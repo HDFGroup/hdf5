@@ -29,8 +29,12 @@
  *	H5F_mpio_open
  *		- "unique" key treated same as in H5F_mpio_access
  *
+ *	H5F_mpio_read & H5F_mpio_write
+ *		- Eventually these should choose collective or independent i/o
+ *		  based on a parameter that is passed down to it from H5Dwrite,
+ *		  rather than the access_parms (which are fixed at the open).
+ *
  *	H5F_mpio_read
- *		- always does independent read (not collective)
  *		- One implementation of MPI/MPI-IO causes MPI_Get_count
  *		  to return (incorrectly) a negative count.
  *		  I added code to detect this, and a kludge to pretend
@@ -239,13 +243,10 @@ H5F_mpio_open(const char *name, const H5F_access_t *access_parms, uintn flags,
 
     switch (access_parms->u.mpio.access_mode){
     case H5ACC_INDEPENDENT:
+    case H5ACC_COLLECTIVE:
 	/*void*/
 	break;
 	
-    case H5ACC_COLLECTIVE:
-	HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, NULL,
-		      "collective I/O is not supported yet");
-
     default:
 	HRETURN_ERROR(H5E_IO, H5E_BADVALUE, NULL, "invalid file access mode");
     }
@@ -381,6 +382,9 @@ H5F_mpio_close(H5F_low_t *lf, const H5F_access_t *access_parms)
  * 	Robb Matzke, 18 Feb 1998
  *	Added the ACCESS_PARMS argument.
  *
+ * 	rky, 10 Apr 1998
+ *	Call independent or collective MPI read, based on ACCESS_PARMS.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -415,8 +419,20 @@ H5F_mpio_read(H5F_low_t *lf, const H5F_access_t *access_parms,
     }
 
     /* Read the data.  */
-    mpierr = MPI_File_read_at( lf->u.mpio.f, mpi_off, (void*) buf,
-				size_i, MPI_BYTE, &mpi_stat );
+    switch (access_parms->u.mpio.access_mode){
+    case H5ACC_INDEPENDENT:
+	mpierr = MPI_File_read_at     ( lf->u.mpio.f, mpi_off, (void*) buf,
+					size_i, MPI_BYTE, &mpi_stat );
+	break;
+	
+    case H5ACC_COLLECTIVE:
+	mpierr = MPI_File_read_at_all ( lf->u.mpio.f, mpi_off, (void*) buf,
+					size_i, MPI_BYTE, &mpi_stat );
+	break;
+
+    default:
+	HRETURN_ERROR(H5E_IO, H5E_BADVALUE, NULL, "invalid file access mode");
+    }
     if (mpierr != MPI_SUCCESS) {
         MPI_Error_string( mpierr, mpierrmsg, &msglen );
 	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, mpierrmsg );
@@ -483,6 +499,9 @@ H5F_mpio_read(H5F_low_t *lf, const H5F_access_t *access_parms,
  * 	Robb Matzke, 18 Feb 1998
  *	Added the ACCESS_PARMS argument.
  *
+ * 	rky, 10 Apr 1998
+ *	Call independent or collective MPI write, based on ACCESS_PARMS.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -516,6 +535,20 @@ H5F_mpio_write(H5F_low_t *lf, const H5F_access_t *access_parms,
     }
 
     /* Write the data.  */
+    switch (access_parms->u.mpio.access_mode){
+    case H5ACC_INDEPENDENT:
+	mpierr = MPI_File_write_at    ( lf->u.mpio.f, mpi_off, (void*) buf,
+					size_i, MPI_BYTE, &mpi_stat );
+	break;
+	
+    case H5ACC_COLLECTIVE:
+	mpierr = MPI_File_write_at_all( lf->u.mpio.f, mpi_off, (void*) buf,
+					size_i, MPI_BYTE, &mpi_stat );
+	break;
+
+    default:
+	HRETURN_ERROR(H5E_IO, H5E_BADVALUE, NULL, "invalid file access mode");
+    }
     mpierr = MPI_File_write_at( lf->u.mpio.f, mpi_off, (void*) buf,
 				size_i, MPI_BYTE, &mpi_stat );
     if (mpierr != MPI_SUCCESS) {
