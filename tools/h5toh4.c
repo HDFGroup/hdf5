@@ -87,8 +87,16 @@ main(int argc, char **argv)
 		return -1;
 	}
 
+/*
+	if ((status = H5dont_atexit()) < 0) {
+		fprintf(stderr,"Error: Unable to stop loading of the cleanup routines\n");
+		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "h5toh4", __FILE__, __LINE__);
+		return status;
+	}
+*/
+
 	while ( *fargv != NULL ) {
-		if ( strcmp(*fargv,"-h") == 0 ) {
+		if ( HDstrcmp(*fargv,"-h") == 0 ) {
 			PrintOptions_h5toh4();
 			return -1;
 		}
@@ -97,7 +105,7 @@ main(int argc, char **argv)
 
 	fargv = argv + optind;
 
-	if (argc == 2 && strcmp(*fargv,"-m") == 0) {
+	if (argc == 2 && HDstrcmp(*fargv,"-m") == 0) {
 		fargv++;
 		argc--;
 	}
@@ -112,7 +120,7 @@ main(int argc, char **argv)
 	case 1:	/* h5toh4 file1 */
 		h5_filename = *fargv;
 
-		if (strcmp(h5_filename,"-m") == 0) {
+		if (HDstrcmp(h5_filename,"-m") == 0) {
 			fprintf(stderr,"\nError: Invalid Arguments\n");
 			PrintOptions_h5toh4();
 			status = -1;
@@ -159,7 +167,7 @@ main(int argc, char **argv)
 		h5_filename = *fargv++;
 		h4_filename = *fargv++;
 
-		if (strcmp(h4_filename,"-m") == 0) {
+		if (HDstrcmp(h4_filename,"-m") == 0) {
 			fprintf(stderr,"\nError: Invalid Arguments\n");
 			PrintOptions_h5toh4();
 			status = -1;
@@ -195,7 +203,7 @@ main(int argc, char **argv)
 		break;
 
 	default:	/* h5toh4 -m file1 file2 file3 ... */
-		if (strcmp(*fargv++,"-m") != 0) {
+		if (HDstrcmp(*fargv++,"-m") != 0) {
 			fprintf(stderr,"\nError: Invalid Arguments\n");
 			PrintOptions_h5toh4();
 			status = -1;
@@ -204,7 +212,7 @@ main(int argc, char **argv)
 
 		while ( (h5_filename = *fargv++) != NULL ) {
 
-			if (strcmp(h5_filename,"-m") == 0) {
+			if (HDstrcmp(h5_filename,"-m") == 0) {
 				fprintf(stderr,"\nError: Invalid Arguments\n");
 				PrintOptions_h5toh4();
 				status2 = -1;
@@ -486,7 +494,7 @@ H5G_stat_t statbuf;
 		return (status);
 	}
 
-        if (strcmp(name,"/") == 0) { /* this is the root group, just iterate */
+        if (HDstrcmp(name,"/") == 0) { /* this is the root group, just iterate */
 
 		if ((status = H5Aiterate(gid, NULL, (H5A_operator_t)convert_attr, op_data)) != SUCCEED ) {
 			fprintf(stderr,"Error: Unable to iterate over all of the attributes\n");
@@ -897,15 +905,23 @@ int32 order_array[512];
 			status = FAIL;
 			break;
 		}
+    		if ((status = H5Tclose(type2)) < 0 ) {
+        		fprintf(stderr,"Error: closing type\n");
+			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+			status = FAIL;
+			break;
+    		}
 
 		if ((record_pos = VSseek(vdata_id, 0)) != 0 ) {
 			fprintf(stderr, "Error: Could not seek the beginning of the Vdata, %d\n", (int)record_pos);
 			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+			status = record_pos;
 			break;
 		}
 		if ((num_of_recs = VSwrite(vdata_id, (void *)buffer, n_records, FULL_INTERLACE)) != n_records ) {
 			fprintf(stderr, "Error: Only able to write %d of %d records\n", (int)num_of_recs, (int)n_records);
 			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+			status = num_of_recs;
 			break;
 		}
 
@@ -913,6 +929,7 @@ int32 order_array[512];
     		if ((status = H5Aiterate(did, NULL, (H5A_operator_t)convert_attr, op_data)) < 0 ) {
         		fprintf(stderr,"Error: iterate over attributes\n");
 			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+			break;
     		}
 		if ((status = VSdetach(vdata_id)) != SUCCEED ) {
 			fprintf(stderr, "Error: Unable to detach to vdata %s.\n",name);
@@ -1725,6 +1742,12 @@ convert_shared_dataset(hid_t did, int idx, op_data_t *op_data)
     default:
         fprintf(stderr,"Error: %d class not found\n",class);
 	DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_shared_dataset", __FILE__, __LINE__);
+	status = FAIL;
+    }
+
+    if ((status = H5Tclose(type)) < 0 ) {
+   	fprintf(stderr,"Error: closing type\n");
+	DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
 	status = FAIL;
     }
 
