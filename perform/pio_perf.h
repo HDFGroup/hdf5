@@ -1,9 +1,17 @@
-/*
- * Copyright (C) 2001
- *     National Center for Supercomputing Applications
- *     All rights reserved.
- *
- */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #ifndef PIO_PERF_H__
 #define PIO_PERF_H__
 
@@ -31,7 +39,7 @@ typedef struct parameters_ {
     off_t	num_elmts;      /* Number of native ints in each dset   */
     int         num_iters;      /* Number of times to loop doing the IO */
     size_t 	buf_size;       /* Buffer size                          */
-    size_t      block_size;     /* interleaved block size               */
+    unsigned    interleaved;    /* Interleaved vs. contiguous blocks    */
     hsize_t 	h5_align;       /* HDF5 object alignment                */
     hsize_t 	h5_thresh;      /* HDF5 object alignment threshold      */
     int 	h5_use_chunks;  /* Make HDF5 dataset chunked            */
