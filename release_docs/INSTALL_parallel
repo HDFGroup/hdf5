@@ -52,6 +52,7 @@ E.g., the following works for the Blue machine of LLNL.
     setenv MP_LABELIO   no
     setenv MP_RMPOOL    0
     setenv RUNPARALLEL  "MP_PROCS=2 MP_TASKS_PER_NODE=2 poe"
+    setenv LLNL_COMPILE_SINGLE_THREADED TRUE
 
 The shared library configuration for this version is broken. So, only
 static library is supported.
