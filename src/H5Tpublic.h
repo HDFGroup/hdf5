@@ -505,6 +505,7 @@ __DLL__ H5T_pad_t H5Tget_inpad(hid_t type_id);
 __DLL__ H5T_str_t H5Tget_strpad(hid_t type_id);
 __DLL__ int H5Tget_nmembers(hid_t type_id);
 __DLL__ char *H5Tget_member_name(hid_t type_id, int membno);
+__DLL__ int H5Tget_member_index(hid_t type_id, const char *name);
 __DLL__ size_t H5Tget_member_offset(hid_t type_id, int membno);
 #if defined(WANT_H5_V1_2_COMPAT) || defined(H5_WANT_H5_V1_2_COMPAT)
 __DLL__ int H5Tget_member_dims(hid_t type_id, int membno, size_t dims[]/*out*/,

@@ -44,6 +44,9 @@ New Features
     --------- 
       * Added serial multi-gigabyte file size test.  "test/big -h" shows
         the help page.  AKC - 2002/03/29
+      * A new query function H5Tget_member_index has been added for compound
+	and enumeration data types, to retrieve member's index by name.
+	SLU - 2002/04/05
  
     o APIs
     ------

@@ -43,6 +43,7 @@
 const char *FILENAME[] = {
     "dtypes1",
     "dtypes2",
+    "dtypes3",
     NULL
 };
 
@@ -1073,6 +1074,218 @@ test_compound_7(void)
     return 1;
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	test_query
+ *
+ * Purpose:	Tests query functions of compound and enumeration types.
+ *
+ * Return:	Success: 	0
+ * 	
+ *		Failure:	number of errors
+ *
+ * Programmer:	Raymond Lu
+ *		Thursday, April 4, 2002
+ *  
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int 
+test_query(void)
+{
+    struct s1 {
+	int    a;
+	float  b;
+	long   c;
+	double d;
+    };
+    hid_t	file=-1, tid1=-1, tid2=-1;
+    char	filename[1024];
+    char	compnd_type[]="Compound_type", enum_type[]="Enum_type";
+    int		nmembs, index;
+    short	enum_val;
+
+    TESTING("query functions of compound and enumeration types");
+
+    /* Create File */
+    h5_fixname(FILENAME[2], H5P_DEFAULT, filename, sizeof filename);
+    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0)
+	goto error;
+
+    /* Create a compound datatype */
+    if((tid1=H5Tcreate(H5T_COMPOUND, sizeof(struct s1)))<0) { 
+	H5_FAILED();
+	printf("Can't create datatype!\n");
+	goto error;
+    } /* end if */
+    if(H5Tinsert(tid1, "a", HOFFSET(struct s1, a), H5T_NATIVE_INT)<0) {
+	H5_FAILED();
+	printf("Can't insert field 'a'\n");
+	goto error;
+    } /* end if */
+    if(H5Tinsert(tid1, "b", HOFFSET(struct s1, b), H5T_NATIVE_FLOAT)<0) {
+	H5_FAILED();
+	printf("Can't insert field 'b'\n");
+	goto error;
+    } /* end if */
+    if(H5Tinsert(tid1, "c", HOFFSET(struct s1, c), H5T_NATIVE_LONG)<0) {
+	H5_FAILED();
+	printf("Can't insert field 'c'\n");
+	goto error;
+    } /* end if */
+    if(H5Tinsert(tid1, "d", HOFFSET(struct s1, d), H5T_NATIVE_DOUBLE)<0) {
+        H5_FAILED();
+        printf("Can't insert field 'd'\n");
+        goto error;
+    } /* end if */
+
+    /* Create a enumerate datatype */
+    if((tid2=H5Tcreate(H5T_ENUM, sizeof(short)))<0) {
+        H5_FAILED();
+        printf("Can't create enumerate type\n");
+        goto error;
+    } /* end if */
+    if(H5Tenum_insert(tid2, "RED", (enum_val=0,&enum_val))<0) {
+        H5_FAILED();
+        printf("Can't insert field into enumeration type\n");
+        goto error;
+    } /* end if */
+    if(H5Tenum_insert(tid2, "GREEN", (enum_val=1,&enum_val))<0) {
+        H5_FAILED();
+        printf("Can't insert field into enumeration type\n");
+        goto error;
+    } /* end if */
+    if(H5Tenum_insert(tid2, "BLUE", (enum_val=2,&enum_val))<0) {
+        H5_FAILED();
+        printf("Can't insert field into enumeration type\n");
+        goto error;
+    } /* end if */
+    if(H5Tenum_insert(tid2, "ORANGE", (enum_val=3,&enum_val))<0) {
+        H5_FAILED();
+        printf("Can't insert field into enumeration type\n");
+        goto error;
+    } /* end if */
+    if(H5Tenum_insert(tid2, "YELLOW", (enum_val=4,&enum_val))<0) {
+        H5_FAILED();
+        printf("Can't insert field into enumeration type\n");
+        goto error;
+    } /* end if */
+
+    /* Query member number and member index by name, for compound type. */
+    if((nmembs=H5Tget_nmembers(tid1))!=4) {
+        H5_FAILED();
+        printf("Can't get member number\n");
+        goto error;
+    } /* end if */
+    if((index=H5Tget_member_index(tid1, "c"))!=2) {
+        H5_FAILED();
+        printf("Can't get correct index number\n");
+        goto error;
+    } /* end if */
+
+    /* Query member number and member index by name, for enumeration type. */
+    if((nmembs=H5Tget_nmembers(tid2))!=5) {
+        H5_FAILED();
+        printf("Can't get member number\n");
+        goto error;
+    } /* end if */
+    if((index=H5Tget_member_index(tid2, "ORANGE"))!=3) {
+        H5_FAILED();
+        printf("Can't get correct index number\n");
+        goto error;
+    } /* end if */
+
+    /* Commit compound datatype and close it */
+    if(H5Tcommit(file, compnd_type, tid1)<0) {
+        H5_FAILED();
+        printf("Can't commit compound datatype\n");
+        goto error;
+    } /* end if */
+    if(H5Tclose(tid1)<0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    } /* end if */
+
+    /* Commit enumeration datatype and close it */
+    if(H5Tcommit(file, enum_type, tid2)<0) {
+        H5_FAILED();
+        printf("Can't commit compound datatype\n");
+        goto error;
+    } /* end if */
+    if(H5Tclose(tid2)<0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    } /* end if */
+
+    /* Open the dataytpe for query */
+    if((tid1=H5Topen(file, compnd_type))<0) {
+        H5_FAILED();
+        printf("Can't open datatype\n");
+        goto error;
+    } /* end if */
+    if((tid2=H5Topen(file, enum_type))<0) {
+        H5_FAILED();
+        printf("Can't open datatype\n");
+        goto error;
+    } /* end if */
+
+    /* Query member number and member index by name, for compound type */
+    if((nmembs=H5Tget_nmembers(tid1))!=4) {
+        H5_FAILED();
+        printf("Can't get member number\n");
+        goto error;
+    } /* end if */
+    if((index=H5Tget_member_index(tid1, "c"))!=2) {
+        H5_FAILED();
+        printf("Can't get correct index number\n");
+        goto error;
+    } /* end if */
+
+    /* Query member number and member index by name, for enumeration type */
+    if((nmembs=H5Tget_nmembers(tid2))!=5) {
+        H5_FAILED();
+        printf("Can't get member number\n");
+        goto error;
+    } /* end if */
+    if((index=H5Tget_member_index(tid2, "ORANGE"))!=3) {
+        H5_FAILED();
+        printf("Can't get correct index number\n");
+        goto error;
+    } /* end if */
+
+    /* Close data type and file */
+    if(H5Tclose(tid1)<0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    } /* end if */
+    if(H5Tclose(tid2)<0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    } /* end if */
+
+    if(H5Fclose(file)<0) {
+        H5_FAILED();
+        printf("Can't close file\n");
+        goto error;
+    } /* end if */
+
+    PASSED();
+    return 0;
+
+ error:
+    H5E_BEGIN_TRY {
+        H5Tclose (tid1);
+	H5Tclose (tid2);
+        H5Fclose (file);
+    } H5E_END_TRY;
+    return 1;
+}
+ 
 
 /*-------------------------------------------------------------------------
  * Function:	test_transient
@@ -3881,6 +4094,7 @@ main(void)
     nerrors += test_classes();
     nerrors += test_copy();
     nerrors += test_compound_1();
+    nerrors += test_query();
     nerrors += test_transient (fapl);
     nerrors += test_named (fapl);
     h5_cleanup(FILENAME, fapl); /*must happen before first reset*/
