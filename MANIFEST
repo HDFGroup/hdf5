@@ -999,6 +999,7 @@
 ./tools/h4toh5/h4toh5vdata.c
 ./tools/h4toh5/h4toh5vgroup.c
 ./tools/h4toh5/testh4toh5.sh
+./tools/h4toh5/parafile
 
 ./tools/h5dump/Dependencies
 ./tools/h5dump/Makefile.in
