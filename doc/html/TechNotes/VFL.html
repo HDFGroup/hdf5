@@ -44,10 +44,11 @@
 <LI><A NAME="TOC20" HREF="VFL.html#SEC20">Contiguous I/O Functions</A>
 <LI><A NAME="TOC21" HREF="VFL.html#SEC21">Flushing Cached Data</A>
 </UL>
-<LI><A NAME="TOC22" HREF="VFL.html#SEC22">Registration of a Driver</A>
-<LI><A NAME="TOC23" HREF="VFL.html#SEC23">Querying Driver Information</A>
+<LI><A NAME="TOC22" HREF="VFL.html#SEC22">Optimization Functions</A>
+<LI><A NAME="TOC23" HREF="VFL.html#SEC23">Registration of a Driver</A>
+<LI><A NAME="TOC24" HREF="VFL.html#SEC24">Querying Driver Information</A>
 </UL>
-<LI><A NAME="TOC24" HREF="VFL.html#SEC24">Miscellaneous</A>
+<LI><A NAME="TOC25" HREF="VFL.html#SEC25">Miscellaneous</A>
 </UL>
 <P><HR><P>
 
@@ -1058,9 +1059,9 @@ file and vice versa.
 </P>
 <P>
 <DL>
-<DT><U>Function:</U> static herr_t <B>read</B> <I>(H5FD_t *<VAR>file</VAR>, hid_t <VAR>dxpl</VAR>, haddr_t <VAR>addr</VAR>, hsize_t <VAR>size</VAR>, void *<VAR>buf</VAR>)</I>
+<DT><U>Function:</U> static herr_t <B>read</B> <I>(H5FD_t *<VAR>file</VAR>, H5FD_mem_t <VAR>type</VAR>, hid_t <VAR>dxpl</VAR>, haddr_t <VAR>addr</VAR>, hsize_t <VAR>size</VAR>, void *<VAR>buf</VAR>)</I>
 <DD><A NAME="IDX10"></A>
-<DT><U>Function:</U> static herr_t <B>write</B> <I>(H5FD_t *<VAR>file</VAR>, hid_t <VAR>dxpl</VAR>, haddr_t <VAR>addr</VAR>, hsize_t <VAR>size</VAR>, const void *<VAR>buf</VAR>)</I>
+<DT><U>Function:</U> static herr_t <B>write</B> <I>(H5FD_t *<VAR>file</VAR>, H5FD_mem_t <VAR>type</VAR>, hid_t <VAR>dxpl</VAR>, haddr_t <VAR>addr</VAR>, hsize_t <VAR>size</VAR>, const void *<VAR>buf</VAR>)</I>
 <DD><A NAME="IDX11"></A>
 
 </P>
@@ -1071,7 +1072,9 @@ supplied by the caller. The <CODE>write</CODE> function transfers data in the
 opposite direction. Both functions take a data transfer property list
 <VAR>dxpl</VAR> which indicates the fine points of how the data is to be
 transferred and which comes directly from the <CODE>H5Dread</CODE> or
-<CODE>H5Dwrite</CODE> function.
+<CODE>H5Dwrite</CODE> function.  Both functions receive <VAR>type</VAR> of
+data being written, which may allow a driver to tune it's behavior for
+different kinds of data.
 </DL>
 
 </P>
@@ -1092,8 +1095,8 @@ system calls which were interrupted.
 
 <PRE>
 static herr_t
-H5FD_sec2_read(H5FD_t *_file, hid_t dxpl_id/*unused*/, haddr_t addr,
-               hsize_t size, void *buf/*out*/)
+H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t type/*unused*/, hid_t dxpl_id/*unused*/,
+        haddr_t addr, hsize_t size, void *buf/*out*/)
 {
     H5FD_sec2_t         *file = (H5FD_sec2_t*)_file;
     ssize_t             nbytes;
@@ -1203,7 +1206,57 @@ H5FD_sec2_flush(H5FD_t *_file)
 
 
 
-<H2><A NAME="SEC22" HREF="VFL.html#TOC22">Registration of a Driver</A></H2>
+<H2><A NAME="SEC22" HREF="VFL.html#TOC22">Optimization Functions</A></H2>
+
+<P>
+The library is capable of performing several generic optimizations on I/O, but
+these types of optimizations may not be appropriate for a given VFL driver.
+</P>
+
+<P>
+Each driver may provide a query function to allow the library to query whether
+to enable these optimizations.  If a driver lacks a query function, the library
+will disable all types of optimizations which can be queried.
+</P>
+
+<P>
+<DL>
+<DT><U>Function:</U> static herr_t <B>query</B> <I>(const H5FD_t *<VAR>file</VAR>, unsigned long *<VAR>flags</VAR>)</I>
+<DD><A NAME="IDX17"></A>
+</P>
+<P>
+This function is called by the library to query which optimizations to enable
+for I/O to this driver.  These are the flags which are currently defined:
+
+<UL>
+<DL>
+<DT>H5FD_FEAT_AGGREGATE_METADATA    (0x00000001)
+<DD>Defining the H5FD_FEAT_AGGREGATE_METADATA for a VFL driver means that
+the library will attempt to allocate a larger block for metadata and
+then sub-allocate each metadata request from that larger block.
+<DT>H5FD_FEAT_ACCUMULATE_METADATA   (0x00000002)
+<DD>Defining the H5FD_FEAT_ACCUMULATE_METADATA for a VFL driver means that
+the library will attempt to cache metadata as it is written to the file
+and build up a larger block of metadata to eventually pass to the VFL
+'write' routine.
+<DT>H5FD_FEAT_DATA_SIEVE            (0x00000004)
+<DD>Defining the H5FD_FEAT_DATA_SIEVE for a VFL driver means that
+the library will attempt to cache raw data as it is read from/written to
+a file in a "data sieve" buffer.  See Rajeev Thakur's papers:
+    <UL>
+    <DL>
+    <DT>http://www.mcs.anl.gov/~thakur/papers/romio-coll.ps.gz
+    <DT>http://www.mcs.anl.gov/~thakur/papers/mpio-high-perf.ps.gz
+    </DL>
+    </UL>
+</DL>
+</UL>
+</P>
+
+</DL>
+</P>
+
+<H2><A NAME="SEC23" HREF="VFL.html#TOC23">Registration of a Driver</A></H2>
 
 <P>
 Before a driver can be used the HDF5 library needs to be told of its
@@ -1275,6 +1328,10 @@ The function which ends access to a file.
 An optional function to determine whether two open files have the same key. If
 this function is not present then the library assumes that two files will
 never be the same.
+<DT><CODE>int (*query)(const H5FD_t *f, unsigned long *flags)</CODE>
+<DD>
+An optional function to determine which library optimizations a driver can
+support.
 <DT><CODE>haddr_t (*alloc)(H5FD_t *file, H5FD_mem_t type, hsize_t size)</CODE>
 <DD>
 An optional function to allocate space in the file.
@@ -1290,10 +1347,10 @@ A function to set the end of address space.
 <DT><CODE>haddr_t (*get_eof)(H5FD_t *file)</CODE>
 <DD>
 A function to return the current end-of-file marker value.
-<DT><CODE>herr_t (*read)(H5FD_t *file, hid_t dxpl, haddr_t addr, hsize_t size, void *buffer)</CODE>
+<DT><CODE>herr_t (*read)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr, hsize_t size, void *buffer)</CODE>
 <DD>
 A function to read data from a file.
-<DT><CODE>herr_t (*write)(H5FD_t *file, hid_t dxpl, haddr_t addr, hsize_t size, const void *buffer)</CODE>
+<DT><CODE>herr_t (*write)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr, hsize_t size, const void *buffer)</CODE>
 <DD>
 A function to write data to a file.
 <DT><CODE>herr_t (*flush)(H5FD_t *file)</CODE>
@@ -1326,6 +1383,7 @@ static const H5FD_class_t H5FD_sec2_g = {
     H5FD_sec2_open,                             /*open                  */
     H5FD_sec2_close,                            /*close                 */
     H5FD_sec2_cmp,                              /*cmp                   */
+    H5FD_sec2_query,                            /*query                 */
     NULL,                                       /*alloc                 */
     NULL,                                       /*free                  */
     H5FD_sec2_get_eoa,                          /*get_eoa               */
@@ -1368,7 +1426,7 @@ already use that driver.
 
 
 
-<H2><A NAME="SEC23" HREF="VFL.html#TOC23">Querying Driver Information</A></H2>
+<H2><A NAME="SEC24" HREF="VFL.html#TOC24">Querying Driver Information</A></H2>
 
 <P>
 <DL>
@@ -1390,7 +1448,7 @@ driver-specific data transfer information instead.
 </P>
 
 
-<H1><A NAME="SEC24" HREF="VFL.html#TOC24">Miscellaneous</A></H1>
+<H1><A NAME="SEC25" HREF="VFL.html#TOC25">Miscellaneous</A></H1>
 
 <P>
 The various private <CODE>H5F_low_*</CODE> functions will be replaced by public
@@ -1478,5 +1536,8 @@ in the missing parts of the mapping.
 This document was generated on 18 November 1999 using the
 <A HREF="http://wwwcn.cern.ch/dci/texi2html/">texi2html</A>
 translator version 1.51.</P>
+<P>
+Updated on 10/24/00 by hand, Quincey Koziol
+</P>
 </BODY>
 </HTML>
