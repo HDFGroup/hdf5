@@ -61,30 +61,24 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, char *obj1_name,
 int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank,
                  hsize_t *dims, options_t options, char *obj1, char *obj2 );
 void print_pos( int *ph, int curr_pos, int *acc, 
-															 int *pos, int rank, char *obj1, char *obj2 );
+                int *pos, int rank, char *obj1, char *obj2 );
 void print_class( H5T_class_t tclass, char *sclass );
 hid_t fixtype( hid_t f_type );
 void list( const char *filename, int nobjects, info_t *info );
 
 void diff( hid_t file1_id, char *obj1_name, hid_t file2_id, char *obj2_name, 
-										 options_t options, int type );
+           options_t options, int type );
 
 
 void compare( hid_t file1_id, char *obj1_name, int nobjects1, info_t *info1,
               hid_t file2_id, char *obj2_name, int nobjects2, info_t *info2,
               options_t options );
 void match( hid_t file1_id, char *file1_name, int nobjects1, info_t *info1,
-												hid_t file2_id, char *file2_name, int nobjects2, info_t *info2,
-												options_t options );
+            hid_t file2_id, char *file2_name, int nobjects2, info_t *info2,
+            options_t options );
 
 int check_n_input( char * );
 int check_f_input( char * );
-
-
-
-
-
-
 
 
 /*-------------------------------------------------------------------------
@@ -124,7 +118,6 @@ void usage( const char *progname )
   USAGE);
  fprintf(stderr,"\n");
  fprintf(stderr,"Items in [ ] are optional \n");
- exit(EXIT_FAILURE);
 }
 
 
@@ -163,11 +156,11 @@ int main(int argc, const char *argv[])
  void       *edata;
  hid_t      (*func)(void*);
 
-	char       *file1_name;
+ char       *file1_name;
  char       *file2_name;
  char       *obj1_name  = NULL;
  char       *obj2_name  = NULL;
-	
+ 
 
 
 #if 1 
@@ -196,11 +189,11 @@ int main(int argc, const char *argv[])
    for (s=argv[argno]+1; *s; s++) 
    {
     switch (*s) {
-				default:
-				printf("-%s is an invalid option\n", s );
+    default:
+    printf("-%s is an invalid option\n", s );
     usage(progname);
     exit(EXIT_SUCCESS);
-				break;
+    break;
     case 'h': 
      usage(progname);
      exit(EXIT_SUCCESS);
@@ -216,14 +209,20 @@ int main(int argc, const char *argv[])
      {
       options.d_      = 1;
 
-						if ( check_f_input(argv[argno+1])==-1 )
-						{
+      if ( check_f_input(argv[argno+1])==-1 )
+      {
        printf("<-d %s> is not a valid option\n", argv[argno+1] );
        usage(progname);
        exit(EXIT_SUCCESS);
-						}
+      }
 
       options.d_delta = atof(argv[argno+1]);
+     }
+     else
+     {
+      printf("<-d %s> is not a valid option\n", argv[argno+1] );
+      usage(progname);
+      exit(EXIT_SUCCESS);
      }
      break;
     case 'p': 
@@ -231,12 +230,12 @@ int main(int argc, const char *argv[])
      {
       options.p_         = 1;
 
-						if ( check_f_input(argv[argno+1])==-1 )
-						{
-							printf("<-p %s> is not a valid option\n", argv[argno+1] );
+      if ( check_f_input(argv[argno+1])==-1 )
+      {
+       printf("<-p %s> is not a valid option\n", argv[argno+1] );
        usage(progname);
        exit(EXIT_SUCCESS);
-						}
+      }
 
       options.p_relative  = atof(argv[argno+1]);
      }
@@ -246,12 +245,12 @@ int main(int argc, const char *argv[])
      {
       options.n_             = 1;
 
-						printf("<-n %s> is not a valid option\n", argv[argno+1] );
-						if ( check_n_input(argv[argno+1])==-1 )
-						{
+      if ( check_n_input(argv[argno+1])==-1 )
+      {
+       printf("<-n %s> is not a valid option\n", argv[argno+1] );
        usage(progname);
        exit(EXIT_SUCCESS);
-						}
+      }
       options.n_number_count = atoi(argv[argno+1]);
      }
      break;
@@ -338,8 +337,8 @@ int main(int argc, const char *argv[])
 
  if ( options.l_ )
  {
-		list ( file1_name, nobjects1, info1 );
-		list ( file2_name, nobjects2, info2 );
+  list ( file1_name, nobjects1, info1 );
+  list ( file2_name, nobjects2, info2 );
   printf("\n");
  }
   
@@ -351,21 +350,21 @@ int main(int argc, const char *argv[])
  */
  
  if ( obj1_name )
-	{
-	 compare(file1_id,obj1_name,nobjects1,info1,
-			       file2_id,obj2_name,nobjects2,info2,options);
-	}
+ {
+  compare(file1_id,obj1_name,nobjects1,info1,
+          file2_id,obj2_name,nobjects2,info2,options);
+ }
 
 /*-------------------------------------------------------------------------
  * compare all
  *-------------------------------------------------------------------------
  */
 
-	else 
-	{
+ else 
+ {
   match(file1_id,file1_name,nobjects1,info1,
-			     file2_id,file2_name,nobjects2,info2,options);
-	}
+        file2_id,file2_name,nobjects2,info2,options);
+ }
  
  /* close */
  status = H5Fclose(file1_id);
@@ -401,16 +400,16 @@ int main(int argc, const char *argv[])
 
 int check_n_input( char *str )
 {
-	unsigned i;
-	char c;
+ unsigned i;
+ char c;
 
-	for ( i = 0; i < strlen(str); i++)
-	{
+ for ( i = 0; i < strlen(str); i++)
+ {
   c = str[i];
-		if ( c < 49 || c > 57  ) /* ascii values between 1 and 9 */
-			return -1;
-	}
-	return 1;
+  if ( c < 49 || c > 57  ) /* ascii values between 1 and 9 */
+   return -1;
+ }
+ return 1;
 }
 
 /*-------------------------------------------------------------------------
@@ -433,17 +432,17 @@ int check_n_input( char *str )
 
 int check_f_input( char *str )
 {
-	unsigned i;
-	char c;
+ unsigned i;
+ char c;
 
-	for ( i = 0; i < strlen(str); i++)
-	{
+ for ( i = 0; i < strlen(str); i++)
+ {
   c = str[i];
-		if ( c < 48 || c > 57  ) /* ascii values between 0 and 9 */
-			if  ( c!= 46) /* . */
-			return -1;
-	}
-	return 1;
+  if ( c < 48 || c > 57  ) /* ascii values between 0 and 9 */
+   if  ( c!= 46) /* . */
+   return -1;
+ }
+ return 1;
 }
 
 
@@ -485,9 +484,9 @@ void list( const char *filename, int nobjects, info_t *info )
   case H5G_TYPE:
    printf("%s %20s\n", info[i].name, "datatype" );
    break;
-		default:
+  default:
    printf("non supported object\n" );
-			break;
+   break;
   }
  }
 
@@ -515,24 +514,24 @@ void list( const char *filename, int nobjects, info_t *info )
 
 int get_index( char *obj, int nobjects, info_t *info )
 {
-	char *pdest;
+ char *pdest;
  int  result;
-	int  i;
+ int  i;
 
-	for ( i = 0; i < nobjects; i++) 
+ for ( i = 0; i < nobjects; i++) 
  {
-		
-		if ( strcmp(obj,info[i].name)==0 )
-			return i;
+  
+  if ( strcmp(obj,info[i].name)==0 )
+   return i;
 
-		pdest  = strstr( info[i].name, obj );
+  pdest  = strstr( info[i].name, obj );
   result = pdest - info[i].name;
 
-		/* found at position 1, meaning without '/' */
+  /* found at position 1, meaning without '/' */
   if( pdest != NULL && result==1 )
    return i;
-	}
-	return -1;
+ }
+ return -1;
 }
 
 /*-------------------------------------------------------------------------
@@ -559,30 +558,30 @@ void compare( hid_t file1_id, char *obj1_name, int nobjects1, info_t *info1,
               options_t options )
 {
 
-	int i = get_index( obj1_name, nobjects1, info1 );
-	int j = get_index( obj2_name, nobjects2, info2 );
+ int i = get_index( obj1_name, nobjects1, info1 );
+ int j = get_index( obj2_name, nobjects2, info2 );
 
-	if ( i == -1 )
-	{
-		printf( "Object <%s> could not be found\n", obj1_name );
+ if ( i == -1 )
+ {
+  printf( "Object <%s> could not be found\n", obj1_name );
   return;
-	}
+ }
 
-	if ( j == -1 )
-	{
-		printf( "Object <%s> could not be found\n", obj1_name );
+ if ( j == -1 )
+ {
+  printf( "Object <%s> could not be found\n", obj1_name );
   return;
-	}
+ }
 
-	/* objects are not the same type */
-	if ( info1[i].type != info2[j].type )
-	{
-		printf( "<%s> is of different type than <%s>\n", obj1_name, obj2_name );
+ /* objects are not the same type */
+ if ( info1[i].type != info2[j].type )
+ {
+  printf( "<%s> is of different type than <%s>\n", obj1_name, obj2_name );
   return;
-	}
-		
-	diff( file1_id, obj1_name, file2_id, obj2_name, options, info1[i].type );
-	
+ }
+  
+ diff( file1_id, obj1_name, file2_id, obj2_name, options, info1[i].type );
+ 
 }
 
 
@@ -606,43 +605,43 @@ void compare( hid_t file1_id, char *obj1_name, int nobjects1, info_t *info1,
 
 
 void diff( hid_t file1_id, char *obj1_name, hid_t file2_id, char *obj2_name, 
-										 options_t options, int type )
+           options_t options, int type )
 {
 
-	switch ( type )
-	{
-		
+ switch ( type )
+ {
+  
 /*-------------------------------------------------------------------------
-	* H5G_GROUP
-	*-------------------------------------------------------------------------
-	*/ 
-		
-	case H5G_GROUP:
-		
-		break;
-		
-	/*-------------------------------------------------------------------------
-		* H5G_DATASET
-		*-------------------------------------------------------------------------
-		*/
-		
-	case H5G_DATASET:
-		
-		diff_dataset(file1_id,file2_id,obj1_name,obj2_name,options);
-		break;
-		
-	/*-------------------------------------------------------------------------
-		* H5G_TYPE
-		*-------------------------------------------------------------------------
-		*/
-		
-	case H5G_TYPE:
-			
-		break;
-		
-	} /* switch */
-	
-	
+ * H5G_GROUP
+ *-------------------------------------------------------------------------
+ */ 
+  
+ case H5G_GROUP:
+  
+  break;
+  
+ /*-------------------------------------------------------------------------
+  * H5G_DATASET
+  *-------------------------------------------------------------------------
+  */
+  
+ case H5G_DATASET:
+  
+  diff_dataset(file1_id,file2_id,obj1_name,obj2_name,options);
+  break;
+  
+ /*-------------------------------------------------------------------------
+  * H5G_TYPE
+  *-------------------------------------------------------------------------
+  */
+  
+ case H5G_TYPE:
+   
+  break;
+  
+ } /* switch */
+ 
+ 
 }
 
 
@@ -698,9 +697,9 @@ void match( hid_t file1_id, char *file1_name, int nobjects1, info_t *info1,
             hid_t file2_id, char *file2_name, int nobjects2, info_t *info2,
             options_t options )
 {
-	int  cmp;
-	int  more_names_exist = (nobjects1>0 && nobjects2>0) ? 1 : 0;
-	int  curr1=0;
+ int  cmp;
+ int  more_names_exist = (nobjects1>0 && nobjects2>0) ? 1 : 0;
+ int  curr1=0;
  int  curr2=0;
  
  while ( more_names_exist )
@@ -712,9 +711,9 @@ void match( hid_t file1_id, char *file1_name, int nobjects1, info_t *info1,
    printf( "%s found in file 1 <%s> and %s found in file 2 <%s>\n", 
     info1[curr1].name, file1_name, info2[curr2].name, file2_name);
 
-			/* do the diff */
-			diff( file1_id, info1[curr1].name, file2_id, info1[curr1].name, options, 
-				     info1[curr1].type );
+   /* do the diff */
+   diff( file1_id, info1[curr1].name, file2_id, info1[curr1].name, options, 
+         info1[curr1].type );
 
    curr1++;
    curr2++;
@@ -736,30 +735,30 @@ void match( hid_t file1_id, char *file1_name, int nobjects1, info_t *info1,
 
   more_names_exist = (curr1<nobjects1 && curr2<nobjects2) ? 1 : 0;
 
-	
+ 
  } /* end while */
 
-	/* list1 did not end */
-	if (curr1<nobjects1)
-	{
-		while ( curr1<nobjects1 )
-		{
+ /* list1 did not end */
+ if (curr1<nobjects1)
+ {
+  while ( curr1<nobjects1 )
+  {
    printf( "%s is in file 1 <%s>, but not in file 2 <%s>\n", info1[curr1].name, 
     file1_name, file2_name);
    curr1++;
-		}
-	}
+  }
+ }
 
-	/* list2 did not end */
-	if (curr2<nobjects2)
-	{
-		while ( curr2<nobjects2 )
-		{
+ /* list2 did not end */
+ if (curr2<nobjects2)
+ {
+  while ( curr2<nobjects2 )
+  {
    printf( "%s is in file 2 <%s>, but not in file 1 <%s>\n", info2[curr2].name, 
     file1_name, file2_name);
    curr2++;
-		}
-	}
+  }
+ }
 
 
 }
@@ -786,7 +785,7 @@ void match( hid_t file1_id, char *file1_name, int nobjects1, info_t *info1,
 
 
 int diff_dataset( hid_t file1_id, hid_t file2_id, char *obj1_name, 
-																	 char *obj2_name, options_t options )
+                  char *obj2_name, options_t options )
 {
 
  hid_t   dset1_id, dset2_id; 
@@ -820,20 +819,20 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, char *obj1_name,
 
  /* Open the datasets */
  if ( (dset1_id = H5Dopen(file1_id,obj1_name)) < 0 )
-	{
-		printf("Cannot open dataset <%s>\n", obj1_name );
+ {
+  printf("Cannot open dataset <%s>\n", obj1_name );
   return -1;
-	}
+ }
 
  if ( (dset2_id = H5Dopen(file2_id,obj2_name)) < 0 )
-	{
-		printf("Cannot open dataset <%s>\n", obj2_name );
+ {
+  printf("Cannot open dataset <%s>\n", obj2_name );
   return -1;
-	}
+ }
 
-	printf( "Comparing <%s> with <%s>\n", obj1_name, obj2_name );
+ printf( "Comparing <%s> with <%s>\n", obj1_name, obj2_name );
 
-	/* enable error reporting */
+ /* enable error reporting */
  H5Eset_auto(func, edata);
 
  /* Get the datatype */
@@ -895,7 +894,7 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, char *obj1_name,
 
 
 /*-------------------------------------------------------------------------
- * check for non supported datatypes
+ * check for non supported classes
  *-------------------------------------------------------------------------
  */
 
@@ -943,16 +942,16 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, char *obj1_name,
  {
   printf( "<%s> is of rank %d and <%s> is of rank %d\n", 
    obj1_name, rank1, obj2_name, rank2 );
-		printf( "<%s>: ", obj1_name );
-		printf("[ " );  
-		for (j = 0; j < rank1; j++) 
-			printf("%d ", dims1[j]  );
-		printf("]\n" );
-		printf( "<%s>: ", obj2_name );
-		printf("[ " );  
-		for (j = 0; j < rank1; j++) 
-			printf("%d ", dims2[j]  );
-		printf("]\n" );
+  printf( "<%s>: ", obj1_name );
+  printf("[ " );  
+  for (j = 0; j < rank1; j++) 
+   printf("%d ", dims1[j]  );
+  printf("]\n" );
+  printf( "<%s>: ", obj2_name );
+  printf("[ " );  
+  for (j = 0; j < rank1; j++) 
+   printf("%d ", dims2[j]  );
+  printf("]\n" );
   goto out;
  }
 
@@ -1086,11 +1085,11 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
  char   *i1ptr1, *i1ptr2;
  short  *i2ptr1, *i2ptr2;
  int    *i4ptr1, *i4ptr2;
-	long   *i8ptr1, *i8ptr2;
+ long   *i8ptr1, *i8ptr2;
  float  *fptr1, *fptr2;
  double *dptr1, *dptr2;
  int    nfound=0; /* number of differences found */
-	int    ph=1;     /* print header /*
+ int    ph=1;     /* print header /*
 
  /* accumulator and matrix position */
  int    acc[32];
@@ -1374,7 +1373,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
    *-------------------------------------------------------------------------
    */
 
-			case 8:
+   case 8:
     i8ptr1 = (long *) buf1;
     i8ptr2 = (long *) buf2;
  
@@ -1451,11 +1450,11 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
     } /*for */
 
     break;
-				
+    
 
-			default:
+   default:
     printf("no valid H5T_INTEGER size found" );
-				break;
+    break;
     
        
    } /*switch*/
@@ -1633,9 +1632,9 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
 
     break;
 
-				default:
+    default:
     printf("no valid H5T_FLOAT size found" );
-				break;
+    break;
       
    } /*switch*/
 
@@ -1671,17 +1670,17 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
 
 
 void print_pos( int *ph, int curr_pos, int *acc, 
-															 int *pos, int rank, char *obj1, char *obj2 )
+                int *pos, int rank, char *obj1, char *obj2 )
 {
  int i;
 
-	/* print header */
-	if ( *ph==1 )
-	{
+ /* print header */
+ if ( *ph==1 )
+ {
   printf("%-15s %-15s %-15s %-20s\n", "position", obj1, obj2, "difference");
   printf("------------------------------------------------------------\n");
-		*ph=0;
-	}
+  *ph=0;
+ }
 
  for ( i = 0; i < rank; i++)
   pos[i]=0;
@@ -1800,19 +1799,19 @@ hid_t fixtype(hid_t f_type)
  */
   if (size <= sizeof(char)) {
    m_type = H5Tcopy(H5T_NATIVE_SCHAR);
-			printf("using memory type H5T_NATIVE_SCHAR\n");
+   printf("using memory type H5T_NATIVE_SCHAR\n");
   } else if (size <= sizeof(short)) {
    m_type = H5Tcopy(H5T_NATIVE_SHORT);
-			printf("using memory type H5T_NATIVE_SHORT\n");
+   printf("using memory type H5T_NATIVE_SHORT\n");
   } else if (size <= sizeof(int)) {
    m_type = H5Tcopy(H5T_NATIVE_INT);
-			printf("using memory type H5T_NATIVE_INT\n");
+   printf("using memory type H5T_NATIVE_INT\n");
   } else if (size <= sizeof(long)) {
    m_type = H5Tcopy(H5T_NATIVE_LONG);
-			printf("using memory type H5T_NATIVE_LONG\n");
+   printf("using memory type H5T_NATIVE_LONG\n");
   } else {
    m_type = H5Tcopy(H5T_NATIVE_LLONG);
-			printf("using memory type H5T_NATIVE_LLONG\n");
+   printf("using memory type H5T_NATIVE_LLONG\n");
   }
   
   H5Tset_sign(m_type, H5Tget_sign(f_type));
@@ -1826,13 +1825,13 @@ hid_t fixtype(hid_t f_type)
  */
   if (size <= sizeof(float)) {
    m_type = H5Tcopy(H5T_NATIVE_FLOAT);
-			printf("using memory type H5T_NATIVE_FLOAT\n");
+   printf("using memory type H5T_NATIVE_FLOAT\n");
   } else if (size <= sizeof(double)) {
    m_type = H5Tcopy(H5T_NATIVE_DOUBLE);
-			printf("using memory type H5T_NATIVE_DOUBLE\n");
+   printf("using memory type H5T_NATIVE_DOUBLE\n");
   } else {
    m_type = H5Tcopy(H5T_NATIVE_LDOUBLE);
-			printf("using memory type H5T_NATIVE_LDOUBLE\n");
+   printf("using memory type H5T_NATIVE_LDOUBLE\n");
   }
   break;
   
@@ -2225,15 +2224,15 @@ int do_test_files()
  */
 
 void compare_uni( hid_t file1_id, char *obj1_name, int nobjects1, info_t *info1,
-																	 hid_t file2_id, char *obj2_name, int nobjects2, info_t *info2,
-																		options_t options )
+                  hid_t file2_id, char *obj2_name, int nobjects2, info_t *info2,
+                  options_t options )
 {
  char       *pdest;
  int        result;
  int        len;
-	int        i, j;
+ int        i, j;
 
-	int        obj1_found = 0;
+ int        obj1_found = 0;
  int        obj2_found = 0;
 
 /*-------------------------------------------------------------------------
