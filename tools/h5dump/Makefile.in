@@ -35,7 +35,7 @@ LIBTOOLS=../lib/libh5tools.la
 LIBHDF5=$(top_builddir)/src/libhdf5.la
 
 PUB_PROGS=h5dump
-PROGS=$(PUB_PROGS) $(TEST_PROGS) h5dumpgentest
+PROGS=$(PUB_PROGS) $(TEST_PROGS)
 
 ## Source and object files for the library; do not install
 ##
