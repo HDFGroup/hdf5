@@ -129,6 +129,7 @@
 #define color_H5Fget_obj_ids "red"
 #define color_H5Fmount "red"
 #define color_H5Funmount "red"
+#define color_H5Fget_freespace "red"
 
 #define color_H5Gcreate "red"
 #define color_H5Gopen "red"
