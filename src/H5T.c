@@ -503,7 +503,7 @@ H5T_init_inf(void)
     size_t      u;              /* Local index value */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOINIT(H5T_init_inf);
+    FUNC_ENTER_NOAPI_NOINIT(H5T_init_inf);
 
     /* Get the float datatype */
     if (NULL==(dst_p=H5I_object(H5T_NATIVE_FLOAT_g)))
@@ -616,7 +616,7 @@ H5T_init_hw(void)
 #endif /* H5_HAVE_GET_FPC_CSR */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOINIT(H5T_init_hw);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_init_hw);
 
 #ifdef H5_HAVE_GET_FPC_CSR
     /* [This code is specific to SGI machines] */
@@ -686,7 +686,7 @@ H5T_init_interface(void)
     unsigned    copied_dtype=1;         /* Flag to indicate whether datatype was copied or allocated (for error cleanup) */
     herr_t	ret_value=SUCCEED;
 
-    FUNC_ENTER_NOINIT(H5T_init_interface);
+    FUNC_ENTER_NOAPI_NOINIT(H5T_init_interface);
 
     /* Initialize the atom group for the file IDs */
     if (H5I_init_group(H5I_DATATYPE, H5I_DATATYPEID_HASHSIZE, H5T_RESERVED_ATOMS, (H5I_free_t)H5T_close)<0)
@@ -1135,7 +1135,7 @@ H5T_unlock_cb (void *_dt, hid_t UNUSED id, void UNUSED *key)
 {
     H5T_t	*dt = (H5T_t *)_dt;
     
-    FUNC_ENTER_NOINIT(H5T_unlock_cb);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_unlock_cb);
 
     assert (dt);
     if (H5T_STATE_IMMUTABLE==dt->state)
@@ -1171,7 +1171,7 @@ H5T_term_interface(void)
     int	i, nprint=0, n=0;
     H5T_path_t	*path = NULL;
 
-    FUNC_ENTER_NOINIT(H5T_term_interface);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_term_interface);
 
     if (interface_initialize_g) {
 	/* Unregister all conversion functions */
@@ -2063,7 +2063,7 @@ H5T_register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
     int	i;			/*counter			*/
     herr_t	ret_value=SUCCEED;		/*return value			*/
 
-    FUNC_ENTER_NOINIT(H5T_register);
+    FUNC_ENTER_NOAPI_NOINIT(H5T_register);
 
     /* Check args */
     assert(src);
@@ -3401,8 +3401,8 @@ done:
 size_t
 H5T_get_size(const H5T_t *dt)
 {
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5T_get_size);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_get_size);
 
     /* check args */
     assert(dt);
@@ -4071,7 +4071,7 @@ done:
 hbool_t
 H5T_path_noop(const H5T_path_t *p)
 {
-    FUNC_ENTER_NOINIT(H5T_path_noop);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_path_noop);
 
     assert(p);
 
@@ -4096,7 +4096,7 @@ H5T_path_noop(const H5T_path_t *p)
 H5T_bkg_t
 H5T_path_bkg(const H5T_path_t *p)
 {
-    FUNC_ENTER_NOINIT(H5T_path_bkg);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_path_bkg);
 
     assert(p);
 
@@ -4409,7 +4409,7 @@ H5T_print_stats(H5T_path_t UNUSED * path, int UNUSED * nprint/*in,out*/)
     char	bandwidth[32];
 #endif
 
-    FUNC_ENTER_NOINIT(H5T_print_stats);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_print_stats);
     
 #ifdef H5T_DEBUG
     if (H5DEBUG(T) && path->stats.ncalls>0) {

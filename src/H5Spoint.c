@@ -116,7 +116,7 @@ done:
 static herr_t
 H5S_point_iter_coords (const H5S_sel_iter_t *iter, hssize_t *coords)
 {
-    FUNC_ENTER_NOINIT(H5S_point_iter_coords);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_point_iter_coords);
 
     /* Check args */
     assert (iter);
@@ -147,7 +147,7 @@ H5S_point_iter_coords (const H5S_sel_iter_t *iter, hssize_t *coords)
 static herr_t
 H5S_point_iter_block (const H5S_sel_iter_t *iter, hssize_t *start, hssize_t *end)
 {
-    FUNC_ENTER_NOINIT(H5S_point_iter_block);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_point_iter_block);
 
     /* Check args */
     assert (iter);
@@ -179,7 +179,7 @@ H5S_point_iter_block (const H5S_sel_iter_t *iter, hssize_t *start, hssize_t *end
 static hsize_t
 H5S_point_iter_nelmts (const H5S_sel_iter_t *iter)
 {
-    FUNC_ENTER_NOINIT(H5S_point_iter_nelmts);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_point_iter_nelmts);
 
     /* Check args */
     assert (iter);
@@ -210,7 +210,7 @@ H5S_point_iter_has_next_block(const H5S_sel_iter_t *iter)
 {
     htri_t ret_value=TRUE;   /* Return value */
 
-    FUNC_ENTER_NOINIT(H5S_point_iter_has_next_block);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_point_iter_has_next_block);
 
     /* Check args */
     assert (iter);
@@ -245,7 +245,7 @@ done:
 static herr_t
 H5S_point_iter_next(H5S_sel_iter_t *iter, size_t nelem)
 {
-    FUNC_ENTER_NOINIT(H5S_point_iter_next);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_point_iter_next);
 
     /* Check args */
     assert (iter);
@@ -281,7 +281,7 @@ H5S_point_iter_next(H5S_sel_iter_t *iter, size_t nelem)
 static herr_t
 H5S_point_iter_next_block(H5S_sel_iter_t *iter)
 {
-    FUNC_ENTER_NOINIT(H5S_point_iter_next_block);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_point_iter_next_block);
 
     /* Check args */
     assert (iter);
@@ -313,7 +313,7 @@ H5S_point_iter_next_block(H5S_sel_iter_t *iter)
 static herr_t
 H5S_point_iter_release (H5S_sel_iter_t UNUSED * iter)
 {
-    FUNC_ENTER_NOINIT(H5S_point_iter_release);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_point_iter_release);
 
     /* Check args */
     assert (iter);
@@ -526,7 +526,7 @@ H5S_select_elements (H5S_t *space, H5S_seloper_t op, size_t num_elem,
 {
     herr_t ret_value=SUCCEED;  /* return value */
 
-    FUNC_ENTER_NOINIT(H5S_select_elements);
+    FUNC_ENTER_NOAPI_NOINIT(H5S_select_elements);
 
     /* Check args */
     assert(space);
@@ -707,7 +707,7 @@ H5S_get_select_elem_npoints(H5S_t *space)
 {
     hssize_t ret_value=FAIL;        /* return value */
 
-    FUNC_ENTER_NOINIT(H5S_get_select_elem_npoints);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_get_select_elem_npoints);
 
     assert(space);
 
@@ -971,7 +971,7 @@ H5S_get_select_elem_pointlist(H5S_t *space, hsize_t startpoint, hsize_t numpoint
     H5S_pnt_node_t *node;       /* Point node */
     int rank;                  /* Dataspace rank */
 
-    FUNC_ENTER_NOINIT(H5S_get_select_elem_pointlist);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_get_select_elem_pointlist);
 
     assert(space);
     assert(buf);

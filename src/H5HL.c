@@ -552,7 +552,7 @@ H5HL_dest(H5F_t UNUSED *f, H5HL_t *heap)
 {
     H5HL_free_t	*fl;
 
-    FUNC_ENTER_NOINIT(H5HL_dest);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_dest);
 
     /* check arguments */
     assert(heap);
@@ -591,7 +591,7 @@ H5HL_dest(H5F_t UNUSED *f, H5HL_t *heap)
 static herr_t
 H5HL_clear(H5HL_t *heap)
 {
-    FUNC_ENTER_NOINIT(H5HL_clear);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_clear);
 
     /* check arguments */
     assert(heap);
@@ -735,7 +735,7 @@ done:
 static H5HL_free_t *
 H5HL_remove_free(H5HL_t *heap, H5HL_free_t *fl)
 {
-    FUNC_ENTER_NOINIT(H5HL_remove_free);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_remove_free);
 
     if (fl->prev) fl->prev->next = fl->next;
     if (fl->next) fl->next->prev = fl->prev;

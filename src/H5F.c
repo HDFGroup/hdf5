@@ -230,7 +230,7 @@ H5F_init_interface(void)
     H5P_genclass_t  *mnt_pclass;
     hbool_t 	    local		= H5F_MNT_SYM_LOCAL_DEF;
     
-    FUNC_ENTER_NOINIT(H5F_init_interface);
+    FUNC_ENTER_NOAPI_NOINIT(H5F_init_interface);
 
 #ifdef OLD_METADATA_WRITE
 #ifdef H5_HAVE_PARALLEL
@@ -478,7 +478,7 @@ H5F_term_interface(void)
 {
     int	n = 0;
 
-    FUNC_ENTER_NOINIT(H5F_term_interface);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_term_interface);
 
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_FILE))) {
@@ -664,7 +664,7 @@ H5F_flush_all_cb(void *_f, hid_t UNUSED fid, void *_invalidate)
     H5F_t *f=(H5F_t *)_f;
     unsigned    invalidate = (*((hbool_t*)_invalidate);
 
-    FUNC_ENTER_NOINIT(H5F_flush_all_cb);
+    FUNC_ENTER_NOAPI_NOINIT(H5F_flush_all_cb);
 
     H5F_flush(f, H5F_SCOPE_LOCAL, (invalidate ? H5F_FLUSH_INVALIDATE : H5F_FLUSH_NONE));
 
@@ -989,7 +989,7 @@ H5F_get_obj_count(H5F_t *f, unsigned types)
 {
     int   ret_value;            /* Return value */
 
-    FUNC_ENTER_NOINIT(H5F_get_obj_count);
+    FUNC_ENTER_NOAPI_NOINIT(H5F_get_obj_count);
 
     if((ret_value=H5F_get_objects(f, types, -1, NULL)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get counts of opened file IDs and object IDs in the file");
@@ -1054,7 +1054,7 @@ H5F_get_obj_ids(H5F_t *f, unsigned types, int max_objs, hid_t *oid_list)
 {
     int ret_value;              /* Return value */
  
-    FUNC_ENTER_NOINIT(H5F_get_obj_ids);
+    FUNC_ENTER_NOAPI_NOINIT(H5F_get_obj_ids);
 
     if((ret_value=H5F_get_objects(f, types, max_objs, oid_list)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get object IDs opened in the file");  
@@ -1086,7 +1086,7 @@ H5F_get_objects(H5F_t *f, unsigned types, int max_index, hid_t *obj_id_list)
     H5F_olist_t olist;          /* Structure to hold search results */
     int ret_value;              /* Return value */
 
-    FUNC_ENTER_NOINIT(H5F_get_object);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_object);
 
     /* Set up search information */
     olist.obj_id_list  = (max_index==0 ? NULL : obj_id_list);
@@ -1165,7 +1165,7 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
     H5F_olist_t *olist = (H5F_olist_t *)key;    /* Alias for search info */
     int      ret_value = FALSE;    /* Return value */
  
-    FUNC_ENTER_NOINIT(H5F_get_objects_cb);
+    FUNC_ENTER_NOAPI_NOINIT(H5F_get_objects_cb);
 
     assert(obj_ptr);
     assert(olist);
@@ -1293,7 +1293,7 @@ H5F_get_vfd_handle(H5F_t *file, hid_t fapl, void**file_handle)
 {
     herr_t ret_value;
 
-    FUNC_ENTER_NOINIT(H5F_get_vfd_handle);
+    FUNC_ENTER_NOAPI_NOINIT(H5F_get_vfd_handle);
 
     assert(file_handle);
     if((ret_value=H5FD_get_vfd_handle(file->shared->lf, fapl, file_handle)) < 0)
@@ -1328,7 +1328,7 @@ H5F_equal(void *_haystack, hid_t UNUSED id, void *_needle)
     const H5FD_t	*needle = (const H5FD_t*)_needle;
     int		retval;
     
-    FUNC_ENTER_NOINIT(H5F_equal);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_equal);
 
     retval = (0==H5FD_cmp(haystack->shared->lf, needle));
 
@@ -1363,7 +1363,7 @@ H5F_locate_signature(H5FD_t *file, hid_t dxpl_id)
     unsigned	    n, maxpow;
     haddr_t         ret_value;       /* Return value */
 
-    FUNC_ENTER_NOINIT(H5F_locate_signature);
+    FUNC_ENTER_NOAPI_NOINIT(H5F_locate_signature);
 
     /* Find the least N such that 2^N is larger than the file size */
     if (HADDR_UNDEF==(addr=H5FD_get_eof(file)) ||
@@ -1489,7 +1489,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
     int		n;
     H5P_genplist_t *plist;              /* Property list */
  
-    FUNC_ENTER_NOINIT(H5F_new);
+    FUNC_ENTER_NOAPI_NOINIT(H5F_new);
 
     if (NULL==(f=H5FL_CALLOC(H5F_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
@@ -1630,7 +1630,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
 {
     herr_t	   ret_value = SUCCEED;
     
-    FUNC_ENTER_NOINIT(H5F_dest);
+    FUNC_ENTER_NOAPI_NOINIT(H5F_dest);
 
     if (f && 1==f->nrefs) {
 	if (1==f->shared->nrefs) {
@@ -2590,7 +2590,7 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
     H5P_genplist_t *plist;              /* Property list */
     herr_t              ret_value;      /* Return value */
 
-    FUNC_ENTER_NOINIT(H5F_flush);
+    FUNC_ENTER_NOAPI_NOINIT(H5F_flush);
 
     /* Sanity check arguments */
     assert(f);
@@ -3217,7 +3217,7 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
     H5RS_str_t  *name_r;                /* Ref-counted version of name */
     herr_t	ret_value = SUCCEED;	/*return value			*/
     
-    FUNC_ENTER_NOINIT(H5F_mount);
+    FUNC_ENTER_NOAPI_NOINIT(H5F_mount);
 
     assert(loc);
     assert(name && *name);
@@ -3338,7 +3338,7 @@ H5F_unmount(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
     unsigned	i;			/*coutners			*/
     int	lt, rt, md=(-1), cmp;	/*binary search indices		*/
     
-    FUNC_ENTER_NOINIT(H5F_unmount);
+    FUNC_ENTER_NOAPI_NOINIT(H5F_unmount);
 
     assert(loc);
     assert(name && *name);
@@ -3725,8 +3725,8 @@ done:
 unsigned
 H5F_get_intent(const H5F_t *f)
 {
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5F_get_intent);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_intent);
 
     assert(f);
 
@@ -3756,8 +3756,8 @@ H5F_get_intent(const H5F_t *f)
 size_t
 H5F_sizeof_addr(const H5F_t *f)
 {
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5F_sizeof_addr);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_sizeof_addr);
 
     assert(f);
     assert(f->shared);
@@ -3788,8 +3788,8 @@ H5F_sizeof_addr(const H5F_t *f)
 size_t
 H5F_sizeof_size(const H5F_t *f)
 {
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5F_sizeof_size);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_sizeof_size);
 
     assert(f);
     assert(f->shared);
@@ -3821,8 +3821,8 @@ H5F_sizeof_size(const H5F_t *f)
  */
 unsigned H5F_sym_leaf_k(const H5F_t *f)
 {
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5F_sym_leaf_k);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_sym_leaf_k);
 
     assert(f);
     assert(f->shared);
@@ -3855,8 +3855,8 @@ unsigned H5F_sym_leaf_k(const H5F_t *f)
 int
 H5F_Kvalue(const H5F_t *f, const H5B_class_t *type)
 {
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5F_Kvalue);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_Kvalue);
 
     assert(f);
     assert(f->shared);
@@ -3885,8 +3885,8 @@ H5F_Kvalue(const H5F_t *f, const H5B_class_t *type)
 hid_t
 H5F_get_driver_id(const H5F_t *f)
 {
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5F_get_driver_id);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_driver_id);
 
     assert(f);
     assert(f->shared);
@@ -3952,8 +3952,8 @@ done:
 haddr_t 
 H5F_get_base_addr(const H5F_t *f)
 {
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5F_get_base_addr);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_base_addr);
 
     assert(f);
     assert(f->shared);
@@ -4189,8 +4189,8 @@ herr_t
 H5F_addr_pack(H5F_t UNUSED *f, haddr_t *addr_p/*out*/,
 	      const unsigned long objno[2])
 {
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5F_addr_pack);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_addr_pack);
 
     assert(f);
     assert(objno);

@@ -110,7 +110,7 @@ H5FD_init_interface(void)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOINIT(H5FD_init_interface);
+    FUNC_ENTER_NOAPI_NOINIT(H5FD_init_interface);
 
     if (H5I_init_group(H5I_VFL, H5I_VFL_HASHSIZE, 0,
 		       (H5I_free_t)H5FD_free_cls)<0)
@@ -149,7 +149,7 @@ H5FD_term_interface(void)
 {
     int	n = 0;
 
-    FUNC_ENTER_NOINIT(H5FD_term_interface);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_term_interface);
 
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_VFL))) {
@@ -185,7 +185,7 @@ H5FD_term_interface(void)
 static herr_t
 H5FD_free_cls(H5FD_class_t *cls)
 {
-    FUNC_ENTER_NOINIT(H5FD_free_cls);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_free_cls);
 
     H5MM_xfree(cls);
 
@@ -493,7 +493,7 @@ H5FD_pl_copy(void *(*copy_func)(const void *), size_t pl_size, const void *old_p
     void *new_pl = NULL;        /* Copy of property list */
     herr_t ret_value=SUCCEED;   /* Return value */
     
-    FUNC_ENTER_NOINIT(H5FD_pl_copy)
+    FUNC_ENTER_NOAPI_NOINIT(H5FD_pl_copy)
 
     /* Copy old pl, if one exists */
     if (old_pl) {
@@ -538,7 +538,7 @@ H5FD_pl_close(hid_t driver_id, herr_t (*free_func)(void *), void *pl)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOINIT(H5FD_pl_close)
+    FUNC_ENTER_NOAPI_NOINIT(H5FD_pl_close)
 
     /* Allow driver to free or do it ourselves */
     if (pl && free_func) {
@@ -2026,7 +2026,7 @@ H5FD_real_alloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 {
     haddr_t ret_value = HADDR_UNDEF;
 
-    FUNC_ENTER_NOINIT(H5FD_real_alloc);
+    FUNC_ENTER_NOAPI_NOINIT(H5FD_real_alloc);
 
     /* check args */
     assert(file);
@@ -2074,7 +2074,7 @@ H5FD_update_eoa(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     hsize_t wasted;
     haddr_t ret_value = HADDR_UNDEF;
 
-    FUNC_ENTER_NOINIT(H5FD_update_eoa);
+    FUNC_ENTER_NOAPI_NOINIT(H5FD_update_eoa);
 
     /* check args */
     assert(file);

@@ -735,7 +735,7 @@ static unsigned
 H5FP_gen_request_id()
 {
     static unsigned int i = 0;
-    FUNC_ENTER_NOINIT(H5FP_gen_request_id);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_gen_request_id);
     FUNC_LEAVE_NOAPI(i++);
 }
 
@@ -756,7 +756,7 @@ H5FP_dump_to_file(H5FD_t *file, hid_t dxpl_id)
     unsigned dumping = 1;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOINIT(H5FP_dump_to_file);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_dump_to_file);
 
     /* check args */
     assert(file);

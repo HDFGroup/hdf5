@@ -125,7 +125,7 @@ done:
  */
 herr_t
 H5F_contig_fill(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *layout,
-    struct H5P_genplist_t *dc_plist, const struct H5S_t *space,
+    const struct H5S_t *space,
     const struct H5O_fill_t *fill, size_t elmt_size)
 {
     hssize_t    snpoints;       /* Number of points in space (for error checking) */
@@ -154,7 +154,6 @@ H5F_contig_fill(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *layout,
     assert(layout && H5D_CONTIGUOUS==layout->type);
     assert(layout->ndims>0 && layout->ndims<=H5O_LAYOUT_NDIMS);
     assert(H5F_addr_defined(layout->addr));
-    assert(dc_plist!=NULL);
     assert(space);
     assert(elmt_size>0);
 

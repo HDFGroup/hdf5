@@ -372,8 +372,8 @@ H5V_hyper_eq(int n,
     int	i;
     htri_t      ret_value=TRUE;         /* Return value */
 
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5V_hyper_eq);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_hyper_eq);
 
     if (n <= 0) HGOTO_DONE(TRUE);
 
@@ -419,8 +419,8 @@ H5V_hyper_disjointp(unsigned n,
     unsigned	u;
     htri_t      ret_value=FALSE;        /* Return value */
 
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5V_hyper_disjointp);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_hyper_disjointp);
 
     if (!n || !size1 || !size2)	HGOTO_DONE(TRUE);
 

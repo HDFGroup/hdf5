@@ -170,7 +170,7 @@ H5FL_EXTERN(time_t);
 static herr_t
 H5O_init_interface(void)
 {
-    FUNC_ENTER_NOINIT(H5O_init_interface);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_init_interface);
 
     /*
      * Initialize functions that decode messages from symbol table entries.
@@ -265,7 +265,7 @@ H5O_init(H5F_t *f, hid_t dxpl_id, size_t size_hint, H5G_entry_t *ent/*out*/, had
     haddr_t     tmp_addr;
     herr_t      ret_value = SUCCEED;    /* return value */
 
-    FUNC_ENTER_NOINIT(H5O_init);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_init);
 
     /* check args */
     assert(f);
@@ -815,7 +815,7 @@ H5O_dest(H5F_t UNUSED *f, H5O_t *oh)
 {
     unsigned	i;
 
-    FUNC_ENTER_NOINIT(H5O_dest);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dest);
 
     /* check args */
     assert(oh);
@@ -871,7 +871,7 @@ H5O_clear(H5O_t *oh)
 {
     unsigned	u;      /* Local index variable */
 
-    FUNC_ENTER_NOINIT(H5O_clear);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_clear);
 
     /* check args */
     assert(oh);
@@ -956,7 +956,7 @@ H5O_reset_real(const H5O_class_t *type, void *native)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOINIT(H5O_reset_real);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_reset_real);
 
     /* check args */
     assert(type);
@@ -1035,7 +1035,7 @@ H5O_free_real(const H5O_class_t *type, void *mesg)
 {
     void * ret_value=NULL;      /* Return value */
 
-    FUNC_ENTER_NOINIT(H5O_free_real);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_free_real);
     
     /* check args */
     assert(type);
@@ -1117,7 +1117,7 @@ H5O_copy_real (const H5O_class_t *type, const void *mesg, void *dst)
 {
     void	*ret_value = NULL;
     
-    FUNC_ENTER_NOINIT(H5O_copy_real);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_copy_real);
 
     /* check args */
     assert (type);
@@ -1389,7 +1389,7 @@ H5O_exists_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, hid_t d
     unsigned	u;
     htri_t      ret_value;       /* Return value */
     
-    FUNC_ENTER_NOINIT(H5O_exists_real);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_exists_real);
 
     assert(ent);
     assert(ent->file);
@@ -1505,7 +1505,7 @@ H5O_read_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, void *mes
     H5G_type_t		cache_type;
     void		*ret_value = NULL;
 
-    FUNC_ENTER_NOINIT(H5O_read_real);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_read_real);
 
     /* check args */
     assert(ent);
@@ -1587,7 +1587,7 @@ H5O_find_in_ohdr(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_class_t **type_p,
     const H5O_class_t	*type = NULL;
     unsigned		ret_value;
 
-    FUNC_ENTER_NOINIT(H5O_find_in_ohdr);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_find_in_ohdr);
 
     /* Check args */
     assert(f);
@@ -1987,7 +1987,7 @@ H5O_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_class_t *type,
     H5O_shared_t	sh_mesg;
     int		        ret_value = FAIL;
 
-    FUNC_ENTER_NOINIT(H5O_append_real);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_append_real);
 
     /* check args */
     assert(f);
@@ -2035,7 +2035,7 @@ H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *flags, const H5O_class_t *orig_type,
     size_t	size;                   /* Size of space allocated for object header */
     unsigned    ret_value=UFAIL;        /* Return value */
 
-    FUNC_ENTER_NOINIT(H5O_new_mesg);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_new_mesg);
 
     /* check args */
     assert(f);
@@ -2109,7 +2109,7 @@ H5O_write_mesg(H5O_t *oh, unsigned idx, const H5O_class_t *type,
     H5O_mesg_t         *idx_msg;        /* Pointer to message to modify */
     herr_t      ret_value=SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOINIT(H5O_write_mesg);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_write_mesg);
 
     /* check args */
     assert(oh);
@@ -2162,7 +2162,7 @@ H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force)
     size_t	size;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
-    FUNC_ENTER_NOINIT(H5O_touch_oh);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_touch_oh);
 
     assert(oh);
 
@@ -2444,7 +2444,7 @@ H5O_remove_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, hid_t d
     unsigned	u;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOINIT(H5O_remove_real);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_remove_real);
 
     /* check args */
     assert(ent);
@@ -2540,7 +2540,7 @@ H5O_alloc_extend_chunk(H5O_t *oh, unsigned chunkno, size_t size)
     uint8_t	*old_addr;
     unsigned	ret_value;
 
-    FUNC_ENTER_NOINIT(H5O_alloc_extend_chunk);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_alloc_extend_chunk);
 
     /* check args */
     assert(oh);
@@ -2675,7 +2675,7 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
     unsigned	u;
     unsigned	ret_value;		/*return value	*/
 
-    FUNC_ENTER_NOINIT(H5O_alloc_new_chunk);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_alloc_new_chunk);
 
     /* check args */
     assert (oh);
@@ -2858,7 +2858,7 @@ H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
     size_t	aligned_size = H5O_ALIGN(size);
     unsigned	ret_value;      /* Return value */
 
-    FUNC_ENTER_NOINIT(H5O_alloc);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_alloc);
 
     /* check args */
     assert (oh);
@@ -2983,7 +2983,7 @@ H5O_share (H5F_t *f, hid_t dxpl_id, const H5O_class_t *type, const void *mesg,
     void	*buf = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
-    FUNC_ENTER_NOINIT(H5O_share);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_share);
 
     /* Check args */
     assert (f);
@@ -3169,7 +3169,7 @@ H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
     unsigned	u;
     herr_t ret_value=SUCCEED;   /* Return value */
     
-    FUNC_ENTER_NOINIT(H5O_delete_oh);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_delete_oh);
 
     /* Check args */
     assert (f);
@@ -3231,7 +3231,7 @@ H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg)
     const H5O_class_t	*type;  /* Type of object to free */
     herr_t ret_value=SUCCEED;   /* Return value */
     
-    FUNC_ENTER_NOINIT(H5O_delete_mesg);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_delete_mesg);
 
     /* Check args */
     assert (f);

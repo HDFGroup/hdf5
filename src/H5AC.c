@@ -197,7 +197,7 @@ H5AC_init_interface(void)
 #endif /* H5_HAVE_PARALLEL */
     herr_t ret_value=SUCCEED;           /* Return value */
 
-    FUNC_ENTER_NOINIT(H5AC_init_interface);
+    FUNC_ENTER_NOAPI_NOINIT(H5AC_init_interface);
 
     /* Sanity check */
     assert(H5P_CLS_DATASET_XFER_g!=(-1));
@@ -305,7 +305,7 @@ H5AC_term_interface(void)
 {
     int		n=0;
 
-    FUNC_ENTER_NOINIT(H5AC_term_interface);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5AC_term_interface);
 
     if (interface_initialize_g) {
         if(H5AC_dxpl_id>0 || H5AC_noblock_dxpl_id>0 || H5AC_ind_dxpl_id>0) {
@@ -708,8 +708,8 @@ H5AC_compare(const void *_a, const void *_b)
     H5AC_info_t           *slot_a;
     H5AC_info_t           *slot_b;
 
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5AC_compare);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5AC_compare);
 
     assert(current_cache_g);
 

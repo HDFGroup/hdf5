@@ -67,7 +67,7 @@ H5A_init_interface(void)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOINIT(H5A_init_interface);
+    FUNC_ENTER_NOAPI_NOINIT(H5A_init_interface);
 
     /*
      * Create attribute group.
@@ -101,7 +101,7 @@ H5A_term_interface(void)
 {
     int	n=0;
 
-    FUNC_ENTER_NOINIT(H5A_term_interface);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_term_interface);
     
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_ATTR))) {
@@ -221,7 +221,7 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
     int	seq=0;
     hid_t	ret_value = FAIL;
 
-    FUNC_ENTER_NOINIT(H5A_create);
+    FUNC_ENTER_NOAPI_NOINIT(H5A_create);
 
     /* check args */
     assert(ent);
@@ -343,7 +343,7 @@ H5A_get_index(H5G_entry_t *ent, const char *name, hid_t dxpl_id)
     int		i;                      /* Index variable */
     int		ret_value=FAIL;         /* Return value */
 
-    FUNC_ENTER_NOINIT(H5A_get_index);
+    FUNC_ENTER_NOAPI_NOINIT(H5A_get_index);
 
     assert(ent);
     assert(name);
@@ -509,7 +509,7 @@ H5A_open(H5G_entry_t *ent, unsigned idx, hid_t dxpl_id)
     H5A_t       *attr = NULL;
     hid_t	    ret_value = FAIL;
 
-    FUNC_ENTER_NOINIT(H5A_open);
+    FUNC_ENTER_NOAPI_NOINIT(H5A_open);
 
     /* check args */
     assert(ent);
@@ -622,7 +622,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
     int         idx;	      /* index of attribute in object header */
     herr_t		ret_value = FAIL;
 
-    FUNC_ENTER_NOINIT(H5A_write);
+    FUNC_ENTER_NOAPI_NOINIT(H5A_write);
 
     assert(attr);
     assert(mem_type);
@@ -769,7 +769,7 @@ H5A_read(H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
     size_t		buf_size;		/* desired buffer size	*/
     herr_t		ret_value = FAIL;
 
-    FUNC_ENTER_NOINIT(H5A_read);
+    FUNC_ENTER_NOAPI_NOINIT(H5A_read);
 
     assert(attr);
     assert(mem_type);
@@ -1071,7 +1071,7 @@ H5A_get_storage_size(H5A_t *attr)
 {
     hsize_t	ret_value;      /* Return value */
     
-    FUNC_ENTER_NOINIT(H5A_get_storage_size);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_get_storage_size);
 
     /* Set return value */
     ret_value = attr->data_size;
@@ -1203,7 +1203,7 @@ H5A_rename(H5G_entry_t *ent, const char *old_name, const char *new_name, hid_t d
     H5A_t       *found_attr;    /* Attribute with OLD_NAME */
     herr_t	ret_value=SUCCEED;      /* Return value */
     
-    FUNC_ENTER_NOINIT(H5A_rename);
+    FUNC_ENTER_NOAPI_NOINIT(H5A_rename);
 
     /* Check arguments */
     assert(ent);

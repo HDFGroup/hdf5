@@ -301,7 +301,7 @@ done:
 static herr_t
 H5E_init_interface (void)
 {
-    FUNC_ENTER_NOINIT(H5E_init_interface);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_init_interface);
 
     H5E_auto_data_g = stderr;
 
@@ -542,7 +542,7 @@ H5E_walk_cb(int n, H5E_error_t *err_desc, void *client_data)
     const char		*min_str = NULL;
     const int		indent = 2;
 
-    FUNC_ENTER_NOINIT(H5E_walk_cb);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_walk_cb);
     /*NO TRACE*/
 
     /* Check arguments */
@@ -685,7 +685,7 @@ H5E_push(H5E_major_t maj_num, H5E_minor_t min_num, const char *function_name,
      *		HERROR().  HERROR() is called by HRETURN_ERROR() which could
      *		be called by FUNC_ENTER().
      */
-    FUNC_ENTER_NOINIT(H5E_push);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_push);
 
     /*
      * Don't fail if arguments are bad.  Instead, substitute some default

@@ -140,7 +140,7 @@ static herr_t H5I_debug(H5I_type_t grp);
 static herr_t 
 H5I_init_interface(void)
 {
-    FUNC_ENTER_NOINIT(H5I_init_interface);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5I_init_interface);
 
     /*
      * Make certain the ID types don't overflow the number of bits allocated
@@ -177,7 +177,7 @@ H5I_term_interface(void)
     H5I_type_t		grp;
     int		n=0;
 
-    FUNC_ENTER_NOINIT(H5I_term_interface);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5I_term_interface);
 
     if (interface_initialize_g) {
         /* How many groups are still being used? */
@@ -1077,7 +1077,7 @@ H5I_find_id(hid_t id)
     unsigned		hash_loc;		/*bucket pointer	*/
     H5I_id_info_t	*ret_value = NULL;	/*return value		*/
 
-    FUNC_ENTER_NOINIT(H5I_find_id);
+    FUNC_ENTER_NOAPI_NOINIT(H5I_find_id);
 
     /* Check arguments */
     grp = H5I_GROUP(id);

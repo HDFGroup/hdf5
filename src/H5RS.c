@@ -68,7 +68,7 @@ H5RS_xstrdup(const char *s)
 {
     char *ret_value;   /* Return value */
 
-    FUNC_ENTER_NOINIT(H5RS_xstrdup);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5RS_xstrdup);
 
     if (s) {
         ret_value = H5FL_BLK_MALLOC(str_buf,HDstrlen(s) + 1);
@@ -351,7 +351,7 @@ int
 H5RS_cmp(const H5RS_str_t *rs1, const H5RS_str_t *rs2)
 {
     /* Can't return invalid value from this function */
-    FUNC_ENTER_NOINIT(H5RS_cmp);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5RS_cmp);
 
     /* Sanity check */
     assert(rs1);

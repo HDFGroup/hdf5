@@ -524,7 +524,7 @@ done:
 static herr_t
 H5B_dest(H5F_t UNUSED *f, H5B_t *bt)
 {
-    FUNC_ENTER_NOINIT(H5B_dest);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B_dest);
 
     /*
      * Check arguments.
@@ -564,7 +564,7 @@ H5B_clear(H5B_t *bt)
 {
     int	i;      /* Local index variable */
 
-    FUNC_ENTER_NOINIT(H5B_clear);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B_clear);
 
     /*
      * Check arguments.
@@ -704,7 +704,7 @@ H5B_split(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_t *old_bt, haddr
     int	i, k, nleft, nright;
     size_t	recsize = 0;
 
-    FUNC_ENTER_NOINIT(H5B_split);
+    FUNC_ENTER_NOAPI_NOINIT(H5B_split);
 
     /*
      * Check arguments.
@@ -848,7 +848,7 @@ H5B_decode_key(H5F_t *f, H5B_t *bt, int idx)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOINIT(H5B_decode_key);
+    FUNC_ENTER_NOAPI_NOINIT(H5B_decode_key);
 
     assert(bt->key[idx].dirty==0);
 
@@ -880,7 +880,7 @@ H5B_decode_keys(H5F_t *f, H5B_t *bt, int idx)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOINIT(H5B_decode_keys);
+    FUNC_ENTER_NOAPI_NOINIT(H5B_decode_keys);
 
     assert(f);
     assert(bt);
@@ -1078,7 +1078,7 @@ H5B_insert_child(H5F_t *f, const H5B_class_t *type, H5B_t *bt,
     size_t	recsize;
     int	i;
 
-    FUNC_ENTER_NOINIT(H5B_insert_child);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B_insert_child);
 
     assert(bt);
     assert(bt->nchildren<2*H5F_KVALUE(f, type));
@@ -1210,7 +1210,7 @@ H5B_insert_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
     H5B_ins_t	my_ins = H5B_INS_ERROR;
     H5B_ins_t	ret_value = H5B_INS_ERROR;
 
-    FUNC_ENTER_NOINIT(H5B_insert_helper);
+    FUNC_ENTER_NOAPI_NOINIT(H5B_insert_helper);
 
     /*
      * Check arguments

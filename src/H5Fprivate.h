@@ -434,8 +434,7 @@ H5_DLL ssize_t H5F_seq_writevv(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *lay
 H5_DLL herr_t H5F_contig_create(H5F_t *f, hid_t dxpl_id,
         struct H5O_layout_t *layout);
 H5_DLL herr_t H5F_contig_fill(H5F_t *f, hid_t dxpl_id,
-        struct H5O_layout_t *layout, struct H5P_genplist_t *dc_plist,
-        const struct H5S_t *space,
+        struct H5O_layout_t *layout, const struct H5S_t *space,
         const struct H5O_fill_t *fill, size_t elmt_size);
 H5_DLL herr_t H5F_contig_delete(H5F_t *f, hid_t dxpl_id,
         const struct H5O_layout_t *layout);

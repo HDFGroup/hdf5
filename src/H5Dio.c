@@ -217,7 +217,7 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_t
     size_t buf_size;            /* Desired buffer size	*/
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOINIT(H5D_fill);
+    FUNC_ENTER_NOAPI_NOINIT(H5D_fill);
 
     /* Check args */
     assert(buf);
@@ -525,7 +525,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     unsigned	sconv_flags=0;	        /* Flags for the space conversion */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
-    FUNC_ENTER_NOINIT(H5D_read);
+    FUNC_ENTER_NOAPI_NOINIT(H5D_read);
 
     /* check args */
     assert(dataset && dataset->ent.file);
@@ -746,7 +746,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     unsigned	sconv_flags=0;	        /* Flags for the space conversion */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
-    FUNC_ENTER_NOINIT(H5D_write);
+    FUNC_ENTER_NOAPI_NOINIT(H5D_write);
 
     /* check args */
     assert(dataset && dataset->ent.file);
@@ -961,7 +961,7 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S
     hsize_t	n, smine_nelmts;	/*elements per strip	*/
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
-    FUNC_ENTER_NOINIT(H5D_contig_read);
+    FUNC_ENTER_NOAPI_NOINIT(H5D_contig_read);
     
     /*
      * If there is no type conversion then read directly into the
@@ -1180,7 +1180,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
     hsize_t	n, smine_nelmts;	/*elements per strip	*/
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
-    FUNC_ENTER_NOINIT(H5D_contig_write);
+    FUNC_ENTER_NOAPI_NOINIT(H5D_contig_write);
     
     /*
      * If there is no type conversion then write directly from the
@@ -1406,7 +1406,7 @@ UNUSED
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
-    FUNC_ENTER_NOINIT(H5D_chunk_read);
+    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_read);
     
     /* Map elements between file and memory for each chunk*/
     if(H5D_create_chunk_map(dataset, mem_type, file_space, mem_space, &fm)<0)
@@ -1703,7 +1703,7 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
-    FUNC_ENTER_NOINIT(H5D_chunk_write);
+    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_write);
     
 #ifdef QAK
 {
@@ -2016,7 +2016,7 @@ H5D_io_assist_mpio(H5P_genplist_t *dx_plist, H5FD_mpio_xfer_t xfer_mode,
 { 
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
-    FUNC_ENTER_NOINIT(H5D_io_assist_mpio);
+    FUNC_ENTER_NOAPI_NOINIT(H5D_io_assist_mpio);
     
     /* The following may not handle a collective call correctly
      * since it does not ensure all processes can handle the write
@@ -2068,7 +2068,7 @@ H5D_chunk_coords_assist(hssize_t *coords, size_t ndims, const hsize_t chunks[], 
     hsize_t tmp;                /* Size of "down elements" in each dimension */
     size_t i, j;                /* Local index variables */
 
-    FUNC_ENTER_NOINIT(H5D_chunk_coords_assist);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_chunk_coords_assist);
 
     for(i=0; i<ndims; i++) {
         tmp=1;
@@ -2117,7 +2117,7 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
     unsigned u;                         /* Local index variable */
     herr_t	ret_value = SUCCEED;	/*return value		*/
      
-    FUNC_ENTER_NOINIT(H5D_create_chunk_map);
+    FUNC_ENTER_NOAPI_NOINIT(H5D_create_chunk_map);
 #ifdef QAK
 {
     int mpi_rank;
@@ -2392,7 +2392,7 @@ H5D_free_chunk_info(void *_chunk_info)
 {
     H5D_chunk_info_t *chunk_info=(H5D_chunk_info_t *)_chunk_info;
 
-    FUNC_ENTER_NOINIT(H5D_free_chunk_info);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_free_chunk_info);
 
     assert(chunk_info);
 
@@ -2428,7 +2428,7 @@ H5D_destroy_chunk_map(fm_map *fm)
 {
     herr_t	ret_value = SUCCEED;	/*return value		*/
      
-    FUNC_ENTER_NOINIT(H5D_destroy_chunk_map);
+    FUNC_ENTER_NOAPI_NOINIT(H5D_destroy_chunk_map);
 
     /* Free the chunk info tree */
     if(fm->fsel)
@@ -2483,7 +2483,7 @@ H5D_create_chunk_file_map_hyper(const fm_map *fm)
     unsigned    u;                          /* Local index variable */
     herr_t	ret_value = SUCCEED;        /* Return value */
     
-    FUNC_ENTER_NOINIT(H5D_create_chunk_file_map_hyper);
+    FUNC_ENTER_NOAPI_NOINIT(H5D_create_chunk_file_map_hyper);
 
     /* Make a copy of file dataspace */
     if((tmp_fspace = H5S_copy(fm->file_space))==NULL)
@@ -2652,7 +2652,7 @@ H5D_create_chunk_mem_map_hyper(const fm_map *fm)
     unsigned    u;                          /* Local index variable */
     herr_t	ret_value = SUCCEED;        /* Return value */
     
-    FUNC_ENTER_NOINIT(H5D_create_chunk_mem_map_hyper);
+    FUNC_ENTER_NOAPI_NOINIT(H5D_create_chunk_mem_map_hyper);
 #ifdef QAK
 {
     hsize_t mem_dims[H5O_LAYOUT_NDIMS];   /* Dimensions of memory space */
@@ -2798,7 +2798,7 @@ H5D_chunk_file_cb(void UNUSED *elem, hid_t UNUSED type_id, hsize_t ndims, hssize
     unsigned    u;                              /* Local index variable */
     herr_t	ret_value = SUCCEED;            /* Return value		*/
     
-    FUNC_ENTER_NOINIT(H5D_chunk_file_cb)
+    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_file_cb)
 
     /* Calculate the index of this chunk */
     if(H5V_chunk_index((unsigned)ndims,coords,fm->layout->dim,fm->chunks,fm->down_chunks,&chunk_index)<0)
@@ -2909,7 +2909,7 @@ H5D_chunk_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, hsize_t ndims, hssize_
     hsize_t     chunk_index;                    /* Chunk index */
     herr_t	ret_value = SUCCEED;            /* Return value		*/
     
-    FUNC_ENTER_NOINIT(H5D_chunk_mem_cb);
+    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_mem_cb);
 
     /* Calculate the index of this chunk */
     if(H5V_chunk_index((unsigned)ndims,coords,fm->layout->dim,fm->chunks,fm->down_chunks,&chunk_index)<0)

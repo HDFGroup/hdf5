@@ -77,7 +77,7 @@ H5Z_filter_fletcher32_compute(void *_src, size_t len)
     size_t count = len;         /* Number of bytes left to checksum */
     uint32_t s1 = 0, s2 = 0;    /* Temporary partial checksums */
 
-    FUNC_ENTER_NOINIT(H5Z_filter_fletcher32_compute);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5Z_filter_fletcher32_compute);
 
     /* Compute checksum */
     while(count > 1) {

@@ -336,8 +336,8 @@ H5T_bit_find (uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction,
     size_t	iu;
     ssize_t     ret_value=(-1);         /* Return value */
 
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5T_bit_find);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_bit_find);
 
     /* Some functions call this with value=TRUE */
     assert (TRUE==1);
@@ -438,8 +438,8 @@ H5T_bit_inc(uint8_t *buf, size_t start, size_t size)
     unsigned	carry = 1;
     unsigned	acc, mask;
 
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5T_bit_find);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_bit_find);
 
     assert(buf);
     start %= 8;

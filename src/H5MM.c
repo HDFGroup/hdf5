@@ -58,8 +58,8 @@ static int interface_initialize_g = 0;
 void *
 H5MM_malloc(size_t size)
 {
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5MM_malloc);
+    /* Use FUNC_ENTER_NOAPI_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT(H5MM_malloc);
 
     assert(size);
 
@@ -91,8 +91,8 @@ H5MM_malloc(size_t size)
 void *
 H5MM_calloc(size_t size)
 {
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5MM_calloc);
+    /* Use FUNC_ENTER_NOAPI_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT(H5MM_calloc);
 
     assert(size);
 
@@ -129,8 +129,8 @@ H5MM_realloc(void *mem, size_t size)
 {
     void *ret_value;
 
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5MM_realloc);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5MM_realloc);
 
     if (!mem) {
 	if (0 == size)
@@ -177,8 +177,8 @@ H5MM_xstrdup(const char *s)
 {
     char	*ret_value=NULL;
 
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5MM_xstrdup);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5MM_xstrdup);
 
     if (s) {
         ret_value = H5MM_malloc(HDstrlen(s) + 1);
@@ -254,8 +254,8 @@ done:
 void *
 H5MM_xfree(void *mem)
 {
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5MM_xfree);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5MM_xfree);
 
     if (mem)
         HDfree(mem);

@@ -276,7 +276,7 @@ H5FP_sap_receive(H5FP_request_t *req, int source, int tag, char **buf)
     herr_t ret_value = SUCCEED;
     int mrc;
 
-    FUNC_ENTER_NOINIT(H5FP_sap_receive);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_sap_receive);
 
     HDmemset(&status, 0, sizeof(status));
 
@@ -304,7 +304,7 @@ H5FP_object_lock_cmp(H5FP_object_lock *o1,
                      H5FP_object_lock *o2,
                      int UNUSED cmparg)
 {
-    FUNC_ENTER_NOINIT(H5FP_object_lock_cmp);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_object_lock_cmp);
     assert(o1);
     assert(o2);
     FUNC_LEAVE_NOAPI(HDmemcmp(o1->oid, o2->oid, sizeof(o1->oid)));
@@ -330,7 +330,7 @@ H5FP_new_object_lock(const unsigned char *oid, unsigned rank,
 {
     H5FP_object_lock *ret_value = NULL;
     
-    FUNC_ENTER_NOINIT(H5FP_new_object_lock);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_new_object_lock);
     assert(oid);
 
     if ((ret_value = (H5FP_object_lock *)H5MM_malloc(sizeof(H5FP_object_lock))) == NULL)
@@ -356,7 +356,7 @@ done:
 static herr_t
 H5FP_free_object_lock(H5FP_object_lock *ol)
 {
-    FUNC_ENTER_NOINIT(H5FP_free_object_lock);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_free_object_lock);
     HDfree(ol);
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
@@ -374,7 +374,7 @@ H5FP_find_object_lock(H5FP_file_info *info, unsigned char *oid)
 {
     H5FP_object_lock *ret_value = NULL;
 
-    FUNC_ENTER_NOINIT(H5FP_find_object_lock);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_find_object_lock);
 
     assert(info);
     assert(oid);
@@ -411,7 +411,7 @@ H5FP_remove_object_lock_from_list(H5FP_file_info *info,
     H5TB_NODE *node;
     herr_t ret_value = FAIL;
 
-    FUNC_ENTER_NOINIT(H5FP_remove_object_lock_from_list);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_remove_object_lock_from_list);
 
     if ((node = H5TB_dfind(info->locks, (void *)ol, NULL)) != NULL) {
         H5FP_free_object_lock(H5TB_rem(&info->locks->root, node, NULL));
@@ -433,7 +433,7 @@ H5FP_file_mod_cmp(H5FP_mdata_mod *k1,
                   H5FP_mdata_mod *k2,
                   int UNUSED cmparg)
 {
-    FUNC_ENTER_NOINIT(H5FP_file_mod_cmp);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_file_mod_cmp);
     assert(k1);
     assert(k2);
     FUNC_LEAVE_NOAPI(k1->addr - k2->addr);
@@ -450,7 +450,7 @@ H5FP_file_mod_cmp(H5FP_mdata_mod *k1,
 static herr_t
 H5FP_free_mod_node(H5FP_mdata_mod *info)
 {
-    FUNC_ENTER_NOINIT(H5FP_free_mod_node);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_free_mod_node);
 
     if (info) {
         HDfree(info->metadata);
@@ -476,7 +476,7 @@ H5FP_new_file_mod_node(unsigned UNUSED rank, H5FD_mem_t mem_type,
 {
     H5FP_mdata_mod *ret_value = NULL;
 
-    FUNC_ENTER_NOINIT(H5FP_new_file_mod_node);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_new_file_mod_node);
 
     if ((ret_value = (H5FP_mdata_mod *)H5MM_malloc(sizeof(H5FP_mdata_mod))) == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "out of memory");
@@ -510,7 +510,7 @@ H5FP_add_file_mod_to_list(H5FP_file_info *info, H5FD_mem_t mem_type,
     H5TB_NODE *node;
     herr_t ret_value = FAIL;
 
-    FUNC_ENTER_NOINIT(H5FP_add_file_mod_to_list);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_add_file_mod_to_list);
 
     /* check args */
     assert(info);
@@ -554,7 +554,7 @@ done:
 static herr_t
 H5FP_free_file_info_node(H5FP_file_info *info)
 {
-    FUNC_ENTER_NOINIT(H5FP_free_file_info_node);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_free_file_info_node);
 
     if (info) {
         H5TB_dfree(info->mod_tree, (void (*)(void*))H5FP_free_mod_node, NULL);
@@ -576,7 +576,7 @@ H5FP_free_file_info_node(H5FP_file_info *info)
 static int
 H5FP_file_info_cmp(H5FP_file_info *k1, H5FP_file_info *k2, int UNUSED cmparg)
 {
-    FUNC_ENTER_NOINIT(H5FP_file_info_cmp);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_file_info_cmp);
     assert(k1);
     assert(k2);
     FUNC_LEAVE_NOAPI(k1->file_id - k2->file_id);
@@ -595,7 +595,7 @@ H5FP_new_file_info_node(unsigned file_id)
 {
     H5FP_file_info *ret_value;
 
-    FUNC_ENTER_NOINIT(H5FP_new_file_info_node);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_new_file_info_node);
 
     if ((ret_value = (H5FP_file_info *)H5MM_malloc(sizeof(H5FP_file_info))) == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "out of memory");
@@ -635,7 +635,7 @@ H5FP_find_file_info(unsigned file_id)
     H5TB_NODE *node = NULL;
     H5FP_file_info *ret_value = NULL;
 
-    FUNC_ENTER_NOINIT(H5FP_find_file_info);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_find_file_info);
 
     if (file_info_tree && file_info_tree->root) {
         H5FP_file_info s;
@@ -668,7 +668,7 @@ H5FP_add_new_file_info_to_list(unsigned file_id, haddr_t maxaddr,
     H5FP_file_info *info;
     herr_t ret_value = FAIL;
 
-    FUNC_ENTER_NOINIT(H5FP_add_new_file_info_to_list);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_add_new_file_info_to_list);
 
     if ((info = H5FP_new_file_info_node(file_id)) != NULL) {
         int mrc;
@@ -727,7 +727,7 @@ H5FP_remove_file_id_from_list(unsigned file_id)
     H5TB_NODE *node;
     herr_t ret_value = FAIL;
 
-    FUNC_ENTER_NOINIT(H5FP_remove_file_id_from_list);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_remove_file_id_from_list);
 
     s.file_id = file_id;    /* This is the key field for the TBBT */
 
@@ -760,7 +760,7 @@ H5FP_send_reply(unsigned to, unsigned req_id, unsigned file_id, H5FP_status_t st
     herr_t ret_value = SUCCEED;
     int mrc;
 
-    FUNC_ENTER_NOINIT(H5FP_send_reply);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_send_reply);
 
     reply.req_id = req_id;
     reply.file_id = file_id;
@@ -791,7 +791,7 @@ H5FP_dump(H5FP_file_info *info, unsigned to, unsigned req_id, unsigned file_id)
     herr_t ret_value = SUCCEED;
     int mrc;
 
-    FUNC_ENTER_NOINIT(H5FP_dump);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_dump);
 
     /* check args */
     assert(info);
@@ -865,7 +865,7 @@ static unsigned
 H5FP_gen_sap_file_id()
 {
     static unsigned i = 0;
-    FUNC_ENTER_NOINIT(H5FP_gen_sap_file_id);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_gen_sap_file_id);
     FUNC_LEAVE_NOAPI(i++);
 }
 
@@ -883,7 +883,7 @@ H5FP_sap_handle_open_request(H5FP_request_t *req, unsigned UNUSED md_size)
     herr_t ret_value = SUCCEED;
     int mrc;
 
-    FUNC_ENTER_NOINIT(H5FP_sap_handle_open_request);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_sap_handle_open_request);
 
     if (req->obj_type == H5FP_OBJ_FILE) {
         unsigned new_file_id = H5FP_gen_sap_file_id();
@@ -936,7 +936,7 @@ H5FP_sap_handle_lock_request(H5FP_request_t *req)
     herr_t ret_value = SUCCEED;
     unsigned i, j;
 
-    FUNC_ENTER_NOINIT(H5FP_sap_handle_lock_request);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_sap_handle_lock_request);
 
     if ((oids = (struct lock_group *)H5MM_malloc(list_size *
                                               sizeof(struct lock_group))) == NULL) {
@@ -1139,7 +1139,7 @@ H5FP_sap_handle_release_lock_request(H5FP_request_t *req)
     herr_t ret_value;
     unsigned i, j;
 
-    FUNC_ENTER_NOINIT(H5FP_sap_handle_release_lock_request);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_sap_handle_release_lock_request);
 
     if ((oids = (struct release_group *)H5MM_malloc(list_size *
                                                  sizeof(struct release_group))) == NULL) {
@@ -1243,7 +1243,7 @@ H5FP_sap_handle_read_request(H5FP_request_t *req)
     char *metadata = NULL;
     int mrc;
 
-    FUNC_ENTER_NOINIT(H5FP_sap_handle_read_request);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_sap_handle_read_request);
 
     r.req_id = req->req_id;
     r.file_id = req->file_id;
@@ -1313,7 +1313,7 @@ H5FP_sap_handle_write_request(H5FP_request_t *req, char *mdata, unsigned md_size
     H5FP_status_t exit_state = H5FP_STATUS_OK;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOINIT(H5FP_sap_handle_write_request);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_sap_handle_write_request);
 
     if ((info = H5FP_find_file_info(req->file_id)) != NULL) {
 #if 0
@@ -1397,7 +1397,7 @@ H5FP_sap_handle_flush_request(H5FP_request_t *req)
     H5FP_status_t exit_state = H5FP_STATUS_OK;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOINIT(H5FP_sap_handle_flush_request);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_sap_handle_flush_request);
 
     if ((info = H5FP_find_file_info(req->file_id)) != NULL)
         if (info->num_mods) {
@@ -1439,7 +1439,7 @@ H5FP_sap_handle_close_request(H5FP_request_t *req)
     H5FP_status_t exit_state = H5FP_STATUS_OK;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOINIT(H5FP_sap_handle_close_request);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_sap_handle_close_request);
 
     if ((info = H5FP_find_file_info(req->file_id)) != NULL) {
         int comm_size;
@@ -1482,7 +1482,7 @@ H5FP_sap_handle_alloc_request(H5FP_request_t *req)
     int             mrc;
     herr_t          ret_value = SUCCEED;
 
-    FUNC_ENTER_NOINIT(H5FP_sap_handle_alloc_request);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_sap_handle_alloc_request);
 
     sap_alloc.req_id = req->req_id;
     sap_alloc.file_id = req->file_id;
@@ -1545,7 +1545,7 @@ H5FP_sap_handle_free_request(H5FP_request_t *req)
     herr_t          ret_value = SUCCEED;
     int             mrc;
 
-    FUNC_ENTER_NOINIT(H5FP_sap_handle_free_request);
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_sap_handle_free_request);
 
     sap_alloc.req_id = req->req_id;
     sap_alloc.file_id = req->file_id;
