@@ -7,6 +7,8 @@
 <STYLE TYPE="text/css">
 
 P { text-indent: 2em}
+P.item { margin-left: 2em; text-indent: -2em}
+P.item2 { margin-left: 2em; text-indent: 2em}
 
 TABLE.format { border:solid; border-collapse:collapse; caption-side:top; text-align:center; width:80%;}
 TABLE.format TH { border:ridge; padding:4px; width:25%;}
@@ -15,10 +17,11 @@ TABLE.format CAPTION { font-weight:bold; font-size:larger;}
 
 TABLE.note {border:none; text-align:right; width:80%;}
 
-TABLE.desc { border:solid; border-collapse:collapse; text-align:left; width:80%;}
+TABLE.desc { border:solid; border-collapse:collapse; caption-size:top; text-align:left; width:80%;}
 TABLE.desc TR { vertical-align:top;}
 TABLE.desc TH { border-style:ridge; font-size:larger; padding:4px; text-decoration:underline;}
 TABLE.desc TD { border-style:ridge; padding:4px; }
+TABLE.desc CAPTION { font-weight:bold; font-size:larger;}
 
 TABLE.list { border:none; }
 TABLE.list TR { vertical-align:top;}
@@ -192,7 +195,7 @@ TABLE.list TD { border:none; }
          <li>Free space
       </ul>
 
-      The HDF5 library uses these low-level objects to represent the
+    <P>The HDF5 library uses these low-level objects to represent the
       higher-level objects that are then presented to the user or 
       to applications through the APIs.
       For instance, a group is an object header that contains a message that
@@ -619,7 +622,11 @@ TABLE.list TD { border:none; }
             constrains this value to be the absolute file address 
             of the super block itself when creating new files; 
             future versions of the library may provide greater 
-            flexibility.  Unless otherwise noted,
+            flexibility.  When opening an existing file and this address does
+            not match the offset of the superblock, the library assumes
+            that the entire contents of the HDF5 file have been adjusted in
+            the file and adjusts the base address and end of file address to
+            reflect their new positions in the file.  Unless otherwise noted,
             all other file addresses are relative to this base
             address.
             </P>
@@ -646,7 +653,7 @@ TABLE.list TD { border:none; }
         <tr>
           <td>End of File Address</td>
           <td>
-            <P>This is the relative file address of the first byte past
+            <P>This is the absolute file address of the first byte past
             the end of all HDF5 data.  It is used to determine whether a
             file has been accidently truncated and as an address where
             file data allocation can occur if space from the free list is
@@ -915,7 +922,7 @@ TABLE.list TD { border:none; }
             <table class=list>
                 <tr>
                 <th width="30%">Node Type</th>
-                <th width="70%" align=left>Description</th>
+                <th align=left>Description</th>
                 </tr>
                 <tr>
                     <td align=center>0</td>
@@ -2170,7 +2177,7 @@ TABLE.list TD { border:none; }
             <table class=list>
                 <tr>
                   <th width="30%">Bit</th>
-                  <th width="70%" align=left>Description</th>
+                  <th align=left>Description</th>
                 </tr>
 
                 <tr>
@@ -2226,181 +2233,185 @@ TABLE.list TD { border:none; }
     <hr>
     <h4><a name="NILMessage">Name: NIL</a></h4>
 
-    <B>Type: </B>0x0000<br>
-    <B>Length:</B> varies<br>
-    <B>Status:</B> Optional, may be repeated.<br>
-    <B>Purpose and Description:</B> The NIL message is used to
-    indicate a message which is to be ignored when reading the header messages
-    for a data object.
-    [Possibly one which has been deleted for some reason.]<br>
-    <B>Format of Data:</B> Unspecified.<br>
-    <br>
+    <P class=item><B>Header Message Type: </B>0x0000
+    </P>
+    <P class=item><B>Length:</B> varies
+    </P>
+    <P class=item><B>Status:</B> Optional, may be repeated.
+    </P>
+    <P class=item><B>Purpose and Description:</B> The NIL message is used to indicate a
+        message which is to be ignored when reading the header messages for a
+        data object.  [Possibly one which has been deleted for some reason.]
+    </P>
+    <P class=item><B>Format of Data:</B> Unspecified.
+    </P>
 
     <hr>
     <h4><a name="SimpleDataSpace">Name: Simple Dataspace</a></h4>
 
-    <B>Type: </B>0x0001<br>
-    <B>Length:</B> Varies according to the number of dimensions, 
-      as described in the following table.<br>
-    <B>Status:</B> The <em>Simple Dataspace</em> message is required 
-     and may not be repeated.<br>
-
-    <P>The <em>Simple Dataspace</em> message describes the number
-      of dimensions and size of each dimension that the data object
-      has.  This message is only used for datasets which have a
-      simple, rectilinear grid layout; datasets requiring a more
-      complex layout (irregularly structured or unstructured grids, etc.) 
-      must use the <em>Complex Dataspace</em> message for expressing 
-      the space the dataset inhabits.  
-      <i>(Note: The <em>Complex Dataspace</em> functionality is 
-      not yet implemented.  It is not described in this document.)</i>
+    <P class=item><B>Header Message Type: </B>0x0001
+    </P>
+    <P class=item><B>Length:</B> Varies according to the number of dimensions, 
+      as described in the following table.
+    </P>
+    <P class=item><B>Status:</B> Required for dataset objects, may not be
+        repeated.
+    </P>
+    <P class=item><B>Description:</B> The simple dataspace message describes the
+        number of dimensions (i.e. "rank") and size of each dimension that the
+        data object has.  This message is only used for datasets which have a
+        simple, rectilinear grid layout; datasets requiring a more complex
+        layout (irregularly structured or unstructured grids, etc.) must use
+        the <em>Complex Dataspace</em> message for expressing the space the
+        dataset inhabits.  <i>(Note: The <em>Complex Dataspace</em>
+        functionality is not yet implemented and it is not described in this
+        document.)</i>
     </P>
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>Simple Dataspace Message</b>
+    <P class=item><B>Format of Data:</B>
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Simple Dataspace Message
 	</caption>
 
-	<tr align=center>
-	  <th width="25%">byte</th>
-	  <th width="25%">byte</th>
-	  <th width="25%">byte</th>
-	  <th width="25%">byte</th>
+	<tr>
+	  <th>byte</th>
+	  <th>byte</th>
+	  <th>byte</th>
+	  <th>byte</th>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td>Version</td>
 	  <td>Dimensionality</td>
 	  <td>Flags</td>
 	  <td>Reserved</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4>Reserved</td>
 	</tr>
 
-	<tr align=center>
-	  <td colspan=4>Dimension Size #1 (&lt;size&gt; bytes)</td>
-	<tr align=center>
+	<tr>
+	  <td colspan=4>Dimension #1 Size<sup>L</sup></td>
+	<tr>
 	  <td colspan=4>.<br>.<br>.<br></td>
-	<tr align=center>
-	  <td colspan=4>Dimension Size #n (&lt;size&gt; bytes)</td>
-	<tr align=center>
-	  <td colspan=4>Dimension Maximum #1 (&lt;size&gt; bytes)</td>
-	<tr align=center>
+	<tr>
+	  <td colspan=4>Dimension #n Size<sup>L</sup></td>
+	<tr>
+	  <td colspan=4>Dimension #1 Maximum Size<sup>L</sup></td>
+	<tr>
 	  <td colspan=4>.<br>.<br>.<br></td>
-	<tr align=center>
-	  <td colspan=4>Dimension Maximum #n (&lt;size&gt; bytes)</td>
-	<tr align=center>
-	  <td colspan=4>Permutation Index #1</td>
-	<tr align=center>
+	<tr>
+	  <td colspan=4>Dimension #n Maximum Size<sup>L</sup></td>
+	<tr>
+	  <td colspan=4>Permutation Index #1<sup>L</sup></td>
+	<tr>
 	  <td colspan=4>.<br>.<br>.<br></td>
-	<tr align=center>
-	  <td colspan=4>Permutation Index #n</td>
+	<tr>
+	  <td colspan=4>Permutation Index #n<sup>L</sup></td>
       </table>
-    </center>
 
-    <p>
-    <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
+      <table class=note>
+        <tr><td>
+            (Items marked with an 'L' the above table are
+            <br>
+            of the size specified in "Size of Lengths.")
+        </td></tr>
+      </table>
+    </div>
+
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
 	</tr>
 
-	<tr valign=top>
-	  <td>Version </td>
-	  <td>This value is used to determine the format of the
+	<tr>
+	  <td>Version</td>
+	  <td>
+            <P>This value is used to determine the format of the
 	    Simple Dataspace Message.  When the format of the
 	    information in the message is changed, the version number
 	    is incremented and can be used to determine how the
-	    information in the object header is formatted.</td>
+	    information in the object header is formatted.  This
+            document describes version one (1) (there was no version
+            zero (0)).
+            </P>
+          </td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Dimensionality</td>
-	  <td>This value is the number of dimensions that the data
-	    object has.</td>
+	  <td>
+            <P>This value is the number of dimensions that the data
+	    object has.
+            </P>
+          </td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Flags</td>
-	  <td>This field is used to store flags to indicate the
+	  <td>
+            <P>This field is used to store flags to indicate the
 	    presence of parts of this message.  Bit 0 (the least
 	    significant bit) is used to indicate that maximum
 	    dimensions are present.  Bit 1 is used to indicate that
-	    permutation indices are present for each dimension.</td>
+	    permutation indices are present.
+            </P>
+          </td>
 	</tr>
 
-	<tr valign=top>
-	  <td>Dimension Size #n (&lt;size&gt; bytes)</td>
-	  <td>This value is the current size of the dimension of the
+	<tr>
+	  <td>Dimension #n Size</td>
+	  <td>
+            <P>This value is the current size of the dimension of the
 	    data as stored in the file.  The first dimension stored in
 	    the list of dimensions is the slowest changing dimension
 	    and the last dimension stored is the fastest changing
-	    dimension.</td>
+	    dimension.
+            </P>
+          </td>
 	</tr>
 
-	<tr valign=top>
-	  <td>Dimension Maximum #n (&lt;size&gt; bytes)</td>
-	  <td>This value is the maximum size of the dimension of the
+	<tr>
+	  <td>Dimension #n Maximum Size</td>
+	  <td>
+            <P>This value is the maximum size of the dimension of the
 	    data as stored in the file.  This value may be the special
-	    value &lt;UNLIMITED&gt; (all bits set) which indicates
-	    that the data may expand along this dimension
-	    indefinitely.  If these values are not stored, the maximum
-	    value of each dimension is assumed to be the same as the
-	    current size value.</td>
+            "<A href="#UnlimitedDim">unlimited</A>" size which indicates
+	    that the data may expand along this dimension indefinitely.
+            If these values are not stored, the maximum size of each
+            dimension is assumed to be the dimension's current size.
+            </P>
+          </td>
 	</tr>
 
-	<tr valign=top>
-	  <td>Permutation Index #n (4 bytes)</td>
-	  <td>This value is the index permutation used to map
+	<tr>
+	  <td>Permutation Index #n</td>
+	  <td>
+            <P>This value is the index permutation used to map
 	    each dimension from the canonical representation to an
 	    alternate axis for each dimension.  If these values are
 	    not stored, the first dimension stored in the list of
 	    dimensions is the slowest changing dimension and the last
-	    dimension stored is the fastest changing dimension.</td>
+	    dimension stored is the fastest changing dimension.
+            </P>
+          </td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-<!-- Delete examples throughout doc
-    <h4>Examples</h4>
-    <dl>
-      <dt> Example #1 
-      <dd>A sample 640 horizontally by 480 vertically raster image
-	dimension header.  The number of dimensions would be set to 2
-	and the first dimension's size and maximum would both be set
-	to 480.  The second dimension's size and maximum would both be
-	set to 640
-.
-      <dt>Example #2 
-      <dd>A sample 4 dimensional scientific dataset which is composed
-	of 30x24x3 slabs of data being written out in an unlimited
-	series every several minutes as timestep data (currently there
-	are five slabs).  The number of dimensions is 4.  The first
-	dimension size is 5 and its maximum is &lt;UNLIMITED&gt;. The
-	second through fourth dimension's size and maximum value are
-	set to 3, 24, and 30 respectively.
+    </P>
 
-      <dt>Example #3 
-      <dd>A sample unlimited length text string, currently of length
-	83. The number of dimensions is 1, the size of the first
-	dimension is 83 and the maximum of the first dimension is set
-	to &lt;UNLIMITED&gt;, allowing further text data to be
-	appended to the string or possibly the string to be replaced
-	with another string of a different size.  (This could also be
-	stored as a scalar dataset with number-type set to "string")
-    </dl>
--->
-
-<!-- DELETE ENTIRE DATASPACE SECTION -->
 <!--
     <hr>
     <h4><a name="DataSpaceMessage">Name: Complex Dataspace (Fiber Bundle?)</a></h4>
-    <b>Type: </b>0x0002<br>
+    <b>Header Message Type: </b>0x0002<br>
     <b>Length:</b> varies<br>
 
     <b>Status:</b> One of the <em>Simple Dataspace</em> or
@@ -2693,76 +2704,228 @@ TABLE.list TD { border:none; }
     <hr>
     <h4><a name="DataTypeMessage">Name: Datatype</a></h4>
 
-    <b>Type:</b> 0x0003<br>
-    <b>Length:</b> variable<br>
-    <b>Status:</b> One required per dataset or named datatype<br>
+    <P class=item><B>Header Message Type:</B> 0x0003
+    </P>
+    <P class=item><B>Length:</B> variable
+    </P>
+    <P class=item><B>Status:</B> Required for dataset or named datatype objects,
+        may not be repeated.
+    </P>
 
-    <p>The datatype message defines the datatype for each data point
-      of a dataset.  A datatype can describe an atomic type like a
-      fixed- or floating-point type or a compound type like a C
-      struct.  A datatype does not, however, describe how data points
-      are combined to produce a dataset. Datatypes are stored on disk
-      as a datatype message, which is a list of datatype classes and
-      their associated properties.
+    <P class=item><B>Description:</B> The datatype message defines the datatype
+        for each element of a dataset.  A datatype can describe an atomic type
+        like a fixed- or floating-point type or a compound type like a C
+        struct.
+        Datatypes messages are stored 
+        as a list of datatype classes and
+        their associated properties.
+    </P>
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>Datatype Message</b>
+    <P class=item2>Datatype messages that are part of a dataset object, 
+        do not describe how elements are related to one another, the dataspace
+        message is used for that purpose.  Datatype messages that are part of
+        a named datatype message describe an "abstract" datatype that can be
+        used by other objects in the file.
+    </P>
+
+    <P class=item><B>Format of Data:</B>
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Datatype Message
 	</caption>
 
-	<tr align=center>
+	<tr>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	</tr>
 
-	<tr align=center>
-	  <td>Type Class and Version</td>
-	  <td colspan=3>Class Bit Field</td>
+	<tr>
+	  <td>Class and Version</td>
+	  <td>Class Bit Field, Bits 0-7</td>
+	  <td>Class Bit Field, Bits 8-15</td>
+	  <td>Class Bit Field, Bits 16-23</td>
 	</tr>
 
-	<tr align=center>
-	  <td colspan=4>Size in Bytes (4 bytes)</td>
+	<tr>
+	  <td colspan=4>Size</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4><br><br>Properties<br><br><br></td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-    <p>The Class Bit Field and Properties fields vary depending
-      on the Type Class, which is the low-order four bits of the Type
-      Class and Version field (the high-order four bits are the
-      version, which should be set to the value one).  The type class
-      is one of 0 (fixed-point number), 1 (floating-point number), 
-      2 (date and time), 3 (text string), 4 (bit field), 5 (opaque), 
-      6 (compound), 7 (reference), 8 (enumeration), or 9 (variable-length).  
-      The Class Bit Field is zero and the size of the
-      Properties field is zero except for the cases noted here.
-
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>Bit Field for Fixed-point Numbers (Class 0)</b>
-	</caption>
-
-	<tr align=center>
-	  <th width="10%">Bits</th>
-	  <th width="90%">Meaning</th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
 	</tr>
 
-	<tr valign=top>
+	<tr>
+	  <td>Class and Version</td>
+	  <td>
+            <P>The version of the datatype message and the datatype's class
+                information are packed together in this field.  The version
+                number is packed in the top 4 bits of the field and the class
+                is contained in the bottom 4 bits.
+            </P>
+            <P>The version number information is used for changes in the
+                format of the datatype message and is described here:
+                <table class=list>
+                    <tr>
+                      <th width="30%">Version</th>
+                      <th align=left>Description</th>
+                    </tr>
+
+                    <tr>
+                      <td align=center><code>0</code></td>
+                      <td>Never used
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align=center><code>1</code></td>
+                      <td>Used by early versions of the library to encode
+                            compound datatypes with explicit array fields.
+                            See the compound datatype description below for
+                            further details.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align=center><code>2</code></td>
+                      <td>The current version used by the library.
+                      </td>
+                    </tr>
+                </table>
+            </P>
+            <P>The class of the datatype determines the format for the class
+                bit field and properties portion of the datatype message, which
+                are described below.  The
+                following classes are currently defined:
+                <table width=100% class=list>
+                    <tr>
+                      <th width="30%">Value</th>
+                      <th align=left>Description</th>
+                    </tr>
+
+                    <tr>
+                      <td align=center><code>0</code></td>
+                      <td>Fixed-Point</td>
+                    </tr>
+
+                    <tr>
+                      <td align=center><code>1</code></td>
+                      <td>Floating-Point</td>
+                    </tr>
+
+                    <tr>
+                      <td align=center><code>2</code></td>
+                      <td>Time</td>
+                    </tr>
+
+                    <tr>
+                      <td align=center><code>3</code></td>
+                      <td>String</td>
+                    </tr>
+
+                    <tr>
+                      <td align=center><code>4</code></td>
+                      <td>Bitfield</td>
+                    </tr>
+
+                    <tr>
+                      <td align=center><code>5</code></td>
+                      <td>Opaque</td>
+                    </tr>
+
+                    <tr>
+                      <td align=center><code>6</code></td>
+                      <td>Compound</td>
+                    </tr>
+
+                    <tr>
+                      <td align=center><code>7</code></td>
+                      <td>Reference</td>
+                    </tr>
+
+                    <tr>
+                      <td align=center><code>8</code></td>
+                      <td>Enumerated</td>
+                    </tr>
+
+                    <tr>
+                      <td align=center><code>9</code></td>
+                      <td>Variable-Length</td>
+                    </tr>
+
+                    <tr>
+                      <td align=center><code>10</code></td>
+                      <td>Array</td>
+                    </tr>
+                </table>
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Class Bit Fields</td>
+	  <td>
+            <P>The information in these bit fields is specific to each datatype
+                class and is described below.  All bits not defined for a
+                datatype class are set to zero.
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Size</td>
+	  <td>
+            <P>The size of the datatype in bytes.
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Properties</td>
+	  <td>
+            <P>This variable-sized field encodes information specific to each
+                datatype class and is described below.  If there is no
+                property information specified for a datatype class, the size
+                of this field is zero.
+            </P>
+          </td>
+	</tr>
+
+      </table>
+    </div>
+
+    <P>Class specific information for Fixed-Point Numbers (Class 0):
+
+    <br>
+    <div align=center>
+      <table class=desc>
+	<caption>
+	  Bit Field Description
+	</caption>
+
+	<tr>
+	  <th width="10%">Bits</th>
+	  <th>Meaning</th>
+	</tr>
+
+	<tr>
 	  <td>0</td>
 	  <td><b>Byte Order.</b> If zero, byte order is little-endian;
 	    otherwise, byte order is big endian.</td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>1, 2</td>
 	  <td><b>Padding type.</b>  Bit 1 is the lo_pad type and bit 2
 	    is the hi_pad type.  If a datum has unused bits at either
@@ -2770,68 +2933,101 @@ TABLE.list TD { border:none; }
 	    locations.</td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>3</td>
 	  <td><b>Signed.</b> If this bit is set then the fixed-point
 	    number is in 2's complement form.</td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>4-23</td>
 	  <td>Reserved (zero).</td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>Properties for Fixed-point Numbers (Class 0)</b>
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Property Descriptions
 	</caption>
 
-	<tr align=center>
+	<tr>
 	  <th width="25%">Byte</th>
 	  <th width="25%">Byte</th>
 	  <th width="25%">Byte</th>
 	  <th width="25%">Byte</th>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=2>Bit Offset</td>
 	  <td colspan=2>Bit Precision</td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>Bit Field for Floating-point Numbers (Class 1)</b>
-	</caption>
-
-	<tr align=center>
-	  <th width="10%">Bits</th>
-	  <th width="90%">Meaning</th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
 	</tr>
 
-	<tr valign=top>
+	<tr>
+	  <td>Bit Offset</td>
+	  <td>
+            <P>The bit offset of the first significant bit of the fixed-point
+                value within the datatype.  The bit offset specifies the number
+                of bits "to the right of" the value.
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Bit Precision</td>
+	  <td>
+            <P>The number of bits of precision of the fixed-point value
+                within the datatype.
+            </P>
+          </td>
+	</tr>
+
+      </table>
+    </div>
+    </P>
+
+    <P>Class specific information for Floating-Point Numbers (Class 1):
+
+    <br>
+    <div align=center>
+      <table class=desc>
+	<caption>
+	  Bit Field Description
+	</caption>
+
+	<tr>
+	  <th width="10%">Bits</th>
+	  <th>Meaning</th>
+	</tr>
+
+	<tr>
 	  <td>0</td>
 	  <td><b>Byte Order.</b> If zero, byte order is little-endian;
 	    otherwise, byte order is big endian.</td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>1, 2, 3</td>
 	  <td><b>Padding type.</b>  Bit 1 is the low bits pad type, bit 2
 	    is the high bits pad type, and bit 3 is the internal bits
-	    pad type.  If a datum has unused bits at either or between
+	    pad type.  If a datum has unused bits at either end or between
 	    the sign bit, exponent, or mantissa, then the value of bit
 	    1, 2, or 3 is copied to those locations.</td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>4-5</td>
 	  <td><b>Normalization.</b> The value can be 0 if there is no
 	    normalization, 1 if the most significant bit of the
@@ -2841,104 +3037,258 @@ TABLE.list TD { border:none; }
 	    appear in this field.</td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>6-7</td>
 	  <td>Reserved (zero).</td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>8-15</td>
-	  <td><b>Sign.</b> This is the bit position of the sign
-	    bit.</td>
+	  <td><b>Sign Location.</b> This is the bit position of the sign
+	    bit.  Bits are numbered with the least significant bit zero.</td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>16-23</td>
 	  <td>Reserved (zero).</td>
 	</tr>
 
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>Properties for Floating-point Numbers (Class 1)</b>
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Property Descriptions
 	</caption>
 
-	<tr align=center>
+	<tr>
 	  <th width="25%">Byte</th>
 	  <th width="25%">Byte</th>
 	  <th width="25%">Byte</th>
 	  <th width="25%">Byte</th>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=2>Bit Offset</td>
 	  <td colspan=2>Bit Precision</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td>Exponent Location</td>
-	  <td>Exponent Size in Bits</td>
+	  <td>Exponent Size</td>
 	  <td>Mantissa Location</td>
-	  <td>Mantissa Size in Bits</td>
+	  <td>Mantissa Size</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4>Exponent Bias</td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-   <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>Bit Field for Strings (Class 3)</b>
-	</caption>
-
-	<tr align=center>
-	  <th width="10%">Bits</th>
-	  <th width="90%">Meaning</th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
 	</tr>
 
-	<tr valign=top>
+	<tr>
+	  <td>Bit Offset</td>
+	  <td>
+            <P>The bit offset of the first significant bit of the floating-point
+                value within the datatype.  The bit offset specifies the number
+                of bits "to the right of" the value.
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Bit Precision</td>
+	  <td>
+            <P>The number of bits of precision of the floating-point value
+                within the datatype.
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Exponent Location</td>
+	  <td>
+            <P>The bit position of the exponent field.  Bits are numbered with
+                the least significant bit number zero.
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Exponent Size</td>
+	  <td>
+            <P>The size of the exponent field in bits.
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Mantissa Location</td>
+	  <td>
+            <P>The bit position of the mantissa field.  Bits are numbered with
+                the least significant bit number zero.
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Mantissa Size</td>
+	  <td>
+            <P>The size of the mantissa field in bits.
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Exponent Bias</td>
+	  <td>
+            <P>The bias of the exponent field.
+            </P>
+          </td>
+	</tr>
+
+      </table>
+    </div>
+    </P>
+
+    <P>Class specific information for Time (Class 2):
+
+    <br>
+    <div align=center>
+      <table class=desc>
+	<caption>
+	  Bit Field Description
+	</caption>
+
+	<tr>
+	  <th width="10%">Bits</th>
+	  <th>Meaning</th>
+	</tr>
+
+	<tr>
+	  <td>0</td>
+	  <td><b>Byte Order.</b> If zero, byte order is little-endian;
+	    otherwise, byte order is big endian.</td>
+	</tr>
+
+	<tr>
+	  <td>1-23</td>
+	  <td>Reserved (zero).</td>
+	</tr>
+      </table>
+    </div>
+
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Property Descriptions
+	</caption>
+
+	<tr>
+	  <th width="25%">Byte</th>
+	  <th width="25%">Byte</th>
+	</tr>
+
+	<tr>
+	  <td colspan=2>Bit Precision</td>
+	</tr>
+      </table>
+    </div>
+
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
+	</tr>
+
+	<tr>
+	  <td>Bit Precision</td>
+	  <td>
+            <P>The number of bits of precision of the time value.
+            </P>
+          </td>
+	</tr>
+
+      </table>
+    </div>
+    </P>
+
+    <P>Class specific information for Strings (Class 3):
+
+    <br>
+    <div align=center>
+      <table class=desc>
+	<caption>
+	  Bit Field Description
+	</caption>
+
+	<tr>
+	  <th width="10%">Bits</th>
+	  <th>Meaning</th>
+	</tr>
+
+	<tr>
 	  <td>0-3</td>
 	  <td><b>Padding type.</b>  This four-bit value determines the
 	    type of padding to use for the string.  The values are:
 
-	    <dl>
-	      <dt><code>0</code> Null terminate.
-	      <dd>A zero byte marks the end of the string and is
-		guaranteed to be present after converting a long
-		string to a short string.  When converting a short
-		string to a long string the value is padded with
-		additional null characters as necessary.
-		
-		<br><br>
-	      <dt><code>1</code> Null pad.
-	      <dd>Null characters are added to the end of the value
-		during conversions from short values to long values
-		but conversion in the opposite direction simply
-		truncates the value.
+            <table width=100% class=list>
+                <tr>
+                  <th width="30%">Value</th>
+                  <th align=left>Description</th>
+                </tr>
 
-		<br><br>
-	      <dt><code>2</code> Space pad.
-	      <dd>Space characters are added to the end of the value
-		during conversions from short values to long values
-		but conversion in the opposite direction simply
-		truncates the value.  This is the Fortran
-		representation of the string.
+                <tr>
+                  <td align=center><code>0</code></td>
+                  <td>Null Terminate: A zero byte marks the end of the
+                    string and is guaranteed to be present after
+                    converting a long string to a short string.  When
+                    converting a short string to a long string the value is
+                    padded with additional null characters as necessary.
+                  </td>
+                </tr>
 
-		<br><br>
-	      <dt><code>3-15</code> Reserved.
-	      <dd>These values are reserved for future use.
-	    </dl>
+                <tr>
+                  <td align=center><code>1</code></td>
+                  <td>Null Pad: Null characters are added to the end of
+                    the value during conversions from short values to long
+                    values but conversion in the opposite direction simply
+                    truncates the value.
+                  </td>
+                </tr>
+
+                <tr>
+                  <td align=center><code>2</code></td>
+                  <td>Space Pad: Space characters are added to the end of
+                    the value during conversions from short values to long
+                    values but conversion in the opposite direction simply
+                    truncates the value.  This is the Fortran
+                    representation of the string.
+                  </td>
+                </tr>
+
+                <tr>
+                  <td align=center><code>3-15</code></td>
+                  <td>Reserved
+                  </td>
+                </tr>
+            </table>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>4-7</td>
 	  <td><b>Character Set.</b>  The character set to use for
 	    encoding the string.  The only character set supported is
@@ -2946,32 +3296,38 @@ TABLE.list TD { border:none; }
 	    yet.</td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>8-23</td>
 	  <td>Reserved (zero).</td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>Bit Field for Bitfield Types (Class 4)</b>
+    <P>There are no properties defined for the string class.
+    </P>
+    </P>
+
+    <P>Class specific information for Bitfields (Class 4):
+
+    <br>
+    <div align=center>
+      <table class=desc>
+	<caption>
+	  Bit Field Description
 	</caption>
 
-	<tr align=center>
+	<tr>
 	  <th width="10%">Bits</th>
-	  <th width="90%">Meaning</th>
+	  <th>Meaning</th>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>0</td>
 	  <td><b>Byte Order.</b> If zero, byte order is little-endian;
 	    otherwise, byte order is big endian.</td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>1, 2</td>
 	  <td><b>Padding type.</b>  Bit 1 is the lo_pad type and bit 2
 	    is the hi_pad type.  If a datum has unused bits at either
@@ -2979,87 +3335,141 @@ TABLE.list TD { border:none; }
 	    locations.</td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>3-23</td>
 	  <td>Reserved (zero).</td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>Properties for Bitfield Types (Class 4)</b>
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Property Description
 	</caption>
 
-	<tr align=center>
+	<tr>
 	  <th width="25%">Byte</th>
 	  <th width="25%">Byte</th>
 	  <th width="25%">Byte</th>
 	  <th width="25%">Byte</th>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=2>Bit Offset</td>
 	  <td colspan=2>Bit Precision</td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>Bit Field for Opaque Types (Class 5)</b>
-	</caption>
-
-	<tr align=center>
-	  <th width="10%">Bits</th>
-	  <th width="90%">Meaning</th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
 	</tr>
 
-	<tr valign=top>
+	<tr>
+	  <td>Bit Offset</td>
+	  <td>
+            <P>The bit offset of the first significant bit of the bitfield
+                within the datatype.  The bit offset specifies the number
+                of bits "to the right of" the value.
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Bit Precision</td>
+	  <td>
+            <P>The number of bits of precision of the bitfield
+                within the datatype.
+            </P>
+          </td>
+	</tr>
+      </table>
+    </div>
+    </P>
+
+    <P>Class specific information for Opaque (Class 5):
+
+    <br>
+    <div align=center>
+      <table class=desc>
+	<caption>
+	  Bit Field Description
+	</caption>
+
+	<tr>
+	  <th width="10%">Bits</th>
+	  <th>Meaning</th>
+	</tr>
+
+	<tr>
 	  <td>0-23</td>
 	  <td>Reserved (zero).</td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>Properties for Opaque Types (Class 5)</b>
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Property Description
 	</caption>
 
-	<tr align=center>
+	<tr>
 	  <th width="25%">Byte</th>
 	  <th width="25%">Byte</th>
 	  <th width="25%">Byte</th>
 	  <th width="25%">Byte</th>
 	</tr>
 
-	<tr align=center>
-	  <td colspan=4><br>Null-terminated ASCII Tag<br>
-	    (multiple of 8 bytes)<br><br></td>
+	<tr>
+	  <td colspan=4><br>ASCII Tag<br>
+	    <br></td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>Bit Field for Compound Types (Class 6)</b>
-	</caption>
-
-	<tr align=center>
-	  <th width="10%">Bits</th>
-	  <th width="90%">Meaning</th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
 	</tr>
 
-	<tr valign=top>
+	<tr>
+	  <td>ASCII Tag</td>
+	  <td>
+            <P>This NUL-terminated string provides a description for the
+                opaque type.  It is NUL-padded to a multiple of 8 bytes.
+            </P>
+          </td>
+	</tr>
+      </table>
+    </div>
+    </P>
+
+    <P>Class specific information for Compound (Class 6):
+
+    <br>
+    <div align=center>
+      <table class=desc>
+	<caption>
+	  Bit Field Description
+	</caption>
+
+	<tr>
+	  <th width="10%">Bits</th>
+	  <th>Meaning</th>
+	</tr>
+
+	<tr>
 	  <td>0-15</td>
 	  <td><b>Number of Members.</b> This field contains the number
 	    of members defined for the compound datatype.  The member
@@ -3067,272 +3477,677 @@ TABLE.list TD { border:none; }
 	    type message.
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>15-23</td>
 	  <td>Reserved (zero).</td>
 	</tr>
       </table>
-    </center>
+    </div>
+    </P>
 
-    <p>The Properties field of a compound datatype is a list of the
+    <P>The Properties field of a compound datatype is a list of the
       member definitions of the compound datatype.  The member
       definitions appear one after another with no intervening bytes.
       The member types are described with a recursive datatype
-      message.
+      message.  Note that the property descriptions are different for different
+      versions of the datatype version.
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>Properties for Compound Types (Class 6)</b>
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Properties Description for Datatype Version 0
 	</caption>
 
-	<tr align=center>
+	<tr>
 	  <th width="25%">Byte</th>
 	  <th width="25%">Byte</th>
 	  <th width="25%">Byte</th>
 	  <th width="25%">Byte</th>
 	</tr>
 
-	<tr align=center>
-	  <td colspan=4><br><br>Name (null terminated, multiple of
-	    eight bytes)<br><br><br></td>
+	<tr>
+	  <td colspan=4><br>Name<br><br></td>
 	</tr>
 
-	<tr align=center>
-	  <td colspan=4>Byte Offset of Member in Compound Instance</td>
+	<tr>
+	  <td colspan=4>Byte Offset of Member</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td>Dimensionality</td>
-	  <td colspan=3>reserved</td>
+	  <td colspan=3>Reserved (zero)</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4>Dimension Permutation</td>
 	</tr>
 
-	<tr align=center>
-	  <td colspan=4>Reserved</td>
+	<tr>
+	  <td colspan=4>Reserved (zero)</td>
 	</tr>
 
-	<tr align=center>
-	  <td colspan=4>Size of Dimension 0 (required)</td>
+	<tr>
+	  <td colspan=4>Dimension #1 Size (required)</td>
 	</tr>
 
-	<tr align=center>
-	  <td colspan=4>Size of Dimension 1 (required)</td>
+	<tr>
+	  <td colspan=4>Dimension #2 Size (required)</td>
 	</tr>
 
-	<tr align=center>
-	  <td colspan=4>Size of Dimension 2 (required)</td>
+	<tr>
+	  <td colspan=4>Dimension #3 Size (required)</td>
 	</tr>
 
-	<tr align=center>
-	  <td colspan=4>Size of Dimension 3 (required)</td>
+	<tr>
+	  <td colspan=4>Dimension #4 Size (required)</td>
 	</tr>
 
-	<tr align=center>
-	  <td colspan=4><br><br>Member Type Message<br><br><br></td>
+	<tr>
+	  <td colspan=4><br>Member Type Message<br><br></td>
 	</tr>
 
       </table>
-    </center>
+    </div>
 
-   <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>Bit Field for Enumeration Types (Class 8)</b>
-	</caption>
-
-	<tr align=center>
-	  <th width="10%">Bits</th>
-	  <th width="90%">Meaning</th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
 	</tr>
 
-	<tr valign=top>
+	<tr>
+	  <td>Name</td>
+	  <td>
+            <P>This NUL-terminated string provides a description for the
+                opaque type.  It is NUL-padded to a multiple of 8 bytes.
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Byte Offset of Member</td>
+	  <td>
+            <P>This is the byte offset of the member within the datatype.
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Dimensionality</td>
+	  <td>
+            <P>If set to zero, this field indicates a scalar member.  If set
+                to a value greater than zero, this field indicates that the
+                member is an array of values.  For array members, the size of
+                the array is indicated by the 'Size of Dimension n' field in
+                this message.
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Dimension Permutation</td>
+	  <td>
+            <P>This field was intended to allow an array field to have 
+                it's dimensions permuted, but this was never implemented.
+                This field should always be set to zero.
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Dimension #n Size</td>
+	  <td>
+            <P>This field is the size of a dimension of the array field as
+            stored in the file.  The first dimension stored in the list of
+            dimensions is the slowest changing dimension and the last
+            dimension stored is the fastest changing dimension.
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Member Type Message</td>
+	  <td>
+            <P>This field is a datatype message describing the datatype of
+            the member.
+            </P>
+          </td>
+	</tr>
+
+      </table>
+    </div>
+
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Properties Description for Datatype Version 1
+	</caption>
+
+	<tr>
+	  <th width="25%">Byte</th>
+	  <th width="25%">Byte</th>
+	  <th width="25%">Byte</th>
+	  <th width="25%">Byte</th>
+	</tr>
+
+	<tr>
+	  <td colspan=4><br>Name<br><br></td>
+	</tr>
+
+	<tr>
+	  <td colspan=4>Byte Offset of Member</td>
+	</tr>
+
+	<tr>
+	  <td colspan=4><br>Member Type Message<br><br></td>
+	</tr>
+
+      </table>
+    </div>
+
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
+	</tr>
+
+	<tr>
+	  <td>Name</td>
+	  <td>
+            <P>This NUL-terminated string provides a description for the
+                opaque type.  It is NUL-padded to a multiple of 8 bytes.
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Byte Offset of Member</td>
+	  <td>
+            <P>This is the byte offset of the member within the datatype.
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Member Type Message</td>
+	  <td>
+            <P>This field is a datatype message describing the datatype of
+            the member.
+            </P>
+          </td>
+	</tr>
+
+      </table>
+    </div>
+    </P>
+
+    <P>Class specific information for Reference (Class 7):
+
+    <br>
+    <div align=center>
+      <table class=desc>
+	<caption>
+	  Bit Field Description
+	</caption>
+
+	<tr>
+	  <th width="10%">Bits</th>
+	  <th>Meaning</th>
+	</tr>
+
+	<tr>
+	  <td>0-3</td>
+	  <td><b>Type.</b> This four-bit value contains the type of reference
+            described.  The values defined are:
+
+            <table width=100% class=list>
+                <tr>
+                  <th width="30%">Value</th>
+                  <th align=left>Description</th>
+                </tr>
+
+                <tr>
+                  <td align=center><code>0</code></td>
+                  <td>Object Reference: A reference to another object in this
+                    HDF5 file.
+                  </td>
+                </tr>
+
+                <tr>
+                  <td align=center><code>1</code></td>
+                  <td>Dataset Region Reference: A reference to a region within
+                    a dataset in this HDF5 file.
+                  </td>
+                </tr>
+
+                <tr>
+                  <td align=center><code>2</code></td>
+                  <td>Internal Reference: A reference to a region within the
+                    current dataset.
+                  </td>
+                </tr>
+
+                <tr>
+                  <td align=center><code>3-15</code></td>
+                  <td>Reserved
+                  </td>
+                </tr>
+            </table>
+
+            </td>
+	</tr>
+
+	<tr>
+	  <td>15-23</td>
+	  <td>Reserved (zero).</td>
+	</tr>
+      </table>
+    </div>
+
+    <P>There are no properties defined for the reference class.
+    </P>
+    </P>
+
+    <P>Class specific information for Enumeration (Class 8):
+
+    <br>
+    <div align=center>
+      <table class=desc>
+	<caption>
+	  Bit Field Description
+	</caption>
+
+	<tr>
+	  <th width="10%">Bits</th>
+	  <th>Meaning</th>
+	</tr>
+
+	<tr>
 	  <td>0-15</td>
 	  <td><b>Number of Members.</b> The number of name/value
 	    pairs defined for the enumeration type.</td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>16-23</td>
 	  <td>Reserved (zero).</td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>Properties for Enumeration Types (Class 8)</b>
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Property Description
 	</caption>
 
-	<tr align=center>
+	<tr>
 	  <th width="25%">Byte</th>
 	  <th width="25%">Byte</th>
 	  <th width="25%">Byte</th>
 	  <th width="25%">Byte</th>
 	</tr>
 
-	<tr align=center>
-	  <td colspan=4><br>Parent Type<br><br></td>
+	<tr>
+	  <td colspan=4><br>Base Type<br><br></td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4><br>Names<br><br></td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4><br>Values<br><br></td>
         </tr>
 
       </table>
-    </center>
+    </div>
 
-    <center>
-      <table border=0 cellpadding=4 width="80%">
-	<tr align=left valign=top>
-          <td valign=top width=20%>Parent Type:</td>
-	  <td valign=top>Each enumeration type is based on some parent type, 
-	    usually an integer. The information for that parent type is 
-	    described recursively by this field.</td>
-	</tr><tr align=left valign=top>
-          <td valign=top>Names:</td>
-	  <td valign=top>The name for each name/value pair. Each name is 
-	    stored as a null terminated ASCII string in a multiple of 
-	    eight bytes. The names are in no particular order.</td>
-	</tr><tr align=left valign=top>  
-          <td valign=top>Values:</td>
-	  <td valign=top>The list of values in the same order as the names. 
-	    The values are packed (no inter-value padding) and the 
-	    size of each value is determined by the parent type.</td>
-        </tr>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
+	</tr>
+
+	<tr>
+	  <td>Base Type</td>
+	  <td>
+            <P>Each enumeration type is based on some parent type, usually an
+                integer. The information for that parent type is described
+                recursively by this field.
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Names</td>
+	  <td>
+            <P>The name for each name/value pair. Each name is stored as a null
+                terminated ASCII string in a multiple of eight bytes. The names
+                are in no particular order.
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Values</td>
+	  <td>
+            <P>The list of values in the same order as the names.  The values
+                are packed (no inter-value padding) and the size of each value
+                is determined by the parent type.
+            </P>
+          </td>
+	</tr>
+
       </table>
-    </center>
+    </div>
+    </P>
 
 
-   <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>Bit Field for Variable-length Types (Class 9)</b>
+    <P>Class specific information for Variable-Length (Class 9):
+
+    <br>
+    <div align=center>
+      <table class=desc>
+	<caption>
+	  Bit Field Description
 	</caption>
 
-	<tr align=center>
+	<tr>
 	  <th width="10%">Bits</th>
-	  <th width="90%">Meaning</th>
+	  <th>Meaning</th>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>0-3</td>
-	  <td><dl><dt><b>Type</b></dt>
-	    <dt>0 Variable-length sequence</dt>
-              <dd>This variable-length datatype can be of any sequence 
-              of data.  Variable-length sequences do not have padding 
-              or character set information.</dd>
-            <dt>1 Variable-length string</dt>
-              <dd>This variable-length datatype is composed of a series of 
-              characters.  Variable-length strings have padding and 
-              character set information.</dd></dl>
-          </td>
+	  <td><b>Type.</b> This four-bit value contains the type of
+            variable-length datatype described.  The values defined are:
+
+            <table width=100% class=list>
+                <tr>
+                  <th width="30%">Value</th>
+                  <th align=left>Description</th>
+                </tr>
+
+                <tr>
+                  <td align=center><code>0</code></td>
+                  <td>Sequence: A variable-length sequence of any sequence of
+                    data.  Variable-length sequences do not have padding or
+                    character set information.
+                  </td>
+                </tr>
+
+                <tr>
+                  <td align=center><code>1</code></td>
+                  <td>String: A variable-length sequence of characters.
+                    Variable-length strings have padding and character set
+                    information.
+                  </td>
+                </tr>
+
+                <tr>
+                  <td align=center><code>2-15</code></td>
+                  <td>Reserved
+                  </td>
+                </tr>
+            </table>
+
+            </td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>4-7</td>
-	  <td><dl><dt><b>Padding type</b> (variable-length string only)</dt>
-              <dd>This four-bit value determines the type of padding 
-              used for variable-length strings.  The values are the same 
-              as for the string padding type, as follows:</dd>
-	    <dt>0 Null terminate</dt>
-              <dd>A zero byte marks the end of a string and is guaranteed 
-              to be present after converting a long string to a short 
-              string.  When converting a short string to a long string, 
-              the value is padded with additional null characters 
-              as necessary.
-            <dt>1 Null pad</dt>
-              <dd>Null characters are added to the end of the value 
-              during conversion from a short string to a longer string.  
-              Conversion from a long string to a shorter string 
-              simply truncates the value.</dd>
-            <dt>2 Space pad</dt>
-              <dd>Space characters are added to the end of the value 
-              during conversion from a short string to a longer string.
-              Conversion from a long string to a shorter string simply 
-              truncates the value.
-              This is the Fortran representation of the string.
-              </dd>
-            <dt>3-15 Reserved</dt>
-              <dd>These values are reserved for future use.</dd></dl>
+	  <td><b>Padding type.</b> (variable-length string only)
+                  This four-bit value determines the type of padding 
+                  used for variable-length strings.  The values are the same 
+                  as for the string padding type, as follows:
+            <table width=100% class=list>
+                <tr>
+                  <th width="30%">Value</th>
+                  <th align=left>Description</th>
+                </tr>
+
+                <tr>
+                  <td align=center><code>0</code></td>
+                  <td>Null terminate: A zero byte marks the end of a string
+                    and is guaranteed to be present after converting a long
+                    string to a short string.  When converting a short string
+                    to a long string, the value is padded with additional null
+                    characters as necessary.
+                  </td>
+                </tr>
+
+                <tr>
+                  <td align=center><code>1</code></td>
+                  <td>Null pad: Null characters are added to the end of the
+                    value during conversion from a short string to a longer
+                    string.  Conversion from a long string to a shorter string
+                    simply truncates the value.
+                  </td>
+                </tr>
+
+                <tr>
+                  <td align=center><code>2</code></td>
+                  <td>Space pad: Space characters are added to the end of the
+                    value during conversion from a short string to a longer
+                    string.  Conversion from a long string to a shorter string
+                    simply truncates the value.  This is the Fortran
+                    representation of the string.
+                  </td>
+                </tr>
+
+                <tr>
+                  <td align=center><code>3-15</code></td>
+                  <td>Reserved
+                  </td>
+                </tr>
+            </table>
+
+            This value is set to zero for variable-length sequences.
+
           </td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>8-11</td>
-	  <td><dl><dt><b>Character set</b> (variable-length string only)</dt>
-              <dd>This four-bit value specifies the character set 
-              to be used for encoding the string.</dd>
-	    <dt>0 8-bit ASCII</dt>
-              <dd>As of this writing (July 2002, Release 1.4.4), 
-              8-bit ASCII is the only character set supported.
-              Therefore, no translations have been defined.</dd></dl>
+	  <td><b>Character Set.</b> (variable-length string only)
+                  This four-bit value specifies the character set 
+                  to be used for encoding the string:
+            <table width=100% class=list>
+                <tr>
+                  <th width="30%">Value</th>
+                  <th align=left>Description</th>
+                </tr>
+
+                <tr>
+                  <td align=center><code>0</code></td>
+                  <td>ASCII: As of this writing (July 2003, Release 1.6.0),
+                    8-bit ASCII is the only character set supported.  Therefore,
+                    no translations have been defined.
+                  </td>
+                </tr>
+
+                <tr>
+                  <td align=center><code>1-15</code></td>
+                  <td>Reserved
+                  </td>
+                </tr>
+            </table>
+
+            This value is set to zero for variable-length sequences.
+
           </td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>12-23</td>
 	  <td>Reserved (zero).</td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-        <caption align=top>
-          <b>Properties for Variable-length Types (Class 9)</b>
+    <br>
+    <div align=center>
+      <table class=format>
+        <caption>
+          Property Description
         </caption>
 
-        <tr align=center>
+        <tr>
           <th width="25%">Byte</th>
           <th width="25%">Byte</th>
           <th width="25%">Byte</th>
           <th width="25%">Byte</th>
         </tr>
 
-        <tr align=center>
-          <td colspan=4><br>Parent Type<br><br></td>
+        <tr>
+          <td colspan=4><br>Base Type<br><br></td>
         </tr>
 
       </table>
-    </center>
+    </div>
 
-    <center>
-      <table border=0 cellpadding=4 width="80%">
-        <tr align=left valign=top>
-          <td valign=top width=20%>Parent Type:</td>
-          <td valign=top>Each variable-length type is based on 
-            some parent type.  The information for that parent type is 
-            described recursively by this field.</td>
-        </tr>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
+	</tr>
+
+	<tr>
+	  <td>Base Type</td>
+	  <td>
+            <P>Each variable-length type is based on some parent type.  The
+                information for that parent type is described recursively by
+                this field.
+            </P>
+          </td>
+	</tr>
+
       </table>
-    </center>
+    </div>
+    </P>
 
+    <P>Class specific information for Array (Class 10):
 
+    <P>There are no bit fields defined for the array class.
+    </P>
 
-   <p>
+    <br>
+    <div align=center>
+      <table class=format>
+        <caption>
+          Property Description
+        </caption>
 
-<!--
-    <p>Datatype examples are <a href="Datatypes.html">here</a>.
--->
-      
+        <tr>
+          <th width="25%">Byte</th>
+          <th width="25%">Byte</th>
+          <th width="25%">Byte</th>
+          <th width="25%">Byte</th>
+        </tr>
+
+	<tr>
+	  <td>Dimensionality</td>
+	  <td colspan=3>Reserved (zero)</td>
+	</tr>
+
+	<tr>
+	  <td colspan=4>Dimension #1 Size</td>
+	</tr>
+	<tr>
+	  <td colspan=4>.<br>.<br>.<br></td>
+	</tr>
+	<tr>
+	  <td colspan=4>Dimension #n Size</td>
+	</tr>
+
+	<tr>
+	  <td colspan=4>Permutation Index #1</td>
+	</tr>
+	<tr>
+	  <td colspan=4>.<br>.<br>.<br></td>
+	</tr>
+	<tr>
+	  <td colspan=4>Permutation Index #n</td>
+	</tr>
+
+        <tr>
+          <td colspan=4><br>Base Type<br><br></td>
+        </tr>
+
+      </table>
+    </div>
+
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
+	</tr>
+
+	<tr>
+	  <td>Dimensionality</td>
+	  <td>
+            <P>This value is the number of dimensions that the array has.
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Dimension #n Size</td>
+	  <td>
+            <P>This value is the size of the dimension of the array
+	    as stored in the file.  The first dimension stored in
+	    the list of dimensions is the slowest changing dimension
+	    and the last dimension stored is the fastest changing
+	    dimension.
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Permutation Index #n</td>
+	  <td>
+            <P>This value is the index permutation used to map
+	    each dimension from the canonical representation to an
+	    alternate axis for each dimension.  Currently, dimension
+            permutations are not supported and these indices should be set
+            to the index position minus one (i.e. the first dimension should
+            be set to 0, the second dimension should be set to 1, etc.)
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Base Type</td>
+	  <td>
+            <P>Each array type is based on some parent type.  The
+                information for that parent type is described recursively by
+                this field.
+            </P>
+          </td>
+	</tr>
+
+      </table>
+    </div>
+
+    </P>
 
     <hr>
     <h4><a name="FillValueMessage">Name: Data Storage - Fill Value</a></h4>
-    <b>Type:</b> 0x0004<br>
+    <b>Header Message Type:</b> 0x0004<br>
     <b>Length:</b> varies<br>
     <b>Status:</b> Optional, may not be repeated.<br>
 
@@ -3389,7 +4204,7 @@ TABLE.list TD { border:none; }
 
     <hr>
     <h4><a name="ReservedMessage_0005">Name: Reserved - Not Assigned Yet</a></h4>
-    <b>Type:</b> 0x0005<br>
+    <b>Header Message Type:</b> 0x0005<br>
     <b>Length:</b> N/A<br>
     <b>Status:</b> N/A<br>
 
@@ -3398,7 +4213,7 @@ TABLE.list TD { border:none; }
     <hr>
     <h4><a name="CompactDataStorageMessage">Name: Data Storage - Compact</a></h4>
 
-    <b>Type:</b> 0x0006<br>
+    <b>Header Message Type:</b> 0x0006<br>
     <b>Length:</b> varies<br>
     <b>Status:</b> Optional, may not be repeated.<br>
 
@@ -3418,7 +4233,7 @@ TABLE.list TD { border:none; }
     <hr>
     <h4><a name="ExternalFileListMessage">Name: Data Storage -
 	External Data Files</a></h4>
-    <b>Type:</b> 0x0007<BR>
+    <b>Header Message Type:</b> 0x0007<BR>
     <b>Length:</b> varies<BR>
     <b>Status:</b> Optional, may not be repeated.<BR>
 
@@ -3596,7 +4411,7 @@ TABLE.list TD { border:none; }
     <hr>
     <h4><a name="LayoutMessage">Name: Data Storage - Layout</a></h4>
 
-    <b>Type:</b> 0x0008<BR>
+    <b>Header Message Type:</b> 0x0008<BR>
     <b>Length:</b> varies<BR>
     <b>Status:</b> Required for datasets, may not be repeated.
 
@@ -3717,7 +4532,7 @@ TABLE.list TD { border:none; }
 
     <hr>
     <h4><a name="ReservedMessage_0009">Name: Reserved - Not Assigned Yet</a></h4>
-    <b>Type:</b> 0x0009<BR>
+    <b>Header Message Type:</b> 0x0009<BR>
     <b>Length:</b> N/A<BR>
     <b>Status:</b> N/A<BR>
     <b>Purpose and Description:</b> N/A<BR>
@@ -3725,7 +4540,7 @@ TABLE.list TD { border:none; }
 
     <hr>
     <h4><a name="ReservedMessage_000A">Name: Reserved - Not Assigned Yet</a></h4>
-    <b>Type:</b> 0x000A<BR>
+    <b>Header Message Type:</b> 0x000A<BR>
     <b>Length:</b> N/A<BR>
     <b>Status:</b> N/A<BR>
     <b>Purpose and Description:</b> N/A<BR>
@@ -3733,7 +4548,7 @@ TABLE.list TD { border:none; }
 
     <hr>
     <h4><a name="FilterMessage">Name: Data Storage - Filter Pipeline</a></h4>
-    <b>Type:</b> 0x000B<BR>
+    <b>Header Message Type:</b> 0x000B<BR>
     <b>Length:</b> varies<BR>
     <b>Status:</b> Optional, may not be repeated.
 
@@ -3915,7 +4730,7 @@ TABLE.list TD { border:none; }
 
     <hr>
     <h4><a name="AttributeMessage">Name: Attribute</a></h4>
-    <b>Type:</b> 0x000C<BR>
+    <b>Header Message Type:</b> 0x000C<BR>
     <b>Length:</b> varies<BR>
     <b>Status:</b> Optional, may be repeated.<BR>
     
@@ -4049,7 +4864,7 @@ TABLE.list TD { border:none; }
     <hr>
     <h4><a name="NameMessage">Name: Object Name</a></h4>
 
-    <p><b>Type:</b> 0x000D<br>
+    <p><b>Header Message Type:</b> 0x000D<br>
       <b>Length:</b> varies<br>
       <b>Status:</b> Optional, may not be repeated.
 
@@ -4096,7 +4911,7 @@ TABLE.list TD { border:none; }
     <hr>
     <h4><a name="ModifiedMessage">Name: Object Modification Date &amp; Time</a></h4>
 
-    <p><b>Type:</b> 0x000E<br>
+    <p><b>Header Message Type:</b> 0x000E<br>
       <b>Length:</b> fixed<br>
       <b>Status:</b> Optional, may not be repeated.
 
@@ -4197,7 +5012,7 @@ TABLE.list TD { border:none; }
     
     <hr>
     <h4><a name="SharedMessage">Name: Shared Object Message</a></h4>
-    <b>Type:</b> 0x000F<br>
+    <b>Header Message Type:</b> 0x000F<br>
     <b>Length:</b> 4 Bytes<br>
     <b>Status:</b> Optional, may be repeated.
 
@@ -4294,7 +5109,7 @@ TABLE.list TD { border:none; }
 
 <hr>
 <h4><a name="ContinuationMessage">Name: Object Header Continuation</a></h4>
-<b>Type:</b> 0x0010<BR>
+<b>Header Message Type:</b> 0x0010<BR>
 <b>Length:</b> fixed<BR>
 <b>Status:</b> Optional, may be repeated.<BR>
 <b>Purpose and Description:</b>  The object header continuation is the location
@@ -4340,7 +5155,7 @@ the file.
 
 <hr>
 <h4><a name="SymbolTableMessage">Name: Group Message</a></h4>
-<b>Type:</b> 0x0011<BR>
+<b>Header Message Type:</b> 0x0011<BR>
 <b>Length:</b> fixed<BR>
 <b>Status:</b> Required for groups, may not be repeated.<BR>
 <b>Purpose and Description:</b> Each group has a B-tree and a
@@ -4463,6 +5278,8 @@ in the structure, with each item formatted according to its datatype.</p>
 </P>
 <P>The <A name="UndefinedAddress">"undefined address"</A> for a file is a
 file address with all bits set, i.e. <code>0xffff...ff</code>.
+<P>The <A name="UnlimitedDim">"unlimited size"</A> for a size is a
+value with all bits set, i.e. <code>0xffff...ff</code>.
 
 <!-- #BeginLibraryItem "/ed_libs/NavBar_ADevG.lbi" --><hr>
 <center>
