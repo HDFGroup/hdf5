@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 1998 NCSA
- *                    All rights reserved.
+ * Copyright (C) 1998-2001 NCSA
+ *                         All rights reserved.
  *
  * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
  *              Tuesday, June 16, 1998
@@ -23,7 +23,7 @@
 static intn             interface_initialize_g = 0;
 
 static herr_t H5S_all_init (const struct H5O_layout_t *layout,
-			    const H5S_t *space, H5S_sel_iter_t *iter, size_t *min_elem_out);
+			    const H5S_t *space, H5S_sel_iter_t *iter);
 static hsize_t H5S_all_favail (const H5S_t *space, const H5S_sel_iter_t *iter,
 			      hsize_t max);
 static hsize_t H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
@@ -65,6 +65,7 @@ const H5S_mconv_t	H5S_ALL_MCONV[1] = {{
     H5S_all_mscat, 				/*scatter		*/
 }};
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5S_all_init
  *
@@ -81,13 +82,8 @@ const H5S_mconv_t	H5S_ALL_MCONV[1] = {{
  */
 static herr_t
 H5S_all_init (const struct H5O_layout_t UNUSED *layout,
-	       const H5S_t *space, H5S_sel_iter_t *sel_iter, size_t *min_elem_out)
+	       const H5S_t *space, H5S_sel_iter_t *sel_iter)
 {
-    hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
-    intn	space_ndims;			/*dimensionality of space*/
-    hsize_t	acc;				    /*accumulator		*/
-    intn	i;				/*counters		*/
-
     FUNC_ENTER (H5S_all_init, FAIL);
 
     /* Check args */
@@ -101,21 +97,9 @@ H5S_all_init (const struct H5O_layout_t UNUSED *layout,
     /* Start at the upper left location */
     sel_iter->all.offset=0;
 
-    /* Get the dimensions of the space, to set the min. # of elements */
-    if ((space_ndims=H5S_get_simple_extent_dims (space, hsize, NULL))<0) {
-        HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
-		       "unable to retrieve hyperslab parameters");
-    }
-
-    /* Adjust the slowest varying dimension to account for strip mining */
-    for (i=1, acc=1; i<space_ndims; i++)
-        acc *= hsize[i];
-    
-    /* Set the minimum # of elements to output */
-    *min_elem_out=acc;
-    
     FUNC_LEAVE (SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5S_all_favail
@@ -134,36 +118,20 @@ H5S_all_init (const struct H5O_layout_t UNUSED *layout,
  *-------------------------------------------------------------------------
  */
 static hsize_t
-H5S_all_favail (const H5S_t *space, const H5S_sel_iter_t *sel_iter, hsize_t max)
+H5S_all_favail (const H5S_t UNUSED *space, const H5S_sel_iter_t *sel_iter, hsize_t max)
 {
-    hsize_t	nelmts;
-    int		m_ndims;	/* file dimensionality	*/
-    hsize_t	size[H5O_LAYOUT_NDIMS];	/*size of selected hyperslab	*/
-    hsize_t	acc;
-    int		i;
-
     FUNC_ENTER (H5S_all_favail, 0);
 
     /* Check args */
     assert (space && H5S_SEL_ALL==space->select.type);
     assert (sel_iter);
 
-    /*
-     * The stripmine size is such that only the slowest varying dimension can
-     * be split up.  We choose the largest possible strip mine size which is
-     * not larger than the desired size.
-     */
-    m_ndims = H5S_get_simple_extent_dims (space, size, NULL);
-    for (i=m_ndims-1, acc=1; i>0; --i)
-        acc *= size[i];
-    nelmts = (max/acc) * acc;
-    if (nelmts<=0) {
-        HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, 0,
-		       "strip mine buffer is too small");
-    }
-
-    FUNC_LEAVE (MIN(sel_iter->all.elmt_left,nelmts));
+#ifdef QAK
+    printf("%s: sel_iter->all.elmt_left=%u, max=%u\n",FUNC,(unsigned)sel_iter->all.elmt_left,(unsigned)max);
+#endif /* QAK */
+    FUNC_LEAVE (MIN(sel_iter->all.elmt_left,max));
 }   /* H5S_all_favail() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5S_all_fgath
@@ -197,15 +165,10 @@ H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 	       const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
 	       size_t elmt_size, const H5S_t *file_space,
 	       H5S_sel_iter_t *file_iter, hsize_t nelmts, hid_t dxpl_id,
-	       void *_buf/*out*/)
+	       void *buf/*out*/)
 {
-    hssize_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of slab in file*/
-    hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
-    hssize_t	zero[H5O_LAYOUT_NDIMS];		/*zero			*/
-    uint8_t	*buf=(uint8_t*)_buf;		/*for pointer arithmetic*/
-    hsize_t	acc;				/*accumulator		*/
-    intn	space_ndims;			/*dimensionality of space*/
-    intn	i;				/*counters		*/
+    hsize_t     actual_bytes;       /* The actual number of bytes to read */
+    hsize_t	buf_off;            /* Dataset offset for copying memory */
 
     FUNC_ENTER (H5S_all_fgath, 0);
 
@@ -218,40 +181,15 @@ H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     assert (nelmts>0);
     assert (buf);
 
-    /*
-     * Get hyperslab information to determine what elements are being
-     * selected (there might eventually be other selection methods too).
-     * We only support hyperslabs with unit sample because there's no way to
-     * currently pass sample information into H5F_arr_read() much less
-     * H5F_istore_read().
-     */
-    if ((space_ndims=H5S_get_simple_extent_dims (file_space, hsize, NULL))<0) {
-        HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
-		       "unable to retrieve hyperslab parameters");
-    }
-
-    if(space_ndims>0) {
-        HDmemset(file_offset,0,sizeof(hssize_t)*space_ndims);
-
-        /* Adjust the slowest varying dimension to take care of strip mining */
-        for (i=1, acc=1; i<space_ndims; i++)
-            acc *= hsize[i];
-        assert (0==file_iter->all.offset % acc);
-        assert (0==nelmts % acc);
-        file_offset[0] += file_iter->all.offset / acc;
-        hsize[0] = nelmts / acc;
-    } /* end if */
-
-    /* The fastest varying dimension is for the data point itself */
-    file_offset[space_ndims] = 0;
-    hsize[space_ndims] = elmt_size;
-    HDmemset (zero, 0, (space_ndims+1)*sizeof(*zero));
+    /* Set the offset in the dataset and the number of bytes to read */
+    buf_off=file_iter->all.offset*elmt_size;
+    actual_bytes=elmt_size*nelmts;
 
     /*
-     * Gather from file.
+     * Read piece from file.
      */
-    if (H5F_arr_read(f, dxpl_id, layout, pline, fill, efl, hsize, hsize,
-		     zero, file_offset, buf/*out*/)<0) {
+    if (H5F_seq_read(f, dxpl_id, layout, pline, fill, efl, file_space,
+            elmt_size, actual_bytes, buf_off, buf/*out*/)<0) {
         HRETURN_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
     }
 
@@ -261,6 +199,7 @@ H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     
     FUNC_LEAVE (nelmts);
 } /* H5S_all_fgath() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5S_all_fscat
@@ -287,15 +226,10 @@ H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 	       const struct H5O_pline_t *pline, const struct H5O_fill_t *fill,
 	       const struct H5O_efl_t *efl, size_t elmt_size,
 	       const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-	       hsize_t nelmts, hid_t dxpl_id, const void *_buf)
+	       hsize_t nelmts, hid_t dxpl_id, const void *buf)
 {
-    hssize_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of hyperslab	*/
-    hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
-    hssize_t	zero[H5O_LAYOUT_NDIMS];		/*zero vector		*/
-    const uint8_t *buf=(const uint8_t*)_buf;    /*for pointer arithmetic*/
-    hsize_t	acc;				/*accumulator		*/
-    intn	space_ndims;			/*space dimensionality	*/
-    intn	i;				/*counters		*/
+    hsize_t     actual_bytes;       /* The actual number of bytes to write */
+    hsize_t	buf_off;            /* Dataset offset for copying memory */
 
     FUNC_ENTER (H5S_all_fscat, FAIL);
 
@@ -308,37 +242,16 @@ H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
     assert (nelmts>0);
     assert (buf);
 
-    /*
-     * Get information to determine what elements are being selected.
-     */
-    if ((space_ndims=H5S_get_simple_extent_dims (file_space, hsize, NULL))<0) {
-	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
-		       "unable to retrieve hyperslab parameters");
-    }
-    
-    if(space_ndims>0) {
-        HDmemset(file_offset,0,sizeof(hssize_t)*space_ndims);
-
-        /* Adjust the slowest varying dimension to account for strip mining */
-        for (i=1, acc=1; i<space_ndims; i++)
-            acc *= hsize[i];
-        assert (0==file_iter->all.offset % acc);
-        assert (0==nelmts % acc);
-        file_offset[0] += file_iter->all.offset / acc;
-        hsize[0] = nelmts / acc;
-    } /* end if */
-    
-    /* The fastest varying dimension is for the data point itself */
-    file_offset[space_ndims] = 0;
-    hsize[space_ndims] = elmt_size;
-    HDmemset (zero, 0, (space_ndims+1)*sizeof(*zero));
+    /* Set the offset in the dataset and the number of bytes to write */
+    buf_off=file_iter->all.offset*elmt_size;
+    actual_bytes=elmt_size*nelmts;
 
     /*
-     * Scatter to file.
+     * Write piece from file.
      */
-    if (H5F_arr_write (f, dxpl_id, layout, pline, fill, efl, hsize, hsize,
-		       zero, file_offset, buf)<0) {
-        HRETURN_ERROR (H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error");
+    if (H5F_seq_write(f, dxpl_id, layout, pline, fill, efl, file_space,
+            elmt_size, actual_bytes, buf_off, buf/*out*/)<0) {
+        HRETURN_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
     }
 
     /* Advance iterator */
@@ -347,6 +260,7 @@ H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
     
     FUNC_LEAVE (SUCCEED);
 }   /* H5S_all_fscat() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5S_all_mgath
@@ -371,17 +285,10 @@ H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 static hsize_t
 H5S_all_mgath (const void *_buf, size_t elmt_size,
 	       const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
-	       hsize_t nelmts, void *_tconv_buf/*out*/)
+	       hsize_t nelmts, void *tconv_buf/*out*/)
 {
-    hssize_t	mem_offset[H5O_LAYOUT_NDIMS];	/*slab offset in app buf*/
-    hsize_t	mem_size[H5O_LAYOUT_NDIMS];	/*total size of app buf	*/
-    hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
-    hssize_t	zero[H5O_LAYOUT_NDIMS];		/*zero			*/
     const uint8_t *buf=(const uint8_t*)_buf;   /* Get local copies for address arithmetic */
-    uint8_t	*tconv_buf=(uint8_t*)_tconv_buf;
-    hsize_t	acc;				/*accumulator		*/
-    intn	space_ndims;			/*dimensionality of space*/
-    intn	i;				/*counters		*/
+    size_t      actual_bytes;       /* The actual number of bytes to read */
 
     FUNC_ENTER (H5S_all_mgath, 0);
 
@@ -393,45 +300,12 @@ H5S_all_mgath (const void *_buf, size_t elmt_size,
     assert (nelmts>0);
     assert (tconv_buf);
 
-    /*
-     * Retrieve information to determine what elements are being selected.
-     */
-    if ((space_ndims=H5S_get_simple_extent_dims (mem_space, hsize, NULL))<0) {
-        HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
-		       "unable to retrieve hyperslab parameters");
-    }
-    if(space_ndims>0) {
-        HDmemset(mem_offset,0,sizeof(hssize_t)*space_ndims);
+    /* Set the offset in the dataset and the number of bytes to read */
+    buf += mem_iter->all.offset*elmt_size;
+    actual_bytes=elmt_size*nelmts;
 
-        if (H5S_get_simple_extent_dims (mem_space, mem_size, NULL)<0) {
-            HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
-                   "unable to retrieve data space dimensions");
-        }
-
-        /* Adjust the slowest varying dimension to account for strip mining */
-        for (i=1, acc=1; i<space_ndims; i++)
-            acc *= hsize[i];
-        assert (0==mem_iter->all.offset % acc);
-        assert (0==nelmts % acc);
-        mem_offset[0] += mem_iter->all.offset / acc;
-        hsize[0] = nelmts / acc;
-    } /* end if */
-    
-    /* The fastest varying dimension is for the data point itself */
-    mem_offset[space_ndims] = 0;
-    mem_size[space_ndims] = elmt_size;
-    hsize[space_ndims] = elmt_size;
-    HDmemset (zero, 0, (space_ndims+1)*sizeof(*zero));
-
-    /*
-     * Scatter from conversion buffer to application memory.
-     */
-    H5_CHECK_OVERFLOW(space_ndims+1,intn,uintn);
-    if (H5V_hyper_copy ((uintn)(space_ndims+1), hsize, hsize, zero, tconv_buf,
-			mem_size, mem_offset, buf)<0) {
-        HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
-		       "unable to scatter data to memory");
-    }
+    /* "read" in the bytes from the source (buf) to the destination (tconv_buf) */
+    HDmemcpy(tconv_buf,buf,actual_bytes);
 
     /* Advance iterator */
     mem_iter->all.elmt_left-=nelmts;
@@ -440,6 +314,7 @@ H5S_all_mgath (const void *_buf, size_t elmt_size,
     FUNC_LEAVE (nelmts);
 }   /* H5S_all_mgath() */
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5S_all_mscat
  *
@@ -458,19 +333,12 @@ H5S_all_mgath (const void *_buf, size_t elmt_size,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S_all_mscat (const void *_tconv_buf, size_t elmt_size,
+H5S_all_mscat (const void *tconv_buf, size_t elmt_size,
 	       const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
 	       hsize_t nelmts, void *_buf/*out*/)
 {
-    hssize_t	mem_offset[H5O_LAYOUT_NDIMS];	/*slab offset in app buf*/
-    hsize_t	mem_size[H5O_LAYOUT_NDIMS];	/*total size of app buf	*/
-    hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
-    hssize_t	zero[H5O_LAYOUT_NDIMS];		/*zero			*/
-    uint8_t	*buf=(uint8_t*)_buf;   /* Get local copies for address arithmetic */
-    const uint8_t *tconv_buf=(const uint8_t *)_tconv_buf;
-    hsize_t	acc;				/*accumulator		*/
-    intn	space_ndims;			/*dimensionality of space*/
-    intn	i;				/*counters		*/
+    uint8_t *buf=(uint8_t *)_buf;
+    size_t      actual_bytes;       /* The actual number of bytes to write */
 
     FUNC_ENTER (H5S_all_mscat, FAIL);
 
@@ -482,47 +350,12 @@ H5S_all_mscat (const void *_tconv_buf, size_t elmt_size,
     assert (nelmts>0);
     assert (buf);
 
-    /*
-     * Retrieve information to determine what elements are being selected.
-     */
-    if ((space_ndims=H5S_get_simple_extent_dims (mem_space, hsize, NULL))<0) {
-        HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
-		       "unable to retrieve hyperslab parameters");
-    }
+    /* Set the offset in the dataset and the number of bytes to write */
+    buf += mem_iter->all.offset*elmt_size;
+    actual_bytes=elmt_size*nelmts;
 
-    if(space_ndims>0) {
-        HDmemset(mem_offset,0,sizeof(hssize_t)*space_ndims);
-
-        if (H5S_get_simple_extent_dims (mem_space, mem_size, NULL)<0) {
-            HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
-                   "unable to retrieve data space dimensions");
-        }
-
-        /* Adjust the slowest varying dimension to take care of strip mining */
-        for (i=1, acc=1; i<space_ndims; i++) {
-            acc *= hsize[i];
-        }
-        assert (0==mem_iter->all.offset % acc);
-        assert (0==nelmts % acc);
-        mem_offset[0] += mem_iter->all.offset / acc;
-        hsize[0] = nelmts / acc;
-    } /* end if */
-
-    /* The fastest varying dimension is for the data point itself */
-    mem_offset[space_ndims] = 0;
-    mem_size[space_ndims] = elmt_size;
-    hsize[space_ndims] = elmt_size;
-    HDmemset (zero, 0, (space_ndims+1)*sizeof(*zero));
-
-    /*
-     * Scatter from conversion buffer to application memory.
-     */
-    H5_CHECK_OVERFLOW(space_ndims+1,intn,uintn);
-    if (H5V_hyper_copy ((uintn)(space_ndims+1), hsize, mem_size, mem_offset, buf,
-			hsize, zero, tconv_buf)<0) {
-	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
-		       "unable to scatter data to memory");
-    }
+    /* "write" the bytes from the source (tconv_buf) to the destination (buf) */
+    HDmemcpy(buf,tconv_buf,actual_bytes);
 
     /* Advance iterator */
     mem_iter->all.elmt_left-=nelmts;
