@@ -2814,7 +2814,9 @@ main(void)
     if (H5Gclose (grp)<0) goto error;
 
     nerrors += test_create(file)<0 	?1:0;
+#ifndef H5_NO_SHARED_WRITING
     nerrors += test_simple_io(file, filename)<0	?1:0;
+#endif /* H5_NO_SHARED_WRITING */
     nerrors += test_compact_io(fapl)<0  ?1:0;
     nerrors += test_max_compact(fapl)<0  ?1:0;
     nerrors += test_tconv(file)<0	?1:0; 
@@ -2822,11 +2824,15 @@ main(void)
     nerrors += test_onebyte_shuffle(file)<0 ?1:0;
     nerrors += test_multiopen (file)<0	?1:0;
     nerrors += test_types(file)<0       ?1:0;
+#ifndef H5_NO_SHARED_WRITING    
     nerrors += test_userblock_offset(fapl)<0     ?1:0;
+#endif /* H5_NO_SHARED_WRITING */    
     nerrors += test_missing_filter(file)<0	?1:0;
 #ifndef H5_WANT_H5_V1_4_COMPAT
     nerrors += test_can_apply(file)<0	?1:0; 
-    nerrors += test_set_local(filename,fapl)<0	?1:0; 
+#ifndef H5_NO_SHARED_WRITING    
+    nerrors += test_set_local(filename,fapl)<0	?1:0;
+#endif /* H5_NO_SHARED_WRITING */     
 #endif /* H5_WANT_H5_V1_4_COMPAT */
     nerrors += test_can_apply_szip(file)<0	?1:0; 
 

@@ -834,6 +834,7 @@ int main( void )
 
  PASSED();
 
+#ifndef H5_NO_SHARED_WRITING 
 
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with H5Fmount; long name
@@ -1141,6 +1142,7 @@ int main( void )
  PASSED();
 
 
+#endif /* H5_NO_SHARED_WRITING */    
 
 
 /*-------------------------------------------------------------------------
@@ -1314,7 +1316,7 @@ int main( void )
  TESTING("H5Iget_name with a small buffer for name");
 
  /* Reopen the group */
- if ((group_id = H5Gopen( file_id, "/g15" ))<0) goto out;
+ if ((group_id = H5Gopen( file_id, "/g17" ))<0) goto out;
 
  /* Get name */
  name_len=H5Iget_name( group_id, name2, size2 );
@@ -1324,7 +1326,7 @@ int main( void )
   name_len=H5Iget_name( group_id, name, size );
 
  /* Verify */
- if (check_name( name, "/g15" )!=0) goto out;
+ if (check_name( name, "/g17" )!=0) goto out;
   
  /* Close */
  H5Gclose( group_id );
@@ -1340,7 +1342,7 @@ int main( void )
  TESTING("H5Iget_name with a dynamic buffer for name");
 
  /* Reopen the group */
- if ((group_id = H5Gopen( file_id, "/g15" ))<0) goto out;
+ if ((group_id = H5Gopen( file_id, "/g17" ))<0) goto out;
 
  /* Get name */
  name_len=H5Iget_name( group_id, NULL, size );
@@ -1352,7 +1354,7 @@ int main( void )
  if (H5Iget_name( group_id, name3, name_len+1 )<0) goto out;
 
  /* Verify */
- if (check_name( name3, "/g15"  )!=0)
+ if (check_name( name3, "/g17"  )!=0)
   goto out;
 
   /* Get name */
@@ -1406,6 +1408,7 @@ int main( void )
  PASSED();
 
 
+#ifndef H5_NO_SHARED_WRITING 
 
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with added names with mounting
@@ -1470,7 +1473,7 @@ int main( void )
  
  PASSED();
 
-
+  
 
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with H5Fclose
@@ -1506,7 +1509,6 @@ int main( void )
  H5Gclose( group2_id );
  
  PASSED();
-
 
 
 /*-------------------------------------------------------------------------
@@ -1719,6 +1721,7 @@ int main( void )
  PASSED();
 
 
+#endif /* H5_NO_SHARED_WRITING */  
 
  
 /*-------------------------------------------------------------------------
@@ -2084,6 +2087,7 @@ int main( void )
  
  PASSED();
 
+#ifndef H5_NO_SHARED_WRITING 
  
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with several nested mounted files
@@ -2864,6 +2868,7 @@ int main( void )
  
  PASSED();
 
+#endif /* H5_NO_SHARED_WRITING */  
 
 
 /*-------------------------------------------------------------------------
