@@ -61,14 +61,36 @@ int main( void )
   H5P_DEFAULT ))<0) goto out;
 
 
-
-
 /*-------------------------------------------------------------------------
- * Test H5Iget_name with H5Gcreate 
+ * Test H5Iget_name with H5Gcreate, one group
  *-------------------------------------------------------------------------
  */
 
- TESTING("H5Iget_name with H5Gcreate");
+ TESTING("H5Iget_name with H5Gcreate, one group");
+
+ /* Create group "g0" in the root group using absolute name */
+ if ((group_id = H5Gcreate( file_id, "/g0", 0 ))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )<0) goto out;
+  
+ /* Verify */
+ if (check_name( name, "/g0" )!=0)
+  goto out;
+
+ /* Close */
+ H5Gclose( group_id );
+
+ PASSED();
+
+
+
+/*-------------------------------------------------------------------------
+ * Test H5Iget_name with H5Gcreate, more than one group
+ *-------------------------------------------------------------------------
+ */
+
+ TESTING("H5Iget_name with H5Gcreate, more than one group");
 
  /* Create group "g1" in the root group using absolute name */
  if ((group_id = H5Gcreate( file_id, "/g1", 0 ))<0) goto out;
@@ -95,6 +117,7 @@ int main( void )
  H5Gclose( group2_id );
 
  PASSED();
+
 
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with H5Gopen
@@ -128,6 +151,8 @@ int main( void )
  H5Gclose( group2_id );
 
  PASSED();
+
+
 
 
 /*-------------------------------------------------------------------------
@@ -175,6 +200,8 @@ int main( void )
 
  PASSED();
 
+
+
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with H5Dopen
  *-------------------------------------------------------------------------
@@ -214,6 +241,7 @@ int main( void )
  H5Gclose( group_id );
 
  PASSED();
+
 
 
 /*-------------------------------------------------------------------------
@@ -309,6 +337,8 @@ int main( void )
 
  PASSED();
 
+
+
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with H5Gmove and H5Gopen
  *-------------------------------------------------------------------------
@@ -338,6 +368,8 @@ int main( void )
  PASSED();
 
 
+
+
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with H5Gmove and H5Dopen
  *-------------------------------------------------------------------------
@@ -362,6 +394,8 @@ int main( void )
  H5Dclose( dataset_id ); 
 
  PASSED();
+
+
 
 
 /*-------------------------------------------------------------------------
@@ -427,6 +461,7 @@ int main( void )
 
  
  PASSED();
+
 
 
 /*-------------------------------------------------------------------------
@@ -809,6 +844,9 @@ int main( void )
 
  PASSED();
 
+
+
+
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with a defined type dataset
  *-------------------------------------------------------------------------
@@ -875,6 +913,8 @@ int main( void )
  H5Tclose( type_id );
 
  PASSED();
+
+
 
 
 /*-------------------------------------------------------------------------
@@ -1305,6 +1345,8 @@ int main( void )
  
  PASSED();
 
+
+
  
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with H5Glink hard
@@ -1346,6 +1388,7 @@ int main( void )
  PASSED();
 
 
+
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with H5Glink symbolic
  *-------------------------------------------------------------------------
@@ -1384,6 +1427,8 @@ int main( void )
  H5Gclose( group3_id );
  
  PASSED();
+
+#if 1
 
 
 /*-------------------------------------------------------------------------
@@ -1577,7 +1622,7 @@ int main( void )
  *-------------------------------------------------------------------------
  */
 
-
+#endif
  
  /* Close file */
  H5Fclose( file_id );

@@ -1905,6 +1905,9 @@ done:
  *  	Quincey Koziol, 12 Oct 1998
  *  	Moved guts of function into H5D_open_oid
  *
+	*	  Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
+ *	  Added `id to name' support.
+ *
  *-------------------------------------------------------------------------
  */
 H5D_t *
@@ -1932,6 +1935,10 @@ H5D_open(H5G_entry_t *loc, const char *name)
     ret_value = dataset;
 
 done:
+
+				/*Free the ID to name buffer */
+    H5G_free_ent_name(&ent);
+
     FUNC_LEAVE(ret_value);
 }
 

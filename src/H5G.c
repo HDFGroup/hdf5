@@ -1057,16 +1057,19 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	  H5G_entry_t *grp_ent/*out*/, H5G_entry_t *obj_ent/*out*/,
 	  unsigned target, int *nlinks)
 {
-    H5G_entry_t		_grp_ent;	/*entry for current group	*/
-    H5G_entry_t		_obj_ent;	/*entry found			*/
-    size_t		nchars;		/*component name length		*/
-    int			_nlinks = H5G_NLINKS;
-    const char		*s = NULL;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    H5G_entry_t		  _grp_ent;  /*entry for current group	*/
+    H5G_entry_t		  _obj_ent;	 /*entry found			*/
+    size_t		       nchars;		   /*component name length		*/
+    int			         _nlinks = H5G_NLINKS;
+    const char		   *s = NULL;
+    herr_t         ret_value=SUCCEED;  
+				
 
-				H5G_t *tmp_grp;
-				const char		*orig_name = name;
-				H5G_entry_t		tmp_obj_ent;	/*temporary entry for search */
+				H5G_t          *tmp_grp;
+				const char		   *orig_name = name;
+				unsigned int   null_obj = obj_ent == NULL ? 1 : 0;
+				unsigned int   null_grp = grp_ent == NULL ? 1 : 0;
+				unsigned int   found_once = 0;
     
     FUNC_ENTER_NOINIT(H5G_namei);
 
@@ -1080,27 +1083,31 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
      * root of the file; for relative names it starts at CWG.
      */
     if (!name || !*name) {
-	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "no name given");
+     HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "no name given");
     } else if (!loc_ent) {
-	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "no current working group");
+     HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "no current working group");
     } else if ('/' == *name) {
-		tmp_grp=H5G_rootof(loc_ent->file);
-	
-		/* Deep copy of the symbol table entry */
-		if (H5G_ent_copy( &(tmp_grp->ent), obj_ent )<0)
-					HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to copy entry");
-
+     
+     tmp_grp=H5G_rootof(loc_ent->file);
+     
+     /* Deep copy of the symbol table entry */
+     if (H5G_ent_copy( &(tmp_grp->ent), obj_ent )<0)
+      HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to copy entry");
+     
+     
     } else {
-	/* Deep copy of the symbol table entry */
-					if (H5G_ent_copy( loc_ent, obj_ent )<0)
-					HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to copy entry");
+     /* Deep copy of the symbol table entry */
+     if (H5G_ent_copy( loc_ent, obj_ent )<0)
+      HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to copy entry");
+     
     }
-
+    
+    
     HDmemset(grp_ent, 0, sizeof(H5G_entry_t));
     grp_ent->header = HADDR_UNDEF;
 
     /* traverse the name */
-    while ((name = H5G_component(name, &nchars)) && *name) {
+ while ((name = H5G_component(name, &nchars)) && *name) {
 	if (rest) *rest = name;
 
 	/*
@@ -1129,36 +1136,25 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	/*
 	 * Advance to the next component of the name.
 	 */
+	if(found_once) {
+		if(grp_ent->name)
+			H5MM_xfree(grp_ent->name);
+		if(grp_ent->old_name)
+			H5MM_xfree(grp_ent->old_name);
+	}
 	*grp_ent = *obj_ent;
 	HDmemset(obj_ent, 0, sizeof(H5G_entry_t));
 	obj_ent->header = HADDR_UNDEF;
+	/* Set flag if at least one component was found */
+	found_once =1;
 
-	/* Temporary entry */
-	tmp_obj_ent = *obj_ent;
-
-	if (H5G_stab_find(grp_ent, H5G_comp_g, &tmp_obj_ent/*out*/)<0) {
+	if (H5G_stab_find(grp_ent, H5G_comp_g, /*&tmp_obj_ent*/ obj_ent/*out*/ )<0) {
 	    /*
 	     * Component was not found in the current symbol table, possibly
 	     * because GRP_ENT isn't a symbol table.
 	     */
 	    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found");
 	}
-	
-	/* Deep copy of the symbol table entry */
-	if (H5G_ent_copy( &tmp_obj_ent, obj_ent )<0)
-					HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to copy entry");
-
-	/* Remove the 'ID to name' info, if the entry is mot the one we want */
- if ( tmp_obj_ent.name ) {
-  if (HDstrcmp(orig_name,tmp_obj_ent.name)!=0)
-  {
-   /* Free the ID to name buffers */
-   if ( tmp_obj_ent.name )
-    tmp_obj_ent.name = H5MM_xfree(tmp_obj_ent.name);
-   if ( tmp_obj_ent.old_name )
-    tmp_obj_ent.old_name = H5MM_xfree(tmp_obj_ent.old_name);
-  }
- }
 
 
 	/*
@@ -1195,7 +1191,19 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
   *rest = name; /*final null */
 
 done:
-    FUNC_LEAVE(ret_value);
+	if(null_obj) {
+		if(obj_ent->name)
+			H5MM_xfree(obj_ent->name);
+			if(obj_ent->old_name)
+			H5MM_xfree(obj_ent->old_name);
+	}
+	if(null_grp && found_once) {
+		if(grp_ent->name)
+			H5MM_xfree(grp_ent->name);
+			if(grp_ent->old_name)
+			H5MM_xfree(grp_ent->old_name);
+	}
+   FUNC_LEAVE(ret_value);
 }
 
 
@@ -1229,11 +1237,12 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
 {
     H5O_stab_t		stab_mesg;		/*info about local heap	*/
     const char		*clv = NULL;		/*cached link value	*/
-    char		*linkval = NULL;	/*the copied link value	*/
+    char		      *linkval = NULL;	/*the copied link value	*/
     herr_t      ret_value=SUCCEED;       /* Return value */
+				H5G_entry_t tmp;
 
 					/*Store old name */
-				char* old_name=obj_ent->name;
+				char* old_name = H5MM_strdup(obj_ent->name);
     
     FUNC_ENTER_NOAPI(H5G_traverse_slink, FAIL);
 
@@ -1245,13 +1254,28 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
 	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read symbolic link value");
     linkval = H5MM_xstrdup (clv);
 
+		
+				/* Free the ID to name buffer */
+				H5G_free_ent_name(obj_ent);
+				H5G_free_ent_name(grp_ent);
+
+				H5G_ent_copy(grp_ent,&tmp);
+
     /* Traverse the link */
-    if (H5G_namei (grp_ent, linkval, NULL, grp_ent, obj_ent, H5G_TARGET_NORMAL, nlinks))
+    if (H5G_namei (&tmp, linkval, NULL, grp_ent, obj_ent, H5G_TARGET_NORMAL, nlinks))
 	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to follow symbolic link");
+				
+		
+				/* Free the ID to name buffer */
+				H5G_free_ent_name(obj_ent);
 
 				obj_ent->name = old_name;
-
+	
 done:
+
+				if ( ret_value == FAIL )
+					H5MM_xfree (old_name);
+				H5G_free_ent_name(&tmp);
     H5MM_xfree (linkval);
     FUNC_LEAVE (ret_value);
 }
@@ -1359,6 +1383,9 @@ done:
  *
  * Modifications:
  *
+	*	  Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
+ *	  Added `id to name' support.
+ *
  *-------------------------------------------------------------------------
  */
 H5G_t *
@@ -1376,6 +1403,8 @@ H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint)
     /* check args */
     assert(loc);
     assert(name && *name);
+
+				HDmemset(&grp_ent, 0, sizeof(H5G_entry_t));
 
     /* lookup name */
     if (0 == H5G_namei(loc, name, &rest, &grp_ent, NULL, H5G_TARGET_NORMAL, NULL))
@@ -1419,8 +1448,12 @@ H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint)
     ret_value=grp;
 
 done:
-    if(ret_value==NULL) {
-        if(grp!=NULL)
+
+				/*Free the ID to name buffer */
+    H5G_free_ent_name(&grp_ent);
+    
+				if(ret_value==NULL) {
+					        if(grp!=NULL)
             H5FL_FREE(H5G_t,grp);
     } /* end if */
 
@@ -1480,6 +1513,9 @@ done:
  * Modifications:
  *      Modified to call H5G_open_oid - QAK - 3/17/99
  *
+ * Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
+ *	Added `id to name' support.
+ *
  *-------------------------------------------------------------------------
  */
 H5G_t *
@@ -1509,6 +1545,10 @@ H5G_open(H5G_entry_t *loc, const char *name)
 done:
     if (!ret_value && grp)
         H5FL_FREE(H5G_t,grp);
+
+				/*Free the ID to name buffer */
+    H5G_free_ent_name(&ent);
+
 
     FUNC_LEAVE(ret_value);
 }
@@ -1701,6 +1741,9 @@ done:
  *
  * Modifications:
  *
+ * Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
+ *	Added `id to name' support.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1755,6 +1798,9 @@ H5G_insert(H5G_entry_t *loc, const char *name, H5G_entry_t *ent)
     }
 
 done:
+				/*Free the ID to name buffer */
+    H5G_free_ent_name(&grp);
+
     FUNC_LEAVE(ret_value);
 }
 
@@ -1961,6 +2007,9 @@ done:
  *
  * Modifications:
  *
+ * Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
+ *	Added `id to name' support.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2042,6 +2091,9 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
              */
             if (H5G_stab_insert (&grp_ent, rest, &cur_obj)<0)
                 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to create new name/link for object");
+
+												
+												
             break;
 
         case H5G_LINK_HARD:
@@ -2049,6 +2101,8 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "source object not found");
             if (H5G_insert (new_loc, new_name, &cur_obj)<0)
                 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to create new name/link for object");
+
+												
             break;
 
         default:
@@ -2056,6 +2110,12 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
     }
 
 done:
+
+    if ( type == H5G_LINK_SOFT )
+					/*Free the ID to name buffer */
+     H5G_free_ent_name(&grp_ent);
+			  
+    H5G_free_ent_name(&cur_obj);
     FUNC_LEAVE (ret_value);
 }
 
@@ -2116,6 +2176,9 @@ done:
  *              Monday, April 13, 1998
  *
  * Modifications:
+ *
+ * Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
+ *	Added `id to name' support.
  *
  *-------------------------------------------------------------------------
  */
@@ -2182,6 +2245,11 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
     }
 
 done:
+
+				/*Free the ID to name buffer */
+    H5G_free_ent_name(&grp_ent);
+    H5G_free_ent_name(&obj_ent);
+
     FUNC_LEAVE (ret_value);
 }
 
@@ -2203,6 +2271,9 @@ done:
  *              Monday, April 13, 1998
  *
  * Modifications:
+ *
+ * Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
+ *	Added `id to name' support.
  *
  *-------------------------------------------------------------------------
  */
@@ -2241,6 +2312,10 @@ H5G_linkval (H5G_entry_t *loc, const char *name, size_t size, char *buf/*out*/)
 	HDstrncpy (buf, s, size);
 
 done:
+				/*Free the ID to name buffer */
+    H5G_free_ent_name(&grp_ent);
+    H5G_free_ent_name(&obj_ent);
+
     FUNC_LEAVE (ret_value);
 }
 
@@ -2256,6 +2331,9 @@ done:
  *              Monday, July 20, 1998
  *
  * Modifications:
+ *
+ * Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
+ *	Added `id to name' support.
  *
  *-------------------------------------------------------------------------
  */
@@ -2285,6 +2363,10 @@ H5G_set_comment(H5G_entry_t *loc, const char *name, const char *buf)
     }
 
 done:
+
+				/*Free the ID to name buffer */
+    H5G_free_ent_name(&obj_ent);
+
     FUNC_LEAVE(ret_value);
 }
 
@@ -2304,6 +2386,9 @@ done:
  *              Monday, July 20, 1998
  *
  * Modifications:
+ *
+ * Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
+ *	Added `id to name' support.
  *
  *-------------------------------------------------------------------------
  */
@@ -2334,6 +2419,10 @@ H5G_get_comment(H5G_entry_t *loc, const char *name, size_t bufsize, char *buf)
     }
 
 done:
+
+				/*Free the ID to name buffer */
+    H5G_free_ent_name(&obj_ent);
+
     FUNC_LEAVE(ret_value);
 }
     
@@ -2349,6 +2438,9 @@ done:
  *              Thursday, September 17, 1998
  *
  * Modifications:
+ *
+ * Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
+ *	Added `id to name' support.
  *
  *-------------------------------------------------------------------------
  */
@@ -2378,6 +2470,11 @@ H5G_unlink(H5G_entry_t *loc, const char *name)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to unlink name from symbol table");
 
 done:
+
+				/*Free the ID to name buffer */
+    H5G_free_ent_name(&grp_ent);
+    H5G_free_ent_name(&obj_ent);
+
     FUNC_LEAVE(ret_value);
 }
 
@@ -2478,6 +2575,9 @@ done:
  *
  * Modifications:
  *
+ * Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
+ *	Added `id to name' support.
+ *
  *-------------------------------------------------------------------------
  */
 H5F_t *
@@ -2511,9 +2611,89 @@ H5G_insertion_file(H5G_entry_t *loc, const char *name)
     ret_value=grp_ent.file;
 
 done:
+
+				/*Free the ID to name buffer */
+    H5G_free_ent_name(&grp_ent);
     FUNC_LEAVE(ret_value);
 }
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_free_grp_name
+ *
+ * Purpose:	Free the 'ID to name' buffers.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: August 22, 2002
+ *
+ * Comments: Used now only on the root group close , on H5F_close
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_free_grp_name(H5G_t *grp)
+{
+ herr_t      ret_value=SUCCEED;       /* Return value */
+	H5G_entry_t *ent;
+ 
+ FUNC_ENTER_NOAPI(H5G_free_grp_name, FAIL);
+ 
+ /* Check args */
+ assert(grp);
+ assert(grp->nref > 0);
+
+	if (NULL==( ent = H5G_entof(grp)))
+  HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "cannot get entry");
+
+	H5G_free_ent_name(ent);
+ 
+ 
+done:
+ FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_free_ent_name
+ *
+ * Purpose:	Free the 'ID to name' buffers.
+ *
+ * Return:	Success
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: August 22, 2002
+ *
+ * Comments: 
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_free_ent_name(H5G_entry_t *ent)
+{
+ herr_t      ret_value=SUCCEED;       /* Return value */
+ 
+ FUNC_ENTER_NOAPI(H5G_free_ent_name, FAIL);
+ 
+ /* Check args */
+ assert(ent);
+
+	if ( ent->name )
+		ent->name = H5MM_xfree(ent->name);
+	if ( ent->old_name )
+		ent->old_name = H5MM_xfree(ent->old_name);
+ 
+done:
+ FUNC_LEAVE(ret_value);
+}
 
 
 /*-------------------------------------------------------------------------
@@ -2548,6 +2728,9 @@ H5G_insert_name(H5G_entry_t *loc, H5G_entry_t *obj, const char *name)
   len1 = HDstrlen(loc->name);
   len2 = HDstrlen(name);
   assert(len2>0&&len1>0);
+		if(obj->name)
+			obj->name=H5MM_xfree(obj->name);
+
   /* this is the root group */
   if ('/'==loc->name[len1-1]) 
   {
@@ -2849,18 +3032,18 @@ done:
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to replace name ");
        
        H5MM_xfree(new_dst_name);
+
+							H5MM_xfree(new_src_name);
        
-       
-      }/*if */
+      }/* if */
       
-     }/*if */
+     }/* if */
      
-     
-    } /*for */
-   }/*if */
+    } /* for */
+
+   }/* if */
    
-   
-  } /*if */
+  } /* if */
   
   /* Verify if file IDs refer to the same file */
   else {

@@ -225,7 +225,10 @@ H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent)
     udata.operation = H5G_OPER_INSERT;
     udata.name = name;
     udata.heap_addr = stab.heap_addr;
-    udata.ent = *obj_ent;
+   
+				/* Deep copy */
+				H5G_ent_copy(obj_ent, &udata.ent);
+
 
     /* insert */
     if (H5B_insert(grp_ent->file, H5B_SNODE, stab.btree_addr, split_ratios, &udata) < 0)

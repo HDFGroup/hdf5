@@ -5406,8 +5406,6 @@ done:
  *      Robb Matzke, 20 May 1999
  *	Now able to copy opaque types.
  *
-	*	Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
- *	Added a deep copy of the symbol table entry
 	*
  *-------------------------------------------------------------------------
  */
@@ -5430,11 +5428,6 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 
 				/* Copy actual information */
     *new_dt = *old_dt;
-
-				/* Deep copy of the symbol table entry */
-				if (H5G_ent_copy(&(old_dt->ent),&(new_dt->ent))<0)
-					HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to copy entry");
-
 			
     /* Copy parent information */
     if (new_dt->parent)

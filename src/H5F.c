@@ -1456,6 +1456,10 @@ done:
  *      Robb Matzke, 2000-10-31
  *      H5FL_FREE() aborts if called with a null pointer (unlike the
  *      original H5MM_free()).
+ *
+	*	  Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
+ *	  Added `id to name' support.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1472,6 +1476,10 @@ H5F_dest(H5F_t *f)
 	     * the memory associated with it.
 	     */
 	    if (f->shared->root_grp) {
+
+                /*Free the ID to name buffer */
+                H5G_free_grp_name(f->shared->root_grp);
+
                 H5FL_FREE(H5G_t,f->shared->root_grp);
                 f->shared->root_grp=NULL;
             }

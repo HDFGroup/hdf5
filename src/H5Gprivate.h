@@ -196,4 +196,7 @@ __DLL__  herr_t H5G_replace_name( int type, H5G_entry_t	*loc, const char *src_na
 																								 const char *dst_name, int op );
 __DLL__  herr_t H5G_insert_name( H5G_entry_t	*loc, H5G_entry_t	*obj, const char *name);
 __DLL__  herr_t H5G_ent_copy( const H5G_entry_t *src, H5G_entry_t *dst );
+/*Free the ID to name buffer */
+__DLL__  herr_t H5G_free_grp_name(H5G_t *grp);
+__DLL__  herr_t H5G_free_ent_name(H5G_entry_t *ent);
 #endif

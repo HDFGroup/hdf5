@@ -323,6 +323,10 @@ done:
  *	Quincey Koziol, 2002-7-180
  *	Added dxpl parameter to allow more control over I/O from metadata
  *      cache.
+ *
+ * Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
+ *	Added `id to name' support.
+	* 
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -397,6 +401,12 @@ H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_
      * preempted from the cache.
      */
     if (destroy) {
+
+					/*Free the ID to name buffer */
+					for (i=0; i<sym->nsyms; i++) {
+						H5G_free_ent_name(&(sym->entry[i]));
+					}
+
 	sym->entry = H5FL_ARR_FREE(H5G_entry_t,sym->entry);
 	H5FL_FREE(H5G_node_t,sym);
     }
@@ -881,6 +891,10 @@ done:
  * Modifications:
  *		Robb Matzke, 1999-07-28
  *		The ADDR argument is passed by value.
+ *
+ * Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
+ *	Added `id to name' support.
+	*
  *-------------------------------------------------------------------------
  */
 static H5B_ins_t
@@ -944,6 +958,9 @@ H5G_node_remove(H5F_t *f, haddr_t addr, void *_lt_key/*in,out*/,
     if ((s=H5HL_peek(f, bt_udata->heap_addr, sn->entry[idx].name_off)))
 	H5HL_remove(f, bt_udata->heap_addr, sn->entry[idx].name_off, HDstrlen(s)+1);
     H5E_clear(); /*no big deal*/
+
+		/*Free the ID to name buffer */
+	 H5G_free_ent_name(sn->entry+idx);
 
     /* Remove the entry from the symbol table node */
     if (1==sn->nsyms) {
