@@ -577,9 +577,8 @@ dataset_writeAll(char *filename)
 	    xfer_plist, data_array1);					    
     VRFY((ret >= 0), "H5Dwrite dataset1 succeeded");
 
-#ifdef NEWSTUFF
-printf("doing ZROW write\n");
     /* setup dimensions again to writeAll with zero rows for process 0 */
+printf("writeAll by some with zero row\n");
     slab_set(mpi_rank, mpi_size, start, count, stride, block, ZROW);
     ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
@@ -588,12 +587,10 @@ printf("doing ZROW write\n");
 	ret=H5Sselect_hyperslab(mem_dataspace, H5S_SELECT_SET, start, stride, count, block);
 	VRFY((ret >= 0), "H5Sset_hyperslab mem_dataspace succeeded");
     }
-    MESG("writeAll by Zero Row");
+    MESG("writeAll by some with zero row");
     ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
 	    xfer_plist, data_array1);					    
     VRFY((ret >= 0), "H5Dwrite dataset1 by ZROW succeeded");
-#endif
-
 
     /* release all temporary handles. */
     /* Could have used them for dataset2 but it is cleaner */
@@ -641,6 +638,21 @@ printf("doing ZROW write\n");
     ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
 	    xfer_plist, data_array1);					    
     VRFY((ret >= 0), "H5Dwrite dataset2 succeeded");
+
+    /* setup dimensions again to writeAll with zero columns for process 0 */
+printf("writeAll by some with zero col\n");
+    slab_set(mpi_rank, mpi_size, start, count, stride, block, ZCOL);
+    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
+    VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
+    /* need to make mem_dataspace to match for process 0 */
+    if (MAINPROCESS){
+	ret=H5Sselect_hyperslab(mem_dataspace, H5S_SELECT_SET, start, stride, count, block);
+	VRFY((ret >= 0), "H5Sset_hyperslab mem_dataspace succeeded");
+    }
+    MESG("writeAll by some with zero col");
+    ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+	    xfer_plist, data_array1);					    
+    VRFY((ret >= 0), "H5Dwrite dataset1 by ZCOL succeeded");
 
     /* release all temporary handles. */
     H5Sclose(file_dataspace);
@@ -775,7 +787,26 @@ dataset_readAll(char *filename)
     /* read data collectively */
     ret = H5Dread(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
 	    xfer_plist, data_array1);					    
-    VRFY((ret >= 0), "H5Dread succeeded");
+    VRFY((ret >= 0), "H5Dread dataset1 succeeded");
+
+    /* verify the read data with original expected data */
+    ret = dataset_vrfy(start, count, stride, block, data_array1, data_origin1);
+    if (ret) nerrors++;
+
+    /* setup dimensions again to readAll with zero columns for process 0 */
+printf("readAll by some with zero col\n");
+    slab_set(mpi_rank, mpi_size, start, count, stride, block, ZCOL);
+    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
+    VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
+    /* need to make mem_dataspace to match for process 0 */
+    if (MAINPROCESS){
+	ret=H5Sselect_hyperslab(mem_dataspace, H5S_SELECT_SET, start, stride, count, block);
+	VRFY((ret >= 0), "H5Sset_hyperslab mem_dataspace succeeded");
+    }
+    MESG("readAll by some with zero col");
+    ret = H5Dread(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+	    xfer_plist, data_array1);					    
+    VRFY((ret >= 0), "H5Dread dataset1 by ZCOL succeeded");
 
     /* verify the read data with original expected data */
     ret = dataset_vrfy(start, count, stride, block, data_array1, data_origin1);
@@ -815,10 +846,29 @@ dataset_readAll(char *filename)
     ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
 
-    /* read data independently */
+    /* read data collectively */
     ret = H5Dread(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
 	    xfer_plist, data_array1);					    
-    VRFY((ret >= 0), "H5Dread succeeded");
+    VRFY((ret >= 0), "H5Dread dataset2 succeeded");
+
+    /* verify the read data with original expected data */
+    ret = dataset_vrfy(start, count, stride, block, data_array1, data_origin1);
+    if (ret) nerrors++;
+
+    /* setup dimensions again to readAll with zero rows for process 0 */
+printf("readAll by some with zero row\n");
+    slab_set(mpi_rank, mpi_size, start, count, stride, block, ZROW);
+    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
+    VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
+    /* need to make mem_dataspace to match for process 0 */
+    if (MAINPROCESS){
+	ret=H5Sselect_hyperslab(mem_dataspace, H5S_SELECT_SET, start, stride, count, block);
+	VRFY((ret >= 0), "H5Sset_hyperslab mem_dataspace succeeded");
+    }
+    MESG("readAll by some with zero row");
+    ret = H5Dread(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+	    xfer_plist, data_array1);					    
+    VRFY((ret >= 0), "H5Dread dataset1 by ZROW succeeded");
 
     /* verify the read data with original expected data */
     ret = dataset_vrfy(start, count, stride, block, data_array1, data_origin1);
