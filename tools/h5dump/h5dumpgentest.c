@@ -4444,7 +4444,7 @@ make_external(hid_t fid)
  *
  *-------------------------------------------------------------------------
  */
-static void gent_filters()
+static void gent_filters(void)
 {
  hid_t    fid;  /* file id */
  hid_t    dcpl; /* dataset creation property list */
