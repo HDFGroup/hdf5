@@ -148,7 +148,8 @@ H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id)
     if(H5T_is_sensible(type)!=TRUE)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "datatype is not sensible");
 
-    /* Mark datatype as being on disk now */
+    /* Mark datatype as being on disk now.  This step changes the size of datatype as
+     * stored on disk. */
     if(H5T_set_loc(type, file, H5T_LOC_DISK)<0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype on disk")
 
@@ -164,7 +165,8 @@ H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id)
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to name data type");
     type->state = H5T_STATE_OPEN;
 
-    /* Mark datatype as being on memory now */
+    /* Mark datatype as being on memory now.  Since this datatype may still be used in memory
+     * after committed to disk, change its size back as in memory. */
     if(H5T_set_loc(type, NULL, H5T_LOC_MEMORY)<0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype in memory")
 
