@@ -297,10 +297,11 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
 
     case H5T_VLEN:  /* Variable length datatypes...  */
         /* Decode base type of VL information */
+        if (NULL==(dt->parent = H5MM_calloc(sizeof(H5T_t))))
+            HRETURN_ERROR (H5E_DATATYPE, H5E_NOSPACE, NULL, "memory allocation failed");
         H5F_addr_undef(&(dt->parent->ent.header));
-	    if (H5O_dtype_decode_helper(f, pp, dt->parent)<0) {
+	    if (H5O_dtype_decode_helper(f, pp, dt->parent)<0)
             HRETURN_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode VL parent type");
-        }
 
         dt->force_conv=TRUE;
         /* Mark this type as on disk */
@@ -837,6 +838,10 @@ H5O_dtype_size(H5F_t *f, const void *mesg)
 	}
 	ret_value += dt->u.enumer.nmembs * dt->parent->size;
 	break;
+
+    case H5T_VLEN:
+	ret_value += H5O_dtype_size(f, dt->parent);
+    break;
 
     default:
 	/*no properties */
