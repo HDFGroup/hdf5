@@ -739,18 +739,6 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 	f->shared->gc_ref = fapl->gc_ref;
 	f->shared->sieve_buf_size = fapl->sieve_buf_size;
 
-#ifdef H5_HAVE_PARALLEL
-	/*
-	 * Disable cache if file is open using MPIO driver.  Parallel
-	 * does not permit caching.  (maybe able to relax it for
-	 * read only open.)
-	 */
-	if (H5FD_MPIO==fapl->driver_id){
-	    f->shared->rdcc_nbytes = 0;
-	    f->shared->mdc_nelmts = 0;
-	}
-#endif
-
 	/*
 	 * Create a meta data cache with the specified number of elements.
 	 * The cache might be created with a different number of elements and

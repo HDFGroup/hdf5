@@ -1144,13 +1144,11 @@ printf("%s: check 0.5\n",FUNC);
 printf("%s: check 1.0\n",FUNC);
 #endif /* QAK */
     if (0==efl->nused) {
-        if (H5F_arr_create(f, &(new_dset->layout)) < 0) {
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
-                "unable to initialize storage");
-        }
-    } else {
+        if (H5F_arr_create(f, &(new_dset->layout)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize storage");
+    } /* end if */
+    else
         new_dset->layout.addr = HADDR_UNDEF;
-    }
 
 #ifdef QAK
 printf("%s: check 2.0\n",FUNC);
