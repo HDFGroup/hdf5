@@ -471,7 +471,7 @@ run_test(FILE *output, iotype iot, parameters parms)
         double t;
 
         MPI_Barrier(pio_comm_g);
-        res = do_pio(parms);
+        res = do_pio(output, parms);
 
         /* gather all of the "write" times */
         t = get_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS);
@@ -833,8 +833,8 @@ parse_command_line(int argc, char *argv[])
         case 'D':
             pio_debug_level = strtol(opt_arg, NULL, 10);
 
-            if (pio_debug_level > 3)
-                pio_debug_level = 3;
+            if (pio_debug_level > 4)
+                pio_debug_level = 4;
             else if (pio_debug_level < 0)
                 pio_debug_level = 0;
 
