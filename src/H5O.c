@@ -27,10 +27,6 @@
 #include "H5Oprivate.h"
 #include "H5Pprivate.h"
 
-/* The MPIO driver for H5FD_mpio_tas_allsame() */
-#include "H5FDmpio.h"
-
-
 #define PABLO_MASK	H5O_mask
 
 /* PRIVATE PROTOTYPES */
@@ -589,10 +585,6 @@ H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
             combine=1;
         } /* end if */
         else {
-#ifdef H5_HAVE_PARALLEL
-            if (IS_H5FD_MPIO(f))
-                H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 will write*/
-#endif /* H5_HAVE_PARALLEL */
             if (H5F_block_write(f, H5FD_MEM_OHDR, addr, H5O_SIZEOF_HDR(f), 
                         H5P_DATASET_XFER_DEFAULT, buf) < 0) {
                 HRETURN_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL,
@@ -675,10 +667,6 @@ H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
                     HDmemcpy(p+H5O_SIZEOF_HDR(f),oh->chunk[u].image,oh->chunk[u].size);
 
                     /* Write the combined prefix/chunk out */
-#ifdef H5_HAVE_PARALLEL
-                    if (IS_H5FD_MPIO(f))
-                        H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 write*/
-#endif /* H5_HAVE_PARALLEL */
                     if (H5F_block_write(f, H5FD_MEM_OHDR, addr,
                                 (H5O_SIZEOF_HDR(f)+oh->chunk[u].size),
                                 H5P_DATASET_XFER_DEFAULT, p) < 0) {
@@ -690,10 +678,6 @@ H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
                     p = H5FL_BLK_FREE(chunk_image,p);
                 } /* end if */
                 else {
-#ifdef H5_HAVE_PARALLEL
-                    if (IS_H5FD_MPIO(f))
-                    H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 write*/
-#endif /* H5_HAVE_PARALLEL */
                     if (H5F_block_write(f, H5FD_MEM_OHDR, oh->chunk[u].addr,
                                 (oh->chunk[u].size),
                                 H5P_DATASET_XFER_DEFAULT, oh->chunk[u].image) < 0) {

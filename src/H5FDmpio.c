@@ -55,7 +55,6 @@ typedef struct H5FD_mpio_t {
     int         mpi_rank;       /* This process's rank                  */
     int         mpi_size;       /* Total number of processes            */
     int         mpi_round;      /* Current round robin process (for metadata I/O) */
-    hbool_t	allsame;	/*same data for all procs?		*/
     haddr_t	eof;		/*end-of-file marker			*/
     haddr_t	eoa;		/*end-of-address marker			*/
     MPI_Datatype btype;		/*buffer type for xfers			*/
@@ -417,48 +416,6 @@ H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode/*out*/)
         *xfer_mode = dx->xfer_mode;
 
     FUNC_LEAVE(SUCCEED);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD_mpio_tas_allsame
- *
- * Purpose:     Test and set the allsame parameter.
- *
- * Return:      Success:        the old value of the allsame flag
- *
- *              Failure:        assert fails if access_parms is NULL.
- *
- * Programmer:  rky 980828
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-htri_t
-H5FD_mpio_tas_allsame(H5FD_t *_file, hbool_t newval)
-{
-    H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
-    hbool_t	oldval;
-
-    FUNC_ENTER(H5FD_mpio_tas_allsame, FAIL);
-
-#ifdef H5FDmpio_DEBUG
-    if (H5FD_mpio_Debug[(int)'t'])
-    	fprintf(stdout, "Entering H5FD_mpio_tas_allsame, newval=%d\n", newval);
-#endif
-
-    assert(file);
-    assert(H5FD_MPIO==file->pub.driver_id);
-    oldval = file->allsame;
-    file->allsame = newval;
-
-#ifdef H5FDmpio_DEBUG
-    if (H5FD_mpio_Debug[(int)'t'])
-    	fprintf(stdout, "Leaving H5FD_mpio_tas_allsame, oldval=%d\n", oldval);
-#endif
-
-    FUNC_LEAVE(oldval);
 }
 
 
@@ -1336,10 +1293,18 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
  *		Kim Yates, Pat Weidhaas,  2000-09-26
  *		Move block of coding where only p0 writes after the
  *              MPI_File_set_view call. 
+ *
+ *		Quincey Koziol,  2002-05-10
+ *		Instead of always writing metadata from process 0, spread the
+ *              burden among all the processes by using a round-robin rotation
+ *              scheme.
+ *
+ *		Quincey Koziol,  2002-05-10
+ *		Removed allsame code, keying off the type parameter instead.
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t addr,
+H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 		size_t size, const void *buf)
 {
     H5FD_mpio_t			*file = (H5FD_mpio_t*)_file;
@@ -1350,7 +1315,6 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t ad
     MPI_Datatype		buf_type, file_type;
     int         		size_i, bytes_written;
     int				use_types_this_time, used_types_last_time;
-    hbool_t     		allsame;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t              	ret_value=SUCCEED;
 
@@ -1436,8 +1400,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t ad
     file->use_types = 0;
 
     /* Only p<round> will do the actual write if all procs in comm write same data */
-    allsame = H5FD_mpio_tas_allsame(_file, FALSE);
-    if (allsame && H5_mpi_1_metawrite_g) {
+    if ((type!=H5FD_MEM_DRAW) && H5_mpi_1_metawrite_g) {
         if (file->mpi_rank != file->mpi_round) {
 #ifdef H5FDmpio_DEBUG
             if (H5FD_mpio_Debug[(int)'w']) {
@@ -1504,7 +1467,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t ad
     
 done:
     /* if only p<round> writes, need to broadcast the ret_value to other processes */
-    if (allsame && H5_mpi_1_metawrite_g) {
+    if ((type!=H5FD_MEM_DRAW) && H5_mpi_1_metawrite_g) {
 	if (MPI_SUCCESS !=
 	    MPI_Bcast(&ret_value, sizeof(ret_value), MPI_BYTE, file->mpi_round, file->comm))
           HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Bcast failed");

@@ -101,8 +101,6 @@
 #include "H5MMprivate.h"	/*core memory management		*/
 #include "H5Pprivate.h"		/*property lists				*/
 
-#include "H5FDmpio.h"		/*for H5FD_mpio_tas_allsame()		*/
-
 #define PABLO_MASK	H5B_mask
 
 #define BOUND(MIN,X,MAX) ((X)<(MIN)?(MIN):((X)>(MAX)?(MAX):(X)))
@@ -527,10 +525,6 @@ H5B_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5B_t *bt)
 	 * bother writing data for the child entries that don't exist or
 	 * for the final unchanged children.
 	 */
-#ifdef H5_HAVE_PARALLEL
-	if (IS_H5FD_MPIO(f))
-	    H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /* only p0 will write */
-#endif /* H5_HAVE_PARALLEL */
 	if (H5F_block_write(f, H5FD_MEM_BTREE, addr, size, H5P_DATASET_XFER_DEFAULT, bt->page)<0) {
 	    HRETURN_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL,
 			  "unable to save B-tree node to disk");

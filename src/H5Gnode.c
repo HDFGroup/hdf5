@@ -35,8 +35,6 @@
 #include "H5Oprivate.h"		/*header messages			*/
 #include "H5Pprivate.h"		/*property lists			*/
 
-#include "H5FDmpio.h"		/*the MPIO file driver			*/
-
 #define PABLO_MASK	H5G_node_mask
 
 /* PRIVATE PROTOTYPES */
@@ -367,10 +365,6 @@ H5G_node_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
         H5G_ent_encode_vec(f, &p, sym->entry, sym->nsyms);
         HDmemset(p, 0, size - (p - buf));
 
-#ifdef H5_HAVE_PARALLEL
-        if (IS_H5FD_MPIO(f))
-            H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 will write*/
-#endif /* H5_HAVE_PARALLEL */
         status = H5F_block_write(f, H5FD_MEM_BTREE, addr, size, H5P_DATASET_XFER_DEFAULT, buf);
         if (status < 0)
             HRETURN_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL,
