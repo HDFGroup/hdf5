@@ -29,14 +29,23 @@
 #include "H5Spkg.h"		/* Dataspace functions			  */
 #include "H5Vprivate.h"         /* Vector functions */
 
-/* Interface initialization */
+/* Pablo mask */
 #define PABLO_MASK      H5Spoint_mask
+
+/* Interface initialization */
 #define INTERFACE_INIT  NULL
 static int             interface_initialize_g = 0;
 
 /* Static function prototypes */
 static herr_t H5S_select_elements (H5S_t *space, H5S_seloper_t op,
     size_t num_elem, const hssize_t **coord);
+static herr_t H5S_point_iter_coords(const H5S_sel_iter_t *iter, hssize_t *coords);
+static herr_t H5S_point_iter_block(const H5S_sel_iter_t *iter, hssize_t *start, hssize_t *end);
+static hsize_t H5S_point_iter_nelmts(const H5S_sel_iter_t *iter);
+static htri_t H5S_point_iter_has_next_block(const H5S_sel_iter_t *iter);
+static herr_t H5S_point_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
+static herr_t H5S_point_iter_next_block(H5S_sel_iter_t *sel_iter);
+static herr_t H5S_point_iter_release(H5S_sel_iter_t *sel_iter);
 
 /* Declare a free list to manage the H5S_pnt_node_t struct */
 H5FL_DEFINE_STATIC(H5S_pnt_node_t);
@@ -78,8 +87,11 @@ H5S_point_iter_init(H5S_sel_iter_t *iter, const H5S_t *space, size_t UNUSED elmt
     
     /* Initialize methods for selection iterator */
     iter->iter_coords=H5S_point_iter_coords;
+    iter->iter_block=H5S_point_iter_block;
     iter->iter_nelmts=H5S_point_iter_nelmts;
+    iter->iter_has_next_block=H5S_point_iter_has_next_block;
     iter->iter_next=H5S_point_iter_next;
+    iter->iter_next_block=H5S_point_iter_next_block;
     iter->iter_release=H5S_point_iter_release;
 
 done:
@@ -102,12 +114,10 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5S_point_iter_coords (const H5S_sel_iter_t *iter, hssize_t *coords)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5S_point_iter_coords, FAIL);
+    FUNC_ENTER_NOINIT(H5S_point_iter_coords);
 
     /* Check args */
     assert (iter);
@@ -116,9 +126,41 @@ H5S_point_iter_coords (const H5S_sel_iter_t *iter, hssize_t *coords)
     /* Copy the offset of the current point */
     HDmemcpy(coords,iter->u.pnt.curr->pnt,sizeof(hssize_t)*iter->rank);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* H5S_point_iter_coords() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_point_iter_block
+ *
+ * Purpose:	Retrieve the current block of iterator for current
+ *              selection
+ *
+ * Return:	non-negative on success, negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, June 2, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5S_point_iter_block (const H5S_sel_iter_t *iter, hssize_t *start, hssize_t *end)
+{
+    FUNC_ENTER_NOINIT(H5S_point_iter_block);
+
+    /* Check args */
+    assert (iter);
+    assert (start);
+    assert (end);
+
+    /* Copy the current point as a block */
+    HDmemcpy(start,iter->u.pnt.curr->pnt,sizeof(hssize_t)*iter->rank);
+    HDmemcpy(end,iter->u.pnt.curr->pnt,sizeof(hssize_t)*iter->rank);
+
+    FUNC_LEAVE_NOAPI(SUCCEED);
+}   /* H5S_point_iter_block() */
 
 
 /*-------------------------------------------------------------------------
@@ -135,22 +177,52 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hsize_t
+static hsize_t
 H5S_point_iter_nelmts (const H5S_sel_iter_t *iter)
 {
-    hsize_t ret_value;          /* Return value */
-
-    FUNC_ENTER_NOAPI(H5S_point_iter_nelmts, 0);
+    FUNC_ENTER_NOINIT(H5S_point_iter_nelmts);
 
     /* Check args */
     assert (iter);
 
-    /* Set return value */
-    ret_value=iter->elmt_left;
+    FUNC_LEAVE_NOAPI(iter->elmt_left);
+}   /* H5S_point_iter_nelmts() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_point_iter_has_next_block
+ PURPOSE
+    Check if there is another block left in the current iterator
+ USAGE
+    htri_t H5S_point_iter_has_next_block(iter)
+        const H5S_sel_iter_t *iter;       IN: Pointer to selection iterator
+ RETURNS
+    Non-negative (TRUE/FALSE) on success/Negative on failure
+ DESCRIPTION
+    Check if there is another block available in the selection iterator.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static htri_t
+H5S_point_iter_has_next_block(const H5S_sel_iter_t *iter)
+{
+    htri_t ret_value=TRUE;   /* Return value */
+
+    FUNC_ENTER_NOINIT(H5S_point_iter_has_next_block);
+
+    /* Check args */
+    assert (iter);
+
+    /* Check if there is another point in the list */
+    if(iter->u.pnt.curr->next==NULL)
+        HGOTO_DONE(FALSE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}   /* H5S_point_iter_nelmts() */
+}   /* H5S_point_iter_has_next_block() */
 
 
 /*--------------------------------------------------------------------------
@@ -171,12 +243,10 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t
+static herr_t
 H5S_point_iter_next(H5S_sel_iter_t *iter, size_t nelem)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5S_point_iter_next, FAIL);
+    FUNC_ENTER_NOINIT(H5S_point_iter_next);
 
     /* Check args */
     assert (iter);
@@ -188,9 +258,40 @@ H5S_point_iter_next(H5S_sel_iter_t *iter, size_t nelem)
         nelem--;
     } /* end while */
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* H5S_point_iter_next() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_point_iter_next_block
+ PURPOSE
+    Increment selection iterator to next block
+ USAGE
+    herr_t H5S_point_iter_next_block(iter)
+        H5S_sel_iter_t *iter;       IN: Pointer to selection iterator
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    Advance selection iterator to the next block in the selection.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5S_point_iter_next_block(H5S_sel_iter_t *iter)
+{
+    FUNC_ENTER_NOINIT(H5S_point_iter_next_block);
+
+    /* Check args */
+    assert (iter);
+
+    /* Increment the iterator */
+    iter->u.pnt.curr=iter->u.pnt.curr->next;
+
+    FUNC_LEAVE_NOAPI(SUCCEED);
+}   /* H5S_point_iter_next_block() */
 
 
 /*--------------------------------------------------------------------------
@@ -210,18 +311,15 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t
+static herr_t
 H5S_point_iter_release (H5S_sel_iter_t UNUSED * iter)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5S_point_iter_release, FAIL);
+    FUNC_ENTER_NOINIT(H5S_point_iter_release);
 
     /* Check args */
     assert (iter);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* H5S_point_iter_release() */
 
 
@@ -962,10 +1060,10 @@ done:
  PURPOSE
     Gets the bounding box containing the selection.
  USAGE
-    herr_t H5S_point_bounds(space, hsize_t *start, hsize_t *end)
+    herr_t H5S_point_bounds(space, start, end)
         H5S_t *space;           IN: Dataspace pointer of selection to query
-        hsize_t *start;         OUT: Starting coordinate of bounding box
-        hsize_t *end;           OUT: Opposite coordinate of bounding box
+        hssize_t *start;         OUT: Starting coordinate of bounding box
+        hssize_t *end;           OUT: Opposite coordinate of bounding box
  RETURNS
     Non-negative on success, negative on failure
  DESCRIPTION
@@ -983,7 +1081,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
+H5S_point_bounds(const H5S_t *space, hssize_t *start, hssize_t *end)
 {
     H5S_pnt_node_t *node;       /* Point node */
     int rank;                   /* Dataspace rank */
@@ -1001,17 +1099,17 @@ H5S_point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
 
     /* Set the start and end arrays up */
     for(i=0; i<rank; i++) {
-        start[i]=HSIZET_MAX;
-        end[i]=0;
+        start[i]=HSSIZET_MAX;
+        end[i]=HSSIZET_MIN;
     } /* end for */
 
     /* Iterate through the node, checking the bounds on each element */
     node=space->select.sel_info.pnt_lst->head;
     while(node!=NULL) {
         for(i=0; i<rank; i++) {
-            if(start[i]>(hsize_t)(node->pnt[i]+space->select.offset[i]))
+            if(start[i]>(node->pnt[i]+space->select.offset[i]))
                 start[i]=node->pnt[i]+space->select.offset[i];
-            if(end[i]<(hsize_t)(node->pnt[i]+space->select.offset[i]))
+            if(end[i]<(node->pnt[i]+space->select.offset[i]))
                 end[i]=node->pnt[i]+space->select.offset[i];
         } /* end for */
         node=node->next;

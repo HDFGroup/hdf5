@@ -27,10 +27,21 @@
 #include "H5Spkg.h"		/* Dataspace functions			*/
 #include "H5Vprivate.h"         /* Vector functions                     */
 
-/* Interface initialization */
+/* Pablo mask */
 #define PABLO_MASK      H5Sall_mask
+
+/* Interface initialization */
 #define INTERFACE_INIT  NULL
 static int             interface_initialize_g = 0;
+
+/* Static function prototypes */
+static herr_t H5S_all_iter_coords(const H5S_sel_iter_t *iter, hssize_t *coords);
+static herr_t H5S_all_iter_block(const H5S_sel_iter_t *iter, hssize_t *start, hssize_t *end);
+static hsize_t H5S_all_iter_nelmts(const H5S_sel_iter_t *iter);
+static htri_t H5S_all_iter_has_next_block(const H5S_sel_iter_t *iter);
+static herr_t H5S_all_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
+static herr_t H5S_all_iter_next_block(H5S_sel_iter_t *sel_iter);
+static herr_t H5S_all_iter_release(H5S_sel_iter_t *sel_iter);
 
 
 /*-------------------------------------------------------------------------
@@ -66,8 +77,11 @@ H5S_all_iter_init (H5S_sel_iter_t *iter, const H5S_t *space, size_t UNUSED elmt_
 
     /* Initialize methods for selection iterator */
     iter->iter_coords=H5S_all_iter_coords;
+    iter->iter_block=H5S_all_iter_block;
     iter->iter_nelmts=H5S_all_iter_nelmts;
+    iter->iter_has_next_block=H5S_all_iter_has_next_block;
     iter->iter_next=H5S_all_iter_next;
+    iter->iter_next_block=H5S_all_iter_next_block;
     iter->iter_release=H5S_all_iter_release;
 
 done:
@@ -90,12 +104,12 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5S_all_iter_coords (const H5S_sel_iter_t *iter, hssize_t *coords)
 {
     herr_t ret_value=SUCCEED;        /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_all_iter_coords, FAIL);
+    FUNC_ENTER_NOINIT(H5S_all_iter_coords);
 
     /* Check args */
     assert (iter);
@@ -107,6 +121,46 @@ H5S_all_iter_coords (const H5S_sel_iter_t *iter, hssize_t *coords)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
+}   /* H5S_all_iter_coords() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_all_iter_block
+ *
+ * Purpose:	Retrieve the current block of iterator for current
+ *              selection
+ *
+ * Return:	non-negative on success, negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, June 2, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5S_all_iter_block (const H5S_sel_iter_t *iter, hssize_t *start, hssize_t *end)
+{
+    unsigned u;                 /* Local index variable */
+
+    FUNC_ENTER_NOINIT(H5S_all_iter_block);
+
+    /* Check args */
+    assert (iter);
+    assert (start);
+    assert (end);
+
+    /* Get the start of the 'all' block */
+    /* (Always '0' coordinates for now) */
+    HDmemset(start,0,sizeof(hssize_t)*iter->rank);
+
+    /* Compute the end of the 'all' block */
+    /* (Always size of the extent for now) */
+    for(u=0; u<iter->rank; u++)
+        end[u]=iter->dims[u]-1;
+
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* H5S_all_iter_coords() */
 
 
@@ -124,22 +178,45 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hsize_t
+static hsize_t
 H5S_all_iter_nelmts (const H5S_sel_iter_t *iter)
 {
-    hsize_t ret_value;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5S_all_iter_nelmts, 0);
+    FUNC_ENTER_NOINIT(H5S_all_iter_nelmts);
 
     /* Check args */
     assert (iter);
 
-    /* Set return value */
-    ret_value=iter->elmt_left;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(iter->elmt_left);
 }   /* H5S_all_iter_nelmts() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_all_iter_next
+ PURPOSE
+    Check if there is another block left in the current iterator
+ USAGE
+    htri_t H5S_all_iter_has_next_block(iter)
+        const H5S_sel_iter_t *iter;       IN: Pointer to selection iterator
+ RETURNS
+    Non-negative (TRUE/FALSE) on success/Negative on failure
+ DESCRIPTION
+    Check if there is another block available in the selection iterator.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static htri_t
+H5S_all_iter_has_next_block (const H5S_sel_iter_t UNUSED *iter)
+{
+    FUNC_ENTER_NOINIT(H5S_all_iter_has_next_block);
+
+    /* Check args */
+    assert (iter);
+
+    FUNC_LEAVE_NOAPI(FALSE);
+}   /* H5S_all_iter_has_next_block() */
 
 
 /*--------------------------------------------------------------------------
@@ -160,12 +237,10 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t
+static herr_t
 H5S_all_iter_next(H5S_sel_iter_t *iter, size_t nelem)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5S_all_iter_next, FAIL);
+    FUNC_ENTER_NOINIT(H5S_all_iter_next);
 
     /* Check args */
     assert (iter);
@@ -174,9 +249,37 @@ H5S_all_iter_next(H5S_sel_iter_t *iter, size_t nelem)
     /* Increment the iterator */
     iter->u.all.offset+=nelem;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* H5S_all_iter_next() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_all_iter_next_block
+ PURPOSE
+    Increment selection iterator to next block
+ USAGE
+    herr_t H5S_all_iter_next_block(iter)
+        H5S_sel_iter_t *iter;       IN: Pointer to selection iterator
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    Advance selection iterator to the next block in the selection.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5S_all_iter_next_block(H5S_sel_iter_t UNUSED *iter)
+{
+    FUNC_ENTER_NOINIT(H5S_all_iter_next_block);
+
+    /* Check args */
+    assert (iter);
+
+    FUNC_LEAVE_NOAPI(FAIL);
+}   /* H5S_all_iter_next_block() */
 
 
 /*--------------------------------------------------------------------------
@@ -196,18 +299,15 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t
+static herr_t
 H5S_all_iter_release (H5S_sel_iter_t UNUSED * iter)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5S_all_iter_release, FAIL);
+    FUNC_ENTER_NOINIT(H5S_all_iter_release);
 
     /* Check args */
     assert (iter);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* H5S_all_iter_release() */
 
 
@@ -436,10 +536,10 @@ done:
  PURPOSE
     Gets the bounding box containing the selection.
  USAGE
-    herr_t H5S_all_bounds(space, hsize_t *start, hsize_t *end)
+    herr_t H5S_all_bounds(space, start, end)
         H5S_t *space;           IN: Dataspace pointer of selection to query
-        hsize_t *start;         OUT: Starting coordinate of bounding box
-        hsize_t *end;           OUT: Opposite coordinate of bounding box
+        hssize_t *start;         OUT: Starting coordinate of bounding box
+        hssize_t *end;           OUT: Opposite coordinate of bounding box
  RETURNS
     Non-negative on success, negative on failure
  DESCRIPTION
@@ -456,7 +556,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_all_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
+H5S_all_bounds(const H5S_t *space, hssize_t *start, hssize_t *end)
 {
     int rank;                  /* Dataspace rank */
     int i;                     /* index variable */
@@ -474,7 +574,7 @@ H5S_all_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
     /* Just copy over the complete extent */
     for(i=0; i<rank; i++) {
         start[i]=0;
-        end[i]=space->extent.u.simple.size[i]-1;
+        H5_ASSIGN_OVERFLOW(end[i],space->extent.u.simple.size[i]-1,hsize_t,hssize_t);
     } /* end for */
 
 done:

@@ -79,10 +79,16 @@ typedef struct H5S_sel_iter_t H5S_sel_iter_t;
 
 /* Method to retrieve the current coordinates of iterator for current selection */
 typedef herr_t (*H5S_sel_iter_coords_func_t)(const H5S_sel_iter_t *iter, hssize_t *coords);
+/* Method to retrieve the current block of iterator for current selection */
+typedef herr_t (*H5S_sel_iter_block_func_t)(const H5S_sel_iter_t *iter, hssize_t *start, hssize_t *end);
 /* Method to determine number of elements left in iterator for current selection */
 typedef hsize_t (*H5S_sel_iter_nelmts_func_t)(const H5S_sel_iter_t *iter);
+/* Method to determine if there are more blocks left in the current selection */
+typedef htri_t (*H5S_sel_iter_has_next_block_func_t)(const H5S_sel_iter_t *iter);
 /* Method to move selection iterator to the next element in the selection */
 typedef herr_t (*H5S_sel_iter_next_func_t)(H5S_sel_iter_t *iter, size_t nelem);
+/* Method to move selection iterator to the next block in the selection */
+typedef herr_t (*H5S_sel_iter_next_block_func_t)(H5S_sel_iter_t *iter);
 /* Method to release iterator for current selection */
 typedef herr_t (*H5S_sel_iter_release_func_t)(H5S_sel_iter_t *iter);
 
@@ -102,8 +108,11 @@ struct H5S_sel_iter_t {
 
     /* Methods on selections */
     H5S_sel_iter_coords_func_t iter_coords;     /* Method to retrieve the current coordinates of iterator for current selection */
+    H5S_sel_iter_block_func_t iter_block;       /* Method to retrieve the current block of iterator for current selection */
     H5S_sel_iter_nelmts_func_t iter_nelmts;     /* Method to determine number of elements left in iterator for current selection */
+    H5S_sel_iter_has_next_block_func_t iter_has_next_block;         /* Method to query if there is another block left in the selection */
     H5S_sel_iter_next_func_t iter_next;         /* Method to move selection iterator to the next element in the selection */
+    H5S_sel_iter_next_block_func_t iter_next_block;     /* Method to move selection iterator to the next block in the selection */
     H5S_sel_iter_release_func_t iter_release;   /* Method to release iterator for current selection */
 };
 
@@ -205,8 +214,10 @@ H5_DLL herr_t H5S_select_write(H5F_t *f, struct H5O_layout_t *layout,
         const void *buf/*out*/);
 H5_DLL htri_t H5S_select_valid(const H5S_t *space);
 H5_DLL hssize_t H5S_get_select_npoints(const H5S_t *space);
-H5_DLL herr_t H5S_get_select_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
+H5_DLL herr_t H5S_get_select_bounds(const H5S_t *space, hssize_t *start, hssize_t *end);
 H5_DLL herr_t H5S_select_offset(H5S_t *space, const hssize_t *offset);
+H5_DLL herr_t H5S_select_copy(H5S_t *dst, const H5S_t *src);
+H5_DLL htri_t H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2);
 H5_DLL herr_t H5S_select_release(H5S_t *ds);
 H5_DLL herr_t H5S_select_all(H5S_t *space, unsigned rel_prev);
 H5_DLL herr_t H5S_select_none(H5S_t *space);

@@ -139,7 +139,7 @@ typedef hssize_t (*H5S_sel_serial_size_func_t)(const H5S_t *space);
 /* Method to store current selection in "serialized" form (a byte sequence suitable for storing on disk) */
 typedef herr_t (*H5S_sel_serialize_func_t)(const H5S_t *space, uint8_t *buf);
 /* Method to determine to smallest n-D bounding box containing the current selection */
-typedef herr_t (*H5S_sel_bounds_func_t)(const H5S_t *space, hsize_t *start, hsize_t *end);
+typedef herr_t (*H5S_sel_bounds_func_t)(const H5S_t *space, hssize_t *start, hssize_t *end);
 /* Method to determine if current selection is contiguous */
 typedef htri_t (*H5S_sel_is_contiguous_func_t)(const H5S_t *space);
 /* Method to determine if current selection is a single block */
@@ -184,15 +184,9 @@ H5_DLL herr_t H5S_release_simple(H5S_simple_t *simple);
 H5_DLL herr_t H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src);
 
 /* Operations on selections */
-H5_DLL herr_t H5S_select_copy(H5S_t *dst, const H5S_t *src);
-H5_DLL htri_t H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2);
 
 /* Point selection iterator functions */
 H5_DLL herr_t H5S_point_iter_init(H5S_sel_iter_t *iter, const H5S_t *space, size_t elmt_size);
-H5_DLL herr_t H5S_point_iter_coords(const H5S_sel_iter_t *iter, hssize_t *coords);
-H5_DLL hsize_t H5S_point_iter_nelmts(const H5S_sel_iter_t *iter);
-H5_DLL herr_t H5S_point_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
-H5_DLL herr_t H5S_point_iter_release(H5S_sel_iter_t *sel_iter);
 
 /* Point selection functions */
 H5_DLL herr_t H5S_point_release(H5S_t *space);
@@ -202,7 +196,7 @@ H5_DLL htri_t H5S_point_is_valid(const H5S_t *space);
 H5_DLL hssize_t H5S_point_serial_size(const H5S_t *space);
 H5_DLL herr_t H5S_point_serialize(const H5S_t *space, uint8_t *buf);
 H5_DLL herr_t H5S_point_deserialize(H5S_t *space, const uint8_t *buf);
-H5_DLL herr_t H5S_point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
+H5_DLL herr_t H5S_point_bounds(const H5S_t *space, hssize_t *start, hssize_t *end);
 H5_DLL htri_t H5S_point_is_contiguous(const H5S_t *space);
 H5_DLL htri_t H5S_point_is_single(const H5S_t *space);
 H5_DLL htri_t H5S_point_is_regular(const H5S_t *space);
@@ -212,10 +206,6 @@ H5_DLL herr_t H5S_point_get_seq_list(const H5S_t *space, unsigned flags,
 
 /* "All" selection iterator  functions */
 H5_DLL herr_t H5S_all_iter_init(H5S_sel_iter_t *iter, const H5S_t *space, size_t elmt_size);
-H5_DLL herr_t H5S_all_iter_coords(const H5S_sel_iter_t *iter, hssize_t *coords);
-H5_DLL hsize_t H5S_all_iter_nelmts(const H5S_sel_iter_t *iter);
-H5_DLL herr_t H5S_all_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
-H5_DLL herr_t H5S_all_iter_release(H5S_sel_iter_t *sel_iter);
 
 /* "All" selection functions */
 H5_DLL herr_t H5S_all_release(H5S_t *space);
@@ -224,7 +214,7 @@ H5_DLL htri_t H5S_all_is_valid(const H5S_t *space);
 H5_DLL hssize_t H5S_all_serial_size(const H5S_t *space);
 H5_DLL herr_t H5S_all_serialize(const H5S_t *space, uint8_t *buf);
 H5_DLL herr_t H5S_all_deserialize(H5S_t *space, const uint8_t *buf);
-H5_DLL herr_t H5S_all_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
+H5_DLL herr_t H5S_all_bounds(const H5S_t *space, hssize_t *start, hssize_t *end);
 H5_DLL htri_t H5S_all_is_contiguous(const H5S_t *space);
 H5_DLL htri_t H5S_all_is_single(const H5S_t *space);
 H5_DLL htri_t H5S_all_is_regular(const H5S_t *space);
@@ -234,10 +224,6 @@ H5_DLL herr_t H5S_all_get_seq_list(const H5S_t *space, unsigned flags,
 
 /* Hyperslab selection iterator functions */
 H5_DLL herr_t H5S_hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space, size_t elmt_size);
-H5_DLL herr_t H5S_hyper_iter_coords(const H5S_sel_iter_t *iter, hssize_t *coords);
-H5_DLL hsize_t H5S_hyper_iter_nelmts(const H5S_sel_iter_t *iter);
-H5_DLL herr_t H5S_hyper_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
-H5_DLL herr_t H5S_hyper_iter_release(H5S_sel_iter_t *sel_iter);
 
 /* Hyperslab selection functions */
 H5_DLL herr_t H5S_hyper_release(H5S_t *space);
@@ -247,7 +233,7 @@ H5_DLL htri_t H5S_hyper_is_valid(const H5S_t *space);
 H5_DLL hssize_t H5S_hyper_serial_size(const H5S_t *space);
 H5_DLL herr_t H5S_hyper_serialize(const H5S_t *space, uint8_t *buf);
 H5_DLL herr_t H5S_hyper_deserialize(H5S_t *space, const uint8_t *buf);
-H5_DLL herr_t H5S_hyper_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
+H5_DLL herr_t H5S_hyper_bounds(const H5S_t *space, hssize_t *start, hssize_t *end);
 H5_DLL htri_t H5S_hyper_is_contiguous(const H5S_t *space);
 H5_DLL htri_t H5S_hyper_is_single(const H5S_t *space);
 H5_DLL htri_t H5S_hyper_is_regular(const H5S_t *space);
@@ -257,10 +243,6 @@ H5_DLL herr_t H5S_hyper_get_seq_list(const H5S_t *space, unsigned flags,
 
 /* "None" selection iterator functions */
 H5_DLL herr_t H5S_none_iter_init(H5S_sel_iter_t *iter, const H5S_t *space, size_t elmt_size);
-H5_DLL herr_t H5S_none_iter_coords(const H5S_sel_iter_t *iter, hssize_t *coords);
-H5_DLL hsize_t H5S_none_iter_nelmts(const H5S_sel_iter_t *iter);
-H5_DLL herr_t H5S_none_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
-H5_DLL herr_t H5S_none_iter_release(H5S_sel_iter_t *sel_iter);
 
 /* "None" selection functions */
 H5_DLL herr_t H5S_none_release(H5S_t *space);
@@ -269,7 +251,7 @@ H5_DLL htri_t H5S_none_is_valid(const H5S_t *space);
 H5_DLL hssize_t H5S_none_serial_size(const H5S_t *space);
 H5_DLL herr_t H5S_none_serialize(const H5S_t *space, uint8_t *buf);
 H5_DLL herr_t H5S_none_deserialize(H5S_t *space, const uint8_t *buf);
-H5_DLL herr_t H5S_none_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
+H5_DLL herr_t H5S_none_bounds(const H5S_t *space, hssize_t *start, hssize_t *end);
 H5_DLL htri_t H5S_none_is_contiguous(const H5S_t *space);
 H5_DLL htri_t H5S_none_is_single(const H5S_t *space);
 H5_DLL htri_t H5S_none_is_regular(const H5S_t *space);
@@ -302,5 +284,10 @@ H5_DLL htri_t H5S_mpio_opt_possible(const H5S_t *mem_space,
                                      const H5S_t *file_space, const unsigned flags);
 
 #endif /* H5_HAVE_PARALLEL */
+
+/* Testing functions */
+#ifdef H5S_TESTING
+H5_DLL htri_t H5S_select_shape_same_test(hid_t sid1, hid_t sid2);
+#endif /* H5S_TESTING */
 
 #endif /*_H5Spkg_H*/
