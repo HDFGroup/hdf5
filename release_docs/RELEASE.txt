@@ -44,6 +44,31 @@ New Features
             define 'H5_USING_PURIFY' in your CFLAGS when building the library.
             QAK - 2004/07/23
 
+        - WINDOWS building,testing and installing improvements
+
+          - On Windows, FORTRAN,C++ and C projects are merged into one zip file, 
+            users can choose an option to build either FORTRAN or C++ or both 
+            with basic C library.For detailed information,
+            please read INSTALL_Windows.txt.
+
+          - On Windows, szip compression library with or without encoder can be easily
+            turned off or on when building HDF5.  For detailed information,
+            please read INSTALL_Windows.txt, especially section V. 
+  
+          - On Windows, an optional procedure for building,testing and installing
+            HDF5 from command line is provided. This procedure is supposed to be
+            convenient for experienced users, please read 
+            INSTALL_windows_From_Command_Line.txt for details.
+
+          - On Windows, an alternative short instruction document for building,
+            testing and installing HDF5 is provided. This instruction is supposed to
+            be convenient for general users, please read 
+            INSTALL_Windows_Short.txt for details.
+
+          - On Windows, h5repack,h5diff,h5ls and h5import tool tests have been added.
+          KY - 2004/9/16
+  
+
     Library:
     --------
         - Modified the way how HDF5 calculates 'pixels_per_scanline' parameter for
@@ -221,7 +246,20 @@ Bug Fixes since HDF5-1.6.2 release
 
 Documentation
 =============
-
+    Windows 
+    -------
+        -  INSTALL_Windows.txt has been enhanced to include instructions building 
+           HDF5 with FORTRAN and C++. 
+        -  Two optional installation documents have been added. They are
+           INSTALL_Windows_Short.txt and INSTALL_Windows_From_Command_Line.txt.
+           INSTALL_Windows_Short.txt is supposed to help general users who
+           only want to build,test and install HDF5 in a quick way.
+           INSTALL_Windows_From_Command_Line.txt is supposed to help users who
+           would like to compile,test and install HDF5 in command line environment.
+        -  INSTALL_Windows_withcpp.txt and INSTALL_Windows_withF90.txt become
+           obsolete. Users should NOT refer to those documents anymore.
+        KY 2004/09/16
+        
 
 
 Platforms Tested
@@ -304,10 +342,14 @@ Platforms Tested
 				  mpich-gm-1.2.5..intel
 
     Windows 2000 (NT5.0)          MSVC++ 6.0
+                                  MSVC++ .NET
                                   DEC Visual Fortran 6.0
                                   Intel C and F90 compilers version 7.1
 				  Code Warrior 8.0
     Windows XP                    MSVC++.NET
+                                  MSVC++ 6.0
+                                  DEC Visual Fortran 6.0
+
     MAC OS X                      Darwin 7.5
                                   gcc and g++ Apple Computer, Inc. GCC 
                                   version 1175, based on gcc version 3.3.2
