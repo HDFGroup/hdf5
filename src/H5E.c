@@ -2555,7 +2555,7 @@ H5Eauto_is_stack(hid_t estack_id, unsigned *is_stack)
     herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER_API(H5Eauto_is_stack, FAIL)
-    H5TRACE2("e","ix",estack_id,is_stack);
+    H5TRACE2("e","i*Iu",estack_id,is_stack);
 
     if(estack_id == H5E_DEFAULT) {
     	if((estack = H5E_get_my_stack())==NULL) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
