@@ -316,12 +316,17 @@ H5Giterate(hid_t loc_id, const char *name, int *idx,
     udata.op = op;
     udata.op_data = op_data;
 
+    /* Set the number of entries looked at to zero */
+    udata.final_ent = 0;
+
     /* Iterate over the group members */
     if ((ret_value = H5B_iterate (H5G_fileof(udata.group), H5B_SNODE,
-				  &(udata.group->ent.cache.stab.btree_addr),
-				  &udata))<0) {
-	HERROR (H5E_SYM, H5E_CANTINIT, "iteration operator failed");
+              &(udata.group->ent.cache.stab.btree_addr), &udata))<0) {
+        HERROR (H5E_SYM, H5E_CANTINIT, "iteration operator failed");
     }
+    /* Set the index we stopped at */
+    *idx=udata.final_ent;
+
     H5I_dec_ref (udata.group_id); /*also closes udata.group*/
     FUNC_LEAVE (ret_value);
 }

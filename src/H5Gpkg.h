@@ -104,6 +104,7 @@ typedef struct H5G_bt_ud2_t {
     void	*op_data;	/*user-defined operator data		     */
 
     /* upward */
+    int		final_ent;  /*final entry looked at */
     
 } H5G_bt_ud2_t;
 
