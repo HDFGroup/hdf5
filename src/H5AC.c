@@ -1258,15 +1258,14 @@ H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     idx = H5AC_HASH(f, addr);
     cache = f->shared->cache;
     info = cache->slot + idx;
-#ifdef H5_HAVE_FPHDF5
-    lf = f->shared->lf;
-#endif  /* H5_HAVE_FPHDF5 */
 #ifdef H5AC_DEBUG
     prot = cache->prot + idx;
 #endif /* H5AC_DEBUG */
 
 #ifdef H5_HAVE_PARALLEL
 #ifdef H5_HAVE_FPHDF5
+    lf = f->shared->lf;
+
     if (H5FD_is_fphdf5_driver(lf)) {
         /*
          * This is the FPHDF5 driver. Grab a lock for this piece of
@@ -1504,13 +1503,6 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 
 
     FUNC_ENTER_NOAPI(H5AC_unprotect, FAIL)
-
-#ifdef H5_HAVE_FPHDF5
-    /*
-     * XXX: Send a request to the SAP asking to release the lock on this
-     * particular address. -BW
-     */
-#endif  /* H5_HAVE_FPHDF5 */
 
     /* check args */
     assert(f);

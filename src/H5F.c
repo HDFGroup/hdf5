@@ -3361,11 +3361,6 @@ H5F_close(H5F_t *f)
                           H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLOSING | H5F_FLUSH_CLEAR_ONLY) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
         }
-
-        /* Let's all meet up now... */
-        if (H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL,
-                      H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLOSING | H5F_FLUSH_CLEAR_ONLY) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
 #endif  /* H5_HAVE_FPHDF5 */
     } /* end if */
 

@@ -30,12 +30,6 @@
 #include "H5Sprivate.h"		/* Dataspaces 				*/
 #include "H5Vprivate.h"		/* Vectors and arrays 			*/
 
-#ifdef H5_HAVE_FPHDF5
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
-
-#include "H5Fpkg.h"             /* File access                          */
-#endif  /* H5_HAVE_FPHDF5 */
-
 /*#define H5D_DEBUG*/
 
 /* Interface initialization */
@@ -1832,14 +1826,6 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
     /* Update the dataset's entry info. */
     if (H5D_update_entry_info(file, dxpl_id, new_dset, dc_plist) != SUCCEED)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't update the metadata cache")
-
-#ifdef H5_HAVE_FPHDF5
-    /* FPHDF5 is all about independent writes */
-    if (H5FD_is_fphdf5_driver(file->shared->lf))
-        if (H5Pset_dxpl_fphdf5(dxpl_id, H5FD_MPIO_INDEPENDENT) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL,
-                        "unable to set xfer property list to independent write")
-#endif  /* H5_HAVE_FPHDF5 */
 
     /* 
      * Give the dataset a name.  That is, create and add a new

@@ -39,10 +39,6 @@
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5Pprivate.h"		/* Property lists			*/
 
-#ifdef H5_HAVE_FPHDF5
-#include "H5FDfphdf5.h"         /* FPHDF5 File Descriptor                  */
-#endif  /* H5_HAVE_FPHDF5 */
-
 #ifdef H5_HAVE_GETTIMEOFDAY
 #include <sys/time.h>
 #endif /* H5_HAVE_GETTIMEOFDAY */
@@ -265,9 +261,6 @@ H5O_init(H5F_t *f, hid_t dxpl_id, size_t size_hint, H5G_entry_t *ent/*out*/, had
     H5O_t      *oh = NULL;
     haddr_t     tmp_addr;
     herr_t      ret_value = SUCCEED;    /* return value */
-#ifdef H5_HAVE_FPHDF5
-    unsigned    capt_only = 0;
-#endif  /* H5_HAVE_FPHDF5 */
 
     FUNC_ENTER_NOINIT(H5O_init);
 
@@ -315,29 +308,6 @@ H5O_init(H5F_t *f, hid_t dxpl_id, size_t size_hint, H5G_entry_t *ent/*out*/, had
     oh->mesg[0].raw = oh->chunk[0].image + H5O_SIZEOF_MSGHDR(f);
     oh->mesg[0].raw_size = size_hint - H5O_SIZEOF_MSGHDR(f);
     oh->mesg[0].chunkno = 0;
-
-#ifdef H5_HAVE_FPHDF5
-    if (H5FD_is_fphdf5_driver(f->shared->lf)) {
-        H5P_genplist_t *plist;
-
-        /* Get the data xfer property list */
-        if ((plist = H5I_object(dxpl_id)) == NULL)
-            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dataset transfer list");
-
-        /* Check if the "Captain Only" flag's been set */
-        if (H5P_exist_plist(plist, H5FD_FPHDF5_CAPTN_ALLOC_ONLY) > 0)
-            if (H5P_get(plist, H5FD_FPHDF5_CAPTN_ALLOC_ONLY, &capt_only) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "can't retrieve FPHDF5 property");
-    }
-
-    /*
-     * We only want to initialize the object header if this isn't an
-     * FPHDF5 driver or it is, but the captain only flag is set or if the
-     * captain only flag just isn't set.
-     */
-    if (!H5FD_is_fphdf5_driver(f->shared->lf) || !capt_only || (H5FD_fphdf5_is_captain(f->shared->lf) && capt_only))
-        ;
-#endif  /* H5_HAVE_FPHDF5 */
 
     /* cache it */
     if (H5AC_set(f, dxpl_id, H5AC_OHDR, ent->header, oh) < 0)
