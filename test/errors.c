@@ -41,6 +41,8 @@ hid_t   ERR_STACK;
 #define ERR_CLS_NAME            "Error Test"
 #define PROG_NAME               "Error Program"
 #define PROG_VERS               "1.0"
+#define ERR_MAJ_MSG             "Error in test"
+#define ERR_MIN_MSG             "Error in subroutine"
 
 #define SPACE1_DIM1             4
 #define SPACE1_RANK             1
@@ -139,7 +141,7 @@ test_error(hid_t file)
 		H5_FAILED();
 		printf("    Read different values than written.\n");
 		printf("    At index %d,%d\n", i, j);
-		goto error;
+		TEST_ERROR ;
 	    }
 	}
     }
@@ -177,14 +179,36 @@ test_error(hid_t file)
 static herr_t 
 init_error(void)
 {
-    if((ERR_CLS = H5Eregister_class(ERR_CLS_NAME, PROG_NAME, PROG_VERS))<0)
-        goto error;
-
-    if((ERR_MAJ_TEST = H5Ecreate_msg(ERR_CLS, H5E_MAJOR_new, "Error in test"))<0)
-        goto error;
-    if((ERR_MIN_SUBROUTINE = H5Ecreate_msg(ERR_CLS, H5E_MINOR_new, "Error in subroutine"))<0)
-        goto error;
+    size_t cls_size = strlen(ERR_CLS_NAME)+1;
+    char *cls_name = malloc(strlen(ERR_CLS_NAME)+1);
+    size_t msg_size = strlen(ERR_MIN_MSG) + 1;
+    char *msg = malloc(strlen(ERR_MIN_MSG)+1);
+    H5E_type_t *msg_type= malloc(sizeof(H5E_type_t));
     
+    if((ERR_CLS = H5Eregister_class(ERR_CLS_NAME, PROG_NAME, PROG_VERS))<0)
+        TEST_ERROR;
+
+    if(cls_size != H5Eget_class(ERR_CLS, cls_name, cls_size) + 1) 
+        TEST_ERROR;
+    if(strcmp(ERR_CLS_NAME, cls_name)) 
+        TEST_ERROR;
+   
+    if((ERR_MAJ_TEST = H5Ecreate_msg(ERR_CLS, H5E_MAJOR_new, ERR_MAJ_MSG))<0)
+        TEST_ERROR;
+    if((ERR_MIN_SUBROUTINE = H5Ecreate_msg(ERR_CLS, H5E_MINOR_new, ERR_MIN_MSG))<0)
+        TEST_ERROR;
+
+    if(msg_size != H5Eget_msg(ERR_MIN_SUBROUTINE, msg_type, msg, msg_size) + 1)
+        TEST_ERROR;
+    if(*msg_type != H5E_MINOR_new)
+        TEST_ERROR;
+    if(strcmp(msg, ERR_MIN_MSG))
+        TEST_ERROR;
+
+    free(cls_name);
+    free(msg);
+    free(msg_type);
+
     PASSED();
     return 0;
 
@@ -214,10 +238,10 @@ static herr_t
 error_stack(void)
 {
     if((ERR_STACK = H5Eget_current_stack())<0)
-        goto error;
+        TEST_ERROR;
 
     if(H5Eclose_stack(ERR_STACK)<0)
-        goto error;
+        TEST_ERROR;
     
     PASSED();
     return 0;
@@ -250,13 +274,13 @@ close_error(void)
 {
     /*
     if(H5Eclose_msg(ERR_MAJ_TEST)<0)
-        goto error;
+        TEST_ERROR ;
     if(H5Eclose_msg(ERR_MIN_SUBROUTINE)<0)
-        goto error;
+        TEST_ERROR ;
     */
     
     if(H5Eunregister_class(ERR_CLS)<0)
-        goto error;
+        TEST_ERROR ;
 
     PASSED();
     return 0;
@@ -288,36 +312,35 @@ main(void)
     const char          *FUNC="main()";
     
     h5_reset();
-
 #ifndef NEW_ERR 
     if(init_error()<0)
-        goto error;
+        TEST_ERROR ;
 #endif /* NEW_ERR */
     
     fapl = h5_fileaccess();
     
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
-	goto error;
+	TEST_ERROR ;
     
 #ifndef NEW_ERR 
     if(error_stack()<0)
-        goto error;
+        TEST_ERROR ;
 #endif /* NEW_ERR */
 
     /*if(test_error(file)<0) {*/
 #ifndef NEW_ERR
         /*H5Epush(H5E_DEFAULT, __FILE__, FUNC, __LINE__, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, "Error test failed");*/
 #endif /* NEW_ERR */        
-    /*    goto error;
+    /*    TEST_ERROR ;
     }*/
     
-    if (H5Fclose(file)<0) goto error;
+    if (H5Fclose(file)<0) TEST_ERROR ;
     h5_cleanup(FILENAME, fapl);
 
 #ifndef NEW_ERR 
     if(close_error()<0)
-        goto error;
+        TEST_ERROR ;
 #endif /* NEW_ERR */
     printf("All error API test based on native datatype test passed.\n");
     
