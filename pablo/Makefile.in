@@ -4,6 +4,10 @@
 #                    All rights reserved.
 #
 # 
+top_srcdir=@top_srcdir@
+top_builddir=..
+srcdir=@srcdir@
+VPATH=.:@srcdir@
 @COMMENCE@
 TRACE=perl ../bin/trace
 ###############################################################################
@@ -129,7 +133,7 @@ clean: mostlyclean
 #
 distclean: clean
 	$(RM) .depend TAGS *~ core *.core *.bak *.old *.new $(DISTCLEAN)
-	@if test -f Makefile.in; then					      \
+	@if test -f $(srcdir)/Makefile.in; then				      \
 	   (set -x; $(RM) Makefile);					      \
 	fi
 
