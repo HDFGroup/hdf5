@@ -1,85 +1,87 @@
+/*
+ * Copyright (C) 2001 National Center for Supercomputing Applications
+ *                    All rights reserved.
+ */
 #include <stdio.h>                
 #include <stdlib.h>               
+
 #include "gif.h"                  
 
 int EndianOrder;
 
-static BYTE * ReadDataSubBlocks(BYTE **MemGif2, WORD *DSize);
+static BYTE *ReadDataSubBlocks(BYTE **MemGif2, WORD *DSize);
 
 WORD 
-GetWord (MemGif)
-BYTE *MemGif;
+GetWord(BYTE *MemGif)
 {
-	WORD w;
-	if (EndianOrder == 1) /* LittleEndian */
-	{
-		w  = (WORD) (*MemGif++ & 0xFF);
-		w |= (WORD) ((*MemGif++ & 0xFF) << 0x08);
-	}
-	else
-	{
-		w = (WORD) (*MemGif++ & 0xFF);
-		w = ((WORD) (*MemGif++ & 0xFF)) | (w << 0x08);
-	}
-	return w;
+    WORD w;
+
+    if (EndianOrder == 1) {
+        /* LittleEndian */
+        w  = (WORD) (*MemGif++ & 0xFF);
+        w |= (WORD) ((*MemGif++ & 0xFF) << 0x08);
+    } else {
+        w = (WORD) (*MemGif++ & 0xFF);
+        w = ((WORD) (*MemGif++ & 0xFF)) | (w << 0x08);
+    }
+
+    return w;
 }
 
 BYTE
-GetByte (MemGif)
-BYTE *MemGif;
+GetByte(BYTE *MemGif)
 {	
-	return *MemGif;
+    return *MemGif;
 }
 
 /*
-**  Read a GIF image BYTE Header.
-**
-**  This function reads the Header, Logical Screen Descriptor, and
-**  Global Color Table (if any) from a GIF image file.  The information
-**  is stored in a GIFHEAD structure.
-**
-**  Returns: -1 if a FILE stream error occured during the read,
-**           otherwise 0 if no error occured.
-*/
+ *  Read a GIF image BYTE Header.
+ *
+ *  This function reads the Header, Logical Screen Descriptor, and
+ *  Global Color Table (if any) from a GIF image file.  The information
+ *  is stored in a GIFHEAD structure.
+ *
+ *  Returns: -1 if a FILE stream error occured during the read,
+ *           otherwise 0 if no error occured.
+ */
 int
-ReadGifHeader(GifHead, MemGif2)
-GIFHEAD *GifHead;       /* Pointer to GIF header structure  */
-BYTE    **MemGif2;       /* GIF image file input FILE stream */
+ReadGifHeader(GIFHEAD *GifHead, /* Pointer to GIF header structure  */
+              BYTE **MemGif2)   /* GIF image file input FILE stream */
 {
-    WORD i;    /* Loop counter                                */
+    WORD i;             /* Loop counter                                */
     WORD tableSize;     /* Number of entires in the Global Color Table */
-	
-	GifHead->TableSize = 0;
-	for (i = 0 ; i < 6 ; i++) {
-		GifHead->HeaderDump[i] = *(*MemGif2)++;
-	}
-	if (strncmp((const char *)GifHead->HeaderDump , "GIF" , 3)) {
-		printf("The file does not appear to be a valid GIF file.\n");
-		exit(-1);
-	}
-	
-	for (i = 0 ; i < 7 ; i++) {
-		GifHead->LSDDump[i] = *(*MemGif2)++;
-	}
 
-	GifHead->PackedField = GifHead->LSDDump[4];
-	/* Check if a Global Color Table is present */
-    if (GifHead->PackedField & 0x80)
-    {
+    GifHead->TableSize = 0;
+    for (i = 0 ; i < 6 ; i++) {
+        GifHead->HeaderDump[i] = *(*MemGif2)++;
+    }
+
+    if (strncmp((const char *)GifHead->HeaderDump , "GIF" , 3)) {
+        printf("The file does not appear to be a valid GIF file.\n");
+        exit(-1);
+    }
+    
+    for (i = 0 ; i < 7 ; i++) {
+        GifHead->LSDDump[i] = *(*MemGif2)++;
+    }
+
+    GifHead->PackedField = GifHead->LSDDump[4];
+
+    /* Check if a Global Color Table is present */
+    if (GifHead->PackedField & 0x80) {
         /* Read number of color table entries */
         tableSize = (WORD) (1L << ((GifHead->PackedField & 0x07) + 1));
-		GifHead->TableSize = tableSize;
-        /* Read the Global Color Table */
-		/* 
-		** There are some changes made here apart from just
-		** reading in the global color table as would
-		** seem intuitively obvious.
-		** The colors are stored in the bottom part of the 
-		** palette as opposed to the top
-		*/
+        GifHead->TableSize = tableSize;
 
-        for (i = 0; i < tableSize; i++)
-        {
+        /* Read the Global Color Table */
+
+        /* 
+         * There are some changes made here apart from just reading in the
+         * global color table as would seem intuitively obvious.  The colors
+         * are stored in the bottom part of the palette as opposed to the top
+         */
+
+        for (i = 0; i < tableSize; i++) {
             GifHead->HDFPalette[i][0] = *(*MemGif2)++;
             GifHead->HDFPalette[i][1] = *(*MemGif2)++;
             GifHead->HDFPalette[i][2] = *(*MemGif2)++;
@@ -87,12 +89,12 @@ BYTE    **MemGif2;       /* GIF image file input FILE stream */
     }
 
     /* Check for a FILE stream error */
-	/*
+#if 0
     if (ferror(FpGif))
-        return(-1); 
-	*/
+        return -1; 
+#endif  /* 0 */
 
-    return(0);          /* No FILE stream error occured */
+    return 0;   /* No FILE stream error occured */
 }
 
 
