@@ -549,7 +549,7 @@ if test -n "$PARALLEL"; then
   dnl Change to the C language
   AC_LANG_C
 
-  AC_TRY_COMPILE([
+  AC_TRY_LINK([
 #include <mpi.h>
   ],
     [MPI_Comm_c2f(); return 0;],
@@ -560,7 +560,7 @@ if test -n "$PARALLEL"; then
   )
 
   AC_MSG_CHECKING([for MPI_Info_c2f and MPI_Info_f2c functions])
-  AC_TRY_COMPILE([
+  AC_TRY_LINK([
 #include <mpi.h>
   ],
     [MPI_Info_c2f(); return 0;],
