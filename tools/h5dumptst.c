@@ -181,7 +181,7 @@ static void test_attribute(void) {
 hid_t fid, root, space, attr, type;
 hsize_t dims[2];
 char buf[60];
-int i, data[20];
+int i, data[10];
 double d[10];
 char string[]= "string attribute";
 int point = 100;
@@ -204,7 +204,7 @@ int point = 100;
   dims[0] = 10;
   space = H5Screate_simple(1, dims, NULL);
   attr = H5Acreate (root, "attr2", H5T_STD_I32BE, space, H5P_DEFAULT);
-  for (i = 0; i < 20; i++) data[i] = i+1;
+  for (i = 0; i < 10; i++) data[i] = i+1;
   H5Awrite(attr, H5T_NATIVE_INT, data);
   H5Sclose(space);
   H5Aclose(attr);
