@@ -33,7 +33,6 @@
 #define MESG(x)                                                         \
 	if (verbose) printf("%s\n", x);                                 \
 
-#ifdef H5_WANT_H5_V1_6_COMPAT
 #define VRFY(val, mesg) do {                                            \
     if (val) {                                                          \
         if (*mesg != '\0') {                                            \
@@ -52,37 +51,13 @@
             exit(nerrors);                                              \
         }                                                               \
     }                                                                   \
-    H5Eclear();                                                         \
 } while(0)
-#else /* H5_WANT_H5_V1_6_COMPAT */
-#define VRFY(val, mesg) do {                                            \
-    if (val) {                                                          \
-        if (*mesg != '\0') {                                            \
-            MESG(mesg);                                                 \
-        }                                                               \
-    } else {                                                            \
-        printf("Proc %d: ", mpi_rank);                                  \
-        printf("*** PHDF5 ERROR ***\n");                                \
-        printf("        Assertion (%s) failed at line %4d in %s\n",     \
-               mesg, (int)__LINE__, __FILE__);                          \
-        ++nerrors;                                                      \
-        fflush(stdout);                                                 \
-        if (!verbose) {                                                 \
-            printf("aborting MPI process\n");                           \
-            MPI_Finalize();                                             \
-            exit(nerrors);                                              \
-        }                                                               \
-    }                                                                   \
-    H5Eclear(H5E_DEFAULT);                                              \
-} while(0)
-#endif /* H5_WANT_H5_V1_6_COMPAT */
 
 /*
  * Checking for information purpose.
  * If val is false, print mesg; else nothing.
  * Either case, no error setting.
  */
-#ifdef H5_WANT_H5_V1_6_COMPAT
 #define INFO(val, mesg) do {                                            \
     if (val) {                                                          \
         if (*mesg != '\0') {                                            \
@@ -95,24 +70,7 @@
                mesg, (int)__LINE__, __FILE__);                          \
         fflush(stdout);                                                 \
     }                                                                   \
-    H5Eclear();                                                         \
 } while(0)
-#else /* H5_WANT_H5_V1_6_COMPAT */
-#define INFO(val, mesg) do {                                            \
-    if (val) {                                                          \
-        if (*mesg != '\0') {                                            \
-            MESG(mesg);                                                 \
-        }                                                               \
-    } else {                                                            \
-        printf("Proc %d: ", mpi_rank);                                  \
-        printf("*** PHDF5 REMARK (not an error) ***\n");                \
-        printf("        Condition (%s) failed at line %4d in %s\n",     \
-               mesg, (int)__LINE__, __FILE__);                          \
-        fflush(stdout);                                                 \
-    }                                                                   \
-    H5Eclear(H5E_DEFAULT);                                              \
-} while(0)
-#endif /* H5_WANT_H5_V1_6_COMPAT */
 
 #define MPI_BANNER(mesg) do {                                           \
     printf("--------------------------------\n");                       \
