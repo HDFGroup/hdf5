@@ -47,6 +47,12 @@ AC_OUTPUT_COMMANDS([
 AC_CANONICAL_HOST
 AC_SUBST([CPPFLAGS])
 
+dnl Different compilers may need default libraries. They are specified in
+dnl the config/* files, so we put this statement here so that it'll be
+dnl set by the code which follows...
+dnl
+AC_SUBST(DEFAULT_LIBS) DEFAULT_LIBS=""
+
 dnl ----------------------------------------------------------------------
 dnl Set prefix default (install directory) to a directory in the build area.
 dnl This allows multiple src-dir builds within one host.
