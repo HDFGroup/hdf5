@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1998, 1999, 2000, 2001
+ * Copyright (C) 1998, 1999, 2000, 2001, 2002
  *     National Center for Supercomputing Applications
  *     All rights reserved.
  *
@@ -1541,7 +1541,7 @@ dump_group(hid_t gid, const char *name)
 {
     H5G_stat_t  statbuf;
     hid_t       dset, type;
-    char        type_name[1024], *tmp;
+    char        type_name[1024], *tmp, comment[50];
     int         i, xtype = H5G_UNKNOWN; /* dump all */
 
     tmp = malloc(strlen(prefix) + strlen(name) + 2);
@@ -1553,6 +1553,14 @@ dump_group(hid_t gid, const char *name)
 
     if (display_oid)
 	dump_oid(gid);
+
+    comment[0] = '\0';
+    H5Gget_comment(gid, ".", sizeof(comment), comment);
+
+    if (comment[0]) {
+        indentation(indent);
+        printf("COMMENT \"%s\"\n", comment);
+    }
 
     if (!strcmp(name, "/") && unamedtype)
 	/* dump unamed type in root group */
