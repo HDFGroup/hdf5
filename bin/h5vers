@@ -300,18 +300,19 @@ sub gen_configure {
   close FILE;
 
   $conf =~ /^(.*?)\/?configure.in$/;
-
-  if ($1) {
-    system("cd $1 && autoconf && rm -rf autom4te.cache");
-  } else {
-    system("autoconf && rm -rf autom4te.cache");
-  }
 }
 
 # Update the configure.in files and regenerate them
 gen_configure("HDF5", $CONFIGURE) if $CONFIGURE;
 gen_configure("HDF5 Fortran", $FORTRAN_CONFIGURE) if $FORTRAN_CONFIGURE;
 gen_configure("HDF5 C++", $CXX_CONFIGURE) if $CXX_CONFIGURE;
+
+# Reconfigure once (which will update all three configure files)
+if ($1) {
+  system("cd $1 && bin/reconfigure && rm -rf autom4te.cache");
+} else {
+  system("bin/reconfigure && rm -rf autom4te.cache");
+}
 
 # Print the new version number
 if ($verbose) {
