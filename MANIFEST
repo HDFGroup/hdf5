@@ -726,6 +726,8 @@
 
 ./pablo/HDFIOTrace.h
 ./pablo/HDFTrace.h
+./pablo/HDFentryNames.h
+./pablo/HDFidList.h
 ./pablo/HDFmpioProtos.h
 ./pablo/HDFrecord_RT.h
 ./pablo/Makefile.in
@@ -734,9 +736,11 @@
 ./pablo/PabloHDF_RT.c
 ./pablo/PabloHDF_SDDF.c
 ./pablo/PabloHDFff.f
-./pablo/ProcIDs.h
 ./pablo/PabloSedscr
+./pablo/ProcIDs.h
+./pablo/ProcMasks.h
 ./pablo/ProcTrace.h
+./pablo/ProcTrace.inc
 ./pablo/READ_ME
 
 ./perform/Dependencies
