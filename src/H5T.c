@@ -2792,7 +2792,7 @@ H5T_open (H5G_entry_t *ent, hid_t dxpl_id)
     {
         shared_fo->fo_count++;
 
-        if(NULL == (dt = H5FL_CALLOC(H5T_t)))
+        if(NULL == (dt = H5FL_MALLOC(H5T_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate space for datatype")
 
         dt->shared=shared_fo;
@@ -2846,15 +2846,9 @@ H5T_open_oid (H5G_entry_t *ent, hid_t dxpl_id)
 
     assert (ent);
 
-    if(NULL==(dt=H5FL_CALLOC(H5T_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    if(NULL==(dt->shared=H5FL_MALLOC(H5T_shared_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-
     if (H5O_open (ent)<0)
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to open named data type");
-    /* The fourth argument to H5O_read is dt because we've already CALLOC'ed memory for it */
-    if (NULL==(dt=H5O_read (ent, H5O_DTYPE_ID, 0, dt, dxpl_id)))
+    if (NULL==(dt=H5O_read (ent, H5O_DTYPE_ID, 0, NULL, dxpl_id)))
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to load type message from object header");
 
     /* Mark the type as named and open */
@@ -3428,7 +3422,7 @@ H5T_set_size(H5T_t *dt, size_t size)
                     if((num_membs = H5T_get_nmembers(dt))<0)    
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to get number of members");
 
-                    for(i=0; i<num_membs; i++) {
+                    for(i=0; i<(unsigned)num_membs; i++) {
                         memb_offset = H5T_get_member_offset(dt, i);
                         if(memb_offset > max_offset) {
                             max_offset = memb_offset;
@@ -3436,10 +3430,7 @@ H5T_set_size(H5T_t *dt, size_t size)
                         }
                     }
                     
-                    if((memb_type = H5T_get_member_type(dt, max_index))==NULL)    
-                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to get type of member");
-
-                    max_size = H5T_get_size(memb_type);
+                    max_size = H5T_get_member_size(dt, max_index);
 
                     if(size<(max_offset+max_size))
                         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size shrinking will cut off last member ");
