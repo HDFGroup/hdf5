@@ -60,6 +60,7 @@
 
 #include "H5private.h"		/*library		  */
 #include "H5Eprivate.h"		/*error handling	  */
+#include "H5Fprivate.h"        /* File address macros */
 #include "H5MMprivate.h"	/*Core memory management	  */
 #include "H5FLprivate.h"	/*Free Lists	  */
 #include "H5TBprivate.h"    /*Threaded, balanced, binary trees	  */
@@ -1154,7 +1155,6 @@ H5TB_ffind(H5TB_NODE * root, void * key, unsigned fast_compare, H5TB_NODE ** pp)
     H5TB_NODE  *parent = NULL;
     int        side;
     int        cmp = 1;
-    haddr_t    cmp_addr = 1;
     H5TB_NODE  *ret_value = NULL;
 
     FUNC_ENTER (H5TB_ffind, NULL);
@@ -1162,9 +1162,9 @@ H5TB_ffind(H5TB_NODE * root, void * key, unsigned fast_compare, H5TB_NODE ** pp)
     switch(fast_compare) {
         case H5TB_FAST_HADDR_COMPARE:
             if (ptr) {
-                while (0 != (cmp_addr = (*(haddr_t *)key - *(haddr_t *)ptr->key))) {
+                while (0 != (cmp = H5F_addr_cmp(*(haddr_t *)key,*(haddr_t *)ptr->key))) {
                       parent = ptr;
-                      side = (cmp_addr < 0) ? LEFT : RIGHT;
+                      side = (cmp < 0) ? LEFT : RIGHT;
                       if (!HasChild(ptr, side))
                           break;
                       ptr = ptr->link[side];
@@ -1174,7 +1174,7 @@ H5TB_ffind(H5TB_NODE * root, void * key, unsigned fast_compare, H5TB_NODE ** pp)
                 *pp = parent;
 
             /* Set return value */
-            ret_value= (0 == cmp_addr) ? ptr : NULL;
+            ret_value= (0 == cmp) ? ptr : NULL;
             break;
 
         case H5TB_FAST_INTN_COMPARE:
