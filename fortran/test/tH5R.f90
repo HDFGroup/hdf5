@@ -48,9 +48,9 @@
           INTEGER :: rankr = 1 
           TYPE(hobj_ref_t_f), DIMENSION(4) ::  ref
           TYPE(hobj_ref_t_f), DIMENSION(4) ::  ref_out
-          INTEGER, DIMENSION(7) :: ref_dim
+          INTEGER(HSIZE_T), DIMENSION(1) :: ref_dim
           INTEGER, DIMENSION(5) :: data = (/1, 2, 3, 4, 5/)
-          INTEGER, DIMENSION(7) :: data_dims
+          INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
 
 
           !
@@ -219,8 +219,8 @@
           INTEGER     ::   error
           TYPE(hdset_reg_ref_t_f) , DIMENSION(2) :: ref     ! Buffers to store references
           TYPE(hdset_reg_ref_t_f) , DIMENSION(2) :: ref_out !
-          INTEGER, DIMENSION(7) :: ref_dim
-          INTEGER, DIMENSION(7) :: data_dims
+          INTEGER(HSIZE_T), DIMENSION(2) :: ref_dim
+          INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
           INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/2,9/)  ! Datasets dimensions
           INTEGER(HSIZE_T), DIMENSION(1) :: dimsr = (/2/)   ! 
           INTEGER(HSSIZE_T), DIMENSION(2) :: start

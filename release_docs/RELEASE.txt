@@ -85,6 +85,11 @@ New Features
           underlaying parallel I/O system is conforming to the POSIX
           write/read requirement.  AKC - 2003/11/12
 
+    Fortran Library:
+    ----------------
+         - h5dwrite/read_f and h5awrite/read_f functions only accept dims parameter
+           of the type INTEGER(HSIZE_T).
+
     Tools:
     ------
         - h5repack.sh did not report errors encountered during tests.  It does

@@ -217,19 +217,14 @@ H5_DLL int_f nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *ne
 #   define nh5dclose_c                 FNAME(H5DCLOSE_C)
 #   define nh5dopen_c                  FNAME(H5DOPEN_C)
 #   define nh5dwrite_c                 FNAME(H5DWRITE_C)
-#   define nh5dwrite_c_b               FNAME(H5DWRITE_C_B)
 #   define nh5dwrite_ref_obj_c         FNAME(H5DWRITE_REF_OBJ_C)
-#   define nh5dwrite_ref_obj_c_b       FNAME(H5DWRITE_REF_OBJ_C_B)
 #   define nh5dwrite_ref_reg_c         FNAME(H5DWRITE_REF_REG_C)
-#   define nh5dwrite_ref_reg_c_b       FNAME(H5DWRITE_REF_REG_C_B)
 #   define nh5dwritec_c                FNAME(H5DWRITEC_C)
 #   define nh5dwritec_c_b              FNAME(H5DWRITEC_C_B)
 #   define nh5dread_c                  FNAME(H5DREAD_C)
 #   define nh5dread_c_b                FNAME(H5DREAD_C_B)
 #   define nh5dread_ref_reg_c          FNAME(H5DREAD_REF_REG_C)
-#   define nh5dread_ref_reg_c_b        FNAME(H5DREAD_REF_REG_C_B)
 #   define nh5dread_ref_obj_c          FNAME(H5DREAD_REF_OBJ_C)
-#   define nh5dread_ref_obj_c_b        FNAME(H5DREAD_REF_OBJ_C_B)
 #   define nh5dreadc_c                 FNAME(H5DREADC_C)
 #   define nh5dreadc_c_b               FNAME(H5DREADC_C_B)
 #   define nh5dget_space_c             FNAME(H5DGET_SPACE_C)
@@ -252,19 +247,13 @@ H5_DLL int_f nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *ne
 #   define nh5dclose_c                 FNAME(h5dclose_c)
 #   define nh5dopen_c                  FNAME(h5dopen_c)
 #   define nh5dwrite_c                 FNAME(h5dwrite_c)
-#   define nh5dwritec_c_b              FNAME(h5dwritec_c_b)
-#   define nh5dwrite_c_b               FNAME(h5dwrite_c_b)
 #   define nh5dwritec_c                FNAME(h5dwritec_c)
 #   define nh5dwrite_ref_obj_c         FNAME(h5dwrite_ref_obj_c)
-#   define nh5dwrite_ref_obj_c_b       FNAME(h5dwrite_ref_obj_c_b)
 #   define nh5dwrite_ref_reg_c         FNAME(h5dwrite_ref_reg_c)
-#   define nh5dwrite_ref_reg_c_b       FNAME(h5dwrite_ref_reg_c_b)
 #   define nh5dread_c                  FNAME(h5dread_c)
 #   define nh5dread_c_b                FNAME(h5dread_c_b)
 #   define nh5dread_ref_reg_c          FNAME(h5dread_ref_reg_c)
-#   define nh5dread_ref_reg_c_b        FNAME(h5dread_ref_reg_c_b)
 #   define nh5dread_ref_obj_c          FNAME(h5dread_ref_obj_c)
-#   define nh5dread_ref_obj_c_b        FNAME(h5dread_ref_obj_c_b)
 #   define nh5dreadc_c                 FNAME(h5dreadc_c)
 #   define nh5dreadc_c_b               FNAME(h5dreadc_c_b)
 #   define nh5dget_space_c             FNAME(h5dget_space_c)
@@ -293,9 +282,6 @@ H5_DLL int_f nh5dopen_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *ds
 H5_DLL int_f nh5dclose_c ( hid_t_f *dset_id );
 
 H5_DLL int_f nh5dwrite_c
-(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, int_f *dims);
-
-H5_DLL int_f nh5dwrite_c_b
 (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims);
 
 H5_DLL int_f nh5dwrite_vl_integer_c
@@ -317,46 +303,25 @@ H5_DLL int_f nh5dread_vl_string_c
 (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims, size_t_f *len);
 
 H5_DLL int_f nh5dwrite_ref_obj_c
-(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f *buf, int_f *dims);
-
-H5_DLL int_f nh5dwrite_ref_obj_c_b
 (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f *buf, hsize_t_f *dims);
 
 H5_DLL int_f nh5dwrite_ref_reg_c
-(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f *buf, int_f *dims);
-
-H5_DLL int_f nh5dwrite_ref_reg_c_b
 (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f *buf, hsize_t_f *dims);
 
 H5_DLL int_f nh5dwritec_c
-(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, int_f *dims);
-
-H5_DLL int_f nh5dwritec_c_b
 (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims);
 
+
 H5_DLL int_f nh5dread_c
-(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, int_f *dims);
-
-
-H5_DLL int_f nh5dread_c_b
 (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims);
 
 H5_DLL int_f nh5dread_ref_obj_c
-(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f *buf, int_f *dims);
-
-H5_DLL int_f nh5dread_ref_obj_c_b
 (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f * buf, hsize_t_f *dims);
 
 H5_DLL int_f nh5dread_ref_reg_c
-(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f *buf, int_f *dims);
-
-H5_DLL int_f nh5dread_ref_reg_c_b
 (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f * buf, hsize_t_f *dims);
 
 H5_DLL int_f nh5dreadc_c
-(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, int_f *dims);
-
-H5_DLL int_f nh5dreadc_c_b
 (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims);
 
 H5_DLL int_f nh5dget_space_c ( hid_t_f *dset_id , hid_t_f *space_id);

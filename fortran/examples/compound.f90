@@ -62,7 +62,7 @@
      DOUBLE PRECISION, DIMENSION(dimsize) :: double_member
      REAL, DIMENSION(dimsize)             :: real_member
      INTEGER :: i
-     INTEGER, DIMENSION(7) :: data_dims 
+     INTEGER(HSIZE_T), DIMENSION(2) :: data_dims 
      data_dims(1) = dimsize
      !
      ! Initialize data buffer.

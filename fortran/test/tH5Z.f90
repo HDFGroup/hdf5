@@ -181,8 +181,7 @@
           INTEGER     ::   num_errors = 0 ! Number of data errors
 
           INTEGER     :: i, j    !general purpose integers
-          INTEGER(HSIZE_T), DIMENSION(7) :: data_dims_b
-          INTEGER, DIMENSION(7) :: data_dims
+          INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
           INTEGER(HID_T) ::  crp_list
           INTEGER :: options_mask, pix_per_block 
           LOGICAL :: flag
@@ -257,9 +256,9 @@
           !
           ! Write the dataset.
           !
-          data_dims_b(1) = N
-          data_dims_b(2) =  M
-          CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, dset_data, data_dims_b, error)
+          data_dims(1) = N
+          data_dims(2) =  M
+          CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, dset_data, data_dims, error)
               CALL check("h5dwrite_f", error, total_error)
 
 
@@ -310,7 +309,7 @@
           !
           ! Read the dataset.
           !
-          CALL h5dread_f (dset_id, H5T_NATIVE_INTEGER, data_out, data_dims_b, error)
+          CALL h5dread_f (dset_id, H5T_NATIVE_INTEGER, data_out, data_dims, error)
               CALL check("h5dread_f", error, total_error)
 
           !

@@ -92,7 +92,7 @@
           !         
           INTEGER, DIMENSION(NX,NY) :: data_in, data_out
 
-          INTEGER, DIMENSION(7) :: data_dims
+          INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
           filename1 = "mount1"
           filename2 = "mount2"
 
@@ -326,7 +326,7 @@
           !array to store data 
           !
           INTEGER, DIMENSION(4,6) :: dset_data, data_out
-          INTEGER, DIMENSION(7) :: data_dims
+          INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
      
           !
           !initialize the dset_data array which will be written to the "/dset"

@@ -40,7 +40,7 @@
      INTEGER, ALLOCATABLE :: data_out (:,:)  ! Buffer to store data
      INTEGER :: rank = 2 ! Dataset rank 
      INTEGER :: i, j
-     INTEGER :: dims(7)
+     INTEGER(HSIZE_T), DIMENSION(2) :: dims
 
      INTEGER :: error  ! Error flag
      !

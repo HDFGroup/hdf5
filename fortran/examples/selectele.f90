@@ -64,7 +64,7 @@
 
      INTEGER :: error  ! Error flag
      LOGICAL :: status
-     INTEGER, DIMENSION(7) :: data_dims
+     INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
 
 
    !

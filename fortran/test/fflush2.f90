@@ -79,7 +79,7 @@
      !data buffers 
      !         
      INTEGER, DIMENSION(NX,NY) :: data_out
-     INTEGER, DIMENSION(7) :: data_dims
+     INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
      data_dims(1) = NX
      data_dims(2) = NY
 

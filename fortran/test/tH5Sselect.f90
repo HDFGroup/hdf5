@@ -117,7 +117,7 @@
     !flag to check operation success 
     !
     INTEGER :: error, error_n 
-    INTEGER, DIMENSION(7) :: data_dims
+    INTEGER(HSIZE_T), DIMENSION(3) :: data_dims
 
 
     !
@@ -398,7 +398,7 @@
     !
     INTEGER :: error 
     LOGICAL :: status
-    INTEGER, DIMENSION(7) :: data_dims
+    INTEGER(HSIZE_T), DIMENSION(3) :: data_dims
 
 
     !
@@ -814,7 +814,7 @@
      !flag to check operation success 
      !
      INTEGER :: error, error_n 
-     INTEGER, DIMENSION(7) :: data_dims
+     INTEGER(HSIZE_T), DIMENSION(3) :: data_dims
 
      !
      !initialize the coord array to give the selected points' position 

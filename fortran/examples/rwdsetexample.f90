@@ -36,7 +36,7 @@
      INTEGER     ::  i, j
 
      INTEGER, DIMENSION(4,6) :: dset_data, data_out ! Data buffers
-     INTEGER, DIMENSION(7) :: data_dims
+     INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
      
      !
      ! Initialize the dset_data array.

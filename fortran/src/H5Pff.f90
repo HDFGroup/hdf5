@@ -22,54 +22,54 @@
        INTERFACE h5pset_fill_value_f
          MODULE PROCEDURE h5pset_fill_value_integer
          MODULE PROCEDURE h5pset_fill_value_real
-! Comment if on T3E
+! Comment if on Crays
          MODULE PROCEDURE h5pset_fill_value_double
-! End comment if on T3E
+! End comment if on Crays
          MODULE PROCEDURE h5pset_fill_value_char
        END INTERFACE
      
        INTERFACE h5pget_fill_value_f
          MODULE PROCEDURE h5pget_fill_value_integer
          MODULE PROCEDURE h5pget_fill_value_real
-! Comment if on T3E
+! Comment if on Crays
          MODULE PROCEDURE h5pget_fill_value_double
-! End comment if on T3E
+! End comment if on Crays
          MODULE PROCEDURE h5pget_fill_value_char
        END INTERFACE
 
        INTERFACE h5pset_f
          MODULE PROCEDURE h5pset_integer
          MODULE PROCEDURE h5pset_real
-! Comment if on T3E
+! Comment if on Crays
          MODULE PROCEDURE h5pset_double
-! End comment if on T3E
+! End comment if on Crays
          MODULE PROCEDURE h5pset_char
        END INTERFACE
      
        INTERFACE h5pget_f
          MODULE PROCEDURE h5pget_integer
          MODULE PROCEDURE h5pget_real
-! Comment if on T3E
+! Comment if on Crays
          MODULE PROCEDURE h5pget_double
-! End comment if on T3E
+! End comment if on Crays
          MODULE PROCEDURE h5pget_char
        END INTERFACE
 
        INTERFACE h5pregister_f
          MODULE PROCEDURE h5pregister_integer
          MODULE PROCEDURE h5pregister_real
-! Comment if on T3E
+! Comment if on Crays
          MODULE PROCEDURE h5pregister_double
-! End comment if on T3E
+! End comment if on Crays
          MODULE PROCEDURE h5pregister_char
        END INTERFACE
      
        INTERFACE h5pinsert_f
          MODULE PROCEDURE h5pinsert_integer
          MODULE PROCEDURE h5pinsert_real
-! Comment if on T3E
+! Comment if on Crays
          MODULE PROCEDURE h5pinsert_double
-! End comment if on T3E
+! End comment if on Crays
          MODULE PROCEDURE h5pinsert_char
        END INTERFACE
        

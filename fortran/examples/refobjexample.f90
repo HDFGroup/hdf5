@@ -50,7 +50,7 @@
      TYPE(hobj_ref_t_f), DIMENSION(4) ::  ref_out
      INTEGER, DIMENSION(5) :: data = (/1, 2, 3, 4, 5/)
      INTEGER :: class
-     INTEGER, DIMENSION(7) :: data_dims, ref_size
+     INTEGER(HSIZE_T), DIMENSION(2) :: data_dims, ref_size
      !
      !  Initialize FORTRAN interface. 
      !
