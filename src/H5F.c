@@ -126,6 +126,9 @@ Modifications:
     Changed pablo mask from H5_mask to H5F_mask for the FUNC_LEAVE call.
     It was already H5F_mask for the PABLO_TRACE_ON call.
 
+    rky 980816
+    Added .disp, .btype, .ftype to H5F_access_t.
+
 --------------------------------------------------------------------------*/
 herr_t 
 H5F_init_interface(void)
@@ -159,6 +162,11 @@ H5F_init_interface(void)
 #elif (H5F_LOW_DFLT == H5F_LOW_MPIO)
     H5F_access_dflt.u.mpio.comm = MPI_COMM_SELF;
     H5F_access_dflt.u.mpio.info = MPI_INFO_NULL;
+    H5F_access_dflt.u.mpio.btype = MPI_DATATYPE_NULL;
+    H5F_access_dflt.u.mpio.ftype = MPI_DATATYPE_NULL;
+    H5F_addr_reset( &(H5F_access_dflt.u.mpio.disp) );
+    H5F_access_dflt.u.mpio.use_types = 0;
+    H5F_access_dflt.u.mpio.old_use_types = 0;
 #elif (H5F_LOW_DFLT == H5F_LOW_SPLIT)
 #   error "H5F_LOW_SPLIT cannot be a default file driver"
 #elif (H5F_LOW_DFLT == H5F_LOW_FAMILY)
