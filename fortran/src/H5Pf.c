@@ -775,7 +775,7 @@ nh5pset_stdio_c (hid_t_f *prp_id)
 {
      int ret_value = -1;
      hid_t c_prp_id;
-     herr_t ret;
+     herr_t ret = -1;
      /*
       * Call H5Pset_stdio function.
       */
@@ -803,7 +803,7 @@ nh5pget_stdio_c (hid_t_f *prp_id, int_f* io)
 {
      int ret_value = -1;
      hid_t c_prp_id;
-     herr_t ret;
+     herr_t ret = -1;
      /*
       * Call H5Pget_stdio function.
       */
@@ -830,7 +830,7 @@ nh5pset_sec2_c (hid_t_f *prp_id)
 {
      int ret_value = -1;
      hid_t c_prp_id;
-     herr_t ret;
+     herr_t ret = -1;
      /*
       * Call H5Pset_sec2 function.
       */
@@ -858,7 +858,7 @@ nh5pget_sec2_c (hid_t_f *prp_id, int_f* sec2)
 {
      int ret_value = -1;
      hid_t c_prp_id;
-     herr_t ret;
+     herr_t ret = -1;
      /*
       * Call H5Pget_sec2 function.
       */
@@ -949,7 +949,7 @@ nh5pset_core_c (hid_t_f *prp_id, size_t_f* increment)
 {
      int ret_value = -1;
      hid_t c_prp_id;
-     herr_t ret;
+     herr_t ret = -1;
      size_t c_increment;
      c_increment = (size_t)*increment;
      /*
@@ -978,8 +978,8 @@ nh5pget_core_c (hid_t_f *prp_id, size_t_f* increment)
 {
      int ret_value = -1;
      hid_t c_prp_id;
-     herr_t ret;
-     size_t c_increment;
+     herr_t ret = -1;
+     size_t c_increment = 0;
      /*
       * Call H5Pset_increment function.
       */
@@ -1009,7 +1009,7 @@ nh5pset_family_c(hid_t_f *prp_id, hsize_t_f* memb_size, hid_t_f* memb_plist )
 {
      int ret_value = -1;
      hid_t c_prp_id;
-     herr_t ret;
+     herr_t ret = -1;
      hsize_t c_memb_size;
      hid_t c_memb_plist;
      c_memb_size =(hsize_t) *memb_size;
@@ -1042,9 +1042,9 @@ nh5pget_family_c(hid_t_f *prp_id, hsize_t_f* memb_size, hid_t_f* memb_plist)
 {
      int ret_value = -1;
      hid_t c_prp_id;
-     herr_t ret;
-     hsize_t c_memb_size;
-     hid_t c_memb_plist;
+     herr_t ret = -1;
+     hsize_t c_memb_size = 0;
+     hid_t c_memb_plist = -1;
      /*
       * Call H5Pget_family function.
       */
@@ -1163,7 +1163,7 @@ nh5pset_split_c(hid_t_f *prp_id, int_f* meta_len, _fcd meta_ext, hid_t_f* meta_p
      hid_t c_prp_id;
      hid_t c_meta_plist;
      hid_t c_raw_plist; 
-     herr_t ret;
+     herr_t ret = -1;
      char* c_meta_ext;
      char* c_raw_ext;
      c_meta_ext = (char *)HD5f2cstring(meta_ext, (int)*meta_len); 
@@ -1207,12 +1207,13 @@ nh5pget_split_c(hid_t_f *prp_id, size_t_f* meta_ext_size , _fcd meta_ext, hid_t_
 {
      int ret_value = -1;
      hid_t c_prp_id;
-     herr_t ret;
+     herr_t ret = -1;
      size_t c_meta_ext_size, c_raw_ext_size; 
-     hid_t c_meta_plist, c_raw_plist;
+     hid_t c_meta_plist = -1;
+     hid_t c_raw_plist = -1; 
 
-     char* c_meta_ext;
-     char* c_raw_ext;
+     char* c_meta_ext = NULL;
+     char* c_raw_ext  = NULL;
 
      c_meta_ext_size = (size_t) *meta_ext_size;
      c_raw_ext_size = (size_t) *raw_ext_size;
