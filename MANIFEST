@@ -966,6 +966,7 @@
 ./src/H5Zpublic.h
 ./src/H5Zszip.c
 ./src/H5Zshuffle.c
+./src/H5Znbit.c
 ./src/H5config.h.in
 ./src/H5detect.c
 ./src/H5private.h
