@@ -28,9 +28,7 @@ static hbool_t		interface_initialize_g = TRUE;
  *		All arguments are passed by reference and their values may be
  *		modified by this function.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Saturday, October 11, 1997
@@ -77,9 +75,7 @@ H5V_stride_optimize1(intn *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
  *		All arguments are passed by reference and their values may be
  *		modified by this function.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Saturday, October 11, 1997
@@ -283,9 +279,7 @@ H5V_hyper_disjointp(intn n,
  *		the minimum corner of BUF and continues for SIZE[] bytes in
  *		each dimension.
  *		
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Friday, October 10, 1997
@@ -360,9 +354,7 @@ H5V_hyper_fill(intn n, const hsize_t *_size,
  *		are undefined if the source hyperslab overlaps the
  *		destination hyperslab.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Friday, October 10, 1997
@@ -464,9 +456,7 @@ H5V_hyper_copy(intn n, const hsize_t *_size,
  * Purpose:	Fills all bytes of a hyperslab with the same value using
  *		memset().
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Saturday, October 11, 1997
@@ -520,9 +510,7 @@ H5V_stride_fill(intn n, hsize_t elmt_size, const hsize_t *size,
  * Note:	If the src_stride is all zero and elmt_size is one, then it's
  *		probably more efficient to use H5V_stride_fill() instead.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Saturday, October 11, 1997
@@ -581,9 +569,7 @@ H5V_stride_copy(int n, hsize_t elmt_size, const hsize_t *size,
  *		we copy exactly NELMTS elements each of size ELMT_SIZE.	 The
  *		size counters wrap if NELMTS is more than a size counter.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Saturday, October 11, 1997
@@ -647,9 +633,7 @@ H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size,
  *		memset(). Increases amount copied by power of two until the
  *		halfway point is crossed, then copies the rest in one swoop.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *		Thursday, June 18, 1998

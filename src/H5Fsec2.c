@@ -115,9 +115,7 @@ H5F_sec2_open(const char *name, const H5F_access_t __unused__ *access_parms,
  * Errors:
  *		IO	  CLOSEERROR	Close failed. 
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, October 22, 1997
@@ -150,9 +148,7 @@ H5F_sec2_close(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
  *		IO	  READERROR	Read failed. 
  *		IO	  SEEKERROR	Lseek failed. 
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, October 22, 1997
@@ -257,9 +253,7 @@ H5F_sec2_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
  *		IO	  SEEKERROR	Lseek failed. 
  *		IO	  WRITEERROR	Write failed. 
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, October 22, 1997

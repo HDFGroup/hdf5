@@ -161,9 +161,7 @@ H5O_mtime_decode(H5F_t __unused__ *f, const uint8 *p,
  *
  * Purpose:	Encodes a modification time message.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -274,9 +272,7 @@ H5O_mtime_size(H5F_t __unused__ *f, const void __unused__ *mesg)
  *
  * Purpose:	Prints debugging info for the message.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov

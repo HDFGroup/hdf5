@@ -125,9 +125,7 @@ H5G_node_sizeof_rkey(H5F_t *f, const void __unused__ *udata)
  *
  * Purpose:	Decodes a raw key into a native key.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -159,9 +157,7 @@ H5G_node_decode_key(H5F_t *f, H5B_t __unused__ *bt, uint8 *raw, void *_key)
  *
  * Purpose:	Encodes a native key into a raw key.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -221,10 +217,10 @@ H5G_node_size(H5F_t *f)
  *		is also called internally to split a symbol node with LT_KEY
  *		and RT_KEY null pointers.
  *
- * Return:	Success:	SUCCEED.  The address of symbol table node is
+ * Return:	Success:	Non-negative.  The address of symbol table node is
  *				returned through the ADDR argument.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -292,9 +288,7 @@ H5G_node_create(H5F_t *f, H5B_ins_t __unused__ op, void *_lt_key,
  *
  * Purpose:	Flush a symbol table node to disk.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -595,10 +589,10 @@ H5G_node_cmp3(H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
  *		entry field.  Otherwise the entry is copied from the
  *		UDATA entry field to the symbol table.
  *
- * Return:	Success:	SUCCEED if found and data returned through
+ * Return:	Success:	Non-negative if found and data returned through
  *				the UDATA pointer.
  *
- *		Failure:	FAIL if not found.
+ *		Failure:	Negative if not found.
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -1029,9 +1023,7 @@ H5G_node_remove(H5F_t *f, const haddr_t *addr, void *_lt_key/*in,out*/,
  *
  * Purpose:	This function gets called during a group iterate operation.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -1118,9 +1110,7 @@ H5G_node_iterate (H5F_t *f, const haddr_t *addr, void *_udata)
  * Purpose:	Prints debugging information about a symbol table node
  *		or a B-tree node for a symbol table B-tree.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov

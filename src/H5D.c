@@ -106,7 +106,7 @@ USAGE
     herr_t H5D_init_interface()
    
 RETURNS
-   SUCCEED/FAIL
+    Non-negative on success/Negative on failure
 DESCRIPTION
     Initializes any interface-specific data or routines.
 
@@ -120,7 +120,7 @@ H5D_init_interface(void)
     /* Initialize the atom group for the dataset IDs */
     if ((ret_value = H5I_init_group(H5I_DATASET, H5I_DATASETID_HASHSIZE,
 				    H5D_RESERVED_ATOMS,
-				    (herr_t (*)(void *)) H5D_close)) != FAIL) {
+				    (herr_t (*)(void *)) H5D_close)) >=0) {
 	ret_value = H5_add_exit(H5D_term_interface);
     }
     FUNC_LEAVE(ret_value);
@@ -135,7 +135,7 @@ H5D_init_interface(void)
  USAGE
     void H5D_term_interface()
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Release the atom group and any other resources allocated.
  GLOBAL VARIABLES
@@ -302,9 +302,7 @@ H5Dopen(hid_t loc_id, const char *name)
  *		resources used by it. It is illegal to subsequently use that
  *		same dataset ID in calls to other dataset functions.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Errors:
  *		ARGS	  BADTYPE	Not a dataset. 
@@ -572,9 +570,7 @@ H5Dget_create_plist(hid_t dset_id)
  *		The PLIST_ID can be the constant H5P_DEFAULT in which
  *		case the default data transfer properties are used.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Errors:
  *		ARGS	  BADTYPE	Not a data space. 
@@ -679,9 +675,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
  *		The PLIST_ID can be the constant H5P_DEFAULT in which
  *		case the default data transfer properties are used.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Errors:
  *
@@ -763,9 +757,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
  *		SIZE. The dimensionality of SIZE is the same as the data
  *		space of the dataset being changed.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Friday, January 30, 1998
@@ -1167,7 +1159,7 @@ done:
  *
  * Purpose:	Opens a dataset for access.
  *
- * Return:	SUCCEED/FAIL
+ * Return:	Dataset pointer on success, NULL on failure
  *
  * Errors:
  *
@@ -1323,9 +1315,7 @@ done:
  *		dataset object header, and frees all resources used by the
  *		descriptor.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Errors:
  *		DATASET	  CANTINIT	Couldn't free the type or space,
@@ -1383,9 +1373,7 @@ H5D_close(H5D_t *dataset)
  * Purpose:	Reads (part of) a DATASET into application memory BUF. See
  *		H5Dread() for complete details.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Thursday, December  4, 1997
@@ -1747,9 +1735,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
  * Purpose:	Writes (part of) a DATASET to a file from application memory
  *		BUF. See H5Dwrite() for complete details.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Thursday, December  4, 1997
@@ -2130,9 +2116,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
  *
  * Purpose:	Increases the size of a dataset.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Friday, January 30, 1998
@@ -2294,9 +2278,7 @@ H5D_get_file (const H5D_t *dset)
  *		defined for SPACE then initialize only that part of the
  *		dataset.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Monday, October  5, 1998

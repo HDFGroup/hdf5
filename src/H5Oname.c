@@ -98,9 +98,7 @@ H5O_name_decode(H5F_t __unused__ *f, const uint8 *p,
  *
  * Purpose:     Encodes a name message.
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov
@@ -177,7 +175,7 @@ H5O_name_copy(const void *_mesg, void *_dest)
  *
  * Return:      Success:        Message data size in bytes w/o alignment.
  *
- *              Failure:        FAIL
+ *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov
@@ -209,9 +207,7 @@ H5O_name_size(H5F_t __unused__ *f, const void *_mesg)
  * Purpose:     Frees internal pointers and resets the message to an
  *              initial state.
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov
@@ -242,9 +238,7 @@ H5O_name_reset(void *_mesg)
  *
  * Purpose:     Prints debugging info for the message.
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov

@@ -113,9 +113,7 @@ H5O_shared_decode (H5F_t *f, const uint8 *buf, H5O_shared_t __unused__ *sh)
  *
  * Purpose:	Encodes message _MESG into buffer BUF.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, April  2, 1998
@@ -198,9 +196,7 @@ H5O_shared_size (H5F_t *f, const void __unused__ *_mesg)
  *
  * Purpose:	Prints debugging info for the message
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, April  2, 1998

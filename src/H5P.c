@@ -44,7 +44,7 @@ USAGE
     herr_t H5P_init_interface()
    
 RETURNS
-   SUCCEED/FAIL
+    Non-negative on success/Negative on failure
 DESCRIPTION
     Initializes any interface-specific data or routines.
 
@@ -104,7 +104,7 @@ H5P_init_interface(void)
  USAGE
     void H5P_term_interface()
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Release the atom group and any other resources allocated.
  GLOBAL VARIABLES
@@ -134,7 +134,7 @@ H5P_term_interface(void)
 	H5P_class_t type;	IN: Property list class whose default is
  *				    desired.
  RETURNS
-    Property list ID or FAIL
+    Property list ID or Negative
  
  ERRORS
     ARGS      BADVALUE	    Unknown property list class. 
@@ -219,7 +219,7 @@ H5Pcreate(H5P_class_t type)
  *
  * Return:	Success:	A new property list ID.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		Wednesday, December  3, 1997
@@ -257,7 +257,7 @@ H5P_create(H5P_class_t type, void *plist)
     herr_t H5Pclose(oid)
 	hid_t oid;	 IN: property list object to release access to
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
 	This function releases access to a property list object
 --------------------------------------------------------------------------*/
@@ -294,9 +294,7 @@ H5Pclose(hid_t plist_id)
  * Purpose:	Closes a property list and frees the memory associated with
  *		the property list.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, February 18, 1998
@@ -467,10 +465,10 @@ H5P_get_class(hid_t plist_id)
  *		Any (or even all) of the output arguments can be null
  *		pointers.
  *
- * Return:	Success:	SUCCEED, version information is returned
+ * Return:	Success:	Non-negative, version information is returned
  *				through the arguments.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -509,9 +507,7 @@ H5Pget_version(hid_t plist_id, int *boot/*out*/, int *freelist/*out*/,
  * Purpose:	Sets the userblock size field of a file creation property
  *		list.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
@@ -555,9 +551,9 @@ H5Pset_userblock(hid_t plist_id, hsize_t size)
  * Purpose:	Queries the size of a user block in a file creation property
  *		list.
  *
- * Return:	Success:	SUCCEED, size returned through SIZE argument.
+ * Return:	Success:	Non-negative, size returned through SIZE argument.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -604,9 +600,7 @@ H5Pget_userblock(hid_t plist_id, hsize_t *size)
  *		For MPI-IO and other parallel systems, choose an alignment
  *		which is a multiple of the disk block size.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Tuesday, June  9, 1998
@@ -649,9 +643,7 @@ H5Pset_alignment(hid_t fapl_id, hsize_t threshold, hsize_t alignment)
  *		file access property list.  The THRESHOLD and/or ALIGNMENT
  *		pointers may be null pointers.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Tuesday, June  9, 1998
@@ -691,9 +683,7 @@ H5Pget_alignment(hid_t fapl_id, hsize_t *threshold/*out*/,
  *		file creation property list.  A value of zero causes the
  *		property to not change.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
@@ -746,9 +736,9 @@ H5Pset_sizes(hid_t plist_id, size_t sizeof_addr, size_t sizeof_size)
  *		file according to a file creation property list.  Either (or
  *		even both) SIZEOF_ADDR and SIZEOF_SIZE may be null pointers.
  *
- * Return:	Success:	SUCCEED, sizes returned through arguments.
+ * Return:	Success:	Non-negative, sizes returned through arguments.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -799,9 +789,7 @@ H5Pget_sizes(hid_t plist_id,
  *		Either (or even both) of IK and LK can be zero in which case
  *		that value is left unchanged.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
@@ -842,9 +830,7 @@ H5Pset_sym_k(hid_t plist_id, int ik, int lk)
  *		details. Either (or even both) IK and LK may be null
  *		pointers.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -883,9 +869,7 @@ H5Pget_sym_k(hid_t plist_id, int *ik /*out */ , int *lk /*out */ )
  *		data.  On average, such a tree will be 75% full, or have an
  *		average rank of 1.5 times the value of IK.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
@@ -925,9 +909,9 @@ H5Pset_istore_k(hid_t plist_id, int ik)
  *		H5Pset_istore_k() for details.	The argument IK may be the
  *		null pointer.
  *
- * Return:	Success:	SUCCEED, size returned through IK
+ * Return:	Success:	Non-negative, size returned through IK
  *
- *		Failure:	
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -962,9 +946,7 @@ H5Pget_istore_k(hid_t plist_id, int *ik /*out */ )
  *
  * Purpose:	Sets the layout of raw data in the file.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
@@ -1004,7 +986,7 @@ H5Pset_layout(hid_t plist_id, H5D_layout_t layout)
  *
  * Return:	Success:	The layout type
  *
- *		Failure:	H5D_LAYOUT_ERROR (-1, same as FAIL)
+ *		Failure:	H5D_LAYOUT_ERROR (negative)
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -1040,9 +1022,7 @@ H5Pget_layout(hid_t plist_id)
  *		As a side effect, the layout method is changed to
  *		H5D_CHUNKED.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
@@ -1105,7 +1085,7 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
  *
  * Return:	Success:	Positive Chunk dimensionality.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -1157,9 +1137,7 @@ H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/)
  *		dataset can be extended (provided the data space also allows
  *		the extending).
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Tuesday, March	3, 1998
@@ -1241,7 +1219,7 @@ H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
  *
  * Return:	Success:	Number of external files
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Tuesday, March  3, 1998
@@ -1287,9 +1265,7 @@ H5Pget_external_count(hid_t plist_id)
  *
  * See Also:	H5Pset_external()
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Tuesday, March  3, 1998
@@ -1372,9 +1348,7 @@ H5Pget_driver(hid_t plist_id)
  *		in the stdio.h file: fopen(), fseek() or fseek64(), fread(),
  *		fwrite(), and fclose().
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Thursday, February 19, 1998
@@ -1413,9 +1387,7 @@ H5Pset_stdio(hid_t plist_id)
  *		negative value.	 In the future, additional arguments may be
  *		added to this function to match those added to H5Pset_stdio().
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Thursday, February 26, 1998
@@ -1454,9 +1426,7 @@ H5Pget_stdio(hid_t plist_id)
  *		in the unistd.h file: open(), lseek() or lseek64(), read(),
  *		write(), and close().
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Thursday, February 19, 1998
@@ -1495,9 +1465,7 @@ H5Pset_sec2(hid_t plist_id)
  *		negative value.	 In the future, additional arguments may be
  *		added to this function to match those added to H5Pset_sec2().
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Thursday, February 26, 1998
@@ -1540,9 +1508,7 @@ H5Pget_sec2(hid_t plist_id)
  *		INCREMENT results in fewer calls to realloc() and probably
  *		less memory fragmentation.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Thursday, February 19, 1998
@@ -1588,9 +1554,7 @@ H5Pset_core(hid_t plist_id, size_t increment)
  *		In the future, additional arguments may be added to this
  *		function to match those added to H5Pset_core().
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Thursday, February 26, 1998
@@ -1633,9 +1597,7 @@ H5Pget_core(hid_t plist_id, size_t *increment/*out*/)
  * Purpose:	Set the low-level driver to split meta data from raw data,
  *		storing meta data in one file and raw data in another file.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Thursday, February 19, 1998
@@ -1702,9 +1664,7 @@ H5Pset_split(hid_t plist_id, const char *meta_ext, hid_t meta_plist_id,
  *		In the future, additional arguments may be added to this
  *		function to match those added to H5Pset_sec2().
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Thursday, February 26, 1998
@@ -1782,9 +1742,7 @@ H5Pget_split(hid_t plist_id, size_t meta_ext_size, char *meta_ext/*out*/,
  *		meaningful when creating new files or opening families that
  *		have only one member.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Thursday, February 19, 1998
@@ -1841,9 +1799,7 @@ H5Pset_family(hid_t plist_id, hsize_t memb_size, hid_t memb_plist_id)
  *		members.  In the future, additional arguments may be added to
  *		this function to match those added to H5Pset_family().
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Thursday, February 26, 1998
@@ -1902,9 +1858,7 @@ H5Pget_family(hid_t plist_id, hsize_t *memb_size/*out*/,
  *		of one means fully read chunks are always preempted before
  *		other chunks.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Tuesday, May 19, 1998
@@ -1962,9 +1916,7 @@ H5Pset_cache(hid_t plist_id, int mdc_nelmts,
  *		(or all) arguments may be null pointers in which case the
  *		corresponding datum is not returned.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Tuesday, May 19, 1998
@@ -2018,9 +1970,7 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
  *		If TCONV and/or BKG are null pointers then buffers will be
  *		allocated and freed during the data transfer.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Monday, March 16, 1998
@@ -2110,9 +2060,7 @@ H5Pget_buffer(hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
  *		The default is to cache blocks with no limit on block size
  *		for serial I/O and to not cache blocks for parallel I/O
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Monday, September 21, 1998
@@ -2149,9 +2097,7 @@ H5Pset_hyper_cache(hid_t plist_id, unsigned cache, unsigned limit)
  *
  * Purpose:	Reads values previously set with H5Pset_hyper_cache().
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Monday, September 21, 1998
@@ -2193,9 +2139,7 @@ H5Pget_hyper_cache(hid_t plist_id, unsigned *cache/*out*/,
  *		property to TRUE.  Otherwise the I/O pipeline treats the
  *		destination datapoints as completely uninitialized.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Tuesday, March 17, 1998
@@ -2233,7 +2177,7 @@ H5Pset_preserve(hid_t plist_id, hbool_t status)
  *
  * Return:	Success:	TRUE or FALSE
  *
- *		Failure:	-1
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Tuesday, March 17, 1998
@@ -2288,9 +2232,7 @@ H5Pget_preserve(hid_t plist_id)
  *		pipeline.  That is, PLIST_ID must be a dataset creation
  *		property list.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Wednesday, April 15, 1998
@@ -2356,7 +2298,7 @@ H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags,
  *
  * Return:	Success:	Number of filters or zero if there are none.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Tuesday, August  4, 1998
@@ -2403,7 +2345,7 @@ H5Pget_nfilters(hid_t plist_id)
  * 
  * Return:	Success:	Filter identification number.
  *
- *		Failure:	H5Z_FILTER_ERROR (-1)
+ *		Failure:	H5Z_FILTER_ERROR (Negative)
  *
  * Programmer:	Robb Matzke
  *              Wednesday, April 15, 1998
@@ -2494,9 +2436,7 @@ H5Pget_filter(hid_t plist_id, int idx, unsigned int *flags/*out*/,
  *		are faster but result in less compression.  This is the same
  *		algorithm as used by the GNU gzip program.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Wednesday, April 15, 1998
@@ -2544,10 +2484,10 @@ H5Pset_deflate(hid_t plist_id, unsigned level)
  *
  * Purpose:	Queries B-tree split ratios.  See H5Pset_btree_ratios().
  *
- * Return:	Success:	SUCCEED with split ratios returned through
+ * Return:	Success:	Non-negative with split ratios returned through
  *				the non-null arguments.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Monday, September 28, 1998
@@ -2594,9 +2534,7 @@ H5Pget_btree_ratios(hid_t plist_id, double *left/*out*/, double *middle/*out*/,
  *		in the tree uses the RIGHT ratio when it splits.  All ratios
  *		are real numbers between 0 and 1, inclusive.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Monday, September 28, 1998
@@ -2644,9 +2582,7 @@ H5Pset_btree_ratios(hid_t plist_id, double left, double middle,
  *		to convert VALUE to the dataset type when the dataset is
  *		created.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, October  1, 1998
@@ -2704,9 +2640,7 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
  *		value will be converted from its current data type to the
  *		specified TYPE.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, October  1, 1998
@@ -2847,9 +2781,7 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
  *		    to the access property list.  Users should call this
  *		    function again to setup the property list.
  *	     
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Albert Cheng
  *		Feb 3, 1998
@@ -2909,9 +2841,7 @@ H5Pset_mpi(hid_t plist_id, MPI_Comm comm, MPI_Info info)
  *		negative value.	 In the future, additional arguments may be
  *		added to this function to match those added to H5Pset_mpi().
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Thursday, February 26, 1998
@@ -2977,9 +2907,7 @@ H5Pget_mpi(hid_t plist_id, MPI_Comm *comm, MPI_Info *info)
  *			    independent is the default mode.
  *			
  *	     
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Albert Cheng
  *		April 2, 1998
@@ -3027,9 +2955,7 @@ H5Pset_xfer(hid_t plist_id, H5D_transfer_t data_xfer_mode)
  *		This function is available only in the parallel HDF5 library
  *		and is not a collective function.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Albert Cheng
  *		April 2, 1998
@@ -3069,7 +2995,7 @@ H5Pget_xfer(hid_t plist_id, H5D_transfer_t *data_xfer_mode)
     hid_t H5P_copy(plist_id)
 	hid_t plist_id;	  IN: property list object to copy
  RETURNS
-    Returns property list ID (atom) on success, FAIL on failure
+    Returns property list ID (atom) on success, Negative on failure
 
  ERRORS
     ARGS      BADRANGE	    Unknown property list class. 

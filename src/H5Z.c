@@ -39,9 +39,7 @@ static size_t H5Z_filter_deflate(uintn flags, size_t cd_nelmts,
  *
  * Purpose:	Initializes the data filter layer.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, April 16, 1998
@@ -148,9 +146,7 @@ H5Z_term_interface (void)
  * Purpose:	This function registers new filter. The COMMENT argument is
  *		used for debugging and may be the null pointer.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, April 16, 1998
@@ -195,9 +191,7 @@ H5Zregister(H5Z_filter_t id, const char *comment, H5Z_func_t func)
  * Purpose:	Same as the public version except this one allows filters
  *		to be set for predefined method numbers <256
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, April 16, 1998
@@ -254,9 +248,7 @@ H5Z_register (H5Z_filter_t id, const char *comment, H5Z_func_t func)
  *
  * Purpose:	Append another filter to the specified pipeline.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Tuesday, August  4, 1998
@@ -376,9 +368,7 @@ H5Z_find(H5Z_filter_t id)
  *		then the pipeline function should free the original buffer
  *		and return a fresh buffer, adjusting BUF_SIZE accordingly.
  *
- * Return:	Success:	0
- *
- *		Failure:	-1
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Tuesday, August  4, 1998

@@ -149,10 +149,8 @@ static hbool_t interface_initialize_g = FALSE;
  *		passed as an argument to the sizeof_rkey() method for the
  *		B-tree.
  *
- * Return:	Success:	SUCCEED, address of new node is returned
- *				through the RETVAL argument.
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success (address of new node is returned
+ *              through the RETVAL argument.) /Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -378,9 +376,7 @@ H5B_load(H5F_t *f, const haddr_t *addr, const void *_type, void *udata)
  *
  * Purpose:	Flushes a dirty B-tree node to disk.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -493,10 +489,9 @@ H5B_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5B_t *bt)
  *		pointers since it assumes that all nodes can be reached
  *		from the parent node.
  *
- * Return:	Success:	SUCCEED if found, values returned through the
- *				UDATA argument.
- *
- *		Failure:	FAIL if not found, UDATA is undefined.
+ * Return:	Non-negative on success (if found, values returned through the
+ *              UDATA argument.) /Negative on failure (if not found, UDATA is
+ *              undefined.)
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -593,10 +588,8 @@ H5B_find(H5F_t *f, const H5B_class_t *type, const haddr_t *addr, void *udata)
  *		The OLD_BT argument is a pointer to a protected B-tree
  *		node.
  *
- * Return:	Success:	SUCCEED.  The address of the new node is
- *				returned through the NEW_ADDR argument.
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success (The address of the new node is
+ *              returned through the NEW_ADDR argument.) /Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -756,9 +749,7 @@ H5B_split(H5F_t *f, const H5B_class_t *type, H5B_t *old_bt,
  *
  * Purpose:	Decode the specified key into native format.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -787,9 +778,7 @@ H5B_decode_key(H5F_t *f, H5B_t *bt, intn idx)
  *
  * Purpose:	Decode keys on either side of the specified branch.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Tuesday, October 14, 1997
@@ -824,9 +813,7 @@ H5B_decode_keys(H5F_t *f, H5B_t *bt, intn idx)
  * Purpose:	Adds a new item to the B-tree.	If the root node of
  *		the B-tree splits then the B-tree gets a new address.
  *
- * Return:	Success:	SUCCEED.
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -1006,9 +993,7 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
  *		on whether ANCHOR is H5B_INS_LEFT or H5B_INS_RIGHT. The BT
  *		argument is a pointer to a protected B-tree node.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -1490,9 +1475,7 @@ H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
  * Purpose:	Calls the list callback for each leaf node of the
  *		B-tree, passing it the UDATA structure.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -1876,10 +1859,8 @@ H5B_remove_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
  *
  * Note:	The current version does not attempt to rebalance the tree.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL.  Failure includes not being able to
- *				find the object which is to be removed.
+ * Return:	Non-negative on success/Negative on failure (Failure includes not
+ *              being able to find the object which is to be removed.)
  *
  * Programmer:	Robb Matzke
  *              Wednesday, September 16, 1998
@@ -1997,9 +1978,7 @@ H5B_nodesize(H5F_t *f, const H5B_class_t *type,
  *
  * Purpose:	Prints debugging info about a B-tree.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov

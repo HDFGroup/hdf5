@@ -182,7 +182,7 @@ H5O_attr_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
         const uint8 *p;         IN: the raw information buffer
         const void *mesg;       IN: Pointer to the simple datatype struct
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
         This function encodes the native memory form of the attribute
     message in the "raw" disk form.
@@ -344,9 +344,7 @@ H5O_attr_size(H5F_t __unused__ *f, const void *mesg)
  * Purpose:     Frees resources within a attribute message, but doesn't free
  *              the message itself.
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              Tuesday, December  9, 1997
@@ -388,7 +386,7 @@ H5O_attr_reset(void *_mesg)
         intn indent;            IN: Amount to indent information by
         intn fwidth;            IN: Field width (?)
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
         This function prints debugging output to the stream passed as a 
     parameter.

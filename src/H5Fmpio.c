@@ -405,9 +405,7 @@ H5F_mpio_open(const char *name, const H5F_access_t *access_parms, uintn flags,
  * Errors:
  *              IO        CLOSEERROR    Fclose failed. 
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  
  *              January 30, 1998
@@ -467,8 +465,7 @@ H5F_mpio_close(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
  *              IO        READERROR     MPI_File_read_at failed. 
  *              IO        READERROR     MPI_Get_count failed
  *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *		(use_types and old_use_types in the access params are altered)
  *
  * Programmer:  rky 980130
@@ -708,8 +705,7 @@ H5F_mpio_tas_allsame(H5F_low_t *lf, hbool_t newval )
  * Errors:
  *              IO        WRITEERROR    MPI_File_write_at failed. 
  *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *		(use_types and old_use_types in the access params are altered)
  *
  * Programmer:  
@@ -901,9 +897,7 @@ H5F_mpio_write(H5F_low_t *lf, H5F_access_t *access_parms,
  * Errors:
  *              IO        WRITEERROR    MPI_File_sync failed. 
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  
  *              January 30, 1998
@@ -947,10 +941,8 @@ H5F_mpio_flush(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
  *
  * Problems and limitations:
  *
- * Return:      Success:        return value is SUCCEED
- *				and the haddr_t contains the converted value
- *
- *              Failure:        return value is FAIL, the haddr_t is undefined
+ * Return:      Non-negative on success (the haddr_t contains the converted
+ *                  value) /Negative on failure (the haddr_t is undefined)
  *
  * Programmer:  
  *              January 30, 1998
@@ -978,12 +970,8 @@ H5F_MPIOff_to_haddr( MPI_Offset mpi_off, haddr_t *addr )
  *
  * Problems and limitations:
  *
- * Return:      Success:        return value is SUCCEED
- *				and the MPIOffset contains the converted
- *				value.
- *
- *		Failure:        return value is FAIL, the MPIOffset is
- *				undefined.
+ * Return:      Non-negative on success (the MPIOffset contains the converted
+ *                  value.) /Negative on failure (the MPIOffset is undefined.)
  *
  * Programmer:  
  *              January 30, 1998

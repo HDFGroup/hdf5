@@ -120,9 +120,7 @@ H5O_layout_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
  *
  * Purpose:     Encodes a message.
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              Wednesday, October  8, 1997
@@ -253,9 +251,7 @@ H5O_layout_size(H5F_t *f, const void *_mesg)
  *
  * Purpose:     Prints debugging info for a message.
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              Wednesday, October  8, 1997

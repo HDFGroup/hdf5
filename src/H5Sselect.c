@@ -32,7 +32,7 @@ static void		H5S_select_term(void);
  USAGE
    herr_t  H5S_select_init(void)
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -58,7 +58,7 @@ H5S_select_init (void)
  USAGE
     void H5S_select_term()
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Release the selection resources allocated.
  GLOBAL VARIABLES
@@ -82,7 +82,7 @@ H5S_select_term(void)
         H5S_t *dst;  OUT: Pointer to the destination dataspace
         H5S_t *src;  IN: Pointer to the source dataspace
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Copies all the selection information (include offset) from the source
     dataspace to the destination dataspace.
@@ -164,7 +164,7 @@ H5S_select_copy (H5S_t *dst, const H5S_t *src)
     herr_t H5S_select_release(space)
         H5S_t *space;       IN: Pointer to dataspace
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Releases all selection information for a dataspace
  GLOBAL VARIABLES
@@ -223,7 +223,7 @@ H5S_select_release (H5S_t *space)
         const hssize_t *count;        IN: Number of blocks included in hyperslab
         const hssize_t *block;        IN: Size of block in hyperslab
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Combines a hyperslab selection with the current selection for a dataspace.
     If the current selection is not a hyperslab, it is freed and the hyperslab
@@ -276,9 +276,7 @@ H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op,
  *
  * Purpose:	Internal version of H5Sselect_hyperslab().
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke (split from HSselect_hyperslab()).
  *              Tuesday, August 25, 1998
@@ -534,7 +532,7 @@ done:
         size_t num_elem;        IN: Number of elements in COORD array.
         const hssize_t **coord; IN: The location of each element selected
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     This function selects array elements to be included in the selection for
     the dataspace.  The COORD array is a 2-D array of size <dataspace rank>
@@ -623,7 +621,7 @@ done:
     herr_t H5Sselect_elements(dsid)
         hid_t dsid;             IN: Dataspace ID of selection to modify
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     This function selects the entire extent for a dataspace.
  GLOBAL VARIABLES
@@ -667,7 +665,7 @@ done:
     herr_t H5Sselect_elements(dsid)
         hid_t dsid;             IN: Dataspace ID of selection to modify
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     This function de-selects the entire extent for a dataspace.
  GLOBAL VARIABLES
@@ -800,7 +798,7 @@ H5S_get_select_npoints (const H5S_t *space)
         const H5S_t *space;             IN: Pointer to dataspace iterator is for
         H5S_sel_iter_t *sel_iter;       IN: Pointer to selection iterator
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Releases all information for a dataspace selection iterator
  GLOBAL VARIABLES
@@ -851,7 +849,7 @@ H5S_sel_iter_release (const H5S_t *space, H5S_sel_iter_t *sel_iter)
         hid_t dsid;             IN: Dataspace ID to query
  RETURNS
     TRUE if the selection fits within the extent, FALSE if it does not and
-        FAIL on an error.
+        Negative on an error.
  DESCRIPTION
     Determines if the current selection at the current offet fits within the
     extent for the dataspace.
@@ -891,7 +889,7 @@ H5Sselect_valid(hid_t spaceid)
         H5S_t *space;             IN: Dataspace pointer to query
  RETURNS
     TRUE if the selection fits within the extent, FALSE if it does not and
-        FAIL on an error.
+        Negative on an error.
  DESCRIPTION
     Determines if the current selection at the current offet fits within the
     extent for the dataspace.

@@ -95,9 +95,7 @@ H5O_stab_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
  *
  * Purpose:     Encodes a symbol table message.
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov
@@ -239,9 +237,7 @@ H5O_stab_size(H5F_t *f, const void __unused__ *_mesg)
  *
  * Purpose:     Prints debugging info for a symbol table message.
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov

@@ -116,7 +116,7 @@ H5S_point_init (const struct H5O_layout_t __unused__ *layout,
         size_t num_elem;        IN: Number of elements in COORD array.
         const hssize_t *coord[];    IN: The location of each element selected
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     This function adds elements to the current point selection for a dataspace
  GLOBAL VARIABLES
@@ -362,9 +362,7 @@ H5S_point_fgath (H5F_t *f, const struct H5O_layout_t *layout,
  *		LAYOUT and EFL. Each element is ELMT_SIZE bytes.
  *		The caller is requesting that NELMTS elements are copied.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, June 16, 1998
@@ -557,9 +555,7 @@ H5S_point_mgath (const void *_buf, size_t elmt_size,
  *		ELMT_SIZE bytes and they are organized in application memory
  *		according to MEM_SPACE.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Wednesday, June 17, 1998
@@ -639,7 +635,7 @@ H5S_point_mscat (const void *_tconv_buf, size_t elmt_size,
     herr_t H5S_point_release(space)
         H5S_t *space;       IN: Pointer to dataspace
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Releases all point selection information for a dataspace
  GLOBAL VARIABLES
@@ -716,7 +712,7 @@ H5S_point_npoints (const H5S_t *space)
         H5S_t *dst;  OUT: Pointer to the destination dataspace
         H5S_t *src;  IN: Pointer to the source dataspace
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Copies all the point selection information from the source
     dataspace to the destination dataspace.
@@ -796,7 +792,7 @@ done:
         H5S_t *space;             IN: Dataspace pointer to query
  RETURNS
     TRUE if the selection fits within the extent, FALSE if it does not and
-        FAIL on an error.
+        Negative on an error.
  DESCRIPTION
     Determines if the current selection at the current offet fits within the
     extent for the dataspace.

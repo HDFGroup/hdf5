@@ -123,7 +123,7 @@ USAGE
     herr_t H5F_init_interface()
    
 RETURNS
-   SUCCEED/FAIL
+    Non-negative on success/Negative on failure
 DESCRIPTION
     Initializes any interface-specific data or routines.
 
@@ -206,7 +206,7 @@ H5F_init_interface(void)
  USAGE
     void H5F_term_interface()
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Release the atom group and any other resources allocated.
  GLOBAL VARIABLES
@@ -604,9 +604,7 @@ H5F_new(H5F_file_t *shared, const H5F_create_t *fcpl, const H5F_access_t *fapl)
  *		for the file struct.  The shared info for the file is freed
  *		only when its reference count reaches zero.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -1331,9 +1329,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t access_id)
  *		not remove them from the cache.  The OBJECT_ID can be a file,
  *		dataset, group, attribute, or named data type.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, August  6, 1998
@@ -1436,9 +1432,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
  *		CACHE	  CANTFLUSH	Can't flush cache. 
  *		IO	  WRITEERROR	Can't write header. 
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -1560,9 +1554,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate)
  *		called when a file hid_t reference count gets to zero as a
  *		result of calling H5Fclose().
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Tuesday, September 23, 1997
@@ -1693,7 +1685,7 @@ H5F_close(H5F_t *f)
     CACHE     CANTFLUSH	    Can't flush cache. 
 
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
 
  DESCRIPTION
 	This function terminates access to an HDF5 file.  If this is the last
@@ -1744,9 +1736,7 @@ H5Fclose(hid_t file_id)
  *		using mount properties in PLIST.  CHILD must not already be
  *		mouted and must not be a mount ancestor of the mount-point.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Tuesday, October  6, 1998
@@ -1862,9 +1852,7 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
  *		group, the H5G_namei() will resolve it to the root of the
  *		mounted file, not the group where the file is mounted.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Tuesday, October  6, 1998
@@ -1973,9 +1961,7 @@ H5F_unmount(H5G_entry_t *loc, const char *name)
  * Purpose:	If ENT is a mount point then copy the entry for the root
  *		group of the mounted file into ENT.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Tuesday, October  6, 1998
@@ -2035,9 +2021,7 @@ H5F_mountpoint(H5G_entry_t *find/*in,out*/)
  * Purpose:	Mount file CHILD_ID onto the group specified by LOC_ID and
  *		NAME using mount properties PLIST_ID.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Tuesday, October  6, 1998
@@ -2097,9 +2081,7 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
  *		it's the group in the parent, but if it was opened after the
  *		mount then it's the root group of the child.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Tuesday, October  6, 1998
@@ -2195,9 +2177,7 @@ H5Freopen(hid_t file_id)
  * Errors:
  *		IO	  READERROR	Low-level read failed. 
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -2242,9 +2222,7 @@ H5F_block_read(H5F_t *f, const haddr_t *addr, hsize_t size,
  *		IO	  WRITEERROR	Low-level write failed. 
  *		IO	  WRITEERROR	No write intent. 
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -2292,9 +2270,7 @@ H5F_block_write(H5F_t *f, const haddr_t *addr, hsize_t size,
  *
  * Errors:
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov

@@ -53,7 +53,7 @@ USAGE
     herr_t H5S_init_interface()
    
 RETURNS
-   SUCCEED/FAIL
+    Non-negative on success/Negative on failure
 DESCRIPTION
     Initializes any interface-specific data or routines.
 
@@ -66,7 +66,7 @@ H5S_init_interface(void)
 
     /* Initialize the atom group for the file IDs */
     if ((ret_value = H5I_init_group(H5I_DATASPACE, H5I_DATASPACEID_HASHSIZE,
-            H5S_RESERVED_ATOMS, (herr_t (*)(void *)) H5S_close)) != FAIL) {
+            H5S_RESERVED_ATOMS, (herr_t (*)(void *)) H5S_close)) >= 0) {
         ret_value = H5_add_exit(&H5S_term_interface);
     }
 
@@ -100,7 +100,7 @@ H5S_init_interface(void)
  USAGE
     void H5S_term_interface()
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Release the atom group and any other resources allocated.
  GLOBAL VARIABLES
@@ -224,9 +224,7 @@ H5S_term_interface(void)
  *		memory conversion info.  The FCONV and MCONV arguments are
  *		not copied.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Tuesday, August 11, 1998
@@ -342,9 +340,7 @@ done:
  *
  * Purpose:	Releases all memory associated with a dataspace extent.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *		Thursday, July 23, 1998
@@ -390,9 +386,7 @@ H5S_extent_release(H5S_t *ds)
  *
  * Purpose:	Releases all memory associated with a data space.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Tuesday, December  9, 1997
@@ -429,9 +423,7 @@ H5S_close(H5S_t *ds)
  *
  * Purpose:	Release access to a data space object.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Errors:
  *
@@ -466,9 +458,7 @@ H5Sclose(hid_t space_id)
  * Purpose:	Releases all memory associated with a simple data space.
  *          (but doesn't free the simple space itself)
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *		Friday, April  17, 1998
@@ -499,7 +489,7 @@ H5S_release_simple(H5S_simple_t *simple)
  *
  * Return:	Success:	ID of the new dataspace
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		Friday, January 30, 1998
@@ -542,7 +532,7 @@ H5Scopy(hid_t space_id)
  *
  * Purpose:	Copies a dataspace extent.
  *
- * Return:	SUCCEED/FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *		Thursday, July 23, 1998
@@ -582,7 +572,7 @@ H5Sextent_copy(hid_t dst_id,hid_t src_id)
  *
  * Purpose:	Copies a dataspace extent
  *
- * Return:	SUCCEED/FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *		Wednesday, June  3, 1998
@@ -839,7 +829,7 @@ H5S_get_npoints_max(const H5S_t *ds)
  *
  * Return:	Success:	The number of dimensions in a data space.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		Thursday, December 11, 1997
@@ -875,7 +865,7 @@ H5Sget_simple_extent_ndims(hid_t space_id)
  * Return:	Success:	Non-negative number of dimensions.  Zero
  *				implies a scalar.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		Thursday, December 11, 1997
@@ -925,7 +915,7 @@ H5S_get_simple_extent_ndims(const H5S_t *ds)
  * Return:	Success:	Number of dimensions, the same value as
  *				returned by H5Sget_simple_extent_ndims().
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		Thursday, December 11, 1997
@@ -966,7 +956,7 @@ H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[]/*out*/,
  *
  * Return:	Success:	Number of dimensions.  Zero implies scalar.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		Thursday, December 11, 1997
@@ -1025,9 +1015,7 @@ H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[], hsize_t max_dims[])
  * Purpose:	Updates a data space by writing a message to an object
  *		header.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Tuesday, December  9, 1997
@@ -1264,7 +1252,7 @@ H5Sis_simple(hid_t space_id)
  	const size_t *max;    IN: Maximum size of each dimension for the
  				  dataspace
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     This function sets the number and size of each dimension in the
     dataspace. Setting RANK to a value of zero converts the dataspace to a
@@ -1337,9 +1325,7 @@ H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
  * Purpose:	This is where the real work happens for
  *		H5Sset_extent_simple().
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke (copied from H5Sset_extent_simple)
  *              Wednesday, July  8, 1998
@@ -1430,7 +1416,7 @@ H5S_set_extent_simple (H5S_t *space, int rank, const hsize_t *dims,
  * 	Quincey Koziol
  *	Instead of returning a point into the data space conversion table we
  *	copy all the information into a user-supplied CONV buffer and return
- *	SUCCEED or FAIL.
+ *	non-negative on success or negative on failure.
  *
  * 	Robb Matzke, 11 Aug 1998
  *	Returns a pointer into the conversion path table.  A path entry
@@ -1523,7 +1509,7 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
  *
  * Return:	Success:	Number of dimensions whose size increased.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		Friday, January 30, 1998
@@ -1581,7 +1567,7 @@ H5S_extend (H5S_t *space, const hsize_t *size)
  *
  * Return:	Success:	The ID for the new simple data space object.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Errors:
  *
@@ -1693,7 +1679,7 @@ H5Sget_simple_extent_type(hid_t sid)
     herr_t H5Sset_extent_none(space_id)
         hid_t space_id;	      IN: Dataspace object to reset
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
 	This function resets the type of a dataspace back to "none" with no
     extent information stored for the dataspace.
@@ -1730,7 +1716,7 @@ H5Sset_extent_none(hid_t space_id)
         hid_t space_id;	        IN: Dataspace object to reset
         const hssize_t *offset; IN: Offset to position the selection at
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
 	This function creates an offset for the selection within an extent, allowing
     the same shaped selection to be moved to different locations within a
@@ -1771,9 +1757,7 @@ H5Soffset_simple(hid_t space_id, const hssize_t *offset)
  *
  * Purpose:	Prints debugging information about a data space.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Tuesday, July 21, 1998

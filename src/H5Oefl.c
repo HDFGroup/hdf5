@@ -136,9 +136,7 @@ H5O_efl_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
  *
  * Purpose:	Encodes a message.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Tuesday, November 25, 1997
@@ -314,9 +312,7 @@ H5O_efl_size(H5F_t *f, const void *_mesg)
  * Purpose:	Frees internal pointers and resets the message to an
  *		initialial state.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Tuesday, November 25, 1997
@@ -399,9 +395,7 @@ H5O_efl_total_size (H5O_efl_t *efl)
  *		of any particular member of the external file list results in
  *		zeros.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Wednesday, March  4, 1998
@@ -485,9 +479,7 @@ H5O_efl_read (H5F_t __unused__ *f, const H5O_efl_t *efl, haddr_t *addr,
  *		of any particular member of the external file list just
  *		extends that file.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Wednesday, March  4, 1998
@@ -570,9 +562,7 @@ H5O_efl_write (H5F_t __unused__ *f, const H5O_efl_t *efl, haddr_t *addr,
  *
  * Purpose:	Prints debugging info for a message.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Tuesday, November 25, 1997

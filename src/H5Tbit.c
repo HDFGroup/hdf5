@@ -405,7 +405,7 @@ H5T_bit_find (uint8 *buf, size_t offset, size_t size, H5T_sdir_t direction,
  * Return:	Success:        The carry-out value, one if overflow zero
  *				otherwise.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Friday, June 26, 1998

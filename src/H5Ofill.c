@@ -100,9 +100,7 @@ H5O_fill_decode(H5F_t *f, const uint8 *p, H5O_shared_t *sh)
  *
  * Purpose:	Encode a fill value message.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, October  1, 1998
@@ -220,9 +218,7 @@ H5O_fill_size(H5F_t *f, const void *_mesg)
  *
  * Purpose:	Resets a message to an initial state
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, October  1, 1998
@@ -255,9 +251,7 @@ H5O_fill_reset(void *_mesg)
  *
  * Purpose:	Prints debugging info for the message.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, October  1, 1998
@@ -301,9 +295,7 @@ H5O_fill_debug(H5F_t *f, const void *_mesg, FILE *stream, intn indent,
  *		value struct will be set to NULL to indicate that it has the
  *		same type as the dataset.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, October  1, 1998

@@ -88,7 +88,7 @@ USAGE
     herr_t H5_init_library()
    
 RETURNS
-   SUCCEED/FAIL
+    Non-negative on success/Negative on failure
 DESCRIPTION
     Initializes any library-global data or routines.
 
@@ -154,7 +154,7 @@ H5_init_library(void)
         void (*func)(void);     IN: Function pointer of routine to add to chain
 
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Pre-pend the new function to the list of function to call during the exit
     process.  These routines are responsible for free'ing static buffers, etc.
@@ -193,7 +193,7 @@ H5_add_exit(void (*func)(void))
  USAGE
     void H5_term_library()
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Walk through the shutdown routines for the various interfaces and 
     terminate them all.
@@ -224,7 +224,7 @@ USAGE
     void H5_init_thread()
    
 RETURNS
-   SUCCEED/FAIL
+    Non-negative on success/Negative on failure
 DESCRIPTION
     Initializes any thread-specific data or routines.
 
@@ -250,7 +250,7 @@ H5_init_thread(void)
  USAGE
     void H5_term_thread()
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Release the error stack and any other thread-specific resources allocated
     on a "per thread" basis.
@@ -271,7 +271,7 @@ USAGE
     herr_t H5_init_interface()
    
 RETURNS
-   SUCCEED/FAIL
+    Non-negative on success/Negative on failure
 DESCRIPTION
     Initializes any interface-specific data or routines.
 
@@ -292,7 +292,7 @@ H5_init_interface(void)
  USAGE
     herr_t H5dont_atexit(void)
  RETURNS
-    Returns SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
         This routine indicates to the library that an 'atexit()' cleanip routine
     should not be installed.  The major (only?) purpose for this is in
@@ -417,9 +417,8 @@ H5_debug_mask(const char *s)
  * 		printf("%u.%u.%u", maj, min, rel)		or
  *		printf("version %u.%u release %u", maj, min, rel)
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:
+ *  Non-negative on success/Negative on failure
  *
  * Programmer:	Unknown
  *
@@ -496,9 +495,8 @@ H5check_version (unsigned majnum, unsigned minnum, unsigned relnum)
  *              is failing inexplicably, then try calling this function
  *              first.
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:
+ *  Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              Tuesday, December  9, 1997
@@ -521,9 +519,8 @@ H5open(void)
  *
  * Purpose:	Terminate the library and release all resources.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:
+ *  Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Friday, January 30, 1998
@@ -1335,8 +1332,8 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		}
 	    } else {
 		herr_t status = va_arg (ap, herr_t);
-		if (SUCCEED==status) fprintf (out, "SUCCEED");
-		else if (FAIL==status) fprintf (out, "FAIL");
+		if (status>=0) fprintf (out, "SUCCEED");
+		else if (status<0) fprintf (out, "FAIL");
 		else fprintf (out, "%d", (int)status);
 	    }
 	    break;
@@ -1573,7 +1570,7 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		hid_t obj = va_arg (ap, hid_t);
 		if (-2 == obj) {
 		    fprintf (out, "H5P_DEFAULT");
-		} else if (FAIL==obj) {
+		} else if (obj<0) {
 		    fprintf (out, "FAIL");
 		} else {
 		    switch (H5I_get_type (obj)) {

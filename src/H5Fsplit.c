@@ -168,9 +168,7 @@ H5F_split_open(const char *name, const H5F_access_t *access_parms,
  *
  * Purpose:     Closes a split file.
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              Monday, November 13, 1997
@@ -201,9 +199,7 @@ H5F_split_close(H5F_low_t *lf, const H5F_access_t *access_parms)
  *              data/raw data boundary. Reading past the end of a file
  *              returns zeros instead of failing.
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              Monday, November 13, 1997
@@ -253,9 +249,7 @@ H5F_split_read(H5F_low_t *lf, const H5F_access_t *access_parms,
  *
  * Purpose:     Writes BUF to either the meta data file or the raw data file.
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              Monday, November 13, 1997
@@ -304,9 +298,7 @@ H5F_split_write(H5F_low_t *lf, const H5F_access_t *access_parms,
  *
  * Purpose:     Flushes all data to disk.
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              Monday, November 13, 1997
@@ -413,10 +405,9 @@ H5F_split_access(const char *name, const H5F_access_t *access_parms,
  * Purpose:     Allocates memory from the end of the meta data file or raw
  *              data file.
  *
- * Return:      Success:        SUCCEED with the address of the allocated
- *                              memory returned through the ADDR argument.
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success (with the address of the allocated
+ *                      memory returned through the ADDR argument.) /Negative
+ *                      on failure
  *
  * Programmer:  Robb Matzke
  *              Thursday, November 13, 1997
@@ -476,7 +467,7 @@ H5F_split_extend(H5F_low_t *lf, const H5F_access_t *access_parms, intn op,
  *				contain the address within the free block
  *				where the request starts.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Tuesday, June  9, 1998

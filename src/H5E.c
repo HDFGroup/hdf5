@@ -148,9 +148,7 @@ void *H5E_auto_data_g = stderr;
  *		
  * See Also:	H5Ewalk()
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Friday, February 27, 1998
@@ -179,9 +177,7 @@ H5Eset_auto(H5E_auto_t func, void *client_data)
  *		traversal function and its data.  Either (or both) arguments
  *		may be null in which case the value is not returned.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Saturday, February 28, 1998
@@ -209,10 +205,7 @@ H5Eget_auto(H5E_auto_t *func, void **client_data)
  *
  * Purpose:	Clears the error stack for the current thread.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL.  This function can fail if there are
- *				problems initializing the library.
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Friday, February 27, 1998
@@ -239,9 +232,7 @@ H5Eclear(void)
  *		prints error messages.  Users are encouraged to write there
  *		own more specific error handlers.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Friday, February 27, 1998
@@ -276,10 +267,7 @@ H5Eprint(FILE *stream)
  * Purpose:	Walks the error stack for the current thread and calls some
  *		function for each error along the way.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL.  This function can fail if there are
- *				problems initializing the library.
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Friday, February 27, 1998
@@ -325,9 +313,7 @@ H5Ewalk(H5E_direction_t direction, H5E_walk_t func, void *client_data)
  *		CLIENT_DATA argument of H5Ewalk().  It is expected to be a
  *		file pointer (or stderr if null).
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Friday, December 12, 1997
@@ -458,9 +444,7 @@ H5Eget_minor (H5E_minor_t n)
  *		the function name and file name automatically, but the
  *		programmer is responsible for the description string).
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Friday, December 12, 1997
@@ -514,10 +498,7 @@ H5E_push(H5E_major_t maj_num, H5E_minor_t min_num, const char *function_name,
  *
  * Purpose:	Clears the error stack for the current thread.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL.  This function can fail if there are
- *				problems initializing the library.
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Friday, February 27, 1998
@@ -554,10 +535,7 @@ H5E_clear(void)
  *		direction), an error stack entry, and the CLIENT_DATA pointer
  *		passed to H5E_print.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL.  This function can fail if there are
- *				problems initializing the library.
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Friday, December 12, 1997

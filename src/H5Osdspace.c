@@ -161,7 +161,7 @@ H5O_sdspace_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
 	const uint8 *p;		IN: the raw information buffer
 	const void *mesg;	IN: Pointer to the simple dimensionality struct
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
 	This function encodes the native memory form of the simple
     dimensionality message in the "raw" disk form.
@@ -290,9 +290,7 @@ H5O_sdspace_copy(const void *mesg, void *dest)
  * Purpose:	Frees the inside of a dataspace message and resets it to some
  *		initial value.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, April 30, 1998
@@ -375,7 +373,7 @@ H5O_sdspace_size(H5F_t *f, const void *mesg)
 	intn indent;		IN: Amount to indent information by
 	intn fwidth;		IN: Field width (?)
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
 	This function prints debugging output to the stream passed as a 
     parameter.

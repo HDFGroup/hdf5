@@ -214,9 +214,7 @@ H5Gopen(hid_t loc_id, const char *name)
  * Purpose:	Closes the specified group.  The group ID will no longer be
  *		valid for accessing the group.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, December 31, 1997
@@ -263,8 +261,8 @@ H5Gclose(hid_t group_id)
  *				returns non-zero, or zero if all members were
  *				processed with no operator returning non-zero.
  *
- *		Failure:	FAIL if something goes wrong within the
- *				library, or a negative value returned by one
+ *		Failure:	Negative if something goes wrong within the
+ *				library, or the negative value returned by one
  *				of the operators.
  *
  * Programmer:	Robb Matzke
@@ -335,9 +333,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx,
  *		inserted as an atomic operation.  Both names are interpreted
  *		relative to LOC_ID which is either a file ID or a group ID.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Monday, April  6, 1998
@@ -392,9 +388,7 @@ H5Gmove(hid_t loc_id, const char *src, const char *dst)
  *		is made for `./x/y/bar' then the actual object looked up is
  *		`./x/y/./foo'.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Monday, April  6, 1998
@@ -445,9 +439,7 @@ H5Glink(hid_t loc_id, H5G_link_t type, const char *cur_name,
  *		object is open, then the reclamation of the file space is
  *		delayed until all handles to the object are closed).
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Monday, April  6, 1998
@@ -488,10 +480,8 @@ H5Gunlink(hid_t loc_id, const char *name)
  *		non-zero then all symbolic links are followed; otherwise all
  *		links except the last component of the name are followed.
  *
- * Return:	Success:	SUCCEED with the fields of STATBUF (if
- *				non-null) initialized.
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success (with the fields of STATBUF (if
+ *              non-null) initialized.) /Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Monday, April 13, 1998
@@ -533,9 +523,8 @@ H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link,
  *		most SIZE characters (counting the null terminator) are
  *		copied to the BUF result buffer.
  *
- * Return:	Success:	SUCCEED, the link value is in BUF.
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success (the link value is in BUF.) /Negative on
+ *              failure
  *
  * Programmer:	Robb Matzke
  *              Monday, April 13, 1998
@@ -578,9 +567,7 @@ H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
  *		one comment at a time.  Passing NULL for the COMMENT argument
  *		will remove the comment property from the object.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Monday, July 20, 1998
@@ -627,7 +614,7 @@ H5Gset_comment(hid_t loc_id, const char *name, const char *comment)
  *				the null terminator.  The value returned may
  *				be larger than the BUFSIZE argument.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Monday, July 20, 1998
@@ -676,9 +663,7 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
  *
  * Purpose:	Initializes the H5G interface.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Monday, January	 5, 1998
@@ -857,12 +842,12 @@ H5G_basename(const char *name, size_t *size_p)
  *		
  * Errors:
  *
- * Return:	Success:	SUCCEED if name can be fully resolved.	See
+ * Return:	Success:	Non-negative if name can be fully resolved.	See
  *				above for values of REST, GRP_ENT, and
  *				OBJ_ENT.  NLINKS has been decremented for
  *				each symbolic link that was followed.
  *
- *		Failure:	FAIL if the name could not be fully resolved.
+ *		Failure:	Negative if the name could not be fully resolved.
  *				See above for values of REST, GRP_ENT, and
  *				OBJ_ENT.
  *
@@ -991,12 +976,12 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
  * Purpose:	Traverses symbolic link.  The link head appears in the group
  *		whose entry is GRP_ENT and the link head entry is OBJ_ENT.
  *
- * Return:	Success:	SUCCEED, OBJ_ENT will contain information
+ * Return:	Success:	Non-negative, OBJ_ENT will contain information
  *				about the object to which the link points and
  *				GRP_ENT will contain the information about
  *				the group in which the link tail appears.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Friday, April 10, 1998
@@ -1053,9 +1038,7 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
  *		group.  Otherwise a new root group is created and then
  *		opened.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -1300,9 +1283,7 @@ H5G_reopen(H5G_t *grp)
  *
  * Purpose:	Closes the specified group.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Monday, January	 5, 1998
@@ -1371,9 +1352,7 @@ H5G_rootof(H5F_t *f)
  *
  * Errors:
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Friday, September 19, 1997
@@ -1452,10 +1431,10 @@ H5G_insert(H5G_entry_t *loc, const char *name, H5G_entry_t *ent)
  *
  * Errors:
  *
- * Return:	Success:	SUCCEED, see above for values of GRP_ENT and
+ * Return:	Success:	Non-negative, see above for values of GRP_ENT and
  *				OBJ_ENT.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -1661,9 +1640,7 @@ H5G_loc (hid_t loc_id)
  * Purpose:	Creates a link from NEW_NAME to CUR_NAME.  See H5Glink() for
  *		full documentation.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Monday, April  6, 1998
@@ -1788,10 +1765,10 @@ H5G_link (H5G_entry_t *loc, H5G_link_t type, const char *cur_name,
  *
  * Purpose:	Returns information about an object.
  *
- * Return:	Success:	SUCCEED with info about the object returned
+ * Return:	Success:	Non-negative with info about the object returned
  *				through STATBUF if it isn't the null pointer.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Monday, April 13, 1998
@@ -1887,13 +1864,13 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
  *
  * Purpose:	Returns the value of a symbolic link.
  *
- * Return:	Success:	SUCCEED, with at most SIZE bytes of the link
+ * Return:	Success:	Non-negative, with at most SIZE bytes of the link
  *				value copied into the BUF buffer.  If the
  *				link value is larger than SIZE characters
  *				counting the null terminator then the BUF
  *				result will not be null terminated.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Monday, April 13, 1998
@@ -1953,9 +1930,7 @@ H5G_linkval (H5G_entry_t *loc, const char *name, size_t size, char *buf/*out*/)
  *
  * Purpose:	(Re)sets the comment for an object.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Monday, July 20, 1998
@@ -2004,7 +1979,7 @@ H5G_set_comment(H5G_entry_t *loc, const char *name, const char *buf)
  *				null terminator.  Zero if the object has no
  *				comment.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Monday, July 20, 1998
@@ -2048,9 +2023,7 @@ H5G_get_comment(H5G_entry_t *loc, const char *name, size_t bufsize, char *buf)
  *
  * Purpose:	Unlink a name from a group.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, September 17, 1998
@@ -2099,9 +2072,7 @@ H5G_unlink(H5G_entry_t *loc, const char *name)
  *
  * Purpose:	Atomically rename an object.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Friday, September 25, 1998

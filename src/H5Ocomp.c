@@ -155,9 +155,7 @@ H5O_pline_decode(H5F_t __unused__ *f, const uint8 *p,
  *
  * Purpose:	Encodes message MESG into buffer P.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Wednesday, April 15, 1998
@@ -362,9 +360,7 @@ H5O_pline_size (H5F_t __unused__ *f, const void *mesg)
  * Purpose:	Resets a filter pipeline message by clearing all filters.
  *		The MESG buffer is not freed.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Wednesday, April 15, 1998
@@ -400,9 +396,7 @@ H5O_pline_reset (void *mesg)
  *		on output stream STREAM.  Each line is indented INDENT
  *		characters and the field name takes up FWIDTH characters.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Wednesday, April 15, 1998

@@ -62,9 +62,7 @@ static herr_t H5RA_fix_overflow(H5RA_t *ra, H5T_t *type, H5RA_meta_t *meta,
  *
  * Purpose:	Initialize the interface.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Tuesday, August 25, 1998
@@ -148,7 +146,7 @@ H5RA_term_interface(void)
  *
  * Return:	Success:	A ragged array ID.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Tuesday, August 25, 1998
@@ -355,7 +353,7 @@ H5RA_create(H5G_entry_t *loc, const char *name, H5T_t *type,
  *		
  * Return:	Success:	An array ID
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Tuesday, August 25, 1998
@@ -469,9 +467,7 @@ H5RA_open(H5G_entry_t *loc, const char *name)
  *
  * Purpose:	Close a ragged array.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Tuesday, August 25, 1998
@@ -511,9 +507,7 @@ H5RAclose(hid_t array_id)
  *
  * Purpose:	Close a ragged array
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Tuesday, August 25, 1998
@@ -550,9 +544,7 @@ H5RA_close(H5RA_t *ra)
  *		of the ragged array contains SIZE[] elements of type TYPE_ID
  *		and each row is stored in a buffer pointed to by BUF[].
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Tuesday, August 25, 1998
@@ -613,9 +605,7 @@ H5RAwrite(hid_t array_id, hssize_t start_row, hsize_t nrows,
  *		of the ragged array contains SIZE[] elements of type TYPE_ID
  *		and each row is stored in a buffer pointed to by BUF[].
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Tuesday, August 25, 1998
@@ -774,9 +764,7 @@ H5RA_write(H5RA_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
  *		pointer to those elements.  The first part of the row has
  *		already been written to the raw dataset.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Wednesday, August 26, 1998
@@ -903,14 +891,14 @@ H5RA_fix_overflow(H5RA_t *ra, H5T_t *type, H5RA_meta_t *meta, hsize_t nelmts,
  *		input value of SIZE[] is irrelevant in this case) and the
  *		library will allocate memory for each row by calling malloc().
  *
- * Return:	Success:	SUCCEED.  The values of the SIZE[] array will
+ * Return:	Success:	Non-negative.  The values of the SIZE[] array will
  *				be the true length of each row.  If a row is
  *				longer than the caller-allocated length then
  *				SIZE[] will contain the true length of the
  *				row although not all elements of that row
  *				will be stored in the buffer.
  *
- *		Failure:	FAIL.  The BUF[] array will contain it's
+ *		Failure:	Negative.  The BUF[] array will contain it's
  *				original pointers (null or otherwise)
  *				although the caller-supplied buffers may have
  *				been modified. The SIZE[] array may also be
@@ -965,9 +953,7 @@ H5RAread(hid_t array_id, hssize_t start_row, hsize_t nrows,
  *
  * Purpose:	Reads (part of) a ragged array.  See H5RAread() for details.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Wednesday, August 26, 1998

@@ -416,9 +416,7 @@ H5S_hyper_get_regions (size_t *num_regions, intn dim, size_t bound_count,
  *
  * Purpose:	Cache a hyperslab block for reading or writing.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Monday, September 21, 1998
@@ -481,9 +479,7 @@ H5S_hyper_block_cache (H5S_hyper_node_t *node,
  *
  * Purpose:	Read in data from a cached hyperslab block
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Monday, September 21, 1998
@@ -533,9 +529,7 @@ H5S_hyper_block_read (H5S_hyper_node_t *node, H5S_hyper_fhyper_info_t *fhyper_in
  *
  * Purpose:	Write out data to a cached hyperslab block
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Monday, September 21, 1998
@@ -648,7 +642,7 @@ H5S_hyper_fread (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
     if((reg_id=H5S_hyper_get_regions(&num_regions,dim,
             fhyper_info->space->select.sel_info.hyper.hyper_lst->count,
             fhyper_info->lo_bounds, fhyper_info->hi_bounds,
-            fhyper_info->iter->hyp.pos,fhyper_info->space->select.offset))!=FAIL) {
+            fhyper_info->iter->hyp.pos,fhyper_info->space->select.offset))>=0) {
 
         /* Get the pointer to the actual regions array */
         regions=H5TB_buf_ptr(reg_id);
@@ -929,7 +923,7 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
     if((reg_id=H5S_hyper_get_regions(&num_regions,dim,
             fhyper_info->space->select.sel_info.hyper.hyper_lst->count,
             fhyper_info->lo_bounds, fhyper_info->hi_bounds,
-            fhyper_info->iter->hyp.pos,fhyper_info->space->select.offset))!=FAIL) {
+            fhyper_info->iter->hyp.pos,fhyper_info->space->select.offset))>=0) {
 
         /* Get the pointer to the actual regions array */
         regions=H5TB_buf_ptr(reg_id);
@@ -1061,9 +1055,7 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
  *		LAYOUT and EFL. Each element is ELMT_SIZE bytes.
  *		The caller is requesting that NELMTS elements are copied.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, June 16, 1998
@@ -1191,7 +1183,7 @@ H5S_hyper_mread (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
     if((reg_id=H5S_hyper_get_regions(&num_regions,dim,
             fhyper_info->space->select.sel_info.hyper.hyper_lst->count,
             fhyper_info->lo_bounds, fhyper_info->hi_bounds,
-            fhyper_info->iter->hyp.pos,fhyper_info->space->select.offset))!=FAIL) {
+            fhyper_info->iter->hyp.pos,fhyper_info->space->select.offset))>=0) {
 
         /* Get the pointer to the actual regions array */
         regions=H5TB_buf_ptr(reg_id);
@@ -1464,7 +1456,7 @@ H5S_hyper_mwrite (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
     if((reg_id=H5S_hyper_get_regions(&num_regions,dim,
             fhyper_info->space->select.sel_info.hyper.hyper_lst->count,
             fhyper_info->lo_bounds, fhyper_info->hi_bounds,
-            fhyper_info->iter->hyp.pos,fhyper_info->space->select.offset))!=FAIL) {
+            fhyper_info->iter->hyp.pos,fhyper_info->space->select.offset))>=0) {
 
         /* Get the pointer to the actual regions array */
         regions=H5TB_buf_ptr(reg_id);
@@ -1592,9 +1584,7 @@ H5S_hyper_mwrite (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
  *		ELMT_SIZE bytes and they are organized in application memory
  *		according to MEM_SPACE.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Wednesday, June 17, 1998
@@ -1739,7 +1729,7 @@ H5S_hyper_bsearch(hssize_t size, H5S_hyper_bound_t *barr, size_t count)
         const hssize_t *start;    IN: Offset of block
         const hsize_t *size;      IN: Size of block
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Adds a new hyperslab node to a list of them.
  GLOBAL VARIABLES
@@ -1796,7 +1786,7 @@ done:
         H5S_hyper_node_t **head;  IN: Pointer to pointer to head of hyperslab list
         H5S_hyper_node_t *node;   IN: Pointer to node to prepend
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Prepends an existing hyperslab node to a list of them.
  GLOBAL VARIABLES
@@ -1833,7 +1823,7 @@ H5S_hyper_node_prepend (H5S_hyper_node_t **head, H5S_hyper_node_t *node)
         const hssize_t *start;    IN: Offset of block
         const hsize_t *end;       IN: Offset of end of block
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Adds a block to an existing hyperslab selection.
  GLOBAL VARIABLES
@@ -2043,7 +2033,7 @@ done:
         H5S_hyper_node_t **uniq;  IN: Handle to list of non-overlapping nodes
         H5S_hyper_node_t **overlap;  IN: Handle to list of overlapping nodes
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Clips a list of hyperslab nodes against the current hyperslab selection.
     The list of non-overlapping and overlapping nodes which are generated from
@@ -2286,7 +2276,7 @@ done:
     herr_t H5S_hyper_release(space)
         H5S_t *space;       IN: Pointer to dataspace
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Releases all hyperslab selection information for a dataspace
  GLOBAL VARIABLES
@@ -2392,7 +2382,7 @@ H5S_hyper_npoints (const H5S_t *space)
         H5S_t *space;                   IN: Pointer to dataspace iterator is for
         H5S_sel_iter_t *sel_iter;       IN: Pointer to selection iterator
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Releases all information for a dataspace hyperslab selection iterator
  GLOBAL VARIABLES
@@ -2452,7 +2442,7 @@ H5S_hyper_compare_bounds (const void *r1, const void *r2)
         H5S_t *dst;  OUT: Pointer to the destination dataspace
         H5S_t *src;  IN: Pointer to the source dataspace
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Copies all the hyperslab selection information from the source
     dataspace to the destination dataspace.
@@ -2599,7 +2589,7 @@ done:
         H5S_t *space;             IN: Dataspace pointer to query
  RETURNS
     TRUE if the selection fits within the extent, FALSE if it does not and
-        FAIL on an error.
+        Negative on an error.
  DESCRIPTION
     Determines if the current selection at the current offet fits within the
     extent for the dataspace.

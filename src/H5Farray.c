@@ -31,9 +31,7 @@ static intn interface_initialize_g = FALSE;
  *
  * Purpose:	Creates an array of bytes.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Friday, January 16, 1998
@@ -99,9 +97,7 @@ H5F_arr_create (H5F_t *f, struct H5O_layout_t *layout/*in,out*/)
  *		MEM_SIZE[]. The dimensionality of these vectors is implied by
  *		the LAYOUT argument.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Friday, January 16, 1998
@@ -323,9 +319,7 @@ H5F_arr_read (H5F_t *f, const H5D_xfer_t *xfer,
  *		memory array is MEM_SIZE[].  The dimensionality of these
  *		vectors is implied by the LAYOUT argument.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Friday, January 16, 1998

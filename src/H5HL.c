@@ -75,10 +75,10 @@ static intn interface_initialize_g = FALSE;
  *		If the heap ever has to grow, then REALLOC_HINT is the
  *		minimum amount by which the heap will grow.
  *
- * Return:	Success:	SUCCEED. The file address of new heap is
+ * Return:	Success:	Non-negative. The file address of new heap is
  *				returned through the ADDR argument.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -297,9 +297,7 @@ H5HL_load(H5F_t *f, const haddr_t *addr, const void __unused__ *udata1,
  * Purpose:	Flushes a heap from memory to disk if it's dirty.  Optionally
  *		deletes the heap from memory.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -727,9 +725,7 @@ H5HL_insert(H5F_t *f, const haddr_t *addr, size_t buf_size, const void *buf)
  *		Do not partially write an object to create it;	the first
  *		write for an object must be for the entire object.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -786,9 +782,7 @@ H5HL_write(H5F_t *f, const haddr_t *addr, size_t offset, size_t size,
  *		in two separate objects, one at the original offset and
  *		one at the first offset past the removed portion.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -908,9 +902,7 @@ H5HL_remove(H5F_t *f, const haddr_t *addr, size_t offset, size_t size)
  *
  * Purpose:	Prints debugging information about a heap.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov

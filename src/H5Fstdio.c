@@ -140,9 +140,7 @@ H5F_stdio_open(const char *name, const H5F_access_t __unused__ *access_parms,
  * Errors:
  *		IO	  CLOSEERROR	Fclose failed. 
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, October 22, 1997
@@ -175,9 +173,7 @@ H5F_stdio_close(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
  *		IO	  READERROR	Fread failed. 
  *		IO	  SEEKERROR	Fseek failed. 
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, October 22, 1997
@@ -286,9 +282,7 @@ H5F_stdio_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
  *		IO	  SEEKERROR	Fseek failed. 
  *		IO	  WRITEERROR	Fwrite failed. 
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, October 22, 1997
@@ -375,9 +369,7 @@ H5F_stdio_write(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
  * Errors:
  *		IO	  WRITEERROR	Fflush failed. 
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, October 22, 1997

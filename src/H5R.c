@@ -46,7 +46,7 @@ USAGE
     herr_t H5R_init_interface()
    
 RETURNS
-   SUCCEED/FAIL
+    Non-negative on success/Negative on failure
 DESCRIPTION
     Initializes any interface-specific data or routines.
 
@@ -59,7 +59,7 @@ H5R_init_interface(void)
 
     /* Initialize the atom group for the file IDs */
     if ((ret_value = H5I_init_group(H5I_REFERENCE, H5I_REFID_HASHSIZE,
-            H5R_RESERVED_ATOMS, (herr_t (*)(void *)) NULL)) != FAIL) {
+            H5R_RESERVED_ATOMS, (herr_t (*)(void *)) NULL)) >= 0) {
         ret_value = H5_add_exit(&H5R_term_interface);
     }
 
@@ -108,7 +108,7 @@ H5R_term_interface(void)
                                     Region references.
         
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Creates a particular type of reference specified with REF_TYPE, in the
     space pointed to by REF.  The LOC_ID and NAME are used to locate the object
@@ -183,7 +183,7 @@ done:
                                     Region references.
         
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Creates a particular type of reference specified with REF_TYPE, in the
     space pointed to by REF.  The LOC_ID and NAME are used to locate the object
@@ -239,7 +239,7 @@ done:
         void *ref;          IN: Reference to open.
         
  RETURNS
-    Valid ID on success, FAIL on failure
+    Valid ID on success, Negative on failure
  DESCRIPTION
     Given a reference to some object, open that object and return an ID for
     that object.
@@ -303,7 +303,7 @@ done:
         void *ref;          IN: Reference to open.
         
  RETURNS
-    Valid ID on success, FAIL on failure
+    Valid ID on success, Negative on failure
  DESCRIPTION
     Given a reference to some object, open that object and return an ID for
     that object.
@@ -384,7 +384,7 @@ done:
         void *ref;        IN: Reference to open.
         
  RETURNS
-    Valid ID on success, FAIL on failure
+    Valid ID on success, Negative on failure
  DESCRIPTION
     Given a reference to some object, creates a copy of the dataset pointed
     to's dataspace and defines a selection in the copy which is the region

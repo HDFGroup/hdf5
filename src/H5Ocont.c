@@ -94,9 +94,7 @@ H5O_cont_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
  *
  * Purpose:     Encodes a continuation message.
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov
@@ -130,9 +128,7 @@ H5O_cont_encode(H5F_t *f, uint8 *p, const void *_mesg)
  *
  * Purpose:     Prints debugging info.
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov

@@ -85,9 +85,7 @@ static void *(*H5O_fast_g[H5G_NCACHED]) (const H5G_cache_t *,
  *
  * Purpose:	Initialize the H5O interface.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
@@ -118,11 +116,11 @@ H5O_init_interface(void)
  *		write access and should eventually be closed by calling
  *		H5O_close().
  *
- * Return:	Success:	SUCCEED, the ENT argument contains
+ * Return:	Success:	Non-negative, the ENT argument contains
  *				information about the object header,
  *				including its address.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -217,9 +215,7 @@ H5O_create(H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/)
  * Purpose:	Opens an object header which is described by the symbol table
  *		entry OBJ_ENT.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Monday, January	 5, 1998
@@ -254,9 +250,7 @@ H5O_open(H5G_entry_t *obj_ent)
  *
  * Purpose:	Closes an object header that was previously open.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Monday, January	 5, 1998
@@ -493,9 +487,7 @@ H5O_load(H5F_t *f, const haddr_t *addr, const void __unused__ *_udata1,
  *
  * Purpose:	Flushes (and destroys) an object header.
  *
- * Return:	Success:	SUCCESS
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -670,9 +662,7 @@ H5O_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5O_t *oh)
  *		need to be freed.  This function does that if appropriate
  *		but doesn't free NATIVE.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -779,7 +769,7 @@ H5O_copy (const H5O_class_t *type, const void *mesg, void *dst)
  *
  * Return:	Success:	New link count
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -849,7 +839,7 @@ H5O_link(H5G_entry_t *ent, intn adjust)
  *
  * Return:	Success:	Number of messages of specified type.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Tuesday, April 21, 1998
@@ -1019,7 +1009,7 @@ H5O_read(H5G_entry_t *ent, const H5O_class_t *type, intn sequence, void *mesg)
  *
  * Return:	Success:	Index number of message.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -1109,7 +1099,7 @@ H5O_find_in_ohdr(H5F_t *f, const haddr_t *addr, const H5O_class_t **type_p,
  * Return:	Success:	The sequence number of the message that
  *				was modified or created.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -1282,9 +1272,7 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
  *		unless one already exists.  Then update any existing
  *		modification time message with the current time.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Monday, July 27, 1998
@@ -1344,9 +1332,7 @@ H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force)
  *		is non-zero, nothing happens if there is no MTIME message in
  *		the object header.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Monday, July 27, 1998
@@ -1407,9 +1393,7 @@ H5O_touch(H5G_entry_t *ent, hbool_t force)
  *		No attempt is made to join adjacent free areas of the
  *		object header into a single larger free area.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -1525,7 +1509,7 @@ H5O_remove(H5G_entry_t *ent, const H5O_class_t *type, intn sequence)
  * Return:	Success:	Message index for null message which
  *				is large enough to hold SIZE bytes.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -1652,7 +1636,7 @@ H5O_alloc_extend_chunk(H5O_t *oh, intn chunkno, size_t size)
  *				least SIZE bytes not counting the message
  *				ID or size fields.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -1838,7 +1822,7 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
  *
  * Return:	Success:	Index of message
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -1950,10 +1934,10 @@ H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
  *
  * Purpose:	Writes a message to the global heap.
  *
- * Return:	Success:	SUCCEED, and HOBJ describes the global heap
+ * Return:	Success:	Non-negative, and HOBJ describes the global heap
  *				object.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Thursday, April  2, 1998
@@ -2006,9 +1990,7 @@ H5O_share (H5F_t *f, const H5O_class_t *type, const void *mesg,
  *
  * Purpose:	Prints debugging info about an object header.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov

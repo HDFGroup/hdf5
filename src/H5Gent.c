@@ -59,9 +59,7 @@ H5G_ent_cache(H5G_entry_t *ent, H5G_type_t *cache_type)
  *              H5G_NO_CHANGE then the cache type isn't changed--just the
  *              dirty bit is set.
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              Friday, September 19, 1997
@@ -89,10 +87,10 @@ H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type)
  * Errors:
  *              SYM       CANTDECODE    Can't decode. 
  *
- * Return:      Success:        SUCCEED, with *pp pointing to the first byte
+ * Return:      Success:        Non-negative, with *pp pointing to the first byte
  *                              after the last symbol.
  *
- *              Failure:        FAIL
+ *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov
@@ -132,10 +130,10 @@ H5G_ent_decode_vec(H5F_t *f, const uint8 **pp, H5G_entry_t *ent, intn n)
  *
  * Errors:
  *
- * Return:      Success:        SUCCEED with *pp pointing to the first byte
+ * Return:      Success:        Non-negative with *pp pointing to the first byte
  *                              following the symbol table entry.
  *
- *              Failure:        FAIL
+ *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov
@@ -201,10 +199,10 @@ H5G_ent_decode(H5F_t *f, const uint8 **pp, H5G_entry_t *ent)
  * Errors:
  *              SYM       CANTENCODE    Can't encode. 
  *
- * Return:      Success:        SUCCEED, with *pp pointing to the first byte
+ * Return:      Success:        Non-negative, with *pp pointing to the first byte
  *                              after the last symbol.
  *
- *              Failure:        FAIL
+ *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov
@@ -245,10 +243,10 @@ H5G_ent_encode_vec(H5F_t *f, uint8 **pp, const H5G_entry_t *ent, intn n)
  *
  * Errors:
  *
- * Return:      Success:        SUCCEED, with *pp pointing to the first byte
+ * Return:      Success:        Non-negative, with *pp pointing to the first byte
  *                              after the symbol table entry.
  *
- *              Failure:        FAIL
+ *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov
@@ -322,9 +320,7 @@ H5G_ent_encode(H5F_t *f, uint8 **pp, const H5G_entry_t *ent)
  *
  * Errors:
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov

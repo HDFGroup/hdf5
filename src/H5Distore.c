@@ -218,9 +218,7 @@ H5F_istore_sizeof_rkey(H5F_t __unused__ *f, const void *_udata)
  *
  * Purpose:	Decodes a raw key into a native key for the B-tree
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Friday, October 10, 1997
@@ -261,9 +259,7 @@ H5F_istore_decode_key(H5F_t __unused__ *f, H5B_t *bt, uint8 *raw, void *_key)
  *
  * Purpose:	Encode a key from native format to raw format.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Friday, October 10, 1997
@@ -304,9 +300,7 @@ H5F_istore_encode_key(H5F_t __unused__ *f, H5B_t *bt, uint8 *raw, void *_key)
  *
  * Purpose:	Prints a key.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, April 16, 1998
@@ -448,11 +442,9 @@ H5F_istore_cmp3(H5F_t __unused__ *f, void *_lt_key, void *_udata,
  *		the domain represented by UDATA doesn't intersect the domain
  *		already represented by the B-tree.
  *
- * Return:	Success:	SUCCEED.  The address of leaf is returned
- *				through the ADDR argument.  It is also added
- *				to the UDATA.
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success (The address of leaf is returned through
+ *                  the ADDR argument.  It is also added to the UDATA.)
+ *                  /Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Tuesday, October 14, 1997
@@ -540,10 +532,8 @@ H5F_istore_new_node(H5F_t *f, H5B_ins_t op,
  *		called with the maximum stored chunk indices less than the
  *		requested chunk indices.
  *
- * Return:	Success:	SUCCEED with information about the chunk
- *				returned through the UDATA argument.
- *
- *		Failure:	FAIL if not found.
+ * Return:	Non-negative on success (with information about the chunk returned
+ *                  through the UDATA argument.) /Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Thursday, October  9, 1997
@@ -731,9 +721,7 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr, void *_lt_key,
  * Purpose:	Initialize the raw data chunk cache for a file.  This is
  *		called when the file handle is initialized.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Monday, May 18, 1998
@@ -772,9 +760,7 @@ H5F_istore_init (H5F_t *f)
  *		the RESET flag is turned on because it results in one fewer
  *		memory copy.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
@@ -896,9 +882,7 @@ H5F_istore_flush_entry (H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
  * Purpose:     Preempts the specified entry from the cache, flushing it to
  *              disk if necessary.
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              Thursday, May 21, 1998
@@ -954,9 +938,7 @@ H5F_istore_preempt (H5F_t *f, H5F_rdcc_ent_t *ent)
  * Purpose:	Writes all dirty chunks to disk and optionally preempts them
  *		from the cache.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
@@ -1001,9 +983,7 @@ H5F_istore_flush (H5F_t *f, hbool_t preempt)
  * Purpose:	Destroy the entire chunk cache by flushing dirty entries,
  *		preempting all entries, and freeing the cache itself.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
@@ -1049,9 +1029,7 @@ H5F_istore_dest (H5F_t *f)
  *		room for something which is SIZE bytes.  Only unlocked
  *		entries are considered for preemption.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
@@ -1440,9 +1418,7 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
  *		It's only purpose is to provide additional information to the
  *		preemption policy.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
@@ -1524,9 +1500,7 @@ H5F_istore_unlock (H5F_t *f, const H5O_layout_t *layout,
  * Purpose:	Reads a multi-dimensional buffer from (part of) an indexed raw
  *		storage array.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, October 15, 1997
@@ -1696,9 +1670,7 @@ H5F_istore_read(H5F_t *f, const H5D_xfer_t *xfer, const H5O_layout_t *layout,
  * Purpose:	Writes a multi-dimensional buffer to (part of) an indexed raw
  *		storage array.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, October 15, 1997
@@ -1880,10 +1852,8 @@ H5F_istore_write(H5F_t *f, const H5D_xfer_t *xfer, const H5O_layout_t *layout,
  *		This function must be called before passing ISTORE to any of
  *		the other indexed storage functions!
  *
- * Return:	Success:	SUCCEED with the ISTORE argument initialized
- *				and ready to write to an object header.
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success (with the ISTORE argument initialized and
+ *              ready to write to an object header.) /Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Tuesday, October 21, 1997
@@ -1928,9 +1898,7 @@ H5F_istore_create(H5F_t *f, H5O_layout_t *layout /*out */ )
  *		HEADERS is non-zero then print table column headers,
  *		otherwise assume that the H5AC layer has already printed them.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
@@ -1989,9 +1957,7 @@ H5F_istore_stats (H5F_t *f, hbool_t headers)
  *
  * Purpose:	Debugs a B-tree node for indexed raw data storage.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, April 16, 1998
@@ -2024,9 +1990,7 @@ H5F_istore_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
  *		assigned.  Save the retrieved information in the udata
  *		supplied.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Albert Cheng
  *              June 27, 1998
@@ -2072,9 +2036,7 @@ H5F_istore_get_addr (H5F_t *f, const H5O_layout_t *layout,
  *		Return SUCCEED if all needed allocation succeed, otherwise
  *		FAIL.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Note:	Current implementation relies on cache_size being 0,
  *		thus no chunk is cashed and written to disk immediately

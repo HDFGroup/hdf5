@@ -206,9 +206,7 @@ H5F_low_close(H5F_low_t *lf, const H5F_access_t *access_parms)
  *		IO	  READERROR	Read failed. 
  *		IO	  UNSUPPORTED	No read method. 
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, October 22, 1997
@@ -258,9 +256,7 @@ H5F_low_read(H5F_low_t *lf, const H5F_access_t *access_parms,
  *		IO	  UNSUPPORTED	No write method. 
  *		IO	  WRITEERROR	Write failed. 
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, October 22, 1997
@@ -352,9 +348,7 @@ H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
  *		file.  Extending the physical file is necessary because
  *		H5F_open() checks for truncated files.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Monday, November 10, 1997
@@ -516,12 +510,9 @@ H5F_low_access(const H5F_low_class_t *type, const char *name,
  *		end of file marker.  A subclass can override this function by
  *		providing its own allocation method.
  *
- * Return:	Success:	SUCCEED, the address of the old end-of-file
- *				is returned through the ADDR argument and the
- *				logical size of the file has been extended by
- *				SIZE bytes.
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success (the address of the old end-of-file is
+ *              returned through the ADDR argument and the logical size of the
+ *              file has been extended by SIZE bytes.) /Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Thursday, November 13, 1997
@@ -570,8 +561,7 @@ H5F_low_extend(H5F_low_t *lf, const H5F_access_t *access_parms, intn op,
  *				ADDR will be the address within the free
  *				block where the request can be satisfied.
  *
- *		Failure:	FAIL with the output value of ADDR
- *				undefined.
+ *		Failure:	Negative with the output value of ADDR undefined.
  *
  * Programmer:	Robb Matzke
  *              Tuesday, June  9, 1998
@@ -624,9 +614,7 @@ H5F_low_alloc (H5F_low_t *lf, intn op, hsize_t alignment, hsize_t threshold,
  *
  * Purpose:	Sets the logical end-of-file to the specified address.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Thursday, November 13, 1997

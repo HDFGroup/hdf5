@@ -60,9 +60,7 @@ const H5F_low_class_t	H5F_LOW_CORE_g[1] = {{
  *		create a new file.  Therefore, this function always returns
  *		false and KEY is never initialized.
  *
- * Return:	Success:	FALSE
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Friday, October 24, 1997
@@ -142,9 +140,7 @@ H5F_core_open(const char __unused__ *name,
  *
  * Errors:
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:  Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, October 22, 1997
@@ -175,9 +171,7 @@ H5F_core_close(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
  *
  * Errors:
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, October 22, 1997
@@ -225,9 +219,7 @@ H5F_core_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
  *
  * Errors:
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, October 22, 1997

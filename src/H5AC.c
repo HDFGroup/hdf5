@@ -52,7 +52,7 @@ static H5AC_t          *current_cache_g = NULL;         /*for sorting */
  *
  * Return:      Success:        Number of slots actually used.
  *
- *              Failure:        FAIL
+ *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov
@@ -94,9 +94,7 @@ H5AC_create(H5F_t *f, intn size_hint)
  *              This function fails if any object are protected since the
  *              resulting file might not be consistent.
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov
@@ -329,10 +327,8 @@ H5AC_compare(const void *_a, const void *_b)
  *              However, an attempt will be made to flush all non-protected
  *              items before this function returns failure.
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL if there was a request to flush all
- *                              items and something was protected.
+ * Return:      Non-negative on success/Negative on failure if there was a
+ *                  request to flush all items and something was protected.
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov
@@ -457,9 +453,7 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
  *              If H5AC_DEBUG is defined then this function checks
  *              that the object being inserted isn't a protected object.
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov
@@ -527,9 +521,7 @@ H5AC_set(H5F_t *f, const H5AC_class_t *type, const haddr_t *addr, void *thing)
  *              that the old and new addresses don't correspond to the
  *              address of a protected object.
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov
@@ -745,9 +737,7 @@ H5AC_protect(H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
  *              if the TYPE and ADDR arguments are not what was used when the
  *              object was protected or if the object was never protected.
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov
@@ -831,9 +821,7 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
  *
  * Purpose:     Prints debugging info about the cache.
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              Thursday, October 30, 1997

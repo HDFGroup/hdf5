@@ -41,10 +41,10 @@ static intn             interface_initialize_g = FALSE;
  *              H5MF_RAW depending on the purpose for which the storage is
  *              being requested.
  *
- * Return:      Success:        SUCCEED.  The file address of new chunk is
+ * Return:      Success:        Non-negative.  The file address of new chunk is
  *                              returned through the ADDR argument.
  *
- *              Failure:        FAIL
+ *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov
@@ -186,9 +186,7 @@ H5MF_alloc(H5F_t *f, intn op, hsize_t size, haddr_t *addr/*out*/)
  *
  * Note:        This version of the function doesn't do anything.
  *
- * Return:      Success:        0
- *
- *              Failure:        -1
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov
@@ -260,9 +258,7 @@ H5MF_xfree(H5F_t *f, const haddr_t *addr, hsize_t size)
  *		new address will be returned.  However, under certain
  *		circumstances the library may return the same address.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, April 16, 1998

@@ -246,9 +246,7 @@ H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
  *		LAYOUT and EFL. Each element is ELMT_SIZE bytes.
  *		The caller is requesting that NELMTS elements are copied.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, June 16, 1998
@@ -422,9 +420,7 @@ H5S_all_mgath (const void *_buf, size_t elmt_size,
  *		ELMT_SIZE bytes and they are organized in application memory
  *		according to MEM_SPACE.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Wednesday, June 17, 1998
@@ -514,7 +510,7 @@ H5S_all_mscat (const void *_tconv_buf, size_t elmt_size,
     herr_t H5S_all_release(space)
         H5S_t *space;       IN: Pointer to dataspace
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Releases "all" selection information for a dataspace
  GLOBAL VARIABLES

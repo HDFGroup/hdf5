@@ -55,7 +55,7 @@ USAGE
     herr_t H5A_init_interface()
    
 RETURNS
-   SUCCEED/FAIL
+    Non-negative on success/Negative on failure
 DESCRIPTION
     Initializes any interface-specific data or routines.
 
@@ -94,7 +94,7 @@ H5A_init_interface(void)
  USAGE
     void H5A_term_interface()
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Release any other resources allocated.
  GLOBAL VARIABLES
@@ -123,7 +123,7 @@ H5A_term_interface(void)
         hid_t space_id;     IN: ID of dataspace for attribute
         hid_t plist_id;     IN: ID of creation property list (currently not used)
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  
  ERRORS
 
@@ -210,7 +210,7 @@ H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
  *      H5T_t *type;        IN: Datatype of attribute
  *      H5S_t *space;       IN: Dataspace of attribute
  *
- * Return:	SUCCEED/FAIL
+ * Return: Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *		April 2, 1998
@@ -486,7 +486,7 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
  *      const H5G_entry_t *ent;   IN: Pointer to symbol table entry for object to attribute
  *      unsigned idx;       IN: index of attribute to open (0-based)
  *
- * Return:	SUCCEED/FAIL
+ * Return: Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *		April 2, 1998
@@ -548,7 +548,7 @@ done:
         hid_t type_id;        IN: Memory datatype of buffer
         void *buf;           IN: Buffer of data to write
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  
  ERRORS
 
@@ -599,7 +599,7 @@ H5Awrite(hid_t attr_id, hid_t type_id, void *buf)
         const H5T_t *mem_type;     IN: Memory datatype of buffer
         void *buf;           IN: Buffer of data to write
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  
  ERRORS
 
@@ -719,7 +719,7 @@ done:
         hid_t type_id;       IN: Memory datatype of buffer
         void *buf;           IN: Buffer for data to read
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  
  ERRORS
 
@@ -770,7 +770,7 @@ H5Aread(hid_t attr_id, hid_t type_id, void *buf)
         const H5T_t *mem_type;     IN: Memory datatype of buffer
         void *buf;           IN: Buffer for data to read
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  
  ERRORS
 
@@ -1205,7 +1205,7 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
         hid_t loc_id;       IN: Object (dataset or group) to have attribute deleted from
         const char *name;   IN: Name of attribute to delete
  RETURNS
-    0 on success, negative on failure
+    Non-negative on success/Negative on failure
  
  ERRORS
 
@@ -1283,7 +1283,7 @@ H5Adelete(hid_t loc_id, const char *name)
     herr_t H5Aclose (attr_id)
         hid_t attr_id;       IN: Attribute to release access to
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  
  ERRORS
 
@@ -1371,9 +1371,7 @@ H5A_copy(const H5A_t *old_attr)
  *
  * Purpose:	Frees a attribute and all associated memory.  
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Monday, December  8, 1997

@@ -34,9 +34,7 @@ static hbool_t		interface_initialize_g = FALSE;
  *
  * Errors:
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -115,9 +113,7 @@ H5G_stab_create(H5F_t *f, size_t init, H5G_entry_t *self/*out*/)
  *
  * Errors:
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -166,9 +162,7 @@ H5G_stab_find(H5G_entry_t *grp_ent, const char *name,
  *
  * Errors:
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -222,9 +216,7 @@ H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent)
  *
  * Purpose:	Remove NAME from a symbol table.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, September 17, 1998

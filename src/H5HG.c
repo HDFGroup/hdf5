@@ -349,9 +349,7 @@ H5HG_load (H5F_t *f, const haddr_t *addr, const void __unused__ *udata1,
  * Purpose:	Flushes a global heap collection from memory to disk if it's
  *		dirty.  Optionally deletes teh heap from memory.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Friday, March 27, 1998
@@ -411,7 +409,7 @@ H5HG_flush (H5F_t *f, hbool_t destroy, const haddr_t *addr, H5HG_heap_t *heap)
  *
  * Return:	Success:	The heap object ID of the new object.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Friday, March 27, 1998
@@ -505,10 +503,10 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, int cwfsno, size_t size)
  *		It is legal to push a zero-byte object onto the heap to get
  *		the reference count features of heap objects.
  *
- * Return:	Success:	SUCCEED, and a heap object handle returned
+ * Return:	Success:	Non-negative, and a heap object handle returned
  *				through the HOBJ pointer.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Friday, March 27, 1998
@@ -726,7 +724,7 @@ H5HG_read (H5F_t *f, H5HG_t *hobj, void *object/*out*/)
  *
  * Return:	Success:	Number of links present after the adjustment.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Monday, March 30, 1998
@@ -776,9 +774,7 @@ H5HG_link (H5F_t *f, H5HG_t *hobj, intn adjust)
  *
  * Purpose:	Removes the specified object from the global heap.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Monday, March 30, 1998
@@ -878,9 +874,7 @@ H5HG_remove (H5F_t *f, H5HG_t *hobj)
  *
  * Purpose:	Prints debugging information about a global heap collection.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov

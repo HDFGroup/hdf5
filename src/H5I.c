@@ -145,7 +145,7 @@ NAME
 USAGE
     herr_t H5I_init_interface()
 RETURNS
-   SUCCEED/FAIL
+    Non-negative on success/Negative on failure
 DESCRIPTION
     Initializes any interface-specific data or routines.
 --------------------------------------------------------------------------*/
@@ -182,7 +182,7 @@ H5I_init_interface(void)
     later.
 
  RETURNS
-    Returns SUCCEED if successful and FAIL otherwise
+    Non-negative on success/Negative on failure
 
 ******************************************************************************/
 intn 
@@ -274,9 +274,7 @@ H5I_init_group(H5I_type_t grp,	 /* IN: Group to initialize */
  *		the free-func for each ID's object and then adding the ID
  *		struct to the ID free list.
  *		
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Unknown
  *
@@ -363,7 +361,7 @@ H5I_destroy_group(H5I_type_t grp)
  *
  * Return:	Success:	New object id.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Unknown
  *
@@ -475,7 +473,7 @@ H5I_register(H5I_type_t grp, void *object)
     fail if the group is not a reference counted group.
 
  RETURNS
-    ID/FAIL
+    ID/Negative
 
 *******************************************************************************/
 hid_t
@@ -700,7 +698,7 @@ H5I_remove(hid_t id)
  *
  * Return:	Success:	New reference count.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Unknown
  *
@@ -889,7 +887,7 @@ H5I_get_id_node(void)
     Puts an ID node into the free list
 
  RETURNS
-    SUCCEED
+    Non-negative on success/Negative on failure
 
 *******************************************************************************/
 static herr_t
@@ -912,7 +910,7 @@ H5I_release_id_node(H5I_id_info_t *id)
  USAGE
     intn H5I_term_interface()
  RETURNS
-    Returns SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Free various buffers allocated in the H5I routines.
  GLOBAL VARIABLES

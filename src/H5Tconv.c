@@ -37,9 +37,7 @@ static intn interface_initialize_g = FALSE;
  * Purpose:     The no-op conversion.  The library knows about this
  *              conversion without it being registered.
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        never fails
+ * Return: Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              Wednesday, January 14, 1998
@@ -84,9 +82,7 @@ H5T_conv_noop(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *
  * Note:        This is a soft conversion function.
  *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              Tuesday, January 13, 1998
@@ -190,9 +186,7 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
  *		already initialized then the member conversion functions
  *		are recalculated.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Monday, January 26, 1998
@@ -368,9 +362,7 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
  *
  * 		Copy BACKGROUND to BUF
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, January 22, 1998
@@ -566,9 +558,7 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
  *		function for integer conversions and is probably not
  *		particularly fast.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Wednesday, June 10, 1998
@@ -924,9 +914,7 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		all for floating point conversions and is probably not
  *		particularly fast!
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Tuesday, June 23, 1998
@@ -1327,9 +1315,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *
  * Purpose:	Convert one fixed-length string type to another.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Friday, August  7, 1998
@@ -1556,9 +1542,7 @@ H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
  * Purpose:	Convert native `float' to native `double' using hardware.
  *		This is a fast special case.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Tuesday, June 23, 1998
@@ -1610,9 +1594,7 @@ H5T_conv_float_double (hid_t __unused__ src_id, hid_t __unused__ dst_id,
  * Purpose:	Convert native `double' to native `float' using hardware.
  *		This is a fast special case.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Tuesday, June 23, 1998
@@ -1678,9 +1660,8 @@ H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  * Purpose:	Converts 4-byte little-endian integers (signed or unsigned)
  *		to 8-byte litte-endian IEEE floating point.
  *
- * Return:	Success:	SUCCEED
+ * Return:	Non-negative on success/Negative on failure
  *
- *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
  *		Wednesday, June 10, 1998

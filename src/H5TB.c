@@ -72,7 +72,7 @@ USAGE
     herr_t H5TB_init_interface()
    
 RETURNS
-   SUCCEED/FAIL
+    Non-negative on success/Negative on failure
 DESCRIPTION
     Initializes any interface-specific data or routines.
 
@@ -85,7 +85,7 @@ H5TB_init_interface(void)
 
     /* Initialize the atom group for the file IDs */
     if ((ret_value = H5I_init_group(H5I_TEMPBUF, H5I_TEMPBUFID_HASHSIZE,
-            H5TB_RESERVED_ATOMS, NULL)) != FAIL) {
+            H5TB_RESERVED_ATOMS, NULL)) >= 0) {
         ret_value = H5_add_exit(&H5TB_term_interface);
     }
     FUNC_LEAVE(ret_value);
@@ -100,7 +100,7 @@ H5TB_init_interface(void)
  USAGE
     void H5TB_term_interface()
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Release the atom group and any other resources allocated.
  GLOBAL VARIABLES
@@ -138,9 +138,7 @@ H5TB_term_interface(void)
  *
  * Purpose:	Releases all memory associated with a temporary buffer.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *		Thursday, June 11, 1998

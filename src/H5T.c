@@ -113,7 +113,7 @@ USAGE
     herr_t H5T_init_interface()
    
 RETURNS
-   SUCCEED/FAIL
+    Non-negative on success/Negative on failure
 DESCRIPTION
     Initializes any interface-specific data or routines.
 
@@ -130,7 +130,7 @@ H5T_init_interface(void)
     /* Initialize the atom group for the file IDs */
     if ((ret_value = H5I_init_group(H5I_DATATYPE, H5I_DATATYPEID_HASHSIZE,
 				    H5T_RESERVED_ATOMS,
-				    (herr_t (*)(void *)) H5T_close)) != FAIL) {
+				    (herr_t (*)(void *)) H5T_close)) >= 0) {
 	ret_value = H5_add_exit(&H5T_term_interface);
     }
 
@@ -684,9 +684,7 @@ H5T_init_interface(void)
  *		called when the library is closing in order to unlock all
  *		registered data types and thus make them free-able.
  *
- * Return:	Success:	0
- *
- *		Failure:	0
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Monday, April 27, 1998
@@ -716,7 +714,7 @@ H5T_unlock_cb (void *_dt, const void __unused__ *key)
  USAGE
     void H5T_term_interface()
  RETURNS
-    SUCCEED/FAIL
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Release the atom group and any other resources allocated.
  GLOBAL VARIABLES
@@ -856,7 +854,7 @@ H5T_term_interface(void)
  *
  * Return:	Success:	A new type identifier.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Errors:
  *		ARGS	  BADVALUE	Invalid size. 
@@ -906,7 +904,7 @@ H5Tcreate(H5T_class_t type, size_t size)
  *
  * Return:	Success:	Object ID of the named data type.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Monday, June  1, 1998
@@ -956,9 +954,7 @@ H5Topen(hid_t loc_id, const char *name)
  * Purpose:	Save a transient data type to a file and turn the type handle
  *		into a named, immutable type.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Monday, June  1, 1998
@@ -1005,7 +1001,7 @@ H5Tcommit(hid_t loc_id, const char *name, hid_t type_id)
  *
  * Return:	Success:	TRUE if committed, FALSE otherwise.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Thursday, June  4, 1998
@@ -1041,7 +1037,7 @@ H5Tcommitted(hid_t type_id)
  *
  * Return:	Success:	The ID of a new data type.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		Tuesday, December  9, 1997
@@ -1112,9 +1108,7 @@ H5Tcopy(hid_t type_id)
  *
  * Purpose:	Frees a data type and all associated memory.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Tuesday, December  9, 1997
@@ -1156,7 +1150,7 @@ H5Tclose(hid_t type_id)
  *
  * Return:	Success:	TRUE if equal, FALSE if unequal
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Errors:
  *
@@ -1201,9 +1195,7 @@ H5Tequal(hid_t type1_id, hid_t type2_id)
  *		Once a data type is locked it can never be unlocked unless
  *		the entire library is closed.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Friday, January	 9, 1998
@@ -1250,7 +1242,7 @@ H5Tlock(hid_t type_id)
  * Return:	Success:	One of the non-negative data type class
  *				constants.
  *
- *		Failure:	H5T_NO_CLASS (-1, same as FAIL)
+ *		Failure:	H5T_NO_CLASS (Negative)
  *
  * Programmer:	Robb Matzke
  *		Monday, December  8, 1997
@@ -1334,9 +1326,7 @@ H5Tget_size(hid_t type_id)
  *
  *		All data types have a positive size.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -1434,7 +1424,7 @@ H5Tset_size(hid_t type_id, size_t size)
  *
  * Return:	Success:	A byte order constant
  *
- *		Failure:	H5T_ORDER_ERROR (-1, same as FAIL)
+ *		Failure:	H5T_ORDER_ERROR (Negative)
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -1472,9 +1462,7 @@ H5Tget_order(hid_t type_id)
  *
  * Purpose:	Sets the byte order for an atomic data type.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -1571,9 +1559,7 @@ H5Tget_precision(hid_t type_id)
  *		the locations and sizes of the sign, mantissa, and exponent
  *		fields first.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -1737,9 +1723,7 @@ H5Tget_offset(hid_t type_id)
  *		The offset of an H5T_STRING cannot be set to anything but
  *		zero. 
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -1789,9 +1773,7 @@ H5Tset_offset(hid_t type_id, size_t offset)
  *		pad type and returns their values through the LSB and MSB
  *		arguments, either of which may be the null pointer.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Friday, January	 9, 1998
@@ -1828,9 +1810,7 @@ H5Tget_pad(hid_t type_id, H5T_pad_t *lsb/*out*/, H5T_pad_t *msb/*out*/)
  *
  * Purpose:	Sets the LSB and MSB pad types.
  *
- * Return:	Success:	
- *
- *		Failure:	
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Friday, January	 9, 1998
@@ -1875,7 +1855,7 @@ H5Tset_pad(hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb)
  *
  * Return:	Success:	The sign type.
  *
- *		Failure:	H5T_SGN_ERROR (-1, same as FAIL)
+ *		Failure:	H5T_SGN_ERROR (Negative)
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -1913,9 +1893,7 @@ H5Tget_sign(hid_t type_id)
  *
  * Purpose:	Sets the sign property for an integer.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -1961,10 +1939,10 @@ H5Tset_sign(hid_t type_id, H5T_sign_t sign)
  *
  *		Any (or even all) of the arguments can be null pointers.
  *
- * Return:	Success:	SUCCEED, field locations and sizes are
+ * Return:	Success:	Non-negative, field locations and sizes are
  *				returned through the arguments.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -2013,9 +1991,7 @@ H5Tget_fields(hid_t type_id, size_t *spos/*out*/,
  *		Fields are not allowed to extend beyond the number of bits of
  *		precision, nor are they allowed to overlap with one another.
  *		
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -2127,9 +2103,7 @@ H5Tget_ebias(hid_t type_id)
  *
  * Purpose:	Sets the exponent bias of a floating-point type.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -2172,7 +2146,7 @@ H5Tset_ebias(hid_t type_id, size_t ebias)
  *
  * Return:	Success:	Normalization ID
  *
- *		Failure:	H5T_NORM_ERROR (-1, same as FAIL)
+ *		Failure:	H5T_NORM_ERROR (Negative)
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -2211,9 +2185,7 @@ H5Tget_norm(hid_t type_id)
  * Purpose:	Sets the mantissa normalization method for a floating point
  *		data type.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -2260,7 +2232,7 @@ H5Tset_norm(hid_t type_id, H5T_norm_t norm)
  *
  * Return:	Success:	The internal padding type.
  *
- *		Failure:	H5T_PAD_ERROR (-1, same as FAIL)
+ *		Failure:	H5T_PAD_ERROR (Negative)
  *
  * Programmer:	Robb Matzke
  *		Friday, January	 9, 1998
@@ -2301,9 +2273,7 @@ H5Tget_inpad(hid_t type_id)
  *		sign, exponent, or mantissa) then they will be filled
  *		according to the value of this property.
  *
- * Return:	Success:	
- *
- *		Failure:	
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Friday, January	 9, 1998
@@ -2350,7 +2320,7 @@ H5Tset_inpad(hid_t type_id, H5T_pad_t pad)
  *		
  * Return:	Success:	The character set of an H5T_STRING type.
  *
- *		Failure:	H5T_CSET_ERROR (-1, same as FAIL)
+ *		Failure:	H5T_CSET_ERROR (Negative)
  *
  * Programmer:	Robb Matzke
  *		Friday, January	 9, 1998
@@ -2390,9 +2360,7 @@ H5Tget_cset(hid_t type_id)
  *		different nationalities and to convert between them to the
  *		extent possible.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Friday, January	 9, 1998
@@ -2439,7 +2407,7 @@ H5Tset_cset(hid_t type_id, H5T_cset_t cset)
  *		
  * Return:	Success:	The character set of an H5T_STRING type.
  *
- *		Failure:	H5T_STR_ERROR (-1, same as FAIL)
+ *		Failure:	H5T_STR_ERROR (Negative)
  *
  * Programmer:	Robb Matzke
  *		Friday, January	 9, 1998
@@ -2490,9 +2458,7 @@ H5Tget_strpad(hid_t type_id)
  *		long string is padded on the end by appending nulls or
  *		spaces.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Friday, January	 9, 1998
@@ -2536,7 +2502,7 @@ H5Tset_strpad(hid_t type_id, H5T_str_t strpad)
  * Return:	Success:	Number of members defined in a compound data
  *				type.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Errors:
  *
@@ -2667,7 +2633,7 @@ H5Tget_member_offset(hid_t type_id, int membno)
  *
  * Return:	Success:	A value between zero and four, inclusive.
  *
- *		Failure:	-1
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -2718,7 +2684,7 @@ H5Tget_member_dims(hid_t type_id, int membno,
  *				modifying the returned data type does not
  *				modify the member type.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -2779,11 +2745,11 @@ H5Tget_member_type(hid_t type_id, int membno)
  *		compound data type cannot have a member which is a compound
  *		data type.
  *
- * Return:	Success:	SUCCEED, the PARENT_ID compound data type is
+ * Return:	Success:	Non-negative, the PARENT_ID compound data type is
  *				modified to include a copy of the member type
  *				MEMBER_ID.
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Errors:
  *
@@ -2841,9 +2807,7 @@ H5Tinsert(hid_t parent_id, const char *name, size_t offset, hid_t member_id)
  *		array with NDIMS dimensionality and the size of the array is
  *		DIMS. The total member size should be relatively small.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Tuesday, July  7, 1998
@@ -2909,9 +2873,7 @@ H5Tinsert_array(hid_t parent_id, const char *name, size_t offset,
  * Purpose:	Recursively removes padding from within a compound data type
  *		to make it more efficient (space-wise) to store that data.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -2962,9 +2924,7 @@ H5Tpack(hid_t type_id)
  *		are then used when determining which conversion function is
  *		appropriate for this path.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Friday, January	 9, 1998
@@ -3026,9 +2986,7 @@ H5Tregister_hard(const char *name, hid_t src_id, hid_t dst_id,
  *		of the master soft list and replacing the soft function in
  *		all applicable existing conversion paths.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Tuesday, January 13, 1998
@@ -3153,9 +3111,7 @@ H5Tregister_soft(const char *name, H5T_class_t src_cls, H5T_class_t dst_cls,
  *
  * Purpose:	Removes FUNC from all conversion paths.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Tuesday, January 13, 1998
@@ -3331,9 +3287,7 @@ H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
  *		fields already initialized and the conversion of BUF supplies
  *		the `c' and `d' field values).
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Wednesday, June 10, 1998
@@ -3431,9 +3385,7 @@ H5Tget_overflow(void)
  *		documentation of arguments and return values.  The NULL
  *		pointer may be passed to remove the overflow handler.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Tuesday, July  7, 1998
@@ -3681,9 +3633,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
  * Purpose:	Commit a type, giving it a name and causing it to become
  *		immutable.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Monday, June  1, 1998
@@ -3763,9 +3713,7 @@ H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type)
  *		This function is a no-op if the type is not transient or if
  *		the type is already read-only or immutable.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Thursday, June  4, 1998
@@ -3804,9 +3752,7 @@ H5T_lock (H5T_t *dt, hbool_t immutable)
  * Purpose:	Frees a data type and all associated memory.  If the data
  *		type is locked then nothing happens.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Monday, December  8, 1997
@@ -3865,7 +3811,7 @@ H5T_close(H5T_t *dt)
  *
  * Return:	Success:	TRUE, FALSE
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -3923,9 +3869,7 @@ H5T_get_size(const H5T_t *dt)
  *		instance of PARENT will have the member begin at byte offset
  *		OFFSET from the beginning.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Monday, December  8, 1997
@@ -4007,9 +3951,7 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, intn ndims,
  * Purpose:	Recursively packs a compound data type by removing padding
  *		bytes. This is done in place (that is, destructively).
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -4060,9 +4002,7 @@ H5T_pack(H5T_t *dt)
  *		This even works for locked data types since it doesn't change
  *		the value of the type.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -4695,9 +4635,7 @@ H5T_timer_end (H5_timer_t __unused__ *timer, H5T_cdata_t __unused__ *cdata,
  *
  * Purpose:	Prints information about a data type.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998

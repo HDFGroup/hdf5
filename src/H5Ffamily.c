@@ -260,9 +260,7 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
  * Purpose:	Closes all members of a file family and releases resources
  *		used by the file descriptor.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Monday, November 10, 1997
@@ -302,9 +300,7 @@ H5F_fam_close(H5F_low_t *lf, const H5F_access_t *access_parms)
  *		flushing the file causes the first member to be physically
  *		extended to it's maximum size).
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Monday, November 10, 1997
@@ -369,9 +365,7 @@ H5F_fam_read(H5F_low_t *lf, const H5F_access_t *access_parms,
  *		of file, so this function will extend the physical file to
  *		accommodate the new data if necessary.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Monday, November 10, 1997
@@ -490,9 +484,7 @@ H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
  *		the member size if we open this file for read access at a
  *		later date.
  *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Monday, November 10, 1997
