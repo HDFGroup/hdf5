@@ -12,7 +12,7 @@
 
 #include "hdf5.h"
 
-#define FILE "refere.h5"
+#define H5FILE_NAME "refere.h5"
 
 int
 main(void) {
@@ -32,7 +32,7 @@ main(void) {
    /* 
     *  Create a file using default properties.
     */
-   fid = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+   fid = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
    /* 
     *  Create  group "A" in the file.
@@ -91,7 +91,7 @@ main(void) {
    /* 
     * Reopen the file.
     */
-   fid = H5Fopen(FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+   fid = H5Fopen(H5FILE_NAME, H5F_ACC_RDWR, H5P_DEFAULT);
 
    /* 
     *  Open and read dataset "R".

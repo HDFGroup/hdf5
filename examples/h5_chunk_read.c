@@ -5,7 +5,7 @@
  
 #include "hdf5.h"
 
-#define FILE        "SDSextendible.h5"
+#define H5FILE_NAME        "SDSextendible.h5"
 #define DATASETNAME "ExtendibleArray" 
 #define RANK         2
 #define RANKC        1
@@ -39,7 +39,7 @@ main (void)
     /*
      * Open the file and the dataset.
      */
-    file = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file = H5Fopen(H5FILE_NAME, H5F_ACC_RDONLY, H5P_DEFAULT);
     dataset = H5Dopen(file, DATASETNAME);
  
     /*
