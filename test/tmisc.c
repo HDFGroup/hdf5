@@ -1268,8 +1268,10 @@ test_misc8(void)
     CHECK(ret, FAIL, "H5Pset_space_time"); 
 
     /* Use compression as well as chunking for these datasets */
+#ifdef H5_HAVE_COMPRESSION
     ret = H5Pset_deflate(dcpl,9);
     CHECK(ret, FAIL, "H5Pset_deflate"); 
+#endif /* end H5_HAVE_COMPRESSION */
 
     /* Create a chunked dataset, with space allocation early */
     did = H5Dcreate(fid, MISC8_DSETNAME5, H5T_NATIVE_INT, sid, dcpl);
@@ -1282,10 +1284,17 @@ test_misc8(void)
     /* Check the storage size after data is written */
     storage_size=H5Dget_storage_size(did);
     CHECK(storage_size, 0, "H5Dget_storage_size");
+#ifdef H5_HAVE_COMPRESSION
     if(storage_size>=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
         num_errs++;
         printf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
     } 
+#else
+    if(storage_size!=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
+        num_errs++;                                          
+        printf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
+    }
+#endif /* end H5_HAVE_COMPRESSION */
 
     /* Close dataset ID */
     ret = H5Dclose(did);
