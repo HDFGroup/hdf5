@@ -684,6 +684,9 @@ H5Tget_overflow ()
         <dt><em>hid_t</em> <code>base_type_id</code>
             <dd>Base type of datatype to create.
     </dl>
+<dt><strong>See Also:</strong>
+    <dd><a href="RM_H5D.html#Dataset-GetVLBuf">H5Dget_vlen_buf_size</a>
+    <dd><a href="RM_H5D.html#Dataset-VLReclaim">H5Dvlen_reclaim</a>
 <dt><strong>Returns:</strong>
     <dd>Returns datatype identifier if successful;
         otherwise returns a negative value.
@@ -873,15 +876,16 @@ H5Tget_overflow ()
     <dd><code>H5Tget_class</code> returns the datatype class identifier.
         <p>
         Valid class identifiers, as defined in <code>H5Tpublic.h</code>, are:
-        <ul><li><code>H5T_INTEGER</code> (<code>0</code>)
-            <li><code>H5T_FLOAT</code> (<code>1</code>)
-            <li><code>H5T_TIME</code> (<code>2</code>)
-            <li><code>H5T_STRING</code> (<code>3</code>)
-            <li><code>H5T_BITFIELD</code> (<code>4</code>)
-            <li><code>H5T_OPAQUE</code> (<code>5</code>)
-            <li><code>H5T_COMPOUND</code> (<code>6</code>)
-            <li><code>H5T_REFERENCE</code> (<code>7</code>)
-            <li><code>H5T_ENUM</code> (<code>8</code>)
+        <ul><li><code>H5T_INTEGER</code>
+            <li><code>H5T_FLOAT</code>
+            <li><code>H5T_TIME</code>
+            <li><code>H5T_STRING</code>
+            <li><code>H5T_BITFIELD</code>
+            <li><code>H5T_OPAQUE</code>
+            <li><code>H5T_COMPOUND</code>
+            <li><code>H5T_REFERENCE</code>
+            <li><code>H5T_ENUM</code>
+            <li><code>H5T_VLEN</code>
         </ul>
 <dt><strong>Parameters:</strong>
     <dl>

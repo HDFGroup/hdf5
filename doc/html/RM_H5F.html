@@ -557,22 +557,32 @@ facilitate moving easily between them.</i>
 <dl>
 <dt><strong>Name:</strong> <a name="File-Reopen">H5Freopen</a>
 <dt><strong>Signature:</strong>
-    <dd><em>hid__t </em><code>H5Freopen</code>(<em>hid_t</em> <code>file_id</code>
+    <dd><em>hid_t </em><code>H5Freopen</code>(<em>hid_t</em> <code>file_id</code>
         )
 <dt><strong>Purpose:</strong>
-        <dd>Reopens an HDF5 file.
+        <dd>Returns a new identifier for a previously-opened HDF5 file.
 <dt><strong>Description:</strong>
-        <dd><code>H5Freopen</code> reopens an HDF5 file.  The new 
-            file identifier which is returned points to the same file 
-            as the specified file idetifier, <code>file_id</code>.  
+        <dd><code>H5Freopen</code> returns a new file identifier for an
+            already-open HDF5 file, as specified by <code>file_id</code>.  
             Both identifiers share caches and other information.  
             The only difference between the identifiers is that the 
             new identifier is not mounted anywhere and no files are 
             mounted on it.
+            <p>
+            Note that there is no circumstance under which 
+            <code>H5Freopen</code> can actually open a closed file; 
+            the file  must already be open and have an active 
+            <code>file_id</code>.  E.g., one cannot close a file with 
+            <code> H5Fclose&nbsp;(file_id) </code> then use 
+            <code> H5Freopen&nbsp;(file_id) </code> to reopen it.
+            <p>
+            The new file identifier should be closed by calling
+            <code>H5Fclose()</code> when it is no longer needed.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>file_id</code>
-            <dd>Identifier of a file to terminate access to.
+            <dd>Identifier of a file for which an additional identifier 
+                is required.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a new file identifier if successful;
