@@ -236,10 +236,10 @@ typedef struct H5FL_arr_head_t {
 #define H5FL_ARR_DEFINE(t,m)    H5_DLL H5FL_ARR_DEFINE_COMMON(t,m)
 #define H5FL_ARR_EXTERN(t)      extern H5_DLL int H5FL_ARR_NAME(t)
 #define H5FL_ARR_DEFINE_STATIC(t,m)  static H5FL_ARR_DEFINE_COMMON(t,m)
-#define H5FL_ARR_MALLOC(t,elem) H5MM_malloc(elem*sizeof(t))
-#define H5FL_ARR_CALLOC(t,elem) H5MM_calloc(elem*sizeof(t))
+#define H5FL_ARR_MALLOC(t,elem) H5MM_malloc((elem)*sizeof(t))
+#define H5FL_ARR_CALLOC(t,elem) H5MM_calloc((elem)*sizeof(t))
 #define H5FL_ARR_FREE(t,obj) H5MM_xfree(obj)
-#define H5FL_ARR_REALLOC(t,obj,new_elem) H5MM_realloc(obj,new_elem*sizeof(t))
+#define H5FL_ARR_REALLOC(t,obj,new_elem) H5MM_realloc(obj,(new_elem)*sizeof(t))
 #endif /* H5_NO_ARR_FREE_LISTS */
 
 /*
