@@ -4873,13 +4873,13 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
                    "memory allocation failed");
         }
 
-        /* Sort the fields based on offsets */
-        H5T_sort_value((H5T_t *)old_dt,NULL);
-	
         HDmemcpy(new_dt->u.compnd.memb, old_dt->u.compnd.memb,
              new_dt->u.compnd.nmembs * sizeof(H5T_cmemb_t));
 
         for (i=0; i<new_dt->u.compnd.nmembs; i++) {
+            intn	j;
+            intn    old_match;
+
             s = new_dt->u.compnd.memb[i].name;
             new_dt->u.compnd.memb[i].name = H5MM_xstrdup(s);
             tmp = H5T_copy (old_dt->u.compnd.memb[i].type, method);
@@ -4888,14 +4888,30 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
             /* Apply the accumulated size change to the offset of the field */
             new_dt->u.compnd.memb[i].offset += accum_change;
 
-            /* If the field changed size, add that change to the accumulated size change */
-            if(new_dt->u.compnd.memb[i].type->size != old_dt->u.compnd.memb[i].type->size) {
-                /* Adjust the size of the member */
-                new_dt->u.compnd.memb[i].size = (old_dt->u.compnd.memb[i].size*tmp->size)/old_dt->u.compnd.memb[i].type->size;
+            if(old_dt->u.compnd.sorted != H5T_SORT_VALUE) {
+                for (old_match=-1, j=0; j<old_dt->u.compnd.nmembs; j++) {
+                    if(!HDstrcmp(new_dt->u.compnd.memb[i].name,old_dt->u.compnd.memb[j].name)) {
+                        old_match=j;
+                        break;
+                    } /* end if */
+                } /* end for */
 
-                accum_change += (new_dt->u.compnd.memb[i].type->size - old_dt->u.compnd.memb[i].type->size);
+                /* check if we couldn't find a match */
+                if(old_match<0)
+                    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "fields in datatype corrupted");
             } /* end if */
-        }
+            else {
+                old_match=i;
+            } /* end else */
+
+            /* If the field changed size, add that change to the accumulated size change */
+            if(new_dt->u.compnd.memb[i].type->size != old_dt->u.compnd.memb[old_match].type->size) {
+                /* Adjust the size of the member */
+                new_dt->u.compnd.memb[i].size = (old_dt->u.compnd.memb[old_match].size*tmp->size)/old_dt->u.compnd.memb[old_match].type->size;
+
+                accum_change += (new_dt->u.compnd.memb[i].type->size - old_dt->u.compnd.memb[old_match].type->size);
+            } /* end if */
+        } /* end for */
 
         /* Apply the accumulated size change to the size of the compound struct */
         new_dt->size += accum_change;
