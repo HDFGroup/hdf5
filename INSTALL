@@ -102,7 +102,7 @@
 	used to configure, build, test, and install the HDF5 library,
 	header files, and support programs.
 
-	$ gunzip <hdf5-1.2.0.tar.gz |tar xf -
+	$ gunzip < hdf5-1.2.0.tar.gz | tar xf -
 	$ cd hdf5-1.2.0
 	$ make check
 	$ make install
@@ -345,7 +345,10 @@
 	saying `--disable-static' or `--disable-shared'.
 
 	    $ ./configure --disable-shared
-	
+
+	The C++ and Fortran libraries are currently only available in the
+	static format.
+
 	To build only statically linked executables on platforms which
 	support shared libraries, use the `--enable-static-exec' flag.
 
