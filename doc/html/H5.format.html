@@ -105,8 +105,8 @@ TABLE.list TD { border:none; }
 	      <li><a href="#SimpleDataSpace">Name: Simple Dataspace</a>                                     <!-- 0x0001 -->
 <!--          <li><a href="#DataSpaceMessage">Name: Complex Dataspace</a>  -->                              <!-- 0x0002 -->
 	      <li><a href="#DataTypeMessage">Name: Datatype</a>                                             <!-- 0x0003 -->
-	      <li><a href="#FillValueMessage">Name: Data Storage - Fill Value</a>                           <!-- 0x0004 -->
-	      <li><a href="#ReservedMessage_0005">Name: Reserved - not assigned yet</a>                     <!-- 0x0005 -->
+	      <li><a href="#OldFillValueMessage">Name: Data Storage - Fill Value (Old)</a>                  <!-- 0x0004 -->
+	      <li><a href="#FillValueMessage">Name: Data Storage - Fill Value</a>                           <!-- 0x0005 -->
 	    </ol>
         </ol>
         </font>
@@ -1701,7 +1701,7 @@ TABLE.list TD { border:none; }
         </td>
           
         <tr>
-          <td colspan=4>Collection Size</td>
+          <td colspan=4>Collection Size<sup>L</sup></td>
         </tr>
           
         <tr>
@@ -1723,6 +1723,14 @@ TABLE.list TD { border:none; }
         <tr>
           <td colspan=4><br>Global Heap Object 0 (free space)<br><br></td>
         </tr>
+      </table>
+
+      <table class=note>
+        <tr><td>
+            (Items marked with an 'L' the above table are
+            <br>
+            of the size specified in "Size of Lengths.")
+        </td></tr>
       </table>
     </div>
 
@@ -1758,7 +1766,7 @@ TABLE.list TD { border:none; }
         </tr>
 
         <tr>
-          <td>Collection Data Size</td>
+          <td>Collection Size</td>
           <td>
             <P>This is the size in bytes of the entire collection
             including this field.  The default (and minimum)
@@ -1815,7 +1823,7 @@ TABLE.list TD { border:none; }
         </tr>
 
         <tr>
-          <td colspan=4>Object Data Size<sup>L</sup></td>
+          <td colspan=4>Object Size<sup>L</sup></td>
         </tr>
 
         <tr>
@@ -1875,9 +1883,9 @@ TABLE.list TD { border:none; }
         <tr>
           <td>Object Size</td>
           <td>
-            <P>This is the size of the the fields above plus the object data
-            stored for the object.  The actual storage size is rounded up to a
-            multiple of eight.
+            <P>This is the size of the object data stored for the object.
+            The actual storage space allocated for the object data is rounded
+            up to a multiple of eight.
             </P>
           </td>
         </tr>
@@ -2025,7 +2033,8 @@ TABLE.list TD { border:none; }
       integrity.  Information stored by user applications as attributes
       is also stored in the object's header.  The header of each object is
       not necessarily located immediately prior to the object's data in the
-      file and in fact may be located in any position in the file.
+      file and in fact may be located in any position in the file.  The order
+      of the messages in an object header is not significant.
     </P>
 
     <P>Header messages are aligned on 8-byte boundaries.
@@ -2904,6 +2913,7 @@ TABLE.list TD { border:none; }
 
       </table>
     </div>
+    </P>
 
     <P>Class specific information for Fixed-Point Numbers (Class 0):
 
@@ -4146,69 +4156,287 @@ TABLE.list TD { border:none; }
     </P>
 
     <hr>
-    <h4><a name="FillValueMessage">Name: Data Storage - Fill Value</a></h4>
-    <b>Header Message Type:</b> 0x0004<br>
-    <b>Length:</b> varies<br>
-    <b>Status:</b> Optional, may not be repeated.<br>
+    <h4><a name="OldFillValueMessage">Name: Data Storage - Fill Value (Old)</a></h4>
 
-    <p>The fill value message stores a single data point value which
-      is returned to the application when an uninitialized data point
-      is read from the dataset.  The fill value is interpretted with
-      the same datatype as the dataset.  If no fill value message is
-      present then a fill value of all zero is assumed.
+    <P class=item><B>Header Message Type:</B> 0x0004
+    </P>
+    <P class=item><B>Length:</B> varies
+    </P>
+    <P class=item><B>Status:</B> Optional, may not be repeated.
+    </P>
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>Fill Value Message</b>
+    <P class=item><B>Description:</B> The fill value message stores a single
+        data value which is returned to the application when an uninitialized
+        data element is read from a dataset.  The fill value is interpreted
+        with the same datatype as the dataset.  If no fill value message is
+        present then a fill value of all zero bytes is assumed.
+    </P>
+
+    <P class=item2>This fill value message is deprecated in favor of the "new"
+        fill value message (Message Type 0x0005) and is only written to the
+        file for forward compatibility with versions of the HDF5 library before
+        the 1.6.0 version.  Additionally, it only appears for datasets with a
+        user defined fill value (as opposed to the library default fill value
+        or an explicitly set "undefined" fill value).
+    </P>
+
+    <P class=item><B>Format of Data:</B>
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Fill Value Message (Old)
 	</caption>
 
-	<tr align=center>
+	<tr>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	</tr>
 
-	<tr align=center>
-	  <td colspan=4>Size (4 bytes)</td>
+	<tr>
+	  <td colspan=4>Size</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4><br>Fill Value<br><br></td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
 	</tr>
 
-	<tr valign=top>
-	  <td>Size (4 bytes)</td>
-	  <td>This is the size of the Fill Value field in bytes.</td>
+	<tr>
+	  <td>Size</td>
+	  <td>
+            <P>This is the size of the Fill Value field in bytes.
+            </P>
+          </td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Fill Value</td>
-	  <td>The fill value.  The bytes of the fill value are
-	    interpreted using the same datatype as for the dataset.</td>
+	  <td>
+            <P>The fill value.  The bytes of the fill value are interpreted
+                using the same datatype as for the dataset.
+            </P>
+          </td>
 	</tr>
       </table>
-    </center>
+    </div>
+    </P>
 
     <hr>
-    <h4><a name="ReservedMessage_0005">Name: Reserved - Not Assigned Yet</a></h4>
-    <b>Header Message Type:</b> 0x0005<br>
-    <b>Length:</b> N/A<br>
-    <b>Status:</b> N/A<br>
+    <h4><a name="FillValueMessage">Name: Data Storage - Fill Value </a></h4>
 
+    <P class=item><B>Header Message Type:</B> 0x0005
+    </P>
+    <P class=item><B>Length:</B> varies
+    </P>
+    <P class=item><B>Status:</B> Required for dataset objects, may not be repeated.
+    </P>
 
+    <P class=item><B>Description:</B> The fill value message stores a single
+        data value which is returned to the application when an uninitialized
+        data element is read from a dataset.  The fill value is interpreted
+        with the same datatype as the dataset.
+    </P>
+
+    <P class=item><B>Format of Data:</B>
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Fill Value Message
+	</caption>
+
+	<tr>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	</tr>
+
+	<tr>
+	  <td>Version</td>
+	  <td>Space Allocation Time</td>
+	  <td>Fill Value Write Time</td>
+	  <td>Fill Value Defined</td>
+	</tr>
+
+	<tr>
+	  <td colspan=4>Size</td>
+	</tr>
+
+	<tr>
+	  <td colspan=4><br>Fill Value<br><br></td>
+	</tr>
+      </table>
+    </div>
+
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
+	</tr>
+
+	<tr>
+	  <td>Version</td>
+	  <td>
+            <P>The version number information is used for changes in the
+                format of the fill value message and is described here:
+                <table class=list>
+                    <tr>
+                      <th width="30%">Version</th>
+                      <th align=left>Description</th>
+                    </tr>
+
+                    <tr>
+                      <td align=center><code>0</code></td>
+                      <td>Never used
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align=center><code>1</code></td>
+                      <td>Used by version 1.6.x of the library to encode
+                            fill values.  In this version, the Size field is
+                            always present.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align=center><code>2</code></td>
+                      <td>The current version used by the library (version
+                        1.7.3 or later).  In this version, the Size field is
+                        only present if the Fill Value Defined field is set
+                        to 1.
+                      </td>
+                    </tr>
+                </table>
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Space Allocation Time</td>
+	  <td>
+            <P>When the storage space for the dataset's raw data will be
+                allocated.  The allowed values are:
+                <table class=list>
+                    <tr>
+                      <th width="30%">Value</th>
+                      <th align=left>Description</th>
+                    </tr>
+
+                    <tr>
+                      <td align=center><code>1</code></td>
+                      <td>Early allocation.  Storage space for the entire dataset
+                        should be allocated in the file when the dataset is
+                        created.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align=center><code>2</code></td>
+                      <td>Late allocation.  Storage space for the entire dataset
+                        should not be allocated until the dataset is written
+                        to.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align=center><code>3</code></td>
+                      <td>Incremental allocation.  Storage space for the
+                        dataset should not be allocated until the portion
+                        of the dataset is written to.  This is currently
+                        used in conjunction with chunked data storage for
+                        datasets.
+                      </td>
+                    </tr>
+                </table>
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Fill Value Write Time</td>
+	  <td>
+            <P>At the time that storage space for the dataset's raw data is
+                allocated, this value indicates whether the fill value should
+                be written to the raw data storage elements.  The allowed values
+                are:
+                <table class=list>
+                    <tr>
+                      <th width="30%">Value</th>
+                      <th align=left>Description</th>
+                    </tr>
+
+                    <tr>
+                      <td align=center><code>0</code></td>
+                      <td>On allocation.  The fill value is always written to
+                        the raw data storage when the storage space is allocated.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align=center><code>1</code></td>
+                      <td>Never.  The fill value should never be written to
+                        the raw data storage.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align=center><code>2</code></td>
+                      <td>Fill value written if set by user.  The fill value
+                        will be written to the raw data storage when the storage
+                        space is allocated only if the user explicitly set
+                        the fill value.  If the fill value is the library
+                        default or is undefined, it will not be written to
+                        the raw data storage.
+                      </td>
+                    </tr>
+                </table>
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Fill Value Defined</td>
+	  <td>
+            <P>This value indicates if a fill value is defined for this
+                dataset.  If this value is 0, the fill value is undefined.
+                If this value is 1, a fill value is defined for this dataset.
+                For version 2 or later of the fill value message, this value
+                controls the presence of the Size field.
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Size</td>
+	  <td>
+            <P>This is the size of the Fill Value field in bytes.  This field
+                is not present if the Version field is >1 and the Fill Value
+                Defined field is set to 0.
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Fill Value</td>
+	  <td>
+            <P>The fill value.  The bytes of the fill value are interpreted
+                using the same datatype as for the dataset.
+            </P>
+          </td>
+	</tr>
+      </table>
+    </div>
+    </P>
 
     <hr>
     <h4><a name="CompactDataStorageMessage">Name: Data Storage - Compact</a></h4>
