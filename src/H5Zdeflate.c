@@ -78,9 +78,9 @@ H5Z_filter_deflate (unsigned UNUSED flags, size_t cd_nelmts,
 	}
 	HDmemset(&z_strm, 0, sizeof(z_strm));
 	z_strm.next_in = *buf;
-	z_strm.avail_in = nbytes;
+	z_strm.avail_in = (uInt)nbytes;
 	z_strm.next_out = outbuf;
-	z_strm.avail_out = nalloc;
+	z_strm.avail_out = (uInt)nalloc;
 	if (Z_OK!=inflateInit(&z_strm)) {
 	    HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, 0, "inflateInit() failed");
 	}
@@ -100,7 +100,7 @@ H5Z_filter_deflate (unsigned UNUSED flags, size_t cd_nelmts,
 				"uncompression");
 		}
 		z_strm.next_out = (unsigned char*)outbuf + z_strm.total_out;
-		z_strm.avail_out = nalloc - z_strm.total_out;
+		z_strm.avail_out = (uInt)(nalloc - z_strm.total_out);
 	    }
 	}
 	
