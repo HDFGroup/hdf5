@@ -307,9 +307,9 @@ H5AC_compare(const void *_a, const void *_b)
         }
     } else if (NULL == current_cache_g->slot[b].type) {
         return 1;
-    } else if (current_cache_g->slot[a].addr < current_cache_g->slot[b].addr) {
+    } else if (H5F_addr_lt(&current_cache_g->slot[a].addr,&current_cache_g->slot[b].addr)) {
         return -1;
-    } else if (current_cache_g->slot[a].addr > current_cache_g->slot[b].addr) {
+    } else if (H5F_addr_gt(&current_cache_g->slot[a].addr,&current_cache_g->slot[b].addr)) {
         return 1;
     }
     return 0;

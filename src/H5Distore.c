@@ -173,7 +173,7 @@ H5B_class_t H5B_ISTORE[1] = {{
 #define H5F_HASH_DIVISOR 8     /* Attempt to spread out the hashing */
                                 /* This should be the same size as the alignment of */
                                 /* of the smallest file format object written to the file.  */
-#define H5F_HASH(F,ADDR) H5F_addr_hash((ADDR/H5F_HASH_DIVISOR),(F)->shared->rdcc.nslots)
+#define H5F_HASH(F,ADDR) H5F_addr_hash(ADDR,(F)->shared->rdcc.nslots)
 
 /* Declare a free list to manage the chunk information */
 H5FL_BLK_DEFINE_STATIC(istore_chunk);
@@ -1315,6 +1315,7 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 		 hbool_t relax, intn *idx_hint/*in,out*/)
 {
     uintn		idx=0;			/*hash index number	*/
+    haddr_t     loc;
     hbool_t		found = FALSE;		/*already in cache?	*/
     H5F_rdcc_t		*rdcc = &(f->shared->rdcc);/*raw data chunk cache*/
     H5F_rdcc_ent_t	*ent = NULL;		/*cache entry		*/
@@ -1335,8 +1336,9 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
         idx *= layout->dim[i];
 	    idx += offset[i];
 	}
-	idx += (uintn)(layout->addr);
-    idx=H5F_HASH(f,idx);
+	loc = layout->addr;
+	H5F_addr_inc(&loc,idx);
+    idx=H5F_HASH(f,&loc);
 	ent = rdcc->slot[idx];
     
 	if (ent &&
