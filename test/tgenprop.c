@@ -958,8 +958,10 @@ test_genprop_prop_cls_cb1(const char *name, size_t size, void *value)
 {
     /* Set the information from the close call */
     prop1_cb_info.cls_count++;
-    prop1_cb_info.cls_name=HDstrdup(name);
-    prop1_cb_info.cls_value=HDmalloc(size);
+    if(prop1_cb_info.cls_name==NULL)
+        prop1_cb_info.cls_name=HDstrdup(name);
+    if(prop1_cb_info.cls_value==NULL)
+        prop1_cb_info.cls_value=HDmalloc(size);
     HDmemcpy(prop1_cb_info.cls_value,value,size);
 
     return(SUCCEED);
@@ -1171,6 +1173,13 @@ test_genprop_list_callback(void)
         num_errs++;
         printf("Property #1 value doesn't match!, line=%d\n",__LINE__);
     } /* end if */
+
+    /* Close second list */
+    ret = H5Pclose_list(lid2);
+    CHECK_I(ret, "H5Pclose_list");
+
+    /* Verify close callback information for properties tracked */
+    VERIFY(prop1_cb_info.cls_count, 2, "H5Pclose");
 
     /* Free memory allocated for tracking properties */
     HDfree(prop1_cb_info.crt_name);
