@@ -1,16 +1,16 @@
 /*
  * Generate the binary hdf5 files for the h5dump tests.
  */
-
 #include "hdf5.h"
 
 #define FILE1 "tgroup.h5"
 #define FILE2 "tdset.h5"
 #define FILE3 "tattr.h5"
 #define FILE4 "tslink.h5"
-#define FILE5 "tall.h5"
+#define FILE5 "thlink.h5"
+#define FILE6 "tall.h5"
 
-static void test_group() {
+static void test_group(void) {
 hid_t fid, group;
 
   fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -54,7 +54,7 @@ hid_t fid, group;
   H5Fclose(fid);
 }
 
-static void test_dataset() {
+static void test_dataset(void) {
 hid_t fid, dataset, space;
 hsize_t dims[2];
 int dset1[10][20];
@@ -69,22 +69,22 @@ int i, j;
   /* dset1 */
   dims[0] = 10; dims[1] = 20;
   space = H5Screate_simple(2, dims, NULL);
-  dataset = H5Dcreate(fid, "/dset1", H5T_NATIVE_INT, space, H5P_DEFAULT);
+  dataset = H5Dcreate(fid, "/dset1", H5T_STD_I32BE, space, H5P_DEFAULT);
   for (i = 0; i < 10; i++)
        for (j = 0; j < 20; j++)
             dset1[i][j] = j;
-  H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
+  H5Dwrite(dataset, H5T_STD_I32BE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
   H5Sclose(space);
   H5Dclose(dataset);
 
   /* dset2 */
   dims[0] = 30; dims[1] = 10;
   space = H5Screate_simple(2, dims, NULL);
-  dataset = H5Dcreate(fid, "/dset2", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT);
+  dataset = H5Dcreate(fid, "/dset2", H5T_IEEE_F64BE, space, H5P_DEFAULT);
   for (i = 0; i < 30; i++)
        for (j = 0; j < 10; j++)
             dset2[i][j] = j*1.1 + i;
-  H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
+  H5Dwrite(dataset, H5T_IEEE_F64BE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
   H5Sclose(space);
   H5Dclose(dataset);
 
@@ -97,7 +97,7 @@ static void test_nameddt() {
 }
 */
 
-static void test_attribute() {
+static void test_attribute(void) {
 hid_t fid, root, space, attr;
 hsize_t dims[2];
 char buf[60];
@@ -121,18 +121,18 @@ double d[10];
   /* attribute 2 */
   dims[0] = 20;
   space = H5Screate_simple(1, dims, NULL);
-  attr = H5Acreate (root, "attr2", H5T_NATIVE_INT, space, H5P_DEFAULT);
+  attr = H5Acreate (root, "attr2", H5T_STD_I32BE, space, H5P_DEFAULT);
   for (i = 0; i < 20; i++) data[i] = i+1;
-  H5Awrite(attr, H5T_NATIVE_INT, data);
+  H5Awrite(attr, H5T_STD_I32BE, data);
   H5Sclose(space);
   H5Aclose(attr);
 
   /* attribute 3 */
   dims[0] = 10;
   space = H5Screate_simple(1, dims, NULL);
-  attr = H5Acreate (root, "attr3", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT);
+  attr = H5Acreate (root, "attr3", H5T_IEEE_F64BE, space, H5P_DEFAULT);
   for (i = 0; i < 10; i++) d[i] = 0.0001 * i+ 0.0001;
-  H5Awrite(attr, H5T_NATIVE_DOUBLE, d);
+  H5Awrite(attr, H5T_IEEE_F64BE, d);
   H5Sclose(space);
   H5Aclose(attr);
 
@@ -141,7 +141,7 @@ double d[10];
   H5Fclose(fid);
 }
 
-static void test_softlink() {
+static void test_softlink(void) {
 hid_t fid, root;
 herr_t status;
 
@@ -159,6 +159,44 @@ herr_t status;
 
 }
 
+/*
+             /
+         /   |   \
+      g1    g2    dset
+
+    /   \     |
+ link1  link2 link3
+(g2)   (dset) (dset)     */
+
+static void test_hardlink(void) {
+hid_t fid, group, dataset, space;
+hsize_t dim;
+int i, dset[5];
+
+  fid = H5Fcreate(FILE5, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+  dim = 5;
+  space = H5Screate_simple(1, &dim, NULL);
+  dataset = H5Dcreate(fid, "/dset", H5T_STD_I32BE, space, H5P_DEFAULT);
+  for (i = 0; i < 5; i++) dset[i] = i;
+  H5Dwrite(dataset, H5T_STD_I32BE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset);
+  H5Sclose(space);
+  H5Dclose(dataset);
+
+  group = H5Gcreate (fid, "/g1", 0);
+  H5Glink (group, H5G_LINK_HARD, "/dset", "link2");
+  H5Gclose(group);
+
+  group = H5Gcreate (fid, "/g2", 0);
+  H5Glink (group, H5G_LINK_HARD, "/dset", "link3");
+  H5Gclose(group);
+
+  group = H5Gopen(fid, "/g1");
+  H5Glink (group, H5G_LINK_HARD, "/g2", "link1");
+  H5Gclose(group);
+
+  H5Fclose(fid);
+}
 
 /*
 
@@ -171,7 +209,7 @@ g2	: dset2.1  dset2.2
 
 */
 
-static void test_all() {
+static void test_all(void) {
 hid_t fid, group, attr, dataset, space;
 hsize_t dims[2];
 int data[2][2], dset1[10][10], dset2[20];
@@ -179,7 +217,7 @@ char buf[60];
 int i, j;
 float dset2_1[10], dset2_2[3][5];
 
-  fid = H5Fcreate(FILE5, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+  fid = H5Fcreate(FILE6, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
   /* create groups */
   group = H5Gcreate (fid, "/g1", 0);
@@ -210,9 +248,9 @@ float dset2_1[10], dset2_2[3][5];
 
   dims[0] = 2; dims[1] = 2;
   space = H5Screate_simple(2, dims, NULL);
-  attr = H5Acreate (group, "attr2", H5T_NATIVE_INT, space, H5P_DEFAULT);
+  attr = H5Acreate (group, "attr2", H5T_STD_I32BE, space, H5P_DEFAULT);
   data[0][0] = 0; data[0][1] = 1; data[1][0] = 2; data[1][1] = 3;
-  H5Awrite(attr, H5T_NATIVE_INT, data);
+  H5Awrite(attr, H5T_STD_I32BE, data);
   H5Sclose(space);
   H5Aclose(attr);
 
@@ -223,11 +261,11 @@ float dset2_1[10], dset2_2[3][5];
   /* dset1.1.1 */
   dims[0] = 10; dims[1] = 10;
   space = H5Screate_simple(2, dims, NULL);
-  dataset = H5Dcreate(group, "dset1.1.1", H5T_NATIVE_INT, space, H5P_DEFAULT);
+  dataset = H5Dcreate(group, "dset1.1.1", H5T_STD_I32BE, space, H5P_DEFAULT);
   for (i = 0; i < 10; i++)
        for (j = 0; j < 10; j++)
             dset1[i][j] = j;
-  H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
+  H5Dwrite(dataset, H5T_STD_I32BE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
   H5Sclose(space);
 
   /* attributes of dset1.1.1 */
@@ -252,10 +290,10 @@ float dset2_1[10], dset2_2[3][5];
   /* dset1.1.2 */
   dims[0] = 20;
   space = H5Screate_simple(1, dims, NULL);
-  dataset = H5Dcreate(group, "dset1.1.2", H5T_NATIVE_INT, space, H5P_DEFAULT);
+  dataset = H5Dcreate(group, "dset1.1.2", H5T_STD_I32BE, space, H5P_DEFAULT);
   for (i = 0; i < 20; i++)
        dset2[i] = i;
-  H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
+  H5Dwrite(dataset, H5T_STD_I32BE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
   H5Sclose(space);
   H5Dclose(dataset);
 
@@ -271,21 +309,21 @@ float dset2_1[10], dset2_2[3][5];
   /* dset2.1 */
   dims[0] = 10;
   space = H5Screate_simple(1, dims, NULL);
-  dataset = H5Dcreate(group, "dset2.1", H5T_NATIVE_FLOAT, space, H5P_DEFAULT);
+  dataset = H5Dcreate(group, "dset2.1", H5T_IEEE_F32BE, space, H5P_DEFAULT);
   for (i = 0; i < 10; i++)
        dset2_1[i] = i*0.1+1;
-  H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_1);
+  H5Dwrite(dataset, H5T_IEEE_F32BE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_1);
   H5Sclose(space);
   H5Dclose(dataset);
  
   /* dset2.2 */
   dims[0] = 3; dims[1] = 5;
   space = H5Screate_simple(2, dims, NULL);
-  dataset = H5Dcreate(group, "dset2.2", H5T_NATIVE_FLOAT, space, H5P_DEFAULT);
+  dataset = H5Dcreate(group, "dset2.2", H5T_IEEE_F32BE, space, H5P_DEFAULT);
   for (i = 0; i < 3; i++)
        for (j = 0; j < 5; j++)
             dset2_2[i][j] = i*0.1;
-  H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_2);
+  H5Dwrite(dataset, H5T_IEEE_F32BE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_2);
   H5Sclose(space);
   H5Dclose(dataset);
 
@@ -296,13 +334,15 @@ float dset2_1[10], dset2_2[3][5];
 }
 
 
-void main(){
+int main(void){
 
 test_group();
 test_attribute();
 test_softlink();
 test_dataset();
+test_hardlink();
 test_all();
+return 0;
 
 }
 
