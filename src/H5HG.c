@@ -1060,6 +1060,9 @@ done:
  * Modifications:
  *		Robb Matzke, 1999-07-28
  *		The ADDR argument is passed by value.
+ *
+ *              Robb Matzke, LLNL, 2003-06-05
+ *              The size does not include the object header, just the data.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1070,7 +1073,6 @@ H5HG_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     unsigned		j, k;
     H5HG_heap_t		*h = NULL;
     char		buf[64];
-    size_t		size;
     uint8_t		*p = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -1120,19 +1122,18 @@ H5HG_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
 		     "Size of object body:",
 		     (unsigned long)(h->obj[u].size),
 		     (unsigned long)H5HG_ALIGN(h->obj[u].size));
-	    size = h->obj[u].size - H5HG_SIZEOF_OBJHDR (f);
 	    p = h->obj[u].begin + H5HG_SIZEOF_OBJHDR (f);
-	    for (j=0; j<size; j+=16) {
+	    for (j=0; j<h->obj[u].size; j+=16) {
 		fprintf (stream, "%*s%04d: ", indent+6, "", j);
 		for (k=0; k<16; k++) {
 		    if (8==k) fprintf (stream, " ");
-		    if (j+k<size) {
+		    if (j+k<h->obj[u].size) {
 			fprintf (stream, "%02x ", p[j+k]);
 		    } else {
 			HDfputs("   ", stream);
 		    }
 		}
-		for (k=0; k<16 && j+k<size; k++) {
+		for (k=0; k<16 && j+k<h->obj[u].size; k++) {
 		    if (8==k) fprintf (stream, " ");
 		    HDfputc(p[j+k]>' ' && p[j+k]<='~' ? p[j+k] : '.', stream);
 		}
