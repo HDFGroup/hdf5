@@ -1685,6 +1685,7 @@ H5Z_xform_create(const char *expr)
 	if(isalpha(expr[i]))
 	    count++;
     }
+ 
     /* When there are no "x"'s in the equation (ie, simple transform case),
      * we don't need to allocate any space since no array will have to be 
      * stored */
@@ -1751,6 +1752,10 @@ H5Z_xform_destroy(H5Z_data_xform_t *data_xform_prop)
         /* Free the expression */
         H5MM_xfree(data_xform_prop->xform_exp);
 
+	/* Free the pointers to the temp. arrays, if there are any */
+	if(data_xform_prop->dat_val_pointers->num_ptrs > 0)
+	    H5MM_xfree(data_xform_prop->dat_val_pointers->ptr_dat_val);
+	
 	/* Free the data storage struct */
 	H5MM_xfree(data_xform_prop->dat_val_pointers);
 	
@@ -1811,6 +1816,7 @@ H5Z_xform_copy(H5Z_data_xform_t **data_xform_prop)
 	    if(isalpha(new_data_xform_prop->xform_exp[i]))
 		count++;
 	}
+	
 	if(count > 0)
 	    if((new_data_xform_prop->dat_val_pointers->ptr_dat_val = (void*) HDcalloc(count, sizeof(void*))) == NULL)
 		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory for pointers in transform array")
