@@ -25,8 +25,7 @@
  * Purpose: public function, can be called in an applicattion program.
  *   return differences between 2 HDF5 files
  *
- * Return: An  exit status of 0 means no differences were found, 1 means some 
- *   differences were found.
+ * Return: Number of differences found; -1 for error.
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -45,8 +44,7 @@ int  h5diff(const char *fname1,
  trav_info_t  *info1=NULL;
  trav_info_t  *info2=NULL;
  hid_t        file1_id, file2_id; 
- int          nfound;
-
+ int          nfound=0;
 
 /*-------------------------------------------------------------------------
  * open the files first; if they are not valid, no point in continuing
@@ -60,16 +58,17 @@ int  h5diff(const char *fname1,
  if ((file1_id=H5Fopen(fname1,H5F_ACC_RDONLY,H5P_DEFAULT))<0 )
  {
   printf("h5diff: %s: No such file or directory\n", fname1 );
-  exit(1);
+  nfound = -1;
  }
  if ((file2_id=H5Fopen(fname2,H5F_ACC_RDONLY,H5P_DEFAULT))<0 )
  {
   printf("h5diff: %s: No such file or directory\n", fname2 );
-  exit(1);
+  nfound = -1;
  }
  /* enable error reporting */
  } H5E_END_TRY;
-
+ if (nfound<0)
+  return -1;
 
 /*-------------------------------------------------------------------------
  * get the number of objects in the files
@@ -87,7 +86,10 @@ int  h5diff(const char *fname1,
  info1 = (trav_info_t*) malloc( nobjects1 * sizeof(trav_info_t));
  info2 = (trav_info_t*) malloc( nobjects2 * sizeof(trav_info_t));
  if (info1==NULL || info2==NULL)
-  return 0;
+ {
+  nfound=-1;
+  goto out;
+ }
 
  h5trav_getinfo( file1_id, info1 );
  h5trav_getinfo( file2_id, info2 );
@@ -118,11 +120,15 @@ int  h5diff(const char *fname1,
  
  h5trav_freeinfo(info1,nobjects1);
  h5trav_freeinfo(info2,nobjects2);
+
+out:
  /* close */
- assert( (H5Fclose(file1_id)) >=0);
- assert( (H5Fclose(file2_id)) >=0);
+ H5Fclose(file1_id);
+ H5Fclose(file2_id);
 
  return nfound;
+
+
 }
 
 
