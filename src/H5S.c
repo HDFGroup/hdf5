@@ -32,6 +32,9 @@
 #include "H5Oprivate.h"		/* object headers		  */
 #include "H5Spkg.h"		/* Dataspace functions			  */
 
+/* Local macro definitions */
+#define H5S_ENCODE_VERSION      0
+
 /* Local static function prototypes */
 static H5S_t * H5S_create(H5S_class_t type);
 static herr_t H5S_set_extent_simple (H5S_t *space, unsigned rank,
@@ -1828,16 +1831,22 @@ H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc)
 
     /* Verify the size of buffer.  If it's not big enough, simply return the
      * right size without filling the buffer. */
-    if(!buf || *nalloc<(extent_size+select_size+3)) {
-        *nalloc = extent_size+select_size+3;
+    if(!buf || *nalloc<(extent_size+select_size+1+1+1+4)) {
+        *nalloc = extent_size+select_size+1+1+1+4;
 	HGOTO_DONE(ret_value);
     }
    
+    /* Encode the type of the information */
+    *buf++ = H5O_SDSPACE_ID;
+
+    /* Encode the version of the dataspace information */
+    *buf++ = H5S_ENCODE_VERSION;
+
     /* Encode the "size of size" information */
     *buf++ = f.shared->sizeof_size;
 
     /* Encode size of extent information. Pointer is actually moved in this macro. */
-    UINT16ENCODE(buf, extent_size);
+    UINT32ENCODE(buf, extent_size);
    
     /* Encode the extent part of dataspace */
     if(H5O_encode(&f, buf, obj, H5O_SDSPACE_ID)<0)
@@ -1926,6 +1935,17 @@ H5S_decode(unsigned char *buf)
 
     FUNC_ENTER_NOAPI(H5S_decode, NULL);
 
+    /* Initialize this before anything goes bad... */
+    f.shared=NULL;
+
+    /* Decode the type of the information */
+    if(*buf++ != H5O_SDSPACE_ID)
+	HGOTO_ERROR(H5E_DATASPACE, H5E_BADMESG, NULL, "not an encoded dataspace");
+
+    /* Decode the version of the dataspace information */
+    if(*buf++ != H5S_ENCODE_VERSION)
+	HGOTO_ERROR(H5E_DATASPACE, H5E_VERSION, NULL, "unknown version of encoded dataspace");
+
     /* Fake file structure, used only for header message operation */
     f.shared = (H5F_file_t*)H5MM_calloc(sizeof(H5F_file_t));
 
@@ -1933,7 +1953,7 @@ H5S_decode(unsigned char *buf)
     f.shared->sizeof_size = *buf++;
 
     /* Decode size of extent information */
-    UINT16DECODE(buf, extent_size);
+    UINT32DECODE(buf, extent_size);
      
     /* Decode the extent part of dataspace */
     if((extent = H5O_decode(&f, buf, H5O_SDSPACE_ID))==NULL)

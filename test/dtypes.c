@@ -1892,6 +1892,7 @@ test_encode(void)
     size_t      cmpd_buf_size = 0;
     size_t      enum_buf_size = 0;
     unsigned char       *cmpd_buf=NULL, *enum_buf=NULL;
+    herr_t      ret;
 
     TESTING("functions of encoding and decoding data types");
 
@@ -1976,6 +1977,16 @@ test_encode(void)
 
     if(cmpd_buf_size>0)
         cmpd_buf = (unsigned char*)calloc(1, cmpd_buf_size);
+
+    /* Try decoding bogus buffer */
+    H5E_BEGIN_TRY {
+	ret = H5Tdecode(cmpd_buf);
+    } H5E_END_TRY;
+    if(ret!=FAIL) {
+        H5_FAILED();
+        printf("Decoded bogus buffer!\n");
+        goto error;
+    }
 
     if(H5Tencode(tid1, cmpd_buf, &cmpd_buf_size)<0) {
         H5_FAILED();

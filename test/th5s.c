@@ -563,6 +563,12 @@ test_h5s_encode(void)
     if(sbuf_size>0)
         sbuf = (unsigned char*)calloc(1, sbuf_size);
 
+    /* Try decoding bogus buffer */
+    H5E_BEGIN_TRY {
+	ret = H5Sdecode(sbuf);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Sdecode");
+
     ret = H5Sencode(sid1, sbuf, &sbuf_size);
     CHECK(ret, FAIL, "H5Sencode");
 

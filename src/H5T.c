@@ -259,6 +259,9 @@ static herr_t H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src,
 static herr_t H5T_register(H5T_pers_t pers, const char *name, H5T_t *src,
         H5T_t *dst, H5T_conv_t func, hid_t dxpl_id);
 
+/* Local macro definitions */
+#define H5T_ENCODE_VERSION      0
+
 /*
  * Type initialization macros
  *
@@ -2671,10 +2674,16 @@ H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_BADSIZE, FAIL, "can't find datatype size");
 
     /* Don't encode if buffer size isn't big enough or buffer is empty */
-    if(!buf || *nalloc<buf_size) {
-        *nalloc = buf_size;
+    if(!buf || *nalloc<(buf_size+1+1)) {
+        *nalloc = buf_size+1+1;
 	HGOTO_DONE(ret_value);
     }
+
+    /* Encode the type of the information */
+    *buf++ = H5O_DTYPE_ID;
+
+    /* Encode the version of the dataspace information */
+    *buf++ = H5T_ENCODE_VERSION;
 
     if(H5O_encode(&f, buf, obj, H5O_DTYPE_ID)<0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode object");
@@ -2708,6 +2717,14 @@ H5T_decode(unsigned char *buf)
     H5T_t       *ret_value;
 
     FUNC_ENTER_NOAPI(H5T_decode, NULL);
+
+    /* Decode the type of the information */
+    if(*buf++ != H5O_DTYPE_ID)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_BADMESG, NULL, "not an encoded datatype");
+
+    /* Decode the version of the datatype information */
+    if(*buf++ != H5T_ENCODE_VERSION)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_VERSION, NULL, "unknown version of encoded datatype");
 
     if((ret_value = H5O_decode(NULL, buf, H5O_DTYPE_ID))==NULL)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object");
