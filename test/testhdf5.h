@@ -107,22 +107,6 @@
 extern "C" {
 #endif
 
-/* Routines for operating on the list of tests (for the "all in one" tests) */
-H5TEST_DLL void TestUsage(void);
-H5TEST_DLL void AddTest(const char *TheName, void (*TheCall) (void),
-		     void (*Cleanup) (void), const char *TheDescr);
-H5TEST_DLL void TestInfo(const char *ProgName);
-H5TEST_DLL void TestParseCmdLine(int argc, char *argv[], int *Summary, int *CleanUp);
-H5TEST_DLL void PerformTests(void);
-H5TEST_DLL void TestSummary(void);
-H5TEST_DLL void TestCleanup(void);
-H5TEST_DLL void TestInit(void);
-H5TEST_DLL int  GetTestVerbosity(void);
-H5TEST_DLL int  SetTestVerbosity(int newval);
-H5TEST_DLL void ParseTestVerbosity(char *argv);
-H5TEST_DLL int  GetTestNumErrs(void);
-H5TEST_DLL int  TestErrPrintf(const char *format, ...);
-
 /* Prototypes for the test routines */
 void                    test_metadata(void);
 void                    test_tbbt(void);

@@ -101,6 +101,7 @@ extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 extern "C" {
 #endif
 
+/* Generally useful testing routines */
 H5TEST_DLL int h5_cleanup(const char *base_name[], hid_t fapl);
 H5TEST_DLL herr_t h5_errors(void *client_data);
 H5TEST_DLL char *h5_fixname(const char *base_name, hid_t fapl, char *fullname,
@@ -111,6 +112,22 @@ H5TEST_DLL void h5_reset(void);
 H5TEST_DLL void h5_show_hostname(void);
 H5TEST_DLL off_t h5_get_file_size(const char *filename);
 H5TEST_DLL int print_func(const char *format, ...);
+
+/* Routines for operating on the list of tests (for the "all in one" tests) */
+H5TEST_DLL void TestUsage(void);
+H5TEST_DLL void AddTest(const char *TheName, void (*TheCall) (void),
+		     void (*Cleanup) (void), const char *TheDescr);
+H5TEST_DLL void TestInfo(const char *ProgName);
+H5TEST_DLL void TestParseCmdLine(int argc, char *argv[], int *Summary, int *CleanUp);
+H5TEST_DLL void PerformTests(void);
+H5TEST_DLL void TestSummary(void);
+H5TEST_DLL void TestCleanup(void);
+H5TEST_DLL void TestInit(void);
+H5TEST_DLL int  GetTestVerbosity(void);
+H5TEST_DLL int  SetTestVerbosity(int newval);
+H5TEST_DLL void ParseTestVerbosity(char *argv);
+H5TEST_DLL int  GetTestNumErrs(void);
+H5TEST_DLL int  TestErrPrintf(const char *format, ...);
 
 #ifdef H5_HAVE_PARALLEL
 H5TEST_DLL int h5_set_info_object(void);
