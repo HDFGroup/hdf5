@@ -63,6 +63,7 @@
 ./config/solaris2.x
 ./config/unicosmk
 
+./doc/Makefile.in
 ./doc/html/Attributes.html
 ./doc/html/Big.html
 ./doc/html/Caching.html
@@ -111,6 +112,7 @@
 ./doc/html/IH_mapHead.gif
 ./doc/html/IOPipe.html
 ./doc/html/Lib_Maint.html		_DO_NOT_DISTRIBUTE_
+./doc/html/Makefile.in
 ./doc/html/MemoryManagement.html	_DO_NOT_DISTRIBUTE_
 ./doc/html/MountingFiles.html
 ./doc/html/NCSAfooterlogo.gif
@@ -136,6 +138,7 @@
 ./doc/html/RM_H5T.html
 ./doc/html/RM_H5Z.html
 ./doc/html/Tools.html
+./doc/html/Tutor/Makefile.in
 ./doc/html/Version.html
 ./doc/html/chunk1.gif
 ./doc/html/chunk1.obj			_DO_NOT_DISTRIBUTE_
