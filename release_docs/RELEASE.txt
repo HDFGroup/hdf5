@@ -40,14 +40,16 @@ New Features
 
   o Library
   =========
-   o General
-   --------- 
-
-   o APIs
-   ------
-
-   o Performance
-   -------------
+    o General
+    --------- 
+      * Added serial multi-gigabyte file size test.  "test/big -h" shows
+        the help page.  AKC - 2002/03/29
+ 
+    o APIs
+    ------
+ 
+    o Performance
+    -------------
 
   o Parallel Library
   ==================
