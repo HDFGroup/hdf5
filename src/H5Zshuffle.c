@@ -72,27 +72,27 @@ H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
     unsigned cd_values[H5Z_SHUFFLE_TOTAL_NPARMS];  /* Filter parameters */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_set_local_shuffle, FAIL);
+    FUNC_ENTER_NOAPI(H5Z_set_local_shuffle, FAIL)
 
     /* Get the filter's current parameters */
     if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_SHUFFLE,&flags,&cd_nelmts, cd_values,0,NULL)<0)
-	HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get shuffle parameters");
+	HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get shuffle parameters")
 
     /* Check that no parameters are currently set */
     if(cd_nelmts!=H5Z_SHUFFLE_USER_NPARMS)
-	HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "incorrect # of shuffle parameters");
+	HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "incorrect # of shuffle parameters")
 
     /* Set "local" parameter for this dataset */
     if((cd_values[H5Z_SHUFFLE_PARM_SIZE]=(unsigned)H5Tget_size(type_id))==0)
-	HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size");
+	HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size")
 
     /* Modify the filter's parameters for this dataset */
     if(H5Pmodify_filter(dcpl_id, H5Z_FILTER_SHUFFLE, flags, H5Z_SHUFFLE_TOTAL_NPARMS, cd_values)<0)
-	HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set local shuffle parameters");
+	HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set local shuffle parameters")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5Z_set_local_shuffle() */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z_set_local_shuffle() */ /*lint !e715 Make lint ignore space_id parameter */
 
 
 /*-------------------------------------------------------------------------
@@ -130,11 +130,11 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
     size_t leftover;            /* Extra bytes at end of buffer */
     size_t ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_filter_shuffle, 0);
+    FUNC_ENTER_NOAPI(H5Z_filter_shuffle, 0)
 
     /* Check arguments */
     if (cd_nelmts!=H5Z_SHUFFLE_TOTAL_NPARMS || cd_values[H5Z_SHUFFLE_PARM_SIZE]==0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid shuffle parameters");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid shuffle parameters")
 
     /* Get the number of bytes per element from the parameter block */
     bytesoftype=cd_values[H5Z_SHUFFLE_PARM_SIZE];
@@ -149,7 +149,7 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
 
         /* Allocate the destination buffer */
         if (NULL==(dest = H5MM_malloc(nbytes)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for shuffle buffer");
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for shuffle buffer")
 
         if(flags & H5Z_FLAG_REVERSE) {
             /* Get the pointer to the source buffer */
@@ -167,7 +167,7 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
             /* Add leftover to the end of data */ 
             if(leftover>0) {
                 /* Adjust back to end of shuffled bytes */
-                _dest -= (bytesoftype - 1);
+                _dest -= (bytesoftype - 1);     /*lint !e794 _dest is initialized */
                 HDmemcpy((void*)_dest, (void*)_src, leftover);
             }
         } /* end if */
@@ -187,7 +187,7 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
             /* Add leftover to the end of data */ 
             if(leftover>0) {
                 /* Adjust back to end of shuffled bytes */
-                _src -= (bytesoftype - 1);
+                _src -= (bytesoftype - 1);      /*lint !e794 _src is initialized */
                 HDmemcpy((void*)_dest, (void*)_src, leftover);
             }
         } /* end else */
@@ -204,7 +204,7 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
     ret_value = nbytes;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /*H5_HAVE_FILTER_SHUFFLE */
 

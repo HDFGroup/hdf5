@@ -73,4 +73,11 @@
         H5AC.c
         H5B.c
         H5D.c
+        H5Dio.c
+
+        H5Z.c
+        H5Zdeflate.c
+        H5Zfletcher32.c
+        H5Zshuffle.c
+        H5Zszip.c
 */
