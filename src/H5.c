@@ -851,7 +851,7 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 		    } else if (sizeof(hsize_t)==sizeof(long)) {
 			HDstrcpy (modifier, "l");
 		    } else {
-			HDstrcpy (modifier, PRINTF_LL_WIDTH);
+			HDstrcpy (modifier, H5_PRINTF_LL_WIDTH);
 		    }
 		    break;
 		case 'Z':
@@ -860,7 +860,7 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 		    } else if (sizeof(size_t)==sizeof(long)) {
 			HDstrcpy (modifier, "l");
 		    } else {
-			HDstrcpy (modifier, PRINTF_LL_WIDTH);
+			HDstrcpy (modifier, H5_PRINTF_LL_WIDTH);
 		    }
 		    break;
 		default:
@@ -963,7 +963,7 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 		     * Some compilers complain when `long double' and
 		     * `double' are the same thing.
 		     */
-#if SIZEOF_LONG_DOUBLE != SIZEOF_DOUBLE
+#if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
 		    long double x = va_arg (ap, long double);
 		    n = fprintf (stream, template, x);
 #else
@@ -984,12 +984,12 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 			if (fwidth>0) {
 			    sprintf(template+HDstrlen(template), "%d", fwidth);
 			}
-			if (sizeof(x)==SIZEOF_INT) {
+			if (sizeof(x)==H5_SIZEOF_INT) {
 			    HDstrcat(template, "d");
-			} else if (sizeof(x)==SIZEOF_LONG) {
+			} else if (sizeof(x)==H5_SIZEOF_LONG) {
 			    HDstrcat(template, "ld");
-			} else if (sizeof(x)==SIZEOF_LONG_LONG) {
-			    HDstrcat(template, PRINTF_LL_WIDTH);
+			} else if (sizeof(x)==H5_SIZEOF_LONG_LONG) {
+			    HDstrcat(template, H5_PRINTF_LL_WIDTH);
 			    HDstrcat(template, "d");
 			}
 			n = fprintf(stream, template, x);

@@ -55,7 +55,7 @@
  * Macros that check for overflows.  These are somewhat dangerous to fiddle
  * with.
  */
-#if (SIZEOF_SIZE_T >= SIZEOF_OFF_T)
+#if (H5_SIZEOF_SIZE_T >= H5_SIZEOF_OFF_T)
 #   define H5F_OVERFLOW_SIZET2OFFT(X)					      \
     ((size_t)(X)>=(size_t)((size_t)1<<(8*sizeof(off_t)-1)))
 #else

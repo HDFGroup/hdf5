@@ -2088,7 +2088,7 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 	} else {
 	    /* Some other type of object */
 	    statbuf->objno[0] = (unsigned long)(obj_ent.header);
-#if SIZEOF_UINT64_T>SIZEOF_LONG
+#if H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG
 	    statbuf->objno[1] = (unsigned long)(obj_ent.header >>
 						8*sizeof(long));
 #else

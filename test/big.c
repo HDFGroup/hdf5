@@ -18,7 +18,7 @@ const char *FILENAME[] = {
 #define WRT_SIZE	4*1024
 #define FAMILY_SIZE	1024*1024*1024
 
-#if SIZEOF_LONG_LONG >= 8
+#if H5_SIZEOF_LONG_LONG >= 8
 #   define GB8LL	((unsigned long_long)8*1024*1024*1024)
 #else
 #   define GB8LL	0	/*cannot do the test*/

@@ -2427,7 +2427,7 @@ H5Pget_family(hid_t plist_id, hsize_t *memb_size/*out*/,
 }
 
 
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_mpi
  *
@@ -2660,7 +2660,7 @@ H5Pget_xfer(hid_t plist_id, H5D_transfer_t *data_xfer_mode)
 
     FUNC_LEAVE (SUCCEED);
 }
-#endif /* HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 #endif /* WANT_H5_V1_2_COMPAT */
 
 

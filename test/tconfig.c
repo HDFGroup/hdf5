@@ -99,85 +99,85 @@ void
 test_config_ctypes(void)
 {
     /* standard basic types */
-    vrfy_ctype(char, SIZEOF_CHAR);
-    vrfy_ctype(int, SIZEOF_INT);
-    vrfy_ctype(short, SIZEOF_SHORT);
-    vrfy_ctype(long, SIZEOF_LONG);
-    vrfy_ctype(float, SIZEOF_FLOAT);
-    vrfy_ctype(double, SIZEOF_DOUBLE);
+    vrfy_ctype(char, H5_SIZEOF_CHAR);
+    vrfy_ctype(int, H5_SIZEOF_INT);
+    vrfy_ctype(short, H5_SIZEOF_SHORT);
+    vrfy_ctype(long, H5_SIZEOF_LONG);
+    vrfy_ctype(float, H5_SIZEOF_FLOAT);
+    vrfy_ctype(double, H5_SIZEOF_DOUBLE);
 
     /* non-standard basic types */
-#if SIZEOF_LONG_LONG > 0
-    vrfy_ctype(long_long, SIZEOF_LONG_LONG);
+#if H5_SIZEOF_LONG_LONG > 0
+    vrfy_ctype(long_long, H5_SIZEOF_LONG_LONG);
 #endif
 
-#if SIZEOF_LONG_DOUBLE > 0
-    vrfy_ctype(long double, SIZEOF_LONG_DOUBLE);
+#if H5_SIZEOF_LONG_DOUBLE > 0
+    vrfy_ctype(long double, H5_SIZEOF_LONG_DOUBLE);
 #endif
 
-#if SIZEOF_UINT8_T > 0
-    vrfy_ctype(uint8_t, SIZEOF_UINT8_T);
+#if H5_SIZEOF_UINT8_T > 0
+    vrfy_ctype(uint8_t, H5_SIZEOF_UINT8_T);
 #endif
 
-#if SIZEOF_UINT16_T > 0
-    vrfy_ctype(uint16_t, SIZEOF_UINT16_T);
+#if H5_SIZEOF_UINT16_T > 0
+    vrfy_ctype(uint16_t, H5_SIZEOF_UINT16_T);
 #endif
 
-#if SIZEOF_UINT32_T > 0
-    vrfy_ctype(uint32_t, SIZEOF_UINT32_T);
+#if H5_SIZEOF_UINT32_T > 0
+    vrfy_ctype(uint32_t, H5_SIZEOF_UINT32_T);
 #endif
 
-#if SIZEOF_UINT64_T > 0
-    vrfy_ctype(uint64_t, SIZEOF_UINT64_T);
+#if H5_SIZEOF_UINT64_T > 0
+    vrfy_ctype(uint64_t, H5_SIZEOF_UINT64_T);
 #endif
 
-#if SIZEOF_UINT_FAST8_T > 0
-    vrfy_ctype(uint_fast8_t, SIZEOF_UINT_FAST8_T);
+#if H5_SIZEOF_UINT_FAST8_T > 0
+    vrfy_ctype(uint_fast8_t, H5_SIZEOF_UINT_FAST8_T);
 #endif
 
-#if SIZEOF_UINT_FAST16_T > 0
-    vrfy_ctype(uint_fast16_t, SIZEOF_UINT_FAST16_T);
+#if H5_SIZEOF_UINT_FAST16_T > 0
+    vrfy_ctype(uint_fast16_t, H5_SIZEOF_UINT_FAST16_T);
 #endif
 
-#if SIZEOF_UINT_FAST32_T > 0
-    vrfy_ctype(uint_fast32_t, SIZEOF_UINT_FAST32_T);
+#if H5_SIZEOF_UINT_FAST32_T > 0
+    vrfy_ctype(uint_fast32_t, H5_SIZEOF_UINT_FAST32_T);
 #endif
 
-#if SIZEOF_UINT_FAST64_T > 0
-    vrfy_ctype(uint_fast64_t, SIZEOF_UINT_FAST64_T);
+#if H5_SIZEOF_UINT_FAST64_T > 0
+    vrfy_ctype(uint_fast64_t, H5_SIZEOF_UINT_FAST64_T);
 #endif
 
-#if SIZEOF_UINT_LEAST8_T > 0
-    vrfy_ctype(uint_least8_t, SIZEOF_UINT_LEAST8_T);
+#if H5_SIZEOF_UINT_LEAST8_T > 0
+    vrfy_ctype(uint_least8_t, H5_SIZEOF_UINT_LEAST8_T);
 #endif
 
-#if SIZEOF_UINT_LEAST16_T > 0
-    vrfy_ctype(uint_least16_t, SIZEOF_UINT_LEAST16_T);
+#if H5_SIZEOF_UINT_LEAST16_T > 0
+    vrfy_ctype(uint_least16_t, H5_SIZEOF_UINT_LEAST16_T);
 #endif
 
-#if SIZEOF_UINT_LEAST32_T > 0
-    vrfy_ctype(uint_least32_t, SIZEOF_UINT_LEAST32_T);
+#if H5_SIZEOF_UINT_LEAST32_T > 0
+    vrfy_ctype(uint_least32_t, H5_SIZEOF_UINT_LEAST32_T);
 #endif
 
-#if SIZEOF_UINT_LEAST64_T > 0
-    vrfy_ctype(uint_least64_t, SIZEOF_UINT_LEAST64_T);
+#if H5_SIZEOF_UINT_LEAST64_T > 0
+    vrfy_ctype(uint_least64_t, H5_SIZEOF_UINT_LEAST64_T);
 #endif
 
     /* pseudo standard basic types */
-#if SIZEOF___INT64 > 0
-    vrfy_ctype(__int64, SIZEOF___INT64);
+#if H5_SIZEOF___INT64 > 0
+    vrfy_ctype(__int64, H5_SIZEOF___INT64);
 #endif
 
-#if SIZEOF_OFF_T > 0
-    vrfy_ctype(off_t, SIZEOF_OFF_T);
+#if H5_SIZEOF_OFF_T > 0
+    vrfy_ctype(off_t, H5_SIZEOF_OFF_T);
 #endif
 
-#if SIZEOF_SIZE_T > 0
-    vrfy_ctype(size_t, SIZEOF_SIZE_T);
+#if H5_SIZEOF_SIZE_T > 0
+    vrfy_ctype(size_t, H5_SIZEOF_SIZE_T);
 #endif
 
-#if SIZEOF_SSIZE_T > 0
-    vrfy_ctype(ssize_t, SIZEOF_SSIZE_T);
+#if H5_SIZEOF_SSIZE_T > 0
+    vrfy_ctype(ssize_t, H5_SIZEOF_SSIZE_T);
 #endif
 
 }

@@ -517,8 +517,8 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
  
     /* Build default formats for long long types */
     if (!fmt_llong[0]) {
-        sprintf(fmt_llong, "%%%sd", PRINTF_LL_WIDTH);
-        sprintf(fmt_ullong, "%%%su", PRINTF_LL_WIDTH);
+        sprintf(fmt_llong, "%%%sd", H5_PRINTF_LL_WIDTH);
+        sprintf(fmt_ullong, "%%%su", H5_PRINTF_LL_WIDTH);
     }
 
     /* Append value depending on data type */
