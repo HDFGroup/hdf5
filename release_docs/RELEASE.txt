@@ -44,6 +44,11 @@ New Features
 
     Library:
     --------
+        - Modified the way how HDF5 calculates 'pixels_per_scanline' parameter for 
+          SZIP compression. Now there is no restriction on the size and shape of the
+          chunk except that the total number of elements in the chunk cannot be 
+          bigger than 'pixels_per_block' parameter provided by the user.  
+                                                                     EIP - 2004/07/21  
         - Added support for SZIP without encoder.  Added H5Zget_filter_info
           and changed H5Pget_filter and H5Pget_filter_by_id to support this
           change.  JL/NF - 2004/06/30
