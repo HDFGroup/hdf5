@@ -38,7 +38,6 @@ static herr_t		H5P_init_interface(void);
 /* These go away as each old-style property list is converted to a generic */
 /* property list -QAK */
 hid_t H5P_NO_CLASS=(hid_t)H5P_NO_CLASS_OLD;
-hid_t H5P_MOUNT=(hid_t)H5P_MOUNT_OLD;
 
 /*
  * Predefined property list classes. These are initialized at runtime by 
@@ -216,7 +215,7 @@ H5P_init_interface(void)
     if (NULL==(pclass = H5P_create_class (root_class,"file create",H5P_FILE_CREATE_HASH_SIZE,1,NULL,NULL,NULL,NULL,NULL,NULL)))
         HRETURN_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
-    /* Register the dataset creation class */
+    /* Register the file creation class */
     if ((H5P_CLS_FILE_CREATE_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
         HRETURN_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
@@ -245,6 +244,15 @@ H5P_init_interface(void)
     /* Register the data xfer class */
     if ((H5P_CLS_DATASET_XFER_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
         HRETURN_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
+
+    /* Allocate the mount class */
+    if (NULL==(pclass = H5P_create_class (root_class,"file mount",H5P_MOUNT_HASH_SIZE,1,NULL,NULL,NULL,NULL,NULL,NULL)))
+        HRETURN_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
+
+    /* Register the mount class */
+    if ((H5P_CLS_MOUNT_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
+        HRETURN_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
+
 
     FUNC_LEAVE(ret_value);
 }
@@ -339,33 +347,6 @@ H5Pcreate(hid_t type)
         if((ret_value=H5Pcreate_list(type))<0)
             HRETURN_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create property list");
     } /* end if */
-    else {
-        /* Set the type of the property list to create for older property lists */
-        old_type=(H5P_class_t_old)type;
-        assert( old_type == H5P_MOUNT_OLD);
-
-        /* Allocate a new property list and initialize it with default values */
-        switch (old_type) {
-            case H5P_MOUNT_OLD:
-                src = &H5F_mount_dflt;
-                break;
-            default:
-                HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                      "unknown property list class");
-        } /* end switch */
-
-        /* Copy the property list */
-        if (NULL==(new_plist=H5P_copy(old_type, src))) {
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL,
-                          "unable to copy default property list");
-        } /* end if */
-        
-        /* Atomize the new property list */
-        if ((ret_value = H5P_create(old_type, new_plist)) < 0) {
-            HRETURN_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL,
-                          "unable to register property list");
-        } /* end if */
-    } /* end else */
     
     FUNC_LEAVE(ret_value);
 }
@@ -488,16 +469,6 @@ H5P_close(void *_plist)
     /* Check args */
     if (!plist)
         HRETURN (SUCCEED);
-
-    /* Some property lists may need to do special things */
-    switch (plist->cls) {
-        case H5P_MOUNT_OLD:
-            break;
-
-        default:
-            HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-                   "unknown property list class");
-    }
 
     /* Return the property list to the free list */
     H5FL_FREE(H5P_t,plist);
@@ -918,17 +889,6 @@ H5P_copy (H5P_class_t_old type, const void *src)
     
     FUNC_ENTER (H5P_copy, NULL);
     
-    /* How big is the property list */
-    switch (type) {
-        case H5P_MOUNT_OLD:
-            size = sizeof(H5F_mprop_t);
-            break;
-
-        default:
-            HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, NULL,
-                  "unknown property list class");
-    }
-
     /* Create the new property list */
     if (NULL==(dst = H5FL_ALLOC(H5P_t,0))) {
         HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
@@ -940,18 +900,6 @@ H5P_copy (H5P_class_t_old type, const void *src)
 
     /* Set the type of the property list */
     dst->cls=type;
-
-    /* Deep-copy pointers */
-    switch (type) {
-        
-        case H5P_MOUNT_OLD:
-            /* Nothing to do */
-            break;
-
-        default:
-            HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, NULL,
-                  "unknown property list class");
-    }
 
     FUNC_LEAVE (dst);
 }

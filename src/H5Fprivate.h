@@ -346,13 +346,11 @@ __DLL__ size_t H5F_sizeof_size(const H5F_t *f);
 #define H5F_ACS_FILE_DRV_INFO_SIZE             sizeof(void*)
 #define H5F_ACS_FILE_DRV_INFO_DEF              NULL
 
-/* Mount property list */
-typedef struct H5F_mprop_t {
-    hbool_t		local;	/* Are absolute symlinks local to file?	*/
-} H5F_mprop_t;
-
-/* library variables */
-__DLLVAR__ const H5F_mprop_t H5F_mount_dflt;
+/* ======================== File Mount properties ====================*/
+/* Definition for whether absolute symlinks local to file. */
+#define H5F_MNT_SYM_LOCAL_NAME 		"local"
+#define H5F_MNT_SYM_LOCAL_SIZE		sizeof(hbool_t) 	
+#define H5F_MNT_SYM_LOCAL_DEF	 	FALSE	
 
 /* Forward declarations for prototypes arguments */
 struct H5O_layout_t;

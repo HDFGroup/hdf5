@@ -48,13 +48,6 @@
 
 #define PABLO_MASK	H5F_mask
 
-/*
- * Define the default mount property list.
- */
-const H5F_mprop_t	H5F_mount_dflt = {
-    FALSE,			/* Absolute symlinks are wrt mount root	   */
-};
-
 /* Interface initialization */
 static int interface_initialize_g = 0;
 #define INTERFACE_INIT H5F_init_interface
@@ -165,6 +158,7 @@ H5F_init_interface(void)
     int             objectdir_ver       = H5F_CRT_OBJ_DIR_VERS_DEF;
     int             sharedheader_ver    = H5F_CRT_SHARE_HEAD_VERS_DEF;
     /* File access property class variables.  In sequence, they are 
+     * - File access property class to modify
      * - Size of meta data cache(elements)
      * - Size of raw data chunk cache(elements)
      * - Size of raw data chunk cache(bytes)
@@ -189,7 +183,12 @@ H5F_init_interface(void)
     unsigned        gc_ref              = H5F_ACS_GARBG_COLCT_REF_DEF;
     hid_t           driver_id           = H5F_ACS_FILE_DRV_ID_DEF;
     void            *driver_info        = H5F_ACS_FILE_DRV_INFO_DEF;
-
+    /* File mount property class variable. 
+     * - Mount property class to modify
+     * - whether absolute symlinks is local to file 
+     */
+    H5P_genclass_t  *mnt_pclass;
+    hbool_t 	    local		= H5F_MNT_SYM_LOCAL_DEF;
     
     FUNC_ENTER(H5F_init_interface, FAIL);
 
@@ -381,8 +380,25 @@ H5F_init_interface(void)
                      "can't insert property into class");
 
     /* Register the default file access property list */
+
     if((H5P_LST_FILE_ACCESS_g = H5Pcreate_list(H5P_CLS_FILE_ACCESS_g))<0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, 
+                     "can't insert property into class");
+
+    /* ================ Mount Porperty Class Initialization ==============*/
+    assert(H5P_CLS_MOUNT_g!=-1);
+    /* Get the pointer to file mount class */
+    if(H5I_GENPROP_CLS != H5I_get_type(H5P_CLS_MOUNT_g) ||
+         NULL == (mnt_pclass = H5I_object(H5P_CLS_MOUNT_g)))
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
+
+    /* Register property of whether symlinks is local to file */
+    if(H5P_register(mnt_pclass,H5F_MNT_SYM_LOCAL_NAME,H5F_MNT_SYM_LOCAL_SIZE, &local,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
+                     "can't insert property into class"); 
+    /* Register the default file mount property list */
+    if((H5P_LST_MOUNT_g = H5Pcreate_list(H5P_CLS_MOUNT_g))<0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL,
                      "can't insert property into class");
 
 done:
@@ -2456,7 +2472,7 @@ done:
  */
 static herr_t
 H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
-	  const H5F_mprop_t * UNUSED plist)
+	  const hid_t UNUSED plist_id)
 {
     H5G_t	*mount_point = NULL;	/*mount point group		*/
     H5G_entry_t	*mp_ent = NULL;		/*mount point symbol table entry*/
@@ -2470,7 +2486,10 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
     assert(loc);
     assert(name && *name);
     assert(child);
-    assert(plist);
+
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id) ||
+        TRUE != H5Pisa_class(plist_id, H5P_MOUNT))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not property list");
 
     /*
      * Check that the child isn't mounted, that the mount point exists, and
@@ -2740,7 +2759,6 @@ herr_t
 H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
 {
     H5G_entry_t		*loc = NULL;
-    const H5F_mprop_t	*plist = NULL;
     H5F_t		*child = NULL;
     
     FUNC_ENTER(H5Fmount, FAIL);
@@ -2757,16 +2775,15 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
 	NULL==(child=H5I_object(child_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
     }
-    if (H5P_DEFAULT==plist_id) {
-	plist = &H5F_mount_dflt;
-    } else if (H5P_MOUNT!=H5P_get_class(plist_id) ||
-	       NULL==(plist=H5I_object(plist_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a mount property list");
-    }
+    if(H5P_DEFAULT == plist_id)
+        plist_id = H5P_MOUNT_DEFAULT;
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id) ||
+        TRUE != H5Pisa_class(plist_id, H5P_MOUNT))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property list");
+    
 
     /* Do the mount */
-    if (H5F_mount(loc, name, child, plist)<0) {
+    if (H5F_mount(loc, name, child, plist_id)<0) {
 	HRETURN_ERROR(H5E_FILE, H5E_MOUNT, FAIL,
 		      "unable to mount file");
     }

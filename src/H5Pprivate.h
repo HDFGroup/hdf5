@@ -90,13 +90,8 @@ typedef struct H5P_genplist_tag {
     H5P_genprop_t *props[1];  /* Hash table of pointers to properties in the list */
 } H5P_genplist_t;
 
-/* Master property list structure */
 typedef struct {
-    /* Union of all the different kinds of property lists */
-    union {
-        H5F_mprop_t mount;      /* Mounting properties */
-    } u;
-    H5P_class_t_old cls;        /* Property list class */
+    H5P_class_t cls;
 } H5P_t;
 
 /* Private functions, not part of the publicly documented API */

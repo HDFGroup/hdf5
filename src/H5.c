@@ -1970,18 +1970,6 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		    case H5I_TEMPLATE_5:
 		    case H5I_TEMPLATE_6:
 		    case H5I_TEMPLATE_7:
-                        /* These will eventually go away when the old-style */
-                        /* property lists are converted to generic property */
-                        /* lists -QAK */
-			switch (H5P_get_class(id_type)) {
-                            case H5P_MOUNT_OLD:
-                                fprintf(out, "H5P_MOUNT");
-                                break;
-                            default:
-                                fprintf (out, "H5I_TEMPLATE_%d",
-                                         (int)(id_type-H5I_TEMPLATE_0));
-                                break;
-			}
 			break;
 		    case H5I_GROUP:
 			fprintf (out, "H5I_GROUP");
@@ -2133,9 +2121,6 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		switch (plist_class) {
                     case H5P_NO_CLASS_OLD:
                         fprintf (out, "H5P_NO_CLASS");
-                        break;
-                    case H5P_MOUNT_OLD:
-                        fprintf (out, "H5P_MOUNT");
                         break;
                     default:
                         fprintf (out, "%ld", (long)plist_class);

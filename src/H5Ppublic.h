@@ -39,7 +39,6 @@ typedef long off_t;
 /* Property list classes */
 typedef enum H5P_class_t_old {
     H5P_NO_CLASS_OLD     = -1,  /*error return value                 */
-    H5P_MOUNT_OLD        = 0,   /*file mounting properties           */
     H5P_NCLASSES_OLD            /*this must be last!                 */
 } H5P_class_t_old;
 
@@ -54,7 +53,6 @@ typedef hid_t H5P_class_t;      /* Alias H5P_class_t to hid_t */
 /*      - merge/delete H5Pcopy and H5Pcopy_new */
 /*      - merge/delete H5Pclose and H5Pclose_list */
 __DLLVAR__ hid_t H5P_NO_CLASS;
-__DLLVAR__ hid_t H5P_MOUNT;
 
 /* H5P_DATASET_XFER was the name from the beginning through 1.2.  It was
  * changed to H5P_DATA_XFER on v1.3.0.  Then it was changed back to
@@ -98,7 +96,7 @@ extern "C" {
 #define H5P_DATASET_CREATE_HASH_SIZE   	17
 #define H5P_DATASET_XFER       		(H5open(), H5P_CLS_DATASET_XFER_g)
 #define H5P_DATASET_XFER_HASH_SIZE   	17
-#define H5P_MOUNT_NEW       		(H5open(), H5P_CLS_MOUNT_g)
+#define H5P_MOUNT       		(H5open(), H5P_CLS_MOUNT_g)
 #define H5P_MOUNT_HASH_SIZE   		17
 __DLLVAR__ hid_t H5P_CLS_NO_CLASS_g;
 __DLLVAR__ hid_t H5P_CLS_FILE_CREATE_g;
