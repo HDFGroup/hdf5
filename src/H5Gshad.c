@@ -16,8 +16,9 @@
 
 #define PABLO_MASK	H5G_shadow_mask
 
-/* Is the interface initialized? */
+/* Interface initialization */
 static hbool_t interface_initialize_g = FALSE;
+#define INTERFACE_INIT	NULL
 
 typedef struct H5G_hash_t {
    haddr_t		grp_addr;
@@ -111,7 +112,7 @@ H5G_shadow_check (H5F_t *f)
 	       fprintf (stderr, "), ");
 	       shadow_error = TRUE;
 	    }
-	    
+
 	    /* Linked to symbol table entry */
 	    if (shadow->main && shadow!=shadow->main->shadow) {
 	       fprintf (stderr, "entry linkage problem, ");
@@ -167,7 +168,7 @@ H5G_shadow_p (H5G_entry_t *ent)
    size_t 		delta = (char*)&(tmp.entry) - (char*)&tmp;
    hbool_t		ret_value = FALSE;
    
-   FUNC_ENTER (H5G_shadow_p, NULL, FALSE);
+   FUNC_ENTER (H5G_shadow_p, FALSE);
 
    if (!ent || !ent->shadow) return FALSE;
    ret_value = ((char*)ent - (char*)(ent->shadow) == delta);
@@ -197,7 +198,7 @@ H5G_shadow_p (H5G_entry_t *ent)
 herr_t
 H5G_shadow_dissociate (H5G_entry_t *ent)
 {
-   FUNC_ENTER (H5G_shadow_dissociate, NULL, FAIL);
+   FUNC_ENTER (H5G_shadow_dissociate, FAIL);
 
    if (H5G_shadow_p (ent)) {
       if (ent->shadow->main) {
@@ -239,7 +240,7 @@ herr_t
 H5G_shadow_sync (H5G_entry_t *ent)
 {
    H5G_shadow_t	*shadow = NULL;
-   FUNC_ENTER (H5G_shadow_sync, NULL, FAIL);
+   FUNC_ENTER (H5G_shadow_sync, FAIL);
 
    /*
     * If the caller supplied us with a shadow instead of the main entry, then
@@ -287,7 +288,7 @@ H5G_shadow_list (H5F_t *f, const haddr_t *grp_addr)
    uintn	idx = H5F_addr_hash (grp_addr, f->shared->nshadows);
    H5G_hash_t	*bucket = NULL;
 
-   FUNC_ENTER (H5G_shadows, NULL, NULL);
+   FUNC_ENTER (H5G_shadows, NULL);
 
    for (bucket=f->shared->shadow[idx]; bucket; bucket=bucket->next) {
       if (0==idx &&
@@ -331,7 +332,7 @@ H5G_shadow_assoc_node (H5F_t *f, H5G_node_t *sym, const H5G_ac_ud1_t *ac_udata)
    intn		i = 0;
    haddr_t	heap_addr;
 
-   FUNC_ENTER (H5G_shadow_assoc_node, NULL, FAIL);
+   FUNC_ENTER (H5G_shadow_assoc_node, FAIL);
 
    /* Check arguments */
    assert (f);			/* The file			*/
@@ -405,7 +406,7 @@ H5G_shadow_open (H5F_t *f, H5G_entry_t *grp, H5G_entry_t *ent)
    H5G_entry_t	*ret_value = NULL;
    haddr_t	grp_header;
    
-   FUNC_ENTER (H5G_shadow_open, NULL, NULL);
+   FUNC_ENTER (H5G_shadow_open, NULL);
 
    /* check args */
    assert (f);
@@ -563,7 +564,7 @@ H5G_shadow_close (H5F_t *f, H5G_entry_t *ent)
    H5G_hash_t	*hash=NULL;
    H5G_shadow_t	*hash_ent=NULL, *shadow=NULL;
    
-   FUNC_ENTER (H5G_shadow_close, NULL, FAIL);
+   FUNC_ENTER (H5G_shadow_close, FAIL);
 
    /* check args */
    assert (ent);
@@ -662,7 +663,7 @@ H5G_shadow_move (H5F_t *f, H5G_shadow_t *shadow, const char *new_name,
    H5G_hash_t	*hash;
    uintn	idx;
    
-   FUNC_ENTER (H5G_shadow_move, NULL, FAIL);
+   FUNC_ENTER (H5G_shadow_move, FAIL);
 
    assert (shadow);
    assert (new_entry);
@@ -735,7 +736,7 @@ H5G_shadow_flush (H5F_t *f, hbool_t invalidate)
    H5G_shadow_t	*shadow = NULL;
    intn		nfound=0;
 
-   FUNC_ENTER (H5G_shadow_flush, NULL, FAIL);
+   FUNC_ENTER (H5G_shadow_flush, FAIL);
 
    for (idx=0; idx<f->shared->nshadows; idx++) {
       for (hash=f->shared->shadow[idx]; hash; hash=hash->next) {

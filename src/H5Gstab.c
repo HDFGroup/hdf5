@@ -18,10 +18,11 @@
 
 #define PABLO_MASK	H5G_stab_mask
 static hbool_t interface_initialize_g = FALSE;
+#define INTERFACE_INIT	NULL
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_stab_new
+ * Function:	H5G_stab_create
  *
  * Purpose:	Creates a new empty symbol table (object header, name heap,
  *		and B-tree).  The caller can specify an initial size for the
@@ -54,13 +55,13 @@ static hbool_t interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_stab_new (H5F_t *f, H5G_entry_t *self, size_t init)
+H5G_stab_create (H5F_t *f, H5G_entry_t *self, size_t init)
 {
    size_t	name;				/*offset of "" name	*/
    haddr_t	addr;				/*object header address	*/
    H5O_stab_t	stab;				/*symbol table message	*/
 
-   FUNC_ENTER (H5G_stab_new, NULL, FAIL);
+   FUNC_ENTER (H5G_stab_create, FAIL);
 
    /*
     * Check arguments.
@@ -70,7 +71,7 @@ H5G_stab_new (H5F_t *f, H5G_entry_t *self, size_t init)
    init = MAX(init, H5H_SIZEOF_FREE(f)+2);
 
    /* Create symbol table private heap */
-   if (H5H_new (f, H5H_LOCAL, init, &(stab.heap_addr)/*out*/)<0) {
+   if (H5H_create (f, H5H_LOCAL, init, &(stab.heap_addr)/*out*/)<0) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*can't create heap*/
    }
    if ((name = H5H_insert (f, &(stab.heap_addr), 1, "")<0)) {
@@ -85,7 +86,7 @@ H5G_stab_new (H5F_t *f, H5G_entry_t *self, size_t init)
    }
 
    /* Create the B-tree */
-   if (H5B_new (f, H5B_SNODE, NULL, &(stab.btree_addr)/*out*/)<0) {
+   if (H5B_create (f, H5B_SNODE, NULL, &(stab.btree_addr)/*out*/)<0) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*can't create B-tree*/
    }
 
@@ -94,7 +95,7 @@ H5G_stab_new (H5F_t *f, H5G_entry_t *self, size_t init)
     * since nothing refers to it yet.  The link count will be
     * incremented if the object is added to the group directed graph.
     */
-   if (H5O_new (f, 0, 4+2*H5F_SIZEOF_OFFSET(f), &addr/*out*/)<0) {
+   if (H5O_create (f, 0, 4+2*H5F_SIZEOF_ADDR(f), &addr/*out*/)<0) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*can't create header*/
    }
    
@@ -146,7 +147,7 @@ H5G_stab_find (H5F_t *f, const haddr_t *addr, H5G_entry_t *self,
    H5G_bt_ud1_t         udata;		/*data to pass through B-tree	*/
    H5O_stab_t		stab;		/*symbol table message		*/
 
-   FUNC_ENTER (H5G_stab_find, NULL, NULL);
+   FUNC_ENTER (H5G_stab_find, NULL);
 
    /* Check arguments */
    assert (f);
@@ -227,7 +228,7 @@ H5G_stab_insert (H5F_t *f, H5G_entry_t *self, const char *name,
    H5O_stab_t		stab;		/*symbol table message		*/
    H5G_bt_ud1_t		udata;		/*data to pass through B-tree	*/
 
-   FUNC_ENTER (H5G_stab_insert, NULL, NULL);
+   FUNC_ENTER (H5G_stab_insert, NULL);
 
    /* check arguments */
    assert (f);
@@ -311,7 +312,7 @@ H5G_stab_list (H5F_t *f, H5G_entry_t *self, intn maxentries,
    H5O_stab_t		stab;
    intn			i;
 
-   FUNC_ENTER (H5G_stab_list, NULL, FAIL);
+   FUNC_ENTER (H5G_stab_list, FAIL);
 
    /* check args */
    assert (f);

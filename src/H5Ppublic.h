@@ -24,33 +24,30 @@
 #include <H5Apublic.h>
 
 /* Define atomic datatypes */
-#define H5P_SCALAR  MAKE_ATOM(H5_DATASPACE,0)   /* Atom for scalar dataspace */
-#define H5P_ALL     MAKE_ATOM(H5_DATASPACE,1)   /* Atom for "entire" dataspace */
+#define H5P_ALL		(-2)
 
 /* Different types of dataspaces */
-#define H5P_TYPE_UNKNOWN    0 /* Dataspace is not unitialized */
-#define H5P_TYPE_SIMPLE     1 /* Dataspace is simple */
-#define H5P_TYPE_COMPLEX    2 /* Dataspace is complex */
+typedef enum H5P_class_t {
+   H5P_NO_CLASS		=-1, 		/*error				*/
+   H5P_SCALAR		=0, 		/*scalar variable		*/
+   H5P_SIMPLE		=1, 		/*simple data space		*/
+   H5P_COMPLEX		=2		/*complex data space		*/
+} H5P_class_t;
 
-typedef struct {
-    uintn type;     /* Type of dimensionality object */
-    struct H5P_sdim_t *s;  /* Pointer to simple dimensionality information */
-  } H5P_dim_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /* Functions in H5P.c */
-uintn H5Pnelem(hid_t dim_id);
-uint32 H5Pget_lrank(hid_t dim_id);
-herr_t H5Pget_ldims(hid_t dim_id, uint32 *dims);
-hbool_t H5Pis_simple(hid_t dim_id);
-herr_t H5Pset_space(hid_t sid, uint32 rank, const uint32 *dims);
+hid_t H5Pcreate (H5P_class_t type);
+herr_t H5Pclose (hid_t space_id);
+size_t H5Pget_npoints (hid_t space_id);
 
-/* Private functions which need to be globally visible */
-void H5P_term_interface (void);
-void H5P_destroy(void *dataspace);
+intn H5Pget_lrank(hid_t space_id);
+herr_t H5Pget_ldims(hid_t space_id, intn *dims);
+hbool_t H5Pis_simple(hid_t space_id);
+herr_t H5Pset_space(hid_t space_id, intn rank, const intn *dims);
 
 #ifdef __cplusplus
 }

@@ -49,8 +49,8 @@
 #define H5F_SIGNATURE_LEN 8
 
 /* size of size_t and off_t as they exist on disk */
-#define H5F_SIZEOF_OFFSET(F) ((F)->shared->file_create_parms.sizeof_addr)
-#define H5F_SIZEOF_SIZE(F)	((F)->shared->file_create_parms.sizeof_size)
+#define H5F_SIZEOF_ADDR(F)	((F)->shared->create_parms.sizeof_addr)
+#define H5F_SIZEOF_SIZE(F)	((F)->shared->create_parms.sizeof_size)
 
 /*
  * File open flags.
@@ -210,10 +210,10 @@
 #define NBYTEDECODE(s, d, n) {   HDmemcpy(d,s,n); p+=n }
 
 /*
- * File-creation template information structure
+ * File-creation template.
  */
-typedef struct {
-   uintn userblock_size;	/* Size of the file user block in bytes */
+typedef struct H5F_create_t {
+   uintn userblock_size;	/* Size of the file user block in bytes	*/
    uintn sym_leaf_k;		/* 1/2 rank for symbol table leaf nodes */
    uintn btree_k[8];		/* 1/2 rank for btree internal nodes 	*/
    uint8 sizeof_addr;          	/* Number of bytes in an address	*/
@@ -223,7 +223,7 @@ typedef struct {
    uint8 freespace_ver;        	/* Version # of the free-space information */
    uint8 objectdir_ver;        	/* Version # of the object directory format */
    uint8 sharedheader_ver;     	/* Version # of the shared header format */
-} file_create_temp_t;
+} H5F_create_t;
 
 /*
  * These things make a file unique.
@@ -310,7 +310,7 @@ extern const H5F_low_class_t H5F_LOW_STDIO[];	/* Posix stdio 		*/
 extern const H5F_low_class_t H5F_LOW_CORE[];	/* In-core temp file	*/
 extern const H5F_low_class_t H5F_LOW_FAM[];	/* File family		*/
 extern const H5F_low_class_t H5F_LOW_SPLIT[];	/* Split meta/raw data	*/
-   
+
 /*
  * Define the structure to store the file information for HDF5 files. One of
  * these structures is allocated per file, not per H5Fopen().
@@ -327,7 +327,7 @@ typedef struct H5F_file_t {
    haddr_t 	freespace_addr;	/* Relative address of free-space info	*/
    haddr_t	hdf5_eof;	/* Relative addr of end of all hdf5 data*/
    struct H5AC_t *cache; 	/* The object cache 			*/
-   file_create_temp_t file_create_parms; /* File-creation template 	*/
+   H5F_create_t	create_parms;	/* File-creation template 		*/
 #ifdef LATER
    file_access_temp_t file_access_parms; /* File-access template	*/
 #endif
@@ -352,18 +352,18 @@ typedef struct H5F_t {
 
 
 #ifdef NOT_YET
-#define H5F_ENCODE_OFFSET(f,p,o) (H5F_SIZEOF_OFFSET(f)==4 ? UINT32ENCODE(p,o) \
-    : H5F_SIZEOF_OFFSET(f)==8 ? UINT64ENCODE(p,o) \
-    : H5F_SIZEOF_OFFSET(f)==2 ? UINT16ENCODE(p,o) \
+#define H5F_ENCODE_OFFSET(f,p,o) (H5F_SIZEOF_ADDR(f)==4 ? UINT32ENCODE(p,o) \
+    : H5F_SIZEOF_ADDR(f)==8 ? UINT64ENCODE(p,o) \
+    : H5F_SIZEOF_ADDR(f)==2 ? UINT16ENCODE(p,o) \
     : H5FPencode_unusual_offset(f,&(p),(uint8 *)&(o)))
 #else /* NOT_YET */
-#define H5F_ENCODE_OFFSET(f,p,o) switch(H5F_SIZEOF_OFFSET(f)) { case 4: UINT32ENCODE(p,o); break;\
+#define H5F_ENCODE_OFFSET(f,p,o) switch(H5F_SIZEOF_ADDR(f)) { case 4: UINT32ENCODE(p,o); break;\
     case 8: UINT64ENCODE(p,o); break;\
     case 2: UINT16ENCODE(p,o); break;}
 #endif /* NOT_YET */
 
 #define H5F_DECODE_OFFSET(f,p,o)					      \
-   switch (H5F_SIZEOF_OFFSET (f)) {					      \
+   switch (H5F_SIZEOF_ADDR (f)) {					      \
    case 4:								      \
       UINT32DECODE (p, o);						      \
       break;								      \
@@ -397,17 +397,20 @@ typedef struct H5F_t {
 
 struct H5O_istore_t; /*forward decl for prototype arguments*/
 
+/* library variables */
+extern const H5F_create_t H5F_create_dflt;
+
 /* Private functions, not part of the publicly documented API */
 void H5F_encode_length_unusual(const H5F_t *f, uint8 **p, uint8 *l);
 H5F_t *H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
-		 const file_create_temp_t *create_parms);
+		 const H5F_create_t *create_parms);
 herr_t H5F_close (H5F_t *f);
 herr_t H5F_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
 		  intn fwidth);
 
 /* Functions that operate on indexed storage */
-herr_t H5F_istore_new (H5F_t *f, struct H5O_istore_t *istore,
-		       uintn ndims, const size_t alignment[]);
+herr_t H5F_istore_create (H5F_t *f, struct H5O_istore_t *istore,
+			  uintn ndims, const size_t alignment[]);
 herr_t H5F_istore_read (H5F_t *f, const struct H5O_istore_t *mesg,
 			const size_t offset[], const size_t size[],
 			void *buf);
@@ -417,7 +420,8 @@ herr_t H5F_istore_write (H5F_t *f, const struct H5O_istore_t *mesg,
 
 /* Functions that operate on contiguous storage wrt boot block */
 herr_t H5F_block_read (H5F_t *f, const haddr_t *addr, size_t size, void *buf);
-herr_t H5F_block_write (H5F_t *f, const haddr_t *addr, size_t size, void *buf);
+herr_t H5F_block_write (H5F_t *f, const haddr_t *addr, size_t size,
+			const void *buf);
 
 /* Functions that operate directly on low-level files */
 herr_t H5F_low_extend (H5F_low_t *lf, intn op, size_t size, haddr_t *addr);

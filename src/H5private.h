@@ -100,7 +100,7 @@
  * File addresses.
  */
 typedef struct {
-   uint64		offset;
+   uint64		offset;		/*offset within an HDF5 file	*/
 } haddr_t;
 
 #define NO_ADDR		NULL
@@ -369,7 +369,8 @@ extern char *strdup (const char *s);
  *		profiling.
  *
  * Notes:	Every file must have a file-scope variable called
- *		`initialize_interface'.
+ *		`initialize_interface_g' of type hbool_t which is initialized
+ * 		to FALSE.
  *
  * 		Don't use local variable initializers which contain
  *		calls to other library functions since the initializer
@@ -401,12 +402,20 @@ extern char *strdup (const char *s);
  *	initializing functions.  Infinite recursion is no longer a
  *	danger.
  *
+ * 	Robb Matzke, 3 Dec 1997
+ *	The interface initialization function is no longer passed as an
+ *	argument unless the `FUNC_ENTER_INIT' form is called.  Instead, the
+ *	function comes from the `INTERFACE_INIT' constant which must be
+ *	defined in every source file.
+ *
  *-------------------------------------------------------------------------
  */
 extern hbool_t library_initialize_g; /*good thing C's lazy about extern!*/
 extern hbool_t thread_initialize_g; /*don't decl interface_initialize_g */
 
-#define FUNC_ENTER(func_name,interface_init_func,err) {		      	      \
+#define FUNC_ENTER(func_name,err) FUNC_ENTER_INIT(func_name,INTERFACE_INIT,err)
+
+#define FUNC_ENTER_INIT(func_name,interface_init_func,err) {	      	      \
    CONSTR (FUNC, #func_name);						      \
    PABLO_SAVE (ID_ ## func_name);					      \
 									      \

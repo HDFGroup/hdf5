@@ -44,8 +44,9 @@ static herr_t H5G_node_decode_key (H5F_t *f, H5B_t *bt, uint8 *raw,
 static herr_t H5G_node_encode_key (H5F_t *f, H5B_t *bt, uint8 *raw,
 				   void *_key);
 static size_t H5G_node_size (H5F_t *f);
-static herr_t H5G_node_new (H5F_t *f, H5B_ins_t op, void *_lt_key,
-			    void *_udata, void *_rt_key, haddr_t *addr/*out*/);
+static herr_t H5G_node_create (H5F_t *f, H5B_ins_t op, void *_lt_key,
+			       void *_udata, void *_rt_key,
+			       haddr_t *addr/*out*/);
 static herr_t H5G_node_flush (H5F_t *f, hbool_t destroy, const haddr_t *addr,
 			      H5G_node_t *sym);
 static H5G_node_t *H5G_node_load (H5F_t *f, const haddr_t *addr,
@@ -77,7 +78,7 @@ H5B_class_t H5B_SNODE[1] = {{
    H5B_SNODE_ID,				/*id			*/
    sizeof (H5G_node_key_t),			/*sizeof_nkey		*/
    H5G_node_sizeof_rkey,			/*get_sizeof_rkey	*/
-   H5G_node_new,				/*new			*/
+   H5G_node_create,				/*new			*/
    H5G_node_cmp2,				/*cmp2			*/
    H5G_node_cmp3,				/*cmp3			*/
    H5G_node_found,				/*found			*/
@@ -89,8 +90,9 @@ H5B_class_t H5B_SNODE[1] = {{
    H5G_node_encode_key,				/*encode		*/
 }};
 
-/* Has the interface been initialized? */
+/* Interface initialization */
 static intn interface_initialize_g = FALSE;
+#define INTERFACE_INIT	NULL
 
 
 /*-------------------------------------------------------------------------
@@ -140,7 +142,7 @@ H5G_node_decode_key (H5F_t *f, H5B_t *bt, uint8 *raw, void *_key)
 {
    H5G_node_key_t	*key = (H5G_node_key_t *)_key;
 
-   FUNC_ENTER (H5G_node_decode_key, NULL, FAIL);
+   FUNC_ENTER (H5G_node_decode_key, FAIL);
 
    assert (f);
    assert (raw);
@@ -174,7 +176,7 @@ H5G_node_encode_key (H5F_t *f, H5B_t *bt, uint8 *raw, void *_key)
 {
    H5G_node_key_t	*key = (H5G_node_key_t *)_key;
 
-   FUNC_ENTER (H5G_node_encode_key, NULL, FAIL);
+   FUNC_ENTER (H5G_node_encode_key, FAIL);
 
    assert (f);
    assert (raw);
@@ -212,7 +214,7 @@ H5G_node_size (H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_node_new
+ * Function:	H5G_node_create
  *
  * Purpose:	Creates a new empty symbol table.  This function is called
  *		by the B-tree insert function for an empty tree.  It is
@@ -233,16 +235,16 @@ H5G_node_size (H5F_t *f)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_new (H5F_t *f, H5B_ins_t op,
-	      void *_lt_key, void *_udata, void *_rt_key,
-	      haddr_t *addr/*out*/)
+H5G_node_create (H5F_t *f, H5B_ins_t op,
+		 void *_lt_key, void *_udata, void *_rt_key,
+		 haddr_t *addr/*out*/)
 {
    H5G_node_key_t	*lt_key = (H5G_node_key_t*)_lt_key;
    H5G_node_key_t	*rt_key = (H5G_node_key_t*)_rt_key;
    H5G_node_t		*sym = NULL;
    size_t		size = 0;
 
-   FUNC_ENTER (H5G_node_new, NULL, FAIL);
+   FUNC_ENTER (H5G_node_create, FAIL);
 
    /*
     * Check arguments.
@@ -307,7 +309,7 @@ H5G_node_flush (H5F_t *f, hbool_t destroy, const haddr_t *addr,
    herr_t	status;
    int		i;
 
-   FUNC_ENTER (H5G_node_flush, NULL, FAIL);
+   FUNC_ENTER (H5G_node_flush, FAIL);
 
    /*
     * Check arguments.
@@ -402,7 +404,7 @@ H5G_node_load (H5F_t *f, const haddr_t *addr, const void *_udata1,
    const H5G_ac_ud1_t *ac_udata = (const H5G_ac_ud1_t*)_udata1;
    H5G_node_t	*ret_value = NULL; /*for error handling*/
 
-   FUNC_ENTER (H5G_node_load, NULL, NULL);
+   FUNC_ENTER (H5G_node_load, NULL);
 
    /*
     * Check arguments.
@@ -447,8 +449,13 @@ H5G_node_load (H5F_t *f, const haddr_t *addr, const void *_udata1,
    }
    buf = H5MM_xfree (buf);
 
-   /* shadows */
-   if (H5G_shadow_assoc_node (f, sym, ac_udata)<0) {
+   /*
+    * shadows.  If we are running this under the debugger, then the grp_addr
+    * field of ac_udata might be undefined.  If that's the case, then we
+    * don't try to associate any shadows with this symbol table node.
+    */
+   if (H5F_addr_defined (&(ac_udata->grp_addr)) &&
+       H5G_shadow_assoc_node (f, sym, ac_udata)<0) {
       HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, NULL);
    }
    
@@ -499,7 +506,7 @@ H5G_node_cmp2 (H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
    const char		*s1, *s2;
    intn			cmp;
 
-   FUNC_ENTER (H5G_node_cmp2, NULL, FAIL);
+   FUNC_ENTER (H5G_node_cmp2, FAIL);
 
    assert (udata);
    assert (lt_key);
@@ -553,7 +560,7 @@ H5G_node_cmp3 (H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
    H5G_node_key_t	*rt_key = (H5G_node_key_t *)_rt_key;
    const char		*s;
 
-   FUNC_ENTER (H5G_node_cmp3, NULL, FAIL);
+   FUNC_ENTER (H5G_node_cmp3, FAIL);
 
    /* left side */
    if (NULL==(s=H5H_peek (f, &(udata->heap_addr), lt_key->offset))) {
@@ -610,7 +617,7 @@ H5G_node_found (H5F_t *f, const haddr_t *addr, const void *_lt_key,
    const char		*s;
    herr_t		ret_value = FAIL;
 
-   FUNC_ENTER (H5G_node_found, NULL, FAIL);
+   FUNC_ENTER (H5G_node_found, FAIL);
 
    /*
     * Check arguments.
@@ -746,7 +753,7 @@ H5G_node_insert (H5F_t *f, const haddr_t *addr,
    H5G_node_t		*insert_into=NULL;	/*node that gets new entry*/
    haddr_t		insert_addr;		/*address of that node	*/
 
-   FUNC_ENTER (H5G_node_insert, NULL, H5B_INS_ERROR);
+   FUNC_ENTER (H5G_node_insert, H5B_INS_ERROR);
 
    /*
     * Check arguments.
@@ -813,8 +820,8 @@ H5G_node_insert (H5F_t *f, const haddr_t *addr,
       ret_value = H5B_INS_RIGHT;
 
       /* The right node */
-      if (H5G_node_new (f, H5B_INS_FIRST, NULL, NULL, NULL,
-			new_node/*out*/)<0) {
+      if (H5G_node_create (f, H5B_INS_FIRST, NULL, NULL, NULL,
+			   new_node/*out*/)<0) {
 	 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, H5B_INS_ERROR);
       }
       if (NULL==(snrt=H5AC_find (f, H5AC_SNODE, new_node, &ac_udata, NULL))) {
@@ -944,7 +951,7 @@ H5G_node_list (H5F_t *f, const haddr_t *addr, void *_udata)
    herr_t		ret_value = FAIL;
    H5G_ac_ud1_t		ac_udata;
    
-   FUNC_ENTER (H5G_node_list, NULL, FAIL);
+   FUNC_ENTER (H5G_node_list, FAIL);
 
    /*
     * Check arguments.
@@ -1030,7 +1037,7 @@ H5G_node_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
    const char	*s;
    H5G_ac_ud1_t	ac_udata;
 
-   FUNC_ENTER (H5G_node_debug, NULL, FAIL);
+   FUNC_ENTER (H5G_node_debug, FAIL);
 
    /*
     * Check arguments.
@@ -1045,7 +1052,7 @@ H5G_node_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
     * We have absolutely no idea where the object header for the symbol table
     * to which this node belongs is located.  In fact, if the file is corrupt,
     * there may not even be an object header for that symbol table.  So we
-    * supply `-1' as the group address which causes no open objects to be
+    * supply UNDEF as the group address which causes no open objects to be
     * associated with the node.  For that reason, we flush this node from the
     * cache when we're done so if some later caller knows the header address
     * they'll be able to access the open objects.

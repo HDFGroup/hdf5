@@ -87,40 +87,38 @@ typedef struct H5O_t {
 } H5O_t;
 
 /*
- * Null message.
+ * Null Message.
  */
 #define H5O_NULL_ID	0x0000
 extern const H5O_class_t H5O_NULL[1];
 
 /*
- * Simple Dimensionality message.
+ * Simple Dimensionality Message.
  */
-#define H5O_SIM_DIM_ID	0x0001
-extern const H5O_class_t H5O_SIM_DIM[1];
-
-typedef H5P_sdim_t H5O_sim_dim_t;
+#define H5O_SDSPACE_ID	0x0001
+extern const H5O_class_t H5O_SDSPACE[1];
+/* operates on an H5P_simple_t struct */
 
 /*
- * Simple Datatype message.
+ * Data Type Message.
  */
-#define H5O_SIM_DTYPE_ID	0x0003
-extern const H5O_class_t H5O_SIM_DTYPE[1];
-
-typedef h5_atomic_type_t H5O_sim_dtype_t;
+#define H5O_DTYPE_ID	0x0003
+extern const H5O_class_t H5O_DTYPE[1];
+/* operates on an H5T_t struct */
 
 /*
- * Standard Data Storage message.
+ * Contiguous Data Storage Message.
  */
-#define H5O_STD_STORE_ID	0x0005
-extern const H5O_class_t H5O_STD_STORE[1];
+#define H5O_CSTORE_ID		0x0005
+extern const H5O_class_t H5O_CSTORE[1];
 
-typedef struct H5O_std_store_t {
-   haddr_t	off;
-   size_t	len;
-} H5O_std_store_t;
+typedef struct H5O_cstore_t {
+   haddr_t	addr;
+   size_t	size;
+} H5O_cstore_t;
 
 /*
- * Indexed Data Storage message.
+ * Indexed Data Storage Message.
  */
 #define H5O_ISTORE_ID		0x0008
 #define H5O_ISTORE_NDIMS	32
@@ -131,6 +129,19 @@ typedef struct H5O_istore_t {
    uintn	ndims;			/*num dimensions in stored data	*/
    size_t	alignment[H5O_ISTORE_NDIMS];	/*algn in logical space	*/
 } H5O_istore_t;
+
+/*
+ * External File List Message
+ */
+#define H5O_EFL_ID		0x0009
+extern const H5O_class_t H5O_EFL[1];
+
+typedef struct H5O_efl_t {
+   haddr_t	heap_addr;		/*Address of name heap		*/
+   uintn	nalloc;			/*Number of slots allocated	*/
+   uintn	nused;			/*Number of slots used		*/
+   size_t	*offset;		/*Array of name offsets in heap	*/
+} H5O_efl_t;
 
 /*
  * Object name message.
@@ -169,7 +180,7 @@ typedef struct H5O_stab_t {
 
 
 
-herr_t H5O_new (H5F_t *f, intn nlink, size_t size_hint, haddr_t*);
+herr_t H5O_create (H5F_t *f, intn nlink, size_t size_hint, haddr_t*);
 intn H5O_link (H5F_t *f, H5G_entry_t *ent, intn adjust);
 void *H5O_read (H5F_t *f, const haddr_t *addr, H5G_entry_t *ent,
 		const H5O_class_t *type, intn sequence, void *mesg);

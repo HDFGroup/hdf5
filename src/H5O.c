@@ -43,34 +43,35 @@ static const H5AC_class_t H5AC_OHDR[1] = {{
    (herr_t(*)(H5F_t*,hbool_t,const haddr_t*,void*))H5O_flush,
 }};
 
-/* Is the interface initialized? */
+/* Interface initialization */
 static intn interface_initialize_g = FALSE;
+#define INTERFACE_INIT	NULL
 
 /* ID to type mapping */
 static const H5O_class_t *const message_type_g[] = {
-   H5O_NULL,      /*0x0000 Null 					*/
-   H5O_SIM_DIM,   /*0x0001 Simple dimensionality			*/
+   H5O_NULL,    /*0x0000 Null 						*/
+   H5O_SDSPACE, /*0x0001 Simple Dimensionality				*/
    NULL,		/*0x0002 Data space (fiber bundle?)		*/
-   H5O_SIM_DTYPE, /*0x0003 Simple data type				*/
-   NULL,		/*0x0004 Compound data type			*/
-   H5O_STD_STORE, /*0x0005 Data storage -- standard object		*/
+   H5O_DTYPE,   /*0x0003 Data Type					*/
+   NULL,		/*0x0004 Not assigned				*/
+   H5O_CSTORE,  /*0x0005 Contiguous Data Storage			*/
    NULL,		/*0x0006 Data storage -- compact object		*/
    NULL,		/*0x0007 Data storage -- external object	*/
-   H5O_ISTORE, 	  /*0x0008 Data storage -- indexed object		*/
-   NULL, 		/*0x0009 Not assigned				*/
+   H5O_ISTORE, 	/*0x0008 Indexed Data Storage				*/
+   H5O_EFL,	/*0x0009 External File List				*/
    NULL,		/*0x000A Not assigned				*/
    NULL,		/*0x000B Data storage -- compressed object	*/
    NULL,		/*0x000C Attribute list				*/
-   H5O_NAME,		/*0x000D Object name				*/
+   H5O_NAME,	/*0x000D Object name					*/
    NULL,		/*0x000E Object modification date and time	*/
    NULL,		/*0x000F Shared header message			*/
-   H5O_CONT,		/*0x0010 Object header continuation		*/
-   H5O_STAB,		/*0x0011 Symbol table				*/
+   H5O_CONT,	/*0x0010 Object header continuation			*/
+   H5O_STAB,	/*0x0011 Symbol table					*/
 };
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_new
+ * Function:	H5O_create
  *
  * Purpose:	Creates a new object header, sets the link count
  *		to NLINK, and caches the header.
@@ -89,13 +90,13 @@ static const H5O_class_t *const message_type_g[] = {
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_new (H5F_t *f, intn nlink, size_t size_hint, haddr_t *addr/*out*/)
+H5O_create (H5F_t *f, intn nlink, size_t size_hint, haddr_t *addr/*out*/)
 {
    size_t	size;		/*total size of object header	*/
    H5O_t	*oh = NULL;
    haddr_t	tmp_addr;
 
-   FUNC_ENTER (H5O_new, NULL, FAIL);
+   FUNC_ENTER (H5O_create, FAIL);
 
    /* check args */
    assert (f);
@@ -184,7 +185,7 @@ H5O_load (H5F_t *f, const haddr_t *addr, const void *_udata1, void *_udata2)
    size_t	chunk_size;
    H5O_cont_t	*cont=NULL;
 
-   FUNC_ENTER (H5O_load, NULL, NULL);
+   FUNC_ENTER (H5O_load, NULL);
 
    /* check args */
    assert (f);
@@ -344,7 +345,7 @@ H5O_flush (H5F_t *f, hbool_t destroy, const haddr_t *addr, H5O_t *oh)
    int		i;
    H5O_cont_t	*cont = NULL;
    
-   FUNC_ENTER (H5O_flush, NULL, FAIL);
+   FUNC_ENTER (H5O_flush, FAIL);
 
    /* check args */
    assert (f);
@@ -476,7 +477,7 @@ H5O_flush (H5F_t *f, hbool_t destroy, const haddr_t *addr, H5O_t *oh)
 herr_t
 H5O_reset (const H5O_class_t *type, void *native)
 {
-   FUNC_ENTER (H5O_reset, NULL, FAIL);
+   FUNC_ENTER (H5O_reset, FAIL);
 
    if (native) {
       if (type->reset) {
@@ -517,7 +518,7 @@ H5O_link (H5F_t *f, H5G_entry_t *ent, intn adjust)
    H5O_t	*oh = NULL;
    haddr_t	addr;
    
-   FUNC_ENTER (H5O_link, NULL, FAIL);
+   FUNC_ENTER (H5O_link, FAIL);
 
    /* check args */
    assert (f);
@@ -582,7 +583,7 @@ H5O_read (H5F_t *f, const haddr_t *addr, H5G_entry_t *ent,
    H5G_type_t	cache_type;
    haddr_t	_addr;
    
-   FUNC_ENTER (H5O_read, NULL, NULL);
+   FUNC_ENTER (H5O_read, NULL);
 
    /* check args */
    assert (f);
@@ -650,7 +651,7 @@ H5O_find_in_ohdr (H5F_t *f, const haddr_t *addr, const H5O_class_t **type_p,
    H5O_t	*oh = NULL;
    int		i;
    
-   FUNC_ENTER (H5O_find_in_ohdr, NULL, FAIL);
+   FUNC_ENTER (H5O_find_in_ohdr, FAIL);
    
    /* check args */
    assert (f);
@@ -717,7 +718,7 @@ H5O_peek (H5F_t *f, const haddr_t *addr, const H5O_class_t *type,
    intn		idx;
    H5O_t	*oh = NULL;
    
-   FUNC_ENTER (H5O_peek, NULL, NULL);
+   FUNC_ENTER (H5O_peek, NULL);
 
    /* check args */
    assert (f);
@@ -775,7 +776,7 @@ H5O_modify (H5F_t *f, const haddr_t *addr, H5G_entry_t *ent,
    size_t	size;
    haddr_t	_addr;
    
-   FUNC_ENTER (H5O_modify, NULL, FAIL);
+   FUNC_ENTER (H5O_modify, FAIL);
 
    /* check args */
    assert (f);
@@ -879,7 +880,7 @@ H5O_remove (H5F_t *f, const haddr_t *addr, H5G_entry_t *ent,
    intn		i, seq;
    haddr_t	_addr;
    
-   FUNC_ENTER (H5O_remove, NULL, FAIL);
+   FUNC_ENTER (H5O_remove, FAIL);
 
    /* check args */
    assert (f);
@@ -954,7 +955,7 @@ H5O_alloc_extend_chunk (H5O_t *oh, intn chunkno, size_t size)
    size_t	delta;
    uint8	*old_addr;
 
-   FUNC_ENTER (H5O_alloc_extend_chunk, NULL, FAIL);
+   FUNC_ENTER (H5O_alloc_extend_chunk, FAIL);
 
    /* check args */
    assert (oh);
@@ -1071,7 +1072,7 @@ H5O_alloc_new_chunk (H5F_t *f, H5O_t *oh, size_t size)
    H5O_cont_t	*cont = NULL;		/*native continuation message	*/
    intn		i, chunkno;
    
-   FUNC_ENTER (H5O_alloc_new_chunk, NULL, FAIL);
+   FUNC_ENTER (H5O_alloc_new_chunk, FAIL);
 
    /* check args */
    assert (oh);
@@ -1083,7 +1084,7 @@ H5O_alloc_new_chunk (H5F_t *f, H5O_t *oh, size_t size)
     * that could be moved to make room for the continuation message.
     * Don't ever move continuation message from one chunk to another.
     */
-   cont_size = H5F_SIZEOF_OFFSET(f) + H5F_SIZEOF_SIZE(f);
+   cont_size = H5F_SIZEOF_ADDR(f) + H5F_SIZEOF_SIZE(f);
    for (i=0; i<oh->nmesgs; i++) {
       if (H5O_NULL_ID == oh->mesg[i].type->id) {
 	 if (cont_size == oh->mesg[i].raw_size) {
@@ -1228,7 +1229,7 @@ H5O_alloc (H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
    intn		idx;
    intn		null_idx;
    
-   FUNC_ENTER (H5O_alloc, NULL, FAIL);
+   FUNC_ENTER (H5O_alloc, FAIL);
 
    /* check args */
    assert (oh);
@@ -1330,7 +1331,7 @@ H5O_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
    int		*sequence;
    haddr_t	tmp_addr;
    
-   FUNC_ENTER (H5O_debug, NULL, FAIL);
+   FUNC_ENTER (H5O_debug, FAIL);
 
    /* check args */
    assert (f);

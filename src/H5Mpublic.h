@@ -29,20 +29,19 @@ extern "C" {
 #endif
 
 /* Functions in H5M.c */
-hid_t H5Mcreate(hid_t owner_id, hobjtype_t type, const char *name);
 hid_t H5Maccess(hid_t oid);
 hid_t H5Mcopy(hid_t oid);
-hid_t H5Mfind_name(hid_t oid, hobjtype_t type, const char *name);
+hid_t H5Mfind_name(hid_t oid, group_t type, const char *name);
 uint32 H5Mname_len(hid_t oid);
 herr_t H5Mget_name(hid_t oid, char *name);
 herr_t H5Mset_name(hid_t oid, const char *name);
-hid_t H5Msearch(hid_t oid, hobjtype_t type, const char *name);
-hid_t H5Mindex(hid_t oid, hobjtype_t type, uint32 idx);
+hid_t H5Msearch(hid_t oid, group_t type, const char *name);
+hid_t H5Mindex(hid_t oid, group_t type, uint32 idx);
 hid_t H5Mflush(hid_t oid);
 herr_t H5Mdelete(hid_t oid);
 hid_t H5Mget_file(hid_t oid);
 hid_t H5Mget_parent(hid_t oid);
-herr_t H5Mrelease(hid_t oid);
+herr_t H5Mclose(hid_t oid);
 
 #ifdef __cplusplus
 }

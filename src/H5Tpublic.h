@@ -23,62 +23,89 @@
 #include <H5public.h>
 #include <H5Apublic.h>
 
-/* Define atomic datatype bases */
-#define H5T_CHAR    MAKE_ATOM(H5_DATATYPE,0)
-#define H5T_INT     MAKE_ATOM(H5_DATATYPE,1)
-#define H5T_FLOAT   MAKE_ATOM(H5_DATATYPE,2)
-#define H5T_DATE    MAKE_ATOM(H5_DATATYPE,3)
-#define H5T_TIME    MAKE_ATOM(H5_DATATYPE,4)
-#define H5T_SPTR    MAKE_ATOM(H5_DATATYPE,5)
-#define H5T_PPTR    MAKE_ATOM(H5_DATATYPE,6)
-#define H5T_COMPOUND MAKE_ATOM(H5_DATATYPE,7)
+/* These are the various classes of data types */
+typedef enum H5T_class_t {
+   H5T_NO_CLASS		=-1,	/*error					*/
+   H5T_FIXED		=0,	/*fixed-point types			*/
+   H5T_FLOAT		=1,	/*floating-point types			*/
+   H5T_DATE		=2,	/*date and time	types			*/
+   H5T_STRING		=3,	/*character string types		*/
+   H5T_BITFIELD		=4,	/*bit field types			*/
+   H5T_OPAQUE		=5, 	/*opaque types				*/
+   H5T_COMPOUND		=6	/*compound types			*/
+} H5T_class_t;
 
-/* Define atomic datatype architectures */
-#define H5T_BIGENDIAN       0
-#define H5T_LITTLEENDIAN    1
+/* Byte orders */
+typedef enum H5T_order_t {
+   H5T_ORDER_ERROR	=-1, 	/*error					*/
+   H5T_ORDER_LE		=0, 	/*little endian				*/
+   H5T_ORDER_BE		=1, 	/*bit endian				*/
+   H5T_ORDER_VAX	=2, 	/*VAX mixed endian			*/
+   H5T_ORDER_NONE	=3	/*no particular order (strings, bits,..)*/
+} H5T_order_t;
 
-/* Define the machine's architecture */
-/*
-WARNING!
-    This is _extremly_ crude is is only valid for very generic architectures,
-    anything with a wierd size of integer or wacky floating-point format will
-    _not_ work with this hack.  It needs to be replaced with Robb's much more
-    comprehensive code from H5detect.c. -QAK
-WARNING!
-*/
-#define H5T_ARCH_BIGENDIAN  0
-#define H5T_ARCH_LITTLEENDIAN  1
-#ifdef WORDS_BIGENDIAN
-#define H5T_ARCH_TYPE  H5T_ARCH_BIGENDIAN
-#else /* WORDS_BIGENDIAN */
-#define H5T_ARCH_TYPE  H5T_ARCH_LITTLEENDIAN
-#endif /* WORDS_BIGENDIAN */
+/* Types of fixed-point sign schemes */
+typedef enum H5T_sign_t {
+   H5T_SGN_ERROR	=-1, 	/*error					*/
+   H5T_SGN_NONE		=0, 	/*this is an unsigned type		*/
+   H5T_SGN_2		=1 	/*two's complement			*/
+} H5T_sign_t;
 
-typedef struct {
-    hid_t base;           /* Basic datatype */
-    uint8 len;              /* Length of base-type, in bytes */
-    uint8 arch;             /* Architecture of the base-type */
- } h5_atomic_type_t;
+/* Floating-point normalization schemes */
+typedef enum H5T_norm_t {
+   H5T_NORM_ERROR	=-1, 	/*error					*/
+   H5T_NORM_IMPLIED	=0,	/*msb of mantissa isn't stored, always 1*/
+   H5T_NORM_MSBSET	=1, 	/*msb of mantissa is always 1		*/
+   H5T_NORM_NONE	=2	/*not normalized			*/
+} H5T_norm_t;
+
+/* Character set to use for text strings */
+typedef enum H5T_cset_t {
+   H5T_CSET_ERROR	=-1,	/*error					*/
+   H5T_CSET_ASCII	=0	/*US ASCII				*/
+} H5T_cset_t;
+
+/* Type of padding to use in character strings */
+typedef enum H5T_str_t {
+   H5T_STR_ERROR	=-1, 	/*error					*/
+   H5T_STR_NULL		=0, 	/*pad with null term like in C		*/
+   H5T_STR_SPACE	=1, 	/*pad with spaces like in Fortran	*/
+} H5T_str_t;
+
+
+
+#define H5T_PAD_ZERO	(-1)	/*pad with all zeros			*/
+#define H5T_PAD_ONE	(-2)	/*pad with all ones			*/
+#define H5T_PAD_FROM(X)	(X)	/*pad with value of bit X		*/
+
+/* The predefined types */
+extern hid_t H5T_NATIVE_CHAR;
+extern hid_t H5T_NATIVE_UCHAR;
+extern hid_t H5T_NATIVE_SHORT;
+extern hid_t H5T_NATIVE_USHORT;
+extern hid_t H5T_NATIVE_INT;
+extern hid_t H5T_NATIVE_UINT;
+extern hid_t H5T_NATIVE_LONG;
+extern hid_t H5T_NATIVE_ULONG;
+extern hid_t H5T_NATIVE_FLOAT;
+extern hid_t H5T_NATIVE_DOUBLE;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Functions in H5T.c */
-uint32 H5Tget_num_fields(hid_t tid);
-hbool_t H5Tis_field_atomic(hid_t tid,uintn fidx);
-hbool_t H5Tis_atomic(hid_t tid);
-herr_t H5Tset_type(hid_t tid,hid_t base,uint8 len,uint8 arch);
-herr_t H5Tget_type(hid_t tid,hid_t *base,uint8 *len,uint8 *arch);
-uintn H5Tsize(hid_t tid, hbool_t mem_flag);
-intn H5Tarch(hid_t tid);
-herr_t H5Tadd_field (hid_t tid, const char *name, hid_t base, uint8 len,
-		     uint8 arch, hid_t space);
-herr_t H5Tget_fields(hid_t tid, hid_t *field_list);
+hid_t H5Tcreate (H5T_class_t type, size_t size);
+hid_t H5Tcopy (hid_t type_id);
+herr_t H5Tclose (hid_t type_id);
+hbool_t H5Tequal (hid_t type1_id, hid_t type2_id);
 
-/* Private functions which need to be globally visible */
-void H5T_term_interface (void);
-void H5T_destroy(void *datatype);
+H5T_class_t H5Tget_class (hid_t type_id);
+size_t H5Tget_size (hid_t type_id);
+intn H5Tget_num_members (hid_t type_id);
+
+herr_t H5Tinsert_member (hid_t parent_id, const char *name, off_t offset,
+			 hid_t member_id);
+
 
 #ifdef __cplusplus
 }

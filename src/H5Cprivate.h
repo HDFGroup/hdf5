@@ -24,29 +24,7 @@
 #include <H5private.h>
 #include <H5Fprivate.h>
 
-/*
- * Default file-creation template values.
- */
-#define H5C_USERBLOCK_DEFAULT  0       /* Default user blocks size in bytes */
-#define H5C_OFFSETSIZE_DEFAULT 4       /* Default file offset size in bytes */
-#define H5C_LENGTHSIZE_DEFAULT 4       /* Default file length size in bytes */
-#define H5C_SYM_LEAF_K_DEFAULT	4	/* Default K for tab leaf nodes      */
-	 
-#define H5C_BTREE_K_DEFAULT	{					      \
-   16,					/* Symbol table internal nodes	*/    \
-   32,					/* Indexed storage intern nodes	*/    \
-    0,					/* unused			*/    \
-    0,					/* unused			*/    \
-    0,					/* unused			*/    \
-    0,					/* unused			*/    \
-    0,					/* unused			*/    \
-    0					/* unused			*/    \
-}
-
-hid_t H5C_create(hid_t owner_id, hobjtype_t type, const char *name);
-hid_t H5C_copy(hid_t tid);
-herr_t H5C_release(hid_t oid);
-hid_t H5C_get_default_atom(hobjtype_t type);
-herr_t H5C_init(hid_t dst_atm, const file_create_temp_t *src);
+hid_t H5C_create (H5C_class_t type, void *tmpl);
+H5C_class_t H5C_class (hid_t template);
 
 #endif

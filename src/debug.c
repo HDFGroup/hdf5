@@ -53,20 +53,6 @@ main (int argc, char *argv[])
    herr_t	status = SUCCEED;
    haddr_t	extra;
 
-   H5F_addr_reset (&addr);
-   H5F_addr_reset (&extra);
-   
-   /*
-    * Parse command arguments.
-    */
-   if (argc>2) {
-      printf ("New address: %s\n", argv[2]);
-      addr.offset = HDstrtol (argv[2], NULL, 0);
-   }
-   if (argc>3) {
-      extra.offset = HDstrtol (argv[3], NULL, 0);
-   }
-   
    /*
     * Open the file and get the file descriptor.
     */
@@ -79,6 +65,19 @@ main (int argc, char *argv[])
       HDexit (2);
    }
 
+   /*
+    * Parse command arguments.
+    */
+   H5F_addr_reset (&addr);
+   H5F_addr_reset (&extra);
+   if (argc>2) {
+      printf ("New address: %s\n", argv[2]);
+      addr.offset = HDstrtol (argv[2], NULL, 0);
+   }
+   if (argc>3) {
+      extra.offset = HDstrtol (argv[3], NULL, 0);
+   }
+   
    /*
     * Read the signature at the specified file position.
     */

@@ -35,7 +35,9 @@
  * Private file-scope variables.
  */
 #define PABLO_MASK	H5AC_mask
+#define INTERFACE_INIT	NULL
 static int	interface_initialize_g = FALSE;		/*initialized?*/
+
 
 #ifdef H5AC_SORT_BY_ADDR
 static H5AC_t *current_cache_g = NULL;			/*for sorting */
@@ -43,7 +45,7 @@ static H5AC_t *current_cache_g = NULL;			/*for sorting */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5AC_new
+ * Function:	H5AC_create
  *
  * Purpose:	Initialize the cache just after a file is opened.  The
  *		SIZE_HINT is the number of cache slots desired.  If you
@@ -63,10 +65,10 @@ static H5AC_t *current_cache_g = NULL;			/*for sorting */
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_new (H5F_t *f, intn size_hint)
+H5AC_create (H5F_t *f, intn size_hint)
 {
    H5AC_t	*cache = NULL;
-   FUNC_ENTER (H5AC_new, NULL, FAIL);
+   FUNC_ENTER (H5AC_create, FAIL);
 
    assert (f);
    assert (NULL==f->shared->cache);
@@ -103,7 +105,7 @@ herr_t
 H5AC_dest (H5F_t *f)
 {
    H5AC_t	*cache = NULL;
-   FUNC_ENTER (H5AC_dest, NULL, FAIL);
+   FUNC_ENTER (H5AC_dest, FAIL);
 
    assert (f);
    assert (f->shared->cache);
@@ -184,7 +186,7 @@ H5AC_find_f (H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
    H5AC_slot_t	*slot = NULL;
    H5AC_t	*cache = NULL;
 
-   FUNC_ENTER (H5AC_find, NULL, NULL);
+   FUNC_ENTER (H5AC_find, NULL);
 
    assert (f);
    assert (f->shared->cache);
@@ -349,7 +351,7 @@ H5AC_flush (H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
    intn		nslots;
    H5AC_t	*cache=NULL;
 
-   FUNC_ENTER (H5AC_flush, NULL, FAIL);
+   FUNC_ENTER (H5AC_flush, FAIL);
 
    assert (f);
    assert (f->shared->cache);
@@ -465,7 +467,7 @@ H5AC_set (H5F_t *f, const H5AC_class_t *type, const haddr_t *addr, void *thing)
    H5AC_slot_t	*slot = NULL;
    H5AC_t	*cache=NULL;
 
-   FUNC_ENTER (H5AC_set, NULL, FAIL);
+   FUNC_ENTER (H5AC_set, FAIL);
 
    assert (f);
    assert (f->shared->cache);
@@ -535,7 +537,7 @@ H5AC_rename (H5F_t *f, const H5AC_class_t *type,
    herr_t	status;
    H5AC_t	*cache=NULL;
 
-   FUNC_ENTER (H5AC_rename, NULL, FAIL);
+   FUNC_ENTER (H5AC_rename, FAIL);
 
    assert (f);
    assert (f->shared->cache);
@@ -639,7 +641,7 @@ H5AC_protect (H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
    }
 #endif
    
-   FUNC_ENTER (H5AC_protect, NULL, NULL);
+   FUNC_ENTER (H5AC_protect, NULL);
 
    /* check args */
    assert (f);
@@ -746,7 +748,7 @@ H5AC_unprotect (H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
    H5AC_t	*cache = NULL;
    H5AC_slot_t	*slot = NULL;
    
-   FUNC_ENTER (H5AC_unprotect, NULL, FAIL);
+   FUNC_ENTER (H5AC_unprotect, FAIL);
 
    /* check args */
    assert (f);
@@ -830,7 +832,7 @@ H5AC_debug (H5F_t *f)
    H5AC_t	*cache = f->shared->cache;
    double	miss_rate;
 
-   FUNC_ENTER (H5AC_debug, NULL, FAIL);
+   FUNC_ENTER (H5AC_debug, FAIL);
 
    fprintf (stderr, "HDF5-DIAG: cache diagnostics for %s\n", f->name);
    fprintf (stderr, "   %18s  %8s %8s %8s %8s+%-8s\n",

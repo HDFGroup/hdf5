@@ -28,6 +28,7 @@
 
 #define PABLO_MASK H5F_family
 static hbool_t interface_initialize_g = FALSE;
+#define INTERFACE_INIT NULL
 
 /*
  * Number of bits in the member address.  This can be up to (but not
@@ -97,7 +98,7 @@ H5F_fam_open (const char *name, uintn flags, H5F_search_t *key/*out*/)
    size_t	nbits=H5F_FAM_DFLT_NBITS;/*num bits in an offset	*/
    haddr_t	tmp_addr;		/*temporary address		*/
 
-   FUNC_ENTER (H5F_fam_open, NULL, NULL);
+   FUNC_ENTER (H5F_fam_open, NULL);
 
    /*
     * If we're truncating the file then delete all but the first family
@@ -227,7 +228,7 @@ H5F_fam_close (H5F_low_t *lf)
 {
    intn		membno;
    
-   FUNC_ENTER (H5F_fam_close, NULL, FAIL);
+   FUNC_ENTER (H5F_fam_close, FAIL);
 
    assert (lf);
    
@@ -273,7 +274,7 @@ H5F_fam_read (H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
    off_t	offset;
    size_t	member_size;
    
-   FUNC_ENTER (H5F_fam_read, NULL, FAIL);
+   FUNC_ENTER (H5F_fam_read, FAIL);
 
    assert (lf);
    assert (addr && H5F_addr_defined (addr));
@@ -339,7 +340,7 @@ H5F_fam_write (H5F_low_t *lf, const haddr_t *addr, size_t size,
    intn		i;
    size_t	member_size;
    
-   FUNC_ENTER (H5F_fam_write, NULL, FAIL);
+   FUNC_ENTER (H5F_fam_write, FAIL);
 
    assert (lf);
    assert (addr && H5F_addr_defined (addr));
@@ -440,7 +441,7 @@ H5F_fam_flush (H5F_low_t *lf)
    haddr_t	addr1, addr2, addr3;
    size_t	max_offset;
    
-   FUNC_ENTER (H5F_fam_flush, NULL, FAIL);
+   FUNC_ENTER (H5F_fam_flush, FAIL);
 
    /*
     * Make sure that the first family member is the maximum size because
@@ -508,7 +509,7 @@ H5F_fam_access (const char *name, int mode, H5F_search_t *key/*out*/)
    char		member_name[4096];
    hbool_t	status;
    
-   FUNC_ENTER (H5F_fam_access, NULL, FAIL);
+   FUNC_ENTER (H5F_fam_access, FAIL);
 
    for (membno=0; /*void*/; membno++) {
       sprintf (member_name, name, membno);

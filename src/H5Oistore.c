@@ -37,9 +37,9 @@ const H5O_class_t H5O_ISTORE[1] = {{
    H5O_istore_debug, 			/*debug the message		*/
 }};
 
-/* Is the interface initialized? */
+/* Interface initialization */
 static hbool_t interface_initialize_g = FALSE;
-
+#define INTERFACE_INIT	NULL
 
 
 /*-------------------------------------------------------------------------
@@ -65,7 +65,7 @@ H5O_istore_decode (H5F_t *f, size_t raw_size, const uint8 *p)
    H5O_istore_t *mesg = NULL;
    intn		i;
 
-   FUNC_ENTER (H5O_istore_decode, NULL, NULL);
+   FUNC_ENTER (H5O_istore_decode, NULL);
 
    /* check args */
    assert (f);
@@ -112,7 +112,7 @@ H5O_istore_encode (H5F_t *f, size_t raw_size, uint8 *p, const void *_mesg)
    const H5O_istore_t	*mesg = (const H5O_istore_t *)_mesg;
    int			i;
 
-   FUNC_ENTER (H5O_istore_encode, NULL, FAIL);
+   FUNC_ENTER (H5O_istore_encode, FAIL);
 
    /* check args */
    assert (f);
@@ -163,7 +163,7 @@ H5O_istore_copy (const void *_mesg, void *_dest)
    const H5O_istore_t	*mesg = (const H5O_istore_t *)_mesg;
    H5O_istore_t		*dest = (H5O_istore_t *)_dest;
 
-   FUNC_ENTER (H5O_istore_copy, NULL, NULL);
+   FUNC_ENTER (H5O_istore_copy, NULL);
 
    /* check args */
    assert (mesg);
@@ -201,14 +201,14 @@ H5O_istore_size (H5F_t *f, const void *_mesg)
    const H5O_istore_t 	*mesg = (const H5O_istore_t *)_mesg;
    size_t		ret_value = FAIL;
    
-   FUNC_ENTER (H5O_istore_size, NULL, FAIL);
+   FUNC_ENTER (H5O_istore_size, FAIL);
 
    /* check args */
    assert (f);
    assert (mesg);
    assert (mesg->ndims>0 && mesg->ndims<=H5O_ISTORE_NDIMS);
 
-   ret_value = H5F_SIZEOF_OFFSET (f) +		/* B-tree address	*/
+   ret_value = H5F_SIZEOF_ADDR (f) +		/* B-tree address	*/
                1 +				/* max dimension index	*/
                7 +				/* reserved bytes	*/
                mesg->ndims * 4;			/* alignment		*/
@@ -241,7 +241,7 @@ H5O_istore_debug (H5F_t *f, const void *_mesg, FILE *stream, intn indent,
    const H5O_istore_t	*mesg = (const H5O_istore_t *)_mesg;
    intn			i;
 
-   FUNC_ENTER (H5O_istore_debug, NULL, FAIL);
+   FUNC_ENTER (H5O_istore_debug, FAIL);
 
    /* check args */
    assert (f);

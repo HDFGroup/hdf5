@@ -1,20 +1,21 @@
-static char *FileHeader = "\n\
+/**/
+static const char *FileHeader = "\n\
 /*-------------------------------------------------------------------------\n\
- * Copyright (C) 1997   National Center for Supercomputing Applications.   \n\
- *                      All rights reserved.                               \n\
- *                                                                         \n\
+ * Copyright (C) 1997	National Center for Supercomputing Applications.   \n\
+ *			All rights reserved.				   \n\
+ *									   \n\
  *-------------------------------------------------------------------------";
 /*
  *
  * Created:	H5detect.c
- * 		10 Aug 1997
- * 		Robb Matzke
+ *		10 Aug 1997
+ *		Robb Matzke
  *
  * Purpose:	This code was borrowed heavily from the `detect.c'
- * 		program in the AIO distribution from Lawrence
- * 		Livermore National Laboratory.
+ *		program in the AIO distribution from Lawrence
+ *		Livermore National Laboratory.
  *
- *	        Detects machine byte order and floating point
+ *		Detects machine byte order and floating point
  *		format and generates a C source file (native.c)
  *		to describe those paramters.
  *
@@ -50,8 +51,7 @@ static char *FileHeader = "\n\
  * was detected.
  */
 typedef struct detected_t {
-   char	        *typename;
-   char	        *varname;
+   const char	*varname;
    int		size;
    int		padding;
    int		perm[32];
@@ -61,11 +61,11 @@ typedef struct detected_t {
 } detected_t;
 
 static void print_results (int nd, detected_t *d);
-static void iprint (detected_t*, int);
-static void print_known_formats (detected_t*, int);
+static void iprint (detected_t*);
+static void print_known_formats (detected_t*);
 static int byte_cmp (int, void*, void*);
 static int bit_cmp (int, int*, void*, void*);
-static void fix_order (int, int, int, int*, char**);
+static void fix_order (int, int, int, int*, const char **);
 static void fix_padding (detected_t*);
 static int imp_bit (int, int*, void*, void*);
 static int find_bias (int, int, int, int*, void*);
@@ -95,31 +95,31 @@ static void print_header (void);
 
 static detected_t Known[] = {
    /* Single-byte quantities */
-   {"char",			"Byte addressable",
+   {"Byte addressable",
     1, 0, LE_1, INTEGER},
 
    /* Little-endian fixed-point */
-   {"int16",			"Little-endian",
+   {"Little-endian",
     2, 0, LE_2, INTEGER},
-   {"int32", 			"Little-endian",
+   {"Little-endian",
     4, 0, LE_4, INTEGER},
 
    /* Big-endian fixed-point */
-   {"int16",			"Big-endian",
+   {"Big-endian",
     2, 0, BE_2, INTEGER},
-   {"int32",			"Big-endian",
+   {"Big-endian",
     4, 0, BE_4, INTEGER},
 
    /* Little-endian IEEE floating-point */
-   {"float32",			"Little-endian IEEE",
+   {"Little-endian IEEE",
     4, 0, LE_4, 31, 0, 23, 1, 23, 8, 127},
-   {"float64",			"Little-endian IEEE",
+   {"Little-endian IEEE",
     8, 0, LE_8, 63, 0, 52, 1, 52, 11, 1023},
 
    /* Big-endian IEEE floating-point */
-   {"float32",			"Big-endian IEEE",
+   {"Big-endian IEEE",
     4, 0, BE_4, 31, 0, 23, 1, 23, 8, 127},
-   {"float64",			"Big-endian IEEE",
+   {"Big-endian IEEE",
     8, 0, BE_8, 63, 0, 52, 1, 52, 11, 1023},
 };
 
@@ -129,47 +129,45 @@ static detected_t Known[] = {
  *
  * Purpose:	This macro takes a type like `int' and a base name like
  *		`nati' and detects the byte order.  The VAR is used to
- * 		construct the names of the C variables defined.
+ *		construct the names of the C variables defined.
  *
  * Return:	void
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
- *	        Jun 12 1996
+ *		Jun 12 1996
  *
  * Modifications:
  *
- * 	Robb Matzke, 4 Nov 1996
+ *	Robb Matzke, 4 Nov 1996
  *	The INFO.perm now contains `-1' for bytes that aren't used and
  *	are always zero.  This happens on the Cray for `short' where
  *	sizeof(short) is 8, but only the low-order 4 bytes are ever used.
  *
- * 	Robb Matzke, 4 Nov 1996
+ *	Robb Matzke, 4 Nov 1996
  *	Added a `padding' field to indicate how many zero bytes appear to
  *	the left (N) or right (-N) of the value.
  *
- * 	Robb Matzke, 5 Nov 1996
+ *	Robb Matzke, 5 Nov 1996
  *	Removed HFILE and CFILE arguments.
  *
  *-------------------------------------------------------------------------
  */
-#define DETECT_I(TYPE,TYPE_S,VAR,VAR_S,INFO) {	                      	      \
+#define DETECT_I(TYPE,VAR,INFO) {					      \
    TYPE _v;								      \
    int _i, _j;								      \
    unsigned char *_x;							      \
    memset (&INFO, 0, sizeof(INFO));					      \
-   INFO.typename = TYPE_S;						      \
-   INFO.varname = VAR_S;						      \
+   INFO.varname = #VAR;							      \
    INFO.size = sizeof(TYPE);						      \
-   for (_i=sizeof(TYPE),_v=0; _i>0; --_i) _v = (_v<<8) + _i;	      	      \
+   for (_i=sizeof(TYPE),_v=0; _i>0; --_i) _v = (_v<<8) + _i;		      \
    for (_i=0,_x=(unsigned char *)&_v; _i<sizeof(TYPE); _i++) {		      \
       _j = (*_x++)-1;							      \
-      assert (_j<(signed)sizeof(TYPE));				      \
+      assert (_j<(signed)sizeof(TYPE));					      \
       INFO.perm[_i] = _j;						      \
    }									      \
    fix_padding (&(INFO));						      \
-   if (!strncmp(TYPE_S, "unsigned", 8)) INFO.sign = 0;                       \
-   else INFO.sign = 1;							      \
+   INFO.sign = ('U'!=*(#VAR));						      \
 }
 
 
@@ -191,22 +189,21 @@ static detected_t Known[] = {
  * Modifications:
  *
  *	Robb Matzke, 14 Aug 1996
- *      The byte order detection has been changed because on the Cray
- *      the last pass causes a rounding to occur that causes the least
- *      significant mantissa byte to change unexpectedly.
+ *	The byte order detection has been changed because on the Cray
+ *	the last pass causes a rounding to occur that causes the least
+ *	significant mantissa byte to change unexpectedly.
  *
- *    	Robb Matzke, 5 Nov 1996
+ *	Robb Matzke, 5 Nov 1996
  *	Removed HFILE and CFILE arguments.
  *-------------------------------------------------------------------------
  */
-#define DETECT_F(TYPE,TYPE_S,VAR,VAR_S,INFO) {		                      \
+#define DETECT_F(TYPE,VAR,INFO) {					      \
    TYPE _v1, _v2, _v3;							      \
-   int _i, _j, _first=(-1), _last=(-1);				      \
-   char *_mesg;							      \
+   int _i, _j, _first=(-1), _last=(-1);					      \
+   char *_mesg;								      \
 									      \
    memset (&INFO, 0, sizeof(INFO));					      \
-   INFO.typename = TYPE_S;						      \
-   INFO.varname = VAR_S;						      \
+   INFO.varname = #VAR;							      \
    INFO.size = sizeof(TYPE);						      \
    INFO.padding = 0;							      \
 									      \
@@ -215,13 +212,13 @@ static detected_t Known[] = {
       _v3 = _v1; _v1 += _v2; _v2 /= 256.0;				      \
       if ((_j=byte_cmp(sizeof(TYPE), &_v3, &_v1))>=0) {			      \
 	 if (0==_i || INFO.perm[_i-1]!=_j) {				      \
-	    INFO.perm[_i] = _j;					      \
-	    _last = _i;						      \
+	    INFO.perm[_i] = _j;						      \
+	    _last = _i;							      \
 	    if (_first<0) _first = _i;					      \
 	 }								      \
       }									      \
    }									      \
-   fix_order (sizeof(TYPE), _first, _last, INFO.perm, &_mesg);		      \
+   fix_order (sizeof(TYPE), _first, _last, INFO.perm, (const char**)&_mesg);  \
 									      \
    /* Implicit mantissa bit */						      \
    _v1 = 0.5;								      \
@@ -247,7 +244,7 @@ static detected_t Known[] = {
    INFO.esize = INFO.sign - INFO.epos;					      \
 									      \
    _v1 = 1.0;								      \
-   INFO.bias = find_bias (INFO.epos, INFO.esize, INFO.imp, INFO.perm, &_v1); \
+   INFO.bias = find_bias (INFO.epos, INFO.esize, INFO.imp, INFO.perm, &_v1);  \
 }
 
 
@@ -269,106 +266,100 @@ static detected_t Known[] = {
 static void
 print_results (int nd, detected_t *d) {
 
-   int		i, j;
+   int		i;
 
-   printf ("#define DEFAULT_INTEGER_FIELDS {FALSE,0,0,0,0,0}\n\n");
-   printf ("#define FALSE 0\n");
-   printf ("#define TRUE 1\n");
+   /* Include files */
+   printf ("\
+#define H5T_PACKAGE /*suppress error about including H5Tpkg.h*/
+\n\
+#include <H5private.h>\n\
+#include <H5Eprivate.h>\n\
+#include <H5MMprivate.h>\n\
+#include <H5Tpkg.h>\n\
+\n\
+static hbool_t interface_initialize_g = FALSE;\n\
+#define INTERFACE_INIT NULL\n\
+\n");
+   
 
-   printf ("\ntypedef struct {\n");
-   printf ("   uintn class, bytes, padding, size, align;\n");
-   printf ("   uintn order[32], sign, imp, mloc, msize, eloc, esize;\n");
-   printf ("   uint32 bias;\n");
-   printf ("};\n\n");
+   /* Global definitions for each type */
+   for (i=0; i<nd; i++) {
+      printf ("hid_t H5T_NATIVE_%s;\n", d[i].varname);
+   }
+   
+   /* Function declaration */
+   printf ("\n\
+herr_t\n\
+H5T_init (void)\n\
+{\n\
+   H5T_t	*dt = NULL;\n\
+   static intn	ncalls = 0;\n\
+\n\
+   FUNC_ENTER (H5T_init, FAIL);\n\
+\n\
+   if (ncalls++) return SUCCEED; /*already initialized*/\n\
+\n"); 
 
    for (i=0; i<nd; i++) {
-      printf ("\n/*\n");
-      iprint (d+i, 0);
-      print_known_formats (d+i, 0);
-      printf (" */\n");
-      printf ("const H5T_desc_t H5T_%s[1] = {{\n",
+      
+      /* Print a comment to describe this section of definitions. */
+      printf ("\n   /*\n");
+      iprint (d+i);
+      print_known_formats (d+i);
+      printf ("    */\n");
+
+      /* The part common to fixed and floating types */
+      printf ("\
+   dt = H5MM_xcalloc (1, sizeof(H5T_t));\n\
+   dt->locked = TRUE;\n\
+   dt->type = H5T_%s;\n\
+   dt->size = %d;\n\
+   dt->u.atomic.order = H5T_ORDER_%s;\n\
+   dt->u.atomic.prec = %d;\n\
+   dt->u.atomic.lo_pad = H5T_PAD_ZERO;\n\
+   dt->u.atomic.hi_pad = H5T_PAD_ZERO;\n",
+	      d[i].msize?"FLOAT":"FIXED", 		/*class		*/
+	      d[i].size+abs (d[i].padding), 		/*size		*/
+	      d[i].perm[0]?"BE":"LE", 			/*byte order	*/
+	      8*d[i].size); 				/*precision	*/
+
+      if (0==d[i].msize) {
+	 /* The part unique to fixed point types */
+	 printf ("\
+   dt->u.atomic.u.i.sign = H5T_SGN_%s;\n",
+		 d[i].sign?"2":"NONE");
+      } else {
+	 /* The part unique to floating point types */
+	 printf ("\
+   dt->u.atomic.u.f.sign = %d;\n\
+   dt->u.atomic.u.f.epos = %d;\n\
+   dt->u.atomic.u.f.esize = %d;\n\
+   dt->u.atomic.u.f.ebias = 0x%08x;\n\
+   dt->u.atomic.u.f.mpos = %d;\n\
+   dt->u.atomic.u.f.msize = %d;\n\
+   dt->u.atomic.u.f.norm = H5T_NORM_%s;\n\
+   dt->u.atomic.u.f.pad = H5T_PAD_ZERO;\n",
+		 d[i].sign, 				/*sign location	*/
+		 d[i].epos, 				/*exponent loc	*/
+		 d[i].esize, 				/*exponent size	*/
+		 d[i].bias, 				/*exponent bias	*/
+		 d[i].mpos, 				/*mantissa loc	*/
+		 d[i].msize, 				/*mantissa size	*/
+		 d[i].imp?"IMPLIED":"NONE"); 		/*normalization	*/
+      }
+
+      /* Atomize the type */
+      printf ("\
+   if ((H5T_NATIVE_%s = H5Aregister_atom (H5_DATATYPE, dt))<0) {\n\
+      /* Can't initialize type system - atom registration failure */\n\
+      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL);\n\
+   }\n", 
 	      d[i].varname);
-      printf ("   /* Class               */  %s,\n",
-	      d[i].msize?"H5T_FLOAT":"H5T_FIXED");
-      printf ("   /* Number of bytes     */  %d,\n", d[i].size);
-      printf ("   /* Zero padding        */  %d,\n", d[i].padding);
-      printf ("   /* sizeof()            */  %d,\n",
-	      d[i].size + abs (d[i].padding));
-
-      /* alignment isn't detected yet */
-      printf ("   /* Alignment           */  %d,\n",
-	      d[i].size + abs (d[i].padding));
-
-      printf ("   /* Byte order          */   {");
-      for (j=0;  j<32;  j++) {
-	 if (j && 0==j%8) printf ("\n                                ");
-	 printf ("%3d%s", j<d[i].size?d[i].perm[j]:-1, j+1<32?",":"");
-      }
-      printf ("},\n");
-
-      if (d[i].msize) {
-	 printf ("   /* Float sign loc      */  %d,\n", d[i].sign);
-	 printf ("   /* Float implicit bit  */  %s,\n",
-		 d[i].imp?"TRUE":"FALSE");
-	 printf ("   /* Float mantissa loc  */  %d,\n", d[i].mpos);
-	 printf ("   /* Float matnissa size */  %d,\n", d[i].msize);
-	 printf ("   /* Float exponent loc  */  %d,\n", d[i].epos);
-	 printf ("   /* Float exponent size */  %d,\n", d[i].esize);
-	 printf ("   /* Float exponent bias */  0x%x,\n", d[i].bias);
-      } else {
-	 printf ("   /* Signed?             */  %s,\n",
-		 d[i].sign?"TRUE":"FALSE");
-	 printf ("   DEFAULT_INTEGER_FIELDS,\n");
-      }
-      printf ("}};\n\n");
+      
    }
+
+   printf ("   FUNC_LEAVE (SUCCEED);\n}\n");
 }
-
-
-/*-------------------------------------------------------------------------
- * Function:	tprint
- *
- * Purpose:	Prints a binary number beginning with the most
- *		significant bit and continuing to the least
- *		significant bit.
- *
- * 		If PERM is the null pointer then it isn't used and
- *		_A is assumed to be in big endian order.
- *
- * Return:	void
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jun 13, 1996
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-#if 0
-static void
-tprint (int nbytes, int *perm, void *_a) {
-
-   int			i, j;
-   unsigned char	*a = (unsigned char *)_a;
-   unsigned char	b;
-
-   for (i=0; i<nbytes; i++) {
-      if (perm) {
-	 assert (perm[i]<nbytes);
-	 b = a[perm[i]];
-      } else {
-	 b = a[i];
-      }
-      for (j=0; j<8; j++,b<<=1) putchar (b & 0x80 ? '1' : '0');
-      if (i+1<nbytes) {
-	 putchar (' ');
-	 if (0==(i+1)%4) putchar (' ');
-      }
-   }
-   putchar ('\n');
-}
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -388,14 +379,14 @@ tprint (int nbytes, int *perm, void *_a) {
  *-------------------------------------------------------------------------
  */
 static void
-iprint (detected_t *d, int indent) {
+iprint (detected_t *d) {
 
    int		i, j, k;
 
    /*
     * Print the byte ordering above the bit fields.
     */
-   printf ("%*s * ", indent, "");
+   printf ("    * ");
    for (i=d->size-1; i>=0; --i) {
       printf ("%4d", d->perm[i]);
       if (i>0) fputs ("     ", stdout);
@@ -406,7 +397,7 @@ iprint (detected_t *d, int indent) {
    /*
     * Print the bit fields
     */
-   printf ("%*s * ", indent, "");
+   printf ("    * ");
    for (i=d->size-1,k=d->size*8-1; i>=0; --i) {
       for (j=7; j>=0; --j) {
 	 if (k==d->sign && d->msize) {
@@ -415,8 +406,12 @@ iprint (detected_t *d, int indent) {
 	    putchar ('E');
 	 } else if (k>=d->mpos && k<d->mpos+d->msize) {
 	    putchar ('M');
-	 } else {
+	 } else if (d->msize) {
+	    putchar ('?');		/*unknown floating point bit*/
+	 } else if (d->sign) {
 	    putchar ('I');
+	 } else {
+	    putchar ('U');
 	 }
 	 --k;
       }
@@ -431,7 +426,7 @@ iprint (detected_t *d, int indent) {
     * Is there an implicit bit in the mantissa.
     */
    if (d->msize) {
-      printf ("%*s * Implicit bit? %s\n", indent, "", d->imp?"yes":"no");
+      printf ("    * Implicit bit? %s\n", d->imp?"yes":"no");
    }
 }
 
@@ -439,7 +434,7 @@ iprint (detected_t *d, int indent) {
 /*-------------------------------------------------------------------------
  * Function:	print_known_formats
  *
- * Purpose:     Prints archetecture names for the specified format
+ * Purpose:	Prints archetecture names for the specified format
  *		description, if any.
  *
  * Return:	void
@@ -453,7 +448,7 @@ iprint (detected_t *d, int indent) {
  *-------------------------------------------------------------------------
  */
 static void
-print_known_formats (detected_t *d, int indent) {
+print_known_formats (detected_t *d) {
 
    int		i, j, diff;
    int		n=sizeof(Known)/sizeof(Known[0]);
@@ -465,7 +460,7 @@ print_known_formats (detected_t *d, int indent) {
       }
       if (diff) continue;
 
-      /* if (d->sign  != Known[i].sign)  continue;*/
+      /* if (d->sign  != Known[i].sign)	 continue;*/
       if (d->mpos  != Known[i].mpos)  continue;
       if (d->msize != Known[i].msize) continue;
       if (d->imp   != Known[i].imp)   continue;
@@ -473,8 +468,7 @@ print_known_formats (detected_t *d, int indent) {
       if (d->esize != Known[i].esize) continue;
       if (d->bias  != Known[i].bias)  continue;
 
-      printf ("%*s * %s %s\n",
-	      indent, "", Known[i].varname, Known[i].typename);
+      printf ("    * %s\n", Known[i].varname);
    }
 }
       
@@ -514,7 +508,7 @@ byte_cmp (int n, void *_a, void *_b) {
  * Function:	bit_cmp
  *
  * Purpose:	Compares two bit vectors and returns the index for the
- *		first bit that differs between the two vectors.  The
+ *		first bit that differs between the two vectors.	 The
  *		size of the vector is NBYTES.  PERM is a mapping from
  *		actual order to little endian.
  *
@@ -559,7 +553,7 @@ bit_cmp (int nbytes, int *perm, void *_a, void *_b) {
  *		creates a permutation vector that maps the actual order
  *		of a floating point number to little-endian.
  *
- * 		This function assumes that the mantissa byte ordering
+ *		This function assumes that the mantissa byte ordering
  *		implies the total ordering.
  *
  * Return:	void
@@ -573,7 +567,7 @@ bit_cmp (int nbytes, int *perm, void *_a, void *_b) {
  *-------------------------------------------------------------------------
  */
 static void
-fix_order (int n, int first, int last, int *perm, char **mesg) {
+fix_order (int n, int first, int last, int *perm, const char **mesg) {
 
    int		i;
 
@@ -623,7 +617,7 @@ fix_order (int n, int first, int last, int *perm, char **mesg) {
  *		from the permutation, and the `padding' field is set to an
  *		appropriate value.
  *
- * 		If N bytes of padding appear to the left (lower address) of
+ *		If N bytes of padding appear to the left (lower address) of
  *		the value, then `padding=N'.  If N bytes of padding appear
  *		to the right of the value then `padding=(-N)'.
  *
@@ -681,7 +675,7 @@ fix_padding (detected_t *d) {
  *		floating point values stored in _A and _B then the function
  *		returns non-zero.
  *
- * 		This function assumes that the exponent occupies higher
+ *		This function assumes that the exponent occupies higher
  *		order bits than the mantissa and that the most significant
  *		bit of the mantissa is next to the least signficant bit
  *		of the exponent.
@@ -690,7 +684,7 @@ fix_padding (detected_t *d) {
  * Return:	Success:	Non-zero if the most significant bit
  *				of the mantissa is discarded (ie, the
  *				mantissa has an implicit `one' as the
- *				most significant bit).  Otherwise,
+ *				most significant bit).	Otherwise,
  *				returns zero.
  *
  *		Failure:	exit(1)
@@ -701,7 +695,7 @@ fix_padding (detected_t *d) {
  *
  * Modifications:
  *
- * 	Robb Matzke, 6 Nov 1996
+ *	Robb Matzke, 6 Nov 1996
  *	Fixed a bug that occurs with non-implicit architectures.
  *
  *-------------------------------------------------------------------------
@@ -716,7 +710,7 @@ imp_bit (int n, int *perm, void *_a, void *_b) {
 
    /*
     * Look for the least significant bit that has changed between
-    * A and B.  This is the least significant bit of the exponent.
+    * A and B.	This is the least significant bit of the exponent.
     */
    changed = bit_cmp (n, perm, a, b);
    assert (changed>=0);
@@ -750,7 +744,7 @@ imp_bit (int n, int *perm, void *_a, void *_b) {
  *
  * Modifications:
  *
- * 	Robb Matzke, 6 Nov 1996
+ *	Robb Matzke, 6 Nov 1996
  *	Fixed a bug with non-implicit architectures returning the
  *	wrong exponent bias.
  *
@@ -803,11 +797,11 @@ print_header (void) {
    char			real_name[30], *comma;
    char			host_name[256];
    int			i, n;
-   char			*s;
-   static char		*month_name[] = {
+   const char		*s;
+   static const char	*month_name[] = {
       "Jan", "Feb", "Mar", "Apr", "May", "Jun",
       "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-   static char		*purpose = "\
+   static const char	*purpose = "\
 This machine-generated source code contains\n\
 information about the various integer and\n\
 floating point numeric formats found on this\n\
@@ -819,7 +813,7 @@ Each of the numeric formats listed below are\n\
 printed from most significant bit to least\n\
 significant bit even though the actual bytes\n\
 might be stored in a different order in\n\
-memory.  The integers above each binary byte\n\
+memory.	 The integers above each binary byte\n\
 indicate the relative order of the bytes in\n\
 memory; little-endian machines have\n\
 decreasing numbers while big-endian machines\n\
@@ -830,11 +824,12 @@ letters with `S' for the mantissa sign bit,\n\
 `M' for the mantissa magnitude, and `E' for\n\
 the exponent.  The exponent has an associated\n\
 bias which can be subtracted to find the\n\
-true exponent.  The radix point is assumed\n\
-to be before the first `M' bit.  Any bit\n\
-not falling into one of these categories\n\
-is printed as a question mark, as are all\n\
-bits of integer quantities.\n\
+true exponent.	The radix point is assumed\n\
+to be before the first `M' bit.	 Any bit\n\
+of a floating-point value not falling into one\n\
+of these categories is printed as a question\n\
+mark.  Bits of fixed-point types are printed as\n\
+`I' for 2's complement and `U' for magnitude.\n\
 \n\
 If the most significant bit of the normalized\n\
 mantissa (always a `1' except for `0.0') is\n\
@@ -842,7 +837,7 @@ not stored then an `implicit=yes' appears\n\
 under the field description.  In thie case,\n\
 the radix point is still assumed to be\n\
 before the first `M' but after the implicit\n\
-bit.";
+bit.\n";
 
    /*
     * The real name is the first item from the passwd gecos field.
@@ -869,7 +864,8 @@ bit.";
    /*
     * The file header: warning, copyright notice, build information.
     */
-   printf ("/*\n * DO NOT EDIT THIS FILE--IT IS MACHINE GENERATED!\n */\n\n");
+   printf ("/*\n * DO NOT EDIT OR DISTRIBUTE THIS FILE -- "
+	   "IT IS MACHINE GENERATED!\n */\n\n");
    puts (FileHeader);	/*the copyright notice--see top of this file*/
    
    printf (" *\n * Created:\t\t%s %2d, %4d\n",
@@ -886,7 +882,7 @@ bit.";
    printf (" *\n * Purpose:\t\t");
    for (s=purpose; *s; s++) {
       putchar (*s);
-      if ('\n'==*s) printf (" *\t\t\t");
+      if ('\n'==*s && s[1]) printf (" *\t\t\t");
    }
 
    printf (" *\n * Modifications:\n *\n");
@@ -925,16 +921,16 @@ main (int argc, char *argv[]) {
 
    print_header();
 
-   DETECT_I (signed char,     "signed char",    natsc, "natsc", d[nd]); nd++;
-   DETECT_I (unsigned char,   "unsigned char",  natuc, "natuc", d[nd]); nd++;
-   DETECT_I (short,           "short",          nats,  "natss", d[nd]); nd++;
-   DETECT_I (unsigned short,  "unsigned short", nats,  "natus", d[nd]); nd++;
-   DETECT_I (int,             "int",            nati,  "natsi", d[nd]); nd++;
-   DETECT_I (unsigned int,    "unsigned int",   nati,  "natui", d[nd]); nd++;
-   DETECT_I (long,            "long",           natl,  "natsl", d[nd]); nd++;
-   DETECT_I (unsigned long,   "unsigned long",  natl,  "natul", d[nd]); nd++;
-   DETECT_F (float,           "float",          natf,  "natf",  d[nd]); nd++;
-   DETECT_F (double,          "double",         natd,  "natd",  d[nd]); nd++;
+   DETECT_I (signed char,    CHAR,   d[nd]); nd++;
+   DETECT_I (unsigned char,  UCHAR,  d[nd]); nd++;
+   DETECT_I (short,	     SHORT,  d[nd]); nd++;
+   DETECT_I (unsigned short, USHORT, d[nd]); nd++;
+   DETECT_I (int,	     INT,    d[nd]); nd++;
+   DETECT_I (unsigned int,   UINT,   d[nd]); nd++;
+   DETECT_I (long,	     LONG,   d[nd]); nd++;
+   DETECT_I (unsigned long,  ULONG,  d[nd]); nd++;
+   DETECT_F (float,	     FLOAT,  d[nd]); nd++;
+   DETECT_F (double,	     DOUBLE, d[nd]); nd++;
 
    print_results (nd, d);
    exit (0);

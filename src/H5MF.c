@@ -26,6 +26,7 @@
 
 /* Is the interface initialized? */
 static intn interface_initialize_g = FALSE;
+#define INTERFACE_INIT	NULL
 
 
 /*-------------------------------------------------------------------------
@@ -55,7 +56,7 @@ H5MF_alloc (H5F_t *f, intn op, size_t size, haddr_t *addr/*out*/)
 {
    haddr_t	tmp_addr;
    
-   FUNC_ENTER (H5MF_alloc, NULL, FAIL);
+   FUNC_ENTER (H5MF_alloc, FAIL);
 
    /* check arguments */
    assert (f);
@@ -109,7 +110,7 @@ H5MF_alloc (H5F_t *f, intn op, size_t size, haddr_t *addr/*out*/)
 herr_t
 H5MF_free (H5F_t *f, const haddr_t *addr, size_t size)
 {
-   FUNC_ENTER (H5MF_free, NULL, FAIL);
+   FUNC_ENTER (H5MF_free, FAIL);
 
    /* check arguments */
    assert (f);

@@ -45,7 +45,7 @@
 #define H5G_SIZEOF_SCRATCH	24
 #define H5G_SIZEOF_ENTRY(F)						      \
    (H5F_SIZEOF_SIZE(F) +	/*offset of name into heap     		*/    \
-    H5F_SIZEOF_OFFSET(F) +	/*address of object header		*/    \
+    H5F_SIZEOF_ADDR(F) +	/*address of object header		*/    \
     4 +				/*entry type				*/    \
     H5G_SIZEOF_SCRATCH)		/*scratch pad space			*/
     
@@ -57,7 +57,7 @@
  */
 typedef enum H5G_type_t {
    H5G_NOTHING_CACHED		=0,	/*nothing is cached, must be 0	*/
-   H5G_CACHED_SDATA		=1,	/*simple dataset, `sdata'	*/
+   H5G_CACHED_SDSPACE		=1,	/*simple data space		*/
    H5G_CACHED_STAB		=2 	/*symbol table, `stab'		*/
 } H5G_type_t;
 
@@ -67,14 +67,9 @@ typedef enum H5G_type_t {
  */
 typedef union H5G_cache_t {
    struct {
-      struct	{
-	 uint8 length;
-	 uint8 arch;
-	 uint16 type;
-      } nt ;			/*number type				*/
       uint32 ndim;		/*number of dimensions			*/
       uint32 dim[4];		/*dimension sizes			*/
-   } sdata;
+   } sdspace;
 
    struct {
       haddr_t btree_addr;	/*file address of symbol table B-tree	*/

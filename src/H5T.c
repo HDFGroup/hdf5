@@ -14,47 +14,24 @@
 static char RcsId[] = "@(#)$Revision$";
 #endif
 
-/* $Id$ */
+#define H5T_PACKAGE		/*suppress error about including H5Tpkg	*/
 
-/*LINTLIBRARY */
-/*+
-   FILE
-       H5T.c
-   HDF5 Data-type routines
-
-   EXPORTED ROUTINES
-       H5Tget_num_fields  -- Get the number of fields in a compound datatype
-       H5Tis_field_atomic -- Check if a field is atomic
-       H5Tis_atomic/H5T_is_atomic -- Check if a datatype is atomic
-       H5Tset_type        -- Set the base type of a user-defined datatype
-       H5Tget_type        -- Get the base type of a datatype
-       H5Tadd_field       -- Add a field to a compound datatype
-       H5Tsize            -- Determine the size of a datatype
-
-   LIBRARY-SCOPED ROUTINES
-       H5T_create         -- (Meta-Object) Create a datatype
-       H5T_release        -- (Meta-Object) Release access to a datatype
-
-   LOCAL ROUTINES
-       H5T_init_interface    -- initialize the interface
-   + */
-
-#include <H5private.h>  /* Generic Functions */
-#include <H5Aprivate.h> /* Atom functions */
-#include <H5Eprivate.h> /* Error handling */
-#include <H5Mprivate.h> /* Meta data */
-#include <H5Pprivate.h> /* Data space */
-#include <H5Tprivate.h> /* Data-type functions */
+#include <H5private.h>		/*generic functions 			*/
+#include <H5Aprivate.h>		/*atom functions 			*/
+#include <H5Eprivate.h>		/*error handling 			*/
+#include <H5Mprivate.h>		/*meta data 				*/
+#include <H5MMprivate.h>	/*memory management			*/
+#include <H5Pprivate.h>		/*data space 				*/
+#include <H5Tpkg.h>		/*data-type functions 			*/
 
 #define PABLO_MASK	H5T_mask
 
-/*--------------------- Locally scoped variables -----------------------------*/
+#define H5T_COMPND_INC	64	/*typical max numb of members per struct*/
 
-/* Whether we've installed the library termination function yet for this interface */
+/* Interface initialization */
 static intn interface_initialize_g = FALSE;
-
-/*------------------_-- Local function prototypes ----------------------------*/
-static herr_t H5T_init_interface(void);
+#define INTERFACE_INIT H5T_init_interface
+static void H5T_term_interface (void);
 
 /*--------------------------------------------------------------------------
 NAME
@@ -68,40 +45,24 @@ DESCRIPTION
     Initializes any interface-specific data or routines.
 
 --------------------------------------------------------------------------*/
-static herr_t H5T_init_interface(void)
+herr_t
+H5T_init_interface (void)
 {
-    herr_t ret_value = SUCCEED;
-    FUNC_ENTER (H5T_init_interface, NULL, FAIL);
+   herr_t ret_value = SUCCEED;
+   FUNC_ENTER (H5T_init_interface, FAIL);
 
-    /* Initialize the atom group for the file IDs */
-    if((ret_value=H5Ainit_group(H5_DATATYPE,H5A_DATATYPEID_HASHSIZE,H5T_RESERVED_ATOMS,H5T_destroy))!=FAIL)
-        ret_value=H5_add_exit(&H5T_term_interface);
+   /* Initialize the atom group for the file IDs */
+   if ((ret_value=H5Ainit_group (H5_DATATYPE, H5A_DATATYPEID_HASHSIZE,
+				 H5T_RESERVED_ATOMS,
+				 (herr_t (*)(void*))H5T_close))!=FAIL) {
+      ret_value=H5_add_exit (&H5T_term_interface);
+   }
 
-    FUNC_LEAVE(ret_value);
-}	/* H5T_init_interface */
-
-/*--------------------------------------------------------------------------
-NAME
-   H5T_init -- Make certain that the interface has been initialized
-USAGE
-    herr_t H5T_init()
+   /* Initialize pre-defined data types */
+   ret_value = H5T_init ();
    
-RETURNS
-   SUCCEED/FAIL
-DESCRIPTION
-    Library public routine to make certain the H5T interface has been properly
-    initialized.
-
---------------------------------------------------------------------------*/
-herr_t H5T_init(void)
-{
-    herr_t ret_value = SUCCEED;
-    FUNC_ENTER (H5T_init, H5T_init_interface, FAIL);
-
-    /* Actual work is done in the FUNC_ENTER macro */
-
-    FUNC_LEAVE(ret_value);
-}	/* H5T_init */
+   FUNC_LEAVE (ret_value);
+}
 
 /*--------------------------------------------------------------------------
  NAME
@@ -120,814 +81,835 @@ herr_t H5T_init(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-void H5T_term_interface (void)
+static void
+H5T_term_interface (void)
 {
-    H5Adestroy_group(H5_DATATYPE);
-} /* end H5T_term_interface() */
+   H5Adestroy_group (H5_DATATYPE);
+}
 
-/*--------------------------------------------------------------------------
- NAME
-    H5T_create
- PURPOSE
-    Create a new HDF5 data-type object
- USAGE
-    hid_t H5T_create(owner_id, type, name)
-        hid_t owner_id;       IN: Group/file which owns this object
-        hobjtype_t type;        IN: Type of object to create
-        const char *name;       IN: Name of the object
- RETURNS
-    Returns ID (atom) on success, FAIL on failure
- DESCRIPTION
-        This function actually creates the data-type object.
---------------------------------------------------------------------------*/
-hid_t H5T_create(hid_t owner_id, hobjtype_t type, const char *name)
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tcreate
+ *
+ * Purpose:	Create a new type and initialize it to reasonable values.
+ *		The type is a member of type class TYPE and is SIZE bytes.
+ *
+ * Return:	Success:	A new type identifier.
+ *
+ *		Failure:	FAIL
+ *
+ * Errors:
+ *		ARGS      BADVALUE      Invalid size. 
+ *		DATATYPE  CANTINIT      Can't create type. 
+ *		DATATYPE  CANTREGISTER  Can't register data type atom. 
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, December  5, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Tcreate (H5T_class_t type, size_t size)
 {
-    h5_datatype_t *new_dt;            /* new data-type object to create */
-    hid_t ret_value = SUCCEED;
+   H5T_t	*dt = NULL;
+   hid_t	ret_value = FAIL;
+   
+   FUNC_ENTER (H5Tcreate, FAIL);
 
-    FUNC_ENTER(H5T_create, H5T_init_interface, FAIL);
+   /* check args */
+   if (size<=0) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL); /*invalid size*/
+   }
+   
+   /* create the type */
+   if (NULL==(dt=H5T_create (type, size))) {
+      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL);/*can't create type*/
+   }
+   
+   /* Make it an atom */
+   if ((ret_value=H5Aregister_atom (H5_DATATYPE, dt))<0) {
+      /* Can't register data type atom */
+      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL);
+   }
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+   FUNC_LEAVE (ret_value);
+}
 
-    /* Allocate space for the new data-type */
-    if((new_dt=HDmalloc(sizeof(h5_datatype_t)))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
-    
-    /* Initialize the datatype */
-    new_dt->dt.base=0;           /* No Default datatype */
-    new_dt->name=HDstrdup(name); /* Make a copy of the datatype's name */
-    new_dt->ci=NULL;             /* Set the complex information to NULL */
-
-    /* Register the new datatype and get an ID for it */
-    if((ret_value=H5Aregister_atom(H5_DATATYPE, (const VOIDP)new_dt))==FAIL)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL);
-
-done:
-  if(ret_value == FAIL)   
-    { /* Error condition cleanup */
-
-    } /* end if */
-
-    /* Normal function cleanup */
-
-    FUNC_LEAVE(ret_value);
-} /* end H5T_create() */
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Tget_num_fields
- PURPOSE
-    Return the number of fields in a compound datatype
- USAGE
-    uint32 H5Tget_num_fields(tid)
-        hid_t tid;            IN: Datatype object to query
- RETURNS
-    The number of fields in a compound datatype on success, UFAIL on failure
- DESCRIPTION
-        This function checks the number of fields in a compound user-defined
-    datatype.  UFAIL is returned on an error or if an atomic datatype is
-    queried, otherwise the number of fields is returned.
---------------------------------------------------------------------------*/
-uint32 H5Tget_num_fields(hid_t tid)
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_create
+ *
+ * Purpose:	Creates a new data type and initializes it to reasonable
+ *		values.  The new data type is SIZE bytes and an instance of
+ *		the class TYPE.
+ *
+ * Return:	Success:	Pointer to the new type.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, December  5, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_t *
+H5T_create (H5T_class_t type, size_t size)
 {
-    h5_datatype_t *dt;         /* new data-type object to create */
-    uint32        ret_value = UFAIL;
+   H5T_t	*dt = NULL;
+   
+   FUNC_ENTER (H5T_create, NULL);
 
-    FUNC_ENTER(H5Tget_num_fields, H5T_init_interface, UFAIL);
+   assert (size>0);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+   switch (type) {
+   case H5T_FIXED:
+      /* Default type is a native `int' */
+      if (NULL==(dt=H5T_copy (H5Aatom_object (H5T_NATIVE_INT)))) {
+	 /* Can't derive type from native int */
+	 HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL);
+      }
+      break;
 
-    /* Go get the object */
-    if((dt=H5Aatom_object(tid))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+   case H5T_FLOAT:
+      /* Default type is a native `double' */
+      if (NULL==(dt=H5T_copy (H5Aatom_object (H5T_NATIVE_DOUBLE)))) {
+	 /* Can't derive type from native double */
+	 HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL);
+      }
+      break;
 
-    /* Check the base type of the datatype */
-    if(H5T_COMPOUND!=dt->dt.base)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL);
-    
-    /* Check if the compound information has been initialized */
-    if(NULL==dt->ci)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_UNINITIALIZED, FAIL);
+   case H5T_DATE:
+   case H5T_STRING:
+   case H5T_BITFIELD:
+   case H5T_OPAQUE:
+      assert ("not implemented yet" && 0);
+      HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, NULL);
 
-    /* Grab the number of fields */
-    ret_value=dt->ci->n;
+   case H5T_COMPOUND:
+      dt = H5MM_xcalloc (1, sizeof(H5T_t));
+      dt->type = type;
+      break;
 
-done:
-  if(ret_value == UFAIL)
-    { /* Error condition cleanup */
+   default:
+      /* Unknown data type class */
+      HRETURN_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, NULL);
+   }
 
-    } /* end if */
+   dt->size = size;
+   FUNC_LEAVE (dt);
+}
 
-    /* Normal function cleanup */
-
-    FUNC_LEAVE(ret_value);
-} /* end H5Tget_num_fields() */
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Tis_field_atomic
- PURPOSE
-    Check if a field in a compound datatype is atomic
- USAGE
-    hbool_t H5Tis_field_atomic(tid, fidx)
-        hid_t tid;            IN: Datatype object to query
-        uintn fidx;             IN: Index of the field to query
- RETURNS
-    BFAIL/BTRUE/BFALSE
- DESCRIPTION
-        This function checks the basic type of field in a user-defined datatype.
-    BTRUE is returned if the datatype is atomic (i.e. not compound), BFALSE is
-    returned if the datatype is compound, BFAIL on error.
---------------------------------------------------------------------------*/
-hbool_t H5Tis_field_atomic(hid_t tid, uintn fidx)
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tget_num_members
+ *
+ * Purpose:	Determines how many members compound data type TYPE_ID has.
+ *
+ * Return:	Success:	Number of members defined in a compound data
+ *				type.
+ *
+ *		Failure:	FAIL
+ *
+ * Errors:
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, December  8, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+intn
+H5Tget_num_members (hid_t type_id)
 {
-    h5_datatype_t *dt;         /* new data-type object to create */
-    hbool_t        ret_value = BTRUE;
+   
+   H5T_t	*dt = NULL;
 
-    FUNC_ENTER(H5Tis_field_atomic, H5T_init_interface, BFAIL);
+   FUNC_ENTER (H5Tget_num_members, FAIL);
+   H5ECLEAR;
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+   /* Check args */
+   if (H5_DATATYPE!=H5Aatom_group (type_id) ||
+       NULL==(dt=H5Aatom_object (type_id)) ||
+       H5T_COMPOUND!=dt->type) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a compound data type*/
+   }
 
-    /* Go get the object */
-    if((dt=H5Aatom_object(tid))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+   FUNC_LEAVE (dt->u.compnd.nmembs);
+}
 
-    /* Check the base type of the datatype */
-    if(H5T_COMPOUND!=dt->dt.base)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL);
-    
-    /* Check if the compound information has been initialized */
-    if(NULL==dt->ci)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_UNINITIALIZED, FAIL);
-
-    /* Check if the field is valid*/
-    if(fidx>=dt->ci->n)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL);
-
-    /* Check the base type of the field */
-    if(H5T_COMPOUND==dt->ci->flist[fidx].dt.base || H5P_SCALAR!=dt->ci->flist[fidx].dim_id)
-        ret_value=BFALSE;
-
-done:
-  if(ret_value == BFAIL)
-    { /* Error condition cleanup */
-
-    } /* end if */
-
-    /* Normal function cleanup */
-
-    FUNC_LEAVE(ret_value);
-} /* end H5Tis_field_atomic() */
-
-/*--------------------------------------------------------------------------
- NAME
-    H5T_is_atomic
- PURPOSE
-    Check if a datatype is atomic (internal)
- USAGE
-    hbool_t H5Tis_atomic(type)
-        h5_datatype_t *type;            IN: Ptr to datatype object to query
- RETURNS
-    BFAIL/BTRUE/BFALSE
- DESCRIPTION
-        This function checks the basic type of a user-defined datatype.  BTRUE
-    is returned if the datatype is atomic (i.e. not compound), BFALSE is
-    returned if the datatype is compound, BFAIL on error.
---------------------------------------------------------------------------*/
-hbool_t H5T_is_atomic(h5_datatype_t *type)
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tget_class
+ *
+ * Purpose:	Returns the data type class identifier for data type TYPE_ID.
+ *
+ * Return:	Success:	One of the non-negative data type class
+ *				constants.
+ *
+ *		Failure:	H5T_NO_CLASS (-1)
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, December  8, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_class_t
+H5Tget_class (hid_t type_id)
 {
-    hbool_t        ret_value = BTRUE;
+   H5T_t	*dt = NULL;
+   
+   FUNC_ENTER (H5Tget_class, FAIL);
+   H5ECLEAR;
 
-    FUNC_ENTER(H5T_is_atomic, H5T_init_interface, BFAIL);
+   /* Check args */
+   if (H5_DATATYPE!=H5Aatom_group (type_id) ||
+       NULL==(dt=H5Aatom_object (type_id))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a data type*/
+   }
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+   FUNC_LEAVE (dt->type);
+}
 
-   assert (type);
-    /* Check the base type of the datatype */
-    if(H5T_COMPOUND==type->dt.base)
-        ret_value=BFALSE;
 
-#ifdef LATER
-done:
-#endif /* LATER */
-  if(ret_value == BFAIL)
-    { /* Error condition cleanup */
-
-    } /* end if */
-
-    /* Normal function cleanup */
-
-    FUNC_LEAVE(ret_value);
-} /* end H5T_is_atomic() */
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Tis_atomic
- PURPOSE
-    Check if a datatype is atomic (API)
- USAGE
-    hbool_t H5Tis_atomic(tid)
-        hid_t tid;            IN: Datatype object to query
- RETURNS
-    BFAIL/BTRUE/BFALSE
- DESCRIPTION
-        This function checks the basic type of a user-defined datatype.  BTRUE
-    is returned if the datatype is atomic (i.e. not compound), BFALSE is
-    returned if the datatype is compound, BFAIL on error.
---------------------------------------------------------------------------*/
-hbool_t H5Tis_atomic(hid_t tid)
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tget_size
+ *
+ * Purpose:	Determines the total size of a data type in bytes.
+ *
+ * Return:	Success:	Size of the data type in bytes.  The size of
+ *				data type is the size of an instance of that
+ *				data type.
+ *
+ *		Failure:	0 (valid data types are never zero size)
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, December  8, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+size_t
+H5Tget_size (hid_t type_id)
 {
-    h5_datatype_t *dt;         /* new data-type object to create */
-    hbool_t        ret_value = BTRUE;
+   H5T_t	*dt = NULL;
+   size_t	size;
+   
+   FUNC_ENTER (H5Tget_size, 0);
+   H5ECLEAR;
 
-    FUNC_ENTER(H5Tis_atomic, H5T_init_interface, BFAIL);
+   /* Check args */
+   if (H5_DATATYPE!=H5Aatom_group (type_id) ||
+       NULL==(dt=H5Aatom_object (type_id))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a data type*/
+   }
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
-    if(H5Aatom_group(tid)!=H5_DATATYPE)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+   /* size */
+   size = H5T_get_size (dt);
 
-    /* Go get the object */
-    if((dt=H5Aatom_object(tid))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+   FUNC_LEAVE (size);
+}
 
-    /* Check the base type of the datatype */
-    ret_value=H5T_is_atomic(dt);
-
-done:
-  if(ret_value == BFAIL)
-    { /* Error condition cleanup */
-
-    } /* end if */
-
-    /* Normal function cleanup */
-
-    FUNC_LEAVE(ret_value);
-} /* end H5Tis_atomic() */
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Tset_type
- PURPOSE
-    Set the base type of a user-defined datatype 
- USAGE
-    herr_t H5Tset_type(tid, base, len, arch)
-        hid_t tid;            IN: Datatype object to modify
-        hid_t base;           IN: Base type to set the datatype to
-        uint8 len;              IN: Length of the object in bytes
-        uint8 arch;             IN: Architecture format to store type with
- RETURNS
-    SUCCEED/FAIL
- DESCRIPTION
-        This function sets the basic type of a user-defined datatype.  Each
-    datatype is either an atomic type (i.e. has no further divisions of the
-    type) or is a compound type (like a C structure).  If the datatype is set
-    to a compound type, the 'len' argument is not used.
---------------------------------------------------------------------------*/
-herr_t H5Tset_type(hid_t tid,hid_t base,uint8 len,uint8 arch)
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_get_size
+ *
+ * Purpose:	Determines the total size of a data type in bytes.
+ *
+ * Return:	Success:	Size of the data type in bytes.  The size of
+ *				the data type is the size of an instance of
+ *				that data type.
+ *
+ *		Failure:	0 (valid data types are never zero size)
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, December  9, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+size_t
+H5T_get_size (const H5T_t *dt)
 {
-    h5_datatype_t *dt;         /* new data-type object to create */
-    herr_t        ret_value = SUCCEED;
+   FUNC_ENTER (H5T_get_size, 0);
 
-    FUNC_ENTER(H5Tset_type, H5T_init_interface, FAIL);
+   /* check args */
+   assert (dt);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
-    if(base<H5T_CHAR || base>H5T_COMPOUND)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
+   FUNC_LEAVE (dt->size);
+}
 
-    /* Go get the object */
-    if((dt=H5Aatom_object(tid))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
-    if(dt->dt.base!=0)
-        HGOTO_ERROR(H5E_FUNC, H5E_ALREADYINIT, FAIL);
-    
-    /* Set the basic datatype information */
-    dt->dt.base=base;
-    dt->dt.len=len;
-    dt->dt.arch=arch;
-
-done:
-  if(ret_value == FAIL)   
-    { /* Error condition cleanup */
-
-    } /* end if */
-
-    /* Normal function cleanup */
-
-    FUNC_LEAVE(ret_value);
-} /* end H5Tset_type() */
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Tget_type
- PURPOSE
-    Get the base type of a datatype 
- USAGE
-    herr_t H5Tget_type(tid, base, len, arch)
-        hid_t tid;            IN: Datatype object to modify
-        hid_t *base;          IN: Base type of the datatype
-        uint8 *len;             IN: Length of the object in bytes
-        uint8 *arch;            IN: Architecture format type stored with
- RETURNS
-    SUCCEED/FAIL
- DESCRIPTION
-        This function gets the basic type of a user-defined datatype.  Each
-    datatype is either an atomic type (i.e. has no further divisions of the
-    type) or is a compound type (like a C structure).  If the datatype is 
-    to a compound type, the 'len' argument is not used.
---------------------------------------------------------------------------*/
-herr_t H5Tget_type(hid_t tid,hid_t *base,uint8 *len,uint8 *arch)
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tinsert_member
+ *
+ * Purpose:	Adds another member to the compound data type PARENT_ID.  The
+ *		new member has a NAME which must be unique within the
+ *		compound data type. The OFFSET argument defines the start of
+ *		the member in an instance of the compound data type, and
+ *		MEMBER_ID is the type of the new member.
+ *
+ * Note:	All members of a compound data type must be atomic; a
+ *		compound data type cannot have a member which is a compound
+ *		data type.
+ *
+ * Return:	Success:	SUCCEED, the PARENT_ID compound data type is
+ *				modified to include a copy of the member type
+ *				MEMBER_ID.
+ *
+ *		Failure:	FAIL
+ *
+ * Errors:
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, December  8, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tinsert_member (hid_t parent_id, const char *name, off_t offset,
+		  hid_t member_id)
 {
-    h5_datatype_t *dt;         /* new data-type object to create */
-    herr_t        ret_value = SUCCEED;
+   H5T_t	*parent = NULL;		/*the compound parent data type	*/
+   H5T_t	*member = NULL;		/*the atomic member type	*/
+   
+   FUNC_ENTER (H5Tinsert_member, FAIL);
+   H5ECLEAR;
 
-    FUNC_ENTER(H5Tget_type, H5T_init_interface, FAIL);
+   /* Check args */
+   if (H5_DATATYPE!=H5Aatom_group (parent_id) ||
+       NULL==(parent=H5Aatom_object (parent_id)) ||
+       H5T_COMPOUND!=parent->type) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a compound data type*/
+   }
+   if (parent->locked) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL); /*parent is locked*/
+   }
+   if (!name || !*name) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL); /*no member name*/
+   }
+   if (H5_DATATYPE!=H5Aatom_group (member_id) ||
+       NULL==(member=H5Aatom_object (member_id)) ||
+       H5T_COMPOUND==member->type) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not an atomic data type*/
+   }
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
-    if(H5Aatom_group(tid)!=H5_DATATYPE)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL);
+   if (H5T_insert_member (parent, name, offset, member)<0) {
+      /* Can't insert member. */
+      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINSERT, FAIL);
+   }
 
-    /* Go get the object */
-    if((dt=H5Aatom_object(tid))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
-    if(dt->dt.base==0)
-        HGOTO_ERROR(H5E_FUNC, H5E_UNINITIALIZED, FAIL);
-    
-    /* Set the basic datatype information */
-    if(base!=NULL)
-        *base=dt->dt.base;
-    if(len!=NULL)
-        *len=dt->dt.len;
-    if(arch!=NULL)
-        *arch=dt->dt.arch;
+   FUNC_LEAVE (SUCCEED);
+}
 
-done:
-  if(ret_value == FAIL)   
-    { /* Error condition cleanup */
-
-    } /* end if */
-
-    /* Normal function cleanup */
-
-    FUNC_LEAVE(ret_value);
-} /* end H5Tget_type() */
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Tadd_field
- PURPOSE
-    Add a field to a compound datatype
- USAGE
-    herr_t H5Tadd_field(tid, name, base, len, arch, space)
-        hid_t tid;            IN: Datatype object to query
-        const char *fidx;       IN: Field name
-        hid_t base;           IN: Field's base type, either an atom ID for
-                                    an existing compound type, or an atomic
-                                    base type
-        uint8 len;              IN: Length of an atomic base type
-        uint8 arch;             IN: Architecture format of an atomic base type
-        hid_t space;          IN: The dimensionality of the field to add
- RETURNS
-    SUCCEED/FAIL
- DESCRIPTION
-        This function adds a field to a user-defined compound datatype.  The
-    field can either be a base/len/arch triplet or an existing compound type
-    (passed in the base argument).  The space parameter is either H5P_SCALAR
-    (to indicate a scalar field) or the atom of a datatype for more complex
-    dimensionality fields.
---------------------------------------------------------------------------*/
-herr_t H5Tadd_field(hid_t tid, const char *name, hid_t base, uint8 len, uint8 arch, hid_t space)
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_insert_member
+ *
+ * Purpose:	Adds a new MEMBER to the compound data type PARENT.  The new
+ *		member will have a NAME that is unique within PARENT and an
+ *		instance of PARENT will have the member begin at byte offset
+ *		OFFSET from the beginning.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, December  8, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_insert_member (H5T_t *parent, const char *name, off_t offset,
+		   const H5T_t *member)
 {
-    h5_field_info_t *new_field; /* pointer to new field to add */
-    h5_datatype_t *dt;          /* data-type object to manipulate */
-    herr_t ret_value = SUCCEED;
+   intn		i;
+   H5T_t	*tmp = NULL;
+   
+   FUNC_ENTER (H5T_insert_member, FAIL);
 
-    FUNC_ENTER(H5Tadd_field, H5T_init_interface, FAIL);
+   /* check args */
+   assert (parent && H5T_COMPOUND==parent->type);
+   assert (!parent->locked);
+   assert (member && H5T_COMPOUND!=member->type);
+   assert (name && *name);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+   /* Does NAME already exist in PARENT? */
+   for (i=0; i<parent->u.compnd.nmembs; i++) {
+      if (!HDstrcmp (parent->u.compnd.memb[i].name, name)) {
+	 /* Member name is not unique */
+	 HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINSERT, FAIL);
+      }
+   }
 
-    /* Go get the object */
-    if((dt=H5Aatom_object(tid))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+   /* Increase member array if necessary */
+   if (parent->u.compnd.nmembs>=parent->u.compnd.nalloc) {
+      parent->u.compnd.nalloc += H5T_COMPND_INC;
+      parent->u.compnd.memb = H5MM_xrealloc (parent->u.compnd.memb,
+					     (parent->u.compnd.nalloc*
+					      sizeof(H5T_member_t)));
+   }
 
-    /* Check the base type of the datatype */
-    if(H5T_COMPOUND!=dt->dt.base)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL);
-    
-    /* Check if the compound information has been initialized */
-    if(NULL==dt->ci)
-      {
-        if(NULL==(dt->ci=HDmalloc(sizeof(h5_compound_info_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
-        dt->ci->n=0;            /* Set the number of fields to 0 */
-        dt->ci->mem_size=0;     /* Set the size of the structure */
-        dt->ci->disk_size=0;    /* Set the size of the structure */
-        dt->ci->flist=NULL;     /* No field information yet */
-      } /* end if */
+   /* Add member to end of member array */
+   i = parent->u.compnd.nmembs;
+   parent->u.compnd.memb[i].name = H5MM_xstrdup (name);
+   parent->u.compnd.memb[i].offset = offset;
+   parent->u.compnd.memb[i].ndims = 0; /*defaults to scalar*/
+   
+   tmp = H5T_copy (member);
+   parent->u.compnd.memb[i].type = *tmp;
+   H5MM_xfree (tmp);
 
-    if(NULL==(new_field=HDrealloc(dt->ci->flist,(dt->ci->n+1)*sizeof(h5_field_info_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
-    dt->ci->n++;    /* increment the number of fields */
-    dt->ci->flist=new_field;    /* save the pointer to the increased array of fields */
-    new_field=&dt->ci->flist[dt->ci->n-1];   /* get a "convenience" pointer to the new field */
+   FUNC_LEAVE (SUCCEED);
+}
 
-    new_field->name=HDstrdup(name); /* copy the name */
-    new_field->name_off=0;          /* name isn't stored yet */
-    new_field->struct_off=dt->ci->disk_size;    /* Set the offset of the field on disk */
-    new_field->dim_id=H5Mcopy(space);    /* Make a copy of the dimension space for the field */
-    if((H5Ais_reserved(base)==BTRUE) && base!=H5T_COMPOUND) /* Check if this is a "simple" datatype */
-      {
-        new_field->dt.base=base;        /* Make a copy of the datatype for the field */
-        new_field->dt.len=len;
-        new_field->dt.arch=arch;
-      } /* end if */
-    else
-      {
-        new_field->dt.base=H5Mcopy(base);    /* Make a copy of the datatype for the field */
-        new_field->dt.len=H5Tsize(base,BTRUE);
-        new_field->dt.arch=arch;
-      } /* end else */
-
-done:
-  if(ret_value == FAIL)
-    { /* Error condition cleanup */
-
-    } /* end if */
-
-    /* Normal function cleanup */
-
-    FUNC_LEAVE(ret_value);
-} /* end H5Tadd_field() */
-
-/*--------------------------------------------------------------------------
- NAME
-    H5T_size
- PURPOSE
-    Determine the size of a datatype (internal)
- USAGE
-    uintn H5T_size(dt, mem_flag)
-        h5_datatype_t *dt;      IN: Pointer to Datatype object to query
-        hbool_t mem_flag;       IN: Whether the memory or disk size is desired
- RETURNS
-    The size of the datatype on success or UFAIL on failure.
- DESCRIPTION
-        Ths function returns the size of the datatype in bytes as it is stored
-    on disk or in memory, depending on the mem_flag.  Setting the mem_flag to
-    BTRUE returns the size in memory, BFALSE returns the size on disk.
---------------------------------------------------------------------------*/
-uintn H5T_size(h5_datatype_t *dt, hbool_t mem_flag)
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tcopy
+ *
+ * Purpose:	Copies a data type.  The resulting data type is not locked.
+ *
+ * Return:	Success:	The ID of a new data type.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, December  9, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Tcopy (hid_t type_id)
 {
-    uintn ret_value = UFAIL;
+   H5T_t	*dt = NULL;
+   H5T_t	*new_dt = NULL;
+   hid_t	ret_value = FAIL;
+   
+   FUNC_ENTER (H5Tcopy, FAIL);
+   H5ECLEAR;
 
-    FUNC_ENTER(H5T_size, H5T_init_interface, UFAIL);
+   /* check args */
+   if (H5_DATATYPE!=H5Aatom_group (type_id) ||
+       NULL==(dt=H5Aatom_object (type_id))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a data type*/
+   }
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+   /* copy */
+   if (NULL==(new_dt = H5T_copy (dt))) {
+      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL); /*can't copy*/
+   }
 
-    assert(dt);
+   /* atomize result */
+   if ((ret_value=H5Aregister_atom (H5_DATATYPE, new_dt))<0) {
+      H5T_close (new_dt);
+      /* Can't register data type atom */
+      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL);
+   }
 
-    if(dt->dt.base==H5T_COMPOUND)
-      {
-        intn i;             /* local counting variable */
+   FUNC_LEAVE (ret_value);
+}
 
-        /* Check the base type of the datatype */
-        if(H5T_COMPOUND!=dt->dt.base)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL);
-        
-        /* Check if the compound information has been initialized */
-        if(NULL==dt->ci)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_UNINITIALIZED, FAIL);
-
-        /* Grab the number of fields */
-        for(i=0; i<=dt->ci->n; i++)
-            ret_value+=H5Tsize(dt->ci->flist[i].dt.base,mem_flag)*H5Pnelem(dt->ci->flist[i].dim_id);
-      } /* end if */
-    else
-      { /* Simple, user-defined datatypes */
-        switch(dt->dt.base)
-          {
-            case H5T_CHAR:
-            case H5T_INT:
-            case H5T_FLOAT:     /* All three of thes types use the length as the number of bytes */
-                ret_value=dt->dt.len;
-                break;
-
-            case H5T_DATE:
-                ret_value=8;    /* Number of characters for ISO 8601 format */
-                break;
-
-            case H5T_TIME:
-                ret_value=6;    /* Number of characters for ISO 8601 format */
-                break;
-
-            case H5T_SPTR:
-                HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, UFAIL);
-                break;
-
-            case H5T_PPTR:
-                HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, UFAIL);
-                break;
-
-            default:
-                HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, UFAIL);
-          } /* end switch */
-      } /* end else */
-
-done:
-  if(ret_value == UFAIL)
-    { /* Error condition cleanup */
-
-    } /* end if */
-
-    /* Normal function cleanup */
-
-    FUNC_LEAVE(ret_value);
-} /* end H5T_size() */
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Tsize
- PURPOSE
-    Determine the size of a datatype
- USAGE
-    uintn H5Tsize(tid, mem_flag)
-        hid_t tid;              IN: Datatype object to query
-        hbool_t mem_flag;       IN: Whether the memory or disk size is desired
- RETURNS
-    The size of the datatype on success or UFAIL on failure.
- DESCRIPTION
-        This function returns the size of the datatype in bytes as it is stored
-    on disk or in memory, depending on the mem_flag.  Setting the mem_flag to
-    BTRUE returns the size in memory, BFALSE returns the size on disk.
- NOTE:
-        This function does not compute the number of bytes for a predefined
-    library type (ie. H5T_CHAR, H5T_INT) which has not been "named" by the
-    user as field or new type.
---------------------------------------------------------------------------*/
-uintn H5Tsize(hid_t tid, hbool_t mem_flag)
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_copy
+ *
+ * Purpose:	Copies datatype OLD_DT.  The resulting data type is not
+ *		locked.
+ *
+ * Return:	Success:	Pointer to a new copy of the OLD_DT argument.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, December  4, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_t *
+H5T_copy (const H5T_t *old_dt)
 {
-    uintn ret_value = UFAIL;
+   H5T_t	*new_dt = NULL;
+   intn		i;
+   char		*s;
+   
+   FUNC_ENTER (H5T_copy, NULL);
 
-    FUNC_ENTER(H5Tsize, H5T_init_interface, UFAIL);
+   /* check args */
+   assert (old_dt);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+   /* copy */
+   new_dt = H5MM_xcalloc (1, sizeof(H5T_t));
+   *new_dt = *old_dt;
+   new_dt->locked = FALSE;
+   
+   if (H5T_COMPOUND==new_dt->type) {
+      new_dt->u.compnd.memb = H5MM_xmalloc (new_dt->u.compnd.nmembs *
+					    sizeof(H5T_member_t));
+      HDmemcpy (new_dt->u.compnd.memb, old_dt->u.compnd.memb,
+		new_dt->u.compnd.nmembs * sizeof(H5T_member_t));
+      for (i=0; i<new_dt->u.compnd.nmembs; i++) {
+	 s = new_dt->u.compnd.memb[i].name;
+	 new_dt->u.compnd.memb[i].name = H5MM_xstrdup (s);
+      }
+   }
+   
+   FUNC_LEAVE (new_dt);
+}
 
-    if((H5Ais_reserved(tid)==BTRUE) && tid!=H5T_COMPOUND) /* Check if this is a "simple" datatype */
-      {
-#ifdef LATER
-        switch(tid)
-          {
-            case H5T_CHAR:
-            case H5T_INT:
-            case H5T_FLOAT:     /* All three of thes types use the length as the number of bytes */
-                ret_value=len;
-                break;
-
-            case H5T_DATE:
-                ret_value=8;    /* Number of characters for ISO 8601 format */
-                break;
-
-            case H5T_TIME:
-                ret_value=6;    /* Number of characters for ISO 8601 format */
-                break;
-
-            case H5T_SPTR:
-                HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, UFAIL);
-                break;
-
-            case H5T_PPTR:
-                HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, UFAIL);
-                break;
-
-            default:
-                HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, UFAIL);
-          } /* end switch */
-#endif /* LATER */
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, UFAIL);
-      } /* end if */
-    else
-      {
-        h5_datatype_t *dt;  /* datatype pointer */
-
-        /* Go get the object */
-        if((dt=H5Aatom_object(tid))==NULL)
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
-
-        ret_value=H5T_size(dt,mem_flag);
-      } /* end else */
-
-done:
-  if(ret_value == UFAIL)
-    { /* Error condition cleanup */
-
-    } /* end if */
-
-    /* Normal function cleanup */
-
-    FUNC_LEAVE(ret_value);
-} /* end H5Tsize() */
-
-/*--------------------------------------------------------------------------
- NAME
-    H5T_arch
- PURPOSE
-    Determine the architecture of a datatype (internal)
- USAGE
-    uintn H5T_arch(dt)
-        h5_datatype_t *dt;      IN: Pointer to Datatype object to query
- RETURNS
-    The architure type of the datatype on success or FAIL on failure.
- DESCRIPTION
-        Ths function returns the architure type of the datatype.
---------------------------------------------------------------------------*/
-intn H5T_arch(h5_datatype_t *dt)
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tclose
+ *
+ * Purpose:	Frees a data type and all associated memory.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, December  9, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tclose (hid_t type_id)
 {
-    intn ret_value = FAIL;
+   H5T_t	*dt = NULL;
+   
+   FUNC_ENTER (H5Tclose, FAIL);
+   H5ECLEAR;
 
-    FUNC_ENTER(H5T_arch, H5T_init_interface, FAIL);
+   /* check args */
+   if (H5_DATATYPE!=H5Aatom_group (type_id) ||
+       NULL==(dt=H5Aatom_object (type_id))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a data type*/
+   }
+   if (dt->locked) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL); /*predefined data type*/
+   }
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+   /* When the reference count reaches zero the resources are freed */
+   if (H5A_dec_ref (type_id)<0) {
+      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL); /*problem freeing id*/
+   }
 
-    assert(dt);
+   FUNC_LEAVE (SUCCEED);
+}
 
-    ret_value=dt->dt.arch;
-
-done:
-  if(ret_value == FAIL)
-    { /* Error condition cleanup */
-
-    } /* end if */
-
-    /* Normal function cleanup */
-
-    FUNC_LEAVE(ret_value);
-} /* end H5T_arch() */
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Tarch
- PURPOSE
-    Determine the architecture of a datatype
- USAGE
-    intn H5Tarch(tid)
-        hid_t tid;            IN: Datatype object to query
- RETURNS
-    The architecture of the datatype on success or FAIL on failure.
- DESCRIPTION
-        Ths function returns the architecture of the datatype.
---------------------------------------------------------------------------*/
-intn H5Tarch(hid_t tid)
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_close
+ *
+ * Purpose:	Frees a data type and all associated memory.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, December  8, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_close (H5T_t *dt)
 {
-    h5_datatype_t *dt;  /* datatype pointer */
-    intn ret_value = FAIL;
+   intn		i;
+   
+   FUNC_ENTER (H5T_close, FAIL);
 
-    FUNC_ENTER(H5Tarch, H5T_init_interface, FAIL);
+   assert (dt);
+   assert (!dt->locked);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+   if (dt && H5T_COMPOUND==dt->type) {
+      for (i=0; i<dt->u.compnd.nmembs; i++) {
+	 H5MM_xfree (dt->u.compnd.memb[i].name);
+      }
+      H5MM_xfree (dt->u.compnd.memb);
+      H5MM_xfree (dt);
+      
+   } else if (dt) {
+      H5MM_xfree (dt);
+   }
 
-    /* Go get the object */
-    if((dt=H5Aatom_object(tid))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+   FUNC_LEAVE (SUCCEED);
+}
 
-    ret_value=H5T_arch(dt);
 
-done:
-  if(ret_value == FAIL)
-    { /* Error condition cleanup */
-
-    } /* end if */
-
-    /* Normal function cleanup */
-
-    FUNC_LEAVE(ret_value);
-} /* end H5Tarch() */
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Tget_fields
- PURPOSE
-    Determine the size of a datatype
- USAGE
-    herr_t H5Tget_fields(tid, field_list)
-        hid_t tid;            IN: Datatype object to query
-        hoid_t *field_list;     IN: Array to store list of fields
- RETURNS
-    SUCCEED/FAIL
- DESCRIPTION
-        Ths function returns a list of OIDs for the fields in a compound
-    datatype.  Atomic fields are returned in the list of OIDs, but have special
-    OID values which cannot be further dereferenced.
---------------------------------------------------------------------------*/
-herr_t H5Tget_fields(hid_t tid, hid_t *field_list)
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tequal
+ *
+ * Purpose:	Determines if two data types are equal.
+ *
+ * Return:	Success:	TRUE if equal, FALSE if unequal
+ *
+ *		Failure:	FAIL
+ *
+ * Errors:
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, December 10, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5Tequal (hid_t type1_id, hid_t type2_id)
 {
-    herr_t ret_value = FAIL;
+   const H5T_t	*dt1 = NULL;
+   const H5T_t	*dt2 = NULL;
+   hbool_t	ret_value = FAIL;
+   
+   FUNC_ENTER (H5Tequal, FAIL);
 
-    FUNC_ENTER(H5Tget_fields, H5T_init_interface, FAIL);
+   /* check args */
+   if (H5_DATATYPE!=H5Aatom_group (type1_id) ||
+       NULL==(dt1=H5Aatom_object (type1_id)) ||
+       H5_DATATYPE!=H5Aatom_group (type2_id) ||
+       NULL==(dt2=H5Aatom_object (type2_id))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a data type*/
+   }
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
-    if(H5Aatom_group(tid)!=H5_DATATYPE)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
-    if(field_list==NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
+   ret_value = (0==H5T_cmp (dt1, dt2));
 
-done:
-  if(ret_value == UFAIL)
-    { /* Error condition cleanup */
+   FUNC_LEAVE (ret_value);
+}
 
-    } /* end if */
-
-    /* Normal function cleanup */
-
-    FUNC_LEAVE(ret_value);
-} /* end H5Tget_fields() */
-
-/*--------------------------------------------------------------------------
- NAME
-    H5T_destroy
- PURPOSE
-    Private function to destroy datatype objects.
- USAGE
-    void H5T_destroy(datatype)
-        void *datatype;       IN: Pointer to datatype object to destroy
- RETURNS
-    none
- DESCRIPTION
-    This function releases whatever memory is used by a datatype object.
-    It should only be called from the atom manager when the reference count
-    for a datatype drops to zero.
---------------------------------------------------------------------------*/
-void H5T_destroy(void *datatype)
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_cmp
+ *
+ * Purpose:	Compares two data types.
+ *
+ * Return:	Success:	0 if DT1 and DT2 are equal.
+ *				<0 if DT1 is less than DT2.
+ * 				>0 if DT1 is greater than DT2.
+ *
+ *		Failure:	0, never fails
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, December 10, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+intn
+H5T_cmp (const H5T_t *dt1, const H5T_t *dt2)
 {
-    h5_datatype_t *dt=(h5_datatype_t *)datatype;  /* data-type object to destroy */
+   intn		*idx1=NULL, *idx2=NULL;
+   intn		ret_value = 0;
+   intn		i, j, tmp;
+   hbool_t	swapped;
+   
+   FUNC_ENTER (H5T_equal, 0);
 
-    /* Don't call standard init/leave code, this is a private void function */
-    /* FUNC_ENTER(H5T_destroy, H5T_init_interface, FAIL); */
+   /* check args */
+   assert (dt1);
+   assert (dt2);
 
-    if(dt->name!=NULL)
-        HDfree(dt->name);
-    if(dt->ci!=NULL)
-      {
-      } /* end if */
-    HDfree(dt);
+   /* the easy case */
+   if (dt1==dt2) HGOTO_DONE (0);
 
-#ifdef LATER
-done:
-  if(ret_value == FAIL)   
-    { /* Error condition cleanup */
+   /* compare */
+   if (dt1->type < dt2->type) HGOTO_DONE (-1);
+   if (dt1->type > dt2->type) HGOTO_DONE (1);
 
-    } /* end if */
+   if (dt1->size < dt2->size) HGOTO_DONE (-1);
+   if (dt1->size > dt2->size) HGOTO_DONE (1);
 
-    /* Normal function cleanup */
-    FUNC_LEAVE(ret_value);
-#endif /* LATER */
+   if (H5T_COMPOUND==dt1->type) {
+      /*
+       * Compound data types...
+       */
+      if (dt1->u.compnd.nmembs < dt2->u.compnd.nmembs) HGOTO_DONE (-1);
+      if (dt1->u.compnd.nmembs > dt2->u.compnd.nmembs) HGOTO_DONE (1);
 
-} /* H5T_destroy */
+      /* Build an index for each type so the names are sorted */
+      idx1 = H5MM_xmalloc (dt1->u.compnd.nmembs * sizeof(intn));
+      idx2 = H5MM_xmalloc (dt1->u.compnd.nmembs * sizeof(intn));
+      for (i=0; i<dt1->u.compnd.nmembs; i++) idx1[i] = idx2[i] = i;
+      for (i=dt1->u.compnd.nmembs-1, swapped=TRUE; swapped && i>=0; --i) {
+	 for (j=0, swapped=FALSE; j<i; j++) {
+	    if (HDstrcmp (dt1->u.compnd.memb[idx1[j]].name,
+			  dt1->u.compnd.memb[idx1[j+1]].name)>0) {
+	       tmp = idx1[j];
+	       idx1[j] = idx1[j+1];
+	       idx1[j+1] = tmp;
+	       swapped = TRUE;
+	    }
+	 }
+      }
+      for (i=dt1->u.compnd.nmembs-1, swapped=TRUE; swapped && i>=0; --i) {
+	 for (j=0, swapped=FALSE; j<i; j++) {
+	    if (HDstrcmp (dt2->u.compnd.memb[idx2[j]].name,
+			  dt2->u.compnd.memb[idx2[j+1]].name)>0) {
+	       tmp = idx2[j];
+	       idx2[j] = idx2[j+1];
+	       idx2[j+1] = tmp;
+	       swapped = TRUE;
+	    }
+	 }
+      }
+      
+#ifndef NDEBUG
+      for (i=0; i<dt1->u.compnd.nmembs; i++) {
+	 assert (HDstrcmp (dt1->u.compnd.memb[idx1[i]].name,
+			   dt1->u.compnd.memb[idx1[i+1]].name));
+	 assert (HDstrcmp (dt2->u.compnd.memb[idx2[i]].name,
+			   dt2->u.compnd.memb[idx2[i+1]].name));
+      }
+#endif
 
-/*--------------------------------------------------------------------------
- NAME
-    H5T_release
- PURPOSE
-    Release access to an HDF5 datatype object.
- USAGE
-    herr_t H5T_release(oid)
-        hid_t oid;       IN: Object to release access to
- RETURNS
-    SUCCEED/FAIL
- DESCRIPTION
-        This function releases a datatype from active use by a user.
---------------------------------------------------------------------------*/
-herr_t H5T_release(hid_t oid)
-{
-    herr_t        ret_value = SUCCEED;
+      /* Compare the members */
+      for (i=0; i<dt1->u.compnd.nmembs; i++) {
+	 tmp = HDstrcmp (dt1->u.compnd.memb[idx1[i]].name,
+			 dt2->u.compnd.memb[idx2[i]].name);
+	 if (tmp<0) HGOTO_DONE (-1);
+	 if (tmp>0) HGOTO_DONE (1);
 
-    FUNC_ENTER(H5T_release, H5T_init_interface, FAIL);
+	 if (dt1->u.compnd.memb[idx1[i]].offset <
+	     dt2->u.compnd.memb[idx2[i]].offset) HGOTO_DONE (-1);
+	 if (dt1->u.compnd.memb[idx1[i]].offset >
+	     dt2->u.compnd.memb[idx2[i]].offset) HGOTO_DONE (1);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+	 if (dt1->u.compnd.memb[idx1[i]].ndims <
+	     dt2->u.compnd.memb[idx2[i]].ndims) HGOTO_DONE (-1);
+	 if (dt1->u.compnd.memb[idx1[i]].ndims >
+	     dt2->u.compnd.memb[idx2[i]].ndims) HGOTO_DONE (1);
 
-    /* Chuck the object! :-) */
-    if(H5Adec_ref(oid)==FAIL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+	 for (j=0; j<dt1->u.compnd.memb[idx1[i]].ndims; j++) {
+	    if (dt1->u.compnd.memb[idx1[i]].dim[j] <
+		dt2->u.compnd.memb[idx2[i]].dim[j]) HGOTO_DONE (-1);
+	    if (dt1->u.compnd.memb[idx1[i]].dim[j] >
+		dt2->u.compnd.memb[idx2[i]].dim[j]) HGOTO_DONE (1);
+	 }
+	 
+	 for (j=0; j<dt1->u.compnd.memb[idx1[i]].ndims; j++) {
+	    if (dt1->u.compnd.memb[idx1[i]].perm[j] <
+		dt2->u.compnd.memb[idx2[i]].perm[j]) HGOTO_DONE (-1);
+	    if (dt1->u.compnd.memb[idx1[i]].perm[j] >
+		dt2->u.compnd.memb[idx2[i]].perm[j]) HGOTO_DONE (1);
+	 }
 
-done:
-  if(ret_value == FAIL)   
-    { /* Error condition cleanup */
+	 tmp = H5T_cmp (&(dt1->u.compnd.memb[idx1[i]].type),
+			&(dt2->u.compnd.memb[idx2[i]].type));
+	 if (tmp<0) HGOTO_DONE (-1);
+	 if (tmp>0) HGOTO_DONE (1);
+      }
+      
+   } else {
+      /*
+       * Atomic data types...
+       */
+      if (dt1->u.atomic.order < dt2->u.atomic.order) HGOTO_DONE (-1);
+      if (dt1->u.atomic.order > dt2->u.atomic.order) HGOTO_DONE (1);
 
-    } /* end if */
+      if (dt1->u.atomic.prec < dt2->u.atomic.prec) HGOTO_DONE (-1);
+      if (dt1->u.atomic.prec > dt2->u.atomic.prec) HGOTO_DONE (1);
 
-    /* Normal function cleanup */
+      if (dt1->u.atomic.offset < dt2->u.atomic.offset) HGOTO_DONE (-1);
+      if (dt1->u.atomic.offset > dt2->u.atomic.offset) HGOTO_DONE (1);
+      
+      if (dt1->u.atomic.lo_pad < dt2->u.atomic.lo_pad) HGOTO_DONE (-1);
+      if (dt1->u.atomic.lo_pad > dt2->u.atomic.lo_pad) HGOTO_DONE (1);
+      
+      if (dt1->u.atomic.hi_pad < dt2->u.atomic.hi_pad) HGOTO_DONE (-1);
+      if (dt1->u.atomic.hi_pad > dt2->u.atomic.hi_pad) HGOTO_DONE (1);
 
-    FUNC_LEAVE(ret_value);
-} /* end H5T_release() */
+      switch (dt1->type) {
+      case H5T_FIXED:
+	 if (dt1->u.atomic.u.i.sign < dt2->u.atomic.u.i.sign) HGOTO_DONE (-1);
+	 if (dt1->u.atomic.u.i.sign > dt2->u.atomic.u.i.sign) HGOTO_DONE (1);
+	 break;
 
+      case H5T_FLOAT:
+	 if (dt1->u.atomic.u.f.sign < dt2->u.atomic.u.f.sign) HGOTO_DONE (-1);
+	 if (dt1->u.atomic.u.f.sign > dt2->u.atomic.u.f.sign) HGOTO_DONE (1);
+	 
+	 if (dt1->u.atomic.u.f.epos < dt2->u.atomic.u.f.epos) HGOTO_DONE (-1);
+	 if (dt1->u.atomic.u.f.epos > dt2->u.atomic.u.f.epos) HGOTO_DONE (1);
+	 
+	 if (dt1->u.atomic.u.f.esize <
+	     dt2->u.atomic.u.f.esize) HGOTO_DONE (-1);
+	 if (dt1->u.atomic.u.f.esize >
+	     dt2->u.atomic.u.f.esize) HGOTO_DONE (1);
+	 
+	 if (dt1->u.atomic.u.f.ebias <
+	     dt2->u.atomic.u.f.ebias) HGOTO_DONE (-1);
+	 if (dt1->u.atomic.u.f.ebias >
+	     dt2->u.atomic.u.f.ebias) HGOTO_DONE (1);
+	 
+	 if (dt1->u.atomic.u.f.mpos < dt2->u.atomic.u.f.mpos) HGOTO_DONE (-1);
+	 if (dt1->u.atomic.u.f.mpos > dt2->u.atomic.u.f.mpos) HGOTO_DONE (1);
+	 
+	 if (dt1->u.atomic.u.f.msize <
+	     dt2->u.atomic.u.f.msize) HGOTO_DONE (-1);
+	 if (dt1->u.atomic.u.f.msize >
+	     dt2->u.atomic.u.f.msize) HGOTO_DONE (1);
+	 
+	 if (dt1->u.atomic.u.f.norm < dt2->u.atomic.u.f.norm) HGOTO_DONE (-1);
+	 if (dt1->u.atomic.u.f.norm > dt2->u.atomic.u.f.norm) HGOTO_DONE (1);
+	 
+	 if (dt1->u.atomic.u.f.pad < dt2->u.atomic.u.f.pad) HGOTO_DONE (-1);
+	 if (dt1->u.atomic.u.f.pad > dt2->u.atomic.u.f.pad) HGOTO_DONE (1);
+
+	 break;
+
+      case H5T_DATE:
+	 /*void*/
+	 break;
+
+      case H5T_STRING:
+	 if (dt1->u.atomic.u.s.cset < dt1->u.atomic.u.s.cset) HGOTO_DONE (-1);
+	 if (dt1->u.atomic.u.s.cset > dt1->u.atomic.u.s.cset) HGOTO_DONE (1);
+	 
+	 if (dt1->u.atomic.u.s.spad < dt1->u.atomic.u.s.spad) HGOTO_DONE (-1);
+	 if (dt1->u.atomic.u.s.spad > dt1->u.atomic.u.s.spad) HGOTO_DONE (1);
+
+	 break;
+	 
+      case H5T_BITFIELD:
+	 /*void*/
+	 break;
+
+      case H5T_OPAQUE:
+	 /*void*/
+	 break;
+
+      default:
+	 assert ("not implemented yet" && 0);
+      }
+   }
+
+ done:
+   H5MM_xfree (idx1);
+   H5MM_xfree (idx2);
+
+   FUNC_LEAVE (ret_value);
+}
+      

@@ -24,6 +24,7 @@
 
 #define PABLO_MASK	H5F_core
 static hbool_t interface_initialize_g = FALSE;
+#define INTERFACE_INIT NULL
 
 static hbool_t H5F_core_access (const char *name, int mode, H5F_search_t *key);
 static H5F_low_t *H5F_core_open (const char *name, uintn flags, H5F_search_t*);
@@ -66,7 +67,7 @@ const H5F_low_class_t H5F_LOW_CORE[1] = {{
 static hbool_t
 H5F_core_access (const char *name, int mode, H5F_search_t *key/*out*/)
 {
-   FUNC_ENTER (H5F_core_access, NULL, FAIL);
+   FUNC_ENTER (H5F_core_access, FAIL);
    FUNC_LEAVE (FALSE);
 }
 
@@ -98,7 +99,7 @@ H5F_core_open (const char *name, uintn flags, H5F_search_t *key)
    H5F_low_t		*lf = NULL;
    static ino_t		ino=0;
 
-   FUNC_ENTER (H5F_core_open, NULL, NULL);
+   FUNC_ENTER (H5F_core_open, NULL);
 
    if (0==(flags & H5F_ACC_WRITE) || 0==(flags & H5F_ACC_CREAT)) {
       /* must creat file with write access */
@@ -141,7 +142,7 @@ H5F_core_open (const char *name, uintn flags, H5F_search_t *key)
 static herr_t
 H5F_core_close (H5F_low_t *lf)
 {
-   FUNC_ENTER (H5F_core_close, NULL, FAIL);
+   FUNC_ENTER (H5F_core_close, FAIL);
 
    lf->u.core.mem = H5MM_xfree (lf->u.core.mem);
    lf->u.core.size = 0;
@@ -177,7 +178,7 @@ H5F_core_read (H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
    size_t	n;
    size_t	eof;
    
-   FUNC_ENTER (H5F_core_read, NULL, FAIL);
+   FUNC_ENTER (H5F_core_read, FAIL);
 
    assert (lf);
    assert (addr && H5F_addr_defined (addr));
@@ -224,7 +225,7 @@ H5F_core_write (H5F_low_t *lf, const haddr_t *addr, size_t size,
 {
    size_t	inc_amount;
    
-   FUNC_ENTER (H5F_core_write, NULL, FAIL);
+   FUNC_ENTER (H5F_core_write, FAIL);
 
    assert (lf);
    assert (addr && H5F_addr_defined (addr));

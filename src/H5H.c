@@ -59,12 +59,13 @@ static const H5AC_class_t H5AC_HEAP[1] = {{
    (herr_t(*)(H5F_t*,hbool_t,const haddr_t*,void*))H5H_flush,
 }};
 
-/* Is the interface initialized? */
+/* Interface initialization */
 static intn interface_initialize_g = FALSE;
+#define INTERFACE_INIT	NULL
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5H_new
+ * Function:	H5H_create
  *
  * Purpose:	Creates a new heap data structure on disk and caches it
  *		in memory.  SIZE_HINT is a hint for the initial size of the
@@ -91,20 +92,20 @@ static intn interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 herr_t
-H5H_new (H5F_t *f, H5H_type_t heap_type, size_t size_hint,
-	 haddr_t *addr/*out*/)
+H5H_create (H5F_t *f, H5H_type_t heap_type, size_t size_hint,
+	    haddr_t *addr/*out*/)
 {
    H5H_t	*heap = NULL;
    size_t	total_size;		/*total heap size on disk	*/
 
-   FUNC_ENTER (H5H_new, NULL, FAIL);
+   FUNC_ENTER (H5H_create, FAIL);
 
    /* check arguments */
    assert (f);
    assert (addr);
    if (H5H_GLOBAL==heap_type) {
 #ifndef NDEBUG
-      fprintf (stderr, "H5H_new: a local heap is used as the global heap\n");
+      fprintf (stderr, "H5H_create: a local heap is used as the global heap\n");
 #endif
    }
    
@@ -176,7 +177,7 @@ H5H_load (H5F_t *f, const haddr_t *addr, const void *udata1, void *udata2)
    size_t	free_block=H5H_FREE_NULL;
    H5H_t	*ret_value=NULL;
 
-   FUNC_ENTER (H5H_load, NULL, NULL);
+   FUNC_ENTER (H5H_load, NULL);
 
    /* check arguments */
    assert (f);
@@ -279,7 +280,7 @@ H5H_flush (H5F_t *f, hbool_t destroy, const haddr_t *addr, H5H_t *heap)
    H5H_free_t	*fl = heap->freelist;
    haddr_t	hdr_end_addr;
 
-   FUNC_ENTER (H5H_flush, NULL, FAIL);
+   FUNC_ENTER (H5H_flush, FAIL);
 
    /* check arguments */
    assert (f);
@@ -401,7 +402,7 @@ H5H_read (H5F_t *f, const haddr_t *addr, size_t offset, size_t size, void *buf)
 {
    H5H_t	*heap = NULL;
 
-   FUNC_ENTER (H5H_read, NULL, NULL);
+   FUNC_ENTER (H5H_read, NULL);
 
    /* check arguments */
    assert (f);
@@ -461,7 +462,7 @@ H5H_peek (H5F_t *f, const haddr_t *addr, size_t offset)
    H5H_t	*heap = NULL;
    const void	*retval = NULL;
 
-   FUNC_ENTER (H5H_peek, NULL, NULL);
+   FUNC_ENTER (H5H_peek, NULL);
 
    /* check arguments */
    assert (f);
@@ -538,7 +539,7 @@ H5H_insert (H5F_t *f, const haddr_t *addr, size_t buf_size, const void *buf)
    static	nmessages = 0;
 #endif
 
-   FUNC_ENTER (H5H_insert, NULL, FAIL);
+   FUNC_ENTER (H5H_insert, FAIL);
 
    /* check arguments */
    assert (f);
@@ -693,7 +694,7 @@ H5H_write (H5F_t *f, const haddr_t *addr, size_t offset, size_t size,
 {
    H5H_t	*heap = NULL;
 
-   FUNC_ENTER (H5H_write, NULL, FAIL);
+   FUNC_ENTER (H5H_write, FAIL);
 
    /* check arguments */
    assert (f);
@@ -755,7 +756,7 @@ H5H_remove (H5F_t *f, const haddr_t *addr, size_t offset, size_t size)
    static int	nmessages = 0;
 #endif
 
-   FUNC_ENTER (H5H_remove, NULL, FAIL);
+   FUNC_ENTER (H5H_remove, FAIL);
 
    /* check arguments */
    assert (f);
@@ -870,7 +871,7 @@ H5H_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent, intn fwidth
    uint8	*marker = NULL;
    size_t	amount_free = 0;
 
-   FUNC_ENTER (H5H_debug, NULL, FAIL);
+   FUNC_ENTER (H5H_debug, FAIL);
 
    /* check arguments */
    assert (f);

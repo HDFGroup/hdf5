@@ -47,9 +47,9 @@
 #define H5G_INIT_HEAP		8192
 #define PABLO_MASK		H5G_mask
 
-/* Is the interface initialized? */
+/* Interface initialization */
 static hbool_t interface_initialize_g = FALSE;
-
+#define INTERFACE_INIT		NULL
 
 
 /*-------------------------------------------------------------------------
@@ -92,7 +92,7 @@ H5Gnew (hid_t file, const char *name, size_t size_hint)
    H5F_t	*f=NULL;
    H5G_entry_t	*grp_handle=NULL;
    
-   FUNC_ENTER (H5Gnew, NULL, FAIL);
+   FUNC_ENTER (H5Gnew, FAIL);
 
    /* Check/fix arguments */
    if (!name || !*name) {
@@ -158,7 +158,7 @@ H5Gset (hid_t file, const char *name)
 {
    H5F_t	*f=NULL;
    
-   FUNC_ENTER (H5Gset, NULL, FAIL);
+   FUNC_ENTER (H5Gset, FAIL);
 
    /* Check/fix arguments */
    if (!name || !*name) {
@@ -217,7 +217,7 @@ H5Gpush (hid_t file, const char *name)
 {
    H5F_t	*f=NULL;
    
-   FUNC_ENTER (H5Gpush, NULL, FAIL);
+   FUNC_ENTER (H5Gpush, FAIL);
 
    /* Check/fix arguments */
    if (!name || !*name) {
@@ -277,7 +277,7 @@ H5Gpop (hid_t file)
 {
    H5F_t	*f=NULL;
    
-   FUNC_ENTER (H5Gpop, NULL, FAIL);
+   FUNC_ENTER (H5Gpop, FAIL);
 
    /* Check/fix arguments */
    if (H5_FILE!=H5Aatom_group (file)) {
@@ -344,57 +344,6 @@ H5G_component (const char *name, size_t *size_p)
    return name;
 }
 
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_basename
- *
- * Purpose:	Returns a pointer into NAME for the start of the last
- *		component of NAME.  On return, the optional SIZE_P is
- *		initialized to point to the size of the base name not
- *		counting trailing slashes or the null character.
- *
- * Errors:
- *
- * Return:	Success:	Ptr to base name within NAME with SIZE_P
- *				pointing to the number of characters in the
- *				base name.
- *
- *		Failure:	Ptr to the null terminator of NAME.
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Aug 11 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-#if 0
-static const char *
-H5G_basename (const char *name, size_t *size_p)
-{
-   const char	*s;
-   
-   assert (name);
-
-   s = name + HDstrlen(name);
-   while (s>name && '/'==s[-1]) --s; /*skip past trailing slashes*/
-   while (s>name && '/'!=s[-1]) --s; /*skip past base name*/
-
-   /*
-    * If the input was the name of the root group `/' (or
-    * equivalent) then return the null string.
-    */
-   if ('/'==*s) {
-      if (size_p) *size_p = 0;
-      return s + HDstrlen(s); /*null terminator*/
-   }
-
-   if (size_p) *size_p = HDstrcspn (s, "/");
-   return s;
-}
-#endif
-   
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_namei
@@ -476,7 +425,7 @@ H5G_namei (H5F_t *f, H5G_entry_t *cwg, const char *name,
       H5F_addr_undef (&(grp_ent->header));
    }
    
-   FUNC_ENTER (H5G_namei, NULL, NULL);
+   FUNC_ENTER (H5G_namei, NULL);
 
    /* check args */
    assert (f);
@@ -619,7 +568,7 @@ H5G_mkroot (H5F_t *f, size_t size_hint)
    H5G_entry_t	*ent_ptr=NULL;		/*pointer to a symbol table entry*/
    const char	*obj_name=NULL;		/*name of old root object	*/
    
-   FUNC_ENTER (H5G_mkroot, NULL, FAIL);
+   FUNC_ENTER (H5G_mkroot, FAIL);
 
    /*
     * Make sure that the file descriptor has the latest info -- someone might
@@ -657,7 +606,7 @@ H5G_mkroot (H5F_t *f, size_t size_hint)
     * something goes wrong at this step, closing the `handle' will rewrite
     * info back into f->root_sym because we set the dirty bit.
     */
-   if (H5G_stab_new (f, f->shared->root_sym, size_hint)<0) {
+   if (H5G_stab_create (f, f->shared->root_sym, size_hint)<0) {
       HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*cant create root*/
    }
    if (1!=H5O_link (f, f->shared->root_sym, 1)) {
@@ -753,7 +702,7 @@ H5G_new (H5F_t *f, const char *name, size_t size_hint)
    size_t	nchars;			/*number of characters in compon*/
    herr_t	status;			/*function return status	*/
    
-   FUNC_ENTER (H5G_new, NULL, NULL);
+   FUNC_ENTER (H5G_new, NULL);
 
    /* check args */
    assert (f);
@@ -800,7 +749,7 @@ H5G_new (H5F_t *f, const char *name, size_t size_hint)
    }
    
    /* create group */
-   if (H5G_stab_new (f, &ent, size_hint)<0) {
+   if (H5G_stab_create (f, &ent, size_hint)<0) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL); /*can't create grp*/
    }
 
@@ -851,7 +800,7 @@ H5G_set (H5F_t *f, const char *name)
    H5O_stab_t	stab_mesg;
    herr_t	ret_value=FAIL;
    
-   FUNC_ENTER (H5G_set, NULL, FAIL);
+   FUNC_ENTER (H5G_set, FAIL);
 
    if (NULL==(handle=H5G_open (f, name))) {
       /* Can't open group */
@@ -913,7 +862,7 @@ H5G_getcwg (H5F_t *f)
 {
    H5G_entry_t	*handle=NULL;
    
-   FUNC_ENTER (H5G_getcwg, NULL, NULL);
+   FUNC_ENTER (H5G_getcwg, NULL);
    
    if (f->cwg_stack && f->cwg_stack->handle) {
       handle = f->cwg_stack->handle;
@@ -955,7 +904,7 @@ H5G_push (H5F_t *f, const char *name)
    H5O_stab_t	stab_mesg;
    herr_t	ret_value = FAIL;
    
-   FUNC_ENTER (H5G_pushd, NULL, FAIL);
+   FUNC_ENTER (H5G_push, FAIL);
 
    if (NULL==(handle=H5G_open (f, name))) {
       /* Can't open group */
@@ -1009,7 +958,7 @@ H5G_pop (H5F_t *f)
 {
    H5G_cwgstk_t	*stack=NULL;
    
-   FUNC_ENTER (H5G_pop, NULL, FAIL);
+   FUNC_ENTER (H5G_pop, FAIL);
 
    if ((stack=f->cwg_stack)) {
       if (H5G_close (f, stack->handle)<0) {
@@ -1075,7 +1024,7 @@ H5G_create (H5F_t *f, const char *name, size_t ohdr_hint)
    size_t	nchars;			/*number of characters in name	*/
    char		_comp[1024];		/*name component		*/
    
-   FUNC_ENTER (H5G_create, NULL, NULL);
+   FUNC_ENTER (H5G_create, NULL);
 
    /* Check args. */
    assert (f);
@@ -1105,7 +1054,7 @@ H5G_create (H5F_t *f, const char *name, size_t ohdr_hint)
       if (H5F_addr_defined (&(f->shared->root_sym->header))) {
 	 HRETURN_ERROR (H5E_SYM, H5E_EXISTS, NULL); /*root exists*/
       }
-      if (H5O_new (f, 0, ohdr_hint, &(ent.header)/*out*/)<0) {
+      if (H5O_create (f, 0, ohdr_hint, &(ent.header)/*out*/)<0) {
 	 /* can't create header */
 	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL);
       }
@@ -1141,7 +1090,7 @@ H5G_create (H5F_t *f, const char *name, size_t ohdr_hint)
    /*
     * Create the object header.
     */
-   if (H5O_new (f, 0, ohdr_hint, &(ent.header)/*out*/)<0) {
+   if (H5O_create (f, 0, ohdr_hint, &(ent.header)/*out*/)<0) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL);
    }
    
@@ -1238,7 +1187,7 @@ H5G_open (H5F_t *f, const char *name)
    H5G_entry_t	grp;
    H5G_entry_t	*cwg=NULL;
    
-   FUNC_ENTER (H5G_open, NULL, NULL);
+   FUNC_ENTER (H5G_open, NULL);
 
    /* check args */
    assert (f);
@@ -1287,7 +1236,7 @@ H5G_open (H5F_t *f, const char *name)
 herr_t
 H5G_close (H5F_t *f, H5G_entry_t *ent)
 {
-   FUNC_ENTER (H5G_close, NULL, FAIL);
+   FUNC_ENTER (H5G_close, FAIL);
 
    assert (f);
 
@@ -1345,7 +1294,7 @@ H5G_find (H5F_t *f, const char *name,
    H5G_entry_t	*ent_p = NULL;
    H5G_entry_t	*cwg = NULL;
    
-   FUNC_ENTER (H5G_find, NULL, FAIL);
+   FUNC_ENTER (H5G_find, FAIL);
 
    /* check args */
    assert (f);

@@ -27,7 +27,17 @@ typedef enum {
    BADGROUP=(-1),   		/* Invalid Group */
    H5_ERR=0,                    /* Group ID for Error stack objects */
    H5_FILE,                     /* Group ID for File objects */
-   H5_TEMPLATE,                 /* Group ID for Template objects */
+   H5_TEMPLATE_0,               /* Group ID for Template objects */
+   H5_TEMPLATE_1,               /* Group ID for Template objects */
+   H5_TEMPLATE_2,               /* Group ID for Template objects */
+   H5_TEMPLATE_3,               /* Group ID for Template objects */
+   H5_TEMPLATE_4,               /* Group ID for Template objects */
+   H5_TEMPLATE_5,               /* Group ID for Template objects */
+   H5_TEMPLATE_6,               /* Group ID for Template objects */
+   H5_TEMPLATE_7,               /* Group ID for Template objects */
+#ifndef NDEBUG
+   H5_TEMPLATE_MAX, 		/* Not really a group ID */
+#endif
    H5_DATATYPE,                 /* Group ID for Datatype objects */
    H5_DATASPACE,                /* Group ID for Dataspace objects */
    H5_DATASET,                  /* Group ID for Dataset objects */
@@ -42,15 +52,16 @@ typedef int32 hid_t;
 typedef intn (*H5Asearch_func_t)(const VOIDP obj, const VOIDP key);
 
 /* # of bits to use for Group ID in each atom (change if MAXGROUP>16) */
-#define GROUP_BITS  4
-#define GROUP_MASK  0x0F
+#define GROUP_BITS  8
+#define GROUP_MASK  0xFF
 
 /* # of bits to use for the Atom index in each atom (assumes 8-bit bytes) */
 #define ATOM_BITS   ((sizeof(hid_t)*8)-GROUP_BITS)
 #define ATOM_MASK   0x0FFFFFFF
 
 /* Combine a Group number and an atom index into an atom */
-#define MAKE_ATOM(g,i)      ((((hid_t)(g)&GROUP_MASK)<<((sizeof(hid_t)*8)-GROUP_BITS))|((hid_t)(i)&ATOM_MASK))
+#define MAKE_ATOM(g,i)      ((((hid_t)(g)&GROUP_MASK)<<ATOM_BITS)|	\
+			     ((hid_t)(i)&ATOM_MASK))
 
 #ifdef __cplusplus
 extern "C" {
@@ -73,7 +84,7 @@ extern "C" {
 intn H5Ainit_group(group_t grp,     /* IN: Group to initialize */
     intn hash_size,                 /* IN: Minimum hash table size to use for group */
     uintn reserved,                 /* IN: Number of hash table entries to reserve */
-    void (*free_func)(void *)       /* IN: Function to call when releasing ref counted objects */
+    herr_t (*free_func)(void *)       /* IN: Function to call when releasing ref counted objects */
 );
 
 /******************************************************************************
@@ -111,21 +122,6 @@ intn H5Adestroy_group(group_t grp       /* IN: Group to destroy */
 *******************************************************************************/
 hid_t H5Aregister_atom(group_t grp,     /* IN: Group to register the object in */
     const void *object                    /* IN: Object to attach to atom */
-);
-
-/******************************************************************************
- NAME
-     H5Ainc_ref - Adds a reference to a reference counted atom.
-
- DESCRIPTION
-    Increments the number of references outstanding for an atom.  This will
-    fail if the group is not a reference counted group.
-
- RETURNS
-    SUCCEED/FAIL
-
-*******************************************************************************/
-intn H5Ainc_ref(hid_t atm   /* IN: Atom to increment reference count for */
 );
 
 /******************************************************************************
@@ -170,22 +166,6 @@ group_t H5Aatom_group(hid_t atm   /* IN: Atom to retrieve group for */
 VOIDP H5Aremove_atom(hid_t atm   /* IN: Atom to remove */
 );
 
-/******************************************************************************
- NAME
-     H5Adec_ref - Decrements a reference to a reference counted atom.
-
- DESCRIPTION
-    Decrements the number of references outstanding for an atom.  This will
-    fail if the group is not a reference counted group.  The atom group's
-    'free' function will be called for the atom if the reference count for the
-    atom reaches 0.
-
- RETURNS
-    SUCCEED/FAIL
-
-*******************************************************************************/
-intn H5Adec_ref(hid_t atm   /* IN: Atom to decrement reference count for */
-);
 
 /******************************************************************************
  NAME

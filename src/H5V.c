@@ -14,6 +14,7 @@
 #define H5V_HYPER_NDIMS	H5O_ISTORE_NDIMS
 #define PABLO_MASK	H5V_mask
 static hbool_t		interface_initialize_g = TRUE;
+#define INTERFACE_INIT	NULL
 
 static herr_t H5V_stride_optimize1 (size_t *np, size_t *elmt_size,
 				    size_t *size, intn *stride1);
@@ -48,7 +49,7 @@ static herr_t
 H5V_stride_optimize1 (size_t *np, size_t *elmt_size, size_t *size, 
 		      intn *stride1)
 {
-   FUNC_ENTER (H5V_stride_optimize1, NULL, FAIL);
+   FUNC_ENTER (H5V_stride_optimize1, FAIL);
    
    /*
     * This has to be true because if we optimize the dimensionality down to
@@ -97,7 +98,7 @@ static herr_t
 H5V_stride_optimize2 (size_t *np, size_t *elmt_size, size_t *size, 
 		      intn *stride1, intn *stride2)
 {
-   FUNC_ENTER (H5V_stride_optimize2, NULL, FAIL);
+   FUNC_ENTER (H5V_stride_optimize2, FAIL);
    
    /*
     * This has to be true because if we optimize the dimensionality down to
@@ -154,7 +155,7 @@ H5V_hyper_stride (size_t n, const size_t *size,
    size_t	acc;		/*accumulator				*/
    int		i;		/*counter				*/
    
-   FUNC_ENTER (H5V_hyper_stride, NULL, (abort(),0));
+   FUNC_ENTER (H5V_hyper_stride, (abort(),0));
 
    assert (n>=0 && n<H5V_HYPER_NDIMS);
    assert (size);
@@ -302,7 +303,7 @@ H5V_hyper_fill (size_t n, const size_t *_size,
    int		i;
 #endif
 
-   FUNC_ENTER (H5V_hyper_fill, NULL, FAIL);
+   FUNC_ENTER (H5V_hyper_fill, FAIL);
 
    /* check args */
    assert (n>0 && n<=H5V_HYPER_NDIMS);
@@ -388,7 +389,7 @@ H5V_hyper_copy (size_t n, const size_t *_size,
    intn		i;
 #endif
 
-   FUNC_ENTER (H5V_hyper_copy, NULL, FAIL);
+   FUNC_ENTER (H5V_hyper_copy, FAIL);
 
    /* check args */
    assert (n>0 && n<=H5V_HYPER_NDIMS);
@@ -451,7 +452,7 @@ H5V_stride_fill (size_t n, size_t elmt_size, const size_t *size,
    intn		i, j;			/*counters			*/
    hbool_t	carry;			/*subtraction carray value	*/
 
-   FUNC_ENTER (H5V_stride_fill, NULL, FAIL);
+   FUNC_ENTER (H5V_stride_fill, FAIL);
 
    H5V_vector_cpy (n, idx, size);
    nelmts = H5V_vector_reduce_product (n, size);
@@ -509,7 +510,7 @@ H5V_stride_copy (size_t n, size_t elmt_size, const size_t *size,
    intn		i, j;				/*counters		*/
    hbool_t	carry;				/*carray for subtraction*/
 
-   FUNC_ENTER (H5V_stride_copy, NULL, FAIL);
+   FUNC_ENTER (H5V_stride_copy, FAIL);
 
    H5V_vector_cpy (n, idx, size);
    nelmts = H5V_vector_reduce_product (n, size);
@@ -570,7 +571,7 @@ H5V_stride_copy2 (size_t nelmts, size_t elmt_size,
    intn		i, j;
    hbool_t	carry;
    
-   FUNC_ENTER (H5V_stride_copy2, NULL, FAIL);
+   FUNC_ENTER (H5V_stride_copy2, FAIL);
 
    H5V_vector_cpy (dst_n, dst_idx, dst_size);
    H5V_vector_cpy (src_n, src_idx, src_size);

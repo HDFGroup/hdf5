@@ -19,6 +19,7 @@
 
 #define PABLO_MASK	H5F_sec2
 static hbool_t interface_initialize_g = FALSE;
+#define INTERFACE_INIT	NULL
 
 static H5F_low_t *H5F_stdio_open (const char *name, uintn flags,
 				  H5F_search_t *key);
@@ -73,7 +74,7 @@ H5F_stdio_open (const char *name, uintn flags, H5F_search_t *key/*out*/)
    FILE		*f=NULL;
    struct stat	sb;
 
-   FUNC_ENTER (H5F_stdio_open, NULL, NULL);
+   FUNC_ENTER (H5F_stdio_open, NULL);
 
    if (access (name, F_OK)<0) {
       if ((flags & H5F_ACC_CREAT) && (flags & H5F_ACC_WRITE)) {
@@ -141,7 +142,7 @@ H5F_stdio_open (const char *name, uintn flags, H5F_search_t *key/*out*/)
 static herr_t
 H5F_stdio_close (H5F_low_t *lf)
 {
-   FUNC_ENTER (H5F_stdio_close, NULL, FAIL);
+   FUNC_ENTER (H5F_stdio_close, FAIL);
 
    if (fclose (lf->u.stdio.f)<0) {
       HRETURN_ERROR (H5E_IO, H5E_CLOSEERROR, FAIL); /*close failed*/
@@ -180,7 +181,7 @@ H5F_stdio_read (H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
    size_t	n;
    off_t	offset;
    
-   FUNC_ENTER (H5F_stdio_read, NULL, FAIL);
+   FUNC_ENTER (H5F_stdio_read, FAIL);
 
    /* Check for overflow */
    offset = addr->offset;
@@ -264,7 +265,7 @@ H5F_stdio_write (H5F_low_t *lf, const haddr_t *addr, size_t size,
 {
    off_t	offset;
 
-   FUNC_ENTER (H5F_stdio_write, NULL, FAIL);
+   FUNC_ENTER (H5F_stdio_write, FAIL);
 
    /* Check for overflow */
    offset = addr->offset;
@@ -324,7 +325,7 @@ H5F_stdio_write (H5F_low_t *lf, const haddr_t *addr, size_t size,
 static herr_t
 H5F_stdio_flush (H5F_low_t *lf)
 {
-   FUNC_ENTER (H5F_stdio_flush, NULL, FAIL);
+   FUNC_ENTER (H5F_stdio_flush, FAIL);
 
    /*
     * What happens to the file position?  Is it guaranteed to be the same

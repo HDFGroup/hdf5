@@ -47,8 +47,9 @@ const H5O_class_t H5O_CONT[1] = {{
    H5O_cont_debug,			/*debugging			*/
 }};
 
-/* Is the interface initialized? */
+/* Interface initialization */
 static intn interface_initialize_g = FALSE;
+#define INTERFACE_INIT	NULL
 
 
 /*-------------------------------------------------------------------------
@@ -73,11 +74,11 @@ H5O_cont_decode (H5F_t *f, size_t raw_size, const uint8 *p)
 {
    H5O_cont_t	*cont = NULL;
    
-   FUNC_ENTER (H5O_cont_decode, NULL, NULL);
+   FUNC_ENTER (H5O_cont_decode, NULL);
 
    /* check args */
    assert (f);
-   assert (raw_size == H5F_SIZEOF_OFFSET(f) + H5F_SIZEOF_SIZE(f));
+   assert (raw_size == H5F_SIZEOF_ADDR(f) + H5F_SIZEOF_SIZE(f));
    assert (p);
 
    /* decode */
@@ -111,11 +112,11 @@ H5O_cont_encode (H5F_t *f, size_t size, uint8 *p, const void *_mesg)
 {
    const H5O_cont_t	*cont = (const H5O_cont_t *)_mesg;
 
-   FUNC_ENTER (H5O_cont_encode, NULL, FAIL);
+   FUNC_ENTER (H5O_cont_encode, FAIL);
 
    /* check args */
    assert (f);
-   assert (size == H5F_SIZEOF_OFFSET(f) + H5F_SIZEOF_SIZE(f));
+   assert (size == H5F_SIZEOF_ADDR(f) + H5F_SIZEOF_SIZE(f));
    assert (p);
    assert (cont);
 
@@ -150,7 +151,7 @@ H5O_cont_debug (H5F_t *f, const void *_mesg, FILE *stream,
 {
    const H5O_cont_t	*cont = (const H5O_cont_t *)_mesg;
    
-   FUNC_ENTER (H5O_cont_debug, NULL, FAIL);
+   FUNC_ENTER (H5O_cont_debug, FAIL);
 
    /* check args */
    assert (f);

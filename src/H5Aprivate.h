@@ -81,9 +81,12 @@ typedef struct atom_group_struct_tag {
     intn hash_size;         /* size of the hash table to store the atoms in */
     uintn atoms;            /* current number of atoms held */
     uintn nextid;           /* atom ID to use for the next atom */
-    void (*free_func)(void *);   /* Pointer to function to call when releasing ref counted object */
+    herr_t (*free_func)(void *);   /* Pointer to function to call when releasing ref counted object */
     atom_info_t **atom_list;/* pointer to an array of ptrs to atoms */
   }atom_group_t;
+
+intn H5A_dec_ref (hid_t atm);
+hid_t H5A_inc_ref (hid_t atm);
 
 #endif
 

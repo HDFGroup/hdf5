@@ -37,9 +37,7 @@ hbool_t H5Fis_hdf5(const char *filename);
 hid_t H5Fcreate(const char *filename, uintn flags, hid_t create_template, hid_t access_template);
 hid_t H5Fopen(const char *filename, uintn flags, hid_t access_template);
 herr_t H5Fclose(hid_t fid);
-herr_t H5Fflush (hid_t fid, hbool_t invalidate);
-hid_t H5Fget_create_template(hid_t fid);
-void H5F_term_interface (void);
+hid_t H5Fget_create_template (hid_t fid);
 
 #ifdef __cplusplus
 }

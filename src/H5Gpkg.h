@@ -21,7 +21,7 @@
 
 #define H5G_NODE_VERS	1	/*symbol table node version number	*/
 #define H5G_SIZE_HINT	1024	/*default root grp size hint		*/
-#define H5G_NODE_K(F) ((F)->shared->file_create_parms.sym_leaf_k)
+#define H5G_NODE_K(F) ((F)->shared->create_parms.sym_leaf_k)
 #define H5G_NODE_SIZEOF_HDR(F) (H5G_NODE_SIZEOF_MAGIC + 4)
 #define H5G_DEFAULT_ROOT_SIZE  32
 
@@ -158,7 +158,7 @@ extern const H5AC_class_t H5AC_SNODE[1];
  * functions that understand names are exported to the rest of
  * the library and appear in H5Gprivate.h.
  */
-herr_t H5G_stab_new (H5F_t *f, H5G_entry_t *self, size_t init);
+herr_t H5G_stab_create (H5F_t *f, H5G_entry_t *self, size_t init);
 H5G_entry_t *H5G_stab_find (H5F_t *f, const haddr_t *addr, H5G_entry_t *self,
 			    const char *name);
 H5G_entry_t *H5G_stab_insert (H5F_t *f, H5G_entry_t *self,

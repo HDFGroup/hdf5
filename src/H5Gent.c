@@ -13,8 +13,8 @@
 #include <H5MMprivate.h>
 
 #define PABLO_MASK	H5G_ent_mask
-
 static hbool_t interface_initialize_g = FALSE;
+#define INTERFACE_INIT	NULL
 
 
 /*-------------------------------------------------------------------------
@@ -64,7 +64,7 @@ H5G_ent_calloc (void)
 herr_t
 H5G_ent_invalidate (H5G_entry_t *ent)
 {
-   FUNC_ENTER (H5G_ent_invalidate, NULL, FAIL);
+   FUNC_ENTER (H5G_ent_invalidate, FAIL);
    
    if (ent && H5G_NOTHING_CACHED!=ent->type) {
       ent->dirty = TRUE;
@@ -97,7 +97,7 @@ H5G_ent_invalidate (H5G_entry_t *ent)
 herr_t
 H5G_ent_addr (H5G_entry_t *ent, haddr_t *addr/*out*/)
 {
-   FUNC_ENTER (H5G_ent_addr, NULL, FAIL);
+   FUNC_ENTER (H5G_ent_addr, FAIL);
    
    assert (ent);
    *addr = ent->header;
@@ -128,7 +128,7 @@ H5G_ent_addr (H5G_entry_t *ent, haddr_t *addr/*out*/)
 H5G_cache_t *
 H5G_ent_cache (H5G_entry_t *ent, H5G_type_t *cache_type)
 {
-   FUNC_ENTER (H5G_ent_cache, NULL, NULL);
+   FUNC_ENTER (H5G_ent_cache, NULL);
    if (!ent) {
       HRETURN_ERROR (H5E_SYM, H5E_BADVALUE, NULL);
    }
@@ -162,7 +162,7 @@ H5G_ent_cache (H5G_entry_t *ent, H5G_type_t *cache_type)
 herr_t
 H5G_ent_modified (H5G_entry_t *ent, H5G_type_t cache_type)
 {
-   FUNC_ENTER (H5G_ent_modified, NULL, FAIL);
+   FUNC_ENTER (H5G_ent_modified, FAIL);
    assert (ent);
    if (H5G_NO_CHANGE!=ent->type) ent->type = cache_type;
    ent->dirty = TRUE;
@@ -197,7 +197,7 @@ H5G_ent_decode_vec (H5F_t *f, const uint8 **pp, H5G_entry_t *ent, intn n)
 {
    intn		i;
 
-   FUNC_ENTER (H5G_ent_decode_vec, NULL, FAIL);
+   FUNC_ENTER (H5G_ent_decode_vec, FAIL);
 
    /* check arguments */
    assert (f);
@@ -241,7 +241,7 @@ H5G_ent_decode (H5F_t *f, const uint8 **pp, H5G_entry_t *ent)
 {
    const uint8	*p_ret = *pp;
 
-   FUNC_ENTER (H5G_ent_decode, NULL, FAIL);
+   FUNC_ENTER (H5G_ent_decode, FAIL);
 
    /* check arguments */
    assert (f);
@@ -258,20 +258,17 @@ H5G_ent_decode (H5F_t *f, const uint8 **pp, H5G_entry_t *ent)
    case H5G_NOTHING_CACHED:
       break;
 
-   case H5G_CACHED_SDATA:
-      assert (1+1+2+(5*4) <= H5G_SIZEOF_SCRATCH);
-      ent->cache.sdata.nt.length= *(*pp)++;
-      ent->cache.sdata.nt.arch= *(*pp)++;
-      UINT16DECODE (*pp, ent->cache.sdata.nt.type);
-      UINT32DECODE (*pp, ent->cache.sdata.ndim);
-      UINT32DECODE (*pp, ent->cache.sdata.dim[0]);
-      UINT32DECODE (*pp, ent->cache.sdata.dim[1]);
-      UINT32DECODE (*pp, ent->cache.sdata.dim[2]);
-      UINT32DECODE (*pp, ent->cache.sdata.dim[3]);
+   case H5G_CACHED_SDSPACE:
+      assert (5*4 <= H5G_SIZEOF_SCRATCH);
+      UINT32DECODE (*pp, ent->cache.sdspace.ndim);
+      UINT32DECODE (*pp, ent->cache.sdspace.dim[0]);
+      UINT32DECODE (*pp, ent->cache.sdspace.dim[1]);
+      UINT32DECODE (*pp, ent->cache.sdspace.dim[2]);
+      UINT32DECODE (*pp, ent->cache.sdspace.dim[3]);
       break;
 
    case H5G_CACHED_STAB:
-      assert (2*H5F_SIZEOF_OFFSET (f) <= H5G_SIZEOF_SCRATCH);
+      assert (2*H5F_SIZEOF_ADDR (f) <= H5G_SIZEOF_SCRATCH);
       H5F_addr_decode (f, pp, &(ent->cache.stab.btree_addr));
       H5F_addr_decode (f, pp, &(ent->cache.stab.heap_addr));
       break;
@@ -312,7 +309,7 @@ H5G_ent_encode_vec (H5F_t *f, uint8 **pp, H5G_entry_t *ent, intn n)
 {
    intn		i;
 
-   FUNC_ENTER (H5G_ent_encode_vec, NULL, FAIL);
+   FUNC_ENTER (H5G_ent_encode_vec, FAIL);
 
    /* check arguments */
    assert (f);
@@ -362,7 +359,7 @@ H5G_ent_encode (H5F_t *f, uint8 **pp, H5G_entry_t *ent)
 {
    uint8	*p_ret = *pp + H5G_SIZEOF_ENTRY(f);
 
-   FUNC_ENTER (H5G_ent_encode, NULL, FAIL);
+   FUNC_ENTER (H5G_ent_encode, FAIL);
 
    /* check arguments */
    assert (f);
@@ -379,20 +376,17 @@ H5G_ent_encode (H5F_t *f, uint8 **pp, H5G_entry_t *ent)
    case H5G_NOTHING_CACHED:
       break;
 
-   case H5G_CACHED_SDATA:
-      assert (1+1+2+(5*4) <= H5G_SIZEOF_SCRATCH);
-      *(*pp)++= ent->cache.sdata.nt.length;
-      *(*pp)++= ent->cache.sdata.nt.arch;
-      UINT16ENCODE (*pp, ent->cache.sdata.nt.type);
-      UINT32ENCODE (*pp, ent->cache.sdata.ndim);
-      UINT32ENCODE (*pp, ent->cache.sdata.dim[0]);
-      UINT32ENCODE (*pp, ent->cache.sdata.dim[1]);
-      UINT32ENCODE (*pp, ent->cache.sdata.dim[2]);
-      UINT32ENCODE (*pp, ent->cache.sdata.dim[3]);
+   case H5G_CACHED_SDSPACE:
+      assert (5*4 <= H5G_SIZEOF_SCRATCH);
+      UINT32ENCODE (*pp, ent->cache.sdspace.ndim);
+      UINT32ENCODE (*pp, ent->cache.sdspace.dim[0]);
+      UINT32ENCODE (*pp, ent->cache.sdspace.dim[1]);
+      UINT32ENCODE (*pp, ent->cache.sdspace.dim[2]);
+      UINT32ENCODE (*pp, ent->cache.sdspace.dim[3]);
       break;
 
    case H5G_CACHED_STAB:
-      assert (2*H5F_SIZEOF_OFFSET (f) <= H5G_SIZEOF_SCRATCH);
+      assert (2*H5F_SIZEOF_ADDR (f) <= H5G_SIZEOF_SCRATCH);
       H5F_addr_encode (f, pp, &(ent->cache.stab.btree_addr));
       H5F_addr_encode (f, pp, &(ent->cache.stab.heap_addr));
       break;
@@ -435,7 +429,7 @@ H5G_ent_debug (H5F_t *f, H5G_entry_t *ent, FILE *stream, intn indent,
    int		i;
    char		buf[64];
    
-   FUNC_ENTER (H5G_ent_debug, NULL, FAIL);
+   FUNC_ENTER (H5G_ent_debug, FAIL);
 
    fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	    "Name offset into private heap:",
@@ -461,25 +455,16 @@ H5G_ent_debug (H5F_t *f, H5G_entry_t *ent, FILE *stream, intn indent,
       fprintf (stream, "Nothing Cached\n");
       break;
 	 
-   case H5G_CACHED_SDATA:
-      fprintf (stream, "S-data\n");
-      fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
-	       "Number type length:",
-	       (unsigned)(ent->cache.sdata.nt.length));
-      fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
-	       "Number type architecture:",
-	       (unsigned)(ent->cache.sdata.nt.arch));
-      fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
-	       "Number type type:",
-	       (unsigned)(ent->cache.sdata.nt.type));
+   case H5G_CACHED_SDSPACE:
+      fprintf (stream, "Simple data space\n");
       fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
 	       "Dimensionality:",
-	       (unsigned)(ent->cache.sdata.ndim));
-      for (i=0; i<ent->cache.sdata.ndim && i<4; i++) {
+	       (unsigned)(ent->cache.sdspace.ndim));
+      for (i=0; i<ent->cache.sdspace.ndim && i<4; i++) {
 	 sprintf (buf, "Dimension %d", i);
 	 fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
 		  buf,
-		  (unsigned)(ent->cache.sdata.dim[i]));
+		  (unsigned)(ent->cache.sdspace.dim[i]));
       }
       break;
 	 

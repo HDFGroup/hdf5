@@ -62,11 +62,38 @@ static char RcsId[] = "@(#)$Revision$";
 
 /*--------------------- Locally scoped variables -----------------------------*/
 
-/* Whether we've installed the library termination function yet for this interface */
-static intn interface_initialize_g = FALSE;
+/*
+ * Define the default file creation template.
+ */
+const H5F_create_t H5F_create_dflt = {
+    0,      			/* Default user-block size */
+    4,				/* Default 1/2 rank for symtab leaf nodes */
+    {				/* Default 1/2 rank for btree intern nodes*/
+       16, 			/* Symbol table internal nodes		*/
+       32, 			/* Indexed storage internal nodes	*/
+       0,			/* unused				*/
+       0,			/* unused				*/
+       0,			/* unused				*/
+       0,			/* unused				*/
+       0,			/* unused				*/
+       0,			/* unused				*/
+    },
+    4,     			/* Default offset size */
+    4,     			/* Default length size */
+    HDF5_BOOTBLOCK_VERSION,     /* Current Boot-Block version # */
+    HDF5_SMALLOBJECT_VERSION,   /* Current Small-Object heap version # */
+    HDF5_FREESPACE_VERSION,     /* Current Free-Space info version # */
+    HDF5_OBJECTDIR_VERSION,     /* Current Object Directory info version # */
+    HDF5_SHAREDHEADER_VERSION,  /* Current Shared-Header format version # */
+};
 
-/*--------------------- Local function prototypes ----------------------------*/
+/* Interface initialization */
+static intn interface_initialize_g = FALSE;
+#define INTERFACE_INIT H5F_init_interface
 static herr_t H5F_init_interface(void);
+static void H5F_term_interface (void);
+
+/* PRIVATE PROTOTYPES */
 static H5F_t *H5F_new (H5F_file_t *shared);
 static H5F_t *H5F_dest (H5F_t *f);
 static herr_t H5F_flush (H5F_t *f, hbool_t invalidate);
@@ -94,7 +121,7 @@ Modifications:
 static herr_t H5F_init_interface(void)
 {
     herr_t ret_value = SUCCEED;
-    FUNC_ENTER (H5F_init_interface, NULL, FAIL);
+    FUNC_ENTER (H5F_init_interface, FAIL);
 
     /* Initialize the atom group for the file IDs */
     if((ret_value=H5Ainit_group(H5_FILE,H5A_FILEID_HASHSIZE,0,NULL))!=FAIL)
@@ -120,10 +147,11 @@ static herr_t H5F_init_interface(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-void H5F_term_interface (void)
+static void
+H5F_term_interface (void)
 {
     H5Adestroy_group(H5_FILE);
-} /* end H5F_term_interface() */
+}
 
 /*--------------------------------------------------------------------------
  NAME
@@ -171,37 +199,6 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-       H5F_compare_files -- compare file objects for the atom API
- USAGE
-       intn HPcompare_filename(obj, key)
-       const VOIDP obj;             IN: pointer to the file record
-       const VOIDP key;             IN: pointer to the search key
-
- ERRORS
-
- RETURNS
-       TRUE if the key matches the obj, FALSE otherwise
- DESCRIPTION
-       Look inside the file record for the atom API and compare the the
-       keys.
---------------------------------------------------------------------------*/
-static intn
-H5F_compare_files (const VOIDP _obj, const VOIDP _key)
-{
-   const H5F_t		*obj = (const H5F_t *)_obj;
-   const H5F_search_t	*key = (const H5F_search_t *)_key;
-   int			ret_value = FALSE;
-   
-   FUNC_ENTER (H5F_compare_files, NULL, FALSE);
-
-   ret_value = (obj->shared->key.dev == key->dev &&
-		obj->shared->key.ino == key->ino);
-
-   FUNC_LEAVE (ret_value);
-}
-
-/*--------------------------------------------------------------------------
- NAME
     H5Fget_create_template
 
  PURPOSE
@@ -223,36 +220,64 @@ H5F_compare_files (const VOIDP _obj, const VOIDP _key)
         This function returns an atom with a copy of the template parameters
     used to create a file.
 --------------------------------------------------------------------------*/
-hid_t H5Fget_create_template(hid_t fid)
+hid_t
+H5Fget_create_template (hid_t fid)
 {
-    H5F_t *file=NULL;         /* file struct for file to close */
-    hid_t ret_value = FAIL;
+    H5F_t		*file = NULL;
+    hid_t		ret_value = FAIL;
+    H5F_create_t	*tmpl = NULL;
 
-    FUNC_ENTER(H5Fget_create_template, H5F_init_interface, FAIL);
-
-    /* Clear errors and check args and all the boring stuff. */
+    FUNC_ENTER (H5Fget_create_template, FAIL);
     H5ECLEAR;
 
-    /* Get the file structure */
-    if((file=H5Aatom_object(fid))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL); /*can't get file struct*/
+    /* check args */
+    if (H5_FILE!=H5Aatom_group (fid)) {
+       HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL); /*not a file*/
+    }
+    if (NULL==(file=H5Aatom_object (fid))) {
+       HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL); /*can't get file struct*/
+    }
 
     /* Create the template object to return */
-    if((ret_value=H5Mcreate(fid,H5_TEMPLATE,NULL))==FAIL)
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTCREATE, FAIL); /*can't create template*/
+    tmpl = H5MM_xmalloc (sizeof(H5F_create_t));
+    *tmpl = file->shared->create_parms;
+    if ((ret_value=H5C_create (H5C_FILE_CREATE, tmpl))<0) {
+       /* Can't register template */
+       HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL);
+    }
 
-    if(H5C_init(ret_value,&(file->shared->file_create_parms))==FAIL)
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL); /*can't init template*/
+    FUNC_LEAVE (ret_value);
+}
 
-done:
-  if(ret_value == FAIL)   
-    { /* Error condition cleanup */
+/*--------------------------------------------------------------------------
+ NAME
+       H5F_compare_files -- compare file objects for the atom API
+ USAGE
+       intn HPcompare_filename(obj, key)
+       const VOIDP obj;             IN: pointer to the file record
+       const VOIDP key;             IN: pointer to the search key
 
-    } /* end if */
+ ERRORS
 
-    /* Normal function cleanup */
+ RETURNS
+       TRUE if the key matches the obj, FALSE otherwise
+ DESCRIPTION
+       Look inside the file record for the atom API and compare the the
+       keys.
+--------------------------------------------------------------------------*/
+static intn
+H5F_compare_files (const VOIDP _obj, const VOIDP _key)
+{
+   const H5F_t		*obj = (const H5F_t *)_obj;
+   const H5F_search_t	*key = (const H5F_search_t *)_key;
+   int			ret_value = FALSE;
+   
+   FUNC_ENTER (H5F_compare_files, FALSE);
 
-    FUNC_LEAVE(ret_value);
+   ret_value = (obj->shared->key.dev == key->dev &&
+		obj->shared->key.ino == key->ino);
+
+   FUNC_LEAVE (ret_value);
 }
 
 
@@ -282,7 +307,7 @@ H5F_locate_signature (H5F_low_t *f_handle, haddr_t *addr/*out*/)
    uint8	buf[H5F_SIGNATURE_LEN];
    uintn	n=9;
    
-   FUNC_ENTER (H5F_locate_signature, H5F_init_interface, FAIL);
+   FUNC_ENTER (H5F_locate_signature, FAIL);
 
    H5F_low_size (f_handle, &max_addr);
    H5F_addr_reset (addr);
@@ -327,7 +352,7 @@ hbool_t H5Fis_hdf5(const char *filename)
     haddr_t addr;		/* Address of file signature & header */
     hbool_t ret_value = BFALSE;
 
-    FUNC_ENTER(H5Fis_hdf5, H5F_init_interface, BFAIL);
+    FUNC_ENTER(H5Fis_hdf5, BFAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -377,7 +402,7 @@ static H5F_t *
 H5F_new (H5F_file_t *shared)
 {
    H5F_t	*f = NULL;
-   FUNC_ENTER (H5F_new, H5F_init_interface, NULL);
+   FUNC_ENTER (H5F_new, NULL);
 
    f = H5MM_xcalloc (1, sizeof(H5F_t));
    f->shared = shared;
@@ -391,7 +416,7 @@ H5F_new (H5F_file_t *shared)
       H5F_addr_undef (&(f->shared->hdf5_eof));
 
       /* Create a main cache */
-      H5AC_new (f, H5AC_NSLOTS);
+      H5AC_create (f, H5AC_NSLOTS);
 
       /* Create the shadow hash table */
       f->shared->nshadows = H5G_NSHADOWS;
@@ -433,7 +458,7 @@ H5F_new (H5F_file_t *shared)
 static H5F_t *
 H5F_dest (H5F_t *f)
 {
-   FUNC_ENTER (H5F_dest, H5F_init_interface, NULL);
+   FUNC_ENTER (H5F_dest, NULL);
    
    if (f) {
       if (0 == --(f->shared->nrefs)) {
@@ -546,7 +571,7 @@ H5F_dest (H5F_t *f)
  */
 H5F_t *
 H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
-	  const file_create_temp_t *create_parms)
+	  const H5F_create_t *create_parms)
 {
    H5F_t	*f = NULL;		/*return value			*/
    H5F_t	*ret_value = NULL;	/*a copy of `f'			*/
@@ -559,11 +584,11 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
    const uint8	*p=NULL;		/*         ..and pointer into it*/
    size_t	fixed_size = 24;	/*size of fixed part of boot blk*/
    size_t	variable_size;		/*variable part of boot block	*/
-   file_create_temp_t *cp=NULL;		/*file creation parameters	*/
+   H5F_create_t	*cp=NULL;		/*file creation parameters	*/
    haddr_t	addr1, addr2;		/*temporary address		*/
    const char	*s = name;
    
-   FUNC_ENTER (H5F_open, H5F_init_interface, NULL);
+   FUNC_ENTER (H5F_open, NULL);
 
    assert (name && *name);
 
@@ -618,17 +643,7 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
    /*
     * If no file creation parameters are supplied then use defaults.
     */
-   if (!create_parms) {
-      hid_t create_temp = H5C_get_default_atom (H5_TEMPLATE);
-      if (create_temp<0) {
-	 /* Can't get default file create template id */
-	 HRETURN_ERROR (H5E_FILE, H5E_CANTINIT, NULL);
-      }
-      if (NULL==(create_parms=H5Aatom_object (create_temp))) {
-	 /* Can't unatomize default template id */
-	 HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL);
-      }
-   }
+   if (!create_parms) create_parms = &H5F_create_dflt;
    
    /*
     * Does the file exist?  If so, get the device and i-node values so we can
@@ -742,11 +757,9 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
     * first time this file is opened.
     */
    if (1==f->shared->nrefs) {
-      HDmemcpy (&(f->shared->file_create_parms),
-		create_parms,
-		sizeof(file_create_temp_t));
+      f->shared->create_parms = *create_parms;
    }
-   cp = &(f->shared->file_create_parms);
+   cp = &(f->shared->create_parms);
 
    /*
     * Read or write the file boot block.
@@ -760,7 +773,7 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
        */
       H5F_addr_reset (&(f->shared->boot_addr));
       H5F_addr_inc (&(f->shared->boot_addr),
-		    f->shared->file_create_parms.userblock_size);
+		    f->shared->create_parms.userblock_size);
       f->shared->base_addr = f->shared->boot_addr;
       
       f->shared->consist_flags = 0x03;
@@ -786,7 +799,7 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
        * user-defined data.
        */
       f->shared->base_addr = f->shared->boot_addr;
-      f->shared->file_create_parms.userblock_size=f->shared->base_addr.offset;
+      f->shared->create_parms.userblock_size=f->shared->base_addr.offset;
       
       /*
        * Decode the fixed size part of the boot block.  For each of the
@@ -866,8 +879,8 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
       assert (p-buf == fixed_size);
 
       /* Read the variable length part of the boot block... */
-      variable_size = H5F_SIZEOF_OFFSET (f) + /*global small obj heap*/
-		      H5F_SIZEOF_OFFSET (f) + /*global free list addr*/
+      variable_size = H5F_SIZEOF_ADDR (f) + /*global small obj heap*/
+		      H5F_SIZEOF_ADDR (f) + /*global free list addr*/
 		      H5F_SIZEOF_SIZE (f)   + /*logical file size*/
 		      H5G_SIZEOF_ENTRY (f);
       assert (variable_size <= sizeof buf);
@@ -990,12 +1003,12 @@ hid_t H5Fcreate(const char *filename, uintn flags, hid_t create_temp,
 		hid_t access_temp)
 {
     H5F_t	*new_file=NULL;     /* file struct for new file */
-    const file_create_temp_t *create_parms; /* pointer to the parameters to
+    const H5F_create_t *create_parms; /* pointer to the parameters to
 					     * use when creating the file
 					     */
     hid_t	ret_value = FAIL;
 
-    FUNC_ENTER(H5Fcreate, H5F_init_interface, FAIL);
+    FUNC_ENTER(H5Fcreate, FAIL);
     H5ECLEAR;
 
     /* Check/fix arguments */
@@ -1005,15 +1018,19 @@ hid_t H5Fcreate(const char *filename, uintn flags, hid_t create_temp,
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL); /*invalid flags*/
     flags = (H5F_ACC_WRITE | H5F_ACC_CREAT) |
             (H5ACC_OVERWRITE==flags ? H5F_ACC_TRUNC : H5F_ACC_EXCL);
-    if (0==create_temp)
-        create_temp = H5C_get_default_atom (H5_TEMPLATE);
-    if (NULL==(create_parms=H5Aatom_object(create_temp)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL); /*can't unatomize template*/
+    
+    if (create_temp<=0) {
+       create_parms = &H5F_create_dflt;
+    } else if (NULL==(create_parms=H5Aatom_object (create_temp))) {
+       HGOTO_ERROR (H5E_ATOM, H5E_BADATOM, FAIL); /*can't unatomize template*/
+    }
+    
 #ifdef LATER
-    if (0==access_temp)
-        access_temp = H5CPget_default_atom(H5_TEMPLATE);
-    if (NULL==(access_parms=H5Aatom_object(access_temp)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL); /*can't unatomize template*/
+    if (access_temp<=0) {
+       access_parms = &H5F_access_dflt;
+    } else if (NULL==(access_parms=H5Aatom_object (access_temp))) {
+       HGOTO_ERROR (H5E_ATOM, H5E_BADATOM, FAIL); /*can't unatomize template*/
+    }
 #endif
     
     /*
@@ -1086,7 +1103,7 @@ hid_t H5Fopen(const char *filename, uintn flags, hid_t access_temp)
     H5F_t	*new_file=NULL;     	/* file struct for new file */
     hid_t 	ret_value = FAIL;
 
-    FUNC_ENTER(H5Fopen, H5F_init_interface, FAIL);
+    FUNC_ENTER(H5Fopen, FAIL);
     H5ECLEAR;
 
     /* Check/fix arguments. */
@@ -1152,7 +1169,7 @@ H5F_flush (H5F_t *f, hbool_t invalidate)
    uint8	buf[2048], *p=buf;
    herr_t	shadow_flush;
    
-   FUNC_ENTER (H5F_flush, H5F_init_interface, FAIL);
+   FUNC_ENTER (H5F_flush, FAIL);
 
    /*
     * Nothing to do if the file is read only.  This determination is made at
@@ -1177,16 +1194,16 @@ H5F_flush (H5F_t *f, hbool_t invalidate)
    HDmemcpy (p, H5F_SIGNATURE, H5F_SIGNATURE_LEN);
    p += H5F_SIGNATURE_LEN;
    
-   *p++ = f->shared->file_create_parms.bootblock_ver;
-   *p++ = f->shared->file_create_parms.smallobject_ver;
-   *p++ = f->shared->file_create_parms.freespace_ver;
-   *p++ = f->shared->file_create_parms.objectdir_ver;
-   *p++ = f->shared->file_create_parms.sharedheader_ver;
-   *p++ = H5F_SIZEOF_OFFSET (f);
+   *p++ = f->shared->create_parms.bootblock_ver;
+   *p++ = f->shared->create_parms.smallobject_ver;
+   *p++ = f->shared->create_parms.freespace_ver;
+   *p++ = f->shared->create_parms.objectdir_ver;
+   *p++ = f->shared->create_parms.sharedheader_ver;
+   *p++ = H5F_SIZEOF_ADDR (f);
    *p++ = H5F_SIZEOF_SIZE (f);
    *p++ = 0; /*reserved*/
-   UINT16ENCODE (p, f->shared->file_create_parms.sym_leaf_k);
-   UINT16ENCODE (p, f->shared->file_create_parms.btree_k[H5B_SNODE_ID]);
+   UINT16ENCODE (p, f->shared->create_parms.sym_leaf_k);
+   UINT16ENCODE (p, f->shared->create_parms.btree_k[H5B_SNODE_ID]);
    UINT32ENCODE (p, f->shared->consist_flags);
    H5F_addr_encode (f, &p, &(f->shared->smallobj_addr));
    H5F_addr_encode (f, &p, &(f->shared->freespace_addr));
@@ -1218,58 +1235,6 @@ H5F_flush (H5F_t *f, hbool_t invalidate)
    FUNC_LEAVE (SUCCEED);
 }
 
-/*--------------------------------------------------------------------------
- NAME
-    H5Fflush
-
- PURPOSE
-    Flush all cached data to disk and optionally invalidates all cached
-    data.
-
- USAGE
-    herr_t H5Fflush(fid, invalidate)
-        hid_t fid;      	IN: File ID of file to close.
-        hbool_t invalidate;	IN: Invalidate all of the cache?
-
- ERRORS
-    ARGS      BADTYPE       Not a file atom. 
-    ATOM      BADATOM       Can't get file struct. 
-    CACHE     CANTFLUSH     Flush failed. 
-
- RETURNS
-    SUCCEED/FAIL
-
- DESCRIPTION
-        This function flushes all cached data to disk and, if INVALIDATE
-    is non-zero, removes cached objects from the cache so they must be
-    re-read from the file on the next access to the object.
-
- MODIFICATIONS:
---------------------------------------------------------------------------*/
-herr_t
-H5Fflush (hid_t fid, hbool_t invalidate)
-{
-   H5F_t	*file = NULL;
-
-   FUNC_ENTER (H5Fflush, H5F_init_interface, FAIL);
-   H5ECLEAR;
-
-   /* check arguments */
-   if (H5_FILE!=H5Aatom_group (fid)) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a file atom*/
-   }
-   if (NULL==(file=H5Aatom_object (fid))) {
-      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL); /*can't get file struct*/
-   }
-
-   /* do work */
-   if (H5F_flush (file, invalidate)<0) {
-      HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL); /*flush failed*/
-   }
-
-   FUNC_LEAVE (SUCCEED);
-}
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_close
@@ -1293,7 +1258,7 @@ H5F_close (H5F_t *f)
 {
    herr_t	ret_value = FAIL;
 
-   FUNC_ENTER (H5F_close, H5F_init_interface, FAIL);
+   FUNC_ENTER (H5F_close, FAIL);
 
    if (-2==(ret_value=H5F_flush (f, TRUE))) {
       /*objects are still open, but don't fail yet*/
@@ -1302,6 +1267,7 @@ H5F_close (H5F_t *f)
       HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL);
    }
    if (f->intent & H5F_ACC_DEBUG) H5AC_debug (f);
+
    H5F_low_close (f->shared->lf);
    H5F_dest (f);
 
@@ -1351,7 +1317,7 @@ herr_t H5Fclose(hid_t fid)
     H5F_t	*file=NULL;         /* file struct for file to close */
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER(H5Fclose, H5F_init_interface, FAIL);
+    FUNC_ENTER(H5Fclose, FAIL);
     H5ECLEAR;
 
     /* Check/fix arguments. */
@@ -1400,7 +1366,7 @@ H5F_block_read (H5F_t *f, const haddr_t *addr, size_t size, void *buf)
 {
    haddr_t	abs_addr;
    
-   FUNC_ENTER (H5F_block_read, H5F_init_interface, FAIL);
+   FUNC_ENTER (H5F_block_read, FAIL);
 
    if (0==size) return 0;
 
@@ -1441,11 +1407,11 @@ H5F_block_read (H5F_t *f, const haddr_t *addr, size_t size, void *buf)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_block_write (H5F_t *f, const haddr_t *addr, size_t size, void *buf)
+H5F_block_write (H5F_t *f, const haddr_t *addr, size_t size, const void *buf)
 {
    haddr_t	abs_addr;
    
-   FUNC_ENTER (H5F_block_write, H5F_init_interface, FAIL);
+   FUNC_ENTER (H5F_block_write, FAIL);
 
    if (0==size) return 0;
 
@@ -1492,7 +1458,7 @@ herr_t
 H5F_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
 	   intn fwidth)
 {
-   FUNC_ENTER (H5F_debug, H5F_init_interface, FAIL);
+   FUNC_ENTER (H5F_debug, FAIL);
 
    /* check args */
    assert (f);
@@ -1544,34 +1510,34 @@ H5F_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
    
    fprintf (stream, "%*s%-*s %lu bytes\n", indent, "", fwidth,
 	    "Size of user block:",
-	    (unsigned long)(f->shared->file_create_parms.userblock_size));
+	    (unsigned long)(f->shared->create_parms.userblock_size));
    fprintf (stream, "%*s%-*s %u bytes\n", indent, "", fwidth,
 	    "Size of file size_t type:",
-	    (unsigned)(f->shared->file_create_parms.sizeof_size));
+	    (unsigned)(f->shared->create_parms.sizeof_size));
    fprintf (stream, "%*s%-*s %u bytes\n", indent, "", fwidth,
 	    "Size of file haddr_t type:",
-	    (unsigned)(f->shared->file_create_parms.sizeof_addr));
+	    (unsigned)(f->shared->create_parms.sizeof_addr));
    fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
 	    "Symbol table leaf node 1/2 rank:",
-	    (unsigned)(f->shared->file_create_parms.sym_leaf_k));
+	    (unsigned)(f->shared->create_parms.sym_leaf_k));
    fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
 	    "Symbol table internal node 1/2 rank:",
-	    (unsigned)(f->shared->file_create_parms.btree_k[H5B_SNODE_ID]));
+	    (unsigned)(f->shared->create_parms.btree_k[H5B_SNODE_ID]));
    fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
 	    "Boot block version number:",
-	    (unsigned)(f->shared->file_create_parms.bootblock_ver));
+	    (unsigned)(f->shared->create_parms.bootblock_ver));
    fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
 	    "Small object heap version number:",
-	    (unsigned)(f->shared->file_create_parms.smallobject_ver));
+	    (unsigned)(f->shared->create_parms.smallobject_ver));
    fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
 	    "Free list version number:",
-	    (unsigned)(f->shared->file_create_parms.freespace_ver));
+	    (unsigned)(f->shared->create_parms.freespace_ver));
    fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
 	    "Object directory version number:",
-	    (unsigned)(f->shared->file_create_parms.objectdir_ver));
+	    (unsigned)(f->shared->create_parms.objectdir_ver));
    fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
 	    "Shared header version number:",
-	    (unsigned)(f->shared->file_create_parms.sharedheader_ver));
+	    (unsigned)(f->shared->create_parms.sharedheader_ver));
 
    fprintf (stream, "%*sRoot symbol table entry:\n", indent, "");
    H5G_ent_debug (f, f->shared->root_sym, stream, indent+3, MAX(0, fwidth-3));

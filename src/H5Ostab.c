@@ -50,8 +50,9 @@ const H5O_class_t H5O_STAB[1] = {{
    H5O_stab_debug,			/*debug the message		*/
 }};
 
-/* Is the interface initialized? */
+/* Interface initialization */
 static hbool_t interface_initialize_g = FALSE;
+#define INTERFACE_INIT	NULL
 
 
 /*-------------------------------------------------------------------------
@@ -77,11 +78,11 @@ H5O_stab_decode (H5F_t *f, size_t raw_size, const uint8 *p)
 {
    H5O_stab_t	*stab;
    
-   FUNC_ENTER (H5O_stab_decode, NULL, NULL);
+   FUNC_ENTER (H5O_stab_decode, NULL);
 
    /* check args */
    assert (f);
-   assert (raw_size == 2*H5F_SIZEOF_OFFSET(f));
+   assert (raw_size == 2*H5F_SIZEOF_ADDR(f));
    assert (p);
 
    /* decode */
@@ -115,11 +116,11 @@ H5O_stab_encode (H5F_t *f, size_t raw_size, uint8 *p, const void *_mesg)
 {
    const H5O_stab_t	*stab = (const H5O_stab_t *)_mesg;
 
-   FUNC_ENTER (H5O_stab_encode, NULL, FAIL);
+   FUNC_ENTER (H5O_stab_encode, FAIL);
 
    /* check args */
    assert (f);
-   assert (raw_size == 2 * H5F_SIZEOF_OFFSET(f));
+   assert (raw_size == 2 * H5F_SIZEOF_ADDR(f));
    assert (p);
    assert (stab);
 
@@ -155,7 +156,7 @@ H5O_stab_fast (const H5G_cache_t *cache, void *_mesg)
 {
    H5O_stab_t	*stab = (H5O_stab_t *)_mesg;
    
-   FUNC_ENTER (H5O_stab_fast, NULL, NULL);
+   FUNC_ENTER (H5O_stab_fast, NULL);
 
    /* check args */
    assert (cache);
@@ -194,7 +195,7 @@ H5O_stab_cache (H5G_type_t *cache_type, H5G_cache_t *cache, const void *_mesg)
    const H5O_stab_t	*stab = (const H5O_stab_t *)_mesg;
    hbool_t		modified = FALSE;
    
-   FUNC_ENTER (H5O_stab_cache, NULL, FAIL);
+   FUNC_ENTER (H5O_stab_cache, FAIL);
 
    /* check args */
    assert (cache_type);
@@ -246,7 +247,7 @@ H5O_stab_copy (const void *_mesg, void *_dest)
    const H5O_stab_t	*stab = (const H5O_stab_t *)_mesg;
    H5O_stab_t		*dest = (H5O_stab_t *)_dest;
    
-   FUNC_ENTER (H5O_stab_copy, NULL, NULL);
+   FUNC_ENTER (H5O_stab_copy, NULL);
 
    /* check args */
    assert (stab);
@@ -281,8 +282,8 @@ H5O_stab_copy (const void *_mesg, void *_dest)
 static size_t
 H5O_stab_size (H5F_t *f, const void *_mesg)
 {
-   FUNC_ENTER (H5O_stab_size, NULL, FAIL);
-   FUNC_LEAVE (2 * H5F_SIZEOF_OFFSET(f));
+   FUNC_ENTER (H5O_stab_size, FAIL);
+   FUNC_LEAVE (2 * H5F_SIZEOF_ADDR(f));
 }
 
 
@@ -309,7 +310,7 @@ H5O_stab_debug (H5F_t *f, const void *_mesg, FILE *stream, intn indent,
 {
    const H5O_stab_t	*stab = (const H5O_stab_t *)_mesg;
    
-   FUNC_ENTER (H5O_stab_debug, NULL, FAIL);
+   FUNC_ENTER (H5O_stab_debug, FAIL);
 
    /* check args */
    assert (f);

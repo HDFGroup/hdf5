@@ -47,8 +47,9 @@ const H5O_class_t H5O_NAME[1] = {{
    H5O_name_debug,			/*debug the message		*/
 }};
 
-/* Is the interface initialized? */
+/* Interface initialization */
 static hbool_t interface_initialize_g = FALSE;
+#define INTERFACE_INIT	NULL
 
 
 /*-------------------------------------------------------------------------
@@ -75,7 +76,7 @@ H5O_name_decode (H5F_t *f, size_t raw_size, const uint8 *p)
    H5O_name_t	*mesg;
    char		*s;
 
-   FUNC_ENTER (H5O_name_decode, NULL, NULL);
+   FUNC_ENTER (H5O_name_decode, NULL);
 
    /* check args */
    assert (f);
@@ -114,7 +115,7 @@ H5O_name_encode (H5F_t *f, size_t raw_size, uint8 *p, const void *_mesg)
    const H5O_name_t	*mesg = (const H5O_name_t *)_mesg;
    size_t		size;
 
-   FUNC_ENTER (H5O_name_encode, NULL, FAIL);
+   FUNC_ENTER (H5O_name_encode, FAIL);
 
    /* check args */
    assert (f);
@@ -157,7 +158,7 @@ H5O_name_copy (const void *_mesg, void *_dest)
    const H5O_name_t	*mesg = (const H5O_name_t *)_mesg;
    H5O_name_t		*dest = (H5O_name_t *)_dest;
 
-   FUNC_ENTER (H5O_name_copy, NULL, NULL);
+   FUNC_ENTER (H5O_name_copy, NULL);
 
    /* check args */
    assert (mesg);
@@ -197,7 +198,7 @@ H5O_name_size (H5F_t *f, const void *_mesg)
    const H5O_name_t	*mesg = (const H5O_name_t *)_mesg;
    size_t		size;
    
-   FUNC_ENTER (H5O_name_size, NULL, FAIL);
+   FUNC_ENTER (H5O_name_size, FAIL);
 
    /* check args */
    assert (f);
@@ -231,7 +232,7 @@ H5O_name_reset (void *_mesg)
 {
    H5O_name_t	*mesg = (H5O_name_t *)_mesg;
    
-   FUNC_ENTER (H5O_name_reset, NULL, FAIL);
+   FUNC_ENTER (H5O_name_reset, FAIL);
 
    /* check args */
    assert (mesg);
@@ -266,7 +267,7 @@ H5O_name_debug (H5F_t *f, const void *_mesg, FILE *stream,
 {
    const H5O_name_t	*mesg = (const H5O_name_t *)_mesg;
 
-   FUNC_ENTER (H5O_name_debug, NULL, FAIL);
+   FUNC_ENTER (H5O_name_debug, FAIL);
 
    /* check args */
    assert (f);

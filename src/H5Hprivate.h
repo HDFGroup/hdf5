@@ -29,7 +29,7 @@
    (H5H_SIZEOF_MAGIC +			/*heap signature		*/    \
     H5F_SIZEOF_SIZE (F) +		/*data size			*/    \
     H5F_SIZEOF_SIZE (F) +		/*free list head		*/    \
-    H5F_SIZEOF_OFFSET (F))		/*data address			*/
+    H5F_SIZEOF_ADDR (F))		/*data address			*/
    
 #define H5H_SIZEOF_FREE(F)						      \
    (H5F_SIZEOF_SIZE (F) +		/*ptr to next free block	*/    \
@@ -44,8 +44,8 @@ typedef enum H5H_type_t {
 /*
  * Library prototypes...
  */
-herr_t H5H_new (H5F_t *f, H5H_type_t type, size_t size_hint,
-		 haddr_t *addr/*out*/);
+herr_t H5H_create (H5F_t *f, H5H_type_t type, size_t size_hint,
+		   haddr_t *addr/*out*/);
 void *H5H_read (H5F_t *f, const haddr_t *addr, size_t offset, size_t size,
 		void *buf);
 const void *H5H_peek (H5F_t *f, const haddr_t *addr, size_t offset);

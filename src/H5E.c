@@ -41,9 +41,6 @@ static char RcsId[] = "@(#)$Revision$";
 
 /*-------------------- Locally scoped variables -----------------------------*/
 
-/* Is the interface initialized? */
-static intn interface_initialize_g = FALSE;
-
 static const hdf_maj_error_messages_t hdf_maj_error_messages[] =
 {
     {H5E_NONE_MAJOR,    "No error"},
@@ -110,11 +107,14 @@ static const hdf_min_error_messages_t hdf_min_error_messages[] =
     {H5E_LINK,		"Link count failure"},
 };
 
-/*--------------------- Globally scoped variables ---------------------------*/
+/* Interface initialization? */
+static intn interface_initialize_g = FALSE;
+#define INTERFACE_INIT H5E_init_interface
+static herr_t H5E_init_interface(void);
+
+
 int32 thrderrid;     	/* Thread-specific "global" error-handler ID */
 
-/*------------------_-- Local function prototypes ---------------------------*/
-static herr_t H5E_init_interface(void);
 
 /*--------------------------------------------------------------------------
 NAME
@@ -135,7 +135,7 @@ Modifications:
 static herr_t H5E_init_interface(void)
 {
     herr_t ret_value = SUCCEED;
-    FUNC_ENTER (H5E_init_interface, NULL, FAIL);
+    FUNC_ENTER (H5E_init_interface, FAIL);
 
     /* Initialize the atom group for the error stacks */
     if((ret_value=H5Ainit_group(H5_ERR,H5A_ERRSTACK_HASHSIZE,0,NULL))!=FAIL)
@@ -185,7 +185,7 @@ int32 H5Enew_err_stack(uintn initial_stack_size)
     H5E_errstack_t *new_stack=NULL;     /* Pointer to the new error stack */
     int32 ret_value = FAIL;
 
-    FUNC_ENTER(H5Enew_err_stack, H5E_init_interface,FAIL);
+    FUNC_ENTER(H5Enew_err_stack, FAIL);
 
     /* Allocate the stack header */
     if((new_stack=HDmalloc(sizeof(H5E_errstack_t)))==NULL)
@@ -234,7 +234,7 @@ intn H5Edelete_err_stack(int32 err_stack)
     H5E_errstack_t *old_stack=NULL;         /* Pointer to the new error stack */
     intn ret_value = SUCCEED;
 
-    FUNC_ENTER(H5Edelete_err_stack, H5E_init_interface,FAIL);
+    FUNC_ENTER(H5Edelete_err_stack, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     if (H5Aatom_group(err_stack)!=H5_ERR)
@@ -287,7 +287,7 @@ H5Eclear (int32 err_hand)
     H5E_errstack_t *err_stack=NULL; /* Pointer to the error stack to put value on */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER (H5Eclear, H5E_init_interface, FAIL);
+    FUNC_ENTER (H5Eclear, FAIL);
 
     /* Get the error stack for this error handler, initialized earlier in H5Enew_err_stack */
     if (H5Aatom_group(err_hand)!=H5_ERR)
@@ -341,7 +341,7 @@ H5E_store(int32 errid, hdf_maj_err_code_t maj, hdf_min_err_code_t min, const cha
     H5E_errstack_t *err_stack=NULL;     /* Pointer to the error stack to put value on */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER(H5E_store, H5E_init_interface,FAIL);
+    FUNC_ENTER(H5E_store, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5Eclear(errid);
@@ -407,7 +407,7 @@ H5Epush(hdf_maj_err_code_t maj, hdf_min_err_code_t min, const char *function_nam
     H5E_errstack_t *err_stack=NULL;     /* Pointer to the error stack to put value on */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER(H5Epush, H5E_init_interface,FAIL);
+    FUNC_ENTER(H5Epush, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     if (function_name==NULL || file_name==NULL || H5Aatom_group(thrderrid)!=H5_ERR)
@@ -453,7 +453,7 @@ H5E_push_func_t H5Eset_push(H5E_push_func_t func)
     H5E_errstack_t *err_stack=NULL;     /* Pointer to the error stack to put value on */
     H5E_push_func_t ret_value = NULL;
 
-    FUNC_ENTER(H5Eset_push, H5E_init_interface,NULL);
+    FUNC_ENTER(H5Eset_push, NULL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;

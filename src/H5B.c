@@ -131,12 +131,13 @@ static const H5AC_class_t H5AC_BT[1] = {{
    (herr_t(*)(H5F_t*,hbool_t,const haddr_t*,void*))H5B_flush,
 }};
 
-/* Is the H5B interface initialized? */
+/* Interface initialization? */
+#define INTERFACE_INIT NULL
 static interface_initialize_g = FALSE;
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B_new
+ * Function:	H5B_create
  *
  * Purpose:	Creates a new empty B-tree leaf node.  The UDATA pointer is
  *		passed as an argument to the sizeof_rkey() method for the
@@ -156,14 +157,14 @@ static interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B_new (H5F_t *f, const H5B_class_t *type, void *udata, haddr_t *retval)
+H5B_create (H5F_t *f, const H5B_class_t *type, void *udata, haddr_t *retval)
 {
    H5B_t	*bt=NULL;
    size_t	size, sizeof_rkey;
    size_t	total_native_keysize;
    intn		offset, i;
 
-   FUNC_ENTER (H5B_new, NULL, FAIL);
+   FUNC_ENTER (H5B_create, FAIL);
 
    /*
     * Check arguments.
@@ -202,7 +203,7 @@ H5B_new (H5F_t *f, const H5B_class_t *type, void *udata, haddr_t *retval)
     */
    for (i=0,offset=H5B_SIZEOF_HDR(f);
 	i<2*H5B_K(f,type);
-	i++,offset+=bt->sizeof_rkey+H5F_SIZEOF_OFFSET(f)) {
+	i++,offset+=bt->sizeof_rkey+H5F_SIZEOF_ADDR(f)) {
 
       bt->key[i].dirty = FALSE;
       bt->key[i].rkey = bt->page + offset;
@@ -258,7 +259,7 @@ H5B_load (H5F_t *f, const haddr_t *addr, const void *_type, void *udata)
    uint8		*p;
    H5B_t		*ret_value = NULL;
 
-   FUNC_ENTER (H5B_load, NULL, NULL);
+   FUNC_ENTER (H5B_load, NULL);
 
    /* Check arguments */
    assert (f);
@@ -312,7 +313,7 @@ H5B_load (H5F_t *f, const haddr_t *addr, const void *_type, void *udata)
 	 H5F_addr_decode (f, (const uint8**)&p, bt->child+i);
       } else {
 	 H5F_addr_undef (bt->child+i);
-	 p += H5F_SIZEOF_OFFSET(f);
+	 p += H5F_SIZEOF_ADDR(f);
       }
    }
 
@@ -358,7 +359,7 @@ H5B_flush (H5F_t *f, hbool_t destroy, const haddr_t *addr, H5B_t *bt)
    size_t	size = 0;
    uint8	*p = bt->page;
 
-   FUNC_ENTER (H5B_flush, NULL, FAIL);
+   FUNC_ENTER (H5B_flush, FAIL);
 
    /*
     * Check arguments.
@@ -408,7 +409,7 @@ H5B_flush (H5F_t *f, hbool_t destroy, const haddr_t *addr, H5B_t *bt)
 	 if (i<bt->ndirty) {
 	    H5F_addr_encode (f, &p, &(bt->child[i]));
 	 } else {
-	    p += H5F_SIZEOF_OFFSET(f);
+	    p += H5F_SIZEOF_ADDR(f);
 	 }
       }
 
@@ -469,7 +470,7 @@ H5B_find (H5F_t *f, const H5B_class_t *type, const haddr_t *addr, void *udata)
    intn		idx=-1, lt=0, rt, cmp=1;
    int		ret_value = FAIL;
 
-   FUNC_ENTER (H5B_find, NULL, FAIL);
+   FUNC_ENTER (H5B_find, FAIL);
 
    /*
     * Check arguments.
@@ -567,7 +568,7 @@ H5B_split (H5F_t *f, const H5B_class_t *type, H5B_t *old_bt,
    intn		i, k;
    size_t	recsize = 0;
 
-   FUNC_ENTER (H5B_split, NULL, FAIL);
+   FUNC_ENTER (H5B_split, FAIL);
 
    /*
     * Check arguments.
@@ -580,13 +581,13 @@ H5B_split (H5F_t *f, const H5B_class_t *type, H5B_t *old_bt,
     * Initialize variables.
     */
    assert (old_bt->nchildren == 2*H5B_K(f,type));
-   recsize = old_bt->sizeof_rkey + H5F_SIZEOF_OFFSET(f);
+   recsize = old_bt->sizeof_rkey + H5F_SIZEOF_ADDR(f);
    k = H5B_K(f,type);
 
    /*
     * Create the new B-tree node.
     */
-   if (H5B_new (f, type, udata, new_addr/*out*/)<0) {
+   if (H5B_create (f, type, udata, new_addr/*out*/)<0) {
       HGOTO_ERROR (H5E_BTREE, H5E_CANTINIT, FAIL);
    }
    if (NULL==(new_bt=H5AC_protect (f, H5AC_BT, new_addr, type, udata))) {
@@ -671,7 +672,7 @@ done:
 static herr_t
 H5B_decode_key (H5F_t *f, H5B_t *bt, intn idx)
 {
-   FUNC_ENTER (H5B_decode_key, NULL, FAIL);
+   FUNC_ENTER (H5B_decode_key, FAIL);
    
    bt->key[idx].nkey = bt->native + idx * bt->type->sizeof_nkey;
    if ((bt->type->decode)(f, bt, bt->key[idx].rkey,
@@ -702,7 +703,7 @@ H5B_decode_key (H5F_t *f, H5B_t *bt, intn idx)
 static herr_t
 H5B_decode_keys (H5F_t *f, H5B_t *bt, intn idx)
 {
-   FUNC_ENTER (H5B_decode_keys, NULL, FAIL);
+   FUNC_ENTER (H5B_decode_keys, FAIL);
 
    assert (f);
    assert (bt);
@@ -750,7 +751,7 @@ H5B_insert (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
    uint8 	*buf;
    H5B_ins_t	my_ins = H5B_INS_ERROR;
 
-   FUNC_ENTER (H5B_insert, NULL, FAIL);
+   FUNC_ENTER (H5B_insert, FAIL);
 
    /*
     * Check arguments.
@@ -891,12 +892,12 @@ H5B_insert_child (H5F_t *f, const H5B_class_t *type, H5B_t *bt,
    size_t	recsize;
    intn		i;
 
-   FUNC_ENTER (H5B_insert_child, NULL, FAIL);
+   FUNC_ENTER (H5B_insert_child, FAIL);
    assert (bt);
    assert (child);
 
    bt->dirty = TRUE;
-   recsize = bt->sizeof_rkey + H5F_SIZEOF_OFFSET(f);
+   recsize = bt->sizeof_rkey + H5F_SIZEOF_ADDR(f);
    
    if (H5B_INS_RIGHT==anchor) {
       /*
@@ -1005,7 +1006,7 @@ H5B_insert_helper (H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
    H5B_ins_t	my_ins = H5B_INS_ERROR;
    H5B_ins_t	ret_value = H5B_INS_ERROR;
 
-   FUNC_ENTER (H5B_insert_helper, NULL, H5B_INS_ERROR);
+   FUNC_ENTER (H5B_insert_helper, H5B_INS_ERROR);
 
    /*
     * Check arguments
@@ -1362,7 +1363,7 @@ H5B_list (H5F_t *f, const H5B_class_t *type, const haddr_t *addr, void *udata)
    intn		i;
    herr_t	ret_value = FAIL;
 
-   FUNC_ENTER (H5B_list, NULL, FAIL);
+   FUNC_ENTER (H5B_list, FAIL);
 
    /*
     * Check arguments.
@@ -1442,7 +1443,7 @@ H5B_nodesize (H5F_t *f, const H5B_class_t *type,
 {
    size_t	size;
    
-   FUNC_ENTER (H5B_nodesize, NULL, (size_t)0);
+   FUNC_ENTER (H5B_nodesize, (size_t)0);
 
    /*
     * Check arguments.
@@ -1463,7 +1464,7 @@ H5B_nodesize (H5F_t *f, const H5B_class_t *type,
     * Total node size.
     */
    size = (H5B_SIZEOF_HDR(f) +				/*node header	*/
-	   2 * H5B_K(f,type) * H5F_SIZEOF_OFFSET(f) +	/*child pointers*/
+	   2 * H5B_K(f,type) * H5F_SIZEOF_ADDR(f) +	/*child pointers*/
 	   (2*H5B_K(f,type)+1) * sizeof_rkey);		/*keys		*/
 
    FUNC_LEAVE (size);
@@ -1494,7 +1495,7 @@ H5B_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
    H5B_t		*bt = NULL;
    int			i;
 
-   FUNC_ENTER (H5B_debug, NULL, FAIL);
+   FUNC_ENTER (H5B_debug, FAIL);
 
    /*
     * Check arguments.
@@ -1596,7 +1597,7 @@ H5B_assert (H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
       struct child_t *next;
    } *head=NULL, *tail=NULL, *prev=NULL, *cur=NULL, *tmp=NULL;
 
-   FUNC_ENTER (H5B_assert, NULL, FAIL);
+   FUNC_ENTER (H5B_assert, FAIL);
    if (0==ncalls++) {
       fprintf (stderr, "HDF5-DIAG: debugging B-trees (expensive)\n");
    }

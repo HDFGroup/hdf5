@@ -25,6 +25,7 @@
 
 #define PABLO_MASK	H5F_sec2
 static hbool_t interface_initialize_g = FALSE;
+#define INTERFACE_INIT	NULL
 
 static H5F_low_t *H5F_sec2_open (const char *name, uintn flags, H5F_search_t*);
 static herr_t H5F_sec2_close (H5F_low_t *lf);
@@ -73,7 +74,7 @@ H5F_sec2_open (const char *name, uintn flags, H5F_search_t *key/*out*/)
    int			fd;
    struct stat		sb;
 
-   FUNC_ENTER (H5F_sec2_open, NULL, NULL);
+   FUNC_ENTER (H5F_sec2_open, NULL);
 
    oflags = (flags & H5F_ACC_WRITE) ? O_RDWR : O_RDONLY;
    oflags |= (flags & H5F_ACC_CREAT) ? O_CREAT : 0;
@@ -122,7 +123,7 @@ H5F_sec2_open (const char *name, uintn flags, H5F_search_t *key/*out*/)
 static herr_t
 H5F_sec2_close (H5F_low_t *lf)
 {
-   FUNC_ENTER (H5F_sec2_close, NULL, FAIL);
+   FUNC_ENTER (H5F_sec2_close, FAIL);
 
    if (close (lf->u.sec2.fd)<0) {
       HRETURN_ERROR (H5E_IO, H5E_CLOSEERROR, FAIL); /*close failed*/
@@ -161,7 +162,7 @@ H5F_sec2_read (H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
    ssize_t	n;
    off_t	offset;
    
-   FUNC_ENTER (H5F_sec2_read, NULL, FAIL);
+   FUNC_ENTER (H5F_sec2_read, FAIL);
 
 
    /* Check for overflow */
@@ -248,7 +249,7 @@ H5F_sec2_write (H5F_low_t *lf, const haddr_t *addr, size_t size,
 {
    off_t	offset;
    
-   FUNC_ENTER (H5F_sec2_write, NULL, FAIL);
+   FUNC_ENTER (H5F_sec2_write, FAIL);
 
    /* Check for overflow */
    offset = addr->offset;

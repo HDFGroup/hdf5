@@ -39,10 +39,10 @@
 #define H5B_SIZEOF_HDR(F)						      \
    (H5B_SIZEOF_MAGIC +		/*magic number				*/    \
     4 +				/*type, level, num entries		*/    \
-    2*H5F_SIZEOF_OFFSET(F))	/*left and right sibling addresses	*/
+    2*H5F_SIZEOF_ADDR(F))	/*left and right sibling addresses	*/
 
 #define H5B_K(F,TYPE)		/*K value given file and Btree subclass	*/    \
-   ((F)->shared->file_create_parms.btree_k[(TYPE)->id])
+   ((F)->shared->create_parms.btree_k[(TYPE)->id])
 
 typedef enum H5B_ins_t {
    H5B_INS_ERROR	=-1, 	/*error return value			*/
@@ -114,7 +114,7 @@ typedef struct H5B_t {
  */
 herr_t H5B_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
 		  intn fwidth, const H5B_class_t *type, void *udata);
-herr_t H5B_new (H5F_t *f, const H5B_class_t *type, void *udata, haddr_t*);
+herr_t H5B_create (H5F_t *f, const H5B_class_t *type, void *udata, haddr_t*);
 herr_t H5B_find (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
 		 void *udata);
 herr_t H5B_insert (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,

@@ -69,9 +69,6 @@ MODIFICATION HISTORY
 
 /*-------------------- Locally scoped variables -----------------------------*/
 
-/* Is the interface initialized? */
-static int interface_initialize_g = FALSE;
-
 #ifdef ATOMS_ARE_CACHED
 /* Array of pointers to atomic groups */
 static hid_t atom_id_cache[ATOM_CACHE_SIZE]={-1,-1,-1,-1};
@@ -84,11 +81,15 @@ static atom_group_t *atom_group_list[MAXGROUP]={NULL};
 /* Pointer to the atom node free list */
 static atom_info_t *atom_free_list=NULL;
 
+/* Interface initialialization? */
+static hbool_t interface_initialize_g = FALSE;
+#define INTERFACE_INIT H5A_init_interface
+static herr_t H5A_init_interface(void);
+
 /*--------------------- Local function prototypes ---------------------------*/
 static atom_info_t *H5A_find_atom(hid_t atm);
 static atom_info_t *H5A_get_atom_node(void);
 static herr_t H5A_release_atom_node(atom_info_t *atm);
-static herr_t H5A_init_interface(void);
 
 /*--------------------------------------------------------------------------
 NAME
@@ -103,7 +104,7 @@ DESCRIPTION
 static herr_t H5A_init_interface(void)
 {
     herr_t ret_value = SUCCEED;
-    FUNC_ENTER (H5A_init_interface, H5A_init_interface, FAIL);
+    FUNC_ENTER (H5A_init_interface, FAIL);
 
     /* Registers the cleanup routine with the exit chain */
     ret_value=H5_add_exit(&H5A_term_interface);
@@ -131,13 +132,13 @@ static herr_t H5A_init_interface(void)
 intn H5Ainit_group(group_t grp,      /* IN: Group to initialize */
     intn hash_size,                 /* IN: Minimum hash table size to use for group */
     uintn reserved,                 /* IN: Number of hash table entries to reserve */
-    void (*free_func)(void *)            /* IN: Function to call when releasing ref counted objects */
+    herr_t (*free_func)(void *)            /* IN: Function to call when releasing ref counted objects */
 )
 {
     atom_group_t *grp_ptr=NULL;     /* ptr to the atomic group */
     intn ret_value=SUCCEED;
 
-    FUNC_ENTER (H5Ainit_group, H5A_init_interface, FAIL);
+    FUNC_ENTER (H5Ainit_group, FAIL);
 
     if((grp<=BADGROUP || grp>=MAXGROUP) && hash_size>0)
         HGOTO_DONE(FAIL);
@@ -219,7 +220,7 @@ intn H5Adestroy_group(group_t grp       /* IN: Group to destroy */
     atom_group_t *grp_ptr=NULL;     /* ptr to the atomic group */
     intn ret_value=SUCCEED;
 
-    FUNC_ENTER (H5Adestroy_group, H5A_init_interface, FAIL);
+    FUNC_ENTER (H5Adestroy_group, FAIL);
 
     if(grp<=BADGROUP || grp>=MAXGROUP)
         HGOTO_DONE(FAIL);
@@ -285,7 +286,7 @@ hid_t H5Aregister_atom(group_t grp,     /* IN: Group to register the object in *
     uintn hash_loc;                 /* new item's hash table location */
     hid_t ret_value=SUCCEED;
 
-    FUNC_ENTER (H5Aregister_atom, H5A_init_interface, FAIL);
+    FUNC_ENTER (H5Aregister_atom, FAIL);
 
     if(grp<=BADGROUP || grp>=MAXGROUP)
         HGOTO_DONE(FAIL);
@@ -362,46 +363,39 @@ done:
 
 /******************************************************************************
  NAME
-     H5Ainc_ref - Adds a reference to a reference counted atom.
-
+     H5A_inc_ref - Adds a reference to a reference counted atom.
+    	IN: Atom to increment reference count for
  DESCRIPTION
     Increments the number of references outstanding for an atom.  This will
     fail if the group is not a reference counted group.
 
  RETURNS
-    SUCCEED/FAIL
+    atm/FAIL
 
 *******************************************************************************/
-intn H5Ainc_ref(hid_t atm   /* IN: Atom to increment reference count for */
-)
+hid_t
+H5A_inc_ref (hid_t atm)
 {
-    group_t grp=ATOM_TO_GROUP(atm); /* Group the object is in */
-    atom_group_t *grp_ptr=NULL;     /* ptr to the atomic group */
-    atom_info_t *atm_ptr=NULL;      /* ptr to the new atom */
-    intn ret_value=FAIL;
+   group_t	grp = ATOM_TO_GROUP (atm); 	/* Group the object is in */
+   atom_group_t *grp_ptr = NULL;		/* ptr to the atomic group */
+   atom_info_t	*atm_ptr = NULL;      		/* ptr to the new atom */
+   hid_t	ret_value=FAIL;
 
-    FUNC_ENTER (H5Ainc_ref, H5A_init_interface, FAIL);
+   FUNC_ENTER (H5A_inc_ref, FAIL);
 
-    grp_ptr=atom_group_list[grp];
-    if(grp_ptr==NULL || grp_ptr->count<=0 || grp_ptr->free_func==NULL)
-        HGOTO_DONE(FAIL);
+   grp_ptr = atom_group_list[grp];
+   if (grp_ptr==NULL || grp_ptr->count<=0 || grp_ptr->free_func==NULL) {
+      HRETURN (FAIL);
+   }
 
-    /* General lookup of the atom */
-    if((atm_ptr=H5A_find_atom(atm))!=NULL)
-      {
-        atm_ptr->count++;
-        ret_value=SUCCEED;
-      } /* end if */
+   /* General lookup of the atom */
+   if ((atm_ptr=H5A_find_atom(atm))!=NULL) {
+      atm_ptr->count++;
+      ret_value=atm;
+   }
 
-done:
-  if(ret_value == FAIL)   
-    { /* Error condition cleanup */
-
-    } /* end if */
-
-    /* Normal function cleanup */
-    FUNC_LEAVE(ret_value);
-}   /* end H5Ainc_ref() */
+   FUNC_LEAVE (ret_value);
+}
 
 /******************************************************************************
  NAME
@@ -423,7 +417,7 @@ VOIDP H5Aatom_object(hid_t atm   /* IN: Atom to retrieve object for */
     atom_info_t *atm_ptr=NULL;      /* ptr to the new atom */
     VOIDP ret_value=NULL;
 
-    FUNC_ENTER (H5Aatom_object, H5A_init_interface, NULL);
+    FUNC_ENTER (H5Aatom_object, NULL);
 
 #ifdef ATOMS_ARE_CACHED
     /* Look for the atom in the cache first */
@@ -479,7 +473,7 @@ group_t H5Aatom_group(hid_t atm   /* IN: Atom to retrieve group for */
 {
     group_t ret_value=BADGROUP;
 
-    FUNC_ENTER (H5Aatom_group, H5A_init_interface, FAIL);
+    FUNC_ENTER (H5Aatom_group, FAIL);
 
     ret_value=ATOM_TO_GROUP(atm);
     if(ret_value<=BADGROUP || ret_value>=MAXGROUP)
@@ -519,7 +513,7 @@ VOIDP H5Aremove_atom(hid_t atm   /* IN: Atom to remove */
 #endif /* ATOMS_ARE_CACHED */
     VOIDP ret_value=NULL;
 
-    FUNC_ENTER (H5Aremove_atom, H5A_init_interface, NULL);
+    FUNC_ENTER (H5Aremove_atom, NULL);
 
     grp=ATOM_TO_GROUP(atm);
     if(grp<=BADGROUP || grp>=MAXGROUP)
@@ -582,8 +576,8 @@ done:
 
 /******************************************************************************
  NAME
-     H5Adec_ref - Decrements a reference to a reference counted atom.
-
+     H5A_dec_ref - Decrements a reference to a reference counted atom.
+          IN: Atom to decrement reference count for
  DESCRIPTION
     Decrements the number of references outstanding for an atom.  This will
     fail if the group is not a reference counted group.  The atom group's
@@ -594,42 +588,37 @@ done:
     SUCCEED/FAIL
 
 *******************************************************************************/
-intn H5Adec_ref(hid_t atm   /* IN: Atom to decrement reference count for */
-)
+intn
+H5A_dec_ref (hid_t atm)
 {
-    group_t grp=ATOM_TO_GROUP(atm); /* Group the object is in */
-    atom_group_t *grp_ptr=NULL;     /* ptr to the atomic group */
-    atom_info_t *atm_ptr=NULL;      /* ptr to the new atom */
-    VOIDP obj;                      /* object to call 'free' function with */
-    intn ret_value=FAIL;
+   group_t	grp = ATOM_TO_GROUP(atm); /* Group the object is in */
+   atom_group_t *grp_ptr=NULL;     /* ptr to the atomic group */
+   atom_info_t	*atm_ptr=NULL;      /* ptr to the new atom */
+   VOIDP 	obj;                /* object to call 'free' function with */
+   intn		ret_value=FAIL;
 
-    FUNC_ENTER (H5Adec_ref, H5A_init_interface, FAIL);
+   FUNC_ENTER (H5A_dec_ref, FAIL);
 
-    grp_ptr=atom_group_list[grp];
-    if(grp_ptr==NULL || grp_ptr->count<=0 || grp_ptr->free_func==NULL)
-        HGOTO_DONE(FAIL);
+   grp_ptr = atom_group_list[grp];
+   if (grp_ptr==NULL || grp_ptr->count<=0 || grp_ptr->free_func==NULL) {
+      HRETURN (FAIL);
+   }
+   
+   /* General lookup of the atom */
+   if ((atm_ptr=H5A_find_atom(atm))!=NULL) {
+      /* Decrement the reference count */
+      atm_ptr->count--;
 
-    /* General lookup of the atom */
-    if((atm_ptr=H5A_find_atom(atm))!=NULL)
-      {
-        /* Decrement the reference count */
-        atm_ptr->count--;
+      /* If the reference count is zero, remove the object from the group */
+      if (0==atm_ptr->count && (obj=H5Aremove_atom(atm))!=NULL) {
+	 /* call the user's 'free' function for the atom's information */
+	 (*grp_ptr->free_func)(obj);
+      }
+      ret_value=SUCCEED;
+   }
 
-        /* If the reference count is zero, remove the object from the group */
-        if(atm_ptr->count==0 && (obj=H5Aremove_atom(atm))!=NULL)
-            (*grp_ptr->free_func)(obj); /* call the user's 'free' function for the atom's information */
-        ret_value=SUCCEED;
-      } /* end if */
-
-done:
-  if(ret_value == FAIL)   
-    { /* Error condition cleanup */
-
-    } /* end if */
-
-    /* Normal function cleanup */
-    FUNC_LEAVE(ret_value);
-}   /* end H5Adec_ref() */
+   FUNC_LEAVE (ret_value);
+}
 
 /******************************************************************************
  NAME
@@ -655,7 +644,7 @@ VOIDP H5Asearch_atom(group_t grp,        /* IN: Group to search for the object i
     intn i;                         /* local counting variable */
     VOIDP ret_value=NULL;
 
-    FUNC_ENTER (H5Asearch_atom, H5A_init_interface, NULL);
+    FUNC_ENTER (H5Asearch_atom, NULL);
 
     if(grp<=BADGROUP || grp>=MAXGROUP)
         HGOTO_DONE(NULL);
@@ -705,7 +694,7 @@ intn H5Ais_reserved(hid_t atm      /* IN: Group to search for the object in */
     group_t grp;                    /* atom's atomic group */
     hbool_t ret_value=BFAIL;
 
-    FUNC_ENTER (H5Ais_reserved, H5A_init_interface, FAIL);
+    FUNC_ENTER (H5Ais_reserved, FAIL);
 
     grp=ATOM_TO_GROUP(atm);
     if(grp<=BADGROUP || grp>=MAXGROUP)
@@ -751,7 +740,7 @@ static atom_info_t *H5A_find_atom(hid_t atm   /* IN: Atom to retrieve atom for *
     uintn hash_loc;                 /* atom's hash table location */
     atom_info_t *ret_value=NULL;
 
-    FUNC_ENTER (H5A_find_atom, H5A_init_interface, NULL);
+    FUNC_ENTER (H5A_find_atom, NULL);
 
     grp=ATOM_TO_GROUP(atm);
     if(grp<=BADGROUP || grp>=MAXGROUP)
@@ -807,7 +796,7 @@ static atom_info_t *H5A_get_atom_node(void)
 {
     atom_info_t *ret_value=NULL;
 
-    FUNC_ENTER (H5A_get_atom_node, H5A_init_interface, NULL);
+    FUNC_ENTER (H5A_get_atom_node, NULL);
 
     if(atom_free_list!=NULL)
       {
@@ -845,7 +834,7 @@ done:
 static herr_t
 H5A_release_atom_node(atom_info_t *atm)
 {
-    FUNC_ENTER (H5A_release_atom_node, H5A_init_interface, FAIL);
+    FUNC_ENTER (H5A_release_atom_node, FAIL);
 
     /* Insert the atom at the beginning of the free list */
     atm->next=atom_free_list;

@@ -37,8 +37,9 @@ static char RcsId[] = "@(#)$Revision$";
 
 /*--------------------- Locally scoped variables -----------------------------*/
 
-/* Whether we've installed the library termination function yet for this interface */
+/* Interface initialization */
 static intn interface_initialize_g = FALSE;
+#define INTERFACE_INIT NULL
 
 /*--------------------------------------------------------------------------
  NAME
@@ -62,7 +63,7 @@ herr_t H5D_convert_buf(void *dst, const void *src, uintn len, uintn size)
     char *d=(char *)dst;
     herr_t        ret_value = SUCCEED;
 
-    FUNC_ENTER(H5D_convert_buf, NULL, FAIL);
+    FUNC_ENTER(H5D_convert_buf, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;

@@ -1,13 +1,13 @@
 /****************************************************************************
- * NCSA HDF                                                                 *
- * Software Development Group                                               *
- * National Center for Supercomputing Applications                          *
- * University of Illinois at Urbana-Champaign                               *
- * 605 E. Springfield, Champaign IL 61820                                   *
- *                                                                          *
- * For conditions of distribution and use, see the accompanying             *
- * hdf/COPYING file.                                                        *
- *                                                                          *
+ * NCSA HDF								    *
+ * Software Development Group						    *
+ * National Center for Supercomputing Applications			    *
+ * University of Illinois at Urbana-Champaign				    *
+ * 605 E. Springfield, Champaign IL 61820				    *
+ *									    *
+ * For conditions of distribution and use, see the accompanying		    *
+ * hdf/COPYING file.							    *
+ *									    *
  ****************************************************************************/
 
 /* $Id$ */
@@ -22,40 +22,23 @@
 
 /* Private headers needed by this file */
 #include <H5private.h>
-#include <H5Cprivate.h>		/*for hobjtype_t defn*/
+#include <H5Gprivate.h>		/*for H5G_entry_t			*/
 
 #define H5T_RESERVED_ATOMS  8
 
-/* Structure for storing information about a field in a compound datatype */
-typedef struct {
-    char *name;         /* Name of the field */
-    uintn name_off;     /* Offset of name in global small-data heap */
-    uintn struct_off;   /* Offset of field within structure */
-    h5_atomic_type_t dt;  /* Datatype of the field */
-    hid_t dim_id;     /* dimensionality ID of the field */
-  } h5_field_info_t;
+typedef struct H5T_t H5T_t;
 
-/* Structure for storing information about a compound datatype */
-typedef struct {
-    uintn n;            /* Number of fields */
-    uintn mem_size;     /* Size of the compound structure in memory */
-    uintn disk_size;    /* Size of the compound structure on disk */
-    h5_field_info_t *flist;   /* List of fields in the compound object */
-  } h5_compound_info_t;
+herr_t H5T_init (void);
 
-/* Structure for storing information any datatype */
-typedef struct {
-    h5_atomic_type_t  dt;     /* Base type of this object */
-    char *name;               /* Name of datatype */
-    h5_compound_info_t *ci;   /* Information for compound datatypes */
-  } h5_datatype_t;
 
 /* Private functions */
-herr_t H5T_init(void);
-hid_t H5T_create(hid_t owner_id, hobjtype_t type, const char *name);
-hbool_t H5T_is_atomic(h5_datatype_t *type);
-uintn H5T_size(h5_datatype_t *dt, hbool_t mem_flag);
-intn H5T_arch(h5_datatype_t *dt);
-herr_t H5T_release(hid_t oid);
+herr_t H5T_init_interface (void);
+H5T_t *H5T_create (H5T_class_t type, size_t size);
+H5T_t *H5T_copy (const H5T_t *old_dt);
+herr_t H5T_close (H5T_t *dt);
+size_t H5T_get_size (const H5T_t *dt);
+intn H5T_cmp (const H5T_t *dt1, const H5T_t *dt2);
 
+herr_t H5T_insert_member (H5T_t *parent, const char *name, off_t offset,
+			  const H5T_t *member);
 #endif

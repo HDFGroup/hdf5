@@ -37,32 +37,19 @@ static char RcsId[] = "@(#)$Revision$";
 #include <H5Aprivate.h>		/* Atoms				*/
 #include <H5Bprivate.h>	    	/* B-tree subclass names 		*/
 #include <H5Cprivate.h>     	/* Template information 		*/
+#include <H5Dprivate.h>		/* Datasets				*/
 #include <H5Eprivate.h>		/* Error handling			*/
+#include <H5MMprivate.h>	/* Memory management			*/
 
 #define PABLO_MASK	H5C_mask
 
-/*--------------------- Locally scoped variables -----------------------------*/
-
-/* Whether we've installed the library termination function yet for this interface */
-static intn interface_initialize_g = FALSE;
-
-/* Define the library's default file creation template (constants in hdf5lims.h) */
-const file_create_temp_t default_file_create={
-    H5C_USERBLOCK_DEFAULT,      /* Default user-block size */
-    H5C_SYM_LEAF_K_DEFAULT,	/* Default 1/2 rank for symtab leaf nodes */
-    H5C_BTREE_K_DEFAULT,	/* Default 1/2 rank for btree internal nodes */
-    H5C_OFFSETSIZE_DEFAULT,     /* Default offset size */
-    H5C_LENGTHSIZE_DEFAULT,     /* Default length size */
-    HDF5_BOOTBLOCK_VERSION,     /* Current Boot-Block version # */
-    HDF5_SMALLOBJECT_VERSION,   /* Current Small-Object heap version # */
-    HDF5_FREESPACE_VERSION,     /* Current Free-Space info version # */
-    HDF5_OBJECTDIR_VERSION,     /* Current Object Directory info version # */
-    HDF5_SHAREDHEADER_VERSION   /* Current Shared-Header format version # */
-};
-static hid_t default_file_id=FAIL;   /* Atom for the default file-creation template */
-
-/*--------------------- Local function prototypes ----------------------------*/
+/* Is the interface initialized? */
+static hbool_t interface_initialize_g = FALSE;
+#define INTERFACE_INIT H5C_init_interface
 static herr_t H5C_init_interface(void);
+
+/* PRIVATE PROTOTYPES */
+static void H5C_term_interface (void);
 
 /*--------------------------------------------------------------------------
 NAME
@@ -76,18 +63,37 @@ DESCRIPTION
     Initializes any interface-specific data or routines.
 
 --------------------------------------------------------------------------*/
-static herr_t H5C_init_interface(void)
+static herr_t
+H5C_init_interface (void)
 {
-    herr_t ret_value = SUCCEED;
+   herr_t 	ret_value = SUCCEED;
+   intn		i;
+   herr_t	status;
+   
+   FUNC_ENTER (H5C_init_interface, FAIL);
+   
+   assert (H5C_NCLASSES <= H5_TEMPLATE_MAX-H5_TEMPLATE_0);
 
-    FUNC_ENTER (H5C_init_interface, NULL, FAIL);
+   /*
+    * Initialize the mappings between template classes and atom groups. We
+    * keep the two separate because template classes are publicly visible but
+    * atom groups aren't.
+    */
+   for (i=0; i<H5C_NCLASSES; i++) {
+      status = H5Ainit_group (H5_TEMPLATE_0+i, H5A_TEMPID_HASHSIZE, 0, NULL);
+      if (status<0) ret_value = FAIL;
+   }
+   if (ret_value<0) HRETURN_ERROR (H5E_ATOM, H5E_CANTINIT, FAIL);
 
-    /* Initialize the atom group for the file IDs */
-    if((ret_value=H5Ainit_group(H5_TEMPLATE,H5A_TEMPID_HASHSIZE,0,NULL))!=FAIL)
-        ret_value=H5_add_exit(&H5C_term_interface);
+   /*
+    * Register cleanup function.
+    */
+   if (H5_add_exit (H5C_term_interface)<0) {
+      HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL);
+   }
 
-    FUNC_LEAVE(ret_value);
-}	/* H5C_init_interface */
+   FUNC_LEAVE(ret_value);
+}
 
 /*--------------------------------------------------------------------------
  NAME
@@ -106,209 +112,185 @@ static herr_t H5C_init_interface(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-void H5C_term_interface (void)
+static void
+H5C_term_interface (void)
 {
-    H5Aremove_atom(default_file_id);
-    H5Adestroy_group(H5_TEMPLATE);
-} /* end H5C_term_interface() */
+   intn		i;
+
+   for (i=0; i<H5C_NCLASSES; i++) {
+      H5Adestroy_group (H5_TEMPLATE_0+i);
+   }
+}
 
 /*--------------------------------------------------------------------------
  NAME
-    H5C_get_default_atom
+    H5Ccreate
  PURPOSE
-    Retrive an atom for a default HDF5 template.
+    Returns a copy of the default template for some class of templates.
  USAGE
-    hid_t H5C_create(type)
-        hobjtype_t type;        IN: Type of object to retrieve default template of
+    herr_t H5Ccreate (type)
+        H5C_class_t type;	IN: Template class whose default is desired.
  RETURNS
-    Returns template ID (atom) of the default object for a template type on
-    success, FAIL on failure
+    Template ID or FAIL
+ 
+ ERRORS
+    ARGS      BADVALUE      Unknown template class. 
+    ATOM      CANTINIT      Can't register template. 
+    INTERNAL  UNSUPPORTED   Not implemented yet. 
+
  DESCRIPTION
-        This is function retrieves atoms for the default templates for the
-    different types of HDF5 templates.
-
- MODIFICATIONS
-    Robb Matzke, 4 Aug 1997
-    The `FUNC' auto variable was changed from `H5C_create' to
-    `H5C_get_default_atom'.
+    Returns a copy of the default template for some class of templates.
 --------------------------------------------------------------------------*/
-hid_t H5C_get_default_atom(hobjtype_t type)
+hid_t
+H5Ccreate (H5C_class_t type)
 {
-    hid_t        ret_value = FAIL;
+   hid_t	ret_value = FAIL;
+   void		*tmpl = NULL;
 
-    FUNC_ENTER(H5C_get_default_atom, H5C_init_interface, FAIL);
+   FUNC_ENTER (H5Ccreate, FAIL);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+   /* Allocate a new template and initialize it with default values */
+   switch (type) {
+   case H5C_FILE_CREATE:
+      tmpl = H5MM_xmalloc (sizeof(H5F_create_t));
+      memcpy (tmpl, &H5F_create_dflt, sizeof(H5F_create_t));
+      break;
 
-    switch(type)
-      {
-        case H5_TEMPLATE:
-            if(default_file_id==FAIL)
-              {
-                if((default_file_id=H5Aregister_atom(H5_TEMPLATE, (const void *)&default_file_create))==FAIL)
-                    HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL);
-              } /* end else */
-            HGOTO_DONE(default_file_id);
-            break;
+   case H5C_FILE_ACCESS:
+      /* Not implemented yet */
+      HRETURN_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
 
-        default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
-      } /* end switch */
+   case H5C_DATASET_CREATE:
+      tmpl = H5MM_xmalloc (sizeof(H5D_create_t));
+      memcpy (tmpl, &H5D_create_dflt, sizeof(H5D_create_t));
+      break;
 
-done:
-  if(ret_value == FAIL)   
-    { /* Error condition cleanup */
+   case H5C_DATASET_XFER:
+      tmpl = H5MM_xmalloc (sizeof(H5D_xfer_t));
+      memcpy (tmpl, &H5D_xfer_dflt, sizeof(H5D_xfer_t));
+      break;
+      
+   default:
+      /* Unknown template class */
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);
+   }
 
-    } /* end if */
+   /* Atomize the new template */
+   if ((ret_value = H5C_create (type, tmpl))<0) {
+      HRETURN_ERROR (H5E_ATOM, H5E_CANTINIT, FAIL); /*can't register template*/
+   }
 
-    /* Normal function cleanup */
+   FUNC_LEAVE (ret_value);
+}
 
-    FUNC_LEAVE(ret_value);
-} /* end H5C_get_default_atom() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5C_create
+ *
+ * Purpose:	Given a pointer to some template struct, atomize the template
+ *		and return its ID. The template memory is not copied, so the
+ *		caller should not free it; it will be freed by H5C_release().
+ *
+ * Return:	Success:	A new template ID.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, December  3, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5C_create (H5C_class_t type, void *tmpl)
+{
+   hid_t	ret_value = FAIL;
+   
+   FUNC_ENTER (H5C_create, FAIL);
 
+   /* check args */
+   assert (type>=0 && type<H5C_NCLASSES);
+   assert (tmpl);
+
+   /* Atomize the new template */
+   if ((ret_value = H5Aregister_atom (H5_TEMPLATE_0+type, tmpl))<0) {
+      HRETURN_ERROR (H5E_ATOM, H5E_CANTINIT, FAIL); /*can't register template*/
+   }
+
+   FUNC_LEAVE (ret_value);
+}
+   
 /*--------------------------------------------------------------------------
  NAME
-    H5C_init
- PURPOSE
-    Initialize a new HDF5 template with a copy of an existing template.
- USAGE
-    herr_t H5C_init(dst_atm, src)
-        hid_t dst_atm;               IN: Atom for the template to initialize
-        file_create_temp_t *src;       IN: Template to use to initialize with
- RETURNS
-    SUCCEED/FAIL
- DESCRIPTION
-        This function copies the contents of the source template into the
-    newly created destination template.
---------------------------------------------------------------------------*/
-herr_t H5C_init(hid_t dst_atm, const file_create_temp_t *src)
-{
-    file_create_temp_t *dst;    /* destination template */
-    herr_t ret_value = SUCCEED;   /* return value */
-
-    FUNC_ENTER(H5C_init, H5C_init_interface, FAIL);
-
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
-    if(src==NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
-
-    /* Get the template to initialize */
-    if((dst=H5Aatom_object(dst_atm))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
-
-    /* Copy in the source template */
-    HDmemcpy(dst,src,sizeof(file_create_temp_t));
-
-done:
-  if(ret_value == FAIL)   
-    { /* Error condition cleanup */
-
-    } /* end if */
-
-    /* Normal function cleanup */
-
-    FUNC_LEAVE(ret_value);
-} /* end H5C_init() */
-
-/*--------------------------------------------------------------------------
- NAME
-    H5C_create
- PURPOSE
-    Create a new HDF5 template.
- USAGE
-    hid_t H5C_create(owner_id, type, name)
-        hid_t owner_id;       IN: Group/file which owns this template
-        hobjtype_t type;        IN: Type of template to create
-        const char *name;       IN: Name of the template to create
- RETURNS
-    Returns template ID (atom) on success, FAIL on failure
- DESCRIPTION
-        This is the primary function for creating different HDF5 templates.
-    Currently the name of template is not used and may be NULL.
---------------------------------------------------------------------------*/
-hid_t H5C_create(hid_t owner_id, hobjtype_t type, const char *name)
-{
-    hid_t ret_value = FAIL;   /* atom for template object to return */
-
-    FUNC_ENTER(H5C_create, H5C_init_interface, FAIL);
-
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
-
-    switch(type)
-      {
-        case H5_TEMPLATE:
-            {
-                file_create_temp_t *new_create_temp;    /* new template object to create */
-
-                if((new_create_temp=HDmalloc(sizeof(file_create_temp_t)))==NULL)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
-                if((ret_value=H5Aregister_atom(H5_TEMPLATE, (const VOIDP)new_create_temp))==FAIL)
-                    HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL);
-            } /* end case/block */
-            break;
-
-        default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
-      } /* end switch */
-
-done:
-  if(ret_value == FAIL)   
-    { /* Error condition cleanup */
-
-    } /* end if */
-
-    /* Normal function cleanup */
-
-    FUNC_LEAVE(ret_value);
-} /* end H5C_create() */
-
-/*--------------------------------------------------------------------------
- NAME
-    H5C_release
+    H5Cclose
  PURPOSE
     Release access to a template object.
  USAGE
-    herr_t H5C_release(oid)
+    herr_t H5Cclose(oid)
         hid_t oid;       IN: Template object to release access to
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
         This function releases access to a template object
 --------------------------------------------------------------------------*/
-herr_t H5C_release(hid_t oid)
+herr_t
+H5Cclose (hid_t template)
 {
-    file_create_temp_t *template;     /* template to destroy */
-    herr_t        ret_value = SUCCEED;
+   void 	*tmpl=NULL;
 
-    FUNC_ENTER(H5C_release, H5C_init_interface, FAIL);
+   FUNC_ENTER (H5Cclose, FAIL);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+   /* Chuck the object! :-) */
+   if (NULL==(tmpl=H5Aremove_atom (template))) {
+      HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+   }
+   H5MM_xfree (tmpl);
 
-    /* Chuck the object! :-) */
-    if((template=H5Aremove_atom(oid))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
-    HDfree(template);
+   FUNC_LEAVE (SUCCEED);
+}
 
-done:
-  if(ret_value == FAIL)   
-    { /* Error condition cleanup */
 
-    } /* end if */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5C_class
+ *
+ * Purpose:	Returns the class identifier for a template.
+ *
+ * Return:	Success:	A template class
+ *
+ *		Failure:	H5C_NO_CLASS (-1)
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, December  3, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5C_class_t
+H5C_class (hid_t template)
+{
+   group_t	group;
+   H5C_class_t	ret_value = H5C_NO_CLASS;
+   
+   FUNC_ENTER (H5C_class, H5C_NO_CLASS);
+   
+   if ((group = H5Aatom_group (template))<0 ||
+       group<H5_TEMPLATE_0 || group>=H5_TEMPLATE_MAX) {
+      /* not a template */
+      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, H5C_NO_CLASS);
+   }
 
-    /* Normal function cleanup */
-
-    FUNC_LEAVE(ret_value);
-} /* end H5C_release() */
+   ret_value = group - H5_TEMPLATE_0;
+   FUNC_LEAVE (ret_value);
+}
 
 /*--------------------------------------------------------------------------
  NAME
     H5Cgetparm
  PURPOSE
-    Get a parameter from a template
+    Get a property value from a template
  USAGE
     herr_t H5Cgetparm(tid, parm, buf)
         hid_t tid;        IN: Template object to retrieve parameter from
@@ -316,6 +298,16 @@ done:
         VOIDP buf;          OUT: Pointer to buffer to store parameter in
  RETURNS
     SUCCEED/FAIL
+
+ ERRORS
+    ARGS      BADRANGE      No result buffer argument supplied. 
+    ARGS      BADRANGE      Unknown property for dataset create template. 
+    ARGS      BADRANGE      Unknown property for dataset transfer template. 
+    ARGS      BADRANGE      Unknown property for file access template. 
+    ARGS      BADRANGE      Unknown property for file create template. 
+    ARGS      BADRANGE      Unknown template class. 
+    ATOM      BADTYPE       Can't unatomize template. 
+
  DESCRIPTION
         This function retrieves the value of a specific parameter from a
     template
@@ -328,85 +320,119 @@ done:
   	Robb Matzke, 17 Oct 1997
  	Added H5_ISTORE_K.
 --------------------------------------------------------------------------*/
-herr_t H5Cgetparm(hid_t tid, file_create_param_t parm, VOIDP buf)
+herr_t
+H5Cgetparm (hid_t template, H5C_prop_t prop, void *buf)
 {
-    file_create_temp_t *template;    /* template to query */
-    herr_t ret_value = SUCCEED;
+   H5C_class_t		type;
+    
+   const void		*tmpl=NULL;
+   const H5F_create_t	*file_create=NULL;
+   const H5D_create_t	*dset_create=NULL;
 
-    FUNC_ENTER(H5Cgetparm, H5C_init_interface, FAIL);
+   FUNC_ENTER (H5Cgetparm, FAIL);
+   H5ECLEAR;
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
-    if(H5Aatom_group(tid)!=H5_TEMPLATE)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, FAIL);
-    if(buf==NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
+   /* check args */
+   if (NULL==(tmpl = H5Aatom_object (template)) ||
+       (type=H5C_class (template))<0) {
+      /* Can't unatomize template */
+      HRETURN_ERROR (H5E_ATOM, H5E_BADTYPE, FAIL);
+   }
+   if (!buf) {
+      /* No result buffer argument supplied */
+      HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+   }
 
-    /* Get a pointer the template to query */
-    if((template=H5Aatom_object(tid))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+   /* Handle each class of template */
+   switch (type) {
+   case H5C_FILE_CREATE:
+      file_create = (const H5F_create_t *)tmpl;
+      switch (prop) {
+      case H5F_USERBLOCK_SIZE:
+	 *(uintn *)buf=file_create->userblock_size;
+	 break;
 
-    switch(parm)
-      {
-        case H5_USERBLOCK_SIZE:
-            *(uintn *)buf=template->userblock_size;
-            break;
+      case H5F_OFFSET_SIZE:
+	 *(uint8 *)buf=file_create->sizeof_addr;
+	 break;
 
-        case H5_OFFSET_SIZE:
-            *(uint8 *)buf=template->sizeof_addr;
-            break;
+      case H5F_LENGTH_SIZE:
+	 *(uint8 *)buf=file_create->sizeof_size;
+	 break;
 
-        case H5_LENGTH_SIZE:
-            *(uint8 *)buf=template->sizeof_size;
-            break;
+      case H5F_SYM_LEAF_K:
+	 *(uintn *)buf=file_create->sym_leaf_k;
+	 break;
 
-        case H5_SYM_LEAF_K:
-	    *(uintn *)buf=template->sym_leaf_k;
-	    break;
+      case H5F_SYM_INTERN_K:
+	 *(uintn *)buf = file_create->btree_k[H5B_SNODE_ID];
+	 break;
 
-        case H5_SYM_INTERN_K:
-	    *(uintn *)buf = template->btree_k[H5B_SNODE_ID];
-	    break;
+      case H5F_ISTORE_K:
+	 *(uintn *)buf = file_create->btree_k[H5B_ISTORE_ID];
+	 break;
 
-        case H5_ISTORE_K:
-	    *(uintn *)buf = template->btree_k[H5B_ISTORE_ID];
-	    break;
+      case H5F_BOOTBLOCK_VER:
+	 *(uint8 *)buf=file_create->bootblock_ver;
+	 break;
 
-        case H5_BOOTBLOCK_VER:
-            *(uint8 *)buf=template->bootblock_ver;
-            break;
+      case H5F_SMALLOBJECT_VER:
+	 *(uint8 *)buf=file_create->smallobject_ver;
+	 break;
 
-        case H5_SMALLOBJECT_VER:
-            *(uint8 *)buf=template->smallobject_ver;
-            break;
+      case H5F_FREESPACE_VER:
+	 *(uint8 *)buf=file_create->freespace_ver;
+	 break;
 
-        case H5_FREESPACE_VER:
-            *(uint8 *)buf=template->freespace_ver;
-            break;
+      case H5F_OBJECTDIR_VER:
+	 *(uint8 *)buf=file_create->objectdir_ver;
+	 break;
 
-        case H5_OBJECTDIR_VER:
-            *(uint8 *)buf=template->objectdir_ver;
-            break;
+      case H5F_SHAREDHEADER_VER:
+	 *(uint8 *)buf=file_create->sharedheader_ver;
+	 break;
 
-        case H5_SHAREDHEADER_VER:
-            *(uint8 *)buf=template->sharedheader_ver;
-            break;
+      default:
+	 /* Unknown property for file create template */
+	 HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+      }
+      break;
 
-        default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
-      } /* end switch */
+   case H5C_FILE_ACCESS:
+      /* Unknown property for file access template */
+      HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+       
+   case H5C_DATASET_CREATE:
+      dset_create = (const H5D_create_t *)tmpl;
+      switch (prop) {
+      case H5D_LAYOUT:
+	 *(H5D_layout_t*)buf = dset_create->layout;
+	 break;
 
-done:
-  if(ret_value == FAIL)   
-    { /* Error condition cleanup */
-        /* none */
-    } /* end if */
+      case H5D_CHUNK_NDIMS:
+      case H5D_CHUNK_SIZE:
+      case H5D_COMPRESS:
+      case H5D_PRE_OFFSET:
+      case H5D_PRE_SCALE:
+	 /* Not implemented yet */
+	 HRETURN_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
 
-    /* Normal function cleanup */
-        /* none */
+      default:
+	 /* Unknown property for dataset create template */
+	 HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+      }
+      break;
+       
+   case H5C_DATASET_XFER:
+      /* Unknown property for dataset transfer template */
+      HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
 
-    FUNC_LEAVE(ret_value);
-} /* end H5Cgetparm() */
+   default:
+      /* Unknown template class */
+      HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+   }
+   FUNC_LEAVE (SUCCEED);
+}
 
 /*--------------------------------------------------------------------------
  NAME
@@ -420,6 +446,24 @@ done:
         const VOIDP buf;    IN: Pointer to parameter buffer
  RETURNS
     SUCCEED/FAIL
+
+ ERRORS
+    ARGS      BADRANGE      Indexed storage internal node 1/2 rank is not
+                            valid. 
+    ARGS      BADRANGE      No buffer argument specified. 
+    ARGS      BADRANGE      Symbol internal node 1/2 rank is not valid. 
+    ARGS      BADRANGE      Symbol leaf node 1/2 rank is not valid. 
+    ARGS      BADRANGE      This is a read-only property. 
+    ARGS      BADRANGE      Unknown file creation property. 
+    ARGS      BADRANGE      Unknown property for dataset create template. 
+    ARGS      BADRANGE      Unknown property for dataset transfer template. 
+    ARGS      BADRANGE      Unknown property for file access template. 
+    ARGS      BADRANGE      Unknown template class. 
+    ARGS      BADVALUE      File haddr_t size is not valid. 
+    ARGS      BADVALUE      File size_t size is not valid. 
+    ARGS      BADVALUE      Userblock size is not valid. 
+    ATOM      BADTYPE       Can't unatomize template. 
+
  DESCRIPTION
         This function stores the value of a specific parameter for a template
 
@@ -441,117 +485,154 @@ done:
   	Robb Matzke, 17 Oct 1997
  	Added H5_ISTORE_K.
 --------------------------------------------------------------------------*/
-herr_t H5Csetparm(hid_t tid, file_create_param_t parm, const VOIDP buf)
+herr_t
+H5Csetparm (hid_t template, H5C_prop_t prop, const void *buf)
 {
-    file_create_temp_t *template;    /* template to query */
-    herr_t ret_value = SUCCEED;
-    uintn val;
-    intn i;
+   void		*tmpl = NULL;
+   H5F_create_t	*file_create = NULL;
+   H5D_create_t	*dset_create = NULL;
+   H5C_class_t	type;
+   H5D_layout_t	layout;
+   uintn	val;
+   intn		i;
 
-    FUNC_ENTER(H5Csetparm, H5C_init_interface, FAIL);
+   FUNC_ENTER (H5Csetparm, FAIL);
+   H5ECLEAR;
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
-    if(H5Aatom_group(tid)!=H5_TEMPLATE)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, FAIL);
-    if(buf==NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
+   /* check args */
+   if (NULL==(tmpl = H5Aatom_object (template)) ||
+       (type = H5C_class (template))<0) {
+      /* Can't unatomize template */
+      HRETURN_ERROR (H5E_ATOM, H5E_BADTYPE, FAIL);
+   }
+   if (!buf) {
+      /* No buffer argument specified */
+      HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+   }
 
-    /* Get a pointer the template to query */
-    if((template=H5Aatom_object(tid))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+   /* Handle each class of template */
+   switch (type) {
+   case H5C_FILE_CREATE:
+      file_create = (H5F_create_t *)tmpl;
+      
+      switch (prop) {
+      case H5F_USERBLOCK_SIZE:
+	 val = *(const uintn *)buf;
+	 for (i=8; i<8*sizeof(int); i++) {
+	    uintn p2 = 8==i ? 0 :1<<i;
+	    if (val==p2) break;
+	 }
+	 if (i>=8*sizeof(int)) {
+	    /* Userblock size is not valid */
+	    HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);
+	 }
+	 file_create->userblock_size=val;
+	 break;
 
-    switch(parm)
-      {
-        case H5_USERBLOCK_SIZE:
-            val = *(const uintn *)buf;
-	    for (i=8; i<8*sizeof(int); i++) {
-	       uintn p2 = 8==i ? 0 :1<<i;
-	       if (val==p2) break;
-	    }
-	    if (i>=8*sizeof(int)) {
-	       HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);
-	    }
-            template->userblock_size=val;
-            break;
+      case H5F_OFFSET_SIZE:
+	 val = *(const uint8 *)buf;
+	 if (val!=2 && val!=4 && val!=8 && val!=16) {
+	    /* file haddr_t size is not valid */
+	    HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);
+	 }
+	 file_create->sizeof_addr=val;
+	 break;
 
-        case H5_OFFSET_SIZE:
-            val = *(const uint8 *)buf;
-            if(!(val==2 || val==4 || val==8 || val==16 || val==32 || val==64 || val==128 || val==256))
-               HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);
-            template->sizeof_addr=val;
-            break;
+      case H5F_LENGTH_SIZE:
+	 val = *(const uint8 *)buf;
+	 if(val!=2 && val!=4 && val!=8 && val!=16) {
+	    /* file size_t size is not valid */
+	    HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);
+	 }
+	 file_create->sizeof_size=val;
+	 break;
 
-        case H5_LENGTH_SIZE:
-            val = *(const uint8 *)buf;
-            if(!(val==2 || val==4 || val==8 || val==16 || val==32 || val==64 || val==128 || val==256))
-               HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);
-            template->sizeof_size=val;
-            break;
+      case H5F_SYM_LEAF_K:
+	 val = *(const uintn *)buf;
+	 if (val<2) {
+	    /* Symbol leaf node 1/2 rank is not valid */
+	    HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+	 }
+	 file_create->sym_leaf_k = val;
+	 break;
 
-        case H5_SYM_LEAF_K:
-            val = *(const uintn *)buf;
-            if (val<2) {
-               HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
-            }
-            template->sym_leaf_k = val;
-            break;
+      case H5F_SYM_INTERN_K:
+	 val = *(const uintn *)buf;
+	 if (val<2) {
+	    /* Symbol internal node 1/2 rank is not valid */
+	    HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+	 }
+	 file_create->btree_k[H5B_SNODE_ID] = val;
+	 break;
 
-        case H5_SYM_INTERN_K:
-            val = *(const uintn *)buf;
-            if (val<2) {
-               HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
-            }
-            template->btree_k[H5B_SNODE_ID] = val;
-            break;
-
-        case H5_ISTORE_K:
-	    val = *(const uintn *)buf;
-	    if (val<2) {
-	       HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
-	    }
-	    template->btree_k[H5B_ISTORE_ID] = val;
-	    break;
+      case H5F_ISTORE_K:
+	 val = *(const uintn *)buf;
+	 if (val<2) {
+	    /* Indexed storage internal node 1/2 rank is not valid */
+	    HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+	 }
+	 file_create->btree_k[H5B_ISTORE_ID] = val;
+	 break;
 	    
-        case H5_BOOTBLOCK_VER:  /* this should be range checked */
-            template->bootblock_ver=*(const uint8 *)buf;
-            break;
+      case H5F_BOOTBLOCK_VER:
+      case H5F_SMALLOBJECT_VER:
+      case H5F_FREESPACE_VER:
+      case H5F_OBJECTDIR_VER:
+      case H5F_SHAREDHEADER_VER:
+	 /* This is a read-only property */
+	 HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
 
-        case H5_SMALLOBJECT_VER:    /* this should be range checked */
-            template->smallobject_ver=*(const uint8 *)buf;
-            break;
+      default:
+	 /* Unknown file creation property */
+	 HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
+      }
+      break;
 
-        case H5_FREESPACE_VER:  /* this should be range checked */
-            template->freespace_ver=*(const uint8 *)buf;
-            break;
+   case H5C_FILE_ACCESS:
+      /* Unknown property for file access template */
+      HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+       
+   case H5C_DATASET_CREATE:
+      dset_create = (H5D_create_t *)tmpl;
+      switch (prop) {
+      case H5D_LAYOUT:
+	 layout = *(const H5D_layout_t*)buf;
+	 if (layout<0 || layout>=H5D_NLAYOUTS) {
+	    /* Raw data layout method is not valid */
+	    HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+	 }
+	 dset_create->layout = layout;
+	 break;
+	 
+      case H5D_CHUNK_NDIMS:
+      case H5D_CHUNK_SIZE:
+      case H5D_COMPRESS:
+      case H5D_PRE_OFFSET:
+      case H5D_PRE_SCALE:
+	 /* Not implemented yet */
+	 HRETURN_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
 
-        case H5_OBJECTDIR_VER:  /* this should be range checked */
-            template->objectdir_ver=*(const uint8 *)buf;
-            break;
+      default:
+	 /* Unknown property for dataset create template */
+	 HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+      }
+      break;
+       
+   case H5C_DATASET_XFER:
+      /* Unknown property for dataset transfer template */
+      HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
 
-        case H5_SHAREDHEADER_VER:   /* this should be range checked */
-            template->sharedheader_ver=*(const uint8 *)buf;
-            break;
-
-        default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
-      } /* end switch */
-
-done:
-  if(ret_value == FAIL)   
-    { /* Error condition cleanup */
-        /* none */
-    } /* end if */
-
-    /* Normal function cleanup */
-        /* none */
-
-    FUNC_LEAVE(ret_value);
-} /* end H5Csetparm() */
+   default:
+      /* Unknown template class */
+      HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+   }
+   
+   FUNC_LEAVE (SUCCEED);
+}
 
 /*--------------------------------------------------------------------------
  NAME
-    H5C_copy
+    H5Ccopy
  PURPOSE
     Copy a template
  USAGE
@@ -559,43 +640,71 @@ done:
         hid_t tid;        IN: Template object to copy
  RETURNS
     Returns template ID (atom) on success, FAIL on failure
+
+ ERRORS
+    ARGS      BADRANGE      Unknown template class. 
+    ATOM      BADATOM       Can't unatomize template. 
+    ATOM      CANTREGISTER  Register the atom for the new template. 
+    INTERNAL  UNSUPPORTED   Dataset transfer properties are not implemented
+                            yet. 
+    INTERNAL  UNSUPPORTED   File access properties are not implemented yet. 
+
  DESCRIPTION
     This function creates a new copy of a template with all the same parameter
     settings.
 --------------------------------------------------------------------------*/
-hid_t H5C_copy(hid_t tid)
+hid_t
+H5Ccopy (hid_t template)
 {
-    file_create_temp_t *template, *new_template;    /* template to query */
-    herr_t ret_value = SUCCEED;
+   const void	*tmpl = NULL;
+   void		*new_tmpl = NULL;
+   H5C_class_t	type;
+   size_t	size;
+   hid_t	ret_value = FAIL;
+   group_t	group;
 
-    FUNC_ENTER(H5C_copy, H5C_init_interface, FAIL);
+   FUNC_ENTER (H5Ccopy, FAIL);
+   H5ECLEAR;
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+   /* check args */
+   if (NULL==(tmpl=H5Aatom_object (template)) ||
+       (type=H5C_class (template))<0 ||
+       (group=H5Aatom_group (template))<0) {
+      /* Can't unatomize template */
+      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL);
+   }
 
-    /* Get a pointer the template to query */
-    if((template=H5Aatom_object(tid))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+   /* How big is the template */
+   switch (type) {
+   case H5C_FILE_CREATE:
+      size = sizeof(H5F_create_t);
+      break;
 
-    /* Allocate space for the new template */
-    if((new_template=HDmalloc(sizeof(file_create_temp_t)))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
+   case H5C_FILE_ACCESS:
+      /* File access properties are not implemented yet */
+      HRETURN_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
 
-    /* Copy over the information from the old template */
-    HDmemcpy(new_template,template,sizeof(file_create_temp_t));
+   case H5C_DATASET_CREATE:
+      size = sizeof(H5D_create_t);
+      break;
+      
+   case H5C_DATASET_XFER:
+      size = sizeof(H5D_xfer_t);
+      break;
 
-    /* Register the atom for the new template */
-    if((ret_value=H5Aregister_atom(H5_TEMPLATE, (const VOIDP)new_template))==FAIL)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL);
+   default:
+      /* Unknown template class */
+      HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+   }
 
-done:
-  if(ret_value == FAIL)   
-    { /* Error condition cleanup */
+   /* Create the new template */
+   new_tmpl = H5MM_xmalloc (size);
+   HDmemcpy (new_tmpl, tmpl, size);
 
-    } /* end if */
+   /* Register the atom for the new template */
+   if ((ret_value=H5Aregister_atom (group, new_tmpl))<0) {
+      HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL);
+   }
 
-    /* Normal function cleanup */
-
-    FUNC_LEAVE(ret_value);
-} /* end H5C_copy() */
-
+   FUNC_LEAVE (ret_value);
+}
