@@ -9702,7 +9702,7 @@ rm -f conftest*
 fi
 
 
-H5_VERSION=`cut -d' ' -f3 $srcdir/README |head -1`
+H5_VERSION=`cut -d' ' -f3 $srcdir/README.txt | head -1`
 
 
  CONFIG_DATE=`date`
