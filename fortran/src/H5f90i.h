@@ -69,52 +69,45 @@ typedef float             real_f;
 
 
 /* LINUX definitions */
-#if (defined(i386) || defined(__i386__)) && (defined(linux) || defined(__linux__))
+#if (defined(linux) || defined(__gnu_linux__) || defined(__linux__))
 
+/* Common definitions */
 typedef char              *_fcd;
-typedef long long         hsize_t_f;
-typedef long long         hssize_t_f;
-typedef int               size_t_f;
 typedef int               int_f;
 typedef int               hid_t_f;
 typedef float             real_f;
+#define _fcdtocp(desc) (desc)
+
+/* IA32 specific definitions */
+#if (defined(i386) || defined(__i386) || defined(__i386__))
+
+typedef long long         hsize_t_f;
+typedef long long         hssize_t_f;
+typedef int               size_t_f;
 #if defined H5_ABSOFT
 #define DF_CAPFNAMES
 #else
 #define FNAME_POST_UNDERSCORE
 #endif /*H5_ABSOFT*/
-#define _fcdtocp(desc) (desc)
 
-#endif /*LINUX*/
+/* AMD64 specific definitions */
+#elif defined __x86_64__
 
-/* LINUX64 definitions */
-#if defined  __x86_64__
-
-typedef char              *_fcd;
 typedef long long         hsize_t_f;
 typedef long long         hssize_t_f;
 typedef int               size_t_f;
-typedef int               int_f;
-typedef int               hid_t_f;
-typedef float             real_f;
 #define FNAME_POST_UNDERSCORE
-#define _fcdtocp(desc) (desc)
-#endif /*LINUX64*/
 
-/* IA64 LINUX definitions */
-#if defined __ia64
+/* IA64 specific definitions */
+#elif defined __ia64
 
-typedef char              *_fcd;
 typedef long              hsize_t_f;
 typedef long              hssize_t_f;
 typedef long              size_t_f;
-typedef int               int_f;
-typedef int               hid_t_f;
-typedef float             real_f;
 #define FNAME_POST_UNDERSCORE
-#define _fcdtocp(desc) (desc)
 
 #endif /* IA64 LINUX*/
+#endif /* LINUX*/
 
 #if defined(IRIX) || defined(IRIS4) || defined(sgi) || defined(__sgi__) || defined(__sgi)
 
