@@ -93,6 +93,11 @@ all:
 # a version of make that doesn't treat the makefile as the initial target
 # the user may want to occassionally type `make Makefile' in any source
 # directory.
+# The `Makefile' target has been renamed to `reconfigure' so that the
+# autoconf and make depend processes do not start up automatically.
+# One must do `make reconfigure' explicitedly to start the process.
+# (When srcdir is used and if more than one machines are running,
+# this automatic Makefile/autoconf can get things unstable.)
 #
 STAMP1=$(top_builddir)/config/stamp1
 STAMP2=$(top_builddir)/config/stamp2
@@ -117,7 +122,8 @@ $(top_srcdir)/configure: $(top_srcdir)/configure.in
 $(top_builddir)/config.status: $(top_srcdir)/configure $(STAMP1)
 	-cd $(top_builddir); ./config.status --recheck
 
-Makefile: $(MAKEFILE_PARTS) $(STAMP2)
+# rerun the autoconf process if any configure components have changed. 
+reconfigure: $(MAKEFILE_PARTS) $(STAMP2)
 	-cd $(top_builddir); CONFIG_HEADERS= ./config.status
 
 #------------------------------------------------------------------------------
