@@ -2167,6 +2167,38 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
+/*-------------------------------------------------------------------------
+ * Function: H5S_has_extent
+ *
+ * Purpose: Determines if a simple dataspace's extent has been set (e.g.,
+ *          by H5Sset_extent_simple() ).  Helps avoid write errors.
+ *
+ * Return: TRUE if dataspace has extent set
+ *          FALSE if dataspace's extent is uninitialized
+ *
+ * Programmer: James Laird
+ *
+ * Date: July 23, 2004
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5S_has_extent(const H5S_t *ds)
+{
+    htri_t ret_value;
+    FUNC_ENTER_NOAPI(H5S_has_extent, FAIL)
+
+    assert(ds);
+
+    if(ds->extent.rank==0 && ds->extent.nelem == 0 && ds->extent.type != H5S_NULL)
+        ret_value = FALSE;
+    else
+        ret_value = TRUE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
 
 /*-------------------------------------------------------------------------
  * Function: H5S_set_extent_real

@@ -2135,6 +2135,10 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
     if(H5T_detect_class(type, H5T_VLEN))
         has_vl_type=TRUE;
 
+    /* Check if the dataspace has an extent set (or is NULL) */
+    if( !(H5S_has_extent(space)) )
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "dataspace extent has not been set.")
+
     /* Initialize the dataset object */
     if(NULL == (new_dset = H5D_new(dcpl_id,TRUE,has_vl_type)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
@@ -3559,6 +3563,8 @@ H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid datatype")
     if (NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace")
+    if( !(H5S_has_extent(space)) )
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspace does not have extent set")
 
     ret_value=H5S_select_iterate(buf,type_id,space,op,operator_data);
 
