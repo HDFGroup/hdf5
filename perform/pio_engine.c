@@ -54,35 +54,12 @@
     }                                                   \
 } while(0)
 
-#ifndef HDopen
-#  ifdef O_BINARY
-#    define HDopen(S,F,M)       open(S,F|_O_BINARY,M)
-#  else   /* O_BINARY */
-#    define HDopen(S,F,M)       open(S,F,M)
-#  endif  /* !O_BINARY */
-#endif  /* !HDopen */
-
-#ifndef HDclose
-#  define HDclose(F)            close(F)
-#endif  /* !HDclose */
-
-#ifndef HDseek
-#  define HDseek(F,L,W)         lseek(F,L,W)
-#endif  /* !HDseek */
-
-#ifndef HDwrite
-#  define HDwrite(F,B,S)        write(F,B,S)
-#endif  /* !HDwrite */
-
-#ifndef HDread
-#  define HDread(F,B,S)         read(F,B,S)
-#endif  /* !HDread */
 
 /* Raw I/O macros */
 #define RAWCREATE(fn)           HDopen(fn, O_CREAT|O_TRUNC|O_RDWR, 0600)
 #define RAWOPEN(fn, F)          HDopen(fn, F, 0600)
 #define RAWCLOSE(F)             HDclose(F)
-#define RAWSEEK(F,L)            HDseek(F,(off_t) L,SEEK_SET)
+#define RAWSEEK(F,L)            HDlseek(F, L, SEEK_SET)
 #define RAWWRITE(F,B,S)         HDwrite(F,B,S)
 #define RAWREAD(F,B,S)          HDread(F,B,S)
 
