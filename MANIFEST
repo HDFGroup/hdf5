@@ -1087,6 +1087,9 @@
 ./src/H5Bpkg.h
 ./src/H5Bprivate.h
 ./src/H5Bpublic.h
+./src/H5C.c
+./src/H5Cprivate.h
+./src/H5Cpublic.h
 ./src/H5D.c
 ./src/H5Dcontig.c
 ./src/H5Dcompact.c
