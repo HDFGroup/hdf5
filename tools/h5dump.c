@@ -186,8 +186,8 @@ static const dump_header xmlformat = {
 	"",				/*enumblockbegin*/
 	"",				/*enumblockend*/
 
-	"{",           /*dataspacedescriptionbegin*/
-	"}",           /*dataspacedescriptionend*/
+	"",           /*dataspacedescriptionbegin*/
+	"",           /*dataspacedescriptionend*/
 	"(",           /*dataspacedimbegin*/
 	")",           /*dataspacedimend*/
 
