@@ -25,24 +25,30 @@ static char RcsId[] = "$Revision$";
 *************************************************************/
 
 #include "testhdf5.h"
+#include "H5Bprivate.h"
 
 #define F1_USERBLOCK_SIZE  HDF5_USERBLOCK_DEFAULT
 #define F1_OFFSET_SIZE     HDF5_OFFSETSIZE_DEFAULT
 #define F1_LENGTH_SIZE     HDF5_LENGTHSIZE_DEFAULT
-#define F1_BTREEPAGE_SIZE  HDF5_BTREEPAGE_DEFAULT
+#define F1_SYM_LEAF_K	   HDF5_SYM_LEAF_K_DEFAULT
+#define F1_SYM_INTERN_K	   (btree_k_default_g[H5B_SNODE_ID])
 #define FILE1   "tfile1.h5"
 
 #define F2_USERBLOCK_SIZE  512
-#define F2_OFFSET_SIZE  8
-#define F2_LENGTH_SIZE  8
-#define F2_BTREEPAGE_SIZE  2048
+#define F2_OFFSET_SIZE     8
+#define F2_LENGTH_SIZE     8
+#define F2_SYM_LEAF_K	   8
+#define F2_SYM_INTERN_K	   32
 #define FILE2   "tfile2.h5"
 
 #define F3_USERBLOCK_SIZE  HDF5_USERBLOCK_DEFAULT
 #define F3_OFFSET_SIZE     F2_OFFSET_SIZE
 #define F3_LENGTH_SIZE     F2_LENGTH_SIZE
-#define F3_BTREEPAGE_SIZE  F2_BTREEPAGE_SIZE
+#define F3_SYM_LEAF_K	   F2_SYM_LEAF_K
+#define F3_SYM_INTERN_K	   F2_SYM_INTERN_K
 #define FILE3   "tfile3.h5"
+
+static const uintn btree_k_default_g[] = HDF5_BTREE_K_DEFAULT;
 
 /****************************************************************
 **
@@ -87,10 +93,15 @@ printf("LENGTH_SIZE=%u\n",parm);
     CHECK(ret,FAIL,"H5Cgetparm");
     VERIFY(parm,F1_LENGTH_SIZE,"H5Cgetparm");
 
-    ret=H5Cgetparm(tmpl1,H5_BTREE_SIZE,&parm);
-printf("BTREE_SIZE=%u\n",parm);
+    ret=H5Cgetparm(tmpl1,H5_SYM_LEAF_K,&parm);
+printf("SYM_LEAF_K=%u\n",parm);
     CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm,F1_BTREEPAGE_SIZE,"H5Cgetparm");
+    VERIFY(parm,F1_SYM_LEAF_K,"H5Cgetparm");
+
+    ret=H5Cgetparm(tmpl1,H5_SYM_INTERN_K,&parm);
+printf("SYM_INTERN_K=%u\n",parm);
+    CHECK(ret,FAIL,"H5Cgetparm");
+    VERIFY(parm,F1_SYM_INTERN_K,"H5Cgetparm");
 
     /* Release file-creation template */
     ret=H5Mrelease(tmpl1);
@@ -117,8 +128,12 @@ printf("BTREE_SIZE=%u\n",parm);
     ret=H5Csetparm(tmpl1,H5_LENGTH_SIZE,&parm);
     CHECK(ret,FAIL,"H5Csetparm");
 
-    parm=F2_BTREEPAGE_SIZE;
-    ret=H5Csetparm(tmpl1,H5_BTREE_SIZE,&parm);
+    parm=F2_SYM_LEAF_K;
+    ret=H5Csetparm(tmpl1,H5_SYM_LEAF_K,&parm);
+    CHECK(ret,FAIL,"H5Csetparm");
+
+    parm=F2_SYM_INTERN_K;
+    ret=H5Csetparm(tmpl1,H5_SYM_INTERN_K,&parm);
     CHECK(ret,FAIL,"H5Csetparm");
 
     /* Try to create second file, with non-standard file-creation template params */
@@ -149,10 +164,15 @@ printf("LENGTH_SIZE=%u\n",parm);
     CHECK(ret,FAIL,"H5Cgetparm");
     VERIFY(parm,F2_OFFSET_SIZE,"H5Cgetparm");
 
-    ret=H5Cgetparm(tmpl1,H5_BTREE_SIZE,&parm);
-printf("BTREE_SIZE=%u\n",parm);
+    ret=H5Cgetparm(tmpl1,H5_SYM_LEAF_K,&parm);
+printf("SYM_LEAF_K=%u\n",parm);
     CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm,F2_BTREEPAGE_SIZE,"H5Cgetparm");
+    VERIFY(parm,F2_SYM_LEAF_K,"H5Cgetparm");
+
+    ret=H5Cgetparm(tmpl1,H5_SYM_INTERN_K,&parm);
+printf("SYM_INTERN_K=%u\n",parm);
+    CHECK(ret,FAIL,"H5Cgetparm");
+    VERIFY(parm,F2_SYM_INTERN_K,"H5Cgetparm");
 
     /* Clone the file-creation template */
     tmpl2=H5Mcopy(tmpl1);
@@ -195,10 +215,15 @@ printf("LENGTH_SIZE=%u\n",parm);
     CHECK(ret,FAIL,"H5Cgetparm");
     VERIFY(parm,F3_OFFSET_SIZE,"H5Cgetparm");
 
-    ret=H5Cgetparm(tmpl1,H5_BTREE_SIZE,&parm);
-printf("BTREE_SIZE=%u\n",parm);
+    ret=H5Cgetparm(tmpl1,H5_SYM_LEAF_K,&parm);
+printf("SYM_LEAF_K=%u\n",parm);
     CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm,F3_BTREEPAGE_SIZE,"H5Cgetparm");
+    VERIFY(parm,F3_SYM_LEAF_K,"H5Cgetparm");
+
+    ret=H5Cgetparm(tmpl1,H5_SYM_INTERN_K,&parm);
+printf("SYM_INTERN_K=%u\n",parm);
+    CHECK(ret,FAIL,"H5Cgetparm");
+    VERIFY(parm,F3_SYM_INTERN_K,"H5Cgetparm");
 
     /* Release file-creation template */
     ret=H5Mrelease(tmpl1);
@@ -257,10 +282,15 @@ printf("LENGTH_SIZE=%u\n",parm);
     CHECK(ret,FAIL,"H5Cgetparm");
     VERIFY(parm,F2_LENGTH_SIZE,"H5Cgetparm");
 
-    ret=H5Cgetparm(tmpl1,H5_BTREE_SIZE,&parm);
-printf("BTREE_SIZE=%u\n",parm);
+    ret=H5Cgetparm(tmpl1,H5_SYM_LEAF_K,&parm);
+printf("SYM_LEAF_K=%u\n",parm);
     CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm,F2_BTREEPAGE_SIZE,"H5Cgetparm");
+    VERIFY(parm,F2_SYM_LEAF_K,"H5Cgetparm");
+
+    ret=H5Cgetparm(tmpl1,H5_SYM_INTERN_K,&parm);
+printf("SYM_INTERN_K=%u\n",parm);
+    CHECK(ret,FAIL,"H5Cgetparm");
+    VERIFY(parm,F2_SYM_INTERN_K,"H5Cgetparm");
 
     /* Release file-creation template */
     ret=H5Mrelease(tmpl1);

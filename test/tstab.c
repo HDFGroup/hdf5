@@ -44,6 +44,7 @@ test_stab (void)
    hdf5_file_t	*f;
    H5G_entry_t	cwd, sub;
    int		i;
+   haddr_t	addr;
    char		name[256];
    herr_t	status;
    int		nsyms = 5000;
@@ -66,12 +67,12 @@ test_stab (void)
     */
    status = H5G_new (f, NULL, NULL, "/big", nsyms*10+2, &cwd);
    CHECK_I (status, "H5G_new");
-   H5G_stab_new (f, &sub, 0);
-   status = H5O_link (f, sub.header, &sub, nsyms-1);
-   CHECK_I (status, "H5O_link");
+   addr = H5G_stab_new (f, &sub, 0);
+   CHECK_I (addr, "H5G_stab_new");
+   MESSAGE (8, print_func ("Address %lu\n", (unsigned long)addr););
    
    
-   for (i=0; i<5000; i++) {
+   for (i=0; i<nsyms; i++) {
       sprintf (name, "sub%05d", i);
       MESSAGE (8, print_func ("%s\n", name););
 #if 1
