@@ -1589,6 +1589,7 @@ static void display_string
 
 		memmove(tempstr.s, tempstr.s + 1, tempstr.len -1);
 		tempstr.s[tempstr.len - 2] = '\0';
+		tempstr.len = tempstr.len - 2;
 
 		free_space = NCOLS - indent - COL - strlen(out_buf);
 
@@ -1621,8 +1622,8 @@ static void display_string
                      printf("%s\" //\n", out_buf);
                      first_row = 0;
                  } else {
-                     indentation(indent+COL); 
-                     printf("%s\"", out_buf);
+                     indentation(indent+COL);     
+					 printf("%s\"", out_buf);
                      strncpy(out_buf, tempstr.s, x);
                      out_buf[x] = '\0';
 					 printf("%s\" //\n", out_buf);
@@ -1736,7 +1737,7 @@ static void display_string
                out_buf[0] = '\0';
                row_size = 0;
             } else {
-                 strcat(out_buf, "\"");
+                 strcat(out_buf, "\""); 
                  strcat(out_buf, tempstr.s);
                  strcat(out_buf, "\",");
                  if ((int)strlen(out_buf) < (NCOLS-indent-COL)) strcat(out_buf, " ");
