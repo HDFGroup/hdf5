@@ -361,6 +361,8 @@
 ./fortran/src/H5Dff.f90
 ./fortran/src/H5Ef.c
 ./fortran/src/H5Eff.f90
+./fortran/src/H5FDmpiof.c
+./fortran/src/H5FDmpioff.f90
 ./fortran/src/H5Ff.c
 ./fortran/src/H5Fff.f90
 ./fortran/src/H5Gf.c
@@ -370,9 +372,7 @@
 ./fortran/src/H5If.c
 ./fortran/src/H5Iff.f90
 ./fortran/src/H5Pf.c
-./fortran/src/H5Pf_parallel.c
 ./fortran/src/H5Pff.f90
-./fortran/src/H5Pff_parallel.f90
 ./fortran/src/H5Rf.c
 ./fortran/src/H5Rff.f90
 ./fortran/src/H5Sf.c
@@ -389,7 +389,7 @@
 ./fortran/src/H5fortran_flags.f90
 ./fortran/src/H5fortran_types.f90.in
 ./fortran/src/HDF5.f90
-./fortran/src/HDF5_parallel.f90
+./fortran/src/HDF5mpio.f90
 ./fortran/src/Makefile.in
 ./fortran/src/README
 
