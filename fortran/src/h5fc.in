@@ -53,6 +53,7 @@ SHOW="eval"
 FCBASE="@F9X@"
 FLINKERBASE="@F9X@"
 FFLAGS="@FFLAGS@"
+F9XMODFLAG="@F9XMODFLAG@"
 LDFLAGS="@LDFLAGS@"
 LIBS="@LIBS@"
 
@@ -197,7 +198,7 @@ if test "x$do_link" = "xyes"; then
   link_args="$link_args ${libdir}/libhdf5_fortran.a ${libdir}/libhdf5.a"
 
   link_args="$link_args $LIBS"
-  $SHOW $FLINKER $FFLAGS $LDFLAGS $link_objs $link_args
+  $SHOW $FLINKER ${F9XMODFLAG}${libdir} $link_objs $link_args
   status=$?
 fi
 
