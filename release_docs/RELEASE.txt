@@ -1,12 +1,12 @@
-HDF5 version 1.4.3-snap12 currently under development
+HDF5 version 1.4.3-post0 currently under development
 ==============================================================================
 
 
 INTRODUCTION
 
-This document describes the differences between HDF5-1.4.2 and
-HDF5-1.4.3, and contains information on the platforms tested and
-known problems in HDF5-1.4.2. For more details check the HISTORY.txt
+This document describes the differences between HDF5-1.4.3 and
+HDF5-1.4.3_post0, and contains information on the platforms tested and
+known problems in HDF5-1.4.3. For more details check the HISTORY.txt
 file in the HDF5 source.
 
 The HDF5 documentation can be found on the NCSA ftp server
@@ -26,7 +26,7 @@ If you have any questions or comments, please send them to:
 CONTENTS
 
 - New Features
-- Bug Fixes since HDF5-1.4.2
+- Bug Fixes since HDF5-1.4.3
 - Documentation
 - Platforms Tested
 - Supported Configuration Features
@@ -37,116 +37,35 @@ New Features
 ============
   o Configuration
   ================
-    * Can use just enable-threadsafe if the C compiler has built-in pthreads
-      support.
 
   o Library
   =========
    o General
    --------- 
-    * Added a new test to verify the information provided by the configure
-      command.
-    * Changed internal error handling macros to reduce code size of library by
-      about 10%.
 
    o APIs
    ------
-    * Changed prototype for H5Awrite from:
-        H5Awrite(hid_t attr_id, hid_t type_id, void *buf)
-      to:
-        H5Awrite(hid_t attr_id, hid_t type_id, const void *buf)
-    * The H5Pset_fapl_split() accepts raw and meta file names similar to the
-      syntax of H5Pset_fapl_multi() in addition to what it used to accept.
-
-    C++ API:
-    * Added operator= to class PredType
-    * Add the overloaded member function Attribute::getName to return
-      the attribute name's length as in C API.  Note that the current
-      Attribute::getName, that returns "string", is still available.
-    * Following the change in the C library, the corresponding C++ API
-      is changed from:
-        void Attribute::write( const DataType& mem_type, void *buf )
-      to:
-        void Attribute::write( const DataType& mem_type, const void *buf )
 
    o Performance
    -------------
-    * Added perform programs to test the HDF5 library performance.  Programs
-      are installed in directory perform/.
-    * Improved performance of byte-swapping during data conversions.
-    * Improved performance of single, contiguous hyperslabs when reading or
-      writing.
-    * Added support to read/write portions of chunks directly, if they are
-      uncompressed and too large to cache.  This should speed up I/O on chunked
-      datasets for a few more cases.  -QAK, 1/31/02
 
   o Parallel Library
   ==================
-    * Parallel C HDF5 now works on HP-UX platforms, Compaq clusters,
-      Linux clusters, Cplants (alpha-linux clusters).
 
   o Tools
   =======
-    * A helper script called ``h5cc'', which helps compilation of HDF5
-      programs, is now distributed with HDF5. See the reference manual
-      for information on how to use this feature.
-    * The H5Dumper can now dump comments associated with groups. -WCW 01-05-02
 
   o Support for new platforms and languages
   =========================================
-    * HDF5 C++ Library is supported on Windows platforms.
-    * HDF5 F90 shared library is supported on Windows platforms.
-    * HDF5 C Library is supported on IA32 and IA64 platforms.
 
 
 
-Bug Fixes since HDF5-1.4.2 Release
+Bug Fixes since HDF5-1.4.3 Release
 ==================================
-
-    * Fixed a bug when reading chunked datasets where the edge of the dataset
-      would be incorrectly detected and generate an assertion failure.
-    * Fixed a bug where reading an entire dataset wasn't being handled
-      optimally when the dataset had unlimited dimensions.  Dataset is read
-      in a single low-level I/O now, instead of being broken into separate
-      pieces internally.
-    * Fixed a bug where reading or writing chunked data which needed datatype
-      conversion could result in data values getting corrupted.
-    * Fixed a bug where appending a point selection to the current selection
-      would not actually append the point when there were no points defined
-      currently.
-    * Fixed a bug where 'or'ing a hyperslab with a 'none' selection would
-      fail.  Now adds that hyperslab as the first hyperlab in the selection.
-    * Fixed a bug in the 'big' test where quota limits weren't being detected
-      properly if they caused close() to fail.
-    * Fixed a bug in internal B-tree code where a B-tree was not being copied
-      correctly.
-    * Fixed an off-by-one error in H5Sselect_valid when hyperslab selections
-      which would allow hyperslab selections which overlapped the edge of the
-      selection by one element as valid.
-    * Fixed the internal macros used to encode & decode file metadata, to avoid
-      an unaligned access warning on IA64 machines.
-    * Corrected behavior of H5Tinsert to not allow compound datatype fields to
-      be inserted past the end of the datatype.
-    * Retired the DPSS virtual file driver (--with-gridstorage configure
-      option).
-    * Fixed bug where variable-length datatypes for attributes was not working
-      correctly.
-    * Fixed bug where raw data re-allocated from the free-list would sometimes
-      overlap with the metadata accumulator and get corrupted. QAK - 1/23/02
-    * Fixed bug where a preempted chunk in the chunk data could still be
-      used by an internal pointer and cause an assertion failure or core
-      dump. QAK - 2/13/02
-    * Fixed bug where non-zero fill-value was not being read correctly from
-      certain chunked datasets when using an "all" or contiguous hyperslab
-      selection.  QAK - 2/14/02
 
 
 Documentation
 =============
-    * Documentation was updated for the hdf5-1.4.3 release.
-    * A new "HDF5 User's Guide" is under development.  See 
-      http://hdf.ncsa.uiuc.edu/HDF5/doc_dev_snapshot/H5_NewUG/current/.
-    * Parallel Tutorial is available at http://hdf.ncsa.uiuc.edu/HDF5/doc/Tutor/
 
 
 Platforms Tested
