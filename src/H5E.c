@@ -1485,7 +1485,9 @@ H5Epush_stack(hid_t err_stack, const char *file, const char *func, unsigned line
     va_list     ap;             /* Varargs info */
     H5E_t       *estack;        /* Pointer to error stack to modify */
     H5E_msg_t   *maj_ptr, *min_ptr;     /* Pointer to major and minor error info */
-    char        tmp[H5E_LEN];   /* Buffer to place formatted description in */
+    int         tmp_len;        /* Current size of description buffer */
+    int         desc_len;       /* Actual length of description when formatted */
+    char        *tmp=NULL;      /* Buffer to place formatted description in */
     herr_t	ret_value=SUCCEED;      /* Return value */
 
     /* Don't clear the error stack! :-) */
@@ -1513,7 +1515,20 @@ H5Epush_stack(hid_t err_stack, const char *file, const char *func, unsigned line
 
     /* Format the description */
     va_start(ap, fmt);
-    HDvsnprintf(tmp, H5E_LEN, fmt, ap);
+
+    /* Allocate space for the formatted description buffer */
+    tmp_len=128;
+    if((tmp=H5MM_malloc((size_t)tmp_len))==NULL)
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+    /* If the description doesn't fit into the initial buffer size, allocate more space and try again */
+    while((desc_len=HDvsnprintf(tmp, (size_t)tmp_len, fmt, ap))>tmp_len) {
+        H5MM_xfree(tmp);
+        tmp_len = desc_len+1;
+        if((tmp=H5MM_malloc((size_t)tmp_len))==NULL)
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+    } /* end while */
+
     va_end(ap);
 
     /* Push the error on the stack */
@@ -1521,6 +1536,9 @@ H5Epush_stack(hid_t err_stack, const char *file, const char *func, unsigned line
         HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't push error on stack")
 
 done:
+    if(tmp)
+        H5MM_xfree(tmp);
+
     FUNC_LEAVE_API(ret_value)
 }
 

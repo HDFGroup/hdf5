@@ -74,6 +74,8 @@ hid_t   ERR_MIN_GETNUM;
 #define SPACE2_DIM1	        10
 #define SPACE2_DIM2	        10
 
+#define LONG_DESC_SIZE          8192
+
 herr_t custom_print_cb(unsigned n, const H5E_error_t *err_desc, void* client_data);
 
 
@@ -429,6 +431,8 @@ main(void)
     hid_t		file, fapl;
     hid_t               estack_id;
     char		filename[1024];
+    char                *long_desc;
+    size_t              u;
     const char          *FUNC_main="main";
 
     fprintf(stderr, "   This program tests the Error API.  There're supposed to be some error messages\n");
@@ -446,8 +450,8 @@ main(void)
     /* Test error stack */ 
     if(error_stack()<0) {
         /* Push an error onto error stack */
-        H5Epush_stack(ERR_STACK, __FILE__, FUNC_main, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_ERRSTACK, 
-                "Error stack test failed");
+        if(H5Epush_stack(ERR_STACK, __FILE__, FUNC_main, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_ERRSTACK, 
+                "Error stack test failed")<0) TEST_ERROR;
         
         /* Delete an error from the top of error stack */
         H5Epop(ERR_STACK, 1);
@@ -470,6 +474,17 @@ main(void)
         H5Eprint_stack(estack_id, stderr);
         H5Eclose_stack(estack_id);
     }
+
+    /* Test pushing a very long error description */
+    if((long_desc=HDmalloc(LONG_DESC_SIZE))==NULL) TEST_ERROR;
+
+    for(u=0; u<LONG_DESC_SIZE; u++)
+        long_desc[u]='A'+(u%26);
+    long_desc[LONG_DESC_SIZE-1]='\0';
+    if(H5Epush_stack(H5E_DEFAULT, __FILE__, FUNC_main, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, 
+            "Testing very long description string, %s", long_desc)<0) TEST_ERROR;
+    if(H5Eprint_stack(H5P_DEFAULT, stderr)<0) TEST_ERROR;
+    HDfree(long_desc);
     
     if (H5Fclose(file)<0) TEST_ERROR ;
     h5_cleanup(FILENAME, fapl);
