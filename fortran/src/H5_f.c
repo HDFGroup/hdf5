@@ -163,7 +163,6 @@ nh5close_types_c( hid_t_f * types, int_f *lentypes,
  * Name:              h5init_flags_c
  * Purpose:           Initialize Fortran flags
  * Inputs:            h5d_flags    - H5D inteface flags 
- *                    h5e_flags    - H5E interface flags
  *                    h5f_flags    - H5F interface flags
  *                    h5fd_flags    - H5FD interface flags
  *                    h5g_flags    - H5G interface flags
@@ -181,7 +180,7 @@ nh5close_types_c( hid_t_f * types, int_f *lentypes,
  *                    Added more FD flags and new H5LIB flags
  *---------------------------------------------------------------------------*/
 int_f
-nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, int_f *h5f_flags,
+nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
                  int_f *h5fd_flags, int_f *h5g_flags, int_f *h5i_flags,
                  int_f *h5p_flags, int_f *h5r_flags, int_f *h5s_flags,
                  int_f *h5t_flags, int_f *h5z_flags)
@@ -210,35 +209,6 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, int_f *h5f_flags,
     h5d_flags[17] = H5D_FILL_VALUE_DEFAULT;
     h5d_flags[18] = H5D_FILL_VALUE_USER_DEFINED;
 
-/*
- *  H5E flags
- */
-    
-      h5e_flags[0] = H5E_NONE_MAJOR;
-      h5e_flags[1] = H5E_ARGS;
-      h5e_flags[2] = H5E_RESOURCE;
-      h5e_flags[3] = H5E_INTERNAL;
-      h5e_flags[4] = H5E_FILE;
-      h5e_flags[5] = H5E_IO;
-      h5e_flags[6] = H5E_FUNC;
-      h5e_flags[7] = H5E_ATOM;
-      h5e_flags[8] = H5E_CACHE;
-      h5e_flags[9] = H5E_BTREE;
-      h5e_flags[10] = H5E_SYM;
-      h5e_flags[11] = H5E_HEAP;
-      h5e_flags[12] = H5E_OHDR;
-      h5e_flags[13] = H5E_DATATYPE;
-      h5e_flags[14] = H5E_DATASPACE;
-      h5e_flags[15] = H5E_DATASET;
-      h5e_flags[16] = H5E_STORAGE;
-      h5e_flags[17] = H5E_PLIST;
-      h5e_flags[18] = H5E_ATTR;
-      h5e_flags[19] = H5E_PLINE;
-      h5e_flags[20] = H5E_EFL;
-      h5e_flags[21] = H5E_REFERENCE;
-      h5e_flags[22] = H5E_VFL;
-      h5e_flags[23] = H5E_TBBT;
-    
 /*
  *  H5F flags
  */

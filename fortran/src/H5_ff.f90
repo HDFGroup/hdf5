@@ -77,7 +77,6 @@
         END INTERFACE
         INTERFACE
           INTEGER FUNCTION h5init_flags_c(i_H5D_flags, &
-                                i_H5E_flags, &
                                 i_H5F_flags, &
                                 i_H5FD_flags, &
                                 i_H5G_flags, &
@@ -92,7 +91,6 @@
           INTEGER i_H5G_flags(H5G_FLAGS_LEN)
           INTEGER i_H5D_flags(H5D_FLAGS_LEN)
           INTEGER i_H5FD_flags(H5FD_FLAGS_LEN)
-          INTEGER i_H5E_flags(H5E_FLAGS_LEN)
           INTEGER i_H5I_flags(H5I_FLAGS_LEN)
           INTEGER i_H5P_flags(H5P_FLAGS_LEN)
           INTEGER i_H5R_flags(H5R_FLAGS_LEN)
@@ -116,7 +114,6 @@
         error_0 = h5open_c()
         error_1 = h5init_types_c(predef_types, floating_types, integer_types)
         error_2 = h5init_flags_c(H5D_flags, &
-                                H5E_flags, &
                                 H5F_flags, &
                                 H5FD_flags, &
                                 H5G_flags, &
