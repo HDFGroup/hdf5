@@ -206,7 +206,7 @@ size_t H5Tget_ebias (hid_t type_id);
 H5T_norm_t H5Tget_norm (hid_t type_id);
 H5T_pad_t H5Tget_inpad (hid_t type_id);
 H5T_str_t H5Tget_strpad (hid_t type_id);
-intn H5Tget_nmembers (hid_t type_id);
+int H5Tget_nmembers (hid_t type_id);
 char *H5Tget_member_name (hid_t type_id, int membno);
 size_t H5Tget_member_offset (hid_t type_id, int membno);
 int H5Tget_member_dims (hid_t type_id, int membno, size_t dims[]/*out*/,

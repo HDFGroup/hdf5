@@ -243,7 +243,7 @@ H5S_simp_mscat (const void *tconv_buf, size_t elmt_size,
 			   "hyperslab sampling is not implemented yet");
 	}
     }
-    if (H5S_get_dims (mem_space, mem_size)<0) {
+    if (H5S_get_dims (mem_space, mem_size, NULL)<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		       "unable to retrieve data space dimensions");
     }
@@ -348,7 +348,7 @@ H5S_simp_mgath (const void *buf, size_t elmt_size,
 			   "hyperslab sampling is not implemented yet");
 	}
     }
-    if (H5S_get_dims (mem_space, mem_size)<0) {
+    if (H5S_get_dims (mem_space, mem_size, NULL)<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
 		       "unable to retrieve data space dimensions");
     }

@@ -45,13 +45,12 @@ static char             RcsId[] = "@(#)$Revision$";
 
 #include <H5private.h>          /* Generic functions */
 #include <H5Aprivate.h>		/* Atom interface */
-#include <H5Pprivate.h>         /* Template interface */
 #include <H5Dprivate.h>         /* Dataset interface */
 #include <H5Eprivate.h>         /*error handling */
 #include <H5Sprivate.h>         /* Dataspace functions */
 #include <H5Tprivate.h>         /* Datatype interface */
 #include <H5Mprivate.h>         /* Meta-object interface */
-#include <H5Pprivate.h>         /* Template interface */
+#include <H5Pprivate.h>         /* Property list interface */
 
 #define PABLO_MASK      H5M_mask
 

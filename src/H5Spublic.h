@@ -22,7 +22,7 @@
 
 /* Define atomic datatypes */
 #define H5S_ALL         (-2)
-#define H5S_UNLIMITED	0
+#define H5S_UNLIMITED	((size_t)(-1L))
 
 /* Different types of dataspaces */
 typedef enum H5S_class_t {

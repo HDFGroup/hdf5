@@ -93,8 +93,10 @@ typedef struct H5S_tconv_t {
 H5S_t *H5S_copy (const H5S_t *src);
 herr_t H5S_close (H5S_t *ds);
 size_t H5S_get_npoints (const H5S_t *ds);
+size_t H5S_get_npoints_max(const H5S_t *ds);
 intn H5S_get_ndims (const H5S_t *ds);
-intn H5S_get_dims (const H5S_t *ds, size_t dims[]/*out*/);
+intn H5S_get_dims (const H5S_t *ds, size_t dims[]/*out*/,
+		   size_t max_dims[]/*out*/);
 herr_t H5S_modify (H5G_entry_t *ent, const H5S_t *space);
 H5S_t *H5S_read (H5F_t *f, H5G_entry_t *ent);
 intn H5S_cmp (const H5S_t *ds1, const H5S_t *ds2);

@@ -29,7 +29,7 @@
 #define H5V_ZERO        NULL
 
 size_t H5V_hyper_stride(intn n, const size_t *size, const size_t *total_size,
-			const size_t *offset, intn *stride);
+			const size_t *offset, ssize_t *stride);
 hbool_t H5V_hyper_disjointp(intn n, const size_t *offset1,
 			    const size_t *size1, const size_t *offset2,
 			    const size_t *size2);
@@ -42,18 +42,18 @@ herr_t H5V_hyper_copy(intn n, const size_t *size,
 		      void *_dst, const size_t *src_total_size,
 		      const size_t *src_offset, const void *_src);
 herr_t H5V_stride_fill(intn n, size_t elmt_size, const size_t *size,
-		       const intn *stride, void *_dst, uint8 fill_value);
+		       const ssize_t *stride, void *_dst, uint8 fill_value);
 herr_t H5V_stride_copy(intn n, size_t elmt_size, const size_t *_size,
-		       const intn *dst_stride, void *_dst,
-		       const intn *src_stride, const void *_src);
+		       const ssize_t *dst_stride, void *_dst,
+		       const ssize_t *src_stride, const void *_src);
 herr_t H5V_stride_copy2(size_t nelmts, size_t elmt_size, intn dst_n,
-			const size_t *dst_size, const intn *dst_stride,
+			const size_t *dst_size, const ssize_t *dst_stride,
 			void *_dst, intn src_n, const size_t *src_size,
-			const intn *src_stride, const void *_src);
+			const ssize_t *src_stride, const void *_src);
 herr_t H5V_stride_optimize1(intn *np, size_t *elmt_size, size_t *size,
-			    intn *stride1);
+			    ssize_t *stride1);
 herr_t H5V_stride_optimize2(intn *np, size_t *elmt_size, size_t *size,
-			    intn *stride1, intn *stride2);
+			    ssize_t *stride1, ssize_t *stride2);
 
 
 /*-------------------------------------------------------------------------

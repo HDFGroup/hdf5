@@ -54,6 +54,7 @@ static const H5E_major_mesg_t H5E_major_mesg_g[] = {
     {H5E_DATASET,	"Dataset interface"},
     {H5E_STORAGE,	"Data storage layer"},
     {H5E_TEMPLATE,	"Property list interface"},
+    {H5E_EFL, 		"External file list"},
 };
 
 static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {

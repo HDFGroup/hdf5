@@ -89,6 +89,9 @@ typedef struct atom_group_struct_tag {
     atom_info_t **atom_list;    /*pointer to an array of ptrs to atoms       */
 } atom_group_t;
 
+/* Type of the function to compare objects & keys */
+typedef intn (*H5A_search_func_t) (const void * obj, const void * key);
+
 /* Private Functions in H5A.c */
 intn H5A_init_group (group_t grp, intn hash_size, uintn reserved,
 		     herr_t (*free_func)(void *));
@@ -97,7 +100,7 @@ hid_t H5A_register (group_t grp, void *object);
 void *H5A_object (hid_t atm);
 group_t H5A_group (hid_t atm);
 void *H5A_remove (hid_t atm);
-void *H5A_search (group_t grp, H5Asearch_func_t func, const void *key);
+void *H5A_search (group_t grp, H5A_search_func_t func, const void *key);
 void H5A_term_interface (void);
 intn H5A_dec_ref (hid_t atm);
 hid_t H5A_inc_ref (hid_t atm);

@@ -31,9 +31,9 @@
  *
  * Purpose:     Attempts to create a dataset.
  *
- * Return:      Success:        SUCCEED
+ * Return:      Success:        0
  *
- *              Failure:        FAIL
+ *              Failure:        -1
  *
  * Programmer:  Robb Matzke
  *              Tuesday, December  9, 1997
@@ -56,7 +56,7 @@ test_create(hid_t file)
     dims[0] = 256;
     dims[1] = 512;
     space = H5Screate_simple(2, dims, NULL);
-    assert(space != FAIL);
+    assert(space>=0);
 
     /*
      * Create a dataset using the default dataset creation properties.  We're
@@ -171,10 +171,10 @@ test_create(hid_t file)
         goto error;
     }
     puts(" PASSED");
-    return SUCCEED;
+    return 0;
 
   error:
-    return FAIL;
+    return -1;
 }
 
 /*-------------------------------------------------------------------------
@@ -184,9 +184,9 @@ test_create(hid_t file)
  *              multi-dimensional array without data type or data space
  *              conversions, without compression, and stored contiguously.
  *
- * Return:      Success:        SUCCEED
+ * Return:      Success:        0
  *
- *              Failure:        FAIL
+ *              Failure:        -1
  *
  * Programmer:  Robb Matzke
  *              Wednesday, December 10, 1997
@@ -217,7 +217,7 @@ test_simple_io(hid_t file)
     dims[0] = 100;
     dims[1] = 200;
     space = H5Screate_simple(2, dims, NULL);
-    assert(space != FAIL);
+    assert(space>=0);
 
     /* Create the dataset */
     dataset = H5Dcreate(file, DSET_SIMPLE_IO_NAME, H5T_NATIVE_INT, space,
@@ -264,10 +264,10 @@ test_simple_io(hid_t file)
     H5Dclose(dataset);
 
     puts(" PASSED");
-    return SUCCEED;
+    return 0;
 
   error:
-    return FAIL;
+    return -1;
 }
 
 /*-------------------------------------------------------------------------
@@ -275,9 +275,9 @@ test_simple_io(hid_t file)
  *
  * Purpose:     Test some simple data type conversion stuff.
  *
- * Return:      Success:        SUCCEED
+ * Return:      Success:        0
  *
- *              Failure:        FAIL
+ *              Failure:        -1
  *
  * Programmer:  Robb Matzke
  *              Wednesday, January 14, 1998
@@ -289,8 +289,8 @@ test_simple_io(hid_t file)
 static herr_t
 test_tconv(hid_t file)
 {
-    uint8	*out=NULL, *in=NULL;
-    intn	i;
+    char	*out=NULL, *in=NULL;
+    int		i;
     size_t	dims[1];
     hid_t	space, dataset, type;
     herr_t	status;
@@ -303,13 +303,17 @@ test_tconv(hid_t file)
     printf("%-70s", "Testing data type conversion");
 
     /* Initialize the dataset */
-    for (i = 0; i < 1000000; i++)
-        ((int32 *) out)[i] = 0x11223344;
+    for (i = 0; i < 1000000; i++) {
+	out[i*4+0] = 0x11;
+	out[i*4+1] = 0x22;
+	out[i*4+2] = 0x33;
+	out[i*4+3] = 0x44;
+    }
 
     /* Create the data space */
     dims[0] = 1000000;
     space = H5Screate_simple (1, dims, NULL);
-    assert(space != FAIL);
+    assert(space >= 0);
 
     /* Create the data set */
     dataset = H5Dcreate(file, DSET_TCONV_NAME, H5T_NATIVE_INT32, space,
@@ -351,7 +355,7 @@ test_tconv(hid_t file)
     H5Tclose(type);
 
     puts(" PASSED");
-    return SUCCEED;
+    return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -375,7 +379,7 @@ main(void)
 {
     hid_t                   file;
     herr_t                  status;
-    intn                    nerrors = 0;
+    int                     nerrors = 0;
 
     status = H5open ();
     assert (status>=0);

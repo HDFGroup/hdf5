@@ -107,11 +107,86 @@
 #endif
 
 /*
+ * Numeric data types
+ */
+typedef char            char8;
+typedef signed char int8;
+typedef unsigned char   uchar8, uint8;
+
+#if SIZEOF_SHORT==2
+typedef short int16;
+typedef unsigned short uint16;
+#else
+typedef int int16;              /*not really */
+typedef unsigned uint16;        /*not really */
+#endif
+
+#if SIZEOF_INT==4
+typedef int int32;
+typedef unsigned int uint32;
+#elif SIZEOF_LONG==4
+typedef long int32;
+typedef unsigned long uint32;
+#else
+typedef int int32;              /*not really */
+typedef unsigned uint32;        /*not really */
+#endif
+
+#if SIZEOF_INT==8
+typedef int             int64;
+typedef unsigned        uint64;
+#elif SIZEOF_LONG==8
+typedef long            int64;
+typedef unsigned long   uint64;
+#elif SIZEOF_LONG_LONG==8
+typedef long long       int64;
+typedef unsigned long long uint64;
+#else
+#  error "no 64-bit integer type"
+#endif
+
+#if SIZEOF_FLOAT==4
+typedef float float32;
+#else
+typedef float float32;          /*not really */
+#endif
+
+#if SIZEOF_FLOAT==8
+typedef float float64;
+#elif SIZEOF_DOUBLE==8
+typedef double float64;
+#else
+#  error "no 64-bit floating point type"
+#endif
+
+/*
+ * Define a type for generic integers.  Use this instead of `int' to
+ * show that some thought went into the algorithm.
+ */
+typedef int intn;
+typedef unsigned uintn;
+
+/*
+ * Status return values for the `herr_t' type.
+ * Since some unix/c routines use 0 and -1 (or more precisely, non-negative
+ * vs. negative) as their return code, and some assumption had been made in
+ * the code about that, it is important to keep these constants the same
+ * values.  When checking the success or failure of an integer-valued
+ * function, remember to compare against zero and not one of these two
+ * values.
+ */
+#define SUCCEED         0
+#define FAIL            (-1)
+#define UFAIL           (unsigned)(-1)
+
+/*
  * File addresses.
  */
 typedef struct {
     uint64                  offset;     /*offset within an HDF5 file    */
 } haddr_t;
+
+#define H5F_ADDR_UNDEF {((uint64)(-1L))}
 
 /*
  * Some compilers have problems declaring auto variables that point

@@ -57,9 +57,9 @@ static const H5O_class_t *const message_type_g[] = {
     NULL,		/*0x0004 Not assigned				*/
     NULL,		/*0x0005 Not assigned				*/
     NULL,		/*0x0006 Data storage -- compact object		*/
-    NULL,		/*0x0007 Data storage -- external object	*/
+    H5O_EFL,		/*0x0007 Data storage -- external data files	*/
     H5O_LAYOUT,		/*0x0008 Data Layout				*/
-    H5O_EFL,		/*0x0009 External File List			*/
+    NULL,		/*0x0009 Not assigned				*/
     NULL,		/*0x000A Not assigned				*/
     NULL,		/*0x000B Data storage -- compressed object	*/
     NULL,		/*0x000C Attribute list				*/

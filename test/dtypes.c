@@ -89,7 +89,10 @@ test_classes(void)
 static herr_t
 test_copy(void)
 {
-    hid_t                   a_copy;
+    hid_t               a_copy;
+    herr_t		status;
+    herr_t 		(*func)(void*) = NULL;
+    void		*client_data = NULL;
 
     printf("%-70s", "Testing H5Tcopy()");
 
@@ -109,7 +112,14 @@ test_copy(void)
         }
         goto error;
     }
-    if (H5Tclose(H5T_NATIVE_CHAR) >= 0) {
+
+    /* Temporarily turn off error reporting. */
+    H5Eget_auto (&func, &client_data);
+    H5Eset_auto (NULL, NULL);
+    status = H5Tclose (H5T_NATIVE_CHAR);
+    H5Eset_auto (func, client_data);
+
+    if (status >= 0) {
         puts("*FAILED*");
         if (!isatty(1)) {
             AT();
@@ -159,7 +169,7 @@ test_compound(void)
         }
         goto error;
     }
-    /* Add a coupld fields */
+    /* Add a couple fields */
     status = H5Tinsert(complex_id, "real", HOFFSET(tmp, re),
                        H5T_NATIVE_DOUBLE);
     if (status < 0) {

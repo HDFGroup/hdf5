@@ -11,7 +11,7 @@ CPPFLAGS=-I. -I../src @CPPFLAGS@
 
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
-PROGS=testhdf5  hyperslab istore dtypes dsets cmpd_dset extend
+PROGS=testhdf5  hyperslab istore dtypes dsets cmpd_dset extend external
 TESTS=$(PROGS)
 
 # Temporary files
@@ -23,7 +23,7 @@ MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 extend.h5 istore.h5 tfile1.h5 tfile2.h5  \
 # other source lists are for the individual tests, the files of which may
 # overlap with other tests.
 PROG_SRC=testhdf5.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5s.c dtypes.c  \
-         hyperslab.c istore.c dsets.c cmpd_dset.c extend.c
+         hyperslab.c istore.c dsets.c cmpd_dset.c extend.c external.c
 PROG_OBJ=$(PROG_SRC:.c=.o)
 
 TESTHDF5_SRC=testhdf5.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5s.c
@@ -46,6 +46,9 @@ CMPD_DSET_OBJ=$(CMPD_DSET_SRC:.c=.o)
 
 EXTEND_SRC=extend.c
 EXTEND_OBJ=$(EXTEND_SRC:.c=.o)
+
+EXTERNAL_SRC=external.c
+EXTERNAL_OBJ=$(EXTERNAL_SRC:.c=.o)
 
 # Private header files (not to be installed)...
 PRIVATE_HDR=testhdf5.h
@@ -71,5 +74,8 @@ cmpd_dset: $(CMPD_DSET_OBJ) ../src/libhdf5.a
 
 extend: $(EXTEND_OBJ) ../src/libhdf5.a
 	$(CC) $(CFLAGS) -o $@ $(EXTEND_OBJ) ../src/libhdf5.a $(LIBS)
+
+external: $(EXTERNAL_OBJ) ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ $(EXTERNAL_OBJ) ../src/libhdf5.a $(LIBS)
 
 @CONCLUDE@

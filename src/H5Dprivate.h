@@ -31,14 +31,15 @@
 /* Set the minimum object header size to create objects with */
 #define H5D_MINHDR_SIZE 512
 
-/* Dataset creation template */
+/* Dataset creation property list */
 typedef struct H5D_create_t {
-    H5D_layout_t        layout;
-    intn                chunk_ndims;
-    size_t              chunk_size[32];
+    H5D_layout_t        layout;		/*storage layout		     */
+    intn                chunk_ndims;	/*chunk dimensionality		     */
+    size_t              chunk_size[32];	/*chunk size if chunked storage	     */
+    H5O_efl_t		efl;		/*external file list		     */
 } H5D_create_t;
 
-/* Dataset transfer template */
+/* Dataset transfer property list */
 typedef struct H5D_xfer_t {
     int _placeholder;                   /*unused--delete this later          */
 } H5D_xfer_t;

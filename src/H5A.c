@@ -671,7 +671,7 @@ H5A_dec_ref(hid_t atm)
 *******************************************************************************/
 void *
 H5A_search(group_t grp,	    /* IN: Group to search for the object in */
-	   H5Asearch_func_t func,   /* IN: Ptr to the comparison function */
+	   H5A_search_func_t func,   /* IN: Ptr to the comparison function */
 	   const void *key  /* IN: pointer to key to compare against */
 )
 {

@@ -209,7 +209,7 @@
 #define NBYTEDECODE(s, d, n) {	 HDmemcpy(d,s,n); p+=n }
 
 /*
- * File-creation template.
+ * File-creation property list.
  */
 typedef struct H5F_create_t {
     size_t	userblock_size;	/* Size of the file user block in bytes */
@@ -225,7 +225,7 @@ typedef struct H5F_create_t {
 } H5F_create_t;
 
 /*
- * File-access template.
+ * File-access property list.
  */
 typedef struct H5F_access_t {
     H5F_driver_t driver;	/* Low level file driver		*/
@@ -391,8 +391,8 @@ typedef struct H5F_file_t {
     haddr_t	freespace_addr;	/* Relative address of free-space info	*/
     haddr_t	hdf5_eof;	/* Relative addr of end of all hdf5 data*/
     struct H5AC_t *cache;	/* The object cache			*/
-    H5F_create_t create_parms;	/* File-creation template		*/
-    H5F_access_t access_parms;  /* File-access template	*/
+    H5F_create_t create_parms;	/* File-creation property list		*/
+    H5F_access_t access_parms;  /* File-access property list		*/
     struct H5G_entry_t *root_ent; /* Root symbol table entry		*/
 } H5F_file_t;
 

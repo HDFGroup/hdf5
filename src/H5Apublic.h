@@ -44,10 +44,7 @@ typedef enum {
 } group_t;
 
 /* Type of atoms to return to users */
-typedef int32 hid_t;
-
-/* Type of the function to compare objects & keys */
-typedef intn (*H5Asearch_func_t) (const void * obj, const void * key);
+typedef int hid_t;
 
 /* # of bits to use for Group ID in each atom (change if MAXGROUP>16) */
 #define GROUP_BITS  8

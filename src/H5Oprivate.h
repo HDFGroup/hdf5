@@ -127,6 +127,28 @@ extern const H5O_class_t H5O_DTYPE[1];
 /* operates on an H5T_t struct */
 
 /*
+ * External File List Message
+ */
+#define H5O_EFL_ID		0x0007	/*external file list id		     */
+#define H5O_EFL_ALLOC		16	/*number of slots to alloc at once   */
+#define H5O_EFL_UNLIMITED	H5F_UNLIMITED /*max possible file size	     */
+extern const H5O_class_t H5O_EFL[1];	/*external file list class	     */
+
+typedef struct H5O_efl_entry_t {
+    size_t	name_offset;		/*offset of name within heap	     */
+    char	*name;			/*malloc'd name			     */
+    size_t	offset;			/*offset of data within file	     */
+    size_t	size;			/*size allocated within file	     */
+} H5O_efl_entry_t;
+
+typedef struct H5O_efl_t {
+    haddr_t	heap_addr;		/*address of name heap		     */
+    uintn	nalloc;			/*number of slots allocated	     */
+    uintn	nused;			/*number of slots used		     */
+    H5O_efl_entry_t *slot;		/*array of external file entries     */
+} H5O_efl_t;
+
+/*
  * Data Layout Message
  */
 #define H5O_LAYOUT_ID		0x0008
@@ -139,19 +161,6 @@ typedef struct H5O_layout_t {
     uintn	ndims;			/*num dimensions in stored data	     */
     size_t	dim[H5O_LAYOUT_NDIMS];	/*size of data or chunk		     */
 } H5O_layout_t;
-
-/*
- * External File List Message
- */
-#define H5O_EFL_ID		0x0009
-extern const H5O_class_t H5O_EFL[1];
-
-typedef struct H5O_efl_t {
-    haddr_t	heap_addr;		/*address of name heap		     */
-    uintn	nalloc;			/*number of slots allocated	     */
-    uintn	nused;			/*number of slots used		     */
-    size_t	*offset;		/*array of name offsets in heap	     */
-} H5O_efl_t;
 
 /*
  * Object name message.
@@ -191,6 +200,7 @@ typedef struct H5O_stab_t {
     haddr_t	heap_addr;		/*address of name heap		     */
 } H5O_stab_t;
 
+/* General message operators */
 herr_t H5O_create (H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/);
 herr_t H5O_open (H5F_t *f, H5G_entry_t *ent);
 herr_t H5O_close (H5G_entry_t *ent);
@@ -203,4 +213,8 @@ herr_t H5O_remove (H5G_entry_t *ent, const H5O_class_t *type, intn sequence);
 herr_t H5O_reset (const H5O_class_t *type, void *native);
 herr_t H5O_debug (H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 		  intn fwidth);
+
+/* EFL operators */
+size_t H5O_efl_total_size (H5O_efl_t *efl);
+
 #endif

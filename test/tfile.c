@@ -32,8 +32,8 @@ static char             RcsId[] = "$Revision$";
 #include <H5Mprivate.h>
 
 #define F1_USERBLOCK_SIZE  0
-#define F1_OFFSET_SIZE     4
-#define F1_LENGTH_SIZE     4
+#define F1_OFFSET_SIZE     sizeof(size_t)
+#define F1_LENGTH_SIZE     sizeof(size_t)
 #define F1_SYM_LEAF_K      4
 #define F1_SYM_INTERN_K    16
 #define FILE1   "tfile1.h5"

@@ -116,8 +116,8 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
 	      void *_buf/*out*/)
 {
     uint8	*buf = (uint8 *)_buf;		/*cast for arithmetic	*/
-    intn	file_stride[H5O_LAYOUT_NDIMS];	/*strides through file	*/
-    intn	mem_stride[H5O_LAYOUT_NDIMS];	/*strides through memory*/
+    ssize_t	file_stride[H5O_LAYOUT_NDIMS];	/*strides through file	*/
+    ssize_t	mem_stride[H5O_LAYOUT_NDIMS];	/*strides through memory*/
     size_t	hslab_size[H5O_LAYOUT_NDIMS];	/*hyperslab size	*/
     size_t	idx[H5O_LAYOUT_NDIMS];		/*multi-dim counter	*/
     size_t	mem_start, file_start;		/*byte offsets to start	*/
@@ -250,8 +250,8 @@ H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
 	       const void *_buf)
 {
     const uint8	*buf = (const uint8 *)_buf;	/*cast for arithmetic	*/
-    intn	file_stride[H5O_LAYOUT_NDIMS];	/*strides through file	*/
-    intn	mem_stride[H5O_LAYOUT_NDIMS];	/*strides through memory*/
+    ssize_t	file_stride[H5O_LAYOUT_NDIMS];	/*strides through file	*/
+    ssize_t	mem_stride[H5O_LAYOUT_NDIMS];	/*strides through memory*/
     size_t	hslab_size[H5O_LAYOUT_NDIMS];	/*hyperslab size	*/
     size_t	idx[H5O_LAYOUT_NDIMS];		/*multi-dim counter	*/
     size_t	mem_start, file_start;		/*byte offsets to start	*/

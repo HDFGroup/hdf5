@@ -5,7 +5,7 @@
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Friday, January 30, 1998
  *
- * Purpose:	Tests extendable datasets.
+ * Purpose:	Tests extendible datasets.
  */
 #include <assert.h>
 #include <hdf5.h>
@@ -17,7 +17,7 @@
 /*-------------------------------------------------------------------------
  * Function:	main
  *
- * Purpose:	Tests extendable datasets
+ * Purpose:	Tests extendible datasets
  *
  * Return:	Success:	exit(0)
  *

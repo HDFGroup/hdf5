@@ -62,6 +62,12 @@ herr_t H5Pset_layout (hid_t tid, H5D_layout_t layout);
 H5D_layout_t H5Pget_layout (hid_t tid);
 herr_t H5Pset_chunk (hid_t tid, int ndims, const size_t dim[]);
 int H5Pget_chunk (hid_t tid, int max_ndims, size_t dim[]/*out*/);
+herr_t H5Pset_external (hid_t plist_id, const char *name, size_t offset,
+			size_t size);
+int H5Pget_external_count (hid_t plist_id);
+herr_t H5Pget_external (hid_t plist_id, int idx, size_t name_size,
+			char *name/*out*/, size_t *offset/*out*/,
+			size_t *size/*out*/);
 H5F_driver_t H5Pget_driver (hid_t tid);
 herr_t H5Pset_stdio (hid_t tid);
 herr_t H5Pget_stdio (hid_t tid);

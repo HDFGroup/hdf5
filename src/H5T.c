@@ -1774,7 +1774,7 @@ H5Tset_strpad(hid_t type_id, H5T_str_t strpad)
  *
  *-------------------------------------------------------------------------
  */
-intn
+int
 H5Tget_nmembers(hid_t type_id)
 {
 

@@ -45,7 +45,8 @@ typedef enum H5E_major_t {
     H5E_DATASPACE,              /*Dataspace                                  */
     H5E_DATASET,                /*Dataset                                    */
     H5E_STORAGE,                /*data storage                               */
-    H5E_TEMPLATE                /*Templates                                  */
+    H5E_TEMPLATE,               /*Property lists                             */
+    H5E_EFL			/*External file list			     */
 } H5E_major_t;
 
 /* Declare an enumerated type which holds all the valid minor HDF error codes */

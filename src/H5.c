@@ -272,45 +272,45 @@ H5dont_atexit(void)
     FUNC_LEAVE(SUCCEED);
 }                               /* end H5dont_atexit() */
 
-/*--------------------------------------------------------------------------
-NAME
-   H5version -- Checks the version of the library
-USAGE
-   herr_t H5version(majnum, minnum, relnum, patnum)
-   uintn *majnum;   OUT: The major revision number of the HDF5 library
-   uintn *minnum;   OUT: The minor revision number of the HDF5 library
-   uintn *relnum;   OUT: The release revision number of the HDF5 library
-   uintn *patnum;   OUT: The patch revision number of the HDF5 library
-   
-RETURNS
-   SUCCEED/FAIL
-DESCRIPTION
-    Checks the version numbers of the library.
-
---------------------------------------------------------------------------*/
+
+/*-------------------------------------------------------------------------
+ * Function:	H5version
+ *
+ * Purpose:	Returns the library version numbers through arguments. MAJNUM
+ *		will be the major revision number of the library, MINNUM the
+ *		minor revision number, RELNUM the release revision number,
+ *		and PATNUM the patch revision number.
+ *
+ * Note:	When printing an HDF5 version number it should be printed as
+ *		`printf ("HDF5-%d.%d.%d%c", maj, min, rel, 'a'+patch)'.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Unknown
+ *
+ * Modifications:
+ * 	Robb Matzke, 4 Mar 1998
+ *	Now use "normal" data types for the interface.  Any of the arguments
+ *	may be null pointers
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t 
-H5version(uintn *majnum, uintn *minnum, uintn *relnum, uintn *patnum)
+H5version(unsigned *majnum, unsigned *minnum, unsigned *relnum,
+	  unsigned *patnum)
 {
     herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER(H5version, FAIL);
 
-    /* Check args and all the boring stuff. */
-    if (majnum == NULL || minnum == NULL || relnum == NULL || patnum == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
-                    "null pointer argument");
-
     /* Set the version information */
-    *majnum = HDF5_MAJOR_VERSION;
-    *minnum = HDF5_MINOR_VERSION;
-    *relnum = HDF5_RELEASE_VERSION;
-    *patnum = HDF5_PATCH_VERSION;
+    if (majnum) *majnum = HDF5_MAJOR_VERSION;
+    if (minnum) *minnum = HDF5_MINOR_VERSION;
+    if (relnum) *relnum = HDF5_RELEASE_VERSION;
+    if (patnum) *patnum = HDF5_PATCH_VERSION;
 
-  done:
-    if (ret_value == FAIL) {    /* Error condition cleanup */
-
-    }                           /* end if */
-    /* Normal function cleanup */
     FUNC_LEAVE(ret_value);
 }
 

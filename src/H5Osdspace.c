@@ -296,7 +296,7 @@ H5O_sdspace_debug(H5F_t *f, const void *mesg, FILE * stream,
 	    if (H5S_UNLIMITED==sdim->max[u]) {
 		fprintf (stream, "%sINF", u?", ":"");
 	    } else {
-		fprintf (stream, "%s%lu\n", u?", ":"",
+		fprintf (stream, "%s%lu", u?", ":"",
 			 (unsigned long) (sdim->max[u]));
 	    }
 	}

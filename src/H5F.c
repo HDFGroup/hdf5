@@ -40,11 +40,11 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5private.h>		/*library functions			  */
 #include <H5Aprivate.h>		/*atoms					  */
 #include <H5ACprivate.h>	/*cache					  */
-#include <H5Pprivate.h>		/*templates				  */
-#include <H5Eprivate.h>		/*error handling		  */
+#include <H5Eprivate.h>		/*error handling			  */
 #include <H5Gprivate.h>		/*symbol tables				  */
 #include <H5Mprivate.h>		/*meta data				  */
-#include <H5MMprivate.h>	/*core memory management	  */
+#include <H5MMprivate.h>	/*core memory management		  */
+#include <H5Pprivate.h>		/*property lists			  */
 
 #include <ctype.h>
 #include <sys/types.h>
@@ -62,7 +62,7 @@ static char		RcsId[] = "@(#)$Revision$";
 /*-------------------- Locally scoped variables -----------------------------*/
 
 /*
- * Define the default file creation template.
+ * Define the default file creation property list.
  */
 const H5F_create_t	H5F_create_dflt = {
     0,				/* Default user-block size */
@@ -87,8 +87,8 @@ const H5F_create_t	H5F_create_dflt = {
 };
 
 /*
- * Define the default file access template.  The template is initialized by
- * H5F_init_interface().
+ * Define the default file access property list.  The template is initialized
+ * by H5F_init_interface().
  */
 H5F_access_t H5F_access_dflt;
 
@@ -141,7 +141,7 @@ H5F_init_interface(void)
 		       "unable to initialize interface");
     }
 
-    /* Initialize the default file access template */
+    /* Initialize the default file access property list */
     H5F_access_dflt.driver = H5F_LOW_DFLT;
 #if (H5F_LOW_DFLT == H5F_LOW_SEC2)
     /* Nothing to initialize */

@@ -58,6 +58,8 @@ typedef enum H5F_driver_t {
     H5F_LOW_FAMILY	= 5 	/*split addr space over many files	*/
 } H5F_driver_t;
 
+/* Unlimited file size for H5Pset_external() */
+#define H5F_UNLIMITED	((size_t)(-1L))
 
 /* Parallel styles passed to H5Pset_mpi() */
 #ifdef HAVE_PARALLEL
@@ -71,9 +73,9 @@ extern "C" {
 
 /* Functions in H5F.c */
 hbool_t H5Fis_hdf5 (const char *filename);
-hid_t H5Fcreate (const char *filename, uintn flags, hid_t create_template,
-                 hid_t access_template);
-hid_t H5Fopen (const char *filename, uintn flags, hid_t access_template);
+hid_t H5Fcreate (const char *filename, unsigned flags, hid_t create_plist,
+                 hid_t access_plist);
+hid_t H5Fopen (const char *filename, unsigned flags, hid_t access_plist);
 herr_t H5Fclose (hid_t fid);
 hid_t H5Fget_create_template (hid_t fid);
 hid_t H5Fget_access_template (hid_t file_id);

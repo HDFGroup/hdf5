@@ -165,6 +165,7 @@
 ./test/dspace.c
 ./test/dtypes.c
 ./test/extend.c
+./test/external.c
 ./test/hyperslab.c
 ./test/istore.c
 ./test/testhdf5.c
