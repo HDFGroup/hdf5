@@ -35,9 +35,9 @@ Expected output for 'h5dump --xml tnamed_dtype_attr.h5'
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Attribute>
-   <hdf5:Data>
-      <hdf5:NoData/>
-   </hdf5:Data>
+      <hdf5:Data>
+         <hdf5:NoData/>
+      </hdf5:Data>
    </hdf5:Dataset>
 </hdf5:RootGroup>
 </hdf5:HDF5-File>

@@ -161,9 +161,9 @@ Expected output for 'h5dump --xml tdset.h5'
             <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
          </hdf5:AtomicType>
       </hdf5:DataType>
-   <hdf5:Data>
-      <hdf5:NoData/>
-   </hdf5:Data>
+      <hdf5:Data>
+         <hdf5:NoData/>
+      </hdf5:Data>
    </hdf5:Dataset>
 </hdf5:RootGroup>
 </hdf5:HDF5-File>
