@@ -65,15 +65,18 @@ New Features
 
 Bug Fixes since HDF5-1.4.3 Release
 ==================================
+    * Fixed bug where selection offset was being ignored for certain hyperslab
+        selections when optimized I/O was being performed.  QAK - 2002/04/02
+    * Fixed limitation in h5dumper with object names which reached over 1024
+        characters in length. We can now handle arbitrarily larger sizes for
+        object names. BW - 2002/03/29
+    * Fixed bug where variable-length string type doesn't behave as
+        string.  SLU - 2002/03/28
     * Fixed bug in H5Gget_objinfo() which was not setting the 'fileno'
-        of the H5G_stat_t struct.  QAK - 3/27/02
+        of the H5G_stat_t struct.  QAK - 2002/03/27
     * Fixed data corruption bug in hyperslab routines when contiguous
         hyperslab that spans entire dimension and is larger than type
-        conversion buffer is attempted to be read.  QAK - 3/26/02
-    * Fixed bug where variable-length string type doesn't behave as string.
-    * Fixed limitation in h5dumper with object names which reached over 1024
-		characters in length. We can now handle arbitrarily larger sizes for
-        object names. BW - 3/29/02
+        conversion buffer is attempted to be read.  QAK - 2002/03/26
 
 
 Documentation

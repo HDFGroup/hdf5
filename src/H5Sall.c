@@ -479,6 +479,7 @@ printf("%s: check 1.0\n",FUNC);
                 mem_size=(mem_node->end[u]-mem_node->start[u])+1;
                 mem_off=mem_node->start[u];
             } /* end else */
+            mem_off+=mem_space->select.offset[u];
         } /* end if */
         else {
             mem_size=mem_space->extent.u.simple.size[u];
@@ -495,6 +496,7 @@ printf("%s: check 1.0\n",FUNC);
                 file_size=(file_node->end[u]-file_node->start[u])+1;
                 file_off=file_node->start[u];
             } /* end else */
+            file_off+=file_space->select.offset[u];
         } /* end if */
         else {
             file_size=file_space->extent.u.simple.size[u];
@@ -708,6 +710,7 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
                 mem_size=(mem_node->end[u]-mem_node->start[u])+1;
                 mem_off=mem_node->start[u];
             } /* end else */
+            mem_off+=mem_space->select.offset[u];
         } /* end if */
         else {
             mem_size=mem_space->extent.u.simple.size[u];
@@ -724,6 +727,7 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
                 file_size=(file_node->end[u]-file_node->start[u])+1;
                 file_off=file_node->start[u];
             } /* end else */
+            file_off+=file_space->select.offset[u];
         } /* end if */
         else {
             file_size=file_space->extent.u.simple.size[u];
