@@ -207,8 +207,8 @@ H5F_init_interface(void)
 #ifdef HAVE_PARALLEL
 	if ((status=H5FD_MPIO)<0) goto end_registration;
 #endif
-    end_registration:
-    } H5E_END_TRY;
+    end_registration: ;
+	} H5E_END_TRY;
     if (status<0) {
 	HRETURN_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
 		      "file driver registration failed");
