@@ -44,6 +44,7 @@
 #define H5E_ATOM            (H5OPEN H5E_ATOM_g)
 #define H5E_ATTR            (H5OPEN H5E_ATTR_g)
 #define H5E_IO              (H5OPEN H5E_IO_g)
+#define H5E_SLIST           (H5OPEN H5E_SLIST_g)
 #define H5E_EFL             (H5OPEN H5E_EFL_g)
 #define H5E_TST             (H5OPEN H5E_TST_g)
 #define H5E_ARGS            (H5OPEN H5E_ARGS_g)
@@ -71,6 +72,7 @@ H5_DLLVAR hid_t H5E_TBBT_g;         /* Threaded, Balanced, Binary Trees */
 H5_DLLVAR hid_t H5E_ATOM_g;         /* Object atom */
 H5_DLLVAR hid_t H5E_ATTR_g;         /* Attribute */
 H5_DLLVAR hid_t H5E_IO_g;           /* Low-level I/O */
+H5_DLLVAR hid_t H5E_SLIST_g;        /* Skip Lists */
 H5_DLLVAR hid_t H5E_EFL_g;          /* External file list */
 H5_DLLVAR hid_t H5E_TST_g;          /* Ternary Search Trees */
 H5_DLLVAR hid_t H5E_ARGS_g;         /* Invalid arguments to routine */
@@ -81,6 +83,10 @@ H5_DLLVAR hid_t H5E_CACHE_g;        /* Object cache */
 /*********************/
 /* Minor error codes */
 /*********************/
+
+/* Threaded, balanced binary tree errors */
+#define H5E_CANTMAKETREE    (H5OPEN H5E_CANTMAKETREE_g)
+H5_DLLVAR hid_t H5E_CANTMAKETREE_g; /* Can't create a binary tree node */
 
 /* Generic low-level file I/O errors */
 #define H5E_SEEKERROR       (H5OPEN H5E_SEEKERROR_g)
@@ -114,6 +120,10 @@ H5_DLLVAR hid_t H5E_CANTUNLOCK_g;   /* Unable to unlock object */
 H5_DLLVAR hid_t H5E_CANTGC_g;       /* Unable to garbage collect */
 H5_DLLVAR hid_t H5E_CANTGETSIZE_g;  /* Unable to compute size */
 
+/* Heap errors */
+#define H5E_CANTRESTORE     (H5OPEN H5E_CANTRESTORE_g)
+H5_DLLVAR hid_t H5E_CANTRESTORE_g;  /* Can't restore condition */
+
 /* Function entry/exit interface errors */
 #define H5E_CANTINIT        (H5OPEN H5E_CANTINIT_g)
 #define H5E_ALREADYINIT     (H5OPEN H5E_ALREADYINIT_g)
@@ -143,12 +153,10 @@ H5_DLLVAR hid_t H5E_BADMESG_g;      /* Unrecognized message */
 H5_DLLVAR hid_t H5E_CANTDELETE_g;   /* Can't delete message */
 
 /* FPHDF5 errors */
-#define H5E_CANTMAKETREE    (H5OPEN H5E_CANTMAKETREE_g)
 #define H5E_CANTRECV        (H5OPEN H5E_CANTRECV_g)
 #define H5E_CANTSENDMDATA   (H5OPEN H5E_CANTSENDMDATA_g)
 #define H5E_CANTCHANGE      (H5OPEN H5E_CANTCHANGE_g)
 #define H5E_CANTALLOC       (H5OPEN H5E_CANTALLOC_g)
-H5_DLLVAR hid_t H5E_CANTMAKETREE_g; /* Can't create a binary tree node */
 H5_DLLVAR hid_t H5E_CANTRECV_g;     /* Can't receive messages from processes */
 H5_DLLVAR hid_t H5E_CANTSENDMDATA_g;/* Can't send metadata message */
 H5_DLLVAR hid_t H5E_CANTCHANGE_g;   /* Can't register change with server */

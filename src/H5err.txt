@@ -71,6 +71,7 @@ MAJOR, H5E_FPHDF5, Flexible Parallel HDF5
 MAJOR, H5E_TST, Ternary Search Trees
 MAJOR, H5E_RS, Reference Counted Strings
 MAJOR, H5E_ERROR, Error API
+MAJOR, H5E_SLIST, Skip Lists
 
 # Sections (for grouping minor errors)
 SECTION, ARGS, Argument errors
@@ -87,6 +88,8 @@ SECTION, TYPECONV, Datatype conversion errors
 SECTION, DSPACE, Dataspace errors
 SECTION, PLIST, Property list errors
 SECTION, MPI, Parallel MPI errors
+SECTION, HEAP, Heap errors
+SECTION, TBBT, Threaded, balanced binary tree errors
 SECTION, FPH5, FPHDF5 errors
 SECTION, PIPELINE, I/O pipeline errors
 
@@ -198,8 +201,13 @@ MINOR, PLIST, H5E_DUPCLASS, Duplicate class name in parent class
 MINOR, MPI, H5E_MPI, Some MPI function failed
 MINOR, MPI, H5E_MPIERRSTR, MPI Error String
 
+# Heap errors
+MINOR, HEAP, H5E_CANTRESTORE, Can't restore condition
+
+# TBBT errors
+MINOR, TBBT, H5E_CANTMAKETREE, Can't create a binary tree node
+
 # FPHDF5 errors
-MINOR, FPH5, H5E_CANTMAKETREE, Can't create a binary tree node
 MINOR, FPH5, H5E_CANTRECV, Can't receive messages from processes
 MINOR, FPH5, H5E_CANTSENDMDATA, Can't send metadata message
 MINOR, FPH5, H5E_CANTCHANGE, Can't register change with server

@@ -41,6 +41,7 @@ hid_t H5E_TBBT_g           = FAIL;      /* Threaded, Balanced, Binary Trees */
 hid_t H5E_ATOM_g           = FAIL;      /* Object atom */
 hid_t H5E_ATTR_g           = FAIL;      /* Attribute */
 hid_t H5E_IO_g             = FAIL;      /* Low-level I/O */
+hid_t H5E_SLIST_g          = FAIL;      /* Skip Lists */
 hid_t H5E_EFL_g            = FAIL;      /* External file list */
 hid_t H5E_TST_g            = FAIL;      /* Ternary Search Trees */
 hid_t H5E_ARGS_g           = FAIL;      /* Invalid arguments to routine */
@@ -49,6 +50,9 @@ hid_t H5E_PLINE_g          = FAIL;      /* Data filters */
 hid_t H5E_CACHE_g          = FAIL;      /* Object cache */
 
 /* Minor error IDs */
+
+/* Threaded, balanced binary tree errors */
+hid_t H5E_CANTMAKETREE_g   = FAIL;      /* Can't create a binary tree node */
 
 /* Generic low-level file I/O errors */
 hid_t H5E_SEEKERROR_g      = FAIL;      /* Seek failed */
@@ -68,6 +72,9 @@ hid_t H5E_CANTUNLOCK_g     = FAIL;      /* Unable to unlock object */
 hid_t H5E_CANTGC_g         = FAIL;      /* Unable to garbage collect */
 hid_t H5E_CANTGETSIZE_g    = FAIL;      /* Unable to compute size */
 
+/* Heap errors */
+hid_t H5E_CANTRESTORE_g    = FAIL;      /* Can't restore condition */
+
 /* Function entry/exit interface errors */
 hid_t H5E_CANTINIT_g       = FAIL;      /* Unable to initialize object */
 hid_t H5E_ALREADYINIT_g    = FAIL;      /* Object already initialized */
@@ -86,7 +93,6 @@ hid_t H5E_BADMESG_g        = FAIL;      /* Unrecognized message */
 hid_t H5E_CANTDELETE_g     = FAIL;      /* Can't delete message */
 
 /* FPHDF5 errors */
-hid_t H5E_CANTMAKETREE_g   = FAIL;      /* Can't create a binary tree node */
 hid_t H5E_CANTRECV_g       = FAIL;      /* Can't receive messages from processes */
 hid_t H5E_CANTSENDMDATA_g  = FAIL;      /* Can't send metadata message */
 hid_t H5E_CANTCHANGE_g     = FAIL;      /* Can't register change with server */

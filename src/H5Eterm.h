@@ -42,6 +42,7 @@ H5E_TBBT_g=
 H5E_ATOM_g=    
 H5E_ATTR_g=    
 H5E_IO_g=    
+H5E_SLIST_g=    
 H5E_EFL_g=    
 H5E_TST_g=    
 H5E_ARGS_g=    
@@ -51,6 +52,9 @@ H5E_CACHE_g= (-1);
 
 /* Reset minor error IDs */
 
+
+/* Threaded, balanced binary tree errors */    
+H5E_CANTMAKETREE_g=
 
 /* Generic low-level file I/O errors */    
 H5E_SEEKERROR_g=    
@@ -70,6 +74,9 @@ H5E_CANTUNLOCK_g=
 H5E_CANTGC_g=    
 H5E_CANTGETSIZE_g=
 
+/* Heap errors */    
+H5E_CANTRESTORE_g=
+
 /* Function entry/exit interface errors */    
 H5E_CANTINIT_g=    
 H5E_ALREADYINIT_g=    
@@ -88,7 +95,6 @@ H5E_BADMESG_g=
 H5E_CANTDELETE_g=
 
 /* FPHDF5 errors */    
-H5E_CANTMAKETREE_g=    
 H5E_CANTRECV_g=    
 H5E_CANTSENDMDATA_g=    
 H5E_CANTCHANGE_g=    

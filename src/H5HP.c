@@ -700,21 +700,21 @@ H5HP_change(H5HP_t *heap, int val, void *_obj)
     if(val<old_val) {
         if(heap->type==H5HP_MAX_HEAP) {
             if(H5HP_sink_max(heap,obj_loc)<0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTCHANGE, FAIL, "unable to restore heap condition");
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTRESTORE, FAIL, "unable to restore heap condition");
         } /* end if */
         else {
             if(H5HP_swim_min(heap,obj_loc)<0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTCHANGE, FAIL, "unable to restore heap condition");
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTRESTORE, FAIL, "unable to restore heap condition");
         } /* end else */
     } /* end if */
     else {
         if(heap->type==H5HP_MAX_HEAP) {
             if(H5HP_swim_max(heap,obj_loc)<0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTCHANGE, FAIL, "unable to restore heap condition");
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTRESTORE, FAIL, "unable to restore heap condition");
         } /* end if */
         else {
             if(H5HP_sink_min(heap,obj_loc)<0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTCHANGE, FAIL, "unable to restore heap condition");
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTRESTORE, FAIL, "unable to restore heap condition");
         } /* end else */
     } /* end else */
 
@@ -783,11 +783,11 @@ H5HP_incr(H5HP_t *heap, unsigned amt, void *_obj)
     /* Restore heap condition */
     if(heap->type==H5HP_MAX_HEAP) {
         if(H5HP_swim_max(heap,obj_loc)<0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTCHANGE, FAIL, "unable to restore heap condition");
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRESTORE, FAIL, "unable to restore heap condition");
     } /* end if */
     else {
         if(H5HP_sink_min(heap,obj_loc)<0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTCHANGE, FAIL, "unable to restore heap condition");
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRESTORE, FAIL, "unable to restore heap condition");
     } /* end else */
 
 done:
@@ -855,11 +855,11 @@ H5HP_decr(H5HP_t *heap, unsigned amt, void *_obj)
     /* Restore heap condition */
     if(heap->type==H5HP_MAX_HEAP) {
         if(H5HP_sink_max(heap,obj_loc)<0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTCHANGE, FAIL, "unable to restore heap condition");
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRESTORE, FAIL, "unable to restore heap condition");
     } /* end if */
     else {
         if(H5HP_swim_min(heap,obj_loc)<0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTCHANGE, FAIL, "unable to restore heap condition");
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRESTORE, FAIL, "unable to restore heap condition");
     } /* end else */
 
 done:

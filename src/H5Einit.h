@@ -128,6 +128,11 @@ if((msg = H5E_create_msg(cls, H5E_MAJOR, "Low-level I/O"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_IO_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_SLIST_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MAJOR, "Skip Lists"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_SLIST_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 assert(H5E_EFL_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MAJOR, "External file list"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
@@ -163,6 +168,13 @@ if((H5E_CACHE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
 /* Minor error codes */
 /*********************/
 
+
+/* Threaded, balanced binary tree errors */
+assert(H5E_CANTMAKETREE_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Can't create a binary tree node"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_CANTMAKETREE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
 /* Generic low-level file I/O errors */
 assert(H5E_SEEKERROR_g==(-1));
@@ -238,6 +250,13 @@ if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to compute size"))==NULL)
 if((H5E_CANTGETSIZE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
+/* Heap errors */
+assert(H5E_CANTRESTORE_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Can't restore condition"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_CANTRESTORE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+
 /* Function entry/exit interface errors */
 assert(H5E_CANTINIT_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to initialize object"))==NULL)
@@ -300,11 +319,6 @@ if((H5E_CANTDELETE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
 /* FPHDF5 errors */
-assert(H5E_CANTMAKETREE_g==(-1));
-if((msg = H5E_create_msg(cls, H5E_MINOR, "Can't create a binary tree node"))==NULL)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
-if((H5E_CANTMAKETREE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 assert(H5E_CANTRECV_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MINOR, "Can't receive messages from processes"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
