@@ -1453,8 +1453,8 @@ H5Tcreate(H5T_class_t type, size_t size)
     FUNC_ENTER_API(H5Tcreate, FAIL);
     H5TRACE2("i","Ttz",type,size);
 
-    /* check args. We start to support size adjustment for compound type. */
-    if (size == 0 && type != H5T_COMPOUND)
+    /* check args */
+    if (size == 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid size");
 
     /* create the type */
@@ -2024,6 +2024,8 @@ H5Tset_size(hid_t type_id, size_t size)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined");
     if (H5T_REFERENCE==dt->shared->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for this datatype");
+    if (size==0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't adjust size to 0");
 
     /* Do the work */
     if (H5T_set_size(dt, size)<0)

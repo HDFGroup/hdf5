@@ -2098,8 +2098,12 @@ test_compound_12(void)
 
     TESTING("adjust size of compound data types");
 
-    /* Create the empty compound type */
-    if ((complex_id = H5Tcreate(H5T_COMPOUND, 0))<0) goto error;
+    /* Create a compound type of minimal size */
+    if ((complex_id = H5Tcreate(H5T_COMPOUND, 1))<0) goto error;
+    
+    /* Verify the size */
+    if((new_size=H5Tget_size(complex_id))<0) goto error; 
+    if(new_size!=1) goto error;
 
     /* Add a couple fields and adjust the size */
     offset = size;
@@ -2128,9 +2132,14 @@ test_compound_12(void)
     /* Tries to cut last member.  Supposed to fail. */
     size--;
     H5E_BEGIN_TRY {
-        H5Tset_size(complex_id, size);
+        ret = H5Tset_size(complex_id, size);
     } H5E_END_TRY;  
-    
+    if(ret>=0) {
+        H5_FAILED();
+        puts("  Tries to cut off the last member. Should have failed.");
+        goto error;
+    }
+
     if (H5Tclose (complex_id)<0) goto error;
     PASSED();
     return 0;
