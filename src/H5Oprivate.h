@@ -1,8 +1,18 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 /*-------------------------------------------------------------------------
- * Copyright (C) 1997-2001 National Center for Supercomputing Applications
- *			   All rights reserved.
- *
- *-------------------------------------------------------------------------
  *
  * Created:		H5Oprivate.h
  *			Aug  5 1997
@@ -25,8 +35,9 @@
 #include "H5Fprivate.h"
 #include "H5Gprivate.h"
 #include "H5HGprivate.h"
-#include "H5Tprivate.h"
+#include "H5Rprivate.h"
 #include "H5Spublic.h"
+#include "H5Tprivate.h"
 #include "H5Zprivate.h"
 
 /*
@@ -290,6 +301,37 @@ typedef struct H5O_stab_t {
     haddr_t	btree_addr;		/*address of B-tree		     */
     haddr_t	heap_addr;		/*address of name heap		     */
 } H5O_stab_t;
+
+/*
+ * Generic property list message.
+ */
+#define H5O_PLIST_ID	0x0012
+H5_DLLVAR const H5O_class_t H5O_PLIST[1];
+
+/* operates on an H5P_genplist_t struct */
+
+#ifdef H5_HAVE_FPHDF5
+/*
+ * Flexible parallel message
+ */
+#define H5O_FPHDF5_ID	0x0013
+H5_DLLVAR const H5O_class_t H5O_FPHDF5[1];
+
+struct H5S_simple_t;
+struct H5P_genplist_t;
+
+typedef struct H5O_fphdf5_t {
+    uint8_t oid[H5R_OBJ_REF_BUF_SIZE];  /* OID of object                    */
+    struct H5S_simple_t *sdim;          /* Simple dimensionality structure  */
+    H5T_t *dtype;                       /* Datatype structure               */
+    time_t *mtime;                      /* Modification time                */
+    H5O_name_t *group;                  /* Group name                       */
+    H5O_name_t *dset;                   /* Dataset name                     */
+    struct H5P_genplist_t *plist;       /* Property list of the object      */
+} H5O_fphdf5_t;
+
+/* operates on an H5O_fphdf5_t struct */
+#endif  /* H5_HAVE_FPHDF5 */
 
 /* General message operators */
 H5_DLL herr_t H5O_create(H5F_t *f, size_t size_hint,
