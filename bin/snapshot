@@ -164,7 +164,8 @@ CONFIGURE="./configure $HDF4LIB $OP_CONFIGURE"
 # Execute the requests
 snapshot=yes
 
-BASEDIR=${HOME}/hdf5-snapshots
+H5VERSION=hdf5_1_2
+BASEDIR=${HOME}/snapshots-${H5VERSION}
 CURRENT=${BASEDIR}/current
 PREVIOUS=${BASEDIR}/previous
 
@@ -178,7 +179,7 @@ if [ "$cmd" = "all" -o -n "$cmdcheckout" ]; then
     test -d ${BASEDIR} || mkdir -p ${BASEDIR} || exit 1
 
     # Check out the current version from CVS
-    cvs -Q co -d ${CURRENT} hdf5 || exit 1
+    cvs -Q co -d ${CURRENT} -r ${H5VERSION} hdf5 || exit 1
 fi # Do CVS checkout
 
 
@@ -245,6 +246,11 @@ fi # Test the HDF5 library
 # Run Release snapshot, update version, and commit to cvs and tag
 #=============================
 if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
+    echo "Release is under construction.  No release done."
+    errcode=1
+    snapshot=no
+    break
+    exit $errcord
     if [ "$snapshot" = "yes" ]; then
 	(cd ${CURRENT}; ${MAKE} distclean)
 	(
