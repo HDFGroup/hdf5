@@ -39,7 +39,7 @@ void *old_client_data;			/* previous error handler arg.*/
 /* other option flags */
 
 /* FILENAME and filenames must have the same number of names */
-const char *FILENAME[12]={
+const char *FILENAME[13]={
 	    "ParaEg1",
 	    "ParaEg2",
 	    "ParaEg3",
@@ -51,8 +51,9 @@ const char *FILENAME[12]={
             "ParaFill",
 	    "ParaCC",
             "ParaNull",
+            "ModeConfusion",
 	    NULL};
-char	filenames[12][PATH_MAX];
+char	filenames[13][PATH_MAX];
 hid_t	fapl;				/* file access property list */
 
 #ifdef USE_PAUSE
@@ -335,6 +336,7 @@ int main(int argc, char **argv)
     int mpi_size, mpi_rank;				/* mpi variables */
     H5Ptest_param_t ndsets_params, ngroups_params;
     H5Ptest_param_t collngroups_params;
+    H5Ptest_param_t io_mode_confusion_params;
 
     /* Un-buffer the stdout and stderr */
     setbuf(stderr, NULL);
@@ -432,6 +434,14 @@ int main(int argc, char **argv)
     }
     AddTest("null", null_dataset, NULL, 
 	    "null dataset test", filenames[10]);
+
+    io_mode_confusion_params.name  = filenames[11];
+    io_mode_confusion_params.count = 0; /* value not used */
+
+    AddTest("I/Omodeconf", io_mode_confusion, NULL, 
+	    "I/O mode confusion test -- hangs quickly on failure", 
+            &io_mode_confusion_params);
+
 
     /* Display testing information */
     TestInfo(argv[0]);

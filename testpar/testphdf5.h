@@ -172,6 +172,7 @@ void coll_chunk1(void);
 void coll_chunk2(void);
 void coll_chunk3(void);
 void coll_chunk4(void);
+void io_mode_confusion(void);
 
 /* commonly used prototypes */
 hid_t create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type, hbool_t use_gpfs);
