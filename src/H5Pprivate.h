@@ -65,8 +65,8 @@ typedef struct H5P_genclass_tag {
     unsigned   plists;     /* Number of property lists that have been created since the last modification to the class */
     unsigned   classes;    /* Number of classes that have been derived since the last modification to the class */
     unsigned   ref_count;  /* Number of oustanding ID's open on this class object */
-    unsigned   internal:1; /* Whether this class is internal to the library or not */
-    unsigned   deleted:1;  /* Whether this class has been deleted and is waiting for dependent classes & proplists to close */
+    unsigned   internal;   /* Whether this class is internal to the library or not */
+    unsigned   deleted;    /* Whether this class has been deleted and is waiting for dependent classes & proplists to close */
 
     /* Callback function pointers & info */
     H5P_cls_create_func_t create_func;  /* Function to call when a property list is created */

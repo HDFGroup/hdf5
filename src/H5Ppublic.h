@@ -141,6 +141,7 @@ __DLL__ htri_t H5Pequal(hid_t id1, hid_t id2);
 __DLL__ htri_t H5Pisa_class(hid_t plist_id, hid_t pclass_id);
 __DLL__ int H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func,
             void *iter_data);
+__DLL__ herr_t H5Pcopy_prop(hid_t dst_id, hid_t src_id, const char *name);
 __DLL__ herr_t H5Premove(hid_t plist_id, const char *name);
 __DLL__ herr_t H5Punregister(hid_t pclass_id, const char *name);
 __DLL__ herr_t H5Pclose_list(hid_t plist_id);

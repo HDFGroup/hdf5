@@ -64,7 +64,8 @@ static H5P_genclass_t *H5P_create_class(H5P_genclass_t *par_class,
      H5P_cls_close_func_t cls_close, void *close_data);
 static herr_t H5P_close_list(void *_plist);
 static herr_t H5P_close_class(void *_pclass);
-static H5P_genprop_t *H5P_copy_prop(H5P_genprop_t *oprop);
+static herr_t H5P_unregister(H5P_genclass_t *pclass, const char *name);
+static H5P_genprop_t *H5P_dup_prop(H5P_genprop_t *oprop);
 static herr_t H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod);
 static herr_t H5P_add_prop(H5P_genprop_t *hash[], unsigned hashsize, H5P_genprop_t *prop);
 static herr_t H5P_free_prop(H5P_genprop_t *prop);
@@ -616,7 +617,7 @@ static hid_t H5P_copy_pclass(H5P_genclass_t *pclass)
             /* Walk through the list of properties at each hash location */
             while(tmp!=NULL) {
                 /* Make a copy of the class's property */
-                if((pcopy=H5P_copy_prop(tmp))==NULL)
+                if((pcopy=H5P_dup_prop(tmp))==NULL)
                     HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, FAIL,"Can't copy property");
 
                 /* Insert the initialized property into the property list */
@@ -702,15 +703,15 @@ static hid_t H5P_copy_plist(H5P_genplist_t *plist)
 
         /* Walk through the list of properties at each hash location */
         while(tprop!=NULL) {
-            /* Make a copy of the class's property */
-            if((new_prop=H5P_copy_prop(tprop))==NULL)
+            /* Make a copy of the list's property */
+            if((new_prop=H5P_dup_prop(tprop))==NULL)
                 HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, FAIL,"Can't copy property");
 
             /* Call property copy callback, if it exists */
             if(new_prop->copy) {
                 if((new_prop->copy)(new_prop->name,new_prop->size,new_prop->value)<0) {
                     H5P_free_prop(new_prop);
-                    HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL,"Can't copy property");
+                    HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, FAIL,"Can't copy property");
                 } /* end if */
             } /* end if */
 
@@ -3462,14 +3463,14 @@ H5Pget_hyper_vector_size(hid_t plist_id, size_t *vector_size/*out*/)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5P_copy_prop
+    H5P_dup_prop
  PURPOSE
-    Internal routine to copy a property
+    Internal routine to duplicate a property
  USAGE
-    H5P_genprop_t *H5P_copy_prop(oprop)
+    H5P_genprop_t *H5P_dup_prop(oprop)
         H5P_genprop_t *oprop;   IN: Pointer to property to copy
  RETURNS
-    Returns a pointer to the newly created property on success,
+    Returns a pointer to the newly created duplicate of a property on success,
         NULL on failure.
  DESCRIPTION
     Allocates memory and copies property information into a new property object.
@@ -3479,12 +3480,12 @@ H5Pget_hyper_vector_size(hid_t plist_id, size_t *vector_size/*out*/)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static H5P_genprop_t *
-H5P_copy_prop(H5P_genprop_t *oprop)
+H5P_dup_prop(H5P_genprop_t *oprop)
 {
     H5P_genprop_t *prop=NULL;        /* Pointer to new property copied */
     H5P_genprop_t *ret_value=NULL;   /* Return value */
 
-    FUNC_ENTER (H5P_copy_prop, NULL);
+    FUNC_ENTER (H5P_dup_prop, NULL);
 
     assert(oprop);
 
@@ -3535,7 +3536,7 @@ done:
     } /* end if */
 
     FUNC_LEAVE (ret_value);
-}   /* H5P_copy_prop() */
+}   /* H5P_dup_prop() */
 
 
 /*--------------------------------------------------------------------------
@@ -4168,7 +4169,7 @@ static H5P_genplist_t *H5P_create_list(H5P_genclass_t *pclass)
                     /* Check for property already existing in list */
                     if(H5P_find_prop(plist->props,tclass->hashsize,tmp->name)==NULL) {
                         /* Make a copy of the class's property */
-                        if((pcopy=H5P_copy_prop(tmp))==NULL)
+                        if((pcopy=H5P_dup_prop(tmp))==NULL)
                             HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, NULL,"Can't copy property");
 
                         /* Create initial value from default value for non-zero sized properties */
@@ -4457,7 +4458,7 @@ herr_t H5P_register(H5P_genclass_t *pclass, const char *name, size_t size,
      */
     if(pclass->plists>0 || pclass->classes>0) {
         if((new_class=H5P_create_class(pclass->parent,pclass->name,pclass->hashsize,
-                (unsigned)pclass->internal,pclass->create_func,pclass->create_data,
+                pclass->internal,pclass->create_func,pclass->create_data,
                 pclass->copy_func,pclass->copy_data,
                 pclass->close_func,pclass->close_data))==NULL)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy class");
@@ -4467,7 +4468,7 @@ herr_t H5P_register(H5P_genclass_t *pclass, const char *name, size_t size,
             tmp_prop=pclass->props[u];
             while(tmp_prop!=NULL) {
                 /* Make a copy of the class's property */
-                if((pcopy=H5P_copy_prop(tmp_prop))==NULL)
+                if((pcopy=H5P_dup_prop(tmp_prop))==NULL)
                     HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, FAIL,"Can't copy property");
 
                 /* Insert the property into the new property class */
@@ -5910,7 +5911,7 @@ htri_t H5Pequal(hid_t id1, hid_t id2)
 
     /* Check arguments. */
     if ((H5I_GENPROP_LST != H5I_get_type(id1) && H5I_GENPROP_CLS != H5I_get_type(id1))
-            || (H5I_GENPROP_CLS != H5I_get_type(id2) && H5I_GENPROP_CLS != H5I_get_type(id2)))
+            || (H5I_GENPROP_LST != H5I_get_type(id2) && H5I_GENPROP_CLS != H5I_get_type(id2)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property objects");
     if (H5I_get_type(id1) != H5I_get_type(id2))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not the same kind of property objects");
@@ -6819,11 +6820,258 @@ herr_t H5Premove(hid_t plist_id, const char *name)
 
     /* Create the new property list class */
     if ((ret_value=H5P_remove(plist_id,plist,name))<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to remove property");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "unable to remove property");
 
 done:
     FUNC_LEAVE (ret_value);
 }   /* H5Premove() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_copy_prop_plist
+ PURPOSE
+    Internal routine to copy a property from one list to another
+ USAGE
+    herr_t H5P_copy_prop_plist(dst_plist, src_plist, name)
+        hid_t dst_id;               IN: ID of destination property list or class
+        hid_t src_id;               IN: ID of source property list or class
+        const char *name;           IN: Name of property to copy
+ RETURNS
+    Success: non-negative value.
+    Failure: negative value.
+ DESCRIPTION
+    Copies a property from one property list to another.
+    
+    If a property is copied from one list to another, the property will be
+    first deleted from the destination list (generating a call to the 'close'
+    callback for the property, if one exists) and then the property is copied
+    from the source list to the destination list (generating a call to the
+    'copy' callback for the property, if one exists).
+
+    If the property does not exist in the destination list, this call is
+    equivalent to calling H5Pinsert and the 'create' callback will be called
+    (if such a callback exists for the property).
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5P_copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name)
+{
+    H5P_genplist_t *dst_plist;      /* Pointer to destination property list */
+    H5P_genplist_t *src_plist;      /* Pointer to source property list */
+    H5P_genprop_t *prop;            /* Temporary property pointer */
+    H5P_genprop_t *new_prop=NULL;   /* Pointer to new property */
+    herr_t ret_value=SUCCEED;       /* return value */
+
+    FUNC_ENTER (H5P_copy_prop_plist, FAIL);
+
+    assert(name);
+
+    /* Get the objects to operate on */
+    if(NULL == (src_plist = H5I_object(src_id)) || NULL == (dst_plist = H5I_object(dst_id)))
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property object doesn't exist");
+
+    /* Check if the property exists in the destination */
+    prop=H5P_find_prop(dst_plist->props,dst_plist->pclass->hashsize,name);
+
+    /* If the property exists in the destination alread */
+    if(prop!=NULL) {
+        /* Delete the property from the destination list, calling the 'close' callback if necessary */
+        if(H5P_remove(dst_id,dst_plist,name)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "unable to remove property");
+
+        /* Get the pointer to the source property */
+        prop=H5P_find_prop(src_plist->props,src_plist->pclass->hashsize,name);
+
+        /* Make a copy of the source property */
+        if((new_prop=H5P_dup_prop(prop))==NULL)
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, FAIL,"Can't copy property");
+
+        /* Call property copy callback, if it exists */
+        if(new_prop->copy) {
+            if((new_prop->copy)(new_prop->name,new_prop->size,new_prop->value)<0)
+                HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, FAIL,"Can't copy property");
+        } /* end if */
+
+        /* Insert the initialized property into the property list */
+        if(H5P_add_prop(dst_plist->props,dst_plist->pclass->hashsize,new_prop)<0)
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, FAIL,"Can't insert property into list");
+
+        /* Increment the number of properties in list */
+        dst_plist->nprops++;
+    } /* end if */
+    /* If not, get the information required to do an H5Pinsert with the property into the destination list */
+    else {
+        /* Get the pointer to the source property */
+        prop=H5P_find_prop(src_plist->props,src_plist->pclass->hashsize,name);
+
+        /* Create property object from parameters */
+        if((new_prop=H5P_create_prop(prop->name,prop->size,prop->def_value,prop->value,prop->create,prop->set,prop->get,prop->del,prop->copy,prop->copy))==NULL)
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTCREATE, FAIL,"Can't create property");
+
+        /* Call property creation callback, if it exists */
+        if(new_prop->create) {
+            if((new_prop->create)(new_prop->name,new_prop->size,new_prop->value)<0)
+                HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, NULL,"Can't initialize property");
+        } /* end if */
+
+        /* Insert property into property list class */
+        if(H5P_add_prop(dst_plist->props,dst_plist->pclass->hashsize,new_prop)<0)
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, FAIL,"Can't insert property into class");
+
+        /* Increment property count for class */
+        dst_plist->nprops++;
+
+    } /* end else */
+
+done:
+    /* Cleanup, if necessary */
+    if(ret_value<0) {
+        if(new_prop!=NULL)
+            H5P_free_prop(new_prop);
+    } /* end if */
+
+    FUNC_LEAVE (ret_value);
+}   /* H5P_copy_prop_plist() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_copy_prop_pclass
+ PURPOSE
+    Internal routine to copy a property from one class to another
+ USAGE
+    herr_t H5P_copy_prop_pclass(dst_pclass, src_pclass, name)
+        H5P_genclass_t	*dst_pclass;    IN: Pointer to destination class
+        H5P_genclass_t	*src_pclass;    IN: Pointer to source class
+        const char *name;               IN: Name of property to copy
+ RETURNS
+    Success: non-negative value.
+    Failure: negative value.
+ DESCRIPTION
+    Copies a property from one property class to another.
+    
+    If a property is copied from one class to another, all the property
+    information will be first deleted from the destination class and then the
+    property information will be copied from the source class into the
+    destination class.
+    
+    If the property does not exist in the destination class or list, this call
+    is equivalent to calling H5Pregister.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5P_copy_prop_pclass(H5P_genclass_t *dst_pclass, H5P_genclass_t *src_pclass, const char *name)
+{
+    H5P_genprop_t *prop;            /* Temporary property pointer */
+    herr_t ret_value=SUCCEED;       /* return value */
+
+    FUNC_ENTER (H5P_copy_prop_pclass, FAIL);
+
+    assert(dst_pclass);
+    assert(src_pclass);
+    assert(name);
+
+    /* Check if the property exists in the destination */
+    prop=H5P_find_prop(dst_pclass->props,dst_pclass->hashsize,name);
+
+    /* If the property exists in the destination already */
+    if(prop!=NULL) {
+        /* Delete the old property from the destination class */
+        if(H5P_unregister(dst_pclass,name)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "unable to remove property");
+    } /* end if */
+
+    /* Register the property into the destination */
+    if(H5P_register(dst_pclass,name,prop->size,prop->def_value,prop->create,prop->set,prop->get,prop->del,prop->copy,prop->close)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "unable to remove property");
+
+done:
+    /* Cleanup, if necessary */
+
+    FUNC_LEAVE (ret_value);
+}   /* H5P_copy_prop_pclass() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Pcopy_prop
+ PURPOSE
+    Routine to copy a property from one list or class to another
+ USAGE
+    herr_t H5Pcopy_prop(dst_id, src_id, name)
+        hid_t dst_id;               IN: ID of destination property list or class
+        hid_t src_id;               IN: ID of source property list or class
+        const char *name;           IN: Name of property to copy
+ RETURNS
+    Success: non-negative value.
+    Failure: negative value.
+ DESCRIPTION
+    Copies a property from one property list or class to another.
+    
+    If a property is copied from one class to another, all the property
+    information will be first deleted from the destination class and then the
+    property information will be copied from the source class into the
+    destination class.
+    
+    If a property is copied from one list to another, the property will be
+    first deleted from the destination list (generating a call to the 'close'
+    callback for the property, if one exists) and then the property is copied
+    from the source list to the destination list (generating a call to the
+    'copy' callback for the property, if one exists).
+
+    If the property does not exist in the destination class or list, this call
+    is equivalent to calling H5Pregister or H5Pinsert (for a class or list, as
+    appropriate) and the 'create' callback will be called in the case of the
+    property being copied into a list (if such a callback exists for the
+    property).
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5Pcopy_prop(hid_t dst_id, hid_t src_id, const char *name)
+{
+    void *src_obj, *dst_obj;    /* Property objects to copy between */
+    herr_t ret_value=SUCCEED;      /* return value */
+
+    FUNC_ENTER (H5Pcopy_prop, FAIL);
+
+    /* Check arguments. */
+    if ((H5I_GENPROP_LST != H5I_get_type(src_id) && H5I_GENPROP_CLS != H5I_get_type(src_id))
+            || (H5I_GENPROP_LST != H5I_get_type(dst_id) && H5I_GENPROP_CLS != H5I_get_type(dst_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property objects");
+    if (H5I_get_type(src_id) != H5I_get_type(dst_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not the same kind of property objects");
+    if (!name || !*name)
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name given");
+    if(NULL == (src_obj = H5I_object(src_id)) || NULL == (dst_obj = H5I_object(dst_id)))
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property object doesn't exist");
+
+    /* Compare property lists */
+    if(H5I_GENPROP_LST == H5I_get_type(src_id)) {
+        if(H5P_copy_prop_plist(dst_id,src_id,name)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy property between lists");
+    } /* end if */
+    /* Must be property classes */
+    else {
+        if(H5P_copy_prop_pclass(dst_obj,src_obj,name)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy property between classes");
+    } /* end else */
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5Pcopy_prop() */
 
 
 /*--------------------------------------------------------------------------
