@@ -72,6 +72,11 @@ AC_PROG_MAKE_SET
 AC_PROG_INSTALL
 AC_PROG_RANLIB
 
+if test "X$AR" = "X"; then
+   AC_CHECK_PROGS(AR,ar xar,:,$PATH)
+fi
+AC_SUBST(AR)
+
 AC_MSG_CHECKING(for GNU Make)
 if test "`${MAKE-make} --version -f /dev/null 2>/dev/null |\
   sed -n 1p|cut -c1-8`" = "GNU Make"; then
@@ -86,7 +91,7 @@ fi
 dnl ----------------------------------------------------------------------
 dnl Check for libraries.  (none required yet)
 dnl
-
+AC_CHECK_LIB(coug, main)	dnl ...for ASCI/Red
 
 
 dnl ----------------------------------------------------------------------

@@ -67,6 +67,9 @@
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
 
+/* Define if you have the coug library (-lcoug).  */
+#undef HAVE_LIBCOUG
+
 /* Define if you have the mpi library (-lmpi).  */
 #undef HAVE_LIBMPI
 
