@@ -477,7 +477,7 @@ else
     link_static_flag='-bnso -bI:/lib/syscalls.exp'
     ;;
 
-  hpux9* | hpux10*)
+  hpux9* | hpux10* | hpux11*)
     # Is there a better link_static_flag that works with the bundled CC?
     wl='-Wl,'
     link_static_flag="${wl}-a ${wl}archive"
@@ -793,7 +793,7 @@ else
     export_dynamic_flag_spec='${wl}-E'
     ;;
 
-  hpux10*)
+  hpux10* | hpux11*)
     archive_cmds='$LD -b +h $soname +s +b $install_libdir -o $lib$libobjs'
     hardcode_libdir_flag_spec='${wl}+b ${wl}$libdir'
     hardcode_direct=yes
@@ -1136,7 +1136,7 @@ gnu*)
   shlibpath_var=LD_LIBRARY_PATH
   ;;
 
-hpux9* | hpux10*)
+hpux9* | hpux10* | hpux11*)
   # Give a soname corresponding to the major version so that dld.sl refuses to
   # link against other versions.
   dynamic_linker="$host_os dld.sl"
