@@ -310,8 +310,6 @@ typedef struct H5MF_free_t {
 /*
  * Define the low-level file interface.
  */
-/* rky 980816 Removed const modifier from access params for read and write,
- * because H5F_mpio_read and H5F_mpio_write alter some fields therein. */
 typedef struct H5F_low_class_t {
     hbool_t	(*access)(const char *name, const H5F_access_t *access_parms,
 			  int mode, H5F_search_t *key/*out*/);
