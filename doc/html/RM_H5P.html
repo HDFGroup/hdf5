@@ -1793,7 +1793,7 @@ facilitate moving easily between them.</i>
 <dl>
   <dt><strong>Name:</strong> <a name="Property-GetSec2">H5Pget_sec2</a>
   <dt><strong>Signature:</strong>
-    <dd><em>returntype</em> <code>H5Pget_sec2</code>(<em>hid_t</em> <code>plist</code>)
+    <dd><em>herr_t</em> <code>H5Pget_sec2</code>(<em>hid_t</em> <code>plist</code>)
   <dt><strong>Purpose:</strong>
     <dd>Checks whether the file access property list is set 
         to the sec2 driver.
@@ -2213,28 +2213,31 @@ facilitate moving easily between them.</i>
 <dl>
   <dt><strong>Name:</strong> <a name="Property-SetCache">H5Pset_cache</a>
   <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pset_cache</code>(<em>hid_t</em> <code>plist</code>,
+    <dd><em>herr_t</em> <code>H5Pset_cache</code>(<em>hid_t</em> <code>plist_id</code>,
         <em>int</em> <code>mdc_nelmts</code>,
+        <em>int</em> <code>rdcc_nelmts</code>,
         <em>size_t</em> <code>rdcc_nbytes</code>,
         <em>double</em> <code>rdcc_w0</code>
     )
   <dt><strong>Purpose:</strong>
-    <dd>Sets the number of elements in the meta data cache and the
-        total number of bytes in the raw data chunk cache.
+    <dd>Sets the meta data cache and raw data chunk cache parameters.  
   <dt><strong>Description:</strong>
-    <dd><code>H5Pset_cache</code> sets the number of elements (objects) 
-        in the meta data cache and the total number of bytes in the 
-        raw data chunk cache.
+    <dd><code>H5Pset_cache</code> sets 
+        the number of elements (objects) in the meta data cache and 
+        the number of elements, the total number of bytes, and 
+        the preemption policy value in the raw data chunk cache.
         <p>
-        Sets or queries the meta data cache and raw data chunk cache 
-	parameters.  The <em>plist</em> is a file access property
-	list.  The number of elements (objects) in the meta data cache 
-	is <em>mdc_nelmts</em>.  The total size of the raw data chunk
-	cache and the preemption policy is <em>rdcc_nbytes</em> and
-	<em>w0</em>.  For <code>H5Pget_cache()</code> any (or all) of
-	the pointer arguments may be null pointers.
+	The <em>plist_id</em> is a file access property list.  
+        The number of elements (objects) in the meta data cache 
+	and the raw data chunk cache are <em>mdc_nelmts</em> and 
+	<em>rdcc_nelmts</em>, respectively.  
+        The total size of the raw data chunk cache and the preemption policy 
+        are <em>rdcc_nbytes</em> and <em>rdcc_w0</em>.  
         <p>
-        The RDCC_W0 value should be between 0 and 1 inclusive and
+        Any (or all) of the <code>H5Pget_cache()</code> pointer arguments 
+        may be null pointers.
+        <p>
+        The <em>rdcc_w0</em> value should be between 0 and 1 inclusive and
         indicates how much chunks that have been fully read are
         favored for preemption.  A value of zero means fully read
         chunks are treated no differently than other chunks (the
@@ -2242,10 +2245,12 @@ facilitate moving easily between them.</i>
         read chunks are always preempted before other chunks. 
   <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>hid_t</em> <code>plist</code>
+        <dt><em>hid_t</em> <code>plist_id</code>
             <dd>IN: Identifier of the file access property list.
         <dt><em>int</em> <code>mdc_nelmts</code>
             <dd>IN: Number of elements (objects) in the meta data cache.
+        <dt><em>int</em> <code>rdcc_nelmts</code>
+            <dd>IN: Number of elements (objects) in the raw data chunk cache.
         <dt><em>size_t</em> <code>rdcc_nbytes</code>
             <dd>IN: Total size of the raw data chunk cache, in bytes.
         <dt><em>double</em> <code>rdcc_w0</code>
@@ -2269,25 +2274,29 @@ facilitate moving easily between them.</i>
 <dl>
   <dt><strong>Name:</strong> <a name="Property-GetCache">H5Pget_cache</a>
   <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pget_cache</code>(<em>hid_t</em> <code>plist</code>,
+    <dd><em>herr_t</em> <code>H5Pget_cache</code>(<em>hid_t</em> <code>plist_id</code>,
         <em>int</em> <code>*mdc_nelmts</code>,
+        <em>int</em> <code>*rdcc_nelmts</code>,
         <em>size_t</em> <code>*rdcc_nbytes</code>,
         <em>double</em> <code>*rdcc_w0</code>
     )
   <dt><strong>Purpose:</strong>
-    <dd>Retrieves maximum sizes of meta data cache and RDCC_WO.
+    <dd>Queries the meta data cache and raw data chunk cache parameters.  
   <dt><strong>Description:</strong>
     <dd>Retrieves the maximum possible number of elements in the meta
-        data cache and the maximum possible number of bytes and the
-        RDCC_W0 value in the raw data chunk cache.  Any (or all)
-        arguments may be null pointers in which case the corresponding
-        datum is not returned.
+        data cache and raw data chunk cache, the maximum possible number of 
+        bytes in the raw data chunk cache, and the preemption policy value,
+        <em>rdcc_w0</em>.  
+        Any (or all) arguments may be null pointers, in which case the 
+        corresponding datum is not returned.
   <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>hid_t</em> <code>plist</code>
+        <dt><em>hid_t</em> <code>plist_id</code>
             <dd>IN: Identifier of the file access property list.
         <dt><em>int</em> <code>*mdc_nelmts</code>
             <dd>IN/OUT: Number of elements (objects) in the meta data cache.
+        <dt><em>int</em> <code>*rdcc_nelmts</code>
+            <dd>IN/OUT: Number of elements (objects) in the raw data chunk cache.
         <dt><em>size_t</em> <code>*rdcc_nbytes</code>
             <dd>IN/OUT: Total size of the raw data chunk cache, in bytes.
         <dt><em>double</em> <code>*rdcc_w0</code>
