@@ -2069,7 +2069,7 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
             H5_CHECK_OVERFLOW(tempamount_read,hsize_t,size_t);
             amount_read = MIN(size, (size_t)tempamount_read);
 #else /* NDEBUG */
-            amount_read = MIN(size, (size_t)tempamount_read);
+            amount_read = MIN(size, (size_t)(file->accum_size-read_off));
 #endif /* NDEBUG */
 
             /* Copy the data out of the buffer */
