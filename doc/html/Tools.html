@@ -110,10 +110,12 @@ installed with HDF5.
         <li><a href="#Tools-Redeploy">h5redeploy</a> -- 
             Updates HDF5 compiler tools after an HDF5 software installation 
             in a new location  
-         <li><a href="#Tools-H5CC">h5cc</a> --
-            Simplifies the compilation of HDF5 programs written in C
-        <li><a href="#Tools-H5FC">h5fc</a> --
-            Simplifies the compilation of HDF5 programs written in Fortran90
+         <li><a href="#Tools-H5CC">h5cc</a> and
+            <a href="#Tools-H5CC">h5pcc</a> --
+            Simplify the compilation of HDF5 programs written in C
+         <li><a href="#Tools-H5FC">h5fc</a> and
+            <a href="#Tools-H5FC">h5pfc</a> --
+            Simplify the compilation of HDF5 programs written in Fortran90
         <li><a href="#Tools-H5C++">h5c++</a> --
             Simplifies the compilation of HDF5 programs written in C++
     <br><br>
@@ -2051,48 +2053,56 @@ installed with HDF5.
 </dl>
 
 <!-- NEW PAGE -->
-<!-- HEADER RIGHT "h5cc" -->
+<!-- HEADER RIGHT "h5cc and h5pcc" -->
 <hr>
 <dl>
-<dt><strong>Tool Name:</strong> <a name="Tools-H5CC">h5cc</a>
+<dt><strong>Tool Names:</strong> <a name="Tools-H5CC">h5cc and h5pcc</a>
 <dt><strong>Syntax:</strong>
     <dd><code>h5cc
-        [</code><em>OPTIONS</em><code>]</code> <em>&lt;compile line&gt;</em>
+        [</code><em>OPTIONS</em><code> ]</code> <em>compile_line</em>
+    <dd><code>h5pcc
+        [</code><em>OPTIONS</em><code> ]</code> <em>compile_line</em>
 <dt><strong>Purpose:</strong>
-    <dd>Helper script to compile HDF5 applications.
+    <dd>Helper scripts to compile HDF5 C applications.
 <dt><strong>Description:</strong>
-    <dd><code>h5cc</code> can be used in much the same way MPIch is used
-        to compile an HDF5 program. It takes care of specifying where the
-        HDF5 header files and libraries are on the command line.
+    <dd><code>h5cc</code> and <code>h5pcc</code> can be used in much 
+        the same way as MPIch is used to compile an HDF5 program. 
+        These tools take care of specifying on the command line
+        the locations of the HDF5 header files and libraries.
+        <code>h5cc</code> is for use in serial computing environments;
+        <code>h5pcc</code> is for parallel environments.
         <p>
-        <code>h5cc</code> supersedes all other compiler scripts in that
-        if you've used them to compile the HDF5 library, then
-        <code>h5cc</code> also uses those scripts. For example, when
-        compiling an MPIch program, you use the <code>mpicc</code>
-        script. If you've built HDF5 using MPIch, then <code>h5cc</code>
+        <code>h5cc</code> and <code>h5pcc</code> subsume all other 
+        compiler scripts in that if you have used a set of scripts to compile 
+        the HDF5 library, then <code>h5cc</code> and <code>h5pcc</code> 
+        also use those scripts.  
+        For example, when compiling an MPIch program, you use the 
+        <code>mpicc</code> script. 
+        If you have built HDF5 using MPIch, then <code>h5cc</code>
         uses the MPIch program for compilation.
         <p>
-        Some programs use HDF5 in only a few modules. It isn't necessary
-        to use <code>h5cc</code> to compile those modules which don't use
-        HDF5. In fact, since <code>h5cc</code> is only a convenience
-        script, you are still able to compile HDF5 modules in the normal
-        way. In that case, you will have to specify the HDF5 libraries
+        Some programs use HDF5 in only a few modules. 
+        It is not necessary to use <code>h5cc</code> or <code>h5pcc</code> 
+        to compile those modules which do not use HDF5. 
+        In fact, since <code>h5cc</code> and <code>h5pcc</code> are only 
+        convenience scripts, you can still compile HDF5 modules in the 
+        normal manner, though you will have to specify the HDF5 libraries 
         and include paths yourself.
         <p>
         An example of how to use <code>h5cc</code> to compile the program
-        <code>hdf_prog</code>, which consists of modules
+        <code>hdf_prog</code>, which consists of the modules
         <code>prog1.c</code> and <code>prog2.c</code> and uses the HDF5
-        shared library, would be as follows:
+        shared library, would be as follows.
+        <code>h5pcc</code> is used in an identical manner.
         <pre>
         # h5cc -c prog1.c
         # h5cc -c prog2.c
-        # h5cc -shlib -o hdf_prog prog1.o prog2.o
-        </pre>
+        # h5cc -shlib -o hdf_prog prog1.o prog2.o </pre>
 <dt><strong>Options and Parameters:</strong>
     <dd>
     <dl>
         <dt><code>-help</code>
-            <dd>Prints a help message.
+            <dd>Print a help message.
         <dt><code>-echo</code>
             <dd>Show all the shell commands executed.
         <dt><code>-prefix=DIR</code>
@@ -2106,16 +2116,16 @@ installed with HDF5.
             <dd>Compile using shared HDF5 libraries.
         <dt><code>-noshlib</code>
             <dd>Compile using static HDF5 libraries [default].
-        <dt><em>&lt;compile line&gt;</em>
+        <dt><em>compile_line</em>
             <dd>The normal compile line options for your compiler. 
-                <code>h5cc</code> uses the same compiler you used to compile HDF5. 
-                Check your compiler's manual for more information on which
-                options are needed.
+                <code>h5cc</code> and <code>h5pcc</code> use the 
+                same compiler you used to compile HDF5; 
+                check your compiler's manual for more information 
+                on which options are needed.
     </dl>
 <dt><strong>Environment Variables:</strong>
     <dd>When set, these environment variables override some of the built-in
-        defaults of <code>h5cc</code>.
-
+        <code>h5cc</code> and <code>h5pcc</code> defaults.
     <dl>
         <dt><code>HDF5_CC</code>
             <dd>Use a different C compiler.
@@ -2133,67 +2143,74 @@ installed with HDF5.
 </dl>
 
 <!-- NEW PAGE -->
-<!-- HEADER RIGHT "h5fc" -->
+<!-- HEADER RIGHT "h5fc and h5pfc" -->
 <hr>
 <dl>
-<dt><strong>Tool Name:</strong> <a name="Tools-H5FC">h5fc</a>
+<dt><strong>Tool Names:</strong> <a name="Tools-H5FC">h5fc and h5pfc</a>
 <dt><strong>Syntax:</strong>
     <dd><code>h5fc
-        [</code><em>OPTIONS</em><code>]</code> <em>&lt;compile line&gt;</em>
+        [</code><em>OPTIONS</em><code> ]</code> <em>compile_line</em>
+    <dd><code>h5pfc
+        [</code><em>OPTIONS</em><code> ]</code> <em>compile_line</em>
 <dt><strong>Purpose:</strong>
-    <dd>Helper script to compile HDF5 Fortran90 applications.
+    <dd>Helper scripts to compile HDF5 Fortran90 applications.
 <dt><strong>Description:</strong>
-    <dd><p>
-        <code>h5fc</code> can be used in much the same way MPIch is used
-        to compile an HDF5 program. It takes care of specifying where the
-        HDF5 header files and libraries are on the command line.
+    <dd><code>h5fc</code> and <code>h5pfc</code> can be used in much the 
+        same way MPIch is used to compile an HDF5 program. 
+        These tools take care of specifying on the command line
+        the locations of the HDF5 header files and libraries.
+        <code>h5fc</code> is for use in serial computing environments;
+        <code>h5pfc</code> is for parallel environments.
         <p>
-        <code>h5fc</code> supersedes all other compiler scripts in that
-        if you've used them to compile the HDF5 Fortran library, then
-        <code>h5fc</code> also uses those scripts. For example, when
+        <code>h5fc</code> and <code>h5pfc</code> subsume all other 
+        compiler scripts in that if you have used a set of scripts to compile 
+        the HDF5 Fortran library, then <code>h5fc</code> and <code>h5pfc</code> 
+        also use those scripts. For example, when
         compiling an MPIch program, you use the <code>mpif90</code>
-        script. If you've built HDF5 using MPIch, then <code>h5fc</code>
+        script. If you have built HDF5 using MPIch, then <code>h5fc</code>
         uses the MPIch program for compilation.
         <p>
-        Some programs use HDF5 in only a few modules. It isn't necessary
-        to use <code>h5fc</code> to compile those modules which don't use
-        HDF5. In fact, since <code>h5fc</code> is only a convenience
-        script, you are still able to compile HDF5 Fortran modules in the 
-        normal way. In that case, you will have to specify the HDF5 libraries
-        and include paths yourself.
+        Some programs use HDF5 in only a few modules. It is not necessary
+        to use <code>h5fc</code> and <code>h5pfc</code> to compile those 
+        modules which do not use HDF5. 
+        In fact, since <code>h5fc</code> and <code>h5pfc</code> are only 
+        convenience scripts, you can still compile HDF5 Fortran modules in 
+        the normal manner, though you will have to specify the 
+        HDF5 libraries and include paths yourself.
         <p>
         An example of how to use <code>h5fc</code> to compile the program
-        <code>hdf_prog</code>, which consists of modules
+        <code>hdf_prog</code>, which consists of the modules
         <code>prog1.f90</code> and <code>prog2.f90</code> 
-        and uses the HDF5 Fortran library, would be as follows:
+        and uses the HDF5 Fortran library, would be as follows.
+        <code>h5pfc</code> is used in an identical manner.
         <pre>
         # h5fc -c prog1.f90
         # h5fc -c prog2.f90
-        # h5fc -o hdf_prog prog1.o prog2.o
-        </pre>
+        # h5fc -o hdf_prog prog1.o prog2.o </pre>
 <dt><strong>Options and Parameters:</strong>
     <dd>
     <dl>
         <dt><code>-help</code>
-            <dd>Prints a help message.
+            <dd>Print a help message.
         <dt><code>-echo</code>
             <dd>Show all the shell commands executed.
         <dt><code>-prefix=DIR</code>
             <dd>Use the directory <code>DIR</code> to find HDF5 
-                <code>lib/</code> and <code>include/</code> subdirectories 
+                <code>lib/</code> and <code>include/</code> subdirectories. 
                 <br>
                 Default: prefix specified when configuring HDF5.
         <dt><code>-show</code>
             <dd>Show the commands without executing them.
-        <dt><em>&lt;compile line&gt;</em>
+        <dt><em>compile_line</em>
             <dd>The normal compile line options for your compiler. 
-                <code>h5fc</code> uses the same compiler you used 
-                to compile HDF5. Check your compiler's manual for 
-                more information on which options are needed.
+                <code>h5fc</code> and <code>h5pfc</code> use the 
+                same compiler you used to compile HDF5; 
+                check your compiler's manual for more information 
+                on which options are needed.
     </dl>
 <dt><strong>Environment Variables:</strong>
     <dd>When set, these environment variables override some of the built-in
-        defaults of <code>h5cc</code>.
+        <code>h5fc</code> and <code>h5pfc</code> defaults.
         <dl>
           <dt><code>HDF5_FC</code>
             <dd>Use a different Fortran90 compiler.
@@ -2224,7 +2241,7 @@ installed with HDF5.
         to compile an HDF5 program. It takes care of specifying where the
         HDF5 header files and libraries are on the command line.
         <p>
-        <code>h5c++</code> supersedes all other compiler scripts in that
+        <code>h5c++</code> subsumes all other compiler scripts in that
         if you've used one set of compiler scripts to compile the 
 	HDF5 C++ library, then <code>h5c++</code> uses those same scripts. 
 	For example, when compiling an MPIch program, 
@@ -2369,7 +2386,7 @@ And in this document, the
 Describes HDF5 Release 1.6.1, October 2003
 </address><!-- #EndLibraryItem --> 
 
-Last modified: 30 October 2003
+Last modified: 8 January 2004
 
 </body>
 </html>
