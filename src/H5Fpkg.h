@@ -228,13 +228,13 @@ H5_DLL ssize_t H5F_contig_writevv(H5F_t *f, hsize_t _max_data, haddr_t _addr,
     hid_t dxpl_id, const void *buf);
 
 /* Functions that operate on compact dataset storage */
-H5_DLL ssize_t H5F_compact_readvv(H5F_t UNUSED *f, const struct H5O_layout_t *layout,
+H5_DLL ssize_t H5F_compact_readvv(H5F_t *f, const struct H5O_layout_t *layout,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[], 
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[], 
-    hid_t UNUSED dxpl_id, void *buf);
-H5_DLL ssize_t H5F_compact_writevv(H5F_t UNUSED *f, struct H5O_layout_t *layout,
+    hid_t dxpl_id, void *buf);
+H5_DLL ssize_t H5F_compact_writevv(H5F_t *f, struct H5O_layout_t *layout,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[], 
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[], 
-    hid_t UNUSED dxpl_id, const void *buf);
+    hid_t dxpl_id, const void *buf);
 #endif
 
