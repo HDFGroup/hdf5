@@ -471,6 +471,41 @@ HDsnprintf(char *buf, size_t UNUSED size, const char *fmt, ...)
 }
 #endif /* HAVE_SNPRINTF */
 
+#ifndef HAVE_VSNPRINTF
+
+
+/*-------------------------------------------------------------------------
+ * Function:	HDvsnprintf
+ *
+ * Purpose:	The same as HDsnprintf() except the variable arguments are
+ *		passed as a va_list.
+ *
+ * Note:	This function is for compatibility on systems that don't have
+ *		vsnprintf(3). It doesn't actually check for overflow like the
+ *		real vsnprintf() would.
+ *
+ * Return:	Success:	Number of characters stored, not including
+ *				the terminating null. If this value equals
+ *				SIZE then there was not enough space in BUF
+ *				for all the output.
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, April 26, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+HDvsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
+{
+    return vsprintf(buf, fmt, ap);
+}
+#endif /* HAVE_VSNPRINTF */
+
+
 
 /*-------------------------------------------------------------------------
  * Function:	HDfprintf

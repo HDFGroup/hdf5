@@ -122,7 +122,7 @@ H5S_term_interface(void)
 
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_DATASPACE))) {
-	    H5I_clear_group(H5I_DATASPACE);
+	    H5I_clear_group(H5I_DATASPACE, FALSE);
 	} else {
 #ifdef H5S_DEBUG
 	    /*

@@ -126,7 +126,7 @@ H5D_term_interface(void)
 
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_DATASET))) {
-	    H5I_clear_group(H5I_DATASET);
+	    H5I_clear_group(H5I_DATASET, FALSE);
 	} else {
 	    H5I_destroy_group(H5I_DATASET);
 	    interface_initialize_g = 0;

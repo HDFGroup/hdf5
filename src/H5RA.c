@@ -125,7 +125,7 @@ H5RA_term_interface(void)
 
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_RAGGED))) {
-	    H5I_clear_group(H5I_RAGGED);
+	    H5I_clear_group(H5I_RAGGED, FALSE);
 	} else {
 	    H5T_close(H5RA_meta_type_g);
 	    H5RA_meta_type_g = NULL;

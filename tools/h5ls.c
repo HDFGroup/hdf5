@@ -983,8 +983,9 @@ dump_dataset_values(hid_t dset)
 
     /* Set to all default values and then override */
     memset(&info, 0, sizeof info);
-    info.idx_fmt = "        (%s) ";
+    info.idx_fmt = "(%s)";
     info.line_ncols = width_g;
+    info.line_multi_new = 1;
     if (label_g) info.cmpd_name = "%s=";
 
     /*
@@ -996,10 +997,16 @@ dump_dataset_values(hid_t dset)
 	info.ascii = TRUE;
 	info.elmt_suf1 = "";
 	info.elmt_suf2 = "";
-	info.idx_fmt = "        (%s) \"";
+	info.line_pre ="        %s \"";
 	info.line_suf = "\"";
     }
 
+    /*
+     * If a compound datatype is split across multiple lines then add an
+     * ellipsis to the beginning of the continuation line.
+     */
+    info.line_pre  = "        %s ";
+    info.line_cont = "        %s  ";
     
     /*
      * Print all the values.
@@ -1066,10 +1073,17 @@ list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
 
 	/* Data */
 	memset(&info, 0, sizeof info);
+	info.line_multi_new = 1;
 	if (nelmts<5) {
-	    info.idx_fmt = "        Data:  ";
+	    info.idx_fmt = "";
+	    info.line_1st  = "        Data:  ";
+	    info.line_pre  = "               ";
+	    info.line_cont = "                ";
+	    
 	} else {
-	    info.idx_fmt = "            (%s) ";
+	    info.idx_fmt = "(%s)";
+	    info.line_pre  = "            %s ";
+	    info.line_cont = "            %s  ";
 	}
 	info.line_ncols = width_g;
 	if (label_g) info.cmpd_name = "%s=";
@@ -1078,7 +1092,8 @@ list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
 	    info.ascii = TRUE;
 	    info.elmt_suf1 = "";
 	    info.elmt_suf2 = "";
-	    info.idx_fmt = "            (%s) \"";
+	    info.idx_fmt  = "(%s)";
+	    info.line_pre = "            %s \"";
 	    info.line_suf = "\"";
 	}
 	if ((p_type=h5dump_fixtype(type))>=0) {
@@ -1191,6 +1206,7 @@ dataset_list2(hid_t dset, const char UNUSED *name)
     hsize_t		chsize[64];	/*chunk size in elements	*/
     int			ndims;		/*dimensionality		*/
     int			n, max_len;	/*max extern file name length	*/
+    double		utilization;	/*percent utilization of storage*/
     int			i;
     
     if (verbose_g>0) {
@@ -1218,6 +1234,16 @@ dataset_list2(hid_t dset, const char UNUSED *name)
 	       (unsigned long)used, 1==used?"":"s",
 	       (unsigned long)total, 1==total?"":"s");
 	if (total>0) {
+#ifdef WIN32
+	    hsize_t mask = (hsize_1)1 << (8*sizeof(hsize_t)-1);
+	    if ((used & mask) || (total & mask)) {
+		total = 0; /*prevent utilization printing*/
+	    } else {
+		utilization = (hssize_t)used*100.0 /(hssize_t)total;
+	    }
+#else
+	    utilization = (used*100.0)/total;
+#endif
 	    printf(", %1.2f%% utilization", (used*100.0)/total);
 	}
 	putchar('\n');

@@ -111,7 +111,7 @@ H5P_term_interface(void)
 	}
 	if (n) {
 	    for (i=0; i<H5P_NCLASSES; i++) {
-		H5I_clear_group((H5I_type_t)(H5I_TEMPLATE_0+i));
+		H5I_clear_group((H5I_type_t)(H5I_TEMPLATE_0+i), FALSE);
 	    }
 	} else {
 	    for (i=0; i<H5P_NCLASSES; i++) {

@@ -117,7 +117,7 @@ H5TB_term_interface(void)
 
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_TEMPBUF))) {
-	    H5I_clear_group(H5I_TEMPBUF);
+	    H5I_clear_group(H5I_TEMPBUF, FALSE);
 	} else {
 	    /* Free group and buffers */
 	    H5I_destroy_group(H5I_TEMPBUF);

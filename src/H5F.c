@@ -338,7 +338,10 @@ herr_t
 H5F_close_all(void)
 {
     FUNC_ENTER(H5F_close_all, FAIL);
-    H5I_clear_group(H5I_FILE);
+    if (H5I_clear_group(H5I_FILE, FALSE)<0) {
+	HRETURN_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL,
+		      "unable to close one or more files");
+    }
     FUNC_LEAVE(SUCCEED);
 }
 

@@ -1113,50 +1113,46 @@ H5T_term_interface(void)
     H5T_path_t	*path = NULL;
 
     if (interface_initialize_g) {
-	if ((n=H5I_nmembers(H5I_DATATYPE))) {
-	    H5I_clear_group(H5I_DATATYPE);
-	} else {
-	    /* Unregister all conversion functions */
-	    for (i=0; i<H5T_g.npaths; i++) {
-		path = H5T_g.path[i];
-		assert (path);
+	/* Unregister all conversion functions */
+	for (i=0; i<H5T_g.npaths; i++) {
+	    path = H5T_g.path[i];
+	    assert (path);
 
-		if (path->func) {
-		    H5T_print_stats(path, &nprint/*in,out*/);
-		    path->cdata.command = H5T_CONV_FREE;
-		    if ((path->func)(FAIL, FAIL, &(path->cdata),
-				     0, NULL, NULL)<0) {
+	    if (path->func) {
+		H5T_print_stats(path, &nprint/*in,out*/);
+		path->cdata.command = H5T_CONV_FREE;
+		if ((path->func)(FAIL, FAIL, &(path->cdata),
+				 0, NULL, NULL)<0) {
 #ifdef H5T_DEBUG
-			if (H5DEBUG(T)) {
-			    fprintf (H5DEBUG(T), "H5T: conversion function "
-				     "0x%08lx failed to free private data for "
-				     "%s (ignored)\n",
-				     (unsigned long)(path->func), path->name);
-			}
-#endif
-			H5E_clear(); /*ignore the error*/
+		    if (H5DEBUG(T)) {
+			fprintf (H5DEBUG(T), "H5T: conversion function "
+				 "0x%08lx failed to free private data for "
+				 "%s (ignored)\n",
+				 (unsigned long)(path->func), path->name);
 		    }
+#endif
+		    H5E_clear(); /*ignore the error*/
 		}
-		H5T_close (path->src);
-		H5T_close (path->dst);
-		H5MM_xfree (path);
-		H5T_g.path[i] = NULL;
 	    }
-
-	    /* Clear conversion tables */
-	    H5T_g.path = H5MM_xfree(H5T_g.path);
-	    H5T_g.npaths = H5T_g.apaths = 0;
-	    H5T_g.soft = H5MM_xfree(H5T_g.soft);
-	    H5T_g.nsoft = H5T_g.asoft = 0;
-
-	    /* Unlock all datatypes, then free them */
-	    H5I_search (H5I_DATATYPE, H5T_unlock_cb, NULL);
-	    H5I_destroy_group(H5I_DATATYPE);
-
-	    /* Mark interface as closed */
-	    interface_initialize_g = 0;
-	    n = 1; /*H5I*/
+	    H5T_close (path->src);
+	    H5T_close (path->dst);
+	    H5MM_xfree (path);
+	    H5T_g.path[i] = NULL;
 	}
+
+	/* Clear conversion tables */
+	H5T_g.path = H5MM_xfree(H5T_g.path);
+	H5T_g.npaths = H5T_g.apaths = 0;
+	H5T_g.soft = H5MM_xfree(H5T_g.soft);
+	H5T_g.nsoft = H5T_g.asoft = 0;
+
+	/* Unlock all datatypes, then free them */
+	H5I_search (H5I_DATATYPE, H5T_unlock_cb, NULL);
+	H5I_destroy_group(H5I_DATATYPE);
+
+	/* Mark interface as closed */
+	interface_initialize_g = 0;
+	n = 1; /*H5I*/
     }
     return n;
 }
@@ -4551,6 +4547,8 @@ H5T_lock (H5T_t *dt, hbool_t immutable)
  *		Monday, December  8, 1997
  *
  * Modifications:
+ * 		Robb Matzke, 1999-04-27
+ *		This function fails if the datatype state is IMMUTABLE.
  *
  *-------------------------------------------------------------------------
  */
@@ -4558,9 +4556,9 @@ herr_t
 H5T_close(H5T_t *dt)
 {
     intn	i;
+    H5T_t	*parent = dt->parent;
 
     FUNC_ENTER(H5T_close, FAIL);
-
     assert(dt);
 
     /*
@@ -4575,41 +4573,44 @@ H5T_close(H5T_t *dt)
 	dt->state = H5T_STATE_NAMED;
     }
 
+    /*
+     * Don't free locked datatypes.
+     */
+    if (H5T_STATE_IMMUTABLE==dt->state) {
+	HRETURN_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL,
+		      "unable to close immutable datatype");
+    }
+
+    /* Close the datatype */
+    switch (dt->type) {
+    case H5T_COMPOUND:
+	for (i=0; i<dt->u.compnd.nmembs; i++) {
+	    H5MM_xfree(dt->u.compnd.memb[i].name);
+	    H5T_close(dt->u.compnd.memb[i].type);
+	}
+	H5MM_xfree(dt->u.compnd.memb);
+	H5MM_xfree(dt);
+	break;
+
+    case H5T_ENUM:
+	for (i=0; i<dt->u.enumer.nmembs; i++) {
+	    H5MM_xfree(dt->u.enumer.name[i]);
+	}
+	H5MM_xfree(dt->u.enumer.name);
+	H5MM_xfree(dt->u.enumer.value);
+	H5MM_xfree(dt);
+	break;
+
+    default:
+	H5MM_xfree(dt);
+    }
+
     /* Close the parent */
-    if (dt->parent && H5T_close(dt->parent)<0) {
+    if (parent && H5T_close(parent)<0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to close parent data type");
     }
     
-    /*
-     * Don't free locked datatypes unless we are shutting down the
-     * interface.
-     */
-    if (H5T_STATE_IMMUTABLE!=dt->state) {
-	switch (dt->type) {
-	case H5T_COMPOUND:
-	    for (i=0; i<dt->u.compnd.nmembs; i++) {
-		H5MM_xfree(dt->u.compnd.memb[i].name);
-		H5T_close(dt->u.compnd.memb[i].type);
-	    }
-	    H5MM_xfree(dt->u.compnd.memb);
-	    H5MM_xfree(dt);
-	    break;
-
-	case H5T_ENUM:
-	    for (i=0; i<dt->u.enumer.nmembs; i++) {
-		H5MM_xfree(dt->u.enumer.name[i]);
-	    }
-	    H5MM_xfree(dt->u.enumer.name);
-	    H5MM_xfree(dt->u.enumer.value);
-	    H5MM_xfree(dt);
-	    break;
-
-	default:
-	    H5MM_xfree(dt);
-	}
-    }
-
     FUNC_LEAVE(SUCCEED);
 }
 

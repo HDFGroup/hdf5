@@ -726,7 +726,7 @@ H5G_term_interface(void)
     
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_GROUP))) {
-	    H5I_clear_group(H5I_GROUP);
+	    H5I_clear_group(H5I_GROUP, FALSE);
 	} else {
 	    /* Empty the object type table */
 	    for (i=0; i<H5G_ntypes_g; i++) {

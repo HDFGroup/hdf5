@@ -689,6 +689,9 @@ __DLL__ int64_t HDstrtoll (const char *s, const char **rest, int base);
 #define HDvfprintf(F,FMT,A)	vfprintf(F,FMT,A)
 #define HDvprintf(FMT,A)	vprintf(FMT,A)
 #define HDvsprintf(S,FMT,A)	vsprintf(S,FMT,A)
+#ifdef HAVE_VSNPRINTF
+#   define HDvsnprintf(S,N,FMT,A) vsnprintf(S,N,FMT,A)
+#endif
 #define HDwait(W)		wait(W)
 #define HDwaitpid(P,W,O)	waitpid(P,W,O)
 #define HDwcstombs(S,P,Z)	wcstombs(S,P,Z)
@@ -703,6 +706,9 @@ char *strdup(const char *s);
 
 #ifndef HAVE_SNPRINTF
 __DLL__ int HDsnprintf(char *buf, size_t size, const char *fmt, ...);
+#endif
+#ifndef HAVE_VSNPRINTF
+__DLL__ int HDvsnprintf(char *buf, size_t size, const char *fmt, va_list ap);
 #endif
 
 /*

@@ -364,14 +364,18 @@ H5I_nmembers(H5I_type_t grp)
  *              Wednesday, March 24, 1999
  *
  * Modifications:
+ * 		Robb Matzke, 1999-04-27
+ *		If FORCE is zero then any item for which the free callback
+ *		failed is not removed.  This function returns failure if
+ *		items could not be removed.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5I_clear_group(H5I_type_t grp)
+H5I_clear_group(H5I_type_t grp, hbool_t force)
 {
     H5I_id_group_t	*grp_ptr = NULL;	/* ptr to the atomic group */
-    H5I_id_info_t	*cur=NULL, *next=NULL;
+    H5I_id_info_t	*cur=NULL, *next=NULL, *prev=NULL;
     intn		ret_value = SUCCEED;
     uintn		i;
 
@@ -401,26 +405,35 @@ H5I_clear_group(H5I_type_t grp)
     /*
      * Call free method for all objects in group regardless of their reference
      * counts. Ignore the return value from from the free method and remove
-     * object from group regardless.
+     * object from group regardless if FORCE is non-zero.
      */
     for (i=0; i<grp_ptr->hash_size; i++) {
 	for (cur=grp_ptr->id_list[i]; cur; cur=next) {
 	    /* Free the object regardless of reference count */
 	    if (grp_ptr->free_func && (grp_ptr->free_func)(cur->obj_ptr)<0) {
+		if (force) {
 #if H5I_DEBUG
-		if (H5DEBUG(I)) {
-		    fprintf(H5DEBUG(I), "H5I: free grp=%d obj=0x%08lx "
-			    "failure ignored\n", (int)grp,
-			    (unsigned long)(cur->obj_ptr));
-		}
+		    if (H5DEBUG(I)) {
+			fprintf(H5DEBUG(I), "H5I: free grp=%d obj=0x%08lx "
+				"failure ignored\n", (int)grp,
+				(unsigned long)(cur->obj_ptr));
+		    }
 #endif /*H5I_DEBUG*/
+		    /* Add ID struct to free list */
+		    next = cur->next;
+		    H5I_release_id_node(cur);
+		} else {
+		    if (prev) prev->next = cur;
+		    else grp_ptr->id_list[i] = cur;
+		    prev = cur;
+		}
+	    } else {
+		/* Add ID struct to free list */
+		next = cur->next;
+		H5I_release_id_node(cur);
 	    }
-		    
-	    /* Add ID struct to free list */
-	    next = cur->next;
-	    H5I_release_id_node(cur);
 	}
-	grp_ptr->id_list[i]=NULL;
+	if (!prev) grp_ptr->id_list[i]=NULL;
     }
     
   done:
@@ -472,7 +485,8 @@ H5I_destroy_group(H5I_type_t grp)
      * free function is invoked for each atom being freed.
      */
     if (1==grp_ptr->count) {
-	H5I_clear_group(grp);
+	H5I_clear_group(grp, TRUE);
+	H5E_clear(); /*don't care about errors*/
 	H5MM_xfree(grp_ptr->id_list);
 	HDmemset (grp_ptr, 0, sizeof(*grp_ptr));
     } else {

@@ -94,7 +94,7 @@ H5R_term_interface(void)
     
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_REFERENCE))) {
-	    H5I_clear_group(H5I_REFERENCE);
+	    H5I_clear_group(H5I_REFERENCE, FALSE);
 	} else {
 	    H5I_destroy_group(H5I_REFERENCE);
 	    interface_initialize_g = 0;

@@ -194,6 +194,9 @@
 /* Define if you have the system function.  */
 #undef HAVE_SYSTEM
 
+/* Define if you have the vsnprintf function.  */
+#undef HAVE_VSNPRINTF
+
 /* Define if you have the waitpid function.  */
 #undef HAVE_WAITPID
 
