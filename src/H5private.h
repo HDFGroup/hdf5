@@ -153,6 +153,7 @@
 
 #include <windef.h>
 #include <winbase.h>
+#include <io.h>
 
 /* H5_inline */
 
@@ -173,15 +174,8 @@ MS doesn't recognize it yet (as of April 2001)
 # define H5_inline 
 #endif
 
-/* Metroworks <sys/types.h> doesn't define off_t. */
-#ifdef __MWERKS__
-typedef long off_t;
-/* Metroworks does not define EINTR in <errno.h> */
-# define EINTR 4
-#endif
-/*__MWERKS__*/
 
-#endif
+#endif 
 /*WIN32*/
 
 #ifndef F_OK
@@ -757,7 +751,17 @@ __DLL__ int64_t HDstrtoll (const char *s, const char **rest, int base);
 #define HDwaitpid(P,W,O)	waitpid(P,W,O)
 #define HDwcstombs(S,P,Z)	wcstombs(S,P,Z)
 #define HDwctomb(S,C)		wctomb(S,C)
+
+
+#if defined (__MWERKS__)
+/* workaround for a bug in the Metrowerks header file for write
+ which is not defined as const void*
+ pvn
+ */
+#define HDwrite(F,M,Z)		write(F,(void*)M,Z)
+#else
 #define HDwrite(F,M,Z)		write(F,M,Z)
+#endif
 
 /*
  * And now for a couple non-Posix functions...  Watch out for systems that

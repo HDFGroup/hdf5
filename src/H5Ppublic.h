@@ -28,6 +28,15 @@
 #include "H5MMpublic.h"
 #include "H5Zpublic.h"
 
+
+/* Metroworks <sys/types.h> doesn't define off_t. */
+#ifdef __MWERKS__
+typedef long off_t;
+/* Metroworks does not define EINTR in <errno.h> */
+# define EINTR 4
+#endif
+/*__MWERKS__*/
+
 /* Property list classes */
 typedef enum H5P_class_t {
     H5P_NO_CLASS         = -1,  /*error return value                 */
