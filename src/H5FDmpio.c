@@ -1220,6 +1220,13 @@ H5FD_mpio_read(H5FD_t *_file, hid_t dxpl_id, haddr_t addr, hsize_t size,
  *
  * 		Robb Matzke, 1999-08-06
  *		Modified to work with the virtual file layer.
+ *
+ *		Albert Cheng, 1999-12-19
+ *		When only-p0-write-allsame-data, p0 Bcasts the
+ *		ret_value to other processes.  This prevents
+ *		a racing condition (that other processes try to
+ *		read the file before p0 finishes writing) and also
+ *		allows all processes to report the same ret_value.
  *-------------------------------------------------------------------------
  */
 static herr_t
