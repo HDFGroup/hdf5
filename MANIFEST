@@ -288,7 +288,11 @@
 ./tools/Makefile.in
 ./tools/h5debug.c
 ./tools/h5dump.c
+./tools/h5dump.h
+./tools/h5dumputil.c
 ./tools/h5import.c
 ./tools/h5ls.c
 ./tools/h5repart.c
+./tools/h5tools.c
 ./tools/h5tools.h
+
