@@ -10,9 +10,9 @@ DATASET "/g1/dset2" {
    }
 }
 DATASET "/dset1" {
-   HARDLINK "/g1/dset2"
+   HARDLINK "/dset1"
 }
 DATASET "/g1/g1.1/dset3" {
-   HARDLINK "/g1/dset2"
+   HARDLINK "/dset1"
 }
 }

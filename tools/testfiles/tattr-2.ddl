@@ -6,15 +6,15 @@ ATTRIBUTE "/attr1" {
    DATATYPE  H5T_STD_I8BE
    DATASPACE  SIMPLE { ( 24 ) / ( 24 ) }
    DATA {
-      97, 116, 116, 114, 105, 98, 117, 116, 101, 32, 111, 102, 32, 114, 111,
-      111, 116, 32, 103, 114, 111, 117, 112, 0
+   (0): 97, 116, 116, 114, 105, 98, 117, 116, 101, 32, 111, 102, 32, 114,
+   (14): 111, 111, 116, 32, 103, 114, 111, 117, 112, 0
    }
 }
 ATTRIBUTE "/attr4" {
    DATATYPE  H5T_STD_I32BE
    DATASPACE  SCALAR
    DATA {
-      100
+   (0): 100
    }
 }
 ATTRIBUTE "/attr5" {
@@ -26,7 +26,7 @@ ATTRIBUTE "/attr5" {
       }
    DATASPACE  SCALAR
    DATA {
-      "string attribute"
+   (0): "string attribute"
    }
 }
 }

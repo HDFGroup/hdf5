@@ -12,7 +12,7 @@ GROUP "/g1" {
    }
    GROUP "g1.1" {
       DATASET "dset3" {
-         HARDLINK "/g1/dset2"
+         HARDLINK "/dset1"
       }
    }
 }
