@@ -2757,7 +2757,8 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
-	/* read data from space */ 
+	/* Sanity check that space is allocated, then read data from it */ 
+        assert(dataset->layout.addr!=HADDR_UNDEF || dataset->efl.nused>0 || dataset->layout.type==H5D_COMPACT);
         n = H5S_select_fgath(dataset->ent.file, &(dataset->layout), 
                 dc_plist, &(dataset->efl), src_type_size, file_space, 
                 &file_iter, smine_nelmts, dxpl_id, tconv_buf/*out*/);
