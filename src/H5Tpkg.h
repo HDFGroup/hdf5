@@ -1091,6 +1091,7 @@ H5_DLL H5T_t * H5T_array_create(H5T_t *base, int ndims,
 /* Compound functions */
 H5_DLL H5T_t *H5T_get_member_type(const H5T_t *dt, unsigned membno);
 H5_DLL size_t H5T_get_member_offset(const H5T_t *dt, unsigned membno);
+H5_DLL size_t H5T_get_member_size(H5T_t *dt, int membno);
 H5_DLL htri_t H5T_is_packed(const H5T_t *dt);
 
 #endif

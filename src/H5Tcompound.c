@@ -300,6 +300,40 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5T_get_member_size
+ *
+ * Purpose:	Returns the size of the specified member.
+ *
+ * Return:	Success:	The size in bytes of the member's datatype.
+ *
+ *		Failure:        0
+ *
+ * Programmer:	Quincey Koziol
+ *	        October 4, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+size_t
+H5T_get_member_size(H5T_t *dt, int membno)
+{
+    size_t	ret_value = 0;
+
+    FUNC_ENTER_NOAPI(H5T_get_member_size, 0);
+
+    assert(dt);
+    assert(membno >=0 && membno < dt->shared->u.compnd.nmembs);
+    
+    /* Value */
+    ret_value = dt->shared->u.compnd.memb[membno].type->shared->size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Tinsert
  *
  * Purpose:	Adds another member to the compound datatype PARENT_ID.  The
