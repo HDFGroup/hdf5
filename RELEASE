@@ -1,3 +1,18 @@
+Changes since HDF5-1.2.0
+==========================
+* h5dump correctly displays compound datatypes.
+* Corrected an error in h5toh4 which did not convert the 32bits
+  int from HDF5 to HDF4 corectly for the T3E platform.
+* Corrected a floating point number conversion error for the
+  Cray J90 platform.  The error did not convert the value 0.0
+  correctly.
+* The multi and split file drivers did not work on big-endian
+  machines.  Fixed.
+* Added GLOBUS-GASS file driver, upgraded to Globus 1.1.
+* Incorporated DPSS file driver contributed by the Cactus group.
+  DPSS is renamed to storage grid.
+
+
 Release information for hdf5-1.2.0beta
 ------------------------------------
 
