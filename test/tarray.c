@@ -699,6 +699,9 @@ test_array_compound_array(void)
     typedef struct {        /* Typedef for compound datatype */
         int i;
         float f[ARRAY1_DIM1];
+#ifdef WANT_H5_V1_2_COMPAT
+        double d[ARRAY1_DIM1];
+#endif /* WANT_H5_V1_2_COMPAT */
     } s1_t;
     s1_t wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
     s1_t rdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information read in */
@@ -710,8 +713,14 @@ test_array_compound_array(void)
     hid_t		tid3;       /* Nested Array Datatype ID	*/
     hsize_t		sdims1[] = {SPACE1_DIM1};
     hsize_t		tdims1[] = {ARRAY1_DIM1};
+#ifdef WANT_H5_V1_2_COMPAT
+    size_t		otdims1[] = {ARRAY1_DIM1};
+#endif /* WANT_H5_V1_2_COMPAT */
     int         ndims;      /* Array rank for reading */
     hsize_t		rdims1[H5S_MAX_RANK];    /* Array dimensions for reading */
+#ifdef WANT_H5_V1_2_COMPAT
+    size_t		ordims1[H5S_MAX_RANK];    /* Array dimensions for reading */
+#endif /* WANT_H5_V1_2_COMPAT */
     int         nmemb;      /* Number of compound members */
     char       *mname;      /* Name of compound field */
     size_t      off;        /* Offset of compound field */
@@ -729,6 +738,10 @@ test_array_compound_array(void)
             wdata[i][j].i=i*10+j;
             for(k=0; k<ARRAY1_DIM1; k++)
                 wdata[i][j].f[k]=i*10+j*2.5+k;
+#ifdef WANT_H5_V1_2_COMPAT
+            for(k=0; k<ARRAY1_DIM1; k++)
+                wdata[i][j].d[k]=i*15+j*7.5+k;
+#endif /* WANT_H5_V1_2_COMPAT */
         } /* end for */
 
     /* Create file */
@@ -758,6 +771,13 @@ test_array_compound_array(void)
     /* Close array of floats field datatype */
     ret=H5Tclose(tid3);
     CHECK(ret, FAIL, "H5Tclose");
+
+/* Compatibility code to verify that the old API functions are still working */
+#ifdef WANT_H5_V1_2_COMPAT
+    /* Insert float array field */
+    ret = H5Tinsert_array (tid2, "d", HOFFSET(s1_t,d), ARRAY1_RANK,otdims1,NULL,H5T_NATIVE_DOUBLE);
+    CHECK(ret, FAIL, "H5Tinsert_array");
+#endif /* WANT_H5_V1_2_COMPAT */
 
     /* Create an array datatype to refer to */
     tid1 = H5Tarray_create (tid2,ARRAY1_RANK,tdims1,NULL);
@@ -826,7 +846,11 @@ test_array_compound_array(void)
 
     /* Check the number of members */
     nmemb=H5Tget_nmembers(tid2);
+#ifdef WANT_H5_V1_2_COMPAT
+    VERIFY(nmemb,3,"H5Tget_nmembers");
+#else /* WANT_H5_V1_2_COMPAT */
     VERIFY(nmemb,2,"H5Tget_nmembers");
+#endif /* WANT_H5_V1_2_COMPAT */
 
     /* Check the 1st field's name */
     mname=H5Tget_member_name(tid2,0);
@@ -904,6 +928,34 @@ test_array_compound_array(void)
     /* Close the member datatype */
     ret=H5Tclose(mtid);
     CHECK(mtid, FAIL, "H5Tclose");
+
+/* Compatibility code to verify that the old API functions are still working */
+#ifdef WANT_H5_V1_2_COMPAT
+    /* Check the 3rd field's name */
+    mname=H5Tget_member_name(tid2,2);
+    CHECK(mname, NULL, "H5Tget_member_name");
+    if(HDstrcmp(mname,"d")!=0) {
+        num_errs++;
+        printf("Compound field name doesn't match!, mname=%s\n",mname);
+    } /* end if */
+    free(mname);
+
+    /* Check the 3rd field's offset */
+    off=H5Tget_member_offset(tid2,2);
+    VERIFY(off, HOFFSET(s1_t,d), "H5Tget_member_offset");
+
+    /* Check the array rank */
+    ndims=H5Tget_member_dims(tid2,2,ordims1,NULL);
+    VERIFY(ndims,ARRAY1_RANK,"H5Tget_member_dims");
+
+    /* Check the array dimensions */
+    for(i=0; i<ndims; i++)
+        if(ordims1[i]!=otdims1[i]) {
+            num_errs++;
+            printf("Nested array dimension information doesn't match!, ordims1[%d]=%d, otdims1[%d]=%d\n",(int)i,(int)ordims1[i],(int)i,(int)otdims1[i]);
+            continue;
+        } /* end if */
+#endif /* WANT_H5_V1_2_COMPAT */
 
     /* Close Compound Datatype */
     ret = H5Tclose(tid2);
