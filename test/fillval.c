@@ -376,7 +376,8 @@ test_rdwr(const char *filename, H5D_layout_t layout)
     hsize_t	cur_size[5] = {32, 16, 8, 4, 2};
     hsize_t	ch_size[5] = {1, 16, 8, 4, 2};
     hsize_t	one[5] = {1, 1, 1, 1, 1};
-    hssize_t	hs_size[5], hs_offset[5], hs_stride[5], nelmts;
+    hsize_t	hs_size[5], hs_stride[5];
+    hssize_t	hs_offset[5], nelmts;
 #ifdef NO_FILLING
     int		fillval = 0;
 #else
@@ -520,7 +521,8 @@ test_extend(const char *filename, H5D_layout_t layout)
     hsize_t	max_size[5] = {128, 64, 32, 16, 8};
     hsize_t	ch_size[5] = {1, 16, 8, 4, 2};
     hsize_t	one[5] = {1, 1, 1, 1, 1};
-    hssize_t	hs_size[5], hs_offset[5], hs_stride[5], nelmts;
+    hsize_t	hs_size[5], hs_stride[5];
+    hssize_t	hs_offset[5], nelmts;
 #ifdef NO_FILLING
     int		fillval = 0;
 #else
