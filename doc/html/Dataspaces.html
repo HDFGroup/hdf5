@@ -393,7 +393,7 @@ portions of a dataspace may be added in the future.
 
 <DL>
 <DT>
-<TT>herr_t H5Sselect_hyperslab (hid_t <I>space</I>, h5s_selopt_t <I>op</I>,
+<TT>herr_t H5Sselect_hyperslab (hid_t <I>space</I>, h5s_seloper_t <I>op</I>,
     const hssize_t * <I>start</I>, const hsize_t * <I>stride</I>,
     const hsize_t * <I>count</I>, const hsize_t * <I>block</I>)</TT></DT>
 
@@ -443,7 +443,7 @@ I/O is performed.
 </DD>
 
 <DT>
-<TT>herr_t H5Sselect_elements (hid_t <I>space</I>, h5s_selopt_t <I>op</I>,
+<TT>herr_t H5Sselect_elements (hid_t <I>space</I>, h5s_seloper_t <I>op</I>,
     const size_t <I>num_elements</I>, const hssize_t *<I>coord</I>[])</TT></DT>
 
 <DD>
@@ -496,7 +496,7 @@ dataspace not to include any elements.
 </DD>
 
 <DT>
-<TT>herr_t H5Sselect_op (hid_t <I>space1</I>, h5s_selopt_t <I>op</I>,
+<TT>herr_t H5Sselect_op (hid_t <I>space1</I>, h5s_seloper_t <I>op</I>,
     hid_t <I>space2</I>)</TT></DT>
 
 <DD>
@@ -677,7 +677,7 @@ is returned.
 
 <!-- Created: Thu Dec  4 14:57:32 EST 1997 -->
 <!-- hhmts start -->
-Last modified:  13 December 1999
+Last modified:  5 July 2001
 <!-- hhmts end -->
 
 <br>
