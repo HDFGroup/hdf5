@@ -436,9 +436,9 @@ test_array_array_atomic(void)
 
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
-        for(j=0; j<ARRAY2_DIM1; j++) {
-            for(k=0; k<ARRAY2_DIM2; k++) {
-                for(l=0; l<ARRAY2_DIM3; l++) {
+        for(j=0; j<ARRAY1_DIM1; j++) {
+            for(k=0; k<ARRAY3_DIM1; k++) {
+                for(l=0; l<ARRAY3_DIM2; l++) {
                     if(wdata[i][j][k][l]!=rdata[i][j][k][l]) {
                         TestErrPrintf("Array data information doesn't match!, wdata[%d][%d][%d][%d]=%d, rdata[%d][%d][%d][%d]=%d\n",(int)i,(int)j,(int)k,(int)l,(int)wdata[i][j][k][l],(int)i,(int)j,(int)k,(int)l,(int)rdata[i][j][k][l]);
                         continue;
