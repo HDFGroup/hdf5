@@ -165,13 +165,13 @@ void TestParseCmdLine(int argc, char *argv[], int *Summary, int *CleanUp)
         if ((argc > CLLoop + 1) && ((HDstrcmp(argv[CLLoop], "-verbose") == 0) ||
                                     (HDstrcmp(argv[CLLoop], "-v") == 0))) {
             if (argv[CLLoop + 1][0] == 'l')
-                Verbosity = VERBO_LO;
+                SetTestVerbosity(VERBO_LO);
             else if (argv[CLLoop + 1][0] == 'm')
-                Verbosity = VERBO_MED;
+                SetTestVerbosity(VERBO_MED);
             else if (argv[CLLoop + 1][0] == 'h')
-                Verbosity = VERBO_HI;
+                SetTestVerbosity(VERBO_HI);
             else
-                Verbosity = atoi(argv[CLLoop + 1]);
+                SetTestVerbosity(atoi(argv[CLLoop + 1]));
         }                       /* end if */
         if ((argc > CLLoop) && ((HDstrcmp(argv[CLLoop], "-summary") == 0) ||
                                 (HDstrcmp(argv[CLLoop], "-s") == 0)))
@@ -300,6 +300,19 @@ void TestCleanup(void)
 int GetTestVerbosity(void)
 {
     return(Verbosity);
+}
+
+/*
+ * Set the verbosity level for the testing framework.
+ * Return previous verbosity level.
+ */
+int SetTestVerbosity(int new)
+{
+    int old;
+
+    old = Verbosity;
+    Verbosity = new;
+    return(old);
 }
 
 
