@@ -28,7 +28,8 @@ HDF5/H5P API Specification
 <!-- HEADER RIGHT " " -->
 
 
-<!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
+<!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" -->
+<hr>
 <center>
 <table border=0 width=98%>
 <tr><td valign=top align=left>
@@ -76,6 +77,209 @@ which require many different parameters to be easily manipulated.
 <p>
 <strong>The C Interfaces:</strong>
 
+<!-- FOR USE WITH PRINT VERSION ----------------------------------------
+<table border="0" width="95%">
+<tr>
+<td valign="top" width="31%">
+
+  <i>General Functions</i>
+  <ul>
+    <li><a href="#Property-Create">H5Pcreate</a>
+    <li><a href="#Property-GetClass">H5Pget_class</a>
+    <li><a href="#Property-Copy">H5Pcopy</a>
+    <li><a href="#Property-Close">H5Pclose</a>
+  </ul>
+	
+  <i>Generic Properties</i> 
+  <ul>
+    <li><a href="#Property-CreateClass">H5Pcreate_class</a> 
+    <li><a href="#Property-CreateList">H5Pcreate_list</a> 
+    <li><a href="#Property-Register">H5Pregister</a> 
+    <li><a href="#Property-Insert">H5Pinsert</a> 
+    <li><a href="#Property-Set">H5Pset</a> 
+    <li><a href="#Property-Exist">H5Pexist</a> 
+    <li><a href="#Property-GetSize">H5Pget_size</a> 
+    <li><a href="#Property-GetNProps">H5Pget_nprops</a> 
+    <li><a href="#Property-GetClassName">H5Pget_class_name</a> 
+    <li><a href="#Property-GetClassParent">H5Pget_class_parent</a> 
+    <li><a href="#Property-IsAClass">H5Pisa_class</a> 
+    <li><a href="#Property-Get">H5Pget</a> 
+    <li><a href="#Property-Equal">H5Pequal</a> 
+    <li><a href="#Property-Iterate">H5Piterate</a> 
+    <li><a href="#Property-CopyProp">H5Pcopy_prop</a> 
+    <li><a href="#Property-Remove">H5Premove</a> 
+    <li><a href="#Property-Unregister">H5Punregister</a> 
+    <li><a href="#Property-CloseList">H5Pclose_list</a> 
+    <li><a href="#Property-CloseClass">H5Pclose_class</a> 
+  </ul>
+</td>
+<td valign="top" width="3%">&nbsp;</td>
+<td valign="top" width="32%">
+  <i>File Access Properties</i>
+  <ul>
+    <li><a href="#Property-SetFcloseDegree">H5Pset_fclose_degree</a>
+    <li><a href="#Property-GetFcloseDegree">H5Pget_fclose_degree</a>
+    <li><a href="#Property-SetFaplCore">H5Pset_fapl_core</a>
+    <li><a href="#Property-GetFaplCore">H5Pget_fapl_core</a>
+    <li><a href="#Property-SetFaplFamily">H5Pset_fapl_family</a>
+    <li><a href="#Property-GetFaplFamily">H5Pget_fapl_family</a>
+    <li><a href="#Property-SetFamilyOffset">H5Pset_family_offset</a>
+    <li><a href="#Property-GetFamilyOffset">H5Pget_family_offset</a>    
+    <li><a href="#Property-SetFaplLog">H5Pset_fapl_log</a>
+    <li><a href="#Property-SetFaplMpio">H5Pset_fapl_mpio</a>&nbsp;&nbsp;&nbsp;||
+    <li><a href="#Property-GetFaplMpio">H5Pget_fapl_mpio</a>&nbsp;&nbsp;&nbsp;||
+    <li><a href="#Property-SetFaplMpiPosix">H5Pset_fapl_mpiposix</a>&nbsp;&nbsp;&nbsp;||
+    <li><a href="#Property-GetFaplMpiPosix">H5Pget_fapl_mpiposix</a>&nbsp;&nbsp;&nbsp;||
+    <li><a href="#Property-SetFaplMulti">H5Pset_fapl_multi</a>
+    <li><a href="#Property-GetFaplMulti">H5Pget_fapl_multi</a>
+    <li><a href="#Property-SetMultiType">H5Pset_multi_type</a>
+    <li><a href="#Property-GetMultiType">H5Pget_multi_type</a>
+    <li><a href="#Property-SetFaplSplit">H5Pset_fapl_split</a>
+    <li><a href="#Property-SetFaplSec2">H5Pset_fapl_sec2</a>
+    <li><a href="#Property-SetFaplStdio">H5Pset_fapl_stdio</a>
+    <li><a href="#Property-SetFaplStream">H5Pset_fapl_stream</a>
+    <li><a href="#Property-GetFaplStream">H5Pget_fapl_stream</a>
+<!-- FOR USE WITH PRINT VERSION ---------------------------------------->
+<!--<li><a href="#Property-SetDriver">H5Pset_driver</a>                              -->
+<!-- FOR USE WITH PRINT VERSION ----------------------------------------
+    <li><a href="#Property-GetDriver">H5Pget_driver</a>
+<!-- FOR USE WITH PRINT VERSION ---------------------------------------->
+<!--<li><a href="#Property-GetDriverInfo">H5Pget_driver_info</a>                     -->
+<!-- FOR USE WITH PRINT VERSION ----------------------------------------
+    <li><a href="#Property-SetMetaBlockSize">H5Pset_meta_block_size</a>
+    <li><a href="#Property-GetMetaBlockSize">H5Pget_meta_block_size</a>
+    <li><a href="#Property-SetSieveBufSize">H5Pset_sieve_buf_size</a>
+    <li><a href="#Property-GetSieveBufSize">H5Pget_sieve_buf_size</a>
+    <li><a href="#Property-SetAlignment">H5Pset_alignment</a>
+    <li><a href="#Property-GetAlignment">H5Pget_alignment</a>
+    <li><a href="#Property-SetCache">H5Pset_cache</a>
+    <li><a href="#Property-GetCache">H5Pget_cache</a>
+    <li><a href="#Property-SetGCReferences">H5Pset_gc_references</a>
+    <li><a href="#Property-GetGCReferences">H5Pget_gc_references</a>
+    <li><a href="#Property-SetFaplGass">H5Pset_fapl_gass</a>
+    <li><a href="#Property-GetFaplGass">H5Pget_fapl_gass</a>
+    <li><a href="#Property-SetFaplSrb">H5Pset_fapl_srb</a>
+    <li><a href="#Property-GetFaplSrb">H5Pget_fapl_srb</a>
+<!-- FOR USE WITH PRINT VERSION ---------------------------------------->
+    <!--
+    <li><a href="#Property-xxx">xxx</a>
+    <li><a href="#Property-xxx">xxx</a>&nbsp;&nbsp;&nbsp;||
+    -->
+<!-- FOR USE WITH PRINT VERSION ----------------------------------------
+  </ul>
+</td>
+<td valign="top" width="3%">&nbsp;</td>
+<td valign="top" width="31%">
+  <i>File Creation Properties</i>
+  <ul>
+    <li><a href="#Property-GetVersion">H5Pget_version</a>
+    <li><a href="#Property-SetUserblock">H5Pset_userblock</a>
+    <li><a href="#Property-GetUserblock">H5Pget_userblock</a>
+    <li><a href="#Property-SetSizes">H5Pset_sizes</a>
+    <li><a href="#Property-GetSizes">H5Pget_sizes</a>
+    <li><a href="#Property-SetSymK">H5Pset_sym_k</a>
+    <li><a href="#Property-GetSymK">H5Pget_sym_k</a>
+    <li><a href="#Property-SetIstoreK">H5Pset_istore_k</a>
+    <li><a href="#Property-GetIstoreK">H5Pget_istore_k</a>
+  </ul>
+	<br><br><br><br><br><br>
+&nbsp;&nbsp;&nbsp;|| <i>Indicates functions<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;available only in the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parallel HDF5 library.</i>
+	<br><br><br><br><br><br><br><br><br><br><br><br>
+&nbsp;&nbsp;&nbsp;<i>(Function listing<br>
+&nbsp;&nbsp;&nbsp;continues on next page.)</i></pre>
+</td>
+</tr>
+</table>
+<!-- FOR USE WITH PRINT VERSION ---------------------------------------->
+
+<!-- NEW PAGE -->
+
+<!-- FOR USE WITH PRINT VERSION ----------------------------------------
+<table border="0" width="95%">
+<tr>
+<td valign="top" width="31%">
+  <i>Dataset Creation Properties</i>
+  <ul>
+    <li><a href="#Property-SetLayout">H5Pset_layout</a>
+    <li><a href="#Property-GetLayout">H5Pget_layout</a>
+    <li><a href="#Property-SetChunk">H5Pset_chunk</a>
+    <li><a href="#Property-GetChunk">H5Pget_chunk</a>
+    <li><a href="#Property-SetDeflate">H5Pset_deflate</a>
+<!-- FOR USE WITH PRINT VERSION ---------------------------------------->
+<!--
+    <li><a href="#Property-GetDeflate">H5Pget_deflate</a>
+    <li><a href="#Property-SetCompression">H5Pset_compression</a>
+    <li><a href="#Property-GetCompression">H5Pget_compression</a>
+-->
+<!-- FOR USE WITH PRINT VERSION ----------------------------------------
+    <li><a href="#Property-SetFillValue">H5Pset_fill_value</a>
+    <li><a href="#Property-GetFillValue">H5Pget_fill_value</a>
+    <li><a href="#Property-FillValueDefined">H5Pfill_value_defined</a>
+    <li><a href="#Property-SetFillTime">H5Pset_fill_time</a>
+    <li><a href="#Property-GetFillTime">H5Pget_fill_time</a>
+    <li><a href="#Property-SetAllocTime">H5Pset_alloc_time</a>
+    <li><a href="#Property-GetAllocTime">H5Pget_alloc_time</a>
+    <li><a href="#Property-SetFilter">H5Pset_filter</a>
+    <li><a href="#Property-AllFiltersAvail">H5Pall_filters_avail</a>
+    <li><a href="#Property-GetNFilters">H5Pget_nfilters</a>
+    <li><a href="#Property-GetFilter">H5Pget_filter</a>
+    <li><a href="#Property-GetFilterById">H5Pget_filter_by_id</a>
+    <li><a href="#Property-ModifyFilter">H5Pmodify_filter</a>
+    <li><a href="#Property-RemoveFilter">H5Premove_filter</a>
+    <li><a href="#Property-SetFletcher32">H5Pset_fletcher32</a>
+    <li><a href="#Property-SetShuffle">H5Pset_shuffle</a>
+    <li><a href="#Property-SetSzip">H5Pset_szip</a>
+    <li><a href="#Property-SetExternal">H5Pset_external</a>
+    <li><a href="#Property-GetExternalCount">H5Pget_external_count</a>
+    <li><a href="#Property-GetExternal">H5Pget_external</a>
+  </ul>
+</td>
+<td valign="top" width="3%">&nbsp;</td>
+<td valign="top" width="32%">
+  <i>Dataset Access, Memory, and <br> Transfer Properties</i>
+  <ul>
+    <li><a href="#Property-SetBuffer">H5Pset_buffer</a>
+    <li><a href="#Property-GetBuffer">H5Pget_buffer</a>
+    <li><a href="#Property-SetPreserve">H5Pset_preserve</a>
+    <li><a href="#Property-GetPreserve">H5Pget_preserve</a>
+    <li><a href="#Property-SetEdcCheck">H5Pset_edc_check</a>
+    <li><a href="#Property-GetEdcCheck">H5Pget_edc_check</a>
+    <li><a href="#Property-SetFilterCallback">H5Pset_filter_callback</a>
+    <li><a href="#Property-SetHyperCache">H5Pset_hyper_cache</a>&nbsp;*
+    <li><a href="#Property-GetHyperCache">H5Pget_hyper_cache</a>&nbsp;*
+    <li><a href="#Property-SetHyperVectorSize">H5Pset_hyper_vector_size</a>
+    <li><a href="#Property-GetHyperVectorSize">H5Pget_hyper_vector_size</a>
+    <li><a href="#Property-SetBTreeRatios">H5Pset_btree_ratios</a>
+    <li><a href="#Property-GetBTreeRatios">H5Pget_btree_ratios</a>
+    <li><a href="#Property-SetVLMemManager">H5Pset_vlen_mem_manager</a>
+    <li><a href="#Property-GetVLMemManager">H5Pget_vlen_mem_manager</a>
+    <li><a href="#Property-SetDxplMpio">H5Pset_dxpl_mpio</a>&nbsp;&nbsp;&nbsp;||
+    <li><a href="#Property-GetDxplMpio">H5Pget_dxpl_mpio</a>&nbsp;&nbsp;&nbsp;||
+    <li><a href="#Property-SetDxplMulti">H5Pset_dxpl_multi</a>
+    <li><a href="#Property-GetDxplMulti">H5Pget_dxpl_multi</a>
+    <li><a href="#Property-SetMultiType">H5Pset_multi_type</a> 
+    <li><a href="#Property-GetMultiType">H5Pget_multi_type</a>
+        <br>&nbsp;
+    <li><a href="#Property-SetSmallData">H5Pset_small_data_block_size</a>
+    <li><a href="#Property-GetSmallData">H5Pget_small_data_block_size</a>
+  </ul>
+</td>
+<td valign="top" width="3%">&nbsp;</td>
+<td valign="top" width="31%">
+<br>
+&nbsp;&nbsp;&nbsp;|| <i>Indicates functions<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;available only in the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parallel HDF5 library.</i>
+</td>
+</tr>
+</table>
+<!-- FOR USE WITH PRINT VERSION ---------------------------------------->
+
+<br><br>
+
+<!-- FOR USE WITH ELECTRONIC VERSION ----------------------------------->
 <table border=0>
 <tr><td valign=top>
 
@@ -167,8 +371,10 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-SetFaplStream">H5Pset_fapl_stream</a>
     <li><a href="#Property-GetFaplStream">H5Pget_fapl_stream</a>
 <!--<li><a href="#Property-SetDriver">H5Pset_driver</a>                              -->
+<!-- FOR USE WITH ELECTRONIC VERSION ----------------------------------->
     <li><a href="#Property-GetDriver">H5Pget_driver</a>
 <!--<li><a href="#Property-GetDriverInfo">H5Pget_driver_info</a>                     -->
+<!-- FOR USE WITH ELECTRONIC VERSION ----------------------------------->
     <li><a href="#Property-SetMetaBlockSize">H5Pset_meta_block_size</a>
     <li><a href="#Property-GetMetaBlockSize">H5Pget_meta_block_size</a>
     <li><a href="#Property-SetSieveBufSize">H5Pset_sieve_buf_size</a>
@@ -187,6 +393,7 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-xxx">xxx</a>
     <li><a href="#Property-xxx">xxx</a>&nbsp;&nbsp;&nbsp;||
     -->
+<!-- FOR USE WITH ELECTRONIC VERSION ----------------------------------->
     </ul>
 
 
@@ -204,6 +411,7 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-SetCompression">H5Pset_compression</a>
     <li><a href="#Property-GetCompression">H5Pget_compression</a>
 -->
+<!-- FOR USE WITH ELECTRONIC VERSION ----------------------------------->
     <li><a href="#Property-SetFillValue">H5Pset_fill_value</a>
     <li><a href="#Property-GetFillValue">H5Pget_fill_value</a>
     <li><a href="#Property-FillValueDefined">H5Pfill_value_defined</a>
@@ -262,8 +470,10 @@ which require many different parameters to be easily manipulated.
 ||&nbsp;&nbsp;&nbsp;<i>Available only in the parallel HDF5 library.</i>
 </td></tr>
 -->
-
+<!-- FOR USE WITH ELECTRONIC VERSION ----------------------------------->
 </table>
+<!-- FOR USE WITH ELECTRONIC VERSION ----------------------------------->
+
 <br>
 
 * Functions labelled with an asterisk (*) are provided only for 
@@ -414,6 +624,7 @@ See further notes in the description of each function.
   </tr>
 </table>
 
+<!-- NEW PAGE -->
 <br>
 <strong>The FORTRAN90 Interfaces:</strong>
 
@@ -597,6 +808,8 @@ as the corresponding C function.
 
 </td></tr>
 </table>
+
+
 
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Pall_filters_avail" -->
@@ -9363,7 +9576,8 @@ END SUBROUTINE h5punregister_f
 -->
 
 
-<!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
+<!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" -->
+<hr>
 <center>
 <table border=0 width=98%>
 <tr><td valign=top align=left>
@@ -9399,13 +9613,15 @@ of complete manual formatted as print volume)&nbsp;&nbsp;&nbsp;</small></i>
 </table>
 </center>
 <hr>
-<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
+<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" -->
+<address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
 Describes HDF5 Release 1.6.3, September 2004
-</address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
+</address>
+<!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 13 September 2004");
+document.writeln("Last modified: 27 September 2004");
 -->
 </SCRIPT>
  
