@@ -99,7 +99,7 @@ static const H5FD_class_t H5FD_family_g = {
     H5FD_family_open,				/*open			*/
     H5FD_family_close,				/*close			*/
     H5FD_family_cmp,				/*cmp			*/
-    H5FD_family_query,		        /*query			*/
+    H5FD_family_query,		                /*query			*/
     NULL,					/*alloc			*/
     NULL,					/*free			*/
     H5FD_family_get_eoa,			/*get_eoa		*/
@@ -614,7 +614,7 @@ H5FD_family_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
  * Function:	H5FD_family_query
  *
  * Purpose:	Set the flags that this VFL driver is capable of supporting.
- *      (listed in H5FDpublic.h)
+ *              (listed in H5FDpublic.h)
  *
  * Return:	Success:	non-negative
  *
@@ -636,10 +636,11 @@ H5FD_family_query(const H5FD_t UNUSED *_f, unsigned long *flags /* out */)
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
+        *flags=0;
         *flags|=H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
         *flags|=H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes */
         *flags|=H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
-    } /* end if */
+    }
 
     FUNC_LEAVE(ret_value);
 }
