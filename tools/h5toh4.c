@@ -42,12 +42,6 @@ extern int get_tableflag(int, int);
 extern int set_tableflag(int, int);
 extern char* get_objectname(int, int);
 
-#if 0 /*these are defined elsewhere, possibly incompatible --rpm 19990614 */
-extern int optind;
-extern void perror(const char *);
-extern int errno;
-#endif
-
 typedef herr_t (*H5G_operator_t)(hid_t, const char*, void*);
 
 
@@ -77,9 +71,8 @@ main(int argc, char **argv)
 	int status = 0;
 	int status2 = 0;
 
-	optind = 1;
-	fargv = argv + optind;
-	argc -= optind;
+	argc--;
+	argv++;
 
 	if (argc == 0) {
 		fprintf(stderr,"\nError: Invalid Arguments\n");
@@ -87,14 +80,7 @@ main(int argc, char **argv)
 		return -1;
 	}
 
-/*
-	if ((status = H5dont_atexit()) < 0) {
-		fprintf(stderr,"Error: Unable to stop loading of the cleanup routines\n");
-		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "h5toh4", __FILE__, __LINE__);
-		return status;
-	}
-*/
-
+	fargv = argv;
 	while ( *fargv != NULL ) {
 		if ( HDstrcmp(*fargv,"-h") == 0 ) {
 			PrintOptions_h5toh4();
@@ -103,7 +89,7 @@ main(int argc, char **argv)
 		fargv++;
 	}
 
-	fargv = argv + optind;
+	fargv = argv;
 
 	if (argc == 2 && HDstrcmp(*fargv,"-m") == 0) {
 		fargv++;
