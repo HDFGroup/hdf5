@@ -264,7 +264,7 @@ H5F_contig_fill(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *layout,
             if(using_mpi) {
                 /* Round-robin write the chunks out from only one process */
                 if(mpi_round==mpi_rank) {
-                    if (H5F_contig_write(f, size, addr, size, dxpl_id, buf)<0)
+                    if (H5F_contig_write(f, (hsize_t)size, addr, size, dxpl_id, buf)<0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write fill value to dataset");
                 } /* end if */
                 ++mpi_round;

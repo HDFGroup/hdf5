@@ -75,7 +75,7 @@ if (verbose) printf("slab_set BYCOL\n");
 	/* Similar to BYROW except process 0 gets 0 row */
 	block[0] = (mpi_rank ? dim0/mpi_size : 0);
 	block[1] = dim1;
-	stride[0] = block[0];
+        stride[0] = (mpi_rank ? block[0] : 1);  /* avoid setting stride to 0 */
 	stride[1] = block[1];
 	count[0] = 1;
 	count[1] = 1;
@@ -88,7 +88,7 @@ if (verbose) printf("slab_set ZROW\n");
 	block[0] = dim0;
 	block[1] = (mpi_rank ? dim1/mpi_size : 0);
 	stride[0] = block[0];
-	stride[1] = block[1];
+        stride[1] = (mpi_rank ? block[1] : 1);  /* avoid setting stride to 0 */
 	count[0] = 1;
 	count[1] = 1;
 	start[0] = 0;

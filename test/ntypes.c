@@ -1624,7 +1624,7 @@ test_refer_dtype2(hid_t file)
     /* Create references */
     /* Select 6x6 hyperslab for first reference */
     start[0]=2; start[1]=2;
-    stride[0]=0; stride[1]=0;
+    stride[0]=1; stride[1]=1;
     count[0]=1; count[1]=1;
     block[0]=6; block[1]=6;
 

@@ -213,8 +213,8 @@ H5S_hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space, size_t elmt_size)
                 else {
                     if((unsigned)i==(cont_dim-1)) {
                         iter->u.hyp.diminfo[i].start = tdiminfo[i].start*acc;
-                        /* Special case for stride==1 regular selections */
-                        if(tdiminfo[i].stride==1)
+                        /* Special case for single block regular selections */
+                        if(tdiminfo[i].count==1)
                             iter->u.hyp.diminfo[i].stride = 1;
                         else
                             iter->u.hyp.diminfo[i].stride = tdiminfo[i].stride*acc;
@@ -563,7 +563,7 @@ H5S_hyper_iter_next(H5S_sel_iter_t *iter, size_t nelem)
 
         /* Calculate the offset and block count for each dimension */
         for(i=0; i<ndims; i++) {
-            if(tdiminfo[i].stride==1) {
+            if(tdiminfo[i].count==1) {
                 iter_offset[i]=iter->u.hyp.off[i]-tdiminfo[i].start;
                 iter_count[i]=0;
             } /* end if */
@@ -778,7 +778,7 @@ H5S_hyper_iter_next_block(H5S_sel_iter_t *iter)
 
         /* Calculate the offset and block count for each dimension */
         for(u=0; u<ndims; u++) {
-            if(tdiminfo[u].stride==1) {
+            if(tdiminfo[u].count==1) {
                 iter_offset[u]=iter->u.hyp.off[u]-tdiminfo[u].start;
                 iter_count[u]=0;
             } /* end if */
@@ -2090,14 +2090,8 @@ H5S_hyper_serialize (const H5S_t *space, uint8_t *buf)
                     UINT32ENCODE(buf, (uint32_t)offset[i]);
 
                 /* Encode hyperslab ending location */
-                for(i=0; i<ndims; i++) {
-                    if(diminfo[i].stride==1) {
-                        UINT32ENCODE(buf, (uint32_t)(offset[i]+(diminfo[i].count-1)));
-                    } /* end if */
-                    else {
-                        UINT32ENCODE(buf, (uint32_t)(offset[i]+(diminfo[i].block-1)));
-                    } /* end else */
-                } /* end for */
+                for(i=0; i<ndims; i++)
+                    UINT32ENCODE(buf, (uint32_t)(offset[i]+(diminfo[i].block-1)));
 
                 /* Move the offset to the next sequence to start */
                 offset[fast_dim]+=diminfo[fast_dim].stride;
@@ -2230,7 +2224,7 @@ H5S_hyper_deserialize (H5S_t *space, const uint8_t *buf)
     /* Set the count & stride for all blocks */
     for(tcount=count,tstride=stride,j=0; j<rank; j++,tstride++,tcount++) {
         *tcount=1;
-        *tstride=0;
+        *tstride=1;
     } /* end for */
 
     /* Retrieve the coordinates from the buffer */
@@ -2452,12 +2446,8 @@ H5S_get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numbloc
 
                     /* Compute the ending location */
                     HDmemcpy(buf,offset,sizeof(hsize_t)*ndims);
-                    for(i=0; i<ndims; i++) {
-                        if(diminfo[i].stride==1)
-                            buf[i]+=(diminfo[i].count-1);
-                        else
-                            buf[i]+=(diminfo[i].block-1);
-                    } /* end for */
+                    for(i=0; i<ndims; i++)
+                        buf[i]+=(diminfo[i].block-1);
                     buf+=ndims;
 
                     /* Decrement the number of blocks to retrieve */
@@ -3539,7 +3529,7 @@ H5S_hyper_convert(H5S_t *space)
                 /* Fill in temporary information for the dimensions */
                 for(u=0; u<space->extent.u.simple.rank; u++) {
                     tmp_start[u]=0;
-                    tmp_stride[u]=0;
+                    tmp_stride[u]=1;
                     tmp_count[u]=1;
                     tmp_block[u]=space->extent.u.simple.size[u];
                 } /* end for */
@@ -5223,7 +5213,12 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
             block[u]=_block[u]*_count[u];
         }
         else {
-            stride[u]=_stride[u];
+            if(_count[u]==1)
+                stride[u]=1;
+            else {
+                assert(_stride[u]>_block[u]);
+                stride[u]=_stride[u];
+            } /* end else */
             count[u]=_count[u];
             block[u]=_block[u];
         } /* end if */
@@ -5451,7 +5446,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     
     /* Fill in the correct stride values */
     if(stride==NULL) {
-        hssize_t fill=1;
+        hsize_t fill=1;
 
         /* Allocate temporary buffer */
         if ((_stride=H5FL_ARR_MALLOC(hsize_t,space->extent.u.simple.rank))==NULL)
@@ -5462,7 +5457,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
 
     /* Fill in the correct block values */
     if(block==NULL) {
-        hssize_t fill=1;
+        hsize_t fill=1;
 
         /* Allocate temporary buffer */
         if ((_block=H5FL_ARR_MALLOC(hsize_t,space->extent.u.simple.rank))==NULL)
@@ -5596,7 +5591,12 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
                 diminfo[u].block=count[u]*block[u];
             } /* end if */
             else {
-                diminfo[u].stride=stride[u];
+                if(count[u]==1)
+                    diminfo[u].stride=1;
+                else {
+                    assert(stride[u]>block[u]);
+                    diminfo[u].stride=stride[u];
+                } /* end else */
                 diminfo[u].count=count[u];
                 diminfo[u].block=block[u];
             } /* end else */
@@ -5685,6 +5685,7 @@ H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hssize_t start[],
          const hsize_t stride[], const hsize_t count[], const hsize_t block[])
 {
     H5S_t	*space = NULL;  /* Dataspace to modify selection of */
+    unsigned u;                 /* Local index variable */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Sselect_hyperslab, FAIL);
@@ -5697,9 +5698,22 @@ H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hssize_t start[],
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hyperslab doesn't support H5S_SCALAR space");
     if(start==NULL || count==NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab not specified");
-
     if(!(op>H5S_SELECT_NOOP && op<H5S_SELECT_INVALID))
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
+    if(stride!=NULL) {
+        /* Check for 0-sized strides */
+        for(u=0; u<space->extent.u.simple.rank; u++) {
+            if(stride[u]==0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid stride==0 value");
+        } /* end for */
+        if(block!=NULL) {
+            /* Check for strides smaller than blocks */
+            for(u=0; u<space->extent.u.simple.rank; u++) {
+                if(count[u]>1 && stride[u]<block[u])
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid stride<block value");
+            } /* end for */
+        } /* end if */
+    } /* end if */
 
     if (H5S_select_hyperslab(space, op, start, stride, count, block)<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to set hyperslab selection");
@@ -5967,7 +5981,12 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
             block[u]=_block[u]*_count[u];
         }
         else {
-            stride[u]=_stride[u];
+            if(_count[u]==1)
+                stride[u]=1;
+            else {
+                assert(_stride[u]>_block[u]);
+                stride[u]=_stride[u];
+            } /* end else */
             count[u]=_count[u];
             block[u]=_block[u];
         } /* end if */
@@ -6036,7 +6055,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     
     /* Fill in the correct stride values */
     if(stride==NULL) {
-        hssize_t fill=1;
+        hsize_t fill=1;
 
         /* Allocate temporary buffer */
         if ((_stride=H5FL_ARR_MALLOC(hsize_t,space->extent.u.simple.rank))==NULL)
@@ -6047,7 +6066,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
 
     /* Fill in the correct block values */
     if(block==NULL) {
-        hssize_t fill=1;
+        hsize_t fill=1;
 
         /* Allocate temporary buffer */
         if ((_block=H5FL_ARR_MALLOC(hsize_t,space->extent.u.simple.rank))==NULL)
@@ -6105,7 +6124,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
                         /* Fill in temporary information for the dimensions */
                         for(u=0; u<space->extent.u.simple.rank; u++) {
                             tmp_start[u]=0;
-                            tmp_stride[u]=0;
+                            tmp_stride[u]=1;
                             tmp_count[u]=1;
                             tmp_block[u]=space->extent.u.simple.size[u];
                         } /* end for */
@@ -6182,7 +6201,12 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
                 diminfo[u].block=count[u]*block[u];
             } /* end if */
             else {
-                diminfo[u].stride=stride[u];
+                if(count[u]==1)
+                    diminfo[u].stride=1;
+                else {
+                    assert(stride[u]>block[u]);
+                    diminfo[u].stride=stride[u];
+                } /* end else */
                 diminfo[u].count=count[u];
                 diminfo[u].block=block[u];
             } /* end else */
@@ -6263,11 +6287,26 @@ H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hssize_t start[],
     /* Check args */
     if (NULL == (space=H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+    if (H5S_SCALAR==H5S_get_simple_extent_type(space))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hyperslab doesn't support H5S_SCALAR space");
     if(start==NULL || count==NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab not specified");
-
     if(!(op>H5S_SELECT_NOOP && op<H5S_SELECT_INVALID))
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
+    if(stride!=NULL) {
+        /* Check for 0-sized strides */
+        for(u=0; u<space->extent.u.simple.rank; u++) {
+            if(stride[u]==0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid stride==0 value");
+        } /* end for */
+        if(block!=NULL) {
+            /* Check for strides smaller than blocks */
+            for(u=0; u<space->extent.u.simple.rank; u++) {
+                if(count[u]>1 && stride[u]<block[u])
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid stride<block value");
+            } /* end for */
+        } /* end if */
+    } /* end if */
 
     if (H5S_select_hyperslab(space, op, start, stride, count, block)<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to set hyperslab selection");
@@ -7118,11 +7157,11 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
 
     /* Check if we stopped in the middle of a sequence of elements */
     if((iter->u.hyp.off[fast_dim]-tdiminfo[fast_dim].start)%tdiminfo[fast_dim].stride!=0 ||
-            ((iter->u.hyp.off[fast_dim]!=tdiminfo[fast_dim].start) && tdiminfo[fast_dim].stride==1)) {
+            ((iter->u.hyp.off[fast_dim]!=tdiminfo[fast_dim].start) && tdiminfo[fast_dim].count==1)) {
         size_t leftover;  /* The number of elements left over from the last sequence */
 
         /* Calculate the number of elements left in the sequence */
-        if(tdiminfo[fast_dim].stride==1) {
+        if(tdiminfo[fast_dim].count==1) {
             H5_ASSIGN_OVERFLOW(leftover, tdiminfo[fast_dim].block-(iter->u.hyp.off[fast_dim]-tdiminfo[fast_dim].start) ,hsize_t,size_t);
         } /* end if */
         else {
@@ -7172,7 +7211,7 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
 
         /* Compute the current "counts" for this location */
         for(i=0; i<ndims; i++) {
-            if(tdiminfo[i].stride==1) {
+            if(tdiminfo[i].count==1) {
                 tmp_count[i] = 0;
                 tmp_block[i] = iter->u.hyp.off[i]-tdiminfo[i].start;
             } /* end if */

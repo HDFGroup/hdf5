@@ -205,6 +205,26 @@ test_select_hyper(hid_t xfer_plist)
     ext_type = H5Sget_simple_extent_type(sid1);
     VERIFY(ext_type, H5S_SIMPLE, "H5Sget_simple_extent_type");
 
+    /* Test selecting stride==0 to verify failure */
+    start[0]=1; start[1]=0; start[2]=0;
+    stride[0]=0; stride[1]=0; stride[2]=0;
+    count[0]=2; count[1]=15; count[2]=13;
+    block[0]=1; block[1]=1; block[2]=1;
+    H5E_BEGIN_TRY {
+        ret = H5Sselect_hyperslab(sid1,H5S_SELECT_SET,start,stride,count,block);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Test selecting stride<block to verify failure */
+    start[0]=1; start[1]=0; start[2]=0;
+    stride[0]=1; stride[1]=1; stride[2]=1;
+    count[0]=2; count[1]=15; count[2]=13;
+    block[0]=2; block[1]=2; block[2]=2;
+    H5E_BEGIN_TRY {
+        ret = H5Sselect_hyperslab(sid1,H5S_SELECT_SET,start,stride,count,block);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Sselect_hyperslab");
+
     /* Select 2x15x13 hyperslab for disk dataset */
     start[0]=1; start[1]=0; start[2]=0;
     stride[0]=1; stride[1]=1; stride[2]=1;
@@ -4140,7 +4160,7 @@ test_select_combine(void)
 
     /* 'AND' "all" selection with another hyperslab */
     start[0]=start[1]=0;
-    stride[0]=stride[1]=0;
+    stride[0]=stride[1]=1;
     count[0]=count[1]=1;
     block[0]=block[1]=5;
     error=H5Sselect_hyperslab(space1,H5S_SELECT_AND,start,stride,count,block);
@@ -4274,7 +4294,7 @@ test_select_combine(void)
 
     /* 'OR' "none" selection with another hyperslab */
     start[0]=start[1]=0;
-    stride[0]=stride[1]=0;
+    stride[0]=stride[1]=1;
     count[0]=count[1]=1;
     block[0]=block[1]=5;
     error=H5Sselect_hyperslab(space1,H5S_SELECT_OR,start,stride,count,block);
@@ -4309,7 +4329,7 @@ test_select_combine(void)
 
     /* 'AND' "none" selection with another hyperslab */
     start[0]=start[1]=0;
-    stride[0]=stride[1]=0;
+    stride[0]=stride[1]=1;
     count[0]=count[1]=1;
     block[0]=block[1]=5;
     error=H5Sselect_hyperslab(space1,H5S_SELECT_AND,start,stride,count,block);
@@ -4329,7 +4349,7 @@ test_select_combine(void)
 
     /* 'XOR' "none" selection with another hyperslab */
     start[0]=start[1]=0;
-    stride[0]=stride[1]=0;
+    stride[0]=stride[1]=1;
     count[0]=count[1]=1;
     block[0]=block[1]=5;
     error=H5Sselect_hyperslab(space1,H5S_SELECT_XOR,start,stride,count,block);
@@ -4364,7 +4384,7 @@ test_select_combine(void)
 
     /* 'NOTB' "none" selection with another hyperslab */
     start[0]=start[1]=0;
-    stride[0]=stride[1]=0;
+    stride[0]=stride[1]=1;
     count[0]=count[1]=1;
     block[0]=block[1]=5;
     error=H5Sselect_hyperslab(space1,H5S_SELECT_NOTB,start,stride,count,block);
@@ -4384,7 +4404,7 @@ test_select_combine(void)
 
     /* 'NOTA' "none" selection with another hyperslab */
     start[0]=start[1]=0;
-    stride[0]=stride[1]=0;
+    stride[0]=stride[1]=1;
     count[0]=count[1]=1;
     block[0]=block[1]=5;
     error=H5Sselect_hyperslab(space1,H5S_SELECT_NOTA,start,stride,count,block);
