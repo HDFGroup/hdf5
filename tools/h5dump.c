@@ -3693,10 +3693,6 @@ xml_dump_group(hid_t gid, const char *name)
 		       dump_function_table->dump_attribute_function, NULL);
 
 	    /* iterate through all the members */
-	    xtype = H5G_GROUP;
-	    H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
-	    xtype = H5G_DATASET;
-	    H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
 	    if (!strcmp(name, "/") && unamedtype) {
 		/* Very special case: dump unamed type in root group */
 		for (i = 0; i < type_table->nobjs; i++) {
@@ -3715,6 +3711,10 @@ xml_dump_group(hid_t gid, const char *name)
 	    }
 	    xtype = H5G_TYPE;
 	    H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
+	    xtype = H5G_DATASET;
+	    H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
+	    xtype = H5G_GROUP;
+	    H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
 	    xtype = H5G_LINK;
 	    H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
 	}
@@ -3723,10 +3723,6 @@ xml_dump_group(hid_t gid, const char *name)
 	H5Aiterate(gid, NULL, dump_function_table->dump_attribute_function,
 		   NULL);
 	/* iterate through all the members */
-	xtype = H5G_GROUP;
-	H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
-	xtype = H5G_DATASET;
-	H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
 	if (!strcmp(name, "/") && unamedtype) {
 	    /* Very special case: dump unamed type in root group */
 	    for (i = 0; i < type_table->nobjs; i++) {
@@ -3744,6 +3740,10 @@ xml_dump_group(hid_t gid, const char *name)
 	    }
 	}
 	xtype = H5G_TYPE;
+	H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
+	xtype = H5G_DATASET;
+	H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
+	xtype = H5G_GROUP;
 	H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
 	xtype = H5G_LINK;
 	H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);

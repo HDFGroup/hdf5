@@ -5,6 +5,27 @@ Expected output for 'h5dump --xml tref.h5'
 <!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">
 <HDF5-File>
 <RootGroup OBJ-XID="root">
+   <Dataset Name="ZZZDataset3" OBJ-XID="/ZZZDataset3" Parents="root">
+      <Dataspace>
+         <SimpleDataspace Ndims="1">
+            <Dimension  DimSize="3" MaxDimSize="3"/>
+         </SimpleDataspace>
+      </Dataspace>
+      <DataType> 
+         <AtomicType>
+            <ReferenceType>
+               <ObjectReferenceType />
+            </ReferenceType>
+         </AtomicType>
+      </DataType>
+   <Data>
+   <DataFromFile>
+      "/Group1/Dataset1"
+      "/Group1/Dataset2"
+      "/Group1"
+   </DataFromFile>
+   </Data>
+   </Dataset>
    <Group Name="Group1" OBJ-XID="/Group1" Parents="/" >
       <Dataset Name="Dataset1" OBJ-XID="/Group1/Dataset1" Parents="/Group1">
          <Dataspace>
@@ -41,26 +62,5 @@ Expected output for 'h5dump --xml tref.h5'
          </Data>
       </Dataset>
    </Group>
-   <Dataset Name="ZZZDataset3" OBJ-XID="/ZZZDataset3" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="3" MaxDimSize="3"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <ReferenceType>
-               <ObjectReferenceType />
-            </ReferenceType>
-         </AtomicType>
-      </DataType>
-   <Data>
-   <DataFromFile>
-      "/Group1/Dataset1"
-      "/Group1/Dataset2"
-      "/Group1"
-   </DataFromFile>
-   </Data>
-   </Dataset>
 </RootGroup>
 </HDF5-File>

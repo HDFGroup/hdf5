@@ -5,128 +5,6 @@ Expected output for 'h5dump --xml tcompound2.h5'
 <!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">
 <HDF5-File>
 <RootGroup OBJ-XID="root">
-   <Group Name="group1" OBJ-XID="/group1" Parents="/" >
-      <Dataset Name="dset2" OBJ-XID="/group1/dset2" Parents="/group1">
-         <StorageLayout>
-            <ChunkedLayout Ndims="1">
-               <ChunkDimension DimSize="2" />
-            </ChunkedLayout>
-         </StorageLayout>
-         <Dataspace>
-            <SimpleDataspace Ndims="1">
-               <Dimension  DimSize="6" MaxDimSize="10"/>
-            </SimpleDataspace>
-         </Dataspace>
-         <NamedDataTypePtr OBJ-XID="/type1"/>
-      <!-- Note: format of compound data not specified -->
-         <Data>
-            <DataFromFile>
-            0 0 1 1.1 2 2.2 3 3.3 4 4.4 5 5.5
-            </DataFromFile>
-         </Data>
-      </Dataset>
-      <Dataset Name="dset4" OBJ-XID="/group1/dset4" Parents="/group1">
-         <StorageLayout>
-            <ChunkedLayout Ndims="1">
-               <ChunkDimension DimSize="2" />
-            </ChunkedLayout>
-         </StorageLayout>
-         <Dataspace>
-            <SimpleDataspace Ndims="1">
-               <Dimension  DimSize="6" MaxDimSize="10"/>
-            </SimpleDataspace>
-         </Dataspace>
-         <NamedDataTypePtr OBJ-XID="/group1/type3"/>
-      <!-- Note: format of compound data not specified -->
-         <Data>
-            <DataFromFile>
-            0 0 1 1 2 2 3 3 4 4 5 5
-            </DataFromFile>
-         </Data>
-      </Dataset>
-      <NamedDataType Name="type3" OBJ-XID="/group1/type3" Parents="/group1">
-         <CompoundType>
-            <Field FieldName="int">
-               <DataType> 
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="float">
-               <DataType> 
-                  <AtomicType>
-                     <FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-         </CompoundType>
-      </NamedDataType>
-   </Group>
-   <Group Name="group2" OBJ-XID="/group2" Parents="/" >
-      <Dataset Name="dset5" OBJ-XID="/group2/dset5" Parents="/group2">
-         <StorageLayout>
-            <ChunkedLayout Ndims="1">
-               <ChunkDimension DimSize="2" />
-            </ChunkedLayout>
-         </StorageLayout>
-         <Dataspace>
-            <SimpleDataspace Ndims="1">
-               <Dimension  DimSize="6" MaxDimSize="10"/>
-            </SimpleDataspace>
-         </Dataspace>
-         <NamedDataTypePtr OBJ-XID="/#9560:0"/>
-      <!-- Note: format of compound data not specified -->
-         <Data>
-            <DataFromFile>
-            0 0 1 1 2 2 3 3 4 4 5 5
-            </DataFromFile>
-         </Data>
-      </Dataset>
-   </Group>
-   <Dataset Name="dset1" OBJ-XID="/dset1" Parents="root">
-      <StorageLayout>
-         <ChunkedLayout Ndims="1">
-            <ChunkDimension DimSize="2" />
-         </ChunkedLayout>
-      </StorageLayout>
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="6" MaxDimSize="UNLIMITED"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <CompoundType>
-            <Field FieldName="a_name">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="b_name">
-               <DataType>
-                  <AtomicType>
-                     <FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="c_name">
-               <DataType>
-                  <AtomicType>
-                     <FloatType ByteOrder="BE" Size="8" SignBitLocation="63" ExponentBits="11" ExponentLocation="52" MantissaBits="52" MantissaLocation="0" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-         </CompoundType>
-      </DataType>
-   <!-- Note: format of compound data not specified -->
-      <Data>
-         <DataFromFile>
-         0 0 1 1 1 0.5 2 4 0.333333 3 9 0.25 4 16 0.2 5 25 0.166667
-         </DataFromFile>
-      </Data>
-   </Dataset>
    <NamedDataType Name="#9560:0" OBJ-XID="/#9560:0" Parents="root">
       <CompoundType>
          <Field FieldName="int">
@@ -192,5 +70,127 @@ Expected output for 'h5dump --xml tcompound2.h5'
          </Field>
       </CompoundType>
    </NamedDataType>
+   <Dataset Name="dset1" OBJ-XID="/dset1" Parents="root">
+      <StorageLayout>
+         <ChunkedLayout Ndims="1">
+            <ChunkDimension DimSize="2" />
+         </ChunkedLayout>
+      </StorageLayout>
+      <Dataspace>
+         <SimpleDataspace Ndims="1">
+            <Dimension  DimSize="6" MaxDimSize="UNLIMITED"/>
+         </SimpleDataspace>
+      </Dataspace>
+      <DataType> 
+         <CompoundType>
+            <Field FieldName="a_name">
+               <DataType>
+                  <AtomicType>
+                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </AtomicType>
+               </DataType>
+            </Field>
+            <Field FieldName="b_name">
+               <DataType>
+                  <AtomicType>
+                     <FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
+                  </AtomicType>
+               </DataType>
+            </Field>
+            <Field FieldName="c_name">
+               <DataType>
+                  <AtomicType>
+                     <FloatType ByteOrder="BE" Size="8" SignBitLocation="63" ExponentBits="11" ExponentLocation="52" MantissaBits="52" MantissaLocation="0" />
+                  </AtomicType>
+               </DataType>
+            </Field>
+         </CompoundType>
+      </DataType>
+   <!-- Note: format of compound data not specified -->
+      <Data>
+         <DataFromFile>
+         0 0 1 1 1 0.5 2 4 0.333333 3 9 0.25 4 16 0.2 5 25 0.166667
+         </DataFromFile>
+      </Data>
+   </Dataset>
+   <Group Name="group1" OBJ-XID="/group1" Parents="/" >
+      <NamedDataType Name="type3" OBJ-XID="/group1/type3" Parents="/group1">
+         <CompoundType>
+            <Field FieldName="int">
+               <DataType> 
+                  <AtomicType>
+                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </AtomicType>
+               </DataType>
+            </Field>
+            <Field FieldName="float">
+               <DataType> 
+                  <AtomicType>
+                     <FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
+                  </AtomicType>
+               </DataType>
+            </Field>
+         </CompoundType>
+      </NamedDataType>
+      <Dataset Name="dset2" OBJ-XID="/group1/dset2" Parents="/group1">
+         <StorageLayout>
+            <ChunkedLayout Ndims="1">
+               <ChunkDimension DimSize="2" />
+            </ChunkedLayout>
+         </StorageLayout>
+         <Dataspace>
+            <SimpleDataspace Ndims="1">
+               <Dimension  DimSize="6" MaxDimSize="10"/>
+            </SimpleDataspace>
+         </Dataspace>
+         <NamedDataTypePtr OBJ-XID="/type1"/>
+      <!-- Note: format of compound data not specified -->
+         <Data>
+            <DataFromFile>
+            0 0 1 1.1 2 2.2 3 3.3 4 4.4 5 5.5
+            </DataFromFile>
+         </Data>
+      </Dataset>
+      <Dataset Name="dset4" OBJ-XID="/group1/dset4" Parents="/group1">
+         <StorageLayout>
+            <ChunkedLayout Ndims="1">
+               <ChunkDimension DimSize="2" />
+            </ChunkedLayout>
+         </StorageLayout>
+         <Dataspace>
+            <SimpleDataspace Ndims="1">
+               <Dimension  DimSize="6" MaxDimSize="10"/>
+            </SimpleDataspace>
+         </Dataspace>
+         <NamedDataTypePtr OBJ-XID="/group1/type3"/>
+      <!-- Note: format of compound data not specified -->
+         <Data>
+            <DataFromFile>
+            0 0 1 1 2 2 3 3 4 4 5 5
+            </DataFromFile>
+         </Data>
+      </Dataset>
+   </Group>
+   <Group Name="group2" OBJ-XID="/group2" Parents="/" >
+      <Dataset Name="dset5" OBJ-XID="/group2/dset5" Parents="/group2">
+         <StorageLayout>
+            <ChunkedLayout Ndims="1">
+               <ChunkDimension DimSize="2" />
+            </ChunkedLayout>
+         </StorageLayout>
+         <Dataspace>
+            <SimpleDataspace Ndims="1">
+               <Dimension  DimSize="6" MaxDimSize="10"/>
+            </SimpleDataspace>
+         </Dataspace>
+         <NamedDataTypePtr OBJ-XID="/#9560:0"/>
+      <!-- Note: format of compound data not specified -->
+         <Data>
+            <DataFromFile>
+            0 0 1 1 2 2 3 3 4 4 5 5
+            </DataFromFile>
+         </Data>
+      </Dataset>
+   </Group>
 </RootGroup>
 </HDF5-File>

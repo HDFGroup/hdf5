@@ -5,287 +5,6 @@ Expected output for 'h5dump --xml tsaf.h5'
 <!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">
 <HDF5-File>
 <RootGroup OBJ-XID="root">
-   <Group Name=".attributes" OBJ-XID="/.attributes" Parents="/" >
-      <Group Name="database" OBJ-XID="/.attributes/database" Parents="/.attributes" >
-         <Dataset Name=".SAF_DbProps" OBJ-XID="/.attributes/database/.SAF_DbProps" Parents="/.attributes/database">
-            <Dataspace>
-               <SimpleDataspace Ndims="1">
-                  <Dimension  DimSize="1" MaxDimSize="1"/>
-               </SimpleDataspace>
-            </Dataspace>
-            <DataType> 
-               <CompoundType>
-                  <Field FieldName="magic">
-                     <DataType>
-                        <AtomicType>
-                           <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                        </AtomicType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="SFileDir">
-                     <DataType>
-                        <AtomicType>
-                           <StringType Cset="H5T_CSET_ASCII" StrSize="1024" StrPad="H5T_STR_NULLTERM"/>
-                        </AtomicType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="ImportFile">
-                     <DataType>
-                        <AtomicType>
-                           <StringType Cset="H5T_CSET_ASCII" StrSize="1024" StrPad="H5T_STR_NULLTERM"/>
-                        </AtomicType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="parallel">
-                     <DataType>
-                        <AtomicType>
-                           <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                        </AtomicType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="safapi">
-                     <DataType>
-                        <CompoundType>
-                           <Field FieldName="vmajor">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="vminor">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="rel">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="annot">
-                              <DataType>
-                                 <AtomicType>
-                                    <StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                        </CompoundType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="saflib">
-                     <DataType>
-                        <CompoundType>
-                           <Field FieldName="vmajor">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="vminor">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="rel">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="annot">
-                              <DataType>
-                                 <AtomicType>
-                                    <StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                        </CompoundType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="vbt">
-                     <DataType>
-                        <CompoundType>
-                           <Field FieldName="vmajor">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="vminor">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="rel">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="annot">
-                              <DataType>
-                                 <AtomicType>
-                                    <StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                        </CompoundType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="dsl">
-                     <DataType>
-                        <CompoundType>
-                           <Field FieldName="vmajor">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="vminor">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="rel">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="annot">
-                              <DataType>
-                                 <AtomicType>
-                                    <StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                        </CompoundType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="hdf5">
-                     <DataType>
-                        <CompoundType>
-                           <Field FieldName="vmajor">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="vminor">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="rel">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="annot">
-                              <DataType>
-                                 <AtomicType>
-                                    <StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                        </CompoundType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="mpi">
-                     <DataType>
-                        <CompoundType>
-                           <Field FieldName="vmajor">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="vminor">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="rel">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="annot">
-                              <DataType>
-                                 <AtomicType>
-                                    <StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                        </CompoundType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="DoToc">
-                     <DataType>
-                        <AtomicType>
-                           <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                        </AtomicType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="ReadOnly">
-                     <DataType>
-                        <AtomicType>
-                           <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                        </AtomicType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="Clobber">
-                     <DataType>
-                        <AtomicType>
-                           <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                        </AtomicType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="OSModes">
-                     <DataType>
-                        <AtomicType>
-                           <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                        </AtomicType>
-                     </DataType>
-                  </Field>
-               </CompoundType>
-            </DataType>
-         <!-- Note: format of compound data not specified -->
-            <Data>
-               <DataFromFile>
-               -604320037 "." "don't import" 1 0 0 0 "none" 0 1 0 "devel" 1 3 0 "" 0 0 0 "none" 1 2 1 "" 1 2 0 "" 1 0 1 0
-               </DataFromFile>
-            </Data>
-         </Dataset>
-      </Group>
-   </Group>
    <Dataset Name=".DSL_METADATA" OBJ-XID="/.DSL_METADATA" Parents="root">
       <StorageLayout>
          <ChunkedLayout Ndims="1">
@@ -2598,5 +2317,286 @@ Expected output for 'h5dump --xml tsaf.h5'
          </DataFromFile>
       </Data>
    </Dataset>
+   <Group Name=".attributes" OBJ-XID="/.attributes" Parents="/" >
+      <Group Name="database" OBJ-XID="/.attributes/database" Parents="/.attributes" >
+         <Dataset Name=".SAF_DbProps" OBJ-XID="/.attributes/database/.SAF_DbProps" Parents="/.attributes/database">
+            <Dataspace>
+               <SimpleDataspace Ndims="1">
+                  <Dimension  DimSize="1" MaxDimSize="1"/>
+               </SimpleDataspace>
+            </Dataspace>
+            <DataType> 
+               <CompoundType>
+                  <Field FieldName="magic">
+                     <DataType>
+                        <AtomicType>
+                           <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                        </AtomicType>
+                     </DataType>
+                  </Field>
+                  <Field FieldName="SFileDir">
+                     <DataType>
+                        <AtomicType>
+                           <StringType Cset="H5T_CSET_ASCII" StrSize="1024" StrPad="H5T_STR_NULLTERM"/>
+                        </AtomicType>
+                     </DataType>
+                  </Field>
+                  <Field FieldName="ImportFile">
+                     <DataType>
+                        <AtomicType>
+                           <StringType Cset="H5T_CSET_ASCII" StrSize="1024" StrPad="H5T_STR_NULLTERM"/>
+                        </AtomicType>
+                     </DataType>
+                  </Field>
+                  <Field FieldName="parallel">
+                     <DataType>
+                        <AtomicType>
+                           <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                        </AtomicType>
+                     </DataType>
+                  </Field>
+                  <Field FieldName="safapi">
+                     <DataType>
+                        <CompoundType>
+                           <Field FieldName="vmajor">
+                              <DataType>
+                                 <AtomicType>
+                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </AtomicType>
+                              </DataType>
+                           </Field>
+                           <Field FieldName="vminor">
+                              <DataType>
+                                 <AtomicType>
+                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </AtomicType>
+                              </DataType>
+                           </Field>
+                           <Field FieldName="rel">
+                              <DataType>
+                                 <AtomicType>
+                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </AtomicType>
+                              </DataType>
+                           </Field>
+                           <Field FieldName="annot">
+                              <DataType>
+                                 <AtomicType>
+                                    <StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
+                                 </AtomicType>
+                              </DataType>
+                           </Field>
+                        </CompoundType>
+                     </DataType>
+                  </Field>
+                  <Field FieldName="saflib">
+                     <DataType>
+                        <CompoundType>
+                           <Field FieldName="vmajor">
+                              <DataType>
+                                 <AtomicType>
+                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </AtomicType>
+                              </DataType>
+                           </Field>
+                           <Field FieldName="vminor">
+                              <DataType>
+                                 <AtomicType>
+                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </AtomicType>
+                              </DataType>
+                           </Field>
+                           <Field FieldName="rel">
+                              <DataType>
+                                 <AtomicType>
+                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </AtomicType>
+                              </DataType>
+                           </Field>
+                           <Field FieldName="annot">
+                              <DataType>
+                                 <AtomicType>
+                                    <StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
+                                 </AtomicType>
+                              </DataType>
+                           </Field>
+                        </CompoundType>
+                     </DataType>
+                  </Field>
+                  <Field FieldName="vbt">
+                     <DataType>
+                        <CompoundType>
+                           <Field FieldName="vmajor">
+                              <DataType>
+                                 <AtomicType>
+                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </AtomicType>
+                              </DataType>
+                           </Field>
+                           <Field FieldName="vminor">
+                              <DataType>
+                                 <AtomicType>
+                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </AtomicType>
+                              </DataType>
+                           </Field>
+                           <Field FieldName="rel">
+                              <DataType>
+                                 <AtomicType>
+                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </AtomicType>
+                              </DataType>
+                           </Field>
+                           <Field FieldName="annot">
+                              <DataType>
+                                 <AtomicType>
+                                    <StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
+                                 </AtomicType>
+                              </DataType>
+                           </Field>
+                        </CompoundType>
+                     </DataType>
+                  </Field>
+                  <Field FieldName="dsl">
+                     <DataType>
+                        <CompoundType>
+                           <Field FieldName="vmajor">
+                              <DataType>
+                                 <AtomicType>
+                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </AtomicType>
+                              </DataType>
+                           </Field>
+                           <Field FieldName="vminor">
+                              <DataType>
+                                 <AtomicType>
+                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </AtomicType>
+                              </DataType>
+                           </Field>
+                           <Field FieldName="rel">
+                              <DataType>
+                                 <AtomicType>
+                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </AtomicType>
+                              </DataType>
+                           </Field>
+                           <Field FieldName="annot">
+                              <DataType>
+                                 <AtomicType>
+                                    <StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
+                                 </AtomicType>
+                              </DataType>
+                           </Field>
+                        </CompoundType>
+                     </DataType>
+                  </Field>
+                  <Field FieldName="hdf5">
+                     <DataType>
+                        <CompoundType>
+                           <Field FieldName="vmajor">
+                              <DataType>
+                                 <AtomicType>
+                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </AtomicType>
+                              </DataType>
+                           </Field>
+                           <Field FieldName="vminor">
+                              <DataType>
+                                 <AtomicType>
+                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </AtomicType>
+                              </DataType>
+                           </Field>
+                           <Field FieldName="rel">
+                              <DataType>
+                                 <AtomicType>
+                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </AtomicType>
+                              </DataType>
+                           </Field>
+                           <Field FieldName="annot">
+                              <DataType>
+                                 <AtomicType>
+                                    <StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
+                                 </AtomicType>
+                              </DataType>
+                           </Field>
+                        </CompoundType>
+                     </DataType>
+                  </Field>
+                  <Field FieldName="mpi">
+                     <DataType>
+                        <CompoundType>
+                           <Field FieldName="vmajor">
+                              <DataType>
+                                 <AtomicType>
+                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </AtomicType>
+                              </DataType>
+                           </Field>
+                           <Field FieldName="vminor">
+                              <DataType>
+                                 <AtomicType>
+                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </AtomicType>
+                              </DataType>
+                           </Field>
+                           <Field FieldName="rel">
+                              <DataType>
+                                 <AtomicType>
+                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </AtomicType>
+                              </DataType>
+                           </Field>
+                           <Field FieldName="annot">
+                              <DataType>
+                                 <AtomicType>
+                                    <StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
+                                 </AtomicType>
+                              </DataType>
+                           </Field>
+                        </CompoundType>
+                     </DataType>
+                  </Field>
+                  <Field FieldName="DoToc">
+                     <DataType>
+                        <AtomicType>
+                           <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                        </AtomicType>
+                     </DataType>
+                  </Field>
+                  <Field FieldName="ReadOnly">
+                     <DataType>
+                        <AtomicType>
+                           <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                        </AtomicType>
+                     </DataType>
+                  </Field>
+                  <Field FieldName="Clobber">
+                     <DataType>
+                        <AtomicType>
+                           <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                        </AtomicType>
+                     </DataType>
+                  </Field>
+                  <Field FieldName="OSModes">
+                     <DataType>
+                        <AtomicType>
+                           <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                        </AtomicType>
+                     </DataType>
+                  </Field>
+               </CompoundType>
+            </DataType>
+         <!-- Note: format of compound data not specified -->
+            <Data>
+               <DataFromFile>
+               -604320037 "." "don't import" 1 0 0 0 "none" 0 1 0 "devel" 1 3 0 "" 0 0 0 "none" 1 2 1 "" 1 2 0 "" 1 0 1 0
+               </DataFromFile>
+            </Data>
+         </Dataset>
+      </Group>
+   </Group>
 </RootGroup>
 </HDF5-File>
