@@ -35,6 +35,7 @@ static void *H5O_attr_decode (H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_sha
 static void *H5O_attr_copy (const void *_mesg, void *_dest);
 static size_t H5O_attr_size (H5F_t *f, const void *_mesg);
 static herr_t H5O_attr_reset (void *_mesg);
+static herr_t H5O_attr_free (void *mesg);
 static herr_t H5O_attr_delete (H5F_t *f, hid_t dxpl_id, const void *_mesg);
 static herr_t H5O_attr_link(H5F_t *f, hid_t dxpl_id, const void *_mesg);
 static herr_t H5O_attr_debug (H5F_t *f, hid_t dxpl_id, const void *_mesg,
@@ -50,7 +51,7 @@ const H5O_class_t H5O_ATTR[1] = {{
     H5O_attr_copy,		/* copy the native value        */
     H5O_attr_size,		/* size of raw message          */
     H5O_attr_reset,		/* reset method                 */
-    NULL,		        /* free method			*/
+    H5O_attr_free,	        /* free method			*/
     H5O_attr_delete,		/* file delete method		*/
     H5O_attr_link,		/* link method			*/
     NULL,			/* get share method		*/
@@ -371,7 +372,6 @@ static void            *
 H5O_attr_copy(const void *_src, void *_dst)
 {
     const H5A_t            *src = (const H5A_t *) _src;
-    H5A_t                  *dst = NULL;
     void                   *ret_value;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_copy);
@@ -380,11 +380,8 @@ H5O_attr_copy(const void *_src, void *_dst)
     assert(src);
 
     /* copy */
-    if (NULL == (dst = H5A_copy(_dst,src)))
+    if (NULL == (ret_value = H5A_copy(_dst,src)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "can't copy attribute");
-
-    /* Set return value */
-    ret_value=dst;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -482,7 +479,6 @@ static herr_t
 H5O_attr_reset(void *_mesg)
 {
     H5A_t                  *attr = (H5A_t *) _mesg;
-    H5A_t                  *tmp = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_reset);
@@ -490,9 +486,35 @@ H5O_attr_reset(void *_mesg)
     if (attr)
         H5A_free(attr);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_attr_free
+ *
+ * Purpose:	Free's the message
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, November 18, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_attr_free (void *mesg)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_free);
+
+    assert (mesg);
+
+    H5FL_FREE(H5A_t,mesg);
+
+    FUNC_LEAVE_NOAPI(SUCCEED);
+} /* end H5O_attr_free() */
 
 
 /*-------------------------------------------------------------------------

@@ -467,6 +467,8 @@ H5P_copy_plist(H5P_genplist_t *old_plist)
     hid_t new_plist_id;         /* Property list ID of new list created */
     H5TB_NODE *curr_node;       /* Current node in TBBT */
     H5TB_TREE *seen=NULL;       /* TBBT containing properties already seen */
+    size_t nseen;               /* Number of items 'seen' */
+    hbool_t has_parent_class;   /* Flag to indicate that this property list's class has a parent */
     hid_t ret_value=FAIL;       /* return value */
  
     FUNC_ENTER_NOAPI(H5P_copy_plist, FAIL);
@@ -501,6 +503,7 @@ H5P_copy_plist(H5P_genplist_t *old_plist)
      */
     if((seen=H5TB_fast_dmake(H5TB_FAST_STR_COMPARE))==NULL)
         HGOTO_ERROR(H5E_PLIST,H5E_CANTMAKETREE,FAIL,"can't create TBBT for seen properties");
+    nseen=0;
 
     /* Cycle through the deleted properties & copy them into the new list's deleted section */
     if(old_plist->del->root) {
@@ -519,6 +522,7 @@ H5P_copy_plist(H5P_genplist_t *old_plist)
             /* Add property name to "seen" list */
             if(H5TB_dins(seen,new_name,new_name)==NULL)
                 HGOTO_ERROR(H5E_PLIST,H5E_CANTINSERT,FAIL,"can't insert property into seen TBBT");
+            nseen++;
 
             /* Get the next property node in the TBBT */
             curr_node=H5TB_next(curr_node);
@@ -553,6 +557,7 @@ H5P_copy_plist(H5P_genplist_t *old_plist)
             /* Add property name to "seen" list */
             if(H5TB_dins(seen,new_prop->name,new_prop->name)==NULL)
                 HGOTO_ERROR(H5E_PLIST,H5E_CANTINSERT,FAIL,"can't insert property into seen TBBT");
+            nseen++;
 
             /* Increment the number of properties in list */
             new_plist->nprops++;
@@ -567,6 +572,7 @@ H5P_copy_plist(H5P_genplist_t *old_plist)
      * initialize each with default value & make property 'copy' callback.
      */
     tclass=old_plist->pclass;
+    has_parent_class=(tclass!=NULL && tclass->parent!=NULL && tclass->parent->nprops>0);
     while(tclass!=NULL) {
         if(tclass->nprops>0) {
             /* Walk through the properties in the old class */
@@ -576,7 +582,7 @@ H5P_copy_plist(H5P_genplist_t *old_plist)
                 tmp=curr_node->data;
 
                 /* Only "copy" properties we haven't seen before */
-                if(H5TB_dfind(seen,tmp->name,NULL)==NULL) {
+                if(nseen==0 || H5TB_dfind(seen,tmp->name,NULL)==NULL) {
                     /* Call property creation callback, if it exists */
                     if(tmp->copy) {
                         /* Call the callback & insert changed value into tree (if necessary) */
@@ -584,9 +590,12 @@ H5P_copy_plist(H5P_genplist_t *old_plist)
                             HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, FAIL,"Can't create property");
                     } /* end if */
 
-                    /* Add property name to "seen" list */
-                    if(H5TB_dins(seen,tmp->name,tmp->name)==NULL)
-                        HGOTO_ERROR(H5E_PLIST,H5E_CANTINSERT,FAIL,"can't insert property into seen TBBT");
+                    /* Add property name to "seen" list, if we have other classes to work on */
+                    if(has_parent_class) {
+                        if(H5TB_dins(seen,tmp->name,tmp->name)==NULL)
+                            HGOTO_ERROR(H5E_PLIST,H5E_CANTINSERT,FAIL,"can't insert property into seen TBBT");
+                        nseen++;
+                    } /* end if */
 
                     /* Increment the number of properties in list */
                     new_plist->nprops++;
@@ -4454,7 +4463,6 @@ H5P_get(H5P_genplist_t *plist, const char *name, void *value)
 
     assert(plist);
     assert(name);
-
     assert(value);
 
     /* Check if the property has been deleted */
@@ -5188,6 +5196,9 @@ H5P_close(void *_plist)
     H5P_genclass_t *tclass;         /* Temporary class pointer */
     H5P_genplist_t *plist=(H5P_genplist_t *)_plist;
     H5TB_TREE *seen=NULL;           /* TBBT to hold names of properties already seen */
+    size_t nseen;                   /* Number of items 'seen' */
+    hbool_t has_parent_class;       /* Flag to indicate that this property list's class has a parent */
+    ssize_t ndel;                   /* Number of items deleted */
     H5TB_NODE *curr_node;           /* Current node in TBBT */
     H5P_genprop_t *tmp;             /* Temporary pointer to properties */
     herr_t ret_value=SUCCEED;       /* return value */
@@ -5209,6 +5220,7 @@ H5P_close(void *_plist)
      */
     if((seen=H5TB_fast_dmake(H5TB_FAST_STR_COMPARE))==NULL)
         HGOTO_ERROR(H5E_PLIST,H5E_CANTMAKETREE,FAIL,"can't create TBBT for seen properties");
+    nseen=0;
 
     /* Walk through the changed properties in the list */
     if(plist->props->root) {
@@ -5226,17 +5238,23 @@ H5P_close(void *_plist)
             /* Add property name to "seen" list */
             if(H5TB_dins(seen,tmp->name,tmp->name)==NULL)
                 HGOTO_ERROR(H5E_PLIST,H5E_CANTINSERT,FAIL,"can't insert property into seen TBBT");
+            nseen++;
 
             /* Get the next property node in the TBBT */
             curr_node=H5TB_next(curr_node);
         } /* end while */
     } /* end if */
 
+    /* Determine number of deleted items from property list */
+    if((ndel=H5TB_count(plist->del))<0)
+        HGOTO_ERROR(H5E_PLIST,H5E_CANTCOUNT,FAIL,"can't deterimine # of items in TBBT");
+
     /*
      * Check if we should remove class properties (up through list of parent classes also),
      * initialize each with default value & make property 'remove' callback.
      */
     tclass=plist->pclass;
+    has_parent_class=(tclass!=NULL && tclass->parent!=NULL && tclass->parent->nprops>0);
     while(tclass!=NULL) {
         if(tclass->nprops>0) {
             /* Walk through the properties in the class */
@@ -5248,8 +5266,8 @@ H5P_close(void *_plist)
                 /* Only "delete" properties we haven't seen before
                  * and that haven't already been deleted
                  */
-                if(H5TB_dfind(seen,tmp->name,NULL)==NULL &&
-                        H5TB_dfind(plist->del,tmp->name,NULL)==NULL) {
+                if((nseen==0 || H5TB_dfind(seen,tmp->name,NULL)==NULL) &&
+                        (ndel==0 || H5TB_dfind(plist->del,tmp->name,NULL)==NULL)) {
 
                     /* Call property close callback, if it exists */
                     if(tmp->close) {
@@ -5267,9 +5285,12 @@ H5P_close(void *_plist)
                         H5MM_xfree(tmp_value);
                     } /* end if */
 
-                    /* Add property name to "seen" list */
-                    if(H5TB_dins(seen,tmp->name,tmp->name)==NULL)
-                        HGOTO_ERROR(H5E_PLIST,H5E_CANTINSERT,FAIL,"can't insert property into seen TBBT");
+                    /* Add property name to "seen" list, if we have other classes to work on */
+                    if(has_parent_class) {
+                        if(H5TB_dins(seen,tmp->name,tmp->name)==NULL)
+                            HGOTO_ERROR(H5E_PLIST,H5E_CANTINSERT,FAIL,"can't insert property into seen TBBT");
+                        nseen++;
+                    } /* end if */
                 } /* end if */
 
                 /* Get the next property node in the TBBT */
