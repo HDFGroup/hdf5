@@ -62,7 +62,7 @@ lib progs check test _test uninstall:
 	done
 
 tests TAGS dep depend:
-	@@SETX@; for d in $(SUBDIRS) perform examples; do		      \
+	@@SETX@; for d in $(SUBDIRS) perform; do		      \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
 
