@@ -1,4 +1,4 @@
-HDF5 version 1.7.28 released on Sun Jun 13 03:28:56 CDT 2004
+HDF5 version 1.7.29 released on Sun Jul  4 03:35:47 CDT 2004
 ================================================================================
 
 
@@ -44,6 +44,11 @@ New Features
 
     Library:
     --------
+        - A new API function H5Fget_name was added.  It returns the name
+            of the file by object(file, group, data set, named data type,
+            attribute) ID.  SLU - 2004/06/29
+        - A new API function H5Fget_filesize was added.  It returns the
+            actual file size of the opened file.  SLU - 2004/06/24
 	- New Feature of Data transformation is added.  AKC - 2004/05/03.
         - New exception handler for datatype conversion is put in to 
             replace the old overflow callback function.  This exception
@@ -83,6 +88,10 @@ New Features
             field in the H5G_stat_t struct for testing if two objects are the
             same within a file.  QAK - 2003/08/08
         - Switched over to new error API. SLU - 2003/07/25
+        - Added support for user defined identifier types.  NF/JL - 2004/06/29
+        - Added support for SZIP without encoder.  Added H5Zget_filter_info
+          and changed H5Pget_filter and H5Pget_filter_by_id to support this
+          change.
 
     Parallel Library:
     -----------------
