@@ -290,8 +290,8 @@ H5_DLL herr_t H5D_mpio_spaces_write(H5D_io_info_t *io_info,
 
 /* MPI-IO function to check if a direct I/O transfer is possible between
  * memory and the file */
-H5_DLL htri_t H5D_mpio_opt_possible(const H5F_t *file, const H5S_t *mem_space,
-    const H5S_t *file_space, const unsigned flags, const H5O_layout_t *layout);
+H5_DLL htri_t H5D_mpio_opt_possible(const H5D_t *file, const H5S_t *mem_space,
+    const H5S_t *file_space, const unsigned flags);
 #endif /* H5_HAVE_PARALLEL */
 
 /* Testing functions */

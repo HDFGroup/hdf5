@@ -133,7 +133,7 @@ typedef int DATATYPE;
 extern int dim0, dim1;				/*Dataset dimensions */
 extern int chunkdim0, chunkdim1;		/*Chunk dimensions */
 extern int nerrors;				/*errors count */
-extern H5E_auto_stack_t old_func;		/* previous error handler */
+extern H5E_auto_t old_func;			/* previous error handler */
 extern void *old_client_data;			/*previous error handler arg.*/
 extern int facc_type;				/*Test file access type */
 
@@ -164,6 +164,9 @@ void coll_chunk2(void);
 void coll_chunk3(void);
 void coll_chunk4(void);
 void io_mode_confusion(void);
+#ifdef H5_HAVE_FILTER_DEFLATE
+void compress_readAll(void);
+#endif /* H5_HAVE_FILTER_DEFLATE */
 
 /* commonly used prototypes */
 hid_t create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type, hbool_t use_gpfs);

@@ -3294,7 +3294,7 @@ H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     /*
      * Check if we can set direct MPI-IO read/write functions
      */
-    opt=H5D_mpio_opt_possible(dset->ent.file,mem_space,file_space,flags,&dset->shared->layout);
+    opt=H5D_mpio_opt_possible(dset,mem_space,file_space,flags);
     if(opt==FAIL)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for direct IO dataspace ");
 

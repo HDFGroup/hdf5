@@ -33,7 +33,7 @@ int ngroups = 512;                      /* number of groups to create in root
                                          * group. */
 int facc_type = FACC_MPIO;		/*Test file access type */
 
-H5E_auto_stack_t old_func;		        /* previous error handler */
+H5E_auto_t old_func;		        /* previous error handler */
 void *old_client_data;			/* previous error handler arg.*/
 
 /* other option flags */
@@ -381,6 +381,11 @@ int main(int argc, char **argv)
     AddTest("eidsetw2", extend_writeInd2, NULL, 
 	    "extendible dataset independent write #2", PARATESTFILE);
 
+#ifdef H5_HAVE_FILTER_DEFLATE
+    AddTest("cmpdsetr", compress_readAll, NULL, 
+	    "compressed dataset collective read", PARATESTFILE);
+#endif /* H5_HAVE_FILTER_DEFLATE */
+
     ndsets_params.name = PARATESTFILE;
     ndsets_params.count = ndatasets;
     AddTest("ndsetw", multiple_dset_write, NULL, 
@@ -428,6 +433,7 @@ int main(int argc, char **argv)
       AddTest("cchunk4", coll_chunk4,NULL,
 	      "collective to independent chunk io",PARATESTFILE);
     }
+
     AddTest("null", null_dataset, NULL, 
 	    "null dataset test", PARATESTFILE);
 
@@ -437,7 +443,6 @@ int main(int argc, char **argv)
     AddTest("I/Omodeconf", io_mode_confusion, NULL, 
 	    "I/O mode confusion test -- hangs quickly on failure", 
             &io_mode_confusion_params);
-
 
     /* Display testing information */
     TestInfo(argv[0]);

@@ -12,8 +12,6 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* $Id$ */
-
 /*
  * Parallel tests for file operations
  */
