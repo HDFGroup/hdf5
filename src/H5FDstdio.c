@@ -596,6 +596,9 @@ H5FD_stdio_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
 {   
     H5FD_stdio_t       *file = (H5FD_stdio_t *)_file;
     static const char  *func="H5FD_stdio_get_handle";  /* Function Name for error reporting */
+
+    /* Shut compiler up */
+    fapl=fapl;
    
     /* Clear the error stack */
     H5Eclear();

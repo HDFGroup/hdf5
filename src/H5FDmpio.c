@@ -1192,7 +1192,7 @@ done:
  *-------------------------------------------------------------------------
 */
 static herr_t  
-H5FD_mpio_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
+H5FD_mpio_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
 {   
     H5FD_mpio_t         *file = (H5FD_mpio_t *)_file;
     herr_t              ret_value = SUCCEED;

@@ -1800,7 +1800,7 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
                 /* Block to free is in the middle of the accumulator */
                 if(H5F_addr_lt(addr,file->accum_loc+file->accum_size)) {
                     haddr_t tail_addr;
-                    hsize_t tail_size;
+                    size_t tail_size;
 
                     /* Calculate the address & size of the tail to write */
                     tail_addr=addr+size;
