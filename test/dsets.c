@@ -687,8 +687,8 @@ corrupt_data(unsigned int flags, size_t cd_nelmts,
  *-------------------------------------------------------------------------
  */
 static H5Z_cb_return_t 
-filter_cb_cont(H5Z_filter_t filter, void* UNUSED buf, size_t UNUSED buf_size, 
-           void* UNUSED op_data)
+filter_cb_cont(H5Z_filter_t filter, void UNUSED *buf, size_t UNUSED buf_size, 
+           void UNUSED *op_data)
 {
     if(H5Z_FILTER_FLETCHER32==filter)
        return H5Z_CB_CONT; 
@@ -712,8 +712,8 @@ filter_cb_cont(H5Z_filter_t filter, void* UNUSED buf, size_t UNUSED buf_size,
  *-------------------------------------------------------------------------
  */
 static H5Z_cb_return_t 
-filter_cb_fail(H5Z_filter_t filter, void* UNUSED buf, size_t UNUSED buf_size, 
-           void* UNUSED op_data)
+filter_cb_fail(H5Z_filter_t filter, void UNUSED *buf, size_t UNUSED buf_size, 
+           void UNUSED *op_data)
 {
     if(H5Z_FILTER_FLETCHER32==filter)
        return H5Z_CB_FAIL; 

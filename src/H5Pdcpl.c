@@ -888,7 +888,7 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value");
 
     /* Reset the fill structure */
-    if(H5O_reset(H5O_FILL, &fill)<0)
+    if(H5O_reset(H5O_FILL_ID, &fill)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't reset fill value");
 
     if(value) {

@@ -1,33 +1,33 @@
-/****************************************************************************
-* NCSA HDF								    *
-* Software Development Group						    *
-* National Center for Supercomputing Applications			    *
-* University of Illinois at Urbana-Champaign				    *
-* 605 E. Springfield, Champaign IL 61820				    *
-*									    *
-* For conditions of distribution and use, see the accompanying		    *
-* hdf/COPYING file.							    *
-*									    *
-****************************************************************************/
-
-/* $Id$ */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #define H5A_PACKAGE		/*suppress error about including H5Apkg	*/
 #define H5S_PACKAGE		/*suppress error about including H5Spkg	*/
 
 /* Private header files */
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5Apkg.h"		/* Attributes				*/
 #include "H5Bprivate.h"		/* B-tree subclass names	  	*/
 #include "H5Dprivate.h"		/* Datasets				*/
-#include "H5Gprivate.h"		/* Groups				*/
-#include "H5Tprivate.h"		/* Datatypes				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Gprivate.h"		/* Groups				*/
+#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Pprivate.h"		/* Property lists			*/
 #include "H5Oprivate.h"     	/* Object Headers       		*/
-#include "H5Spkg.h"		    /* Data-space functions			  */
-#include "H5Apkg.h"		/* Attributes				*/
+#include "H5Pprivate.h"		/* Property lists			*/
+#include "H5Spkg.h"		/* Dataspace functions			*/
+#include "H5Tprivate.h"		/* Datatypes				*/
 
 #define PABLO_MASK	H5A_mask
 
@@ -251,8 +251,10 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to copy entry");
 
     /* Compute the internal sizes */
-    attr->dt_size=(H5O_DTYPE[0].raw_size)(attr->ent.file,type);
-    attr->ds_size=(H5O_SDSPACE[0].raw_size)(attr->ent.file,&(space->extent.u.simple));
+    attr->dt_size=H5O_raw_size(H5O_DTYPE_ID,attr->ent.file,type);
+    assert(attr->dt_size>0);
+    attr->ds_size=H5O_raw_size(H5O_SDSPACE_ID,attr->ent.file,&(space->extent.u.simple));
+    assert(attr->ds_size>0);
     H5_ASSIGN_OVERFLOW(attr->data_size,H5S_get_simple_extent_npoints(attr->ds)*H5T_get_size(attr->dt),hssize_t,size_t);
 
     /* Hold the symbol table entry (and file) open */
@@ -262,22 +264,22 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
 
     /* Read in the existing attributes to check for duplicates */
     seq=0;
-    while(H5O_read(&(attr->ent), H5O_ATTR, seq, &found_attr, dxpl_id)!=NULL) {
+    while(H5O_read(&(attr->ent), H5O_ATTR_ID, seq, &found_attr, dxpl_id)!=NULL) {
         /*
 	 * Compare found attribute name to new attribute name reject creation
 	 * if names are the same.
 	 */
 	if(HDstrcmp(found_attr.name,attr->name)==0) {
-	    H5O_reset (H5O_ATTR, &found_attr);
+	    H5O_reset (H5O_ATTR_ID, &found_attr);
 	    HGOTO_ERROR(H5E_ATTR, H5E_ALREADYEXISTS, FAIL, "attribute already exists");
 	}
-	H5O_reset (H5O_ATTR, &found_attr);
+	H5O_reset (H5O_ATTR_ID, &found_attr);
 	seq++;
     }
     H5E_clear ();
 
     /* Create the attribute message and save the attribute index */
-    if (H5O_modify(&(attr->ent), H5O_ATTR, H5O_NEW_MESG, 0, 1, attr, dxpl_id) < 0) 
+    if (H5O_modify(&(attr->ent), H5O_ATTR_ID, H5O_NEW_MESG, 0, 1, attr, dxpl_id) < 0) 
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to update attribute header messages");
 
     /* Register the new attribute and get an ID for it */
@@ -331,17 +333,17 @@ H5A_get_index(H5G_entry_t *ent, const char *name, hid_t dxpl_id)
 
     /* Look up the attribute for the object */
     i=0;
-    while(H5O_read(ent, H5O_ATTR, i, &found_attr, dxpl_id)!=NULL) {
+    while(H5O_read(ent, H5O_ATTR_ID, i, &found_attr, dxpl_id)!=NULL) {
 	/*
 	 * Compare found attribute name to new attribute name reject creation
 	 * if names are the same.
 	 */
 	if(HDstrcmp(found_attr.name,name)==0) {
-	    H5O_reset (H5O_ATTR, &found_attr);
+	    H5O_reset (H5O_ATTR_ID, &found_attr);
 	    ret_value = i;
 	    break;
 	}
-	H5O_reset (H5O_ATTR, &found_attr);
+	H5O_reset (H5O_ATTR_ID, &found_attr);
 	i++;
     }
     H5E_clear ();
@@ -497,7 +499,7 @@ H5A_open(H5G_entry_t *ent, unsigned idx, hid_t dxpl_id)
 
     /* Read in attribute with H5O_read() */
     H5_CHECK_OVERFLOW(idx,unsigned,int);
-    if (NULL==(attr=H5O_read(ent, H5O_ATTR, (int)idx, attr, dxpl_id)))
+    if (NULL==(attr=H5O_read(ent, H5O_ATTR_ID, (int)idx, attr, dxpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to load attribute info from dataset header");
     attr->initialized=1;
    
@@ -652,7 +654,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
 
     /* Modify the attribute data */
     attr->data=tconv_buf;   /* Set the data pointer temporarily */
-    if (H5O_modify(&(attr->ent), H5O_ATTR, idx, 0, 1, attr, dxpl_id) < 0) 
+    if (H5O_modify(&(attr->ent), H5O_ATTR_ID, idx, 0, 1, attr, dxpl_id) < 0) 
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL,
 		    "unable to update attribute header messages");
 
@@ -1113,7 +1115,7 @@ H5Aget_num_attrs(hid_t loc_id)
     }
 
     /* Look up the attribute for the object */
-    ret_value=H5O_count(ent, H5O_ATTR, H5AC_ind_dxpl_id);
+    ret_value=H5O_count(ent, H5O_ATTR_ID, H5AC_ind_dxpl_id);
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -1197,7 +1199,7 @@ H5A_rename(H5G_entry_t *ent, const char *old_name, const char *new_name, hid_t d
         
     /* Read in the existing attributes to check for duplicates */
     seq=0;
-    while(H5O_read(ent, H5O_ATTR, seq, found_attr, dxpl_id)!=NULL) {
+    while(H5O_read(ent, H5O_ATTR_ID, seq, found_attr, dxpl_id)!=NULL) {
         /*
 	 * Compare found attribute name.
 	 */
@@ -1205,7 +1207,7 @@ H5A_rename(H5G_entry_t *ent, const char *old_name, const char *new_name, hid_t d
             idx = seq;
             break;
 	}
-	H5O_reset (H5O_ATTR, found_attr);
+	H5O_reset (H5O_ATTR_ID, found_attr);
 	seq++;
     }
  
@@ -1224,7 +1226,7 @@ H5A_rename(H5G_entry_t *ent, const char *old_name, const char *new_name, hid_t d
     found_attr->initialized=TRUE;
 
     /* Modify the attribute message */
-    if (H5O_modify(ent, H5O_ATTR, idx, 0, 1, found_attr, dxpl_id) < 0) 
+    if (H5O_modify(ent, H5O_ATTR_ID, idx, 0, 1, found_attr, dxpl_id) < 0) 
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to update attribute header messages");
    
     /* Close the attribute */
@@ -1303,17 +1305,17 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
      * reasonable.
      */
     idx = attr_num ? (int)*attr_num : 0;
-    if(idx<H5O_count(ent, H5O_ATTR, H5AC_dxpl_id)) {
-        while(H5O_read(ent, H5O_ATTR, idx++, &found_attr, H5AC_dxpl_id)!=NULL) {
+    if(idx<H5O_count(ent, H5O_ATTR_ID, H5AC_dxpl_id)) {
+        while(H5O_read(ent, H5O_ATTR_ID, idx++, &found_attr, H5AC_dxpl_id)!=NULL) {
 	    /*
 	     * Compare found attribute name to new attribute name reject
 	     * creation if names are the same.
 	     */
 	    if((ret_value=(op)(loc_id,found_attr.name,op_data))!=0) {
-		H5O_reset (H5O_ATTR, &found_attr);
+		H5O_reset (H5O_ATTR_ID, &found_attr);
 		break;
 	    }
-	    H5O_reset (H5O_ATTR, &found_attr);
+	    H5O_reset (H5O_ATTR_ID, &found_attr);
 	}
 	H5E_clear ();
     }
@@ -1372,17 +1374,17 @@ H5Adelete(hid_t loc_id, const char *name)
 
     /* Look up the attribute for the object */
     idx=0;
-    while(H5O_read(ent, H5O_ATTR, idx, &found_attr, H5AC_dxpl_id)!=NULL) {
+    while(H5O_read(ent, H5O_ATTR_ID, idx, &found_attr, H5AC_dxpl_id)!=NULL) {
 	/*
 	 * Compare found attribute name to new attribute name reject
 	 * creation if names are the same.
 	 */
 	if(HDstrcmp(found_attr.name,name)==0) {
-	    H5O_reset (H5O_ATTR, &found_attr);
+	    H5O_reset (H5O_ATTR_ID, &found_attr);
 	    found = idx;
 	    break;
 	}
-	H5O_reset (H5O_ATTR, &found_attr);
+	H5O_reset (H5O_ATTR_ID, &found_attr);
 	idx++;
     }
     H5E_clear ();
@@ -1390,7 +1392,7 @@ H5Adelete(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "attribute not found");
 
     /* Delete the attribute from the location */
-    if ((ret_value=H5O_remove(ent, H5O_ATTR, found, H5AC_dxpl_id)) < 0)
+    if ((ret_value=H5O_remove(ent, H5O_ATTR_ID, found, H5AC_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute header message");
     
 done:

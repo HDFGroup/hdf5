@@ -28,10 +28,13 @@
  *
  *-------------------------------------------------------------------------
  */
+
+#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+
 #include "H5private.h"
 #include "H5Eprivate.h"
 #include "H5MMprivate.h"
-#include "H5Oprivate.h"
+#include "H5Opkg.h"             /* Object header functions                 */
 
 #ifdef H5O_ENABLE_BOGUS
 #define PABLO_MASK      H5O_bogus_mask

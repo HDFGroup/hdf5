@@ -253,8 +253,8 @@ H5G_node_size(H5F_t *f)
  *-------------------------------------------------------------------------
  */
 static H5G_node_t *
-H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void * UNUSED _udata1,
-	      void * UNUSED _udata2)
+H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED  *_udata1,
+	      void UNUSED * _udata2)
 {
     H5G_node_t		   *sym = NULL;
     size_t		    size = 0;

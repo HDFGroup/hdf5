@@ -1,16 +1,16 @@
-/****************************************************************************
-* NCSA HDF                                                                  *
-* Software Development Group                                                *
-* National Center for Supercomputing Applications                           *
-* University of Illinois at Urbana-Champaign                                *
-* 605 E. Springfield, Champaign IL 61820                                    *
-*                                                                           *
-* For conditions of distribution and use, see the accompanying              *
-* hdf/COPYING file.                                                         *
-*                                                                           *
-****************************************************************************/
-
-/* $Id$ */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
 
@@ -488,7 +488,7 @@ H5D_crt_copy(hid_t new_plist_id, hid_t old_plist_id, void UNUSED *copy_data)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
     /* Make copies of fill value, external file list, and data pipeline */
-    if(src_fill.buf && (NULL==H5O_copy(H5O_FILL, &src_fill, &dst_fill))) {
+    if(src_fill.buf && (NULL==H5O_copy(H5O_FILL_ID, &src_fill, &dst_fill))) {
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't copy fill value");
     }
     else if (!src_fill.buf) {
@@ -496,9 +496,9 @@ H5D_crt_copy(hid_t new_plist_id, hid_t old_plist_id, void UNUSED *copy_data)
 	dst_fill.size = src_fill.size;
     }
     HDmemset(&dst_efl,0,sizeof(H5O_efl_t));
-    if(NULL==H5O_copy(H5O_EFL, &src_efl, &dst_efl)) 
+    if(NULL==H5O_copy(H5O_EFL_ID, &src_efl, &dst_efl)) 
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't copy external file list");
-    if(NULL==H5O_copy(H5O_PLINE, &src_pline, &dst_pline)) 
+    if(NULL==H5O_copy(H5O_PLINE_ID, &src_pline, &dst_pline)) 
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't copy data pipeline");
 
     /* Set the fill value, external file list, and data pipeline property 
@@ -559,9 +559,9 @@ H5D_crt_close(hid_t dcpl_id, void UNUSED *close_data)
 
     /* Clean up any values set for the fill-value, external file-list and
      * data pipeline */
-    H5O_reset(H5O_FILL, &fill);
-    H5O_reset(H5O_EFL, &efl);
-    H5O_reset(H5O_PLINE, &pline);
+    H5O_reset(H5O_FILL_ID, &fill);
+    H5O_reset(H5O_EFL_ID, &efl);
+    H5O_reset(H5O_PLINE_ID, &pline);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1531,7 +1531,7 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
     H5O_fill_new_t      fill = { NULL, 0, NULL, H5D_ALLOC_TIME_LATE, H5D_FILL_TIME_ALLOC, TRUE };
     H5D_fill_value_t	fill_status;
 
-    H5O_t              *oh=NULL;        /* Pointer to dataset's object header */
+    struct H5O_t       *oh=NULL;        /* Pointer to dataset's object header */
 
     /* return code */
     herr_t ret_value = SUCCEED;
@@ -1589,7 +1589,7 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't tell if fill value defined");
 
     if (fill_status == H5D_FILL_VALUE_DEFAULT || fill_status == H5D_FILL_VALUE_USER_DEFINED) {
-        if (H5O_copy(H5O_FILL, fill_prop, &fill) == NULL)
+        if (H5O_copy(H5O_FILL_ID, fill_prop, &fill) == NULL)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT,FAIL, "unable to copy fill value");
 
         if (fill_prop->buf && fill_prop->size > 0 && H5O_fill_convert(&fill, type, dxpl_id) < 0)
@@ -1611,20 +1611,20 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT,FAIL, "unable to create dataset");
 
     /* Write new fill value message */
-    if (H5O_append(file, dxpl_id, oh, H5O_FILL_NEW, H5O_FLAG_CONSTANT, &fill) < 0)
+    if (H5O_append(file, dxpl_id, oh, H5O_FILL_NEW_ID, H5O_FLAG_CONSTANT, &fill) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update fill value header message");        
 
     /* If there is valid information for the old fill value struct, update it */
     if (fill.buf) {
         /* Clear any previous values */
-        H5O_reset(H5O_FILL, fill_prop);
+        H5O_reset(H5O_FILL_ID, fill_prop);
 
         /* Copy new fill value information to old fill value struct */
-        if(H5O_copy(H5O_FILL, &fill, fill_prop) == NULL)
+        if(H5O_copy(H5O_FILL_ID, &fill, fill_prop) == NULL)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT,FAIL,"unable to copy fill value");
 
         /* Write old fill value */
-        if (fill_prop->buf && H5O_append(file, dxpl_id, oh, H5O_FILL, H5O_FLAG_CONSTANT, fill_prop) < 0)
+        if (fill_prop->buf && H5O_append(file, dxpl_id, oh, H5O_FILL_ID, H5O_FLAG_CONSTANT, fill_prop) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update fill value header message");
 
         /* Update dataset creation property */
@@ -1633,7 +1633,7 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
     } /* end if */
 
     /* Update the type and space header messages */
-    if (H5O_append(file, dxpl_id, oh, H5O_DTYPE, H5O_FLAG_CONSTANT | H5O_FLAG_SHARED, type) < 0 ||
+    if (H5O_append(file, dxpl_id, oh, H5O_DTYPE_ID, H5O_FLAG_CONSTANT | H5O_FLAG_SHARED, type) < 0 ||
             H5S_append(file, dxpl_id, oh, space) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update type or space header messages");
 
@@ -1645,7 +1645,7 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve pipeline filter");
 
         if (pline.nfilters > 0 &&
-                H5O_append(file, dxpl_id, oh, H5O_PLINE, H5O_FLAG_CONSTANT, &pline) < 0)
+                H5O_append(file, dxpl_id, oh, H5O_PLINE_ID, H5O_FLAG_CONSTANT, &pline) < 0)
             HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update filter header message");
     } /* end if */
 
@@ -1681,14 +1681,14 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
             efl->slot[i].name_offset = offset;
         }
 
-        if (H5O_append(file, dxpl_id, oh, H5O_EFL, H5O_FLAG_CONSTANT, efl) < 0)
+        if (H5O_append(file, dxpl_id, oh, H5O_EFL_ID, H5O_FLAG_CONSTANT, efl) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update external file list message");
     }
 
     /* Update layout message */
     /* (Don't make layout message constant yet, since space may not be allocated) */
     /* Note: this is relying on H5D_alloc_storage not calling H5O_modify during dataset creation */
-    if (H5D_COMPACT != layout->type && H5O_append(file, dxpl_id, oh, H5O_LAYOUT, 0, layout) < 0)
+    if (H5D_COMPACT != layout->type && H5O_append(file, dxpl_id, oh, H5O_LAYOUT_ID, 0, layout) < 0)
          HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout"); 
 
 #ifdef H5O_ENABLE_BOGUS
@@ -2047,14 +2047,14 @@ H5D_isa(H5G_entry_t *ent, hid_t dxpl_id)
     assert(ent);
 
     /* Data type */
-    if ((exists=H5O_exists(ent, H5O_DTYPE, 0, dxpl_id))<0) {
+    if ((exists=H5O_exists(ent, H5O_DTYPE_ID, 0, dxpl_id))<0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header");
     } else if (!exists) {
 	HGOTO_DONE(FALSE);
     }
 
     /* Layout */
-    if ((exists=H5O_exists(ent, H5O_LAYOUT, 0, dxpl_id))<0) {
+    if ((exists=H5O_exists(ent, H5O_LAYOUT_ID, 0, dxpl_id))<0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header");
     } else if (!exists) {
 	HGOTO_DONE(FALSE);
@@ -2185,7 +2185,7 @@ H5D_open_oid(H5G_entry_t *ent, hid_t dxpl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, NULL, "unable to open");
     
     /* Get the type and space */
-    if (NULL==(dataset->type=H5O_read(&(dataset->ent), H5O_DTYPE, 0, NULL, dxpl_id)))
+    if (NULL==(dataset->type=H5O_read(&(dataset->ent), H5O_DTYPE_ID, 0, NULL, dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to load type info from dataset header");
 
     if (NULL==(dataset->space=H5S_read(&(dataset->ent),dxpl_id)))
@@ -2196,7 +2196,7 @@ H5D_open_oid(H5G_entry_t *ent, hid_t dxpl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "can't get dataset creation property list");
 
     /* Get the optional filters message */
-    if(NULL == H5O_read(&(dataset->ent), H5O_PLINE, 0, &pline, dxpl_id)) {
+    if(NULL == H5O_read(&(dataset->ent), H5O_PLINE_ID, 0, &pline, dxpl_id)) {
         H5E_clear();
         HDmemset(&pline, 0, sizeof(pline));
     }
@@ -2213,7 +2213,7 @@ H5D_open_oid(H5G_entry_t *ent, hid_t dxpl_id)
      * values are copied to the dataset create plist so the user can query
      * them.
      */
-    if (NULL==H5O_read(&(dataset->ent), H5O_LAYOUT, 0, &(dataset->layout), dxpl_id))
+    if (NULL==H5O_read(&(dataset->ent), H5O_LAYOUT_ID, 0, &(dataset->layout), dxpl_id))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to read data layout message");
     switch (dataset->layout.type) {
         case H5D_CONTIGUOUS:
@@ -2254,10 +2254,10 @@ H5D_open_oid(H5G_entry_t *ent, hid_t dxpl_id)
     /* Retrieve & release the previous fill-value settings */
     if(H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, fill_prop) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't get fill value");
-    H5O_reset(H5O_FILL, fill_prop);
+    H5O_reset(H5O_FILL_ID, fill_prop);
 
     /* Get the new fill value message */
-    if(NULL == H5O_read(&(dataset->ent), H5O_FILL_NEW, 0, &fill, dxpl_id)) {
+    if(NULL == H5O_read(&(dataset->ent), H5O_FILL_NEW_ID, 0, &fill, dxpl_id)) {
         H5E_clear();
         HDmemset(&fill, 0, sizeof(fill));
 
@@ -2280,12 +2280,12 @@ H5D_open_oid(H5G_entry_t *ent, hid_t dxpl_id)
         } /* end switch */
     } /* end if */
     if(fill.fill_defined) {
-        if(NULL==H5O_copy(H5O_FILL, &fill, fill_prop))
+        if(NULL==H5O_copy(H5O_FILL_ID, &fill, fill_prop))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't copy fill value");
     } else {
 	/* For compatibility with v1.4.  Retrieve the old fill value message.
  	 * If size is 0, make it -1 for undefined. */
-        if(NULL == H5O_read(&(dataset->ent), H5O_FILL, 0, fill_prop, dxpl_id)) {
+        if(NULL == H5O_read(&(dataset->ent), H5O_FILL_ID, 0, fill_prop, dxpl_id)) {
             H5E_clear();
             HDmemset(fill_prop, 0, sizeof(H5O_fill_t));
         }
@@ -2309,7 +2309,7 @@ H5D_open_oid(H5G_entry_t *ent, hid_t dxpl_id)
      * also undefined when space allocate time is H5D_ALLOC_TIME_LATE. */
     if( !H5F_addr_defined(dataset->layout.addr)) {
         HDmemset(&dataset->efl,0,sizeof(H5O_efl_t));
-        if(NULL != H5O_read(&(dataset->ent), H5O_EFL, 0, &dataset->efl, dxpl_id))
+        if(NULL != H5O_read(&(dataset->ent), H5O_EFL_ID, 0, &dataset->efl, dxpl_id))
             if(H5P_set(plist, H5D_CRT_EXT_FILE_LIST_NAME, &dataset->efl) < 0)
             	HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set external file list");
     }
@@ -2385,7 +2385,7 @@ H5D_close(H5D_t *dataset)
 
     /* Update header message of layout for compact dataset. */
     if(dataset->layout.type==H5D_COMPACT && dataset->layout.dirty) {
-        if(H5O_modify(&(dataset->ent), H5O_LAYOUT, 0, 0, 1, &(dataset->layout), H5AC_dxpl_id)<0)
+        if(H5O_modify(&(dataset->ent), H5O_LAYOUT_ID, 0, 0, 1, &(dataset->layout), H5AC_dxpl_id)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout message");
         dataset->layout.dirty = FALSE;
     } /* end if */
@@ -3496,7 +3496,7 @@ H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_allo
               * (this is only for forward compatibility).
               */
             if(time_alloc!=H5D_ALLOC_CREATE)
-                if (H5O_modify (&(dset->ent), H5O_LAYOUT, 0, H5O_FLAG_CONSTANT, update_time, &(dset->layout), dxpl_id) < 0)
+                if (H5O_modify (&(dset->ent), H5O_LAYOUT_ID, 0, H5O_FLAG_CONSTANT, update_time, &(dset->layout), dxpl_id) < 0)
                     HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout message");
         } /* end if */
     } /* end if */
@@ -4467,7 +4467,7 @@ H5D_flush(H5F_t *f, hid_t dxpl_id)
             if(NULL==(dataset=H5I_object_verify(id_list[j], H5I_DATASET)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to get dataset object");
             if(dataset->layout.type==H5D_COMPACT && dataset->layout.dirty)
-                if(H5O_modify(&(dataset->ent), H5O_LAYOUT, 0, 0, 1, &(dataset->layout), dxpl_id)<0)
+                if(H5O_modify(&(dataset->ent), H5O_LAYOUT_ID, 0, 0, 1, &(dataset->layout), dxpl_id)<0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update layout message");
             dataset->layout.dirty = FALSE;
         }

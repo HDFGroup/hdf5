@@ -108,7 +108,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_all_iter_release (H5S_sel_iter_t * UNUSED sel_iter)
+H5S_all_iter_release (H5S_sel_iter_t UNUSED * sel_iter)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -140,7 +140,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_all_release (H5S_t * UNUSED space)
+H5S_all_release (H5S_t UNUSED * space)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 

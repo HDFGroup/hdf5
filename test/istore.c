@@ -1,12 +1,23 @@
-/*
- * Copyright (C) 1997 NCSA
- *		      All rights reserved.
- *
- * Programmer:	Robb Matzke <matzke@llnl.gov>
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/* Programmer:	Robb Matzke <matzke@llnl.gov>
  *		Wednesday, October 15, 1997
  *
  * Purpose:	Tests various aspects of indexed raw data storage.
  */
+
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 #include "h5test.h"
@@ -119,7 +130,7 @@ new_object(H5F_t *f, const char *name, unsigned ndims, H5G_entry_t *ent/*out*/)
     }
     /* Create the root of the B-tree that describes chunked storage */
     H5F_istore_create (f, H5P_DATASET_XFER_DEFAULT, &layout/*in,out*/);
-    if (H5O_modify(ent, H5O_LAYOUT, H5O_NEW_MESG, 0, 1, &layout, H5P_DATASET_XFER_DEFAULT) < 0) {
+    if (H5O_modify(ent, H5O_LAYOUT_ID, H5O_NEW_MESG, 0, 1, &layout, H5P_DATASET_XFER_DEFAULT) < 0) {
 	H5_FAILED();
 	puts("    H5O_modify istore message failure.");
 	goto error;
@@ -247,7 +258,7 @@ test_extend(H5F_t *f, const char *prefix,
 	printf("    Cannot create %u-d object `%s'\n", ndims, name);
 	goto error;
     }
-    if (NULL == H5O_read(&handle, H5O_LAYOUT, 0, &layout, H5P_DATASET_XFER_DEFAULT)) {
+    if (NULL == H5O_read(&handle, H5O_LAYOUT_ID, 0, &layout, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	puts("    Unable to read istore message.");
 	goto error;
@@ -456,7 +467,7 @@ test_sparse(H5F_t *f, const char *prefix, size_t nblocks,
 	printf("    Cannot create %u-d object `%s'\n", ndims, name);
 	goto error;
     }
-    if (NULL == H5O_read(&handle, H5O_LAYOUT, 0, &layout, H5P_DATASET_XFER_DEFAULT)) {
+    if (NULL == H5O_read(&handle, H5O_LAYOUT_ID, 0, &layout, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	printf("    Unable to read istore message\n");
 	goto error;

@@ -3405,7 +3405,7 @@ H5T_isa(H5G_entry_t *ent, hid_t dxpl_id)
     FUNC_ENTER_NOAPI(H5T_isa, FAIL);
     assert(ent);
 
-    if ((ret_value=H5O_exists(ent, H5O_DTYPE, 0, dxpl_id))<0)
+    if ((ret_value=H5O_exists(ent, H5O_DTYPE_ID, 0, dxpl_id))<0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to read object header");
 
 done:
@@ -3489,7 +3489,7 @@ H5T_open_oid (H5G_entry_t *ent, hid_t dxpl_id)
 
     if (H5O_open (ent)<0)
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to open named data type");
-    if (NULL==(dt=H5O_read (ent, H5O_DTYPE, 0, NULL, dxpl_id)))
+    if (NULL==(dt=H5O_read (ent, H5O_DTYPE_ID, 0, NULL, dxpl_id)))
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to load type message from object header");
 
     /* Mark the type as named and open */
@@ -5054,7 +5054,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T_print_stats(H5T_path_t * UNUSED path, int * UNUSED nprint/*in,out*/)
+H5T_print_stats(H5T_path_t UNUSED * path, int UNUSED * nprint/*in,out*/)
 {
 #ifdef H5T_DEBUG
     hsize_t	nbytes;

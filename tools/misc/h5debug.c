@@ -15,6 +15,7 @@
  *-------------------------------------------------------------------------
  */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
 #include "H5private.h"
 #include "H5Iprivate.h"
@@ -24,7 +25,7 @@
 #include "H5Gprivate.h"
 #include "H5HGprivate.h"
 #include "H5HLprivate.h"
-#include "H5Oprivate.h"
+#include "H5Opkg.h"
 
 /* File drivers */
 #include "H5FDfamily.h"

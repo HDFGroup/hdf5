@@ -1,13 +1,27 @@
-/*
- * Copyright © 1998 NCSA
- *                  All rights reserved.
- *
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/* Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Tuesday, November 24, 1998
  */
 #include "h5test.h"
 #include "H5Iprivate.h"
-#include "H5Oprivate.h"
+/*
+ * This file needs to access private datatypes from the H5O package.
+ */
+#define H5O_PACKAGE
+#include "H5Opkg.h"
 
 /*
  * This file needs to access private datatypes from the H5G package.
@@ -80,7 +94,7 @@ main(void)
     TESTING("message creation");
     stab.btree_addr = 11111111;
     stab.heap_addr = 22222222;
-    if (H5O_modify(&oh_ent, H5O_STAB, H5O_NEW_MESG, 0, 1, &stab, H5P_DATASET_XFER_DEFAULT)<0) {
+    if (H5O_modify(&oh_ent, H5O_STAB_ID, H5O_NEW_MESG, 0, 1, &stab, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -90,7 +104,7 @@ main(void)
 	H5Eprint(stdout);
 	goto error;
     }
-    if (NULL==H5O_read(&oh_ent, H5O_STAB, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
+    if (NULL==H5O_read(&oh_ent, H5O_STAB_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -112,7 +126,7 @@ main(void)
     TESTING("message modification");
     stab.btree_addr = 33333333;
     stab.heap_addr = 44444444;
-    if (H5O_modify(&oh_ent, H5O_STAB, 0, 0, 1, &stab, H5P_DATASET_XFER_DEFAULT)<0) {
+    if (H5O_modify(&oh_ent, H5O_STAB_ID, 0, 0, 1, &stab, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -122,7 +136,7 @@ main(void)
 	H5Eprint(stdout);
 	goto error;
     }
-    if (NULL==H5O_read(&oh_ent, H5O_STAB, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
+    if (NULL==H5O_read(&oh_ent, H5O_STAB_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -145,7 +159,7 @@ main(void)
     TESTING("duplicate message creation");
     stab.btree_addr = 55555555;
     stab.heap_addr = 66666666;
-    if (H5O_modify(&oh_ent, H5O_STAB, H5O_NEW_MESG, 0, 1, &stab, H5P_DATASET_XFER_DEFAULT)<0) {
+    if (H5O_modify(&oh_ent, H5O_STAB_ID, H5O_NEW_MESG, 0, 1, &stab, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -155,7 +169,7 @@ main(void)
 	H5Eprint(stdout);
 	goto error;
     }
-    if (NULL==H5O_read(&oh_ent, H5O_STAB, 1, &ro, H5P_DATASET_XFER_DEFAULT)) {
+    if (NULL==H5O_read(&oh_ent, H5O_STAB_ID, 1, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -177,7 +191,7 @@ main(void)
     TESTING("duplicate message modification");
     stab.btree_addr = 77777777;
     stab.heap_addr = 88888888;
-    if (H5O_modify(&oh_ent, H5O_STAB, 1, 0, 1, &stab, H5P_DATASET_XFER_DEFAULT)<0) {
+    if (H5O_modify(&oh_ent, H5O_STAB_ID, 1, 0, 1, &stab, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -187,7 +201,7 @@ main(void)
 	H5Eprint(stdout);
 	goto error;
     }
-    if (NULL==H5O_read(&oh_ent, H5O_STAB, 1, &ro, H5P_DATASET_XFER_DEFAULT)) {
+    if (NULL==H5O_read(&oh_ent, H5O_STAB_ID, 1, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -211,7 +225,7 @@ main(void)
     for (i=0; i<40; i++) {
         stab.btree_addr = (i+1)*1000+1;
         stab.heap_addr = (i+1)*1000+2;
-        if (H5O_modify(&oh_ent, H5O_STAB, H5O_NEW_MESG, 0, 1, &stab, H5P_DATASET_XFER_DEFAULT)<0) {
+        if (H5O_modify(&oh_ent, H5O_STAB_ID, H5O_NEW_MESG, 0, 1, &stab, H5P_DATASET_XFER_DEFAULT)<0) {
 	    H5_FAILED();
 	    H5Eprint(stdout);
 	    goto error;
@@ -232,7 +246,7 @@ main(void)
     for (i=0; i<10; i++) {
         stab.btree_addr = (i + 1) * 1000 + 10;
         stab.heap_addr = (i + 1) * 1000 + 20;
-        if (H5O_modify(&oh_ent, H5O_STAB, H5O_NEW_MESG, 0, 1, &stab, H5P_DATASET_XFER_DEFAULT)<0) {
+        if (H5O_modify(&oh_ent, H5O_STAB_ID, H5O_NEW_MESG, 0, 1, &stab, H5P_DATASET_XFER_DEFAULT)<0) {
 	    H5_FAILED();
 	    H5Eprint(stdout);
 	    goto error;
@@ -249,12 +263,12 @@ main(void)
      * Delete all symbol table messages.
      */
     TESTING("message deletion");
-    if (H5O_remove(&oh_ent, H5O_STAB, H5O_ALL, H5P_DATASET_XFER_DEFAULT)<0) {
+    if (H5O_remove(&oh_ent, H5O_STAB_ID, H5O_ALL, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
     }
-    if (H5O_read(&oh_ent, H5O_STAB, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
+    if (H5O_read(&oh_ent, H5O_STAB_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	puts("    H5O_read() should have failed but didn't");
 	H5Eclear();

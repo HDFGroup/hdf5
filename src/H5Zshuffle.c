@@ -46,8 +46,8 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
                    size_t nbytes, size_t *buf_size, void **buf)
 {
     void *dest = NULL;          /* Buffer to deposit [un]shuffled bytes into */
-    unsigned char *_src;        /* Alias for source buffer */
-    unsigned char *_dest;       /* Alias for destination buffer */
+    unsigned char *_src=NULL;   /* Alias for source buffer */
+    unsigned char *_dest=NULL;  /* Alias for destination buffer */
     unsigned bytesoftype;       /* Number of bytes per element */
     size_t numofelements;       /* Number of elements in buffer */
     size_t i,j;                 /* Local index variables */

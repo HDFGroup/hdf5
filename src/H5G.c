@@ -1,8 +1,18 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 /*-------------------------------------------------------------------------
- * Copyright (C) 1997-2002 National Center for Supercomputing Applications
- *			   All rights reserved.
- *
- *-------------------------------------------------------------------------
  *
  * Created:	H5G.c
  *		Jul 18 1997
@@ -1449,7 +1459,7 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
     HDmemset(&tmp_grp_ent,0,sizeof(H5G_entry_t));
 
     /* Get the link value */
-    if (NULL==H5O_read (grp_ent, H5O_STAB, 0, &stab_mesg, dxpl_id))
+    if (NULL==H5O_read (grp_ent, H5O_STAB_ID, 0, &stab_mesg, dxpl_id))
 	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address");
     if (NULL==(clv=H5HL_peek (grp_ent->file, dxpl_id, stab_mesg.heap_addr,
 			      obj_ent->cache.slink.lval_offset)))
@@ -1550,11 +1560,11 @@ H5G_mkroot (H5F_t *f, hid_t dxpl_id, H5G_entry_t *ent)
 	 */
 	if (H5O_open (ent)<0)
 	    HGOTO_ERROR (H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open root group");
-	if (NULL==H5O_read (ent, H5O_STAB, 0, &stab, dxpl_id)) {
+	if (NULL==H5O_read (ent, H5O_STAB_ID, 0, &stab, dxpl_id)) {
 	    H5O_close(ent);
 	    HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "root object is not a group");
 	}
-	H5O_reset (H5O_STAB, &stab);
+	H5O_reset (H5O_STAB_ID, &stab);
     }
 
     /* Create the path names for the root group's entry */
@@ -1678,7 +1688,7 @@ H5G_isa(H5G_entry_t *ent, hid_t dxpl_id)
 
     assert(ent);
 
-    if ((ret_value=H5O_exists(ent, H5O_STAB, 0, dxpl_id))<0)
+    if ((ret_value=H5O_exists(ent, H5O_STAB_ID, 0, dxpl_id))<0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header");
 
 done:
@@ -1781,7 +1791,7 @@ H5G_open_oid(H5G_entry_t *ent, hid_t dxpl_id)
     /* Grab the object header */
     if (H5O_open(&(grp->ent)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to open group");
-    if (NULL==H5O_read (&(grp->ent), H5O_STAB, 0, &mesg, dxpl_id)) {
+    if (NULL==H5O_read (&(grp->ent), H5O_STAB_ID, 0, &mesg, dxpl_id)) {
         H5O_close(&(grp->ent));
         HGOTO_ERROR (H5E_SYM, H5E_CANTOPENOBJ, NULL, "not a group");
     }
@@ -2221,12 +2231,12 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
              * Add the link-value to the local heap for the symbol table which
              * will contain the link.
              */
-            if (NULL==H5O_read (&grp_ent, H5O_STAB, 0, &stab_mesg, dxpl_id))
+            if (NULL==H5O_read (&grp_ent, H5O_STAB_ID, 0, &stab_mesg, dxpl_id))
                 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to determine local heap address");
             if ((size_t)(-1)==(offset=H5HL_insert (grp_ent.file, dxpl_id,
                    stab_mesg.heap_addr, HDstrlen(cur_name)+1, cur_name)))
                 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to write link value to local heap");
-            H5O_reset (H5O_STAB, &stab_mesg);
+            H5O_reset (H5O_STAB_ID, &stab_mesg);
 
             /*
              * Create a symbol table entry for the link.  The object header is
@@ -2362,7 +2372,7 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
     if (statbuf) {
 	if (H5G_CACHED_SLINK==obj_ent.type) {
 	    /* Named object is a symbolic link */
-	    if (NULL==H5O_read (&grp_ent, H5O_STAB, 0, &stab_mesg, dxpl_id) ||
+	    if (NULL==H5O_read (&grp_ent, H5O_STAB_ID, 0, &stab_mesg, dxpl_id) ||
 		NULL==(s=H5HL_peek (grp_ent.file, dxpl_id, stab_mesg.heap_addr, 
 				    obj_ent.cache.slink.lval_offset)))
 		HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to read symbolic link value");
@@ -2383,9 +2393,9 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 #endif
 	    statbuf->nlink = H5O_link (&obj_ent, 0, dxpl_id);
 	    statbuf->type = H5G_LINK;
-	    if (NULL==H5O_read(&obj_ent, H5O_MTIME, 0, &(statbuf->mtime), dxpl_id)) {
+	    if (NULL==H5O_read(&obj_ent, H5O_MTIME_ID, 0, &(statbuf->mtime), dxpl_id)) {
 		H5E_clear();
-                if (NULL==H5O_read(&obj_ent, H5O_MTIME_NEW, 0, &(statbuf->mtime), dxpl_id)) {
+                if (NULL==H5O_read(&obj_ent, H5O_MTIME_NEW_ID, 0, &(statbuf->mtime), dxpl_id)) {
                     H5E_clear();
                     statbuf->mtime = 0;
                 }
@@ -2582,7 +2592,7 @@ H5G_linkval (H5G_entry_t *loc, const char *name, size_t size, char *buf/*out*/, 
      * Get the address of the local heap for the link value and a pointer
      * into that local heap.
      */
-    if (NULL==H5O_read (&grp_ent, H5O_STAB, 0, &stab_mesg, dxpl_id))
+    if (NULL==H5O_read (&grp_ent, H5O_STAB_ID, 0, &stab_mesg, dxpl_id))
 	HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to determine local heap address");
     if (NULL==(s=H5HL_peek (grp_ent.file, dxpl_id, stab_mesg.heap_addr,
 			    obj_ent.cache.slink.lval_offset)))
@@ -2633,15 +2643,15 @@ H5G_set_comment(H5G_entry_t *loc, const char *name, const char *buf, hid_t dxpl_
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
 
     /* Remove the previous comment message if any */
-    if (H5O_remove(&obj_ent, H5O_NAME, 0, dxpl_id)<0)
+    if (H5O_remove(&obj_ent, H5O_NAME_ID, 0, dxpl_id)<0)
         H5E_clear();
 
     /* Add the new message */
     if (buf && *buf) {
 	comment.s = H5MM_xstrdup(buf);
-	if (H5O_modify(&obj_ent, H5O_NAME, H5O_NEW_MESG, 0, 1, &comment, dxpl_id)<0)
+	if (H5O_modify(&obj_ent, H5O_NAME_ID, H5O_NEW_MESG, 0, 1, &comment, dxpl_id)<0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to set comment object header message");
-	H5O_reset(H5O_NAME, &comment);
+	H5O_reset(H5O_NAME_ID, &comment);
     }
 
 done:
@@ -2689,7 +2699,7 @@ H5G_get_comment(H5G_entry_t *loc, const char *name, size_t bufsize, char *buf, h
 
     /* Get the message */
     comment.s = NULL;
-    if (NULL==H5O_read(&obj_ent, H5O_NAME, 0, &comment, dxpl_id)) {
+    if (NULL==H5O_read(&obj_ent, H5O_NAME_ID, 0, &comment, dxpl_id)) {
 	if (buf && bufsize>0)
             buf[0] = '\0';
 	ret_value = 0;
@@ -2697,7 +2707,7 @@ H5G_get_comment(H5G_entry_t *loc, const char *name, size_t bufsize, char *buf, h
         if(buf && bufsize)
 	   HDstrncpy(buf, comment.s, bufsize);
 	ret_value = (int)HDstrlen(comment.s);
-	H5O_reset(H5O_NAME, &comment);
+	H5O_reset(H5O_NAME_ID, &comment);
     }
 
 done:

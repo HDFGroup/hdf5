@@ -1,8 +1,18 @@
-/*
- * Copyright (C) 1997-2001 NCSA
- *		           All rights reserved.
- *
- * Programmer: 	Robb Matzke <matzke@llnl.gov>
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/* Programmer: 	Robb Matzke <matzke@llnl.gov>
  *	       	Wednesday, October  8, 1997
  *
  * Purpose:	Indexed (chunked) I/O functions.  The logical
@@ -983,8 +993,8 @@ H5F_istore_flush_entry(H5F_t *f, hid_t dxpl_id, H5F_rdcc_ent_t *ent, hbool_t res
     /* Reset, but do not free or removed from list */
     if (reset) {
         point_of_no_return = FALSE;
-        ent->layout = H5O_free(H5O_LAYOUT, ent->layout);
-        ent->pline = H5O_free(H5O_PLINE, ent->pline);
+        ent->layout = H5O_free(H5O_LAYOUT_ID, ent->layout);
+        ent->pline = H5O_free(H5O_PLINE_ID, ent->pline);
         if (buf==ent->chunk) buf = NULL;
         if(ent->chunk!=NULL)
             ent->chunk = H5MM_xfree(ent->chunk);
@@ -1002,8 +1012,8 @@ done:
      * list.
      */
     if (ret_value<0 && point_of_no_return) {
-        ent->layout = H5O_free(H5O_LAYOUT, ent->layout);
-        ent->pline = H5O_free(H5O_PLINE, ent->pline);
+        ent->layout = H5O_free(H5O_LAYOUT_ID, ent->layout);
+        ent->pline = H5O_free(H5O_PLINE_ID, ent->pline);
         if(ent->chunk)
             ent->chunk = H5MM_xfree(ent->chunk);
     }
@@ -1049,8 +1059,8 @@ H5F_istore_preempt(H5F_t *f, hid_t dxpl_id, H5F_rdcc_ent_t * ent, hbool_t flush)
     }
     else {
 	/* Reset, but do not free or remove from list */
-	ent->layout = H5O_free(H5O_LAYOUT, ent->layout);
-	ent->pline = H5O_free(H5O_PLINE, ent->pline);
+	ent->layout = H5O_free(H5O_LAYOUT_ID, ent->layout);
+	ent->pline = H5O_free(H5O_PLINE_ID, ent->pline);
 	if(ent->chunk != NULL)
 	    ent->chunk = H5MM_xfree(ent->chunk);
     }
@@ -1483,8 +1493,8 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         ent->dirty = FALSE;
         ent->chunk_size = chunk_size;
         ent->alloc_size = chunk_size;
-        ent->layout = H5O_copy(H5O_LAYOUT, layout, NULL);
-        ent->pline = H5O_copy(H5O_PLINE, pline, NULL);
+        ent->layout = H5O_copy(H5O_LAYOUT_ID, layout, NULL);
+        ent->pline = H5O_copy(H5O_PLINE_ID, pline, NULL);
         for (u=0; u<layout->ndims; u++)
             ent->offset[u] = offset[u];
         ent->rd_count = chunk_size;
@@ -1625,8 +1635,8 @@ H5F_istore_unlock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 
             HDmemset (&x, 0, sizeof x);
             x.dirty = TRUE;
-            x.layout = H5O_copy (H5O_LAYOUT, layout, NULL);
-            x.pline = H5O_copy (H5O_PLINE, pline, NULL);
+            x.layout = H5O_copy (H5O_LAYOUT_ID, layout, NULL);
+            x.pline = H5O_copy (H5O_PLINE_ID, pline, NULL);
             for (u=0, tempchunk_size=1; u<layout->ndims; u++) {
                 x.offset[u] = offset[u];
                 tempchunk_size *= layout->dim[u];

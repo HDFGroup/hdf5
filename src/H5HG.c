@@ -217,8 +217,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5HG_heap_t *
-H5HG_load (H5F_t *f, hid_t dxpl_id, haddr_t addr, const void * UNUSED udata1,
-	   void * UNUSED udata2)
+H5HG_load (H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
+	   void UNUSED * udata2)
 {
     H5HG_heap_t	*heap = NULL;
     H5HG_heap_t	*ret_value = NULL;

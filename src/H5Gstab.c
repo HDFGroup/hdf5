@@ -1,13 +1,23 @@
-/*
- * Copyright (C) 1997-2001 National Center for Supercomputing Applications
- *		           All rights reserved.
- *
- * Programmer: Robb Matzke <matzke@llnl.gov>
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/* Programmer: Robb Matzke <matzke@llnl.gov>
  *	       Friday, September 19, 1997
  *
  */
-#define H5G_PACKAGE
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
 
 #include "H5private.h"
 #include "H5Eprivate.h"
@@ -99,7 +109,7 @@ H5G_stab_create(H5F_t *f, hid_t dxpl_id, size_t init, H5G_entry_t *self/*out*/)
      * Insert the symbol table message into the object header and the symbol
      * table entry.
      */
-    if (H5O_modify(self, H5O_STAB, H5O_NEW_MESG, H5O_FLAG_CONSTANT, 1, &stab, dxpl_id)<0) {
+    if (H5O_modify(self, H5O_STAB_ID, H5O_NEW_MESG, H5O_FLAG_CONSTANT, 1, &stab, dxpl_id)<0) {
 	H5O_close(self);
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message");
     }
@@ -151,7 +161,7 @@ H5G_stab_find(H5G_entry_t *grp_ent, const char *name,
     assert(name && *name);
 
     /* set up the udata */
-    if (NULL == H5O_read(grp_ent, H5O_STAB, 0, &stab, dxpl_id))
+    if (NULL == H5O_read(grp_ent, H5O_STAB_ID, 0, &stab, dxpl_id))
 	HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't read message");
     udata.operation = H5G_OPER_FIND;
     udata.name = name;
@@ -223,7 +233,7 @@ H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent, hi
        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot insert name");
 
     /* initialize data to pass through B-tree */
-    if (NULL == H5O_read(grp_ent, H5O_STAB, 0, &stab, dxpl_id))
+    if (NULL == H5O_read(grp_ent, H5O_STAB_ID, 0, &stab, dxpl_id))
 	HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table");
     udata.operation = H5G_OPER_INSERT;
     udata.name = name;
@@ -269,7 +279,7 @@ H5G_stab_remove(H5G_entry_t *grp_ent, const char *name, hid_t dxpl_id)
     assert(name && *name);
 
     /* initialize data to pass through B-tree */
-    if (NULL==H5O_read(grp_ent, H5O_STAB, 0, &stab, dxpl_id))
+    if (NULL==H5O_read(grp_ent, H5O_STAB_ID, 0, &stab, dxpl_id))
 	HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table");
     udata.operation = H5G_OPER_REMOVE;
     udata.name = name;

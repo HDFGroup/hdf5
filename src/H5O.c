@@ -1,8 +1,18 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 /*-------------------------------------------------------------------------
- * Copyright (C) 1997-2001 National Center for Supercomputing Applications
- *			   All rights reserved.
- *
- *-------------------------------------------------------------------------
  *
  * Created:		H5O.c
  *			Aug  5 1997
@@ -14,7 +24,9 @@
  *
  *-------------------------------------------------------------------------
  */
+
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
 #include "H5private.h"
 #include "H5ACprivate.h"
@@ -24,7 +36,7 @@
 #include "H5Iprivate.h"
 #include "H5MFprivate.h"
 #include "H5MMprivate.h"
-#include "H5Oprivate.h"
+#include "H5Opkg.h"             /* Object header functions                 */
 #include "H5Pprivate.h"
 
 #ifdef H5_HAVE_GETTIMEOFDAY
@@ -40,12 +52,29 @@ static H5O_t *H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata
 		       void *_udata2);
 static herr_t H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh);
 static herr_t H5O_dest(H5F_t *f, H5O_t *oh);
+static herr_t H5O_reset_real(const H5O_class_t *type, void *native);
+static void * H5O_free_real(const H5O_class_t *type, void *mesg);
+static void * H5O_copy_real(const H5O_class_t *type, const void *mesg,
+        void *dst);
+static int H5O_count_real (H5G_entry_t *ent, const H5O_class_t *type,
+        hid_t dxpl_id);
+static htri_t H5O_exists_real(H5G_entry_t *ent, const H5O_class_t *type,
+        int sequence, hid_t dxpl_id);
+static void * H5O_read_real(H5G_entry_t *ent, const H5O_class_t *type,
+        int sequence, void *mesg, hid_t dxpl_id);
 #ifdef NOT_YET
 static herr_t H5O_share(H5F_t *f, hid_t dxpl_id, const H5O_class_t *type, const void *mesg,
 			 H5HG_t *hobj/*out*/);
 #endif /* NOT_YET */
 static unsigned H5O_find_in_ohdr(H5F_t *f, hid_t dxpl_id, haddr_t addr,
 			     const H5O_class_t **type_p, int sequence);
+static int H5O_modify_real(H5G_entry_t *ent, const H5O_class_t *type,
+    int overwrite, unsigned flags, unsigned update_time, const void *mesg,
+    hid_t dxpl_id);
+static int H5O_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
+    const H5O_class_t *type, unsigned flags, const void *mesg);
+static herr_t H5O_remove_real(H5G_entry_t *ent, const H5O_class_t *type,
+    int sequence, hid_t dxpl_id);
 static unsigned H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type,
 		      size_t size);
 static unsigned H5O_alloc_extend_chunk(H5O_t *oh, unsigned chunkno, size_t size);
@@ -423,8 +452,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5O_t *
-H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void * UNUSED _udata1,
-	 void * UNUSED _udata2)
+H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
+	 void UNUSED * _udata2)
 {
     H5O_t	*oh = NULL;
     H5O_t	*ret_value;
@@ -801,9 +830,9 @@ H5O_dest(H5F_t UNUSED *f, H5O_t *oh)
         assert (oh->mesg[i].dirty==0);
 
         if (oh->mesg[i].flags & H5O_FLAG_SHARED)
-            H5O_free(H5O_SHARED, oh->mesg[i].native);
+            H5O_free_real(H5O_SHARED, oh->mesg[i].native);
         else
-            H5O_free(oh->mesg[i].type, oh->mesg[i].native);
+            H5O_free_real(oh->mesg[i].type, oh->mesg[i].native);
     }
     oh->mesg = H5FL_ARR_FREE(H5O_mesg_t,oh->mesg);
 
@@ -828,15 +857,61 @@ H5O_dest(H5F_t UNUSED *f, H5O_t *oh)
  *		Aug 12 1997
  *
  * Modifications:
+ *              Changed to use IDs for types, instead of type objects, then
+ *              call "real" routine.
+ *              Quincey Koziol
+ *		Feb 14 2003
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_reset(const H5O_class_t *type, void *native)
+H5O_reset(hid_t type_id, void *native)
+{
+    const H5O_class_t *type;            /* Actual H5O class type for the ID */
+    herr_t      ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_reset,FAIL);
+
+    /* check args */
+    assert(type_id>=0 && type_id<(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])));
+    type=message_type_g[type_id];    /* map the type ID to the actual type object */
+    assert(type);
+
+    /* Call the "real" reset routine */
+    if((ret_value=H5O_reset_real(type, native))<0)
+	HGOTO_ERROR(H5E_OHDR, H5E_READERROR, FAIL, "unable to reset object header");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5O_reset() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_reset_real
+ *
+ * Purpose:	Some message data structures have internal fields that
+ *		need to be freed.  This function does that if appropriate
+ *		but doesn't free NATIVE.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		matzke@llnl.gov
+ *		Aug 12 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_reset_real(const H5O_class_t *type, void *native)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_reset, FAIL);
+    FUNC_ENTER_NOINIT(H5O_reset_real);
+
+    /* check args */
+    assert(type);
 
     if (native) {
 	if (type->reset) {
@@ -849,7 +924,7 @@ H5O_reset(const H5O_class_t *type, void *native)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5O_reset_real() */
 
 
 /*-------------------------------------------------------------------------
@@ -870,23 +945,64 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5O_free (const H5O_class_t *type, void *mesg)
+H5O_free (hid_t type_id, void *mesg)
+{
+    const H5O_class_t *type;            /* Actual H5O class type for the ID */
+    void * ret_value;                   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_free, NULL);
+
+    /* check args */
+    assert(type_id>=0 && type_id<(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])));
+    type=message_type_g[type_id];    /* map the type ID to the actual type object */
+    assert(type);
+    
+    /* Call the "real" free routine */
+    if((ret_value=H5O_free_real(type, mesg))==NULL)
+	HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to free object header");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5O_free() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_free_real
+ *
+ * Purpose:	Similar to H5O_reset() except it also frees the message
+ *		pointer.
+ *
+ * Return:	Success:	NULL
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, May 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5O_free_real(const H5O_class_t *type, void *mesg)
 {
     void * ret_value=NULL;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_free, NULL);
+    FUNC_ENTER_NOINIT(H5O_free_real);
     
+    /* check args */
+    assert(type);
+
     if (mesg) {
-        H5O_reset (type, mesg);
+        H5O_reset_real(type, mesg);
         if (NULL!=(type->free))
             (type->free)(mesg);
         else
             H5MM_xfree (mesg);
     }
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5O_free_real() */
 
 
 /*-------------------------------------------------------------------------
@@ -903,16 +1019,60 @@ done:
  *              Thursday, May 21, 1998
  *
  * Modifications:
+ *              Changed to use IDs for types, instead of type objects, then
+ *              call "real" routine.
+ *              Quincey Koziol
+ *		Feb 14 2003
  *
  *-------------------------------------------------------------------------
  */
 void *
-H5O_copy (const H5O_class_t *type, const void *mesg, void *dst)
+H5O_copy (hid_t type_id, const void *mesg, void *dst)
 {
-    void	*ret_value = NULL;
+    const H5O_class_t *type;            /* Actual H5O class type for the ID */
+    void	*ret_value;             /* Return value */
     
     FUNC_ENTER_NOAPI(H5O_copy, NULL);
 
+    /* check args */
+    assert(type_id>=0 && type_id<(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])));
+    type=message_type_g[type_id];    /* map the type ID to the actual type object */
+    assert(type);
+
+    /* Call the "real" copy routine */
+    if((ret_value=H5O_copy_real(type, mesg, dst))==NULL)
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy object header message");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5O_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_copy_real
+ *
+ * Purpose:	Copies a message.  If MESG is is the null pointer then a null
+ *		pointer is returned with no error.
+ *
+ * Return:	Success:	Ptr to the new message
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, May 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5O_copy_real (const H5O_class_t *type, const void *mesg, void *dst)
+{
+    void	*ret_value = NULL;
+    
+    FUNC_ENTER_NOINIT(H5O_copy_real);
+
+    /* check args */
     assert (type);
     assert (type->copy);
 
@@ -923,7 +1083,7 @@ H5O_copy (const H5O_class_t *type, const void *mesg, void *dst)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5O_copy_real() */
 
 
 
@@ -1006,18 +1166,64 @@ done:
  *              Tuesday, April 21, 1998
  *
  * Modifications:
+ *              Changed to use IDs for types, instead of type objects, then
+ *              call "real" routine.
+ *              Quincey Koziol
+ *		Feb 14 2003
  *
  *-------------------------------------------------------------------------
  */
 int
-H5O_count (H5G_entry_t *ent, const H5O_class_t *type, hid_t dxpl_id)
+H5O_count (H5G_entry_t *ent, hid_t type_id, hid_t dxpl_id)
+{
+    const H5O_class_t *type;            /* Actual H5O class type for the ID */
+    int	ret_value;                      /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5O_count_real, FAIL);
+
+    /* Check args */
+    assert (ent);
+    assert (ent->file);
+    assert (H5F_addr_defined(ent->header));
+    assert(type_id>=0 && type_id<(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])));
+    type=message_type_g[type_id];    /* map the type ID to the actual type object */
+    assert (type);
+
+    /* Call the "real" count routine */
+    if((ret_value=H5O_count_real(ent, type, dxpl_id))<0)
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTCOUNT, FAIL, "unable to count object header messages");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5O_count() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_count_real
+ *
+ * Purpose:	Counts the number of messages in an object header which are a
+ *		certain type.
+ *
+ * Return:	Success:	Number of messages of specified type.
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, April 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5O_count_real (H5G_entry_t *ent, const H5O_class_t *type, hid_t dxpl_id)
 {
     H5O_t	*oh = NULL;
     int	acc;
     unsigned	u;
     int	ret_value;
     
-    FUNC_ENTER_NOAPI(H5O_count, FAIL);
+    FUNC_ENTER_NOAPI(H5O_count_real, FAIL);
 
     /* Check args */
     assert (ent);
@@ -1039,7 +1245,7 @@ H5O_count (H5G_entry_t *ent, const H5O_class_t *type, hid_t dxpl_id)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5O_count_real() */
 
 
 /*-------------------------------------------------------------------------
@@ -1059,17 +1265,65 @@ done:
  *              Monday, November  2, 1998
  *
  * Modifications:
+ *              Changed to use IDs for types, instead of type objects, then
+ *              call "real" routine.
+ *              Quincey Koziol
+ *		Feb 14 2003
  *
  *-------------------------------------------------------------------------
  */
 htri_t
-H5O_exists(H5G_entry_t *ent, const H5O_class_t *type, int sequence, hid_t dxpl_id)
+H5O_exists(H5G_entry_t *ent, hid_t type_id, int sequence, hid_t dxpl_id)
+{
+    const H5O_class_t *type;            /* Actual H5O class type for the ID */
+    htri_t      ret_value;              /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5O_exists, FAIL);
+
+    assert(ent);
+    assert(ent->file);
+    assert(type_id>=0 && type_id<(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])));
+    type=message_type_g[type_id];    /* map the type ID to the actual type object */
+    assert(type);
+    assert(sequence>=0);
+
+    /* Call the "real" exists routine */
+    if((ret_value=H5O_exists_real(ent, type, sequence, dxpl_id))<0)
+	HGOTO_ERROR(H5E_OHDR, H5E_READERROR, FAIL, "unable to verify object header message");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5O_exists() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_exists_real
+ *
+ * Purpose:	Determines if a particular message exists in an object
+ *		header without trying to decode the message.
+ *
+ * Return:	Success:	FALSE if the message does not exist; TRUE if
+ *				th message exists.
+ *
+ *		Failure:	FAIL if the existence of the message could
+ *				not be determined due to some error such as
+ *				not being able to read the object header.
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, November  2, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5O_exists_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, hid_t dxpl_id)
 {
     H5O_t	*oh=NULL;
     unsigned	u;
     htri_t      ret_value;       /* Return value */
     
-    FUNC_ENTER_NOAPI(H5O_exists, FAIL);
+    FUNC_ENTER_NOINIT(H5O_exists_real);
 
     assert(ent);
     assert(ent->file);
@@ -1093,7 +1347,7 @@ H5O_exists(H5G_entry_t *ent, const H5O_class_t *type, int sequence, hid_t dxpl_i
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5O_exists_real() */
 
 
 /*-------------------------------------------------------------------------
@@ -1118,19 +1372,74 @@ done:
  *		Aug  6 1997
  *
  * Modifications:
+ *              Changed to use IDs for types, instead of type objects, then
+ *              call "real" routine.
+ *              Quincey Koziol
+ *		Feb 14 2003
  *
  *-------------------------------------------------------------------------
  */
 void *
-H5O_read(H5G_entry_t *ent, const H5O_class_t *type, int sequence, void *mesg, hid_t dxpl_id)
+H5O_read(H5G_entry_t *ent, hid_t type_id, int sequence, void *mesg, hid_t dxpl_id)
+{
+    const H5O_class_t *type;            /* Actual H5O class type for the ID */
+    void *ret_value;                    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_read, NULL);
+
+    /* check args */
+    assert(ent);
+    assert(ent->file);
+    assert(H5F_addr_defined(ent->header));
+    assert(type_id>=0 && type_id<(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])));
+    type=message_type_g[type_id];    /* map the type ID to the actual type object */
+    assert(type);
+    assert(sequence >= 0);
+
+    /* Call the "real" read routine */
+    if((ret_value=H5O_read_real(ent, type, sequence, mesg, dxpl_id))==NULL)
+	HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to load object header");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5O_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_read_real
+ *
+ * Purpose:	Reads a message from an object header and returns a pointer
+ *		to it.	The caller will usually supply the memory through
+ *		MESG and the return value will be MESG.	 But if MESG is
+ *		the null pointer, then this function will malloc() memory
+ *		to hold the result and return its pointer instead.
+ *
+ * Return:	Success:	Ptr to message in native format.  The message
+ *				should be freed by calling H5O_reset().  If
+ *				MESG is a null pointer then the caller should
+ *				also call H5MM_xfree() on the return value
+ *				after calling H5O_reset().
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *		matzke@llnl.gov
+ *		Aug  6 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5O_read_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, void *mesg, hid_t dxpl_id)
 {
     H5O_t		*oh = NULL;
-    void		*ret_value = NULL;
     int		idx;
     H5G_cache_t		*cache = NULL;
     H5G_type_t		cache_type;
+    void		*ret_value = NULL;
 
-    FUNC_ENTER_NOAPI(H5O_read, NULL);
+    FUNC_ENTER_NOINIT(H5O_read_real);
 
     /* check args */
     assert(ent);
@@ -1179,7 +1488,7 @@ H5O_read(H5G_entry_t *ent, const H5O_class_t *type, int sequence, void *mesg, hi
 		ret_value = tmp_mesg;
 	    }
 	} else {
-	    ret_value = H5O_read (&(shared->u.ent), type, 0, mesg, dxpl_id);
+	    ret_value = H5O_read_real(&(shared->u.ent), type, 0, mesg, dxpl_id);
 	    if (type->set_share &&
                     (type->set_share)(ent->file, ret_value, shared)<0)
 		HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, NULL, "unable to set sharing information");
@@ -1200,7 +1509,7 @@ done:
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, NULL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5O_read_real() */
 
 
 /*-------------------------------------------------------------------------
@@ -1321,21 +1630,95 @@ done:
  *	constant it can never become non-constant.  Constant messages cannot
  *	be modified.
  *
+ *      Changed to use IDs for types, instead of type objects, then
+ *      call "real" routine.
+ *      Quincey Koziol
+ *	Feb 14 2003
+ *
  *-------------------------------------------------------------------------
  */
 int
-H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, int overwrite,
+H5O_modify(H5G_entry_t *ent, hid_t type_id, int overwrite,
+   unsigned flags, unsigned update_time, const void *mesg, hid_t dxpl_id)
+{
+    const H5O_class_t *type;            /* Actual H5O class type for the ID */
+    int	ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_modify, FAIL);
+
+    /* check args */
+    assert(ent);
+    assert(ent->file);
+    assert(H5F_addr_defined(ent->header));
+    assert(type_id>=0 && type_id<(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])));
+    type=message_type_g[type_id];    /* map the type ID to the actual type object */
+    assert(type);
+    assert(mesg);
+    assert (0==(flags & ~H5O_FLAG_BITS));
+
+    /* Call the "real" modify routine */
+    if((ret_value= H5O_modify_real(ent, type, overwrite, flags, update_time, mesg, dxpl_id))<0)
+	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to write object header");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5O_modify() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_modify_real
+ *
+ * Purpose:	Modifies an existing message or creates a new message.
+ *		The cache fields in that symbol table entry ENT are *not*
+ *		updated, you must do that separately because they often
+ *		depend on multiple object header messages.  Besides, we
+ *		don't know which messages will be constant and which will
+ *		not.
+ *
+ *		The OVERWRITE argument is either a sequence number of a
+ *		message to overwrite (usually zero) or the constant
+ *		H5O_NEW_MESG (-1) to indicate that a new message is to
+ *		be created.  If the message to overwrite doesn't exist then
+ *		it is created (but only if it can be inserted so its sequence
+ *		number is OVERWRITE; that is, you can create a message with
+ *		the sequence number 5 if there is no message with sequence
+ *		number 4).
+ *
+ *              The UPDATE_TIME argument is a boolean that allows the caller
+ *              to skip updating the modification time.  This is useful when
+ *              several calls to H5O_modify will be made in a sequence.
+ *
+ * Return:	Success:	The sequence number of the message that
+ *				was modified or created.
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *		matzke@llnl.gov
+ *		Aug  6 1997
+ *
+ * Modifications:
+ *
+ *	Robb Matzke, 7 Jan 1998
+ *	Handles constant vs non-constant messages.  Once a message is made
+ *	constant it can never become non-constant.  Constant messages cannot
+ *	be modified.
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5O_modify_real(H5G_entry_t *ent, const H5O_class_t *type, int overwrite,
    unsigned flags, unsigned update_time, const void *mesg, hid_t dxpl_id)
 {
     H5O_t		*oh=NULL;
     int		        sequence;
     unsigned		idx;            /* Index of message to modify */
     H5O_mesg_t         *idx_msg;        /* Pointer to message to modify */
-    int		        ret_value = FAIL;
     size_t		size=0;
     H5O_shared_t	sh_mesg;
+    int		        ret_value;
 
-    FUNC_ENTER_NOAPI(H5O_modify, FAIL);
+    FUNC_ENTER_NOAPI(H5O_modify_real, FAIL);
 
     /* check args */
     assert(ent);
@@ -1433,7 +1816,7 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, int overwrite,
         HDmemcpy(idx_msg->native,&sh_mesg,sizeof(H5O_shared_t));
     } else {
 	if (idx_msg->native)
-	    H5O_reset (idx_msg->type, idx_msg->native);
+	    H5O_reset_real(idx_msg->type, idx_msg->native);
 	idx_msg->native = (type->copy) (mesg, idx_msg->native);
 	if (NULL == idx_msg->native)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to copy message to object header");
@@ -1455,7 +1838,7 @@ done:
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
     
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5O_modify_real() */
 
 
 /*-------------------------------------------------------------------------
@@ -1564,20 +1947,77 @@ done:
  *		Dec 31 2002
  *
  * Modifications:
+ *              Changed to use IDs for types, instead of type objects, then
+ *              call "real" routine.
+ *              Quincey Koziol
+ *		Feb 14 2003
  *
  *-------------------------------------------------------------------------
  */
 int
-H5O_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_class_t *type, 
+H5O_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hid_t type_id, unsigned flags,
+    const void *mesg)
+{
+    const H5O_class_t *type;            /* Actual H5O class type for the ID */
+    int	ret_value;                      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_append,FAIL);
+
+    /* check args */
+    assert(f);
+    assert(oh);
+    assert(type_id>=0 && type_id<(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])));
+    type=message_type_g[type_id];    /* map the type ID to the actual type object */
+    assert(type);
+    assert(0==(flags & ~H5O_FLAG_BITS));
+    assert(mesg);
+
+    /* Call the "real" append routine */
+    if((ret_value=H5O_append_real( f, dxpl_id, oh, type, flags, mesg))<0)
+	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to append to object header");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5O_append() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_append_real
+ *
+ * Purpose:	Simplified version of H5O_modify, used when creating a new
+ *              object header message (usually during object creation)
+ *
+ *              Modifies an existing message or creates a new message.
+ *		The cache fields in that symbol table entry ENT are *not*
+ *		updated, you must do that separately because they often
+ *		depend on multiple object header messages.  Besides, we
+ *		don't know which messages will be constant and which will
+ *		not.
+ *
+ * Return:	Success:	The sequence number of the message that
+ *				was created.
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Dec 31 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5O_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_class_t *type, 
     unsigned flags, const void *mesg)
 {
     unsigned		idx;            /* Index of message to modify */
     H5O_mesg_t         *idx_msg;        /* Pointer to message to modify */
-    int		        ret_value = FAIL;
     size_t		size=0;
     H5O_shared_t	sh_mesg;
+    int		        ret_value = FAIL;
 
-    FUNC_ENTER_NOAPI(H5O_append, FAIL);
+    FUNC_ENTER_NOINIT(H5O_append_real);
 
     /* check args */
     assert(f);
@@ -1640,7 +2080,7 @@ H5O_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_class_t *type,
         HDmemcpy(idx_msg->native,&sh_mesg,sizeof(H5O_shared_t));
     } else {
 	if (idx_msg->native)
-	    H5O_reset (idx_msg->type, idx_msg->native);
+	    H5O_reset_real(idx_msg->type, idx_msg->native);
 	idx_msg->native = (type->copy) (mesg, idx_msg->native);
 	if (NULL == idx_msg->native)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to copy message to object header");
@@ -1655,7 +2095,7 @@ H5O_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_class_t *type,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5O_append() */
+} /* end H5O_append_real () */
 
 
 /*-------------------------------------------------------------------------
@@ -1901,18 +2341,73 @@ done:
  *	Robb Matzke, 7 Jan 1998
  *	Does not remove constant messages.
  *
+ *      Changed to use IDs for types, instead of type objects, then
+ *      call "real" routine.
+ *      Quincey Koziol
+ *	Feb 14 2003
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_remove(H5G_entry_t *ent, const H5O_class_t *type, int sequence, hid_t dxpl_id)
+H5O_remove(H5G_entry_t *ent, hid_t type_id, int sequence, hid_t dxpl_id)
+{
+    const H5O_class_t *type;            /* Actual H5O class type for the ID */
+    herr_t      ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_remove, FAIL);
+
+    /* check args */
+    assert(ent);
+    assert(ent->file);
+    assert(H5F_addr_defined(ent->header));
+    assert(type_id>=0 && type_id<(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])));
+    type=message_type_g[type_id];    /* map the type ID to the actual type object */
+    assert(type);
+
+    /* Call the "real" remove routine */
+    if((ret_value=H5O_remove_real(ent, type, sequence, dxpl_id))<0)
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to remove object header message");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5O_remove() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_remove_real
+ *
+ * Purpose:	Removes the specified message from the object header.
+ *		If sequence is H5O_ALL (-1) then all messages of the
+ *		specified type are removed.  Removing a message causes
+ *		the sequence numbers to change for subsequent messages of
+ *		the same type.
+ *
+ *		No attempt is made to join adjacent free areas of the
+ *		object header into a single larger free area.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		matzke@llnl.gov
+ *		Aug 28 1997
+ *
+ * Modifications:
+ *
+ *	Robb Matzke, 7 Jan 1998
+ *	Does not remove constant messages.
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_remove_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, hid_t dxpl_id)
 {
     H5O_t		*oh = NULL;
     int		seq, nfailed = 0;
     unsigned		u;
-    herr_t      ret_value=SUCCEED;       /* Return value */
     H5O_shared_t	*sh_mesg = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_remove, FAIL);
+    FUNC_ENTER_NOINIT(H5O_remove_real);
 
     /* check args */
     assert(ent);
@@ -1959,7 +2454,7 @@ H5O_remove(H5G_entry_t *ent, const H5O_class_t *type, int sequence, hid_t dxpl_i
 	    /* change message type to nil and zero it */
 	    oh->mesg[u].type = H5O_NULL;
 	    HDmemset(oh->mesg[u].raw, 0, oh->mesg[u].raw_size);
-	    oh->mesg[u].native = H5O_free (type, oh->mesg[u].native);
+	    oh->mesg[u].native = H5O_free_real(type, oh->mesg[u].native);
 	    oh->mesg[u].dirty = TRUE;
 	    oh->cache_info.dirty = TRUE;
 	    H5O_touch_oh(ent->file, oh, FALSE);
@@ -1975,7 +2470,7 @@ done:
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5O_remove_real() */
 
 
 /*-------------------------------------------------------------------------
@@ -2482,6 +2977,91 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5O_raw_size
+ *
+ * Purpose:	Call the 'raw_size' method for a
+ *              particular class of object header.
+ *
+ * Return:	Size of message on success, 0 on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Feb 13 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+size_t
+H5O_raw_size(hid_t type_id, H5F_t *f, const void *mesg)
+{
+    const H5O_class_t *type;            /* Actual H5O class type for the ID */
+    size_t      ret_value;       /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5O_raw_size,0);
+
+    /* Check args */
+    assert(type_id>=0 && type_id<(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])));
+    type=message_type_g[type_id];    /* map the type ID to the actual type object */
+    assert (type);
+    assert (type->raw_size);
+    assert (f);
+    assert (mesg);
+
+    /* Compute the raw data size for the mesg */
+    if ((ret_value = (type->raw_size)(f, mesg))==0)
+        HGOTO_ERROR (H5E_OHDR, H5E_CANTCOUNT, 0, "unable to determine size of message");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5O_raw_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_debug_id
+ *
+ * Purpose:	Act as a proxy for calling the 'debug' method for a
+ *              particular class of object header.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Feb 13 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_debug_id(hid_t type_id, H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream, int indent, int fwidth)
+{
+    const H5O_class_t *type;            /* Actual H5O class type for the ID */
+    herr_t      ret_value;       /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5O_debug_id,FAIL);
+
+    /* Check args */
+    assert(type_id>=0 && type_id<(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])));
+    type=message_type_g[type_id];    /* map the type ID to the actual type object */
+    assert(type);
+    assert(type->debug);
+    assert(f);
+    assert(mesg);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
+
+    /* Call the debug method in the class */
+    if ((ret_value = (type->debug)(f, dxpl_id, mesg, stream, indent, fwidth))<0)
+        HGOTO_ERROR (H5E_OHDR, H5E_INTERNAL, FAIL, "unable to debug message");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5O_debug_id() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_debug
  *
  * Purpose:	Prints debugging info about an object header.
@@ -2641,13 +3221,13 @@ H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
 		mesg = (oh->mesg[i].type->decode)(f, dxpl_id, p, oh->mesg[i].native);
 		H5MM_xfree (p);
 	    } else {
-		mesg = H5O_read (&(shared->u.ent), oh->mesg[i].type, 0, NULL, dxpl_id);
+		mesg = H5O_read_real(&(shared->u.ent), oh->mesg[i].type, 0, NULL, dxpl_id);
 	    }
 	    if (oh->mesg[i].type->debug) {
 		(oh->mesg[i].type->debug)(f, dxpl_id, mesg, stream, indent+3,
 					  MAX (0, fwidth-3));
 	    }
-	    H5O_free (oh->mesg[i].type, mesg);
+	    H5O_free_real(oh->mesg[i].type, mesg);
 	}
     }
     sequence = H5MM_xfree(sequence);

@@ -871,13 +871,12 @@
 ./src/H5Odtype.c
 ./src/H5Oefl.c
 ./src/H5Ofill.c
-./src/H5Ofphdf5.c
 ./src/H5Olayout.c
 ./src/H5Omtime.c
 ./src/H5Oname.c
 ./src/H5Onull.c
+./src/H5Opkg.h
 ./src/H5Opline.c
-./src/H5Oplist.c
 ./src/H5Oprivate.h
 ./src/H5Opublic.h
 ./src/H5Osdspace.c

@@ -116,7 +116,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_point_iter_release (H5S_sel_iter_t * UNUSED sel_iter)
+H5S_point_iter_release (H5S_sel_iter_t UNUSED * sel_iter)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 

@@ -196,8 +196,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5HL_t *
-H5HL_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void * UNUSED udata1,
-	  void * UNUSED udata2)
+H5HL_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
+	  void UNUSED * udata2)
 {
     uint8_t		hdr[52];
     size_t              sizeof_hdr;     /* Cache H5HL header size for file */
