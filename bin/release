@@ -149,11 +149,11 @@ sub release (@) {
    # our current working directory.
    $_ = cwd;
    my ($parent,$root) = m%(.*)/(.*)$% or die "cannot split directory";
-   if ($root ne "hdf-$ver" && ! -e "../hdf-$ver") {
-      symlink $root, "../hdf-$ver" or die "cannot create link";
+   if ($root ne "hdf5-$ver" && ! -e "../hdf5-$ver") {
+      symlink $root, "../hdf5-$ver" or die "cannot create link";
       $created_symlink = 1;
    }
-   my $name = "$root/$releases/hdf-$ver";
+   my $name = "$root/$releases/hdf5-$ver";
 
    # Build the releases.
    @types = ("gzip") unless @types;
@@ -161,7 +161,7 @@ sub release (@) {
    $_ = `cat MANIFEST`;
    s/^\.\///mg;
    @filelist = ("Makefile", split /\s*\n/, $_);
-   $filelist = join " ", map {"hdf-$ver/$_"} @filelist;
+   $filelist = join " ", map {"hdf5-$ver/$_"} @filelist;
 
    chdir ".." or die;
    for (@types) {
@@ -192,7 +192,7 @@ sub release (@) {
    chdir $root or die;
 
    # Remove the temporary symlink we created above.
-   unlink "../hdf-$ver" if $created_symlink;
+   unlink "../hdf5-$ver" if $created_symlink;
    
 
    # Update version info
