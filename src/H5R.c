@@ -156,20 +156,17 @@ H5R_create(void *_ref, H5G_entry_t *loc, const char *name, H5R_type_t ref_type, 
     switch(ref_type) {
         case H5R_OBJECT:
         {
-            haddr_t addr;
             hobj_ref_t *ref=(hobj_ref_t *)_ref; /* Get pointer to correct type of reference struct */
             uint8_t *p;       /* Pointer to OID to store */
 
             /* Set information for reference */
-            p=(uint8_t *)ref->oid;
-            H5F_addr_pack(loc->file,&addr,&sb.objno[0]);
-            H5F_addr_encode(loc->file,&p,addr);
+            p=(uint8_t *)ref;
+            H5F_addr_encode(loc->file,&p,sb.objno);
             break;
         }
 
         case H5R_DATASET_REGION:
         {
-            haddr_t addr;
             H5HG_t hobjid;      /* Heap object ID */
             hdset_reg_ref_t *ref=(hdset_reg_ref_t *)_ref; /* Get pointer to correct type of reference struct */
             hssize_t buf_size;  /* Size of buffer needed to serialize selection */
@@ -211,8 +208,7 @@ H5R_create(void *_ref, H5G_entry_t *loc, const char *name, H5R_type_t ref_type, 
 
             /* Serialize information for dataset OID */
             p=(uint8_t *)buf;
-            H5F_addr_pack(loc->file,&addr,&sb.objno[0]);
-            H5F_addr_encode(loc->file,&p,addr);
+            H5F_addr_encode(loc->file,&p,sb.objno);
 
             /* Serialize the selection */
             if ((*space->select.serialize)(space,p) < 0)
@@ -360,7 +356,7 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref)
              *  open a dataset for now
              */
             /* Get the object oid */
-            p=(uint8_t *)ref->oid;
+            p=(uint8_t *)ref;
             H5F_addr_decode(ent.file,(const uint8_t **)&p,&(ent.header));
         } /* end case */
         break;
@@ -670,7 +666,7 @@ H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref)
             hobj_ref_t *ref=(hobj_ref_t *)_ref; /* Only object references currently supported */
 
             /* Get the object oid */
-            p=(uint8_t *)ref->oid;
+            p=(uint8_t *)ref;
             H5F_addr_decode(ent.file,(const uint8_t **)&p,&(ent.header));
         } /* end case */
         break;

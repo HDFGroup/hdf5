@@ -50,10 +50,7 @@ typedef struct {
  */
 #define H5R_OBJ_REF_BUF_SIZE    sizeof(haddr_t)
 /* Object reference structure for user's code */
-typedef struct {
-    unsigned char oid[H5R_OBJ_REF_BUF_SIZE];    /* Buffer to store OID of object referenced */
-                                /* Needs to be large enough to store largest haddr_t in a worst case machine (ie. 8 bytes currently) */
-} hobj_ref_t;
+typedef haddr_t hobj_ref_t; /* Needs to be large enough to store largest haddr_t in a worst case machine (ie. 8 bytes currently) */
 
 #define H5R_DSET_REG_REF_BUF_SIZE    (sizeof(haddr_t)+sizeof(int))
 /* Dataset Region reference structure for user's code */
