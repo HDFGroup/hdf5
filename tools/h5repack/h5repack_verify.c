@@ -57,7 +57,7 @@ int has_filter(hid_t dcpl_id,
  {
   cd_nelmts = NELMTS(cd_values);
   filtn = H5Pget_filter(dcpl_id, 
-   i, 
+   (unsigned)i, 
    &filt_flags, 
    &cd_nelmts,
    cd_values, 

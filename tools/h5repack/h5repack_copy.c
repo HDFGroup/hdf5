@@ -73,10 +73,6 @@ int copy_objects(const char* fnamein,
  if (h5trav_gettable(fidin,travt)<0)
   goto out;
 
-#if defined (H5_REPACK_DEBUG)
- h5trav_printtable(travt);
-#endif
-
 /*-------------------------------------------------------------------------
  * do the copy
  *-------------------------------------------------------------------------
@@ -221,6 +217,7 @@ int do_copy_objects(hid_t fidin,
     goto error;
    if ( (rank=H5Sget_simple_extent_ndims(space_id))<0)
     goto error;
+   HDmemset(dims, 0, sizeof dims);
    if ( H5Sget_simple_extent_dims(space_id,dims,NULL)<0)
     goto error;
    nelmts=1;
@@ -282,15 +279,24 @@ int do_copy_objects(hid_t fidin,
      */
     if (filter_this(travt->objs[i].name,options,&obj))
     {
-     /* filters require CHUNK layout; if we do not have one define a default */
-     if (obj.chunk.rank==0)
+     if (rank)
      {
-      obj.chunk.rank=rank;
-      for (j=0; j<rank; j++) 
-       obj.chunk.chunk_lengths[j] = dims[j];
+      /* filters require CHUNK layout; if we do not have one define a default */
+      if (obj.chunk.rank==0)
+      {
+       obj.chunk.rank=rank;
+       for (j=0; j<rank; j++) 
+        obj.chunk.chunk_lengths[j] = dims[j];
+      }
+      if (apply_filters(dcpl_id,H5Tget_size(mtype_id),options,&obj)<0)
+       continue;
      }
-     if (apply_filters(dcpl_id,H5Tget_size(mtype_id),options,&obj)<0)
-      continue;
+     else
+     {
+      if (options->verbose)
+       printf("Warning: Filter could not be applied to <%s>\n",
+        travt->objs[i].name);
+     }
     }
     
     /*-------------------------------------------------------------------------

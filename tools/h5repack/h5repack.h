@@ -19,7 +19,7 @@
 #include "hdf5.h"
 #include "h5trav.h"
 
-#if 0
+#if 1
 #define H5_REPACK_DEBUG
 #endif
 

@@ -90,6 +90,11 @@ int main(int argc, char **argv)
  /* pack it */
  h5repack(infile,outfile,&options);
 
+#if defined(H5_REPACK_DEBUG)
+ if (h5repack_verify(outfile,&options)<=0)
+ printf("Warning: Output file does not have some of the requested filters\n");
+#endif
+
  /* free tables */
  h5repack_end(&options);
 
