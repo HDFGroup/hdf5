@@ -47,8 +47,7 @@
 
 /* Define the code template for insertions for the "OP" in the H5SL_FIND macro */
 #define H5SL_FIND_INSERT_FOUND(SLIST,X,UPDATE,I,ITEM)                   \
-        X->item=ITEM;                                                   \
-        HGOTO_DONE(SUCCEED);
+        HGOTO_DONE(FAIL);
 
 /* Define the code template for removals for the "OP" in the H5SL_FIND macro */
 #define H5SL_FIND_REMOVE_FOUND(SLIST,X,UPDATE,I,ITEM)                   \
@@ -381,8 +380,7 @@ H5SL_count(H5SL_t *slist)
     Insert element into a skip list.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
-    Inserting an item with the same key as an existing object replaces
-    the existing object's item pointer with the new item pointer.
+    Inserting an item with the same key as an existing object fails.
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/

@@ -158,19 +158,13 @@ typedef herr_t (*H5C_write_permitted_func_t)(H5F_t *f,
  * structure H5C_cache_entry_t
  *
  * Instances of the H5C_cache_entry_t structure are used to store cache 
- * entries in a hash table and sometimes in a threaded balanced binary tree.  
- * See H5TB.c for the particulars of the tree.
+ * entries in a hash table and sometimes in a skip list.  
+ * See H5SL.c for the particulars of the skip list.
  *
  * In typical application, this structure is the first field in a 
  * structure to be cached.  For historical reasons, the external module
  * is responsible for managing the is_dirty field.  All other fields are
  * managed by the cache.
- *
- * Note that our current implementation of a threaded balanced binary tree 
- * will occasionaly change the node a particular datum is associated with.  
- * Thus this structure does not have a back pointer to its tree node.  If we
- * ever modify the threaded balanced binary tree code to fix this, a back 
- * pointer would save us a few tree traversals.
  *
  * The fields of this structure are discussed individually below:
  *
@@ -214,10 +208,10 @@ typedef herr_t (*H5C_write_permitted_func_t)(H5F_t *f,
  *		Note that protected entries are removed from the LRU lists
  *		and inserted on the protected list.
  *
- * in_tree:	Boolean flag indicating whether the entry is in the threaded
- *		balanced binary tree.  As a general rule, entries are placed
- *		in the tree when they are marked dirty.  However they may
- *		remain in the tree after being flushed.
+ * in_slist:	Boolean flag indicating whether the entry is in the skip list
+ *		As a general rule, entries are placed in the list when they
+ *              are marked dirty.  However they may remain in the list after
+ *              being flushed.
  *
  *
  * Fields supporting the hash table:
@@ -322,7 +316,7 @@ typedef struct H5C_cache_entry_t
     const H5C_class_t *	type;
     hbool_t		is_dirty;
     hbool_t		is_protected;
-    hbool_t		in_tree;
+    hbool_t		in_slist;
 
     /* fields supporting the hash table: */
 

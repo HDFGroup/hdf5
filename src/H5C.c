@@ -33,6 +33,10 @@
  *
  * Modifications:
  *
+ *              QAK - 11/27/2004
+ *              Switched over to using skip list routines instead of TBBT
+ *              routines.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -65,9 +69,9 @@
  *
  *	 - Create MPI type for dirty objects when flushing in parallel.
  *
- *	 - Fix TBBT routines so deletions don't move nodes in memory and
- *         point directly to the TBBT node from the LRU list, eliminating
- *         binary tree lookups when evicting objects from the cache.
+ *	 - Now that TBBT routines aren't used, fix nodes in memory to
+ *         point directly to the skip list node from the LRU list, eliminating
+ *         skip list lookups when evicting objects from the cache.
  *
  *	Tests:
  *
@@ -93,7 +97,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"         /* Property lists                       */
-#include "H5TBprivate.h"        /* Threaded, Balanced, Binary Trees     */
+#include "H5SLprivate.h"	/* Skip lists				*/
 
 
 /****************************************************************************
@@ -422,10 +426,10 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 	    (cache_ptr)->max_index_len = (cache_ptr)->index_len;     \
         if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size ) \
 	    (cache_ptr)->max_index_size = (cache_ptr)->index_size;   \
-        if ( (cache_ptr)->tree_len > (cache_ptr)->max_tree_len )     \
-	    (cache_ptr)->max_tree_len = (cache_ptr)->tree_len;       \
-        if ( (cache_ptr)->tree_size > (cache_ptr)->max_tree_size )   \
-	    (cache_ptr)->max_tree_size = (cache_ptr)->tree_size;     \
+        if ( (cache_ptr)->slist_len > (cache_ptr)->max_slist_len )   \
+	    (cache_ptr)->max_slist_len = (cache_ptr)->slist_len;     \
+        if ( (cache_ptr)->slist_size > (cache_ptr)->max_slist_size ) \
+	    (cache_ptr)->max_slist_size = (cache_ptr)->slist_size;   \
         if ( (entry_ptr)->size >                                     \
              ((cache_ptr)->max_size)[(entry_ptr)->type->id] ) {      \
             ((cache_ptr)->max_size)[(entry_ptr)->type->id]           \
@@ -433,10 +437,10 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
         }
 
 #define H5C__UPDATE_STATS_FOR_UNPROTECT(cache_ptr)                   \
-        if ( (cache_ptr)->tree_len > (cache_ptr)->max_tree_len )     \
-	    (cache_ptr)->max_tree_len = (cache_ptr)->tree_len;       \
-        if ( (cache_ptr)->tree_size > (cache_ptr)->max_tree_size )   \
-	    (cache_ptr)->max_tree_size = (cache_ptr)->tree_size; 
+        if ( (cache_ptr)->slist_len > (cache_ptr)->max_slist_len )   \
+	    (cache_ptr)->max_slist_len = (cache_ptr)->slist_len;     \
+        if ( (cache_ptr)->slist_size > (cache_ptr)->max_slist_size ) \
+	    (cache_ptr)->max_slist_size = (cache_ptr)->slist_size; 
 
 #define H5C__UPDATE_STATS_FOR_RENAME(cache_ptr, entry_ptr) \
 	(((cache_ptr)->renames)[(entry_ptr)->type->id])++;
@@ -750,7 +754,7 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
 
 /**************************************************************************
  *
- * Tree insertion and deletion macros:  
+ * Skip list insertion and deletion macros:  
  *
  * These used to be functions, but I converted them to macros to avoid some
  * function call overhead.
@@ -759,10 +763,10 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
 
 /*-------------------------------------------------------------------------
  *
- * Macro:	H5C__INSERT_ENTRY_IN_TREE
+ * Macro:	H5C__INSERT_ENTRY_IN_SLIST
  *
  * Purpose:     Insert the specified instance of H5C_cache_entry_t into 
- *		the tree in the specified instance of H5C_t.  Update
+ *		the skip list in the specified instance of H5C_t.  Update
  *		the associated length and size fields.
  *
  * Return:      N/A
@@ -786,45 +790,42 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  *		wringing a little more speed out of the cache.
  *
  *		Note that we don't bother to check if the entry is already
- *		in the tree -- if it is, H5TB_dins() will fail.
+ *		in the tree -- if it is, H5SL_insert() will fail.
+ *
+ *		QAK -- 11/27/04
+ *		Switched over to using skip list routines.
  *
  *-------------------------------------------------------------------------
  */
 
-#define H5C__INSERT_ENTRY_IN_TREE(cache_ptr, entry_ptr)                        \
+#define H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr)                       \
 {                                                                              \
-    H5TB_NODE *	loc_node_ptr = NULL;                                           \
-                                                                               \
     HDassert( (cache_ptr) );                                                   \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                        \
     HDassert( (entry_ptr) );                                                   \
     HDassert( (entry_ptr)->size > 0 );                                         \
     HDassert( H5F_addr_defined((entry_ptr)->addr) );                           \
-    HDassert( !((entry_ptr)->in_tree) );                                       \
+    HDassert( !((entry_ptr)->in_slist) );                                      \
                                                                                \
-    loc_node_ptr = H5TB_dins((cache_ptr)->tree_ptr, (void *)(entry_ptr), NULL);\
+    if ( H5SL_insert((cache_ptr)->slist_ptr, &entry_ptr->addr, entry_ptr) < 0 ) \
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Can't insert entry in skip list") \
                                                                                \
-    if ( loc_node_ptr == NULL ) {                                              \
+    (entry_ptr)->in_slist = TRUE;                                              \
+    (cache_ptr)->slist_len++;                                                  \
+    (cache_ptr)->slist_size += (entry_ptr)->size;                              \
                                                                                \
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't insert entry in tree") \
-    }                                                                          \
+    HDassert( (cache_ptr)->slist_len > 0 );                                    \
+    HDassert( (cache_ptr)->slist_size > 0 );                                   \
                                                                                \
-    (entry_ptr)->in_tree = TRUE;                                               \
-    (cache_ptr)->tree_len++;                                                   \
-    (cache_ptr)->tree_size += (entry_ptr)->size;                               \
-                                                                               \
-    HDassert( (cache_ptr)->tree_len > 0 );                                     \
-    HDassert( (cache_ptr)->tree_size > 0 );                                    \
-                                                                               \
-} /* H5C__INSERT_ENTRY_IN_TREE */
+} /* H5C__INSERT_ENTRY_IN_SLIST */
 
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5C__REMOVE_ENTRY_FROM_TREE
+ * Function:    H5C__REMOVE_ENTRY_FROM_SLIST
  *
  * Purpose:     Remove the specified instance of H5C_cache_entry_t from the 
- *		index tree in the specified instance of H5C_t.  Update
+ *		index skip list in the specified instance of H5C_t.  Update
  *		the associated length and size fields.
  *
  * Return:      N/A
@@ -841,37 +842,34 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  *		to the macro H5C__REMOVE_ENTRY_FROM_TREE in the hopes of
  *		wringing a little more performance out of the cache.
  *
+ *		QAK -- 11/27/04
+ *		Switched over to using skip list routines.
+ *
  *-------------------------------------------------------------------------
  */
 
-#define H5C__REMOVE_ENTRY_FROM_TREE(cache_ptr, entry_ptr, node_ptr) \
+#define H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr)          \
 {                                                                   \
     HDassert( (cache_ptr) );                                        \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );             \
     HDassert( (entry_ptr) );                                        \
     HDassert( !((entry_ptr)->is_protected) );                       \
-    HDassert( (node_ptr) );                                         \
-    HDassert( (node_ptr)->data == (entry_ptr) );                    \
     HDassert( (entry_ptr)->size > 0 );                              \
-    HDassert( (entry_ptr)->in_tree );                               \
-    HDassert( (cache_ptr)->tree_ptr );                              \
-    HDassert( (cache_ptr)->tree_ptr->root );                        \
+    HDassert( (entry_ptr)->in_slist );                              \
+    HDassert( (cache_ptr)->slist_ptr );                             \
                                                                     \
-    if ( H5TB_rem(&((cache_ptr)->tree_ptr->root), (node_ptr), NULL) \
-         != (entry_ptr) ) {                                         \
+    if ( H5SL_remove((cache_ptr)->slist_ptr, &(entry_ptr)->addr)    \
+         != (entry_ptr) )                                           \
                                                                     \
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,                    \
-                    "Can't delete entry from tree.")                \
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL,                  \
+                    "Can't delete entry from skip list.")           \
                                                                     \
-    } else {                                                        \
-                                                                    \
-        HDassert( (cache_ptr)->tree_len > 0 );                      \
-        (cache_ptr)->tree_len--;                                    \
-        HDassert( (cache_ptr)->tree_size >= (entry_ptr)->size );    \
-        (cache_ptr)->tree_size -= (entry_ptr)->size;                \
-        (entry_ptr)->in_tree = FALSE;                               \
-    }                                                               \
-} /* H5C__REMOVE_ENTRY_FROM_TREE */
+    HDassert( (cache_ptr)->slist_len > 0 );                         \
+    (cache_ptr)->slist_len--;                                       \
+    HDassert( (cache_ptr)->slist_size >= (entry_ptr)->size );       \
+    (cache_ptr)->slist_size -= (entry_ptr)->size;                   \
+    (entry_ptr)->in_slist = FALSE;                                  \
+} /* H5C__REMOVE_ENTRY_FROM_SLIST */
 
 
 /**************************************************************************
@@ -1589,6 +1587,11 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  *
  *						JRM - 7/19/04
  *
+ * Note that the dirty entries are now stored in a skip list, instead of
+ * the threaded, balanced binary tree (TBBT).
+ *
+ *						QAK - 11/27/04
+ *
  *           *********************************************
  *
  * WARNING:  A copy of H5C_t is in tst/cache.c (under the name "local_H5C_t"
@@ -1680,23 +1683,23 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  *
  *
  * When we flush the cache, we need to write entries out in increasing
- * address order.  An instance of TBBT is used to store dirty entries in
+ * address order.  An instance of a skip list is used to store dirty entries in
  * sorted order.  Whether it is cheaper to sort the dirty entries as needed,
- * or to maintain the tree is an open question.  At a guess, it depends
+ * or to maintain the list is an open question.  At a guess, it depends
  * on how frequently the cache is flushed.  We will see how it goes.
  *
- * For now at least, I will not remove dirty entries from the tree as they
+ * For now at least, I will not remove dirty entries from the list as they
  * are flushed.
  *
- * tree_len:    Number of entries currently in the threaded binary B-tree
+ * slist_len:    Number of entries currently in the skip list
  *              used to maintain a sorted list of dirty entries in the 
  *		cache.
  *
- * tree_size:   Number of bytes of cache entries currently stored in the
- *              threaded binary B-tree used to maintain a sorted list of
+ * slist_size:   Number of bytes of cache entries currently stored in the
+ *              skip list used to maintain a sorted list of
  *		dirty entries in the cache.
  *
- * tree_ptr:	pointer to the instance of H5TB_TREE used maintain a sorted
+ * slist_ptr:	pointer to the instance of H5SL_t used maintain a sorted
  *		list of dirty entries in the cache.  This sorted list has
  *		two uses:
  *
@@ -1913,10 +1916,10 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  * max_index_size:  Largest value attained by the index_size field in the
  *              current epoch.
  *
- * max_tree_len:  Largest value attained by the tree_len field in the
+ * max_slist_len:  Largest value attained by the slist_len field in the
  *              current epoch.
  *
- * max_tree_size:  Largest value attained by the tree_size field in the
+ * max_slist_size:  Largest value attained by the slist_size field in the
  *              current epoch.
  *
  * max_pl_len:  Largest value attained by the pl_len field in the
@@ -1997,9 +2000,9 @@ struct H5C_t
     H5C_cache_entry_t *		(index[H5C__HASH_TABLE_LEN]);
 
 
-    int32_t                     tree_len;
-    size_t                      tree_size;
-    H5TB_TREE *                 tree_ptr;
+    int32_t                     slist_len;
+    size_t                      slist_size;
+    H5SL_t *                    slist_ptr;
 
     int32_t                     pl_len;
     size_t                      pl_size;
@@ -2042,8 +2045,8 @@ struct H5C_t
     int32_t                     max_index_len;
     size_t                      max_index_size;
 
-    int32_t                     max_tree_len;
-    size_t                      max_tree_size;
+    int32_t                     max_slist_len;
+    size_t                      max_slist_size;
 
     int32_t                     max_pl_len;
     size_t                      max_pl_size;
@@ -2084,9 +2087,8 @@ static herr_t H5C_flush_single_entry(H5F_t *             f,
                                      const H5C_class_t * type_ptr,
                                      haddr_t             addr,
                                      unsigned            flags,
-                                     H5TB_NODE *         tgt_node_ptr,
                                      hbool_t *           first_flush_ptr,
-                                     hbool_t    del_entry_from_tree_on_destroy);
+                                     hbool_t    del_entry_from_slist_on_destroy);
 
 static void * H5C_load_entry(H5F_t *             f,
                              hid_t               dxpl_id,
@@ -2167,10 +2169,10 @@ H5C_create(size_t		      max_cache_size,
                     "memory allocation failed")
     }
 
-    if ( (cache_ptr->tree_ptr = H5TB_fast_dmake(H5TB_FAST_HADDR_COMPARE)) 
+    if ( (cache_ptr->slist_ptr = H5SL_create(H5SL_TYPE_HADDR,0.5,16)) 
          == NULL ) {
 
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, NULL, "can't create TBBT.")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, NULL, "can't create skip list.")
     }
 
     /* If we get this far, we should succeed.  Go ahead and initialize all
@@ -2190,8 +2192,8 @@ H5C_create(size_t		      max_cache_size,
     cache_ptr->index_len		= 0;
     cache_ptr->index_size		= (size_t)0;
 
-    cache_ptr->tree_len			= 0;
-    cache_ptr->tree_size		= (size_t)0;
+    cache_ptr->slist_len			= 0;
+    cache_ptr->slist_size		= (size_t)0;
 
     for ( i = 0; i < H5C__HASH_TABLE_LEN; i++ )
     {
@@ -2232,13 +2234,8 @@ done:
 
         if ( cache_ptr != NULL ) {
 
-            if ( cache_ptr->tree_ptr != NULL ) {
-
-                /* the index tree should be empty, so we can pass in
-                 * NULL for the fd & fk parameters.
-                 */
-                H5TB_dfree(cache_ptr->tree_ptr, NULL, NULL);
-            }
+            if ( cache_ptr->slist_ptr != NULL )
+                H5SL_close(cache_ptr->slist_ptr);
 
             cache_ptr->magic = 0;
             H5FL_FREE(H5C_t, cache_ptr);
@@ -2299,13 +2296,10 @@ H5C_dest(H5F_t * f,
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     }
 
-    if ( cache_ptr->tree_ptr != NULL ) {
+    if ( cache_ptr->slist_ptr != NULL ) {
 
-        /* the index tree should be empty, so we can pass in
-         * NULL for the fd & fk parameters.
-         */
-        H5TB_dfree(cache_ptr->tree_ptr, NULL, NULL);
-        cache_ptr->tree_ptr = NULL;
+        H5SL_close(cache_ptr->slist_ptr);
+        cache_ptr->slist_ptr = NULL;
     }
 
     cache_ptr->magic = 0;
@@ -2355,13 +2349,10 @@ H5C_dest_empty(H5C_t * cache_ptr)
     }
 
 
-    if ( cache_ptr->tree_ptr != NULL ) {
+    if ( cache_ptr->slist_ptr != NULL ) {
 
-        /* the tree should be empty, so we can pass in
-         * NULL for the fd & fk parameters.
-         */
-        H5TB_dfree(cache_ptr->tree_ptr, NULL, NULL);
-        cache_ptr->tree_ptr = NULL;
+        H5SL_close(cache_ptr->slist_ptr);
+        cache_ptr->slist_ptr = NULL;
     }
 
     cache_ptr->magic = 0;
@@ -2418,11 +2409,11 @@ H5C_flush_cache(H5F_t *  f,
     hbool_t		first_flush = TRUE;
     int32_t		protected_entries = 0;
     int32_t		i;
-    H5TB_NODE * 	node_ptr;
+    H5SL_node_t * 	node_ptr;
     H5C_cache_entry_t *	entry_ptr;
 #if H5C_DO_SANITY_CHECKS
-    int32_t		actual_tree_len = 0;
-    size_t              actual_tree_size = 0;
+    int32_t		actual_slist_len = 0;
+    size_t              actual_slist_size = 0;
 #endif /* H5C_DO_SANITY_CHECKS */
 
     FUNC_ENTER_NOAPI(H5C_flush_cache, FAIL)
@@ -2430,29 +2421,28 @@ H5C_flush_cache(H5F_t *  f,
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
     HDassert( cache_ptr->skip_file_checks || f );
-    HDassert( cache_ptr->tree_ptr );
+    HDassert( cache_ptr->slist_ptr );
 
-    if ( cache_ptr->tree_ptr->root == NULL ) {
+    if ( cache_ptr->slist_len == 0 ) {
 
         node_ptr = NULL;
-        HDassert( cache_ptr->tree_len == 0 );
-        HDassert( cache_ptr->tree_size == 0 );
+        HDassert( cache_ptr->slist_size == 0 );
 
     } else {
 
-        node_ptr = H5TB_first(cache_ptr->tree_ptr->root);
+        node_ptr = H5SL_first(cache_ptr->slist_ptr);
     }
 
     while ( node_ptr != NULL )
     {
-        entry_ptr = (H5C_cache_entry_t *)(node_ptr->data);
+        entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
 
         HDassert( entry_ptr != NULL );
-        HDassert( entry_ptr->in_tree );
+        HDassert( entry_ptr->in_slist );
 
 #if H5C_DO_SANITY_CHECKS
-        actual_tree_len++;
-        actual_tree_size += entry_ptr->size;
+        actual_slist_len++;
+        actual_slist_size += entry_ptr->size;
 #endif /* H5C_DO_SANITY_CHECKS */
 
         if ( entry_ptr->is_protected ) {
@@ -2471,7 +2461,6 @@ H5C_flush_cache(H5F_t *  f,
                                             NULL, 
                                             entry_ptr->addr, 
                                             flags, 
-                                            node_ptr, 
                                             &first_flush, 
                                             FALSE);
             if ( status < 0 ) {
@@ -2484,23 +2473,31 @@ H5C_flush_cache(H5F_t *  f,
             }
         }
 
-        node_ptr = H5TB_next(node_ptr);
+        node_ptr = H5SL_next(node_ptr);
 
     } /* while */
 
 #if H5C_DO_SANITY_CHECKS
-    HDassert( actual_tree_len == cache_ptr->tree_len );
-    HDassert( actual_tree_size == cache_ptr->tree_size );
+    HDassert( actual_slist_len == cache_ptr->slist_len );
+    HDassert( actual_slist_size == cache_ptr->slist_size );
 #endif /* H5C_DO_SANITY_CHECKS */
 
     if ( destroy ) {
 
-        /* don't pass in any key or data free functions, as all
-         * unprotected entries should have already been destroyed.
-         */
-        H5TB_free(&(cache_ptr->tree_ptr->root), NULL, NULL);
-        cache_ptr->tree_len = 0;
-        cache_ptr->tree_size = 0;
+        if(cache_ptr->slist_ptr) {
+
+            /* XXX: Replace this with call to H5SL_free() when its implemented... */
+            H5SL_close(cache_ptr->slist_ptr);
+
+            /* XXX: ...and remove this call */
+            if ( (cache_ptr->slist_ptr = H5SL_create(H5SL_TYPE_HADDR,0.5,16)) 
+                 == NULL ) {
+
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create skip list.")
+            }
+        }
+        cache_ptr->slist_len = 0;
+        cache_ptr->slist_size = 0;
 
         /* Since we are doing a destroy, we must make a pass through
          * the hash table and flush all entries that remain.  Note that
@@ -2521,7 +2518,7 @@ H5C_flush_cache(H5F_t *  f,
                     
                     H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr)
 
-                    if ( !entry_ptr->in_tree ) {
+                    if ( !entry_ptr->in_slist ) {
 
 	                protected_entries++;
                         HDassert( !(entry_ptr->is_dirty) );
@@ -2529,7 +2526,7 @@ H5C_flush_cache(H5F_t *  f,
                 } else {
 
                     HDassert( !(entry_ptr->is_dirty) );
-                    HDassert( !(entry_ptr->in_tree) );
+                    HDassert( !(entry_ptr->in_slist) );
 
                     status = H5C_flush_single_entry(f, 
                                                     primary_dxpl_id, 
@@ -2538,7 +2535,6 @@ H5C_flush_cache(H5F_t *  f,
                                                     NULL, 
                                                     entry_ptr->addr, 
                                                     flags, 
-                                                    NULL, 
                                                     &first_flush, 
                                                     FALSE);
                     if ( status < 0 ) {
@@ -2567,13 +2563,13 @@ H5C_flush_cache(H5F_t *  f,
 
             while ( entry_ptr != NULL )
             {
-                entry_ptr->in_tree = FALSE;
+                entry_ptr->in_slist = FALSE;
 
                 H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, FAIL)
 
                 if ( entry_ptr->is_dirty ) {
 
-                    H5C__INSERT_ENTRY_IN_TREE(cache_ptr, entry_ptr)
+                    H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr)
                 }
                 entry_ptr = entry_ptr->next;
             }
@@ -2666,7 +2662,7 @@ H5C_insert_entry(H5F_t * 	     f,
 
     HDassert( entry_ptr->size < H5C_MAX_ENTRY_SIZE ); 
 
-    entry_ptr->in_tree = FALSE;
+    entry_ptr->in_slist = FALSE;
 
     entry_ptr->ht_next = NULL;
     entry_ptr->ht_prev = NULL;
@@ -2771,7 +2767,7 @@ H5C_insert_entry(H5F_t * 	     f,
 
     if ( entry_ptr->is_dirty ) {
 
-        H5C__INSERT_ENTRY_IN_TREE(cache_ptr, entry_ptr)
+        H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr)
     }
 
     H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, FAIL)
@@ -2813,10 +2809,8 @@ H5C_rename_entry(H5F_t *	     f,
 	         haddr_t 	     new_addr)
 {
     herr_t		ret_value = SUCCEED;      /* Return value */
-    H5TB_NODE *		old_node_ptr = NULL;
     H5C_cache_entry_t *	entry_ptr = NULL;
     H5C_cache_entry_t *	test_entry_ptr = NULL;
-    H5C_cache_entry_t	search_target;
 
     FUNC_ENTER_NOAPI(H5C_rename_entry, FAIL)
 
@@ -2830,30 +2824,14 @@ H5C_rename_entry(H5F_t *	     f,
 
     H5C__SEARCH_INDEX(cache_ptr, old_addr, entry_ptr, FAIL)
 
-    if ( ( entry_ptr == NULL ) || ( entry_ptr->type != type ) ) {
+    if ( ( entry_ptr == NULL ) || ( entry_ptr->type != type ) )
 
         /* the old item doesn't exist in the cache, so we are done. */
         HGOTO_DONE(SUCCEED)
 
-    } else {
-
-        HDassert( entry_ptr->addr == old_addr );
-        HDassert( entry_ptr->type == type );
-        HDassert( !(entry_ptr->is_protected) );
-
-        if ( entry_ptr->in_tree ) {
-
-            HDassert( cache_ptr->tree_ptr );
-            search_target.addr = old_addr;
-
-            old_node_ptr = H5TB_dfind(cache_ptr->tree_ptr, 
-                                      (void *)(&search_target), 
-                                      NULL);
-
-            HDassert( old_node_ptr != NULL );
-            HDassert( old_node_ptr->key == (void *)entry_ptr );
-        }
-    }
+    HDassert( entry_ptr->addr == old_addr );
+    HDassert( entry_ptr->type == type );
+    HDassert( !(entry_ptr->is_protected) );
 
     H5C__SEARCH_INDEX(cache_ptr, new_addr, test_entry_ptr, FAIL)
 
@@ -2872,7 +2850,7 @@ H5C_rename_entry(H5F_t *	     f,
     }
 
     /* If we get this far, we have work to do.  Remove *entry_ptr from
-     * the hash table (and tree if necessary), change its address to the 
+     * the hash table (and skip list if necessary), change its address to the 
      * new address, and then re-insert.
      *
      * Update the replacement policy for a hit to avoid an eviction before
@@ -2883,9 +2861,11 @@ H5C_rename_entry(H5F_t *	     f,
      */
     H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr)
 
-    if ( old_node_ptr ) {
+    if ( entry_ptr->in_slist ) {
 
-        H5C__REMOVE_ENTRY_FROM_TREE(cache_ptr, entry_ptr, old_node_ptr)
+        HDassert( cache_ptr->slist_ptr );
+
+        H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr)
     }
 
     entry_ptr->addr = new_addr;
@@ -2894,7 +2874,7 @@ H5C_rename_entry(H5F_t *	     f,
 
     if ( entry_ptr->is_dirty ) {
 
-        H5C__INSERT_ENTRY_IN_TREE(cache_ptr, entry_ptr)
+        H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr)
     }
 
     H5C__UPDATE_RP_FOR_RENAME(cache_ptr, entry_ptr, FAIL)
@@ -3058,7 +3038,7 @@ H5C_protect(H5F_t *	       f,
         }
 
         /* Insert the entry in the hash table.  It can't be dirty yet, so 
-         * we don't even check to see if it should go in the tree.
+         * we don't even check to see if it should go in the skip list.
          */
         H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, NULL)
 
@@ -3133,8 +3113,8 @@ done:
  *
  *		JRM - 7/21/04
  *		Updated the function for the addition of the hash table.
- *		In particular, we now add dirty entries to the tree if
- *		they aren't in the tree already.
+ *		In particular, we now add dirty entries to the skip list if
+ *		they aren't in the list already.
  *
  *-------------------------------------------------------------------------
  */
@@ -3178,13 +3158,13 @@ H5C_unprotect(H5F_t *		  f,
 
     entry_ptr->is_protected = FALSE;    
 
-    /* add the entry to the tree if it is dirty, and it isn't already in
-     * the tree.
+    /* add the entry to the skip list if it is dirty, and it isn't already in
+     * the list.
      */
 
-    if ( ( entry_ptr->is_dirty ) && ( ! (entry_ptr->in_tree) ) ) {
+    if ( ( entry_ptr->is_dirty ) && ( ! (entry_ptr->in_slist) ) ) {
 
-        H5C__INSERT_ENTRY_IN_TREE(cache_ptr, entry_ptr)
+        H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr)
     }
 
     /* this implementation of the "deleted" option is a bit inefficient, as
@@ -3227,7 +3207,6 @@ H5C_unprotect(H5F_t *		  f,
                                     type, 
                                     addr, 
                                     (H5F_FLUSH_CLEAR_ONLY|H5F_FLUSH_INVALIDATE),
-                                    NULL, 
                                     &dummy_first_flush, 
                                     TRUE) < 0 ) {
 
@@ -3382,11 +3361,11 @@ H5C_stats(H5C_t * cache_ptr,
               (long)(cache_ptr->max_index_len));
 
     HDfprintf(stdout, 
-              "  current (max) tree size / length   = %ld (%ld) / %ld (%ld)\n",
-              (long)(cache_ptr->tree_size),
-              (long)(cache_ptr->max_tree_size),
-              (long)(cache_ptr->tree_len),
-              (long)(cache_ptr->max_tree_len));
+              "  current (max) skip list size / length   = %ld (%ld) / %ld (%ld)\n",
+              (long)(cache_ptr->slist_size),
+              (long)(cache_ptr->max_slist_size),
+              (long)(cache_ptr->slist_len),
+              (long)(cache_ptr->max_slist_len));
 
     HDfprintf(stdout, 
               "  current (max) PL size / length     = %ld (%ld) / %ld (%ld)\n",
@@ -3559,8 +3538,8 @@ H5C_stats__reset(H5C_t * cache_ptr)
     cache_ptr->max_index_len			= 0;
     cache_ptr->max_index_size			= (size_t)0;
 
-    cache_ptr->max_tree_len			= 0;
-    cache_ptr->max_tree_size			= (size_t)0;
+    cache_ptr->max_slist_len			= 0;
+    cache_ptr->max_slist_size			= (size_t)0;
 
     cache_ptr->max_pl_len			= 0;
     cache_ptr->max_pl_size			= (size_t)0;
@@ -3682,6 +3661,9 @@ done:
  *		JRM -- 7/21/04
  *		Updated function for the addition of the hash table.
  *
+ *		QAK -- 11/26/04
+ *		Updated function for the switch from TBBTs to skip lists.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3692,17 +3674,14 @@ H5C_flush_single_entry(H5F_t *		   f,
                        const H5C_class_t * type_ptr, 
                        haddr_t		   addr, 
                        unsigned		   flags,
-                       H5TB_NODE *	   tgt_node_ptr,
                        hbool_t *	   first_flush_ptr,
-                       hbool_t		   del_entry_from_tree_on_destroy)
+                       hbool_t		   del_entry_from_slist_on_destroy)
 {
     hbool_t		destroy = ( (flags & H5F_FLUSH_INVALIDATE) != 0 );
     hbool_t		clear_only = ( (flags & H5F_FLUSH_CLEAR_ONLY) != 0);  
     herr_t		ret_value = SUCCEED;      /* Return value */
     herr_t		status;
-    H5TB_NODE *		node_ptr;
     H5C_cache_entry_t *	entry_ptr = NULL;
-    H5C_cache_entry_t	search_target;
 
     FUNC_ENTER_NOAPI_NOINIT(H5C_flush_single_entry)
 
@@ -3715,37 +3694,17 @@ H5C_flush_single_entry(H5F_t *		   f,
     /* attempt to find the target entry in the hash table */
     H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL)
 
-    /* If tgt_node_ptr is NULL, look up the target entry in the tree. */
-
-    if ( tgt_node_ptr == NULL ) {
-
-        HDassert( cache_ptr->tree_ptr );
-        search_target.addr = addr;
-
-        node_ptr = H5TB_dfind(cache_ptr->tree_ptr, 
-                              (void *)&search_target, 
-                              NULL);
-
-    } else {
-
-        node_ptr = tgt_node_ptr;
-    }
-
 #if H5C_DO_SANITY_CHECKS
-    if ( node_ptr != NULL ) {
+    if ( entry_ptr->in_slist ) {
 
-        if ( ( entry_ptr == NULL ) ||
-             ( entry_ptr != (H5C_cache_entry_t *)(node_ptr->data) ) ||
-             ( ! (entry_ptr->in_tree) ) ||
-             ( entry_ptr->addr != addr ) ||
-             ( node_ptr->data != node_ptr->key ) ) {
+        if ( ( entry_ptr->addr != addr ) ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                        "Hash table and tree out of sync.")
+                        "Hash table and skip list out of sync.")
         }
     } else if ( entry_ptr != NULL ) {
 
-        if ( ( entry_ptr->in_tree ) ||
+        if ( ( entry_ptr->in_slist ) ||
              ( entry_ptr->is_dirty ) ||
              ( entry_ptr->addr != addr ) ) {
 
@@ -3820,9 +3779,9 @@ H5C_flush_single_entry(H5F_t *		   f,
         }
 
         /* Always remove the entry from the hash table on a destroy.  On a 
-         * flush with destroy, it is cheaper to discard the tree all at once
+         * flush with destroy, it is cheaper to discard the skip list all at once
          * rather than remove the entries one by one, so we only delete from
-         * the tree if requested.
+         * the list if requested.
          *
          * We must do deletions now as the callback routines will free the 
          * entry if destroy is true.
@@ -3831,9 +3790,9 @@ H5C_flush_single_entry(H5F_t *		   f,
 
             H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr)
 
-            if ( ( node_ptr ) && ( del_entry_from_tree_on_destroy ) ) {
+            if ( ( entry_ptr->in_slist ) && ( del_entry_from_slist_on_destroy ) ) {
 
-                H5C__REMOVE_ENTRY_FROM_TREE(cache_ptr, entry_ptr, node_ptr)
+                H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr)
             }
         }
 
@@ -3948,7 +3907,7 @@ H5C_load_entry(H5F_t *             f,
     entry_ptr->addr = addr;
     entry_ptr->type = type;
     entry_ptr->is_protected = FALSE;
-    entry_ptr->in_tree = FALSE;
+    entry_ptr->in_slist = FALSE;
 
     if ( (type->size)(f, thing, &(entry_ptr->size)) < 0 ) {
 
@@ -4069,7 +4028,6 @@ H5C_make_space_in_cache(H5F_t *	f,
                                                 entry_ptr->type, 
                                                 entry_ptr->addr, 
                                                 (unsigned)0, 
-                                                NULL, 
                                                 &first_flush, 
                                                 FALSE);
             } else {
@@ -4081,7 +4039,6 @@ H5C_make_space_in_cache(H5F_t *	f,
                                                 entry_ptr->type, 
                                                 entry_ptr->addr, 
                                                 H5F_FLUSH_INVALIDATE,
-                                                NULL, 
                                                 &first_flush, 
                                                 TRUE);
             }
@@ -4107,7 +4064,7 @@ H5C_make_space_in_cache(H5F_t *	f,
         {
             HDassert( ! (entry_ptr->is_protected) );
             HDassert( entry_ptr->is_dirty );
-            HDassert( entry_ptr->in_tree );
+            HDassert( entry_ptr->in_slist );
 
             prev_ptr = entry_ptr->aux_prev;
 
@@ -4118,7 +4075,6 @@ H5C_make_space_in_cache(H5F_t *	f,
                                             entry_ptr->type, 
                                             entry_ptr->addr, 
                                             (unsigned)0, 
-                                            NULL, 
                                             &first_flush, 
                                             FALSE);
 
@@ -4162,7 +4118,6 @@ H5C_make_space_in_cache(H5F_t *	f,
                                             entry_ptr->type, 
                                             entry_ptr->addr, 
                                             H5F_FLUSH_INVALIDATE,
-                                            NULL, 
                                             &first_flush, 
                                             TRUE);
 
