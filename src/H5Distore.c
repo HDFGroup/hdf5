@@ -1821,9 +1821,7 @@ H5D_istore_readvv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache, hid_t dxp
 {
     H5D_istore_ud1_t udata;		/*B-tree pass-through	*/
     haddr_t	        chunk_addr;     /* Chunk address on disk */
-#ifndef NDEBUG
     size_t		u;              /* Local index variables */
-#endif
     ssize_t             ret_value;      /* Return value */
     
     FUNC_ENTER_NOAPI(H5D_istore_readvv, FAIL);
@@ -1885,6 +1883,86 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
         uint8_t         *chunk;         /* Pointer to cached chunk in memory */
         unsigned        idx_hint=0;     /* Cache index hint      */
         ssize_t         naccessed;      /* Number of bytes accessed in chunk */
+
+        /* If the chunk address is not defined, check if the fill value is
+         * undefined also.  If both situations hold, don't bother copying
+         * values to the destination buffer, since they will just be
+         * garbage.
+         *
+         * Ideally, this will eventually be checked at a higher level and
+         * the entire I/O operation on the chunk will be skipped.  -QAK
+         */
+        if(!H5F_addr_defined(chunk_addr)) {
+            const H5O_fill_t *fill=&(dset->dcpl_cache.fill);    /* Fill value info */
+            H5D_fill_time_t fill_time=dset->dcpl_cache.fill_time;  /* Fill time */
+            H5D_fill_value_t	fill_status;
+            H5D_rdcc_t		*rdcc = &(dset->cache.chunk);/*raw data chunk cache*/
+            hbool_t		found = FALSE;		/*already in cache?	*/
+
+            /* Check if the chunk is in the cache (but hasn't been written to disk yet) */
+            if (rdcc->nslots>0) {
+                unsigned idx=H5D_HASH(dset,store->chunk.index); /* Cache entry index */
+                H5D_rdcc_ent_t	*ent = rdcc->slot[idx]; /* Cache entry */
+                
+                /* Potential match... */
+                if (ent) {
+                    for (u=0, found=TRUE; u<dset->layout.u.chunk.ndims; u++) {
+                        if (store->chunk.offset[u]!=ent->offset[u]) {
+                            found = FALSE;
+                            break;
+                        } /* end if */
+                    } /* end for */
+                } /* end if */
+            } /* end if */
+
+            /* If the chunk is in the cache, then it must have valid data */
+            if(!found) {
+                /* Check if the fill value is defined */
+                if (H5P_is_fill_value_defined(fill, &fill_status) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't tell if fill value defined");
+
+                /* If we are never to return fill values, or if we would return them
+                 * but they aren't set, process the entire set of I/O vectors and
+                 * get out now.
+                 */
+                if(fill_time==H5D_FILL_TIME_NEVER ||
+                        (fill_time==H5D_FILL_TIME_IFSET && fill_status!=H5D_FILL_VALUE_USER_DEFINED)) {
+                    size_t size;                /* Size of sequence in bytes */
+                    size_t v;                   /* Local index variable */
+                    ssize_t bytes_processed=0;  /* Eventual return value */
+
+                    /* Work through all the sequences */
+                    for(u=*mem_curr_seq, v=*chunk_curr_seq; u<mem_max_nseq && v<chunk_max_nseq; ) {
+                        /* Choose smallest buffer to write */
+                        if(chunk_len_arr[v]<mem_len_arr[u])
+                            size=chunk_len_arr[v];
+                        else
+                            size=mem_len_arr[u];
+
+                        /* Update source information */
+                        chunk_len_arr[v]-=size;
+                        chunk_offset_arr[v]+=size;
+                        if(chunk_len_arr[v]==0)
+                            v++;
+
+                        /* Update destination information */
+                        mem_len_arr[u]-=size;
+                        mem_offset_arr[u]+=size;
+                        if(mem_len_arr[u]==0)
+                            u++;
+
+                        /* Increment number of bytes copied */
+                        bytes_processed+=(ssize_t)size;
+                    } /* end for */
+
+                    /* Update current sequence vectors */
+                    *mem_curr_seq=u;
+                    *chunk_curr_seq=v;
+
+                    HGOTO_DONE(bytes_processed);
+                } /* end if */
+            } /* end if */
+        } /* end if */
 
         /*
          * Lock the chunk, copy from application to chunk, then unlock the
