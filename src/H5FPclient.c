@@ -669,10 +669,9 @@ done:
  * Modifications:
  */
 herr_t
-H5FP_request_free(H5FD_t *file, H5FD_mem_t mem_type, haddr_t addr,
-                  hsize_t size, unsigned *req_id, H5FP_status_t *status)
+H5FP_request_free(H5FD_t *file, unsigned *req_id, H5FP_status_t *status)
 {
-    H5FP_reply_t    sap_reply;
+    H5FP_alloc_t    sap_alloc;
     H5FP_request_t  req;
     MPI_Status      mpi_status;
     int             mrc;
@@ -687,13 +686,10 @@ H5FP_request_free(H5FD_t *file, H5FD_mem_t mem_type, haddr_t addr,
 
     HDmemset(&req, 0, sizeof(req));
 
-    req.req_type = H5FP_REQ_ALLOC;
+    req.req_type = H5FP_REQ_FREE;
     req.req_id = H5FP_gen_request_id();
     req.file_id = H5FD_fphdf5_file_id(file);
     req.proc_rank = H5FD_fphdf5_mpi_rank(file);
-    req.mem_type = mem_type;
-    req.addr = addr;
-    req.meta_block_size = size; /* use this field as the size to free */
 
     if ((mrc = MPI_Send(&req, 1, H5FP_request, (int)H5FP_sap_rank,
                         H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS)
@@ -701,13 +697,19 @@ H5FP_request_free(H5FD_t *file, H5FD_mem_t mem_type, haddr_t addr,
 
     HDmemset(&mpi_status, 0, sizeof(mpi_status));
 
-    if ((mrc = MPI_Recv(&sap_reply, 1, H5FP_reply, (int)H5FP_sap_rank,
-                        H5FP_TAG_REPLY, H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
+    if ((mrc = MPI_Recv(&sap_alloc, 1, H5FP_alloc, (int)H5FP_sap_rank,
+                        H5FP_TAG_ALLOC, H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
 
-    if (sap_reply.status != H5FP_STATUS_OK)
+    if (sap_alloc.status != H5FP_STATUS_OK)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCHANGE, FAIL, "can't free space on server");
 
+    if ((mrc = MPI_Bcast(&sap_alloc, 1, H5FP_alloc, (int)H5FP_capt_barrier_rank,
+                         H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mrc);
+
+    /* Set the EOA for all processes. This doesn't fail. */
+    file->cls->set_eoa(file, sap_alloc.eoa);
     *status = H5FP_STATUS_OK;
 
 done:

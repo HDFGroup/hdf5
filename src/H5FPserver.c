@@ -161,6 +161,7 @@ static herr_t   H5FP_sap_handle_write_request(H5FP_request_t *req,
 static herr_t   H5FP_sap_handle_flush_request(H5FP_request_t *req);
 static herr_t   H5FP_sap_handle_close_request(H5FP_request_t *req);
 static herr_t   H5FP_sap_handle_alloc_request(H5FP_request_t *req);
+static herr_t   H5FP_sap_handle_free_request(H5FP_request_t *req);
 
 /*
  *===----------------------------------------------------------------------===
@@ -232,6 +233,9 @@ H5FP_sap_receive_loop(void)
             break;
         case H5FP_REQ_ALLOC:
             hrc = H5FP_sap_handle_alloc_request(&req);
+            break;
+        case H5FP_REQ_FREE:
+            hrc = H5FP_sap_handle_free_request(&req);
             break;
         case H5FP_REQ_STOP:
             hrc = SUCCEED;
@@ -1444,13 +1448,17 @@ H5FP_sap_handle_close_request(H5FP_request_t *req)
         if (MPI_Comm_size(H5FP_SAP_COMM, &comm_size) != MPI_SUCCESS)
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_size failed");
 
-        if (++info->closing == comm_size - 1)
-            /* all processes have closed the file - remove it from list */
+        if (++info->closing == comm_size - 1) {
+            /* Free the freelist -- this call never fails */
+            H5FD_free_freelist((H5FD_t*)&info->file);
+
+            /* All processes have closed the file - remove it from list */
             if (H5FP_remove_file_id_from_list(req->file_id) != SUCCEED) {
                 exit_state = H5FP_STATUS_BAD_FILE_ID;
                 HGOTO_ERROR(H5E_FPHDF5, H5E_NOTFOUND, FAIL,
                             "cannot remove file ID from list");
             }
+        }
     }
 
 done:
@@ -1476,12 +1484,12 @@ H5FP_sap_handle_alloc_request(H5FP_request_t *req)
 
     FUNC_ENTER_NOINIT(H5FP_sap_handle_alloc_request);
 
-    if ((info = H5FP_find_file_info(req->file_id)) != NULL) {
-        sap_alloc.req_id = req->req_id;
-        sap_alloc.file_id = info->file_id;
-        sap_alloc.status = H5FP_STATUS_OK;
-        sap_alloc.mem_type = req->mem_type;
+    sap_alloc.req_id = req->req_id;
+    sap_alloc.file_id = info->file_id;
+    sap_alloc.status = H5FP_STATUS_OK;
+    sap_alloc.mem_type = req->mem_type;
 
+    if ((info = H5FP_find_file_info(req->file_id)) != NULL) {
         /*
          * Try allocating from the free-list that is kept on the server
          * first. If that fails, then call the specified allocation
@@ -1497,19 +1505,94 @@ H5FP_sap_handle_alloc_request(H5FP_request_t *req)
          * Whatta pain.
          */
         if ((sap_alloc.addr = H5FD_alloc((H5FD_t*)&info->file, req->mem_type, H5P_DEFAULT,
-                                         req->meta_block_size)) == HADDR_UNDEF)
+                                         req->meta_block_size)) == HADDR_UNDEF) {
+            sap_alloc.status = H5FP_STATUS_CANT_ALLOC;
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
                         "SAP unable to allocate file memory");
+        }
 
         /* Get the EOA from the file. This call doesn't fail. */
         sap_alloc.eoa = ((H5FD_t*)&info->file)->cls->get_eoa((H5FD_t*)&info->file);
-
-        if ((mrc = MPI_Send(&sap_alloc, 1, H5FP_alloc, (int)req->proc_rank,
-                            H5FP_TAG_ALLOC, H5FP_SAP_COMM)) != MPI_SUCCESS)
-            HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
+        sap_alloc.status = H5FP_STATUS_OK;
+    } else {
+        sap_alloc.addr = HADDR_UNDEF;
+        sap_alloc.eoa = HADDR_UNDEF;
+        sap_alloc.status = H5FP_STATUS_CANT_ALLOC;
     }
 
 done:
+    if ((mrc = MPI_Send(&sap_alloc, 1, H5FP_alloc, (int)req->proc_rank,
+                        H5FP_TAG_ALLOC, H5FP_SAP_COMM)) != MPI_SUCCESS)
+        HMPI_DONE_ERROR(FAIL, "MPI_Send failed", mrc);
+
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+/*
+ * Function:    H5FP_sap_handle_free_request
+ * Purpose:     Handle a request to free data from the file.
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
+ * Programmer:  Bill Wendling, 31. March 2003
+ * Modifications:
+ */
+static herr_t
+H5FP_sap_handle_free_request(H5FP_request_t *req)
+{
+    H5FP_alloc_t    sap_alloc;
+    H5FP_file_info *info;
+    H5FP_status_t   exit_state = H5FP_STATUS_OK;
+    herr_t          ret_value = SUCCEED;
+    int             mrc;
+
+    FUNC_ENTER_NOINIT(H5FP_sap_handle_free_request);
+
+    sap_alloc.req_id = req->req_id;
+    sap_alloc.file_id = info->file_id;
+    sap_alloc.status = H5FP_STATUS_OK;
+    sap_alloc.addr = HADDR_UNDEF;
+
+    if ((info = H5FP_find_file_info(req->file_id)) != NULL) {
+        H5FD_t *f = (H5FD_t*)&info->file;
+
+        if (f->eoma)
+            if (H5FD_free(f, H5FD_MEM_DEFAULT, H5P_DEFAULT,
+                          f->eoma, f->cur_meta_block_size) != SUCCEED) {
+                exit_state = H5FP_STATUS_CANT_FREE;
+                sap_alloc.status = H5FP_STATUS_CANT_FREE;
+                HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL,
+                            "SAP unable to free metadata block");
+            }
+
+        /* Reset metadata block information, just in case */
+        f->eoma = 0;
+        f->cur_meta_block_size = 0;
+
+        if (f->eosda)
+            if (H5FD_free(f, H5FD_MEM_DRAW, H5P_DEFAULT,
+                          f->eosda, f->cur_sdata_block_size) != SUCCEED) {
+                exit_state = H5FP_STATUS_CANT_FREE;
+                sap_alloc.status = H5FP_STATUS_CANT_FREE;
+                HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL,
+                            "SAP unable to free 'small data' block");
+            }
+
+        /* Reset "small data" block information, just in case */
+        f->eosda = 0;
+        f->cur_sdata_block_size = 0;
+
+        /* Get the EOA from the file. This call doesn't fail. */
+        sap_alloc.eoa = ((H5FD_t*)&info->file)->cls->get_eoa((H5FD_t*)&info->file);
+    } else {
+        sap_alloc.eoa = HADDR_UNDEF;
+        sap_alloc.status = H5FP_STATUS_CANT_FREE;
+    }
+
+done:
+    if ((mrc = MPI_Send(&sap_alloc, 1, H5FP_alloc, (int)req->proc_rank,
+                        H5FP_TAG_ALLOC, H5FP_SAP_COMM)) != MPI_SUCCESS)
+        HMPI_DONE_ERROR(FAIL, "MPI_Send failed", mrc);
+
     FUNC_LEAVE_NOAPI(ret_value);
 }
 

@@ -157,6 +157,10 @@ typedef enum sap_status {
     /* Bad file ID */
     H5FP_STATUS_BAD_FILE_ID,
 
+    /* Can't do memory things */
+    H5FP_STATUS_CANT_ALLOC,
+    H5FP_STATUS_CANT_FREE,
+
     /* Reserved for completely disasterous failures which require an abort */
     H5FP_STATUS_CATASTROPHIC
 } H5FP_status_t;
@@ -283,14 +287,11 @@ extern herr_t H5FP_request_flush_metadata(H5FD_t *file, unsigned file_id,
                                           H5FP_status_t *status);
 extern herr_t H5FP_request_close(H5FD_t *file, unsigned sap_file_id,
                                  unsigned *req_id, H5FP_status_t *status);
-
 extern herr_t H5FP_request_allocate(H5FD_t *file, H5FD_mem_t mem_type,
                                     hsize_t size, haddr_t *addr,
                                     haddr_t *eoa, unsigned *req_id,
                                     H5FP_status_t *status);
-extern herr_t H5FP_request_free(H5FD_t *file, H5FD_mem_t mem_type,
-                                haddr_t addr, hsize_t size,
-                                unsigned *req_id, H5FP_status_t *status);
+extern herr_t H5FP_request_free(H5FD_t *file, unsigned *req_id, H5FP_status_t *status);
 
 /* NOTE: Don't use these functions outside of the H5FP* modules! */
 extern herr_t H5FP_send_metadata(const char *mdata, int len, int to);

@@ -2083,27 +2083,6 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t si
     assert(file->cls);
     assert(type >= 0 && type < H5FD_MEM_NTYPES);
 
-#ifdef H5_HAVE_FPHDF5
-    /*
-     * When we're using the FPHDF5 driver, allocate from the SAP. If this
-     * is the SAP executing this code, then skip the send to the SAP and
-     * try to do the actual allocations.
-     */
-    if (file->driver_id == H5FD_FPHDF5 && !H5FD_fphdf5_is_sap(file)) {
-        unsigned        req_id;
-        H5FP_status_t   status;
-
-        /* Send the request to the SAP */
-        if (H5FP_request_free(file, type, addr, size, &req_id, &status) != SUCCEED)
-            /* FIXME: Should we check the "status" variable here? */
-            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTFREE, FAIL,
-                        "server couldn't free from file");
-
-        /* We've succeeded -- return the value */
-        HGOTO_DONE(ret_value);
-    }
-#endif  /* H5_HAVE_FPHDF5 */
-
     if (!H5F_addr_defined(addr) || addr>file->maxaddr ||
             H5F_addr_overflow(addr, size) || addr+size>file->maxaddr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid region");

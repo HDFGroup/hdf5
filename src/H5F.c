@@ -2552,33 +2552,56 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
          * file.
          */
         if (flags & H5F_FLUSH_INVALIDATE) {
-            if (f->shared->lf->feature_flags & H5FD_FEAT_AGGREGATE_METADATA) {
-                /* Return the unused portion of the metadata block to a free list */
-                if (f->shared->lf->eoma != 0)
-                    if (H5FD_free(f->shared->lf, H5FD_MEM_DEFAULT, dxpl_id,
-                                  f->shared->lf->eoma,
-                                  f->shared->lf->cur_meta_block_size) < 0)
-                        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL,
-                                    "can't free metadata block");
+#ifdef H5_HAVE_FPHDF5
+            /*
+             * If this is not the SAP, then we want to send a "free"
+             * command to the SAP to free up the EOMA and EOSDA
+             * information. This might also update the EOA information on
+             * the clients...
+             */
+            if (H5FD_is_fphdf5_driver(f->shared->lf) && !H5FD_fphdf5_is_sap(f->shared->lf)) {
+                unsigned        req_id;
+                H5FP_status_t   status;
 
-                /* Reset metadata block information, just in case */
-                f->shared->lf->eoma=0;
-                f->shared->lf->cur_meta_block_size=0;
-            } /* end if */
+                /* Send the request to the SAP */
+                if (H5FP_request_free(f->shared->lf, &req_id, &status) != SUCCEED)
+                    /* FIXME: Should we check the "status" variable here? */
+                    HGOTO_ERROR(H5E_FPHDF5, H5E_CANTFREE, FAIL,
+                                "server couldn't free from file");
+            } else {
+#endif  /* H5_HAVE_FPHDF5 */
 
-            if (f->shared->lf->feature_flags & H5FD_FEAT_AGGREGATE_SMALLDATA) {
-                /* Return the unused portion of the "small data" block to a free list */
-                if (f->shared->lf->eosda != 0)
-                    if (H5FD_free(f->shared->lf, H5FD_MEM_DRAW, dxpl_id,
-                                  f->shared->lf->eosda,
-                                  f->shared->lf->cur_sdata_block_size) < 0)
-                        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL,
-                                    "can't free 'small data' block");
+                if (f->shared->lf->feature_flags & H5FD_FEAT_AGGREGATE_METADATA) {
+                    /* Return the unused portion of the metadata block to a free list */
+                    if (f->shared->lf->eoma != 0)
+                        if (H5FD_free(f->shared->lf, H5FD_MEM_DEFAULT, dxpl_id,
+                                      f->shared->lf->eoma,
+                                      f->shared->lf->cur_meta_block_size) < 0)
+                            HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL,
+                                        "can't free metadata block");
 
-                /* Reset "small data" block information, just in case */
-                f->shared->lf->eosda=0;
-                f->shared->lf->cur_sdata_block_size=0;
-            } /* end if */
+                    /* Reset metadata block information, just in case */
+                    f->shared->lf->eoma=0;
+                    f->shared->lf->cur_meta_block_size=0;
+                } /* end if */
+
+                if (f->shared->lf->feature_flags & H5FD_FEAT_AGGREGATE_SMALLDATA) {
+                    /* Return the unused portion of the "small data" block to a free list */
+                    if (f->shared->lf->eosda != 0)
+                        if (H5FD_free(f->shared->lf, H5FD_MEM_DRAW, dxpl_id,
+                                      f->shared->lf->eosda,
+                                      f->shared->lf->cur_sdata_block_size) < 0)
+                            HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL,
+                                        "can't free 'small data' block");
+
+                    /* Reset "small data" block information, just in case */
+                    f->shared->lf->eosda=0;
+                    f->shared->lf->cur_sdata_block_size=0;
+                } /* end if */
+
+#ifdef H5_HAVE_FPHDF5
+            }
+#endif  /* H5_HAVE_FPHDF5 */
         } /* end if */
 
         /* flush the data sieve buffer, if we have a dirty one */
