@@ -292,7 +292,7 @@
 #define color_H5Pisa_class "red"
 #define color_H5Piterate "red"
 #define color_H5Pcopy_prop "red"
-#define color_H5Pdelete_filter "red"
+#define color_H5Premove_filter "red"
 #define color_H5Premove "red"
 #define color_H5Punregister "red"
 #define color_H5Pclose_class "red"

@@ -223,7 +223,7 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-SetExternal">H5Pset_external</a>
     <li><a href="#Property-GetExternalCount">H5Pget_external_count</a>
     <li><a href="#Property-GetExternal">H5Pget_external</a>
-    <li><a href="#Property-DeleteFilter">H5Pdelete_filter</a>
+    <li><a href="#Property-DeleteFilter">H5Premove_filter</a>
     </ul>
 
     <p><i>Dataset Access, Memory, and <br> Transfer Properties</i>
@@ -283,7 +283,7 @@ See further notes in the description of each function.
       <li><a href="#Property-Create">H5Pcreate</a>
       <li><a href="#Property-CreateClass">H5Pcreate_class</a>
       <li><a href="#Property-CreateList">H5Pcreate_list</a>
-      <li><a href="#Property-Equal">H5Pdelete_filter</a>
+      <li><a href="#Property-Equal">H5Premove_filter</a>
       <li><a href="#Property-Equal">H5Pequal</a>
       <li><a href="#Property-Exist">H5Pexist</a>
       <li><a href="#Property-FillValueDefined">H5Pfill_value_defined</a>
@@ -510,7 +510,7 @@ as the corresponding C function.
     <li><a href="#Property-SetExternal">h5pset_external_f</a>
     <li><a href="#Property-GetExternalCount">h5pget_external_count_f</a>
     <li><a href="#Property-GetExternal">h5pget_external_f</a>
-    <li><a href="#Property-DeleteFilter">h5pdelete_filter_f</a>
+    <li><a href="#Property-DeleteFilter">h5premove_filter_f</a>
     </ul>
 
 <!--
@@ -1189,18 +1189,18 @@ SUBROUTINE
 </dl>
 
 <!-- NEW PAGE -->
-<!-- HEADER RIGHT "H5Pdelete_filter" -->
+<!-- HEADER RIGHT "H5Premove_filter" -->
 <hr>
 <dl>
-  <dt><strong>Name:</strong> <a name="Property-DeleteFilter">H5Pdelete_filter</a>
+  <dt><strong>Name:</strong> <a name="Property-RemoveFilter">H5Pdelete_filter</a>
   <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pdelete_filter</code>(<em>hid_t</em> <code>plist</code>,
+    <dd><em>herr_t</em> <code>H5Premove_filter</code>(<em>hid_t</em> <code>plist</code>,
         <em>H5Z_filter_t</em> <code>filter</code>
     )
   <dt><strong>Purpose:</strong>
     <dd>Delete one or more filters in the filter pipeline.
   <dt><strong>Description:</strong>
-    <dd><code>H5Pdelete_filter</code> removes the specified 
+    <dd><code>H5Premove_filter</code> removes the specified 
         <code>filter</code> from the filter pipeline in <code>plist</code>.
 	<p>
 	The <code>filter</code> parameter specifies the filter to be removed.  
@@ -1257,10 +1257,10 @@ SUBROUTINE
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
 
-    <dt><strong>Fortran90 Interface:</strong> h5pdelete_filter_f
+    <dt><strong>Fortran90 Interface:</strong> h5premove_filter_f
     <dd>
 	<pre>
-SUBROUTINE h5pdelete_filter_f(prp_id, filter, hdferr) 
+SUBROUTINE h5premove_filter_f(prp_id, filter, hdferr) 
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: prp_id      ! Property list identifier
   INTEGER, INTENT(IN)        :: filter      ! Filter to be modified
@@ -1274,7 +1274,7 @@ SUBROUTINE h5pdelete_filter_f(prp_id, filter, hdferr)
                                             !
   INTEGER, INTENT(OUT)       :: hdferr      ! Error code
                                             ! 0 on success and -1 on failure
-END SUBROUTINE h5pdelete_filter_f
+END SUBROUTINE h5premove_filter_f
 	</pre>		
 		
 		<!--<dt><strong>Non-C API(s):</strong>

@@ -6333,7 +6333,7 @@
           END SUBROUTINE h5pmodify_filter_f
 
 !----------------------------------------------------------------------
-! Name:		h5pdelete_filter_f 
+! Name:		h5premove_filter_f 
 !
 ! Purpose: 	Delete one or more filters from the filter pipeline. 
 !
@@ -6356,11 +6356,11 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pdelete_filter_f(prp_id, filter, hdferr)
+          SUBROUTINE h5premove_filter_f(prp_id, filter, hdferr)
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pdelete_filter_f
+!DEC$attributes dllexport :: h5premove_filter_f
 !DEC$endif
 !
             IMPLICIT NONE
@@ -6369,21 +6369,21 @@
 
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
 
-!            INTEGER, EXTERNAL :: h5pdelete_filter_c
+!            INTEGER, EXTERNAL :: h5premove_filter_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5pdelete_filter_c(prp_id, filter)
+              INTEGER FUNCTION h5premove_filter_c(prp_id, filter)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5PMODIFY_FILTER_C'::h5pdelete_filter_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5PMODIFY_FILTER_C'::h5premove_filter_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id 
               INTEGER, INTENT(IN) :: filter 
-              END FUNCTION h5pdelete_filter_c
+              END FUNCTION h5premove_filter_c
             END INTERFACE
 
-            hdferr = h5pdelete_filter_c(prp_id, filter)
-          END SUBROUTINE h5pdelete_filter_f
+            hdferr = h5premove_filter_c(prp_id, filter)
+          END SUBROUTINE h5premove_filter_f
 
      END MODULE H5P

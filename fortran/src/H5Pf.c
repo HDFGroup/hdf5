@@ -3238,8 +3238,8 @@ DONE:
 }
 
 /*----------------------------------------------------------------------------
- * Name:        h5pdelete_filter_c
- * Purpose:     Call H5Pdelete_filter to delete one or more filters
+ * Name:        h5premove_filter_c
+ * Purpose:     Call H5Premove_filter to delete one or more filters
  * Inputs:      prp_id - property list identifier 
  *              filter - Filter to be deleted
  * Returns:     0 on success, -1 on failure
@@ -3248,7 +3248,7 @@ DONE:
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5pdelete_filter_c (hid_t_f *prp_id, int_f* filter)
+nh5premove_filter_c (hid_t_f *prp_id, int_f* filter)
 {
      int ret_value = -1;
      hid_t c_prp_id;
@@ -3259,9 +3259,9 @@ nh5pdelete_filter_c (hid_t_f *prp_id, int_f* filter)
      c_prp_id = (hid_t)*prp_id;
 
      /*
-      * Call H5Pdelety_filter function.
+      * Call H5Premove_filter function.
       */
-     ret = H5Pdelete_filter(c_prp_id, c_filter);
+     ret = H5Premove_filter(c_prp_id, c_filter);
 
      if (ret < 0) goto DONE;
      ret_value = 0;

@@ -3137,7 +3137,7 @@ test_filter_delete(hid_t file)
     */
 #if defined H5_HAVE_FILTER_DEFLATE
     /* delete the deflate filter */
-    if (H5Pdelete_filter(dcpl1,H5Z_FILTER_DEFLATE)<0) goto error;
+    if (H5Premove_filter(dcpl1,H5Z_FILTER_DEFLATE)<0) goto error;
 
     /* get information about filters */
     if ((nfilters = H5Pget_nfilters(dcpl1))<0) goto error; 
@@ -3151,7 +3151,7 @@ test_filter_delete(hid_t file)
 
     /* Try to delete the deflate filter again */
     H5E_BEGIN_TRY {
-        ret=H5Pdelete_filter(dcpl1,H5Z_FILTER_DEFLATE);
+        ret=H5Premove_filter(dcpl1,H5Z_FILTER_DEFLATE);
     } H5E_END_TRY;
     if (ret >=0) {
         H5_FAILED();
@@ -3166,7 +3166,7 @@ test_filter_delete(hid_t file)
     *---------------------------------------------------------------------- 
     */
     /* delete all filters */
-    if (H5Pdelete_filter(dcpl1,H5Z_FILTER_NONE)<0) goto error; 
+    if (H5Premove_filter(dcpl1,H5Z_FILTER_NONE)<0) goto error; 
 
     /* get information about filters */
     if ((nfilters = H5Pget_nfilters(dcpl1))<0) goto error; 

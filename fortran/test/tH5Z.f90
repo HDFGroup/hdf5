@@ -94,7 +94,7 @@
      endif
 
 !
-! Verify h5pdelete_filter_f
+! Verify h5premove_filter_f
 !
      CALL h5zfilter_avail_f(H5Z_FILTER_FLETCHER32_F, status, error)
               CALL check("h5zfilter_avail_f", error, total_error)
@@ -118,7 +118,7 @@
             endif
 
             ! Delete a single filter
-            CALL h5pdelete_filter_f(crtpr_id, H5Z_FILTER_SHUFFLE_F, error)
+            CALL h5premove_filter_f(crtpr_id, H5Z_FILTER_SHUFFLE_F, error)
                   CALL check("h5pset_shuffle_f", error, total_error) 
 
             ! Verify the correct number of filters now
@@ -130,8 +130,8 @@
             endif
 
             ! Delete all filters
-            CALL h5pdelete_filter_f(crtpr_id, H5Z_FILTER_NONE_F, error)
-                  CALL check("h5pdelete_filter_f", error, total_error) 
+            CALL h5premove_filter_f(crtpr_id, H5Z_FILTER_NONE_F, error)
+                  CALL check("h5premove_filter_f", error, total_error) 
 
             ! Verify the correct number of filters now
             CALL h5pget_nfilters_f(crtpr_id, nfilters, error)

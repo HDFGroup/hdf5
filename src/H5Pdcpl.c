@@ -1622,7 +1622,7 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function: H5Pdelete_filter
+ * Function: H5Premove_filter
  *
  * Purpose: Deletes a filter from the dataset creation property list;
  *  deletes all filters if FILTER is H5Z_FILTER_NONE  
@@ -1638,13 +1638,13 @@ done:
  */
 
 herr_t
-H5Pdelete_filter(hid_t plist_id, H5Z_filter_t filter)
+H5Premove_filter(hid_t plist_id, H5Z_filter_t filter)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     H5O_pline_t pline;          /* Filter pipeline */
     herr_t ret_value = SUCCEED; /* return value          */
 
-    FUNC_ENTER_API(H5Pdelete_filter, FAIL)
+    FUNC_ENTER_API(H5Premove_filter, FAIL)
     H5TRACE2("e","iZf",plist_id,filter);
 
     /* Get the property list structure */

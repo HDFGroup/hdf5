@@ -192,7 +192,7 @@ int apply_filters(hid_t dcpl_id,
  {
   if (obj->filter[i].filtn==H5Z_FILTER_NONE)
   {
-   if (nfilters && H5Pdelete_filter(dcpl_id,H5Z_FILTER_NONE)<0) 
+   if (nfilters && H5Premove_filter(dcpl_id,H5Z_FILTER_NONE)<0) 
     return -1;
    return 0;
   }
@@ -205,7 +205,7 @@ int apply_filters(hid_t dcpl_id,
  */
 
  if (nfilters) {
-  if (H5Pdelete_filter(dcpl_id,H5Z_FILTER_NONE)<0) 
+  if (H5Premove_filter(dcpl_id,H5Z_FILTER_NONE)<0) 
    return -1;
  }
 
