@@ -102,35 +102,30 @@ test_file_create(void)
 	// Create file FILE1
 	file1 = new H5File (FILE1, H5F_ACC_EXCL);
 
-	/*
-	* try to create the same file with H5F_ACC_TRUNC. This should fail
-	* because file1 is the same file and is currently open.
-	*/
+	// try to create the same file with H5F_ACC_TRUNC. This should fail
+	// because file1 is the same file and is currently open.
 	try {
 	    H5File file2 (FILE1, H5F_ACC_TRUNC);  // should throw E
 
-	    // Should FAIL but didn't - BMR (Note 1): a macro, with a diff 
-	    // name, that skips the comparison b/w the 1st & 2nd args would 
-	    // be more appropriate, but verify_val can be used for now;
-	    // also, more text about what is testing would be better.
-	    verify_val(file2.getId(), FAIL, "H5File constructor", __LINE__, __FILE__); 
+	    // Should FAIL but didn't, so throw an invalid action exception
+            throw InvalidActionException("H5File constructor", "Attempted to create an existing file.");
 	}
 	catch( FileIException E ) {} // do nothing, FAIL expected
 
-	// Close file file1 
-
+	// Close file1 
 	delete file1;
 	file1 = NULL;
 
-	/*
-	* Try again with H5F_ACC_EXCL. This should fail because the file already
-	* exists from the previous steps.
-	*/
+	// Try again with H5F_ACC_EXCL. This should fail because the file already
+	// exists from the previous steps.
 	try { 
 	    H5File file2(FILE1, H5F_ACC_EXCL);  // should throw E
-	    verify_val(file2.getId(), FAIL, "H5File constructor", __LINE__, __FILE__);
+
+	    // Should FAIL but didn't, so throw an invalid action exception
+            throw InvalidActionException("H5File constructor", "File already exists.");
 	}
-	catch( FileIException E ) {} // do nothing, FAIL expected
+	catch( FileIException E ) // catching creating existing file
+	{} // do nothing, FAIL expected
 
     	// Test create with H5F_ACC_TRUNC. This will truncate the existing file.
 	file1 = new H5File (FILE1, H5F_ACC_TRUNC);
@@ -141,19 +136,23 @@ test_file_create(void)
      	*/
     	try {
 	    H5File file2 (FILE1, H5F_ACC_TRUNC);   // should throw E
-	    verify_val(file2.getId(), FAIL, "H5File constructor", __LINE__, __FILE__);
-	}
-	catch( FileIException E ) {} // do nothing, FAIL expected
 
-    	/*
-     	* Try with H5F_ACC_EXCL. This should fail too because the file already
-     	* exists.
-     	*/
+	    // Should FAIL but didn't, so throw an invalid action exception
+            throw InvalidActionException("H5File constructor", "H5F_ACC_TRUNC attempt on an opened file.");
+	}
+	catch( FileIException E ) // catching truncating opened file
+	{} // do nothing, FAIL expected
+
+     	// Try with H5F_ACC_EXCL. This should fail too because the file already
+     	// exists.
     	try {
 	    H5File file3 (FILE1, H5F_ACC_EXCL);  // should throw E
-	    verify_val(file3.getId(), FAIL, "H5File constructor", __LINE__, __FILE__);
+
+	    // Should FAIL but didn't, so throw an invalid action exception
+            throw InvalidActionException("H5File constructor", "H5F_ACC_EXCL attempt on an existing file.");
     	}
-	catch( FileIException E ) {} // do nothing, FAIL expected
+	catch( FileIException E ) // catching H5F_ACC_EXCL on existing file
+	{} // do nothing, FAIL expected
 
     	// Get the file-creation template
 	FileCreatPropList tmpl1 = file1->getCreatePlist();
@@ -174,16 +173,22 @@ test_file_create(void)
 	// tmpl1 is automatically closed; if error occurs, it'll be
 	// caught in the catch block
 
-	/* Close first file */
+	// Close first file
 	delete file1;
     }
-    catch( PropListIException E ) {
-	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__);
+    catch (InvalidActionException E)
+    {
+        cerr << " FAILED" << endl;
+        cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
+        if (file1 != NULL) // clean up
+            delete file1;
     }
-    catch( FileIException E ) {
-	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__);
-	if (file1 != NULL)  // clean up 
-	    delete file1;
+    // catch all other exceptions
+    catch (Exception E)
+    {
+	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+        if (file1 != NULL) // clean up
+            delete file1;
     }
 
     // Setting this to NULL for cleaning up in failure situations
@@ -198,10 +203,8 @@ test_file_create(void)
 	tmpl1->setSizes( F2_OFFSET_SIZE, F2_LENGTH_SIZE );
 	tmpl1->setSymk( F2_SYM_INTERN_K, F2_SYM_LEAF_K );
 
-    	/*
-     	 * Try to create second file, with non-standard file-creation template
-     	 * params.
-     	*/
+     	// Try to create second file, with non-standard file-creation template
+     	// params.
 	H5File file2( FILE2, H5F_ACC_TRUNC, *tmpl1 );
 
     	/* Release file-creation template */
@@ -260,8 +263,10 @@ test_file_create(void)
 	/* Dynamically release file-creation template */
 	delete tmpl1;
     }
-    catch( PropListIException E ) {
-	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__);
+    // catch all exceptions
+    catch (Exception E)
+    {
+	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
 	if (tmpl1 != NULL)  // clean up 
 	    delete tmpl1;
     }
@@ -318,7 +323,7 @@ test_file_open(void)
     }   // end of try block
 
     catch( Exception E ) {
-        issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__);
+        issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 } /* test_file_open() */
 
@@ -368,7 +373,7 @@ test_file_size(void)
     }   // end of try block
 
     catch( Exception E ) {
-        issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__);
+        issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 
     // use C test utility routine to close property list.
@@ -459,8 +464,9 @@ test_file_name()
 	comp_type.getFileName();
 	verify_val(file_name, FILE4, "CompType::getFileName", __LINE__, __FILE__);
     }   // end of try block
+
     catch (Exception E) {
-        issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__);
+        issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 
 } /* test_file_name() */

@@ -94,12 +94,13 @@ int test_report( int nerrors, const string& testname )
  *
  *-------------------------------------------------------------------------
  */
-void issue_fail_msg(const char* where, int line, const char* file_name)
+void issue_fail_msg(const char* where, int line, const char* file_name, 
+		    const char* message)
 {
     if (GetTestVerbosity()>=VERBO_HI)
     {
-        cerr << "   Call to routine: " << where << " at line " << line
-             << " in " << file_name << "has failed" << endl;
+        cerr << "--> From " << where << " at line " << line
+             << " in " << file_name << " - " << message << endl << endl;
     }
 }
 
