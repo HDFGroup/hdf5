@@ -1008,7 +1008,7 @@ Optional Features:
   --enable-linux-lfs      Enable support for large (64-bit) files on Linux.
                           [default=check]
   --enable-threadsafe     Enable thread safe capability
-  --enable-hdf5v1_4       Compile the HDF5 v1.4 compatibility interface
+  --enable-hdf5v1_6       Compile the HDF5 v1.6 compatibility interface
                           [default=no]
   --enable-stream-vfd     Build the Stream Virtual File Driver [default=no]
   --enable-gpfs           Enable GPFS hints for the MPI/POSIX file driver.
@@ -28231,20 +28231,20 @@ _ACEOF
 
 fi
 
-echo "$as_me:$LINENO: checking whether HDF5 v1.4 compatibility functions enabled" >&5
-echo $ECHO_N "checking whether HDF5 v1.4 compatibility functions enabled... $ECHO_C" >&6
-# Check whether --enable-hdf5v1_4 or --disable-hdf5v1_4 was given.
-if test "${enable_hdf5v1_4+set}" = set; then
-  enableval="$enable_hdf5v1_4"
-  HDF5_V1_4_COMPAT=$enableval
+echo "$as_me:$LINENO: checking whether HDF5 v1.6 compatibility functions enabled" >&5
+echo $ECHO_N "checking whether HDF5 v1.6 compatibility functions enabled... $ECHO_C" >&6
+# Check whether --enable-hdf5v1_6 or --disable-hdf5v1_6 was given.
+if test "${enable_hdf5v1_6+set}" = set; then
+  enableval="$enable_hdf5v1_6"
+  HDF5_V1_6_COMPAT=$enableval
 fi;
 
-if test "$HDF5_V1_4_COMPAT" = "yes"; then
+if test "$HDF5_V1_6_COMPAT" = "yes"; then
   echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
 
 cat >>confdefs.h <<\_ACEOF
-#define WANT_H5_V1_4_COMPAT 1
+#define WANT_H5_V1_6_COMPAT 1
 _ACEOF
 
 else
@@ -33207,8 +33207,8 @@ IF_YES_NO "$GASS"
 PRINT_N "                           GPFS"
 IF_YES_NO "$GPFS"
 
-PRINT_N "        HDF5 v1.4 Compatibility"
-IF_YES_NO "$HDF5_V1_4_COMPAT"
+PRINT_N "        HDF5 v1.6 Compatibility"
+IF_YES_NO "$HDF5_V1_6_COMPAT"
 
 PRINT_N "                        hsize_t"
 case "$HSIZET" in
