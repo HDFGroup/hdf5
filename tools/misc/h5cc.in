@@ -27,6 +27,7 @@ prefix="@prefix@"
 exec_prefix="@exec_prefix@"
 libdir="@libdir@"
 includedir="@includedir@"
+HL="@HL@"
 
 ############################################################################
 ##                                                                        ##
@@ -246,9 +247,15 @@ if test "x$do_compile" = "xyes"; then
   fi
 fi
 
+
 if test "x$do_link" = "xyes"; then
   shared_link=""
-  libraries=" $libraries -lhdf5_hl -lhdf5 "
+# conditionnaly link with the hl library  
+  if test "X$HL" = "Xhl"; then
+   libraries=" $libraries -lhdf5_hl -lhdf5 "
+  else
+   libraries=" $libraries  -lhdf5 "	  
+  fi
   link_args="$link_args -L${libdir}"
 
   case "$kind" in
