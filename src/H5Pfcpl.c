@@ -40,7 +40,7 @@ static int             interface_initialize_g = 0;
  *
  * Purpose:	Retrieves version information for various parts of a file.
  *
- *		BOOT:		The file boot block.
+ *		SUPER:		The file super block.
  *		HEAP:		The global heap.
  *		FREELIST:	The global free list.
  *		STAB:		The root symbol table entry.
@@ -65,23 +65,23 @@ static int             interface_initialize_g = 0;
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_version(hid_t plist_id, int *boot/*out*/, int *freelist/*out*/,
+H5Pget_version(hid_t plist_id, int *super/*out*/, int *freelist/*out*/,
 	       int *stab/*out*/, int *shhdr/*out*/)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(H5Pget_version, FAIL);
-    H5TRACE5("e","ixxxx",plist_id,boot,freelist,stab,shhdr);
+    H5TRACE5("e","ixxxx",plist_id,super,freelist,stab,shhdr);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get values */
-    if (boot)
-        if(H5P_get(plist, H5F_CRT_BOOT_VERS_NAME, boot) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get boot version");
+    if (super)
+        if(H5P_get(plist, H5F_CRT_SUPER_VERS_NAME, super) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get superblock version");
     if (freelist)
         if(H5P_get(plist, H5F_CRT_FREESPACE_VERS_NAME, freelist) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get free-space version");

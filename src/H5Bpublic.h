@@ -32,6 +32,9 @@
 
 /* B-tree IDs for various internal things. */
 /* Not really a "public" symbol, but that should be OK -QAK */
+/* Note - if more of these are added, any 'K' values (for internal or leaf
+ * nodes) they use will need to be stored in the file somewhere. -QAK
+ */
 typedef enum H5B_subid_t {
     H5B_SNODE_ID	 = 0,	/*B-tree is for symbol table nodes	     */
     H5B_ISTORE_ID	 = 1,	/*B-tree is for indexed object storage	     */

@@ -257,7 +257,7 @@ typedef struct H5F_t H5F_t;
 /* Definitions for the 1/2 rank for btree internal nodes    */
 #define H5F_CRT_BTREE_RANK_NAME      "btree_rank"
 #define H5F_CRT_BTREE_RANK_SIZE      sizeof(int[H5B_NUM_BTREE_ID])
-#define H5F_CRT_BTREE_RANK_DEF       {16,32}
+#define H5F_CRT_BTREE_RANK_DEF       {HDF5_BTREE_SNODE_IK_DEF,HDF5_BTREE_ISTORE_IK_DEF}
 /* Definitions for byte number in an address                */
 #define H5F_CRT_ADDR_BYTE_NUM_NAME   "addr_byte_num"
 #define H5F_CRT_ADDR_BYTE_NUM_SIZE   sizeof(size_t)
@@ -266,10 +266,10 @@ typedef struct H5F_t H5F_t;
 #define H5F_CRT_OBJ_BYTE_NUM_NAME     "obj_byte_num"
 #define H5F_CRT_OBJ_BYTE_NUM_SIZE     sizeof(size_t)
 #define H5F_CRT_OBJ_BYTE_NUM_DEF      sizeof(hsize_t)
-/* Definitions for version number of the bootblock          */
-#define H5F_CRT_BOOT_VERS_NAME        "boot_version"
-#define H5F_CRT_BOOT_VERS_SIZE        sizeof(int)
-#define H5F_CRT_BOOT_VERS_DEF         HDF5_BOOTBLOCK_VERSION
+/* Definitions for version number of the superblock         */
+#define H5F_CRT_SUPER_VERS_NAME       "super_version"
+#define H5F_CRT_SUPER_VERS_SIZE       sizeof(int)
+#define H5F_CRT_SUPER_VERS_DEF        HDF5_SUPERBLOCK_VERSION_DEF
 /* Definitions for free-space version number                */
 #define H5F_CRT_FREESPACE_VERS_NAME   "free_space_version"
 #define H5F_CRT_FREESPACE_VERS_SIZE   sizeof(int)
@@ -400,7 +400,7 @@ H5_DLL size_t H5F_sizeof_size(const H5F_t *f);
 H5_DLL unsigned H5F_sym_leaf_k(const H5F_t *f);
 H5_DLL int H5F_Kvalue(const H5F_t *f, const struct H5B_class_t *type);
 
-/* Functions that operate on blocks of bytes wrt boot block */
+/* Functions that operate on blocks of bytes wrt super block */
 H5_DLL herr_t H5F_block_read(H5F_t *f, H5FD_mem_t type, haddr_t addr,
                 size_t size, hid_t dxpl_id, void *buf/*out*/);
 H5_DLL herr_t H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr,

@@ -219,11 +219,21 @@
 #endif
 
 /* Version #'s of the major components of the file format */
-#define HDF5_BOOTBLOCK_VERSION	0	/* of the boot block format	  */
+#define HDF5_SUPERBLOCK_VERSION_DEF	0	/* The default super block format	  */
+#define HDF5_SUPERBLOCK_VERSION_MAX	1	/* The maximum super block format	  */
 #define HDF5_FREESPACE_VERSION	0	/* of the Free-Space Info	  */
 #define HDF5_OBJECTDIR_VERSION	0	/* of the Object Directory format */
 #define HDF5_SHAREDHEADER_VERSION 0	/* of the Shared-Header Info	  */
 #define HDF5_DRIVERINFO_VERSION	0	/* of the Driver Information Block*/
+
+/* B-tree internal 'K' values */
+#define HDF5_BTREE_SNODE_IK_DEF         16
+#define HDF5_BTREE_ISTORE_IK_DEF        32      /* Note! this value is assumed
+                                                    to be 32 for older versions
+                                                    of the superblock (<1) and
+                                                    if it is changed, the code
+                                                    must compensate. -QAK
+                                                 */
 
 /*
  * Status return values for the `herr_t' type.

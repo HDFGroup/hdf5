@@ -55,8 +55,11 @@ Bug Fixes since HDF5-1.6.0 release
 
 Library
 -------
+    - Modified library and file format to support storing indexed storage
+        (chunked dataset) B-tree's with non-default internal 'K' values.
+        QAK - 2003/07/15
     - Returned H5T_BKG_TEMP support to library after it was accidentally
-        removed.  (2003/07/14 - QAK)
+        removed.  QAK - 2003/07/14
 
 Configuration
 -------------

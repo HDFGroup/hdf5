@@ -147,6 +147,15 @@ typedef struct
 #define MISC10_FILE_NEW         "tmisc10.h5"
 #define MISC10_DSETNAME         "Dataset1"
 
+/* Definitions for misc. test #11 */
+#define MISC11_FILE             "tmisc11.h5"
+#define MISC11_USERBLOCK        1024
+#define MISC11_SIZEOF_OFF       4
+#define MISC11_SIZEOF_LEN       4
+#define MISC11_SYM_LK           8
+#define MISC11_SYM_IK           32
+#define MISC11_ISTORE_IK        64
+
 /****************************************************************
 **
 **  test_misc1(): test unlinking a dataset from a group and immediately
@@ -1659,6 +1668,159 @@ test_misc10(void)
 
 /****************************************************************
 **
+**  test_misc11(): Test that all properties in a file creation property
+**      list are stored correctly in the file and can be retrieved
+**      when the file is re-opened.
+**
+****************************************************************/
+static void
+test_misc11(void)
+{
+    hid_t       file;           /* File IDs for old & new files */
+    hid_t       fcpl;           /* File creation property list */
+    hsize_t     userblock;      /* Userblock size retrieved from FCPL */
+    size_t      off_size;       /* Size of offsets in the file */
+    size_t      len_size;       /* Size of lengths in the file */
+    int         sym_ik;         /* Symbol table B-tree initial 'K' value */
+    int         istore_ik;      /* Indexed storage B-tree initial 'K' value */
+#ifdef H5_WANT_H5_V1_4_COMPAT
+    int         sym_lk;         /* Symbol table B-tree leaf 'K' value */
+#else /* H5_WANT_H5_V1_4_COMPAT */
+    unsigned    sym_lk;         /* Symbol table B-tree leaf 'K' value */
+#endif /* H5_WANT_H5_V1_4_COMPAT */
+    int super;                  /* Superblock version # */
+    int freelist;               /* Free list version # */
+    int stab;                   /* Symbol table entry version # */
+    int shhdr;                  /* Shared object header version # */
+    herr_t      ret;            /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing file creation properties retrieved correctly\n"));
+
+    /* Creating a file with the default file creation property list should
+     * create a version 0 superblock
+     */
+
+    /* Create file with default file creation property list */
+    file= H5Fcreate(MISC11_FILE, H5F_ACC_TRUNC , H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fcreate");
+
+    /* Get the file's dataset creation property list */
+    fcpl =  H5Fget_create_plist(file);
+    CHECK(fcpl, FAIL, "H5Fget_create_plist");
+
+    /* Get the file's version information */
+    ret=H5Pget_version(fcpl, &super, &freelist, &stab, &shhdr);
+    CHECK(ret, FAIL, "H5Pget_version");
+    VERIFY(super,0,"H5Pget_version");
+    VERIFY(freelist,0,"H5Pget_version");
+    VERIFY(stab,0,"H5Pget_version");
+    VERIFY(shhdr,0,"H5Pget_version");
+
+    /* Close FCPL */
+    ret=H5Pclose(fcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close file */
+    ret=H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Create a file creation property list */
+    fcpl = H5Pcreate(H5P_FILE_CREATE);
+    CHECK(fcpl, FAIL, "H5Pcreate"); 
+
+    /* Set all the properties in the FCPL */
+    ret=H5Pset_userblock(fcpl,(hsize_t)MISC11_USERBLOCK);
+    CHECK(ret, FAIL, "H5Pset_userblock"); 
+
+    ret=H5Pset_sizes(fcpl,MISC11_SIZEOF_OFF,MISC11_SIZEOF_LEN);
+    CHECK(ret, FAIL, "H5Pset_sizes"); 
+
+    ret=H5Pset_sym_k(fcpl,MISC11_SYM_IK,MISC11_SYM_LK);
+    CHECK(ret, FAIL, "H5Pset_sym_k"); 
+
+    ret=H5Pset_istore_k(fcpl,MISC11_ISTORE_IK);
+    CHECK(ret, FAIL, "H5Pset_istore_k"); 
+
+    /* Creating a file with the non-default file creation property list should
+     * create a version 1 superblock
+     */
+
+    /* Create file with custom file creation property list */
+    file= H5Fcreate(MISC11_FILE, H5F_ACC_TRUNC , fcpl, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fcreate");
+
+    /* Close FCPL */
+    ret=H5Pclose(fcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Get the file's dataset creation property list */
+    fcpl =  H5Fget_create_plist(file);
+    CHECK(fcpl, FAIL, "H5Fget_create_plist");
+
+    /* Get the file's version information */
+    ret=H5Pget_version(fcpl, &super, &freelist, &stab, &shhdr);
+    CHECK(ret, FAIL, "H5Pget_version");
+    VERIFY(super,1,"H5Pget_version");
+    VERIFY(freelist,0,"H5Pget_version");
+    VERIFY(stab,0,"H5Pget_version");
+    VERIFY(shhdr,0,"H5Pget_version");
+
+    /* Close FCPL */
+    ret=H5Pclose(fcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close file */
+    ret=H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Re-open the file */
+    file = H5Fopen(MISC11_FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fcreate");
+
+    /* Get the file's dataset creation property list */
+    fcpl =  H5Fget_create_plist(file);
+    CHECK(fcpl, FAIL, "H5Fget_create_plist");
+
+    /* Get the file's version information */
+    ret=H5Pget_version(fcpl, &super, &freelist, &stab, &shhdr);
+    CHECK(ret, FAIL, "H5Pget_version");
+    VERIFY(super,1,"H5Pget_version");
+    VERIFY(freelist,0,"H5Pget_version");
+    VERIFY(stab,0,"H5Pget_version");
+    VERIFY(shhdr,0,"H5Pget_version");
+
+    /* Retrieve all the property values & check them */
+    ret=H5Pget_userblock(fcpl,&userblock);
+    CHECK(ret, FAIL, "H5Pget_userblock"); 
+    VERIFY(userblock, MISC11_USERBLOCK, "H5Pget_userblock"); 
+
+    ret=H5Pget_sizes(fcpl,&off_size,&len_size);
+    CHECK(ret, FAIL, "H5Pget_sizes"); 
+    VERIFY(off_size, MISC11_SIZEOF_OFF, "H5Pget_sizes"); 
+    VERIFY(len_size, MISC11_SIZEOF_LEN, "H5Pget_sizes"); 
+
+    ret=H5Pget_sym_k(fcpl,&sym_ik,&sym_lk);
+    CHECK(ret, FAIL, "H5Pget_sym_k"); 
+    VERIFY(sym_ik, MISC11_SYM_IK, "H5Pget_sym_k"); 
+    VERIFY(sym_lk, MISC11_SYM_LK, "H5Pget_sym_k"); 
+
+    ret=H5Pget_istore_k(fcpl,&istore_ik);
+    CHECK(ret, FAIL, "H5Pget_istore_k"); 
+    VERIFY(istore_ik, MISC11_ISTORE_IK, "H5Pget_istore_k"); 
+
+    /* Close file */
+    ret=H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close FCPL */
+    ret=H5Pclose(fcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+} /* end test_misc11() */
+
+/****************************************************************
+**
 **  test_misc(): Main misc. test routine.
 ** 
 ****************************************************************/
@@ -1678,6 +1840,7 @@ test_misc(void)
     test_misc8();       /* Test storage sizes of various types of dataset storage */
     test_misc9();       /* Test for opening (not creating) core files */
     test_misc10();      /* Test for using dataset creation property lists from old files */
+    test_misc11();      /* Test for all properties of a file creation property list being stored */
 
 } /* test_misc() */
 
@@ -1699,16 +1862,17 @@ test_misc(void)
 void
 cleanup_misc(void)
 {
-    remove(MISC1_FILE);
-    remove(MISC2_FILE_1);
-    remove(MISC2_FILE_2);
-    remove(MISC3_FILE);
-    remove(MISC4_FILE_1);
-    remove(MISC4_FILE_2);
-    remove(MISC5_FILE);
-    remove(MISC6_FILE);
-    remove(MISC7_FILE);
-    remove(MISC8_FILE);
-    remove(MISC9_FILE);
-    remove(MISC10_FILE_NEW);
+    HDremove(MISC1_FILE);
+    HDremove(MISC2_FILE_1);
+    HDremove(MISC2_FILE_2);
+    HDremove(MISC3_FILE);
+    HDremove(MISC4_FILE_1);
+    HDremove(MISC4_FILE_2);
+    HDremove(MISC5_FILE);
+    HDremove(MISC6_FILE);
+    HDremove(MISC7_FILE);
+    HDremove(MISC8_FILE);
+    HDremove(MISC9_FILE);
+    HDremove(MISC10_FILE_NEW);
+    HDremove(MISC11_FILE);
 }
