@@ -52,7 +52,7 @@ static struct {
     int  nalloc;                /* number of slots allocated */
     int  nobjs;                 /* number of objects */
     struct {
-        unsigned long id[2];    /* object number */
+        haddr_t id;             /* object number */
         char *name;             /* full object name */
     } *obj;
 } idtab_g;
@@ -156,8 +156,7 @@ sym_insert(H5G_stat_t *sb, const char *name)
 
     /* Insert the entry */
     n = idtab_g.nobjs++;
-    idtab_g.obj[n].id[0] = sb->objno[0];
-    idtab_g.obj[n].id[1] = sb->objno[1];
+    idtab_g.obj[n].id = sb->objno;
     idtab_g.obj[n].name = malloc(strlen(name)+1);
     strcpy(idtab_g.obj[n].name, name);
 }
@@ -186,10 +185,8 @@ sym_lookup(H5G_stat_t *sb)
     
     if (sb->nlink<2) return NULL; /*only one name possible*/
     for (n=0; n<idtab_g.nobjs; n++) {
- if (idtab_g.obj[n].id[0]==sb->objno[0] &&
-     idtab_g.obj[n].id[1]==sb->objno[1]) {
-     return idtab_g.obj[n].name;
- }
+     if (idtab_g.obj[n].id==sb->objno)
+         return idtab_g.obj[n].name;
     }
     return NULL;
 }
@@ -1162,9 +1159,8 @@ display_type(hid_t type, int ind)
     /* Shared? If so then print the type's OID */
     if (H5Tcommitted(type)) {
  if (H5Gget_objinfo(type, ".", FALSE, &sb)>=0) {
-     printf("shared-%lu:%lu:%lu:%lu ",
-     sb.fileno[1], sb.fileno[0],
-     sb.objno[1], sb.objno[0]);
+     printf("shared-%lu:"H5_PRINTF_HADDR_FMT" ",
+     sb.fileno, sb.objno);
  } else {
      printf("shared ");
  }
@@ -1258,10 +1254,10 @@ dump_dataset_values(hid_t dset)
     sprintf(fmt_double, "%%1.%dg", DBL_DIG);
     info.fmt_double = fmt_double;
 
-    info.dset_format =  "DSET-%lu:%lu:%lu:%lu-";
+    info.dset_format =  "DSET-%lu:"H5_PRINTF_HADDR_FMT"-";
     info.dset_hidefileno = 0;
     
-    info.obj_format = "-%lu:%lu:%lu:%lu";
+    info.obj_format = "-%lu:"H5_PRINTF_HADDR_FMT;
     info.obj_hidefileno = 0;
     
     info.dset_blockformat_pre = "%sBlk%lu: ";
@@ -1376,7 +1372,7 @@ list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
      info.line_suf = "\"";
  }
  /* values of type reference */
- info.obj_format = "-%lu:%lu:%lu:%lu";
+ info.obj_format = "-%lu:"H5_PRINTF_HADDR_FMT;
  info.obj_hidefileno = 0;
  if (hexdump_g) {
      p_type = H5Tcopy(type);
@@ -1791,8 +1787,8 @@ list (hid_t group, const char *name, void *_iter)
      * which is common to all objects. */
     if (verbose_g>0 && H5G_LINK!=sb.type) {
  if (sb.type>=0) H5Aiterate(obj, NULL, list_attr, NULL);
- printf("    %-10s %lu:%lu:%lu:%lu\n", "Location:",
-        sb.fileno[1], sb.fileno[0], sb.objno[1], sb.objno[0]);
+ printf("    %-10s %lu:"H5_PRINTF_HADDR_FMT"\n", "Location:",
+        sb.fileno, sb.objno);
  printf("    %-10s %u\n", "Links:", sb.nlink);
         if (sb.mtime>0) {
             if (simple_output_g) tm=gmtime(&(sb.mtime));
