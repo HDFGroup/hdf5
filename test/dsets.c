@@ -112,12 +112,14 @@ int	points[DSET_DIM1][DSET_DIM2], check[DSET_DIM1][DSET_DIM2];
 double	points_dbl[DSET_DIM1][DSET_DIM2], check_dbl[DSET_DIM1][DSET_DIM2];
 
 /* Local prototypes for filter functions */
-static herr_t can_apply_bogus(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static size_t filter_bogus(unsigned int flags, size_t cd_nelmts, 
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+#ifndef H5_WANT_H5_V1_4_COMPAT
+static herr_t can_apply_bogus(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static herr_t set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static size_t filter_bogus2(unsigned int flags, size_t cd_nelmts, 
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 static size_t filter_corrupt(unsigned int flags, size_t cd_nelmts, 
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
 
@@ -330,7 +332,11 @@ test_simple_io(hid_t fapl)
     tconv_buf = malloc (1000);
     xfer = H5Pcreate (H5P_DATASET_XFER);
     assert (xfer>=0);
-    if (H5Pset_buffer (xfer, 1000, tconv_buf, NULL)<0) goto error;
+#ifdef H5_WANT_H5_V1_4_COMPAT
+    if (H5Pset_buffer (xfer, (hsize_t)1000, tconv_buf, NULL)<0) goto error;
+#else /* H5_WANT_H5_V1_4_COMPAT */
+    if (H5Pset_buffer (xfer, (size_t)1000, tconv_buf, NULL)<0) goto error;
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
     /* Create the dataset */
     if ((dataset = H5Dcreate(file, DSET_SIMPLE_IO_NAME, H5T_NATIVE_INT, space,
@@ -768,7 +774,11 @@ test_conv_buffer(hid_t fid)
     hsize_t     dimsb[1];
     hsize_t     dimsc[1];
     hid_t       xfer_list;
+#ifdef H5_WANT_H5_V1_4_COMPAT
+    hsize_t      size;
+#else /* H5_WANT_H5_V1_4_COMPAT */
     size_t      size;
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
     TESTING("data type conversion buffer size");
     
@@ -956,6 +966,7 @@ const H5Z_class_t H5Z_BOGUS[1] = {{
     filter_bogus,		/* The actual filter function	*/
 }};
 
+#ifndef H5_WANT_H5_V1_4_COMPAT
 
 /*-------------------------------------------------------------------------
  * Function:	can_apply_bogus
@@ -981,6 +992,7 @@ can_apply_bogus(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id)
     else
         return 1;
 }
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 
 /*-------------------------------------------------------------------------
@@ -1007,6 +1019,7 @@ filter_bogus(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
     return nbytes;
 }
 
+#ifndef H5_WANT_H5_V1_4_COMPAT
 
 /*-------------------------------------------------------------------------
  * Function:	set_local_bogus2
@@ -1119,6 +1132,7 @@ filter_bogus2(unsigned int flags, size_t cd_nelmts,
     else
         return(nbytes);
 }
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 /* This message derives from H5Z */
 const H5Z_class_t H5Z_CORRUPT[1] = {{
@@ -1283,7 +1297,11 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
      */
     if ((dxpl = H5Pcreate (H5P_DATASET_XFER))<0) goto error;
     tconv_buf = malloc (1000);
-    if (H5Pset_buffer (dxpl, 1000, tconv_buf, NULL)<0) goto error;
+#ifdef H5_WANT_H5_V1_4_COMPAT
+    if (H5Pset_buffer (dxpl, (hsize_t)1000, tconv_buf, NULL)<0) goto error;
+#else /* H5_WANT_H5_V1_4_COMPAT */
+    if (H5Pset_buffer (dxpl, (size_t)1000, tconv_buf, NULL)<0) goto error;
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
     if (if_fletcher32==DISABLE_FLETCHER32) {
         if(H5Pset_edc_check(dxpl, H5Z_DISABLE_EDC)<0)
@@ -2377,6 +2395,7 @@ test_types(hid_t file)
     return -1;
 }
 
+#ifndef H5_WANT_H5_V1_4_COMPAT
 /* This message derives from H5Z */
 const H5Z_class_t H5Z_CAN_APPLY[1] = {{
     H5Z_FILTER_BOGUS,		/* Filter id number		*/
@@ -2425,7 +2444,6 @@ test_can_apply(hid_t file)
         printf("    Line %d: Can't set chunk sizes\n",__LINE__);
         goto error;
     } /* end if */
-#ifndef H5_WANT_H5_V1_4_COMPAT
     if(H5Zregister (H5Z_CAN_APPLY)<0) {
         H5_FAILED();
         printf("    Line %d: Can't register 'can apply' filter\n",__LINE__);
@@ -2436,7 +2454,6 @@ test_can_apply(hid_t file)
         printf("    Line %d: Can't set bogus filter\n",__LINE__);
         goto error;
     }
-#endif /* H5_WANT_H5_V1_4_COMPAT */
 
     /* Create the data space */
     if ((sid = H5Screate_simple(2, dims, NULL))<0) {
@@ -2542,6 +2559,7 @@ test_can_apply(hid_t file)
 error:
     return -1;
 } /* end test_can_apply() */
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 
 /*-------------------------------------------------------------------------
@@ -2671,6 +2689,7 @@ error:
     return -1;
 } /* end test_can_apply_szip() */
 
+#ifndef H5_WANT_H5_V1_4_COMPAT
 /* This message derives from H5Z */
 const H5Z_class_t H5Z_SET_LOCAL[1] = {{
     H5Z_FILTER_BOGUS2,		/* Filter id number		*/
@@ -2738,7 +2757,6 @@ test_set_local(hid_t fapl)
         printf("    Line %d: Can't set chunk sizes\n",__LINE__);
         goto error;
     } /* end if */
-#ifndef H5_WANT_H5_V1_4_COMPAT
     if(H5Zregister (H5Z_SET_LOCAL)<0) {
         H5_FAILED();
         printf("    Line %d: Can't register 'set local' filter\n",__LINE__);
@@ -2749,7 +2767,6 @@ test_set_local(hid_t fapl)
         printf("    Line %d: Can't set bogus2 filter\n",__LINE__);
         goto error;
     }
-#endif /* H5_WANT_H5_V1_4_COMPAT */
 
     /* Create the data space */
     if ((sid = H5Screate_simple(2, dims, NULL))<0) {
@@ -2943,6 +2960,7 @@ test_set_local(hid_t fapl)
 error:
     return -1;
 } /* end test_set_local() */
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 
 /*-------------------------------------------------------------------------

@@ -6173,7 +6173,11 @@ test_select(void)
     CHECK(plist_id, FAIL, "H5Pcreate");
 
     /* test I/O with a very small buffer for reads */
-    ret=H5Pset_buffer(plist_id,59,NULL,NULL);
+#ifdef H5_WANT_H5_V1_4_COMPAT
+    ret=H5Pset_buffer(plist_id,(hsize_t)59,NULL,NULL);
+#else /* H5_WANT_H5_V1_4_COMPAT */
+    ret=H5Pset_buffer(plist_id,(size_t)59,NULL,NULL);
+#endif /* H5_WANT_H5_V1_4_COMPAT */
     CHECK(ret, FAIL, "H5Pset_buffer");
 
     /* These next tests use the same file */
