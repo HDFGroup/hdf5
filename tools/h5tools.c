@@ -38,7 +38,6 @@ static void display_compound_data(hsize_t hs_nelmts, hid_t p_type,
 				  unsigned char *sm_buf, size_t p_type_nbytes,
 				  hsize_t p_nelmts, hsize_t elmtno);
 
-
 int h5dump_attr(hid_t oid, hid_t ptype);				  
 /*
  * If REPEAT_VERBOSE is defined then character strings will be printed so
@@ -889,15 +888,15 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 	    /* Print object type and close object */
 	    switch (otype) {
 	    case H5G_GROUP:
-		h5dump_str_append(str, "GRP");
+		h5dump_str_append(str, GROUPNAME);
 		H5Gclose(obj);
 		break;
 	    case H5G_DATASET:
-		h5dump_str_append(str, "DSET");
+		h5dump_str_append(str, DATASET);
 		H5Dclose(obj);
 		break;
 	    case H5G_TYPE:
-		h5dump_str_append(str, "TYPE");
+		h5dump_str_append(str, TYPE);
 		H5Tclose(obj);
 		break;
 	    default:
@@ -1737,6 +1736,7 @@ hsize_t i;
 /*char p_buf[256];		*/
 char* out_buf = malloc(sizeof(char) * nCols);
 struct h5dump_str_t tempstr;
+int x;
 
 /******************************************************************************************/
     h5dump_t		info;
@@ -1764,7 +1764,14 @@ struct h5dump_str_t tempstr;
     for (i=0; i<hs_nelmts && (elmtno+i) < p_nelmts; i++) {
 		h5dump_str_reset(&tempstr);  
 		h5dump_sprint(&tempstr, &info, container, p_type, sm_buf+i*p_type_nbytes);
+		for (x = 0; x <tempstr.len; x++){
+		/* removes the strange characters */
+			if (tempstr.s[x] == 1){
+				memmove(tempstr.s+x, tempstr.s+(x+1), strlen(tempstr.s+x));
+				tempstr.len --;
+			}
 
+		}
          if ((int)(strlen(out_buf)+tempstr.len+1) > (nCols-indent-COL)) {
              /* first row of member */
              if (compound_data && (elmtno+i+1) == dim_n_size)
@@ -1920,8 +1927,7 @@ static void display_string
 					 memset(out_buf, '\0', nCols); 
 					 temp = copy_atomic_char(out_buf,tempstr.s,tempstr.len,x);
                      out_buf[x] = '\0';
-					 printf("%s\" %s\n",
-out_buf,CONCATENATOR);
+					 printf("%s\" %s\n",out_buf,CONCATENATOR);
 					 x = temp;
                  }
              }
@@ -2520,3 +2526,4 @@ int h5dump_attr(hid_t oid, hid_t p_type){
 	free(sm_buf);
 	return (status);
 }
+
