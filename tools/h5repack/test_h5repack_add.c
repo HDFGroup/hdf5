@@ -41,7 +41,7 @@ make_deflate(hid_t fid)
  int      rank=2;
  hsize_t  dims[2]={4,2};
  hsize_t  chunk_dims[2]={2,1};
- int      buf[4][2]={1,2,3,4,5,6,7,8};
+ int      buf[4][2]={{1,2},{3,4},{5,6},{7,8}};
  
  /* create a space */
  if((sid = H5Screate_simple(rank, dims, NULL))<0)
@@ -103,7 +103,7 @@ make_szip(hid_t fid)
  int      rank=2;
  hsize_t  dims[2]={4,2};
  hsize_t  chunk_dims[2]={2,1};
- int      buf[4][2]={1,2,3,4,5,6,7,8};
+ int      buf[4][2]={{1,2},{3,4},{5,6},{7,8}};
  unsigned szip_options_mask=H5_SZIP_ALLOW_K13_OPTION_MASK|H5_SZIP_NN_OPTION_MASK;
  unsigned szip_pixels_per_block;
 
@@ -177,9 +177,7 @@ int make_dsets()
   TEST_ERROR;
  
  nerrors += make_deflate(fid);
-#if 1
  nerrors += make_szip(fid);
-#endif
  
  /* close */
  if(H5Fclose(fid)<0)

@@ -18,9 +18,6 @@
 #include "h5diff.h"
 #include "test_h5repack_add.h"
 
-
-
-
 /*-------------------------------------------------------------------------
  * Function:	test
  *
@@ -47,6 +44,9 @@ test()
  pack_opt_t  pack_options;
  diff_opt_t  diff_options;
  memset(&diff_options, 0, sizeof (diff_opt_t));
+
+ /* compare attributes in h5diff */
+ diff_options.attr=1;
 
  TESTING("    deflate filter");
 

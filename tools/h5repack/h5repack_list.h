@@ -27,14 +27,14 @@
  */
 
 
-int get_objlist(char* infname, 
+int get_objlist(const char* infname, 
                 pack_opt_t *options);
 
-int copy_file(char* fnamein, 
-              char* fnameout,
+int copy_file(const char* fnamein, 
+              const char* fnameout,
               pack_opt_t *options);
 
-void print_objlist(char *filename, 
+void print_objlist(const char *filename, 
                    int nobjects, 
                    trav_info_t *info );
 

@@ -42,8 +42,8 @@ static void print_options(pack_opt_t *options);
  *
  *-------------------------------------------------------------------------
  */
-int h5repack(char* infile, 
-             char* outfile, 
+int h5repack(const char* infile, 
+             const char* outfile, 
              pack_opt_t *options)
 {
  options->trip=0;
@@ -113,7 +113,7 @@ int h5repack_end  (pack_opt_t *options)
  *-------------------------------------------------------------------------
  */
 
-int h5repack_addcomp(char* str, 
+int h5repack_addcomp(const char* str, 
                      pack_opt_t *options)
 {
  obj_list_t      *obj_list=NULL; /*one object list for the -t and -c option entry */
@@ -128,6 +128,8 @@ int h5repack_addcomp(char* str,
 
  /* parse the -t option */
  obj_list=parse_comp(str,&n_objs,&comp);
+ if (obj_list==NULL)
+  return -1;
 
   /* searh for the "*" all objects character */
  for (i = 0; i < n_objs; i++) 
@@ -150,6 +152,8 @@ int h5repack_addcomp(char* str,
 
  if (options->all_comp==0)
   options_add_comp(obj_list,n_objs,comp,options->op_tbl);
+
+ free(obj_list);
  return 0;
 }
 
@@ -166,7 +170,7 @@ int h5repack_addcomp(char* str,
  */
 
 
-int h5repack_addchunk(char* str, 
+int h5repack_addchunk(const char* str, 
                       pack_opt_t *options)
 {
   
@@ -183,6 +187,8 @@ int h5repack_addchunk(char* str,
  
  /* parse the -c option */
  obj_list=parse_chunk(str,&n_objs,chunk_lengths,&chunk_rank);
+ if (obj_list==NULL)
+  return -1;
 
   /* searh for the "*" all objects character */
  for (i = 0; i < n_objs; i++) 
@@ -339,7 +345,7 @@ void print_options(pack_opt_t *options)
  *-------------------------------------------------------------------------
  */
 
-void read_info(char *filename,
+void read_info(const char *filename,
                pack_opt_t *options) 
 {
  char stype[10];

@@ -37,7 +37,8 @@
  */
 
 
-int get_objlist(char* fname, pack_opt_t *options)
+int get_objlist(const char* fname, 
+                pack_opt_t *options)
 {
  hid_t        fid; 
  int          nobjects, i;
@@ -139,8 +140,8 @@ int get_objlist(char* fname, pack_opt_t *options)
  *-------------------------------------------------------------------------
  */
 
-int copy_file(char* fnamein, 
-              char* fnameout,
+int copy_file(const char* fnamein, 
+              const char* fnameout,
               pack_opt_t *options)
 {
  hid_t       fidin; 
@@ -231,7 +232,7 @@ int copy_file(char* fnamein,
  *
  *-------------------------------------------------------------------------
  */
-void print_objlist(char *filename, 
+void print_objlist(const char *filename, 
                    int nobjects, 
                    trav_info_t *info )
 {

@@ -36,7 +36,7 @@ int          options_add_comp  ( obj_list_t *obj_list,
                                  int n_objs,
                                  comp_info_t comp,
                                  pack_opttbl_t *table );
-pack_info_t* options_get_object( char *path,
+pack_info_t* options_get_object( const char *path,
                                  pack_opttbl_t *table);
 
 

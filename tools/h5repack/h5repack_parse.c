@@ -25,10 +25,11 @@
  * Purpose: read compression info
  *
  * Return: a list of names, the number of names and its compression type
+ *  NULL, on error
  *
  * Examples: 
  * "AA,B,CDE:RLE" 
- * "*:GZIP 6"
+ * "GZIP 6"
  * "A,B:NONE"
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
@@ -39,7 +40,9 @@
  */
 
 
-obj_list_t* parse_comp(char *str, int *n_objs, comp_info_t *comp)
+obj_list_t* parse_comp(const char *str, 
+                       int *n_objs, 
+                       comp_info_t *comp)
 {
  unsigned    i, u;
  char        c;
@@ -74,6 +77,11 @@ obj_list_t* parse_comp(char *str, int *n_objs, comp_info_t *comp)
   
  n++;
  obj_list=malloc(n*sizeof(obj_list_t));
+ if (obj_list==NULL)
+ {
+  printf("Could not alloc object list\n");
+  return NULL;
+ }
  *n_objs=n;
 
  /* get object list */
@@ -114,6 +122,7 @@ obj_list_t* parse_comp(char *str, int *n_objs, comp_info_t *comp)
     for ( m=0,u=i+1; u<len; u++,m++) {
      c = str[u];
      if (!isdigit(c)){
+      if (obj_list) free(obj_list);
       printf("Input Error: Compression parameter not digit in <%s>\n",str);
       exit(1);
      }
@@ -221,10 +230,11 @@ char* get_scomp(int code)
  * Purpose: read chunkink info
  *
  * Return: a list of names, the number of names and its chunking info
+ *  NULL, on error
  *
  * Examples: 
  * "AA,B,CDE:10X10 
- * "*:10X10"
+ * "10X10"
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -234,7 +244,7 @@ char* get_scomp(int code)
  */
 
 
-obj_list_t* parse_chunk(char *str, 
+obj_list_t* parse_chunk(const char *str, 
                         int *n_objs, 
                         hsize_t *chunk_lengths, 
                         int *chunk_rank)
@@ -268,6 +278,11 @@ obj_list_t* parse_chunk(char *str,
   
  n++;
  obj_list=malloc(n*sizeof(obj_list_t));
+ if (obj_list==NULL)
+ {
+  printf("Could not alloc object list\n");
+  return NULL;
+ }
  *n_objs=n;
 
  /* get object list */

@@ -101,9 +101,9 @@ typedef struct {
 extern "C" {
 #endif
 
-int h5repack         (char* infile, char* outfile, pack_opt_t *options);
-int h5repack_addcomp (char* str, pack_opt_t *options);
-int h5repack_addchunk(char* str, pack_opt_t *options);
+int h5repack         (const char* infile, const char* outfile, pack_opt_t *options);
+int h5repack_addcomp (const char* str, pack_opt_t *options);
+int h5repack_addchunk(const char* str, pack_opt_t *options);
 int h5repack_init    (pack_opt_t *options, int verbose);
 int h5repack_end     (pack_opt_t *options);
 
@@ -117,7 +117,7 @@ int h5repack_end     (pack_opt_t *options);
  */
 
 
-void read_info(char *filename,pack_opt_t *options);
+void read_info(const char *filename,pack_opt_t *options);
 
 
 
