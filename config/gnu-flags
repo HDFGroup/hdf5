@@ -147,10 +147,11 @@ case "$cc_vendor-$cc_version" in
         PROD_CFLAGS="-O3 $NOFP"
         ;;
       *)
-        PROD_CFLAGS="-O $NOFP -finline-functions"
+        PROD_CFLAGS="-O $NOFP"
         ;;
     esac
 
+    PROD_CFLAGS="$PROD_CFLAGS -finline-functions"
     PROD_CPPFLAGS=
 
     # Debug
@@ -158,7 +159,7 @@ case "$cc_vendor-$cc_version" in
     DEBUG_CPPFLAGS=
 
     # Profile
-    PROFILE_CFLAGS=-g -pg
+    PROFILE_CFLAGS="-g -pg"
     PROFILE_CPPFLAGS=
     ;;
 esac
@@ -168,18 +169,48 @@ esac
 # Please follow the pattern below by adding new versions at the top, copying
 # the information from the previous version and adding modifications to that.
 case "$cc_vendor-$cc_version" in
-  gcc-3.3*)
+  gcc-3.4*)
     # Replace -ansi flag with -std=c99 flag
     CFLAGS="`echo $CFLAGS | sed -e 's/-ansi/-std=c99/g'`"
 
-    # Append warning flags from gcc-2.95.* case
+    # Disable warnings about using 'long long' type
     CFLAGS="$CFLAGS -Wno-long-long"
 
     # Append warning flags from gcc-3* case
     CFLAGS="$CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
 
     # Append warning flags from gcc-3.2* case
-    CFLAGS="$CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization"
+    CFLAGS="$CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wmultichar"
+
+    # The "format=2" warning generates too many warnings about valid
+    # usage in the library.
+    #CFLAGS="$CFLAGS -Wformat=2"
+
+    # The "unreachable code" warning does not appear to be reliable yet...
+    #CFLAGS="$CFLAGS -Wunreachable-code"
+
+    # Append warning flags from gcc-3.3* case
+    CFLAGS="$CFLAGS -Wendif-labels"
+
+    # Append more extra warning flags that only gcc3.4+ know about
+    CFLAGS="$CFLAGS -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch"
+
+    # Flags are set
+    cc_flags_set=yes
+    ;;
+
+  gcc-3.3*)
+    # Replace -ansi flag with -std=c99 flag
+    CFLAGS="`echo $CFLAGS | sed -e 's/-ansi/-std=c99/g'`"
+
+    # Disable warnings about using 'long long' type
+    CFLAGS="$CFLAGS -Wno-long-long"
+
+    # Append warning flags from gcc-3* case
+    CFLAGS="$CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
+
+    # Append warning flags from gcc-3.2* case
+    CFLAGS="$CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wmultichar"
 
     # The "format=2" warning generates too many warnings about valid
     # usage in the library.
@@ -199,14 +230,14 @@ case "$cc_vendor-$cc_version" in
     # Replace -ansi flag with -std=c99 flag
     CFLAGS="`echo $CFLAGS | sed -e 's/-ansi/-std=c99/g'`"
 
-    # Append warning flags from gcc-2.95.* case
+    # Disable warnings about using 'long long' type
     CFLAGS="$CFLAGS -Wno-long-long"
 
     # Append warning flags from gcc-3* case
     CFLAGS="$CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
 
     # Append more extra warning flags that only gcc3.2+ know about
-    CFLAGS="$CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization"
+    CFLAGS="$CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wmultichar"
 
     # The "format=2" warning generates too many warnings about valid
     # usage in the library.
@@ -223,7 +254,7 @@ case "$cc_vendor-$cc_version" in
     # Replace -ansi flag with -std=c99 flag
     CFLAGS="`echo $CFLAGS | sed -e 's/-ansi/-std=c99/g'`"
 
-    # Append warning flags from gcc-2.95.* case
+    # Disable warnings about using 'long long' type
     CFLAGS="$CFLAGS -Wno-long-long"
 
     # Append some extra warning flags that only gcc3+ know about
@@ -233,17 +264,8 @@ case "$cc_vendor-$cc_version" in
     cc_flags_set=yes
     ;;
 
-  gcc-2.95*)
-    # Append some extra warning flags that only gcc2.95+ know about
-    CFLAGS="$CFLAGS -Wno-long-long"
-
-    # Flags are set
-    cc_flags_set=yes
-    ;;
-
-  gcc-2.96*)
-    # -Wno-long-long to suppress the long long warnings since we want
-    # to use it though it is not in the C89 standard.
+  gcc-2.9[56]*)
+    # Disable warnings about using 'long long' type
     CFLAGS="$CFLAGS -Wno-long-long"
 
     # Flags are set
