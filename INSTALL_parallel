@@ -26,9 +26,9 @@ configure for a few machines we tested.  If your particular platform
 is not shown or somehow the steps do not work for yours, please go
 to the next section for more detail explanations.
 
-IBM SP2: follow the instructions in INSTALL.ibm.sp.parallel.
+IBM SP2: follow the instructions in bin/config_para_ibm_sp.sh.
 
-TFLOPS: follow the instuctions in INSTALL.ascired.
+TFLOPS: follow the instuctions in INSTALL_TFLOPS.
 
 SGI Origin 2000:
 Cray T3E:
