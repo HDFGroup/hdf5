@@ -340,6 +340,9 @@ Linux 2.4 IA64 Intel  y       n       y    n    y        y           y
 
 Known Problems
 ==============
+* There are two h5dump xml tests(h5dump --xml thlink.h5 and h5dump --xml tmany.h5)
+  failed on windows xp with .NET for debug and debug dll. Release and Release
+  dll work fine. 
 
 * PGI C++ compiler fails when compiling the C++ library's tests.
   Therefore, we cannot verify that the C++ library built with the PGI C++
