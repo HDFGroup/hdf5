@@ -304,12 +304,18 @@ H5_init_interface(void)
 herr_t 
 H5dont_atexit(void)
 {
+#ifdef DONT_DO_THIS
     FUNC_ENTER_INIT(H5dont_atexit, NULL, FAIL);
+#endif /* DONT_DO_THIS */
 
     if (install_atexit_g == TRUE)
         install_atexit_g = FALSE;
 
+#ifdef DONT_DO_THIS
     FUNC_LEAVE(SUCCEED);
+#else /* DONT_DO_THIS */
+    return(SUCCEED);
+#endif /* DONT_DO_THIS */
 }
 
 
