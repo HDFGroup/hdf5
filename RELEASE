@@ -49,6 +49,8 @@ New features
      retrieved with H5Pget_sieve_buf_size().
    * Added new Virtual File Driver, Stream VFD, to send/receive entire
      HDF5 files via socket connections.
+   * As parts of VFL, HDF-GASS and HDF-SRB are also added to this release.  
+     To find out details, please read INSTALL_VFL file. 
    * Increased maximum number of dimensions for a dataset (H5S_MAX_RANK) from
      31 to 32 to align with HDF4 & netCDF.
    * Added 'query' function to VFL drivers.  Also added 'type' parameter to
