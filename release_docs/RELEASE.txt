@@ -159,6 +159,9 @@ Documentation
 New Features
 ============
 
+    * New functions H5Glink2 and H5Gmove2 were added to allow link and move to
+      be in different locations in the same file.  The old functions H5Glink 
+      and H5Gmove remain valid.  SLU - 2002/04/26 
     * Fill-value's behaviors for contiguous dataset have been redefined.  
       Basicly, dataset won't allocate space until it's necessary.  Full details
       are available at http://hdf.ncsa.uiuc.edu/RFC/Fill_Value, at this moment.

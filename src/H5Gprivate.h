@@ -125,9 +125,9 @@ __DLL__ H5G_t *H5G_reopen(H5G_t *grp);
 __DLL__ herr_t H5G_close(H5G_t *grp);
 __DLL__ H5G_t *H5G_rootof(H5F_t *f);
 __DLL__ htri_t H5G_isa(H5G_entry_t *ent);
-__DLL__ herr_t H5G_link(H5G_entry_t *loc, H5G_link_t type,
-			const char *cur_name, const char *new_name,
-			unsigned namei_flags);
+__DLL__ herr_t H5G_link(H5G_entry_t *cur_loc, const char *cur_name, 
+			H5G_entry_t *new_loc, const char *new_name, 
+			H5G_link_t type, unsigned namei_flags);
 __DLL__ int H5G_get_type(H5G_entry_t *ent);
 __DLL__ herr_t H5G_get_objinfo(H5G_entry_t *loc, const char *name,
 			       hbool_t follow_link,
@@ -140,8 +140,8 @@ __DLL__ int H5G_get_comment(H5G_entry_t *loc, const char *name,
 			     size_t bufsize, char *buf);
 __DLL__ herr_t H5G_insert(H5G_entry_t *loc, const char *name,
 			  H5G_entry_t *ent);
-__DLL__ herr_t H5G_move(H5G_entry_t *loc, const char *src_name,
-			const char *dst_name);
+__DLL__ herr_t H5G_move(H5G_entry_t *src_loc, const char *src_name,
+			H5G_entry_t *dst_loc, const char *dst_name);
 __DLL__ herr_t H5G_unlink(H5G_entry_t *loc, const char *name);
 __DLL__ herr_t H5G_find(H5G_entry_t *loc, const char *name,
 			H5G_entry_t *grp_ent/*out*/, H5G_entry_t *ent/*out*/);

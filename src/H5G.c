@@ -343,12 +343,13 @@ H5Giterate(hid_t loc_id, const char *name, int *idx,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Gmove
+ * Function:	H5Gmove2
  *
  * Purpose:	Renames an object within an HDF5 file.  The original name SRC
  *		is unlinked from the group graph and the new name DST is
  *		inserted as an atomic operation.  Both names are interpreted
- *		relative to LOC_ID which is either a file ID or a group ID.
+ *		relative to SRC_LOC_ID and DST_LOC_ID, which are either a file 
+ *		ID or a group ID.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -357,29 +358,52 @@ H5Giterate(hid_t loc_id, const char *name, int *idx,
  *
  * Modifications:
  *
+ *		Raymond Lu
+ *		Thursday, April 18, 2002
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gmove(hid_t loc_id, const char *src, const char *dst)
+H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
+	 const char *dst_name)
 {
-    H5G_entry_t		*loc=NULL;
-    
-    FUNC_ENTER (H5Gmove, FAIL);
-    H5TRACE3("e","iss",loc_id,src,dst);
+    H5G_entry_t		*src_loc=NULL;
+    H5G_entry_t		*dst_loc=NULL;
 
-    if (NULL==(loc=H5G_loc(loc_id))) {
+    FUNC_ENTER (H5Gmove2, FAIL);
+    H5TRACE4("e","isis",src_loc_id,src_name,dst_loc_id,dst_name);
+
+    if (src_loc_id != H5G_SAME_LOC && NULL==(src_loc=H5G_loc(src_loc_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
     }
-    if (!src || !*src) {
+    if (dst_loc_id != H5G_SAME_LOC && NULL==(dst_loc=H5G_loc(dst_loc_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    }
+    if (!src_name || !*src_name) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
 		      "no current name specified");
     }
-    if (!dst || !*dst) {
+    if (!dst_name || !*dst_name) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
 		      "no new name specified");
     }
 
-    if (H5G_move(loc, src, dst)<0) {
+    if(src_loc_id == H5G_SAME_LOC && dst_loc_id == H5G_SAME_LOC) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, 
+            "source and destination should not be both H5G_SAME_LOC");
+    }
+    else if(src_loc_id == H5G_SAME_LOC) {
+	src_loc = dst_loc;
+    }
+    else if(dst_loc_id == H5G_SAME_LOC) {
+	dst_loc = src_loc;
+    }
+    else if(src_loc->file != dst_loc->file) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+            "source and destination should be in the same file.");
+    }
+	
+    if (H5G_move(src_loc, src_name, dst_loc, dst_name)<0) {
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
 		      "unable to change object name");
     }
@@ -389,14 +413,15 @@ H5Gmove(hid_t loc_id, const char *src, const char *dst)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Glink
+ * Function:	H5Glink2
  *
  * Purpose:	Creates a link of the specified type from NEW_NAME to
  *		CUR_NAME.
  *
  *		If TYPE is H5G_LINK_HARD then CUR_NAME must name an existing
- *		object and both names are interpreted relative to LOC_ID
- *		which is either a file ID or a group ID.
+ *		object.  CUR_NAME and NEW_NAME are interpreted relative to 
+ *		CUR_LOC_ID and NEW_LOC_ID, which is either a file ID or a 
+ *		group ID.
  *
  * 		If TYPE is H5G_LINK_SOFT then CUR_NAME can be anything and is
  *		interpreted at lookup time relative to the group which
@@ -415,17 +440,21 @@ H5Gmove(hid_t loc_id, const char *src, const char *dst)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Glink(hid_t loc_id, H5G_link_t type, const char *cur_name,
-	 const char *new_name)
+H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type, 
+	 hid_t new_loc_id, const char *new_name)
 {
-    H5G_entry_t	*loc = NULL;
-    
-    FUNC_ENTER (H5Glink, FAIL);
-    H5TRACE4("e","iGlss",loc_id,type,cur_name,new_name);
+    H5G_entry_t	*cur_loc = NULL;
+    H5G_entry_t *new_loc = NULL;
+
+    FUNC_ENTER (H5Glink2, FAIL);
+    H5TRACE5("e","isGlis",cur_loc_id,cur_name,type,new_loc_id,new_name);
 
     /* Check arguments */
-    if (NULL==(loc=H5G_loc (loc_id))) {
+    if (cur_loc_id != H5G_SAME_LOC && NULL==(cur_loc=H5G_loc(cur_loc_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    }
+    if (new_loc_id != H5G_SAME_LOC && NULL==(new_loc=H5G_loc(new_loc_id))) {
+        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
     }
     if (type!=H5G_LINK_HARD && type!=H5G_LINK_SOFT) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "unrecognized link type");
@@ -438,7 +467,24 @@ H5Glink(hid_t loc_id, H5G_link_t type, const char *cur_name,
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "no new name specified");
     }
-    if (H5G_link (loc, type, cur_name, new_name, H5G_TARGET_NORMAL)<0) {
+
+    if(cur_loc_id == H5G_SAME_LOC && new_loc_id == H5G_SAME_LOC) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, 
+		"source and destination should not be both H5G_SAME_LOC");
+    }
+    else if(cur_loc_id == H5G_SAME_LOC) {
+        cur_loc = new_loc;
+    }
+    else if(new_loc_id == H5G_SAME_LOC) {
+   	new_loc = cur_loc;
+    }
+    else if(cur_loc->file != new_loc->file) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+            "source and destination should be in the same file.");
+    }
+
+    if (H5G_link(cur_loc, cur_name, new_loc, new_name, type, H5G_TARGET_NORMAL)
+	<0) {
 	HRETURN_ERROR (H5E_SYM, H5E_LINK, FAIL, "unable to create link");
     }
 
@@ -1866,8 +1912,8 @@ H5G_loc (hid_t loc_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_link (H5G_entry_t *loc, H5G_link_t type, const char *cur_name,
-	  const char *new_name, unsigned namei_flags)
+H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
+	  const char *new_name, H5G_link_t type, unsigned namei_flags)
 {
     H5G_entry_t		cur_obj;	/*entry for the link tail	*/
     H5G_entry_t		grp_ent;	/*ent for grp containing link hd*/
@@ -1880,7 +1926,8 @@ H5G_link (H5G_entry_t *loc, H5G_link_t type, const char *cur_name,
     FUNC_ENTER (H5G_link, FAIL);
 
     /* Check args */
-    assert (loc);
+    assert (cur_loc);
+    assert (new_loc);
     assert (cur_name && *cur_name);
     assert (new_name && *new_name);
 
@@ -1890,8 +1937,8 @@ H5G_link (H5G_entry_t *loc, H5G_link_t type, const char *cur_name,
 	 * Lookup the the new_name so we can get the group which will contain
 	 * the new entry.  The entry shouldn't exist yet.
 	 */
-	if (H5G_namei (loc, new_name, &rest, &grp_ent, NULL, H5G_TARGET_NORMAL,
-		       NULL)>=0) {
+	if (H5G_namei (new_loc, new_name, &rest, &grp_ent, NULL, 
+			H5G_TARGET_NORMAL, NULL)>=0) {
 	    HRETURN_ERROR (H5E_SYM, H5E_EXISTS, FAIL, "already exists");
 	}
 	H5E_clear (); /*it's okay that we didn't find it*/
@@ -1956,12 +2003,12 @@ H5G_link (H5G_entry_t *loc, H5G_link_t type, const char *cur_name,
 	break;
 
     case H5G_LINK_HARD:
-	if (H5G_namei(loc, cur_name, NULL, NULL, &cur_obj, namei_flags,
+	if (H5G_namei(cur_loc, cur_name, NULL, NULL, &cur_obj, namei_flags,
 		      NULL)<0) {
 	    HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL,
 			  "source object not found");
 	}
-	if (H5G_insert (loc, new_name, &cur_obj)<0) {
+	if (H5G_insert (new_loc, new_name, &cur_obj)<0) {
 	    HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
 			   "unable to create new name/link for object");
 	}
@@ -2323,21 +2370,26 @@ H5G_unlink(H5G_entry_t *loc, const char *name)
  *
  * Modifications:
  *
+ *		Raymond Lu
+ *		Thursday, April 18, 2002
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_move(H5G_entry_t *loc, const char *src_name, const char *dst_name)
+H5G_move(H5G_entry_t *src_loc, const char *src_name, H5G_entry_t *dst_loc, 
+		const char *dst_name)
 {
     H5G_stat_t		sb;
     char		*linkval=NULL;
     size_t		lv_size=32;
     
     FUNC_ENTER(H5G_move, FAIL);
-    assert(loc);
+    assert(src_loc);
+    assert(dst_loc);
     assert(src_name && *src_name);
     assert(dst_name && *dst_name);
 
-    if (H5G_get_objinfo(loc, src_name, FALSE, &sb)<0) {
+    if (H5G_get_objinfo(src_loc, src_name, FALSE, &sb)<0) {
 	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
     }
     if (H5G_LINK==sb.type) {
@@ -2352,12 +2404,12 @@ H5G_move(H5G_entry_t *loc, const char *src_name, const char *dst_name)
 			      "value");
 	    }
 	    linkval[lv_size-1] = '\0';
-	    if (H5G_linkval(loc, src_name, lv_size, linkval)<0) {
+	    if (H5G_linkval(src_loc, src_name, lv_size, linkval)<0) {
 		HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
 			      "unable to read symbolic link value");
 	    }
 	} while (linkval[lv_size-1]);
-	if (H5G_link(loc, H5G_LINK_SOFT, linkval, dst_name,
+	if (H5G_link(src_loc, linkval, dst_loc, dst_name, H5G_LINK_SOFT,
 		     H5G_TARGET_NORMAL)<0) {
 	    HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
 			  "unable to rename symbolic link");
@@ -2368,7 +2420,7 @@ H5G_move(H5G_entry_t *loc, const char *src_name, const char *dst_name)
 	/*
 	 * Rename the object.
 	 */
-	if (H5G_link(loc, H5G_LINK_HARD, src_name, dst_name,
+	if (H5G_link(src_loc, src_name, dst_loc, dst_name, H5G_LINK_HARD,
 		     H5G_TARGET_MOUNT)<0) {
 	    HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
 			  "unable to register new name for object");
@@ -2376,7 +2428,7 @@ H5G_move(H5G_entry_t *loc, const char *src_name, const char *dst_name)
     }
 
     /* Remove the old name */
-    if (H5G_unlink(loc, src_name)<0) {
+    if (H5G_unlink(src_loc, src_name)<0) {
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
 		      "unable to deregister old object name");
     }

@@ -11,6 +11,8 @@
 
 const char *FILENAME[] = {
     "unlink",
+    "new_move_a",
+    "new_move_b",
     NULL
 };
 
@@ -275,7 +277,168 @@ test_rename(hid_t file)
     } H5E_END_TRY;
     return 1;
 }
+
+    
+/*-------------------------------------------------------------------------
+ * Function:    test_new_move
+ *
+ * Purpose:     Tests H5Gmove2()
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        number of errors
+ *
+ * Programmer:  Raymond Lu 
+ *              Thursday, April 25, 2002 
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_new_move(void)
+{
+    hid_t 	fapl, file_a, file_b;
+    hid_t	grp1, grp2, grp_move, moved_grp;
+    char 	filename[1024];
+
+    TESTING("new move");
+   
+    /* Create a second file */ 
+    fapl = h5_fileaccess();
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
+    if ((file_a=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
+        goto error;
+    h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
+    if ((file_b=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
+        goto error;
+
+    /* Create groups in first file */
+    if((grp1=H5Gcreate(file_a, "group1", 0))<0) goto error;
+    if((grp2=H5Gcreate(file_a, "group2", 0))<0) goto error;
+    if((grp_move=H5Gcreate(grp1, "group_move", 0))<0) goto error;
+
+    /* Create hard and soft links. */
+    if(H5Glink2(grp1, "group_move", H5G_LINK_HARD, H5G_SAME_LOC, "hard")<0) 
+	goto error;
+    if(H5Glink2(grp1, "/group1/group_move", H5G_LINK_SOFT, grp2, "soft")<0)
+	goto error;
+
+    /* Move a group within the file.  Both of source and destination use
+     * H5G_SAME_LOC.  Should fail. */
+    H5E_BEGIN_TRY {
+        if(H5Gmove2(H5G_SAME_LOC, "group_move", H5G_SAME_LOC, "group_new_name")
+		!=FAIL) goto error;
+    } H5E_END_TRY;
+
+    /* Move a group across files.  Should fail. */
+    H5E_BEGIN_TRY {
+        if(H5Gmove2(grp1, "group_move", file_b, "group_new_name")!=FAIL)
+	    goto error;
+    } H5E_END_TRY;
     
+    /* Move a group across groups in the same file. */
+    if(H5Gmove2(grp1, "group_move", grp2, "group_new_name")<0)
+	goto error;
+
+    /* Open the group just moved to the new location. */
+    if((moved_grp = H5Gopen(grp2, "group_new_name"))<0) 
+	goto error;
+
+    H5Gclose(grp1);
+    H5Gclose(grp2);
+    H5Gclose(grp_move);
+    H5Gclose(moved_grp);
+    H5Fclose(file_a);
+    H5Fclose(file_b);
+
+    PASSED();
+    return 0;
+
+  error:
+    H5E_BEGIN_TRY {
+ 	H5Gclose(grp1);
+	H5Gclose(grp2);
+	H5Gclose(grp_move);
+        H5Gclose(moved_grp);
+	H5Fclose(file_a);
+	H5Fclose(file_b);
+    } H5E_END_TRY;
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    check_new_move
+ *
+ * Purpose:     Checks result of H5Gmove2()
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        number of errors
+ *
+ * Programmer:  Raymond Lu
+ *              Thursday, April 25, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+check_new_move(void)
+{
+    hid_t 	fapl, file;
+    H5G_stat_t	sb_hard1, sb_hard2, sb_soft;
+    char 	filename[1024];
+    char 	linkval[1024];
+
+    TESTING("check new move function");
+
+    /* Open file */
+    fapl = h5_fileaccess();
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
+    if ((file=H5Fopen(filename, H5F_ACC_RDONLY, fapl))<0) {
+        goto error;
+    }
+
+    /* Get hard link info */
+    if(H5Gget_objinfo(file, "/group2/group_new_name", TRUE, &sb_hard1)<0)
+	goto error;
+    if(H5Gget_objinfo(file, "/group1/hard", TRUE, &sb_hard2)<0)
+	goto error;
+
+    /* Check hard links */
+    if(H5G_GROUP!=sb_hard1.type || H5G_GROUP!=sb_hard2.type) {
+        H5_FAILED();
+        puts("    Unexpected object type, should have been a group");
+        goto error;
+    }
+    if( sb_hard1.objno[0]!=sb_hard2.objno[0] || 
+        sb_hard1.objno[1]!=sb_hard2.objno[1] ) { 
+        H5_FAILED();
+        puts("    Hard link test failed.  Link seems not to point to the ");
+        puts("    expected file location.");
+        goto error;
+    }
+
+    /* Check soft links */
+    if (H5Gget_linkval(file, "group2/soft", sizeof linkval, linkval)<0) {
+        goto error;
+    }
+    if (strcmp(linkval, "/group1/group_move")) {
+        H5_FAILED();
+        puts("    Soft link test failed. Wrong link value");
+        goto error;
+    }
+
+    /* Cleanup */
+    if(H5Fclose(file)<0) goto error;
+    PASSED();
+    return 0;
+
+  error:
+    return -1;
+}
 
 
 /*-------------------------------------------------------------------------
@@ -313,7 +476,9 @@ main(void)
     nerrors += test_many(file);
     nerrors += test_symlink(file);
     nerrors += test_rename(file);
-    
+    nerrors += test_new_move();
+    nerrors += check_new_move();
+ 
     /* Close */
     if (H5Fclose(file)<0) goto error;
     if (nerrors) {

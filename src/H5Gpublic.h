@@ -67,6 +67,11 @@ typedef struct H5G_stat_t {
     size_t		linklen;	/*symbolic link value length	*/
 } H5G_stat_t;
     
+#define H5G_SAME_LOC 0
+#define H5Glink(cur_loc_id, type, cur_name, new_name) \
+    H5Glink2(cur_loc_id, cur_name, type, H5G_SAME_LOC, new_name)
+#define H5Gmove(src_loc_id, src_name, dst_name) \
+    H5Gmove2(src_loc_id, src_name, H5G_SAME_LOC, dst_name)
 
 typedef herr_t (*H5G_iterate_t)(hid_t group, const char *name,
 				void *op_data);
@@ -76,9 +81,10 @@ __DLL__ hid_t H5Gopen(hid_t loc_id, const char *name);
 __DLL__ herr_t H5Gclose(hid_t group_id);
 __DLL__ herr_t H5Giterate(hid_t loc_id, const char *name, int *idx,
 			  H5G_iterate_t op, void *op_data);
-__DLL__ herr_t H5Gmove(hid_t loc_id, const char *src, const char *dst);
-__DLL__ herr_t H5Glink(hid_t loc_id, H5G_link_t type, const char *cur_name,
-		       const char *new_name);
+__DLL__ herr_t H5Gmove2(hid_t src_loc, const char *src, hid_t dst_loc, 
+			const char *dst);
+__DLL__ herr_t H5Glink2(hid_t src_loc, const char *cur_name, H5G_link_t type,
+		        hid_t dst_loc, const char *new_name);
 __DLL__ herr_t H5Gunlink(hid_t loc_id, const char *name);
 __DLL__ herr_t H5Gget_objinfo(hid_t loc_id, const char *name,
 			      hbool_t follow_link, H5G_stat_t *statbuf/*out*/);
