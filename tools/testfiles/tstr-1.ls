@@ -1,7 +1,7 @@
 #############################
  output for 'h5ls -w80 -r -d tstr.h5'
 #############################
-/tstr.h5/comp1           Dataset {3, 6}
+/comp1                   Dataset {3, 6}
     Data:
         (0,0) {[0,1,4,9,16,25,36,49,64,81,1,4,9,16,25,36,49,64,81,100,4,9,16,
         (0,0)  25,36,49,64,81,100,121,9,16,25,36,49,64,81,100,121,144,16,25,36,
@@ -303,18 +303,18 @@
         (2,5)  "abcdefgh12345678abcdefgh12345678",
         (2,5)  "abcdefgh12345678abcdefgh12345678",
         (2,5)  "abcdefgh12345678abcdefgh12345678"]}
-/tstr.h5/string1         Dataset {3, 4}
+/string1                 Dataset {3, 4}
     Data:
         (0,0) "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s0", "s1",
         (2,3) "s2"
-/tstr.h5/string2         Dataset {20}
+/string2                 Dataset {20}
     Data:
         (0) "ab cd ef1  ", "ab cd ef2  ", "ab cd ef3  ", "ab cd ef4  ",
         (4) "ab cd ef5  ", "ab cd ef6  ", "ab cd ef7  ", "ab cd ef8  ",
         (8) "ab cd ef9  ", "ab cd ef0  ", "ab cd ef1  ", "ab cd ef2  ",
         (12) "ab cd ef3  ", "ab cd ef4  ", "ab cd ef5  ", "ab cd ef6  ",
         (16) "ab cd ef7  ", "ab cd ef8  ", "ab cd ef9  ", "ab cd ef0  "
-/tstr.h5/string3         Dataset {27}
+/string3                 Dataset {27}
     Data:
         (0) "abcd0\000\000\000", "abcd1\000\000\000", "abcd2\000\000\000",
         (3) "abcd3\000\000\000", "abcd4\000\000\000", "abcd5\000\000\000",
@@ -325,7 +325,7 @@
         (18) "abcd8\000\000\000", "abcd9\000\000\000", "abcd0\000\000\000",
         (21) "abcd1\000\000\000", "abcd2\000\000\000", "abcd3\000\000\000",
         (24) "abcd4\000\000\000", "abcd5\000\000\000", "abcd6\000\000\000"
-/tstr.h5/string4         Dataset {3}
+/string4                 Dataset {3}
     Data:
         (0) "s1234567890123456789" ' ' repeats 147 times,
         (1) "s1234567890123456789" ' ' repeats 147 times,
