@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 1998-2001 NCSA HDF
- * 		           All rights reserved.
+ * 		      All rights reserved.
  *		      
  * Purpose:	Provides error handling in the form of a stack.  The
  *		FUNC_ENTER() macro clears the error stack whenever an API
@@ -29,7 +29,7 @@
  *
  */
 #include "H5private.h"		/* Generic Functions			  */
-#include "H5Iprivate.h"		/* IDs				  */
+#include "H5Iprivate.h"		/* IDs                                    */
 #include "H5Eprivate.h"		/* Private error routines		  */
 #include "H5MMprivate.h"	/* Memory management			  */
 
@@ -145,8 +145,9 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
     {H5E_CANTGET,		"Can't get value"},
     {H5E_CANTSET,		"Can't set value"},
 
-    /* Parallel I/O errors */
-    {H5E_MPI,		"Some MPI function failed"}
+    /* Parallel MPI errors */
+    {H5E_MPI,		"Some MPI function failed"},
+    {H5E_MPIERRSTR,     "MPI Error String"}
 };
 
 /* Interface initialization? */
@@ -174,6 +175,14 @@ H5E_t *H5E_get_stack(void);
  * thread first calls H5E_push().  */
 H5E_t		H5E_stack_g[1];
 #define H5E_get_my_stack()	(H5E_stack_g+0)
+#endif
+
+#ifdef H5_HAVE_PARALLEL
+/*
+ * variables used for MPI error reporting
+ */
+char	H5E_mpi_error_str[MPI_MAX_ERROR_STRING];
+int	H5E_mpi_error_str_len;
 #endif
 
 /*

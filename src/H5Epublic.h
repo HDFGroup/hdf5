@@ -186,7 +186,8 @@ typedef enum H5E_minor_t {
     H5E_CANTSET,                /*Can't set value */
 
     /* Parallel errors */
-    H5E_MPI			/*some MPI function failed		     */
+    H5E_MPI,			/*some MPI function failed		     */
+    H5E_MPIERRSTR		/*MPI Error String 			     */
 } H5E_minor_t;
 
 /* Information about an error */

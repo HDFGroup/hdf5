@@ -1,5 +1,5 @@
 /*
- * Copyright © 1999-2001 NCSA
+ * Copyright (c) 1999-2002 NCSA
  *                       All rights reserved.
  *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
@@ -719,6 +719,7 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     MPI_File			fh;
     int				mpi_amode;
     int				mpi_rank;
+    int				mpi_code;	/* mpi return code */
     MPI_Offset			size;
     const H5FD_mpio_fapl_t	*fa=NULL;
     H5FD_mpio_fapl_t		_fa;
@@ -788,8 +789,9 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 #endif
 
     /*OKAY: CAST DISCARDS CONST*/
-    if (MPI_SUCCESS != MPI_File_open(fa->comm, (char*)name, mpi_amode, fa->info, &fh))
-        HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, NULL, "MPI_File_open failed");
+    if (MPI_SUCCESS !=
+	(mpi_code=MPI_File_open(fa->comm, (char*)name, mpi_amode, fa->info, &fh)))
+	    HMPI_RETURN_ERROR(NULL, "MPI_File_open failed", mpi_code);
 
 
 /*  Following changes in handling file-truncation made be rkyates and ppweidhaas, sep 99  */
@@ -1551,9 +1553,11 @@ H5FD_mpio_flush(H5FD_t *_file)
 {
     H5FD_mpio_t		*file = (H5FD_mpio_t*)_file;
     int                 mpi_rank=-1;
+    int			mpi_code;	/* mpi return code */
     uint8_t             byte=0;
     MPI_Status          mpi_stat = {0};
     MPI_Offset          mpi_off;
+    herr_t              ret_value=SUCCEED;
 
     FUNC_ENTER(H5FD_mpio_flush, FAIL);
 
@@ -1593,15 +1597,16 @@ H5FD_mpio_flush(H5FD_t *_file)
     }
 
 
-    if (MPI_SUCCESS != MPI_File_sync(file->f))
-        HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_sync failed");
+    if (MPI_SUCCESS != (mpi_code=MPI_File_sync(file->f)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_File_sync failed", mpi_code);
 
+done:
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'t'])
     	fprintf(stdout, "Leaving H5FD_mpio_flush\n" );
 #endif
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE(ret_value);
 }
 
 
