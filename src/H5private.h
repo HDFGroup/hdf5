@@ -579,7 +579,7 @@ __DLL__ int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDmkfifo(S,M)		mkfifo(S,M)
 #define HDmktime(T)		mktime(T)
 #define HDmodf(X,Y)		modf(X,Y)
-#ifdef HAVE__O_BINARY
+#ifdef O_BINARY
 #define HDopen(S,F,M)		open(S,F|_O_BINARY,M)
 #else
 #define HDopen(S,F,M)		open(S,F,M)
