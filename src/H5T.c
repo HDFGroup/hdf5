@@ -246,6 +246,197 @@ static herr_t H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src,
 static herr_t H5T_register(H5T_pers_t pers, const char *name, H5T_t *src,
         H5T_t *dst, H5T_conv_t func, hid_t dxpl_id);
 
+/*
+ * Type initialization macros
+ *
+ * These use the "template macro" technique to reduce the amount of gratuitous
+ * duplicated code when initializing the datatypes for the library.  The main
+ * template macro is the H5T_INIT_TYPE() macro below.
+ *
+ */
+
+/* Define the code template for types which need no extra initialization for the "GUTS" in the H5T_INIT_TYPE macro */
+#define H5T_INIT_TYPE_NONE_CORE {					      \
+}
+
+/* Define the code template for bitfields for the "GUTS" in the H5T_INIT_TYPE macro */
+#define H5T_INIT_TYPE_BITFIELD_CORE {					      \
+    dt->type = H5T_BITFIELD;						      \
+}
+
+/* Define the code template for times for the "GUTS" in the H5T_INIT_TYPE macro */
+#define H5T_INIT_TYPE_TIME_CORE {					      \
+    dt->type = H5T_TIME;						      \
+}
+
+/* Define the code template for types which reset the offset for the "GUTS" in the H5T_INIT_TYPE macro */
+#define H5T_INIT_TYPE_OFFSET_CORE {					      \
+    dt->u.atomic.offset = 0;						      \
+}
+
+/* Define common code for all numeric types (floating-point & int, signed & unsigned) */
+#define H5T_INIT_TYPE_NUM_COMMON(ENDIANNESS) {				      \
+    dt->u.atomic.order = ENDIANNESS;					      \
+    dt->u.atomic.offset = 0;						      \
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;				      \
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;				      \
+}
+
+/* Define the code templates for standard floats for the "GUTS" in the H5T_INIT_TYPE macro */
+#define H5T_INIT_TYPE_FLOAT_COMMON(ENDIANNESS) {			      \
+    H5T_INIT_TYPE_NUM_COMMON(ENDIANNESS)				      \
+    dt->u.atomic.u.f.sign = 31;						      \
+    dt->u.atomic.u.f.epos = 23;						      \
+    dt->u.atomic.u.f.esize = 8;						      \
+    dt->u.atomic.u.f.ebias = 0x7f;					      \
+    dt->u.atomic.u.f.mpos = 0;						      \
+    dt->u.atomic.u.f.msize = 23;					      \
+    dt->u.atomic.u.f.norm = H5T_NORM_IMPLIED;				      \
+    dt->u.atomic.u.f.pad = H5T_PAD_ZERO;				      \
+}
+
+#define H5T_INIT_TYPE_FLOATLE_CORE {					      \
+    H5T_INIT_TYPE_FLOAT_COMMON(H5T_ORDER_LE)				      \
+}
+
+#define H5T_INIT_TYPE_FLOATBE_CORE {					      \
+    H5T_INIT_TYPE_FLOAT_COMMON(H5T_ORDER_BE)				      \
+}
+
+/* Define the code templates for standard doubles for the "GUTS" in the H5T_INIT_TYPE macro */
+#define H5T_INIT_TYPE_DOUBLE_COMMON(ENDIANNESS) {			      \
+    H5T_INIT_TYPE_NUM_COMMON(ENDIANNESS)				      \
+    dt->u.atomic.u.f.sign = 63;						      \
+    dt->u.atomic.u.f.epos = 52;						      \
+    dt->u.atomic.u.f.esize = 11;					      \
+    dt->u.atomic.u.f.ebias = 0x03ff;					      \
+    dt->u.atomic.u.f.mpos = 0;						      \
+    dt->u.atomic.u.f.msize = 52;					      \
+    dt->u.atomic.u.f.norm = H5T_NORM_IMPLIED;				      \
+    dt->u.atomic.u.f.pad = H5T_PAD_ZERO;				      \
+}
+
+#define H5T_INIT_TYPE_DOUBLELE_CORE {					      \
+    H5T_INIT_TYPE_DOUBLE_COMMON(H5T_ORDER_LE)				      \
+}
+
+#define H5T_INIT_TYPE_DOUBLEBE_CORE {					      \
+    H5T_INIT_TYPE_DOUBLE_COMMON(H5T_ORDER_BE)				      \
+}
+
+/* Define the code templates for standard signed integers for the "GUTS" in the H5T_INIT_TYPE macro */
+#define H5T_INIT_TYPE_SINT_COMMON(ENDIANNESS) {				      \
+    H5T_INIT_TYPE_NUM_COMMON(ENDIANNESS)				      \
+    dt->u.atomic.u.i.sign = H5T_SGN_2;					      \
+}
+
+#define H5T_INIT_TYPE_SINTLE_CORE {					      \
+    H5T_INIT_TYPE_SINT_COMMON(H5T_ORDER_LE)				      \
+}
+
+#define H5T_INIT_TYPE_SINTBE_CORE {					      \
+    H5T_INIT_TYPE_SINT_COMMON(H5T_ORDER_BE)				      \
+}
+
+/* Define the code templates for standard unsigned integers for the "GUTS" in the H5T_INIT_TYPE macro */
+#define H5T_INIT_TYPE_UINT_COMMON(ENDIANNESS) {				      \
+    H5T_INIT_TYPE_NUM_COMMON(ENDIANNESS)				      \
+    dt->u.atomic.u.i.sign = H5T_SGN_NONE;				      \
+}
+
+#define H5T_INIT_TYPE_UINTLE_CORE {					      \
+    H5T_INIT_TYPE_UINT_COMMON(H5T_ORDER_LE)				      \
+}
+
+#define H5T_INIT_TYPE_UINTBE_CORE {					      \
+    H5T_INIT_TYPE_UINT_COMMON(H5T_ORDER_BE)				      \
+}
+
+/* Define a macro for common code for all newly allocate datatypes */
+#define H5T_INIT_TYPE_ALLOC_COMMON(TYPE) {				      \
+    dt->ent.header = HADDR_UNDEF;					      \
+    dt->type = TYPE;							      \
+}
+
+/* Define the code templates for opaque for the "GUTS" in the H5T_INIT_TYPE macro */
+#define H5T_INIT_TYPE_OPAQUE_CORE {					      \
+    H5T_INIT_TYPE_ALLOC_COMMON(H5T_OPAQUE)				      \
+    dt->u.opaque.tag = H5MM_strdup("");					      \
+}
+
+/* Define the code templates for strings for the "GUTS" in the H5T_INIT_TYPE macro */
+#define H5T_INIT_TYPE_STRING_COMMON {					      \
+    H5T_INIT_TYPE_ALLOC_COMMON(H5T_STRING)				      \
+    H5T_INIT_TYPE_NUM_COMMON(H5T_ORDER_NONE)				      \
+    dt->u.atomic.u.s.cset = H5T_CSET_ASCII;				      \
+}
+
+#define H5T_INIT_TYPE_CSTRING_CORE {					      \
+    H5T_INIT_TYPE_STRING_COMMON						      \
+    dt->u.atomic.u.s.pad = H5T_STR_NULLTERM;				      \
+}
+
+#define H5T_INIT_TYPE_FORSTRING_CORE {					      \
+    H5T_INIT_TYPE_STRING_COMMON						      \
+    dt->u.atomic.u.s.pad = H5T_STR_SPACEPAD;				      \
+}
+
+/* Define the code templates for references for the "GUTS" in the H5T_INIT_TYPE macro */
+#define H5T_INIT_TYPE_REF_COMMON {					      \
+    H5T_INIT_TYPE_ALLOC_COMMON(H5T_REFERENCE)				      \
+    H5T_INIT_TYPE_NUM_COMMON(H5T_ORDER_NONE)				      \
+}
+
+#define H5T_INIT_TYPE_OBJREF_CORE {					      \
+    H5T_INIT_TYPE_REF_COMMON						      \
+    dt->force_conv = TRUE;						      \
+    dt->u.atomic.u.r.rtype = H5R_OBJECT;				      \
+    dt->u.atomic.u.r.loc = H5T_LOC_MEMORY;				      \
+}
+
+#define H5T_INIT_TYPE_REGREF_CORE {					      \
+    H5T_INIT_TYPE_REF_COMMON						      \
+    dt->u.atomic.u.r.rtype = H5R_DATASET_REGION;			      \
+}
+
+/* Define the code templates for the "SIZE_TMPL" in the H5T_INIT_TYPE macro */
+#define H5T_INIT_TYPE_SET_SIZE(SIZE) {					      \
+    dt->size = SIZE;							      \
+    dt->u.atomic.prec = 8*SIZE;						      \
+}
+
+#define H5T_INIT_TYPE_NOSET_SIZE(SIZE) {				      \
+}
+
+/* Define the code templates for the "CRT_TMPL" in the H5T_INIT_TYPE macro */
+#define H5T_INIT_TYPE_COPY_CREATE(BASE) {				      \
+    /* Base off of existing datatype */					      \
+    if(NULL==(dt = H5T_copy(BASE,H5T_COPY_TRANSIENT)))			      \
+        HGOTO_ERROR (H5E_RESOURCE, H5E_CANTCOPY, FAIL, "duplicating base type failed") \
+}
+
+#define H5T_INIT_TYPE_ALLOC_CREATE(BASE) {				      \
+    /* Allocate new datatype info */					      \
+    if (NULL==(dt = H5FL_CALLOC(H5T_t)))				      \
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed") \
+}
+
+#define H5T_INIT_TYPE(GUTS,GLOBAL,CRT_TMPL,BASE,SIZE_TMPL,SIZE) {	      \
+    /* Get new datatype struct */					      \
+    H5_GLUE3(H5T_INIT_TYPE_,CRT_TMPL,_CREATE)(BASE)			      \
+									      \
+    /* Adjust information for all types */				      \
+    dt->state = H5T_STATE_IMMUTABLE;					      \
+    H5_GLUE3(H5T_INIT_TYPE_,SIZE_TMPL,_SIZE)(SIZE)			      \
+									      \
+    /* Adjust information for this type */				      \
+    H5_GLUE3(H5T_INIT_TYPE_,GUTS,_CORE)					      \
+									      \
+    /* Atomize result */						      \
+    if ((GLOBAL = H5I_register(H5I_DATATYPE, dt)) < 0)			      \
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom") \
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5T_init
@@ -303,8 +494,15 @@ H5T_init_interface(void)
     H5T_t       *native_ullong=NULL;    /* Datatype structure for native unsigned llong */
     H5T_t       *native_float=NULL;     /* Datatype structure for native float */
     H5T_t       *native_double=NULL;    /* Datatype structure for native double */
+    H5T_t       *std_u8le=NULL;         /* Datatype structure for unsigned 8-bit little-endian integer */
+    H5T_t       *std_u8be=NULL;         /* Datatype structure for unsigned 8-bit big-endian integer */
+    H5T_t       *std_u16le=NULL;        /* Datatype structure for unsigned 16-bit little-endian integer */
+    H5T_t       *std_u16be=NULL;        /* Datatype structure for unsigned 16-bit big-endian integer */
     H5T_t       *std_u32le=NULL;        /* Datatype structure for unsigned 32-bit little-endian integer */
+    H5T_t       *std_u32be=NULL;        /* Datatype structure for unsigned 32-bit big-endian integer */
     H5T_t       *std_i32le=NULL;        /* Datatype structure for signed 32-bit little-endian integer */
+    H5T_t       *std_u64le=NULL;        /* Datatype structure for unsigned 64-bit little-endian integer */
+    H5T_t       *std_u64be=NULL;        /* Datatype structure for unsigned 64-bit big-endian integer */
     H5T_t       *ieee_f64le=NULL;       /* Datatype structure for IEEE 64-bit little-endian floating-point */
     H5T_t	*dt = NULL;
     H5T_t	*fixedpt=NULL;          /* Datatype structure for native int */
@@ -369,1282 +567,228 @@ H5T_init_interface(void)
      *------------------------------------------------------------ 
      */
 
-    /* int8 */
-    if (H5T_NATIVE_INT8_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_int,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-	dt->state = H5T_STATE_IMMUTABLE;
-	dt->size = 1;
-	dt->u.atomic.prec = 8;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_INT8_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-    if (H5T_NATIVE_UINT8_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-	dt->state = H5T_STATE_IMMUTABLE;
-	dt->size = 1;
-	dt->u.atomic.prec = 8;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_UINT8_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    }
-    if (H5T_NATIVE_INT_LEAST8_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_int,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-	dt->state = H5T_STATE_IMMUTABLE;
-	dt->size = 1;
-	dt->u.atomic.prec = 8;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_INT_LEAST8_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    }
-    if (H5T_NATIVE_UINT_LEAST8_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-	dt->state = H5T_STATE_IMMUTABLE;
-	dt->size = 1;
-	dt->u.atomic.prec = 8;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_UINT_LEAST8_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    }
-    if (H5T_NATIVE_INT_FAST8_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_int,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-	dt->state = H5T_STATE_IMMUTABLE;
-	dt->size = 1;
-	dt->u.atomic.prec = 8;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_INT_FAST8_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    }
-    if (H5T_NATIVE_UINT_FAST8_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-	dt->state = H5T_STATE_IMMUTABLE;
-	dt->size = 1;
-	dt->u.atomic.prec = 8;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_UINT_FAST8_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    }
-    
-    /* int16 */
-    if (H5T_NATIVE_INT16_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_int,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-	dt->state = H5T_STATE_IMMUTABLE;
-	dt->size = 2;
-	dt->u.atomic.prec = 16;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_INT16_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    }
-    if (H5T_NATIVE_UINT16_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-	dt->state = H5T_STATE_IMMUTABLE;
-	dt->size = 2;
-	dt->u.atomic.prec = 16;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_UINT16_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    }
-    if (H5T_NATIVE_INT_LEAST16_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_int,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-	dt->state = H5T_STATE_IMMUTABLE;
-	dt->size = 2;
-	dt->u.atomic.prec = 16;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_INT_LEAST16_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    }
-    if (H5T_NATIVE_UINT_LEAST16_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-	dt->state = H5T_STATE_IMMUTABLE;
-	dt->size = 2;
-	dt->u.atomic.prec = 16;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_UINT_LEAST16_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    }
-    if (H5T_NATIVE_INT_FAST16_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_int,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-	dt->state = H5T_STATE_IMMUTABLE;
-	dt->size = 2;
-	dt->u.atomic.prec = 16;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_INT_FAST16_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    }
-    if (H5T_NATIVE_UINT_FAST16_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-	dt->state = H5T_STATE_IMMUTABLE;
-	dt->size = 2;
-	dt->u.atomic.prec = 16;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_UINT_FAST16_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    }
-    
-    /* int32 */
-    if (H5T_NATIVE_INT32_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_int,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-	dt->state = H5T_STATE_IMMUTABLE;
-	dt->size = 4;
-	dt->u.atomic.prec = 32;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_INT32_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    }
-    if (H5T_NATIVE_UINT32_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-	dt->state = H5T_STATE_IMMUTABLE;
-	dt->size = 4;
-	dt->u.atomic.prec = 32;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_UINT32_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    }
-    if (H5T_NATIVE_INT_LEAST32_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_int,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-	dt->state = H5T_STATE_IMMUTABLE;
-	dt->size = 4;
-	dt->u.atomic.prec = 32;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_INT_LEAST32_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    }
-    if (H5T_NATIVE_UINT_LEAST32_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-	dt->state = H5T_STATE_IMMUTABLE;
-	dt->size = 4;
-	dt->u.atomic.prec = 32;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_UINT_LEAST32_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    }
-    if (H5T_NATIVE_INT_FAST32_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_int,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-	dt->state = H5T_STATE_IMMUTABLE;
-	dt->size = 4;
-	dt->u.atomic.prec = 32;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_INT_FAST32_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    }
-    if (H5T_NATIVE_UINT_FAST32_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-	dt->state = H5T_STATE_IMMUTABLE;
-	dt->size = 4;
-	dt->u.atomic.prec = 32;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_UINT_FAST32_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    }
-    
-    /* int64 */
-    if (H5T_NATIVE_INT64_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_int,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-	dt->state = H5T_STATE_IMMUTABLE;
-	dt->size = 8;
-	dt->u.atomic.prec = 64;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_INT64_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    }
-    if (H5T_NATIVE_UINT64_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-	dt->state = H5T_STATE_IMMUTABLE;
-	dt->size = 8;
-	dt->u.atomic.prec = 64;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_UINT64_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    }
-    if (H5T_NATIVE_INT_LEAST64_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_int,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-	dt->state = H5T_STATE_IMMUTABLE;
-	dt->size = 8;
-	dt->u.atomic.prec = 64;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_INT_LEAST64_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    }
-    if (H5T_NATIVE_UINT_LEAST64_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-	dt->state = H5T_STATE_IMMUTABLE;
-	dt->size = 8;
-	dt->u.atomic.prec = 64;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_UINT_LEAST64_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    }
-    if (H5T_NATIVE_INT_FAST64_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_int,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-	dt->state = H5T_STATE_IMMUTABLE;
-	dt->size = 8;
-	dt->u.atomic.prec = 64;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_INT_FAST64_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    }
-    if (H5T_NATIVE_UINT_FAST64_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-	dt->state = H5T_STATE_IMMUTABLE;
-	dt->size = 8;
-	dt->u.atomic.prec = 64;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_UINT_FAST64_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    }
-    
-
-    /*------------------------------------------------------------
-     * Native types
-     *------------------------------------------------------------ 
+    /* Use this global as a proxy for all the globals, since they all get
+     * initialized and shutdown at the same time.
      */
+    if(H5T_NATIVE_INT_LEAST8_g<0) {
+        /* int8 */
+        H5T_INIT_TYPE(NONE,H5T_NATIVE_INT_LEAST8_g,COPY,native_int,SET,1)
+        H5T_INIT_TYPE(NONE,H5T_NATIVE_UINT_LEAST8_g,COPY,native_uint,SET,1)
+        H5T_INIT_TYPE(NONE,H5T_NATIVE_INT_FAST8_g,COPY,native_int,SET,1)
+        H5T_INIT_TYPE(NONE,H5T_NATIVE_UINT_FAST8_g,COPY,native_uint,SET,1)
+        
+        /* int16 */
+        H5T_INIT_TYPE(NONE,H5T_NATIVE_INT_LEAST16_g,COPY,native_int,SET,2)
+        H5T_INIT_TYPE(NONE,H5T_NATIVE_UINT_LEAST16_g,COPY,native_uint,SET,2)
+        H5T_INIT_TYPE(NONE,H5T_NATIVE_INT_FAST16_g,COPY,native_int,SET,2)
+        H5T_INIT_TYPE(NONE,H5T_NATIVE_UINT_FAST16_g,COPY,native_uint,SET,2)
+        
+        /* int32 */
+        H5T_INIT_TYPE(NONE,H5T_NATIVE_INT_LEAST32_g,COPY,native_int,SET,4)
+        H5T_INIT_TYPE(NONE,H5T_NATIVE_UINT_LEAST32_g,COPY,native_uint,SET,4)
+        H5T_INIT_TYPE(NONE,H5T_NATIVE_INT_FAST32_g,COPY,native_int,SET,4)
+        H5T_INIT_TYPE(NONE,H5T_NATIVE_UINT_FAST32_g,COPY,native_uint,SET,4)
+        
+        /* int64 */
+        H5T_INIT_TYPE(NONE,H5T_NATIVE_INT_LEAST64_g,COPY,native_int,SET,8)
+        H5T_INIT_TYPE(NONE,H5T_NATIVE_UINT_LEAST64_g,COPY,native_uint,SET,8)
+        H5T_INIT_TYPE(NONE,H5T_NATIVE_INT_FAST64_g,COPY,native_int,SET,8)
+        H5T_INIT_TYPE(NONE,H5T_NATIVE_UINT_FAST64_g,COPY,native_uint,SET,8)
+        
 
-    /* 1-byte bit field */
-    if(H5T_NATIVE_B8_g<0) {
-        /* Base off of native datatype */
-        dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->type = H5T_BITFIELD;
-        dt->size = 1;
-        dt->u.atomic.prec = 8;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_B8_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-    
-    /* 2-byte bit field */
-    if(H5T_NATIVE_B16_g<0) {
-        /* Base off of native datatype */
-        dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->type = H5T_BITFIELD;
-        dt->size = 2;
-        dt->u.atomic.prec = 16;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_B16_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-    
-    /* 4-byte bit field */
-    if(H5T_NATIVE_B32_g<0) {
-        /* Base off of native datatype */
-        dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->type = H5T_BITFIELD;
-        dt->size = 4;
-        dt->u.atomic.prec = 32;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_B32_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-    
-    /* 8-byte bit field */
-    if(H5T_NATIVE_B64_g<0) {
-        /* Base off of native datatype */
-        dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->type = H5T_BITFIELD;
-        dt->size = 8;
-        dt->u.atomic.prec = 64;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_B64_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-    
-    /* haddr_t */
-    if(H5T_NATIVE_HADDR_g<0) {
-        /* Base off of native datatype */
-        dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->size = sizeof(haddr_t);
-        dt->u.atomic.prec = 8*dt->size;
-        dt->u.atomic.offset = 0;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_HADDR_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-
-    /* hsize_t */
-    if(H5T_NATIVE_HSIZE_g<0) {
-        /* Base off of native datatype */
-        dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->size = sizeof(hsize_t);
-        dt->u.atomic.prec = 8*dt->size;
-        dt->u.atomic.offset = 0;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_HSIZE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-    
-    /* hssize_t */
-    if(H5T_NATIVE_HSSIZE_g<0) {
-        /* Base off of native datatype */
-        dt = H5T_copy(native_int,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->size = sizeof(hssize_t);
-        dt->u.atomic.prec = 8*dt->size;
-        dt->u.atomic.offset = 0;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_HSSIZE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-    
-    /* herr_t */
-    if(H5T_NATIVE_HERR_g<0) {
-        /* Base off of native datatype */
-        dt = H5T_copy(native_int,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->size = sizeof(herr_t);
-        dt->u.atomic.prec = 8*dt->size;
-        dt->u.atomic.offset = 0;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_HERR_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-
-    /* hbool_t */
-    if(H5T_NATIVE_HBOOL_g<0) {
-        /* Base off of native datatype */
-        dt = H5T_copy(native_int,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->size = sizeof(hbool_t);
-        dt->u.atomic.prec = 8*dt->size;
-        dt->u.atomic.offset = 0;
-
-        /* Atomize result */
-        if ((H5T_NATIVE_HBOOL_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-
-    /*------------------------------------------------------------
-     * IEEE Types
-     *------------------------------------------------------------ 
-     */
-
-    /* IEEE 4-byte little-endian float */
-    if (H5T_IEEE_F32LE_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_double,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->size = 4;
-        dt->u.atomic.offset = 0;
-        dt->u.atomic.prec = 32;
-        dt->u.atomic.order = H5T_ORDER_LE;
-        dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.u.f.sign = 31;
-        dt->u.atomic.u.f.epos = 23;
-        dt->u.atomic.u.f.esize = 8;
-        dt->u.atomic.u.f.ebias = 0x7f;
-        dt->u.atomic.u.f.mpos = 0;
-        dt->u.atomic.u.f.msize = 23;
-        dt->u.atomic.u.f.norm = H5T_NORM_IMPLIED;
-        dt->u.atomic.u.f.pad = H5T_PAD_ZERO;
-
-        /* Atomize result */
-        if ((H5T_IEEE_F32LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-
-    /* IEEE 4-byte big-endian float */
-    if (H5T_IEEE_F32BE_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_double,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->size = 4;
-        dt->u.atomic.offset = 0;
-        dt->u.atomic.prec = 32;
-        dt->u.atomic.order = H5T_ORDER_BE;
-        dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.u.f.sign = 31;
-        dt->u.atomic.u.f.epos = 23;
-        dt->u.atomic.u.f.esize = 8;
-        dt->u.atomic.u.f.ebias = 0x7f;
-        dt->u.atomic.u.f.mpos = 0;
-        dt->u.atomic.u.f.msize = 23;
-        dt->u.atomic.u.f.norm = H5T_NORM_IMPLIED;
-        dt->u.atomic.u.f.pad = H5T_PAD_ZERO;
-
-        /* Atomize result */
-        if ((H5T_IEEE_F32BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-
-    /* IEEE 8-byte little-endian float */
-    if (H5T_IEEE_F64LE_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_double,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->size = 8;
-        dt->u.atomic.offset = 0;
-        dt->u.atomic.prec = 64;
-        dt->u.atomic.order = H5T_ORDER_LE;
-        dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.u.f.sign = 63;
-        dt->u.atomic.u.f.epos = 52;
-        dt->u.atomic.u.f.esize = 11;
-        dt->u.atomic.u.f.ebias = 0x03ff;
-        dt->u.atomic.u.f.mpos = 0;
-        dt->u.atomic.u.f.msize = 52;
-        dt->u.atomic.u.f.norm = H5T_NORM_IMPLIED;
-        dt->u.atomic.u.f.pad = H5T_PAD_ZERO;
-
-        /* Atomize result */
-        if ((H5T_IEEE_F64LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-
-    /* IEEE 8-byte big-endian float */
-    if (H5T_IEEE_F64BE_g<0) {
-        /* Base off of native datatype */
-	dt = H5T_copy(native_double,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->size = 8;
-        dt->u.atomic.offset = 0;
-        dt->u.atomic.prec = 64;
-        dt->u.atomic.order = H5T_ORDER_BE;
-        dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.u.f.sign = 63;
-        dt->u.atomic.u.f.epos = 52;
-        dt->u.atomic.u.f.esize = 11;
-        dt->u.atomic.u.f.ebias = 0x03ff;
-        dt->u.atomic.u.f.mpos = 0;
-        dt->u.atomic.u.f.msize = 52;
-        dt->u.atomic.u.f.norm = H5T_NORM_IMPLIED;
-        dt->u.atomic.u.f.pad = H5T_PAD_ZERO;
-
-        /* Atomize result */
-        if ((H5T_IEEE_F64BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-
-    /*------------------------------------------------------------
-     * Other "standard" types
-     *------------------------------------------------------------ 
-     */
-    
-
-    /* 1-byte little-endian (endianness is irrelevant) signed integer */
-    if(H5T_STD_I8LE_g<0) {
-        /* Base off of native datatype */
-        dt = H5T_copy(native_int,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->size = 1;
-        dt->u.atomic.offset = 0;
-        dt->u.atomic.prec = 8;
-        dt->u.atomic.order = H5T_ORDER_LE;
-        dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.u.i.sign = H5T_SGN_2;
-
-        /* Atomize result */
-        if ((H5T_STD_I8LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-    
-    /* 1-byte big-endian (endianness is irrelevant) signed integer */
-    if(H5T_STD_I8BE_g<0) {
-        /* Base off of native datatype */
-        dt = H5T_copy(native_int,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->size = 1;
-        dt->u.atomic.offset = 0;
-        dt->u.atomic.prec = 8;
-        dt->u.atomic.order = H5T_ORDER_BE;
-        dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.u.i.sign = H5T_SGN_2;
-
-        /* Atomize result */
-        if ((H5T_STD_I8BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-    
-    /* 2-byte little-endian signed integer */
-    if(H5T_STD_I16LE_g<0) {
-        /* Base off of native datatype */
-        dt = H5T_copy(native_int,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->size = 2;
-        dt->u.atomic.offset = 0;
-        dt->u.atomic.prec = 16;
-        dt->u.atomic.order = H5T_ORDER_LE;
-        dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.u.i.sign = H5T_SGN_2;
-
-        /* Atomize result */
-        if ((H5T_STD_I16LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-    
-    /* 2-byte big-endian signed integer */
-    if(H5T_STD_I16BE_g<0) {
-        /* Base off of native datatype */
-        dt = H5T_copy(native_int,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->size = 2;
-        dt->u.atomic.offset = 0;
-        dt->u.atomic.prec = 16;
-        dt->u.atomic.order = H5T_ORDER_BE;
-        dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.u.i.sign = H5T_SGN_2;
-
-        /* Atomize result */
-        if ((H5T_STD_I16BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-    
-    /* 4-byte little-endian signed integer */
-    if(H5T_STD_I32LE_g<0) {
-        /* Base off of native datatype */
-        dt = H5T_copy(native_int,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->size = 4;
-        dt->u.atomic.offset = 0;
-        dt->u.atomic.prec = 32;
-        dt->u.atomic.order = H5T_ORDER_LE;
-        dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.u.i.sign = H5T_SGN_2;
-
-        /* Atomize result */
-        if ((H5T_STD_I32LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-    
-    /* 4-byte big-endian signed integer */
-    if(H5T_STD_I32BE_g<0) {
-        /* Base off of native datatype */
-        dt = H5T_copy(native_int,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->size = 4;
-        dt->u.atomic.offset = 0;
-        dt->u.atomic.prec = 32;
-        dt->u.atomic.order = H5T_ORDER_BE;
-        dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.u.i.sign = H5T_SGN_2;
-
-        /* Atomize result */
-        if ((H5T_STD_I32BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-    
-    /* 8-byte little-endian signed integer */
-    if(H5T_STD_I64LE_g<0) {
-        /* Base off of native datatype */
-        dt = H5T_copy(native_int,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->size = 8;
-        dt->u.atomic.offset = 0;
-        dt->u.atomic.prec = 64;
-        dt->u.atomic.order = H5T_ORDER_LE;
-        dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.u.i.sign = H5T_SGN_2;
-
-        /* Atomize result */
-        if ((H5T_STD_I64LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-    
-    /* 8-byte big-endian signed integer */
-    if(H5T_STD_I64BE_g<0) {
-        /* Base off of native datatype */
-        dt = H5T_copy(native_int,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->size = 8;
-        dt->u.atomic.offset = 0;
-        dt->u.atomic.prec = 64;
-        dt->u.atomic.order = H5T_ORDER_BE;
-        dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.u.i.sign = H5T_SGN_2;
-
-        /* Atomize result */
-        if ((H5T_STD_I64BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-    
-    /* 1-byte little-endian (endianness is irrelevant) unsigned integer */
-    if(H5T_STD_U8LE_g<0) {
-        /* Base off of native datatype */
-        dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->size = 1;
-        dt->u.atomic.offset = 0;
-        dt->u.atomic.prec = 8;
-        dt->u.atomic.order = H5T_ORDER_LE;
-        dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.u.i.sign = H5T_SGN_NONE;
-
-        /* Atomize result */
-        if ((H5T_STD_U8LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-
-        /*
-         * Register little-endian (order is irrelevant) 8-bit bitfield now also
+        /*------------------------------------------------------------
+         * Native types
+         *------------------------------------------------------------ 
          */
-        /* Base off of current datatype */
-        dt = H5T_copy(dt,H5T_COPY_TRANSIENT);
-        assert(dt);
 
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->type = H5T_BITFIELD;
+        /* 1-byte bit field */
+        H5T_INIT_TYPE(BITFIELD,H5T_NATIVE_B8_g,COPY,native_uint,SET,1)
+        
+        /* 2-byte bit field */
+        H5T_INIT_TYPE(BITFIELD,H5T_NATIVE_B16_g,COPY,native_uint,SET,2)
+        
+        /* 4-byte bit field */
+        H5T_INIT_TYPE(BITFIELD,H5T_NATIVE_B32_g,COPY,native_uint,SET,4)
+        
+        /* 8-byte bit field */
+        H5T_INIT_TYPE(BITFIELD,H5T_NATIVE_B64_g,COPY,native_uint,SET,8)
+        
+        /* haddr_t */
+        H5T_INIT_TYPE(OFFSET,H5T_NATIVE_HADDR_g,COPY,native_uint,SET,sizeof(haddr_t))
 
-        /* Atomize result */
-        if ((H5T_STD_B8LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-    
-    /* 1-byte big-endian (endianness is irrelevant) unsigned integer */
-    if(H5T_STD_U8BE_g<0) {
-        /* Base off of native datatype */
-        dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
+        /* hsize_t */
+        H5T_INIT_TYPE(OFFSET,H5T_NATIVE_HSIZE_g,COPY,native_uint,SET,sizeof(hsize_t))
+        
+        /* hssize_t */
+        H5T_INIT_TYPE(OFFSET,H5T_NATIVE_HSSIZE_g,COPY,native_int,SET,sizeof(hssize_t))
+        
+        /* herr_t */
+        H5T_INIT_TYPE(OFFSET,H5T_NATIVE_HERR_g,COPY,native_int,SET,sizeof(herr_t))
 
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->size = 1;
-        dt->u.atomic.offset = 0;
-        dt->u.atomic.prec = 8;
-        dt->u.atomic.order = H5T_ORDER_BE;
-        dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.u.i.sign = H5T_SGN_NONE;
+        /* hbool_t */
+        H5T_INIT_TYPE(OFFSET,H5T_NATIVE_HBOOL_g,COPY,native_int,SET,sizeof(hbool_t))
 
-        /* Atomize result */
-        if ((H5T_STD_U8BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-
-        /*
-         * Register big-endian (order is irrelevant) 8-bit bitfield now also
+        /*------------------------------------------------------------
+         * IEEE Types
+         *------------------------------------------------------------ 
          */
-        /* Base off of current datatype */
-        dt = H5T_copy(dt,H5T_COPY_TRANSIENT);
-        assert(dt);
 
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->type = H5T_BITFIELD;
+        /* IEEE 4-byte little-endian float */
+        H5T_INIT_TYPE(FLOATLE,H5T_IEEE_F32LE_g,COPY,native_double,SET,4)
 
-        /* Atomize result */
-        if ((H5T_STD_B8BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-    
-    /* 2-byte little-endian unsigned integer */
-    if(H5T_STD_U16LE_g<0) {
-        /* Base off of native datatype */
-        dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
+        /* IEEE 4-byte big-endian float */
+        H5T_INIT_TYPE(FLOATBE,H5T_IEEE_F32BE_g,COPY,native_double,SET,4)
 
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->size = 2;
-        dt->u.atomic.offset = 0;
-        dt->u.atomic.prec = 16;
-        dt->u.atomic.order = H5T_ORDER_LE;
-        dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.u.i.sign = H5T_SGN_NONE;
+        /* IEEE 8-byte little-endian float */
+        H5T_INIT_TYPE(DOUBLELE,H5T_IEEE_F64LE_g,COPY,native_double,SET,8)
 
-        /* Atomize result */
-        if ((H5T_STD_U16LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
+        /* IEEE 8-byte big-endian float */
+        H5T_INIT_TYPE(DOUBLEBE,H5T_IEEE_F64BE_g,COPY,native_double,SET,8)
 
-        /*
-         * Register little-endian 16-bit bitfield now also
+        /*------------------------------------------------------------
+         * Other "standard" types
+         *------------------------------------------------------------ 
          */
-        /* Base off of current datatype */
-        dt = H5T_copy(dt,H5T_COPY_TRANSIENT);
-        assert(dt);
+        
 
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->type = H5T_BITFIELD;
+        /* 1-byte little-endian (endianness is irrelevant) signed integer */
+        H5T_INIT_TYPE(SINTLE,H5T_STD_I8LE_g,COPY,native_int,SET,1)
+        
+        /* 1-byte big-endian (endianness is irrelevant) signed integer */
+        H5T_INIT_TYPE(SINTBE,H5T_STD_I8BE_g,COPY,native_int,SET,1)
+        
+        /* 2-byte little-endian signed integer */
+        H5T_INIT_TYPE(SINTLE,H5T_STD_I16LE_g,COPY,native_int,SET,2)
+        
+        /* 2-byte big-endian signed integer */
+        H5T_INIT_TYPE(SINTBE,H5T_STD_I16BE_g,COPY,native_int,SET,2)
+        
+        /* 4-byte little-endian signed integer */
+        H5T_INIT_TYPE(SINTLE,H5T_STD_I32LE_g,COPY,native_int,SET,4)
+        
+        /* 4-byte big-endian signed integer */
+        H5T_INIT_TYPE(SINTBE,H5T_STD_I32BE_g,COPY,native_int,SET,4)
+        
+        /* 8-byte little-endian signed integer */
+        H5T_INIT_TYPE(SINTLE,H5T_STD_I64LE_g,COPY,native_int,SET,8)
+        
+        /* 8-byte big-endian signed integer */
+        H5T_INIT_TYPE(SINTBE,H5T_STD_I64BE_g,COPY,native_int,SET,8)
+        
+        /* 1-byte little-endian (endianness is irrelevant) unsigned integer */
+        H5T_INIT_TYPE(UINTLE,H5T_STD_U8LE_g,COPY,native_uint,SET,1)
+        std_u8le=dt;    /* Keep type for later */
+        
+        /* 1-byte big-endian (endianness is irrelevant) unsigned integer */
+        H5T_INIT_TYPE(UINTBE,H5T_STD_U8BE_g,COPY,native_uint,SET,1)
+        std_u8be=dt;    /* Keep type for later */
+        
+        /* 2-byte little-endian unsigned integer */
+        H5T_INIT_TYPE(UINTLE,H5T_STD_U16LE_g,COPY,native_uint,SET,2)
+        std_u16le=dt;    /* Keep type for later */
+        
+        /* 2-byte big-endian unsigned integer */
+        H5T_INIT_TYPE(UINTBE,H5T_STD_U16BE_g,COPY,native_uint,SET,2)
+        std_u16be=dt;    /* Keep type for later */
+        
+        /* 4-byte little-endian unsigned integer */
+        H5T_INIT_TYPE(UINTLE,H5T_STD_U32LE_g,COPY,native_uint,SET,4)
+        std_u32le=dt;    /* Keep type for later */
+        
+        /* 4-byte big-endian unsigned integer */
+        H5T_INIT_TYPE(UINTBE,H5T_STD_U32BE_g,COPY,native_uint,SET,4)
+        std_u32be=dt;    /* Keep type for later */
+        
+        /* 8-byte little-endian unsigned integer */
+        H5T_INIT_TYPE(UINTLE,H5T_STD_U64LE_g,COPY,native_uint,SET,8)
+        std_u64le=dt;    /* Keep type for later */
+        
+        /* 8-byte big-endian unsigned integer */
+        H5T_INIT_TYPE(UINTBE,H5T_STD_U64BE_g,COPY,native_uint,SET,8)
+        std_u64be=dt;    /* Keep type for later */
+        
 
-        /* Atomize result */
-        if ((H5T_STD_B16LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-    
-    /* 2-byte big-endian unsigned integer */
-    if(H5T_STD_U16BE_g<0) {
-        /* Base off of native datatype */
-        dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->size = 2;
-        dt->u.atomic.offset = 0;
-        dt->u.atomic.prec = 16;
-        dt->u.atomic.order = H5T_ORDER_BE;
-        dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.u.i.sign = H5T_SGN_NONE;
-
-        /* Atomize result */
-        if ((H5T_STD_U16BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-
-        /*
-         * Register big-endian 16-bit bitfield now also
+        /*------------------------------------------------------------
+         * Little- & Big-endian bitfields
+         *------------------------------------------------------------ 
          */
-        /* Base off of current datatype */
-        dt = H5T_copy(dt,H5T_COPY_TRANSIENT);
-        assert(dt);
 
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->type = H5T_BITFIELD;
+        /* little-endian (order is irrelevant) 8-bit bitfield */
+        H5T_INIT_TYPE(BITFIELD,H5T_STD_B8LE_g,COPY,std_u8le,NOSET,-)
 
-        /* Atomize result */
-        if ((H5T_STD_B16BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-    
-    /* 4-byte little-endian unsigned integer */
-    if(H5T_STD_U32LE_g<0) {
-        /* Base off of native datatype */
-        dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
+        /* big-endian (order is irrelevant) 8-bit bitfield */
+        H5T_INIT_TYPE(BITFIELD,H5T_STD_B8BE_g,COPY,std_u8be,NOSET,-)
 
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->size = 4;
-        dt->u.atomic.offset = 0;
-        dt->u.atomic.prec = 32;
-        dt->u.atomic.order = H5T_ORDER_LE;
-        dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.u.i.sign = H5T_SGN_NONE;
+        /* Little-endian 16-bit bitfield */
+        H5T_INIT_TYPE(BITFIELD,H5T_STD_B16LE_g,COPY,std_u16le,NOSET,-)
 
-        /* Atomize result */
-        if ((H5T_STD_U32LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
+        /* Big-endian 16-bit bitfield */
+        H5T_INIT_TYPE(BITFIELD,H5T_STD_B16BE_g,COPY,std_u16be,NOSET,-)
 
-        /*
-         * Register little-endian 32-bit bitfield now also
+        /* Little-endian 32-bit bitfield */
+        H5T_INIT_TYPE(BITFIELD,H5T_STD_B32LE_g,COPY,std_u32le,NOSET,-)
+
+        /* Big-endian 32-bit bitfield */
+        H5T_INIT_TYPE(BITFIELD,H5T_STD_B32BE_g,COPY,std_u32be,NOSET,-)
+
+        /* Little-endian 64-bit bitfield */
+        H5T_INIT_TYPE(BITFIELD,H5T_STD_B64LE_g,COPY,std_u64le,NOSET,-)
+
+        /* Big-endian 64-bit bitfield */
+        H5T_INIT_TYPE(BITFIELD,H5T_STD_B64BE_g,COPY,std_u64be,NOSET,-)
+
+        /*------------------------------------------------------------
+         * The Unix architecture for dates and times.
+         *------------------------------------------------------------ 
          */
-        /* Base off of current datatype */
-        dt = H5T_copy(dt,H5T_COPY_TRANSIENT);
-        assert(dt);
 
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->type = H5T_BITFIELD;
+        /* Little-endian 32-bit UNIX time_t */
+        H5T_INIT_TYPE(TIME,H5T_UNIX_D32LE_g,COPY,std_u32le,NOSET,-)
 
-        /* Atomize result */
-        if ((H5T_STD_B32LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
+        /* Big-endian 32-bit UNIX time_t */
+        H5T_INIT_TYPE(TIME,H5T_UNIX_D32BE_g,COPY,std_u32be,NOSET,-)
 
-        /*
-         * Register 4-byte little-endian UNIX time_t now also
+        /* Little-endian 64-bit UNIX time_t */
+        H5T_INIT_TYPE(TIME,H5T_UNIX_D64LE_g,COPY,std_u64le,NOSET,-)
+
+        /* Big-endian 64-bit UNIX time_t */
+        H5T_INIT_TYPE(TIME,H5T_UNIX_D64BE_g,COPY,std_u64be,NOSET,-)
+
+
+        /* Indicate that the types that are created from here down are allocated
+         * H5FL_ALLOC(), not copied with H5T_copy()
          */
-        /* Base off of current datatype */
-        dt = H5T_copy(dt,H5T_COPY_TRANSIENT);
-        assert(dt);
+         copied_dtype=0;
 
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->type = H5T_TIME;
+        /* Opaque data */
+        H5T_INIT_TYPE(OPAQUE,H5T_NATIVE_OPAQUE_g,ALLOC,-,SET,1)
 
-        /* Atomize result */
-        if ((H5T_UNIX_D32LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-    
-    /* 4-byte big-endian unsigned integer */
-    if(H5T_STD_U32BE_g<0) {
-        /* Base off of native datatype */
-        dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->size = 4;
-        dt->u.atomic.offset = 0;
-        dt->u.atomic.prec = 32;
-        dt->u.atomic.order = H5T_ORDER_BE;
-        dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.u.i.sign = H5T_SGN_NONE;
-
-        /* Atomize result */
-        if ((H5T_STD_U32BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-
-        /*
-         * Register big-endian 32-bit bitfield now also
+        /*------------------------------------------------------------
+         * The `C' architecture
+         *------------------------------------------------------------ 
          */
-        /* Base off of current datatype */
-        dt = H5T_copy(dt,H5T_COPY_TRANSIENT);
-        assert(dt);
 
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->type = H5T_BITFIELD;
+        /* One-byte character string */
+        H5T_INIT_TYPE(CSTRING,H5T_C_S1_g,ALLOC,-,SET,1)
 
-        /* Atomize result */
-        if ((H5T_STD_B32BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-
-        /*
-         * Register 4-byte big-endian UNIX time_t now also
+        /*------------------------------------------------------------
+         * The `Fortran' architecture
+         *------------------------------------------------------------ 
          */
-        /* Base off of current datatype */
-        dt = H5T_copy(dt,H5T_COPY_TRANSIENT);
-        assert(dt);
 
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->type = H5T_TIME;
+        /* One-byte character string */
+        H5T_INIT_TYPE(FORSTRING,H5T_FORTRAN_S1_g,ALLOC,-,SET,1)
 
-        /* Atomize result */
-        if ((H5T_UNIX_D32BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-    
-    /* 8-byte little-endian unsigned integer */
-    if(H5T_STD_U64LE_g<0) {
-        /* Base off of native datatype */
-        dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->size = 8;
-        dt->u.atomic.offset = 0;
-        dt->u.atomic.prec = 64;
-        dt->u.atomic.order = H5T_ORDER_LE;
-        dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.u.i.sign = H5T_SGN_NONE;
-
-        /* Atomize result */
-        if ((H5T_STD_U64LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-
-        /*
-         * Register little-endian 64-bit bitfield now also
+        /*------------------------------------------------------------
+         * Pointer types
+         *------------------------------------------------------------ 
          */
-        /* Base off of current datatype */
-        dt = H5T_copy(dt,H5T_COPY_TRANSIENT);
-        assert(dt);
 
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->type = H5T_BITFIELD;
-
-        /* Atomize result */
-        if ((H5T_STD_B64LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-
-        /*
-         * Register 8-byte little-endian UNIX time_t now also
-         */
-        /* Base off of current datatype */
-        dt = H5T_copy(dt,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->type = H5T_TIME;
-
-        /* Atomize result */
-        if ((H5T_UNIX_D64LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-    
-    /* 8-byte big-endian unsigned integer */
-    if(H5T_STD_U64BE_g<0) {
-        /* Base off of native datatype */
-        dt = H5T_copy(native_uint,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->size = 8;
-        dt->u.atomic.offset = 0;
-        dt->u.atomic.prec = 64;
-        dt->u.atomic.order = H5T_ORDER_BE;
-        dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.u.i.sign = H5T_SGN_NONE;
-
-        /* Atomize result */
-        if ((H5T_STD_U64BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-
-        /*
-         * Register big-endian 64-bit bitfield now also
-         */
-        /* Base off of current datatype */
-        dt = H5T_copy(dt,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->type = H5T_BITFIELD;
-
-        /* Atomize result */
-        if ((H5T_STD_B64BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-
-        /*
-         * Register 8-byte big-endian UNIX time_t now also
-         */
-        /* Base off of current datatype */
-        dt = H5T_copy(dt,H5T_COPY_TRANSIENT);
-        assert(dt);
-
-        /* Adjust information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->type = H5T_TIME;
-
-        /* Atomize result */
-        if ((H5T_UNIX_D64BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-    } /* end if */
-    
-
-    /*------------------------------------------------------------
-     * Little- & Big-endian bitfields
-     *------------------------------------------------------------ 
-     */
-
-     /* Moved into the U32LE, U32BE, U64LE & U64BE sections */
-
-    /*------------------------------------------------------------
-     * The Unix architecture for dates and times.
-     *------------------------------------------------------------ 
-     */
-
-     /* Moved into the U32LE, U32BE, U64LE & U64BE sections */
-
-    /* Indicate that the types that are created from here down are allocated
-     * H5FL_ALLOC(), not copied with H5T_copy()
-     */
-     copied_dtype=0;
-
-    /* Opaque data */
-    if(H5T_NATIVE_OPAQUE_g<0) {
-        if (NULL==(dt = H5FL_CALLOC(H5T_t)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-
-        /* Set information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->ent.header = HADDR_UNDEF;
-        dt->type = H5T_OPAQUE;
-        dt->size = 1;
-        dt->u.opaque.tag = H5MM_strdup("");
-
-        /* Atomize result */
-        if ((H5T_NATIVE_OPAQUE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize H5T layer");
-    } /* end if */
-
-    /*------------------------------------------------------------
-     * The `C' architecture
-     *------------------------------------------------------------ 
-     */
-
-    /* One-byte character string */
-    if(H5T_C_S1_g<0) {
-        if (NULL==(dt = H5FL_CALLOC(H5T_t)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->ent.header = HADDR_UNDEF;
-        dt->type = H5T_STRING;
-        dt->size = 1;
-        dt->u.atomic.order = H5T_ORDER_NONE;
-        dt->u.atomic.offset = 0;
-        dt->u.atomic.prec = 8 * dt->size;
-        dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.u.s.cset = H5T_CSET_ASCII;
-        dt->u.atomic.u.s.pad = H5T_STR_NULLTERM;
-
-        if ((H5T_C_S1_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize H5T layer");
-    } /* end if */
-
-    /*------------------------------------------------------------
-     * The `Fortran' architecture
-     *------------------------------------------------------------ 
-     */
-
-    /* One-byte character string */
-    if(H5T_FORTRAN_S1_g<0) {
-        if (NULL==(dt = H5FL_CALLOC(H5T_t)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->ent.header = HADDR_UNDEF;
-        dt->type = H5T_STRING;
-        dt->size = 1;
-        dt->u.atomic.order = H5T_ORDER_NONE;
-        dt->u.atomic.offset = 0;
-        dt->u.atomic.prec = 8 * dt->size;
-        dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.u.s.cset = H5T_CSET_ASCII;
-        dt->u.atomic.u.s.pad = H5T_STR_SPACEPAD;
-
-        if ((H5T_FORTRAN_S1_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize H5T layer");
-    } /* end if */
-
-    /*------------------------------------------------------------
-     * Pointer types
-     *------------------------------------------------------------ 
-     */
-
-    /* Object pointer (i.e. object header address in file) */
-    if(H5T_STD_REF_OBJ_g<0) {
-        if (NULL==(dt = H5FL_CALLOC(H5T_t)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->ent.header = HADDR_UNDEF;
-        dt->type = H5T_REFERENCE;
-        dt->size = H5R_OBJ_REF_BUF_SIZE;
-        dt->force_conv = TRUE;
-        dt->u.atomic.order = H5T_ORDER_NONE;
-        dt->u.atomic.offset = 0;
-        dt->u.atomic.prec = 8 * dt->size;
-        dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.u.r.rtype = H5R_OBJECT;
-        dt->u.atomic.u.r.loc = H5T_LOC_MEMORY;
-
-        if ((H5T_STD_REF_OBJ_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize H5T layer");
-    } /* end if */
-    
-    /* Dataset Region pointer (i.e. selection inside a dataset) */
-    if(H5T_STD_REF_DSETREG_g<0) {
-        if (NULL==(dt = H5FL_CALLOC(H5T_t)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->ent.header = HADDR_UNDEF;
-        dt->type = H5T_REFERENCE;
-        dt->size = H5R_DSET_REG_REF_BUF_SIZE;
-        dt->u.atomic.order = H5T_ORDER_NONE;
-        dt->u.atomic.offset = 0;
-        dt->u.atomic.prec = 8 * dt->size;
-        dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-        dt->u.atomic.u.r.rtype = H5R_DATASET_REGION;
-
-        if ((H5T_STD_REF_DSETREG_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize H5T layer");
+        /* Object pointer (i.e. object header address in file) */
+        H5T_INIT_TYPE(OBJREF,H5T_STD_REF_OBJ_g,ALLOC,-,SET,H5R_OBJ_REF_BUF_SIZE)
+        
+        /* Dataset Region pointer (i.e. selection inside a dataset) */
+        H5T_INIT_TYPE(REGREF,H5T_STD_REF_DSETREG_g,ALLOC,-,SET,H5R_DSET_REG_REF_BUF_SIZE)
     } /* end if */
 
     /*
