@@ -308,7 +308,7 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
     file->op = OP_UNKNOWN;
 #ifdef WIN32
     filehandle = _get_osfhandle(fd);
-    results = GetFileInformationByHandle(filehandle, &fileinfo);
+    results = GetFileInformationByHandle((HANDLE)filehandle, &fileinfo);
     file->fileindexhi = fileinfo.nFileIndexHigh;
     file->fileindexlo = fileinfo.nFileIndexLow;
 #else
