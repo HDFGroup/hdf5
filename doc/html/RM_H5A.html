@@ -25,6 +25,7 @@ HDF5/H5A API Specification
 <!-- #EndLibraryItem --></head>
 
 <body bgcolor="#FFFFFF">
+<!-- HEADER RIGHT " " -->
 
 
 <!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
@@ -60,8 +61,7 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><center>
+<hr><!-- #EndLibraryItem --><center>
 <h1>H5A: Attribute Interface</h1>
 </center>
 
@@ -104,39 +104,45 @@ and information about attributes.
 <table border="0">
   <tr>
     <td valign="top">
+	<ul>
       <li><a href="#Annot-Close">H5Aclose</a>
       <li><a href="#Annot-Create">H5Acreate</a>
       <li><a href="#Annot-Delete">H5Adelete</a>
-      <li><a href="#Annot-GetName">H5Aget_name</a>      
+      <li><a href="#Annot-GetName">H5Aget_name</a>
+	</ul>      
     </td>
     
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
     
     <td valign="top">
+	<ul>
       <li><a href="#Annot-NumAttrs">H5Aget_num_attrs</a>
       <li><a href="#Annot-GetSpace">H5Aget_space</a>
       <li><a href="#Annot-GetType">H5Aget_type</a>
       <li><a href="#Annot-Iterate">H5Aiterate</a>
-    </td>
+    </ul>
+	</td>
     
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
     
     <td valign="top">
+	<ul>
       <li><a href="#Annot-OpenIdx">H5Aopen_idx</a>
       <li><a href="#Annot-OpenName">H5Aopen_name</a>
       <li><a href="#Annot-Read">H5Aread</a>
       <li><a href="#Annot-Write">H5Awrite</a>
+	</ul>
     </td>
   </tr>
 </table>
 
-<p>
+<br>
 <strong>The FORTRAN90 Interfaces:</strong>
 
 <br>
 <font size=-1>
 <i>In general, each FORTRAN90 subroutine performs exactly the same task 
-as the corresponding C function.  The links below go to the C function 
+as the corresponding C function.  The links below (electronic versions only) go to the C function 
 descriptions, which serve as general descriptions for both.  A button, 
 under <strong>Non-C API(s)</strong> at the end of the C function description,
 opens an external browser window displaying the FORTRAN90-specific 
@@ -144,6 +150,7 @@ information.  You will probably want to adjust the size and location of
 this external window so that both browser windows are visible and to 
 facilitate moving easily between them.</i>
 </font>
+<br>
 
 <table border=0>
 <tr><td valign=top>
@@ -189,15 +196,61 @@ library and is up to the user's interpretation.
 See <a href="Attributes.html"><cite>Attributes</cite></a> in the
 <a href="H5.user.html"><cite>HDF5 User's Guide</cite></a> for further information.
 
+<!-- NEW PAGE -->
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Aclose" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Annot-Close">H5Aclose</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Aclose</code>(<em>hid_t</em> <code>attr_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Closes the specified attribute.
+<dt><strong>Description:</strong>
+    <dd><code>H5Aclose</code> terminates access to the attribute 
+        specified by <code>attr_id</code> by releasing the identifier.
+        <p>
+        Further use of a released attribute identifier is illegal; 
+        a function using such an identifier will fail.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>attr_id</code>
+            <dd>IN: Attribute to release access to.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5aclose_f
+    <dd>
+	<pre>
+SUBROUTINE h5aclose_f(attr_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(OUT) :: attr_id  ! Attribute identifier 
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5aclose_f	
+	</pre>
+		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Acreate" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Annot-Create">H5Acreate</a>
 <dt><strong>Signature:</strong>
-    <dd><em>hid_t</em> <code>H5Acreate</code>(<em>hid_t</em> <code>loc_id</code>,
+    <dd><font size="-1"><em>hid_t</em> <code>H5Acreate</code>(<em>hid_t</em> <code>loc_id</code>,
         <em>const char *</em><code>name</code>,
         <em>hid_t</em> <code>type_id</code>,
         <em>hid_t</em> <code>space_id</code>,
-        <em>hid_t</em> <code>create_plist</code>
+        <em>hid_t</em> <code>create_plist</code></font>
     )
 <dt><strong>Purpose:</strong>
     <dd>Creates a dataset as an attribute of another group, dataset, 
@@ -224,152 +277,82 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
         is currently unused;
         it may be used in the future for optional attribute properties.  
         At this time, <code>H5P_DEFAULT</code> is the only accepted value.
-        <p>
+        </p>
         The attribute identifier returned from this function must be released 
         with <code>H5Aclose</code> or resource leaks will develop.  
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>hid_t</em> <code>loc_id</code>
-            <dd>IN: Object (dataset, group, or named datatype) to be attached to.
-        <dt><em>const char *</em><code>name</code>
-            <dd>IN: Name of attribute to create.
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>IN: Identifier of datatype for attribute.
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>IN: Identifier of dataspace for attribute.
-        <dt><em>hid_t</em> <code>create_plist</code>
+        <dt><em>hid_t</em> <code>loc_id</code></dt>
+            <dd>IN: Object (dataset, group, or named datatype) to be attached to.</dd>
+        <dt><em>const char *</em><code>name</code></dt>
+            <dd>IN: Name of attribute to create.</dd>
+        <dt><em>hid_t</em> <code>type_id</code></dt>
+            <dd>IN: Identifier of datatype for attribute.</dd>
+        <dt><em>hid_t</em> <code>space_id</code></dt>
+            <dd>IN: Identifier of dataspace for attribute.</dd>
+        <dt><em>hid_t</em> <code>create_plist</code></dt>
             <dd>IN: Identifier of creation property list. (Currently unused;
-                    the only accepted value is <code>H5P_DEFAULT</code>.)
+                    the only accepted value is <code>H5P_DEFAULT</code>.)</dd>
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns an attribute identifier if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5a_FORTRAN.html#h5acreate_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+			
+		<!--<dt><strong>Non-C API(s):</strong>        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
+		
+<dt><strong>Fortran90 Interface:</strong> h5acreate_f
+    <dd>
+	<pre>
+SUBROUTINE h5acreate_f(obj_id, name, type_id, space_id, attr_id, &amp; hdferr, creation_prp) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: obj_id    ! Object identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name    ! Attribute name
+  INTEGER(HID_T), INTENT(IN) :: type_id   ! Attribute datatype identifier 
+  INTEGER(HID_T), INTENT(IN) :: space_id  ! Attribute dataspace identifier
+  INTEGER(HID_T), INTENT(OUT) :: attr_id  ! Attribute identifier 
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code:
+                                       ! 0 on success and -1 on failure
+  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: creation_prp
+                                       ! Attribute creation property 
+                                       ! list identifier 
+END SUBROUTINE h5acreate_f
+	</pre>
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Adelete" -->
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Annot-OpenName">H5Aopen_name</a>
+<dt><strong>Name:</strong> <a name="Annot-Delete">H5Adelete</a>
 <dt><strong>Signature:</strong>
-    <dd><em>hid_t</em> <code>H5Aopen_name</code>(<em>hid_t</em> <code>loc_id</code>,
+    <dd><em>herr_t</em> <code>H5Adelete</code>(<em>hid_t</em> <code>loc_id</code>,
         <em>const char *</em><code>name</code>
     )
 <dt><strong>Purpose:</strong>
-    <dd> Opens an attribute specified by name.
+    <dd>Deletes an attribute from a location.
 <dt><strong>Description:</strong>
-    <dd><code>H5Aopen_name</code> opens an attribute specified by 
-         its name, <code>name</code>, which is attached to the 
-         object specified with <code>loc_id</code>. 
-         The location object may be either a group, dataset, or 
-         named datatype, which may have any sort of attribute. 
-         The attribute identifier returned from this function must 
-         be released with <code>H5Aclose</code> or resource leaks 
-         will develop. 
+    <dd><code>H5Adelete</code> removes the attribute specified by its  
+        name, <code>name</code>, from a dataset, group, or named datatype. 
+        This function should not be used when attribute identifiers are 
+        open on <code>loc_id</code> as it may cause the internal indexes 
+        of the attributes to change and future writes to the open 
+        attributes to produce incorrect results. 
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>loc_id</code>
-            <dd>IN: Identifier of a group, dataset, or named datatype 
-                atttribute to be attached to.
+            <dd>IN: Identifier of the dataset, group, or named datatype 
+                to have the attribute deleted from.
         <dt><em>const char *</em><code>name</code>
-            <dd>IN: Attribute name.
-    </dl>
-<dt><strong>Returns:</strong>
-    <dd>Returns attribute identifier if successful;
-        otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5a_FORTRAN.html#h5aopen_name_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<hr>
-<dl>
-<dt><strong>Name:</strong> <a name="Annot-OpenIdx">H5Aopen_idx</a>
-<dt><strong>Signature:</strong>
-    <dd><em>hid_t</em> <code>H5Aopen_idx</code>(<em>hid_t</em> <code>loc_id</code>,
-        <em>unsigned int</em> <code>idx</code>
-    )
-<dt><strong>Purpose:</strong>
-    <dd>Opens the attribute specified by its index.
-<dt><strong>Description:</strong>
-    <dd><code>H5Aopen_idx</code> opens an attribute which is attached 
-        to the object specified with <code>loc_id</code>. 
-        The location object may be either a group, dataset, or 
-        named datatype, all of which may have any sort of attribute.  
-        The attribute specified by the index, <code>idx</code>, 
-        indicates the attribute to access.  
-        The value of <code>idx</code> is a 0-based, non-negative integer.
-        The attribute identifier returned from this function must be 
-        released with <code>H5Aclose</code> or resource leaks will develop. 
-<dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>loc_id</code>
-            <dd>IN: Identifier of the group, dataset, or named datatype 
-                attribute to be attached to.
-        <dt><em>unsigned int</em> <code>idx</code>
-            <dd>IN: Index of the attribute to open.
-    </dl>
-<dt><strong>Returns:</strong>
-    <dd>Returns attribute identifier if successful;
-        otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5a_FORTRAN.html#h5aopen_idx_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<hr>
-<dl>
-<dt><strong>Name:</strong> <a name="Annot-Write">H5Awrite</a>
-<dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Awrite</code>(<em>hid_t</em> <code>attr_id</code>,
-        <em>hid_t</em> <code>mem_type_id</code>,
-        <em>const void *</em><code>buf</code>
-    )
-<dt><strong>Purpose:</strong>
-    <dd>Writes data to an attribute.
-<dt><strong>Description:</strong>
-    <dd><code>H5Awrite</code> writes an attribute, specified with 
-        <code>attr_id</code>.  The attribute's memory datatype 
-        is specified with <code>mem_type_id</code>.  The entire 
-        attribute is written from <code>buf</code> to the file. 
-        <p>
-        Datatype conversion takes place at the time of a read or write
-        and is automatic.  See the
-        <a href="Datatypes.html#Datatypes-DataConversion">Data Conversion</a> 
-        section of <cite>The Data Type Interface (H5T)</cite> in the 
-        <cite>HDF5 User's Guide</cite> for a discussion of 
-        data conversion, including the range of conversions currently 
-        supported by the HDF5 libraries.
-<dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>attr_id</code>
-            <dd>IN: Identifier of an attribute to write.
-        <dt><em>hid_t</em> <code>mem_type_id</code>
-            <dd>IN: Identifier of the attribute datatype (in memory).
-        <dt><em>const void *</em><code>buf</code>
-            <dd>IN: Data to be written.
+            <dd>IN: Name of the attribute to delete.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
 <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5a_FORTRAN.html#h5awrite_f" 
+    <dd><a href="fortran/h5a_FORTRAN.html#h5adelete_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
         <!--
         <img src="Graphics/Java.gif"> 
@@ -377,118 +360,8 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
         -->
 </dl>
 
-
-<hr>
-<dl>
-<dt><strong>Name:</strong> <a name="Annot-Read">H5Aread</a>
-<dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Aread</code>(<em>hid_t</em> <code>attr_id</code>,
-        <em>hid_t</em> <code>mem_type_id</code>,
-        <em>void *</em><code>buf</code>
-    )
-<dt><strong>Purpose:</strong>
-    <dd>Reads an attribute.
-<dt><strong>Description:</strong>
-    <dd><code>H5Aread</code> reads an attribute, specified with 
-        <code>attr_id</code>.  The attribute's memory datatype 
-        is specified with <code>mem_type_id</code>.  The entire 
-        attribute is read into <code>buf</code> from the file. 
-        <p>
-        Datatype conversion takes place at the time of a read or write
-        and is automatic.  See the
-        <a href="Datatypes.html#Datatypes-DataConversion">Data Conversion</a> 
-        section of <cite>The Data Type Interface (H5T)</cite> in the 
-        <cite>HDF5 User's Guide</cite> for a discussion of 
-        data conversion, including the range of conversions currently 
-        supported by the HDF5 libraries.
-<dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>attr_id</code>
-            <dd>IN: Identifier of an attribute to read.
-        <dt><em>hid_t</em> <code>mem_type_id</code>
-            <dd>IN: Identifier of the attribute datatype (in memory).
-        <dt><em>void *</em><code>buf</code>
-            <dd>OUT: Buffer for data to be read.
-    </dl>
-<dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5a_FORTRAN.html#h5aread_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<hr>
-<dl>
-<dt><strong>Name:</strong> <a name="Annot-GetSpace">H5Aget_space</a>
-<dt><strong>Signature:</strong>
-    <dd><em>hid_t</em> <code>H5Aget_space</code>(<em>hid_t</em> <code>attr_id</code>)
-<dt><strong>Purpose:</strong>
-    <dd>Gets a copy of the dataspace for an attribute.
-<dt><strong>Description:</strong>
-    <dd><code>H5Aget_space</code> retrieves a copy of the dataspace 
-        for an attribute.  The dataspace identifier returned from 
-        this function must be released with <code>H5Sclose</code>
-        or resource leaks will develop.
-<dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>attr_id</code>
-            <dd>IN: Identifier of an attribute. 
-    </dl>
-<dt><strong>Returns:</strong>
-    <dd>Returns attribute dataspace identifier if successful;
-        otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5a_FORTRAN.html#h5aget_space_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<hr>
-<dl>
-<dt><strong>Name:</strong> <a name="Annot-GetType">H5Aget_type</a>
-<dt><strong>Signature:</strong>
-    <dd><em>hid_t</em> <code>H5Aget_type</code>(<em>hid_t</em> <code>attr_id</code>)
-<dt><strong>Purpose:</strong>
-    <dd>Gets an attribute datatype.
-<dt><strong>Description:</strong>
-    <dd><code>H5Aget_type</code> retrieves a copy of the datatype 
-        for an attribute.  
-        <p>
-        The datatype is reopened if it is a named type before returning
-        it to the application.  The datatypes returned by this function
-        are always read-only.  If an error occurs when atomizing the 
-        return datatype, then the datatype is closed.
-        <p>
-        The datatype identifier returned from this function must be 
-        released with <code>H5Tclose</code> or resource leaks will develop.
-<dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>attr_id</code>
-            <dd>IN: Identifier of an attribute.
-    </dl>
-<dt><strong>Returns:</strong>
-    <dd>Returns a datatype identifier if successful;
-        otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5a_FORTRAN.html#h5aget_type_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Aget_name" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Annot-GetName">H5Aget_name</a>
@@ -529,7 +402,8 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Aget_num_attrs" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Annot-NumAttrs">H5Aget_num_attrs</a>
@@ -559,7 +433,76 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
         -->
 </dl>
 
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Aget_space" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Annot-GetSpace">H5Aget_space</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Aget_space</code>(<em>hid_t</em> <code>attr_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Gets a copy of the dataspace for an attribute.
+<dt><strong>Description:</strong>
+    <dd><code>H5Aget_space</code> retrieves a copy of the dataspace 
+        for an attribute.  The dataspace identifier returned from 
+        this function must be released with <code>H5Sclose</code>
+        or resource leaks will develop.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>attr_id</code>
+            <dd>IN: Identifier of an attribute. 
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns attribute dataspace identifier if successful;
+        otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5a_FORTRAN.html#h5aget_space_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
 
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Aget_type" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Annot-GetType">H5Aget_type</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Aget_type</code>(<em>hid_t</em> <code>attr_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Gets an attribute datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Aget_type</code> retrieves a copy of the datatype 
+        for an attribute.  
+        <p>
+        The datatype is reopened if it is a named type before returning
+        it to the application.  The datatypes returned by this function
+        are always read-only.  If an error occurs when atomizing the 
+        return datatype, then the datatype is closed.
+        <p>
+        The datatype identifier returned from this function must be 
+        released with <code>H5Tclose</code> or resource leaks will develop.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>attr_id</code>
+            <dd>IN: Identifier of an attribute.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a datatype identifier if successful;
+        otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5a_FORTRAN.html#h5aget_type_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Aiterate" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Annot-Iterate">H5Aiterate</a>
@@ -631,36 +574,40 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Aopen_idx" -->
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Annot-Delete">H5Adelete</a>
+<dt><strong>Name:</strong> <a name="Annot-OpenIdx">H5Aopen_idx</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Adelete</code>(<em>hid_t</em> <code>loc_id</code>,
-        <em>const char *</em><code>name</code>
+    <dd><em>hid_t</em> <code>H5Aopen_idx</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>unsigned int</em> <code>idx</code>
     )
 <dt><strong>Purpose:</strong>
-    <dd>Deletes an attribute from a location.
+    <dd>Opens the attribute specified by its index.
 <dt><strong>Description:</strong>
-    <dd><code>H5Adelete</code> removes the attribute specified by its  
-        name, <code>name</code>, from a dataset, group, or named datatype. 
-        This function should not be used when attribute identifiers are 
-        open on <code>loc_id</code> as it may cause the internal indexes 
-        of the attributes to change and future writes to the open 
-        attributes to produce incorrect results. 
+    <dd><code>H5Aopen_idx</code> opens an attribute which is attached 
+        to the object specified with <code>loc_id</code>. 
+        The location object may be either a group, dataset, or 
+        named datatype, all of which may have any sort of attribute.  
+        The attribute specified by the index, <code>idx</code>, 
+        indicates the attribute to access.  
+        The value of <code>idx</code> is a 0-based, non-negative integer.
+        The attribute identifier returned from this function must be 
+        released with <code>H5Aclose</code> or resource leaks will develop. 
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>loc_id</code>
-            <dd>IN: Identifier of the dataset, group, or named datatype 
-                to have the attribute deleted from.
-        <dt><em>const char *</em><code>name</code>
-            <dd>IN: Name of the attribute to delete.
+            <dd>IN: Identifier of the group, dataset, or named datatype 
+                attribute to be attached to.
+        <dt><em>unsigned int</em> <code>idx</code>
+            <dd>IN: Index of the attribute to open.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
+    <dd>Returns attribute identifier if successful;
         otherwise returns a negative value.
 <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5a_FORTRAN.html#h5adelete_f" 
+    <dd><a href="fortran/h5a_FORTRAN.html#h5aopen_idx_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
         <!--
         <img src="Graphics/Java.gif"> 
@@ -668,30 +615,85 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Aopen_name" -->
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Annot-Close">H5Aclose</a>
+<dt><strong>Name:</strong> <a name="Annot-OpenName">H5Aopen_name</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Aclose</code>(<em>hid_t</em> <code>attr_id</code>)
+    <dd><em>hid_t</em> <code>H5Aopen_name</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em><code>name</code>
+    )
 <dt><strong>Purpose:</strong>
-    <dd>Closes the specified attribute.
+    <dd> Opens an attribute specified by name.
 <dt><strong>Description:</strong>
-    <dd><code>H5Aclose</code> terminates access to the attribute 
-        specified by <code>attr_id</code> by releasing the identifier.
+    <dd><code>H5Aopen_name</code> opens an attribute specified by 
+         its name, <code>name</code>, which is attached to the 
+         object specified with <code>loc_id</code>. 
+         The location object may be either a group, dataset, or 
+         named datatype, which may have any sort of attribute. 
+         The attribute identifier returned from this function must 
+         be released with <code>H5Aclose</code> or resource leaks 
+         will develop. 
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>loc_id</code>
+            <dd>IN: Identifier of a group, dataset, or named datatype 
+                atttribute to be attached to.
+        <dt><em>const char *</em><code>name</code>
+            <dd>IN: Attribute name.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns attribute identifier if successful;
+        otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5a_FORTRAN.html#h5aopen_name_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Aread" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Annot-Read">H5Aread</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Aread</code>(<em>hid_t</em> <code>attr_id</code>,
+        <em>hid_t</em> <code>mem_type_id</code>,
+        <em>void *</em><code>buf</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Reads an attribute.
+<dt><strong>Description:</strong>
+    <dd><code>H5Aread</code> reads an attribute, specified with 
+        <code>attr_id</code>.  The attribute's memory datatype 
+        is specified with <code>mem_type_id</code>.  The entire 
+        attribute is read into <code>buf</code> from the file. 
         <p>
-        Further use of a released attribute identifier is illegal; 
-        a function using such an identifier will fail.
+        Datatype conversion takes place at the time of a read or write
+        and is automatic.  See the
+        <a href="Datatypes.html#Datatypes-DataConversion">Data Conversion</a> 
+        section of <cite>The Data Type Interface (H5T)</cite> in the 
+        <cite>HDF5 User's Guide</cite> for a discussion of 
+        data conversion, including the range of conversions currently 
+        supported by the HDF5 libraries.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>attr_id</code>
-            <dd>IN: Attribute to release access to.
+            <dd>IN: Identifier of an attribute to read.
+        <dt><em>hid_t</em> <code>mem_type_id</code>
+            <dd>IN: Identifier of the attribute datatype (in memory).
+        <dt><em>void *</em><code>buf</code>
+            <dd>OUT: Buffer for data to be read.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
 <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5a_FORTRAN.html#h5aclose_f" 
+    <dd><a href="fortran/h5a_FORTRAN.html#h5aread_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
         <!--
         <img src="Graphics/Java.gif"> 
@@ -699,6 +701,51 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
         -->
 </dl>
 
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Awrite" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Annot-Write">H5Awrite</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Awrite</code>(<em>hid_t</em> <code>attr_id</code>,
+        <em>hid_t</em> <code>mem_type_id</code>,
+        <em>const void *</em><code>buf</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Writes data to an attribute.
+<dt><strong>Description:</strong>
+    <dd><code>H5Awrite</code> writes an attribute, specified with 
+        <code>attr_id</code>.  The attribute's memory datatype 
+        is specified with <code>mem_type_id</code>.  The entire 
+        attribute is written from <code>buf</code> to the file. 
+        <p>
+        Datatype conversion takes place at the time of a read or write
+        and is automatic.  See the
+        <a href="Datatypes.html#Datatypes-DataConversion">Data Conversion</a> 
+        section of <cite>The Data Type Interface (H5T)</cite> in the 
+        <cite>HDF5 User's Guide</cite> for a discussion of 
+        data conversion, including the range of conversions currently 
+        supported by the HDF5 libraries.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>attr_id</code>
+            <dd>IN: Identifier of an attribute to write.
+        <dt><em>hid_t</em> <code>mem_type_id</code>
+            <dd>IN: Identifier of the attribute datatype (in memory).
+        <dt><em>const void *</em><code>buf</code>
+            <dd>IN: Data to be written.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5a_FORTRAN.html#h5awrite_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
 
 <!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
 <center>
@@ -733,14 +780,15 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
+<hr><!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
 Describes HDF5 Release 1.6.0, July 2003
-</address><!-- #EndLibraryItem -->
- 
-Last modified: 6 June 2001
+</address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
+<!--
+document.writeln("Last modified: 3 October 2003");
+-->
+</SCRIPT>
  
 </body>
 </html>
