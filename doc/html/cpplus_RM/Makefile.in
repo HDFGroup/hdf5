@@ -1,0 +1,134 @@
+# HDF5 Library Makefile(.in)
+#
+# Copyright (C) 2001 National Center for Supercomputing Applications.
+#                    All rights reserved.
+#
+# 
+top_srcdir=@top_srcdir@
+top_builddir=../../..
+srcdir=@srcdir@
+VPATH=.:@srcdir@
+@COMMENCE@
+
+# Subdirectories in build-order (not including `examples')
+SUBDIRS=
+DOCDIR=$(docdir)/hdf5/cpplus_RM
+
+# Public doc files (to be installed)...
+PUB_DOCS= H5AbstractDs_8cpp.html H5AbstractDs_8h-source.html \
+          H5AbstractDs_8h.html H5Alltypes_8h-source.html H5Alltypes_8h.html \
+          H5AtomType_8cpp.html H5AtomType_8h-source.html H5AtomType_8h.html \
+          H5Attribute_8cpp.html H5Attribute_8h-source.html \
+          H5Attribute_8h.html H5Classes_8h-source.html H5Classes_8h.html \
+          H5CommonFG_8cpp.html H5CommonFG_8h-source.html H5CommonFG_8h.html \
+          H5CompType_8cpp.html H5CompType_8h-source.html H5CompType_8h.html \
+          H5CppDoc_8h-source.html H5CppDoc_8h.html H5Cpp_8h-source.html \
+          H5Cpp_8h.html H5DataSet_8cpp.html H5DataSet_8h-source.html \
+          H5DataSet_8h.html H5DataSpace_8cpp.html H5DataSpace_8h-source.html \
+          H5DataSpace_8h.html H5DataType_8cpp.html H5DataType_8h-source.html \
+          H5DataType_8h.html H5DcreatProp_8cpp.html \
+          H5DcreatProp_8h-source.html H5DcreatProp_8h.html \
+          H5DxferProp_8cpp.html H5DxferProp_8h-source.html \
+          H5DxferProp_8h.html H5EnumType_8cpp.html H5EnumType_8h-source.html \
+          H5EnumType_8h.html H5Exception_8cpp.html \
+          H5Exception_8h-source.html H5Exception_8h.html \
+          H5FaccProp_8cpp.html H5FaccProp_8h-source.html H5FaccProp_8h.html \
+          H5FcreatProp_8cpp.html H5FcreatProp_8h-source.html \
+          H5FcreatProp_8h.html H5File_8cpp.html H5File_8h-source.html \
+          H5File_8h.html H5FloatType_8cpp.html H5FloatType_8h-source.html \
+          H5FloatType_8h.html H5Group_8cpp.html H5Group_8h-source.html \
+          H5Group_8h.html H5IdComponent_8cpp.html \
+          H5IdComponent_8h-source.html H5IdComponent_8h.html \
+          H5Idtemplates_8h-source.html H5Idtemplates_8h.html \
+          H5Include_8h-source.html H5Include_8h.html H5IntType_8cpp.html \
+          H5IntType_8h-source.html H5IntType_8h.html H5Library_8cpp.html \
+          H5Library_8h-source.html H5Library_8h.html H5Object_8cpp.html \
+          H5Object_8h-source.html H5Object_8h.html H5PredType_8cpp.html \
+          H5PredType_8h-source.html H5PredType_8h.html H5PropList_8cpp.html \
+          H5PropList_8h-source.html H5PropList_8h.html \
+          H5RefCounter_8cpp.html H5RefCounter_8h-source.html \
+          H5RefCounter_8h.html H5StrType_8cpp.html H5StrType_8h-source.html \
+          H5StrType_8h.html NCSAlogo.jpg annotated.html \
+          classH5_1_1AbstractDs-members.html classH5_1_1AbstractDs.html \
+          classH5_1_1AbstractDs.png classH5_1_1AtomType-members.html \
+          classH5_1_1AtomType.html classH5_1_1AtomType.png \
+          classH5_1_1Attribute-members.html classH5_1_1Attribute.html \
+          classH5_1_1Attribute.png \
+          classH5_1_1AttributeIException-members.html \
+          classH5_1_1AttributeIException.html \
+          classH5_1_1AttributeIException.png \
+          classH5_1_1CommonFG-members.html classH5_1_1CommonFG.html \
+          classH5_1_1CommonFG.png classH5_1_1CompType-members.html \
+          classH5_1_1CompType.html classH5_1_1CompType.png \
+          classH5_1_1DSetCreatPropList-members.html \
+          classH5_1_1DSetCreatPropList.html classH5_1_1DSetCreatPropList.png \
+          classH5_1_1DSetMemXferPropList-members.html \
+          classH5_1_1DSetMemXferPropList.html \
+          classH5_1_1DSetMemXferPropList.png classH5_1_1DataSet-members.html \
+          classH5_1_1DataSet.html classH5_1_1DataSet.png \
+          classH5_1_1DataSetIException-members.html \
+          classH5_1_1DataSetIException.html classH5_1_1DataSetIException.png \
+          classH5_1_1DataSpace-members.html classH5_1_1DataSpace.html \
+          classH5_1_1DataSpace.png \
+          classH5_1_1DataSpaceIException-members.html \
+          classH5_1_1DataSpaceIException.html \
+          classH5_1_1DataSpaceIException.png \
+          classH5_1_1DataType-members.html classH5_1_1DataType.html \
+          classH5_1_1DataType.png classH5_1_1DataTypeIException-members.html \
+          classH5_1_1DataTypeIException.html \
+          classH5_1_1DataTypeIException.png \
+          classH5_1_1EnumType-members.html classH5_1_1EnumType.html \
+          classH5_1_1EnumType.png classH5_1_1Exception-members.html \
+          classH5_1_1Exception.html classH5_1_1Exception.png \
+          classH5_1_1FileAccPropList-members.html \
+          classH5_1_1FileAccPropList.html classH5_1_1FileAccPropList.png \
+          classH5_1_1FileCreatPropList-members.html \
+          classH5_1_1FileCreatPropList.html classH5_1_1FileCreatPropList.png \
+          classH5_1_1FileIException-members.html \
+          classH5_1_1FileIException.html classH5_1_1FileIException.png \
+          classH5_1_1FloatType-members.html \
+          classH5_1_1FloatType.html classH5_1_1FloatType.png \
+          classH5_1_1Group-members.html \
+          classH5_1_1Group.html classH5_1_1Group.png \
+          classH5_1_1GroupIException-members.html \
+          classH5_1_1GroupIException.html classH5_1_1GroupIException.png \
+          classH5_1_1H5File-members.html classH5_1_1H5File.html \
+          classH5_1_1H5File.png classH5_1_1H5Library-members.html \
+          classH5_1_1H5Library.html classH5_1_1H5Object-members.html \
+          classH5_1_1H5Object.html classH5_1_1H5Object.png \
+          classH5_1_1IdComponent-members.html \
+          classH5_1_1IdComponent.html classH5_1_1IdComponent.png \
+          classH5_1_1IdComponentException-members.html \
+          classH5_1_1IdComponentException.html \
+          classH5_1_1IdComponentException.png classH5_1_1IntType-members.html \
+          classH5_1_1IntType.html classH5_1_1IntType.png \
+          classH5_1_1LibraryIException-members.html \
+          classH5_1_1LibraryIException.html classH5_1_1LibraryIException.png \
+          classH5_1_1PredType-members.html classH5_1_1PredType.html \
+          classH5_1_1PredType.png classH5_1_1PropList-members.html \
+          classH5_1_1PropList.html classH5_1_1PropList.png \
+          classH5_1_1PropListIException-members.html \
+          classH5_1_1PropListIException.html \
+          classH5_1_1PropListIException.png \
+          classH5_1_1RefCounter-members.html classH5_1_1RefCounter.html \
+          classH5_1_1RefCounter_1_1RefCounter.html \
+          classH5_1_1RefCounter_1_1abc.html \
+          classH5_1_1ReferenceException-members.html \
+          classH5_1_1ReferenceException.html \
+          classH5_1_1ReferenceException.png classH5_1_1StrType-members.html \
+          classH5_1_1StrType.html classH5_1_1StrType.png \
+          classH5_1_1UserData4Aiterate-members.html \
+          classH5_1_1UserData4Aiterate.html create_8cpp-example.html \
+          doxygen.css doxygen.png dsets_8cpp-example.html examples.html \
+          files.html functions.html functions_func.html functions_vars.html \
+          globals.html globals_defs.html globals_func.html globals_type.html \
+          globals_vars.html header.html header_files hierarchy.html \
+          index.html namespaceH5.html namespacemembers.html \
+          namespacemembers_func.html namespacemembers_type.html \
+          namespacemembers_vars.html namespaces.html namespacestd.html \
+          writedata_8cpp-example.html
+
+# Other doc files (not to be installed)...
+PRIVATE_DOCS=
+
+@CONCLUDE@

@@ -20,7 +20,7 @@ VPATH=.:@srcdir@
 
 # Subdirectories in build-order (not including `examples')
 SUBDIRS=ADGuide Graphics Intro PSandPDF TechNotes Tutor \
-        cpplus ed_libs ed_styles fortran
+        cpplus cpplus_RM fortran ed_libs ed_styles 
 DOCDIR=$(docdir)/hdf5
 
 # Public doc files (to be installed)...
