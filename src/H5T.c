@@ -2761,7 +2761,79 @@ H5Tinsert (hid_t parent_id, const char *name, size_t offset, hid_t member_id)
     }
 
     /* Insert */
-    if (H5T_insert(parent, name, offset, member) < 0) {
+    if (H5T_insert(parent, name, offset, 0, NULL, NULL, member) < 0) {
+	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL,
+		      "can't insert member");
+    }
+    
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tinsert_array
+ *
+ * Purpose:	Adds another member to the compound data type PARENT_ID. The
+ *		new member has a NAME which must be unique within the
+ *		compound data type.  The OFFSET argument defines the start of
+ *		the member in an instance of the compound data type and
+ *		MEMBER_ID is the type of the new member.  The member is an
+ *		array with NDIMS dimensionality and the size of the array is
+ *		DIMS. The total member size should be relatively small.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, July  7, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tinsert_array (hid_t parent_id, const char *name, size_t offset,
+		 int ndims, const size_t *dim, const int *perm,
+		 hid_t member_id)
+{
+    H5T_t	*parent = NULL;		/*the compound parent data type */
+    H5T_t	*member = NULL;		/*the atomic member type	*/
+    intn	i;
+
+    FUNC_ENTER(H5Tinsert_array, FAIL);
+    H5TRACE7("e","iszIs*z*Isi",parent_id,name,offset,ndims,dim,perm,member_id);
+
+    /* Check args */
+    if (H5_DATATYPE != H5I_group(parent_id) ||
+	NULL == (parent = H5I_object(parent_id)) ||
+	H5T_COMPOUND != parent->type) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound data type");
+    }
+    if (H5T_STATE_TRANSIENT!=parent->state) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "parent type read-only");
+    }
+    if (!name || !*name) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no member name");
+    }
+    if (ndims<1 || ndims>4) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid dimensionality");
+    }
+    if (!dim) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no dimensions specified");
+    }
+    for (i=0; i<ndims; i++) {
+	if (dim[i]<1) {
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid dimension");
+	}
+    }
+    if (H5_DATATYPE != H5I_group(member_id) ||
+	NULL == (member = H5I_object(member_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    }
+
+    /* Insert */
+    if (H5T_insert(parent, name, offset, ndims, dim, perm, member) < 0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL,
 		      "can't insert member");
     }
@@ -3781,9 +3853,12 @@ H5T_get_size(const H5T_t *dt)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
+H5T_insert(H5T_t *parent, const char *name, size_t offset, intn ndims,
+	   const size_t *dim, const intn *perm, const H5T_t *member)
 {
-    intn		    i;
+    intn		idx, i;
+    size_t		total_size;
+    
 
     FUNC_ENTER(H5T_insert, FAIL);
 
@@ -3794,7 +3869,7 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
     assert(name && *name);
 
     /* Does NAME already exist in PARENT? */
-    for (i = 0; i < parent->u.compnd.nmembs; i++) {
+    for (i=0; i<parent->u.compnd.nmembs; i++) {
 	if (!HDstrcmp(parent->u.compnd.memb[i].name, name)) {
 	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL,
 			  "member name is not unique");
@@ -3802,12 +3877,13 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
     }
 
     /* Does the new member overlap any existing member ? */
-    for (i = 0; i < parent->u.compnd.nmembs; i++) {
+    for (total_size=member->size, i=0; i<ndims; i++) total_size *= dim[i];
+    for (i=0; i<parent->u.compnd.nmembs; i++) {
 	if ((offset <= parent->u.compnd.memb[i].offset &&
-	     offset + member->size > parent->u.compnd.memb[i].offset) ||
+	     offset + total_size > parent->u.compnd.memb[i].offset) ||
 	    (parent->u.compnd.memb[i].offset <= offset &&
 	     parent->u.compnd.memb[i].offset +
-	     parent->u.compnd.memb[i].type->size > offset)) {
+	     parent->u.compnd.memb[i].size > offset)) {
 	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL,
 			  "member overlaps with another member");
 	}
@@ -3827,11 +3903,16 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
     }
 
     /* Add member to end of member array */
-    i = parent->u.compnd.nmembs;
-    parent->u.compnd.memb[i].name = H5MM_xstrdup(name);
-    parent->u.compnd.memb[i].offset = offset;
-    parent->u.compnd.memb[i].ndims = 0;		/*defaults to scalar */
-    parent->u.compnd.memb[i].type = H5T_copy (member, H5T_COPY_ALL);
+    idx = parent->u.compnd.nmembs;
+    parent->u.compnd.memb[idx].name = H5MM_xstrdup(name);
+    parent->u.compnd.memb[idx].offset = offset;
+    parent->u.compnd.memb[idx].size = total_size;
+    parent->u.compnd.memb[idx].ndims = ndims;
+    parent->u.compnd.memb[idx].type = H5T_copy (member, H5T_COPY_ALL);
+    for (i=0; i<ndims; i++) {
+	parent->u.compnd.memb[idx].dim[i] = dim[i];
+	parent->u.compnd.memb[idx].perm[i] = perm?perm[i]:i;
+    }
 
     parent->u.compnd.nmembs++;
     FUNC_LEAVE(SUCCEED);
@@ -3868,7 +3949,7 @@ H5T_pack(H5T_t *dt)
 
     if (H5T_COMPOUND == dt->type) {
 	/* Recursively pack the members */
-	for (i = 0; i < dt->u.compnd.nmembs; i++) {
+	for (i=0; i<dt->u.compnd.nmembs; i++) {
 	    if (H5T_pack(dt->u.compnd.memb[i].type) < 0) {
 		HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 			      "unable to pack part of a compound data type");
@@ -3877,9 +3958,9 @@ H5T_pack(H5T_t *dt)
 
 	/* Remove padding between members */
 	H5T_sort_by_offset(dt);
-	for (i = 0, offset = 0; i < dt->u.compnd.nmembs; i++) {
+	for (i=0, offset=0; i<dt->u.compnd.nmembs; i++) {
 	    dt->u.compnd.memb[i].offset = offset;
-	    offset += H5T_get_size (dt->u.compnd.memb[i].type);
+	    offset += dt->u.compnd.memb[i].size;
 	}
 
 	/* Change total size */
@@ -4042,6 +4123,11 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
 		dt2->u.compnd.memb[idx2[i]].offset) HGOTO_DONE(-1);
 	    if (dt1->u.compnd.memb[idx1[i]].offset >
 		dt2->u.compnd.memb[idx2[i]].offset) HGOTO_DONE(1);
+
+	    if (dt1->u.compnd.memb[idx1[i]].size <
+		dt2->u.compnd.memb[idx2[i]].size) HGOTO_DONE(-1);
+	    if (dt1->u.compnd.memb[idx1[i]].size >
+		dt2->u.compnd.memb[idx2[i]].size) HGOTO_DONE(1);
 
 	    if (dt1->u.compnd.memb[idx1[i]].ndims <
 		dt2->u.compnd.memb[idx2[i]].ndims) HGOTO_DONE(-1);

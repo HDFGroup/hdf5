@@ -160,14 +160,16 @@ H5O_dtype_decode_helper(const uint8 **pp, H5T_t *dt)
         dt->u.compnd.nmembs = flags & 0xffff;
         assert(dt->u.compnd.nmembs > 0);
         dt->u.compnd.nalloc = dt->u.compnd.nmembs;
-        dt->u.compnd.memb = H5MM_calloc(dt->u.compnd.nalloc*sizeof(H5T_member_t));
+        dt->u.compnd.memb = H5MM_calloc(dt->u.compnd.nalloc*
+					sizeof(H5T_member_t));
 	if (NULL==dt->u.compnd.memb) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
 	}
         for (i = 0; i < dt->u.compnd.nmembs; i++) {
             dt->u.compnd.memb[i].name = H5MM_xstrdup((const char *)*pp);
-            *pp += ((HDstrlen((const char *)*pp) + 8) / 8) * 8;         /*multiple of 8 w/ null terminator */
+	    /*multiple of 8 w/ null terminator */
+            *pp += ((HDstrlen((const char *)*pp) + 8) / 8) * 8;
             UINT32DECODE(*pp, dt->u.compnd.memb[i].offset);
             dt->u.compnd.memb[i].ndims = *(*pp)++;
             assert(dt->u.compnd.memb[i].ndims <= 4);
@@ -194,6 +196,12 @@ H5O_dtype_decode_helper(const uint8 **pp, H5T_t *dt)
                 HRETURN_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL,
                               "can't decode member type");
             }
+	    
+	    /* Total member size */
+	    dt->u.compnd.memb[i].size = dt->u.compnd.memb[i].type->size;
+	    for (j=0; j<dt->u.compnd.memb[i].ndims; j++) {
+		dt->u.compnd.memb[i].size *= dt->u.compnd.memb[i].dim[j];
+	    }
         }
         break;
 

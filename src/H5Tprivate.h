@@ -54,7 +54,8 @@ size_t H5T_get_size (const H5T_t *dt);
 intn H5T_cmp (const H5T_t *dt1, const H5T_t *dt2);
 hbool_t H5T_is_atomic (const H5T_t *dt);
 herr_t H5T_insert (H5T_t *parent, const char *name, size_t offset,
-                   const H5T_t *member);
+                   intn ndims, const size_t *dim, const intn *perm,
+		   const H5T_t *member);
 herr_t H5T_sort_by_offset (H5T_t *dt);
 herr_t H5T_pack (H5T_t *dt);
 herr_t H5T_debug (H5T_t *dt, FILE * stream);

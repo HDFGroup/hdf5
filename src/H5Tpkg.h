@@ -86,6 +86,7 @@ struct H5T_t {
 typedef struct H5T_member_t {
     char		*name;		/*name of this member		     */
     size_t		offset;		/*offset from beginning of struct    */
+    size_t		size;		/*total size: dims * type_size	     */
     intn		ndims;		/*member dimensionality		     */
     size_t		dim[4];		/*size in each dimension	     */
     intn		perm[4];	/*index permutation		     */

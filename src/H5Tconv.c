@@ -23,6 +23,7 @@ typedef struct H5T_conv_struct_t {
     hid_t	*dst_memb_id;		/*destination member type ID's	     */
     H5T_conv_t	*memb_conv;		/*array of membr conversion functions*/
     H5T_cdata_t	**memb_cdata;		/*array of member cdata pointers     */
+    size_t	*memb_nelmts;		/*member element count		     */
 } H5T_conv_struct_t;
 
 /* Interface initialization */
@@ -268,6 +269,45 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 		priv->dst_memb_id[priv->src2dst[i]] = tid;
 	    }
 	}
+
+	/*
+	 * Those members which are in both the source and destination must be
+	 * the same size and shape arrays.
+	 */
+	for (i=0; i<src->u.compnd.nmembs; i++) {
+	    if (priv->src2dst[i]>=0) {
+		H5T_member_t *src_memb = src->u.compnd.memb + i;
+		H5T_member_t *dst_memb = dst->u.compnd.memb + priv->src2dst[i];
+		if (src_memb->ndims != dst_memb->ndims) {
+		    HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+				  "source and dest members have incompatible "
+				  "size or shape");
+		}
+		for (j=0; j<src_memb->ndims; j++) {
+		    if (src_memb->dim[j] != dst_memb->dim[j]) {
+			HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+				      "source and dest members have "
+				      "incompatible size or shape");
+		    }
+#ifndef LATER
+		    /* Their permutation vectors must be equal */
+		    if (src_memb->perm[j]!=dst_memb->perm[j]) {
+			HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+				      "member permutations must be equal");
+		    }
+#endif
+		}
+	    }
+	}
+
+	/* Calculate number of elements of each member */
+	priv->memb_nelmts = H5MM_malloc(src->u.compnd.nmembs*sizeof(size_t));
+	for (i=0; i<src->u.compnd.nmembs; i++) {
+	    priv->memb_nelmts[i] = 1;
+	    for (j=0; j<src->u.compnd.memb[i].ndims; j++) {
+		priv->memb_nelmts[i] *= src->u.compnd.memb[i].dim[j];
+	    }
+	}
     }
 
     /*
@@ -374,24 +414,6 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	assert (H5T_COMPOUND==src->type);
 	assert (H5T_COMPOUND==dst->type);
 
-#ifndef LATER
-	/*
-	 * Struct members must be scalar for now.
-	 */
-	for (i=0; i<src->u.compnd.nmembs; i++) {
-	    if (src->u.compnd.memb[i].ndims>0) {
-		HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-			       "array members are not supported yet");
-	    }
-	}
-	for (i=0; i<dst->u.compnd.nmembs; i++) {
-	    if (dst->u.compnd.memb[i].ndims>0) {
-		HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-			       "array members are not supported yet");
-	    }
-	}
-#endif
-
 	if (H5T_conv_struct_init (src, dst, cdata)<0) {
 	    HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
 			   "unable to initialize conversion data");
@@ -402,11 +424,12 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	/*
 	 * Free the private conversion data.
 	 */
-	H5MM_xfree (priv->src2dst);
-	H5MM_xfree (priv->src_memb_id);
-	H5MM_xfree (priv->dst_memb_id);
-	H5MM_xfree (priv->memb_conv);
-	H5MM_xfree (priv->memb_cdata);
+	H5MM_xfree(priv->src2dst);
+	H5MM_xfree(priv->src_memb_id);
+	H5MM_xfree(priv->dst_memb_id);
+	H5MM_xfree(priv->memb_conv);
+	H5MM_xfree(priv->memb_cdata);
+	H5MM_xfree(priv->memb_nelmts);
 	cdata->priv = priv = H5MM_xfree (priv);
 	break;
 
@@ -463,25 +486,23 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 		src_memb = src->u.compnd.memb + i;
 		dst_memb = dst->u.compnd.memb + src2dst[i];
 
-		if (H5T_get_size (dst_memb->type) <=
-		    H5T_get_size (src_memb->type)) {
+		if (dst_memb->size <= src_memb->size) {
 		    H5T_conv_t tconv_func = priv->memb_conv[src2dst[i]];
 		    H5T_cdata_t *memb_cdata = priv->memb_cdata[src2dst[i]];
 		    memb_cdata->command = H5T_CONV_CONV;
 		    (tconv_func)(priv->src_memb_id[src2dst[i]],
 				 priv->dst_memb_id[src2dst[i]],
-				 memb_cdata,
-				 1,
+				 memb_cdata, priv->memb_nelmts[i],
 				 buf + src_memb->offset,
 				 bkg + dst_memb->offset);
 
 		    HDmemmove (buf + offset, buf + src_memb->offset,
-			       H5T_get_size (dst_memb->type));
-		    offset += H5T_get_size (dst_memb->type);
+			       dst_memb->size);
+		    offset += dst_memb->size;
 		} else {
 		    HDmemmove (buf + offset, buf + src_memb->offset,
-			       H5T_get_size (src_memb->type));
-		    offset += H5T_get_size (src_memb->type);
+			       src_memb->size);
+		    offset += src_memb->size;
 		}
 	    }
 
@@ -496,19 +517,18 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 		if (src2dst[i]<0) continue;
 		src_memb = src->u.compnd.memb + i;
 		dst_memb = dst->u.compnd.memb + src2dst[i];
-		offset -= H5T_get_size (dst_memb->type);
+		offset -= dst_memb->size;
 
-		if (H5T_get_size (dst_memb->type) >
-		    H5T_get_size (src_memb->type)) {
+		if (dst_memb->size > src_memb->size) {
 		    H5T_conv_t tconv_func = priv->memb_conv[src2dst[i]];
 		    H5T_cdata_t *memb_cdata = priv->memb_cdata[src2dst[i]];
 		    memb_cdata->command = H5T_CONV_CONV;
 		    (tconv_func)(priv->src_memb_id[src2dst[i]],
-				 priv->dst_memb_id[src2dst[i]], memb_cdata, 1,
-				 buf + offset, bkg + dst_memb->offset);
+				 priv->dst_memb_id[src2dst[i]],
+				 memb_cdata, priv->memb_nelmts[i],
+				 buf+offset, bkg+dst_memb->offset);
 		}
-		HDmemmove (bkg+dst_memb->offset, buf+offset,
-			   H5T_get_size (dst_memb->type));
+		HDmemmove (bkg+dst_memb->offset, buf+offset, dst_memb->size);
 	    }
 	    assert (0==offset);
 
@@ -935,7 +955,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     /* Conversion-related variables */
     hssize_t	expo;			/*exponent			*/
     hssize_t	expo_max;		/*maximum possible dst exponent	*/
-    size_t	msize;			/*useful size of mantissa in src*/
+    size_t	msize=0;		/*useful size of mantissa in src*/
     size_t	mpos;			/*offset to useful mant is src	*/
     size_t	mrsh;			/*amount to right shift mantissa*/
     hbool_t	carry;			/*carry after rounding mantissa	*/

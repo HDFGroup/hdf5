@@ -18,7 +18,7 @@
 typedef struct s1_t {
     unsigned int a;
     unsigned int b;
-    unsigned int c;
+    unsigned int c[4];
     unsigned int d;
     unsigned int e;
 } s1_t;
@@ -30,7 +30,7 @@ typedef s1_t s2_t;
 typedef struct s3_t {
     unsigned int e;
     unsigned int d;
-    unsigned int c;
+    unsigned int c[4];
     unsigned int b;
     unsigned int a;
 } s3_t;
@@ -47,7 +47,7 @@ typedef struct s5_t {
     unsigned int a;
     unsigned int b;
     unsigned int mid1;
-    unsigned int c;
+    unsigned int c[4];
     unsigned int mid2;
     unsigned int d;
     unsigned int e;
@@ -154,6 +154,7 @@ main (void)
     hssize_t 		f_offset[2];	/*offset of hyperslab in file	*/
     hsize_t 		h_size[2];	/*size of hyperslab		*/
     hsize_t 		h_sample[2];	/*hyperslab sampling		*/
+    size_t		memb_size[1] = {4};
 
     /* Create the file */
     file = H5Fcreate (TEST_FILE_NAME, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
@@ -180,18 +181,22 @@ STEP  1: Initialize dataset `s1' and store it on disk in native order.\n");
     
     /* Initialize the dataset */
     for (i=0; i<NX*NY; i++) {
-	s1[i].a = 5*i+0;
+	s1[i].a = 8*i+0;
 	s1[i].b = 2000*2*i;
-	s1[i].c = 5*i+2;
+	s1[i].c[0] = 8*i+2;
+	s1[i].c[1] = 8*i+3;
+	s1[i].c[2] = 8*i+4;
+	s1[i].c[3] = 8*i+5;
 	s1[i].d = 2001+2*i;
-	s1[i].e = 5*i+4;
+	s1[i].e = 8*i+7;
     }
 
     /* Create the memory data type */
     s1_tid = H5Tcreate (H5T_COMPOUND, sizeof(s1_t));
     H5Tinsert (s1_tid, "a", HOFFSET(s1_t,a), H5T_NATIVE_INT);
     H5Tinsert (s1_tid, "b", HOFFSET(s1_t,b), H5T_NATIVE_INT);
-    H5Tinsert (s1_tid, "c", HOFFSET(s1_t,c), H5T_NATIVE_INT);
+    H5Tinsert_array (s1_tid, "c", HOFFSET(s1_t,c), 1, memb_size, NULL,
+		     H5T_NATIVE_INT);
     H5Tinsert (s1_tid, "d", HOFFSET(s1_t,d), H5T_NATIVE_INT);
     H5Tinsert (s1_tid, "e", HOFFSET(s1_t,e), H5T_NATIVE_INT);
     assert (s1_tid>=0);
@@ -220,7 +225,8 @@ STEP  2: Read the dataset from disk into a new memory buffer which has the\n\
     s2_tid = H5Tcreate (H5T_COMPOUND, sizeof(s2_t));
     H5Tinsert (s2_tid, "a", HOFFSET(s2_t,a), H5T_NATIVE_INT);
     H5Tinsert (s2_tid, "b", HOFFSET(s2_t,b), H5T_NATIVE_INT);
-    H5Tinsert (s2_tid, "c", HOFFSET(s2_t,c), H5T_NATIVE_INT);
+    H5Tinsert_array (s2_tid, "c", HOFFSET(s2_t,c), 1, memb_size, NULL,
+		     H5T_NATIVE_INT);
     H5Tinsert (s2_tid, "d", HOFFSET(s2_t,d), H5T_NATIVE_INT);
     H5Tinsert (s2_tid, "e", HOFFSET(s2_t,e), H5T_NATIVE_INT);
     assert (s2_tid>=0);
@@ -233,7 +239,10 @@ STEP  2: Read the dataset from disk into a new memory buffer which has the\n\
     for (i=0; i<NX*NY; i++) {
 	assert (s1[i].a==s2[i].a);
 	assert (s1[i].b==s2[i].b);
-	assert (s1[i].c==s2[i].c);
+	assert (s1[i].c[0]==s2[i].c[0]);
+	assert (s1[i].c[1]==s2[i].c[1]);
+	assert (s1[i].c[2]==s2[i].c[2]);
+	assert (s1[i].c[3]==s2[i].c[3]);
 	assert (s1[i].d==s2[i].d);
 	assert (s1[i].e==s2[i].e);
     }
@@ -252,7 +261,8 @@ STEP  3: Read the dataset again with members in a different order.\n");
     s3_tid = H5Tcreate (H5T_COMPOUND, sizeof(s3_t));
     H5Tinsert (s3_tid, "a", HOFFSET(s3_t,a), H5T_NATIVE_INT);
     H5Tinsert (s3_tid, "b", HOFFSET(s3_t,b), H5T_NATIVE_INT);
-    H5Tinsert (s3_tid, "c", HOFFSET(s3_t,c), H5T_NATIVE_INT);
+    H5Tinsert_array (s3_tid, "c", HOFFSET(s3_t,c), 1, memb_size, NULL,
+		     H5T_NATIVE_INT);
     H5Tinsert (s3_tid, "d", HOFFSET(s3_t,d), H5T_NATIVE_INT);
     H5Tinsert (s3_tid, "e", HOFFSET(s3_t,e), H5T_NATIVE_INT);
     assert (s3_tid>=0);
@@ -265,7 +275,10 @@ STEP  3: Read the dataset again with members in a different order.\n");
     for (i=0; i<NX*NY; i++) {
 	assert (s1[i].a==s3[i].a);
 	assert (s1[i].b==s3[i].b);
-	assert (s1[i].c==s3[i].c);
+	assert (s1[i].c[0]==s3[i].c[0]);
+	assert (s1[i].c[1]==s3[i].c[1]);
+	assert (s1[i].c[2]==s3[i].c[2]);
+	assert (s1[i].c[3]==s3[i].c[3]);
 	assert (s1[i].d==s3[i].d);
 	assert (s1[i].e==s3[i].e);
     }
@@ -316,7 +329,8 @@ STEP  5: Read members into a superset which is partially initialized.\n");
     s5_tid = H5Tcreate (H5T_COMPOUND, sizeof(s5_t));
     H5Tinsert (s5_tid, "a", HOFFSET(s5_t,a), H5T_NATIVE_INT);
     H5Tinsert (s5_tid, "b", HOFFSET(s5_t,b), H5T_NATIVE_INT);
-    H5Tinsert (s5_tid, "c", HOFFSET(s5_t,c), H5T_NATIVE_INT);
+    H5Tinsert_array (s5_tid, "c", HOFFSET(s5_t,c), 1, memb_size, NULL,
+		     H5T_NATIVE_INT);
     H5Tinsert (s5_tid, "d", HOFFSET(s5_t,d), H5T_NATIVE_INT);
     H5Tinsert (s5_tid, "e", HOFFSET(s5_t,e), H5T_NATIVE_INT);
     assert (s5_tid>=0);
@@ -329,7 +343,10 @@ STEP  5: Read members into a superset which is partially initialized.\n");
     for (i=0; i<NX*NY; i++) {
 	assert (s1[i].a==s5[i].a);
 	assert (s1[i].b==s5[i].b);
-	assert (s1[i].c==s5[i].c);
+	assert (s1[i].c[0]==s5[i].c[0]);
+	assert (s1[i].c[1]==s5[i].c[1]);
+	assert (s1[i].c[2]==s5[i].c[2]);
+	assert (s1[i].c[3]==s5[i].c[3]);
 	assert (s1[i].d==s5[i].d);
 	assert (s1[i].e==s5[i].e);
     }
@@ -355,8 +372,8 @@ STEP  6: Update fields `b' and `d' on the file, leaving the other fields\n\
 
     /* Initialize `s4' with new values */
     for (i=0; i<NX*NY; i++) {
-	s4[i].b = 5*i+1;
-	s4[i].d = 5*i+3;
+	s4[i].b = 8*i+1;
+	s4[i].d = 8*i+6;
     }
 
     /* Write the data to file */
@@ -369,11 +386,14 @@ STEP  6: Update fields `b' and `d' on the file, leaving the other fields\n\
 
     /* Compare */
     for (i=0; i<NX*NY; i++) {
-	assert (s1[i].a == 5*i+0);
-	assert (s1[i].b == 5*i+1);
-	assert (s1[i].c == 5*i+2);
-	assert (s1[i].d == 5*i+3);
-	assert (s1[i].e == 5*i+4);
+	assert (s1[i].a == 8*i+0);
+	assert (s1[i].b == 8*i+1);
+	assert (s1[i].c[0] == 8*i+2);
+	assert (s1[i].c[1] == 8*i+3);
+	assert (s1[i].c[2] == 8*i+4);
+	assert (s1[i].c[3] == 8*i+5);
+	assert (s1[i].d == 8*i+6);
+	assert (s1[i].e == 8*i+7);
     }
     
     /*
@@ -398,7 +418,10 @@ STEP  7: Reading original dataset with explicit data space.\n");
     for (i=0; i<NX*NY; i++) {
 	assert (s2[i].a == s1[i].a);
 	assert (s2[i].b == s1[i].b);
-	assert (s2[i].c == s1[i].c);
+	assert (s2[i].c[0] == s1[i].c[0]);
+	assert (s2[i].c[1] == s1[i].c[1]);
+	assert (s2[i].c[2] == s1[i].c[2]);
+	assert (s2[i].c[3] == s1[i].c[3]);
 	assert (s2[i].d == s1[i].d);
 	assert (s2[i].e == s1[i].e);
     }
@@ -420,7 +443,8 @@ STEP  8: Read middle third hyperslab into memory array.\n");
     f_offset[1] = NY/3;
     h_size[0] = 2*NX/3 - f_offset[0];
     h_size[1] = 2*NY/3 - f_offset[1];
-    status = H5Sselect_hyperslab (s8_f_sid, H5S_SELECT_SET, f_offset, NULL, h_size, NULL);
+    status = H5Sselect_hyperslab (s8_f_sid, H5S_SELECT_SET, f_offset, NULL,
+				  h_size, NULL);
     assert (status>=0);
 
     /* Create memory data space */
@@ -441,7 +465,10 @@ STEP  8: Read middle third hyperslab into memory array.\n");
 
 	    assert (ps8->a == ps1->a);
 	    assert (ps8->b == ps1->b);
-	    assert (ps8->c == ps1->c);
+	    assert (ps8->c[0] == ps1->c[0]);
+	    assert (ps8->c[1] == ps1->c[1]);
+	    assert (ps8->c[2] == ps1->c[2]);
+	    assert (ps8->c[3] == ps1->c[3]);
 	    assert (ps8->d == ps1->d);
 	    assert (ps8->e == ps1->e);
 	}
@@ -462,7 +489,8 @@ STEP  9: Read middle third of hyperslab into middle third of memory array.\n");
 
     /* Initialize */
     for (i=0; i<NX*NY; i++) {
-	s2[i].a = s2[i].b = s2[i].c = s2[i].d = s2[i].e = (unsigned)(-1);
+	s2[i].a = s2[i].b = s2[i].d = s2[i].e = (unsigned)(-1);
+	s2[i].c[0] = s2[i].c[1] = s2[i].c[2] = s2[i].c[3] = (unsigned)(-1);
     }
     
     /* Read the hyperslab */
@@ -480,13 +508,19 @@ STEP  9: Read middle third of hyperslab into middle third of memory array.\n");
 		(hsize_t)j<f_offset[1]+h_size[1]) {
 		assert (ps2->a == ps1->a);
 		assert (ps2->b == ps1->b);
-		assert (ps2->c == ps1->c);
+		assert (ps2->c[0] == ps1->c[0]);
+		assert (ps2->c[1] == ps1->c[1]);
+		assert (ps2->c[2] == ps1->c[2]);
+		assert (ps2->c[3] == ps1->c[3]);
 		assert (ps2->d == ps1->d);
 		assert (ps2->e == ps1->e);
 	    } else {
 		assert (ps2->a == (unsigned)(-1));
 		assert (ps2->b == (unsigned)(-1));
-		assert (ps2->c == (unsigned)(-1));
+		assert (ps2->c[0] == (unsigned)(-1));
+		assert (ps2->c[1] == (unsigned)(-1));
+		assert (ps2->c[2] == (unsigned)(-1));
+		assert (ps2->c[3] == (unsigned)(-1));
 		assert (ps2->d == (unsigned)(-1));
 		assert (ps2->e == (unsigned)(-1));
 	    }
@@ -505,7 +539,8 @@ STEP 10: Read middle third of hyperslab into middle third of memory array\n\
 
     /* Initialize */
     for (i=0; i<NX*NY; i++) {
-	s5[i].a = s5[i].b = s5[i].c = s5[i].d = s5[i].e = (unsigned)(-1);
+	s5[i].a = s5[i].b = s5[i].d = s5[i].e = (unsigned)(-1);
+	s5[i].c[0] = s5[i].c[1] = s5[i].c[2] = s5[i].c[3] = (unsigned)(-1);
 	s5[i].pre = s5[i].mid1 = s5[i].mid2 = s5[i].post = (unsigned)(-1);
     }
     
@@ -526,7 +561,10 @@ STEP 10: Read middle third of hyperslab into middle third of memory array\n\
 		assert (ps5->a == ps1->a);
 		assert (ps5->b == ps1->b);
 		assert (ps5->mid1 == (unsigned)(-1));
-		assert (ps5->c == ps1->c);
+		assert (ps5->c[0] == ps1->c[0]);
+		assert (ps5->c[1] == ps1->c[1]);
+		assert (ps5->c[2] == ps1->c[2]);
+		assert (ps5->c[3] == ps1->c[3]);
 		assert (ps5->mid2 == (unsigned)(-1));
 		assert (ps5->d == ps1->d);
 		assert (ps5->e == ps1->e);
@@ -536,7 +574,10 @@ STEP 10: Read middle third of hyperslab into middle third of memory array\n\
 		assert (ps5->a == (unsigned)(-1));
 		assert (ps5->b == (unsigned)(-1));
 		assert (ps5->mid1 == (unsigned)(-1));
-		assert (ps5->c == (unsigned)(-1));
+		assert (ps5->c[0] == (unsigned)(-1));
+		assert (ps5->c[1] == (unsigned)(-1));
+		assert (ps5->c[2] == (unsigned)(-1));
+		assert (ps5->c[3] == (unsigned)(-1));
 		assert (ps5->mid2 == (unsigned)(-1));
 		assert (ps5->d == (unsigned)(-1));
 		assert (ps5->e == (unsigned)(-1));
@@ -582,9 +623,12 @@ STEP 11: Write an array back to the middle third of the dataset to\n\
 	for (j=0; j<NY; j++) {
 	    s1_t *ps1 = s1 + i*NY + j;
 	    
-	    assert (ps1->a == 5*(i*NY+j)+0);
-	    assert (ps1->c == 5*(i*NY+j)+2);
-	    assert (ps1->e == 5*(i*NY+j)+4);
+	    assert (ps1->a == 8*(i*NY+j)+0);
+	    assert (ps1->c[0] == 8*(i*NY+j)+2);
+	    assert (ps1->c[1] == 8*(i*NY+j)+3);
+	    assert (ps1->c[2] == 8*(i*NY+j)+4);
+	    assert (ps1->c[3] == 8*(i*NY+j)+5);
+	    assert (ps1->e == 8*(i*NY+j)+7);
 	    if ((hssize_t)i>=f_offset[0] &&
 		(hsize_t)i<f_offset[0]+h_size[0] &&
 		(hssize_t)j>=f_offset[1] &&
@@ -592,19 +636,13 @@ STEP 11: Write an array back to the middle third of the dataset to\n\
 		assert (ps1->b == (unsigned)(-1));
 		assert (ps1->d == (unsigned)(-1));
 	    } else {
-		assert (ps1->b == 5*(i*NY+j)+1);
-		assert (ps1->d == 5*(i*NY+j)+3);
+		assert (ps1->b == 8*(i*NY+j)+1);
+		assert (ps1->d == 8*(i*NY+j)+6);
 	    }
 	}
     }
 #endif /* OLD_WAY */
     
-
-
-
-
-
-
 
 
 

@@ -138,12 +138,13 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 hid_t
-H5Screate(H5S_class_t type)
+H5Screate (H5S_class_t type)
 {
     H5S_t  *new_ds=NULL;
     hid_t	ret_value = FAIL;
 
     FUNC_ENTER(H5Screate, FAIL);
+    H5TRACE1("i","Sc",type);
 
     /* Check args */
     if(type<=H5S_NO_CLASS || type> H5S_SIMPLE)  /* don't allow complex dataspace yet */

@@ -192,6 +192,7 @@ H5Sselect_hyperslab (hid_t spaceid, H5S_seloper_t op,
     herr_t ret_value=FAIL;  /* return value */
 
     FUNC_ENTER (H5Sselect_hyperslab, FAIL);
+    H5TRACE6("e","iSs*Hs*h*h*h",spaceid,op,start,_stride,count,_block);
 
     /* Check args */
     if (H5_DATASPACE != H5I_group(spaceid) ||
@@ -332,6 +333,7 @@ H5Sselect_npoints (hid_t spaceid)
     hsize_t ret_value=0;        /* return value */
 
     FUNC_ENTER (H5Sselect_npoints, 0);
+    H5TRACE1("h","i",spaceid);
 
     /* Check args */
     if (H5_DATASPACE != H5I_group(spaceid) ||
