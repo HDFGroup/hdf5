@@ -191,7 +191,7 @@ Platforms Tested
                                           Patch 109503-07 2001/08/11
                                   Sun WorkShop 6 update 1 C++ 5.2 Patch
                                         109508-04 2001/07/11
-    TFLOPS r1.0.4 v4.0.8 i386     pgcc Rel 3.1-4i with mpich-1.2.1 with
+    TFLOPS r1.0.4 v4.2.2 i386     pgcc Rel 3.1-4i with mpich-1.2.3 with
                                           local modifications
     IA-32 Linux 2.2.10smpx        cc Intel 5.0.1
                                   egcs-2.91.66
@@ -234,7 +234,7 @@ Supported Configuration Features Summary
     DECOSF         y  n         y    n         y     y          y     y
     T3E            y  y         y    y         n     n          y     y
     SV1            y  n         y    n         n     n          y     y
-    TFLOPS         y  y (1)     n    n         n     n          y     y (4)
+    TFLOPS         n  y (1)     n    n         n     n          y     y (4)
     AIX-4.3 SP2    y  y         y    y         n     n          y     n
     AIX-4.3 SP3    y  y         y    y         y     n          y     n
     Win2000        y  n         y    n         y (6) y          y     y
