@@ -6,6 +6,12 @@ code release 'zip' file (hdf5-1_2_0.zip).
 
 The following sections discuss in detail installation procedures. 
 
+  Section 1: Building from Source Code Release
+  Section 2: Building an application using the HDF5 library or DLL
+  Section 3: Some more helpful pointers
+  Section 4: ZLIB library - removing or changing the path
+
+Section 1:
 Building from Source Code Release (hdf5-1_2_0.zip)
 ===============================================
 
@@ -238,10 +244,9 @@ STEP IV: BUILDING THE EXAMPLES
 
 			
 
-STEP V:  
-
-BUILDING AN APPLICATION USING THE HDF5 LIBRARY - SOME HELPFUL POINTERS
-=====================================================================
+Section 2:  
+BUILDING AN APPLICATION USING THE HDF5 LIBRARY OR DLL- SOME HELPFUL POINTERS
+============================================================================
 
 If you are building an application that uses the HDF5 library 
 the following locations will need to be specified for locating
@@ -253,7 +258,50 @@ where <top-level HDF5 directory> may be
     C:\MyHDFstuff\hdf5\
 
 
+To specify this location in the settings for your VC++ project:
 
+      1. Open your VC project in Microsoft Visual C++ and make sure it is the 
+         active project.
+      2. Go to the Project menu and chose the 'Settings' option.
+      3. Chose the build configuration you would like to modify in the drop down
+         menu labeled with 'Settings For:'
+      4. Chose the C/C++ tab
+      5. At the bottom of the window, there should be a text-area labeled with
+         'Project Options:'.  In this text-area, scroll until you reach the end
+         and type /I "<top-level HDF5 directory>\src" and then click OK.
+
+To link the HDF5 library with your application:
+
+      1. Open your VC project in Microsoft Visual C++ and make sure it is the 
+         active project.
+      2. Go to the Project menu and chose the 'Add to Project' option and then
+         'Files' option.
+      3. Change the 'Files of type:' to 'Library Files (.lib)'
+      4. Navigate through the directories until you find the location of the
+         hdf5.lib.  
+	5. Select hdf5.lib and click OK.
+
+
+To use the DLL:
+
+      1. Follow the steps for specifing the location of the header files as shown
+         above.
+	2. Follow the steps for linking the HDF5 library as shown above except now
+         link the export library that is created with the DLL.  The export library
+         is called hdf5dll.lib.
+      3. Place the DLL in a location that Windows will be able to locate it.
+         The search path and order for DLL's is
+         a) The directory where the executable module for the current process is
+            located.
+         b) The current directory. 
+         c} The Windows system directory. The GetSystemDirectory function 
+            retrieves the path of this directory. 
+         d) The Windows directory. The GetWindowsDirectory function retrieves the
+            path of this directory.
+         e) The directories listed in the PATH environment variable. 
+
+
+Section 3:
 MORE HELPFUL POINTERS
 =====================
 
@@ -295,7 +343,7 @@ Settings... details:
                                       Single-Threaded
 
 
-
+Section 4:
 ZLIB LIBRARY- REMOVING OR CHANGING THE PATH
 ============================================
 
