@@ -1214,7 +1214,7 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
  *-------------------------------------------------------------------------
  */
 void *
-H5FL_arr_alloc(H5FL_arr_head_t *head, uintn elem, uintn clear)
+H5FL_arr_alloc(H5FL_arr_head_t *head, size_t elem, uintn clear)
 {
     H5FL_arr_node_t *new_obj;   /* Pointer to the new free list node allocated */
     void *ret_value;        /* Pointer to object to return */
@@ -1302,7 +1302,7 @@ H5FL_arr_alloc(H5FL_arr_head_t *head, uintn elem, uintn clear)
  *-------------------------------------------------------------------------
  */
 void *
-H5FL_arr_realloc(H5FL_arr_head_t *head, void * obj, uintn new_elem)
+H5FL_arr_realloc(H5FL_arr_head_t *head, void * obj, size_t new_elem)
 {
     H5FL_arr_node_t *temp;  /* Temp. ptr to the new free list node allocated */
     void *ret_value;        /* Pointer to object to return */
