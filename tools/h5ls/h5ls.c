@@ -28,50 +28,50 @@
 #include "h5tools_utils.h"
 
 /* Command-line switches */
-static int verbose_g = 0;		/*lots of extra output		     */
-static int width_g = 80;		/*output width in characters	     */
-static hbool_t address_g = FALSE;	/*print raw data addresses	     */
-static hbool_t data_g = FALSE;		/*display dataset values?	     */
-static hbool_t label_g = FALSE;		/*label compound values?	     */
-static hbool_t string_g = FALSE;	/*print 1-byte numbers as ASCII?     */
-static hbool_t fullname_g = FALSE;	/*print full path names		     */
-static hbool_t recursive_g = FALSE;	/*recursive descent listing	     */
-static hbool_t grp_literal_g = FALSE;	/*list group, not contents	     */
-static hbool_t hexdump_g = FALSE;	/*show data as raw hexadecimal	     */
-static hbool_t show_errors_g = FALSE;	/*print HDF5 error messages	     */
-static hbool_t simple_output_g = FALSE;	/*make output more machine-readable  */
+static int verbose_g = 0;  /*lots of extra output       */
+static int width_g = 80;  /*output width in characters      */
+static hbool_t address_g = FALSE; /*print raw data addresses      */
+static hbool_t data_g = FALSE;  /*display dataset values?      */
+static hbool_t label_g = FALSE;  /*label compound values?      */
+static hbool_t string_g = FALSE; /*print 1-byte numbers as ASCII?     */
+static hbool_t fullname_g = FALSE; /*print full path names       */
+static hbool_t recursive_g = FALSE; /*recursive descent listing      */
+static hbool_t grp_literal_g = FALSE; /*list group, not contents      */
+static hbool_t hexdump_g = FALSE; /*show data as raw hexadecimal      */
+static hbool_t show_errors_g = FALSE; /*print HDF5 error messages      */
+static hbool_t simple_output_g = FALSE; /*make output more machine-readable  */
 static hbool_t show_file_name_g = FALSE;/*show file name for full names      */
 
 /* Info to pass to the iteration functions */
 typedef struct iter_t {
-    const char	*container;		/*full name of the container object  */
+    const char *container;  /*full name of the container object  */
 } iter_t;
 
 /* Table containing object id and object name */
 static struct {
-    int		nalloc;			/*number of slots allocated	     */
-    int		nobjs;			/*number of objects		     */
+    int  nalloc;   /*number of slots allocated      */
+    int  nobjs;   /*number of objects       */
     struct {
-	unsigned long id[2];		/*object number			     */
-	char	*name;			/*full object name		     */
+ unsigned long id[2];  /*object number        */
+ char *name;   /*full object name       */
     } *obj;
 } idtab_g;
 
 /* Information about how to display each type of object */
 static struct dispatch_t {
-    const char	*name;
-    hid_t	(*open)(hid_t loc, const char *name);
-    herr_t	(*close)(hid_t obj);
-    herr_t	(*list1)(hid_t obj);
-    herr_t	(*list2)(hid_t obj, const char *name);
+    const char *name;
+    hid_t (*open)(hid_t loc, const char *name);
+    herr_t (*close)(hid_t obj);
+    herr_t (*list1)(hid_t obj);
+    herr_t (*list2)(hid_t obj, const char *name);
 } dispatch_g[H5G_NTYPES];
 
-#define DISPATCH(TYPE,NAME,OPEN,CLOSE,LIST1,LIST2) {			      \
-    dispatch_g[TYPE].name = (NAME);					      \
-    dispatch_g[TYPE].open = (OPEN);					      \
-    dispatch_g[TYPE].close = (CLOSE);					      \
-    dispatch_g[TYPE].list1 = (LIST1);					      \
-    dispatch_g[TYPE].list2 = (LIST2);					      \
+#define DISPATCH(TYPE,NAME,OPEN,CLOSE,LIST1,LIST2) {         \
+    dispatch_g[TYPE].name = (NAME);           \
+    dispatch_g[TYPE].open = (OPEN);           \
+    dispatch_g[TYPE].close = (CLOSE);           \
+    dispatch_g[TYPE].list1 = (LIST1);           \
+    dispatch_g[TYPE].list2 = (LIST2);           \
 }
 
 static herr_t list (hid_t group, const char *name, void *cd);
@@ -80,13 +80,13 @@ static char *fix_name(const char *path, const char *base);
 
 
 /*-------------------------------------------------------------------------
- * Function:	usage
+ * Function: usage
  *
- * Purpose:	Prints a usage message on stderr and then returns.
+ * Purpose: Prints a usage message on stderr and then returns.
  *
- * Return:	void
+ * Return: void
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Thursday, July 16, 1998
  *
  * Modifications:
@@ -120,18 +120,18 @@ usage: %s [OPTIONS] [OBJECTS...]\n\
       within the file then the contents of the root group are displayed).\n\
       The file name may include a printf(3C) integer format such as\n\
       \"%%05d\" to open a file family.\n",
-	    progname);
+     progname);
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	sym_insert
+ * Function: sym_insert
  *
- * Purpose:	Add a symbol to the table.
+ * Purpose: Add a symbol to the table.
  *
- * Return:	void
+ * Return: void
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Thursday, January 21, 1999
  *
  * Modifications:
@@ -141,7 +141,7 @@ usage: %s [OPTIONS] [OBJECTS...]\n\
 static void
 sym_insert(H5G_stat_t *sb, const char *name)
 {
-    int		n;
+    int  n;
 
     /*
      * Don't add it if the link count is 1 because such an object can only
@@ -151,9 +151,9 @@ sym_insert(H5G_stat_t *sb, const char *name)
     
     /* Extend the table */
     if (idtab_g.nobjs>=idtab_g.nalloc) {
-	idtab_g.nalloc = MAX(256, 2*idtab_g.nalloc);
-	idtab_g.obj = realloc(idtab_g.obj,
-			      idtab_g.nalloc*sizeof(idtab_g.obj[0]));
+ idtab_g.nalloc = MAX(256, 2*idtab_g.nalloc);
+ idtab_g.obj = realloc(idtab_g.obj,
+         idtab_g.nalloc*sizeof(idtab_g.obj[0]));
     }
 
     /* Insert the entry */
@@ -166,15 +166,15 @@ sym_insert(H5G_stat_t *sb, const char *name)
 
 
 /*-------------------------------------------------------------------------
- * Function:	sym_lookup
+ * Function: sym_lookup
  *
- * Purpose:	Find another name for the specified object.
+ * Purpose: Find another name for the specified object.
  *
- * Return:	Success:	Ptr to another name.
+ * Return: Success: Ptr to another name.
  *
- *		Failure:	NULL
+ *  Failure: NULL
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Thursday, January 21, 1999
  *
  * Modifications:
@@ -184,29 +184,29 @@ sym_insert(H5G_stat_t *sb, const char *name)
 static char *
 sym_lookup(H5G_stat_t *sb)
 {
-    int		n;
+    int  n;
     
     if (sb->nlink<2) return NULL; /*only one name possible*/
     for (n=0; n<idtab_g.nobjs; n++) {
-	if (idtab_g.obj[n].id[0]==sb->objno[0] &&
-	    idtab_g.obj[n].id[1]==sb->objno[1]) {
-	    return idtab_g.obj[n].name;
-	}
+ if (idtab_g.obj[n].id[0]==sb->objno[0] &&
+     idtab_g.obj[n].id[1]==sb->objno[1]) {
+     return idtab_g.obj[n].name;
+ }
     }
     return NULL;
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	display_string
+ * Function: display_string
  *
- * Purpose:	Print a string value by escaping unusual characters. If
- *		STREAM is null then we only count how large the output would
- *		be.
+ * Purpose: Print a string value by escaping unusual characters. If
+ *  STREAM is null then we only count how large the output would
+ *  be.
  *
- * Return:	Number of characters printed.
+ * Return: Number of characters printed.
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Thursday, November  5, 1998
  *
  * Modifications:
@@ -216,80 +216,80 @@ sym_lookup(H5G_stat_t *sb)
 static int
 display_string(FILE *stream, const char *s, hbool_t escape_spaces)
 {
-    int		nprint=0;
+    int  nprint=0;
     
     for (/*void*/; s && *s; s++) {
-	switch (*s) {
-	case '"':
-	    if (stream) fprintf(stream, "\\\"");
-	    nprint += 2;
-	    break;
-	case '\\':
-	    if (stream) fprintf(stream, "\\\\");
-	    nprint += 2;
-	    break;
-	case '\b':
-	    if (stream) fprintf(stream, "\\b");
-	    nprint += 2;
-	    break;
-	case '\f':
-	    if (stream) fprintf(stream, "\\f");
-	    nprint += 2;
-	    break;
-	case '\n':
-	    if (stream) fprintf(stream, "\\n");
-	    nprint += 2;
-	    break;
-	case '\r':
-	    if (stream) fprintf(stream, "\\r");
-	    nprint += 2;
-	    break;
-	case '\t':
-	    if (stream) fprintf(stream, "\\t");
-	    nprint += 2;
-	    break;
-	case ' ':
-	    if (escape_spaces) {
-		if (stream) fprintf(stream, "\\ ");
-		nprint += 2;
-	    } else {
-		if (stream) fprintf(stream, " ");
-		nprint++;
-	    }
-	    break;
-	default:
-	    if (isprint((int)*s)) {
-		if (stream) putc(*s, stream);
-		nprint++;
-	    } else {
-		if (stream) {
-		    fprintf(stream, "\\%03o", *((const unsigned char*)s));
-		}
-		nprint += 4;
-	    }
-	    break;
-	}
+ switch (*s) {
+ case '"':
+     if (stream) fprintf(stream, "\\\"");
+     nprint += 2;
+     break;
+ case '\\':
+     if (stream) fprintf(stream, "\\\\");
+     nprint += 2;
+     break;
+ case '\b':
+     if (stream) fprintf(stream, "\\b");
+     nprint += 2;
+     break;
+ case '\f':
+     if (stream) fprintf(stream, "\\f");
+     nprint += 2;
+     break;
+ case '\n':
+     if (stream) fprintf(stream, "\\n");
+     nprint += 2;
+     break;
+ case '\r':
+     if (stream) fprintf(stream, "\\r");
+     nprint += 2;
+     break;
+ case '\t':
+     if (stream) fprintf(stream, "\\t");
+     nprint += 2;
+     break;
+ case ' ':
+     if (escape_spaces) {
+  if (stream) fprintf(stream, "\\ ");
+  nprint += 2;
+     } else {
+  if (stream) fprintf(stream, " ");
+  nprint++;
+     }
+     break;
+ default:
+     if (isprint((int)*s)) {
+  if (stream) putc(*s, stream);
+  nprint++;
+     } else {
+  if (stream) {
+      fprintf(stream, "\\%03o", *((const unsigned char*)s));
+  }
+  nprint += 4;
+     }
+     break;
+ }
     }
     return nprint;
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	display_native_type
+ * Function: display_native_type
  *
- * Purpose:	Prints the name of a native C data type.
+ * Purpose: Prints the name of a native C data type.
  *
- * Return:	Success:	TRUE
+ * Return: Success: TRUE
  *
- *		Failure:	FALSE, nothing printed.
+ *  Failure: FALSE, nothing printed.
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Thursday, November  5, 1998
  *
  * Modifications:
- * 		Robb Matzke, 1999-06-11
- *		Added the C9x types, but we still prefer to display the types
- *		from the C language itself (like `int' vs. `int32_t').
+ *   Robb Matzke, 1999-06-11
+ *  Added the C9x types, but we still prefer to display the types
+ *  from the C language itself (like `int' vs. `int32_t').
  *
  *-------------------------------------------------------------------------
  */
@@ -297,112 +297,112 @@ static hbool_t
 display_native_type(hid_t type, int UNUSED ind)
 {
     if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
-	printf("native signed char");
+ printf("native signed char");
     } else if (H5Tequal(type, H5T_NATIVE_UCHAR)) {
-	printf("native unsigned char");
+ printf("native unsigned char");
     } else if (H5Tequal(type, H5T_NATIVE_INT)) {
-	printf("native int");
+ printf("native int");
     } else if (H5Tequal(type, H5T_NATIVE_UINT)) {
-	printf("native unsigned int");
+ printf("native unsigned int");
     } else if (H5Tequal(type, H5T_NATIVE_SHORT)) {
-	printf("native short");
+ printf("native short");
     } else if (H5Tequal(type, H5T_NATIVE_USHORT)) {
-	printf("native unsigned short");
+ printf("native unsigned short");
     } else if (H5Tequal(type, H5T_NATIVE_LONG)) {
-	printf("native long");
+ printf("native long");
     } else if (H5Tequal(type, H5T_NATIVE_ULONG)) {
-	printf("native unsigned long");
+ printf("native unsigned long");
     } else if (H5Tequal(type, H5T_NATIVE_LLONG)) {
-	printf("native long long");
+ printf("native long long");
     } else if (H5Tequal(type, H5T_NATIVE_ULLONG)) {
-	printf("native unsigned long long");
+ printf("native unsigned long long");
     } else if (H5Tequal(type, H5T_NATIVE_FLOAT)) {
-	printf("native float");
+ printf("native float");
     } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
-	printf("native double");
+ printf("native double");
     } else if (H5Tequal(type, H5T_NATIVE_LDOUBLE)) {
-	printf("native long double");
+ printf("native long double");
     } else if (H5Tequal(type, H5T_NATIVE_INT8)) {
-	printf("native int8_t");
+ printf("native int8_t");
     } else if (H5Tequal(type, H5T_NATIVE_UINT8)) {
-	printf("native uint8_t");
+ printf("native uint8_t");
     } else if (H5Tequal(type, H5T_NATIVE_INT16)) {
-	printf("native int16_t");
+ printf("native int16_t");
     } else if (H5Tequal(type, H5T_NATIVE_UINT16)) {
-	printf("native uint16_t");
+ printf("native uint16_t");
     } else if (H5Tequal(type, H5T_NATIVE_INT32)) {
-	printf("native int32_t");
+ printf("native int32_t");
     } else if (H5Tequal(type, H5T_NATIVE_UINT32)) {
-	printf("native uint32_t");
+ printf("native uint32_t");
     } else if (H5Tequal(type, H5T_NATIVE_INT64)) {
-	printf("native int64_t");
+ printf("native int64_t");
     } else if (H5Tequal(type, H5T_NATIVE_UINT64)) {
-	printf("native uint64_t");
+ printf("native uint64_t");
     } else if (H5Tequal(type, H5T_NATIVE_INT_LEAST8)) {
-	printf("native int_least8_t");
+ printf("native int_least8_t");
     } else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST8)) {
-	printf("native uint_least8_t");
+ printf("native uint_least8_t");
     } else if (H5Tequal(type, H5T_NATIVE_INT_LEAST16)) {
-	printf("native int_least16_t");
+ printf("native int_least16_t");
     } else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST16)) {
-	printf("native uint_least16_t");
+ printf("native uint_least16_t");
     } else if (H5Tequal(type, H5T_NATIVE_INT_LEAST32)) {
-	printf("native int_least32_t");
+ printf("native int_least32_t");
     } else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST32)) {
-	printf("native uint_least32_t");
+ printf("native uint_least32_t");
     } else if (H5Tequal(type, H5T_NATIVE_INT_LEAST64)) {
-	printf("native int_least64_t");
+ printf("native int_least64_t");
     } else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST64)) {
-	printf("native uint_least64_t");
+ printf("native uint_least64_t");
     } else if (H5Tequal(type, H5T_NATIVE_INT_FAST8)) {
-	printf("native int_fast8_t");
+ printf("native int_fast8_t");
     } else if (H5Tequal(type, H5T_NATIVE_UINT_FAST8)) {
-	printf("native uint_fast8_t");
+ printf("native uint_fast8_t");
     } else if (H5Tequal(type, H5T_NATIVE_INT_FAST16)) {
-	printf("native int_fast16_t");
+ printf("native int_fast16_t");
     } else if (H5Tequal(type, H5T_NATIVE_UINT_FAST16)) {
-	printf("native uint_fast16_t");
+ printf("native uint_fast16_t");
     } else if (H5Tequal(type, H5T_NATIVE_INT_FAST32)) {
-	printf("native int_fast32_t");
+ printf("native int_fast32_t");
     } else if (H5Tequal(type, H5T_NATIVE_UINT_FAST32)) {
-	printf("native uint_fast32_t");
+ printf("native uint_fast32_t");
     } else if (H5Tequal(type, H5T_NATIVE_INT_FAST64)) {
-	printf("native int_fast64_t");
+ printf("native int_fast64_t");
     } else if (H5Tequal(type, H5T_NATIVE_UINT_FAST64)) {
-	printf("native uint_fast64_t");
+ printf("native uint_fast64_t");
     } else if (H5Tequal(type, H5T_NATIVE_B8)) {
-	printf("native 8-bit field");
+ printf("native 8-bit field");
     } else if (H5Tequal(type, H5T_NATIVE_B16)) {
-	printf("native 16-bit field");
+ printf("native 16-bit field");
     } else if (H5Tequal(type, H5T_NATIVE_B32)) {
-	printf("native 32-bit field");
+ printf("native 32-bit field");
     } else if (H5Tequal(type, H5T_NATIVE_B64)) {
-	printf("native 64-bit field");
+ printf("native 64-bit field");
     } else if (H5Tequal(type, H5T_NATIVE_HSIZE)) {
-	printf("native hsize_t");
+ printf("native hsize_t");
     } else if (H5Tequal(type, H5T_NATIVE_HSSIZE)) {
-	printf("native hssize_t");
+ printf("native hssize_t");
     } else if (H5Tequal(type, H5T_NATIVE_HERR)) {
-	printf("native herr_t");
+ printf("native herr_t");
     } else if (H5Tequal(type, H5T_NATIVE_HBOOL)) {
-	printf("native hbool_t");
+ printf("native hbool_t");
     } else {
-	return FALSE;
+ return FALSE;
     }
     return TRUE;
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	display_ieee_type
+ * Function: display_ieee_type
  *
- * Purpose:	Print the name of an IEEE floating-point data type.
+ * Purpose: Print the name of an IEEE floating-point data type.
  *
- * Return:	Success:	TRUE
+ * Return: Success: TRUE
  *
- *		Failure:	FALSE, nothing printed
+ *  Failure: FALSE, nothing printed
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Thursday, November  5, 1998
  *
  * Modifications:
@@ -413,30 +413,30 @@ static hbool_t
 display_ieee_type(hid_t type, int UNUSED ind)
 {
     if (H5Tequal(type, H5T_IEEE_F32BE)) {
-	printf("IEEE 32-bit big-endian float");
+ printf("IEEE 32-bit big-endian float");
     } else if (H5Tequal(type, H5T_IEEE_F32LE)) {
-	printf("IEEE 32-bit little-endian float");
+ printf("IEEE 32-bit little-endian float");
     } else if (H5Tequal(type, H5T_IEEE_F64BE)) {
-	printf("IEEE 64-bit big-endian float");
+ printf("IEEE 64-bit big-endian float");
     } else if (H5Tequal(type, H5T_IEEE_F64LE)) {
-	printf("IEEE 64-bit little-endian float");
+ printf("IEEE 64-bit little-endian float");
     } else {
-	return FALSE;
+ return FALSE;
     }
     return TRUE;
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	display_precision
+ * Function: display_precision
  *
- * Purpose:	Prints information on the next line about precision and
- *		padding if the precision is less than the total data type
- *		size.
+ * Purpose: Prints information on the next line about precision and
+ *  padding if the precision is less than the total data type
+ *  size.
  *
- * Return:	void
+ * Return: void
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Thursday, November  5, 1998
  *
  * Modifications:
@@ -446,11 +446,11 @@ display_ieee_type(hid_t type, int UNUSED ind)
 static void
 display_precision(hid_t type, int ind)
 {
-    size_t		prec;		/*precision			*/
-    H5T_pad_t		plsb, pmsb;	/*lsb and msb padding		*/
-    const char		*plsb_s=NULL;	/*lsb padding string		*/
-    const char		*pmsb_s=NULL;	/*msb padding string		*/
-    size_t		nbits;		/*number of bits		*/
+    size_t  prec;  /*precision   */
+    H5T_pad_t  plsb, pmsb; /*lsb and msb padding  */
+    const char  *plsb_s=NULL; /*lsb padding string  */
+    const char  *pmsb_s=NULL; /*msb padding string  */
+    size_t  nbits;  /*number of bits  */
 
     /*
      * If the precision is less than the total size then show the precision
@@ -458,78 +458,78 @@ display_precision(hid_t type, int ind)
      * information.
      */
     if (8*H5Tget_size(type)!=(prec=H5Tget_precision(type))) {
-	printf("\n%*s(%lu bit%s of precision beginning at bit %lu)",
-	       ind, "", (unsigned long)prec, 1==prec?"":"s",
-	       (unsigned long)H5Tget_offset(type));
+ printf("\n%*s(%lu bit%s of precision beginning at bit %lu)",
+        ind, "", (unsigned long)prec, 1==prec?"":"s",
+        (unsigned long)H5Tget_offset(type));
 
-	H5Tget_pad(type, &plsb, &pmsb);
-	if (H5Tget_offset(type)>0) {
-	    switch (plsb) {
-	    case H5T_PAD_ZERO:
-		plsb_s = "zero";
-		break;
-	    case H5T_PAD_ONE:
-		plsb_s = "one";
-		break;
-	    case H5T_PAD_BACKGROUND:
-		plsb_s = "bkg";
-		break;
-	    case H5T_PAD_ERROR:
-	    case H5T_NPAD:
-		plsb_s = "unknown";
-		break;
-	    }
-	}
-	if (H5Tget_offset(type)+prec<8*H5Tget_size(type)) {
-	    switch (pmsb) {
-	    case H5T_PAD_ZERO:
-		pmsb_s = "zero";
-		break;
-	    case H5T_PAD_ONE:
-		pmsb_s = "one";
-		break;
-	    case H5T_PAD_BACKGROUND:
-		pmsb_s = "bkg";
-		break;
-	    case H5T_PAD_ERROR:
-	    case H5T_NPAD:
-		pmsb_s = "unknown";
-		break;
-	    }
-	}
-	if (plsb_s || pmsb_s) {
-	    printf("\n%*s(", ind, "");
-	    if (plsb_s) {
-		nbits = H5Tget_offset(type);
-		printf("%lu %s bit%s at bit 0",
-		       (unsigned long)nbits, plsb_s, 1==nbits?"":"s");
-	    }
-	    if (plsb_s && pmsb_s) printf(", ");
-	    if (pmsb_s) {
-		nbits = 8*H5Tget_size(type)-(H5Tget_offset(type)+prec);
-		printf("%lu %s bit%s at bit %lu",
-		       (unsigned long)nbits, pmsb_s, 1==nbits?"":"s",
-		       (unsigned long)(8*H5Tget_size(type)-nbits));
-	    }
-	    printf(")");
-	}
+ H5Tget_pad(type, &plsb, &pmsb);
+ if (H5Tget_offset(type)>0) {
+     switch (plsb) {
+     case H5T_PAD_ZERO:
+  plsb_s = "zero";
+  break;
+     case H5T_PAD_ONE:
+  plsb_s = "one";
+  break;
+     case H5T_PAD_BACKGROUND:
+  plsb_s = "bkg";
+  break;
+     case H5T_PAD_ERROR:
+     case H5T_NPAD:
+  plsb_s = "unknown";
+  break;
+     }
+ }
+ if (H5Tget_offset(type)+prec<8*H5Tget_size(type)) {
+     switch (pmsb) {
+     case H5T_PAD_ZERO:
+  pmsb_s = "zero";
+  break;
+     case H5T_PAD_ONE:
+  pmsb_s = "one";
+  break;
+     case H5T_PAD_BACKGROUND:
+  pmsb_s = "bkg";
+  break;
+     case H5T_PAD_ERROR:
+     case H5T_NPAD:
+  pmsb_s = "unknown";
+  break;
+     }
+ }
+ if (plsb_s || pmsb_s) {
+     printf("\n%*s(", ind, "");
+     if (plsb_s) {
+  nbits = H5Tget_offset(type);
+  printf("%lu %s bit%s at bit 0",
+         (unsigned long)nbits, plsb_s, 1==nbits?"":"s");
+     }
+     if (plsb_s && pmsb_s) printf(", ");
+     if (pmsb_s) {
+  nbits = 8*H5Tget_size(type)-(H5Tget_offset(type)+prec);
+  printf("%lu %s bit%s at bit %lu",
+         (unsigned long)nbits, pmsb_s, 1==nbits?"":"s",
+         (unsigned long)(8*H5Tget_size(type)-nbits));
+     }
+     printf(")");
+ }
     }
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	display_int_type
+ * Function: display_int_type
  *
- * Purpose:	Print the name of an integer data type.  Common information
- *		like number of bits, byte order, and sign scheme appear on
- *		the first line. Additional information might appear in
- *		parentheses on the following lines.
+ * Purpose: Print the name of an integer data type.  Common information
+ *  like number of bits, byte order, and sign scheme appear on
+ *  the first line. Additional information might appear in
+ *  parentheses on the following lines.
  *
- * Return:	Success:	TRUE
+ * Return: Success: TRUE
  *
- *		Failure:	FALSE, nothing printed
+ *  Failure: FALSE, nothing printed
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Thursday, November  5, 1998
  *
  * Modifications:
@@ -539,40 +539,40 @@ display_precision(hid_t type, int ind)
 static hbool_t
 display_int_type(hid_t type, int ind)
 {
-    H5T_order_t		order;		/*byte order value		*/
-    const char 		*order_s=NULL;	/*byte order string		*/
-    H5T_sign_t		sign;		/*sign scheme value		*/
-    const char		*sign_s=NULL;	/*sign scheme string		*/
+    H5T_order_t  order;  /*byte order value  */
+    const char   *order_s=NULL; /*byte order string  */
+    H5T_sign_t  sign;  /*sign scheme value  */
+    const char  *sign_s=NULL; /*sign scheme string  */
     
     if (H5T_INTEGER!=H5Tget_class(type)) return FALSE;
     
     /* Byte order */
     if (H5Tget_size(type)>1) {
-	order = H5Tget_order(type);
-	if (H5T_ORDER_LE==order) {
-	    order_s = " little-endian";
-	} else if (H5T_ORDER_BE==order) {
-	    order_s = " big-endian";
-	} else if (H5T_ORDER_VAX==order) {
-	    order_s = " mixed-endian";
-	} else {
-	    order_s = " unknown-byte-order";
-	}
+ order = H5Tget_order(type);
+ if (H5T_ORDER_LE==order) {
+     order_s = " little-endian";
+ } else if (H5T_ORDER_BE==order) {
+     order_s = " big-endian";
+ } else if (H5T_ORDER_VAX==order) {
+     order_s = " mixed-endian";
+ } else {
+     order_s = " unknown-byte-order";
+ }
     } else {
-	order_s = "";
+ order_s = "";
     }
 
     /* Sign */
     if ((sign=H5Tget_sign(type))>=0) {
-	if (H5T_SGN_NONE==sign) {
-	    sign_s = " unsigned";
-	} else if (H5T_SGN_2==sign) {
-	    sign_s = "";
-	} else {
-	    sign_s = " unknown-sign";
-	}
+ if (H5T_SGN_NONE==sign) {
+     sign_s = " unsigned";
+ } else if (H5T_SGN_2==sign) {
+     sign_s = "";
+ } else {
+     sign_s = " unknown-sign";
+ }
     } else {
-	sign_s = " unknown-sign";
+ sign_s = " unknown-sign";
     }
     
     /*
@@ -580,22 +580,22 @@ display_int_type(hid_t type, int ind)
      * information on the subsequent lines
      */
     printf("%lu-bit%s%s integer",
-	   (unsigned long)(8*H5Tget_size(type)), order_s, sign_s);
+    (unsigned long)(8*H5Tget_size(type)), order_s, sign_s);
     display_precision(type, ind);
     return TRUE;
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	display_float_type
+ * Function: display_float_type
  *
- * Purpose:	Print info about a floating point data type.
+ * Purpose: Print info about a floating point data type.
  *
- * Return:	Success:	TRUE
+ * Return: Success: TRUE
  *
- *		Failure:	FALSE, nothing printed
+ *  Failure: FALSE, nothing printed
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Thursday, November  5, 1998
  *
  * Modifications:
@@ -605,33 +605,33 @@ display_int_type(hid_t type, int ind)
 static hbool_t
 display_float_type(hid_t type, int ind)
 {
-    H5T_order_t		order;		/*byte order value		*/
-    const char 		*order_s=NULL;	/*byte order string		*/
-    size_t		spos;		/*sign bit position		*/
-    size_t		esize, epos;	/*exponent size and position	*/
-    size_t		msize, mpos;	/*significand size and position	*/
-    size_t		ebias;		/*exponent bias			*/
-    H5T_norm_t		norm;		/*significand normalization	*/
-    const char		*norm_s=NULL;	/*normalization string		*/
-    H5T_pad_t		pad;		/*internal padding value	*/
-    const char		*pad_s=NULL;	/*internal padding string	*/
+    H5T_order_t  order;  /*byte order value  */
+    const char   *order_s=NULL; /*byte order string  */
+    size_t  spos;  /*sign bit position  */
+    size_t  esize, epos; /*exponent size and position */
+    size_t  msize, mpos; /*significand size and position */
+    size_t  ebias;  /*exponent bias   */
+    H5T_norm_t  norm;  /*significand normalization */
+    const char  *norm_s=NULL; /*normalization string  */
+    H5T_pad_t  pad;  /*internal padding value */
+    const char  *pad_s=NULL; /*internal padding string */
     
     if (H5T_FLOAT!=H5Tget_class(type)) return FALSE;
     
     /* Byte order */
     if (H5Tget_size(type)>1) {
-	order = H5Tget_order(type);
-	if (H5T_ORDER_LE==order) {
-	    order_s = " little-endian";
-	} else if (H5T_ORDER_BE==order) {
-	    order_s = " big-endian";
-	} else if (H5T_ORDER_VAX==order) {
-	    order_s = " mixed-endian";
-	} else {
-	    order_s = " unknown-byte-order";
-	}
+ order = H5Tget_order(type);
+ if (H5T_ORDER_LE==order) {
+     order_s = " little-endian";
+ } else if (H5T_ORDER_BE==order) {
+     order_s = " big-endian";
+ } else if (H5T_ORDER_VAX==order) {
+     order_s = " mixed-endian";
+ } else {
+     order_s = " unknown-byte-order";
+ }
     } else {
-	order_s = "";
+ order_s = "";
     }
 
     /*
@@ -639,7 +639,7 @@ display_float_type(hid_t type, int ind)
      * subsequent lines.
      */
     printf("%lu-bit%s floating-point",
-	   (unsigned long)(8*H5Tget_size(type)), order_s);
+    (unsigned long)(8*H5Tget_size(type)), order_s);
     display_precision(type, ind);
 
     /* Print sizes, locations, and other information about each field */
@@ -648,60 +648,60 @@ display_float_type(hid_t type, int ind)
     norm = H5Tget_norm(type);
     switch (norm) {
     case H5T_NORM_IMPLIED:
-	norm_s = ", msb implied";
-	break;
+ norm_s = ", msb implied";
+ break;
     case H5T_NORM_MSBSET:
-	norm_s = ", msb always set";
-	break;
+ norm_s = ", msb always set";
+ break;
     case H5T_NORM_NONE:
-	norm_s = ", no normalization";
-	break;
+ norm_s = ", no normalization";
+ break;
     case H5T_NORM_ERROR:
-	norm_s = ", unknown normalization";
-	break;
+ norm_s = ", unknown normalization";
+ break;
     }
     printf("\n%*s(significant for %lu bit%s at bit %lu%s)", ind, "", 
-	   (unsigned long)msize, 1==msize?"":"s", (unsigned long)mpos,
-	   norm_s);
+    (unsigned long)msize, 1==msize?"":"s", (unsigned long)mpos,
+    norm_s);
     printf("\n%*s(exponent for %lu bit%s at bit %lu, bias is 0x%lx)",
-	   ind, "", (unsigned long)esize, 1==esize?"":"s",
-	   (unsigned long)epos, (unsigned long)ebias);
+    ind, "", (unsigned long)esize, 1==esize?"":"s",
+    (unsigned long)epos, (unsigned long)ebias);
     printf("\n%*s(sign bit at %lu)", ind, "", (unsigned long)spos);
 
     /* Display internal padding */
     if (1+esize+msize<H5Tget_precision(type)) {
-	pad = H5Tget_inpad(type);
-	switch (pad) {
-	case H5T_PAD_ZERO:
-	    pad_s = "zero";
-	    break;
-	case H5T_PAD_ONE:
-	    pad_s = "one";
-	    break;
-	case H5T_PAD_BACKGROUND:
-	    pad_s = "bkg";
-	    break;
-	case H5T_PAD_ERROR:
-	case H5T_NPAD:
-	    pad_s = "unknown";
-	    break;
-	}
-	printf("\n%*s(internal padding bits are %s)", ind, "", pad_s);
+ pad = H5Tget_inpad(type);
+ switch (pad) {
+ case H5T_PAD_ZERO:
+     pad_s = "zero";
+     break;
+ case H5T_PAD_ONE:
+     pad_s = "one";
+     break;
+ case H5T_PAD_BACKGROUND:
+     pad_s = "bkg";
+     break;
+ case H5T_PAD_ERROR:
+ case H5T_NPAD:
+     pad_s = "unknown";
+     break;
+ }
+ printf("\n%*s(internal padding bits are %s)", ind, "", pad_s);
     }
     return TRUE;
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	display_cmpd_type
+ * Function: display_cmpd_type
  *
- * Purpose:	Print info about a compound data type.
+ * Purpose: Print info about a compound data type.
  *
- * Return:	Success:	TRUE
+ * Return: Success: TRUE
  *
- *		Failure:	FALSE, nothing printed
+ *  Failure: FALSE, nothing printed
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Thursday, November  5, 1998
  *
  * Modifications:
@@ -711,10 +711,10 @@ display_float_type(hid_t type, int ind)
 static hbool_t
 display_cmpd_type(hid_t type, int ind)
 {
-    char	*name=NULL;	/*member name				*/
-    size_t	size;		/*total size of type in bytes		*/
-    hid_t	subtype;	/*member data type			*/
-    int		i, n;	        /*miscellaneous counters		*/
+    char *name=NULL; /*member name    */
+    size_t size;  /*total size of type in bytes  */
+    hid_t subtype; /*member data type   */
+    int  i, n;         /*miscellaneous counters  */
     
     
     if (H5T_COMPOUND!=H5Tget_class(type)) return FALSE;
@@ -736,21 +736,21 @@ display_cmpd_type(hid_t type, int ind)
     }
     size = H5Tget_size(type);
     printf("\n%*s} %lu byte%s",
-	   ind, "", (unsigned long)size, 1==size?"":"s");
+    ind, "", (unsigned long)size, 1==size?"":"s");
     return TRUE;
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	display_enum_type
+ * Function: display_enum_type
  *
- * Purpose:	Print info about an enumeration data type.
+ * Purpose: Print info about an enumeration data type.
  *
- * Return:	Success:	TRUE
+ * Return: Success: TRUE
  *
- *		Failure:	FALSE, nothing printed
+ *  Failure: FALSE, nothing printed
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Wednesday, December 23, 1998
  *
  * Modifications:
@@ -760,15 +760,15 @@ display_cmpd_type(hid_t type, int ind)
 static hbool_t
 display_enum_type(hid_t type, int ind)
 {
-    char	**name=NULL;	/*member names				*/
-    unsigned char *value=NULL;	/*value array				*/
-    int		nmembs;		/*number of members			*/
-    int		nchars;		/*number of output characters		*/
-    hid_t	super;		/*enum base integer type		*/
-    hid_t	native=-1;	/*native integer data type		*/
-    size_t	dst_size;	/*destination value type size		*/
-    int		i;		/*miscellaneous counters		*/
-    size_t	j;
+    char **name=NULL; /*member names    */
+    unsigned char *value=NULL; /*value array    */
+    int  nmembs;  /*number of members   */
+    int  nchars;  /*number of output characters  */
+    hid_t super;  /*enum base integer type  */
+    hid_t native=-1; /*native integer data type  */
+    size_t dst_size; /*destination value type size  */
+    int  i;  /*miscellaneous counters  */
+    size_t j;
         
     if (H5T_ENUM!=H5Tget_class(type)) return FALSE;
     nmembs = H5Tget_nmembers(type);
@@ -781,18 +781,18 @@ display_enum_type(hid_t type, int ind)
      * Determine what data type to use for the native values.  To simplify
      * things we entertain three possibilities:
      *  1. long_long -- the largest native signed integer
-     *	2. unsigned long_long -- the largest native unsigned integer
-     *	3. raw format
+     * 2. unsigned long_long -- the largest native unsigned integer
+     * 3. raw format
      */
     if (H5Tget_size(type)<=sizeof(long_long)) {
-	dst_size = sizeof(long_long);
-	if (H5T_SGN_NONE==H5Tget_sign(type)) {
-	    native = H5T_NATIVE_ULLONG;
-	} else {
-	    native = H5T_NATIVE_LLONG;
-	}
+ dst_size = sizeof(long_long);
+ if (H5T_SGN_NONE==H5Tget_sign(type)) {
+     native = H5T_NATIVE_ULLONG;
+ } else {
+     native = H5T_NATIVE_LLONG;
+ }
     } else {
-	dst_size = H5Tget_size(type);
+ dst_size = H5Tget_size(type);
     }
 
     /* Get the names and raw values of all members */
@@ -800,8 +800,8 @@ display_enum_type(hid_t type, int ind)
     name = calloc((size_t)nmembs, sizeof(char*));
     value = calloc((size_t)nmembs, MAX(H5Tget_size(type), dst_size));
     for (i=0; i<nmembs; i++) {
-	name[i] = H5Tget_member_name(type, i);
-	H5Tget_member_value(type, i, value+i*H5Tget_size(type));
+ name[i] = H5Tget_member_name(type, i);
+ H5Tget_member_value(type, i, value+i*H5Tget_size(type));
     }
 
     /* Convert values to native data type */
@@ -812,22 +812,22 @@ display_enum_type(hid_t type, int ind)
 
     /* Print members */
     for (i=0; i<nmembs; i++) {
-	printf("\n%*s", ind+4, "");
-	nchars = display_string(stdout, name[i], TRUE);
-	printf("%*s = ", MAX(0, 16-nchars), "");
+ printf("\n%*s", ind+4, "");
+ nchars = display_string(stdout, name[i], TRUE);
+ printf("%*s = ", MAX(0, 16-nchars), "");
 
-	if (native<0) {
-	    printf("0x");
-	    for (j=0; j<dst_size; j++) {
-		printf("%02x", value[i*dst_size+j]);
-	    }
-	} else if (H5T_SGN_NONE==H5Tget_sign(native)) {
-	    HDfprintf(stdout,"%"H5_PRINTF_LL_WIDTH"u",
-		   *((unsigned long_long*)((void*)(value+i*dst_size))));
-	} else {
-	    HDfprintf(stdout,"%"H5_PRINTF_LL_WIDTH"d",
-		   *((long_long*)((void*)(value+i*dst_size))));
-	}
+ if (native<0) {
+     printf("0x");
+     for (j=0; j<dst_size; j++) {
+  printf("%02x", value[i*dst_size+j]);
+     }
+ } else if (H5T_SGN_NONE==H5Tget_sign(native)) {
+     HDfprintf(stdout,"%"H5_PRINTF_LL_WIDTH"u",
+     *((unsigned long_long*)((void*)(value+i*dst_size))));
+ } else {
+     HDfprintf(stdout,"%"H5_PRINTF_LL_WIDTH"d",
+     *((long_long*)((void*)(value+i*dst_size))));
+ }
     }
 
     /* Release resources */
@@ -843,15 +843,15 @@ display_enum_type(hid_t type, int ind)
 
 
 /*-------------------------------------------------------------------------
- * Function:	display_string_type
+ * Function: display_string_type
  *
- * Purpose:	Print information about a string data type.
+ * Purpose: Print information about a string data type.
  *
- * Return:	Success:	TRUE
+ * Return: Success: TRUE
  *
- *		Failure:	FALSE, nothing printed
+ *  Failure: FALSE, nothing printed
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Thursday, November  5, 1998
  *
  * Modifications:
@@ -861,10 +861,10 @@ display_enum_type(hid_t type, int ind)
 static hbool_t
 display_string_type(hid_t type, int UNUSED ind)
 {
-    H5T_str_t		pad;
-    const char		*pad_s=NULL;
-    H5T_cset_t		cset;
-    const char		*cset_s=NULL;
+    H5T_str_t  pad;
+    const char  *pad_s=NULL;
+    H5T_cset_t  cset;
+    const char  *cset_s=NULL;
     
     if (H5T_STRING!=H5Tget_class(type)) return FALSE;
 
@@ -872,14 +872,14 @@ display_string_type(hid_t type, int UNUSED ind)
     pad = H5Tget_strpad(type);
     switch (pad) {
     case H5T_STR_NULLTERM:
-	pad_s = "null-terminated";
-	break;
+ pad_s = "null-terminated";
+ break;
     case H5T_STR_NULLPAD:
-	pad_s = "null-padded";
-	break;
+ pad_s = "null-padded";
+ break;
     case H5T_STR_SPACEPAD:
-	pad_s = "space-padded";
-	break;
+ pad_s = "space-padded";
+ break;
     case H5T_STR_RESERVED_3:
     case H5T_STR_RESERVED_4:
     case H5T_STR_RESERVED_5:
@@ -894,16 +894,16 @@ display_string_type(hid_t type, int UNUSED ind)
     case H5T_STR_RESERVED_14:
     case H5T_STR_RESERVED_15:
     case H5T_STR_ERROR:
-	pad_s = "unknown-format";
-	break;
+ pad_s = "unknown-format";
+ break;
     }
 
     /* Character set */
     cset = H5Tget_cset(type);
     switch (cset) {
     case H5T_CSET_ASCII:
-	cset_s = "ASCII";
-	break;
+ cset_s = "ASCII";
+ break;
     case H5T_CSET_RESERVED_1:
     case H5T_CSET_RESERVED_2:
     case H5T_CSET_RESERVED_3:
@@ -920,31 +920,31 @@ display_string_type(hid_t type, int UNUSED ind)
     case H5T_CSET_RESERVED_14:
     case H5T_CSET_RESERVED_15:
     case H5T_CSET_ERROR:
-	cset_s = "unknown-character-set";
-	break;
+ cset_s = "unknown-character-set";
+ break;
     }
 
     printf("%lu-byte %s %s string",
-	   (unsigned long)H5Tget_size(type), pad_s, cset_s);
+    (unsigned long)H5Tget_size(type), pad_s, cset_s);
     return TRUE;
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	display_reference_type
+ * Function: display_reference_type
  *
- * Purpose:	Prints information about a reference data type.
+ * Purpose: Prints information about a reference data type.
  *
- * Return:	Success:	TRUE
+ * Return: Success: TRUE
  *
- *		Failure:	FALSE, nothing printed
+ *  Failure: FALSE, nothing printed
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Thursday, November  5, 1998
  *
  * Modifications:
- * 		Robb Matzke, 1999-06-04
- *		Knows about object and dataset region references.
+ *   Robb Matzke, 1999-06-04
+ *  Knows about object and dataset region references.
  *
  *-------------------------------------------------------------------------
  */
@@ -954,12 +954,12 @@ display_reference_type(hid_t type, int UNUSED ind)
     if (H5T_REFERENCE!=H5Tget_class(type)) return FALSE;
 
     if (H5Tequal(type, H5T_STD_REF_OBJ)) {
-	printf("object reference");
+ printf("object reference");
     } else if (H5Tequal(type, H5T_STD_REF_DSETREG)) {
-	printf("dataset region reference");
+ printf("dataset region reference");
     } else {
-	printf("%lu-byte unknown reference",
-	       (unsigned long)H5Tget_size(type));
+ printf("%lu-byte unknown reference",
+        (unsigned long)H5Tget_size(type));
     }
     
     return TRUE;
@@ -967,15 +967,15 @@ display_reference_type(hid_t type, int UNUSED ind)
 
 
 /*-------------------------------------------------------------------------
- * Function:	display_opaque_type
+ * Function: display_opaque_type
  *
- * Purpose:	Prints information about an opaque data type.
+ * Purpose: Prints information about an opaque data type.
  *
- * Return:	Success:	TRUE
+ * Return: Success: TRUE
  *
- *		Failure:	FALSE, nothing printed
+ *  Failure: FALSE, nothing printed
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Monday, June  7, 1999
  *
  * Modifications:
@@ -985,18 +985,18 @@ display_reference_type(hid_t type, int UNUSED ind)
 static hbool_t
 display_opaque_type(hid_t type, int ind)
 {
-    char	*tag;
-    size_t	size;
+    char *tag;
+    size_t size;
     
     if (H5T_OPAQUE!=H5Tget_class(type)) return FALSE;
 
     size = H5Tget_size(type);
     printf("%lu-byte opaque type", (unsigned long)size);
     if ((tag=H5Tget_tag(type))) {
-	printf("\n%*s(tag = \"", ind, "");
-	display_string(stdout, tag, FALSE);
-	printf("\")");
-	free(tag);
+ printf("\n%*s(tag = \"", ind, "");
+ display_string(stdout, tag, FALSE);
+ printf("\")");
+ free(tag);
     }
     return TRUE;
 }
@@ -1087,130 +1087,177 @@ display_array_type(hid_t type, int ind)
     H5Tclose(super);
     return TRUE;
 }
-            
+      
+
+/*-------------------------------------------------------------------------
+ * Function: display_bitfield_type
+ *
+ * Purpose: Print information about a bitfield type.
+ *
+ * Return: Success: TRUE
+ *
+ *  Failure: FALSE, nothing printed
+ *
+ * Programmer: Pedro Vicente
+ *              Tuesday, May  20, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static hbool_t
+display_bitfield_type(hid_t type, int UNUSED ind)
+{
+
+	if (H5T_BITFIELD!=H5Tget_class(type)) return FALSE;
+   
+ if (H5Tequal(type, H5T_STD_B8BE)) {
+     printf("8-bit bitfield big-endian");
+ } else if (H5Tequal(type, H5T_STD_B8LE)) {
+     printf("8-bit bitfield little-endian");
+ } else if (H5Tequal(type, H5T_STD_B16BE)) {
+     printf("16-bit bitfield big-endian");
+ } else if (H5Tequal(type, H5T_STD_B16LE)) {
+     printf("16-bit bitfield little-endian");
+ } else if (H5Tequal(type, H5T_STD_B32BE)) {
+     printf("32-bit bitfield big-endian");
+ } else if (H5Tequal(type, H5T_STD_B32LE)) {
+     printf("32-bit bitfield little-endian");
+ } else if (H5Tequal(type, H5T_STD_B64BE)) {
+     printf("64-bit bitfield big-endian");
+ } else if (H5Tequal(type, H5T_STD_B64LE)) {
+     printf("64-bit bitfield little-endian");
+ } else {
+     printf("user defined bitfield");
+    }
+    return TRUE;
+}
+
+      
 
 /*-------------------------------------------------------------------------
- * Function:	display_type
+ * Function: display_type
  *
- * Purpose:	Prints a data type definition.  The definition is printed
- *		without any leading space or trailing line-feed (although
- *		there might be line-feeds inside the type definition).  The
- *		first line is assumed to have IND characters before it on
- *		the same line (printed by the caller).
+ * Purpose: Prints a data type definition.  The definition is printed
+ *  without any leading space or trailing line-feed (although
+ *  there might be line-feeds inside the type definition).  The
+ *  first line is assumed to have IND characters before it on
+ *  the same line (printed by the caller).
  *
- * Return:	void
+ * Return: void
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Thursday, November  5, 1998
  *
  * Modifications:
- * 		Robb Matzke, 1999-06-11
- *		Prints the OID of shared data types.
+ *   Robb Matzke, 1999-06-11
+ *  Prints the OID of shared data types.
  *
  *-------------------------------------------------------------------------
  */
 static void
 display_type(hid_t type, int ind)
 {
-    H5T_class_t		data_class = H5Tget_class(type);
-    H5G_stat_t		sb;
+    H5T_class_t  data_class = H5Tget_class(type);
+    H5G_stat_t  sb;
     
     /* Bad data type */
     if (type<0) {
-	printf("<ERROR>");
-	return;
+ printf("<ERROR>");
+ return;
     }
 
     /* Shared? If so then print the type's OID */
     if (H5Tcommitted(type)) {
-	if (H5Gget_objinfo(type, ".", FALSE, &sb)>=0) {
-	    printf("shared-%lu:%lu:%lu:%lu ",
-		   sb.fileno[1], sb.fileno[0],
-		   sb.objno[1], sb.objno[0]);
-	} else {
-	    printf("shared ");
-	}
+ if (H5Gget_objinfo(type, ".", FALSE, &sb)>=0) {
+     printf("shared-%lu:%lu:%lu:%lu ",
+     sb.fileno[1], sb.fileno[0],
+     sb.objno[1], sb.objno[0]);
+ } else {
+     printf("shared ");
+ }
     }
     
     /* Print the type */
-    if (display_native_type(type, ind) ||
-	display_ieee_type(type, ind) ||
-	display_int_type(type, ind) ||
-	display_float_type(type, ind) ||
-	display_cmpd_type(type, ind) ||
-	display_enum_type(type, ind) ||
-	display_string_type(type, ind) ||
-	display_reference_type(type, ind) ||
-        display_vlen_type(type, ind) ||
-        display_array_type(type, ind) ||
-	display_opaque_type(type, ind)) {
-	return;
+    if ((!simple_output_g && display_native_type(type, ind)) ||
+ display_ieee_type(type, ind) ||
+ display_int_type(type, ind) ||
+ display_float_type(type, ind) ||
+ display_cmpd_type(type, ind) ||
+ display_enum_type(type, ind) ||
+ display_string_type(type, ind) ||
+ display_reference_type(type, ind) ||
+ display_vlen_type(type, ind) ||
+ display_array_type(type, ind) ||
+ display_opaque_type(type, ind) ||
+	display_bitfield_type(type, ind)) {
+ return;
     }
 
     /* Unknown type */
     printf("%lu-byte class-%u unknown",
-	   (unsigned long)H5Tget_size(type),
-	   (unsigned)data_class);
+    (unsigned long)H5Tget_size(type),
+    (unsigned)data_class);
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	dump_dataset_values
+ * Function: dump_dataset_values
  *
- * Purpose:	Prints all values of a dataset.
+ * Purpose: Prints all values of a dataset.
  *
- * Return:	void
+ * Return: void
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Tuesday, July 21, 1998
  *
  * Modifications:
- *		Robb Matzke, 1999-09-27
- *		Understands the simple_output_g switch which causes data to
- *		be displayed in a more machine-readable format.
+ *  Robb Matzke, 1999-09-27
+ *  Understands the simple_output_g switch which causes data to
+ *  be displayed in a more machine-readable format.
  *-------------------------------------------------------------------------
  */
 static void
 dump_dataset_values(hid_t dset)
 {
-    hid_t		f_type = H5Dget_type(dset);
-    size_t		size = H5Tget_size(f_type);
-    h5dump_t		info;
-    char		string_prefix[64];
+    hid_t  f_type = H5Dget_type(dset);
+    size_t  size = H5Tget_size(f_type);
+    h5dump_t  info;
+    char  string_prefix[64];
     static char         fmt_double[16], fmt_float[16];
-	
+ 
     /* Set to all default values and then override */
     memset(&info, 0, sizeof info);
 
     if (simple_output_g) {
-	info.idx_fmt = "";
-	info.line_ncols = 65535; /*something big*/
-	info.line_per_line = 1;
-	info.line_multi_new = 0;
-	info.line_pre  = "        ";
-	info.line_cont = "         ";
-	
-	info.arr_pre = "";
-	info.arr_suf = "";
-	info.arr_sep = " ";
+ info.idx_fmt = "";
+ info.line_ncols = 65535; /*something big*/
+ info.line_per_line = 1;
+ info.line_multi_new = 0;
+ info.line_pre  = "        ";
+ info.line_cont = "         ";
+ 
+ info.arr_pre = "";
+ info.arr_suf = "";
+ info.arr_sep = " ";
 
-	info.cmpd_pre = "";
-	info.cmpd_suf = "";
-	info.cmpd_sep = " ";
+ info.cmpd_pre = "";
+ info.cmpd_suf = "";
+ info.cmpd_sep = " ";
 
-	if (label_g) info.cmpd_name = "%s=";
-	
-	info.elmt_suf1 = " ";
-	info.str_locale = ESCAPE_HTML;
-	
+ if (label_g) info.cmpd_name = "%s=";
+ 
+ info.elmt_suf1 = " ";
+ info.str_locale = ESCAPE_HTML;
+ 
     } else {
-	info.idx_fmt = "(%s)";
-	info.line_ncols = width_g;
-	info.line_multi_new = 1;
-	if (label_g) info.cmpd_name = "%s=";
-	info.line_pre  = "        %s ";
-	info.line_cont = "        %s  ";
-	info.str_repeat = 8;
+ info.idx_fmt = "(%s)";
+ info.line_ncols = width_g;
+ info.line_multi_new = 1;
+ if (label_g) info.cmpd_name = "%s=";
+ info.line_pre  = "        %s ";
+ info.line_cont = "        %s  ";
+ info.str_repeat = 8;
     }
 
     /* Floating point types should display full precision */
@@ -1231,23 +1278,23 @@ dump_dataset_values(hid_t dset)
     info.line_indent = "";
     
     if (hexdump_g) {
-	/*
-	 * Print all data in hexadecimal format if the `-x' or `--hexdump'
-	 * command line switch was given.
-	 */
-	info.raw = TRUE;
+ /*
+  * Print all data in hexadecimal format if the `-x' or `--hexdump'
+  * command line switch was given.
+  */
+ info.raw = TRUE;
     } else if (string_g && 1==size && H5T_INTEGER==H5Tget_class(f_type)) {
-	/*
-	 * Print 1-byte integer data as an ASCI character string instead of
-	 * integers if the `-s' or `--string' command-line option was given.
-	 */
-	info.ascii = TRUE;
-	info.elmt_suf1 = "";
-	info.elmt_suf2 = "";
-	strcpy(string_prefix, info.line_pre);
-	strcat(string_prefix, "\"");
-	info.line_pre = string_prefix;
-	info.line_suf = "\"";
+ /*
+  * Print 1-byte integer data as an ASCI character string instead of
+  * integers if the `-s' or `--string' command-line option was given.
+  */
+ info.ascii = TRUE;
+ info.elmt_suf1 = "";
+ info.elmt_suf2 = "";
+ strcpy(string_prefix, info.line_pre);
+ strcat(string_prefix, "\"");
+ info.line_pre = string_prefix;
+ info.line_suf = "\"";
     }
     
     /*
@@ -1255,7 +1302,7 @@ dump_dataset_values(hid_t dset)
      */
     printf("    Data:\n");
     if (h5tools_dump_dset(stdout, &info, dset, -1, NULL, -1) < 0) {
-	printf("        Unable to print data.\n");
+ printf("        Unable to print data.\n");
     }
 
     H5Tclose(f_type);
@@ -1263,15 +1310,15 @@ dump_dataset_values(hid_t dset)
 
 
 /*-------------------------------------------------------------------------
- * Function:	list_attr
+ * Function: list_attr
  *
- * Purpose:	Prints information about attributes.
+ * Purpose: Prints information about attributes.
  *
- * Return:	Success:	0
+ * Return: Success: 0
  *
- *		Failure:	-1
+ *  Failure: -1
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Friday, June  5, 1998
  *
  * Modifications:
@@ -1281,93 +1328,93 @@ dump_dataset_values(hid_t dset)
 static herr_t
 list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
 {
-    hid_t	attr, space, type, p_type;
-    hsize_t	size[64], nelmts=1;
-    int		ndims, i, n;
-    size_t	need;
+    hid_t attr, space, type, p_type;
+    hsize_t size[64], nelmts=1;
+    int  ndims, i, n;
+    size_t need;
     hsize_t     temp_need;
-    void	*buf;
-    h5dump_t	info;
+    void *buf;
+    h5dump_t info;
 
     printf("    Attribute: ");
     n = display_string(stdout, attr_name, TRUE);
     printf("%*s", MAX(0, 9-n), "");
     if ((attr = H5Aopen_name(obj, attr_name))) {
-	space = H5Aget_space(attr);
-	type = H5Aget_type(attr);
+ space = H5Aget_space(attr);
+ type = H5Aget_type(attr);
 
-	/* Data space */
-	ndims = H5Sget_simple_extent_dims(space, size, NULL);
-	if (0==ndims) {
-	    puts(" scalar");
-	} else {
-	    printf(" {");
-	    for (i=0; i<ndims; i++) {
-		HDfprintf(stdout, "%s%Hu", i?", ":"", size[i]);
-		nelmts *= size[i];
-	    }
-	    puts("}");
-	}
+ /* Data space */
+ ndims = H5Sget_simple_extent_dims(space, size, NULL);
+ if (0==ndims) {
+     puts(" scalar");
+ } else {
+     printf(" {");
+     for (i=0; i<ndims; i++) {
+  HDfprintf(stdout, "%s%Hu", i?", ":"", size[i]);
+  nelmts *= size[i];
+     }
+     puts("}");
+ }
 
-	/* Data type */
-	printf("        Type:      ");
-	display_type(type, 15);
-	putchar('\n');
+ /* Data type */
+ printf("        Type:      ");
+ display_type(type, 15);
+ putchar('\n');
 
-	/* Data */
-	memset(&info, 0, sizeof info);
-	info.line_multi_new = 1;
-	if (nelmts<5) {
-	    info.idx_fmt = "";
-	    info.line_1st  = "        Data:  ";
-	    info.line_pre  = "               ";
-	    info.line_cont = "                ";
-	    info.str_repeat = 8;
-	    
-	} else {
-	    printf("        Data:\n");
-	    info.idx_fmt = "(%s)";
-	    info.line_pre  = "            %s ";
-	    info.line_cont = "            %s  ";
-	    info.str_repeat = 8;
-	}
-	info.line_ncols = width_g;
-	if (label_g) info.cmpd_name = "%s=";
-	if (string_g && 1==H5Tget_size(type) &&
-	    H5T_INTEGER==H5Tget_class(type)) {
-	    info.ascii = TRUE;
-	    info.elmt_suf1 = "";
-	    info.elmt_suf2 = "";
-	    info.idx_fmt  = "(%s)";
-	    info.line_pre = "            %s \"";
-	    info.line_suf = "\"";
-	}
-	/* values of type reference */
-	info.obj_format = "-%lu:%lu:%lu:%lu";
+ /* Data */
+ memset(&info, 0, sizeof info);
+ info.line_multi_new = 1;
+ if (nelmts<5) {
+     info.idx_fmt = "";
+     info.line_1st  = "        Data:  ";
+     info.line_pre  = "               ";
+     info.line_cont = "                ";
+     info.str_repeat = 8;
+     
+ } else {
+     printf("        Data:\n");
+     info.idx_fmt = "(%s)";
+     info.line_pre  = "            %s ";
+     info.line_cont = "            %s  ";
+     info.str_repeat = 8;
+ }
+ info.line_ncols = width_g;
+ if (label_g) info.cmpd_name = "%s=";
+ if (string_g && 1==H5Tget_size(type) &&
+     H5T_INTEGER==H5Tget_class(type)) {
+     info.ascii = TRUE;
+     info.elmt_suf1 = "";
+     info.elmt_suf2 = "";
+     info.idx_fmt  = "(%s)";
+     info.line_pre = "            %s \"";
+     info.line_suf = "\"";
+ }
+ /* values of type reference */
+ info.obj_format = "-%lu:%lu:%lu:%lu";
  info.obj_hidefileno = 0;
-	if (hexdump_g) {
-	    p_type = H5Tcopy(type);
-	} else {
-	    p_type = h5tools_fixtype(type);
-	}
-	if (p_type>=0) {
+ if (hexdump_g) {
+     p_type = H5Tcopy(type);
+ } else {
+     p_type = h5tools_fixtype(type);
+ }
+ if (p_type>=0) {
             temp_need= nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
             assert(temp_need==(hsize_t)((size_t)temp_need));
             need = (size_t)temp_need;
-	    buf = malloc(need);
-	    assert(buf);
-	    if (H5Aread(attr, p_type, buf)>=0) {
-		h5tools_dump_mem(stdout, &info, attr, p_type, space, buf, -1);
-	    }
-	    free(buf);
-	    H5Tclose(p_type); 
-	}
-	    
-	H5Sclose(space);
-	H5Tclose(type);
-	H5Aclose(attr);
+     buf = malloc(need);
+     assert(buf);
+     if (H5Aread(attr, p_type, buf)>=0) {
+  h5tools_dump_mem(stdout, &info, attr, p_type, space, buf, -1);
+     }
+     free(buf);
+     H5Tclose(p_type); 
+ }
+     
+ H5Sclose(space);
+ H5Tclose(type);
+ H5Aclose(attr);
     } else {
-	putchar('\n');
+ putchar('\n');
     }
     
     return 0;
@@ -1375,18 +1422,18 @@ list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
 
 
 /*-------------------------------------------------------------------------
- * Function:	dataset_list1
+ * Function: dataset_list1
  *
- * Purpose:	List information about a dataset which should appear on the
- *		same line as the dataset name.  This information will precede
- *		information which is applicable to all objects which will be
- *		printed by the caller.
+ * Purpose: List information about a dataset which should appear on the
+ *  same line as the dataset name.  This information will precede
+ *  information which is applicable to all objects which will be
+ *  printed by the caller.
  *
- * Return:	Success:	0
+ * Return: Success: 0
  *
- *		Failure:	-1
+ *  Failure: -1
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Thursday, August 27, 1998
  *
  * Modifications:
@@ -1396,11 +1443,11 @@ list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
 static herr_t
 dataset_list1(hid_t dset)
 {
-    hsize_t		cur_size[64];	/*current dataset dimensions	*/
-    hsize_t		max_size[64];	/*maximum dataset dimensions	*/
-    hid_t		space;		/*data space			*/
-    int 		ndims;		/*dimensionality		*/
-    int			i;
+    hsize_t  cur_size[64]; /*current dataset dimensions */
+    hsize_t  max_size[64]; /*maximum dataset dimensions */
+    hid_t  space;  /*data space   */
+    int   ndims;  /*dimensionality  */
+    int   i;
 
     /*
      * Information that goes on the same row as the name.  The name has
@@ -1410,12 +1457,12 @@ dataset_list1(hid_t dset)
     ndims = H5Sget_simple_extent_dims(space, cur_size, max_size);
     printf (" {");
     for (i=0; i<ndims; i++) {
-	HDfprintf (stdout, "%s%Hu", i?", ":"", cur_size[i]);
-	if (max_size[i]==H5S_UNLIMITED) {
-	    HDfprintf (stdout, "/%s", "Inf");
-	} else if (max_size[i]!=cur_size[i] || verbose_g>0) {
-	    HDfprintf(stdout, "/%Hu", max_size[i]);
-	}
+ HDfprintf (stdout, "%s%Hu", i?", ":"", cur_size[i]);
+ if (max_size[i]==H5S_UNLIMITED) {
+     HDfprintf (stdout, "/%s", "Inf");
+ } else if (max_size[i]!=cur_size[i] || verbose_g>0) {
+     HDfprintf(stdout, "/%Hu", max_size[i]);
+ }
     }
     if (0==ndims) printf("SCALAR");
     putchar('}');
@@ -1426,16 +1473,16 @@ dataset_list1(hid_t dset)
 
 
 /*-------------------------------------------------------------------------
- * Function:	dataset_list2
+ * Function: dataset_list2
  *
- * Purpose:	List information about a dataset which should appear after
- *		information which is general to all objects.
+ * Purpose: List information about a dataset which should appear after
+ *  information which is general to all objects.
  *
- * Return:	Success:	0
+ * Return: Success: 0
  *
- *		Failure:	-1
+ *  Failure: -1
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Thursday, August 27, 1998
  *
  * Modifications:
@@ -1445,136 +1492,136 @@ dataset_list1(hid_t dset)
 static herr_t
 dataset_list2(hid_t dset, const char UNUSED *name)
 {
-    hid_t		dcpl;		/*dataset creation property list*/
-    hid_t		type;		/*data type of dataset		*/
-    hid_t		space;		/*data space of dataset		*/
-    int			nf;		/*number of filters		*/
-    unsigned		filt_flags;	/*filter flags			*/
-    H5Z_filter_t	filt_id;	/*filter identification number	*/
-    unsigned		cd_values[20];	/*filter client data values	*/
-    size_t		cd_nelmts;	/*filter client number of values*/
-    size_t		cd_num;		/*filter client data counter	*/
-    char		f_name[256];	/*filter/file name		*/
-    char		s[64];		/*temporary string buffer	*/
-    off_t		f_offset;	/*offset in external file	*/
-    hsize_t		f_size;		/*bytes used in external file	*/
-    hsize_t		total, used;	/*total size or offset		*/
-    hsize_t		chsize[64];	/*chunk size in elements	*/
-    int			ndims;		/*dimensionality		*/
-    int			n, max_len;	/*max extern file name length	*/
-    double		utilization;	/*percent utilization of storage*/
-    int			i;
+    hid_t  dcpl;  /*dataset creation property list*/
+    hid_t  type;  /*data type of dataset  */
+    hid_t  space;  /*data space of dataset  */
+    int   nf;  /*number of filters  */
+    unsigned  filt_flags; /*filter flags   */
+    H5Z_filter_t filt_id; /*filter identification number */
+    unsigned  cd_values[20]; /*filter client data values */
+    size_t  cd_nelmts; /*filter client number of values*/
+    size_t  cd_num;  /*filter client data counter */
+    char  f_name[256]; /*filter/file name  */
+    char  s[64];  /*temporary string buffer */
+    off_t  f_offset; /*offset in external file */
+    hsize_t  f_size;  /*bytes used in external file */
+    hsize_t  total, used; /*total size or offset  */
+    hsize_t  chsize[64]; /*chunk size in elements */
+    int   ndims;  /*dimensionality  */
+    int   n, max_len; /*max extern file name length */
+    double  utilization; /*percent utilization of storage*/
+    int   i;
     
     if (verbose_g>0) {
-	dcpl = H5Dget_create_plist(dset);
-	space = H5Dget_space(dset);
-	type = H5Dget_type(dset);
+ dcpl = H5Dget_create_plist(dset);
+ space = H5Dget_space(dset);
+ type = H5Dget_type(dset);
 
-	/* Print information about chunked storage */
-	if (H5D_CHUNKED==H5Pget_layout(dcpl)) {
-	    ndims = H5Pget_chunk(dcpl, NELMTS(chsize), chsize/*out*/);
-	    printf("    %-10s {", "Chunks:");
-	    total = H5Tget_size(type);
-	    for (i=0; i<ndims; i++) {
-		printf("%s%lu", i?", ":"", (unsigned long)(chsize[i]));
-		total *= chsize[i];
-	    }
-	    printf("} %lu bytes\n", (unsigned long)total);
-	}
+ /* Print information about chunked storage */
+ if (H5D_CHUNKED==H5Pget_layout(dcpl)) {
+     ndims = H5Pget_chunk(dcpl, NELMTS(chsize), chsize/*out*/);
+     printf("    %-10s {", "Chunks:");
+     total = H5Tget_size(type);
+     for (i=0; i<ndims; i++) {
+  printf("%s%lu", i?", ":"", (unsigned long)(chsize[i]));
+  total *= chsize[i];
+     }
+     printf("} %lu bytes\n", (unsigned long)total);
+ }
 
-	/* Print total raw storage size */
-	used = H5Sget_simple_extent_npoints(space) * H5Tget_size(type);
-	total = H5Dget_storage_size(dset);
-	printf("    %-10s ", "Storage:");
-	printf("%lu logical byte%s, %lu allocated byte%s",
-	       (unsigned long)used, 1==used?"":"s",
-	       (unsigned long)total, 1==total?"":"s");
-	if (total>0) {
+ /* Print total raw storage size */
+ used = H5Sget_simple_extent_npoints(space) * H5Tget_size(type);
+ total = H5Dget_storage_size(dset);
+ printf("    %-10s ", "Storage:");
+ printf("%lu logical byte%s, %lu allocated byte%s",
+        (unsigned long)used, 1==used?"":"s",
+        (unsigned long)total, 1==total?"":"s");
+ if (total>0) {
 #ifdef WIN32
-	    hsize_t mask = (hsize_t)1 << (8*sizeof(hsize_t)-1);
-	    if ((used & mask) || (total & mask)) {
-		total = 0; /*prevent utilization printing*/
-	    } else {
-		utilization = (hssize_t)used*100.0 /(hssize_t)total;
-	    }
+     hsize_t mask = (hsize_t)1 << (8*sizeof(hsize_t)-1);
+     if ((used & mask) || (total & mask)) {
+  total = 0; /*prevent utilization printing*/
+     } else {
+  utilization = (hssize_t)used*100.0 /(hssize_t)total;
+     }
 #else
-	    utilization = (used*100.0)/total;
+     utilization = (used*100.0)/total;
 #endif
-	    printf(", %1.2f%% utilization", utilization/*(used*100.0)/total*/);
-	}
-	putchar('\n');
-	
-	/* Print information about external strorage */
-	if ((nf = H5Pget_external_count(dcpl))>0) {
-	    for (i=0, max_len=0; i<nf; i++) {
-		H5Pget_external(dcpl, i, sizeof(f_name), f_name, NULL, NULL);
-		n = display_string(NULL, f_name, TRUE);
-		max_len = MAX(max_len, n);
-	    }
-	    printf("    %-10s %d external file%s\n",
-		   "Extern:", nf, 1==nf?"":"s");
-	    printf("        %4s %10s %10s %10s %s\n",
-		   "ID", "DSet-Addr", "File-Addr", "Bytes", "File");
-	    printf("        %4s %10s %10s %10s ",
-		   "----", "----------", "----------", "----------");
-	    for (i=0; i<max_len; i++) putchar('-');
-	    putchar('\n');
-	    for (i=0, total=0; i<nf; i++) {
-		if (H5Pget_external(dcpl, i, sizeof(f_name), f_name, &f_offset,
-				    &f_size)<0) {
-		    HDfprintf(stdout,
-			      "        #%03d %10Hu %10s %10s ***ERROR*** %s\n",
-			      i, total, "", "",
-			      i+1<nf?"Following addresses are incorrect":"");
-		} else if (H5S_UNLIMITED==f_size) {
-		    HDfprintf(stdout, "        #%03d %10Hu %10Hu %10s ",
-			      i, total, (hsize_t)f_offset, "INF");
-		    display_string(stdout, f_name, TRUE);
-		} else {
-		    HDfprintf(stdout, "        #%03d %10Hu %10Hu %10Hu ",
-			      i, total, (hsize_t)f_offset, f_size);
-		    display_string(stdout, f_name, TRUE);
-		}
-		putchar('\n');
-		total += f_size;
-	    }
-	    printf("        %4s %10s %10s %10s ",
-		   "----", "----------", "----------", "----------");
-	    for (i=0; i<max_len; i++) putchar('-');
-	    putchar('\n');
-	}
+     printf(", %1.2f%% utilization", utilization/*(used*100.0)/total*/);
+ }
+ putchar('\n');
+ 
+ /* Print information about external strorage */
+ if ((nf = H5Pget_external_count(dcpl))>0) {
+     for (i=0, max_len=0; i<nf; i++) {
+  H5Pget_external(dcpl, i, sizeof(f_name), f_name, NULL, NULL);
+  n = display_string(NULL, f_name, TRUE);
+  max_len = MAX(max_len, n);
+     }
+     printf("    %-10s %d external file%s\n",
+     "Extern:", nf, 1==nf?"":"s");
+     printf("        %4s %10s %10s %10s %s\n",
+     "ID", "DSet-Addr", "File-Addr", "Bytes", "File");
+     printf("        %4s %10s %10s %10s ",
+     "----", "----------", "----------", "----------");
+     for (i=0; i<max_len; i++) putchar('-');
+     putchar('\n');
+     for (i=0, total=0; i<nf; i++) {
+  if (H5Pget_external(dcpl, i, sizeof(f_name), f_name, &f_offset,
+        &f_size)<0) {
+      HDfprintf(stdout,
+         "        #%03d %10Hu %10s %10s ***ERROR*** %s\n",
+         i, total, "", "",
+         i+1<nf?"Following addresses are incorrect":"");
+  } else if (H5S_UNLIMITED==f_size) {
+      HDfprintf(stdout, "        #%03d %10Hu %10Hu %10s ",
+         i, total, (hsize_t)f_offset, "INF");
+      display_string(stdout, f_name, TRUE);
+  } else {
+      HDfprintf(stdout, "        #%03d %10Hu %10Hu %10Hu ",
+         i, total, (hsize_t)f_offset, f_size);
+      display_string(stdout, f_name, TRUE);
+  }
+  putchar('\n');
+  total += f_size;
+     }
+     printf("        %4s %10s %10s %10s ",
+     "----", "----------", "----------", "----------");
+     for (i=0; i<max_len; i++) putchar('-');
+     putchar('\n');
+ }
 
-	/* Print information about raw data filters */
-	if ((nf = H5Pget_nfilters(dcpl))>0) {
-	    for (i=0; i<nf; i++) {
-		cd_nelmts = NELMTS(cd_values);
-		filt_id = H5Pget_filter(dcpl, i, &filt_flags, &cd_nelmts,
-					cd_values, sizeof(f_name), f_name);
-		f_name[sizeof(f_name)-1] = '\0';
-		sprintf(s, "Filter-%d:", i);
-		printf("    %-10s %s-%u %s {", s,
-		       f_name[0]?f_name:"method",
-		       (unsigned)filt_id,
-		       filt_flags & H5Z_FLAG_OPTIONAL?"OPT":"");
-		for (cd_num=0; cd_num<cd_nelmts; cd_num++) {
-		    printf("%s%u", cd_num?", ":"", cd_values[cd_num]);
-		}
-		printf("}\n");
-	    }
-	}
+ /* Print information about raw data filters */
+ if ((nf = H5Pget_nfilters(dcpl))>0) {
+     for (i=0; i<nf; i++) {
+  cd_nelmts = NELMTS(cd_values);
+  filt_id = H5Pget_filter(dcpl, i, &filt_flags, &cd_nelmts,
+     cd_values, sizeof(f_name), f_name);
+  f_name[sizeof(f_name)-1] = '\0';
+  sprintf(s, "Filter-%d:", i);
+  printf("    %-10s %s-%u %s {", s,
+         f_name[0]?f_name:"method",
+         (unsigned)filt_id,
+         filt_flags & H5Z_FLAG_OPTIONAL?"OPT":"");
+  for (cd_num=0; cd_num<cd_nelmts; cd_num++) {
+      printf("%s%u", cd_num?", ":"", cd_values[cd_num]);
+  }
+  printf("}\n");
+     }
+ }
 
-	/* Print data type */
-	printf("    %-10s ", "Type:");
-	display_type(type, 15);
-	printf("\n");
+ /* Print data type */
+ printf("    %-10s ", "Type:");
+ display_type(type, 15);
+ printf("\n");
 
-	/* Print address information */
-	if (address_g) H5Ddebug(dset, 0);
+ /* Print address information */
+ if (address_g) H5Ddebug(dset, 0);
 
-	/* Close stuff */
-	H5Tclose(type);
-	H5Sclose(space);
-	H5Pclose(dcpl);
+ /* Close stuff */
+ H5Tclose(type);
+ H5Sclose(space);
+ H5Pclose(dcpl);
     }
 
     if (data_g) dump_dataset_values(dset);
@@ -1583,16 +1630,16 @@ dataset_list2(hid_t dset, const char UNUSED *name)
 
 
 /*-------------------------------------------------------------------------
- * Function:	group_list2
+ * Function: group_list2
  *
- * Purpose:	List information about a group which should appear after
- *		information which is general to all objects.
+ * Purpose: List information about a group which should appear after
+ *  information which is general to all objects.
  *
- * Return:	Success:	0
+ * Return: Success: 0
  *
- *		Failure:	-1
+ *  Failure: -1
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Thursday, January 21, 1999
  *
  * Modifications:
@@ -1602,27 +1649,27 @@ dataset_list2(hid_t dset, const char UNUSED *name)
 static herr_t
 group_list2(hid_t grp, const char *name)
 {
-    iter_t	iter;
+    iter_t iter;
     
     if (recursive_g) {
-	iter.container = name;
-	H5Giterate(grp, ".", NULL, list, &iter);
+ iter.container = name;
+ H5Giterate(grp, ".", NULL, list, &iter);
     }
     return 0;
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	datatype_list2
+ * Function: datatype_list2
  *
- * Purpose:	List information about a data type which should appear after
- *		information which is general to all objects.
+ * Purpose: List information about a data type which should appear after
+ *  information which is general to all objects.
  *
- * Return:	Success:	0
+ * Return: Success: 0
  *
- *		Failure:	-1
+ *  Failure: -1
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Thursday, November  5, 1998
  *
  * Modifications:
@@ -1633,27 +1680,27 @@ static herr_t
 datatype_list2(hid_t type, const char UNUSED *name)
 {
     if (verbose_g>0) {
-	printf("    %-10s ", "Type:");
-	display_type(type, 15);
-	printf("\n");
+ printf("    %-10s ", "Type:");
+ display_type(type, 15);
+ printf("\n");
     }
     return 0;
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	link_open
+ * Function: link_open
  *
- * Purpose:	This gets called to open a symbolic link.  Since symbolic
- *		links don't correspond to actual objects we simply print the
- *		link information and return failure.
+ * Purpose: This gets called to open a symbolic link.  Since symbolic
+ *  links don't correspond to actual objects we simply print the
+ *  link information and return failure.
  *
- * Return:	Success:	0 - an invalid object but successful return
- *				of this function.
+ * Return: Success: 0 - an invalid object but successful return
+ *    of this function.
  *
- *		Failure:	-1
+ *  Failure: -1
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Thursday, August 27, 1998
  *
  * Modifications:
@@ -1663,11 +1710,11 @@ datatype_list2(hid_t type, const char UNUSED *name)
 static hid_t
 link_open(hid_t location, const char *name)
 {
-    char	buf[64];
+    char buf[64];
     
     if (H5Gget_linkval (location, name, sizeof(buf), buf)<0) return -1;
     if (NULL==HDmemchr(buf, 0, sizeof(buf))) {
-	strcpy(buf+sizeof(buf)-4, "...");
+ strcpy(buf+sizeof(buf)-4, "...");
     }
     fputs(buf, stdout);
 
@@ -1676,15 +1723,15 @@ link_open(hid_t location, const char *name)
 
 
 /*-------------------------------------------------------------------------
- * Function:	list
+ * Function: list
  *
- * Purpose:	Prints the group member name.
+ * Purpose: Prints the group member name.
  *
- * Return:	Success:	0
+ * Return: Success: 0
  *
- *		Failure:	-1
+ *  Failure: -1
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Monday, March 23, 1998
  *
  * Modifications:
@@ -1694,37 +1741,37 @@ link_open(hid_t location, const char *name)
 static herr_t
 list (hid_t group, const char *name, void *_iter)
 {
-    hid_t	obj=-1;
-    char	buf[512], comment[50], *fullname=NULL, *s=NULL;
-    H5G_stat_t	sb;
-    struct tm	*tm;
-    herr_t	status;
-    iter_t	*iter = (iter_t*)_iter;
-    int		n;
+    hid_t obj=-1;
+    char buf[512], comment[50], *fullname=NULL, *s=NULL;
+    H5G_stat_t sb;
+    struct tm *tm;
+    herr_t status;
+    iter_t *iter = (iter_t*)_iter;
+    int  n;
     
     /* Print the object name, either full name or base name */
     fullname = fix_name(iter->container, name);
     if (fullname_g) {
-	n = display_string(stdout, fullname, TRUE);
-	printf("%*s ", MAX(0, 24-n), "");
+ n = display_string(stdout, fullname, TRUE);
+ printf("%*s ", MAX(0, 24-n), "");
     } else {
-	n = display_string(stdout, name, TRUE);
-	printf("%*s ", MAX(0, 24-n), "");
+ n = display_string(stdout, name, TRUE);
+ printf("%*s ", MAX(0, 24-n), "");
     }
 
     /* Get object information */
     H5E_BEGIN_TRY {
-	status = H5Gget_objinfo(group, name, FALSE, &sb);
+ status = H5Gget_objinfo(group, name, FALSE, &sb);
     } H5E_END_TRY;
     if (status<0) {
-	puts("**NOT FOUND**");
-	return 0;
+ puts("**NOT FOUND**");
+ return 0;
     } else if (sb.type<0 || sb.type>=H5G_NTYPES) {
-	printf("Unknown type(%d)", sb.type);
-	sb.type = -1;
+ printf("Unknown type(%d)", sb.type);
+ sb.type = -1;
     }
     if (sb.type>=0 && dispatch_g[sb.type].name) {
-	fputs(dispatch_g[sb.type].name, stdout);
+ fputs(dispatch_g[sb.type].name, stdout);
     }
 
     /*
@@ -1732,12 +1779,12 @@ list (hid_t group, const char *name, void *_iter)
      * and return.
      */
     if ((s=sym_lookup(&sb))) {
-	printf(", same as ");
-	display_string(stdout, s, TRUE);
-	printf("\n");
-	goto done;
+ printf(", same as ");
+ display_string(stdout, s, TRUE);
+ printf("\n");
+ goto done;
     } else {
-	sym_insert(&sb, fullname);
+ sym_insert(&sb, fullname);
     }
     
     /*
@@ -1745,17 +1792,17 @@ list (hid_t group, const char *name, void *_iter)
      * then return right away.
      */
     if (sb.type>=0 &&
-	(NULL==dispatch_g[sb.type].open ||
-	 (obj=(dispatch_g[sb.type].open)(group, name))<0)) {
-	printf(" *ERROR*\n");
-	goto done;
+ (NULL==dispatch_g[sb.type].open ||
+  (obj=(dispatch_g[sb.type].open)(group, name))<0)) {
+ printf(" *ERROR*\n");
+ goto done;
     }
     
     /*
      * List the first line of information for the object.
      */
     if (sb.type>=0 && dispatch_g[sb.type].list1) {
-	(dispatch_g[sb.type].list1)(obj);
+ (dispatch_g[sb.type].list1)(obj);
     }
     putchar('\n');
     
@@ -1764,25 +1811,25 @@ list (hid_t group, const char *name, void *_iter)
      * which is common to all objects.
      */
     if (verbose_g>0 && H5G_LINK!=sb.type) {
-	if (sb.type>=0) H5Aiterate(obj, NULL, list_attr, NULL);
-	printf("    %-10s %lu:%lu:%lu:%lu\n", "Location:",
-	       sb.fileno[1], sb.fileno[0], sb.objno[1], sb.objno[0]);
-	printf("    %-10s %u\n", "Links:", sb.nlink);
-	if (sb.mtime>0 && NULL!=(tm=localtime(&(sb.mtime)))) {
-	    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
-	    printf("    %-10s %s\n", "Modified:", buf);
-	}
-	comment[0] = '\0';
-	H5Gget_comment(group, name, sizeof(comment), comment);
-	strcpy(comment+sizeof(comment)-4, "...");
-	if (comment[0]) {
-	    printf("    %-10s \"", "Comment:");
-	    display_string(stdout, comment, FALSE);
-	    puts("\"");
-	}
+ if (sb.type>=0) H5Aiterate(obj, NULL, list_attr, NULL);
+ printf("    %-10s %lu:%lu:%lu:%lu\n", "Location:",
+        sb.fileno[1], sb.fileno[0], sb.objno[1], sb.objno[0]);
+ printf("    %-10s %u\n", "Links:", sb.nlink);
+ if (sb.mtime>0 && NULL!=(tm=localtime(&(sb.mtime)))) {
+     strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+     printf("    %-10s %s\n", "Modified:", buf);
+ }
+ comment[0] = '\0';
+ H5Gget_comment(group, name, sizeof(comment), comment);
+ strcpy(comment+sizeof(comment)-4, "...");
+ if (comment[0]) {
+     printf("    %-10s \"", "Comment:");
+     display_string(stdout, comment, FALSE);
+     puts("\"");
+ }
     }
     if (sb.type>=0 && dispatch_g[sb.type].list2) {
-	(dispatch_g[sb.type].list2)(obj, fullname);
+ (dispatch_g[sb.type].list2)(obj, fullname);
     }
     
     /*
@@ -1790,7 +1837,7 @@ list (hid_t group, const char *name, void *_iter)
      */
  done:
     if (sb.type>=0 && obj>=0 && dispatch_g[sb.type].close) {
-	(dispatch_g[sb.type].close)(obj);
+ (dispatch_g[sb.type].close)(obj);
     }
     if (fullname) free(fullname);
     return 0;
@@ -1798,17 +1845,17 @@ list (hid_t group, const char *name, void *_iter)
 
 
 /*-------------------------------------------------------------------------
- * Function:	fix_name
+ * Function: fix_name
  *
- * Purpose:	Returns a malloc'd buffer that contains the PATH and BASE
- *		names separated by a single slash. It also removes duplicate
- *		and trailing slashes.
+ * Purpose: Returns a malloc'd buffer that contains the PATH and BASE
+ *  names separated by a single slash. It also removes duplicate
+ *  and trailing slashes.
  *
- * Return:	Success:	Ptr to fixed name from malloc()
+ * Return: Success: Ptr to fixed name from malloc()
  *
- *		Failure:	NULL
+ *  Failure: NULL
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Thursday, January 21, 1999
  *
  * Modifications:
@@ -1818,25 +1865,25 @@ list (hid_t group, const char *name, void *_iter)
 static char *
 fix_name(const char *path, const char *base)
 {
-    size_t	n = (path?strlen(path):0) + (base?strlen(base):0) + 3;
-    char	*s = malloc(n), prev='\0';
-    int		len=0;
+    size_t n = (path?strlen(path):0) + (base?strlen(base):0) + 3;
+    char *s = malloc(n), prev='\0';
+    int  len=0;
 
     if (path) {
-	/* Path, followed by slash */
-	for (/*void*/; *path; path++) {
-	    if ('/'!=*path || '/'!=prev) prev = s[len++] = *path;
-	}
-	if ('/'!=prev) prev = s[len++] = '/';
+ /* Path, followed by slash */
+ for (/*void*/; *path; path++) {
+     if ('/'!=*path || '/'!=prev) prev = s[len++] = *path;
+ }
+ if ('/'!=prev) prev = s[len++] = '/';
     }
 
     if (base) {
-	/* Base name w/o trailing slashes */
-	const char *end = base + strlen(base);
-	while (end>base && '/'==end[-1]) --end;
-	for (/*void*/; base<end; base++) {
-	    if ('/'!=*base || '/'!=prev) prev = s[len++] = *base;
-	}
+ /* Base name w/o trailing slashes */
+ const char *end = base + strlen(base);
+ while (end>base && '/'==end[-1]) --end;
+ for (/*void*/; base<end; base++) {
+     if ('/'!=*base || '/'!=prev) prev = s[len++] = *base;
+ }
     }
 
     s[len] = '\0';
@@ -1845,18 +1892,18 @@ fix_name(const char *path, const char *base)
 
 
 /*-------------------------------------------------------------------------
- * Function:	get_width
+ * Function: get_width
  *
- * Purpose:	Figure out how wide the screen is.  This is highly
- *		unportable, but the user can always override the width we
- *		detect by giving a command-line option. These code snippets
- *		were borrowed from the GNU less(1).
+ * Purpose: Figure out how wide the screen is.  This is highly
+ *  unportable, but the user can always override the width we
+ *  detect by giving a command-line option. These code snippets
+ *  were borrowed from the GNU less(1).
  *
- * Return:	Success:	Number of columns.
+ * Return: Success: Number of columns.
  *
- *		Failure:	Some default number of columms.
+ *  Failure: Some default number of columms.
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Friday, November  6, 1998
  *
  * Modifications:
@@ -1866,63 +1913,63 @@ fix_name(const char *path, const char *base)
 static int
 get_width(void)
 {
-    int		width = 80;		/*the default			*/
-    char	*s;
+    int  width = 80;  /*the default   */
+    char *s;
 
     /*
      * Try to get it from the COLUMNS environment variable first since it's
      * value is sometimes wrong.
      */
     if ((s=getenv("COLUMNS")) && *s && isdigit((int)*s)) {
-	width = (int)strtol(s, NULL, 0);
+ width = (int)strtol(s, NULL, 0);
     }
 
 #if defined(H5_HAVE_STRUCT_VIDEOCONFIG) && defined(H5_HAVE__GETVIDEOCONFIG)
     {
-	/* Microsoft C */
-	struct videoconfig w;
-	_getvideoconfig(&w);
-	width = w.numtextcols;
+ /* Microsoft C */
+ struct videoconfig w;
+ _getvideoconfig(&w);
+ width = w.numtextcols;
     }
 #elif defined(H5_HAVE_STRUCT_TEXT_INFO) && defined(H5_HAVE_GETTEXTINFO)
     {
-	/* Borland C or DJGPPC */
-	struct text_info w;
-	gettextinfo(&w);
-	width = w.screenwidth;
+ /* Borland C or DJGPPC */
+ struct text_info w;
+ gettextinfo(&w);
+ width = w.screenwidth;
     }
 #elif defined(H5_HAVE_GETCONSOLESCREENBUFFERINFO)
     {
-	/* Win32 C */
-	CONSOLE_SCREEN_BUFFER_INFO scr;
-	GetConsoleScreenBufferInfo(con_out, &scr);
-	width = scr.srWindow.Right - scr.srWindow.Left + 1;
+ /* Win32 C */
+ CONSOLE_SCREEN_BUFFER_INFO scr;
+ GetConsoleScreenBufferInfo(con_out, &scr);
+ width = scr.srWindow.Right - scr.srWindow.Left + 1;
     }
 #elif defined(H5_HAVE__SCRSIZE)
     {
-	/* OS/2 */
-	int w[2];
-	_scrsize(w);
-	width = w[0];
+ /* OS/2 */
+ int w[2];
+ _scrsize(w);
+ width = w[0];
     }
 #elif defined(H5_HAVE_TIOCGWINSZ) && defined(H5_HAVE_IOCTL)
 #ifndef __PUMAGON__
 /* the ioctl() call coredump on TFLOPS.  Turn it off for now. */
     {
-	/* Unix with ioctl(TIOCGWINSZ) */
-	struct winsize w;
-	if (ioctl(2, TIOCGWINSZ, &w)>=0 && w.ws_col>0) {
-	    width = w.ws_col;
-	}
+ /* Unix with ioctl(TIOCGWINSZ) */
+ struct winsize w;
+ if (ioctl(2, TIOCGWINSZ, &w)>=0 && w.ws_col>0) {
+     width = w.ws_col;
+ }
     }
 #endif
 #elif defined(H5_HAVE_TIOCGETD) && defined(H5_HAVE_IOCTL)
     {
-	/* Unix with ioctl(TIOCGETD) */
-	struct uwdata w;
-	if (ioctl(2, WIOCGETD, &w)>=0 && w.uw_width>0) {
-	    width = w.uw_width / w.uw_hs;
-	}
+ /* Unix with ioctl(TIOCGETD) */
+ struct uwdata w;
+ if (ioctl(2, WIOCGETD, &w)>=0 && w.uw_width>0) {
+     width = w.uw_width / w.uw_hs;
+ }
     }
 #endif
 
@@ -1933,15 +1980,15 @@ get_width(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function: main
  *
- * Purpose:	Opens a file and lists the specified group
+ * Purpose: Opens a file and lists the specified group
  *
- * Return:	Success:	0
+ * Return: Success: 0
  *
- *		Failure:	1
+ *  Failure: 1
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Monday, March 23, 1998
  *
  * Modifications:
@@ -1951,15 +1998,15 @@ get_width(void)
 int
 main (int argc, char *argv[])
 {
-    hid_t	file=-1, root=-1;
-    char	*fname=NULL, *oname=NULL, *x;
-    const char	*progname="h5ls";
-    const char	*s = NULL;
-    char	*rest, *container=NULL;
-    int		argno;
-    H5G_stat_t	sb;
-    iter_t	iter;
-    static char	root_name[] = "/";
+    hid_t file=-1, root=-1;
+    char *fname=NULL, *oname=NULL, *x;
+    const char *progname="h5ls";
+    const char *s = NULL;
+    char *rest, *container=NULL;
+    int  argno;
+    H5G_stat_t sb;
+    iter_t iter;
+    static char root_name[] = "/";
     char        drivername[50];
 
     /* Initialize h5tools lib */
@@ -1967,13 +2014,13 @@ main (int argc, char *argv[])
 
     /* Build display table */
     DISPATCH(H5G_DATASET, "Dataset", H5Dopen, H5Dclose,
-	     dataset_list1, dataset_list2);
+      dataset_list1, dataset_list2);
     DISPATCH(H5G_GROUP, "Group", H5Gopen, H5Gclose,
-	     NULL, group_list2);
+      NULL, group_list2);
     DISPATCH(H5G_TYPE, "Type", H5Topen, H5Tclose,
-	     NULL, datatype_list2);
+      NULL, datatype_list2);
     DISPATCH(H5G_LINK, "-> ", link_open, NULL,
-	     NULL, NULL);
+      NULL, NULL);
 
 #if 0
     /* Name of this program without the path */
@@ -1986,125 +2033,125 @@ main (int argc, char *argv[])
 
     /* Switches come before non-switch arguments */
     for (argno=1; argno<argc && '-'==argv[argno][0]; argno++) {
-	if (!strcmp(argv[argno], "--")) {
-	    /* Last switch */
-	    argno++;
-	    break;
-	} else if (!strcmp(argv[argno], "--help")) {
-	    usage(progname);
-	    exit(0);
-	} else if (!strcmp(argv[argno], "--address")) {
-	    address_g = TRUE;
-	} else if (!strcmp(argv[argno], "--data")) {
-	    data_g = TRUE;
-	} else if (!strcmp(argv[argno], "--errors")) {
-	    show_errors_g = TRUE;
-	} else if (!strcmp(argv[argno], "--full")) {
-	    fullname_g = TRUE;
-	} else if (!strcmp(argv[argno], "--group")) {
-	    grp_literal_g = TRUE; 
-	} else if (!strcmp(argv[argno], "--label")) {
-	    label_g = TRUE;
-	} else if (!strcmp(argv[argno], "--recursive")) {
-	    recursive_g = TRUE;
-	    fullname_g = TRUE;
-	} else if (!strcmp(argv[argno], "--simple")) {
-	    simple_output_g = TRUE;
-	} else if (!strcmp(argv[argno], "--string")) {
-	    string_g = TRUE;
-	} else if (!strncmp(argv[argno], "--width=", 8)) {
-	    width_g = (int)strtol(argv[argno]+8, &rest, 0);
-	    if (width_g<=0 || *rest) {
-		usage(progname);
-		exit(1);
-	    }
-	} else if (!strcmp(argv[argno], "--width")) {
-	    if (argno+1>=argc) {
-		usage(progname);
-		exit(1);
-	    } else {
-		s = argv[++argno];
-	    }
-	    width_g = (int)strtol(s, &rest, 0);
-	    if (width_g<=0 || *rest) {
-		usage(progname);
-		exit(1);
-	    }
-	} else if (!strcmp(argv[argno], "--verbose")) {
-	    verbose_g++;
-	} else if (!strcmp(argv[argno], "--version")) {
+ if (!strcmp(argv[argno], "--")) {
+     /* Last switch */
+     argno++;
+     break;
+ } else if (!strcmp(argv[argno], "--help")) {
+     usage(progname);
+     exit(0);
+ } else if (!strcmp(argv[argno], "--address")) {
+     address_g = TRUE;
+ } else if (!strcmp(argv[argno], "--data")) {
+     data_g = TRUE;
+ } else if (!strcmp(argv[argno], "--errors")) {
+     show_errors_g = TRUE;
+ } else if (!strcmp(argv[argno], "--full")) {
+     fullname_g = TRUE;
+ } else if (!strcmp(argv[argno], "--group")) {
+     grp_literal_g = TRUE; 
+ } else if (!strcmp(argv[argno], "--label")) {
+     label_g = TRUE;
+ } else if (!strcmp(argv[argno], "--recursive")) {
+     recursive_g = TRUE;
+     fullname_g = TRUE;
+ } else if (!strcmp(argv[argno], "--simple")) {
+     simple_output_g = TRUE;
+ } else if (!strcmp(argv[argno], "--string")) {
+     string_g = TRUE;
+ } else if (!strncmp(argv[argno], "--width=", 8)) {
+     width_g = (int)strtol(argv[argno]+8, &rest, 0);
+     if (width_g<=0 || *rest) {
+  usage(progname);
+  exit(1);
+     }
+ } else if (!strcmp(argv[argno], "--width")) {
+     if (argno+1>=argc) {
+  usage(progname);
+  exit(1);
+     } else {
+  s = argv[++argno];
+     }
+     width_g = (int)strtol(s, &rest, 0);
+     if (width_g<=0 || *rest) {
+  usage(progname);
+  exit(1);
+     }
+ } else if (!strcmp(argv[argno], "--verbose")) {
+     verbose_g++;
+ } else if (!strcmp(argv[argno], "--version")) {
             print_version(progname);
-	    exit(0);
-	} else if (!strcmp(argv[argno], "--hexdump")) {
-	    hexdump_g = TRUE;
-	} else if (!strncmp(argv[argno], "-w", 2)) {
-	    if (argv[argno][2]) {
-		s = argv[argno]+2;
-	    } else if (argno+1>=argc) {
-		usage(progname);
-		exit(1);
-	    } else {
-		s = argv[++argno];
-	    }
-	    width_g = (int)strtol(s, &rest, 0);
-	    if (width_g<=0 || *rest) {
-		usage(progname);
-		exit(1);
-	    }
-	} else if ('-'!=argv[argno][1]) {
-	    /* Single-letter switches */
-	    for (s=argv[argno]+1; *s; s++) {
-		switch (*s) {
-		case '?':
-		case 'h':	/* --help */
-		    usage(progname);
-		    exit(0);
-		case 'a':	/* --address */
-		    address_g = TRUE;
-		    break;
-		case 'd':	/* --data */
-		    data_g = TRUE;
-		    break;
-		case 'e':	/* --errors */
-		    show_errors_g = TRUE;
-		    break;
-		case 'f':	/* --full */
-		    fullname_g = TRUE;
-		    break;
-		case 'g':	/* --group */
-		    grp_literal_g = TRUE;
-		    break;
-		case 'l':	/* --label */
-		    label_g = TRUE;
-		    break;
-		case 'r':	/* --recursive */
-		    recursive_g = TRUE;
-		    fullname_g = TRUE;
-		    break;
-		case 'S':	/* --simple */
-		    simple_output_g = TRUE;
-		    break;
-		case 's':	/* --string */
-		    string_g = TRUE;
-		    break;
-		case 'v':	/* --verbose */
-		    verbose_g++;
-		    break;
-		case 'V':	/* --version */
+     exit(0);
+ } else if (!strcmp(argv[argno], "--hexdump")) {
+     hexdump_g = TRUE;
+ } else if (!strncmp(argv[argno], "-w", 2)) {
+     if (argv[argno][2]) {
+  s = argv[argno]+2;
+     } else if (argno+1>=argc) {
+  usage(progname);
+  exit(1);
+     } else {
+  s = argv[++argno];
+     }
+     width_g = (int)strtol(s, &rest, 0);
+     if (width_g<=0 || *rest) {
+  usage(progname);
+  exit(1);
+     }
+ } else if ('-'!=argv[argno][1]) {
+     /* Single-letter switches */
+     for (s=argv[argno]+1; *s; s++) {
+  switch (*s) {
+  case '?':
+  case 'h': /* --help */
+      usage(progname);
+      exit(0);
+  case 'a': /* --address */
+      address_g = TRUE;
+      break;
+  case 'd': /* --data */
+      data_g = TRUE;
+      break;
+  case 'e': /* --errors */
+      show_errors_g = TRUE;
+      break;
+  case 'f': /* --full */
+      fullname_g = TRUE;
+      break;
+  case 'g': /* --group */
+      grp_literal_g = TRUE;
+      break;
+  case 'l': /* --label */
+      label_g = TRUE;
+      break;
+  case 'r': /* --recursive */
+      recursive_g = TRUE;
+      fullname_g = TRUE;
+      break;
+  case 'S': /* --simple */
+      simple_output_g = TRUE;
+      break;
+  case 's': /* --string */
+      string_g = TRUE;
+      break;
+  case 'v': /* --verbose */
+      verbose_g++;
+      break;
+  case 'V': /* --version */
                     print_version(progname);
-		    exit(0);
-		case 'x':	/* --hexdump */
-		    hexdump_g = TRUE;
-		    break;
-		default:
-		    usage(progname);
-		    exit(1);
-		}
-	    }
-	} else {
-	    usage(progname);
-	    exit(1);
-	}
+      exit(0);
+  case 'x': /* --hexdump */
+      hexdump_g = TRUE;
+      break;
+  default:
+      usage(progname);
+      exit(1);
+  }
+     }
+ } else {
+     usage(progname);
+     exit(1);
+ }
     }
 
     /*
@@ -2112,8 +2159,8 @@ main (int argc, char *argv[])
      * absolutely nothing ;-)
      */
     if (argno>=argc) {
-	usage(progname);
-	exit(1);
+ usage(progname);
+ exit(1);
     }
 
     /* Turn off HDF5's automatic error printing unless you're debugging h5ls */
@@ -2124,7 +2171,7 @@ main (int argc, char *argv[])
      * Each remaining argument is an hdf5 file followed by an optional slash
      * and object name.
      *
-     * Example:	../dir1/foo/bar/baz
+     * Example: ../dir1/foo/bar/baz
      *          \_________/\______/
      *             file       obj
      *
@@ -2136,60 +2183,60 @@ main (int argc, char *argv[])
      */
     show_file_name_g = (argc-argno > 1); /*show file names if more than one*/
     while (argno<argc) {
-	fname = argv[argno++];
-	oname = NULL;
-	file = -1;
+ fname = argv[argno++];
+ oname = NULL;
+ file = -1;
 
-	while (fname && *fname) {
+ while (fname && *fname) {
             file = h5tools_fopen(fname, NULL, drivername, sizeof drivername);
 
-	    if (file>=0) {
-		if (verbose_g) {
-		    printf("Opened \"%s\" with %s driver.\n",
-			   fname, drivername);
-		}
-		break; /*success*/
-	    }
-	    
-	    /* Shorten the file name; lengthen the object name */
-	    x = oname;
-	    oname = strrchr(fname, '/');
-	    if (x) *x = '/';
-	    if (!oname) break;
-	    *oname = '\0';
-	}
-	if (file<0) {
-	    fprintf(stderr, "%s: unable to open file\n", argv[argno-1]);
+     if (file>=0) {
+  if (verbose_g) {
+      printf("Opened \"%s\" with %s driver.\n",
+      fname, drivername);
+  }
+  break; /*success*/
+     }
+     
+     /* Shorten the file name; lengthen the object name */
+     x = oname;
+     oname = strrchr(fname, '/');
+     if (x) *x = '/';
+     if (!oname) break;
+     *oname = '\0';
+ }
+ if (file<0) {
+     fprintf(stderr, "%s: unable to open file\n", argv[argno-1]);
             continue;
-	}
-	if (oname) oname++;
-	if (!oname || !*oname) oname = root_name;
+ }
+ if (oname) oname++;
+ if (!oname || !*oname) oname = root_name;
 
-	/* Open the object and display it's information */
-	if (H5Gget_objinfo(file, oname, TRUE, &sb)>=0 &&
-	    H5G_GROUP==sb.type && !grp_literal_g) {
-	    /*
-	     * Specified name is a group. List the complete contents of the
-	     * group.
-	     */
-	    sym_insert(&sb, oname);
+ /* Open the object and display it's information */
+ if (H5Gget_objinfo(file, oname, TRUE, &sb)>=0 &&
+     H5G_GROUP==sb.type && !grp_literal_g) {
+     /*
+      * Specified name is a group. List the complete contents of the
+      * group.
+      */
+     sym_insert(&sb, oname);
             iter.container = container = fix_name(show_file_name_g?fname:"", oname);
-	    H5Giterate(file, oname, NULL, list, &iter);
-	    free(container);
+     H5Giterate(file, oname, NULL, list, &iter);
+     free(container);
 
-	} else if ((root=H5Gopen(file, "/"))<0) {
-	    exit(1); /*major problem!*/
-		
-	} else {
-	    /*
-	     * Specified name is a non-group object -- list that object.  The
-	     * container for the object is everything up to the base name.
-	     */
+ } else if ((root=H5Gopen(file, "/"))<0) {
+     exit(1); /*major problem!*/
+  
+ } else {
+     /*
+      * Specified name is a non-group object -- list that object.  The
+      * container for the object is everything up to the base name.
+      */
             iter.container = show_file_name_g ? fname : "/";
-	    list(root, oname, &iter);
-	    if (H5Gclose(root)<0) exit(1);
-	}
-	H5Fclose(file);
+     list(root, oname, &iter);
+     if (H5Gclose(root)<0) exit(1);
+ }
+ H5Fclose(file);
     }
     h5tools_close();
     

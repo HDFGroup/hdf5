@@ -145,6 +145,10 @@ TOOLTEST tarray1.ls -w80 -r -d tarray1.h5
 # test for empty data
 TOOLTEST tempty.ls -w80 -d tempty.h5
 
+# test for all dataset types written to attributes
+# enable -S for avoiding printing NATIVE types
+TOOLTEST tattr2.ls -w80 -v -S tattr2.h5
+
 if test $nerrors -eq 0 ; then
 	echo "All h5ls tests passed."
 fi
