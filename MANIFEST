@@ -855,6 +855,8 @@
 ./src/H5HL.c
 ./src/H5HLprivate.h
 ./src/H5HLpublic.h
+./src/H5HP.c
+./src/H5HPprivate.h
 ./src/H5I.c
 ./src/H5Iprivate.h
 ./src/H5Ipublic.h
@@ -1005,6 +1007,7 @@
 ./test/tgenprop.c
 ./test/th5s.c
 ./test/th5s.h5
+./test/theap.c
 ./test/titerate.c
 ./test/tmeta.c
 ./test/tmisc.c
