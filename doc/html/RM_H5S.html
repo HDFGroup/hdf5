@@ -416,6 +416,9 @@ of the <cite>HDF5 User's Guide.</cite>.
     <dd><code>H5Sget_simple_extent_dims</code> returns the size and maximum sizes 
         of each dimension of a dataspace through the <code>dims</code> 
         and <code>maxdims</code> parameters.
+        <p>
+        Either or both of <code>dims</code> and <code>maxdims</code> 
+        may be NULL.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>space_id</code>
@@ -641,9 +644,9 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Name:</strong> <a name="Dataspace-SelectHyperslab">H5Sselect_hyperslab</a>
 <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Sselect_hyperslab</code>(<em>hid_t</em> <code>space_id</code>,
-        <em>H5S_seloper_t</em><code>op</code>,
+        <em>H5S_seloper_t</em> <code>op</code>,
         <em>const hssize_t *</em><code>start</code>,
-        <em>const hsize_t *</em><code>stride</code>
+        <em>const hsize_t *</em><code>stride</code>,
         <em>const hsize_t *</em><code>count</code>,
         <em>const hsize_t *</em><code>block</code>
     )
@@ -844,7 +847,7 @@ I/O is performed.
 <dl>
 <dt><strong>Name:</strong> <a name="Dataspace-SelectElemPointList">H5Sget_select_elem_pointlist</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Sget_select_elem_pointlist</code>(<em>hid_t </em><code>space_id</code>
+    <dd><em>herr_t </em><code>H5Sget_select_elem_pointlist</code>(<em>hid_t </em><code>space_id</code>,
         <em>hsize_t </em><code>startpoint</code>,
         <em>hsize_t </em><code>numpoints</code>,
         <em>hsize_t *</em><code>buf</code>
@@ -896,7 +899,7 @@ I/O is performed.
 <dl>
 <dt><strong>Name:</strong> <a name="Dataspace-SelectBounds">H5Sget_select_bounds</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Sget_select_bounds</code>(<em>hid_t </em><code>space_id</code>
+    <dd><em>herr_t </em><code>H5Sget_select_bounds</code>(<em>hid_t </em><code>space_id</code>,
         <em>hsize_t *</em><code>start</code>,
         <em>hsize_t *</em><code>end</code>
     )
