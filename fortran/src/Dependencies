@@ -1,149 +1,507 @@
 ## This file is machine generated on GNU systems.
 ## Only temporary changes may be made here.
 
-H5Af.lo: \
-   $(srcdir)/H5Af.c \
+H5f90kit.lo: \
+   $(srcdir)/H5f90kit.c \
    $(srcdir)/H5f90.h \
+   $(top_srcdir)/src/hdf5.h \
+   $(top_srcdir)/src/H5public.h \
+   $(top_builddir)/src/H5pubconf.h \
+   $(top_srcdir)/src/H5api_adpt.h \
+   $(top_srcdir)/src/H5Ipublic.h \
+   $(top_srcdir)/src/H5Apublic.h \
+   $(top_srcdir)/src/H5ACpublic.h \
+   $(top_srcdir)/src/H5Bpublic.h \
+   $(top_srcdir)/src/H5Dpublic.h \
+   $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Fpublic.h \
+   $(top_srcdir)/src/H5FDpublic.h \
+   $(top_srcdir)/src/H5Gpublic.h \
+   $(top_srcdir)/src/H5HGpublic.h \
+   $(top_srcdir)/src/H5HLpublic.h \
+   $(top_srcdir)/src/H5MMpublic.h \
+   $(top_srcdir)/src/H5Opublic.h \
+   $(top_srcdir)/src/H5Ppublic.h \
+   $(top_srcdir)/src/H5Zpublic.h \
+   $(top_srcdir)/src/H5Rpublic.h \
+   $(top_srcdir)/src/H5Spublic.h \
+   $(top_srcdir)/src/H5Tpublic.h \
+   $(top_srcdir)/src/H5FDcore.h \
+   $(top_srcdir)/src/H5FDfamily.h \
+   $(top_srcdir)/src/H5FDmpio.h \
+   $(top_srcdir)/src/H5FDsec2.h \
+   $(top_srcdir)/src/H5FDstdio.h \
+   $(top_srcdir)/src/H5FDsrb.h \
+   $(top_srcdir)/src/H5FDgass.h \
+   $(top_srcdir)/src/H5FDdpss.h \
+   $(top_srcdir)/src/H5FDstream.h \
+   $(top_srcdir)/src/H5FDmulti.h \
+   $(top_srcdir)/src/H5FDlog.h \
    $(srcdir)/H5f90i.h \
-   $(srcdir)/H5f90proto.h
-H5Aff.lo: \
-   $(srcdir)/H5Aff.f90 \
-   H5fortran_types.f90 \
-   $(srcdir)/H5f90global.f90
-H5Df.lo: \
-   $(srcdir)/H5Df.c \
+   $(srcdir)/H5f90proto.h \
+   $(srcdir)/H5Git.h
+H5_f.lo: \
+   $(srcdir)/H5_f.c \
    $(srcdir)/H5f90.h \
+   $(top_srcdir)/src/hdf5.h \
+   $(top_srcdir)/src/H5public.h \
+   $(top_builddir)/src/H5pubconf.h \
+   $(top_srcdir)/src/H5api_adpt.h \
+   $(top_srcdir)/src/H5Ipublic.h \
+   $(top_srcdir)/src/H5Apublic.h \
+   $(top_srcdir)/src/H5ACpublic.h \
+   $(top_srcdir)/src/H5Bpublic.h \
+   $(top_srcdir)/src/H5Dpublic.h \
+   $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Fpublic.h \
+   $(top_srcdir)/src/H5FDpublic.h \
+   $(top_srcdir)/src/H5Gpublic.h \
+   $(top_srcdir)/src/H5HGpublic.h \
+   $(top_srcdir)/src/H5HLpublic.h \
+   $(top_srcdir)/src/H5MMpublic.h \
+   $(top_srcdir)/src/H5Opublic.h \
+   $(top_srcdir)/src/H5Ppublic.h \
+   $(top_srcdir)/src/H5Zpublic.h \
+   $(top_srcdir)/src/H5Rpublic.h \
+   $(top_srcdir)/src/H5Spublic.h \
+   $(top_srcdir)/src/H5Tpublic.h \
+   $(top_srcdir)/src/H5FDcore.h \
+   $(top_srcdir)/src/H5FDfamily.h \
+   $(top_srcdir)/src/H5FDmpio.h \
+   $(top_srcdir)/src/H5FDsec2.h \
+   $(top_srcdir)/src/H5FDstdio.h \
+   $(top_srcdir)/src/H5FDsrb.h \
+   $(top_srcdir)/src/H5FDgass.h \
+   $(top_srcdir)/src/H5FDdpss.h \
+   $(top_srcdir)/src/H5FDstream.h \
+   $(top_srcdir)/src/H5FDmulti.h \
+   $(top_srcdir)/src/H5FDlog.h \
    $(srcdir)/H5f90i.h \
-   $(srcdir)/H5f90proto.h
-H5Dff.lo: \
-   $(srcdir)/H5Dff.f90 \
-   H5fortran_types.f90 \
-   $(srcdir)/H5Rff.f90 \
-   $(srcdir)/H5f90global.f90
-H5Ef.lo: \
-   $(srcdir)/H5Ef.c \
+   $(srcdir)/H5f90proto.h \
+   $(srcdir)/H5Git.h
+H5Git.lo: \
+   $(srcdir)/H5Git.c \
+   $(top_srcdir)/src/hdf5.h \
+   $(top_srcdir)/src/H5public.h \
+   $(top_builddir)/src/H5pubconf.h \
+   $(top_srcdir)/src/H5api_adpt.h \
+   $(top_srcdir)/src/H5Ipublic.h \
+   $(top_srcdir)/src/H5Apublic.h \
+   $(top_srcdir)/src/H5ACpublic.h \
+   $(top_srcdir)/src/H5Bpublic.h \
+   $(top_srcdir)/src/H5Dpublic.h \
+   $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Fpublic.h \
+   $(top_srcdir)/src/H5FDpublic.h \
+   $(top_srcdir)/src/H5Gpublic.h \
+   $(top_srcdir)/src/H5HGpublic.h \
+   $(top_srcdir)/src/H5HLpublic.h \
+   $(top_srcdir)/src/H5MMpublic.h \
+   $(top_srcdir)/src/H5Opublic.h \
+   $(top_srcdir)/src/H5Ppublic.h \
+   $(top_srcdir)/src/H5Zpublic.h \
+   $(top_srcdir)/src/H5Rpublic.h \
+   $(top_srcdir)/src/H5Spublic.h \
+   $(top_srcdir)/src/H5Tpublic.h \
+   $(top_srcdir)/src/H5FDcore.h \
+   $(top_srcdir)/src/H5FDfamily.h \
+   $(top_srcdir)/src/H5FDmpio.h \
+   $(top_srcdir)/src/H5FDsec2.h \
+   $(top_srcdir)/src/H5FDstdio.h \
+   $(top_srcdir)/src/H5FDsrb.h \
+   $(top_srcdir)/src/H5FDgass.h \
+   $(top_srcdir)/src/H5FDdpss.h \
+   $(top_srcdir)/src/H5FDstream.h \
+   $(top_srcdir)/src/H5FDmulti.h \
+   $(top_srcdir)/src/H5FDlog.h \
+   $(srcdir)/H5Git.h
+H5Rf.lo: \
+   $(srcdir)/H5Rf.c \
    $(srcdir)/H5f90.h \
+   $(top_srcdir)/src/hdf5.h \
+   $(top_srcdir)/src/H5public.h \
+   $(top_builddir)/src/H5pubconf.h \
+   $(top_srcdir)/src/H5api_adpt.h \
+   $(top_srcdir)/src/H5Ipublic.h \
+   $(top_srcdir)/src/H5Apublic.h \
+   $(top_srcdir)/src/H5ACpublic.h \
+   $(top_srcdir)/src/H5Bpublic.h \
+   $(top_srcdir)/src/H5Dpublic.h \
+   $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Fpublic.h \
+   $(top_srcdir)/src/H5FDpublic.h \
+   $(top_srcdir)/src/H5Gpublic.h \
+   $(top_srcdir)/src/H5HGpublic.h \
+   $(top_srcdir)/src/H5HLpublic.h \
+   $(top_srcdir)/src/H5MMpublic.h \
+   $(top_srcdir)/src/H5Opublic.h \
+   $(top_srcdir)/src/H5Ppublic.h \
+   $(top_srcdir)/src/H5Zpublic.h \
+   $(top_srcdir)/src/H5Rpublic.h \
+   $(top_srcdir)/src/H5Spublic.h \
+   $(top_srcdir)/src/H5Tpublic.h \
+   $(top_srcdir)/src/H5FDcore.h \
+   $(top_srcdir)/src/H5FDfamily.h \
+   $(top_srcdir)/src/H5FDmpio.h \
+   $(top_srcdir)/src/H5FDsec2.h \
+   $(top_srcdir)/src/H5FDstdio.h \
+   $(top_srcdir)/src/H5FDsrb.h \
+   $(top_srcdir)/src/H5FDgass.h \
+   $(top_srcdir)/src/H5FDdpss.h \
+   $(top_srcdir)/src/H5FDstream.h \
+   $(top_srcdir)/src/H5FDmulti.h \
+   $(top_srcdir)/src/H5FDlog.h \
    $(srcdir)/H5f90i.h \
-   $(srcdir)/H5f90proto.h
-H5Eff.lo: \
-   $(srcdir)/H5Eff.f90 \
-   $(srcdir)/H5fortran_flags.f90\
-   $(srcdir)/H5f90global.f90
+   $(srcdir)/H5f90proto.h \
+   $(srcdir)/H5Git.h
 H5Ff.lo: \
    $(srcdir)/H5Ff.c \
    $(srcdir)/H5f90.h \
+   $(top_srcdir)/src/hdf5.h \
+   $(top_srcdir)/src/H5public.h \
+   $(top_builddir)/src/H5pubconf.h \
+   $(top_srcdir)/src/H5api_adpt.h \
+   $(top_srcdir)/src/H5Ipublic.h \
+   $(top_srcdir)/src/H5Apublic.h \
+   $(top_srcdir)/src/H5ACpublic.h \
+   $(top_srcdir)/src/H5Bpublic.h \
+   $(top_srcdir)/src/H5Dpublic.h \
+   $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Fpublic.h \
+   $(top_srcdir)/src/H5FDpublic.h \
+   $(top_srcdir)/src/H5Gpublic.h \
+   $(top_srcdir)/src/H5HGpublic.h \
+   $(top_srcdir)/src/H5HLpublic.h \
+   $(top_srcdir)/src/H5MMpublic.h \
+   $(top_srcdir)/src/H5Opublic.h \
+   $(top_srcdir)/src/H5Ppublic.h \
+   $(top_srcdir)/src/H5Zpublic.h \
+   $(top_srcdir)/src/H5Rpublic.h \
+   $(top_srcdir)/src/H5Spublic.h \
+   $(top_srcdir)/src/H5Tpublic.h \
+   $(top_srcdir)/src/H5FDcore.h \
+   $(top_srcdir)/src/H5FDfamily.h \
+   $(top_srcdir)/src/H5FDmpio.h \
+   $(top_srcdir)/src/H5FDsec2.h \
+   $(top_srcdir)/src/H5FDstdio.h \
+   $(top_srcdir)/src/H5FDsrb.h \
+   $(top_srcdir)/src/H5FDgass.h \
+   $(top_srcdir)/src/H5FDdpss.h \
+   $(top_srcdir)/src/H5FDstream.h \
+   $(top_srcdir)/src/H5FDmulti.h \
+   $(top_srcdir)/src/H5FDlog.h \
    $(srcdir)/H5f90i.h \
-   $(srcdir)/H5f90proto.h
-H5Fff.lo: \
-   $(srcdir)/H5Fff.f90 \
-   H5fortran_types.f90 \
-   $(srcdir)/H5f90global.f90
+   $(srcdir)/H5f90proto.h \
+   $(srcdir)/H5Git.h
+H5Sf.lo: \
+   $(srcdir)/H5Sf.c \
+   $(srcdir)/H5f90.h \
+   $(top_srcdir)/src/hdf5.h \
+   $(top_srcdir)/src/H5public.h \
+   $(top_builddir)/src/H5pubconf.h \
+   $(top_srcdir)/src/H5api_adpt.h \
+   $(top_srcdir)/src/H5Ipublic.h \
+   $(top_srcdir)/src/H5Apublic.h \
+   $(top_srcdir)/src/H5ACpublic.h \
+   $(top_srcdir)/src/H5Bpublic.h \
+   $(top_srcdir)/src/H5Dpublic.h \
+   $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Fpublic.h \
+   $(top_srcdir)/src/H5FDpublic.h \
+   $(top_srcdir)/src/H5Gpublic.h \
+   $(top_srcdir)/src/H5HGpublic.h \
+   $(top_srcdir)/src/H5HLpublic.h \
+   $(top_srcdir)/src/H5MMpublic.h \
+   $(top_srcdir)/src/H5Opublic.h \
+   $(top_srcdir)/src/H5Ppublic.h \
+   $(top_srcdir)/src/H5Zpublic.h \
+   $(top_srcdir)/src/H5Rpublic.h \
+   $(top_srcdir)/src/H5Spublic.h \
+   $(top_srcdir)/src/H5Tpublic.h \
+   $(top_srcdir)/src/H5FDcore.h \
+   $(top_srcdir)/src/H5FDfamily.h \
+   $(top_srcdir)/src/H5FDmpio.h \
+   $(top_srcdir)/src/H5FDsec2.h \
+   $(top_srcdir)/src/H5FDstdio.h \
+   $(top_srcdir)/src/H5FDsrb.h \
+   $(top_srcdir)/src/H5FDgass.h \
+   $(top_srcdir)/src/H5FDdpss.h \
+   $(top_srcdir)/src/H5FDstream.h \
+   $(top_srcdir)/src/H5FDmulti.h \
+   $(top_srcdir)/src/H5FDlog.h \
+   $(srcdir)/H5f90i.h \
+   $(srcdir)/H5f90proto.h \
+   $(srcdir)/H5Git.h
+H5Df.lo: \
+   $(srcdir)/H5Df.c \
+   $(srcdir)/H5f90.h \
+   $(top_srcdir)/src/hdf5.h \
+   $(top_srcdir)/src/H5public.h \
+   $(top_builddir)/src/H5pubconf.h \
+   $(top_srcdir)/src/H5api_adpt.h \
+   $(top_srcdir)/src/H5Ipublic.h \
+   $(top_srcdir)/src/H5Apublic.h \
+   $(top_srcdir)/src/H5ACpublic.h \
+   $(top_srcdir)/src/H5Bpublic.h \
+   $(top_srcdir)/src/H5Dpublic.h \
+   $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Fpublic.h \
+   $(top_srcdir)/src/H5FDpublic.h \
+   $(top_srcdir)/src/H5Gpublic.h \
+   $(top_srcdir)/src/H5HGpublic.h \
+   $(top_srcdir)/src/H5HLpublic.h \
+   $(top_srcdir)/src/H5MMpublic.h \
+   $(top_srcdir)/src/H5Opublic.h \
+   $(top_srcdir)/src/H5Ppublic.h \
+   $(top_srcdir)/src/H5Zpublic.h \
+   $(top_srcdir)/src/H5Rpublic.h \
+   $(top_srcdir)/src/H5Spublic.h \
+   $(top_srcdir)/src/H5Tpublic.h \
+   $(top_srcdir)/src/H5FDcore.h \
+   $(top_srcdir)/src/H5FDfamily.h \
+   $(top_srcdir)/src/H5FDmpio.h \
+   $(top_srcdir)/src/H5FDsec2.h \
+   $(top_srcdir)/src/H5FDstdio.h \
+   $(top_srcdir)/src/H5FDsrb.h \
+   $(top_srcdir)/src/H5FDgass.h \
+   $(top_srcdir)/src/H5FDdpss.h \
+   $(top_srcdir)/src/H5FDstream.h \
+   $(top_srcdir)/src/H5FDmulti.h \
+   $(top_srcdir)/src/H5FDlog.h \
+   $(srcdir)/H5f90i.h \
+   $(srcdir)/H5f90proto.h \
+   $(srcdir)/H5Git.h
 H5Gf.lo: \
    $(srcdir)/H5Gf.c \
    $(srcdir)/H5f90.h \
+   $(top_srcdir)/src/hdf5.h \
+   $(top_srcdir)/src/H5public.h \
+   $(top_builddir)/src/H5pubconf.h \
+   $(top_srcdir)/src/H5api_adpt.h \
+   $(top_srcdir)/src/H5Ipublic.h \
+   $(top_srcdir)/src/H5Apublic.h \
+   $(top_srcdir)/src/H5ACpublic.h \
+   $(top_srcdir)/src/H5Bpublic.h \
+   $(top_srcdir)/src/H5Dpublic.h \
+   $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Fpublic.h \
+   $(top_srcdir)/src/H5FDpublic.h \
+   $(top_srcdir)/src/H5Gpublic.h \
+   $(top_srcdir)/src/H5HGpublic.h \
+   $(top_srcdir)/src/H5HLpublic.h \
+   $(top_srcdir)/src/H5MMpublic.h \
+   $(top_srcdir)/src/H5Opublic.h \
+   $(top_srcdir)/src/H5Ppublic.h \
+   $(top_srcdir)/src/H5Zpublic.h \
+   $(top_srcdir)/src/H5Rpublic.h \
+   $(top_srcdir)/src/H5Spublic.h \
+   $(top_srcdir)/src/H5Tpublic.h \
+   $(top_srcdir)/src/H5FDcore.h \
+   $(top_srcdir)/src/H5FDfamily.h \
+   $(top_srcdir)/src/H5FDmpio.h \
+   $(top_srcdir)/src/H5FDsec2.h \
+   $(top_srcdir)/src/H5FDstdio.h \
+   $(top_srcdir)/src/H5FDsrb.h \
+   $(top_srcdir)/src/H5FDgass.h \
+   $(top_srcdir)/src/H5FDdpss.h \
+   $(top_srcdir)/src/H5FDstream.h \
+   $(top_srcdir)/src/H5FDmulti.h \
+   $(top_srcdir)/src/H5FDlog.h \
    $(srcdir)/H5f90i.h \
-   $(srcdir)/H5f90proto.h
-H5Gff.lo: \
-   $(srcdir)/H5Gff.f90 \
-   H5fortran_types.f90 \
-   $(srcdir)/H5f90global.f90
-H5Git.lo: \
-   $(srcdir)/H5Git.c \
+   $(srcdir)/H5f90proto.h \
+   $(srcdir)/H5Git.h
+H5Af.lo: \
+   $(srcdir)/H5Af.c \
+   $(srcdir)/H5f90.h \
+   $(top_srcdir)/src/hdf5.h \
+   $(top_srcdir)/src/H5public.h \
+   $(top_builddir)/src/H5pubconf.h \
+   $(top_srcdir)/src/H5api_adpt.h \
+   $(top_srcdir)/src/H5Ipublic.h \
+   $(top_srcdir)/src/H5Apublic.h \
+   $(top_srcdir)/src/H5ACpublic.h \
+   $(top_srcdir)/src/H5Bpublic.h \
+   $(top_srcdir)/src/H5Dpublic.h \
+   $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Fpublic.h \
+   $(top_srcdir)/src/H5FDpublic.h \
+   $(top_srcdir)/src/H5Gpublic.h \
+   $(top_srcdir)/src/H5HGpublic.h \
+   $(top_srcdir)/src/H5HLpublic.h \
+   $(top_srcdir)/src/H5MMpublic.h \
+   $(top_srcdir)/src/H5Opublic.h \
+   $(top_srcdir)/src/H5Ppublic.h \
+   $(top_srcdir)/src/H5Zpublic.h \
+   $(top_srcdir)/src/H5Rpublic.h \
+   $(top_srcdir)/src/H5Spublic.h \
+   $(top_srcdir)/src/H5Tpublic.h \
+   $(top_srcdir)/src/H5FDcore.h \
+   $(top_srcdir)/src/H5FDfamily.h \
+   $(top_srcdir)/src/H5FDmpio.h \
+   $(top_srcdir)/src/H5FDsec2.h \
+   $(top_srcdir)/src/H5FDstdio.h \
+   $(top_srcdir)/src/H5FDsrb.h \
+   $(top_srcdir)/src/H5FDgass.h \
+   $(top_srcdir)/src/H5FDdpss.h \
+   $(top_srcdir)/src/H5FDstream.h \
+   $(top_srcdir)/src/H5FDmulti.h \
+   $(top_srcdir)/src/H5FDlog.h \
+   $(srcdir)/H5f90i.h \
+   $(srcdir)/H5f90proto.h \
+   $(srcdir)/H5Git.h
+H5Tf.lo: \
+   $(srcdir)/H5Tf.c \
+   $(srcdir)/H5f90.h \
+   $(top_srcdir)/src/hdf5.h \
+   $(top_srcdir)/src/H5public.h \
+   $(top_builddir)/src/H5pubconf.h \
+   $(top_srcdir)/src/H5api_adpt.h \
+   $(top_srcdir)/src/H5Ipublic.h \
+   $(top_srcdir)/src/H5Apublic.h \
+   $(top_srcdir)/src/H5ACpublic.h \
+   $(top_srcdir)/src/H5Bpublic.h \
+   $(top_srcdir)/src/H5Dpublic.h \
+   $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Fpublic.h \
+   $(top_srcdir)/src/H5FDpublic.h \
+   $(top_srcdir)/src/H5Gpublic.h \
+   $(top_srcdir)/src/H5HGpublic.h \
+   $(top_srcdir)/src/H5HLpublic.h \
+   $(top_srcdir)/src/H5MMpublic.h \
+   $(top_srcdir)/src/H5Opublic.h \
+   $(top_srcdir)/src/H5Ppublic.h \
+   $(top_srcdir)/src/H5Zpublic.h \
+   $(top_srcdir)/src/H5Rpublic.h \
+   $(top_srcdir)/src/H5Spublic.h \
+   $(top_srcdir)/src/H5Tpublic.h \
+   $(top_srcdir)/src/H5FDcore.h \
+   $(top_srcdir)/src/H5FDfamily.h \
+   $(top_srcdir)/src/H5FDmpio.h \
+   $(top_srcdir)/src/H5FDsec2.h \
+   $(top_srcdir)/src/H5FDstdio.h \
+   $(top_srcdir)/src/H5FDsrb.h \
+   $(top_srcdir)/src/H5FDgass.h \
+   $(top_srcdir)/src/H5FDdpss.h \
+   $(top_srcdir)/src/H5FDstream.h \
+   $(top_srcdir)/src/H5FDmulti.h \
+   $(top_srcdir)/src/H5FDlog.h \
+   $(srcdir)/H5f90i.h \
+   $(srcdir)/H5f90proto.h \
+   $(srcdir)/H5Git.h
+H5Pf.lo: \
+   $(srcdir)/H5Pf.c \
+   $(srcdir)/H5f90.h \
+   $(top_srcdir)/src/hdf5.h \
+   $(top_srcdir)/src/H5public.h \
+   $(top_builddir)/src/H5pubconf.h \
+   $(top_srcdir)/src/H5api_adpt.h \
+   $(top_srcdir)/src/H5Ipublic.h \
+   $(top_srcdir)/src/H5Apublic.h \
+   $(top_srcdir)/src/H5ACpublic.h \
+   $(top_srcdir)/src/H5Bpublic.h \
+   $(top_srcdir)/src/H5Dpublic.h \
+   $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Fpublic.h \
+   $(top_srcdir)/src/H5FDpublic.h \
+   $(top_srcdir)/src/H5Gpublic.h \
+   $(top_srcdir)/src/H5HGpublic.h \
+   $(top_srcdir)/src/H5HLpublic.h \
+   $(top_srcdir)/src/H5MMpublic.h \
+   $(top_srcdir)/src/H5Opublic.h \
+   $(top_srcdir)/src/H5Ppublic.h \
+   $(top_srcdir)/src/H5Zpublic.h \
+   $(top_srcdir)/src/H5Rpublic.h \
+   $(top_srcdir)/src/H5Spublic.h \
+   $(top_srcdir)/src/H5Tpublic.h \
+   $(top_srcdir)/src/H5FDcore.h \
+   $(top_srcdir)/src/H5FDfamily.h \
+   $(top_srcdir)/src/H5FDmpio.h \
+   $(top_srcdir)/src/H5FDsec2.h \
+   $(top_srcdir)/src/H5FDstdio.h \
+   $(top_srcdir)/src/H5FDsrb.h \
+   $(top_srcdir)/src/H5FDgass.h \
+   $(top_srcdir)/src/H5FDdpss.h \
+   $(top_srcdir)/src/H5FDstream.h \
+   $(top_srcdir)/src/H5FDmulti.h \
+   $(top_srcdir)/src/H5FDlog.h \
+   $(srcdir)/H5f90i.h \
+   $(srcdir)/H5f90proto.h \
    $(srcdir)/H5Git.h
 H5If.lo: \
    $(srcdir)/H5If.c \
    $(srcdir)/H5f90.h \
+   $(top_srcdir)/src/hdf5.h \
+   $(top_srcdir)/src/H5public.h \
+   $(top_builddir)/src/H5pubconf.h \
+   $(top_srcdir)/src/H5api_adpt.h \
+   $(top_srcdir)/src/H5Ipublic.h \
+   $(top_srcdir)/src/H5Apublic.h \
+   $(top_srcdir)/src/H5ACpublic.h \
+   $(top_srcdir)/src/H5Bpublic.h \
+   $(top_srcdir)/src/H5Dpublic.h \
+   $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Fpublic.h \
+   $(top_srcdir)/src/H5FDpublic.h \
+   $(top_srcdir)/src/H5Gpublic.h \
+   $(top_srcdir)/src/H5HGpublic.h \
+   $(top_srcdir)/src/H5HLpublic.h \
+   $(top_srcdir)/src/H5MMpublic.h \
+   $(top_srcdir)/src/H5Opublic.h \
+   $(top_srcdir)/src/H5Ppublic.h \
+   $(top_srcdir)/src/H5Zpublic.h \
+   $(top_srcdir)/src/H5Rpublic.h \
+   $(top_srcdir)/src/H5Spublic.h \
+   $(top_srcdir)/src/H5Tpublic.h \
+   $(top_srcdir)/src/H5FDcore.h \
+   $(top_srcdir)/src/H5FDfamily.h \
+   $(top_srcdir)/src/H5FDmpio.h \
+   $(top_srcdir)/src/H5FDsec2.h \
+   $(top_srcdir)/src/H5FDstdio.h \
+   $(top_srcdir)/src/H5FDsrb.h \
+   $(top_srcdir)/src/H5FDgass.h \
+   $(top_srcdir)/src/H5FDdpss.h \
+   $(top_srcdir)/src/H5FDstream.h \
+   $(top_srcdir)/src/H5FDmulti.h \
+   $(top_srcdir)/src/H5FDlog.h \
    $(srcdir)/H5f90i.h \
-   $(srcdir)/H5f90proto.h
-H5Iff.lo: \
-   $(srcdir)/H5Iff.f90 \
-   H5fortran_types.f90 \
-   $(srcdir)/H5f90global.f90
-H5Pf.lo: \
-   $(srcdir)/H5Pf.c \
+   $(srcdir)/H5f90proto.h \
+   $(srcdir)/H5Git.h
+H5Ef.lo: \
+   $(srcdir)/H5Ef.c \
    $(srcdir)/H5f90.h \
+   $(top_srcdir)/src/hdf5.h \
+   $(top_srcdir)/src/H5public.h \
+   $(top_builddir)/src/H5pubconf.h \
+   $(top_srcdir)/src/H5api_adpt.h \
+   $(top_srcdir)/src/H5Ipublic.h \
+   $(top_srcdir)/src/H5Apublic.h \
+   $(top_srcdir)/src/H5ACpublic.h \
+   $(top_srcdir)/src/H5Bpublic.h \
+   $(top_srcdir)/src/H5Dpublic.h \
+   $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Fpublic.h \
+   $(top_srcdir)/src/H5FDpublic.h \
+   $(top_srcdir)/src/H5Gpublic.h \
+   $(top_srcdir)/src/H5HGpublic.h \
+   $(top_srcdir)/src/H5HLpublic.h \
+   $(top_srcdir)/src/H5MMpublic.h \
+   $(top_srcdir)/src/H5Opublic.h \
+   $(top_srcdir)/src/H5Ppublic.h \
+   $(top_srcdir)/src/H5Zpublic.h \
+   $(top_srcdir)/src/H5Rpublic.h \
+   $(top_srcdir)/src/H5Spublic.h \
+   $(top_srcdir)/src/H5Tpublic.h \
+   $(top_srcdir)/src/H5FDcore.h \
+   $(top_srcdir)/src/H5FDfamily.h \
+   $(top_srcdir)/src/H5FDmpio.h \
+   $(top_srcdir)/src/H5FDsec2.h \
+   $(top_srcdir)/src/H5FDstdio.h \
+   $(top_srcdir)/src/H5FDsrb.h \
+   $(top_srcdir)/src/H5FDgass.h \
+   $(top_srcdir)/src/H5FDdpss.h \
+   $(top_srcdir)/src/H5FDstream.h \
+   $(top_srcdir)/src/H5FDmulti.h \
+   $(top_srcdir)/src/H5FDlog.h \
    $(srcdir)/H5f90i.h \
-   $(srcdir)/H5f90proto.h
-H5Pf_parallel.lo: \
-   $(srcdir)/H5Pf_parallel.c \
-   $(srcdir)/H5f90.h \
-   $(srcdir)/H5f90i.h \
-   $(srcdir)/H5f90proto.h
-H5Pff.lo: \
-   $(srcdir)/H5Pff.f90 \
-   H5fortran_types.f90 \
-   $(srcdir)/H5f90global.f90
-H5Pff_parallel.lo: \
-   $(srcdir)/H5Pff_parallel.f90 \
-   H5fortran_types.f90 \
-   $(srcdir)/H5f90global.f90
-H5Rf.lo: \
-   $(srcdir)/H5Rf.c \
-   $(srcdir)/H5f90.h \
-   $(srcdir)/H5f90i.h \
-   $(srcdir)/H5f90proto.h
-H5Rff.lo: \
-   $(srcdir)/H5Rff.f90 \
-   H5fortran_types.f90 \
-   $(srcdir)/H5f90global.f90
-H5Sf.lo: \
-   $(srcdir)/H5Sf.c \
-   $(srcdir)/H5f90.h \
-   $(srcdir)/H5f90i.h \
-   $(srcdir)/H5f90proto.h
-H5Sff.lo: \
-   $(srcdir)/H5Sff.f90 \
-   H5fortran_types.f90 \
-   $(srcdir)/H5f90global.f90
-H5Tf.lo: \
-   $(srcdir)/H5Sf.c \
-   $(srcdir)/H5f90.h \
-   $(srcdir)/H5f90i.h \
-   $(srcdir)/H5f90proto.h
-H5Tff.lo: \
-   $(srcdir)/H5Tff.f90 \
-   H5fortran_types.f90 \
-   $(srcdir)/H5f90global.f90
-H5f90global.lo: \
-   $(srcdir)/H5f90global.f90 \
-   H5fortran_types.f90
-H5f90kit.lo: \
-   $(srcdir)/H5f90kit.c \
-   $(srcdir)/H5f90.h \
-   $(srcdir)/H5f90i.h \
-   $(srcdir)/H5f90proto.h
-H5f.lo: \
-   $(srcdir)/H5f.c \
-   $(srcdir)/H5f90.h \
-   $(srcdir)/H5f90i.h \
-   $(srcdir)/H5f90proto.h
-H5ff.lo: \
-   $(srcdir)/H5ff.f90 \
-   $(srcdir)/H5f90global.f90
-HDF5.lo: \
-   $(srcdir)/HDF5.f90 \
-   $(srcdir)/H5f90global.f90 \
-   $(srcdir)/H5Fff.f90 \
-   $(srcdir)/H5Gff.f90 \
-   $(srcdir)/H5Eff.f90 \
-   $(srcdir)/H5Iff.f90 \
-   $(srcdir)/H5Sff.f90 \
-   $(srcdir)/H5Dff.f90 \
-   $(srcdir)/H5Aff.f90 \
-   $(srcdir)/H5Tff.f90 \
-   $(srcdir)/H5Pff.f90 \
-   $(srcdir)/H5Rff.f90
-HDF5_parallel.lo: \
-   $(srcdir)/HDF5_parallel.f90 \
-   $(srcdir)/H5f90global.f90 \
-   $(srcdir)/H5Fff.f90 \
-   $(srcdir)/H5Gff.f90 \
-   $(srcdir)/H5Eff.f90 \
-   $(srcdir)/H5Iff.f90 \
-   $(srcdir)/H5Sff.f90 \
-   $(srcdir)/H5Dff.f90 \
-   $(srcdir)/H5Aff.f90 \
-   $(srcdir)/H5Tff.f90 \
-   $(srcdir)/H5Pff.f90 \
-   $(srcdir)/H5Pff_parallel.f90 \
-   $(srcdir)/H5Rff.f90
+   $(srcdir)/H5f90proto.h \
+   $(srcdir)/H5Git.h
