@@ -16,21 +16,10 @@
 #include "h5test.h"
 #include "h5repack.h"
 
-#if 0
-#define CHUNK_DEBUG
-#endif
-
-#if defined(CHUNK_DEBUG)
-#define DIM1  39
-#define DIM2  20
-#define CDIM1 19
-#define CDIM2 10
-#else
 #define DIM1  40
 #define DIM2  20
 #define CDIM1 20
 #define CDIM2 10
-#endif
 
 #define RANK  2
 

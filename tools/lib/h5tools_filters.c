@@ -114,7 +114,7 @@ int h5tools_canreadf(const char* name, /* object name, serves also as boolean pr
  *-------------------------------------------------------------------------
  */
   case H5Z_FILTER_SHUFFLE:
-   if (!have_szip)
+   if (!have_shuffle)
    {
     if (name)
      print_warning(name,"shuffle");

@@ -124,7 +124,7 @@ int main (void)
  *-------------------------------------------------------------------------
  */
  PASSED();
- TESTING("    copy of datasets with filters");
+ TESTING("    copy of datasets with all filters");
  
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
@@ -161,19 +161,76 @@ int main (void)
 
  PASSED();
 
- TESTING("    removing one filter");
 
-/*-------------------------------------------------------------------------
- * test the NONE specific option; uncompress a dataset
- *-------------------------------------------------------------------------
- */
+ TESTING("    removing deflate filter");
 
 #ifdef H5_HAVE_FILTER_DEFLATE
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
  if (h5repack_addfilter("dset_gzip:NONE",&pack_options)<0)
   TEST_ERROR;
- if (h5repack_addfilter("dset1:NONE",&pack_options)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+
+ PASSED();  
+#else
+ SKIPPED();
+#endif
+
+  TESTING("    removing szip filter");
+
+#ifdef H5_HAVE_FILTER_SZIP
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("dset_szip:NONE",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+
+ PASSED();  
+#else
+ SKIPPED();
+#endif
+
+ TESTING("    removing shuffle filter");
+
+#ifdef H5_HAVE_FILTER_SHUFFLE
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("dset_shuffle:NONE",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+
+ PASSED();  
+#else
+ SKIPPED();
+#endif
+
+  TESTING("    removing fletcher filter");
+
+#ifdef H5_HAVE_FILTER_FLETCHER32
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("dset_fletcher32:NONE",&pack_options)<0)
   TEST_ERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
   TEST_ERROR;
@@ -190,26 +247,10 @@ int main (void)
 #endif
 
 
- TESTING("    deflate filter");
+
+ TESTING("    adding deflate filter");
 
 #ifdef H5_HAVE_FILTER_DEFLATE
-
-/*-------------------------------------------------------------------------
- * test no object option (preserve old filters)
- *-------------------------------------------------------------------------
- */
-
- if (h5repack_init (&pack_options, 0)<0)
-  TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
-  TEST_ERROR;
- if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
-  TEST_ERROR;
- if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
-  TEST_ERROR;
- if (h5repack_end (&pack_options)<0)
-  TEST_ERROR;
-
 
 /*-------------------------------------------------------------------------
  * test an individual object option
@@ -230,11 +271,19 @@ int main (void)
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
+ PASSED();  
+#else
+ SKIPPED();
+#endif
 
 /*-------------------------------------------------------------------------
  * test all objects option
  *-------------------------------------------------------------------------
  */
+
+ TESTING("    adding deflate filter to all");
+
+#ifdef H5_HAVE_FILTER_DEFLATE
 
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
@@ -256,9 +305,12 @@ int main (void)
  SKIPPED();
 #endif
 
+/*-------------------------------------------------------------------------
+ * deflate
+ *-------------------------------------------------------------------------
+ */
 
-
- TESTING("    szip filter");
+ TESTING("    adding szip filter");
 
 #ifdef H5_HAVE_FILTER_SZIP
 
@@ -282,10 +334,19 @@ int main (void)
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
 
+ PASSED();  
+#else
+ SKIPPED();
+#endif
+
+
 /*-------------------------------------------------------------------------
  * test all objects option
  *-------------------------------------------------------------------------
  */
+TESTING("    adding szip filter to all");
+
+#ifdef H5_HAVE_FILTER_SZIP
 
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
@@ -306,7 +367,7 @@ int main (void)
 #endif
 
 
- TESTING("    shuffle filter");
+ TESTING("    addding shuffle filter");
 
 #ifdef H5_HAVE_FILTER_SHUFFLE
 
@@ -330,10 +391,19 @@ int main (void)
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
 
+ PASSED();  
+#else
+ SKIPPED();
+#endif
+
 /*-------------------------------------------------------------------------
  * test all objects option
  *-------------------------------------------------------------------------
  */
+
+TESTING("    addding shuffle filter to all");
+
+#ifdef H5_HAVE_FILTER_SHUFFLE
 
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
@@ -357,7 +427,7 @@ int main (void)
 
 
  
- TESTING("    checksum filter");
+ TESTING("    adding checksum filter");
 
 #ifdef H5_HAVE_FILTER_FLETCHER32
 
@@ -380,11 +450,21 @@ int main (void)
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
+ 
+ PASSED();  
+#else
+ SKIPPED();
+#endif
 
 /*-------------------------------------------------------------------------
  * test all objects option
  *-------------------------------------------------------------------------
  */
+
+ 
+ TESTING("    adding checksum filter to all");
+
+#ifdef H5_HAVE_FILTER_FLETCHER32
 
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
@@ -406,7 +486,109 @@ int main (void)
  SKIPPED();
 #endif
 
- TESTING("    layout chunked");
+ 
+ TESTING("    filter queue fletcher, shuffle, deflate, szip");
+
+/*-------------------------------------------------------------------------
+ * add some filters
+ *-------------------------------------------------------------------------
+ */
+
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addlayout("dset1:CHUNK 20x10",&pack_options)<0)
+  TEST_ERROR;
+#if defined (H5_HAVE_FILTER_FLETCHER32)
+ if (h5repack_addfilter("dset1:FLET",&pack_options)<0)
+  TEST_ERROR;
+#endif
+ if (h5repack_addfilter("dset1:SHUF",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("dset1:SZIP=8",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("dset1:GZIP=1",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+
+ PASSED();  
+
+ TESTING("    filter conversion from deflate to szip");
+/*-------------------------------------------------------------------------
+ * filter conversion from deflate to szip
+ *-------------------------------------------------------------------------
+ */
+#ifdef H5_HAVE_FILTER_DEFLATE
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("dset_gzip:SZIP=8",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+ PASSED();  
+#else
+ SKIPPED();
+#endif
+
+ TESTING("    filter conversion from szip to deflate");
+/*-------------------------------------------------------------------------
+ * filter conversion from szip to deflate
+ *-------------------------------------------------------------------------
+ */
+#ifdef H5_HAVE_FILTER_SZIP
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("dset_szip:GZIP=1",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+ PASSED();  
+#else
+ SKIPPED();
+#endif
+
+ TESTING("    filter conversion from szip and shuffle to deflate");
+/*-------------------------------------------------------------------------
+ * filter conversion from szip to deflate
+ *-------------------------------------------------------------------------
+ */
+#ifdef H5_HAVE_FILTER_SZIP
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("dset_all:GZIP=1",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+ PASSED();  
+#else
+ SKIPPED();
+#endif
+
+ TESTING("    adding layout chunked");
 
 /*-------------------------------------------------------------------------
  * test an individual object option
@@ -425,11 +607,13 @@ int main (void)
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
+ PASSED(); 
 
 /*-------------------------------------------------------------------------
  * test all objects option
  *-------------------------------------------------------------------------
  */
+ TESTING("    adding layout chunked to all");
 
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
@@ -446,7 +630,7 @@ int main (void)
 
  PASSED();  
 
- TESTING("    layout contiguous");
+ TESTING("    adding layout contiguous");
 
 /*-------------------------------------------------------------------------
  * test an individual object option
@@ -464,6 +648,11 @@ int main (void)
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
+
+ PASSED();  
+
+ TESTING("    adding layout contiguous to all");
+
 
 /*-------------------------------------------------------------------------
  * test all objects option
@@ -484,7 +673,7 @@ int main (void)
  
  PASSED();  
 
- TESTING("    layout compact");
+ TESTING("    adding layout compact");
 
 /*-------------------------------------------------------------------------
  * test an individual object option
@@ -503,6 +692,9 @@ int main (void)
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
+ PASSED();  
+
+ TESTING("    adding layout compact to all");
 
 /*-------------------------------------------------------------------------
  * test all objects option
@@ -701,95 +893,6 @@ int main (void)
   TEST_ERROR;
   PASSED();  
 
-
- TESTING("    filter queue fletcher, shuffle, deflate, szip");
-
-/*-------------------------------------------------------------------------
- * add some filters
- *-------------------------------------------------------------------------
- */
-
- if (h5repack_init (&pack_options, 0)<0)
-  TEST_ERROR;
- if (h5repack_addlayout("dset1:CHUNK 20x10",&pack_options)<0)
-  TEST_ERROR;
-#if defined (H5_HAVE_FILTER_FLETCHER32)
- if (h5repack_addfilter("dset1:FLET",&pack_options)<0)
-  TEST_ERROR;
-#endif
- if (h5repack_addfilter("dset1:SHUF",&pack_options)<0)
-  TEST_ERROR;
- if (h5repack_addfilter("dset1:SZIP=8",&pack_options)<0)
-  TEST_ERROR;
- if (h5repack_addfilter("dset1:GZIP=1",&pack_options)<0)
-  TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
-  TEST_ERROR;
- if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
-  TEST_ERROR;
- if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
-  TEST_ERROR;
- if (h5repack_end (&pack_options)<0)
-  TEST_ERROR;
-
- PASSED();  
-
- TESTING("    filter conversion from deflate to szip");
-/*-------------------------------------------------------------------------
- * filter conversion from deflate to szip
- *-------------------------------------------------------------------------
- */
- if (h5repack_init (&pack_options, 0)<0)
-  TEST_ERROR;
- if (h5repack_addfilter("dset_gzip:SZIP=8",&pack_options)<0)
-  TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
-  TEST_ERROR;
- if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
-  TEST_ERROR;
- if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
-  TEST_ERROR;
- if (h5repack_end (&pack_options)<0)
-  TEST_ERROR;
- PASSED();  
-
- TESTING("    filter conversion from szip to deflate");
-/*-------------------------------------------------------------------------
- * filter conversion from szip to deflate
- *-------------------------------------------------------------------------
- */
- if (h5repack_init (&pack_options, 0)<0)
-  TEST_ERROR;
- if (h5repack_addfilter("dset_szip:GZIP=1",&pack_options)<0)
-  TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
-  TEST_ERROR;
- if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
-  TEST_ERROR;
- if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
-  TEST_ERROR;
- if (h5repack_end (&pack_options)<0)
-  TEST_ERROR;
- PASSED();  
-
- TESTING("    filter conversion from 2 filters to 1 filter");
-/*-------------------------------------------------------------------------
- * filter conversion from szip to deflate
- *-------------------------------------------------------------------------
- */
- if (h5repack_init (&pack_options, 0)<0)
-  TEST_ERROR;
- if (h5repack_addfilter("dset_all:GZIP=1",&pack_options)<0)
-  TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
-  TEST_ERROR;
- if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
-  TEST_ERROR;
- if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
-  TEST_ERROR;
- if (h5repack_end (&pack_options)<0)
-  TEST_ERROR;
- PASSED();  
 
 
 
