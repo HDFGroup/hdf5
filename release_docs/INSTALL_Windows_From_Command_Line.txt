@@ -1,5 +1,5 @@
-      Instructions for Building and Testing HDF5 on Command Line
-                         for Windows XP/2000
+	Instructions for Building and Testing HDF5 on Command Line
+                         for Windows XP
 
 ************************************************************************
 Note: This instruction is written for users who would like to build HDF5
@@ -7,7 +7,7 @@ Note: This instruction is written for users who would like to build HDF5
       line.
          
       Currently, we only support building and testing HDF5 on command
-      line with Microsoft Visual C++ 6.0 and DEC Fortran 6.0.
+      line with Microsoft Visual C++ 6.0 and Compaq Visual Fortran 6.0.
       
       For all other Windows development tools, HDF5 should be built in
       the development environment.  Please refer to INSTALL_Windows.txt
@@ -24,7 +24,7 @@ notes in INSTALL_Windows.txt before starting below procedures.
 
 Extra Preconditions
 
-   1. Set path for Microsoft Visual C++ 6.0 and DEC Fortran 6.0
+   1. Set path for Microsoft Visual C++ 6.0 and Compaq Visual Fortran 6.0
    
       Open "System" in Control Panel.
    
@@ -32,7 +32,7 @@ Extra Preconditions
       "Path" in the "System variables" box, then click "Edit" and 
       add your Visual C++ 6.0 path (For example, 
       C:\Program Files\Microsoft Visual Studio\Common\MSDev98\Bin\)
-      and DEC Fortran 6.0 path (For example, 
+      and Compaq Visual Fortran 6.0 path (For example, 
       C:\Program Files\Microsoft Visual Studio\Common\MSDev98\Bin\)
       into "Variable Value" and click "OK".
 
@@ -41,7 +41,7 @@ Extra Preconditions
       To use WinZip command line utility, you have to install 
       WinZip 9.0 or higher version.
 
-      If you want to extract hdf5\windows\all.zip on the command line,
+      If you want to extract zip files on the command line,
       you should
    
       2.1 Install WinZip command line support add-on 1.1
@@ -58,28 +58,18 @@ Extra Preconditions
           into "Variable Value" and click "OK".
 
       Note: 
-         You can also extract all.zip from interactive WinZip interface 
-         without the above two steps.
+         You can also extract zip files from interactive WinZip
+         interface without the above two steps.
   
 ***********************************************************************
 Step 1. Building and testing HDF5 libraries and tools
 
-   1. Unpack all.zip
-
-      Unpack all.zip in c:\MyHDFstuff\hdf5\windows into the 
-      C:\myHDFstuff directory.
-      
-      This can be done with either of the following 2 options:
-
-      Option A. Unpack from the interactive WinZip interface
-
-      Option B. unpack on the command line
-
-         cd into the c:\MyHDFstuff\hdf5\windows directory
+   1. Run batch file copy_hdf.bat.
+  	Go to  c:\MyHDFstuff\hdf5\windows and run copy_hdf.bat. This process
+   	will copy all the necessary batch files and text files saved under 
+   	c:\MyHDFstuff\hdf5\windows directory to the directories where they 
+   	will be used.
    
-         type: wzunzip -yO -d -o all.zip c:\MyHDFstuff
-   
-
    2. Build and Test
 
       We provide 2 options for users to build test HDF5 libraries 

@@ -1,9 +1,9 @@
-HDF5 Build and Install Instructions for Windows 2000/XP (Short Version)
+HDF5 Build and Install Instructions for Windows XP (Short Version)
 ------------------------------------------------------------------------
 Note: This short instruction is written for users who want to quickly
       build HDF5 library and tools from the HDF5 source code package
       but do not want to know HDF5 building and installation details
-      on Windows 2000/XP.
+      on Windows XP.
          
       For detailed HDF5 build and install information, or if you have
       trouble following any steps in the instructions, please refer to
@@ -20,14 +20,12 @@ notes in INSTALL_Windows.txt before starting below procedures.
 
 STEP 1: Building HDF5 Libraries and Tools
     
-1. Unpack all.zip
-    
-   Unpack all.zip in c:\MyHDFstuff\hdf5\windows into the 
-   c:\MyHDFstuff directory. 
+1. Run batch file copy_hdf.bat.
+   Go to  c:\MyHDFstuff\hdf5\windows and run copy_hdf.bat. 
 
 2. Open all.dsw workspace
     
-   Open the c:\MyHDFstuff\hdf5\proj\all\all.dsw workspace. 
+   Open the c:\MyHDFstuff\hdf5\windows\proj\all\all.dsw workspace. 
 
 3. (Optional) Add C++ and/or FORTRAN related projects
     
@@ -44,20 +42,24 @@ STEP 1: Building HDF5 Libraries and Tools
    3.2 Add the follwing projects to project "all" dependencies 
        ONLY if you want to build HDF5 FORTRAN libraries
               
-          flush1_fortran
-          flush1_fortrandll
-          flush2_fortran
-          flush2_fortrandll
-          hdf5_f90cstub
-          hdf5_f90cstubdll
-          hdf5_fortran
-          hdf5_fortrandll
-          libtest_cstubdll
-          libtest_fortran
-          libtest_fortrandll
-          testhdf5_fortran
-          testhdf5_fortrandll
-         
+         flush1_fortran
+         flush1_fortrandll
+         flush2_fortran
+         flush2_fortrandll
+         hdf5_f90cstub
+         hdf5_f90cstubdll
+         hdf5_fortran
+         hdf5_fortrandll
+         hdf5_hl_fortran
+         hl_test_image_fortran
+         hl_test_lite_fortran
+         hl_test_table_fortran
+         libtest_cstubdll
+         libtest_fortran
+         libtest_fortrandll
+         testhdf5_fortran
+         testhdf5_fortrandll
+        
 4. Select "Build", then Select "Set Active Configuration".
 
    In "Project configurations", select the active configuration
