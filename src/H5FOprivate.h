@@ -23,14 +23,14 @@
 #endif /* LATER */
 
 /* Private headers needed by this file */
-#include "H5private.h"
-#include "H5Fprivate.h"
-#include "H5TBprivate.h"	/* TBBTs	  		        */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Fprivate.h"		/* File access				*/
+#include "H5SLprivate.h"	/* Skip list routines			*/
 
 /* Typedefs */
 
 /* Typedef for open object cache */
-typedef H5TB_TREE H5FO_t;       /* Currently, all open objects are stored in TBBT */
+typedef H5SL_t H5FO_t;       /* Currently, all open objects are stored in skip list */
 
 /* Macros */
 
