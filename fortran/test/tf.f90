@@ -32,6 +32,16 @@
             RETURN
          END SUBROUTINE check   
 
+         SUBROUTINE verify(string,value,correct_value,total_error)
+            CHARACTER(LEN=*) :: string
+            INTEGER :: value, correct_value, total_error
+            if (value .ne. correct_value) then
+                total_error=total_error+1
+                write(*,*) string
+            endif
+            RETURN
+         END SUBROUTINE verify
+
 !----------------------------------------------------------------------
 ! Name:		h5_fixname_f 
 !
