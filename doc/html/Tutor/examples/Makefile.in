@@ -10,7 +10,8 @@ srcdir=@srcdir@
 @COMMENCE@
 
 # Subdirectories in build-order (not including `examples')
-SUBDIRS=java
+#SUBDIRS=java
+SUBDIRS=
 DOCDIR=$(docdir)/hdf5/Tutor/examples
 
 # Public doc files (to be installed)...
