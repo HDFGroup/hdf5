@@ -783,8 +783,6 @@ main(void)
     hid_t		file, grp, fapl;
     herr_t		status;
     int			nerrors=0, mdc_nelmts;
-    size_t		rdcc_nbytes;
-    double		rdcc_w0;
 
     status = H5open ();
     assert (status>=0);
@@ -798,9 +796,9 @@ main(void)
 
 #if 1
     /* Turn off raw data cache */
-    status = H5Pget_cache(fapl, &mdc_nelmts, &rdcc_nbytes, &rdcc_w0);
+    status = H5Pget_cache(fapl, &mdc_nelmts, NULL, NULL, NULL);
     assert(status>=0);
-    status = H5Pset_cache(fapl, mdc_nelmts, 0, rdcc_w0);
+    status = H5Pset_cache(fapl, mdc_nelmts, 0, 0, 0.0);
     assert(status>=0);
 #endif
     

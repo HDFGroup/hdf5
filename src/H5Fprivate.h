@@ -239,7 +239,8 @@ typedef struct H5F_create_t {
  * File-access property list.
  */
 typedef struct H5F_access_t {
-    intn	mdc_nelmts;	/* Size of meta data cache (nelmts)	*/
+    intn	mdc_nelmts;	/* Size of meta data cache (elements)	*/
+    intn	rdcc_nelmts;	/* Size of raw data chunk cache (elmts)	*/
     size_t	rdcc_nbytes;	/* Size of raw data chunk cache	(bytes)	*/
     double	rdcc_w0;	/* Preempt read chunks first? [0.0..1.0]*/
     hsize_t	threshold;	/* Threshold for alignment		*/
@@ -419,10 +420,10 @@ typedef struct H5F_rdcc_t {
     uintn		nflushes;/* Number of cache flushes		*/
     size_t		nbytes;	/* Current cached raw data in bytes	*/
     intn		nslots;	/* Number of chunk slots allocated	*/
-#ifndef H5F_RDCC_NEW
+    struct H5F_rdcc_ent_t *head; /* Head of doubly linked list		*/
+    struct H5F_rdcc_ent_t *tail; /* Tail of doubly linked list		*/
     intn		nused;	/* Number of chunk slots in use		*/
-#endif
-    struct H5F_rdcc_ent_t *slot; /* Chunk slots, each points to a chunk	*/
+    struct H5F_rdcc_ent_t **slot; /* Chunk slots, each points to a chunk*/
 } H5F_rdcc_t;
 
 /*

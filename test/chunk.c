@@ -159,11 +159,12 @@ test_rowmaj (int op, hsize_t cache_size, hsize_t io_size)
     char	*buf = calloc (1, SQUARE(io_size));
     hsize_t	i, j, hs_size[2];
     hssize_t	hs_offset[2];
-    int		mdc_nelmts;
+    int		mdc_nelmts, rdcc_nelmts;
     double	w0;
 
-    H5Pget_cache (fapl_g, &mdc_nelmts, NULL, &w0);
-    H5Pset_cache (fapl_g, mdc_nelmts, cache_size*SQUARE (CH_SIZE), w0);
+    H5Pget_cache (fapl_g, &mdc_nelmts, &rdcc_nelmts, NULL, &w0);
+    H5Pset_cache (fapl_g, mdc_nelmts, rdcc_nelmts,
+		  cache_size*SQUARE (CH_SIZE), w0);
     file = H5Fopen (FILE_NAME, H5F_ACC_RDWR, fapl_g);
     dset = H5Dopen (file, "dset");
     file_space = H5Dget_space (dset);
@@ -227,11 +228,12 @@ test_diag (int op, hsize_t cache_size, hsize_t io_size, hsize_t offset)
     hsize_t	i, hs_size[2], nio=0;
     hssize_t	hs_offset[2];
     char	*buf = calloc (1, SQUARE (io_size));
-    int		mdc_nelmts;
+    int		mdc_nelmts, rdcc_nelmts;
     double	w0;
 
-    H5Pget_cache (fapl_g, &mdc_nelmts, NULL, &w0);
-    H5Pset_cache (fapl_g, mdc_nelmts, cache_size*SQUARE (CH_SIZE), w0);
+    H5Pget_cache (fapl_g, &mdc_nelmts, &rdcc_nelmts, NULL, &w0);
+    H5Pset_cache (fapl_g, mdc_nelmts, rdcc_nelmts,
+		  cache_size*SQUARE (CH_SIZE), w0);
     file = H5Fopen (FILE_NAME, H5F_ACC_RDWR, fapl_g);
     dset = H5Dopen (file, "dset");
     file_space = H5Dget_space (dset);
@@ -293,7 +295,7 @@ main (void)
      * Create a global file access property list.
      */
     fapl_g = H5Pcreate (H5P_FILE_ACCESS);
-    H5Pget_cache (fapl_g, NULL, NULL, &w0);
+    H5Pget_cache (fapl_g, NULL, NULL, NULL, &w0);
 
     /* Create the file */
     create_dataset ();

@@ -159,6 +159,7 @@ H5F_init_interface(void)
 
     /* Initialize the default file access property list */
     H5F_access_dflt.mdc_nelmts = H5AC_NSLOTS;
+    H5F_access_dflt.rdcc_nelmts = 521;
     H5F_access_dflt.rdcc_nbytes = 1024*1024; /*1MB*/
     H5F_access_dflt.rdcc_w0 = 0.75; /*preempt fully read chunks*/
     H5F_access_dflt.threshold = 1; /*alignment applies to everything*/

@@ -1878,14 +1878,16 @@ H5Pget_family(hid_t plist_id, hsize_t *memb_size/*out*/,
  * Function:	H5Pset_cache
  *
  * Purpose:	Set the number of objects in the meta data cache and the
- *		total number of bytes in the raw data chunk cache.
+ *		maximum number of chunks and bytes in the raw data chunk
+ *		cache.
  *
  * 		The RDCC_W0 value should be between 0 and 1 inclusive and
- *		indicates how much chunks that have been fully read are
- *		favored for preemption.  A value of zero means fully read
- *		chunks are treated no differently than other chunks (the
- *		preemption is strictly LRU) while a value of one means fully
- *		read chunks are always preempted before other chunks.
+ *		indicates how much chunks that have been fully read or fully
+ *		written are favored for preemption.  A value of zero means
+ *		fully read or written chunks are treated no differently than
+ *		other chunks (the preemption is strictly LRU) while a value
+ *		of one means fully read chunks are always preempted before
+ *		other chunks.
  *
  * Return:	Success:	SUCCEED
  *
@@ -1899,13 +1901,14 @@ H5Pget_family(hid_t plist_id, hsize_t *memb_size/*out*/,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_cache(hid_t plist_id, int mdc_nelmts, size_t rdcc_nbytes,
-	      double rdcc_w0)
+H5Pset_cache(hid_t plist_id, int mdc_nelmts,
+	     int rdcc_nelmts, size_t rdcc_nbytes, double rdcc_w0)
 {
     H5F_access_t	*fapl = NULL;
     
     FUNC_ENTER (H5Pset_cache, FAIL);
-    H5TRACE4("e","iIszd",plist_id,mdc_nelmts,rdcc_nbytes,rdcc_w0);
+    H5TRACE5("e","iIsIszd",plist_id,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,
+             rdcc_w0);
 
     /* Check arguments */
     if (H5P_FILE_ACCESS!=H5P_get_class (plist_id) ||
@@ -1917,6 +1920,10 @@ H5Pset_cache(hid_t plist_id, int mdc_nelmts, size_t rdcc_nbytes,
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "meta data cache size must be non-negative");
     }
+    if (rdcc_nelmts<0) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+		      "raw data chunk cache nelmts must be non-negative");
+    }
     if (rdcc_w0<0.0 || rdcc_w0>1.0) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "raw data cache w0 value must be between 0.0 and 1.0 "
@@ -1925,6 +1932,7 @@ H5Pset_cache(hid_t plist_id, int mdc_nelmts, size_t rdcc_nbytes,
 
     /* Set sizes */
     fapl->mdc_nelmts = mdc_nelmts;
+    fapl->rdcc_nelmts = rdcc_nelmts;
     fapl->rdcc_nbytes = rdcc_nbytes;
     fapl->rdcc_w0 = rdcc_w0;
 
@@ -1936,10 +1944,10 @@ H5Pset_cache(hid_t plist_id, int mdc_nelmts, size_t rdcc_nbytes,
  * Function:	H5Pget_cache
  *
  * Purpose:	Retrieves the maximum possible number of elements in the meta
- *		data cache and the maximum possible number of bytes and the
- *		RDCC_W0 value in the raw data chunk cache.  Any (or all)
- *		arguments may be null pointers in which case the corresponding
- *		datum is not returned.
+ *		data cache and the maximum possible number of elements and
+ *		bytes and the RDCC_W0 value in the raw data chunk cache.  Any
+ *		(or all) arguments may be null pointers in which case the
+ *		corresponding datum is not returned.
  *
  * Return:	Success:	SUCCEED
  *
@@ -1953,13 +1961,14 @@ H5Pset_cache(hid_t plist_id, int mdc_nelmts, size_t rdcc_nbytes,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_cache(hid_t plist_id, int *mdc_nelmts, size_t *rdcc_nbytes,
-	      double *rdcc_w0)
+H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
+	     int *rdcc_nelmts, size_t *rdcc_nbytes, double *rdcc_w0)
 {
     H5F_access_t	*fapl = NULL;
     
     FUNC_ENTER (H5Pget_cache, FAIL);
-    H5TRACE4("e","i*Is*z*d",plist_id,mdc_nelmts,rdcc_nbytes,rdcc_w0);
+    H5TRACE5("e","i*Is*Is*z*d",plist_id,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,
+             rdcc_w0);
 
     /* Check arguments */
     if (H5P_FILE_ACCESS!=H5P_get_class (plist_id) ||
@@ -1970,6 +1979,7 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts, size_t *rdcc_nbytes,
 
     /* Get sizes */
     if (mdc_nelmts) *mdc_nelmts = fapl->mdc_nelmts;
+    if (rdcc_nelmts) *rdcc_nelmts = fapl->rdcc_nelmts;
     if (rdcc_nbytes) *rdcc_nbytes = fapl->rdcc_nbytes;
     if (rdcc_w0) *rdcc_w0 = fapl->rdcc_w0;
 
@@ -2103,6 +2113,7 @@ H5Pset_hyper_cache(hid_t plist_id, unsigned cache, unsigned limit)
     H5D_xfer_t		*plist = NULL;
     
     FUNC_ENTER (H5Pset_hyper_cache, FAIL);
+    H5TRACE3("e","iIuIu",plist_id,cache,limit);
 
     /* Check arguments */
     if (H5P_DATASET_XFER != H5P_get_class (plist_id) ||
@@ -2141,6 +2152,7 @@ H5Pget_hyper_cache(hid_t plist_id, unsigned *cache/*out*/, unsigned *limit/*out*
     H5D_xfer_t		*plist = NULL;
     
     FUNC_ENTER (H5Pget_hyper_cache, 0);
+    H5TRACE3("e","ixx",plist_id,cache,limit);
 
     /* Check arguments */
     if (H5P_DATASET_XFER != H5P_get_class (plist_id) ||

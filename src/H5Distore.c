@@ -13,6 +13,21 @@
  *		chunk index to disk address.  Each chunk can be compressed
  *		independently and the chunks may move around in the file as
  *		their storage requirements change.
+ *
+ * Cache:	Disk I/O is performed in units of chunks and H5MF_alloc()
+ *		contains code to optionally align chunks on disk block
+ *		boundaries for performance.
+ *
+ *		The chunk cache is an extendible hash indexed by a function
+ *		of storage B-tree address and chunk N-dimensional offset
+ *		within the dataset.  Collisions are not resolved -- one of
+ *		the two chunks competing for the hash slot must be preempted
+ *		from the cache.  All entries in the hash also participate in
+ *		a doubly-linked list and entries are penalized by moving them
+ *		toward the front of the list.  When a new chunk is about to
+ *		be added to the cache the heap is pruned by preempting
+ *		entries near the front of the list to make room for the new
+ *		entry which is added to the end of the list.
  */
 #include <H5private.h>
 #include <H5Dprivate.h>
@@ -22,6 +37,31 @@
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
 #include <H5Vprivate.h>
+
+/*
+ * Feature: If this constant is defined then every cache preemption and load
+ *	    causes a character to be printed on the standard error stream:
+ *
+ *     `.': Entry was preempted because it has been completely read or
+ *	    completely written but not partially read and not partially
+ *	    written. This is often a good reason for preemption because such
+ *	    a chunk will be unlikely to be referenced in the near future.
+ *
+ *     `:': Entry was preempted because it hasn't been used recently.
+ *
+ *     `#': Entry was preempted because another chunk collided with it. This
+ *	    is usually a relatively bad thing.  If there are too many of
+ *	    these then the number of entries in the cache can be increased.
+ *
+ *       c: Entry was preempted because the file is closing.
+ *
+ *	 w: A chunk read operation was eliminated because the library is
+ *	    about to write new values to the entire chunk.  This is a good
+ *	    thing, especially on files where the chunk size is the same as
+ *	    the disk block size, chunks are aligned on disk block boundaries,
+ *	    and the operating system can also eliminate a read operation.
+ */
+/* #define H5F_ISTORE_DEBUG */
 
 /* Interface initialization */
 #define PABLO_MASK	H5F_istore_mask
@@ -40,6 +80,9 @@ typedef struct H5F_rdcc_ent_t {
     size_t	chunk_size;	/*size of a chunk			*/
     size_t	alloc_size;	/*amount allocated for the chunk	*/
     uint8	*chunk;		/*the unfiltered chunk data		*/
+    intn	idx;		/*index in hash table			*/
+    struct H5F_rdcc_ent_t *next;/*next item in doubly-linked list	*/
+    struct H5F_rdcc_ent_t *prev;/*previous item in doubly-linked list	*/
 } H5F_rdcc_ent_t;
 
 /* Private prototypes */
@@ -688,9 +731,10 @@ H5F_istore_init (H5F_t *f)
     FUNC_ENTER (H5F_istore_init, FAIL);
 
     HDmemset (rdcc, 0, sizeof(H5F_rdcc_t));
-    if (f->shared->access_parms->rdcc_nbytes>0) {
-	rdcc->nslots = 25; /*some initial number of slots*/
-	rdcc->slot = H5MM_calloc (rdcc->nslots*sizeof(H5F_rdcc_ent_t));
+    if (f->shared->access_parms->rdcc_nbytes>0 &&
+	f->shared->access_parms->rdcc_nelmts>0) {
+	rdcc->nslots = f->shared->access_parms->rdcc_nelmts;
+	rdcc->slot = H5MM_calloc (rdcc->nslots*sizeof(H5F_rdcc_ent_t*));
 	if (NULL==rdcc->slot) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
@@ -797,7 +841,7 @@ H5F_istore_flush_entry (H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
 	f->shared->rdcc.nflushes++;
     }
     
-    /* Reset */
+    /* Reset, but do not free or removed from list */
     if (reset) {
 	point_of_no_return = FALSE;
 	ent->layout = H5O_free(H5O_LAYOUT, ent->layout);
@@ -815,7 +859,8 @@ H5F_istore_flush_entry (H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
     /*
      * If we reached the point of no return then we have no choice but to
      * reset the entry.  This can only happen if RESET is true but the
-     * output pipeline failed.
+     * output pipeline failed.  Do not free the entry or remove it from the
+     * list.
      */
     if (ret_value<0 && point_of_no_return) {
 	ent->layout = H5O_free(H5O_LAYOUT, ent->layout);
@@ -846,25 +891,17 @@ H5F_istore_flush_entry (H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
 herr_t
 H5F_istore_flush (H5F_t *f)
 {
-    H5F_rdcc_t	*rdcc = &(f->shared->rdcc);
-    intn	i, nerrors=0;
+    H5F_rdcc_t		*rdcc = &(f->shared->rdcc);
+    intn		nerrors=0;
+    H5F_rdcc_ent_t	*ent=NULL;
     
     FUNC_ENTER (H5F_istore_flush, FAIL);
 
-#ifdef H5F_RDCC_NEW
-    for (i=0; i<rdcc->nslots; i++) {
-	if (rdcc->slot[i].chunk &&
-	    H5F_istore_flush_entry(f, rdcc->slot+i, FALSE)<0) {
+    for (ent=rdcc->head; ent; ent=ent->next) {
+	if (H5F_istore_flush_entry(f, ent, FALSE)<0) {
 	    nerrors++;
 	}
     }
-#else
-    for (i=0; i<rdcc->nused; i++) {
-	if (H5F_istore_flush_entry (f, rdcc->slot+i, FALSE)<0) {
-	    nerrors++;
-	}
-    }
-#endif
     if (nerrors) {
 	HRETURN_ERROR (H5E_IO, H5E_CANTFLUSH, FAIL,
 		       "unable to flush one or more raw data chunks");
@@ -890,29 +927,41 @@ H5F_istore_flush (H5F_t *f)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_istore_preempt (H5F_t *f, intn idx)
+H5F_istore_preempt (H5F_t *f, H5F_rdcc_ent_t *ent)
 {
     H5F_rdcc_t          *rdcc = &(f->shared->rdcc);
-    H5F_rdcc_ent_t      *ent = rdcc->slot + idx;
     
     FUNC_ENTER (H5F_istore_preempt, FAIL);
 
-#ifdef H5F_RDCC_NEW
-    assert(idx>=0 && idx<rdcc->nslots);
-    assert (!ent->locked);
+    assert(f);
+    assert(ent);
+    assert(!ent->locked);
+    assert(ent->idx>=0 && ent->idx<rdcc->nslots);
 
+    /* Flush */
     H5F_istore_flush_entry(f, ent, TRUE);
-    rdcc->nbytes -= ent->chunk_size;
-#else
-    assert (idx>=0 && idx<rdcc->nused);
-    assert (!ent->locked);
 
-    H5F_istore_flush_entry (f, ent, TRUE);
-    HDmemmove (rdcc->slot+idx, rdcc->slot+idx+1,
-               (rdcc->nused-(idx+1)) * sizeof(H5F_rdcc_ent_t));
-    rdcc->nused -= 1;
+    /* Unlink from list */
+    if (ent->prev) {
+	ent->prev->next = ent->next;
+    } else {
+	rdcc->head = ent->next;
+    }
+    if (ent->next) {
+	ent->next->prev = ent->prev;
+    } else {
+	rdcc->tail = ent->prev;
+    }
+    ent->prev = ent->next = NULL;
+
+    /* Remove from cache */
+    rdcc->slot[ent->idx] = NULL;
+    ent->idx = -1;
     rdcc->nbytes -= ent->chunk_size;
-#endif
+    --rdcc->nused;
+
+    /* Free */
+    H5MM_xfree(ent);
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -938,25 +987,22 @@ H5F_istore_preempt (H5F_t *f, intn idx)
 herr_t
 H5F_istore_dest (H5F_t *f)
 {
-    H5F_rdcc_t	*rdcc = &(f->shared->rdcc);
-    intn	i, nerrors=0;
+    H5F_rdcc_t		*rdcc = &(f->shared->rdcc);
+    intn		nerrors=0;
+    H5F_rdcc_ent_t	*ent=NULL, *next=NULL;
     
     FUNC_ENTER (H5F_istore_dest, FAIL);
 
-#ifdef H5F_RDCC_NEW
-    for (i=0; i<rdcc->nslots; i++) {
-	if (rdcc->slot[i].chunk &&
-	    H5F_istore_preempt(f, i)<0) {
-	    nerrors++;
-	}
-    }
-#else
-    for (i=rdcc->nused-1; i>=0; --i) {
-	if (H5F_istore_preempt(f, i)<0) {
-	    nerrors++;
-	}
-    }
+    for (ent=rdcc->head; ent; ent=next) {
+#ifdef H5F_ISTORE_DEBUG
+	fputc('c', stderr);
+	fflush(stderr);
 #endif
+	next = ent->next;
+	if (H5F_istore_preempt(f, ent)<0) {
+	    nerrors++;
+	}
+    }
     if (nerrors) {
 	HRETURN_ERROR (H5E_IO, H5E_CANTFLUSH, FAIL,
 		       "unable to flush one or more raw data chunks");
@@ -989,71 +1035,89 @@ H5F_istore_dest (H5F_t *f)
 static herr_t
 H5F_istore_prune (H5F_t *f, size_t size)
 {
-#ifdef H5F_RDCC_NEW
-    intn		i, nerrors=0;
-    static intn		place=0;
+    intn		i, j, nerrors=0;
     H5F_rdcc_t		*rdcc = &(f->shared->rdcc);
-    H5F_rdcc_ent_t 	*ent = NULL;
     size_t		total = f->shared->access_parms->rdcc_nbytes;
-#else
-    intn		i, meth0, meth1, nerrors=0;
-    H5F_rdcc_t		*rdcc = &(f->shared->rdcc);
-    H5F_rdcc_ent_t	*ent0, *ent1;
-    double		w0 = f->shared->access_parms->rdcc_w0;
-    size_t		total = f->shared->access_parms->rdcc_nbytes;
-#endif
-    
+    const int		nmeth=2;	/*number of methods		*/
+    intn		w[1];		/*weighting as an interval	*/
+    H5F_rdcc_ent_t	*p[2], *cur;	/*list pointers			*/
+    H5F_rdcc_ent_t	*n[2];		/*list next pointers		*/
+
     FUNC_ENTER (H5F_istore_prune, FAIL);
 
-#ifdef H5F_RDCC_NEW
-    for (i=0; rdcc->nbytes+size>total && i<rdcc->nslots; i++, place++) {
-	if (place>=rdcc->nslots) place = 0;
-	ent = rdcc->slot+place;
-	if (ent->chunk && !ent->locked) {
-	    if (H5F_istore_preempt(f, place)<0) nerrors++;
-	}
-    }
-#else
     /*
-     * We have two pointers that slide down the cache beginning at the least
-     * recently used entry.  The distance between the pointers represents the
-     * relative weight.  A weight of 50% for the first pointer means that the
-     * second pointer is half the cache length behind the first pointer.
+     * Preemption is accomplished by having multiple pointers (currently two)
+     * slide down the list beginning at the head. Pointer p(N+1) will start
+     * traversing the list when pointer pN reaches wN percent of the original
+     * list.  In other words, preemption method N gets to consider entries in
+     * approximate least recently used order w0 percent before method N+1
+     * where 100% means tha method N will run to completion before method N+1
+     * begins.  The pointers participating in the list traversal are each
+     * given a chance at preemption before any of the pointers are advanced.
      */
-    meth0 = rdcc->nused;
-    meth1 = rdcc->nused * (1.0+w0);
-    for (i=MAX(meth0, meth1)-1;
-	 rdcc->nbytes+size>total && i>=0;
-	 --i, --meth0, --meth1) {
+    w[0] = rdcc->nused * f->shared->access_parms->rdcc_w0;
+    p[0] = rdcc->head;
+    p[1] = NULL;
 
-	ent0 = rdcc->slot+meth0; /*might be a bad pointer!*/
-	ent1 = rdcc->slot+meth1; /*might be a bad pointer!*/
+    while ((p[0] || p[1]) && rdcc->nbytes+size>total) {
+
+	/* Introduce new pointers */
+	for (i=0; i<nmeth-1; i++) if (0==w[i]) p[i+1] = rdcc->head;
 	
-	if (meth0>=0 && meth0<rdcc->nused && !ent0->locked &&
-	    (0==ent0->rd_count || ent0->chunk_size==ent0->rd_count) &&
-	    (0==ent0->wr_count || ent0->chunk_size==ent0->wr_count)) {
-	    /*
-	     * Method 0: Preempt entries that have a zero rd_count.  If the
-	     * application is accessing a dataset with a set of
-	     * non-overlapping partial I/O requests then chunks with a zero
-	     * rd_count will probably not be accessed in the near future.
-	     */
-	    if (H5F_istore_preempt (f, meth0)<0) nerrors++;
-	    
-	} else if (meth1>=0 && meth1<rdcc->nused && !ent1->locked) {
-	    /*
-	     * Method 1: Discard the least recently used members from the
-	     * cache.  This is a catch-all.
-	     */
-	    if (H5F_istore_preempt (f, meth1)<0) nerrors++;
-	}
-    }
+	/* Compute next value for each pointer */
+	for (i=0; i<nmeth; i++) n[i] = p[i] ? p[i]->next : NULL;
+
+	/* Give each method a chance */
+	for (i=0; i<nmeth && rdcc->nbytes+size>total; i++) {
+	    if (0==i && p[0] && !p[0]->locked &&
+		((0==p[0]->rd_count && 0==p[0]->wr_count) ||
+		 (0==p[0]->rd_count && p[0]->chunk_size==p[0]->wr_count) ||
+		 (p[0]->chunk_size==p[0]->rd_count && 0==p[0]->wr_count))) {
+		/*
+		 * Method 0: Preempt entries that have been completely written
+		 * and/or completely read but not entries that are partially
+		 * written or partially read.
+		 */
+		cur = p[0];
+#ifdef H5F_ISTORE_DEBUG
+		putc('.', stderr);
+		fflush(stderr);
 #endif
+		
+	    } else if (1==i && p[1] && !p[1]->locked) {
+		/*
+		 * Method 1: Preempt the entry without regard to
+		 * considerations other than being locked.  This is the last
+		 * resort preemption.
+		 */
+		cur = p[1];
+#ifdef H5F_ISTORE_DEBUG
+		putc(':', stderr);
+		fflush(stderr);
+#endif
+		
+	    } else {
+		/* Nothing to preempt at this point */
+		cur= NULL;
+	    }
+
+	    if (cur) {
+		if (H5F_istore_preempt(f, cur)<0) nerrors++;
+		for (j=0; j<nmeth; j++) {
+		    if (p[j]==cur) p[j] = NULL;
+		}
+	    }
+	}
+	
+	/* Advance pointers */
+	for (i=0; i<nmeth; i++) p[i] = n[i];
+	for (i=0; i<nmeth-1; i++) w[i] -= 1;
+    }
+
     if (nerrors) {
 	HRETURN_ERROR (H5E_IO, H5E_CANTFLUSH, FAIL,
 		       "unable to preempt one or more raw data cache entry");
     }
-
     FUNC_LEAVE (SUCCEED);
 }
 
@@ -1092,12 +1156,11 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 		 const H5O_pline_t *pline, const hssize_t offset[],
 		 hbool_t relax, intn *idx_hint/*in,out*/)
 {
-#ifdef H5F_RDCC_NEW
-    uintn		idx;
-#endif
+    uintn		idx;			/*hash index number	*/
+    hbool_t		found = FALSE;		/*already in cache?	*/
     H5F_rdcc_t		*rdcc = &(f->shared->rdcc);/*raw data chunk cache*/
     H5F_rdcc_ent_t	*ent = NULL;		/*cache entry		*/
-    intn		i, j, found = -1;	/*counters		*/
+    intn		i;			/*counters		*/
     H5F_istore_ud1_t	udata;			/*B-tree pass-through	*/
     size_t		chunk_size=0;		/*size of a chunk	*/
     size_t		chunk_alloc=0;		/*allocated chunk size	*/
@@ -1107,61 +1170,41 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 
     FUNC_ENTER (H5F_istore_lock, NULL);
 
-#ifdef H5F_RDCC_NEW
     if (rdcc->nslots>0) {
 	idx = layout->addr.offset;
-	for (i=0; i<layout->ndims; i++) idx ^= offset[i];
+	for (i=0; i<layout->ndims; i++) idx = (idx<<1) ^ offset[i];
 	idx %= rdcc->nslots;
-	ent = rdcc->slot + idx;
+	ent = rdcc->slot[idx];
     
-	if (ent->chunk &&
+	if (ent &&
 	    layout->ndims==ent->layout->ndims &&
 	    H5F_addr_eq(&(layout->addr), &(ent->layout->addr))) {
-	    for (i=0, found=idx; i<ent->layout->ndims; i++) {
+	    for (i=0, found=TRUE; i<ent->layout->ndims; i++) {
 		if (offset[i]!=ent->offset[i]) {
-		    found = -1;
+		    found = FALSE;
 		    break;
 		}
 	    }
 	}
     }
-#else
-    /* First use the hint because that's O(1) */
-    if (idx_hint && *idx_hint>=0 && *idx_hint<rdcc->nused) {
-	ent = rdcc->slot + *idx_hint;
-	if (layout->ndims==ent->layout->ndims &&
-	    H5F_addr_eq(&(layout->addr), &(ent->layout->addr))) {
-	    for (i=0, found=*idx_hint; found>=0 && i<ent->layout->ndims; i++) {
-		if (offset[i]!=ent->offset[i]) found = -1;
-	    }
-	}
-    }
 
-    /* If the hint is wrong then search the cache, O(n) */
-    for (i=0; found<0 && i<rdcc->nused; i++) {
-	ent = rdcc->slot + i;
-	if (layout->ndims==ent->layout->ndims &&
-	    H5F_addr_eq(&(layout->addr), &(ent->layout->addr))) {
-	    for (j=0, found=i; found>=0 && j<ent->layout->ndims; j++) {
-		if (offset[j]!=ent->offset[j]) found = -1;
-	    }
-	}
-    }
-#endif
-
-    if (found>=0) {
+    if (found) {
 	/*
 	 * Already in the cache.  Count a hit.
 	 */
 	rdcc->nhits++;
-	
-    } else if (found<0 && relax) {
+
+    } else if (!found && relax) {
 	/*
 	 * Not in the cache, but we're about to overwrite the whole thing
 	 * anyway, so just allocate a buffer for it but don't initialize that
 	 * buffer with the file contents. Count this as a hit instead of a
 	 * miss because we saved ourselves lots of work.
 	 */
+#ifdef H5F_ISTORE_DEBUG
+	putc('w', stderr);
+	fflush(stderr);
+#endif
 	rdcc->nhits++;
 	for (i=0, chunk_size=1; i<layout->ndims; i++) {
 	    chunk_size *= layout->dim[i];
@@ -1215,26 +1258,44 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 	    rdcc->ninits++;
 	}
     }
-
-    assert (found>=0 || chunk_size>0);
-#ifdef H5F_RDCC_NEW
-    if (found<0 && rdcc->nslots>0 &&
+    assert (found || chunk_size>0);
+    
+    if (!found && rdcc->nslots>0 &&
 	chunk_size<=f->shared->access_parms->rdcc_nbytes &&
-	(NULL==ent->chunk || !ent->locked)) {
+	(!ent || !ent->locked)) {
 	/*
 	 * Add the chunk to the cache only if the slot is not already locked.
 	 * Preempt enough things from the cache to make room.
 	 */
+	if (ent) {
+#ifdef H5F_ISTORE_DEBUG
+	    putc('#', stderr);
+	    fflush(stderr);
+#endif
+#if 0
+	    HDfprintf(stderr, "\ncollision %3d %10a {",
+		      idx, &(ent->layout->addr));
+	    for (i=0; i<layout->ndims; i++) {
+		HDfprintf(stderr, "%s%Zu", i?",":"", ent->offset[i]);
+	    }
+	    HDfprintf(stderr, "}\n              %10a {", &(layout->addr));
+	    for (i=0; i<layout->ndims; i++) {
+		HDfprintf(stderr, "%s%Zu", i?",":"", offset[i]);
+	    }
+	    fprintf(stderr, "}\n");
+#endif
+	    if (H5F_istore_preempt(f, ent)<0) {
+		HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL,
+			    "unable to preempt chunk from cache");
+	    }
+	}
 	if (H5F_istore_prune(f, chunk_size)<0) {
 	    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL,
 			"unable to preempt chunk(s) from cache");
 	}
-	if (rdcc->slot[idx].chunk &&
-	    H5F_istore_preempt(f, idx)<0) {
-	    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL,
-			"unable to preempt chunk from cache");
-	}
-	ent = rdcc->slot + idx;
+
+	/* Create a new entry */
+	ent = H5MM_malloc(sizeof(H5F_rdcc_ent_t));
 	ent->locked = 0;
 	ent->dirty = FALSE;
 	ent->chunk_size = chunk_size;
@@ -1247,83 +1308,67 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 	ent->rd_count = chunk_size;
 	ent->wr_count = chunk_size;
 	ent->chunk = chunk;
-	found = idx;
-    }
-#else
-    if (found<0 && chunk_size<=f->shared->access_parms->rdcc_nbytes) {
-	/*
-	 * Add the chunk to the beginning of the cache after pruning the cache
-	 * to make room.
-	 */
-	if (H5F_istore_prune (f, chunk_size)<0) {
-	    H5E_clear ();
-	}
-	if (rdcc->nused>=rdcc->nslots) {
-	    size_t na = MAX (25, 2*rdcc->nslots);
-	    H5F_rdcc_ent_t *x = H5MM_realloc (rdcc->slot,
-					      na*sizeof(H5F_rdcc_ent_t));
-	    if (NULL==x) {
-		HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-			     "memory allocation failed");
-	    }
-	    rdcc->nslots = (intn)na;
-	    rdcc->slot = x;
-	}
-	HDmemmove (rdcc->slot+1, rdcc->slot,
-		   rdcc->nused*sizeof(H5F_rdcc_ent_t));
-	rdcc->nused++;
+
+	/* Add it to the cache */
+	assert(NULL==rdcc->slot[idx]);
+	rdcc->slot[idx] = ent;
+	ent->idx = idx;
 	rdcc->nbytes += chunk_size;
-	ent = rdcc->slot;
-	ent->locked = 0;
-	ent->dirty = FALSE;
-	ent->chunk_size = chunk_size;
-	ent->alloc_size = chunk_alloc;
-	ent->layout = H5O_copy (H5O_LAYOUT, layout, NULL);
-	ent->pline = H5O_copy (H5O_PLINE, pline, NULL);
-	for (i=0; i<layout->ndims; i++) {
-	    ent->offset[i] = offset[i];
+	rdcc->nused++;
+
+	/* Add it to the linked list */
+	ent->next = NULL;
+	if (rdcc->tail) {
+	    rdcc->tail->next = ent;
+	    ent->prev = rdcc->tail;
+	    rdcc->tail = ent;
+	} else {
+	    rdcc->head = rdcc->tail = ent;
+	    ent->prev = NULL;
 	}
-	ent->rd_count = chunk_size;
-	ent->wr_count = chunk_size;
-	ent->chunk = chunk;
-	found = 0;
-    }
-#endif
-    else if (found<0) {
+	found = TRUE;
+	
+    } else if (!found) {
 	/*
 	 * The chunk is larger than the entire cache so we don't cache it.
 	 * This is the reason all those arguments have to be repeated for the
 	 * unlock function.
 	 */
 	ent = NULL;
-	found = -999;
+	idx = -999;
 
-#ifndef H5F_RDCC_NEW
-    } else if (found>0) {
+    } else if (found) {
 	/*
-	 * The chunk is not at the beginning of the cache; move it forward by
-	 * one slot.  This is how we implement the LRU preemption algorithm.
+	 * The chunk is not at the beginning of the cache; move it backward
+	 * by one slot.  This is how we implement the LRU preemption
+	 * algorithm.
 	 */
-	H5F_rdcc_ent_t x = rdcc->slot[found];
-	rdcc->slot[found] = rdcc->slot[found-1];
-	rdcc->slot[found-1] = x;
-	ent = rdcc->slot + --found;
-#endif
+	if (ent->next) {
+	    if (ent->next->next) {
+		ent->next->next->prev = ent;
+	    } else {
+		rdcc->tail = ent;
+	    }
+	    ent->next->prev = ent->prev;
+	    if (ent->prev) {
+		ent->prev->next = ent->next;
+	    } else {
+		rdcc->head = ent->next;
+	    }
+	    ent->prev = ent->next;
+	    ent->next = ent->next->next;
+	    ent->prev->next = ent;
+	}
     }
 
     /* Lock the chunk into the cache */
     if (ent) {
 	assert (!ent->locked);
 	ent->locked = TRUE;
-#ifndef H5F_RDCC_NEW
-	if (idx_hint) *idx_hint = found;
-#endif
 	chunk = ent->chunk;
     }
 
-#ifdef H5F_RDCC_NEW
-    if (idx_hint) *idx_hint = found;
-#endif
+    if (idx_hint) *idx_hint = idx;
     ret_value = chunk;
     
  done:
@@ -1370,25 +1415,14 @@ H5F_istore_unlock (H5F_t *f, const H5O_layout_t *layout,
     
     FUNC_ENTER (H5F_istore_unlock, FAIL);
 
-#ifdef H5F_RDCC_NEW
     if (-999==*idx_hint) {
 	/*not in cache*/
     } else {
 	assert(*idx_hint>=0 && *idx_hint<rdcc->nslots);
-	assert(rdcc->slot[*idx_hint].chunk==chunk);
+	assert(rdcc->slot[*idx_hint]);
+	assert(rdcc->slot[*idx_hint]->chunk==chunk);
 	found = *idx_hint;
     }
-#else
-    /* First look at the hint */
-    if (idx_hint && *idx_hint>=0 && *idx_hint<rdcc->nused) {
-	if (rdcc->slot[*idx_hint].chunk==chunk) found = *idx_hint;
-    }
-
-    /* Then look at all the entries */
-    for (i=0; found<0 && i<rdcc->nused; i++) {
-	if (rdcc->slot[i].chunk==chunk) found = i;
-    }
-#endif
     
     if (found<0) {
 	/*
@@ -1417,7 +1451,7 @@ H5F_istore_unlock (H5F_t *f, const H5O_layout_t *layout,
 	/*
 	 * It's in the cache so unlock it.
 	 */
-	ent = rdcc->slot + found;
+	ent = rdcc->slot[found];
 	assert (ent->locked);
 	if (dirty) {
 	    ent->dirty = TRUE;

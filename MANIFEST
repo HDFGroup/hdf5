@@ -44,6 +44,7 @@
 ./config/depend.in
 ./config/freebsd2.2.1
 ./config/hpux10.20
+./config/hpux9.03
 ./config/intel-osf1
 ./config/irix5.3
 ./config/irix6.2
@@ -74,6 +75,7 @@
 ./doc/html/H5.api_map.html
 ./doc/html/H5.format.html
 ./doc/html/H5.intro.html
+./doc/html/H5.intro.datamap.gif
 ./doc/html/H5.sample_code.html
 ./doc/html/H5.user.html
 ./doc/html/IOPipe.html
@@ -89,9 +91,11 @@
 ./doc/html/RM_H5Front.html
 ./doc/html/RM_H5G.html
 ./doc/html/RM_H5P.html
+./doc/html/RM_H5R.html
 ./doc/html/RM_H5S.html
 ./doc/html/RM_H5T.html
 ./doc/html/RM_H5Z.html
+./doc/html/Tools.html
 ./doc/html/Version.html
 ./doc/html/chunk1.gif
 ./doc/html/chunk1.obj			_DO_NOT_DISTRIBUTE_
