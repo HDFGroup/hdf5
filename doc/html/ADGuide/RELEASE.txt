@@ -1,4 +1,4 @@
-HDF5 version 1.4.3-snap4 released on Sat Oct 20 02:24:37 CDT 2001
+HDF5 version 1.4.3-snap5 released on Sat Oct 27 07:59:32 CDT 2001
 ==============================================================================
 
 
@@ -65,6 +65,13 @@ Bug Fixes since HDF5-1.4.2 Release
       pieces internally.
     * Fixed a bug where reading or writing chunked data which needed datatype
       conversion could result in data values getting corrupted.
+    * Fixed a bug where appending a point selection to the current selection
+      would not actually append the point when there were no points defined
+      currently.
+    * Fixed a bug where 'or'ing a hyperslab with a 'none' selection would
+      fail.  Now adds that hyperslab as the first hyperlab in the selection.
+    * Fixed a bug in the 'big' test where quota limits weren't being detected
+      properly if they caused close() to fail.
 
 
 Documentation
