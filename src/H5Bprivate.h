@@ -19,7 +19,7 @@
 
 #include "H5Bproto.h"		/*API prototypes			*/
 
-
+#include "H5Fprivate.h"
 
 #define H5B_MAGIC	"TREE"	/* tree node magic number		*/
 #define H5B_HDR_SIZE(F)	(8+2*H5F_SIZEOF_OFFSET(F))

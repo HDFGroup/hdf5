@@ -17,9 +17,12 @@
 #ifndef _H5Gprivate_H
 #define _H5Gprivate_H
 
-#include "H5Gproto.h"		/*include public declarations		*/
+/*include public declarations		*/
+#include "H5Gproto.h"
 
-#include "H5Fprivate.h"		/*include packages needed by this header*/
+/*include packages needed by this header*/
+#include "H5Bprivate.h"
+#include "H5Fprivate.h"
 
 #define H5G_NODE_MAGIC	"SNOD"	/*symbol table node magic number	*/
 #define H5G_NODE_VERS	1	/*symbol table node version number	*/
@@ -83,6 +86,11 @@ typedef struct H5G_node_key_t {
    off_t	offset;		/*offset into heap for name		*/
 } H5G_node_key_t;
 
+typedef enum H5G_oper_t {
+   H5G_OPER_FIND	=0,	/*find a symbol				*/
+   H5G_OPER_MODIFY	=1	/*modify a symbol			*/
+} H5G_oper_t;
+
 /*
  * Data exchange structure for symbol table nodes.  This structure is
  * passed through the B-link tree layer to the methods for the objects
@@ -91,10 +99,11 @@ typedef struct H5G_node_key_t {
 typedef struct H5G_node_ud1_t {
 
    /* downward */
-   char		*name;		/*points to temporary memory		*/
+   H5G_oper_t	operation;	/*what operation to perform		*/
+   const char	*name;		/*points to temporary memory		*/
    haddr_t	heap;		/*symbol table heap address		*/
 
-   /* upward */
+   /* upward for H5G_OPER_FIND, downward for H5G_OPER_MODIFY */
    H5G_entry_t	entry;		/*symbol table entry			*/
 
 } H5G_node_ud1_t;
@@ -104,17 +113,28 @@ typedef struct H5G_node_list_t {
    /* downward */
    H5G_entry_t	*entry;		/*array of entries, alloc'd by caller	*/
    char		**name;		/*array of string ptrs, allocd by caller*/
-   intn		nentries;	/*size of the ADDR and NAME arrays	*/
+   intn		maxentries;	/*size of the ADDR and NAME arrays	*/
    haddr_t	heap;		/*heap address				*/
 
    /* upward */
-   intn		nused;		/*num. symbols processed		*/
+   intn		nsyms;		/*num. symbols processed		*/
    
 } H5G_node_list_t;
+
+extern const H5B_class_t H5B_SNODE[1];
 
 /*
  * Library prototypes...
  */
+haddr_t H5G_new (hdf5_file_t *f, size_t init);
+haddr_t H5G_find (hdf5_file_t *f, haddr_t addr, const char *name,
+		  H5G_entry_t *entry);
+herr_t H5G_modify (hdf5_file_t *f, haddr_t addr, const char *name,
+		   H5G_entry_t *entry);
+herr_t H5G_insert (hdf5_file_t *f, haddr_t addr, const char *name,
+		   H5G_entry_t *entry);
+intn H5G_list (hdf5_file_t *f, haddr_t addr, int maxentries,
+	       char *names[], H5G_entry_t entries[]);
 herr_t H5G_decode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent);
 herr_t H5G_decode_vec (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent, intn n);
 herr_t H5G_encode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent);

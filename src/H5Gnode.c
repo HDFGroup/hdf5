@@ -59,7 +59,7 @@ static const H5AC_class_t H5AC_SNODE[1] = {{
 }};
 
 /* H5G inherits B-tree like properties from H5B */
-static const H5B_class_t H5B_SNODE[1] = {{
+const H5B_class_t H5B_SNODE[1] = {{
    0,						/*id			*/
    64,						/*k			*/
    sizeof (H5G_node_key_t),			/*sizeof_nkey		*/
@@ -385,6 +385,11 @@ H5G_node_cmp (hdf5_file_t *f, void *_lt_key, void *_udata, void *_rt_key)
  *		structure which contains the symbol name on function
  *		entry.
  *
+ * 		If the operation flag in UDATA is H5G_OPER_FIND, then
+ *		the entry is copied from the symbol table to the UDATA
+ *		entry field.  Otherwise the entry is copied from the
+ *		UDATA entry field to the symbol table.
+ *
  * Return:	Success:	0 if found and data returned through the
  *				UDATA pointer.
  *
@@ -428,7 +433,23 @@ H5G_node_found (hdf5_file_t *f, haddr_t addr, void *_lt_key, void *_udata,
    }
    if (cmp) return -1;
 
-   udata->entry = sn->entry[idx];
+   switch (udata->operation) {
+   case H5G_OPER_FIND:
+      /*
+       * The caller is querying the symbol entry.
+       */
+      udata->entry = sn->entry[idx];
+      break;
+
+   case H5G_OPER_MODIFY:
+      /*
+       * The caller is modifying the symbol entry. 
+       */
+      sn->entry[idx] = udata->entry;
+      sn->dirty += 1;
+      break;
+   }
+
    return 0;
 }
 
@@ -616,46 +637,59 @@ static herr_t
 H5G_node_list (hdf5_file_t *f, haddr_t addr, void *_udata)
 {
    H5G_node_list_t	*udata = (H5G_node_list_t *)_udata;
-   H5G_entry_t 		*ent;
-   intn			i, nsyms;
-   const char 		*s;
-   H5G_node_t		*sn;
+   H5G_node_t		*sn = H5AC_find (f, H5AC_SNODE, addr, NULL);
+   off_t		*offsets = NULL;
+   intn			nsyms, i;
+   const char		*s;
 
-   /*
-    * Read the symbol table and save the entry info.  We save it
-    * in a separate buffer if names are requested because the name
-    * lookup may invalidate the symbol table.
-    */
-   sn = H5AC_find (f, H5AC_SNODE, addr, NULL);
    if (!sn) return -1;
    nsyms = sn->nsyms;
-   if (udata->name) {
-      ent = H5MM_xmalloc (nsyms * sizeof(H5G_entry_t));
-      HDmemcpy (ent, sn->entry, nsyms*sizeof(H5G_entry_t));
-      sn = NULL;
-   } else {
-      ent = sn->entry;
+
+   /*
+    * If we've already overflowed the user-supplied buffer, then just
+    * keep track of how many names we've seen and don't bother doing
+    * anything else.
+    */
+   if (udata->nsyms >= udata->maxentries) {
+      udata->nsyms += nsyms;
+      return 0;
    }
 
    /*
-    * Gather the info.
+    * Save the name offsets because looking up the name may cause the
+    * symbol table node to be preempted from the cache.
     */
-   if (udata->name || udata->entry) {
-      for (i=0; i<nsyms && udata->nused<udata->nentries; i++) {
-	 if (udata->name) {
-	    s = H5H_peek (f, udata->heap, ent[i].name_off);
-	    udata->name[udata->nused] = H5MM_xstrdup (s);
-	 }
-	 if (udata->entry) {
-	    udata->entry[udata->nused] = ent[i];
-	 }
-	 udata->nused += 1;
+   if (udata->entry) {
+      for (i=0; i<nsyms && udata->nsyms+i<udata->maxentries; i++) {
+	 udata->entry[udata->nsyms+i] = sn->entry[i];
       }
-   } else {
-      udata->nused += sn->nsyms;
+   } else if (udata->name) {
+      offsets = H5MM_xmalloc (nsyms * sizeof(off_t));
+      for (i=0; i<nsyms && udata->nsyms+i<udata->maxentries; i++) {
+	 offsets[i] = sn->entry[i].name_off;
+      }
    }
 
-   if (!sn) H5MM_xfree (ent);
+   /*
+    * Now strdup() the names.
+    */
+   if (udata->name && udata->entry) {
+      for (i=0; i<nsyms && udata->nsyms+i<udata->maxentries; i++) {
+	 s = H5H_peek (f, udata->heap, udata->entry[udata->nsyms+i].name_off);
+	 udata->name[udata->nsyms+i] = H5MM_xstrdup (s);
+      }
+   } else if (udata->name) {
+      for (i=0; i<nsyms && udata->nsyms+i<udata->maxentries; i++) {
+	 s = H5H_peek (f, udata->heap, offsets[i]);
+	 udata->name[udata->nsyms+i] = H5MM_xstrdup (s);
+      }
+      offsets = H5MM_xfree (offsets);
+   }
+
+   /*
+    * Update the number of symbols.
+    */
+   udata->nsyms += nsyms;
    return 0;
 }
 
