@@ -23,6 +23,7 @@
 /* This is a near top-level header! Try not to include much! */
 #include <H5private.h>
 #include <H5Dpublic.h>		/*for the H5D_transfer_t type  		     */
+#include <H5MMpublic.h>		/*for the H5MM_allocate_t and H5MM_free_t types */
 
 /*
  * Feature: Define this constant to be non-zero if you want to enable code
@@ -342,6 +343,10 @@ typedef struct H5F_xfer_t {
     uintn       	cache_hyper;    /*cache hyperslab blocks during I/O? */
     uintn       	block_limit;    /*largest hyperslab block to cache   */
     H5D_transfer_t	xfer_mode;	/*independent or collective transfer */
+    H5MM_allocate_t vlen_alloc; /* VL datatype allocation function */
+    void * alloc_info;          /* VL datatype allocation information */
+    H5MM_free_t vlen_free;      /* VL datatype free function */
+    void * free_info;           /* VL datatype free information */
 } H5F_xfer_t;
 
 /*

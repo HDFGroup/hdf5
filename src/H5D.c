@@ -463,11 +463,8 @@ H5Dget_type(hid_t dset_id)
 		       "unable to copy the data type");
     }
     /* Mark any VL datatypes as being in memory now */
-    if(H5T_get_class(copied_type)==H5T_VLEN) {
-	if (H5T_vlen_set_loc(copied_type, NULL, H5T_VLEN_MEMORY)<0) {
-            HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-			  "invalid VL location");
-        }
+	if (H5T_vlen_mark(copied_type, NULL, H5T_VLEN_MEMORY)<0) {
+        HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location");
     }
     if (H5T_lock (copied_type, FALSE)<0) {
 	H5T_close (copied_type);
@@ -594,7 +591,6 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     const H5T_t		   *mem_type = NULL;
     const H5S_t		   *mem_space = NULL;
     const H5S_t		   *file_space = NULL;
-    const H5F_xfer_t	   *xfer_parms = NULL;
 
     FUNC_ENTER(H5Dread, FAIL);
     H5TRACE6("e","iiiiix",dset_id,mem_type_id,mem_space_id,file_space_id,
@@ -632,10 +628,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 			  "selection+offset not within extent");
 	}
     }
-    if (H5P_DEFAULT == plist_id) {
-	xfer_parms = &H5F_xfer_dflt;
-    } else if (H5P_DATASET_XFER != H5P_get_class(plist_id) ||
-	       NULL == (xfer_parms = H5I_object(plist_id))) {
+    if (H5P_DEFAULT != plist_id && H5P_DATASET_XFER != H5P_get_class(plist_id)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
     }
     if (!buf) {
@@ -643,7 +636,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     }
 
     /* read raw data */
-    if (H5D_read(dset, mem_type, mem_space, file_space, xfer_parms,
+    if (H5D_read(dset, mem_type, mem_space, file_space, plist_id,
 		 buf/*out*/) < 0) {
 	HRETURN_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data");
     }
@@ -693,7 +686,6 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     const H5T_t		   *mem_type = NULL;
     const H5S_t		   *mem_space = NULL;
     const H5S_t		   *file_space = NULL;
-    const H5F_xfer_t	   *xfer_parms = NULL;
 
     FUNC_ENTER(H5Dwrite, FAIL);
     H5TRACE6("e","iiiiix",dset_id,mem_type_id,mem_space_id,file_space_id,
@@ -731,10 +723,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 			  "selection+offset not within extent");
 	}
     }
-    if (H5P_DEFAULT == plist_id) {
-	xfer_parms = &H5F_xfer_dflt;
-    } else if (H5P_DATASET_XFER != H5P_get_class(plist_id) ||
-	       NULL == (xfer_parms = H5I_object(plist_id))) {
+    if (H5P_DEFAULT != plist_id && H5P_DATASET_XFER != H5P_get_class(plist_id)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
     }
     if (!buf) {
@@ -742,7 +731,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     }
 
     /* write raw data */
-    if (H5D_write(dset, mem_type, mem_space, file_space, xfer_parms,
+    if (H5D_write(dset, mem_type, mem_space, file_space, plist_id,
 		  buf) < 0) {
 	HRETURN_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data");
     }
@@ -922,10 +911,8 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     new_dset->type = H5T_copy(type, H5T_COPY_ALL);
 
     /* Mark any VL datatypes as being on disk now */
-    if(H5T_get_class(new_dset->type)==H5T_VLEN) {
-	    if (H5T_vlen_set_loc(new_dset->type, f, H5T_VLEN_DISK)<0) {
-            HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid VL location");
-        }
+    if (H5T_vlen_mark(new_dset->type, f, H5T_VLEN_DISK)<0) {
+        HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid VL location");
     }
 
     efl = &(new_dset->create_parms->efl);
@@ -1447,13 +1434,18 @@ H5D_close(H5D_t *dataset)
  * 	rky 980918
  *	Added must_convert to do non-optimized read when necessary.
  *
+ *  Quincey Koziol, 2 July 1999
+ *  Changed xfer_parms parameter to xfer plist parameter, so it could be passed
+ *  to H5T_convert
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
-	 const H5S_t *file_space, const H5F_xfer_t *xfer_parms,
+	 const H5S_t *file_space, hid_t dset_xfer_plid,
 	 void *buf/*out*/)
 {
+    const H5F_xfer_t	   *xfer_parms = NULL;
     hssize_t    	nelmts;			/*number of elements	*/
     size_t		smine_start;		/*strip mine start loc	*/
     size_t		n, smine_nelmts;	/*elements per strip	*/
@@ -1486,13 +1478,20 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /* check args */
     assert(dataset && dataset->ent.file);
     assert(mem_type);
-    assert(xfer_parms);
     assert(buf);
 
     /* Initialize these before any errors can occur */
     HDmemset(&mem_iter,0,sizeof(H5S_sel_iter_t));
     HDmemset(&bkg_iter,0,sizeof(H5S_sel_iter_t));
     HDmemset(&file_iter,0,sizeof(H5S_sel_iter_t));
+
+    /* Get the dataset transfer property list */
+    if (H5P_DEFAULT == dset_xfer_plid) {
+        xfer_parms = &H5F_xfer_dflt;
+    } else if (H5P_DATASET_XFER != H5P_get_class(dset_xfer_plid) ||
+	       NULL == (xfer_parms = H5I_object(dset_xfer_plid))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
+    }
 
     if (!file_space) {
         if (NULL==(free_this_space=H5S_read (&(dataset->ent)))) {
@@ -1752,7 +1751,7 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
          * Perform data type conversion.
          */
 	if (H5T_convert(tpath, src_id, dst_id, smine_nelmts, 0, tconv_buf,
-			bkg_buf)<0) {
+			bkg_buf, dset_xfer_plid)<0) {
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                 "data type conversion failed");
         }
@@ -1819,13 +1818,18 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
  * 	rky 980918
  *	Added must_convert to do non-optimized read when necessary.
  *
+ *  Quincey Koziol, 2 July 1999
+ *  Changed xfer_parms parameter to xfer plist parameter, so it could be passed
+ *  to H5T_convert
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
-	  const H5S_t *file_space, const H5F_xfer_t *xfer_parms,
+	  const H5S_t *file_space, hid_t dset_xfer_plid,
 	  const void *buf)
 {
+    const H5F_xfer_t	   *xfer_parms = NULL;
     hssize_t		nelmts;			/*total number of elmts	*/
     size_t		smine_start;		/*strip mine start loc	*/
     size_t		n, smine_nelmts;	/*elements per strip	*/
@@ -1858,7 +1862,6 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /* check args */
     assert(dataset && dataset->ent.file);
     assert(mem_type);
-    assert(xfer_parms);
     assert(buf);
 
 #ifdef HAVE_PARALLEL
@@ -1887,6 +1890,14 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     HDmemset(&mem_iter,0,sizeof(H5S_sel_iter_t));
     HDmemset(&bkg_iter,0,sizeof(H5S_sel_iter_t));
     HDmemset(&file_iter,0,sizeof(H5S_sel_iter_t));
+
+    /* Get the dataset transfer property list */
+    if (H5P_DEFAULT == dset_xfer_plid) {
+        xfer_parms = &H5F_xfer_dflt;
+    } else if (H5P_DATASET_XFER != H5P_get_class(dset_xfer_plid) ||
+	       NULL == (xfer_parms = H5I_object(dset_xfer_plid))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
+    }
 
     if (0==(dataset->ent.file->intent & H5F_ACC_RDWR)) {
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL,
@@ -1949,7 +1960,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	}
     }
 #ifdef QAK
-    printf("%s: after H5T_find, tpath=%p\n",FUNC,tpath);
+    printf("%s: after H5T_find, tpath=%p, tpath->name=%s\n",FUNC,tpath,tpath->name);
 #endif /* QAK */
     if (NULL==(sconv=H5S_find(mem_space, file_space))) {
 	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
@@ -2152,7 +2163,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
          * Perform data type conversion.
          */
 	if (H5T_convert(tpath, src_id, dst_id, smine_nelmts, 0, tconv_buf,
-			bkg_buf)<0) {
+			bkg_buf, dset_xfer_plid)<0) {
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                 "data type conversion failed");
         }
@@ -2685,6 +2696,7 @@ H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t operator,
 herr_t
 H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
 {
+    const H5F_xfer_t	   *xfer_parms = NULL;
     herr_t ret_value=FAIL;
 
     FUNC_ENTER(H5Dvlen_reclaim, FAIL);
@@ -2693,12 +2705,20 @@ H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
     /* Check args */
     if (H5I_DATATYPE!=H5I_get_type(type_id) ||
         H5I_DATASPACE!=H5I_get_type(space_id) ||
-	H5P_DATASET_XFER!=H5P_get_class(plist_id) ||
         buf==NULL) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument");
     }
 
-/* Call H5Diterate with args, etc. */
+    /* Retrieve dataset transfer property list */
+    if (H5P_DEFAULT == plist_id) {
+        xfer_parms = &H5F_xfer_dflt;
+    } else if (H5P_DATASET_XFER != H5P_get_class(plist_id) ||
+	       NULL == (xfer_parms = H5I_object(plist_id))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
+    }
+
+    /* Call H5Diterate with args, etc. */
+    ret_value=H5Diterate(buf,type_id,space_id,H5T_vlen_reclaim,xfer_parms);
 
     FUNC_LEAVE(ret_value);
 }   /* end H5Dvlen_reclaim() */

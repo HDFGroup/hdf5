@@ -97,7 +97,8 @@ __DLL__ H5T_path_t *H5T_path_find(const H5T_t *src, const H5T_t *dst,
 __DLL__ herr_t H5T_sort_value(H5T_t *dt, int *map);
 __DLL__ herr_t H5T_sort_name(H5T_t *dt, int *map);
 __DLL__ herr_t H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id,
-			   size_t nelmts, size_t stride, void *buf, void *bkg);
+			   size_t nelmts, size_t stride, void *buf, void *bkg,
+               hid_t dset_xfer_plist);
 __DLL__ herr_t H5T_set_size(H5T_t *dt, size_t size);
 __DLL__ herr_t H5T_set_precision(H5T_t *dt, size_t prec);
 __DLL__ herr_t H5T_set_offset(H5T_t *dt, size_t offset);
@@ -105,6 +106,7 @@ __DLL__ char *H5T_enum_nameof(H5T_t *dt, void *value, char *name/*out*/,
 			      size_t size);
 __DLL__ herr_t H5T_enum_valueof(H5T_t *dt, const char *name,
 				void *value/*out*/);
-__DLL__ herr_t H5T_vlen_set_loc(H5T_t *dt, H5F_t *f, H5T_vlen_type_t loc);
+__DLL__ herr_t H5T_vlen_reclaim(void *elem, hid_t type_id, hsize_t UNUSED ndim, hssize_t UNUSED *point, void UNUSED *_op_data);
+__DLL__ herr_t H5T_vlen_mark(H5T_t *dt, H5F_t *f, H5T_vlen_type_t loc);
 
 #endif

@@ -2722,7 +2722,7 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
     HDmemcpy(buf, plist->fill.buf, H5T_get_size(plist->fill.type));
     
     /* Do the conversion */
-    if (H5T_convert(tpath, src_id, type_id, 1, 0, buf, bkg)<0) {
+    if (H5T_convert(tpath, src_id, type_id, 1, 0, buf, bkg, H5P_DEFAULT)<0) {
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		    "data type conversion failed");
     }
@@ -3050,6 +3050,93 @@ H5Pget_gc_reference(hid_t fapl_id, unsigned *gc_ref/*out*/)
 
     FUNC_LEAVE (SUCCEED);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_vlen_mem_manager
+ *
+ * Purpose:	Sets the memory allocate/free pair for VL datatypes.  The
+ *      allocation routine is called when data is read into a new array
+ *      and the free routine is called when H5Dvlen_reclaim is called.
+ *      The alloc_info and free_info are user parameters which are passed
+ *      to the allocation and freeing functions respectively.
+ *      To reset the allocate/free functions to the default setting of using
+ *      the system's malloc/free functions, call this routine with alloc_func
+ *      and free_func set to NULL.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, July 1, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t alloc_func,
+        void *alloc_info, H5MM_free_t free_func, void *free_info)
+{
+    H5F_xfer_t		*plist = NULL;
+    
+    FUNC_ENTER (H5Pset_vlen_mem_manager, FAIL);
+
+    /* Check arguments */
+    if (H5P_DATASET_XFER != H5P_get_class (plist_id) ||
+            NULL == (plist = H5I_object (plist_id))) {
+        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
+    }
+
+    /* Update property list */
+    plist->vlen_alloc = alloc_func;
+    plist->alloc_info = alloc_info;
+    plist->vlen_free = free_func;
+    plist->free_info = free_info;
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_vlen_mem_manager
+ *
+ * Purpose:	The inverse of H5Pset_vlen_mem_manager()
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, July 1, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func,
+        void **alloc_info, H5MM_free_t *free_func, void **free_info)
+{
+    H5F_xfer_t		*plist = NULL;
+    
+    FUNC_ENTER (H5Pset_vlen_mem_manager, FAIL);
+
+    /* Check arguments */
+    if (H5P_DATASET_XFER != H5P_get_class (plist_id) ||
+            NULL == (plist = H5I_object (plist_id))) {
+        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
+    }
+
+    if(alloc_func!=NULL)
+        *alloc_func= plist->vlen_alloc;
+    if(alloc_info!=NULL)
+        *alloc_info= plist->alloc_info;
+    if(free_func!=NULL)
+        *free_func= plist->vlen_free;
+    if(free_info!=NULL)
+        *free_info= plist->free_info;
+
+    FUNC_LEAVE (SUCCEED);
+}
+
 
 
 /*--------------------------------------------------------------------------

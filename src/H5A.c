@@ -243,10 +243,8 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
     attr->name=HDstrdup(name);
     attr->dt=H5T_copy(type, H5T_COPY_ALL);
     /* Mark any VL datatypes as being on disk now */
-    if(H5T_get_class(attr->dt)==H5T_VLEN) {
-	    if (H5T_vlen_set_loc(attr->dt, ent->file, H5T_VLEN_DISK)<0) {
-            HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location");
-        }
+    if (H5T_vlen_mark(attr->dt, ent->file, H5T_VLEN_DISK)<0) {
+        HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location");
     }
     attr->ds=H5S_copy(space);
     attr->initialized = TRUE; /*for now, set to false later*/
@@ -667,7 +665,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, void *buf)
     }
 
     /* Perform data type conversion */
-    if (H5T_convert(tpath, src_id, dst_id, nelmts, 0, tconv_buf, bkg_buf)<0) {
+    if (H5T_convert(tpath, src_id, dst_id, nelmts, 0, tconv_buf, bkg_buf, H5P_DEFAULT)<0) {
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL,
 		    "data type conversion failed");
     }
@@ -835,7 +833,7 @@ H5A_read(H5A_t *attr, const H5T_t *mem_type, void *buf)
         }
 
     /* Perform data type conversion.  */
-    if (H5T_convert(tpath, src_id, dst_id, nelmts, 0, tconv_buf, bkg_buf)<0) {
+    if (H5T_convert(tpath, src_id, dst_id, nelmts, 0, tconv_buf, bkg_buf, H5P_DEFAULT)<0) {
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL,
 		    "data type conversion failed");
     }
@@ -962,11 +960,9 @@ H5Aget_type(hid_t attr_id)
 		      "unable to copy datatype");
     }
     /* Mark any VL datatypes as being in memory now */
-    if(H5T_get_class(dst)==H5T_VLEN) {
-	if (H5T_vlen_set_loc(dst, NULL, H5T_VLEN_MEMORY)<0) {
-            HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+	if (H5T_vlen_mark(dst, NULL, H5T_VLEN_MEMORY)<0) {
+        HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 			  "invalid VL location");
-        }
     }
     if (H5T_lock(dst, FALSE)<0) {
 	H5T_close(dst);

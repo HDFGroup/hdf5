@@ -18,6 +18,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5Gprivate.h>		/*groups				  */
 #include <H5HGprivate.h>	/*global heap				  */
 #include <H5MMprivate.h>	/*memory management			  */
+#include <H5Pprivate.h>		/* Property Lists			  */
 #include <H5Sprivate.h>		/*data space				  */
 #include <H5Tpkg.h>		/*data-type functions			  */
 
@@ -1358,7 +1359,7 @@ H5T_term_interface(void)
 		H5T_print_stats(path, &nprint/*in,out*/);
 		path->cdata.command = H5T_CONV_FREE;
 		if ((path->func)(FAIL, FAIL, &(path->cdata),
-				 0, 0, NULL, NULL)<0) {
+				 0, 0, NULL, NULL,H5P_DEFAULT)<0) {
 #ifdef H5T_DEBUG
 		    if (H5DEBUG(T)) {
 			fprintf (H5DEBUG(T), "H5T: conversion function "
@@ -3912,10 +3913,11 @@ H5Tvlen_create(hid_t base_id)
     }
     H5F_addr_undef (&(dt->ent.header));
     dt->type = H5T_VLEN;
+    dt->force_conv = TRUE;      /* Force conversions (i.e. memory to memory conversions should duplicate data, not point to the same VL sequences */
     dt->parent = H5T_copy(base, H5T_COPY_ALL);
 
     /* Set up VL information */
-    if (H5T_vlen_set_loc(dt, NULL, H5T_VLEN_MEMORY)<0) {
+    if (H5T_vlen_mark(dt, NULL, H5T_VLEN_MEMORY)<0) {
         HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location");
     }
 
@@ -4139,7 +4141,7 @@ H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
 	    }
 	    HDmemset(&cdata, 0, sizeof cdata);
 	    cdata.command = H5T_CONV_INIT;
-	    if ((func)(tmp_sid, tmp_did, &cdata, 0, 0, NULL, NULL)<0) {
+	    if ((func)(tmp_sid, tmp_did, &cdata, 0, 0, NULL, NULL, H5P_DEFAULT)<0) {
 		H5I_dec_ref(tmp_sid);
 		H5I_dec_ref(tmp_did);
 		tmp_sid = tmp_did = -1;
@@ -4171,7 +4173,7 @@ H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
 	    H5T_print_stats(old_path, &nprint);
 	    old_path->cdata.command = H5T_CONV_FREE;
 	    if ((old_path->func)(tmp_sid, tmp_did, &(old_path->cdata),
-				 0, 0, NULL, NULL)<0) {
+				 0, 0, NULL, NULL, H5P_DEFAULT)<0) {
 #ifdef H5T_DEBUG
 		if (H5DEBUG(T)) {
 		    fprintf (H5DEBUG(T), "H5T: conversion function 0x%08lx "
@@ -4287,7 +4289,7 @@ H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
 	/* Shut down path */
 	H5T_print_stats(path, &nprint);
 	path->cdata.command = H5T_CONV_FREE;
-	if ((path->func)(FAIL, FAIL, &(path->cdata), 0, 0, NULL, NULL)<0) {
+	if ((path->func)(FAIL, FAIL, &(path->cdata), 0, 0, NULL, NULL, H5P_DEFAULT)<0) {
 #ifdef H5T_DEBUG
 	    if (H5DEBUG(T)) {
 		fprintf(H5DEBUG(T), "H5T: conversion function 0x%08lx failed "
@@ -4370,7 +4372,10 @@ H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
  *		with the converted values to fill in cracks (for instance,
  *		BACKGROUND might be an array of structs with the `a' and `b'
  *		fields already initialized and the conversion of BUF supplies
- *		the `c' and `d' field values).
+ *		the `c' and `d' field values).  The PLIST_ID a dataset transfer
+ *      property list which is passed to the conversion functions.  (It's
+ *      currently only used to pass along the VL datatype custom allocation
+ *      information -QAK 7/1/99)
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -4378,24 +4383,24 @@ H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
  *              Wednesday, June 10, 1998
  *
  * Modifications:
+ *              Added xfer_parms argument to pass VL datatype custom allocation
+ *              information down the chain.  - QAK, 7/1/99
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts, void *buf,
-	    void *background)
+	    void *background, hid_t plist_id)
 {
     H5T_path_t		*tpath=NULL;		/*type conversion info	*/
     H5T_t		*src=NULL, *dst=NULL;	/*unatomized types	*/
     
     FUNC_ENTER (H5Tconvert, FAIL);
-    H5TRACE5("e","iizxx",src_id,dst_id,nelmts,buf,background);
 
     /* Check args */
-    if (H5I_DATATYPE!=H5I_get_type(src_id) ||
-	NULL==(src=H5I_object(src_id)) ||
-	H5I_DATATYPE!=H5I_get_type(dst_id) ||
-	NULL==(dst=H5I_object(dst_id))) {
+    if (H5I_DATATYPE!=H5I_get_type(src_id) || NULL==(src=H5I_object(src_id)) ||
+        H5I_DATATYPE!=H5I_get_type(dst_id) || NULL==(dst=H5I_object(dst_id)) ||
+        (H5P_DEFAULT != plist_id && H5P_DATASET_XFER != H5P_get_class(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }
 
@@ -4405,7 +4410,7 @@ H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts, void *buf,
 		       "unable to convert between src and dst data types");
     }
 
-    if (H5T_convert(tpath, src_id, dst_id, nelmts, 0, buf, background)<0) {
+    if (H5T_convert(tpath, src_id, dst_id, nelmts, 0, buf, background, plist_id)<0) {
 	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		       "data type conversion failed");
     }
@@ -4831,7 +4836,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     } 
     } else if (H5T_VLEN == new_dt->type) {
         /* H5T_copy converts any VL type into a memory VL type */
-	    if (H5T_vlen_set_loc(new_dt, NULL, H5T_VLEN_MEMORY)<0) {
+	    if (H5T_vlen_mark(new_dt, NULL, H5T_VLEN_MEMORY)<0) {
             HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid VL location");
         }
     } else if (H5T_OPAQUE == new_dt->type) {
@@ -5506,6 +5511,14 @@ H5T_struct_insert(H5T_t *parent, const char *name, size_t offset, intn ndims,
 
     parent->u.compnd.sorted = H5T_SORT_NONE;
     parent->u.compnd.nmembs++;
+
+    /*
+     * Set the "force conversion" flag if VL datatype fields exist in this type
+     * or any component types
+     */
+    if(member->type==H5T_VLEN || member->force_conv==TRUE)
+        parent->force_conv=TRUE;
+
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -6401,7 +6414,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	H5T_g.path[0]->func = H5T_conv_noop;
 	H5T_g.path[0]->cdata.command = H5T_CONV_INIT;
 	if (H5T_conv_noop(FAIL, FAIL, &(H5T_g.path[0]->cdata), 0, 0,
-			  NULL, NULL)<0) {
+			  NULL, NULL, H5P_DEFAULT)<0) {
 #ifdef H5T_DEBUG
 	    if (H5DEBUG(T)) {
 		fprintf(H5DEBUG(T), "H5T: unable to initialize no-op "
@@ -6417,8 +6430,12 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
      * Find the conversion path.  If source and destination types are equal
      * then use entry[0], otherwise do a binary search over the
      * remaining entries.
+     *
+     * Quincey Koziol, 2 July, 1999
+     * Only allow the no-op conversion to occur if no "force conversion" flags
+     * are set
      */
-    if (0==H5T_cmp(src, dst)) {
+    if (src->force_conv==FALSE && dst->force_conv==FALSE && 0==H5T_cmp(src, dst)) {
 	table = H5T_g.path[0];
 	cmp = 0;
 	md = 0;
@@ -6488,7 +6505,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 			"query");
 	}
 	path->cdata.command = H5T_CONV_INIT;
-	if ((func)(src_id, dst_id, &(path->cdata), 0, 0, NULL, NULL)<0) {
+	if ((func)(src_id, dst_id, &(path->cdata), 0, 0, NULL, NULL, H5P_DEFAULT)<0) {
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL,
 			"unable to initialize conversion function");
 	}
@@ -6520,7 +6537,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	}
 	path->cdata.command = H5T_CONV_INIT;
 	if ((H5T_g.soft[i].func) (src_id, dst_id, &(path->cdata),
-				       0, 0, NULL, NULL)<0) {
+				       0, 0, NULL, NULL, H5P_DEFAULT)<0) {
 	    HDmemset (&(path->cdata), 0, sizeof(H5T_cdata_t));
 	    H5E_clear(); /*ignore the error*/
 	} else {
@@ -6542,7 +6559,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	assert(table==H5T_g.path[md]);
 	H5T_print_stats(table, &nprint/*in,out*/);
 	table->cdata.command = H5T_CONV_FREE;
-	if ((table->func)(FAIL, FAIL, &(table->cdata), 0, 0, NULL, NULL)<0) {
+	if ((table->func)(FAIL, FAIL, &(table->cdata), 0, 0, NULL, NULL, H5P_DEFAULT)<0) {
 #ifdef H5T_DEBUG
 	    if (H5DEBUG(T)) {
 		fprintf(H5DEBUG(T), "H5T: conversion function 0x%08lx free "
@@ -6615,11 +6632,15 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
  *		then convert one value at each memory location advancing
  *		STRIDE bytes each time; otherwise assume both source and
  *		destination values are packed.
+ *
+ *      Quincey Koziol, 1999-07-01
+ *      Added dataset transfer properties, to allow custom VL datatype
+ *      allocation function to be passed down to VL conversion routine.
  *-------------------------------------------------------------------------
  */
 herr_t
 H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id, size_t nelmts,
-	    size_t stride, void *buf, void *bkg)
+	    size_t stride, void *buf, void *bkg, hid_t dset_xfer_plist)
 {
 #ifdef H5T_DEBUG
     H5_timer_t		timer;
@@ -6632,7 +6653,7 @@ H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id, size_t nelmts,
 #endif
     tpath->cdata.command = H5T_CONV_CONV;
     if ((tpath->func)(src_id, dst_id, &(tpath->cdata), nelmts, stride, buf,
-		      bkg)<0) {
+		      bkg, dset_xfer_plist)<0) {
 	HRETURN_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL,
 		      "data type conversion failed");
     }

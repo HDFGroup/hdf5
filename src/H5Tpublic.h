@@ -159,7 +159,7 @@ typedef struct {
 /* All data type conversion functions are... */
 typedef herr_t (*H5T_conv_t) (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			      size_t nelmts, size_t stride, void *buf,
-			      void *bkg);
+			      void *bkg, hid_t dset_xfer_plist);
 
 /*
  * If an error occurs during a data type conversion then the function
@@ -519,7 +519,7 @@ __DLL__ herr_t H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id,
 			     hid_t dst_id, H5T_conv_t func);
 __DLL__ H5T_conv_t H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata);
 __DLL__ herr_t H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts,
-			  void *buf, void *background);
+			  void *buf, void *background, hid_t plist_id);
 __DLL__ H5T_overflow_t H5Tget_overflow(void);
 __DLL__ herr_t H5Tset_overflow(H5T_overflow_t func);
 

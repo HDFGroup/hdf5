@@ -62,10 +62,10 @@ __DLL__ herr_t H5D_close(H5D_t *dataset);
 __DLL__ htri_t H5D_isa(H5G_entry_t *ent);
 __DLL__ herr_t H5D_read(H5D_t *dataset, const H5T_t *mem_type,
 			const H5S_t *mem_space, const H5S_t *file_space,
-			const H5F_xfer_t *xfer_parms, void *buf/*out*/);
+			hid_t dset_xfer_plist, void *buf/*out*/);
 __DLL__ herr_t H5D_write(H5D_t *dataset, const H5T_t *mem_type,
 			 const H5S_t *mem_space, const H5S_t *file_space,
-			 const H5F_xfer_t *xfer_parms, const void *buf);
+			 hid_t dset_xfer_plist, const void *buf);
 __DLL__ herr_t H5D_extend(H5D_t *dataset, const hsize_t *size);
 __DLL__ H5G_entry_t *H5D_entof(H5D_t *dataset);
 __DLL__ H5T_t *H5D_typeof(H5D_t *dset);

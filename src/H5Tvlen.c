@@ -21,6 +21,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5private.h>		/* Generic Functions			*/
 #include <H5Eprivate.h>     /* Errors */
 #include <H5HGprivate.h>    /* Global Heaps */
+#include <H5Iprivate.h>     /* IDs */
 #include <H5MMprivate.h>    /* Memory Allocation */
 #include <H5Tpkg.h>         /* Datatypes */
 
@@ -29,6 +30,9 @@ static char		RcsId[] = "@(#)$Revision$";
 /* Interface initialization */
 static intn interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
+
+/* Local functions */
+static herr_t H5T_vlen_reclaim_recurse(void *elem, H5T_t *dt, H5MM_free_t free_func, void *free_info);
 
 
 /*-------------------------------------------------------------------------
@@ -45,7 +49,8 @@ static intn interface_initialize_g = 0;
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5T_vlen_set_loc(H5T_t *dt, H5F_t *f, H5T_vlen_type_t loc)
+static herr_t
+H5T_vlen_set_loc(H5T_t *dt, H5F_t *f, H5T_vlen_type_t loc)
 {
     FUNC_ENTER (H5T_vlen_set_loc, FAIL);
 
@@ -100,7 +105,7 @@ herr_t H5T_vlen_set_loc(H5T_t *dt, H5F_t *f, H5T_vlen_type_t loc)
     } /* end switch */
 
     FUNC_LEAVE (SUCCEED);
-}   /* end H5T_vlen_disk_write() */
+}   /* end H5T_vlen_set_loc() */
 
 
 /*-------------------------------------------------------------------------
@@ -177,7 +182,7 @@ herr_t H5T_vlen_mem_read(H5F_t UNUSED *f, void *vl_addr, void *buf, size_t len)
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5T_vlen_mem_alloc(H5F_t UNUSED *f, void *vl_addr, hsize_t seq_len, hsize_t base_size)
+herr_t H5T_vlen_mem_alloc(const H5F_xfer_t *xfer_parms, void *vl_addr, hsize_t seq_len, hsize_t base_size)
 {
     hvl_t *vl=(hvl_t *)vl_addr;   /* Pointer to the user's hvl_t information */
 
@@ -186,8 +191,15 @@ herr_t H5T_vlen_mem_alloc(H5F_t UNUSED *f, void *vl_addr, hsize_t seq_len, hsize
     /* check parameters */
     assert(vl);
 
-	if(NULL==(vl->p=H5MM_malloc(seq_len*base_size)))
-	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
+    /* Use the user's memory allocation routine is one is defined */
+    if(xfer_parms->vlen_alloc!=NULL) {
+        if(NULL==(vl->p=(xfer_parms->vlen_alloc)(seq_len*base_size,xfer_parms->alloc_info)))
+            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
+      } /* end if */
+    else {  /* Default to system malloc */
+        if(NULL==(vl->p=H5MM_malloc(seq_len*base_size)))
+            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
+      } /* end else */
     vl->len=seq_len;
 
     FUNC_LEAVE (SUCCEED);
@@ -312,7 +324,7 @@ herr_t H5T_vlen_disk_read(H5F_t *f, void *vl_addr, void *buf, size_t UNUSED len)
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5T_vlen_disk_alloc(H5F_t UNUSED *f, void UNUSED *vl_addr, hsize_t UNUSED seq_len, hsize_t UNUSED base_size)
+herr_t H5T_vlen_disk_alloc(const H5F_xfer_t UNUSED *f, void UNUSED *vl_addr, hsize_t UNUSED seq_len, hsize_t UNUSED base_size)
 {
     FUNC_ENTER (H5T_vlen_disk_alloc, FAIL);
 
@@ -363,3 +375,211 @@ herr_t H5T_vlen_disk_write(H5F_t *f, void *vl_addr, void *buf, size_t len)
     FUNC_LEAVE (SUCCEED);
 }   /* end H5T_vlen_disk_write() */
 
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5T_vlen_reclaim_recurse
+ PURPOSE
+    Internal recursive routine to free VL datatypes
+ USAGE
+    herr_t H5T_vlen_reclaim(elem,dt)
+        void *elem;  IN/OUT: Pointer to the dataset element
+        H5T_t *dt;   IN: Datatype of dataset element
+        
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+    Frees any dynamic memory used by VL datatypes in the current dataset
+    element.  Performs a recursive depth-first traversal of all compound
+    datatypes to free all VL datatype information allocated by any field.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t 
+H5T_vlen_reclaim_recurse(void *elem, H5T_t *dt, H5MM_free_t free_func, void *free_info)
+{
+    intn i,j;   /* local counting variable */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER(H5T_vlen_reclaim_recurse, FAIL);
+
+    assert(elem);
+    assert(dt);
+
+    /* Check the datatype of this element */
+    switch(dt->type) {
+        /* Check each field and recurse on VL and compound ones */
+        case H5T_COMPOUND:
+            for (i=0; i<dt->u.compnd.nmembs; i++) {
+                /* Recurse if it's VL or compound */
+                if(dt->u.compnd.memb[i].type->type==H5T_COMPOUND || dt->u.compnd.memb[i].type->type==H5T_VLEN) {
+                    uintn nelem=1;  /* Number of array elements in field */
+                    void *off;     /* offset of field */
+
+                    /* Compute the number of array elements in field */
+                    for(j=0; j<dt->u.compnd.memb[i].ndims; j++)
+                        nelem *= dt->u.compnd.memb[i].dim[j];
+                    
+                    /* Calculate the offset of each array element and recurse on it */
+                    while(nelem>0) {
+                        off=((uint8_t *)elem)+dt->u.compnd.memb[i].offset+(nelem-1)*dt->u.compnd.memb[i].type->size;
+                        if(H5T_vlen_reclaim_recurse(off,dt->u.compnd.memb[i].type,free_func,free_info)<0)
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "Unable to free compound field");
+                        nelem--;
+                    } /* end while */
+                } /* end if */
+            } /* end for */
+            break;
+
+        /* Recurse on the VL information if it's VL or compound, then free VL sequence */
+        case H5T_VLEN:
+            {
+                hvl_t *vl=(hvl_t *)elem;    /* Temp. ptr to the vl info */
+
+                /* Recurse if it's VL or compound */
+                if(dt->parent->type==H5T_COMPOUND || dt->parent->type==H5T_VLEN) {
+                    void *off;     /* offset of field */
+
+                    /* Calculate the offset of each array element and recurse on it */
+                    while(vl->len>0) {
+                        off=((uint8_t *)vl->p)+(vl->len-1)*dt->parent->size;
+                        if(H5T_vlen_reclaim_recurse(off,dt->parent,free_func,free_info)<0)
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "Unable to free VL element");
+                        vl->len--;
+                    } /* end while */
+                } /* end if */
+
+                /* Free the VL sequence */
+                if(free_func!=NULL)
+                    (*free_func)(vl->p,free_info);
+                else
+                    H5MM_xfree(vl->p);
+            } /* end case */
+            break;
+
+        default:
+            break;
+    } /* end switch */
+
+done:
+    FUNC_LEAVE(ret_value);
+}   /* end H5T_vlen_reclaim_recurse() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5T_vlen_reclaim
+ PURPOSE
+    Default method to reclaim any VL data for a buffer element
+ USAGE
+    herr_t H5T_vlen_reclaim(elem,type_id,ndim,point,op_data)
+        void *elem;  IN/OUT: Pointer to the dataset element
+        hid_t type_id;   IN: Datatype of dataset element
+        hsize_t ndim;    IN: Number of dimensions in dataspace
+        hssize_t *point; IN: Coordinate location of element in dataspace
+        void *op_data    IN: Operator data
+        
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+    Frees any dynamic memory used by VL datatypes in the current dataset
+    element.  Recursively descends compound datatypes to free all VL datatype
+    information allocated by any field.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t 
+H5T_vlen_reclaim(void *elem, hid_t type_id, hsize_t UNUSED ndim, hssize_t UNUSED *point, void *op_data)
+{
+    H5F_xfer_t	   *xfer_parms = (H5F_xfer_t *)op_data; /* Dataset transfer plist from iterator */
+    H5T_t	*dt = NULL;
+    herr_t ret_value = FAIL;
+
+    FUNC_ENTER(H5T_vlen_reclaim, FAIL);
+
+    assert(elem);
+    assert(H5I_DATATYPE == H5I_get_type(type_id));
+
+    /* Check args */
+    if (H5I_DATATYPE!=H5I_get_type(type_id) || NULL==(dt=H5I_object(type_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+
+    /* Pull the free function and free info pointer out of the op_data and call the recurse datatype free function */
+    ret_value=H5T_vlen_reclaim_recurse(elem,dt,xfer_parms->vlen_free,xfer_parms->free_info);
+
+#ifdef LATER
+done:
+#endif /* LATER */
+    FUNC_LEAVE(ret_value);
+}   /* end H5T_vlen_reclaim() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5T_vlen_mark
+ PURPOSE
+    Recursively mark any VL datatypes as on disk/in memory
+ USAGE
+    herr_t H5T_vlen_mark(dt,f,loc)
+        H5T_t *dt;              IN/OUT: Pointer to the datatype to mark
+        H5F_t *dt;              IN: Pointer to the file the datatype is in
+        H5T_vlen_type_t loc     IN: location of VL type
+        
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+    Recursively descends any VL or compound datatypes to mark all VL datatypes
+    as either on disk or in memory.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5T_vlen_mark(H5T_t *dt, H5F_t *f, H5T_vlen_type_t loc)
+{
+    intn i;   /* local counting variable */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER(H5T_vlen_mark, FAIL);
+
+    assert(dt);
+    assert(loc>H5T_VLEN_BADTYPE && loc<H5T_VLEN_MAXTYPE);
+
+    /* Check the datatype of this element */
+    switch(dt->type) {
+        /* Check each field and recurse on VL and compound ones */
+        case H5T_COMPOUND:
+            for (i=0; i<dt->u.compnd.nmembs; i++) {
+                /* Recurse if it's VL or compound */
+                if(dt->u.compnd.memb[i].type->type==H5T_COMPOUND || dt->u.compnd.memb[i].type->type==H5T_VLEN) {
+                    if(H5T_vlen_mark(dt->u.compnd.memb[i].type,f,loc)<0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
+                } /* end if */
+            } /* end for */
+            break;
+
+        /* Recurse on the VL information if it's VL or compound, then free VL sequence */
+        case H5T_VLEN:
+            /* Recurse if it's VL or compound */
+            if(dt->parent->type==H5T_COMPOUND || dt->parent->type==H5T_VLEN) {
+                if(H5T_vlen_mark(dt->parent,f,loc)<0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
+            } /* end if */
+
+            /* Mark this VL sequence */
+            if(H5T_vlen_set_loc(dt,f,loc)<0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
+            break;
+
+        default:
+            break;
+    } /* end switch */
+
+done:
+    FUNC_LEAVE(ret_value);
+}   /* end H5T_vlen_mark() */

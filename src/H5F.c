@@ -85,6 +85,10 @@ const H5F_xfer_t	H5F_xfer_dflt = {
 				 * block size to cache
 				 */
     H5D_XFER_DFLT,      	/* Independent data transfer      	*/
+    NULL,                   /* Default to malloc for VL allocations */
+    NULL,                   /* No information needed for malloc allocations */
+    NULL,                   /* Default to free for VL frees */
+    NULL,                   /* No information needed for free frees */
 };
 
 /*

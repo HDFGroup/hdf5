@@ -235,6 +235,13 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
 		HRETURN_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL,
 			      "unable to decode member type");
 	    }
+
+        /*
+         * Set the "force conversion" flag if VL datatype fields exist in this
+         * type or any component types
+         */
+        if(dt->u.compnd.memb[i].type->type==H5T_VLEN || dt->u.compnd.memb[i].type->force_conv==TRUE)
+            dt->force_conv=TRUE;
 	    
 	    /* Total member size */
 	    dt->u.compnd.memb[i].size = dt->u.compnd.memb[i].type->size;
@@ -295,8 +302,9 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
             HRETURN_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode VL parent type");
         }
 
+        dt->force_conv=TRUE;
         /* Mark this type as on disk */
-	    if (H5T_vlen_set_loc(dt, f, H5T_VLEN_DISK)<0) {
+	    if (H5T_vlen_mark(dt, f, H5T_VLEN_DISK)<0) {
             HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location");
         }
         break;
