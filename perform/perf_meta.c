@@ -807,7 +807,11 @@ main(int argc, char **argv)
         if(facc_type == FACC_DEFAULT || facc_type == FACC_MPIO)  
             H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
         else if(facc_type == FACC_MPIPOSIX)  
+#ifdef H5_WANT_H5_V1_4_COMPAT
+            H5Pset_fapl_mpiposix(fapl, MPI_COMM_WORLD);
+#else /* H5_WANT_H5_V1_4_COMPAT */
             H5Pset_fapl_mpiposix(fapl, MPI_COMM_WORLD, FALSE);
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 #endif /*H5_HAVE_PARALLEL*/
     }
     

@@ -223,7 +223,11 @@ static void test_iter_group(void)
         VERIFY(num_membs,NDATASETS+2,"H5Gget_num_objs");
   
         for(i=0; i< (int)num_membs; i++) {
+#ifdef H5_WANT_H5_V1_4_COMPAT
+            int obj_type;         /* Type of object in file */
+#else /*H5_WANT_H5_V1_4_COMPAT*/
             H5G_obj_t obj_type;         /* Type of object in file */
+#endif /*H5_WANT_H5_V1_4_COMPAT*/
 
             ret = H5Gget_objname_by_idx(file, (hsize_t)i, dataset_name, NAMELEN);
             CHECK(ret, FAIL, "H5Gget_objname_by_idx");
