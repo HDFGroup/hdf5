@@ -761,6 +761,15 @@ H5I_remove(hid_t id)
 	curr_id = curr_id->next;
     }
 
+#ifdef IDS_ARE_CACHED
+    /* Delete object from cache */
+    for (i = 0; i < ID_CACHE_SIZE; i++)
+	if (H5I_cache_g[i] && H5I_cache_g[i]->id == id) {
+	    H5I_cache_g[i] = NULL;
+	    break; /* we assume there is only one instance in the cache */
+	}
+#endif /* IDS_ARE_CACHED */
+
     if (curr_id != NULL) {
 	if (last_id == NULL) {
 	    /* ID is the first in the chain */
@@ -774,15 +783,6 @@ H5I_remove(hid_t id)
 	/* couldn't find the ID in the proper place */
 	HGOTO_DONE(NULL);
     }
-
-#ifdef IDS_ARE_CACHED
-    /* Delete object from cache */
-    for (i = 0; i < ID_CACHE_SIZE; i++)
-	if (H5I_cache_g[i] && H5I_cache_g[i]->id == id) {
-	    H5I_cache_g[i] = NULL;
-	    break; /* we assume there is only one instance in the cache */
-	}
-#endif /* IDS_ARE_CACHED */
 
     /* Decrement the number of IDs in the group */
     (grp_ptr->ids)--;
