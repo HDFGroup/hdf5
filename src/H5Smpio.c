@@ -76,7 +76,7 @@ H5S_mpio_all_type( const H5S_t *space, const size_t elmt_size,
     *is_derived_type = 0;
 
 #ifdef H5Smpi_DEBUG
-    fprintf(stdout, "Leave %s total_bytes=%lld\n", FUNC, total_bytes );
+    fprintf(stdout, "Leave %s total_bytes=%lld\n", FUNC, (long long)total_bytes );
 #endif
     FUNC_LEAVE (SUCCEED);
 } /* H5S_mpio_all_type() */
@@ -141,7 +141,7 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
 #ifdef H5Smpi_DEBUG
 	fprintf(stdout,
 	    "hyper_type: start=%lld  stride=%lld  count=%lld  block=%lld  xtent=%lld",
-	    d[i].start, d[i].strid, d[i].count, d[i].block, d[i].xtent );
+	    (long long)d[i].start, (long long)d[i].strid, (long long)d[i].count, (long long)d[i].block, (long long)d[i].xtent );
 	if (i==0) fprintf(stdout, "  rank=%d\n", rank );
 	else	  fprintf(stdout, "\n" );
 #endif
@@ -182,8 +182,8 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
     } /* end for */
     num_to_collapse = i;
 
-    num_to_collapse = 0; /* rky 980827 DEBUG Temporary change
-			    to prevent coalescing until I get it correct. */
+    num_to_collapse = 0; /* rky 980827 DEBUG Temporary change to prevent
+			    collapsing dims until further testing of collapse */
 
     assert(0<=num_to_collapse && num_to_collapse<rank);
     new_rank = rank - num_to_collapse;
@@ -202,16 +202,13 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
     }
 
     /* check for possibility to coalesce blocks of the uncoalesced dimensions */
-    /* rky 980827 DEBUG
-       Temporarily comment this out to preclude coalescing until it's fixed.
     for (i=0; i<new_rank; ++i) {
         if (d[i].strid == d[i].block) {
-	    /-* transform smaller blocks to 1 larger block of combined size *-/
-	    d[i].block *= d[i].count;
+	    /* transform smaller blocks to 1 larger block of combined size */
+	    d[i].strid = d[i].block *= d[i].count;
 	    d[i].count = 1;
 	}
     }
-     * rky 980827 */
 
     /* initialize induction variables */
     s[0] = 0;			/* stays constant */
@@ -227,7 +224,7 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
     /* construct the type by walking the hyperslab dims from the inside out */
     for ( i=new_rank-1; i>=0; --i) {
 #ifdef H5Smpi_DEBUG
-	fprintf(stdout, "hyper_type: i=%d Making vector type\n count=%lld block=%lld stride=%lld\n", i, d[i].count, d[i].block, d[i].strid );
+	fprintf(stdout, "hyper_type: i=%d Making vector type\n count=%lld block=%lld stride=%lld\n", i, (long long)d[i].count, (long long)d[i].block, (long long)d[i].strid );
 #endif
 	err = MPI_Type_vector(	(int)(d[i].count),	/* count */
 				(int)(d[i].block),	/* blocklength */
@@ -476,7 +473,7 @@ H5S_mpio_spaces_xfer (H5F_t *f, const struct H5O_layout_t *layout,
     H5F_addr_add( &disp, &(layout->addr) );
     f->shared->access_parms->u.mpio.disp = disp;
 #ifdef H5Smpi_DEBUG
-    fprintf(stdout, "spaces_xfer: disp=%lld\n", disp.offset );
+    fprintf(stdout, "spaces_xfer: disp=%lld\n", (long long)disp.offset );
 #endif
 
     /* Effective address determined by base addr and the MPI file type */
