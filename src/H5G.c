@@ -40,6 +40,7 @@
 #define H5G_INIT_HEAP		8192
 #define PABLO_MASK	H5G_mask
 
+static herr_t H5G_mkroot (hdf5_file_t *f, size_t size_hint);
 
 /* Is the interface initialized? */
 static intn interface_initialize_g = FALSE;
@@ -105,7 +106,7 @@ H5G_basename (const char *name, size_t *size_p)
    
    assert (name);
 
-   s = name + strlen(name);
+   s = name + HDstrlen(name);
    while (s>name && '/'==s[-1]) --s; /*skip past trailing slashes*/
    while (s>name && '/'!=s[-1]) --s; /*skip past base name*/
 
@@ -115,7 +116,7 @@ H5G_basename (const char *name, size_t *size_p)
     */
    if ('/'==*s) {
       if (size_p) *size_p = 0;
-      return s + strlen(s); /*null terminator*/
+      return s + HDstrlen(s); /*null terminator*/
    }
 
    if (size_p) *size_p = strcspn (s, "/");
@@ -126,7 +127,9 @@ H5G_basename (const char *name, size_t *size_p)
 /*-------------------------------------------------------------------------
  * Function:	H5G_namei
  *
- * Purpose:	Given a name (absolute or relative) return the symbol table
+ * Purpose:	(Partially) translates a name to a symbol table entry.
+ *
+ *		Given a name (absolute or relative) return the symbol table
  *		entry for that name and for the directory that contains the
  *		base name.  These entries (DIR_ENT and BASE_ENT) are returned
  *		through memory passed into the function by the caller.  Either
@@ -141,12 +144,6 @@ H5G_basename (const char *name, size_t *size_p)
  *		`..' is not internally recognized (it is recognized if
  * 		such a name appears in the symbol table).
  *
- * 		As a special case, if the NAME is the string `/' (or
- *		equivalent) then DIR_ENT and BASE_ENT are both initialized
- *		to the contents of the root symbol table entry.  However,
- *		the contents of the root symbol table entry may be
- *		uninitialized.
- *
  * 		If the name cannot be fully resolved, then REST will
  *		point to the part of NAME where the traversal failed
  *		(REST will always point to a relative name) and BASE_ENT
@@ -154,6 +151,18 @@ H5G_basename (const char *name, size_t *size_p)
  *		information about the directory (or other object) at which
  *		the traversal failed.  However, if the name can be fully
  *		resolved, then REST points to the null terminator of NAME.
+ *
+ * 		As a special case, if the NAME is the name `/' (or
+ *		equivalent) then DIR_ENT is initialized to all zero and
+ *		BASE_ENT is initialized with the contents of the root
+ *		symbol table entry.
+ *
+ * 		As a special case, if the NAME is the string `/foo' (or
+ *		equivalent) and the root symbol table entry points to a
+ *		non-directory object with a name message with the value
+ *		`foo' then DIR_ENT is initialized to all zero and BASE_ENT
+ * 		is initialized with the contents of the root symbol table
+ *		entry.
  *
  * Return:	Success:	SUCCEED if the name can be fully
  *				resolved.
@@ -180,6 +189,7 @@ H5G_namei (hdf5_file_t *f, H5G_entry_t *cwd, const char *name,
    H5G_entry_t	*tmp, *dir, *base;	/*ptrs to DIR and BASE entries	*/
    size_t	nchars;			/*component name length		*/
    char		comp[1024];		/*component name buffer		*/
+   hbool_t	aside = FALSE;		/*did we look at a name message?*/
    
    FUNC_ENTER (H5G_namei, NULL, FAIL);
 
@@ -224,10 +234,25 @@ H5G_namei (hdf5_file_t *f, H5G_entry_t *cwd, const char *name,
       HDmemcpy (comp, name, nchars);
       comp[nchars] = '\0';
 
-      /*
-       * Look for the component in the current symbol table.
-       */
       if (H5G_stab_find (f, dir, comp, base)<0) {
+	 /*
+	  * Component was not found in the current symbol table, probably
+	  * because it isn't a symbol table.  If it is the root symbol then
+	  * see if it has the appropriate name field.  The ASIDE variable
+	  * prevents us from saying `/foo/foo' where the root object has
+	  * the name `foo'.
+	  */
+	 H5O_name_t mesg;
+	 if (!aside && dir->header==f->root_sym->header &&
+	     H5O_read (f, dir->header, dir, H5O_NAME, 0, &mesg)) {
+	    if (!strcmp (mesg.s, comp)) {
+	       H5O_reset (H5O_NAME, &mesg);
+	       *base = *dir;
+	       aside = TRUE;
+	    }
+	    H5O_reset (H5O_NAME, &mesg);
+	 }
+
 	 /* component not found */
 	 if (dir_ent) *dir_ent = *dir;
 	 HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, -2);
@@ -236,11 +261,22 @@ H5G_namei (hdf5_file_t *f, H5G_entry_t *cwd, const char *name,
       /* next component */
       name += nchars;
    }
-   
+
    /* output parameters */
    if (rest) *rest = name; /*final null*/
-   if (dir_ent) *dir_ent = *dir;
+   if (dir_ent) {
+      if (base->header == f->root_sym->header) {
+	 HDmemset (dir_ent, 0, sizeof(H5G_entry_t)); /*root has no parent*/
+      } else {
+	 *dir_ent = *dir;
+      }
+   }
    if (base_ent) *base_ent = *base;
+
+   /* Perhaps the root object doesn't even exist! */
+   if (base->header<=0) {
+      HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, -2); /*root not found*/
+   }
    
    FUNC_LEAVE (SUCCEED);
 }
@@ -250,11 +286,11 @@ H5G_namei (hdf5_file_t *f, H5G_entry_t *cwd, const char *name,
  * Function:	H5G_mkroot
  *
  * Purpose:	Creates the root directory if it doesn't exist; otherwise
- *		nothing happens.  If the root symbol table previously
- *		pointed to something other than a directory, then that
- *		object is made a member of the root directory and is
- *		given a name corresponding to the object name message.
- *		If the root object doesn't have an object name message
+ *		nothing happens.  If the root symbol table entry previously
+ *		pointed to something other than a directory, then that object
+ *		is made a member of the root directory and is given a name
+ *		corresponding to the object's name message (the name message
+ *		is removed).  If the root object doesn't have a name message
  *		then the name `Root Object' is used.
  *
  * Return:	Success:	SUCCEED
@@ -267,9 +303,8 @@ H5G_namei (hdf5_file_t *f, H5G_entry_t *cwd, const char *name,
  *
  * Modifications:
  *
- *-------------------------------------------------------------------------
- */
-herr_t
+ *------------------------------------------------------------------------- */
+static herr_t
 H5G_mkroot (hdf5_file_t *f, size_t size_hint)
 {
    H5O_stab_t	stab;			/*symbol table message		*/
@@ -277,14 +312,15 @@ H5G_mkroot (hdf5_file_t *f, size_t size_hint)
    H5G_entry_t	root;			/*old root entry		*/
    const char	*root_name=NULL;	/*name of old root object	*/
    intn		nlinks;			/*number of links		*/
+   hbool_t	reset = FALSE;		/*should name message be reset?	*/
    
    FUNC_ENTER (H5G_mkroot, NULL, FAIL);
 
    /*
     * Is there already a root object that needs to move into the new
-    * root symbol table?
+    * root symbol table?  The root object is a symbol table if we can
+    * read the H5O_STAB message.
     */
-   name.s = NULL;
    if (f->root_sym->header>0) {
       if (H5O_read (f, f->root_sym->header, f->root_sym, H5O_STAB, 0, &stab)) {
 	 /* root directory already exists */
@@ -293,6 +329,8 @@ H5G_mkroot (hdf5_file_t *f, size_t size_hint)
 			   0, &name)) {
 	 root = *(f->root_sym);
 	 root_name = name.s; /*dont reset name until root_name is done*/
+	 reset = TRUE;
+	 H5O_remove (f, f->root_sym->header, f->root_sym, H5O_NAME, H5O_ALL);
       } else {
 	 root = *(f->root_sym);
 	 root_name = "Root Object";
@@ -318,17 +356,19 @@ H5G_mkroot (hdf5_file_t *f, size_t size_hint)
     * of 1.
     */
    if (root_name) {
+
+#ifndef NDEBUG
       nlinks = H5O_link (f, root.header, &root, 0);
       assert (1==nlinks);
+#endif
 	 
       if (H5G_stab_insert (f, f->root_sym, root_name, &root)) {
 	 /* can't insert old root object in new root directory */
 	 H5O_reset (H5O_NAME, &name);
 	 HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, FAIL);
       }
-      H5O_reset (H5O_NAME, &name);
+      if (reset) H5O_reset (H5O_NAME, &name);
    }
-   f->root_type=H5F_ROOT_DIRECTORY; /* set the root symbol type be a directory */
 
    FUNC_LEAVE (SUCCEED);
 }
@@ -344,9 +384,10 @@ H5G_mkroot (hdf5_file_t *f, size_t size_hint)
  *		table entry for the new directory's parent and ENT will
  *		contain the symbol table entry for the new directory.
  *
- * 		Do not use this function to create the root symbol table
- *		since it is a special case.  Use H5G_mkroot() instead.
- *		Creating `/' with this function will return failure.
+ * 		A root directory is created implicitly by this function
+ *		when necessary.  Calling this function with the name "/"
+ *		(or any equivalent name) will result in an H5E_EXISTS
+ * 		failure.
  *
  * Return:	Success:	SUCCEED, if DIR_ENT is not the null pointer
  *				then it will be initialized with the
@@ -382,6 +423,10 @@ H5G_new (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
    if (!dir_ent) dir_ent = &_parent;
    if (!ent) ent = &_child;
 
+   /* Create root directory if necessary */
+   H5G_mkroot (f, size_hint);
+   H5ECLEAR;
+
    /* lookup name */
    status = H5G_namei (f, cwd, name, &rest, dir_ent, NULL);
    if (status<0 && !rest) {
@@ -403,7 +448,7 @@ H5G_new (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
 	 HRETURN_ERROR (H5E_DIRECTORY, H5E_COMPLEN, FAIL);
       } else {
 	 /* null terminate */
-	 memcpy (_comp, rest, nchars);
+	 HDmemcpy (_comp, rest, nchars);
 	 _comp[nchars] = '\0';
 	 rest = _comp;
       }
@@ -426,16 +471,19 @@ H5G_new (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
 /*-------------------------------------------------------------------------
  * Function:	H5G_find
  *
- * Purpose:	Finds an object with the specified NAME in file F.  If the
- *		name is relative then it is interpretted relative to CWD,
- *		a symbol table entry for a symbol table.  On successful return,
- *		DIR_ENT (if non-null) will be initialized with the symbol table
- *		information for the directory in which the object appears
- *		and ENT will be initialized with the symbol table entry for
- *		the object.
+ * Purpose:	Finds an object with the specified NAME in file F.  If
+ *		the name is relative then it is interpretted relative
+ *		to CWD, a symbol table entry for a symbol table.  On
+ *		successful return, DIR_ENT (if non-null) will be
+ *		initialized with the symbol table information for the
+ *		directory in which the object appears (or all zero if
+ *		the returned object is the root object) and ENT will
+ *		be initialized with the symbol table entry for the
+ *		object (ENT is optional when the caller is interested
+ *		only in the existence of the object).
  *
- * 		ENT is optional when the caller is interested only in the
- *		existence of the object.
+ * 		This function will fail if the root object is
+ * 		requested and there is none.
  *
  * Return:	Success:	SUCCEED with DIR_ENT and ENT initialized.
  *
@@ -447,8 +495,7 @@ H5G_new (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
  *
  * Modifications:
  *
- *-------------------------------------------------------------------------
- */
+ *------------------------------------------------------------------------- */
 herr_t
 H5G_find (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
 	  const char *name, H5G_entry_t *ent)
@@ -459,6 +506,10 @@ H5G_find (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
    assert (f);
    assert (name && *name);
    assert (cwd || '/'==*name);
+
+   if (f->root_sym->header<=0) {
+      HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, FAIL); /*object not found*/
+   }
 
    if (H5G_namei (f, cwd, name, NULL, dir_ent, ent)<0) {
       HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, FAIL); /*object not found*/
@@ -475,11 +526,12 @@ H5G_find (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
  *		giving it the specified NAME.  If NAME is relative then
  *		it is interpreted with respect to the CWD pointer.  If
  *		non-null, DIR_ENT will be initialized with the symbol table
- *		entry for the directory which contains the new ENT.
+ *		entry for the directory which contains the new ENT (or all
+ *		zero if the new ENT is the root object).
  *
- * 		NAME must not be the name of the root symbol table entry
- *		('/') since that is a special case.  If NAME is the root
- * 		symbol table entry, then this function will return failure.
+ * 		This function attempts to use a non-directory file if
+ * 		the file contains just one object.  The one object
+ * 		will be the root object.
  *
  * 		Inserting an object entry into the symbol table increments
  *		the link counter for that object.
@@ -496,8 +548,7 @@ H5G_find (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
  *
  * Modifications:
  *
- *-------------------------------------------------------------------------
- */
+ *------------------------------------------------------------------------- */
 herr_t
 H5G_insert (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
 	    const char *name, H5G_entry_t *ent)
@@ -507,6 +558,7 @@ H5G_insert (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
    H5G_entry_t	_parent;
    size_t	nchars;
    char		_comp[1024];
+   H5O_stab_t	stab;
    
    FUNC_ENTER (H5G_insert, NULL, FAIL);
 
@@ -517,7 +569,21 @@ H5G_insert (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
    assert (ent);
    if (!dir_ent) dir_ent = &_parent;
 
-   /* lookup name */
+   /*
+    * If there's already an object or if this object is a directory then
+    * create a root directory. The object is a directory if we can read
+    * the symbol table message from its header.  H5G_mkroot() fails if
+    * the root object is already a directory, but we don't care.
+    */
+   if (f->root_sym->header>0 ||
+       H5O_read (f, ent->header, ent, H5O_STAB, 0, &stab)) {
+      H5G_mkroot (f, H5G_SIZE_HINT);
+      H5ECLEAR;
+   }
+
+   /*
+    * Look up the name -- it shouldn't exist yet.
+    */
    status = H5G_namei (f, cwd, name, &rest, dir_ent, NULL);
    if (status<0 && !rest) {
       HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, FAIL); /*lookup failed*/
@@ -526,80 +592,72 @@ H5G_insert (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
    }
    H5ECLEAR; /*it's OK that we didn't find it*/
 
-   /* should be one null-terminated component left */
+   /*
+    * The caller may be attempting to insert a root object that either
+    * doesn't have a name or we shouldn't interfere with the name
+    * it already has.
+    */
    rest = H5G_component (rest, &nchars);
-   assert (rest && *rest);
+   if (!rest || !*rest) {
+      if (f->root_sym->header>0) {
+	 HRETURN_ERROR (H5E_DIRECTORY, H5E_EXISTS, FAIL); /*root exists*/
+      }
+      HDmemset (dir_ent, 0, sizeof(H5G_entry_t));
+      if (1!=H5O_link (f, ent->header, ent, 1)) {
+	 HRETURN_ERROR (H5E_DIRECTORY, H5E_LINK, FAIL); /*bad link count*/
+      }
+      *(f->root_sym) = *ent;
+      HRETURN (SUCCEED);
+   }
+
+   /*
+    * There should be one component left.  Make sure it's null
+    * terminated.
+    */
    if (rest[nchars]) {
       if (H5G_component (rest+nchars, NULL)) {
-	 /* missing component */
+	 /* name component not found */
 	 HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, FAIL);
       } else if (nchars+1 > sizeof _comp) {
-	 /* component name is too long */
+	 /* name component is too long */
 	 HRETURN_ERROR (H5E_DIRECTORY, H5E_COMPLEN, FAIL);
       } else {
 	 /* null terminate */
-	 memcpy (_comp, rest, nchars);
+	 HDmemcpy (_comp, rest, nchars);
 	 _comp[nchars] = '\0';
 	 rest = _comp;
       }
    }
 
+   /*
+    * If this is the only object then insert it as the root object.  Add
+    * a name messaage to the object header (or modify the first one we
+    * find).
+    */
+   if (f->root_sym->header<=0) {
+      H5O_name_t name_mesg;
+      name_mesg.s = rest;
+      if (H5O_modify (f, ent->header, ent, NULL, H5O_NAME, 0, &name_mesg)<0) {
+	 /* cannot add/change name message */
+	 HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, FAIL);
+      }
+      if (1!=H5O_link (f, ent->header, ent, 1)) {
+	 HRETURN_ERROR (H5E_DIRECTORY, H5E_LINK, FAIL); /*bad link count*/
+      }
+      *(f->root_sym) = *ent;
+      HRETURN (SUCCEED);
+   }
+   
    /* increment the link count */
    if (H5O_link (f, ent->header, ent, 1)<0) {
-      HRETURN_ERROR (H5E_DIRECTORY, H5E_LINK, FAIL); /*can't increase linkage*/
+      HRETURN_ERROR (H5E_DIRECTORY, H5E_LINK, FAIL); /*link inc failure*/
    }
 
    /* insert entry into parent */
    if (H5G_stab_insert (f, dir_ent, rest, ent)<0) {
+      H5O_link (f, ent->header, ent, -1); /*don't care if it fails*/
       HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, FAIL); /*can't insert*/
    }
-      
-   FUNC_LEAVE (SUCCEED);
-}
-   
-/*--------------------------------------------------------------------------
- NAME
-    H5G_set_root
- PURPOSE
-    Inserts symbol table ENT as the file's root object giving it the specified
-    NAME.  NAME is not allowed to be relative.
- USAGE
-    herr_t H5G_set_root(f, name, ent)
-        hatom_t f;          IN: File to set root entry
-        const char *name;   IN: Root object's name
-        H5G_entry_t *ent;   IN: Root object's symbol-table entry
- RETURNS
-    SUCCEED/FAIL
- DESCRIPTION
-        This function sets the root object of a file to be the symbol-table
-    table passed as an argument.  The primary function of this routine is to
-    make a dataset the root object of a file.  (The dataset may be replaced
-    with a "real" root directory, but at this point, the dataset is the only
-    object in the file)
---------------------------------------------------------------------------*/
-herr_t
-H5G_set_root (hdf5_file_t *f, const char *name, H5G_entry_t *ent)
-{
-   herr_t	status;
-   const char	*rest=NULL;
-   H5G_entry_t	_parent;
-   size_t	nchars;
-   char		_comp[1024];
-   
-   FUNC_ENTER (H5G_set_root, NULL, FAIL);
-
-   /* check args */
-   assert (f);
-   assert (name && *name);
-   assert (ent);
-
-   /* lookup base-name */
-   if(HDstrlen(rest = H5G_basename (name, NULL))<=0)
-      HRETURN_ERROR (H5E_SYM, H5E_BADVALUE, FAIL); /* invalid base name */
-   H5ECLEAR; 
-
-   /* insert entry as root object */
-   HDmemcpy(file->root_sym,ent,sizeof(H5G_entry_t));
       
    FUNC_LEAVE (SUCCEED);
 }
@@ -639,7 +697,6 @@ H5G_modify (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
 {
    const char	*rest=NULL;
    H5G_entry_t	_parent;
-   size_t	nchars;
    
    FUNC_ENTER (H5G_modify, NULL, FAIL);
 
@@ -655,14 +712,12 @@ H5G_modify (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
       HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, FAIL); /*entry not found*/
    }
 
-   /* get the base name */
-   rest = H5G_basename (name, &nchars);
-
-   /* cannot modify the root symbol entry */
-   if (!*rest) HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, FAIL);
-
-   /* modify entry in parent */
-   if (H5G_stab_modify (f, dir_ent, rest, ent)<0) {
+   /*
+    * Modify the entry in the parent or in the file struct.
+    */
+   if (dir_ent->header<=0) {
+      *(f->root_sym) = *ent;
+   } else if (H5G_stab_modify (f, dir_ent, rest, ent)<0) {
       HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, FAIL); /*can't modify*/
    }
 
@@ -1076,7 +1131,7 @@ H5G_decode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent)
       break;
 
    default:
-      abort();
+      HDabort();
    }
 
    *pp = p_ret + H5G_SIZEOF_ENTRY(f);
@@ -1187,7 +1242,7 @@ H5G_encode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent)
       break;
 
    default:
-      abort();
+      HDabort();
    }
 
    /* fill with zero */

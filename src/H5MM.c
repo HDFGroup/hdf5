@@ -105,7 +105,7 @@ H5MM_xrealloc (void *mem, size_t size)
       mem = H5MM_xfree (mem);
 
    } else {
-      mem = realloc (mem, size);
+      mem = HDrealloc (mem, size);
       assert (mem);
    }
 
@@ -138,8 +138,8 @@ H5MM_xstrdup (const char *s)
    char		*mem;
 
    if (!s) return NULL;
-   mem = H5MM_xmalloc (strlen (s)+1);
-   strcpy (mem, s);
+   mem = H5MM_xmalloc (HDstrlen (s)+1);
+   HDstrcpy (mem, s);
    return mem;
 }
 

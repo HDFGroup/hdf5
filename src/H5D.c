@@ -36,6 +36,7 @@ static char RcsId[] = "@(#)$Revision$";
 #include <H5Aprivate.h> /* Atoms */
 #include <H5Dprivate.h> /* Dataset functions */
 #include <H5Eprivate.h> /* Error handling */
+#include <H5Mprivate.h> /* Meta data */
 
 #define PABLO_MASK	H5D_mask
 
@@ -269,6 +270,7 @@ herr_t H5D_flush(hatom_t oid)
     /* Check if we have information to flush to the file... */
     if(dataset->modified==BTRUE)
       {
+#if 0
         /* Check if we need to create the dataset header and insert the dataset in the file's hierarchy */
         if(dataset->header==0)
           {
@@ -333,6 +335,7 @@ herr_t H5D_flush(hatom_t oid)
             
             /* Add the appropriate messages for the dataset */
           } /* end if */
+#endif
       } /* end if */
 
 done:

@@ -347,7 +347,7 @@ H5B_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5B_t *bt)
    if (bt->dirty) {
       
       /* magic number */
-      memcpy (p, H5B_MAGIC, H5B_SIZEOF_MAGIC);
+      HDmemcpy (p, H5B_MAGIC, H5B_SIZEOF_MAGIC);
       p += 4;
 
       /* node type and level */
@@ -586,12 +586,12 @@ H5B_split (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, intn anchor)
    /*
     * Copy data into the new node from the old node.
     */
-   memcpy (bt->page + H5B_SIZEOF_HDR(f),
-	   old->page + H5B_SIZEOF_HDR(f) + delta*recsize,
-	   H5B_K(f,type) * recsize + bt->sizeof_rkey);
-   memcpy (bt->native,
-	   old->native + delta * type->sizeof_nkey,
-	   (H5B_K(f,type)+1) * type->sizeof_nkey);
+   HDmemcpy (bt->page + H5B_SIZEOF_HDR(f),
+	     old->page + H5B_SIZEOF_HDR(f) + delta*recsize,
+	     H5B_K(f,type) * recsize + bt->sizeof_rkey);
+   HDmemcpy (bt->native,
+	     old->native + delta * type->sizeof_nkey,
+	     (H5B_K(f,type)+1) * type->sizeof_nkey);
 
    for (i=0, offset=H5B_SIZEOF_HDR(f);
 	i<=2*H5B_K(f,type);
@@ -630,12 +630,12 @@ H5B_split (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, intn anchor)
    old->nchildren = H5B_K(f,type);
    
    if (H5B_ANCHOR_RT==anchor) {
-      memcpy (old->page + H5B_SIZEOF_HDR(f),
-	      old->page + H5B_SIZEOF_HDR(f) + delta*recsize,
-	      H5B_K(f,type) * recsize);
-      memmove (old->native,
-	       old->native + delta * type->sizeof_nkey,
-	       (H5B_K(f,type)+1) * type->sizeof_nkey);
+      HDmemcpy (old->page + H5B_SIZEOF_HDR(f),
+		old->page + H5B_SIZEOF_HDR(f) + delta*recsize,
+		H5B_K(f,type) * recsize);
+      HDmemmove (old->native,
+		 old->native + delta * type->sizeof_nkey,
+		 (H5B_K(f,type)+1) * type->sizeof_nkey);
 
       for (i=0; i<=2*H5B_K(f,type); i++) {
 
@@ -798,7 +798,7 @@ H5B_insert (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
       if (!bt->key[0].nkey && H5B_decode_key (f, bt, 0)<0) {
 	 HRETURN_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
       }
-      memcpy (lt_key, bt->key[0].nkey, type->sizeof_nkey);
+      HDmemcpy (lt_key, bt->key[0].nkey, type->sizeof_nkey);
    }
 
    /* the new node */
@@ -810,7 +810,7 @@ H5B_insert (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
 	  H5B_decode_key (f, bt, bt->nchildren)<0) {
 	 HRETURN_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
       }
-      memcpy (rt_key, bt->key[bt->nchildren].nkey, type->sizeof_nkey);
+      HDmemcpy (rt_key, bt->key[bt->nchildren].nkey, type->sizeof_nkey);
    }
 
    /*
@@ -872,16 +872,16 @@ H5B_insert (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
    bt->child[0] = addr;
    bt->key[0].dirty = 1;
    bt->key[0].nkey = bt->native;
-   memcpy (bt->key[0].nkey, lt_key, type->sizeof_nkey);
+   HDmemcpy (bt->key[0].nkey, lt_key, type->sizeof_nkey);
 
    bt->child[1] = child;
    bt->key[1].dirty = 1;
    bt->key[1].nkey = bt->native + type->sizeof_nkey;
-   memcpy (bt->key[1].nkey, md_key, type->sizeof_nkey);
+   HDmemcpy (bt->key[1].nkey, md_key, type->sizeof_nkey);
 
    bt->key[2].dirty = 1;
    bt->key[2].nkey = bt->native + 2 * type->sizeof_nkey;
-   memcpy (bt->key[2].nkey, rt_key, type->sizeof_nkey);
+   HDmemcpy (bt->key[2].nkey, rt_key, type->sizeof_nkey);
 
    FUNC_LEAVE (new_root);
 }
@@ -925,13 +925,13 @@ H5B_insert_child (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr,
       /*
        * The MD_KEY is the left key of the new node.
        */
-      memmove (bt->page + H5B_SIZEOF_HDR(f) + (idx+1)*recsize,
-	       bt->page + H5B_SIZEOF_HDR(f) + idx*recsize,
-	       (bt->nchildren-idx)*recsize + bt->sizeof_rkey);
+      HDmemmove (bt->page + H5B_SIZEOF_HDR(f) + (idx+1)*recsize,
+		 bt->page + H5B_SIZEOF_HDR(f) + idx*recsize,
+		 (bt->nchildren-idx)*recsize + bt->sizeof_rkey);
 
-      memmove (bt->native + (idx+1) * type->sizeof_nkey,
-	       bt->native + idx * type->sizeof_nkey,
-	       ((bt->nchildren-idx)+1) * type->sizeof_nkey);
+      HDmemmove (bt->native + (idx+1) * type->sizeof_nkey,
+		 bt->native + idx * type->sizeof_nkey,
+		 ((bt->nchildren-idx)+1) * type->sizeof_nkey);
 
       for (i=bt->nchildren; i>=idx; --i) {
 	 bt->key[i+1].dirty = bt->key[i].dirty;
@@ -943,21 +943,21 @@ H5B_insert_child (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr,
       }
       bt->key[idx].dirty = 1;
       bt->key[idx].nkey = bt->native + idx * type->sizeof_nkey;
-      memcpy (bt->key[idx].nkey, md_key, type->sizeof_nkey);
+      HDmemcpy (bt->key[idx].nkey, md_key, type->sizeof_nkey);
 
    } else {
       /*
        * The MD_KEY is the right key of the new node.
        */
-      memmove (bt->page + (H5B_SIZEOF_HDR(f) +
-			   (idx+1)*recsize + bt->sizeof_rkey),
-	       bt->page + (H5B_SIZEOF_HDR(f) +
-			   idx*recsize + bt->sizeof_rkey),
-	       (bt->nchildren-idx) * recsize);
+      HDmemmove (bt->page + (H5B_SIZEOF_HDR(f) +
+			     (idx+1)*recsize + bt->sizeof_rkey),
+		 bt->page + (H5B_SIZEOF_HDR(f) +
+			     idx*recsize + bt->sizeof_rkey),
+		 (bt->nchildren-idx) * recsize);
 
-      memmove (bt->native + idx + 2,
-	       bt->native + idx + 1,
-	       (bt->nchildren-idx) * type->sizeof_nkey);
+      HDmemmove (bt->native + idx + 2,
+		 bt->native + idx + 1,
+		 (bt->nchildren-idx) * type->sizeof_nkey);
 
       for (i=bt->nchildren; i>idx; --i) {
 	 bt->key[i+1].dirty = bt->key[i].dirty;
@@ -969,12 +969,12 @@ H5B_insert_child (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr,
       }
       bt->key[idx+1].dirty = 1;
       bt->key[idx+1].nkey = bt->native + (idx+1) * type->sizeof_nkey;
-      memcpy (bt->key[idx+1].nkey, md_key, type->sizeof_nkey);
+      HDmemcpy (bt->key[idx+1].nkey, md_key, type->sizeof_nkey);
    }
 
-   memmove (bt->child + idx + 1,
-	    bt->child + idx,
-	    (bt->nchildren - idx) * sizeof(haddr_t));
+   HDmemmove (bt->child + idx + 1,
+	      bt->child + idx,
+	      (bt->nchildren - idx) * sizeof(haddr_t));
 
    bt->child[idx] = child;
    bt->nchildren += 1;
@@ -1064,13 +1064,13 @@ H5B_insert_helper (hdf5_file_t *f, haddr_t addr, const H5B_class_t *type,
       if (!bt->key[idx].nkey && H5B_decode_key (f, bt, idx)<0) {
 	 HRETURN_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
       }
-      memcpy (lt_key, bt->key[idx].nkey, type->sizeof_nkey);
+      HDmemcpy (lt_key, bt->key[idx].nkey, type->sizeof_nkey);
 
       /* right key */
       if (!bt->key[idx+1].nkey && H5B_decode_key (f, bt, idx+1)<0) {
 	 HRETURN_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
       }
-      memcpy (rt_key, bt->key[idx+1].nkey, type->sizeof_nkey);
+      HDmemcpy (rt_key, bt->key[idx+1].nkey, type->sizeof_nkey);
 
       /* compare */
       if ((cmp=(type->cmp)(f, lt_key, udata, rt_key))<0) {
@@ -1096,11 +1096,11 @@ H5B_insert_helper (hdf5_file_t *f, haddr_t addr, const H5B_class_t *type,
 	 if (!bt->key[idx].nkey && H5B_decode_key (f, bt, idx)<0) {
 	    HRETURN_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
 	 }
-	 memcpy (lt_key, bt->key[idx].nkey, type->sizeof_nkey);
+	 HDmemcpy (lt_key, bt->key[idx].nkey, type->sizeof_nkey);
 	 if (!bt->key[idx+1].nkey && H5B_decode_key (f, bt, idx+1)<0) {
 	    HRETURN_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
 	 }
-	 memcpy (rt_key, bt->key[idx+1].nkey, type->sizeof_nkey);
+	 HDmemcpy (rt_key, bt->key[idx+1].nkey, type->sizeof_nkey);
       }
    } else if (cmp>0 && idx+1>=bt->nchildren) {
       idx = bt->nchildren-1;
@@ -1109,11 +1109,11 @@ H5B_insert_helper (hdf5_file_t *f, haddr_t addr, const H5B_class_t *type,
 	 if (!bt->key[idx].nkey && H5B_decode_key (f, bt, idx)<0) {
 	    HRETURN_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
 	 }
-	 memcpy (lt_key, bt->key[idx].nkey, type->sizeof_nkey);
+	 HDmemcpy (lt_key, bt->key[idx].nkey, type->sizeof_nkey);
 	 if (!bt->key[idx+1].nkey && H5B_decode_key (f, bt, idx+1)<0) {
 	    HRETURN_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
 	 }
-	 memcpy (rt_key, bt->key[idx+1].nkey, type->sizeof_nkey);
+	 HDmemcpy (rt_key, bt->key[idx+1].nkey, type->sizeof_nkey);
       }
    }
    assert (0==cmp);
@@ -1138,11 +1138,11 @@ H5B_insert_helper (hdf5_file_t *f, haddr_t addr, const H5B_class_t *type,
       
       bt->key[0].dirty = 1;
       bt->key[0].nkey = bt->native;
-      memcpy (bt->key[0].nkey, lt_key, type->sizeof_nkey);
+      HDmemcpy (bt->key[0].nkey, lt_key, type->sizeof_nkey);
 
       bt->key[1].dirty = 1;
       bt->key[1].nkey = bt->native + type->sizeof_nkey;
-      memcpy (bt->key[1].nkey, rt_key, type->sizeof_nkey);
+      HDmemcpy (bt->key[1].nkey, rt_key, type->sizeof_nkey);
       idx = 0;
    }
 
@@ -1171,7 +1171,7 @@ H5B_insert_helper (hdf5_file_t *f, haddr_t addr, const H5B_class_t *type,
     */
    if (*lt_key_changed) {
       bt->key[idx].nkey = bt->native + idx * type->sizeof_nkey;
-      memcpy (bt->key[idx].nkey, lt_key, type->sizeof_nkey);
+      HDmemcpy (bt->key[idx].nkey, lt_key, type->sizeof_nkey);
       bt->dirty += 1;
       bt->key[idx].dirty = 1;
       if (idx>0) *lt_key_changed = FALSE;
@@ -1179,7 +1179,7 @@ H5B_insert_helper (hdf5_file_t *f, haddr_t addr, const H5B_class_t *type,
    if (*rt_key_changed) {
       bt->key[idx+1].nkey = bt->native +
 			    (idx+1) * type->sizeof_nkey;
-      memcpy (bt->key[idx+1].nkey, rt_key, type->sizeof_nkey);
+      HDmemcpy (bt->key[idx+1].nkey, rt_key, type->sizeof_nkey);
       bt->dirty += 1;
       bt->key[idx+1].dirty = 1;
       if (idx+1<bt->nchildren) *rt_key_changed = FALSE;
@@ -1229,13 +1229,13 @@ H5B_insert_helper (hdf5_file_t *f, haddr_t addr, const H5B_class_t *type,
 	 if (!bt->key[0].nkey && H5B_decode_key (f, bt, 0)<0) {
 	    HRETURN_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
 	 }
-	 memcpy (md_key, bt->key[0].nkey, type->sizeof_nkey);
+	 HDmemcpy (md_key, bt->key[0].nkey, type->sizeof_nkey);
       } else {
 	 if (!bt->key[bt->nchildren].nkey &&
 	     H5B_decode_key (f, bt, bt->nchildren)<0) {
 	    HRETURN_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
 	 }
-	 memcpy (md_key, bt->key[bt->nchildren].nkey, type->sizeof_nkey);
+	 HDmemcpy (md_key, bt->key[bt->nchildren].nkey, type->sizeof_nkey);
       }
    }
 

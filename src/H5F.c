@@ -336,7 +336,6 @@ H5F_new (void)
    /* Create a root symbol slot */
    f->root_sym = H5MM_xcalloc (1, sizeof (H5G_entry_t));
    f->root_sym->type = H5G_NOTHING_CACHED;
-   f->root_type=H5F_ROOT_NONE;
    
    return f;
 }
@@ -791,63 +790,6 @@ done:
     /* Normal function cleanup */
     FUNC_LEAVE(ret_value);
 } /* end H5Fclose() */
-
-/*--------------------------------------------------------------------------
- NAME
-    H5F_root_type
- PURPOSE
-    Check the type of the root symbol-entry for a file.
- USAGE
-    H5F_root_symtype_t_ H5F_root_type(fid)
-        int32 fid;      IN: File ID of file to query
- RETURNS
-    Returns root symbol type on success, H5F_ROOT_ERROR on failure.
- DESCRIPTION
-        This function retrieves the type of symbol-entry the root object in the
-    file describes.  Legimate values are:
-        H5F_ROOT_NONE      - Root-symbol table is empty, neither a dataset nor a directory is the root object
-        H5F_ROOT_UNKNOWN   - Don't know (yet) if the root object is a dataset or a directory
-        H5F_ROOT_DATASET   - Root object is a dataset
-        H5F_ROOT_DIRECTORY - Root object is a directory
-
-        This function is designed for internal use and should be modified to
-    not return H5F_ROOT_UNKNOWN if it is made part of the public API.
-
- ERRORS
-    H5E_ARGS - H5E_BADTYPE      - Argument checking
-    H5E_ATOM - H5E_BADATOM      - Can't get the object for an atom
- MODIFICATIONS:
-    Quincey Koziol, 13 Aug 1997
---------------------------------------------------------------------------*/
-H5F_root_symtype_t H5F_root_type(hatom_t fid)
-{
-    hdf5_file_t *f=NULL;        /* file struct for new file */
-    H5F_root_symtype_t ret_value = H5F_ROOT_ERROR;
-
-    FUNC_ENTER(H5F_root_type, H5F_init_interface, H5F_ROOT_ERROR);
-
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
-    if(H5Aatom_group(fid)!=H5_FILE)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL);
-
-    /* Get the file handle to close */
-    if((f=H5Aatom_object(fid))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
-
-    ret_value=f->root_type;
-
-done:
-    if(ret_value == H5F_ROOT_ERROR)   
-      { /* Error condition cleanup */
- 
-      }
-
-    /* Normal function cleanup */
-
-    FUNC_LEAVE(ret_value);
-} /* end H5F_root_type() */
-
 
 
 /*-------------------------------------------------------------------------

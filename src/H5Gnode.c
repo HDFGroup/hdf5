@@ -313,7 +313,7 @@ H5G_node_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
 
       /* entries */
       H5G_encode_vec (f, &p, sym->entry, sym->nsyms);
-      memset (p, 0, size - (p-buf));
+      HDmemset (p, 0, size - (p-buf));
       
       status = H5F_block_write (f, addr, size, buf);
       buf = H5MM_xfree (buf);
@@ -665,7 +665,7 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
     * heap address changed and update the symbol table object header
     * with the new heap address.
     */
-   offset = H5H_insert (f, udata->heap, strlen(udata->name)+1, udata->name);
+   offset = H5H_insert (f, udata->heap, HDstrlen(udata->name)+1, udata->name);
    udata->entry.name_off = offset;
    if (offset<0) HGOTO_ERROR (H5E_SYM, H5E_CANTINSERT, FAIL);
 
@@ -685,8 +685,8 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
       sn->dirty += 1;
       
       if (idx<=H5G_NODE_K(f)) {
-	 memmove (sn->entry+idx+1, sn->entry+idx,
-		  (H5G_NODE_K(f)-idx) * sizeof(H5G_entry_t));
+	 HDmemmove (sn->entry+idx+1, sn->entry+idx,
+		    (H5G_NODE_K(f)-idx) * sizeof(H5G_entry_t));
 	 sn->entry[idx] = udata->entry;
 	 sn->entry[idx].name_off = offset;
 	 sn->nsyms += 1;

@@ -28,6 +28,7 @@
 #define H5O_NCHUNKS	8		/*initial number of chunks	*/
 #define H5O_NEW_MESG	(-1)		/*new message			*/
 #define H5O_NO_ADDR	(-1)		/*no disk address yet		*/
+#define H5O_ALL		(-1)		/*delete all messages of type	*/
 
 #define H5O_VERSION	1
 #define H5O_ALIGNMENT	4
@@ -90,13 +91,39 @@ typedef struct H5O_t {
 extern const H5O_class_t H5O_NULL[1];
 
 /*
+ * Simple Dimensionality message.
+ */
+#define H5O_SIM_DIM_ID	0x0001
+extern const H5O_class_t H5O_SIM_DIM[1];
+
+typedef struct {
+    uint32 rank;        /* Number of dimensions */
+    uint32 dim_flags;   /* Dimension flags */
+    uint32 *size;       /* Dimension sizes */
+    uint32 *max;        /* Maximum dimension sizes */
+    uint32 *perm;       /* Dimension permutations */
+} H5O_sim_dim_t;
+
+/*
+ * Simple Datatype message.
+ */
+#define H5O_SIM_DTYPE_ID	0x0003
+extern const H5O_class_t H5O_SIM_DTYPE[1];
+
+typedef struct {
+    uint8 length;   /* Number of bytes */
+    uint8 arch;     /* Architecture format of the data */
+    hatom_t type;   /* Type of the data */
+} H5O_sim_dtype_t;
+
+/*
  * Object name message.
  */
 #define H5O_NAME_ID	0x000d
 extern const H5O_class_t H5O_NAME[1];
 
 typedef struct H5O_name_t {
-   char		*s;			/*ptr to malloc'd memory	*/
+   const char	*s;			/*ptr to malloc'd memory	*/
 } H5O_name_t;
 
 /*
@@ -124,32 +151,6 @@ typedef struct H5O_stab_t {
    haddr_t	heap;			/*address of name heap		*/
 } H5O_stab_t;
 
-/*
- * Simple Datatype message.
- */
-#define H5O_SIM_DTYPE_ID	0x0003
-extern const H5O_class_t H5O_SIM_DTYPE[1];
-
-typedef struct {
-    uint8 length;   /* Number of bytes */
-    uint8 arch;     /* Architecture format of the data */
-    hatom_t type;   /* Type of the data */
-} H5O_sim_dtype_t;
-
-/*
- * Simple Dimensionality message.
- */
-#define H5O_SIM_DIM_ID	0x0001
-extern const H5O_class_t H5O_SIM_DIM[1];
-
-typedef struct {
-    uint32 rank;        /* Number of dimensions */
-    uint32 dim_flags;   /* Dimension flags */
-    uint32 *size;       /* Dimension sizes */
-    uint32 *max;        /* Maximum dimension sizes */
-    uint32 *perm;       /* Dimension permutations */
-} H5O_sim_dim_t;
-
 
 
 haddr_t H5O_new (hdf5_file_t *f, intn nlink, size_t size_hint);
@@ -161,6 +162,8 @@ const void *H5O_peek (hdf5_file_t *f, haddr_t addr, const H5O_class_t *type,
 intn H5O_modify (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
 		 hbool_t *ent_modified, const H5O_class_t *type,
 		 intn overwrite, const void *mesg);
+herr_t H5O_remove (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
+		   const H5O_class_t *type, intn sequence);
 herr_t H5O_reset (const H5O_class_t *type, void *native);
 herr_t H5O_debug (hdf5_file_t *f, haddr_t addr, FILE *stream,
 		  intn indent, intn fwidth);

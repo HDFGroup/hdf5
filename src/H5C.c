@@ -396,6 +396,9 @@ done:
  	Robb Matzke, 13 Aug 1997
 	Removed H5_BTREE_SIZE and replaced it with H5_SYM_LEAF_K and
 	H5_SYM_INTERN_K.
+
+	Robb Matzke, 26 Aug 1997
+	Changed `hash_size' to `val' in two places.
 --------------------------------------------------------------------------*/
 herr_t H5Csetparm(hatom_t tid, file_create_param_t parm, const VOIDP buf)
 {
@@ -434,14 +437,14 @@ herr_t H5Csetparm(hatom_t tid, file_create_param_t parm, const VOIDP buf)
 
         case H5_OFFSET_SIZE:
             val = *(const uintn *)buf;
-            if(!(val==2 || val==4 || val==8 || val==16 || val==32 || val==64 || val==128 || hash_size==256))
+            if(!(val==2 || val==4 || val==8 || val==16 || val==32 || val==64 || val==128 || val==256))
                HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);
             template->offset_size=val;
             break;
 
         case H5_LENGTH_SIZE:
             val = *(const uintn *)buf;
-            if(!(val==2 || val==4 || val==8 || val==16 || val==32 || val==64 || val==128 || hash_size==256))
+            if(!(val==2 || val==4 || val==8 || val==16 || val==32 || val==64 || val==128 || val==256))
                HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);
             template->length_size=val;
             break;

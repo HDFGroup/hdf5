@@ -304,7 +304,6 @@ typedef struct {
     file_access_temp_t file_access_parms; /* File-access template	*/
 #endif
     struct H5G_entry_t *root_sym; /* Root symbol table entry		*/
-    H5F_root_symtype_t root_type; /* What kind of symbol is the root? 	*/
   } hdf5_file_t;
 
 
@@ -357,7 +356,6 @@ typedef struct {
 void H5F_encode_length_unusual(const hdf5_file_t *f, uint8 **p, uint8 *l);
 void H5F_encode_offset_unusual(const hdf5_file_t *f, uint8 **p, uint8 *o);
 intn H5F_compare_filename(const VOIDP obj, const VOIDP key);
-H5F_root_symtype_t H5F_root_type(hatom_t fid);
 herr_t H5F_block_read (hdf5_file_t *f, haddr_t addr, size_t size, void *buf);
 herr_t H5F_block_write (hdf5_file_t *f, haddr_t addr, size_t size, void *buf);
 herr_t H5F_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,

@@ -26,6 +26,7 @@
 #define H5G_NODE_MAGIC	"SNOD"	/*symbol table node magic number	*/
 #define H5G_NODE_SIZEOF_MAGIC 4 /*sizeof symbol node magic number	*/
 #define H5G_NODE_VERS	1	/*symbol table node version number	*/
+#define H5G_SIZE_HINT	1024	/*default root dir size hint		*/
 #define H5G_NODE_K(F) ((F)->file_create_parms.sym_leaf_k)
 #define H5G_NODE_SIZEOF_HDR(F) (H5G_NODE_SIZEOF_MAGIC + 4)
 #define H5G_SIZEOF_ENTRY(F)						      \
@@ -134,7 +135,6 @@ extern const H5B_class_t H5B_SNODE[1];
  */
 
 /* functions that understand directories */
-herr_t H5G_mkroot (hdf5_file_t *f, size_t size_hint);
 herr_t H5G_new (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
 		const char *name, size_t size_hint, H5G_entry_t *ent);
 herr_t H5G_find (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,

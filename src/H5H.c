@@ -626,7 +626,7 @@ H5H_insert (hdf5_file_t *f, haddr_t addr, size_t buf_size, const void *buf)
 				   H5H_SIZEOF_HDR(f)+heap->mem_alloc);
 
       /* clear new section so junk doesn't appear in the file */
-      memset (heap->chunk+H5H_SIZEOF_HDR(f)+old_size, 0, need_more);
+      HDmemset (heap->chunk+H5H_SIZEOF_HDR(f)+old_size, 0, need_more);
    }
 
    /*
@@ -929,11 +929,11 @@ H5H_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
       for (j=0; j<16; j++) {
 	 if (i+j<h->disk_alloc) {
 	    if (marker[i+j]) {
-	       fputc (' ', stream);
+	       HDfputc (' ', stream);
 	    } else {
 	       c = h->chunk[H5H_SIZEOF_HDR(f)+i+j];
-	       if (c>' ' && c<'~') fputc (c, stream);
-	       else fputc ('.', stream);
+	       if (c>' ' && c<'~') HDfputc (c, stream);
+	       else HDfputc ('.', stream);
 	    }
 	 }
       }

@@ -766,6 +766,39 @@ H5O_modify (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5O_remove
+ *
+ * Purpose:	Removes the specified message from the object header.
+ *		If sequence is H5O_ALL (-1) then all messages of the
+ *		specified type are removed.  Removing a message causes
+ *		the sequence numbers to change for subsequent messages of
+ *		the same type.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *		robb@maya.nuance.com
+ *		Aug 28 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_remove (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
+	    const H5O_class_t *type, intn sequence)
+{
+   FUNC_ENTER (H5O_remove, NULL, FAIL);
+
+   fprintf (stderr, "H5O_remove: not implemented yet (no-op)!\n");
+
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_alloc_extend_chunk
  *
  * Purpose:	Extends a chunk which hasn't been allocated on disk yet
