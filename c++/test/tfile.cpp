@@ -38,25 +38,25 @@
 using namespace H5;
 #endif
 
-const int F1_USERBLOCK_SIZE = (hsize_t)0;
-const int F1_OFFSET_SIZE = sizeof(haddr_t);
-const int F1_LENGTH_SIZE = sizeof(hsize_t);
-const int F1_SYM_LEAF_K  = 4;
-const int F1_SYM_INTERN_K = 16;
+const hsize_t F1_USERBLOCK_SIZE = (hsize_t)0;
+const size_t F1_OFFSET_SIZE = sizeof(haddr_t);
+const size_t F1_LENGTH_SIZE = sizeof(hsize_t);
+const unsigned F1_SYM_LEAF_K  = 4;
+const unsigned F1_SYM_INTERN_K = 16;
 const string    FILE1("tfile1.h5");
 
-const int F2_USERBLOCK_SIZE = (hsize_t)512;
-const int F2_OFFSET_SIZE = 8;
-const int F2_LENGTH_SIZE = 8;
-const int F2_SYM_LEAF_K  = 8;
-const int F2_SYM_INTERN_K = 32;
+const hsize_t F2_USERBLOCK_SIZE = (hsize_t)512;
+const size_t F2_OFFSET_SIZE = 8;
+const size_t F2_LENGTH_SIZE = 8;
+const unsigned F2_SYM_LEAF_K  = 8;
+const unsigned F2_SYM_INTERN_K = 32;
 const string    FILE2("tfile2.h5");
 
-const int F3_USERBLOCK_SIZE = (hsize_t)0;
-const int F3_OFFSET_SIZE = F2_OFFSET_SIZE;
-const int F3_LENGTH_SIZE = F2_LENGTH_SIZE;
-const int F3_SYM_LEAF_K  = F2_SYM_LEAF_K;
-const int F3_SYM_INTERN_K = F2_SYM_INTERN_K;
+const hsize_t F3_USERBLOCK_SIZE = (hsize_t)0;
+const size_t F3_OFFSET_SIZE = F2_OFFSET_SIZE;
+const size_t F3_LENGTH_SIZE = F2_LENGTH_SIZE;
+const unsigned F3_SYM_LEAF_K  = F2_SYM_LEAF_K;
+const unsigned F3_SYM_INTERN_K = F2_SYM_INTERN_K;
 const string    FILE3("tfile3.h5");
 
 const int KB =  1024;
@@ -74,6 +74,12 @@ const string    FILE4("tfile4.h5");
  *              January, 2001
  *
  * Modifications:
+ *	January, 2005: C tests' macro VERIFY casts values to 'long' for all
+ *		       cases.  Since there are no operator<< for 'long long'
+ *		       or int64 in VS C++ ostream, I casted the hsize_t values
+ *		       passed to verify_val to 'long' as well.  If problems
+ *		       arises later, this will have to be specificly handled 
+ *		       with a special routine.
  *
  *-------------------------------------------------------------------------
  */
@@ -90,8 +96,11 @@ test_file_create(void)
     /* First ensure the file does not exist */
     remove(FILE1.c_str());
 
+    // Setting this to NULL for cleaning up in failure situations
+    H5File* file1 = NULL;
     try {
-	H5File* file1 = new H5File (FILE1, H5F_ACC_EXCL);
+	// Create file FILE1
+	file1 = new H5File (FILE1, H5F_ACC_EXCL);
 
 	/*
 	* try to create the same file with H5F_ACC_TRUNC. This should fail
@@ -111,6 +120,7 @@ test_file_create(void)
 	// Close file file1 
 
 	delete file1;
+	file1 = NULL;
 
 	/*
 	* Try again with H5F_ACC_EXCL. This should fail because the file already
@@ -145,18 +155,18 @@ test_file_create(void)
     	}
 	catch( FileIException E ) {} // do nothing, FAIL expected
 
-    	/* Get the file-creation template */
+    	// Get the file-creation template
 	FileCreatPropList tmpl1 = file1->getCreatePlist();
 
 	hsize_t ublock = tmpl1.getUserblock();
-	verify_val(ublock, F1_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
+	verify_val((long)ublock, (long)F1_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
 
-    	size_t  parm1, parm2;		/*file-creation parameters	*/
+    	size_t  parm1, parm2;		// file-creation parameters
 	tmpl1.getSizes( parm1, parm2);
 	verify_val(parm1, F1_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
 	verify_val(parm2, F1_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
 
-        unsigned  iparm1,iparm2;        /*file-creation parameters      */
+        unsigned  iparm1,iparm2;        // file-creation parameters
         tmpl1.getSymk( iparm1, iparm2);
         verify_val(iparm1, F1_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
         verify_val(iparm2, F1_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
@@ -172,12 +182,16 @@ test_file_create(void)
     }
     catch( FileIException E ) {
 	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__);
+	if (file1 != NULL)  // clean up 
+	    delete file1;
     }
 
+    // Setting this to NULL for cleaning up in failure situations
+    FileCreatPropList* tmpl1 = NULL;
     try
     {
     	/* Create a new file with a non-standard file-creation template */
-	FileCreatPropList* tmpl1 = new FileCreatPropList;
+	tmpl1 = new FileCreatPropList;
 
     	/* Set the new file-creation parameters */
 	tmpl1->setUserblock (F2_USERBLOCK_SIZE);
@@ -192,13 +206,14 @@ test_file_create(void)
 
     	/* Release file-creation template */
 	delete tmpl1;
+	tmpl1 = NULL;
 
 	/* Get the file-creation template */
 	tmpl1 = new FileCreatPropList (file2.getCreatePlist());
 
 	/* Get the file-creation parameters */
 	hsize_t ublock = tmpl1->getUserblock();
-	verify_val(ublock, F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
+	verify_val((long)ublock, (long)F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
 
     	size_t  parm1, parm2;		/*file-creation parameters	*/
 	tmpl1->getSizes( parm1, parm2);
@@ -216,6 +231,7 @@ test_file_create(void)
 
 	/* Dynamically release file-creation template */
 	delete tmpl1;
+	tmpl1 = NULL;
 
 	/* Set the new file-creation parameter */
 	tmpl2.setUserblock( F3_USERBLOCK_SIZE );
@@ -231,7 +247,7 @@ test_file_create(void)
 
 	/* Get the file-creation parameters */
 	ublock = tmpl1->getUserblock();
-	verify_val(ublock, F3_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
+	verify_val((long)ublock, (long)F3_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
 
 	tmpl1->getSizes( parm1, parm2);
 	verify_val(parm1, F3_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
@@ -246,6 +262,8 @@ test_file_create(void)
     }
     catch( PropListIException E ) {
 	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__);
+	if (tmpl1 != NULL)  // clean up 
+	    delete tmpl1;
     }
 } /* test_file_create() */
 
@@ -261,6 +279,12 @@ test_file_create(void)
  *              January, 2001
  *
  * Modifications:
+ *	January, 2005: C tests' macro VERIFY casts values to 'long' for all
+ *		       cases.  Since there are no operator<< for 'long long'
+ *		       or int64 in VS C++ ostream, I casted the hsize_t values
+ *		       passed to verify_val to 'long' as well.  If problems
+ *		       arises later, this will have to be specificly handled 
+ *		       with a special routine.
  *
  *-------------------------------------------------------------------------
  */
@@ -280,7 +304,7 @@ test_file_open(void)
 
 	/* Get the file-creation parameters */
 	hsize_t ublock = tmpl1.getUserblock();
-	verify_val(ublock, F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
+	verify_val((long)ublock, (long)F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
 
     	size_t  parm1, parm2;		/*file-creation parameters	*/
 	tmpl1.getSizes( parm1, parm2);
