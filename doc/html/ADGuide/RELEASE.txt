@@ -1,4 +1,4 @@
-HDF5 version 1.6.0-post4 released on Sun Sep  7 20:52:51 CDT 2003
+HDF5 version 1.6.0-post5 released on Wed Sep 10 13:34:42 CDT 2003
 ================================================================================
 
 
@@ -56,6 +56,9 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Corrected bug when opening a file twice with read-only permission
+            for one open and then closing the read-only access file ID would
+            generate an error.  QAK - 2003/09/10
         - Corrected bug in repeated calls to H5Pget_access_plist() which would
             incorrectly manage reference counts of internal information and
             eventually blow up.  QAK - 2003/09/02
