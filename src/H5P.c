@@ -2937,6 +2937,7 @@ H5Pset_meta_block_size(hid_t fapl_id, hsize_t size)
     H5F_access_t	*fapl = NULL;
     
     FUNC_ENTER (H5Pset_meta_block_size, FAIL);
+    H5TRACE2("e","ih",fapl_id,size);
 
     /* Check args */
     if (H5P_FILE_ACCESS != H5P_get_class (fapl_id) ||
@@ -2973,6 +2974,7 @@ H5Pget_meta_block_size(hid_t fapl_id, hsize_t *size/*out*/)
     H5F_access_t	*fapl = NULL;
 
     FUNC_ENTER (H5Pget_meta_block_size, FAIL);
+    H5TRACE2("e","ix",fapl_id,size);
 
     /* Check args */
     if (H5P_FILE_ACCESS != H5P_get_class (fapl_id) ||
