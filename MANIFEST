@@ -1124,16 +1124,33 @@
 ./tools/h5diff/Dependencies
 ./tools/h5diff/Makefile.in
 ./tools/h5diff/h5diff.c
+./tools/h5diff/h5diff_array.c
+./tools/h5diff/h5diff_dset.c
+./tools/h5diff/h5diff_main.c
+./tools/h5diff/h5diff_util.c
 ./tools/h5diff/h5trav.c
+./tools/h5diff/h5trav_table.c
 ./tools/h5diff/h5trav.h
-./tools/h5diff/h5difftst.c
+./tools/h5diff/h5diff.h
+./tools/h5diff/test_h5diff.c
 ./tools/h5diff/testh5diff.sh
 
 ./tools/h5repack/Dependencies
 ./tools/h5repack/Makefile.in
 ./tools/h5repack/h5repack.sh
 ./tools/h5repack/h5repack.c
-./tools/h5repack/h5repacktst.c
+./tools/h5repack/h5repack_list.c
+./tools/h5repack/h5repack_main.c
+./tools/h5repack/h5repack_opttable.c
+./tools/h5repack/h5repack_parse.c
+./tools/h5repack/h5repack.h
+./tools/h5repack/h5repack_list.h
+./tools/h5repack/h5repack_opttable.h
+./tools/h5repack/h5repack_parse.h
+./tools/h5repack/test_h5repack_add.c
+./tools/h5repack/test_h5repack_main.c
+./tools/h5repack/test_h5repack_add.h
+
 
 ./tools/h5ls/Dependencies
 ./tools/h5ls/Makefile.in
