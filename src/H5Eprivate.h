@@ -28,24 +28,24 @@
 
 /* Error class */
 typedef struct H5E_cls_t {
-    char *cls_name;
-    char *lib_name;
-    char *lib_vers;
+    char *cls_name;             /* Name of error class */
+    char *lib_name;             /* Name of library within class */
+    char *lib_vers;             /* Version of library */
 } H5E_cls_t;
 
 /* Major or minor message */
 typedef struct H5E_msg_t {
-    char        *msg;
-    H5E_type_t   type;
-    H5E_cls_t   *cls;
+    char        *msg;           /* Message for error */
+    H5E_type_t   type;          /* Type of error (major or minor) */
+    H5E_cls_t   *cls;           /* Which error class this message belongs to */
 } H5E_msg_t;
 
 /* Error stack */
 typedef struct H5E_t {
-    int	nused;			        /*num slots currently used in stack  */
-    H5E_error_t slot[32];	/*array of error records	     */
-    H5E_auto_t  func;
-    void *auto_data;
+    size_t nused;		        /* Num slots currently used in stack  */
+    H5E_error_t slot[H5E_NSLOTS];	/* Array of error records	     */
+    H5E_auto_t  func;                   /* Function for 'automatic' error reporting */
+    void *auto_data;                    /* Callback data for 'automatic error reporting */
 } H5E_t;
 
 /* Printing information */
@@ -60,7 +60,6 @@ typedef struct H5E_print_t {
 #define    H5E_CLS_LIB_VERS     ""              /* How to find out version number? */
 
 /* HDF5 error class: major errors */
-#define    H5E_NONE_MAJOR_MSG	        "No error"
 #define    H5E_MAJ_ARGS_MSG		"Function arguments"
 #define    H5E_MAJ_RESOURCE_MSG        "Resource unavailable"
 #define    H5E_MAJ_INTERNAL_MSG        "Internal HDF5 error"
@@ -91,7 +90,6 @@ typedef struct H5E_print_t {
 
 /* HDF5 error class: minor errors */
     /* Argument errors */
-#define    H5E_NONE_MINOR_MSG	"No error"
 #define    H5E_MIN_UNINITIALIZED_MSG "Information is uninitialized"
 #define    H5E_MIN_UNSUPPORTED_MSG 	"Feature is unsupported"
 #define    H5E_MIN_BADTYPE_MSG 	"Inappropriate type"
@@ -202,44 +200,20 @@ typedef struct H5E_print_t {
 #define    H5E_MIN_CANAPPLY_MSG      "Error from filter \"can apply\" callback"
 #define    H5E_MIN_SETLOCAL_MSG      "Error from filter \"set local\" callback"
 
-#ifdef H5_HAVE_THREADSAFE
-/*
- * The per-thread error stack. pthread_once() initializes a special
- * key that will be used by all threads to create a stack specific to
- * each thread individually. The association of stacks to threads will
- * be handled by the pthread library.
- *
- * In order for this macro to work, H5E_get_my_stack() must be preceeded
- * by "H5E_t *estack =".
- */
-H5E_t *    H5E_get_stack(void);
-#define H5E_get_my_stack()  H5E_get_stack()
-#else /* H5_HAVE_THREADSAFE */
-/*
- * The current error stack.  Eventually we'll have some sort of global table 
- * so each thread has it's own stack.  The stacks will be created on demand 
- * when the thread first calls H5E_push().  */
-H5_DLLVAR H5E_t		H5E_stack_g[1];
-#define H5E_get_my_stack() (H5E_stack_g+0)
-#endif /* H5_HAVE_THREADSAFE */
-
 /*
  * HERROR macro, used to facilitate error reporting between a FUNC_ENTER()
  * and a FUNC_LEAVE() within a function body.  The arguments are the major
  * error number, the minor error number, and a description of the error.
  */
-#define HERROR(maj_id, min_id, str) H5E_push(H5E_get_my_stack(), __FILE__, FUNC, __LINE__, H5E_ERR_CLS_g, maj_id, min_id, str)
+#define HERROR(maj_id, min_id, str) H5E_push(NULL, __FILE__, FUNC, __LINE__, H5E_ERR_CLS_g, maj_id, min_id, str)
 
 /*
  * HCOMMON_ERROR macro, used by HDONE_ERROR and HGOTO_ERROR
  * (Shouldn't need to be used outside this header file)
  */
 #define HCOMMON_ERROR(maj, min, str)  				              \
-   H5E_t *estack = H5E_get_my_stack();                                        \
    HERROR(maj, min, str);						      \
-   /*fprintf(stderr, "HCOMMON_ERROR: estack->func=%p\n", estack->func);*/   \
-   if (H5_IS_API(FUNC) && estack->auto_data) 				      \
-       (void)((estack->func)(H5E_DEFAULT, estack->auto_data))
+   H5E_dump_api_stack(H5_IS_API(FUNC));
 
 /*
  * HDONE_ERROR macro, used to facilitate error reporting between a
@@ -247,6 +221,8 @@ H5_DLLVAR H5E_t		H5E_stack_g[1];
  * "done:" label.  The arguments are
  * the major error number, the minor error number, a return value, and a
  * description of the error.
+ * (This macro can also be used to push an error and set the return value
+ *      without jumping to any labels)
  */
 #define HDONE_ERROR(maj, min, ret_val, str) {				      \
    HCOMMON_ERROR (maj, min, str);					      \
@@ -293,6 +269,7 @@ H5_DLL herr_t  H5E_walk (H5E_t *estack, H5E_direction_t direction, H5E_walk_t fu
                              void *client_data);
 H5_DLL herr_t  H5E_get_auto(H5E_t *estack, H5E_auto_t *func, void **client_data);
 H5_DLL herr_t  H5E_set_auto(H5E_t *estack, H5E_auto_t func, void *client_data);
+H5_DLL herr_t  H5E_dump_api_stack(int is_api);
 
 #ifdef H5_HAVE_PARALLEL
 /*

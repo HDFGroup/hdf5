@@ -46,8 +46,22 @@
 
 #define PABLO_MASK	H5E_mask
 
+/* Interface initialization? */
+static int interface_initialize_g = 0;
+#define INTERFACE_INIT H5E_init_interface
+
+/* HDF5 error class ID */
+hid_t H5E_ERR_CLS_g			= FAIL;
+
+/*
+ * Predefined errors. These are initialized at runtime in H5E_init_interface()
+ * in this source file.
+ *
+ * If more of these are added, the new ones must be added to the list of
+ * types to reset in H5E_term_interface().
+ */
+
 /* Major error IDs */
-hid_t    H5E_NONE_MAJOR_g   = FAIL;                /*special zero, no error                     */
 hid_t    H5E_ARGS_g         = FAIL;                      /*invalid arguments to routine               */
 hid_t    H5E_RESOURCE_g     = FAIL;                  /*resource unavailable                       */
 hid_t    H5E_INTERNAL_g     = FAIL;                  /*Internal error (too specific to document in detail) */
@@ -77,7 +91,6 @@ hid_t    H5E_RS_g           = FAIL;  		        /*Reference Counted Strings      
 hid_t    H5E_ERROR_g        = FAIL;  		        /*Error API				     */
 
 /* Minor error IDs */
-hid_t    H5E_NONE_MINOR_g         = FAIL;                /*special zero, no error                     */
 hid_t    H5E_UNINITIALIZED_g              = FAIL;             /*information is unitialized                 */
 hid_t    H5E_UNSUPPORTED_g                = FAIL;               /*feature is unsupported                     */
 hid_t    H5E_BADTYPE_g            = FAIL;                   /*incorrect type found                       */
@@ -173,21 +186,26 @@ hid_t    H5E_CALLBACK_g           = FAIL;                  /*callback failed    
 hid_t    H5E_CANAPPLY_g           = FAIL;                  /*error from filter "can apply" callback     */
 hid_t    H5E_SETLOCAL_g           = FAIL;                  /*error from filter "set local" callback     */
 
-/* Interface initialization? */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT H5E_init_interface
-
+#ifdef H5_HAVE_THREADSAFE
 /*
- * Predefined errors. These are initialized at runtime in H5E_init_interface()
- * in this source file.
+ * The per-thread error stack. pthread_once() initializes a special
+ * key that will be used by all threads to create a stack specific to
+ * each thread individually. The association of stacks to threads will
+ * be handled by the pthread library.
  *
- * If more of these are added, the new ones must be added to the list of
- * types to reset in H5E_term_interface().
+ * In order for this macro to work, H5E_get_my_stack() must be preceeded
+ * by "H5E_t *estack =".
  */
-hid_t H5E_ERR_CLS_g			= FAIL;
-#ifndef H5_HAVE_THREADSAFE
+static H5E_t *    H5E_get_stack(void);
+#define H5E_get_my_stack()  H5E_get_stack()
+#else /* H5_HAVE_THREADSAFE */
+/*
+ * The current error stack.
+ */
 H5E_t		H5E_stack_g[1];
+#define H5E_get_my_stack() (H5E_stack_g+0)
 #endif /* H5_HAVE_THREADSAFE */
+
 
 #ifdef H5_HAVE_PARALLEL
 /*
@@ -200,52 +218,8 @@ int	H5E_mpi_error_str_len;
 /* Static function declarations */
 static herr_t H5E_init_interface (void);
 static int H5E_close_msg_cb(void *obj_ptr, hid_t obj_id, void *key);
-static herr_t H5E_walk_cb(int n, H5E_error_t *err_desc, void *client_data);
-
-
-#ifdef OLD_ERR /* Old codes, commented out */
-
-#ifdef H5_HAVE_THREADSAFE
-/*-------------------------------------------------------------------------
- * Function:	H5E_get_stack
- *
- * Purpose:	Support function for H5E_get_my_stack() to initialize and
- *              acquire per-thread error stack.
- *
- * Return:	Success:	error stack (H5E_t *)
- *
- *		Failure:	NULL
- *
- * Programmer:	Chee Wai LEE
- *              April 24, 2000
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-H5E_t *
-H5E_get_stack(void)
-{
-    H5E_t *estack;
-    H5E_t *ret_value;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5E_get_stack,NULL);
-
-    estack = pthread_getspecific(H5TS_errstk_key_g);
-    if (!estack) {
-        /* no associated value with current thread - create one */
-        estack = (H5E_t *)H5MM_malloc(sizeof(H5E_t));
-        pthread_setspecific(H5TS_errstk_key_g, (void *)estack);
-    }
-
-    /* Set return value */
-    ret_value=estack;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-#endif  /* H5_HAVE_THREADSAFE */
-#endif /* OLD_ERR */
+static herr_t H5E_walk_cb(unsigned n, H5E_error_t *err_desc, void *client_data);
+static herr_t H5E_clear_entries(H5E_t *estack, unsigned nentries);
 
 /*--------------------------------------------------------------------------
  * Function:    H5E_init_interface
@@ -267,150 +241,367 @@ H5E_init_interface(void)
     FUNC_ENTER_NOINIT(H5E_init_interface);
 
     /* Initialize the atom group for the error class IDs */
-    H5I_init_group(H5I_ERROR_CLASS, H5I_ERRCLS_HASHSIZE, H5E_RESERVED_ATOMS, 
-                    (H5I_free_t)H5E_unregister_class);
+    if(H5I_init_group(H5I_ERROR_CLASS, H5I_ERRCLS_HASHSIZE, H5E_RESERVED_ATOMS, 
+                    (H5I_free_t)H5E_unregister_class)<0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group");
     /* Initialize the atom group for the major error IDs */
-    H5I_init_group(H5I_ERROR_MSG, H5I_ERRMSG_HASHSIZE, H5E_RESERVED_ATOMS, 
-                    (H5I_free_t)H5E_close_msg);
+    if(H5I_init_group(H5I_ERROR_MSG, H5I_ERRMSG_HASHSIZE, H5E_RESERVED_ATOMS, 
+                    (H5I_free_t)H5E_close_msg)<0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group");
     /* Initialize the atom group for the error stacks */
-    H5I_init_group(H5I_ERROR_STACK, H5I_ERRSTK_HASHSIZE, H5E_RESERVED_ATOMS, 
-                    (H5I_free_t)H5E_close_stack);
+    if(H5I_init_group(H5I_ERROR_STACK, H5I_ERRSTK_HASHSIZE, H5E_RESERVED_ATOMS, 
+                    (H5I_free_t)H5E_close_stack)<0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group");
 
 #ifndef H5_HAVE_THREADSAFE
+    H5E_stack_g[0].nused = 0;
     H5E_stack_g[0].func = (H5E_auto_t)H5Eprint;
-    H5E_stack_g[0].auto_data = stderr;
+    H5E_stack_g[0].auto_data = NULL;
 #endif /* H5_HAVE_THREADSAFE */
 
-    H5E_ERR_CLS_g = H5E_register_class(H5E_CLS_NAME, H5E_CLS_LIB_NAME, H5E_CLS_LIB_VERS);
+    /* Allocate the HDF5 error class */
+    assert(H5E_ERR_CLS_g==(-1));
+    if((H5E_ERR_CLS_g = H5E_register_class(H5E_CLS_NAME, H5E_CLS_LIB_NAME, H5E_CLS_LIB_VERS))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "class initialization failed");
 
-    H5E_NONE_MAJOR_g  = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_NONE_MAJOR_MSG);
-    H5E_ARGS_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_ARGS_MSG);
-    H5E_RESOURCE_g    = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_RESOURCE_MSG);
-    H5E_INTERNAL_g    = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_INTERNAL_MSG);
-    H5E_FILE_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_FILE_MSG);
+    /* Allocate the HDF5 major errors */
 
-    H5E_IO_g          = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_IO_MSG);
-    H5E_FUNC_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_FUNC_MSG);
-    H5E_ATOM_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_ATOM_MSG);
-    H5E_CACHE_g       = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_CACHE_MSG);
-    H5E_BTREE_g       = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_BTREE_MSG);
+    assert(H5E_ARGS_g==(-1));
+    if((H5E_ARGS_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_ARGS_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_RESOURCE_g==(-1));
+    if((H5E_RESOURCE_g    = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_RESOURCE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_INTERNAL_g==(-1));
+    if((H5E_INTERNAL_g    = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_INTERNAL_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_FILE_g==(-1));
+    if((H5E_FILE_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_FILE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_IO_g==(-1));
+    if((H5E_IO_g          = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_IO_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_FUNC_g==(-1));
+    if((H5E_FUNC_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_FUNC_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_ATOM_g==(-1));
+    if((H5E_ATOM_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_ATOM_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CACHE_g==(-1));
+    if((H5E_CACHE_g       = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_CACHE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_BTREE_g==(-1));
+    if((H5E_BTREE_g       = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_BTREE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_SYM_g==(-1));
+    if((H5E_SYM_g         = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_SYM_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_HEAP_g==(-1));
+    if((H5E_HEAP_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_HEAP_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_OHDR_g==(-1));
+    if((H5E_OHDR_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_HEAP_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_DATATYPE_g==(-1));
+    if((H5E_DATATYPE_g    = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_DATATYPE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_DATASPACE_g==(-1));
+    if((H5E_DATASPACE_g   = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_DATASPACE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_DATASET_g==(-1));
+    if((H5E_DATASET_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_DATASET_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_STORAGE_g==(-1));
+    if((H5E_STORAGE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_STORAGE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_PLIST_g==(-1));
+    if((H5E_PLIST_g       = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_PLIST_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_ATTR_g==(-1));
+    if((H5E_ATTR_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_ATTR_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_PLINE_g==(-1));
+    if((H5E_PLINE_g       = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_PLINE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_EFL_g==(-1));
+    if((H5E_EFL_g         = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_EFL_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_REFERENCE_g==(-1));
+    if((H5E_REFERENCE_g   = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_REFERENCE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_VFL_g==(-1));
+    if((H5E_VFL_g         = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_VFL_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_TBBT_g==(-1));
+    if((H5E_TBBT_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_TBBT_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_FPHDF5_g==(-1));
+    if((H5E_FPHDF5_g      = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_FPHDF5_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_TST_g==(-1));
+    if((H5E_TST_g         = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_TST_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_RS_g==(-1));
+    if((H5E_RS_g          = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_RS_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_ERROR_g==(-1));
+    if((H5E_ERROR_g       = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_ERROR_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
 
-    H5E_SYM_g         = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_SYM_MSG);
-    H5E_HEAP_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_HEAP_MSG);
-    H5E_OHDR_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_HEAP_MSG);
-    H5E_DATATYPE_g    = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_DATATYPE_MSG);
-    H5E_DATASPACE_g   = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_DATASPACE_MSG);
+    /* Allocate the HDF5 minor errors */
 
-    H5E_DATASET_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_DATASET_MSG);
-    H5E_STORAGE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_STORAGE_MSG);
-    H5E_PLIST_g       = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_PLIST_MSG);
-    H5E_ATTR_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_ATTR_MSG);
-    H5E_PLINE_g       = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_PLINE_MSG);
-    
-    H5E_EFL_g         = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_EFL_MSG);
-    H5E_REFERENCE_g   = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_REFERENCE_MSG);
-    H5E_VFL_g         = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_VFL_MSG);
-    H5E_TBBT_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_TBBT_MSG);
-    H5E_FPHDF5_g      = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_FPHDF5_MSG);
+    assert(H5E_UNINITIALIZED_g==(-1));
+    if((H5E_UNINITIALIZED_g      = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_UNINITIALIZED_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_UNSUPPORTED_g==(-1));
+    if((H5E_UNSUPPORTED_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_UNSUPPORTED_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_BADTYPE_g==(-1));
+    if((H5E_BADTYPE_g      = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_BADTYPE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_BADRANGE_g==(-1));
+    if((H5E_BADRANGE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_BADRANGE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_BADVALUE_g==(-1));
+    if((H5E_BADVALUE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_BADVALUE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
 
-    H5E_TST_g         = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_TST_MSG);
-    H5E_RS_g          = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_RS_MSG);
-    H5E_ERROR_g       = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR, H5E_MAJ_ERROR_MSG);
+    assert(H5E_NOSPACE_g==(-1));
+    if((H5E_NOSPACE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_NOSPACE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTCOPY_g==(-1));
+    if((H5E_CANTCOPY_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTCOPY_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTFREE_g==(-1));
+    if((H5E_CANTFREE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTFREE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_ALREADYEXISTS_g==(-1));
+    if((H5E_ALREADYEXISTS_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_ALREADYEXISTS_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTLOCK_g==(-1));
+    if((H5E_CANTLOCK_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTLOCK_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTUNLOCK_g==(-1));
+    if((H5E_CANTUNLOCK_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTUNLOCK_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTGC_g==(-1));
+    if((H5E_CANTGC_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTGC_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    
+    assert(H5E_FILEEXISTS_g==(-1));
+    if((H5E_FILEEXISTS_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_FILEEXISTS_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_FILEOPEN_g==(-1));
+    if((H5E_FILEOPEN_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_FILEOPEN_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTCREATE_g==(-1));
+    if((H5E_CANTCREATE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTCREATE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTOPENFILE_g==(-1));
+    if((H5E_CANTOPENFILE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTOPENFILE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTCLOSEFILE_g==(-1));
+    if((H5E_CANTCLOSEFILE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTCLOSEFILE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_NOTHDF5_g==(-1));
+    if((H5E_NOTHDF5_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_NOTHDF5_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_BADFILE_g==(-1));
+    if((H5E_BADFILE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_BADFILE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_TRUNCATED_g==(-1));
+    if((H5E_TRUNCATED_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_TRUNCATED_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_MOUNT_g==(-1));
+    if((H5E_MOUNT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_MOUNT_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
 
-    /* Minor errors */
-    H5E_NONE_MINOR_g  = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_NONE_MINOR_MSG);
-    H5E_UNINITIALIZED_g      = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_UNINITIALIZED_MSG);
-    H5E_UNSUPPORTED_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_UNSUPPORTED_MSG);
-    H5E_BADTYPE_g      = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_BADTYPE_MSG);
-    H5E_BADRANGE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_BADRANGE_MSG);
-    H5E_BADVALUE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_BADVALUE_MSG);
+    assert(H5E_SEEKERROR_g==(-1));
+    if((H5E_SEEKERROR_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_SEEKERROR_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_READERROR_g==(-1));
+    if((H5E_READERROR_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_READERROR_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_WRITEERROR_g==(-1));
+    if((H5E_WRITEERROR_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_WRITEERROR_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CLOSEERROR_g==(-1));
+    if((H5E_CLOSEERROR_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CLOSEERROR_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_OVERFLOW_g==(-1));
+    if((H5E_OVERFLOW_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_OVERFLOW_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_FCNTL_g==(-1));
+    if((H5E_FCNTL_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_FCNTL_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
 
-    H5E_NOSPACE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_NOSPACE_MSG);
-    H5E_CANTCOPY_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTCOPY_MSG);
-    H5E_CANTFREE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTFREE_MSG);
-    H5E_ALREADYEXISTS_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_ALREADYEXISTS_MSG);
-    H5E_CANTLOCK_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTLOCK_MSG);
-    H5E_CANTUNLOCK_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTUNLOCK_MSG);
-    H5E_CANTGC_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTGC_MSG);
+    assert(H5E_CANTINIT_g==(-1));
+    if((H5E_CANTINIT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTINIT_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_ALREADYINIT_g==(-1));
+    if((H5E_ALREADYINIT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_ALREADYINIT_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTRELEASE_g==(-1));
+    if((H5E_CANTRELEASE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTRELEASE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
     
-    H5E_FILEEXISTS_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_FILEEXISTS_MSG);
-    H5E_FILEOPEN_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_FILEOPEN_MSG);
-    H5E_CANTCREATE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTCREATE_MSG);
-    H5E_CANTOPENFILE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTOPENFILE_MSG);
-    H5E_CANTCLOSEFILE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTCLOSEFILE_MSG);
-    H5E_NOTHDF5_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_NOTHDF5_MSG);
-    H5E_BADFILE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_BADFILE_MSG);
-    H5E_TRUNCATED_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_TRUNCATED_MSG);
-    H5E_MOUNT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_MOUNT_MSG);
+    assert(H5E_BADATOM_g==(-1));
+    if((H5E_BADATOM_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_BADATOM_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_BADGROUP_g==(-1));
+    if((H5E_BADGROUP_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_BADGROUP_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTREGISTER_g==(-1));
+    if((H5E_CANTREGISTER_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTREGISTER_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTINC_g==(-1));
+    if((H5E_CANTINC_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTINC_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTDEC_g==(-1));
+    if((H5E_CANTDEC_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTDEC_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_NOIDS_g==(-1));
+    if((H5E_NOIDS_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_NOIDS_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    
+    assert(H5E_CANTFLUSH_g==(-1));
+    if((H5E_CANTFLUSH_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTFLUSH_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTLOAD_g==(-1));
+    if((H5E_CANTLOAD_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTLOAD_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_PROTECT_g==(-1));
+    if((H5E_PROTECT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_PROTECT_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_NOTCACHED_g==(-1));
+    if((H5E_NOTCACHED_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_NOTCACHED_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    
+    assert(H5E_NOTFOUND_g==(-1));
+    if((H5E_NOTFOUND_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_NOTFOUND_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_EXISTS_g==(-1));
+    if((H5E_EXISTS_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_EXISTS_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTENCODE_g==(-1));
+    if((H5E_CANTENCODE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTENCODE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTDECODE_g==(-1));
+    if((H5E_CANTDECODE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTDECODE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTSPLIT_g==(-1));
+    if((H5E_CANTSPLIT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTSPLIT_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTINSERT_g==(-1));
+    if((H5E_CANTINSERT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTINSERT_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTLIST_g==(-1));
+    if((H5E_CANTLIST_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTLIST_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    
+    assert(H5E_LINKCOUNT_g==(-1));
+    if((H5E_LINKCOUNT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_LINKCOUNT_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_VERSION_g==(-1));
+    if((H5E_VERSION_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_VERSION_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_ALIGNMENT_g==(-1));
+    if((H5E_ALIGNMENT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_ALIGNMENT_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_BADMESG_g==(-1));
+    if((H5E_BADMESG_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_BADMESG_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTDELETE_g==(-1));
+    if((H5E_CANTDELETE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTDELETE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    
+    assert(H5E_CANTOPENOBJ_g==(-1));
+    if((H5E_CANTOPENOBJ_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTOPENOBJ_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_COMPLEN_g==(-1));
+    if((H5E_COMPLEN_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_COMPLEN_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CWG_g==(-1));
+    if((H5E_CWG_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CWG_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_LINK_g==(-1));
+    if((H5E_LINK_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_LINK_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_SLINK_g==(-1));
+    if((H5E_SLINK_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_SLINK_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    
+    assert(H5E_CANTCONVERT_g==(-1));
+    if((H5E_CANTCONVERT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTCONVERT_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_BADSIZE_g==(-1));
+    if((H5E_BADSIZE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_BADSIZE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    
+    assert(H5E_CANTCLIP_g==(-1));
+    if((H5E_CANTCLIP_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTCLIP_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTCOUNT_g==(-1));
+    if((H5E_CANTCOUNT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTCOUNT_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTSELECT_g==(-1));
+    if((H5E_CANTSELECT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTSELECT_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTNEXT_g==(-1));
+    if((H5E_CANTNEXT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTNEXT_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_BADSELECT_g==(-1));
+    if((H5E_BADSELECT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_BADSELECT_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTCOMPARE_g==(-1));
+    if((H5E_CANTCOMPARE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTCOMPARE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    
+    assert(H5E_CANTGET_g==(-1));
+    if((H5E_CANTGET_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTGET_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTSET_g==(-1));
+    if((H5E_CANTSET_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTSET_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_DUPCLASS_g==(-1));
+    if((H5E_DUPCLASS_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_DUPCLASS_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
 
-    H5E_SEEKERROR_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_SEEKERROR_MSG);
-    H5E_READERROR_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_READERROR_MSG);
-    H5E_WRITEERROR_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_WRITEERROR_MSG);
-    H5E_CLOSEERROR_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CLOSEERROR_MSG);
+    assert(H5E_MPI_g==(-1));
+    if((H5E_MPI_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_MPI_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_MPIERRSTR_g==(-1));
+    if((H5E_MPIERRSTR_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_MPIERRSTR_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    
+    assert(H5E_CANTMAKETREE_g==(-1));
+    if((H5E_CANTMAKETREE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTMAKETREE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTRECV_g==(-1));
+    if((H5E_CANTRECV_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTRECV_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTSENDMDATA_g==(-1));
+    if((H5E_CANTSENDMDATA_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTSENDMDATA_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTCHANGE_g==(-1));
+    if((H5E_CANTCHANGE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTCHANGE_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANTALLOC_g==(-1));
+    if((H5E_CANTALLOC_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTALLOC_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
 
-    H5E_CANTINIT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTINIT_MSG);
-    H5E_ALREADYINIT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_ALREADYINIT_MSG);
-    H5E_CANTRELEASE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTRELEASE_MSG);
-    
-    H5E_BADATOM_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_BADATOM_MSG);
-    H5E_BADGROUP_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_BADGROUP_MSG);
-    H5E_CANTREGISTER_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTREGISTER_MSG);
-    H5E_CANTINC_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTINC_MSG);
-    H5E_CANTDEC_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTDEC_MSG);
-    H5E_NOIDS_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_NOIDS_MSG);
-    
-    H5E_CANTFLUSH_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTFLUSH_MSG);
-    H5E_CANTLOAD_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTLOAD_MSG);
-    H5E_PROTECT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_PROTECT_MSG);
-    H5E_NOTCACHED_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_NOTCACHED_MSG);
-    
-    H5E_NOTFOUND_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_NOTFOUND_MSG);
-    H5E_EXISTS_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_EXISTS_MSG);
-    H5E_CANTENCODE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTENCODE_MSG);
-    H5E_CANTDECODE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTDECODE_MSG);
-    H5E_CANTSPLIT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTSPLIT_MSG);
-    H5E_CANTINSERT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTINSERT_MSG);
-    H5E_CANTLIST_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTLIST_MSG);
-    
-    H5E_LINKCOUNT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_LINKCOUNT_MSG);
-    H5E_VERSION_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_VERSION_MSG);
-    H5E_ALIGNMENT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_ALIGNMENT_MSG);
-    H5E_BADMESG_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_BADMESG_MSG);
-    H5E_CANTDELETE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTDELETE_MSG);
-    
-    H5E_CANTOPENOBJ_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTOPENOBJ_MSG);
-    H5E_COMPLEN_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_COMPLEN_MSG);
-    H5E_CWG_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CWG_MSG);
-    H5E_LINK_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_LINK_MSG);
-    H5E_SLINK_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_SLINK_MSG);
-    
-    H5E_CANTCONVERT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTCONVERT_MSG);
-    H5E_BADSIZE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_BADSIZE_MSG);
-    
-    H5E_CANTCLIP_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTCLIP_MSG);
-    H5E_CANTCOUNT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTCOUNT_MSG);
-    H5E_CANTSELECT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTSELECT_MSG);
-    H5E_CANTNEXT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTNEXT_MSG);
-    H5E_BADSELECT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_BADSELECT_MSG);
-    H5E_CANTCOMPARE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTCOMPARE_MSG);
-    
-    H5E_CANTGET_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTGET_MSG);
-    H5E_CANTSET_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTSET_MSG);
-    H5E_DUPCLASS_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_DUPCLASS_MSG);
-
-    H5E_MPI_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_MPI_MSG);
-    H5E_MPIERRSTR_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_MPIERRSTR_MSG);
-    
-    H5E_CANTMAKETREE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTMAKETREE_MSG);
-    H5E_CANTRECV_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTRECV_MSG);
-    H5E_CANTSENDMDATA_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTSENDMDATA_MSG);
-    H5E_CANTCHANGE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTCHANGE_MSG);
-    H5E_CANTALLOC_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANTALLOC_MSG);
-
-    H5E_NOFILTER_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_NOFILTER_MSG);
-    H5E_CALLBACK_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CALLBACK_MSG);
-    H5E_CANAPPLY_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANAPPLY_MSG);
-    H5E_SETLOCAL_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_SETLOCAL_MSG);
+    assert(H5E_NOFILTER_g==(-1));
+    if((H5E_NOFILTER_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_NOFILTER_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CALLBACK_g==(-1));
+    if((H5E_CALLBACK_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CALLBACK_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_CANAPPLY_g==(-1));
+    if((H5E_CANAPPLY_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_CANAPPLY_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
+    assert(H5E_SETLOCAL_g==(-1));
+    if((H5E_SETLOCAL_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR, H5E_MIN_SETLOCAL_MSG))<0)
+        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -438,45 +629,153 @@ int
 H5E_term_interface(void)
 {
     int	        ncls, nmsg, nstk, n=0;
-    H5E_t       *estack;
 
     FUNC_ENTER_NOINIT(H5E_term_interface);
 
     if (interface_initialize_g) {
-#ifdef H5_HAVE_THREADSAFE
-        /* Free default error stack here? */ 
-        estack = pthread_getspecific(H5TS_errstk_key_g);
-        if (estack) {
-            H5MM_free(estack);
-        }
-#endif
-    
-        /* Check if there are any open property list classes or lists */
+        /* Check if there are any open error stacks, classes or messages */
         ncls = H5I_nmembers(H5I_ERROR_CLASS);
         nmsg = H5I_nmembers(H5I_ERROR_MSG);
         nstk = H5I_nmembers(H5I_ERROR_STACK);
 
         n = ncls + nmsg + nstk;
         if(n>0) {
-	    if (nmsg>0)
-	        H5I_clear_group(H5I_ERROR_MSG, FALSE);
-
-	    if (ncls>0) {
-	        H5I_clear_group(H5I_ERROR_CLASS, FALSE);
-                
-                /* Reset the error class, if they've been closed */
-                if(H5I_nmembers(H5I_ERROR_CLASS)==0)
-                        H5E_ERR_CLS_g = -1;
-            }
-            
+            /* Clear any outstanding error stacks */
             if (nstk>0)
 	        H5I_clear_group(H5I_ERROR_STACK, FALSE);
         
+            /* Clear all the error classes */
+	    if (ncls>0) {
+	        H5I_clear_group(H5I_ERROR_CLASS, FALSE);
+                
+                /* Reset the HDF5 error class, if its been closed */
+                if(H5I_nmembers(H5I_ERROR_CLASS)==0)
+                    H5E_ERR_CLS_g = -1;
+            }
+            
+            /* Clear all the error messages */
+	    if (nmsg>0) {
+	        H5I_clear_group(H5I_ERROR_MSG, FALSE);
+                
+                /* Reset the HDF5 error messages, if they've been closed */
+                if(H5I_nmembers(H5I_ERROR_MSG)==0) {
+                    /* Reset major error IDs */
+                    H5E_ARGS_g=
+                    H5E_RESOURCE_g=
+                    H5E_INTERNAL_g=
+                    H5E_FILE_g=
+                    H5E_IO_g=
+                    H5E_FUNC_g=
+                    H5E_ATOM_g=
+                    H5E_CACHE_g=
+                    H5E_BTREE_g=
+                    H5E_SYM_g=
+                    H5E_HEAP_g=
+                    H5E_OHDR_g=
+                    H5E_DATATYPE_g=
+                    H5E_DATASPACE_g=
+                    H5E_DATASET_g=
+                    H5E_STORAGE_g=
+                    H5E_PLIST_g=
+                    H5E_ATTR_g=
+                    H5E_PLINE_g=
+                    H5E_EFL_g=
+                    H5E_REFERENCE_g=
+                    H5E_VFL_g=
+                    H5E_TBBT_g=
+                    H5E_FPHDF5_g=
+                    H5E_TST_g=
+                    H5E_RS_g=
+                    H5E_ERROR_g= (-1);
+
+                    /* Reset minor error IDs */
+                    H5E_UNINITIALIZED_g=
+                    H5E_UNSUPPORTED_g=
+                    H5E_BADTYPE_g=
+                    H5E_BADRANGE_g=
+                    H5E_BADVALUE_g=
+                    H5E_NOSPACE_g=
+                    H5E_CANTCOPY_g=
+                    H5E_CANTFREE_g=
+                    H5E_ALREADYEXISTS_g=
+                    H5E_CANTLOCK_g=
+                    H5E_CANTUNLOCK_g=
+                    H5E_CANTGC_g=
+                    H5E_FILEEXISTS_g=
+                    H5E_FILEOPEN_g=
+                    H5E_CANTCREATE_g=
+                    H5E_CANTOPENFILE_g=
+                    H5E_CANTCLOSEFILE_g=
+                    H5E_NOTHDF5_g=
+                    H5E_BADFILE_g=
+                    H5E_TRUNCATED_g=
+                    H5E_MOUNT_g=
+                    H5E_SEEKERROR_g=
+                    H5E_READERROR_g=
+                    H5E_WRITEERROR_g=
+                    H5E_CLOSEERROR_g=
+                    H5E_OVERFLOW_g=
+                    H5E_FCNTL_g=
+                    H5E_CANTINIT_g=
+                    H5E_ALREADYINIT_g=
+                    H5E_CANTRELEASE_g=
+                    H5E_BADATOM_g=
+                    H5E_BADGROUP_g=
+                    H5E_CANTREGISTER_g=
+                    H5E_CANTINC_g=
+                    H5E_CANTDEC_g=
+                    H5E_NOIDS_g=
+                    H5E_CANTFLUSH_g=
+                    H5E_CANTLOAD_g=
+                    H5E_PROTECT_g=
+                    H5E_NOTCACHED_g=
+                    H5E_NOTFOUND_g=
+                    H5E_EXISTS_g=
+                    H5E_CANTENCODE_g=
+                    H5E_CANTDECODE_g=
+                    H5E_CANTSPLIT_g=
+                    H5E_CANTINSERT_g=
+                    H5E_CANTLIST_g=
+                    H5E_LINKCOUNT_g=
+                    H5E_VERSION_g=
+                    H5E_ALIGNMENT_g=
+                    H5E_BADMESG_g=
+                    H5E_CANTDELETE_g=
+                    H5E_CANTOPENOBJ_g=
+                    H5E_COMPLEN_g=
+                    H5E_CWG_g=
+                    H5E_LINK_g=
+                    H5E_SLINK_g=
+                    H5E_CANTCONVERT_g=
+                    H5E_BADSIZE_g=
+                    H5E_CANTCLIP_g=
+                    H5E_CANTCOUNT_g=
+                    H5E_CANTSELECT_g=
+                    H5E_CANTNEXT_g=
+                    H5E_BADSELECT_g=
+                    H5E_CANTCOMPARE_g=
+                    H5E_CANTGET_g=
+                    H5E_CANTSET_g=
+                    H5E_DUPCLASS_g=
+                    H5E_MPI_g=
+                    H5E_MPIERRSTR_g=
+                    H5E_CANTMAKETREE_g=
+                    H5E_CANTRECV_g=
+                    H5E_CANTSENDMDATA_g=
+                    H5E_CANTCHANGE_g=
+                    H5E_CANTALLOC_g=
+                    H5E_NOFILTER_g=
+                    H5E_CALLBACK_g=
+                    H5E_CANAPPLY_g=
+                    H5E_SETLOCAL_g= (-1);
+                } /* end if */
+            } /* end if */
+
 	} else {
 	    /* Destroy the error class, message, and stack id groups */
+	    H5I_destroy_group(H5I_ERROR_STACK);
 	    H5I_destroy_group(H5I_ERROR_CLASS);
 	    H5I_destroy_group(H5I_ERROR_MSG);
-	    H5I_destroy_group(H5I_ERROR_STACK);
 
 	    /* Mark closed */
 	    interface_initialize_g = 0;
@@ -486,6 +785,52 @@ H5E_term_interface(void)
 
     FUNC_LEAVE_NOAPI(n);
 }
+
+
+#ifdef H5_HAVE_THREADSAFE
+/*-------------------------------------------------------------------------
+ * Function:	H5E_get_stack
+ *
+ * Purpose:	Support function for H5E_get_my_stack() to initialize and
+ *              acquire per-thread error stack.
+ *
+ * Return:	Success:	error stack (H5E_t *)
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Chee Wai LEE
+ *              April 24, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5E_t *
+H5E_get_stack(void)
+{
+    H5E_t *estack;
+    H5E_t *ret_value;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5E_get_stack,NULL);
+
+    estack = pthread_getspecific(H5TS_errstk_key_g);
+
+    if (!estack) {
+        /* no associated value with current thread - create one */
+        estack = (H5E_t *)H5MM_malloc(sizeof(H5E_t));
+        estack->nused = 0;
+        estack->func = H5Eprint;
+        estack->auto_data = NULL;
+        pthread_setspecific(H5TS_errstk_key_g, (void *)estack);
+    }
+
+    /* Set return value */
+    ret_value=estack;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+#endif  /* H5_HAVE_THREADSAFE */
 
 
 /*-------------------------------------------------------------------------
@@ -700,8 +1045,8 @@ H5E_get_class_name(H5E_cls_t *cls, char *name, size_t size)
         len = 0;
 
     if(name) {
-       HDstrncpy(name, cls->cls_name, MIN(len+1, (ssize_t)size));
-       if(len >= (ssize_t)size)
+       HDstrncpy(name, cls->cls_name, MIN((size_t)(len+1), size));
+       if((size_t)len >= size)
           name[size-1]='\0';
     } 
     
@@ -710,7 +1055,6 @@ H5E_get_class_name(H5E_cls_t *cls, char *name, size_t size)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-
 
 
 /*-------------------------------------------------------------------------
@@ -737,10 +1081,11 @@ H5E_close_msg_cb(void *obj_ptr, hid_t obj_id, void *key)
         
     FUNC_ENTER_NOAPI(H5_close_msg_cb, FAIL);
   
-    assert(obj_ptr);
+    assert(err_msg);
 
+    /* Close the message if it is in the class being closed */
     if(err_msg->cls == cls)
-        H5E_close_msg(err_msg);
+        H5I_dec_ref(obj_id);
     
  done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -801,10 +1146,11 @@ H5E_close_msg(H5E_msg_t *err)
     
     FUNC_ENTER_NOAPI(H5E_close_msg, FAIL);
 
-    /* Doesn't free err->cls here */
     if(err) {
         if(err->msg)    
             H5MM_xfree((void*)err->msg);
+        /* Don't free err->cls here */
+
         H5MM_xfree((void*)err);
     }
 
@@ -931,73 +1277,31 @@ done:
 ssize_t
 H5E_get_msg(H5E_msg_t *msg_ptr, H5E_type_t *type, char *msg, size_t size)
 {
-    ssize_t       ret_value;   /* Return value */
     ssize_t       len;
+    ssize_t       ret_value;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5E_get_msg, FAIL);
 
+    /* Get the length of the message string */
     len = HDstrlen(msg_ptr->msg);
 
+    /* Copy the message into the user's buffer, if given */
     if(msg) {
-       HDstrncpy(msg, msg_ptr->msg, MIN(len+1, size));
-       if(len >= (ssize_t)size)
+       HDstrncpy(msg, msg_ptr->msg, MIN((size_t)(len+1), size));
+       if((size_t)len >= size)
           msg[size-1]='\0';
     } 
     
+    /* Give the message type, if asked */
     if(type)
         *type = msg_ptr->type;
 
+    /* Set the return value to the full length of the message */
     ret_value = len;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-
-
-#ifdef H5_HAVE_THREADSAFE
-/*-------------------------------------------------------------------------
- * Function:	H5E_get_stack
- *
- * Purpose:	Support function for H5E_get_my_stack() to initialize and
- *              acquire per-thread error stack.
- *
- * Return:	Success:	error stack (H5E_t *)
- *
- *		Failure:	NULL
- *
- * Programmer:	Chee Wai LEE
- *              April 24, 2000
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-H5E_t *
-H5E_get_stack(void)
-{
-    H5E_t *estack, *tmp;
-    H5E_t *ret_value;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5E_get_stack,NULL);
-
-    estack = pthread_getspecific(H5TS_errstk_key_g);
-
-    if (!estack) {
-        /* no associated value with current thread - create one */
-        /* Where is it freed? */
-        estack = (H5E_t *)H5MM_calloc(sizeof(H5E_t));
-        estack->func = H5Eprint;
-        estack->auto_data = stderr;
-        pthread_setspecific(H5TS_errstk_key_g, (void *)estack);
-    }
-
-    /* Set return value */
-    ret_value=estack;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-#endif  /* H5_HAVE_THREADSAFE */
 
 
 /*-------------------------------------------------------------------------
@@ -1048,42 +1352,35 @@ done:
 hid_t
 H5E_get_current_stack(void)
 {
-    hid_t       ret_value;   /* Return value */
     H5E_t	*current_stack = H5E_get_my_stack ();
-    H5E_t   *estack_copy = H5MM_malloc(sizeof(H5E_t));
+    H5E_t	*estack_copy = H5MM_malloc(sizeof(H5E_t));
     H5E_error_t     *current_error, *new_error;
-    int         i;
+    unsigned    u;              /* Local index variable */
+    hid_t       ret_value;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5E_get_current_stack, FAIL);
 
     /* Make a copy of current error stack */
     estack_copy->nused = current_stack->nused; 
-    for(i=0; i<current_stack->nused; i++) {
-        current_error = &(current_stack->slot[i]);
-        new_error = &(estack_copy->slot[i]);
+    for(u=0; u<current_stack->nused; u++) {
+        current_error = &(current_stack->slot[u]);
+        new_error = &(estack_copy->slot[u]);
        
-        /* Should we make copies of these IDs? */ 
+        /* Increment the IDs to indicate that they are used in this stack */
+        H5I_inc_ref(current_error->cls_id);
         new_error->cls_id = current_error->cls_id;       
+        H5I_inc_ref(current_error->maj_id);
         new_error->maj_id = current_error->maj_id;       
+        H5I_inc_ref(current_error->min_id);
         new_error->min_id = current_error->min_id;       
         new_error->func_name = HDstrdup(current_error->func_name);       
         new_error->file_name = HDstrdup(current_error->file_name);       
         new_error->line = current_error->line;
         new_error->desc = HDstrdup(current_error->desc);       
-    }
+    } /* end for */
    
     /* Empty current error stack */ 
-    for(i=0; i<current_stack->nused; i++) {
-        current_error = &(current_stack->slot[i]);
-        if(current_error->func_name)
-            H5MM_xfree((void*)current_error->func_name);
-        if(current_error->file_name)
-            H5MM_xfree((void*)current_error->file_name);
-        if(current_error->desc)
-            H5MM_xfree((void*)current_error->desc);
-    }
-    HDmemset(current_stack->slot, 0, sizeof(H5E_error_t)*current_stack->nused);
-    current_stack->nused = 0;
+    H5E_clear(current_stack);
    
     /* Register the error stack to get an ID for it */
     /* Need to check for error */
@@ -1109,22 +1406,21 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Eset_current_stack(hid_t err_stack_id)
+H5Eset_current_stack(hid_t err_stack)
 {
-    herr_t         ret_value = SUCCEED;   /* Return value */
     H5E_t      *estack;
+    herr_t         ret_value = SUCCEED;   /* Return value */
     
     FUNC_ENTER_API(H5Eset_current_stack, FAIL);
-    H5TRACE1("e","i",err_stack_id);
+    H5TRACE1("e","i",err_stack);
     
-    /* Need to check for errors */
-    if(err_stack_id == H5E_DEFAULT)
-        goto done; /*HGOTO_DONE(SUCCEED);*/
-    else
-        estack = H5I_object_verify(err_stack_id, H5I_ERROR_STACK);
+    if(err_stack != H5E_DEFAULT) {
+        /* Need to check for errors */
+        estack = H5I_object_verify(err_stack, H5I_ERROR_STACK);
 
-    /* Add HGOTO_ERROR later */
-    ret_value=H5E_set_current_stack(estack);
+        /* Add HGOTO_ERROR later */
+        ret_value=H5E_set_current_stack(estack);
+    } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -1148,41 +1444,34 @@ done:
 herr_t
 H5E_set_current_stack(H5E_t *estack)
 {
-    herr_t       ret_value = SUCCEED;   /* Return value */
     H5E_t	*current_stack = H5E_get_my_stack();
     H5E_error_t     *current_error, *new_error;
-    int         i;
+    unsigned     u;                     /* Local index variable */
+    herr_t       ret_value = SUCCEED;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5E_get_current_stack, FAIL);
 
     /* Empty current error stack */ 
-    for(i=0; i<current_stack->nused; i++) {
-        current_error = &(current_stack->slot[i]);
-        if(current_error->func_name)
-            H5MM_xfree((void*)current_error->func_name);
-        if(current_error->file_name)
-            H5MM_xfree((void*)current_error->file_name);
-        if(current_error->desc)
-            H5MM_xfree((void*)current_error->desc);
-    }
-    HDmemset(current_stack->slot, 0, sizeof(H5E_error_t)*current_stack->nused);
-    current_stack->nused = 0;
+    H5E_clear(current_stack);
 
     /* Copy new stack to current error stack */
     current_stack->nused = estack->nused; 
-    for(i=0; i<current_stack->nused; i++) {
-        current_error = &(current_stack->slot[i]);
-        new_error = &(estack->slot[i]);
+    for(u=0; u<current_stack->nused; u++) {
+        current_error = &(current_stack->slot[u]);
+        new_error = &(estack->slot[u]);
        
-        /* Should we make copies of these IDs? */ 
+        /* Increment the IDs to indicate that they are used in this stack */
+        H5I_inc_ref(new_error->cls_id);
         current_error->cls_id = new_error->cls_id;
+        H5I_inc_ref(new_error->maj_id);
         current_error->maj_id = new_error->maj_id;
+        H5I_inc_ref(new_error->min_id);
         current_error->min_id = new_error->min_id;
         current_error->func_name = HDstrdup(new_error->func_name);       
         current_error->file_name = HDstrdup(new_error->file_name);       
         current_error->line = new_error->line;
         current_error->desc = HDstrdup(new_error->desc);       
-    }
+    } /* end for */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1207,24 +1496,18 @@ herr_t
 H5Eclose_stack(hid_t stack_id)
 {
     herr_t       ret_value = SUCCEED;   /* Return value */
-    H5E_t    *err_stack;
 
     FUNC_ENTER_API(H5Eclose_stack, FAIL);
     H5TRACE1("e","i",stack_id);
-/*HDfprintf(stderr, "H5Eclose_stack is called\n");*/
-    /* Add HGOTO_ERROR later */
-    if(H5E_DEFAULT == stack_id)
-        ;
-    
-    /* Need to check for errors */
-    err_stack = H5I_object_verify(stack_id, H5I_ERROR_STACK);
 
-    /*
-     * Decrement the counter on the dataset.  It will be freed if the count
-     * reaches zero.
-     */
-    /* Need to check for errors */
-    H5I_dec_ref(stack_id);
+    if(H5E_DEFAULT != stack_id) {
+        /*
+         * Decrement the counter on the error stack.  It will be freed if the count
+         * reaches zero.
+         */
+        /* Need to check for errors */
+        H5I_dec_ref(stack_id);
+    } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -1246,27 +1529,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5E_close_stack(H5E_t *err_stack)
+H5E_close_stack(H5E_t *estack)
 {
     herr_t       ret_value = SUCCEED;   /* Return value */
-    H5E_error_t     *error;
-    int          i;
 
     FUNC_ENTER_NOAPI(H5E_close_stack, FAIL);
-/*HDfprintf(stderr, "H5E_close_stack is called\n");*/
     
-    if(err_stack) {
-        for(i=0; i<err_stack->nused; i++) {
-            error = &(err_stack->slot[i]);
-
-            if(error->func_name)
-                H5MM_xfree((void*)error->func_name);
-            if(error->file_name)
-                H5MM_xfree((void*)error->file_name);
-            if(error->desc)
-                H5MM_xfree((void*)error->desc);
-        }
-        H5MM_xfree((void*)err_stack);
+    if(estack) {
+        H5E_clear(estack);
+        H5MM_xfree((void*)estack);
     }
     
 done:
@@ -1291,8 +1562,8 @@ done:
 int
 H5Eget_num(hid_t error_stack_id)
 {
-    int       ret_value;   /* Return value */
     H5E_t *estack;
+    int       ret_value;   /* Return value */
 
     FUNC_ENTER_API(H5Eget_num, FAIL);
     H5TRACE1("Is","i",error_stack_id);
@@ -1326,14 +1597,15 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5E_get_num(H5E_t *err_stack)
+H5E_get_num(H5E_t *estack)
 {
     int      ret_value;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5E_get_num, FAIL);
  
-    assert(err_stack);   
-    ret_value = err_stack->nused;
+    assert(estack);   
+
+    ret_value = estack->nused;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1357,8 +1629,8 @@ done:
 herr_t
 H5Epop(hid_t err_stack, size_t count)
 {
-    herr_t       ret_value = SUCCEED;   /* Return value */
     H5E_t *estack;
+    herr_t       ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(H5Epop, FAIL);
     H5TRACE2("e","iz",err_stack,count);
@@ -1396,47 +1668,18 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5E_pop(H5E_t *err_stack, size_t count)
+H5E_pop(H5E_t *estack, size_t count)
 {
     herr_t      ret_value = SUCCEED;   /* Return value */
-    H5E_error_t     *old_head, *new_head, *delete_head;
-    size_t      delete_count;    
-    int         i;
     
     FUNC_ENTER_NOAPI(H5E_pop, FAIL);
 
-    assert(err_stack);  
+    /* Sanity check */
+    assert(estack);
+    assert(estack->nused>=count);
 
-    /* Do an in-place move.  Shift the remaining errors to the top of stack. */
-    if(count != err_stack->nused) { 
-        old_head = &(err_stack->slot[0]); 
-        new_head = &(err_stack->slot[count]);
-
-        /* Free memory for the errors to be deleted */
-        for(i=0; i<count; i++) {
-            H5E_error_t *error = &(err_stack->slot[i]);
-            if(error->func_name)
-                H5MM_xfree((void*)error->func_name);
-            if(error->file_name)
-                H5MM_xfree((void*)error->file_name);
-            if(error->desc)
-                H5MM_xfree((void*)error->desc);
-        }
-       
-        /* Move the rest errors to the top of stack. Watch out: func_name, file_name, desc in new slot 
-         * each points to the same location as the old slot.  Do not free them when deleting the old
-         * slot. */ 
-        HDmemmove(old_head, new_head, (err_stack->nused-count)*sizeof(H5E_error_t));
-
-        /* Point to the beginning of errors to be removed, delete the old moved slots. */
-        delete_head = &(err_stack->slot[err_stack->nused-count]);
-        delete_count = count;
-        HDmemset(delete_head, 0, delete_count*sizeof(H5E_error_t));
-
-        err_stack->nused = err_stack->nused - count;   
-    } else  {
-        H5E_clear(err_stack);
-    }
+    /* Remove the entries from the error stack */
+    H5E_clear_entries(estack, count);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1473,37 +1716,35 @@ done:
  */
 herr_t
 H5Epush(hid_t err_stack, const char *file, const char *func, unsigned line, 
-        hid_t maj_id, hid_t min_id, const char *fmt, ...)
+        hid_t cls_id, hid_t maj_id, hid_t min_id, const char *fmt, ...)
 {
-    herr_t	ret_value;
-    H5E_t   *estack_ptr;
-    H5E_msg_t   *maj_ptr, *min_ptr;
-    va_list     ap;
-    hid_t       cls_id;
-    char        tmp[128];  /* What's the maximal length? */
+    va_list     ap;             /* Varargs info */
+    H5E_t       *estack;        /* Pointer to error stack to modify */
+    H5E_msg_t   *maj_ptr, *min_ptr;     /* Pointer to major and minor error info */
+    char        tmp[H5E_LEN];   /* Buffer to place formatted description in */
+    herr_t	ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5Epush, FAIL);
     H5TRACE7("e","issIuiis",err_stack,file,func,line,maj_id,min_id,fmt);
     
     /* Need to check for errors */
     if(err_stack == H5E_DEFAULT)
-    	estack_ptr = H5E_get_my_stack();
+    	estack = NULL;
     else
-        estack_ptr = H5I_object_verify(err_stack, H5I_ERROR_STACK);
+        estack = H5I_object_verify(err_stack, H5I_ERROR_STACK);
     
     maj_ptr = H5I_object_verify(maj_id, H5I_ERROR_MSG);
     min_ptr = H5I_object_verify(min_id, H5I_ERROR_MSG);
-    /* Error check later */
     if(maj_ptr->cls != min_ptr->cls)
-        ;
-    cls_id = H5I_register(H5I_ERROR_CLASS, maj_ptr->cls);
+        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "major and minor errors not from same error class")
 
+    /* Format the description */
     va_start(ap, fmt);
     HDvsnprintf(tmp, H5E_LEN, fmt, ap);
     va_end(ap);
 
-    /* Should we make copies of maj_idm and min_id? */
-    ret_value = H5E_push(estack_ptr, file, func, line, cls_id, maj_id, min_id, tmp);
+    /* Push the error on the stack */
+    ret_value = H5E_push(estack, file, func, line, cls_id, maj_id, min_id, tmp);
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -1551,6 +1792,15 @@ H5E_push(H5E_t *estack, const char *file, const char *func, unsigned line,
      */
     FUNC_ENTER_NOINIT(H5E_push);
 
+    /* Sanity check */
+    assert(cls_id>0);
+    assert(maj_id>0);
+    assert(min_id>0);
+
+    /* Check for 'default' error stack */
+    if(estack==NULL)
+        estack=H5E_get_my_stack();
+
     /*
      * Don't fail if arguments are bad.  Instead, substitute some default
      * value.
@@ -1565,8 +1815,12 @@ H5E_push(H5E_t *estack, const char *file, const char *func, unsigned line,
     assert (estack);
 
     if (estack->nused<H5E_NSLOTS) {
+        /* Increment the IDs to indicate that they are used in this stack */
+        H5I_inc_ref(cls_id);
 	estack->slot[estack->nused].cls_id = cls_id;
+        H5I_inc_ref(maj_id);
 	estack->slot[estack->nused].maj_id = maj_id;
+        H5I_inc_ref(min_id);
 	estack->slot[estack->nused].min_id = min_id;
 	estack->slot[estack->nused].func_name = HDstrdup(func);
 	estack->slot[estack->nused].file_name = HDstrdup(file);
@@ -1596,23 +1850,76 @@ H5E_push(H5E_t *estack, const char *file, const char *func, unsigned line,
 herr_t
 H5Eclear(hid_t err_stack)
 {
+    H5E_t   *estack;            /* Error stack to operate on */
     herr_t ret_value=SUCCEED;   /* Return value */
-    H5E_t   *estack_ptr;
     
     FUNC_ENTER_API(H5Eclear, FAIL);
     H5TRACE1("e","i",err_stack);
-    /* FUNC_ENTER() does all the work */
 
     /* Need to check for errors */
     if(err_stack == H5E_DEFAULT)
-    	estack_ptr = H5E_get_my_stack();
+    	estack = NULL;
     else
-        estack_ptr = H5I_object_verify(err_stack, H5I_ERROR_STACK);
+        estack = H5I_object_verify(err_stack, H5I_ERROR_STACK);
  
-    ret_value = H5E_clear(estack_ptr);
+    ret_value = H5E_clear(estack);
 
 done:
     FUNC_LEAVE_API(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5E_clear_entries
+ *
+ * Purpose:	Private function to clear the error stack entries for the
+ *              specified error stack.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, August 6, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5E_clear_entries(H5E_t *estack, unsigned nentries)
+{
+    H5E_error_t         *error; /* Pointer to error stack entry to clear */
+    unsigned u;                 /* Local index variable */
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5E_clear_entries, FAIL);
+
+    /* Sanity check */
+    assert(estack);
+    assert(estack->nused>=nentries);
+
+    /* Empty the error stack from the top down */ 
+    for(u=0; nentries>0; nentries--,u++) {
+        error = &(estack->slot[estack->nused-(u+1)]);
+
+        /* Decrement the IDs to indicate that they are no longer used by this stack */
+        H5I_dec_ref(error->cls_id);
+        H5I_dec_ref(error->maj_id);
+        H5I_dec_ref(error->min_id);
+
+        /* Release strings */
+        if(error->func_name)
+            H5MM_xfree((void*)error->func_name);
+        if(error->file_name)
+            H5MM_xfree((void*)error->file_name);
+        if(error->desc)
+            H5MM_xfree((void*)error->desc);
+    } /* end for */
+
+    /* Decrement number of errors on stack */
+    estack->nused-=u;
+    
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1635,25 +1942,17 @@ herr_t
 H5E_clear(H5E_t *estack)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
-    H5E_error_t         *error;
-    int                 i;
 
     FUNC_ENTER_NOAPI(H5E_clear, FAIL);
 
+    /* Check for 'default' error stack */
+    if(estack==NULL)
+        estack=H5E_get_my_stack();
+
     /* Empty the error stack */ 
-    if (estack) {
-        for(i=0; i<estack->nused; i++) {
-            error = &(estack->slot[i]);
-            if(error->func_name)
-                H5MM_xfree((void*)error->func_name);
-            if(error->file_name)
-                H5MM_xfree((void*)error->file_name);
-            if(error->desc)
-                H5MM_xfree((void*)error->desc);
-        }
-        HDmemset(estack->slot, 0, sizeof(H5E_error_t)*estack->nused);
-        estack->nused = 0;
-    }
+    assert(estack);
+    if(estack->nused)
+        H5E_clear_entries(estack, estack->nused);
     
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1689,8 +1988,8 @@ done:
 herr_t
 H5Eprint(hid_t err_stack, FILE *stream)
 {
+    H5E_t   *estack;            /* Error stack to operate on */
     herr_t ret_value=SUCCEED;   /* Return value */
-    H5E_t   *estack_ptr;
     
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Eprint, FAIL);
@@ -1698,11 +1997,11 @@ H5Eprint(hid_t err_stack, FILE *stream)
 
     /* Need to check for errors */
     if(err_stack == H5E_DEFAULT)
-    	estack_ptr = H5E_get_my_stack();
+    	estack = H5E_get_my_stack();
     else
-        estack_ptr = H5I_object_verify(err_stack, H5I_ERROR_STACK);
+        estack = H5I_object_verify(err_stack, H5I_ERROR_STACK);
  
-    ret_value = H5E_print(estack_ptr, stream);
+    ret_value = H5E_print(estack, stream);
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -1738,24 +2037,26 @@ done:
 herr_t
 H5E_print(H5E_t *estack, FILE *stream)
 {
+    H5E_print_t eprint;         /* Callback information to pass to H5E_walk_cb() */
+    H5E_cls_t   origin_cls={NULL, NULL, NULL};
     herr_t	ret_value = SUCCEED;
-    H5E_print_t eprint;
-    H5E_cls_t   origin_cls={"Unknown class", "Unknown library", "Unknown library version"};
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_NOAPI(H5E_print, FAIL);
-    /*NO TRACE*/
     
+    /* Sanity check */
     assert(estack);
+
+    /* If no stream was given, use stderr */
     if (!stream) 
         eprint.stream = stderr;
     else
         eprint.stream = stream;
 
-    eprint.cls.cls_name = origin_cls.cls_name;
-    eprint.cls.lib_name = origin_cls.lib_name;
-    eprint.cls.lib_vers = origin_cls.lib_vers; 
+    /* Reset the original error class information */
+    eprint.cls = origin_cls;
     
+    /* Walk the error stack */
     ret_value = H5E_walk (estack, H5E_WALK_DOWNWARD, H5E_walk_cb, (void*)&eprint);
   
 done:
@@ -1785,20 +2086,20 @@ done:
 herr_t
 H5Ewalk(hid_t err_stack, H5E_direction_t direction, H5E_walk_t func, void *client_data)
 {
-    H5E_t   *estack_ptr;
-    herr_t	ret_value;
+    H5E_t   *estack;            /* Error stack to operate on */
+    herr_t	ret_value;      /* Return value */
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Ewalk, FAIL);
-    H5TRACE4("e","iEdxx",err_stack,direction,func,client_data);
+    /*NO TRACE*/
 
     /* Need to check for errors */
     if(err_stack == H5E_DEFAULT)
-    	estack_ptr = H5E_get_my_stack();
+    	estack = H5E_get_my_stack();
     else
-        estack_ptr = H5I_object_verify(err_stack, H5I_ERROR_STACK);
+        estack = H5I_object_verify(err_stack, H5I_ERROR_STACK);
 
-    ret_value = H5E_walk (estack_ptr, direction, func, client_data);
+    ret_value = H5E_walk (estack, direction, func, client_data);
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -1839,34 +2140,30 @@ done:
 herr_t
 H5E_walk (H5E_t *estack, H5E_direction_t direction, H5E_walk_t func, void *client_data)
 {
-    int		i;
-    herr_t	status;
+    int		i;              /* Local index variable */
+    herr_t	status;         /* Status from callback function */
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5E_walk, FAIL);
 
-    /* check args, but rather than failing use some default value */
-    if (direction!=H5E_WALK_UPWARD && direction!=H5E_WALK_DOWNWARD) {
-	direction = H5E_WALK_UPWARD;
-    }
-
-    /* walk the stack */
+    /* Sanity check */
     assert (estack);
-    
-/*for(i=0; i<estack->nused; i++)
-    HDfprintf(stderr, "%s %d: i=%d, maj_id=%d, min_id=%d, nused=%d\n", FUNC, __LINE__, i, estack->slot[i].maj_id, 
-            estack->slot[i].min_id, estack->nused);
-*/
 
-    if (func && H5E_WALK_UPWARD==direction) {
-	for (i=0, status=SUCCEED; i<estack->nused && status>=0; i++) {
-	    status = (func)(i, estack->slot+i, client_data);
-	}
-    } else if (func && H5E_WALK_DOWNWARD==direction) {
-	for (i=estack->nused-1, status=SUCCEED; i>=0 && status>=0; --i) {
-	    status = (func)(estack->nused-(i+1), estack->slot+i, client_data);
-	}
-    }
+    /* check args, but rather than failing use some default value */
+    if (direction!=H5E_WALK_UPWARD && direction!=H5E_WALK_DOWNWARD)
+	direction = H5E_WALK_UPWARD;
+
+    /* Walk the stack if a callback function was given */
+    if(func) {
+        status=SUCCEED;
+        if (H5E_WALK_UPWARD==direction) {
+            for (i=0; i<(int)estack->nused && status>=0; i++)
+                status = (func)((unsigned)i, estack->slot+i, client_data);
+        } else {
+            for (i=estack->nused-1; i>=0 && status>=0; i--)
+                status = (func)(estack->nused-(i+1), estack->slot+i, client_data);
+        }
+    } /* end if */
     
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1907,23 +2204,24 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5E_walk_cb(int n, H5E_error_t *err_desc, void *client_data)
+H5E_walk_cb(unsigned n, H5E_error_t *err_desc, void *client_data)
 {
     H5E_print_t         *eprint  = (H5E_print_t *)client_data;
-    FILE		*stream  = NULL;
-    H5E_cls_t           *cls_ptr = NULL;
-    H5E_msg_t           *maj_ptr = NULL;
-    H5E_msg_t           *min_ptr = NULL;
-    const char		*maj_str = NULL;
-    const char		*min_str = NULL;
-    const char		*cls_str = NULL;
-    const int		indent = 2;
+    FILE		*stream;        /* I/O stream to print output to */
+    H5E_cls_t           *cls_ptr;       /* Pointer to error class */
+    H5E_msg_t           *maj_ptr;       /* Pointer to major error info */
+    H5E_msg_t           *min_ptr;       /* Pointer to minor error info */
+    const char		*cls_str;       /* Class description */
+    const char		*maj_str = "No major description";      /* Major error description */
+    const char		*min_str = "No major description";      /* Minor error description */
+    const int		indent = 2;     /* Amount to indent errors in stack */
 
     FUNC_ENTER_NOINIT(H5E_walk_cb);
-    /*NO TRACE*/
 
     /* Check arguments */
     assert (err_desc);
+
+    /* If no client data was passed, output to stderr */
     if (!client_data) stream = stderr;
     else stream = eprint->stream;
     
@@ -1938,20 +2236,17 @@ H5E_walk_cb(int n, H5E_error_t *err_desc, void *client_data)
         min_str = min_ptr->msg;
 
     /* Get error class info */
-    /* add error checking later */
-    if(HDstrcmp(maj_ptr->cls->cls_name, min_ptr->cls->cls_name))
-        ;
     cls_ptr = maj_ptr->cls;
     cls_str = maj_ptr->cls->cls_name;
     
-    /* Print error message */
-    if(HDstrcmp(cls_ptr->lib_name, eprint->cls.lib_name)) {
+    /* Print error class header if new class */
+    if(eprint->cls.lib_name==NULL || HDstrcmp(cls_ptr->lib_name, eprint->cls.lib_name)) {
         /* update to the new class information */
         if(cls_ptr->cls_name) eprint->cls.cls_name = cls_ptr->cls_name;
         if(cls_ptr->lib_name) eprint->cls.lib_name = cls_ptr->lib_name;
         if(cls_ptr->lib_vers) eprint->cls.lib_vers = cls_ptr->lib_vers;
 
-        fprintf (stream, "%s-DIAG: Error detected in %s ", cls_ptr->lib_name, cls_ptr->lib_vers);
+        fprintf (stream, "%s-DIAG: Error detected in %s (%s) ", cls_ptr->cls_name, cls_ptr->lib_name, cls_ptr->lib_vers);
         
         /* try show the process or thread id in multiple processes cases*/
 #ifdef H5_HAVE_PARALLEL
@@ -1959,24 +2254,22 @@ H5E_walk_cb(int n, H5E_error_t *err_desc, void *client_data)
 	    MPI_Initialized(&mpi_initialized);
 	    if (mpi_initialized){
 	        MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-	        fprintf (stream, "MPI-process %d.", mpi_rank);
+	        fprintf (stream, "MPI-process %d", mpi_rank);
 	    }else
-	        fprintf (stream, "thread 0.");
+	        fprintf (stream, "thread 0");
         }
 #elif defined(H5_HAVE_THREADSAFE)
-        fprintf (stream, "thread %d.", (int)pthread_self());
+        fprintf (stream, "thread %d", (int)pthread_self());
 #else
-        fprintf (stream, "thread 0.");
+        fprintf (stream, "thread 0");
 #endif
-        /* Don't know what this is for */
-        /*if (estack && estack->nused>0) fprintf (stream, "  Back trace follows.");*/
-        HDfputc ('\n', stream);
+        fprintf (stream, ":\n");
     }
 
-    fprintf (stream, "%*s#%03d: %s line %u in %s(): %s\n",
+    /* Print error message */
+    fprintf (stream, "%*s#%03u: %s line %u in %s(): %s\n",
 	     indent, "", n, err_desc->file_name, err_desc->line,
 	     err_desc->func_name, err_desc->desc);
-    fprintf (stream, "%*sclass: %s\n", indent*2, "", cls_str);
     fprintf (stream, "%*smajor: %s\n", indent*2, "", maj_str);
     fprintf (stream, "%*sminor: %s\n", indent*2, "", min_str);
 
@@ -2008,18 +2301,18 @@ H5E_walk_cb(int n, H5E_error_t *err_desc, void *client_data)
 herr_t
 H5Eget_auto(hid_t estack_id, H5E_auto_t *func, void **client_data)
 {
+    H5E_t   *estack;            /* Error stack to operate on */
     herr_t ret_value=SUCCEED;   /* Return value */
-    H5E_t *estack_ptr = NULL;
     
     FUNC_ENTER_API(H5Eget_auto, FAIL);
     H5TRACE3("e","i*x*x",estack_id,func,client_data);
     
     if(estack_id == H5E_DEFAULT)
-    	estack_ptr = H5E_get_my_stack();
+    	estack = H5E_get_my_stack();
     else
-        estack_ptr = H5I_object_verify(estack_id, H5I_ERROR_STACK);
+        estack = H5I_object_verify(estack_id, H5I_ERROR_STACK);
 
-    ret_value = H5E_get_auto(estack_ptr, func, client_data);
+    ret_value = H5E_get_auto(estack, func, client_data);
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -2089,18 +2382,18 @@ done:
 herr_t
 H5Eset_auto(hid_t estack_id, H5E_auto_t func, void *client_data)
 {
+    H5E_t   *estack;            /* Error stack to operate on */
     herr_t ret_value=SUCCEED;   /* Return value */
-    H5E_t   *estack_ptr = NULL;
     
     FUNC_ENTER_API(H5Eset_auto, FAIL);
     H5TRACE3("e","ixx",estack_id,func,client_data);
 
     if(estack_id == H5E_DEFAULT)
-    	estack_ptr = H5E_get_my_stack();
+    	estack = H5E_get_my_stack();
     else
-        estack_ptr = H5I_object_verify(estack_id, H5I_ERROR_STACK);
+        estack = H5I_object_verify(estack_id, H5I_ERROR_STACK);
     
-    ret_value = H5E_set_auto(estack_ptr, func, client_data);   
+    ret_value = H5E_set_auto(estack, func, client_data);   
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -2138,7 +2431,6 @@ herr_t
 H5E_set_auto(H5E_t *estack, H5E_auto_t func, void *client_data)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
-    H5E_t *tmp;
 
     FUNC_ENTER_NOAPI(H5E_set_auto, FAIL);
 
@@ -2146,6 +2438,42 @@ H5E_set_auto(H5E_t *estack, H5E_auto_t func, void *client_data)
 
     estack->func = func;
     estack->auto_data = client_data;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5E_dump_api_stack
+ *
+ * Purpose:	Private function to dump the error stack during an error in
+ *              an API function if a callback function is defined for the
+ *              current error stack.
+ *		
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, August 6, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5E_dump_api_stack(int is_api)
+{
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5E_dump_api_stack, FAIL);
+
+    /* Only dump the error stack during an API call */
+    if(is_api) {
+        H5E_t *estack = H5E_get_my_stack();
+
+        if (estack->func)
+            (void)((estack->func)(H5E_DEFAULT, estack->auto_data));
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

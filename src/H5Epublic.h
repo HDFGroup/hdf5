@@ -24,7 +24,10 @@
 #include "H5public.h"
 #include "H5Ipublic.h"
 
+/* Value for the default error stack */
 #define H5E_DEFAULT             0
+
+/* Limit of error strings recorded */
 #define H5E_LEN                 128
 
 /* Take out _new later */
@@ -59,7 +62,6 @@ typedef struct H5E_error_t {
 H5_DLLVAR hid_t H5E_ERR_CLS_g;
 
 /* HDF5 error class: major errors. */
-#define H5E_NONE_MAJOR                      (H5OPEN H5E_NONE_MAJOR_g)
 #define H5E_ARGS                            (H5OPEN H5E_ARGS_g)
 #define H5E_RESOURCE                        (H5OPEN H5E_RESOURCE_g)
 #define H5E_INTERNAL                        (H5OPEN H5E_INTERNAL_g)
@@ -88,7 +90,6 @@ H5_DLLVAR hid_t H5E_ERR_CLS_g;
 #define H5E_RS                              (H5OPEN H5E_RS_g)
 #define H5E_ERROR                           (H5OPEN H5E_ERROR_g)
 
-H5_DLLVAR hid_t    H5E_NONE_MAJOR_g;                /*special zero, no error                     */
 H5_DLLVAR hid_t    H5E_ARGS_g;                      /*invalid arguments to routine               */
 H5_DLLVAR hid_t    H5E_RESOURCE_g;                  /*resource unavailable                       */
 H5_DLLVAR hid_t    H5E_INTERNAL_g;                  /*Internal error (too specific to document in detail) */
@@ -119,14 +120,12 @@ H5_DLLVAR hid_t    H5E_ERROR_g;  		        /*Error API				     */
 
 /* HDF5 error class: minor errors. */
          /* Argument errors */
-#define H5E_NONE_MINOR                      (H5OPEN H5E_NONE_MINOR_g)
 #define H5E_UNINITIALIZED                   (H5OPEN H5E_UNINITIALIZED_g)
 #define H5E_UNSUPPORTED                     (H5OPEN H5E_UNSUPPORTED_g)
 #define H5E_BADTYPE                         (H5OPEN H5E_BADTYPE_g)
 #define H5E_BADRANGE                        (H5OPEN H5E_BADRANGE_g)
 #define H5E_BADVALUE                        (H5OPEN H5E_BADVALUE_g)
 
-H5_DLLVAR hid_t    H5E_NONE_MINOR_g;                /*special zero, no error                     */
 H5_DLLVAR hid_t    H5E_UNINITIALIZED_g;             /*information is unitialized                 */
 H5_DLLVAR hid_t    H5E_UNSUPPORTED_g;               /*feature is unsupported                     */
 H5_DLLVAR hid_t    H5E_BADTYPE_g;                   /*incorrect type found                       */
@@ -354,22 +353,22 @@ H5_DLLVAR hid_t    H5E_SETLOCAL_g;                  /*error from filter "set loc
  * Public API Convenience Macros for Error reporting - Documented
  */
 /* Use the Standard C __FILE__ & __LINE__ macros instead of typing them in */
-#define H5Epush_sim(func,maj,min,str) H5Epush(H5E_DEFAULT,__FILE__,func,__LINE__,maj,min,str)
+#define H5Epush_sim(func,cls,maj,min,str) H5Epush(H5E_DEFAULT,__FILE__,func,__LINE__,cls,maj,min,str)
 
 /*
  * Public API Convenience Macros for Error reporting - Undocumented
  */
 /* Use the Standard C __FILE__ & __LINE__ macros instead of typing them in */
 /*  And return after pushing error onto stack */
-#define H5Epush_ret(func,maj,min,str,ret) {         \
-    H5Epush(H5E_DEFAULT,__FILE__,func,__LINE__,maj,min,str);    \
+#define H5Epush_ret(func,cls,maj,min,str,ret) {         \
+    H5Epush(H5E_DEFAULT,__FILE__,func,__LINE__,cls,maj,min,str);    \
     return(ret);                                    \
 }
 
 /* Use the Standard C __FILE__ & __LINE__ macros instead of typing them in */
 /*  And goto a label after pushing error onto stack */
-#define H5Epush_goto(func,maj,min,str,label) {      \
-    H5Epush(H5E_DEFAULT,__FILE__,func,__LINE__,maj,min,str);    \
+#define H5Epush_goto(func,cls,maj,min,str,label) {      \
+    H5Epush(H5E_DEFAULT,__FILE__,func,__LINE__,cls,maj,min,str);    \
     goto label;                                   \
 }
 
@@ -384,6 +383,11 @@ typedef enum H5E_direction_t {
 extern "C" {
 #endif
 
+/* Error stack traversal callback function pointers */
+typedef herr_t (*H5E_walk_t)(unsigned n, H5E_error_t *err_desc, void *client_data);
+typedef herr_t (*H5E_auto_t)(hid_t estack, void *client_data);
+
+/* Public API functions */
 H5_DLL hid_t  H5Eregister_class(const char *cls_name, const char *lib_name, const char *version);
 H5_DLL herr_t H5Eunregister_class(hid_t class_id);
 H5_DLL herr_t H5Eclose_msg(hid_t err_id);
@@ -395,12 +399,10 @@ H5_DLL ssize_t H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg, size_t size
 H5_DLL int     H5Eget_num(hid_t error_stack_id);
 H5_DLL herr_t  H5Eset_current_stack(hid_t err_stack_id);
 H5_DLL herr_t  H5Epush(hid_t err_stack, const char *file, const char *func, unsigned line, 
-                           hid_t maj_id, hid_t min_id, const char *msg, ...);
+                           hid_t cls_id, hid_t maj_id, hid_t min_id, const char *msg, ...);
 H5_DLL herr_t  H5Epop(hid_t err_stack, size_t count);
 H5_DLL herr_t  H5Eclear(hid_t err_stack);
 H5_DLL herr_t  H5Eprint(hid_t err_stack, FILE *stream);
-typedef herr_t (*H5E_walk_t)(int n, H5E_error_t *err_desc, void *client_data);
-typedef herr_t (*H5E_auto_t)(hid_t estack, void *client_data);
 H5_DLL herr_t  H5Ewalk(hid_t err_stack, H5E_direction_t direction, H5E_walk_t func, 
                             void *client_data);
 H5_DLL herr_t  H5Eget_auto(hid_t estack_id, H5E_auto_t *func, void **client_data);
