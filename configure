@@ -30090,6 +30090,7 @@ int main(int argc, char **argv)
     int bytes_read = 0, ret;
 
     MPI_Init(&argc, &argv);
+    memset(&mpi_stat, 0, sizeof(MPI_Status)); /* zero out status */
     ret = MPI_Get_count(&mpi_stat, MPI_BYTE, &bytes_read);
     MPI_Finalize();
 
