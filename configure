@@ -7454,7 +7454,7 @@ done
 
 if test -n "$F9XMODFLAG"; then
   echo $F9XMODFLAG 1>&6
-  FFLAGS="$F9XMODFLAG. $F9XMODFLAG../src $FFLAGS"
+  FFLAGS="$F9XMODFLAG. $F9XMODFLAG../src $F9XMODFLAG../../../fortran/src  $FFLAGS"
 else
   echo unknown 1>&6
 fi
@@ -33928,6 +33928,8 @@ fi
 
 
  HL=""
+# name of fortran folder inside "hl", if FORTRAN compile is requested
+ HL_FOR=""
 echo "$as_me:$LINENO: checking if high level library is enabled" >&5
 echo $ECHO_N "checking if high level library is enabled... $ECHO_C" >&6
 # Check whether --enable-hl or --disable-hl was given.
@@ -34014,12 +34016,22 @@ if test "X$HDF_CXX" = "Xyes"; then
 fi
 
 # conditionally generate the high level makefiles
-# to do : fortran with hl
-
 if test "X$HDF5_HL" = "Xyes"; then
  HL_FILES="hl/Makefile
            hl/src/Makefile
            hl/test/Makefile"
+fi
+
+# with FORTRAN support
+if test "X$HDF5_HL" = "Xyes" &&  test "X$HDF_FORTRAN" = "Xyes"; then
+ HL_FILES="hl/Makefile
+	   hl/src/Makefile
+	   hl/test/Makefile
+	   hl/fortran/Makefile
+	   hl/fortran/src/Makefile
+	   hl/fortran/test/Makefile"
+# name of folder inside "hl"
+HL_FOR="fortran"
 fi
 
 
@@ -34723,6 +34735,7 @@ s,@CC_VERSION@,$CC_VERSION,;t t
 s,@ROOT@,$ROOT,;t t
 s,@DYNAMIC_DIRS@,$DYNAMIC_DIRS,;t t
 s,@HL@,$HL,;t t
+s,@HL_FOR@,$HL_FOR,;t t
 /@COMMENCE@/r $COMMENCE
 s,@COMMENCE@,,;t t
 /@CONCLUDE@/r $CONCLUDE

@@ -1569,5 +1569,24 @@
 ./hl/test/test_table_be.hdf5
 ./hl/test/test_table_cray.hdf5
 
+# hl fortran
+./hl/fortran/src/Dependencies
+./hl/fortran/src/H5f90i.h
+./hl/fortran/src/H5IMfc.c
+./hl/fortran/src/H5IMff.f90
+./hl/fortran/src/H5LTf90proto.h
+./hl/fortran/src/H5LTfc.c
+./hl/fortran/src/H5LTff.f90
+./hl/fortran/src/H5TBfc.c
+./hl/fortran/src/H5TBff.f90
+./hl/fortran/src/Makefile.in
+./hl/fortran/test/Makefile.in
+./hl/fortran/test/tstimage.f90
+./hl/fortran/test/tstlite.f90
+./hl/fortran/test/tsttable.f90
+./hl/fortran/test/Dependencies
+./hl/fortran/Makefile.in
+
+
 
 ./windows/all.zip
