@@ -67,7 +67,7 @@ hid_t   ERR_MIN_GETNUM;
 #define SPACE2_DIM1	        10
 #define SPACE2_DIM2	        10
 
-herr_t custom_print_cb(unsigned n, H5E_error_t *err_desc, void* client_data);
+herr_t custom_print_cb(unsigned n, const H5E_error_t *err_desc, void* client_data);
 
 
 /*-------------------------------------------------------------------------
@@ -332,7 +332,7 @@ dump_error(hid_t estack)
  *-------------------------------------------------------------------------
  */
 herr_t 
-custom_print_cb(unsigned n, H5E_error_t *err_desc, void* client_data)
+custom_print_cb(unsigned n, const H5E_error_t *err_desc, void* client_data)
 {
     FILE		*stream  = (FILE *)client_data;
     char                maj[MSG_SIZE];

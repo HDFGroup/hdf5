@@ -162,10 +162,10 @@ cleanup (void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-display_error_cb (void UNUSED *client_data)
+display_error_cb (hid_t estack, void UNUSED *client_data)
 {
     puts ("*FAILED*");
-    H5Eprint (H5E_DEFAULT, stdout);
+    H5Eprint (estack, stdout);
     return 0;
 }
 
