@@ -40,6 +40,11 @@
 #include <Winsock.h>
 #endif
 
+#ifdef HAVE_SYS_TIMEB 
+#include <sys/timeb.h>
+#endif
+
+
 #define RAW_FILE_NAME	"iopipe.raw"
 #define HDF5_FILE_NAME	"iopipe.h5"
 #define HEADING		"%-16s"
@@ -94,12 +99,17 @@ print_stats (const char *prefix,
 	     ((double)(r_start->ru_stime.tv_sec)+
 	      (double)(r_start->ru_stime.tv_usec)/1000000.0);
 #endif
-
+#ifndef HAVE_SYS_TIMEB
     e_time = ((double)(t_stop->tv_sec)+
 	      (double)(t_stop->tv_usec)/1000000.0) -
 	     ((double)(t_start->tv_sec)+
 	      (double)(t_start->tv_usec)/1000000.0);
-
+#else
+    e_time = ((double)(t_stop->tv_sec)+
+	      (double)(t_stop->tv_usec)/1000.0) -
+	     ((double)(t_start->tv_sec)+
+	      (double)(t_start->tv_usec)/1000.0);
+#endif
     bw = (double)nbytes / e_time;
     
 #ifdef HAVE_GETRUSAGE
@@ -131,8 +141,12 @@ static void
 synchronize (void)
 {
 #ifdef HAVE_SYSTEM
+#ifdef WIN32
+	_flushall();
+#else
     system ("sync");
     system ("df >/dev/null");
+#endif
 #if 0
     /*
      * This works well on Linux to get rid of all cached disk buffers. The
@@ -182,6 +196,11 @@ main (void)
     hssize_t		start[2];
     hsize_t		count[2];
 
+
+#ifdef HAVE_SYS_TIMEB
+	struct _timeb *tbstart = malloc(sizeof(struct _timeb));
+	struct _timeb *tbstop = malloc(sizeof(struct _timeb));
+#endif
     /*
      * The extra cast in the following statement is a bug workaround for the
      * Win32 version 5.0 compiler.
@@ -212,6 +231,10 @@ main (void)
 #endif
 #ifdef HAVE_GETTIMEOFDAY
     gettimeofday (&t_start, NULL);
+#else 
+#ifdef HAVE_SYS_TIMEB
+	_ftime(tbstart);
+#endif
 #endif   
     fprintf (stderr, HEADING, "fill raw");
     for (i=0; i<nwrite; i++) {
@@ -224,6 +247,14 @@ main (void)
 #endif
 #ifdef HAVE_GETTIMEOFDAY
     gettimeofday (&t_stop, NULL);
+#else
+#ifdef HAVE_SYS_TIMEB
+	_ftime(tbstop);
+	t_start.tv_sec = tbstart->time;
+	t_start.tv_usec = tbstart->millitm;
+	t_stop.tv_sec = tbstop->time;
+	t_stop.tv_usec = tbstop->millitm;
+#endif	
 #endif 
     putc ('\n', stderr);
     print_stats ("fill raw",
@@ -238,6 +269,10 @@ main (void)
 #endif
 #ifdef HAVE_GETTIMEOFDAY
     gettimeofday (&t_start, NULL);
+#else
+#ifdef HAVE_SYS_TIMEB
+	_ftime(tbstart);
+#endif
 #endif 
     fprintf (stderr, HEADING, "fill hdf5");
     for (i=0; i<nread; i++) {
@@ -252,6 +287,14 @@ main (void)
 #endif
 #ifdef HAVE_GETTIMEOFDAY
     gettimeofday (&t_stop, NULL);
+#else
+#ifdef HAVE_SYS_TIMEB
+	_ftime(tbstop);
+	t_start.tv_sec = tbstart->time;
+	t_start.tv_usec = tbstart->millitm;
+	t_stop.tv_sec = tbstop->time;
+	t_stop.tv_usec = tbstop->millitm;
+#endif	
 #endif 
     putc ('\n', stderr);
     print_stats ("fill hdf5",
@@ -265,6 +308,10 @@ main (void)
 #endif
 #ifdef HAVE_GETTIMEOFDAY
     gettimeofday (&t_start, NULL);
+#else
+#ifdef HAVE_SYS_TIMEB
+	_ftime(tbstart);
+#endif
 #endif 
     fprintf (stderr, HEADING, "out raw");
     for (i=0; i<nwrite; i++) {
@@ -280,6 +327,14 @@ main (void)
 #endif
 #ifdef HAVE_GETTIMEOFDAY
     gettimeofday (&t_stop, NULL);
+#else
+#ifdef HAVE_SYS_TIMEB
+	_ftime(tbstop);
+	t_start.tv_sec = tbstart->time;
+	t_start.tv_usec = tbstart->millitm;
+	t_stop.tv_sec = tbstop->time;
+	t_stop.tv_usec = tbstop->millitm;
+#endif	
 #endif 
     putc ('\n', stderr);
     print_stats ("out raw",
@@ -293,6 +348,10 @@ main (void)
 #endif
 #ifdef HAVE_GETTIMEOFDAY
     gettimeofday (&t_start, NULL);
+#else
+#ifdef HAVE_SYS_TIMEB
+	_ftime(tbstart);
+#endif
 #endif 
     fprintf (stderr, HEADING, "out hdf5");
     for (i=0; i<nwrite; i++) {
@@ -307,6 +366,14 @@ main (void)
 #endif
 #ifdef HAVE_GETTIMEOFDAY
     gettimeofday (&t_stop, NULL);
+#else
+#ifdef HAVE_SYS_TIMEB
+	_ftime(tbstop);
+	t_start.tv_sec = tbstart->time;
+	t_start.tv_usec = tbstart->millitm;
+	t_stop.tv_sec = tbstop->time;
+	t_stop.tv_usec = tbstop->millitm;
+#endif	
 #endif 
     putc ('\n', stderr);
     print_stats ("out hdf5",
@@ -320,6 +387,10 @@ main (void)
 #endif
 #ifdef HAVE_GETTIMEOFDAY
     gettimeofday (&t_start, NULL);
+#else
+#ifdef HAVE_SYS_TIMEB
+	_ftime(tbstart);
+#endif
 #endif 
     fprintf (stderr, HEADING, "in raw");
     for (i=0; i<nread; i++) {
@@ -335,6 +406,14 @@ main (void)
 #endif
 #ifdef HAVE_GETTIMEOFDAY
     gettimeofday (&t_stop, NULL);
+#else
+#ifdef HAVE_SYS_TIMEB
+	_ftime(tbstop);
+	t_start.tv_sec = tbstart->time;
+	t_start.tv_usec = tbstart->millitm;
+	t_stop.tv_sec = tbstop->time;
+	t_stop.tv_usec = tbstop->millitm;
+#endif	
 #endif 
     putc ('\n', stderr);
     print_stats ("in raw",
@@ -349,6 +428,10 @@ main (void)
 #endif
 #ifdef HAVE_GETTIMEOFDAY
     gettimeofday (&t_start, NULL);
+#else
+#ifdef HAVE_SYS_TIMEB
+	_ftime(tbstart);
+#endif	
 #endif 
     fprintf (stderr, HEADING, "in hdf5");
     for (i=0; i<nread; i++) {
@@ -363,6 +446,14 @@ main (void)
 #endif
 #ifdef HAVE_GETTIMEOFDAY
     gettimeofday (&t_stop, NULL);
+#else
+#ifdef HAVE_SYS_TIMEB
+	_ftime(tbstop);
+	t_start.tv_sec = tbstart->time;
+	t_start.tv_usec = tbstart->millitm;
+	t_stop.tv_sec = tbstop->time;
+	t_stop.tv_usec = tbstop->millitm;
+#endif
 #endif 
     putc ('\n', stderr);
     print_stats ("in hdf5",
@@ -381,6 +472,10 @@ main (void)
 #endif
 #ifdef HAVE_GETTIMEOFDAY
     gettimeofday (&t_start, NULL);
+#else
+#ifdef HAVE_SYS_TIMEB
+	_ftime(tbstart);
+#endif	
 #endif 
     fprintf (stderr, HEADING, "in hdf5 partial");
     for (i=0; i<nread; i++) {
@@ -395,6 +490,14 @@ main (void)
 #endif
 #ifdef HAVE_GETTIMEOFDAY
     gettimeofday (&t_stop, NULL);
+#else
+#ifdef HAVE_SYS_TIMEB
+	_ftime(tbstop);
+	t_start.tv_sec = tbstart->time;
+	t_start.tv_usec = tbstart->millitm;
+	t_stop.tv_sec = tbstop->time;
+	t_stop.tv_usec = tbstop->millitm;
+#endif	
 #endif 
     putc ('\n', stderr);
     print_stats ("in hdf5 partial",
