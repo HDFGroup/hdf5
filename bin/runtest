@@ -29,7 +29,7 @@ TOWHOM=${DEBUGMODE:+acheng}
 TOWHOM=${TOWHOM:-hdf5lib@ncsa.uiuc.edu}
 
 # Setup
-HOSTNAME=`hostname | sed -e s/.ncsa.uiuc.edu//`
+HOSTNAME=`hostname | cut -f1 -d.`	# no domain part
 H5DIR=$HOME/HDF5/v_1_3/hdf5
 TODAY=`date +%y%m%d`
 H5VER=			# default to current CVS version

@@ -168,6 +168,7 @@ H5VERSION=hdf5
 BASEDIR=${HOME}/snapshots-${H5VERSION}
 CURRENT=${BASEDIR}/current
 PREVIOUS=${BASEDIR}/previous
+HOSTNAME=`hostname | cut -f1 -d.`	# no domain part
 
 # Try finding a version of diff that supports the -I option too.
 DIFF=diff
@@ -201,10 +202,10 @@ if [ "$cmd" = "all" -o -n "$cmdtest" ]; then
 	#create TESTDIR if not exist yet
 	case "$SRCDIRNAME" in
 	"")
-	    SRCDIRNAME=`hostname`
+	    SRCDIRNAME=$HOSTNAME
 	    ;;
 	-*)
-	    SRCDIRNAME="`hostname`$SRCDIRNAME"
+	    SRCDIRNAME="$HOSTNAME$SRCDIRNAME"
 	    ;;
 	esac
 	TESTDIR=${BASEDIR}/TestDir/${SRCDIRNAME}
@@ -287,10 +288,10 @@ if [ -n "$cmdclean" ]; then
     else
 	case "$SRCDIRNAME" in
 	"")
-	    SRCDIRNAME=`hostname`
+	    SRCDIRNAME=$HOSTNAME
 	    ;;
 	-*)
-	    SRCDIRNAME="`hostname`$SRCDIRNAME"
+	    SRCDIRNAME="$HOSTNAME$SRCDIRNAME"
 	    ;;
 	esac
 	TESTDIR=${BASEDIR}/TestDir/${SRCDIRNAME}
