@@ -78,7 +78,7 @@ static void
 test_file_create(void)
 {
     /* Output message about test being performed */
-    MESSAGE(5, ("Testing Low-Level File Creation I/O\n"));
+    MESSAGE(5, ("Testing File Creation I/O\n"));
 
     /* Test create with various sequences of H5F_ACC_EXCL and */
     /* H5F_ACC_TRUNC flags */
@@ -274,7 +274,7 @@ static void
 test_file_open(void)
 {
     /* Output message about test being performed */
-    MESSAGE(5, ("Testing Low-Level File Opening I/O\n"));
+    MESSAGE(5, ("Testing File Opening I/O\n"));
 
     try {
 
@@ -282,7 +282,6 @@ test_file_open(void)
 	H5File fid1 (FILE2, H5F_ACC_RDWR );
 
 	/* Get the file-creation template */
-	//FileCreatPropList tmpl1;
 	FileCreatPropList tmpl1 = fid1.getCreatePlist();
 
 	/* Get the file-creation parameters */
@@ -329,7 +328,7 @@ void
 test_file(void)
 {
     /* Output message about test being performed */
-    MESSAGE(5, ("Testing Low-Level File I/O\n"));
+    MESSAGE(5, ("Testing File I/O operations\n"));
 
     test_file_create();	/* Test file creation (also creation templates) */
     test_file_open();	/* Test file opening */

@@ -37,9 +37,9 @@ using namespace std;
 /*-------------------------------------------------------------------------
  * Function:	test_report
  *
- * Purpose:	Prints out the number of errors for dataset tests if there  
- *		were any failures occurred.  If no failure, test_report
- *		prints out the "All dataset tests passed" message 
+ * Purpose:	Prints out the number of errors for the tests indicated
+ * 		by 'testname,' if there were any failures occurred.  If 
+ * 		no failure, test_report prints out the tests passed message.
  *
  * Return:	if any failure has occurred:	1
  *
@@ -59,15 +59,15 @@ int test_report( int nerrors, const string& testname )
       nerrors = MAX(1, nerrors);
 	if (1 == nerrors)
 	    cout << "***** " << nerrors << testname
-					<< " FAILED! *****" << endl;
+					<< " TEST FAILED! *****" << endl;
 	else
 	    cout << "***** " << nerrors << testname
-					<< " FAILED! *****" << endl;
+					<< " TESTS FAILED! *****" << endl;
       return 1;
    }
    else 
    {
-      cout << "All dataset tests passed." << endl;
+      cout << "All" << testname << " tests passed." << endl;
       return 0;
    }
 }

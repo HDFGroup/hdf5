@@ -1030,11 +1030,12 @@ main(void)
     }
     catch (Exception E) 
     {
-	return(test_report(nerrors, string(" DATASET TESTS")));
+	return(test_report(nerrors, string(" Dataset")));
     }
     /* use C test utility routine to clean up data files */
     h5_cleanup(FILENAME, fapl_id);
 
     /* print out dsets test results */
-    return(test_report(nerrors, string(" DATASET TESTS")));
+    cerr << endl << endl;
+    return(test_report(nerrors, string(" Dataset")));
 }
