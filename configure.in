@@ -55,6 +55,19 @@ set >&AS_MESSAGE_LOG_FD
 AC_MSG_RESULT([done])
 
 dnl ----------------------------------------------------------------------
+dnl Some platforms have broken ``tr'' programs. Check that it actually
+dnl does what it's supposed to do. Catch this early since configure
+dnl relies upon tr heavily and there's no use continuing if it's broken.
+dnl
+AC_MSG_CHECKING([if tr works])
+TRTEST=`echo "Test" | tr 'a-z,' 'A-Z '`
+if test $TRTEST != "TEST"; then
+  AC_MSG_ERROR([tr program doesn't work])
+else
+  AC_MSG_RESULT([yes])
+fi
+
+dnl ----------------------------------------------------------------------
 dnl Check that the cache file was build on the same host as what we're
 dnl running on now.
 dnl
