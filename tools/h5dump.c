@@ -1,7 +1,7 @@
 #include "h5dump.h"
 #include <stdio.h>
 #include "H5private.h"
-#include "H5tools.h"
+#include "h5tools.h"
 
 static int display_data = 1;
 static int status = 0;
