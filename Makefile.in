@@ -108,7 +108,7 @@ distclean:
 	-$(CP) Makefile.dist Makefile
 
 maintainer-clean:
-	@echo "This command is intented for maintainers to use;"
+	@echo "This target is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 	@@SETX@; for d in $(SUBDIRS) examples pablo; do			      \
 	   (cd $$d && $(MAKE) $@);					      \
