@@ -89,6 +89,8 @@ H5T_str_t str_pad;
 H5T_cset_t cset;
 H5G_stat_t statbuf;
 
+	hid_t super;
+
     switch (H5Tget_class(type)) {
 
     case H5T_INTEGER:
@@ -319,6 +321,15 @@ H5G_stat_t statbuf;
         break;
 	case H5T_REFERENCE:
 		printf("H5T_REFERENCE");
+		break;
+	case H5T_ENUM:
+		printf("H5T_ENUM ");
+		super = H5Tget_super(type);
+		print_datatype(super);
+		printf(" {\n");
+	//	print_enum(type);
+		indentation (indent + 3);
+		printf("}\n");
 		break;
     default:
         printf( "unknown data type");
@@ -775,9 +786,12 @@ size_t dims[H5DUMP_MAX_RANK];
          ndims = H5Tget_member_dims(type, i, dims, perm);
 
          indentation (indent+COL);
-
-         print_datatype(mtype);
-
+		 if (H5T_ENUM == H5Tget_class(type)) {
+			print_datatype(type);
+		 }
+		 else {
+			print_datatype(mtype);
+		 }
          printf (" \"%s\"", fname);
   
          if (ndims != 1 || dims[0] != 1) {
@@ -934,6 +948,10 @@ hid_t  type, space;
 	case H5T_REFERENCE:
 		 dump_data(did, DATASET_DATA);
 		 break;
+/*	case H5T_ENUM:
+		 dump_data(did,ENUM_DATA);
+		 break;
+*/
     default: break;
     }
 
