@@ -32,14 +32,18 @@
 	5.3. Configuring
 	5.3.1. Specifying the installation directories
 	5.3.2. Using an alternate C compiler
-	5.3.3. Additional compilation flags
-	5.3.4. Compiling HDF5 wrapper libraries
-	5.3.5. Specifying other programs
-	5.3.6. Specifying other libraries and headers
-	5.3.7. Static versus shared linking
-	5.3.8. Optimization versus symbolic debugging
-	5.3.9. Large (>2GB) vs. small (<2GB) file capability
-	5.3.10. Parallel vs. serial library
+        5.3.3. Configuring for 64-bit support
+	5.3.4. Additional compilation flags
+	5.3.5. Compiling HDF5 wrapper libraries
+	5.3.6. Specifying other programs
+	5.3.7. Specifying other libraries and headers
+	5.3.8. Static versus shared linking
+	5.3.9. Optimization versus symbolic debugging
+	5.3.10. Large (>2GB) vs. small (<2GB) file capability
+	5.3.11. Parallel vs. serial library
+        5.3.12. Threadsafe capability
+        5.3.13. Backward compatibility
+        5.3.14. Network stream capability
 	5.4. Building
 	5.5. Testing
 	5.6. Installing
@@ -251,6 +255,10 @@
 
 	    $ CC=/usr/local/mpi/bin/mpicc ./configure
 
+5.3.3. Configuring for 64-bit support
+        Several machine architectures support 32-bit or 64-bit binaries.
+        The options below describe how to enable support for different options.
+
 	On Irix64 the default compiler is `cc'. To use an alternate
 	compiler specify it with the CC variable:
 
@@ -262,19 +270,16 @@
 
 	    $ CC='cc -xarch=v9' ./configure
 
-	To configure AIX 64 bits including fortran API,
-	(Remark: need to hardset $AR to 'ar -X 64'.)
+	To configure AIX 64-bit support including fortran API and C++,
+	(Note: need to set $AR to 'ar -X 64'.)
 	Serial:
-	    $ CC='xlc -q64' F9X='xlf -q64' AR='ar -X 64'\
+	    $ CFLAGS=-q64 FFLAGS=-q64 CXXFLAGS=-q64 AR='ar -X 64'\
 	    $ ./configure --enable-fortran
-	Parallel:
-	    $ CC='mpcc_r -q64' F9X='mpxlf_r -q64' AR='ar -X 64'\
+	Parallel: (C++ not supported with parallel)
+	    $ CFLAGS=-q64 FFLAGS=-q64 AR='ar -X 64'\
 	    $ ./configure --enable-fortran
 
-	Specifying these machine architecture flags in the CFLAGS variable
-	(see below) will not work correctly.
-
-5.3.3. Additional compilation flags
+5.3.4. Additional compilation flags
 	If addtional flags must be passed to the compilation commands
 	then specify those flags with the CFLAGS variable. For instance,
 	to enable symbolic debugging of a production version of HDF5 one
@@ -282,7 +287,7 @@
 
 	    $ CFLAGS=-g ./configure --enable-production
 
-5.3.4. Compiling HDF5 wrapper libraries
+5.3.5. Compiling HDF5 wrapper libraries
 	One can optionally build the Fortran and/or C++ interface to the
 	HDF5 C library. By default, both options are disabled. To build
 	them, specify `--enable-fortran' and `--enable-cxx' respectively.
@@ -314,7 +319,7 @@
         Note: See sections 5.7 and 5.8 for how to build Fortran Library with
               PGI or Intel compilers. 
 
-5.3.5. Specifying other programs
+5.3.6. Specifying other programs
 	The build system has been tuned for use with GNU make but works
 	also with other versions of make.  If the `make' command runs a
 	non-GNU version but a GNU version is available under a different
@@ -348,7 +353,7 @@
 	       because the HDF5 makefiles also use the install program to
 	       also change file ownership and/or access permissions.
 
-5.3.6. Specifying other libraries and headers
+5.3.7. Specifying other libraries and headers
 	Configure searches the standard places (those places known by the
 	systems compiler) for include files and header files. However,
 	additional directories can be specified by using the CPPFLAGS
@@ -388,7 +393,7 @@
 
         $ ./configure --with-szlib=/Szip_Install_Directory
 
-5.3.7. Static versus shared linking
+5.3.8. Static versus shared linking
 	The build process will create static libraries on all systems and
 	shared libraries on systems that support dynamic linking to a
 	sufficient degree. Either form of library may be suppressed by
@@ -404,7 +409,7 @@
 
 	    $ ./configure --enable-static-exec
 
-5.3.8. Optimization versus symbolic debugging
+5.3.9. Optimization versus symbolic debugging
 	The library can be compiled to provide symbolic debugging support
 	so it can be debugged with gdb, dbx, ddd, etc or it can be
 	compiled with various optimizations. To compile for symbolic
@@ -441,7 +446,7 @@
 	releases). The tracing must also be enabled at runtime to see any
 	output (see Debugging.html).
 
-5.3.9. Large (>2GB) vs. small (<2GB) file capability
+5.3.10. Large (>2GB) vs. small (<2GB) file capability
 	In order to read or write files that could potentially be larger
 	than 2GB it is necessary to use the non-ANSI `long long' data
 	type on some platforms. However, some compilers (e.g., GNU gcc
@@ -451,31 +456,32 @@
 
 	    $ ./configure --disable-hsizet
 
-5.3.10. Parallel vs. serial library
+5.3.11. Parallel vs. serial library
 	The HDF5 library can be configured to use MPI and MPI-IO for
 	parallelizm on a distributed multi-processor system.  Read the
 	file INSTALL_parallel for detailed explanations.
 
-5.3.11. Threadsafe capability
+5.3.12. Threadsafe capability
 	The HDF5 library can be configured to be thread-safe (on a very
 	large scale) with the with the `--enable-threadsafe' flag to
 	configure. Read the file doc/TechNotes/ThreadSafeLibrary.html for
 	further details.
 
-5.3.12. Backward compatibility
-	The 1.6 version of the HDF5 library can be configured to operate
-	identically to the v1.4 library with the `--enable-hdf5v1_4'
+5.3.13. Backward compatibility
+	The 1.8 version of the HDF5 library can be configured to operate
+	identically to the v1.6 library with the `--enable-hdf5v1_6'
 	configure flag. This allows existing code to be compiled with the
-	v1.6 library without requiring immediate changes to the
+	v1.8 library without requiring immediate changes to the
 	application source code. This flag will only be supported in the
-	v1.6 branch of the library, it will not be available in v1.7+.
+	v1.8 branch of the library, it will not be available in v1.9+.
 
-5.3.13. Network stream capability
+5.3.14. Network stream capability
 	The HDF5 library can be configured with a network stream file
 	driver with the `--enable-stream-vfd' configure flag. This option
 	compiles the "stream" Virtual File Driver into the main library.
 	See the documentation on the Virtual File Layer for more details
-	about the use of this driver.
+	about the use of this driver.  The network stream capability is
+        enabled by default.
 
 5.4. Building
 	The library, confidence tests, and programs can be build by
