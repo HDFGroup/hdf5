@@ -1537,9 +1537,6 @@ H5F_close(H5F_t *f)
 {
     FUNC_ENTER(H5F_close, FAIL);
 
-    /* Close all current working groups */
-    while (H5G_pop(f)>=0) /*void*/;
-    
     /*
      * If object headers are still open then delay deletion of resources until
      * they have all been closed.  Flush all caches and update the object

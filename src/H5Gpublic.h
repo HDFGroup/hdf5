@@ -59,9 +59,6 @@ typedef herr_t (*H5G_iterate_t)(hid_t group, const char *group_name,
 hid_t H5Gcreate (hid_t loc_id, const char *name, size_t size_hint);
 hid_t H5Gopen (hid_t loc_id, const char *name);
 herr_t H5Gclose (hid_t group_id);
-herr_t H5Gset (hid_t loc_id, const char *name);
-herr_t H5Gpush (hid_t loc_id, const char *name);
-herr_t H5Gpop (hid_t loc_id);
 herr_t H5Giterate (hid_t loc_id, const char *name, int *idx, H5G_iterate_t op,
 		   void *op_data);
 herr_t H5Gmove (hid_t loc_id, const char *src, const char *dst);

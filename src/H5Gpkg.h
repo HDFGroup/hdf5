@@ -56,16 +56,6 @@ struct H5G_t {
 };
 
 /*
- * Each file has a stack of open groups with the latest entry on the
- * stack the current working group.  If the stack is empty then the
- * current working group is the root object.
- */
-typedef struct H5G_cwgstk_t {
-    H5G_t               *grp;           /*a handle to an open group          */
-    struct H5G_cwgstk_t *next;          /*next item (earlier) on stack       */
-} H5G_cwgstk_t;
-
-/*
  * These operations can be passed down from the H5G_stab layer to the
  * H5G_node layer through the B-tree layer.
  */

@@ -248,182 +248,6 @@ H5Gclose(hid_t group_id)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Gset
- *
- * Purpose:	Sets the working group for file handle FILE to the
- *		specified group.
- *
- *		Each file handle maintains its own notion of the current
- *		working group.	That is, if a single file is opened with
- *		multiple calls to H5Fopen(), which returns multiple file
- *		handles, then each handle's current working group can be
- *		set independently of the other file handles for that file.
- *
- * 		The initial current working group is the root group.
- *
- * See also:	H5Gpush(), H5Gpop()
- *
- * Errors:
- *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *		Wednesday, September 24, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Gset(hid_t loc_id, const char *name)
-{
-    H5G_t	*grp = NULL;
-    H5G_entry_t	*loc = NULL;
-
-    FUNC_ENTER(H5Gset, FAIL);
-    H5TRACE2("e","is",loc_id,name);
-
-    /* Check/fix arguments */
-    if (NULL==(loc=H5G_loc(loc_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-    }
-    if (!name || !*name) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
-    }
-    
-    /* Set the current working group */
-    if (NULL == (grp = H5G_open(loc, name))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_NOTFOUND, FAIL, "no such group");
-    }
-    if (H5G_set(grp) < 0) {
-	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
-		      "unable to change current working group");
-    }
-    
-    /* Close the handle */
-    if (H5G_close(grp)<0) {
-	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close group");
-    }
-    FUNC_LEAVE(SUCCEED);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Gpush
- *
- * Purpose:	Similar to H5Gset() except the new working group is pushed
- *		on a stack.
- *
- *		Each file handle maintains its own notion of the current
- *		working group.	That is, if a single file is opened with
- *		multiple calls to H5Fopen(), which returns multiple file
- *		handles, then each handle's current working group can be
- *		set independently of the other file handles for that file.
- *
- * See also:	H5Gset(), H5Gpop()
- *
- * Errors:
- *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *		Wednesday, September 24, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Gpush(hid_t loc_id, const char *name)
-{
-    H5G_t	*grp = NULL;
-    H5G_entry_t	*loc = NULL;
-
-    FUNC_ENTER(H5Gpush, FAIL);
-    H5TRACE2("e","is",loc_id,name);
-
-    /* Check arguments */
-    if (NULL == (loc = H5G_loc(loc_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-    }
-    if (!name || !*name) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
-    }
-
-    /* Push group onto stack */
-    if (NULL == (grp = H5G_open(loc, name))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_NOTFOUND, FAIL, "no such group");
-    }
-    if (H5G_push(grp) < 0) {
-	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
-		      "can't change current working group");
-    }
-    /* Close the handle */
-    if (H5G_close(grp) < 0) {
-	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close group");
-    }
-    FUNC_LEAVE(SUCCEED);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Gpop
- *
- * Purpose:	Removes the top (latest) entry from the working group stack
- *		and sets the current working group to the previous value.
- *
- *		Each file handle maintains its own notion of the current
- *		working group.	That is, if a single file is opened with
- *		multiple calls to H5Fopen(), which returns multiple file
- *		handles, then each handle's current working group can be
- *		set independently of the other file handles for that file.
- *
- *		If LOC_ID is a group ID then it's used only to determine the
- *		file from which to pop.
- *
- * See also:	H5Gset(), H5Gpush()
- *
- * Errors:
- *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL.  The final entry cannot be popped from
- *				the group stack (but it can be changed
- *				with H5Gset()).
- *
- * Programmer:	Robb Matzke
- *		Wednesday, September 24, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Gpop(hid_t loc_id)
-{
-    H5G_entry_t	*loc = NULL;
-
-    FUNC_ENTER(H5Gpop, FAIL);
-    H5TRACE1("e","i",loc_id);
-
-    /* Check arguments */
-    if (NULL == (loc = H5G_loc(loc_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-    }
-
-    /* pop */
-    if (H5G_pop(loc->file)<0) {
-	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "stack is empty");
-    }
-    FUNC_LEAVE(SUCCEED);
-}
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5Giterate
  *
  * Purpose:	Iterates over the entries of a group.  The LOC_ID and NAME
@@ -1073,7 +897,7 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
 		       "no current working group");
     } else if ('/' == *name) {
-	*obj_ent = loc_ent->file->shared->root_grp->ent;
+	*obj_ent = H5G_rootof(loc_ent->file)->ent;
     } else {
 	*obj_ent = *loc_ent;
     }
@@ -1479,7 +1303,7 @@ H5G_close(H5G_t *grp)
     assert(grp->nref > 0);
 
     if (1 == grp->nref) {
-	assert (grp!=H5G_fileof(grp)->shared->root_grp);
+	assert (grp!=H5G_rootof(H5G_fileof(grp)));
 	if (H5O_close(&(grp->ent)) < 0) {
 	    HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close");
 	}
@@ -1494,188 +1318,27 @@ H5G_close(H5G_t *grp)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_set
+ * Function:	H5G_rootof
  *
- * Purpose:	Sets the current working group to be the specified group.
- *		This affects only the top item on the group stack for the
- *		specified file as accessed through this file handle.  If the
- *		file is opened multiple times, then the current working group
- *		for this file handle is the only one that is changed.
+ * Purpose:	Return a pointer to the root group of the file.
  *
- * Note:	The group is re-opened and held open until it is removed from
- *		the current working group stack.
+ * Return:	Success:	
  *
- * Errors:
- *		SYM	  CWG		Can't open group. 
- *		SYM	  CWG		Couldn't close previous c.w.g. 
- *		SYM	  CWG		Not a group. 
- *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
+ *		Failure:	
  *
  * Programmer:	Robb Matzke
- *		Wednesday, September 24, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5G_set (H5G_t *grp)
-{
-    H5F_t	*f;
-    
-    FUNC_ENTER(H5G_set, FAIL);
-
-    /* check args */
-    assert(grp);
-    f = H5G_fileof (grp);
-
-    /*
-     * If there is no stack then create one, otherwise close the current
-     * working group.
-     */
-    if (!f->cwg_stack) {
-	if (NULL==(f->cwg_stack = H5MM_calloc(sizeof(H5G_cwgstk_t)))) {
-	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			   "memory allocation failed");
-	}
-    } else if (H5G_close(f->cwg_stack->grp) < 0) {
-	HRETURN_ERROR(H5E_SYM, H5E_CWG, FAIL,
-		      "couldn't close previous current working group");
-    }
-    f->cwg_stack->grp = H5G_reopen (grp);
-
-    FUNC_LEAVE(SUCCEED);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_getcwg
- *
- * Purpose:	Returns the current working group.
- *		
- * Return:	Success:	The current working group.  This group should
- *				not* be closed with H5G_close() when the
- *				caller is done with it.
- *
- *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *		Wednesday, September 24, 1997
+ *              Tuesday, October 13, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 H5G_t *
-H5G_getcwg(H5F_t *f)
+H5G_rootof(H5F_t *f)
 {
-    H5G_t	*ret_value = NULL;
-
-    FUNC_ENTER(H5G_getcwg, NULL);
-
-    /* check args */
-    assert(f);
-
-    if (f->cwg_stack) {
-	ret_value = f->cwg_stack->grp;
-    } else {
-	ret_value = f->shared->root_grp;
-    }
     
-    FUNC_LEAVE(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_push
- *
- * Purpose:	Pushes a new current working group onto the stack.  The GRP
- *		is reopened and held open until it is removed from the stack.
- *
- * Errors:
- *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *		Friday, September 19, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5G_push (H5G_t *grp)
-{
-    H5G_cwgstk_t	*stack = NULL;
-
-    FUNC_ENTER(H5G_push, FAIL);
-
-    /* check args */
-    assert(grp);
-
-    /*
-     * Push a new entry onto the stack.
-     */
-    if (NULL==(stack = H5MM_calloc(sizeof(H5G_cwgstk_t)))) {
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-		       "memory allocation failed");
-    }
-    stack->grp = H5G_reopen(grp);
-    stack->next = H5G_fileof(grp)->cwg_stack;
-    H5G_fileof(grp)->cwg_stack = stack;
-
-    FUNC_LEAVE(SUCCEED);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_pop
- *
- * Purpose:	Pops the top current working group off the stack.  If the
- *		stack becomes empty then the current working group is
- *		implicitly the root group.
- *
- * Errors:
- *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL if the stack is empty.
- *
- * Programmer:	Robb Matzke
- *		Friday, September 19, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5G_pop (H5F_t *f)
-{
-    H5G_cwgstk_t	   *stack = NULL;
-
-    FUNC_ENTER(H5G_pop, FAIL);
-
-    /* check args */
-    assert(f);
-
-    if ((stack = f->cwg_stack)) {
-	if (H5G_close(stack->grp) < 0) {
-	    HRETURN_ERROR(H5E_SYM, H5E_CWG, FAIL,
-			  "can't close current working group");
-	}
-	f->cwg_stack = stack->next;
-	stack->grp = NULL;
-	H5MM_xfree(stack);
-    } else {
-	HRETURN_ERROR(H5E_SYM, H5E_CWG, FAIL, "stack is empty");
-    }
-
-    FUNC_LEAVE(SUCCEED);
+    FUNC_ENTER(H5G_rootof, NULL);
+    FUNC_LEAVE(f->shared->root_grp);
 }
 
 
@@ -1878,13 +1541,9 @@ H5G_loc (hid_t loc_id)
 	if (NULL==(f=H5I_object (loc_id))) {
 	    HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, NULL, "invalid file ID");
 	}
-	if (NULL==(group=H5G_getcwg (f))) {
-	    HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, NULL,
-			   "unable to get current working group");
-	}
-	if (NULL==(ret_value=H5G_entof(group))) {
+	if (NULL==(ret_value=H5G_entof(H5G_rootof(f)))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
-			  "unable to get symbol table entry of c.w.g.");
+			  "unable to get symbol table entry for root group");
 	}
 	break;
 

@@ -52,7 +52,7 @@ static void
 test_1(void)
 {
     hid_t	file;
-    hid_t	g1, g2, g3, g4;
+    hid_t	g1, g2, g3;
     herr_t	status;
     char	comment[64];
     int		cmp;
@@ -64,17 +64,13 @@ test_1(void)
     
     g1 = H5Gcreate(file, "test_1a", 0);
     CHECK_I(g1, "H5Gcreate");
-    status = H5Gset(file, "test_1a");
 
     g2 = H5Gcreate(g1, "sub_1", 0);
     CHECK_I(g2, "H5Gcreate");
-    g3 = H5Gcreate(file, "sub_2", 0);
+
+    g3 = H5Gcreate(file, "test_1b", 0);
     CHECK_I(g3, "H5Gcreate");
-    
-    H5Gpop(g3);
-    g4 = H5Gcreate(file, "test_1b", 0);
-    CHECK_I(g4, "H5Gcreate");
-    status = H5Gset_comment(g4, ".", "hello world");
+    status = H5Gset_comment(g3, ".", "hello world");
     CHECK_I(status, "H5Gset_comment");
 
     /* Close all groups */
@@ -84,19 +80,15 @@ test_1(void)
     CHECK_I(status, "H5Gclose");
     status = H5Gclose(g3);
     CHECK_I(status, "H5Gclose");
-    status = H5Gclose(g4);
-    CHECK_I(status, "H5Gclose");
     
     /* Open all groups with absolute names to check for exsistence */
     g1 = H5Gopen(file, "/test_1a");
     CHECK_I(g1, "H5Gopen");
     g2 = H5Gopen(file, "/test_1a/sub_1");
     CHECK_I(g2, "H5Gopen");
-    g3 = H5Gopen(file, "/test_1a/sub_2");
+    g3 = H5Gopen(file, "/test_1b");
     CHECK_I(g3, "H5Gopen");
-    g4 = H5Gopen(file, "/test_1b");
-    CHECK_I(g4, "H5Gopen");
-    status = H5Gget_comment(g4, "././.", sizeof comment, comment);
+    status = H5Gget_comment(g3, "././.", sizeof comment, comment);
     CHECK_I(status, "H5Gget_comment");
     cmp = strcmp(comment, "hello world");
     VERIFY(cmp, 0, "strcmp");
@@ -107,8 +99,6 @@ test_1(void)
     status = H5Gclose(g2);
     CHECK_I(status, "H5Gclose");
     status = H5Gclose(g3);
-    CHECK_I(status, "H5Gclose");
-    status = H5Gclose(g4);
     CHECK_I(status, "H5Gclose");
 
     /* Close file */
@@ -135,12 +125,12 @@ test_1(void)
 static void
 test_2(void)
 {
-    hid_t                   fid, create_plist, access_plist, dir;
-    H5F_t                  *f;
-    int                     i;
-    char                    name[256];
-    herr_t                  status;
-    int                     nsyms = 5000;
+    hid_t               fid, cwg, create_plist, access_plist, dir;
+    H5F_t               *f;
+    int                 i;
+    char                name[256];
+    herr_t              status;
+    int                 nsyms = 5000;
 
     MESSAGE(2, ("........large directories\n"));
 
@@ -189,21 +179,20 @@ test_2(void)
      * Create a directory that has so many entries that the root
      * of the B-tree ends up splitting.
      */
-    dir = H5Gcreate(fid, "/big", (size_t)nsyms*16+2);
-    CHECK_I(dir, "H5Gcreate");
-    status = H5Gclose(dir);
-    CHECK_I(status, "H5Gclose");
-    status = H5Gset(fid, "/big");
-    CHECK_I(status, "H5Gset");
+    cwg = H5Gcreate(fid, "/big", (size_t)nsyms*16+2);
+    CHECK_I(cwg, "H5Gcreate");
 
     for (i = 0; i < nsyms; i++) {
         sprintf(name, "%05d%05d", rand() % 100000, i);
         MESSAGE(8, ("%s\n", name));
-        dir = H5Gcreate(fid, name, 0);
+	dir = H5Gcreate(cwg, name, 0);
         CHECK_I(dir, "H5Gcreate");
         status = H5Gclose(dir);
         CHECK_I(status, "H5Gclose");
     }
+
+    status = H5Gclose(cwg);
+    CHECK_I(status, "H5Gclose");
 
     /* close the property lists */
     status = H5Pclose(create_plist);

@@ -107,10 +107,7 @@ H5G_t *H5G_create (H5G_entry_t *loc, const char *name, size_t size_hint);
 H5G_t *H5G_open (H5G_entry_t *loc, const char *name);
 H5G_t *H5G_reopen (H5G_t *grp);
 herr_t H5G_close (H5G_t *grp);
-herr_t H5G_set (H5G_t *grp);
-herr_t H5G_push (H5G_t *grp);
-herr_t H5G_pop (H5F_t *f);
-H5G_t *H5G_getcwg(H5F_t *f);
+H5G_t *H5G_rootof(H5F_t *f);
 herr_t H5G_link (H5G_entry_t *loc, H5G_link_t type, const char *cur_name,
 		 const char *new_name);
 herr_t H5G_get_objinfo (H5G_entry_t *loc, const char *name,

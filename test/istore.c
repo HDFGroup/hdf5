@@ -135,7 +135,7 @@ new_object(H5F_t *f, const char *name, intn ndims, H5G_entry_t *ent/*out*/)
 	return -1;
     }
     /* Give the object header a name */
-    if (H5G_insert(H5G_entof(H5G_getcwg(f)), name, ent) < 0) {
+    if (H5G_insert(H5G_entof(H5G_rootof(f)), name, ent) < 0) {
 	printf("*FAILED*\n");
 	if (!isatty(1)) {
 	    AT();
@@ -639,7 +639,7 @@ main(int argc, char *argv[])
      * By creating a group we cause the library to emit it's debugging
      * diagnostic messages before we begin testing...
      */
-    dir = H5G_create(H5G_entof(H5G_getcwg(f)), "flushing_diagnostics", 0);
+    dir = H5G_create(H5G_entof(H5G_rootof(f)), "flushing_diagnostics", 0);
     H5G_close(dir);
     dir = NULL;
 
