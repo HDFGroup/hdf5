@@ -47,8 +47,8 @@ static h5dump_t dataformat = {
     "%lu",    /*fmt_ulong*/
     NULL,     /*fmt_llong*/
     NULL,     /*fmt_ullong*/
-    "%g",     /*fmt_double*/
-    "%g",     /*fmt_float*/
+    "%1.*g",  /*fmt_double*/
+    "%1.*g",  /*fmt_float*/
 
     0,        /*ascii*/
     0,        /*str_locale*/

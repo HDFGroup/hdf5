@@ -713,10 +713,12 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 	    h5dump_str_append(str, OPT(info->fmt_raw, "%02x"), ucp_vp[i]);
     } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
         memcpy(&tempdouble, vp, sizeof(double)); 
-	h5dump_str_append(str, OPT(info->fmt_double, "%g"), tempdouble);
+	h5dump_str_append(str, OPT(info->fmt_double, "%1.*g"),
+			  DBL_DIG, tempdouble);
     } else if (H5Tequal(type, H5T_NATIVE_FLOAT)) {
         memcpy(&tempfloat, vp, sizeof(float));	
-        h5dump_str_append(str, OPT(info->fmt_double, "%g"), tempfloat);
+        h5dump_str_append(str, OPT(info->fmt_double, "%1.*g"),
+			  FLT_DIG, tempfloat);
     } else if (info->ascii &&
 	       (H5Tequal(type, H5T_NATIVE_SCHAR) ||
 		H5Tequal(type, H5T_NATIVE_UCHAR))) {
@@ -757,8 +759,7 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 		break;
 	    }
 	}
-
-    } else if (H5T_STRING==H5Tget_class(type)) {
+    } else if (H5T_STRING == H5Tget_class(type)) {
 	unsigned int i;
 
 	size = H5Tget_size(type);
