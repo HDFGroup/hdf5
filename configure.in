@@ -1227,7 +1227,7 @@ case "$CC_BASENAME" in
          AC_MSG_RESULT($path/mpirun)
          RUNSERIAL="${RUNSERIAL:-none}"
          if test -z "$RUNPARALLEL"; then
-            RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=2}"
+            RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=3}"
          fi
       else
          AC_MSG_RESULT(none)
@@ -1262,7 +1262,7 @@ case "$CC_BASENAME" in
 	 AC_MSG_RESULT($path/$cmd);
          RUNSERIAL="${RUNSERIAL:-none}"
          if test -z "$RUNPARALLEL"; then
-            RUNPARALLEL="$path/$cmd -np \$\${NPROCS:=2}"
+            RUNPARALLEL="$path/$cmd -np \$\${NPROCS:=3}"
          fi
       else
 	 AC_MSG_RESULT(none)
@@ -1318,7 +1318,7 @@ case "X-$enable_parallel" in
 
       dnl Set RUNPARALLEL to mpirun if not set yet.
       if test "X$PARALLEL" = "Xyes" -a -z "$RUNPARALLEL"; then
-         RUNPARALLEL="mpirun -np \$\${NPROCS:=2}"
+         RUNPARALLEL="mpirun -np \$\${NPROCS:=3}"
       fi
       ;;
 
