@@ -524,7 +524,7 @@ H5S_point_mgath (const void *_buf, size_t elmt_size,
     for(num_gath=0; num_gath<nelmts; num_gath++) {
         if(mem_iter->pnt.elmt_left>0) {
             /* Compute the location of the point to get */
-            for(i=space_ndims-1,acc=1,off=0; i>=0; i--) {
+            for(i=space_ndims-1,acc=elmt_size,off=0; i>=0; i--) {
                 off+=(mem_iter->pnt.curr->pnt[i]+mem_space->select.offset[i])*acc;
                 acc*=mem_size[i];
             } /* end for */
@@ -606,7 +606,7 @@ H5S_point_mscat (const void *_tconv_buf, size_t elmt_size,
     for(num_scat=0; num_scat<nelmts; num_scat++) {
         if(mem_iter->pnt.elmt_left>0) {
             /* Compute the location of the point to get */
-            for(i=space_ndims-1,acc=1,off=0; i>=0; i--) {
+            for(i=space_ndims-1,acc=elmt_size,off=0; i>=0; i--) {
                 off+=(mem_iter->pnt.curr->pnt[i]+mem_space->select.offset[i])*acc;
                 acc*=mem_size[i];
             } /* end for */
