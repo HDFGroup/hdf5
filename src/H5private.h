@@ -144,11 +144,13 @@
 inline is now in C but in the C99 standard and not the old C89 version so
 MS doesn't recognize it yet (as of April 2001)
 */
+/*
 #if defined(__MWERKS__) || defined(__cplusplus)
 # define H5_inline   inline
 # else
 # define H5_inline 
 #endif
+*/
 
 #endif /*WIN32*/
 
