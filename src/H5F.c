@@ -256,6 +256,7 @@ H5F_init_interface(void)
     H5F_access_dflt.threshold = 1; /*alignment applies to everything*/
     H5F_access_dflt.alignment = 1; /*no alignment*/
     H5F_access_dflt.gc_ref = 0; /*don't garbage-collect references*/
+    H5F_access_dflt.meta_block_size = 2048; /* set metadata block allocations to 2KB */
     H5F_access_dflt.driver_id = H5FD_SEC2; /*default driver*/
     H5F_access_dflt.driver_info = NULL; /*driver file access properties*/
 
@@ -513,6 +514,7 @@ H5Fget_access_plist(hid_t file_id)
     _fapl.threshold = f->shared->threshold;
     _fapl.alignment = f->shared->alignment;
     _fapl.gc_ref = f->shared->gc_ref;
+    _fapl.meta_block_size = f->shared->lf->def_meta_block_size;
     _fapl.driver_id = f->shared->lf->driver_id;
     _fapl.driver_info = NULL; /*just for now */
 
@@ -1757,7 +1759,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 	if (IS_H5FD_MPIO(f))
 	    H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 will write*/
 #endif
-	if (H5FD_write(f->shared->lf, H5P_DEFAULT, f->shared->boot_addr,
+	if (H5FD_write(f->shared->lf, H5FD_MEM_SUPER, H5P_DEFAULT, f->shared->boot_addr,
 		       superblock_size, sbuf)<0) {
 	    HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
 			  "unable to write superblock");
@@ -1769,7 +1771,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 	    if (IS_H5FD_MPIO(f))
 		H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 will write*/
 #endif
-	    if (H5FD_write(f->shared->lf, H5P_DEFAULT,
+	    if (H5FD_write(f->shared->lf, H5FD_MEM_SUPER, H5P_DEFAULT,
 			   f->shared->base_addr+superblock_size, driver_size,
 			   dbuf)<0) {
 		HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
@@ -2496,8 +2498,8 @@ H5F_block_read(H5F_t *f, haddr_t addr, hsize_t size, hid_t dxpl_id,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_block_write(H5F_t *f, haddr_t addr, hsize_t size, hid_t dxpl_id,
-		const void *buf)
+H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,
+        hid_t dxpl_id, const void *buf)
 {
     haddr_t		    abs_addr;
 
@@ -2513,7 +2515,7 @@ H5F_block_write(H5F_t *f, haddr_t addr, hsize_t size, hid_t dxpl_id,
     abs_addr = f->shared->base_addr + addr;
 
     /* Write the data */
-    if (H5FD_write(f->shared->lf, dxpl_id, abs_addr, size, buf)) {
+    if (H5FD_write(f->shared->lf, type, dxpl_id, abs_addr, size, buf)) {
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed");
     }
 
