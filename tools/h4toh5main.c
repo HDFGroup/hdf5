@@ -96,7 +96,7 @@ int main(int argc, char ** argv) {
 
 	case 1:	/* h4toh5 file1 */
 		h4_filename = argv[0];
-
+#ifndef WIN32
 		if (test_file(h4_filename,O_EXCL,292) != 0 ) { 
 		  /* 292 Decimal - 0444 Octal, a+r */
 		  printf("the current hdf4 file name is not set properly.\n");
@@ -108,7 +108,7 @@ int main(int argc, char ** argv) {
 		   status = -1;
 		   break;
 		}
-
+#endif
 		/*0. check whether this file is an hdf file. */
 
 		if(!Hishdf(h4_filename)){
@@ -124,14 +124,14 @@ int main(int argc, char ** argv) {
 		  status = -1;
 		  break;
 		}
-
+#ifndef WIN32
 		if (test_file(h5_filename,O_CREAT|O_EXCL,436) != 0) {
 		  /* 436 Decimal - 0664 Octal, ug+rw,o+r */
 		  printf("permission of hdf5 file is not set properly.\n");
 		  status = -1;
 		  break;
 		}
-
+#endif
 		status = h4toh5(h4_filename, h5_filename);
 
 		if ( status == FAIL ) {
@@ -149,6 +149,7 @@ int main(int argc, char ** argv) {
 		h4_filename = argv[0];
 		h5_filename = argv[1];
 
+#ifndef WIN32
 		if (test_file(h4_filename,O_EXCL,292) != 0 ) { 
 		  /* 292 Decimal - 0444 Octal, a+r */
 		  printf("permission of hdf4 file is not set properly.\n");    
@@ -162,6 +163,7 @@ int main(int argc, char ** argv) {
 		   break;
 		}
 
+#endif
 		/*0. check whether this file is a hdf file. */
 
 		if(!Hishdf(h4_filename)){
@@ -171,6 +173,7 @@ int main(int argc, char ** argv) {
 		  break;
 		}
 
+#ifndef WIN32
 		if (test_file(h5_filename,O_CREAT|O_RDWR,436) != 0) { /* 436 Decimal - 0664 Octal, ug+rw,o+r */
 		  printf("permission of hdf5 file is not set properly.\n");
 		  status = -1;
@@ -183,6 +186,7 @@ int main(int argc, char ** argv) {
 		  break;
 		}
 
+#endif
 		status = h4toh5(h4_filename, h5_filename);
 		if ( status == FAIL ) {
 		   printf("error in converting %sinto %s\n",h4_filename,h5_filename);
