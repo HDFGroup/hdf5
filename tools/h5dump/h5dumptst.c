@@ -45,6 +45,8 @@
 #define FILE31	"tarray7.h5"
 #define FILE32	"tempty.h5"
 #define FILE33  "tgrp_comments.h5"
+#define FILE34  "tsplit_file"
+#define FILE35  "tfamily%05d.h5"
 
 #define LENSTR		50
 #define LENSTR2		11
@@ -2673,6 +2675,80 @@ static void test_group_comments(void)
     H5Fclose(fid);
 }
 
+static
+void test_split_file(void)
+{
+    hid_t fapl, fid, root, attr, space, dataset, atype;
+    char meta[] = "this is some metadata on this file";
+    hsize_t dims[2];
+    int i, j, dset[10][15];
+
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT);
+    fid = H5Fcreate(FILE34, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    root = H5Gopen(fid, "/");
+
+    atype = H5Tcopy(H5T_C_S1);
+    H5Tset_size(atype, strlen(meta) + 1);
+    H5Tset_strpad(atype, H5T_STR_NULLTERM);
+
+    dims[0] = 1;
+    space = H5Screate_simple(1, dims, NULL);
+    attr = H5Acreate(root, "Metadata", atype, space, H5P_DEFAULT);
+    H5Awrite(attr, atype, meta);
+    H5Tclose(atype);
+    H5Sclose(space);
+    H5Aclose(attr);
+
+    /* create dataset */
+    dims[0] = 10;
+    dims[1] = 15;
+    space = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate(fid, "/dset1", H5T_STD_I32BE, space, H5P_DEFAULT);
+
+    for (i = 0; i < 10; i++)
+         for (j = 0; j < 15; j++)
+              dset[i][j] = i + j;
+
+    H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset);
+    H5Sclose(space);
+    H5Dclose(dataset);
+    H5Gclose(root);
+    H5Fclose(fid);
+    H5Pclose(fapl);
+}
+
+static
+void test_family(void)
+{
+    hid_t fapl, fid, space, dataset;
+    hsize_t dims[2];
+    int i, j, dset[10][15];
+
+#define FAMILY_SIZE     256
+
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT);
+
+    fid = H5Fcreate(FILE35, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+
+    /* create dataset */
+    dims[0] = 10;
+    dims[1] = 15;
+    space = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate(fid, "/dset1", H5T_STD_I32BE, space, H5P_DEFAULT);
+
+    for (i = 0; i < 10; i++)
+         for (j = 0; j < 15; j++)
+              dset[i][j] = i + j;
+
+    H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset);
+    H5Sclose(space);
+    H5Dclose(dataset);
+    H5Fclose(fid);
+    H5Pclose(fapl);
+}
+
 int main(void)
 {
     test_group();
@@ -2718,6 +2794,8 @@ int main(void)
 
     test_empty();
     test_group_comments();
+    test_split_file();
+    test_family();
 
     return 0;
 }

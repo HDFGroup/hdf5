@@ -153,6 +153,10 @@ TOOLTEST tall-5s.ddl -d "/g1/g1.1/dset1.1.2[0;2;10;]" tall.h5
 TOOLTEST tdset-3s.ddl -d "/dset1[1,1;;;]" tdset.h5
 TOOLTEST tdset2-1s.ddl -d "/dset1[;3 2;4 4;1 4]" tdset2.h5
 
+# test the --filedriver flag
+TOOLTEST tsplit_file.ddl --filedriver=split tsplit_file
+TOOLTEST tfamily.ddl --filedriver=family tfamily%05d.h5
+
 # test XML
 TOOLTEST tall.h5.xml --xml tall.h5
 TOOLTEST tattr.h5.xml --xml tattr.h5
