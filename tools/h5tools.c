@@ -1163,7 +1163,7 @@ h5dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
  */ 
 static int
 h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
-		   hid_t p_type, int obj_data)
+		   hid_t p_type)
 {
     hid_t		f_space;		/*file data space	*/
     hsize_t		elmtno, i;		/*counters		*/
@@ -1198,15 +1198,9 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
     memset(&ctx, 0, sizeof ctx);
     ctx.need_prefix = 1;
 
-    if (programtype == H5DUMP) {	
-	if (obj_data == DATASET_DATA) {
-	    f_space = H5Dget_space(dset);
-        } else {
-	    f_space = H5Aget_space(dset);
-	}
-    } else {
+
 	f_space = H5Dget_space(dset);
-    }
+    
 	
     ctx.ndims = H5Sget_simple_extent_ndims(f_space);
     if ((size_t)(ctx.ndims)>NELMTS(sm_size)) return -1;
@@ -1258,25 +1252,11 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 	}
 	
 	/* Read the data */
-	if (programtype == H5LS) {
-	    if (H5Dread(dset, p_type, sm_space, f_space, H5P_DEFAULT,
-			sm_buf)<0) {
-		return -1;
-	    }
-	} else if (programtype == H5DUMP){
-	    if (obj_data == DATASET_DATA) {
-		if (H5Dread(dset, p_type, sm_space, f_space, H5P_DEFAULT,
-			    sm_buf) <0)
-		    return -1;
-	    } else {
-		if (H5Aread(dset, p_type, sm_buf) < 0) 
-		    return -1;
-	    }
-
-	} else if (programtype == UNKNOWN) {
-	    return (FAIL);
-	}
 	
+	if (H5Dread(dset, p_type, sm_space, f_space, H5P_DEFAULT,
+		sm_buf)<0) {
+		return -1;	
+	}
 	/* Print the data */
 	flags = ((0==elmtno?START_OF_DATA:0) |
 		 (elmtno+hs_nelmts>=p_nelmts?END_OF_DATA:0));
@@ -1659,7 +1639,7 @@ h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type)
     H5Sclose(f_space);
 
     /* Print the data */
-    status = h5dump_simple_dset(stream, info, dset, p_type, DATASET_DATA);
+    status = h5dump_simple_dset(stream, info, dset, p_type);
     if (p_type!=_p_type) H5Tclose(p_type);
     return status;
 }
@@ -2328,7 +2308,12 @@ print_data(hid_t oid, hid_t _p_type, int obj_data)
     hid_t	p_type = _p_type;
     hid_t	f_type;
     int		status = -1;
-
+/* for getting the attribute */
+	void *sm_buf;
+	hid_t type;
+	hsize_t size[64], nelmts = 1, dim_n_size;
+	size_t p_type_nbytes, need;
+	int ndims, i;
 
     if (p_type < 0) {
 
@@ -2355,9 +2340,68 @@ print_data(hid_t oid, hid_t _p_type, int obj_data)
     if (f_space < 0) return status;
  
     if (H5Sis_simple(f_space) >= 0) 
-		status = h5dump_simple_dset(NULL,NULL, oid, p_type, obj_data);
-/*      status = h5dump_simple(oid, p_type, obj_data);
-*/
+		if (obj_data == DATASET_DATA) {
+			status = h5dump_simple_dset(NULL,NULL, oid,p_type);
+		}
+		else { /*attribute data*/
+			/* all this was taken from various places like h5ls.c and 
+			 * h5dump_simple.  I plan on either taken this and making
+			 * another function for it or just taking the print stuff
+			 * and making a function for it
+			 */
+
+			/* get the size of the attribute and allocate enough mem*/
+			type = H5Aget_type(oid);
+			ndims = H5Sget_simple_extent_dims(f_space, size, NULL);
+			if (ndims){
+				for (i = 0; i < ndims; i++){
+					nelmts *= size[i];	
+				}
+			}
+			need = nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
+			sm_buf = malloc(need);
+			p_type_nbytes = H5Tget_size(p_type);
+			dim_n_size = size[ndims - 1];
+
+			/*read the attr*/
+			if (H5Aread(oid, p_type, sm_buf) < 0){
+				return (status);
+			}
+			/*print it*/
+			switch (H5Tget_class(p_type)) {
+			case H5T_INTEGER:
+				display_numeric_data (nelmts, p_type, sm_buf, p_type_nbytes, 
+					nelmts, dim_n_size, 0);
+				break;
+				
+			case H5T_FLOAT:
+				display_numeric_data (nelmts, p_type, sm_buf, p_type_nbytes, 
+					nelmts, dim_n_size, 0);
+				break;
+				
+			case H5T_TIME:
+				break;
+				
+			case H5T_STRING:
+				display_string (nelmts, p_type, sm_buf, p_type_nbytes, 
+					nelmts, dim_n_size, 0);
+				break;
+				
+			case H5T_BITFIELD:
+				break;
+				
+			case H5T_OPAQUE:
+				break;
+				
+			case H5T_COMPOUND:
+				compound_data = 1;
+				display_compound_data (nelmts, p_type, sm_buf, p_type_nbytes, nelmts, 0);
+				compound_data = 0;
+				break;
+				
+			default: break;
+			}
+		}
 
     H5Sclose(f_space);
 
