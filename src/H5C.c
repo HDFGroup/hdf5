@@ -862,9 +862,38 @@ H5Cget_chunk(hid_t tid, int max_ndims, size_t dim[] /*out */ )
 /*-------------------------------------------------------------------------
  * Function:    H5Cset_mpi
  *
- * Purpose:     Sets the access mode for MPIO call and store the user supplied
- *		communicator and info.
+ * Signature:   herr_t H5Cset_mpi(hid_t tid, MPI_Comm comm, MPI_Info info,
+ *                  uintn access_mode) 
  *
+ * Purpose:     Store the access mode for MPIO call and the user supplied
+ *              communicator and info in the access template which can then
+ *              be used to open file.  This function is available only in the
+ *              parallel HDF5 library and is not a collective function.
+ *
+ * Parameters:
+ *              hid_t tid 
+ *                  ID of template to modify 
+ *              MPI_Comm comm 
+ *      	    MPI communicator to be used for file open as defined in
+ *                  MPI_FILE_OPEN of MPI-2.  This function  does not make a
+ *                  duplicated communicator. Any modification to comm after
+ *                  this function call returns may have undetermined effect
+ *                  to the access template.  Users should call this function
+ *                  again to setup the template.
+ *              MPI_Info info 
+ *      	    MPI info object to be used for file open as defined in
+ *                  MPI_FILE_OPEN of MPI-2.  This function  does not make a
+ *                  duplicated info. Any modification to info after
+ *                  this function call returns may have undetermined effect
+ *                  to the access template.  Users should call this function
+ *                  again to setup the template.
+ *              uintn access_mode 
+ *      	    File data access modes: 
+ *      		H5ACC_INDEPENDENT 
+ *      	            Allow independent datasets access. 
+ *      		H5ACC_COLLECTIVE 
+ *      		    Allow only collective datasets access. 
+ *           
  * Return:      Success:        SUCCEED
  *
  *              Failure:        FAIL
@@ -910,7 +939,7 @@ H5Cset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, uintn access_mode)
     /* need to verify comm and info contain sensible information */
     /* need to duplicate info too but don't know a quick way to do it now. */
 #endif
-    if ((mrc = MPI_Comm_dup(comm, &lcomm) != MPI_SUCCESS))
+    if ((mrc = MPI_Comm_dup(comm, &lcomm)) != MPI_SUCCESS)
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                       "failure to duplicate communicator");
     tmpl->comm = comm;
