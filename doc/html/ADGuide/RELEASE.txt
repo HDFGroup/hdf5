@@ -1,4 +1,4 @@
-HDF5 version 1.7.8 released on Sun Oct 26 02:00:42 CST 2003
+HDF5 version 1.7.9 released on Sun Nov  2 03:05:37 CST 2003
 ================================================================================
 
 
@@ -41,6 +41,8 @@ New Features
 
     Library:
     --------
+        - New function H5Iget_file_id() was added.  It returns file ID given
+            an object(dataset, group, or attribute) ID.  SLU 2003/10/29
         - Added new fields to the H5G_stat_t for more information about an
             object's object header.  QAK 2003/10/06
         - Added new H5Fget_freespace() routine to query the free space in a
@@ -80,6 +82,10 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fixed problems with MPI datatypes that caused ASCI Q machine to
+            hang.  QAK - 2003/10/28
+        - Removed HDF5_MPI_PREFER_DERIVED_TYPES environment variable support,
+            since it had no benefit.  QAK - 2003/10/28
         - Single hyperslab selections (which were set with only one call to
             H5Sselect_hyperslab) that had dimensions that could be "flattened"
             but were interspersed with dimensions that could not be flattened
