@@ -66,6 +66,8 @@ Configuration
     * Changed the default value of $NPROCS from 2 to 3 since 3 processes
       have a much bigger chance catching parallel errors than just 2.
     * Basic port to Compaq (nee DEC) Alpha OSF 5.
+    * Added --enable-linux-lfs flag to allow more control over whether to enable
+      or disable large file support on Linux.
 
 
 Tools

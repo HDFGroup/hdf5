@@ -1965,7 +1965,7 @@ H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size
 	 void *buf/*out*/)
 {
     FUNC_ENTER(H5FDread, FAIL);
-    H5TRACE6("e","xMtiahx",file,type,dxpl_id,addr,size,buf);
+    H5TRACE6("e","xMtiazx",file,type,dxpl_id,addr,size,buf);
 
     /* Check args */
     if (!file || !file->cls) {
@@ -2121,7 +2121,7 @@ H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
 	  const void *buf)
 {
     FUNC_ENTER(H5FDwrite, FAIL);
-    H5TRACE6("e","xMtiahx",file,type,dxpl_id,addr,size,buf);
+    H5TRACE6("e","xMtiazx",file,type,dxpl_id,addr,size,buf);
 
     /* Check args */
     if (!file || !file->cls) {
