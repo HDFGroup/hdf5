@@ -155,7 +155,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 
 #define H5T_CONV_sS(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_sS, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
+    H5T_CONV(H5T_CONV_sS, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
 }
 
 #define H5T_CONV_sU_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
@@ -171,7 +171,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 
 #define H5T_CONV_sU(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_sU, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
+    H5T_CONV(H5T_CONV_sU, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
 }
 
 #define H5T_CONV_uS_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
@@ -187,7 +187,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 
 #define H5T_CONV_uS(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_uS, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
+    H5T_CONV(H5T_CONV_uS, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
 }
 
 #define H5T_CONV_uU_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
@@ -196,7 +196,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 
 #define H5T_CONV_uU(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_uU, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
+    H5T_CONV(H5T_CONV_uU, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
 }
 
 #define H5T_CONV_Ss_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
@@ -217,7 +217,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 
 #define H5T_CONV_Ss(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_Ss, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
+    H5T_CONV(H5T_CONV_Ss, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
 }
 
 #define H5T_CONV_Su_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
@@ -239,7 +239,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 
 #define H5T_CONV_Su(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_Su, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
+    H5T_CONV(H5T_CONV_Su, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
 }
 
 #define H5T_CONV_Us_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
@@ -255,7 +255,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 
 #define H5T_CONV_Us(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_Us, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
+    H5T_CONV(H5T_CONV_Us, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
 }
 
 #define H5T_CONV_Uu_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
@@ -271,7 +271,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 
 #define H5T_CONV_Uu(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_Uu, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
+    H5T_CONV(H5T_CONV_Uu, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
 }
 
 #define H5T_CONV_su_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
@@ -287,7 +287,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 
 #define H5T_CONV_su(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)==sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_su, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
+    H5T_CONV(H5T_CONV_su, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
 }
 
 #define H5T_CONV_us_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
@@ -303,16 +303,46 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 
 #define H5T_CONV_us(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)==sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_us, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
+    H5T_CONV(H5T_CONV_us, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
+}
+
+#define H5T_CONV_fF_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+
+#define H5T_CONV_fF(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
+    assert(sizeof(ST)<=sizeof(DT));					      \
+    H5T_CONV(H5T_CONV_fF, double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
+}
+
+#define H5T_CONV_Ff_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    if (*((ST*)S) > (DT)(D_MAX)) {					      \
+        if (!H5T_overflow_g ||						      \
+    	(H5T_overflow_g)(src_id, dst_id, S, D)<0) {			      \
+    	*((DT*)D) = (D_MAX);						      \
+        }								      \
+    } else if (*((ST*)S) < (D_MIN)) {					      \
+        if (!H5T_overflow_g ||						      \
+    	(H5T_overflow_g)(src_id, dst_id, S, D)<0) {			      \
+    	*((DT*)D) = (D_MIN);						      \
+        }								      \
+    } else {								      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
+    }									      \
+}
+
+#define H5T_CONV_Ff(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
+    assert(sizeof(ST)>=sizeof(DT));					      \
+    H5T_CONV(H5T_CONV_Ff, double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
 }
 
 /* The main part of every integer hardware conversion macro */
-#define H5T_CONV(GUTS,STYPE,DTYPE,ST,DT,D_MIN,D_MAX,STRT) {		      \
+#define H5T_CONV(GUTS,ATYPE,STYPE,DTYPE,ST,DT,D_MIN,D_MAX,STRT) {	      \
     hsize_t	elmtno;			/*element number		*/    \
     void	*src, *s;		/*source buffer			*/    \
     void	*dst, *d;		/*destination buffer		*/    \
     H5T_t	*st, *dt;		/*data type descriptors		*/    \
-    long_long	aligned;		/*largest integer type, aligned	*/    \
+    ATYPE	aligned;		/*aligned type			*/    \
     hbool_t	s_mv, d_mv;		/*move data to align it?	*/    \
     size_t	s_stride, d_stride;	/*src and dst strides		*/    \
     int		direction;		/*1=left-to-right, -1=rt-to-lt	*/    \
@@ -321,15 +351,12 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     case H5T_CONV_INIT:							      \
 	/* Sanity check and initialize statistics */			      \
 	cdata->need_bkg = H5T_BKG_NO;					      \
-	if (NULL==(st=H5I_object(src_id)) ||	                	      \
-                NULL==(dt=H5I_object(dst_id))) {	        	      \
+	if (NULL==(st=H5I_object(src_id)) || NULL==(dt=H5I_object(dst_id)))   \
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,		      \
-			  "unable to dereference data type object ID");	      \
-	}								      \
-	if (st->size!=sizeof(ST) || dt->size!=sizeof(DT)) {		      \
+			  "unable to dereference datatype object ID")	      \
+	if (st->size!=sizeof(ST) || dt->size!=sizeof(DT))		      \
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,		      \
-			  "disagreement about data type size");		      \
-	}								      \
+			  "disagreement about datatype size")		      \
 	CI_ALLOC_PRIV	                                                      \
 	break;								      \
 									      \
@@ -343,17 +370,15 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 	/* Initialize pointers */					      \
 	if (buf_stride) {						      \
 	    s_stride = d_stride = buf_stride;				      \
-	    src = dst = buf;						      \
-	    direction = 1;						      \
-	} else if (STRT) {						      \
-	    s_stride = sizeof(ST);					      \
-	    d_stride = sizeof(DT);					      \
-	    src = (uint8_t*)buf+(STRT)*s_stride;			      \
-	    dst = (uint8_t*)buf+(STRT)*d_stride;			      \
-            direction = -1;						      \
 	} else {							      \
-	    s_stride = sizeof(ST);					      \
-	    d_stride = sizeof(DT);					      \
+            s_stride = sizeof(ST);					      \
+            d_stride = sizeof(DT);					      \
+        }								      \
+        if (STRT) {							      \
+            src = (uint8_t*)buf+(STRT)*s_stride;			      \
+            dst = (uint8_t*)buf+(STRT)*d_stride;			      \
+            direction = -1;						      \
+        } else {							      \
             src = dst = buf;						      \
             direction = 1;						      \
         }								      \
@@ -6584,92 +6609,11 @@ H5T_conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    hsize_t	elmtno;			/*element number		*/
-    uint8_t	*src, *s;		/*source buffer			*/
-    uint8_t	*dst, *d;		/*destination buffer		*/
-    H5T_t	*st, *dt;		/*type descriptors		*/
-    hbool_t	src_mv, dst_mv;		/*align data?			*/
-    double	aligned;		/*aligned data			*/
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5T_conv_float_double, FAIL);
 
-    switch (cdata->command) {
-        case H5T_CONV_INIT:
-            cdata->need_bkg = H5T_BKG_NO;
-            if (NULL==(st=H5I_object(src_id)) ||
-                    NULL==(dt=H5I_object(dst_id)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to dereference data type object ID");
-            if (st->size!=sizeof(float) || dt->size!=sizeof(double))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "disagreement about data type size");
-            CI_ALLOC_PRIV
-            break;
-
-        case H5T_CONV_FREE:
-            CI_PRINT_STATS(FLOAT, DOUBLE);
-            CI_FREE_PRIV
-            break;
-
-        case H5T_CONV_CONV:
-            if (buf_stride) {
-                src = dst = (uint8_t*)buf + buf_stride*(nelmts-1);
-            } else {
-                src = (uint8_t*)buf + sizeof(float)*(nelmts-1);
-                dst = (uint8_t*)buf + sizeof(double)*(nelmts-1);
-            }
-            
-            /* Need alignment? */
-            if (H5T_NATIVE_FLOAT_ALIGN_g>1) {
-                src_mv = ((size_t)buf % H5T_NATIVE_FLOAT_ALIGN_g) ||
-                     ((buf_stride?buf_stride:sizeof(float)) %
-                      H5T_NATIVE_FLOAT_ALIGN_g);
-            } else {
-                src_mv = FALSE;
-            }
-            if (H5T_NATIVE_DOUBLE_ALIGN_g>1) {
-                dst_mv = ((size_t)buf % H5T_NATIVE_DOUBLE_ALIGN_g) ||
-                     ((buf_stride?buf_stride:sizeof(double)) %
-                      H5T_NATIVE_DOUBLE_ALIGN_g);
-            } else {
-                dst_mv = FALSE;
-            }
-            CI_INC_SRC(src_mv)
-            CI_INC_DST(dst_mv)
-            
-            for (elmtno=0; elmtno<nelmts; elmtno++) {
-                /* Align source and/or destination */
-                if (src_mv) {
-                    HDmemcpy(&aligned, src, sizeof(float));
-                    s = (uint8_t*)&aligned;
-                } else {
-                    s = src;
-                }
-                if (dst_mv)
-                    d = (uint8_t*)&aligned;
-                else
-                    d = dst;
-
-                /* Conversion */
-                *((double*)d) = *((float*)s);
-
-                /* Unalign destination */
-                if (dst_mv)
-                    HDmemcpy(dst, &aligned, sizeof(double));
-
-                /* Advance buffer pointers */
-                if (buf_stride) {
-                    src -= buf_stride;
-                    dst -= buf_stride;
-                } else {
-                    src -= sizeof(float);
-                    dst -= sizeof(double);
-                }
-            }
-            break;
-            
-        default:
-            HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unknown conversion command");
-    }
+    H5T_CONV_fF(FLOAT, DOUBLE, float, double, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6704,100 +6648,11 @@ H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    hsize_t	elmtno;			/*element number		*/
-    uint8_t	*src, *s;		/*source buffer			*/
-    uint8_t	*dst, *d;		/*destination buffer		*/
-    H5T_t	*st, *dt;		/*type descriptors		*/
-    hbool_t	src_mv, dst_mv;		/*align data?			*/
-    double	aligned;		/*aligned data			*/
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
-    FUNC_ENTER_NOAPI(H5T_conv_double_float, FAIL);
 
-    switch (cdata->command) {
-        case H5T_CONV_INIT:
-            cdata->need_bkg = H5T_BKG_NO;
-            if (NULL==(st=H5I_object(src_id)) ||
-                    NULL==(dt=H5I_object(dst_id)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to dereference data type object ID");
-            if (st->size!=sizeof(double) || dt->size!=sizeof(float))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "disagreement about data type size");
-            CI_ALLOC_PRIV
-            break;
+    FUNC_ENTER_NOAPI(H5T_conv_float_double, FAIL);
 
-        case H5T_CONV_FREE:
-            CI_PRINT_STATS(DOUBLE, FLOAT);
-            CI_FREE_PRIV
-            break;
-
-        case H5T_CONV_CONV:
-            src = (uint8_t*)buf;
-            dst = (uint8_t*)buf;
-
-            /* Need alignment? */
-            if (H5T_NATIVE_DOUBLE_ALIGN_g>1) {
-                src_mv = ((size_t)buf % H5T_NATIVE_DOUBLE_ALIGN_g) ||
-                     ((buf_stride?buf_stride:sizeof(double)) %
-                      H5T_NATIVE_DOUBLE_ALIGN_g);
-            } else {
-                src_mv = FALSE;
-            }
-            if (H5T_NATIVE_FLOAT_ALIGN_g>1) {
-                dst_mv = ((size_t)buf % H5T_NATIVE_FLOAT_ALIGN_g) ||
-                     ((buf_stride?buf_stride:sizeof(float)) %
-                      H5T_NATIVE_FLOAT_ALIGN_g);
-            } else {
-                dst_mv = FALSE;
-            }
-            CI_INC_SRC(src_mv)
-            CI_INC_DST(dst_mv)
-            
-            for (elmtno=0; elmtno<nelmts; elmtno++) {
-                /* Align source and/or destination */
-                if (src_mv) {
-                    HDmemcpy(&aligned, src, sizeof(double));
-                    s = (uint8_t*)&aligned;
-                } else {
-                    s = src;
-                }
-                if (dst_mv)
-                    d = (uint8_t*)&aligned;
-                else
-                    d = dst;
-
-                /* Conversion */
-                if (*((double*)s) > FLT_MAX) {
-                    if (!H5T_overflow_g ||
-                        (H5T_overflow_g)(src_id, dst_id, s, d)<0) {
-                        *((float*)d) = FLT_MAX;
-                    }
-                } else if (*((double*)s) < -FLT_MAX) {
-                    if (!H5T_overflow_g ||
-                        (H5T_overflow_g)(src_id, dst_id, s, d)<0) {
-                        *((float*)d) = -FLT_MAX;
-                    }
-                } else {
-                    *((float*)d) = (float) *((double*)s);
-                }
-
-                /* Unalign destination */
-                if (dst_mv)
-                    HDmemcpy(dst, &aligned, sizeof(float));
-
-                    /* Advance pointers */
-                if (buf_stride) {
-                    src += buf_stride;
-                    dst += buf_stride;
-                } else {
-                    src += sizeof(double);
-                    dst += sizeof(float);
-                }
-            }
-            break;
-            
-        default:
-            HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unknown conversion command");
-    }
+    H5T_CONV_Ff(DOUBLE, FLOAT, double, float, FLT_MIN, FLT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
