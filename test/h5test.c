@@ -307,6 +307,7 @@ h5_fileaccess(void)
     char	s[1024];
     hid_t	fapl = -1;
     hsize_t	fam_size = 100*1024*1024; /*100 MB*/
+    int         verbosity = 1;
     H5FD_mem_t	mt;
     
     /* First use the environment variable, then the constant */
@@ -368,6 +369,12 @@ h5_fileaccess(void)
 	    fam_size = strtod(val, NULL) * 1024*1024;
 	}
 	if (H5Pset_fapl_family(fapl, fam_size, H5P_DEFAULT)<0) return -1;
+    } else if (!strcmp(name, "log")) {
+        /* Log file access */
+        if ((val=strtok(NULL, " \t\n\r"))) {
+            verbosity = strtol(val, NULL, 0);
+        }
+        if (H5Pset_fapl_log(fapl, NULL, verbosity)<0) return -1;
     } else {
 	/* Unknown driver */
 	return -1;
