@@ -205,8 +205,8 @@ Library
 Configuration
 -------------
 
-    * Included the fortran/examples in the "make check-install" testing. This
-      tests the correctness of the h5fc command. AKC - 2003/04/21
+    * Included the both the examples of fortran and c++ "make check-install"
+      testing. This tests the correctness of the h5fc command. AKC - 2003/04/22
     * When using gcc 3.x, we use -std=gnu99 instead of -ansi for compiling.
       QAK - 2003/04/11
     * IA64 platform has its own configure setting and use Intel Compilers as
