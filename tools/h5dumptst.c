@@ -109,7 +109,7 @@ int i, j;
   /* dset1 */
   dims[0] = 10; dims[1] = 20;
   space = H5Screate_simple(2, dims, NULL);
-  dataset = H5Dcreate(fid, "/dset1", H5T_NATIVE_INT, space, H5P_DEFAULT);
+  dataset = H5Dcreate(fid, "/dset1", H5T_STD_I32BE, space, H5P_DEFAULT);
   for (i = 0; i < 10; i++)
        for (j = 0; j < 20; j++)
             dset1[i][j] = j+i;
@@ -120,7 +120,7 @@ int i, j;
   /* dset2 */
   dims[0] = 30; dims[1] = 20;
   space = H5Screate_simple(2, dims, NULL);
-  dataset = H5Dcreate(fid, "/dset2", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT);
+  dataset = H5Dcreate(fid, "/dset2", H5T_IEEE_F64BE, space, H5P_DEFAULT);
   for (i = 0; i < 30; i++)
        for (j = 0; j < 20; j++)
             dset2[i][j] = 0.0001*j+i;
@@ -152,7 +152,7 @@ int i, j;
   dims[0] = 10; dims[1] = 20;
   maxdims[0] = H5S_UNLIMITED; maxdims[1] = 20;
   space = H5Screate_simple(2, dims,  maxdims);
-  dataset = H5Dcreate(fid, "/dset1", H5T_NATIVE_INT, space, create_plist);
+  dataset = H5Dcreate(fid, "/dset1", H5T_STD_I32BE, space, create_plist);
   for (i = 0; i < 10; i++)
        for (j = 0; j < 20; j++)
             dset1[i][j] = j;
@@ -164,7 +164,7 @@ int i, j;
   dims[0] = 30; dims[1] = 10;
   maxdims[0] = 30; maxdims[1] = H5S_UNLIMITED;
   space = H5Screate_simple(2, dims, maxdims);
-  dataset = H5Dcreate(fid, "/dset2", H5T_NATIVE_DOUBLE, space, create_plist);
+  dataset = H5Dcreate(fid, "/dset2", H5T_IEEE_F64BE, space, create_plist);
   for (i = 0; i < 30; i++)
        for (j = 0; j < 10; j++)
             dset2[i][j] = j;
@@ -193,7 +193,7 @@ int point = 100;
   /* attribute 1 */
   dims[0] = 24;
   space = H5Screate_simple(1, dims, NULL);
-  attr = H5Acreate (root, "attr1", H5T_NATIVE_SCHAR, space, H5P_DEFAULT);
+  attr = H5Acreate (root, "attr1", H5T_STD_I8BE, space, H5P_DEFAULT);
   sprintf(buf, "attribute of root group");
   H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
   H5Sclose(space);
@@ -203,7 +203,7 @@ int point = 100;
   /* attribute 2 */
   dims[0] = 10;
   space = H5Screate_simple(1, dims, NULL);
-  attr = H5Acreate (root, "attr2", H5T_NATIVE_INT, space, H5P_DEFAULT);
+  attr = H5Acreate (root, "attr2", H5T_STD_I32BE, space, H5P_DEFAULT);
   for (i = 0; i < 20; i++) data[i] = i+1;
   H5Awrite(attr, H5T_NATIVE_INT, data);
   H5Sclose(space);
@@ -212,7 +212,7 @@ int point = 100;
   /* attribute 3 */
   dims[0] = 10;
   space = H5Screate_simple(1, dims, NULL);
-  attr = H5Acreate (root, "attr3", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT);
+  attr = H5Acreate (root, "attr3", H5T_IEEE_F64BE, space, H5P_DEFAULT);
   for (i = 0; i < 10; i++) d[i] = 0.1 * i;
   H5Awrite(attr, H5T_NATIVE_DOUBLE, d);
   H5Sclose(space);
@@ -220,7 +220,7 @@ int point = 100;
 
   /* attribute 4 */
   space = H5Screate(H5S_SCALAR);
-  attr = H5Acreate (root, "attr4", H5T_NATIVE_INT, space, H5P_DEFAULT);
+  attr = H5Acreate (root, "attr4", H5T_STD_I32BE, space, H5P_DEFAULT);
   H5Awrite(attr, H5T_NATIVE_INT, &point);
   H5Sclose(space);
   H5Aclose(attr);
@@ -281,7 +281,7 @@ int i, dset[5];
 
   dim = 5;
   space = H5Screate_simple(1, &dim, NULL);
-  dataset = H5Dcreate(fid, "/dset1", H5T_NATIVE_INT, space, H5P_DEFAULT);
+  dataset = H5Dcreate(fid, "/dset1", H5T_STD_I32BE, space, H5P_DEFAULT);
   for (i = 0; i < 5; i++) dset[i] = i;
   H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset);
   H5Sclose(space);
@@ -311,7 +311,7 @@ int i, dset[5];
 
 */
 static void test_compound_dt(void) {       /* test compound data type */
-hid_t fid, group, dataset, space, space3, type;
+hid_t fid, group, dataset, space, space3, type, type2;
 typedef struct {
   int a;
   float b;
@@ -371,39 +371,47 @@ hsize_t dset3_dim[2];
   space = H5Screate_simple(1, &sdim, NULL);
 
   type = H5Tcreate (H5T_COMPOUND, sizeof(dset1[0]));
-  
-  H5Tinsert(type, "a_name", HOFFSET(dset1_t, a), H5T_NATIVE_INT);
-  H5Tinsert(type, "b_name", HOFFSET(dset1_t, b), H5T_NATIVE_FLOAT);
-  H5Tinsert(type, "c_name", HOFFSET(dset1_t, c), H5T_NATIVE_DOUBLE);
-
+  type2 = H5Tcreate(H5T_COMPOUND, sizeof(dset1[0])); 
+  H5Tinsert(type, "a_name", HOFFSET(dset1_t, a), H5T_STD_I32BE);
+  H5Tinsert(type, "b_name", HOFFSET(dset1_t, b), H5T_IEEE_F32BE);
+  H5Tinsert(type, "c_name", HOFFSET(dset1_t, c), H5T_IEEE_F64BE);
+  H5Tinsert(type2, "a_name", HOFFSET(dset1_t, a), H5T_NATIVE_INT);
+  H5Tinsert(type2, "b_name", HOFFSET(dset1_t, b), H5T_NATIVE_FLOAT);
+  H5Tinsert(type2, "c_name", HOFFSET(dset1_t, c), H5T_NATIVE_DOUBLE);
   dataset = H5Dcreate(fid, "/dset1", type, space, H5P_DEFAULT);
-  H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
-
+  H5Dwrite(dataset, type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
+  H5Tclose(type2);
   H5Tclose(type);
   H5Dclose(dataset);
 
   /* shared data type 1 */
   type = H5Tcreate (H5T_COMPOUND, sizeof(dset2_t));
-  H5Tinsert(type, "int_name", HOFFSET(dset2_t, a), H5T_NATIVE_INT);
-  H5Tinsert(type, "float_name", HOFFSET(dset2_t, b), H5T_NATIVE_FLOAT);
+  H5Tinsert(type, "int_name", HOFFSET(dset2_t, a), H5T_STD_I32BE);
+  H5Tinsert(type, "float_name", HOFFSET(dset2_t, b), H5T_IEEE_F32BE);
   H5Tcommit(fid, "type1", type);
-
+  type2 = H5Tcreate (H5T_COMPOUND, sizeof(dset2_t));
+  H5Tinsert(type2, "int_name", HOFFSET(dset2_t, a), H5T_NATIVE_INT);
+  H5Tinsert(type2, "float_name", HOFFSET(dset2_t, b), H5T_NATIVE_FLOAT);
   group = H5Gcreate (fid, "/group1", 0);
 
   dataset = H5Dcreate(group, "dset2", type, space, H5P_DEFAULT);
-  H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
-
+  H5Dwrite(dataset, type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
+  H5Tclose(type2);
   H5Tclose(type);
   H5Dclose(dataset);
 
 
   /* shared data type 2 */
   type = H5Tcreate (H5T_COMPOUND, sizeof(dset3_t));
+  type2 = H5Tcreate (H5T_COMPOUND, sizeof(dset3_t));
   ndims = 1; dim[0] = 4;
-  H5Tinsert_array(type, "int_array", HOFFSET(dset3_t, a), ndims, dim, NULL, H5T_NATIVE_INT);
+  H5Tinsert_array(type, "int_array", HOFFSET(dset3_t, a), ndims, dim, NULL, H5T_STD_I32BE);
   ndims = 2; dim[0] = 5; dim[1] = 6;
-  H5Tinsert_array(type, "float_array", HOFFSET(dset3_t, b), ndims, dim, NULL, H5T_NATIVE_FLOAT);
+  H5Tinsert_array(type, "float_array", HOFFSET(dset3_t, b), ndims, dim, NULL, H5T_IEEE_F32BE);
   H5Tcommit(fid, "type2", type);
+  H5Tinsert_array(type2, "int_array", HOFFSET(dset3_t, a), ndims, dim, NULL, H5T_NATIVE_INT);
+  H5Tinsert_array(type2, "float_array", HOFFSET(dset3_t, b), ndims, dim, NULL, H5T_NATIVE_FLOAT);
+  
 
   dset3_dim[0] = 3;  dset3_dim[1] = 6;
   space3 = H5Screate_simple(2, dset3_dim, NULL);
@@ -417,21 +425,25 @@ hsize_t dset3_dim[2];
                       dset3[i][j].b[k][l] = 0.1* (k+1);
        }
   }
-  H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset3);
+  H5Dwrite(dataset, type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset3);
   H5Sclose(space3);
   H5Tclose(type);
+  H5Tclose(type2);
   H5Dclose(dataset);
 
   /* shared data type 3 */
   type = H5Tcreate (H5T_COMPOUND, sizeof(dset4_t));
-  H5Tinsert(type, "int", HOFFSET(dset4_t, a), H5T_NATIVE_INT);
-  H5Tinsert(type, "float", HOFFSET(dset4_t, b), H5T_NATIVE_FLOAT);
+  type2 = H5Tcreate (H5T_COMPOUND, sizeof(dset4_t));
+  H5Tinsert(type, "int", HOFFSET(dset4_t, a), H5T_STD_I32BE);
+  H5Tinsert(type, "float", HOFFSET(dset4_t, b), H5T_IEEE_F32BE);
   H5Tcommit(group, "type3", type);
-
+  H5Tinsert(type2, "int", HOFFSET(dset4_t, a), H5T_NATIVE_INT);
+  H5Tinsert(type2, "float", HOFFSET(dset4_t, b), H5T_NATIVE_FLOAT);
   dataset = H5Dcreate(group, "dset4", type, space, H5P_DEFAULT);
-  H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset4);
+  H5Dwrite(dataset, type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset4);
 
   H5Tclose(type);
+  H5Tclose(type2);
   H5Dclose(dataset);
   H5Gclose(group);
 
@@ -440,15 +452,19 @@ hsize_t dset3_dim[2];
   group = H5Gcreate (fid, "/group2", 0);
 
   type = H5Tcreate (H5T_COMPOUND, sizeof(dset5_t));
-  H5Tinsert(type, "int", HOFFSET(dset5_t, a), H5T_NATIVE_INT);
-  H5Tinsert(type, "float", HOFFSET(dset5_t, b), H5T_NATIVE_FLOAT);
+  H5Tinsert(type, "int", HOFFSET(dset5_t, a), H5T_STD_I32BE);
+  H5Tinsert(type, "float", HOFFSET(dset5_t, b), H5T_IEEE_F32BE);
   H5Tcommit(group, "type4", type);
+  type2 = H5Tcreate (H5T_COMPOUND, sizeof(dset5_t));
+  H5Tinsert(type2, "int", HOFFSET(dset5_t, a), H5T_NATIVE_INT);
+  H5Tinsert(type2, "float", HOFFSET(dset5_t, b), H5T_NATIVE_FLOAT);
   dataset = H5Dcreate(group, "dset5", type, space, H5P_DEFAULT);
-  H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset5);
+  H5Dwrite(dataset, type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset5);
 
   H5Gunlink(group,"type4");
 
   H5Tclose(type);
+  H5Tclose(type2);
   H5Dclose(dataset);
   H5Sclose(space);
   H5Gclose(group);
@@ -466,7 +482,7 @@ hsize_t dset3_dim[2];
 
 */
 static void test_compound_dt2(void) {       /* test compound data type */
-hid_t fid, group, dataset, space, type, create_plist;
+hid_t fid, group, dataset, space, type, create_plist, type2;
 typedef struct {
   int a;
   float b;
@@ -533,14 +549,22 @@ hsize_t sdim, maxdim;
 
   type = H5Tcreate (H5T_COMPOUND, sizeof(dset1[0]));
   
-  H5Tinsert(type, "a_name", HOFFSET(dset1_t, a), H5T_NATIVE_INT);
-  H5Tinsert(type, "b_name", HOFFSET(dset1_t, b), H5T_NATIVE_FLOAT);
-  H5Tinsert(type, "c_name", HOFFSET(dset1_t, c), H5T_NATIVE_DOUBLE);
+  H5Tinsert(type, "a_name", HOFFSET(dset1_t, a), H5T_STD_I32BE);
+  H5Tinsert(type, "b_name", HOFFSET(dset1_t, b), H5T_IEEE_F32BE);
+  H5Tinsert(type, "c_name", HOFFSET(dset1_t, c), H5T_IEEE_D64BE);
 
   dataset = H5Dcreate(fid, "/dset1", type, space, create_plist);
-  H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
+
+  type2 = H5Tcreate (H5T_COMPOUND, sizeof(dset1[0]));
+  
+  H5Tinsert(type2, "a_name", HOFFSET(dset1_t, a), H5T_NATIVE_INT);
+  H5Tinsert(type2, "b_name", HOFFSET(dset1_t, b), H5T_NATIVE_FLOAT);
+  H5Tinsert(type2, "c_name", HOFFSET(dset1_t, c), H5T_NATIVE_DOUBLE);
+
+  H5Dwrite(dataset, type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
 
   H5Tclose(type);
+  H5Tclose(type2);
   H5Sclose(space);
   H5Dclose(dataset);
 
@@ -551,38 +575,48 @@ hsize_t sdim, maxdim;
 
   /* shared data type 1 */
   type = H5Tcreate (H5T_COMPOUND, sizeof(dset2_t));
-  H5Tinsert(type, "int_name", HOFFSET(dset2_t, a), H5T_NATIVE_INT);
-  H5Tinsert(type, "float_name", HOFFSET(dset2_t, b), H5T_NATIVE_FLOAT);
+  H5Tinsert(type, "int_name", HOFFSET(dset2_t, a), H5T_STD_I32BE);
+  H5Tinsert(type, "float_name", HOFFSET(dset2_t, b), H5T_IEEE_F32BE);
   H5Tcommit(fid, "type1", type);
 
   group = H5Gcreate (fid, "/group1", 0);
 
   dataset = H5Dcreate(group, "dset2", type, space, create_plist);
-  H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
+
+  type2 = H5Tcreate (H5T_COMPOUND, sizeof(dset2_t));
+  H5Tinsert(type2, "int_name", HOFFSET(dset2_t, a), H5T_NATIVE_INT);
+  H5Tinsert(type2, "float_name", HOFFSET(dset2_t, b), H5T_NATIVE_FLOAT); 
+  H5Dwrite(dataset, type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
 
   H5Tclose(type);
+  H5Tclose(type2);
   H5Dclose(dataset);
 
 
   /* shared data type 2 */
   type = H5Tcreate (H5T_COMPOUND, sizeof(dset3_t));
   ndims = 1; dim[0] = 4;
-  H5Tinsert_array(type, "int_array", HOFFSET(dset3_t, a), ndims, dim, perm, H5T_NATIVE_INT);
+  H5Tinsert_array(type, "int_array", HOFFSET(dset3_t, a), ndims, dim, perm, H5T_STD_I32BE);
   ndims = 2; dim[0] = 5; dim[1] = 6;
-  H5Tinsert_array(type, "float_array", HOFFSET(dset3_t, b), ndims, dim, perm, H5T_NATIVE_INT);
+  H5Tinsert_array(type, "float_array", HOFFSET(dset3_t, b), ndims, dim, perm, H5T_IEEE_F32BE);
   H5Tcommit(fid, "type2", type);
   H5Tclose(type);
 
   /* shared data type 3 */
   type = H5Tcreate (H5T_COMPOUND, sizeof(dset4_t));
-  H5Tinsert(type, "int", HOFFSET(dset4_t, a), H5T_NATIVE_INT);
-  H5Tinsert(type, "float", HOFFSET(dset4_t, b), H5T_NATIVE_FLOAT);
+  H5Tinsert(type, "int", HOFFSET(dset4_t, a), H5T_STD_I32BE);
+  H5Tinsert(type, "float", HOFFSET(dset4_t, b), H5T_IEEE_F32BE);
   H5Tcommit(group, "type3", type);
 
   dataset = H5Dcreate(group, "dset4", type, space, create_plist);
-  H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset4);
+
+  type2 = H5Tcreate (H5T_COMPOUND, sizeof(dset4_t));
+  H5Tinsert(type2, "int", HOFFSET(dset4_t, a), H5T_NATIVE_INT);
+  H5Tinsert(type2, "float", HOFFSET(dset4_t, b), H5T_NATIVE_FLOAT);
+  H5Dwrite(dataset, type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset4);
 
   H5Tclose(type);
+  H5Tclose(type2);
   H5Dclose(dataset);
   H5Gclose(group);
 
@@ -591,14 +625,18 @@ hsize_t sdim, maxdim;
   group = H5Gcreate (fid, "/group2", 0);
 
   type = H5Tcreate (H5T_COMPOUND, sizeof(dset5_t));
-  H5Tinsert(type, "int", HOFFSET(dset5_t, a), H5T_NATIVE_INT);
-  H5Tinsert(type, "float", HOFFSET(dset5_t, b), H5T_NATIVE_FLOAT);
+  H5Tinsert(type, "int", HOFFSET(dset5_t, a), H5T_STD_I32BE);
+  H5Tinsert(type, "float", HOFFSET(dset5_t, b), H5T_IEEE_F32BE);
   H5Tcommit(group, "type4", type);
   dataset = H5Dcreate(group, "dset5", type, space, create_plist);
-  H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset5);
+  type2 = H5Tcreate (H5T_COMPOUND, sizeof(dset5_t));
+  H5Tinsert(type2, "int", HOFFSET(dset5_t, a), H5T_NATIVE_INT);
+  H5Tinsert(type2, "float", HOFFSET(dset5_t, b), H5T_NATIVE_FLOAT);
+  H5Dwrite(dataset, type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset5);
 
   H5Gunlink(group,"type4");
 
+  H5Tclose(type);
   H5Tclose(type);
   H5Dclose(dataset);
   H5Sclose(space);
@@ -651,7 +689,7 @@ float dset2_1[10], dset2_2[3][5];
 
   dims[0] = 10;
   space = H5Screate_simple(1, dims, NULL);
-  attr = H5Acreate (group, "attr1", H5T_NATIVE_SCHAR, space, H5P_DEFAULT);
+  attr = H5Acreate (group, "attr1", H5T_STD_I8BE, space, H5P_DEFAULT);
   sprintf(buf, "abcdefghi");
   H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
   H5Sclose(space);
@@ -659,7 +697,7 @@ float dset2_1[10], dset2_2[3][5];
 
   dims[0] = 2; dims[1] = 2;
   space = H5Screate_simple(2, dims, NULL);
-  attr = H5Acreate (group, "attr2", H5T_NATIVE_INT, space, H5P_DEFAULT);
+  attr = H5Acreate (group, "attr2", H5T_STD_I32BE, space, H5P_DEFAULT);
   data[0][0] = 0; data[0][1] = 1; data[1][0] = 2; data[1][1] = 3;
   H5Awrite(attr, H5T_NATIVE_INT, data);
   H5Sclose(space);
@@ -672,7 +710,7 @@ float dset2_1[10], dset2_2[3][5];
   /* dset1.1.1 */
   dims[0] = 10; dims[1] = 10;
   space = H5Screate_simple(2, dims, NULL);
-  dataset = H5Dcreate(group, "dset1.1.1", H5T_NATIVE_INT, space, H5P_DEFAULT);
+  dataset = H5Dcreate(group, "dset1.1.1", H5T_STD_I32BE, space, H5P_DEFAULT);
   for (i = 0; i < 10; i++)
        for (j = 0; j < 10; j++)
             dset1[i][j] = j;
@@ -682,7 +720,7 @@ float dset2_1[10], dset2_2[3][5];
   /* attributes of dset1.1.1 */
   dims[0] = 27;
   space = H5Screate_simple(1, dims, NULL);
-  attr = H5Acreate (dataset, "attr1", H5T_NATIVE_SCHAR, space, H5P_DEFAULT);
+  attr = H5Acreate (dataset, "attr1", H5T_STD_I8BE, space, H5P_DEFAULT);
   sprintf(buf, "1st attribute of dset1.1.1");
   H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
   H5Sclose(space);
@@ -690,7 +728,7 @@ float dset2_1[10], dset2_2[3][5];
 
   dims[0] = 27;
   space = H5Screate_simple(1, dims, NULL);
-  attr = H5Acreate (dataset, "attr2", H5T_NATIVE_SCHAR, space, H5P_DEFAULT);
+  attr = H5Acreate (dataset, "attr2", H5T_STD_I8BE, space, H5P_DEFAULT);
   sprintf(buf, "2nd attribute of dset1.1.1");
   H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
   H5Sclose(space);
@@ -701,7 +739,7 @@ float dset2_1[10], dset2_2[3][5];
   /* dset1.1.2 */
   dims[0] = 20;
   space = H5Screate_simple(1, dims, NULL);
-  dataset = H5Dcreate(group, "dset1.1.2", H5T_NATIVE_INT, space, H5P_DEFAULT);
+  dataset = H5Dcreate(group, "dset1.1.2", H5T_STD_I32BE, space, H5P_DEFAULT);
   for (i = 0; i < 20; i++)
        dset2[i] = i;
   H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
@@ -720,7 +758,7 @@ float dset2_1[10], dset2_2[3][5];
   /* dset2.1 */
   dims[0] = 10;
   space = H5Screate_simple(1, dims, NULL);
-  dataset = H5Dcreate(group, "dset2.1", H5T_NATIVE_FLOAT, space, H5P_DEFAULT);
+  dataset = H5Dcreate(group, "dset2.1", H5T_IEEE_F32BE, space, H5P_DEFAULT);
   for (i = 0; i < 10; i++)
        dset2_1[i] = i*0.1+1;
   H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_1);
@@ -730,7 +768,7 @@ float dset2_1[10], dset2_2[3][5];
   /* dset2.2 */
   dims[0] = 3; dims[1] = 5;
   space = H5Screate_simple(2, dims, NULL);
-  dataset = H5Dcreate(group, "dset2.2", H5T_NATIVE_FLOAT, space, H5P_DEFAULT);
+  dataset = H5Dcreate(group, "dset2.2", H5T_IEEE_F32BE, space, H5P_DEFAULT);
   for (i = 0; i < 3; i++)
        for (j = 0; j < 5; j++)
             dset2_2[i][j] = i*0.1;
@@ -806,7 +844,7 @@ hid_t fid, group;
 */
 
 static void test_many(void) {
-hid_t fid, group, attr, dataset, space, space2, type, create_plist;
+hid_t fid, group, attr, dataset, space, space2, type, create_plist, type2;
 hsize_t dims[2];
 int data[2][2], dset2[10][10], dset3[10][10];
 double d[10];
@@ -842,11 +880,15 @@ const int perm[4] = {0,1,2,3};  /* the 0'th and the 3'rd indices are permuted */
   type = H5Tcreate (H5T_COMPOUND, sizeof(dset1[0]));
 
   dim[0] = dim[1] = dim[2] = dim[3] = 2;
-  H5Tinsert_array(type, "a_array", HOFFSET(dset1_t, a), 4, dim, perm, H5T_NATIVE_INT);
-  H5Tinsert_array(type, "b_array", HOFFSET(dset1_t, b), 4, dim, perm, H5T_NATIVE_DOUBLE);
-  H5Tinsert_array(type, "c_array", HOFFSET(dset1_t, c), 4, dim, perm, H5T_NATIVE_DOUBLE);
+  H5Tinsert_array(type, "a_array", HOFFSET(dset1_t, a), 4, dim, perm, H5T_STD_I32BE);
+  H5Tinsert_array(type, "b_array", HOFFSET(dset1_t, b), 4, dim, perm, H5T_IEEE_D64BE);
+  H5Tinsert_array(type, "c_array", HOFFSET(dset1_t, c), 4, dim, perm, H5T_IEEE_D64BE);
 
-  H5Tcommit(group, "type1", type);
+  type2 = H5Tcreate (H5T_COMPOUND, sizeof(dset1[0]));
+
+  H5Tinsert_array(type2, "a_array", HOFFSET(dset1_t, a), 4, dim, perm, H5T_NATIVE_INT);
+  H5Tinsert_array(type2, "b_array", HOFFSET(dset1_t, b), 4, dim, perm, H5T_NATIVE_DOUBLE);
+  H5Tinsert_array(type2, "c_array", HOFFSET(dset1_t, c), 4, dim, perm, H5T_NATIVE_DOUBLE);
 
   /* dset1 */
   sdim = 6;
@@ -857,7 +899,7 @@ const int perm[4] = {0,1,2,3};  /* the 0'th and the 3'rd indices are permuted */
   /* add attributes to dset1 */
   dims[0] = 10;
   space2 = H5Screate_simple(1, dims, NULL);
-  attr = H5Acreate (dataset, "attr1", H5T_NATIVE_CHAR, space2, H5P_DEFAULT);
+  attr = H5Acreate (dataset, "attr1", H5T_STD_I8BE, space2, H5P_DEFAULT);
   sprintf(buf, "abcdefghi");
   H5Awrite(attr, H5T_NATIVE_CHAR, buf);
   H5Sclose(space2);
@@ -865,7 +907,7 @@ const int perm[4] = {0,1,2,3};  /* the 0'th and the 3'rd indices are permuted */
 
   dims[0] = 2; dims[1] = 2;
   space2 = H5Screate_simple(2, dims, NULL);
-  attr = H5Acreate (dataset, "attr2", H5T_NATIVE_INT, space2, H5P_DEFAULT);
+  attr = H5Acreate (dataset, "attr2", H5T_STD_I32BE, space2, H5P_DEFAULT);
   data[0][0] = 0; data[0][1] = 1; data[1][0] = 2; data[1][1] = 3;
   H5Awrite(attr, H5T_NATIVE_INT, data);
   H5Sclose(space2);
@@ -873,7 +915,7 @@ const int perm[4] = {0,1,2,3};  /* the 0'th and the 3'rd indices are permuted */
 
   dims[0] = 10;
   space2 = H5Screate_simple(1, dims, NULL);
-  attr = H5Acreate (dataset, "attr3", H5T_NATIVE_DOUBLE, space2, H5P_DEFAULT);
+  attr = H5Acreate (dataset, "attr3", H5T_IEEE_D64BE, space2, H5P_DEFAULT);
   for (i = 0; i < 10; i++) d[i] = 0.1 * i;
   H5Awrite(attr, H5T_NATIVE_DOUBLE, d);
   H5Sclose(space2);
@@ -902,12 +944,13 @@ const int perm[4] = {0,1,2,3};  /* the 0'th and the 3'rd indices are permuted */
 	}
   }
 
-  H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
+  H5Dwrite(dataset, type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
 
   H5Dclose(dataset);
   H5Sclose(space);
 
   H5Tclose(type);
+  H5Tclose(type2);
   H5Gclose(group);
 
   group = H5Gcreate (fid, "/g1/g1.2", 0);
@@ -927,7 +970,7 @@ const int perm[4] = {0,1,2,3};  /* the 0'th and the 3'rd indices are permuted */
   dims[0] = 10; dims[1] = 10;
   space = H5Screate_simple(2, dims, NULL);
 
-  dataset = H5Dcreate(group, "dset2", H5T_NATIVE_INT, space, H5P_DEFAULT);
+  dataset = H5Dcreate(group, "dset2", H5T_STD_I32BE, space, H5P_DEFAULT);
   for (i = 0; i < 10; i++)
        for (j = 0; j < 10; j++)
             dset2[i][j] = j;
@@ -950,7 +993,7 @@ const int perm[4] = {0,1,2,3};  /* the 0'th and the 3'rd indices are permuted */
   dims[0] = 10; dims[1] = 10;
   space = H5Screate_simple(2, dims, NULL);
 
-  dataset = H5Dcreate(group, "dset3", H5T_NATIVE_INT, space, H5P_DEFAULT);
+  dataset = H5Dcreate(group, "dset3", H5T_STD_I32BE, space, H5P_DEFAULT);
   for (i = 0; i < 10; i++)
        for (j = 0; j < 10; j++)
             dset3[i][j] = i;
@@ -979,7 +1022,7 @@ hid_t type;
 }
 
 static void test_str(void) {
-hid_t fid, dataset, space, f_type, m_type, str_type;
+hid_t fid, dataset, space, f_type, m_type, str_type, f_type2;
 
 hsize_t dims1[] = { 3, 4};
 char string1[12][2] = {"s1","s2","s3","s4","s5","s6","s7","s8","s9",
@@ -1066,10 +1109,15 @@ size_t mdims[2];
   f_type = H5Tcreate (H5T_COMPOUND, sizeof(compound_t));
   mdims[0] = 8; mdims[1] = 10;
   H5Tinsert_array(f_type, "int_array", HOFFSET(compound_t, a), 2, mdims,
-                  NULL, H5T_NATIVE_INT);
+                  NULL, H5T_STD_I32BE);
   str_type = mkstr(32, H5T_STR_SPACEPAD);
   mdims[0] = 3; mdims[1] = 4;
   H5Tinsert_array(f_type, "string", HOFFSET(compound_t, s), 2, mdims, 
+                  NULL, str_type);
+
+  H5Tinsert_array(f_type2, "int_array", HOFFSET(compound_t, a), 2, mdims,
+                  NULL, H5T_NATIVE_INT);
+  H5Tinsert_array(f_type2, "string", HOFFSET(compound_t, s), 2, mdims, 
                   NULL, str_type);
 
   for (i = 0; i < 3; i++)
@@ -1082,10 +1130,11 @@ size_t mdims[2];
       }
            
   dataset = H5Dcreate(fid, "/comp1", f_type, space, H5P_DEFAULT);
-  H5Dwrite(dataset, f_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, comp1);
+  H5Dwrite(dataset, f_type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, comp1);
 
   H5Tclose(str_type);
   H5Tclose(f_type);
+  H5Tclose(f_type2);
   H5Sclose(space);
   H5Dclose(dataset);
 
@@ -1330,7 +1379,7 @@ void test_objref(){
     ret=H5Gset_comment(group,".",write_comment);
 
     /* Create a dataset (inside Group1) */
-    dataset=H5Dcreate(group,"Dataset1",H5T_NATIVE_UINT,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate(group,"Dataset1",H5T_STD_U32BE,sid1,H5P_DEFAULT);
 
     for(tu32=(uint32_t *)wbuf,i=0; i<SPACE1_DIM1; i++)
         *tu32++=i*3;
@@ -1342,7 +1391,7 @@ void test_objref(){
     ret = H5Dclose(dataset);
 
     /* Create another dataset (inside Group1) */
-    dataset=H5Dcreate(group,"Dataset2",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate(group,"Dataset2",H5T_STD_U8BE,sid1,H5P_DEFAULT);
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -1351,11 +1400,11 @@ void test_objref(){
     tid1 = H5Tcreate (H5T_COMPOUND, sizeof(s1_t));
 
     /* Insert fields */
-    ret=H5Tinsert (tid1, "a", HOFFSET(s1_t,a), H5T_NATIVE_INT);
+    ret=H5Tinsert (tid1, "a", HOFFSET(s1_t,a), H5T_STD_I32BE);
 
-    ret=H5Tinsert (tid1, "b", HOFFSET(s1_t,b), H5T_NATIVE_INT);
+    ret=H5Tinsert (tid1, "b", HOFFSET(s1_t,b), H5T_IEEE_F32BE);
 
-    ret=H5Tinsert (tid1, "c", HOFFSET(s1_t,c), H5T_NATIVE_FLOAT);
+    ret=H5Tinsert (tid1, "c", HOFFSET(s1_t,c), H5T_IEEE_F32BE);
 
     /* Save datatype for later */
     ret=H5Tcommit (group, "Datatype1", tid1);
@@ -1451,7 +1500,7 @@ void test_datareg(){
     sid2 = H5Screate_simple(SPACE2_RANK, dims2, NULL);
 
     /* Create a dataset */
-    dset2=H5Dcreate(fid1,"Dataset2",H5T_NATIVE_UCHAR,sid2,H5P_DEFAULT);
+    dset2=H5Dcreate(fid1,"Dataset2",H5T_STD_U8BE,sid2,H5P_DEFAULT);
 
     for(tu8=dwbuf,i=0; i<SPACE2_DIM1*SPACE2_DIM2; i++)
         *tu8++=i*3;
