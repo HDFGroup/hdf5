@@ -327,6 +327,9 @@
           !
           INTEGER, DIMENSION(4,6) :: dset_data, data_out
           INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
+          INTEGER(HSIZE_T)  :: file_size
+          CHARACTER(LEN=80) :: file_name
+          INTEGER(SIZE_T) :: name_size
      
           !
           !initialize the dset_data array which will be written to the "/dset"
@@ -393,12 +396,25 @@
          !
          CALL h5freopen_f(file_id, reopen_id, error)
               CALL check("h5freopen_f",error,total_error)
+         !
+         !Check file size
+         !
+         CALL h5fget_filesize_f(file_id, file_size, error)
+              CALL check("h5fget_filesize_f",error,total_error)
 
          !
          !Open the dataset based on the reopen_id. 
          !
          CALL h5dopen_f(reopen_id, dsetname, dset_id, error)
               CALL check("h5dopen_f",error,total_error)
+         !
+         !Get file name from the dataset identifier
+         !
+         CALL h5fget_name_f(dset_id, file_name, name_size, error)
+              CALL check("h5fget_name_f",error,total_error)
+              IF(file_name(1:name_size) .NE. fix_filename(1:name_size)) THEN
+                 write(*,*) "file name obtained from the dataset id is incorrect"
+              END IF 
 
          !
          !Read the dataset.
