@@ -162,7 +162,7 @@ H5S_hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space, size_t elmt_size)
 /* Initialize the information needed for regular hyperslab I/O */
         const hsize_t *mem_size;    /* Temporary pointer to dataspace extent's dimension sizes */
         hsize_t acc;                /* Accumulator for "flattened" dimension's sizes */
-        unsigned cont_dim;          /* Maximum contiguous dimension */
+        unsigned cont_dim=0;        /* # of contiguous dimensions */
 
         /* Set the temporary pointer to the dataspace extent's dimension sizes */
         mem_size=space->extent.u.simple.size;
@@ -174,69 +174,84 @@ H5S_hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space, size_t elmt_size)
          * extent in that dimension and all dimensions up to that dimension.
          */
 
-        /* Initialize the number of contiguous dimensions to be the same as the dataspace's rank */
-        cont_dim=rank;
-
         /* Don't flatten adjacent elements into contiguous block if the
          * element size is 0.  This is for the H5S_select_shape_same() code.
          */
         if(elmt_size>0) {
-            /* Check for a "contiguous" block */
+            /* Check for any "contiguous" blocks that can be flattened */
             for(u=rank-1; u>0; u--) {
                 if(tdiminfo[u].count==1 && tdiminfo[u].block==mem_size[u])
-                    cont_dim=u;
-                else
-                    break;
+                    cont_dim++;
             } /* end for */
         } /* end if */
 
         /* Check if the regular selection can be "flattened" */
-        if(cont_dim<rank) {
+        if(cont_dim>0) {
+            unsigned last_dim_flattened=1;      /* Flag to indicate that the last dimension was flattened */
+            unsigned flat_rank=rank-cont_dim;   /* Number of dimensions after flattening */
+            unsigned curr_dim;                  /* Current dimension */
+
             /* Set the iterator's rank to the contiguous dimensions */
-            iter->u.hyp.iter_rank=cont_dim;
+            iter->u.hyp.iter_rank=flat_rank;
 
             /* Allocate the position & initialize to initial location */
-            iter->u.hyp.off = H5FL_ARR_MALLOC(hsize_t,cont_dim);
+            iter->u.hyp.off = H5FL_ARR_MALLOC(hsize_t,flat_rank);
             assert(iter->u.hyp.off);
-            iter->u.hyp.diminfo = H5FL_ARR_MALLOC(H5S_hyper_dim_t,cont_dim);
+            iter->u.hyp.diminfo = H5FL_ARR_MALLOC(H5S_hyper_dim_t,flat_rank);
             assert(iter->u.hyp.diminfo);
-            iter->u.hyp.size = H5FL_ARR_MALLOC(hsize_t,cont_dim);
+            iter->u.hyp.size = H5FL_ARR_MALLOC(hsize_t,flat_rank);
             assert(iter->u.hyp.size);
-            iter->u.hyp.sel_off = H5FL_ARR_MALLOC(hssize_t,cont_dim);
+            iter->u.hyp.sel_off = H5FL_ARR_MALLOC(hssize_t,flat_rank);
             assert(iter->u.hyp.sel_off);
 
             /* "Flatten" dataspace extent and selection information */
+            curr_dim=flat_rank-1;
             for(i=rank-1, acc=1; i>=0; i--) {
                 if(tdiminfo[i].block==mem_size[i] && i>0) {
+                    /* "Flatten" this dimension */
                     assert(tdiminfo[i].start==0);
                     acc *= mem_size[i];
+
+                    /* Indicate that the dimension was flattened */
+                    last_dim_flattened=1;
                 } /* end if */
                 else {
-                    if((unsigned)i==(cont_dim-1)) {
-                        iter->u.hyp.diminfo[i].start = tdiminfo[i].start*acc;
+                    if(last_dim_flattened) {
+                        /* First dimension after flattened dimensions */
+                        iter->u.hyp.diminfo[curr_dim].start = tdiminfo[i].start*acc;
                         /* Special case for single block regular selections */
-                        if(tdiminfo[i].count==1)
-                            iter->u.hyp.diminfo[i].stride = 1;
+                        if(tdiminfo[curr_dim].count==1)
+                            iter->u.hyp.diminfo[curr_dim].stride = 1;
                         else
-                            iter->u.hyp.diminfo[i].stride = tdiminfo[i].stride*acc;
-                        iter->u.hyp.diminfo[i].count = tdiminfo[i].count;
-                        iter->u.hyp.diminfo[i].block = tdiminfo[i].block*acc;
-                        iter->u.hyp.size[i] = mem_size[i]*acc;
-                        iter->u.hyp.sel_off[i] = space->select.offset[i]*acc;
+                            iter->u.hyp.diminfo[curr_dim].stride = tdiminfo[i].stride*acc;
+                        iter->u.hyp.diminfo[curr_dim].count = tdiminfo[i].count;
+                        iter->u.hyp.diminfo[curr_dim].block = tdiminfo[i].block*acc;
+                        iter->u.hyp.size[curr_dim] = mem_size[i]*acc;
+                        iter->u.hyp.sel_off[curr_dim] = space->select.offset[i]*acc;
+
+                        /* Reset the "last dim flattened" flag to avoid flattened any further dimensions */
+                        last_dim_flattened=0;
+
+                        /* Reset the "accumulator" for possible further dimension flattening */
+                        acc=1;
                     } /* end if */
                     else {
-                        iter->u.hyp.diminfo[i].start = tdiminfo[i].start;
-                        iter->u.hyp.diminfo[i].stride = tdiminfo[i].stride;
-                        iter->u.hyp.diminfo[i].count = tdiminfo[i].count;
-                        iter->u.hyp.diminfo[i].block = tdiminfo[i].block;
-                        iter->u.hyp.size[i] = mem_size[i];
-                        iter->u.hyp.sel_off[i] = space->select.offset[i];
+                        /* All other dimensions */
+                        iter->u.hyp.diminfo[curr_dim].start = tdiminfo[i].start;
+                        iter->u.hyp.diminfo[curr_dim].stride = tdiminfo[i].stride;
+                        iter->u.hyp.diminfo[curr_dim].count = tdiminfo[i].count;
+                        iter->u.hyp.diminfo[curr_dim].block = tdiminfo[i].block;
+                        iter->u.hyp.size[curr_dim] = mem_size[i];
+                        iter->u.hyp.sel_off[curr_dim] = space->select.offset[i];
                     } /* end else */
+
+                    /* Decrement "current" flattened dimension */
+                    curr_dim--;
                 } /* end if */
             } /* end for */
 
             /* Initialize "flattened" iterator offset to initial location and dataspace extent and selection information to correct values */
-            for(u=0; u<cont_dim; u++)
+            for(u=0; u<flat_rank; u++)
                 iter->u.hyp.off[u]=iter->u.hyp.diminfo[u].start;
         } /* end if */
         else {
