@@ -1799,5 +1799,23 @@
 ./tools/testfiles/test5.h5
 ./tools/testfiles/h5repack_info.txt
 
+# jam utility and tests
+./tools/h5jam/Dependencies
+./tools/h5jam/h5jam.c
+./tools/h5jam/h5unjam.c
+./tools/h5jam/Makefile.in
+./tools/h5jam/h5jamgentest.c
+./tools/h5jam/testh5jam.sh.in
+./tools/h5jam/tellub.c
+./tools/h5jam/getub.c
+
+# test files for jam
+./tools/testfiles/twithub.h5
+./tools/testfiles/twithub513.h5
+./tools/testfiles/u10.txt
+./tools/testfiles/u511.txt
+./tools/testfiles/u512.txt
+./tools/testfiles/u513.txt
+
 # windows
 ./windows/all.zip
