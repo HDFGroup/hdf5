@@ -67,9 +67,9 @@ extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 extern "C" {
 #endif
 
-int h5_cleanup(const char *base_name[], hid_t fapl);
+H5_DLL int h5_cleanup(const char *base_name[], hid_t fapl);
 herr_t h5_errors(void *client_data);
-char *h5_fixname(const char *base_name, hid_t fapl, char *fullname,
+H5_DLL char *h5_fixname(const char *base_name, hid_t fapl, char *fullname,
 		 size_t size);
 hid_t h5_fileaccess(void);
 void h5_no_hwconv(void);
