@@ -191,6 +191,31 @@ case "$cc_vendor-$cc_version" in
 	cc_flags_set=yes
 	;;
 
+    gcc-3.3*)
+        # Replace -ansi flag with -std=c99 flag
+	CFLAGS="`echo $CFLAGS | sed -e 's/-ansi/-std=c99/g'`"
+
+        # Append warning flags from gcc-2.95.* case
+	CFLAGS="$CFLAGS -Wno-long-long"
+
+        # Append warning flags from gcc-3* case
+	CFLAGS="$CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
+
+        # Append warning flags from gcc-3.2* case
+	CFLAGS="$CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization"
+        # The "format=2" warning generates too many warnings about valid
+        # usage in the library.
+	#CFLAGS="$CFLAGS -Wformat=2"
+        # The "unreachable code" warning does not appear to be reliable yet...
+	#CFLAGS="$CFLAGS -Wunreachable-code"
+
+        # Append more extra warning flags that only gcc3.3+ know about
+	CFLAGS="$CFLAGS -Wendif-labels"
+
+	# Flags are set
+	cc_flags_set=yes
+	;;
+
     gcc-3.2*)
         # Replace -ansi flag with -std=c99 flag
 	CFLAGS="`echo $CFLAGS | sed -e 's/-ansi/-std=c99/g'`"
@@ -202,7 +227,10 @@ case "$cc_vendor-$cc_version" in
 	CFLAGS="$CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
 
         # Append more extra warning flags that only gcc3.2+ know about
-	CFLAGS="$CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wcomments"
+	CFLAGS="$CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization"
+        # The "format=2" warning generates too many warnings about valid
+        # usage in the library.
+	#CFLAGS="$CFLAGS -Wformat=2"
         # The "unreachable code" warning does not appear to be reliable yet...
 	#CFLAGS="$CFLAGS -Wunreachable-code"
 
