@@ -1406,15 +1406,19 @@ dnl
 DYNAMIC_DIRS=""
 if test -n "$LDFLAGS"; then
    for d in $LDFLAGS ; do
-      d=`echo $d | sed -e 's/-L//g'`
       case "$d" in
-         .*)
-	    dnl If the path isn't absolute, make it so by prepending the
-	    dnl ROOT directory to it.
-	    d=${ROOT}/$d
+         -L.*)
+            d=`echo $d | sed -e 's/-L//g'`
+            case "$d" in
+               .*)
+		  dnl If the path isn't absolute, make it so by
+		  dnl prepending the ROOT directory to it.
+	          d=${ROOT}/$d
+	          ;;
+	    esac
+            DYNAMIC_DIRS="-R${d} $DYNAMIC_DIRS"
 	    ;;
       esac
-      DYNAMIC_DIRS="-R${d} $DYNAMIC_DIRS"
    done
 fi
 AC_SUBST(DYNAMIC_DIRS)
