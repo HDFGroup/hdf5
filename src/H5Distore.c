@@ -56,7 +56,8 @@
 #include "H5Sprivate.h"         /* Dataspaces */
 #include "H5Vprivate.h"
 
-/* MPIO & MPIPOSIX drivers needed for special checks */
+/* MPIO, MPIPOSIX, & FPHDF5 drivers needed for special checks */
+#include "H5FDfphdf5.h"
 #include "H5FDmpio.h"
 #include "H5FDmpiposix.h"
 
@@ -2429,23 +2430,38 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         /* Set the MPI-capable file driver flag */
         using_mpi=1;
     } /* end if */
-    else {
-        if(IS_H5FD_MPIPOSIX(f)) {
-            /* Get the MPI communicator */
-            if (MPI_COMM_NULL == (mpi_comm=H5FD_mpiposix_communicator(f->shared->lf)))
-                HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI communicator");
+    else if(IS_H5FD_MPIPOSIX(f)) {
+        /* Get the MPI communicator */
+        if (MPI_COMM_NULL == (mpi_comm=H5FD_mpiposix_communicator(f->shared->lf)))
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI communicator");
 
-            /* Get the MPI rank & size */
-            if ((mpi_rank=H5FD_mpiposix_mpi_rank(f->shared->lf))<0)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
-            if ((mpi_size=H5FD_mpiposix_mpi_size(f->shared->lf))<0)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI size");
+        /* Get the MPI rank & size */
+        if ((mpi_rank=H5FD_mpiposix_mpi_rank(f->shared->lf))<0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
+        if ((mpi_size=H5FD_mpiposix_mpi_size(f->shared->lf))<0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI size");
 
-            /* Set the MPI-capable file driver flag */
-            using_mpi=1;
-        } /* end if */
+        /* Set the MPI-capable file driver flag */
+        using_mpi=1;
     } /* end else */
-#endif /* H5_HAVE_PARALLEL */
+#ifdef H5_HAVE_FPHDF5
+    else if (IS_H5FD_FPHDF5(f)) {
+        /* Get the FPHDF5 barrier communicator */
+        if (MPI_COMM_NULL == (mpi_comm = H5FD_fphdf5_barrier_communicator(f->shared->lf)))
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI communicator");
+
+        /* Get the MPI rank & size */
+        if ((mpi_rank = H5FD_fphdf5_mpi_rank(f->shared->lf)) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
+
+        if ((mpi_size = H5FD_fphdf5_mpi_size(f->shared->lf)) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI size");
+
+        /* Set the MPI-capable file driver flag */
+        using_mpi = 1;
+    } /* end if */
+#endif  /* H5_HAVE_FPHDF5 */
+#endif  /* H5_HAVE_PARALLEL */
 
     /*
      * Setup indice to go through all chunks. (Future improvement

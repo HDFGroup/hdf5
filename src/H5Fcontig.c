@@ -1,15 +1,26 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 /*
- * Copyright (C) 2000-2001 NCSA
- *		           All rights reserved.
- *
  * Programmer: 	Quincey Koziol <koziol@ncsa.uiuc.edu>
  *	       	Thursday, September 28, 2000
  *
- * Purpose:	Contiguous dataset I/O functions.  These routines are similar
- *      to the H5F_istore_* routines and really only abstract away dealing
+ * Purpose:
+ *      Contiguous dataset I/O functions. These routines are similar to
+ *      the H5F_istore_* routines and really only abstract away dealing
  *      with the data sieve buffer from the H5F_arr_read/write and
  *      H5F_seg_read/write.
- *
  */
 
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
@@ -24,7 +35,8 @@
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5Vprivate.h"		/* Vector and array functions		*/
 
-/* MPIO & MPIPOSIX drivers needed for special checks */
+/* MPIO, MPIPOSIX, & FPHDF5 drivers needed for special checks */
+#include "H5FDfphdf5.h"
 #include "H5FDmpio.h"
 #include "H5FDmpiposix.h"
 
@@ -54,6 +66,9 @@ H5FL_BLK_DEFINE_STATIC(zero_fill);
  *		August 22, 2002
  *
  * Modifications:
+ *          Bill Wendling, February 20, 2003
+ *          Added support for getting the barrier COMM if you're using
+ *          Flexible PHDF5.
  *
  *-------------------------------------------------------------------------
  */
@@ -110,23 +125,38 @@ H5F_contig_fill(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *layout,
         /* Set the MPI-capable file driver flag */
         using_mpi=1;
     } /* end if */
-    else {
-        if(IS_H5FD_MPIPOSIX(f)) {
-            /* Get the MPI communicator */
-            if (MPI_COMM_NULL == (mpi_comm=H5FD_mpiposix_communicator(f->shared->lf)))
-                HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI communicator");
+    else if(IS_H5FD_MPIPOSIX(f)) {
+        /* Get the MPI communicator */
+        if (MPI_COMM_NULL == (mpi_comm=H5FD_mpiposix_communicator(f->shared->lf)))
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI communicator");
 
-            /* Get the MPI rank & size */
-            if ((mpi_rank=H5FD_mpiposix_mpi_rank(f->shared->lf))<0)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
-            if ((mpi_size=H5FD_mpiposix_mpi_size(f->shared->lf))<0)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI size");
+        /* Get the MPI rank & size */
+        if ((mpi_rank=H5FD_mpiposix_mpi_rank(f->shared->lf))<0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
+        if ((mpi_size=H5FD_mpiposix_mpi_size(f->shared->lf))<0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI size");
 
-            /* Set the MPI-capable file driver flag */
-            using_mpi=1;
-        } /* end if */
-    } /* end else */
-#endif /* H5_HAVE_PARALLEL */
+        /* Set the MPI-capable file driver flag */
+        using_mpi=1;
+    } /* end if */
+#ifdef H5_HAVE_FPHDF5
+    else if (IS_H5FD_FPHDF5(f)) {
+        /* Get the FPHDF5 barrier communicator */
+        if (MPI_COMM_NULL == (mpi_comm = H5FD_fphdf5_barrier_communicator(f->shared->lf)))
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI communicator");
+
+        /* Get the MPI rank & size */
+        if ((mpi_rank = H5FD_fphdf5_mpi_rank(f->shared->lf)) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
+
+        if ((mpi_size = H5FD_fphdf5_mpi_size(f->shared->lf)) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI size");
+
+        /* Set the MPI-capable file driver flag */
+        using_mpi = 1;
+    } /* end if */
+#endif  /* H5_HAVE_FPHDF5 */
+#endif  /* H5_HAVE_PARALLEL */
 
     /* Get the number of elements in the dataset's dataspace */
     snpoints = H5S_get_simple_extent_npoints(space);

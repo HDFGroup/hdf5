@@ -47,9 +47,10 @@
 #include "H5Pprivate.h"         /* Property lists */
 
 /*
- * The MPIO & MPIPOSIX drivers are needed because there are places where we
- * check for the parallel I/O transfer mode.
+ * The MPIO, MPIPOSIX, & FPHDF5 drivers are needed because there are
+ * places where we check for the parallel I/O transfer mode.
  */
+#include "H5FDfphdf5.h"
 #include "H5FDmpio.h"
 #include "H5FDmpiposix.h"
 
@@ -483,8 +484,8 @@ H5AC_find(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     info = cache->slot + idx;
 
 #ifdef H5_HAVE_PARALLEL
-    /* If MPIO or MPIPOSIX is used, do special parallel I/O actions */
-    if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f)) {
+    /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
+    if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
         H5AC_dest_func_t        dest;
 
         /* Get local pointer to file's dirty cache information */
@@ -561,8 +562,8 @@ H5AC_find(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
         HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "unable to load object");
 
 #ifdef H5_HAVE_PARALLEL
-    /* If MPIO or MPIPOSIX is used, do special parallel I/O actions */
-    if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f)) {
+    /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
+    if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
         H5P_genplist_t *dxpl;           /* Dataset transfer property list */
         H5FD_mpio_xfer_t xfer_mode;     /* I/O transfer mode property value */
 
@@ -741,8 +742,8 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, hboo
         if (NULL==(map=H5FL_ARR_MALLOC(int,cache->nslots)))
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 #ifdef H5_HAVE_PARALLEL
-        /* If MPIO or MPIPOSIX is used, do special parallel I/O actions */
-        if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f)) {
+        /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
+        if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
             H5AC_info_t       **dinfo;
             H5AC_subid_t        type_id;
 #ifndef NDEBUG
@@ -855,8 +856,8 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, hboo
         i = H5AC_HASH(f, addr);
         info = cache->slot + i;
 #ifdef H5_HAVE_PARALLEL
-        /* If MPIO or MPIPOSIX is used, do special parallel I/O actions */
-        if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f)) {
+        /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
+        if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
             H5AC_info_t       **dinfo;
             H5AC_subid_t        type_id;
 #ifndef NDEBUG
@@ -989,8 +990,8 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *
 #endif
 
 #ifdef H5_HAVE_PARALLEL
-    /* If MPIO or MPIPOSIX is used, do special parallel I/O actions */
-    if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f)) {
+    /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
+    if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
         H5AC_info_t       **dinfo;
         H5AC_subid_t        type_id;
         H5P_genplist_t *dxpl;           /* Dataset transfer property list */
@@ -1158,8 +1159,8 @@ H5AC_rename(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t old_addr,
     }
 
 #ifdef H5_HAVE_PARALLEL
-    /* If MPIO or MPIPOSIX is used, do special parallel I/O actions */
-    if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f)) {
+    /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
+    if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
         H5AC_info_t       **new_dinfo;
         H5AC_subid_t        type_id;
         H5P_genplist_t *dxpl;           /* Dataset transfer property list */
@@ -1252,8 +1253,8 @@ H5AC_rename(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t old_addr,
     (*new_info)->addr = new_addr;
 
 #ifdef H5_HAVE_PARALLEL
-    /* If MPIO or MPIPOSIX is used, do special parallel I/O actions */
-    if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f)) {
+    /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
+    if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
         H5AC_info_t       **old_dinfo;
         H5AC_subid_t        type_id;
 
@@ -1360,8 +1361,8 @@ H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 #endif /* H5AC_DEBUG */
 
 #ifdef H5_HAVE_PARALLEL
-    /* If MPIO or MPIPOSIX is used, do special parallel I/O actions */
-    if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f)) {
+    /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
+    if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
         H5AC_info_t       **dinfo;
 
         /* Get pointer to new 'held' information */
@@ -1552,8 +1553,8 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, 
     info = cache->slot + idx;
 
 #ifdef H5_HAVE_PARALLEL
-    /* If MPIO or MPIPOSIX is used, do special parallel I/O actions */
-    if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f)) {
+    /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
+    if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
         H5AC_info_t       **dinfo;
         H5AC_subid_t        type_id;
         H5P_genplist_t *dxpl;           /* Dataset transfer property list */
