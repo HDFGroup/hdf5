@@ -132,6 +132,12 @@ See <a href="#F90andCPPlus">below</a> for the FORTRAN90 and C++ APIs.
 </table>
 </center>
 
+<p>
+A PDF version of this <cite>HDF5 Reference Manual</cite> will be available from
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/doc/PSandPDF/">
+http://hdf.ncsa.uiuc.edu/HDF5/doc/PSandPDF/</a>
+approximately one week after Release 1.6.1.
+
 <a name="F90andCPPlus">
 <hr>
 
@@ -158,20 +164,20 @@ These APIs are described in the following documents.
     <p>
     <u>Fortran90 APIs in the <cite>Reference Manual</cite>:</u>
     The current version of the <cite>HDF5 Reference Manual</cite> includes 
-    a description of the FORTRAN90 API to HDF5.
-    Fortran subroutines exist in the H5A, H5D, H5E, H5F, H5G, H5I, H5P, 
-    H5R, H5S, and H5T interfaces and are described on those pages.
-    <p>  
+    descriptions of the Fortran90 APIs to HDF5.
+    Fortran subroutines exist in the H5, H5A, H5D, H5E, H5F, H5G, H5I, H5P, 
+    H5R, H5S, H5T, and H5Z interfaces and are described on those pages.
     In general, each Fortran subroutine performs exactly the same task 
-    as the corresponding C function.  In the electronic version of this manual, 
-	the links at the top of each reference 
-    manual section go to the C function descriptions, which serve as general 
-    descriptions for both the C and Fortran APIs.  A button, under 
-    <strong>Non-C API(s)</strong> at the end of the C function description,
-    opens an external browser window displaying the Fortran-specific 
-    information.  You will probably want to adjust the size and location of 
-    this external window so that both browser windows are visible and to 
-    facilitate moving easily between them.
+    as the corresponding C function.  
+    <p>  
+    Whereas Fortran subroutines had been described on separate pages in
+    prior reelases, those descriptions are fully integrted into the 
+    body of the reference manual for HDF5 Release 1.6.1.  
+    (Exception: That integration will not be complete for H5P subroutines 
+    until approximately 1 week after the release; most of the H5P Fortran 
+    interfaces are still described on a separate page.  The above-mentioned
+    PDF version of the reference manual will be posted after the Fortran
+    integration is complete.)
     <p>
     <a href="fortran/F90Flags.html" target="External">
     <cite>HDF5 Fortran90 Flags and Datatypes</cite></a>
@@ -186,9 +192,11 @@ These APIs are described in the following documents.
     <p>
     <a href="cpplus/CppInterfaces.html" target="External">
     <cite>HDF5 C++ Interfaces</cite></a>
+<!--
     <p>
     (Note that the C++ APIs are not yet integrated into the 
     <cite>HDF5 Reference Manual</cite>.)
+-->
     </dir>
 
 
@@ -238,7 +246,7 @@ And in this document, the
 Describes HDF5 Release 1.6.1, October 2003
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 9 April 2003");
+document.writeln("Last modified: 16 October 2003");
 -->
 </SCRIPT>
 
