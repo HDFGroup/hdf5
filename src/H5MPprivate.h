@@ -358,6 +358,7 @@
 #define color_H5Pset_fletcher32 "red"
 #define color_H5Pset_szip "red"
 #define color_H5Pset_nbit "red"
+#define color_H5Pset_scaleoffset "red"
 #define color_H5Pset_cache "red"
 #define color_H5Pget_cache "red"
 #define color_H5Pset_hyper_cache "red"
