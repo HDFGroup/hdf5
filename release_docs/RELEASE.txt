@@ -151,8 +151,8 @@ Documentation
 Platforms Tested
 ================
 
-    AIX 4.3.3.0 (IBM SP powerpc)  xlc 3.6.6.0
-                                  mpcc_r 3.6.6.0
+    AIX 4.3.3.0 (IBM SP powerpc)  xlc 5.0.2.0
+                                  mpcc_r 5.0.2.0
                                   xlf 07.01.0000.0002
                                   mpxlf 07.01.0000.0002
     AIX 4.3 (IBM SP RS6000)       C for AIX Compiler, Version 5.0.2.0
