@@ -32,7 +32,7 @@ LIB_OBJ=$(LIB_SRC:.c=.lo)
 PUB_LIB=
 
 # Source and object files for programs...
-PROG_SRC=h5debug.c h5import.c h5ls.c h5repart.c h5dump.c h5dumputil.c \
+PROG_SRC=h5debug.c h5import.c h5ls.c h5repart.c h5dump.c \
 	h5toh4.c h5dumptst.c
 PROG_OBJ=$(PROG_SRC:.c=.lo)
 PRIVATE_HDR=h5tools.h
@@ -60,8 +60,8 @@ h5ls: h5ls.lo
 h5repart: h5repart.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5repart.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-h5dump: h5dump.lo h5dumputil.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5dump.lo h5dumputil.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+h5dump: h5dump.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5dump.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 h5toh4: h5toh4.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5toh4.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
