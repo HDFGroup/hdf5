@@ -160,6 +160,17 @@ case "$cc_vendor-$cc_version" in
 	cc_flags_set=yes
 	;;
 
+    egcs-2.*|pgcc-2.*)
+	# General
+	CFLAGS="$CFLAGS $ARCH -Wsign-compare"
+
+	# Production
+	PROD_CFLAGS="-O6 $NOFP"
+
+	# Flags are set
+	cc_flags_set=yes
+	;;
+
     gcc-2.95*)
         # Append some extra warning flags that only gcc2.95+ know about
 	CFLAGS="$CFLAGS -Wno-long-long"
@@ -168,7 +179,7 @@ case "$cc_vendor-$cc_version" in
 	cc_flags_set=yes
 	;;
 
-    gcc-3.0*)
+    gcc-3*)
         # Replace -ansi flag with -std=c99 flag
 	CFLAGS="`echo $CFLAGS | sed -e 's/-ansi/-std=c99/g'`"
 
@@ -177,34 +188,6 @@ case "$cc_vendor-$cc_version" in
 
         # Append some extra warning flags that only gcc3+ know about
 	CFLAGS="$CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-
-	# Flags are set
-	cc_flags_set=yes
-	;;
-
-    gcc-3.1*)
-        # Replace -ansi flag with -std=c99 flag
-	CFLAGS="`echo $CFLAGS | sed -e 's/-ansi/-std=c99/g'`"
-
-        # Append warning flags from gcc-2.95* case
-	CFLAGS="$CFLAGS -Wno-long-long"
-
-        # Append warning flags from gcc-3.0* case
-	CFLAGS="$CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-
-        # Append some extra warning flags that only gcc3.1+ know about
-        # None currently...
-
-	# Flags are set
-	cc_flags_set=yes
-	;;
-
-    egcs-2.*|pgcc-2.*)
-	# General
-	CFLAGS="$CFLAGS $ARCH -Wsign-compare"
-
-	# Production
-	PROD_CFLAGS="-O6 $NOFP"
 
 	# Flags are set
 	cc_flags_set=yes
@@ -221,10 +204,6 @@ case "$cc_vendor-$cc_version" in
 	# Debug
 	DEBUG_CFLAGS=-g
 	DEBUG_CPPFLAGS=
-
-	# Profile
-	PROFILE_CFLAGS=-pg
-	PROFILE_CPPFLAGS=
 
 	# Flags are set
 	cc_flags_set=yes
