@@ -1231,8 +1231,10 @@
 ./tools/testfiles/tcomp-1.ddl
 ./tools/testfiles/tcomp-2.ddl
 ./tools/testfiles/tcomp-3.ddl
+./tools/testfiles/tcomp-4.ddl
 ./tools/testfiles/tcompound.h5
 ./tools/testfiles/tcompound2.h5
+./tools/testfiles/tcompound_complex.h5
 ./tools/testfiles/tdatareg.h5
 ./tools/testfiles/tdatareg.ddl 
 ./tools/testfiles/tdset-1.ddl
@@ -1345,6 +1347,7 @@
 ./tools/testfiles/tbitfields.h5.xml
 ./tools/testfiles/tcompound.h5.xml
 ./tools/testfiles/tcompound2.h5.xml
+./tools/testfiles/tcompound_complex.h5.xml
 ./tools/testfiles/tdatareg.h5.xml
 ./tools/testfiles/tdset.h5.xml
 ./tools/testfiles/tdset2.h5.xml
