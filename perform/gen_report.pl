@@ -61,7 +61,6 @@
 
 use IO::Handle;
 use Getopt::Long;
-use Switch;
 
 if ($#ARGV == -1) {
 	usage();
@@ -74,11 +73,13 @@ GetOptions("data_type=s"=>\$data_type,
             "procs=i"=>\$num_procs_graph,
 	    "help!"=>\$help,
 	    "throughput=s"=>\$throughput_type,
+	    "io_type=i"=>\$io_type,
             "3d!"=>\$plot_3d);
 
 usage() if $help or !@ARGV;
 
 $throughput_type = "average" if !$throughput_type;
+$io_type = 7 if !$io_type;
 
 foreach my $arg (@ARGV) {
 
@@ -162,6 +163,7 @@ sub usage {
 	-buffer_size \"buffer_size\" plots data from this buffer size (in kilobytes, default is 128)\n
 	-procs \"num_procs\" plots data from the run with num_procs processors (default is 1).\n
 	-throughput \"throughput_type\" plots either the \"max\", \"min\", or \"average\" throughput (default is average)\n
+	-io_type  \"io_type\" where \"io_type\" is the bitwise or of the io_type for which plotting is desired (1 for POSIX, 2 for MPIO, 4 for PHDF5 (default is 7 (all))\n
 	-3d	if present, does a 3d plot in addition to the normal ones\n";
 			
 	exit 1;
@@ -335,6 +337,51 @@ sub write_ascii_file {
 	}
 }
 
+sub draw_plot
+{
+    my($p_3d) = @_;
+    
+    if($p_3d)
+    {
+	$counter = 3;
+	print GNUPLOT_PIPE "splot ";
+    }
+    else
+    {
+	$counter = 2;
+	print GNUPLOT_PIPE "plot ";
+    }
+
+    if($io_type & 1) {
+	print GNUPLOT_PIPE " \"gnuplot.data\" using 1:";
+	
+	if($p_3d) { print GNUPLOT_PIPE "2:"; }       
+	
+	print GNUPLOT_PIPE $counter . " title 'POSIX' with linespoints";
+	$counter = $counter + 1;
+    }
+    if($io_type & 2) {
+	if($io_type & 1) { print GNUPLOT_PIPE ", "; }
+	print GNUPLOT_PIPE  "\"gnuplot.data\" using 1:";
+	
+	if($p_3d) { print GNUPLOT_PIPE "2:"; }       
+	
+	print GNUPLOT_PIPE  $counter . " title 'MPIO' with linespoints";
+	$counter = $counter + 1;
+	if($io_type & 4) { print GNUPLOT_PIPE ", ";}
+    }
+    if($io_type & 4) {
+	print GNUPLOT_PIPE "  \"gnuplot.data\" using 1:";
+	
+	if($p_3d) { print GNUPLOT_PIPE "2:"; }       
+	
+	print GNUPLOT_PIPE  $counter . " title 'PHDF5' with linespoints";
+
+    }
+    print GNUPLOT_PIPE "\n";
+}
+
+
 sub plot_default_graph1 {
 	open(GNUPLOT_DATA_OUTPUT, ">gnuplot.data") or
 		die "error: cannot open file gnuplot.data: $!\n";
@@ -353,19 +400,26 @@ sub plot_default_graph1 {
 	print GNUPLOT_PIPE  "set xtics (\"1\" 1, \"2\" 2, \"4\" 4, \"8\" 8, \"16\" 16, \"32\" 32, \"64\" 64, \"128\" 128, \"256\" 256, \"512\" 512, \"1024\" 1024)\n";
 
 
- 	foreach $proc (sort { $a <=> $b }( keys %results )) {
-	    print GNUPLOT_DATA_OUTPUT $proc . "\t" .		
-			$results{$proc}{$transfer_buffer_size*1024}[0]{$data_type} . "\t" .		
-			$results{$proc}{$transfer_buffer_size*1024}[1]{$data_type}. "\t" .		
-			$results{$proc}{$transfer_buffer_size*1024}[2]{$data_type} . "\n";
+	foreach $proc (sort { $a <=> $b }( keys %results )) 
+	{
+	    print GNUPLOT_DATA_OUTPUT $proc . "\t";
+	    if($io_type & 1) {
+		print GNUPLOT_DATA_OUTPUT $results{$proc}{$transfer_buffer_size*1024}[0]{$data_type} . "\t";
+	    }
+	    if($io_type & 2) {
+		print GNUPLOT_DATA_OUTPUT $results{$proc}{$transfer_buffer_size*1024}[1]{$data_type}. "\t";
+	    }
+	    if($io_type & 4) {
+		print GNUPLOT_DATA_OUTPUT $results{$proc}{$transfer_buffer_size*1024}[2]{$data_type};
+	    }
+	    print GNUPLOT_DATA_OUTPUT "\n";
 
-     	}
-	
+	}
+
 	close(GNUPLOT_DATA_OUTPUT); 
 
-	print GNUPLOT_PIPE "plot \"gnuplot.data\" using 1:2 title 'POSIX' with \\
-	linespoints , \"gnuplot.data\" using 1:3 title 'MPIO' with linespoints, \\
-	\"gnuplot.data\" using 1:4 title 'PHDF5' with linespoints\n";
+	draw_plot(0);
+	
 	unlink(GNUPLOT_DATA_OUTPUT);
 
 }
@@ -387,19 +441,25 @@ sub plot_default_graph2 {
 #the next line attempts to hack gnuplot to get around it's inability to linearly scale, but logarithmically label an axis
 	print GNUPLOT_PIPE  "set xtics (\"4K\" 4*1024, \"8K\" 8*1024, \"16K\" 16*1024, \"32K\" 32*1024, \"64K\" 64*1024, \"128K\" 128*1024, \"256K\" 256*1024, \"512K\" 512*1024, \"1M\" 1024*1024, \"2M\" 2048*1024, \"4M\" 4096*1024, \"8M\" 8192*1024, \"16M\" 16384*1024)\n";
 
- 	foreach $xfer (sort {$a <=> $b} ( keys %{$results{1}} )) {
-	    print GNUPLOT_DATA_OUTPUT $xfer . "\t" .		
-			$results{$num_procs_graph}{$xfer}[0]{$data_type} . "\t" .		
-			$results{$num_procs_graph}{$xfer}[1]{$data_type}. "\t" .		
-			$results{$num_procs_graph}{$xfer}[2]{$data_type} . "\n";
+	foreach $xfer (sort {$a <=> $b} ( keys %{$results{1}} )) 
+	{
+	    print GNUPLOT_DATA_OUTPUT $xfer . "\t";
+	    if($io_type & 1) {
+		print GNUPLOT_DATA_OUTPUT $results{$num_procs_graph}{$xfer}[0]{$data_type} . "\t";
+	    }
+	    if($io_type & 2) {
+		print GNUPLOT_DATA_OUTPUT $results{$num_procs_graph}{$xfer}[1]{$data_type}. "\t";		
+	    }
+	    if($io_type & 4) {
+		print GNUPLOT_DATA_OUTPUT $results{$num_procs_graph}{$xfer}[2]{$data_type};
+	    }
+	    print GNUPLOT_DATA_OUTPUT "\n";
 
      	}
 	
 	close(GNUPLOT_DATA_OUTPUT); 
 
-	print GNUPLOT_PIPE "plot \"gnuplot.data\" using 1:2 title 'POSIX' with \\
-	linespoints , \"gnuplot.data\" using 1:3 title 'MPIO' with linespoints, \\
-	\"gnuplot.data\" using 1:4 title 'PHDF5' with linespoints\n";
+	draw_plot(0);
 	
 	unlink(GNUPLOT_DATA_OUTPUT);
 }
@@ -425,25 +485,32 @@ sub plot_3d_graph3 {
 
 #Read speed on z-axis, processors on x, buffer size on y.
 
-	foreach $proc (sort { $a <=> $b }( keys %results )) {
-		foreach $xfer (sort {$a <=> $b} ( keys %{$results{$proc}} )) {
-			print GNUPLOT_DATA_OUTPUT $proc . "\t" . $xfer . "\t" . 
-			$results{$proc}{$xfer}[0]{"write-only"} . "\t" .		
-			$results{$proc}{$xfer}[1]{"write-only"}. "\t" .		
-			$results{$proc}{$xfer}[2]{"write-only"} . "\n";
+	foreach $proc (sort { $a <=> $b }( keys %results )) 
+	{
+	    foreach $xfer (sort {$a <=> $b} ( keys %{$results{$proc}} )) 
+	    {
+		print GNUPLOT_DATA_OUTPUT $proc . "\t" . $xfer . "\t";
+		if($io_type & 1) {
+		    print GNUPLOT_DATA_OUTPUT $results{$proc}{$xfer}[0]{"write-only"} . "\t";		
+		}
+		if($io_type & 2) {
+		    print GNUPLOT_DATA_OUTPUT $results{$proc}{$xfer}[1]{"write-only"}. "\t";		
+		}
+		if($io_type & 4) {
+		    print GNUPLOT_DATA_OUTPUT $results{$proc}{$xfer}[2]{"write-only"};
+		}
+	    print GNUPLOT_DATA_OUTPUT "\n";
 
-     		}
+	    }
 	}
 	
 	close(GNUPLOT_DATA_OUTPUT); 
 	
-	print GNUPLOT_PIPE "splot \"gnuplot.data\" using 1:2:3 title 'POSIX' with \\
-	linespoints  , \"gnuplot.data\" using 1:2:4 title 'MPIO' with linespoints, \\
-	\"gnuplot.data\" using 1:2:5 title 'PHDF5' with linespoints\n";
-
+	draw_plot(1);
 	
-#:	unlink(GNUPLOT_DATA_OUTPUT);
+	unlink(GNUPLOT_DATA_OUTPUT);
 }
+
 open(GNUPLOT_PIPE, "| gnuplot -persist") || die "Couldn't run gnuplot: $!\n";
 GNUPLOT_PIPE->autoflush(1);
 
