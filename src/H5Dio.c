@@ -792,14 +792,6 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
             !(IS_H5FD_MPIO(dataset->ent.file) || IS_H5FD_MPIPOSIX(dataset->ent.file) || IS_H5FD_FPHDF5(dataset->ent.file)))
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPIO driver only");
 
-    /* If dataset is compact, collective access is only allowed when file space
-     * selection is H5S_ALL */
-    if(doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE
-            && dataset->layout.type==H5D_COMPACT) { 
-        if(H5S_get_select_type(file_space) != H5S_SEL_ALL)    
-            HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access to compact dataset doesn't support partial access");        
-    }
-    
     /* Set the "parallel I/O possible" flag, for H5S_find() */
     if (H5S_mpi_opt_types_g && IS_H5FD_MPIO(dataset->ent.file)) {
 	/* Only collective write should call this since it eventually

@@ -105,16 +105,13 @@ void multiple_dset_write(char *filename, int ndatasets)
 }
 
 /* Example of using PHDF5 to create, write, and read compact dataset.  
- * Hyperslab is prohibited for write.
  */
 void compact_dataset(char *filename)
 {
     int i, j, mpi_size, mpi_rank, err_num=0;
     hbool_t use_gpfs = FALSE;
-    hid_t iof, plist, dcpl, dxpl, dataset, memspace, filespace;
-    hssize_t chunk_origin [DIM];
-    hsize_t chunk_dims [DIM], file_dims [DIM];
-    hsize_t count[DIM]={1,1};
+    hid_t iof, plist, dcpl, dxpl, dataset, filespace;
+    hsize_t file_dims [DIM]={SIZE,SIZE};
     double outme [SIZE][SIZE], inme[SIZE][SIZE];
     char dname[]="dataset";
     herr_t ret;
@@ -127,11 +124,7 @@ void compact_dataset(char *filename)
     plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type, use_gpfs);
     iof = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, plist);
 
-    /* decide the hyperslab according to process number. */
-    get_slab(chunk_origin, chunk_dims, count, file_dims);  
-
     /* Define data space */
-    memspace = H5Screate_simple (DIM, chunk_dims, NULL);
     filespace = H5Screate_simple (DIM, file_dims, NULL);
 
     /* Create a compact dataset */
@@ -145,26 +138,11 @@ void compact_dataset(char *filename)
     dataset = H5Dcreate (iof, dname, H5T_NATIVE_DOUBLE, filespace, dcpl);
     VRFY((dataset >= 0), "H5Dcreate succeeded");        
 
-    /* Define hyperslab */
-    ret = H5Sselect_hyperslab (filespace, H5S_SELECT_SET, chunk_origin, chunk_dims, count, chunk_dims);    
-    VRFY((ret>=0), "mdata hyperslab selection");
-    
     /* set up the collective transfer properties list */
     dxpl = H5Pcreate (H5P_DATASET_XFER);
     VRFY((dxpl >= 0), "");
     ret=H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
-
-    /* calculate data to write */
-    for (i = 0; i < SIZE; i++)
-         for (j = 0; j < SIZE; j++)
-              outme [i][j] = (i+j)*1000 + mpi_rank;
-
-    /* Test hyperslab writing.  Supposed to fail */
-    H5E_BEGIN_TRY {
-        ret=H5Dwrite(dataset, H5T_NATIVE_DOUBLE, memspace, filespace, dxpl, outme);
-    } H5E_END_TRY;
-    VRFY((ret < 0), "H5Dwrite hyperslab write failed as expected");
 
     /* Recalculate data to write.  Each process writes the same data. */
     for (i = 0; i < SIZE; i++)
@@ -178,7 +156,6 @@ void compact_dataset(char *filename)
     H5Pclose (plist);
     H5Dclose (dataset);
     H5Sclose (filespace);
-    H5Sclose (memspace);
     H5Fclose (iof);
 
     /* Open the file and dataset, read and compare the data. */

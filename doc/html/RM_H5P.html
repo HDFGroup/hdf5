@@ -2889,6 +2889,11 @@ facilitate moving easily between them.</i>
     <dd><code>H5Pget_layout</code> returns the layout of the raw data for 
         a dataset.  This function is only valid for dataset creation 
         property lists.  
+        <p>
+        Note that a compact storage layout may affect writing data to
+        the dataset with parallel applications.  See note in
+	<a href="RM_H5D.html#Dataset-Write">H5Dwrite</a>
+        documentation for details.
 	
   <dt><strong>Parameters:</strong>
     <dl>
@@ -6651,6 +6656,11 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
                     <dd>Store raw data separately from the object header as 
                         chunks of data in separate locations in the file.
             </dl></ul>
+        <p>
+        Note that a compact storage layout may affect writing data to
+        the dataset with parallel applications.  See note in
+	<a href="RM_H5D.html#Dataset-Write">H5Dwrite</a>
+        documentation for details.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>

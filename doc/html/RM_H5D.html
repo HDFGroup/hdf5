@@ -1197,6 +1197,12 @@ facilitate moving easily between them.</i>
 	<a href="RM_H5P.html#Property-SetFillTime">H5Pset_fill_time</a>
 	and 
 	<a href="RM_H5P.html#Property-SetAllocTime">H5Pset_alloc_time</a>.)
+        <p>
+        If a dataset's storage layout is 'compact', care must be taken when
+        writing data to the dataset in parallel.  A compact dataset's raw data
+        is cached in memory and may be flushed to the file from any of the
+        parallel processes, so parallel applications should always attempt to
+        write identical data to the dataset from all processes.
 	
 <dt><strong>Parameters:</strong>
     <dl>
