@@ -61,7 +61,7 @@ MOSTLYCLEAN=cmpd_dset.h5 compact_dataset.h5 dataset.h5 extend.h5 istore.h5   \
             getname.h5 getname1.h5 getname2.h5 getname3.h5 sec2_file.h5      \
             family_file000[0-3][0-9].h5 multi_file-[rs].h5 core_file         \
             new_move_[ab].h5 ntypes.h5 dangle.h5 test_filters.h5 	     \
-	    get_file_name.h5 tstint[1-2].h5
+	    get_file_name.h5 tstint[1-2].h5 unlink_chunked.h5
 
 CLEAN=$(TIMINGS)
 

@@ -148,6 +148,7 @@ typedef struct H5D_istore_ud1_t {
 /* Private prototypes */
 static void *H5D_istore_chunk_alloc(size_t size, const H5O_pline_t *pline);
 static void *H5D_istore_chunk_xfree(void *chk, const H5O_pline_t *pline);
+static herr_t H5D_istore_shared_create (H5F_t *f, H5O_layout_t *layout);
 static herr_t H5D_istore_shared_free (void *page);
 
 /* B-tree iterator callbacks */
@@ -931,9 +932,6 @@ H5D_istore_iter_dump (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, hadd
 herr_t
 H5D_istore_init (H5F_t *f, H5D_t *dset)
 {
-    H5D_istore_ud1_t	udata;
-    H5B_shared_t *shared;               /* Shared B-tree node info */
-    size_t	u;                      /* Local index variable */
     H5D_rdcc_t	*rdcc = &(dset->cache.chunk);
     herr_t      ret_value=SUCCEED;       /* Return value */
     
@@ -947,36 +945,9 @@ H5D_istore_init (H5F_t *f, H5D_t *dset)
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     } /* end if */
 
-    /* Initialize "user" data for B-tree callbacks, etc. */
-    udata.mesg = &dset->layout;
-
-    /* Allocate space for the shared structure */
-    if(NULL==(shared=H5FL_MALLOC(H5B_shared_t)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for shared B-tree info")
-
-    /* Set up the "global" information for this file's groups */
-    shared->type= H5B_ISTORE;
-    shared->two_k=2*H5F_KVALUE(f,H5B_ISTORE);
-    shared->sizeof_rkey = H5D_istore_sizeof_rkey(f, &udata);
-    assert(shared->sizeof_rkey);
-    shared->sizeof_rnode = H5B_nodesize(f, shared, &shared->sizeof_keys);
-    assert(shared->sizeof_rnode);
-    if(NULL==(shared->page=H5FL_BLK_MALLOC(chunk_page,shared->sizeof_rnode)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
-#ifdef H5_USING_PURIFY
-HDmemset(shared->page,0,shared->sizeof_rnode);
-#endif /* H5_USING_PURIFY */
-    if(NULL==(shared->nkey=H5FL_SEQ_MALLOC(size_t,(size_t)(2*H5F_KVALUE(f,H5B_ISTORE)+1))))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
-
-    /* Initialize the offsets into the native key buffer */
-    for(u=0; u<(2*H5F_KVALUE(f,H5B_ISTORE)+1); u++)
-        shared->nkey[u]=u*H5B_ISTORE->sizeof_nkey;
-
-    /* Make shared B-tree info reference counted */
-    if(NULL==(dset->layout.u.chunk.btree_shared=H5RC_create(shared,H5D_istore_shared_free)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for shared B-tree info")
-
+    /* Allocate the shared structure */
+    if(H5D_istore_shared_create(f, &dset->layout)<0)
+	HGOTO_ERROR (H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create wrapper for shared B-tree info")
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D_istore_init() */
@@ -1278,6 +1249,65 @@ H5D_istore_dest (H5F_t *f, hid_t dxpl_id, H5D_t *dset)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D_istore_dest() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_istore_shared_create
+ *
+ * Purpose:	Create & initialize B-tree shared info
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, September 27, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_istore_shared_create (H5F_t *f, H5O_layout_t *layout)
+{
+    H5D_istore_ud1_t	udata;
+    H5B_shared_t *shared;               /* Shared B-tree node info */
+    size_t	u;                      /* Local index variable */
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_istore_shared_create)
+
+    /* Initialize "user" data for B-tree callbacks, etc. */
+    udata.mesg = layout;
+
+    /* Allocate space for the shared structure */
+    if(NULL==(shared=H5FL_MALLOC(H5B_shared_t)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for shared B-tree info")
+
+    /* Set up the "global" information for this file's groups */
+    shared->type= H5B_ISTORE;
+    shared->two_k=2*H5F_KVALUE(f,H5B_ISTORE);
+    shared->sizeof_rkey = H5D_istore_sizeof_rkey(f, &udata);
+    assert(shared->sizeof_rkey);
+    shared->sizeof_rnode = H5B_nodesize(f, shared, &shared->sizeof_keys);
+    assert(shared->sizeof_rnode);
+    if(NULL==(shared->page=H5FL_BLK_MALLOC(chunk_page,shared->sizeof_rnode)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
+#ifdef H5_USING_PURIFY
+HDmemset(shared->page,0,shared->sizeof_rnode);
+#endif /* H5_USING_PURIFY */
+    if(NULL==(shared->nkey=H5FL_SEQ_MALLOC(size_t,(size_t)(2*H5F_KVALUE(f,H5B_ISTORE)+1))))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
+
+    /* Initialize the offsets into the native key buffer */
+    for(u=0; u<(2*H5F_KVALUE(f,H5B_ISTORE)+1); u++)
+        shared->nkey[u]=u*H5B_ISTORE->sizeof_nkey;
+
+    /* Make shared B-tree info reference counted */
+    if(NULL==(layout->u.chunk.btree_shared=H5RC_create(shared,H5D_istore_shared_free)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for shared B-tree info")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5D_istore_shared_create() */
 
 
 /*-------------------------------------------------------------------------
@@ -1605,7 +1635,7 @@ H5D_istore_lock(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
             } /* end if */
 #ifdef H5_USING_PURIFY
 else
-    HDmemset(ret_value,0,size);
+    HDmemset(chunk,0,chunk_size);
 #endif /* H5_USING_PURIFY */
             rdcc->ninits++;
         } /* end else */
@@ -2018,9 +2048,7 @@ H5D_istore_writevv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
 {
     H5D_istore_ud1_t udata;		/*B-tree pass-through	*/
     haddr_t	        chunk_addr;     /* Chunk address on disk */
-#ifndef NDEBUG
     size_t		u;              /* Local index variables */
-#endif
     ssize_t             ret_value;      /* Return value */
     
     FUNC_ENTER_NOAPI(H5D_istore_writevv, FAIL);
@@ -2082,16 +2110,38 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
         uint8_t         *chunk;         /* Pointer to cached chunk in memory */
         unsigned        idx_hint=0;     /* Cache index hint      */
         ssize_t         naccessed;      /* Number of bytes accessed in chunk */
+        size_t          total_bytes;    /* Total # of bytes accessed on disk & memory */
         hbool_t         relax;          /* Whether whole chunk is selected */
 
         /*
          * Lock the chunk, copy from application to chunk, then unlock the
          * chunk.
          */
+#ifdef OLD_WAY
+/* Note that this is technically OK, since eventually all the data in the chunk
+ * will be overwritten.  However, it seems risky and a better approach would
+ * be to lock the chunk in the dataset I/O routine (setting the relax flag
+ * appropriately) and then unlock it after all the I/O the chunk was finished. -QAK
+ */
         if(chunk_max_nseq==1 && chunk_len_arr[0] == dset->layout.u.chunk.size)
             relax = TRUE;
         else
             relax = FALSE;
+#else /* OLD_WAY */
+        relax=TRUE;
+        total_bytes=0;
+        for(u=*chunk_curr_seq; u<chunk_max_nseq; u++)
+            total_bytes+=chunk_len_arr[u];
+        if(total_bytes!=dset->layout.u.chunk.size)
+            relax=FALSE;
+        if(relax) {
+            total_bytes=0;
+            for(u=*mem_curr_seq; u<mem_max_nseq; u++)
+                total_bytes+=mem_len_arr[u];
+            if(total_bytes!=dset->layout.u.chunk.size)
+                relax=FALSE;
+        } /* end if */
+#endif /* OLD_WAY */
 
         if (NULL==(chunk=H5D_istore_lock(f, dxpl_cache, dxpl_id, dset, store,
                  &udata, relax, &idx_hint)))
@@ -3121,22 +3171,32 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_istore_delete(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout)
+H5D_istore_delete(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout)
 {
-    H5D_istore_ud1_t	udata;  /* User data for B-tree iterator call */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_istore_delete, FAIL);
 
     /* Check if the B-tree has been created in the file */
     if(H5F_addr_defined(layout->u.chunk.addr)) {
+        H5O_layout_t tmp_layout=*layout;/* Local copy of layout info */
+        H5D_istore_ud1_t	udata;  /* User data for B-tree iterator call */
+
         /* Set up user data for B-tree deletion */
         HDmemset(&udata, 0, sizeof udata);
-        udata.mesg = layout;
+        udata.mesg = &tmp_layout;
+
+        /* Allocate the shared structure */
+        if(H5D_istore_shared_create(f, &tmp_layout)<0)
+            HGOTO_ERROR (H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create wrapper for shared B-tree info")
 
         /* Delete entire B-tree */
-        if(H5B_delete(f, dxpl_id, H5B_ISTORE, layout->u.chunk.addr, &udata)<0)
+        if(H5B_delete(f, dxpl_id, H5B_ISTORE, tmp_layout.u.chunk.addr, &udata)<0)
             HGOTO_ERROR(H5E_IO, H5E_CANTDELETE, 0, "unable to delete chunk B-tree");
+
+        /* Free the raw B-tree node buffer */
+        if(H5RC_DEC(tmp_layout.u.chunk.btree_shared)<0)
+            HGOTO_ERROR (H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page");
     } /* end if */
 
 done:
@@ -3370,39 +3430,17 @@ H5D_istore_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int inden
 {
     H5O_layout_t        layout;
     H5D_istore_ud1_t	udata;
-    H5B_shared_t *shared;               /* Shared B-tree node info */
-    size_t	u;                      /* Local index variable */
     herr_t      ret_value=SUCCEED;      /* Return value */
     
     FUNC_ENTER_NOAPI(H5D_istore_debug,FAIL);
 
-    HDmemset (&udata, 0, sizeof udata);
     layout.u.chunk.ndims = ndims;
+    HDmemset (&udata, 0, sizeof udata);
     udata.mesg = &layout;
 
-    /* Allocate space for the shared structure */
-    if(NULL==(shared=H5FL_MALLOC(H5B_shared_t)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for shared B-tree info")
-
-    /* Set up the "global" information for this file's groups */
-    shared->type= H5B_ISTORE;
-    shared->two_k=2*H5F_KVALUE(f,H5B_ISTORE);
-    shared->sizeof_rkey = H5D_istore_sizeof_rkey(f, &udata);
-    assert(shared->sizeof_rkey);
-    shared->sizeof_rnode = H5B_nodesize(f, shared, &shared->sizeof_keys);
-    assert(shared->sizeof_rnode);
-    if(NULL==(shared->page=H5FL_BLK_MALLOC(chunk_page,shared->sizeof_rnode)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
-    if(NULL==(shared->nkey=H5FL_SEQ_MALLOC(size_t,(size_t)(2*H5F_KVALUE(f,H5B_ISTORE)+1))))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
-
-    /* Initialize the offsets into the native key buffer */
-    for(u=0; u<(2*H5F_KVALUE(f,H5B_ISTORE)+1); u++)
-        shared->nkey[u]=u*H5B_ISTORE->sizeof_nkey;
-
-    /* Make shared B-tree info reference counted */
-    if(NULL==(layout.u.chunk.btree_shared=H5RC_create(shared,H5D_istore_shared_free)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for shared B-tree info")
+    /* Allocate the shared structure */
+    if(H5D_istore_shared_create(f, &layout)<0)
+	HGOTO_ERROR (H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create wrapper for shared B-tree info")
 
     H5B_debug (f, dxpl_id, addr, stream, indent, fwidth, H5B_ISTORE, &udata);
 
