@@ -18,6 +18,9 @@
 #include <ctype.h>
 #include "h5repack.h"
 
+#if 0
+#define PARSE_DEBUG
+#endif
 
 /*-------------------------------------------------------------------------
  * Function: parse_filter
@@ -34,7 +37,7 @@
  *  NONE, to remove the filter 
  *
  * Examples: 
- * "GZIP 6"
+ * "GZIP=6"
  * "A,B:NONE"
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
@@ -59,6 +62,10 @@ obj_list_t* parse_filter(const char *str,
  char        stype[5];
  obj_list_t* obj_list=NULL;
  unsigned    pixels_per_block;
+
+#if defined(PARSE_DEBUG)
+ fprintf(stderr,"%s\n",str);
+#endif
 
  /* initialize compression  info */
  memset(filt,0,sizeof(filter_info_t));
@@ -120,9 +127,9 @@ obj_list_t* parse_filter(const char *str,
  {
   c = str[i];
   scomp[k]=c;
-  if ( c==' ' || i==len-1) 
+  if ( c=='=' || i==len-1) 
   {
-   if ( c==' ') {      /*one more parameter */
+   if ( c=='=') {      /*one more parameter */
     scomp[k]='\0';     /*cut space */
 
     /* here we could have 1, 2 or 3 digits  */
@@ -292,7 +299,7 @@ const char* get_sfilter(H5Z_filter_t filtn)
  *  COMPA, to apply compact layout
  *
  * Example: 
- * "AA,B,CDE:CHUNK 10X10"
+ * "AA,B,CDE:CHUNK=10X10"
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -300,9 +307,6 @@ const char* get_sfilter(H5Z_filter_t filtn)
  *
  *-------------------------------------------------------------------------
  */
-
-
-
 obj_list_t* parse_layout(const char *str, 
                          int *n_objs, 
                          pack_info_t *pack,    /* info about layout needed */
@@ -412,10 +416,6 @@ obj_list_t* parse_layout(const char *str,
     c = str[i];
     sdim[k]=c;
     k++; /*increment sdim index */
-
-#if defined PARSE_DEBUG
-    printf (" i=%d c=%c ",i, c);
-#endif
     
     if (!isdigit(c) && c!='x' && c!='N' && c!='O' && c!='N' && c!='E'){
      if (obj_list) free(obj_list);

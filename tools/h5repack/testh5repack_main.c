@@ -255,9 +255,9 @@ test_filter_deflate(void)
 
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
- if (h5repack_addfilter("dset1:GZIP 9",&pack_options)<0)
+ if (h5repack_addfilter("dset1:GZIP=9",&pack_options)<0)
   TEST_ERROR;
- if (h5repack_addlayout("dset1:CHUNK 20x10",&pack_options)<0)
+ if (h5repack_addlayout("dset1:CHUNK=20x10",&pack_options)<0)
   TEST_ERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
   TEST_ERROR;
@@ -275,9 +275,9 @@ test_filter_deflate(void)
 
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
- if (h5repack_addfilter("GZIP 9",&pack_options)<0)
+ if (h5repack_addfilter("GZIP=9",&pack_options)<0)
   TEST_ERROR;
- if (h5repack_addlayout("CHUNK 20x10",&pack_options)<0)
+ if (h5repack_addlayout("CHUNK=20x10",&pack_options)<0)
   TEST_ERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
   TEST_ERROR;
@@ -339,9 +339,9 @@ test_filter_szip(void)
 
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
- if (h5repack_addfilter("dset2:SZIP 8",&pack_options)<0)
+ if (h5repack_addfilter("dset2:SZIP=8",&pack_options)<0)
   TEST_ERROR;
- if (h5repack_addlayout("dset2:CHUNK 20x10",&pack_options)<0)
+ if (h5repack_addlayout("dset2:CHUNK=20x10",&pack_options)<0)
   TEST_ERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
   TEST_ERROR;
@@ -359,7 +359,7 @@ test_filter_szip(void)
 
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
- if (h5repack_addfilter("SZIP 8",&pack_options)<0)
+ if (h5repack_addfilter("SZIP=8",&pack_options)<0)
   TEST_ERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
   TEST_ERROR;
@@ -425,7 +425,7 @@ test_filter_shuffle(void)
   TEST_ERROR;
  if (h5repack_addfilter("dset1:SHUF",&pack_options)<0)
   TEST_ERROR;
- if (h5repack_addlayout("dset1:CHUNK 20x10",&pack_options)<0)
+ if (h5repack_addlayout("dset1:CHUNK=20x10",&pack_options)<0)
   TEST_ERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
   TEST_ERROR;
@@ -445,7 +445,7 @@ test_filter_shuffle(void)
   TEST_ERROR;
  if (h5repack_addfilter("SHUF",&pack_options)<0)
   TEST_ERROR;
- if (h5repack_addlayout("CHUNK 20x10",&pack_options)<0)
+ if (h5repack_addlayout("CHUNK=20x10",&pack_options)<0)
   TEST_ERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
   TEST_ERROR;
@@ -508,7 +508,7 @@ test_filter_checksum(void)
   TEST_ERROR;
  if (h5repack_addfilter("dset1:FLET",&pack_options)<0)
   TEST_ERROR;
- if (h5repack_addlayout("dset1:CHUNK 20x10",&pack_options)<0)
+ if (h5repack_addlayout("dset1:CHUNK=20x10",&pack_options)<0)
   TEST_ERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
   TEST_ERROR;
@@ -528,7 +528,7 @@ test_filter_checksum(void)
   TEST_ERROR;
  if (h5repack_addfilter("FLET",&pack_options)<0)
   TEST_ERROR;
- if (h5repack_addlayout("CHUNK 20x10",&pack_options)<0)
+ if (h5repack_addlayout("CHUNK=20x10",&pack_options)<0)
   TEST_ERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
   TEST_ERROR;
@@ -589,7 +589,7 @@ test_layout_chunked(void)
 
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
- if (h5repack_addlayout("dset1:CHUNK 20x10",&pack_options)<0)
+ if (h5repack_addlayout("dset1:CHUNK=20x10",&pack_options)<0)
   TEST_ERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
   TEST_ERROR;
@@ -607,7 +607,7 @@ test_layout_chunked(void)
 
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
- if (h5repack_addlayout("CHUNK 20x10",&pack_options)<0)
+ if (h5repack_addlayout("CHUNK=20x10",&pack_options)<0)
   TEST_ERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
   TEST_ERROR;
@@ -813,9 +813,9 @@ test_filterqueue(void)
 #endif
  if (h5repack_addfilter("dset1:SHUF",&pack_options)<0)
   TEST_ERROR;
- if (h5repack_addfilter("dset1:SZIP 8",&pack_options)<0)
+ if (h5repack_addfilter("dset1:SZIP=8",&pack_options)<0)
   TEST_ERROR;
- if (h5repack_addfilter("dset1:GZIP 1",&pack_options)<0)
+ if (h5repack_addfilter("dset1:GZIP=1",&pack_options)<0)
   TEST_ERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
   TEST_ERROR;

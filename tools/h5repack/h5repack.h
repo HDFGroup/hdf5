@@ -21,11 +21,6 @@
 #include "h5diff.h"
 #include "h5tools.h"
 
-
-#if 0
-#define H5_REPACK_DEBUG
-#endif
-
 #define H5FOPENERROR "unable to open file"
 
 #define PFORMAT  "%-7s %-7s %-7s\n" /*chunk info, compression info, name*/

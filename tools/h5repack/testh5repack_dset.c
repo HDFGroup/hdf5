@@ -243,9 +243,7 @@ void write_dset_in(hid_t loc_id,
 
  /* Dataset region reference ( H5R_DATASET_REGION  )  */
  make_dset_reg_ref(loc_id);
-#if defined(H5_REPACK_DEBUG)
- read_dset_reg_ref(loc_id);
-#endif
+
 
 /*-------------------------------------------------------------------------
  * H5T_ENUM

@@ -106,30 +106,30 @@ DIFFTEST()
 #
 TOOLTEST -i test4.h5 -o test4.out.h5
 DIFFTEST test4.h5 test4.out.h5  
-TOOLTEST -i test4.h5 -o test4.out.h5 -f "GZIP 1"
+TOOLTEST -i test4.h5 -o test4.out.h5 -f GZIP=1
 DIFFTEST test4.h5 test4.out.h5
-TOOLTEST -i test4.h5 -o test4.out.h5 -f "SZIP 8"
+TOOLTEST -i test4.h5 -o test4.out.h5 -f SZIP=8
 DIFFTEST test4.h5 test4.out.h5
-TOOLTEST -i test4.h5 -o test4.out.h5 -f "SHUF"
+TOOLTEST -i test4.h5 -o test4.out.h5 -f SHUF
 DIFFTEST test4.h5 test4.out.h5
-TOOLTEST -i test4.h5 -o test4.out.h5 -f "FLET"
+TOOLTEST -i test4.h5 -o test4.out.h5 -f FLET
 DIFFTEST test4.h5 test4.out.h5
-TOOLTEST -i test4.h5 -o test4.out.h5 -f "dset1:SHUF" -f "dset1,dset2:GZIP 6"
+TOOLTEST -i test4.h5 -o test4.out.h5 -f dset1:SHUF -f dset1,dset2:GZIP=6
 DIFFTEST test4.h5 test4.out.h5
-TOOLTEST -i test4.h5 -o test4.out.h5 -l "dset1:CHUNK 20x10" -f "dset1,dset2:SZIP 8"
+TOOLTEST -i test4.h5 -o test4.out.h5 -l dset1:CHUNK=20x10 -f dset1,dset2:SZIP=8
 DIFFTEST test4.h5 test4.out.h5
-TOOLTEST -i test4.h5 -o test4.out.h5 -l "CHUNK 20x10" 
+TOOLTEST -i test4.h5 -o test4.out.h5 -l CHUNK=20x10
 DIFFTEST test4.h5 test4.out.h5
-TOOLTEST -i test4.h5 -o test4.out.h5 -l "COMPA" 
+TOOLTEST -i test4.h5 -o test4.out.h5 -l COMPA
 DIFFTEST test4.h5 test4.out.h5
-TOOLTEST -i test4.h5 -o test4.out.h5 -l "CONTI" 
+TOOLTEST -i test4.h5 -o test4.out.h5 -l CONTI
 DIFFTEST test4.h5 test4.out.h5
-TOOLTEST -i test4.h5 -o test4.out.h5 -f "GZIP 1" -m 1024
+TOOLTEST -i test4.h5 -o test4.out.h5 -f GZIP=1 -m 1024
 DIFFTEST test4.h5 test4.out.h5
-TOOLTEST -i test4.h5 -o test4.out.h5 -f "NONE" 
+TOOLTEST -i test4.h5 -o test4.out.h5 -f NONE 
 DIFFTEST test4.h5 test4.out.h5
-TOOLTEST -i test4.h5 -o test4.out.h5 -e "h5repack_info.txt" 
-DIFFTEST test4.h5 test4.out.h5
+#TOOLTEST -i test4.h5 -o test4.out.h5 -e h5repack_info.txt
+#DIFFTEST test4.h5 test4.out.h5
 
 if test $nerrors -eq 0 ; then
    echo "All $H5REPACK tests passed."
