@@ -9,7 +9,7 @@ namespace H5 {
 class Attribute : public AbstractDs {
    public:
 	// Writes data to this attribute.
-	void write(const DataType& mem_type, void *buf ) const;
+	void write(const DataType& mem_type, const void *buf ) const;
 
 	// Reads data from this attribute.
 	void read( const DataType& mem_type, void *buf ) const;

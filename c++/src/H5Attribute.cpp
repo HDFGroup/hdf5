@@ -24,7 +24,7 @@ Attribute::Attribute( const Attribute& original ) : AbstractDs( original ) {}
 Attribute::Attribute( const hid_t attr_id ) : AbstractDs( attr_id ) {}
 
 // Writes data to this attribute.
-void Attribute::write( const DataType& mem_type, void *buf ) const
+void Attribute::write( const DataType& mem_type, const void *buf ) const
 {
    herr_t ret_value = H5Awrite( id, mem_type.getId(), buf );
    if( ret_value < 0 )
