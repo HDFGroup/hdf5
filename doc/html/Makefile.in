@@ -48,6 +48,7 @@ PRIVATE_DOCS= Chunk_f1.obj Chunk_f2.obj Chunk_f6.obj CodeReview.html \
 	ExternalFiles.html MemoryManagement.html ObjectHeader.txt chunk1.obj \
 	extern1.obj extern2.obj group_p1.obj group_p2.obj group_p3.obj \
 	pipe1.obj pipe2.obj pipe3.obj pipe4.obj pipe5.obj heap.txt move.html \
-	review1.html review1a.html storage.html symtab version.obj
+	review1.html review1a.html storage.html symtab version.obj \
+	Lib_Maint.html
 
 @CONCLUDE@

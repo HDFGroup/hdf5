@@ -7,7 +7,6 @@
 
 ./COPYING
 ./INSTALL
-./INSTALL_MAINT
 ./INSTALL_TFLOPS
 ./INSTALL_parallel
 ./INSTALL_Windows.txt
@@ -111,6 +110,7 @@
 ./doc/html/IH_mapFoot.gif
 ./doc/html/IH_mapHead.gif
 ./doc/html/IOPipe.html
+./doc/html/Lib_Maint.html		_DO_NOT_DISTRIBUTE_
 ./doc/html/MemoryManagement.html	_DO_NOT_DISTRIBUTE_
 ./doc/html/MountingFiles.html
 ./doc/html/NCSAfooterlogo.gif
