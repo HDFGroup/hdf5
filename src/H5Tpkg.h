@@ -323,7 +323,6 @@ H5_DLL H5T_sign_t H5T_get_sign(H5T_t const *dt);
 H5_DLL H5T_t *H5T_get_super(H5T_t *dt);
 H5_DLL char  *H5T_get_member_name(H5T_t const *dt, unsigned membno);
 H5_DLL herr_t H5T_get_member_value(const H5T_t *dt, unsigned membno, void *value);
-H5_DLL H5T_t *H5T_get_member_type(H5T_t *dt, unsigned membno);
 H5_DLL int H5T_get_nmembers(const H5T_t *dt);
 H5_DLL herr_t H5T_insert(H5T_t *parent, const char *name, size_t offset,
         const H5T_t *member);
@@ -1091,6 +1090,7 @@ H5_DLL H5T_t * H5T_array_create(H5T_t *base, int ndims,
         const hsize_t dim[/* ndims */], const int perm[/* ndims */]);
 
 /* Compound functions */
-H5_DLL htri_t H5T_is_packed(H5T_t *dt);
+H5_DLL H5T_t *H5T_get_member_type(const H5T_t *dt, unsigned membno);
+H5_DLL htri_t H5T_is_packed(const H5T_t *dt);
 
 #endif

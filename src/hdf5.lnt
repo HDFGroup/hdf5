@@ -94,6 +94,8 @@
         H5FL.c
         H5FO.c
 
+	H5Tcompound.c
+
         H5Tcset.c
         H5Tenum.c
         H5Tfields.c
