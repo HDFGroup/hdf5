@@ -10,17 +10,17 @@ AC_REVISION($Id$)
 AC_INIT(src/H5.c)
 AC_CONFIG_HEADER(src/H5config.h)
 AC_OUTPUT_COMMANDS([
-  echo "creating src/H5pubconf.h"
-  sed 's/#define /#define H5_/' <src/H5config.h |\
-    sed 's/#undef /#undef H5_/' >pubconf
-  if test ! -f src/H5pubconf.h; then
-    /bin/mv -f pubconf src/H5pubconf.h
-  elif (diff pubconf src/H5pubconf.h >/dev/null); then
-    /bin/rm -f pubconf
-    echo "src/H5pubconf.h is unchanged"
-  else
-    /bin/mv -f pubconf src/H5pubconf.h
-  fi
+   echo "creating src/H5pubconf.h"
+   sed 's/#define /#define H5_/' <src/H5config.h |\
+     sed 's/#undef /#undef H5_/' >pubconf
+   if test ! -f src/H5pubconf.h; then
+      /bin/mv -f pubconf src/H5pubconf.h
+   elif (diff pubconf src/H5pubconf.h >/dev/null); then
+      /bin/rm -f pubconf
+      echo "src/H5pubconf.h is unchanged"
+   else
+      /bin/mv -f pubconf src/H5pubconf.h
+   fi
 ])
 AC_CONFIG_AUX_DIR(bin)
 AC_CANONICAL_HOST
@@ -63,27 +63,27 @@ dnl
 dnl If the `OS' ends with a version number then remove it. For instance,
 dnl `freebsd3.1' would become `freebsd'
 case $host_os in
-    aix4.*)
-	host_os_novers=aix4.x
-	;;
-    freebsd*)
-	host_os_novers=freebsd
-	;;
-    irix5.*)
-	host_os_novers=irix5.x
-	;;
-    irix6.*)
-	host_os_novers=irix6.x
-	;;
-    osf4.*)
-	host_os_novers=osf4.x
-	;;
-    solaris2.*)
-	host_os_novers=solaris2.x
-	;;
-    *)
-	host_os_novers=$host_os
-	;;
+   aix4.*)
+      host_os_novers=aix4.x
+      ;;
+   freebsd*)
+      host_os_novers=freebsd
+      ;;
+   irix5.*)
+      host_os_novers=irix5.x
+      ;;
+   irix6.*)
+      host_os_novers=irix6.x
+      ;;
+   osf4.*)
+      host_os_novers=osf4.x
+      ;;
+   solaris2.*)
+      host_os_novers=solaris2.x
+      ;;
+   *)
+      host_os_novers=$host_os
+      ;;
 esac
 
 host_config="none"
@@ -127,13 +127,12 @@ AC_ARG_ENABLE(fortran,
    [  --enable-fortran        Compile the Fortran interface [default=no]],
    HDF_FORTRAN=$enableval)
 
-if test "X$HDF_FORTRAN" = Xyes; then
+if test "X$HDF_FORTRAN" = "Xyes"; then
    echo "yes"
-
    if test -z $config_dirs; then
-       config_dirs=fortran
+      config_dirs=fortran
    else
-       config_dirs=${config_dirs} fortran
+      config_dirs=${config_dirs} fortran
    fi
 else
    echo "no"
@@ -147,13 +146,12 @@ AC_ARG_ENABLE(c++,
    [  --enable-c++            Compile the C++ interface [default=no]],
    HDF_CXX=$enableval)
 
-if test "X$HDF_CXX" = Xyes; then
+if test "X$HDF_CXX" = "Xyes"; then
    echo "yes"
-
    if test -z $config_dirs; then
-       config_dirs=c++
+      config_dirs=c++
    else
-       config_dirs=${config_dirs} c++
+      config_dirs=${config_dirs} c++
    fi
 else
    echo "no"
@@ -171,17 +169,16 @@ dnl If we should build only static executables
 dnl
 AC_MSG_CHECKING(if should build only statically linked executables)
 AC_ARG_ENABLE(static_exec,
-  [  --enable-static-exec    Build only statically linked executables [default=no]],
-  STATIC_EXEC=$enableval)
+   [  --enable-static-exec    Build only statically linked executables [default=no]],
+   STATIC_EXEC=$enableval)
 
-if test "X$STATIC_EXEC" = Xyes; then
+if test "X$STATIC_EXEC" = "Xyes"; then
    echo "yes"
    LT_STATIC_EXEC="-all-static"
 else
    echo "no"
    LT_STATIC_EXEC=""
 fi
-
 AC_SUBST(LT_STATIC_EXEC)
 
 if test "X$AR" = "X"; then
@@ -192,63 +189,63 @@ AC_SUBST(AR)
 AC_MSG_CHECKING(make)
 AC_SUBST_FILE(DEPEND)
 if test "`${MAKE-make} --version -f /dev/null 2>/dev/null |\
-  sed -n 1p|cut -c1-8`" = "GNU Make"; then
-    AC_MSG_RESULT(GNU make)
-    GMAKE=yes
-    if test "X$GCC" = "Xyes"; then
-	DEPEND=config/depend1
-    else
-	DEPEND=config/depend2
-    fi
+	sed -n 1p|cut -c1-8`" = "GNU Make"; then
+   AC_MSG_RESULT(GNU make)
+   GMAKE=yes
+   if test "X$GCC" = "Xyes"; then
+      DEPEND=config/depend1
+   else
+      DEPEND=config/depend2
+   fi
 else
-    AC_MSG_RESULT(generic)
+   AC_MSG_RESULT(generic)
 fi
 
 dnl How do we include another file into a Makefile?
-if test "X" = "X$DEPEND"; then
-    AC_MSG_CHECKING(how to include a makefile)
+if test -z "$DEPEND"; then
+   AC_MSG_CHECKING(how to include a makefile)
 
-    dnl The include file contains the target for `foo'
-    cat >makeinc <<EOF
+   dnl The include file contains the target for `foo'
+   cat >makeinc <<EOF
 foo:
 	@:
 EOF
 
-    while true; do #for break
+   while true; do #for break
+      dnl pmake. We have to be careful because some pmake think that the
+      dnl contents of the MAKE environment variable is a target.
+      echo '.include <makeinc>' >maketest
+      if (MAKE= ${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
+         AC_MSG_RESULT([.include <FILE>])
+         DEPEND=config/depend3
+         break
+      fi
 
-	dnl pmake. We have to be careful because some pmake think that the
-	dnl contents of the MAKE environment variable is a target.
-	echo '.include <makeinc>' >maketest
-	if (MAKE= ${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
-	    AC_MSG_RESULT([.include <FILE>])
-	    DEPEND=config/depend3
-	    break
-	fi
+      dnl Most make's use `include FILE'
+      echo 'include makeinc' >maketest
+      if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
+         AC_MSG_RESULT(include FILE)
+         DEPEND=config/depend4
+         break;
+      fi
 
-	dnl Most make's use `include FILE'
-	echo 'include makeinc' >maketest
-	if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
-	    AC_MSG_RESULT(include FILE)
-	    DEPEND=config/depend4
-	    break;
-	fi
-
-	dnl default
-	AC_MSG_RESULT(you have a deficient make command)
-	DEPEND=config/dependN
-	break
-    done
-    rm makeinc maketest
+      dnl default
+      AC_MSG_RESULT(you have a deficient make command)
+      DEPEND=config/dependN
+      break
+   done
+   rm makeinc maketest
 fi
 
+dnl ----------------------------------------------------------------------
 dnl Sometimes makes think the `.PATH:' appearing before the first rule
 dnl with an action should override the `all' default target. So we have
 dnl to decide what the proper syntax is.
 dnl
 AC_MSG_CHECKING(how make searches directories)
 while true; do #for break
-    # The most common method is `VPATH=DIR1 DIR2 ...'
-    cat >maketest <<EOF
+   # The most common method is `VPATH=DIR1 DIR2 ...'
+   cat >maketest <<EOF
 VPATH=$srcdir/config $srcdir/src $srcdir/bin
 .c.o:
 	cp $< H5.o
@@ -257,16 +254,16 @@ foo: H5.o
 	/bin/rm -f H5.o
 	@echo works
 EOF
-    if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
-	SEARCH_RULE='VPATH='
-	SEARCH_SEP=' '
-	AC_MSG_RESULT([VPATH=DIR1 DIR2 ...])
-	break
-    fi
+   if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
+      SEARCH_RULE='VPATH='
+      SEARCH_SEP=' '
+      AC_MSG_RESULT([VPATH=DIR1 DIR2 ...])
+      break
+   fi
 
-    # The second most common method is like above except with the
-    # directories separated by colons.
-    cat >maketest <<EOF
+   dnl The second most common method is like above except with the
+   dnl directories separated by colons.
+   cat >maketest <<EOF
 VPATH=$srcdir/config:$srcdir/src:$srcdir/bin
 .c.o:
 	cp $< H5.o
@@ -275,15 +272,15 @@ foo: H5.o
 	/bin/rm -f H5.o
 	@echo works
 EOF
-    if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
-	SEARCH_RULE='VPATH='
-	SEARCH_SEP=':'
-	AC_MSG_RESULT([VPATH=DIR1:DIR2:...])
-	break
-    fi
+   if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
+      SEARCH_RULE='VPATH='
+      SEARCH_SEP=':'
+      AC_MSG_RESULT([VPATH=DIR1:DIR2:...])
+      break
+   fi
 
-    # pmake uses the construct `.PATH: DIR1 DIR2
-    cat >maketest <<EOF
+   dnl pmake uses the construct `.PATH: DIR1 DIR2
+   cat >maketest <<EOF
 .PATH: $srcdir/config $srcdir/src $srcdir/bin
 .c.o:
 	cp $< H5.o
@@ -292,28 +289,28 @@ foo: H5.o
 	/bin/rm -f H5.o
 	@echo works
 EOF
-    if (MAKE= ${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
-	SEARCH_RULE='.PATH: '
-    	SEARCH_SEP=' '
-	AC_MSG_RESULT([.PATH: DIR1 DIR2 ...])
-    	break
-    fi
+   if (MAKE= ${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
+      SEARCH_RULE='.PATH: '
+      SEARCH_SEP=' '
+      AC_MSG_RESULT([.PATH: DIR1 DIR2 ...])
+      break
+   fi
 
-    # No way for make to search directories
-    SEARCH_RULE='## SEARCH DISABLED: '
-    SEARCH_SEP=' '
-    AC_MSG_RESULT([it doesn't])
-    if test ! -f configure; then
-	AC_MSG_ERROR(${MAKE-make} requires the build and source directories to be the same)
-    fi
-    break
+   dnl No way for make to search directories
+   SEARCH_RULE='## SEARCH DISABLED: '
+   SEARCH_SEP=' '
+   AC_MSG_RESULT([it doesn't])
+   if test ! -f configure; then
+      AC_MSG_ERROR(${MAKE-make} requires the build and source directories to be the same)
+   fi
+   break
 done
 rm maketest
 
 dnl ----------------------------------------------------------------------
 dnl Turn on warning flags for gcc.
 dnl
-if test Xyes = "X$GCC"; then
+if test "X$GCC" = "Xyes"; then
    CFLAGS="$CFLAGS -Wall -W -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs -Winline"
 fi
 
@@ -369,14 +366,14 @@ AC_CHECK_HEADERS(stdint.h, C9x=yes)
 dnl Windows
 AC_CHECK_HEADERS(io.h winsock.h sys/timeb.h)
 
-case $host in
-    alpha*-dec*-osf*)
-	dnl The <sys/sysinfo.h> and <sys/proc.h> are needed on the DEC
-	dnl Alpha to turn off UAC fixing. We do *not* attempt to
-	dnl locate these files on other systems because there are too
-	dnl many problems with including them.
-	AC_CHECK_HEADERS(sys/sysinfo.h sys/proc.h)
-	;;
+case "$host" in
+   alpha*-dec*-osf*)
+      dnl The <sys/sysinfo.h> and <sys/proc.h> are needed on the DEC
+      dnl Alpha to turn off UAC fixing. We do *not* attempt to
+      dnl locate these files on other systems because there are too
+      dnl many problems with including them.
+      AC_CHECK_HEADERS(sys/sysinfo.h sys/proc.h)
+      ;;
 esac
 
 dnl ----------------------------------------------------------------------
@@ -403,8 +400,9 @@ dnl Posix.1g types (C9x)
 cat >>confdefs.h <<\EOF
 #include <sys/types.h>
 EOF
-if test "Xyes" = "X$C9x"; then
-    cat >>confdefs.h <<\EOF
+
+if test "X$C9x" = "Xyes"; then
+   cat >>confdefs.h <<\EOF
 #include <stdint.h>
 EOF
 fi
@@ -444,25 +442,26 @@ EOF
 AC_CHECK_SIZEOF(off_t, 4)
 
 AC_ARG_ENABLE(hsizet,
-  [  --disable-hsizet        Datasets can normally be larger than memory
+   [  --disable-hsizet        Datasets can normally be larger than memory
                           and/or files but some compilers are unable to
                           handle this (including versions of GCC before
                           2.8.0).  Disabling the feature causes dataset
                           sizes to be restricted to the size of core memory,
                           or 'size_t'.],
   HSIZET=$enableval)
+
 AC_MSG_CHECKING(for sizeof hsize_t and hssize_t)
 AC_SUBST(HSIZET)
 case $HSIZET in
-    no|small)
-	AC_MSG_RESULT(small)
-	HSIZET=small
-	;;
-    *)
-        AC_MSG_RESULT(large)
-	HSIZET=large
-        AC_DEFINE(HAVE_LARGE_HSIZET)
-	;;
+   no|small)
+      AC_MSG_RESULT(small)
+      HSIZET=small
+      ;;
+   *)
+      AC_MSG_RESULT(large)
+      HSIZET=large
+      AC_DEFINE(HAVE_LARGE_HSIZET)
+      ;;
 esac
 
 dnl Checkpoint the cache
@@ -473,57 +472,56 @@ dnl Is HDF4 present?  If so then we can compile the h5toh4 converter. We
 dnl assume h5toh4 can be compiled and then prove otherwise when we don't find
 dnl a header file or library.
 dnl
-AC_SUBST(H5TOH4)
-H5TOH4=h5toh4
-AC_SUBST(TESTH5TOH4)
-TESTH5TOH4='$(srcdir)/testh5toh4'
+AC_SUBST(H5TOH4) H5TOH4=h5toh4
+AC_SUBST(TESTH5TOH4) TESTH5TOH4='$(srcdir)/testh5toh4'
 
 dnl NCSA keeps hdf4 in a funny place, but for most sites we don't want these.
 test -d /usr/ncsa/include && CPPFLAGS="$CPPFLAGS -I/usr/ncsa/include"
 test -d /usr/ncsa/lib && LDFLAGS="$LDFLAGS -L/usr/ncsa/lib"
 
+FOUND_ZLIB="no"
+
 AC_ARG_WITH(hdf4,[  --with-hdf4=INC,LIB     Use the HDF4 library],,withval=yes)
-case $withval in
-    yes)
-	AC_CHECK_HEADERS(mfhdf.h,,unset H5TOH4 TESTH5TOH4)
-	AC_CHECK_LIB(z,deflate,,unset H5TOH4 TESTH5TOH4)
-	AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4)
-	AC_CHECK_LIB(df,Hstartaccess,,unset H5TOH4 TESTH5TOH4)
-	AC_CHECK_LIB(mfhdf,SDstart,,unset H5TOH4 TESTH5TOH4)
-	;;
-    no)
-	AC_MSG_CHECKING(for HDF4)
-	AC_MSG_RESULT(suppressed)
-	unset H5TOH4 TESTH5TOH4
-	;;
-    *)
-	hdf4_inc="`echo $withval |cut -f1 -d,`"
-	if test "X" != "$hdf4_inc"; then
-	    saved_CPPFLAGS="$CPPFLAGS"
-	    CPPFLAGS="$CPPFLAGS -I$hdf4_inc"
-	    AC_CHECK_HEADERS(mfhdf.h,,
-	        CPPFLAGS="$saved_CPPFLAGS"
-	        unset H5TOH4 TESTH5TOH4
-            )
-	else
-	    AC_CHECK_HEADERS(mfhdf.h)
-	fi
+case "$withval" in
+   yes)
+      AC_CHECK_HEADERS(mfhdf.h,,unset H5TOH4 TESTH5TOH4)
+      AC_CHECK_LIB(z,compress,FOUND_ZLIB="yes",unset H5TOH4 TESTH5TOH4)
+      AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4)
+      AC_CHECK_LIB(df,Hstartaccess,,unset H5TOH4 TESTH5TOH4)
+      AC_CHECK_LIB(mfhdf,SDstart,,unset H5TOH4 TESTH5TOH4)
+      ;;
+   no)
+      AC_MSG_CHECKING(for HDF4)
+      AC_MSG_RESULT(suppressed)
+      unset H5TOH4 TESTH5TOH4
+      ;;
+   *)
+      hdf4_inc="`echo $withval |cut -f1 -d,`"
+      if test -n "$hdf4_inc"; then
+         saved_CPPFLAGS="$CPPFLAGS"
+         CPPFLAGS="$CPPFLAGS -I$hdf4_inc"
+         AC_CHECK_HEADERS(mfhdf.h,,
+                          CPPFLAGS="$saved_CPPFLAGS"
+                          unset H5TOH4 TESTH5TOH4)
+      else
+         AC_CHECK_HEADERS(mfhdf.h)
+      fi
 	
-	hdf4_lib="`echo $withval |cut -f2 -d, -s`"
-	if test "X" != "$hdf4_lib"; then
-	    saved_LDFLAGS="$LDFLAGS"
-	    LDFLAGS="$LDFLAGS -L$hdf4_lib"
-            AC_CHECK_LIB(z,deflate,,unset H5TOH4 TESTH5TOH4)
-            AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4)
-            AC_CHECK_LIB(df,Hstartaccess,,unset H5TOH4 TESTH5TOH4)
-            AC_CHECK_LIB(mfhdf,SDstart,,unset H5TOH4 TESTH5TOH4)
-	else
-	    AC_CHECK_LIB(z,deflate,,unset H5TOH4 TESTH5TOH4)
-	    AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4)
-	    AC_CHECK_LIB(df,Hstartaccess)
-	    AC_CHECK_LIB(mfhdf,SDstart)
-	fi
-	;;
+      hdf4_lib="`echo $withval |cut -f2 -d, -s`"
+      if test -n "$hdf4_lib"; then
+         saved_LDFLAGS="$LDFLAGS"
+         LDFLAGS="$LDFLAGS -L$hdf4_lib"
+         AC_CHECK_LIB(z,compress,FOUND_ZLIB="yes",unset H5TOH4 TESTH5TOH4)
+         AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4)
+         AC_CHECK_LIB(df,Hstartaccess,,unset H5TOH4 TESTH5TOH4)
+         AC_CHECK_LIB(mfhdf,SDstart,,unset H5TOH4 TESTH5TOH4)
+      else
+         AC_CHECK_LIB(z,compress,FOUND_ZLIB="yes",unset H5TOH4 TESTH5TOH4)
+         AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4)
+         AC_CHECK_LIB(df,Hstartaccess)
+         AC_CHECK_LIB(mfhdf,SDstart)
+      fi
+      ;;
 esac
 
 dnl ----------------------------------------------------------------------
@@ -532,49 +530,49 @@ dnl `-lz' and their locations might be specified with the `--enable-zlib'
 dnl command-line switch.  The value is an include path and/or a library path.
 dnl If the library path is specified then it must be preceded by a comma.
 dnl
-
 AC_ARG_WITH(zlib,[  --with-zlib=INC,LIB     Use the GNU zlib compression],
             ,withval=yes)
-case $withval in
-    yes)
-	AC_CHECK_HEADERS(zlib.h)
-	AC_CHECK_LIB(z, compress)
-	;;
-    no)
-	AC_MSG_CHECKING(for GNU zlib)
-	AC_MSG_RESULT(suppressed)
-	;;
-    *)
-	zlib_inc="`echo $withval |cut -f1 -d,`"
-	if test "X" != "$zlib_inc"; then
-	    saved_CPPFLAGS="$CPPFLAGS"
-	    CPPFLAGS="$CPPFLAGS -I$zlib_inc"
-	    AC_CHECK_HEADERS(zlib.h,,CPPFLAGS="$saved_CPPFLAGS")
-        else
-	    AC_CHECK_HEADERS(zlib.h)
-	fi
-
-	zlib_lib="`echo $withval |cut -f2 -d, -s`"
-	if test "X" != "$zlib_lib"; then
-	    saved_LDFLAGS="$LDFLAGS"
-	    LDFLAGS="$LDFLAGS -L$zlib_lib"
-	    AC_CHECK_LIB(z, compress,,LDFLAGS="$saved_LDFLAGS")
-	else
-	    AC_CHECK_LIB(z, compress)
-	fi
-	;;
-esac
+if test "X$FOUND_ZLIB" = "Xno"; then
+   dnl Only check for zlib if we haven't found it above in the HDF4 stuff.
+   case "$withval" in
+      yes)
+         AC_CHECK_HEADERS(zlib.h)
+         AC_CHECK_LIB(z, compress)
+         ;;
+      no)
+         AC_MSG_CHECKING(for GNU zlib)
+         AC_MSG_RESULT(suppressed)
+         ;;
+      *)
+         zlib_inc="`echo $withval |cut -f1 -d,`"
+         if test -n "$zlib_inc"; then
+            saved_CPPFLAGS="$CPPFLAGS"
+            CPPFLAGS="$CPPFLAGS -I$zlib_inc"
+            AC_CHECK_HEADERS(zlib.h,,CPPFLAGS="$saved_CPPFLAGS")
+         else
+            AC_CHECK_HEADERS(zlib.h)
+         fi
+   
+         zlib_lib="`echo $withval |cut -f2 -d, -s`"
+         if test -n "$zlib_lib"; then
+            saved_LDFLAGS="$LDFLAGS"
+            LDFLAGS="$LDFLAGS -L$zlib_lib"
+            AC_CHECK_LIB(z,compress,,LDFLAGS="$saved_LDFLAGS")
+         else
+            AC_CHECK_LIB(z,compress)
+         fi
+         ;;
+   esac
+fi
 
 dnl ----------------------------------------------------------------------
 dnl Is SSL library present?  It is needed by GLOBUS-GASS and Grid Storage 
 dnl driver.
 dnl
-AC_SUBST(SSL)
-SSL=yes
-
+AC_SUBST(SSL) SSL=yes
 AC_ARG_WITH(ssl,[  --with-ssl=LIB          Use SSL libs from LIB ],,)
-if test "X-" != "X-$with_ssl"; then
-    LDFLAGS="$LDFLAGS -L$with_ssl"
+if test -n "$with_ssl"; then
+   LDFLAGS="$LDFLAGS -L$with_ssl"
 fi
 
 AC_CHECK_LIB(crypto,main,,unset SSL)
@@ -584,174 +582,175 @@ dnl ----------------------------------------------------------------------
 dnl Is GLOBUS-GASS(1.1.0 or 1.1.1) Library present?  It is also needed by 
 dnl the Grid Storage driver.
 dnl
-AC_SUBST(GASS)
-GASS=yes
-AC_SUBST(TESTGASS)
-TESTGASS='$(srcdir)/testgass'
-
+AC_SUBST(GASS) GASS=yes
+AC_SUBST(TESTGASS) TESTGASS='$(srcdir)/testgass'
 AC_ARG_WITH(gass,[  --with-gass=INC,LIB     Use the GASS Library [default=no]],
 	    ,withval=no)
-case $withval in
-    yes)
-	AC_CHECK_HEADERS(globus_common.h,,unset GASS TESTGASS)
-        AC_CHECK_LIB(globus_common,globus_module_activate,,unset GASS TESTGASS)
-        AC_CHECK_LIB(globus_gass_cache,main,,unset GASS TESTGASS)
-        AC_CHECK_LIB(globus_gaa,main,,unset GASS TESTGASS)
-        AC_CHECK_LIB(globus_gss,main,,unset GASS TESTGASS)
-        AC_CHECK_LIB(globus_gss_assist,main,,unset GASS TESTGASS)
-        AC_CHECK_LIB(globus_io,main,,unset GASS TESTGASS)
-        AC_CHECK_LIB(globus_gass_transfer_assist,main,,unset GASS TESTGASS)
-        AC_CHECK_LIB(globus_gass_transfer,main,,unset GASS TESTGASS)
-        AC_CHECK_LIB(globus_gass_file,globus_gass_open,,unset GASS TESTGASS)
-	;;
-    no)
-	AC_MSG_CHECKING(for GASS)
-	AC_MSG_RESULT(suppressed)
-	unset GASS TESTGASS
-	;;
-    *)
-	gass_inc="`echo $withval |cut -f1 -d,`"
-	if test "X" != "$gass_inc"; then
-	    saved_CPPFLAGS="$CPPFLAGS"
-	    CPPFLAGS="$CPPFLAGS -I$gass_inc"
-	    AC_CHECK_HEADERS(globus_common.h,,
-	        CPPFLAGS="$saved_CPPFLAGS"
-	        unset GASS TESTGASS
-            )
-	else
-	    AC_CHECK_HEADERS(globus_common.h)
-	fi
+
+case "$withval" in
+   yes)
+      AC_CHECK_HEADERS(globus_common.h,,unset GASS TESTGASS)
+      AC_CHECK_LIB(globus_common,globus_module_activate,,unset GASS TESTGASS)
+      AC_CHECK_LIB(globus_gass_cache,main,,unset GASS TESTGASS)
+      AC_CHECK_LIB(globus_gaa,main,,unset GASS TESTGASS)
+      AC_CHECK_LIB(globus_gss,main,,unset GASS TESTGASS)
+      AC_CHECK_LIB(globus_gss_assist,main,,unset GASS TESTGASS)
+      AC_CHECK_LIB(globus_io,main,,unset GASS TESTGASS)
+      AC_CHECK_LIB(globus_gass_transfer_assist,main,,unset GASS TESTGASS)
+      AC_CHECK_LIB(globus_gass_transfer,main,,unset GASS TESTGASS)
+      AC_CHECK_LIB(globus_gass_file,globus_gass_open,,unset GASS TESTGASS)
+      ;;
+   no)
+      AC_MSG_CHECKING(for GASS)
+      AC_MSG_RESULT(suppressed)
+      unset GASS TESTGASS
+      ;;
+   *)
+      gass_inc="`echo $withval |cut -f1 -d,`"
+      if test -n "$gass_inc"; then
+         saved_CPPFLAGS="$CPPFLAGS"
+         CPPFLAGS="$CPPFLAGS -I$gass_inc"
+         AC_CHECK_HEADERS(globus_common.h,,
+                          CPPFLAGS="$saved_CPPFLAGS"
+                          unset GASS TESTGASS)
+      else
+         AC_CHECK_HEADERS(globus_common.h)
+      fi
 	
-	gass_lib="`echo $withval |cut -f2 -d, -s`"
-	if test "X" != "$gass_lib"; then
-	    saved_LDFLAGS="$LDFLAGS"
-	    LDFLAGS="$LDFLAGS -L$gass_lib"
-            AC_CHECK_LIB(globus_common,globus_module_activate,,unset GASS TESTGASS)
-            AC_CHECK_LIB(globus_gass_cache,main,,unset GASS TESTGASS)
-            AC_CHECK_LIB(globus_gaa,main,,unset GASS TESTGASS)
-            AC_CHECK_LIB(globus_gss,main,,unset GASS TESTGASS)
-            AC_CHECK_LIB(globus_gss_assist,main,,unset GASS TESTGASS)
-            AC_CHECK_LIB(globus_io,main,,unset GASS TESTGASS)
-            AC_CHECK_LIB(globus_gass_transfer_assist,main,,unset GASS TESTGASS)
-            AC_CHECK_LIB(globus_gass_transfer,main,,unset GASS TESTGASS)
-            AC_CHECK_LIB(globus_gass_file,globus_gass_open,,unset GASS TESTGASS)
-	else
-            AC_CHECK_LIB(globus_common,globus_module_activate,,unset GASS TESTGASS)
-            AC_CHECK_LIB(globus_gass_cache,main,,unset GASS TESTGASS)
-            AC_CHECK_LIB(globus_gaa,main,,unset GASS TESTGASS)
-            AC_CHECK_LIB(globus_gss,main,,unset GASS TESTGASS)
-            AC_CHECK_LIB(globus_gss_assist,main,,unset GASS TESTGASS)
-            AC_CHECK_LIB(globus_io,main,,unset GASS TESTGASS)
-            AC_CHECK_LIB(globus_gass_transfer_assist,main,,unset GASS TESTGASS)
-            AC_CHECK_LIB(globus_gass_transfer,main,,unset GASS TESTGASS)
-            AC_CHECK_LIB(globus_gass_file,globus_gass_open,,unset GASS TESTGASS)
-	fi
-	;;
+      gass_lib="`echo $withval |cut -f2 -d, -s`"
+      if test -n "$gass_lib"; then
+         saved_LDFLAGS="$LDFLAGS"
+         LDFLAGS="$LDFLAGS -L$gass_lib"
+         AC_CHECK_LIB(globus_common,globus_module_activate,,unset GASS TESTGASS)
+         AC_CHECK_LIB(globus_gass_cache,main,,unset GASS TESTGASS)
+         AC_CHECK_LIB(globus_gaa,main,,unset GASS TESTGASS)
+         AC_CHECK_LIB(globus_gss,main,,unset GASS TESTGASS)
+         AC_CHECK_LIB(globus_gss_assist,main,,unset GASS TESTGASS)
+         AC_CHECK_LIB(globus_io,main,,unset GASS TESTGASS)
+         AC_CHECK_LIB(globus_gass_transfer_assist,main,,unset GASS TESTGASS)
+         AC_CHECK_LIB(globus_gass_transfer,main,,unset GASS TESTGASS)
+         AC_CHECK_LIB(globus_gass_file,globus_gass_open,,unset GASS TESTGASS)
+      else
+         AC_CHECK_LIB(globus_common,globus_module_activate,,unset GASS TESTGASS)
+         AC_CHECK_LIB(globus_gass_cache,main,,unset GASS TESTGASS)
+         AC_CHECK_LIB(globus_gaa,main,,unset GASS TESTGASS)
+         AC_CHECK_LIB(globus_gss,main,,unset GASS TESTGASS)
+         AC_CHECK_LIB(globus_gss_assist,main,,unset GASS TESTGASS)
+         AC_CHECK_LIB(globus_io,main,,unset GASS TESTGASS)
+         AC_CHECK_LIB(globus_gass_transfer_assist,main,,unset GASS TESTGASS)
+         AC_CHECK_LIB(globus_gass_transfer,main,,unset GASS TESTGASS)
+         AC_CHECK_LIB(globus_gass_file,globus_gass_open,,unset GASS TESTGASS)
+      fi
+      ;;
 esac
-if test "X-" != "X-$GASS"; then
-    AC_DEFINE(HAVE_GASS)
+
+if test -n "$GASS"; then
+   AC_DEFINE(HAVE_GASS)
 fi
 
 dnl ----------------------------------------------------------------------
 dnl Are SRB Client and other system libraries(socket, elf) present?  
 dnl
-AC_SUBST(SRB)
-SRB=yes
-AC_SUBST(TESTSRB)
-TESTSRB='$(srcdir)/testsrb'
+AC_SUBST(SRB) SRB=yes
+AC_SUBST(TESTSRB) TESTSRB='$(srcdir)/testsrb'
 AC_ARG_WITH(srb,[  --with-srb=INC,LIB      Use the SRB Library [default=no]],
 	    ,withval=no)
-case $withval in
-    yes)
-	AC_CHECK_HEADERS(srbClient.h,,unset SRB TESTSRB)
-	AC_CHECK_LIB(elf,main,,unset SRB TESTSRB)
-	AC_CHECK_LIB(socket,main,,unset SRB TESTSRB)
-	AC_CHECK_LIB(SrbClient,clConnect,,unset SRB TESTSRB)
-	;;
-    no)
-	AC_MSG_CHECKING(for SRB)
-	AC_MSG_RESULT(suppressed)
-	unset SRB TESTSRB
-	;;
-    *)
-        srb_inc="`echo $withval |cut -f1 -d,`"
-	if test "X" != "$srb_inc"; then
-	    saved_CPPFLAGS="$CPPFLAGS"
-	    CPPFLAGS="$CPPFLAGS -I$srb_inc"
- 	    AC_CHECK_HEADERS(srbClient.h,,
- 	        CPPFLAGS="$saved_CPPFLAGS"
-                unset SRB TESTSRB)
-        else
-	    AC_CHECK_HEADERS(srbClient.h)
-        fi
 
-        srb_lib="`echo $withval |cut -f2 -d, -s`"
-	if test "X" != "$srb_lib"; then
-	    saved_LDFLAGS="$LDFLAGS"
-	    LDFLAGS="$LDFLAGS -L$srb_lib"
-	    AC_CHECK_LIB(elf,main,,unset SRB TESTSRB)
-            AC_CHECK_LIB(socket,main,,unset SRB TESTSRB)
-	    AC_CHECK_LIB(SrbClient,clConnect,,unset SRB TESTSRB)
-        else
-	    AC_CHECK_LIB(elf,main,,unset SRB TESTSRB)
-            AC_CHECK_LIB(socket,main,,unset SRB TESTSRB)
-	    AC_CHECK_LIB(SrbClient,clConnect,,unset SRB TESTSRB)
-        fi
-	;;
+case "$withval" in
+   yes)
+      AC_CHECK_HEADERS(srbClient.h,,unset SRB TESTSRB)
+      AC_CHECK_LIB(elf,main,,unset SRB TESTSRB)
+      AC_CHECK_LIB(socket,main,,unset SRB TESTSRB)
+      AC_CHECK_LIB(SrbClient,clConnect,,unset SRB TESTSRB)
+      ;;
+   no)
+      AC_MSG_CHECKING(for SRB)
+      AC_MSG_RESULT(suppressed)
+      unset SRB TESTSRB
+      ;;
+   *)
+      srb_inc="`echo $withval |cut -f1 -d,`"
+      if test -n "$srb_inc"; then
+         saved_CPPFLAGS="$CPPFLAGS"
+         CPPFLAGS="$CPPFLAGS -I$srb_inc"
+         AC_CHECK_HEADERS(srbClient.h,,
+                          CPPFLAGS="$saved_CPPFLAGS"
+                          unset SRB TESTSRB)
+      else
+         AC_CHECK_HEADERS(srbClient.h)
+      fi
+
+      srb_lib="`echo $withval |cut -f2 -d, -s`"
+      if test -n "$srb_lib"; then
+         saved_LDFLAGS="$LDFLAGS"
+         LDFLAGS="$LDFLAGS -L$srb_lib"
+         AC_CHECK_LIB(elf,main,,unset SRB TESTSRB)
+         AC_CHECK_LIB(socket,main,,unset SRB TESTSRB)
+         AC_CHECK_LIB(SrbClient,clConnect,,unset SRB TESTSRB)
+      else
+         AC_CHECK_LIB(elf,main,,unset SRB TESTSRB)
+         AC_CHECK_LIB(socket,main,,unset SRB TESTSRB)
+         AC_CHECK_LIB(SrbClient,clConnect,,unset SRB TESTSRB)
+      fi
+      ;;
 esac
-if test "X-" != "X-$SRB"; then
+if test -n "$SRB"; then
     AC_DEFINE(HAVE_SRB)
 fi
 
 dnl ----------------------------------------------------------------------
-dnl Is Grid Storage present?  If so then we can compile in the Grid Storage driver.
+dnl Is Grid Storage present? If so then we can compile in the Grid
+dnl Storage driver.
 dnl
-AC_SUBST(GRIDSTORAGE)
-GRIDSTORAGE=yes
-AC_SUBST(TESTGRIDSTORAGE)
-TESTGRIDSTORAGE='$(srcdir)/testgridstorage'
-
+AC_SUBST(GRIDSTORAGE) GRIDSTORAGE=yes
+AC_SUBST(TESTGRIDSTORAGE) TESTGRIDSTORAGE='$(srcdir)/testgridstorage'
 AC_ARG_WITH(gridstorage,
-	[  --with-gridstorage=INC,LIB     Use the Globus Grid Storage driver [default=no]],
-	,withval=no)
-case $withval in
-    yes)
-	AC_CHECK_HEADERS(grid_storage_file.h,,unset GRIDSTORAGE TESTGRIDSTORAGE)
-	AC_CHECK_LIB(grid_storage_client,main,,unset GRIDSTORAGE TESTGRIDSTORAGE)
-	AC_CHECK_LIB(grid_storage_file,grid_storage_open,,unset GRIDSTORAGE TESTGRIDSTORAGE)
-	;;
-    no)
-	AC_MSG_CHECKING(for GRIDSTORAGE)
-	AC_MSG_RESULT(suppressed)
-	unset GRIDSTORAGE TESTGRIDSTORAGE
-	;;
-    *)
-	gridstorage_inc="`echo $withval |cut -f1 -d,`"
-	if test "X" != "$gridstorage_inc"; then
-	    saved_CPPFLAGS="$CPPFLAGS"
-	    CPPFLAGS="$CPPFLAGS -I$gridstorage_inc"
-	    AC_CHECK_HEADERS(grid_storage_file.h,,
-	        CPPFLAGS="$saved_CPPFLAGS"
-	        unset GRIDSTORAGE TESTGRIDSTORAGE
-            )
-	else
-	    AC_CHECK_HEADERS(grid_storage_file.h)
-	fi
+   [  --with-gridstorage=INC,LIB     Use the Globus Grid Storage driver [default=no]],
+   ,withval=no)
+
+case "$withval" in
+   yes)
+      AC_CHECK_HEADERS(grid_storage_file.h,,unset GRIDSTORAGE TESTGRIDSTORAGE)
+      AC_CHECK_LIB(grid_storage_client,main,,unset GRIDSTORAGE TESTGRIDSTORAGE)
+      AC_CHECK_LIB(grid_storage_file,grid_storage_open,,
+                   unset GRIDSTORAGE TESTGRIDSTORAGE)
+      ;;
+   no)
+      AC_MSG_CHECKING(for GRIDSTORAGE)
+      AC_MSG_RESULT(suppressed)
+      unset GRIDSTORAGE TESTGRIDSTORAGE
+      ;;
+   *)
+      gridstorage_inc="`echo $withval |cut -f1 -d,`"
+      if test -n "$gridstorage_inc"; then
+         saved_CPPFLAGS="$CPPFLAGS"
+         CPPFLAGS="$CPPFLAGS -I$gridstorage_inc"
+         AC_CHECK_HEADERS(grid_storage_file.h,,
+                          CPPFLAGS="$saved_CPPFLAGS"
+                          unset GRIDSTORAGE TESTGRIDSTORAGE)
+      else
+         AC_CHECK_HEADERS(grid_storage_file.h)
+      fi
 	
-	gridstorage_lib="`echo $withval |cut -f2 -d, -s`"
-	if test "X" != "$gridstorage_lib"; then
-	    saved_LDFLAGS="$LDFLAGS"
-	    LDFLAGS="$LDFLAGS -L$gridstorage_lib"
-            AC_CHECK_LIB(grid_storage_client,main,,unset GRIDSTORAGE TESTGRIDSTORAGE)
-            AC_CHECK_LIB(grid_storage_file,grid_storage_open,,unset GRIDSTORAGE TESTGRIDSTORAGE)
-	else
-            AC_CHECK_LIB(grid_storage_client,main,,unset GRIDSTORAGE TESTGRIDSTORAGE)
-            AC_CHECK_LIB(grid_storage_file,grid_storage_open,,unset GRIDSTORAGE TESTGRIDSTORAGE)
-	fi
-	;;
+      gridstorage_lib="`echo $withval |cut -f2 -d, -s`"
+      if test -n "$gridstorage_lib"; then
+         saved_LDFLAGS="$LDFLAGS"
+         LDFLAGS="$LDFLAGS -L$gridstorage_lib"
+         AC_CHECK_LIB(grid_storage_client,main,,
+	              unset GRIDSTORAGE TESTGRIDSTORAGE)
+         AC_CHECK_LIB(grid_storage_file,grid_storage_open,,
+	              unset GRIDSTORAGE TESTGRIDSTORAGE)
+      else
+         AC_CHECK_LIB(grid_storage_client,main,,
+	              unset GRIDSTORAGE TESTGRIDSTORAGE)
+         AC_CHECK_LIB(grid_storage_file,grid_storage_open,,
+	              unset GRIDSTORAGE TESTGRIDSTORAGE)
+      fi
+      ;;
 esac
-if test "X-" != "X-$GRIDSTORAGE"; then
-    AC_DEFINE(HAVE_GRIDSTORAGE)
+
+if test -n "$GRIDSTORAGE"; then
+   AC_DEFINE(HAVE_GRIDSTORAGE)
 fi
 
 dnl ----------------------------------------------------------------------
@@ -772,46 +771,47 @@ dnl `--with-pthread' command-line switch.  The value is an include path
 dnl and/or a library path.  If the library path is specified then it must
 dnl be preceded by a comma.
 dnl
-AC_SUBST(PTHREAD)
-PTHREAD=yes
+AC_SUBST(PTHREAD) PTHREAD=yes
 
 AC_ARG_WITH(pthread,
 	[  --with-pthread=INC,LIB  Use the Pthreads library],
 	,withval=no)
-case $withval in
-    yes)
-	AC_CHECK_HEADERS(pthread.h)
-    if test `uname` != "FreeBSD"; then
-        AC_CHECK_LIB(pthread, pthread_create,,unset PTHREAD)
-    else
-        CFLAGS="$CFLAGS -D_THREAD_SAFE"
-	LDFLAGS="$LDFLAGS -pthread"
-    fi
-	;;
-    no)
-	AC_MSG_CHECKING(for pthread)
-	AC_MSG_RESULT(suppressed)
-	unset PTHREAD
-	;;
-    *)
-	pthread_inc="`echo $withval |cut -f1 -d,`"
-	if test "X-" != "X-$pthread_inc"; then
-	    saved_CPPFLAGS="$CPPFLAGS"
-	    CPPFLAGS="$CPPFLAGS -I$pthread_inc"
-	    AC_CHECK_HEADERS(pthread.h,,CPPFLAGS="$saved_CPPFLAGS"; unset PTHREAD)
-    else
-	    AC_CHECK_HEADERS(pthread.h,,unset PTHREAD)
-	fi
 
-	pthread_lib="`echo $withval |cut -f2 -d, -s`"
-	if test "X-" != "X-$pthread_lib"; then
-	    saved_LDFLAGS="$LDFLAGS"
-	    LDFLAGS="$LDFLAGS -L$pthread_lib"
-	    AC_CHECK_LIB(pthread, pthread_create,,LDFLAGS="$saved_LDFLAGS"; unset PTHREAD)
-	else
-	    AC_CHECK_LIB(pthread, pthread_create,,unset PTHREAD)
-	fi
-	;;
+case "$withval" in
+   yes)
+      AC_CHECK_HEADERS(pthread.h)
+      if test `uname` != "FreeBSD"; then
+         AC_CHECK_LIB(pthread, pthread_create,,unset PTHREAD)
+      else
+         CFLAGS="$CFLAGS -D_THREAD_SAFE"
+         LDFLAGS="$LDFLAGS -pthread"
+      fi
+      ;;
+   no)
+      AC_MSG_CHECKING(for pthread)
+      AC_MSG_RESULT(suppressed)
+      unset PTHREAD
+      ;;
+   *)
+      pthread_inc="`echo $withval |cut -f1 -d,`"
+      if test -n "$pthread_inc"; then
+         saved_CPPFLAGS="$CPPFLAGS"
+         CPPFLAGS="$CPPFLAGS -I$pthread_inc"
+         AC_CHECK_HEADERS(pthread.h,,CPPFLAGS="$saved_CPPFLAGS"; unset PTHREAD)
+      else
+         AC_CHECK_HEADERS(pthread.h,,unset PTHREAD)
+      fi
+
+      pthread_lib="`echo $withval |cut -f2 -d, -s`"
+      if test -n "$pthread_lib"; then
+         saved_LDFLAGS="$LDFLAGS"
+         LDFLAGS="$LDFLAGS -L$pthread_lib"
+         AC_CHECK_LIB(pthread, pthread_create,,
+	              LDFLAGS="$saved_LDFLAGS"; unset PTHREAD)
+      else
+         AC_CHECK_LIB(pthread, pthread_create,,unset PTHREAD)
+      fi
+      ;;
 esac
 
 dnl ----------------------------------------------------------------------
@@ -819,29 +819,29 @@ dnl Enable thread-safe version of library.  It requires pthread on.
 dnl
 AC_MSG_CHECKING(for thread safe support)
 AC_ARG_ENABLE(threadsafe,
-  [  --enable-threadsafe     Enable thread safe capability],
-  THREADSAFE=$enableval)
+   [  --enable-threadsafe     Enable thread safe capability],
+   THREADSAFE=$enableval)
 
-case X-$THREADSAFE in
-    X-|X-no)
-	AC_MSG_RESULT(no)
-	;;
-    X-yes)
-	if test X- = X-$PTHREAD; then
-	    AC_MSG_RESULT(error)
-	    AC_MSG_ERROR(needed pthread library not available)
-	else
-	    AC_MSG_RESULT(yes)
-	    THREADSAFE=yes
-	fi
-	;;
-    *)
-	AC_MSG_RESULT(error)
-	AC_MSG_ERROR(\"$enableval\" is not a valid threadsafe type)
-	;;
+case "X-$THREADSAFE" in
+   X-|X-no)
+      AC_MSG_RESULT(no)
+      ;;
+   X-yes)
+      if test -n "$PTHREAD"; then
+         AC_MSG_RESULT(yes)
+         THREADSAFE=yes
+      else
+         AC_MSG_RESULT(error)
+         AC_MSG_ERROR(needed pthread library not available)
+      fi
+      ;;
+   *)
+      AC_MSG_RESULT(error)
+      AC_MSG_ERROR(\'$enableval\' is not a valid threadsafe type)
+      ;;
 esac
 
-if test X-yes = X-$THREADSAFE; then
+if test "X$THREADSAFE" = "Xyes"; then
     AC_DEFINE(HAVE_THREADSAFE)
 fi
 
@@ -944,21 +944,20 @@ AC_TRY_COMPILE([#include<sys/types.h>],
 dnl ----------------------------------------------------------------------
 dnl Check compiler characteristics
 dnl
-
 AC_C_CONST
 AC_C_INLINE
 
 AC_MSG_CHECKING(for __attribute__ extension)
 AC_TRY_COMPILE(,[int __attribute__((unused)) x],
-		     AC_DEFINE(HAVE_ATTRIBUTE)
-		     AC_MSG_RESULT(yes),
-		     AC_MSG_RESULT(no))
+	       AC_DEFINE(HAVE_ATTRIBUTE)
+	       AC_MSG_RESULT(yes),
+	       AC_MSG_RESULT(no))
 
 AC_MSG_CHECKING(for __FUNCTION__ extension)
 AC_TRY_COMPILE(,[(void)__FUNCTION__],
-		     AC_DEFINE(HAVE_FUNCTION)
-		     AC_MSG_RESULT(yes),
-		     AC_MSG_RESULT(no))
+	       AC_DEFINE(HAVE_FUNCTION)
+	       AC_MSG_RESULT(yes),
+	       AC_MSG_RESULT(no))
 
 dnl ----------------------------------------------------------------------
 dnl Try to figure out how to print `long long'.  Some machines use `%lld'
@@ -972,17 +971,23 @@ AC_MSG_CHECKING(how to print long long)
 AC_CACHE_VAL(hdf5_cv_printf_ll,
 LD_LIBRARY_PATH="$LD_LIBRARY_PATH`echo $LDFLAGS | sed -e 's/-L/:/g' -e 's/ //g'`"
 export LD_LIBRARY_PATH
-             for hdf5_cv_printf_ll in l L q ll unknown; do
-                AC_TRY_RUN([
+
+for hdf5_cv_printf_ll in l L q ll unknown; do
+   AC_TRY_RUN([
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-                  main() {char *s=malloc(128);
-	             long long x = (long long)1048576 * (long long)1048576;
-	             sprintf(s,"%${hdf5_cv_printf_ll}d",x);
-	             exit (strcmp(s,"1099511627776"));}],
-		 break)
-	     done)
+
+int main(void)
+{
+	char *s=malloc(128);
+	long long x = (long long)1048576 * (long long)1048576;
+	sprintf(s,"%${hdf5_cv_printf_ll}d",x);
+	exit(strcmp(s,"1099511627776"));
+}
+   ], break)
+done)
+
 AC_MSG_RESULT(%${hdf5_cv_printf_ll}d and %${hdf5_cv_printf_ll}u)
 AC_DEFINE_UNQUOTED(PRINTF_LL_WIDTH,"$hdf5_cv_printf_ll")
 
@@ -991,36 +996,36 @@ dnl Turn on debugging by setting compiler flags
 dnl
 AC_MSG_CHECKING(for debug flags)
 AC_ARG_ENABLE(debug,
-  [  --enable-debug[=all]    Turn on debugging in all packages.  One may also
+   [  --enable-debug[=all]    Turn on debugging in all packages.  One may also
                           specify a comma-separated list of package names
                           without the leading H5 or the word no.  The default
                           is most packages.],
-  DEBUG_PKG=$enableval)
+   DEBUG_PKG=$enableval)
 
 AC_SUBST(DEBUG_PKG)
 all_packages="ac,b,d,e,f,g,hg,hl,i,mf,mm,o,p,s,t,v,z"
-case X-$DEBUG_PKG in
-    X-|X-yes)
-	DEBUG_PKG="d,e,f,g,hg,i,mm,o,p,s,t,v,z"
-	CPPFLAGS="$CPPFLAGS -UNDEBUG"
-	AC_MSG_RESULT(default ($DEBUG_PKG))
-	;;
-    X-all)
-	DEBUG_PKG=$all_packages
-	CPPFLAGS="$CPPFLAGS -UNDEBUG"
-	AC_MSG_RESULT(all ($DEBUG_PKG))
-	;;
-    X-no|X-none)
-	AC_MSG_RESULT(none)
-	DEBUG_PKG=
-	CPPFLAGS="$CPPFLAGS -DNDEBUG"
-	;;
-    *)
-	AC_MSG_RESULT($DEBUG_PKG)
-	;;
+case "X-$DEBUG_PKG" in
+   X-|X-yes)
+      DEBUG_PKG="d,e,f,g,hg,i,mm,o,p,s,t,v,z"
+      CPPFLAGS="$CPPFLAGS -UNDEBUG"
+      AC_MSG_RESULT(default ($DEBUG_PKG))
+      ;;
+   X-all)
+      DEBUG_PKG=$all_packages
+      CPPFLAGS="$CPPFLAGS -UNDEBUG"
+      AC_MSG_RESULT(all ($DEBUG_PKG))
+      ;;
+   X-no|X-none)
+      AC_MSG_RESULT(none)
+      DEBUG_PKG=
+      CPPFLAGS="$CPPFLAGS -DNDEBUG"
+      ;;
+   *)
+      AC_MSG_RESULT($DEBUG_PKG)
+      ;;
 esac
 
-if test "X" != "X$DEBUG_PKG"; then
+if test -n "$DEBUG_PKG"; then
    for pkg in `echo $DEBUG_PKG | tr 'a-z,' 'A-Z '`; do
       CPPFLAGS="$CPPFLAGS -DH5${pkg}_DEBUG"
    done
@@ -1035,7 +1040,7 @@ AC_ARG_ENABLE(trace,
   TRACE=$enableval)
 
 AC_SUBST(TRACE_API)
-if test X = "X$TRACE" -o Xyes = "X$TRACE"; then
+if test -z "$TRACE" -o "X$TRACE" = "Xyes"; then
    AC_MSG_RESULT(yes)
    TRACE_API=yes
    CPPFLAGS="$CPPFLAGS -DH5_DEBUG_API"
@@ -1098,45 +1103,45 @@ dnl executable. For `mpicc' the executable should be run with `mpirun' from
 dnl the same directory as mpicc if it exists.
 dnl
 case "$CC_BASENAME" in
-    mpicc)
-	# The mpich compiler. Use mpirun from the same directory if it
-	# exists.
-	PARALLEL=mpicc
-	AC_MSG_CHECKING(for mpirun)
+   mpicc)
+      dnl The mpich compiler. Use mpirun from the same directory if it
+      dnl exists.
+      PARALLEL=mpicc
+      AC_MSG_CHECKING(for mpirun)
 
-	# Find the path where mpicc is located.
-	cmd=`echo $CC |cut -f1 -d' '`
-        if (echo $cmd |grep / >/dev/null); then
-	    path="`echo $cmd |sed 's/\(.*\)\/.*$/\1/'`"
-	else
-	    for path in `echo $PATH |tr : ' '`; do
-		if test -x $path/$cmd; then
-		    break;
-		fi
-	    done
-	fi
+      dnl Find the path where mpicc is located.
+      cmd=`echo $CC |cut -f1 -d' '`
+      if (echo $cmd |grep / >/dev/null); then
+	 path="`echo $cmd |sed 's/\(.*\)\/.*$/\1/'`"
+      else
+         for path in `echo $PATH |tr : ' '`; do
+            if test -x $path/$cmd; then
+               break;
+            fi
+         done
+      fi
 
-	# Is there an mpirun at that path?
-	if test -x $path/mpirun; then
-	    AC_MSG_RESULT($path/mpirun)
-	    RUNSERIAL="${RUNSERIAL:-none}"
-	    if test "X-" = "X-$RUNPARALLEL"; then
-	        RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=2}"
-	    fi
-	else
-	    AC_MSG_RESULT(none)
-        fi
-	;;
+      dnl Is there an mpirun at that path?
+      if test -x $path/mpirun; then
+         AC_MSG_RESULT($path/mpirun)
+         RUNSERIAL="${RUNSERIAL:-none}"
+         if test -z "$RUNPARALLEL"; then
+            RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=2}"
+         fi
+      else
+         AC_MSG_RESULT(none)
+      fi
+      ;;
 
-    mpcc|mpcc_r)
-	# The IBM compiler
-	PARALLEL="$CC_BASENAME"
-	;;
+   mpcc|mpcc_r)
+      dnl The IBM compiler
+      PARALLEL="$CC_BASENAME"
+      ;;
 
-    *)
-	# Probably not a parallel compiler, but if `--enable-parallel'
-	# is defined below then we're still building a parallel hdf5.
-	;;
+   *)
+      dnl Probably not a parallel compiler, but if `--enable-parallel'
+      dnl is defined below then we're still building a parallel hdf5.
+      ;;
 esac
 
 dnl ----------------------------------------------------------------------
@@ -1148,104 +1153,103 @@ dnl or mpcc) then parallel support is enabled but configure doesn't search
 dnl for any parallel header files or libraries.
 dnl
 AC_ARG_ENABLE(parallel,
-  [  --enable-parallel=TYPE  Search for MPI-IO and MPI support files])
+   [  --enable-parallel=TYPE  Search for MPI-IO and MPI support files])
 
 AC_MSG_CHECKING(for parallel support files)
 case "X-$enable_parallel" in
-    X-|X-no|X-none)
-	# Either we are not compiling for parallel or the header and library
-	# files and locations are known to the compiler (this is the case
-	# for a correct installation of mpicc for instance).
-	AC_MSG_RESULT(skipped)
-	;;
+   X-|X-no|X-none)
+      dnl Either we are not compiling for parallel or the header and
+      dnl library files and locations are known to the compiler (this is
+      dnl the case for a correct installation of mpicc for instance).
+      AC_MSG_RESULT(skipped)
+      ;;
 
-    X-yes)
-	# We want to compile a parallel library with a compiler that
-	# may already know how to link with MPI and MPI-IO.
-	AC_MSG_RESULT(provided by compiler)
-	PARALLEL=yes
+   X-yes)
+      dnl We want to compile a parallel library with a compiler that
+      dnl may already know how to link with MPI and MPI-IO.
+      AC_MSG_RESULT(provided by compiler)
+      PARALLEL=yes
 
-	# Try link a simple MPI program.  If fail, try again with -lmpi.
-	AC_TRY_LINK(,MPI_Init(),,AC_CHECK_LIB(mpi,MPI_Init,,PARALLEL=no))
+      dnl Try link a simple MPI program.  If fail, try again with -lmpi.
+      AC_TRY_LINK(,MPI_Init(),,AC_CHECK_LIB(mpi,MPI_Init,,PARALLEL=no))
 
-	# Then try link a simple MPI-IO program.  If fail, try again with
-	# -lmpio.
-	if test "yes" = "$PARALLEL"; then
-	    AC_TRY_LINK(,MPI_File_open(),,
-			AC_CHECK_LIB(mpio,MPI_File_open,,PARALLEL=no))
-	fi
+      dnl Then try link a simple MPI-IO program. If fail, try again with
+      dnl -lmpio.
+      if test "X$PARALLEL" = "Xyes"; then
+         AC_TRY_LINK(,MPI_File_open(),,
+                     AC_CHECK_LIB(mpio,MPI_File_open,,PARALLEL=no))
+      fi
 
-	# Set RUNPARALLEL to mpirun if not set yet.
-	if test "yes" = "$PARALLEL" -a "X-" = "X-$RUNPARALLEL"; then
-	    RUNPARALLEL="mpirun -np \$\${NPROCS:=2}"
-	fi
-	;;
+      dnl Set RUNPARALLEL to mpirun if not set yet.
+      if test "X$PARALLEL" = "Xyes" -a -z "$RUNPARALLEL"; then
+         RUNPARALLEL="mpirun -np \$\${NPROCS:=2}"
+      fi
+      ;;
 
-    X-mpich)
-	# For normal mpich installation the compiler, mpicc, should know
-	# where the MPI and MPI-IO header files are located and know which
-	# extra libraries need to be linked and will supply appropriate
-	# flags to the underlying compiler.
-	AC_MSG_RESULT(mpich)
-	AC_MSG_WARN(*** Why aren't you using an mpicc compiler? ***)
+   X-mpich)
+      dnl For normal mpich installation the compiler, mpicc, should know
+      dnl where the MPI and MPI-IO header files are located and know which
+      dnl extra libraries need to be linked and will supply appropriate
+      dnl flags to the underlying compiler.
+      AC_MSG_RESULT(mpich)
+      AC_MSG_WARN(*** Why aren't you using an mpicc compiler? ***)
 
-	# Apparently mpicc isn't installed correctly so configure must search
-	# for the header files and libraries. Actually we only have to search
-	# for the libraries in order to get the onto the link line, the user
-	# will have already told us about the locations. Fail if something
-	# is missing.
-	PARALLEL=mpich
-	AC_CHECK_LIB(mpich,MPI_Init,,AC_MSG_ERROR(no mpich library))
-	;;
+      dnl Apparently mpicc isn't installed correctly so configure must search
+      dnl for the header files and libraries. Actually we only have to search
+      dnl for the libraries in order to get the onto the link line, the user
+      dnl will have already told us about the locations. Fail if something
+      dnl is missing.
+      PARALLEL=mpich
+      AC_CHECK_LIB(mpich,MPI_Init,,AC_MSG_ERROR(no mpich library))
+      ;;
 
     *)
-	AC_MSG_RESULT(error)
-	AC_MSG_ERROR(\"$enable_parallel\" is not a valid parallel search type)
-	;;
+      AC_MSG_RESULT(error)
+      AC_MSG_ERROR(\'$enable_parallel\' is not a valid parallel search type)
+      ;;
 esac
 
 dnl ----------------------------------------------------------------------
 dnl Should the `testpar' directory participate in the build?
 dnl
-if test "X-" != "X-$PARALLEL"; then
-    TESTPARALLEL=testpar
+if test -n "$PARALLEL"; then
+   TESTPARALLEL=testpar
 fi
 
 dnl ----------------------------------------------------------------------
 dnl Print some other parallel information and do some sanity checks.
 dnl
-if test "X-" != "X-$PARALLEL"; then
-    # We are building a parallel library
-    AC_DEFINE(HAVE_PARALLEL)
+if test -n "$PARALLEL"; then
+   dnl We are building a parallel library
+   AC_DEFINE(HAVE_PARALLEL)
 
-    # Display what we found about running programs
-    AC_MSG_CHECKING(prefix for running on one processor)
-    AC_MSG_RESULT($RUNSERIAL)
-    AC_MSG_CHECKING(prefix for running in parallel)
-    AC_MSG_RESULT($RUNPARALLEL)
+   dnl Display what we found about running programs
+   AC_MSG_CHECKING(prefix for running on one processor)
+   AC_MSG_RESULT($RUNSERIAL)
+   AC_MSG_CHECKING(prefix for running in parallel)
+   AC_MSG_RESULT($RUNPARALLEL)
 
-    # Check that we can link a simple MPI and MPI-IO application
-    AC_MSG_CHECKING(whether a simple MPI-IO program can be linked)
-    AC_TRY_LINK(,[MPI_Init();MPI_File_open();],
-		AC_MSG_RESULT(yes),
-		AC_MSG_RESULT(no)
-	        AC_MSG_ERROR('unable to link a simple MPI-IO application'))
+   dnl Check that we can link a simple MPI and MPI-IO application
+   AC_MSG_CHECKING(whether a simple MPI-IO program can be linked)
+   AC_TRY_LINK(,[MPI_Init();MPI_File_open();],
+               AC_MSG_RESULT(yes),
+               AC_MSG_RESULT(no)
+               AC_MSG_ERROR('unable to link a simple MPI-IO application'))
 
+   dnl There *must* be some way to run in parallel even if it's just the
+   dnl word `none'.
+   if test -z "$RUNPARALLEL"; then
+      AC_MSG_ERROR(no way to run a parallel program)
+   fi
 
-    # There *must* be some way to run in parallel even if it's just the
-    # word `none'.
-    if test "X-" = "X-$RUNPARALLEL"; then
-	AC_MSG_ERROR(no way to run a parallel program)
-    fi
-
-    # If RUNSERIAL or RUNPARALLEL is the word `none' then replace it with
-    # the empty string.
-    if test "X-none" = "X-$RUNSERIAL"; then
-	RUNSERIAL=
-    fi
-    if test "X-none" = "X-$RUNPARALLEL"; then
-	RUNPARALLEL=
-    fi
+   dnl If RUNSERIAL or RUNPARALLEL is the word `none' then replace it with
+   dnl the empty string.
+   if test "X$RUNSERIAL" = "Xnone"; then
+      RUNSERIAL=
+   fi
+   if test "X$RUNPARALLEL" = "Xnone"; then
+      RUNPARALLEL=
+   fi
 fi
 
 dnl ----------------------------------------------------------------------
@@ -1253,36 +1257,37 @@ dnl Set some variables for general configuration information to be saved
 dnl and installed with the libraries.
 dnl
 
-# HDF5 version from the first line of the README file.
+dnl HDF5 version from the first line of the README file.
 H5_VERSION=`cut -d' ' -f3 $srcdir/README |head -1`
 AC_SUBST(H5_VERSION)
 
-# Configuration date
+dnl Configuration date
 AC_SUBST(CONFIG_DATE) CONFIG_DATE=`date`
 
-# User doing the configuration
+dnl User doing the configuration
 AC_SUBST(CONFIG_USER) CONFIG_USER="`whoami`@`hostname`"
-if test "X-$ORGANIZATION" != "X-"; then
-    CONFIG_USER="$CONFIG_USER at $ORGANIZATION"
+if test -n "$ORGANIZATION"; then
+   CONFIG_USER="$CONFIG_USER at $ORGANIZATION"
 fi
 
-# Configuration mode (production, development, profile, etc) saved above.
+dnl Configuration mode (production, development, profile, etc) saved above.
 AC_SUBST(CONFIG_MODE)
 
-# Byte sex from the AC_C_BIGENDIAN macro.
+dnl Byte sex from the AC_C_BIGENDIAN macro.
 AC_SUBST(BYTESEX)
-if test $ac_cv_c_bigendian = yes; then
-    BYTESEX="big-endian"
+if test "X$ac_cv_c_bigendian" = "Xyes"; then
+   BYTESEX="big-endian"
 else
-    BYTESEX="little-endian"
+   BYTESEX="little-endian"
 fi
 
-# Are we compiling static libraries, shared libraries, or both?  This is only
-# used for the libhdf5.settings file. We can't just look at $enable_static and
-# $enable_shared because if they're yes the ltconfig might have decided that
-# one or the other is simply not possible.  Therefore we have to look in the
-# generated `libtool' shell script for lines that set the value of
-# `build_libtool_libs' (shared) and `build_old_libs' (static).
+dnl Are we compiling static libraries, shared libraries, or both?  This
+dnl is only used for the libhdf5.settings file. We can't just look at
+dnl $enable_static and $enable_shared because if they're yes the ltconfig
+dnl might have decided that one or the other is simply not possible.
+dnl Therefore we have to look in the generated `libtool' shell script for
+dnl lines that set the value of `build_libtool_libs' (shared) and
+dnl `build_old_libs' (static).
 AC_SUBST(STATIC_SHARED)
 if (grep '^build_libtool_libs=yes' libtool >/dev/null); then
     enable_shared=yes
@@ -1294,37 +1299,50 @@ if (grep '^build_old_libs=yes' libtool >/dev/null); then
 else
     enable_static=no
 fi
-if test $enable_static = yes && test $enable_shared = yes; then
+if test "X$enable_static" = "Xyes" && test "X$enable_shared" = "Xyes"; then
     STATIC_SHARED="static, shared"
-elif test $enable_static = yes; then
+elif test "X$enable_static" = "Xyes"; then
     STATIC_SHARED="static"
-elif test $enable_shared = yes; then
+elif test "X$enable_shared" = "Xyes"; then
     STATIC_SHARED="shared"
 else
     STATIC_SHARED="none"
 fi
 
-# Parallel support? (set above except empty if none)
+dnl Parallel support? (set above except empty if none)
 PARALLEL=${PARALLEL:-no}
 
-# Compiler with version information
+dnl Compiler with version information
 AC_SUBST(CC_VERSION)
-if test "X-$cc_vendor" != "X-" && test "X-$cc_version" != "X-"; then
-    CC_VERSION="$CC ($cc_vendor-$cc_version)"
+if test -n "$cc_vendor" && test -n "$cc_version"; then
+   CC_VERSION="$CC ($cc_vendor-$cc_version)"
 else
-    # If $CC contains directory component, take it as is;
-    # else search it among PATH components.
-    if `echo $CC | grep / 2>&1 /dev/null`; then
-        CC_VERSION="$CC"	
-    else
-        for x in `echo $PATH | sed -e 's/:/ /g'`; do
-           if test -x $x/$CC; then
-               CC_VERSION="$x/$CC"
-               break
-           fi
-       done
-    fi
+   dnl If $CC contains directory component, take it as is;
+   dnl else search it among PATH components.
+   if `echo $CC | grep / 2>&1 /dev/null`; then
+      CC_VERSION="$CC"	
+   else
+      for x in `echo $PATH | sed -e 's/:/ /g'`; do
+         if test -x $x/$CC; then
+            CC_VERSION="$x/$CC"
+            break
+         fi
+      done
+   fi
 fi
+
+dnl ----------------------------------------------------------------------
+dnl Where is the root of the source tree.  Give an absolute address so
+dnl we can find it no matter which directory of the distribution is our
+dnl current directory.  The built-in pwd fails on some systems, but the
+dnl /bin/pwd version works OK.
+dnl
+if test -x /bin/pwd; then
+   pwd=/bin/pwd
+else
+   pwd=pwd
+fi
+AC_SUBST(ROOT) ROOT=`$pwd`
 
 dnl ----------------------------------------------------------------------
 dnl Determine the runtime libraries we may need to include in the
@@ -1332,22 +1350,36 @@ dnl libtools command so that executables will find the correct dynamic
 dnl libraries.
 dnl 
 DYNAMIC_DIRS=""
-if test -n $LDFLAGS; then
+if test -n "$LDFLAGS"; then
    for d in $LDFLAGS ; do
-      d=`echo $d | sed -e 's/-L/-R/g'`
-
-      dnl If the path isn't absolute, make it so by prepending the pwd
-      dnl to it.
+      d=`echo $d | sed -e 's/-L//g'`
       case "$d" in
          .*)
-	    d=`pwd`/$d
+	    dnl If the path isn't absolute, make it so by prepending the
+	    dnl ROOT directory to it.
+	    d=${ROOT}/$d
 	    ;;
       esac
-
-      DYNAMIC_DIRS="$d $DYNAMIC_DIRS"
+      DYNAMIC_DIRS="-R${d} $DYNAMIC_DIRS"
    done
 fi
 AC_SUBST(DYNAMIC_DIRS)
+
+if test -n "$CPPFLAGS"; then
+   TEMP_CPPFLAGS=""
+   for d in $CPPFLAGS ; do
+      case "$d" in
+        -I.*)
+           dnl If the path isn't absolute, make it so by prepending
+           dnl the ROOT directory to it.
+	   d=`echo $d | sed -e 's/-I//g'`
+	   d=-I${ROOT}/${d}
+	   ;;
+      esac
+      TEMP_CPPFLAGS="$d $TEMP_CPPFLAGS"
+   done
+   CPPFLAGS=$TEMP_CPPFLAGS
+fi
 
 dnl ----------------------------------------------------------------------
 dnl Build the Makefiles.  Almost every Makefile.in will begin with the line
@@ -1369,17 +1401,6 @@ if test "X$GMAKE" = "Xyes"; then
 else
    AC_SUBST(SETX) SETX="set -x"
 fi
-
-dnl Where is the root of the source tree.  Give an absolute address so
-dnl we can find it no matter which directory of the distribution is our
-dnl current directory.  The built-in pwd fails on some systems, but the
-dnl /bin/pwd version works OK.
-if test -x /bin/pwd; then
-   pwd=/bin/pwd
-else
-   pwd=pwd
-fi
-AC_SUBST(ROOT) ROOT=`$pwd`
 
 dnl Some cleanup stuff
 rm -f conftest conftest.o conftest.c dummy.o
@@ -1421,9 +1442,9 @@ EOF
 dnl Put the C++ ifdef wrappers in the H5pubconf file as well, but only
 dnl if it's not there already.
 if (grep __cplusplus src H5pubconf.h) >/dev/null 2>&1; then
-  :
+   :
 else
-  cat >> src/H5pubconf.h <<EOF
+   cat >> src/H5pubconf.h <<EOF
 
 /* inline is a keyword in C++. If this is a C++ compiler, undefine it */
 #if defined(__cplusplus) && defined(inline)
