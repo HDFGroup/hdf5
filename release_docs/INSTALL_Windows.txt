@@ -195,6 +195,9 @@ Section I: What do we build and install?
       HDF5 Dynamic Link Library(DLL): 
            debug and release version as well as export libraries for DLL
 
+      HDF5 high level static library:
+           debug and release version
+
       HDF5 tools:
            HDF5 tools 
 
@@ -208,6 +211,9 @@ Section I: What do we build and install?
 
       HDF5 library testing programs:
            HDF5 library comprehensive tests
+
+      HDF5 high level library testing programs:
+           HDF5 high level library comprehensive tests
 		
       HDF5 related tools testing programs:
            HDF5 tools comprehensive tests
@@ -269,6 +275,10 @@ STEP 1: Building HDF5 libraries and tools
              hdf5_f90cstubdll
              hdf5_fortran
              hdf5_fortrandll
+             hdf5_hl_fortran
+             hl_test_lite_fortran
+             hl_test_image_fortran
+             hl_test_table_fortran
              libtest_cstubdll
              libtest_fortran
              libtest_fortrandll
@@ -332,6 +342,14 @@ STEP 1: Building HDF5 libraries and tools
 
                hdf5dll.dll- DLL
                hdf5dll.lib- the DLL export library
+
+            c:\MyHDFstuff\hdf5\proj\hdf5_hl\debug - 
+
+               hdf5_hld.lib- the HDF5 high level static library                  
+
+            c:\MyHDFstuff\hdf5\proj\hdf5_hl\release - 
+
+               hdf5_hl.lib- the HDF5 high level static library 
 
             c:\MyHDFstuff\hdf5\test\libtest\debug - 
         and c:\MyHDFstuff\hdf5\test\libtest\release -
@@ -427,6 +445,16 @@ STEP 1: Building HDF5 libraries and tools
                hdf5_f90cstubdll.dll- the HDF5 C and Fortran stub DLL
                hdf5_f90cstubdll.lib- the HDF5 C and Fortran stub DLL
                                      export library
+
+            c:\MyHDFstuff\hdf5\proj\hdf5_hl_fortran\debug - 
+
+               hdf5_hl_fortrand.lib- the HDF5 Fortran high level static
+                                     library                  
+
+            c:\MyHDFstuff\hdf5\proj\hdf5_hl_fortran\release - 
+
+               hdf5_hl_fortran.lib- the HDF5 Fortran high level static
+                                    library 
 
             c:\MyHDFstuff\hdf5\fortran\test\libtest_cstubdll\debug - 
           
@@ -620,7 +648,18 @@ We provide 2 options for users to test HDF5 libraries and tools.
       Use Notepad or WordPad to check results. You should 
       not find any FAILED marks in your output files.
     
-   3. HDF5 C++ library test
+   3. HDF5 high level library test
+  
+      Run test_hdf5_hl.bat in the hdf5\hl\test directory at the 
+      command prompt as below:
+     
+         test_hdf5_hl release >"Your output filename"
+         test_hdf5_hl debug >"Your output filename"
+
+      Use Notepad or WordPad to check results. You should 
+      not find any FAILED marks in your output files.
+     
+   4. HDF5 C++ library test
   
       Skip this step UNLESS you have built HDF5 C++ libraries
       and want to test them.
@@ -644,7 +683,7 @@ We provide 2 options for users to test HDF5 libraries and tools.
       Use Notepad or WordPad to check results. You should 
       not find any FAILED marks in your output files.
      
-   4. HDF5 Fortran library test
+   5. HDF5 Fortran library test
   
       Skip this step UNLESS you have built HDF5 Fortran libraries     
       and want to test them.
@@ -670,6 +709,20 @@ We provide 2 options for users to test HDF5 libraries and tools.
          testhdf5_fortran release dll >"Your output filename"
          testhdf5_fortran debug >"Your output filename"
          testhdf5_fortran debug dll >"Your output filename"
+
+      Use Notepad or WordPad to check results. You should 
+      not find any FAILED marks in your output files.
+
+   6. HDF5 Fortran high level library test
+  
+      Skip this step UNLESS you have built HDF5 Fortran high level library     
+      and want to test it.
+     
+      Run test_hdf5_hl_fortran.bat in the hdf5\hl\fortran\test directory
+      at the command prompt as below:
+     
+         test_hdf5_hl_fortran release >"Your output filename"
+         test_hdf5_hl_fortran debug >"Your output filename"
 
       Use Notepad or WordPad to check results. You should 
       not find any FAILED marks in your output files.
@@ -989,18 +1042,24 @@ To use HDF5 static library
 
     6. repeat 1-5, to select zlib.lib and szlib.lib.
 
-    7. (optional) repeat 1-5, to select hdf5_cpp.lib to link with HDF5
+    7. (optional) repeat 1-5, to select hdf5_hl.lib to link with HDF5
+       high level static library.
+
+    8. (optional) repeat 1-5, to select hdf5_cpp.lib to link with HDF5
        C++ static library.
 
-    8. (optional) repeat 1-5, to select hdf5_fortran.lib to link with
+    9. (optional) repeat 1-5, to select hdf5_fortran.lib to link with
        HDF5 Fortran static library.
+
+    10.(optional) repeat 1-5, to select hdf5_hl_fortran.lib to link with
+       HDF5 high level Fortran static library.
 
    2) Method Two
 
     1. Go to Tools->Options->Directories,
 
-    2. Insert the correct HDF5, Zlib, Szlib paths for both headers(include)
-       and libraries.  For example, 
+    2. Insert the correct HDF5, Zlib, Szlib paths for both headers
+       (include) and libraries.  For example, 
        
           c:\MyHDFstuff\hdf5\hdf5lib\include
           c:\MyHDFstuff\hdf5\hdf5lib\lib
@@ -1014,11 +1073,17 @@ To use HDF5 static library
     4. Find the "link" option and "Input" category, insert 
        "zlib.lib, szlib.lib, hdf5.lib".
 
-    5. (Optional) repeat 3-4, to insert "hdf5_cpp.lib" if you want to 
+    5. (Optional) repeat 3-4, to insert "hdf5_hl.lib" if you want to 
+       use HDF5 high level static library.
+
+    6. (Optional) repeat 3-4, to insert "hdf5_cpp.lib" if you want to 
        use HDF5 C++ static library.
 
-    6. (Optional) repeat 3-4, to insert "hdf5_fortran.lib" if you want to 
-       use HDF5 Fortran static library.
+    7. (Optional) repeat 3-4, to insert "hdf5_fortran.lib" if you want
+       to use HDF5 Fortran static library.
+
+    8. (Optional) repeat 3-4, to insert "hdf5_hl_fortran.lib" if you
+       want to use HDF5 Fortran high level static library.
 
 
 To use the DLL:
