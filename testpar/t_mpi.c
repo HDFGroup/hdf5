@@ -433,7 +433,7 @@ int test_mpio_1wMr(char *filename, int special_request)
     }
 
     /* show the hostname so that we can tell where the processes are running */
-    if (VERBOSE_MED){
+    if (VERBOSE_DEF){
 	if (gethostname(hostname, 128) < 0){
 	    PRINTID;
 	    printf("gethostname failed\n");
