@@ -1025,7 +1025,7 @@ dnl Check for functions.
 dnl
 AC_CHECK_FUNCS(getpwuid gethostname system getrusage fork waitpid)
 AC_CHECK_FUNCS(gettimeofday BSDgettimeofday difftime snprintf vsnprintf)
-AC_CHECK_FUNCS(compress2 setsysinfo longjmp signal sigaction)
+AC_CHECK_FUNCS(compress2 setsysinfo longjmp signal sigaction strdup)
 AC_TRY_COMPILE([#include<sys/types.h>],
 	       [off64_t n = 0;],
 	       AC_CHECK_FUNCS(lseek64 fseek64),
