@@ -1,7 +1,7 @@
 #ifndef _H5f90_H
 #define _H5f90_H 
 
-#include <hdf5.h>
+#include "hdf5.h"
 #include "H5f90i.h"
 #include "H5f90proto.h"
 
