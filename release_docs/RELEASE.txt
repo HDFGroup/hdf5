@@ -35,6 +35,8 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * New functions H5Gget_comment(modification), H5Aget_storage_size, 
+      H5Arename.  SLU - 2002/10/29
     * Fixed an assertion of H5S_select_iterate that did not account for scalar
       type that has no dimension sizes.   AKC - 2002/10/15
     * Partially fixed space allocation inefficiencies in the file by
