@@ -39,8 +39,12 @@ H5VERSTR=		# default to current CVS version
 # If srcdir is not used, don't launched multiple tests
 SNAPSHOT="${DEBUGMODE:+echo }bin/snapshot"
 SRCDIR="srcdir"
-SNAPCMD="$SRCDIR op-configure --enable-stream-vfd op-configure --enable-static-exec test clean"
+# Default standard Snaptest commands
+SNAPCMD="$SRCDIR test clean"
+# Default Standard snaptest command options
+STANDARD_OPT=""
 ENABLE_PARALLEL="op-configure --enable-parallel"
+#SNAPCMD="$SRCDIR op-configure --enable-stream-vfd op-configure --enable-static-exec test clean"
 
 #***************
 # Various hosts
@@ -195,9 +199,9 @@ CHECK_RSH()
 # $*--Types of test being run
 RUNSNAPTEST()
 {
-    SNAPCMD_OPT=""		# snapshot test option
+    SNAPCMD_OPT="$STANDARD_OPT"		# snapshot test option
     SRCDIRNAME=""
-    CC_SAVED=$CC
+    CC_SAVED="$CC"
     PATH_SAVED=$PATH
     export PATH			# DEC OSF1 needs to export PATH explicitly
     TEST_TYPE=$*
@@ -268,9 +272,33 @@ RUNSNAPTEST()
     date >> $LOGFILE
 
     # restore CC, PATH
-    CC=$CC_SAVED
+    CC="$CC_SAVED"
     PATH=$PATH_SAVED
 }
+
+
+# Snap Test configuration parsing
+SNAPTEST_CONFIG()
+{
+    if [ ! -f $SNAPTESTCFG ]; then
+	return
+    fi
+    while read x y ; do
+	case "$x" in
+	    '#')	# comment.  Continue.
+	    	;;
+	    standard)	#standard configuration
+		STANDARD_OPT="$y"
+		;;
+	    *)		# unknown configuration option
+		echo "***Unknown configuration option***"
+		echo $x $y
+		echo "***Ignored***"
+		;;
+	esac
+    done < $SNAPTESTCFG
+}
+
 
 # Flush the AFS files if applicable.
 # Hopefully the flushing is done when the tests of this
@@ -325,6 +353,8 @@ SNAPYARD=`cd $HOME/snapshots-hdf5${H5VERSTR} && /bin/pwd`
 LOGBASENAME=${SNAPYARD}/log/${HOSTNAME}
 FAILEDLOG=${SNAPYARD}/log/FAILED_LOG_${TODAY}
 CVSLOG=${SNAPYARD}/log/CVS_LOG_${TODAY}
+# Snap Test Configuration file
+SNAPTESTCFG=${SNAPYARD}/snaptest.cfg
 
 
 #################################
@@ -336,12 +366,15 @@ trap PRINT_TRAILER 0
 #
 StartTime=`SecOfDay`
 
-$WHEREAMI
+# Process the configuration
+SNAPTEST_CONFIG
+echo STANDARD_OPT=$STANDARD_OPT
+
 # Do a checkout if one has not been done today
 # Also check MANIFEST file
 if [ ! -f $CVSLOG ]; then
     echo Running CVS checkout with output saved in $CVSLOG
-    ($WHEREAMI; $SNAPSHOT checkout ) >> $CVSLOG 2>&1
+    ($SNAPSHOT checkout ) >> $CVSLOG 2>&1
     errcode=$?
     if [ $errcode -ne 0 ]; then
 	# test failed.
@@ -349,7 +382,7 @@ if [ ! -f $CVSLOG ]; then
 	exit $errcode
     fi
     echo Checking MAINFEST file ...
-    (cd $SNAPYARD/current; $WHEREAMI; bin/chkmanifest)
+    (cd $SNAPYARD/current; bin/chkmanifest)
     errcode=$?
     if [ $errcode -ne 0 ]; then
 	# test failed.
