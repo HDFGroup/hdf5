@@ -154,12 +154,12 @@ test_h5s_basic(void)
      * higher dimensionality than what the library can handle.
      *
      * If this test fails and the H5S_MAX_RANK variable has changed, follow
-     * the instructions in space_overflow.c for regenating the th5s.h5 file.
+     * the instructions in space_overflow.c for regenerating the th5s.h5 file.
      */
     {
     char testfile[512]="";
     char *srcdir = HDgetenv("srcdir");
-    if (srcdir && ((HDstrlen(srcdir) + strlen(TESTFILE) + 1) < sizeof(testfile))){
+    if (srcdir && ((HDstrlen(srcdir) + HDstrlen(TESTFILE) + 1) < sizeof(testfile))){
 	HDstrcpy(testfile, srcdir);
 	HDstrcat(testfile, "/");
     }

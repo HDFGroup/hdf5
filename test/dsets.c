@@ -19,6 +19,7 @@
  * Purpose:	Tests the dataset interface (H5D)
  */
 
+#include <time.h>
 #include "h5test.h"
 
 /*
@@ -1091,7 +1092,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     
     for (i=0; i<size[0]; i++) {
 	for (j=0; j<size[1]/2; j++) {
-	    points[i][j] = rand ();
+	    points[i][j] = HDrandom ();
 	}
     }
     if (H5Dwrite (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, points)<0)
@@ -1197,7 +1198,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
 
     for (i=0; i<hs_size[0]; i++) {
 	for (j=0; j<hs_size[1]; j++) {
-	    points[hs_offset[0]+i][hs_offset[1]+j] = rand ();
+	    points[hs_offset[0]+i][hs_offset[1]+j] = HDrandom();
 	}
     }
     if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, hs_offset, NULL, hs_size,
@@ -1823,7 +1824,7 @@ test_onebyte_shuffle(hid_t file)
 
     for (i= 0;i< 10; i++)
       for (j = 0; j < 20; j++)
-	orig_data[i][j] = rand();
+	orig_data[i][j] = HDrandom();
 
     PASSED();
 #else
@@ -2650,6 +2651,9 @@ main(void)
     }
 #endif
     
+    /* Set the random # seed */
+    HDsrandom((unsigned long)time(NULL));
+
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
 	goto error;
