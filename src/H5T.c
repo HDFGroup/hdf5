@@ -3401,10 +3401,6 @@ H5Tget_member_type(hid_t type_id, int membno)
  *		the member in an instance of the compound data type, and
  *		MEMBER_ID is the type of the new member.
  *
- * Note:	All members of a compound data type must be atomic; a
- *		compound data type cannot have a member which is a compound
- *		data type.
- *
  * Return:	Success:	Non-negative, the PARENT_ID compound data
  *				type is modified to include a copy of the
  *				member type MEMBER_ID.
