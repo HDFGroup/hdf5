@@ -5780,37 +5780,70 @@ H5S_hyper_bounds(H5S_t *space, hsize_t *start, hsize_t *end)
 htri_t
 H5S_hyper_select_contiguous(const H5S_t *space)
 {
-    htri_t ret_value=FAIL;  /* return value */
     H5S_hyper_span_info_t *spans;   /* Hyperslab span info node */
-    H5S_hyper_span_t *span;     /* Hyperslab span node */
-    unsigned u;                    /* index variable */
+    H5S_hyper_span_t *span;         /* Hyperslab span node */
+    unsigned u;                     /* index variable */
+    unsigned small_contiguous,      /* Flag for small contiguous block */
+        large_contiguous;           /* Flag for large contiguous block */
+    htri_t ret_value=FALSE;         /* return value */
 
     FUNC_ENTER (H5S_hyper_select_contiguous, FAIL);
 
     assert(space);
 
-    /* Quicker check for a "regular" hyperslab selection */
+    /* Check for a "regular" hyperslab selection */
     if(space->select.sel_info.hslab.diminfo != NULL) {
         /*
          * For a regular hyperslab to be contiguous, it must have only one
          * block (i.e. count==1 in all dimensions) and the block size must be
          * the same as the dataspace extent's in all but the slowest changing
-         * dimension.
+         * dimension. (dubbed "large contiguous" block)
+         *
+         * OR
+         *
+         * The selection must have only one block (i.e. count==1) and the block
+         * size must be 1 in all but the fastest changing dimension. (dubbed
+         * "small contiguous" block)
          */
-        ret_value=TRUE;	/* assume true and reset if the dimensions don't match */
+
+        /* Initialize flags */
+        large_contiguous=TRUE;	/* assume true and reset if the dimensions don't match */
+        small_contiguous=FALSE;	/* assume false initially */
+
+        /* Check for a "large contigous" block */
         for(u=1; u<space->extent.u.simple.rank; u++) {
             if(space->select.sel_info.hslab.diminfo[u].count>1 || space->select.sel_info.hslab.diminfo[u].block!=space->extent.u.simple.size[u]) {
-                ret_value=FALSE;
+                large_contiguous=FALSE;
                 break;
             } /* end if */
         } /* end for */
+
+        /* If we didn't find a large contiguous block, check for a small one */
+        if(large_contiguous==FALSE) {
+            small_contiguous=TRUE;
+            for(u=0; u<(space->extent.u.simple.rank-1); u++) {
+                if(space->select.sel_info.hslab.diminfo[u].count>1 || space->select.sel_info.hslab.diminfo[u].block!=1) {
+                    small_contiguous=FALSE;
+                    break;
+                } /* end if */
+            } /* end for */
+        } /* end if */
+
+        /* Indicate true if it's either a large or small contiguous block */
+        if(large_contiguous || small_contiguous)
+            ret_value=TRUE;
     } /* end if */
     else {
         /*
-         * For a hyperslab to be contiguous, it's size must be the same as the
-         * dataspace extent's in all but the slowest changing dimension
+         * For a hyperslab to be contiguous, it must have only one block and
+         * (either it's size must be the same as the dataspace extent's in all
+         * but the slowest changing dimension
+         * OR
+         * block size must be 1 in all but the fastest changing dimension).
          */
-        ret_value=TRUE;	/* assume true and reset if the dimensions don't match */
+        /* Initialize flags */
+        large_contiguous=TRUE;	/* assume true and reset if the dimensions don't match */
+        small_contiguous=FALSE;	/* assume false initially */
 
         /* Get information for slowest changing information */
         spans=space->select.sel_info.hslab.span_lst;
@@ -5818,7 +5851,7 @@ H5S_hyper_select_contiguous(const H5S_t *space)
 
         /* If there are multiple spans in the slowest changing dimension, the selection isn't contiguous */
         if(span->next!=NULL)
-            ret_value=FALSE;
+            large_contiguous=FALSE;
         else {
             /* Now check the rest of the dimensions */
             if(span->down!=NULL) {
@@ -5833,13 +5866,13 @@ H5S_hyper_select_contiguous(const H5S_t *space)
 
                     /* Check that this is the only span and it spans the entire dimension */
                     if(span->next!=NULL) {
-                        ret_value=FALSE;
+                        large_contiguous=FALSE;
                         break;
                     } /* end if */
                     else {
                         /* If this span doesn't cover the entire dimension, then this selection isn't contiguous */
                         if(((span->high-span->low)+1)!=(hssize_t)space->extent.u.simple.size[u]) {
-                            ret_value=FALSE;
+                            large_contiguous=FALSE;
                             break;
                         } /* end if */
                         else {
@@ -5853,6 +5886,47 @@ H5S_hyper_select_contiguous(const H5S_t *space)
                 } /* end while */
             } /* end if */
         } /* end else */
+
+        /* If we didn't find a large contiguous block, check for a small one */
+        if(large_contiguous==FALSE) {
+            small_contiguous=TRUE;
+
+            /* Get information for slowest changing information */
+            spans=space->select.sel_info.hslab.span_lst;
+            span=spans->head;
+
+            /* Current dimension working on */
+            u=0;
+
+            /* Cycle down the spans until we run out of down spans or find a non-contiguous span */
+            while(spans!=NULL) {
+                span=spans->head;
+
+                /* Check that this is the only span and it spans the entire dimension */
+                if(span->next!=NULL) {
+                    small_contiguous=FALSE;
+                    break;
+                } /* end if */
+                else {
+                    /* If this span doesn't cover the entire dimension, then this selection isn't contiguous */
+                    if(u<(space->extent.u.simple.rank-1) && ((span->high-span->low)+1)!=1) {
+                        small_contiguous=FALSE;
+                        break;
+                    } /* end if */
+                    else {
+                        /* Walk down to the next span */
+                        spans=span->down;
+
+                        /* Increment dimension */
+                        u++;
+                    } /* end else */
+                } /* end else */
+            } /* end while */
+        } /* end if */
+
+        /* Indicate true if it's either a large or small contiguous block */
+        if(large_contiguous || small_contiguous)
+            ret_value=TRUE;
     } /* end else */
 
     FUNC_LEAVE (ret_value);
