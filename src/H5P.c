@@ -117,6 +117,86 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5P_get_lrank
+ PURPOSE
+    Return the logical rank of a dataspace (internal)
+ USAGE
+    uint32 H5P_get_lrank(sdim)
+        H5P_sdim_t *sdim;            IN: Pointer to dataspace object to query
+ RETURNS
+    The logical rank of a dataspace on success, UFAIL on failure
+ DESCRIPTION
+        This function determines the number of logical dimensions in a 
+    dataspace.  The logical rank is the actual number of dimensions of the
+    dataspace, not the dimensionality of the space its embedded in.
+    UFAIL is returned on an error, otherwise the rank is returned.
+--------------------------------------------------------------------------*/
+uint32 H5P_get_lrank(H5P_sdim_t *sdim)
+{
+    uint32 ret_value = UFAIL;
+
+    FUNC_ENTER(H5P_get_lrank, H5P_init_interface, UFAIL);
+
+    /* Clear errors and check args and all the boring stuff. */
+    H5ECLEAR;
+
+    assert(sdim);
+    ret_value=sdim->rank;
+
+#ifdef LATER
+done:
+#endif /* LATER */
+  if(ret_value == UFAIL)
+    { /* Error condition cleanup */
+
+    } /* end if */
+
+    /* Normal function cleanup */
+
+    FUNC_LEAVE(ret_value);
+} /* end H5P_get_lrank() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_is_simple
+ PURPOSE
+    Check if a dataspace is simple (internal)
+ USAGE
+    hbool_t H5P_is_simple(sdim)
+        H5P_sdim_t *sdim;            IN: Pointer to dataspace object to query
+ RETURNS
+    BTRUE/BFALSE/BFAIL
+ DESCRIPTION
+        This function determines the if a dataspace is "simple". ie. if it
+    has orthogonal, evenly spaced dimensions.
+--------------------------------------------------------------------------*/
+hbool_t H5P_is_simple(H5P_sdim_t *sdim)
+{
+    hbool_t ret_value = BFAIL;
+
+    FUNC_ENTER(H5P_get_lrank, H5P_init_interface, UFAIL);
+
+    /* Clear errors and check args and all the boring stuff. */
+    H5ECLEAR;
+
+    assert(sdim);
+    ret_value=BTRUE;        /* Currently all dataspaces are simple */
+
+#ifdef LATER
+done:
+#endif /* LATER */
+  if(ret_value == BFAIL)
+    { /* Error condition cleanup */
+
+    } /* end if */
+
+    /* Normal function cleanup */
+
+    FUNC_LEAVE(ret_value);
+} /* end H5P_is_simple() */
+
+/*--------------------------------------------------------------------------
+ NAME
     H5Pnelem
  PURPOSE
     Return the number of elements in a dataspace
@@ -146,7 +226,9 @@ uintn H5Pnelem(hatom_t sid)
         ret_value=1;
 #endif /* FINISH_THIS */
 
+#ifdef LATER
 done:
+#endif /* LATER */
   if(ret_value == UFAIL)
     { /* Error condition cleanup */
 

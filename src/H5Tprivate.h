@@ -52,6 +52,7 @@ typedef struct {
 
 /* Private functions */
 hatom_t H5T_create(hatom_t owner_id, hobjtype_t type, const char *name);
+hbool_t H5T_is_atomic(h5_datatype_t *type);
 herr_t H5T_release(hatom_t oid);
 
 #endif

@@ -99,9 +99,9 @@ H5O_sim_dtype_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p)
     /* decode */
     if((sdtype = H5MM_xcalloc (1, sizeof(H5O_sim_dtype_t)))!=NULL)
       {
-        sdtype->length=*p++;
+        sdtype->len=*p++;
         sdtype->arch=*p++;
-        UINT16DECODE(p,sdtype->type);
+        UINT16DECODE(p,sdtype->base);
       } /* end if */
 
     FUNC_LEAVE (sdtype);
@@ -138,9 +138,9 @@ H5O_sim_dtype_encode (hdf5_file_t *f, size_t raw_size, uint8 *p, const void *mes
     assert (sdtype);
 
     /* encode */
-    *p++=sdtype->length;
+    *p++=sdtype->len;
     *p++=sdtype->arch;
-    UINT16ENCODE(p,sdtype->type);
+    UINT16ENCODE(p,sdtype->base);
 
     FUNC_LEAVE (SUCCEED);
 } /* end H5O_sim_dtype_encode() */
@@ -180,9 +180,9 @@ H5O_sim_dtype_fast (const H5G_entry_t *ent, void *mesg)
           if((sdtype = H5MM_xcalloc (1, sizeof(H5O_sim_dtype_t)))!=NULL)
             {
               p=(const uint8 *)&ent->cache.sdata.nt;
-              sdtype->length=*p++;
+              sdtype->len=*p++;
               sdtype->arch=*p++;
-              UINT16DECODE(p,sdtype->type);
+              UINT16DECODE(p,sdtype->base);
             } /* end if */
      } /* end if */
    else
@@ -232,16 +232,16 @@ H5O_sim_dtype_cache (H5G_entry_t *ent, const void *mesg)
       {
         modified = BTRUE;
         ent->type = H5G_CACHED_SDATA;
-        *p++=sdtype->length;
+        *p++=sdtype->len;
         *p++=sdtype->arch;
-        UINT16ENCODE(p,sdtype->type);
+        UINT16ENCODE(p,sdtype->base);
       } /* end if */
     else
       {
-        if(ent->cache.sdata.nt.length != sdtype->length)
+        if(ent->cache.sdata.nt.length != sdtype->len)
           {
             modified = BTRUE;
-            ent->cache.sdata.nt.length = sdtype->length;
+            ent->cache.sdata.nt.length = sdtype->len;
           } /* end if */
 
         if (ent->cache.sdata.nt.arch != sdtype->arch)
@@ -250,10 +250,10 @@ H5O_sim_dtype_cache (H5G_entry_t *ent, const void *mesg)
            ent->cache.sdata.nt.arch = sdtype->arch;
           } /* end if */
 
-        if (ent->cache.sdata.nt.type != sdtype->type)
+        if (ent->cache.sdata.nt.type != (uint16)sdtype->base)
           {
            modified = BTRUE;
-           ent->cache.sdata.nt.type = sdtype->type;
+           ent->cache.sdata.nt.type = (uint16)sdtype->base;
           } /* end if */
       } /* end else */
 
@@ -351,13 +351,13 @@ H5O_sim_dtype_debug (hdf5_file_t *f, const void *mesg, FILE *stream,
 
    fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	    "Length:",
-	    (unsigned long)(sdtype->length));
+	    (unsigned long)(sdtype->len));
    fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	    "Architecture:",
 	    (unsigned long)(sdtype->arch));
    fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	    "Data-Type:",
-	    (unsigned long)(sdtype->type));
+	    (unsigned long)((uint16)sdtype->base));
 
    FUNC_LEAVE (SUCCEED);
 } /* end H5O_sim_dtype_debug() */

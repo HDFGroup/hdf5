@@ -108,7 +108,6 @@ hatom_t H5D_create(hatom_t owner_id, hobjtype_t type, const char *name)
         new_dset->file=owner_id;
     else
         new_dset->file=H5Mget_file(owner_id);
-    new_dset->parent=owner_id;      /* set the owner's ID */
     new_dset->name=HDstrdup(name);  /* make a copy of the dataset name */
     new_dset->modified=BTRUE;       /* Yep, we're new... */
     new_dset->type=0;
@@ -167,8 +166,8 @@ herr_t H5Dset_info(hatom_t oid, hatom_t tid, hatom_t did)
     if(dataset->type!=0 || dataset->dim!=0)
         HGOTO_ERROR(H5E_FUNC, H5E_ALREADYINIT, FAIL);
 
-    dataset->type=tid;
-    dataset->dim=did;
+    dataset->type=H5Aatom_object(tid);
+    dataset->dim=H5Aatom_object(did);
     dataset->modified=BTRUE;       /* indicate the values have changed */
 
 done:
@@ -277,36 +276,57 @@ herr_t H5D_flush(hatom_t oid)
     
     /* Check if we have information to flush to the file... */
     if (dataset->modified) {
-       /* Get the dataset's file... (I'm not fond of this. -QAK) */
-       if((file=H5Aatom_object(dataset->file))==NULL)
-	  HGOTO_ERROR(H5E_INTERNAL, H5E_BADATOM, FAIL);
+        /* Get the dataset's file... (I'm not fond of this. -QAK) */
+        if((file=H5Aatom_object(dataset->file))==NULL)
+          HGOTO_ERROR(H5E_INTERNAL, H5E_BADATOM, FAIL);
 
 
-       if (dataset->header<=0) {
+        if (dataset->header<=0) {
+          /*
+           * Create the object header.
+           */
+            if ((dataset->header = H5O_new (file, 0, H5D_MINHDR_SIZE))<0) {
+             HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*can't create header*/
+          }
+
+          /*
+           * Start creating the symbol table entry.  Inserting messages
+           * into the header may cache things in this entry.
+           */
+            d_sym.header = dataset->header;
+            d_sym.type = H5G_NOTHING_CACHED;
+
+          /*
+           * Write the necessary messages to the header.
+           */
+            /* Check if this dataset has an "atomic" datatype */
+            if(BTRUE==H5T_is_atomic(dataset->type))
+              {
+                if(H5O_modify(file,dataset->header,&d_sym,NULL,H5O_SIM_DTYPE,H5O_NEW_MESG,dataset->type)==FAIL)
+                    HGOTO_ERROR (H5E_INTERNAL, H5E_CANTCREATE, FAIL);
+              } /* end if */
+            else
+              { /* if it's not an atomic datatype, fail for right now */
+                 HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+              } /* end else */
+            /* Check if this dataset has "simple" dimensionality */
+            if(BTRUE==H5P_is_simple(dataset->dim))
+              {
+                if(H5O_modify(file,dataset->header,&d_sym,NULL,H5O_SIM_DIM,H5O_NEW_MESG,dataset->dim)==FAIL)
+                    HGOTO_ERROR (H5E_INTERNAL, H5E_CANTCREATE, FAIL);
+              } /* end if */
+            else
+              { /* if it's not an atomic datatype, fail for right now */
+                 HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+              } /* end else */
+
+
 	  /*
-	   * Create the object header.
+	   * Give the object header a name so others can access it.
 	   */
-	  if ((dataset->header = H5O_new (file, 0, H5D_MINHDR_SIZE))<0) {
-	     HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*can't create header*/
-	  }
-
-	  /*
-	   * Start creating the symbol table entry.  Inserting messages
-	   * into the header may cache things in this entry.
-	   */
-	  d_sym.header = dataset->header;
+#if 1 /* SEE_BELOW */
 	  d_sym.type = H5G_NOTHING_CACHED;
-
-	  /*
-	   * Write the necessary messages to the header.
-	   */
-/*-------------------------------------------------------------------------
- * Quincey?  It should be just a matter of filling in the
- * appropriate H5O_*_t struct and passing it to
- * H5O_modify() along with &d_sym.
- *-------------------------------------------------------------------------
- */
-
+#endif
 
 	  /*
 	   * Give the object header a name so others can access it.

@@ -25,7 +25,7 @@ static char RcsId[] = "@(#)$Revision$";
    EXPORTED ROUTINES
        H5Tget_num_fields  -- Get the number of fields in a compound datatype
        H5Tis_field_atomic -- Check if a field is atomic
-       H5Tis_atomic       -- Check if a datatype is atomic
+       H5Tis_atomic/H5T_is_atomic -- Check if a datatype is atomic
        H5Tset_type        -- Set the base type of a user-defined datatype
        H5Tadd_field       -- Add a field to a compound datatype
        H5Tsize            -- Determine the size of a datatype
@@ -237,9 +237,48 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5T_is_atomic
+ PURPOSE
+    Check if a datatype is atomic (internal)
+ USAGE
+    hbool_t H5Tis_atomic(type)
+        h5_datatype_t *type;            IN: Ptr to datatype object to query
+ RETURNS
+    BFAIL/BTRUE/BFALSE
+ DESCRIPTION
+        This function checks the basic type of a user-defined datatype.  BTRUE
+    is returned if the datatype is atomic (i.e. not compound), BFALSE is
+    returned if the datatype is compound, BFAIL on error.
+--------------------------------------------------------------------------*/
+hbool_t H5T_is_atomic(h5_datatype_t *type)
+{
+    hbool_t        ret_value = BTRUE;
+
+    FUNC_ENTER(H5T_is_atomic, H5T_init_interface, BFAIL);
+
+    /* Clear errors and check args and all the boring stuff. */
+    H5ECLEAR;
+
+    /* Check the base type of the datatype */
+    if(H5T_COMPOUND==type->dt.base)
+        ret_value=BFALSE;
+
+done:
+  if(ret_value == BFAIL)
+    { /* Error condition cleanup */
+
+    } /* end if */
+
+    /* Normal function cleanup */
+
+    FUNC_LEAVE(ret_value);
+} /* end H5T_is_atomic() */
+
+/*--------------------------------------------------------------------------
+ NAME
     H5Tis_atomic
  PURPOSE
-    Check if a datatype is atomic
+    Check if a datatype is atomic (API)
  USAGE
     hbool_t H5Tis_atomic(tid)
         hatom_t tid;            IN: Datatype object to query
@@ -265,8 +304,7 @@ hbool_t H5Tis_atomic(hatom_t tid)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
 
     /* Check the base type of the datatype */
-    if(H5T_COMPOUND==dt->dt.base)
-        ret_value=BFALSE;
+    ret_value=H5T_is_atomic(dt);
 
 done:
   if(ret_value == BFAIL)
