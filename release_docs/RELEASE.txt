@@ -80,8 +80,12 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fixed potential file corruption bug when too many object header
+            messages (probably attributes, from a user perspective) were
+            inserted into an object header and certain other conditions were
+            met.  QAK - 2003/10/08
         - Changed implementation of internal ID searching algorithm to avoid
-            O(n) behavior for many common cases.  QAK 2003/10/06
+            O(n) behavior for many common cases.  QAK - 2003/10/06
         - Allow partial parallel writing to compact datasets.  QAK - 2003/10/06
         - Correctly create reference to shared datatype in attribute, instead
             of making a copy of the shared datatype in the attribute.

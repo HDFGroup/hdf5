@@ -2571,36 +2571,38 @@ H5O_alloc_extend_chunk(H5O_t *oh, unsigned chunkno, size_t size)
 
     /* try to extend a null message */
     for (idx=0; idx<oh->nmesgs; idx++) {
-	if (H5O_NULL_ID == oh->mesg[idx].type->id &&
-	    (oh->mesg[idx].raw + oh->mesg[idx].raw_size ==
-	     oh->chunk[chunkno].image + oh->chunk[chunkno].size)) {
+	if (oh->mesg[idx].chunkno==chunkno) {
+            if ( H5O_NULL_ID == oh->mesg[idx].type->id &&
+                (oh->mesg[idx].raw + oh->mesg[idx].raw_size ==
+                 oh->chunk[chunkno].image + oh->chunk[chunkno].size)) {
 
-	    delta = MAX (H5O_MIN_SIZE, aligned_size - oh->mesg[idx].raw_size);
-	    assert (delta=H5O_ALIGN (delta));
-	    oh->mesg[idx].dirty = TRUE;
-	    oh->mesg[idx].raw_size += delta;
+                delta = MAX (H5O_MIN_SIZE, aligned_size - oh->mesg[idx].raw_size);
+                assert (delta=H5O_ALIGN (delta));
+                oh->mesg[idx].dirty = TRUE;
+                oh->mesg[idx].raw_size += delta;
 
-	    old_addr = oh->chunk[chunkno].image;
+                old_addr = oh->chunk[chunkno].image;
 
-	    /* Be careful not to indroduce garbage */
-	    oh->chunk[chunkno].image = H5FL_BLK_REALLOC(chunk_image,old_addr,
-						    (oh->chunk[chunkno].size + delta));
-	    if (NULL==oh->chunk[chunkno].image)
-		HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, UFAIL, "memory allocation failed");
-	    HDmemset(oh->chunk[chunkno].image + oh->chunk[chunkno].size,
-		     0, delta);
-	    oh->chunk[chunkno].size += delta;
+                /* Be careful not to indroduce garbage */
+                oh->chunk[chunkno].image = H5FL_BLK_REALLOC(chunk_image,old_addr,
+                                                        (oh->chunk[chunkno].size + delta));
+                if (NULL==oh->chunk[chunkno].image)
+                    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, UFAIL, "memory allocation failed");
+                HDmemset(oh->chunk[chunkno].image + oh->chunk[chunkno].size,
+                         0, delta);
+                oh->chunk[chunkno].size += delta;
 
-	    /* adjust raw addresses for messages of this chunk */
-	    if (old_addr != oh->chunk[chunkno].image) {
-		for (u = 0; u < oh->nmesgs; u++) {
-		    if (oh->mesg[u].chunkno == chunkno)
-			oh->mesg[u].raw = oh->chunk[chunkno].image +
-					  (oh->mesg[u].raw - old_addr);
-		}
-	    }
-	    HGOTO_DONE(idx);
-	}
+                /* adjust raw addresses for messages of this chunk */
+                if (old_addr != oh->chunk[chunkno].image) {
+                    for (u = 0; u < oh->nmesgs; u++) {
+                        if (oh->mesg[u].chunkno == chunkno)
+                            oh->mesg[u].raw = oh->chunk[chunkno].image +
+                                              (oh->mesg[u].raw - old_addr);
+                    }
+                }
+                HGOTO_DONE(idx);
+            }
+        } /* end if */
     }
 
     /* create a new null message */
@@ -2945,6 +2947,9 @@ H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
 	    /* Set new object header info to zeros */
 	    HDmemset(&oh->mesg[old_alloc],0,
 		     (oh->alloc_nmesgs-old_alloc)*sizeof(H5O_mesg_t));
+
+            /* "Retarget" local 'msg' pointer into newly allocated array of messages */
+            msg=&oh->mesg[idx];
 	}
         null_msg=&oh->mesg[oh->nmesgs++];
 	null_msg->type = H5O_NULL;
