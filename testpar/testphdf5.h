@@ -117,7 +117,7 @@ extern int dim0, dim1;				/*Dataset dimensions */
 extern int chunkdim0, chunkdim1;		/*Chunk dimensions */
 extern int nerrors;				/*errors count */
 extern int verbose;				/*verbose, default as no. */
-extern herr_t (*old_func)(void*);		/*previous error handler */
+extern H5E_auto_t old_func;		        /* previous error handler */
 extern void *old_client_data;			/*previous error handler arg.*/
 extern int facc_type;				/*Test file access type */
 

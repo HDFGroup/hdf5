@@ -112,7 +112,6 @@ void compact_dataset(char *filename)
     hbool_t use_gpfs = FALSE;
     hid_t iof, plist, dcpl, dxpl, dataset, filespace;
     hsize_t file_dims [DIM]={SIZE,SIZE};
-    hsize_t count[DIM]={1,1};
     double outme [SIZE][SIZE], inme[SIZE][SIZE];
     char dname[]="dataset";
     herr_t ret;
