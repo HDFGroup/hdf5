@@ -71,6 +71,7 @@ H5F_seq_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     assert(f);
     assert(layout);
     assert(buf);
+    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
 
     if (H5F_seq_readv(f, dxpl_id, layout, dc_plist, file_space, elmt_size, 1, &seq_len, &dset_offset, buf)<0)
         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "vector read failed");
@@ -115,6 +116,7 @@ H5F_seq_write(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
     assert(f);
     assert(layout);
     assert(buf);
+    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
 
     if (H5F_seq_writev(f, dxpl_id, layout, dc_plist, file_space, elmt_size, 1, &seq_len, &dset_offset, buf)<0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vector write failed");

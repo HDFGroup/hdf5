@@ -1176,6 +1176,9 @@ H5FL_arr_alloc(H5FL_arr_head_t *head, size_t elem, unsigned clear)
 
     /* Check if there is a maximum number of elements in array */
     if(head->maxelem>0) {
+        /* Sanity check that the number of elements is supported */
+        assert((int)elem<=head->maxelem);
+
         /* Check for nodes available on the free list first */
         if(head->u.list_arr[elem]!=NULL) {
             /* Get a pointer to the block on the free list */
@@ -1260,6 +1263,9 @@ H5FL_arr_realloc(H5FL_arr_head_t *head, void * obj, size_t new_elem)
     else {
         /* Check if there is a maximum number of elements in array */
         if(head->maxelem>0) {
+            /* Sanity check that the number of elements is supported */
+            assert((int)new_elem<=head->maxelem);
+
             /* Get the pointer to the info header in front of the block to free */
             temp=(H5FL_arr_node_t *)((unsigned char *)obj-sizeof(H5FL_arr_node_t));
 

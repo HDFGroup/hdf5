@@ -1033,7 +1033,7 @@ H5S_mpio_opt_possible( const H5S_t *mem_space, const H5S_t *file_space, const un
     htri_t c1,c2;               /* Flags whether a selection is optimizable */
     htri_t ret_value=TRUE;
 
-    FUNC_ENTER_NOAPI(H5S_all_opt_possible, FAIL);
+    FUNC_ENTER_NOAPI(H5S_mpio_opt_possible, FAIL);
 
     /* Check args */
     assert(mem_space);

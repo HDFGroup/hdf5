@@ -146,6 +146,8 @@ H5S_hyper_iter_init (const H5S_t *space, size_t elmt_size, H5S_sel_iter_t *sel_i
         for(u=space->extent.u.simple.rank-1; u>0; u--) {
             if(tdiminfo[u].count==1 && tdiminfo[u].block==mem_size[u])
                 cont_dim=u;
+            else
+                break;
         } /* end for */
 
         /* Check if the regular selection can be "flattened" */

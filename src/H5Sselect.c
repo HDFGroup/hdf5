@@ -803,6 +803,7 @@ H5S_select_fscat (H5F_t *f, struct H5O_layout_t *layout,
     assert (iter);
     assert (nelmts>0);
     assert (_buf);
+    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
 
     /* Get the hyperslab vector size */
     if(NULL == (dx_plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
@@ -1165,6 +1166,11 @@ H5S_select_read(H5F_t *f, const H5O_layout_t *layout, H5P_genplist_t *dc_plist,
 
     FUNC_ENTER_NOAPI(H5S_select_read, FAIL);
 
+    /* Check args */
+    assert(f);
+    assert(_buf);
+    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
+
     /* Get the hyperslab vector size */
     if(NULL == (dx_plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
@@ -1394,6 +1400,11 @@ H5S_select_write(H5F_t *f, H5O_layout_t *layout, H5P_genplist_t *dc_plist,
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_select_write, FAIL);
+
+    /* Check args */
+    assert(f);
+    assert(_buf);
+    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
 
     /* Get the hyperslab vector size */
     if(NULL == (dx_plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
