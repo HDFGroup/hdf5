@@ -442,7 +442,6 @@ H5S_hyper_block_cache (H5S_hyper_node_t *node,
     assert(node);
     assert(fhyper_info);
 
-printf("%s: check 1.0\n",FUNC);
     /* Allocate temporary buffer of proper size */
     if((node->cinfo.block_id=H5TB_get_buf(node->cinfo.size*fhyper_info->elmt_size,1,(void **)&(node->cinfo.block)))<0)
         HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
@@ -518,7 +517,6 @@ H5S_hyper_block_read (H5S_hyper_node_t *node, H5S_hyper_fhyper_info_t *fhyper_in
     node->cinfo.rleft-=region_size;
 
     /* If we've read in all the elements from the block, throw it away */
-printf("%s: rleft=%d, wleft=%d, size=%d\n",FUNC,(int)node->cinfo.rleft,(int)node->cinfo.wleft,(int)node->cinfo.size);
     if(node->cinfo.rleft==0 && (node->cinfo.wleft==0 || node->cinfo.wleft==node->cinfo.size)) {
         /* Release the temporary buffer */
         H5TB_release_buf(node->cinfo.block_id);
