@@ -476,12 +476,15 @@ dnl Checkpoint the cache
 AC_CACHE_SAVE
 
 dnl ----------------------------------------------------------------------
-dnl Is HDF4 present?  If so then we can compile the h5toh4 converter. We
-dnl assume h5toh4 can be compiled and then prove otherwise when we don't find
+dnl Is HDF4 present?  If so then we can compile the h5toh4 and h5toh4 converters.
+dnl We assume they can be compiled and then prove otherwise when we don't find
 dnl a header file or library.
 dnl
 AC_SUBST(H5TOH4) H5TOH4=h5toh4
 AC_SUBST(TESTH5TOH4) TESTH5TOH4='$(srcdir)/testh5toh4'
+
+AC_SUBST(H4TOH5) H4TOH5=h4toh5
+AC_SUBST(TESTH4TOH5) TESTH4TOH5='$(srcdir)/testh4toh5'
 
 dnl NCSA keeps hdf4 in a funny place, but for most sites we don't want these.
 test -d /usr/ncsa/include && CPPFLAGS="$CPPFLAGS -I/usr/ncsa/include"
@@ -490,16 +493,16 @@ test -d /usr/ncsa/lib && LDFLAGS="$LDFLAGS -L/usr/ncsa/lib"
 AC_ARG_WITH(hdf4,[  --with-hdf4=INC,LIB     Use the HDF4 library],,withval=yes)
 case "$withval" in
    yes)
-      AC_CHECK_HEADERS(mfhdf.h,,unset H5TOH4 TESTH5TOH4)
-      AC_CHECK_LIB(z,compress,,unset H5TOH4 TESTH5TOH4)
-      AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4)
-      AC_CHECK_LIB(df,Hstartaccess,,unset H5TOH4 TESTH5TOH4)
-      AC_CHECK_LIB(mfhdf,SDstart,,unset H5TOH4 TESTH5TOH4)
+      AC_CHECK_HEADERS(mfhdf.h,,unset H5TOH4 TESTH5TOH4 H4TOH5 TESTH4TOH5)
+      AC_CHECK_LIB(z,compress,,unset H5TOH4 TESTH5TOH4 H4TOH5 TESTH4TOH5)
+      AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4 H4TOH5 TESTH4TOH5)
+      AC_CHECK_LIB(df,Hstartaccess,,unset H5TOH4 TESTH5TOH4 H4TOH5 TESTH4TOH5)
+      AC_CHECK_LIB(mfhdf,SDstart,,unset H5TOH4 TESTH5TOH4 H4TOH5 TESTH4TOH5)
       ;;
    no)
       AC_MSG_CHECKING(for HDF4)
       AC_MSG_RESULT(suppressed)
-      unset H5TOH4 TESTH5TOH4
+      unset H5TOH4 TESTH5TOH4 H4TOH5 TESTH4TOH5
       ;;
    *)
       hdf4_inc="`echo $withval |cut -f1 -d,`"
@@ -508,7 +511,7 @@ case "$withval" in
          CPPFLAGS="$CPPFLAGS -I$hdf4_inc"
          AC_CHECK_HEADERS(mfhdf.h,,
                           CPPFLAGS="$saved_CPPFLAGS"
-                          unset H5TOH4 TESTH5TOH4)
+                          unset H5TOH4 TESTH5TOH4 H4TOH5 TESTH4TOH5)
       else
          AC_CHECK_HEADERS(mfhdf.h)
       fi
@@ -517,13 +520,13 @@ case "$withval" in
       if test -n "$hdf4_lib"; then
          saved_LDFLAGS="$LDFLAGS"
          LDFLAGS="$LDFLAGS -L$hdf4_lib"
-         AC_CHECK_LIB(z,compress,,unset H5TOH4 TESTH5TOH4)
-         AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4)
-         AC_CHECK_LIB(df,Hstartaccess,,unset H5TOH4 TESTH5TOH4)
-         AC_CHECK_LIB(mfhdf,SDstart,,unset H5TOH4 TESTH5TOH4)
+         AC_CHECK_LIB(z,compress,,unset H5TOH4 TESTH5TOH4 H4TOH5 TESTH4TOH5)
+         AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4 H4TOH5 TESTH4TOH5)
+         AC_CHECK_LIB(df,Hstartaccess,,unset H5TOH4 TESTH5TOH4 H4TOH5 TESTH4TOH5)
+         AC_CHECK_LIB(mfhdf,SDstart,,unset H5TOH4 TESTH5TOH4 H4TOH5 TESTH4TOH5)
       else
-         AC_CHECK_LIB(z,compress,,unset H5TOH4 TESTH5TOH4)
-         AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4)
+         AC_CHECK_LIB(z,compress,,unset H5TOH4 TESTH5TOH4 H4TOH5 TESTH4TOH5)
+         AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4 H4TOH5 TESTH4TOH5)
          AC_CHECK_LIB(df,Hstartaccess)
          AC_CHECK_LIB(mfhdf,SDstart)
       fi
