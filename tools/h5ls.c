@@ -1914,7 +1914,7 @@ main (int argc, char *argv[])
 {
     hid_t	file=-1, root=-1;
     char	*fname=NULL, *oname=NULL, *x;
-    const char	*progname;
+    const char	*progname="h5ls";
     const char	*s = NULL;
     char	*rest, *container=NULL;
     int		argno;
@@ -1938,9 +1938,11 @@ main (int argc, char *argv[])
     DISPATCH(H5G_RAGGED, "Ragged Array", H5Gopen, H5Gclose,
 	     NULL, ragged_list2);
 
+#if 0
     /* Name of this program without the path */
     if ((progname=strrchr(argv[0], '/'))) progname++;
     else progname = argv[0];
+#endif
 
     /* Default output width */
     width_g = get_width();
