@@ -1799,7 +1799,7 @@ H5F_istore_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
          * MPI processes could be writing to other elements in the same chunk.
          * Do a direct write-through of only the elements requested.
          */
-            || IS_H5FD_MPIO(f)
+            || (IS_H5FD_MPIO(f) && (H5F_ACC_RDWR & f->shared->flags))
 #endif /* H5_HAVE_PARALLEL */
             ) {
             H5O_layout_t	l;	/* temporary layout */
@@ -1980,7 +1980,7 @@ H5F_istore_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
          * MPI processes could be writing to other elements in the same chunk.
          * Do a direct write-through of only the elements requested.
          */
-            || IS_H5FD_MPIO(f)
+            || (IS_H5FD_MPIO(f) && (H5F_ACC_RDWR & f->shared->flags))
 #endif /* H5_HAVE_PARALLEL */
             ) {
             H5O_layout_t	l;	/* temporary layout */
