@@ -21,6 +21,9 @@
 extern "C" {
 #endif
 
+#define IMAGE_CLASS   "IMAGE"
+#define PALETTE_CLASS "PALETTE"
+
 
 
 herr_t H5IMmake_image_8bit( hid_t loc_id, 

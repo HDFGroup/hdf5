@@ -14,6 +14,10 @@
 #include "H5DS.h"
 #include "H5LT.h"
 #include <stdlib.h>
+#include "H5IM.h"
+#include "H5TB.h"
+
+
 
 /*-------------------------------------------------------------------------
  * Function: H5DSset_scale
@@ -155,6 +159,15 @@ herr_t H5DSattach_scale(hid_t did,
 
  if (H5I_DATASET!=it1 || H5I_DATASET!=it2)
   return FAIL;
+
+ /* the DS dataset cannot have dimension scales */
+ if (H5LT_find_attribute(dsid,DIMENSION_LIST)==1)
+  return FAIL;
+
+ /* check if the dataset is a "reserved" dataset (image, table) */
+ if (H5DS_is_reserved(did)==1)
+  return FAIL;
+
 
 /*-------------------------------------------------------------------------
  * The dataset may or may not have the associated DS attribute
@@ -1956,6 +1969,79 @@ out:
  } H5E_END_TRY;
  return FAIL;
 }
+
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5DS_is_reserved
+ *
+ * Purpose: Verify that a dataset's CLASS is either an image, palette or table
+ *
+ * Return: true, false, fail
+ *
+ * Programmer: pvn@ncsa.uiuc.edu
+ *
+ * Date: March 19, 2005
+ *
+ * Comments:
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t H5DS_is_reserved(hid_t did)
+{
+ int    has_class;
+ hid_t  tid;
+ hid_t  aid;
+ char   buf[40];
+ herr_t ret;
+
+ /* try to find the attribute "CLASS" on the dataset */
+ if ((has_class = H5LT_find_attribute(did,"CLASS"))<0)
+  return -1;
+
+ if ( has_class ==  0 )
+  return 0;
+
+ else if ( has_class ==  1 )
+ {
+  if ((aid = H5Aopen_name(did,"CLASS"))<0)
+   goto out;
+     
+  if ((tid = H5Aget_type(aid))<0)
+   goto out;
+
+  if (H5Aread(aid,tid,buf)<0)
+   goto out;
+
+  if ( strcmp(buf,IMAGE_CLASS)==0 ||
+       strcmp(buf,PALETTE_CLASS)==0 ||
+       strcmp(buf,TABLE_CLASS)==0 )
+   ret = 1;
+  else
+   ret = 0;
+    
+  if (H5Tclose(tid)<0) 
+   goto out;
+
+  if (H5Aclose(aid)<0)
+   goto out;
+
+ }
+
+ return ret;
+
+/* error zone, gracefully close */
+out:
+ H5E_BEGIN_TRY {
+  H5Tclose(tid);
+  H5Aclose(aid);
+ } H5E_END_TRY;
+ return FAIL;
+}
+
 
 
 

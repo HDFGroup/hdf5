@@ -17,6 +17,8 @@
 #include "H5LT.h"
 #include <stdlib.h>
 #include <string.h>
+#include "H5IM.h"
+
 
 /* operator functions */
 static herr_t verifiy_scale(hid_t dset, unsigned dim, hid_t scale, void *visitor_data);
@@ -1630,6 +1632,7 @@ static int test_errors(void)
  hid_t   gid;                                              /* group ID */
  hid_t   sid;                                              /* space ID */
  hid_t   sidds;                                            /* space ID */
+ hsize_t pal_dims[] = {9,3};
  
  printf("Testing error conditions\n");
 
@@ -1720,6 +1723,118 @@ static int test_errors(void)
   goto out;
 
 
+/*-------------------------------------------------------------------------
+ * try to attach a scale that has scales
+ *-------------------------------------------------------------------------
+ */ 
+
+ TESTING2("attach a scale that has scales");
+
+ /* create the data space for the scale */
+ if ((sidds=H5Screate_simple(rankds,s1_dim,NULL))<0)
+  goto out;
+ 
+ /* create a dataset "ds_b" for the scale */
+ if ((dsid=H5Dcreate(fid,"ds_b",H5T_NATIVE_INT,sidds,H5P_DEFAULT))<0)
+  goto out;
+
+ /* open the previous written "ds_a" */
+ if ((did = H5Dopen(fid,"ds_a"))<0)
+  goto out;
+
+ /* attach "ds_b" to "ds_a", valid */
+ if(H5DSattach_scale(did,dsid,0)<0)
+  goto out;
+
+ /* close */
+ if (H5Dclose(dsid)<0)
+  goto out;
+ if (H5Dclose(did)<0)
+  goto out;
+ if (H5Sclose(sidds)<0)
+  goto out;
+
+ /* open the previous written "dset_a" */
+ if ((did = H5Dopen(fid,"dset_a"))<0)
+  goto out;
+
+  /* open the previous written "ds_a" */
+ if ((dsid = H5Dopen(fid,"ds_a"))<0)
+  goto out;
+
+ /* try to attach "ds_a" to "dset_a", not valid */
+ if(H5DSattach_scale(did,dsid,0)==SUCCESS)
+  goto out;
+
+ /* close */
+ if (H5Dclose(dsid)<0)
+  goto out;
+ if (H5Dclose(did)<0)
+  goto out;
+
+ PASSED();
+
+/*-------------------------------------------------------------------------
+ * try to attach a dataset that is a scale 
+ *-------------------------------------------------------------------------
+ */ 
+
+ TESTING2("attach to a dataset that is a scale");
+
+ /* open the previous written "ds_b", that is a scale */
+ if ((dsid = H5Dopen(fid,"ds_b"))<0)
+  goto out;
+
+ /* open the previous written "ds_a" */
+ if ((did = H5Dopen(fid,"ds_a"))<0)
+  goto out;
+
+ /* try to attach "ds_a" to "ds_b", not valid */
+ if(H5DSattach_scale(dsid,did,0)==SUCCESS)
+  goto out;
+
+ /* close */
+ if (H5Dclose(dsid)<0)
+  goto out;
+ if (H5Dclose(did)<0)
+  goto out;
+
+ PASSED();
+
+/*-------------------------------------------------------------------------
+ * try to attach a scale to an image, pallete or table
+ *-------------------------------------------------------------------------
+ */ 
+
+ TESTING2("attach to a dataset that is a reserved class dataset");
+
+ /* make an image */
+ if (H5IMmake_image_8bit(fid,"image",100,50,NULL)<0)
+  goto out;
+
+ /* make a palette */
+ if (H5IMmake_palette(fid,"pallete",pal_dims,NULL)<0)
+  goto out;
+
+ /* open the previous written "ds_b" */
+ if ((dsid = H5Dopen(fid,"ds_b"))<0)
+  goto out;
+
+ /* open the image dataset */
+ if ((did = H5Dopen(fid,"image"))<0)
+  goto out;
+
+ /* try to attach "ds_a" to the image, not valid */
+ if(H5DSattach_scale(did,dsid,0)==SUCCESS)
+  goto out;
+
+ /* close */
+ if (H5Dclose(dsid)<0)
+  goto out;
+ if (H5Dclose(did)<0)
+  goto out;
+
+ PASSED();
 
  /* close */
  if (H5Fclose(fid)<0)
@@ -1755,7 +1870,6 @@ static int test_rank(void)
  hid_t   did;                                              /* dataset ID */
  hid_t   dsid;                                             /* scale ID */
  int     rank     = 3;                                     /* rank of data dataset */
- int     rankds   = 2;                                     /* rank of DS dataset */
  hsize_t dims[3]  = {DIM1_SIZE,DIM2_SIZE,DIM3_SIZE};       /* size of data dataset */
  char    name[30];                                         /* dataset name buffer */
  char    names[30];                                        /* dataset scale name buffer */
@@ -1883,6 +1997,54 @@ static int test_rank(void)
   goto out;
  
  PASSED();
+
+
+/*-------------------------------------------------------------------------
+ * create a dataset and attach only to 1 dimension
+ *-------------------------------------------------------------------------
+ */  
+
+ TESTING2("attach only to 1 dimension");
+ 
+ /* make a dataset */
+ if (H5LTmake_dataset_int(fid,"dset_b",rank,dims,NULL)<0)
+  goto out;
+
+ if ((did = H5Dopen(fid,"dset_b"))<0)
+  goto out;
+
+ /* attach a DS to dimension 1 */
+ sprintf(name,"ds_a_%d",1);
+ if((dsid = H5Dopen(fid,name))<0)
+  goto out;
+ if(H5DSattach_scale(did,dsid,DIM1)<0)
+  goto out;
+ if (H5DSis_attached(did,dsid,DIM1)<=0)
+  goto out;
+
+
+ /* try to detach all dimensions. for dimensions 0 and 2, it is an error */
+ for (i=0; i<rank; i++) 
+ {
+  if ( i==1 )
+  {
+   if(H5DSdetach_scale(did,dsid,i)<0)
+    goto out;
+  }
+  else
+  {
+   if(H5DSdetach_scale(did,dsid,i)!=FAIL)
+    goto out;
+  }
+ }
+
+ if (H5Dclose(dsid)<0)
+  goto out;
+ if (H5Dclose(did)<0)
+  goto out;
+ 
+ PASSED();
+
 
 
 /*-------------------------------------------------------------------------

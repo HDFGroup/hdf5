@@ -55,7 +55,7 @@ herr_t H5IMmake_image_8bit( hid_t loc_id,
   return -1;
 
  /* Attach the CLASS attribute */
- if ( H5LTset_attribute_string( loc_id, dset_name, "CLASS", "IMAGE" ) < 0 )
+ if ( H5LTset_attribute_string( loc_id, dset_name, "CLASS", IMAGE_CLASS ) < 0 )
   return -1;
 
  /* Attach the VERSION attribute */
@@ -130,7 +130,7 @@ herr_t H5IMmake_image_24bit( hid_t loc_id,
   return -1;
 
  /* Attach the CLASS attribute */
- if ( H5LTset_attribute_string( loc_id, dset_name, "CLASS", "IMAGE" ) < 0 )
+ if ( H5LTset_attribute_string( loc_id, dset_name, "CLASS", IMAGE_CLASS ) < 0 )
   return -1;
 
  /* Attach the VERSION attribute */
@@ -484,7 +484,7 @@ herr_t H5IMmake_palette( hid_t loc_id,
   return -1;
 
  /* Attach the attribute "CLASS" to the >>palette<< dataset*/
- if ( H5LTset_attribute_string( loc_id, pal_name, "CLASS", "PALETTE" ) < 0 )
+ if ( H5LTset_attribute_string( loc_id, pal_name, "CLASS", PALETTE_CLASS ) < 0 )
   return -1;
 
  /* Attach the attribute "PAL_VERSION" to the >>palette<< dataset*/
@@ -1152,7 +1152,7 @@ herr_t H5IMis_image( hid_t loc_id,
   if ( H5Aread( attr_id, attr_type, attr_data ) < 0 )
     goto out;
 
-  if( strcmp( attr_data, "IMAGE" ) == 0 ) 
+  if( strcmp( attr_data, IMAGE_CLASS ) == 0 ) 
    ret = 1;
   else
    ret = 0;
@@ -1216,7 +1216,7 @@ herr_t H5IMis_palette( hid_t loc_id,
  if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
   return -1;
 
-    /* Try to find the attribute "CLASS" on the dataset */
+ /* Try to find the attribute "CLASS" on the dataset */
  has_class = H5LT_find_attribute( did, "CLASS" );
 
  if ( has_class ==  0 )
@@ -1240,7 +1240,7 @@ herr_t H5IMis_palette( hid_t loc_id,
   if ( H5Aread( attr_id, attr_type, attr_data ) < 0 )
     goto out;
 
-  if( strcmp( attr_data, "PALETTE" ) == 0 ) 
+  if( strcmp( attr_data, PALETTE_CLASS ) == 0 ) 
    ret = 1;
   else
    ret = 0;
@@ -1253,7 +1253,7 @@ herr_t H5IMis_palette( hid_t loc_id,
 
  }
 
-     /* Close the dataset. */
+ /* Close the dataset. */
  if ( H5Dclose( did ) < 0 )
   return -1;
 

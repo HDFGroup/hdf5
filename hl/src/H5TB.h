@@ -21,6 +21,10 @@
 
 #include "H5LT.h"
 
+
+#define TABLE_CLASS "TABLE"
+
+
 #define HLTB_MAX_FIELD_LEN 255
 
 #if !defined(MAX)

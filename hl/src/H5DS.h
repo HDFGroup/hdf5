@@ -80,6 +80,17 @@ htri_t H5DSis_attached(hid_t did,
                        unsigned int idx);
 
 
+
+/*-------------------------------------------------------------------------
+ * private functions
+ *-------------------------------------------------------------------------
+ */ 
+
+
+herr_t H5DS_is_reserved(hid_t did);
+
+
+
 #ifdef __cplusplus
 }
 #endif

@@ -170,7 +170,7 @@ herr_t H5TBmake_table( const char *table_title,
  */
  
  /* Attach the CLASS attribute */
- if ( H5LTset_attribute_string( loc_id, dset_name, "CLASS", "TABLE" ) < 0 )
+ if ( H5LTset_attribute_string( loc_id, dset_name, "CLASS", TABLE_CLASS ) < 0 )
   goto out;
 
  /* Attach the VERSION attribute */
@@ -3512,7 +3512,7 @@ herr_t H5TB_attach_attributes( const char *table_title,
  hsize_t i;
  
  /* Attach the CLASS attribute */
- if ( H5LTset_attribute_string( loc_id, dset_name, "CLASS", "TABLE" ) < 0 )
+ if ( H5LTset_attribute_string( loc_id, dset_name, "CLASS", TABLE_CLASS ) < 0 )
   goto out;
 
  /* Attach the VERSION attribute */

@@ -2691,8 +2691,8 @@ herr_t H5LT_get_attribute_disk( hid_t loc_id,
                           void *attr_out ) 
 {
  /* identifiers */
- hid_t      attr_id;
- hid_t      attr_type;
+ hid_t attr_id;
+ hid_t attr_type;
 
  if ( ( attr_id = H5Aopen_name( loc_id, attr_name ) ) < 0 )
   return -1;
