@@ -1730,7 +1730,7 @@ static H5G_t *
 H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint, hid_t dxpl_id)
 {
     H5G_t	*grp = NULL;	/*new group			*/
-    H5F_t       *file;          /* File new group will be in    */
+    H5F_t       *file = NULL;   /* File new group will be in    */
     unsigned    stab_init=0;    /* Flag to indicate that the symbol stable was created successfully */
     H5G_t	*ret_value;	/* Return value */
 

@@ -26,6 +26,13 @@
 #include <assert.h>
 #include <stdlib.h>
 
+/* Disable certain warnings in PC-Lint: */
+/*lint --emacro( {534, 830}, H5P_DEFAULT, H5P_FILE_ACCESS, H5P_DATASET_XFER) */
+/*lint --emacro( {534, 830}, H5F_ACC_DEBUG) */
+/*lint --emacro( {534, 830}, H5F_ACC_RDWR) */
+/*lint --emacro( {534, 830}, H5FD_MULTI) */
+/*lint -esym( 534, H5Eclear, H5Epush) */
+
 #include "hdf5.h"
 
 /*
@@ -35,17 +42,15 @@
  */
 #define H5FD_MULTI_DEBUG
 
-/* Our versions of MIN and MAX */
+/* Our version of MAX */
 #undef MAX
 #define MAX(X,Y)	((X)>(Y)?(X):(Y))
-#undef MIN
-#define MIN(X,Y)	((X)<(Y)?(X):(Y))
 
 #ifndef FALSE
 #define FALSE		0
 #endif
 #ifndef TRUE
-#define TRUE		(!FALSE)
+#define TRUE		1
 #endif
 
 /* Loop through all mapped files */
@@ -60,6 +65,7 @@
 	assert(LOOPVAR>0 && LOOPVAR<H5FD_MEM_NTYPES);			      \
 	if (_seen[LOOPVAR]++) continue;
 
+#ifdef LATER
 #define MAPPED_MEMBERS(MAP,LOOPVAR) {					      \
     H5FD_mem_t _unmapped, LOOPVAR;					      \
 									      \
@@ -67,6 +73,7 @@
 	LOOPVAR = MAP[_unmapped];					      \
 	if (H5FD_MEM_DEFAULT==LOOPVAR) LOOPVAR=_unmapped;		      \
 	assert(LOOPVAR>0 && LOOPVAR<H5FD_MEM_NTYPES);
+#endif /* LATER */
 
 #define ALL_MEMBERS(LOOPVAR) {						      \
     H5FD_mem_t LOOPVAR;							      \
@@ -312,8 +319,7 @@ H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id,
     memb_addr[H5FD_MEM_SUPER] = 0;
     memb_addr[H5FD_MEM_DRAW] = HADDR_MAX/2;
 
-    return H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr,
-			     TRUE);
+    return H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, TRUE);
 }
 
 
@@ -400,7 +406,7 @@ H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id,
  */
 herr_t
 H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map,
-		  const hid_t *memb_fapl, const char **memb_name,
+		  const hid_t *memb_fapl, const char * const *memb_name,
 		  const haddr_t *memb_addr, hbool_t relax)
 {
     H5FD_multi_fapl_t	fa;
@@ -420,18 +426,16 @@ H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map,
 
     /* Check arguments and supply default values */
     if(H5I_GENPROP_LST != H5Iget_type(fapl_id) ||
-        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))   
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADVALUE, "not an access list", -1);
+            TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))   
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADVALUE, "not an access list", -1)
     if (!memb_map) {
-	for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
+	for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1))
 	    _memb_map[mt] = H5FD_MEM_DEFAULT;
-	}
 	memb_map = _memb_map;
     }
     if (!memb_fapl) {
-	for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
+	for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1))
 	    _memb_fapl[mt] = H5Pcreate(H5P_FILE_ACCESS);
-	}
 	memb_fapl = _memb_fapl;
     }
     if (!memb_name) {
@@ -443,9 +447,8 @@ H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map,
 	memb_name = _memb_name_ptrs;
     }
     if (!memb_addr) {
-	for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
+	for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1))
 	    _memb_addr[mt] = (mt?mt-1:0) * HADDR_MAX/H5FD_MEM_NTYPES;
-	}
 	memb_addr = _memb_addr;
     }
     
@@ -453,7 +456,7 @@ H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map,
 	/* Map usage type */
 	mmt = memb_map[mt];
 	if (mmt<0 || mmt>=H5FD_MEM_NTYPES)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADRANGE, "file resource type out of range", -1);
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADRANGE, "file resource type out of range", -1)
 	if (H5FD_MEM_DEFAULT==mmt) mmt = mt;
 
 	/*
@@ -461,11 +464,11 @@ H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map,
 	 * access property lists.
 	 */
 	if (H5P_DEFAULT!=memb_fapl[mmt] && TRUE!=H5Pisa_class(memb_fapl[mmt], H5P_FILE_ACCESS))
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "file resource type incorrect", -1);
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "file resource type incorrect", -1)
 
 	/* All names must be defined */
 	if (!memb_name[mmt] || !memb_name[mmt][0])
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "file resource type not set", -1);
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "file resource type not set", -1)
     }
     
     /*
@@ -523,23 +526,21 @@ H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map/*out*/,
     H5Eclear(H5E_DEFAULT);
 
     if(H5I_GENPROP_LST != H5Iget_type(fapl_id) ||
-        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))   
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not an access list", -1);
+            TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))   
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not an access list", -1)
     if (H5FD_MULTI!=H5Pget_driver(fapl_id))
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADVALUE, "incorrect VFL driver", -1);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADVALUE, "incorrect VFL driver", -1)
     if (NULL==(fa=H5Pget_driver_info(fapl_id)))
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADVALUE, "bad VFL driver info", -1);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADVALUE, "bad VFL driver info", -1)
 
-    if (memb_map) {
+    if (memb_map)
         memcpy(memb_map, fa->memb_map, H5FD_MEM_NTYPES*sizeof(H5FD_mem_t));
-    }
     if (memb_fapl) {
 	for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
-	    if (fa->memb_fapl[mt]>=0) {
+	    if (fa->memb_fapl[mt]>=0)
 		memb_fapl[mt] = H5Pcopy(fa->memb_fapl[mt]);
-	    } else {
+	    else
 		memb_fapl[mt] = fa->memb_fapl[mt]; /*default or bad ID*/
-	    }
 	}
     }
     if (memb_name) {
@@ -547,17 +548,14 @@ H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map/*out*/,
 	    if (fa->memb_name[mt]) {
 		memb_name[mt] = malloc(strlen(fa->memb_name[mt])+1);
 		strcpy(memb_name[mt], fa->memb_name[mt]);
-	    } else {
+	    } else
 		memb_name[mt] = NULL;
-	    }
 	}
     }
-    if (memb_addr) {
+    if (memb_addr)
 	memcpy(memb_addr, fa->memb_addr, H5FD_MEM_NTYPES*sizeof(haddr_t));
-    }
-    if (relax) {
+    if (relax)
 	*relax = fa->relax;
-    }
     
     return 0;
 }
@@ -596,12 +594,12 @@ H5Pset_dxpl_multi(hid_t dxpl_id, const hid_t *memb_dxpl)
 
     /* Check arguments */
     if (TRUE!=H5Pisa_class(dxpl_id,  H5P_DATASET_XFER))
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not a data transfer property list", -1);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not a data transfer property list", -1)
     if (!memb_dxpl)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "invalid pointer", -1);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "invalid pointer", -1)
     for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
         if (memb_dxpl[mt]!=H5P_DEFAULT && TRUE!=H5Pisa_class(memb_dxpl[mt], H5P_DATASET_XFER))
-            H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not a data transfer property list", -1);
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not a data transfer property list", -1)
     }
 
     /* Initialize the data transfer property list */
@@ -647,19 +645,18 @@ H5Pget_dxpl_multi(hid_t dxpl_id, hid_t *memb_dxpl/*out*/)
     H5Eclear(H5E_DEFAULT);
 
     if (TRUE!=H5Pisa_class(dxpl_id, H5P_DATASET_XFER))
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1)
     if (H5FD_MULTI!=H5Pget_driver(dxpl_id))
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADVALUE, "incorrect VFL driver", -1);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADVALUE, "incorrect VFL driver", -1)
     if (NULL==(dx=H5Pget_driver_info(dxpl_id)))
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADVALUE, "bad VFL driver info", -1);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADVALUE, "bad VFL driver info", -1)
 
     if (memb_dxpl) {
 	for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
-	    if (dx->memb_dxpl[mt]>=0) {
+	    if (dx->memb_dxpl[mt]>=0)
 		memb_dxpl[mt] = H5Pcopy(dx->memb_dxpl[mt]);
-	    } else {
+	    else
 		memb_dxpl[mt] = dx->memb_dxpl[mt]; /*default or bad ID */
-	    }
 	}
     }
 
@@ -756,9 +753,8 @@ H5FD_multi_sb_encode(H5FD_t *_file, char *name/*out*/,
     strcpy(name, "NCSAmulti");
 
     assert(7==H5FD_MEM_NTYPES);
-    for (m=H5FD_MEM_SUPER; m<H5FD_MEM_NTYPES; m=(H5FD_mem_t)(m+1)) {
-        buf[m-1] = file->fa.memb_map[m];
-    }
+    for (m=H5FD_MEM_SUPER; m<H5FD_MEM_NTYPES; m=(H5FD_mem_t)(m+1))
+        buf[m-1] = (unsigned char)file->fa.memb_map[m];
     buf[7] = 0;
     buf[8] = 0;
 
@@ -780,9 +776,8 @@ H5FD_multi_sb_encode(H5FD_t *_file, char *name/*out*/,
         nseen++;
     } END_MEMBERS;
     if (H5Tconvert(H5T_NATIVE_HADDR, H5T_STD_U64LE, nseen*2, buf+8, NULL,
-		   H5P_DEFAULT)<0) {
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_DATATYPE, H5E_CANTCONVERT, "can't convert superblock info", -1);
-    }
+		   H5P_DEFAULT)<0)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_DATATYPE, H5E_CANTCONVERT, "can't convert superblock info", -1)
 
     /* Encode all name templates */
     p = buf + 8 + nseen*2*8;
@@ -840,7 +835,7 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
 
     /* Make sure the name/version number is correct */
     if (strcmp(name, "NCSAmult"))
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_BADVALUE, "invalid multi superblock", -1);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_BADVALUE, "invalid multi superblock", -1)
 
     /* Set default values */
     ALL_MEMBERS(mt) {
@@ -869,7 +864,7 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
     memcpy(x, buf, (size_t)(nseen*2*8));
     buf += nseen*2*8;
     if (H5Tconvert(H5T_STD_U64LE, H5T_NATIVE_HADDR, nseen*2, x, NULL, H5P_DEFAULT)<0)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_DATATYPE, H5E_CANTCONVERT, "can't convert superblock info", -1);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_DATATYPE, H5E_CANTCONVERT, "can't convert superblock info", -1)
     ap = (haddr_t*)x;
     UNIQUE_MEMBERS(map, mt) {
         memb_addr[_unmapped] = *ap++;
@@ -920,7 +915,7 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
                     fprintf(stderr, "H5FD_MULTI: close member %d\n", (int)mt);
                 }
 #endif
-                H5FDclose(file->memb[mt]);
+                (void)H5FDclose(file->memb[mt]);
                 file->memb[mt] = NULL;
             }
             file->fa.memb_map[mt] = map[mt];
@@ -937,17 +932,17 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
         }
     } END_MEMBERS;
     if (compute_next(file)<0)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "compute_next() failed", -1);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "compute_next() failed", -1)
 
     /* Open all necessary files */
     if (open_members(file)<0)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "open_members() failed", -1);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "open_members() failed", -1)
 
     /* Set the EOA marker for all open files */
     UNIQUE_MEMBERS(file->fa.memb_map, mt) {
-        if (file->memb[mt]) {
-            H5FDset_eoa(file->memb[mt], memb_eoa[mt]);
-        }
+        if (file->memb[mt])
+            if(H5FDset_eoa(file->memb[mt], memb_eoa[mt])<0)
+                H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_CANTSET, "set_eoa() failed", -1)
     } END_MEMBERS;
 
     return 0;
@@ -1030,11 +1025,11 @@ H5FD_multi_fapl_copy(const void *_old_fa)
 
     if (nerrors) {
         for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
-            if (new_fa->memb_fapl[mt]>=0) H5Pclose(new_fa->memb_fapl[mt]);
+            if (new_fa->memb_fapl[mt]>=0) (void)H5Pclose(new_fa->memb_fapl[mt]);
             if (new_fa->memb_name[mt]) free(new_fa->memb_name[mt]);
         }
         free(new_fa);
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "invalid freespace objects", NULL);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "invalid freespace objects", NULL)
     }
     return new_fa;
 }
@@ -1061,15 +1056,20 @@ H5FD_multi_fapl_free(void *_fa)
 {
     H5FD_multi_fapl_t	*fa = (H5FD_multi_fapl_t*)_fa;
     H5FD_mem_t		mt;
+    static const char *func="H5FD_multi_fapl_free";  /* Function Name for error reporting */
 
     /* Clear the error stack */
     H5Eclear(H5E_DEFAULT);
 
     for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
-	if (fa->memb_fapl[mt]>=0) H5Pclose(fa->memb_fapl[mt]);
-	if (fa->memb_name[mt]) free(fa->memb_name[mt]);
+	if (fa->memb_fapl[mt]>=0)
+            if(H5Pclose(fa->memb_fapl[mt])<0)
+                H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTCLOSEOBJ, "can't close property list", -1)
+	if (fa->memb_name[mt])
+            free(fa->memb_name[mt]);
     }
     free(fa);
+
     return 0;
 }
 
@@ -1114,9 +1114,9 @@ H5FD_multi_dxpl_copy(const void *_old_dx)
 
     if (nerrors) {
         for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1))
-            H5Pclose(new_dx->memb_dxpl[mt]);
+            (void)H5Pclose(new_dx->memb_dxpl[mt]);
         free(new_dx);
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "invalid freespace objects", NULL);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "invalid freespace objects", NULL)
     }
     return new_dx;
 }
@@ -1143,13 +1143,15 @@ H5FD_multi_dxpl_free(void *_dx)
 {
     H5FD_multi_dxpl_t	*dx = (H5FD_multi_dxpl_t*)_dx;
     H5FD_mem_t		mt;
+    static const char *func="H5FD_multi_dxpl_free";  /* Function Name for error reporting */
 
     /* Clear the error stack */
     H5Eclear(H5E_DEFAULT);
 
     for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1))
         if (dx->memb_dxpl[mt]>=0)
-            H5Pclose(dx->memb_dxpl[mt]);
+            if(H5Pclose(dx->memb_dxpl[mt])<0)
+                H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTCLOSEOBJ, "can't close property list", -1)
     free(dx);
     return 0;
 }
@@ -1188,41 +1190,41 @@ H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id,
 
     /* Check arguments */
     if (!name || !*name)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_BADVALUE, "invalid file name", NULL);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_BADVALUE, "invalid file name", NULL)
     if (0==maxaddr || HADDR_UNDEF==maxaddr)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_BADRANGE, "bogus maxaddr", NULL);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_BADRANGE, "bogus maxaddr", NULL)
 
     /*
      * Initialize the file from the file access properties, using default
      * values if necessary.
      */
     if (NULL==(file=calloc(1, sizeof(H5FD_multi_t))))
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed", NULL);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed", NULL)
     if (H5P_FILE_ACCESS_DEFAULT==fapl_id || H5FD_MULTI!=H5Pget_driver(fapl_id)) {
         close_fapl = fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-        H5Pset_fapl_multi(fapl_id, NULL, NULL, NULL, NULL, TRUE);
+        if(H5Pset_fapl_multi(fapl_id, NULL, NULL, NULL, NULL, TRUE)<0)
+            H5Epush_goto(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTSET, "can't set property value", error)
     }
     fa = H5Pget_driver_info(fapl_id);
     assert(fa);
     ALL_MEMBERS(mt) {
 	file->fa.memb_map[mt] = fa->memb_map[mt];
 	file->fa.memb_addr[mt] = fa->memb_addr[mt];
-	if (fa->memb_fapl[mt]>=0) {
+	if (fa->memb_fapl[mt]>=0)
 	    file->fa.memb_fapl[mt] = H5Pcopy(fa->memb_fapl[mt]);
-	} else {
+	else
 	    file->fa.memb_fapl[mt] = fa->memb_fapl[mt];
-	}
-	if (fa->memb_name[mt]) {
+	if (fa->memb_name[mt])
 	    file->fa.memb_name[mt] = my_strdup(fa->memb_name[mt]);
-	} else {
+	else
 	    file->fa.memb_name[mt] = NULL;
-	}
     } END_MEMBERS;
     file->fa.relax = fa->relax;
     file->flags = flags;
     file->name = my_strdup(name);
     if (close_fapl>=0)
-        H5Pclose(close_fapl);
+        if(H5Pclose(close_fapl)<0)
+            H5Epush_goto(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTCLOSEOBJ, "can't close property list", error)
 
     /* Compute derived properties and open member files */
     if (compute_next(file)<0)
@@ -1231,18 +1233,19 @@ H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id,
         H5Epush_goto(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "open_members() failed", error);
 
     /* We must have opened at least the superblock file */
-    if (H5FD_MEM_DEFAULT==(m=file->fa.memb_map[H5FD_MEM_SUPER])) {
+    if (H5FD_MEM_DEFAULT==(m=file->fa.memb_map[H5FD_MEM_SUPER]))
         m = H5FD_MEM_SUPER;
-    }
-    if (NULL==file->memb[m]) goto error;
+    if (NULL==file->memb[m])
+        goto error;
+
     return (H5FD_t*)file;
 
 error:
     /* Cleanup and fail */
     if (file) {
 	ALL_MEMBERS(mt) {
-	    if (file->memb[mt]) H5FDclose(file->memb[mt]);
-	    if (file->fa.memb_fapl[mt]>=0) H5Pclose(file->fa.memb_fapl[mt]);
+	    if (file->memb[mt]) (void)H5FDclose(file->memb[mt]);
+	    if (file->fa.memb_fapl[mt]>=0) (void)H5Pclose(file->fa.memb_fapl[mt]);
 	    if (file->fa.memb_name[mt]) free(file->fa.memb_name[mt]);
 	} END_MEMBERS;
 	if (file->name) free(file->name);
@@ -1301,11 +1304,11 @@ H5FD_multi_close(H5FD_t *_file)
 	}
     } END_MEMBERS;
     if (nerrors)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "error closing member files", -1);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "error closing member files", -1)
 
     /* Clean up other stuff */
     ALL_MEMBERS(mt) {
-	if (file->fa.memb_fapl[mt]>=0) H5Pclose(file->fa.memb_fapl[mt]);
+	if (file->fa.memb_fapl[mt]>=0) (void)H5Pclose(file->fa.memb_fapl[mt]);
 	if (file->fa.memb_name[mt]) free(file->fa.memb_name[mt]);
     } END_MEMBERS;
     free(file->name);
@@ -1472,7 +1475,7 @@ H5FD_multi_set_eoa(H5FD_t *_file, haddr_t eoa)
 	    status = H5FDset_eoa(file->memb[mmt], eoa-file->fa.memb_addr[mmt]);
 	} H5E_END_TRY;
 	if (status<0)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_BADVALUE, "member H5FDset_eoa failed", -1);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_BADVALUE, "member H5FDset_eoa failed", -1)
     }
     
     /* Save new eoa for return later */
@@ -1516,7 +1519,7 @@ H5FD_multi_get_eof(H5FD_t *_file)
 		tmp = H5FDget_eof(file->memb[mt]);
 	    } H5E_END_TRY;
 	    if (HADDR_UNDEF==tmp)
-            H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "member file has unknown eof", HADDR_UNDEF);
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "member file has unknown eof", HADDR_UNDEF)
 	    if (tmp>0) tmp += file->fa.memb_addr[mt];
 	    
 	} else if (file->fa.relax) {
@@ -1528,7 +1531,7 @@ H5FD_multi_get_eof(H5FD_t *_file)
 	    assert(HADDR_UNDEF!=tmp);
 	    
 	} else {
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "bad eof", HADDR_UNDEF);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "bad eof", HADDR_UNDEF)
 	}
 
 	if (tmp>eof) eof = tmp;
@@ -1561,9 +1564,9 @@ H5FD_multi_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
 
     /* Get data type for multi driver */
     if(H5Pget_multi_type(fapl, &type) < 0)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "can't get data type for multi driver", -1);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "can't get data type for multi driver", -1)
     if(type<H5FD_MEM_DEFAULT || type>=H5FD_MEM_NTYPES)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "data type is out of range", -1);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "data type is out of range", -1)
     mmt = file->fa.memb_map[type];
     if(H5FD_MEM_DEFAULT==mmt) mmt = type;
                                                                      
@@ -1599,7 +1602,7 @@ H5FD_multi_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     if (H5FD_MEM_DEFAULT==mmt) mmt = type;
     
     if (HADDR_UNDEF==(addr=H5FDalloc(file->memb[mmt], type, dxpl_id, size))) {
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "member file can't alloc", HADDR_UNDEF);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "member file can't alloc", HADDR_UNDEF)
     }
     addr += file->fa.memb_addr[mmt];
     if (addr+size>file->eoa) file->eoa = addr+size;
@@ -1820,7 +1823,7 @@ H5FD_multi_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
 	}
     }
     if (nerrors)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "error flushing member files", -1);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "error flushing member files", -1)
 	
     return 0;
 }
@@ -1924,7 +1927,7 @@ open_members(H5FD_multi_t *file)
 	}
     } END_MEMBERS;
     if (nerrors)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "error opening member files", -1);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "error opening member files", -1)
 
     return 0;
 }

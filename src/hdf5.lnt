@@ -12,7 +12,11 @@
 -esym(528, H5V_vector_cmp, H5V_vector_cmp_s, H5V_vector_cmp_u)
 -esym(528, H5V_vector_zerop_s, H5V_vector_zerop_u)
 
-// Turn off warnings about not "Expression-like macro not parenthesized" for
+// Turn off warnings about "Ignoring return value of function" for
+// H5open() in public error macros
+-emacro(534, H5Epush_ret, H5Epush_goto)
+
+// Turn off warnings about "Expression-like macro not parenthesized" for
 // enumerated type increment & decrement macros:
 -esym(773, H5_INC_ENUM, H5_DEC_ENUM)
 
@@ -20,7 +24,7 @@
 -esym(750, PABLO_MASK)
 
 // Suppress message about our use of 'goto' in our error macros
--emacro(801,HGOTO_DONE)
+-emacro(801,HGOTO_DONE, H5Epush_goto)
 
 // Suppress message about using 'goto' in a few functions
 -efunc(801,H5_term_library,H5_trace)
@@ -81,6 +85,7 @@
         H5FDcore.c
         H5FDfamily.c
         H5FDlog.c
+        H5FDmulti.c
 
         H5V.c
         H5Z.c
@@ -93,4 +98,6 @@
     macros cleaned up and the PABLO_MASK adjusted, but have not been linted:
         H5FDfphdf5.c
         H5FDgass.c
+        H5FDmpio.c
+        H5FDmpiposix.c
 */

@@ -999,8 +999,7 @@ H5S_mpio_spaces_write(H5F_t *f, H5O_layout_t *layout,
 
     /*OKAY: CAST DISCARDS CONST QUALIFIER*/
     ret_value = H5S_mpio_spaces_xfer(f, layout, elmt_size,
-				     file_space, mem_space, dxpl_id,
-				     (void*)buf, 1/*write*/);
+         file_space, mem_space, dxpl_id, (void*)buf, 1/*write*/);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
