@@ -12,11 +12,11 @@ warn="-fullwarn -woff 1174,1429,1209,1196"
 
 profile="-pg"
 
-debug="-g -DH5AC_DEBUG -DH5B_DEBUG -DH5F_DEBUG -DH5G_DEBUG -UH5O_DEBUG -DH5T_DEBUG -DH5F_OPT_SEEK=0"
+debug="-g"
 
 #production="-O -DNDEBUG"
 
-default_mode='$debug $warn -DH5F_LOW_DFLT=H5F_LOW_SEC2'
+default_mode='$debug $warn'
 
 RANLIB=:		# SGI needs not ranlib
 
