@@ -57,12 +57,70 @@ sub setver ($;$$$) {
 }
 
 ##############################################################################
+# Make sure MANIFEST contains all the necessary files.  If we are running
+# under CVS then look at the CVS/Entries files to get the names that should
+# be in the manifest.  Otherwise we really can't do anything.
+#
+sub manifest () {
+    my ($fname, %manifest);
+    my $nprobs=0;
+
+    # We can't do anything if we're not running under cvs.
+    return "" unless -d "CVS";
+
+    # Read the files from the manifest.
+    open MANIFEST, "MANIFEST" or die "unable to read manifest";
+    while (<MANIFEST>) {
+	chomp;
+	$manifest{$_} = 1;
+    }
+    close MANIFEST;
+
+    # Read files from CVS/Entries
+    open FIND, "find . -name Entries -print | sort |" or
+	die "unable to find CVS entries";
+    while ($fname=<FIND>) {
+	chomp $fname;
+	my ($dir) = $fname =~ m%(.*)/CVS/Entries%;
+	open ENTRIES, $fname or die "unable to open $fname";
+	while (<ENTRIES>) {
+	    my ($ename) = m%^/(.*?)/%;
+	    $ename = "$dir/" . $ename;
+	    if (exists $manifest{$ename}) {
+		delete $manifest{$ename};
+	    } else {
+		print "NEW: $ename\n";
+		$nprobs++;
+	    }
+	}
+	close ENTRIES;
+    }
+    close FIND;
+
+    for (sort keys %manifest) {
+	print "OLD: $_\n";
+	$nprobs++;
+    }
+
+    if ($nprobs) {
+	print "Please add the new files to MANIFEST and remove the old\n";
+	print "files and try again.  The MANIFEST should contain all files\n";
+	print "that are to be distributed for a release.\n";
+	exit 1;
+    }
+}
+
+
+##############################################################################
 # Build a release
 #
 sub release (@) {
    my @types = @_;
    my ($ver, $status, $created_symlink);
    local $_;
+
+   # Make sure no one forgot to update MANIFEST
+   manifest;
 
    # Make sure the version number is correct.
    print "Building an HDF release...\n";
