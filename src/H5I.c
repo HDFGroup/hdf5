@@ -66,13 +66,6 @@ static int interface_initialize_g = 0;
  */
 #define HASH_SIZE_POWER_2
 
-/* Define the following macro for atom caching over all the atoms */
-#define IDS_ARE_CACHED
-
-#ifdef IDS_ARE_CACHED
-#  define ID_CACHE_SIZE 4	      /*# of previous atoms cached	   */
-#endif
-
 #ifdef HASH_SIZE_POWER_2
 /*
  * Map an ID to a hash location (assumes s is a power of 2 and smaller
@@ -114,11 +107,6 @@ typedef struct {
 } H5I_id_group_t;
 
 /*-------------------- Locally scoped variables -----------------------------*/
-
-#ifdef IDS_ARE_CACHED
-/* ID Cache */
-static H5I_id_info_t *H5I_cache_g[ID_CACHE_SIZE];
-#endif
 
 /* Array of pointers to atomic groups */
 static H5I_id_group_t *H5I_id_group_list_g[H5I_NGROUPS];
@@ -387,7 +375,7 @@ H5I_clear_group(H5I_type_t grp, hbool_t force)
     H5I_id_info_t   *tmp=NULL;          /* Temporary node ptr */
     int		ret_value = SUCCEED;
     unsigned    delete_node;            /* Flag to indicate node should be removed from linked list */
-    unsigned	i,j;
+    unsigned	i;
 
     FUNC_ENTER_NOAPI(H5I_clear_group, FAIL);
 
@@ -397,16 +385,6 @@ H5I_clear_group(H5I_type_t grp, hbool_t force)
     grp_ptr = H5I_id_group_list_g[grp];
     if (grp_ptr == NULL || grp_ptr->count <= 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid group");
-
-#ifdef IDS_ARE_CACHED
-    /*
-     * Remove atoms from the global atom cache.
-     */
-    for (i=0; i<ID_CACHE_SIZE; i++) {
-	if (H5I_cache_g[i] && H5I_GRP(H5I_cache_g[i]->id) == grp)
-	    H5I_cache_g[i] = NULL;
-    }
-#endif /* IDS_ARE_CACHED */
 
     /*
      * Call free method for all objects in group regardless of their reference
@@ -480,16 +458,6 @@ H5I_clear_group(H5I_type_t grp, hbool_t force)
                     assert(last->next==cur);
                     last->next=next;
                 } /* end else */
-
-#ifdef IDS_ARE_CACHED
-                /* Scan through cache & remove node, if present */
-                /* (node's 'free' callback function could have made an H5I */
-                /*      call, which would probably put the node back in */
-                /*      the cache - QAK) */
-                for(j=0; j<ID_CACHE_SIZE; j++)
-                    if(H5I_cache_g[j]==cur)
-                        H5I_cache_g[j]=NULL;
-#endif /* IDS_ARE_CACHED */
 
                 /* Free the node */
                 H5FL_FREE(H5I_id_info_t,cur);
@@ -849,9 +817,6 @@ H5I_remove(hid_t id)
     H5I_id_info_t	*last_id;	/*ptr to the last atom		*/
     H5I_type_t		grp;		/*atom's atomic group		*/
     unsigned		hash_loc;	/*atom's hash table location	*/
-#ifdef IDS_ARE_CACHED
-    unsigned		i;		/*local counting variable	*/
-#endif
     void *	      ret_value = NULL;	/*return value			*/
 
     FUNC_ENTER_NOAPI(H5I_remove, NULL);
@@ -877,15 +842,6 @@ H5I_remove(hid_t id)
         last_id = curr_id;
         curr_id = curr_id->next;
     }
-
-#ifdef IDS_ARE_CACHED
-    /* Delete object from cache */
-    for (i = 0; i < ID_CACHE_SIZE; i++)
-        if (H5I_cache_g[i] && H5I_cache_g[i]->id == id) {
-            H5I_cache_g[i] = NULL;
-            break; /* we assume there is only one instance in the cache */
-        }
-#endif /* IDS_ARE_CACHED */
 
     if (curr_id != NULL) {
         if (last_id == NULL) {
@@ -1116,14 +1072,12 @@ done:
 static H5I_id_info_t *
 H5I_find_id(hid_t id)
 {
-    H5I_id_group_t	*grp_ptr = NULL;	/*ptr to the group	*/
-    H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new ID	*/
+    H5I_id_group_t	*grp_ptr;		/*ptr to the group	*/
+    H5I_id_info_t	*last_id;		/*ptr to the last ID	*/
+    H5I_id_info_t	*id_ptr;		/*ptr to the new ID	*/
     H5I_type_t		grp;			/*ID's group		*/
     unsigned		hash_loc;		/*bucket pointer	*/
     H5I_id_info_t	*ret_value = NULL;	/*return value		*/
-#ifdef IDS_ARE_CACHED
-    int		i;
-#endif
 
     FUNC_ENTER_NOINIT(H5I_find_id);
 
@@ -1135,30 +1089,6 @@ H5I_find_id(hid_t id)
     if (grp_ptr == NULL || grp_ptr->count <= 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "invalid group");
 
-#ifdef IDS_ARE_CACHED
-    /*
-     * Look for the ID in the cache first. Implement a simple "move
-     * forward" caching scheme by swapping the found cache item with the
-     * previous cache item.  This gradually migrates used cache items toward
-     * the front of the cache and unused items toward the end.	For instance,
-     * finding `e' in the cache results in:
-     *
-     * Before: a b c d e f g h i j
-     *	       | | |  X	 | | | | |
-     * After:  a b c e d f g h i j
-     */
-    for (i=0; i<ID_CACHE_SIZE; i++)
-	if (H5I_cache_g[i] && H5I_cache_g[i]->id == id) {
-	    ret_value = H5I_cache_g[i];
-	    if (i > 0) {
-		H5I_id_info_t *tmp = H5I_cache_g[i-1];
-		H5I_cache_g[i-1] = H5I_cache_g[i];
-		H5I_cache_g[i] = tmp;
-	    }
-	    HGOTO_DONE(ret_value);
-	}
-#endif /* IDS_ARE_CACHED */
-
     /* Get the bucket in which the ID is located */
     hash_loc = (unsigned)H5I_LOC(id, grp_ptr->hash_size);
     id_ptr = grp_ptr->id_list[hash_loc];
@@ -1166,17 +1096,23 @@ H5I_find_id(hid_t id)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "invalid ID");
 
     /* Scan the bucket's linked list for a match */
+    last_id=NULL;
     while (id_ptr) {
 	if (id_ptr->id == id)
             break;
+        last_id=id_ptr;
 	id_ptr = id_ptr->next;
     }
-    ret_value = id_ptr;
 
-#ifdef IDS_ARE_CACHED
-    /* Add id to the end of the cache */
-    H5I_cache_g[ID_CACHE_SIZE-1] = id_ptr;
-#endif /* IDS_ARE_CACHED */
+    /* If we found an object, move it to the front of the list, if it isn't there already */
+    if(id_ptr!=NULL && last_id!=NULL) {
+        last_id->next=id_ptr->next;
+        id_ptr->next=grp_ptr->id_list[hash_loc];
+        grp_ptr->id_list[hash_loc]=id_ptr;
+    } /* end if */
+
+    /* Set the return value */
+    ret_value = id_ptr;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
