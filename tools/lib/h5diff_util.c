@@ -21,6 +21,7 @@ int      g_nTasks = 1;
 unsigned char	 g_Parallel = 0;  /*0 for serial, 1 for parallel */
 char    outBuff[OUTBUFF_SIZE];
 unsigned int     outBuffOffset;
+FILE*	overflow_file	      = NULL;
 
 /*-------------------------------------------------------------------------
  * Function: parallel_print
@@ -35,20 +36,45 @@ unsigned int     outBuffOffset;
  */
 void parallel_print(const char* format, ...)
 {
+    int 	bytes_written;
     va_list	ap;
 
     va_start(ap, format);
 
     if(!g_Parallel)
-	vprintf(format, ap);
+	vprintf(format, ap); 
     else
     {
-	if((OUTBUFF_SIZE-outBuffOffset) > 0)
-	    outBuffOffset += HDvsnprintf(outBuff+outBuffOffset, OUTBUFF_SIZE-outBuffOffset, format, ap);
+
+	if(overflow_file == NULL) /*no overflow has occurred yet */
+	{
+	    bytes_written = HDvsnprintf(outBuff+outBuffOffset, OUTBUFF_SIZE-outBuffOffset, format, ap);
+
+	    va_end(ap);
+	    va_start(ap, format);
+
+	    if(bytes_written >=  (OUTBUFF_SIZE-outBuffOffset))
+	    {
+		/* Delete the characters that were written to outBuff since they will be written to the overflow_file */
+		memset(outBuff+outBuffOffset, 0, OUTBUFF_SIZE - outBuffOffset);  
+
+		overflow_file = tmpfile(); 
+
+		if(overflow_file == NULL)
+		    printf("Warning: Could not create overflow file.  Output may be truncated.\n");
+		else
+		    bytes_written = HDvfprintf(overflow_file, format, ap);
+	    }
+	    else
+		outBuffOffset += bytes_written;
+	}
+	else
+	    bytes_written = HDvfprintf(overflow_file, format, ap); 
+
+
     }
     va_end(ap);
 }
-
 
 /*-------------------------------------------------------------------------
  * Function: print_pos
@@ -110,7 +136,7 @@ void print_pos( int        *ph,
  for ( i = 0; i < rank; i++)
  {
  /* HDfprintf(stdout,"%Hu ", pos[i]  ); */
-     parallel_print("%d ",(int) pos[i]);
+     parallel_print("%"H5_PRINTF_LL_WIDTH"u ", pos[i]);
  }
  parallel_print("]" );
 }
@@ -377,7 +403,7 @@ get_class(H5T_class_t tclass)
 void print_found(hsize_t nfound)
 {
     if(g_Parallel)
-	outBuffOffset += HDsnprintf(outBuff+outBuffOffset, OUTBUFF_SIZE-outBuffOffset, "%lld differences found\n", nfound);
+	parallel_print("%"H5_PRINTF_LL_WIDTH"u differences found\n", nfound);
     else
 	HDfprintf(stdout,"%Hu differences found\n",nfound);
 }

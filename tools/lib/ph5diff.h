@@ -16,7 +16,8 @@
 #define _PH5DIFF_H__
 
 
-#define OUTBUFF_SIZE 50000
+#define PRINT_DATA_MAX_SIZE 	512
+#define OUTBUFF_SIZE 		PRINT_DATA_MAX_SIZE*2
 /* Send from manager to workers */
 #define MPI_TAG_ARGS		1	
 #define MPI_TAG_PRINT_TOK	2
@@ -25,15 +26,17 @@
 #define MPI_TAG_TOK_REQUEST	3
 #define MPI_TAG_DONE		4
 #define MPI_TAG_TOK_RETURN	5
+#define MPI_TAG_PRINT_DATA	6
 
 /* Operational tags used to init and complete diff */
-#define MPI_TAG_END		6
-#define MPI_TAG_PARALLEL	7
+#define MPI_TAG_END		7
+#define MPI_TAG_PARALLEL	8
 
 extern int	g_nTasks;
 extern unsigned char g_Parallel;
-extern char    outBuff[OUTBUFF_SIZE];
+extern char    outBuff[];
 extern unsigned int	outBuffOffset;
+extern FILE*		overflow_file;
 
 struct diff_args
 {

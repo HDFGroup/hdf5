@@ -50,7 +50,6 @@ print_objname (diff_opt_t * options, hsize_t nfound)
 void phdiff_dismiss_workers(void)
 {
     int i;
-
     for(i=1; i<g_nTasks; i++)
 	MPI_Send(NULL, 0, MPI_BYTE, i, MPI_TAG_END, MPI_COMM_WORLD);
 }
@@ -76,16 +75,62 @@ void print_manager_output(void)
       if( (outBuffOffset>0) && g_Parallel)
       {
 	  printf("%s", outBuff); 
+
+	  if(overflow_file)
+	  {
+	      int     tmp;
+
+	      rewind(overflow_file);
+	      while((tmp = getc(overflow_file)) >= 0)
+		  putchar(tmp);
+
+	      fclose(overflow_file);
+	      overflow_file = NULL;
+	  }
+
 	  fflush(stdout);
 	  memset(outBuff, 0, OUTBUFF_SIZE);
 	  outBuffOffset = 0;
       }
       else if( (outBuffOffset>0) && !g_Parallel)
       {
-	  printf("h5diff error: outBuffOffset>0, but we're not in parallel\n");
+	  printf("h5diff error: outBuffOffset>0, but we're not in parallel!\n");
       }
 }
 
+/*-------------------------------------------------------------------------
+ * Function: print_incoming_data
+ *
+ * Purpose: special function that prints any output that has been sent to the manager
+ * 	    and is currently sitting in the incoming message queue
+ *
+ * Return: none
+ *
+ * Programmer: Leon Arber
+ *
+ * Date: March 7, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static void print_incoming_data(void)
+{
+    char	data[PRINT_DATA_MAX_SIZE+1];
+    int		incomingMessage;
+    MPI_Status	Status;
+    
+    do
+    {	    
+	MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_PRINT_DATA, MPI_COMM_WORLD, &incomingMessage, &Status);
+	if(incomingMessage)
+	{
+	    memset(data, 0, PRINT_DATA_MAX_SIZE+1);
+	    MPI_Recv(data, PRINT_DATA_MAX_SIZE, MPI_CHAR, Status.MPI_SOURCE, MPI_TAG_PRINT_DATA, MPI_COMM_WORLD, &Status);
+
+	    printf("%s", data);
+	}
+    } while(incomingMessage);
+}
 #endif
 
 /*-------------------------------------------------------------------------
@@ -237,8 +282,7 @@ h5diff (const char *fname1,
 	if(g_Parallel)
 	{
 	    /* Let tasks know that they won't be needed */
-	    for(i=1; i<g_nTasks; i++)
-		MPI_Send(filenames, 1024*2, MPI_CHAR, i, MPI_TAG_END, MPI_COMM_WORLD);
+	    phdiff_dismiss_workers();
 	}
 #endif
       assert (objname2);
@@ -246,10 +290,6 @@ h5diff (const char *fname1,
       nfound = diff_compare (file1_id, fname1, objname1, nobjects1, info1,
 			     file2_id, fname2, objname2, nobjects2, info2,
 			     options);
-#ifdef H5_HAVE_PARALLEL
-      /* If there was something we buffered, let's print it now */
-      print_manager_output();
-#endif
     }
 
 /*-------------------------------------------------------------------------
@@ -494,7 +534,6 @@ diff_match (hid_t file1_id,
 			/* check to see if the print token was returned. */
 			if(!havePrintToken)
 			{
-
 			    /* check incoming queue for token */
 			    MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &incomingMessage, &Status);
 
@@ -521,6 +560,9 @@ diff_match (hid_t file1_id,
 				havePrintToken = 0;
 			    }
 			}
+
+			/* Print all the data in our incoming queue */
+			print_incoming_data();  
 		    }
 
 		    /* check array of tasks to see which ones are free.
@@ -551,28 +593,19 @@ diff_match (hid_t file1_id,
 			 * if we don't have the token, some task is currently printing so we'll wait for that task to return it. */
 			if(!havePrintToken)
 			{
-			    MPI_Probe(MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
-
-			    if(Status.MPI_TAG == MPI_TAG_TOK_RETURN)
-			    {
-				MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
-				havePrintToken = 1;
-				nfound += nFoundbyWorker;
-				/* send this task the work unit. */
-				MPI_Send(&args, sizeof(struct diff_args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
-			    }
-			    else
-			    {
-				printf("ERROR: Invalid (%d) tag received\n", Status.MPI_TAG);
-				MPI_Abort(MPI_COMM_WORLD, 0);
-				MPI_Finalize();
-			    }
+			    MPI_Recv(&nFoundbyWorker, sizeof(hsize_t), MPI_BYTE, MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
+			    havePrintToken = 1;
+			    nfound += nFoundbyWorker;
+			    /* send this task the work unit. */
+			    MPI_Send(&args, sizeof(struct diff_args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
 			}
 			/* if we do have the token, check for task to free up, or wait for a task to request it */
 			else
 			{
-			    MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
+			    /* But first print all the data in our incoming queue */
+			    print_incoming_data(); 
 
+			    MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
 			    if(Status.MPI_TAG == MPI_TAG_DONE)
 			    {
 				MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
@@ -595,9 +628,6 @@ diff_match (hid_t file1_id,
 				MPI_Finalize();
 			    }
 			}
-
-
-
 		    }
 		}
 #endif
@@ -612,9 +642,16 @@ diff_match (hid_t file1_id,
 		MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
 		if(Status.MPI_TAG == MPI_TAG_DONE)
 		{
+		    MPI_Recv(&nFoundbyWorker, sizeof(hsize_t), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
+		    nfound += nFoundbyWorker;
+		    busyTasks--;
+		}
+		else if(Status.MPI_TAG == MPI_TAG_TOK_RETURN)
+		{
 		    MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
 		    nfound += nFoundbyWorker;
 		    busyTasks--;
+		    havePrintToken = 1;
 		}
 		else if(Status.MPI_TAG == MPI_TAG_TOK_REQUEST)
 		{
@@ -642,15 +679,28 @@ diff_match (hid_t file1_id,
 		    busyTasks--;
 		    havePrintToken = 1;
 		}
+		else if(Status.MPI_TAG == MPI_TAG_PRINT_DATA)
+		{
+		    char 	data[PRINT_DATA_MAX_SIZE+1];
+		    memset(data, 0, PRINT_DATA_MAX_SIZE+1);
+	
+		    MPI_Recv(data, PRINT_DATA_MAX_SIZE, MPI_CHAR, Status.MPI_SOURCE, MPI_TAG_PRINT_DATA, MPI_COMM_WORLD, &Status);
+		    
+		    printf("%s", data);
+		}
 		else
 		{
-		    printf("ERROR!! Invalid tag (%d) received \n", Status.MPI_TAG);
+		    printf("ph5diff-manager: ERROR!! Invalid tag (%d) received \n", Status.MPI_TAG);
 		    MPI_Abort(MPI_COMM_WORLD, 0);
 		}
 	    }
 
 	    for(i=1; i<g_nTasks; i++)
 		MPI_Send(NULL, 0, MPI_BYTE, i, MPI_TAG_END, MPI_COMM_WORLD);
+
+	    /* Print any final data waiting in our queue */
+	    print_incoming_data();
+
 	}
 
 	free(workerTasks);
@@ -669,10 +719,6 @@ diff_match (hid_t file1_id,
 
     /* the manager can do this. */
     nfound += diff (file1_id, "/", file2_id, "/", options, H5G_GROUP);
-#ifdef H5_HAVE_PARALLEL
-    /* If there was something we buffered, let's print it now */
-    print_manager_output();
-#endif
 
     return nfound;
 }
@@ -712,13 +758,13 @@ diff_compare (hid_t file1_id,
 
     if (i == -1)
     {
-	printf ("Object <%s> could not be found in <%s>\n", obj1_name,
+	parallel_print ("Object <%s> could not be found in <%s>\n", obj1_name,
 		file1_name);
 	f1 = 1;
     }
 	    if (j == -1)
 	    {
-		printf ("Object <%s> could not be found in <%s>\n", obj2_name,
+		parallel_print ("Object <%s> could not be found in <%s>\n", obj2_name,
 			file2_name);
 		f2 = 1;
 	    }
@@ -736,7 +782,7 @@ diff_compare (hid_t file1_id,
   if (info1[i].type != info2[j].type)
     {
       if (options->m_verbose)
-	printf
+	parallel_print
 	  ("Comparison not possible: <%s> is of type %s and <%s> is of type %s\n",
 	   obj1_name, get_type (info1[i].type), obj2_name,
 	   get_type (info2[j].type));
@@ -797,7 +843,7 @@ diff (hid_t file1_id,
 	    if (options->m_verbose)
 	    {
 		if (print_objname (options, (hsize_t)1))
-		    parallel_print("Dataset:     <%s> and <%s>\n", path1, path2); 
+		    parallel_print("Dataset:     <%s> and <%s>\n", path1, path2);  
 		nfound = diff_dataset (file1_id, file2_id, path1, path2, options);
 
 	    }

@@ -98,7 +98,7 @@ int main(int argc, const char *argv[])
 	MPI_Barrier(MPI_COMM_WORLD);
 
 	print_results(nfound, &options);
-	print_manager_output();
+	print_manager_output();  
 
 	MPI_Finalize();
 
@@ -131,8 +131,10 @@ ph5diff_worker(int nID)
     struct diff_args args;
     hid_t file1_id, file2_id;	
     char	filenames[2][1024];
+    char	out_data[PRINT_DATA_MAX_SIZE] = {0};
     hsize_t    nfound=0;
     MPI_Status Status;
+    int 	i;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &nID);
     outBuffOffset = 0;
@@ -140,8 +142,6 @@ ph5diff_worker(int nID)
     MPI_Recv(filenames, 1024*2, MPI_CHAR, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
     if(Status.MPI_TAG == MPI_TAG_PARALLEL)
     {
-	/*printf("We're in parallel mode...opening the files\n"); */
-
 	/* disable error reporting */
 	H5E_BEGIN_TRY
 	{
@@ -179,9 +179,38 @@ ph5diff_worker(int nID)
 
 		    /*Wait for print token. */
 		    MPI_Recv(NULL, 0, MPI_BYTE, 0, MPI_TAG_PRINT_TOK, MPI_COMM_WORLD, &Status);
+	
+		    /*When get token, send all of our output to the manager task and then return the token */
+		    for(i=0; i<outBuffOffset; i+=PRINT_DATA_MAX_SIZE)
+			MPI_Send(outBuff+i, PRINT_DATA_MAX_SIZE, MPI_BYTE, 0, MPI_TAG_PRINT_DATA, MPI_COMM_WORLD);
 
-		    /*When get token, print stuff out and return token */
-		    printf("%s", outBuff);
+			
+		    /* An overflow file exists, so we send it's output to the manager too and then delete it */
+		    if(overflow_file)
+		    {
+    			int	tmp;
+			memset(out_data, 0, PRINT_DATA_MAX_SIZE);
+			i=0;
+			
+			rewind(overflow_file);
+			while((tmp = getc(overflow_file)) >= 0)
+			{
+			    *(out_data + i++) = (char)tmp;
+			    if(i==PRINT_DATA_MAX_SIZE)
+			    {
+				MPI_Send(out_data, PRINT_DATA_MAX_SIZE, MPI_BYTE, 0, MPI_TAG_PRINT_DATA, MPI_COMM_WORLD);
+				i=0;
+				memset(out_data, 0, PRINT_DATA_MAX_SIZE);
+			    }
+			}
+
+			if(i>0)
+			    MPI_Send(out_data, PRINT_DATA_MAX_SIZE, MPI_BYTE, 0, MPI_TAG_PRINT_DATA, MPI_COMM_WORLD);
+
+			fclose(overflow_file);
+			overflow_file = NULL;
+		    }
+		    
 		    fflush(stdout);
 		    memset(outBuff, 0, OUTBUFF_SIZE);
 		    outBuffOffset = 0;
@@ -196,17 +225,17 @@ ph5diff_worker(int nID)
 		}
 		else
 		    MPI_Send(&nfound, sizeof(nfound), MPI_BYTE, 0, MPI_TAG_DONE, MPI_COMM_WORLD);
-
 	    }
 	    else if(Status.MPI_TAG == MPI_TAG_END)
 	    {
 		MPI_Recv(NULL, 0, MPI_BYTE, 0, MPI_TAG_END, MPI_COMM_WORLD, &Status);
-	/*	printf("exiting..., task: %d\n", nID); */
+	/*	printf("exiting..., task: %d\n", nID); 
+		fflush(stdout);*/
 		break;
 	    }
 	    else
 	    {
-		printf("ERROR....invalid tag received\n");
+		printf("ph5diff_worker: ERROR: invalid tag (%d) received\n", Status.MPI_TAG);
 		MPI_Abort(MPI_COMM_WORLD, 0);
 	    }
 
