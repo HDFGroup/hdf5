@@ -140,6 +140,7 @@
 #include "HDF5record_RT.h"
 
 #ifdef HAVE_PARALLEL
+#include "mpio.h"
 #include "MPIO_Init.h"
 #include "MPIO_EventArgs.h"
 #include "MPIO_TraceParams.h"
@@ -189,10 +190,10 @@ int initHDFProcTrace_RT( void );
 void HDFtraceEvent_RT( int , char *, unsigned ) ;
 void BeginIOEventRecord ( int, double , void * );
 void EndIOEventRecord ( int , double , void * );
-void BeginMPIOEventRecord ( int, double, void * ); 
-void EndMPIOEventRecord ( int , double , void *);
+void BeginMPIOEventRecord ( int, double, void *, int ); 
+void EndMPIOEventRecord ( int , double , void *, int);
 void BeginHDFEventRecord( int , double );
-void EndHDFEventRecord ( int , double ,void * );
+void EndHDFEventRecord ( int , double ,void *);
 void HDFrecordFileName( HDFsetInfo * );
 void HDFassignPabloIDs( int *, char *** );
 void writeHDFNamePacketsRT( char **, int );
@@ -230,6 +231,10 @@ extern char *hdfRecordPointer;
 //======================================================================*/
 void HDFinitTrace_RT( char *fileName, unsigned procTraceMask )
 {
+#ifdef  HAVE_PARALLEL
+	int myNode;
+#endif
+	char *nameBuff;
 	int error;
 	TR_LOCK	criticalSection;
 	TRgetClock( &epoch );
@@ -241,22 +246,25 @@ void HDFinitTrace_RT( char *fileName, unsigned procTraceMask )
 	   fprintf (stderr,"Unable to Initialize properly.  Exiting program\n");
 	   exit(-1);
 	}
-	FileName = ( char * ) malloc ( strlen( fileName ) + 1 );
-	strcpy( FileName, fileName ) ;
+	FileName = ( char * ) malloc ( strlen( fileName ) + 10 );
 #ifdef  HAVE_PARALLEL
+        MPI_Comm_rank( MPI_COMM_WORLD, &myNode );
+        setTraceProcessorNumber( myNode );
+	sprintf(FileName,"%s.nd%d\0",fileName,myNode);
 	/*==============================================================*
 	// In the parallel case, initialize MPI-IO tracing.  This will	*
 	// set the trace file name.					*
 	//==============================================================*/
-/*        initMPIOTrace( FileName, RUNTIME_TRACE ); */
+        /*initMPIOTrace( FileName, 1); */
 #else
 	/*==============================================================*
 	// In the non-parallel case, set the trace file name and 	*
 	// initialize the trace library.				*
 	//==============================================================*/
+	strcpy( FileName, fileName ) ;
+#endif	/* HAVE_PARALLEL */
         setTraceFileName(FileName);
         basicLibraryInit( );         
-#endif	/* HAVE_PARALLEL */
 }
 /*======================================================================*
 // NAME									*
@@ -278,23 +286,22 @@ void HDFendTrace_RT( void )
 	//  Assing pablo ids to named identifiers and tag records	*
 	//==============================================================*/
 	HDFassignPabloIDs( &numSetIDs, &Names );
-	mapFile = (char *)malloc( strlen(FileName) + 5 );
-	strcpy(mapFile,FileName);
-	strcat(mapFile,".map");
-        printFileMappingsRT( mapFile, Names, numSetIDs );
+	mapFile = (char *)malloc( strlen(FileName) + 15 );
+	sprintf( mapFile,"%s.map.nd%d\0", FileName, TRgetNode() );
+        printFileMappingsRT( mapFile, Names, numSetIDs ); 
 	/*==============================================================*
 	// Print SDDF summary records					*
 	//==============================================================*/
 	writeHDFRecDescrptrsRT();
 	writeHDFNamePacketsRT( Names, numSetIDs );
-   	for ( j = 0; j < NumHDFProcs; ++j ) {
+     	for ( j = 0; j < NumHDFProcs; ++j ) {
 	   HDFSummarySDDF( HDFQueues[j], j );
-	} 
+	}  
 	endTracing();
 	/*==============================================================*
 	// Clean up storage						*
 	//==============================================================*/
-	free( (void *)mapFile );
+	/* free( (void *)mapFile );
 	for ( j = 0; j < numSetIDs; ++j ) {
 	    if ( Names[j] != NULL ) {
                free((void *)Names[j]);
@@ -307,7 +314,7 @@ void HDFendTrace_RT( void )
         } else {
            free((void *)P);
 	}
-	free((void *)HDFQueues) ;
+	free((void *)HDFQueues) ; */
 }
 /*======================================================================*
 // initHFDProcTrace_RT							*
@@ -410,9 +417,9 @@ void HDFtraceEvent_RT( int eventType, char *dataPtr, unsigned dataLen )
 	   EndHDFEventRecord ( eventType, seconds, dataPtr );
 #ifdef  HAVE_PARALLEL
 	} else if ( isBeginMPIOEvent( eventType ) ) { 
-	   BeginMPIOEventRecord ( eventType, seconds, dataPtr ) ;
+	   BeginMPIOEventRecord ( eventType, seconds, dataPtr, dataLen ) ;
 	} else if ( isEndMPIOEvent( eventType ) ) {
-	   EndMPIOEventRecord ( eventType, seconds, dataPtr );
+	   EndMPIOEventRecord ( eventType, seconds, dataPtr, dataLen );
 #endif  /* HAVE_PARALLEL */
 	} else {
 	   fprintf(stderr,"eventType %d, dataLen = %u\n",eventType,dataLen);
@@ -513,7 +520,10 @@ void EndIOEventRecord ( int eventType, double secs, void *dataPtr )
 //  This routine simply records the time in the record on the top of 	*
 //  the stack.								*
 //======================================================================*/ 
-void BeginMPIOEventRecord( int eventType, double seconds, void *dataPtr )
+void BeginMPIOEventRecord( int eventType, 
+	                   double seconds, 
+	                   void *dataPtr,
+	                   int dataLen )
 {
 	/*==============================================================*
 	// save the time value temporarily in top of stack		*
@@ -527,6 +537,7 @@ void BeginMPIOEventRecord( int eventType, double seconds, void *dataPtr )
 	// name of the file.  For mpiDelete, no information is of any	*
 	// use.								*
 	//==============================================================*/
+        if ( dataLen == 0 ) return;
 	switch ( eventType ) 
 	{
 	   case mpiGetSizeBeginID:
@@ -653,14 +664,17 @@ void BeginMPIOEventRecord( int eventType, double seconds, void *dataPtr )
 //  and computes the duration of the MPI-I/O event.  This is added to   *
 //  the record field corresponding MPI-I/O.  				*
 //======================================================================*/ 
-void EndMPIOEventRecord ( int eventType, double seconds, void *dataPtr )
+void EndMPIOEventRecord ( int eventType, 
+	                  double seconds, 
+	                  void *dataPtr,
+	                  int dataLen )
 {
 	double incDur;
 
 	incDur = seconds - CallStack->lastIOtime;
         CallStack->record.times[MPI] += incDur;
         ++CallStack->record.counts[MPI];
-	if ( eventType == mpiOpenEndID ) {
+	if ( eventType == mpiOpenEndID && dataLen != 0 ) {
 	   /*===========================================================*
 	   // complete the file information for the case of a file 	*
 	   // open and record the information.				*
@@ -761,7 +775,8 @@ void HDFrecordFileName( HDFsetInfo *info )
 {
 	fileRec_t *P;
 	char *t;
-	int match, id;
+	int match; 
+	long id;
 	P = HDFfileList;
 	match = FALSE;
 	id = info->setID;
@@ -793,7 +808,8 @@ void HDFassignPabloIDs( int *nSetIDs, char ***Names )
 {
 	fileRec_t *F, *G;
 	HDFnode_t *P;
-	int j, PabloID = 1;
+	int j; 
+	long PabloID = 1;
 	long hdfID, xRef;
 	char *fName, **T;
 
@@ -815,7 +831,7 @@ void HDFassignPabloIDs( int *nSetIDs, char ***Names )
 	   }
 	   F = F->ptr;
 	}
-	*nSetIDs = PabloID - 1;
+	*nSetIDs = (int)(PabloID - 1);
         if ( *nSetIDs <= 0 ) return;
         /*==============================================================*
 	// Repace hdfID and xRef fields with corresponding Pablo ID	*
@@ -999,7 +1015,6 @@ void HDFSummarySDDF( HDFnode_t *P, int procIndex )
 	              XREFid;
 	} Header;
 
-	Packet = buff;
 	Header.packetLen = sizeof(Header) 
 	                 + sizeof(int)			 /* array len   */
 			 + nTallyFields*sizeof(double)	 /* times array */
@@ -1023,6 +1038,7 @@ void HDFSummarySDDF( HDFnode_t *P, int procIndex )
 	   Header.ExcDur  = P->record.excDur;
 	   Header.HDFid   = P->record.hdfID;
 	   Header.XREFid  = P->record.xRef;
+	   Packet = buff;
 	   memcpy( Packet, &Header, sizeof(Header) );
 	   Packet += sizeof(Header);
 	   /*===========================================================*
@@ -1061,7 +1077,7 @@ void HDFSummarySDDF( HDFnode_t *P, int procIndex )
 	   }
 	   arrayLen = 0;	/* name length */
 	   memcpy( Packet, &arrayLen, sizeof(int) );
-	   putBytes( buff, Header.packetLen );
+	   putBytes( buff, Header.packetLen ); 
            free((void *)P);
            P = Q;
 	} 

@@ -85,6 +85,7 @@ int fileno ( FILE * );
 #include <unistd.h>
 #endif
 
+
 #define HDFtrace3OPEN__
 int HDFtrace3OPEN( const char *, int, mode_t );
 
@@ -116,6 +117,15 @@ extern void preInitIOTrace( void );
 #include "ProcIDs.h"
 #include "HDF5Trace.h"
 #include "IOTrace.h"
+
+#ifdef HAVE_PARALLEL
+#include "mpio.h"
+#include "MPIO_Init.h"
+#include "MPIO_EventArgs.h"
+#include "MPIO_TraceParams.h"
+#include "HDFmpioProtos.h"
+#endif /* HAVE_PARALLEL*/
+
 #define NO_OUTPUT 0
 #define SDDF_OUTPUT 1
 #define RT_OUTPUT 2
@@ -893,3 +903,683 @@ void HDFfinalTimeStamp( void )
         Packet.dataLen      = 0;
         putBytes( (void *)&Packet , sizeof(Packet) );
 }
+#ifdef HAVE_PARALLEL
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_open( MPI_Comm comm, char *filename, int amode, 
+                                    MPI_Info info, MPI_File *fh )
+{
+   	int returnVal;
+   	HDFsetInfo dataPtr;
+   	int dataLen;
+   
+        if ( OUTPUT_SWITCH != RT_OUTPUT ) {
+           returnVal = MPI_File_open( comm, filename, amode, info, fh );
+        } else {
+	   dataLen = sizeof( HDFsetInfo );
+	   dataPtr.setID = (long)fh;
+	   dataPtr.setName = (char *)malloc( strlen(filename) + 1);
+	   strcpy( dataPtr.setName , filename );
+           HDFtraceEvent_RT( mpiOpenBeginID, &dataPtr, dataLen );
+           returnVal = PMPI_File_open( comm, filename, amode, info, fh );
+           HDFtraceEvent_RT( mpiOpenEndID, &dataPtr, dataLen );
+        }
+   	return returnVal;
+}
+
+   
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_close( MPI_File *fh )
+{
+   	int returnVal;
+   	HDFsetInfo dataPtr;
+   	int dataLen;
+   
+        if ( OUTPUT_SWITCH != RT_OUTPUT ) {
+           returnVal = MPI_File_close( fh );
+        } else {
+	   dataLen = sizeof( HDFsetInfo );
+	   dataPtr.setID = (long)fh;
+	   dataPtr.setName = NULL;
+           HDFtraceEvent_RT( mpiCloseBeginID, &dataPtr, dataLen );
+           returnVal = PMPI_File_close( fh );
+           HDFtraceEvent_RT( mpiCloseEndID, &dataPtr, dataLen );
+	   free( dataPtr.setName );
+        }
+   	return returnVal;
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_delete( char *filename, MPI_Info info )
+{
+   	int returnVal;
+   	HDFsetInfo dataPtr;
+   	int dataLen;
+   
+        if ( OUTPUT_SWITCH != RT_OUTPUT ) {
+   	   returnVal = MPI_File_delete( filename, info );
+        } else {
+	   dataLen = sizeof( HDFsetInfo );
+	   dataPtr.setID = 0;
+	   dataPtr.setName = (char *)malloc( sizeof(filename) );
+	   strcpy( dataPtr.setName , filename );
+           HDFtraceEvent_RT( mpiDeleteBeginID, &dataPtr, dataLen );
+   	   returnVal = PMPI_File_delete( filename, info );
+           HDFtraceEvent_RT( mpiDeleteEndID, &dataPtr, dataLen );
+	   free( dataPtr.setName );
+        }
+   	return returnVal;
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_set_size( MPI_File fh, MPI_Offset size )
+{
+   	int returnVal;
+   	HDFsetInfo dataPtr;
+   	int dataLen;
+   
+        if ( OUTPUT_SWITCH != RT_OUTPUT ) {
+   	   returnVal = MPI_File_set_size( fh, size );
+        } else {
+	   dataLen = 0;
+           HDFtraceEvent_RT( mpiSetSizeBeginID,&dataPtr,dataLen );
+   	   returnVal = PMPI_File_set_size( fh, size );
+           HDFtraceEvent_RT( mpiSetSizeEndID, &dataPtr, dataLen );
+        }
+   	return returnVal;
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_preallocate( MPI_File fh, MPI_Offset size)
+{
+   	int returnVal;
+   	HDFsetInfo dataPtr;
+   	int dataLen;
+   
+        if ( OUTPUT_SWITCH != RT_OUTPUT ) {
+   	   returnVal = MPI_File_preallocate( fh, size);
+        } else {
+	   dataLen = 0;
+           HDFtraceEvent_RT( mpiPreallocateBeginID,
+                             &dataPtr,dataLen );
+   	   returnVal = PMPI_File_preallocate( fh, size);
+           HDFtraceEvent_RT( mpiPreallocateEndID, 
+                             &dataPtr, dataLen );
+        }
+   	return returnVal;
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_get_size( MPI_File fh, MPI_Offset *size )
+{
+   	int returnVal;
+   	HDFsetInfo dataPtr;
+   	int dataLen;
+
+        if ( OUTPUT_SWITCH != RT_OUTPUT ) {
+           returnVal = MPI_File_get_size( fh, size);
+	} else {
+	   dataLen = 0;
+           HDFtraceEvent_RT( mpiGetSizeBeginID,
+                             &dataPtr,dataLen );
+           returnVal = PMPI_File_get_size( fh, size);
+           HDFtraceEvent_RT( mpiGetSizeEndID,
+                             &dataPtr,dataLen );
+	}
+   	return returnVal;
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_get_group( MPI_File fh, MPI_Group *group )
+{
+   	int returnVal;
+   	HDFsetInfo dataPtr;
+   	int dataLen;
+   
+        if ( OUTPUT_SWITCH != RT_OUTPUT ) {
+   	   returnVal = MPI_File_get_group( fh, group);
+	} else {
+	   dataLen = 0;
+           HDFtraceEvent_RT( mpiGetGroupBeginID,
+                             &dataPtr,dataLen );
+   	   returnVal = PMPI_File_get_group( fh, group);
+           HDFtraceEvent_RT( mpiGetGroupEndID,
+                             &dataPtr,dataLen );
+	}
+   	return returnVal;
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_get_amode( MPI_File fh, int *amode )
+{
+   	int returnVal;
+   	HDFsetInfo dataPtr;
+   	int dataLen;
+
+        if ( OUTPUT_SWITCH != RT_OUTPUT ) {
+   	   returnVal = MPI_File_get_amode( fh, amode);
+	} else {
+	   dataLen = 0;
+           HDFtraceEvent_RT( mpiGetAmodeBeginID,
+                             &dataPtr,dataLen );
+   	   returnVal = PMPI_File_get_amode( fh, amode);
+           HDFtraceEvent_RT( mpiGetAmodeEndID,
+                             &dataPtr,dataLen );
+	}
+   	return returnVal;
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_set_view( MPI_File fh, MPI_Offset disp, MPI_Datatype etype, 
+                           MPI_Datatype filetype, char *datarep, MPI_Info info )
+{
+   	int returnVal;
+   	HDFsetInfo dataPtr;
+   	int dataLen;
+
+        if ( OUTPUT_SWITCH != RT_OUTPUT ) {
+   	   returnVal = MPI_File_set_view( fh, disp, etype, filetype, 
+                                                      datarep, info );
+	} else {
+	   dataLen = 0;
+           HDFtraceEvent_RT( mpiSetViewBeginID,
+                             &dataPtr,dataLen );
+   	   returnVal = MPI_File_set_view( fh, disp, etype, filetype, 
+                                                      datarep, info );
+           HDFtraceEvent_RT( mpiSetViewEndID,
+                             &dataPtr,dataLen );
+	}
+   	return returnVal;
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_get_view( MPI_File fh, MPI_Offset *disp, MPI_Datatype *etype, 
+                           MPI_Datatype *filetype, char *datarep )
+{
+   	int returnVal;
+   	HDFsetInfo dataPtr;
+   	int dataLen;
+
+        if ( OUTPUT_SWITCH != RT_OUTPUT ) {
+   	   returnVal = MPI_File_get_view(fh, disp, etype, filetype, datarep);
+	} else {
+	   dataLen = 0;
+           HDFtraceEvent_RT( mpiSetViewBeginID,
+                             &dataPtr,dataLen );
+   	   returnVal = PMPI_File_get_view(fh, disp, etype, filetype, datarep);
+           HDFtraceEvent_RT( mpiSetViewEndID,
+                             &dataPtr,dataLen );
+     	   returnVal = PMPI_File_get_view(fh, disp, etype, filetype, datarep);
+
+	}
+   	return returnVal;
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_read_at( MPI_File fh, MPI_Offset offset, void *buf,
+		         int count, MPI_Datatype datatype, MPI_Status *status )
+{
+   	int returnVal;
+   	HDFsetInfo dataPtr;
+   	int dataLen;
+
+        if ( OUTPUT_SWITCH != RT_OUTPUT ) {
+   	   returnVal = MPI_File_read_at( fh, offset, buf, count, datatype, 
+	                                                            status );
+	} else {
+	   dataLen = 0;
+           HDFtraceEvent_RT( mpiReadAtBeginID,
+                             &dataPtr,dataLen );
+   	   returnVal = PMPI_File_read_at( fh, offset, buf, count, datatype, 
+	                                                            status );
+           HDFtraceEvent_RT( mpiReadAtEndID,
+                             &dataPtr,dataLen );
+	}
+   	return returnVal;
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_read_at_all( MPI_File fh, MPI_Offset offset, void *buf,
+   			int count, MPI_Datatype datatype, MPI_Status *status )
+{
+   
+   	int returnVal;
+   	HDFsetInfo dataPtr;
+   	int dataLen;
+
+        if ( OUTPUT_SWITCH != RT_OUTPUT ) {
+   	   returnVal = MPI_File_read_at_all( fh, offset, buf, 
+				      count, datatype, status );
+	} else {
+	   dataLen = 0;
+           HDFtraceEvent_RT( mpiReadAtAllBeginID,
+                             &dataPtr,dataLen );
+   	   returnVal = PMPI_File_read_at_all( fh, offset, buf, 
+				      count, datatype, status );
+           HDFtraceEvent_RT( mpiReadAtAllEndID,
+                             &dataPtr,dataLen );
+	}
+   	return returnVal;
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_write_at( MPI_File fh, MPI_Offset offset, void *buf,
+                      int count, MPI_Datatype datatype, MPI_Status *status )
+{
+   
+   	int returnVal;
+   	HDFsetInfo dataPtr;
+   	int dataLen;
+
+        if ( OUTPUT_SWITCH != RT_OUTPUT ) {
+   	   returnVal = MPI_File_write_at( fh, offset, buf, count, datatype, 
+	                                                           status );
+	} else {
+	   dataLen = 0;
+           HDFtraceEvent_RT( mpiWriteAtBeginID,
+                             &dataPtr,dataLen );
+   	   returnVal = PMPI_File_write_at( fh, offset, buf, count, datatype, 
+	                                                            status );
+           HDFtraceEvent_RT( mpiWriteAtEndID,
+                             &dataPtr,dataLen );
+	}
+   	return returnVal;
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_write_at_all( MPI_File fh, MPI_Offset offset, void *buf,
+                  int count, MPI_Datatype datatype, MPI_Status *status )
+{
+   	int returnVal;
+   	HDFsetInfo dataPtr;
+   	int dataLen;
+
+        if ( OUTPUT_SWITCH != RT_OUTPUT ) {
+   	   returnVal = MPI_File_write_at_all( fh, offset, buf, 
+	 	 	       		count, datatype, status );
+	} else {
+	   dataLen = 0;
+           HDFtraceEvent_RT( mpiWriteAtAllBeginID,
+                             &dataPtr,dataLen );
+   	   returnVal = PMPI_File_write_at_all( fh, offset, buf, 
+	 			       count, datatype, status );
+           HDFtraceEvent_RT( mpiWriteAtAllEndID,
+                             &dataPtr,dataLen );
+	}
+   	return returnVal;
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_iread_at( MPI_File fh, MPI_Offset offset, void *buf,
+   int count, MPI_Datatype datatype, MPIO_Request *request )
+{
+   return MPI_File_iread_at( fh, offset, buf, count, datatype, request );
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_iwrite_at( MPI_File fh, MPI_Offset offset, void *buf, 
+		int count, MPI_Datatype datatype, MPIO_Request *request)
+{
+   return MPI_File_iwrite_at( fh, offset, buf, count, datatype, request );
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_read( MPI_File fh, void *buf, int count, 
+                       MPI_Datatype datatype, MPI_Status *status)
+{
+   	int returnVal;
+   	HDFsetInfo dataPtr;
+   	int dataLen;
+
+        if ( OUTPUT_SWITCH != RT_OUTPUT ) {
+   	   returnVal = MPI_File_read( fh, buf, count, datatype, status );
+	} else {
+	   dataLen = 0;
+           HDFtraceEvent_RT( mpiReadBeginID,
+                             &dataPtr,dataLen );
+   	   returnVal = PMPI_File_read( fh, buf, count, datatype, status );
+           HDFtraceEvent_RT( mpiReadEndID,
+                             &dataPtr,dataLen );
+	}
+   	return returnVal;
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_read_all( MPI_File fh, void *buf, int count, 
+                           MPI_Datatype datatype, MPI_Status *status)
+{
+   	int returnVal;
+   	HDFsetInfo dataPtr;
+   	int dataLen;
+
+        if ( OUTPUT_SWITCH != RT_OUTPUT ) {
+   	   returnVal = MPI_File_read_all( fh, buf, count, datatype, status );
+	} else {
+	   dataLen = 0;
+           HDFtraceEvent_RT( mpiReadAllBeginID,
+                             &dataPtr,dataLen );
+   	   returnVal = PMPI_File_read_all( fh, buf, count, datatype, status );
+           HDFtraceEvent_RT( mpiReadAllEndID,
+                             &dataPtr,dataLen );
+	}
+   	return returnVal;
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_write( MPI_File fh, void *buf, int count, 
+                        MPI_Datatype datatype, MPI_Status *status )
+{
+   	int returnVal;
+   	HDFsetInfo dataPtr;
+   	int dataLen;
+
+        if ( OUTPUT_SWITCH != RT_OUTPUT ) {
+           returnVal = MPI_File_write( fh, buf, count, datatype, status );
+	} else {
+	   dataLen = 0;
+           HDFtraceEvent_RT( mpiWriteBeginID,
+                             &dataPtr,dataLen );
+           returnVal = PMPI_File_write( fh, buf, count, datatype, status );
+           HDFtraceEvent_RT( mpiWriteEndID,
+                             &dataPtr,dataLen );
+	}
+   	return returnVal;
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_write_all( MPI_File fh, void *buf, int count, 
+                            MPI_Datatype datatype, MPI_Status *status )
+{
+   	int returnVal;
+   	HDFsetInfo dataPtr;
+   	int dataLen;
+
+        if ( OUTPUT_SWITCH != RT_OUTPUT ) {
+   	   returnVal = MPI_File_write_all( fh, buf, count, datatype, status );
+	} else {
+	   dataLen = 0;
+           HDFtraceEvent_RT( mpiWriteAllBeginID,
+                             &dataPtr,dataLen );
+   	   returnVal = PMPI_File_write_all( fh, buf, count, datatype, status );
+           HDFtraceEvent_RT( mpiWriteAllEndID,
+                             &dataPtr,dataLen );
+	}
+   	return returnVal;
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_iread( MPI_File fh, void *buf, int count, 
+                        MPI_Datatype datatype, MPIO_Request *request )
+{
+	return MPI_File_iread( fh, buf, count, datatype, request );
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_iwrite( MPI_File fh, void *buf, int count, 
+	                 MPI_Datatype datatype, MPIO_Request *request )
+{
+   return MPI_File_iwrite( fh, buf, count, datatype, request );
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_seek( MPI_File fh, MPI_Offset offset, int whence )
+{
+   
+   	int returnVal;
+   	HDFsetInfo dataPtr;
+   	int dataLen;
+
+        if ( OUTPUT_SWITCH != RT_OUTPUT ) {
+   	   returnVal = MPI_File_seek( fh, offset, whence );
+	} else {
+	   dataLen = 0;
+           HDFtraceEvent_RT( mpiSeekBeginID,
+                             &dataPtr,dataLen );
+   	   returnVal = PMPI_File_seek( fh, offset, whence );
+           HDFtraceEvent_RT( mpiSeekEndID,
+                             &dataPtr,dataLen );
+	}
+   	return returnVal;
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_get_position( MPI_File fh, MPI_Offset *offset )
+{
+   
+   	int returnVal;
+   	HDFsetInfo dataPtr;
+   	int dataLen;
+
+        if ( OUTPUT_SWITCH != RT_OUTPUT ) {
+   	   returnVal = MPI_File_get_position( fh, offset );
+	} else {
+	   dataLen = 0;
+           HDFtraceEvent_RT( mpiGetPositionBeginID,
+                             &dataPtr,dataLen );
+   	   returnVal = PMPI_File_get_position( fh, offset );
+           HDFtraceEvent_RT( mpiGetPositionEndID,
+                             &dataPtr,dataLen );
+	}
+   	return returnVal;
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_get_byte_offset( MPI_File fh, MPI_Offset offset, 
+                                             MPI_Offset *disp )
+{
+   	int returnVal;
+   	HDFsetInfo dataPtr;
+   	int dataLen;
+
+        if ( OUTPUT_SWITCH != RT_OUTPUT ) {
+   	   returnVal = MPI_File_get_byte_offset( fh, offset, disp );
+	} else {
+	   dataLen = 0;
+           HDFtraceEvent_RT( mpiGetByteOffsetBeginID,
+                             &dataPtr,dataLen );
+   	   returnVal = PMPI_File_get_byte_offset( fh, offset, disp );
+           HDFtraceEvent_RT( mpiGetByteOffsetEndID,
+                             &dataPtr,dataLen );
+	}
+   	return returnVal;
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_get_type_extent( MPI_File fh, MPI_Datatype datatype, 
+                                               MPI_Aint *extent )
+{
+   
+   	int returnVal;
+   	HDFsetInfo dataPtr;
+   	int dataLen;
+
+        if ( OUTPUT_SWITCH != RT_OUTPUT ) {
+   	   returnVal = MPI_File_get_type_extent( fh, datatype, extent );
+	} else {
+	   dataLen = 0;
+           HDFtraceEvent_RT( mpiGetTypeExtentBeginID,
+                             &dataPtr,dataLen );
+   	   returnVal = PMPI_File_get_type_extent( fh, datatype, extent );
+           HDFtraceEvent_RT( mpiGetTypeExtentEndID,
+                             &dataPtr,dataLen );
+	}
+   	return returnVal;
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_set_atomicity( MPI_File fh, int flag )
+{
+   	int returnVal;
+   	HDFsetInfo dataPtr;
+   	int dataLen;
+
+        if ( OUTPUT_SWITCH != RT_OUTPUT ) {
+   	   returnVal = MPI_File_set_atomicity( fh, flag );
+	} else {
+	   dataLen = 0;
+           HDFtraceEvent_RT( mpiSetAtomicityBeginID,
+                             &dataPtr,dataLen );
+   	   returnVal = PMPI_File_set_atomicity( fh, flag );
+           HDFtraceEvent_RT( mpiSetAtomicityEndID,
+                             &dataPtr,dataLen );
+	}
+   	return returnVal;
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_get_atomicity( MPI_File fh, int *flag )
+{
+   
+   	int returnVal;
+   	HDFsetInfo dataPtr;
+   	int dataLen;
+
+        if ( OUTPUT_SWITCH != RT_OUTPUT ) {
+   	   returnVal = MPI_File_get_atomicity( fh, flag );
+	} else {
+	   dataLen = 0;
+           HDFtraceEvent_RT( mpiGetAtomicityBeginID,
+                             &dataPtr,dataLen );
+   	   returnVal = PMPI_File_get_atomicity( fh, flag );
+           HDFtraceEvent_RT( mpiGetAtomicityEndID,
+                             &dataPtr,dataLen );
+	}
+   	return returnVal;
+}
+
+/*======================================================================* 
+// Pass call through to regular MPIO entry except in case of Real Time	* 
+// tracing.  								* 
+// Note: The regular MPIO entry may or may not be instrumented.		*
+//======================================================================*/
+int HDF_MPI_File_sync( MPI_File fh )
+{
+   	int returnVal;
+   	HDFsetInfo dataPtr;
+   	int dataLen;
+
+        if ( OUTPUT_SWITCH != RT_OUTPUT ) { 
+   	   returnVal = MPI_File_sync ( fh );
+	} else {
+	   dataLen = 0;
+           HDFtraceEvent_RT( mpiSyncBeginID,
+                             &dataPtr,dataLen );
+   	   returnVal = MPI_File_sync ( fh );
+           HDFtraceEvent_RT( mpiSyncEndID,
+                             &dataPtr,dataLen );
+	} 
+   	return returnVal;
+}
+#endif /* HAVE_PARALLEL */
