@@ -29323,7 +29323,7 @@ if test -n "$TESTPARALLEL"; then
   PARALLEL_MAKE="$TESTPARALLEL/Makefile"
 fi
 
-ac_config_files="$ac_config_files src/libhdf5.settings config/depend1 config/depend2 config/depend3 config/depend4 config/dependN config/commence config/conclude Makefile src/Makefile pablo/Makefile test/Makefile $PARALLEL_MAKE perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5ls/Makefile tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/gifconv/Makefile examples/Makefile doc/Makefile doc/html/Makefile doc/html/ADGuide/Makefile doc/html/Graphics/Makefile doc/html/Intro/Makefile doc/html/PSandPDF/Makefile doc/html/TechNotes/Makefile doc/html/Tutor/Makefile doc/html/Tutor/Graphics/Makefile doc/html/Tutor/examples/Makefile doc/html/Tutor/examples/java/Makefile doc/html/cpplus/Makefile doc/html/fortran/Makefile"
+ac_config_files="$ac_config_files src/libhdf5.settings config/depend1 config/depend2 config/depend3 config/depend4 config/dependN config/commence config/conclude Makefile src/Makefile pablo/Makefile test/Makefile $PARALLEL_MAKE perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5ls/Makefile tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/gifconv/Makefile examples/Makefile doc/Makefile doc/html/Makefile doc/html/ADGuide/Makefile doc/html/Graphics/Makefile doc/html/Intro/Makefile doc/html/PSandPDF/Makefile doc/html/TechNotes/Makefile doc/html/cpplus/Makefile doc/html/fortran/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -29835,10 +29835,6 @@ do
   "doc/html/Intro/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/html/Intro/Makefile" ;;
   "doc/html/PSandPDF/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/html/PSandPDF/Makefile" ;;
   "doc/html/TechNotes/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/html/TechNotes/Makefile" ;;
-  "doc/html/Tutor/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/html/Tutor/Makefile" ;;
-  "doc/html/Tutor/Graphics/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/html/Tutor/Graphics/Makefile" ;;
-  "doc/html/Tutor/examples/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/html/Tutor/examples/Makefile" ;;
-  "doc/html/Tutor/examples/java/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/html/Tutor/examples/java/Makefile" ;;
   "doc/html/cpplus/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/html/cpplus/Makefile" ;;
   "doc/html/fortran/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/html/fortran/Makefile" ;;
   "default-1" ) CONFIG_COMMANDS="$CONFIG_COMMANDS default-1" ;;
