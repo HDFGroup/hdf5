@@ -3385,9 +3385,7 @@ H5P_create_class(H5P_genclass_t *par_class, const char *name, uintn hashsize, ui
     }
 
     /* Allocate room for the class & it's hash table of properties */
-    /* Need to (intn) hashsize so that (hashsize-1) can be negative since hashsize can be 0. */
-    if (NULL==(pclass = H5MM_calloc (sizeof(H5P_genclass_t)+
-		((((intn)hashsize)-1)*sizeof(H5P_genprop_t *)))))
+    if (NULL==(pclass = H5MM_calloc (sizeof(H5P_genclass_t)+((hashsize-1)*sizeof(H5P_genprop_t *)))))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,"memory allocation failed");
 
     /* Set class state */
@@ -3542,7 +3540,7 @@ H5P_genplist_t *H5P_create_list(H5P_genclass_t *class)
      */
 
     /* Allocate room for the property list & it's hash table of properties */
-    if (NULL==(plist = H5MM_calloc (sizeof(H5P_genplist_t)+(((intn)(class->hashsize)-1)*sizeof(H5P_genprop_t *)))))
+    if (NULL==(plist = H5MM_calloc (sizeof(H5P_genplist_t)+((class->hashsize-1)*sizeof(H5P_genprop_t *)))))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,"memory allocation failed");
 
     /* Set class state */

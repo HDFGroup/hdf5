@@ -61,7 +61,7 @@ extern "C" {
  * The library created property list classes
  */
 #define H5P_NO_CLASS_NEW   	(H5open(), H5P_NO_CLASS_g)
-#define H5P_NO_CLASS_HASH_SIZE   0
+#define H5P_NO_CLASS_HASH_SIZE   1  /* 1, not 0, otherwise allocations get weird */
 #define H5P_FILE_CREATE_NEW	(H5open(), H5P_FILE_CREATE_g)
 #define H5P_FILE_CREATE_HASH_SIZE   17
 #define H5P_FILE_ACCESS_NEW (H5open(), H5P_FILE_ACCESS_g)
