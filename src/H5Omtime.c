@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 1998 NCSA
- *		    All rights reserved.
+ * Copyright (C) 1998-2001 NCSA
+ *		           All rights reserved.
  *
  * Programmer:	Robb Matzke <matzke@llnl.gov>
  *		Friday, July 24, 1998
@@ -154,7 +154,7 @@ H5O_mtime_decode(H5F_t UNUSED *f, const uint8_t *p,
 
    tz = timebuffer.timezone;
   
-   the_time -=tz*60;
+   the_time -=tz*60-3600*_daylight;
 
    
 }
