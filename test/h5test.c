@@ -290,24 +290,30 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
     
     /* Use different ones depending on parallel or serial driver used. */
     if (H5P_DEFAULT != fapl && H5FD_MPIO == driver){
+#ifdef H5_HAVE_PARALLEL
 	/* For parallel:
 	 * First use command line option, then the environment variable,
 	 * then try the constant
 	 */
 	prefix = (paraprefix ? paraprefix : getenv("HDF5_PARAPREFIX"));
 	if (!prefix && !HDF5_PARAPREFIX_explained){
-	    printf("*** Remark ***\n"
+	    /* print hint by process 0 once. */
+	    int mpi_rank;
+	    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+	    if (mpi_rank == 0)
+		printf("*** Hint ***\n"
 		   "You can use environment variable HDF5_PARAPREFIX to "
 		   "run parallel test files in a\n"
 		   "different directory or to add file type prefix. E.g.,\n"
 		   "   HDF5_PARAPREFIX=pfs:/PFS/user/me\n"
 		   "   export HDF5_PARAPREFIX\n"
-		   "*** End of Remark ***\n");
+		   "*** End of Hint ***\n");
 	    HDF5_PARAPREFIX_explained++;
 #ifdef HDF5_PARAPREFIX
             prefix = HDF5_PARAPREFIX;
 #endif  /* HDF5_PARAPREFIX */
 	}
+#endif
     }else{
 	/* For serial:
 	 * First use the environment variable, then try the constant
