@@ -33,7 +33,7 @@
 #define TESTFILE   "tlayouto.h5"
 #define SPACE_RANK       2
 #define SPACE_DIM0       (8*1024*1024*1024ULL)
-#define SPACE_DIM1       ((4*1024*1024*1024ULL)+1ULL)
+#define SPACE_DIM1       ((256*1024*1024ULL)+1ULL)
 
 
 /*-------------------------------------------------------------------------
