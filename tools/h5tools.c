@@ -26,7 +26,7 @@ int compound_data;
 int nCols = 80;
 FILE *rawdatastream;	/* should initialize to stdout but gcc moans about it */
 
-static int h5tools_init_g = 0;		/* if h5tools lib has been initialized */
+static int h5tools_init_g = 0;	/* if h5tools lib has been initialized */
 
 int print_data(hid_t oid, hid_t _p_type, int obj_data);
 
@@ -126,9 +126,10 @@ static int h5dump_vlen_dset(FILE *, const h5dump_t *, hid_t, hid_t, int);
 void
 h5tools_init(void)
 {
-    if (!h5tools_init_g){
+    if (!h5tools_init_g) {
 	if (!rawdatastream)
 	    rawdatastream = stdout;
+
 	h5tools_init_g++;
     }
 }
@@ -152,13 +153,14 @@ h5tools_init(void)
 void
 h5tools_close(void)
 {
-    if (h5tools_init_g){
-	if (rawdatastream && rawdatastream != stdout){
+    if (h5tools_init_g) {
+	if (rawdatastream && rawdatastream != stdout) {
 	    if (fclose(rawdatastream))
 		perror("closing rawdatastream");
 	    else
 		rawdatastream = NULL;
 	}
+
 	h5tools_init_g = 0;
     }
 }
@@ -584,12 +586,14 @@ h5dump_region(hid_t region, h5dump_str_t *str/*in,out*/, const h5dump_t *info)
 
     /* Print block information */
     if (nblocks > 0) {
-	int i, j;
+	int i;
 
 	ptdata = malloc(nblocks * ndims * 2 * sizeof(ptdata[0]));
 	H5Sget_select_hyper_blocklist(region, 0, nblocks, ptdata);
 
 	for (i = 0; i < nblocks; i++) {
+	    int j;
+
 	    h5dump_str_append(str, info->dset_blockformat_pre,
 			      i ? "," OPTIONAL_LINE_BREAK " " : "",
 			      (unsigned long)i);
@@ -610,12 +614,14 @@ h5dump_region(hid_t region, h5dump_str_t *str/*in,out*/, const h5dump_t *info)
 
     /* Print point information */
     if (npoints > 0) {
-	int i, j;
+	int i;
 
 	ptdata = malloc(npoints * ndims * sizeof(ptdata[0]));
 	H5Sget_select_elem_pointlist(region, 0, npoints, ptdata);
 
 	for (i = 0; i < npoints; i++) {
+	    int j;
+
 	    h5dump_str_append(str, info->dset_ptformat_pre ,
 			      i ? "," OPTIONAL_LINE_BREAK " " : "",
 			      (unsigned long)i);
@@ -934,13 +940,12 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
              * indentation. Be warned that column number calculations will be
              * incorrect and that object indices at the beginning of the line
              * will be missing (h5dump doesn't display them anyway).  */
-            if (ctx->indent_level >= 0 &&
-                str->len && '\n'==str->s[str->len-1]) {
+            if (ctx->indent_level >= 0 && str->len &&
+			    str->s[str->len - 1] == '\n') {
                 h5dump_str_append(str, OPT(info->line_pre, ""), "");
 
-                for (x=0; x<ctx->indent_level+1; x++) {
+                for (x = 0; x < ctx->indent_level + 1; x++)
                     h5dump_str_append(str, "%s", OPT(info->line_indent, ""));
-                }
             }
 
 	    /* The name */
@@ -997,13 +1002,12 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
          * (h5dump doesn't display them anyway). */
 	h5dump_str_append(str, "%s", OPT(info->cmpd_end, ""));
 
-        if (ctx->indent_level >= 0 &&
-            str->len && '\n'==str->s[str->len-1]) {
+        if (ctx->indent_level >= 0 && str->len &&
+			str->s[str->len - 1] == '\n') {
             h5dump_str_append(str, OPT(info->line_pre, ""), "");
 
-            for (x = 0; x < ctx->indent_level; x++) {
+            for (x = 0; x < ctx->indent_level; x++)
                 h5dump_str_append(str, "%s", OPT(info->line_indent, ""));
-            }
         }
 
 	h5dump_str_append(str, "%s", OPT(info->cmpd_suf, "}"));
@@ -1273,7 +1277,7 @@ h5dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
     for (i = 0; i < nelmts; i++, ctx->cur_elmt++, elmt_counter++){
 	/* Render the element */
 	h5dump_str_reset(&buffer);
-	h5dump_sprint(&buffer, info, container, type, mem+i*size, ctx);
+	h5dump_sprint(&buffer, info, container, type, mem + i * size, ctx);
 
 	if (i + 1 < nelmts || 0 == (flags & END_OF_DATA))
 	    h5dump_str_append(&buffer, "%s", OPT(info->elmt_suf1, ","));
@@ -1306,9 +1310,11 @@ h5dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
 	    }
 	}
 
-	/* we need to break after each row of a dimension---> we should
+	/*
+	 * We need to break after each row of a dimension---> we should
          * break at the end of the each last dimension well that is the
-         * way the dumper did it before */
+         * way the dumper did it before
+	 */
 	if (info->arr_linebreak && ctx->cur_elmt){
             if ((ctx->cur_elmt % ctx->size_last_dim) == 0)
                 ctx->need_prefix = TRUE;
@@ -1351,8 +1357,10 @@ h5dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
 	     * start a new line.
 	     */
 
-            /* added the info->skip_first because the dumper does not want
-             * this check to happen for the first line */
+            /*
+	     * Added the info->skip_first because the dumper does not want
+             * this check to happen for the first line
+	     */
             if ((!info->skip_first || i) &&
                 (ctx->cur_column + strlen(section) +
 		 strlen(OPT(info->elmt_suf2, " ")) +
@@ -1438,12 +1446,11 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 #endif
 
     /*
-     * Check that everything looks okay.  The dimensionality must not be too
+     * Check that everything looks okay. The dimensionality must not be too
      * great and the dimensionality of the items selected for printing must
      * match the dimensionality of the dataset.
      */
     memset(&ctx, 0, sizeof ctx);
-    ctx.indent_level = indentlevel;
     ctx.indent_level = indentlevel;
     ctx.need_prefix = 1;
     f_space = H5Dget_space(dset);
@@ -1467,13 +1474,13 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
     ctx.size_last_dim = total_size[ctx.ndims - 1];
 
     /*
-     * Determine the strip mine size and allocate a buffer.  The strip mine is
+     * Determine the strip mine size and allocate a buffer. The strip mine is
      * a hyperslab whose size is manageable.
      */
     p_type_nbytes = H5Tget_size(p_type);
 
     for (i = ctx.ndims, sm_nbytes = p_type_nbytes; i > 0; --i) {
-	sm_size[i - 1] = MIN (total_size[i - 1], H5DUMP_BUFSIZE / sm_nbytes);
+	sm_size[i - 1] = MIN(total_size[i - 1], H5DUMP_BUFSIZE / sm_nbytes);
 	sm_nbytes *= sm_size[i - 1];
 	assert(sm_nbytes > 0);
     }
@@ -1490,7 +1497,7 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 	/* Calculate the hyperslab size */
 	if (ctx.ndims > 0) {
 	    for (i = 0, hs_nelmts = 1; i < (hsize_t)ctx.ndims; i++) {
-		hs_size[i] = MIN(total_size[i]-hs_offset[i], sm_size[i]);
+		hs_size[i] = MIN(total_size[i] - hs_offset[i], sm_size[i]);
 		ctx.p_max_idx[i] = ctx.p_min_idx[i] + hs_size[i];
 		hs_nelmts *= hs_size[i];
 	    }
@@ -1504,7 +1511,7 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 	    H5Sselect_all(sm_space);
 	    hs_nelmts = 1;
 	}
-	
+
 	/* Read the data */
 	if (H5Dread(dset, p_type, sm_space, f_space, H5P_DEFAULT, sm_buf) < 0)
 	    return -1;
@@ -1573,12 +1580,13 @@ h5dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t type,
      * match the dimensionality of the dataset.
      */
     memset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = indentlevel;
-    ctx.need_prefix = 1;
     ctx.ndims = H5Sget_simple_extent_ndims(space);
 
     if ((size_t)ctx.ndims > NELMTS(ctx.p_min_idx))
 	return -1;
+
+    ctx.indent_level = indentlevel;
+    ctx.need_prefix = 1;
 
     /* Assume entire data space to be printed */
     for (i = 0; i < (hsize_t)ctx.ndims; i++)
@@ -1593,7 +1601,6 @@ h5dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t type,
 	return 0; /*nothing to print*/
 
     ctx.size_last_dim = ctx.p_max_idx[ctx.ndims - 1];
-    ctx.indent_level = indentlevel;
 
     /* Print it */
     h5dump_simple_data(stream, info, -1/*no dataset*/, &ctx,
@@ -1702,7 +1709,7 @@ h5dump_fixtype(hid_t f_type)
 	memb = calloc(nmembs, sizeof(hid_t));
 	name = calloc(nmembs, sizeof(char *));
 	ndims = calloc(nmembs, sizeof(int));
-	dims = calloc(nmembs*4, sizeof(size_t));
+	dims = calloc(nmembs * 4, sizeof(size_t));
 	
 	for (i = 0, size = 0; i < nmembs; i++) {
 	    int j;
@@ -1890,94 +1897,64 @@ done:
     return status;
 }
 
-static
-void *vlcustom_alloc(size_t size, void *info)
-{
-    void *ret_value = NULL;
-    int *mem_used = (int *)info;
-    size_t extra = MAX(sizeof(void *), sizeof(size_t));
-
-    if ((ret_value = HDmalloc(extra + size)) != NULL) {
-        *(size_t *)ret_value = size;
-        *mem_used += size;
-    }
-
-    ret_value = ((unsigned char *)ret_value) + extra;
-    return ret_value;
-}
-
-static
-void vlcustom_free(void *_mem, void *info)
-{
-    if (_mem) {
-        int *mem_used = (int *)info;
-        size_t extra = MAX(sizeof(void *), sizeof(size_t));
-        unsigned char *mem = ((unsigned char *)_mem) - extra;
-
-        *mem_used -= *(size_t *)mem;
-        HDfree(mem);
-    }
-}
-
+/*-------------------------------------------------------------------------
+ * Function:	h5dump_vlen_dset
+ *
+ * Purpose:	Dump variable length datatypes to the STREAM. We can only
+ *		support atomic, 1-dimensional variable length data since other
+ *		types would be way too complicated to dump.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Bill Wendling
+ *              Wednesday, November 8, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
 static int
 h5dump_vlen_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 		 hid_t type, int indentlevel)
 {
-    hvl_t *rdata = NULL;	/*information to read in		*/
+    h5dump_context_t ctx;	/*print context				*/
     hid_t base_type;		/*the base type of the VL data		*/
     hid_t xfer_pid;		/*dataset transfer property list id	*/
     hid_t f_space;		/*file data space			*/
     hsize_t dims[H5S_MAX_RANK];	/*size of the dimensions		*/
+    hid_t mem_space;
     const char *bad_type;
-    hsize_t mem_needed;
-    size_t ncols = 80;
     herr_t ret;
-
-    /* Print info */
-    size_t size;		/*size of memory type			*/
-    hsize_t p_nelmts;		/*total selected elmts			*/
-    int mem_used = 0;
+    hssize_t start = 0, count = 1;
     unsigned int i;
+
+    memset(&ctx, 0, sizeof(h5dump_context_t));
+    ctx.indent_level = indentlevel;
+    ctx.need_prefix = 1;
+    f_space = H5Dget_space(dset);
+    ctx.ndims = H5Sget_simple_extent_ndims(f_space);
+
+    if (ctx.ndims > 1) {
+	ret = FAIL;
+	goto free_space;
+    }
 
     base_type = H5Tget_super(type);
     xfer_pid = H5Pcreate(H5P_DATA_XFER);
 
-    if (xfer_pid == FAIL)
-	return FAIL;
-
-    ret = H5Pset_vlen_mem_manager(xfer_pid, vlcustom_alloc, &mem_used,
-		    		  vlcustom_free, &mem_used);
-
-    if (ret == FAIL) {
-        H5Pclose(xfer_pid);
-	return FAIL;
-    }
-
-    f_space = H5Dget_space(dset);
-
-    if ((size_t)H5Sget_simple_extent_ndims(f_space) > 1) {
-	fprintf(stream,
-		"Multidimensional variable length datatypes not supported\n");
+    if (xfer_pid == FAIL) {
 	ret = FAIL;
-	goto done;
+	goto free_xfer;
     }
-
-    H5Dvlen_get_buf_size(dset, type, f_space, &mem_needed);
 
     H5Sget_simple_extent_dims(f_space, dims, NULL);
-    rdata = HDmalloc(dims[0] * sizeof(hvl_t));
+    ctx.size_last_dim = dims[ctx.ndims - 1];
 
-    if (!rdata) {
-	ret = FAIL;
-        goto done;
-    }
-
-    ret = H5Dread(dset, type, H5S_ALL, H5S_ALL, xfer_pid, rdata);
-
-    if (info->line_ncols > 0)
-        ncols = info->line_ncols;
-
-    size = H5Tget_size(base_type);
+    /* Assume entire data space to be printed */
+    for (i = 0; i < (hsize_t)ctx.ndims; i++)
+	ctx.p_min_idx[i] = 0;
 
 recheck:
     switch (H5Tget_class(base_type)) {
@@ -2016,78 +1993,66 @@ recheck:
 	    bad_type = "H5T_TIME";
     default:
 	fprintf(stream,
-		"Dumper doesn't support %s variable length datatype at this time\n",
-	       bad_type ? bad_type : "(null)");
-	goto done;
+		"Dumper doesn't support %s variable length datatype at this time.\n",
+	        OPT(bad_type, "(null)"));
+	goto free_xfer;
     }
+
+    /* Create a simple memory space so that we can read in the hvl_t object */
+    mem_space = H5Screate_simple(0, NULL, NULL);
 
     for (i = 0; i < dims[0]; i++) {
-	hsize_t j;
+        unsigned char *buffer;
+        hsize_t mem_needed;
+	herr_t ret;
+	hvl_t *vldata;
+        h5dump_context_t tmp;
 
-	p_nelmts = rdata[i].len;
+	start = i;
+	ret = H5Sselect_hyperslab(f_space, H5S_SELECT_SET, &start, NULL, &count, NULL);
 
-#define OUTPUT_ELEMENTS(type, fmt) {				\
-    unsigned char *_data = (unsigned char *)rdata[i].p;		\
-								\
-    indentation(indent + COL);					\
-    for (j = 0; j < p_nelmts; j++, _data += size) {		\
-        fprintf(stream, "%" ## fmt ## "%s", *(type *)_data,	\
-		j == p_nelmts - 1 ? "\n" : ", ");		\
-    }								\
-}
+	if (ret == FAIL)
+	    goto free_mem;
 
-        switch (H5Tget_class(base_type)) {
-        case H5T_INTEGER:
-	    if (H5Tget_sign(base_type) == H5T_SGN_NONE) {
-	        if (size <= sizeof(unsigned char)) {
-		    OUTPUT_ELEMENTS(unsigned char, "c");
-	        } else if (size <= sizeof(unsigned short)) {
-		    OUTPUT_ELEMENTS(unsigned short, "dhu");
-	        } else if (size <= sizeof(unsigned int)) {
-		    OUTPUT_ELEMENTS(unsigned int, "u");
-	        } else if (size <= sizeof(unsigned long)) {
-		    OUTPUT_ELEMENTS(unsigned long, "lu");
-	        } else {
-		    OUTPUT_ELEMENTS(unsigned long_long, PRINTF_LL_WIDTH "u");
-	        }
-	    } else {
-	        if (size <= sizeof(char)) {
-		    OUTPUT_ELEMENTS(char, "c");
-	        } else if (size <= sizeof(short)) {
-		    OUTPUT_ELEMENTS(short, "dh");
-	        } else if (size <= sizeof(int)) {
-		    OUTPUT_ELEMENTS(int, "d");
-	        } else if (size <= sizeof(long)) {
-		    OUTPUT_ELEMENTS(long, "ld");
-	        } else {
-		    OUTPUT_ELEMENTS(long_long, PRINTF_LL_WIDTH "d");
-	        }
-	    }
+	ret = H5Dvlen_get_buf_size(dset, type, f_space, &mem_needed);
 
-	    break;
+	if (ret == FAIL)
+	    goto free_mem;
 
-	case H5T_FLOAT:
-	    if (size <= sizeof(float)) {
-		OUTPUT_ELEMENTS(float, "e");
-	    } else if (size <= sizeof(double)) {
-		OUTPUT_ELEMENTS(double, "e");
-	    } else {
-		OUTPUT_ELEMENTS(long double, "e");
-	    }
+	mem_needed += sizeof(hvl_t);
+	buffer = calloc(mem_needed, 1);
 
-	    break;
-
-	default:
-	    break;
+	if (!buffer) {
+	    indentation(indentlevel);
+	    fprintf(stream,
+	            "Unable to allocate %ld bytes for variable length data.\n",
+	            (long)mem_needed);
+	    continue;
 	}
+
+	ret = H5Dread(dset, type, mem_space, f_space, H5P_DEFAULT, buffer);
+
+	if (ret == FAIL)
+	    goto free_mem;
+
+	vldata = (hvl_t *)buffer;
+
+	/* I cast, therefore, I think I know what I am doing */
+	tmp = ctx;
+	h5dump_simple_data(stream, info, dset, &ctx,
+			   START_OF_DATA | END_OF_DATA,
+			   vldata->len, base_type, (void *)vldata->p);
+	ctx = tmp;
+	fputs("\n", stream);
+	free(buffer);
     }
 
-    ret = H5Dvlen_reclaim(type, f_space, xfer_pid, rdata);
-
-done:
+free_mem:
+    H5Sclose(mem_space);
+free_xfer:
     H5Pclose(xfer_pid);
+free_space:
     H5Sclose(f_space);
-    free(rdata);
     return ret;
 }
 
