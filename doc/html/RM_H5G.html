@@ -342,7 +342,8 @@ END SUBROUTINE h5gcreate_f
         The comment is returned in the buffer <code>comment</code>.
         <p>
         At most <code>bufsize</code> characters, including a null 
-        terminator, are copied.  The result is not null terminated 
+        terminator, are returned in <code>comment</code>.  
+        The returned value is not null terminated 
         if the comment is longer than the supplied buffer.  
         <p>
         If an object does not have a comment, the empty string 
@@ -356,14 +357,14 @@ END SUBROUTINE h5gcreate_f
             is to be retreived.
             <br>
             <code>name</code> can be '.' (dot) if <code>loc_id</code> 
-            fully specifies the object for which the  associated comment 
+            fully specifies the object for which the associated comment 
             is to be retrieved.
             <br>
             <code>name</code> is ignored if <code>loc_id</code> 
             is a dataset or named datatype.
       <dt><em>size_t</em> <code>bufsize</code>
-        <dd>IN: Anticipated size of the buffer required to hold 
-            <code>comment</code>.
+        <dd>IN: Anticipated required size of the 
+            <code>comment</code> buffer.
       <dt><em>char *</em><code>comment</code>
         <dd>OUT: The comment.
     </dl>
@@ -377,10 +378,10 @@ END SUBROUTINE h5gcreate_f
 	<pre>
 SUBROUTINE h5gget_comment_f(loc_id, name, size, buffer, hdferr)
   IMPLICIT NONE
-  INTEGER(HID_T), INTENT(IN) :: loc_id         ! File or group identifier
+  INTEGER(HID_T), INTENT(IN) :: loc_id         ! File, group, dataset, or 
+                                               ! named datatype identifier  
   CHARACTER(LEN=*), INTENT(IN) :: name         ! Name of the object link 
-  CHARACTER(LEN=size), INTENT(OUT) :: buffer   ! Buffer to hold a
-                                               ! comment  
+  CHARACTER(LEN=size), INTENT(OUT) :: buffer   ! Buffer to hold the comment
   INTEGER, INTENT(OUT) :: hdferr               ! Error code 
                                                ! 0 on success and -1 on failure
 END SUBROUTINE h5gget_comment_f
@@ -1282,8 +1283,9 @@ END SUBROUTINE h5gopen_f
   <dt><strong>Purpose:</strong>
     <dd>Sets comment for specified object.
   <dt><strong>Description:</strong>
-    <dd><code>H5Gset_comment</code> sets the comment for the the
-        object <code>name</code> to <code>comment</code>.
+    <dd><code>H5Gset_comment</code> sets the comment for the
+        object specified by <code>loc_id</code> and <code>name</code> 
+        to <code>comment</code>.
         Any previously existing comment is overwritten.
         <p>
         If <code>comment</code> is the empty string or a 
@@ -1293,14 +1295,20 @@ END SUBROUTINE h5gopen_f
         ASCII strings.
         <p>
         Comments can be attached to any object that has an object header, 
-        e.g., data sets, groups, named data types, and data spaces, but 
+        e.g., datasets, groups, named datatypes, and dataspaces, but 
         not symbolic links.
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>IN: Identifier of the file or group.
+        <dd>IN: Identifier of the file, group, dataset, or named datatype.
       <dt><em>const char *</em><code>name</code>
         <dd>IN: Name of the object whose comment is to be set or reset.
+            <br>
+            <code>name</code> can be '.' (dot) if <code>loc_id</code> 
+            fully specifies the object for which the comment is to be set.
+            <br>
+            <code>name</code> is ignored if <code>loc_id</code> 
+            is a dataset or named datatype.
       <dt><em>const char *</em><code>comment</code>
         <dd>IN: The new comment.
     </dl>
@@ -1312,7 +1320,8 @@ END SUBROUTINE h5gopen_f
 	<pre>
 SUBROUTINE h5gset_comment_f(loc_id, name, comment, hdferr)
   IMPLICIT NONE
-  INTEGER(HID_T), INTENT(IN) :: loc_id      ! File or group identifier
+  INTEGER(HID_T), INTENT(IN) :: loc_id      ! File, group, dataset, or 
+                                            ! named datatype identifier
   CHARACTER(LEN=*), INTENT(IN) :: name      ! Name of object 
   CHARACTER(LEN=*), INTENT(IN) :: comment   ! Comment for the object 
   INTEGER, INTENT(OUT) :: hdferr            ! Error code 
@@ -1436,7 +1445,7 @@ And in this document, the
 Describes HDF5 Release 1.6.2, February 2004
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 21 May 2004");
+document.writeln("Last modified: 25 May 2004");
 -->
 </SCRIPT>
  
