@@ -674,6 +674,7 @@
 ./c++/config/depend3.in
 ./c++/config/depend4.in
 ./c++/config/dependN.in
+./c++/config/hpux11.00
 ./c++/config/linux-gnu
 ./c++/config/linux-gnulibc1
 ./c++/config/linux-gnulibc2
