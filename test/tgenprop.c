@@ -519,6 +519,10 @@ test_genprop_basic_list(void)
     cid1 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
+    /* Create a the generic class again, should fail */
+    cid2 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
+    VERIFY(cid2, FAIL, "H5Pcreate_class");
+
     /* Add several properties (w/default values) */
 
     /* Insert first property into class (with no callbacks) */
@@ -1367,6 +1371,54 @@ test_genprop_class_addprop(void)
 
 /****************************************************************
 **
+**  test_genprop_list_equal(): Test basic generic property list code.
+**      More tests for H5Pequal()
+** 
+****************************************************************/
+static void 
+test_genprop_equal(void)
+{
+    hid_t		cid1;		/* Generic Property class ID */
+    hid_t		lid1;		/* Generic Property list ID */
+    hid_t		lid2;		/* Generic Property list ID */
+    herr_t		ret;		/* Generic return value	*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Basic Generic Property List Equal Functionality\n"));
+
+    /* Create a new generic class, derived from the root of the class hierarchy */
+    /* (Use a hash size of 1 to force the properties into the same hash chain) */
+    cid1 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,1,NULL,NULL,NULL,NULL,NULL,NULL);
+    CHECK_I(cid1, "H5Pcreate_class");
+
+    /* Insert first property into class (with no callbacks) */
+    ret = H5Pregister(cid1,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
+    CHECK_I(ret, "H5Pregister");
+
+    /* Insert second property into class (with no callbacks) */
+    ret = H5Pregister(cid1,PROP2_NAME,PROP2_SIZE,PROP2_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
+    CHECK_I(ret, "H5Pregister");
+
+    /* Create a property list from the class */
+    lid1 = H5Pcreate(cid1);
+    CHECK_I(lid1, "H5Pcreate");
+
+    /* Copy the property list */
+    lid2 = H5Pcopy(lid1);
+    CHECK_I(lid2, "H5Pcopy");
+
+    /* Check that the lists are equal */
+    ret = H5Pequal(lid1,lid2);
+    VERIFY(ret, 1, "H5Pequal");
+
+    /* Close class */
+    ret = H5Pclose_class(cid1);
+    CHECK_I(ret, "H5Pclose_class");
+
+} /* ent test_genprop_equal() */
+
+/****************************************************************
+**
 **  test_genprop(): Main generic property testing routine.
 ** 
 ****************************************************************/
@@ -1389,6 +1441,8 @@ test_genprop(void)
 
     test_genprop_list_addprop();    /* Test adding properties to HDF5 property list */
     test_genprop_class_addprop();   /* Test adding properties to HDF5 property class */
+
+    test_genprop_equal();       /* Tests for more H5Pequal verification */
 
 }   /* test_genprop() */
 

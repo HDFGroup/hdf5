@@ -53,6 +53,14 @@ hid_t H5P_LST_DATASET_CREATE_g      = FAIL;
 hid_t H5P_LST_DATASET_XFER_g        = FAIL;
 hid_t H5P_LST_MOUNT_g               = FAIL;
 
+/* Local typedefs */
+
+/* Typedef for checking for duplicate class names in parent class */
+typedef struct {
+    const H5P_genclass_t *parent;       /* Pointer to parent class */
+    const char *name;                   /* Pointer to name to check */
+} H5P_check_class_t;
+
 /* Local static functions */
 static H5P_genclass_t *H5P_create_class(H5P_genclass_t *par_class,
      const char *name, unsigned hashsize, unsigned internal,
@@ -1022,6 +1030,51 @@ H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod)
 
 /*--------------------------------------------------------------------------
  NAME
+    H5P_check_class
+ PURPOSE
+    Internal callback routine to check for duplicated names in parent class.
+ USAGE
+    int H5P_check_class(obj, id, key)
+        H5P_genclass_t *obj;    IN: Pointer to class
+        hid_t id;               IN: ID of object being looked at
+        const void *key;        IN: Pointer to information used to compare
+                                    classes.
+ RETURNS
+    Returns >0 on match, 0 on no match and <0 on failure.
+ DESCRIPTION
+    Checks whether a property list class has the same parent and name as a
+    new class being created.  This is a callback routine for H5I_search()
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static int
+H5P_check_class(void *_obj, hid_t id, const void *_key)
+{
+    H5P_genclass_t *obj=(H5P_genclass_t *)_obj; /* Pointer to the class for this ID */
+    const H5P_check_class_t *key=(const H5P_check_class_t *)_key; /* Pointer to key information for comparison */
+    int ret_value=0;    /* Return value */
+
+    FUNC_ENTER_NOINIT(H5P_check_class);
+
+    assert(obj);
+    assert(H5I_GENPROP_CLS==H5I_get_type(id));
+    assert(key);
+
+    /* Check if the class object has the same parent as the new class */
+    if(obj->parent!=NULL && obj->parent==key->parent) {
+        /* Check if they have the same name */
+        if(HDstrcmp(obj->name,key->name)==0)
+            ret_value=1;        /* Indicate a match */
+    } /* end if */
+
+    FUNC_LEAVE(ret_value);
+} /* end H5P_check_class() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5P_create_class
  PURPOSE
     Internal routine to create a new property list class.
@@ -1061,7 +1114,7 @@ H5P_create_class(H5P_genclass_t *par_class, const char *name, unsigned hashsize,
     H5P_cls_close_func_t cls_close, void *close_data
     )
 {
-    H5P_genclass_t *pclass;         /* Property list class created */
+    H5P_genclass_t *pclass=NULL;   /* Property list class created */
     H5P_genclass_t *ret_value;     /* return value */
 
     FUNC_ENTER_NOINIT(H5P_create_class);
@@ -1073,6 +1126,19 @@ H5P_create_class(H5P_genclass_t *par_class, const char *name, unsigned hashsize,
         assert(par_class);
         assert(hashsize>0);
     }
+
+    /* Check that the class name is unique in the parent class */
+    if(par_class!=NULL) {
+        H5P_check_class_t check_info;   /* Structure to hold the information for checking duplicate names */
+
+        /* Set up the search structure */
+        check_info.parent=par_class;
+        check_info.name=name;
+
+        /* Iterate over the open class IDs and fail if any have the same parent and name */
+        if(H5I_search(H5I_GENPROP_CLS,H5P_check_class,&check_info)!=NULL)
+            HGOTO_ERROR (H5E_PLIST, H5E_DUPCLASS, NULL, "duplicated class name in parent class");
+    } /* end if */
 
     /* Allocate room for the class & it's hash table of properties */
     if (NULL==(pclass = H5MM_calloc (sizeof(H5P_genclass_t)+((hashsize-1)*sizeof(H5P_genprop_t *)))))
@@ -2992,25 +3058,19 @@ H5P_cmp_plist(H5P_genplist_t *plist1, H5P_genplist_t *plist2)
     /* Cycle through the properties and compare them also */
     for(u=0; u<plist1->pclass->hashsize; u++) {
         tprop1=plist1->props[u];
-        tprop2=plist2->props[u];
-
-        /* Check if they both have properties in this hash location */
-        if(tprop1==NULL && tprop2!=NULL) HGOTO_DONE(-1);
-        if(tprop1!=NULL && tprop2==NULL) HGOTO_DONE(1);
 
         /* Check the actual properties */
-        while(tprop1!=NULL && tprop2!=NULL) {
+        while(tprop1!=NULL) {
+            /* Find a property with the same name in the second property list */
+            if((tprop2=H5P_find_prop(plist2->props,plist2->pclass->hashsize,tprop1->name))==NULL)
+                HGOTO_DONE(1);
+
             /* Compare the two properties */
             if((cmp_value=H5P_cmp_prop(tprop1,tprop2))!=0)
                 HGOTO_DONE(cmp_value);
 
-            /* Advance the pointers */
+            /* Advance to next property */
             tprop1=tprop1->next;
-            tprop2=tprop2->next;
-
-            /* Check if they both have properties in this location */
-            if(tprop1==NULL && tprop2!=NULL) HGOTO_DONE(-1);
-            if(tprop1!=NULL && tprop2==NULL) HGOTO_DONE(1);
         } /* end while */
     } /* end for */
 
