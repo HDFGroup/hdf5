@@ -27,11 +27,28 @@ case "X-$CC_BASENAME" in
 	;;
 
     *)
-	#CFLAGS="$CFLAGS"
+        # Watch out for some versions of the compiler
+        case "`($CC -V |head -1) 2>/dev/null`" in
+	    "DEC C V5.2-038 "*)
+		echo "  +------------------------------------------------+"
+		echo "  | You have an old version of cc. Please upgrade. |"
+		echo "  | Continuing anyway, but code generation might be|"
+		echo "  | incorrect, especially if optimizations are     |"
+		echo "  | enabled (look for -O)                          |"
+		echo "  +------------------------------------------------+"
+		sleep 5
+		;;
+	esac
+
+	# Debugging
 	DEBUG_CFLAGS="-g -std -verbose -warnprotos"
 	DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+
+	# Production
 	PROD_CFLAGS="-g0 -verbose -warnprotos -std -O4 -arch host -tune host -ansi_args -fp_reorder -readonly_strings -inline speed"
 	PROD_CPPFLAGS="-D_INTRINSICS -D_INLINE_INTRINSICS"
+
+	# Profiling
 	PROFILE_CFLAGS="-pg -std -verbose -warnprotos"
 	PROFILE_CPPFLAGS=
 	;;

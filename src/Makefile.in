@@ -11,7 +11,7 @@ TRACE=perl ../bin/trace
 CPPFLAGS=-I. @CPPFLAGS@
 
 # This is our main target:
-LIB=libhdf5.a
+LIB=libhdf5.la
 
 # Source and object files for the library (lexicographically)...
 LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5D.c H5E.c H5F.c H5Farray.c H5Fcore.c \
@@ -23,7 +23,7 @@ LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5D.c H5E.c H5F.c H5Farray.c H5Fcore.c \
     H5Snone.c H5Spoint.c H5Sselect.c H5T.c H5Tbit.c H5Tconv.c H5Tinit.c \
     H5TB.c H5V.c H5Z.c 
 
-LIB_OBJ=$(LIB_SRC:.c=.o)
+LIB_OBJ=$(LIB_SRC:.c=.lo)
 
 # Temporary files
 MOSTLYCLEAN=H5detect.o H5detect H5Tinit.o H5Tinit.c
@@ -49,10 +49,5 @@ H5Tinit.c: H5detect
 # no $(LIB) in the action below since that's being made now.
 H5detect: H5detect.o
 	$(CC) $(CFLAGS) -o $@ H5detect.o $(LDFLAGS) $(LIBS)
-
-# dynamic library with gcc. This needs more work to support other systems.
-shared: libhdf5.so.1.2.0
-libhdf5.so.1.2.0: $(LIB_OBJ)
-	$(CC) $(CFLAGS) -o $@ -shared -fPIC $^
 
 @CONCLUDE@

@@ -9,8 +9,7 @@
 #
 lib: $(LIB)
 $(LIB) __no_library__: $(LIB_OBJ)
-	$(AR) -rc $@ $(LIB_OBJ)
-	$(RANLIB) $@
+	@$(LT_LINK_LIB) -o $@ $(CFLAGS) $(LIB_OBJ) $(LIBS)
 
 progs: $(LIB) $(PROGS)
 
@@ -21,7 +20,7 @@ TAGS: $(LIB_SRC)
 
 # Runs each test in order, passing $(TEST_FLAGS) to the program.
 tests: $(TEST_PROGS) $(LIB)
-test _test: tests
+check test _test: tests
 	@for test in $(TEST_PROGS) dummy; do                                  \
 	   if test $$test != dummy; then				      \
 	      echo "============================";			      \
@@ -46,7 +45,7 @@ install: $(LIB) $(PUB_HDR) $(PROGS)
 	@test -d $(libdir) || mkdir $(libdir)
 	@for f in X $(LIB); do						      \
 	   if test $$f != X; then					      \
-	      (set -x; $(INSTALL_DATA) $$f $(libdir)/. || exit 1);	      \
+	      ($(LT_INSTALL_LIB) $$f $(libdir)/. || exit 1);		      \
 	   fi;								      \
 	done
 	@test -d $(includedir) || mkdir $(includedir)
@@ -58,34 +57,39 @@ install: $(LIB) $(PUB_HDR) $(PROGS)
 	@test -d $(bindir) || mkdir $(bindir)
 	@for f in X $(PROGS); do					      \
 	   if test $$f != X; then					      \
-	     (set -x; $(INSTALL_PROGRAM) $$f $(bindir)/. || exit 1);	      \
+	     ($(LT_INSTALL_PROG) $$f $(bindir)/. || exit 1);		      \
 	   fi;							              \
 	done
 
 # Removes those things that `make install' (would have) installed.
 uninstall:
 	@if test "X$(LIB)" != X; then					      \
-           set -x; cd $(libdir) && $(RM) $(LIB);			      \
+	   for f in $(LIB); do						      \
+	      $(LT_UNINSTALL) $(libdir)/$$f;				      \
+	   done;							      \
 	fi
-	@if test "X$(PUBHDR)" != X; then				      \
+	@if test "X$(PUB_HDR)" != X; then				      \
 	   set -x; cd $(includedir) && $(RM) $(PUB_HDR);		      \
 	fi
 	@if test "X$(PROGS)" != X; then					      \
-	   set -x; cd $(bindir) && $(RM) $(PROGS);			      \
+	   for f in $(PROGS); do					      \
+	      $(LT_UNINSTALL) $(bindir)/$$f;				      \
+	   done;							      \
 	fi
 
 # Removes temporary files without removing the final target files.  That is,
 # remove things like object files but not libraries or executables.
 #
 mostlyclean:
-	$(RM) $(LIB_OBJ) $(TEST_OBJ) $(PROG_OBJ) $(MOSTLYCLEAN)
+	-$(RM) $(LIB_OBJ) $(TEST_OBJ) $(PROG_OBJ) $(MOSTLYCLEAN)
 
 # Like `mostlyclean' except it also removes the final targets: things like
 # libraries and executables.  This target doesn't remove any file that
 # is part of the HDF5 distribution.
 #
 clean: mostlyclean
-	$(RM) $(LIB) $(TEST_PROGS) $(PROGS) $(CLEAN)
+	-$(RM) $(LIB) $(TEST_PROGS) $(PROGS) $(CLEAN)
+	-$(RM) -r .libs
 
 # Like `clean' except it also removes files that were created by running
 # configure.  If you've unpacked the source and built HDF5 without creating
@@ -93,7 +97,7 @@ clean: mostlyclean
 # in the distribution.
 #
 distclean: clean
-	$(RM) .depend TAGS *~ core *.core *.bak *.old *.new $(DISTCLEAN)
+	-$(RM) .depend TAGS *~ core *.core *.bak *.old *.new $(DISTCLEAN)
 	@if test -f Makefile.in; then					      \
 	   (set -x; $(RM) Makefile);					      \
 	fi
@@ -102,11 +106,14 @@ distclean: clean
 # the makefile, including those generated from autoheader and autoconf.
 #
 maintainer-clean: distclean
-	$(RM) *~ core core.* *.core *.bak *.contrib gmon.out
+	-$(RM) *~ core core.* *.core *.bak *.contrib gmon.out
 
 # Implicit rules
 .c.o:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
+
+.c.lo:
+	@$(LT_COMPILE) $(CFLAGS) $(CPPFLAGS) -c $<
 
 #------------------------------------------------------------------------------
 # The following section of this makefile contains dependencies between the

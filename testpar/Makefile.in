@@ -9,7 +9,7 @@
 # Add the include directory to the C preprocessor flags the the hdf5 library
 # to the library list.
 CPPFLAGS=-I. -I../src @CPPFLAGS@
-LIBS=../src/libhdf5.a @LIBS@
+LIBS=../src/libhdf5.la @LIBS@
 
 # These tests are parallel
 RUNTEST=$(RUNPARALLEL)
@@ -27,9 +27,9 @@ TEST_OBJ=$(TEST_SRC:.c=.o)
 PRIVATE_HDR=testphdf5.h
 
 # How to build the tests... They all depend on the hdf5 library
-$(TEST_PROGS): ../src/libhdf5.a
+$(TEST_PROGS): ../src/libhdf5.la
 
 testphdf5: $(TEST_OBJ)
-	$(CC) $(CFLAGS) -o $@ $(TEST_OBJ) $(LDFLAGS) $(LIBS)
+	$(LT_LINK_EXE) $(CFLAGS) -o $@ $(TEST_OBJ) $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@

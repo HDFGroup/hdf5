@@ -1,0 +1,76 @@
+#							-*- shell-script -*-
+#
+# This file is part of the HDF5 build script.  It is processed shortly
+# after configure starts and defines, among other things, flags for
+# the various compile modes.
+#
+# See BlankForm in this directory for details.
+
+# The default compiler is `gcc'.
+if test "X-" =  "X-$CC"; then
+    CC=gcc
+    CC_BASENAME=gcc
+fi
+
+ARCH="-mcpu=pentiumpro -march=pentiumpro -malign-double"
+NOFP="-fomit-frame-pointer"
+#HDF4_FLAGS="-D__i386"
+
+# Compiler flags.  We use `-v' to get the version number because it almost
+# always works on Linux systems.
+case `$CC -v 2>&1 |grep 'gcc version' |sed 's/.*gcc version //'` in
+    2.7.*)
+        echo "  +------------------------------------------------+"
+        echo "  | You have an old version of gcc. Please upgrade |"
+        echo "  | to 2.8.1 or better.  Continuing anyway, but    |"
+        echo "  | code generation may be wrong on some platforms.|"
+        echo "  +------------------------------------------------+"
+        sleep 5
+	CFLAGS="$CFLAGS -ansi"
+	PROD_CFLAGS="-O3 $NOFP -finline-functions -Wno-shadow"
+	PROD_CPPFLAGS="$HDF4_FLAGS"
+	DEBUG_CFLAGS="-g -fverbose-asm -Wno-shadow"
+	DEBUG_CPPFLAGS="$HDF4_FLAGS -DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+	PROFILE_CFLAGS=-pg
+	PROFILE_CPPFLAGS=
+	;;
+
+    2.8.*)
+	CFLAGS="$CFLAGS -Wsign-compare"
+	PROD_CFLAGS="$ARCH -O3 $NOFP -finline-functions -fschedule-insns2 -Wno-shadow"
+	PROD_CPPFLAGS="$HDF4_FLAGS"
+	DEBUG_CFLAGS="-g -fverbose-asm -Wno-shadow"
+	DEBUG_CPPFLAGS="$HDF4_FLAGS -DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+	PROFILE_CFLAGS=-pg
+	PROFILE_CPPFLAGS=
+	;;
+
+    egcs-*)
+	CFLAGS="$CFLAGS -Wsign-compare"
+	PROD_CFLAGS="$ARCH -O6 $NOFP -Wno-shadow"
+	PROD_CPPFLAGS="$HDF4_FLAGS"
+	DEBUG_CFLAGS="-g -fverbose-asm -Wno-shadow"
+	DEBUG_CPPFLAGS="$HDF4_FLAGS -DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+	PROFILE_CFLAGS=-pg
+	PROFILE_CPPFLAGS=
+	;;
+
+    pgcc-*)
+	CFLAGS="$CFLAGS -Wsign-compare"
+	PROD_CFLAGS="$ARCH -O6 $NOFP -Wno-shadow"
+	PROD_CPPFLAGS="$HDF4_FLAGS"
+	DEBUG_CFLAGS="-g -fverbose-asm -Wno-shadow"
+	DEBUG_CPPFLAGS="$HDF4_FLAGS -DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+	PROFILE_CFLAGS=-pg
+	PROFILE_CPPFLAGS=
+	;;
+
+    *)
+	PROD_CFLAGS=-O
+	PROD_CPPFLAGS="$HDF4_FLAGS"
+	DEBUG_CFLAGS="-g"
+	DEBUG_CPPFLAGS="$HDF4_FLAGS -DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+	PROFILE_CFLAGS=-pg
+	PROFILE_CPPFLAGS=
+	;;
+esac

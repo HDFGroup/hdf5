@@ -11,7 +11,7 @@
 
 SHELL=/bin/sh
 
-all lib progs test _test install uninstall dep depend: _config
+all lib progs check test _test install uninstall dep depend: _config
 	$(MAKE) $@
 
 clean mostlyclean distclean maintainer-clean TAGS: _config

@@ -6,7 +6,7 @@
 
 # Things that Make needs
 .SUFFIXES:
-.SUFFIXES: .c .o
+.SUFFIXES: .c .o .lo
 @SET_MAKE@
 
 # Programs
@@ -35,6 +35,17 @@ exec_prefix=@exec_prefix@
 bindir=@bindir@
 libdir=@libdir@
 includedir=@includedir@
+
+# Shared libraries
+LT=@top_srcdir@/libtool
+LT_COMPILE=$(LT) --mode=compile $(CC)
+LT_LINK_LIB=$(LT) --mode=link $(CC) -rpath $(libdir)
+LT_LINK_EXE=$(LT) --mode=link $(CC)
+LT_RUN=$(LT) --mode=execute
+LT_INSTALL_PROG=$(LT) --mode=install $(INSTALL_PROGRAM)
+LT_INSTALL_LIB=$(LT) --mode=install $(INSTALL_DATA)
+LT_UNINSTALL=$(LT) --mode=uninstall $(RM)
+
 
 # The default is to build the library and/or programs.  We must build
 # them sequentially.

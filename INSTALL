@@ -1,33 +1,33 @@
+-*- outline -*-
+
 This file contains instructions for the installation of HDF5 on
-Unix-like systems.  First, one must obtain a tarball of the HDF5
-release from the ftp://hdf.ncsa.uiuc.edu/pub/dist/HDF5 repository.
-The files are available in uncompressed tar, gzip, bzip2, and compress
-formats.
+Unix-like systems. Users of the Intel TFLOPS machine should see the
+INSTALL.ascired for instructions.
 
-For those that like to live dangerously and don't like to read ;-) you
-can do the following:
+* Obtaining HDF5
+	The latest supported public release of HDF5 is available from
+	ftp://hdf.ncsa.uiuc.edu/pub/dist/HDF5 and is available in tar
+	format uncompressed or compressed with compress, gzip, or
+	bzip2.
 
-	$ tar xf hdf5-1.0.0a.tar
-	$ cd hdf5-1.0.0a
-        
-        $ sh configure
-        $ make                  # Builds library and tools
-	$ make test             # Builds and runs confidence tests.
-                                # NOTE: if fails, run the
-                                # command in the test directory
+	The HDF team also makes snapshots of the source code available 
+	on a regular basis but these. These snapshots are unsupported
+	(that is, the HDF team will not release a bug-fix on a
+	particular snapshot; rather any bug fixes will be rolled into
+	the next snapshot). Furthermore, the snapshots have only been
+	tested on a few machines and may not test correctly for
+	parallel applications. Snapshots can be found at
+	ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/snapshots in a
+	limited number for formats.
 
-	$ make install		# Optional
+* Warnings about compilers
+	OUTPUT FROM THE FOLLOWING COMPILERS SHOULD BE EXTREMELY
+	SUSPECT WHEN USED TO COMPILE THE HDF5 LIBRARY, ESPECIALLY IF
+	OPTIMIZATIONS ARE ENABLED. IN ALL CASES, HDF5 ATTEMPTS TO WORK
+	AROUND THE COMPILER BUGS BUT THE HDF5 DEVELOPMENT TEAM MAKES
+	NO GUARANTEES THAT THERE ARE OTHER CODE GENERATION PROBLEMS.
 
-Note: For the users of the Intel TFLOPS machine, a special sequence of
-steps for the install may be found in the file: INSTALL.ascired.
-
-OUTPUT FROM THE FOLLOWING COMPILERS SHOULD BE EXTREMELY SUSPECT WHEN
-USED TO COMPILE THE HDF5 LIBRARY, ESPECIALLY IF OPTIMIZATIONS ARE
-ENABLED. IN ALL CASES, HDF5 ATTEMPTS TO WORK AROUND THE COMPILER BUGS
-BUT THE HDF5 DEVELOPMENT TEAM MAKES NO GUARANTEES THAT THERE ARE OTHER 
-CODE GENERATION PROBLEMS.
-
-    * GNU (Intel platforms)
+** GNU (Intel platforms)
 	Versions before 2.8.1 have serious problems allocating
 	registers when functions contain operations on `long long'
 	data types. Supplying the `--disable-hsizet' switch to
@@ -35,194 +35,281 @@ CODE GENERATION PROBLEMS.
 	`long long' data types in situations that are known not to
 	work, but it limits the hdf5 address space to 2GB.
 
-    * DEC
+** DEC
 	The V5.2-038 compiler (and possibly others) occasionally
 	generates incorrect code for memcpy() calls when optimizations
 	are enabled, resulting in unaligned access faults. HDF5 works
 	around the problem by casting the second argument to `char*'.
 
-    * SGI (Irix64 6.2)
+** SGI (Irix64 6.2)
 	The Mongoose 7.00 compiler has serious optimization bugs and
 	should be upgraded to MIPSpro 7.2.1.2m. Patches are available
 	from SGI.
 
-    * Windows/NT
+** Windows/NT
 	The MicroSoft Win32 5.0 compiler is unable to cast unsigned
 	long long values to doubles. HDF5 works around this bug by
 	first casting to signed long long and then to double.
 
 
-=======
-Step 0: Install optional third-party packages.
+* Quick installation
+	For those that don't like to read ;-) the following steps can
+	be used to configure, build, test, and install the HDF5
+	library, header files, and support programs.
 
-    * Zlib compression library, version 1.1.2 or later is used for
-      the `deflate' compression method if available; otherwise no
-      compression filters will be predefined. The source code can be
-      found at http://www.cdrom.com/pub/infozip/zlib
 
-Step 1. Unpack the source tree.
+	$ gunzip <hdf5-1.0.0.tar.gz |tar xf -
+	$ cd hdf5-1.0.0
+	$ make check
+	$ make install
 
-    * The tarball will unpack into an hdf5-1.1.0 directory with one of
-      the following commands:
+* HDF5 dependencies
+** Zlib
+	The HDF5 library has a predefined compression filter that uses 
+	the "deflate" method for chunked datatsets. If zlib-1.1.2 or
+	later is found then hdf5 will use it, otherwise HDF5's
+	predefined compression method will degenerate to a no-op (the
+	compression filter will succeed but the data will not be
+	compressed).
 
-	$ tar xf hdf5-1.1.0.tar				OR
-	$ gunzip <hdf5-1.1.0.tar.gz |tar xf -		OR
-	$ bunzip2 <hdf5-1.1.0.tar.bz2 |tar xf -		OR
-	$ uncompress -c <hdf5-1.1.0.tar.Z |tar xf -
+** MPI and MPI-IO
+	The parallel version of the library is built upon the
+	foundation provided by MPI and MPI-IO. If these libraries are
+	not available when HDF5 is configured then only a serial
+	version of HDF5 can be built.
 
-Step 2. Configure.
+* Full installation instructions for source distributions
+** Unpacking the distribution
+	The HDF5 source code is distributed in a variety of formats
+	which can be unpacked with the following commands, each of
+	which creates an `hdf5-1.0.0' directory.
 
-    * HDF5 uses the GNU autoconf program for configuration.  Most
-      installations can be configured by typing just (from the
-      hdf5-1.1.0 directory)
+*** Non-compressed tar archive (*.tar)
+	$ tar xf hdf5-1.0.0.tar
 
-	$ sh configure
+*** Compressed tar archive (*.tar.Z)
+	$ uncompress -c <hdf5-1.0.0.tar.Z |tar xf -
 
-    * The configuration process can be controlled through environment
-      variables, command-line switches, and host configuration files.
-      For a complete list of switches say `sh configure --help'.
+*** Gzip'd tar archive (*.tar.gz)
+	$ gunzip <hdf5-1.0.0.tar.gz |tar xf -
 
-    * Host configuration files are located in the `config' directory
-      and are based on architecture name, vendor name, and/or operating
-      system which are displayed near the beginning of the `configure'
-      output. Not all hosts require a host configuration file.
+*** Bzip'd tar archive (*.tar.bz2)
+	$ bunzip2 <hdf5-1.0.0.tar.gz |tar xf -
 
-    * The C compiler and flags, the `ar' and `ranlib' program names,
-      and the `make' program can be specified with environment
-      variables if configure doesn't properly detect them and they are 
-      not defined in a host config file.
+** Configuring
+	HDF5 uses the GNU autoconf system for configuration, which
+	detects various features of the host system and creates the
+	various Makefiles.  On most systems it should be sufficient to 
+	say:
 
-	CC	  Name of the C compiler.
-	CFLAGS	  Switches for the C compiler.
-	CPPFLAGS  Additional switches for the .c -> .o step.
-	AR	  Name of the `ar' program.
-	RANLIB	  Name of the `ranlib' program or `:' if none.
-	MAKE	  Name of the `make' program (GNU make is preferred)
+	    $ sh configure
 
-    * The default compiler is `cc -n32' on Irix6.x platforms and `cc -64' on
-      Irix64 platforms. To use an alternate compiler (such as `cc -o32')
-      specify the name and compiler selection switch with the CC environment
-      variable:
+    	The configuration process can be controlled through
+	environment variables, command-line switches, and host
+	configuration files. For a complete list of switches say `sh
+	configure --help'. The host configuration files are located in
+	the `config' directory and are based on architecture name,
+	vendor name, and/or operating system which are displayed near
+	the beginning of the `configure' output. The host config file
+	influences the behavior of configure by setting shell
+	variables.
 
-	$ CC='cc -o32' ./configure ......
+*** Specifying the installation directories
+	Typing `make install' will install the HDF5 library, header
+	files, and support programs in /usr/local/lib,
+	/usr/local/include, and /usr/local/bin.  To use a path other
+	than /usr/local specify the path with the `--prefix=PATH'
+	switch:
 
-    * This version of HDF5 is normally built with various debugging code
-      enabled.  To turn it off add the `--disable-debug' switch to the
-      configure command. Even if debugging support is compiled into the
-      library one must still enable the code at runtime with the HDF5_DEBUG
-      environment variable (see Debugging.html). Including debugging support
-      in the library (whether it's enabled or not) may incur a significant
-      run-time penalty.
+	    $ ./configure --prefix=/home/robb
 
-    * This version of HDF5 is normally built with support for symbolic 
-      debugging with dbx or gdb and without compiler optimization
-      switches.  To disable symbolic debugging and enable
-      optimizations add `--enable-production' to the configure
-      command.
+*** Using an alternate C compiler
+	By default, configure will look for the C compiler by trying
+	`gcc' and `cc'. However, if the environment variable "CC" is
+	set then its value is used as the C compiler (users of csh and
+	derivatives will need to prefix the commands below with
+	`env'). For instance, to use the native C compiler on a system 
+	which also has the GNU gcc compiler:
 
-    * This version of HDF5 is normally built with the ability to print
-      the names, arguments, and return values of all API functions
-      when they're called.  For more information refer to the
-      Debugging.html file.  To disable tracing support add
-      `--disable-trace' to the configure command.
+	    $ CC=cc ./configure
 
-    * Configure will look for the GNU zlib (a compression library) in
-      the standard places for your environment.  If it's installed in
-      a non-standard place then absolute path names can be specified
-      with `--with-zlib=INCDIR,LIBDIR' for the include file and/or
-      library. To prevent detection of zlib use `--without-zlib'.
+	A parallel version of hdf5 can be built by specifying `mpicc'
+	as the C compiler (the `--enable-parallel' flag documented
+	below is optional).  Using the `mpicc' compiler will insure
+	that the correct MPI and MPI-IO header files and libraries are 
+	used.
 
-    * The HDF5-to-HDF4 conversion tool requires the HDF4 library and header
-      files which are auto-detected by configure.  If they are in a
-      non-standard place then absolute path names can be specified with
-      `--with-hdf4=INCDIR,LIBDIR' for the include file and/or library. To
-      prevent detection of hdf4 use `--without-hdf4'. Beware of the GNU zlib
-      that comes with hdf4 -- it's too old to use with hdf5 (hdf4 tools can be 
-      linked with the newer versions of zlib).
+	    $ CC=/usr/local/mpi/bin/mpicc ./configure
 
-    * Old versions of gcc (<2.8.0) may experience register allocation
-      problems on some architectures.  If this happens then the
-      `--disable-hsizet' can be given but the resulting library will
-      be unable to handle datasets larger than 4GB.
+	On Irix 6.x systems the default compiler is `cc -n32' and on
+	Irix64 it is `cc -64'. To use an alternate compiler specify it 
+	with the CC variable:
 
-    * Libraries, include files, programs, and documentation are
-      installed (when one says `make install') under /usr/local/lib,
-      /usr/local/include, /usr/local/bin, and /usr/local/man.
-      However, if you want them in some other location you can specify
-      a prefix to use instead of /usr/local.  For instance, to install
-      in /usr/lib, /usr/include, /usr/bin, and /usr/man one would say
+	    $ CC='cc -o32' ./configure
 
-	$ ./configure --prefix=/usr
+*** Additional compilation flags
+	If addtional flags must be passed to the compilation commands
+	then specify those flags with the CFLAGS variable. For
+	instance, to enable symbolic debugging of a production version 
+	of HDF5 one might say:
 
-      The library can be used directly from the source tree without
-      installing it.
+	    $ CFLAGS=-g ./confgure --enable-production
 
-Step 3. Compile library, tests, and programs.
+*** Speicifying other programs
+	The build system has been tuned for use with GNU make but
+	works also with other versions of make.  If the `make' command 
+	runs a non-GNU version but a GNU version is available under a
+	different name (perhaps `gmake') then HDF5 can be configured
+	to use it by setting the MAKE variable. Note that whatever
+	value is used for MAKE must also be used as the make command
+	when building the library:
 
-    * Build library targets by saying
+	    $ MAKE=gmake ./configure
+	    $ gmake
 
-        $ make
+	The `AR' and `RANLIB' variables can also be set to the names
+	of the `ar' and `ranlib' (or `:') commands to override values
+	detected by configure.
 
-      Note: If you supplied some other make command through the MAKE
-      environment variable in the previous step then use that command
-      instead. The same applies below.
+*** Specifying other libraries and headers
+	Configure searches the standard places (those places known by
+	the systems compiler) for include files and header
+	files. However, additional directories can be specified by
+	using the CPPFLAGS and/or LDFLAGS variables:
 
-      Note: When using GNU make you can add `-j -l6' to the make
-      command to compile in parallel on SMP machines.  Do not give a
-      number after the `-j' since GNU make will turn it off for
-      recursive invocations of make.
+	    $ CPPFLAGS=-I/home/robb/include \
+              LDFLAGS=-L/home/robb/lib \
+	      ./configure
 
-Step 4. Run confidence tests.
+	HDF5 uses the zlib library for two purposes: it provides
+	support for the HDF5 deflate data compression filter, and it
+	is used by the h5toh4 converter in support of HDF4. Configure
+	searches the standard places (plus those specified above with
+	CPPFLAGS and LDFLAGS variables) for the zlib headers and
+	library. The search can be disabled by specifying
+	`--without-zlib' or alternate directories can be specified
+	with `--with-zlib=INCDIR,LIBDIR'.
 
-    * All confidence tests should be run by saying
+	    $ ./configure --with-zlib=/usr/unsup/include,/usr/unsup/lib
 
-	$ make test
+        The HDF5-to-HDF4 conversion tool requires the HDF4 library and 
+        header files which are detected the same way as zlib. The
+        switch to give to configure is `--with-hdf4'.  Note that HDF5
+        requires a newer version of zlib than the one shipped with
+        some versions of HDF4.
 
-      The command will fail if any test fails, and one will see the
-      word "*FAIL*" in the output.
+*** Static versus shared linking
+	The build process will create static libraries on all systems
+	and shared libraries on systems that support dynamic linking
+	to a sufficient degree.  Either form of library may be
+	suppressed by saying `--disable-static' or `--disable-shared'.
 
-    * Some old versions of make will report that `test is up to
-      date'. If this happens then run `make _test' instead or run
-      `make test' from within the test directory.
+	    $ ./configure --disable-shared
 
-    * Temporary files will be deleted by each test when it completes,
-      but may continue to exist in an incomplete state if the test
-      fails. To prevent deletion of the files define the
-      HDF5_NOCLEANUP environment variable.
+*** Optimization versus symbolic debugging
+	The library can be compiled to provide symbolic debugging
+	support so it can be debugged with gdb, dbx, ddd, etc or it
+	can be compiled with various optimizations.  To compile for
+	symbolic debugging (the default for snapshots) say
+	`--disable-production'; to compile with optimizations (the
+	default for supported public releases) say
+	`--enable-production'.  On some systems the library can also
+	be compiled for profiling with gprof by saying
+	`--enable-production=profile'.
 
-Step 5. Install public files.
+	    $ ./configure --enable-production
 
-    * Install the library, header files, and programs by saying:
+	Regardless of whether support for symbolic debugging is
+	enabled, the library also is able to perform runtime debugging
+	of certain packages (such as type conversion execution times,
+	and extensive invariant condition checking). To enable this
+	debugging supply a comma-separated list of package names to to
+	the `--enable-debug' switch (see Debugging.html for a list of
+	package names). Debugging can be disabled by saying
+	`--disable-debug'. The default debugging level for snapshots
+	is a subset of the available packages; the default for
+	supported releases is no debugging (debugging can incur a
+	significant runtime penalty).
 
-        $ make install
+	    $ ./configure --enable-debug=s,t
 
-    * This step will fail unless you have permission to write to the
-      installation directories.  Of course, you can use the header
-      files, library, and programs directly out of the source tree if
-      you like, skipping this step.  The directory specified for the
-      --prefix switch (or "/usr/local") must exist, but the
-      directories under it are created automatically by make.
+	HDF5 is also able to print a trace of all API function calls,
+	their arguments, and the return values. To enable or disable
+	the ability to trace the API say `--enable-trace' or
+	`--disable-trace'. The tracing must also be enabled at runtime 
+	to see any output (see Debugging.html).
 
-    * The minimum which must be installed are:
+*** Large (>2GB) vs. small (<2GB) file capability
+	In order to read or write files that could potentially be
+	larger than 2GB it is necessary to use the non-ANSI `long
+	long' data type on some platforms. However, some compilers
+	(e.g., GNU gcc versions before 2.8.1 on Intel platforms)
+	are unable to produce correct machine code for this data
+	type. To disable use of the `long long' type on these machines 
+	say:
 
-	The library:
-	    ./src/libhdf5.a
+	    $ ./configure --disable-hsizet
 
-	The public header files:
-	    ./src/H5*public.h
+** Building
+	The library, confidence tests, and programs can be build by
+	saying just
 
-	The main header file:
-	    ./src/hdf5.h
+	    $ make
 
-	The configuration information:
-	    ./src/H5config.h
+	Note that if you supplied some other make command via the MAKE 
+	variable during the configuration step then that same command
+	must be used here.
+
+	When using GNU make you can add `-j -l6' to the make command
+	to compile in arallel on SMP machines. Do not give a number
+	after th `-j' since GNU make will turn it off for recursive
+	invocations of make.
+
+	    $ make -j -l6
+
+** Testing
+	HDF5 comes with various test suites, all of which can be run
+	by saying
+
+	    $ make check
+
+	To run only the tests for the library change to the `test'
+	directory before issuing the command. Similarly, tests for the 
+	parallel aspects of the library are in `testpar' and tests for 
+	the support programs are in `tools'.
+
+	Temporary files will be deleted by each test when it complets, 
+	but may continue to exist in an incomplete state if the test
+	fails. To prevent deletion of the files define the
+	HDF5_NOCLEANUP environment variable.
+
+** Installing
+	The HDF5 library, include files, and support programs can be
+	installed in a (semi-)public place by saying `make
+	install'. The files are installed under the directory
+	specified with `--prefix=DIR' (or '/usr/local') in directories 
+	named `lib', `include', and `bin'. The prefix directory must
+	exist prior to `make install', but its subdirectories are
+	created automatically.
+
+	The library can be used without installing it by pointing the
+	compiler at the `src' directory for both include files and
+	libraries.  However, the minimum which must be installed to
+	make the library publically available is:
+
+	    The library:
+		./src/libhdf5.a
+
+	    The public header files:
+		./src/H5*public.h
+
+	    The main header file:
+		./src/hdf5.h
+
+	    The configuration information:
+		./src/H5config.h
 	
-    * Additional useful things which are installed:
-
-	The tools library:
-	    ./tools/libh5tools.a
-
-	Some tools:
+    	The support programs that are useful are:
 	    ./tools/h5ls	(list file contents)
 	    ./tools/h5dump	(dump file contents)
 	    ./tools/h5repart	(repartition file families)
@@ -230,7 +317,6 @@ Step 5. Install public files.
 	    ./tools/h5debug	(low-level file debugging)
 	    ./tools/h5import	(a demo)
 
-Step 6. Subscribe to mailing lists.
-
-    * Subscribe to the mailing lists described in the README file.
+* Support
+	Support is described in the README file.
 

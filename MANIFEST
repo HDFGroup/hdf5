@@ -18,6 +18,7 @@
 ./README
 ./RELEASE
 ./acconfig.h
+./aclocal.m4
 ./configure
 ./configure.in
 ./all.zip
@@ -32,25 +33,27 @@
 ./bin/h5vers
 ./bin/install-sh
 ./bin/iostats
+./bin/ltconfig
+./bin/ltmain.sh
 ./bin/release
 ./bin/snapshot
 ./bin/trace
 ./bin/versinc				_DO_NOT_DISTRIBUTE_
 
 ./config/BlankForm
-./config/alpha-dec
-./config/alpha-dec-osf4.0
 ./config/commence.in
 ./config/conclude.in
+./config/dec-osf4.x
 ./config/depend.in
 ./config/freebsd
 ./config/hpux10.20
 ./config/hpux9.03
 ./config/intel-osf1
-./config/irix5.3
+./config/irix5.x
 ./config/irix6.x
-./config/irix64
-./config/linux
+./config/linux-gnu
+./config/linux-gnulibc1
+./config/linux-gnulibc2
 ./config/powerpc-ibm-aix4.2.1.0
 ./config/rs6000-ibm-aix4.1.4.0
 ./config/solaris2.5

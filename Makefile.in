@@ -21,7 +21,10 @@ SUBDIRS=src test tools @TESTPARALLEL@
 #		library, header files, or programs.  The components can be
 #		built individually with the targets lib, progs, and tests.
 #
-# test:		Test the uninstalled library to make sure it works.
+# check:	Test the uninstalled library to make sure it works. You may
+#		also say `test' or `_test' (`test' doesn't work from the top
+#		level directory for some versions of make because `test' is
+#		also a directory).
 #
 # install:	Installs libraries, header files, programs, and documentation
 #		in the various directories under the prefix directory (lib,
@@ -59,7 +62,7 @@ SUBDIRS=src test tools @TESTPARALLEL@
 #		make used in combination with gcc will maintain dependency
 #		information automatically.
 #
-lib progs tests test _test install uninstall TAGS dep depend:
+lib progs tests check test _test install uninstall TAGS dep depend:
 	@@SETX@; for d in $(SUBDIRS); do				      \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done

@@ -5,4 +5,4 @@
 #
 # See BlankForm in this directory for details.
 
-. config/linux
+. config/linux-gnulibc1

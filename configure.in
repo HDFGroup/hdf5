@@ -4,8 +4,6 @@ dnl
 dnl Copyright (C) 1997 National Center for Supercomputing Applications.
 dnl                    All rights reserved.
 
-
-
 dnl ----------------------------------------------------------------------
 dnl Initialize configure.
 dnl
@@ -50,22 +48,42 @@ dnl	OS
 dnl	VENDOR
 dnl	CPU
 dnl
+dnl If the `OS' ends with a version number then remove it. For instance,
+dnl `freebsd3.1' would become `freebsd'
+case $host_os in
+    freebsd*)
+	host_os_novers=freebsd
+	;;
+    irix5.*)
+	host_os_novers=irix5.x
+	;;
+    irix6.*)
+	host_os_novers=irix6.x
+	;;
+    osf4.*)
+	host_os_novers=osf4.x
+	;;
+    *)
+	host_os_novers=$host_os
+	;;
+esac
 
-AC_MSG_CHECKING(for host config file)
 host_config="none"
-for f in $host \
-         $host_vendor-$host_os \
-         $host_cpu-$host_os \
+for f in $host_cpu-$host_vendor-$host_os_novers \
+         $host_vendor-$host_os_novers \
+         $host_cpu-$host_os_novers \
          $host_cpu-$host_vendor \
-	 $host_os \
+	 $host_os_novers \
 	 $host_vendor \
 	 $host_cpu ; do
+   AC_MSG_CHECKING(for config $f)
    if test -f config/$f; then
       host_config=config/$f
+      AC_MSG_RESULT(found)
       break
    fi
+   AC_MSG_RESULT(no)
 done
-AC_MSG_RESULT($host_config)
 if test $host_config != "none"; then
    CC_BASENAME="`echo $CC |cut -f1 -d' ' |xargs basename 2>/dev/null`"
    . $host_config
@@ -78,7 +96,7 @@ AC_PROG_CC
 CC_BASENAME="`echo $CC |cut -f1 -d' ' |xargs basename 2>/dev/null`"
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
-AC_PROG_RANLIB
+AM_PROG_LIBTOOL
 
 if test "X$AR" = "X"; then
    AC_CHECK_PROGS(AR,ar xar,:,$PATH)
@@ -148,12 +166,15 @@ AC_CHECK_HEADERS(stddef.h)
 dnl Windows
 AC_CHECK_HEADERS(io.h winsock.h sys/timeb.h)
 
-dnl The <sys/sysinfo.h> and <sys/proc.h> are needed on the DEC Alpha
-dnl to turn off UAC fixing. We do *not* attempt to locate these files on
-dnl other systems because there are too many problems with including them.
-if test "$host_vendor-$host_cpu" = "dec-alpha"; then
-    AC_CHECK_HEADERS(sys/sysinfo.h sys/proc.h)
-fi
+case $host in
+    alpha*-dec*-osf*)
+	dnl The <sys/sysinfo.h> and <sys/proc.h> are needed on the DEC
+	dnl Alpha to turn off UAC fixing. We do *not* attempt to
+	dnl locate these files on other systems because there are too
+	dnl many problems with including them.
+	AC_CHECK_HEADERS(sys/sysinfo.h sys/proc.h)
+	;;
+esac
 
 dnl ----------------------------------------------------------------------
 dnl Data types and their sizes.

@@ -77,16 +77,16 @@ for cvs in `find . -type d -name CVS -print`; do
 	fi
     done
 done
-for file in ./Changes `sh -c 'svf ls' 2>/dev/null`; do
-    if (grep $file $MANIFEST >/dev/null); then
-	:
-    elif [ $file = ./Changes ]; then
-        :
-    else
-	echo "+ $file"
-	fail=yes
-    fi
-done
+# for file in ./Changes `sh -c 'svf ls' 2>/dev/null`; do
+#     if (grep $file $MANIFEST >/dev/null); then
+# 	:
+#     elif [ $file = ./Changes ]; then
+#         :
+#     else
+# 	echo "+ $file"
+# 	fail=yes
+#     fi
+# done
 
 if [ "X$fail" = "Xyes" ]; then
     cat 1>&2 <<EOF

@@ -6,16 +6,19 @@
 # 
 @COMMENCE@
 
-# Add include directory to the C preprocessor flags, add the -lh5tools to the
-# libraries.
+# Add include directory to the C preprocessor flags, add -lh5tools and
+# -lhdf5 to the list of libraries.
 CPPFLAGS=-I../src -I. @CPPFLAGS@
-LIBS=../src/libhdf5.a libh5tools.a @LIBS@
+LIBS=../src/libhdf5.la @LIBS@
 
 # Test programs and scripts.
 TEST_PROGS=
 TEST_SCRIPTS=testh5dump.sh @TESTH5TOH4@
 
-# These are our main targets: library and tools.
+# These are our main targets: library and tools. We link this library
+# statically because some systems can only link executables to a single
+# shared library and libhdf5 is much bigger than libh5tools.
+LT_LINK_LIB=$(LT) --mode=link $(CC) -static
 LIB=libh5tools.a
 PROGS=h5debug h5import h5ls h5repart h5dump @H5TOH4@
 
@@ -33,28 +36,28 @@ TEST_SRC=
 TEST_OBJ=$(TEST_SRC:.c=.o)
 
 # Programs have to be built before they can be tested!
-test _test: $(PROGS)
+check test _test: $(PROGS)
 
 # How to build the programs... They all depend on the hdf5 library and
 # the tools library compiled in this directory.
-$(PROGS): ../src/libhdf5.a $(LIB)
+$(PROGS): $(LIB) ../src/libhdf5.la
 
 h5debug: h5debug.o
-	$(CC) $(CFLAGS) -o $@ h5debug.o $(LDFLAGS) $(LIBS)
+	$(LT_LINK_EXE) $(CFLAGS) -o $@ h5debug.o $(LIB) $(LDFLAGS) $(LIBS)
 
 h5import: h5import.o
-	$(CC) $(CFLAGS) -o $@ h5import.o $(LDFLAGS) $(LIBS)
+	$(LT_LINK_EXE) $(CFLAGS) -o $@ h5import.o $(LIB) $(LDFLAGS) $(LIBS)
 
 h5ls: h5ls.o
-	$(CC) $(CFLAGS) -o $@ h5ls.o $(LDFLAGS) $(LIBS)
+	$(LT_LINK_EXE) $(CFLAGS) -o $@ h5ls.o $(LIB) $(LDFLAGS) $(LIBS)
 
 h5repart: h5repart.o
-	$(CC) $(CFLAGS) -o $@ h5repart.o $(LDFLAGS) $(LIBS)
+	$(LT_LINK_EXE) $(CFLAGS) -o $@ h5repart.o $(LIB) $(LDFLAGS) $(LIBS)
 
 h5dump: h5dump.o h5dumputil.o
-	$(CC) $(CFLAGS) -o $@ h5dump.o h5dumputil.o $(LDFLAGS) $(LIBS)
+	$(LT_LINK_EXE) $(CFLAGS) -o $@ h5dump.o h5dumputil.o $(LIB) $(LDFLAGS) $(LIBS)
 
 h5toh4: h5toh4.o
-	$(CC) $(CFLAGS) -o $@ h5toh4.o $(LDFLAGS) $(LIBS)
+	$(LT_LINK_EXE) $(CFLAGS) -o $@ h5toh4.o $(LIB) $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@
