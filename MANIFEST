@@ -856,6 +856,7 @@
 ./src/H5MM.c
 ./src/H5MMprivate.h
 ./src/H5MMpublic.h
+./src/H5MPprivate.h
 ./src/H5O.c
 ./src/H5Oattr.c
 ./src/H5Ocomp.c
