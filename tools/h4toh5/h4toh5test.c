@@ -100,6 +100,7 @@ int main(void) {
     printf("failed to create ras24_test.hdf file.\n");
     return FAIL;
   }
+
   if(test_imageattr()== FAIL) {
      printf("failed to create image_attr_test.hdf file.\n");
      return FAIL;
@@ -1002,6 +1003,11 @@ int  test_ras8() {
   il = MFGR_INTERLACE_PIXEL;
   dims[0] = X_LENGTH;
   dims[1] = Y_LENGTH;
+  /* define start and edges value. */
+  for (i =0;i<2;i++) {
+	start[i] = 0;
+        edges[i] = dims[i];
+  }
 
   /* Create the array. */
   ri_id = GRcreate(gr_id, "Image_uint8", ncomp, DFNT_UINT8, il, dims);
@@ -1109,6 +1115,10 @@ int  test_ras24() {
   il = MFGR_INTERLACE_PIXEL;
   dims[0] = X_LENGTH;
   dims[1] = Y_LENGTH;
+  for(i=0;i<2;i++) {
+	start[i] = 0;
+        edges[i] = dims[i];
+  }
 
   /* Create the array. */
   ri_id = GRcreate(gr_id, "Image_uint24", ncomp, DFNT_UINT8, il, dims);
