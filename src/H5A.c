@@ -1292,7 +1292,7 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
     H5G_entry_t		*ent = NULL;	/*symtab ent of object to attribute */
     H5A_t          	found_attr;
     herr_t	        ret_value = 0;
-    int		idx;
+    int		idx, start_idx;
 
     FUNC_ENTER_API(H5Aiterate, FAIL);
     H5TRACE4("e","i*Iuxx",loc_id,attr_num,op,op_data);
@@ -1307,7 +1307,9 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
      * Look up the attribute for the object. Make certain the start point is
      * reasonable.
      */
-    idx = attr_num ? (int)*attr_num : 0;
+    start_idx = idx = attr_num ? (int)*attr_num : 0;
+    if (idx<0)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified");
     if(idx<H5O_count(ent, H5O_ATTR_ID, H5AC_dxpl_id)) {
         while(H5O_read(ent, H5O_ATTR_ID, idx++, &found_attr, H5AC_dxpl_id)!=NULL) {
 	    /*
@@ -1322,6 +1324,9 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
 	}
 	H5E_clear ();
     }
+    else
+        if(start_idx>0)
+            HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified");
 
     if (attr_num)
         *attr_num = (unsigned)idx;
