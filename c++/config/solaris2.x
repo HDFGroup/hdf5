@@ -17,13 +17,13 @@ fi
 
 # Try solaris native compiler flags
 if test -z "$cxx_flags_set"; then
-    CFLAGS="-erroff=%none"
+    CXXFLAGS="-instances=global"
     LIBS="$LIBS -lsocket"
-    DEBUG_CFLAGS=-g
+    DEBUG_CXXFLAGS=-g
     DEBUG_CPPFLAGS=
-    PROD_CFLAGS="-O -s"
+    PROD_CXXFLAGS="-O -s"
     PROD_CPPFLAGS=
-    PROFILE_CFLAGS=-xpg
+    PROFILE_CXXFLAGS=-xpg
     PROFILE_CPPFLAGS=
     cxx_flags_set=yes
 fi
