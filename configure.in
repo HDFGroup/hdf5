@@ -1322,3 +1322,28 @@ touch ./config/stamp2
 
 # Finally the makefiles
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
+
+dnl We don't want inline defined for C++ compilers
+cat >> src/H5config.h <<EOF
+
+/* inline is a keyword in C++. If this is a C++ compiler, undefine it */
+#ifdef __cplusplus
+#    ifdef inline
+#	 undef inline
+#    endif
+#endif
+EOF
+
+dnl Put the C++ ifdef wrappers in the H5pubconf file as well, but only
+dnl if it's not there already.
+if (! grep __cplusplus src/H5pubconf.h >/dev/null); then
+  cat >> src/H5pubconf.h <<EOF
+
+/* inline is a keyword in C++. If this is a C++ compiler, undefine it */
+#ifdef __cplusplus
+#    ifdef inline
+#	 undef inline
+#    endif
+#endif
+EOF
+fi
