@@ -740,22 +740,17 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                     /* Compute file offset */
                     file_offset = posix_file_offset + (off_t)nbytes_xfer;
 
-		    /* bytes to transfer this time */
-		    nbytes_toxfer = bytes_count - nbytes_xfer;
-		    if (nbytes_toxfer > buf_size)
-			nbytes_toxfer = buf_size;
-
                     /* only care if seek returns error */
                     rc = POSIXSEEK(fd->posixfd, file_offset) < 0 ? -1 : 0;
                     VRFY((rc==0), "POSIXSEEK");
 
                     /* check if all bytes are written */
                     rc = ((ssize_t)buf_size ==
-                        POSIXWRITE(fd->posixfd, buffer, nbytes_toxfer));
+                        POSIXWRITE(fd->posixfd, buffer, buf_size));
                     VRFY((rc != 0), "POSIXWRITE");
 
                     /* Advance global offset in dataset */
-                    nbytes_xfer+=nbytes_toxfer;
+                    nbytes_xfer+=buf_size;
                 } /* end if */
                 /* Interleaved access pattern */
                 else {
@@ -1195,22 +1190,17 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                     /* Compute file offset */
                     file_offset = posix_file_offset + (off_t)nbytes_xfer;
 
-		    /* bytes to transfer this time */
-		    nbytes_toxfer = bytes_count - nbytes_xfer;
-		    if (nbytes_toxfer > buf_size)
-			nbytes_toxfer = buf_size;
-
                     /* only care if seek returns error */
                     rc = POSIXSEEK(fd->posixfd, file_offset) < 0 ? -1 : 0;
                     VRFY((rc==0), "POSIXSEEK");
 
                     /* check if all bytes are written */
                     rc = ((ssize_t)buf_size ==
-                        POSIXREAD(fd->posixfd, buffer, nbytes_toxfer));
+                        POSIXREAD(fd->posixfd, buffer, buf_size));
                     VRFY((rc != 0), "POSIXREAD");
 
                     /* Advance global offset in dataset */
-                    nbytes_xfer+=nbytes_toxfer;
+                    nbytes_xfer+=buf_size;
                 } /* end if */
                 /* Interleaved access pattern */
                 else {
