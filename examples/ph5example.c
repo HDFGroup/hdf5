@@ -62,6 +62,17 @@ int verbose = 0;			/* verbose, default as no. */
 int doread=1;				/* read test */
 int dowrite=1;				/* write test */
 
+/* Prototypes */
+void slab_set(hssize_t start[], hsize_t count[], hsize_t stride[], int mode);
+void dataset_fill(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE * dataset);
+void dataset_print(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE * dataset);
+int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE *dataset, DATATYPE *original);
+void phdf5writeInd(char *filename);
+void phdf5readInd(char *filename);
+void phdf5writeAll(char *filename);
+void phdf5readAll(char *filename);
+void test_split_comm_access(char *filenames[]);
+int parse_options(int argc, char **argv);
 
 
 /*
@@ -149,21 +160,19 @@ void dataset_print(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE
 int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE *dataset, DATATYPE *original)
 {
 #define MAX_ERR_REPORT	10		/* Maximum number of errors reported */
-    DATATYPE *dataptr = dataset;
-    DATATYPE *originptr = original;
 
-    int i, j, nerrors;
+    int i, j, nerr;
 
     /* print it if verbose */
     if (verbose)
 	dataset_print(start, count, stride, dataset);
 
-    nerrors = 0;
+    nerr = 0;
     for (i=0; i < count[0]; i++){
 	for (j=0; j < count[1]; j++){
 	    if (*dataset++ != *original++){
-		nerrors++;
-		if (nerrors <= MAX_ERR_REPORT){
+		nerr++;
+		if (nerr <= MAX_ERR_REPORT){
 		    printf("Dataset Verify failed at [%d][%d](row %d, col %d): expect %d, got %d\n",
 			i, j,
 			(int)(i*stride[0]+start[0]), (int)(j*stride[1]+start[1]),
@@ -172,11 +181,11 @@ int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE *
 	    }
 	}
     }
-    if (nerrors > MAX_ERR_REPORT)
+    if (nerr > MAX_ERR_REPORT)
 	printf("[more errors ...]\n");
-    if (nerrors)
-	printf("%d errors found in dataset_vrfy\n", nerrors);
-    return(nerrors);
+    if (nerr)
+	printf("%d errors found in dataset_vrfy\n", nerr);
+    return(nerr);
 }
 
 
@@ -191,37 +200,26 @@ int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE *
 void
 phdf5writeInd(char *filename)
 {
-    hid_t fid1, fid2;		/* HDF5 file IDs */
+    hid_t fid1;			/* HDF5 file IDs */
     hid_t acc_tpl1;		/* File access templates */
-    hid_t sid1,sid2;   		/* Dataspace ID */
+    hid_t sid1;   		/* Dataspace ID */
     hid_t file_dataspace;	/* File dataspace ID */
     hid_t mem_dataspace;	/* memory dataspace ID */
     hid_t dataset1, dataset2;	/* Dataset ID */
-    int rank = SPACE1_RANK; 	/* Logical rank of dataspace */
     hsize_t dims1[SPACE1_RANK] =
 	{SPACE1_DIM1,SPACE1_DIM2};	/* dataspace dim sizes */
-    hsize_t dimslocal1[SPACE1_RANK] =
-	{SPACE1_DIM1,SPACE1_DIM2}; 	/* local dataspace dim sizes */
     DATATYPE data_array1[SPACE1_DIM1][SPACE1_DIM2];	/* data buffer */
 
     hssize_t   start[SPACE1_RANK];			/* for hyperslab setting */
     hsize_t count[SPACE1_RANK], stride[SPACE1_RANK];	/* for hyperslab setting */
 
     herr_t ret;         	/* Generic return value */
-    int   i, j;
-    int mpi_size, mpi_rank;
-    char *fname;
-    int mrc;			/* mpi return code */
     
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
     if (verbose)
 	printf("Independent write test on file %s\n", filename);
-
-    /* set up MPI parameters */
-    MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
-    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
     /* -------------------
      * START AN HDF5 FILE 
@@ -331,14 +329,11 @@ if (verbose)
 void
 phdf5readInd(char *filename)
 {
-    hid_t fid1, fid2;		/* HDF5 file IDs */
+    hid_t fid1;			/* HDF5 file IDs */
     hid_t acc_tpl1;		/* File access templates */
-    hid_t sid1,sid2;   		/* Dataspace ID */
     hid_t file_dataspace;	/* File dataspace ID */
     hid_t mem_dataspace;	/* memory dataspace ID */
     hid_t dataset1, dataset2;	/* Dataset ID */
-    int rank = SPACE1_RANK; 	/* Logical rank of dataspace */
-    hsize_t dims1[] = {SPACE1_DIM1,SPACE1_DIM2};   	/* dataspace dim sizes */
     DATATYPE data_array1[SPACE1_DIM1][SPACE1_DIM2];	/* data buffer */
     DATATYPE data_origin1[SPACE1_DIM1][SPACE1_DIM2];	/* expected data buffer */
 
@@ -346,19 +341,12 @@ phdf5readInd(char *filename)
     hsize_t count[SPACE1_RANK], stride[SPACE1_RANK];	/* for hyperslab setting */
 
     herr_t ret;         	/* Generic return value */
-    int   i, j;
-    int mpi_size, mpi_rank;
 
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
     if (verbose)
 	printf("Independent read test on file %s\n", filename);
-
-    /* set up MPI parameters */
-    MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
-    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-
 
     /* setup file access template */
     acc_tpl1 = H5Pcreate (H5P_FILE_ACCESS);
@@ -454,14 +442,13 @@ if (verbose)
 void
 phdf5writeAll(char *filename)
 {
-    hid_t fid1, fid2;		/* HDF5 file IDs */
+    hid_t fid1;			/* HDF5 file IDs */
     hid_t acc_tpl1;		/* File access templates */
     hid_t xfer_plist;		/* Dataset transfer properties list */
-    hid_t sid1,sid2;   		/* Dataspace ID */
+    hid_t sid1;   		/* Dataspace ID */
     hid_t file_dataspace;	/* File dataspace ID */
     hid_t mem_dataspace;	/* memory dataspace ID */
     hid_t dataset1, dataset2;	/* Dataset ID */
-    int rank = SPACE1_RANK; 	/* Logical rank of dataspace */
     hsize_t dims1[SPACE1_RANK] =
 	{SPACE1_DIM1,SPACE1_DIM2};	/* dataspace dim sizes */
     DATATYPE data_array1[SPACE1_DIM1][SPACE1_DIM2];	/* data buffer */
@@ -470,17 +457,12 @@ phdf5writeAll(char *filename)
     hsize_t count[SPACE1_RANK], stride[SPACE1_RANK];	/* for hyperslab setting */
 
     herr_t ret;         	/* Generic return value */
-    int mpi_size, mpi_rank;
     
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
     if (verbose)
 	printf("Collective write test on file %s\n", filename);
-
-    /* set up MPI parameters */
-    MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
-    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
     /* -------------------
      * START AN HDF5 FILE 
@@ -658,15 +640,12 @@ if (verbose)
 void
 phdf5readAll(char *filename)
 {
-    hid_t fid1, fid2;		/* HDF5 file IDs */
+    hid_t fid1;			/* HDF5 file IDs */
     hid_t acc_tpl1;		/* File access templates */
     hid_t xfer_plist;		/* Dataset transfer properties list */
-    hid_t sid1,sid2;   		/* Dataspace ID */
     hid_t file_dataspace;	/* File dataspace ID */
     hid_t mem_dataspace;	/* memory dataspace ID */
     hid_t dataset1, dataset2;	/* Dataset ID */
-    int rank = SPACE1_RANK; 	/* Logical rank of dataspace */
-    hsize_t dims1[] = {SPACE1_DIM1,SPACE1_DIM2};   	/* dataspace dim sizes */
     DATATYPE data_array1[SPACE1_DIM1][SPACE1_DIM2];	/* data buffer */
     DATATYPE data_origin1[SPACE1_DIM1][SPACE1_DIM2];	/* expected data buffer */
 
@@ -674,17 +653,12 @@ phdf5readAll(char *filename)
     hsize_t count[SPACE1_RANK], stride[SPACE1_RANK];	/* for hyperslab setting */
 
     herr_t ret;         	/* Generic return value */
-    int mpi_size, mpi_rank;
 
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
     if (verbose)
 	printf("Collective read test on file %s\n", filename);
-
-    /* set up MPI parameters */
-    MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
-    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
     /* -------------------
      * OPEN AN HDF5 FILE 
@@ -854,7 +828,6 @@ if (verbose)
 void
 test_split_comm_access(char *filenames[])
 {
-    int mpi_size, myrank;
     MPI_Comm comm;
     MPI_Info info = MPI_INFO_NULL;
     int color, mrc;
@@ -867,11 +840,8 @@ test_split_comm_access(char *filenames[])
 	printf("Independent write test on file %s %s\n",
 	    filenames[0], filenames[1]);
 
-    /* set up MPI parameters */
-    MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
-    MPI_Comm_rank(MPI_COMM_WORLD,&myrank);
-    color = myrank%2;
-    mrc = MPI_Comm_split (MPI_COMM_WORLD, color, myrank, &comm);
+    color = mpi_rank%2;
+    mrc = MPI_Comm_split (MPI_COMM_WORLD, color, mpi_rank, &comm);
     assert(mrc==MPI_SUCCESS);
     MPI_Comm_size(comm,&newprocs);
     MPI_Comm_rank(comm,&newrank);
@@ -902,7 +872,7 @@ test_split_comm_access(char *filenames[])
 	ret=H5Fclose(fid);
 	assert(ret != FAIL);
     }
-    if (myrank == 0){
+    if (mpi_rank == 0){
 	mrc = MPI_File_delete(filenames[color], info);
 	assert(mrc==MPI_SUCCESS);
     }
