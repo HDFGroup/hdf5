@@ -18,6 +18,9 @@
  *      Robb Matzke, 4 Aug 1997
  *      Added calls to H5E.
  *
+ *      Quincey Koziol, 22 Apr 2000
+ *      Turned on "H5AC_SORT_BY_ADDR"
+ *
  *-------------------------------------------------------------------------
  */
 #include <H5private.h>
@@ -29,7 +32,7 @@
  * Sorting the cache by address before flushing is sometimes faster
  * than flushing in cache order.
  */
-/* #define H5AC_SORT_BY_ADDR */
+#define H5AC_SORT_BY_ADDR
 
 /*
  * Private file-scope variables.
