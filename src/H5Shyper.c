@@ -77,7 +77,7 @@ static hsize_t H5S_hyper_fwrite_opt (H5F_t *f, const struct H5O_layout_t *layout
 		 const H5S_t *file_space, H5S_sel_iter_t *file_iter,
 		 hsize_t nelmts, hid_t dxpl_id, const void *_buf);
 static herr_t H5S_hyper_init (const struct H5O_layout_t *layout,
-			      const H5S_t *space, H5S_sel_iter_t *iter, size_t *min_elem_out);
+			      const H5S_t *space, H5S_sel_iter_t *iter);
 static hsize_t H5S_hyper_favail (const H5S_t *space, const H5S_sel_iter_t *iter,
 				hsize_t max);
 static hsize_t H5S_hyper_fgath (H5F_t *f, const struct H5O_layout_t *layout,
@@ -173,8 +173,7 @@ H5FL_BLK_DEFINE_STATIC(hyper_block);
  */
 static herr_t
 H5S_hyper_init (const struct H5O_layout_t UNUSED *layout,
-	       const H5S_t *space, H5S_sel_iter_t *sel_iter,
-		size_t UNUSED *min_elem_out)
+	       const H5S_t *space, H5S_sel_iter_t *sel_iter)
 {
     FUNC_ENTER (H5S_hyper_init, FAIL);
 
@@ -5408,7 +5407,6 @@ H5S_hyper_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t 
 {
     H5S_hyper_iter_info_t iter_info;  /* Block of parameters to pass into recursive calls */
     H5S_sel_iter_t	iter;   /* selection iteration info*/
-    size_t	min_elem_out=1; /* Minimum # of elements to output*/
     herr_t ret_value=FAIL;      /* return value */
 
     FUNC_ENTER (H5S_hyper_select_iterate, FAIL);
@@ -5419,7 +5417,7 @@ H5S_hyper_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t 
     assert(H5I_DATATYPE == H5I_get_type(type_id));
 
     /* Initialize the selection iterator */
-    if (H5S_hyper_init(NULL, space, &iter, &min_elem_out)<0) {
+    if (H5S_hyper_init(NULL, space, &iter)<0) {
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		     "unable to initialize selection information");
     } 

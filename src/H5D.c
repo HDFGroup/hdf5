@@ -1589,7 +1589,6 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     size_t		dst_type_size;	    /*size of destination type*/
     hsize_t		target_size;		/*desired buffer size	*/
     hsize_t		request_nelmts;		/*requested strip mine	*/
-    size_t		min_elem_out=1;     /*Minimum # of elements to output*/
     H5T_bkg_t	need_bkg;		    /*type of background buf*/
     H5S_t		*free_this_space=NULL;  /*data space to free	*/
     hbool_t     must_convert;       /*have to xfer the slow way*/
@@ -1775,15 +1774,15 @@ printf("%s: check 1.2, \n",FUNC);
     /*
      * This is the general case.  Figure out the strip mine size.
      */
-    if ((sconv->f->init)(&(dataset->layout), file_space, &file_iter, &min_elem_out)<0) {
+    if ((sconv->f->init)(&(dataset->layout), file_space, &file_iter)<0) {
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
 		     "unable to initialize file selection information");
     } 
-    if ((sconv->m->init)(&(dataset->layout), mem_space, &mem_iter, &min_elem_out)<0) {
+    if ((sconv->m->init)(&(dataset->layout), mem_space, &mem_iter)<0) {
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
 		     "unable to initialize memory selection information");
     } 
-    if ((sconv->m->init)(&(dataset->layout), mem_space, &bkg_iter, &min_elem_out)<0) {
+    if ((sconv->m->init)(&(dataset->layout), mem_space, &bkg_iter)<0) {
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
 		     "unable to initialize background selection information");
     } 
@@ -1792,12 +1791,10 @@ printf("%s: check 1.2, \n",FUNC);
     dst_type_size = H5T_get_size(mem_type);
     target_size = xfer_parms->buf_size;
 #ifdef QAK
-printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_elem_out=%d\n",FUNC,(int)src_type_size,(int)dst_type_size,(int)target_size,(int)min_elem_out);
+printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUNC,(int)src_type_size,(int)dst_type_size,(int)target_size);
 #endif /* QAK */
     request_nelmts = target_size / MAX(src_type_size, dst_type_size);
 
-    /* Adjust to the min. # of elements to output */
-    request_nelmts = (request_nelmts/min_elem_out)*min_elem_out;
 #ifdef QAK
     printf("%s: check 3.0, request_nelmts=%d\n",FUNC,(int)request_nelmts);
 #endif
@@ -2040,7 +2037,6 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     size_t		dst_type_size;	    /*size of destination type*/
     hsize_t		target_size;		/*desired buffer size	*/
     hsize_t		request_nelmts;		/*requested strip mine	*/
-    size_t		min_elem_out=1;     /*Minimum # of elements to output*/
     H5T_bkg_t	need_bkg;		    /*type of background buf*/
     H5S_t		*free_this_space=NULL;	/*data space to free	*/
     hbool_t     must_convert;       /*have to xfer the slow way*/
@@ -2160,7 +2156,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	}
     }
 #ifdef QAK
-    printf("%s: after H5T_find, tpath=%p, tpath->name=%s\n",FUNC,tpath,tpath->name);
+    printf("%s: check 0.6, after H5T_find, tpath=%p, tpath->name=%s\n",FUNC,tpath,tpath->name);
 #endif /* QAK */
     if (NULL==(sconv=H5S_find(mem_space, file_space))) {
 	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
@@ -2188,6 +2184,10 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * If there is no type conversion then try writing directly from
      * application buffer to file.
      */
+#ifdef QAK
+    printf("%s: check 0.7, H5T_IS_NOOP(path)=%d, sconv->write=%p\n", FUNC,
+	   (int)H5T_IS_NOOP(tpath), sconv->write);
+#endif /* QAK */
     if (H5T_IS_NOOP(tpath) && sconv->write) {
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
@@ -2251,15 +2251,15 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /*
      * This is the general case.  Figure out the strip mine size.
      */
-    if ((sconv->f->init)(&(dataset->layout), file_space, &file_iter, &min_elem_out)<0) {
+    if ((sconv->f->init)(&(dataset->layout), file_space, &file_iter)<0) {
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
 		     "unable to initialize file selection information");
     } 
-    if ((sconv->m->init)(&(dataset->layout), mem_space, &mem_iter, &min_elem_out)<0) {
+    if ((sconv->m->init)(&(dataset->layout), mem_space, &mem_iter)<0) {
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
 		     "unable to initialize memory selection information");
     } 
-    if ((sconv->f->init)(&(dataset->layout), file_space, &bkg_iter, &min_elem_out)<0) {
+    if ((sconv->f->init)(&(dataset->layout), file_space, &bkg_iter)<0) {
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
 		     "unable to initialize memory selection information");
     }
@@ -2267,18 +2267,18 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     src_type_size = H5T_get_size(mem_type);
     dst_type_size = H5T_get_size(dataset->type);
     target_size = xfer_parms->buf_size;
+#ifdef QAK
+printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUNC,(int)src_type_size,(int)dst_type_size,(int)target_size);
+#endif /* QAK */
     request_nelmts = target_size / MAX (src_type_size, dst_type_size);
 
-    /* Adjust to the min. # of elements to output */
-    request_nelmts = (request_nelmts/min_elem_out)*min_elem_out;
+#ifdef QAK
+    printf("%s: check 3.0, request_nelmts=%d, tpath->cdata.need_bkg=%d\n",FUNC,(int)request_nelmts,(int)tpath->cdata.need_bkg);
+#endif
     if (request_nelmts<=0) {
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
 		     "temporary buffer max size is too small");
     }
-    
-#ifdef QAK
-    printf("%s: check 3.0, request_nelmts=%d, tpath->cdata.need_bkg=%d\n",FUNC,(int)request_nelmts,(int)tpath->cdata.need_bkg);
-#endif
 
     /*
      * Get a temporary buffer for type conversion unless the app has already
