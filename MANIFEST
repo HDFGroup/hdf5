@@ -306,6 +306,7 @@
 ./test/tohdr.c
 ./test/tselect.c
 ./test/tstab.c
+./test/unlink.c
 
 ./testpar/Makefile.ascired
 ./testpar/Makefile.ibmsp

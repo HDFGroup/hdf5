@@ -426,7 +426,7 @@ H5B_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5B_t *bt)
 	H5F_addr_encode(f, &p, &(bt->right));
 
 	/* child keys and pointers */
-	for (i = 0; i <= bt->nchildren; i++) {
+	for (i=0; i<=bt->nchildren; i++) {
 
 	    /* encode the key */
 	    assert(bt->key[i].rkey == p);
@@ -456,7 +456,7 @@ H5B_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5B_t *bt)
 	 * for the final unchanged children.
 	 */
 #ifdef HAVE_PARALLEL
-	H5F_mpio_tas_allsame( f->shared->lf, TRUE );	/* only p0 will write */
+	H5F_mpio_tas_allsame(f->shared->lf, TRUE); /* only p0 will write */
 #endif /* HAVE_PARALLEL */
 	if (H5F_block_write(f, addr, (hsize_t)size, H5D_XFER_DFLT,
 	    bt->page) < 0) {
@@ -475,6 +475,7 @@ H5B_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5B_t *bt)
     }
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5B_find
@@ -981,7 +982,7 @@ H5B_insert_child(H5F_t *f, const H5B_class_t *type, H5B_t *bt,
 		  bt->native + idx * type->sizeof_nkey,
 		  ((bt->nchildren - idx) + 1) * type->sizeof_nkey);
 
-	for (i = bt->nchildren; i >= idx; --i) {
+	for (i=bt->nchildren; i>=idx; --i) {
 	    bt->key[i+1].dirty = bt->key[i].dirty;
 	    if (bt->key[i].nkey) {
 		bt->key[i+1].nkey = bt->native + (i+1) * type->sizeof_nkey;
@@ -1524,13 +1525,14 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
  */
 static H5B_ins_t
 H5B_remove_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
-		  uint8 *lt_key/*out*/, hbool_t *lt_key_changed/*out*/,
-		  uint8 *md_key/*out*/, void *udata, uint8 *rt_key/*out*/,
-		  hbool_t *rt_key_changed/*out*/)
+		  intn level, uint8 *lt_key/*out*/,
+		  hbool_t *lt_key_changed/*out*/, void *udata,
+		  uint8 *rt_key/*out*/, hbool_t *rt_key_changed/*out*/)
 {
-    H5B_t	*bt = NULL;
+    H5B_t	*bt = NULL, *sibling = NULL;
     H5B_ins_t	ret_value = H5B_INS_ERROR;
-    intn	idx=-1, lt=0, rt, cmp=1;
+    intn	idx=-1, lt=0, rt, cmp=1, i;
+    size_t	sizeof_rkey, sizeof_node, sizeof_rec;
     
     FUNC_ENTER(H5B_remove_helper, FAIL);
     assert(f);
@@ -1540,7 +1542,6 @@ H5B_remove_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
     assert(type->cmp3);
     assert(type->found);
     assert(lt_key && lt_key_changed);
-    assert(md_key);
     assert(udata);
     assert(rt_key && rt_key_changed);
 
@@ -1576,12 +1577,13 @@ H5B_remove_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
      */
     assert(idx>=0 && idx<bt->nchildren);
     if (bt->level>0) {
+	/* We're at an internal node -- call recursively */
 	if ((ret_value=H5B_remove_helper(f,
 					 bt->child+idx,
 					 type,
+					 level+1,
 					 bt->key[idx].nkey/*out*/,
 					 lt_key_changed/*out*/,
-					 md_key/*out*/,
 					 udata,
 					 bt->key[idx+1].nkey/*out*/,
 					 rt_key_changed/*out*/))<0) {
@@ -1589,17 +1591,30 @@ H5B_remove_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
 			"key not found in subtree");
 	}
     } else if (type->remove) {
+	/*
+	 * We're at a leave node but the leave node points to an object that
+	 * has a removal method.  Pass the removal request to the pointed-to
+	 * object and let it decide how to progress.
+	 */
 	if ((ret_value=(type->remove)(f,
 				      bt->child+idx,
 				      bt->key[idx].nkey,
 				      lt_key_changed,
-				      md_key,
 				      udata,
 				      bt->key[idx+1].nkey,
 				      rt_key_changed))<0) {
 	    HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL,
 			"key not found in leaf node");
 	}
+    } else {
+	/*
+	 * We're at a leaf node which points to an object that has no removal
+	 * method.  The best we can do is to leave the object alone but
+	 * remove the B-tree reference to the object.
+	 */
+	*lt_key_changed = FALSE;
+	*rt_key_changed = FALSE;
+	ret_value = H5B_INS_REMOVE;
     }
 
     /*
@@ -1621,6 +1636,7 @@ H5B_remove_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
     }
     if (*rt_key_changed) {
 	bt->dirty = TRUE;
+	bt->key[idx+1].dirty = TRUE;
 	if (idx+1<bt->nchildren) {
 	    *rt_key_changed = FALSE;
 	} else {
@@ -1631,41 +1647,134 @@ H5B_remove_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
     /*
      * If the subtree returned H5B_INS_REMOVE then we should remove the
      * subtree entry from the current node.  There are four cases:
-     *
-     *	 1: If the subtree is the only child of this node then remove both
-     *	    keys and the subtree and return H5B_INS_REMOVE.
-     *
-     *	 2: If the subtree is the left-most child of this node then we
-     *	    discard the left-most key and the left-most child (the child has
-     *	    already been freed) and shift everything down by one.  We copy
-     *	    the new left-most key into lt_key and notify the caller that the
-     *	    left key has changed.  Return H5B_INS_NOOP.
-     *
-     *	 3: If the subtree is the right-most child of this node then we
-     *	    discard the right-most key and the right-most child (the child
-     *	    has already been freed).  We copy the new right-most key into
-     *	    rt_key and notify the caller that the right key has changed.
-     *	    Return H5B_INS_NOOP.
-     *
-     *	 4: There are subtrees out of this node to both the left and right of
-     *	    the subtree being removed.  The key to the left of the subtree
-     *	    and the subtree are removed from this node and all keys and nodes
-     *	    to the right are shifted left by one place.  The subtree has
-     *	    already been freed). Return H5B_INS_NOOP.
      */
-    if (1==bt->nchildren) {
-	HGOTO_ERROR(H5E_BTREE, H5E_UNSUPPORTED, FAIL,
-		    "not implemented yet (all node removal)");
-    } else if (0==idx) {
-	HGOTO_ERROR(H5E_BTREE, H5E_UNSUPPORTED, FAIL,
-		    "not implemented yet (first node removal)");
-    } else if (idx+1==bt->nchildren) {
-	HGOTO_ERROR(H5E_BTREE, H5E_UNSUPPORTED, FAIL,
-		    "not implemented yet (last node removal)");
+    sizeof_rec = bt->sizeof_rkey + H5F_SIZEOF_ADDR(f);
+    if (H5B_INS_REMOVE==ret_value && 1==bt->nchildren) {
+	/*
+	 * The subtree is the only child of this node.  Discard both
+	 * keys and the subtree pointer. Free this node (unless it's the
+	 * root node) and return H5B_INS_REMOVE.
+	 */
+	bt->dirty = TRUE;
+	bt->nchildren = 0;
+	bt->ndirty = 0;
+	if (level>0) {
+	    if (H5F_addr_defined(&(bt->left))) {
+		if (NULL==(sibling=H5AC_find(f, H5AC_BT, &(bt->left), type,
+					     udata))) {
+		    HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL,
+				"unable to unlink node from tree");
+		}
+		sibling->right = bt->right;
+		sibling->dirty = TRUE;
+	    }
+	    if (H5F_addr_defined(&(bt->right))) {
+		if (NULL==(sibling=H5AC_find(f, H5AC_BT, &(bt->right), type,
+					     udata))) {
+		    HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL,
+				"unable to unlink node from tree");
+		}
+		sibling->left = bt->left;
+		sibling->dirty = TRUE;
+	    }
+	    H5F_addr_undef(&(bt->left));
+	    H5F_addr_undef(&(bt->right));
+	    sizeof_rkey = (type->get_sizeof_rkey)(f, udata);
+	    sizeof_node = H5B_nodesize(f, type, NULL, sizeof_rkey);
+	    if (H5AC_unprotect(f, H5AC_BT, addr, bt)<0 ||
+		H5AC_flush(f, H5AC_BT, addr, TRUE)<0 ||
+		H5MF_xfree(f, addr, sizeof_node)<0) {
+		bt = NULL;
+		HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL,
+			    "unable to free B-tree node");
+	    }
+	    bt = NULL;
+	}
+
+    } else if (H5B_INS_REMOVE==ret_value && 0==idx) {
+	/*
+	 * The subtree is the left-most child of this node. We discard the
+	 * left-most key and the left-most child (the child has already been
+	 * freed) and shift everything down by one.  We copy the new left-most
+	 * key into lt_key and notify the caller that the left key has
+	 * changed.  Return H5B_INS_NOOP.
+	 */
+	bt->dirty = TRUE;
+	bt->nchildren -= 1;
+	bt->ndirty = bt->nchildren;
+	
+	HDmemmove(bt->page+H5B_SIZEOF_HDR(f),
+		  bt->page+H5B_SIZEOF_HDR(f)+sizeof_rec,
+		  bt->nchildren*sizeof_rec + bt->sizeof_rkey);
+	HDmemmove(bt->native,
+		  bt->native + type->sizeof_nkey,
+		  (bt->nchildren+1) * type->sizeof_nkey);
+	HDmemmove(bt->child,
+		  bt->child+1,
+		  bt->nchildren * sizeof(haddr_t));
+	for (i=0; i<bt->nchildren; i++) {
+	    bt->key[i].dirty = bt->key[i+1].dirty;
+	    if (bt->key[i+1].nkey) {
+		bt->key[i].nkey = bt->native + i*type->sizeof_nkey;
+	    } else {
+		bt->key[i].nkey = NULL;
+	    }
+	}
+	assert(bt->key[0].nkey);
+	HDmemcpy(lt_key, bt->key[0].nkey, type->sizeof_nkey);
+	*lt_key_changed = TRUE;
+	ret_value = H5B_INS_NOOP;
+
+    } else if (H5B_INS_REMOVE==ret_value && idx+1==bt->nchildren) {
+	/*
+	 * The subtree is the right-most child of this node.  We discard the
+	 * right-most key and the right-most child (the child has already been
+	 * freed).  We copy the new right-most key into rt_key and notify the
+	 * caller that the right key has changed.  Return H5B_INS_NOOP.
+	 */
+	bt->dirty = TRUE;
+	bt->nchildren -= 1;
+	bt->ndirty = MIN(bt->ndirty, bt->nchildren);
+	assert(bt->key[bt->nchildren].nkey);
+	HDmemcpy(rt_key, bt->key[bt->nchildren].nkey, type->sizeof_nkey);
+	*rt_key_changed = TRUE;
+	ret_value = H5B_INS_NOOP;
+
+    } else if (H5B_INS_REMOVE==ret_value) {
+	/*
+	 * There are subtrees out of this node to both the left and right of
+	 * the subtree being removed.  The key to the left of the subtree and
+	 * the subtree are removed from this node and all keys and nodes to
+	 * the right are shifted left by one place.  The subtree has already
+	 * been freed). Return H5B_INS_NOOP.
+	 */
+	bt->dirty = TRUE;
+	bt->nchildren -= 1;
+	bt->ndirty = bt->nchildren;
+	
+	HDmemmove(bt->page+H5B_SIZEOF_HDR(f)+idx*sizeof_rec,
+		  bt->page+H5B_SIZEOF_HDR(f)+(idx+1)*sizeof_rec,
+		  (bt->nchildren-idx)*sizeof_rec + bt->sizeof_rkey);
+	HDmemmove(bt->native + idx * type->sizeof_nkey,
+		  bt->native + (idx+1) * type->sizeof_nkey,
+		  (bt->nchildren+1-idx) * type->sizeof_nkey);
+	HDmemmove(bt->child+idx,
+		  bt->child+idx+1,
+		  (bt->nchildren-idx) * sizeof(haddr_t));
+	for (i=idx; i<bt->nchildren; i++) {
+	    bt->key[i].dirty = bt->key[i+1].dirty;
+	    if (bt->key[i+1].nkey) {
+		bt->key[i].nkey = bt->native + i*type->sizeof_nkey;
+	    } else {
+		bt->key[i].nkey = NULL;
+	    }
+	}
+	ret_value = H5B_INS_NOOP;
+	
     } else {
-	HGOTO_ERROR(H5E_BTREE, H5E_UNSUPPORTED, FAIL,
-		    "not implemented yet (middle node removal)");
+	ret_value = H5B_INS_NOOP;
     }
+    
     
  done:
     if (bt && H5AC_unprotect(f, H5AC_BT, addr, bt)<0) {
@@ -1701,25 +1810,46 @@ H5B_remove(H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
 	   void *udata)
 {
     /* These are defined this way to satisfy alignment constraints */
-    uint64	_lt_key[128], _md_key[128], _rt_key[128];
+    uint64	_lt_key[128], _rt_key[128];
     uint8	*lt_key = (uint8*)_lt_key;	/*left key*/
-    uint8	*md_key = (uint8*)_md_key;	/*middle key*/
     uint8	*rt_key = (uint8*)_rt_key;	/*right key*/
     hbool_t	lt_key_changed = FALSE;		/*left key changed?*/
     hbool_t	rt_key_changed = FALSE;		/*right key changed?*/
+    H5B_t	*bt = NULL;			/*btree node */
+    
     
     FUNC_ENTER(H5B_remove, FAIL);
+
+    /* Check args */
     assert(f);
     assert(type);
     assert(type->sizeof_nkey <= sizeof _lt_key);
     assert(addr && H5F_addr_defined(addr));
 
-    if (H5B_remove_helper(f, addr, type, lt_key, &lt_key_changed, md_key,
+    /* The actual removal */
+    if (H5B_remove_helper(f, addr, type, 0, lt_key, &lt_key_changed,
 			  udata, rt_key, &rt_key_changed)<0) {
 	HRETURN_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL,
 		      "unable to remove entry from B-tree");
     }
 
+    /*
+     * If the B-tree is now empty then make sure we mark the root node as
+     * being at level zero
+     */
+    if (NULL==(bt=H5AC_find(f, H5AC_BT, addr, type, udata))) {
+	HRETURN_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL,
+		      "unable to load B-tree root node");
+    }
+    if (0==bt->nchildren && 0!=bt->level) {
+	bt->level = 0;
+	bt->dirty = TRUE;
+    }
+    
+
+#ifdef H5B_DEBUG
+    H5B_assert(f, addr, type, udata);
+#endif
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -1749,7 +1879,7 @@ H5B_remove(H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
  */
 static size_t
 H5B_nodesize(H5F_t *f, const H5B_class_t *type,
-	     size_t *total_nkey_size, size_t sizeof_rkey)
+	     size_t *total_nkey_size/*out*/, size_t sizeof_rkey)
 {
     size_t		    size;
 

@@ -544,7 +544,7 @@ herr_t H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
 
 /* Functions that operate on indexed storage */
 herr_t H5F_istore_init (H5F_t *f);
-herr_t H5F_istore_flush (H5F_t *f);
+herr_t H5F_istore_flush (H5F_t *f, hbool_t preempt);
 herr_t H5F_istore_dest (H5F_t *f);
 herr_t H5F_istore_stats (H5F_t *f, hbool_t headers);
 herr_t H5F_istore_create(H5F_t *f, struct H5O_layout_t *layout /*in,out*/);

@@ -396,12 +396,10 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
         for (i = 0; i < nslots; i++) {
 #ifdef H5AC_SORT_BY_ADDR
             slot = cache->slot + map[i];
-            if (NULL == slot->type)
-                break;          /*the rest are empty */
+            if (NULL == slot->type) break;          /*the rest are empty */
 #else
             slot = cache->slot + i;
-            if (NULL == slot->type)
-                continue;
+            if (NULL == slot->type) continue;
 #endif
             if (!type || type == slot->type) {
                 flush = slot->type->flush;
@@ -639,7 +637,7 @@ H5AC_rename(H5F_t *f, const H5AC_class_t *type,
  *
  *-------------------------------------------------------------------------
  */
-void                   *
+void *
 H5AC_protect(H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
              const void *udata1, void *udata2)
 {

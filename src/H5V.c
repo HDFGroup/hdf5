@@ -423,7 +423,7 @@ H5V_hyper_copy(intn n, const hsize_t *_size,
     {
         hsize_t	    dst_acc;	/*accumulator				*/
         hsize_t	    src_acc;	/*accumulator				*/
-        int		    i;		/*counter				*/
+        int         i;		/*counter				*/
 
         /* init */
         dst_stride[n-1] = 1;

@@ -802,7 +802,7 @@ herr_t
 H5HL_remove(H5F_t *f, const haddr_t *addr, size_t offset, size_t size)
 {
     H5HL_t		*heap = NULL;
-    H5HL_free_t		*fl = heap->freelist, *fl2 = NULL;
+    H5HL_free_t		*fl = NULL, *fl2 = NULL;
 
     FUNC_ENTER(H5HL_remove, FAIL);
 
@@ -823,6 +823,7 @@ H5HL_remove(H5F_t *f, const haddr_t *addr, size_t offset, size_t size)
     }
     assert(offset < heap->mem_alloc);
     assert(offset + size <= heap->mem_alloc);
+    fl = heap->freelist;
 
     heap->dirty += 1;
 
@@ -847,6 +848,7 @@ H5HL_remove(H5F_t *f, const haddr_t *addr, size_t offset, size_t size)
 		    fl2 = H5HL_remove_free(heap, fl2);
 		    HRETURN(SUCCEED);
 		}
+		fl2 = fl2->next;
 	    }
 	    HRETURN(SUCCEED);
 
@@ -861,6 +863,7 @@ H5HL_remove(H5F_t *f, const haddr_t *addr, size_t offset, size_t size)
 		    fl2 = H5HL_remove_free(heap, fl2);
 		    HRETURN(SUCCEED);
 		}
+		fl2 = fl2->next;
 	    }
 	    HRETURN(SUCCEED);
 	}

@@ -237,7 +237,6 @@ H5MF_xfree(H5F_t *f, const haddr_t *addr, hsize_t size)
 	f->shared->fl_free[i].addr = *addr;
 	f->shared->fl_free[i].size = size;
     }
-    
     FUNC_LEAVE(SUCCEED);
 }
 

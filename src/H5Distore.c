@@ -188,7 +188,7 @@ H5F_istore_sizeof_rkey(H5F_t __unused__ *f, const void *_udata)
 
     nbytes = 4 +			/*storage size		*/
 	     4 +			/*filter mask		*/
-	     udata->mesg.ndims * 4; 	/*dimension indices	*/
+	     udata->mesg.ndims*8;	/*dimension indices	*/
 
     return nbytes;
 }
@@ -230,7 +230,7 @@ H5F_istore_decode_key(H5F_t __unused__ *f, H5B_t *bt, uint8 *raw, void *_key)
     UINT32DECODE(raw, key->nbytes);
     UINT32DECODE(raw, key->filter_mask);
     for (i = 0; i < ndims; i++) {
-	UINT32DECODE(raw, key->offset[i]);
+	UINT64DECODE(raw, key->offset[i]);
     }
 
     FUNC_LEAVE(SUCCEED);
@@ -273,7 +273,7 @@ H5F_istore_encode_key(H5F_t __unused__ *f, H5B_t *bt, uint8 *raw, void *_key)
     UINT32ENCODE(raw, key->nbytes);
     UINT32ENCODE(raw, key->filter_mask);
     for (i = 0; i < ndims; i++) {
-	UINT32ENCODE(raw, key->offset[i]);
+	UINT64ENCODE(raw, key->offset[i]);
     }
 
     FUNC_LEAVE(SUCCEED);
@@ -870,45 +870,6 @@ H5F_istore_flush_entry (H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
     FUNC_LEAVE (ret_value);
 }
 
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_istore_flush
- *
- * Purpose:	Writes all dirty chunks to disk but does not remove them from
- *		the cache.
- *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *              Thursday, May 21, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_istore_flush (H5F_t *f)
-{
-    H5F_rdcc_t		*rdcc = &(f->shared->rdcc);
-    intn		nerrors=0;
-    H5F_rdcc_ent_t	*ent=NULL;
-    
-    FUNC_ENTER (H5F_istore_flush, FAIL);
-
-    for (ent=rdcc->head; ent; ent=ent->next) {
-	if (H5F_istore_flush_entry(f, ent, FALSE)<0) {
-	    nerrors++;
-	}
-    }
-    if (nerrors) {
-	HRETURN_ERROR (H5E_IO, H5E_CANTFLUSH, FAIL,
-		       "unable to flush one or more raw data chunks");
-    }
-    FUNC_LEAVE (SUCCEED);
-}
-
 /*-------------------------------------------------------------------------
  * Function:    H5F_istore_preempt
  *
@@ -963,6 +924,53 @@ H5F_istore_preempt (H5F_t *f, H5F_rdcc_ent_t *ent)
     /* Free */
     H5MM_xfree(ent);
 
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_istore_flush
+ *
+ * Purpose:	Writes all dirty chunks to disk and optionally preempts them
+ *		from the cache.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, May 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_istore_flush (H5F_t *f, hbool_t preempt)
+{
+    H5F_rdcc_t		*rdcc = &(f->shared->rdcc);
+    intn		nerrors=0;
+    H5F_rdcc_ent_t	*ent=NULL, *next=NULL;
+    
+    FUNC_ENTER (H5F_istore_flush, FAIL);
+
+    for (ent=rdcc->head; ent; ent=next) {
+	next = ent->next;
+	if (preempt) {
+	    if (H5F_istore_preempt(f, ent)<0) {
+		nerrors++;
+	    }
+	} else {
+	    if (H5F_istore_flush_entry(f, ent, FALSE)<0) {
+		nerrors++;
+	    }
+	}
+    }
+    
+    if (nerrors) {
+	HRETURN_ERROR (H5E_IO, H5E_CANTFLUSH, FAIL,
+		       "unable to flush one or more raw data chunks");
+    }
     FUNC_LEAVE (SUCCEED);
 }
 

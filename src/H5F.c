@@ -1449,7 +1449,7 @@ H5F_flush(H5F_t *f, hbool_t invalidate)
     }
 
     /* flush the entire raw data cache */
-    if (H5F_istore_flush (f)<0) {
+    if (H5F_istore_flush (f, invalidate)<0) {
 	HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
 		      "unable to flush raw data cache");
     }
@@ -1493,7 +1493,7 @@ H5F_flush(H5F_t *f, hbool_t invalidate)
     
     /* write the boot block to disk */
 #ifdef HAVE_PARALLEL
-    H5F_mpio_tas_allsame( f->shared->lf, TRUE );	/* only p0 will write */
+    H5F_mpio_tas_allsame(f->shared->lf, TRUE);	/* only p0 will write */
 #endif
     if (H5F_low_write(f->shared->lf, f->shared->access_parms,
     		      H5D_XFER_DFLT,
@@ -1507,6 +1507,7 @@ H5F_flush(H5F_t *f, hbool_t invalidate)
     }
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_close
@@ -1532,18 +1533,17 @@ H5F_close(H5F_t *f)
     /* Close all current working groups */
     while (H5G_pop(f)>=0) /*void*/;
     
-    /* Flush the boot block and caches */
-    if (H5F_flush(f, FALSE) < 0) {
-	HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
-		      "unable to flush cache");
-    }
-    
     /*
      * If object headers are still open then delay deletion of resources until
-     * they have all been closed.  The file is in a consistent state now, so
-     * forgetting to close everything is not a major problem.
+     * they have all been closed.  Flush all caches and update the object
+     * header anyway so that failing to close all objects isn't a major
+     * problem.
      */
     if (f->nopen>0) {
+	if (H5F_flush(f, FALSE)<0) {
+	    HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
+			  "unable to flush cache");
+	}
 #ifdef H5F_DEBUG
 	if (H5DEBUG(F)) {
 	    fprintf(H5DEBUG(F), "H5F: H5F_close(%s): %u object header%s still "
@@ -1559,7 +1559,7 @@ H5F_close(H5F_t *f)
     } else if (f->close_pending) {
 #ifdef H5F_DEBUG
 	if (H5DEBUG(F)) {
-	    fprintf(H5DEBUG(F), "H5F: H5F_close: operation completed\n");
+	    fprintf(H5DEBUG(F), "H5F: H5F_close: operation completing\n");
 	}
 #endif
     }
@@ -1569,7 +1569,7 @@ H5F_close(H5F_t *f)
      * close it also.
      */
     if (1==f->shared->nrefs) {
-	/* Flush again just to be safe, but this time clean up the cache */
+	/* Flush and destroy all caches */
 	if (H5F_flush (f, TRUE)<0) {
 	    HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL,
 			   "unable to flush cache");
@@ -1581,7 +1581,18 @@ H5F_close(H5F_t *f)
 
 	/* Close files and release resources */
 	H5F_low_close(f->shared->lf, f->shared->access_parms);
+    } else {
+	/*
+	 * Flush all caches but do not destroy. As long as all handles for
+	 * this file are closed the flush isn't really necessary, but lets
+	 * just be safe.
+	 */
+	if (H5F_flush(f, TRUE)<0) {
+	    HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
+			  "unable to flush cache");
+	}
     }
+    
     if (H5F_dest(f)<0) {
 	HRETURN_ERROR (H5E_FILE, H5E_CANTINIT, FAIL,
 		       "problems closing file");

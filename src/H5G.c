@@ -523,14 +523,29 @@ H5Giterate(hid_t loc_id, const char *name, int *idx,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gmove(hid_t __unused__ loc_id, const char __unused__ *src,
-	 const char __unused__ *dst)
+H5Gmove(hid_t loc_id, const char *src, const char *dst)
 {
+    H5G_entry_t		*loc=NULL;
+    
     FUNC_ENTER (H5Gmove, FAIL);
     H5TRACE3("e","iss",loc_id,src,dst);
 
-    HRETURN_ERROR (H5E_SYM, H5E_UNSUPPORTED, FAIL,
-		   "unable to rename object (not implemented yet)");
+    if (NULL==(loc=H5G_loc(loc_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    }
+    if (!src || !*src) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+		      "no current name specified");
+    }
+    if (!dst || !*dst) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+		      "no new name specified");
+    }
+
+    if (H5G_move(loc, src, dst)<0) {
+	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
+		      "unable to change object name");
+    }
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -2379,6 +2394,43 @@ H5G_unlink(H5G_entry_t *loc, const char *name)
     if (H5G_stab_remove(&grp_ent, base)<0) {
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
 		      "unable to unlink name from symbol table");
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_move
+ *
+ * Purpose:	Atomically rename an object.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, September 25, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_move(H5G_entry_t *loc, const char *src_name, const char *dst_name)
+{
+    FUNC_ENTER(H5G_move, FAIL);
+    assert(loc);
+    assert(src_name && *src_name);
+    assert(dst_name && *dst_name);
+
+    if (H5G_link(loc, H5G_LINK_HARD, src_name, dst_name)<0) {
+	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
+		      "unable to register new name for object");
+    }
+    if (H5G_unlink(loc, src_name)<0) {
+	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
+		      "unable to deregister old object name");
     }
 
     FUNC_LEAVE(SUCCEED);
