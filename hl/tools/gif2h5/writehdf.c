@@ -95,7 +95,7 @@ char     *GIFFileName;
 		fprintf(stderr , "strncpy failed\n");
 		exit(1);
 	}
-	GroupName[VSNAMELENMAX] = '\0';
+	GroupName[VSNAMELENMAX - 1] = '\0';
 
 
 	if ((file_id = H5Fcreate(HDFName , H5F_ACC_TRUNC , H5P_DEFAULT , H5P_DEFAULT)) < 0) {
