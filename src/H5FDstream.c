@@ -520,7 +520,7 @@ H5FDstream_open_socket (const char *filename, int o_flags,
   /* Return if opening the socket failed */
   if (*errormsg)
   {
-    if (H5FD_STREAM_ERROR_CHECK (sock))
+    if (! H5FD_STREAM_ERROR_CHECK (sock))
     {
       H5FD_STREAM_CLOSE_SOCKET (sock);
       sock = H5FD_STREAM_INVALID_SOCKET;
@@ -754,7 +754,7 @@ static H5FD_t *H5FD_stream_open (const char *filename,
        the opened socket is not needed anymore */
     if (errormsg == NULL)
     {
-      if (_stream.internal_socket && H5FD_STREAM_ERROR_CHECK (_stream.socket))
+      if (_stream.internal_socket && ! H5FD_STREAM_ERROR_CHECK (_stream.socket))
       {
         H5FD_STREAM_CLOSE_SOCKET (_stream.socket);
       }
@@ -784,7 +784,7 @@ static H5FD_t *H5FD_stream_open (const char *filename,
     {
       H5MM_xfree (_stream.mem);
     }
-    if (_stream.internal_socket && H5FD_STREAM_ERROR_CHECK (_stream.socket))
+    if (_stream.internal_socket && ! H5FD_STREAM_ERROR_CHECK (_stream.socket))
     {
       H5FD_STREAM_CLOSE_SOCKET (_stream.socket);
     }
@@ -902,7 +902,7 @@ static herr_t H5FD_stream_close (H5FD_t *_stream)
   }
 
   /* Release resources */
-  if (H5FD_STREAM_ERROR_CHECK (stream->socket) && stream->internal_socket)
+  if (! H5FD_STREAM_ERROR_CHECK (stream->socket) && stream->internal_socket)
   {
     H5FD_STREAM_CLOSE_SOCKET (stream->socket);
   }
