@@ -1,4 +1,4 @@
-HDF5 version 1.7.40 released on Sun Oct 24 05:20:48 CDT 2004
+HDF5 version 1.7.41 released on Sun Nov  7 05:18:16 CST 2004
 ================================================================================
 
 
@@ -52,6 +52,9 @@ New Features
 
     Library:
     --------
+        - Modified registration of SZIP to dynamically detect the presence
+            or absence of the encoder.  Changed configure and Makefiles,
+            and tests to dynamically detect encoder.  2004/02/11
         - Compound datatype has been enhanced with a new feature of size 
             adjustment.  The size can be increased and decreased(without
             cutting the last member) as long as it doesn't go down to zero.  
@@ -144,6 +147,7 @@ New Features
 
     Tools:
     ------
+        - new tool, h5jam. See reference manual.  2004/10/08
         - h5repack.sh did not report errors encountered during tests.  It does
             now.  AKC - 2004/04/02
         - Added the MPI-I/O and MPI-POSIX drivers to the list of VFL drivers
