@@ -239,8 +239,8 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
     hid_t	file=-1, space=-1, dcpl=-1, comp_type_id=-1;
     hid_t	dset1=-1, dset2=-1, dset3=-1, dset4=-1, dset5=-1, 
 		dset6=-1, /* dset7=-1, */ dset8=-1, dset9=-1;
-    hsize_t     cur_size[5] = {2, 16, 8, 4, 2};
-    hsize_t	ch_size[5] = {1, 1, 1, 4, 2};
+    hsize_t     cur_size[5] = {2, 8, 8, 4, 2};
+    hsize_t	ch_size[5] = {1, 1, 1, 4, 1};
     short	rd_s, fill_s = 0x1234;
     long	rd_l, fill_l = 0x4321;
     char	filename[1024];
@@ -602,7 +602,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
 		H5T_class_t datatype, hid_t ctype_id)
 {
     hid_t	fspace=-1, mspace=-1, dset1=-1, dset2=-1;
-    hsize_t	cur_size[5] = {2, 16, 8, 4, 2};
+    hsize_t	cur_size[5] = {2, 8, 8, 4, 2};
     hsize_t	one[5] = {1, 1, 1, 1, 1};
     hsize_t	hs_size[5], hs_stride[5];
     hssize_t	hs_offset[5], nelmts;
@@ -863,7 +863,7 @@ test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
 {
     char        filename[1024];
     hid_t 	file=-1, dcpl=-1, ctype_id=-1;
-    hsize_t     ch_size[5] = {2, 16, 8, 4, 2};
+    hsize_t     ch_size[5] = {2, 8, 8, 4, 2};
     int		nerrors=0;
     int         fillval = 0x4c70f1cd;
     comp_datatype       fill_ctype={0,0,0,0};
