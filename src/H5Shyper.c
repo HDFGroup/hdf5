@@ -879,8 +879,14 @@ H5S_hyper_iter_next (const H5S_t *file_space, H5S_sel_iter_t *file_iter)
 
     /* Calculate the offset and block count for each dimension */
     for(i=0; i<ndims; i++) {
-        iter_offset[i]=(file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)%file_space->select.sel_info.hslab.diminfo[i].stride;
-        iter_count[i]=(file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)/file_space->select.sel_info.hslab.diminfo[i].stride;
+        if(file_space->select.sel_info.hslab.diminfo[i].stride==1) {
+            iter_offset[i]=file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start;
+            iter_count[i]=0;
+        } /* end if */
+        else {
+            iter_offset[i]=(file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)%file_space->select.sel_info.hslab.diminfo[i].stride;
+            iter_count[i]=(file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)/file_space->select.sel_info.hslab.diminfo[i].stride;
+        } /* end else */
     } /* end for */
 
     /* Start with the fastest changing dimension */
