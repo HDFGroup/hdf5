@@ -112,7 +112,10 @@ DONE:
 
 /*----------------------------------------------------------------------------
  * Name:        h5_exit_c
- * Purpose:     Call 'exit()' to terminate application
+ * Purpose:     Call 'exit()' to terminate application.  Be careful not to 
+ *              overflow the exit value range since UNIX supports a very
+ *              small range such as 1 byte.  Therefore, exit(256) may end
+ *              up as exit(0).
  * Inputs:      status - status for exit() to return
  * Returns:     none
  * Programmer:  Quincey Koziol

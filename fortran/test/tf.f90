@@ -164,6 +164,9 @@
 !
 ! Purpose:	Exit application
 !               It is a fortran counterpart for the standard C 'exit()' routine
+! 		Be careful not to overflow the exit value range since
+! 		UNIX supports a very small range such as 1 byte.
+!		Therefore, exit(256) may end up as exit(0).
 !
 ! Inputs:  
 !		status	- Status to return from application
@@ -197,4 +200,3 @@
             CALL h5_exit_c(status)
 
           END SUBROUTINE h5_exit_f
-
