@@ -20,8 +20,6 @@
  *                                                                           *  
  ****************************************************************************/
 
-/* $Id$ */
-
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 /* Predefined file drivers */
@@ -2514,6 +2512,9 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
 
     FUNC_ENTER_NOINIT(H5F_flush);
 
+    /* Sanity check arguments */
+    assert(f);
+
     /*
      * Nothing to do if the file is read only.	This determination is
      * made at the shared open(2) flags level, implying that opening a
@@ -4088,6 +4089,44 @@ H5F_addr_pack(H5F_t UNUSED *f, haddr_t *addr_p/*out*/,
     
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_sieve_overlap_clear
+ *
+ * Purpose:	Checks for an address range's overlap with the sieve buffer
+ *              and resets the sieve buffer if it overlaps.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, March  19, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_sieve_overlap_clear(H5F_t *f, haddr_t addr, hsize_t size)
+{
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5F_sieve_overlap_clear,FAIL);
+
+    /* Sanity check arguments */
+    assert(f);
+
+    /* Check for the address range overlapping with the sieve buffer */
+    if(H5F_addr_overlap(f->shared->sieve_loc,f->shared->sieve_size,addr,size)) {
+        /* Reset sieve information */
+        f->shared->sieve_loc=HADDR_UNDEF;
+        f->shared->sieve_size=0;
+        f->shared->sieve_dirty=0;
+    } /* end if */
+    
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* H5F_sieve_overlap_clear() */
 
 
 /*-------------------------------------------------------------------------
