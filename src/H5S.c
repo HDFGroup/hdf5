@@ -1367,6 +1367,9 @@ H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
             space->extent.max = H5FL_ARR_MALLOC(hsize_t,rank);
             HDmemcpy(space->extent.max, max, sizeof(hsize_t) * rank);
         } /* end if */
+        else {
+           space->extent.max = NULL;
+        }
     }
 
     /* Selection related cleanup */

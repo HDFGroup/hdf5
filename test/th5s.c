@@ -137,6 +137,18 @@ test_h5s_basic(void)
     VERIFY(HDmemcmp(tmax, max2, SPACE2_RANK * sizeof(hsize_t)), 0,
 	   "H5Sget_simple_extent_dims");
 
+    /* Change max dims from zero to non-zero and back again */
+    ret = H5Sset_extent_simple(sid1, SPACE1_RANK, dims1, max2);
+    CHECK(ret, FAIL, "H5Sset_extent_simple");
+    ret = H5Sset_extent_simple(sid1, SPACE1_RANK, dims1, NULL);
+    CHECK(ret, FAIL, "H5Sset_extent_simple");
+    rank = H5Sget_simple_extent_dims(sid1, tdims, tmax);
+    CHECK(rank, FAIL, "H5Sget_simple_extent_dims");
+    VERIFY(HDmemcmp(tdims, dims1, SPACE1_RANK * sizeof(hsize_t)), 0,
+	   "H5Sget_simple_extent_dims");
+    VERIFY(HDmemcmp(tmax, dims1, SPACE1_RANK * sizeof(hsize_t)), 0,
+	   "H5Sget_simple_extent_dims");
+
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
 
