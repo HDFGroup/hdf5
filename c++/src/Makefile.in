@@ -29,6 +29,6 @@ LIB_SRC=H5Exception.C H5RefCounter.C H5IdComponent.C H5Library.C	\
 	H5CompType.C H5DataSet.C H5CommonFG.C H5Group.C H5File.C
 LIB_OBJ=$(LIB_SRC:.C=.lo)
 
-ARFLAGS=rc
+PUB_HDR=H5Cpp.h
 
 @CONCLUDE@
