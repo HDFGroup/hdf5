@@ -86,7 +86,7 @@ status = H5Dwrite(dataset, H5T_NATIVE_INT, dataspace, filespace,
                   H5C_DEFAULT, data1);
 
 /*
- * Extend the dataset. Dataset becomes 7 x 3.
+ * Extend the dataset. Dataset becomes 10 x 3.
  */
 dims[0]   = dims1[0] + dims2[0];
 size[0]   = dims[0];  
@@ -113,7 +113,7 @@ status = H5Dwrite(dataset, H5T_NATIVE_INT, dataspace, filespace,
                   H5C_DEFAULT, data2);
 
 /*
- * Extend the dataset. Dataset becomes 7 x 5.
+ * Extend the dataset. Dataset becomes 10 x 5.
  */
 dims[1]   = dims1[1] + dims3[1];
 size[0]   = dims[0];  
@@ -139,6 +139,20 @@ dataspace = H5Pcreate_simple(RANK, dims3, NULL);
 status = H5Dwrite(dataset, H5T_NATIVE_INT, dataspace, filespace,
                   H5C_DEFAULT, data3);
 
+/*
+ * Resulting dataset
+ *                 
+         3 3 3 2 2
+         3 3 3 2 2
+         3 3 3 0 0
+         2 0 0 0 0
+         2 0 0 0 0
+         2 0 0 0 0
+         2 0 0 0 0
+         2 0 0 0 0
+         2 0 0 0 0
+         2 0 0 0 0
+ */ 
 /*
  * Close/release resources.
  */
