@@ -318,8 +318,10 @@ run_test_loop(FILE *output, struct options *opts)
             parms.num_elmts = opts->file_size / (parms.num_dsets * sizeof(int));
 
             print_indent(output, TAB_SPACE * 1);
+            fprintf(output, "Transfer Buffer Size: %u\n", j);
+            print_indent(output, TAB_SPACE * 1);
             fprintf(output,
-                    "# of files: %u, # of dsets: %lu, Elements per dset: %lu\n",
+                    "  # of files: %u, # of dsets: %lu, Elements per dset: %lu\n",
                     parms.num_files, parms.num_dsets, parms.num_elmts);
 
             if (io_runs & PIO_RAW)
