@@ -2293,6 +2293,10 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
         if(H5S_hyper_convert(fm->file_space)<0)
             HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to convert selection to span trees")
        
+        /* Normalize the hyperslab selections by adjusting them by the offset */
+        if(H5S_hyper_normalize_offset(fm->file_space)<0)
+            HGOTO_ERROR (H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
+
 #ifdef QAK
     {
         int mpi_rank;
@@ -2338,6 +2342,10 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
     if(fsel_type!=H5S_SEL_POINTS && H5S_select_shape_same(file_space,equiv_mspace)==TRUE) {
         if(H5S_hyper_convert(fm->mem_space)<0)
             HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to convert selection to span trees")
+
+        /* Normalize the hyperslab selections by adjusting them by the offset */
+        if(H5S_hyper_normalize_offset(fm->mem_space)<0)
+            HGOTO_ERROR (H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
 
         /* If the selections are the same shape, use the file chunk information
          * to generate the memory chunk information quickly.
@@ -2743,11 +2751,11 @@ H5D_create_chunk_mem_map_hyper(const fm_map *fm)
     assert(fm->f_ndims>0);
 
     /* Get offset of first block in file selection */
-    if(H5S_get_select_hyper_blocklist(fm->file_space, (hsize_t)0, (hsize_t)1, file_off)<0)
+    if(H5S_get_select_hyper_blocklist(fm->file_space, 1, (hsize_t)0, (hsize_t)1, file_off)<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection block info")
 
     /* Get offset of first block in memory selection */
-    if(H5S_get_select_hyper_blocklist(fm->mem_space, (hsize_t)0, (hsize_t)1, mem_off)<0)
+    if(H5S_get_select_hyper_blocklist(fm->mem_space, 1, (hsize_t)0, (hsize_t)1, mem_off)<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection block info")
 
     /* Calculate the adjustment for memory selection from file selection */

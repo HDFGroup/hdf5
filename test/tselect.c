@@ -12,8 +12,6 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* $Id$ */
-
 /***********************************************************
 *
 * Test program:	 tselect
@@ -124,6 +122,10 @@
 #define CHUNK_X   87                    /* chunk dimensions */
 #define CHUNK_Y   61    
 #define CHUNK_Z  181    
+
+/* Basic chunk size */
+#define SPACE10_DIM1    180
+#define SPACE10_CHUNK_SIZE 12
 
 /* Location comparison function */
 int compare_size_t(const void *s1, const void *s2);
@@ -6542,6 +6544,230 @@ test_shape_same(void)
 
 /****************************************************************
 **
+**  test_select_hyper_chunk_offset(): Tests selections on dataspace,
+**      verify that offsets for hyperslab selections are working in
+**      chunked datasets.
+** 
+****************************************************************/
+static void 
+test_select_hyper_chunk_offset(void)
+{
+    hid_t fid;          /* File ID  */
+    hid_t sid;          /* Dataspace ID */
+    hid_t msid;         /* Memory dataspace ID */
+    hid_t did;          /* Dataset ID */
+    const hsize_t mem_dims[1] = { SPACE10_DIM1 };      /* Dataspace dimensions for memory */
+    const hsize_t dims[1] = { 0 };      /* Dataspace initial dimensions */
+    const hsize_t maxdims[1] = { H5S_UNLIMITED };       /* Dataspace mam dims */
+    int *wbuf;                          /* Buffer for writing data */
+    int *rbuf;                          /* Buffer for reading data */
+    hid_t dcpl;                         /* Dataset creation property list ID */
+    hsize_t chunks[1]={SPACE10_CHUNK_SIZE };    /* Chunk size */
+    hssize_t start[1] = { 0 };          /* The start of the hyperslab */
+    hsize_t count[1] = { SPACE10_CHUNK_SIZE };  /* The size of the hyperslab */
+    int i,j;                            /* Local index */
+    herr_t ret;                         /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(6, ("Testing hyperslab selections using offsets in chunked datasets\n"));
+
+    /* Allocate buffers */
+    wbuf= (int*)HDmalloc(sizeof(int)*SPACE10_DIM1);
+    CHECK(wbuf, NULL, "HDmalloc");
+    rbuf= (int*)HDmalloc(sizeof(int)*SPACE10_DIM1);
+    CHECK(rbuf, NULL, "HDmalloc");
+
+    /* Initialize the write buffer */
+    for(i=0; i<SPACE10_DIM1; i++)
+        wbuf[i]=i;
+
+    /* Create file */
+    fid = H5Fcreate (FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create a dataset creation property list */
+    dcpl = H5Pcreate (H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate");
+
+    /* Set to chunked storage layout */
+    ret=H5Pset_layout (dcpl, H5D_CHUNKED);
+    CHECK(ret, FAIL, "H5Pset_layout");
+
+    /* Set the chunk size */
+    ret=H5Pset_chunk (dcpl, 1, chunks);
+    CHECK(ret, FAIL, "H5Pset_chunk");
+    
+    /* Create dataspace for memory */
+    msid = H5Screate_simple (1, mem_dims, NULL);
+    CHECK(msid, FAIL, "H5Screate_simple");
+
+    /* Select the correct chunk in the memory dataspace */
+    ret=H5Sselect_hyperslab (msid, H5S_SELECT_SET, start, NULL, count, NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Create dataspace for dataset */
+    sid = H5Screate_simple (1, dims, maxdims);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Create the dataset */
+    did = H5Dcreate (fid, "fooData", H5T_NATIVE_INT, sid, dcpl);
+    CHECK(did, FAIL, "H5Dcreate");
+
+    /* Close the dataspace */
+    ret=H5Sclose (sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close the dataset creation property list */
+    ret=H5Pclose (dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Loop over writing out each chunk */
+    for(i=SPACE10_CHUNK_SIZE; i<=SPACE10_DIM1; i+=SPACE10_CHUNK_SIZE) {
+        hssize_t offset[1];                 /* Offset of selection */
+        hid_t fsid;                         /* File dataspace ID */
+        hsize_t size[1];                    /* The size to extend the dataset to */
+
+        /* Extend the dataset */
+        size[0] = i;                 /* The size to extend the dataset to */
+        ret=H5Dextend (did, size);
+        CHECK(ret, FAIL, "H5Dextend");
+
+        /* Get the (extended) dataspace from the dataset */
+        fsid = H5Dget_space (did);
+        CHECK(fsid, FAIL, "H5Dget_space");
+
+        /* Select the correct chunk in the dataset */
+        ret=H5Sselect_hyperslab (fsid, H5S_SELECT_SET, start, NULL, count, NULL);
+        CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+        /* Set the selection offset for the file dataspace */
+        offset[0] = i - SPACE10_CHUNK_SIZE;
+        ret=H5Soffset_simple (fsid, offset);
+        CHECK(ret, FAIL, "H5Soffset_simple");
+
+        /* Set the selection offset for the memory dataspace */
+        offset[0] = SPACE10_DIM1-i;
+        ret=H5Soffset_simple (msid, offset);
+        CHECK(ret, FAIL, "H5Soffset_simple");
+
+        /* Write the data to the chunk */
+        ret=H5Dwrite (did, H5T_NATIVE_INT, msid, fsid, H5P_DEFAULT, wbuf);
+        CHECK(ret, FAIL, "H5Soffset_simple");
+
+        /* Close the file dataspace copy */
+        ret=H5Sclose (fsid);
+        CHECK(ret, FAIL, "H5Sclose");
+    }
+
+    /* Read the data back in */
+    ret=H5Dread (did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+
+    /* Verify the information read in */
+    for(i=0; i<SPACE10_DIM1; i+=SPACE10_CHUNK_SIZE) {
+        for(j=0; j<SPACE10_CHUNK_SIZE; j++) {
+            if(wbuf[i+j]!=rbuf[((SPACE10_DIM1-i)-SPACE10_CHUNK_SIZE)+j]) {
+                printf("Line: %d - Error! i=%d, j=%d, rbuf=%d, wbuf=%d\n",__LINE__,i,j,rbuf[((SPACE10_DIM1-i)-SPACE10_CHUNK_SIZE)+j],wbuf[i+j]);
+                num_errs++;
+            } /* end if */
+        } /* end for */
+    } /* end for */
+
+/* Check with 'OR'ed set of hyperslab selections, which makes certain the
+ * hyperslab spanlist code gets tested. -QAK
+ */
+
+    /* Re-initialize the write buffer */
+    for(i=0; i<SPACE10_DIM1; i++)
+        wbuf[i]=i*2;
+
+    /* Change the selected the region in the memory dataspace */
+    start[0] = 0;
+    count[0] = SPACE10_CHUNK_SIZE/3;
+    ret=H5Sselect_hyperslab (msid, H5S_SELECT_SET, start, NULL, count, NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+    start[0] = (2*SPACE10_CHUNK_SIZE)/3;
+    ret=H5Sselect_hyperslab (msid, H5S_SELECT_OR, start, NULL, count, NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Loop over writing out each chunk */
+    for(i=SPACE10_CHUNK_SIZE; i<=SPACE10_DIM1; i+=SPACE10_CHUNK_SIZE) {
+        hssize_t offset[1];                 /* Offset of selection */
+        hid_t fsid;                         /* File dataspace ID */
+        hsize_t size[1];                    /* The size to extend the dataset to */
+
+        /* Extend the dataset */
+        size[0] = i;                 /* The size to extend the dataset to */
+        ret=H5Dextend (did, size);
+        CHECK(ret, FAIL, "H5Dextend");
+
+        /* Get the (extended) dataspace from the dataset */
+        fsid = H5Dget_space (did);
+        CHECK(fsid, FAIL, "H5Dget_space");
+
+        /* Select the correct region in the dataset */
+        start[0] = 0;
+        ret=H5Sselect_hyperslab (fsid, H5S_SELECT_SET, start, NULL, count, NULL);
+        CHECK(ret, FAIL, "H5Sselect_hyperslab");
+        start[0] = (2*SPACE10_CHUNK_SIZE)/3;
+        ret=H5Sselect_hyperslab (fsid, H5S_SELECT_OR, start, NULL, count, NULL);
+        CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+        /* Set the selection offset for the file dataspace */
+        offset[0] = i - SPACE10_CHUNK_SIZE;
+        ret=H5Soffset_simple (fsid, offset);
+        CHECK(ret, FAIL, "H5Soffset_simple");
+
+        /* Set the selection offset for the memory dataspace */
+        offset[0] = SPACE10_DIM1-i;
+        ret=H5Soffset_simple (msid, offset);
+        CHECK(ret, FAIL, "H5Soffset_simple");
+
+        /* Write the data to the chunk */
+        ret=H5Dwrite (did, H5T_NATIVE_INT, msid, fsid, H5P_DEFAULT, wbuf);
+        CHECK(ret, FAIL, "H5Soffset_simple");
+
+        /* Close the file dataspace copy */
+        ret=H5Sclose (fsid);
+        CHECK(ret, FAIL, "H5Sclose");
+    }
+
+    /* Read the data back in */
+    ret=H5Dread (did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+
+    /* Verify the information read in */
+    for(i=0; i<SPACE10_DIM1; i+=SPACE10_CHUNK_SIZE) {
+        for(j=0; j<SPACE10_CHUNK_SIZE; j++) {
+            /* We're not writing out the "middle" of each chunk, so don't check that */
+            if(j<(SPACE10_CHUNK_SIZE/3) || j>=((2*SPACE10_CHUNK_SIZE)/3)) {
+                if(wbuf[i+j]!=rbuf[((SPACE10_DIM1-i)-SPACE10_CHUNK_SIZE)+j]) {
+                    printf("Line: %d - Error! i=%d, j=%d, rbuf=%d, wbuf=%d\n",__LINE__,i,j,rbuf[((SPACE10_DIM1-i)-SPACE10_CHUNK_SIZE)+j],wbuf[i+j]);
+                    num_errs++;
+                } /* end if */
+            } /* end if */
+        } /* end for */
+    } /* end for */
+
+    /* Close the memory dataspace */
+    ret=H5Sclose (msid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close the dataset */
+    ret=H5Dclose (did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close the file */
+    ret=H5Fclose (fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Free the buffers */
+    HDfree(wbuf);
+    HDfree(rbuf);
+}   /* test_select_hyper_chunk_offset() */
+
+/****************************************************************
+**
 **  test_select(): Main H5S selection testing routine.
 ** 
 ****************************************************************/
@@ -6677,6 +6903,9 @@ test_select(void)
 
     /* Test scalar dataspaces in chunked datasets */
     test_select_scalar_chunk();
+
+    /* Test using selection offset on hyperslab in chunked dataset */
+    test_select_hyper_chunk_offset();
 
 }   /* test_select() */
 
