@@ -56,10 +56,7 @@ void DataSpace::copy( const DataSpace& like_space )
    id = H5Scopy( like_space.getId() );
 
    // points to the same ref counter
-   ref_count = like_space.ref_count;
-
-   // increment ref counter to indicate additional references to this id
-   ref_count->increment();
+   ref_count = new RefCounter;
 
    if( id <= 0 )
    {

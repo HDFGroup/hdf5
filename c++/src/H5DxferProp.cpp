@@ -19,14 +19,6 @@ DSetMemXferPropList::DSetMemXferPropList() : PropList( H5P_DATASET_XFER ) {}
 // Copy constructor: makes a copy of the original DSetMemXferPropList object;
 DSetMemXferPropList::DSetMemXferPropList( const DSetMemXferPropList& orig ) : PropList( orig ) {}
 
-// Copies a dataset transfer property list using assignment statement
-// Notes: can this be inherited from PropList??? and copy or operator=???
-DSetMemXferPropList& DSetMemXferPropList::operator=( const DSetMemXferPropList& rhs )
-{
-   copy (rhs);
-   return( *this );
-}
-
 // Sets type conversion and background buffers
 void DSetMemXferPropList::setBuffer( size_t size, void* tconv, void* bkg ) const
 {
@@ -150,7 +142,7 @@ void DSetMemXferPropList::getVlenMemManager( H5MM_allocate_t& alloc_func, void**
    }
 }
 
-/* these two functions are in parallel mode only - not supported at this time.
+/* this function is in parallel mode only - not supported at this time.
 // Sets the transfer mode
 void DSetMemXferPropList::setXfer( H5D_transfer_t data_xfer_mode = H5D_XFER_INDEPENDENT ) const
 {
@@ -161,6 +153,7 @@ void DSetMemXferPropList::setXfer( H5D_transfer_t data_xfer_mode = H5D_XFER_INDE
    }
 }
 
+// this function is in parallel mode only - not supported at this time.
 // Gets the transfer mode
 H5D_transfer_t DSetMemXferPropList::getXfer() const
 {

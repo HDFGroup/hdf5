@@ -10,29 +10,14 @@ class DataSpace : public IdComponent {
 	// Default DataSpace objects
 	static const DataSpace ALL;
 
-	// Default constructor
-	DataSpace();
-
 	// Creates a dataspace object given the space type
 	DataSpace( H5S_class_t type ); // H5Screate
-
-	// Assignement operator
-	//DataSpace& operator=( const DataSpace& rhs );
 
 	// Creates a simple dataspace
 	DataSpace( int rank, const hsize_t * dims, const hsize_t * maxdims = NULL); // H5Screate_simple
 
-	// Copy constructor: makes a copy of the original DataSpace object.
-	DataSpace( const DataSpace& original );
-
 	// Makes copy of an existing dataspace.
 	void copy( const DataSpace& like_space ); // H5Scopy
-
-	// Gets value of member id of this dataspace
-        //hid_t getId () const;
-
-	// Sets value for member id of this dataspace.
-        //void setId( hid_t new_space_id );
 
 	// Determines if this dataspace is a simple one.
 	bool isSimple () const;
@@ -102,6 +87,12 @@ class DataSpace : public IdComponent {
 
 	// Used by the API to close the dataspace 
 	void p_close() const;
+
+	// Default constructor
+	DataSpace();
+
+	// Copy constructor: makes a copy of the original DataSpace object.
+	DataSpace( const DataSpace& original );
 
 	virtual ~DataSpace();
 };

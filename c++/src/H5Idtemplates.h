@@ -18,8 +18,10 @@ void resetIdComponent(
    if( obj->noReference())  // ref count of this object is decremented here
    {
       if( obj->getId() > 0 )
+      {
          obj->p_close();  // which p_close depends on whom this
                              // IdComponent object belongs to
+      }
       obj->reset();  // delete ref_count from IdComponent
    }
 }

@@ -1,3 +1,6 @@
+
+// Class DataSet inherits from AbstractDs and provides accesses to a dataset.
+
 #ifndef _H5DataSet_H
 #define _H5DataSet_H
 
@@ -6,14 +9,7 @@ namespace H5 {
 #endif
 
 class DataSet : public AbstractDs {
-
    public:
-	// Default constructor
-	DataSet();
-
-	// Copy constructor
-	DataSet( const DataSet& original );
-
 	// Gets the dataspace of this dataset.
 	virtual DataSpace getSpace() const;
 
@@ -51,6 +47,12 @@ class DataSet : public AbstractDs {
 
 	// Used by the API to appropriately close a dataset
 	virtual void p_close() const;
+
+	// Default constructor
+	DataSet();
+
+	// Copy constructor
+	DataSet( const DataSet& original );
 
 	virtual ~DataSet();
 

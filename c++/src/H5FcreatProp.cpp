@@ -19,14 +19,6 @@ FileCreatPropList::FileCreatPropList() : PropList( H5P_FILE_CREATE ) {}
 // Copy constructor: makes a copy of the original FileCreatPropList object;
 FileCreatPropList::FileCreatPropList( const FileCreatPropList& orig ) : PropList( orig ) {}
 
-// Copies a file create property list using assignment statement
-// Notes: can this be inherited from PropList??? and copy or operator=???
-FileCreatPropList& FileCreatPropList::operator=( const FileCreatPropList& rhs )
-{
-   copy (rhs);
-   return( *this );
-}
-
 void FileCreatPropList::getVersion( 
 			int& boot, int& freelist, int& stab, int& shhdr ) const
 {

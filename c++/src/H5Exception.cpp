@@ -128,67 +128,60 @@ void Exception::printError( FILE* stream ) const
       throw Exception( "printError: H5Eprint fails" );
 }
 
+Exception::~Exception()
+{
+   herr_t ret_value = H5Eprint( NULL ); // print to stderr
+   if( ret_value < 0 )
+      throw Exception( "printError: H5Eprint fails" );
+}
+
 FileIException::FileIException():Exception(){}
-FileIException::FileIException( string message ): 
-Exception( message ){}
+FileIException::FileIException( string message ): Exception( message ){}
+FileIException::~FileIException() {}
 
 GroupIException::GroupIException():Exception(){}
-GroupIException::GroupIException( string message ): 
-Exception( message ){}
-
-ObjectHeaderException::ObjectHeaderException():Exception(){}
-ObjectHeaderException::ObjectHeaderException( string message ): Exception( message ) {}
+GroupIException::GroupIException( string message ): Exception( message ){}
+GroupIException::~GroupIException() {}
 
 DataSpaceIException::DataSpaceIException():Exception(){}
 DataSpaceIException::DataSpaceIException( string message ): Exception( message ) {}
+DataSpaceIException::~DataSpaceIException() {}
 
 DataTypeIException::DataTypeIException():Exception(){}
 DataTypeIException::DataTypeIException( string message ): Exception( message ) {}
+DataTypeIException::~DataTypeIException() {}
 
 PropListIException::PropListIException():Exception(){}
 PropListIException::PropListIException( string message ): Exception( message ) {}
+PropListIException::~PropListIException() {}
 
 DataSetIException::DataSetIException():Exception(){}
 DataSetIException::DataSetIException( string message ): Exception( message ) {}
+DataSetIException::~DataSetIException() {}
 
 AttributeIException::AttributeIException():Exception(){}
 AttributeIException::AttributeIException( string message ): Exception( message ) {}
-
-FunctionArgumentException::FunctionArgumentException():Exception(){}
-FunctionArgumentException::FunctionArgumentException( string message ): Exception( message ) {}
+AttributeIException::~AttributeIException() {}
 
 ReferenceException::ReferenceException():Exception(){}
-ReferenceException::ReferenceException( string message ):
-Exception( message ) {}
-
-DataStorageException::DataStorageException():Exception(){}
-DataStorageException::DataStorageException( string message ):
-Exception( message ) {}
+ReferenceException::ReferenceException( string message ): Exception( message ) {}
+ReferenceException::~ReferenceException() {}
 
 LibraryIException::LibraryIException():Exception(){}
-LibraryIException::LibraryIException( string message ):
-Exception( message ) {}
+LibraryIException::LibraryIException( string message ): Exception( message ) {}
+LibraryIException::~LibraryIException() {}
 
 IdComponentException::IdComponentException(): Exception() {}
 IdComponentException::IdComponentException( string message ): Exception( message ) {}
+IdComponentException::~IdComponentException() {}
 
 // The following are from Java API but not done here:
 // AtomException, BtreeException, DataFiltersException, 
 // ExternalFileListException, FunctionEntryExitException, 
 // HeapException, InternalErrorException, LowLevelIOException, 
 // MetaDataCacheException, ResourceUnavailableException, 
-// SymbolTableException 
-
-File_GroupException::File_GroupException()
-{
-   // for now, do nothing
-}
-
-File_GroupException::File_GroupException( string message )
-{
-   // for now, do nothing
-}
-
+// SymbolTableException, ObjectHeaderException, FunctionArgumentException,
+// DataStorageException
 
 #ifndef H5_NO_NAMESPACE
 } // end namespace

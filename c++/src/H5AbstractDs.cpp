@@ -127,6 +127,9 @@ void AbstractDs::getDataType( StrType& strtype ) const
 }
 end of old style of getDataType */
 
+// Default destructor
+AbstractDs::~AbstractDs() {}
+
 #ifndef H5_NO_NAMESPACE
 } // end namespace
 #endif

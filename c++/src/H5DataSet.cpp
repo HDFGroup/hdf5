@@ -199,7 +199,7 @@ void DataSet::p_close() const
 // a member function so it can be template to work around that problem.
 DataSet::~DataSet()
 {
-   // The dataset id will be closed properly
+   // The dataset id will be closed properly 
    resetIdComponent( this );
 }
 

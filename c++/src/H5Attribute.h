@@ -6,11 +6,7 @@ namespace H5 {
 #endif
 
 class Attribute : public AbstractDs {
-
    public:
-	// Copy constructor: makes a copy of an existing Attribute object.
-	Attribute( const Attribute& original );
-
 	// Writes data to this attribute.
 	void write(const DataType& mem_type, void *buf ) const;
 
@@ -31,6 +27,9 @@ class Attribute : public AbstractDs {
 
         // Creates a copy of an existing attribute using the attribute id
         Attribute( const hid_t attr_id );
+
+	// Copy constructor: makes a copy of an existing Attribute object.
+	Attribute( const Attribute& original );
 
 	virtual ~Attribute();
 

@@ -1,8 +1,6 @@
-/*
-This class is a prototype class.  Most of its member functions are those
-that are common to both H5File and Group.  H5File and Group will inherit
-these functions.
-*/
+// CommonFG is a protocol class.  Its existence is simply to provide the
+// common services that are provided by H5File and Group.  The file or
+// group in the context of this class is referred to as 'location'.
 
 #ifndef _CommonFG_H
 #define _CommonFG_H
@@ -48,27 +46,28 @@ class CommonFG {
 	void move( const string& src, const string& dst ) const;
 	void move( const char* src, const char* dst ) const;
 
-	// Returns information about an object
+	// Returns information about an HDF5 object, given by its name, 
+	// at this location.
 	void getObjinfo( const string& name, hbool_t follow_link, H5G_stat_t& statbuf ) const;
 	void getObjinfo( const char* name, hbool_t follow_link, H5G_stat_t& statbuf ) const;
 
-	// Returns the name of the object that the symbolic link points to.
+	// Returns the name of the HDF5 object that the symbolic link points to.
 	string getLinkval( const string& name, size_t size ) const;
 	string getLinkval( const char* name, size_t size ) const;
 
-	// Sets the comment for an object specified by its name
+	// Sets the comment for an HDF5 object specified by its name
 	void setComment( const string& name, const string& comment ) const;
 	void setComment( const char* name, const char* comment ) const;
 
-	// Retrieves comment for specified object
+	// Retrieves comment for the HDF5 object specified by its name
 	string getComment( const string& name, size_t bufsize ) const;
 	string getComment( const char* name, size_t bufsize ) const;
 
-	// Mounts the file 'child' onto this group
+	// Mounts the file 'child' onto this location
 	void mount( const string& name, H5File& child, PropList& plist ) const;
 	void mount( const char* name, H5File& child, PropList& plist) const;
 
-	// Unmounts the file named 'name' from this parent group
+	// Unmounts the file named 'name' from this parent location
 	void unmount( const string& name ) const;
 	void unmount( const char* name ) const;
 
@@ -77,27 +76,27 @@ class CommonFG {
 	int iterateElems( const string& name, int *idx, H5G_iterate_t op, void *op_data );
 	int iterateElems( const char* name, int *idx, H5G_iterate_t op, void *op_data );
 
-	// Opens a generic named datatype in this file
+	// Opens a generic named datatype in this location
 	DataType openDataType( const string& name ) const;
 	DataType openDataType( const char* name ) const;
 
-	// Opens a named enumeration datatype in this file
+	// Opens a named enumeration datatype in this location
 	EnumType openEnumType( const string& name ) const;
 	EnumType openEnumType( const char* name ) const;
 
-	// Opens a named compound datatype in this file
+	// Opens a named compound datatype in this location
 	CompType openCompType( const string& name ) const;
 	CompType openCompType( const char* name ) const;
 
-	// Opens a named integer datatype in this file
+	// Opens a named integer datatype in this location
 	IntType openIntType( const string& name ) const;
 	IntType openIntType( const char* name ) const;
 
-	// Opens a named floating-point datatype in this file
+	// Opens a named floating-point datatype in this location
 	FloatType openFloatType( const string& name ) const;
 	FloatType openFloatType( const char* name ) const;
 
-	// Opens a named string datatype in this file
+	// Opens a named string datatype in this location
 	StrType openStrType( const string& name ) const;
 	StrType openStrType( const char* name ) const;
 
@@ -105,7 +104,6 @@ class CommonFG {
 	virtual void throwException() const = 0;
 
 	CommonFG();
-
 	virtual ~CommonFG();
 
    private:

@@ -6,7 +6,7 @@ using namespace std;
 #endif
 
 // Creates a reference counter to be used by an HDF5 object
-RefCounter::RefCounter() : counter(1) { } 
+RefCounter::RefCounter() : counter(1) {} 
  
 // Returns the current value of the reference counter
 int RefCounter::getCounter () const { return counter; }

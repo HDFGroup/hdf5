@@ -16,9 +16,6 @@ class FileCreatPropList : public PropList {
 	// Copy constructor: creates a copy of a FileCreatPropList object
 	FileCreatPropList( const FileCreatPropList& orig );
 
-	// Copies a file creation property list using assignment statement
-	FileCreatPropList& operator=( const FileCreatPropList& rhs );
-
 	// Retrieves version information for various parts of a file.
 	void getVersion( int& boot, int& freelist, int& stab, int& shhdr ) const;
 

@@ -19,14 +19,6 @@ FileAccPropList::FileAccPropList() : PropList( H5P_FILE_ACCESS ) {}
 // Copy constructor: makes a copy of the original FileAccPropList object;
 FileAccPropList::FileAccPropList( const FileAccPropList& orig ) : PropList( orig ) {}
 
-// Copies a file access property list using assignment statement
-// Notes: can this be inherited from PropList??? and copy or operator=???
-FileAccPropList& FileAccPropList::operator=( const FileAccPropList& rhs )
-{
-   copy (rhs);
-   return( *this );
-}
-
 /* commented out for 1.3.x, only in 1.2.x
 void FileAccPropList::setStdio() const
 {

@@ -16,9 +16,6 @@ class FileAccPropList : public PropList {
 	// Copy constructor: creates a copy of a FileAccPropList object
 	FileAccPropList( const FileAccPropList& orig );
 
-	// Copies a file access property list using assignment statement.
-	FileAccPropList& operator=( const FileAccPropList& rhs );
-
 	// Sets the low level file driver to use the functions 
 	// declared in the stdio.h
 	// void setStdio() const;

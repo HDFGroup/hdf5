@@ -1,7 +1,5 @@
-//#ifndef _H5RefCounter_H
-//#define _H5RefCounter_H
-#ifndef _MY_RefCounter
-#define _MY_RefCounter
+#ifndef _H5RefCounter_H
+#define _H5RefCounter_H
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {

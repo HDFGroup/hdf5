@@ -59,95 +59,83 @@ class Exception {
 
 	// Prints the error stack in a default manner.
 	//void printError() const;
-	void printError( FILE* stream = NULL ) const;
+	virtual void printError( FILE* stream = NULL ) const;
+
+	// virtual Destructor
+	virtual ~Exception();
 
    private:
 	string detailMessage;
-};
-
-// This exception is privately used in Group and H5File only
-class File_GroupException {
-   public:
-	File_GroupException();
-	File_GroupException( string message );
 };
 
 class FileIException : public Exception {
    public:
 	FileIException();
 	FileIException( string message );
+	virtual ~FileIException();
 };
 
 class GroupIException : public Exception {
    public:
 	GroupIException();
 	GroupIException( string message );
-};
-
-class ObjectHeaderException : public Exception {
-   public:
-	ObjectHeaderException();
-	ObjectHeaderException( string message );
+	virtual ~GroupIException();
 };
 
 class DataSpaceIException : public Exception {
    public:
 	DataSpaceIException();
 	DataSpaceIException( string message );
+	virtual ~DataSpaceIException();
 };
 
 class DataTypeIException : public Exception {
    public:
 	DataTypeIException();
 	DataTypeIException( string message );
+	virtual ~DataTypeIException();
 };
 
 class PropListIException : public Exception {
    public:
 	PropListIException();
 	PropListIException( string message );
+	virtual ~PropListIException();
 };
 
 class DataSetIException : public Exception {
    public:
 	DataSetIException();
 	DataSetIException( string message );
+	virtual ~DataSetIException();
 };
 
 class AttributeIException : public Exception {
    public:
 	AttributeIException();
 	AttributeIException( string message );
-};
-
-class FunctionArgumentException : public Exception {
-   public:
-	FunctionArgumentException();
-	FunctionArgumentException( string message );
+	virtual ~AttributeIException();
 };
 
 class ReferenceException : public Exception {
    public:
 	ReferenceException();
 	ReferenceException( string message );
-};
-
-class DataStorageException : public Exception {
-   public:
-	DataStorageException();
-	DataStorageException( string message );
+	virtual ~ReferenceException();
 };
 
 class LibraryIException : public Exception {
    public:
 	LibraryIException();
 	LibraryIException( string message );
+	virtual ~LibraryIException();
 };
 
 class IdComponentException : public Exception {
    public:
 	IdComponentException();
 	IdComponentException( string message );
+	virtual ~IdComponentException();
 };
 
 // The following are from Java API but not done here:
@@ -155,7 +143,8 @@ class IdComponentException : public Exception {
 // ExternalFilelistException, FunctionEntryExitException, 
 // HeapException, InternalErrorException, LowLevelIOException, 
 // MetaDataCacheException, ResourceUnavailableException, 
-// SymbolTableException 
+// SymbolTableException, ObjectHeaderException, FunctionArgumentException,
+// DataStorageException
 #ifndef H5_NO_NAMESPACE
 }
 #endif

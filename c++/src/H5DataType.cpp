@@ -53,10 +53,16 @@ void DataType::copy( const DataType& like_type )
 
    // call C routine to copy the datatype
    id = H5Tcopy( like_type.getId() );
+   ref_count = new RefCounter;
+
+/*
+id != like_type.id so this object has a different ref_count than
+like_type 
    ref_count = like_type.ref_count;
 
    // increment ref counter to indicate additional references to this id
    ref_count->increment();
+*/
 
    if( id <= 0 )
    {
@@ -85,27 +91,11 @@ bool DataType::operator==(const DataType& compared_type ) const
 // the parameter list???
 //int DataType::iterate( unsigned * idx, H5A_operator_t op, void *op_data )
 //{
-   // Call C routine H5Aiterate to iterate the object's attributes
-   //int ret_value = H5Aiterate( id, idx, op, op_data );
-   //if( ret_value >= 0 )
-      //return( ret_value );
-   //else
-   //{
-      //throw DataTypeIException();
-   //}
 //}
 
 // Creates a new variable-length datatype - Note: make it inheritance???
 //DataType DataType::vlenCreate( const DataType& base_type )
 //{
-   // Call C routine to create a new VL datatype
-   //hid_t type_id = H5Tvlen_create( id );
-   //if( type_id > 0 )
-      //id_obj->setId( type_id );
-   //else
-   //{
-      //throw DataTypeIException();
-   //}
 //}
 
 // Commits a transient datatype to a file, creating a new named datatype
@@ -237,7 +227,7 @@ DataType DataType::getSuper() const
       DataType base_type( base_type_id );
       return( base_type );
    }
-   else {}
+   else
    {
       throw DataTypeIException();
    }

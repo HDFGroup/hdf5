@@ -15,10 +15,7 @@ const PropList PropList::DEFAULT( H5P_DEFAULT );
 
 // Default constructor - set id to 0 by default here but may be set
 // to a valid one, if any, by a subclass constructor.
-PropList::PropList() : IdComponent( 0 )
-{
-//   id_obj = new IdComponent( 0 );  // init default object's id to 0
-}
+PropList::PropList() : IdComponent( 0 ) {}
 
 // Creates a new property of specified type
 PropList::PropList( H5P_class_t type ) : IdComponent( 0 )
@@ -55,10 +52,7 @@ void PropList::copy( const PropList& like_plist )
    id = H5Pcopy( like_plist.getId() );
 
    // points to the same ref counter
-   ref_count = like_plist.ref_count;
-
-   // increment ref counter to indicate additional references to this id
-   ref_count->increment();
+   ref_count = new RefCounter;
 
    if( id <= 0 )
    {

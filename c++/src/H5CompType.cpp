@@ -201,12 +201,6 @@ void CompType::insertMember( const string name, size_t offset, const DataType& n
    }
 }
 
-// Adds an array member to this compound datatype.
-void CompType::insertMember( const string member_name, size_t offset, int ndims, const size_t* dim, const int* perm, const DataType& new_member ) const
-{
-   throw DataTypeIException( "Error: insertMember is no longer supported.");
-}
-
 // Recursively removes padding from within a compound datatype. 
 void CompType::pack() const
 {

@@ -16,9 +16,6 @@ class DSetCreatPropList : public PropList {
 	// often used by the compiler when passing by value occurs.
 	DSetCreatPropList( const DSetCreatPropList& orig );
 
-	// Copies a dataset creation property list using assignment statement
-	DSetCreatPropList& operator=( const DSetCreatPropList& rhs );
-
 	// Sets the type of storage used to store the raw data for the 
 	// dataset that uses this property list
 	void setLayout(hid_t plist, H5D_layout_t layout ) const;

@@ -1,3 +1,6 @@
+// Class CompType inherits from DataType and provides accesses to a compound
+// datatype.
+
 #ifndef _H5CompType_H
 #define _H5CompType_H
 
@@ -7,35 +10,27 @@ namespace H5 {
 
 class CompType : public DataType {
    public:
-	// Creates a new datatype
+	// Creates a new compound datatype, given the type's size
 	CompType( size_t size ); // H5Tcreate
-
-	// Default constructor
-	CompType();
-
-	// Creates a compound datatype using an existing id
-	CompType( const hid_t existing_id );
-
-	// Copy constructor - makes a copy of original object
-	CompType( const CompType& original );
 
 	// Gets the compound datatype of the specified dataset
 	CompType( const DataSet& dataset );  // H5Dget_type
 
-	// Retrieves the number of members in this compound datatype. 
+	// Returns the number of members in this compound datatype. 
 	int getNmembers() const;
 
-	// Retrieves the name of a member of this compound datatype. 
+	// Returns the name of a member of this compound datatype. 
 	string getMemberName( int member_num ) const;
 
-	// Retrieves the offset of a member of this compound datatype. 
+	// Returns the offset of a member of this compound datatype. 
 	size_t getMemberOffset( int memb_no ) const;
 
 	// Returns the dimensionality of the specified member. 
 	int getMemberDims( int member_num, size_t* dims, int* perm ) const;
 
-	// Gets the type class of the specified member.  It provides to
-	// the user a way of knowing what type to declare.
+	// Returns the type class of the specified member of this compound
+	// datatype.  It provides to the user a way of knowing what type
+	// to create another datatype of the same class
 	H5T_class_t getMemberClass( int member_num ) const;
 
 	// Returns the generic datatype of the specified member in 
@@ -65,11 +60,17 @@ class CompType : public DataType {
 	// Adds a new member to this compound datatype.
 	void insertMember( const string name, size_t offset, const DataType& new_member ) const;
 
-	// Adds an array datatype member to this compound datatype.
-	void insertMember( const string name, size_t offset, int ndims, const size_t* dim, const int* perm, const DataType& new_member ) const;
-
 	// Recursively removes padding from within this compound datatype. 
 	void pack() const;
+
+	// Default constructor
+	CompType();
+
+	// Creates a compound datatype using an existing id
+	CompType( const hid_t existing_id );
+
+	// Copy constructor - makes a copy of original object
+	CompType( const CompType& original );
 
 	virtual ~CompType();
 

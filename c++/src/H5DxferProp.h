@@ -15,10 +15,6 @@ class DSetMemXferPropList : public PropList {
 	// Copy constructor: creates a copy of a DSetMemXferPropList object
 	DSetMemXferPropList( const DSetMemXferPropList& orig );
 
-	// Copies a dataset memory and transfer property list using 
-	// assignment statement
-	DSetMemXferPropList& operator=( const DSetMemXferPropList& rhs );
-
 	// Sets type conversion and background buffers
 	void setBuffer( size_t size, void* tconv, void* bkg ) const;
 

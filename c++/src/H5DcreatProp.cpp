@@ -18,13 +18,6 @@ const DSetCreatPropList DSetCreatPropList::DEFAULT( H5P_DEFAULT );
 // Copy constructor: makes a copy of the original DSetCreatPropList object;
 DSetCreatPropList::DSetCreatPropList( const DSetCreatPropList& orig ) : PropList( orig ) {}
 
-// Copies a dataset creation property list using assignment statement
-DSetCreatPropList& DSetCreatPropList::operator=( const DSetCreatPropList& rhs )
-{
-   copy (rhs);
-   return( *this );
-}
-
 // Sets the size of the chunks used to store a chunked layout dataset.
 void DSetCreatPropList::setChunk( int ndims, const hsize_t* dim ) const
 {

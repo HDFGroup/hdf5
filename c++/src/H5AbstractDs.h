@@ -1,3 +1,8 @@
+// Class AbstractDs is an abstract base class, from which Attribute and
+// DataSet inherit.  It provides the services that are common to both
+// Attribute and DataSet.  It also inherits from H5Object and passes down
+// the services that H5Object provides.
+
 #ifndef _AbstractDs_H
 #define _AbstractDs_H
 
@@ -6,9 +11,6 @@ namespace H5 {
 #endif
 class AbstractDs : public H5Object {
    public:
-	// Copy constructor
-	AbstractDs( const AbstractDs& original );
-
 	// Gets the dataspace of this abstract dataset - pure virtual
 	virtual DataSpace getSpace() const = 0;
 
@@ -16,22 +18,24 @@ class AbstractDs : public H5Object {
 	// dataset        
 	H5T_class_t getTypeClass() const;
 
-	// Gets a copy the datatype of this abstract dataset.  Note that 
-	// this datatype is a generic one and can only be accessed via 
-	// generic member functions, i.e., member functions belong to 
-	// DataType.  To get specific datatype, i.e. EnumType, 
-	// FloatType, etc..., use the specific functions instead .
+	// Gets a copy the datatype of that this abstract dataset uses.
+	// Note that this datatype is a generic one and can only be accessed 
+	// via generic member functions, i.e., member functions belong 
+	// to DataType.  To get specific datatype, i.e. EnumType, FloatType, 
+	// etc..., use the specific functions, that follow, instead .
 	DataType getDataType() const;
 
-        // Gets a copy of the specific datatype of this abstract dataset -
-	// overloading for subtypes.
+        // Gets a copy of the specific datatype of this abstract dataset
         EnumType getEnumType() const;
         CompType getCompType() const;
         IntType getIntType() const;
         FloatType getFloatType() const;
         StrType getStrType() const;
 
-	virtual ~AbstractDs() {}; 
+	// Copy constructor
+	AbstractDs( const AbstractDs& original );
+
+	virtual ~AbstractDs(); 
 
    protected:
 	// Default constructor

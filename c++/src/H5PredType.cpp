@@ -185,7 +185,7 @@ bool PredType::committed()
    return (-1);
 }  
 
-// Destructor: calls ~AtomType immediately
+// Default destructor
 PredType::~PredType() {}
 
 #ifndef H5_NO_NAMESPACE

@@ -103,13 +103,15 @@ hid_t IdComponent::getId () const
 void IdComponent::reset ()
 {
    delete ref_count;
+   ref_count = NULL;
 }
 
 // Default destructor
 IdComponent::~IdComponent() {
 
-/* uncomment this block when decide to use dontAtExit or fix the atexit/
-   global destructor problem - BMR 11/14/00
+/* uncomment this block and complete it when deciding to use dontAtExit 
+   unless the atexit/global destructor problem is fixed, then 
+   remove it- BMR 11/14/00
 
    if( id == NOTATEXIT )
    {

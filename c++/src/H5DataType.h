@@ -7,9 +7,6 @@ namespace H5 {
 
 class DataType : public H5Object {
    public:
-	// Default constructor
-	DataType();
-
 	// Creates a datatype given its class and size
 	DataType( const H5T_class_t type_class, size_t size );
 
@@ -81,6 +78,9 @@ class DataType : public H5Object {
 
 	// Creates a copy of an existing DataType using its id 
 	DataType( const hid_t type_id, bool predtype = false );
+
+	// Default constructor
+	DataType();
 
 	virtual ~DataType();
 
