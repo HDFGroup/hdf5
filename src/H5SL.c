@@ -35,6 +35,13 @@
  *              (This implementation has an additional backward pointer, which
  *               allows the list to be iterated in reverse)
  *
+ *              (We should also look into "Deterministic Skip Lists" (see
+ *              paper by Munro, Papadakis & Sedgewick))
+ *
+ *              (There's also an article on "Alternating Skip Lists", which
+ *              are similar to deterministic skip lists, in the August 2000
+ *              issue of Dr. Dobb's Journal)
+ *
  */
 
 /* Interface initialization */
