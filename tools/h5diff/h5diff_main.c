@@ -20,6 +20,10 @@
 static void usage(void);
 static int check_n_input( const char* );
 static int check_f_input( const char* );
+void h5diff_exit(int status);
+#ifdef H5_HAVE_PARALLEL
+static void ph5diff_worker( void );
+#endif
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -88,7 +92,7 @@ int main(int argc, const char *argv[])
 	MPI_Comm_size(MPI_COMM_WORLD, &g_nTasks);
 #else
 	printf("You cannot run ph5diff unless you compiles a parallel build of HDF5\n");
-	exit(2);
+	h5diff_exit(2);
 #endif
     }
     else
@@ -280,88 +284,114 @@ int main(int argc, const char *argv[])
 	return ret;
     }
 #ifdef H5_HAVE_PARALLEL
-    /* All the other tasks just sit around and wait to be assigned something to diff */
+    /* All other tasks become workers and wait for assignments. */
     else
-    {	
-	struct diff_args args;
-	hid_t file1_id, file2_id;	
-	char	filenames[2][1024];
-
-	outBuffOffset = 0;
-
-	MPI_Recv(filenames, 1024*2, MPI_CHAR, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
-	if(Status.MPI_TAG == MPI_TAG_PARALLEL)
-	{
-/*	    printf("We're in parallel mode...opening the files\n");*/
-
-	    /* disable error reporting */
-	    H5E_BEGIN_TRY
-	    {
-		/* Open the files */
-		if ((file1_id = H5Fopen (filenames[0], H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
-		{
-		    printf ("h5diff Task [%d]: <%s>: unable to open file\n", nID, fname1);
-		    MPI_Abort(MPI_COMM_WORLD, 0);
-		}
-		if ((file2_id = H5Fopen (filenames[1], H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
-		{
-		    printf ("h5diff Task [%d]: <%s>: unable to open file\n", nID, fname2);
-		    MPI_Abort(MPI_COMM_WORLD, 0);
-		}
-		/* enable error reporting */
-	    }
-	    H5E_END_TRY;
-
-
-	    while(1)
-	    {
-		MPI_Probe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
-
-		if(Status.MPI_TAG == MPI_TAG_ARGS)
-		{
-		    /*Recv parameters for diff from manager task */
-		    MPI_Recv(&args, sizeof(struct diff_args), MPI_BYTE, 0, MPI_TAG_ARGS, MPI_COMM_WORLD, &Status);
-		    /*Do the diff */
-		    nfound = diff(file1_id, args.name, file2_id, args.name, &(args.options), args.type);
-
-		    /*If print buffer has something in it, request print token.*/
-		    if(outBuffOffset>0)
-		    {
-			MPI_Send(NULL, 0, MPI_BYTE, 0, MPI_TAG_TOK_REQUEST, MPI_COMM_WORLD);
-
-			/*Wait for print token. */
-			MPI_Recv(NULL, 0, MPI_BYTE, 0, MPI_TAG_PRINT_TOK, MPI_COMM_WORLD, &Status);
-
-			/*When get token, print stuff out and return token */
-			printf("%s", outBuff);
-			memset(outBuff, 0, OUTBUFF_SIZE);
-			outBuffOffset = 0;
-
-			MPI_Send(&nfound, 1, MPI_LONG_LONG, 0, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD);
-		    }
-		    else
-			MPI_Send(&nfound, 1, MPI_LONG_LONG, 0, MPI_TAG_DONE, MPI_COMM_WORLD);
-
-		}
-		else if(Status.MPI_TAG == MPI_TAG_END)
-		{
-		    MPI_Recv(NULL, 0, MPI_BYTE, 0, MPI_TAG_END, MPI_COMM_WORLD, &Status);
-/*		    printf("exiting..., task: %d\n", nID);*/
-		    break;
-		}
-		else
-		{
-		    printf("ERROR....invalid tag received\n");
-		    MPI_Abort(MPI_COMM_WORLD, 0);
-		}
-
-	    }
-	}
-	MPI_Barrier(MPI_COMM_WORLD);
-	MPI_Finalize();	
-    }
+	ph5diff_worker();
 #endif
 }
+
+#ifdef H5_HAVE_PARALLEL
+/*-------------------------------------------------------------------------
+ * Function: ph5diff_worker
+ *
+ * Purpose: worker process of ph5diff
+ *
+ * Return: none
+ *
+ * Programmer: Leon Arber
+ * Date: January 2005
+ *
+ * Comments:
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+ph5diff_worker(void)
+{	
+    struct diff_args args;
+    hid_t file1_id, file2_id;	
+    char	filenames[2][1024];
+    hsize_t    nfound=0;
+    int	       nID;
+    MPI_Status Status;
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &nID);
+    outBuffOffset = 0;
+    
+    MPI_Recv(filenames, 1024*2, MPI_CHAR, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
+    if(Status.MPI_TAG == MPI_TAG_PARALLEL)
+    {
+	/*printf("We're in parallel mode...opening the files\n");*/
+
+	/* disable error reporting */
+	H5E_BEGIN_TRY
+	{
+	    /* Open the files */
+	    if ((file1_id = H5Fopen (filenames[0], H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+	    {
+		printf ("h5diff Task [%d]: <%s>: unable to open file\n", nID, filenames[0]);
+		MPI_Abort(MPI_COMM_WORLD, 0);
+	    }
+	    if ((file2_id = H5Fopen (filenames[1], H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+	    {
+		printf ("h5diff Task [%d]: <%s>: unable to open file\n", nID, filenames[1]);
+		MPI_Abort(MPI_COMM_WORLD, 0);
+	    }
+	    /* enable error reporting */
+	}
+	H5E_END_TRY;
+
+
+	while(1)
+	{
+	    MPI_Probe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
+
+	    if(Status.MPI_TAG == MPI_TAG_ARGS)
+	    {
+		/*Recv parameters for diff from manager task */
+		MPI_Recv(&args, sizeof(struct diff_args), MPI_BYTE, 0, MPI_TAG_ARGS, MPI_COMM_WORLD, &Status);
+		/*Do the diff */
+		nfound = diff(file1_id, args.name, file2_id, args.name, &(args.options), args.type);
+
+		/*If print buffer has something in it, request print token.*/
+		if(outBuffOffset>0)
+		{
+		    MPI_Send(NULL, 0, MPI_BYTE, 0, MPI_TAG_TOK_REQUEST, MPI_COMM_WORLD);
+
+		    /*Wait for print token. */
+		    MPI_Recv(NULL, 0, MPI_BYTE, 0, MPI_TAG_PRINT_TOK, MPI_COMM_WORLD, &Status);
+
+		    /*When get token, print stuff out and return token */
+		    printf("%s", outBuff);
+		    memset(outBuff, 0, OUTBUFF_SIZE);
+		    outBuffOffset = 0;
+
+		    MPI_Send(&nfound, 1, MPI_LONG_LONG, 0, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD);
+		}
+		else
+		    MPI_Send(&nfound, 1, MPI_LONG_LONG, 0, MPI_TAG_DONE, MPI_COMM_WORLD);
+
+	    }
+	    else if(Status.MPI_TAG == MPI_TAG_END)
+	    {
+		MPI_Recv(NULL, 0, MPI_BYTE, 0, MPI_TAG_END, MPI_COMM_WORLD, &Status);
+		/*printf("exiting..., task: %d\n", nID);*/
+		break;
+	    }
+	    else
+	    {
+		printf("ERROR....invalid tag received\n");
+		MPI_Abort(MPI_COMM_WORLD, 0);
+	    }
+
+	}
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Finalize();	
+}
+#endif
 
 /*-------------------------------------------------------------------------
  * Function: check_n_input
@@ -494,8 +524,37 @@ void usage(void)
     printf("   h5diff file1 file1 /g1/dset1 /g1/dset2\n");
     printf("\n");
     printf("   to compare '/g1/dset1' and '/g1/dset2' in the same file\n");
-    exit(0);
+    h5diff_exit(0);
 }
 
 
+/*-------------------------------------------------------------------------
+ * Function: h5diff_exit
+ *
+ * Purpose: dismiss phdiff worker processes and exit
+ *
+ * Return: none
+ *
+ * Programmer: Albert Cheng
+ * Date: Feb 6, 2005
+ *
+ * Comments:
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void h5diff_exit(int status)
+{
+#ifdef H5_HAVE_PARALLEL
+    /* if in parallel mode, dismiss workers, close down MPI, then exit */
+    if(g_nTasks > 1){
+	phdiff_dismiss_workers();
+	MPI_Barrier(MPI_COMM_WORLD);
+    }
+    if(g_Parallel)
+	MPI_Finalize();
+#endif
+    exit(status);
+}
 
