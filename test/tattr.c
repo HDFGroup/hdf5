@@ -395,6 +395,72 @@ test_attr_basic_read(void)
 
 /****************************************************************
 **
+**  test_attr_flush(): Test H5A (attribute) code for performing
+**                      I/O when H5Fflush is used.
+** 
+****************************************************************/
+static void 
+test_attr_flush(void)
+{
+    hid_t fil,          /* File ID */
+        att,            /* Attribute ID */
+        spc,            /* Dataspace ID */
+        set;            /* Dataset ID */
+    double wdata=3.14159;       /* Data to write */
+    double rdata;       /* Data read in */
+    herr_t ret;		/* Generic return value		*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Attribute Flushing\n"));
+
+    fil = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fil, FAIL, "H5Fcreate");
+
+    spc = H5Screate(H5S_SCALAR);
+    CHECK(spc, FAIL, "H5Screate");
+
+    set = H5Dcreate(fil, DSET1_NAME, H5T_NATIVE_DOUBLE, spc, H5P_DEFAULT);
+    CHECK(set, FAIL, "H5Dcreate");
+
+    att = H5Acreate(set, ATTR1_NAME, H5T_NATIVE_DOUBLE, spc, H5P_DEFAULT);
+    CHECK(att, FAIL, "H5Acreate");
+
+    ret=H5Aread(att, H5T_NATIVE_DOUBLE, &rdata);
+    CHECK(ret, FAIL, "H5Awrite");
+
+    if(rdata!=0.0)
+        TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n",rdata,0.0);
+
+    ret=H5Fflush(fil, H5F_SCOPE_GLOBAL);
+    CHECK(ret, FAIL, "H5Fflush");
+
+    ret=H5Aread(att, H5T_NATIVE_DOUBLE, &rdata);
+    CHECK(ret, FAIL, "H5Awrite");
+
+    if(rdata!=0.0)
+        TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n",rdata,0.0);
+
+    ret=H5Awrite(att, H5T_NATIVE_DOUBLE, &wdata);
+    CHECK(ret, FAIL, "H5Awrite");
+
+    ret=H5Aread(att, H5T_NATIVE_DOUBLE, &rdata);
+    CHECK(ret, FAIL, "H5Awrite");
+
+    if(rdata!=wdata)
+        TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n",rdata,wdata);
+
+    ret=H5Sclose(spc);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret=H5Aclose(att);
+    CHECK(ret, FAIL, "H5Aclose");
+    ret=H5Dclose(set);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret=H5Fclose(fil);
+    CHECK(ret, FAIL, "H5Fclose");
+}   /* test_attr_basic_flush() */
+
+/****************************************************************
+**
 **  test_attr_compound_write(): Test H5A (attribute) code.
 **      Tests compound datatype attributes
 ** 
@@ -1503,6 +1569,7 @@ test_attr(void)
     /* These next two tests use the same file information */
     test_attr_basic_write();    /* Test basic H5A writing code */
     test_attr_basic_read();     /* Test basic H5A reading code */
+    test_attr_flush();          /* Test H5A I/O in the presence of H5Fflush calls */
 
     /* These next two tests use the same file information */
     test_attr_compound_write();  /* Test complex datatype H5A writing code */

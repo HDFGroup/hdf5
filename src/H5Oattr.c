@@ -340,7 +340,10 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
         p += attr->ds_size;
     
     /* Store attribute data */
-    HDmemcpy(p,attr->data,attr->data_size);
+    if(attr->data)
+        HDmemcpy(p,attr->data,attr->data_size);
+    else
+        HDmemset(p,0,attr->data_size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
