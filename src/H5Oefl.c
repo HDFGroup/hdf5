@@ -537,7 +537,7 @@ H5O_efl_write (H5F_t UNUSED *f, const H5O_efl_t *efl, haddr_t addr,
 			 "unable to seek in external raw data file");
 	}
 	to_write = MIN(efl->slot[i].size-skip, size);
-	if ((size_t)HDwrite (fd, (void*)buf, to_write)!=to_write) {
+	if ((size_t)HDwrite (fd, buf, to_write)!=to_write) {
 	    HGOTO_ERROR (H5E_EFL, H5E_READERROR, FAIL,
 			 "write error in external raw data file");
 	} 

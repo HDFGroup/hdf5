@@ -133,6 +133,9 @@
 #ifdef H5_HAVE_SYS_PROC_H
 #   include <sys/proc.h>
 #endif
+#ifdef H5_HAVE_IO_H
+#   include <io.h>
+#endif
 
 
 #ifdef WIN32
@@ -150,7 +153,6 @@
 
 #include <windef.h>
 #include <winbase.h>
-#include <io.h>
 
 /* H5_inline */
 
@@ -182,44 +184,11 @@ typedef long off_t;
 #endif
 /*WIN32*/
 
-/*
- * This driver supports systems that have the lseek64() function by defining
- * some macros here so we don't have to have conditional compilations later
- * throughout the code.
- *
- * file_offset_t:	The datatype for file offsets, the second argument of
- *			the lseek() or lseek64() call.
- *
- * file_seek:		The function which adjusts the current file position,
- *			either lseek() or lseek64().
- */
-/* adding for windows NT file system support. */
-/* pvn: added __MWERKS__ support. */
-
-#ifdef H5_HAVE_LSEEK64
-#   define file_offset_t	off64_t
-#   define file_seek		lseek64
-#elif defined (WIN32)
-# ifdef __MWERKS__
-# define file_offset_t off_t
-# define file_seek lseek
-# else /*MSVC*/
-# define file_offset_t __int64
-# define file_seek _lseeki64
-# endif
-#else
-#   define file_offset_t	off_t
-#   define file_seek		lseek
-#endif
-
 #ifndef F_OK
 #   define F_OK	00
 #   define W_OK 02
 #   define R_OK 04
 #endif
-
-
-
 
 /*
  * Pablo support files.
@@ -575,7 +544,12 @@ __DLL__ void H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds);
 #define HDexecve(S,AV,E)	execve(S,AV,E)
 #define HDexecvp(S,AV)		execvp(S,AV)
 #define HDexit(N)		exit(N)
+#if defined __MWERKS__
+#include <abort_exit.h>
+#define HD_exit(N)		__exit(N)
+#else
 #define HD_exit(N)		_exit(N)
+#endif
 #define HDexp(X)		exp(X)
 #define HDfabs(X)		fabs(X)
 #define HDfclose(F)		fclose(F)
@@ -1130,5 +1104,3 @@ __DLL__ intn H5T_term_interface(void);
 __DLL__ intn H5Z_term_interface(void);
 
 #endif
-
-

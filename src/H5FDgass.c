@@ -56,6 +56,25 @@ typedef struct H5FD_gass_t {
 
 
 /*
+ * This driver supports systems that have the lseek64() function by defining
+ * some macros here so we don't have to have conditional compilations later
+ * throughout the code.
+ *
+ * file_offset_t:	The datatype for file offsets, the second argument of
+ *			the lseek() or lseek64() call.
+ *
+ * file_seek:		The function which adjusts the current file position,
+ *			either lseek() or lseek64().
+ */
+#ifdef H5_HAVE_LSEEK64
+#   define file_offset_t	off64_t
+#   define file_seek		lseek64
+#else
+#   define file_offset_t	off_t
+#   define file_seek		lseek
+#endif
+
+/*
  * These macros check for overflow of various quantities.  These macros
  * assume that file_offset_t is signed and haddr_t and size_t are unsigned.
  * 

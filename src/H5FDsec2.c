@@ -75,6 +75,30 @@ typedef struct H5FD_sec2_t {
 #endif
 } H5FD_sec2_t;
 
+/*
+ * This driver supports systems that have the lseek64() function by defining
+ * some macros here so we don't have to have conditional compilations later
+ * throughout the code.
+ *
+ * file_offset_t:	The datatype for file offsets, the second argument of
+ *			the lseek() or lseek64() call.
+ *
+ * file_seek:		The function which adjusts the current file position,
+ *			either lseek() or lseek64().
+ */
+/* adding for windows NT file system support. */
+
+#ifdef H5_HAVE_LSEEK64
+#   define file_offset_t	off64_t
+#   define file_seek		lseek64
+#elif defined WIN32
+#   define file_offset_t    __int64
+#   define file_seek        _lseeki64
+#else
+#   define file_offset_t	off_t
+#   define file_seek		lseek
+#endif
+
 
 /*
  * These macros check for overflow of various quantities.  These macros
@@ -635,7 +659,7 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
     while (size>0) {
         do {
             assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
-            nbytes = HDwrite(file->fd, (void*) buf, (size_t)size);
+            nbytes = HDwrite(file->fd, buf, (size_t)size);
         } while (-1==nbytes && EINTR==errno);
         if (-1==nbytes) {
             /* error */

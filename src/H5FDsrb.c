@@ -20,7 +20,13 @@ static hid_t H5FD_SRB_g = 0;
 
 #ifdef H5_HAVE_SRB
 
-
+#ifdef H5_HAVE_LSEEK64
+#   define file_offset_t	off64_t
+#   define file_seek		lseek64
+#else
+#   define file_offset_t	off_t
+#   define file_seek		lseek
+#endif
 
 /*
  * These macros check for overflow of various quantities.  These macros
