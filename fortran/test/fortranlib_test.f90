@@ -39,6 +39,7 @@
      INTEGER :: basic_datatype_total_error = 0
      INTEGER :: enum_total_error = 0
      INTEGER :: external_total_error = 0
+     INTEGER :: multi_file_total_error = 0
      INTEGER :: attribute_total_error = 0
      INTEGER :: identifier_total_error = 0
      INTEGER :: group_total_error = 0
@@ -230,6 +231,15 @@
      write(*, fmt = '(48x,a)', advance = 'no')  ' '
      write(*, fmt = e_format) error_string
      total_error = total_error + external_total_error 
+    
+     error_string = failure
+     cleanup = .FALSE.
+     CALL multi_file_test(cleanup, multi_file_total_error)
+     IF (multi_file_total_error == 0) error_string = success
+     write(*, fmt = '(23a)', advance = 'no') ' Multi file driver test'     
+     write(*, fmt = '(47x,a)', advance = 'no')  ' '
+     write(*, fmt = e_format) error_string
+     total_error = total_error + multi_file_total_error 
     
 !     write(*,*)
 !     write(*,*) '========================================='
