@@ -747,6 +747,7 @@
 
 ./perform/Dependencies
 ./perform/Makefile.in
+./perform/benchpar.c
 ./perform/chunk.c
 ./perform/gen_report.pl
 ./perform/iopipe.c
