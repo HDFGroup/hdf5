@@ -15,6 +15,7 @@ $Source = "";
 # usually the same as the package name.
 #
 %TypeString = ("hbool_t"                   => "b",
+               "htri_t"                    => "b",
                "double"                    => "d",
                "H5D_layout_t"              => "Dl",
                "H5D_transfer_t"            => "Dt",
