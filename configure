@@ -5186,10 +5186,14 @@ else
         # The ``-b nolibpath -b ...'' flags were messing with the mpicc
         # compiler's already defined library paths and it wasn't able to find
         # the libraries it needed to run....DOH!
+	# s[0-9][0-9][0-9][0-9][0-9] are seaborg.nersc.gov nodes
+	# Cu[0-9][0-9] are copper.ncsa.uiuc.edu nodes
         hname="`hostname`"
 
         case "$hname" in
-          *pacific.llnl.gov | snow*.llnl.gov | *s0*)
+          *pacific.llnl.gov | snow*.llnl.gov | \
+          s[0-9][0-9][0-9][0-9][0-9] | \
+          Cu[0-9][0-9])
             hardcode_libdir_flag_spec=' '
             ;;
           *)
@@ -6464,7 +6468,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 6467 "configure"
+#line 6471 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -6562,7 +6566,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 6565 "configure"
+#line 6569 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H

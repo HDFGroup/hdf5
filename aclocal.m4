@@ -1506,10 +1506,14 @@ else
         # The ``-b nolibpath -b ...'' flags were messing with the mpicc
         # compiler's already defined library paths and it wasn't able to find
         # the libraries it needed to run....DOH!
+	# s[0-9][0-9][0-9][0-9][0-9] are seaborg.nersc.gov nodes
+	# Cu[0-9][0-9] are copper.ncsa.uiuc.edu nodes
         hname="`hostname`"
 
         case "$hname" in
-          *pacific.llnl.gov | snow*.llnl.gov | *s0*)
+          *pacific.llnl.gov | snow*.llnl.gov | \
+          s[[0-9]][[0-9]][[0-9]][[0-9]][[0-9]] | \
+          Cu[[0-9]][[0-9]])
             hardcode_libdir_flag_spec=' '
             ;;
           *)
