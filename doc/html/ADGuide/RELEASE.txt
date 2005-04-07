@@ -1,4 +1,4 @@
-HDF5 version 1.6.4-post0 released on Wed Mar 30 21:17:05 CST 2005
+HDF5 version 1.6.4-post1 released on Wed Apr  6 21:22:33 CDT 2005
 ================================================================================
 
 INTRODUCTION
@@ -50,7 +50,8 @@ New Features
 
     F90 API:
     --------
-
+     - Added missing h5tget_member_class_f function
+                                            EIP 2005/04/06
     C++ API:
     --------
 
