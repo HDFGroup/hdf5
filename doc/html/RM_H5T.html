@@ -94,7 +94,7 @@ of a dataset.
     <li><a href="#Datatype-GetNativeType">H5Tget_native_type</a>
     <li><a href="#Datatype-DetectClass">H5Tdetect_class</a>
     <li><a href="#Datatype-Close">H5Tclose</a>
-<p>
+<br><br>
 <i>Conversion Functions</i>
     <li><a href="#Datatype-Convert">H5Tconvert</a>
     <li><a href="#Datatype-Find">H5Tfind</a>
@@ -130,7 +130,7 @@ of a dataset.
     <li><a href="#Datatype-GetStrpad">H5Tget_strpad</a>
     <li><a href="#Datatype-SetStrpad">H5Tset_strpad</a>
   </td></tr></table>
-<p>
+<br>
 <i>Enumeration Datatypes</i>
     <li><a href="#Datatype-EnumCreate">H5Tenum_create</a>
     <li><a href="#Datatype-EnumInsert">H5Tenum_insert</a>
@@ -150,16 +150,16 @@ of a dataset.
     <li><a href="#Datatype-GetMemberType">H5Tget_member_type</a>
     <li><a href="#Datatype-Insert">H5Tinsert</a>
     <li><a href="#Datatype-Pack">H5Tpack</a>
-<p>
+<br><br>
 <i>Array Datatypes</i>
     <li><a href="#Datatype-ArrayCreate">H5Tarray_create</a>
     <li><a href="#Datatype-GetArrayNdims">H5Tget_array_ndims</a>
     <li><a href="#Datatype-GetArrayDims">H5Tget_array_dims</a>
-<p>
+<br><br>
 <i>Variable-length Datatypes</i>
     <li><a href="#Datatype-VLCreate">H5Tvlen_create</a>
     <li><a href="#Datatype-IsVariableString">H5Tis_variable_str</a>
-<p>
+<br><br>
 <i>Opaque Datatypes</i>
     <li><a href="#Datatype-SetTag">H5Tset_tag</a>
     <li><a href="#Datatype-GetTag">H5Tget_tag</a>
@@ -280,7 +280,17 @@ as the corresponding C function.
 <!--<li><a href="#Datatype-GetOverflow">h5tget_overflow_f</a>           -->
 <!--<li><a href="#Datatype-Register">h5tregister_f</a>                  -->
 <!--<li><a href="#Datatype-Unregister">h5tunregister_f</a>              -->
-    <p>
+    <br><br>
+    <i>Enumeration Datatypes</i>
+    <li><a href="#Datatype-EnumCreate">h5tenum_create_f</a>
+    <li><a href="#Datatype-EnumInsert">h5tenum_insert_f</a>
+    <li><a href="#Datatype-EnumNameOf">h5tenum_nameof_f</a>
+    <li><a href="#Datatype-EnumValueOf">h5tenum_valueof_f</a>
+    <li><a href="#Datatype-GetMemberValue">h5tget_member_value_f</a>
+    <li><a href="#Datatype-GetNmembers">h5tget_nmembers_f</a>
+    <li><a href="#Datatype-GetMemberName">h5tget_member_name_f</a>
+    <li><a href="#Datatype-GetMemberIndex">h5tget_member_index_f</a>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top width=32%>
 <i>Atomic Datatype Properties</i>
     <li><a href="#Datatype-SetSize">h5tset_size_f</a>
     <li><a href="#Datatype-GetOrder">h5tget_order_f</a>
@@ -289,8 +299,6 @@ as the corresponding C function.
     <li><a href="#Datatype-SetPrecision">h5tset_precision_f</a>
     <li><a href="#Datatype-GetOffset">h5tget_offset_f</a>
     <li><a href="#Datatype-SetOffset">h5tset_offset_f</a>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top width=32%>
-<i>Atomic (continued)</i>
 <!--  <table><tr><td valign=top>                                            -->
     <li><a href="#Datatype-GetPad">h5tget_pad_f</a>
     <li><a href="#Datatype-SetPad">h5tset_pad_f</a>
@@ -310,41 +318,31 @@ as the corresponding C function.
     <li><a href="#Datatype-GetStrpad">h5tget_strpad_f</a>
     <li><a href="#Datatype-SetStrpad">h5tset_strpad_f</a>
 <!--  </td></tr></table>                                                    -->
-    <p>     
-    <i>Array Datatypes</i>
-    <li><a href="#Datatype-ArrayCreate">h5tarray_create_f</a>   
-    <li><a href="#Datatype-GetArrayNdims">h5tget_array_ndims_f</a>  
-    <li><a href="#Datatype-GetArrayDims">h5tget_array_dims_f</a>  
 <!--<p>                                                                     -->
 <!--<i>Variable-length Datatypes</i>                                        -->
 <!--<li><a href="#Datatype-VLCreate">h5tvlen_create_f</a>               -->
     </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top width=32%>
+    <i>Array Datatypes</i>
+    <li><a href="#Datatype-ArrayCreate">h5tarray_create_f</a>   
+    <li><a href="#Datatype-GetArrayNdims">h5tget_array_ndims_f</a>  
+    <li><a href="#Datatype-GetArrayDims">h5tget_array_dims_f</a>  
+    <br><br>     
     <i>Compound Datatype Properties</i>
     <li><a href="#Datatype-GetNmembers">h5tget_nmembers_f</a>
-<!--<li><a href="#Datatype-GetMemberClass">h5tget_member_class_f</a>        -->
+    <li><a href="#Datatype-GetMemberClass">h5tget_member_class_f</a>
     <li><a href="#Datatype-GetMemberName">h5tget_member_name_f</a>
-<!--<li><a href="#Datatype-GetMemberIndex">h5tget_member_index_f</a>      -->
+    <li><a href="#Datatype-GetMemberIndex">h5tget_member_index_f</a>
     <li><a href="#Datatype-GetMemberOffset">h5tget_member_offset_f</a>
 <!--<li><a href="#Datatype-GetMemberDims">h5tget_member_dims_f</a>          -->
     <li><a href="#Datatype-GetMemberType">h5tget_member_type_f</a>
     <li><a href="#Datatype-Insert">h5tinsert_f</a>
     <li><a href="#Datatype-Pack">h5tpack_f</a>
 <!--<li><a href="#Datatype-InsertArray">h5tinsert_array_f</a>               -->
-    <p>
-    <i>Enumeration Datatypes</i>
-    <li><a href="#Datatype-EnumCreate">h5tenum_create_f</a>
-    <li><a href="#Datatype-EnumInsert">h5tenum_insert_f</a>
-    <li><a href="#Datatype-EnumNameOf">h5tenum_nameof_f</a>
-    <li><a href="#Datatype-EnumValueOf">h5tenum_valueof_f</a>
-    <li><a href="#Datatype-GetMemberValue">h5tget_member_value_f</a>
-    <li><a href="#Datatype-GetNmembers">h5tget_nmembers_f</a>
-    <li><a href="#Datatype-GetMemberName">h5tget_member_name_f</a>
-<!--<li><a href="#Datatype-GetMemberIndex">h5tget_member_index_f</a>      -->
-    <p>
+    <br><br>
     <i>Variable-length Datatypes</i>
     <li><a href="#Datatype-VLCreate">h5tvlen_create_f</a>
     <li><a href="#Datatype-IsVariableString">h5tis_variable_str_f</a>
-    <p>
+    <br><br>
     <i>Opaque Datatypes</i>
     <li><a href="#Datatype-SetTag">h5tset_tag_f</a>
     <li><a href="#Datatype-GetTag">h5tget_tag_f</a>
@@ -1619,16 +1617,20 @@ END SUBROUTINE h5tget_inpad_f
 <dt><strong>Returns:</strong>
     <dd>Returns the datatype class, a non-negative value, if successful;
         otherwise returns a negative value.
-<dt><strong>Fortran90 Interface:</strong>
-    <dd>None.
-<!--
-	<pre>
-
-	</pre>		
--->	
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
-        
+<dt><strong>Fortran90 Interface:</strong> h5tget_member_class_f
+    <dd>
+        <pre>
+SUBROUTINE h5tget_member_class_f(type_id, member_no, class, hdferr) 
+  INTEGER(HID_T), INTENT(IN) :: type_id       ! Datatype identifier 
+  INTEGER, INTENT(IN) :: member_no            ! Member number
+  INTEGER, INTENT(OUT) :: class               ! Member class
+  INTEGER, INTENT(OUT) :: hdferr              ! Error code
+END SUBROUTINE h5tget_member_class_f
+        </pre>		
+        <!--
+        <dt><strong>Non-C API(s):</strong>
+        <dd>
+ 
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1667,16 +1669,19 @@ END SUBROUTINE h5tget_inpad_f
 <dt><strong>Returns:</strong>
     <dd>Returns a valid field or member index if successful;
         otherwise returns a negative value.
-<dt><strong>Fortran90 Interface:</strong>
-    <dd>None.
-<!--
-	<pre>
-
+<dt><strong>Fortran90 Interface:</strong> h5tget_member_index_f
+    <dd>
+        <pre>
+SUBROUTINE h5tget_member_index_f(type_id, name, index, hdferr) 
+  INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name   ! Member name
+  INTEGER, INTENT(OUT) :: index          ! Member index
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+END SUBROUTINE h5tget_member_index_f
 	</pre>		
--->
-		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
+        <!--
+        <dt><strong>Non-C API(s):</strong>
+        <dd>
         
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -3985,7 +3990,7 @@ Describes HDF5 Release 1.6.4, March 2005
 </address>
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 8 September 2004");
+document.writeln("Last modified: 7 April 2005");
 -->
 </SCRIPT>
  
