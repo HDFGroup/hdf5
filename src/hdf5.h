@@ -48,9 +48,6 @@
 #include "H5FDmpi.h"            /* MPI-based file drivers		*/
 #include "H5FDmulti.h"		/* Usage-partitioned file family	*/
 #include "H5FDsec2.h"		/* POSIX unbuffered file I/O		*/
-#ifdef H5_HAVE_LIBSRBCLIENT
-#include "H5FDsrb.h"        	/* Remote access using SRB              */
-#endif
 #include "H5FDstdio.h"		/* Standard C buffered I/O		*/
 #include "H5FDstream.h"     	/* In-memory files streamed via sockets */
 

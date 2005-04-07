@@ -1,6 +1,7 @@
 		Installation Instructions for HDF5
                 with Different Virtual File Layer 
               
+Support for SRB and GASS drivers was removed. See RELEASE.txt file
                    *              *             *
 
 This file contains installation instructions for HDF5 with certain Virtual File

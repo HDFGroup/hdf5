@@ -41,7 +41,6 @@
 #include "H5FDmpi.h"            /* MPI-based file drivers		*/
 #include "H5FDmulti.h"		/* Usage-partitioned file family	*/
 #include "H5FDsec2.h"		/* POSIX unbuffered file I/O		*/
-#include "H5FDsrb.h"        	/* Remote access using SRB              */
 #include "H5FDstdio.h"		/* Standard C buffered I/O		*/
 #include "H5FDstream.h"     	/* In-memory files streamed via sockets */
 #include "H5FLprivate.h"	/* Free lists                           */
@@ -165,9 +164,6 @@ H5FD_term_interface(void)
                 H5FD_log_term();
                 H5FD_stdio_term();
                 H5FD_family_term();
-#ifdef H5_HAVE_SRB
-                H5FD_srb_term();
-#endif
                 H5FD_core_term();
                 H5FD_multi_term();
 #ifdef H5_HAVE_PARALLEL

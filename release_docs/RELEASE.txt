@@ -81,6 +81,8 @@ New Features
 
     Library:
     --------
+        - Retired SRB vfd (--with-srb). Functions H5Pset_fapl_srb and
+          H5Pget_fapl_srb were removed.  EIP - 2005/04/07
 	- Retired GASS vfd (--with-gass).  Functions H5Pset_fapl_gass and
 	  H5Pget_fapl_gass are removed too.  AKC - 2005/3/3
         - Pablo was removed from the source code EIP - 2005/01/21

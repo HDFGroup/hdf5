@@ -1197,81 +1197,6 @@ fi
 
 
 dnl ----------------------------------------------------------------------
-dnl Are SRB Client and other system libraries(socket, elf) present?  
-dnl
-AC_SUBST([SRB]) SRB="yes"
-AC_SUBST([TESTSRB]) TESTSRB='$(srcdir)/testsrb'
-AC_ARG_WITH([srb],
-            [AC_HELP_STRING([--with-srb=DIR],
-                            [Use the SRB library [default=no]])],,
-            withval=no)
-
-case "$withval" in
-  yes)
-    AC_CHECK_HEADERS([srbClient.h],, [unset SRB TESTSRB])
-    AC_CHECK_LIB([elf], [main],, [unset SRB TESTSRB])
-    AC_CHECK_LIB([socket], [main],, [unset SRB TESTSRB])
-    AC_CHECK_LIB([SrbClient], [clConnect],, [unset SRB TESTSRB])
-    ;;
-  no)
-    AC_MSG_CHECKING([for SRB])
-    AC_MSG_RESULT([suppressed])
-    unset SRB TESTSRB
-    ;;
-  *)
-    case "$withval" in
-      *,*)
-        srb_inc="`echo $withval | cut -f1 -d,`"
-        srb_lib="`echo $withval | cut -f2 -d, -s`"
-        ;;
-      *)
-        if test -n "$withval"; then
-          srb_inc="$withval/include"
-          srb_lib="$withval/lib"
-        fi
-        ;;
-    esac
-
-    dnl Trying to include -I/usr/include and -L/usr/lib is redundant and
-    dnl can mess some compilers up.
-    if test "X$srb_inc" = "X/usr/include"; then
-      srb_inc=""
-    fi
-    if test "X$srb_lib" = "X/usr/lib"; then
-      srb_lib=""
-    fi
-
-    if test -n "$srb_inc"; then
-      saved_CPPFLAGS="$CPPFLAGS"
-      CPPFLAGS="$CPPFLAGS -I$srb_inc"
-      AC_CHECK_HEADERS(srbClient.h,,
-                       CPPFLAGS="$saved_CPPFLAGS"
-                       unset SRB TESTSRB)
-    else
-      AC_CHECK_HEADERS(srbClient.h)
-    fi
-
-    if test -n "$srb_lib"; then
-      saved_LDFLAGS="$LDFLAGS"
-      LDFLAGS="$LDFLAGS -L$srb_lib"
-      AC_CHECK_LIB(elf,main,,unset SRB TESTSRB)
-      AC_CHECK_LIB(socket,main,,unset SRB TESTSRB)
-      AC_CHECK_LIB(SrbClient,clConnect,,unset SRB TESTSRB)
-    else
-      AC_CHECK_LIB(elf,main,,unset SRB TESTSRB)
-      AC_CHECK_LIB(socket,main,,unset SRB TESTSRB)
-      AC_CHECK_LIB(SrbClient,clConnect,,unset SRB TESTSRB)
-    fi
-    ;;
-esac
-
-if test -n "$SRB"; then
-  AC_DEFINE([HAVE_SRB], [1], [Define if the SRB is defined])
-fi
-
-AM_CONDITIONAL([BUILD_SRB_CONDITIONAL], [test -n "$SRB"])
-
-dnl ----------------------------------------------------------------------
 dnl Is LLNL's PDB present? If so then we'll compile the PDB-to-HDF5
 dnl translator.
 dnl
@@ -3234,8 +3159,6 @@ else
   PRINT "No"
 fi
 
-PRINT_N "                            SRB"
-IF_YES_NO "$SRB"
 
 PRINT_N "                     Stream VFD"
 IF_ENABLED_DISABLED "$STREAM_VFD"

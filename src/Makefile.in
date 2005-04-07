@@ -57,7 +57,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-DIST_COMMON = $(am__include_HEADERS_DIST) $(srcdir)/H5config.h.in \
+DIST_COMMON = $(include_HEADERS) $(srcdir)/H5config.h.in \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/libhdf5.settings.in $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
@@ -81,29 +81,6 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(settingsdir)" \
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libhdf5_la_LIBADD =
-am__libhdf5_la_SOURCES_DIST = H5.c H5A.c H5AC.c H5B.c H5B2.c \
-	H5B2cache.c H5B2dbg.c H5B2test.c H5BT.c H5BTbtree2.c \
-	H5BTcache.c H5BTdbg.c H5BTtest.c H5C.c H5D.c H5Dcontig.c \
-	H5Dcompact.c H5Defl.c H5Dio.c H5Distore.c H5Dmpio.c \
-	H5Dselect.c H5Dtest.c H5E.c H5F.c H5Fdbg.c H5FD.c H5FDcore.c \
-	H5FDfamily.c H5FDfphdf5.c H5FDlog.c H5FDmpi.c H5FDmpio.c \
-	H5FDmpiposix.c H5FDmulti.c H5FDsec2.c H5FDsrb.c H5FDstdio.c \
-	H5FDstream.c H5FL.c H5FO.c H5FP.c H5FPclient.c H5FPserver.c \
-	H5FS.c H5G.c H5Gent.c H5Gnode.c H5Gstab.c H5HG.c H5HGdbg.c \
-	H5HL.c H5HLdbg.c H5HP.c H5I.c H5MF.c H5MM.c H5O.c H5Oattr.c \
-	H5Obogus.c H5Ocont.c H5Odtype.c H5Oefl.c H5Ofill.c H5Olayout.c \
-	H5Omtime.c H5Oname.c H5Onull.c H5Opline.c H5Osdspace.c \
-	H5Oshared.c H5Ostab.c H5P.c H5Pdcpl.c H5Pdxpl.c H5Pfapl.c \
-	H5Pfcpl.c H5Ptest.c H5R.c H5RC.c H5RS.c H5S.c H5Sall.c \
-	H5Shyper.c H5Smpio.c H5Snone.c H5Spoint.c H5Sselect.c \
-	H5Stest.c H5SH.c H5SHcache.c H5SHdbg.c H5SL.c H5ST.c H5T.c \
-	H5Tarray.c H5Tbit.c H5Tcommit.c H5Tcompound.c H5Tconv.c \
-	H5Tcset.c H5Tenum.c H5Tfields.c H5Tfixed.c H5Tfloat.c \
-	H5Tinit.c H5Tnative.c H5Toffset.c H5Topaque.c H5Torder.c \
-	H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvlen.c H5TS.c H5V.c H5Z.c \
-	H5Zdeflate.c H5Zfletcher32.c H5Znbit.c H5Zshuffle.c H5Zszip.c \
-	H5Zscaleoffset.c H5Ztrans.c
-@BUILD_SRB_CONDITIONAL_TRUE@am__objects_1 = H5FDsrb.lo
 am_libhdf5_la_OBJECTS = H5.lo H5A.lo H5AC.lo H5B.lo H5B2.lo \
 	H5B2cache.lo H5B2dbg.lo H5B2test.lo H5BT.lo H5BTbtree2.lo \
 	H5BTcache.lo H5BTdbg.lo H5BTtest.lo H5C.lo H5D.lo H5Dcontig.lo \
@@ -111,8 +88,8 @@ am_libhdf5_la_OBJECTS = H5.lo H5A.lo H5AC.lo H5B.lo H5B2.lo \
 	H5Dselect.lo H5Dtest.lo H5E.lo H5F.lo H5Fdbg.lo H5FD.lo \
 	H5FDcore.lo H5FDfamily.lo H5FDfphdf5.lo H5FDlog.lo H5FDmpi.lo \
 	H5FDmpio.lo H5FDmpiposix.lo H5FDmulti.lo H5FDsec2.lo \
-	$(am__objects_1) H5FDstdio.lo H5FDstream.lo H5FL.lo H5FO.lo \
-	H5FP.lo H5FPclient.lo H5FPserver.lo H5FS.lo H5G.lo H5Gent.lo \
+	H5FDstdio.lo H5FDstream.lo H5FL.lo H5FO.lo H5FP.lo \
+	H5FPclient.lo H5FPserver.lo H5FS.lo H5G.lo H5Gent.lo \
 	H5Gnode.lo H5Gstab.lo H5HG.lo H5HGdbg.lo H5HL.lo H5HLdbg.lo \
 	H5HP.lo H5I.lo H5MF.lo H5MM.lo H5O.lo H5Oattr.lo H5Obogus.lo \
 	H5Ocont.lo H5Odtype.lo H5Oefl.lo H5Ofill.lo H5Olayout.lo \
@@ -145,18 +122,9 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(libhdf5_la_SOURCES) H5detect.c
-DIST_SOURCES = $(am__libhdf5_la_SOURCES_DIST) H5detect.c
+DIST_SOURCES = $(libhdf5_la_SOURCES) H5detect.c
 settingsDATA_INSTALL = $(INSTALL_DATA)
 DATA = $(settings_DATA)
-am__include_HEADERS_DIST = H5public.h H5Apublic.h H5ACpublic.h \
-	H5Bpublic.h H5B2public.h H5BTpublic.h H5Cpublic.h H5Dpublic.h \
-	H5Epubgen.h H5Epublic.h H5Fpublic.h H5FDpublic.h H5FDcore.h \
-	H5FDfamily.h H5FDfphdf5.h H5FDlog.h H5FDmpi.h H5FDmpio.h \
-	H5FDmpiposix.h H5FDmulti.h H5FDsec2.h H5FDsrb.h H5FDstdio.h \
-	H5FDstream.h H5FPpublic.h H5Gpublic.h H5HGpublic.h \
-	H5HLpublic.h H5Ipublic.h H5MMpublic.h H5Opublic.h H5Ppublic.h \
-	H5Rpublic.h H5Spublic.h H5SHpublic.h H5Tpublic.h H5Zpublic.h \
-	H5pubconf.h hdf5.h H5api_adpt.h
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(include_HEADERS)
 ETAGS = etags
@@ -189,8 +157,6 @@ BUILD_PARALLEL_CONDITIONAL_TRUE = @BUILD_PARALLEL_CONDITIONAL_TRUE@
 BUILD_PDB2HDF = @BUILD_PDB2HDF@
 BUILD_PDB2HDF_CONDITIONAL_FALSE = @BUILD_PDB2HDF_CONDITIONAL_FALSE@
 BUILD_PDB2HDF_CONDITIONAL_TRUE = @BUILD_PDB2HDF_CONDITIONAL_TRUE@
-BUILD_SRB_CONDITIONAL_FALSE = @BUILD_SRB_CONDITIONAL_FALSE@
-BUILD_SRB_CONDITIONAL_TRUE = @BUILD_SRB_CONDITIONAL_TRUE@
 BYTESEX = @BYTESEX@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
@@ -282,11 +248,9 @@ SET_MAKE = @SET_MAKE@
 # configure's automatic SHELL detection may not work on the build machine.
 SHELL = /bin/sh
 SIZE_T = @SIZE_T@
-SRB = @SRB@
 STATIC_SHARED = @STATIC_SHARED@
 STRIP = @STRIP@
 TESTPARALLEL = @TESTPARALLEL@
-TESTSRB = @TESTSRB@
 TRACE_API = @TRACE_API@
 USE_FILTER_DEFLATE = @USE_FILTER_DEFLATE@
 USE_FILTER_FLETCHER32 = @USE_FILTER_FLETCHER32@
@@ -382,10 +346,6 @@ MOSTLYCLEANFILES = H5detect.o H5detect.lo H5detect H5Tinit.o H5Tinit.lo H5Tinit.
 # libhdf5.settings is generated during configure. Remove it when distclean.
 DISTCLEAN = libhdf5.settings
 
-# Compile SRB file driver only if SRB is enabled.
-@BUILD_SRB_CONDITIONAL_TRUE@SRB_SOURCE = H5FDsrb.c
-@BUILD_SRB_CONDITIONAL_TRUE@SRB_HEADER = H5FDsrb.h
-
 # library sources
 libhdf5_la_SOURCES = H5.c H5A.c H5AC.c H5B.c H5B2.c H5B2cache.c H5B2dbg.c      \
         H5B2test.c H5BT.c H5BTbtree2.c H5BTcache.c H5BTdbg.c H5BTtest.c H5C.c \
@@ -395,7 +355,7 @@ libhdf5_la_SOURCES = H5.c H5A.c H5AC.c H5B.c H5B2.c H5B2cache.c H5B2dbg.c      \
         H5Defl.c H5Dio.c H5Distore.c H5Dmpio.c H5Dselect.c H5Dtest.c H5E.c H5F.c \
         H5Fdbg.c H5FD.c H5FDcore.c  \
         H5FDfamily.c H5FDfphdf5.c H5FDlog.c H5FDmpi.c H5FDmpio.c   \
-        H5FDmpiposix.c H5FDmulti.c H5FDsec2.c $(SRB_SOURCE) H5FDstdio.c           \
+        H5FDmpiposix.c H5FDmulti.c H5FDsec2.c H5FDstdio.c           \
         H5FDstream.c H5FL.c H5FO.c H5FP.c H5FPclient.c H5FPserver.c H5FS.c    \
         H5G.c H5Gent.c H5Gnode.c H5Gstab.c  \
         H5HG.c H5HGdbg.c H5HL.c H5HLdbg.c H5HP.c H5I.c H5MF.c H5MM.c H5O.c    \
@@ -418,7 +378,7 @@ include_HEADERS = H5public.h H5Apublic.h H5ACpublic.h H5Bpublic.h H5B2public.h \
         H5BTpublic.h H5Cpublic.h H5Dpublic.h  \
         H5Epubgen.h H5Epublic.h H5Fpublic.h H5FDpublic.h H5FDcore.h H5FDfamily.h          \
         H5FDfphdf5.h H5FDlog.h H5FDmpi.h H5FDmpio.h H5FDmpiposix.h              \
-        H5FDmulti.h H5FDsec2.h $(SRB_HEADER) H5FDstdio.h H5FDstream.h H5FPpublic.h             \
+        H5FDmulti.h H5FDsec2.h  H5FDstdio.h H5FDstream.h H5FPpublic.h             \
         H5Gpublic.h H5HGpublic.h H5HLpublic.h H5Ipublic.h                     \
         H5MMpublic.h H5Opublic.h H5Ppublic.h H5Rpublic.h H5Spublic.h \
         H5SHpublic.h \
@@ -588,7 +548,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FDmpiposix.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FDmulti.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FDsec2.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FDsrb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FDstdio.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FDstream.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FL.Plo@am__quote@

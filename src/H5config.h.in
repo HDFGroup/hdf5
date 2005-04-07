@@ -139,9 +139,6 @@
 /* Define to 1 if you have the `dmalloc' library (-ldmalloc). */
 #undef HAVE_LIBDMALLOC
 
-/* Define to 1 if you have the `elf' library (-lelf). */
-#undef HAVE_LIBELF
-
 /* Define to 1 if you have the `lmpe' library (-llmpe). */
 #undef HAVE_LIBLMPE
 
@@ -168,12 +165,6 @@
 
 /* Define to 1 if you have the `silo' library (-lsilo). */
 #undef HAVE_LIBSILO
-
-/* Define to 1 if you have the `socket' library (-lsocket). */
-#undef HAVE_LIBSOCKET
-
-/* Define to 1 if you have the `SrbClient' library (-lSrbClient). */
-#undef HAVE_LIBSRBCLIENT
 
 /* Define to 1 if you have the `sz' library (-lsz). */
 #undef HAVE_LIBSZ
@@ -231,12 +222,6 @@
 
 /* Define if `socklen_t' is defined */
 #undef HAVE_SOCKLEN_T
-
-/* Define if the SRB is defined */
-#undef HAVE_SRB
-
-/* Define to 1 if you have the <srbClient.h> header file. */
-#undef HAVE_SRBCLIENT_H
 
 /* Define if `struct stat' has the `st_blocks' field */
 #undef HAVE_STAT_ST_BLOCKS

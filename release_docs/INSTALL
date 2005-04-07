@@ -131,8 +131,7 @@
 
 3.3. Certain Virtual File Layer(VFL)
 	If users want to install with special Virtual File Layer(VFL),
-	please go to read INSTALL_VFL file.  SRB and Globus-GASS have
-	been documented. 
+	please go to read INSTALL_VFL file.  
 
 
 4. HDF5 dependencies

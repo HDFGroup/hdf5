@@ -29,7 +29,7 @@
 #
 # HDF5 Library Test Makefile(.in)
 #
-SOURCES = $(libh5test_la_SOURCES) big.c bittests.c blocktrack.c btree2.c cache.c cmpd_dset.c dangle.c dsets.c dt_atomic.c dtransform.c dtypes.c enum.c err_compat.c error_test.c extend.c external.c file_handle.c filename.c fillval.c flush1.c flush2.c getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c mtime.c ntypes.c ohdr.c reserved.c set_extent.c sheap.c srb_append.c srb_read.c srb_write.c stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c
+SOURCES = $(libh5test_la_SOURCES) big.c bittests.c blocktrack.c btree2.c cache.c cmpd_dset.c dangle.c dsets.c dt_atomic.c dtransform.c dtypes.c enum.c err_compat.c error_test.c extend.c external.c file_handle.c filename.c fillval.c flush1.c flush2.c getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c mtime.c ntypes.c ohdr.c reserved.c set_extent.c sheap.c stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -56,7 +56,7 @@ host_triplet = @host@
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
-check_PROGRAMS = $(am__EXEEXT_2) error_test$(EXEEXT) \
+check_PROGRAMS = $(am__EXEEXT_1) error_test$(EXEEXT) \
 	err_compat$(EXEEXT) testmeta$(EXEEXT)
 subdir = test
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -70,10 +70,7 @@ am__DEPENDENCIES_1 = $(top_builddir)/src/libhdf5.la
 libh5test_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_libh5test_la_OBJECTS = h5test.lo testframe.lo
 libh5test_la_OBJECTS = $(am_libh5test_la_OBJECTS)
-@BUILD_SRB_CONDITIONAL_TRUE@am__EXEEXT_1 = srb_write$(EXEEXT) \
-@BUILD_SRB_CONDITIONAL_TRUE@	srb_append$(EXEEXT) \
-@BUILD_SRB_CONDITIONAL_TRUE@	srb_read$(EXEEXT)
-am__EXEEXT_2 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
+am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	stab$(EXEEXT) gheap$(EXEEXT) cache$(EXEEXT) btree2$(EXEEXT) \
 	blocktrack$(EXEEXT) sheap$(EXEEXT) hyperslab$(EXEEXT) \
 	istore$(EXEEXT) bittests$(EXEEXT) dt_atomic$(EXEEXT) \
@@ -84,7 +81,7 @@ am__EXEEXT_2 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	set_extent$(EXEEXT) ttsafe$(EXEEXT) stream_test$(EXEEXT) \
 	getname$(EXEEXT) file_handle$(EXEEXT) ntypes$(EXEEXT) \
 	dangle$(EXEEXT) dtransform$(EXEEXT) filename$(EXEEXT) \
-	reserved$(EXEEXT) $(am__EXEEXT_1)
+	reserved$(EXEEXT)
 big_SOURCES = big.c
 big_OBJECTS = big.$(OBJEXT)
 big_LDADD = $(LDADD)
@@ -221,18 +218,6 @@ sheap_SOURCES = sheap.c
 sheap_OBJECTS = sheap.$(OBJEXT)
 sheap_LDADD = $(LDADD)
 sheap_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
-srb_append_SOURCES = srb_append.c
-srb_append_OBJECTS = srb_append.$(OBJEXT)
-srb_append_LDADD = $(LDADD)
-srb_append_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
-srb_read_SOURCES = srb_read.c
-srb_read_OBJECTS = srb_read.$(OBJEXT)
-srb_read_LDADD = $(LDADD)
-srb_read_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
-srb_write_SOURCES = srb_write.c
-srb_write_OBJECTS = srb_write.$(OBJEXT)
-srb_write_LDADD = $(LDADD)
-srb_write_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
 stab_SOURCES = stab.c
 stab_OBJECTS = stab.$(OBJEXT)
 stab_LDADD = $(LDADD)
@@ -282,18 +267,16 @@ SOURCES = $(libh5test_la_SOURCES) big.c bittests.c blocktrack.c \
 	extend.c external.c file_handle.c filename.c fillval.c \
 	flush1.c flush2.c getname.c gheap.c hyperslab.c istore.c \
 	lheap.c links.c mount.c mtime.c ntypes.c ohdr.c reserved.c \
-	set_extent.c sheap.c srb_append.c srb_read.c srb_write.c \
-	stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c \
-	$(ttsafe_SOURCES) unlink.c
+	set_extent.c sheap.c stab.c stream_test.c $(testhdf5_SOURCES) \
+	testmeta.c $(ttsafe_SOURCES) unlink.c
 DIST_SOURCES = $(libh5test_la_SOURCES) big.c bittests.c blocktrack.c \
 	btree2.c cache.c cmpd_dset.c dangle.c dsets.c dt_atomic.c \
 	dtransform.c dtypes.c enum.c err_compat.c error_test.c \
 	extend.c external.c file_handle.c filename.c fillval.c \
 	flush1.c flush2.c getname.c gheap.c hyperslab.c istore.c \
 	lheap.c links.c mount.c mtime.c ntypes.c ohdr.c reserved.c \
-	set_extent.c sheap.c srb_append.c srb_read.c srb_write.c \
-	stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c \
-	$(ttsafe_SOURCES) unlink.c
+	set_extent.c sheap.c stab.c stream_test.c $(testhdf5_SOURCES) \
+	testmeta.c $(ttsafe_SOURCES) unlink.c
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -324,8 +307,6 @@ BUILD_PARALLEL_CONDITIONAL_TRUE = @BUILD_PARALLEL_CONDITIONAL_TRUE@
 BUILD_PDB2HDF = @BUILD_PDB2HDF@
 BUILD_PDB2HDF_CONDITIONAL_FALSE = @BUILD_PDB2HDF_CONDITIONAL_FALSE@
 BUILD_PDB2HDF_CONDITIONAL_TRUE = @BUILD_PDB2HDF_CONDITIONAL_TRUE@
-BUILD_SRB_CONDITIONAL_FALSE = @BUILD_SRB_CONDITIONAL_FALSE@
-BUILD_SRB_CONDITIONAL_TRUE = @BUILD_SRB_CONDITIONAL_TRUE@
 BYTESEX = @BYTESEX@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
@@ -417,11 +398,9 @@ SET_MAKE = @SET_MAKE@
 # configure's automatic SHELL detection may not work on the build machine.
 SHELL = /bin/sh
 SIZE_T = @SIZE_T@
-SRB = @SRB@
 STATIC_SHARED = @STATIC_SHARED@
 STRIP = @STRIP@
 TESTPARALLEL = @TESTPARALLEL@
-TESTSRB = @TESTSRB@
 TRACE_API = @TRACE_API@
 USE_FILTER_DEFLATE = @USE_FILTER_DEFLATE@
 USE_FILTER_FLETCHER32 = @USE_FILTER_FLETCHER32@
@@ -513,9 +492,6 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_builddir)/src
 TEST_SCRIPT = $(top_srcdir)/test/testerror.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 
-# Build and run SRB tests only if SRB driver is enabled.
-@BUILD_SRB_CONDITIONAL_TRUE@SRB_TESTS = srb_write srb_append srb_read
-
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
 TEST_PROG = testhdf5 lheap ohdr stab gheap cache btree2 blocktrack sheap \
@@ -523,8 +499,7 @@ TEST_PROG = testhdf5 lheap ohdr stab gheap cache btree2 blocktrack sheap \
            dtypes dsets cmpd_dset extend external links unlink big mtime     \
            fillval mount flush1 flush2 enum \
            set_extent ttsafe stream_test \
-           getname file_handle ntypes dangle dtransform filename reserved    \
-           $(SRB_TESTS)
+           getname file_handle ntypes dangle dtransform filename reserved 
 
 
 # The libh5test.a library provides common support code for the tests.
@@ -738,15 +713,6 @@ set_extent$(EXEEXT): $(set_extent_OBJECTS) $(set_extent_DEPENDENCIES)
 sheap$(EXEEXT): $(sheap_OBJECTS) $(sheap_DEPENDENCIES) 
 	@rm -f sheap$(EXEEXT)
 	$(LINK) $(sheap_LDFLAGS) $(sheap_OBJECTS) $(sheap_LDADD) $(LIBS)
-srb_append$(EXEEXT): $(srb_append_OBJECTS) $(srb_append_DEPENDENCIES) 
-	@rm -f srb_append$(EXEEXT)
-	$(LINK) $(srb_append_LDFLAGS) $(srb_append_OBJECTS) $(srb_append_LDADD) $(LIBS)
-srb_read$(EXEEXT): $(srb_read_OBJECTS) $(srb_read_DEPENDENCIES) 
-	@rm -f srb_read$(EXEEXT)
-	$(LINK) $(srb_read_LDFLAGS) $(srb_read_OBJECTS) $(srb_read_LDADD) $(LIBS)
-srb_write$(EXEEXT): $(srb_write_OBJECTS) $(srb_write_DEPENDENCIES) 
-	@rm -f srb_write$(EXEEXT)
-	$(LINK) $(srb_write_LDFLAGS) $(srb_write_OBJECTS) $(srb_write_LDADD) $(LIBS)
 stab$(EXEEXT): $(stab_OBJECTS) $(stab_DEPENDENCIES) 
 	@rm -f stab$(EXEEXT)
 	$(LINK) $(stab_LDFLAGS) $(stab_OBJECTS) $(stab_LDADD) $(LIBS)
@@ -807,9 +773,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reserved.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/set_extent.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sheap.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/srb_append.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/srb_read.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/srb_write.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stab.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tarray.Po@am__quote@

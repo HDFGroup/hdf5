@@ -56,9 +56,6 @@
 #endif
 #endif
 
-#ifdef H5_HAVE_SRB              /*for SRB I/O                                */
-#include <srbClient.h>
-#endif
 
 #include "H5api_adpt.h"
 
