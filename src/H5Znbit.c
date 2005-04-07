@@ -351,13 +351,14 @@ done:
  *
  * Purpose:     Set the array cd_values[] for a given datatype identifier 
  *              type_id if its datatype class is not integer, nor
- *              floating-point, nor array, and nor compound  
+ *              floating-point, nor array, nor compound, nor VL datatype,
+ *              and nor VL string  
  *
  * Return:      Success: Non-negative
  *              Failure: Negative
  *
  * Programmer:  Xiaowen Wu
- *              Thursday, March 3, 2005
+ *              Tuesday, April 5, 2005
  *
  * Modifications:
  *
@@ -367,7 +368,6 @@ static herr_t H5Z_set_parms_nooptype(hid_t type_id, unsigned cd_values[])
 {
     size_t dtype_size;          /* No-op datatype's size (in bytes) */
     herr_t ret_value=SUCCEED;   /* Return value */
-    htri_t is_vlstring;         /* flag indicating if datatype is varible-length string */
 
     FUNC_ENTER_NOAPI(H5Z_set_parms_nooptype, FAIL)
 
@@ -378,24 +378,8 @@ static herr_t H5Z_set_parms_nooptype(hid_t type_id, unsigned cd_values[])
     if((dtype_size=H5Tget_size(type_id))==0)
 	HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size")
 
-    /* Check if datatype is a variable-length string */
-    if((is_vlstring=H5Tis_variable_str(type_id))<0) 
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, 
-                    "cannot determine if datatype is a variable-length string")
-
     /* Set "local" parameter for datatype size */
-    if(is_vlstring) {
-#if 0
-        printf("\n*** inside function H5Z_set_parms_nooptype in file H5Znbit.c\n");
-        printf("\n*** indirectly called by function H5Z_set_local_nbit\n");
-        printf("\n*** size of variable-length string datatype: %d\n", dtype_size);
-#endif
-        /* temporal fix, needs to be changed */ 
-        cd_values[cd_values_index++] = 16;
-    }
-    else            
-        cd_values[cd_values_index++] = dtype_size;
-
+    cd_values[cd_values_index++] = dtype_size;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -495,7 +479,7 @@ done:
  *              Failure: Negative
  *
  * Programmer:  Xiaowen Wu
- *              Tuesday, January 11, 2005
+ *              Tuesday, April 5, 2005
  *
  * Modifications:
  *
@@ -506,6 +490,7 @@ static herr_t H5Z_set_parms_array(hid_t type_id, unsigned cd_values[])
     hid_t       dtype_base;        /* Array datatype's base datatype */
     H5T_class_t dtype_base_class;  /* Array datatype's base datatype's class */
     size_t dtype_size;             /* Array datatype's size (in bytes) */
+    htri_t is_vlstring;            /* flag indicating if datatype is varible-length string */
     herr_t ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5Z_set_parms_array, FAIL)
@@ -544,6 +529,15 @@ static herr_t H5Z_set_parms_array(hid_t type_id, unsigned cd_values[])
                 HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot set parameters for datatype")
             break;
         default: /* other datatype that nbit does no compression */
+            /* Check if base datatype is a variable-length string */
+            if((is_vlstring=H5Tis_variable_str(dtype_base))<0)
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL,
+                            "cannot determine if datatype is a variable-length string")
+
+            /* base datatype of VL or VL-string is not supported */
+            if(dtype_base_class == H5T_VLEN || is_vlstring)
+                HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"datatype not supported by nbit")
+
             if(H5Z_set_parms_nooptype(dtype_base, cd_values)==FAIL)
                 HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot set parameters for datatype")
             break;
@@ -563,7 +557,7 @@ done:
  *              Failure: Negative
  *
  * Programmer:  Xiaowen Wu
- *              Tuesday, January 11, 2005
+ *              Tuesday, April 5, 2005
  *
  * Modifications:
  *
@@ -575,8 +569,10 @@ static herr_t H5Z_set_parms_compound(hid_t type_id, unsigned cd_values[])
     int         nmembers;           /* Compound datatype's number of members */
     hid_t       dtype_member;       /* Compound datatype's member datatype */
     H5T_class_t dtype_member_class; /* Compound datatype's member datatype's class */
-    size_t dtype_member_offset;     /* Compound datatype's member datatype's offset (in bytes) */
+    size_t dtype_member_offset;     /* Compound datatype's current member datatype's offset (in bytes) */
+    size_t dtype_next_member_offset;/* Compound datatype's next member datatype's offset (in bytes) */
     size_t dtype_size;              /* Compound datatype's size (in bytes) */
+    htri_t is_vlstring;             /* flag indicating if datatype is varible-length string */
     herr_t ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5Z_set_parms_compound, FAIL)
@@ -630,8 +626,31 @@ static herr_t H5Z_set_parms_compound(hid_t type_id, unsigned cd_values[])
                     HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot set parameters for datatype")
                 break;
             default: /* other datatype that nbit does no compression */ 
-                if(H5Z_set_parms_nooptype(dtype_member, cd_values)==FAIL)
-                    HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot set parameters for datatype")
+                /* Check if datatype is a variable-length string */
+                if((is_vlstring=H5Tis_variable_str(dtype_member))<0)
+                    HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL,
+                                "cannot determine if datatype is a variable-length string")
+
+                /* Because for some no-op datatype (VL datatype and VL string datatype), its 
+		 * size can not be retrieved correctly by using function call H5Tget_size, 
+		 * special handling is needed for getting the size. Here the difference between 
+                 * adjacent member offset is used (if alignment is present, the result can be 
+		 * larger, but it does not affect the nbit filter's correctness).
+                 */
+                if(dtype_member_class == H5T_VLEN || is_vlstring) {
+                    /* Set datatype class code */
+                    cd_values[cd_values_index++] = H5Z_NBIT_NOOPTYPE;
+
+                    if(i != nmembers - 1)
+                        dtype_next_member_offset = H5Tget_member_offset(type_id,(unsigned)i+1);
+                    else /* current member is the last member */
+                        dtype_next_member_offset = dtype_size;
+
+                    /* Set "local" parameter for datatype size */
+                    cd_values[cd_values_index++] = dtype_next_member_offset - dtype_member_offset;
+                } else 
+                    if(H5Z_set_parms_nooptype(dtype_member, cd_values)==FAIL)
+                        HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot set parameters for datatype")
                 break;
         } /* end switch */
     } /* end for */
@@ -816,6 +835,8 @@ H5Z_filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
     }
     /* output; compress */
     else { 
+        assert(nbytes == d_nelmts * cd_values[4]);
+
         size_out = nbytes;
 
         /* allocate memory space for compressed buffer */
