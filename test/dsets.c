@@ -80,6 +80,7 @@ const char *FILENAME[] = {
 #define DSET_NBIT_ARRAY_NAME          "nbit_array"
 #define DSET_NBIT_COMPOUND_NAME       "nbit_compound"
 #define DSET_NBIT_COMPOUND_NAME_2     "nbit_compound_2"
+#define DSET_NBIT_COMPOUND_NAME_3     "nbit_compound_3"
 #define DSET_SCALEOFFSET_INT_NAME     "scaleoffset_int"
 #define DSET_SCALEOFFSET_INT_NAME_2   "scaleoffset_int_2"
 #define DSET_SCALEOFFSET_FLOAT_NAME   "scaleoffset_float"
@@ -2570,10 +2571,11 @@ test_nbit_int(hid_t file)
       for (j = 0; j < size[1]; j++) { 
         orig_data[i][j] = ((long_long)HDrandom() % 
                            (long_long)HDpow(2, precision - 1)) << offset;
+
         /* even-numbered values are negtive */
         if((i*size[1]+j+1)%2 == 0) 
             orig_data[i][j] = -orig_data[i][j];
-        }
+      }
 
     PASSED();
 #else
@@ -2624,13 +2626,15 @@ test_nbit_int(hid_t file)
             }
         }
     }
+
     /*----------------------------------------------------------------------
      * Cleanup
      *----------------------------------------------------------------------
      */
     if (H5Tclose(datatype)<0) goto error;
     if (H5Tclose(mem_datatype)<0) goto error;
-    if (H5Pclose (dc)<0) goto error;
+    if (H5Pclose(dc)<0) goto error;
+    if (H5Sclose(space)<0) goto error;
     if (H5Dclose(dataset)<0) goto error;
 
     PASSED();
@@ -2758,7 +2762,8 @@ test_nbit_float(hid_t file)
      *----------------------------------------------------------------------
      */
     if (H5Tclose(datatype)<0) goto error;
-    if (H5Pclose (dc)<0) goto error;
+    if (H5Pclose(dc)<0) goto error;
+    if (H5Sclose(space)<0) goto error;
     if (H5Dclose(dataset)<0) goto error;
 
     PASSED();
@@ -2890,7 +2895,8 @@ test_nbit_double(hid_t file)
      *----------------------------------------------------------------------
      */
     if (H5Tclose(datatype)<0) goto error;
-    if (H5Pclose (dc)<0) goto error;
+    if (H5Pclose(dc)<0) goto error;
+    if (H5Sclose(space)<0) goto error;
     if (H5Dclose(dataset)<0) goto error;
 
     PASSED();
@@ -3041,7 +3047,8 @@ test_nbit_array(hid_t file)
     if (H5Tclose(base_datatype)<0) goto error;
     if (H5Tclose(mem_array_datatype)<0) goto error;
     if (H5Tclose(mem_base_datatype)<0) goto error;
-    if (H5Pclose (dc)<0) goto error;
+    if (H5Pclose(dc)<0) goto error;
+    if (H5Sclose(space)<0) goto error;
     if (H5Dclose(dataset)<0) goto error;
 
     PASSED();
@@ -3240,7 +3247,8 @@ test_nbit_compound(hid_t file)
     if (H5Tclose(f_tid)<0) goto error;
     if (H5Tclose(cmpd_tid)<0) goto error;
     if (H5Tclose(mem_cmpd_tid)<0) goto error;
-    if (H5Pclose (dc)<0) goto error;
+    if (H5Pclose(dc)<0) goto error;
+    if (H5Sclose(space)<0) goto error;
     if (H5Dclose(dataset)<0) goto error;
 
     PASSED();
@@ -3530,7 +3538,204 @@ test_nbit_compound_2(hid_t file)
     if (H5Tclose(base_tid)<0) goto error;
     if (H5Tclose(array_cmplx_tid)<0) goto error;
     if (H5Tclose(mem_array_cmplx_tid)<0) goto error;
-    if (H5Pclose (dc)<0) goto error;
+    if (H5Pclose(dc)<0) goto error;
+    if (H5Sclose(space)<0) goto error;
+    if (H5Dclose(dataset)<0) goto error;
+
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+    return 0;
+
+error:
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_nbit_compound_3
+ *
+ * Purpose:     Tests no-op datatypes in compound datatype for nbit filter
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Xiaowen Wu
+ *              Thursday, Mar. 31th, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_nbit_compound_3(hid_t file)
+{
+#ifdef H5_HAVE_FILTER_NBIT
+    typedef struct {     /* Struct with some no-op type fields */
+        int i;              /* integer field, NOT a no-op type */
+        char str[30];       /* fixed-length string, no-op type */
+        char *vl_str;       /* varible-length string, no-op type */
+        hvl_t v;            /* VL datatype field, no-op type */
+        hobj_ref_t r;       /* Object reference field, no-op type */
+        unsigned char o[5]; /* Opaque field, no-op type */
+    } atomic;
+    hid_t               i_tid, str_tid, vl_str_tid, v_tid, o_tid;
+    hid_t               cmpd_tid; /* atomic compound datatype */
+    hid_t               dataset, space, dc, obj_ref_dataset;
+    const hsize_t       size[1] = {5};
+    const hsize_t       chunk_size[1] = {5};
+    atomic              orig_data[5];
+    atomic              new_data[5];
+    hsize_t             i, k;
+
+#else /* H5_HAVE_FILTER_NBIT */
+    const char          *not_supported= "    Nbit is not enabled.";
+#endif /* H5_HAVE_FILTER_NBIT */
+
+    TESTING("    nbit compound with no-op type (setup)");
+#ifdef H5_HAVE_FILTER_NBIT
+
+    /* Define datatypes of members of compound datatype */
+    i_tid=H5Tcopy(H5T_NATIVE_INT);
+    if(H5Tset_precision(i_tid, 17)<0) goto error;
+
+    str_tid=H5Tcopy(H5T_C_S1);    
+    if(H5Tset_size(str_tid,30)<0) goto error;
+
+    vl_str_tid = H5Tcopy(H5T_C_S1);
+    if(H5Tset_size(vl_str_tid,H5T_VARIABLE)<0) goto error;
+
+    if((v_tid = H5Tvlen_create(H5T_NATIVE_UINT))<0) goto error;
+
+    if((o_tid = H5Tcreate(H5T_OPAQUE, sizeof(orig_data[0].o)))<0) goto error;
+    if(H5Tset_tag(o_tid, "testing opaque field")<0) goto error;
+
+    /* Create a dataset compound datatype and insert some atomic types */
+    cmpd_tid = H5Tcreate(H5T_COMPOUND, sizeof(atomic));
+    if(H5Tinsert(cmpd_tid, "i", HOFFSET(atomic, i), i_tid)<0) goto error;
+    if(H5Tinsert(cmpd_tid, "str", HOFFSET(atomic, str), str_tid)<0) goto error;
+    if(H5Tinsert(cmpd_tid, "vl_str", HOFFSET(atomic, vl_str), vl_str_tid)<0) goto error;
+    if(H5Tinsert(cmpd_tid, "v", HOFFSET(atomic, v), v_tid)<0) goto error;
+    if(H5Tinsert(cmpd_tid, "r", HOFFSET(atomic, r), H5T_STD_REF_OBJ)<0) goto error;
+    if(H5Tinsert(cmpd_tid, "o", HOFFSET(atomic, o), o_tid)<0) goto error;
+
+    /* Create the data space */
+    if ((space = H5Screate_simple(1, size, NULL))<0) goto error;
+
+    /* Use nbit filter  */
+    if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if (H5Pset_chunk(dc, 1, chunk_size)<0) goto error;
+    if (H5Pset_nbit(dc)<0) goto error;
+
+    /* Create the dataset */
+    if ((dataset = H5Dcreate(file, DSET_NBIT_COMPOUND_NAME_3, cmpd_tid,
+                             space, dc))<0) goto error;
+
+    /* Create the dataset object reference points to */
+    if ((obj_ref_dataset = H5Dcreate(file, "nbit_obj_ref", H5T_NATIVE_INT,
+                                     space, H5P_DEFAULT))<0) goto error;
+
+    /* Initialize data */
+    for(i = 0; i < size[0]; i++) {
+        orig_data[i].i = HDrandom() % (long)HDpow(2, 17-1);
+        strcpy(orig_data[i].str, "fixed-length C string");
+        orig_data[i].vl_str = strdup("variable-length C string");
+
+        orig_data[i].v.p = HDmalloc((i+1)*sizeof(unsigned int));
+        orig_data[i].v.len = i+1;
+        for(k = 0; k < (i+1); k++) ((unsigned int *)orig_data[i].v.p)[k]=i*100+k;
+
+        /* Create reference to the dataset "nbit_obj_ref" */
+        if(H5Rcreate(&orig_data[i].r, file, "nbit_obj_ref", H5R_OBJECT, -1)<0) goto error;
+
+        for(k = 0; k < 5; k++) orig_data[i].o[k] = i + k;
+    }
+
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+
+    /*----------------------------------------------------------------------
+     * STEP 1: Test nbit by setting up a chunked dataset and writing
+     * to it.
+     *----------------------------------------------------------------------
+     */
+    TESTING("    nbit compound with no-op type (write)");
+
+#ifdef H5_HAVE_FILTER_NBIT
+    if (H5Dwrite(dataset, cmpd_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                 orig_data)<0)
+        goto error;
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+
+    /*----------------------------------------------------------------------
+     * STEP 2: Try to read the data we just wrote.
+     *----------------------------------------------------------------------
+     */
+    TESTING("    nbit compound with no-op type (read)");
+
+#ifdef H5_HAVE_FILTER_NBIT
+    /* Read the dataset back */
+    if (H5Dread(dataset, cmpd_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                new_data)<0)
+        goto error;
+
+    /* Check that the values read are the same as the values written */
+    for (i = 0; i < size[0]; i++) {
+        if(new_data[i].i != orig_data[i].i ||
+           strcmp(new_data[i].str, orig_data[i].str) !=0 ||
+           strcmp(new_data[i].vl_str, orig_data[i].vl_str) !=0 ||
+           new_data[i].v.len != orig_data[i].v.len ||
+           new_data[i].r != orig_data[i].r)
+        {
+            H5_FAILED();
+            printf("    Read different values than written.\n");
+            printf("    At index %lu\n", (unsigned long)i);
+            goto error;
+        } 
+
+        for(k=0; k<i+1; k++)
+            if(((unsigned int *)orig_data[i].v.p)[k] !=((unsigned int *)new_data[i].v.p)[k]) 
+            {
+                H5_FAILED();
+                printf("    Read different values than written.\n");
+                printf("    At index %lu\n", (unsigned long)i);
+                goto error;
+            }
+
+        for(k=0; k<5; k++)
+            if(orig_data[i].o[k] != new_data[i].o[k]) 
+            {
+                H5_FAILED();
+                printf("    Read different values than written.\n");
+                printf("    At index %lu\n", (unsigned long)i);
+                goto error;
+            }
+    }
+
+    /*----------------------------------------------------------------------
+     * Cleanup
+     *----------------------------------------------------------------------
+     */
+    if (H5Dvlen_reclaim(cmpd_tid, space, H5P_DEFAULT, new_data)<0) goto error; 
+    if (H5Dvlen_reclaim(cmpd_tid, space, H5P_DEFAULT, orig_data)<0) goto error;
+    if (H5Tclose(i_tid)<0) goto error;
+    if (H5Tclose(str_tid)<0) goto error;
+    if (H5Tclose(vl_str_tid)<0) goto error;
+    if (H5Tclose(v_tid)<0) goto error;
+    if (H5Tclose(o_tid)<0) goto error;
+    if (H5Tclose(cmpd_tid)<0) goto error;
+    if (H5Pclose(dc)<0) goto error;
+    if (H5Sclose(space)<0) goto error;
     if (H5Dclose(dataset)<0) goto error;
 
     PASSED();
@@ -3661,7 +3866,8 @@ test_scaleoffset_int(hid_t file)
      *----------------------------------------------------------------------
      */
     if (H5Tclose(datatype)<0) goto error;
-    if (H5Pclose (dc)<0) goto error;
+    if (H5Pclose(dc)<0) goto error;
+    if (H5Sclose(space)<0) goto error;
     if (H5Dclose(dataset)<0) goto error;
 
     PASSED();
@@ -3808,7 +4014,8 @@ test_scaleoffset_int_2(hid_t file)
      *----------------------------------------------------------------------
      */
     if (H5Tclose(datatype)<0) goto error;
-    if (H5Pclose (dc)<0) goto error;
+    if (H5Pclose(dc)<0) goto error;
+    if (H5Sclose(space)<0) goto error;
     if (H5Dclose(dataset)<0) goto error;
 
     PASSED();
@@ -3930,7 +4137,8 @@ test_scaleoffset_float(hid_t file)
      *----------------------------------------------------------------------
      */
     if (H5Tclose(datatype)<0) goto error;
-    if (H5Pclose (dc)<0) goto error;
+    if (H5Pclose(dc)<0) goto error;
+    if (H5Sclose(space)<0) goto error;
     if (H5Dclose(dataset)<0) goto error;
 
     PASSED();
@@ -5381,6 +5589,7 @@ int main(void)
     nerrors += test_nbit_array(file)<0 ?1:0;
     nerrors += test_nbit_compound(file)<0 ?1:0; 
     nerrors += test_nbit_compound_2(file)<0 ?1:0;
+    nerrors += test_nbit_compound_3(file)<0 ?1:0;
     nerrors += test_scaleoffset_int(file)<0 ?1:0; 
     nerrors += test_scaleoffset_int_2(file)<0 ?1:0; 
     nerrors += test_scaleoffset_float(file)<0 ?1:0; 
