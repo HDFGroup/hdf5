@@ -72,7 +72,7 @@ typedef struct H5FL_reg_head_t {
 #define H5FL_DEFINE_COMMON(t) H5FL_reg_head_t H5FL_REG_NAME(t)={0,0,0,0,#t,sizeof(t),NULL}
 
 /* Declare a free list to manage objects of type 't' */
-#define H5FL_DEFINE(t)  H5_DLL H5FL_DEFINE_COMMON(t)
+#define H5FL_DEFINE(t) H5_DLL H5FL_DEFINE_COMMON(t)
 
 /* Reference a free list for type 't' defined in another file */
 #define H5FL_EXTERN(t)  extern H5_DLL H5FL_reg_head_t H5FL_REG_NAME(t)
@@ -200,7 +200,8 @@ typedef struct H5FL_arr_head_t {
     size_t list_mem;       /* Amount of memory in block on free list */
     const char *name;      /* Name of the type */
     int  maxelem;          /* Maximum number of elements in an array */
-    size_t size;           /* Size of the array elements in the list */
+    size_t base_size;      /* Size of the "base" object in the list */
+    size_t elem_size;      /* Size of the array elements in the list */
     H5FL_arr_node_t *list_arr;  /* Array of lists of free blocks */
 } H5FL_arr_head_t;
 
@@ -210,16 +211,22 @@ typedef struct H5FL_arr_head_t {
 #define H5FL_ARR_NAME(t)        H5_##t##_arr_free_list
 #ifndef H5_NO_ARR_FREE_LISTS
 /* Common macro for H5FL_BLK_DEFINE & H5FL_BLK_DEFINE_STATIC */
-#define H5FL_ARR_DEFINE_COMMON(t,m) H5FL_arr_head_t H5FL_ARR_NAME(t)={0,0,0,#t"_arr",m+1,sizeof(t),NULL}
+#define H5FL_ARR_DEFINE_COMMON(b,t,m) H5FL_arr_head_t H5FL_ARR_NAME(t)={0,0,0,#t"_arr",m+1,b,sizeof(t),NULL}
 
 /* Declare a free list to manage arrays of type 't' */
-#define H5FL_ARR_DEFINE(t,m)  H5_DLL H5FL_ARR_DEFINE_COMMON(t,m)
+#define H5FL_ARR_DEFINE(t,m)  H5_DLL H5FL_ARR_DEFINE_COMMON(0,t,m)
+
+/* Declare a free list to manage base 'b' + arrays of type 't' */
+#define H5FL_BARR_DEFINE(b,t,m)  H5_DLL H5FL_ARR_DEFINE_COMMON(sizeof(b),t,m)
 
 /* Reference a free list for arrays of type 't' defined in another file */
 #define H5FL_ARR_EXTERN(t)  extern H5_DLL H5FL_arr_head_t H5FL_ARR_NAME(t)
 
 /* Declare a static free list to manage arrays of type 't' */
-#define H5FL_ARR_DEFINE_STATIC(t,m)  static H5FL_ARR_DEFINE_COMMON(t,m)
+#define H5FL_ARR_DEFINE_STATIC(t,m)  static H5FL_ARR_DEFINE_COMMON(0,t,m)
+
+/* Declare a static free list to manage base 'b' + arrays of type 't' */
+#define H5FL_BARR_DEFINE_STATIC(b,t,m)  static H5FL_ARR_DEFINE_COMMON(sizeof(b),t,m)
 
 /* Allocate an array of type 't' */
 #define H5FL_ARR_MALLOC(t,elem) H5FL_arr_malloc(&(H5FL_ARR_NAME(t)),elem)
@@ -235,15 +242,17 @@ typedef struct H5FL_arr_head_t {
 
 #else /* H5_NO_ARR_FREE_LISTS */
 /* Common macro for H5FL_ARR_DEFINE & H5FL_ARR_DEFINE_STATIC */
-#define H5FL_ARR_DEFINE_COMMON(t,m) int H5FL_ARR_NAME(t)
+#define H5FL_ARR_DEFINE_COMMON(t,m) size_t H5FL_ARR_NAME(t)
 
-#define H5FL_ARR_DEFINE(t,m)    H5_DLL H5FL_ARR_DEFINE_COMMON(t,m)
-#define H5FL_ARR_EXTERN(t)      extern H5_DLL int H5FL_ARR_NAME(t)
-#define H5FL_ARR_DEFINE_STATIC(t,m)  static H5FL_ARR_DEFINE_COMMON(t,m)
-#define H5FL_ARR_MALLOC(t,elem) H5MM_malloc((elem)*sizeof(t))
-#define H5FL_ARR_CALLOC(t,elem) H5MM_calloc((elem)*sizeof(t))
+#define H5FL_ARR_DEFINE(t,m)    H5_DLL H5FL_ARR_DEFINE_COMMON(t,m) = 0
+#define H5FL_BARR_DEFINE(b,t,m) H5_DLL H5FL_ARR_DEFINE_COMMON(t,m) = sizeof(b)
+#define H5FL_ARR_EXTERN(t)      extern H5_DLL H5FL_ARR_DEFINE_COMMON(t,m)
+#define H5FL_ARR_DEFINE_STATIC(t,m)  static H5FL_ARR_DEFINE_COMMON(t,m) = 0
+#define H5FL_BARR_DEFINE_STATIC(t,m)  static H5FL_ARR_DEFINE_COMMON(t,m) = sizeof(b)
+#define H5FL_ARR_MALLOC(t,elem) H5MM_malloc(H5FL_ARR_NAME(t) + ((elem)*sizeof(t)))
+#define H5FL_ARR_CALLOC(t,elem) H5MM_calloc(H5FL_ARR_NAME(t) + ((elem)*sizeof(t)))
 #define H5FL_ARR_FREE(t,obj) H5MM_xfree(obj)
-#define H5FL_ARR_REALLOC(t,obj,new_elem) H5MM_realloc(obj,(new_elem)*sizeof(t))
+#define H5FL_ARR_REALLOC(t,obj,new_elem) H5MM_realloc(obj,H5FL_ARR_NAME(t) + ((new_elem)*sizeof(t)))
 #endif /* H5_NO_ARR_FREE_LISTS */
 
 /* Data structure for free list of sequence blocks */

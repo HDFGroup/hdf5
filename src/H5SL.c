@@ -35,6 +35,13 @@
  *              (This implementation has an additional backward pointer, which
  *               allows the list to be iterated in reverse)
  *
+ *              (We should also look into "Deterministic Skip Lists" (see
+ *              paper by Munro, Papadakis & Sedgewick))
+ *
+ *              (There's also an article on "Alternating Skip Lists", which
+ *              are similar to deterministic skip lists, in the August 2000
+ *              issue of Dr. Dobb's Journal)
+ *
  */
 
 /* Interface initialization */
@@ -45,7 +52,6 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5SLprivate.h"	/* Skip list routines			*/
 
 /* Local Macros */
@@ -68,7 +74,7 @@
         else                                                            \
             X->forward[0]->backward=X->backward;                        \
         tmp=X->item;                                                    \
-        H5MM_xfree(X);                                                  \
+        H5FL_ARR_FREE(H5SL_node_ptr_t,X);                               \
         while(SLIST->curr_level>0 && SLIST->header->forward[SLIST->curr_level]==NULL) \
             SLIST->curr_level--;                                        \
         SLIST->nobjs--;                                                 \
@@ -174,6 +180,10 @@ static herr_t H5SL_close_common(H5SL_t *slist, H5SL_operator_t op, void *op_data
 
 /* Declare a free list to manage the H5SL_t struct */
 H5FL_DEFINE_STATIC(H5SL_t);
+
+/* Declare a "base + array" list to manage the H5SL_node_t struct */
+typedef H5SL_node_t *H5SL_node_ptr_t;
+H5FL_BARR_DEFINE_STATIC(H5SL_node_t,H5SL_node_ptr_t,H5SL_LEVEL_MAX);
 
 
 /*--------------------------------------------------------------------------
@@ -282,7 +292,7 @@ H5SL_new_node(size_t lvl, void *item, const void *key)
     FUNC_ENTER_NOAPI_NOINIT(H5SL_new_node);
 
     /* Allocate the node */
-    if((ret_value=H5MM_malloc(sizeof(H5SL_node_t)+(sizeof(H5SL_node_t *)*(lvl+1))))==NULL)
+    if((ret_value=H5FL_ARR_MALLOC(H5SL_node_ptr_t,(lvl+1)))==NULL)
         HGOTO_ERROR(H5E_SLIST,H5E_NOSPACE,NULL,"memory allocation failed");
 
     /* Initialize node */
@@ -458,7 +468,7 @@ H5SL_release_common(H5SL_t *slist, H5SL_operator_t op, void *op_data)
         if(op!=NULL)
             (void)(op)(node->item,(void *)node->key,op_data);
 
-        H5MM_xfree(node);
+        H5FL_ARR_FREE(H5SL_node_ptr_t,node);
         node=next_node;
     } /* end while */
 
@@ -515,7 +525,7 @@ H5SL_close_common(H5SL_t *slist, H5SL_operator_t op, void *op_data)
     (void)H5SL_release_common(slist,op,op_data);      /* always succeeds */
 
     /* Release header node */
-    H5MM_xfree(slist->header);
+    H5FL_ARR_FREE(H5SL_node_ptr_t,slist->header);
 
     /* Free skip list object */
     H5FL_FREE(H5SL_t,slist);
