@@ -562,7 +562,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 
 	/* Check for valid selection */
 	if (H5S_SELECT_VALID(mem_space)!=TRUE)
-	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "memory selection+offset not within extent")
     }
     if (H5S_ALL != file_space_id) {
 	if (NULL == (file_space = H5I_object_verify(file_space_id, H5I_DATASPACE)))
@@ -570,7 +570,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 
 	/* Check for valid selection */
 	if (H5S_SELECT_VALID(file_space)!=TRUE)
-	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "file selection+offset not within extent")
     }
 
     /* Get the default dataset transfer property list if the user didn't provide one */
