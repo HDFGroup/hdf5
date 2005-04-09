@@ -420,6 +420,9 @@
 ./doc/html/cpplus_RM/H5AbstractDs_8h.html
 ./doc/html/cpplus_RM/H5Alltypes_8h-source.html
 ./doc/html/cpplus_RM/H5Alltypes_8h.html
+./doc/html/cpplus_RM/H5ArrayType_8cpp.html
+./doc/html/cpplus_RM/H5ArrayType_8h-source.html
+./doc/html/cpplus_RM/H5ArrayType_8h.html
 ./doc/html/cpplus_RM/H5AtomType_8cpp.html
 ./doc/html/cpplus_RM/H5AtomType_8h-source.html
 ./doc/html/cpplus_RM/H5AtomType_8h.html
@@ -502,11 +505,17 @@
 ./doc/html/cpplus_RM/H5StrType_8cpp.html
 ./doc/html/cpplus_RM/H5StrType_8h-source.html
 ./doc/html/cpplus_RM/H5StrType_8h.html
+./doc/html/cpplus_RM/H5VarLenType_8cpp.html
+./doc/html/cpplus_RM/H5VarLenType_8h-source.html
+./doc/html/cpplus_RM/H5VarLenType_8h.html
 ./doc/html/cpplus_RM/NCSAlogo.jpg
 ./doc/html/cpplus_RM/annotated.html
+./doc/html/cpplus_RM/chunks_8cpp-example.html
 ./doc/html/cpplus_RM/classH5_1_1AbstractDs-members.html
 ./doc/html/cpplus_RM/classH5_1_1AbstractDs.html
 ./doc/html/cpplus_RM/classH5_1_1AbstractDs.png
+./doc/html/cpplus_RM/classH5_1_1ArrayType.html
+./doc/html/cpplus_RM/classH5_1_1ArrayType-members.html
 ./doc/html/cpplus_RM/classH5_1_1AtomType-members.html
 ./doc/html/cpplus_RM/classH5_1_1AtomType.html
 ./doc/html/cpplus_RM/classH5_1_1AtomType.png
@@ -611,11 +620,14 @@
 ./doc/html/cpplus_RM/classH5_1_1StrType.png
 ./doc/html/cpplus_RM/classH5_1_1UserData4Aiterate-members.html
 ./doc/html/cpplus_RM/classH5_1_1UserData4Aiterate.html
+./doc/html/cpplus_RM/classH5_1_1VarLenType.html
+./doc/html/cpplus_RM/classH5_1_1VarLenType-members.html
+./doc/html/cpplus_RM/compound_8cpp-example.html
 ./doc/html/cpplus_RM/create_8cpp-example.html
 ./doc/html/cpplus_RM/doxygen.css
 ./doc/html/cpplus_RM/doxygen.png
-./doc/html/cpplus_RM/dsets_8cpp-example.html
 ./doc/html/cpplus_RM/examples.html
+./doc/html/cpplus_RM/extend__ds_8cpp-example.html
 ./doc/html/cpplus_RM/files.html
 ./doc/html/cpplus_RM/functions.html
 ./doc/html/cpplus_RM/functions_func.html
@@ -625,6 +637,7 @@
 ./doc/html/cpplus_RM/globals_func.html
 ./doc/html/cpplus_RM/globals_type.html
 ./doc/html/cpplus_RM/globals_vars.html
+./doc/html/cpplus_RM/h5group_8cpp-example.html
 ./doc/html/cpplus_RM/header.html
 ./doc/html/cpplus_RM/hierarchy.html
 ./doc/html/cpplus_RM/index.html
@@ -635,6 +648,7 @@
 ./doc/html/cpplus_RM/namespacemembers_vars.html
 ./doc/html/cpplus_RM/namespaces.html
 ./doc/html/cpplus_RM/namespacestd.html
+./doc/html/cpplus_RM/readdata_8cpp-example.html
 ./doc/html/cpplus_RM/writedata_8cpp-example.html
 
 ./doc/html/cpplus_RM/header_files/Dependencies
