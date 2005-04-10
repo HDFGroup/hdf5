@@ -162,7 +162,7 @@
 
           INTEGER, DIMENSION(4,6) :: dset_data, data_out ! Data buffers
           INTEGER     ::   error ! Error flag
-
+          INTEGER(HID_T) :: driver
           INTEGER     :: i, j    !general purpose integers
           INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
           INTEGER :: mdc_nelmts
@@ -217,6 +217,11 @@
           CALL h5pget_fapl_multi_f(fapl, memb_map_out, memb_fapl_out, memb_name_out, &
                                    memb_addr_out, relax_out, error)
               CALL check("h5pget_fapl_multi_f", error, total_error)
+          CALL h5pget_driver_f(fapl, driver, error)
+              CALL check("h5pget_driver_f",error, total_error)
+          if(driver .ne. H5FD_MULTI_F) then
+             write(*,*) "Wrong value for driver"
+          endif
           !
           ! Let's check h5pget(set)cache_f APIs here for now 
           !

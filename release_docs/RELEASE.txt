@@ -471,6 +471,11 @@ Bug Fixes since HDF5-1.6.0 release
     Documentation 
     ------------- 
 
+    F90 APIs
+    --------
+        - h5pget_driver_f was returning information that could not be
+          interpreted by fortran application program; fixed. EIP - 2005/04/10 
+
 
 Platforms Tested
 ================

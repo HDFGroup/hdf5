@@ -41,6 +41,7 @@
      INTEGER :: rank = 2 ! Dataset rank 
      INTEGER :: i, j
      INTEGER(HSIZE_T), DIMENSION(2) :: dims
+     INTEGER(HID_T) :: driver
 
      INTEGER :: error  ! Error flag
      !
@@ -60,6 +61,11 @@
           CALL check("h5pcreate_f", error, total_error)
      CALL h5pset_fapl_mpio_f(plac_id, comm, info, error)
           CALL check("h5pset_fapl_mpio_f", error, total_error)
+     CALL h5pget_driver_f(plac_id, driver, error)
+          CALL check("h5pget_driver_f", error, total_error)
+     if( driver .ne. H5FD_MPIO_F) then
+          write(*,*) "Wrong driver information returned"
+     endif
      CALL h5_fixname_f(filename, fix_filename, plac_id, error)
 
      !

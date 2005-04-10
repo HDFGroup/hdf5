@@ -167,6 +167,7 @@ nh5close_types_c( hid_t_f * types, int_f *lentypes,
  * Inputs:            h5d_flags    - H5D inteface flags 
  *                    h5f_flags    - H5F interface flags
  *                    h5fd_flags    - H5FD interface flags
+ *                    h5fd_hid_flags- H5FD interface flags of type hid_t
  *                    h5g_flags    - H5G interface flags
  *                    h5i_flags    - H5I interface flags
  *                    h5p_flags    - H5P interface flags
@@ -180,10 +181,13 @@ nh5close_types_c( hid_t_f * types, int_f *lentypes,
  *                    Tuesday, August 3, 1999
  * Modifications:     Added Z flags. EIP,  March 12, 2003
  *                    Added more FD flags and new H5LIB flags
+ *                    Added more FD flags for HDF5 file driver 
+ *                                  EIP, April 9, 2005 
  *---------------------------------------------------------------------------*/
 int_f
 nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
-                 int_f *h5fd_flags, int_f *h5g_flags, int_f *h5i_flags,
+                 int_f *h5fd_flags, hid_t *h5fd_hid_flags, 
+                 int_f *h5g_flags, int_f *h5i_flags,
                  int_f *h5p_flags, int_f *h5r_flags, int_f *h5s_flags,
                  int_f *h5t_flags, int_f *h5z_flags)
 {
@@ -245,6 +249,18 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
       h5fd_flags[8] = H5FD_MEM_LHEAP;
       h5fd_flags[9] = H5FD_MEM_OHDR; 
       h5fd_flags[10] = H5FD_MEM_NTYPES;
+
+/*
+ *  H5FD flags of type hid_t
+ */
+      h5fd_hid_flags[0] = H5FD_CORE;
+      h5fd_hid_flags[1] = H5FD_FAMILY;
+      h5fd_hid_flags[2] = H5FD_LOG;
+      h5fd_hid_flags[3] = H5FD_MPIO;
+      h5fd_hid_flags[4] = H5FD_MULTI;
+      h5fd_hid_flags[5] = H5FD_SEC2;
+      h5fd_hid_flags[6] = H5FD_STDIO;
+      h5fd_hid_flags[7] = H5FD_STREAM;
 
 /*
  *  H5G flags
