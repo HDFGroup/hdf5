@@ -149,6 +149,7 @@
           INTEGER(HID_T) :: dspace_id     ! Dataspace identifier
           INTEGER(HID_T) :: dtype_id      ! Datatype identifier
           INTEGER(HID_T) :: fapl, fapl_1  ! File access property list identifier
+          INTEGER(HID_T) :: driver
           INTEGER, DIMENSION(0:H5FD_MEM_NTYPES_F-1) :: memb_map, memb_map_out
           INTEGER(HID_T), DIMENSION(0:H5FD_MEM_NTYPES_F-1) :: memb_fapl, memb_fapl_out
           CHARACTER(LEN=20), DIMENSION(0:H5FD_MEM_NTYPES_F-1) :: memb_name, memb_name_out
@@ -162,6 +163,7 @@
 
           INTEGER, DIMENSION(4,6) :: dset_data, data_out ! Data buffers
           INTEGER     ::   error ! Error flag
+ 
 
           INTEGER     :: i, j    !general purpose integers
           INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
@@ -217,6 +219,11 @@
           CALL h5pget_fapl_multi_f(fapl, memb_map_out, memb_fapl_out, memb_name_out, &
                                    memb_addr_out, relax_out, error)
               CALL check("h5pget_fapl_multi_f", error, total_error)
+          CALL h5pget_driver_f(fapl, driver, error)
+              CALL check("h5pget_driver_f",error, total_error)
+          if(driver .ne. H5FD_MULTI_F) then
+             write(*,*) "Wrong value for driver"
+          endif
           !
           ! Let's check h5pget(set)cache_f APIs here for now 
           !

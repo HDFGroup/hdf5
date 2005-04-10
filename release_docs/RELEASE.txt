@@ -87,6 +87,9 @@ Bug Fixes since HDF5-1.6.4 release
 
     F90 API
     -------
+       - h5pget_driver_f was returning information that could not be
+         interpreted by fortran application program; fixed. EIP - 2005/04/10
+                                
 
     C++ API
     -------
@@ -308,9 +311,6 @@ Known Problems
   sockets used by the poe command and left behind due to failed commands.
   Ask your system administrator to clean them out.  Lastly, request IBM
   to provide a mean to run poe without the debug socket.
-
-* Fortran subroutine h5pget_driver_f doesn't return a correct driver 
-  information.
 
 * There are two h5dump xml tests(h5dump --xml thlink.h5 and 
   h5dump --xml tmany.h5) failed on windows xp with .NET for debug and 

@@ -310,6 +310,36 @@
       EQUIVALENCE(H5FD_flags(10), H5FD_MEM_OHDR_F)
       EQUIVALENCE(H5FD_flags(11), H5FD_MEM_NTYPES_F)
 
+
+!
+! H5FD file drivers flags declaration
+!
+      INTEGER, PARAMETER :: H5FD_HID_FLAGS_LEN = 8
+      INTEGER H5FD_hid_flags(H5FD_HID_FLAGS_LEN)
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$ ATTRIBUTES DLLEXPORT :: /H5FD_HID_FLAGS/
+!DEC$endif
+      COMMON /H5FD_HID_FLAGS/ H5FD_hid_flags
+      
+      INTEGER(HID_T) :: H5FD_CORE_F
+      INTEGER(HID_T) :: H5FD_FAMILY_F
+      INTEGER(HID_T) :: H5FD_LOG_F
+      INTEGER(HID_T) :: H5FD_MPIO_F
+      INTEGER(HID_T) :: H5FD_MULTI_F
+      INTEGER(HID_T) :: H5FD_SEC2_F
+      INTEGER(HID_T) :: H5FD_STDIO_F
+      INTEGER(HID_T) :: H5FD_STREAM_F
+
+      EQUIVALENCE(H5FD_hid_flags(1), H5FD_CORE_F)
+      EQUIVALENCE(H5FD_hid_flags(2), H5FD_FAMILY_F)
+      EQUIVALENCE(H5FD_hid_flags(3), H5FD_LOG_F)
+      EQUIVALENCE(H5FD_hid_flags(4), H5FD_MPIO_F)
+      EQUIVALENCE(H5FD_hid_flags(5), H5FD_MULTI_F)
+      EQUIVALENCE(H5FD_hid_flags(6), H5FD_SEC2_F)
+      EQUIVALENCE(H5FD_hid_flags(7), H5FD_STDIO_F)
+      EQUIVALENCE(H5FD_hid_flags(8), H5FD_STREAM_F)
+
+      
 !
 ! H5E flags declaration
 !

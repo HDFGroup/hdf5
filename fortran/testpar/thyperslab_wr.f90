@@ -60,6 +60,29 @@
           CALL check("h5pcreate_f", error, total_error)
      CALL h5pset_fapl_mpio_f(plac_id, comm, info, error)
           CALL check("h5pset_fapl_mpio_f", error, total_error)
+     CALL h5pget_driver_f(plac_id, driver, error)
+          CALL check("h5pget_driver_f", error, total_error)
+     if( driver .ne. H5FD_MPIO_F) then
+          write(*,*) "Wrong driver information returned"
+     endif
+     CALL h5_fixname_f(filename, fix_filename, plac_id, error)
+
+     !
+     ! Create the file collectively.
+     ! 
+     CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error, access_prp = plac_id)
+          CALL check("h5fcreate_f", error, total_error)
+     CALL h5pclose_f(plac_id, error)
+          CALL check("h5pclose_f", error, total_error)
+     !
+     ! Create the data space for the  dataset. 
+     !
+     CALL h5screate_simple_f(rank, dimsf, filespace, error)
+          CALL check("h5screate_simple_f", error, total_error)
+
+     !
+     ! Create the dataset with default properties.
+     !
      CALL h5_fixname_f(filename, fix_filename, plac_id, error)
 
      !
