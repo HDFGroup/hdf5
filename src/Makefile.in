@@ -108,7 +108,7 @@ am_libhdf5_la_OBJECTS = H5.lo H5A.lo H5AC.lo H5B.lo H5B2.lo \
 libhdf5_la_OBJECTS = $(am_libhdf5_la_OBJECTS)
 PROGRAMS = $(noinst_PROGRAMS)
 H5detect_SOURCES = H5detect.c
-H5detect_OBJECTS = H5detect.$(OBJEXT)
+H5detect_OBJECTS = H5detect-H5detect.$(OBJEXT)
 H5detect_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
@@ -336,6 +336,7 @@ H5CC = $(bindir)/h5cc
 H5CC_PP = $(bindir)/h5pcc
 H5FC = $(bindir)/h5fc
 H5FC_PP = $(bindir)/h5pfc
+H5detect_CFLAGS = -g
 
 # Our main target, the HDF5 library
 lib_LTLIBRARIES = libhdf5.la
@@ -636,7 +637,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Zshuffle.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Zszip.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Ztrans.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5detect.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5detect-H5detect.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -658,6 +659,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+
+H5detect-H5detect.o: H5detect.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(H5detect_CFLAGS) $(CFLAGS) -MT H5detect-H5detect.o -MD -MP -MF "$(DEPDIR)/H5detect-H5detect.Tpo" -c -o H5detect-H5detect.o `test -f 'H5detect.c' || echo '$(srcdir)/'`H5detect.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/H5detect-H5detect.Tpo" "$(DEPDIR)/H5detect-H5detect.Po"; else rm -f "$(DEPDIR)/H5detect-H5detect.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='H5detect.c' object='H5detect-H5detect.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(H5detect_CFLAGS) $(CFLAGS) -c -o H5detect-H5detect.o `test -f 'H5detect.c' || echo '$(srcdir)/'`H5detect.c
+
+H5detect-H5detect.obj: H5detect.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(H5detect_CFLAGS) $(CFLAGS) -MT H5detect-H5detect.obj -MD -MP -MF "$(DEPDIR)/H5detect-H5detect.Tpo" -c -o H5detect-H5detect.obj `if test -f 'H5detect.c'; then $(CYGPATH_W) 'H5detect.c'; else $(CYGPATH_W) '$(srcdir)/H5detect.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/H5detect-H5detect.Tpo" "$(DEPDIR)/H5detect-H5detect.Po"; else rm -f "$(DEPDIR)/H5detect-H5detect.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='H5detect.c' object='H5detect-H5detect.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(H5detect_CFLAGS) $(CFLAGS) -c -o H5detect-H5detect.obj `if test -f 'H5detect.c'; then $(CYGPATH_W) 'H5detect.c'; else $(CYGPATH_W) '$(srcdir)/H5detect.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

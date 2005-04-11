@@ -279,7 +279,7 @@ H5CC = $(bindir)/h5cc
 H5CC_PP = $(bindir)/h5pcc
 H5FC = $(bindir)/h5fc
 H5FC_PP = $(bindir)/h5pfc
-SUBDIRS = src test
+@BUILD_CXX_CONDITIONAL_TRUE@SUBDIRS = src test
 DIST_SUBDIRS = $(SUBDIRS) examples
 
 # Automake needs to be taught how to build lib, progs, and tests targets.

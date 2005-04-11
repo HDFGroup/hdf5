@@ -19,7 +19,10 @@
 
 include $(top_srcdir)/config/commence.am
 
-SUBDIRS=src test
+## Only recurse into subdirectories if C++ interface is enabled.
+if BUILD_CXX_CONDITIONAL
+   SUBDIRS=src test
+endif
 DIST_SUBDIRS = $(SUBDIRS) examples
 
 # Clean and mostlyclean need to recurse into examples directory

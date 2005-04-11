@@ -286,7 +286,8 @@ H5FC_PP = $(bindir)/h5pfc
 @BUILD_PARALLEL_CONDITIONAL_TRUE@TESTPARALLEL_DIR = testpar
 
 # Subdirectories in build order, not including examples directory
-SUBDIRS = src test $(TESTPARALLEL_DIR)
+@BUILD_FORTRAN_CONDITIONAL_TRUE@SUBDIRS = src test $(TESTPARALLEL_DIR)
+
 # All directories that have Makefiles
 DIST_SUBDIRS = src test testpar examples
 

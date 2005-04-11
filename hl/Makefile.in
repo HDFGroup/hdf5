@@ -277,7 +277,7 @@ H5FC = $(bindir)/h5fc
 H5FC_PP = $(bindir)/h5pfc
 @BUILD_FORTRAN_CONDITIONAL_TRUE@FORTRAN_DIR = fortran
 @BUILD_CXX_CONDITIONAL_TRUE@CXX_DIR = c++
-SUBDIRS = src test $(CXX_DIR) $(FORTRAN_DIR)
+@BUILD_HDF5_HL_CONDITIONAL_TRUE@SUBDIRS = src test $(CXX_DIR) $(FORTRAN_DIR)
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,

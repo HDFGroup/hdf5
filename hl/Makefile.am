@@ -24,6 +24,10 @@ if BUILD_CXX_CONDITIONAL
   CXX_DIR = c++
 endif
 
-SUBDIRS=src test $(CXX_DIR) $(FORTRAN_DIR)
+## Don't recurse into any subdirectories if HDF5 is not configured to
+## use the HL library
+if BUILD_HDF5_HL_CONDITIONAL
+   SUBDIRS=src test $(CXX_DIR) $(FORTRAN_DIR)
+endif
 
 include $(top_srcdir)/config/conclude.am

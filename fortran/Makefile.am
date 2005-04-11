@@ -28,7 +28,11 @@ if BUILD_PARALLEL_CONDITIONAL
 endif
 
 # Subdirectories in build order, not including examples directory
-SUBDIRS=src test $(TESTPARALLEL_DIR)
+## Only recurse into subdirectories if HDF5 is configured to use Fortran.
+if BUILD_FORTRAN_CONDITIONAL
+   SUBDIRS=src test $(TESTPARALLEL_DIR)
+endif
+
 # All directories that have Makefiles
 DIST_SUBDIRS=src test testpar examples
 

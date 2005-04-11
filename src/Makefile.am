@@ -24,6 +24,7 @@ include $(top_srcdir)/config/commence.am
 # a long time to compile it with any optimization on.  H5detect is used
 # to generate H5Tinit.c once. So, optimization is not critical.
 noinst_PROGRAMS = H5detect
+H5detect_CFLAGS = -g
 
 # Our main target, the HDF5 library
 lib_LTLIBRARIES=libhdf5.la
