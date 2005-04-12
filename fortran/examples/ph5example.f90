@@ -22,7 +22,8 @@
      IMPLICIT NONE
 
      INCLUDE 'mpif.h'
-     CHARACTER(LEN=10), PARAMETER :: filename = "sds.h5"  ! File name
+     ! Hard coded the file name.  Change it according to where your PFS is.
+     CHARACTER(LEN=20), PARAMETER :: filename = "/tmp/sds.h5"  ! File name
      CHARACTER(LEN=8), PARAMETER :: dsetname = "IntArray" ! Dataset name
 
      INTEGER(HID_T) :: file_id       ! File identifier 
@@ -113,6 +114,9 @@
      CALL h5dclose_f(dset_id, error)
      CALL h5pclose_f(plist_id, error)
      CALL h5fclose_f(file_id, error)
+     ! Attempt to remove the data file.  Remove the line if the compiler
+     ! does not support it.
+     CALL unlink(filename)
 
      !
      ! Close FORTRAN interface
