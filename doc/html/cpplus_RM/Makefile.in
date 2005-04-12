@@ -121,7 +121,7 @@ PUB_DOCS= H5AbstractDs_8cpp.html H5AbstractDs_8h-source.html                  \
           classH5_1_1VarLenType.html classH5_1_1VarLenType-members.html       \
           classH5_1_1VarLenType.png                                           \
           compound_8cpp-example.html create_8cpp-example.html doxygen.css     \
-          doxygen.png dsets_8cpp-example.html extend__ds_8cpp-example.html    \
+          doxygen.png .html extend__ds_8cpp-example.html                      \
           examples.html files.html functions.html functions_func.html         \
           functions_vars.html h5group_8cpp-example.html header.html           \
           hierarchy.html index.html namespaceH5.html namespaces.html          \
