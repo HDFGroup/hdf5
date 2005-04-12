@@ -77,7 +77,7 @@ tests TAGS dep depend uninstall:
 	done
 
 install-all:
-	@@SETX@; for d in dummy @subdirs@ perform; do			      \
+	@@SETX@; for d in dummy @subdirs@; do				      \
 	  if test $$d != "dummy"; then					      \
 	    (cd $$d && $(MAKE) $@) || exit 1;				      \
 	  fi;								      \
