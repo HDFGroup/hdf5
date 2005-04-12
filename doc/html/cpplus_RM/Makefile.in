@@ -17,6 +17,7 @@ DOCDIR=$(docdir)/hdf5/cpplus_RM
 # Public doc files (to be installed)...
 PUB_DOCS= H5AbstractDs_8cpp.html H5AbstractDs_8h-source.html                  \
           H5AbstractDs_8h.html H5Alltypes_8h-source.html H5Alltypes_8h.html   \
+          H5ArrayType_8cpp.html H5ArrayType_8h.html H5ArrayType_8h-source.html \
           H5AtomType_8cpp.html H5AtomType_8h-source.html H5AtomType_8h.html   \
           H5Attribute_8cpp.html H5Attribute_8h-source.html                    \
           H5Attribute_8h.html H5Classes_8h-source.html H5Classes_8h.html      \
@@ -39,18 +40,21 @@ PUB_DOCS= H5AbstractDs_8cpp.html H5AbstractDs_8h-source.html                  \
           H5FloatType_8h.html H5Group_8cpp.html H5Group_8h-source.html        \
           H5Group_8h.html H5IdComponent_8cpp.html                             \
           H5IdComponent_8h-source.html H5IdComponent_8h.html                  \
-          H5Idtemplates_8h-source.html H5Idtemplates_8h.html                  \
           H5Include_8h-source.html H5Include_8h.html H5IntType_8cpp.html      \
           H5IntType_8h-source.html H5IntType_8h.html H5Library_8cpp.html      \
           H5Library_8h-source.html H5Library_8h.html H5Object_8cpp.html       \
           H5Object_8h-source.html H5Object_8h.html H5PredType_8cpp.html       \
           H5PredType_8h-source.html H5PredType_8h.html H5PropList_8cpp.html   \
           H5PropList_8h-source.html H5PropList_8h.html                        \
-          H5RefCounter_8cpp.html H5RefCounter_8h-source.html                  \
-          H5RefCounter_8h.html H5StrType_8cpp.html H5StrType_8h-source.html   \
+          H5StrType_8cpp.html H5StrType_8h-source.html                        \
           H5StrType_8h.html NCSAlogo.jpg annotated.html                       \
+          H5VarLenType_8cpp.html H5VarLenType_8h.html                         \
+          H5VarLenType_8h-source.html                                         \
+          chunks_8cpp-example.html                                            \
           classH5_1_1AbstractDs-members.html classH5_1_1AbstractDs.html       \
           classH5_1_1AbstractDs.png classH5_1_1AtomType-members.html          \
+          classH5_1_1ArrayType.html classH5_1_1ArrayType-members.html         \
+          classH5_1_1ArrayType.png                                            \
           classH5_1_1AtomType.html classH5_1_1AtomType.png                    \
           classH5_1_1Attribute-members.html classH5_1_1Attribute.html         \
           classH5_1_1Attribute.png                                            \
@@ -110,22 +114,18 @@ PUB_DOCS= H5AbstractDs_8cpp.html H5AbstractDs_8h-source.html                  \
           classH5_1_1PropListIException-members.html                          \
           classH5_1_1PropListIException.html                                  \
           classH5_1_1PropListIException.png                                   \
-          classH5_1_1RefCounter-members.html classH5_1_1RefCounter.html       \
-          classH5_1_1RefCounter_1_1RefCounter.html                            \
-          classH5_1_1RefCounter_1_1abc.html                                   \
           classH5_1_1ReferenceException-members.html                          \
           classH5_1_1ReferenceException.html                                  \
           classH5_1_1ReferenceException.png classH5_1_1StrType-members.html   \
           classH5_1_1StrType.html classH5_1_1StrType.png                      \
-          classH5_1_1UserData4Aiterate-members.html                           \
-          classH5_1_1UserData4Aiterate.html create_8cpp-example.html          \
-          doxygen.css doxygen.png dsets_8cpp-example.html examples.html       \
-          files.html functions.html functions_func.html functions_vars.html   \
-          globals.html globals_defs.html globals_func.html globals_type.html  \
-          globals_vars.html header.html hierarchy.html                        \
-          index.html namespaceH5.html namespacemembers.html                   \
-          namespacemembers_func.html namespacemembers_type.html               \
-          namespacemembers_vars.html namespaces.html namespacestd.html        \
+          classH5_1_1VarLenType.html classH5_1_1VarLenType-members.html       \
+          classH5_1_1VarLenType.png                                           \
+          compound_8cpp-example.html create_8cpp-example.html doxygen.css     \
+          doxygen.png dsets_8cpp-example.html extend__ds_8cpp-example.html    \
+          examples.html files.html functions.html functions_func.html         \
+          functions_vars.html h5group_8cpp-example.html header.html           \
+          hierarchy.html index.html namespaceH5.html namespaces.html          \
+          namespacestd.html readdata_8cpp-example.html                        \ 
           writedata_8cpp-example.html
 
 # Other doc files (not to be installed)...
