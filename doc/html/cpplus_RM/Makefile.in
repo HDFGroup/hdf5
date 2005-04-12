@@ -125,7 +125,7 @@ PUB_DOCS= H5AbstractDs_8cpp.html H5AbstractDs_8h-source.html                  \
           examples.html files.html functions.html functions_func.html         \
           functions_vars.html h5group_8cpp-example.html header.html           \
           hierarchy.html index.html namespaceH5.html namespaces.html          \
-          namespacestd.html readdata_8cpp-example.html                        \ 
+          namespacestd.html readdata_8cpp-example.html                        \
           writedata_8cpp-example.html
 
 # Other doc files (not to be installed)...
