@@ -172,3 +172,7 @@ hdf5_cv_sw_ulong_to_fp_bottom_bit_works=${hdf5_cv_sw_ulong_to_fp_bottom_bit_work
 # (1/5/05 - SLU)
 hdf5_cv_sw_ldouble_to_integer_works=${hdf5_cv_sw_ldouble_to_integer_works='no'}
 hdf5_cv_sw_integer_to_ldouble_works=${hdf5_cv_sw_integer_to_ldouble_works='no'}
+# For IRIX 6.5, any version that is older than MIPSpro 7.3.1.3m, 
+#the MPI derived datatype is not working.
+hdf5_mpi_complex_derived_datatype_works=${hdf5_mpi_complex_derived_datatype_works='no'}
+
