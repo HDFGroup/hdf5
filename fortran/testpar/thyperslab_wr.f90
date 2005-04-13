@@ -41,6 +41,7 @@
      INTEGER :: rank = 2 ! Dataset rank 
      INTEGER :: i, j
      INTEGER(HSIZE_T), DIMENSION(2) :: dims
+     INTEGER(HID_T) :: driver
 
      INTEGER :: error  ! Error flag
      !
