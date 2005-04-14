@@ -17,6 +17,12 @@
 #define H5FDstream_H
 
 #ifdef H5_HAVE_STREAM
+#   define H5FD_STREAM  (H5FD_stream_init())
+#else
+#   define H5FD_STREAM (-1)
+#endif /*H5_HAVE_STREAM */ 
+
+#ifdef H5_HAVE_STREAM
 
 /* check what sockets type we have (Unix or Windows sockets)
    Note that only MS compilers require to use Windows sockets
@@ -39,8 +45,6 @@
 #define H5FD_STREAM_INVALID_SOCKET         INVALID_SOCKET
 
 #endif
-
-#define H5FD_STREAM	(H5FD_stream_init())
 
 #ifdef __cplusplus
 extern "C" {
