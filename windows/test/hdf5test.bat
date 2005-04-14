@@ -86,6 +86,13 @@ bittests%2\%1\bittests%2
 
 echo.
 echo ============================
+echo Testing dt_atomic 
+echo ============================
+
+dt_atomic%2\%1\dt_atomic%2
+
+echo.
+echo ============================
 echo Testing dtypes 
 echo ============================
 
