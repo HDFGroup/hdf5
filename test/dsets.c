@@ -3589,7 +3589,7 @@ test_nbit_compound_3(hid_t file)
     const hsize_t       chunk_size[1] = {5};
     atomic              orig_data[5];
     atomic              new_data[5];
-    hsize_t             i, k;
+    hsize_t             i, k, j;
 
 #else /* H5_HAVE_FILTER_NBIT */
     const char          *not_supported= "    Nbit is not enabled.";
@@ -3610,7 +3610,7 @@ test_nbit_compound_3(hid_t file)
 
     if((v_tid = H5Tvlen_create(H5T_NATIVE_UINT))<0) goto error;
 
-    if((o_tid = H5Tcreate(H5T_OPAQUE, sizeof(orig_data[0].o)))<0) goto error;
+    if((o_tid = H5Tcreate(H5T_OPAQUE, 5))<0) goto error;
     if(H5Tset_tag(o_tid, "testing opaque field")<0) goto error;
 
     /* Create a dataset compound datatype and insert some atomic types */
@@ -3646,12 +3646,12 @@ test_nbit_compound_3(hid_t file)
 
         orig_data[i].v.p = HDmalloc((i+1)*sizeof(unsigned int));
         orig_data[i].v.len = i+1;
-        for(k = 0; k < (i+1); k++) ((unsigned int *)orig_data[i].v.p)[k]=i*100+k;
+        for(k = 0; k < (i+1); k++) ((unsigned int *)orig_data[i].v.p)[k] = i*100 + k;
 
         /* Create reference to the dataset "nbit_obj_ref" */
         if(H5Rcreate(&orig_data[i].r, file, "nbit_obj_ref", H5R_OBJECT, -1)<0) goto error;
 
-        for(k = 0; k < 5; k++) orig_data[i].o[k] = i + k;
+        for(j = 0; j < 5; j++) orig_data[i].o[j] = i + j;
     }
 
     PASSED();
@@ -3712,8 +3712,8 @@ test_nbit_compound_3(hid_t file)
                 goto error;
             }
 
-        for(k=0; k<5; k++)
-            if(orig_data[i].o[k] != new_data[i].o[k]) 
+        for(j=0; j<5; j++)
+            if(orig_data[i].o[j] != new_data[i].o[j]) 
             {
                 H5_FAILED();
                 printf("    Read different values than written.\n");
