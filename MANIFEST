@@ -1762,6 +1762,8 @@
 ./windows/test/cmpd_dsetdll/cmpd_dsetdll.dsp
 ./windows/test/dangle/dangle.dsp
 ./windows/test/dangledll/dangledll.dsp
+./windows/test/dt_atomic/dt_atomic.dsp
+./windows/test/dt_atomicdll/dt_atomicdll.dsp
 ./windows/test/dsets/dsets.dsp
 ./windows/test/dsetsdll/dsetsdll.dsp
 ./windows/test/dtransform/dtransform.dsp
