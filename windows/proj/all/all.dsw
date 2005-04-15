@@ -3,7 +3,7 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "all"=.\all.dsp - Package Owner=<4>
+Project: "all"=".\all.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -342,30 +342,6 @@ Package=<4>
     Project_Dep_Name hl_test_table
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name hdf5_f90cstub
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libtest_cstubdll
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name dsets_cpp
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name dsets_cppdll
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name hdf5_cpp
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name hdf5_cppdll
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name testhdf5_cpp
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name testhdf5_cppdll
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name blocktrack
     End Project Dependency
     Begin Project Dependency
@@ -383,11 +359,17 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name sheapdll
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name dt_atomic
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name dt_atomicdll
+    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "big"=..\..\test\big\big.dsp - Package Owner=<4>
+Project: "big"="..\..\test\big\big.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -405,7 +387,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "bigdll"=..\..\test\bigdll\bigdll.dsp - Package Owner=<4>
+Project: "bigdll"="..\..\test\bigdll\bigdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -423,7 +405,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "bittests"=..\..\test\bittests\bittests.dsp - Package Owner=<4>
+Project: "bittests"="..\..\test\bittests\bittests.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -438,7 +420,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "bittestsdll"=..\..\test\bittestsdll\bittestsdll.dsp - Package Owner=<4>
+Project: "bittestsdll"="..\..\test\bittestsdll\bittestsdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -453,7 +435,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "blocktrack"=..\..\test\blocktrack\blocktrack.dsp - Package Owner=<4>
+Project: "blocktrack"="..\..\test\blocktrack\blocktrack.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -471,7 +453,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "blocktrackdll"=..\..\test\blocktrackdll\blocktrackdll.dsp - Package Owner=<4>
+Project: "blocktrackdll"="..\..\test\blocktrackdll\blocktrackdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -489,7 +471,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "btree2"=..\..\test\btree2\btree2.dsp - Package Owner=<4>
+Project: "btree2"="..\..\test\btree2\btree2.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -507,7 +489,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "btree2dll"=..\..\test\btree2dll\btree2dll.dsp - Package Owner=<4>
+Project: "btree2dll"="..\..\test\btree2dll\btree2dll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -525,7 +507,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "cache"=..\..\TEST\cache\cache.dsp - Package Owner=<4>
+Project: "cache"="..\..\TEST\cache\cache.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -540,7 +522,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "cachedll"=..\..\TEST\cachedll\cachedll.dsp - Package Owner=<4>
+Project: "cachedll"="..\..\TEST\cachedll\cachedll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -555,7 +537,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "chunk"=..\..\test\chunk\chunk.dsp - Package Owner=<4>
+Project: "chunk"="..\..\test\chunk\chunk.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -570,7 +552,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "chunkdll"=..\..\test\chunkdll\chunkdll.dsp - Package Owner=<4>
+Project: "chunkdll"="..\..\test\chunkdll\chunkdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -585,7 +567,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "cmpd_dset"=..\..\test\cmpd_dset\cmpd_dset.dsp - Package Owner=<4>
+Project: "cmpd_dset"="..\..\test\cmpd_dset\cmpd_dset.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -603,7 +585,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "cmpd_dsetdll"=..\..\test\cmpd_dsetdll\cmpd_dsetdll.dsp - Package Owner=<4>
+Project: "cmpd_dsetdll"="..\..\test\cmpd_dsetdll\cmpd_dsetdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -621,7 +603,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "dangle"=..\..\TEST\dangle\dangle.dsp - Package Owner=<4>
+Project: "dangle"="..\..\TEST\dangle\dangle.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -639,7 +621,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "dangledll"=..\..\TEST\dangledll\dangledll.dsp - Package Owner=<4>
+Project: "dangledll"="..\..\TEST\dangledll\dangledll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -657,7 +639,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "dsets"=..\..\test\dsets\dsets.dsp - Package Owner=<4>
+Project: "dsets"="..\..\test\dsets\dsets.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -711,7 +693,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "dsetsdll"=..\..\test\dsetsdll\dsetsdll.dsp - Package Owner=<4>
+Project: "dsetsdll"="..\..\test\dsetsdll\dsetsdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -729,7 +711,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "dt_atomic"=..\..\test\dt_atomic\dt_atomic.dsp - Package Owner=<4>
+Project: "dt_atomic"="..\..\test\dt_atomic\dt_atomic.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -747,7 +729,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "dt_atomicdll"=..\..\test\dt_atomicdll\dt_atomicdll.dsp - Package Owner=<4>
+Project: "dt_atomicdll"="..\..\test\dt_atomicdll\dt_atomicdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -765,7 +747,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "dtransform"=..\..\TEST\dtransform\dtransform.dsp - Package Owner=<4>
+Project: "dtransform"="..\..\TEST\dtransform\dtransform.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -783,7 +765,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "dtransformdll"=..\..\TEST\dtransformdll\dtransformdll.dsp - Package Owner=<4>
+Project: "dtransformdll"="..\..\TEST\dtransformdll\dtransformdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -801,7 +783,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "dtypes"=..\..\test\dtypes\dtypes.dsp - Package Owner=<4>
+Project: "dtypes"="..\..\test\dtypes\dtypes.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -819,7 +801,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "dtypesdll"=..\..\test\dtypesdll\dtypesdll.dsp - Package Owner=<4>
+Project: "dtypesdll"="..\..\test\dtypesdll\dtypesdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -837,7 +819,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "enum"=..\..\test\enum\enum.dsp - Package Owner=<4>
+Project: "enum"="..\..\test\enum\enum.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -855,7 +837,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "enumdll"=..\..\test\enumdll\enumdll.dsp - Package Owner=<4>
+Project: "enumdll"="..\..\test\enumdll\enumdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -873,7 +855,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "extend"=..\..\test\extend\extend.dsp - Package Owner=<4>
+Project: "extend"="..\..\test\extend\extend.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -891,7 +873,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "extenddll"=..\..\test\extenddll\extenddll.dsp - Package Owner=<4>
+Project: "extenddll"="..\..\test\extenddll\extenddll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -909,7 +891,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "external"=..\..\test\external\external.dsp - Package Owner=<4>
+Project: "external"="..\..\test\external\external.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -927,7 +909,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "externaldll"=..\..\test\externaldll\externaldll.dsp - Package Owner=<4>
+Project: "externaldll"="..\..\test\externaldll\externaldll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -945,7 +927,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "file_handle"=..\..\test\file_handle\file_handle.dsp - Package Owner=<4>
+Project: "file_handle"="..\..\test\file_handle\file_handle.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -963,7 +945,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "file_handledll"=..\..\test\file_handledll\file_handledll.dsp - Package Owner=<4>
+Project: "file_handledll"="..\..\test\file_handledll\file_handledll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -981,7 +963,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "filename"=..\..\TEST\filename\filename.dsp - Package Owner=<4>
+Project: "filename"="..\..\TEST\filename\filename.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -999,7 +981,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "filenamedll"=..\..\TEST\filenamedll\filenamedll.dsp - Package Owner=<4>
+Project: "filenamedll"="..\..\TEST\filenamedll\filenamedll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1017,7 +999,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "fillval"=..\..\test\fillval\fillval.dsp - Package Owner=<4>
+Project: "fillval"="..\..\test\fillval\fillval.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1035,7 +1017,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "fillvaldll"=..\..\test\fillvaldll\fillvaldll.dsp - Package Owner=<4>
+Project: "fillvaldll"="..\..\test\fillvaldll\fillvaldll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1053,7 +1035,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "flush1"=..\..\test\flush1\flush1.dsp - Package Owner=<4>
+Project: "flush1"="..\..\test\flush1\flush1.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1071,7 +1053,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "flush1_fortran"=..\..\FORTRAN\TEST\flush1_fortran\flush1_fortran.dsp - Package Owner=<4>
+Project: "flush1_fortran"="..\..\FORTRAN\TEST\flush1_fortran\flush1_fortran.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1089,7 +1071,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "flush1_fortrandll"=..\..\FORTRAN\TEST\flush1_fortrandll\flush1_fortrandll.dsp - Package Owner=<4>
+Project: "flush1_fortrandll"="..\..\FORTRAN\TEST\flush1_fortrandll\flush1_fortrandll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1110,7 +1092,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "flush1dll"=..\..\test\flush1dll\flush1dll.dsp - Package Owner=<4>
+Project: "flush1dll"="..\..\test\flush1dll\flush1dll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1128,7 +1110,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "flush2"=..\..\test\flush2\flush2.dsp - Package Owner=<4>
+Project: "flush2"="..\..\test\flush2\flush2.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1146,7 +1128,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "flush2_fortran"=..\..\FORTRAN\TEST\flush2_fortran\flush2_fortran.dsp - Package Owner=<4>
+Project: "flush2_fortran"="..\..\FORTRAN\TEST\flush2_fortran\flush2_fortran.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1164,7 +1146,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "flush2_fortrandll"=..\..\FORTRAN\TEST\flush2_fortrandll\flush2_fortrandll.dsp - Package Owner=<4>
+Project: "flush2_fortrandll"="..\..\FORTRAN\TEST\flush2_fortrandll\flush2_fortrandll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1185,7 +1167,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "flush2dll"=..\..\test\flush2dll\flush2dll.dsp - Package Owner=<4>
+Project: "flush2dll"="..\..\test\flush2dll\flush2dll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1203,7 +1185,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "getname"=..\..\TEST\getname\getname.dsp - Package Owner=<4>
+Project: "getname"="..\..\TEST\getname\getname.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1221,7 +1203,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "getnamedll"=..\..\test\getnamedll\getnamedll.dsp - Package Owner=<4>
+Project: "getnamedll"="..\..\test\getnamedll\getnamedll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1239,7 +1221,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "getub"=..\..\TEST\getub\getub.dsp - Package Owner=<4>
+Project: "getub"="..\..\TEST\getub\getub.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1257,7 +1239,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "gheap"=..\..\test\gheap\gheap.dsp - Package Owner=<4>
+Project: "gheap"="..\..\test\gheap\gheap.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1275,7 +1257,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "gheapdll"=..\..\test\gheapdll\gheapdll.dsp - Package Owner=<4>
+Project: "gheapdll"="..\..\test\gheapdll\gheapdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1293,7 +1275,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "gif2h5"=..\..\tools\gifconv\gif2h5.dsp - Package Owner=<4>
+Project: "gif2h5"="..\..\tools\gifconv\gif2h5.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1308,7 +1290,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "gif2h5dll"=..\..\tools\gifconvdll\gif2h5dll.dsp - Package Owner=<4>
+Project: "gif2h5dll"="..\..\tools\gifconvdll\gif2h5dll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1323,7 +1305,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "h52gif"=..\..\tools\gifconv\h52gif.dsp - Package Owner=<4>
+Project: "h52gif"="..\..\tools\gifconv\h52gif.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1338,7 +1320,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "h52gifdll"=..\..\tools\gifconvdll\h52gifdll.dsp - Package Owner=<4>
+Project: "h52gifdll"="..\..\tools\gifconvdll\h52gifdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1353,7 +1335,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "h5debug"=..\..\tools\h5debug\h5debug.dsp - Package Owner=<4>
+Project: "h5debug"="..\..\tools\h5debug\h5debug.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1368,7 +1350,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "h5debugdll"=..\..\tools\h5debugdll\h5debugdll.dsp - Package Owner=<4>
+Project: "h5debugdll"="..\..\tools\h5debugdll\h5debugdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1383,7 +1365,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "h5diff"=..\..\TOOLS\h5diff\h5diff.dsp - Package Owner=<4>
+Project: "h5diff"="..\..\TOOLS\h5diff\h5diff.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1401,7 +1383,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "h5diffdll"=..\..\TOOLS\h5diffdll\h5diffdll.dsp - Package Owner=<4>
+Project: "h5diffdll"="..\..\TOOLS\h5diffdll\h5diffdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1419,7 +1401,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "h5difftst"=..\..\TOOLS\TESTFILES\h5difftst\h5difftst.dsp - Package Owner=<4>
+Project: "h5difftst"="..\..\TOOLS\TESTFILES\h5difftst\h5difftst.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1434,7 +1416,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "h5dump"=..\..\tools\h5dump\h5dump.dsp - Package Owner=<4>
+Project: "h5dump"="..\..\tools\h5dump\h5dump.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1452,7 +1434,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "h5dumpdll"=..\..\tools\h5dumpdll\h5dumpdll.dsp - Package Owner=<4>
+Project: "h5dumpdll"="..\..\tools\h5dumpdll\h5dumpdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1470,7 +1452,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "h5dumptst"=..\..\tools\testfiles\h5dumptst\h5dumptst.dsp - Package Owner=<4>
+Project: "h5dumptst"="..\..\tools\testfiles\h5dumptst\h5dumptst.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1488,7 +1470,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "h5import"=..\..\tools\h5import\h5import.dsp - Package Owner=<4>
+Project: "h5import"="..\..\tools\h5import\h5import.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1503,7 +1485,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "h5importdll"=..\..\tools\h5importdll\h5importdll.dsp - Package Owner=<4>
+Project: "h5importdll"="..\..\tools\h5importdll\h5importdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1518,7 +1500,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "h5importtst"=..\..\TOOLS\TESTFILES\h5importtst\h5importtst.dsp - Package Owner=<4>
+Project: "h5importtst"="..\..\TOOLS\TESTFILES\h5importtst\h5importtst.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1533,40 +1515,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "h5jam"=..\..\TOOLS\h5jam\h5jam.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name hdf5
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name toolslib
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "h5jamtst"=..\..\TOOLS\TESTFILES\h5jamtst\h5jamtst.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name hdf5
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "h5ls"=..\..\tools\h5ls\h5ls.dsp - Package Owner=<4>
+Project: "h5jam"="..\..\TOOLS\h5jam\h5jam.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1584,7 +1533,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "h5lsdll"=..\..\tools\h5lsdll\h5lsdll.dsp - Package Owner=<4>
+Project: "h5jamtst"="..\..\TOOLS\TESTFILES\h5jamtst\h5jamtst.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1593,16 +1542,13 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name hdf5dll
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name toolslibD
+    Project_Dep_Name hdf5
     End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "h5repack"=..\..\tools\h5repack\h5repack.dsp - Package Owner=<4>
+Project: "h5ls"="..\..\tools\h5ls\h5ls.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1620,7 +1566,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "h5repackdll"=..\..\TOOLS\h5repackdll\h5repackdll.dsp - Package Owner=<4>
+Project: "h5lsdll"="..\..\tools\h5lsdll\h5lsdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1638,7 +1584,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "h5repacktst"=..\..\tools\testfiles\h5repacktst\h5repacktst.dsp - Package Owner=<4>
+Project: "h5repack"="..\..\tools\h5repack\h5repack.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1656,22 +1602,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "h5repart"=..\..\tools\h5repart\h5repart.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name hdf5
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "h5repartdll"=..\..\tools\h5repartdll\h5repartdll.dsp - Package Owner=<4>
+Project: "h5repackdll"="..\..\TOOLS\h5repackdll\h5repackdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1682,11 +1613,14 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name hdf5dll
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name toolslibD
+    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "h5unjam"=..\..\TOOLS\h5unjam\h5unjam.dsp - Package Owner=<4>
+Project: "h5repacktst"="..\..\tools\testfiles\h5repacktst\h5repacktst.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1704,19 +1638,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "hdf5"=..\hdf5\hdf5.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "hdf5_cpp"=..\hdf5_cpp\hdf5_cpp.dsp - Package Owner=<4>
+Project: "h5repart"="..\..\tools\h5repart\h5repart.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1731,7 +1653,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "hdf5_cppdll"=..\hdf5_cppdll\hdf5_cppdll.dsp - Package Owner=<4>
+Project: "h5repartdll"="..\..\tools\h5repartdll\h5repartdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1746,7 +1668,37 @@ Package=<4>
 
 ###############################################################################
 
-Project: "hdf5_f90cstub"=..\hdf5_f90cstub\hdf5_f90cstub.dsp - Package Owner=<4>
+Project: "h5unjam"="..\..\TOOLS\h5unjam\h5unjam.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name toolslib
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "hdf5"="..\hdf5\hdf5.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "hdf5_cpp"="..\hdf5_cpp\hdf5_cpp.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1761,7 +1713,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "hdf5_f90cstubdll"=..\hdf5_f90cstubdll\hdf5_f90cstubdll.dsp - Package Owner=<4>
+Project: "hdf5_cppdll"="..\hdf5_cppdll\hdf5_cppdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1776,7 +1728,37 @@ Package=<4>
 
 ###############################################################################
 
-Project: "hdf5_fortran"=..\hdf5_fortran\hdf5_fortran.dsp - Package Owner=<4>
+Project: "hdf5_f90cstub"="..\hdf5_f90cstub\hdf5_f90cstub.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "hdf5_f90cstubdll"="..\hdf5_f90cstubdll\hdf5_f90cstubdll.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "hdf5_fortran"="..\hdf5_fortran\hdf5_fortran.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1791,7 +1773,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "hdf5_fortrandll"=..\hdf5_fortrandll\hdf5_fortrandll.dsp - Package Owner=<4>
+Project: "hdf5_fortrandll"="..\hdf5_fortrandll\hdf5_fortrandll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1806,7 +1788,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "hdf5_hl"=..\hdf5_hl\hdf5_hl.dsp - Package Owner=<4>
+Project: "hdf5_hl"="..\hdf5_hl\hdf5_hl.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1818,7 +1800,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "hdf5_hl_fortran"=..\hdf5_hl_fortran\hdf5_hl_fortran.dsp - Package Owner=<4>
+Project: "hdf5_hl_fortran"="..\hdf5_hl_fortran\hdf5_hl_fortran.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1830,7 +1812,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "hdf5dll"=..\hdf5dll\hdf5dll.dsp - Package Owner=<4>
+Project: "hdf5dll"="..\hdf5dll\hdf5dll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1842,7 +1824,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "hl_test_image"=..\..\HL\TEST\hl_test_image\hl_test_image.dsp - Package Owner=<4>
+Project: "hl_test_image"="..\..\HL\TEST\hl_test_image\hl_test_image.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1860,7 +1842,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "hl_test_image_fortran"=..\..\HL\FORTRAN\TEST\hl_test_image_fortran\hl_test_image_fortran.dsp - Package Owner=<4>
+Project: "hl_test_image_fortran"="..\..\HL\FORTRAN\TEST\hl_test_image_fortran\hl_test_image_fortran.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1881,7 +1863,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "hl_test_lite"=..\..\HL\TEST\hl_test_lite\hl_test_lite.dsp - Package Owner=<4>
+Project: "hl_test_lite"="..\..\HL\TEST\hl_test_lite\hl_test_lite.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1899,7 +1881,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "hl_test_lite_fortran"=..\..\HL\FORTRAN\TEST\hl_test_lite_fortran\hl_test_lite_fortran.dsp - Package Owner=<4>
+Project: "hl_test_lite_fortran"="..\..\HL\FORTRAN\TEST\hl_test_lite_fortran\hl_test_lite_fortran.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1920,7 +1902,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "hl_test_table"=..\..\HL\TEST\hl_test_table\hl_test_table.dsp - Package Owner=<4>
+Project: "hl_test_table"="..\..\HL\TEST\hl_test_table\hl_test_table.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1938,7 +1920,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "hl_test_table_fortran"=..\..\HL\FORTRAN\TEST\hl_test_table_fortran\hl_test_table_fortran.dsp - Package Owner=<4>
+Project: "hl_test_table_fortran"="..\..\HL\FORTRAN\TEST\hl_test_table_fortran\hl_test_table_fortran.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1959,7 +1941,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "hyperslab"=..\..\test\hyperslab\hyperslab.dsp - Package Owner=<4>
+Project: "hyperslab"="..\..\test\hyperslab\hyperslab.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1974,7 +1956,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "hyperslabdll"=..\..\test\hyperslabdll\hyperslabdll.dsp - Package Owner=<4>
+Project: "hyperslabdll"="..\..\test\hyperslabdll\hyperslabdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1989,7 +1971,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "iopipe"=..\..\test\iopipe\iopipe.dsp - Package Owner=<4>
+Project: "iopipe"="..\..\test\iopipe\iopipe.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2004,7 +1986,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "iopipedll"=..\..\test\iopipedll\iopipedll.dsp - Package Owner=<4>
+Project: "iopipedll"="..\..\test\iopipedll\iopipedll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2019,43 +2001,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "istore"=..\..\test\istore\istore.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name hdf5
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libtest
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "istoredll"=..\..\test\istoredll\istoredll.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name hdf5dll
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libtestD
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "lheap"=..\..\test\lheap\lheap.dsp - Package Owner=<4>
+Project: "istore"="..\..\test\istore\istore.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2073,7 +2019,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "lheapdll"=..\..\test\lheapdll\lheapdll.dsp - Package Owner=<4>
+Project: "istoredll"="..\..\test\istoredll\istoredll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2091,7 +2037,43 @@ Package=<4>
 
 ###############################################################################
 
-Project: "libtest"=..\..\test\libtest\libtest.dsp - Package Owner=<4>
+Project: "lheap"="..\..\test\lheap\lheap.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtest
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "lheapdll"="..\..\test\lheapdll\lheapdll.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtestD
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "libtest"="..\..\test\libtest\libtest.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2106,7 +2088,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "libtestD"=..\..\test\libtestD\libtestD.dsp - Package Owner=<4>
+Project: "libtestD"="..\..\test\libtestD\libtestD.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2121,7 +2103,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "libtest_cstubdll"=..\..\fortran\test\libtest_cstubdll\libtest_cstubdll.dsp - Package Owner=<4>
+Project: "libtest_cstubdll"="..\..\fortran\test\libtest_cstubdll\libtest_cstubdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2136,7 +2118,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "libtest_fortran"=..\..\FORTRAN\TEST\libtest_fortran\libtest_fortran.dsp - Package Owner=<4>
+Project: "libtest_fortran"="..\..\FORTRAN\TEST\libtest_fortran\libtest_fortran.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2151,7 +2133,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "libtest_fortrandll"=..\..\fortran\test\libtest_fortrandll\libtest_fortrandll.dsp - Package Owner=<4>
+Project: "libtest_fortrandll"="..\..\fortran\test\libtest_fortrandll\libtest_fortrandll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2166,7 +2148,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "links"=..\..\test\links\links.dsp - Package Owner=<4>
+Project: "links"="..\..\test\links\links.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2184,7 +2166,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "linksdll"=..\..\test\linksdll\linksdll.dsp - Package Owner=<4>
+Project: "linksdll"="..\..\test\linksdll\linksdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2202,7 +2184,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "mount"=..\..\test\mount\mount.dsp - Package Owner=<4>
+Project: "mount"="..\..\test\mount\mount.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2220,7 +2202,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "mountdll"=..\..\test\mountdll\mountdll.dsp - Package Owner=<4>
+Project: "mountdll"="..\..\test\mountdll\mountdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2238,7 +2220,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "mtime"=..\..\test\mtime\mtime.dsp - Package Owner=<4>
+Project: "mtime"="..\..\test\mtime\mtime.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2256,7 +2238,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "mtimedll"=..\..\test\mtimedll\mtimedll.dsp - Package Owner=<4>
+Project: "mtimedll"="..\..\test\mtimedll\mtimedll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2274,7 +2256,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "ntypes"=..\..\test\ntypes\ntypes.dsp - Package Owner=<4>
+Project: "ntypes"="..\..\test\ntypes\ntypes.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2292,7 +2274,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "ntypesdll"=..\..\test\ntypesdll\ntypesdll.dsp - Package Owner=<4>
+Project: "ntypesdll"="..\..\test\ntypesdll\ntypesdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2310,7 +2292,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "ohdr"=..\..\test\ohdr\ohdr.dsp - Package Owner=<4>
+Project: "ohdr"="..\..\test\ohdr\ohdr.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2328,7 +2310,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "ohdrdll"=..\..\test\ohdrdll\ohdrdll.dsp - Package Owner=<4>
+Project: "ohdrdll"="..\..\test\ohdrdll\ohdrdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2346,7 +2328,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "overhead"=..\..\test\overhead\overhead.dsp - Package Owner=<4>
+Project: "overhead"="..\..\test\overhead\overhead.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2361,7 +2343,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "overheaddll"=..\..\test\overheaddll\overheaddll.dsp - Package Owner=<4>
+Project: "overheaddll"="..\..\test\overheaddll\overheaddll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2376,43 +2358,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "reserved"=..\..\TEST\reserved\reserved.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name hdf5
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libtest
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "reserveddll"=..\..\TEST\reserveddll\reserveddll.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name hdf5dll
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libtestD
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "set_extent"=..\..\TEST\set_extent\set_extent.dsp - Package Owner=<4>
+Project: "reserved"="..\..\TEST\reserved\reserved.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2430,7 +2376,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "set_extentdll"=..\..\test\set_extentdll\set_extentdll.dsp - Package Owner=<4>
+Project: "reserveddll"="..\..\TEST\reserveddll\reserveddll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2448,7 +2394,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "sheap"=..\..\test\sheap\sheap.dsp - Package Owner=<4>
+Project: "set_extent"="..\..\TEST\set_extent\set_extent.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2466,7 +2412,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "sheapdll"=..\..\test\sheapdll\sheapdll.dsp - Package Owner=<4>
+Project: "set_extentdll"="..\..\test\set_extentdll\set_extentdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2484,7 +2430,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "stab"=..\..\test\stab\stab.dsp - Package Owner=<4>
+Project: "sheap"="..\..\test\sheap\sheap.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2502,7 +2448,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "stabdll"=..\..\test\stabdll\stabdll.dsp - Package Owner=<4>
+Project: "sheapdll"="..\..\test\sheapdll\sheapdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2520,7 +2466,43 @@ Package=<4>
 
 ###############################################################################
 
-Project: "talign"=..\..\TOOLS\talign\talign.dsp - Package Owner=<4>
+Project: "stab"="..\..\test\stab\stab.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtest
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "stabdll"="..\..\test\stabdll\stabdll.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtestD
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "talign"="..\..\TOOLS\talign\talign.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2538,7 +2520,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "taligndll"=..\..\TOOLS\taligndll\taligndll.dsp - Package Owner=<4>
+Project: "taligndll"="..\..\TOOLS\taligndll\taligndll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2556,7 +2538,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "tellub"=..\..\TEST\tellub\tellub.dsp - Package Owner=<4>
+Project: "tellub"="..\..\TEST\tellub\tellub.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2574,7 +2556,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "testh5repack_detect_szip"=..\..\TOOLS\TESTFILES\testh5repack_detect_szip\testh5repack_detect_szip.dsp - Package Owner=<4>
+Project: "testh5repack_detect_szip"="..\..\TOOLS\TESTFILES\testh5repack_detect_szip\testh5repack_detect_szip.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2592,7 +2574,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "testh5repack_detect_szipdll"=..\..\TOOLS\TESTFILES\testh5repack_detect_szipdll\testh5repack_detect_szipdll.dsp - Package Owner=<4>
+Project: "testh5repack_detect_szipdll"="..\..\TOOLS\TESTFILES\testh5repack_detect_szipdll\testh5repack_detect_szipdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2610,7 +2592,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "testhdf5"=..\..\test\testhdf5\testhdf5.dsp - Package Owner=<4>
+Project: "testhdf5"="..\..\test\testhdf5\testhdf5.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2664,7 +2646,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "testhdf5_fortran"=..\..\FORTRAN\TEST\testhdf5_fortran\testhdf5_fortran.dsp - Package Owner=<4>
+Project: "testhdf5_fortran"="..\..\FORTRAN\TEST\testhdf5_fortran\testhdf5_fortran.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2682,7 +2664,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "testhdf5_fortrandll"=..\..\fortran\test\testhdf5_fortrandll\testhdf5_fortrandll.dsp - Package Owner=<4>
+Project: "testhdf5_fortrandll"="..\..\fortran\test\testhdf5_fortrandll\testhdf5_fortrandll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2703,7 +2685,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "testhdf5dll"=..\..\test\testhdf5dll\testhdf5dll.dsp - Package Owner=<4>
+Project: "testhdf5dll"="..\..\test\testhdf5dll\testhdf5dll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2721,7 +2703,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "toolslib"=..\..\tools\toolslib\toolslib.dsp - Package Owner=<4>
+Project: "toolslib"="..\..\tools\toolslib\toolslib.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2733,7 +2715,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "toolslibD"=..\..\tools\toolslibD\toolslibD.dsp - Package Owner=<4>
+Project: "toolslibD"="..\..\tools\toolslibD\toolslibD.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2745,7 +2727,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "unlink"=..\..\test\unlink\unlink.dsp - Package Owner=<4>
+Project: "unlink"="..\..\test\unlink\unlink.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2763,7 +2745,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "unlinkdll"=..\..\test\unlinkdll\unlinkdll.dsp - Package Owner=<4>
+Project: "unlinkdll"="..\..\test\unlinkdll\unlinkdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
