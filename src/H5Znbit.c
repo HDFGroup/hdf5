@@ -720,7 +720,7 @@ H5Z_set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 
     /* Allocate memory space for cd_values[] */
     if(NULL==(cd_values = H5MM_malloc(cd_values_actual_nparms*sizeof(unsigned))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for cd_values[]")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for cd_values[]")
 
     /* Get the filter's current parameters */
 #ifdef H5_WANT_H5_V1_6_COMPAT
