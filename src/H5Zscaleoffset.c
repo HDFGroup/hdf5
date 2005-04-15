@@ -605,7 +605,7 @@ H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 
         /* Get memory's endianness order */
         if((mem_order=H5Tget_order(H5T_NATIVE_INT))==H5T_ORDER_ERROR)
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, 0, "bad H5T_NATIVE_INT endianness order")
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad H5T_NATIVE_INT endianness order")
 
         /* Check if memory byte order matches dataset datatype byte order */
         switch(mem_order) {
@@ -618,14 +618,14 @@ H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
                     need_convert = TRUE;
                 break;
             default:
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, 0, "bad H5T_NATIVE_INT endianness order")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad H5T_NATIVE_INT endianness order")
         } /* end switch */
 
         if(dtype_class==H5T_INTEGER) {
             /* Before getting fill value, get its integer type */
             if((type = H5Z_scaleoffset_get_type(cd_values[H5Z_SCALEOFFSET_PARM_SIZE], 
                                                 cd_values[H5Z_SCALEOFFSET_PARM_SIGN]))==0)
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, 0, "cannot use C integer datatype for cast")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "cannot use C integer datatype for cast")
 
             /* Get dataset fill value and store in cd_values[] */
             if(H5Z_scaleoffset_set_parms_fillval(dcpl_id, type_id, type, cd_values, need_convert)<0)
