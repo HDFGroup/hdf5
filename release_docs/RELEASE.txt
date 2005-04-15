@@ -81,6 +81,44 @@ New Features
 
     Library:
     --------
+       - HDF5 supports collective MPI-IO for irregular selection with HDF5
+          dataset. Irregular selection is when users use H5Sselect_hyperslab
+          more than once for the same dataset.
+          Currently, not all MPI-IO packages support complicated MPI derived
+                     datatype used in the implementation of irregular
+                     selection INSIDE HDF5. 
+                     DEC 5.x is not supporting complicated derived datatype.
+                     For AIX 5.1,
+                     if your poe version number is 3.2.0.22 or higher,
+                     please edit powerpc-ibm-aix5.x under hdf5/config,
+                     Find the line with
+                            << hdf5_mpi_complex_derived_datatype_works>>
+                     and comment out this line before the configure.
+                     check poe version with the following command:
+                     lpp -l all | grep ppe.poe
+                     with IRIX 6.5, 
+                     if your C compiler version is 7.4 or higher,
+                     please edit irix6.x under hdf5/config,
+                     Find the line with
+                            << hdf5_mpi_complex_derived_datatype_works>>
+                     and comment out this line before the configure.
+                     check  cc version with the following command:
+                           cc -version
+                     KY - 2005/04/15
+        - HDF5 N-bit filter 
+          HDF5 support N-bit filter from this version,  
+          The N-Bit filter is used effectively for compressing data of N-Bit
+          datatype as well as compound and array datatype with N-Bit fields. 
+          KY - 2005/04/15
+        - HDF5 scaleoffset filter
+          HDF5 supports scaleoffset filter for users to do data
+          compression through HDF5 library. 
+          Scale-Offset compression performs a scale and/or offset operation
+          on each data value and truncates the resulting value to a minimum 
+          number of bits and then stores the data.
+          Currently only integer datatype
+          is supported. Please check the HDF5 reference manual for this.
+          KY - 2005/04/15
         - Retired SRB vfd (--with-srb). Functions H5Pset_fapl_srb and
           H5Pget_fapl_srb were removed.  EIP - 2005/04/07
 	- Retired GASS vfd (--with-gass).  Functions H5Pset_fapl_gass and
@@ -540,14 +578,10 @@ Platforms Tested
     IA-64 Linux 2.4.16 ia64       gcc version 2.96 20000731
                                   Intel(R) C++ Version 7.0
                                   Intel(R) Fortran Compiler Version 7.0
-    Windows 2000 (NT5.0)          MSVC++ 6.0
-                                  MSVC++ .NET
-                                  DEC Visual Fortran 6.0
-                                  Intel C and F90 compilers version 7.1
-				  Code Warrior 8.0
     Windows XP                    MSVC++ 6.0
-				  MSVC++ .NET
-                                  DEC Visual Fortran 6.6
+				  MSVC++ .NET 2003,
+                                  Intel C++ Version 8.1
+                                  DEC Visual Fortran 6.6c
     MAC OS X                      Darwin 6.5
                                   gcc and g++ Apple Computer, Inc. GCC 
                                   version 1161, based on gcc version 3.1
