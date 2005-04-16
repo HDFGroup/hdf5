@@ -998,6 +998,7 @@
 ./c++/src/H5VarLenType.cpp
 ./c++/src/H5VarLenType.h
 ./c++/src/Makefile.in
+./c++/src/RM_stylesheet.css
 ./c++/src/cpp_doc_config
 ./c++/src/h5c++.in
 ./c++/src/header.html
