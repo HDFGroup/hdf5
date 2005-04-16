@@ -296,6 +296,7 @@ void DSetMemXferPropList::setVlenMemManager( H5MM_allocate_t alloc_func, void* a
 // Function:	DSetMemXferPropList::setVlenMemManager
 ///\brief	Sets the memory manager for variable-length datatype 
 ///		allocation - system \c malloc and \c free will be used.
+///
 ///\exception	H5::PropListIException
 // Programmer:	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -403,6 +404,7 @@ hsize_t DSetMemXferPropList::getSmallDataBlockSize()
 //--------------------------------------------------------------------------
 // Function:	DSetMemXferPropList::setHyperVectorSize
 ///\brief	Sets number of I/O vectors to be read/written in hyperslab I/O.
+///
 ///\exception	H5::PropListIException
 ///\par Description
 ///		For information, please refer to the C layer Reference

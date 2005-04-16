@@ -142,6 +142,7 @@ void FileCreatPropList::setSizes( size_t sizeof_addr, size_t sizeof_size ) const
 // Function:	FileCreatPropList::getSizes
 ///\brief	Retrieves the size of the offsets and lengths used in an 
 ///		HDF5 file.
+///
 ///\exception	H5::PropListIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -182,6 +183,7 @@ void FileCreatPropList::setSymk( int ik, int lk ) const
 // Function:    FileCreatPropList::getSymk
 ///\brief       Retrieves the size of the symbol table B-tree 1/2 rank and
 ///             the symbol table leaf node 1/2 size.
+///
 ///\exception   H5::PropListIException
 ///\par Description
 ///             For information, please see

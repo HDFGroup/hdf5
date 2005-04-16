@@ -380,6 +380,7 @@ void CompType::insertMember( const string& name, size_t offset, const DataType& 
 //--------------------------------------------------------------------------
 // Function:	CompType::pack
 ///\brief	Recursively removes padding from within a compound datatype. 
+///
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------

@@ -103,6 +103,7 @@ IdComponent& IdComponent::operator=( const IdComponent& rhs )
 //--------------------------------------------------------------------------
 // Function:	IdComponent::setId
 ///\brief	Sets the identifier of this object to a new value.
+///
 ///\exception	H5::IdComponentException when the attempt to close the HDF5
 ///		object fails
 // Description:

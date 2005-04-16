@@ -424,6 +424,7 @@ bool DSetCreatPropList::allFiltersAvail()
 //--------------------------------------------------------------------------
 // Function:	DSetCreatPropList::setShuffle
 ///\brief	Sets method of the shuffle filter
+///
 ///\exception	H5::PropListIException
 ///\par Description
 ///		Please refer to the Reference Manual of \c H5Pset_shuffle for
@@ -539,6 +540,7 @@ void DSetCreatPropList::setFillTime(H5D_fill_time_t fill_time)
 //--------------------------------------------------------------------------
 // Function:	DSetCreatPropList::setFletcher32
 ///\brief	Sets Fletcher32 checksum of EDC for this property list.
+///
 ///\exception	H5::PropListIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------

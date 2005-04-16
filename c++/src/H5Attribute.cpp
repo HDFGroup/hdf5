@@ -273,7 +273,8 @@ hsize_t Attribute::getStorageSize() const
 
 //--------------------------------------------------------------------------
 // Function:	Attribute::close
-///\brief:	Closes this attribute.
+///\brief	Closes this attribute.
+///
 ///\exception	H5::AttributeIException
 // Programmer	Binh-Minh Ribler - Mar 9, 2005
 //--------------------------------------------------------------------------

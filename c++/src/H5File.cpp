@@ -176,6 +176,7 @@ bool H5File::isHdf5(const string& name )
 //--------------------------------------------------------------------------
 // Function:	H5File::reOpen
 ///\brief	Reopens this file.
+///
 ///\exception	H5::FileIException
 // Description
 //		If this object has represented another HDF5 file, the previous
@@ -208,6 +209,7 @@ void H5File::reOpen()
 //--------------------------------------------------------------------------
 // Function:	H5File::reopen
 ///\brief	Reopens this file.
+///
 ///\exception	H5::FileIException
 ///\par Description
 ///		This function will be replaced by the above function \c reOpen
@@ -534,6 +536,7 @@ hid_t H5File::getLocId() const
 //--------------------------------------------------------------------------
 // Function:	H5File::close
 ///\brief	Closes this HDF5 file.
+///
 ///\exception	H5::FileIException
 // Programmer	Binh-Minh Ribler - Mar 9, 2005
 //--------------------------------------------------------------------------

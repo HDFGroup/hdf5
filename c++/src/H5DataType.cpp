@@ -285,6 +285,7 @@ H5T_overflow_t DataType::getOverflow(void) const
 //--------------------------------------------------------------------------
 // Function:	DataType::lock
 ///\brief	Locks a datatype, making it read-only and non-destructible.
+///
 ///\exception	H5::DataTypeIException
 ///\par Descrition
 ///		This is normally done by the library for predefined data 
@@ -618,6 +619,7 @@ DataSpace DataType::getRegion(void *ref, H5R_type_t ref_type) const
 //--------------------------------------------------------------------------
 // Function:	DataType::close
 ///\brief	Closes the datatype if it is not a predefined type.
+///
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - Mar 9, 2005
 //--------------------------------------------------------------------------
