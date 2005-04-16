@@ -1233,7 +1233,7 @@ done:
 hid_t
 H5Dopen(hid_t loc_id, const char *name)
 {
-    H5D_t       *dset;
+    H5D_t       *dset = NULL;
     H5G_entry_t	*loc = NULL;		/*location holding the dataset	*/
     H5G_entry_t  ent;            	/*dataset symbol table entry	*/
     hid_t        dxpl_id = H5AC_dxpl_id;    /* dxpl to use to open datset */
@@ -1252,6 +1252,10 @@ H5Dopen(hid_t loc_id, const char *name)
     if (H5G_find(loc, name, NULL, &ent, dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found")
 
+    /* Check that the object found is the correct type */
+    if (H5G_get_type(&ent, dxpl_id) != H5G_DATASET)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset")
+
     /* Open the dataset */
     if ((dset = H5D_open(&ent, dxpl_id))==NULL)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open dataset")
@@ -1261,6 +1265,10 @@ H5Dopen(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "can't register dataset atom")
 
 done:
+    if(ret_value < 0)
+        if(dset != NULL)
+            if(H5D_close(dset) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
     FUNC_LEAVE_API(ret_value)
 }
 

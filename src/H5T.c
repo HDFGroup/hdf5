@@ -1578,6 +1578,10 @@ H5Topen(hid_t loc_id, const char *name)
     if (H5G_find (loc, name, NULL, &ent/*out*/, dxpl_id)<0)
         HGOTO_ERROR (H5E_DATATYPE, H5E_NOTFOUND, FAIL, "not found");
 
+    /* Check that the object found is the correct type */
+    if (H5G_get_type(&ent, dxpl_id) != H5G_TYPE)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a named datatype")
+
     /* Open it */
     if ((type=H5T_open (&ent, dxpl_id)) ==NULL)
         HGOTO_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to open named data type");

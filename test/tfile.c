@@ -1295,6 +1295,129 @@ test_file_ishdf5(void)
 
 /****************************************************************
 **
+**  test_file_open_dot(): low-level file test routine.  
+**      This test checks whether opening objects with "." for a name
+**      works correctly in variuous situations.
+**
+*****************************************************************/
+static void 
+test_file_open_dot(void)
+{
+    hid_t fid;          /* File ID */
+    hid_t gid, gid2;    /* Group IDs */
+    hid_t did;          /* Dataset ID */
+    hid_t sid;          /* Dataspace ID */
+    hid_t tid, tid2;    /* Datatype IDs */
+    herr_t   ret;
+ 
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing opening objects with \".\" for a name\n"));
+
+    /* Create a new HDF5 file to work with */
+    fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create a group in the HDF5 file */
+    gid = H5Gcreate(fid, GRP_NAME, 0);
+    CHECK(gid, FAIL, "H5Gcreate");
+
+    /* Create a dataspace for creating datasets */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create a dataset with no name using the file ID */
+    H5E_BEGIN_TRY {
+        did = H5Dcreate(fid, ".", H5T_NATIVE_INT, sid, H5P_DEFAULT);
+    } H5E_END_TRY;
+    VERIFY(did, FAIL, "H5Dcreate");
+
+    /* Create a dataset with no name using the group ID */
+    H5E_BEGIN_TRY {
+        did = H5Dcreate(gid, ".", H5T_NATIVE_INT, sid, H5P_DEFAULT);
+    } H5E_END_TRY;
+    VERIFY(did, FAIL, "H5Dcreate");
+
+    /* Open a dataset with no name using the file ID */
+    H5E_BEGIN_TRY {
+        did = H5Dopen(fid, ".");
+    } H5E_END_TRY;
+    VERIFY(did, FAIL, "H5Dopen");
+
+    /* Open a dataset with no name using the group ID */
+    H5E_BEGIN_TRY {
+        did = H5Dopen(gid, ".");
+    } H5E_END_TRY;
+    VERIFY(did, FAIL, "H5Dopen");
+
+    /* Make a copy of a datatype to use for creating a named datatype */
+    tid = H5Tcopy(H5T_NATIVE_INT);
+    CHECK(tid, FAIL, "H5Tcopy");
+
+    /* Create a named datatype with no name using the file ID */
+    H5E_BEGIN_TRY {
+        ret = H5Tcommit(fid, ".", tid);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Tcommit");
+
+    /* Create a named datatype with no name using the group ID */
+    H5E_BEGIN_TRY {
+        ret = H5Tcommit(gid, ".", tid);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Tcommit");
+
+    /* Open a named datatype with no name using the file ID */
+    H5E_BEGIN_TRY {
+        tid2 = H5Topen(fid, ".");
+    } H5E_END_TRY;
+    VERIFY(tid2, FAIL, "H5Topen");
+
+    /* Open a named datatype with no name using the group ID */
+    H5E_BEGIN_TRY {
+        tid2 = H5Topen(gid, ".");
+    } H5E_END_TRY;
+    VERIFY(tid2, FAIL, "H5Topen");
+
+    /* Create a group with no name using the file ID */
+    H5E_BEGIN_TRY {
+        gid2 = H5Gcreate(fid, ".", 0);
+    } H5E_END_TRY;
+    VERIFY(gid2, FAIL, "H5Gcreate");
+
+    /* Create a group with no name using the group ID */
+    H5E_BEGIN_TRY {
+        gid2 = H5Gcreate(gid, ".", 0);
+    } H5E_END_TRY;
+    VERIFY(gid2, FAIL, "H5Gcreate");
+
+    /* Open a group with no name using the file ID (should open the root group) */
+    gid2 = H5Gopen(fid, ".");
+    CHECK(gid2, FAIL, "H5Gopen");
+
+    ret = H5Gclose(gid2);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Open a group with no name using the group ID (should open the group again) */
+    gid2 = H5Gopen(gid, ".");
+    CHECK(gid2, FAIL, "H5Gopen");
+
+    ret = H5Gclose(gid2);
+    CHECK(ret, FAIL, "H5Gclose");
+
+
+    /* Close everything */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+} /* end test_file_open_dot() */
+
+/****************************************************************
+**
 **  test_file(): Main low-level file I/O test routine.
 ** 
 ****************************************************************/
@@ -1313,6 +1436,7 @@ test_file(void)
     test_file_perm();           /* Test file access permissions */
     test_file_freespace();      /* Test file free space information */
     test_file_ishdf5();         /* Test detecting HDF5 files correctly */
+    test_file_open_dot();       /* Test opening objects with "." for a name */
 }				/* test_file() */
 
 
