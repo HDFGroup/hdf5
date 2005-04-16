@@ -296,13 +296,15 @@ hssize_t H5File::getFreeSpace() const
 ///\exception	H5::FileIException
 ///\par Description
 ///		The valid values for \a types include:
-///		\li \c H5F_OBJ_FILE  Files only  
-///		\li \c H5F_OBJ_DATASET  Datasets only  
-///		\li \c H5F_OBJ_GROUP  Groups only  
-///		\li \c H5F_OBJ_DATATYPE    Named datatypes only  
-///		\li \c H5F_OBJ_ATTR    Attributes only  
-///		\li \c H5F_OBJ_ALL  All of the above 
-///		\li \c (i.e., H5F_OBJ_FILE | H5F_OBJ_DATASET | H5F_OBJ_GROUP | H5F_OBJ_DATATYPE | H5F_OBJ_ATTR )  
+///		\li \c H5F_OBJ_FILE	- Files only  
+///		\li \c H5F_OBJ_DATASET	- Datasets only  
+///		\li \c H5F_OBJ_GROUP	- Groups only  
+///		\li \c H5F_OBJ_DATATYPE	- Named datatypes only  
+///		\li \c H5F_OBJ_ATTR	- Attributes only  
+///		\li \c H5F_OBJ_ALL    - All of the above, i.e., \c H5F_OBJ_FILE 
+///					| \c H5F_OBJ_DATASET | \c H5F_OBJ_GROUP 
+///					| \c H5F_OBJ_DATATYPE | \c H5F_OBJ_ATTR 
+///\par
 /// Multiple object types can be combined with the logical OR operator (|).
 // Programmer   Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
@@ -346,13 +348,15 @@ int H5File::getObjCount() const
 ///\exception	H5::FileIException
 ///\par Description
 ///		The valid values for \a types include:
-///		\li \c H5F_OBJ_FILE  Files only  
-///		\li \c H5F_OBJ_DATASET  Datasets only  
-///		\li \c H5F_OBJ_GROUP  Groups only  
-///		\li \c H5F_OBJ_DATATYPE    Named datatypes only  
-///		\li \c H5F_OBJ_ATTR    Attributes only  
-///		\li \c H5F_OBJ_ALL  All of the above 
-///		\li \c (I.e., H5F_OBJ_FILE | H5F_OBJ_DATASET | H5F_OBJ_GROUP | H5F_OBJ_DATATYPE | H5F_OBJ_ATTR )  
+///		\li \c H5F_OBJ_FILE	- Files only  
+///		\li \c H5F_OBJ_DATASET	- Datasets only  
+///		\li \c H5F_OBJ_GROUP	- Groups only  
+///		\li \c H5F_OBJ_DATATYPE	- Named datatypes only  
+///		\li \c H5F_OBJ_ATTR	- Attributes only  
+///		\li \c H5F_OBJ_ALL    - All of the above, i.e., \c H5F_OBJ_FILE 
+///					| \c H5F_OBJ_DATASET | \c H5F_OBJ_GROUP 
+///					| \c H5F_OBJ_DATATYPE | \c H5F_OBJ_ATTR 
+///\par
 /// Multiple object types can be combined with the logical OR operator (|).
 //
 // Notes: will do the overload for this one after hearing from Quincey???
@@ -376,10 +380,10 @@ void H5File::getObjIDs(unsigned types, int max_objs, hid_t *oid_list) const
 ///			      the low-level virtual file driver
 ///\exception	H5::FileIException
 ///\par Description
-///		For the FAMILY or MULTI drivers, \a fapl should be 
+///		For the \c FAMILY or \c MULTI drivers, \a fapl should be 
 ///		defined through the property list functions: 
-///		\c FileAccPropList::setFamilyOffset for the FAMILY driver 
-///		and \c FileAccPropList::setMultiType for the MULTI driver.
+///		\c FileAccPropList::setFamilyOffset for the \c FAMILY driver 
+///		and \c FileAccPropList::setMultiType for the \c MULTI driver.
 ///
 ///		The obtained file handle is dynamic and is valid only while 
 ///		the file remains open; it will be invalid if the file is 
@@ -434,7 +438,7 @@ string H5File::getFileName() const
 ///\param	dataspace - IN: Dataspace with selection
 ///\param	ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
 ///\return	A reference
-///\exception	H5::ReferenceIException
+///\exception	H5::IdComponentException
 ///\par Description
 ///		Note that name must be an absolute path to the object in the file.
 // Programmer	Binh-Minh Ribler - May, 2004
@@ -451,7 +455,7 @@ void* H5File::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_t
 ///		a reference to an HDF5 object, not to a dataset region.
 ///\param	name - IN: Name of the object to be referenced
 ///\return	A reference
-///\exception	H5::ReferenceIException
+///\exception	H5::IdComponentException
 ///\par Description
 //		This function passes H5R_OBJECT and -1 to the protected 
 //		function for it to pass to the C API H5Rcreate
@@ -476,7 +480,7 @@ void* H5File::Reference(const char* name) const
 ///		\li \c H5G_GROUP   - Object is a group.  
 ///		\li \c H5G_DATASET - Object is a dataset.  
 ///		\li \c H5G_TYPE    - Object is a named datatype 
-///\exception	H5::ReferenceIException
+///\exception	H5::IdComponentException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 H5G_obj_t H5File::getObjType(void *ref, H5R_type_t ref_type) const
@@ -490,7 +494,7 @@ H5G_obj_t H5File::getObjType(void *ref, H5R_type_t ref_type) const
 ///\param	ref      - IN: Reference to get region of
 ///\param	ref_type - IN: Type of reference to get region of - default
 ///\return	DataSpace instance
-///\exception	H5::ReferenceIException
+///\exception	H5::IdComponentException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 DataSpace H5File::getRegion(void *ref, H5R_type_t ref_type) const

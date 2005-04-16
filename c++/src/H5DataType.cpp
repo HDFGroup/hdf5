@@ -556,7 +556,7 @@ bool DataType::isVariableStr() const
 ///\param	dataspace - IN: Dataspace with selection
 ///\param	ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
 ///\return	A reference
-///\exception	H5::ReferenceIException
+///\exception	H5::IdComponentException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void* DataType::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type) const
@@ -571,7 +571,7 @@ void* DataType::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref
 ///		a reference to an HDF5 object, not to a dataset region.
 ///\param	name - IN: Name of the object to be referenced
 ///\return	A reference
-///\exception	H5::ReferenceIException
+///\exception	H5::IdComponentException
 ///\par Description
 //		This function passes H5R_OBJECT and -1 to the protected 
 //		function for it to pass to the C API H5Rcreate
@@ -593,7 +593,7 @@ void* DataType::Reference(const char* name) const
 ///			\li \c H5G_GROUP Object is a group.  
 ///			\li \c H5G_DATASET   Object is a dataset.  
 ///			\li \c H5G_TYPE Object is a named datatype 
-///\exception	H5::ReferenceIException
+///\exception	H5::IdComponentException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 H5G_obj_t DataType::getObjType(void *ref, H5R_type_t ref_type) const
@@ -607,7 +607,7 @@ H5G_obj_t DataType::getObjType(void *ref, H5R_type_t ref_type) const
 ///\param	ref      - IN: Reference to get region of
 ///\param	ref_type - IN: Type of reference to get region of - default
 ///\return	DataSpace instance
-///\exception	H5::ReferenceIException
+///\exception	H5::IdComponentException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 DataSpace DataType::getRegion(void *ref, H5R_type_t ref_type) const
