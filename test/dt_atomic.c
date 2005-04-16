@@ -104,6 +104,8 @@ static int without_hardware_g = 0;
     NELMTS=(SRC_PREC-1)*3+1;                                                                    \
     BUF = (unsigned char*)aligned_malloc(NELMTS*MAX(SRC_SIZE, DST_SIZE));                       \
     SAVED = (unsigned char*)aligned_malloc(NELMTS*MAX(SRC_SIZE, DST_SIZE));                     \
+    HDmemset(BUF, 0, NELMTS*MAX(SRC_SIZE, DST_SIZE));                                           \
+    HDmemset(SAVED, 0, NELMTS*MAX(SRC_SIZE, DST_SIZE));                                         \
                                                                                                 \
     buf_p = BUF;                                                                                \
     saved_p = SAVED;                                                                            \
@@ -199,8 +201,11 @@ static int without_hardware_g = 0;
     /* Allocate buffers */                                                                      \
     BUF = (unsigned char*)aligned_malloc(NELMTS*MAX(SRC_SIZE, DST_SIZE));                       \
     SAVED = (unsigned char*)aligned_malloc(NELMTS*MAX(SRC_SIZE, DST_SIZE));                     \
-    tmp1 = (unsigned char*)malloc(SRC_SIZE);                                                    \
-    tmp2 = (unsigned char*)malloc(SRC_SIZE);                                                    \
+    HDmemset(BUF, 0, NELMTS*MAX(SRC_SIZE, DST_SIZE));                                           \
+    HDmemset(SAVED, 0, NELMTS*MAX(SRC_SIZE, DST_SIZE));                                         \
+                                                                                                \
+    tmp1 = (unsigned char*)calloc(1, SRC_SIZE);                                                 \
+    tmp2 = (unsigned char*)calloc(1, SRC_SIZE);                                                 \
                                                                                                 \
     buf_p = BUF;                                                                                \
     saved_p = SAVED;                                                                            \
@@ -281,6 +286,8 @@ static int without_hardware_g = 0;
     /* Allocate buffers */                                                                      \
     BUF = (unsigned char*)aligned_malloc(NELMTS*MAX(SRC_SIZE, DST_SIZE));                       \
     SAVED = (unsigned char*)aligned_malloc( NELMTS*MAX(SRC_SIZE, DST_SIZE));                    \
+    HDmemset(BUF, 0, NELMTS*MAX(SRC_SIZE, DST_SIZE));                                           \
+    HDmemset(SAVED, 0, NELMTS*MAX(SRC_SIZE, DST_SIZE));                                         \
     value = (unsigned char*)calloc(SRC_SIZE, sizeof(unsigned char));                            \
                                                                                                 \
     buf_p = BUF;                                                                                \
@@ -701,7 +708,9 @@ test_derived_flt(void)
     endian = H5Tget_order(H5T_NATIVE_INT);
     buf = (unsigned char*)malloc(nelmts*(MAX(src_size, size)));
     saved_buf = (unsigned char*)malloc(nelmts*src_size);
-    aligned = (int*)malloc(src_size);
+    HDmemset(buf, 0, nelmts*MAX(src_size, size));
+    HDmemset(saved_buf, 0, nelmts*src_size);
+    aligned = (int*)calloc(1, src_size);
 
     for(i=0; i<nelmts*src_size; i++)
         buf[i] = saved_buf[i] = HDrand();
@@ -862,6 +871,8 @@ test_derived_flt(void)
     endian = H5Tget_order(tid2);
     buf = (unsigned char*)malloc(nelmts*(MAX(src_size, dst_size)));
     saved_buf = (unsigned char*)malloc(nelmts*src_size);
+    HDmemset(buf, 0, nelmts*MAX(src_size, dst_size));
+    HDmemset(saved_buf, 0, nelmts*src_size);
 
     for(i=0; i<nelmts*src_size; i++)
         buf[i] = saved_buf[i] = HDrand();
@@ -1181,8 +1192,10 @@ test_derived_integer(void)
     src_size = H5Tget_size(tid1);
     dst_size = H5Tget_size(tid2);
     endian = H5Tget_order(tid1);
-    buf = (unsigned char*)malloc(nelmts*(MAX(src_size, dst_size)));
-    saved_buf = (unsigned char*)malloc(nelmts*src_size);
+    buf = (unsigned char*)HDmalloc(nelmts*(MAX(src_size, dst_size)));
+    saved_buf = (unsigned char*)HDmalloc(nelmts*src_size);
+    HDmemset(buf, 0, nelmts*MAX(src_size, dst_size));
+    HDmemset(saved_buf, 0, nelmts*src_size);
 
     for(i=0; i<nelmts*src_size; i++)
         buf[i] = saved_buf[i] = HDrand();
@@ -1433,7 +1446,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
     dst_nbits = H5Tget_precision(dst); /* not 8*dst_size, esp on J90 - QAK */
     src_sign = H5Tget_sign(src);
     dst_sign = H5Tget_sign(dst);
-    aligned = HDmalloc(sizeof(long_long));
+    aligned = HDcalloc(1, sizeof(long_long));
 
     /* Allocate and initialize the source buffer through macro INIT_INTEGER.  The BUF
      * will be used for the conversion while the SAVED buffer will be
@@ -2506,7 +2519,7 @@ test_conv_flt_1 (const char *name, hbool_t run_special, hid_t src, hid_t dst)
     endian = H5Tget_order(H5T_NATIVE_FLOAT);
 
     /* Allocate buffers */
-    aligned = HDmalloc(MAX(sizeof(long double), sizeof(double)));
+    aligned = HDcalloc(1, MAX(sizeof(long double), sizeof(double)));
 
     /* Allocate and initialize the source buffer through macro INIT_FP or INIT_FP_SPECIAL.  
      * The BUF will be used for the conversion while the SAVED buffer will be used for 
@@ -3077,7 +3090,7 @@ test_conv_int_fp(const char *name, hbool_t run_special, hid_t src, hid_t dst)
     dst_size = H5Tget_size(dst);
     src_nbits = H5Tget_precision(src); /* not 8*src_size, esp on J90 - QAK */
     dst_nbits = H5Tget_precision(dst); /* not 8*dst_size, esp on J90 - QAK */
-    aligned = HDmalloc(MAX(sizeof(long double), sizeof(long_long)));
+    aligned = HDcalloc(1, MAX(sizeof(long double), sizeof(long_long)));
 #ifdef SHOW_OVERFLOWS
     noverflows_g = 0;
 #endif
