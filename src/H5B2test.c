@@ -125,7 +125,7 @@ H5B2_test_compare(const void *rec1, const void *rec2)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_test_compare)
 
-    FUNC_LEAVE_NOAPI(*(const hssize_t *)rec1-*(const hssize_t *)rec2);
+    FUNC_LEAVE_NOAPI((herr_t)(*(const hssize_t *)rec1-*(const hssize_t *)rec2));
 } /* H5B2_test_compare() */
 
 

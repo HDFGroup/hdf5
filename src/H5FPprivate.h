@@ -329,7 +329,7 @@ extern haddr_t H5FP_client_alloc(H5FD_t *file, H5FD_mem_t type,
 extern herr_t H5FP_request_free(H5FD_t *file, H5FD_mem_t mem_type,
                                 haddr_t addr, hsize_t size,
                                 unsigned *req_id, H5FP_status_t *status);
-extern herr_t H5FP_request_get_eoa(H5FD_t *file, haddr_t *eoa, unsigned *req_id,
+extern herr_t H5FP_request_get_eoa(const H5FD_t *file, haddr_t *eoa, unsigned *req_id,
                                    H5FP_status_t *status);
 extern herr_t H5FP_request_set_eoa(H5FD_t *file, haddr_t eoa, unsigned *req_id,
                                    H5FP_status_t *status);

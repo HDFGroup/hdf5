@@ -156,7 +156,7 @@ h5diff (const char *fname1,
 	const char *fname2,
 	const char *objname1, const char *objname2, diff_opt_t * options)
 {
-  int nobjects1, nobjects2, i;
+  int nobjects1, nobjects2;
   trav_info_t *info1 = NULL;
   trav_info_t *info2 = NULL;
   hid_t        file1_id=(-1), file2_id=(-1); 
@@ -303,6 +303,8 @@ h5diff (const char *fname1,
 #ifdef H5_HAVE_PARALLEL
       if(g_Parallel)
       {
+          int i;
+
 	  if(  (strlen(fname1) > 1024) || (strlen(fname2) > 1024))
 	  {
 	      printf("The parallel diff only supports path names up to 1024 characters\n");

@@ -578,7 +578,7 @@ H5D_mpio_spaces_write(H5D_io_info_t *io_info,
  * Function:	H5D_mpio_spaces_span_read
  *
  * Purpose:	MPI-IO function to read directly from app buffer to file for
-                span-tree 
+                span-tree
  *
  * Return:	non-negative on success, negative on failure.
  *
@@ -641,9 +641,7 @@ H5D_mpio_spaces_span_write(H5D_io_info_t *io_info,
 
     FUNC_ENTER_NOAPI_NOFUNC(H5D_mpio_spaces_span_write);
 
-    fflush(stdout);
     /*OKAY: CAST DISCARDS CONST QUALIFIER*/
-
     ret_value = H5D_mpio_spaces_span_xfer(io_info, elmt_size, file_space,
         mem_space, (void*)buf, 1/*write*/);
 

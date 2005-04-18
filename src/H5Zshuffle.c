@@ -126,7 +126,10 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
     unsigned char *_dest=NULL;  /* Alias for destination buffer */
     unsigned bytesoftype;       /* Number of bytes per element */
     size_t numofelements;       /* Number of elements in buffer */
-    size_t i,j;                 /* Local index variables */
+    size_t i;                   /* Local index variables */
+#ifdef NO_DUFFS_DEVICE
+    size_t j;                   /* Local index variable */
+#endif /* NO_DUFFS_DEVICE */
     size_t leftover;            /* Extra bytes at end of buffer */
     size_t ret_value;           /* Return value */
 

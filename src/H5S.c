@@ -1730,7 +1730,8 @@ static herr_t
 H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc)
 {
     size_t      extent_size;
-    hssize_t    select_size;
+    hssize_t    sselect_size;
+    size_t      select_size;
     H5F_t       f;                /* fake file structure*/
     herr_t      ret_value = SUCCEED;
 
@@ -1744,8 +1745,9 @@ H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc)
     if((extent_size=H5O_raw_size(H5O_SDSPACE_ID, &f, obj))==0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADSIZE, FAIL, "can't find dataspace size");
 
-    if((select_size=H5S_SELECT_SERIAL_SIZE(obj))<0)
+    if((sselect_size=H5S_SELECT_SERIAL_SIZE(obj))<0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADSIZE, FAIL, "can't find dataspace selection size");
+    H5_ASSIGN_OVERFLOW(select_size,sselect_size,hssize_t,size_t);
 
     /* Verify the size of buffer.  If it's not big enough, simply return the
      * right size without filling the buffer. */

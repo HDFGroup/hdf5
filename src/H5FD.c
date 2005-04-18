@@ -2883,7 +2883,7 @@ done:
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5FD_get_eoa(H5FD_t *file)
+H5FD_get_eoa(const H5FD_t *file)
 {
     haddr_t	ret_value;
     
@@ -3048,7 +3048,7 @@ done:
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5FD_get_eof(H5FD_t *file)
+H5FD_get_eof(const H5FD_t *file)
 {
     haddr_t	ret_value;
 

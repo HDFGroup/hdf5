@@ -1331,7 +1331,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
     size_t		src_size, dst_size;	/*type sizes		*/
     unsigned char	*buf=NULL;		/*buffer for conversion	*/
     unsigned char	*saved=NULL;		/*original values	*/
-    size_t		i, j, k;		/*counters		*/
+    size_t		j, k;			/*counters		*/
     unsigned char	*hw=NULL;		/*hardware conv result	*/
     unsigned char	src_bits[32];		/*src value in LE order	*/
     unsigned char	dst_bits[32];		/*dest value in LE order*/
@@ -2066,7 +2066,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
         /* Print errors */
         if (0==fails_this_test++)
             H5_FAILED();
-        printf("    test %u elmt %u\n", (unsigned)i+1, (unsigned)j);
+        printf("    elmt %u\n", (unsigned)j);
 
         printf("        src = ");
         for (k=0; k<src_size; k++)
@@ -2397,7 +2397,7 @@ test_conv_flt_1 (const char *name, hbool_t run_special, hid_t src, hid_t dst)
     unsigned char	*hw=NULL;		/*ptr to hardware-conv'd*/
     int			underflow;		/*underflow occurred	*/
     int 		uflow=0;		/*underflow debug counters*/
-    size_t		i, j, k;		/*counters		*/
+    size_t		j, k;			/*counters		*/
     int			endian;			/*machine endianess	*/
     size_t		dst_ebias;		/* Destination type's exponent bias */
     size_t		src_epos;		/* Source type's exponent position */
@@ -2777,7 +2777,7 @@ test_conv_flt_1 (const char *name, hbool_t run_special, hid_t src, hid_t dst)
 
         if (0==fails_this_test++)
             H5_FAILED();
-        printf("    test %u, elmt %u\n", (unsigned)i+1, (unsigned)j);
+        printf("    elmt %u\n", (unsigned)j);
         
         printf("        src =");
         for (k=0; k<src_size; k++)
@@ -2912,7 +2912,7 @@ test_conv_int_fp(const char *name, hbool_t run_special, hid_t src, hid_t dst)
     size_t		src_size, dst_size;	/*type sizes		*/
     unsigned char	*buf=NULL;		/*buffer for conversion	*/
     unsigned char	*saved=NULL;		/*original values	*/
-    size_t		i, j, k;		/*counters		*/
+    size_t		j, k;			/*counters		*/
     unsigned char 	*hw=NULL;		/*hardware conv result	*/
     unsigned char	src_bits[32];		/*src value in LE order	*/
     unsigned char	dst_bits[32];		/*dest value in LE order*/
@@ -3687,7 +3687,7 @@ test_conv_int_fp(const char *name, hbool_t run_special, hid_t src, hid_t dst)
         /* Print errors */
         if (0==fails_this_test++)
             H5_FAILED();
-        printf("    test %u elmt %u: \n", (unsigned)i+1, (unsigned)j);
+        printf("    elmt %u: \n", (unsigned)j);
 
         printf("        src = ");
         for (k=0; k<src_size; k++)

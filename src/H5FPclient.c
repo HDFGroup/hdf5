@@ -887,7 +887,7 @@ done:
  * Modifications:
  */
 herr_t
-H5FP_request_get_eoa(H5FD_t *file, haddr_t *eoa, unsigned *req_id, H5FP_status_t *status)
+H5FP_request_get_eoa(const H5FD_t *file, haddr_t *eoa, unsigned *req_id, H5FP_status_t *status)
 {
     H5FP_eoa_t      sap_eoa;
     H5FP_request_t  req;

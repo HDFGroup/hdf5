@@ -51,9 +51,9 @@ static H5FD_t  *H5FD_fphdf5_open(const char *name, unsigned flags,
                                  hid_t fapl_id, haddr_t maxaddr);
 static herr_t   H5FD_fphdf5_close(H5FD_t *_file);
 static herr_t   H5FD_fphdf5_query(const H5FD_t *_f1, unsigned long *flags);
-static haddr_t  H5FD_fphdf5_get_eoa(H5FD_t *_file);
+static haddr_t  H5FD_fphdf5_get_eoa(const H5FD_t *_file);
 static herr_t   H5FD_fphdf5_set_eoa(H5FD_t *_file, haddr_t addr);
-static haddr_t  H5FD_fphdf5_get_eof(H5FD_t *_file);
+static haddr_t  H5FD_fphdf5_get_eof(const H5FD_t *_file);
 static herr_t   H5FD_fphdf5_get_handle(H5FD_t *_file, hid_t fapl,
                                      void **file_handle);
 static herr_t   H5FD_fphdf5_read(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
@@ -359,9 +359,9 @@ done:
  *-------------------------------------------------------------------------
  */
 hbool_t
-H5FD_fphdf5_is_sap(H5FD_t *_file)
+H5FD_fphdf5_is_sap(const H5FD_t *_file)
 {
-    H5FD_fphdf5_t  *file = (H5FD_fphdf5_t*)_file;
+    const H5FD_fphdf5_t  *file = (const H5FD_fphdf5_t*)_file;
     hbool_t         ret_value = FALSE;
 
     FUNC_ENTER_NOAPI(H5FD_fphdf5_is_sap, FALSE)
@@ -834,9 +834,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_fphdf5_get_eoa(H5FD_t *_file)
+H5FD_fphdf5_get_eoa(const H5FD_t *_file)
 {
-    H5FD_fphdf5_t  *file = (H5FD_fphdf5_t *)_file;
+    const H5FD_fphdf5_t  *file = (const H5FD_fphdf5_t *)_file;
     unsigned        req_id = 0;
     H5FP_status_t   status = H5FP_STATUS_OK;
     haddr_t         ret_value;
@@ -921,9 +921,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_fphdf5_get_eof(H5FD_t *_file)
+H5FD_fphdf5_get_eof(const H5FD_t *_file)
 {
-    H5FD_fphdf5_t  *file = (H5FD_fphdf5_t*)_file;
+    const H5FD_fphdf5_t  *file = (const H5FD_fphdf5_t*)_file;
     haddr_t         ret_value;
 
     FUNC_ENTER_NOAPI(H5FD_fphdf5_get_eof, HADDR_UNDEF)

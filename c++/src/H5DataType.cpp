@@ -95,13 +95,13 @@ DataType::DataType(const DataType& original) : H5Object(original)
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//              Replaced resetIdComponent with decRefCount to use new ID
-//              reference counting mechanisms by Quincey Koziol, June 1, 2004
+//		Replaced resetIdComponent with decRefCount to use C library
+//		ID reference counting mechanism - BMR, Feb 20, 2005
 //--------------------------------------------------------------------------
 void DataType::copy( const DataType& like_type )
 {
-   // reset the identifier of this instance, H5Tclose will be called 
-   // if needed 
+   // reset the identifier of this instance, H5Tclose will be called
+   // if needed
    if( is_predtype == false ) {
         try {
             decRefCount();
@@ -249,7 +249,7 @@ H5T_conv_t DataType::find( const DataType& dest, H5T_cdata_t **pcdata ) const
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataType::convert( const DataType& dest, hsize_t nelmts, void *buf, void *background, PropList& plist ) const
+void DataType::convert( const DataType& dest, size_t nelmts, void *buf, void *background, PropList& plist ) const
 {
    // Get identifiers for C API
    hid_t dest_id = dest.getId();
@@ -625,8 +625,8 @@ void DataType::close()
 ///\brief	Properly terminates access to this datatype.
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//              Replaced resetIdComponent with decRefCount to use new ID
-//              reference counting mechanisms by Quincey Koziol, June 1, 2004
+//		Replaced resetIdComponent with decRefCount to use C library
+//		ID reference counting mechanism - BMR, Feb 20, 2005
 //--------------------------------------------------------------------------
 DataType::~DataType()
 {  

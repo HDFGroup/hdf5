@@ -104,7 +104,7 @@ struct H5P_genplist_t;
 H5_DLL hid_t    H5FD_fphdf5_init(void);
 H5_DLL void     H5FD_fphdf5_term(void);
 H5_DLL unsigned H5FD_fphdf5_file_id(H5FD_t *_file);
-H5_DLL hbool_t  H5FD_fphdf5_is_sap(H5FD_t *_file);
+H5_DLL hbool_t  H5FD_fphdf5_is_sap(const H5FD_t *_file);
 H5_DLL hbool_t  H5FD_fphdf5_is_captain(H5FD_t *_file);
 H5_DLL hbool_t  H5FD_is_fphdf5_driver(H5FD_t *_file);
 

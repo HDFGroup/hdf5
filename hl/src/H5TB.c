@@ -305,12 +305,8 @@ herr_t H5TBappend_records( hid_t loc_id,
  hid_t    did;
  hid_t    tid=-1;    
  hid_t    mem_type_id=-1;
- hsize_t  count[1];    
- hsize_t offset[1];
  hid_t    sid=-1;
  hid_t    mem_space_id=-1;
- hsize_t  dims[1];
- hsize_t  mem_dims[1];
  hsize_t  nrecords_orig;
  hsize_t  nfields;
 

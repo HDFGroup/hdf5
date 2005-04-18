@@ -89,9 +89,9 @@ static H5FD_t *H5FD_family_open(const char *name, unsigned flags,
 static herr_t H5FD_family_close(H5FD_t *_file);
 static int H5FD_family_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static herr_t H5FD_family_query(const H5FD_t *_f1, unsigned long *flags);
-static haddr_t H5FD_family_get_eoa(H5FD_t *_file);
+static haddr_t H5FD_family_get_eoa(const H5FD_t *_file);
 static herr_t H5FD_family_set_eoa(H5FD_t *_file, haddr_t eoa);
-static haddr_t H5FD_family_get_eof(H5FD_t *_file);
+static haddr_t H5FD_family_get_eof(const H5FD_t *_file);
 static herr_t  H5FD_family_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
 static herr_t H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 			       size_t size, void *_buf/*out*/);
@@ -862,9 +862,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_family_get_eoa(H5FD_t *_file)
+H5FD_family_get_eoa(const H5FD_t *_file)
 {
-    H5FD_family_t	*file = (H5FD_family_t*)_file;
+    const H5FD_family_t	*file = (const H5FD_family_t*)_file;
     haddr_t ret_value;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_family_get_eoa, HADDR_UNDEF)
@@ -970,9 +970,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_family_get_eof(H5FD_t *_file)
+H5FD_family_get_eof(const H5FD_t *_file)
 {
-    H5FD_family_t	*file = (H5FD_family_t*)_file;
+    const H5FD_family_t	*file = (const H5FD_family_t*)_file;
     haddr_t		eof=0;
     int			i;      /* Local index variable */
     haddr_t ret_value;   /* Return value */

@@ -137,9 +137,9 @@ static H5FD_t *H5FD_multi_open(const char *name, unsigned flags,
 static herr_t H5FD_multi_close(H5FD_t *_file);
 static int H5FD_multi_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static herr_t H5FD_multi_query(const H5FD_t *_f1, unsigned long *flags);
-static haddr_t H5FD_multi_get_eoa(H5FD_t *_file);
+static haddr_t H5FD_multi_get_eoa(const H5FD_t *_file);
 static herr_t H5FD_multi_set_eoa(H5FD_t *_file, haddr_t eoa);
-static haddr_t H5FD_multi_get_eof(H5FD_t *_file);
+static haddr_t H5FD_multi_get_eof(const H5FD_t *_file);
 static herr_t  H5FD_multi_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
 static haddr_t H5FD_multi_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size);
 static herr_t H5FD_multi_free(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
@@ -292,7 +292,7 @@ herr_t
 H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id,
 		  const char *raw_ext, hid_t raw_plist_id)
 {
-    H5FD_mem_t		mt, memb_map[H5FD_MEM_NTYPES];
+    H5FD_mem_t		memb_map[H5FD_MEM_NTYPES];
     hid_t		memb_fapl[H5FD_MEM_NTYPES];
     const char		*memb_name[H5FD_MEM_NTYPES];
     char		meta_name[1024], raw_name[1024];
@@ -304,12 +304,12 @@ H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id,
     H5Eclear_stack(H5E_DEFAULT);
 
     /* Initialize */
-    for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
+    ALL_MEMBERS(mt) {
 	memb_map[mt] = (H5FD_MEM_DRAW==mt?mt:H5FD_MEM_SUPER);
 	memb_fapl[mt] = -1;
 	memb_name[mt] = NULL;
 	memb_addr[mt] = HADDR_UNDEF;
-    }
+    } END_MEMBERS;
 
     /* The file access properties */
     memb_fapl[H5FD_MEM_SUPER] = meta_plist_id;
@@ -1024,7 +1024,6 @@ H5FD_multi_fapl_copy(const void *_old_fa)
 {
     const H5FD_multi_fapl_t *old_fa = (const H5FD_multi_fapl_t*)_old_fa;
     H5FD_multi_fapl_t *new_fa = malloc(sizeof(H5FD_multi_fapl_t));
-    H5FD_mem_t mt;
     int nerrors = 0;
     static const char *func="H5FD_multi_fapl_copy";  /* Function Name for error reporting */
     
@@ -1078,7 +1077,6 @@ static herr_t
 H5FD_multi_fapl_free(void *_fa)
 {
     H5FD_multi_fapl_t	*fa = (H5FD_multi_fapl_t*)_fa;
-    H5FD_mem_t		mt;
     static const char *func="H5FD_multi_fapl_free";  /* Function Name for error reporting */
 
     /* Clear the error stack */
@@ -1118,7 +1116,6 @@ H5FD_multi_dxpl_copy(const void *_old_dx)
 {
     const H5FD_multi_dxpl_t *old_dx = (const H5FD_multi_dxpl_t*)_old_dx;
     H5FD_multi_dxpl_t *new_dx = malloc(sizeof(H5FD_multi_dxpl_t));
-    H5FD_mem_t mt;
     int nerrors = 0;
     static const char *func="H5FD_multi_dxpl_copy";  /* Function Name for error reporting */
     
@@ -1166,7 +1163,6 @@ static herr_t
 H5FD_multi_dxpl_free(void *_dx)
 {
     H5FD_multi_dxpl_t	*dx = (H5FD_multi_dxpl_t*)_dx;
-    H5FD_mem_t		mt;
     static const char *func="H5FD_multi_dxpl_free";  /* Function Name for error reporting */
 
     /* Clear the error stack */
@@ -1369,23 +1365,24 @@ H5FD_multi_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 {
     const H5FD_multi_t	*f1 = (const H5FD_multi_t*)_f1;
     const H5FD_multi_t	*f2 = (const H5FD_multi_t*)_f2;
-    H5FD_mem_t		mt;
+    H5FD_mem_t		out_mt = H5FD_MEM_DEFAULT;
     int			cmp=0;
 
     /* Clear the error stack */
     H5Eclear_stack(H5E_DEFAULT);
 
     ALL_MEMBERS(mt) {
+        out_mt = mt;
 	if (f1->memb[mt] && f2->memb[mt]) break;
 	if (!cmp) {
 	    if (f1->memb[mt]) cmp = -1;
 	    else if (f2->memb[mt]) cmp = 1;
 	}
     } END_MEMBERS;
-    assert(cmp || mt<H5FD_MEM_NTYPES);
-    if (mt>=H5FD_MEM_NTYPES) return cmp;
+    assert(cmp || out_mt<H5FD_MEM_NTYPES);
+    if (out_mt>=H5FD_MEM_NTYPES) return cmp;
 
-    return H5FDcmp(f1->memb[mt], f2->memb[mt]);
+    return H5FDcmp(f1->memb[out_mt], f2->memb[out_mt]);
 }
 
 
@@ -1442,9 +1439,9 @@ H5FD_multi_query(const H5FD_t *_f, unsigned long *flags /* out */)
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_multi_get_eoa(H5FD_t *_file)
+H5FD_multi_get_eoa(const H5FD_t *_file)
 {
-    H5FD_multi_t	*file = (H5FD_multi_t*)_file;
+    const H5FD_multi_t	*file = (const H5FD_multi_t*)_file;
 
     /* Clear the error stack */
     H5Eclear_stack(H5E_DEFAULT);
@@ -1530,9 +1527,9 @@ H5FD_multi_set_eoa(H5FD_t *_file, haddr_t eoa)
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_multi_get_eof(H5FD_t *_file)
+H5FD_multi_get_eof(const H5FD_t *_file)
 {
-    H5FD_multi_t	*file = (H5FD_multi_t*)_file;
+    const H5FD_multi_t	*file = (const H5FD_multi_t*)_file;
     haddr_t		eof=0, tmp;
     static const char *func="H5FD_multi_eof";  /* Function Name for error reporting */
 

@@ -320,7 +320,8 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     bt2->cache_info.is_dirty = TRUE;
     bt2->depth = 0;
     bt2->root.addr = HADDR_UNDEF;
-    bt2->root.node_nrec = bt2->root.all_nrec = 0;
+    bt2->root.node_nrec = 0;
+    bt2->root.all_nrec = 0;
 
     /* Initialize shared B-tree info */
     if(H5B2_shared_init(f, bt2, type, node_size, rrec_size, split_percent, merge_percent)<0)
@@ -532,8 +533,8 @@ H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, H5RC_t *bt2_shared)
     /* Determine total number of records in new child nodes */
     if(bt2->depth>0) {
         unsigned u;             /* Local index variable */
-        unsigned new_left_all_nrec;     /* New total number of records in left child */
-        unsigned new_right_all_nrec;    /* New total number of records in right child */
+        hsize_t new_left_all_nrec;     /* New total number of records in left child */
+        hsize_t new_right_all_nrec;    /* New total number of records in right child */
 
         /* Compute total of all records in each child node */
         new_left_all_nrec = new_root->node_ptrs[0].node_nrec;

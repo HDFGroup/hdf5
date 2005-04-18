@@ -1283,7 +1283,6 @@ H5Pset_scaleoffset(hid_t plist_id, unsigned min_bits)
     H5O_pline_t         pline;
     H5P_genplist_t *plist;      /* Property list pointer */
     unsigned cd_values[1];      /* Filter parameters */
-    unsigned int config_flags;
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_scaleoffset, FAIL);

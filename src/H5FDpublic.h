@@ -168,9 +168,9 @@ typedef struct H5FD_class_t {
     haddr_t (*alloc)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size);
     herr_t  (*free)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
                     haddr_t addr, hsize_t size);
-    haddr_t (*get_eoa)(H5FD_t *file);
+    haddr_t (*get_eoa)(const H5FD_t *file);
     herr_t  (*set_eoa)(H5FD_t *file, haddr_t addr);
-    haddr_t (*get_eof)(H5FD_t *file);
+    haddr_t (*get_eof)(const H5FD_t *file);
     herr_t  (*get_handle)(H5FD_t *file, hid_t fapl, void**file_handle);
     herr_t  (*read)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl,
                     haddr_t addr, size_t size, void *buffer);
