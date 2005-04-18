@@ -1,0 +1,26 @@
+# Add libtool shared library version numbers to the HDF5 library
+# See libtool versioning documentation online.
+LT_VERS_INTERFACE = 0
+LT_VERS_REVISION = 0
+LT_VERS_AGE = 0
+
+## If the API changes *at all*, increment LT_VERS_INTERFACE and
+## reset LT_VERS_REVISION to 0.
+##
+## If the API changes but no functions are removed, also increment
+## LT_VERS_AGE.
+## If any functions are removed from the API, reset LT_VERS_AGE
+## to 0.
+##
+## If the source changes but there are no API changes, increment
+## LT_VERS_REVISION.  This will happen automatically when
+## bin/h5vers is run, but doing it manually shouldn't hurt
+## anything.
+##
+## Note that this versioning system doesn't attempt to handle
+## the effects of the H5_V1_x_COMPAT flag.
+##
+## Since the revision number is automatically incremented by
+## bin/h5vers, don't move LT_VERS_REVISION from the fourth line
+## without also editing the script!
+

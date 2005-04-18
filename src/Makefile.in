@@ -60,7 +60,8 @@ host_triplet = @host@
 DIST_COMMON = $(include_HEADERS) $(srcdir)/H5config.h.in \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/libhdf5.settings.in $(top_srcdir)/config/commence.am \
-	$(top_srcdir)/config/conclude.am
+	$(top_srcdir)/config/conclude.am \
+	$(top_srcdir)/config/lt_vers.am
 noinst_PROGRAMS = H5detect$(EXEEXT)
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -336,10 +337,19 @@ H5CC = $(bindir)/h5cc
 H5CC_PP = $(bindir)/h5pcc
 H5FC = $(bindir)/h5fc
 H5FC_PP = $(bindir)/h5pfc
+
+# Add libtool shared library version numbers to the HDF5 library
+# See libtool versioning documentation online.
+LT_VERS_INTERFACE = 0
+LT_VERS_REVISION = 0
+LT_VERS_AGE = 0
 H5detect_CFLAGS = -g
 
 # Our main target, the HDF5 library
 lib_LTLIBRARIES = libhdf5.la
+
+# Add libtool numbers to the HDF5 library (from config/lt_vers.am)
+libhdf5_la_LDFLAGS = -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISION):$(LT_VERS_AGE)
 
 # Temporary files
 MOSTLYCLEANFILES = H5detect.o H5detect.lo H5detect H5Tinit.o H5Tinit.lo H5Tinit.c
@@ -420,7 +430,7 @@ all: H5config.h
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/conclude.am $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/lt_vers.am $(top_srcdir)/config/conclude.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \

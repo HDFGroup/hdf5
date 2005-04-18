@@ -18,6 +18,7 @@
 #
 
 include $(top_srcdir)/config/commence.am
+include $(top_srcdir)/config/lt_vers.am
 
 # How to build H5detect for number format detection.
 # Use -g to force no optimization since many compilers (e.g., Intel) takes
@@ -28,6 +29,9 @@ H5detect_CFLAGS = -g
 
 # Our main target, the HDF5 library
 lib_LTLIBRARIES=libhdf5.la
+
+# Add libtool numbers to the HDF5 library (from config/lt_vers.am)
+libhdf5_la_LDFLAGS= -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISION):$(LT_VERS_AGE)
 
 # Temporary files
 MOSTLYCLEANFILES=H5detect.o H5detect.lo H5detect H5Tinit.o H5Tinit.lo H5Tinit.c

@@ -72,6 +72,12 @@ use strict;
 # something like: This is hdf5-1.2.3-pre1 currently under development.
 # The AC_INIT macro in configure.in will also change in this case to be
 # something like: AC_INIT([HDF5], [hdf5-1.2.3-pre1], [hdfhelp@ncsa.uiuc.edu])
+#
+# Whenever the version changes, this script will increment the revision
+# field in HDF5's libtool shared library version in config/lt_vers.am,
+# which is included in src/Makefile.am.  Incrementing the revision field
+# indicates that the source code has changed since the last version
+# (which it probably has).
 ##############################################################################
 
 sub getvers {
@@ -150,9 +156,9 @@ while ($_ = shift) {
 die "mutually exclusive options given\n" if $set && $inc;
 
 # Determine file to use as H5public.h, README.txt,
-# release_docs/RELEASE.txt, and configure.in. The README.txt,
-# release_docs/RELEASE.txt, and configure.in files are always in the
-# directory above H5public.h
+# release_docs/RELEASE.txt, configure.in, and config/lt_vers.am. The
+# README.txt, release_docs/RELEASE.txt, configure.in, and
+# config/lt_vers.am files are always in the directory above H5public.h
 unless ($file) {
   for (@files) {
     ($file=$_,last) if -f $_;
@@ -160,6 +166,10 @@ unless ($file) {
 }
 die "unable to find source files\n" unless defined $file;
 die "unable to read file: $file\n" unless -r $file;
+# config/lt_vers.am
+my $LT_VERS = $file;
+$LT_VERS =~ s/[^\/]*$/..\/config\/lt_vers.am/;
+die "unable to read file: $LT_VERS\n" unless -r $file;
 # README.txt
 my $README = $file;
 $README =~ s/[^\/]*$/..\/README.txt/;
@@ -219,6 +229,7 @@ if ($set) {
   $README = "";
   $RELEASE = "";
   $CONFIGURE = "";
+  $LT_VERS = "";
   @newver = @curver;
 }
 
@@ -238,6 +249,23 @@ if ($newver[0]!=$curver[0] ||
   rename $file, "$file~" or die "unable to save backup file\n";
   open FILE, ">$file" or die "unable to open $file but backup saved!\n";
   print FILE $contents;
+  close FILE;
+}
+
+# Update the libtool shared library version in src/Makefile.am
+if ($LT_VERS) {
+  open FILE, $LT_VERS or die "$LT_VERS: $!\n";
+  my ($contentsy) = join "", <FILE>;
+  close FILE;
+
+  local($_) = $contentsy;
+
+  my ($lt_revision) = /^LT_VERS_REVISION\s*=\s*(\d+)/m;
+  my $new_lt_revision = $lt_revision+1;
+  ($contentsy) =~ s/^(LT_VERS_REVISION\s*=\s*)\d+/$1$new_lt_revision/m;
+
+  open FILE, ">$LT_VERS" or die "$LT_VERS: $!\n";
+  print FILE $contentsy;
   close FILE;
 }
 
