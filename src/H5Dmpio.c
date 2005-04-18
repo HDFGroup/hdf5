@@ -36,13 +36,14 @@
 
 #ifdef H5_HAVE_PARALLEL
 
+/* For regular hyperslab selection. */
 static herr_t
 H5D_mpio_spaces_xfer(H5D_io_info_t *io_info, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
                      void *buf/*out*/, 
 		     hbool_t do_write);
 
-
+/* For irregular hyperslab selection. */
 static herr_t
 H5D_mpio_spaces_span_xfer(H5D_io_info_t *io_info, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
@@ -373,20 +374,24 @@ done:
     function until you don't see this line. Nov. 11,2004, KY**/
 
 static herr_t
-H5D_mpio_spaces_span_xfer(H5D_io_info_t *io_info, size_t elmt_size,
-    const H5S_t *file_space, const H5S_t *mem_space,
-    void *_buf /*out*/, hbool_t do_write )
+H5D_mpio_spaces_span_xfer(H5D_io_info_t *io_info, 
+			  size_t elmt_size,
+			  const H5S_t *file_space, 
+			  const H5S_t *mem_space,
+			  void *_buf /*out*/, 
+			  hbool_t do_write )
 {
-    haddr_t	 addr;                  /* Address of dataset (or selection) within file */
-    size_t	 mpi_buf_count, mpi_file_count;       /* Number of "objects" to transfer */
-    hsize_t	 mpi_buf_offset, mpi_file_offset;       /* Offset within dataset where selection (ie. MPI type) begins */
-    MPI_Datatype mpi_buf_type, mpi_file_type;   /* MPI types for buffer (memory) and file */
-    hbool_t	 mbt_is_derived=0,      /* Whether the buffer (memory) type is derived and needs to be free'd */
-		 mft_is_derived=0;      /* Whether the file type is derived and needs to be free'd */
-    hbool_t	 plist_is_setup=0;      /* Whether the dxpl has been customized */
-    uint8_t	*buf=(uint8_t *)_buf;   /* Alias for pointer arithmetic */
-    int          mpi_code;              /* MPI return code */
-    herr_t	 ret_value = SUCCEED;   /* Return value */
+    haddr_t	 addr;                              /* Address of dataset (or selection) within file */
+    size_t	 mpi_buf_count, mpi_file_count;     /* Number of "objects" to transfer */
+    hsize_t	 mpi_buf_offset, mpi_file_offset;   /* Offset within dataset where selection (ie. MPI type) begins */
+    MPI_Datatype mpi_buf_type, mpi_file_type;      /* MPI types for buffer (memory) and file */
+    hbool_t	 mbt_is_derived=0,                 /* Whether the buffer (memory) type is derived and needs to be free'd */
+		 mft_is_derived=0;                /* Whether the file type is derived and needs to be free'd */
+    hbool_t	 plist_is_setup=0;                /* Whether the dxpl has been customized */
+    uint8_t	*buf=(uint8_t *)_buf;             /* Alias for pointer arithmetic */
+    int          mpi_code;                        /* MPI return code */
+    herr_t	 ret_value = SUCCEED;             /* Return value */
+
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_mpio_spaces_span_xfer);
 
@@ -422,26 +427,27 @@ H5D_mpio_spaces_span_xfer(H5D_io_info_t *io_info, size_t elmt_size,
     printf("mpi_buf_count %d\n",mpi_buf_count);
     /* create the MPI file type */
 
-       if(H5S_SELECT_IS_REGULAR(file_space)== TRUE){ 
- if ( H5S_mpio_space_type( file_space, elmt_size,
+   if(H5S_SELECT_IS_REGULAR(file_space)== TRUE){ 
+     if ( H5S_mpio_space_type( file_space, elmt_size,
 			       /* out: */
 			       &mpi_file_type,
 			       &mpi_file_count,
 			       &mpi_file_offset,
 			       &mft_is_derived )<0)
     	HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't create MPI file type");
-       }
-       else {
-	 if ( H5S_mpio_space_span_type( file_space, elmt_size,
+   }
+   else {
+     if ( H5S_mpio_space_span_type( file_space, elmt_size,
 			       /* out: */
 			       &mpi_file_type,
 			       &mpi_file_count,
 			       &mpi_file_offset,
 			       &mft_is_derived )<0)
     	HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't create MPI file type");
-       }
-    /* Get the base address of the contiguous dataset or the chunk */
-    if(io_info->dset->shared->layout.type == H5D_CONTIGUOUS)
+   }
+
+   /* Get the base address of the contiguous dataset or the chunk */
+   if(io_info->dset->shared->layout.type == H5D_CONTIGUOUS)
        addr = H5D_contig_get_addr(io_info->dset) + mpi_file_offset;
     else {
         haddr_t   chunk_addr; /* for collective chunk IO */
@@ -457,19 +463,20 @@ H5D_mpio_spaces_span_xfer(H5D_io_info_t *io_info, size_t elmt_size,
      */
     if(H5FD_mpi_setup_collective(io_info->dxpl_id, mpi_buf_type, mpi_file_type)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI-I/O properties");
-    plist_is_setup=1;
+   plist_is_setup=1;
 
-    /* Adjust the buffer pointer to the beginning of the selection */
-    buf+=mpi_buf_offset;
+   /* Adjust the buffer pointer to the beginning of the selection */
+   buf+=mpi_buf_offset;
 
-    /* transfer the data */
-    if (do_write) {
-    	if (H5F_block_write(io_info->dset->ent.file, H5FD_MEM_DRAW, addr, mpi_buf_count, io_info->dxpl_id, buf) <0)
-	    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,"MPI write failed");
-    } else {
+   /* transfer the data */
+   if (do_write) {
+       if (H5F_block_write(io_info->dset->ent.file, H5FD_MEM_DRAW, addr, mpi_buf_count, io_info->dxpl_id, buf) <0)
+	   HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,"MPI write failed");
+    } 
+   else {
     	if (H5F_block_read (io_info->dset->ent.file, H5FD_MEM_DRAW, addr, mpi_buf_count, io_info->dxpl_id, buf) <0)
 	    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL,"MPI read failed");
-    }
+   }
 
 done:
     /* Reset the dxpl settings */
@@ -593,9 +600,11 @@ H5D_mpio_spaces_write(H5D_io_info_t *io_info,
  */
 herr_t
 H5D_mpio_spaces_span_read(H5D_io_info_t *io_info,
-    size_t UNUSED nelmts, size_t elmt_size,
-    const H5S_t *file_space, const H5S_t *mem_space,
-    void *buf/*out*/)
+			  size_t UNUSED nelmts, 
+			  size_t elmt_size,
+			  const H5S_t *file_space, 
+			  const H5S_t *mem_space,
+			  void *buf/*out*/)
 {
     herr_t ret_value;
 
@@ -633,9 +642,11 @@ H5D_mpio_spaces_span_read(H5D_io_info_t *io_info,
  */
 herr_t
 H5D_mpio_spaces_span_write(H5D_io_info_t *io_info,
-    size_t UNUSED nelmts, size_t elmt_size,
-    const H5S_t *file_space, const H5S_t *mem_space,
-    const void *buf)
+			   size_t UNUSED nelmts, 
+			   size_t elmt_size,
+			   const H5S_t *file_space, 
+			   const H5S_t *mem_space,
+			   const void *buf)
 {
     herr_t ret_value;
 

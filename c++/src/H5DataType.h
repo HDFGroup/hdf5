@@ -29,7 +29,7 @@ class H5_DLLCPP DataType : public H5Object {
 	DataType( const DataType& original );
 
 	// Closes this datatype.
-        virtual void close();
+	virtual void close();
 
 	// Copies an existing datatype to this datatype object
 	void copy( const DataType& like_type );
@@ -51,7 +51,7 @@ class H5_DLLCPP DataType : public H5Object {
 	H5T_conv_t find( const DataType& dest, H5T_cdata_t **pcdata ) const;
 
 	// Converts data from between specified datatypes. 
-	void convert( const DataType& dest, hsize_t nelmts, void *buf, void *background, PropList& plist ) const;
+	void convert( const DataType& dest, size_t nelmts, void *buf, void *background, PropList& plist ) const;
 
 	// Assignment operator
 	DataType& operator=( const DataType& rhs );

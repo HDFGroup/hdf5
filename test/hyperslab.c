@@ -221,13 +221,13 @@ test_fill(size_t nx, size_t ny, size_t nz,
 				 * original * fill values and add the new ones.
 				 */
 				ref_value = init_full(dst, nx, ny, nz);
-				for (u=dst_offset[0];
+				for (u=(size_t)dst_offset[0];
 				     u<dst_offset[0]+dx;
 				     u++) {
-				    for (v = dst_offset[1];
+				    for (v = (size_t)dst_offset[1];
 					 v < dst_offset[1] + dy;
 					 v++) {
-					for (w = dst_offset[2];
+					for (w = (size_t)dst_offset[2];
 					     w < dst_offset[2] + dz;
 					     w++) {
 					    ref_value -= dst[u*ny*nz+v*nz+w];

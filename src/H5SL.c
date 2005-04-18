@@ -573,7 +573,7 @@ H5SL_create(H5SL_type_t type, double p, size_t max_level)
     /* Set the static internal fields */
     new_slist->type=type;
     new_slist->p=p;
-    new_slist->p1=p*RAND_MAX;
+    new_slist->p1=(int)(p*RAND_MAX);
     new_slist->max_level=max_level;
 
     /* Set the dynamic internal fields */
