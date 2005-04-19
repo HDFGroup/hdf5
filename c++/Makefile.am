@@ -23,7 +23,7 @@ include $(top_srcdir)/config/commence.am
 if BUILD_CXX_CONDITIONAL
    SUBDIRS=src test
 endif
-DIST_SUBDIRS = $(SUBDIRS) examples
+DIST_SUBDIRS = src test examples
 
 # Clean and mostlyclean need to recurse into examples directory
 clean-local:
