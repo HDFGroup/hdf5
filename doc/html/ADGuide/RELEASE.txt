@@ -1,4 +1,4 @@
-HDF5 version 1.7.45 released on Wed Mar  2 08:33:33 CST 2005
+HDF5 version 1.7.46 released on Wed Apr 20 04:46:45 CDT 2005
 ================================================================================
 
 
@@ -36,6 +36,28 @@ New Features
 
     Configuration:
     --------------
+	- HDF5 now uses automake 1.9.5 to generate Makefiles.in.
+	  This has a number of effects on users:
+          The Fortran compiler should be set using the environment
+          variable $FC, not $F9X.  F9X still works, but is depreciated.
+	  The output of make may be different.  This should be only a
+          cosmetic effect.
+	  make depened (or make dep) is no longer recognized, since automake
+	  handles dependency tracking.
+	  Some new configure options exist.  --enable-dependency-tracking
+          and --disable-dependency-tracking are used to control automake's
+	  dependency tracking.  Dependencies are on by default *on most
+	  platforms and compilers*.  If --enable-dependency-tracking is
+	  used, they will be enabled on any platform.  However, this can
+	  slow down builds or even cause build errors in some cases.
+	  Likewise, --disable-dependency-tracking can speed up builds and
+	  avoid some build errors.
+	  Some make targets have alternate names.  make check-install and
+	  make installcheck do the same thing, for instance.
+	  pmake on IRIX can be invoked from the root directory, but the
+	  -V flag must be used to invoke it in any subdirectory or it
+	  will give an error about undefined variables.
+	  JML 2005/01 - 2005/03
         - Hardware conversion between long double and integers is also added.
           SLU 2005/02/10
         - Started to support software conversion between long double and 
@@ -59,6 +81,48 @@ New Features
 
     Library:
     --------
+       - HDF5 supports collective MPI-IO for irregular selection with HDF5
+          dataset. Irregular selection is when users use H5Sselect_hyperslab
+          more than once for the same dataset.
+          Currently, not all MPI-IO packages support complicated MPI derived
+                     datatype used in the implementation of irregular
+                     selection INSIDE HDF5. 
+                     DEC 5.x is not supporting complicated derived datatype.
+                     For AIX 5.1,
+                     if your poe version number is 3.2.0.22 or higher,
+                     please edit powerpc-ibm-aix5.x under hdf5/config,
+                     Find the line with
+                            << hdf5_mpi_complex_derived_datatype_works>>
+                     and comment out this line before the configure.
+                     check poe version with the following command:
+                     lpp -l all | grep ppe.poe
+                     with IRIX 6.5, 
+                     if your C compiler version is 7.4 or higher,
+                     please edit irix6.x under hdf5/config,
+                     Find the line with
+                            << hdf5_mpi_complex_derived_datatype_works>>
+                     and comment out this line before the configure.
+                     check  cc version with the following command:
+                           cc -version
+                     KY - 2005/04/15
+        - HDF5 N-bit filter 
+          HDF5 support N-bit filter from this version,  
+          The N-Bit filter is used effectively for compressing data of N-Bit
+          datatype as well as compound and array datatype with N-Bit fields. 
+          KY - 2005/04/15
+        - HDF5 scaleoffset filter
+          HDF5 supports scaleoffset filter for users to do data
+          compression through HDF5 library. 
+          Scale-Offset compression performs a scale and/or offset operation
+          on each data value and truncates the resulting value to a minimum 
+          number of bits and then stores the data.
+          Currently only integer datatype
+          is supported. Please check the HDF5 reference manual for this.
+          KY - 2005/04/15
+        - Retired SRB vfd (--with-srb). Functions H5Pset_fapl_srb and
+          H5Pget_fapl_srb were removed.  EIP - 2005/04/07
+	- Retired GASS vfd (--with-gass).  Functions H5Pset_fapl_gass and
+	  H5Pget_fapl_gass are removed too.  AKC - 2005/3/3
         - Pablo was removed from the source code EIP - 2005/01/21
         - Modified registration of SZIP to dynamically detect the presence
             or absence of the encoder.  Changed configure and Makefiles,
@@ -150,7 +214,8 @@ New Features
 
     Fortran Library:
     ----------------
-         
+         - added missing h5tget_member_class_f function
+                                                 EIP 2005/04/06         
          - added new functions h5fget_name_f and h5fget_filesize_f 
                                                  EIP 2004/07/08
          - h5dwrite/read_f and h5awrite/read_f functions only accept dims parameter
@@ -178,6 +243,12 @@ New Features
             "<number>:<number>:<number>:<number>" to "<number>:<number>"
             QAK - 2003/08/08
 
+    High-Level APIs:
+    ------
+        - Added Packet Table API for creating tables with less overhead than
+            H5TB API.  Added C++ wrapper for Packet Tables.  See documentation.
+            JML - 2004/03/28
+
 
 Support for new platforms, languages and compilers.
 =======================================
@@ -203,6 +274,14 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fixed error in opening object in group that was opened in mounted
+            file which has been unmounted.  QAK - 2005/03/17
+        - Fixed a racing condition in MPIPOSIX virtual file drive close
+	  function.  Now all processes must completed the close before any
+	  of them is returned.  This prevents some "faster" processes start
+	  accessing the file for another purpose (e.g., open with truncate)
+	  while other "slower" processes have not closed the same file with
+	  the previous purpose.  AKC - 2005/03/01
         - H5Tget_member_value calls for enum datatype didn't return correct 
             value if H5Tenum_valueof was called first.  It's fixed.  SLU - 
             2005/02/08
@@ -405,6 +484,8 @@ Bug Fixes since HDF5-1.6.0 release
 
     Performance
     -------------
+        - Optimized I/O for enumerated datatypes that are a superset of source
+            enumerated datatype.  QAK - 2005/03/19
         - More optimizations to inner loops of datatype conversions for
             integers and floats which give a 10-50% speedup.  QAK - 2003/11/07
         - Hoisted invariant 'if/else's out of inner datatype conversion loop for
@@ -427,6 +508,11 @@ Bug Fixes since HDF5-1.6.0 release
 
     Documentation 
     ------------- 
+
+    F90 APIs
+    --------
+        - h5pget_driver_f was returning information that could not be
+          interpreted by fortran application program; fixed. EIP - 2005/04/10 
 
 
 Platforms Tested
@@ -477,12 +563,12 @@ Platforms Tested
      (Solaris 2.7)                WorkShop Compilers 5.0 98/12/15 C++ 5.0 
                                   WorkShop Compilers 5.0 98/10/25 
                                   FORTRAN 90 2.0 Patch 107356-04 
-    SunOS 5.8/32                  Sun WorkShop 6 update 2 C 5.3
+    SunOS 5.8 32,46               Sun WorkShop 6 update 2 C 5.3
      (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 90
                                   Sun WorkShop 6 update 2 C++ 5.3
-    SunOS 5.8/64                  Sun WorkShop 6 update 2 C 5.3
-     (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 90
-                                  Sun WorkShop 6 update 2 C++ 5.3
+    SunOS 5.9 32,64               Sun C 5.6 2004/07/15
+     (Solaris 2.9)                Sun Fortran 95 8.0 2004/07/15
+                                  Sun C++ 5.6 2004/07/15
     TFLOPS r1.0.4 v4.3.3 i386     pgcc Rel 3.1-4i with mpich-1.2.4 with
                                           local modifications
     IA-32 Linux 2.4.9             gcc 2.96
@@ -492,14 +578,10 @@ Platforms Tested
     IA-64 Linux 2.4.16 ia64       gcc version 2.96 20000731
                                   Intel(R) C++ Version 7.0
                                   Intel(R) Fortran Compiler Version 7.0
-    Windows 2000 (NT5.0)          MSVC++ 6.0
-                                  MSVC++ .NET
-                                  DEC Visual Fortran 6.0
-                                  Intel C and F90 compilers version 7.1
-				  Code Warrior 8.0
     Windows XP                    MSVC++ 6.0
-				  MSVC++ .NET
-                                  DEC Visual Fortran 6.6
+				  MSVC++ .NET 2003,
+                                  Intel C++ Version 8.1
+                                  DEC Visual Fortran 6.6c
     MAC OS X                      Darwin 6.5
                                   gcc and g++ Apple Computer, Inc. GCC 
                                   version 1161, based on gcc version 3.1
