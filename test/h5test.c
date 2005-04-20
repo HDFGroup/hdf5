@@ -301,9 +301,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 	 */
         static int explained = 0;
 
-	prefix = (paraprefix ? paraprefix : getenv("HDF5_PARAPREFIX"));
-/*	prefix = (paraprefix ? paraprefix : getenv_all(MPI_COMM_WORLD, 0, "HDF5_PARAPREFIX")); */
-
+	prefix = (paraprefix ? paraprefix : getenv_all(MPI_COMM_WORLD, 0, "HDF5_PARAPREFIX")); 
 
 	if (!prefix && !explained) {
 	    /* print hint by process 0 once. */
@@ -858,10 +856,13 @@ int h5_szip_can_encode(void )
  * 		val is the string to which the value of that environment
  * 		variable will be copied.
  *
- * Return:	No failure.  
- * 		If an env variable doesn't exist, it is set to NULL.
- * 		This function will allocate space for the variable, and it
- * 		is up to the calling function to free that memory.
+ * 		NOTE: The pointer returned by this function is only
+ * 		valid until the next call to getenv_all and the data
+ * 		stored there must be copied somewhere else before any
+ * 		further calls to getenv_all take place.
+ *
+ * Return:	pointer to a string containing the value of the environment variable
+ * 		NULL if the varialbe doesn't exist in task 'root's environment.
  *
  * Programmer:	Leon Arber
  *              4/4/05
@@ -908,7 +909,6 @@ char* getenv_all(MPI_Comm comm, int root, const char* name)
 	    else if(strlen(env) < len)
 		env = (char*) HDrealloc(env, len+1);
 
-	    HDmemset(env, 0, len);
 	    MPI_Bcast(env, len, MPI_CHAR, root, comm);
 	    env[len+1] = '\0';
 	}
