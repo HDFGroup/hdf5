@@ -36,6 +36,8 @@ New Features
 
     Configuration:
     --------------
+	- When HDF5 is created as a shared library, it now uses libtool's
+	  shared library versioning scheme. -JML 2005/04/18
 	- HDF5 now uses automake 1.9.5 to generate Makefiles.in.
 	  This has a number of effects on users:
           The Fortran compiler should be set using the environment
