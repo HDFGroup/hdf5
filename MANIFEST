@@ -1309,6 +1309,8 @@
 ./tools/testfiles/thlink.h5
 ./tools/testfiles/tlarge_objname.ddl
 ./tools/testfiles/tlarge_objname.h5
+./tools/testfiles/tlonglinks.ddl
+./tools/testfiles/tlonglinks.h5
 ./tools/testfiles/tloop-1.ddl
 ./tools/testfiles/tloop.h5
 ./tools/testfiles/tloop2.h5

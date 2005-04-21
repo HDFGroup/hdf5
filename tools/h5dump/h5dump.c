@@ -35,9 +35,9 @@ const char  *progname = "h5dump";
 
 int                 d_status = EXIT_SUCCESS;
 static int          unamedtype = 0;     /* shared data type with no name */
-static size_t       prefix_len = 1024;
+extern size_t       prefix_len;
 static table_t     *group_table = NULL, *dset_table = NULL, *type_table = NULL;
-char               *prefix;
+extern char        *prefix;
 static const char  *driver = NULL;      /* The driver to open the file with. */
 
 static const dump_header *dump_header_format;
@@ -825,7 +825,7 @@ print_datatype(hid_t type,unsigned in_group)
             if (H5Tequal(tmp_type, str_type)) {
                 printf("H5T_C_S1;\n");
                 goto done;
-            } 
+            }
 
             /* If not equal to C variable-length string, check Fortran type. */
             H5Tclose(str_type);
@@ -3734,15 +3734,15 @@ print_enum(hid_t type)
 	    for (j = 0; j < dst_size; j++)
 		printf("%02x", value[i * dst_size + j]);
 	} else if (H5T_SGN_NONE == H5Tget_sign(native)) {
- 	    /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
- 	     *strangely, unless use another pointer "copy".*/
- 	    copy = value+i*dst_size;
+	    /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
+	     *strangely, unless use another pointer "copy".*/
+	    copy = value+i*dst_size;
 	    HDfprintf(stdout,"%" H5_PRINTF_LL_WIDTH "u", *((unsigned long_long *)
 					      ((void *)copy)));
 	} else {
- 	    /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
- 	     *strangely, unless use another pointer "copy".*/
- 	    copy = value+i*dst_size;
+	    /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
+	     *strangely, unless use another pointer "copy".*/
+	    copy = value+i*dst_size;
 	    HDfprintf(stdout,"%" H5_PRINTF_LL_WIDTH "d",
 		   *((long_long *) ((void *)copy)));
 	}

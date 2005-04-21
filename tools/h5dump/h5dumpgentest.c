@@ -77,6 +77,7 @@
 #define FILE48  "tfvalues.h5"
 #define FILE49  "tstr3.h5"
 #define FILE50  "taindices.h5"
+#define FILE51  "tlonglinks.h5"
 
 
 
@@ -194,6 +195,9 @@ typedef struct s1_t {
 /* "File 43" macros */
 /* Name of dataset to create in datafile                              */
 #define F43_DSETNAME "Dataset"
+
+/* "File 51" macros */
+#define F51_MAX_NAME_LEN    ((64*1024)+1024)
 
 static void gent_group(void)
 {
@@ -5310,6 +5314,56 @@ static void gent_aindices(void)
  assert(ret>=0);
 }
 
+/*-------------------------------------------------------------------------
+ * Function: gent_longlinks
+ *
+ * Purpose: make file with very long names for objects
+ *
+ *-------------------------------------------------------------------------
+ */
+static void gent_longlinks(void)
+{
+    hid_t		fid = (-1);     /* File ID */
+    hid_t		gid = (-1);     /* Group ID */
+    hid_t		gid2 = (-1);    /* Datatype ID */
+    char               *objname = NULL; /* Name of object [Long] */
+    size_t              u;              /* Local index variable */
+
+    /* Create files */
+    fid = H5Fcreate(FILE51, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    assert(fid >= 0);
+
+    /* Create group with short name in file (used as target for hard links) */
+    gid=H5Gcreate(fid, "grp1", (size_t)0);
+    assert(gid >= 0);
+
+    /* Construct very long file name */
+    objname = HDmalloc((size_t)(F51_MAX_NAME_LEN + 1));
+    assert(objname);
+    for(u = 0; u < F51_MAX_NAME_LEN; u++)
+        objname[u] = 'a';
+    objname[F51_MAX_NAME_LEN] = '\0';
+
+    /* Create hard link to existing object */
+    assert(H5Glink2(fid, "grp1", H5G_LINK_HARD, fid, objname) >= 0);
+
+    /* Create soft link to existing object */
+    objname[0] = 'b';
+    assert(H5Glink2(fid, "grp1", H5G_LINK_SOFT, fid, objname) >= 0);
+
+    /* Create group with long name in existing group */
+    gid2=H5Gcreate(gid, objname, (size_t)0);
+    assert(gid2 >= 0);
+
+    /* Close objects */
+    assert(H5Gclose(gid2) >= 0);
+    assert(H5Gclose(gid) >= 0);
+    assert(H5Fclose(fid) >= 0);
+
+    /* Release memory */
+    HDfree(objname);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -5369,6 +5423,7 @@ int main(void)
     gent_fcontents();
     gent_string();
     gent_aindices();
+    gent_longlinks();
 
     return 0;
 }
