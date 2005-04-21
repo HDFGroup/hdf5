@@ -36,7 +36,8 @@
 
 
 extern hid_t thefile;
-extern char  *prefix;
+size_t       prefix_len = 1024;
+char  *prefix;
 extern char  *progname;
 extern int   d_status;
 
@@ -249,17 +250,19 @@ fill_ref_path_table(hid_t group, const char *name, void UNUSED * op_data)
 {
     hid_t                   obj;
     char                   *tmp;
+    size_t                  tmp_len;
     H5G_stat_t              statbuf;
     ref_path_table_entry_t *pte;
     char                   *thepath;
 
     H5Gget_objinfo(group, name, FALSE, &statbuf);
-    tmp = (char *) malloc(strlen(prefix) + strlen(name) + 2);
+    tmp_len = strlen(prefix) + strlen(name) + 2;
+    tmp = (char *) malloc(tmp_len);
 
     if (tmp == NULL)
 	return FAIL;
 
-    thepath = (char *) malloc(strlen(prefix) + strlen(name) + 2);
+    thepath = (char *) malloc(tmp_len);
 
     if (thepath == NULL) {
 	free(tmp);
@@ -286,6 +289,11 @@ fill_ref_path_table(hid_t group, const char *name, void UNUSED * op_data)
 	break;
     case H5G_GROUP:
 	if ((obj = H5Gopen(group, name)) >= 0) {
+            if (prefix_len <= tmp_len) {
+                prefix_len = tmp_len + 1;
+                prefix = realloc(prefix, prefix_len);
+            }
+
 	    strcat(strcat(prefix, "/"), name);
 	    pte = ref_path_table_lookup(thepath);
 	    if (pte == NULL) {

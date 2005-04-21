@@ -292,6 +292,9 @@ fi
 # user defined
 TOOLTEST tuserfilter.ddl -H  -p -d myfilter  tfilters.h5
 
+# test for displaying objects with very long names
+TOOLTEST tlonglinks.ddl tlonglinks.h5
+
 
 if test $nerrors -eq 0 ; then
    echo "All $DUMPER tests passed."

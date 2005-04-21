@@ -27,6 +27,8 @@ const char *FILENAME[] = {
     NULL
 };
 
+#define MAX_NAME_LEN    ((64*1024)+1024)
+
 
 /*-------------------------------------------------------------------------
  * Function:	mklinks
@@ -48,7 +50,7 @@ static int
 mklinks(hid_t fapl)
 {
     hid_t		file, scalar, grp, d1;
-    static hsize_t	size[1] = {1};
+    hsize_t	        size[1] = {1};
     char		filename[1024];
 
     TESTING("link creation");
@@ -61,7 +63,7 @@ mklinks(hid_t fapl)
     if ((scalar=H5Screate_simple (1, size, size))<0) goto error;
 
     /* Create a group */
-    if ((grp=H5Gcreate (file, "grp1", 0))<0) goto error;
+    if ((grp=H5Gcreate (file, "grp1", (size_t)0))<0) goto error;
     if (H5Gclose (grp)<0) goto error;
 
     /* Create a dataset */
@@ -121,7 +123,7 @@ new_links(hid_t fapl)
     hid_t		scalar=(-1);
     hid_t		dset1=(-1), dset2=(-1);
     char		filename[1024]; 
-    static hsize_t      size[1] = {1};
+    hsize_t             size[1] = {1};
 
     TESTING("H5Glink2 function");
 
@@ -137,10 +139,10 @@ new_links(hid_t fapl)
     if ((scalar=H5Screate_simple (1, size, size))<0) goto error;
 
     /* Create two groups in each file */
-    if ((grp1_a=H5Gcreate (file_a, "grp1", 0))<0) goto error;
-    if ((grp2_a=H5Gcreate (file_a, "grp2", 0))<0) goto error;
-    if ((grp1_b=H5Gcreate (file_b, "grp1", 0))<0) goto error;
-    if ((grp2_b=H5Gcreate (file_b, "grp2", 0))<0) goto error;
+    if ((grp1_a=H5Gcreate (file_a, "grp1", (size_t)0))<0) goto error;
+    if ((grp2_a=H5Gcreate (file_a, "grp2", (size_t)0))<0) goto error;
+    if ((grp1_b=H5Gcreate (file_b, "grp1", (size_t)0))<0) goto error;
+    if ((grp2_b=H5Gcreate (file_b, "grp2", (size_t)0))<0) goto error;
 
     /* Create datasets */
     if((dset1=H5Dcreate(file_a, "dataset1", H5T_NATIVE_INT, scalar, 
@@ -449,6 +451,79 @@ ck_new_links(hid_t fapl)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    long_links
+ *
+ * Purpose:     Build a file with long names
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, April 16, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+long_links(hid_t fapl)
+{
+    hid_t		fid = (-1);     /* File ID */
+    hid_t		gid = (-1);     /* Group ID */
+    hid_t		gid2 = (-1);    /* Datatype ID */
+    char               *objname = NULL; /* Name of object [Long] */
+    size_t              u;              /* Local index variable */
+    char		filename[1024]; 
+
+    TESTING("long names for objects & links");
+
+    /* Create files */
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
+    if((fid=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+
+    /* Create group with short name in file (used as target for hard links) */
+    if((gid=H5Gcreate (fid, "grp1", (size_t)0))<0) TEST_ERROR;
+
+    /* Construct very long file name */
+    if((objname = HDmalloc((size_t)(MAX_NAME_LEN + 1))) == NULL) TEST_ERROR;
+    for(u = 0; u < MAX_NAME_LEN; u++)
+        objname[u] = 'a';
+    objname[MAX_NAME_LEN] = '\0';
+
+    /* Create hard link to existing object */
+    if(H5Glink2(fid, "grp1", H5G_LINK_HARD, fid, objname) < 0) TEST_ERROR;
+
+    /* Create soft link to existing object */
+    objname[0] = 'b';
+    if(H5Glink2(fid, "grp1", H5G_LINK_SOFT, fid, objname) < 0) TEST_ERROR;
+
+    /* Create group with long name in existing group */
+    if((gid2=H5Gcreate(gid, objname, (size_t)0))<0) TEST_ERROR;
+
+    /* Close objects */
+    if(H5Gclose(gid2)<0) TEST_ERROR;
+    if(H5Gclose(gid)<0) TEST_ERROR;
+    if(H5Fclose(fid)<0) TEST_ERROR;
+
+    /* Release memory */
+    HDfree(objname);
+
+    PASSED();
+    return 0;
+
+ error:
+    H5E_BEGIN_TRY {
+    	H5Gclose (gid2);
+    	H5Gclose (gid);
+    	H5Fclose (fid);
+    } H5E_END_TRY;
+    HDfree(objname);
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Test links
@@ -475,9 +550,10 @@ main(void)
 
     /* The tests... */
     nerrors += mklinks(fapl) < 0 ? 1 : 0;
-    nerrors += new_links(fapl) < 0 ? 1 : 0;
     nerrors += cklinks(fapl) < 0 ? 1 : 0;
+    nerrors += new_links(fapl) < 0 ? 1 : 0;
     nerrors += ck_new_links(fapl) < 0 ? 1 : 0;
+    nerrors += long_links(fapl) < 0 ? 1 : 0;
 
     /* Results */
     if (nerrors) {

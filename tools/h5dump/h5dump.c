@@ -35,9 +35,9 @@ const char  *progname = "h5dump";
 
 int                 d_status = EXIT_SUCCESS;
 static int          unamedtype = 0;     /* shared data type with no name */
-static size_t       prefix_len = 1024;
+extern size_t       prefix_len;
 static table_t     *group_table = NULL, *dset_table = NULL, *type_table = NULL;
-char               *prefix;
+extern char        *prefix;
 static const char  *driver = NULL;      /* The driver to open the file with. */
 
 static const dump_header *dump_header_format;
@@ -654,8 +654,8 @@ print_datatype(hid_t type,unsigned in_group)
     hsize_t     dims[H5DUMP_MAX_RANK];
     H5T_str_t   str_pad;
     H5T_cset_t  cset;
-    H5T_order_t order;
     H5G_stat_t  statbuf;
+    H5T_order_t order;
     hid_t       super;
     hid_t       tmp_type;
     htri_t      is_vlstr=FALSE;
@@ -815,7 +815,7 @@ print_datatype(hid_t type,unsigned in_group)
                 printf("H5T_C_S1;\n");
                 goto done;
             } 
-           
+
             /* Change the endianness and see if they're equal. */ 
             order = H5Tget_order(tmp_type);
             if(order==H5T_ORDER_LE)
@@ -853,6 +853,7 @@ print_datatype(hid_t type,unsigned in_group)
                 goto done;
             }
 
+            /* Type doesn't match any of above. */
             printf("unknown_one_character_type;\n ");
             d_status = EXIT_FAILURE;
 

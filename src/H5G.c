@@ -2505,7 +2505,6 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
     const char		*rest = NULL;	/*last component of new name	*/
     char		*norm_cur_name = NULL;	/* Pointer to normalized current name */
     char		*norm_new_name = NULL;	/* Pointer to normalized current name */
-    char		_comp[1024];	/*name component		*/
     size_t		nchars;		/*characters in component	*/
     size_t		offset;		/*offset to sym-link value	*/
     herr_t      ret_value=SUCCEED;       /* Return value */
@@ -2540,15 +2539,7 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
              * There should be one component left.  Make sure it's null
              * terminated and that `rest' points to it.
              */
-            if (rest[nchars]) {
-                if (nchars+1 > sizeof _comp) {
-                    HGOTO_ERROR (H5E_SYM, H5E_COMPLEN, FAIL, "name component is too long");
-                } else {
-                    HDmemcpy (_comp, rest, nchars);
-                    _comp[nchars] = '\0';
-                    rest = _comp;
-                }
-            }
+            assert(!rest[nchars]);
 
             /*
              * Add the link-value to the local heap for the symbol table which
