@@ -103,10 +103,10 @@ typedef union H5G_cache_t {
  */
 typedef struct H5G_entry_t {
     hbool_t     dirty;                  /*entry out-of-date?                 */
-    size_t      name_off;               /*offset of name within name heap    */
-    haddr_t     header;                 /*file address of object header      */
     H5G_type_t  type;                   /*type of information cached         */
     H5G_cache_t cache;                  /*cached data from object header     */
+    size_t      name_off;               /*offset of name within name heap    */
+    haddr_t     header;                 /*file address of object header      */
     H5F_t       *file;                  /*file to which this obj hdr belongs */
     H5RS_str_t  *user_path_r;           /* Path to object, as opened by user */
     H5RS_str_t  *canon_path_r;          /* Path to object, as found in file  */

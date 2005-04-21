@@ -42,9 +42,9 @@ typedef struct H5E_error_t {
     hid_t       cls_id;         /*class ID                           */
     hid_t       maj_num;	/*major error ID		     */
     hid_t       min_num;	/*minor error number		     */
+    unsigned	line;		/*line in file where error occurs    */
     const char	*func_name;   	/*function in which error occurred   */
     const char	*file_name;	/*file in which error occurred       */
-    unsigned	line;		/*line in file where error occurs    */
     const char	*desc;		/*optional supplied description      */
 } H5E_error_t;
 
