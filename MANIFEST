@@ -1648,8 +1648,7 @@
 ./hl/c++/Makefile.am
 ./hl/c++/Makefile.in
 
-#windows all.zip
-./windows/all.zip
+#windows projects
 
 #windows c++ examples
 ./windows/c++/examples/allcppexamples/allcppexamples.dsp
