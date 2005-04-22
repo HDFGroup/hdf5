@@ -79,7 +79,6 @@ static void display_type(hid_t type, int ind);
 static char *fix_name(const char *path, const char *base);
 
 hid_t thefile;
-char  *prefix;
 const char *progname="h5ls";
 int   d_status;
 
