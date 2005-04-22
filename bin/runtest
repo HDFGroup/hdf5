@@ -647,7 +647,7 @@ DIFFLOG=${LOGDIR}/DIFF_LOG_${TODAY}
 # Snap Test hosts and Configuration files
 ALLHOSTSFILE=${SNAPYARD}/allhostfile
 SNAPTESTCFG=${SNAPYARD}/snaptest.cfg
-TMPFILE="/tmp/#runtest.${TODAY}.$$"
+TMPFILE="${LOGDIR}/#runtest.${TODAY}.$$"
 
 # more processing of setup option if requested
 if test x-$CMD = x-setup; then
