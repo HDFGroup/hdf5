@@ -98,10 +98,6 @@ SOURCE=..\..\..\fortran\src\H5Af.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\H5Dcompact.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\fortran\src\H5Df.c
 # End Source File
 # Begin Source File
@@ -126,31 +122,7 @@ SOURCE=..\..\..\fortran\src\H5If.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\H5Opline.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\H5Pdcpl.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\H5Pdxpl.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\fortran\src\H5Pf.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\H5Pfapl.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\H5Pfcpl.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\H5Ptest.c
 # End Source File
 # Begin Source File
 
@@ -159,10 +131,6 @@ SOURCE=..\..\..\fortran\src\H5Rf.c
 # Begin Source File
 
 SOURCE=..\..\..\fortran\src\H5Sf.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\H5Stest.c
 # End Source File
 # Begin Source File
 
