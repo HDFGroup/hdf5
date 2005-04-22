@@ -36,6 +36,13 @@ New Features
 
     Configuration:
     --------------
+        - On windows, all.zip is deprecated. users should
+             read INSTALL_Windows.txt to know the details.
+             Reasons to deprecate all.zip:
+		1. Avoid confliction for windows programmers
+                2. Decrease size of CVS tree by adding all.zip
+	        3. Avoid using winzip as the intermediate step
+             --KY 2005/04/22
 	- When HDF5 is created as a shared library, it now uses libtool's
 	  shared library versioning scheme. -JML 2005/04/18
 	- HDF5 now uses automake 1.9.5 to generate Makefiles.in.
@@ -621,8 +628,6 @@ AIX-5.1 32-bit        y   y         y        y         y    n             y
 AIX-5.1 64-bit        y   y         y        y         y    n             y
 WinXP           (6)   y   n         n        n         y    y             y
 WinXP Intel           y   n         n        n         y    y             y
-Win2000               y   n         y        n         y    y             y
-Win2000 Intel         y   n         y        n         y    y             y
 WinNT CW              y   n         n        n         n    n             y
 Mac OS X 10.2         y   n         n        n         y    y             y
 FreeBSD               y   y (1)     n        n         y    y             y
@@ -654,8 +659,6 @@ AIX-5.1 32-bit        y       n       y    n    y        y           y
 AIX-5.1 64-bit        y       n       y    n    y        y           y
 WinXP           (6)   y       n       y    n    n        y           y
 WinXP Intel           y       n       y    n    n        y           y
-Win2000               y       n       y    n    n        y           y
-Win2000 Intel         y       n       y    n    n        y           y
 WinNT CW              y       n       y    n    n        y           y
 Mac OS X 10.2         y       n       y    n    y        y           n
 FreeBSD               y       y       y    n    y        y           y
@@ -682,6 +685,8 @@ Linux 2.4 IA64 Intel  y       n       y    n    y        y           y
 
 Known Problems
 ==============
+* On windows XP, Fortran DLLs are not working with DEC Fortran 6.6c and Intel
+  8.1.
 * On IBM AIX systems, parallel HDF5 mode will fail some tests with error
   messages like "INFO: 0031-XXX ...".  This is from the command poe.
   Set the environment variable MP_INFOLEVEL to 0 to minimize the messages
