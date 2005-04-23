@@ -145,14 +145,17 @@ if test "X-" = "X-$f9x_flags_set"; then
   f9x_flags_set=yes
 fi
 
-# The default C++ compiler
-
-# Use AIX supplied C++ compiler by default.
-CXX=${CXX=xlC}
 # IBM MPI-IO implementation has a bug, 
 #it cannot generate correct MPI derived datatype.
 hdf5_mpi_complex_derived_datatype_works=${hdf5_mpi_complex_derived_datatype_works='no'}
 
+# The default C++ compiler
 
+# Use AIX supplied C++ compiler by default.
+CXX=${CXX=xlC}
+
+# Added -qweaksymbol to suppress linker messages warning of duplicate
+# symbols; these warnings are harmless. - BMR
+CXXFLAGS="$CXXFLAGS -qweaksymbol"
 
 
