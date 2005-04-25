@@ -95,9 +95,15 @@ in the file file_io.win32.c and including it on the projects
 #if _MSC_VER >= 1300 /* .Net supports FUNCTION */
 #define H5_HAVE_FUNCTION 1
 #define H5_ULLONG_TO_FP_CAST_WORKS 1
+#if defined __INTEL_COMPILER
+#undef H5_LLONG_TO_FP_CAST_WORKS
+#else
+#define H5_LLONG_TO_FP_CAST_WORKS 1
+#endif
 #else
 #undef H5_HAVE_FUNCTION
 #undef H5_ULLONG_TO_FP_CAST_WORKS 
+#define H5_LLONG_TO_FP_CAST_WORKS 1
 #endif 
 
 #define H5_FC_FUNC_(name, NAME) NAME
