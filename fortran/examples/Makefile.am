@@ -47,6 +47,9 @@ INSTALL_FILES=dsetexample.f90 fileexample.f90 rwdsetexample.f90             \
 # Tell automake which files to clean
 CLEANFILES=*.h5 $(EXTRA_PROG)
 
+# Mark this directory as part of the Fortran API
+HDF_FORTRAN=yes
+
 # Tell automake how to build examples using h5fc
 # Additional dependencies for the examples are listed below
 $(EXTRA_PROG): $(LIBHDF5) $(LIBH5F)

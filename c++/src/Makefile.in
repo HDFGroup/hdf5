@@ -349,6 +349,9 @@ include_HEADERS = H5Cpp.h H5AbstractDs.h H5AtomType.h H5Attribute.h H5Classes.h 
 # distclean.
 DISTCLEANFILES = h5c++ libhdf5.settings
 
+# Mark this directory as part of the C++ API
+HDF_CXX = yes
+
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
 # lib_LIBRARIES are built for lib target), but EXTRA_LIB, EXTRA_PROG, and

@@ -42,6 +42,9 @@ INSTALL_FILES=create.cpp readdata.cpp writedata.cpp compound.cpp         \
 MOSTLYCLEANFILES=*.h5
 CLEANFILES=$(EXTRA_PROG)
 
+# Tell conclude.am that these are C++ tests.
+HDF_CXX=yes
+
 # How to install examples
 EXAMPLEDIR=$(docdir)/hdf5/examples/c++
 

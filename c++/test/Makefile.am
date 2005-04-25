@@ -36,4 +36,7 @@ LDADD=$(LIBH5CPP) $(LIBH5TEST) $(LIBHDF5)
 dsets_SOURCES=dsets.cpp h5cpputil.cpp
 testhdf5_SOURCES=testhdf5.cpp tattr.cpp tfile.cpp th5s.cpp h5cpputil.cpp
 
+# Tell conclude.am that these are C++ tests.
+HDF_CXX=yes
+
 include $(top_srcdir)/config/conclude.am

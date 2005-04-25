@@ -378,6 +378,10 @@ LDADD = libh5test_fortran.la $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)
 # Temporary files
 MOSTLYCLEANFILES = *.h5 *.tmp
 
+# Mark this directory as part of the Fortran API (this affects output
+# from tests in conclude.am)
+HDF_FORTRAN = yes
+
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
 # lib_LIBRARIES are built for lib target), but EXTRA_LIB, EXTRA_PROG, and

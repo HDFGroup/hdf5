@@ -39,6 +39,9 @@ ptesthdf5_fortran_SOURCES=thdf5.f90 ptesthdf5_fortran.f90 thyperslab_wr.f90
 # The tests depend on several libraries.
 LDADD=$(LIBH5FTEST) $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)
 
+# Mark this directory as part of the Fortran API
+HDF_FORTRAN=yes
+
 # Fortran module files can have different extensions and different names
 # (e.g., different capitalizations) on different platforms.  Write rules
 # for them explicitly rather than trying to teach automake about them.

@@ -57,6 +57,10 @@ LDADD=libh5test_fortran.la $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)
 # Temporary files
 MOSTLYCLEANFILES=*.h5 *.tmp
 
+# Mark this directory as part of the Fortran API (this affects output
+# from tests in conclude.am)
+HDF_FORTRAN=yes
+
 ## Fortran dependencies must be hardcoded, unfortunately.
 ##FORTLIBTEST_OBJ= fortranlib_test.lo                                    \
 ##        tH5F.lo tH5D.lo tH5R.lo tH5S.lo tH5T.lo tH5VL.lo tH5Z.lo       \

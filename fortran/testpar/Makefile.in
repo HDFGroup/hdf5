@@ -315,6 +315,9 @@ ptesthdf5_fortran_SOURCES = thdf5.f90 ptesthdf5_fortran.f90 thyperslab_wr.f90
 # The tests depend on several libraries.
 LDADD = $(LIBH5FTEST) $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)
 
+# Mark this directory as part of the Fortran API
+HDF_FORTRAN = yes
+
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
 # lib_LIBRARIES are built for lib target), but EXTRA_LIB, EXTRA_PROG, and

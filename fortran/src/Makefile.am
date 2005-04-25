@@ -92,6 +92,9 @@ else
   H5FC_NAME = h5fc
 endif
 
+# Mark this directory as part of the Fortran API
+HDF_FORTRAN=yes
+
 # Hardcode the dependencies of these files. There isn't a known way of
 # determining this automagically (like we do with the C files). So, when
 # doing a parallel make, some modules could be made way before the

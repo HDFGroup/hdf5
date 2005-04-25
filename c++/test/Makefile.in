@@ -318,6 +318,9 @@ LDADD = $(LIBH5CPP) $(LIBH5TEST) $(LIBHDF5)
 dsets_SOURCES = dsets.cpp h5cpputil.cpp
 testhdf5_SOURCES = testhdf5.cpp tattr.cpp tfile.cpp th5s.cpp h5cpputil.cpp
 
+# Tell conclude.am that these are C++ tests.
+HDF_CXX = yes
+
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
 # lib_LIBRARIES are built for lib target), but EXTRA_LIB, EXTRA_PROG, and

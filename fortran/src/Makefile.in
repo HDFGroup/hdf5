@@ -363,6 +363,9 @@ settings_DATA = libhdf5_fortran.settings
 # is configured for parallel mode
 @BUILD_PARALLEL_CONDITIONAL_TRUE@H5FC_NAME = h5pfc
 
+# Mark this directory as part of the Fortran API
+HDF_FORTRAN = yes
+
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
 # lib_LIBRARIES are built for lib target), but EXTRA_LIB, EXTRA_PROG, and

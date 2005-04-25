@@ -53,4 +53,7 @@ include_HEADERS=H5Cpp.h H5AbstractDs.h H5AtomType.h H5Attribute.h H5Classes.h   
 # distclean.
 DISTCLEANFILES=h5c++ libhdf5.settings
 
+# Mark this directory as part of the C++ API
+HDF_CXX=yes
+
 include $(top_srcdir)/config/conclude.am
