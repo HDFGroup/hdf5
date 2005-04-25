@@ -254,7 +254,7 @@ int main(void)
     SKIPPED()
 #endif
 
-#ifndef H5_LLONG_TO_FP_CAST_BROKEN
+#ifdef H5_ULLONG_TO_FP_CAST_WORKS
     TEST_TYPE_CONTIG(dxpl_id_utrans_inv, unsigned long_long, H5T_NATIVE_ULLONG, "ullong", transformData, 0);
 #else
     TESTING("contiguous, with type conversion (float->ullong)")
@@ -280,7 +280,7 @@ int main(void)
     SKIPPED()
 #endif
 
-#ifndef H5_LLONG_TO_FP_CAST_BROKEN
+#ifdef H5_ULLONG_TO_FP_CAST_WORKS
     TEST_TYPE_CHUNK(dxpl_id_utrans_inv, unsigned long_long, H5T_NATIVE_ULLONG, "ullong", transformData, 0);
 #else
     TESTING("chunked, with type conversion (float->ullong)")
