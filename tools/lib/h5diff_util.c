@@ -59,8 +59,8 @@ void parallel_print(const char* format, ...)
 	    if((bytes_written+1) == (OUTBUFF_SIZE-outBuffOffset))
 #endif 
 	    {
-		/* Delete the characters that were written to outBuff since they will be written to the overflow_file */
-		memset(outBuff+outBuffOffset, 0, OUTBUFF_SIZE - outBuffOffset); 
+		/* Terminate the outbuff at the end of the previous output */
+		outBuff[outBuffOffset] = '\0';
 		
 		overflow_file = HDtmpfile(); 
 		if(overflow_file == NULL)

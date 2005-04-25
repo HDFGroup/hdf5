@@ -15,7 +15,6 @@
 #ifndef _PH5DIFF_H__
 #define _PH5DIFF_H__
 
-
 #define PRINT_DATA_MAX_SIZE 	512
 #define OUTBUFF_SIZE 		PRINT_DATA_MAX_SIZE*4
 /* Send from manager to workers */
