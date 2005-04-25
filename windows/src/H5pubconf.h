@@ -38,7 +38,11 @@ in the file file_io.win32.c and including it on the projects
 
 #define H5_SIZEOF_LONG 4
 
+#if defined __INTEL_COMPILER
+#define H5_SIZEOF_LONG_DOUBLE 12
+#else
 #define H5_SIZEOF_LONG_DOUBLE 8
+#endif
 #define H5_SIZEOF_OFF_T 4
 #define H5_SIZEOF_SHORT 2
 #define H5_SIZEOF_SIZE_T 4
