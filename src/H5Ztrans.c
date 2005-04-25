@@ -154,7 +154,7 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
 #define ULLONG_TO_FP_XFORM_TYPE_OP_ERROR  
 #endif
 
-#ifndef H5_LLONG_TO_FP_CAST_WORKS
+#ifdef H5_LLONG_TO_FP_CAST_BROKEN
 #define   LLONG_TO_FP_XFORM_TYPE_OP_ERROR	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Cannot convert from long long to double: required for data transform") 
 #else
 #define LLONG_TO_FP_XFORM_TYPE_OP_ERROR
