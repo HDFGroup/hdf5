@@ -141,39 +141,25 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
 										\
 }
 
-#ifdef H5_ULLONG_TO_FP_CAST_WORKS
-#define H5Z_XFORM_TYPE_OP(RESL,RESR,TYPE,OP,SIZE)			\
-{									\
-    if((TYPE) == H5T_NATIVE_CHAR)					\
-	H5Z_XFORM_DO_OP1((RESL), (RESR), char, OP, (SIZE))		\
-    else if((TYPE) == H5T_NATIVE_UCHAR)					\
-	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned char, OP, (SIZE))	\
-    else if((TYPE) == H5T_NATIVE_SCHAR)					\
-	H5Z_XFORM_DO_OP1((RESL), (RESR), signed char, OP, (SIZE))	\
-    else if((TYPE) == H5T_NATIVE_SHORT)					\
-	H5Z_XFORM_DO_OP1((RESL), (RESR), short, OP, (SIZE))		\
-    else if((TYPE) == H5T_NATIVE_USHORT)				\
-	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned short, OP, (SIZE))	\
-    else if((TYPE) == H5T_NATIVE_INT)					\
-	H5Z_XFORM_DO_OP1((RESL), (RESR), int, OP, (SIZE))		\
-    else if((TYPE) == H5T_NATIVE_UINT)					\
-	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned int, OP, (SIZE))	\
-    else if((TYPE) == H5T_NATIVE_LONG)					\
-	H5Z_XFORM_DO_OP1((RESL), (RESR), long, OP, (SIZE))		\
-    else if((TYPE) == H5T_NATIVE_ULONG)					\
-	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned long, OP, (SIZE))	\
-    else if((TYPE) == H5T_NATIVE_LLONG)					\
-	H5Z_XFORM_DO_OP1((RESL), (RESR), long_long, OP, (SIZE))		\
-    else if((TYPE) == H5T_NATIVE_ULLONG)				\
-	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned long_long, OP, (SIZE))\
-    else if((TYPE) == H5T_NATIVE_FLOAT)					\
-	H5Z_XFORM_DO_OP1((RESL), (RESR), float, OP, (SIZE))		\
-    else if((TYPE) == H5T_NATIVE_DOUBLE)				\
-	H5Z_XFORM_DO_OP1((RESL), (RESR), double, OP, (SIZE))		\
-    else if((TYPE) == H5T_NATIVE_LDOUBLE)				\
-	H5Z_XFORM_DO_OP1((RESL), (RESR), long double, OP, (SIZE))	\
-}
+/* Due to the undefined nature of embedding macros/conditionals within macros, we employ
+ * this clever little hack.  We always compile in the code for the type conversion, even if
+ * it isn't supported in the compiler.  To avoid errors, we define  ULLONG_TO_FP_XFORM_TYPE_OP_ERROR on
+ * unsupported compilers, which will cause the code to execute HGOTO_ERROR and skip the code
+ * that does the actual conversion */
+
+
+#ifndef H5_ULLONG_TO_FP_CAST_WORKS
+#define   ULLONG_TO_FP_XFORM_TYPE_OP_ERROR	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Cannot convert from unsigned long long to double: required for data transform") 
 #else
+#define ULLONG_TO_FP_XFORM_TYPE_OP_ERROR  
+#endif
+
+#ifndef H5_LLONG_TO_FP_CAST_WORKS
+#define   LLONG_TO_FP_XFORM_TYPE_OP_ERROR	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Cannot convert from long long to double: required for data transform") 
+#else
+#define LLONG_TO_FP_XFORM_TYPE_OP_ERROR
+#endif
+
 #define H5Z_XFORM_TYPE_OP(RESL,RESR,TYPE,OP,SIZE)			\
 {									\
     if((TYPE) == H5T_NATIVE_CHAR)					\
@@ -195,10 +181,15 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
     else if((TYPE) == H5T_NATIVE_ULONG)					\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned long, OP, (SIZE))	\
     else if((TYPE) == H5T_NATIVE_LLONG)					\
+    {									\
+	LLONG_TO_FP_XFORM_TYPE_OP_ERROR					\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), long_long, OP, (SIZE))		\
+    }									\
     else if((TYPE) == H5T_NATIVE_ULLONG)				\
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,                       \
-	    "Cannot convert from unsigned long long to double: required for data transform") \
+    {									\
+	 ULLONG_TO_FP_XFORM_TYPE_OP_ERROR				\
+         H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned long_long, OP, (SIZE)) \
+    }									\
     else if((TYPE) == H5T_NATIVE_FLOAT)					\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), float, OP, (SIZE))		\
     else if((TYPE) == H5T_NATIVE_DOUBLE)				\
@@ -206,7 +197,6 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
     else if((TYPE) == H5T_NATIVE_LDOUBLE)				\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), long double, OP, (SIZE))	\
 }
-#endif
 
 #define H5Z_XFORM_DO_OP3(OP)                                                                                                                    \
 {                                                                                                                                               \
