@@ -650,7 +650,7 @@ H5_FCDLL int_f nh5open_c(void);
 H5_FCDLL int_f nh5close_c(void);
 H5_FCDLL int_f nh5init_types_c(hid_t_f *types, hid_t_f * floatingtypes, hid_t_f * integertypes);
 H5_FCDLL int_f nh5close_types_c(hid_t_f *types, int_f *lentypes, hid_t_f * floatingtypes, int_f * floatinglen, hid_t_f * integertypes,  int_f * integerlen);
- H5_FCDLL int_f nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
+H5_FCDLL int_f nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
                               int_f *h5fd_flags, hid_t_f *h5fd_hid_flags,
                               int_f *h5g_flags, int_f *h5i_flags,
                               int_f *h5p_flags, int_f *h5r_flags, int_f *h5s_flags,

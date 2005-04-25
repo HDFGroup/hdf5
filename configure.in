@@ -2940,7 +2940,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  c++/examples/Makefile
                  fortran/Makefile
                  fortran/src/h5fc
-                 fortran/src/H5fortran_types.f90
                  fortran/src/libhdf5_fortran.settings
                  fortran/src/Makefile
                  fortran/test/Makefile

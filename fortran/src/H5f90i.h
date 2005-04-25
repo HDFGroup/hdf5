@@ -22,17 +22,17 @@
 
 #include "H5private.h"
 
+/*
+ * Include generated header.  This header defines integer types,
+ * so this file only needs to define _fcd and real_f.
+ */
+#include "H5f90i_gen.h"
+
 #if (defined (UNICOS) || (defined (_UNICOS)))
 
 #include <fortran.h>
 
 /*typedef char*              _fcd;*/
-typedef long               haddr_t_f;
-typedef long               hsize_t_f;
-typedef long               hssize_t_f;
-typedef long               size_t_f;
-typedef long               int_f;
-typedef long               hid_t_f;
 typedef double             real_f;
 
 #endif /* UNICOS */
@@ -40,12 +40,6 @@ typedef double             real_f;
 #if defined(IBM6000) || defined(_AIX)
 
 typedef char              *_fcd;
-typedef long long         haddr_t_f;
-typedef long long         hsize_t_f;
-typedef long long         hssize_t_f;
-typedef int               size_t_f;
-typedef int               int_f;
-typedef int               hid_t_f;
 typedef float             real_f;
 #define _fcdtocp(desc) (desc)
 #endif /*IBM6000*/
@@ -53,12 +47,6 @@ typedef float             real_f;
 /* MAC APPLE definitions with IBM XL compiler*/
 #if defined(__APPLE__)
 typedef char              *_fcd;
-typedef long long         haddr_t_f;
-typedef long long         hsize_t_f;
-typedef long long         hssize_t_f;
-typedef int               size_t_f;
-typedef int               int_f;
-typedef int               hid_t_f;
 typedef float             real_f;
 #define _fcdtocp(desc) (desc)
 
@@ -69,34 +57,17 @@ typedef float             real_f;
 
 /* Common definitions */
 typedef char              *_fcd;
-typedef int               int_f;
-typedef int               hid_t_f;
 typedef float             real_f;
 #define _fcdtocp(desc) (desc)
 
 /* IA32 specific definitions */
 #if (defined(i386) || defined(__i386) || defined(__i386__))
 
-typedef long long         haddr_t_f;
-typedef long long         hsize_t_f;
-typedef long long         hssize_t_f;
-typedef int               size_t_f;
-
 /* AMD64 specific definitions */
 #elif defined __x86_64__
 
-typedef long long         haddr_t_f;
-typedef long long         hsize_t_f;
-typedef long long         hssize_t_f;
-typedef int               size_t_f;
-
 /* IA64 specific definitions */
 #elif defined __ia64
-
-typedef long              haddr_t_f;
-typedef long              hsize_t_f;
-typedef long              hssize_t_f;
-typedef long              size_t_f;
 
 #endif /* IA64 */
 #endif /* LINUX*/
@@ -104,12 +75,6 @@ typedef long              size_t_f;
 #if defined(IRIX) || defined(IRIS4) || defined(sgi) || defined(__sgi__) || defined(__sgi)
 
 typedef char          *_fcd;
-typedef long          haddr_t_f;
-typedef long          hsize_t_f;
-typedef long          hssize_t_f;
-typedef long          size_t_f;
-typedef int           int_f;
-typedef int           hid_t_f;
 typedef float         real_f;
 #define _fcdtocp(desc) (desc)
 #endif /* IRIX */
@@ -117,12 +82,6 @@ typedef float         real_f;
 #if (defined(SUN) || defined(sun) || defined(__sun__) || defined(__SUNPRO_C)) & !defined(__i386)
 
 typedef char              *_fcd;
-typedef long long         haddr_t_f;
-typedef long long         hssize_t_f;
-typedef long long         hsize_t_f;
-typedef int               size_t_f;
-typedef int               int_f;
-typedef int               hid_t_f;
 typedef float             real_f;
 #define _fcdtocp(desc) (desc)
 
@@ -131,12 +90,6 @@ typedef float             real_f;
 #if defined DEC_ALPHA || (defined __alpha && defined __unix__ && !defined __linux__)
 
 typedef char             *_fcd;
-typedef long             haddr_t_f;
-typedef long             hsize_t_f;
-typedef long             hssize_t_f;
-typedef long             size_t_f;
-typedef int              int_f;
-typedef int              hid_t_f;
 typedef float            real_f;
 #define _fcdtocp(desc) (desc)
 
@@ -145,12 +98,6 @@ typedef float            real_f;
 #if defined __alpha__ && defined __linux__
 
 typedef char             *_fcd;
-typedef long long        haddr_t_f;
-typedef long long        hsize_t_f;
-typedef long long        hssize_t_f;
-typedef long long        size_t_f;
-typedef int              int_f;
-typedef int              hid_t_f;
 typedef float            real_f;
 #define _fcdtocp(desc) (desc)
 
@@ -159,27 +106,14 @@ typedef float            real_f;
 #if defined(HP9000) || (!defined(__convexc__) && (defined(hpux) || defined(__hpux)))
 
 typedef char           *_fcd;
-typedef long long      haddr_t_f;
-typedef long long      hsize_t_f;
-typedef long long      hssize_t_f;
-typedef long           size_t_f;
-typedef int            int_f;
-typedef int            hid_t_f;
 typedef float          real_f;
 #define _fcdtocp(desc) (desc)
 
 #endif /* HP9000 */
 
-
 #if defined _WINDOWS || defined WIN32
 
 typedef char              *_fcd;
-typedef int               haddr_t_f;
-typedef int               hsize_t_f;
-typedef int               hssize_t_f;
-typedef int               size_t_f;
-typedef int               int_f;
-typedef int               hid_t_f;
 typedef float             real_f;
 
 #define _fcdtocp(desc) (desc)
@@ -191,31 +125,8 @@ typedef float             real_f;
 
 /* Common definitions */
 typedef char              *_fcd;
-typedef int               int_f;
-typedef int               hid_t_f;
 typedef float             real_f;
 #define _fcdtocp(desc) (desc)
-
-/* IA32 specific definitions */
-#if (defined(i386) || defined(__i386) || defined(__i386__))
-typedef long long         haddr_t_f;
-typedef long long         hsize_t_f;
-typedef long long         hssize_t_f;
-typedef int               size_t_f;
-/* AMD64 specific definitions */
-#elif defined __x86_64__
-typedef long long         haddr_t_f;
-typedef long long         hsize_t_f;
-typedef long long         hssize_t_f;
-typedef int               size_t_f;
-/* IA64 specific definitions */
-#elif defined __ia64
-typedef long              haddr_t_f;
-typedef long              hsize_t_f;
-typedef long              hssize_t_f;
-typedef long              size_t_f;
-#endif /* IA64 */
-
 
 #endif /* FreeBSD */
 
