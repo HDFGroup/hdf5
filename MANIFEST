@@ -1620,7 +1620,6 @@
 ./hl/test/earth.pal
 
 # hl fortran
-./hl/fortran/src/H5f90i.h
 ./hl/fortran/src/H5IMfc.c
 ./hl/fortran/src/H5IMff.f90
 ./hl/fortran/src/H5LTf90proto.h
