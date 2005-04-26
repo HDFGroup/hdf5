@@ -74,16 +74,19 @@ const char *FILENAME[] = {
 #define DSET_SET_LOCAL_NAME	"set_local"
 #define DSET_SET_LOCAL_NAME_2	"set_local_2"
 #define DSET_ONEBYTE_SHUF_NAME   "onebyte_shuffle"
-#define DSET_NBIT_INT_NAME            "nbit_int"
-#define DSET_NBIT_FLOAT_NAME          "nbit_float"
-#define DSET_NBIT_DOUBLE_NAME         "nbit_double"
-#define DSET_NBIT_ARRAY_NAME          "nbit_array"
-#define DSET_NBIT_COMPOUND_NAME       "nbit_compound"
-#define DSET_NBIT_COMPOUND_NAME_2     "nbit_compound_2"
-#define DSET_NBIT_COMPOUND_NAME_3     "nbit_compound_3"
-#define DSET_SCALEOFFSET_INT_NAME     "scaleoffset_int"
-#define DSET_SCALEOFFSET_INT_NAME_2   "scaleoffset_int_2"
-#define DSET_SCALEOFFSET_FLOAT_NAME   "scaleoffset_float"
+#define DSET_NBIT_INT_NAME             "nbit_int"
+#define DSET_NBIT_FLOAT_NAME           "nbit_float"
+#define DSET_NBIT_DOUBLE_NAME          "nbit_double"
+#define DSET_NBIT_ARRAY_NAME           "nbit_array"
+#define DSET_NBIT_COMPOUND_NAME        "nbit_compound"
+#define DSET_NBIT_COMPOUND_NAME_2      "nbit_compound_2"
+#define DSET_NBIT_COMPOUND_NAME_3      "nbit_compound_3"
+#define DSET_SCALEOFFSET_INT_NAME      "scaleoffset_int"
+#define DSET_SCALEOFFSET_INT_NAME_2    "scaleoffset_int_2"
+#define DSET_SCALEOFFSET_FLOAT_NAME    "scaleoffset_float"
+#define DSET_SCALEOFFSET_FLOAT_NAME_2  "scaleoffset_float_2"
+#define DSET_SCALEOFFSET_DOUBLE_NAME   "scaleoffset_double"
+#define DSET_SCALEOFFSET_DOUBLE_NAME_2 "scaleoffset_double_2"
 #define DSET_COMPARE_DCPL_NAME	"compare_dcpl"
 #define DSET_COMPARE_DCPL_NAME_2	"compare_dcpl_2"
 
@@ -3800,7 +3803,7 @@ test_scaleoffset_int(hid_t file)
 
     /* Set up to use scaleoffset filter, let library calculate minbits */
     if (H5Pset_chunk(dc, 2, chunk_size)<0) goto error;
-    if (H5Pset_scaleoffset(dc, 0)<0) goto error; 
+    if (H5Pset_scaleoffset(dc, 0, 2)<0) goto error; 
 
     /* Create the dataset */
     if ((dataset = H5Dcreate(file, DSET_SCALEOFFSET_INT_NAME, datatype,
@@ -3917,7 +3920,6 @@ test_scaleoffset_int_2(hid_t file)
     const char          *not_supported= "    Scaleoffset is not enabled.";
 #endif /* H5_HAVE_FILTER_SCALEOFFSET */
 
-    puts("Testing scaleoffset filter");
     TESTING("    scaleoffset int with fill value (setup)");
 #ifdef H5_HAVE_FILTER_SCALEOFFSET
     datatype = H5Tcopy(H5T_NATIVE_INT);
@@ -3937,7 +3939,7 @@ test_scaleoffset_int_2(hid_t file)
 
     /* Set up to use scaleoffset filter, let library calculate minbits */
     if (H5Pset_chunk(dc, 2, chunk_size)<0) goto error;
-    if (H5Pset_scaleoffset(dc, 0)<0) goto error;
+    if (H5Pset_scaleoffset(dc, 0, 2)<0) goto error;
 
     /* Create the dataset */
     if ((dataset = H5Dcreate(file, DSET_SCALEOFFSET_INT_NAME_2, datatype,
@@ -4005,7 +4007,7 @@ test_scaleoffset_int_2(hid_t file)
             H5_FAILED();
             printf("    Read different values than written.\n");
             printf("    At index %lu,%lu\n", 0, (unsigned long)j);
-            goto error; 
+            goto error;
         }
     }
 
@@ -4032,15 +4034,15 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_scaleoffset_float
  *
- * Purpose:     Tests the float datatype for scaleoffset filter, the filter
- *              does nothing to floating-point datatype at present
+ * Purpose:     Tests the float datatype for scaleoffset filter, with fill
+ *              value undefined, using variable-minimum-bits method
  *
  * Return:      Success:        0
  *
  *              Failure:        -1
  *
  * Programmer:  Xiaowen Wu
- *              Tuesday, Mar. 22th, 2005
+ *              Wednesday, Apr. 20th, 2005
  *
  * Modifications:
  *
@@ -4060,8 +4062,7 @@ test_scaleoffset_float(hid_t file)
     const char          *not_supported= "    Scaleoffset is not enabled.";
 #endif /* H5_HAVE_FILTER_SCALEOFFSET */
 
-    puts("Testing scaleoffset filter");
-    TESTING("    scaleoffset float (setup)");
+    TESTING("    scaleoffset float without fill value, D-scaling (setup)");
 #ifdef H5_HAVE_FILTER_SCALEOFFSET
     datatype = H5Tcopy(H5T_NATIVE_FLOAT);
 
@@ -4073,10 +4074,15 @@ test_scaleoffset_float(hid_t file)
 
     /* Create the dataset property list  */
     if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
-    
-    /* Set up to use scaleoffset filter, let library calculate minbits */
+
+    /* Fill value undefined */
+    if (H5Pset_fill_value(dc, datatype, NULL)<0) goto error;
+
+    /* Set up to use scaleoffset filter, decimal scale factor is 3, 
+     * use variable-minimum-bits method 
+     */
     if (H5Pset_chunk(dc, 2, chunk_size)<0) goto error;
-    if (H5Pset_scaleoffset(dc, 0)<0) goto error; 
+    if (H5Pset_scaleoffset(dc, 3, 0)<0) goto error; 
 
     /* Create the dataset */
     if ((dataset = H5Dcreate(file, DSET_SCALEOFFSET_FLOAT_NAME, datatype,
@@ -4084,8 +4090,13 @@ test_scaleoffset_float(hid_t file)
 
     /* Initialize data */
     for (i= 0;i< size[0]; i++)
-      for (j = 0; j < size[1]; j++)  
-        orig_data[i][j] = (HDrandom() % 10000) / 1000.0;
+      for (j = 0; j < size[1]; j++) {  
+        orig_data[i][j] = (HDrandom() % 100000) / 10000.0;
+
+        /* even-numbered values are negtive */
+        if((i*size[1]+j+1)%2 == 0) 
+            orig_data[i][j] = -orig_data[i][j];
+      }
 
     PASSED();
 #else
@@ -4098,7 +4109,7 @@ test_scaleoffset_float(hid_t file)
      * to it.
      *----------------------------------------------------------------------
      */
-    TESTING("    scaleoffset float (write)");
+    TESTING("    scaleoffset float without fill value, D-scaling (write)");
 
 #ifdef H5_HAVE_FILTER_SCALEOFFSET
     if (H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
@@ -4113,7 +4124,7 @@ test_scaleoffset_float(hid_t file)
      * STEP 2: Try to read the data we just wrote.
      *----------------------------------------------------------------------
      */
-    TESTING("    scaleoffset float (read)");
+    TESTING("    scaleoffset float without fill value, D-scaling (read)");
 
 #ifdef H5_HAVE_FILTER_SCALEOFFSET
     /* Read the dataset back */
@@ -4123,12 +4134,441 @@ test_scaleoffset_float(hid_t file)
     /* Check that the values read are the same as the values written */
     for (i=0; i<size[0]; i++) {
         for (j=0; j<size[1]; j++) {
-            if (new_data[i][j] != orig_data[i][j]) {
+            if (HDfabs(new_data[i][j]-orig_data[i][j]) > HDpow(10, -3)) {
                 H5_FAILED();
                 printf("    Read different values than written.\n");
                 printf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
-                goto error; 
+                goto error;
             }
+        }
+    }
+
+    /*----------------------------------------------------------------------
+     * Cleanup
+     *----------------------------------------------------------------------
+     */
+    if (H5Tclose(datatype)<0) goto error;
+    if (H5Pclose(dc)<0) goto error;
+    if (H5Sclose(space)<0) goto error;
+    if (H5Dclose(dataset)<0) goto error;
+
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+    return 0;
+error:
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_scaleoffset_float_2
+ *
+ * Purpose:     Tests the float datatype for scaleoffset filter, with fill
+ *              value set, using variable-minimum-bits method
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Xiaowen Wu
+ *              Wednesday, Apr. 20th, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_scaleoffset_float_2(hid_t file)
+{
+#ifdef H5_HAVE_FILTER_SCALEOFFSET
+    hid_t               dataset, datatype, space, mspace, dc;
+    const hsize_t       size[2] = {2, 5};
+    const hsize_t       chunk_size[2] = {2,5};
+    float               orig_data[2][5];
+    float               new_data[2][5];
+    float               fillval;
+    hssize_t            start[2];  /* Start of hyperslab */
+    hsize_t             stride[2]; /* Stride of hyperslab */
+    hsize_t             count[2];  /* Block count */
+    hsize_t             block[2];  /* Block sizes */
+    hsize_t             j;
+#else /* H5_HAVE_FILTER_SCALEOFFSET */
+    const char          *not_supported= "    Scaleoffset is not enabled.";
+#endif /* H5_HAVE_FILTER_SCALEOFFSET */
+
+    TESTING("    scaleoffset float with fill value, D-scaling (setup)");
+#ifdef H5_HAVE_FILTER_SCALEOFFSET
+    datatype = H5Tcopy(H5T_NATIVE_FLOAT);
+
+    /* Set order of dataset datatype */
+    if(H5Tset_order(datatype, H5T_ORDER_BE)<0) goto error;  
+
+    /* Create the data space for the dataset */
+    if ((space = H5Screate_simple(2, size, NULL))<0) goto error;
+
+    /* Create the dataset property list  */
+    if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+
+    /* Set fill value */
+    fillval = 10000.0;
+    if (H5Pset_fill_value(dc, H5T_NATIVE_FLOAT, &fillval)<0) goto error;
+
+    /* Set up to use scaleoffset filter, decimal scale factor is 3, 
+     * use variable-minimum-bits method 
+     */
+    if (H5Pset_chunk(dc, 2, chunk_size)<0) goto error;
+    if (H5Pset_scaleoffset(dc, 3, 0)<0) goto error;
+
+    /* Create the dataset */
+    if ((dataset = H5Dcreate(file, DSET_SCALEOFFSET_FLOAT_NAME_2, datatype,
+                             space,dc))<0) goto error;
+
+    /* Create the memory data space */
+    if ((mspace = H5Screate_simple(2, size, NULL))<0) goto error;
+
+    /* Select hyperslab for data to write, using 1x5 blocks, 
+     * (1,1) stride and (1,1) count starting at the position (0,0).
+     */
+    start[0]  = 0; start[1]  = 0;
+    stride[0] = 1; stride[1] = 1;
+    count[0]  = 1; count[1]  = 1;    
+    block[0]  = 1; block[1]  = 5;
+    if(H5Sselect_hyperslab(mspace, H5S_SELECT_SET, start, 
+                           stride, count, block)<0) goto error;
+
+    /* Initialize data of hyperslab */
+    for (j = 0; j < size[1]; j++) { 
+        orig_data[0][j] = (HDrandom() % 100000) / 1000.0;
+
+        /* even-numbered values are negtive */ 
+        if((j+1)%2 == 0) 
+            orig_data[0][j] = -orig_data[0][j];
+    }
+
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+
+    /*----------------------------------------------------------------------
+     * STEP 1: Test scaleoffset by setting up a chunked dataset and writing
+     * to it.
+     *----------------------------------------------------------------------
+     */
+    TESTING("    scaleoffset float with fill value, D-scaling (write)");
+
+#ifdef H5_HAVE_FILTER_SCALEOFFSET
+    /* only data in the hyperslab will be written, other value should be fill value */
+    if (H5Dwrite(dataset, H5T_NATIVE_FLOAT, mspace, mspace, H5P_DEFAULT,
+                 orig_data)<0) goto error;
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+
+    /*----------------------------------------------------------------------
+     * STEP 2: Try to read the data we just wrote.
+     *----------------------------------------------------------------------
+     */
+    TESTING("    scaleoffset float with fill value, D-scaling (read)");
+
+#ifdef H5_HAVE_FILTER_SCALEOFFSET
+    /* Read the dataset back */
+    if (H5Dread(dataset, H5T_NATIVE_FLOAT, mspace, mspace, H5P_DEFAULT, 
+                new_data)<0) goto error;
+
+    /* Check that the values read are the same as the values written */
+    for (j=0; j<size[1]; j++) {
+        if (HDfabs(new_data[0][j]-orig_data[0][j]) > HDpow(10, -3)) {
+            H5_FAILED();
+            printf("    Read different values than written.\n");
+            printf("    At index %lu,%lu\n", 0, (unsigned long)j);
+            goto error; 
+        }
+    }
+    /*----------------------------------------------------------------------
+     * Cleanup
+     *----------------------------------------------------------------------
+     */
+    if (H5Tclose(datatype)<0) goto error;
+    if (H5Pclose(dc)<0) goto error;
+    if (H5Sclose(space)<0) goto error;
+    if (H5Dclose(dataset)<0) goto error;
+
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+    return 0;
+error:
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_scaleoffset_double
+ *
+ * Purpose:     Tests the double datatype for scaleoffset filter, with fill
+ *              value undefined, using variable-minimum-bits method
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Xiaowen Wu
+ *              Monday, Apr. 25th, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_scaleoffset_double(hid_t file)
+{
+#ifdef H5_HAVE_FILTER_SCALEOFFSET
+    hid_t               dataset, datatype, space, dc;
+    const hsize_t       size[2] = {2, 5};
+    const hsize_t       chunk_size[2] = {2,5};
+    double              orig_data[2][5];
+    double              new_data[2][5];
+    hsize_t             i, j;
+#else /* H5_HAVE_FILTER_SCALEOFFSET */
+    const char          *not_supported= "    Scaleoffset is not enabled.";
+#endif /* H5_HAVE_FILTER_SCALEOFFSET */
+
+    TESTING("    scaleoffset double without fill value, D-scaling (setup)");
+#ifdef H5_HAVE_FILTER_SCALEOFFSET
+    datatype = H5Tcopy(H5T_NATIVE_DOUBLE);
+
+    /* Set order of dataset datatype */
+    if(H5Tset_order(datatype, H5T_ORDER_BE)<0) goto error; 
+
+    /* Create the data space */
+    if ((space = H5Screate_simple(2, size, NULL))<0) goto error;
+
+    /* Create the dataset property list  */
+    if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+
+    /* Fill value undefined */
+    if (H5Pset_fill_value(dc, datatype, NULL)<0) goto error;
+
+    /* Set up to use scaleoffset filter, decimal scale factor is 7, 
+     * use variable-minimum-bits method 
+     */
+    if (H5Pset_chunk(dc, 2, chunk_size)<0) goto error;
+    if (H5Pset_scaleoffset(dc, 7, 0)<0) goto error; 
+
+    /* Create the dataset */
+    if ((dataset = H5Dcreate(file, DSET_SCALEOFFSET_DOUBLE_NAME, datatype,
+                             space,dc))<0) goto error;
+
+    /* Initialize data */
+    for (i= 0;i< size[0]; i++)
+      for (j = 0; j < size[1]; j++) {  
+        orig_data[i][j] = (HDrandom() % 10000000) / 10000000.0;
+
+        /* even-numbered values are negtive */
+        if((i*size[1]+j+1)%2 == 0) 
+            orig_data[i][j] = -orig_data[i][j];
+      }
+
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+
+    /*----------------------------------------------------------------------
+     * STEP 1: Test scaleoffset by setting up a chunked dataset and writing
+     * to it.
+     *----------------------------------------------------------------------
+     */
+    TESTING("    scaleoffset double without fill value, D-scaling (write)");
+
+#ifdef H5_HAVE_FILTER_SCALEOFFSET
+    if (H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                 orig_data)<0) goto error;
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+
+    /*----------------------------------------------------------------------
+     * STEP 2: Try to read the data we just wrote.
+     *----------------------------------------------------------------------
+     */
+    TESTING("    scaleoffset double without fill value, D-scaling (read)");
+
+#ifdef H5_HAVE_FILTER_SCALEOFFSET
+    /* Read the dataset back */
+    if (H5Dread(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                new_data)<0) goto error;
+
+    /* Check that the values read are the same as the values written */
+    for (i=0; i<size[0]; i++) {
+        for (j=0; j<size[1]; j++) {
+            if (HDfabs(new_data[i][j]-orig_data[i][j]) > HDpow(10, -7)) {
+                H5_FAILED();
+                printf("    Read different values than written.\n");
+                printf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
+                goto error;
+            }
+        }
+    }
+
+    /*----------------------------------------------------------------------
+     * Cleanup
+     *----------------------------------------------------------------------
+     */
+    if (H5Tclose(datatype)<0) goto error;
+    if (H5Pclose(dc)<0) goto error;
+    if (H5Sclose(space)<0) goto error;
+    if (H5Dclose(dataset)<0) goto error;
+
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+    return 0;
+error:
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_scaleoffset_double_2
+ *
+ * Purpose:     Tests the double datatype for scaleoffset filter, with fill
+ *              value set, using variable-minimum-bits method
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Xiaowen Wu
+ *              Monday, Apr. 25th, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_scaleoffset_double_2(hid_t file)
+{
+#ifdef H5_HAVE_FILTER_SCALEOFFSET
+    hid_t               dataset, datatype, space, mspace, dc;
+    const hsize_t       size[2] = {2, 5};
+    const hsize_t       chunk_size[2] = {2,5};
+    double              orig_data[2][5];
+    double              new_data[2][5];
+    double              fillval;
+    hssize_t            start[2];  /* Start of hyperslab */
+    hsize_t             stride[2]; /* Stride of hyperslab */
+    hsize_t             count[2];  /* Block count */
+    hsize_t             block[2];  /* Block sizes */
+    hsize_t             j;
+#else /* H5_HAVE_FILTER_SCALEOFFSET */
+    const char          *not_supported= "    Scaleoffset is not enabled.";
+#endif /* H5_HAVE_FILTER_SCALEOFFSET */
+
+    TESTING("    scaleoffset double with fill value, D-scaling (setup)");
+#ifdef H5_HAVE_FILTER_SCALEOFFSET
+    datatype = H5Tcopy(H5T_NATIVE_DOUBLE);
+
+    /* Set order of dataset datatype */
+    if(H5Tset_order(datatype, H5T_ORDER_BE)<0) goto error;  
+
+    /* Create the data space for the dataset */
+    if ((space = H5Screate_simple(2, size, NULL))<0) goto error;
+
+    /* Create the dataset property list  */
+    if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+
+    /* Set fill value */
+    fillval = 10000.0;
+    if (H5Pset_fill_value(dc, H5T_NATIVE_DOUBLE, &fillval)<0) goto error;
+
+    /* Set up to use scaleoffset filter, decimal scale factor is 7, 
+     * use variable-minimum-bits method 
+     */
+    if (H5Pset_chunk(dc, 2, chunk_size)<0) goto error;
+    if (H5Pset_scaleoffset(dc, 7, 0)<0) goto error;
+
+    /* Create the dataset */
+    if ((dataset = H5Dcreate(file, DSET_SCALEOFFSET_DOUBLE_NAME_2, datatype,
+                             space,dc))<0) goto error;
+
+    /* Create the memory data space */
+    if ((mspace = H5Screate_simple(2, size, NULL))<0) goto error;
+
+    /* Select hyperslab for data to write, using 1x5 blocks, 
+     * (1,1) stride and (1,1) count starting at the position (0,0).
+     */
+    start[0]  = 0; start[1]  = 0;
+    stride[0] = 1; stride[1] = 1;
+    count[0]  = 1; count[1]  = 1;    
+    block[0]  = 1; block[1]  = 5;
+    if(H5Sselect_hyperslab(mspace, H5S_SELECT_SET, start, 
+                           stride, count, block)<0) goto error;
+
+    /* Initialize data of hyperslab */
+    for (j = 0; j < size[1]; j++) { 
+        orig_data[0][j] = (HDrandom() % 10000000) / 10000000.0;
+
+        /* even-numbered values are negtive */ 
+        if((j+1)%2 == 0) 
+            orig_data[0][j] = -orig_data[0][j];
+    }
+
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+
+    /*----------------------------------------------------------------------
+     * STEP 1: Test scaleoffset by setting up a chunked dataset and writing
+     * to it.
+     *----------------------------------------------------------------------
+     */
+    TESTING("    scaleoffset double with fill value, D-scaling (write)");
+
+#ifdef H5_HAVE_FILTER_SCALEOFFSET
+    /* only data in the hyperslab will be written, other value should be fill value */
+    if (H5Dwrite(dataset, H5T_NATIVE_DOUBLE, mspace, mspace, H5P_DEFAULT,
+                 orig_data)<0) goto error;
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+
+    /*----------------------------------------------------------------------
+     * STEP 2: Try to read the data we just wrote.
+     *----------------------------------------------------------------------
+     */
+    TESTING("    scaleoffset double with fill value, D-scaling (read)");
+
+#ifdef H5_HAVE_FILTER_SCALEOFFSET
+    /* Read the dataset back */
+    if (H5Dread(dataset, H5T_NATIVE_DOUBLE, mspace, mspace, H5P_DEFAULT, 
+                new_data)<0) goto error;
+
+    /* Check that the values read are the same as the values written */
+    for (j=0; j<size[1]; j++) {
+        if (HDfabs(new_data[0][j]-orig_data[0][j]) > HDpow(10, -7)) {
+            H5_FAILED();
+            printf("    Read different values than written.\n");
+            printf("    At index %lu,%lu\n", 0, (unsigned long)j);
+            goto error; 
         }
     }
 
@@ -5557,7 +5997,7 @@ int main(void)
     
     /* Set the random # seed */
     HDsrandom((unsigned long)HDtime(NULL)); 
-	
+
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Turn off the chunk cache, so all the chunks are immediately written to disk */
@@ -5593,6 +6033,9 @@ int main(void)
     nerrors += test_scaleoffset_int(file)<0 ?1:0; 
     nerrors += test_scaleoffset_int_2(file)<0 ?1:0; 
     nerrors += test_scaleoffset_float(file)<0 ?1:0; 
+    nerrors += test_scaleoffset_float_2(file)<0 ?1:0; 
+    nerrors += test_scaleoffset_double(file)<0 ?1:0; 
+    nerrors += test_scaleoffset_double_2(file)<0 ?1:0; 
     nerrors += test_multiopen (file)<0	?1:0;
     nerrors += test_types(file)<0       ?1:0;
     nerrors += test_userblock_offset(fapl)<0     ?1:0;
