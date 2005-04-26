@@ -1701,7 +1701,9 @@
 ./windows/examples/testExamples_exp_output.txt
 
 #windows fortran src
+
 ./windows/fortran/src/H5fortran_types.f90
+./windows/fortran/src/H5f90i_gen.h
 
 #windows fortran test
 ./windows/fortran/test/flush1_fortran/flush1_fortran.dsp
