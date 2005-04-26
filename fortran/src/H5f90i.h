@@ -16,12 +16,6 @@
 #ifndef _H5f90i_H
 #define _H5f90i_H
 
-/* 
- * Standard header files needed all the time 
- */
-
-#include "H5private.h"
-
 /*
  * Include generated header.  This header defines integer types,
  * so this file only needs to define _fcd and real_f.

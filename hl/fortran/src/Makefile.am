@@ -11,7 +11,8 @@
 
 include $(top_srcdir)/config/commence.am
 
-AM_CPPFLAGS=-I$(top_srcdir)/src -I$(top_srcdir)/hl/src -I$(top_builddir)/hl/src
+INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/hl/src -I$(top_builddir)/hl/src \
+         -I$(top_srcdir)/fortran/src -I$(top_builddir)/fortran/src
 AM_FCFLAGS=-I$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/src
 
 # Fortran libraries are linked statically to solve a build problem.

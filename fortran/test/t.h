@@ -12,7 +12,8 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "../../src/hdf5.h"
+#include "hdf5.h"
+#include "H5private.h"
 #include "../src/H5f90i.h"
 #include "../src/H5f90proto.h"
 
