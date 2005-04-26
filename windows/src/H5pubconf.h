@@ -38,11 +38,12 @@ in the file file_io.win32.c and including it on the projects
 
 #define H5_SIZEOF_LONG 4
 
-#if defined __INTEL_COMPILER
+/*#if defined __INTEL_COMPILER
 #define H5_SIZEOF_LONG_DOUBLE 12
-#else
+#else*/
+
 #define H5_SIZEOF_LONG_DOUBLE 8
-#endif
+/*#endif*/
 #define H5_SIZEOF_OFF_T 4
 #define H5_SIZEOF_SHORT 2
 #define H5_SIZEOF_SIZE_T 4
@@ -100,14 +101,14 @@ in the file file_io.win32.c and including it on the projects
 #define H5_HAVE_FUNCTION 1
 #define H5_ULLONG_TO_FP_CAST_WORKS 1
 #if defined __INTEL_COMPILER
-#undef H5_LLONG_TO_FP_CAST_WORKS
+#define H5_LLONG_TO_FP_CAST_BROKEN
 #else
-#define H5_LLONG_TO_FP_CAST_WORKS 1
+#undef H5_LLONG_TO_FP_CAST_BROKEN
 #endif
 #else
 #undef H5_HAVE_FUNCTION
 #undef H5_ULLONG_TO_FP_CAST_WORKS 
-#define H5_LLONG_TO_FP_CAST_WORKS 1
+#undef H5_LLONG_TO_FP_CAST_BROKEN
 #endif 
 
 #define H5_FC_FUNC_(name, NAME) NAME
