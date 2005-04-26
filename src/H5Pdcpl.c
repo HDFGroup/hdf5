@@ -1265,12 +1265,12 @@ done:
  * Function:    H5Pset_scaleoffset
  *
  * Purpose:     Sets scaleoffset filter for a dataset creation property list
- *              and user-supplied minimum number of bits
+ *              and user-supplied parameters
  *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Xiaowen Wu
- *              Wednesday, February 9, 2005
+ *              Thursday, April 14, 2005
  *
  * Modifications:
  *              
@@ -1278,15 +1278,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_scaleoffset(hid_t plist_id, unsigned min_bits)
+H5Pset_scaleoffset(hid_t plist_id, int scale_factor, unsigned scale_type)
 {
     H5O_pline_t         pline;
     H5P_genplist_t *plist;      /* Property list pointer */
-    unsigned cd_values[1];      /* Filter parameters */
+    unsigned cd_values[2];      /* Filter parameters */
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_scaleoffset, FAIL);
-    H5TRACE2("e","iIu",plist_id,min_bits);
+    H5TRACE3("e","iIIu",plist_id,scale_factor,scale_type);
 
     /* Check arguments */
     if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
@@ -1296,15 +1296,21 @@ H5Pset_scaleoffset(hid_t plist_id, unsigned min_bits)
     if(NULL == (plist = H5I_object(plist_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
-    /* Set the parameter for the filter 
-     * if min_bits is zero, the scaleoffset filter will automatically calculate min_bits 
+    /* Set parameters for the filter 
+     * scale_type = 0:     floating-point type, filter uses variable-minimum-bits method,
+     *                     scale_factor is decimal scale factor
+     * scale_type = 1:     floating-point type, filter uses fixed-minimum-bits method,
+     *                     scale_factor is the fixed minimum number of bits
+     * scale type = other: integer type, scale_factor is minimum number of bits
+     *                     if scale_factor = 0, then filter calculates minimum number of bits  
      */
-    cd_values[0] = min_bits;
+    cd_values[0] = scale_factor;
+    cd_values[1] = scale_type;
 
     /* Add the scaleoffset filter */
     if(H5P_get(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
-    if(H5Z_append(&pline, H5Z_FILTER_SCALEOFFSET, H5Z_FLAG_OPTIONAL, 1, cd_values)<0)
+    if(H5Z_append(&pline, H5Z_FILTER_SCALEOFFSET, H5Z_FLAG_OPTIONAL, 2, cd_values)<0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add scaleoffset filter to pipeline");
     if(H5P_set(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to set pipeline");
