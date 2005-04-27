@@ -59,6 +59,12 @@ typedef int H5Z_filter_t;
 #define H5_SZIP_EC_OPTION_MASK          4
 #define H5_SZIP_NN_OPTION_MASK          32
 #define H5_SZIP_MAX_PIXELS_PER_BLOCK    32
+ 
+/* Special parameters for ScaleOffset filter*/
+#define H5_SO_FLOAT_DSCALE 0
+#define H5_SO_FLOAT_ESCALE 1
+#define H5_SO_INT          2
+#define H5_SO_INT_MINIMUMBITS_DEFAULT 0
 
 /* Current version of the H5Z_class_t struct */
 #define H5Z_CLASS_T_VERS (1)
