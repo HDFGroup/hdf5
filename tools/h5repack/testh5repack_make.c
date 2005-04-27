@@ -786,7 +786,7 @@ int make_scaleoffset(hid_t loc_id)
   H5Tclose(dtid);
   goto out;
  }
- if (H5Pset_scaleoffset(dcpl,31)<0) 
+ if (H5Pset_scaleoffset(dcpl,31,2)<0) 
  {
   H5Tclose(dtid);
   goto out;
