@@ -389,7 +389,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
 				aggression=obj.filter[i].cd_values[0];
 				if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
 					return -1;
-				if (H5Pset_scaleoffset(dcpl_id,aggression)<0) 
+				if (H5Pset_scaleoffset(dcpl_id,aggression,2)<0) 
 					return -1;
 				break;
 			} /* switch */
