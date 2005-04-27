@@ -314,7 +314,7 @@ H5Z_class_t H5Z_SCALEOFFSET[1] = {{
                                                                                        \
    if(filavail == H5Z_SCALEOFFSET_FILL_DEFINED) { /* fill value defined */             \
       H5Z_scaleoffset_get_filval_1(i, type, filval_buf, filval)                        \
-      if(*minbits == 0) { /* minbits not set yet, calculate max, min, and minbits */   \
+      if(*minbits == H5_SO_INT_MINIMUMBITS_DEFAULT ) { /* minbits not set yet, calculate max, min, and minbits */\
          H5Z_scaleoffset_max_min_1(i, d_nelmts, buf, filval, max, min)                 \
          H5Z_scaleoffset_check_1(type, max, min, minbits)                              \
          span = max - min + 1;                                                         \
@@ -326,7 +326,7 @@ H5Z_class_t H5Z_SCALEOFFSET[1] = {{
          for(i = 0; i < d_nelmts; i++)                                                 \
             buf[i] = (buf[i] == filval)?(((type)1 << *minbits) - 1):(buf[i] - min);    \
    } else { /* fill value undefined */                                                 \
-      if(*minbits == 0) { /* minbits not set yet, calculate max, min, and minbits */   \
+      if(*minbits == H5_SO_INT_MINIMUMBITS_DEFAULT ) { /* minbits not set yet, calculate max, min, and minbits */\
          H5Z_scaleoffset_max_min_2(i, d_nelmts, buf, max, min)                         \
          H5Z_scaleoffset_check_1(type, max, min, minbits)                              \
          span = max - min + 1;                                                         \
@@ -347,7 +347,7 @@ H5Z_class_t H5Z_SCALEOFFSET[1] = {{
                                                                                              \
    if(filavail == H5Z_SCALEOFFSET_FILL_DEFINED) { /* fill value defined */                   \
       H5Z_scaleoffset_get_filval_1(i, type, filval_buf, filval)                              \
-      if(*minbits == 0) { /* minbits not set yet, calculate max, min, and minbits */         \
+      if(*minbits == H5_SO_INT_MINIMUMBITS_DEFAULT ) { /* minbits not set yet, calculate max, min, and minbits */\
          H5Z_scaleoffset_max_min_1(i, d_nelmts, buf, filval, max, min)                       \
          H5Z_scaleoffset_check_2(type, max, min, minbits)                                    \
          span = max - min + 1;                                                               \
@@ -359,7 +359,7 @@ H5Z_class_t H5Z_SCALEOFFSET[1] = {{
          for(i = 0; i < d_nelmts; i++)                                                       \
             buf[i] = (buf[i] == filval)?(((unsigned type)1 << *minbits) - 1):(buf[i] - min); \
    } else { /* fill value undefined */                                                       \
-      if(*minbits == 0) { /* minbits not set yet, calculate max, min, and minbits */         \
+      if(*minbits == H5_SO_INT_MINIMUMBITS_DEFAULT ) { /* minbits not set yet, calculate max, min, and minbits */\
          H5Z_scaleoffset_max_min_2(i, d_nelmts, buf, max, min)                               \
          H5Z_scaleoffset_check_2(type, max, min, minbits)                                    \
          span = max - min + 1;                                                               \
@@ -969,23 +969,24 @@ H5Z_filter_scaleoffset (unsigned flags, size_t cd_nelmts, const unsigned cd_valu
     scale_factor = cd_values[H5Z_SCALEOFFSET_PARM_SCALEFACTOR];
     scale_type   = cd_values[H5Z_SCALEOFFSET_PARM_SCALETYPE];
 
-    /* check and assign proper values set by user to related parameters 
-     * scale type = 0:     floating-point type, variable-minimum-bits method,
-     *                     scale factor is decimal scale factor
-     * scale type = 1:     floating-point type, fixed-minimum-bits method, 
-     *                     scale factor is the fixed minimum number of bits
-     * scale type = other: integer type, scale_factor is minimum number of bits 
+    /* check and assign proper values set by user to related parameters
+     * scale type can be H5_SO_FLOAT_DSCALE (0), H5_SO_FLOAT_ESCALE (1) or H5_SO_INT (other)
+     * H5_SO_FLOAT_DSCALE : floating-point type, variable-minimum-bits method,
+     *                      scale factor is decimal scale factor
+     * H5_SO_FLOAT_ESCALE : floating-point type, fixed-minimum-bits method, 
+     *                      scale factor is the fixed minimum number of bits
+     * H5_SO_INT          : integer type, scale_factor is minimum number of bits 
      */
     if(dtype_class==H5Z_SCALEOFFSET_CLS_FLOAT) { /* floating-point type */
-        if(scale_type!=0 && scale_type!=1)
+        if(scale_type!=H5_SO_FLOAT_DSCALE && scale_type!=H5_SO_FLOAT_ESCALE)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "scale type must be 0 or 1")
     } 
     else if(dtype_class==H5Z_SCALEOFFSET_CLS_INTEGER) { /* integer type */
-        if(scale_type==0 || scale_type==1)
+        if(scale_type==H5_SO_FLOAT_DSCALE || scale_type==H5_SO_FLOAT_ESCALE)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "scale type cannot be 0 or 1")
     }
 
-    if(scale_type==0) { /* floating-point type, variable-minimum-bits */
+    if(scale_type==H5_SO_FLOAT_DSCALE) { /* floating-point type, variable-minimum-bits */
         D_val = scale_factor;
     } else { /* integer type, or floating-point type with fixed-minimum-bits method */
         if(scale_factor>cd_values[H5Z_SCALEOFFSET_PARM_SIZE]*8) 
@@ -1255,7 +1256,7 @@ H5Z_scaleoffset_precompress_i(void *data, unsigned d_nelmts, enum H5Z_scaleoffse
                                                                                              
       if(filavail == H5Z_SCALEOFFSET_FILL_DEFINED) { /* fill value defined */                   
          H5Z_scaleoffset_get_filval_1(i, signed char, filval_buf, filval);       
-         if(*minbits == 0) { /* minbits not set yet, calculate max, min, and minbits */         
+         if(*minbits == H5_SO_INT_MINIMUMBITS_DEFAULT ) { /* minbits not set yet, calculate max, min, and minbits */         
             H5Z_scaleoffset_max_min_1(i, d_nelmts, buf, filval, max, min)
             if((unsigned char)(max - min) > (unsigned char)(~(unsigned char)0 - 2)) 
             { *minbits = sizeof(signed char)*8; return; }                        
@@ -1268,7 +1269,7 @@ H5Z_scaleoffset_precompress_i(void *data, unsigned d_nelmts, enum H5Z_scaleoffse
             for(i = 0; i < d_nelmts; i++)                                                       
                buf[i] = (buf[i] == filval)?(((unsigned char)1 << *minbits) - 1):(buf[i] - min); 
       } else { /* fill value undefined */                                                       
-         if(*minbits == 0) { /* minbits not set yet, calculate max, min, and minbits */         
+         if(*minbits == H5_SO_INT_MINIMUMBITS_DEFAULT ) { /* minbits not set yet, calculate max, min, and minbits */         
             H5Z_scaleoffset_max_min_2(i, d_nelmts, buf, max, min)                               
             if((unsigned char)(max - min) > (unsigned char)(~(unsigned char)0 - 2)) {
                *minbits = sizeof(signed char)*8;
