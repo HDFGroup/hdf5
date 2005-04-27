@@ -1267,6 +1267,21 @@ done:
  * Purpose:     Sets scaleoffset filter for a dataset creation property list
  *              and user-supplied parameters
  *
+ * Parameters:  scale_factor: 
+                              for integer datatype, 
+                              this parameter will be 
+                              minimum-bits, if this value is set to 0, 
+                              scaleoffset filter will calculate the minimum-bits.
+                                                   
+                              For floating-point datatype,
+                              For variable-minimum-bits method, this will be 
+                              the decimal precision of the filter,
+                              For fixed-minimum-bits method, this will be 
+                              the minimum-bit of the filter.
+                scale_type:   0 for floating-point variable-minimum-bits,
+                              1 for floating-point fixed-minimum-bits,
+                              other values, for integer datatype
+                              
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Xiaowen Wu
