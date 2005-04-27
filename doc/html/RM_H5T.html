@@ -854,14 +854,14 @@ END SUBROUTINE h5tcreate_f
         of compound, array, and variable-length datatypes.
         <p>
         Valid class identifiers are as defined in 
-	<a href="#Datatype-GetClass"><code>H5Tget_class</code></a>.
+        <a href="#Datatype-GetClass"><code>H5Tget_class</code></a>.
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em> <code>dtype_id</code></td>
+            <td valign="top"><em>hid_t</em> <code>dtype_id</code></td>
             <td valign="top">Datatype identifier.</td></tr>
         <tr>
-		    <td valign="top"><em>H5T_class_t</em>&nbsp;<code>dtype_class&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>H5T_class_t</em>&nbsp;<code>dtype_class&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">Datatype class.</td></tr>
     </table></ul>
 <dt><strong>Returns:</strong>
@@ -1332,6 +1332,9 @@ END SUBROUTINE h5tget_array_ndims_f
             <li><code>H5T_VLEN</code>
             <li><code>H5T_ARRAY</code>
         </ul>
+        <p>
+        Note that the library returns <code>H5T_STRING</code> 
+        for both fixed-length and variable-length strings.
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
@@ -1598,6 +1601,9 @@ END SUBROUTINE h5tget_inpad_f
     <dd>Given a compound datatype, <code>cdtype_id</code>, the function 
         <code>H5Tget_member_class</code> returns the datatype class of 
         the compound datatype member specified by <code>member_no</code>.
+        <p>
+        Valid class identifiers are as defined in 
+        <a href="#Datatype-GetClass"><code>H5Tget_class</code></a>.
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
