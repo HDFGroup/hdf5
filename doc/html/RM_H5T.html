@@ -1339,10 +1339,13 @@ END SUBROUTINE h5tget_array_ndims_f
             <li><code>H5T_VLEN</code>
             <li><code>H5T_ARRAY</code>
         </ul>
+        <p>
+        Note that the library returns <code>H5T_STRING</code> for 
+        both fixed-length and variable-length strings.
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">Identifier of datatype to query.</td></tr>
     </table></ul>
 <dt><strong>Returns:</strong>
