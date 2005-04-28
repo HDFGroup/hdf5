@@ -20,6 +20,8 @@
 
 /* Public header files needed by this file */
 #include "H5public.h"
+#include "H5Cpublic.h"
+#include "H5ACpublic.h"
 #include "H5Ipublic.h"
 
 /*
@@ -114,6 +116,17 @@ H5_DLL herr_t H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist);
 H5_DLL herr_t H5Funmount(hid_t loc, const char *name);
 H5_DLL hssize_t H5Fget_freespace(hid_t file_id);
 H5_DLL herr_t H5Fget_filesize(hid_t file_id, hsize_t *size);
+H5_DLL herr_t H5Fget_mdc_config(hid_t file_id, 
+				H5AC_cache_config_t * config_ptr);
+H5_DLL herr_t H5Fset_mdc_config(hid_t file_id,
+				H5AC_cache_config_t * config_ptr);
+H5_DLL herr_t H5Fget_mdc_hit_rate(hid_t file_id, double * hit_rate_ptr);
+H5_DLL herr_t H5Fget_mdc_size(hid_t file_id,
+                              size_t * max_size_ptr,
+                              size_t * min_clean_size_ptr,
+                              size_t * cur_size_ptr,
+                              int32_t * cur_num_entries_ptr);
+H5_DLL herr_t H5Freset_mdc_hit_rate_stats(hid_t file_id);
 H5_DLL ssize_t H5Fget_name(hid_t obj_id, char *name, size_t size);
 
 #ifdef __cplusplus

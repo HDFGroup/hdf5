@@ -1898,7 +1898,8 @@ H5C_create(size_t		      max_cache_size,
 
     FUNC_ENTER_NOAPI(H5C_create, NULL)
 
-    HDassert( max_cache_size > 0 );
+    HDassert( max_cache_size >= H5C__MIN_MAX_CACHE_SIZE );
+    HDassert( max_cache_size <= H5C__MAX_MAX_CACHE_SIZE );
     HDassert( min_clean_size <= max_cache_size );
 
     HDassert( max_type_id >= 0 );
@@ -2901,14 +2902,22 @@ H5C_insert_entry(H5F_t * 	     f,
 
         HDassert( entry_ptr->size <= H5C_MAX_ENTRY_SIZE );
 
-        space_needed = (cache_ptr->index_size + entry_ptr->size) -
-                       cache_ptr->max_cache_size;
+        space_needed = entry_ptr->size;
 
-        /* It would be nice to be able to do a tight sanity check on
-         * space_needed here, but it is hard to assign an upper bound on
-         * its value other than then value assigned to it.
-         *
-         * This fact springs from several features of the cache:
+        if ( space_needed > cache_ptr->max_cache_size ) {
+
+            space_needed = cache_ptr->max_cache_size;
+        }
+
+        /* Note that space_needed is just the amount of space that 
+         * needed to insert the new entry without exceeding the cache
+         * size limit.  The subsequent call to H5C_make_space_in_cache()
+         * may evict the entries required to free more or less space
+         * depending on conditions.  It MAY be less if the cache is
+         * currently undersized, or more if the cache is oversized.
+         * 
+         * The cache can exceed its maximum size limit via the following
+         * mechanisms:
          *
          * First, it is possible for the cache to grow without
          * bound as long as entries are protected and not unprotected.
@@ -2916,16 +2925,13 @@ H5C_insert_entry(H5F_t * 	     f,
          * Second, when writes are not permitted it is also possible
          * for the cache to grow without bound.
          *
-         * Finally, we don't check to see if the cache is oversized
-         * at the end of an unprotect.  As a result, it is possible
-         * to have a vastly oversized cache with no protected entries
-         * as long as all the protects preceed the unprotects.
+         * Finally, we usually don't check to see if the cache is 
+         * oversized at the end of an unprotect.  As a result, it is 
+         * possible to have a vastly oversized cache with no protected 
+         * entries as long as all the protects preceed the unprotects.
          *
          * Since items 1 and 2 are not changing any time soon, I see
          * no point in worrying about the third.
-         *
-         * In any case, I hope this explains why there is no sanity
-         * check on space_needed here.
          */
 
         result = H5C_make_space_in_cache(f, 
@@ -3146,6 +3152,12 @@ done:
  *		call to H5C__auto_adjust_cache_size() if that function 
  *		sets the size_decreased flag is TRUE.
  *
+ *		JRM -- 4/25/05
+ *		The size_decreased flag can also be set to TRUE in 
+ *		H5C_set_cache_auto_resize_config() if a new configuration 
+ *		forces an immediate reduction in cache size.  Modified
+ *		the code to deal with this eventuallity.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -3231,14 +3243,22 @@ H5C_protect(H5F_t *	       f,
 
             HDassert( entry_ptr->size <= H5C_MAX_ENTRY_SIZE );
 
-            space_needed = (cache_ptr->index_size + entry_ptr->size) -
-                           cache_ptr->max_cache_size;
+            space_needed = entry_ptr->size;
 
-            /* It would be nice to be able to do a tight sanity check on 
-             * space_needed here, but it is hard to assign an upper bound on 
-             * its value other than then value assigned to it.
+            if ( space_needed > cache_ptr->max_cache_size ) {
+
+                space_needed = cache_ptr->max_cache_size;
+            }
+
+            /* Note that space_needed is just the amount of space that
+             * needed to insert the new entry without exceeding the cache
+             * size limit.  The subsequent call to H5C_make_space_in_cache()
+             * may evict the entries required to free more or less space
+             * depending on conditions.  It MAY be less if the cache is
+             * currently undersized, or more if the cache is oversized.
              *
-             * This fact springs from several features of the cache:
+             * The cache can exceed its maximum size limit via the following
+             * mechanisms:
              *
              * First, it is possible for the cache to grow without
              * bound as long as entries are protected and not unprotected.
@@ -3246,16 +3266,13 @@ H5C_protect(H5F_t *	       f,
              * Second, when writes are not permitted it is also possible
              * for the cache to grow without bound.
              *
-             * Finally, we don't check to see if the cache is oversized 
-             * at the end of an unprotect.  As a result, it is possible 
-             * to have a vastly oversized cache with no protected entries
-             * as long as all the protects preceed the unprotects.
+             * Finally, we usually don't check to see if the cache is
+             * oversized at the end of an unprotect.  As a result, it is
+             * possible to have a vastly oversized cache with no protected
+             * entries as long as all the protects preceed the unprotects.
              *
              * Since items 1 and 2 are not changing any time soon, I see
              * no point in worrying about the third.
-             *
-             * In any case, I hope this explains why there is no sanity
-             * check on space_needed here.
              */
 
             result = H5C_make_space_in_cache(f, primary_dxpl_id, 
@@ -3302,9 +3319,11 @@ H5C_protect(H5F_t *	       f,
 
     H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit)
 
-    if ( ( cache_ptr->resize_enabled ) &&
-         ( cache_ptr->cache_accesses >= 
-           (cache_ptr->resize_ctl).epoch_length ) ) {
+
+    if ( ( cache_ptr->size_decreased ) ||
+         ( ( cache_ptr->resize_enabled ) &&
+           ( cache_ptr->cache_accesses >=
+             (cache_ptr->resize_ctl).epoch_length ) ) ) {
 
         if ( ! have_write_permitted ) {
 
@@ -3329,19 +3348,24 @@ H5C_protect(H5F_t *	       f,
             }
         }
 
-        result = H5C__auto_adjust_cache_size(cache_ptr,
-                                             f,
-                                             primary_dxpl_id,
-                                             secondary_dxpl_id,
-                                             write_permitted,
-                                             &first_flush);
+        if ( ( cache_ptr->resize_enabled ) &&
+             ( cache_ptr->cache_accesses >=
+               (cache_ptr->resize_ctl).epoch_length ) ) {
 
-        if ( result != SUCCEED ) {
+            result = H5C__auto_adjust_cache_size(cache_ptr,
+                                                 f,
+                                                 primary_dxpl_id,
+                                                 secondary_dxpl_id,
+                                                 write_permitted,
+                                                 &first_flush);
+            if ( result != SUCCEED ) {
 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, \
-                        "Cache auto-resize failed.")
-        
-        } else if ( cache_ptr->size_decreased  ) {
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, \
+                            "Cache auto-resize failed.")
+            }
+        }
+
+        if ( cache_ptr->size_decreased  ) {
 
             cache_ptr->size_decreased = FALSE;
         
@@ -3360,7 +3384,7 @@ H5C_protect(H5F_t *	       f,
 
                 result = H5C_make_space_in_cache(f, primary_dxpl_id, 
                                                  secondary_dxpl_id, cache_ptr, 
-                                                 space_needed, write_permitted,
+                                                 (size_t)0, write_permitted,
                                                  &first_flush);
 
                 if ( result < 0 ) {
@@ -3391,10 +3415,7 @@ done:
  *
  * Modifications:
  *
- *		JRM - 7/21/04
- *		Updated the function for the addition of the hash table.
- *		In particular, we now add dirty entries to the skip list if
- *		they aren't in the list already.
+ *		None.
  *
  *-------------------------------------------------------------------------
  */
@@ -3444,6 +3465,11 @@ done:
  *		Reworked function to match major changes in 
  *		H5C_auto_size_ctl_t.  
  *
+ *		JRM -- 4/25/05
+ *		Added code to set cache_ptr->size_decreased to TRUE
+ *		if the new configuration forces an immediate reduction
+ *		in cache size.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -3474,125 +3500,32 @@ H5C_set_cache_auto_resize_config(H5C_t * cache_ptr,
     }
 
     /* check general configuration section of the config: */
-    if ( ( config_ptr->max_size > H5C__MAX_MAX_CACHE_SIZE ) 
-         ||
-         ( config_ptr->max_size < config_ptr->min_size )
-         ||
-         ( config_ptr->min_size < H5C__MIN_MAX_CACHE_SIZE )
-         ||
-         ( ( config_ptr->set_initial_size ) &&
-           ( config_ptr->initial_size > config_ptr->max_size )
-         )
-         ||
-         ( ( config_ptr->set_initial_size ) &&
-           ( config_ptr->initial_size < config_ptr->min_size )
-         )
-         ||
-         ( config_ptr->min_clean_fraction > 1.0 )
-         ||
-         ( config_ptr->min_clean_fraction < 0.0 )
-         ||
-         ( config_ptr->epoch_length < H5C__MIN_AR_EPOCH_LENGTH )
-         ||
-         ( config_ptr->epoch_length > H5C__MAX_AR_EPOCH_LENGTH )
-       ) {
+    if ( SUCCEED != H5C_validate_resize_config(config_ptr,
+                                   H5C_RESIZE_CFG__VALIDATE_GENERAL) ) {
 
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, \
                     "error in general configuration fields of new config.")
     }
 
     /* check size increase control fields of the config: */
-    if ( ( ( config_ptr->incr_mode != H5C_incr__off ) 
-           &&
-           ( config_ptr->incr_mode != H5C_incr__threshold ) 
-         )
-         ||
-         ( ( config_ptr->incr_mode == H5C_incr__threshold )
-           &&
-           ( ( config_ptr->lower_hr_threshold < 0.0 )
-             ||
-             ( config_ptr->lower_hr_threshold > 1.0 )
-             ||
-             ( config_ptr->increment < 1.0 )
-             /* no need to check max_increment, as it is a size_t,
-              * and thus must be non-negative.
-              */
-           ) 
-         )
-       ) {
+    if ( SUCCEED != H5C_validate_resize_config(config_ptr,
+                                   H5C_RESIZE_CFG__VALIDATE_INCREMENT) ) {
 
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, \
                     "error in the size increase control fields of new config.")
     }
 
     /* check size decrease control fields of the config: */
-    if ( ( ( config_ptr->decr_mode != H5C_decr__off ) 
-           &&
-           ( config_ptr->decr_mode != H5C_decr__threshold ) 
-           &&
-           ( config_ptr->decr_mode != H5C_decr__age_out ) 
-           &&
-           ( config_ptr->decr_mode != H5C_decr__age_out_with_threshold ) 
-         )
-         ||
-         ( ( config_ptr->decr_mode == H5C_decr__threshold )
-           &&
-           ( ( config_ptr->upper_hr_threshold > 1.0 )
-             ||
-             ( config_ptr->decrement > 1.0 )
-             ||
-             ( config_ptr->decrement < 0.0 )
-             /* no need to check max_decrement as it is a size_t 
-              * and thus must be non-negative.
-              */
-           )
-         )
-         ||
-         ( ( ( config_ptr->decr_mode == H5C_decr__age_out )
-             ||
-             ( config_ptr->decr_mode == H5C_decr__age_out_with_threshold )
-           )
-           &&
-           (
-             ( config_ptr->epochs_before_eviction < 1 )
-             ||
-             ( config_ptr->epochs_before_eviction > H5C__MAX_EPOCH_MARKERS )
-             ||
-             ( ( config_ptr->apply_empty_reserve )
-               &&
-               ( config_ptr->empty_reserve < 0.0 )
-             )
-             ||
-             ( ( config_ptr->apply_empty_reserve )
-               &&
-               ( config_ptr->empty_reserve > 1.0 )
-             )
-             /* no need to check max_decrement as it is a size_t 
-              * and thus must be non-negative.
-              */
-           )
-         )
-         ||
-         ( ( config_ptr->decr_mode == H5C_decr__age_out_with_threshold )
-           &&
-           ( config_ptr->upper_hr_threshold > 1.0 )
-         )
-       ) {
+    if ( SUCCEED != H5C_validate_resize_config(config_ptr,
+                                   H5C_RESIZE_CFG__VALIDATE_DECREMENT) ) {
 
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, \
                     "error in the size decrease control fields of new config.")
     }
 
     /* check for conflicts between size increase and size decrease controls: */
-    if ( ( config_ptr->incr_mode == H5C_incr__threshold )
-         &&
-         ( ( config_ptr->decr_mode == H5C_decr__threshold ) 
-           ||
-           ( config_ptr->decr_mode == H5C_decr__age_out_with_threshold )
-         )
-         &&
-         ( config_ptr->lower_hr_threshold >= config_ptr->upper_hr_threshold )
-       ) {
+    if ( SUCCEED != H5C_validate_resize_config(config_ptr,
+                                   H5C_RESIZE_CFG__VALIDATE_INTERACTIONS) ) {
 
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, \
                     "conflicting threshold fields in new config.")
@@ -3712,6 +3645,11 @@ H5C_set_cache_auto_resize_config(H5C_t * cache_ptr,
     HDassert( new_min_clean_size <= new_max_cache_size );
     HDassert( (cache_ptr->resize_ctl).min_size <= new_max_cache_size );
     HDassert( new_max_cache_size <= (cache_ptr->resize_ctl).max_size );
+
+    if ( new_max_cache_size < cache_ptr->max_cache_size ) {
+
+        cache_ptr->size_decreased = TRUE;
+    }
 
     cache_ptr->max_cache_size = new_max_cache_size;
     cache_ptr->min_clean_size = new_min_clean_size;
@@ -4307,6 +4245,242 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5C_unprotect() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_validate_resize_config()
+ *
+ * Purpose:	Run a sanity check on the specified sections of the 
+ *		provided instance of struct H5C_auto_size_ctl_t.
+ *
+ *		Do nothing and return SUCCEED if no errors are detected,
+ *		and flag an error and return FAIL otherwise.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              3/23/05
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C_validate_resize_config(H5C_auto_size_ctl_t * config_ptr,
+                           unsigned int tests)
+{
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5C_validate_resize_config, FAIL)
+
+    if ( config_ptr == NULL ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "NULL config_ptr on entry.")
+    }
+
+    if ( config_ptr->version != H5C__CURR_AUTO_SIZE_CTL_VER ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Unknown config version.")
+    }
+
+
+    if ( (tests & H5C_RESIZE_CFG__VALIDATE_GENERAL) != 0 ) {
+
+        if ( ( config_ptr->set_initial_size != TRUE ) && 
+             ( config_ptr->set_initial_size != FALSE ) ) {
+
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                        "set_initial_size must be either TRUE or FALSE");
+        }
+
+        if ( config_ptr->max_size > H5C__MAX_MAX_CACHE_SIZE ) {
+
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "max_size too big");
+        }
+
+        if ( config_ptr->min_size < H5C__MIN_MAX_CACHE_SIZE ) {
+
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "min_size too small");
+        }
+
+        if ( config_ptr->min_size > config_ptr->max_size ) {
+
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "min_size > max_size");
+        }
+
+        if ( ( config_ptr->set_initial_size ) &&
+             ( ( config_ptr->initial_size < config_ptr->min_size ) || 
+               ( config_ptr->initial_size > config_ptr->max_size ) ) ) {
+
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                  "initial_size must be in the interval [min_size, max_size]");
+        }
+
+        if ( ( config_ptr->min_clean_fraction < 0.0 ) || 
+             ( config_ptr->min_clean_fraction > 1.0 ) ) {
+
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                  "min_clean_fraction must be in the interval [0.0, 1.0]");
+        }
+
+        if ( config_ptr->epoch_length < H5C__MIN_AR_EPOCH_LENGTH ) {
+
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "epoch_length too small");
+        }
+
+        if ( config_ptr->epoch_length > H5C__MAX_AR_EPOCH_LENGTH ) {
+
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "epoch_length too big");
+        }
+    } /* H5C_RESIZE_CFG__VALIDATE_GENERAL */
+
+
+    if ( (tests & H5C_RESIZE_CFG__VALIDATE_INCREMENT) != 0 ) {
+
+        if ( ( config_ptr->incr_mode != H5C_incr__off ) &&
+             ( config_ptr->incr_mode != H5C_incr__threshold ) ) {
+
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid incr_mode");
+        }
+
+        if ( config_ptr->incr_mode == H5C_incr__threshold ) {
+         
+            if ( ( config_ptr->lower_hr_threshold < 0.0 ) || 
+                 ( config_ptr->lower_hr_threshold > 1.0 ) ) {
+
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                    "lower_hr_threshold must be in the range [0.0, 1.0]");
+            }
+
+            if ( config_ptr->increment < 1.0 ) {
+
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                            "increment must be greater than or equal to 1.0");
+            }
+
+            if ( ( config_ptr->apply_max_increment != TRUE ) &&
+                 ( config_ptr->apply_max_increment != FALSE ) ) {
+
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                            "apply_max_increment must be either TRUE or FALSE");
+            }
+
+            /* no need to check max_increment, as it is a size_t,
+             * and thus must be non-negative.
+             */
+        } /* H5C_incr__threshold */
+
+    } /* H5C_RESIZE_CFG__VALIDATE_INCREMENT */
+
+
+    if ( (tests & H5C_RESIZE_CFG__VALIDATE_DECREMENT) != 0 ) {
+
+        if ( ( config_ptr->decr_mode != H5C_decr__off ) &&
+             ( config_ptr->decr_mode != H5C_decr__threshold ) &&
+             ( config_ptr->decr_mode != H5C_decr__age_out ) &&
+             ( config_ptr->decr_mode != H5C_decr__age_out_with_threshold )
+           ) {
+
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid decr_mode");
+        }
+
+        if ( config_ptr->decr_mode == H5C_decr__threshold ) {
+
+            if ( config_ptr->upper_hr_threshold > 1.0 ) {
+
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                            "upper_hr_threshold must be <= 1.0");
+            }
+
+            if ( ( config_ptr->decrement > 1.0 ) || 
+                 ( config_ptr->decrement < 0.0 ) ) {
+
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                            "decrement must be in the interval [0.0, 1.0]");
+            }
+
+            /* no need to check max_decrement as it is a size_t
+             * and thus must be non-negative.
+             */
+        } /* H5C_decr__threshold */
+
+        if ( ( config_ptr->decr_mode == H5C_decr__age_out ) ||
+             ( config_ptr->decr_mode == H5C_decr__age_out_with_threshold )
+           ) {
+
+            if ( config_ptr->epochs_before_eviction < 1 ) {
+
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                            "epochs_before_eviction must be positive");
+            }
+
+            if ( config_ptr->epochs_before_eviction > H5C__MAX_EPOCH_MARKERS ) {
+
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                            "epochs_before_eviction too big");
+            }
+
+            if ( ( config_ptr->apply_empty_reserve != TRUE ) &&
+                 ( config_ptr->apply_empty_reserve != FALSE ) ) {
+
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                            "apply_empty_reserve must be either TRUE or FALSE");
+            }
+
+            if ( ( config_ptr->apply_empty_reserve ) &&
+                 ( ( config_ptr->empty_reserve > 1.0 ) || 
+                   ( config_ptr->empty_reserve < 0.0 ) ) ) {
+
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                            "empty_reserve must be in the interval [0.0, 1.0]");
+            }
+
+            /* no need to check max_decrement as it is a size_t
+             * and thus must be non-negative.
+             */
+        } /* H5C_decr__age_out || H5C_decr__age_out_with_threshold */
+
+        if ( config_ptr->decr_mode == H5C_decr__age_out_with_threshold ) {
+
+            if ( ( config_ptr->upper_hr_threshold > 1.0 ) || 
+                 ( config_ptr->upper_hr_threshold < 0.0 ) ) {
+
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                       "upper_hr_threshold must be in the interval [0.0, 1.0]");
+            } 
+        } /* H5C_decr__age_out_with_threshold */
+
+    } /* H5C_RESIZE_CFG__VALIDATE_DECREMENT */
+
+
+    if ( (tests & H5C_RESIZE_CFG__VALIDATE_INTERACTIONS) != 0 ) {
+
+        if ( ( config_ptr->incr_mode == H5C_incr__threshold )
+             &&
+             ( ( config_ptr->decr_mode == H5C_decr__threshold )
+               ||
+               ( config_ptr->decr_mode == H5C_decr__age_out_with_threshold )
+             )
+             &&
+             ( config_ptr->lower_hr_threshold 
+               >= 
+               config_ptr->upper_hr_threshold 
+             )
+           ) {
+
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                        "conflicting threshold fields in config.")
+        }
+    } /* H5C_RESIZE_CFG__VALIDATE_INTERACTIONS */
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C_validate_resize_config() */
 
 
 /*************************************************************************/

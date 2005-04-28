@@ -143,6 +143,11 @@ done:
  *
  *      Raymond Lu, 2001-10-14
  *	Change File creation property list to generic property list mechanism.
+ *
+ *	J. Mainzer, 2005-03-10
+ *	Updated function for changes in property list entries required
+ *	by the new metadata cache.
+ *	
  *-------------------------------------------------------------------------
  */
 static herr_t 
@@ -175,7 +180,7 @@ H5F_init_interface(void)
     unsigned        sharedheader_ver    = H5F_CRT_SHARE_HEAD_VERS_DEF;
     /* File access property class variables.  In sequence, they are 
      * - File access property class to modify
-     * - Size of meta data cache(elements)
+     * - Initial metadata cache resize configuration
      * - Size of raw data chunk cache(elements)
      * - Size of raw data chunk cache(bytes)
      * - Preemption for reading chunks
@@ -188,7 +193,8 @@ H5F_init_interface(void)
      * - File driver info 
      */
     H5P_genclass_t  *acs_pclass;
-    int             mdc_nelmts          = H5F_ACS_META_CACHE_SIZE_DEF;
+    H5AC_cache_config_t 
+		    mdc_initCacheCfg    = H5F_ACS_META_CACHE_INIT_CONFIG_DEF;
     size_t          rdcc_nelmts         = H5F_ACS_DATA_CACHE_ELMT_SIZE_DEF;
     size_t          rdcc_nbytes         = H5F_ACS_DATA_CACHE_BYTE_SIZE_DEF;
     double          rdcc_w0             = H5F_ACS_PREEMPT_READ_CHUNKS_DEF;
@@ -295,8 +301,9 @@ H5F_init_interface(void)
 
     /* Assume that if there are properties in the class, they are the default ones */
     if(nprops==0) {
-        /* Register the size of meta data cache(elements) */
-        if(H5P_register(acs_pclass,H5F_ACS_META_CACHE_SIZE_NAME,H5F_ACS_META_CACHE_SIZE_SIZE, &mdc_nelmts,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+
+        /* Register the initial metadata cache resize configuration */
+        if(H5P_register(acs_pclass,H5F_ACS_META_CACHE_INIT_CONFIG_NAME,H5F_ACS_META_CACHE_INIT_CONFIG_SIZE, &mdc_initCacheCfg,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
         /* Register the size of raw data chunk cache (elements) */
@@ -761,6 +768,10 @@ done:
  *              Fixed bug where the driver ID and info in the property
  *              list were being overwritten but the original ID and info
  *              weren't being close.
+ *
+ *		J Mainzer, Mar 10, 2005
+ *		Updated function for changes in the propertly list entries 
+ *		used by the new metadata cache.
  * 		
  *-------------------------------------------------------------------------
  */
@@ -789,8 +800,8 @@ H5Fget_access_plist(hid_t file_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Copy properties of the file access property list */
-    if(H5P_set(new_plist, H5F_ACS_META_CACHE_SIZE_NAME, &(f->shared->mdc_nelmts)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set meta data cache size")
+    if(H5P_set(new_plist, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, &(f->shared->mdc_initCacheCfg)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set initial meta data cache resize config.")
     if(H5P_set(new_plist, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, &(f->shared->rdcc_nelmts)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set data cache element size")
     if(H5P_set(new_plist, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, &(f->shared->rdcc_nbytes)) < 0)
@@ -1392,13 +1403,16 @@ done:
  *		Changed the file creation and access property list to the 
  *		new generic property list.
  *
+ *		J Mainzer, Mar 10, 2005
+ *		Updated for the new metadata cache, and associated 
+ *		property list changes.
+ *
  *-------------------------------------------------------------------------
  */
 static H5F_t *
 H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 {
     H5F_t	*f=NULL, *ret_value;
-    int		n;
     H5P_genplist_t *plist;              /* Property list */
  
     FUNC_ENTER_NOAPI_NOINIT(H5F_new)
@@ -1450,9 +1464,9 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 
         if(NULL == (plist = H5I_object(fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
+        if(H5P_get(plist, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, &(f->shared->mdc_initCacheCfg)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get initial meta data cache resize config")
 
-        if(H5P_get(plist, H5F_ACS_META_CACHE_SIZE_NAME, &(f->shared->mdc_nelmts)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get meta data cache size")
         if(H5P_get(plist, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, &(f->shared->rdcc_nelmts)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get data cache element size")
         if(H5P_get(plist, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, &(f->shared->rdcc_nbytes)) < 0)
@@ -1474,10 +1488,12 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 	 * The cache might be created with a different number of elements and
 	 * the access property list should be updated to reflect that.
 	 */
-	if ((n=H5AC_create(f, f->shared->mdc_nelmts))<0)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create meta data cache")
+	if ( SUCCEED != H5AC_create(f, &(f->shared->mdc_initCacheCfg)) ) {
 
-	f->shared->mdc_nelmts = n;
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, \
+                        "unable to create meta data cache")
+
+        } 
 
         /* Create the file's "open object" information */
         if(H5FO_create(f)<0)
@@ -4743,6 +4759,303 @@ H5Fget_filesize(hid_t file_id, hsize_t *size)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_filesize() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fget_mdc_config
+ *
+ * Purpose:     Retrieves the current automatic cache resize configuration
+ *		from the metadata cache, and return it in *config_ptr.
+ *
+ *		Note that the version field of *config_Ptr must be correctly
+ *		filled in by the caller.  This allows us to adapt for 
+ *		obsolete versions of the structure.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              3/24/05
+ *
+ * Modifications:
+ *
+ *		Reworked for the addition of the config_ptr parameter.
+ *							JRM -- 4/7/05
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5Fget_mdc_config(hid_t file_id,
+		  H5AC_cache_config_t *config_ptr)
+{
+    H5F_t      *file=NULL;      /* File object for file ID */
+    herr_t     ret_value = SUCCEED;      /* Return value */
+    herr_t     result;
+
+    FUNC_ENTER_API(H5Fget_mdc_config, FAIL)
+    H5TRACE2("e","ix",file_id,config_ptr);
+
+    /* Check args */
+    if ( NULL == (file = H5I_object_verify(file_id, H5I_FILE)) ) {
+
+         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+    }
+
+    if ( ( NULL == config_ptr ) || 
+         ( config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION ) ) {
+
+         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad config_ptr")
+    }
+
+    /* Go get the resize configuration */
+    result = H5AC_get_cache_auto_resize_config(file->shared->cache, config_ptr);
+
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "H5AC_get_cache_auto_resize_config() failed.");
+    }
+
+done:
+
+    FUNC_LEAVE_API(ret_value)
+
+} /* H5Fget_mdc_config() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fset_mdc_config
+ *
+ * Purpose:     Sets the current metadata cache automatic resize 
+ *		configuration, using the contents of the instance of 
+ *		H5AC_cache_config_t pointed to by config_ptr.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              3/24/05
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5Fset_mdc_config(hid_t file_id,
+		  H5AC_cache_config_t *config_ptr)
+{
+    H5F_t      *file=NULL;      /* File object for file ID */
+    herr_t     ret_value = SUCCEED;      /* Return value */
+    herr_t     result;
+
+    FUNC_ENTER_API(H5Fset_mdc_config, FAIL)
+    H5TRACE2("e","ix",file_id,config_ptr);
+
+    /* Check args */
+    if ( NULL == (file = H5I_object_verify(file_id, H5I_FILE)) ) {
+
+         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+    }
+
+    /* set the resize configuration  */
+    result = H5AC_set_cache_auto_resize_config(file->shared->cache, config_ptr);
+
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                    "H5AC_set_cache_auto_resize_config() failed.");
+    }
+
+done:
+
+    FUNC_LEAVE_API(ret_value)
+
+} /* H5Fset_mdc_config() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fget_mdc_hit_rate
+ *
+ * Purpose:     Retrieves the current hit rate from the metadata cache.
+ *		This rate is the overall hit rate since the last time
+ *		the hit rate statistics were reset either manually or 
+ *		automatically.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              3/24/05
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5Fget_mdc_hit_rate(hid_t file_id, 
+                    double *hit_rate_ptr)
+{
+    H5F_t      *file=NULL;      /* File object for file ID */
+    herr_t     ret_value = SUCCEED;      /* Return value */
+    herr_t     result;
+
+    FUNC_ENTER_API(H5Fget_mdc_hit_rate, FAIL)
+    H5TRACE2("e","i*d",file_id,hit_rate_ptr);
+
+    /* Check args */
+    if ( NULL == (file = H5I_object_verify(file_id, H5I_FILE)) ) {
+
+         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+    }
+
+    if ( NULL == hit_rate_ptr ) {
+
+         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL hit rate pointer")
+    }
+
+    /* Go get the current hit rate */
+    result = H5AC_get_cache_hit_rate(file->shared->cache, hit_rate_ptr);
+
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "H5AC_get_cache_hit_rate() failed.");
+    }
+
+done:
+
+    FUNC_LEAVE_API(ret_value)
+
+} /* H5Fget_mdc_hit_rate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fget_mdc_size
+ *
+ * Purpose:     Retrieves the maximum size, minimum clean size, current
+ *		size, and current number of entries from the metadata
+ *		cache associated with the specified file.  If any of 
+ *		the ptr parameters are NULL, the associated datum is 
+ *		not returned.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              3/24/05
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5Fget_mdc_size(hid_t file_id, 
+                size_t *max_size_ptr,
+                size_t *min_clean_size_ptr,
+                size_t *cur_size_ptr,
+                int32_t *cur_num_entries_ptr)
+{
+    H5F_t      *file=NULL;      /* File object for file ID */
+    herr_t     ret_value = SUCCEED;      /* Return value */
+    herr_t     result;
+
+    FUNC_ENTER_API(H5Fget_mdc_size, FAIL)
+    H5TRACE5("e","i*z*z*z*Is",file_id,max_size_ptr,min_clean_size_ptr,
+             cur_size_ptr,cur_num_entries_ptr);
+
+    /* Check args */
+    if ( NULL == (file = H5I_object_verify(file_id, H5I_FILE)) ) {
+
+         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+    }
+
+    /* Go get the size data */
+    result = H5AC_get_cache_size(file->shared->cache,
+                                 max_size_ptr,
+                                 min_clean_size_ptr,
+                                 cur_size_ptr,
+                                 cur_num_entries_ptr);
+
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "H5AC_get_cache_size() failed.");
+    }
+    
+
+done:
+
+    FUNC_LEAVE_API(ret_value)
+
+} /* H5Fget_mdc_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Freset_mdc_hit_rate_stats
+ *
+ * Purpose:     Reset the hit rate statistic whose current value can
+ *		be obtained via the H5Fget_mdc_hit_rate() call.  Note 
+ *		that this statistic will also be reset once per epoch
+ *		by the automatic cache resize code if it is enabled.
+ *
+ *		It is probably a bad idea to call this function unless
+ *		you are controlling cache size from your program instead
+ *		of using our cache size control code.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              3/24/05
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5Freset_mdc_hit_rate_stats(hid_t file_id)
+{
+    H5F_t      *file=NULL;      /* File object for file ID */
+    herr_t     ret_value = SUCCEED;      /* Return value */
+    herr_t     result;
+
+    FUNC_ENTER_API(H5Freset_mdc_hit_rate_stats, FAIL)
+    H5TRACE1("e","i",file_id);
+
+    /* Check args */
+    if ( NULL == (file = H5I_object_verify(file_id, H5I_FILE)) ) {
+
+         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+    }
+
+    /* Reset the hit rate statistic */
+    result = H5AC_reset_cache_hit_rate_stats(file->shared->cache);
+
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "H5AC_reset_cache_hit_rate_stats() failed.");
+    }
+    
+
+done:
+
+    FUNC_LEAVE_API(ret_value)
+
+} /* H5Freset_mdc_hit_rate_stats() */
 
 
 /*-------------------------------------------------------------------------

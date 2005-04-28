@@ -802,11 +802,16 @@ done:
  *		Raymond Lu 
  *		Tuesday, Oct 23, 2001
  *		Changed the file access list to the new generic property list.
+ *
+ *		J. Mainzer
+ *		Thurs. 3/17/05
+ *		The mdc_nelmts entry is no more in the FAPL, so I modified
+ * 		the code to ignore it.
  *	
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_cache(hid_t plist_id, int mdc_nelmts,
+H5Pset_cache(hid_t plist_id, int UNUSED mdc_nelmts,
 	     size_t rdcc_nelmts, size_t rdcc_nbytes, double rdcc_w0)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
@@ -816,8 +821,6 @@ H5Pset_cache(hid_t plist_id, int mdc_nelmts,
     H5TRACE5("e","iIszzd",plist_id,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,rdcc_w0);
 
     /* Check arguments */
-    if (mdc_nelmts<0)
-        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "meta data cache size must be non-negative");
     if (rdcc_w0<0.0 || rdcc_w0>1.0)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "raw data cache w0 value must be between 0.0 and 1.0 inclusive");
 
@@ -826,8 +829,6 @@ H5Pset_cache(hid_t plist_id, int mdc_nelmts,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set sizes */
-    if(H5P_set(plist, H5F_ACS_META_CACHE_SIZE_NAME, &mdc_nelmts) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set meta data cache size");
     if(H5P_set(plist, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, &rdcc_nelmts) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set data cache element size");
     if(H5P_set(plist, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, &rdcc_nbytes) < 0)
@@ -860,6 +861,11 @@ done:
  *		Tuesday, Oct 23, 2001
  *		Changed the file access list to the new generic property 
  *		list.
+ *
+ *		J Mainzer
+ *		Thurs, 3/17/05
+ *		The mdc_nelmts fapl entry is no more, so we now just
+ *		return a constant when that value is requested.
  *	
  *-------------------------------------------------------------------------
  */
@@ -879,9 +885,11 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get sizes */
+
+    /* the mdc_nelmts FAPL entry no longer exists, so just return a constant */
     if (mdc_nelmts)
-        if(H5P_get(plist, H5F_ACS_META_CACHE_SIZE_NAME, mdc_nelmts) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get meta data cache size");
+        *mdc_nelmts = 0;
+
     if (rdcc_nelmts)
         if(H5P_get(plist, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, rdcc_nelmts) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get data cache element size");
@@ -895,6 +903,134 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
 done:
     FUNC_LEAVE_API(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_mdc_config
+ *
+ * Purpose:	Set the initial metadata cache resize configuration in the 
+ *		target FAPL.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	J. Mainzer
+ *              Thursday, April 7, 2005
+ *
+ * Modifications:
+ *
+ *		Done.
+ *	
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_mdc_config(hid_t                 plist_id, 
+                  H5AC_cache_config_t *config_ptr)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
+    
+    FUNC_ENTER_API(H5Pset_mdc_config, FAIL);
+    H5TRACE2("e","ix",plist_id,config_ptr);
+
+    /* Get the plist structure */
+    if( NULL == ( plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS) ) ) {
+
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+    }
+
+    /* validate the new configuration */
+    if ( H5AC_validate_config(config_ptr) < 0 ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                    "invalid metadata cache configuration");
+    }
+
+    /* set the modified config */
+
+    /* If we ever support multiple versions of H5AC_cache_config_t, we 
+     * will have to test the version and do translation here.
+     */
+
+    if(H5P_set(plist, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, config_ptr)<0) {
+
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, \
+                    "can't set metadata cache initial config");
+    }
+    
+done:
+
+    FUNC_LEAVE_API(ret_value);
+
+} /* H5Pset_mdc_config() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_mdc_config
+ *
+ * Purpose:	Retrieve the metadata cache initial resize configuration
+ *		from the target FAPL.
+ *
+ *		Observe that the function will fail if config_ptr is
+ *		NULL, or if config_ptr->version specifies an unknown
+ *		version of H5AC_cache_config_t.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	J. Mainzer
+ *              Thursday, April 7, 2005
+ *
+ * Modifications:
+ *
+ *		None.
+ *	
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5Pget_mdc_config(hid_t                 plist_id, 
+                  H5AC_cache_config_t *config_ptr)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED;   /* return value */
+    H5C_auto_size_ctl_t resizeCfg;
+    
+    FUNC_ENTER_API(H5Pget_mdc_config, FAIL);
+    H5TRACE2("e","ix",plist_id,config_ptr);
+
+    /* Get the plist structure */
+    if ( NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)) ) {
+
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+    }
+
+    /* validate the config_ptr */
+    if ( config_ptr == NULL ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
+    }
+
+    if ( config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown config version.")
+    }
+
+    /* If we ever support multiple versions of H5AC_cache_config_t, we
+     * will have to get the cannonical version here, and then translate
+     * to the version of the structure supplied.
+     */
+
+    /* Get the current initial metadata cache resize configuration */
+    if ( H5P_get(plist, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, config_ptr) < 0 ) {
+
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, \
+                    "can't get metadata cache initial resize config");
+    }
+
+done:
+
+    FUNC_LEAVE_API(ret_value);
+
+} /* H5Pget_mdc_config() */
 
 
 /*-------------------------------------------------------------------------

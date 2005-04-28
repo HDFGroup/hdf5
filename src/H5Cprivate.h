@@ -459,7 +459,7 @@ typedef struct H5C_cache_entry_t
  *	cache size from the old if a cache size increment is triggered.
  *      The increment must be greater than 1.0, and should not exceed 2.0.
  *
- *	The new cache size is obtained my multiplying the current max cache
+ *	The new cache size is obtained by multiplying the current max cache
  *	size by the increment, and then clamping to max_size and to stay 
  *	within the max_increment as necessary.
  *
@@ -559,8 +559,22 @@ typedef struct H5C_cache_entry_t
  *
  ****************************************************************************/
 
+#define H5C_RESIZE_CFG__VALIDATE_GENERAL        0x1
+#define H5C_RESIZE_CFG__VALIDATE_INCREMENT      0x2
+#define H5C_RESIZE_CFG__VALIDATE_DECREMENT      0x4
+#define H5C_RESIZE_CFG__VALIDATE_INTERACTIONS   0x8
+#define H5C_RESIZE_CFG__VALIDATE_ALL      \
+(                                         \
+    H5C_RESIZE_CFG__VALIDATE_GENERAL |    \
+    H5C_RESIZE_CFG__VALIDATE_INCREMENT |  \
+    H5C_RESIZE_CFG__VALIDATE_DECREMENT |  \
+    H5C_RESIZE_CFG__VALIDATE_INTERACTIONS \
+)
+
 #define H5C__CURR_AUTO_SIZE_CTL_VER		1
 #define H5C__CURR_AUTO_RESIZE_RPT_FCN_VER	1
+
+#define H5C__MAX_EPOCH_MARKERS  		10
 
 #define H5C__DEF_AR_UPPER_THRESHHOLD		0.9999
 #define H5C__DEF_AR_LOWER_THRESHHOLD		0.9
@@ -590,20 +604,6 @@ enum H5C_resize_status
     not_full
 }; /* enum H5C_resize_conditions */
 
-enum H5C_cache_incr_mode
-{
-    H5C_incr__off,
-    H5C_incr__threshold
-};
-
-enum H5C_cache_decr_mode
-{
-    H5C_decr__off,
-    H5C_decr__threshold,
-    H5C_decr__age_out,
-    H5C_decr__age_out_with_threshold
-};
-
 typedef void (*H5C_auto_resize_rpt_fcn)(H5C_t * cache_ptr,
                                         int32_t version,
                                         double hit_rate,
@@ -612,6 +612,7 @@ typedef void (*H5C_auto_resize_rpt_fcn)(H5C_t * cache_ptr,
                                         size_t new_max_cache_size,
                                         size_t old_min_clean_size,
                                         size_t new_min_clean_size);
+
 typedef struct H5C_auto_size_ctl_t
 {
     /* general configuration fields: */
@@ -767,6 +768,9 @@ H5_DLL herr_t H5C_unprotect(H5F_t *             f,
                             haddr_t             addr,
                             void *              thing,
                             unsigned int        flags);
+
+H5_DLL herr_t H5C_validate_resize_config(H5C_auto_size_ctl_t * config_ptr,
+                                         unsigned int tests);
 
 #endif /* !_H5Cprivate_H */
 

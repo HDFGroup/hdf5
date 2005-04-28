@@ -334,6 +334,23 @@ H5AC_term_interface(void)
  *		the similar function in H5C.c.  The function is now a 
  *		wrapper for H5C_create().
  *						JRM - 6/4/04
+ *
+ *		Deleted the old size_hint parameter and added the 
+ *		max_cache_size, and min_clean_size parameters.
+ *
+ *                                              JRM - 3/10/05
+ *
+ *		Deleted the max_cache_size, and min_clean_size parameters,
+ *		and added the config_ptr parameter.  Added code to 
+ *		validate the resize configuration before we do anything.
+ *
+ *						JRM - 3/24/05
+ *
+ *		Changed the type of config_ptr from H5AC_auto_size_ctl_t *
+ *		to H5AC_cache_config_t *.  Propagated associated changes
+ *		through the function.
+ *						JRM - 4/7/05
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -352,76 +369,34 @@ static const char * H5AC_entry_type_names[H5AC_NTYPES] =
 };
 
 herr_t
-H5AC_create(const H5F_t *f, int UNUSED size_hint)
+H5AC_create(const H5F_t *f, 
+            H5AC_cache_config_t *config_ptr)
 {
-    int ret_value = SUCCEED;      /* Return value */
-#if 1 /* JRM */ /* test code -- remove when done */
-    H5C_auto_size_ctl_t auto_size_ctl =
-    {
-        /* int32_t     version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
-#if 1
-        /* H5C_auto_resize_report_fcn rpt_fcn = */ NULL,
-#else
-        /* H5C_auto_resize_report_fcn rpt_fcn = */ H5C_def_auto_resize_rpt_fcn,
-#endif
-        /* hbool_t     set_initial_size       = */ TRUE,
-        /* size_t      initial_size           = */ (1 * 1024 * 1024),
-
-        /* double      min_clean_fraction     = */ 0.25,
-
-        /* size_t      max_size               = */ (32 * 1024 * 1024),
-        /* size_t      min_size               = */ ( 1 * 1024 * 1024),
-
-        /* int64_t     epoch_length           = */ 50000,
-
-#if 0
-        /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__off,
-#else
-        /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,
-#endif
-        /* double     lower_hr_threshold      = */ 0.75,
-
-        /* double      increment              = */ 2.0,
-
-        /* hbool_t     apply_max_increment    = */ TRUE,
-        /* size_t      max_increment          = */ (8 * 1024 * 1024),
-
-#if 0
-        /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__off,
-#else
-        /* enum H5C_cache_decr_mode decr_mode = */ 
-                                              H5C_decr__age_out_with_threshold,
-#endif
-
-        /* double      upper_hr_threshold     = */ 0.999,
-
-        /* double      decrement              = */ 0.9,
-
-        /* hbool_t     apply_max_decrement    = */ TRUE,
-        /* size_t      max_decrement          = */ (1 * 1024 * 1024),
-
-        /* int32_t     epochs_before_eviction = */ 3,
-
-        /* hbool_t     apply_empty_reserve    = */ TRUE,
-        /* double      empty_reserve          = */ 0.1
-    };
-
-#endif /* JRM */
+    herr_t ret_value = SUCCEED;      /* Return value */
+    herr_t result;
 
     FUNC_ENTER_NOAPI(H5AC_create, FAIL)
 
-    HDassert(f);
-    HDassert(NULL == f->shared->cache);
+    HDassert ( f );
+    HDassert ( NULL == f->shared->cache );
+    HDassert ( config_ptr != NULL ) ;
 
-    /* this is test code that should be removed when we start passing
-     * in proper size hints.
+    result = H5AC_validate_config(config_ptr);
+
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad cache configuration");
+    }
+
+    /* The default max cache size and min clean size will frequently be 
+     * overwritten shortly by the subsequent set resize config call.
      *                                             -- JRM
      */
-    f->shared->cache = H5C_create(H5C__DEFAULT_MAX_CACHE_SIZE,
-                           H5C__DEFAULT_MIN_CLEAN_SIZE,
-                           (H5AC_NTYPES - 1),
-                           (const char **)H5AC_entry_type_names,
-                           H5AC_check_if_write_permitted);
+    f->shared->cache = H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE,
+                                  H5AC__DEFAULT_MIN_CLEAN_SIZE,
+                                  (H5AC_NTYPES - 1),
+                                  (const char **)H5AC_entry_type_names,
+                                  H5AC_check_if_write_permitted);
 
     if ( NULL == f->shared->cache ) {
 
@@ -429,14 +404,13 @@ H5AC_create(const H5F_t *f, int UNUSED size_hint)
 
     }
 
-#if 1 /* JRM */ /* test code -- remove when done */
-    if ( H5C_set_cache_auto_resize_config(f->shared->cache, &auto_size_ctl) 
-         != SUCCEED ) {
+    result = H5AC_set_cache_auto_resize_config(f->shared->cache, config_ptr);
+
+    if ( result != SUCCEED ) {
 
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
-                    "auto resize config test failed")
+                    "auto resize configuration failed")
     }
-#endif /* JRM */
 
 done:
 
@@ -1252,6 +1226,418 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5AC_stats() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_get_cache_auto_resize_config
+ *
+ * Purpose:     Wrapper function for H5C_get_cache_auto_resize_config().
+ *
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  John Mainzer
+ *              3/10/05
+ *
+ * Modifications:
+ *
+ *		JRM - 4/6/05
+ *              Reworked for the addition of struct H5AC_cache_config_t.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5AC_get_cache_auto_resize_config(H5AC_t * cache_ptr,
+                                  H5AC_cache_config_t *config_ptr)
+{
+    herr_t result;
+    herr_t ret_value = SUCCEED;      /* Return value */
+    H5C_auto_size_ctl_t internal_config;
+
+    FUNC_ENTER_NOAPI(H5AC_get_cache_auto_resize_config, FAIL)
+
+    if ( ( cache_ptr == NULL ) ||
+         ( config_ptr == NULL ) ||
+         ( config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION ) )
+    {
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "Bad cache_ptr or config_ptr on entry.")
+
+    }
+
+    result = H5C_get_cache_auto_resize_config((H5C_t *)cache_ptr,
+					      &internal_config);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "H5C_get_cache_auto_resize_config() failed.")
+    }
+
+    if ( internal_config.rpt_fcn == NULL ) {
+
+        config_ptr->rpt_fcn_enabled = FALSE;
+
+    } else {
+
+	config_ptr->rpt_fcn_enabled = TRUE;
+    }
+
+    config_ptr->set_initial_size       = internal_config.set_initial_size;
+    config_ptr->initial_size           = internal_config.initial_size;
+    config_ptr->min_clean_fraction     = internal_config.min_clean_fraction;
+    config_ptr->max_size               = internal_config.max_size;
+    config_ptr->min_size               = internal_config.min_size;
+    config_ptr->epoch_length           = internal_config.epoch_length;
+    config_ptr->incr_mode              = internal_config.incr_mode;
+    config_ptr->lower_hr_threshold     = internal_config.lower_hr_threshold;
+    config_ptr->increment              = internal_config.increment;
+    config_ptr->apply_max_increment    = internal_config.apply_max_increment;
+    config_ptr->max_increment          = internal_config.max_increment;
+    config_ptr->decr_mode              = internal_config.decr_mode;
+    config_ptr->upper_hr_threshold     = internal_config.upper_hr_threshold;
+    config_ptr->decrement              = internal_config.decrement;
+    config_ptr->apply_max_decrement    = internal_config.apply_max_decrement;
+    config_ptr->max_decrement          = internal_config.max_decrement;
+    config_ptr->epochs_before_eviction = internal_config.epochs_before_eviction;
+    config_ptr->apply_empty_reserve    = internal_config.apply_empty_reserve;
+    config_ptr->empty_reserve          = internal_config.empty_reserve;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_get_cache_auto_resize_config() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_get_cache_size
+ *
+ * Purpose:     Wrapper function for H5C_get_cache_size().
+ *
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  John Mainzer
+ *              3/11/05
+ *
+ * Modifications:
+ *
+ *              None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5AC_get_cache_size(H5AC_t * cache_ptr,
+                    size_t * max_size_ptr,
+                    size_t * min_clean_size_ptr,
+                    size_t * cur_size_ptr,
+                    int32_t * cur_num_entries_ptr)
+{
+    herr_t result;
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5AC_get_cache_size, FAIL)
+
+    result = H5C_get_cache_size((H5C_t *)cache_ptr,
+				max_size_ptr,
+				min_clean_size_ptr,
+				cur_size_ptr,
+				cur_num_entries_ptr);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "H5C_get_cache_size() failed.")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_get_cache_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_get_cache_hit_rate
+ *
+ * Purpose:     Wrapper function for H5C_get_cache_hit_rate().
+ *
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  John Mainzer
+ *              3/10/05
+ *
+ * Modifications:
+ *
+ *              None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5AC_get_cache_hit_rate(H5AC_t * cache_ptr,
+                        double * hit_rate_ptr)
+
+{
+    herr_t result;
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5AC_get_cache_hit_rate, FAIL)
+
+    result = H5C_get_cache_hit_rate((H5C_t *)cache_ptr, hit_rate_ptr);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "H5C_get_cache_hit_rate() failed.")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_get_cache_hit_rate() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5AC_reset_cache_hit_rate_stats()
+ *
+ * Purpose:     Wrapper function for H5C_reset_cache_hit_rate_stats().
+ *
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  John Mainzer, 3/10/05
+ *
+ * Modifications:
+ *
+ *              None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5AC_reset_cache_hit_rate_stats(H5AC_t * cache_ptr)
+{
+    herr_t result;
+    herr_t      ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5AC_reset_cache_hit_rate_stats, FAIL)
+
+    result = H5C_reset_cache_hit_rate_stats((H5C_t *)cache_ptr);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "H5C_reset_cache_hit_rate_stats() failed.")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_reset_cache_hit_rate_stats() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_set_cache_auto_resize_config
+ *
+ * Purpose:     Wrapper function for H5C_set_cache_auto_resize_config().
+ *
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  John Mainzer
+ *              3/10/05
+ *
+ * Modifications:
+ *
+ *              John Mainzer -- 4/6/05
+ *              Updated for the addition of H5AC_cache_config_t.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5AC_set_cache_auto_resize_config(H5AC_t * cache_ptr,
+                                  H5AC_cache_config_t *config_ptr)
+{
+    herr_t               result;
+    herr_t               ret_value = SUCCEED;      /* Return value */
+    H5C_auto_size_ctl_t internal_config;
+
+    FUNC_ENTER_NOAPI(H5AC_set_cache_auto_resize_config, FAIL)
+
+    if ( cache_ptr == NULL ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "NULL cache_ptr on entry.")
+    }
+
+    if ( config_ptr == NULL ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
+    }
+
+    if ( config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown config version.")
+    }
+
+    if ( ( config_ptr->rpt_fcn_enabled != TRUE ) &&
+         ( config_ptr->rpt_fcn_enabled != FALSE ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, 
+                    "config_ptr->rpt_fcn_enabled must be either TRUE or FALSE.")
+    }
+
+    internal_config.version                = H5C__CURR_AUTO_SIZE_CTL_VER;
+
+    if ( config_ptr->rpt_fcn_enabled ) {
+
+        internal_config.rpt_fcn            = H5C_def_auto_resize_rpt_fcn;
+
+    } else {
+
+        internal_config.rpt_fcn            = NULL;
+    }
+    
+    internal_config.set_initial_size       = config_ptr->set_initial_size;
+    internal_config.initial_size           = config_ptr->initial_size;
+    internal_config.min_clean_fraction     = config_ptr->min_clean_fraction;
+    internal_config.max_size               = config_ptr->max_size;
+    internal_config.min_size               = config_ptr->min_size;
+    internal_config.epoch_length           = config_ptr->epoch_length;
+
+    internal_config.incr_mode              = config_ptr->incr_mode;
+    internal_config.lower_hr_threshold     = config_ptr->lower_hr_threshold;
+    internal_config.increment              = config_ptr->increment;
+    internal_config.apply_max_increment    = config_ptr->apply_max_increment;
+    internal_config.max_increment          = config_ptr->max_increment;
+
+    internal_config.decr_mode              = config_ptr->decr_mode;
+    internal_config.upper_hr_threshold     = config_ptr->upper_hr_threshold;
+    internal_config.decrement              = config_ptr->decrement;
+    internal_config.apply_max_decrement    = config_ptr->apply_max_decrement;
+    internal_config.max_decrement          = config_ptr->max_decrement;
+    internal_config.epochs_before_eviction = config_ptr->epochs_before_eviction;
+    internal_config.apply_empty_reserve    = config_ptr->apply_empty_reserve;
+    internal_config.empty_reserve          = config_ptr->empty_reserve;
+
+    result = H5C_set_cache_auto_resize_config((H5C_t *)cache_ptr, 
+                                              &internal_config);
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "H5C_set_cache_auto_resize_config() failed.")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_set_cache_auto_resize_config() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_validate_config()
+ *
+ * Purpose:     Run a sanity check on the contents of the supplied 
+ *		instance of H5AC_cache_config_t.
+ *
+ *              Do nothing and return SUCCEED if no errors are detected,
+ *              and flag an error and return FAIL otherwise.
+ *
+ *		At present, this function operates by packing the data
+ *		from the instance of H5AC_cache_config_t into an instance
+ *		of H5C_auto_size_ctl_t, and then calling 
+ *		H5C_validate_resize_config().  As H5AC_cache_config_t and
+ *		H5C_auto_size_ctl_t diverge, we may have to change this.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              4/6/05
+ *
+ * Modifications:
+ *
+ *              None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5AC_validate_config(H5AC_cache_config_t * config_ptr)
+
+{
+    herr_t               result;
+    herr_t               ret_value = SUCCEED;    /* Return value */
+    H5C_auto_size_ctl_t internal_config;
+
+    FUNC_ENTER_NOAPI(H5AC_validate_config, FAIL)
+
+    if ( config_ptr == NULL ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
+    }
+
+    if ( config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown config version.")
+    }
+
+    if ( ( config_ptr->rpt_fcn_enabled != TRUE ) &&
+         ( config_ptr->rpt_fcn_enabled != FALSE ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                    "config_ptr->rpt_fcn_enabled must be either TRUE or FALSE.")
+    }
+
+    internal_config.version                = H5C__CURR_AUTO_SIZE_CTL_VER;
+
+    if ( config_ptr->rpt_fcn_enabled ) {
+
+        internal_config.rpt_fcn            = H5C_def_auto_resize_rpt_fcn;
+
+    } else {
+
+        internal_config.rpt_fcn            = NULL;
+    }
+    
+    internal_config.set_initial_size       = config_ptr->set_initial_size;
+    internal_config.initial_size           = config_ptr->initial_size;
+    internal_config.min_clean_fraction     = config_ptr->min_clean_fraction;
+    internal_config.max_size               = config_ptr->max_size;
+    internal_config.min_size               = config_ptr->min_size;
+    internal_config.epoch_length           = config_ptr->epoch_length;
+
+    internal_config.incr_mode              = config_ptr->incr_mode;
+    internal_config.lower_hr_threshold     = config_ptr->lower_hr_threshold;
+    internal_config.increment              = config_ptr->increment;
+    internal_config.apply_max_increment    = config_ptr->apply_max_increment;
+    internal_config.max_increment          = config_ptr->max_increment;
+
+    internal_config.decr_mode              = config_ptr->decr_mode;
+    internal_config.upper_hr_threshold     = config_ptr->upper_hr_threshold;
+    internal_config.decrement              = config_ptr->decrement;
+    internal_config.apply_max_decrement    = config_ptr->apply_max_decrement;
+    internal_config.max_decrement          = config_ptr->max_decrement;
+    internal_config.epochs_before_eviction = config_ptr->epochs_before_eviction;
+    internal_config.apply_empty_reserve    = config_ptr->apply_empty_reserve;
+    internal_config.empty_reserve          = config_ptr->empty_reserve;
+
+    result = H5C_validate_resize_config(&internal_config,
+                                        H5C_RESIZE_CFG__VALIDATE_ALL);
+
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error(s) in new config.")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_validate_config() */
 
 
 /*************************************************************************/

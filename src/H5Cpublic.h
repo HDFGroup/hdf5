@@ -34,6 +34,20 @@
 extern "C" {
 #endif
 
+enum H5C_cache_incr_mode
+{
+    H5C_incr__off,
+    H5C_incr__threshold
+};
+
+enum H5C_cache_decr_mode
+{
+    H5C_decr__off,
+    H5C_decr__threshold,
+    H5C_decr__age_out,
+    H5C_decr__age_out_with_threshold
+};
+
 #ifdef __cplusplus
 }
 #endif

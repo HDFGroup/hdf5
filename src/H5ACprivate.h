@@ -70,6 +70,14 @@
 
 #endif /* H5C_COLLECT_CACHE_STATS */
 
+/* Default max metadata cache size and min clean size are give here.
+ * At present, these are the same as those given in H5Cprivate.h.
+ */
+
+#define H5AC__DEFAULT_MAX_CACHE_SIZE	H5C__DEFAULT_MAX_CACHE_SIZE
+#define H5AC__DEFAULT_MIN_CLEAN_SIZE	H5C__DEFAULT_MIN_CLEAN_SIZE
+
+
 /*
  * Class methods pertaining to caching.	 Each type of cached object will
  * have a constant variable with permanent life-span that describes how
@@ -137,7 +145,7 @@ typedef enum H5AC_protect_t {
 } H5AC_protect_t;
 
 
-/* Typedef for metadata cache (defined in H5C.c) */
+/* Typedef for metadata cache (defined in H5Cpkg.h) */
 typedef H5C_t	H5AC_t;
 
 /* Metadata specific properties for FAPL */
@@ -164,6 +172,35 @@ extern hid_t H5AC_dxpl_id;
 /* (Global variable declaration, definition is in H5AC.c) */
 extern hid_t H5AC_ind_dxpl_id;
 
+
+/* Default cache configuration. */
+
+#define H5AC__DEFAULT_CACHE_CONFIG                                            \
+{                                                                             \
+  /* int32_t     version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,     \
+  /* hbool_t     rpt_fcn_enabled        = */ FALSE,                           \
+  /* hbool_t     set_initial_size       = */ TRUE,                            \
+  /* size_t      initial_size           = */ (1 * 1024 * 1024),               \
+  /* double      min_clean_fraction     = */ 0.25,                            \
+  /* size_t      max_size               = */ (16 * 1024 * 1024),              \
+  /* size_t      min_size               = */ ( 1 * 1024 * 1024),              \
+  /* int64_t     epoch_length           = */ 50000,                           \
+  /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,             \
+  /* double      lower_hr_threshold     = */ 0.9,                             \
+  /* double      increment              = */ 2.0,                             \
+  /* hbool_t     apply_max_increment    = */ TRUE,                            \
+  /* size_t      max_increment          = */ (4 * 1024 * 1024),               \
+  /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__age_out_with_threshold,\
+  /* double      upper_hr_threshold     = */ 0.999,                           \
+  /* double      decrement              = */ 0.9,                             \
+  /* hbool_t     apply_max_decrement    = */ TRUE,                            \
+  /* size_t      max_decrement          = */ (1 * 1024 * 1024),               \
+  /* int32_t     epochs_before_eviction = */ 3,                               \
+  /* hbool_t     apply_empty_reserve    = */ TRUE,                            \
+  /* double      empty_reserve          = */ 0.1                              \
+}
+
+
 /*
  * Library prototypes.
  */
@@ -183,7 +220,7 @@ extern hid_t H5AC_ind_dxpl_id;
 
 
 H5_DLL herr_t H5AC_init(void);
-H5_DLL herr_t H5AC_create(const H5F_t *f, int size_hint);
+H5_DLL herr_t H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr);
 H5_DLL herr_t H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, 
                        haddr_t addr, void *thing, unsigned int flags);
 H5_DLL void *H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
@@ -197,6 +234,25 @@ H5_DLL herr_t H5AC_rename(H5F_t *f, const H5AC_class_t *type,
 			   haddr_t old_addr, haddr_t new_addr);
 H5_DLL herr_t H5AC_dest(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5AC_stats(const H5F_t *f);
+
+H5_DLL herr_t H5AC_get_cache_auto_resize_config(H5AC_t * cache_ptr,
+                                               H5AC_cache_config_t *config_ptr);
+
+H5_DLL herr_t H5AC_get_cache_size(H5AC_t * cache_ptr,
+                                  size_t * max_size_ptr,
+                                  size_t * min_clean_size_ptr,
+                                  size_t * cur_size_ptr,
+                                  int32_t * cur_num_entries_ptr);
+
+H5_DLL herr_t H5AC_get_cache_hit_rate(H5AC_t * cache_ptr,
+                                      double * hit_rate_ptr);
+
+H5_DLL herr_t H5AC_reset_cache_hit_rate_stats(H5AC_t * cache_ptr);
+
+H5_DLL herr_t H5AC_set_cache_auto_resize_config(H5AC_t * cache_ptr,
+                                               H5AC_cache_config_t *config_ptr);
+
+H5_DLL herr_t H5AC_validate_config(H5AC_cache_config_t * config_ptr);
 
 #endif /* !_H5ACprivate_H */
 

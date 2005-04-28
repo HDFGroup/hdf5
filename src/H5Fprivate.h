@@ -316,10 +316,10 @@ typedef struct H5F_t H5F_t;
 #define H5F_CRT_SHARE_HEAD_VERS_DEF   HDF5_SHAREDHEADER_VERSION
 
 /* ========= File Access properties ============ */
-/* Definitions for size of meta data cache(elements) */
-#define H5F_ACS_META_CACHE_SIZE_NAME            "mdc_nelmts"
-#define H5F_ACS_META_CACHE_SIZE_SIZE            sizeof(int)
-#define H5F_ACS_META_CACHE_SIZE_DEF             H5AC_NSLOTS
+/* Definitions for the initial metadata cache resize configuration */
+#define H5F_ACS_META_CACHE_INIT_CONFIG_NAME	"mdc_initCacheCfg"
+#define H5F_ACS_META_CACHE_INIT_CONFIG_SIZE	sizeof(H5AC_cache_config_t)
+#define H5F_ACS_META_CACHE_INIT_CONFIG_DEF	H5AC__DEFAULT_CACHE_CONFIG
 
 /* Definitions for size of raw data chunk cache(elements) */
 #define H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME       "rdcc_nelmts"

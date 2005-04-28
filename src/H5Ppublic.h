@@ -24,6 +24,7 @@
 
 /* Public headers needed by this file */
 #include "H5public.h"
+#include "H5Cpublic.h"
 #include "H5Ipublic.h"
 #include "H5Dpublic.h"
 #include "H5Fpublic.h"
@@ -252,11 +253,17 @@ H5_DLL herr_t H5Pset_edc_check(hid_t plist_id, H5Z_EDC_t check);
 H5_DLL H5Z_EDC_t H5Pget_edc_check(hid_t plist_id);
 H5_DLL herr_t H5Pset_filter_callback(hid_t plist_id, H5Z_filter_func_t func, 
                                      void* op_data);
-H5_DLL herr_t H5Pset_cache(hid_t plist_id, int mdc_nelmts, size_t rdcc_nelmts,
-       size_t rdcc_nbytes, double rdcc_w0);
-H5_DLL herr_t H5Pget_cache(hid_t plist_id, int *mdc_nelmts/*out*/,
+H5_DLL herr_t H5Pset_cache(hid_t plist_id, int mdc_nelmts,
+       size_t rdcc_nelmts, size_t rdcc_nbytes, 
+       double rdcc_w0);
+H5_DLL herr_t H5Pget_cache(hid_t plist_id,
+       int *mdc_nelmts, /* out */
        size_t *rdcc_nelmts/*out*/,
        size_t *rdcc_nbytes/*out*/, double *rdcc_w0);
+H5_DLL herr_t H5Pset_mdc_config(hid_t    plist_id,
+       H5AC_cache_config_t * config_ptr);
+H5_DLL herr_t H5Pget_mdc_config(hid_t     plist_id,
+       H5AC_cache_config_t * config_ptr);	/* out */
 H5_DLL herr_t H5Pset_btree_ratios(hid_t plist_id, double left, double middle,
        double right);
 H5_DLL herr_t H5Pget_btree_ratios(hid_t plist_id, double *left/*out*/,

@@ -96,8 +96,12 @@ typedef struct H5F_file_t {
     unsigned	super_chksum;	/* Superblock checksum                  */
     unsigned	drvr_chksum;	/* Driver info block checksum           */
     H5AC_t      *cache;		/* The object cache			*/
+    H5AC_cache_config_t
+		mdc_initCacheCfg; /* initial configuration for the      */
+                                /* metadata cache.  This structure is   */
+                                /* fixed at creation time and should    */
+                                /* not change thereafter.               */
     hid_t       fcpl_id;	/* File creation property list ID 	*/
-    int         mdc_nelmts;	/* Size of meta data cache (elements)	*/
     size_t	rdcc_nelmts;	/* Size of raw data chunk cache (elmts)	*/
     size_t	rdcc_nbytes;	/* Size of raw data chunk cache	(bytes)	*/
     double	rdcc_w0;	/* Preempt read chunks first? [0.0..1.0]*/
