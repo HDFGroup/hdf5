@@ -71,6 +71,7 @@
 ./config/linux-gnuaout
 ./config/linux-gnulibc1
 ./config/linux-gnulibc2
+./config/nv1-cray
 ./config/pgi-flags
 ./config/powerpc-apple
 ./config/powerpc-ibm-aix4.x
@@ -785,6 +786,7 @@
 ./fortran/config/linux-gnuaout
 ./fortran/config/linux-gnulibc1
 ./fortran/config/linux-gnulibc2
+./fortran/config/nv1-cray
 ./fortran/config/pgi-fflags
 ./fortran/config/pgi-flags
 ./fortran/config/powerpc-apple
@@ -920,6 +922,7 @@
 ./c++/config/linux-gnu
 ./c++/config/linux-gnulibc1
 ./c++/config/linux-gnulibc2
+./c++/config/nv1-cray
 ./c++/config/powerpc-ibm-aix
 ./c++/config/rs6000-ibm-aix4.x
 ./c++/config/solaris2.x
