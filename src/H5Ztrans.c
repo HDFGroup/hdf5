@@ -149,15 +149,26 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
 
 
 #ifndef H5_ULLONG_TO_FP_CAST_WORKS
-#define   ULLONG_TO_FP_XFORM_TYPE_OP_ERROR	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Cannot convert from unsigned long long to double: required for data transform") 
+#define H5Z_XFORM_ULL_DO_OP1(RESL,RESR,TYPE,OP,SIZE)                    \
+{									\
+    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Cannot convert from unsigned long long to double: required for data transform") \
+}
 #else
-#define ULLONG_TO_FP_XFORM_TYPE_OP_ERROR  
+#define H5Z_XFORM_ULL_DO_OP1(RESL,RESR,TYPE,OP,SIZE)                    \
+    H5Z_XFORM_DO_OP1(RESL,RESR,TYPE,OP,SIZE)
 #endif
 
+/* Windows Intel 8.1 compiler has error converting long long to double.
+ * Hard code it in.
+ */
 #ifdef H5_LLONG_TO_FP_CAST_BROKEN
-#define   LLONG_TO_FP_XFORM_TYPE_OP_ERROR	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Cannot convert from long long to double: required for data transform") 
+#define H5Z_XFORM_LL_DO_OP1(RESL,RESR,TYPE,OP,SIZE)                     \
+{									\
+    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Cannot convert from long long to double: required for data transform") \
+}
 #else
-#define LLONG_TO_FP_XFORM_TYPE_OP_ERROR
+#define H5Z_XFORM_LL_DO_OP1(RESL,RESR,TYPE,OP,SIZE)                     \
+    H5Z_XFORM_DO_OP1(RESL,RESR,TYPE,OP,SIZE)
 #endif
 
 #define H5Z_XFORM_TYPE_OP(RESL,RESR,TYPE,OP,SIZE)			\
@@ -181,15 +192,9 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
     else if((TYPE) == H5T_NATIVE_ULONG)					\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned long, OP, (SIZE))	\
     else if((TYPE) == H5T_NATIVE_LLONG)					\
-    {									\
-	LLONG_TO_FP_XFORM_TYPE_OP_ERROR					\
-	H5Z_XFORM_DO_OP1((RESL), (RESR), long_long, OP, (SIZE))		\
-    }									\
+	H5Z_XFORM_LL_DO_OP1((RESL), (RESR), long_long, OP, (SIZE))	\
     else if((TYPE) == H5T_NATIVE_ULLONG)				\
-    {									\
-	 ULLONG_TO_FP_XFORM_TYPE_OP_ERROR				\
-         H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned long_long, OP, (SIZE)) \
-    }									\
+	H5Z_XFORM_ULL_DO_OP1((RESL), (RESR), unsigned long_long, OP, (SIZE)) \
     else if((TYPE) == H5T_NATIVE_FLOAT)					\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), float, OP, (SIZE))		\
     else if((TYPE) == H5T_NATIVE_DOUBLE)				\
