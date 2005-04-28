@@ -24,7 +24,7 @@ dnl
 dnl	Check for a Fortran 9X compiler.
 dnl
 AC_DEFUN(AC_PROG_F9X,
-[AC_CHECK_PROGS(F9X, f90 pgf90 xlf90 f95 g95 xlf95)
+[AC_CHECK_PROGS(F9X, f90 pgf90 xlf90 f95 g95 xlf95 ftn)
 test -z "$F9X" && AC_MSG_ERROR([no acceptable f9X compiler found in \$PATH])
 
 AC_PROG_F9X_WORKS

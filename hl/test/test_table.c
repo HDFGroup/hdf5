@@ -22,6 +22,12 @@
 #define TEST_FILE_LE "test_table_le.hdf5"
 #define TEST_FILE_CRAY "test_table_cray.hdf5"
 
+/* Compiler optimization on Cray X1s can cause this file not to compile.
+ * Turn it off.
+ */
+#ifdef __crayx1
+#pragma OPTIMIZE OFF
+#endif
 
 /*-------------------------------------------------------------------------
  * Table API test
@@ -1593,5 +1599,4 @@ static int compare_deleted(hsize_t rrecords, hsize_t dstart, hsize_t drecords,
  }
  return 0;
 }
-
 
