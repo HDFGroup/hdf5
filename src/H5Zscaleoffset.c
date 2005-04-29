@@ -290,17 +290,17 @@ H5Z_class_t H5Z_SCALEOFFSET[1] = {{
 {                                                                                     \
    if(sizeof(type)==sizeof(int)) {                                                    \
       if(H5Z_scaleoffset_rnd(max*HDpow(10, D_val) - min*HDpow(10, D_val))             \
-         > ~(unsigned int)0 - 2) {                                                    \
+         >= ~(unsigned int)0 - 2) {                                                   \
          *minbits = sizeof(int)*8; goto done;                                         \
       }                                                                               \
    } else if(sizeof(type)==sizeof(long)) {                                            \
       if(H5Z_scaleoffset_rnd(max*HDpow(10, D_val) - min*HDpow(10, D_val))             \
-         > ~(unsigned long)0 - 2) {                                                   \
+         >= ~(unsigned long)0 - 2) {                                                  \
          *minbits = sizeof(long)*8; goto done;                                        \
       }                                                                               \
    } else if(sizeof(type)==sizeof(long_long)) {                                       \
       if(H5Z_scaleoffset_rnd(max*HDpow(10, D_val) - min*HDpow(10, D_val))             \
-         > ~(unsigned long_long)0 - 2) {                                              \
+         >= ~(unsigned long_long)0 - 2) {                                             \
          *minbits = sizeof(long_long)*8; goto done;                                   \
       }                                                                               \
    } else                                                                             \
