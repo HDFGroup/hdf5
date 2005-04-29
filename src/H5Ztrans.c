@@ -161,7 +161,7 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
 /* Windows Intel 8.1 compiler has error converting long long to double.
  * Hard code it in.
  */
-#ifdef H5_LLONG_TO_FP_CAST_BROKEN
+#ifndef H5_LLONG_TO_FP_CAST_WORKS
 #define H5Z_XFORM_LL_DO_OP1(RESL,RESR,TYPE,OP,SIZE)                     \
 {									\
     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Cannot convert from long long to double: required for data transform") \
