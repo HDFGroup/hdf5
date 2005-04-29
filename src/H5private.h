@@ -283,24 +283,6 @@
 #endif
 
 /*
- * Although `long long' is part of the revised ANSI-C some compilers don't
- * support it yet.  We define `long_long' as the longest integral integer type
- * supported by the compiler, usually 64 bits.	It must be legal to qualify
- * `long_long' with `unsigned'.
- */
-#if H5_SIZEOF_LONG_LONG>0
-#   define long_long	long long
-#elif H5_SIZEOF___INT64>0
-#   define long_long	__int64	/*Win32*/
-#   undef H5_SIZEOF_LONG_LONG
-#   define H5_SIZEOF_LONG_LONG H5_SIZEOF___INT64
-#else
-#   define long_long	long int
-#   undef H5_SIZEOF_LONG_LONG
-#   define H5_SIZEOF_LONG_LONG H5_SIZEOF_LONG
-#endif
-
-/*
  * Numeric data types.	Some of these might be defined in Posix.1g, otherwise
  * we define them with the closest available type which is at least as large
  * as the number of bits indicated in the type name.  The `int8' types *must*
