@@ -50119,6 +50119,28 @@ else
 echo "${ECHO_T}no" >&6
 fi
 
+echo "$as_me:$LINENO: checking if compiling long long to floating-point typecasts work" >&5
+echo $ECHO_N "checking if compiling long long to floating-point typecasts work... $ECHO_C" >&6
+if test "${hdf5_cv_llong_to_fp_cast_works+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  hdf5_cv_llong_to_fp_cast_works=yes
+fi
+
+
+if test ${hdf5_cv_llong_to_fp_cast_works} = "yes"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define LLONG_TO_FP_CAST_WORKS 1
+_ACEOF
+
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
 echo "$as_me:$LINENO: checking if converting unsigned long long to long double with precision work" >&5
 echo $ECHO_N "checking if converting unsigned long long to long double with precision work... $ECHO_C" >&6
 if test "${hdf5_cv_ullong_to_ldouble_precision_works+set}" = set; then
