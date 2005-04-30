@@ -78,7 +78,7 @@ H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
 #ifdef H5_WANT_H5_V1_6_COMPAT
     if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_SHUFFLE,&flags,&cd_nelmts, cd_values,0,NULL)<0)
 #else
-    if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_SHUFFLE,&flags,&cd_nelmts, cd_values,0,NULL,NULL)<0)
+    if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_SHUFFLE,&flags,&cd_nelmts, cd_values,(size_t)0,NULL,NULL)<0)
 #endif
 	HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get shuffle parameters")
 
@@ -87,7 +87,7 @@ H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
 	HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size")
 
     /* Modify the filter's parameters for this dataset */
-    if(H5Pmodify_filter(dcpl_id, H5Z_FILTER_SHUFFLE, flags, H5Z_SHUFFLE_TOTAL_NPARMS, cd_values)<0)
+    if(H5Pmodify_filter(dcpl_id, H5Z_FILTER_SHUFFLE, flags, (size_t)H5Z_SHUFFLE_TOTAL_NPARMS, cd_values)<0)
 	HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set local shuffle parameters")
 
 done:
@@ -142,11 +142,11 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
     /* Get the number of bytes per element from the parameter block */
     bytesoftype=cd_values[H5Z_SHUFFLE_PARM_SIZE];
 
-    /* Don't do anything for 1-byte elements */
-    if(bytesoftype>1) {
-        /* Compute the number of elements in buffer */
-        numofelements=nbytes/bytesoftype;
+    /* Compute the number of elements in buffer */
+    numofelements=nbytes/bytesoftype;
 
+    /* Don't do anything for 1-byte elements, or "fractional" elements */
+    if(bytesoftype > 1 && numofelements > 1) {
         /* Compute the leftover bytes if there are any */
         leftover = nbytes%bytesoftype;
 
