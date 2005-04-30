@@ -2232,7 +2232,6 @@ H5B2_swap_leaf(H5F_t *f, hid_t dxpl_id, unsigned depth,
     const H5AC_class_t *child_class;    /* Pointer to child node's class info */
     haddr_t child_addr;                 /* Address of child node */
     void *child;                        /* Pointer to child node */
-    unsigned *child_nrec;               /* Pointer to child # of records */
     uint8_t *child_native;              /* Pointer to child's native records */
     H5B2_shared_t *shared;              /* B-tree's shared info */
     herr_t ret_value=SUCCEED;           /* Return value */
@@ -2261,7 +2260,6 @@ H5B2_swap_leaf(H5F_t *f, hid_t dxpl_id, unsigned depth,
 
         /* More setup for accessing child node information */
         child = child_internal;
-        child_nrec = &(child_internal->nrec);
         child_native = child_internal->int_native;
 
         /* Mark child node as dirty now */
@@ -2280,7 +2278,6 @@ H5B2_swap_leaf(H5F_t *f, hid_t dxpl_id, unsigned depth,
 
         /* More setup for accessing child node information */
         child = child_leaf;
-        child_nrec = &(child_leaf->nrec);
         child_native = child_leaf->leaf_native;
 
         /* Mark child node as dirty now */
@@ -3297,7 +3294,6 @@ H5B2_remove_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     haddr_t     leaf_addr=HADDR_UNDEF;  /* Leaf address on disk */
     unsigned    leaf_unprotect_flags=H5AC__NO_FLAGS_SET; /* Flags for unprotecting leaf node */
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
-    int         cmp;                    /* Comparison value of records */
     unsigned    idx;                    /* Location of record which matches key */
     herr_t	ret_value = SUCCEED;
 
@@ -3323,7 +3319,7 @@ H5B2_remove_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     HDassert(leaf->nrec == curr_node_ptr->node_nrec);
 
     /* Find correct location to remove this record */
-    if((cmp = H5B2_locate_record(shared->type,leaf->nrec,shared->nat_off,leaf->leaf_native,udata,&idx)) != 0)
+    if(H5B2_locate_record(shared->type,leaf->nrec,shared->nat_off,leaf->leaf_native,udata,&idx) != 0)
         HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "record is not in B-tree")
 
     /* Make callback to retrieve record in native form */

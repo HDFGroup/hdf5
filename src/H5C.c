@@ -3375,12 +3375,7 @@ H5C_protect(H5F_t *	       f,
              */
             if ( cache_ptr->index_size > cache_ptr->max_cache_size ) {
 
-                size_t space_needed;
-
                 cache_ptr->cache_full = TRUE;
-
-                space_needed = cache_ptr->index_size - 
-                               cache_ptr->max_cache_size + 1;
 
                 result = H5C_make_space_in_cache(f, primary_dxpl_id, 
                                                  secondary_dxpl_id, cache_ptr, 

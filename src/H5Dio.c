@@ -120,7 +120,7 @@ H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
 static herr_t H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type,
         const H5S_t *file_space, const H5S_t *mem_space, fm_map *fm);
 static herr_t H5D_destroy_chunk_map(const fm_map *fm);
-static herr_t H5D_free_chunk_info(void *item, void UNUSED *key, void UNUSED *opdata);
+static herr_t H5D_free_chunk_info(void *item, void *key, void *opdata);
 static herr_t H5D_create_chunk_file_map_hyper(const fm_map *fm);
 static herr_t H5D_create_chunk_mem_map_hyper(const fm_map *fm);
 static herr_t H5D_chunk_file_cb(void *elem, hid_t type_id, unsigned ndims,
