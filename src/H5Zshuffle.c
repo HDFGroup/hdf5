@@ -135,11 +135,11 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
     /* Get the number of bytes per element from the parameter block */
     bytesoftype=cd_values[H5Z_SHUFFLE_PARM_SIZE];
 
-    /* Don't do anything for 1-byte elements */
-    if(bytesoftype>1) {
-        /* Compute the number of elements in buffer */
-        numofelements=nbytes/bytesoftype;
+    /* Compute the number of elements in buffer */
+    numofelements=nbytes/bytesoftype;
 
+    /* Don't do anything for 1-byte elements, or "fractional" elements */
+    if(bytesoftype > 1 && numofelements > 1) {
         /* Compute the leftover bytes if there are any */
         leftover = nbytes%bytesoftype;
 
