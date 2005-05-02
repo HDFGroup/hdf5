@@ -185,7 +185,7 @@ typedef ssize_t			hssize_t;
 #   endif  /* H5_HAVE_PARALLEL */
 #elif H5_SIZEOF_LONG_LONG>=8
     typedef unsigned long_long      haddr_t;
-#   define HADDR_UNDEF              ((haddr_t)(long long)(-1))
+#   define HADDR_UNDEF              ((haddr_t)(long_long)(-1))
 #   define H5_SIZEOF_HADDR_T        H5_SIZEOF_LONG_LONG
 #   ifdef H5_HAVE_PARALLEL
 #       define HADDR_AS_MPI_TYPE    MPI_LONG_LONG_INT
