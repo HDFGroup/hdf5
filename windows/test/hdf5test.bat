@@ -190,61 +190,11 @@ echo ============================
 
 enum%2\%1\enum%2
 
-echo.
-echo ============================
-echo Testing gass_write 
-echo ============================
-
-echo.
-echo Test skipped because GASS driver not available.
-echo.
-
-echo ============================
-echo Testing gass_read 
-echo ============================
-
-echo.
-echo Test skipped because GASS driver not available.
-echo.
-
-echo ============================
-echo Testing gass_append 
-echo ============================
-
-echo.
-echo Test skipped because GASS driver not available.
-echo.
-
 echo ============================
 echo Testing set_extent 
 echo ============================
 
 set_extent%2\%1\set_extent%2
-
-echo.
-echo ============================
-echo Testing srb_write 
-echo ============================
-
-echo.
-echo Test skipped because SRB driver not available.
-echo.
-
-echo ============================
-echo Testing srb_append 
-echo ============================
-
-echo.
-echo Test skipped because SRB driver not available.
-echo.
-
-echo ============================
-echo Testing srb_read 
-echo ============================
-
-echo.
-echo Test skipped because SRB driver not available.
-echo.
 
 echo ============================
 echo Testing ttsafe 
