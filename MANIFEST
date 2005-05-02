@@ -1731,6 +1731,9 @@
 #windows misc
 ./windows/misc/typegen/typegen.dsw
 ./windows/misc/typegen/h5tinit/h5tinit.dsp
+./windows/misc/fortrantyepgen/H5fort_type_define/H5fort_type_define.dsp
+./windows/misc/fortrantyepgen/fortrantyepgen.dsw
+
 
 #windows hl proj
 ./windows/proj/all/all.dsp
