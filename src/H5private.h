@@ -160,12 +160,65 @@
 
 /*
  * MPE Instrumentation support
- * Do not #if the following header file because it contains
- * the needed null definitions for the H5-MPE macros when MPE
- * support is not configured.
- *
  */
-#include "H5MPprivate.h"
+#ifdef H5_HAVE_MPE
+/*------------------------------------------------------------------------
+ * Purpose:    Begin to collect MPE log information for a function. It should
+ *             be ahead of the actual function's process.
+ * 
+ * Programmer: Long Wang
+ *
+ *------------------------------------------------------------------------
+ */
+#include "mpe.h"
+/*
+ * #define eventa(func_name)   h5_mpe_ ## func_name ## _a
+ * #define eventb(func_name)   h5_mpe_ ## func_name ## _b
+ */
+#define eventa(func_name)   h5_mpe_eventa
+#define eventb(func_name)   h5_mpe_eventb
+#define MPE_LOG_VARS(func_name)                                               \
+    static int eventa(func_name) = -1;                                        \
+    static int eventb(func_name) = -1;                                        \
+    const char* p_end_funcname = #func_name;                                  \
+    const char* p_event_start = "start" #func_name;
+
+/* Hardwire the color to "red", since that's what all the routines are using
+ * now.  In the future, if we want to change that color for a given routine,
+ * we should define a "FUNC_ENTER_API_COLOR" macro which takes an extra 'color'
+ * parameter and then make additional FUNC_ENTER_<foo>_COLOR macros to get that
+ * color information down to the BEGIN_MPE_LOG macro (which should have a new
+ * BEGIN_MPE_LOG_COLOR variant). -QAK
+ */
+#define BEGIN_MPE_LOG(func_name)                                              \
+  if (H5_MPEinit_g){							      \
+    if (eventa(func_name) == -1 && eventb(func_name) == -1) {		      \
+	const char* p_color = "red";					      \
+         eventa(func_name)=MPE_Log_get_event_number();                        \
+         eventb(func_name)=MPE_Log_get_event_number();                        \
+         MPE_Describe_state(eventa(func_name), eventb(func_name), (char *)p_end_funcname, (char *)p_color); \
+    }                                                                         \
+    MPE_Log_event(eventa(func_name), 0, (char *)p_event_start); 	              \
+  }
+
+
+/*------------------------------------------------------------------------
+ * Purpose:   Finish the collection of MPE log information for a function. 
+ *            It should be after the actual function's process.
+ *
+ * Programmer: Long Wang
+ */
+#define FINISH_MPE_LOG                                                       \
+    if (H5_MPEinit_g) {                                                      \
+        MPE_Log_event(eventb(func_name), 0, (char *)p_end_funcname);                 \
+    }
+
+#else /* H5_HAVE_MPE */
+#define MPE_LOG_VARS(func_name) /* void */   
+#define BEGIN_MPE_LOG(func_name) /* void */  
+#define FINISH_MPE_LOG   /* void */ 
+
+#endif /* H5_HAVE_MPE */
 
 /*
  * dmalloc (debugging malloc) support
