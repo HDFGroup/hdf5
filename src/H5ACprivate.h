@@ -177,14 +177,14 @@ extern hid_t H5AC_ind_dxpl_id;
 
 #define H5AC__DEFAULT_CACHE_CONFIG                                            \
 {                                                                             \
-  /* int32_t     version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,     \
+  /* int         version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,     \
   /* hbool_t     rpt_fcn_enabled        = */ FALSE,                           \
   /* hbool_t     set_initial_size       = */ TRUE,                            \
   /* size_t      initial_size           = */ (1 * 1024 * 1024),               \
   /* double      min_clean_fraction     = */ 0.25,                            \
   /* size_t      max_size               = */ (16 * 1024 * 1024),              \
   /* size_t      min_size               = */ ( 1 * 1024 * 1024),              \
-  /* int64_t     epoch_length           = */ 50000,                           \
+  /* long int    epoch_length           = */ 50000,                           \
   /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,             \
   /* double      lower_hr_threshold     = */ 0.9,                             \
   /* double      increment              = */ 2.0,                             \
@@ -195,7 +195,7 @@ extern hid_t H5AC_ind_dxpl_id;
   /* double      decrement              = */ 0.9,                             \
   /* hbool_t     apply_max_decrement    = */ TRUE,                            \
   /* size_t      max_decrement          = */ (1 * 1024 * 1024),               \
-  /* int32_t     epochs_before_eviction = */ 3,                               \
+  /* int         epochs_before_eviction = */ 3,                               \
   /* hbool_t     apply_empty_reserve    = */ TRUE,                            \
   /* double      empty_reserve          = */ 0.1                              \
 }

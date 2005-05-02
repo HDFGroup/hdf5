@@ -233,7 +233,7 @@ extern "C" {
 typedef struct H5AC_cache_config_t
 {
     /* general configuration fields: */
-    int32_t                     version;
+    int                         version;
 
     hbool_t			rpt_fcn_enabled;
 
@@ -245,7 +245,7 @@ typedef struct H5AC_cache_config_t
     size_t                      max_size;
     size_t                      min_size;
 
-    int64_t                     epoch_length;
+    long int                    epoch_length;
 
 
     /* size increase control fields: */
@@ -269,7 +269,7 @@ typedef struct H5AC_cache_config_t
     hbool_t                     apply_max_decrement;
     size_t                      max_decrement;
 
-    int32_t                     epochs_before_eviction;
+    int                         epochs_before_eviction;
 
     hbool_t                     apply_empty_reserve;
     double                      empty_reserve;

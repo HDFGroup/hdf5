@@ -1288,7 +1288,7 @@ H5AC_get_cache_auto_resize_config(H5AC_t * cache_ptr,
     config_ptr->min_clean_fraction     = internal_config.min_clean_fraction;
     config_ptr->max_size               = internal_config.max_size;
     config_ptr->min_size               = internal_config.min_size;
-    config_ptr->epoch_length           = internal_config.epoch_length;
+    config_ptr->epoch_length           = (long)(internal_config.epoch_length);
     config_ptr->incr_mode              = internal_config.incr_mode;
     config_ptr->lower_hr_threshold     = internal_config.lower_hr_threshold;
     config_ptr->increment              = internal_config.increment;
@@ -1299,7 +1299,8 @@ H5AC_get_cache_auto_resize_config(H5AC_t * cache_ptr,
     config_ptr->decrement              = internal_config.decrement;
     config_ptr->apply_max_decrement    = internal_config.apply_max_decrement;
     config_ptr->max_decrement          = internal_config.max_decrement;
-    config_ptr->epochs_before_eviction = internal_config.epochs_before_eviction;
+    config_ptr->epochs_before_eviction = 
+                                  (int)(internal_config.epochs_before_eviction);
     config_ptr->apply_empty_reserve    = internal_config.apply_empty_reserve;
     config_ptr->empty_reserve          = internal_config.empty_reserve;
 
@@ -1506,7 +1507,8 @@ H5AC_set_cache_auto_resize_config(H5AC_t * cache_ptr,
     internal_config.min_clean_fraction     = config_ptr->min_clean_fraction;
     internal_config.max_size               = config_ptr->max_size;
     internal_config.min_size               = config_ptr->min_size;
-    internal_config.epoch_length           = config_ptr->epoch_length;
+    internal_config.epoch_length           = 
+                                            (int64_t)(config_ptr->epoch_length);
 
     internal_config.incr_mode              = config_ptr->incr_mode;
     internal_config.lower_hr_threshold     = config_ptr->lower_hr_threshold;
@@ -1519,7 +1521,8 @@ H5AC_set_cache_auto_resize_config(H5AC_t * cache_ptr,
     internal_config.decrement              = config_ptr->decrement;
     internal_config.apply_max_decrement    = config_ptr->apply_max_decrement;
     internal_config.max_decrement          = config_ptr->max_decrement;
-    internal_config.epochs_before_eviction = config_ptr->epochs_before_eviction;
+    internal_config.epochs_before_eviction = 
+                                  (int32_t)(config_ptr->epochs_before_eviction);
     internal_config.apply_empty_reserve    = config_ptr->apply_empty_reserve;
     internal_config.empty_reserve          = config_ptr->empty_reserve;
 
@@ -1608,7 +1611,8 @@ H5AC_validate_config(H5AC_cache_config_t * config_ptr)
     internal_config.min_clean_fraction     = config_ptr->min_clean_fraction;
     internal_config.max_size               = config_ptr->max_size;
     internal_config.min_size               = config_ptr->min_size;
-    internal_config.epoch_length           = config_ptr->epoch_length;
+    internal_config.epoch_length           = 
+                                            (int64_t)(config_ptr->epoch_length);
 
     internal_config.incr_mode              = config_ptr->incr_mode;
     internal_config.lower_hr_threshold     = config_ptr->lower_hr_threshold;
@@ -1621,7 +1625,8 @@ H5AC_validate_config(H5AC_cache_config_t * config_ptr)
     internal_config.decrement              = config_ptr->decrement;
     internal_config.apply_max_decrement    = config_ptr->apply_max_decrement;
     internal_config.max_decrement          = config_ptr->max_decrement;
-    internal_config.epochs_before_eviction = config_ptr->epochs_before_eviction;
+    internal_config.epochs_before_eviction = 
+                                  (int32_t)(config_ptr->epochs_before_eviction);
     internal_config.apply_empty_reserve    = config_ptr->apply_empty_reserve;
     internal_config.empty_reserve          = config_ptr->empty_reserve;
 
