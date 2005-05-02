@@ -4963,11 +4963,12 @@ H5Fget_mdc_size(hid_t file_id,
                 size_t *max_size_ptr,
                 size_t *min_clean_size_ptr,
                 size_t *cur_size_ptr,
-                int32_t *cur_num_entries_ptr)
+                int *cur_num_entries_ptr)
 {
     H5F_t      *file=NULL;      /* File object for file ID */
     herr_t     ret_value = SUCCEED;      /* Return value */
     herr_t     result;
+    int32_t    cur_num_entries;
 
     FUNC_ENTER_API(H5Fget_mdc_size, FAIL)
     H5TRACE5("e","i*z*z*z*Is",file_id,max_size_ptr,min_clean_size_ptr,
@@ -4984,14 +4985,17 @@ H5Fget_mdc_size(hid_t file_id,
                                  max_size_ptr,
                                  min_clean_size_ptr,
                                  cur_size_ptr,
-                                 cur_num_entries_ptr);
+                                 &cur_num_entries);
 
     if ( result != SUCCEED ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                     "H5AC_get_cache_size() failed.");
+
+    } else if ( cur_num_entries_ptr != NULL ) {
+
+	*cur_num_entries_ptr = (int)cur_num_entries;
     }
-    
 
 done:
 

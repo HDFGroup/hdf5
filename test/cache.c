@@ -18139,7 +18139,7 @@ check_file_mdc_api_calls(void)
     size_t max_size;
     size_t min_clean_size;
     size_t cur_size;
-    int32_t cur_num_entries;
+    int cur_num_entries;
     double hit_rate;
     H5AC_cache_config_t default_config = H5AC__DEFAULT_CACHE_CONFIG;
     H5AC_cache_config_t mod_config_1 =
@@ -18591,7 +18591,7 @@ check_and_validate_cache_size(hid_t file_id,
     size_t expected_cur_size;
     size_t cur_size;
     int32_t expected_cur_num_entries;
-    int32_t cur_num_entries;
+    int cur_num_entries;
     H5F_t * file_ptr = NULL;
     H5C_t * cache_ptr = NULL;
 
@@ -18644,7 +18644,7 @@ check_and_validate_cache_size(hid_t file_id,
         } else if ( ( max_size != expected_max_size ) ||
                     ( min_clean_size != expected_min_clean_size ) ||
                     ( cur_size != expected_cur_size ) ||
-                    ( cur_num_entries != expected_cur_num_entries ) ) {
+                    ( cur_num_entries != (int)expected_cur_num_entries ) ) {
 
             pass = FALSE;
             failure_mssg = "H5Fget_mdc_size() returned unexpected value(s).";
@@ -20220,7 +20220,7 @@ check_file_mdc_api_errs(void)
     size_t max_size;
     size_t min_clean_size;
     size_t cur_size;
-    int32_t cur_num_entries;
+    int cur_num_entries;
     double hit_rate;
     H5AC_cache_config_t default_config = H5AC__DEFAULT_CACHE_CONFIG;
     H5AC_cache_config_t scratch;

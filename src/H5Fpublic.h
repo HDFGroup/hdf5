@@ -125,7 +125,7 @@ H5_DLL herr_t H5Fget_mdc_size(hid_t file_id,
                               size_t * max_size_ptr,
                               size_t * min_clean_size_ptr,
                               size_t * cur_size_ptr,
-                              int32_t * cur_num_entries_ptr);
+                              int * cur_num_entries_ptr);
 H5_DLL herr_t H5Freset_mdc_hit_rate_stats(hid_t file_id);
 H5_DLL ssize_t H5Fget_name(hid_t obj_id, char *name, size_t size);
 
