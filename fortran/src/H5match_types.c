@@ -114,8 +114,8 @@ int main()
   initFfile();
 
   /* First, define c_int_x */
-  if(sizeof(long long) == 1)
-    writeTypedef("long long", 1);
+  if(sizeof(long_long) == 1)
+    writeTypedef("long_long", 1);
   else if(sizeof(long) == 1)
     writeTypedef("long", 1);
   else if(sizeof(int) == 1)
@@ -128,8 +128,8 @@ int main()
    * But if char isn't, then nothing is, so this
    * is as close as we can get. */
 
-  if(sizeof(long long) == 2)
-    writeTypedef("long long", 2);
+  if(sizeof(long_long) == 2)
+    writeTypedef("long_long", 2);
   else if(sizeof(long) == 2)
     writeTypedef("long", 2);
   else if(sizeof(int) == 2)
@@ -139,8 +139,8 @@ int main()
   else
     writeTypedefDefault(2);
 
-  if(sizeof(long long) == 4)
-    writeTypedef("long long", 4);
+  if(sizeof(long_long) == 4)
+    writeTypedef("long_long", 4);
   else if(sizeof(long) == 4)
     writeTypedef("long", 4);
   else if(sizeof(int) == 4)
@@ -150,8 +150,8 @@ int main()
   else
     writeTypedefDefault(4);
 
-  if(sizeof(long long) == 8)
-    writeTypedef("long long", 8);
+  if(sizeof(long_long) == 8)
+    writeTypedef("long_long", 8);
   else if(sizeof(long) == 8)
     writeTypedef("long", 8);
   else if(sizeof(int) == 8)
