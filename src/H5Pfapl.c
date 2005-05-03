@@ -992,7 +992,6 @@ H5Pget_mdc_config(hid_t                 plist_id,
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED;   /* return value */
-    H5C_auto_size_ctl_t resizeCfg;
     
     FUNC_ENTER_API(H5Pget_mdc_config, FAIL);
     H5TRACE2("e","ix",plist_id,config_ptr);

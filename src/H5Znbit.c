@@ -163,7 +163,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static void H5Z_calc_parms_nooptype()
+static void H5Z_calc_parms_nooptype(void)
 {
     /* Store datatype class code */
     ++cd_values_actual_nparms;
@@ -187,7 +187,7 @@ static void H5Z_calc_parms_nooptype()
  *
  *-------------------------------------------------------------------------
  */
-static void H5Z_calc_parms_atomic()
+static void H5Z_calc_parms_atomic(void)
 {
     /* Store datatype class code */
     ++cd_values_actual_nparms;
