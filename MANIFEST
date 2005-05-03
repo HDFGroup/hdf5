@@ -624,9 +624,9 @@
 
 ./fortran/testpar/Makefile.am
 ./fortran/testpar/Makefile.in
-./fortran/testpar/ptesthdf5_fortran.f90
-./fortran/testpar/thdf5.f90
-./fortran/testpar/thyperslab_wr.f90
+./fortran/testpar/ptest.f90
+./fortran/testpar/hyper.f90
+
 
 #------------------------------------------------------------------------------
 #
