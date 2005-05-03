@@ -29,7 +29,7 @@
 #
 # HDF5 Fortran Parallel Library Test Makefile(.in)
 #
-SOURCES = $(ptesthdf5_fortran_SOURCES)
+SOURCES = $(parallel_test_SOURCES)
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -65,17 +65,16 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES =
-am__EXEEXT_1 = ptesthdf5_fortran$(EXEEXT)
-am_ptesthdf5_fortran_OBJECTS = thdf5.$(OBJEXT) \
-	ptesthdf5_fortran.$(OBJEXT) thyperslab_wr.$(OBJEXT)
-ptesthdf5_fortran_OBJECTS = $(am_ptesthdf5_fortran_OBJECTS)
-ptesthdf5_fortran_LDADD = $(LDADD)
+am__EXEEXT_1 = parallel_test$(EXEEXT)
+am_parallel_test_OBJECTS = ptest.$(OBJEXT) hyper.$(OBJEXT)
+parallel_test_OBJECTS = $(am_parallel_test_OBJECTS)
+parallel_test_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =  \
 	$(top_builddir)/fortran/test/libh5test_fortran.la
 am__DEPENDENCIES_2 = $(top_builddir)/test/libh5test.la
 am__DEPENDENCIES_3 = $(top_builddir)/fortran/src/libhdf5_fortran.la
 am__DEPENDENCIES_4 = $(top_builddir)/src/libhdf5.la
-ptesthdf5_fortran_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+parallel_test_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
 	$(am__DEPENDENCIES_4)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/src
@@ -84,8 +83,8 @@ LTFCCOMPILE = $(LIBTOOL) --mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)
 FCLD = $(FC)
 FCLINK = $(LIBTOOL) --mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(ptesthdf5_fortran_SOURCES)
-DIST_SOURCES = $(ptesthdf5_fortran_SOURCES)
+SOURCES = $(parallel_test_SOURCES)
+DIST_SOURCES = $(parallel_test_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -303,14 +302,14 @@ AM_FCFLAGS = -I$(top_srcdir)/fortran/src -I$(top_srcdir)/fortran/test $(F9XMODFL
 AM_LDFLAGS = -static
 
 # These are our main targets
-TEST_PROG_PARA = ptesthdf5_fortran
+TEST_PROG_PARA = parallel_test
 
 # Temporary files
 MOSTLYCLEAN = ParaEg[123].h5f
 DISTCLEAN = go
 
 # Test source files
-ptesthdf5_fortran_SOURCES = thdf5.f90 ptesthdf5_fortran.f90 thyperslab_wr.f90
+parallel_test_SOURCES = ptest.f90 hyper.f90 
 
 # The tests depend on several libraries.
 LDADD = $(LIBH5FTEST) $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)
@@ -370,9 +369,9 @@ clean-checkPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
-ptesthdf5_fortran$(EXEEXT): $(ptesthdf5_fortran_OBJECTS) $(ptesthdf5_fortran_DEPENDENCIES) 
-	@rm -f ptesthdf5_fortran$(EXEEXT)
-	$(FCLINK) $(ptesthdf5_fortran_LDFLAGS) $(ptesthdf5_fortran_OBJECTS) $(ptesthdf5_fortran_LDADD) $(LIBS)
+parallel_test$(EXEEXT): $(parallel_test_OBJECTS) $(parallel_test_DEPENDENCIES) 
+	@rm -f parallel_test$(EXEEXT)
+	$(FCLINK) $(parallel_test_LDFLAGS) $(parallel_test_OBJECTS) $(parallel_test_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -593,12 +592,6 @@ uninstall-local:
 	  fi;                                                           \
 	fi
 
-# Put in dependencies to the THDF5 module so that things will be built
-# in the correct order.
-thdf5.lo:		   thdf5.o
-thyperslab_wr.o:           $(srcdir)/thyperslab_wr.f90 thdf5.lo
-ptesthdf5_fortran.o:       $(srcdir)/ptesthdf5_fortran.f90 thdf5.lo
-
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
 build-lib: $(LIB)
@@ -719,6 +712,12 @@ check-vfd:
 	        HDF5_DRIVER=$$vfd $(MAKE) $(AM_MAKEFLAGS) check;              \
 	    fi;                                                               \
 	done
+
+# Put in dependencies to the THDF5 module so that things will be built
+# in the correct order.
+#thdf5.lo:		   thdf5.o
+#thyperslab_wr.o:           $(srcdir)/thyperslab_wr.f90 thdf5.lo
+#ptesthdf5_fortran.o:       $(srcdir)/ptesthdf5_fortran.f90 thdf5.lo
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

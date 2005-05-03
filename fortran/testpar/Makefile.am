@@ -26,7 +26,7 @@ AM_FCFLAGS=-I$(top_srcdir)/fortran/src -I$(top_srcdir)/fortran/test $(F9XMODFLAG
 AM_LDFLAGS=-static
 
 # These are our main targets
-TEST_PROG_PARA=ptesthdf5_fortran
+TEST_PROG_PARA=parallel_test
 check_PROGRAMS=$(TEST_PROG_PARA)
 
 # Temporary files
@@ -34,7 +34,7 @@ MOSTLYCLEAN=ParaEg[123].h5f
 DISTCLEAN=go
 
 # Test source files
-ptesthdf5_fortran_SOURCES=thdf5.f90 ptesthdf5_fortran.f90 thyperslab_wr.f90
+parallel_test_SOURCES=ptest.f90 hyper.f90 
 
 # The tests depend on several libraries.
 LDADD=$(LIBH5FTEST) $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)
@@ -67,8 +67,8 @@ uninstall-local:
 
 # Put in dependencies to the THDF5 module so that things will be built
 # in the correct order.
-thdf5.lo:		   thdf5.o
-thyperslab_wr.o:           $(srcdir)/thyperslab_wr.f90 thdf5.lo
-ptesthdf5_fortran.o:       $(srcdir)/ptesthdf5_fortran.f90 thdf5.lo
+#thdf5.lo:		   thdf5.o
+#thyperslab_wr.o:           $(srcdir)/thyperslab_wr.f90 thdf5.lo
+#ptesthdf5_fortran.o:       $(srcdir)/ptesthdf5_fortran.f90 thdf5.lo
 
 include $(top_srcdir)/config/conclude.am
