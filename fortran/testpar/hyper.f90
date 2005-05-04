@@ -178,7 +178,7 @@ endif
 ! write dataset
 !//////////////////////////////////////////////////////////
 
-call h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, wbuf, dims, hdferror, file_space_id = fspace_id, mem_space_id = mspace_id, xfer_prp = dxpl_id)
+call h5dwrite_f(dset_id,H5T_NATIVE_INTEGER,wbuf,dims,hdferror,file_space_id=fspace_id,mem_space_id=mspace_id,xfer_prp=dxpl_id)
 call check("h5dwrite_f", hdferror, nerrors)
 
 
@@ -259,7 +259,7 @@ endif
 ! read dataset
 !//////////////////////////////////////////////////////////
 
-call h5dread_f(dset_id, H5T_NATIVE_INTEGER, rbuf, dims, hdferror, file_space_id = fspace_id, mem_space_id = mspace_id, xfer_prp = dxpl_id)
+call h5dread_f(dset_id,H5T_NATIVE_INTEGER,rbuf,dims,hdferror,file_space_id=fspace_id,mem_space_id=mspace_id,xfer_prp=dxpl_id)
 call check("h5pcreate_f", hdferror, nerrors)
 
 !//////////////////////////////////////////////////////////
