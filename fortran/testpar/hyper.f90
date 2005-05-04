@@ -47,6 +47,7 @@ integer(hid_t) :: driver_id                       ! low-level file driver identi
 integer        :: istart                          ! start position in array 
 integer        :: iend                            ! end position in array
 integer        :: icount                          ! number of elements in array
+character(len=80) :: filename                     ! filename
 integer        :: i
 
 call mpi_comm_rank( MPI_COMM_WORLD, mpi_rank, mpierror )
@@ -109,7 +110,9 @@ endif
 ! create the file collectively
 !//////////////////////////////////////////////////////////
 
-call h5fcreate_f("parf.h5", H5F_ACC_TRUNC_F, file_id, hdferror, access_prp = fapl_id)
+call h5_fixname_f("parf", filename, fapl_id, hdferror)
+
+call h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, hdferror, access_prp = fapl_id)
 call check("h5fcreate_f", hdferror, nerrors)
 
 call h5screate_simple_f(1, dims, fspace_id, hdferror)
@@ -214,7 +217,7 @@ call check("h5pcreate_f", hdferror, nerrors)
 call h5pset_fapl_mpio_f(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL, hdferror)
 call check("h5pcreate_f", hdferror, nerrors)
 
-call h5fopen_f("parf.h5", H5F_ACC_RDWR_F, file_id, hdferror, access_prp = fapl_id)
+call h5fopen_f(filename, H5F_ACC_RDWR_F, file_id, hdferror, access_prp = fapl_id)
 call check("h5pcreate_f", hdferror, nerrors)
 
 call h5screate_simple_f(1, dims, fspace_id, hdferror)
