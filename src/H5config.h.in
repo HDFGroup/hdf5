@@ -205,6 +205,9 @@
 /* Define to 1 if you have the <pthread.h> header file. */
 #undef HAVE_PTHREAD_H
 
+/* Define to 1 if you have the `random' function. */
+#undef HAVE_RANDOM
+
 /* Define to 1 if you have the <setjmp.h> header file. */
 #undef HAVE_SETJMP_H
 
@@ -222,6 +225,9 @@
 
 /* Define if `socklen_t' is defined */
 #undef HAVE_SOCKLEN_T
+
+/* Define to 1 if you have the `srandom' function. */
+#undef HAVE_SRANDOM
 
 /* Define if `struct stat' has the `st_blocks' field */
 #undef HAVE_STAT_ST_BLOCKS

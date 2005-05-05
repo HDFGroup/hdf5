@@ -758,10 +758,10 @@ typedef off_t                   h5_stat_size_t;
 #define HDqsort(M,N,Z,F)	qsort(M,N,Z,F)
 #define HDraise(N)		raise(N)
 #define HDrand()		rand()
-#ifdef  WIN32
-#define HDrandom()		rand()
-#else
+#ifdef  H5_HAVE_RANDOM
 #define HDrandom()              random()
+#else
+#define HDrandom()		rand()
 #endif
 #define HDread(F,M,Z)		read(F,M,Z)
 #define HDreaddir(D)		readdir(D)
@@ -801,10 +801,10 @@ typedef off_t                   h5_stat_size_t;
 /* sprintf() variable arguments */
 #define HDsqrt(X)		sqrt(X)
 #define HDsrand(N)		srand(N)
-#ifdef WIN32
-#define HDsrandom(N)            srand(N)
-#else
+#ifdef H5_HAVE_SRANDOM
 #define HDsrandom(N)		srandom(N)
+#else
+#define HDsrandom(N)            srand(N)
 #endif
 /* sscanf() variable arguments */
 
