@@ -3395,6 +3395,8 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         H5T_bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
                     }
                 }
+                /*reset CARRY*/
+                carry = 0;
 
                 H5_CHECK_OVERFLOW(expo,hssize_t,hsize_t);
                 H5T_bit_set_d(d, dst.u.f.epos, dst.u.f.esize, (hsize_t)expo);
