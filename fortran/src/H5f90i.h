@@ -22,7 +22,7 @@
  */
 #include "H5f90i_gen.h"
 
-#if (defined (UNICOS) || (defined (_UNICOS)))
+#if (defined (UNICOS) || defined (_UNICOS)) && !defined(__crayx1)
 
 #include <fortran.h>
 
@@ -72,6 +72,12 @@ typedef char          *_fcd;
 typedef float         real_f;
 #define _fcdtocp(desc) (desc)
 #endif /* IRIX */
+
+#if defined(__crayx1)
+typedef char          *_fcd;
+typedef float         real_f;
+#define _fcdtocp(desc) (desc)
+#endif /* Cray X1 */
 
 #if (defined(SUN) || defined(sun) || defined(__sun__) || defined(__SUNPRO_C)) & !defined(__i386)
 

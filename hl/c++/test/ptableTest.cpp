@@ -172,6 +172,9 @@ out:
 int TestGetNext()
 {
     int error;
+    int record;
+    int records[2];
+    int i;
 
     TESTING("GetNextPacket")
 
@@ -181,15 +184,12 @@ int TestGetNext()
     if(! wrapper.IsValid())
       goto out;
 
-    int record;
-    int records[2];
-
     /* Append 5 records to the dataset */
     for(record = 1; record < 6; record++)
         wrapper.AppendPacket(&record);
 
     /* Ensure that we can interate through the records and get the right ones */
-    for(int i = 1; i < 6; i++)
+    for(i = 1; i < 6; i++)
     {
         wrapper.GetNextPacket(&record);
         if(record != i)
@@ -199,7 +199,7 @@ int TestGetNext()
     wrapper.ResetIndex();
 
     /* Ensure that we can interate through the records and get the right ones */
-    for(int i = 1; i < 6; i++)
+    for(i = 1; i < 6; i++)
     {
         error = wrapper.GetNextPacket(&record);
         if(record != i || error <0)
@@ -230,6 +230,7 @@ int TestGetPacket()
 {
     int record;
     int theRecs[3];
+    int i;
     TESTING("GetPacket")
 
     /* Create a dataset */
@@ -249,7 +250,7 @@ int TestGetPacket()
 
     /* Ensure that we can retrieve multiple records */
     wrapper.GetPackets(1, 3, theRecs);
-    for(int i = 0; i < 3; i++)
+    for(i = 0; i < 3; i++)
     {
         if(theRecs[i] != i+2)
           goto out;
