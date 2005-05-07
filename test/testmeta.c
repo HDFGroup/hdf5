@@ -41,8 +41,8 @@
 int main(void)
 {
     hid_t	file_id, prop_id, memspace_id, type_id;
-    hid_t	group_id, access_plist;
-    hid_t	dataset_id, dataspace_id, s_dataspace_id;
+    hid_t	group_id;
+    hid_t	dataset_id, dataspace_id;
     herr_t	status;
     hsize_t	dims[1];
     hsize_t	maxdims[1];
@@ -51,7 +51,7 @@ int main(void)
     unsigned	numdataobj	= 0;
     unsigned	i, j;
     char	name[80];
-    hssize_t	start[1]			= {0};
+    hsize_t	start[1]			= {0};
     hsize_t	stride[1]			= {1};
     hsize_t	count[1]			= {1};
 

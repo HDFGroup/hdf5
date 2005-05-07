@@ -675,7 +675,9 @@ H5T_init_interface(void)
     H5T_t       *native_ullong=NULL;    /* Datatype structure for native unsigned llong */
     H5T_t       *native_float=NULL;     /* Datatype structure for native float */
     H5T_t       *native_double=NULL;    /* Datatype structure for native double */
+#if H5_SW_LDOUBLE_TO_INTEGER_WORKS
     H5T_t       *native_ldouble=NULL;    /* Datatype structure for native double */
+#endif /*H5_SW_LDOUBLE_TO_INTEGER_WORKS*/
     H5T_t       *std_u8le=NULL;         /* Datatype structure for unsigned 8-bit little-endian integer */
     H5T_t       *std_u8be=NULL;         /* Datatype structure for unsigned 8-bit big-endian integer */
     H5T_t       *std_u16le=NULL;        /* Datatype structure for unsigned 16-bit little-endian integer */
@@ -747,8 +749,10 @@ H5T_init_interface(void)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
     if (NULL==(native_double=H5I_object(H5T_NATIVE_DOUBLE_g)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
+#if H5_SW_LDOUBLE_TO_INTEGER_WORKS
     if (NULL==(native_ldouble=H5I_object(H5T_NATIVE_LDOUBLE_g)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
+#endif /*H5_SW_LDOUBLE_TO_INTEGER_WORKS*/
 
     /*------------------------------------------------------------
      * Native types

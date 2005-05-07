@@ -5166,7 +5166,7 @@ H5P_close(void *_plist)
     H5SL_t *seen=NULL;              /* Skip list to hold names of properties already seen */
     size_t nseen;                   /* Number of items 'seen' */
     hbool_t has_parent_class;       /* Flag to indicate that this property list's class has a parent */
-    ssize_t ndel;                   /* Number of items deleted */
+    size_t ndel;                    /* Number of items deleted */
     H5SL_node_t *curr_node;         /* Current node in skip list */
     H5P_genprop_t *tmp;             /* Temporary pointer to properties */
     unsigned make_cb=0;             /* Operator data for property free callback */

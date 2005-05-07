@@ -152,11 +152,13 @@ typedef long_long ssize_t;
 typedef unsigned long_long 	hsize_t;
 typedef signed long_long	hssize_t;
 #       define H5_SIZEOF_HSIZE_T H5_SIZEOF_LONG_LONG
+#       define H5_SIZEOF_HSSIZE_T H5_SIZEOF_LONG_LONG
 #   endif
 #else /* H5_HAVE_LARGE_HSIZET */
 typedef size_t			hsize_t;
 typedef ssize_t			hssize_t;
 #       define H5_SIZEOF_HSIZE_T H5_SIZEOF_SIZE_T
+#       define H5_SIZEOF_HSSIZE_T H5_SIZEOF_SIZE_T
 #endif /* H5_HAVE_LARGE_HSIZET */
 
 /*

@@ -130,18 +130,16 @@ static unsigned parms_index = 0;
 static herr_t
 H5Z_can_apply_nbit(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id)
 {
-    H5T_class_t dtype_class;            /* Datatype's class */
-    unsigned dtype_size;                /* Datatype's size (in bytes) */
     herr_t ret_value=TRUE;              /* Return value */
 
     FUNC_ENTER_NOAPI(H5Z_can_apply_nbit, FAIL)
 
     /* Get datatype's class, for checking the "datatype class" */
-    if((dtype_class = H5Tget_class(type_id)) == H5T_NO_CLASS )
+    if(H5Tget_class(type_id) == H5T_NO_CLASS )
 	HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype class")
 
     /* Get datatype's size, for checking the "datatype size" */
-    if((dtype_size = H5Tget_size(type_id)) == 0)
+    if(H5Tget_size(type_id) == 0)
 	HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size")
 
 done:

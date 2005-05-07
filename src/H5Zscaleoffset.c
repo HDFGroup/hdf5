@@ -31,7 +31,7 @@ typedef struct {
    unsigned mem_order; /* current memory endianness order */
 } parms_atomic; 
 
-enum H5Z_scaleoffset_type {t_uchar=1, t_ushort, t_uint, t_ulong, t_ulong_long,
+enum H5Z_scaleoffset_type {t_bad=0, t_uchar=1, t_ushort, t_uint, t_ulong, t_ulong_long,
                            t_schar, t_short, t_int, t_long, t_long_long, 
                            t_float, t_double};
 
@@ -584,7 +584,6 @@ static herr_t
 H5Z_can_apply_scaleoffset(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id)
 {
     H5T_class_t dtype_class;            /* Datatype's class */
-    unsigned dtype_size;                /* Datatype's size (in bytes) */
     H5T_order_t dtype_order;            /* Datatype's endianness order */
     herr_t ret_value=TRUE;              /* Return value */
 
@@ -595,7 +594,7 @@ H5Z_can_apply_scaleoffset(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED spac
 	HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype class")
 
     /* Get datatype's size, for checking the "datatype size" */
-    if((dtype_size = H5Tget_size(type_id)) == 0)
+    if(H5Tget_size(type_id) == 0)
 	HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size")
 
     if(dtype_class == H5T_INTEGER || dtype_class == H5T_FLOAT) {
@@ -634,9 +633,9 @@ static enum H5Z_scaleoffset_type
 H5Z_scaleoffset_get_type(unsigned dtype_class, unsigned dtype_size, unsigned dtype_sign)
 {
     enum H5Z_scaleoffset_type type; /* integer type */
-    unsigned ret_value;             /* return value */
+    enum H5Z_scaleoffset_type ret_value;             /* return value */
 
-    FUNC_ENTER_NOAPI(H5Z_scaleoffset_get_type, 0)
+    FUNC_ENTER_NOAPI_NOINIT(H5Z_scaleoffset_get_type)
     
     if(dtype_class==H5Z_SCALEOFFSET_CLS_INTEGER) {
         if(dtype_sign==H5Z_SCALEOFFSET_SGN_NONE) { /* unsigned integer */
@@ -646,7 +645,7 @@ H5Z_scaleoffset_get_type(unsigned dtype_class, unsigned dtype_size, unsigned dty
             else if(dtype_size == sizeof(unsigned long))      type = t_ulong;
             else if(dtype_size == sizeof(unsigned long_long)) type = t_ulong_long; 
             else 
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, 0, "cannot find matched memory dataype")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, t_bad, "cannot find matched memory dataype")
         }
 
         if(dtype_sign==H5Z_SCALEOFFSET_SGN_2) { /* signed integer */
@@ -656,7 +655,7 @@ H5Z_scaleoffset_get_type(unsigned dtype_class, unsigned dtype_size, unsigned dty
             else if(dtype_size == sizeof(long))        type = t_long;
             else if(dtype_size == sizeof(long_long))   type = t_long_long; 
             else 
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, 0, "cannot find matched memory dataype")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, t_bad, "cannot find matched memory dataype")
         }
     }
 
@@ -664,11 +663,13 @@ H5Z_scaleoffset_get_type(unsigned dtype_class, unsigned dtype_size, unsigned dty
         if(dtype_size == sizeof(float))       type = t_float;
         else if(dtype_size == sizeof(double)) type = t_double; 
         else 
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, 0, "cannot find matched memory dataype")
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, t_bad, "cannot find matched memory dataype")
     }
 
-done:
+    /* Set return value */
     ret_value = type;
+
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 

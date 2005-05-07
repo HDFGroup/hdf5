@@ -122,7 +122,7 @@ H5SH_cache_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "wrong segmented heap info version")
 
     /* Type of data in heap blocks */
-    sh->heap_type = *p++;
+    sh->heap_type = (H5SH_data_type_t)*p++;
     if(sh->heap_type == H5SH_RAW)
         sh->file_mem_type = H5FD_MEM_DRAW;
     else

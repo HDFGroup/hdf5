@@ -49,9 +49,9 @@ struct H5B_t {
                             /* first field in structure */
     H5RC_t		*rc_shared;	/*ref-counted shared info	     */
     unsigned		level;		/*node level			     */
+    unsigned		nchildren;	/*number of child pointers	     */
     haddr_t		left;		/*address of left sibling	     */
     haddr_t		right;		/*address of right sibling	     */
-    unsigned		nchildren;	/*number of child pointers	     */
     uint8_t		*native;	/*array of keys in native format     */
     haddr_t		*child;		/*2k child pointers		     */
 };

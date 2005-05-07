@@ -487,7 +487,9 @@ diff_match (hid_t file1_id,
 	{
 	    if (table->objs[i].flags[0] && table->objs[i].flags[1])
 	    {
+#ifdef H5_HAVE_PARALLEL
 		int workerFound = 0;
+#endif /* H5_HAVE_PARALLEL */
 		options->cmn_objs = 1;
 		if(!g_Parallel)
 		{

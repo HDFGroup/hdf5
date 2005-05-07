@@ -291,8 +291,6 @@ out:
  */
 herr_t H5PT_close( htbl_t* table)
 {
-  herr_t return_status = 0;
-
   if(table == NULL)
     goto out;
 
@@ -670,10 +668,8 @@ out:
  */
 herr_t H5PTis_valid(hid_t table_id)
 {
-  htbl_t * table;
-
   /* find the table struct from its ID */
-  if((table = (htbl_t *) H5Iobject_verify(table_id, H5PT_ptable_id_type)) ==NULL)
+  if(H5Iobject_verify(table_id, H5PT_ptable_id_type) ==NULL)
     return -1;
 
   return 0;

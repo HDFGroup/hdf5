@@ -77,7 +77,7 @@ H5A_init_interface(void)
     /*
      * Create attribute group.
      */
-    if (H5I_register_type(H5I_ATTR, H5I_ATTRID_HASHSIZE, H5A_RESERVED_ATOMS, (H5I_free_t)H5A_close)<H5I_FILE)
+    if (H5I_register_type(H5I_ATTR, (size_t)H5I_ATTRID_HASHSIZE, H5A_RESERVED_ATOMS, (H5I_free_t)H5A_close)<H5I_FILE)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to initialize interface")
     
 done:
@@ -692,7 +692,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
             HDmemcpy(tconv_buf,buf,(src_type_size*nelmts));
 
             /* Perform datatype conversion */
-            if (H5T_convert(tpath, src_id, dst_id, nelmts, 0, 0, tconv_buf, bkg_buf, dxpl_id)<0)
+            if (H5T_convert(tpath, src_id, dst_id, nelmts, (size_t)0, (size_t)0, tconv_buf, bkg_buf, dxpl_id)<0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "datatype conversion failed")
 
             /* Free the previous attribute data buffer, if there is one */
@@ -858,7 +858,7 @@ H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
                 HDmemcpy(tconv_buf,attr->data,(src_type_size*nelmts));
 
                 /* Perform datatype conversion.  */
-                if (H5T_convert(tpath, src_id, dst_id, nelmts, 0, 0, tconv_buf, bkg_buf, dxpl_id)<0)
+                if (H5T_convert(tpath, src_id, dst_id, nelmts, (size_t)0, (size_t)0, tconv_buf, bkg_buf, dxpl_id)<0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "datatype conversion failed")
 
                 /* Copy the converted data into the user's buffer */

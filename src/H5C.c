@@ -1919,7 +1919,7 @@ H5C_create(size_t		      max_cache_size,
                     "memory allocation failed")
     }
 
-    if ( (cache_ptr->slist_ptr = H5SL_create(H5SL_TYPE_HADDR,0.5,16)) 
+    if ( (cache_ptr->slist_ptr = H5SL_create(H5SL_TYPE_HADDR,0.5,(size_t)16)) 
          == NULL ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, NULL, "can't create skip list.")

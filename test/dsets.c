@@ -2942,7 +2942,6 @@ test_nbit_array(hid_t file)
     const hsize_t       chunk_size[2] = {2,5};
     unsigned int        orig_data[2][5][3][2];
     unsigned int        new_data[2][5][3][2];
-    unsigned int        mask;
     size_t              precision, offset;
     hsize_t             i, j, m, n;
 #else /* H5_HAVE_FILTER_NBIT */
@@ -3026,9 +3025,7 @@ test_nbit_array(hid_t file)
         goto error;
 
     /* Check that the values read are the same as the values written 
-     * Use mask for checking the significant bits, ignoring the padding bits
      */
-    mask = ~(~0 << (precision + offset)) & (~0 << offset);
     for (i=0; i<size[0]; i++) 
       for (j=0; j<size[1]; j++) 
         for (m = 0; m < adims[0]; m++)
@@ -3319,7 +3316,7 @@ test_nbit_compound_2(hid_t file)
     5.2045898}, {-49140.000, 2350.2500, -3.2110596e-1, 6.4998865e-5, -0.0000000}};
     complex             orig_data[2][5];
     complex             new_data[2][5];
-    unsigned int        i_mask, s_mask, c_mask, v_mask, b_mask;
+    unsigned int        i_mask, s_mask, c_mask, b_mask;
     hsize_t             i, j, m, n, b_failed, d_failed;
 
 #else /* H5_HAVE_FILTER_NBIT */
@@ -3485,7 +3482,6 @@ test_nbit_compound_2(hid_t file)
     i_mask = ~(~0 << (precision[0] + offset[0])) & (~0 << offset[0]);
     c_mask = ~(~0 << (precision[1] + offset[1])) & (~0 << offset[1]);
     s_mask = ~(~0 << (precision[2] + offset[2])) & (~0 << offset[2]);
-    v_mask = ~(~0 << (precision[3] + offset[3])) & (~0 << offset[3]);
     b_mask = ~(~0 << (precision[4] + offset[4])) & (~0 << offset[4]);
     for (i=0; i<size[0]; i++) {
       for (j=0; j<size[1]; j++) {
@@ -3587,7 +3583,7 @@ test_nbit_compound_3(hid_t file)
     } atomic;
     hid_t               i_tid, str_tid, vl_str_tid, v_tid, o_tid;
     hid_t               cmpd_tid; /* atomic compound datatype */
-    hid_t               dataset, space, dc, obj_ref_dataset;
+    hid_t               dataset, space, dc, obj_ref_dataset = -1;
     const hsize_t       size[1] = {5};
     const hsize_t       chunk_size[1] = {5};
     atomic              orig_data[5];
@@ -3739,6 +3735,7 @@ test_nbit_compound_3(hid_t file)
     if (H5Tclose(cmpd_tid)<0) goto error;
     if (H5Pclose(dc)<0) goto error;
     if (H5Sclose(space)<0) goto error;
+    if (H5Dclose(obj_ref_dataset)<0) goto error;
     if (H5Dclose(dataset)<0) goto error;
 
     PASSED();
@@ -3910,7 +3907,7 @@ test_scaleoffset_int_2(hid_t file)
     const hsize_t       chunk_size[2] = {2,5};
     int                 orig_data[2][5];
     int                 new_data[2][5];
-    hssize_t            start[2]; /* Start of hyperslab */
+    hsize_t             start[2]; /* Start of hyperslab */
     hsize_t             stride[2]; /* Stride of hyperslab */
     hsize_t             count[2];  /* Block count */
     hsize_t             block[2];  /* Block sizes */
@@ -4006,7 +4003,7 @@ test_scaleoffset_int_2(hid_t file)
         if (new_data[0][j] != orig_data[0][j]) {
             H5_FAILED();
             printf("    Read different values than written.\n");
-            printf("    At index %lu,%lu\n", 0, (unsigned long)j);
+            printf("    At index %lu,%lu\n", (unsigned long)0, (unsigned long)j);
             goto error;
         }
     }
@@ -4190,7 +4187,7 @@ test_scaleoffset_float_2(hid_t file)
     float               orig_data[2][5];
     float               new_data[2][5];
     float               fillval;
-    hssize_t            start[2];  /* Start of hyperslab */
+    hsize_t             start[2];  /* Start of hyperslab */
     hsize_t             stride[2]; /* Stride of hyperslab */
     hsize_t             count[2];  /* Block count */
     hsize_t             block[2];  /* Block sizes */
@@ -4287,7 +4284,7 @@ test_scaleoffset_float_2(hid_t file)
         if (HDfabs(new_data[0][j]-orig_data[0][j]) > HDpow(10, -3)) {
             H5_FAILED();
             printf("    Read different values than written.\n");
-            printf("    At index %lu,%lu\n", 0, (unsigned long)j);
+            printf("    At index %lu,%lu\n", (unsigned long)0, (unsigned long)j);
             goto error; 
         }
     }
@@ -4470,7 +4467,7 @@ test_scaleoffset_double_2(hid_t file)
     double              orig_data[2][5];
     double              new_data[2][5];
     double              fillval;
-    hssize_t            start[2];  /* Start of hyperslab */
+    hsize_t             start[2];  /* Start of hyperslab */
     hsize_t             stride[2]; /* Stride of hyperslab */
     hsize_t             count[2];  /* Block count */
     hsize_t             block[2];  /* Block sizes */
@@ -4567,7 +4564,7 @@ test_scaleoffset_double_2(hid_t file)
         if (HDfabs(new_data[0][j]-orig_data[0][j]) > HDpow(10, -7)) {
             H5_FAILED();
             printf("    Read different values than written.\n");
-            printf("    At index %lu,%lu\n", 0, (unsigned long)j);
+            printf("    At index %lu,%lu\n", (unsigned long)0, (unsigned long)j);
             goto error; 
         }
     }
@@ -5982,7 +5979,8 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-int main(void)
+int
+main(void)
 {
     hid_t		file, grp, fapl;
     int mdc_nelmts;
@@ -5996,7 +5994,7 @@ int main(void)
     fapl = h5_fileaccess();
     
     /* Set the random # seed */
-    HDsrandom((unsigned long)HDtime(NULL)); 
+    HDsrandom((unsigned long)HDtime(NULL));
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 

@@ -25,7 +25,6 @@ static int write_text_attribute(hid_t dataset_id , const char *attr_name,
                                 const char *attr_value, const size_t attr_len)
 {
     /* variables for the attributes */
-    hsize_t attr_dims;     /* dimensions for the attribute */
     hsize_t attr_size;     /* dimensions for the attribute */
     hid_t attr_dataspace_id;    /* dataspaces needed for the various attributes */
     hid_t attr_attr_id;	        /* attribute id */
@@ -34,8 +33,6 @@ static int write_text_attribute(hid_t dataset_id , const char *attr_name,
     /* check strings */
     if (!attr_name || !attr_value)
         return -1;
-
-    attr_dims = 1;
 
     /* figure out size of the data */
     attr_size = (hsize_t)attr_len;

@@ -1564,7 +1564,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 	if (argname) {
 	    unsigned n = (unsigned)MAX (0, (int)HDstrlen(argname)-3); /*lint !e666 Allow expression with side effects */
 	    if (!HDstrcmp (argname+n, "_id")) {
-		HDstrncpy (buf, argname, MIN ((int)sizeof(buf)-1, n));
+		HDstrncpy (buf, argname, (size_t)MIN ((int)sizeof(buf)-1, n));
 		buf[MIN((int)sizeof(buf)-1, n)] = '\0';
 		argname = buf;
 	    }

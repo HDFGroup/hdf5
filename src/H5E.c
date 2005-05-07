@@ -105,7 +105,7 @@ static herr_t  H5E_set_current_stack(H5E_t *estack);
 static herr_t  H5E_close_stack(H5E_t *err_stack);
 static int     H5E_get_num(const H5E_t *err_stack);
 static herr_t  H5E_pop(H5E_t *err_stack, size_t count);
-static herr_t  H5E_clear_entries(H5E_t *estack, unsigned nentries);
+static herr_t  H5E_clear_entries(H5E_t *estack, size_t nentries);
 static herr_t  H5E_print_stack(const H5E_t *estack, FILE *stream);
 static herr_t  H5E_walk_stack(const H5E_t *estack, H5E_direction_t direction, H5E_walk_t func, 
                              void *client_data);
@@ -1755,7 +1755,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5E_clear_entries(H5E_t *estack, unsigned nentries)
+H5E_clear_entries(H5E_t *estack, size_t nentries)
 {
     H5E_error_t         *error; /* Pointer to error stack entry to clear */
     unsigned u;                 /* Local index variable */

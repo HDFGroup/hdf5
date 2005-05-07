@@ -17,7 +17,8 @@ FILE * fort_header;
 #define CFILE "H5f90i_gen.h"
 #define FFILE "H5fortran_types.f90"
 
-void initCfile()
+static void
+initCfile(void)
 {
   fprintf(c_header,
     "/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n\
@@ -42,7 +43,8 @@ void initCfile()
 #include \"H5public.h\"\n\n");
 }
 
-void initFfile()
+static void
+initFfile(void)
 {
   fprintf(fort_header,
     "! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n\
@@ -67,11 +69,13 @@ void initFfile()
 
 }
 
-void endCfile()
+static void
+endCfile(void)
 {
   fprintf(c_header, "\n#endif /* _H5f90i_gen_H */\n");
 }
-void endFfile()
+static void
+endFfile(void)
 {
   fprintf(fort_header, "\n        INTEGER(SIZE_T), PARAMETER :: OBJECT_NAMELEN_DEFAULT_F = -1\n\n");
   fprintf(fort_header, "        END MODULE H5FORTRAN_TYPES\n");
@@ -97,11 +101,6 @@ void writeToFiles(const char* fortran_type, const char* c_type, unsigned int siz
   fprintf(fort_header, "        INTEGER, PARAMETER :: %s = %d\n", fortran_type, size);
   fprintf(c_header, "typedef c_int_%d %s;\n", size, c_type);
 }
-
-/* hid_t and hssize_t don't have their sizes defined anywhere.
- * Use sizeof() instead. */
-#define H5_SIZEOF_HID_T sizeof(hid_t)
-#define H5_SIZEOF_HSSIZE_T sizeof(hssize_t)
 
 int main()
 {
@@ -165,184 +164,89 @@ int main()
   fprintf(c_header, "\n");
 
   /* haddr_t */
-  if( H5_SIZEOF_HADDR_T >= 8) {
-    #ifdef H5_FORTRAN_HAS_INTEGER_8
-      writeToFiles("HADDR_T", "haddr_t_f", 8);
-      goto hsize_t_start;
-    #endif
-  }
-  if( H5_SIZEOF_HADDR_T >= 4) {
-    #ifdef H5_FORTRAN_HAS_INTEGER_4
-      writeToFiles("HADDR_T", "haddr_t_f", 4);
-      goto hsize_t_start;
-    #endif
-  }
-  if( H5_SIZEOF_HADDR_T >= 2) {
-    #ifdef H5_FORTRAN_HAS_INTEGER_2
-      writeToFiles("HADDR_T", "haddr_t_f", 2);
-      goto hsize_t_start;
-    #endif
-  }
-  if( H5_SIZEOF_HADDR_T >= 1) {
-    #ifdef H5_FORTRAN_HAS_INTEGER_1
-      writeToFiles("HADDR_T", "haddr_t_f", 1);
-      goto hsize_t_start;
-    #endif
-  }
+#if defined H5_FORTRAN_HAS_INTEGER_8 && H5_SIZEOF_HADDR_T >= 8
+  writeToFiles("HADDR_T", "haddr_t_f", 8);
+#elif defined H5_FORTRAN_HAS_INTEGER_4 && H5_SIZEOF_HADDR_T >= 4
+  writeToFiles("HADDR_T", "haddr_t_f", 4);
+#elif defined H5_FORTRAN_HAS_INTEGER_2 && H5_SIZEOF_HADDR_T >= 2
+  writeToFiles("HADDR_T", "haddr_t_f", 2);
+#elif defined H5_FORTRAN_HAS_INTEGER_1 && H5_SIZEOF_HADDR_T >= 1
+  writeToFiles("HADDR_T", "haddr_t_f", 1);
+#else
     /* Error: couldn't find a size for haddr_t */
     return -1;
-
-  hsize_t_start:
+#endif
 
   /* hsize_t */
-  if( H5_SIZEOF_HSIZE_T >= 8) {
-    #ifdef H5_FORTRAN_HAS_INTEGER_8
+#if defined H5_FORTRAN_HAS_INTEGER_8 && H5_SIZEOF_HSIZE_T >= 8
       writeToFiles("HSIZE_T", "hsize_t_f", 8);
-      goto hssize_t_start;
-    #endif
-  }
-  if( H5_SIZEOF_HSIZE_T >= 4) {
-    #ifdef H5_FORTRAN_HAS_INTEGER_4
+#elif defined H5_FORTRAN_HAS_INTEGER_4 && H5_SIZEOF_HSIZE_T >= 4
       writeToFiles("HSIZE_T", "hsize_t_f", 4);
-      goto hssize_t_start;
-    #endif
-  }
-  if( H5_SIZEOF_HSIZE_T >= 2) {
-    #ifdef H5_FORTRAN_HAS_INTEGER_2
+#elif defined H5_FORTRAN_HAS_INTEGER_2 && H5_SIZEOF_HSIZE_T >= 2
       writeToFiles("HSIZE_T", "hsize_t_f", 2);
-      goto hssize_t_start;
-    #endif
-  }
-  if( H5_SIZEOF_HSIZE_T >= 1) {
-    #ifdef H5_FORTRAN_HAS_INTEGER_1
+#elif defined H5_FORTRAN_HAS_INTEGER_1 && H5_SIZEOF_HSIZE_T >= 1
       writeToFiles("HSIZE_T", "hsize_t_f", 1);
-      goto hssize_t_start;
-    #endif
-  }
+#else
     /* Error: couldn't find a size for hsize_t */
     return -1;
-
-  hssize_t_start:
+#endif
 
   /* hssize_t */
-  if( H5_SIZEOF_HSSIZE_T >= 8) {
-    #ifdef H5_FORTRAN_HAS_INTEGER_8
+#if defined H5_FORTRAN_HAS_INTEGER_8 && H5_SIZEOF_HSSIZE_T >= 8
       writeToFiles("HSSIZE_T", "hssize_t_f", 8);
-      goto size_t_start;
-    #endif
-  }
-  if( H5_SIZEOF_HSSIZE_T >= 4) {
-    #ifdef H5_FORTRAN_HAS_INTEGER_4
+#elif defined H5_FORTRAN_HAS_INTEGER_4 && H5_SIZEOF_HSSIZE_T >= 4
       writeToFiles("HSSIZE_T", "hssize_t_f", 4);
-      goto size_t_start;
-    #endif
-  }
-  if( H5_SIZEOF_HSSIZE_T >= 2) {
-    #ifdef H5_FORTRAN_HAS_INTEGER_2
+#elif defined H5_FORTRAN_HAS_INTEGER_2 && H5_SIZEOF_HSSIZE_T >= 2
       writeToFiles("HSSIZE_T", "hssize_t_f", 2);
-      goto size_t_start;
-    #endif
-  }
-  if( H5_SIZEOF_HSSIZE_T >= 1) {
-    #ifdef H5_FORTRAN_HAS_INTEGER_1
+#elif defined H5_FORTRAN_HAS_INTEGER_1 && H5_SIZEOF_HSSIZE_T >= 1
       writeToFiles("HSSIZE_T", "hssize_t_f", 1);
-      goto size_t_start;
-    #endif
-  }
+#else
     /* Error: couldn't find a size for hssize_t */
     return -1;
+#endif
 
 
-  size_t_start:
   /* size_t */
-  if( H5_SIZEOF_SIZE_T >= 8) {
-    #ifdef H5_FORTRAN_HAS_INTEGER_8
+#if defined H5_FORTRAN_HAS_INTEGER_8 && H5_SIZEOF_SIZE_T >= 8
       writeToFiles("SIZE_T", "size_t_f", 8);
-      goto int_start;
-    #endif
-  }
-  if( H5_SIZEOF_SIZE_T >= 4) {
-    #ifdef H5_FORTRAN_HAS_INTEGER_4
+#elif defined H5_FORTRAN_HAS_INTEGER_4 && H5_SIZEOF_SIZE_T >= 4
       writeToFiles("SIZE_T", "size_t_f", 4);
-      goto int_start;
-    #endif
-  }
-  if( H5_SIZEOF_SIZE_T >= 2) {
-    #ifdef H5_FORTRAN_HAS_INTEGER_2
+#elif defined H5_FORTRAN_HAS_INTEGER_2 && H5_SIZEOF_SIZE_T >= 2
       writeToFiles("SIZE_T", "size_t_f", 2);
-      goto int_start;
-    #endif
-  }
-  if( H5_SIZEOF_SIZE_T >= 1) {
-    #ifdef H5_FORTRAN_HAS_INTEGER_1
+#elif defined H5_FORTRAN_HAS_INTEGER_1 && H5_SIZEOF_SIZE_T >= 1
       writeToFiles("SIZE_T", "size_t_f", 1);
-      goto int_start;
-    #endif
-  }
+#else
     /* Error: couldn't find a size for size_t */
     return -1;
+#endif
 
-  int_start:
   /* int */
-  if( H5_SIZEOF_INT >= 8) {
-    #ifdef H5_FORTRAN_HAS_INTEGER_8
+#if defined H5_FORTRAN_HAS_INTEGER_8 && H5_SIZEOF_INT >= 8
       writeToFiles("INT", "int_f", 8);
-      goto hid_t_start;
-    #endif
-  }
-  if( H5_SIZEOF_INT >= 4) {
-    #ifdef H5_FORTRAN_HAS_INTEGER_4
+#elif defined H5_FORTRAN_HAS_INTEGER_4 && H5_SIZEOF_INT >= 4
       writeToFiles("INT", "int_f", 4);
-      goto hid_t_start;
-    #endif
-  }
-  if( H5_SIZEOF_INT >= 2) {
-    #ifdef H5_FORTRAN_HAS_INTEGER_2
+#elif defined H5_FORTRAN_HAS_INTEGER_2 && H5_SIZEOF_INT >= 2
       writeToFiles("INT", "int_f", 2);
-      goto hid_t_start;
-    #endif
-  }
-  if( H5_SIZEOF_INT >= 1) {
-    #ifdef H5_FORTRAN_HAS_INTEGER_1
+#elif defined H5_FORTRAN_HAS_INTEGER_1 && H5_SIZEOF_INT >= 1
       writeToFiles("INT", "int_f", 1);
-      goto hid_t_start;
-    #endif
-  }
+#else
     /* Error: couldn't find a size for int */
     return -1;
+#endif
 
-  hid_t_start:
   /* hid_t */
-  if( H5_SIZEOF_HID_T >= 8) {
-    #ifdef H5_FORTRAN_HAS_INTEGER_8
+#if defined H5_FORTRAN_HAS_INTEGER_8 && H5_SIZEOF_HID_T >= 8
       writeToFiles("HID_T", "hid_t_f", 8);
-      goto real_start;
-    #endif
-  }
-  if( H5_SIZEOF_HID_T >= 4) {
-    #ifdef H5_FORTRAN_HAS_INTEGER_4
+#elif defined H5_FORTRAN_HAS_INTEGER_4 && H5_SIZEOF_HID_T >= 4
       writeToFiles("HID_T", "hid_t_f", 4);
-      goto real_start;
-    #endif
-  }
-  if( H5_SIZEOF_HID_T >= 2) {
-    #ifdef H5_FORTRAN_HAS_INTEGER_2
+#elif defined H5_FORTRAN_HAS_INTEGER_2 && H5_SIZEOF_HID_T >= 2
       writeToFiles("HID_T", "hid_t_f", 2);
-      goto real_start;
-    #endif
-  }
-  if( H5_SIZEOF_HID_T >= 1) {
-    #ifdef H5_FORTRAN_HAS_INTEGER_1
+#elif defined H5_FORTRAN_HAS_INTEGER_1 && H5_SIZEOF_HID_T >= 1
       writeToFiles("HID_T", "hid_t_f", 1);
-      goto real_start;
-    #endif
-  }
+#else
     /* Error: couldn't find a size for hid_t */
     return -1;
-
-  real_start:
-    goto done;
-  done:
+#endif
 
   /* Close files */
   endCfile();

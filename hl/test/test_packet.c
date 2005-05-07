@@ -82,7 +82,8 @@ static int cmp_par(hsize_t i, hsize_t j, particle_t *rbuf, particle_t *wbuf )
  * function to create a datatype representing the particle struct
  *-------------------------------------------------------------------------
  */
-static hid_t make_particle_type()
+static hid_t
+make_particle_type(void)
 {
  hid_t type_id;
  hid_t string_type;
@@ -113,8 +114,6 @@ static hid_t make_particle_type()
     /* Create a normal HL table just like the HL examples do */
 static int create_hl_table(hid_t fid)
 {
-  particle_t testparticle;
-
   /* Calculate the offsets of the particle struct members in memory */
   size_t part_offset[NFIELDS] = { HOFFSET( particle_t, name ),
                                   HOFFSET( particle_t, lati ),
@@ -122,12 +121,6 @@ static int create_hl_table(hid_t fid)
                                   HOFFSET( particle_t, pressure ),
                                   HOFFSET( particle_t, temperature )};
 
-  size_t part_sizes[NFIELDS] = { sizeof( testparticle.name),
-                                sizeof( testparticle.lati),
-                                sizeof( testparticle.longi),
-                                sizeof( testparticle.pressure),
-                                sizeof( testparticle.temperature)};
-    
     /* Define field information */
     const char *field_names[NFIELDS]  = 
 		  { "Name","Latitude", "Longitude", "Pressure", "Temperature" };

@@ -11,9 +11,9 @@ if test "X-" = "X-$CC"; then
   CC_BASENAME=gcc
 fi
 
-# Add "_POSIX_C_SOURCE" define to cpp flags, to quiet warnings
+# Add "_XOPEN_SOURCE" define to cpp flags, to quiet warnings
 #       from /usr/include/sys/cdefs.h
-CPPFLAGS="$CPPFLAGS -D_POSIX_C_SOURCE=1" 
+CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=600" 
 
 # Figure out C compiler flags
 . $srcdir/config/gnu-flags
