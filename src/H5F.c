@@ -1294,9 +1294,9 @@ H5F_locate_signature(H5FD_t *file, hid_t dxpl_id)
 	addr = (8==n) ? 0 : (haddr_t)1 << n;
 	if (H5FD_set_eoa(file, addr+H5F_SIGNATURE_LEN)<0)
 	    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, HADDR_UNDEF, "unable to set EOA value for file signature")
-	if (H5FD_read(file, H5FD_MEM_SUPER, dxpl_id, addr, H5F_SIGNATURE_LEN, buf)<0)
+	if (H5FD_read(file, H5FD_MEM_SUPER, dxpl_id, addr, (size_t)H5F_SIGNATURE_LEN, buf)<0)
 	    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, HADDR_UNDEF, "unable to read file signature")
-	if (!HDmemcmp(buf, H5F_SIGNATURE, H5F_SIGNATURE_LEN))
+	if (!HDmemcmp(buf, H5F_SIGNATURE, (size_t)H5F_SIGNATURE_LEN))
             break;
     }
 
@@ -2399,7 +2399,7 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent)
         UINT32DECODE(p, driver_size);
 
         /* Driver name and/or version */
-        HDstrncpy(driver_name, (const char *)p, 8);
+        HDstrncpy(driver_name, (const char *)p, (size_t)8);
         driver_name[8] = '\0';
         p += 8; /* advance past name/version */
 
@@ -2602,7 +2602,7 @@ H5F_write_superblock(H5F_t *f, hid_t dxpl_id)
 
     /* Encode the file super block */
     p = sbuf;
-    HDmemcpy(p, H5F_SIGNATURE, H5F_SIGNATURE_LEN);
+    HDmemcpy(p, H5F_SIGNATURE, (size_t)H5F_SIGNATURE_LEN);
     p += H5F_SIGNATURE_LEN;
     *p++ = (uint8_t)super_vers;
     *p++ = (uint8_t)freespace_vers;
@@ -2665,7 +2665,7 @@ H5F_write_superblock(H5F_t *f, hid_t dxpl_id)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to encode driver information")
 
 	/* Driver name */
-	HDmemcpy(dbuf + 8, driver_name, 8);
+	HDmemcpy(dbuf + 8, driver_name, (size_t)8);
     } /* end if */
 
     /* Compute super block checksum */
@@ -2901,7 +2901,7 @@ H5F_close(H5F_t *f)
     unsigned		u;              /* Local index variable */
     herr_t	        ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5F_close, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5F_close)
 
     assert(f->nrefs>0);
 
@@ -3030,7 +3030,7 @@ H5F_close(H5F_t *f)
                 int i;                  /* Local index variable */
 
                 /* Get the list of IDs of open dataset objects */
-                while((obj_count=H5F_get_obj_ids(f, H5F_OBJ_DATASET, (sizeof(objs)/sizeof(objs[0])), objs))!=0) {
+                while((obj_count=H5F_get_obj_ids(f, H5F_OBJ_DATASET, (int)(sizeof(objs)/sizeof(objs[0])), objs))!=0) {
                
                     /* Try to close all the open objects */
                     for(i=0; i<obj_count; i++)
@@ -3039,7 +3039,7 @@ H5F_close(H5F_t *f)
                 } /* end while */
 
                 /* Get the list of IDs of open group objects */
-                while((obj_count=H5F_get_obj_ids(f, H5F_OBJ_GROUP, (sizeof(objs)/sizeof(objs[0])), objs))!=0) {
+                while((obj_count=H5F_get_obj_ids(f, H5F_OBJ_GROUP, (int)(sizeof(objs)/sizeof(objs[0])), objs))!=0) {
                
                     /* Try to close all the open objects */
                     for(i=0; i<obj_count; i++)
@@ -3048,7 +3048,7 @@ H5F_close(H5F_t *f)
                 } /* end while */
 
                 /* Get the list of IDs of open named datatype objects */
-                while((obj_count=H5F_get_obj_ids(f, H5F_OBJ_DATATYPE, (sizeof(objs)/sizeof(objs[0])), objs))!=0) {
+                while((obj_count=H5F_get_obj_ids(f, H5F_OBJ_DATATYPE, (int)(sizeof(objs)/sizeof(objs[0])), objs))!=0) {
                
                     /* Try to close all the open objects */
                     for(i=0; i<obj_count; i++)
@@ -3057,7 +3057,7 @@ H5F_close(H5F_t *f)
                 } /* end while */
 
                 /* Get the list of IDs of open attribute objects */
-                while((obj_count=H5F_get_obj_ids(f, H5F_OBJ_ATTR, (sizeof(objs)/sizeof(objs[0])), objs))!=0) {
+                while((obj_count=H5F_get_obj_ids(f, H5F_OBJ_ATTR, (int)(sizeof(objs)/sizeof(objs[0])), objs))!=0) {
                
                     /* Try to close all the open objects */
                     for(i=0; i<obj_count; i++)
@@ -4624,4 +4624,3 @@ H5Fget_name(hid_t obj_id, char *name/*out*/, size_t size)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_name() */
-

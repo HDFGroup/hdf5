@@ -86,7 +86,7 @@ int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
         return -1;
     }
     if (H5Tget_size(dtype) != 1) {
-        fprintf(stderr , "Data is %d bytes per pixel. Cannot convert to GIF\n",H5Tget_size(dtype));
+        fprintf(stderr , "Data is %d bytes per pixel. Cannot convert to GIF\n",(int)H5Tget_size(dtype));
         return -1;
     }
 
@@ -141,7 +141,7 @@ int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
             return -1;
         }
         if (H5Tget_size(pal_dtype) != 1) {
-            fprintf(stderr , "Palette data is %d bytes per pixel. Cannot convert to GIF\n",H5Tget_size(pal_dtype));
+            fprintf(stderr , "Palette data is %d bytes per pixel. Cannot convert to GIF\n",(int)H5Tget_size(pal_dtype));
             return -1;
         }
 

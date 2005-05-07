@@ -77,10 +77,10 @@ typedef struct H5O_mesg_t {
     const H5O_class_t	*type;		/*type of message		     */
     hbool_t		dirty;		/*raw out of date wrt native	     */
     uint8_t		flags;		/*message flags			     */
+    unsigned		chunkno;	/*chunk number for this mesg	     */
     void		*native;	/*native format message		     */
     uint8_t		*raw;		/*ptr to raw data		     */
     size_t		raw_size;	/*size with alignment		     */
-    unsigned		chunkno;	/*chunk number for this mesg	     */
 } H5O_mesg_t;
 
 typedef struct H5O_chunk_t {

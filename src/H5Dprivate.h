@@ -194,12 +194,12 @@ typedef struct H5D_dxpl_cache_t {
     void *tconv_buf;            /* Temporary conversion buffer (H5D_XFER_TCONV_BUF_NAME) */
     void *bkgr_buf;             /* Background conversion buffer (H5D_XFER_BKGR_BUF_NAME) */
     H5T_bkg_t bkgr_buf_type;    /* Background buffer type (H5D_XFER_BKGR_BUF_NAME) */
+    H5Z_EDC_t err_detect;       /* Error detection info (H5D_XFER_EDC_NAME) */
     double btree_split_ratio[3];/* B-tree split ratios (H5D_XFER_BTREE_SPLIT_RATIO_NAME) */
     size_t vec_size;            /* Size of hyperslab vector (H5D_XFER_HYPER_VECTOR_SIZE_NAME) */
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t xfer_mode; /* Parallel transfer for this request (H5D_XFER_IO_XFER_MODE_NAME) */
 #endif /*H5_HAVE_PARALLEL*/
-    H5Z_EDC_t err_detect;       /* Error detection info (H5D_XFER_EDC_NAME) */
     H5Z_cb_t filter_cb;         /* Filter callback function (H5D_XFER_FILTER_CB_NAME) */
 } H5D_dxpl_cache_t;
 

@@ -1741,7 +1741,7 @@ H5G_mkroot (H5F_t *f, hid_t dxpl_id, H5G_entry_t *ent)
     if (!ent) {
 	ent = &new_root;
         HDmemset(ent, 0, sizeof(H5G_entry_t));
-	if (H5G_stab_create (f, dxpl_id, H5G_SIZE_HINT, ent/*out*/)<0)
+	if (H5G_stab_create (f, dxpl_id, (size_t)H5G_SIZE_HINT, ent/*out*/)<0)
 	    HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to create root group");
 	if (1 != H5O_link (ent, 1, dxpl_id))
 	    HGOTO_ERROR (H5E_SYM, H5E_LINK, FAIL, "internal error (wrong link count)");

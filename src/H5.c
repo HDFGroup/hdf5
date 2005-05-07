@@ -601,7 +601,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 	    /* Mention the versions we are referring to */
 	    HDfprintf (stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n",
 		     majnum, minnum, relnum, 
-		     H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
+		     (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
 
 	    /* Bail out now. */
 	    HDfputs ("Bye...\n", stderr);
@@ -621,7 +621,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 	    /* Mention the versions we are referring to */
 	    HDfprintf (stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n",
 		     majnum, minnum, relnum, 
-		     H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
+		     (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
 	    break;
         } /* end switch */
 
@@ -1280,16 +1280,16 @@ H5_timer_begin (H5_timer_t *timer)
 #ifdef H5_HAVE_GETRUSAGE
     HDgetrusage (RUSAGE_SELF, &rusage);
     timer->utime = (double)rusage.ru_utime.tv_sec +
-                   (double)rusage.ru_utime.tv_usec/1e6;
+                   ((double)rusage.ru_utime.tv_usec/1e6);
     timer->stime = (double)rusage.ru_stime.tv_sec +
-                   (double)rusage.ru_stime.tv_usec/1e6;
+                   ((double)rusage.ru_stime.tv_usec/1e6);
 #else
     timer->utime = 0.0;
     timer->stime = 0.0;
 #endif
 #ifdef H5_HAVE_GETTIMEOFDAY
     HDgettimeofday (&etime, NULL);
-    timer->etime = (double)etime.tv_sec + (double)etime.tv_usec/1e6;
+    timer->etime = (double)etime.tv_sec + ((double)etime.tv_usec/1e6);
 #else
     timer->etime = 0.0;
 #endif
@@ -1558,7 +1558,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 	if (argname) {
 	    unsigned n = (unsigned)MAX (0, (int)HDstrlen(argname)-3); /*lint !e666 Allow expression with side effects */
 	    if (!HDstrcmp (argname+n, "_id")) {
-		HDstrncpy (buf, argname, MIN ((int)sizeof(buf)-1, n));
+		HDstrncpy (buf, argname, (size_t)MIN ((int)sizeof(buf)-1, n));
 		buf[MIN((int)sizeof(buf)-1, n)] = '\0';
 		argname = buf;
 	    }

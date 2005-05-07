@@ -78,16 +78,16 @@
  * pointing to this struct.
  */
 typedef struct H5F_file_t {
-    unsigned	flags;		/* Access Permissions for file		*/
     H5FD_t	*lf; 		/* Lower level file handle for I/O	*/
     unsigned	nrefs;		/* Ref count for times file is opened	*/
     uint32_t	consist_flags;	/* File Consistency Flags		*/
+    unsigned	flags;		/* Access Permissions for file		*/
 
     /* Cached values from FCPL */
-    size_t	sizeof_addr;	/* Size of addresses in file            */
-    size_t	sizeof_size;	/* Size of offsets in file              */
     unsigned	sym_leaf_k;	/* Size of leaves in symbol tables      */
     unsigned    btree_k[H5B_NUM_BTREE_ID];  /* B-tree key values for each type  */
+    size_t	sizeof_addr;	/* Size of addresses in file            */
+    size_t	sizeof_size;	/* Size of offsets in file              */
     haddr_t	super_addr;	/* Absolute address of super block	*/
     haddr_t	base_addr;	/* Absolute base address for rel.addrs. */
     haddr_t	freespace_addr;	/* Relative address of free-space info	*/
@@ -98,6 +98,7 @@ typedef struct H5F_file_t {
     H5AC_t      *cache;		/* The object cache			*/
     hid_t       fcpl_id;	/* File creation property list ID 	*/
     int         mdc_nelmts;	/* Size of meta data cache (elements)	*/
+    H5F_close_degree_t fc_degree;   /* File close behavior degree	*/
     size_t	rdcc_nelmts;	/* Size of raw data chunk cache (elmts)	*/
     size_t	rdcc_nbytes;	/* Size of raw data chunk cache	(bytes)	*/
     double	rdcc_w0;	/* Preempt read chunks first? [0.0..1.0]*/
@@ -105,11 +106,10 @@ typedef struct H5F_file_t {
     hsize_t	threshold;	/* Threshold for alignment		*/
     hsize_t	alignment;	/* Alignment				*/
     unsigned	gc_ref;		/* Garbage-collect references?		*/
-    struct H5G_t *root_grp;	/* Open root group			*/
     int	ncwfs;			/* Num entries on cwfs list		*/
     struct H5HG_heap_t **cwfs;	/* Global heap cache			*/
+    struct H5G_t *root_grp;	/* Open root group			*/
     H5FO_t *open_objs;          /* Open objects in file                 */
-    H5F_close_degree_t fc_degree;   /* File close behavior degree	*/
     H5RC_t *grp_btree_shared;   /* Ref-counted group B-tree node info   */
 } H5F_file_t;
 

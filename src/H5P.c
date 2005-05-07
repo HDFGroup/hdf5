@@ -489,11 +489,11 @@ H5P_copy_plist(H5P_genplist_t *old_plist)
 
     /* Initialize the skip list to hold the changed properties */
     if((new_plist->props=H5SL_create(H5SL_TYPE_STR,0.5,H5P_DEFAULT_SKIPLIST_HEIGHT))==NULL)
-        HGOTO_ERROR(H5E_PLIST,H5E_CANTMAKETREE,FAIL,"can't create skip list for changed properties");
+        HGOTO_ERROR(H5E_PLIST,H5E_CANTCREATE,FAIL,"can't create skip list for changed properties");
 
     /* Create the skip list for deleted properties */
     if((new_plist->del=H5SL_create(H5SL_TYPE_STR,0.5,H5P_DEFAULT_SKIPLIST_HEIGHT))==NULL)
-        HGOTO_ERROR(H5E_PLIST,H5E_CANTMAKETREE,FAIL,"can't create skip list for deleted properties");
+        HGOTO_ERROR(H5E_PLIST,H5E_CANTCREATE,FAIL,"can't create skip list for deleted properties");
 
     /* Create the skip list to hold names of properties already seen
      * (This prevents a property in the class hierarchy from having it's
@@ -501,7 +501,7 @@ H5P_copy_plist(H5P_genplist_t *old_plist)
      * already been seen)
      */
     if((seen=H5SL_create(H5SL_TYPE_STR,0.5,H5P_DEFAULT_SKIPLIST_HEIGHT))==NULL)
-        HGOTO_ERROR(H5E_PLIST,H5E_CANTMAKETREE,FAIL,"can't create skip list for seen properties");
+        HGOTO_ERROR(H5E_PLIST,H5E_CANTCREATE,FAIL,"can't create skip list for seen properties");
     nseen=0;
 
     /* Cycle through the deleted properties & copy them into the new list's deleted section */
@@ -1363,7 +1363,7 @@ H5P_create_class(H5P_genclass_t *par_class, const char *name, unsigned internal,
 
     /* Create the skip list for properties */
     if((pclass->props=H5SL_create(H5SL_TYPE_STR,0.5,H5P_DEFAULT_SKIPLIST_HEIGHT))==NULL)
-        HGOTO_ERROR(H5E_PLIST,H5E_CANTMAKETREE,NULL,"can't create skip list for properties");
+        HGOTO_ERROR(H5E_PLIST,H5E_CANTCREATE,NULL,"can't create skip list for properties");
 
     /* Set callback functions and pass-along data */
     pclass->create_func = cls_create;
@@ -1527,11 +1527,11 @@ H5P_create(H5P_genclass_t *pclass)
 
     /* Create the skip list for changed properties */
     if((plist->props=H5SL_create(H5SL_TYPE_STR,0.5,H5P_DEFAULT_SKIPLIST_HEIGHT))==NULL)
-        HGOTO_ERROR(H5E_PLIST,H5E_CANTMAKETREE,NULL,"can't create skip list for changed properties");
+        HGOTO_ERROR(H5E_PLIST,H5E_CANTCREATE,NULL,"can't create skip list for changed properties");
 
     /* Create the skip list for deleted properties */
     if((plist->del=H5SL_create(H5SL_TYPE_STR,0.5,H5P_DEFAULT_SKIPLIST_HEIGHT))==NULL)
-        HGOTO_ERROR(H5E_PLIST,H5E_CANTMAKETREE,NULL,"can't create skip list for deleted properties");
+        HGOTO_ERROR(H5E_PLIST,H5E_CANTCREATE,NULL,"can't create skip list for deleted properties");
 
     /* Create the skip list to hold names of properties already seen
      * (This prevents a property in the class hierarchy from having it's
@@ -1539,7 +1539,7 @@ H5P_create(H5P_genclass_t *pclass)
      * already been seen)
      */
     if((seen=H5SL_create(H5SL_TYPE_STR,0.5,H5P_DEFAULT_SKIPLIST_HEIGHT))==NULL)
-        HGOTO_ERROR(H5E_PLIST,H5E_CANTMAKETREE,NULL,"can't create skip list for seen properties");
+        HGOTO_ERROR(H5E_PLIST,H5E_CANTCREATE,NULL,"can't create skip list for seen properties");
 
     /*
      * Check if we should copy class properties (up through list of parent classes also),
@@ -3886,7 +3886,7 @@ H5P_iterate_plist(hid_t plist_id, int *idx, H5P_iterate_t iter_func, void *iter_
 
     /* Create the skip list to hold names of properties already seen */
     if((seen=H5SL_create(H5SL_TYPE_STR,0.5,H5P_DEFAULT_SKIPLIST_HEIGHT))==NULL)
-        HGOTO_ERROR(H5E_PLIST,H5E_CANTMAKETREE,FAIL,"can't create skip list for seen properties");
+        HGOTO_ERROR(H5E_PLIST,H5E_CANTCREATE,FAIL,"can't create skip list for seen properties");
 
     /* Walk through the changed properties in the list */
     if(H5SL_count(plist->props)>0) {
@@ -5098,7 +5098,7 @@ H5P_close(void *_plist)
     H5SL_t *seen=NULL;              /* Skip list to hold names of properties already seen */
     size_t nseen;                   /* Number of items 'seen' */
     hbool_t has_parent_class;       /* Flag to indicate that this property list's class has a parent */
-    ssize_t ndel;                   /* Number of items deleted */
+    size_t ndel;                    /* Number of items deleted */
     H5SL_node_t *curr_node;         /* Current node in skip list */
     H5P_genprop_t *tmp;             /* Temporary pointer to properties */
     unsigned make_cb=0;             /* Operator data for property free callback */
@@ -5120,7 +5120,7 @@ H5P_close(void *_plist)
      * already been seen)
      */
     if((seen=H5SL_create(H5SL_TYPE_STR,0.5,H5P_DEFAULT_SKIPLIST_HEIGHT))==NULL)
-        HGOTO_ERROR(H5E_PLIST,H5E_CANTMAKETREE,FAIL,"can't create skip list for seen properties");
+        HGOTO_ERROR(H5E_PLIST,H5E_CANTCREATE,FAIL,"can't create skip list for seen properties");
     nseen=0;
 
     /* Walk through the changed properties in the list */

@@ -310,10 +310,10 @@ h5tools_str_fmt(h5tools_str_t *str/*in,out*/, size_t start, const char *fmt)
 char *
 h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5dump_t *info,
                    hsize_t elmtno, int ndims, hsize_t min_idx[],
-                   hsize_t max_idx[],h5tools_context_t *ctx)
+                   hsize_t max_idx[], h5tools_context_t *ctx)
 {
-    hsize_t p_prod[H5S_MAX_RANK], p_idx[H5S_MAX_RANK];
-    hsize_t n, i = 0;
+    hsize_t p_prod[H5S_MAX_RANK];
+    hsize_t i = 0;
     hsize_t curr_pos=elmtno;
 
     h5tools_str_reset(str);
@@ -325,12 +325,6 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5dump_t *info,
          */
         for (i = ndims - 1, p_prod[ndims - 1] = 1; i > 0; --i)
             p_prod[i - 1] = (max_idx[i] - min_idx[i]) * p_prod[i];
-
-        /* Calculate the index values from the element number. */
-        for (i = 0, n = elmtno; i < (hsize_t)ndims; i++) {
-            p_idx[i] = n / p_prod[i] + min_idx[i];
-            n %= p_prod[i];
-        }
 
         for ( i = 0; i < (hsize_t)ndims; i++)
         {
@@ -345,7 +339,7 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5dump_t *info,
                 h5tools_str_append(str, "%s", OPT(info->idx_sep, ","));
 
             h5tools_str_append(str, OPT(info->idx_n_fmt, "%lu"),
-                               (unsigned long) ctx->pos[i]);
+                               (unsigned long)ctx->pos[i]);
         }
     } else {
         /* Scalar */

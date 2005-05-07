@@ -2398,7 +2398,7 @@ error:
  *		Failure:	-1
  *
  * Programmer:	Kent Yang
- *              Wednesday, , 2002 Nov. 13th
+ *              Wednesday, Nov. 13th, 2002
  *
  * Modifications:
  *

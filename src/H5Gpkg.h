@@ -97,9 +97,9 @@ typedef struct H5G_bt_ud2_t {
     /* downward */
     hid_t	group_id;	/*group id to pass to iteration operator     */
     H5G_entry_t *ent;           /*the entry to which group_id points         */
-    int		skip;		/*initial entries to skip		     */
     H5G_iterate_t op;		/*iteration operator			     */
     void	*op_data;	/*user-defined operator data		     */
+    int		skip;		/*initial entries to skip		     */
 
     /* upward */
     int		final_ent;	/*final entry looked at                      */
