@@ -398,7 +398,8 @@ H5G_ent_copy(H5G_entry_t *dst, const H5G_entry_t *src, H5G_ent_copy_depth_t dept
     /* If the depth is "very shallow", keep the old entry's user path */
     if(depth==H5G_COPY_LIMITED) {
         tmp_user_path_r=dst->user_path_r;
-        H5RS_decr(dst->canon_path_r);
+        if(dst->canon_path_r)
+            H5RS_decr(dst->canon_path_r);
     } /* end if */
 
     /* Copy the top level information */
