@@ -289,7 +289,7 @@ H5O_init(H5F_t *f, hid_t dxpl_id, size_t size_hint, H5G_entry_t *ent/*out*/, had
     oh->nchunks = 1;
     oh->alloc_nchunks = H5O_NCHUNKS;
 
-    if (NULL == (oh->chunk = H5FL_SEQ_MALLOC(H5O_chunk_t, oh->alloc_nchunks)))
+    if (NULL == (oh->chunk = H5FL_SEQ_MALLOC(H5O_chunk_t, (size_t)oh->alloc_nchunks)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     tmp_addr = ent->header + (hsize_t)H5O_SIZEOF_HDR(f);
@@ -304,7 +304,7 @@ H5O_init(H5F_t *f, hid_t dxpl_id, size_t size_hint, H5G_entry_t *ent/*out*/, had
     oh->nmesgs = 1;
     oh->alloc_nmesgs = H5O_NMESGS;
 
-    if (NULL == (oh->mesg = H5FL_SEQ_CALLOC(H5O_mesg_t, oh->alloc_nmesgs)))
+    if (NULL == (oh->mesg = H5FL_SEQ_CALLOC(H5O_mesg_t, (size_t)oh->alloc_nmesgs)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     oh->mesg[0].type = H5O_NULL;
@@ -416,14 +416,14 @@ H5O_close(H5G_entry_t *obj_ent)
 #endif
     
     /*
-     * If the file open-lock count has reached zero and the file has a close
+     * If the file open-lock count has reached the number of open mount points
+     * (each of which has a group open in the file) and the file has a close
      * pending then close the file and remove it from the H5I_FILE_CLOSING ID
      * group.
      */
-    if (0==obj_ent->file->nopen_objs && obj_ent->file->closing)
+    if (obj_ent->file->mtab.nmounts==obj_ent->file->nopen_objs && obj_ent->file->closing)
 	H5I_dec_ref(obj_ent->file->closing);
 
-				
     /* Free the ID to name buffers */
     H5G_free_ent_name(obj_ent);
 
@@ -517,7 +517,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 
     /* build the message array */
     oh->alloc_nmesgs = MAX(H5O_NMESGS, nmesgs);
-    if (NULL==(oh->mesg=H5FL_SEQ_CALLOC(H5O_mesg_t,oh->alloc_nmesgs)))
+    if (NULL==(oh->mesg=H5FL_SEQ_CALLOC(H5O_mesg_t,(size_t)oh->alloc_nmesgs)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* read each chunk from disk */
@@ -525,7 +525,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 	/* increase chunk array size */
 	if (oh->nchunks >= oh->alloc_nchunks) {
 	    unsigned na = oh->alloc_nchunks + H5O_NCHUNKS;
-	    H5O_chunk_t *x = H5FL_SEQ_REALLOC (H5O_chunk_t, oh->chunk, na);
+	    H5O_chunk_t *x = H5FL_SEQ_REALLOC (H5O_chunk_t, oh->chunk, (size_t)na);
 
 	    if (!x)
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
@@ -677,7 +677,7 @@ H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh)
 	UINT32ENCODE(p, oh->chunk[0].size);
 
 	/* zero to alignment */
-	HDmemset (p, 0, H5O_SIZEOF_HDR(f)-12);
+	HDmemset (p, 0, (size_t)(H5O_SIZEOF_HDR(f)-12));
 
 	/* write the object header prefix */
 
@@ -686,7 +686,7 @@ H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh)
             combine=1;
         } /* end if */
         else {
-            if (H5F_block_write(f, H5FD_MEM_OHDR, addr, H5O_SIZEOF_HDR(f), 
+            if (H5F_block_write(f, H5FD_MEM_OHDR, addr, (size_t)H5O_SIZEOF_HDR(f), 
                         dxpl_id, buf) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to write object header hdr to disk");
         } /* end else */
@@ -759,7 +759,7 @@ H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh)
                         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                     /* Copy in the prefix */
-                    HDmemcpy(p,buf,H5O_SIZEOF_HDR(f));
+                    HDmemcpy(p,buf,(size_t)H5O_SIZEOF_HDR(f));
 
                     /* Copy in the first chunk */
                     HDmemcpy(p+H5O_SIZEOF_HDR(f),oh->chunk[u].image,oh->chunk[u].size);
@@ -2698,7 +2698,7 @@ H5O_alloc_extend_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno, size_t size)
     /* create a new null message */
     if (oh->nmesgs >= oh->alloc_nmesgs) {
         unsigned na = oh->alloc_nmesgs + H5O_NMESGS;
-        H5O_mesg_t *x = H5FL_SEQ_REALLOC (H5O_mesg_t, oh->mesg, na);
+        H5O_mesg_t *x = H5FL_SEQ_REALLOC (H5O_mesg_t, oh->mesg, (size_t)na);
 
         if (NULL==x)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, UFAIL, "memory allocation failed");
@@ -2842,7 +2842,7 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
      */
     if (oh->nchunks >= oh->alloc_nchunks) {
         unsigned na = oh->alloc_nchunks + H5O_NCHUNKS;
-        H5O_chunk_t *x = H5FL_SEQ_REALLOC (H5O_chunk_t, oh->chunk, na);
+        H5O_chunk_t *x = H5FL_SEQ_REALLOC (H5O_chunk_t, oh->chunk, (size_t)na);
 
         if (!x)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, UFAIL, "memory allocation failed");
@@ -2863,7 +2863,7 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
     if (oh->nmesgs + 3 > oh->alloc_nmesgs) {
         int old_alloc=oh->alloc_nmesgs;
         unsigned na = oh->alloc_nmesgs + MAX (H5O_NMESGS, 3);
-        H5O_mesg_t *x = H5FL_SEQ_REALLOC (H5O_mesg_t, oh->mesg, na);
+        H5O_mesg_t *x = H5FL_SEQ_REALLOC (H5O_mesg_t, oh->mesg, (size_t)na);
 
         if (!x)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, UFAIL, "memory allocation failed");
@@ -3029,7 +3029,7 @@ H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
 	if (oh->nmesgs >= oh->alloc_nmesgs) {
 	    int old_alloc=oh->alloc_nmesgs;
 	    unsigned na = oh->alloc_nmesgs + H5O_NMESGS;
-	    H5O_mesg_t *x = H5FL_SEQ_REALLOC (H5O_mesg_t, oh->mesg, na);
+	    H5O_mesg_t *x = H5FL_SEQ_REALLOC (H5O_mesg_t, oh->mesg, (size_t)na);
 
 	    if (!x)
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, UFAIL, "memory allocation failed");

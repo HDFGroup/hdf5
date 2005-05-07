@@ -27,6 +27,13 @@ const char *FILENAME[] = {
     NULL
 };
 
+/* For "mount_after_close" test */
+#define RANK 2
+#define NX 4
+#define NY 5
+#define NAME_BUF_SIZE   40
+int bm[NX][NY], bm_out[NX][NY]; /* Data buffers */
+
 
 /*-------------------------------------------------------------------------
  * Function:	setup
@@ -54,10 +61,10 @@ setup(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
 	goto error;
-    if (H5Gclose(H5Gcreate(file, "/mnt1", 0))<0) goto error;
-    if (H5Gclose(H5Gcreate(file, "/mnt1/file1", 0))<0) goto error;
-    if (H5Gclose(H5Gcreate(file, "/mnt_unlink", 0))<0) goto error;
-    if (H5Gclose(H5Gcreate(file, "/mnt_move_a", 0))<0) goto error;
+    if (H5Gclose(H5Gcreate(file, "/mnt1", (size_t)0))<0) goto error;
+    if (H5Gclose(H5Gcreate(file, "/mnt1/file1", (size_t)0))<0) goto error;
+    if (H5Gclose(H5Gcreate(file, "/mnt_unlink", (size_t)0))<0) goto error;
+    if (H5Gclose(H5Gcreate(file, "/mnt_move_a", (size_t)0))<0) goto error;
     if (H5Glink(file, H5G_LINK_HARD, "/mnt1/file1", "/file1")<0) goto error;
     if (H5Glink(file, H5G_LINK_HARD, "/mnt1", "/mnt1_link")<0) goto error;
     if (H5Fclose(file)<0) goto error;
@@ -66,10 +73,10 @@ setup(hid_t fapl)
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
 	goto error;
-    if (H5Gclose(H5Gcreate(file, "/file2", 0))<0) goto error;
-    if (H5Gclose(H5Gcreate(file, "/rename_a", 0))<0) goto error;
-    if (H5Gclose(H5Gcreate(file, "/rename_b", 0))<0) goto error;
-    if (H5Gclose(H5Gcreate(file, "/rename_a/x", 0))<0) goto error;
+    if (H5Gclose(H5Gcreate(file, "/file2", (size_t)0))<0) goto error;
+    if (H5Gclose(H5Gcreate(file, "/rename_a", (size_t)0))<0) goto error;
+    if (H5Gclose(H5Gcreate(file, "/rename_b", (size_t)0))<0) goto error;
+    if (H5Gclose(H5Gcreate(file, "/rename_a/x", (size_t)0))<0) goto error;
     if (H5Fclose(file)<0) goto error;
 
     /* file 3 */
@@ -1016,6 +1023,231 @@ test_close(hid_t fapl)
     return 1;
 }
     
+
+/*-------------------------------------------------------------------------
+ * Function:	test_mount_after_close
+ *
+ * Purpose:	Test that the library handles mounting a file on a group
+ *              if the group is the only object holding the file open.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, May  4, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_mount_after_close(hid_t fapl)
+{
+    hid_t	fid1=-1, fid2=-1;                     /* File IDs */
+    hid_t       gidA=-1, gidAB=-1, gidABM=-1, gidX=-1, gidXY=-1;  /* Group identifiers */
+    hid_t       gidABMX=-1, gidABC=-1, gidABT=-1;       /* Group IDs for testing */
+    hid_t       didABMXYD=-1;                           /* Dataset ID for testing */
+    hid_t       did=-1, sid=-1;                         /* Dataset and dataspace identifiers */
+    char	filename1[1024], filename2[1024];       /* Name of files to mount */
+    char        objname[NAME_BUF_SIZE];                 /* Name of object opened */
+    hsize_t     dims[] = {NX,NY};                       /* Dataset dimensions */
+    int         i, j;                                   /* Local index variable */
+    
+    TESTING("mounting on group after file is closed");
+    h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
+    h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
+    
+    /*
+    * Initialization of buffer matrix "bm"
+    */
+    for(i =0; i<NX; i++)
+        for(j = 0; j<NY; j++)
+            bm[i][j] = i + j;
+
+    /* Create first file and a groups in it. */
+    /* h5ls -r shows: */
+    /* /A                       Group
+      /A/B                     Group
+      /A/B/C                   -> ./M/X/Y
+      /A/B/M                   Group
+      /A/B/T                   -> /A
+    */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+        TEST_ERROR
+    if((gidAB = H5Gcreate(gidA , "B", (size_t)0)) < 0)
+        TEST_ERROR
+    if((gidABM = H5Gcreate(gidAB , "M", (size_t)0)) < 0) /* Mount point */
+        TEST_ERROR
+    if(H5Glink(gidAB, H5G_LINK_SOFT, "./M/X/Y", "C") < 0) /* Soft link */
+        TEST_ERROR
+    if(H5Glink(gidAB, H5G_LINK_SOFT, "/A", "T") < 0) /* Soft link */
+        TEST_ERROR
+
+    /* Close groups and file */
+    if(H5Gclose(gidABM) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidAB) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidA) < 0)
+        TEST_ERROR
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+   /* Create second file and dataset "D" in it. */
+   /* h5ls shows: */
+   /* /X                       Group
+      /X/T                     -> ./Y
+      /X/Y                     Group
+      /X/Y/D                   Dataset {4, 5}
+    */
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    dims[0] = NX;
+    dims[1] = NY;
+    if((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
+        TEST_ERROR
+
+    if((gidX = H5Gcreate(fid2, "/X", (size_t)0)) < 0)
+        TEST_ERROR
+    if((gidXY = H5Gcreate(gidX, "Y", (size_t)0)) < 0)
+        TEST_ERROR
+    if((did = H5Dcreate(gidXY, "D", H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if(H5Glink(gidX, H5G_LINK_SOFT, "./Y", "T") < 0) /* Soft link */
+        TEST_ERROR
+
+    /* Write data to the dataset. */
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, bm) < 0)
+        TEST_ERROR
+
+    /* Close all identifiers. */
+    if(H5Sclose(sid) < 0)
+        TEST_ERROR
+    if(H5Dclose(did) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidXY) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidX) < 0)
+        TEST_ERROR
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+/* Beginning of the actual test code */
+
+   /*
+    * Reopen both files
+    */
+    if((fid1 = H5Fopen(filename1, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR
+    if((fid2 = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR
+   /*
+    *  Open /A/B to use as a mount point
+    */
+    if((gidAB = H5Gopen(fid1, "/A/B")) < 0)
+        TEST_ERROR
+
+   /*
+    *  Close the parent file. This keeps the file open because of the other handle on the group within
+    */
+    if(H5Fclose(fid1) < 0) /* We close the file (it should stay open from the group) */
+        TEST_ERROR
+
+   /*
+    * Mount second file under G in the first file.
+    */
+    if(H5Fmount(gidAB, "M", fid2, H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Open "normal" group in mounted file */
+    /* (This shows we successfully mounted) */
+    if((gidABMX = H5Gopen(gidAB, "M/X")) < 0)
+        TEST_ERROR
+
+    /* Check name */
+    if(H5Iget_name( gidABMX, objname, (size_t)NAME_BUF_SIZE ) < 0)
+        TEST_ERROR
+    if(HDstrcmp(objname, "/A/B/M/X"))
+        TEST_ERROR
+
+    /* Close object in mounted file */
+    if(H5Gclose(gidABMX) < 0)
+        TEST_ERROR
+
+    /* Open group in mounted file through softlink */
+    if((gidABC = H5Gopen(gidAB, "C")) < 0)
+        TEST_ERROR
+
+    /* Check name */
+    if(H5Iget_name( gidABC, objname, (size_t)NAME_BUF_SIZE ) < 0)
+        TEST_ERROR
+    if(HDstrcmp(objname, "/A/B/C"))
+        TEST_ERROR
+
+    /* Close object in mounted file */
+    if(H5Gclose(gidABC) < 0)
+        TEST_ERROR
+
+    /* Open group in original file through softlink */
+    if((gidABT = H5Gopen(gidAB, "T")) < 0)
+        TEST_ERROR
+
+    /* Check name */
+    if(H5Iget_name( gidABT, objname, (size_t)NAME_BUF_SIZE ) < 0)
+        TEST_ERROR
+    if(HDstrcmp(objname, "/A/B/T"))
+        TEST_ERROR
+
+    /* Close object in original file */
+    if(H5Gclose(gidABT) < 0)
+        TEST_ERROR
+
+    /* Open "normal" dataset in mounted file */
+    if((didABMXYD = H5Dopen(gidAB, "M/X/Y/D")) < 0)
+        TEST_ERROR
+
+    /* Check name */
+    if(H5Iget_name( didABMXYD, objname, (size_t)NAME_BUF_SIZE ) < 0)
+        TEST_ERROR
+    if(HDstrcmp(objname, "/A/B/M/X/Y/D"))
+        TEST_ERROR
+
+    /* Close object in mounted file */
+    if(H5Dclose(didABMXYD) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidAB) < 0)
+        TEST_ERROR
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+    
+    /* Shut down */
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Sclose(sid);
+	H5Dclose(did);
+	H5Gclose(didABMXYD);
+	H5Gclose(gidABT);
+	H5Gclose(gidABC);
+	H5Gclose(gidABMX);
+	H5Gclose(gidXY);
+	H5Gclose(gidX);
+	H5Gclose(gidABM);
+	H5Gclose(gidAB);
+	H5Gclose(gidA);
+	H5Fclose(fid1);
+        H5Fclose(fid2);
+    } H5E_END_TRY;
+    return 1;
+}
+    
     
 
 /*-------------------------------------------------------------------------
@@ -1057,6 +1289,7 @@ main(void)
     nerrors += test_interlink(fapl);
     nerrors += test_uniformity(fapl);
     nerrors += test_close(fapl);
+    nerrors += test_mount_after_close(fapl);
     
     if (nerrors) goto error;
     puts("All mount tests passed.");
