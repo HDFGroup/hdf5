@@ -26,8 +26,8 @@
 #define ESCAPE_HTML             1
 #define OPT(X,S)                ((X) ? (X) : (S))
 #define OPTIONAL_LINE_BREAK     "\001"  /* Special strings embedded in the output */
-#define START_OF_DATA		0x0001
-#define END_OF_DATA		0x0002
+#define START_OF_DATA  0x0001
+#define END_OF_DATA  0x0002
 
 /*
  * Information about how to format output.
@@ -399,23 +399,24 @@ typedef struct dump_header{
 } dump_header;
 
 typedef struct h5tools_context_t {
-    size_t	cur_column;	/*current column for output	*/
-    size_t	cur_elmt;	/*current element/output line	*/
-    int		need_prefix;	/*is line prefix needed?	*/
-    int		ndims;		/*dimensionality		*/
-    hsize_t	p_min_idx[H5S_MAX_RANK]; /*min selected index	*/
-    hsize_t	p_max_idx[H5S_MAX_RANK]; /*max selected index	*/
-    int		prev_multiline;	/*was prev datum multiline?	*/
-    size_t	prev_prefix_len;/*length of previous prefix	*/
-    int		continuation;	/*continuation of previous data?*/
-    hsize_t	size_last_dim;  /*the size of the last dimension,
-                                 *needed so we can break after each
-                                 *row */
-    int		indent_level;   /*the number of times we need some
-                                 *extra indentation */
-    int		default_indent_level; /*this is used when the indent level gets changed */
-    hsize_t acc[H5S_MAX_RANK];    /* accumulator position */
-    hsize_t pos[H5S_MAX_RANK];    /* matrix position */
+    size_t cur_column;                       /*current column for output */
+    size_t cur_elmt;                         /*current element/output line */
+    int  need_prefix;                        /*is line prefix needed? */
+    int  ndims;                              /*dimensionality  */
+    hsize_t p_min_idx[H5S_MAX_RANK];         /*min selected index */
+    hsize_t p_max_idx[H5S_MAX_RANK];         /*max selected index */
+    int  prev_multiline;                     /*was prev datum multiline? */
+    size_t prev_prefix_len;                  /*length of previous prefix */
+    int  continuation;                       /*continuation of previous data?*/
+    hsize_t size_last_dim;                   /*the size of the last dimension,
+                                              *needed so we can break after each
+                                              *row */
+    int  indent_level;                 /*the number of times we need some
+                                       *extra indentation */
+    int  default_indent_level;        /*this is used when the indent level gets changed */
+    hsize_t acc[H5S_MAX_RANK];        /* accumulator position */
+    hsize_t pos[H5S_MAX_RANK];        /* matrix position */
+    hsize_t sm_pos;                   /* current stripmine element position */
 } h5tools_context_t;
 
    
@@ -517,7 +518,7 @@ extern int      h5tools_canreadf(const char* name,
                                  hid_t dcpl_id);
 extern int      h5tools_can_encode(H5Z_filter_t filtn);
 
-void            init_acc_pos(h5tools_context_t	*ctx, hsize_t *dims);
+void            init_acc_pos(h5tools_context_t *ctx, hsize_t *dims);
 
 
-#endif	/* H5TOOLS_H__ */
+#endif /* H5TOOLS_H__ */
