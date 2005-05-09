@@ -1190,6 +1190,9 @@ static void H5Z_scaleoffset_convert(void *buf, unsigned d_nelmts, unsigned dtype
 }
 
 /* Round a floating-point value to the nearest integer value 4/19/05 */
+/* rounding to the bigger absolute value if val is in the middle, 
+ 0.5 -> 1, -0.5 ->-1
+5/9/05, KY */
 static double H5Z_scaleoffset_rnd(double val)                         
 {                                                              
    double u_val, l_val;                                          
@@ -1198,11 +1201,11 @@ static double H5Z_scaleoffset_rnd(double val)
    l_val = HDfloor(val);
 
    if(val > 0) {
-      if((u_val - val)<(val - l_val)) return u_val;      
+      if((u_val - val)<=(val - l_val)) return u_val;      
       else                            return l_val; 
    }     
    else {
-      if((val - l_val)<(u_val - val)) return l_val;      
+      if((val - l_val)<=(u_val - val)) return l_val;      
       else                            return u_val;      
    } 
 }  
