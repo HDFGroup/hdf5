@@ -5244,10 +5244,12 @@ static void gent_aindices(void)
  hsize_t  dims2[2]  = {2,100};
  hsize_t  dims3[3]  = {2,2,100};
  hsize_t  dims4[4]  = {2,3,4,5};
+ hsize_t  dims5[2]  = {32,4097}; /* big enough data size to force a second stripmine read */
  int      buf1[100];
  int      buf2[2][100];
  int      buf3[2][2][100];
  int      buf4[2][3][4][5];
+ double   *buf5;
  int      i, j, k, l, n, ret;
 
  for (i=n=0; i<100; i++){
@@ -5275,6 +5277,10 @@ static void gent_aindices(void)
    }
   }
  }
+
+ buf5 = malloc(32 * 4097 * sizeof(double) );
+ for (i = 0; i < 32 * 4097; i++)
+  buf5[i] = 1;
   
  /* create a file */
  fid  = H5Fcreate(FILE50, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -5288,6 +5294,7 @@ static void gent_aindices(void)
  write_dset(fid,2,dims2,"2d",H5T_NATIVE_INT,buf2);
  write_dset(fid,3,dims3,"3d",H5T_NATIVE_INT,buf3);
  write_dset(fid,4,dims4,"4d",H5T_NATIVE_INT,buf4);
+ write_dset(fid,2,dims5,"stripmine",H5T_NATIVE_DOUBLE,buf5);
 
 /*-------------------------------------------------------------------------
  * test with group indentation
@@ -5312,6 +5319,8 @@ static void gent_aindices(void)
  */
  ret=H5Fclose(fid);
  assert(ret>=0);
+
+ free(buf5);
 }
 
 /*-------------------------------------------------------------------------
