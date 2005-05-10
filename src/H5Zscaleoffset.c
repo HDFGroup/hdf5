@@ -974,8 +974,13 @@ H5Z_filter_scaleoffset (unsigned flags, size_t cd_nelmts, const unsigned cd_valu
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "scale type must be 0 or 1")
     } 
     else if(dtype_class==H5Z_SCALEOFFSET_CLS_INTEGER) { /* integer type */
-        if(scale_type==H5_SO_FLOAT_DSCALE || scale_type==H5_SO_FLOAT_ESCALE)
+        if(scale_type==H5_SO_FLOAT_DSCALE || scale_type==H5_SO_FLOAT_ESCALE) {
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "scale type cannot be 0 or 1")
+        /* check here when scale_factor is less than 0 for integer, library will reset it to 0 
+           in this case, library will calculate the minimum-bits */
+	   if(scale_factor < 0) scale_factor = 0;
+        }
+
     }
 
     if(scale_type==H5_SO_FLOAT_DSCALE) { /* floating-point type, variable-minimum-bits */
