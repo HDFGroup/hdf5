@@ -22,6 +22,11 @@
  */
 #include "H5f90i_gen.h"
 
+/* Define _fcd and real_f.  These are the same on every system
+ * but UNICOS.
+ */
+#define _fcdtocp(desc) (desc)
+
 #if (defined (UNICOS) || defined (_UNICOS)) && !defined(__crayx1)
 
 #include <fortran.h>
@@ -29,105 +34,11 @@
 /*typedef char*              _fcd;*/
 typedef double             real_f;
 
-#endif /* UNICOS */
-
-#if defined(IBM6000) || defined(_AIX)
-
-typedef char              *_fcd;
-typedef float             real_f;
-#define _fcdtocp(desc) (desc)
-#endif /*IBM6000*/
-
-/* MAC APPLE definitions with IBM XL compiler*/
-#if defined(__APPLE__)
-typedef char              *_fcd;
-typedef float             real_f;
-#define _fcdtocp(desc) (desc)
-
-#endif /*APPLE*/
-
-/* LINUX definitions */
-#if (defined(linux) || defined(__gnu_linux__) || defined(__linux__))
-
-/* Common definitions */
-typedef char              *_fcd;
-typedef float             real_f;
-#define _fcdtocp(desc) (desc)
-
-/* IA32 specific definitions */
-#if (defined(i386) || defined(__i386) || defined(__i386__))
-
-/* AMD64 specific definitions */
-#elif defined __x86_64__
-
-/* IA64 specific definitions */
-#elif defined __ia64
-
-#endif /* IA64 */
-#endif /* LINUX*/
-
-#if defined(IRIX) || defined(IRIS4) || defined(sgi) || defined(__sgi__) || defined(__sgi)
-
-typedef char          *_fcd;
-typedef float         real_f;
-#define _fcdtocp(desc) (desc)
-#endif /* IRIX */
-
-#if defined(__crayx1)
-typedef char          *_fcd;
-typedef float         real_f;
-#define _fcdtocp(desc) (desc)
-#endif /* Cray X1 */
-
-#if (defined(SUN) || defined(sun) || defined(__sun__) || defined(__SUNPRO_C)) & !defined(__i386)
-
-typedef char              *_fcd;
-typedef float             real_f;
-#define _fcdtocp(desc) (desc)
-
-#endif     /*SUN*/
-
-#if defined DEC_ALPHA || (defined __alpha && defined __unix__ && !defined __linux__)
-
-typedef char             *_fcd;
-typedef float            real_f;
-#define _fcdtocp(desc) (desc)
-
-#endif /* DEC_ALPHA */
-
-#if defined __alpha__ && defined __linux__
-
-typedef char             *_fcd;
-typedef float            real_f;
-#define _fcdtocp(desc) (desc)
-
-#endif /* DEC_ALPHA_LINUX */
-
-#if defined(HP9000) || (!defined(__convexc__) && (defined(hpux) || defined(__hpux)))
-
-typedef char           *_fcd;
-typedef float          real_f;
-#define _fcdtocp(desc) (desc)
-
-#endif /* HP9000 */
-
-#if defined _WINDOWS || defined WIN32
+#else
 
 typedef char              *_fcd;
 typedef float             real_f;
 
-#define _fcdtocp(desc) (desc)
-
-#endif /*WINDOWS */
-
-/* FreeBSD definitions */
-#if (defined(__FreeBSD) || defined(__FreeBSD__))
-
-/* Common definitions */
-typedef char              *_fcd;
-typedef float             real_f;
-#define _fcdtocp(desc) (desc)
-
-#endif /* FreeBSD */
+#endif
 
 #endif /* _H5f90i_H */
