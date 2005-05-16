@@ -43,8 +43,6 @@ herr_t H5IM_get_palette( hid_t loc_id,
  *  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
  *
  * Modifications:
- *  May 10, 2005
- *  the  default make image 8bit function saves the image with RANK 2 (2D dataset)
  *
  *-------------------------------------------------------------------------
  */
