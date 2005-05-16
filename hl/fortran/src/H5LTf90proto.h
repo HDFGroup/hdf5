@@ -18,6 +18,9 @@
 
 #include "H5pubconf.h"
 #include "H5f90i.h"
+#include <stdlib.h>  
+#include <string.h>
+
 
 H5_DLL char*  HD5f2cstring (_fcd fdesc, int len);
 H5_DLL void HD5packFstring (char *src, char *dest, size_t len);
@@ -242,13 +245,13 @@ nh5immake_image_8bit_c (hid_t_f *loc_id,
                        _fcd name, 
                        hsize_t_f *width,
                        hsize_t_f *height, 
-                       unsigned char *buf);
+                       void *buf);
 H5_DLL
 int_f
 nh5imread_image_c (hid_t_f *loc_id, 
                    int_f *namelen,
                    _fcd name, 
-                   unsigned char *buf);
+                   void *buf);
 
 H5_DLL
 int_f
@@ -259,7 +262,7 @@ nh5immake_image_24bit_c (hid_t_f *loc_id,
                          _fcd il, 
                          hsize_t_f *width,
                          hsize_t_f *height,
-																								 unsigned char *buf);
+																								 void *buf);
 H5_DLL
 int_f
 nh5imget_image_info_c(hid_t_f *loc_id, 
@@ -286,7 +289,7 @@ nh5immake_palette_c (hid_t_f *loc_id,
                      int_f *namelen,
                      _fcd name, 
                      hsize_t_f *dims,
-                     unsigned char *buf);
+                     void *buf);
 
 H5_DLL
 int_f
@@ -326,7 +329,7 @@ nh5imget_palette_c(hid_t_f *loc_id,
                         int_f *namelen,
                         _fcd name,
 																							 int_f *pal_number,
-																					   unsigned char *buf);
+																					   void *buf);
 
 H5_DLL
 int_f

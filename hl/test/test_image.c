@@ -31,10 +31,12 @@
 #define PAL1_NAME   "rainbow"
 #define PAL2_NAME   "sepia"
 #define PAL3_NAME   "earth"
+#define PAL4_NAME   "blue-red"
 
-#define WIDTH  (hsize_t)50
-#define HEIGHT (hsize_t)20
 
+#define WIDTH       (hsize_t)500
+#define HEIGHT      (hsize_t)200
+#define PAL_ENTRIES 9
 
 /* struct to store RGB values read from a .pal file */
 typedef struct rgb_t {
@@ -86,33 +88,55 @@ static int test_simple(void)
  hsize_t       width;
  hsize_t       height;
  hsize_t       planes;
- hsize_t       pal_dims[] = {9,3};
+ hsize_t       pal_dims[] = {PAL_ENTRIES,3};
  hsize_t       pal_dims_out[2];
  char          interlace[20];
  hssize_t      npals;
- hsize_t       i;
+ hsize_t       i, j;
  herr_t        is_image;
  herr_t        is_pal;
  unsigned char image_in1 [ WIDTH*HEIGHT ];
  unsigned char image_out1[ WIDTH*HEIGHT ];
  unsigned char image_in2 [ WIDTH*HEIGHT*3 ];
  unsigned char image_out2[ WIDTH*HEIGHT*3 ];
- unsigned char pal_data_out[9*3];
- /* create a 9 entry grey palette */
- unsigned char pal_data_in[9*3] = {0,0,0,
- 25,25,25,
- 50,50,50,
- 75,75,75,
- 100,100,100,
- 125,125,125,
- 150,150,150,
- 175,175,175,
- 200,200,200};
-    
- for (i = 0; i < WIDTH*HEIGHT; i++ )
-  image_in1[i] = (unsigned char)i;
- for (i = 0; i < WIDTH*HEIGHT*3; i++)
-  image_in2[i] = (unsigned char)i;
+ unsigned char pal_data_out[PAL_ENTRIES*3];
+ unsigned char n;
+ int space;
+ /* create a PAL_ENTRIES entry palette */
+ unsigned char pal_data_in[PAL_ENTRIES*3] = {
+ 0,0,168,      /* dark blue */
+ 0,0,252,      /* blue */
+ 0,168,252,    /* ocean blue */
+ 84,252,252,   /* light blue */
+ 168,252,168,  /* light green */
+ 0,252,168,    /* green */
+ 252,252,84,   /* yellow */
+ 252,168,0,    /* orange */
+ 252,0,0};     /* red */
+  
+ /* create an image of 9 values divided evenly by the array */
+ space = WIDTH*HEIGHT / PAL_ENTRIES;
+ for (i=0, j=0, n=0; i < WIDTH*HEIGHT; i++, j++ )
+ {
+  image_in1[i] = n;
+  if ( j > space ) 
+  {
+   n++;
+   j=0;
+  }
+  if (n>PAL_ENTRIES-1) n=0;
+ }
+ /* create an image 3 byte RGB image */
+ for (i=0, j=0, n=0; i < WIDTH*HEIGHT*3; i++, j++)
+ {
+  image_in2[i] = n;
+  if (j==3) 
+  {
+   n++;
+   j=0;
+  }
+  if (n>255) n=0;
+ }
  
  /* create a file using default properties */
  if ((fid=H5Fcreate(FILE1,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
@@ -126,7 +150,7 @@ static int test_simple(void)
  *-------------------------------------------------------------------------
  */
 
- TESTING2("indexed image");
+ TESTING2("indexed images");
 
  /* write image */
  if (H5IMmake_image_8bit(fid,"image1",WIDTH,HEIGHT,image_in1)<0)
@@ -165,6 +189,7 @@ static int test_simple(void)
    goto out;
   }
  }
+
 
  PASSED();
 
@@ -244,7 +269,7 @@ static int test_simple(void)
   goto out;
 
  /* check */
- for (i = 0; i < 9*3; i++) 
+ for (i = 0; i < PAL_ENTRIES*3; i++) 
  {
   if ( pal_data_in[i] != pal_data_out[i] ) 
   {
@@ -360,7 +385,7 @@ static int test_data(void)
   goto out;
 
 /*-------------------------------------------------------------------------
- * palette #1. sepia palette. 
+ * palette #2. sepia palette. 
  * read a PAL file and attach the palette to the HDF5 file
  *-------------------------------------------------------------------------
  */
@@ -386,12 +411,11 @@ static int test_data(void)
   goto out;
 
 /*-------------------------------------------------------------------------
- * palette #1. earth palette. 
+ * palette #3. earth palette. 
  * read a PAL file and attach the palette to the HDF5 file
  *-------------------------------------------------------------------------
  */
 
- 
  /* read a PAL file */
  if (read_palette(PAL3_FILE, rgb, sizeof(rgb))<0)
   goto out;
@@ -413,6 +437,27 @@ static int test_data(void)
   goto out;
 
  PASSED();
+
+
+/*-------------------------------------------------------------------------
+ * palette #4. blue-red 
+ * make a palette whith blue to red colors
+ *-------------------------------------------------------------------------
+ */
+ for ( i=0, n=0; i<256*3; i+=3, n++)
+ {
+  pal[i]  =n;
+  pal[i+1]=0;
+  pal[i+2]=255-n;
+ }
+
+ /* make a palette */
+ if (H5IMmake_palette(fid,PAL4_NAME,pal_dims,pal)<0)
+  goto out;
+
+ /* attach the palette to the image dataset */
+ if (H5IMlink_palette(fid,IMAGE1_NAME,PAL4_NAME)<0)
+  goto out;
 
 
 /*-------------------------------------------------------------------------

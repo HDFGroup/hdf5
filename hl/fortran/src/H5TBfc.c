@@ -16,7 +16,6 @@
 
 #include "H5TB.h"
 #include "H5LTf90proto.h"
-#include <stdlib.h> 
 
 /*-------------------------------------------------------------------------
  * Function: h5tbmake_table_c

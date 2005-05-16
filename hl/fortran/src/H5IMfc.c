@@ -16,7 +16,6 @@
 
 #include "H5IM.h"
 #include "H5LTf90proto.h"
-#include <stdlib.h> 
 
 
 /*-------------------------------------------------------------------------
@@ -44,7 +43,7 @@ nh5immake_image_8bit_c (hid_t_f *loc_id,
                        _fcd name, 
                        hsize_t_f *width,
                        hsize_t_f *height, 
-                       unsigned char *buf)
+                       void *buf)
 {
  int     ret_value = -1;
  herr_t  ret;
@@ -60,11 +59,11 @@ nh5immake_image_8bit_c (hid_t_f *loc_id,
  if (c_name == NULL) return ret_value;
 
 /*
- * Call H5IMmake_image_8bit function.
+ * Call H5IMmake_image_8bitf function.
  */
  c_loc_id = (hid_t)*loc_id;
 
- ret = H5IMmake_image_8bit(c_loc_id,c_name,*width,*height,buf);
+ ret = H5IMmake_image_8bitf(c_loc_id,c_name,*width,*height,buf);
 
  if (ret < 0) return ret_value;
  ret_value = 0;
@@ -94,7 +93,7 @@ int_f
 nh5imread_image_c (hid_t_f *loc_id, 
                    int_f *namelen,
                    _fcd name, 
-                   unsigned char *buf)
+                   void *buf)
 {
  int     ret_value = -1;
  herr_t  ret;
@@ -115,7 +114,7 @@ nh5imread_image_c (hid_t_f *loc_id,
  */
  c_loc_id = (hid_t)*loc_id;
 
- ret = H5IMread_image(c_loc_id,c_name,buf);
+ ret = H5IMread_imagef(c_loc_id,c_name,buf);
 
  if (ret < 0) return ret_value;
  ret_value = 0;
@@ -149,7 +148,7 @@ nh5immake_image_24bit_c (hid_t_f *loc_id,
                          _fcd il, 
                          hsize_t_f *width,
                          hsize_t_f *height,
-                         unsigned char *buf)
+                         void *buf)
 {
  int     ret_value = -1;
  herr_t  ret;
@@ -171,11 +170,11 @@ nh5immake_image_24bit_c (hid_t_f *loc_id,
  if (c_il == NULL) return ret_value;
 
 /*
- * Call H5IMmake_image_24bit function.
+ * Call H5IMmake_image_24bitf function.
  */
  c_loc_id = (hid_t)*loc_id;
 
- ret = H5IMmake_image_24bit(c_loc_id,c_name,*width,*height,c_il,buf);
+ ret = H5IMmake_image_24bitf(c_loc_id,c_name,*width,*height,c_il,buf);
 
  if (ret < 0) return ret_value;
  ret_value = 0;
@@ -331,7 +330,7 @@ nh5immake_palette_c (hid_t_f *loc_id,
                      int_f *namelen,
                      _fcd name, 
                      hsize_t_f *dims,
-                     unsigned char *buf)
+                     void *buf)
 {
  int     ret_value = -1;
  herr_t  ret;
@@ -361,7 +360,7 @@ nh5immake_palette_c (hid_t_f *loc_id,
  */
  c_loc_id = (hid_t)*loc_id;
 
- ret = H5IMmake_palette(c_loc_id,c_name,c_dims,buf);
+ ret = H5IMmake_palettef(c_loc_id,c_name,c_dims,buf);
 
  free (c_dims);
 
@@ -632,7 +631,7 @@ nh5imget_palette_c(hid_t_f *loc_id,
                         int_f *namelen,
                         _fcd name,
                         int_f *pal_number,
-                        unsigned char *buf)
+                        void *buf)
 {
  int          ret_value = -1;
  herr_t       ret;
@@ -652,7 +651,7 @@ nh5imget_palette_c(hid_t_f *loc_id,
  */
  c_loc_id = (hid_t)*loc_id;
 
- ret = H5IMget_palette(c_loc_id,c_name,*pal_number,buf);
+ ret = H5IMget_palettef(c_loc_id,c_name,*pal_number,buf);
   
  if (ret < 0) return ret_value;
  ret_value = 0;

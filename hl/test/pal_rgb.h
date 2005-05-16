@@ -1,7 +1,7 @@
 
 
 
-const unsigned char pal_rgb[256*3] = {0,0,0,
+const unsigned char pal_rgb[256*3] = {255,255,255,
 0,0,131,
 0,0,135,
 0,0,139,

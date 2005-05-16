@@ -15,6 +15,17 @@
 #include <string.h>
 #include <stdlib.h>
 
+/*-------------------------------------------------------------------------
+ * private functions
+ *-------------------------------------------------------------------------
+ */
+static 
+herr_t H5IM_get_palette( hid_t loc_id, 
+                         const char *image_name,
+                         int pal_number,
+                         hid_t tid,
+                         void *pal_data);
+
 
 /*-------------------------------------------------------------------------
  * Function: H5IMmake_image_8bit
@@ -23,7 +34,7 @@
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
  *
  * Date: June 13, 2001
  *
@@ -32,6 +43,8 @@
  *  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
  *
  * Modifications:
+ *  May 10, 2005
+ *  the  default make image 8bit function saves the image with RANK 2 (2D dataset)
  *
  *-------------------------------------------------------------------------
  */
@@ -42,8 +55,7 @@ herr_t H5IMmake_image_8bit( hid_t loc_id,
                             hsize_t height,
                             const unsigned char *buffer )
 {
- int      rank = 3;
- hsize_t  dims[3];
+ hsize_t  dims[IMAGE8_RANK];
  
   /* Initialize the image dimensions */
  dims[0] = height; 
@@ -51,7 +63,7 @@ herr_t H5IMmake_image_8bit( hid_t loc_id,
  dims[2] = 1;
 
  /* Make the dataset */
- if ( H5LTmake_dataset( loc_id, dset_name, rank, dims, H5T_NATIVE_UCHAR, buffer ) < 0 )
+ if ( H5LTmake_dataset( loc_id, dset_name, IMAGE8_RANK, dims, H5T_NATIVE_UCHAR, buffer ) < 0 )
   return -1;
 
  /* Attach the CLASS attribute */
@@ -59,7 +71,7 @@ herr_t H5IMmake_image_8bit( hid_t loc_id,
   return -1;
 
  /* Attach the VERSION attribute */
- if ( H5LTset_attribute_string( loc_id, dset_name, "IMAGE_VERSION", "1.2" ) < 0 )
+ if ( H5LTset_attribute_string( loc_id, dset_name, "IMAGE_VERSION", IMAGE_VERSION ) < 0 )
   return -1;
 
  /* Attach the IMAGE_SUBCLASS attribute */
@@ -69,8 +81,6 @@ herr_t H5IMmake_image_8bit( hid_t loc_id,
  return 0;
 }
 
-
-
 /*-------------------------------------------------------------------------
  * Function: H5IMmake_image_24bit
  *
@@ -78,7 +88,7 @@ herr_t H5IMmake_image_8bit( hid_t loc_id,
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
  *
  * Date: June 13, 2001
  *
@@ -103,8 +113,7 @@ herr_t H5IMmake_image_24bit( hid_t loc_id,
                              const char *interlace,
                              const unsigned char *buffer )
 {
- int      rank = 3;
- hsize_t  dims[3];
+ hsize_t  dims[IMAGE24_RANK];
  
  /* Initialize the image dimensions */
 
@@ -113,20 +122,20 @@ herr_t H5IMmake_image_24bit( hid_t loc_id,
   /* Number of color planes is defined as the third dimension */
   dims[0] = height; 
   dims[1] = width; 
-  dims[2] = 3; 
+  dims[2] = IMAGE24_RANK; 
  }
  else
  if ( strcmp( interlace, "INTERLACE_PLANE" ) == 0 ) 
  {
   /* Number of color planes is defined as the first dimension */
-  dims[0] = 3; 
+  dims[0] = IMAGE24_RANK; 
   dims[1] = height; 
   dims[2] = width; 
  }
  else return -1;
  
  /* Make the dataset */
- if ( H5LTmake_dataset( loc_id, dset_name, rank, dims, H5T_NATIVE_UCHAR, buffer ) < 0 )
+ if ( H5LTmake_dataset( loc_id, dset_name, IMAGE24_RANK, dims, H5T_NATIVE_UCHAR, buffer ) < 0 )
   return -1;
 
  /* Attach the CLASS attribute */
@@ -134,7 +143,7 @@ herr_t H5IMmake_image_24bit( hid_t loc_id,
   return -1;
 
  /* Attach the VERSION attribute */
- if ( H5LTset_attribute_string( loc_id, dset_name, "IMAGE_VERSION", "1.2" ) < 0 )
+ if ( H5LTset_attribute_string( loc_id, dset_name, "IMAGE_VERSION", IMAGE_VERSION ) < 0 )
   return -1;
 
  /* Attach the IMAGE_SUBCLASS attribute */
@@ -158,7 +167,7 @@ herr_t H5IMmake_image_24bit( hid_t loc_id,
  *
  * Return: 
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
  *
  * Date: May 28, 2001
  *
@@ -202,7 +211,7 @@ static herr_t find_palette( hid_t loc_id, const char *name, void  *op_data )
  *
  * Return: Success: 1, Failure: 0
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
  *
  * Date: May 11, 2001
  *
@@ -235,7 +244,7 @@ static herr_t H5IM_find_palette( hid_t loc_id )
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
  *
  * Date: July 25, 2001
  *
@@ -249,15 +258,15 @@ static herr_t H5IM_find_palette( hid_t loc_id )
  */
 
 herr_t H5IMget_image_info( hid_t loc_id, 
-                     const char *dset_name, 
-                     hsize_t *width,
-                     hsize_t *height,
-                     hsize_t *planes,
-                     char *interlace,
-                     hssize_t *npals )
+                           const char *dset_name, 
+                           hsize_t *width,
+                           hsize_t *height,
+                           hsize_t *planes,
+                           char *interlace,
+                           hssize_t *npals )
 {
  hid_t   did, sid;  
- hsize_t dims[3];
+ hsize_t dims[IMAGE24_RANK];
  hid_t   attr_id;
  hid_t   attr_type;  
  int     has_attr;
@@ -331,7 +340,7 @@ herr_t H5IMget_image_info( hid_t loc_id,
  {
   *height = dims[0]; 
   *width  = dims[1];
-  *planes = dims[2];
+  *planes = 1;
  }
 
  /* Close */
@@ -403,7 +412,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
  *
  * Date: June 13, 2001
  *
@@ -450,7 +459,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
  *
  * Date: May 01, 2001
  *
@@ -503,7 +512,7 @@ herr_t H5IMmake_palette( hid_t loc_id,
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
  *
  * Date: May 01, 2001
  *
@@ -673,7 +682,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
  *
  * Date: September 10, 2001
  *
@@ -770,7 +779,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
  *
  * Date: July 22, 2001
  *
@@ -857,7 +866,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
  *
  * Date: July 22, 2001
  *
@@ -871,9 +880,9 @@ out:
  */
 
 herr_t H5IMget_palette_info( hid_t loc_id, 
-                        const char *image_name,
-                        int pal_number,
-                        hsize_t *pal_dims )
+                             const char *image_name,
+                             int pal_number,
+                             hsize_t *pal_dims )
 {
  hid_t      image_id;
  int        has_pal;
@@ -983,7 +992,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
  *
  * Date: August 30, 2001
  *
@@ -1032,12 +1041,10 @@ herr_t H5IMget_palette( hid_t loc_id,
    goto out;
 
   /* Check if it is really a reference */
-
   if ( attr_class == H5T_REFERENCE )
   {
 
    /* Get the reference(s) */
-
    if ( (attr_space_id = H5Aget_space( attr_id )) < 0 )
     goto out;
 
@@ -1075,11 +1082,9 @@ herr_t H5IMget_palette( hid_t loc_id,
   /* Close the attribute. */  
   if ( H5Aclose( attr_id ) < 0 )
    goto out;
-
  }
 
-
-     /* Close the image dataset. */
+ /* Close the image dataset. */
  if ( H5Dclose( image_id ) < 0 )
   return -1;
 
@@ -1098,7 +1103,7 @@ out:
  *
  * Return: true, false, fail
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
  *
  * Date: August 30, 2001
  *
@@ -1177,8 +1182,6 @@ out:
 
 }
 
-
-
 /*-------------------------------------------------------------------------
  * Function: H5IMis_palette
  *
@@ -1186,7 +1189,7 @@ out:
  *
  * Return: true, false, fail
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
  *
  * Date: August 30, 2001
  *
@@ -1261,6 +1264,488 @@ herr_t H5IMis_palette( hid_t loc_id,
 
 out:
  H5Dclose( did );
+ return -1;
+
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5IMmake_image_8bitf
+ *
+ * Purpose: Creates and writes an image an 8 bit image
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ *
+ * Date: May 10, 2005
+ *
+ * Comments:
+ *  This function allows the creation and writing of an 8bit image on disk.
+ *  The memory datatype is H5T_NATIVE_INT. It is supposed to be called from
+ *  the FORTRAN interface where the image buffer is defined as type "integer"
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t H5IMmake_image_8bitf( hid_t loc_id, 
+                             const char *dset_name, 
+                             hsize_t width,
+                             hsize_t height,
+                             void *buf )
+{
+ hid_t    did;                  /* dataset ID */
+ hid_t    sid;                  /* space ID */
+ hsize_t  dims[IMAGE8_RANK];  /* dimensions */
+ 
+ /* initialize the image dimensions */
+ dims[0] = height; 
+ dims[1] = width; 
+ dims[2] = 1; 
+
+/*-------------------------------------------------------------------------
+ * create and write the dataset
+ *-------------------------------------------------------------------------
+ */
+  
+ /* create the data space for the dataset. */
+ if ((sid=H5Screate_simple(IMAGE8_RANK,dims,NULL))<0)
+  return -1;
+
+ /* create the dataset as H5T_NATIVE_UCHAR */
+ if ((did=H5Dcreate(loc_id,dset_name,H5T_NATIVE_UCHAR,sid,H5P_DEFAULT))<0)
+  return -1;
+
+ /* write with memory type H5T_NATIVE_INT */
+ if (buf) 
+ {
+  if (H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+   return -1;
+ }
+
+ /* close */
+ if (H5Dclose(did)<0)
+  return -1;
+ if (H5Sclose(sid)<0)
+  return -1;
+
+/*-------------------------------------------------------------------------
+ * attach the specification attributes
+ *-------------------------------------------------------------------------
+ */
+  
+ /* attach the CLASS attribute */
+ if ( H5LTset_attribute_string( loc_id, dset_name, "CLASS", IMAGE_CLASS ) < 0 )
+  return -1;
+
+ /* attach the VERSION attribute */
+ if ( H5LTset_attribute_string( loc_id, dset_name, "IMAGE_VERSION", IMAGE_VERSION ) < 0 )
+  return -1;
+
+ /* attach the IMAGE_SUBCLASS attribute */
+ if ( H5LTset_attribute_string( loc_id, dset_name, "IMAGE_SUBCLASS", "IMAGE_INDEXED" ) < 0 )
+  return -1;
+
+ return 0;
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5IMmake_image_24bitf
+ *
+ * Purpose:
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ *
+ * Date: May 10, 2005
+ *
+ * Comments:
+ *  This function allows the creation and writing of an 8bit image on disk.
+ *  The memory datatype is H5T_NATIVE_INT. It is supposed to be called from
+ *  the FORTRAN interface where the image buffer is defined as type "integer"
+ *
+ * Interlace Mode Dimensions in the Dataspace 
+ * INTERLACE_PIXEL [height][width][pixel components] 
+ * INTERLACE_PLANE [pixel components][height][width] 
+ *
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t H5IMmake_image_24bitf( hid_t loc_id, 
+                              const char *dset_name, 
+                              hsize_t width,
+                              hsize_t height,
+                              const char *interlace,
+                              void *buf)
+{
+ hid_t    did;                /* dataset ID */
+ hid_t    sid;                /* space ID */
+ hsize_t  dims[IMAGE24_RANK]; /* dimensions */
+
+/*-------------------------------------------------------------------------
+ * attach the image dimensions according to the interlace mode
+ *-------------------------------------------------------------------------
+ */
+ if ( strcmp( interlace, "INTERLACE_PIXEL" ) == 0 ) 
+ {
+  /* Number of color planes is defined as the third dimension */
+  dims[0] = height; 
+  dims[1] = width; 
+  dims[2] = IMAGE24_RANK; 
+ }
+ else
+ if ( strcmp( interlace, "INTERLACE_PLANE" ) == 0 ) 
+ {
+  /* Number of color planes is defined as the first dimension */
+  dims[0] = IMAGE24_RANK; 
+  dims[1] = height; 
+  dims[2] = width; 
+ }
+ else return -1;
+ 
+/*-------------------------------------------------------------------------
+ * create and write the dataset
+ *-------------------------------------------------------------------------
+ */
+  
+ /* create the data space for the dataset. */
+ if ((sid=H5Screate_simple(IMAGE24_RANK,dims,NULL))<0)
+  return -1;
+
+ /* create the dataset as H5T_NATIVE_UCHAR */
+ if ((did=H5Dcreate(loc_id,dset_name,H5T_NATIVE_UCHAR,sid,H5P_DEFAULT))<0)
+  return -1;
+
+ /* write with memory type H5T_NATIVE_INT */
+ if (buf) 
+ {
+  if (H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+   return -1;
+ }
+
+ /* close */
+ if (H5Dclose(did)<0)
+  return -1;
+ if (H5Sclose(sid)<0)
+  return -1;
+
+/*-------------------------------------------------------------------------
+ * attach the specification attributes
+ *-------------------------------------------------------------------------
+ */
+
+ /* Attach the CLASS attribute */
+ if ( H5LTset_attribute_string( loc_id, dset_name, "CLASS", IMAGE_CLASS ) < 0 )
+  return -1;
+
+ /* Attach the VERSION attribute */
+ if ( H5LTset_attribute_string( loc_id, dset_name, "IMAGE_VERSION", IMAGE_VERSION ) < 0 )
+  return -1;
+
+ /* Attach the IMAGE_SUBCLASS attribute */
+ if ( H5LTset_attribute_string( loc_id, dset_name, "IMAGE_SUBCLASS", "IMAGE_TRUECOLOR" ) < 0 )
+  return -1;
+
+ /* Attach the INTERLACE_MODE attribute. This attributes is only for true color images */
+ if ( H5LTset_attribute_string( loc_id, dset_name, "INTERLACE_MODE", interlace ) < 0 )
+  return -1;
+
+ return 0;
+
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5IMread_imagef
+ *
+ * Purpose: Reads image data from disk.
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ *
+ * Date: May 10, 2005
+ *
+ * Comments:
+ *  This function allows reading of an 8bit image on disk.
+ *  The memory datatype is H5T_NATIVE_INT. It is supposed to be called from
+ *  the FORTRAN interface where the image buffer is defined as type "integer"
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t H5IMread_imagef( hid_t loc_id, 
+                        const char *dset_name, 
+                        void *buf )
+{
+ hid_t   did;  
+
+ /* open the dataset */
+ if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
+  return -1;
+
+ /* read to memory type H5T_NATIVE_INT */
+ if ( H5Dread( did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf ) < 0 )
+  goto out;
+
+ /* close */
+ if ( H5Dclose( did ) )
+  return -1;
+
+ return 0;
+
+out:
+ H5Dclose( did );
+ return -1;
+
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5IMmake_palettef
+ *
+ * Purpose: Creates and writes a palette.
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ *
+ * Date: May 10, 2005
+ *
+ * Comments:
+ *  This function allows writing of an 8bit palette to disk.
+ *  The memory datatype is H5T_NATIVE_INT. It is supposed to be called from
+ *  the FORTRAN interface where the image buffer is defined as type "integer"
+ *
+ *  based on HDF5 Image and Palette Specification  
+ *  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t H5IMmake_palettef( hid_t loc_id, 
+                          const char *pal_name,
+                          const hsize_t *pal_dims,
+                          void *pal_data ) 
+
+{  
+ 
+ hid_t did;                /* dataset ID */
+ hid_t sid;                /* space ID */
+ int   has_pal;
+ 
+ /* Check if the dataset already exists */
+ has_pal = H5LTfind_dataset( loc_id, pal_name );
+ 
+ /* It exists. Return */
+ if ( has_pal == 1 )
+  return 0;
+
+/*-------------------------------------------------------------------------
+ * create and write the dataset
+ *-------------------------------------------------------------------------
+ */
+  
+ /* create the data space for the dataset. */
+ if ((sid=H5Screate_simple(2,pal_dims,NULL))<0)
+  return -1;
+
+ /* create the dataset as H5T_NATIVE_UCHAR */
+ if ((did=H5Dcreate(loc_id,pal_name,H5T_NATIVE_UCHAR,sid,H5P_DEFAULT))<0)
+  return -1;
+
+ /* write with memory type H5T_NATIVE_INT */
+ if (pal_data) 
+ {
+  if (H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,pal_data)<0)
+   return -1;
+ }
+
+ /* close */
+ if (H5Dclose(did)<0)
+  return -1;
+ if (H5Sclose(sid)<0)
+  return -1;
+
+/*-------------------------------------------------------------------------
+ * attach the specification attributes
+ *-------------------------------------------------------------------------
+ */
+
+ /* Attach the attribute "CLASS" to the >>palette<< dataset*/
+ if ( H5LTset_attribute_string( loc_id, pal_name, "CLASS", PALETTE_CLASS ) < 0 )
+  return -1;
+
+ /* Attach the attribute "PAL_VERSION" to the >>palette<< dataset*/
+ if ( H5LTset_attribute_string( loc_id, pal_name, "PAL_VERSION", "1.2" ) < 0 )
+  return -1;
+ 
+ return 0;
+
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5IMget_palettef
+ *
+ * Purpose: Read palette
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ *
+ * Date: May 10, 2005
+ *
+ * Comments:
+ *  This function allows reading of an 8bit palette from disk.
+ *  The memory datatype is H5T_NATIVE_INT. It is supposed to be called from
+ *  the FORTRAN interface where the image buffer is defined as type "integer"
+ *
+ *  based on HDF5 Image and Palette Specification  
+ *  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t H5IMget_palettef( hid_t loc_id, 
+                         const char *image_name,
+                         int pal_number,
+                         void *pal_data )
+{
+ return H5IM_get_palette(loc_id,image_name,pal_number,H5T_NATIVE_INT,pal_data);
+}
+
+/*-------------------------------------------------------------------------
+ * Function: H5IM_get_palette
+ *
+ * Purpose: private function that reads a palette to memory type TID
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ *
+ * Date: May 10, 2005
+ *
+ * Comments:
+ *  This function allows reading of an 8bit palette from disk disk
+ *   to memory type TID
+ *  The memory datatype can be H5T_NATIVE_INT or H5T_NATIVE_UCHAR currently. 
+ *   the H5T_NATIVE_INT is supposed to be called from
+ *   the FORTRAN interface where the image buffer is defined as type "integer"
+ *
+ * Comments:
+ *  based on HDF5 Image and Palette Specification  
+ *  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static 
+herr_t H5IM_get_palette( hid_t loc_id, 
+                         const char *image_name,
+                         int pal_number,
+                         hid_t tid,
+                         void *pal_data)
+{
+ hid_t      image_id;
+ int        has_pal;
+ hid_t      attr_type;
+ hid_t      attr_id;
+ hid_t      attr_space_id;
+ hid_t      attr_class;
+ hssize_t   n_refs;
+ hsize_t    dim_ref;
+ hobj_ref_t *refbuf;     /* buffer to read references */
+ hid_t      pal_id;
+
+ /* Open the dataset. */
+ if ( (image_id = H5Dopen( loc_id, image_name )) < 0 )
+  return -1;
+
+ /* Try to find the attribute "PALETTE" on the >>image<< dataset */
+ has_pal = H5IM_find_palette( image_id );
+
+ if ( has_pal ==  1 )
+ {
+
+  if ( (attr_id = H5Aopen_name( image_id, "PALETTE" )) < 0 )
+   goto out;
+     
+  if ( (attr_type = H5Aget_type( attr_id )) < 0 )
+   goto out;
+
+  if ( (attr_class = H5Tget_class( attr_type )) < 0 )
+   goto out;
+
+  /* Check if it is really a reference */
+  if ( attr_class == H5T_REFERENCE )
+  {
+
+   /* Get the reference(s) */
+   if ( (attr_space_id = H5Aget_space( attr_id )) < 0 )
+    goto out;
+
+   n_refs = H5Sget_simple_extent_npoints( attr_space_id );
+
+   dim_ref = n_refs;
+
+   refbuf = malloc( sizeof(hobj_ref_t) * (int)dim_ref );
+
+   if ( H5Aread( attr_id, attr_type, refbuf ) < 0 )
+    goto out;
+
+   /* Get the palette id */
+   if ( (pal_id = H5Rdereference( image_id, H5R_OBJECT, &refbuf[pal_number] )) < 0 )
+    goto out;
+
+   /* Read the palette dataset using the memory type TID */
+   if ( H5Dread( pal_id, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, pal_data ) < 0 )
+    goto out;
+
+   if ( H5Sclose( attr_space_id ) < 0 )
+    goto out;
+
+   /* close the dereferenced dataset */
+   if (H5Dclose(pal_id)<0)
+    goto out;
+
+   free( refbuf );
+    
+  } /* H5T_REFERENCE */ 
+    
+  if ( H5Tclose( attr_type ) < 0 ) 
+   goto out;
+
+  /* Close the attribute. */  
+  if ( H5Aclose( attr_id ) < 0 )
+   goto out;
+
+ }
+
+ /* Close the image dataset. */
+ if ( H5Dclose( image_id ) < 0 )
+  return -1;
+
+ return 0;
+
+out:
+ H5Dclose( image_id );
  return -1;
 
 }

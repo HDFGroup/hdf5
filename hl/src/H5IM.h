@@ -23,7 +23,9 @@ extern "C" {
 
 #define IMAGE_CLASS   "IMAGE"
 #define PALETTE_CLASS "PALETTE"
-
+#define IMAGE_VERSION "1.2"
+#define IMAGE8_RANK    3
+#define IMAGE24_RANK   3
 
 
 herr_t H5IMmake_image_8bit( hid_t loc_id, 
@@ -86,6 +88,34 @@ herr_t H5IMis_image( hid_t loc_id,
 
 herr_t H5IMis_palette( hid_t loc_id, 
                      const char *dset_name );
+
+herr_t H5IMmake_image_8bitf( hid_t loc_id, 
+                             const char *dset_name, 
+                             hsize_t width,
+                             hsize_t height,
+                             void *buf );
+
+herr_t H5IMmake_image_24bitf( hid_t loc_id, 
+                              const char *dset_name, 
+                              hsize_t width,
+                              hsize_t height,
+                              const char *interlace,
+                              void *buf);
+
+herr_t H5IMread_imagef( hid_t loc_id, 
+                        const char *dset_name, 
+                        void *buf );
+
+herr_t H5IMmake_palettef( hid_t loc_id, 
+                          const char *pal_name,
+                          const hsize_t *pal_dims,
+                          void *pal_data );
+
+herr_t H5IMget_palettef( hid_t loc_id, 
+                         const char *image_name,
+                         int pal_number,
+                         void *pal_data );
+
 
 #ifdef __cplusplus
 }

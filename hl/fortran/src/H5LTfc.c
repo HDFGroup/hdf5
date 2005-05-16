@@ -16,8 +16,7 @@
 
 #include "H5LT.h"
 #include "H5LTf90proto.h"
-#include <stdlib.h> 
-#include <string.h>
+
 
 
 /*-------------------------------------------------------------------------
