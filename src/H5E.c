@@ -103,7 +103,7 @@ static ssize_t H5E_get_msg(const H5E_msg_t *msg_ptr, H5E_type_t *type, char *msg
 static H5E_t  *H5E_get_current_stack(void);
 static herr_t  H5E_set_current_stack(H5E_t *estack);
 static herr_t  H5E_close_stack(H5E_t *err_stack);
-static int     H5E_get_num(const H5E_t *err_stack);
+static size_t  H5E_get_num(const H5E_t *err_stack);
 static herr_t  H5E_pop(H5E_t *err_stack, size_t count);
 static herr_t  H5E_clear_entries(H5E_t *estack, size_t nentries);
 static herr_t  H5E_print_stack(const H5E_t *estack, FILE *stream);
@@ -1252,14 +1252,17 @@ done:
  *              Friday, July 15, 2003
  *
  * Modifications:
+ *              Raymond Lu
+ *              Monday, May 16, 2005
+ *              Changed return value type from INT to SIZE_T.
  *
  *-------------------------------------------------------------------------
  */
-int
+size_t
 H5Eget_num(hid_t error_stack_id)
 {
-    H5E_t *estack;      /* Error stack to operate on */
-    int ret_value;      /* Return value */
+    H5E_t *estack;         /* Error stack to operate on */
+    size_t ret_value;      /* Return value */
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Eget_num, FAIL)
@@ -1299,19 +1302,22 @@ done:
  *              Friday, July 15, 2003
  *
  * Modifications:
+ *              Raymond Lu
+ *              Monday, May 16, 2005
+ *              Changed return value type from INT to SIZE_T.
  *
  *-------------------------------------------------------------------------
  */
-static int
+static size_t
 H5E_get_num(const H5E_t *estack)
 {
-    int      ret_value;   /* Return value */
+    size_t      ret_value;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5E_get_num, FAIL)
  
     assert(estack);   
 
-    H5_ASSIGN_OVERFLOW(ret_value,estack->nused,size_t,int);
+    ret_value = estack->nused;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
