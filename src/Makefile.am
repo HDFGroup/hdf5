@@ -52,7 +52,9 @@ libhdf5_la_SOURCES= H5.c H5A.c H5AC.c H5B.c H5B2.c H5B2cache.c H5B2dbg.c      \
         H5FDmpiposix.c H5FDmulti.c H5FDsec2.c H5FDstdio.c           \
         H5FDstream.c H5FL.c H5FO.c H5FP.c H5FPclient.c H5FPserver.c H5FS.c    \
         H5G.c H5Gent.c H5Gnode.c H5Gstab.c  \
-        H5HG.c H5HGdbg.c H5HL.c H5HLdbg.c H5HP.c H5I.c H5MF.c H5MM.c H5O.c    \
+        H5HG.c H5HGdbg.c H5HL.c H5HLdbg.c H5HP.c H5I.c H5MF.c H5MM.c \
+        H5MP.c H5MPtest.c \
+        H5O.c \
         H5Oattr.c H5Obogus.c   \
         H5Ocont.c H5Odtype.c H5Oefl.c H5Ofill.c H5Olayout.c H5Omtime.c        \
         H5Oname.c H5Onull.c H5Opline.c H5Osdspace.c H5Oshared.c H5Ostab.c     \
@@ -77,19 +79,6 @@ include_HEADERS =H5public.h H5Apublic.h H5ACpublic.h H5Bpublic.h H5B2public.h \
         H5MMpublic.h H5Opublic.h H5Ppublic.h H5Rpublic.h H5Spublic.h \
         H5SHpublic.h \
         H5Tpublic.h H5Zpublic.h H5pubconf.h hdf5.h H5api_adpt.h
-
-# Private headers
-#noinst_HEADERS =H5private.h H5Aprivate.h H5Apkg.h H5ACprivate.h H5Bprivate.h  \
-#        H5B2private.h \
-#        H5BTprivate.h \
-#        H5Dprivate.h H5Eprivate.h H5Fprivate.h H5FDprivate.h H5FLprivate.h    \
-#        H5FOprivate.h H5FSprivate.h H5Gprivate.h H5Gpkg.h                     \
-#        H5HGprivate.h H5HLprivate.h H5HPprivate.h H5Iprivate.h H5MFprivate.h  \
-#        H5MMprivate.h H5Oprivate.h H5Opkg.h H5Pprivate.h H5Ppkg.h             \
-#        H5Rprivate.h H5RCprivate.h H5RSprivate.h H5Sprivate.h H5SHprivate.h \
-#        H5STprivate.h \
-#        H5Tprivate.h H5Tpkg.h H5TSprivate.h H5Vprivate.h        \
-#        H5Zprivate.h H5Zpkg.h H5config.h
 
 # install libhdf5.settings in lib directory
 settingsdir=$(libdir)

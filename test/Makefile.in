@@ -29,7 +29,7 @@
 #
 # HDF5 Library Test Makefile(.in)
 #
-SOURCES = $(libh5test_la_SOURCES) big.c bittests.c blocktrack.c btree2.c cache.c cmpd_dset.c dangle.c dsets.c dt_atomic.c dtransform.c dtypes.c enum.c err_compat.c error_test.c extend.c external.c file_handle.c filename.c fillval.c flush1.c flush2.c getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c mtime.c ntypes.c ohdr.c reserved.c set_extent.c sheap.c stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c
+SOURCES = $(libh5test_la_SOURCES) big.c bittests.c blocktrack.c btree2.c cache.c cmpd_dset.c dangle.c dsets.c dt_atomic.c dtransform.c dtypes.c enum.c err_compat.c error_test.c extend.c external.c file_handle.c filename.c fillval.c flush1.c flush2.c getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c mtime.c ntypes.c ohdr.c pool.c reserved.c set_extent.c sheap.c stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -72,16 +72,16 @@ am_libh5test_la_OBJECTS = h5test.lo testframe.lo
 libh5test_la_OBJECTS = $(am_libh5test_la_OBJECTS)
 am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	stab$(EXEEXT) gheap$(EXEEXT) cache$(EXEEXT) btree2$(EXEEXT) \
-	blocktrack$(EXEEXT) sheap$(EXEEXT) hyperslab$(EXEEXT) \
-	istore$(EXEEXT) bittests$(EXEEXT) dt_atomic$(EXEEXT) \
-	dtypes$(EXEEXT) dsets$(EXEEXT) cmpd_dset$(EXEEXT) \
-	extend$(EXEEXT) external$(EXEEXT) links$(EXEEXT) \
-	unlink$(EXEEXT) big$(EXEEXT) mtime$(EXEEXT) fillval$(EXEEXT) \
-	mount$(EXEEXT) flush1$(EXEEXT) flush2$(EXEEXT) enum$(EXEEXT) \
-	set_extent$(EXEEXT) ttsafe$(EXEEXT) stream_test$(EXEEXT) \
-	getname$(EXEEXT) file_handle$(EXEEXT) ntypes$(EXEEXT) \
-	dangle$(EXEEXT) dtransform$(EXEEXT) filename$(EXEEXT) \
-	reserved$(EXEEXT)
+	blocktrack$(EXEEXT) sheap$(EXEEXT) pool$(EXEEXT) \
+	hyperslab$(EXEEXT) istore$(EXEEXT) bittests$(EXEEXT) \
+	dt_atomic$(EXEEXT) dtypes$(EXEEXT) dsets$(EXEEXT) \
+	cmpd_dset$(EXEEXT) extend$(EXEEXT) external$(EXEEXT) \
+	links$(EXEEXT) unlink$(EXEEXT) big$(EXEEXT) mtime$(EXEEXT) \
+	fillval$(EXEEXT) mount$(EXEEXT) flush1$(EXEEXT) \
+	flush2$(EXEEXT) enum$(EXEEXT) set_extent$(EXEEXT) \
+	ttsafe$(EXEEXT) stream_test$(EXEEXT) getname$(EXEEXT) \
+	file_handle$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
+	dtransform$(EXEEXT) filename$(EXEEXT) reserved$(EXEEXT)
 big_SOURCES = big.c
 big_OBJECTS = big.$(OBJEXT)
 big_LDADD = $(LDADD)
@@ -206,6 +206,10 @@ ohdr_SOURCES = ohdr.c
 ohdr_OBJECTS = ohdr.$(OBJEXT)
 ohdr_LDADD = $(LDADD)
 ohdr_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
+pool_SOURCES = pool.c
+pool_OBJECTS = pool.$(OBJEXT)
+pool_LDADD = $(LDADD)
+pool_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
 reserved_SOURCES = reserved.c
 reserved_OBJECTS = reserved.$(OBJEXT)
 reserved_LDADD = $(LDADD)
@@ -266,17 +270,17 @@ SOURCES = $(libh5test_la_SOURCES) big.c bittests.c blocktrack.c \
 	dtransform.c dtypes.c enum.c err_compat.c error_test.c \
 	extend.c external.c file_handle.c filename.c fillval.c \
 	flush1.c flush2.c getname.c gheap.c hyperslab.c istore.c \
-	lheap.c links.c mount.c mtime.c ntypes.c ohdr.c reserved.c \
-	set_extent.c sheap.c stab.c stream_test.c $(testhdf5_SOURCES) \
-	testmeta.c $(ttsafe_SOURCES) unlink.c
+	lheap.c links.c mount.c mtime.c ntypes.c ohdr.c pool.c \
+	reserved.c set_extent.c sheap.c stab.c stream_test.c \
+	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c
 DIST_SOURCES = $(libh5test_la_SOURCES) big.c bittests.c blocktrack.c \
 	btree2.c cache.c cmpd_dset.c dangle.c dsets.c dt_atomic.c \
 	dtransform.c dtypes.c enum.c err_compat.c error_test.c \
 	extend.c external.c file_handle.c filename.c fillval.c \
 	flush1.c flush2.c getname.c gheap.c hyperslab.c istore.c \
-	lheap.c links.c mount.c mtime.c ntypes.c ohdr.c reserved.c \
-	set_extent.c sheap.c stab.c stream_test.c $(testhdf5_SOURCES) \
-	testmeta.c $(ttsafe_SOURCES) unlink.c
+	lheap.c links.c mount.c mtime.c ntypes.c ohdr.c pool.c \
+	reserved.c set_extent.c sheap.c stab.c stream_test.c \
+	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -495,7 +499,7 @@ check_SCRIPTS = $(TEST_SCRIPT)
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
 TEST_PROG = testhdf5 lheap ohdr stab gheap cache btree2 blocktrack sheap \
-           hyperslab istore bittests dt_atomic \
+           pool hyperslab istore bittests dt_atomic \
            dtypes dsets cmpd_dset extend external links unlink big mtime     \
            fillval mount flush1 flush2 enum \
            set_extent ttsafe stream_test \
@@ -704,6 +708,9 @@ ntypes$(EXEEXT): $(ntypes_OBJECTS) $(ntypes_DEPENDENCIES)
 ohdr$(EXEEXT): $(ohdr_OBJECTS) $(ohdr_DEPENDENCIES) 
 	@rm -f ohdr$(EXEEXT)
 	$(LINK) $(ohdr_LDFLAGS) $(ohdr_OBJECTS) $(ohdr_LDADD) $(LIBS)
+pool$(EXEEXT): $(pool_OBJECTS) $(pool_DEPENDENCIES) 
+	@rm -f pool$(EXEEXT)
+	$(LINK) $(pool_LDFLAGS) $(pool_OBJECTS) $(pool_LDADD) $(LIBS)
 reserved$(EXEEXT): $(reserved_OBJECTS) $(reserved_DEPENDENCIES) 
 	@rm -f reserved$(EXEEXT)
 	$(LINK) $(reserved_LDFLAGS) $(reserved_OBJECTS) $(reserved_LDADD) $(LIBS)
@@ -770,6 +777,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mtime.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ntypes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ohdr.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reserved.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/set_extent.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sheap.Po@am__quote@

@@ -891,7 +891,10 @@
 ./src/H5MM.c
 ./src/H5MMprivate.h
 ./src/H5MMpublic.h
+./src/H5MP.c
+./src/H5MPpkg.h
 ./src/H5MPprivate.h
+./src/H5MPtest.c
 ./src/H5O.c
 ./src/H5Oattr.c
 ./src/H5Obogus.c
@@ -1039,6 +1042,7 @@
 ./test/gen_old_mtime.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_mtime.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_super.c			_DO_NOT_DISTRIBUTE_
+./test/pool.c
 ./test/set_extent.c
 ./test/sheap.c
 ./test/stab.c

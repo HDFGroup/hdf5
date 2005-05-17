@@ -30,7 +30,7 @@ check_SCRIPTS = $(TEST_SCRIPT)
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
 TEST_PROG=testhdf5 lheap ohdr stab gheap cache btree2 blocktrack sheap \
-           hyperslab istore bittests dt_atomic \
+           pool hyperslab istore bittests dt_atomic \
            dtypes dsets cmpd_dset extend external links unlink big mtime     \
            fillval mount flush1 flush2 enum \
            set_extent ttsafe stream_test \

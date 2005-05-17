@@ -92,20 +92,20 @@ am_libhdf5_la_OBJECTS = H5.lo H5A.lo H5AC.lo H5B.lo H5B2.lo \
 	H5FDstdio.lo H5FDstream.lo H5FL.lo H5FO.lo H5FP.lo \
 	H5FPclient.lo H5FPserver.lo H5FS.lo H5G.lo H5Gent.lo \
 	H5Gnode.lo H5Gstab.lo H5HG.lo H5HGdbg.lo H5HL.lo H5HLdbg.lo \
-	H5HP.lo H5I.lo H5MF.lo H5MM.lo H5O.lo H5Oattr.lo H5Obogus.lo \
-	H5Ocont.lo H5Odtype.lo H5Oefl.lo H5Ofill.lo H5Olayout.lo \
-	H5Omtime.lo H5Oname.lo H5Onull.lo H5Opline.lo H5Osdspace.lo \
-	H5Oshared.lo H5Ostab.lo H5P.lo H5Pdcpl.lo H5Pdxpl.lo \
-	H5Pfapl.lo H5Pfcpl.lo H5Ptest.lo H5R.lo H5RC.lo H5RS.lo H5S.lo \
-	H5Sall.lo H5Shyper.lo H5Smpio.lo H5Snone.lo H5Spoint.lo \
-	H5Sselect.lo H5Stest.lo H5SH.lo H5SHcache.lo H5SHdbg.lo \
-	H5SL.lo H5ST.lo H5T.lo H5Tarray.lo H5Tbit.lo H5Tcommit.lo \
-	H5Tcompound.lo H5Tconv.lo H5Tcset.lo H5Tenum.lo H5Tfields.lo \
-	H5Tfixed.lo H5Tfloat.lo H5Tinit.lo H5Tnative.lo H5Toffset.lo \
-	H5Topaque.lo H5Torder.lo H5Tpad.lo H5Tprecis.lo H5Tstrpad.lo \
-	H5Tvlen.lo H5TS.lo H5V.lo H5Z.lo H5Zdeflate.lo \
-	H5Zfletcher32.lo H5Znbit.lo H5Zshuffle.lo H5Zszip.lo \
-	H5Zscaleoffset.lo H5Ztrans.lo
+	H5HP.lo H5I.lo H5MF.lo H5MM.lo H5MP.lo H5MPtest.lo H5O.lo \
+	H5Oattr.lo H5Obogus.lo H5Ocont.lo H5Odtype.lo H5Oefl.lo \
+	H5Ofill.lo H5Olayout.lo H5Omtime.lo H5Oname.lo H5Onull.lo \
+	H5Opline.lo H5Osdspace.lo H5Oshared.lo H5Ostab.lo H5P.lo \
+	H5Pdcpl.lo H5Pdxpl.lo H5Pfapl.lo H5Pfcpl.lo H5Ptest.lo H5R.lo \
+	H5RC.lo H5RS.lo H5S.lo H5Sall.lo H5Shyper.lo H5Smpio.lo \
+	H5Snone.lo H5Spoint.lo H5Sselect.lo H5Stest.lo H5SH.lo \
+	H5SHcache.lo H5SHdbg.lo H5SL.lo H5ST.lo H5T.lo H5Tarray.lo \
+	H5Tbit.lo H5Tcommit.lo H5Tcompound.lo H5Tconv.lo H5Tcset.lo \
+	H5Tenum.lo H5Tfields.lo H5Tfixed.lo H5Tfloat.lo H5Tinit.lo \
+	H5Tnative.lo H5Toffset.lo H5Topaque.lo H5Torder.lo H5Tpad.lo \
+	H5Tprecis.lo H5Tstrpad.lo H5Tvlen.lo H5TS.lo H5V.lo H5Z.lo \
+	H5Zdeflate.lo H5Zfletcher32.lo H5Znbit.lo H5Zshuffle.lo \
+	H5Zszip.lo H5Zscaleoffset.lo H5Ztrans.lo
 libhdf5_la_OBJECTS = $(am_libhdf5_la_OBJECTS)
 PROGRAMS = $(noinst_PROGRAMS)
 H5detect_SOURCES = H5detect.c
@@ -369,7 +369,9 @@ libhdf5_la_SOURCES = H5.c H5A.c H5AC.c H5B.c H5B2.c H5B2cache.c H5B2dbg.c      \
         H5FDmpiposix.c H5FDmulti.c H5FDsec2.c H5FDstdio.c           \
         H5FDstream.c H5FL.c H5FO.c H5FP.c H5FPclient.c H5FPserver.c H5FS.c    \
         H5G.c H5Gent.c H5Gnode.c H5Gstab.c  \
-        H5HG.c H5HGdbg.c H5HL.c H5HLdbg.c H5HP.c H5I.c H5MF.c H5MM.c H5O.c    \
+        H5HG.c H5HGdbg.c H5HL.c H5HLdbg.c H5HP.c H5I.c H5MF.c H5MM.c \
+        H5MP.c H5MPtest.c \
+        H5O.c \
         H5Oattr.c H5Obogus.c   \
         H5Ocont.c H5Odtype.c H5Oefl.c H5Ofill.c H5Olayout.c H5Omtime.c        \
         H5Oname.c H5Onull.c H5Opline.c H5Osdspace.c H5Oshared.c H5Ostab.c     \
@@ -395,19 +397,6 @@ include_HEADERS = H5public.h H5Apublic.h H5ACpublic.h H5Bpublic.h H5B2public.h \
         H5SHpublic.h \
         H5Tpublic.h H5Zpublic.h H5pubconf.h hdf5.h H5api_adpt.h
 
-
-# Private headers
-#noinst_HEADERS =H5private.h H5Aprivate.h H5Apkg.h H5ACprivate.h H5Bprivate.h  \
-#        H5B2private.h \
-#        H5BTprivate.h \
-#        H5Dprivate.h H5Eprivate.h H5Fprivate.h H5FDprivate.h H5FLprivate.h    \
-#        H5FOprivate.h H5FSprivate.h H5Gprivate.h H5Gpkg.h                     \
-#        H5HGprivate.h H5HLprivate.h H5HPprivate.h H5Iprivate.h H5MFprivate.h  \
-#        H5MMprivate.h H5Oprivate.h H5Opkg.h H5Pprivate.h H5Ppkg.h             \
-#        H5Rprivate.h H5RCprivate.h H5RSprivate.h H5Sprivate.h H5SHprivate.h \
-#        H5STprivate.h \
-#        H5Tprivate.h H5Tpkg.h H5TSprivate.h H5Vprivate.h        \
-#        H5Zprivate.h H5Zpkg.h H5config.h
 
 # install libhdf5.settings in lib directory
 settingsdir = $(libdir)
@@ -580,6 +569,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5I.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5MF.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5MM.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5MP.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5MPtest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5O.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Oattr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Obogus.Plo@am__quote@
