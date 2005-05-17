@@ -103,7 +103,7 @@ static ssize_t H5E_get_msg(const H5E_msg_t *msg_ptr, H5E_type_t *type, char *msg
 static H5E_t  *H5E_get_current_stack(void);
 static herr_t  H5E_set_current_stack(H5E_t *estack);
 static herr_t  H5E_close_stack(H5E_t *err_stack);
-static size_t  H5E_get_num(const H5E_t *err_stack);
+static ssize_t H5E_get_num(const H5E_t *err_stack);
 static herr_t  H5E_pop(H5E_t *err_stack, size_t count);
 static herr_t  H5E_clear_entries(H5E_t *estack, size_t nentries);
 static herr_t  H5E_print_stack(const H5E_t *estack, FILE *stream);
@@ -299,9 +299,8 @@ static H5E_t *
 H5E_get_stack(void)
 {
     H5E_t *estack;
-    H5E_t *ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5E_get_stack,NULL)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_get_stack)
 
     estack = pthread_getspecific(H5TS_errstk_key_g);
 
@@ -316,10 +315,7 @@ H5E_get_stack(void)
     }
 
     /* Set return value */
-    ret_value=estack;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(estack)
 }
 #endif  /* H5_HAVE_THREADSAFE */
 
@@ -384,7 +380,7 @@ H5E_register_class(const char *cls_name, const char *lib_name, const char *versi
     H5E_cls_t   *cls;        /* Pointer to error class */
     H5E_cls_t   *ret_value;  /* Return value */
     
-    FUNC_ENTER_NOAPI(H5E_register_class, NULL)
+    FUNC_ENTER_NOAPI_NOINIT(H5E_register_class)
     
     /* Check arguments */
     assert(cls_name);
@@ -466,9 +462,7 @@ done:
 static herr_t
 H5E_unregister_class(H5E_cls_t *cls)
 {
-    herr_t       ret_value = SUCCEED;   /* Return value */
-    
-    FUNC_ENTER_NOAPI(H5E_unregister_class, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_unregister_class)
 
     /* Check arguments */
     assert(cls);
@@ -486,8 +480,7 @@ H5E_unregister_class(H5E_cls_t *cls)
         H5MM_xfree((void*)cls->lib_vers);
     H5MM_xfree((void*)cls);
     
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 
@@ -547,9 +540,8 @@ static ssize_t
 H5E_get_class_name(const H5E_cls_t *cls, char *name, size_t size)
 {
     ssize_t       len;          /* Length of rror class's name */
-    ssize_t       ret_value;    /* Return value */
     
-    FUNC_ENTER_NOAPI(H5E_get_class_name, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_get_class_name)
 
     /* Check arguments */
     assert(cls);
@@ -565,10 +557,7 @@ H5E_get_class_name(const H5E_cls_t *cls, char *name, size_t size)
     } 
     
     /* Return the full length */
-    ret_value = len;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(len)
 }
 
 
@@ -594,7 +583,7 @@ H5E_close_msg_cb(void *obj_ptr, hid_t obj_id, void *key)
     H5E_cls_t   *cls = (H5E_cls_t*)key;
     herr_t      ret_value = SUCCEED;       /* Return value */
         
-    FUNC_ENTER_NOAPI(H5E_close_msg_cb, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5E_close_msg_cb)
   
     /* Check arguments */
     assert(err_msg);
@@ -660,9 +649,7 @@ done:
 static herr_t
 H5E_close_msg(H5E_msg_t *err)
 {
-    herr_t       ret_value = SUCCEED;   /* Return value */
-    
-    FUNC_ENTER_NOAPI(H5E_close_msg, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_close_msg)
 
     /* Check arguments */
     assert(err);
@@ -673,8 +660,7 @@ H5E_close_msg(H5E_msg_t *err)
 
     H5MM_xfree((void*)err);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 /*-------------------------------------------------------------------------
@@ -743,7 +729,7 @@ H5E_create_msg(H5E_cls_t *cls, H5E_type_t msg_type, const char *msg_str)
     H5E_msg_t   *msg;           /* Pointer to new error message */
     H5E_msg_t   *ret_value;     /* Return value */
     
-    FUNC_ENTER_NOAPI(H5E_create_msg, NULL)
+    FUNC_ENTER_NOAPI_NOINIT(H5E_create_msg)
    
     /* Check arguments */
     assert(cls);
@@ -924,9 +910,8 @@ static ssize_t
 H5E_get_msg(const H5E_msg_t *msg, H5E_type_t *type, char *msg_str, size_t size)
 {
     ssize_t       len;          /* Length of rror class's name */
-    ssize_t       ret_value;   /* Return value */
     
-    FUNC_ENTER_NOAPI(H5E_get_msg, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_get_msg)
 
     /* Check arguments */
     assert(msg);
@@ -946,10 +931,7 @@ H5E_get_msg(const H5E_msg_t *msg, H5E_type_t *type, char *msg_str, size_t size)
         *type = msg->type;
 
     /* Set the return value to the full length of the message */
-    ret_value = len;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(len)
 }
 
 
@@ -1013,7 +995,7 @@ H5E_get_current_stack(void)
     unsigned    u;              /* Local index variable */
     H5E_t      *ret_value;   /* Return value */
     
-    FUNC_ENTER_NOAPI(H5E_get_current_stack, NULL)
+    FUNC_ENTER_NOAPI_NOINIT(H5E_get_current_stack)
 
     /* Get a pointer to the current error stack */
     if((current_stack = H5E_get_my_stack ())==NULL) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
@@ -1125,7 +1107,7 @@ H5E_set_current_stack(H5E_t *estack)
     unsigned     u;                     /* Local index variable */
     herr_t       ret_value = SUCCEED;   /* Return value */
     
-    FUNC_ENTER_NOAPI(H5E_set_current_stack, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5E_set_current_stack)
 
     /* Sanity check */
     assert(estack);
@@ -1223,9 +1205,7 @@ done:
 static herr_t
 H5E_close_stack(H5E_t *estack)
 {
-    herr_t       ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5E_close_stack, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_close_stack)
     
     /* Sanity check */
     assert(estack);
@@ -1236,8 +1216,7 @@ H5E_close_stack(H5E_t *estack)
     /* Free the stack structure */
     H5MM_xfree((void*)estack);
     
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 
@@ -1258,11 +1237,11 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-size_t
+ssize_t
 H5Eget_num(hid_t error_stack_id)
 {
     H5E_t *estack;         /* Error stack to operate on */
-    size_t ret_value;      /* Return value */
+    ssize_t ret_value;      /* Return value */
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Eget_num, FAIL)
@@ -1308,19 +1287,14 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static size_t
+static ssize_t
 H5E_get_num(const H5E_t *estack)
 {
-    size_t      ret_value;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5E_get_num, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_get_num)
  
     assert(estack);   
 
-    ret_value = estack->nused;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI((ssize_t)estack->nused)
 }
 
 
@@ -1395,7 +1369,7 @@ H5E_pop(H5E_t *estack, size_t count)
 {
     herr_t      ret_value = SUCCEED;   /* Return value */
     
-    FUNC_ENTER_NOAPI(H5E_pop, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5E_pop)
 
     /* Sanity check */
     assert(estack);
@@ -1767,7 +1741,7 @@ H5E_clear_entries(H5E_t *estack, size_t nentries)
     unsigned u;                 /* Local index variable */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5E_clear_entries, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5E_clear_entries)
 
     /* Sanity check */
     assert(estack);
@@ -1976,7 +1950,7 @@ H5E_print_stack(const H5E_t *estack, FILE *stream)
     herr_t	ret_value = SUCCEED;
 
     /* Don't clear the error stack! :-) */
-    FUNC_ENTER_NOAPI(H5E_print_stack, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5E_print_stack)
     
     /* Sanity check */
     assert(estack);
@@ -2126,7 +2100,7 @@ H5E_walk_stack(const H5E_t *estack, H5E_direction_t direction, H5E_walk_t func, 
     herr_t	status;         /* Status from callback function */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5E_walk_stack, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5E_walk_stack)
 
     /* Sanity check */
     assert (estack);
@@ -2373,19 +2347,17 @@ done:
 static herr_t
 H5E_get_auto_stack(const H5E_t *estack, hbool_t new_api, void * *func, void **client_data)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5E_get_auto_stack, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_get_auto_stack)
 
     assert (estack);
         
     /* Retrieve the requested information */
     if(func)
         *func = new_api ? (void *)estack->u.func_stack : (void *)estack->u.func;
-    if(client_data) *client_data = estack->auto_data;
+    if(client_data)
+        *client_data = estack->auto_data;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 
@@ -2519,9 +2491,7 @@ done:
 static herr_t
 H5E_set_auto_stack(H5E_t *estack, hbool_t new_api, void *func, void *client_data)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5E_set_auto_stack, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_set_auto_stack)
 
     assert(estack);
 
@@ -2533,8 +2503,7 @@ H5E_set_auto_stack(H5E_t *estack, hbool_t new_api, void *func, void *client_data
         estack->u.func = (H5E_auto_t)func;
     estack->auto_data = client_data;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 
