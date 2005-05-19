@@ -82,6 +82,40 @@ more h5tinit.log >> build_results.txt
 del h5tinit.log
 
 echo ***************************************************************************** >> build_results.txt
+echo                         Generate H5f90i_gen.h and H5fortran_types.f90
+echo ***************************************************************************** >> build_results.txt
+
+REM Generate H5fortran_detect.f90
+cd windows\misc\H5fortran_detect_gen
+dfdev H5fortran_detect_gen.dsp /make "H5fortran_detect_gen - Win32 Debug" /Rebuild /out ..\..\..\H5fortran_detect_gen.log
+cd ..\..\..\fortran\src
+H5fortran_detect_gen.exe > H5fortran_detect.f90
+del H5fortran_detect_gen.exe
+cd ..\..\
+more H5fortran_detect_gen.log >> build_results.txt
+del H5fortran_detect_gen.log
+
+REM Generate H5fort_type_defines.h
+cd windows\misc\fortrantypegen
+dfdev H5fortran_detect.dsp /make "H5fortran_detect - Win32 Debug" /Rebuild /out ..\..\..\H5fortran_detect.log
+cd ..\..\..\fortran\src
+H5fortran_detect.exe > H5fort_type_defines.h
+del H5fortran_detect.exe
+cd ..\..\
+more H5fortran_detect.log >> build_results.txt
+del H5fortran_detect.log
+
+REM Generate H5f90i_gen.h and H5fortran_types.f90
+cd windows\misc\matchtypegen
+dfdev H5match_types.dsp /make "H5match_types - Win32 Debug" /Rebuild /out ..\..\..\H5match_types.log
+cd ..\..\..\fortran\src
+H5match_types.exe
+del H5match_types.exe
+cd ..\..\
+more H5match_types.log >> build_results.txt
+del H5match_types.log
+
+echo ***************************************************************************** >> build_results.txt
 echo                         Build HDF5 C/Fortran Libraries and Tools >> build_results.txt
 echo ***************************************************************************** >> build_results.txt
 
@@ -106,6 +140,39 @@ msdev h5tinit.dsp  /make "h5tinit - Win32 Debug" /Rebuild /out ..\..\..\..\h5tin
 cd ..\..\..\..\
 more h5tinit.log >> build_results.txt
 del h5tinit.log
+echo ***************************************************************************** >> build_results.txt
+echo                         Generate H5f90i_gen.h and H5fortran_types.f90
+echo ***************************************************************************** >> build_results.txt
+
+REM Generate H5fortran_detect.f90
+cd windows\misc\H5fortran_detect_gen
+dfdev H5fortran_detect_gen.dsp /make "H5fortran_detect_gen - Win32 Debug" /Rebuild /out ..\..\..\H5fortran_detect_gen.log
+cd ..\..\..\fortran\src
+H5fortran_detect_gen.exe > H5fortran_detect.f90
+del H5fortran_detect_gen.exe
+cd ..\..\
+more H5fortran_detect_gen.log >> build_results.txt
+del H5fortran_detect_gen.log
+
+REM Generate H5fort_type_defines.h
+cd windows\misc\fortrantypegen
+dfdev H5fortran_detect.dsp /make "H5fortran_detect - Win32 Debug" /Rebuild /out ..\..\..\H5fortran_detect.log
+cd ..\..\..\fortran\src
+H5fortran_detect.exe > H5fort_type_defines.h
+del H5fortran_detect.exe
+cd ..\..\
+more H5fortran_detect.log >> build_results.txt
+del H5fortran_detect.log
+
+REM Generate H5f90i_gen.h and H5fortran_types.f90
+cd windows\misc\matchtypegen
+dfdev H5match_types.dsp /make "H5match_types - Win32 Debug" /Rebuild /out ..\..\..\H5match_types.log
+cd ..\..\..\fortran\src
+H5match_types.exe
+del H5match_types.exe
+cd ..\..\
+more H5match_types.log >> build_results.txt
+del H5match_types.log
 
 echo ***************************************************************************** >> build_results.txt
 echo                         Build HDF5 C/C++/Fortran Libraries and Tools >> build_results.txt
