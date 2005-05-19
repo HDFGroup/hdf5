@@ -1826,6 +1826,8 @@
 ./windows/test/ohdrdll/ohdrdll.dsp
 ./windows/test/overhead/overhead.dsp
 ./windows/test/overheaddll/overheaddll.dsp
+./windows/test/pool/pool.dsp
+./windows/test/pooldll/pooldll.dsp
 ./windows/test/reserved/reserved.dsp
 ./windows/test/reserveddll/reserveddll.dsp
 ./windows/test/set_extent/set_extent.dsp
