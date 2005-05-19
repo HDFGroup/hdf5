@@ -1,6 +1,6 @@
 @ECHO OFF
 REM This batch file is used to HDF5 C Library.
-REM Last Modified: 10/26/2004 by Xuan Bai
+REM Last Modified: 05/19/2005 by Fang GUO
 
 echo ============================
 echo Testing testhdf5 
@@ -62,6 +62,13 @@ echo Testing sheap
 echo ============================
 
 sheap%2\%1\sheap%2
+
+echo.
+echo ============================
+echo Testing pool 
+echo ============================
+
+pool%2\%1\pool%2
 
 echo.
 echo ============================
