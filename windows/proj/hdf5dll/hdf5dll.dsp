@@ -1065,6 +1065,36 @@ SOURCE=..\..\..\src\H5MM.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\H5MP.c
+
+!IF  "$(CFG)" == "hdf5dll - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5MPtest.c
+
+!IF  "$(CFG)" == "hdf5dll - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\H5O.c
 
 !IF  "$(CFG)" == "hdf5dll - Win32 Release"
