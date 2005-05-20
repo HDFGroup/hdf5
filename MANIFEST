@@ -1736,7 +1736,6 @@
 #windows misc
 ./windows/misc/typegen/typegen.dsw
 ./windows/misc/typegen/h5tinit/h5tinit.dsp
-./windows/misc/fortrantyepgen/H5fort_type_define/H5fort_type_define.dsp
 ./windows/misc/H5fortran_detect_gen/H5fortran_detect_gen.dsp
 ./windows/misc/H5fortran_detect_gen/H5fortran_detect_gen.dsw
 ./windows/misc/fortrantypegen/H5fortran_detect.dsp
