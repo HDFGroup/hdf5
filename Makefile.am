@@ -152,5 +152,14 @@ check-install:
 installcheck-local:
 	(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
 
+# Automake wants to make config.status depend on configure.  This
+# makes sense, but config.status can't always be regenerated
+# properly, which can cause builds to fail.
+# This is a problem for our Daily Tests, which need to be able to
+# 'make distclean' reliably before running configure.
+# The simple solution is to override the dependency Automake supplies
+# for config.status so that it will never be regenerated.
+$(top_builddir)/config.status:
+
 # Don't include conclude.am in root Makefile; tests target needs to
 # recurse into perform directory as well as reguar subdirs.
