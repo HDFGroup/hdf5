@@ -1068,14 +1068,14 @@ case $withval in
 esac
 
 if test "x$HAVE_ZLIB" = "xyes" -a "x$HAVE_ZLIB_H" = "xyes" -a "x$HAVE_COMPRESS2" = "xyes"; then
-    AC_DEFINE([HAVE_FILTER_DEFLATE], [1], [Define if support for deflate filter is enabled])
+    AC_DEFINE([HAVE_FILTER_DEFLATE], [1], [Define if support for deflate (zlib) filter is enabled])
     USE_FILTER_DEFLATE="yes"
 
     dnl Add "deflate" to external filter list
     if test "X$EXTERNAL_FILTERS" != "X"; then
         EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
     fi
-    EXTERNAL_FILTERS="${EXTERNAL_FILTERS}deflate"
+    EXTERNAL_FILTERS="${EXTERNAL_FILTERS}deflate(zlib)"
 fi
 
 

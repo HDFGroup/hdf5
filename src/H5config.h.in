@@ -54,7 +54,7 @@
 /* Define to 1 if you have the <features.h> header file. */
 #undef HAVE_FEATURES_H
 
-/* Define if support for deflate filter is enabled */
+/* Define if support for deflate (zlib) filter is enabled */
 #undef HAVE_FILTER_DEFLATE
 
 /* Define if support for Fletcher32 checksum is enabled */

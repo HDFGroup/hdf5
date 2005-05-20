@@ -42870,7 +42870,7 @@ _ACEOF
         if test "X$EXTERNAL_FILTERS" != "X"; then
         EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
     fi
-    EXTERNAL_FILTERS="${EXTERNAL_FILTERS}deflate"
+    EXTERNAL_FILTERS="${EXTERNAL_FILTERS}deflate(zlib)"
 fi
 
 
