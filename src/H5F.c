@@ -2555,11 +2555,13 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent, haddr_t addr
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to read file driver information")
         } /* end if */
 
-        /* Check if driver matches family driver saved. Unfortunately, we can't push this function to
-         * each specific driver because we're checking if the driver is correct.*/
+        /* Check if driver matches driver information saved. Unfortunately, we can't push this 
+         * function to each specific driver because we're checking if the driver is correct.*/
         if(!HDstrncmp(driver_name, "NCSAfami", 8) && HDstrcmp(lf->cls->name, "family"))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "family driver should be used")
-            
+        if(!HDstrncmp(driver_name, "NCSAmult", 8) && HDstrcmp(lf->cls->name, "multi"))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "multi driver should be used")
+           
         if (H5FD_sb_decode(lf, driver_name, p) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to decode driver information")
         p += driver_size; /* advance past driver information section */
