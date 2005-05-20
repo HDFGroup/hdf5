@@ -59,6 +59,8 @@
 #define H5F_OBJ_ATTR    (0x0010u)
 #define H5F_OBJ_ALL 	(H5F_OBJ_FILE|H5F_OBJ_DATASET|H5F_OBJ_GROUP|H5F_OBJ_DATATYPE|H5F_OBJ_ATTR)
 
+#define H5F_FAMILY_DEFAULT 0
+
 #ifdef H5_HAVE_PARALLEL
 /*
  * Use this constant string as the MPI_Info key to set H5Fmpio debug flags.
