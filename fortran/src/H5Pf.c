@@ -2995,7 +2995,14 @@ nh5pset_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _f
  */
  
   c_prp_id = (hid_t)*prp_id;
+
+/*
+ * The Cray X1 compiler can become confused when trying to optimize
+ * this loop.  This ugly #pragma tells it not to try to optimize it.
+ */
+#ifdef __crayx1
 #pragma _CRI novector
+#endif
   for (i=0; i < H5FD_MEM_NTYPES; i++) {
        c_memb_map[i] = (H5FD_mem_t)memb_map[i];
        /*printf("map %d \n", c_memb_map[i]); */
