@@ -489,6 +489,17 @@ test_multi(void)
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
         goto error;
 
+    if(H5Fclose(file)<0)                                      
+        goto error;
+    
+    /* Test wrong ways to reopen multi files */
+    if(test_multi_opens(filename, fapl)<0)
+        goto error;
+
+    /* Reopen the file */
+    if((file=H5Fopen(filename, H5F_ACC_RDWR, fapl))<0)
+        goto error;
+
     /* Create and write data set */
     if((space=H5Screate_simple(2, dims, NULL))<0)
         goto error;
@@ -571,7 +582,44 @@ error:
         H5Fclose(file);                                       
     } H5E_END_TRY;                                            
     return -1;                                 
-}                        
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_multi_opens
+ *
+ * Purpose:     Private function for test_multi() to tests wrong ways of
+ *              reopening multi file.
+ *
+ * Return:      Success:        exit(0)
+ *
+ *              Failure:        exit(1)
+ *
+ * Programmer:  Raymond Lu
+ *              Thursday, May 19, 2005
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_multi_opens(char *fname, hid_t fa_pl)
+{
+    hid_t file;
+    char  super_name[1024];     /*name string "%%s-s.h5"*/
+    char  sf_name[1024];        /*name string "multi_file-s.h5"*/
+
+    /* Case: reopen with the name of super file and default property list */ 
+    sprintf(super_name, "%%s-%c.h5", 's');
+    sprintf(sf_name, super_name, fname);
+
+    H5E_BEGIN_TRY {
+        file=H5Fopen(sf_name, H5F_ACC_RDWR, H5P_DEFAULT);
+    } H5E_END_TRY;
+
+    return 0;
+error:
+    return -1;
+}
 
 
 /*-------------------------------------------------------------------------
