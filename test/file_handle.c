@@ -240,11 +240,14 @@ test_family(void)
 
     if(H5Fclose(file)<0)
         goto error;
-   
-    /* Tries to reopen the file with member file size smaller than 
-     * actual 1st member file size(976 bytes).  The library is 
-     * supposed to adjust the member size to 976 bytes. */
-    if(H5Pset_fapl_family(fapl, (hsize_t)512, H5P_DEFAULT)<0)
+
+    /* Test different wrong ways to reopen family files where there's only 
+     * one member file existing. */
+    if(test_family_opens(filename, fapl)<0)
+        goto error;
+
+    /* Reopen the file with default member file size */
+    if(H5Pset_fapl_family(fapl, H5F_FAMILY_DEFAULT, H5P_DEFAULT)<0)
         goto error;
 
     if((file=H5Fopen(filename, H5F_ACC_RDWR, fapl))<0)
@@ -254,7 +257,7 @@ test_family(void)
     if(H5Fget_filesize(file, &file_size) < 0)
         goto error;
 
-    /* The file size is supposed to be 976 bytes right now. */
+    /* The file size is supposed to be about 1024 bytes right now. */
     if(file_size<KB/2 || file_size>4*KB)
         goto error;
 
@@ -301,7 +304,8 @@ test_family(void)
     if(H5Fget_filesize(file, &file_size) < 0)
         goto error;
 
-    /* Some data has been written.  The file size should be bigger(18KB+976 bytes if int size is 4 bytes) now. */ 
+    /* Some data has been written.  The file size should be bigger(18KB+976 
+     * bytes if int size is 4 bytes) now. */ 
     if(sizeof(int)<=4) {
         if(file_size<18*KB || file_size>20*KB)
             goto error;
@@ -318,6 +322,22 @@ test_family(void)
         goto error;
     if(H5Fclose(file)<0)
         goto error;
+
+    /* Test different wrong ways to reopen family files when there're multiple
+     * member files existing. */
+    if(test_family_opens(filename, fapl)<0)
+        goto error;
+
+    /* Reopen the file with correct member file size. */
+    if(H5Pset_fapl_family(fapl, FAMILY_SIZE, H5P_DEFAULT)<0)
+        goto error;
+
+    if((file=H5Fopen(filename, H5F_ACC_RDWR, fapl))<0)
+        goto error;
+
+    if(H5Fclose(file)<0)
+        goto error;
+    
     h5_cleanup(FILENAME, fapl);
     PASSED();
     return 0;
@@ -330,6 +350,72 @@ error:
         H5Pclose (fapl2);
         H5Fclose(file);
     } H5E_END_TRY;
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_family_opens
+ *
+ * Purpose:     Private function for test_family() to tests wrong ways of
+ *              reopening family file.
+ *
+ * Return:      Success:        exit(0)
+ *
+ *              Failure:        exit(1)
+ *
+ * Programmer:  Raymond Lu
+ *              Thursday, May 19, 2005
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_family_opens(char *fname, hid_t fa_pl)
+{
+    hid_t file;
+    char first_name[1024];
+    char wrong_name[1024];
+    int i;
+
+    /* Case 1: reopen file with 1st member file name and default property list */ 
+    sprintf(first_name, fname, 0);
+    
+    H5E_BEGIN_TRY {
+        file=H5Fopen(first_name, H5F_ACC_RDWR, H5P_DEFAULT);
+    } H5E_END_TRY;
+
+    /* Case 2: reopen file with correct name template but default property list */
+    H5E_BEGIN_TRY {
+        file=H5Fopen(fname, H5F_ACC_RDWR, H5P_DEFAULT);
+    } H5E_END_TRY;
+
+    /* Case 3: reopen file with wrong member size */
+    if(H5Pset_fapl_family(fa_pl, 128, H5P_DEFAULT)<0)
+        goto error;
+
+    H5E_BEGIN_TRY {
+        file=H5Fopen(fname, H5F_ACC_RDWR, fa_pl);
+    } H5E_END_TRY;
+    
+    /* Case 4: reopen file with wrong name template */
+    strcpy(wrong_name, fname);
+    for(i=0; i<1024; i++) {
+        if(wrong_name[i] == '5') {
+            wrong_name[i] = '4';
+            break;
+        }
+    }
+
+    if(H5Pset_fapl_family(fa_pl, FAMILY_SIZE, H5P_DEFAULT)<0)
+        goto error;
+
+    H5E_BEGIN_TRY {
+        file=H5Fopen(wrong_name, H5F_ACC_RDWR, fa_pl);
+    } H5E_END_TRY;
+
+    return 0;
+error:
     return -1;
 }
 
