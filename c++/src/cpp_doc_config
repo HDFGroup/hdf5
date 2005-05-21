@@ -5,7 +5,7 @@
 #---------------------------------------------------------------------------
 PROJECT_NAME           = 
 PROJECT_NUMBER         = 
-OUTPUT_DIRECTORY       = C:/HDF/doc_work_2005/1.7/hdf5/doc/html/cpplus_RM/
+OUTPUT_DIRECTORY       = ../../doc/html/cpplus_RM/
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
 USE_WINDOWS_ENCODING   = YES
@@ -107,7 +107,7 @@ HTML_OUTPUT            = .
 HTML_FILE_EXTENSION    = .html
 HTML_HEADER            = header.html
 HTML_FOOTER            = 
-HTML_STYLESHEET        = C:/HDF/doc_work_2005/1.7/hdf5/c++/src/RM_stylesheet.css
+HTML_STYLESHEET        = RM_stylesheet.css
 HTML_ALIGN_MEMBERS     = YES
 GENERATE_HTMLHELP      = NO
 CHM_FILE               = 
