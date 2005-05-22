@@ -60,6 +60,7 @@ PropList::PropList( const PropList& original ) : IdComponent( original ) {}
 //		property's id to H5P_DEFAULT, otherwise, to the given id.  
 //		Note: someone else added this code without comments and this 
 //		description was what I came up with from reading the code.
+//		BMR - 2004
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 PropList::PropList( const hid_t plist_id ) : IdComponent(0)
@@ -591,7 +592,7 @@ PropList::~PropList()
 {
    // The property list id will be closed properly
     try {
-        decRefCount();
+	decRefCount();
     }
     catch (Exception close_error) {
         cerr << "PropList::~PropList - " << close_error.getDetailMsg() << endl;

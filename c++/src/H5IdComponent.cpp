@@ -13,6 +13,7 @@
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
+#include <iostream>
 
 #include "H5Include.h"
 #include "H5Exception.h"
@@ -41,35 +42,89 @@ IdComponent::IdComponent(const hid_t h5_id) : id(h5_id) {}
 IdComponent::IdComponent( const IdComponent& original )
 {
    id = original.id;
-   H5Iinc_ref(id); // increment number of references to this id
+   incRefCount(); // increment number of references to this id
 }
 
 //--------------------------------------------------------------------------
 // Function:	IdComponent::incRefCount
-///\brief	Increment id reference counter.
+///\brief	Increment reference counter for a given id.
+// Programmer	Binh-Minh Ribler - May 2005
+//--------------------------------------------------------------------------
+void IdComponent::incRefCount(hid_t obj_id) const
+{
+    if (p_valid_id(obj_id))
+	if (H5Iinc_ref(obj_id) < 0)
+            throw IdComponentException("IdComponent::incRefCount", "incrementing object ref count failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:	IdComponent::incRefCount
+///\brief	Increment reference counter for the id of this object.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void IdComponent::incRefCount() { H5Iinc_ref(id); }
+void IdComponent::incRefCount() const
+{
+    incRefCount(id);
+}
 
 //--------------------------------------------------------------------------
 // Function:	IdComponent::decRefCount
-///\brief	Decrement id reference counter.
+///\brief	Decrement reference counter for a given id.
+// Programmer	Binh-Minh Ribler - May 2005
+// Modification:
+//		Added the check for ref counter to give a little more info
+//		on why H5Idec_ref fails in some cases - BMR 5/19/2005
+//--------------------------------------------------------------------------
+void IdComponent::decRefCount(hid_t obj_id) const
+{
+    if (p_valid_id(obj_id))
+        if (H5Idec_ref(obj_id) < 0)
+	    if (H5Iget_ref(obj_id) <= 0)
+		throw IdComponentException("IdComponent::decRefCount", 
+					"object ref count is 0 or negative");
+	    else
+		throw IdComponentException("IdComponent::decRefCount", 
+					"decrementing object ref count failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:	IdComponent::decRefCount
+///\brief	Decrement reference counter for the id of this object.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void IdComponent::decRefCount()
+void IdComponent::decRefCount() const
 {
-    if(id>0)
-        if(H5Idec_ref(id)<0)
-            throw IdComponentException("IdComponent::decRefCount", "decrementing object ref count failed");
+    decRefCount(id);
 }
 
 //--------------------------------------------------------------------------
 // Function:	IdComponent::getCounter
-///\brief	Returns the reference counter to this identifier.
+///\brief	Returns the reference counter for a given id.
+///\return	Reference count
+// Programmer	Binh-Minh Ribler - May 2005
+//--------------------------------------------------------------------------
+int IdComponent::getCounter(hid_t obj_id) const
+{
+    int counter = 0;
+    if (p_valid_id(obj_id))
+    {
+	counter = H5Iget_ref(obj_id);
+	if (counter < 0)
+            throw IdComponentException("IdComponent::incRefCount", "incrementing object ref count failed");
+    }
+    return (counter);
+}
+
+//--------------------------------------------------------------------------
+// Function:	IdComponent::getCounter
+///\brief	Returns the reference counter for the id of this object.
 ///\return	Reference count
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-int IdComponent::getCounter() { return( H5Iget_ref(id)); }
+int IdComponent::getCounter() const
+{
+    return (getCounter(id));
+}
 
 //--------------------------------------------------------------------------
 // Function:	IdComponent::operator=
@@ -95,7 +150,7 @@ IdComponent& IdComponent::operator=( const IdComponent& rhs )
    id = rhs.id;
 
    // increment the reference counter
-   H5Iinc_ref(id);
+   incRefCount();
 
    return( *this );
 }
@@ -282,6 +337,26 @@ hid_t IdComponent::p_get_region(void *ref, H5R_type_t ref_type) const
                 "H5Rget_region failed");
    }
    return(space_id);
+}
+
+//
+// Local functions used in this class
+// 
+
+//--------------------------------------------------------------------------
+// Function:	p_valid_id
+// Purpose:	Verifies that the given id is a valid id so it can be passed
+//		into an H5I C function.
+// Return	true if id is valid, false, otherwise
+// Programmer	Binh-Minh Ribler - May, 2005
+//--------------------------------------------------------------------------
+bool IdComponent::p_valid_id(hid_t obj_id) const
+{
+    H5I_type_t id_type = H5Iget_type(obj_id);
+    if (id_type <= H5I_BADID || id_type >= H5I_NGROUPS)
+	return false;
+    else
+	return true;
 }
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS

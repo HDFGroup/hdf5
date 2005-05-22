@@ -119,8 +119,7 @@ void H5File::p_get_file(const char* name, unsigned int flags, const FileCreatPro
     // Open the file if none of the bits above are set.
     else
     {
-	// use create_plist for access plist because of the default argument
-	hid_t access_plist_id = create_plist.getId();
+	hid_t access_plist_id = access_plist.getId();
 	id = H5Fopen( name, flags, access_plist_id );
 	if( id <= 0 )  // throw an exception when open/create fail
 	{
