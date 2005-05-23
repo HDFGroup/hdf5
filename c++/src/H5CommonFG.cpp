@@ -355,7 +355,7 @@ string CommonFG::getLinkval( const char* name, size_t size ) const
       throwException("getLinkval", "H5Gget_linkval failed");
    }
    string value = string( value_C );
-   delete value_C;
+   delete []value_C;
    return( value );
 }
 
@@ -408,8 +408,75 @@ void CommonFG::setComment( const string& name, const string& comment ) const
 }
 
 //--------------------------------------------------------------------------
+// Function:	CommonFG::removeComment
+///\brief	Removes the comment from an object specified by its name.
+///\param	name  - IN: Name of the object
+///\exception	H5::FileIException or H5::GroupIException
+// Programmer	Binh-Minh Ribler - May 2005
+//--------------------------------------------------------------------------
+void CommonFG::removeComment(const char* name) const
+{
+   herr_t ret_value = H5Gset_comment(getLocId(), name, NULL);
+   if( ret_value < 0 )
+   {
+      throwException("removeComment", "H5Gset_comment failed");
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:	CommonFG::removeComment
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above function in that it takes an
+///		\c std::string for \a name.
+// Programmer	Binh-Minh Ribler - May 2005
+//--------------------------------------------------------------------------
+void CommonFG::removeComment(const string& name) const
+{
+   removeComment (name.c_str());
+}
+
+//--------------------------------------------------------------------------
 // Function:	CommonFG::getComment
 ///\brief	Retrieves comment for the specified object.
+///\param	name  - IN: Name of the object
+///\return	Comment string
+///\exception	H5::FileIException or H5::GroupIException
+// Programmer	Binh-Minh Ribler - May 2005
+//--------------------------------------------------------------------------
+string CommonFG::getComment (const string& name) const
+{
+   size_t bufsize = 256;        // anticipating the comment's length
+   hid_t loc_id = getLocId();   // temporary variable
+
+   // temporary C-string for the object's comment
+   char* comment_C = new char[bufsize+1];
+   herr_t ret_value = H5Gget_comment (loc_id, name.c_str(), bufsize, comment_C);
+
+   // if the actual length of the comment is longer than the anticipated
+   // value, then call H5Gget_comment again with the correct value
+   if (ret_value > bufsize)
+   {
+	bufsize = ret_value;
+	delete []comment_C;
+	comment_C = new char[bufsize+1];
+	ret_value = H5Gget_comment (loc_id, name.c_str(), bufsize, comment_C);
+   }
+
+   // if H5Gget_comment returns SUCCEED, return the string comment,
+   // otherwise, throw an exception
+   if( ret_value < 0 )
+   {
+      throwException("getComment", "H5Gget_comment failed");
+   }
+   string comment = string( comment_C );
+   delete []comment_C;
+   return (comment);
+}
+
+//--------------------------------------------------------------------------
+// Function:	CommonFG::getComment
+///\brief	Retrieves comment for the specified object and its comment's
+///		length.
 ///\param	name  - IN: Name of the object
 ///\param	bufsize - IN: Length of the comment to retrieve
 ///\return	Comment string
@@ -429,7 +496,7 @@ string CommonFG::getComment( const char* name, size_t bufsize ) const
       throwException("getComment", "H5Gget_comment failed");
    }
    string comment = string( comment_C );
-   delete comment_C;
+   delete []comment_C;
    return( comment );
 }
 
@@ -784,7 +851,7 @@ string CommonFG::getObjnameByIdx(hsize_t idx) const
 
     // clean up and return the string
     string name = string(name_C);
-    delete [] name_C;
+    delete []name_C;
     return (name);
 }
 

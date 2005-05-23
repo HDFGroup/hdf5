@@ -160,7 +160,7 @@ string EnumType::nameOf( void *value, size_t size ) const
    }
    // otherwise, create the string to hold the datatype name and return it
    string name = string( name_C );
-   delete [] name_C;
+   delete []name_C;
    return( name );
 }
 

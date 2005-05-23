@@ -135,7 +135,7 @@ void Attribute::read( const DataType& mem_type, string& strg ) const
       throw AttributeIException("Attribute::read", "H5Aread failed");
    }
    strg = strg_C;
-   delete strg_C;
+   delete []strg_C;
 }
 
 //--------------------------------------------------------------------------
@@ -205,7 +205,7 @@ ssize_t Attribute::getName( size_t buf_size, string& attr_name ) const
    }
    // otherwise, convert the C attribute name and return 
    attr_name = name_C;
-   delete name_C;
+   delete []name_C;
    return( name_size );
 }
 
@@ -252,7 +252,7 @@ string Attribute::getName() const
    else
       attr_name = name_C;
 
-   delete name_C;
+   delete []name_C;
    return( attr_name ); 
 }
 

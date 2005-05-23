@@ -260,7 +260,7 @@ void DataSet::read( string& strg, const DataType& mem_type, const DataSpace& mem
 
    // Get the String and clean up
    strg = strg_C;
-   delete strg_C;
+   delete []strg_C;
 }
 
 //--------------------------------------------------------------------------

@@ -265,7 +265,7 @@ string IdComponent::p_get_file_name() const
 
    // Convert the C file name and return
    string file_name(name_C);
-   delete name_C;
+   delete []name_C;
    return(file_name);
 }
 

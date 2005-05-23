@@ -307,7 +307,7 @@ string PropList::getProperty(const char* name) const
 
    // Return propety value as a string after deleting temp C-string
    string prop_strg = string(prop_strg_C);
-   delete prop_strg_C;
+   delete []prop_strg_C;
    return (prop_strg);
 }
 //--------------------------------------------------------------------------
