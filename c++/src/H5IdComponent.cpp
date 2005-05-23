@@ -13,7 +13,6 @@
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
-#include <iostream>
 
 #include "H5Include.h"
 #include "H5Exception.h"
