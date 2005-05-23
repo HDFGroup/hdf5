@@ -42,11 +42,13 @@ HDF5/H5E API Specification
 <td valign=top align=right>
 And in this document, the 
 <a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;&nbsp;
+<!--
 <br>
 <a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5im.html">H5IM</a>&nbsp;&nbsp;
 <a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5lt.html">H5LT</a>&nbsp;&nbsp;
 <a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5pt.html">H5PT</a>&nbsp;&nbsp;
 <a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5tb.html">H5TB</a>&nbsp;&nbsp;
+-->
 <br>
 <a href="RM_H5.html">H5</a>&nbsp;&nbsp;
 <a href="RM_H5A.html">H5A</a>&nbsp;&nbsp;
@@ -81,28 +83,35 @@ These functions provide error handling capabilities in the HDF5 environment.
 <tr><td valign=top>
 <ul>
     <li><a href="#Error-Clear">H5Eclear</a>
+    <li><a href="#Error-ClearStack">H5Eclear_stack</a>
     <li><a href="#Error-Print">H5Eprint</a>
+    <li><a href="#Error-PrintStack">H5Eprint_stack</a>
     <li><a href="#Error-Push">H5Epush</a>
-    <li><a href="#Error-SetAuto">H5Eset_auto</a>
-    <li><a href="#Error-GetAuto">H5Eget_auto</a>
-    <li><a href="#Error-Walk">H5Ewalk</a>
-    <li><a href="#Error-WalkCB">H5Ewalk_cb</a>
+    <li><a href="#Error-PushStack">H5Epush_stack</a>
+    <li><a href="#Error-Pop">H5Epop</a>
+    <li><a href="#Error-GetNum">H5Eget_num</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
     <li><a href="#Error-GetMajor">H5Eget_major</a>
-	<li><a href="#Error-AutoIsStack">H5Eauto_is_stack</a>
-    <li><a href="#Error-RegisterClass">H5Eregister_class</a>
-    <li><a href="#Error-CreateMsg">H5Ecreate_msg</a>
-    <li><a href="#Error-GetClassName">H5Eget_class_name</a>
+    <li><a href="#Error-GetMinor">H5Eget_minor</a>
     <li><a href="#Error-GetMsg">H5Eget_msg</a>
-    <li><a href="#Error-Pop">H5Epop</a>
+    <li><a href="#Error-CreateMsg">H5Ecreate_msg</a>
+    <li><a href="#Error-CloseMsg">H5Eclose_msg</a>
+    <li><a href="#Error-RegisterClass">H5Eregister_class</a>
+    <li><a href="#Error-UnregisterClass">H5Eunregister_class</a>
+    <li><a href="#Error-GetClassName">H5Eget_class_name</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
-    <li><a href="#Error-GetNum">H5Eget_num</a>
-    <li><a href="#Error-CloseMsg">H5Eclose_msg</a>
-    <li><a href="#Error-UnregisterClass">H5Eunregister_class</a>
+    <li><a href="#Error-AutoIsStack">H5Eauto_is_stack</a>
+    <li><a href="#Error-SetAuto">H5Eset_auto</a>
+    <li><a href="#Error-SetAutoStack">H5Eset_auto_stack</a>
+    <li><a href="#Error-GetAuto">H5Eget_auto</a>
+    <li><a href="#Error-GetAutoStack">H5Eget_auto_stack</a>
+    <li><a href="#Error-Walk">H5Ewalk</a>
+    <li><a href="#Error-WalkStack">H5Ewalk_stack</a>
+    <li><a href="#Error-WalkCB">H5Ewalk_cb</a>
     <li><a href="#Error-GetCurrentStack">H5Eget_current_stack</a>
     <li><a href="#Error-SetCurrentStack">H5Eset_current_stack</a>
     <li><a href="#Error-CloseStack">H5Eclose_stack</a>	
@@ -117,12 +126,14 @@ These functions provide error handling capabilities in the HDF5 environment.
   <tr>
     <td valign="top">
 	<ul>
-	  <li><a href="#Error-AutoIsStack">H5Eauto_is_stack</a>
+      <li><a href="#Error-AutoIsStack">H5Eauto_is_stack</a>
       <li><a href="#Error-Clear">H5Eclear</a>
+      <li><a href="#Error-ClearStack">H5Eclear_stack</a>
       <li><a href="#Error-CloseMsg">H5Eclose_msg</a>
       <li><a href="#Error-CloseStack">H5Eclose_stack</a>
       <li><a href="#Error-CreateMsg">H5Ecreate_msg</a>
       <li><a href="#Error-GetAuto">H5Eget_auto</a>
+      <li><a href="#Error-GetAutoStack">H5Eget_auto_stack</a>
       <li><a href="#Error-GetClassName">H5Eget_class_name</a>	  
 	</ul>     
     </td>
@@ -138,6 +149,8 @@ These functions provide error handling capabilities in the HDF5 environment.
       <li><a href="#Error-GetNum">H5Eget_num</a>
       <li><a href="#Error-Pop">H5Epop</a>
       <li><a href="#Error-Print">H5Eprint</a>	  
+      <li><a href="#Error-PrintStack">H5Eprint_stack</a>
+      <li><a href="#Error-Push">H5Epush</a>
 	</ul>
     </td>
     
@@ -145,12 +158,14 @@ These functions provide error handling capabilities in the HDF5 environment.
     
     <td valign="top">
 	<ul>
-      <li><a href="#Error-Push">H5Epush</a>	
+      <li><a href="#Error-PushStack">H5Epush_stack</a>
       <li><a href="#Error-RegisterClass">H5Eregister_class</a>
       <li><a href="#Error-SetAuto">H5Eset_auto</a>
+      <li><a href="#Error-SetAutoStack">H5Eset_auto_stack</a>
       <li><a href="#Error-SetCurrentStack">H5Eset_current_stack</a>
       <li><a href="#Error-UnregisterClass">H5Eunregister_class</a>
       <li><a href="#Error-Walk">H5Ewalk</a>
+      <li><a href="#Error-WalkStack">H5Ewalk_stack</a>
       <li><a href="#Error-WalkCB">H5Ewalk_cb</a>
 	</ul>
     </td>
@@ -248,12 +263,13 @@ errors within the H5E package.
   <dt><strong>Fortran90 Interface:</strong>
 </dl>
 
+
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Eclear" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Error-Clear">H5Eclear</a>
-<dt><strong>Signature:</strong>
+<dt><strong>Signature (deprecated):</strong>
     <dd><em>herr_t</em> <code>H5Eclear</code>(<code>void</code>)
 <dt><strong>Purpose:</strong>
     <dd>Clears the error stack for the current thread.
@@ -265,6 +281,12 @@ errors within the H5E package.
         <p>
         <code>H5Eclear</code> can fail if there are problems initializing 
         the library.
+        <p>
+        <strong>Note:</strong>
+        As of HDF5 Release 1.8, <a href="#Error-ClearStack"><code>H5Eclear_stack</code></a> 
+        replaces <code>H5Eclear</code> and <code>H5Eclear</code> is designated 
+        a <em>deprecated function</em>.  <code>H5Eclear</code> may be removed 
+        from the library at a future release.
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr><td valign="top">None</td></tr>
@@ -289,6 +311,59 @@ END SUBROUTINE h5eclear_f
         <img src="Graphics/C++.gif">
         -->
 </dl>
+
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Eclear_stack" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Error-ClearStack">H5Eclear_stack</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Eclear_stack</code>(<em>hid_t</em> <code>estack_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Clears the error stack for the current thread.
+<dt><strong>Description:</strong>
+    <dd><code>H5Eclear_stack</code> clears the error stack specified
+        by <code>estack_id</code> for the current thread.
+        <p>
+        If the value of <code>estack_id</code> is <code>H5E_DEFAULT</code>,
+        the current current error stack will be cleared.
+        <p>
+        The current error stack is also cleared whenever an API function 
+        is called, with certain exceptions 
+        (for instance, <code>H5Eprint</code>).
+        <p>
+        <code>H5Eclear_stack</code> can fail if there are problems initializing 
+        the library.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em>&nbsp;<code>mesg_id</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: Error message identifier.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> 
+    <dd>None.
+<!--
+    <dd>
+	<pre>
+SUBROUTINE h5eclear_stack_f(hdferr) 
+  IMPLICIT NONE
+  INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+END SUBROUTINE h5eclear_stack_f
+	</pre>		
+	-->	
+        <!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
 
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Eclose_msg" -->
@@ -323,7 +398,7 @@ END SUBROUTINE h5eclear_f
   <dt><strong>Name:</strong> <a name="Error-CloseStack">H5Eclose_stack</a>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Eclose_stack</code>(<em>hid_t</em> 
-	  <code>error_stack</code>)
+	  <code>estack_id</code>)
   <dt><strong>Purpose:</strong>
     <dd>Closes object handle for error stack.
   <dt><strong>Description:</strong>
@@ -333,7 +408,7 @@ END SUBROUTINE h5eclear_f
   <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-            <td valign="top"><em>hid_t</em>&nbsp;<code>error_stack</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top"><em>hid_t</em>&nbsp;<code>estack_id</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
             <td valign="top">IN: Error stack identifier.</td></tr>
     </table></ul>
   <dt><strong>Returns:</strong>
@@ -381,12 +456,13 @@ END SUBROUTINE h5eclear_f
     <dd>None.
 </dl>
 
+
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Eget_auto" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Error-GetAuto">H5Eget_auto</a>
-<dt><strong>Signature:</strong>
+<dt><strong>Signature (deprecated):</strong>
     <dd><em>herr_t</em> <code>H5Eget_auto</code>(<em>H5E_auto_t *</em> <code>func</code>,
         <em>void **</em><code>client_data</code>
     )
@@ -398,6 +474,12 @@ END SUBROUTINE h5eclear_f
         automatic error stack traversal function, <code>func</code>, 
         and its data, <code>client_data</code>.  Either (or both) 
         arguments may be null in which case the value is not returned.
+        <p>
+        <strong>Note:</strong>
+        As of HDF5 Release 1.8, <a href="#Error-GetAutoStack"><code>H5Eget_auto_stack</code></a> 
+        replaces <code>H5Eget_auto</code> and <code>H5Eget_auto</code> is designated 
+        a <em>deprecated function</em>.  <code>H5Eget_auto</code> may be removed 
+        from the library at a future release.
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
@@ -427,6 +509,66 @@ SUBROUTINE
         <img src="Graphics/C++.gif">
         -->
 </dl>
+
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Eget_auto_stack" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Error-GetAutoStack">H5Eget_auto_stack</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Eget_auto_stack</code>(
+        <em>hid_t</em> <code>estack_id</code>,
+        <em>H5E_auto_stack_t *</em> <code>func</code>,
+        <em>void **</em><code>client_data</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the current settings for the automatic error stack
+        traversal function and its data.  
+<dt><strong>Description:</strong>
+    <dd><code>H5Eget_auto_stack</code> returns the current settings for the 
+        automatic error stack traversal function, <code>func</code>, 
+        and its data, <code>client_data</code>, that are associated with
+        the error stack specified by <code>estack_id</code>.  
+        <p>
+        Either or both of the <code>func</code> and <code>client_data</code>
+        arguments may be null, in which case the value is not returned.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em>&nbsp;<code>estack_id</code>
+                 &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: Error stack identifier.
+              <code>H5E_DEFAULT</code> indicates the current stack.</td></tr>
+        <tr>
+            <td valign="top"><em>H5E_auto_stack_t *</em> <code>func</code></td>
+            <td valign="top">OUT: The function currently set to be 
+                called upon an error condition.</td></tr>
+        <tr>
+            <td valign="top"><em>void&nbsp;**</em><code>client_data&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Data currently set to be passed 
+              to the error function.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+	
+<!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->    
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
 
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Eget_class_name" -->
@@ -498,7 +640,7 @@ SUBROUTINE
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Error-GetMajor">H5Eget_major</a>
-<dt><strong>Signature:</strong>
+<dt><strong>Signature (deprecated):</strong>
     <dd><em>const char *</em> <code>H5Eget_major</code>(<em>H5E_major_t</em> <code>n</code>)
 <dt><strong>Purpose:</strong>
     <dd>Returns a character string describing an error specified by a 
@@ -506,6 +648,12 @@ SUBROUTINE
 <dt><strong>Description:</strong>
     <dd>Given a major error number, <code>H5Eget_major</code> returns a 
         constant character string that describes the error.
+        <p>
+        <strong>Note:</strong>
+        As of HDF5 Release 1.8, <a href="#Error-GetMsg"><code>H5Eget_msg</code></a> 
+        replaces <code>H5Eget_major</code> and <code>H5Eget_major</code> is designated 
+        a <em>deprecated function</em>.  <code>H5Eget_major</code> may be removed 
+        from the library at a future release.
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
@@ -539,7 +687,7 @@ END SUBROUTINE h5eget_major_f
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Error-GetMinor">H5Eget_minor</a>
-<dt><strong>Signature:</strong>
+<dt><strong>Signature (deprecated):</strong>
     <dd><em>const char *</em> <code>H5Eget_minor</code>(<em>H5E_minor_t</em> <code>n</code>)
 <dt><strong>Purpose:</strong>
     <dd>Returns a character string describing an error specified by a 
@@ -547,6 +695,12 @@ END SUBROUTINE h5eget_major_f
 <dt><strong>Description:</strong>
     <dd>Given a minor error number, <code>H5Eget_minor</code> returns a 
         constant character string that describes the error.
+        <p>
+        <strong>Note:</strong>
+        As of HDF5 Release 1.8, <a href="#Error-GetMsg"><code>H5Eget_msg</code></a> 
+        replaces <code>H5Eget_minor</code> and <code>H5Eget_minor</code> is designated 
+        a <em>deprecated function</em>.  <code>H5Eget_minor</code> may be removed 
+        from the library at a future release.
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
@@ -627,17 +781,17 @@ END SUBROUTINE h5eget_minor_f
 <dl>
   <dt><strong>Name:</strong> <a name="Error-GetNum">H5Eget_num</a>
   <dt><strong>Signature:</strong>
-    <dd><em>ssize_t</em> <code>H5Eget_num</code>(<em>hid_t</em> <code>error_stack</code>)
+    <dd><em>ssize_t</em> <code>H5Eget_num</code>(<em>hid_t</em> <code>estack_id</code>)
   <dt><strong>Purpose:</strong>
     <dd>Retrieves the number of error messages in an error stack.
   <dt><strong>Description:</strong>
     <dd><code>H5Eget_num</code> retrieves the number of error records 
-          in the error stack specified by <code>error_stack</code>
+          in the error stack specified by <code>estack_id</code>
 	  (including major, minor messages and description). 
   <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-            <td valign="top"><em>hid_t</em>&nbsp;<code>error_stack</code>
+            <td valign="top"><em>hid_t</em>&nbsp;<code>estack_id</code>
                  &nbsp;&nbsp;&nbsp;&nbsp;</td>
             <td valign="top">IN: Error stack identifier.</td></tr>
     </table></ul>
@@ -655,19 +809,19 @@ END SUBROUTINE h5eget_minor_f
   <dt><strong>Name:</strong> <a name="Error-Pop">H5Epop</a>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Epop</code>(<em>hid_t</em> 
-	  <code>error_stack</code>, <em>size_t</em> <code>count</code>)
+	  <code>estack_id</code>, <em>size_t</em> <code>count</code>)
   <dt><strong>Purpose:</strong>
     <dd>Deletes specified number of error messages from the error stack.
   <dt><strong>Description:</strong>
     <dd><code>H5Epop</code> deletes the number of error records specified 
           in <code>count</code> from the top of the error stack 
-	  specified by <code>error_stack</code>  
+	  specified by <code>estack_id</code>  
           (including major, minor messages and description).
           The number of error messages to be deleted is specified by count.
   <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-            <td valign="top"><em>hid_t</em>&nbsp;<code>error_stack</code>
+            <td valign="top"><em>hid_t</em>&nbsp;<code>estack_id</code>
               &nbsp;&nbsp;&nbsp;&nbsp;</td>
             <td valign="top">IN: Error stack identifier.</td></tr>
         <tr>
@@ -682,12 +836,13 @@ END SUBROUTINE h5eget_minor_f
     <dd>None.
 </dl>
 
+
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Eprint" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Error-Print">H5Eprint</a>
-<dt><strong>Signature:</strong>
+<dt><strong>Signature (deprecated):</strong>
     <dd><em>herr_t</em> <code>H5Eprint</code>(<em>FILE *</em> <code>stream</code>)
 <dt><strong>Purpose:</strong>
     <dd>Prints the error stack in a default manner.  
@@ -701,6 +856,12 @@ END SUBROUTINE h5eget_minor_f
         <code>H5Eprint</code> is a convenience function for 
         <code>H5Ewalk</code> with a function that prints error messages.  
         Users are encouraged to write their own more specific error handlers.
+        <p>
+        <strong>Note:</strong>
+        As of HDF5 Release 1.8, <a href="#Error-PrintStack"><code>H5Eprint_stack</code></a> 
+        replaces <code>H5Eprint</code> and <code>H5Eprint</code> is designated 
+        a <em>deprecated function</em>.  <code>H5Eprint</code> may be removed 
+        from the library at a future release.
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
@@ -728,12 +889,80 @@ END SUBROUTINE h5eprint_f
         -->
 </dl>
 
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Eprint_stack" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Error-PrintStack">H5Eprint_stack</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Eprint</code>(
+            <em>hid_t</em> <code>estack_id</code>,
+            <em>FILE *</em> <code>stream</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Prints the error stack in a default manner.  
+<dt><strong>Description:</strong>
+    <dd><code>H5Eprint_stack</code> prints the error stack specified by
+        <code>estack_id</code> on the specified stream, <code>stream</code>.  
+        Even if the error stack is empty, a one-line message of the 
+        following form will be printed:
+        <br>&nbsp;&nbsp;&nbsp;&nbsp;
+	  <code>HDF5-DIAG: Error detected in HDF5 library version: 1.5.62 
+          thread 0.</code>
+        <p>
+        A similar line will appear before the error messages of each 
+        error class stating the library name, library version number, and 
+        thread identifier.
+        <p>
+        If <code>estack_id</code> is <code>H5E_DEFAULT</code>, 
+        the current error stack will be printed.
+        <p>
+        <code>H5Eprint_stack</code> is a convenience function for 
+        <code>H5Ewalk_stack</code> with a function that prints error messages.  
+        Users are encouraged to write their own more specific error handlers.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+	    <td valign="top"><em>hid_t </em><code>estack_id</code></td>
+            <td valign="top">IN: Identifier of the error stack to be printed.
+              If the identifier is <code>H5E_DEFAULT</code>, 
+              the current error stack will be printed.</td></tr>
+        <tr>
+	    <td valign="top"><em>FILE&nbsp;*</em>&nbsp;<code>stream&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: File pointer, or stderr if NULL.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> 
+    <dd>None.
+<!--
+<dt><strong>Fortran90 Interface:</strong> h5eprint_stack_f
+    <dd>
+	<pre>
+SUBROUTINE h5eprint_stack_f(hdferr, name)
+  CHARACTER(LEN=*), OPTIONAL, INTENT(IN) :: name ! File name
+  INTEGER, INTENT(OUT) :: hdferr                 ! Error code
+
+END SUBROUTINE h5eprint_stack_f
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Epush" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Error-Push">H5Epush</a>
-<dt><strong>Signature:</strong>
+<dt><strong>Signature (deprecated):</strong>
     <dd><em>herr_t</em> <code>H5Epush</code>(
             <em>const char *</em><code>file</code>,
             <em>const char *</em><code>func</code>,
@@ -755,27 +984,129 @@ END SUBROUTINE h5eprint_f
         the line <code>line</code> within that file, 
         and an error description string <code>str</code>.  
         <p>
-        The function name, file name, and error description strings 
+        The function name, filename, and error description strings 
         must be statically allocated.   
-<dt><strong>Parameters:</strong>
+        <p>
+        <strong>Note:</strong>
+        As of HDF5 Release 1.8, <a href="#Error-PushStack"><code>H5Epush_stack</code></a> 
+        replaces <code>H5Epush</code> and <code>H5Epush</code> is designated 
+        a <em>deprecated function</em>.  <code>H5Epush</code> may be removed 
+        from the library at a future release.
+<dt><strong>Parameters, <code>H5Epush</code>:</strong>
     <ul><table>
         <tr>
-	    <td valign="top"><em>const char *</em><code>file</code>,</td>
-            <td valign="top">IN: Name of the file in which the error was detected.</td></tr>
+	    <td valign="top"><em>const char *</em><code>file</code></td>
+            <td valign="top">IN: Name of the file in which the error 
+              was detected.</td></tr>
         <tr>
-	    <td valign="top"><em>const char *</em><code>func</code>,</td>
-            <td valign="top">IN: Name of the function in which the error was detected.</td></tr>
+	    <td valign="top"><em>const char *</em><code>func</code></td>
+            <td valign="top">IN: Name of the function in which the error 
+              was detected.</td></tr>
         <tr>
-	    <td valign="top"><em>unsigned</em> <code>line</code>,</td>
-            <td valign="top">IN: Line within the file at which the error was detected.</td></tr>
+	    <td valign="top"><em>unsigned</em> <code>line</code></td>
+            <td valign="top">IN: Line within the file at which the error 
+              was detected.</td></tr>
         <tr>
-	    <td valign="top"><em>H5E_major_t</em>&nbsp;<code>maj_num,&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+	    <td valign="top"><em>H5E_major_t</em>&nbsp;<code>maj_num&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Major error number.</td></tr>
         <tr>
-	    <td valign="top"><em>H5E_minor_t</em> <code>min_num</code>,</td>
+	    <td valign="top"><em>H5E_minor_t</em> <code>min_num</code></td>
             <td valign="top">IN: Minor error number.</td></tr>
         <tr>
 	    <td valign="top"><em>const char *</em><code>str</code></td>
+            <td valign="top">IN: Error description string.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+	
+<!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Epush_stack" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Error-PushStack">H5Epush_stack</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Epush_stack</code>(
+            <em>hid_t </em><code>estack_id</code>,
+            <em>const char *</em><code>file</code>,
+            <em>const char *</em><code>func</code>,
+            <em>unsigned</em> <code>line</code>,
+            <em>hid_t </em><code>class_id</code>,
+            <em>hid_t</em> <code>major_id</code>,
+            <em>hid_t</em> <code>minor_id</code>,
+            <em>const char *</em><code>msg</code>,
+            ...)
+<dt><strong>Purpose:</strong>
+    <dd>Pushes new error record onto error stack.
+<dt><strong>Description:</strong>
+    <dd><code>H5Epush_stack</code> pushes a new error record onto the 
+        error stack for the current thread.  
+        <p>
+        The error record contains 
+        the error class identifier <code>class_id</code>,
+        the major and minor message identifiers <code>major_id</code> and 
+        <code>minor_id</code>, 
+        the function name <code>func</code> where the error was detected, 
+        the filename <code>file</code> and line number <code>line</code> 
+        within that file where the error was detected, and 
+        an error description <code>msg</code>.  
+        <p>
+        The major and minor errors must be in the same error class.
+        <p>
+        The function name, filename, and error description strings 
+        must be statically allocated.   
+        <p>
+        <code>msg</code> can be a format control string with 
+        additional arguments.  This design of appending additional arguments
+        is similar to the system and C functions <code>printf</code> and 
+        <code>fprintf</code>.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+	    <td valign="top"><em>hid_t </em><code>estack_id</code></td>
+            <td valign="top">IN: Identifier of the error stack to which
+              the error record is to be pushed.
+              If the identifier is <code>H5E_DEFAULT</code>, the error record
+              will be pushed to the current stack.</td></tr>
+        <tr>
+	    <td valign="top"><em>const char *</em><code>file</code></td>
+            <td valign="top">IN: Name of the file in which the error was 
+              detected.</td></tr>
+        <tr>
+	    <td valign="top"><em>const char *</em><code>func</code></td>
+            <td valign="top">IN: Name of the function in which the error was 
+              detected.</td></tr>
+        <tr>
+	    <td valign="top"><em>unsigned</em> <code>line</code></td>
+            <td valign="top">IN: Line number within the file at which the 
+              error was detected.</td></tr>
+        <tr>
+	    <td valign="top"><em>hid_t</em>&nbsp;<code>class_id</code></td>
+            <td valign="top">IN: Error class identifier.</td></tr>
+        <tr>
+	    <td valign="top"><em>hid_t</em>&nbsp;<code>major_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Major error identifier.</td></tr>
+        <tr>
+	    <td valign="top"><em>hid_t</em> <code>minor_id</code></td>
+            <td valign="top">IN: Minor error identifier.</td></tr>
+        <tr>
+	    <td valign="top"><em>const char *</em><code>msg</code></td>
             <td valign="top">IN: Error description string.</td></tr>
     </table></ul>
 <dt><strong>Returns:</strong>
@@ -819,14 +1150,14 @@ SUBROUTINE
   <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-            <td valign="top"><em>const&nbsp;char</em>*&nbsp;<code>cls_name</code>,&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top"><em>const&nbsp;char</em>*&nbsp;<code>cls_name</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
             <td valign="top">IN: Name of the error class.</td></tr>
         <tr>
-            <td valign="top"><em>const char</em>* <code>lib_name</code>,</td>
+            <td valign="top"><em>const char</em>* <code>lib_name</code></td>
             <td valign="top">IN: Name of the client library or application 
                to which the error class belongs.</td></tr>
         <tr>
-            <td valign="top"><em>const char</em>* <code>version</code>,</td>
+            <td valign="top"><em>const char</em>* <code>version</code></td>
             <td valign="top">IN: Version of the client library or application
                to which the error class belongs.  
                A NULL can be passed in.</td></tr>
@@ -838,12 +1169,13 @@ SUBROUTINE
     <dd>None.
 </dl>
 
+
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Eset_auto" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Error-SetAuto">H5Eset_auto</a>
-<dt><strong>Signature:</strong>
+<dt><strong>Signature (deprecated):</strong>
     <dd><em>herr_t</em> <code>H5Eset_auto</code>(<em>H5E_auto_t</em> <code>func</code>,
         <em>void *</em><code>client_data</code>
     )
@@ -863,6 +1195,12 @@ SUBROUTINE
         <p>
         Automatic stack traversal is always in the 
         <code>H5E_WALK_DOWNWARD</code> direction. 
+        <p>
+        <strong>Note:</strong>
+        As of HDF5 Release 1.8, <a href="#Error-SetAutoStack"><code>H5Eset_auto_stack</code></a> 
+        replaces <code>H5Eset_auto</code> and <code>H5Eset_auto</code> is designated 
+        a <em>deprecated function</em>.  <code>H5Eset_auto</code> may be removed 
+        from the library at a future release.
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
@@ -897,6 +1235,85 @@ END SUBROUTINE h5eset_auto_f
         -->
 </dl>
 
+
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Eset_auto_stack" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Error-SetAutoStack">H5Eset_auto_stack</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Eset_auto_stack</code>(
+        <em>hid_t</em> <code>estack_id</code>,
+        <em>H5E_auto_stack_t</em> <code>func</code>,
+        <em>void *</em><code>client_data</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Turns automatic error printing on or off.
+<dt><strong>Description:</strong>
+    <dd><code>H5Eset_auto_stack</code> turns on or off automatic printing of 
+        errors for the error stack specified with <code>estack_id</code>.  
+        An <code>estack_id</code> value of <code>H5E_DEFAULT</code>
+        indicates the current stack.
+        <p>
+        When automatic printing is turned on, 
+        by the use of a non-null <code>func</code> pointer, 
+        any API function which returns an error indication will 
+        first call <code>func</code>, passing it <code>client_data</code>
+        as an argument.
+        <p>
+        When the library is first initialized, the auto printing function 
+        is set to <code>H5Eprint_stack</code> (cast appropriately) and
+        <code>client_data</code> is the standard error stream pointer,
+        <code>stderr</code>.
+        <p>
+        Automatic stack traversal is always in the 
+        <code>H5E_WALK_DOWNWARD</code> direction. 
+        <p>
+        Automatic error printing is turned off with a 
+        <code>H5Eset_auto_stack</code> call with a NULL 
+        <code>func</code> pointer.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em>&nbsp;<code>estack_id</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: Error stack identifier.</td></tr>
+        <tr>
+	    <td valign="top"><em>H5E_auto_stack_t</em> <code>func</code></td>
+            <td valign="top">IN: Function to be called upon an error 
+              condition.</td></tr>
+        <tr>
+	    <td valign="top"><em>void&nbsp;*</em><code>client_data&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Data passed to the error function.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5eset_auto_f
+    <dd>None.
+<!--    <dd>
+	<pre>
+SUBROUTINE h5eset_auto_f(printflag, hdferr)
+  INTEGER, INTENT(IN) :: printflag  !flag to turn automatic error
+                                    !printing on or off
+                                    !possible values are:
+                                    !printon (1)
+                                    !printoff(0)
+  INTEGER, INTENT(OUT) :: hdferr    ! Error code
+
+END SUBROUTINE h5eset_auto_f
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Eset_current_stack" -->
 <hr>
@@ -904,17 +1321,17 @@ END SUBROUTINE h5eset_auto_f
   <dt><strong>Name:</strong> <a name="Error-SetCurrentStack">H5Eset_current_stack</a>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Eset_current_stack</code>(<em>hid_t</em> 
-	  <code>error_stack</code>)
+	  <code>estack_id</code>)
   <dt><strong>Purpose:</strong>
     <dd>Replaces the current error stack.
   <dt><strong>Description:</strong>
     <dd><code>H5Eset_current_stack</code> replaces the content of 
           the current error stack with a copy of the content of error stack 
-          specified by <code>error_stack</code>.
+          specified by <code>estack_id</code>.
   <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-            <td valign="top"><em>hid_t</em>&nbsp;<code>error_stack</code>,&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top"><em>hid_t</em>&nbsp;<code>estack_id</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
             <td valign="top">IN: Error stack identifier.</td></tr>
     </table></ul>
   <dt><strong>Returns:</strong>
@@ -941,7 +1358,7 @@ END SUBROUTINE h5eset_auto_f
   <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-	    <td valign="top"><em>hid_t</em>&nbsp;<code>class_id</code>,&nbsp;&nbsp;&nbsp;&nbsp;</td>
+	    <td valign="top"><em>hid_t</em>&nbsp;<code>class_id</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
             <td valign="top">IN: Error class identifier.</td></tr>
     </table></ul>
   <dt><strong>Returns:</strong>
@@ -951,12 +1368,13 @@ END SUBROUTINE h5eset_auto_f
     <dd>None.
 </dl>
 
+
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Ewalk" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Error-Walk">H5Ewalk</a>
-<dt><strong>Signature:</strong>
+<dt><strong>Signature (deprecated):</strong>
     <dd><em>herr_t</em> <code>H5Ewalk</code>(<em>H5E_direction_t</em> <code>direction</code>,
         <em>H5E_walk_t</em> <code>func</code>,
         <em>void *</em> <code>client_data</code>
@@ -1008,6 +1426,12 @@ END SUBROUTINE h5eset_auto_f
         <p>
         <code>H5Ewalk</code> can fail if there are problems initializing 
         the library.
+        <p>
+        <strong>Note:</strong>
+        As of HDF5 Release 1.8, <a href="#Error-WalkStack"><code>H5Ewalk_stack</code></a> 
+        replaces <code>H5Ewalk</code> and <code>H5Ewalk</code> is designated 
+        a <em>deprecated function</em>.  <code>H5Ewalk</code> may be removed 
+        from the library at a future release.
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
@@ -1039,6 +1463,112 @@ SUBROUTINE
         <img src="Graphics/C++.gif">
         -->
 </dl>
+
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Ewalk_stack" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Error-WalkStack">H5Ewalk_stack</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Ewalk_stack</code>(
+        <em>hid_t</em> <code>estack_id</code>,
+        <em>H5E_direction_t</em> <code>direction</code>,
+        <em>H5E_walk_t</em> <code>func</code>,
+        <em>void *</em> <code>client_data</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Walks the error stack for the current thread, calling a specified
+        function.
+<dt><strong>Description:</strong>
+    <dd><code>H5Ewalk_stack</code> walks the error stack specified by
+        <code>estack_id</code> for the current thread and calls the function 
+        specified in <code>func</code> for each error along the way.
+        <p>
+        If the value of <code>estack_id</code> is <code>H5E_DEFAULT</code>, 
+        then <code>H5Ewalk_stack</code> walks the current error stack. 
+        <p>
+        <code>direction</code> specifies whether the stack is walked 
+        from the inside out or the outside in.  
+        A value of <code>H5E_WALK_UPWARD</code> means to begin with the
+        most specific error and end at the API; 
+        a value of <code>H5E_WALK_DOWNWARD</code> means to start at the 
+        API and end at the innermost function where the error was first 
+        detected.
+        <p>
+        <code>func</code>, a function compliant with the 
+        <code>H5E_walk_t</code> prototype, will be called for each error 
+        in the error stack. 
+        Its arguments will include an index number <code>n</code>
+        (beginning at zero regardless of stack traversal direction), 
+        an error stack entry <code>err_desc</code>, 
+        and the <code>client_data</code> pointer passed to 
+        <code>H5E_print</code>.
+        The <code>H5E_walk_t</code> prototype is as follows:
+        <dir>
+        <p>
+        <code>typedef</code> <em>herr_t</em> <code>(*H5E_walk_t)(</code><em>int</em> <code>n,</code> 
+            <em>H5E_error_t *</em><code>err_desc,</code> 
+            <em>void *</em><code>client_data)</code>
+        <p>
+        where the parameters have the following meanings:
+            <dl>
+            <dt><em>int</em> <code>n</code>
+                <dd>Indexed position of the error in the stack.
+            <dt><em>H5E_error_t *</em><code>err_desc</code>
+                <dd>Pointer to a data structure describing the error.
+                    (This structure is currently described only in the source
+                    code file <code>hdf5/src/H5Epublic.h</code>.
+                    That file also contains the definitive list of major 
+                    and minor error codes; that information will 
+                    eventually be presented as an appendix to this 
+                    <cite>HDF5 Reference Manual</cite>.)
+            <dt><em>void *</em><code>client_data</code>
+                <dd>Pointer to client data in the format expected by 
+                    the user-defined function.
+            </dl>
+        </dir>
+        <p>
+        <code>H5Ewalk_stack</code> can fail if there are problems initializing 
+        the library.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+	    <td valign="top"><em>hid_t</em> <code>estack_id</code></td>
+            <td valign="top">IN: Error stack identifier.</td></tr>
+        <tr>
+	    <td valign="top"><em>H5E_direction_t</em>&nbsp;<code>direction&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Direction in which the error stack is 
+              to be walked.</td></tr>
+        <tr>
+	    <td valign="top"><em>H5E_walk_t</em> <code>func</code></td>
+            <td valign="top">IN: Function to be called for each error 
+              encountered.</td></tr>
+        <tr>
+	    <td valign="top"><em>void *</em> <code>client_data</code></td>
+            <td valign="top">IN: Data to be passed with <code>func</code>.
+              </td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+	
+<!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
 
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Ewalk_cb" -->
@@ -1151,7 +1681,7 @@ And in this document, the
 Describes HDF5 Release 1.7, the unreleased development branch; working toward HDF5 Release 1.8.0
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 18 May 2005");
+document.writeln("Last modified: 23 May 2005");
 -->
 </SCRIPT>
  
