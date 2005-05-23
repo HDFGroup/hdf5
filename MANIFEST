@@ -627,7 +627,7 @@
 ./fortran/testpar/Makefile.in
 ./fortran/testpar/ptest.f90
 ./fortran/testpar/hyper.f90
-
+./fortran/testpar/mdset.f90
 
 #------------------------------------------------------------------------------
 #

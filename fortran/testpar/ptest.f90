@@ -83,6 +83,17 @@ do_chunk      = .true.
 call hyper(lenght,do_collective,do_chunk,nerrors)
 
 !//////////////////////////////////////////////////////////
+! test write/read several datasets (independent MPI I/O)
+!//////////////////////////////////////////////////////////
+
+if (mpi_rank == 0) write(*,*) 'Writing/reading several datasets (contiguous layout, independent MPI I/O)'
+
+do_collective = .false.
+do_chunk      = .false.
+call multiple_dset_write(lenght,do_collective,do_chunk,nerrors)
+
+
+!//////////////////////////////////////////////////////////
 ! close HDF5 interface
 !//////////////////////////////////////////////////////////
 

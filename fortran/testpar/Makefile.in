@@ -66,7 +66,8 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES =
 am__EXEEXT_1 = parallel_test$(EXEEXT)
-am_parallel_test_OBJECTS = ptest.$(OBJEXT) hyper.$(OBJEXT)
+am_parallel_test_OBJECTS = ptest.$(OBJEXT) hyper.$(OBJEXT) \
+	mdset.$(OBJEXT)
 parallel_test_OBJECTS = $(am_parallel_test_OBJECTS)
 parallel_test_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =  \
@@ -309,7 +310,7 @@ MOSTLYCLEAN = ParaEg[123].h5f
 DISTCLEAN = go
 
 # Test source files
-parallel_test_SOURCES = ptest.f90 hyper.f90 
+parallel_test_SOURCES = ptest.f90 hyper.f90 mdset.f90
 
 # The tests depend on several libraries.
 LDADD = $(LIBH5FTEST) $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)

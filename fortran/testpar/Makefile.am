@@ -34,7 +34,7 @@ MOSTLYCLEAN=ParaEg[123].h5f
 DISTCLEAN=go
 
 # Test source files
-parallel_test_SOURCES=ptest.f90 hyper.f90 
+parallel_test_SOURCES=ptest.f90 hyper.f90 mdset.f90
 
 # The tests depend on several libraries.
 LDADD=$(LIBH5FTEST) $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)

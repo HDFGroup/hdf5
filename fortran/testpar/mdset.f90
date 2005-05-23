@@ -17,7 +17,7 @@
 ! writes/reads dataset by hyperslabs 
 !//////////////////////////////////////////////////////////
 
-subroutine hyper(lenght,do_collective,do_chunk,nerrors)
+subroutine multiple_dset_write(lenght,do_collective,do_chunk,nerrors)
 use hdf5
 implicit none
 include 'mpif.h'
@@ -48,7 +48,8 @@ integer        :: istart                          ! start position in array
 integer        :: iend                            ! end position in array
 integer        :: icount                          ! number of elements in array
 character(len=80) :: filename                     ! filename
-integer        :: i
+character(len=80) :: dsetname                     ! dataset name
+integer        :: n, i
 
 call mpi_comm_rank( MPI_COMM_WORLD, mpi_rank, mpierror )
 call mpi_comm_size( MPI_COMM_WORLD, mpi_size, mpierror )
@@ -76,10 +77,6 @@ endif
 icount  = lenght/mpi_size     ! divide the array by the number of processes
 istart  = mpi_rank*icount     ! start position
 iend    = istart + icount     ! end position
-
-do i = istart, iend-1
- wbuf(i) = i
-enddo
 
 !//////////////////////////////////////////////////////////
 ! HDF5 I/O
@@ -110,7 +107,7 @@ endif
 ! create the file collectively
 !//////////////////////////////////////////////////////////
 
-call h5_fixname_f("parf1", filename, fapl_id, hdferror)
+call h5_fixname_f("parf2", filename, fapl_id, hdferror)
 
 call h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, hdferror, access_prp = fapl_id)
 call check("h5fcreate_f", hdferror, nerrors)
@@ -134,11 +131,16 @@ if (do_chunk) then
 endif
 
 !//////////////////////////////////////////////////////////
-! create the dataset
+! create a property list for collective dataset write
 !//////////////////////////////////////////////////////////
 
-call h5dcreate_f(file_id, "dset", H5T_NATIVE_INTEGER, fspace_id, dset_id, hdferror, dcpl_id)
-call check("h5dcreate_f", hdferror, nerrors)
+call h5pcreate_f(H5P_DATASET_XFER_F, dxpl_id, hdferror)
+call check("h5pcreate_f", hdferror, nerrors)
+ 
+if (do_collective) then
+ call h5pset_dxpl_mpio_f(dxpl_id, H5FD_MPIO_COLLECTIVE_F, hdferror)
+ call check("h5pset_dxpl_mpio_f", hdferror, nerrors)
+endif
 
 !//////////////////////////////////////////////////////////
 ! define hyperslab 
@@ -161,26 +163,32 @@ call check("h5sselect_hyperslab_f", hdferror, nerrors)
 call h5sselect_hyperslab_f(fspace_id, H5S_SELECT_SET_F, start, counti, hdferror)
 call check("h5sselect_hyperslab_f", hdferror, nerrors)
 
-
 !//////////////////////////////////////////////////////////
-! create a property list for collective dataset write
-!//////////////////////////////////////////////////////////
-
-call h5pcreate_f(H5P_DATASET_XFER_F, dxpl_id, hdferror)
-call check("h5pcreate_f", hdferror, nerrors)
- 
-if (do_collective) then
- call h5pset_dxpl_mpio_f(dxpl_id, H5FD_MPIO_COLLECTIVE_F, hdferror)
- call check("h5pset_dxpl_mpio_f", hdferror, nerrors)
-endif
-
-!//////////////////////////////////////////////////////////
-! write dataset
+! create and write the datasets
 !//////////////////////////////////////////////////////////
 
-call h5dwrite_f(dset_id,H5T_NATIVE_INTEGER,wbuf,dims,hdferror,file_space_id=fspace_id,mem_space_id=mspace_id,xfer_prp=dxpl_id)
-call check("h5dwrite_f", hdferror, nerrors)
+do n = 1, 300
 
+! direct the output of the write statement to unit "dsetname"
+ write(dsetname,*) 'dataset', n
+
+! create this dataset
+ call h5dcreate_f(file_id, dsetname, H5T_NATIVE_INTEGER, fspace_id, dset_id, hdferror, dcpl_id)
+ call check("h5dcreate_f", hdferror, nerrors)
+
+ do i = istart, iend-1
+  wbuf(i) = n + mpi_rank
+ enddo
+
+! write this dataset
+ call h5dwrite_f(dset_id,H5T_NATIVE_INTEGER,wbuf,dims,hdferror,file_space_id=fspace_id,mem_space_id=mspace_id,xfer_prp=dxpl_id)
+ call check("h5dwrite_f", hdferror, nerrors)
+
+! close this dataset
+ call h5dclose_f(dset_id, hdferror)
+ call check("h5dclose_f", hdferror, nerrors)
+
+enddo
 
 !//////////////////////////////////////////////////////////
 ! close HDF5 I/O
@@ -200,9 +208,6 @@ call check("h5sclose_f", hdferror, nerrors)
 
 call h5sclose_f(fspace_id, hdferror)
 call check("h5sclose_f", hdferror, nerrors)
-
-call h5dclose_f(dset_id, hdferror)
-call check("h5dclose_f", hdferror, nerrors)
 
 call h5fclose_f(file_id, hdferror)
 call check("h5fclose_f", hdferror, nerrors)
@@ -224,9 +229,6 @@ call h5screate_simple_f(1, dims, fspace_id, hdferror)
 call check("h5pcreate_f", hdferror, nerrors)
 
 call h5screate_simple_f(1, dims, mspace_id, hdferror)
-call check("h5pcreate_f", hdferror, nerrors)
-
-call h5dopen_f(file_id, "dset", dset_id, hdferror)
 call check("h5pcreate_f", hdferror, nerrors)
 
 !//////////////////////////////////////////////////////////
@@ -259,8 +261,37 @@ endif
 ! read dataset
 !//////////////////////////////////////////////////////////
 
-call h5dread_f(dset_id,H5T_NATIVE_INTEGER,rbuf,dims,hdferror,file_space_id=fspace_id,mem_space_id=mspace_id,xfer_prp=dxpl_id)
-call check("h5pcreate_f", hdferror, nerrors)
+do n = 1, 300
+
+! direct the output of the write statement to unit "dsetname"
+ write(dsetname,*) 'dataset', n
+
+! create this dataset
+ call h5dopen_f(file_id, dsetname, dset_id, hdferror)
+ call check("h5pcreate_f", hdferror, nerrors)
+
+! read this dataset
+ call h5dread_f(dset_id,H5T_NATIVE_INTEGER,rbuf,dims,hdferror,file_space_id=fspace_id,mem_space_id=mspace_id,xfer_prp=dxpl_id)
+ call check("h5pcreate_f", hdferror, nerrors)
+
+! close this dataset
+ call h5dclose_f(dset_id, hdferror)
+ call check("h5dclose_f", hdferror, nerrors)
+
+ do i = istart, iend-1
+  wbuf(i) = n + mpi_rank
+ enddo
+
+! compare read and write data. each process compares a subset of the array
+ do i = istart, iend-1
+  if( wbuf(i) /= rbuf(i)) then
+  write(*,*) 'buffers differs at ', i, rbuf(i), wbuf(i)
+  nerrors = nerrors + 1
+  endif
+ enddo
+
+enddo
+
 
 !//////////////////////////////////////////////////////////
 ! close HDF5 I/O
@@ -278,25 +309,12 @@ call check("h5pcreate_f", hdferror, nerrors)
 call h5sclose_f(mspace_id, hdferror)
 call check("h5pcreate_f", hdferror, nerrors)
 
-call h5dclose_f(dset_id, hdferror)
-call check("h5pcreate_f", hdferror, nerrors)
-
 call h5fclose_f(file_id, hdferror)
 call check("h5pcreate_f", hdferror, nerrors)
 
-!//////////////////////////////////////////////////////////
-! compare read and write data. each process compares a subset of the array
-!//////////////////////////////////////////////////////////
-
-do i = istart, iend-1
- if( wbuf(i) /= rbuf(i)) then
- write(*,*) 'buffers differs at ', i, rbuf(i), wbuf(i)
- nerrors = nerrors + 1
- endif
-enddo
 
 deallocate(wbuf)
 deallocate(rbuf)
 
-end subroutine hyper
+end subroutine multiple_dset_write
 
