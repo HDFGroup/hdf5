@@ -13,7 +13,10 @@ fi
 
 # Add "_XOPEN_SOURCE" define to cpp flags, to quiet warnings
 #       from /usr/include/sys/cdefs.h
-CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=600" 
+# (Unless we are using g++ as a C compiler)
+if test "X-g++" != "X-$CC"; then
+    CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=600" 
+fi
 
 # Figure out C compiler flags
 . $srcdir/config/gnu-flags
