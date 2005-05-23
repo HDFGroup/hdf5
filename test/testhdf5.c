@@ -60,6 +60,7 @@ main(int argc, char *argv[])
     AddTest("iterate", test_iterate, cleanup_iterate,  "Group & Attribute Iteration", NULL);
     AddTest("array", test_array, cleanup_array,  "Array Datatypes", NULL);
     AddTest("genprop", test_genprop, cleanup_genprop,  "Generic Properties", NULL);
+    AddTest("unicode", test_unicode, cleanup_unicode,  "UTF-8 Encoding", NULL);
     AddTest("misc", test_misc, cleanup_misc,  "Miscellaneous", NULL);
 
     /* Display testing information */

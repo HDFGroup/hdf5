@@ -1081,6 +1081,7 @@
 ./test/ttsafe_cancel.c
 ./test/ttsafe_dcreate.c
 ./test/ttsafe_error.c
+./test/tunicode.c
 ./test/tvlstr.c
 ./test/tvltypes.c
 ./test/unlink.c

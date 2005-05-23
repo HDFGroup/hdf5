@@ -2687,7 +2687,9 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                         case H5T_CSET_ASCII:
                             fprintf (out, "H5T_CSET_ASCII");
                             break;
-                        case H5T_CSET_RESERVED_1:
+                        case H5T_CSET_UTF8:
+                            fprintf (out, "H5T_CSET_UTF8");
+                            break;
                         case H5T_CSET_RESERVED_2:
                         case H5T_CSET_RESERVED_3:
                         case H5T_CSET_RESERVED_4:

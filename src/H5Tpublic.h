@@ -78,7 +78,7 @@ typedef enum H5T_norm_t {
 typedef enum H5T_cset_t {
     H5T_CSET_ERROR       = -1,  /*error                                      */
     H5T_CSET_ASCII       = 0,   /*US ASCII                                   */
-    H5T_CSET_RESERVED_1  = 1,   /*reserved for later use		     */
+    H5T_CSET_UTF8        = 1,   /*UTF-8 Unicode encoding		     */
     H5T_CSET_RESERVED_2  = 2,   /*reserved for later use		     */
     H5T_CSET_RESERVED_3  = 3,   /*reserved for later use		     */
     H5T_CSET_RESERVED_4  = 4,   /*reserved for later use		     */
@@ -94,7 +94,7 @@ typedef enum H5T_cset_t {
     H5T_CSET_RESERVED_14 = 14,  /*reserved for later use		     */
     H5T_CSET_RESERVED_15 = 15   /*reserved for later use		     */
 } H5T_cset_t;
-#define H5T_NCSET H5T_CSET_RESERVED_1    		/*Number of character sets actually defined  */
+#define H5T_NCSET H5T_CSET_RESERVED_2    		/*Number of character sets actually defined  */
 
 /*
  * Type of padding to use in character strings.  Do not change these values

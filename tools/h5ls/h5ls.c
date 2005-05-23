@@ -904,7 +904,9 @@ display_string_type(hid_t type, int UNUSED ind)
     case H5T_CSET_ASCII:
  cset_s = "ASCII";
  break;
-    case H5T_CSET_RESERVED_1:
+    case H5T_CSET_UTF8:
+ cset_s = "UTF-8";
+ break;
     case H5T_CSET_RESERVED_2:
     case H5T_CSET_RESERVED_3:
     case H5T_CSET_RESERVED_4:

@@ -90,6 +90,9 @@ New Features
 
     Library:
     --------
+       - Added H5T_CSET_UTF8 character set to mark datatypes that use the
+          UTF-8 Unicode character encoding.  Added tests to ensure that
+          library handles UTF-8 object names, attributes, etc. -JL 2005/05/13
        - HDF5 supports collective MPI-IO for irregular selection with HDF5
           dataset. Irregular selection is when users use H5Sselect_hyperslab
           more than once for the same dataset.

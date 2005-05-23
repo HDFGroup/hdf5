@@ -3907,8 +3907,10 @@ H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad precision");
             if (0 != src->shared->u.atomic.offset || 0 != dst->shared->u.atomic.offset)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad offset");
-            if (H5T_CSET_ASCII != src->shared->u.atomic.u.s.cset || H5T_CSET_ASCII != dst->shared->u.atomic.u.s.cset)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad character set");
+            if (H5T_CSET_ASCII != src->shared->u.atomic.u.s.cset && H5T_CSET_UTF8 != src->shared->u.atomic.u.s.cset)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad source character set");
+            if (H5T_CSET_ASCII != dst->shared->u.atomic.u.s.cset && H5T_CSET_UTF8 != dst->shared->u.atomic.u.s.cset)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad destination character set");
             if (src->shared->u.atomic.u.s.pad<0 || src->shared->u.atomic.u.s.pad>=H5T_NPAD ||
                     dst->shared->u.atomic.u.s.pad<0 || dst->shared->u.atomic.u.s.pad>=H5T_NPAD)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad character padding");
