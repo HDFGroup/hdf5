@@ -195,72 +195,6 @@ error:
  
 
 /*-------------------------------------------------------------------------
- * Function:    test_family_opens
- *
- * Purpose:     Private function for test_family() to tests wrong ways of
- *              reopening family file.
- *
- * Return:      Success:        exit(0)
- *
- *              Failure:        exit(1)
- *
- * Programmer:  Raymond Lu
- *              Thursday, May 19, 2005
- *
- * Modifications:
- *-------------------------------------------------------------------------
- */
-static herr_t
-test_family_opens(char *fname, hid_t fa_pl)
-{
-    hid_t file;
-    char first_name[1024];
-    char wrong_name[1024];
-    int i;
-
-    /* Case 1: reopen file with 1st member file name and default property list */ 
-    sprintf(first_name, fname, 0);
-    
-    H5E_BEGIN_TRY {
-        file=H5Fopen(first_name, H5F_ACC_RDWR, H5P_DEFAULT);
-    } H5E_END_TRY;
-
-    /* Case 2: reopen file with correct name template but default property list */
-    H5E_BEGIN_TRY {
-        file=H5Fopen(fname, H5F_ACC_RDWR, H5P_DEFAULT);
-    } H5E_END_TRY;
-
-    /* Case 3: reopen file with wrong member size */
-    if(H5Pset_fapl_family(fa_pl, 128, H5P_DEFAULT)<0)
-        goto error;
-
-    H5E_BEGIN_TRY {
-        file=H5Fopen(fname, H5F_ACC_RDWR, fa_pl);
-    } H5E_END_TRY;
-    
-    /* Case 4: reopen file with wrong name template */
-    strcpy(wrong_name, fname);
-    for(i=0; i<1024; i++) {
-        if(wrong_name[i] == '5') {
-            wrong_name[i] = '4';
-            break;
-        }
-    }
-
-    if(H5Pset_fapl_family(fa_pl, FAMILY_SIZE, H5P_DEFAULT)<0)
-        goto error;
-
-    H5E_BEGIN_TRY {
-        file=H5Fopen(wrong_name, H5F_ACC_RDWR, fa_pl);
-    } H5E_END_TRY;
-
-    return 0;
-error:
-    return -1;
-}
-
-
-/*-------------------------------------------------------------------------
  * Function:    test_family
  *
  * Purpose:     Tests the file handle interface for FAMILY driver
@@ -421,10 +355,10 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:    test_multi_opens
+ * Function:    test_family_opens
  *
- * Purpose:     Private function for test_multi() to tests wrong ways of
- *              reopening multi file.
+ * Purpose:     Private function for test_family() to tests wrong ways of
+ *              reopening family file.
  *
  * Return:      Success:        exit(0)
  *
@@ -437,18 +371,47 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_multi_opens(char *fname, hid_t fa_pl)
+test_family_opens(char *fname, hid_t fa_pl)
 {
     hid_t file;
-    char  super_name[1024];     /*name string "%%s-s.h5"*/
-    char  sf_name[1024];        /*name string "multi_file-s.h5"*/
+    char first_name[1024];
+    char wrong_name[1024];
+    int i;
 
-    /* Case: reopen with the name of super file and default property list */ 
-    sprintf(super_name, "%%s-%c.h5", 's');
-    sprintf(sf_name, super_name, fname);
+    /* Case 1: reopen file with 1st member file name and default property list */ 
+    sprintf(first_name, fname, 0);
+    
+    H5E_BEGIN_TRY {
+        file=H5Fopen(first_name, H5F_ACC_RDWR, H5P_DEFAULT);
+    } H5E_END_TRY;
+
+    /* Case 2: reopen file with correct name template but default property list */
+    H5E_BEGIN_TRY {
+        file=H5Fopen(fname, H5F_ACC_RDWR, H5P_DEFAULT);
+    } H5E_END_TRY;
+
+    /* Case 3: reopen file with wrong member size */
+    if(H5Pset_fapl_family(fa_pl, 128, H5P_DEFAULT)<0)
+        goto error;
 
     H5E_BEGIN_TRY {
-        file=H5Fopen(sf_name, H5F_ACC_RDWR, H5P_DEFAULT);
+        file=H5Fopen(fname, H5F_ACC_RDWR, fa_pl);
+    } H5E_END_TRY;
+    
+    /* Case 4: reopen file with wrong name template */
+    strcpy(wrong_name, fname);
+    for(i=0; i<1024; i++) {
+        if(wrong_name[i] == '5') {
+            wrong_name[i] = '4';
+            break;
+        }
+    }
+
+    if(H5Pset_fapl_family(fa_pl, FAMILY_SIZE, H5P_DEFAULT)<0)
+        goto error;
+
+    H5E_BEGIN_TRY {
+        file=H5Fopen(wrong_name, H5F_ACC_RDWR, fa_pl);
     } H5E_END_TRY;
 
     return 0;
@@ -619,6 +582,43 @@ error:
         H5Fclose(file);                                       
     } H5E_END_TRY;                                            
     return -1;                                 
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_multi_opens
+ *
+ * Purpose:     Private function for test_multi() to tests wrong ways of
+ *              reopening multi file.
+ *
+ * Return:      Success:        exit(0)
+ *
+ *              Failure:        exit(1)
+ *
+ * Programmer:  Raymond Lu
+ *              Thursday, May 19, 2005
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_multi_opens(char *fname, hid_t fa_pl)
+{
+    hid_t file;
+    char  super_name[1024];     /*name string "%%s-s.h5"*/
+    char  sf_name[1024];        /*name string "multi_file-s.h5"*/
+
+    /* Case: reopen with the name of super file and default property list */ 
+    sprintf(super_name, "%%s-%c.h5", 's');
+    sprintf(sf_name, super_name, fname);
+
+    H5E_BEGIN_TRY {
+        file=H5Fopen(sf_name, H5F_ACC_RDWR, H5P_DEFAULT);
+    } H5E_END_TRY;
+
+    return 0;
+error:
+    return -1;
 }
 
 
