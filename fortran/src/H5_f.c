@@ -364,12 +364,13 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
       h5t_flags[21] = H5T_NORM_MSBSET;
       h5t_flags[22] = H5T_NORM_NONE; 
       h5t_flags[23] = H5T_CSET_ASCII;
-      h5t_flags[24] = H5T_STR_NULLTERM;
-      h5t_flags[25] = H5T_STR_NULLPAD;
-      h5t_flags[26] = H5T_STR_SPACEPAD;
-      h5t_flags[27] = H5T_STR_ERROR;
-      h5t_flags[28] = H5T_VLEN;
-      h5t_flags[29] = H5T_ARRAY;
+      h5t_flags[24] = H5T_CSET_UTF8;
+      h5t_flags[25] = H5T_STR_NULLTERM;
+      h5t_flags[26] = H5T_STR_NULLPAD;
+      h5t_flags[27] = H5T_STR_SPACEPAD;
+      h5t_flags[28] = H5T_STR_ERROR;
+      h5t_flags[29] = H5T_VLEN;
+      h5t_flags[30] = H5T_ARRAY;
 /*
  *  H5Z flags
  */
