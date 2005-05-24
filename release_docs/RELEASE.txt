@@ -286,8 +286,15 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - For family driver, the library didn't save member size in file.
+          When file is reopened, the size of 1st member file determine the 
+          member size.  Now member size is saved in file and is used to 
+          define member file size.  Wrong file access property of member size
+          will result in a failure.  Using any other driver except family 
+          will cause library to return error.  So is multi driver. SLU - 
+          2005/05/24  
         - Fixed error in opening object in group that was opened in mounted
-            file which has been unmounted.  QAK - 2005/03/17
+          file which has been unmounted.  QAK - 2005/03/17
         - Fixed a racing condition in MPIPOSIX virtual file drive close
 	  function.  Now all processes must completed the close before any
 	  of them is returned.  This prevents some "faster" processes start

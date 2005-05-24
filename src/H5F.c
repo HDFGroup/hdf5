@@ -2310,7 +2310,12 @@ done:
  *              Sept 12, 2003
  *
  * Modifications:
- *
+ *              Raymond Lu
+ *              May 24, 2005
+ *              Started to check if driver(only family and multi drivers) 
+ *              matches driver information saved in the superblock.  Wrong
+ *              driver will result in a failure.
+ * 
  *-------------------------------------------------------------------------
  */
 static herr_t

@@ -672,16 +672,29 @@ H5FD_family_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
 
     /* Read member file size. Skip name template for now although it's saved. */
     UINT64DECODE(p, msize);
-  
-    /* Default - use the saved member size */ 
-    if(file->pmem_size == H5F_FAMILY_DEFAULT)
-       file->memb_size = msize;
+ 
+    /* For h5repart only. Member size 1 is used to signal h5repart is being used to
+     * change member file size.  Encode the new size. */
+    if(file->pmem_size == 1) {
+        msize = file->memb_size;
+        UINT64ENCODE(p, msize);
+        HGOTO_DONE(ret_value)
+    }
 
-    /* Check if member size is correct */
-    if(file->memb_size != msize) {
+    /* Default - use the saved member size */ 
+    if(file->pmem_size == H5F_FAMILY_DEFAULT) {
+       file->pmem_size = msize;
+    }
+
+    /* Check if member size from file access property is correct */
+    if(file->pmem_size != msize) {
         sprintf(err_msg, "family member size should be %lu", msize);
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, err_msg)
     }
+
+    /* Update member file size to the size saved in the superblock.
+     * That's the size intended to be. */ 
+    file->memb_size = msize;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -710,6 +723,14 @@ done:
  *              file, member size can't be smaller than current member size. 
  *              If there are at least 2 member files, member size can only be equal 
  *              the 1st member size.
+ *
+ *              Raymond Lu
+ *              Tuesday, May 24, 2005
+ *              The modification described above has been changed.  The major checking
+ *              is done in H5F_read_superblock.  Member file size is saved in the 
+ *              superblock now.  H5F_read_superblock() reads this saved size and compare
+ *              to the size passed in from file access property.  Wrong size will 
+ *              result in a failure.
  *
  *-------------------------------------------------------------------------
  */

@@ -223,7 +223,9 @@ main (int argc, char *argv[])
     off_t	src_act_size;		/*source actual member size	*/
     off_t	dst_size=1 GB;		/*destination logical memb size	*/
 #endif
-	
+    hid_t       fapl;
+    hid_t       file;
+    
     /*
      * Get the program name from argv[0]. Use only the last component.
      */
@@ -441,7 +443,35 @@ main (int argc, char *argv[])
 	}
     }
     close (dst);
+
+    /* modify family size saved in superblock. Member size 1 signals library to
+     * save the new size(actual member file size) in superblock.  It's for this 
+     * tool only. */
+    if ((fapl=H5Pcreate(H5P_FILE_ACCESS))<0) {
+        perror ("H5Pcreate");
+        exit (1);
+    }
     
+    if(H5Pset_fapl_family(fapl, 1, H5P_DEFAULT)<0) {
+        perror ("H5Pset_fapl_family");
+        exit (1);
+    }
+
+    if((file=H5Fopen(dst_gen_name, H5F_ACC_RDWR, fapl))<0) {
+        perror ("H5Fopen");
+        exit (1);
+    }
+  
+    if(H5Fclose(file)<0) {
+        perror ("H5Fclose");
+        exit (1);
+    }
+
+    if(H5Pclose(fapl)<0) {
+        perror ("H5Pclose");
+        exit (1);
+    }
+
     /* Free resources and return */
     free (buf);
     return 0;
