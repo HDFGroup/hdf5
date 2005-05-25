@@ -173,7 +173,7 @@ int test_create_close(hid_t fid)
     hid_t table;
     hid_t part_t;
 
-    TESTING("H5PTcreate_fl and H5TBclose");
+    TESTING("H5PTcreate_fl and H5PTclose");
 
     /* Create a datatype for the particle struct */
     part_t = make_particle_type();
