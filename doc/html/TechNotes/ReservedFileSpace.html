@@ -22,7 +22,7 @@
       <ol>
          <li>This system does not take into accout deleted space.  Deleted space can still be allocated as usual, but "reserved" space is always taken off the end of a file.  This means that a file that was filled to capacity but then had a significant number of objects deleted will still throw errors if more data is written.  This occurs because the file's free space is in the middle of the file, not at the end.  A more complete space-reservation system would test if the reserved data can fit into the file's free list, but this would be significantly more complicated to implement.</li>
 
-         <li>HDF5 currently claims to support 16-byte addresses, but since the size of a long long is only 8 bytes, addresses of this size cannot be represented in memory.  This solution does not attempt to address this issue.</li>
+         <li>HDF5 currently claims to support 16-byte addresses, but a number of platforms do not support 16-byte integers, so addresses of this size cannot be represented in memory.  This solution does not attempt to address this issue.</li>
       </ol>
       </p>
    </body>

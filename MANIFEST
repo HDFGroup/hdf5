@@ -210,6 +210,7 @@
 
 ./doc/html/TechNotes.html
 ./doc/html/TechNotes/shuffling-algorithm-report.pdf
+./doc/html/TechNotes/Automake.html
 ./doc/html/TechNotes/Basic_perform.html
 ./doc/html/TechNotes/BigDataSmMach.html
 ./doc/html/TechNotes/ChStudy_1000x1000.gif
