@@ -103,7 +103,8 @@ in the file file_io.win32.c and including it on the projects
 #if defined __INTEL_COMPILER
 #undef H5_LLONG_TO_FP_CAST_WORKS
 #else
-#define H5_LLONG_TO_FP_CAST_WORKS
+/*#define H5_LLONG_TO_FP_CAST_WORKS*/
+
 #endif
 #else
 #undef H5_HAVE_FUNCTION
