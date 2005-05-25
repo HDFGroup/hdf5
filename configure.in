@@ -30,7 +30,10 @@ AC_CONFIG_SRCDIR([src/H5.c])
 AM_CONFIG_HEADER([src/H5config.h])
 
 AC_CONFIG_AUX_DIR([bin])
-AM_INIT_AUTOMAKE
+
+dnl AM_INIT_AUTOMAKE takes a list of options that should be applied to
+dnl every Makefile.am when automake is run.
+AM_INIT_AUTOMAKE([foreign])
 
 dnl AM_MAINTAINER_MODE turns off "rebuild rules" that contain dependencies
 dnl for Makefiles, configure, src/H5config.h, etc.  If AM_MAINTAINER_MODE

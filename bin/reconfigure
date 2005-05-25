@@ -27,8 +27,8 @@ PATH=/afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin:$PATH
   echo /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoheader
   /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoheader
 
-  echo /afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/automake-1.9 --foreign --add-missing
-  /afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/automake-1.9 --foreign --add-missing
+  echo /afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/automake-1.9 --add-missing
+  /afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/automake-1.9 --add-missing
 
   echo /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf
   /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf
