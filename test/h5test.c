@@ -329,7 +329,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
          * For serial:
          *      First use the environment variable, then try the constant
 	 */
-	prefix = getenv("HDF5_PREFIX");
+	prefix = HDgetenv("HDF5_PREFIX");
 
 #ifdef HDF5_PREFIX
 	if (!prefix)
@@ -848,6 +848,7 @@ int h5_szip_can_encode(void )
 }
 #endif /* H5_HAVE_FILTER_SZIP */
 
+#ifdef H5_HAVE_PARALLEL
 /*-------------------------------------------------------------------------
  * Function:	getenv_all
  *
@@ -872,7 +873,6 @@ int h5_szip_can_encode(void )
  *-------------------------------------------------------------------------
  */
 
-#ifdef H5_HAVE_PARALLEL
 char* getenv_all(MPI_Comm comm, int root, const char* name)
 {
     int nID;
