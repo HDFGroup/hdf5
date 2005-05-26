@@ -147,6 +147,7 @@ H5TEST_DLL int h5_szip_can_encode(void);
 #ifdef H5_HAVE_PARALLEL
 H5TEST_DLL int h5_set_info_object(void);
 H5TEST_DLL void h5_dump_info_object(MPI_Info info);
+H5TEST_DLL char* getenv_all(MPI_Comm comm, int root, const char* name);
 #endif
 
 #ifdef __cplusplus

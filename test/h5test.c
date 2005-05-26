@@ -297,7 +297,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 	 */
         static int explained = 0;
 
-	prefix = (paraprefix ? paraprefix : getenv("HDF5_PARAPREFIX"));
+	prefix = (paraprefix ? paraprefix : getenv_all(MPI_COMM_WORLD, 0, "HDF5_PARAPREFIX")); 
 
 	if (!prefix && !explained) {
 	    /* print hint by process 0 once. */
@@ -854,3 +854,83 @@ int h5_szip_can_encode(void )
    return(-1);
 }
 #endif /* H5_HAVE_FILTER_SZIP */
+
+#ifdef H5_HAVE_PARALLEL
+/*-------------------------------------------------------------------------
+ * Function:	getenv_all
+ *
+ * Purpose:	Used to get the environment that the root MPI task has.
+ * 		name specifies which environment variable to look for
+ * 		val is the string to which the value of that environment
+ * 		variable will be copied.
+ *
+ * 		NOTE: The pointer returned by this function is only
+ * 		valid until the next call to getenv_all and the data
+ * 		stored there must be copied somewhere else before any
+ * 		further calls to getenv_all take place.
+ *
+ * Return:	pointer to a string containing the value of the environment variable
+ * 		NULL if the varialbe doesn't exist in task 'root's environment.
+ *
+ * Programmer:	Leon Arber
+ *              4/4/05
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+char* getenv_all(MPI_Comm comm, int root, const char* name)
+{
+    int nID;
+    int len = -1;
+    static char* env = NULL;
+    MPI_Status Status;
+    
+    assert(name);
+   
+    MPI_Comm_rank(comm, &nID); 
+
+    /* The root task does the getenv call 
+     * and sends the result to the other tasks */
+    if(nID == root)
+    {
+	env = HDgetenv(name);
+	if(env)
+	{
+	    len = HDstrlen(env);
+	    MPI_Bcast(&len, 1, MPI_INT, root, comm);
+	    MPI_Bcast(env, len, MPI_CHAR, root, comm);
+	}
+	/* len -1 indicates that the variable was not in the environment */
+	else
+	    MPI_Bcast(&len, 1, MPI_INT, root, comm);
+    }
+    else
+    {
+	MPI_Bcast(&len, 1, MPI_INT, root, comm);
+	if(len >= 0)
+	{
+	    if(env == NULL)
+		env = (char*) HDmalloc(len+1);
+	    else if(strlen(env) < len)
+		env = (char*) HDrealloc(env, len+1);
+
+	    MPI_Bcast(env, len, MPI_CHAR, root, comm);
+	    env[len+1] = '\0';
+	}
+	else
+	{
+	    if(env)
+		HDfree(env);
+	    env = NULL;
+	}
+    }
+
+    MPI_Barrier(comm);
+
+    return env;
+}
+
+#endif
+
