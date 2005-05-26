@@ -92,9 +92,10 @@ if test "X$f9x_flags_set" = "X"; then
 fi
 
 # The Default settings for C++
+# Intel changed C++ compiler's name from "icc" to "icpc" in version 8.1
 if test -z "$CXX"; then
-    CXX=icc
-    CXX_BASENAME=icc
+    CXX=icpc
+    CXX_BASENAME=icpc
 fi
 
 # A patch to make g++ getting the default settings.
