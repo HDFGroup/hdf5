@@ -1729,6 +1729,10 @@
 ./windows/hl/fortran/test/hl_test_table_fortran/hl_test_table_fortran.dsp
 ./windows/hl/fortran/test/test_hdf5_hl_fortran.BAT
 
+#windows hl c++ test
+./windows/hl/c++/test/hl_test_table_cpp/hl_test_table_cpp.dsp
+./windows/hl/c++/test/test_hdf5_hl_cpp.bat
+
 #windows hl test
 ./windows/hl/test/hl_test_image/hl_test_image.dsp
 ./windows/hl/test/hl_test_lite/hl_test_lite.dsp
@@ -1759,7 +1763,7 @@
 ./windows/proj/hdf5_hl/hdf5_hl.dsp
 ./windows/proj/hdf5_hl_fortran/hdf5_hl_fortran.dsp
 ./windows/proj/hdf5dll/hdf5dll.dsp
-
+./windows/proj/hdf5_hl_cpp/hdf5_hl_cpp.dsp
 #windows src
 ./windows/src/H5pubconf.h
 ./windows/src/H5Tinit.c
