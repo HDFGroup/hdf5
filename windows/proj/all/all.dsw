@@ -1812,6 +1812,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "hdf5_hl_cpp"=..\hdf5_hl_cpp\hdf5_hl_cpp.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "hdf5_hl_fortran"=..\hdf5_hl_fortran\hdf5_hl_fortran.dsp - Package Owner=<4>
 
 Package=<5>
@@ -1927,6 +1939,27 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name hdf5_hl
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "hl_test_table_cpp"="..\..\hl\c++\test\hl_test_table_cpp\hl_test_table_cpp.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5_cpp
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hl
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hl_cpp
     End Project Dependency
 }}}
 
