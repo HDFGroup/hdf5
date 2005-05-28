@@ -795,7 +795,7 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
 	CONFIGNAME=`echo $h | cut -f2 -d/`
 	h=`echo $h | cut -f1 -d/`
 	n_test=`expr $n_test + 1`
-	TMP_OUTPUT="#$h.out"
+	TMP_OUTPUT="#${h}_${CONFIGNAME}.out"
 	(PRINT "=============="
 	 PRINT "Testing $h"
 	 PRINT "==============") > $TMP_OUTPUT
@@ -809,7 +809,7 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
 		# launch concurrent tests only if srcdir is used
 		if [ -n "$SRCDIR" ]; then
 		    $CMD &
-		    echo $! > PID.$h
+		    echo $! > PID.${h}_${CONFIGNAME}
 		else
 		    $CMD
 		fi
@@ -830,14 +830,15 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
     # Pause a moment in case the timekeeper is terminating processes.
     wait 30
     for h in $TESTHOST; do
+	CONFIGNAME=`echo $h | cut -f2 -d/`
 	h=`echo $h | cut -f1 -d/`
-	TMP_OUTPUT="#$h.out"
+	TMP_OUTPUT="#${h}_${CONFIGNAME}.out"
 	cat $TMP_OUTPUT
 	# Verify test script did complete by checking the last lines
 	(tail -2 $TMP_OUTPUT | grep -s 'Grand total' > /dev/null 2>&1) ||
 	    (REPORT_ERR "****FAILED ${h}: snaptest did not complete****" &&
 		PRINT_BLANK)
-	rm -f $TMP_OUTPUT PID.$h
+	rm -f $TMP_OUTPUT PID.${h}_${CONFIGNAME}
     done
     exit 0
 fi
