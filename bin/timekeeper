@@ -40,6 +40,7 @@ USAGE()
 {
     echo "Usage: %0 [-h] [-debug] [<time-limit>]"
     echo "    Run timekeeper with <time-limit> minutes, default is $waitminutes."
+    echo "    If <time-limit> is in the form of HH:MM, it means wait till then."
     echo "    -h      print this help page"
     echo "    -debug  run debug mode"
 }
@@ -58,8 +59,27 @@ ParseOption()
 	waitminutes=1		# use shorter time for debug
     fi
     if [ $# -gt 0 ]; then
-	waitminutes=$1
+	targettime=$1
 	shift
+
+	# find out it is minutes to wait or HH:MM to wake up
+	case $targettime in
+	*:*)	# HH:MM
+	    currenttime=`date +%H:%M`
+	    currenthour=`echo $currenttime | cut -f1 -d:`
+	    currentminute=`echo $currenttime | cut -f2 -d:`
+	    targethour=`echo $targettime | cut -f1 -d:`
+	    targetminute=`echo $targettime | cut -f2 -d:`
+	    waitminutes=`expr \( $targethour - $currenthour \) \* 60 + $targetminute - $currentminute`
+	    if test $waitminutes -le 0; then
+		# target time is in tomorrow, add 1 day of minutes
+		waitminutes=`expr 24 \* 60 + $waitminutes`
+	    fi
+	    ;;
+	*)
+	    waitminutes=$targettime
+	    ;;
+	esac
     fi
 }
 
