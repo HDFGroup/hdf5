@@ -92,7 +92,7 @@ hid_t DataSet::p_get_type() const
       return( type_id );
    else
    {
-      throw DataSetIException(0, "H5Dget_type failed");
+      throw DataSetIException("", "H5Dget_type failed");
    }
 }
 

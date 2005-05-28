@@ -178,7 +178,7 @@ hid_t Attribute::p_get_type() const
       return( type_id );
    else
    {
-      throw AttributeIException(0, "H5Aget_type failed");
+      throw AttributeIException("", "H5Aget_type failed");
    }
 }
 
