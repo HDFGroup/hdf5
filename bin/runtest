@@ -784,7 +784,7 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
     cd ${SNAPYARD}/log
     # Fork off timekeeper if concurrent tests will be used.
     if [ -n "$SRCDIR" ]; then
-	timelimit=`cat $TIMELIMIT`
+	timelimit=`grep -v '^#' $TIMELIMIT`
 	($SNAPYARD/current/bin/timekeeper $timelimit > $TIMEKEEPERLOG 2>&1 &)
 	PRINT "    Fork off timekeeper $timelimit"
     fi
