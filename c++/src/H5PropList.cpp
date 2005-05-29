@@ -163,6 +163,7 @@ void PropList::copyProp( PropList& dest, PropList& src, const string& name ) con
 //--------------------------------------------------------------------------
 // Function:	PropList::close
 ///\brief	Closes the property list if it is not a default one.
+///
 ///\exception	H5::PropListIException
 // Programmer	Binh-Minh Ribler - Mar 9, 2005
 //--------------------------------------------------------------------------
@@ -243,6 +244,7 @@ bool PropList::propExist(const string& name ) const
 //--------------------------------------------------------------------------
 // Function:	PropList::closeClass
 ///\brief	Close a property list class.
+///
 ///\exception	H5::PropListIException
 ///\par Description
 ///		Releases memory and detaches a class from the property 

@@ -31,6 +31,7 @@ bool H5Library::need_cleanup = false;
 //--------------------------------------------------------------------------
 // Function:	H5Library::open
 ///\brief	Initializes the HDF5 library. 
+///
 ///\exception	H5::LibraryIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -46,6 +47,7 @@ void H5Library::open()
 //--------------------------------------------------------------------------
 // Function:	H5Library::close
 ///\brief	Flushes all data to disk, closes files, and cleans up memory. 
+///
 ///\exception	H5::LibraryIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -61,6 +63,7 @@ void H5Library::close()
 //--------------------------------------------------------------------------
 // Function:	H5Library::dontAtExit
 ///\brief	Instructs library not to install \c atexit cleanup routine
+///
 ///\exception	H5::LibraryIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -119,6 +122,7 @@ void H5Library::checkVersion(unsigned majnum, unsigned minnum, unsigned relnum)
 ///\brief	Walks through all the garbage collection routines for the
 ///		library, which are supposed to free any unused memory they 
 ///		have allocated.
+///
 ///\exception	H5::LibraryIException
 ///\par Description
 ///		It is not required that H5Library::garbageCollect be called 

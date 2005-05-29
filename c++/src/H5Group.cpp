@@ -144,6 +144,7 @@ DataSpace Group::getRegion(void *ref, H5R_type_t ref_type) const
 //--------------------------------------------------------------------------
 // Function:	Group::close
 ///\brief	Closes this group.
+///
 ///\exception	H5::GroupIException
 // Programmer	Binh-Minh Ribler - Mar 9, 2005
 //--------------------------------------------------------------------------

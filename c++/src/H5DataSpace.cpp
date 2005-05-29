@@ -297,6 +297,7 @@ void DataSpace::setExtentSimple( int rank, const hsize_t *current_size, const hs
 //--------------------------------------------------------------------------
 // Function:	DataSpace::setExtentNone
 ///\brief	Removes the extent from a dataspace.
+///
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -460,6 +461,7 @@ void DataSpace::selectElements ( H5S_seloper_t op, const size_t num_elements, co
 //--------------------------------------------------------------------------
 // Function:	DataSpace::selectAll
 ///\brief	Selects the entire dataspace.
+///
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -475,6 +477,7 @@ void DataSpace::selectAll () const
 //--------------------------------------------------------------------------
 // Function:	DataSpace::selectNone
 ///\brief	Resets the selection region to include no elements.
+///
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -540,6 +543,7 @@ void DataSpace::selectHyperslab( H5S_seloper_t op, const hsize_t *count, const h
 //--------------------------------------------------------------------------
 // Function:	DataSpace::close
 ///\brief	Closes this dataspace.
+///
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - Mar 9, 2005
 //--------------------------------------------------------------------------

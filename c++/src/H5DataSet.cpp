@@ -477,6 +477,7 @@ DataSpace DataSet::getRegion(void *ref, H5R_type_t ref_type) const
 //--------------------------------------------------------------------------
 // Function:	DataSet::close
 ///\brief	Closes this dataset.
+///
 ///\exception	H5::DataSetIException
 // Programmer	Binh-Minh Ribler - Mar 9, 2005
 //--------------------------------------------------------------------------

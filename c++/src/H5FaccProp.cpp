@@ -55,6 +55,7 @@ FileAccPropList::FileAccPropList(const hid_t plist_id) : PropList(plist_id) {}
 //--------------------------------------------------------------------------
 // Function:	FileAccPropList::setStdio
 ///\brief	Modifies this property list to use the \c H5FD_STDIO driver.
+///
 ///\exception	H5::PropListIException
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
@@ -449,6 +450,7 @@ void FileAccPropList::setLog(const string& logfile, unsigned flags, size_t buf_s
 // Function:	FileAccPropList::setSec2
 ///\brief	Modifies this file access property list to use the sec2
 ///		driver.
+///
 ///\exception	H5::PropListIException
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------

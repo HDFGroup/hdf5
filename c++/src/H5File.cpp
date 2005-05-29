@@ -176,6 +176,7 @@ bool H5File::isHdf5(const string& name )
 //--------------------------------------------------------------------------
 // Function:	H5File::reOpen
 ///\brief	Reopens this file.
+///
 ///\exception	H5::FileIException
 // Description
 //		If this object has represented another HDF5 file, the previous
@@ -208,6 +209,7 @@ void H5File::reOpen()
 //--------------------------------------------------------------------------
 // Function:	H5File::reopen
 ///\brief	Reopens this file.
+///
 ///\exception	H5::FileIException
 ///\par Description
 ///		This function will be replaced by the above function \c reOpen
@@ -293,14 +295,16 @@ hssize_t H5File::getFreeSpace() const
 ///\return	Number of opened object IDs
 ///\exception	H5::FileIException
 ///\par Description
-///		The valid values for \a types include:
-///		\li \c H5F_OBJ_FILE  Files only  
-///		\li \c H5F_OBJ_DATASET  Datasets only  
-///		\li \c H5F_OBJ_GROUP  Groups only  
-///		\li \c H5F_OBJ_DATATYPE    Named datatypes only  
-///		\li \c H5F_OBJ_ATTR    Attributes only  
-///		\li \c H5F_OBJ_ALL  All of the above 
-///		\li \c (i.e., H5F_OBJ_FILE | H5F_OBJ_DATASET | H5F_OBJ_GROUP | H5F_OBJ_DATATYPE | H5F_OBJ_ATTR )  
+///             The valid values for \a types include:
+///             \li \c H5F_OBJ_FILE	- Files only
+///             \li \c H5F_OBJ_DATASET	- Datasets only
+///             \li \c H5F_OBJ_GROUP	- Groups only
+///             \li \c H5F_OBJ_DATATYPE	- Named datatypes only
+///             \li \c H5F_OBJ_ATTR	- Attributes only
+///             \li \c H5F_OBJ_ALL    - All of the above, i.e., \c H5F_OBJ_FILE
+///					| \c H5F_OBJ_DATASET | \c H5F_OBJ_GROUP
+///					| \c H5F_OBJ_DATATYPE | \c H5F_OBJ_ATTR
+///\par
 /// Multiple object types can be combined with the logical OR operator (|).
 // Programmer   Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
@@ -343,14 +347,16 @@ int H5File::getObjCount() const
 ///\param	oid_list - List of open object identifiers
 ///\exception	H5::FileIException
 ///\par Description
-///		The valid values for \a types include:
-///		\li \c H5F_OBJ_FILE  Files only  
-///		\li \c H5F_OBJ_DATASET  Datasets only  
-///		\li \c H5F_OBJ_GROUP  Groups only  
-///		\li \c H5F_OBJ_DATATYPE    Named datatypes only  
-///		\li \c H5F_OBJ_ATTR    Attributes only  
-///		\li \c H5F_OBJ_ALL  All of the above 
-///		\li \c (I.e., H5F_OBJ_FILE | H5F_OBJ_DATASET | H5F_OBJ_GROUP | H5F_OBJ_DATATYPE | H5F_OBJ_ATTR )  
+///             The valid values for \a types include:
+///             \li \c H5F_OBJ_FILE	- Files only
+///             \li \c H5F_OBJ_DATASET	- Datasets only
+///             \li \c H5F_OBJ_GROUP	- Groups only
+///             \li \c H5F_OBJ_DATATYPE	- Named datatypes only
+///             \li \c H5F_OBJ_ATTR	- Attributes only
+///             \li \c H5F_OBJ_ALL    - All of the above, i.e., \c H5F_OBJ_FILE
+///					| \c H5F_OBJ_DATASET | \c H5F_OBJ_GROUP
+///					| \c H5F_OBJ_DATATYPE | \c H5F_OBJ_ATTR
+///\par
 /// Multiple object types can be combined with the logical OR operator (|).
 //
 // Notes: will do the overload for this one after hearing from Quincey???
@@ -374,10 +380,10 @@ void H5File::getObjIDs(unsigned types, int max_objs, hid_t *oid_list) const
 ///			      the low-level virtual file driver
 ///\exception	H5::FileIException
 ///\par Description
-///		For the FAMILY or MULTI drivers, \a fapl should be 
+///		For the \c FAMILY or \c MULTI drivers, \a fapl should be 
 ///		defined through the property list functions: 
-///		\c FileAccPropList::setFamilyOffset for the FAMILY driver 
-///		and \c FileAccPropList::setMultiType for the MULTI driver.
+///		\c FileAccPropList::setFamilyOffset for the \c FAMILY driver 
+///		and \c FileAccPropList::setMultiType for the \c MULTI driver.
 ///
 ///		The obtained file handle is dynamic and is valid only while 
 ///		the file remains open; it will be invalid if the file is 
@@ -534,6 +540,7 @@ hid_t H5File::getLocId() const
 //--------------------------------------------------------------------------
 // Function:	H5File::close
 ///\brief	Closes this HDF5 file.
+///
 ///\exception	H5::FileIException
 // Programmer	Binh-Minh Ribler - Mar 9, 2005
 //--------------------------------------------------------------------------

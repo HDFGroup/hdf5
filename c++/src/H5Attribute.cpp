@@ -258,7 +258,8 @@ string Attribute::getName() const
 
 //--------------------------------------------------------------------------
 // Function:	Attribute::close
-///\brief:	Closes this attribute.
+///\brief	Closes this attribute.
+///
 ///\exception	H5::AttributeIException
 // Programmer	Binh-Minh Ribler - Mar 9, 2005
 //--------------------------------------------------------------------------
