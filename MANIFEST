@@ -716,7 +716,13 @@
 ./c++/src/H5VarLenType.h
 ./c++/src/Makefile.am
 ./c++/src/Makefile.in
+./c++/src/RM_stylesheet.css
+./c++/src/cpp_doc_config
 ./c++/src/h5c++.in
+./c++/src/header.html
+./c++/src/header_files/filelist.xml
+./c++/src/header_files/image001.jpg
+./c++/src/header_files/image002.jpg
 
 ./c++/test/Makefile.am
 ./c++/test/Makefile.in
