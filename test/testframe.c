@@ -417,6 +417,15 @@ int GetTestNumErrs(void)
 
 
 /*
+ * Retrieve the number of testing errors for the testing framework
+ */
+void IncTestNumErrs(void)
+{
+    num_errs++;
+}
+
+
+/*
  * Retrieve the current Test Parameters pointer.
  */
 const void *GetTestParameters(void)
