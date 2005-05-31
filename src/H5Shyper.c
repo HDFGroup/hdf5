@@ -5388,7 +5388,6 @@ H5S_hyper_rebuild (H5S_t *space)
             app_diminfo[curr_dim].stride = diminfo[curr_dim].stride = 1;
             app_diminfo[curr_dim].count = diminfo[curr_dim].count = 1;
             app_diminfo[curr_dim].block = diminfo[curr_dim].block = (span->high-span->low)+1;
-            assert(diminfo[curr_dim].block>0);
 
             /* Walk down the span tree */
             if(span->down) {
@@ -5483,7 +5482,6 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
     H5S_hyper_span_info_t *a_not_b=NULL;    /* Span tree for hyperslab spans in old span tree and not in new span tree */
     H5S_hyper_span_info_t *a_and_b=NULL;    /* Span tree for hyperslab spans in both old and new span trees */
     H5S_hyper_span_info_t *b_not_a=NULL;    /* Span tree for hyperslab spans in new span tree and not in old span tree */
-    htri_t      status;         /* Status from internal calls */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5S_generate_hyperslab);
@@ -5513,6 +5511,8 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
         new_spans=NULL;
     } /* end if */
     else {
+        hbool_t updated_spans = FALSE;  /* Whether the spans in the selection were modified */
+
         /* Generate lists of spans which overlap and don't overlap */
         if(H5S_hyper_clip_spans(space->select.sel_info.hslab->span_lst,new_spans,&a_not_b,&a_and_b,&b_not_a)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL, "can't clip hyperslab information");
@@ -5526,6 +5526,9 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
 
                     /* Update the number of elements in current selection */
                     space->select.num_elem+=H5S_hyper_spans_nelem(b_not_a);
+
+                    /* Indicate that the spans were updated */
+                    updated_spans = TRUE;
                 } /* end if */
                 break;
 
@@ -5548,6 +5551,9 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
 
                     /* Indicate that the a_and_b spans are owned */
                     a_and_b=NULL;
+
+                    /* Indicate that the spans were updated */
+                    updated_spans = TRUE;
                 } /* end if */
                 break;
 
@@ -5567,6 +5573,9 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
 
                     /* Update the number of elements in current selection */
                     space->select.num_elem=H5S_hyper_spans_nelem(a_not_b);
+
+                    /* Indicate that the spans were updated */
+                    updated_spans = TRUE;
                 } /* end if */
                 if(b_not_a!=NULL) {
                     if(H5S_hyper_merge_spans(space,b_not_a,FALSE)<0)
@@ -5574,6 +5583,9 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
 
                     /* Update the number of elements in current selection */
                     space->select.num_elem+=H5S_hyper_spans_nelem(b_not_a);
+
+                    /* Indicate that the spans were updated */
+                    updated_spans = TRUE;
                 } /* end if */
                 break;
 
@@ -5596,6 +5608,9 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
 
                     /* Indicate that the a_not_b are owned */
                     a_not_b=NULL;
+
+                    /* Indicate that the spans were updated */
+                    updated_spans = TRUE;
                 } /* end if */
                 break;
 
@@ -5618,6 +5633,9 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
 
                     /* Indicate that the b_not_a are owned */
                     b_not_a=NULL;
+
+                    /* Indicate that the spans were updated */
+                    updated_spans = TRUE;
                 } /* end if */
                 break;
 
@@ -5657,15 +5675,20 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
             space->select.sel_info.hslab->span_lst=spans;
         } /* end if */
         else {
-            /* Check if the resulting hyperslab span tree can be used to re-build
-             * "optimized" start/stride/count/block information.
-             */
-            status=H5S_hyper_can_rebuild(space);
-            if(status<0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't check for rebuilding hyperslab info");
-            if(status>0)
-                if(H5S_hyper_rebuild(space)<0)
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't rebuild hyperslab info");
+            /* Check if we updated the spans */
+            if(updated_spans) {
+                htri_t      status;         /* Status from internal calls */
+
+                /* Check if the resulting hyperslab span tree can be used to re-build
+                 * "optimized" start/stride/count/block information.
+                 */
+                status=H5S_hyper_can_rebuild(space);
+                if(status<0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't check for rebuilding hyperslab info");
+                if(status>0)
+                    if(H5S_hyper_rebuild(space)<0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't rebuild hyperslab info");
+            } /* end if */
         } /* end else */
     } /* end else */
 
@@ -5706,6 +5729,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     const hsize_t *opt_stride;      /* Optimized stride information */
     const hsize_t *opt_count;       /* Optimized count information */
     const hsize_t *opt_block;       /* Optimized block information */
+    hbool_t zero_hyperslab = FALSE; /* Indicate if the new hyperslab contains zero elements */
     unsigned u;                     /* Counters */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -5726,11 +5750,16 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
         block = _ones;
 
     /*
-     * Check for overlapping hyperslab blocks in new selection.
+     * Check new selection.
      */
     for(u=0; u<space->extent.rank; u++) {
+        /* Check for overlapping hyperslab blocks in new selection. */
         if(count[u]>1 && stride[u]<block[u])
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab blocks overlap");
+
+        /* Detect zero-sized hyperslabs in new selection */
+        if(count[u] == 0 || block[u] == 0)
+            zero_hyperslab = TRUE;
     } /* end for */
 
     /* Optimize hyperslab parameters to merge contiguous blocks, etc. */
@@ -5767,6 +5796,27 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
             } /* end else */
         } /* end for */
     } /* end else */
+
+    /* Fixup zero-sized hyperslab selections */
+    if(zero_hyperslab) {
+        switch(op) {
+            case H5S_SELECT_SET:   /* Select "set" operation */
+            case H5S_SELECT_AND:   /* Binary "and" operation for hyperslabs */
+            case H5S_SELECT_NOTA:  /* Binary "B not A" operation for hyperslabs */
+                /* Convert to "none" selection */
+                if(H5S_select_none(space)<0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't convert selection");
+                HGOTO_DONE(SUCCEED);
+
+            case H5S_SELECT_OR:    /* Binary "or" operation for hyperslabs */
+            case H5S_SELECT_XOR:   /* Binary "xor" operation for hyperslabs */
+            case H5S_SELECT_NOTB:  /* Binary "A not B" operation for hyperslabs */
+                HGOTO_DONE(SUCCEED);        /* Selection stays same */
+
+            default:
+                HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
+        } /* end switch */
+    } /* end if */
 
     /* Fixup operation for non-hyperslab selections */
     switch(H5S_GET_SELECT_TYPE(space)) {
@@ -5995,7 +6045,6 @@ H5S_operate_hyperslab (H5S_t *result, H5S_hyper_span_info_t *spans1, H5S_seloper
     H5S_hyper_span_info_t *a_not_b=NULL;    /* Span tree for hyperslab spans in old span tree and not in new span tree */
     H5S_hyper_span_info_t *a_and_b=NULL;    /* Span tree for hyperslab spans in both old and new span trees */
     H5S_hyper_span_info_t *b_not_a=NULL;    /* Span tree for hyperslab spans in new span tree and not in old span tree */
-    htri_t      status;         /* Status from internal calls */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5S_operate_hyperslab);
@@ -6019,6 +6068,8 @@ H5S_operate_hyperslab (H5S_t *result, H5S_hyper_span_info_t *spans1, H5S_seloper
             *span2_owned=TRUE;
     } /* end if */
     else {
+        hbool_t updated_spans = FALSE;  /* Whether the spans in the selection were modified */
+
         assert(spans1);
 
         /* Generate lists of spans which overlap and don't overlap */
@@ -6044,6 +6095,9 @@ H5S_operate_hyperslab (H5S_t *result, H5S_hyper_span_info_t *spans1, H5S_seloper
 
                     /* Update the number of elements in current selection */
                     result->select.num_elem+=H5S_hyper_spans_nelem(b_not_a);
+
+                    /* Indicate that the spans were updated */
+                    updated_spans = TRUE;
                 } /* end if */
                 break;
 
@@ -6058,6 +6112,9 @@ H5S_operate_hyperslab (H5S_t *result, H5S_hyper_span_info_t *spans1, H5S_seloper
 
                     /* Indicate that the result owns the a_and_b spans */
                     a_and_b=NULL;
+
+                    /* Indicate that the spans were updated */
+                    updated_spans = TRUE;
                 } /* end if */
                 break;
 
@@ -6069,6 +6126,9 @@ H5S_operate_hyperslab (H5S_t *result, H5S_hyper_span_info_t *spans1, H5S_seloper
 
                     /* Update the number of elements in current selection */
                     result->select.num_elem=H5S_hyper_spans_nelem(a_not_b);
+
+                    /* Indicate that the spans were updated */
+                    updated_spans = TRUE;
                 } /* end if */
                 if(b_not_a!=NULL) {
                     if(H5S_hyper_merge_spans(result,b_not_a,FALSE)<0)
@@ -6076,6 +6136,9 @@ H5S_operate_hyperslab (H5S_t *result, H5S_hyper_span_info_t *spans1, H5S_seloper
 
                     /* Update the number of elements in current selection */
                     result->select.num_elem+=H5S_hyper_spans_nelem(b_not_a);
+
+                    /* Indicate that the spans were updated */
+                    updated_spans = TRUE;
                 } /* end if */
                 break;
 
@@ -6090,6 +6153,9 @@ H5S_operate_hyperslab (H5S_t *result, H5S_hyper_span_info_t *spans1, H5S_seloper
 
                     /* Indicate that the result owns the a_not_b spans */
                     a_not_b=NULL;
+
+                    /* Indicate that the spans were updated */
+                    updated_spans = TRUE;
                 } /* end if */
                 break;
 
@@ -6104,6 +6170,9 @@ H5S_operate_hyperslab (H5S_t *result, H5S_hyper_span_info_t *spans1, H5S_seloper
 
                     /* Indicate that the result owns the b_not_a spans */
                     b_not_a=NULL;
+
+                    /* Indicate that the spans were updated */
+                    updated_spans = TRUE;
                 } /* end if */
                 break;
 
@@ -6143,15 +6212,20 @@ H5S_operate_hyperslab (H5S_t *result, H5S_hyper_span_info_t *spans1, H5S_seloper
             result->select.sel_info.hslab->span_lst=spans;
         } /* end if */
         else {
-            /* Check if the resulting hyperslab span tree can be used to re-build
-             * "optimized" start/stride/count/block information.
-             */
-            status=H5S_hyper_can_rebuild(result);
-            if(status<0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't check for rebuilding hyperslab info");
-            if(status>0)
-                if(H5S_hyper_rebuild(result)<0)
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't rebuild hyperslab info");
+            /* Check if we updated the spans */
+            if(updated_spans) {
+                htri_t      status;         /* Status from internal calls */
+
+                /* Check if the resulting hyperslab span tree can be used to re-build
+                 * "optimized" start/stride/count/block information.
+                 */
+                status=H5S_hyper_can_rebuild(result);
+                if(status<0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't check for rebuilding hyperslab info");
+                if(status>0)
+                    if(H5S_hyper_rebuild(result)<0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't rebuild hyperslab info");
+            } /* end if */
         } /* end else */
     } /* end else */
 
@@ -6260,6 +6334,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     const hsize_t *opt_stride;      /* Optimized stride information */
     const hsize_t *opt_count;       /* Optimized count information */
     const hsize_t *opt_block;       /* Optimized block information */
+    hbool_t zero_hyperslab = FALSE; /* Indicate if the new hyperslab contains zero elements */
     unsigned u;                    /* Counters */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -6280,11 +6355,16 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
         block = _ones;
 
     /*
-     * Check for overlapping hyperslab blocks in new selection.
+     * Check new selection.
      */
     for(u=0; u<space->extent.rank; u++) {
+        /* Check for overlapping hyperslab blocks in new selection. */
         if(count[u]>1 && stride[u]<block[u])
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab blocks overlap");
+
+        /* Detect zero-sized hyperslabs in new selection */
+        if(count[u] == 0 || block[u] == 0)
+            zero_hyperslab = TRUE;
     } /* end for */
 
     /* Optimize hyperslab parameters to merge contiguous blocks, etc. */
@@ -6321,6 +6401,27 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
             } /* end else */
         } /* end for */
     } /* end else */
+
+    /* Fixup zero-sized hyperslab selections */
+    if(zero_hyperslab) {
+        switch(op) {
+            case H5S_SELECT_SET:   /* Select "set" operation */
+            case H5S_SELECT_AND:   /* Binary "and" operation for hyperslabs */
+            case H5S_SELECT_NOTA:  /* Binary "B not A" operation for hyperslabs */
+                /* Convert to "none" selection */
+                if(H5S_select_none(space)<0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't convert selection");
+                HGOTO_DONE(SUCCEED);
+
+            case H5S_SELECT_OR:    /* Binary "or" operation for hyperslabs */
+            case H5S_SELECT_XOR:   /* Binary "xor" operation for hyperslabs */
+            case H5S_SELECT_NOTB:  /* Binary "A not B" operation for hyperslabs */
+                HGOTO_DONE(SUCCEED);        /* Selection stays same */
+
+            default:
+                HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
+        } /* end switch */
+    } /* end if */
 
     /* Fixup operation for non-hyperslab selections */
     switch(H5S_GET_SELECT_TYPE(space)) {
