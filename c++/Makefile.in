@@ -78,7 +78,7 @@ SUBDIRS=src test
 ##		programs and C compilers.  At the other extreme, the GNU
 ##		make used in combination with gcc will maintain dependency
 ##		information automatically.
-lib progs check test _test uninstall:
+lib progs check check-s check-p test _test uninstall:
 	@@SETX@; for d in $(SUBDIRS); do				      \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
