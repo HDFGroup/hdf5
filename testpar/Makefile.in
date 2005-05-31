@@ -30,7 +30,7 @@ RUNTEST=$(RUNPARALLEL)
 ## Test programs and scripts.
 ##
 TEST_PROGS_PARA=t_mpi testphdf5
-TEST_SCRIPTS=testph5.sh
+TEST_SCRIPTS_PARA=testph5.sh
 
 ## These are our main targets
 PROGS=$(TEST_PROGS_PARA)

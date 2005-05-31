@@ -61,7 +61,7 @@ dep depend:
 	  fi;                                                                 \
 	done
 
-check tests test _test: $(PROGS)
+check check-s check-p tests test _test: $(PROGS)
 	@@SETX@; for d in X lib $(SUBDIRS); do                                \
 	  if test $$d != X; then                                              \
 	    (cd $$d && $(MAKE) $@) || exit 1;                                 \

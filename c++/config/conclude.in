@@ -22,7 +22,27 @@ TAGS: $(LIB_SRC)
 ## Since tests are done in a shell loop, "make -i" does apply inside it.
 ## Set HDF5_Make_Ignore to a non-blank string to ignore errors inside the loop.
 tests: $(TEST_PROGS) $(LIB)
+
+## Same as check-s since there is no Parallel C++ tests yet.
 check test _test: tests
+	@echo "===C++ tests in `echo ${PWD} | sed -e s:.*/::` begin `date`==="
+	$(MAKE) _check-s
+	@echo "===C++ tests in `echo ${PWD} | sed -e s:.*/::` ended `date`==="
+
+## serial tests
+check-s: tests
+	@echo "===Serial C++ tests in `echo ${PWD} | sed -e s:.*/::` begin `date`==="
+	$(MAKE) _check-s
+	@echo "===Serial C++ tests in `echo ${PWD} | sed -e s:.*/::` ended `date`==="
+
+## parallel tests
+check-p: tests
+	@echo "===Parallel C++ tests in `echo ${PWD} | sed -e s:.*/::` begin `date`==="
+	$(MAKE) _check-p
+	@echo "===Parallel C++ tests in `echo ${PWD} | sed -e s:.*/::` ended `date`==="
+
+## Actual execution of sequtial tests.
+_check-s: tests
 	@for test in $(TEST_PROGS) dummy; do                                  \
 	   if test $$test != dummy; then				      \
 	      echo "";							      \
@@ -51,6 +71,11 @@ check test _test: tests
 	   fi;								      \
 	done;								      \
 	test $$test = dummy || false
+
+## Actual execution of parallel tests.
+## No parallel C++ tests yet.  Just a dummy target.
+_check-p: tests
+
 
 ## Make installation directories directories if they don't exist.
 $(libdir):

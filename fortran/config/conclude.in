@@ -21,6 +21,25 @@ TAGS: $(LIB_SRC)
 ## Runs each test in order, passing $(TEST_FLAGS) to the program.
 tests: $(TEST_PROGS) $(LIB)
 check test _test: tests
+	@echo "===Fortran tests in `echo ${PWD} | sed -e s:.*/::` begin `date`==="
+	$(MAKE) _check-s
+	$(MAKE) _check-p
+	@echo "===Fortran tests in `echo ${PWD} | sed -e s:.*/::` ended `date`==="
+
+## serial tests
+check-s: tests
+	@echo "===Serial Fortran tests in `echo ${PWD} | sed -e s:.*/::` begin `date`==="
+	$(MAKE) _check-s
+	@echo "===Serial Fortran tests in `echo ${PWD} | sed -e s:.*/::` ended `date`==="
+
+## parallel tests
+check-p: tests
+	@echo "===Parallel Fortran tests in `echo ${PWD} | sed -e s:.*/::` begin `date`==="
+	$(MAKE) _check-p
+	@echo "===Parallel Fortran tests in `echo ${PWD} | sed -e s:.*/::` ended `date`==="
+
+## Actual execution of sequtial tests.
+_check-s: tests
 	@for test in $(TEST_PROGS) dummy; do                                  \
 	   if test $$test != dummy; then				      \
 	      echo "============================";			      \
@@ -28,22 +47,66 @@ check test _test: tests
 	      echo "============================";			      \
 	      srcdir="$(srcdir)"					      \
 		 $(RUNTEST) ./$$test $(TEST_FLAGS) ||			      \
-		 exit 1;						      \
+		 (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||     \
+		 break;							      \
 	      echo "";							      \
 	   fi;								      \
-	done;
+	done;								      \
+	test $$test = dummy || false
 	@for test in $(TEST_SCRIPTS) dummy; do                                \
 	   if test $$test != dummy; then				      \
 	      echo "============================";			      \
 	      echo "Testing $$test $(TEST_FLAGS)";			      \
 	      echo "============================";			      \
 	      RUNSERIAL="$(RUNSERIAL)" RUNPARALLEL="$(RUNPARALLEL)"           \
-	      srcdir="$(srcdir)"					      \
+	         srcdir="$(srcdir)"					      \
 		 /bin/sh $$test $(TEST_FLAGS) ||		              \
-		 exit 1;						      \
+		 (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||     \
+		 break;							      \
 	      echo "";							      \
 	   fi;								      \
-	done;
+	done;								      \
+	test $$test = dummy || false
+
+## Actual execution of parallel tests.
+_check-p: tests
+	@if test -n "$(TEST_PROGS_PARA)"; then				      \
+	    echo "**** Hint ****";					      \
+	    echo "Parallel test files reside in the current directory"	      \
+	         "by default.";						      \
+	    echo "Set HDF5_PARAPREFIX to use another directory. E.g.,";	      \
+	    echo "    HDF5_PARAPREFIX=/PFS/user/me";			      \
+	    echo "    export HDF5_PARAPREFIX";				      \
+	    echo "    make check";					      \
+	    echo "**** end of Hint ****";				      \
+	fi
+	@for test in $(TEST_PROGS_PARA) dummy; do                             \
+	   if test $$test != dummy; then				      \
+	      echo "============================";			      \
+	      echo "Testing $$test $(TEST_FLAGS)";			      \
+	      echo "============================";			      \
+	      srcdir="$(srcdir)"					      \
+		 $(RUNPARALLEL) ./$$test $(TEST_FLAGS) ||		      \
+		 (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||     \
+		 break;							      \
+	      echo "";							      \
+	   fi;								      \
+	done;								      \
+	test $$test = dummy || false
+	@for test in $(TEST_SCRIPTS_PARA) dummy; do                                \
+	   if test $$test != dummy; then				      \
+	      echo "============================";			      \
+	      echo "Testing $$test $(TEST_FLAGS)";			      \
+	      echo "============================";			      \
+	      RUNSERIAL="$(RUNSERIAL)" RUNPARALLEL="$(RUNPARALLEL)"           \
+	         srcdir="$(srcdir)"					      \
+		 /bin/sh $$test $(TEST_FLAGS) ||		              \
+		 (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||     \
+		 break;							      \
+	      echo "";							      \
+	   fi;								      \
+	done;								      \
+	test $$test = dummy || false
 
 ## Make installation directories directories if they don't exist.
 $(libdir):
