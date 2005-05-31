@@ -281,6 +281,14 @@ test_select_hyper(hid_t xfer_plist)
     ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,stride,count,block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
+    /* Select 0x26 hyperslab to OR into current selection (should be a NOOP) */
+    start[0]=0; start[1]=0;
+    stride[0]=1; stride[1]=1;
+    count[0]=0; count[1]=26;
+    block[0]=1; block[1]=1;
+    ret = H5Sselect_hyperslab(sid2,H5S_SELECT_OR,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
     /* Read selection from disk */
     ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer_plist,rbuf);
     CHECK(ret, FAIL, "H5Dread");
