@@ -30,11 +30,8 @@ FTLIB = ../test/libh5test_fortran.la
 CTLIB = ../../test/.libs/libh5test.a
 FSEARCH_DIRS =@F9XMODFLAG@../src @FSEARCH_DIRS@
 
-## These tests are parallel
-RUNTEST=$(RUNPARALLEL)
-
 ## These are our main targets
-TEST_PROGS=ptesthdf5_fortran
+TEST_PROGS_PARA=ptesthdf5_fortran
 
 ## Temporary files
 MOSTLYCLEAN=ParaEg[123].h5f
@@ -48,7 +45,7 @@ TEST_OBJ=$(TEST_SRC:.f90=.lo)
 TEST_HDR=
 
 ## How to build the tests... They all depend on the hdf5 library
-$(TEST_PROGS): $(LIBHDF5)
+$(TEST_PROGS_PARA): $(LIBHDF5)
 
 $(TEST_OBJ): $(TEST_HDR)
 
