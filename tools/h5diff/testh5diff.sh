@@ -67,6 +67,39 @@ TESTING() {
    echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
+# Some systems will dump some messages to stderr for various reasons.
+# Remove them from the stderr result file.
+# $1 is the file name of the file to be filtered.
+# Cases of filter needed:
+# 1. MPE:
+# In parallel mode and if MPE library is used, it prints the following
+# two message lines whether the MPE tracing is used or not.
+#    Writing logfile.
+#    Finished writing logfile.
+# 2. LANL MPI:
+# The LANL MPI will print some messages like the following,
+#    LA-MPI: *** mpirun (1.5.10)
+#    LA-MPI: *** 3 process(es) on 2 host(s): 2*fln21 1*fln22
+#    LA-MPI: *** libmpi (1.5.10)
+#    LA-MPI: *** Copyright 2001-2004, ACL, Los Alamos National Laboratory
+STDERR_FILTER() {
+    result_file=$1
+    tmp_file=/tmp/h5diff_tmp_$$
+    # Filter MPE messages
+    if test -n "$pmode"; then
+	cp $result_file $tmp_file
+	sed -e '/^Writing logfile./d' -e '/^Finished writing logfile./d' \
+	    < $tmp_file > $result_file
+    fi
+    # Filter LANL MPI messages
+    if test -n "$pmode"; then
+	cp $result_file $tmp_file
+	sed -e '/^LA-MPI:/d' \
+	    < $tmp_file > $result_file
+    fi
+    rm -f $tmp_file
+}
+
 # Run a test and print PASS or *FAIL*.  If a test fails then increment
 # the `nerrors' global variable and (if $verbose is set) display the
 # difference between the actual output and the expected output. The
@@ -106,17 +139,8 @@ TOOLTEST() {
 	    eval $RUNCMD $H5DIFF_BIN "$@"
 	fi
     ) >$actual 2>$actual_err
-    # In parallel mode and if MPE library is used, it prints the following
-    # two message lines.
-    #    Writing logfile.
-    #    Finished writing logfile.
-    # They interfere with the expected output.  Filter them out.
-    if test -n "$pmode"; then
-	sed -e '/^Writing logfile./d' -e '/^Finished writing logfile./d' \
-	    < $actual_err >> $actual
-    else
-	cat $actual_err >> $actual
-    fi
+    STDERR_FILTER $actual_err
+    cat $actual_err >> $actual
 
     if $CMP $expect $actual; then
 	echo " PASSED"
