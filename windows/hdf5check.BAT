@@ -140,6 +140,10 @@ echo ***************************************************************************
 echo hdf5cpptest debug
 call hdf5cpptest debug >> ..\..\check_results.txt
 echo. >> ..\..\check_results.txt
+
+cd ..\..\hl\c++\test
+echo test_hdf5_hl_cpp Debug
+call test_hdf5_hl_cpp Debug >> ..\..\..\check_results.txt
 echo ***************************************************************************** >> ..\..\check_results.txt
 echo                         HDF5 C++ Library Tests -- Release DLL >> ..\..\check_results.txt
 echo ***************************************************************************** >> ..\..\check_results.txt
