@@ -714,7 +714,7 @@ test_unlink(hid_t fapl)
     } H5E_END_TRY;
     if (status>=0) {
 	H5_FAILED();
-	puts("    Unmount by name should not have been allowed!");
+	printf("    %d: Unmount by name should not have been allowed!\n",__LINE__);
 	goto error;
     }
     H5E_BEGIN_TRY {
@@ -722,7 +722,7 @@ test_unlink(hid_t fapl)
     } H5E_END_TRY;
     if (status>=0) {
 	H5_FAILED();
-	puts("    Unmount by name should not have been allowed!");
+	printf("    %d: Unmount by name should not have been allowed!\n",__LINE__);
 	goto error;
     }
     if (H5Funmount(mnt, ".")<0) goto error;
@@ -918,27 +918,27 @@ test_uniformity(hid_t fapl)
     /* Build the virtual file */
     if ((file1=H5Fopen(filename1, H5F_ACC_RDWR, fapl))<0 ||
 	(file2=H5Fopen(filename2, H5F_ACC_RDWR, fapl))<0)
-	goto error;
-    if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT)<0) goto error;
+	TEST_ERROR;
+    if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT)<0) TEST_ERROR;
 
     /* Access some things from the file1 handle */
-    if (H5Gget_objinfo(file1, "/", TRUE, NULL)<0) goto error;
-    if (H5Gget_objinfo(file1, "/mnt1", TRUE, NULL)<0) goto error;
-    if (H5Gget_objinfo(file1, "mnt1", TRUE, NULL)<0) goto error;
-    if (H5Gget_objinfo(file1, "/mnt1/file2", TRUE, NULL)<0) goto error;
-    if (H5Gget_objinfo(file1, "mnt1/file2", TRUE, NULL)<0) goto error;
+    if (H5Gget_objinfo(file1, "/", TRUE, NULL)<0) TEST_ERROR;
+    if (H5Gget_objinfo(file1, "/mnt1", TRUE, NULL)<0) TEST_ERROR;
+    if (H5Gget_objinfo(file1, "mnt1", TRUE, NULL)<0) TEST_ERROR;
+    if (H5Gget_objinfo(file1, "/mnt1/file2", TRUE, NULL)<0) TEST_ERROR;
+    if (H5Gget_objinfo(file1, "mnt1/file2", TRUE, NULL)<0) TEST_ERROR;
     
     /* Access the same things from the file2 handle */
-    if (H5Gget_objinfo(file2, "/", TRUE, NULL)<0) goto error;
-    if (H5Gget_objinfo(file2, "/mnt1", TRUE, NULL)<0) goto error;
-    if (H5Gget_objinfo(file2, "mnt1", TRUE, NULL)<0) goto error;
-    if (H5Gget_objinfo(file2, "/mnt1/file2", TRUE, NULL)<0) goto error;
-    if (H5Gget_objinfo(file2, "mnt1/file2", TRUE, NULL)<0) goto error;
+    if (H5Gget_objinfo(file2, "/", TRUE, NULL)<0) TEST_ERROR;
+    if (H5Gget_objinfo(file2, "/mnt1", TRUE, NULL)<0) TEST_ERROR;
+    if (H5Gget_objinfo(file2, "mnt1", TRUE, NULL)<0) TEST_ERROR;
+    if (H5Gget_objinfo(file2, "/mnt1/file2", TRUE, NULL)<0) TEST_ERROR;
+    if (H5Gget_objinfo(file2, "mnt1/file2", TRUE, NULL)<0) TEST_ERROR;
 
     /* Shut down */
-    if (H5Funmount(file1, "/mnt1")<0) goto error;
-    if (H5Fclose(file1)<0) goto error;
-    if (H5Fclose(file2)<0) goto error;
+    if (H5Funmount(file1, "/mnt1")<0) TEST_ERROR;
+    if (H5Fclose(file1)<0) TEST_ERROR;
+    if (H5Fclose(file2)<0) TEST_ERROR;
     PASSED();
     return 0;
 

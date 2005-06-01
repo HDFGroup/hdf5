@@ -50,12 +50,15 @@
 #define H5F_ACC_DEBUG	(H5CHECK 0x0008u)	/*print debug info	     */
 #define H5F_ACC_CREAT	(H5CHECK 0x0010u)	/*create non-existing files  */
 
-#define H5F_OBJ_FILE	(0x0001u)
-#define H5F_OBJ_DATASET	(0x0002u)
-#define H5F_OBJ_GROUP	(0x0004u)
-#define H5F_OBJ_DATATYPE (0x0008u)
-#define H5F_OBJ_ATTR    (0x0010u)
+/* Flags for H5Fget_obj_count() & H5Fget_obj_ids() calls */
+#define H5F_OBJ_FILE	(0x0001u)       /* File objects */
+#define H5F_OBJ_DATASET	(0x0002u)       /* Dataset objects */
+#define H5F_OBJ_GROUP	(0x0004u)       /* Group objects */
+#define H5F_OBJ_DATATYPE (0x0008u)      /* Named datatype objects */
+#define H5F_OBJ_ATTR    (0x0010u)       /* Attribute objects */
 #define H5F_OBJ_ALL 	(H5F_OBJ_FILE|H5F_OBJ_DATASET|H5F_OBJ_GROUP|H5F_OBJ_DATATYPE|H5F_OBJ_ATTR)
+#define H5F_OBJ_LOCAL   (0x0020u)       /* Restrict search to objects opened through current file ID */
+                                        /* (as opposed to objects opened through any file ID accessing this file) */
 
 #ifdef H5_HAVE_PARALLEL
 /*

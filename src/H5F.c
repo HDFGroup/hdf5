@@ -50,7 +50,13 @@ typedef struct H5F_olist_t {
     H5I_type_t obj_type;        /* Type of object to look for */
     hid_t      *obj_id_list;    /* Pointer to the list of open IDs to return */
     unsigned   *obj_id_count;   /* Number of open IDs */
-    H5F_file_t *shared;         /* Pointer to file to look inside */
+    struct {
+        hbool_t local;          /* Set flag for "local" file searches */
+        union {
+            H5F_file_t *shared; /* Pointer to shared file to look inside */
+            const H5F_t *file;  /* Pointer to file to look inside */
+        } ptr;
+    } file_info;
     unsigned   list_index;      /* Current index in open ID array */
     int   max_index;            /* Maximum # of IDs to put into array */
 } H5F_olist_t;    
@@ -1004,12 +1010,16 @@ H5F_get_objects(const H5F_t *f, unsigned types, int max_index, hid_t *obj_id_lis
     olist.obj_id_count = &obj_id_count;
     olist.list_index   = 0;
     olist.max_index   = max_index;
-    /* Shared file structure is used to verify if file IDs refer to the same 
-     * file. */
-    if(f != NULL)
-        olist.shared = f->shared;
-    else
-	olist.shared = NULL;
+
+    /* Determine if we are searching for local or global objects */
+    if(types&H5F_OBJ_LOCAL) {
+        olist.file_info.local = TRUE;
+        olist.file_info.ptr.file = f;
+    } /* end if */
+    else {
+        olist.file_info.local = FALSE;
+        olist.file_info.ptr.shared = f ? f->shared : NULL;
+    } /* end else */
 
     /* Search through file IDs to count the number, and put their
      * IDs on the object list */
@@ -1083,7 +1093,10 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 
     /* Count file IDs */ 
     if(olist->obj_type == H5I_FILE) {
-	if( !olist->shared || (olist->shared && ((H5F_t*)obj_ptr)->shared == olist->shared) ) {
+        if((olist->file_info.local &&
+                        (!olist->file_info.ptr.file || (olist->file_info.ptr.file && (H5F_t*)obj_ptr == olist->file_info.ptr.file) ))
+                ||  (!olist->file_info.local &&
+                        ( !olist->file_info.ptr.shared || (olist->file_info.ptr.shared && ((H5F_t*)obj_ptr)->shared == olist->file_info.ptr.shared) ))) {
             /* Add the object's ID to the ID list, if appropriate */
             if(olist->obj_id_list) {
                 olist->obj_id_list[olist->list_index] = obj_id;
@@ -1121,9 +1134,14 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unknown data object")
 	}
 
-    	if( (!olist->shared && olist->obj_type==H5I_DATATYPE && H5T_is_immutable((H5T_t*)obj_ptr)==FALSE) 
-                || (!olist->shared && olist->obj_type!=H5I_DATATYPE) 
-                || (ent && ent->file && ent->file->shared == olist->shared) ) {
+        if((olist->file_info.local &&
+                    ( (!olist->file_info.ptr.file && olist->obj_type==H5I_DATATYPE && H5T_is_immutable((H5T_t*)obj_ptr)==FALSE) 
+                            || (!olist->file_info.ptr.file && olist->obj_type!=H5I_DATATYPE) 
+                            || (ent && ent->file == olist->file_info.ptr.file) ))
+                || (!olist->file_info.local &&
+                    ((!olist->file_info.ptr.shared && olist->obj_type==H5I_DATATYPE && H5T_is_immutable((H5T_t*)obj_ptr)==FALSE) 
+                            || (!olist->file_info.ptr.shared && olist->obj_type!=H5I_DATATYPE) 
+                            || (ent && ent->file && ent->file->shared == olist->file_info.ptr.shared) ))) {
             /* Add the object's ID to the ID list, if appropriate */
             if(olist->obj_id_list) {
             	olist->obj_id_list[olist->list_index] = obj_id;
@@ -2896,8 +2914,6 @@ done:
 static herr_t
 H5F_close(H5F_t *f)
 {
-    H5F_close_degree_t	fc_degree;      /* What action to take when closing the last file ID for a file */
-    unsigned	        closing=0;      /* Indicate that the file will be closed */
     unsigned		u;              /* Local index variable */
     herr_t	        ret_value = SUCCEED;    /* Return value */
 
@@ -2919,12 +2935,9 @@ H5F_close(H5F_t *f)
     /* Double-check that this file should be closed */
     assert(1==f->nrefs);
     
-    /* Get the close degree from the file */
-    fc_degree = f->shared->fc_degree;
-
     /* if close degree if "semi" and there are objects left open and we are
      * holding open the file with this file ID, fail now */
-    if(fc_degree==H5F_CLOSE_SEMI && f->nopen_objs>0 && f->shared->nrefs==1)
+    if(f->shared->fc_degree==H5F_CLOSE_SEMI && f->nopen_objs>0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file, there are objects still open")
 
     /*
@@ -2950,7 +2963,7 @@ H5F_close(H5F_t *f)
      *  H5F_CLOSE_STRONG:	if there are still objects open, close them
      *			first, then close file. 
      */ 
-    switch(fc_degree) {
+    switch(f->shared->fc_degree) {
         case H5F_CLOSE_WEAK:
             /*
              * If object headers are still open then delay deletion of 
@@ -2987,39 +3000,11 @@ H5F_close(H5F_t *f)
                         fprintf(H5DEBUG(F), "H5F: H5F_close: operation completing\n");
 #endif
                 } /* end if */
-
-                /* Indicate that the file will be closing */
-                closing=1;
             } /* end else */
             break;
 
         case H5F_CLOSE_SEMI:
-            if (f->nopen_objs>0) {
-#ifdef H5F_DEBUG
-                if (H5DEBUG(F)) {
-                    fprintf(H5DEBUG(F), "H5F: H5F_close(%s): %u object header%s still "
-                    "open (file close will complete when %s closed)\n",
-                    f->name,
-                    f->nopen_objs,
-                    1 == f->nopen_objs?" is":"s are",
-                    1 == f->nopen_objs?"that header is":"those headers are");
-                }
-#endif
-                /* Register an ID for closing the file later */
-                if (!f->closing)
-                    f->closing  = H5I_register(H5I_FILE_CLOSING, f);
-
-                /* Invalidate file ID */
-                f->file_id = -1;
-
-                HGOTO_DONE(SUCCEED)
-            } else {
-                if (!f->closing && f->shared->nrefs>1)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file, there are objects still open")
-
-                /* Indicate that the file will be closing */
-                closing=1;
-            } /* end else */
+            /* If we've gotten this far (ie. there are no open objects in the file), fall through to flush & close */
             break;
 
         case H5F_CLOSE_STRONG:
@@ -3030,7 +3015,7 @@ H5F_close(H5F_t *f)
                 int i;                  /* Local index variable */
 
                 /* Get the list of IDs of open dataset objects */
-                while((obj_count=H5F_get_obj_ids(f, H5F_OBJ_DATASET, (int)(sizeof(objs)/sizeof(objs[0])), objs))!=0) {
+                while((obj_count=H5F_get_obj_ids(f, H5F_OBJ_LOCAL|H5F_OBJ_DATASET, (int)(sizeof(objs)/sizeof(objs[0])), objs))!=0) {
                
                     /* Try to close all the open objects */
                     for(i=0; i<obj_count; i++)
@@ -3039,7 +3024,7 @@ H5F_close(H5F_t *f)
                 } /* end while */
 
                 /* Get the list of IDs of open group objects */
-                while((obj_count=H5F_get_obj_ids(f, H5F_OBJ_GROUP, (int)(sizeof(objs)/sizeof(objs[0])), objs))!=0) {
+                while((obj_count=H5F_get_obj_ids(f, H5F_OBJ_LOCAL|H5F_OBJ_GROUP, (int)(sizeof(objs)/sizeof(objs[0])), objs))!=0) {
                
                     /* Try to close all the open objects */
                     for(i=0; i<obj_count; i++)
@@ -3048,7 +3033,7 @@ H5F_close(H5F_t *f)
                 } /* end while */
 
                 /* Get the list of IDs of open named datatype objects */
-                while((obj_count=H5F_get_obj_ids(f, H5F_OBJ_DATATYPE, (int)(sizeof(objs)/sizeof(objs[0])), objs))!=0) {
+                while((obj_count=H5F_get_obj_ids(f, H5F_OBJ_LOCAL|H5F_OBJ_DATATYPE, (int)(sizeof(objs)/sizeof(objs[0])), objs))!=0) {
                
                     /* Try to close all the open objects */
                     for(i=0; i<obj_count; i++)
@@ -3057,7 +3042,7 @@ H5F_close(H5F_t *f)
                 } /* end while */
 
                 /* Get the list of IDs of open attribute objects */
-                while((obj_count=H5F_get_obj_ids(f, H5F_OBJ_ATTR, (int)(sizeof(objs)/sizeof(objs[0])), objs))!=0) {
+                while((obj_count=H5F_get_obj_ids(f, H5F_OBJ_LOCAL|H5F_OBJ_ATTR, (int)(sizeof(objs)/sizeof(objs[0])), objs))!=0) {
                
                     /* Try to close all the open objects */
                     for(i=0; i<obj_count; i++)
@@ -3065,9 +3050,6 @@ H5F_close(H5F_t *f)
                             HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't close object")
                 } /* end while */
             } /* end while */
-
-            /* Indicate that the file will be closing */
-            closing=1;
             break;
 
         default:
@@ -3077,8 +3059,8 @@ H5F_close(H5F_t *f)
     /* Invalidate file ID */
     f->file_id = -1;
 
-    /* Only flush at this point if the file will be closed */
-    assert(closing);
+    /* Flush at this point since the file will be closed */
+
     /* Dump debugging info */
 #if H5AC_DUMP_STATS_ON_CLOSE
     H5AC_stats(f);

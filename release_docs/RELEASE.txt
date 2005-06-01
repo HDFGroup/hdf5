@@ -41,6 +41,10 @@ New Features
 
     Library:
     --------
+       - Added H5F_OBJ_LOCAL flag to H5Fget_obj_count() & H5Fget_obj_ids(), to
+          allow querying for objects in file that were opened with a particular
+          file ID, instead of all objects opened in file with any file ID.
+          QAK - 2005/06/01
 
     Parallel Library:
     -----------------
@@ -68,6 +72,9 @@ Bug Fixes since HDF5-1.6.4 release
 
     Library
     -------
+        - "SEMI" and "STRONG" file close degree settings now apply only to the
+            particular file ID being closed, instead of operating on all open
+            file IDs for a given file.  QAK - 2005/06/01
         - Fixed error in opening object in group that was opened in mounted
             file which has been unmounted.  QAK - 2005/03/17
 

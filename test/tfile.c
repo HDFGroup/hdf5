@@ -65,6 +65,10 @@
 #define OBJ_ID_COUNT_6	   6    
 #define OBJ_ID_COUNT_8     8 
 
+#define GROUP1  "Group1"
+#define DSET1   "Dataset1"
+#define DSET2   "/Group1/Dataset2"
+
 static void
 create_objects(hid_t, hid_t, hid_t *, hid_t *, hid_t *, hid_t *);
 static void
@@ -180,7 +184,7 @@ test_file_create(void)
     ret = H5Pset_userblock(tmpl1, F2_USERBLOCK_SIZE);
     CHECK(ret, FAIL, "H5Pset_userblock");
 
-    ret = H5Pset_sizes(tmpl1, F2_OFFSET_SIZE, F2_LENGTH_SIZE);
+    ret = H5Pset_sizes(tmpl1, (size_t)F2_OFFSET_SIZE, (size_t)F2_LENGTH_SIZE);
     CHECK(ret, FAIL, "H5Pset_sizes");
 
     ret = H5Pset_sym_k(tmpl1, F2_SYM_INTERN_K, F2_SYM_LEAF_K);
@@ -543,9 +547,10 @@ test_file_close(void)
     /* Create a dataset and a group in each file open respectively */
     create_objects(fid1, fid2, &dataset_id, &group_id1, &group_id2, &group_id3);
 
-    /* Close first open */
+    /* Close first open, should fail since it is SEMI and objects are 
+     * still open. */
     ret = H5Fclose(fid1);
-    CHECK(ret, FAIL, "H5Fclose");
+    VERIFY(ret, FAIL, "H5Fclose");
 
     /* Close second open, should fail since it is SEMI and objects are 
      * still open. */
@@ -555,6 +560,10 @@ test_file_close(void)
     ret = H5Dclose(dataset_id);
     CHECK(ret, FAIL, "H5Dclose");
   
+    /* Close first open */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
     ret = H5Gclose(group_id1);
     CHECK(ret, FAIL, "H5Gclose");
 
@@ -782,7 +791,7 @@ create_objects(hid_t fid1, hid_t fid2, hid_t *ret_did, hid_t *ret_gid1,
     /* Create a group in the second file open */
     {
         hid_t   gid1, gid2, gid3;
-        gid1 = H5Gcreate(fid2, "/group", 0);
+        gid1 = H5Gcreate(fid2, "/group", (size_t)0);
         CHECK(gid1, FAIL, "H5Gcreate");
         if(ret_gid1 != NULL)
             *ret_gid1 = gid1;
@@ -845,7 +854,7 @@ test_get_file_id(void)
     /* Create a group in the file.  Make a duplicated file ID from the group.
      * And close this duplicated ID
      */
-    group_id = H5Gcreate(fid, GRP_NAME, 0);
+    group_id = H5Gcreate(fid, GRP_NAME, (size_t)0);
     CHECK(group_id, FAIL, "H5Gcreate");
    
     /* Test H5Iget_file_id() */
@@ -1288,7 +1297,7 @@ test_file_ishdf5(void)
         buf[u]=(unsigned char)u;
 
     /* Write some information */
-    nbytes = HDwrite(fd, buf, 1024);
+    nbytes = HDwrite(fd, buf, (size_t)1024);
     VERIFY(nbytes, 1024, "HDwrite");
 
     /* Close the file */
@@ -1326,7 +1335,7 @@ test_file_open_dot(void)
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create a group in the HDF5 file */
-    gid = H5Gcreate(fid, GRP_NAME, 0);
+    gid = H5Gcreate(fid, GRP_NAME, (size_t)0);
     CHECK(gid, FAIL, "H5Gcreate");
 
     /* Create a dataspace for creating datasets */
@@ -1387,13 +1396,13 @@ test_file_open_dot(void)
 
     /* Create a group with no name using the file ID */
     H5E_BEGIN_TRY {
-        gid2 = H5Gcreate(fid, ".", 0);
+        gid2 = H5Gcreate(fid, ".", (size_t)0);
     } H5E_END_TRY;
     VERIFY(gid2, FAIL, "H5Gcreate");
 
     /* Create a group with no name using the group ID */
     H5E_BEGIN_TRY {
-        gid2 = H5Gcreate(gid, ".", 0);
+        gid2 = H5Gcreate(gid, ".", (size_t)0);
     } H5E_END_TRY;
     VERIFY(gid2, FAIL, "H5Gcreate");
 
@@ -1426,6 +1435,84 @@ test_file_open_dot(void)
 
 /****************************************************************
 **
+**  test_file_open_overlap(): low-level file test routine.  
+**      This test checks whether opening files in an overlapping way
+**      (as opposed to a nested manner) works correctly.
+**
+*****************************************************************/
+static void 
+test_file_open_overlap(void)
+{
+    hid_t fid1, fid2;
+    hid_t did1, did2;
+    hid_t gid;
+    hid_t sid;
+    int nobjs;          /* # of open objects */
+    herr_t ret;         /* Generic return value */
+ 
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing opening overlapping file opens\n"));
+
+    /* Create file */
+    fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    assert(fid1 > 0);
+
+    /* Open file also */
+    fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
+    assert(fid2 > 0);
+
+    /* Create a group in file */
+    gid = H5Gcreate(fid1, GROUP1, (size_t)0);
+    assert(gid > 0);
+
+    /* Create dataspace for dataset */
+    sid = H5Screate(H5S_SCALAR);
+    assert(sid > 0);
+
+    /* Create dataset in group w/first file ID */
+    did1 = H5Dcreate(gid, DSET1, H5T_NATIVE_INT, sid, H5P_DEFAULT);
+    assert(did1 > 0);
+
+    /* Check number of objects opened in first file */
+    nobjs = H5Fget_obj_count(fid1, H5F_OBJ_LOCAL|H5F_OBJ_ALL);
+    assert(nobjs == 3);         /* 3 == file, dataset & group */
+
+    /* Close dataset */
+    ret = H5Dclose(did1);
+    assert(ret >= 0);
+
+    /* Close group */
+    ret = H5Gclose(gid);
+    assert(ret >= 0);
+
+    /* Close first file ID */
+    ret = H5Fclose(fid1);
+    assert(ret >= 0);
+
+
+    /* Create dataset with second file ID */
+    did2 = H5Dcreate(fid2, DSET2, H5T_NATIVE_INT, sid, H5P_DEFAULT);
+    assert(did2 > 0);
+
+    /* Check number of objects opened in first file */
+    nobjs = H5Fget_obj_count(fid2, H5F_OBJ_ALL);
+    assert(nobjs == 2);         /* 2 == file & dataset */
+
+    /* Close dataspace */
+    ret = H5Sclose(sid);
+    assert(ret >= 0);
+
+    /* Close second dataset */
+    ret = H5Dclose(did2);
+    assert(ret >= 0);
+
+    /* Close second file */
+    ret = H5Fclose(fid2);
+    assert(ret >= 0);
+} /* end test_file_open_overlap() */
+
+/****************************************************************
+**
 **  test_file(): Main low-level file I/O test routine.
 ** 
 ****************************************************************/
@@ -1445,6 +1532,7 @@ test_file(void)
     test_file_freespace();      /* Test file free space information */
     test_file_ishdf5();         /* Test detecting HDF5 files correctly */
     test_file_open_dot();       /* Test opening objects with "." for a name */
+    test_file_open_overlap();   /* Test opening files in an overlapping manner */
 }				/* test_file() */
 
 
