@@ -19,7 +19,7 @@ TAGS: $(LIB_SRC)
 	-etags $(LIB_SRC)
 
 ## Runs each test in order, passing $(TEST_FLAGS) to the program.
-tests: $(TEST_PROGS) $(LIB)
+tests: $(TEST_PROGS) $(TEST_PROGS_PARA) $(LIB)
 check test _test: tests
 	@echo "===Fortran tests in `echo ${PWD} | sed -e s:.*/::` begin `date`==="
 	$(MAKE) _check-s
@@ -211,8 +211,8 @@ mostlyclean:
 ## is part of the HDF5 distribution.
 ##
 clean: mostlyclean
-	@if test -n "$(LIB)" -o -n "$(TEST_PROGS)" -o -n "$(PROGS)" -o -n "$(CLEAN)"; then \
-	    $(RM) $(LIB) $(TEST_PROGS) $(PROGS) $(CLEAN);                     \
+	@if test -n "$(LIB)" -o -n "$(TEST_PROGS)" -o -n "$(TEST_PROGS_PARA)" -o -n "$(PROGS)" -o -n "$(CLEAN)"; then \
+	    $(RM) $(LIB) $(TEST_PROGS) $(TEST_PROGS_PARA) $(PROGS) $(CLEAN);                     \
 	fi
 	-$(RM) *.M *.a *.mod
 	-$(RM) -r .libs
