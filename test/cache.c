@@ -19322,7 +19322,7 @@ mdc_api_call_smoke_check(void)
 
 #define NUM_INVALID_CONFIGS	29
 
-const H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
+H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
 {
   {
     /* 0 -- bad version */
