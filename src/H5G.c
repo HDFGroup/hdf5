@@ -2386,6 +2386,11 @@ H5G_loc (hid_t loc_id)
                 HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, NULL, "invalid file ID");
             if (NULL==(ret_value=H5G_entof(H5G_rootof(f))))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry for root group");
+
+            /* Patch up root group's symbol table entry to reflect this file */
+            /* (but only for non-mounted files) */
+            if(!f->mtab.parent)
+                ret_value->file = f;
             break;
 
         case H5I_GENPROP_CLS:

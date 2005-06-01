@@ -90,6 +90,10 @@ New Features
 
     Library:
     --------
+       - Added H5F_OBJ_LOCAL flag to H5Fget_obj_count() & H5Fget_obj_ids(), to
+          allow querying for objects in file that were opened with a particular
+          file ID, instead of all objects opened in file with any file ID.
+          QAK - 2005/06/01
        - Added H5T_CSET_UTF8 character set to mark datatypes that use the
           UTF-8 Unicode character encoding.  Added tests to ensure that
           library handles UTF-8 object names, attributes, etc. -JL 2005/05/13
@@ -286,6 +290,9 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - "SEMI" and "STRONG" file close degree settings now apply only to the
+            particular file ID being closed, instead of operating on all open
+            file IDs for a given file.  QAK - 2005/06/01
         - For family driver, the library didn't save member size in file.
           When file is reopened, the size of 1st member file determine the 
           member size.  Now member size is saved in file and is used to 
