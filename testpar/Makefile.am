@@ -25,7 +25,7 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/test
 # Test programs and scripts.  These are our main targets.
 #
 TEST_PROG_PARA=t_mpi t_fphdf5 testphdf5
-TEST_SCRIPT=testph5.sh
+TEST_SCRIPT_PARA=testph5.sh
 
 check_PROGRAMS = $(TEST_PROG_PARA)
 check_SCRIPTS= $(TEST_SCRIPT)

@@ -469,7 +469,7 @@ uninstall-am: uninstall-info-am uninstall-localdocDATA
 
 
 # Ignore most rules
-lib progs check test _test:
+lib progs check test _test check-p check-s:
 	@echo "Nothing to be done"
 
 tests dep depend:
