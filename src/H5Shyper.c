@@ -5724,7 +5724,6 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     const hsize_t *opt_stride;      /* Optimized stride information */
     const hsize_t *opt_count;       /* Optimized count information */
     const hsize_t *opt_block;       /* Optimized block information */
-    hbool_t zero_hyperslab = FALSE; /* Indicate if the new hyperslab contains zero elements */
     unsigned u;                     /* Counters */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -5753,8 +5752,25 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab blocks overlap");
 
         /* Detect zero-sized hyperslabs in new selection */
-        if(count[u] == 0 || block[u] == 0)
-            zero_hyperslab = TRUE;
+        if(count[u] == 0 || block[u] == 0) {
+            switch(op) {
+                case H5S_SELECT_SET:   /* Select "set" operation */
+                case H5S_SELECT_AND:   /* Binary "and" operation for hyperslabs */
+                case H5S_SELECT_NOTA:  /* Binary "B not A" operation for hyperslabs */
+                    /* Convert to "none" selection */
+                    if(H5S_select_none(space)<0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't convert selection");
+                    HGOTO_DONE(SUCCEED);
+
+                case H5S_SELECT_OR:    /* Binary "or" operation for hyperslabs */
+                case H5S_SELECT_XOR:   /* Binary "xor" operation for hyperslabs */
+                case H5S_SELECT_NOTB:  /* Binary "A not B" operation for hyperslabs */
+                    HGOTO_DONE(SUCCEED);        /* Selection stays same */
+
+                default:
+                    HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
+            } /* end switch */
+        } /* end if */
     } /* end for */
 
     /* Optimize hyperslab parameters to merge contiguous blocks, etc. */
@@ -5791,27 +5807,6 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
             } /* end else */
         } /* end for */
     } /* end else */
-
-    /* Fixup zero-sized hyperslab selections */
-    if(zero_hyperslab) {
-        switch(op) {
-            case H5S_SELECT_SET:   /* Select "set" operation */
-            case H5S_SELECT_AND:   /* Binary "and" operation for hyperslabs */
-            case H5S_SELECT_NOTA:  /* Binary "B not A" operation for hyperslabs */
-                /* Convert to "none" selection */
-                if(H5S_select_none(space)<0)
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't convert selection");
-                HGOTO_DONE(SUCCEED);
-
-            case H5S_SELECT_OR:    /* Binary "or" operation for hyperslabs */
-            case H5S_SELECT_XOR:   /* Binary "xor" operation for hyperslabs */
-            case H5S_SELECT_NOTB:  /* Binary "A not B" operation for hyperslabs */
-                HGOTO_DONE(SUCCEED);        /* Selection stays same */
-
-            default:
-                HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
-        } /* end switch */
-    } /* end if */
 
     /* Fixup operation for non-hyperslab selections */
     switch(H5S_GET_SELECT_TYPE(space)) {
