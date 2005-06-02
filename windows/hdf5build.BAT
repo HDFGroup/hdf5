@@ -182,7 +182,7 @@ cd src
 h5tinit.exe > h5tinit.c
 
 cd ..\windows\proj\all
-msdev all.dsw /make "hl_test_image_fortran - ALL" "hl_test_lite_fortran - ALL" "hl_test_table_fortran - ALL" "testhdf5_fortrandll - ALL" "testhdf5_fortran - ALL" "flush2_fortrandll - ALL" "flush2_fortran - ALL" "flush1_fortrandll - ALL" "flush1_fortran - ALL" "testhdf5_cppdll - ALL" "testhdf5_cpp - ALL" "dsets_cppdll - ALL" "dsets_cpp - ALL" "all - ALL" /Rebuild /out ..\..\..\all.log
+msdev all.dsw /make "hl_test_image_fortran - ALL" "hl_test_lite_fortran - ALL" "hl_test_table_fortran - ALL" "testhdf5_fortrandll - ALL" "testhdf5_fortran - ALL" "flush2_fortrandll - ALL" "flush2_fortran - ALL" "flush1_fortrandll - ALL" "flush1_fortran - ALL" "testhdf5_cppdll - ALL" "testhdf5_cpp - ALL" "dsets_cppdll - ALL" "dsets_cpp - ALL" "hl_test_table_cpp - ALL" "all - ALL" /Rebuild /out ..\..\..\all.log
 cd ..\..\..\
 more all.log >> build_results.txt
 del all.log
