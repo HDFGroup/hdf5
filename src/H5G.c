@@ -1365,7 +1365,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
+H5G_namei(const H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	  H5G_entry_t *grp_ent/*out*/, H5G_entry_t *obj_ent/*out*/,
 	  unsigned target, int *nlinks/*out*/, H5G_namei_act_t action,
           H5G_entry_t *ent, hid_t dxpl_id)
@@ -1518,7 +1518,7 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	if(H5G_CACHED_SLINK==obj_ent->type &&
                 (0==(target & H5G_TARGET_SLINK) || !last_comp)) {
 	    if ((*nlinks)-- <= 0)
-		HGOTO_ERROR (H5E_SYM, H5E_SLINK, FAIL, "too many symbolic links");
+		HGOTO_ERROR (H5E_SYM, H5E_SLINK, FAIL, "too many links");
 	    if (H5G_traverse_slink (grp_ent, obj_ent, nlinks, dxpl_id)<0)
 		HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "symbolic link traversal failed");
 	}
@@ -1592,7 +1592,7 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
     const H5HL_t        *heap;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
-    FUNC_ENTER_NOAPI(H5G_traverse_slink, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_traverse_slink);
 
     /* Portably initialize the temporary group entry */
     HDmemset(&tmp_grp_ent,0,sizeof(H5G_entry_t));
