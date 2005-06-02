@@ -620,7 +620,7 @@ H5P_get_family_offset(H5P_genplist_t *plist, hsize_t *offset)
                                                                                                
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}   
+}
                 
 
 /*-------------------------------------------------------------------------

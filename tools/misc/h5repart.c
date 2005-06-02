@@ -65,6 +65,10 @@
 #   define MIN3(X,Y,Z)	MIN(MIN(X,Y),Z)
 #endif
 
+/*Make this private property(defined in H5Fprivate.h) available to h5repart, 
+ *to update the member file size in the superblock.*/ 
+#define H5F_ACS_FAMILY_NEWSIZE_NAME            "family_newsize"
+
 
 /*-------------------------------------------------------------------------
  * Function:	usage
@@ -223,7 +227,7 @@ main (int argc, char *argv[])
     off_t	src_act_size;		/*source actual member size	*/
     off_t	dst_size=1 GB;		/*destination logical memb size	*/
 #endif
-    hid_t       fapl;
+    hid_t       fapl;                   /*file access property list     */
     hid_t       file;
     
     /*
@@ -444,19 +448,26 @@ main (int argc, char *argv[])
     }
     close (dst);
 
-    /* modify family size saved in superblock. Member size 1 signals library to
-     * save the new size(actual member file size) in superblock.  It's for this 
-     * tool only. */
+    /* Modify family size saved in superblock through private property. It signals 
+     * library to save the new member size(specified in command line) in superblock.  
+     * This private property is for this tool only. */
     if ((fapl=H5Pcreate(H5P_FILE_ACCESS))<0) {
         perror ("H5Pcreate");
         exit (1);
     }
-    
-    if(H5Pset_fapl_family(fapl, 1, H5P_DEFAULT)<0) {
+
+    if(H5Pset_fapl_family(fapl, H5F_FAMILY_DEFAULT, H5P_DEFAULT) < 0) {
         perror ("H5Pset_fapl_family");
         exit (1);
     }
+   
+    if(H5Pset(fapl, H5F_ACS_FAMILY_NEWSIZE_NAME, &dst_size) < 0) { 
+        perror ("H5Pset_family_newsize");
+        exit (1);
+    }
 
+    /* Open file for "read and write" to flush metadata. Flushing metadata 
+     * will update the superblock to the new member size. */
     if((file=H5Fopen(dst_gen_name, H5F_ACC_RDWR, fapl))<0) {
         perror ("H5Fopen");
         exit (1);

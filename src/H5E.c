@@ -2112,7 +2112,6 @@ H5E_walk_stack(const H5E_t *estack, H5E_direction_t direction, H5E_walk_t func, 
     /* Walk the stack if a callback function was given */
     if(func) {
         status=SUCCEED;
-
         if (H5E_WALK_UPWARD==direction) {
             for (i=0; i<(int)estack->nused && status>=0; i++)
                 status = (func)((unsigned)i, estack->slot+i, client_data);

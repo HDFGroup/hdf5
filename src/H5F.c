@@ -212,6 +212,7 @@ H5F_init_interface(void)
     void            *driver_info        = H5F_ACS_FILE_DRV_INFO_DEF;
     H5F_close_degree_t close_degree     = H5F_CLOSE_DEGREE_DEF;
     hsize_t         family_offset       = H5F_ACS_FAMILY_OFFSET_DEF;
+    hsize_t         family_newsize      = H5F_ACS_FAMILY_NEWSIZE_DEF;
     H5FD_mem_t      mem_type            = H5F_ACS_MULTI_TYPE_DEF;
 
     /* File mount property class variable. 
@@ -361,7 +362,11 @@ H5F_init_interface(void)
         /* Register the offset of family driver info */
         if(H5P_register(acs_pclass,H5F_ACS_FAMILY_OFFSET_NAME,H5F_ACS_FAMILY_OFFSET_SIZE, &family_offset,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
+                 
+        /* Register the private property of new family file size. It's used by h5repart only. */
+        if(H5P_register(acs_pclass,H5F_ACS_FAMILY_NEWSIZE_NAME,H5F_ACS_FAMILY_NEWSIZE_SIZE, &family_newsize,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+         
         /* Register the data type of multi driver info */
         if(H5P_register(acs_pclass,H5F_ACS_MULTI_TYPE_NAME,H5F_ACS_MULTI_TYPE_SIZE, &mem_type,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
@@ -2630,7 +2635,6 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent, haddr_t addr
            
         if (H5FD_sb_decode(lf, driver_name, p) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to decode driver information")
-        p += driver_size; /* advance past driver information section */
     
         /* Compute driver info block checksum */
         assert(sizeof(chksum) == sizeof(shared->drvr_chksum));

@@ -32,6 +32,8 @@ const char *FILENAME[] = {
     "core_file",
     "family_file",
     "multi_file",
+    "fst_family",
+    "scd_family",
     NULL        
 };
           
@@ -231,7 +233,7 @@ test_family_opens(char *fname, hid_t fa_pl)
     } H5E_END_TRY;
 
     /* Case 3: reopen file with wrong member size */
-    if(H5Pset_fapl_family(fa_pl, 128, H5P_DEFAULT)<0)
+    if(H5Pset_fapl_family(fa_pl, (hsize_t)128, H5P_DEFAULT)<0)
         goto error;
 
     H5E_BEGIN_TRY {
@@ -247,7 +249,7 @@ test_family_opens(char *fname, hid_t fa_pl)
         }
     }
 
-    if(H5Pset_fapl_family(fa_pl, FAMILY_SIZE, H5P_DEFAULT)<0)
+    if(H5Pset_fapl_family(fa_pl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT)<0)
         goto error;
 
     H5E_BEGIN_TRY {
@@ -278,6 +280,11 @@ error:
  *              Wednesday, June 23, 2004
  *              Added test for H5Fget_filesize.
  *
+ *              Raymond Lu
+ *              June 2, 2005
+ *              Added a function test_family_opens() to test different 
+ *              wrong way to reopen family files.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -297,6 +304,7 @@ test_family(void)
 
     /* Set property list and file name for FAMILY driver */
     fapl = h5_fileaccess();
+
     if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT)<0)
         goto error;
     h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
@@ -313,7 +321,7 @@ test_family(void)
         goto error;
 
     /* Reopen the file with default member file size */
-    if(H5Pset_fapl_family(fapl, H5F_FAMILY_DEFAULT, H5P_DEFAULT)<0)
+    if(H5Pset_fapl_family(fapl, (hsize_t)H5F_FAMILY_DEFAULT, H5P_DEFAULT)<0)
         goto error;
 
     if((file=H5Fopen(filename, H5F_ACC_RDWR, fapl))<0)
@@ -395,7 +403,7 @@ test_family(void)
         goto error;
 
     /* Reopen the file with correct member file size. */
-    if(H5Pset_fapl_family(fapl, FAMILY_SIZE, H5P_DEFAULT)<0)
+    if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT)<0)
         goto error;
 
     if((file=H5Fopen(filename, H5F_ACC_RDWR, fapl))<0)
@@ -412,7 +420,6 @@ error:
     H5E_BEGIN_TRY {
         H5Sclose(space);
         H5Dclose(dset);
-        H5Pclose (fapl2);
         H5Pclose (fapl2);
         H5Fclose(file);
     } H5E_END_TRY;
@@ -452,8 +459,6 @@ test_multi_opens(char *fname, hid_t fa_pl)
     } H5E_END_TRY;
 
     return 0;
-error:
-    return -1;
 }
 
 

@@ -60,6 +60,8 @@ typedef struct H5FD_family_t {
     hid_t	memb_fapl_id;	/*file access property list for members	*/
     hsize_t	memb_size;	/*actual size of each member file	*/
     hsize_t	pmem_size;	/*member size passed in from property	*/
+    hsize_t	mem_newsize;	/*new member size passed in as private property. 
+                                 *It's used only by h5repart            */
     unsigned	nmembs;		/*number of family members		*/
     unsigned	amembs;		/*number of member slots allocated	*/
     H5FD_t	**memb;		/*dynamic array of member pointers	*/
@@ -584,9 +586,6 @@ H5FD_family_sb_size(H5FD_t *_file)
      * enough for now. */
     ret_value += 8;
 
-    /* name template, NULL termination included */
-    ret_value += HDstrlen(file->name) + 1;
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -627,12 +626,8 @@ H5FD_family_sb_encode(H5FD_t *_file, char *name/*out*/,
     name[8] = '\0';
 
     /* copy member file size */
-    UINT64ENCODE(buf, file->memb_size);
-    p += 8;
+    UINT64ENCODE(p, file->memb_size);
      
-    /* copy name template */
-    HDmemcpy(p, file->name, HDstrlen(file->name) + 1);
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -641,12 +636,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5FD_family_sb_decode
  *
- * Purpose:	Decodes the superblock information for this driver. The NAME
- *		argument is the eight-character (plus null termination) name
- *		stored in the file.
- *
- *		The FILE argument is updated according to the information in
- *		the superblock. 
+ * Purpose:	This function has 2 seperate purpose.  One is to decodes the 
+ *              superblock information for this driver. The NAME argument is 
+ *              the eight-character (plus null termination) name stored in i
+ *              the file.  The FILE argument is updated according to the 
+ *              information in the superblock. 
  *
  * Return:	Success:	0
  *
@@ -663,7 +657,6 @@ static herr_t
 H5FD_family_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
-    unsigned char       *p = buf;
     uint64_t             msize;
     char                err_msg[128];
     herr_t ret_value=SUCCEED;   /* Return value */
@@ -671,13 +664,14 @@ H5FD_family_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
     FUNC_ENTER_NOAPI(H5FD_family_sb_decode, FAIL)
 
     /* Read member file size. Skip name template for now although it's saved. */
-    UINT64DECODE(p, msize);
+    UINT64DECODE(buf, msize);
  
-    /* For h5repart only. Member size 1 is used to signal h5repart is being used to
-     * change member file size.  Encode the new size. */
-    if(file->pmem_size == 1) {
-        msize = file->memb_size;
-        UINT64ENCODE(p, msize);
+    /* For h5repart only. Private property of new member size is used to signal 
+     * h5repart is being used to change member file size.  h5repart will open 
+     * files for read and write.  When the files are closed, metadata will be
+     * flushed to the files and updated this new size */
+    if(file->mem_newsize) {
+        file->memb_size = file->mem_newsize;
         HGOTO_DONE(ret_value)
     }
 
@@ -742,6 +736,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
     H5FD_t     		*ret_value=NULL;
     char		memb_name[4096], temp[4096];
     hsize_t		eof=HADDR_UNDEF;
+    hsize_t             fam_newsize = 0;
     unsigned		t_flags = flags & ~H5F_ACC_CREAT;
     H5P_genplist_t      *plist;      /* Property list pointer */
 
@@ -762,12 +757,19 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
             HGOTO_ERROR(H5E_VFL, H5E_CANTINC, NULL, "unable to increment ref count on VFL driver")
         file->memb_size = 1024*1024*1024; /*1GB. Actual member size to be updated later */
         file->pmem_size = 1024*1024*1024; /*1GB. Member size passed in through property */
+        file->mem_newsize = 0;            /*New member size used by h5repart only       */
     } else {
         H5FD_family_fapl_t *fa;
 
         if(NULL == (plist = H5I_object(fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
         fa = H5P_get_driver_info(plist);
+        
+        /* New family file size. It's used by h5repart only. */
+        if(H5P_exist_plist(plist, H5F_ACS_FAMILY_NEWSIZE_NAME) > 0)
+            if(H5P_get(plist, H5F_ACS_FAMILY_NEWSIZE_NAME, &fam_newsize) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get new family member size")
+
         if(fa->memb_fapl_id==H5P_FILE_ACCESS_DEFAULT) {
             if(H5I_inc_ref(fa->memb_fapl_id)<0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTINC, NULL, "unable to increment ref count on VFL driver")
@@ -780,6 +782,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
         } /* end else */
         file->memb_size = fa->memb_size; /* Actual member size to be updated later */
         file->pmem_size = fa->memb_size; /* Member size passed in through property */
+        file->mem_newsize = fam_newsize; /* New member size passed in through property */
     }
     file->name = H5MM_strdup(name);
     file->flags = flags;
