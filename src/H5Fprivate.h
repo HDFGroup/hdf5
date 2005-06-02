@@ -197,6 +197,8 @@ typedef struct H5F_t H5F_t;
 
 /* If the module using this macro is allowed access to the private variables, access them directly */
 #ifdef H5F_PACKAGE
+/* The FCPL itself */
+#define H5F_FCPL(F)             ((F)->shared->fcpl_id)
 /* size of size_t and off_t as they exist on disk */
 #define H5F_SIZEOF_ADDR(F)      ((F)->shared->sizeof_addr)
 #define H5F_SIZEOF_SIZE(F)      ((F)->shared->sizeof_size)
@@ -215,6 +217,7 @@ typedef struct H5F_t H5F_t;
 /* Base address of file */
 #define H5F_BASE_ADDR(F)        ((F)->shared->base_addr)
 #else /* H5F_PACKAGE */
+#define H5F_FCPL(F)             (H5F_get_fcpl(F))
 #define H5F_SIZEOF_ADDR(F)      (H5F_sizeof_addr(F))
 #define H5F_SIZEOF_SIZE(F)      (H5F_sizeof_size(F))
 #define H5F_SYM_LEAF_K(F)       (H5F_sym_leaf_k(F))
@@ -411,7 +414,12 @@ struct H5RC_t;
 
 /* Private functions, not part of the publicly documented API */
 H5_DLL herr_t H5F_init(void);
+H5_DLL H5F_t * H5F_open(const char *name, unsigned flags, hid_t fcpl_id,
+    hid_t fapl_id, hid_t dxpl_id);
+
+/* Functions than retrieve values from the file struct */
 H5_DLL hid_t H5F_get_driver_id(const H5F_t *f);
+H5_DLL hid_t H5F_get_access_plist(H5F_t *f);
 H5_DLL unsigned H5F_get_intent(const H5F_t *f);
 H5_DLL herr_t H5F_get_fileno(const H5F_t *f, unsigned long *filenum);
 H5_DLL hid_t H5F_get_id(H5F_t *file);
@@ -429,6 +437,7 @@ H5_DLL htri_t H5F_is_mount(const H5F_t *file);
 H5_DLL htri_t H5F_has_mount(const H5F_t *file);
 
 /* Functions than retrieve values set from the FCPL */
+H5_DLL hid_t H5F_get_fcpl(const H5F_t *f);
 H5_DLL size_t H5F_sizeof_addr(const H5F_t *f);
 H5_DLL size_t H5F_sizeof_size(const H5F_t *f);
 H5_DLL unsigned H5F_sym_leaf_k(const H5F_t *f);

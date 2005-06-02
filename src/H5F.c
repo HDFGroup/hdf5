@@ -61,8 +61,6 @@ typedef struct H5F_olist_t {
 } H5F_olist_t;    
 
 /* PRIVATE PROTOTYPES */
-static H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id, 
-			hid_t fapl_id, hid_t dxpl_id);
 static herr_t H5F_close(H5F_t *f);
 
 #ifdef NOT_YET
@@ -776,8 +774,11 @@ done:
  *              weren't being close.
  *
  *		J Mainzer, Mar 10, 2005
- *		Updated function for changes in the propertly list entries 
+ *		Updated function for changes in the property list entries 
  *		used by the new metadata cache.
+ * 		
+ *		Quincey Koziol, May 25, 2005
+ *		Extracted guts into new internal routine.
  * 		
  *-------------------------------------------------------------------------
  */
@@ -785,10 +786,7 @@ hid_t
 H5Fget_access_plist(hid_t file_id)
 {
     H5F_t		*f = NULL;
-    H5P_genplist_t *new_plist;              /* New property list */
-    H5P_genplist_t *old_plist;              /* Old property list */
     hid_t		ret_value = SUCCEED;
-    void		*driver_info=NULL;   
  
     FUNC_ENTER_API(H5Fget_access_plist, FAIL)
     H5TRACE1("i","i",file_id);
@@ -796,6 +794,51 @@ H5Fget_access_plist(hid_t file_id)
     /* Check args */
     if (NULL==(f=H5I_object_verify(file_id, H5I_FILE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+
+    /* Retrieve the file's access property list */
+    if((ret_value = H5F_get_access_plist(f)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file access property list")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fget_access_plist() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_access_plist
+ *
+ * Purpose:	Returns a copy of the file access property list of the
+ *		specified file.
+ *
+ *              NOTE: Make sure that, if you are going to overwrite
+ *              information in the copied property list that was
+ *              previously opened and assigned to the property list, then
+ *              you must close it before overwriting the values.
+ *
+ * Return:	Success:	Object ID for a copy of the file access
+ *				property list.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, May 25, 2005
+ *
+ * Modifications:
+ * 		
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5F_get_access_plist(H5F_t *f)
+{
+    H5P_genplist_t *new_plist;              /* New property list */
+    H5P_genplist_t *old_plist;              /* Old property list */
+    void		*driver_info=NULL;   
+    hid_t		ret_value = SUCCEED;
+ 
+    FUNC_ENTER_NOAPI(H5F_get_access_plist, FAIL)
+
+    /* Check args */
+    HDassert(f);
 
     /* Make a copy of the default file access property list */
     if(NULL == (old_plist = H5I_object(H5P_LST_FILE_ACCESS_g)))
@@ -855,8 +898,8 @@ H5Fget_access_plist(hid_t file_id)
     } 
 
 done:
-    FUNC_LEAVE_API(ret_value)
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_get_access_plist() */
 
 
 /*-------------------------------------------------------------------------
@@ -1729,7 +1772,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5F_t *
+H5F_t *
 H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id)
 {
     H5F_t              *file = NULL;        /*the success return value      */
@@ -4458,7 +4501,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5RC_t *H5F_grp_btree_shared(const H5F_t *f)
+H5RC_t *
+H5F_grp_btree_shared(const H5F_t *f)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_grp_btree_shared)
@@ -4468,6 +4512,36 @@ H5RC_t *H5F_grp_btree_shared(const H5F_t *f)
 
     FUNC_LEAVE_NOAPI(f->shared->grp_btree_shared)
 } /* end H5F_grp_btree_shared() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_fcpl
+ *
+ * Purpose:	Retrieve the value of a file's FCPL.
+ *
+ * Return:	Success:	The FCPL for the file.
+ *
+ * 		Failure:	? (should not happen)
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		May 25 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5F_get_fcpl(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_fcpl)
+
+    assert(f);
+    assert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->fcpl_id)
+} /* end H5F_get_fcpl() */
 
 
 /*-------------------------------------------------------------------------
