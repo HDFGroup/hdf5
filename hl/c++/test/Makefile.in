@@ -610,7 +610,9 @@ install-doc uninstall-doc:
 # TEST_PROG_PARA, or TEST_SCRIPT will actually be executed.
 check-TESTS: test
 
-test _test: check-s check-p
+test _test:
+	$(MAKE) check-s
+	$(MAKE) check-p
 
 check-s: $(LIB) $(PROGS) $(TESTS)
 	@if test -n "$(TEST_PROG)$(TEST_SCRIPT)"; then      \
