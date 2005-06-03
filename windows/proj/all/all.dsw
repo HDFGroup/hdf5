@@ -1680,6 +1680,24 @@ Package=<4>
 
 ###############################################################################
 
+Project: "h5reparttst"=..\..\TOOLS\TESTFILES\h5reparttst\h5reparttst.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name toolslib
+    End Project Dependency
+}}}
+
+###############################################################################
+
 Project: "h5unjam"=..\..\TOOLS\h5unjam\h5unjam.dsp - Package Owner=<4>
 
 Package=<5>
@@ -1848,6 +1866,24 @@ Package=<4>
 
 ###############################################################################
 
+Project: "hl_test_ds"=..\..\HL\TEST\hl_test_ds\hl_test_ds.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hl
+    End Project Dependency
+}}}
+
+###############################################################################
+
 Project: "hl_test_image"=..\..\HL\TEST\hl_test_image\hl_test_image.dsp - Package Owner=<4>
 
 Package=<5>
@@ -1921,6 +1957,24 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name hdf5_fortran
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "hl_test_packet"=..\..\HL\TEST\hl_test_packet\hl_test_packet.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hl
     End Project Dependency
 }}}
 
