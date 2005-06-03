@@ -1764,6 +1764,8 @@
 ./windows/hl/test/hl_test_image/hl_test_image.dsp
 ./windows/hl/test/hl_test_lite/hl_test_lite.dsp
 ./windows/hl/test/hl_test_table/hl_test_table.dsp
+./windows/hl/test/hl_test_ds/hl_test_ds.dsp
+./windows/hl/test/hl_test_packet/hl_test_packet.dsp
 ./windows/hl/test/test_hdf5_hl.BAT
 
 #windows misc
