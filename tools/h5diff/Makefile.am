@@ -26,10 +26,7 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 # is enabled.
 if BUILD_PARALLEL_CONDITIONAL
   H5PDIFF=ph5diff
-  H5DIFF_SCRIPT=$(srcdir)/testh5diff.sh $(srcdir)/testph5diff.sh
-else
-  H5PDIFF=
-  H5DIFF_SCRIPT=$(srcdir)/testh5diff.sh
+  TEST_SCRIPT_PARA=$(srcdir)/testph5diff.sh
 endif
 
 # Our main target, h5diff
@@ -37,10 +34,10 @@ bin_PROGRAMS=h5diff $(H5PDIFF)
 
 # Test programs and scripts
 TEST_PROG=h5difftst
-TEST_SCRIPT=$(H5DIFF_SCRIPT)
+TEST_SCRIPT=$(srcdir)/testh5diff.sh
 
 check_PROGRAMS=$(TEST_PROG)
-check_SCRIPTS=$(TEST_SCRIPT)
+check_SCRIPTS=$(TEST_SCRIPT) $(TEST_SCRIPT_PARA)
 
 # Source files for the program
 h5diff_SOURCES=h5diff_main.c h5diff_common.c

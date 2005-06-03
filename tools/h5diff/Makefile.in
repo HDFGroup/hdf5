@@ -314,18 +314,16 @@ H5FC_PP = $(bindir)/h5pfc
 
 # Include src and tools/lib directories
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
-@BUILD_PARALLEL_CONDITIONAL_FALSE@H5PDIFF = 
 
 # Always build and test h5diff but build and test ph5diff only if parallel
 # is enabled.
 @BUILD_PARALLEL_CONDITIONAL_TRUE@H5PDIFF = ph5diff
-@BUILD_PARALLEL_CONDITIONAL_FALSE@H5DIFF_SCRIPT = $(srcdir)/testh5diff.sh
-@BUILD_PARALLEL_CONDITIONAL_TRUE@H5DIFF_SCRIPT = $(srcdir)/testh5diff.sh $(srcdir)/testph5diff.sh
+@BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_SCRIPT_PARA = $(srcdir)/testph5diff.sh
 
 # Test programs and scripts
 TEST_PROG = h5difftst
-TEST_SCRIPT = $(H5DIFF_SCRIPT)
-check_SCRIPTS = $(TEST_SCRIPT)
+TEST_SCRIPT = $(srcdir)/testh5diff.sh
+check_SCRIPTS = $(TEST_SCRIPT) $(TEST_SCRIPT_PARA)
 
 # Source files for the program
 h5diff_SOURCES = h5diff_main.c h5diff_common.c
