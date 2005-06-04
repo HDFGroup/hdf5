@@ -638,10 +638,20 @@ install-doc uninstall-doc:
 check-TESTS: test
 
 test _test:
-	$(MAKE) check-s
-	$(MAKE) check-p
+	$(MAKE) _check-s
+	$(MAKE) _check-p
 
-check-s: $(LIB) $(PROGS) $(TESTS)
+# Run check-s/check-p recursively down SUBDIRS
+check-s check-p:
+	@$(MAKE) $(AM_MAKEFLAGS) _$@ || exit 1;                          \
+	for d in X $(SUBDIRS); do                                             \
+	    if test $$d != X -a $$d != .; then                                \
+	        (set -x; cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;     \
+	    fi;                                                               \
+	done
+
+# Actual execution of check-s.
+_check-s: $(LIB) $(PROGS) $(TESTS)
 	@if test -n "$(TEST_PROG)$(TEST_SCRIPT)"; then      \
 	   echo "===Serial tests in `echo ${PWD} | sed -e s:.*/::` begin `date`==="; \
         fi
@@ -688,7 +698,8 @@ check-s: $(LIB) $(PROGS) $(TESTS)
 	    echo "===Serial tests in `echo ${PWD} | sed -e s:.*/::` ended `date`===";\
 	fi
 
-check-p: $(LIB) $(PROGS) $(TESTS)
+# Actual execution of check-p.
+_check-p: $(LIB) $(PROGS) $(TESTS)
 	@if test -n "$(TEST_PROG_PARA)$(TEST_SCRIPT_PARA)"; then      \
 	   echo "===Parallel tests in `echo ${PWD} | sed -e s:.*/::` begin `date`==="; \
         fi
