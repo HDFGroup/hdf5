@@ -52,7 +52,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\..\..\..\fortran\test\libtest_fortran\Release\libtest_fortranr.lib"
 
 !ELSEIF  "$(CFG)" == "libtest_fortran - Win32 Debug"
 
