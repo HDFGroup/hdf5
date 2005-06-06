@@ -371,6 +371,12 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name pooldll
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hl_test_ds
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hl_test_packet
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -1675,24 +1681,6 @@ Package=<4>
 {{{
     Begin Project Dependency
     Project_Dep_Name hdf5dll
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "h5reparttst"=..\..\TOOLS\TESTFILES\h5reparttst\h5reparttst.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name hdf5
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name toolslib
     End Project Dependency
 }}}
 
