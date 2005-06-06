@@ -117,7 +117,7 @@ New Features
                      please edit irix6.x under hdf5/config,
                      Find the line with
                             << hdf5_mpi_complex_derived_datatype_works>>
-                     and comment out this line before the configure.
+                     and COMMENT out this line before the configure.
                      check  cc version with the following command:
                            cc -version
                      KY - 2005/04/15
@@ -132,9 +132,9 @@ New Features
           Scale-Offset compression performs a scale and/or offset operation
           on each data value and truncates the resulting value to a minimum 
           number of bits and then stores the data.
-          Currently only integer datatype
-          is supported. Please check the HDF5 reference manual for this.
-          KY - 2005/04/15
+          Scaleoffset filter supports floating-point and integer datatype.
+          Please check the HDF5 reference manual for this.
+          KY - 2005/06/06
         - Retired SRB vfd (--with-srb). Functions H5Pset_fapl_srb and
           H5Pget_fapl_srb were removed.  EIP - 2005/04/07
 	- Retired GASS vfd (--with-gass).  Functions H5Pset_fapl_gass and
