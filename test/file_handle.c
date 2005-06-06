@@ -23,17 +23,17 @@
 
 #define KB              1024
 #define FAMILY_NUMBER   4
-#define FAMILY_SIZE     1024
+#define FAMILY_SIZE     (1*KB)
+#define FAMILY_SIZE2    (5*KB)
 #define MULTI_SIZE      128 
-#define CORE_INCREMENT  4096
+#define CORE_INCREMENT  (4*KB)
 
 const char *FILENAME[] = {      
     "sec2_file",
     "core_file",
     "family_file",
     "multi_file",
-    "fst_family",
-    "scd_family",
+    "family_v1.6_",
     NULL        
 };
           
@@ -428,6 +428,77 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_family_compat
+ *
+ * Purpose:     Tests the backward compatibility for FAMILY driver.  
+ *              See if we can open files created with v1.6 library.
+ *              The source file was created by the test/file_handle.c
+ *              of the v1.6 library.  Then tools/misc/h5repart.c was
+ *              used to concantenated.  The command was "h5repart -m 5k
+ *              family_file%05d.h5 family_v1.6_%05d.h5".
+ *
+ * Return:      Success:        exit(0)
+ *
+ *              Failure:        exit(1)
+ *
+ * Programmer:  Raymond Lu
+ *              June 3, 2005
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+test_family_compat(void)
+{
+    hid_t       file=(-1), fapl;
+    char        filename[1024];
+    char        pathname[1024];
+    char       *srcdir = getenv("srcdir"); /*where the src code is located*/ 
+
+    TESTING("FAMILY file driver backward compatibility");
+
+#ifndef H5_WANT_H5_V1_6_COMPAT
+    SKIPPED();
+    return 0;
+#else /*H5_WANT_H5_V1_6_COMPAT*/
+
+    /* Set property list and file name for FAMILY driver */
+    fapl = h5_fileaccess();
+
+    if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE2, H5P_DEFAULT)<0)
+        goto error;
+
+    h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
+
+    /* Generate correct name for test file by prepending the source path */
+    if(srcdir && ((strlen(srcdir) + strlen(filename) + 1) < sizeof(pathname))) {
+        strcpy(pathname, srcdir);
+        strcat(pathname, "/");
+    } 
+    strcat(pathname, filename);
+
+    if((file=H5Fopen(pathname, H5F_ACC_RDONLY, fapl))<0)
+        goto error;
+
+    if(H5Fclose(file)<0)
+        goto error;
+
+    if(H5Pclose(fapl)<0)
+        goto error;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(file);
+    } H5E_END_TRY;
+    return -1;
+#endif /*H5_WANT_H5_V1_6_COMPAT*/
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_multi_opens
  *
  * Purpose:     Private function for test_multi() to tests wrong ways of
@@ -654,6 +725,7 @@ main(void)
     nerrors += test_sec2()<0      ?1:0;
     nerrors += test_core()<0      ?1:0;
     nerrors += test_family()<0    ?1:0;
+    nerrors += test_family_compat()<0    ?1:0;
     nerrors += test_multi()<0     ?1:0;
 
     if (nerrors) goto error;
