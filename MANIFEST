@@ -1019,6 +1019,10 @@
 ./test/external.c
 ./test/error_test.c
 ./test/err_compat.c
+./test/family_v1.6_00000.h5
+./test/family_v1.6_00001.h5
+./test/family_v1.6_00002.h5
+./test/family_v1.6_00003.h5
 ./test/file_handle.c
 ./test/filename.c
 ./test/fill_old.h5
