@@ -360,10 +360,12 @@ hsize_t diff_datasetid( hid_t dset1_id,
  * array compare
  *-------------------------------------------------------------------------
  */
- if (obj1_name)
+
+ if (obj1_name!=NULL)
   name1=diff_basename(obj1_name);
- if (obj2_name)
+ if (obj2_name!=NULL)
   name2=diff_basename(obj2_name);
+
  nfound = diff_array(buf1, 
                      buf2,
                      nelmts1,
@@ -381,7 +383,7 @@ hsize_t diff_datasetid( hid_t dset1_id,
  *-------------------------------------------------------------------------
  */
 
- if (obj1_name)
+ if (obj1_name!=NULL)
   diff_attr(dset1_id,dset2_id,obj1_name,obj2_name,options);
 
  }/*cmp*/
