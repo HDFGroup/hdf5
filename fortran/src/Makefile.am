@@ -121,13 +121,13 @@ BUILT_SOURCES = H5f90i_gen.h
 # it needs to run H5match_types.
 H5fortran_types.f90 H5f90i_gen.h: H5match_types.c
 	$(MAKE) $(AM_MAKEFLAGS) H5fort_type_defines.h
-	$(MAKE) $(AM_MAKEFLAGS) H5match_types
-	$(RUNSERIAL) ./H5match_types
+	$(MAKE) $(AM_MAKEFLAGS) H5match_types$(EXEEXT)
+	$(RUNSERIAL) ./H5match_types$(EXEEXT)
 
 # H5fort_type_defines.h is created by running H5fortran_detect.
 # Obviously, H5fortran_detect needs to be built first.
-H5fort_type_defines.h: H5fortran_detect
-	$(RUNSERIAL) ./H5fortran_detect > H5fort_type_defines.h
+H5fort_type_defines.h: H5fortran_detect$(EXEEXT)
+	$(RUNSERIAL) ./H5fortran_detect$(EXEEXT) > H5fort_type_defines.h
 
 # Automake knows how to build fortran programs if we tell it the source
 # files.
