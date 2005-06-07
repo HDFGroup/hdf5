@@ -73,7 +73,7 @@ hsize_t diff_array( void *_mem1,
  hsize_t       i;
  int           j;
 
-	/* get the size. */
+ /* get the size. */
  size = H5Tget_size( m_type );
 
  acc[rank-1]=1;
@@ -89,7 +89,7 @@ hsize_t diff_array( void *_mem1,
  {
   tmp1 = ((unsigned char**)mem1)[0]; 
   tmp2 = ((unsigned char**)mem2)[0]; 
-		nfound+=diff_datum(
+  nfound+=diff_datum(
    tmp1,
    tmp2, 
    m_type,
@@ -106,77 +106,77 @@ hsize_t diff_array( void *_mem1,
  }
 
  else
-		
+  
  {
   
-		switch (H5Tget_class(m_type)) 
-		{
-		default:
-			assert(0);
-			break;
-			
-		case H5T_FLOAT:
-			if (H5Tequal(m_type, H5T_NATIVE_FLOAT)) 
-				nfound=diff_float(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
-			else if (H5Tequal(m_type, H5T_NATIVE_DOUBLE)) 
-				nfound=diff_double(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
-			break;
-		
-		case H5T_INTEGER:
-			
-			if (H5Tequal(m_type, H5T_NATIVE_SCHAR))
-				nfound=diff_schar(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
-			else if (H5Tequal(m_type, H5T_NATIVE_UCHAR)) 
-				nfound=diff_uchar(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
-			else if (H5Tequal(m_type, H5T_NATIVE_SHORT))
-				nfound=diff_short(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
-			else if (H5Tequal(m_type, H5T_NATIVE_USHORT))
-				nfound=diff_ushort(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
-			else if (H5Tequal(m_type, H5T_NATIVE_INT)) 
-				nfound=diff_int(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
-			else if (H5Tequal(m_type, H5T_NATIVE_UINT)) 
-				nfound=diff_uint(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
-			else if (H5Tequal(m_type, H5T_NATIVE_LONG)) 
-				nfound=diff_long(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
-			else if (H5Tequal(m_type, H5T_NATIVE_ULONG)) 
-				nfound=diff_ulong(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
-			else if (H5Tequal(m_type, H5T_NATIVE_LLONG)) 
-				nfound=diff_llong(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
-			else if (H5Tequal(m_type, H5T_NATIVE_ULLONG)) 
-				nfound=diff_ullong(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
+  switch (H5Tget_class(m_type)) 
+  {
+  default:
+   assert(0);
+   break;
+   
+  case H5T_FLOAT:
+   if (H5Tequal(m_type, H5T_NATIVE_FLOAT)) 
+    nfound=diff_float(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
+   else if (H5Tequal(m_type, H5T_NATIVE_DOUBLE)) 
+    nfound=diff_double(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
+   break;
+  
+  case H5T_INTEGER:
+   
+   if (H5Tequal(m_type, H5T_NATIVE_SCHAR))
+    nfound=diff_schar(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
+   else if (H5Tequal(m_type, H5T_NATIVE_UCHAR)) 
+    nfound=diff_uchar(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
+   else if (H5Tequal(m_type, H5T_NATIVE_SHORT))
+    nfound=diff_short(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
+   else if (H5Tequal(m_type, H5T_NATIVE_USHORT))
+    nfound=diff_ushort(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
+   else if (H5Tequal(m_type, H5T_NATIVE_INT)) 
+    nfound=diff_int(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
+   else if (H5Tequal(m_type, H5T_NATIVE_UINT)) 
+    nfound=diff_uint(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
+   else if (H5Tequal(m_type, H5T_NATIVE_LONG)) 
+    nfound=diff_long(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
+   else if (H5Tequal(m_type, H5T_NATIVE_ULONG)) 
+    nfound=diff_ulong(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
+   else if (H5Tequal(m_type, H5T_NATIVE_LLONG)) 
+    nfound=diff_llong(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
+   else if (H5Tequal(m_type, H5T_NATIVE_ULLONG)) 
+    nfound=diff_ullong(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
 
-			break;
-			
-		case H5T_COMPOUND:
-		case H5T_STRING:
-		case H5T_BITFIELD:
-		case H5T_OPAQUE:
-		case H5T_ENUM:
-		case H5T_ARRAY:
-		case H5T_VLEN:
+   break;
+   
+  case H5T_COMPOUND:
+  case H5T_STRING:
+  case H5T_BITFIELD:
+  case H5T_OPAQUE:
+  case H5T_ENUM:
+  case H5T_ARRAY:
+  case H5T_VLEN:
   case H5T_REFERENCE:
-			
-			for ( i = 0; i < nelmts; i++)
-			{
-				nfound+=diff_datum(
-					mem1 + i * size,
-					mem2 + i * size, /* offset */
-					m_type,
-					i,
-					rank,
-					acc,
-					pos,
-					options,
-					name1,
-					name2,
-					container1_id,
-					container2_id,
-					&ph);
-				if (options->n && nfound>=options->count)
-					return nfound;
-			} /* i */
-		} /* switch */
-	} /* else */
+   
+   for ( i = 0; i < nelmts; i++)
+   {
+    nfound+=diff_datum(
+     mem1 + i * size,
+     mem2 + i * size, /* offset */
+     m_type,
+     i,
+     rank,
+     acc,
+     pos,
+     options,
+     name1,
+     name2,
+     container1_id,
+     container2_id,
+     &ph);
+    if (options->n && nfound>=options->count)
+     return nfound;
+   } /* i */
+  } /* switch */
+ } /* else */
   
  return nfound;
 }
@@ -237,7 +237,7 @@ hsize_t diff_datum(void       *_mem1,
                    int        *ph)           /*print header */ 
 {
  static char   fmt_llong[255];
-	static char   fmt_ullong[255];
+ static char   fmt_ullong[255];
  static char   fmt_llongp[255];
  static char   fmt_ullongp[255];
  hsize_t       dims[H5S_MAX_RANK];
@@ -263,19 +263,19 @@ hsize_t diff_datum(void       *_mem1,
  hsize_t       nfound=0;   /* differences found */
  int           ret=0;      /* check return error */
 
-	if (!fmt_llong[0]) {
-		
-		/* Build default formats for long long types */
-		sprintf(fmt_llong,  "%%%sd              %%%sd               %%%sd\n", 
-			H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
-		sprintf(fmt_ullong, "%%%su              %%%su               %%%su\n", 
-			H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
-		sprintf(fmt_llongp,  "%%%sd             %%%sd               %%%sd               %%%sd\n", 
-			H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
-		sprintf(fmt_ullongp, "%%%su             %%%su               %%%su               %%%su\n", 
-			H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
-		
-	}
+ if (!fmt_llong[0]) {
+  
+  /* Build default formats for long long types */
+  sprintf(fmt_llong,  "%%%sd              %%%sd               %%%sd\n", 
+   H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
+  sprintf(fmt_ullong, "%%%su              %%%su               %%%su\n", 
+   H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
+  sprintf(fmt_llongp,  "%%%sd             %%%sd               %%%sd               %%%sd\n", 
+   H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
+  sprintf(fmt_ullongp, "%%%su             %%%su               %%%su               %%%su\n", 
+   H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
+  
+ }
 
  type_size = H5Tget_size( m_type );
 
@@ -1686,11 +1686,11 @@ hsize_t diff_char(unsigned char *mem1,
 
 
 /*-------------------------------------------------------------------------
- * Function:	is_zero
+ * Function: is_zero
  *
- * Purpose:	Determines if memory is initialized to all zero bytes.
+ * Purpose: Determines if memory is initialized to all zero bytes.
  *
- * Return:	TRUE if all bytes are zero; FALSE otherwise
+ * Return: TRUE if all bytes are zero; FALSE otherwise
  *
  *-------------------------------------------------------------------------
  */
@@ -1707,9 +1707,9 @@ is_zero(const void *_mem, size_t size)
 }
 
 /*-------------------------------------------------------------------------
- * Function:	close_obj
+ * Function: close_obj
  *
- * Purpose:	Auxialiary function to close an object
+ * Purpose: Auxialiary function to close an object
  *
  *-------------------------------------------------------------------------
  */
@@ -1747,13 +1747,13 @@ void close_obj(H5G_obj_t1 obj_type, hid_t obj_id)
  */
 static int diff_region(hid_t region1_id, hid_t region2_id)
 {
- hssize_t 	nblocks1, npoints1;
- hssize_t 	nblocks2, npoints2;
+ hssize_t  nblocks1, npoints1;
+ hssize_t  nblocks2, npoints2;
  hsize_t   alloc_size;
  hsize_t   *ptdata1;
  hsize_t   *ptdata2;
- int		     ndims1 = H5Sget_simple_extent_ndims(region1_id);
- int		     ndims2 = H5Sget_simple_extent_ndims(region2_id);
+ int       ndims1 = H5Sget_simple_extent_ndims(region1_id);
+ int       ndims2 = H5Sget_simple_extent_ndims(region2_id);
  int       ret=0;
 
 #if defined (H5DIFF_DEBUG)
@@ -1868,131 +1868,131 @@ static int diff_region(hid_t region1_id, hid_t region2_id)
  *-------------------------------------------------------------------------
  */
 hsize_t diff_float(unsigned char *mem1,
-																			unsigned char *mem2,
-																			hsize_t       nelmts,
-																			int           rank, 
-																			hsize_t       *acc,  
-																			hsize_t       *pos,
-																			diff_opt_t    *options, 
-																			const char    *obj1, 
-																			const char    *obj2,
-																			int           *ph)
-																			
+                   unsigned char *mem2,
+                   hsize_t       nelmts,
+                   int           rank, 
+                   hsize_t       *acc,  
+                   hsize_t       *pos,
+                   diff_opt_t    *options, 
+                   const char    *obj1, 
+                   const char    *obj2,
+                   int           *ph)
+                   
 {
-	hsize_t     nfound=0;          /* number of differences found */
-	float       temp1_float;
-	float       temp2_float;
-	hsize_t     i;
-	
-	
-	/* -d and !-p */
-	if (options->d && !options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_float, mem1, sizeof(float));
-			memcpy(&temp2_float, mem2, sizeof(float));
-			
-			if (fabs(temp1_float-temp2_float) > options->delta)
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(FFORMAT,temp1_float,temp2_float,fabs(temp1_float-temp2_float));
-				}
-				nfound++;
-			}
-		mem1+=sizeof(float);
+ hsize_t     nfound=0;          /* number of differences found */
+ float       temp1_float;
+ float       temp2_float;
+ hsize_t     i;
+ 
+ 
+ /* -d and !-p */
+ if (options->d && !options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_float, mem1, sizeof(float));
+   memcpy(&temp2_float, mem2, sizeof(float));
+   
+   if (fabs(temp1_float-temp2_float) > options->delta)
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(FFORMAT,temp1_float,temp2_float,fabs(temp1_float-temp2_float));
+    }
+    nfound++;
+   }
+  mem1+=sizeof(float);
   mem2+=sizeof(float);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-	}
-	
-	/* !-d and -p */
-	else if (!options->d && options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_float, mem1, sizeof(float));
-			memcpy(&temp2_float, mem2, sizeof(float));
-			
-			if ( temp1_float!=0 && fabs(1-temp2_float/temp1_float) > options->percent )
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(FPFORMAT,temp1_float,temp2_float,fabs(temp1_float-temp2_float),
-						fabs(1-temp2_float/temp1_float));
-				}
-				nfound++;
-			}
-		mem1+=sizeof(float);
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+ }
+ 
+ /* !-d and -p */
+ else if (!options->d && options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_float, mem1, sizeof(float));
+   memcpy(&temp2_float, mem2, sizeof(float));
+   
+   if ( temp1_float!=0 && fabs(1-temp2_float/temp1_float) > options->percent )
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(FPFORMAT,temp1_float,temp2_float,fabs(temp1_float-temp2_float),
+      fabs(1-temp2_float/temp1_float));
+    }
+    nfound++;
+   }
+  mem1+=sizeof(float);
   mem2+=sizeof(float);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-	} 
-	
-	/* -d and -p */
-	else if ( options->d && options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_float, mem1, sizeof(float));
-			memcpy(&temp2_float, mem2, sizeof(float));
-			
-			if ( temp1_float!=0 && fabs(1-temp2_float/temp1_float) > options->percent && 
-				fabs(temp1_float-temp2_float) > options->delta )
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(FPFORMAT,temp1_float,temp2_float,fabs(temp1_float-temp2_float),
-						fabs(1-temp2_float/temp1_float));
-				}
-				nfound++;
-			}
-		mem1+=sizeof(float);
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+ } 
+ 
+ /* -d and -p */
+ else if ( options->d && options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_float, mem1, sizeof(float));
+   memcpy(&temp2_float, mem2, sizeof(float));
+   
+   if ( temp1_float!=0 && fabs(1-temp2_float/temp1_float) > options->percent && 
+    fabs(temp1_float-temp2_float) > options->delta )
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(FPFORMAT,temp1_float,temp2_float,fabs(temp1_float-temp2_float),
+      fabs(1-temp2_float/temp1_float));
+    }
+    nfound++;
+   }
+  mem1+=sizeof(float);
   mem2+=sizeof(float);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-	} 
-	else 
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_float, mem1, sizeof(float));
-			memcpy(&temp2_float, mem2, sizeof(float));
-			
-			if (temp1_float != temp2_float)
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(FFORMAT,temp1_float,temp2_float,fabs(temp1_float-temp2_float));
-				}
-				nfound++;
-			}
-			
-	  mem1+=sizeof(float);
-			mem2+=sizeof(float);
-				if (options->n && nfound>=options->count)
-					return nfound;
-		} /* nelmts */
-		
-	}
-	
-	return nfound;
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+ } 
+ else 
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_float, mem1, sizeof(float));
+   memcpy(&temp2_float, mem2, sizeof(float));
+   
+   if (temp1_float != temp2_float)
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(FFORMAT,temp1_float,temp2_float,fabs(temp1_float-temp2_float));
+    }
+    nfound++;
+   }
+   
+   mem1+=sizeof(float);
+   mem2+=sizeof(float);
+    if (options->n && nfound>=options->count)
+     return nfound;
+  } /* nelmts */
+  
+ }
+ 
+ return nfound;
 }
 
 
@@ -2007,132 +2007,132 @@ hsize_t diff_float(unsigned char *mem1,
  *-------------------------------------------------------------------------
  */
 hsize_t diff_double(unsigned char *mem1,
-																	 		unsigned char *mem2,
-																		 	hsize_t       nelmts,
-																		 	int           rank, 
-																		 	hsize_t       *acc,  
-																		 	hsize_t       *pos,
-																		 	diff_opt_t    *options, 
-																		 	const char    *obj1, 
-																		 	const char    *obj2,
-																		 	int           *ph)
-																			
+                    unsigned char *mem2,
+                    hsize_t       nelmts,
+                    int           rank, 
+                    hsize_t       *acc,  
+                    hsize_t       *pos,
+                    diff_opt_t    *options, 
+                    const char    *obj1, 
+                    const char    *obj2,
+                    int           *ph)
+                   
 {
-	hsize_t     nfound=0;          /* number of differences found */
-	double      temp1_double;
+ hsize_t     nfound=0;          /* number of differences found */
+ double      temp1_double;
  double      temp2_double;
-	hsize_t     i;
-	
-	
-	/* -d and !-p */
-	if (options->d && !options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_double, mem1, sizeof(double));
-			memcpy(&temp2_double, mem2, sizeof(double));
-			
-			if (fabs(temp1_double-temp2_double) > options->delta)
-			{
+ hsize_t     i;
+ 
+ 
+ /* -d and !-p */
+ if (options->d && !options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_double, mem1, sizeof(double));
+   memcpy(&temp2_double, mem2, sizeof(double));
+   
+   if (fabs(temp1_double-temp2_double) > options->delta)
+   {
     
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(FFORMAT,temp1_double,temp2_double,fabs(temp1_double-temp2_double));
-				}
-				nfound++;
-			}
-		mem1+=sizeof(double);
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(FFORMAT,temp1_double,temp2_double,fabs(temp1_double-temp2_double));
+    }
+    nfound++;
+   }
+  mem1+=sizeof(double);
   mem2+=sizeof(double);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-	}
-	
-	/* !-d and -p */
-	else if (!options->d && options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_double, mem1, sizeof(double));
-			memcpy(&temp2_double, mem2, sizeof(double));
-			
-			if ( temp1_double!=0 && fabs(1-temp2_double/temp1_double) > options->percent )
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(FPFORMAT,temp1_double,temp2_double,fabs(temp1_double-temp2_double),
-						fabs(1-temp2_double/temp1_double));
-				}
-				nfound++;
-			}
-		mem1+=sizeof(double);
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+ }
+ 
+ /* !-d and -p */
+ else if (!options->d && options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_double, mem1, sizeof(double));
+   memcpy(&temp2_double, mem2, sizeof(double));
+   
+   if ( temp1_double!=0 && fabs(1-temp2_double/temp1_double) > options->percent )
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(FPFORMAT,temp1_double,temp2_double,fabs(temp1_double-temp2_double),
+      fabs(1-temp2_double/temp1_double));
+    }
+    nfound++;
+   }
+  mem1+=sizeof(double);
   mem2+=sizeof(double);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
  } 
-	
-	/* -d and -p */
-	else if ( options->d && options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_double, mem1, sizeof(double));
-			memcpy(&temp2_double, mem2, sizeof(double));
-			
-			if ( temp1_double!=0 && fabs(1-temp2_double/temp1_double) > options->percent && 
-				fabs(temp1_double-temp2_double) > options->delta )
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(FPFORMAT,temp1_double,temp2_double,fabs(temp1_double-temp2_double),
-						fabs(1-temp2_double/temp1_double));
-				}
-				nfound++;
-			}
-			mem1+=sizeof(double);
+ 
+ /* -d and -p */
+ else if ( options->d && options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_double, mem1, sizeof(double));
+   memcpy(&temp2_double, mem2, sizeof(double));
+   
+   if ( temp1_double!=0 && fabs(1-temp2_double/temp1_double) > options->percent && 
+    fabs(temp1_double-temp2_double) > options->delta )
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(FPFORMAT,temp1_double,temp2_double,fabs(temp1_double-temp2_double),
+      fabs(1-temp2_double/temp1_double));
+    }
+    nfound++;
+   }
+   mem1+=sizeof(double);
    mem2+=sizeof(double);
-				if (options->n && nfound>=options->count)
-					return nfound;
-		}
-	} 
-	else 
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_double, mem1, sizeof(double));
-			memcpy(&temp2_double, mem2, sizeof(double));
-			
-			if (temp1_double != temp2_double)
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(FFORMAT,temp1_double,temp2_double,fabs(temp1_double-temp2_double));
-				}
-				nfound++;
-			}
-			
-			mem1+=sizeof(double);
-			mem2+=sizeof(double);
-				if (options->n && nfound>=options->count)
-					return nfound;
-		} /* nelmts */
-		
-	}
-	
-	return nfound;
+    if (options->n && nfound>=options->count)
+     return nfound;
+  }
+ } 
+ else 
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_double, mem1, sizeof(double));
+   memcpy(&temp2_double, mem2, sizeof(double));
+   
+   if (temp1_double != temp2_double)
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(FFORMAT,temp1_double,temp2_double,fabs(temp1_double-temp2_double));
+    }
+    nfound++;
+   }
+   
+   mem1+=sizeof(double);
+   mem2+=sizeof(double);
+    if (options->n && nfound>=options->count)
+     return nfound;
+  } /* nelmts */
+  
+ }
+ 
+ return nfound;
 }
 
 
@@ -2148,132 +2148,132 @@ hsize_t diff_double(unsigned char *mem1,
  *-------------------------------------------------------------------------
  */
 hsize_t diff_schar(unsigned char *mem1,
-																	 	unsigned char *mem2,
-																		 hsize_t       nelmts,
-																		 int           rank, 
-																		 hsize_t       *acc,  
-																		 hsize_t       *pos,
-																		 diff_opt_t    *options, 
-																		 const char    *obj1, 
-																		 const char    *obj2,
-																		 int           *ph)
-																			
+                   unsigned char *mem2,
+                   hsize_t       nelmts,
+                   int           rank, 
+                   hsize_t       *acc,  
+                   hsize_t       *pos,
+                   diff_opt_t    *options, 
+                   const char    *obj1, 
+                   const char    *obj2,
+                   int           *ph)
+                   
 {
-	hsize_t     nfound=0;          /* number of differences found */
-	char        temp1_char;
+ hsize_t     nfound=0;          /* number of differences found */
+ char        temp1_char;
  char        temp2_char;
-	hsize_t     i;
-	
-	
-	/* -d and !-p */
-	if (options->d && !options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_char, mem1, sizeof(char));
-			memcpy(&temp2_char, mem2, sizeof(char));
-			
-			if (abs(temp1_char-temp2_char) > options->delta)
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(IFORMAT,temp1_char,temp2_char,abs(temp1_char-temp2_char));
-				}
-				nfound++;
-			}
-		mem1+=sizeof(char);
+ hsize_t     i;
+ 
+ 
+ /* -d and !-p */
+ if (options->d && !options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_char, mem1, sizeof(char));
+   memcpy(&temp2_char, mem2, sizeof(char));
+   
+   if (abs(temp1_char-temp2_char) > options->delta)
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(IFORMAT,temp1_char,temp2_char,abs(temp1_char-temp2_char));
+    }
+    nfound++;
+   }
+  mem1+=sizeof(char);
   mem2+=sizeof(char);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-	}
-	
-	/* !-d and -p */
-	else if (!options->d && options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_char, mem1, sizeof(char));
-			memcpy(&temp2_char, mem2, sizeof(char));
-			
-			if ( temp1_char!=0 && abs(1-temp2_char/temp1_char) > options->percent )
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(IPFORMAT,temp1_char,temp2_char,abs(temp1_char-temp2_char),
-						abs(1-temp2_char/temp1_char));
-				}
-				nfound++;
-			}
-		mem1+=sizeof(char);
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+ }
+ 
+ /* !-d and -p */
+ else if (!options->d && options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_char, mem1, sizeof(char));
+   memcpy(&temp2_char, mem2, sizeof(char));
+   
+   if ( temp1_char!=0 && abs(1-temp2_char/temp1_char) > options->percent )
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(IPFORMAT,temp1_char,temp2_char,abs(temp1_char-temp2_char),
+      abs(1-temp2_char/temp1_char));
+    }
+    nfound++;
+   }
+  mem1+=sizeof(char);
   mem2+=sizeof(char);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-	} 
-	
-	/* -d and -p */
-	else if ( options->d && options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_char, mem1, sizeof(char));
-			memcpy(&temp2_char, mem2, sizeof(char));
-			
-			if ( temp1_char!=0 && abs(1-temp2_char/temp1_char) > options->percent && 
-				abs(temp1_char-temp2_char) > options->delta )
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(IPFORMAT,temp1_char,temp2_char,abs(temp1_char-temp2_char),
-						abs(1-temp2_char/temp1_char));
-				}
-				nfound++;
-			}
-		mem1+=sizeof(char);
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+ } 
+ 
+ /* -d and -p */
+ else if ( options->d && options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_char, mem1, sizeof(char));
+   memcpy(&temp2_char, mem2, sizeof(char));
+   
+   if ( temp1_char!=0 && abs(1-temp2_char/temp1_char) > options->percent && 
+    abs(temp1_char-temp2_char) > options->delta )
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(IPFORMAT,temp1_char,temp2_char,abs(temp1_char-temp2_char),
+      abs(1-temp2_char/temp1_char));
+    }
+    nfound++;
+   }
+  mem1+=sizeof(char);
   mem2+=sizeof(char);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-	
-	} 
-	else 
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_char, mem1, sizeof(char));
-			memcpy(&temp2_char, mem2, sizeof(char));
-			
-			if (temp1_char != temp2_char)
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(IFORMAT,temp1_char,temp2_char,abs(temp1_char-temp2_char));
-				}
-				nfound++;
-			}
-			
-			mem1+=sizeof(char);
-			mem2+=sizeof(char);
-				if (options->n && nfound>=options->count)
-					return nfound;
-		} /* nelmts */
-		
-	}
-	
-	return nfound;
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+ 
+ } 
+ else 
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_char, mem1, sizeof(char));
+   memcpy(&temp2_char, mem2, sizeof(char));
+   
+   if (temp1_char != temp2_char)
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(IFORMAT,temp1_char,temp2_char,abs(temp1_char-temp2_char));
+    }
+    nfound++;
+   }
+   
+   mem1+=sizeof(char);
+   mem2+=sizeof(char);
+    if (options->n && nfound>=options->count)
+     return nfound;
+  } /* nelmts */
+  
+ }
+ 
+ return nfound;
 }
 
 
@@ -2288,133 +2288,133 @@ hsize_t diff_schar(unsigned char *mem1,
  *-------------------------------------------------------------------------
  */
 hsize_t diff_uchar(unsigned char *mem1,
-																	 	unsigned char *mem2,
-																		 hsize_t       nelmts,
-																		 int           rank, 
-																		 hsize_t       *acc,  
-																		 hsize_t       *pos,
-																		 diff_opt_t    *options, 
-																		 const char    *obj1, 
-																		 const char    *obj2,
-																		 int           *ph)
-																			
+                   unsigned char *mem2,
+                   hsize_t       nelmts,
+                   int           rank, 
+                   hsize_t       *acc,  
+                   hsize_t       *pos,
+                   diff_opt_t    *options, 
+                   const char    *obj1, 
+                   const char    *obj2,
+                   int           *ph)
+                   
 {
-	hsize_t       nfound=0;          /* number of differences found */
-	unsigned char temp1_uchar;
+ hsize_t       nfound=0;          /* number of differences found */
+ unsigned char temp1_uchar;
  unsigned char temp2_uchar;
-	hsize_t       i;
-	
-	
-	/* -d and !-p */
-	if (options->d && !options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
-			memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
-			
-			if (abs(temp1_uchar-temp2_uchar) > options->delta)
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(IFORMAT,temp1_uchar,temp2_uchar,abs(temp1_uchar-temp2_uchar));
-				}
-				nfound++;
-			}
-		mem1+=sizeof(unsigned char);
+ hsize_t       i;
+ 
+ 
+ /* -d and !-p */
+ if (options->d && !options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
+   memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
+   
+   if (abs(temp1_uchar-temp2_uchar) > options->delta)
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(IFORMAT,temp1_uchar,temp2_uchar,abs(temp1_uchar-temp2_uchar));
+    }
+    nfound++;
+   }
+  mem1+=sizeof(unsigned char);
   mem2+=sizeof(unsigned char);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-	
-	}
-	
-	/* !-d and -p */
-	else if (!options->d && options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
-			memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
-			
-			if ( temp1_uchar!=0 && abs(1-temp2_uchar/temp1_uchar) > options->percent )
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(IPFORMAT,temp1_uchar,temp2_uchar,abs(temp1_uchar-temp2_uchar),
-						abs(1-temp2_uchar/temp1_uchar));
-				}
-				nfound++;
-			}
-		mem1+=sizeof(unsigned char);
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+ 
+ }
+ 
+ /* !-d and -p */
+ else if (!options->d && options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
+   memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
+   
+   if ( temp1_uchar!=0 && abs(1-temp2_uchar/temp1_uchar) > options->percent )
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(IPFORMAT,temp1_uchar,temp2_uchar,abs(temp1_uchar-temp2_uchar),
+      abs(1-temp2_uchar/temp1_uchar));
+    }
+    nfound++;
+   }
+  mem1+=sizeof(unsigned char);
   mem2+=sizeof(unsigned char);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-	} 
-	
-	/* -d and -p */
-	else if ( options->d && options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
-			memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
-			
-			if ( temp1_uchar!=0 && abs(1-temp2_uchar/temp1_uchar) > options->percent && 
-				abs(temp1_uchar-temp2_uchar) > options->delta )
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(IPFORMAT,temp1_uchar,temp2_uchar,abs(temp1_uchar-temp2_uchar),
-						abs(1-temp2_uchar/temp1_uchar));
-				}
-				nfound++;
-			}
-			mem1+=sizeof(unsigned char);
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+ } 
+ 
+ /* -d and -p */
+ else if ( options->d && options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
+   memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
+   
+   if ( temp1_uchar!=0 && abs(1-temp2_uchar/temp1_uchar) > options->percent && 
+    abs(temp1_uchar-temp2_uchar) > options->delta )
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(IPFORMAT,temp1_uchar,temp2_uchar,abs(temp1_uchar-temp2_uchar),
+      abs(1-temp2_uchar/temp1_uchar));
+    }
+    nfound++;
+   }
+   mem1+=sizeof(unsigned char);
   mem2+=sizeof(unsigned char);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-		
-	} 
-	else 
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
-			memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
-			
-			if (temp1_uchar != temp2_uchar)
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(IFORMAT,temp1_uchar,temp2_uchar,abs(temp1_uchar-temp2_uchar));
-				}
-				nfound++;
-			}
-			
-			mem1+=sizeof(unsigned char);
-			mem2+=sizeof(unsigned char);
-				if (options->n && nfound>=options->count)
-					return nfound;
-		} /* nelmts */
-		
-	}
-	
-	return nfound;
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+  
+ } 
+ else 
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
+   memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
+   
+   if (temp1_uchar != temp2_uchar)
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(IFORMAT,temp1_uchar,temp2_uchar,abs(temp1_uchar-temp2_uchar));
+    }
+    nfound++;
+   }
+   
+   mem1+=sizeof(unsigned char);
+   mem2+=sizeof(unsigned char);
+    if (options->n && nfound>=options->count)
+     return nfound;
+  } /* nelmts */
+  
+ }
+ 
+ return nfound;
 }
 
 
@@ -2430,135 +2430,135 @@ hsize_t diff_uchar(unsigned char *mem1,
  *-------------------------------------------------------------------------
  */
 hsize_t diff_short(unsigned char *mem1,
-																	 	unsigned char *mem2,
-																		 hsize_t       nelmts,
-																		 int           rank, 
-																		 hsize_t       *acc,  
-																		 hsize_t       *pos,
-																		 diff_opt_t    *options, 
-																		 const char    *obj1, 
-																		 const char    *obj2,
-																		 int           *ph)
-																			
+                   unsigned char *mem2,
+                   hsize_t       nelmts,
+                   int           rank, 
+                   hsize_t       *acc,  
+                   hsize_t       *pos,
+                   diff_opt_t    *options, 
+                   const char    *obj1, 
+                   const char    *obj2,
+                   int           *ph)
+                   
 {
-	hsize_t       nfound=0;          /* number of differences found */
-	short         temp1_short;
+ hsize_t       nfound=0;          /* number of differences found */
+ short         temp1_short;
  short         temp2_short;
-	hsize_t       i;
-	
-	
-	/* -d and !-p */
-	if (options->d && !options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_short, mem1, sizeof(short));
-			memcpy(&temp2_short, mem2, sizeof(short));
-			
-			if (abs(temp1_short-temp2_short) > options->delta)
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(IFORMAT,temp1_short,temp2_short,abs(temp1_short-temp2_short));
-				}
-				nfound++;
-			}
-			mem1+=sizeof(short);
+ hsize_t       i;
+ 
+ 
+ /* -d and !-p */
+ if (options->d && !options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_short, mem1, sizeof(short));
+   memcpy(&temp2_short, mem2, sizeof(short));
+   
+   if (abs(temp1_short-temp2_short) > options->delta)
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(IFORMAT,temp1_short,temp2_short,abs(temp1_short-temp2_short));
+    }
+    nfound++;
+   }
+   mem1+=sizeof(short);
   mem2+=sizeof(short);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-		
-	}
-	
-	/* !-d and -p */
-	else if (!options->d && options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_short, mem1, sizeof(short));
-			memcpy(&temp2_short, mem2, sizeof(short));
-			
-			if ( temp1_short!=0 && abs(1-temp2_short/temp1_short) > options->percent )
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(IPFORMAT,temp1_short,temp2_short,abs(temp1_short-temp2_short),
-						abs(1-temp2_short/temp1_short));
-				}
-				nfound++;
-			}
-			mem1+=sizeof(short);
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+  
+ }
+ 
+ /* !-d and -p */
+ else if (!options->d && options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_short, mem1, sizeof(short));
+   memcpy(&temp2_short, mem2, sizeof(short));
+   
+   if ( temp1_short!=0 && abs(1-temp2_short/temp1_short) > options->percent )
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(IPFORMAT,temp1_short,temp2_short,abs(temp1_short-temp2_short),
+      abs(1-temp2_short/temp1_short));
+    }
+    nfound++;
+   }
+   mem1+=sizeof(short);
   mem2+=sizeof(short);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-		
-		
-	} 
-	
-	/* -d and -p */
-	else if ( options->d && options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_short, mem1, sizeof(short));
-			memcpy(&temp2_short, mem2, sizeof(short));
-			
-			if ( temp1_short!=0 && abs(1-temp2_short/temp1_short) > options->percent && 
-				abs(temp1_short-temp2_short) > options->delta )
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(IPFORMAT,temp1_short,temp2_short,abs(temp1_short-temp2_short),
-						abs(1-temp2_short/temp1_short));
-				}
-				nfound++;
-			}
-			mem1+=sizeof(short);
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+  
+  
+ } 
+ 
+ /* -d and -p */
+ else if ( options->d && options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_short, mem1, sizeof(short));
+   memcpy(&temp2_short, mem2, sizeof(short));
+   
+   if ( temp1_short!=0 && abs(1-temp2_short/temp1_short) > options->percent && 
+    abs(temp1_short-temp2_short) > options->delta )
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(IPFORMAT,temp1_short,temp2_short,abs(temp1_short-temp2_short),
+      abs(1-temp2_short/temp1_short));
+    }
+    nfound++;
+   }
+   mem1+=sizeof(short);
   mem2+=sizeof(short);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-		
-	} 
-	else 
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_short, mem1, sizeof(short));
-			memcpy(&temp2_short, mem2, sizeof(short));
-			
-			if (temp1_short != temp2_short)
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(IFORMAT,temp1_short,temp2_short,abs(temp1_short-temp2_short));
-				}
-				nfound++;
-			}
-			
-			mem1+=sizeof(short);
-			mem2+=sizeof(short);
-				if (options->n && nfound>=options->count)
-					return nfound;
-		} /* nelmts */
-		
-	}
-	
-	return nfound;
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+  
+ } 
+ else 
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_short, mem1, sizeof(short));
+   memcpy(&temp2_short, mem2, sizeof(short));
+   
+   if (temp1_short != temp2_short)
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(IFORMAT,temp1_short,temp2_short,abs(temp1_short-temp2_short));
+    }
+    nfound++;
+   }
+   
+   mem1+=sizeof(short);
+   mem2+=sizeof(short);
+    if (options->n && nfound>=options->count)
+     return nfound;
+  } /* nelmts */
+  
+ }
+ 
+ return nfound;
 }
 
 
@@ -2572,135 +2572,135 @@ hsize_t diff_short(unsigned char *mem1,
  *-------------------------------------------------------------------------
  */
 hsize_t diff_ushort(unsigned char *mem1,
-																	  	unsigned char *mem2,
-																		  hsize_t       nelmts,
-																		  int           rank, 
-																		  hsize_t       *acc,  
-																		  hsize_t       *pos,
-																		  diff_opt_t    *options, 
-																		  const char    *obj1, 
-																		  const char    *obj2,
-																		  int           *ph)
-																			
+                    unsigned char *mem2,
+                    hsize_t       nelmts,
+                    int           rank, 
+                    hsize_t       *acc,  
+                    hsize_t       *pos,
+                    diff_opt_t    *options, 
+                    const char    *obj1, 
+                    const char    *obj2,
+                    int           *ph)
+                   
 {
-	hsize_t        nfound=0;          /* number of differences found */
-	unsigned short temp1_ushort;
+ hsize_t        nfound=0;          /* number of differences found */
+ unsigned short temp1_ushort;
  unsigned short temp2_ushort;
-	hsize_t        i;
-	
-	
-	/* -d and !-p */
-	if (options->d && !options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_ushort, mem1, sizeof(unsigned short));
-			memcpy(&temp2_ushort, mem2, sizeof(unsigned short));
-			
-			if (abs(temp1_ushort-temp2_ushort) > options->delta)
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(IFORMAT,temp1_ushort,temp2_ushort,abs(temp1_ushort-temp2_ushort));
-				}
-				nfound++;
-			}
-				mem1+=sizeof(unsigned short);
+ hsize_t        i;
+ 
+ 
+ /* -d and !-p */
+ if (options->d && !options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_ushort, mem1, sizeof(unsigned short));
+   memcpy(&temp2_ushort, mem2, sizeof(unsigned short));
+   
+   if (abs(temp1_ushort-temp2_ushort) > options->delta)
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(IFORMAT,temp1_ushort,temp2_ushort,abs(temp1_ushort-temp2_ushort));
+    }
+    nfound++;
+   }
+    mem1+=sizeof(unsigned short);
   mem2+=sizeof(unsigned short);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-	
-	}
-	
-	/* !-d and -p */
-	else if (!options->d && options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_ushort, mem1, sizeof(unsigned short));
-			memcpy(&temp2_ushort, mem2, sizeof(unsigned short));
-			
-			if ( temp1_ushort!=0 && abs(1-temp2_ushort/temp1_ushort) > options->percent )
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(IPFORMAT,temp1_ushort,temp2_ushort,abs(temp1_ushort-temp2_ushort),
-						abs(1-temp2_ushort/temp1_ushort));
-				}
-				nfound++;
-			}
-				mem1+=sizeof(unsigned short);
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+ 
+ }
+ 
+ /* !-d and -p */
+ else if (!options->d && options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_ushort, mem1, sizeof(unsigned short));
+   memcpy(&temp2_ushort, mem2, sizeof(unsigned short));
+   
+   if ( temp1_ushort!=0 && abs(1-temp2_ushort/temp1_ushort) > options->percent )
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(IPFORMAT,temp1_ushort,temp2_ushort,abs(temp1_ushort-temp2_ushort),
+      abs(1-temp2_ushort/temp1_ushort));
+    }
+    nfound++;
+   }
+    mem1+=sizeof(unsigned short);
   mem2+=sizeof(unsigned short);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-		
-	
-	} 
-	
-	/* -d and -p */
-	else if ( options->d && options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_ushort, mem1, sizeof(unsigned short));
-			memcpy(&temp2_ushort, mem2, sizeof(unsigned short));
-			
-			if ( temp1_ushort!=0 && abs(1-temp2_ushort/temp1_ushort) > options->percent && 
-				abs(temp1_ushort-temp2_ushort) > options->delta )
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(IPFORMAT,temp1_ushort,temp2_ushort,abs(temp1_ushort-temp2_ushort),
-						abs(1-temp2_ushort/temp1_ushort));
-				}
-				nfound++;
-			}
-				mem1+=sizeof(unsigned short);
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+  
+ 
+ } 
+ 
+ /* -d and -p */
+ else if ( options->d && options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_ushort, mem1, sizeof(unsigned short));
+   memcpy(&temp2_ushort, mem2, sizeof(unsigned short));
+   
+   if ( temp1_ushort!=0 && abs(1-temp2_ushort/temp1_ushort) > options->percent && 
+    abs(temp1_ushort-temp2_ushort) > options->delta )
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(IPFORMAT,temp1_ushort,temp2_ushort,abs(temp1_ushort-temp2_ushort),
+      abs(1-temp2_ushort/temp1_ushort));
+    }
+    nfound++;
+   }
+    mem1+=sizeof(unsigned short);
   mem2+=sizeof(unsigned short);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-	
-	} 
-	else 
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_ushort, mem1, sizeof(unsigned short));
-			memcpy(&temp2_ushort, mem2, sizeof(unsigned short));
-			
-			if (temp1_ushort != temp2_ushort)
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(IFORMAT,temp1_ushort,temp2_ushort,abs(temp1_ushort-temp2_ushort));
-				}
-				nfound++;
-			}
-			
-			mem1+=sizeof(unsigned short);
-			mem2+=sizeof(unsigned short);
-				if (options->n && nfound>=options->count)
-					return nfound;
-		} /* nelmts */
-		
-	}
-	
-	return nfound;
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+ 
+ } 
+ else 
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_ushort, mem1, sizeof(unsigned short));
+   memcpy(&temp2_ushort, mem2, sizeof(unsigned short));
+   
+   if (temp1_ushort != temp2_ushort)
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(IFORMAT,temp1_ushort,temp2_ushort,abs(temp1_ushort-temp2_ushort));
+    }
+    nfound++;
+   }
+   
+   mem1+=sizeof(unsigned short);
+   mem2+=sizeof(unsigned short);
+    if (options->n && nfound>=options->count)
+     return nfound;
+  } /* nelmts */
+  
+ }
+ 
+ return nfound;
 }
 
 
@@ -2715,135 +2715,135 @@ hsize_t diff_ushort(unsigned char *mem1,
  *-------------------------------------------------------------------------
  */
 hsize_t diff_int(unsigned char *mem1,
-																	unsigned char *mem2,
-																	hsize_t       nelmts,
-																	int           rank, 
-																	hsize_t       *acc,  
-																	hsize_t       *pos,
-																	diff_opt_t    *options, 
-																	const char    *obj1, 
-																	const char    *obj2,
-																	int           *ph)
-																			
+                 unsigned char *mem2,
+                 hsize_t       nelmts,
+                 int           rank, 
+                 hsize_t       *acc,  
+                 hsize_t       *pos,
+                 diff_opt_t    *options, 
+                 const char    *obj1, 
+                 const char    *obj2,
+                 int           *ph)
+                   
 {
-	hsize_t       nfound=0;          /* number of differences found */
-	int           temp1_int;
+ hsize_t       nfound=0;          /* number of differences found */
+ int           temp1_int;
  int           temp2_int;
-	hsize_t       i;
-	
-	
-	/* -d and !-p */
-	if (options->d && !options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_int, mem1, sizeof(int));
-			memcpy(&temp2_int, mem2, sizeof(int));
-			
-			if (abs(temp1_int-temp2_int) > options->delta)
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(IFORMAT,temp1_int,temp2_int,abs(temp1_int-temp2_int));
-				}
-				nfound++;
-			}
-				mem1+=sizeof(int);
+ hsize_t       i;
+ 
+ 
+ /* -d and !-p */
+ if (options->d && !options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_int, mem1, sizeof(int));
+   memcpy(&temp2_int, mem2, sizeof(int));
+   
+   if (abs(temp1_int-temp2_int) > options->delta)
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(IFORMAT,temp1_int,temp2_int,abs(temp1_int-temp2_int));
+    }
+    nfound++;
+   }
+    mem1+=sizeof(int);
   mem2+=sizeof(int);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-	
-	}
-	
-	/* !-d and -p */
-	else if (!options->d && options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_int, mem1, sizeof(int));
-			memcpy(&temp2_int, mem2, sizeof(int));
-			
-			if ( temp1_int!=0 && abs(1-temp2_int/temp1_int) > options->percent )
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(IPFORMAT,temp1_int,temp2_int,abs(temp1_int-temp2_int),
-						abs(1-temp2_int/temp1_int));
-				}
-				nfound++;
-			}
-				mem1+=sizeof(int);
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+ 
+ }
+ 
+ /* !-d and -p */
+ else if (!options->d && options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_int, mem1, sizeof(int));
+   memcpy(&temp2_int, mem2, sizeof(int));
+   
+   if ( temp1_int!=0 && abs(1-temp2_int/temp1_int) > options->percent )
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(IPFORMAT,temp1_int,temp2_int,abs(temp1_int-temp2_int),
+      abs(1-temp2_int/temp1_int));
+    }
+    nfound++;
+   }
+    mem1+=sizeof(int);
   mem2+=sizeof(int);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-		
-	
-	} 
-	
-	/* -d and -p */
-	else if ( options->d && options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_int, mem1, sizeof(int));
-			memcpy(&temp2_int, mem2, sizeof(int));
-			
-			if ( temp1_int!=0 && abs(1-temp2_int/temp1_int) > options->percent && 
-				abs(temp1_int-temp2_int) > options->delta )
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(IPFORMAT,temp1_int,temp2_int,abs(temp1_int-temp2_int),
-						abs(1-temp2_int/temp1_int));
-				}
-				nfound++;
-			}
-				mem1+=sizeof(int);
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+  
+ 
+ } 
+ 
+ /* -d and -p */
+ else if ( options->d && options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_int, mem1, sizeof(int));
+   memcpy(&temp2_int, mem2, sizeof(int));
+   
+   if ( temp1_int!=0 && abs(1-temp2_int/temp1_int) > options->percent && 
+    abs(temp1_int-temp2_int) > options->delta )
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(IPFORMAT,temp1_int,temp2_int,abs(temp1_int-temp2_int),
+      abs(1-temp2_int/temp1_int));
+    }
+    nfound++;
+   }
+    mem1+=sizeof(int);
   mem2+=sizeof(int);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-	
-	} 
-	else 
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_int, mem1, sizeof(int));
-			memcpy(&temp2_int, mem2, sizeof(int));
-			
-			if (temp1_int != temp2_int)
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(IFORMAT,temp1_int,temp2_int,abs(temp1_int-temp2_int));
-				}
-				nfound++;
-			}
-			
-			mem1+=sizeof(int);
-			mem2+=sizeof(int);
-				if (options->n && nfound>=options->count)
-					return nfound;
-		} /* nelmts */
-		
-	}
-	
-	return nfound;
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+ 
+ } 
+ else 
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_int, mem1, sizeof(int));
+   memcpy(&temp2_int, mem2, sizeof(int));
+   
+   if (temp1_int != temp2_int)
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(IFORMAT,temp1_int,temp2_int,abs(temp1_int-temp2_int));
+    }
+    nfound++;
+   }
+   
+   mem1+=sizeof(int);
+   mem2+=sizeof(int);
+    if (options->n && nfound>=options->count)
+     return nfound;
+  } /* nelmts */
+  
+ }
+ 
+ return nfound;
 }
 
 
@@ -2858,135 +2858,135 @@ hsize_t diff_int(unsigned char *mem1,
  *-------------------------------------------------------------------------
  */
 hsize_t diff_uint(unsigned char *mem1,
-																	 unsigned char *mem2,
-																		hsize_t       nelmts,
-																		int           rank, 
-																		hsize_t       *acc,  
-																		hsize_t       *pos,
-																		diff_opt_t    *options, 
-																		const char    *obj1, 
-																		const char    *obj2,
-																		int           *ph)
-																			
+                  unsigned char *mem2,
+                  hsize_t       nelmts,
+                  int           rank, 
+                  hsize_t       *acc,  
+                  hsize_t       *pos,
+                  diff_opt_t    *options, 
+                  const char    *obj1, 
+                  const char    *obj2,
+                  int           *ph)
+                   
 {
-	hsize_t        nfound=0;          /* number of differences found */
-	unsigned int temp1_uint;
+ hsize_t        nfound=0;          /* number of differences found */
+ unsigned int temp1_uint;
  unsigned int temp2_uint;
-	hsize_t        i;
-	
-	
-	/* -d and !-p */
-	if (options->d && !options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_uint, mem1, sizeof(unsigned int));
-			memcpy(&temp2_uint, mem2, sizeof(unsigned int));
-			
-			if (abs(temp1_uint-temp2_uint) > options->delta)
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(IFORMAT,temp1_uint,temp2_uint,abs(temp1_uint-temp2_uint));
-				}
-				nfound++;
-			}
-				mem1+=sizeof(unsigned int);
+ hsize_t        i;
+ 
+ 
+ /* -d and !-p */
+ if (options->d && !options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_uint, mem1, sizeof(unsigned int));
+   memcpy(&temp2_uint, mem2, sizeof(unsigned int));
+   
+   if (abs(temp1_uint-temp2_uint) > options->delta)
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(IFORMAT,temp1_uint,temp2_uint,abs(temp1_uint-temp2_uint));
+    }
+    nfound++;
+   }
+    mem1+=sizeof(unsigned int);
   mem2+=sizeof(unsigned int);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-	
-	}
-	
-	/* !-d and -p */
-	else if (!options->d && options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_uint, mem1, sizeof(unsigned int));
-			memcpy(&temp2_uint, mem2, sizeof(unsigned int));
-			
-			if ( temp1_uint!=0 && abs(1-temp2_uint/temp1_uint) > options->percent )
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(IPFORMAT,temp1_uint,temp2_uint,abs(temp1_uint-temp2_uint),
-						abs(1-temp2_uint/temp1_uint));
-				}
-				nfound++;
-			}
-			mem1+=sizeof(unsigned int);
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+ 
+ }
+ 
+ /* !-d and -p */
+ else if (!options->d && options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_uint, mem1, sizeof(unsigned int));
+   memcpy(&temp2_uint, mem2, sizeof(unsigned int));
+   
+   if ( temp1_uint!=0 && abs(1-temp2_uint/temp1_uint) > options->percent )
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(IPFORMAT,temp1_uint,temp2_uint,abs(temp1_uint-temp2_uint),
+      abs(1-temp2_uint/temp1_uint));
+    }
+    nfound++;
+   }
+   mem1+=sizeof(unsigned int);
   mem2+=sizeof(unsigned int);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-		
-		
-	} 
-	
-	/* -d and -p */
-	else if ( options->d && options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_uint, mem1, sizeof(unsigned int));
-			memcpy(&temp2_uint, mem2, sizeof(unsigned int));
-			
-			if ( temp1_uint!=0 && abs(1-temp2_uint/temp1_uint) > options->percent && 
-				abs(temp1_uint-temp2_uint) > options->delta )
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(IPFORMAT,temp1_uint,temp2_uint,abs(temp1_uint-temp2_uint),
-						abs(1-temp2_uint/temp1_uint));
-				}
-				nfound++;
-			}
-				mem1+=sizeof(unsigned int);
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+  
+  
+ } 
+ 
+ /* -d and -p */
+ else if ( options->d && options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_uint, mem1, sizeof(unsigned int));
+   memcpy(&temp2_uint, mem2, sizeof(unsigned int));
+   
+   if ( temp1_uint!=0 && abs(1-temp2_uint/temp1_uint) > options->percent && 
+    abs(temp1_uint-temp2_uint) > options->delta )
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(IPFORMAT,temp1_uint,temp2_uint,abs(temp1_uint-temp2_uint),
+      abs(1-temp2_uint/temp1_uint));
+    }
+    nfound++;
+   }
+    mem1+=sizeof(unsigned int);
   mem2+=sizeof(unsigned int);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-	
-	} 
-	else 
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_uint, mem1, sizeof(unsigned int));
-			memcpy(&temp2_uint, mem2, sizeof(unsigned int));
-			
-			if (temp1_uint != temp2_uint)
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(IFORMAT,temp1_uint,temp2_uint,abs(temp1_uint-temp2_uint));
-				}
-				nfound++;
-			}
-			
-			mem1+=sizeof(unsigned int);
-			mem2+=sizeof(unsigned int);
-				if (options->n && nfound>=options->count)
-					return nfound;
-		} /* nelmts */
-		
-	}
-	
-	return nfound;
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+ 
+ } 
+ else 
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_uint, mem1, sizeof(unsigned int));
+   memcpy(&temp2_uint, mem2, sizeof(unsigned int));
+   
+   if (temp1_uint != temp2_uint)
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(IFORMAT,temp1_uint,temp2_uint,abs(temp1_uint-temp2_uint));
+    }
+    nfound++;
+   }
+   
+   mem1+=sizeof(unsigned int);
+   mem2+=sizeof(unsigned int);
+    if (options->n && nfound>=options->count)
+     return nfound;
+  } /* nelmts */
+  
+ }
+ 
+ return nfound;
 }
 
 
@@ -3001,135 +3001,135 @@ hsize_t diff_uint(unsigned char *mem1,
  *-------------------------------------------------------------------------
  */
 hsize_t diff_long(unsigned char *mem1,
-															 		unsigned char *mem2,
-															 		hsize_t       nelmts,
-															 		int           rank, 
-																 	hsize_t       *acc,  
-																 	hsize_t       *pos,
-																 	diff_opt_t    *options, 
-																 	const char    *obj1, 
-																	 const char    *obj2,
-																	 int           *ph)
-																			
+                  unsigned char *mem2,
+                  hsize_t       nelmts,
+                  int           rank, 
+                  hsize_t       *acc,  
+                  hsize_t       *pos,
+                  diff_opt_t    *options, 
+                  const char    *obj1, 
+                  const char    *obj2,
+                  int           *ph)
+                   
 {
-	hsize_t       nfound=0;          /* number of differences found */
-	long          temp1_long;
+ hsize_t       nfound=0;          /* number of differences found */
+ long          temp1_long;
  long          temp2_long;
-	hsize_t       i;
-	
-	
-	/* -d and !-p */
-	if (options->d && !options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_long, mem1, sizeof(long));
-			memcpy(&temp2_long, mem2, sizeof(long));
-			
-			if (labs(temp1_long-temp2_long) > (long)options->delta)
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(LIFORMAT,temp1_long,temp2_long,labs(temp1_long-temp2_long));
-				}
-				nfound++;
-			}
-				mem1+=sizeof(long);
+ hsize_t       i;
+ 
+ 
+ /* -d and !-p */
+ if (options->d && !options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_long, mem1, sizeof(long));
+   memcpy(&temp2_long, mem2, sizeof(long));
+   
+   if (labs(temp1_long-temp2_long) > (long)options->delta)
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(LIFORMAT,temp1_long,temp2_long,labs(temp1_long-temp2_long));
+    }
+    nfound++;
+   }
+    mem1+=sizeof(long);
   mem2+=sizeof(long);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-	
-	}
-	
-	/* !-d and -p */
-	else if (!options->d && options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_long, mem1, sizeof(long));
-			memcpy(&temp2_long, mem2, sizeof(long));
-			
-			if ( temp1_long!=0 && labs(1-temp2_long/temp1_long) > options->percent )
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(LPIFORMAT,temp1_long,temp2_long,labs(temp1_long-temp2_long),
-						labs(1-temp2_long/temp1_long));
-				}
-				nfound++;
-			}
-				mem1+=sizeof(long);
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+ 
+ }
+ 
+ /* !-d and -p */
+ else if (!options->d && options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_long, mem1, sizeof(long));
+   memcpy(&temp2_long, mem2, sizeof(long));
+   
+   if ( temp1_long!=0 && labs(1-temp2_long/temp1_long) > options->percent )
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(LPIFORMAT,temp1_long,temp2_long,labs(temp1_long-temp2_long),
+      labs(1-temp2_long/temp1_long));
+    }
+    nfound++;
+   }
+    mem1+=sizeof(long);
   mem2+=sizeof(long);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-		
-	
-	} 
-	
-	/* -d and -p */
-	else if ( options->d && options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_long, mem1, sizeof(long));
-			memcpy(&temp2_long, mem2, sizeof(long));
-			
-			if ( temp1_long!=0 && labs(1-temp2_long/temp1_long) > options->percent && 
-				labs(temp1_long-temp2_long) > (long)options->delta )
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(LPIFORMAT,temp1_long,temp2_long,labs(temp1_long-temp2_long),
-						labs(1-temp2_long/temp1_long));
-				}
-				nfound++;
-			}
-				mem1+=sizeof(long);
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+  
+ 
+ } 
+ 
+ /* -d and -p */
+ else if ( options->d && options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_long, mem1, sizeof(long));
+   memcpy(&temp2_long, mem2, sizeof(long));
+   
+   if ( temp1_long!=0 && labs(1-temp2_long/temp1_long) > options->percent && 
+    labs(temp1_long-temp2_long) > (long)options->delta )
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(LPIFORMAT,temp1_long,temp2_long,labs(temp1_long-temp2_long),
+      labs(1-temp2_long/temp1_long));
+    }
+    nfound++;
+   }
+    mem1+=sizeof(long);
   mem2+=sizeof(long);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-	
-	} 
-	else 
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_long, mem1, sizeof(long));
-			memcpy(&temp2_long, mem2, sizeof(long));
-			
-			if (temp1_long != temp2_long)
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(LIFORMAT,temp1_long,temp2_long,labs(temp1_long-temp2_long));
-				}
-				nfound++;
-			}
-			
-			mem1+=sizeof(long);
-			mem2+=sizeof(long);
-				if (options->n && nfound>=options->count)
-					return nfound;
-		} /* nelmts */
-		
-	}
-	
-	return nfound;
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+ 
+ } 
+ else 
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_long, mem1, sizeof(long));
+   memcpy(&temp2_long, mem2, sizeof(long));
+   
+   if (temp1_long != temp2_long)
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(LIFORMAT,temp1_long,temp2_long,labs(temp1_long-temp2_long));
+    }
+    nfound++;
+   }
+   
+   mem1+=sizeof(long);
+   mem2+=sizeof(long);
+    if (options->n && nfound>=options->count)
+     return nfound;
+  } /* nelmts */
+  
+ }
+ 
+ return nfound;
 }
 
 
@@ -3144,135 +3144,135 @@ hsize_t diff_long(unsigned char *mem1,
  *-------------------------------------------------------------------------
  */
 hsize_t diff_ulong(unsigned char *mem1,
-																	  unsigned char *mem2,
-																	 	hsize_t       nelmts,
-																	 	int           rank, 
-																	 	hsize_t       *acc,  
-																		 hsize_t       *pos,
-																		 diff_opt_t    *options, 
-																		 const char    *obj1, 
-																		 const char    *obj2,
-																	 	int           *ph)
-																			
+                   unsigned char *mem2,
+                   hsize_t       nelmts,
+                   int           rank, 
+                   hsize_t       *acc,  
+                   hsize_t       *pos,
+                   diff_opt_t    *options, 
+                   const char    *obj1, 
+                   const char    *obj2,
+                   int           *ph)
+                   
 {
-	hsize_t        nfound=0;          /* number of differences found */
-	unsigned long  temp1_ulong;
+ hsize_t        nfound=0;          /* number of differences found */
+ unsigned long  temp1_ulong;
  unsigned long  temp2_ulong;
-	hsize_t        i;
-	
-	
-	/* -d and !-p */
-	if (options->d && !options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_ulong, mem1, sizeof(unsigned long));
-			memcpy(&temp2_ulong, mem2, sizeof(unsigned long));
-			
-			if (labs((long)(temp1_ulong-temp2_ulong)) > (long)options->delta)
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(LIFORMAT,temp1_ulong,temp2_ulong,labs(temp1_ulong-temp2_ulong));
-				}
-				nfound++;
-			}
-				mem1+=sizeof(unsigned long);
+ hsize_t        i;
+ 
+ 
+ /* -d and !-p */
+ if (options->d && !options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_ulong, mem1, sizeof(unsigned long));
+   memcpy(&temp2_ulong, mem2, sizeof(unsigned long));
+   
+   if (labs((long)(temp1_ulong-temp2_ulong)) > (long)options->delta)
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(LIFORMAT,temp1_ulong,temp2_ulong,labs(temp1_ulong-temp2_ulong));
+    }
+    nfound++;
+   }
+    mem1+=sizeof(unsigned long);
   mem2+=sizeof(unsigned long);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-	
-	}
-	
-	/* !-d and -p */
-	else if (!options->d && options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_ulong, mem1, sizeof(unsigned long));
-			memcpy(&temp2_ulong, mem2, sizeof(unsigned long));
-			
-			if ( temp1_ulong!=0 && labs(1-temp2_ulong/temp1_ulong) > options->percent )
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(LPIFORMAT,temp1_ulong,temp2_ulong,labs(temp1_ulong-temp2_ulong),
-						labs(1-temp2_ulong/temp1_ulong));
-				}
-				nfound++;
-			}
-				mem1+=sizeof(unsigned long);
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+ 
+ }
+ 
+ /* !-d and -p */
+ else if (!options->d && options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_ulong, mem1, sizeof(unsigned long));
+   memcpy(&temp2_ulong, mem2, sizeof(unsigned long));
+   
+   if ( temp1_ulong!=0 && labs(1-temp2_ulong/temp1_ulong) > options->percent )
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(LPIFORMAT,temp1_ulong,temp2_ulong,labs(temp1_ulong-temp2_ulong),
+      labs(1-temp2_ulong/temp1_ulong));
+    }
+    nfound++;
+   }
+    mem1+=sizeof(unsigned long);
   mem2+=sizeof(unsigned long);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-		
-	
-	} 
-	
-	/* -d and -p */
-	else if ( options->d && options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_ulong, mem1, sizeof(unsigned long));
-			memcpy(&temp2_ulong, mem2, sizeof(unsigned long));
-			
-			if ( temp1_ulong!=0 && labs(1-temp2_ulong/temp1_ulong) > options->percent && 
-				labs(temp1_ulong-temp2_ulong) > options->delta )
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(LPIFORMAT,temp1_ulong,temp2_ulong,labs(temp1_ulong-temp2_ulong),
-						labs(1-temp2_ulong/temp1_ulong));
-				}
-				nfound++;
-			}
-			mem1+=sizeof(unsigned long);
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+  
+ 
+ } 
+ 
+ /* -d and -p */
+ else if ( options->d && options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_ulong, mem1, sizeof(unsigned long));
+   memcpy(&temp2_ulong, mem2, sizeof(unsigned long));
+   
+   if ( temp1_ulong!=0 && labs(1-temp2_ulong/temp1_ulong) > options->percent && 
+    labs(temp1_ulong-temp2_ulong) > options->delta )
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(LPIFORMAT,temp1_ulong,temp2_ulong,labs(temp1_ulong-temp2_ulong),
+      labs(1-temp2_ulong/temp1_ulong));
+    }
+    nfound++;
+   }
+   mem1+=sizeof(unsigned long);
   mem2+=sizeof(unsigned long);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-		
-	} 
-	else 
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_ulong, mem1, sizeof(unsigned long));
-			memcpy(&temp2_ulong, mem2, sizeof(unsigned long));
-			
-			if (temp1_ulong != temp2_ulong)
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(LIFORMAT,temp1_ulong,temp2_ulong,labs(temp1_ulong-temp2_ulong));
-				}
-				nfound++;
-			}
-			
-			mem1+=sizeof(unsigned long);
-			mem2+=sizeof(unsigned long);
-				if (options->n && nfound>=options->count)
-					return nfound;
-		} /* nelmts */
-		
-	}
-	
-	return nfound;
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+  
+ } 
+ else 
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_ulong, mem1, sizeof(unsigned long));
+   memcpy(&temp2_ulong, mem2, sizeof(unsigned long));
+   
+   if (temp1_ulong != temp2_ulong)
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(LIFORMAT,temp1_ulong,temp2_ulong,labs(temp1_ulong-temp2_ulong));
+    }
+    nfound++;
+   }
+   
+   mem1+=sizeof(unsigned long);
+   mem2+=sizeof(unsigned long);
+    if (options->n && nfound>=options->count)
+     return nfound;
+  } /* nelmts */
+  
+ }
+ 
+ return nfound;
 }
 
 
@@ -3287,145 +3287,145 @@ hsize_t diff_ulong(unsigned char *mem1,
  *-------------------------------------------------------------------------
  */
 hsize_t diff_llong(unsigned char *mem1,
-															  		unsigned char *mem2,
-																  	hsize_t       nelmts,
-																	  int           rank, 
-																	  hsize_t       *acc,  
-																	  hsize_t       *pos,
-																	  diff_opt_t    *options, 
-																	  const char    *obj1, 
-																	  const char    *obj2,
-																	  int           *ph)
-																			
+                   unsigned char *mem2,
+                   hsize_t       nelmts,
+                   int           rank, 
+                   hsize_t       *acc,  
+                   hsize_t       *pos,
+                   diff_opt_t    *options, 
+                   const char    *obj1, 
+                   const char    *obj2,
+                   int           *ph)
+                   
 {
-	hsize_t       nfound=0;          /* number of differences found */
-	long_long     temp1_llong;
+ hsize_t       nfound=0;          /* number of differences found */
+ long_long     temp1_llong;
  long_long     temp2_llong;
-	hsize_t       i;
-	static char   fmt_llong[255];
+ hsize_t       i;
+ static char   fmt_llong[255];
  static char   fmt_llongp[255];
 
-		if (!fmt_llong[0]) {
-		/* build default formats for long long types */
-		sprintf(fmt_llong,  "%%%sd              %%%sd               %%%sd\n", 
-			H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
-		sprintf(fmt_llongp,  "%%%sd             %%%sd               %%%sd               %%%sd\n", 
-			H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
-	}
-	
-	
-	/* -d and !-p */
-	if (options->d && !options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_llong, mem1, sizeof(long_long));
-			memcpy(&temp2_llong, mem2, sizeof(long_long));
-			
-			if (labs( (long) (temp1_llong-temp2_llong)) > options->delta)
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(fmt_llong,temp1_llong,temp2_llong,labs((long)(temp1_llong-temp2_llong)));
-				}
-				nfound++;
-			}
-				mem1+=sizeof(long_long);
+  if (!fmt_llong[0]) {
+  /* build default formats for long long types */
+  sprintf(fmt_llong,  "%%%sd              %%%sd               %%%sd\n", 
+   H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
+  sprintf(fmt_llongp,  "%%%sd             %%%sd               %%%sd               %%%sd\n", 
+   H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
+ }
+ 
+ 
+ /* -d and !-p */
+ if (options->d && !options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_llong, mem1, sizeof(long_long));
+   memcpy(&temp2_llong, mem2, sizeof(long_long));
+   
+   if (labs( (long) (temp1_llong-temp2_llong)) > options->delta)
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(fmt_llong,temp1_llong,temp2_llong,labs((long)(temp1_llong-temp2_llong)));
+    }
+    nfound++;
+   }
+    mem1+=sizeof(long_long);
   mem2+=sizeof(long_long);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-	
-	}
-	
-	/* !-d and -p */
-	else if (!options->d && options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_llong, mem1, sizeof(long_long));
-			memcpy(&temp2_llong, mem2, sizeof(long_long));
-			
-			if ( temp1_llong!=0 && labs((long)(1-temp2_llong/temp1_llong)) > options->percent )
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(fmt_llongp,temp1_llong,temp2_llong,labs((long)(temp1_llong-temp2_llong)),
-						labs((long)(1-temp2_llong/temp1_llong)));
-				}
-				nfound++;
-			}
-				mem1+=sizeof(long_long);
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+ 
+ }
+ 
+ /* !-d and -p */
+ else if (!options->d && options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_llong, mem1, sizeof(long_long));
+   memcpy(&temp2_llong, mem2, sizeof(long_long));
+   
+   if ( temp1_llong!=0 && labs((long)(1-temp2_llong/temp1_llong)) > options->percent )
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(fmt_llongp,temp1_llong,temp2_llong,labs((long)(temp1_llong-temp2_llong)),
+      labs((long)(1-temp2_llong/temp1_llong)));
+    }
+    nfound++;
+   }
+    mem1+=sizeof(long_long);
   mem2+=sizeof(long_long);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-		
-	
-	} 
-	
-	/* -d and -p */
-	else if ( options->d && options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_llong, mem1, sizeof(long_long));
-			memcpy(&temp2_llong, mem2, sizeof(long_long));
-			
-			if ( temp1_llong!=0 && labs((long)(1-temp2_llong/temp1_llong)) > options->percent && 
-				labs((long)(temp1_llong-temp2_llong)) > options->delta )
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(fmt_llongp,temp1_llong,temp2_llong,labs((long)(temp1_llong-temp2_llong)),
-						labs((long)(1-temp2_llong/temp1_llong)));
-				}
-				nfound++;
-			}
-				mem1+=sizeof(long_long);
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+  
+ 
+ } 
+ 
+ /* -d and -p */
+ else if ( options->d && options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_llong, mem1, sizeof(long_long));
+   memcpy(&temp2_llong, mem2, sizeof(long_long));
+   
+   if ( temp1_llong!=0 && labs((long)(1-temp2_llong/temp1_llong)) > options->percent && 
+    labs((long)(temp1_llong-temp2_llong)) > options->delta )
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(fmt_llongp,temp1_llong,temp2_llong,labs((long)(temp1_llong-temp2_llong)),
+      labs((long)(1-temp2_llong/temp1_llong)));
+    }
+    nfound++;
+   }
+    mem1+=sizeof(long_long);
   mem2+=sizeof(long_long);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-	
-	} 
-	else 
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_llong, mem1, sizeof(long_long));
-			memcpy(&temp2_llong, mem2, sizeof(long_long));
-			
-			if (temp1_llong != temp2_llong)
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(fmt_llong,temp1_llong,temp2_llong,labs((long)(temp1_llong-temp2_llong)));
-				}
-				nfound++;
-			}
-			
-			mem1+=sizeof(long_long);
-			mem2+=sizeof(long_long);
-				if (options->n && nfound>=options->count)
-					return nfound;
-		} /* nelmts */
-		
-	}
-	
-	return nfound;
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+ 
+ } 
+ else 
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_llong, mem1, sizeof(long_long));
+   memcpy(&temp2_llong, mem2, sizeof(long_long));
+   
+   if (temp1_llong != temp2_llong)
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(fmt_llong,temp1_llong,temp2_llong,labs((long)(temp1_llong-temp2_llong)));
+    }
+    nfound++;
+   }
+   
+   mem1+=sizeof(long_long);
+   mem2+=sizeof(long_long);
+    if (options->n && nfound>=options->count)
+     return nfound;
+  } /* nelmts */
+  
+ }
+ 
+ return nfound;
 }
 
 
@@ -3440,144 +3440,144 @@ hsize_t diff_llong(unsigned char *mem1,
  *-------------------------------------------------------------------------
  */
 hsize_t diff_ullong(unsigned char *mem1,
-															  		 unsigned char *mem2,
-															   		hsize_t       nelmts,
-																		  int           rank, 
-																		  hsize_t       *acc,  
-																		  hsize_t       *pos,
-																		  diff_opt_t    *options, 
-																		  const char    *obj1, 
-																		  const char    *obj2,
-																		  int           *ph)
-																			
+                    unsigned char *mem2,
+                    hsize_t       nelmts,
+                    int           rank, 
+                    hsize_t       *acc,  
+                    hsize_t       *pos,
+                    diff_opt_t    *options, 
+                    const char    *obj1, 
+                    const char    *obj2,
+                    int           *ph)
+                   
 {
-	hsize_t             nfound=0;          /* number of differences found */
-	unsigned long_long  temp1_ullong;
+ hsize_t             nfound=0;          /* number of differences found */
+ unsigned long_long  temp1_ullong;
  unsigned long_long  temp2_ullong;
-	hsize_t             i;
-	static char         fmt_ullong[255];
+ hsize_t             i;
+ static char         fmt_ullong[255];
  static char         fmt_ullongp[255];
 
-	if (!fmt_ullong[0]) {
-		/* build default formats for long long types */
-		sprintf(fmt_ullong, "%%%su              %%%su               %%%su\n", 
-			H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
-		sprintf(fmt_ullongp, "%%%su             %%%su               %%%su               %%%su\n", 
-			H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
-	}
-	
-	
-	/* -d and !-p */
-	if (options->d && !options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_ullong, mem1, sizeof(unsigned long_long));
-			memcpy(&temp2_ullong, mem2, sizeof(unsigned long_long));
-			
-			if (labs((long)(temp1_ullong-temp2_ullong)) > options->delta)
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(fmt_ullong,temp1_ullong,temp2_ullong,labs((long)(temp1_ullong-temp2_ullong)));
-				}
-				nfound++;
-			}
-				mem1+=sizeof(unsigned long_long);
+ if (!fmt_ullong[0]) {
+  /* build default formats for long long types */
+  sprintf(fmt_ullong, "%%%su              %%%su               %%%su\n", 
+   H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
+  sprintf(fmt_ullongp, "%%%su             %%%su               %%%su               %%%su\n", 
+   H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
+ }
+ 
+ 
+ /* -d and !-p */
+ if (options->d && !options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_ullong, mem1, sizeof(unsigned long_long));
+   memcpy(&temp2_ullong, mem2, sizeof(unsigned long_long));
+   
+   if (labs((long)(temp1_ullong-temp2_ullong)) > options->delta)
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(fmt_ullong,temp1_ullong,temp2_ullong,labs((long)(temp1_ullong-temp2_ullong)));
+    }
+    nfound++;
+   }
+    mem1+=sizeof(unsigned long_long);
   mem2+=sizeof(unsigned long_long);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-	
-	}
-	
-	/* !-d and -p */
-	else if (!options->d && options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_ullong, mem1, sizeof(unsigned long_long));
-			memcpy(&temp2_ullong, mem2, sizeof(unsigned long_long));
-			
-			if ( temp1_ullong!=0 && labs((long)(1-temp2_ullong/temp1_ullong)) > options->percent )
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(fmt_ullongp,temp1_ullong,temp2_ullong,labs((long)(temp1_ullong-temp2_ullong)),
-						labs((long)(1-temp2_ullong/temp1_ullong)));
-				}
-				nfound++;
-			}
-				mem1+=sizeof(unsigned long_long);
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+ 
+ }
+ 
+ /* !-d and -p */
+ else if (!options->d && options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_ullong, mem1, sizeof(unsigned long_long));
+   memcpy(&temp2_ullong, mem2, sizeof(unsigned long_long));
+   
+   if ( temp1_ullong!=0 && labs((long)(1-temp2_ullong/temp1_ullong)) > options->percent )
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(fmt_ullongp,temp1_ullong,temp2_ullong,labs((long)(temp1_ullong-temp2_ullong)),
+      labs((long)(1-temp2_ullong/temp1_ullong)));
+    }
+    nfound++;
+   }
+    mem1+=sizeof(unsigned long_long);
   mem2+=sizeof(unsigned long_long);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-		
-	
-	} 
-	
-	/* -d and -p */
-	else if ( options->d && options->p)
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_ullong, mem1, sizeof(unsigned long_long));
-			memcpy(&temp2_ullong, mem2, sizeof(unsigned long_long));
-			
-			if ( temp1_ullong!=0 && labs((long)(1-temp2_ullong/temp1_ullong)) > options->percent && 
-				labs((long)(temp1_ullong-temp2_ullong)) > options->delta )
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(fmt_ullongp,temp1_ullong,temp2_ullong,labs((long)(temp1_ullong-temp2_ullong)),
-						labs((long)(1-temp2_ullong/temp1_ullong)));
-				}
-				nfound++;
-			}
-			mem1+=sizeof(unsigned long_long);
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+  
+ 
+ } 
+ 
+ /* -d and -p */
+ else if ( options->d && options->p)
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_ullong, mem1, sizeof(unsigned long_long));
+   memcpy(&temp2_ullong, mem2, sizeof(unsigned long_long));
+   
+   if ( temp1_ullong!=0 && labs((long)(1-temp2_ullong/temp1_ullong)) > options->percent && 
+    labs((long)(temp1_ullong-temp2_ullong)) > options->delta )
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(fmt_ullongp,temp1_ullong,temp2_ullong,labs((long)(temp1_ullong-temp2_ullong)),
+      labs((long)(1-temp2_ullong/temp1_ullong)));
+    }
+    nfound++;
+   }
+   mem1+=sizeof(unsigned long_long);
   mem2+=sizeof(unsigned long_long);
-			if (options->n && nfound>=options->count)
-					return nfound;
-		}
-		
-	} 
-	else 
-	{
-		
-		for ( i = 0; i < nelmts; i++)
-		{
-			memcpy(&temp1_ullong, mem1, sizeof(unsigned long_long));
-			memcpy(&temp2_ullong, mem2, sizeof(unsigned long_long));
-			
-			if (temp1_ullong != temp2_ullong)
-			{
-				if ( print_data(options) ) 
-				{
-					print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-					printf(SPACES);
-					printf(fmt_ullong,temp1_ullong,temp2_ullong,labs((long)(temp1_ullong-temp2_ullong)));
-				}
-				nfound++;
-			}
-			
-			mem1+=sizeof(unsigned long_long);
-			mem2+=sizeof(unsigned long_long);
-				if (options->n && nfound>=options->count)
-					return nfound;
-		} /* nelmts */
-		
-	}
-	
-	return nfound;
+   if (options->n && nfound>=options->count)
+     return nfound;
+  }
+  
+ } 
+ else 
+ {
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   memcpy(&temp1_ullong, mem1, sizeof(unsigned long_long));
+   memcpy(&temp2_ullong, mem2, sizeof(unsigned long_long));
+   
+   if (temp1_ullong != temp2_ullong)
+   {
+    if ( print_data(options) ) 
+    {
+     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     printf(SPACES);
+     printf(fmt_ullong,temp1_ullong,temp2_ullong,labs((long)(temp1_ullong-temp2_ullong)));
+    }
+    nfound++;
+   }
+   
+   mem1+=sizeof(unsigned long_long);
+   mem2+=sizeof(unsigned long_long);
+    if (options->n && nfound>=options->count)
+     return nfound;
+  } /* nelmts */
+  
+ }
+ 
+ return nfound;
 }
 

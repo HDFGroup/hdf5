@@ -52,7 +52,7 @@ int diff_attr(hid_t      loc1_id,
  hid_t      ftype2_id=-1;    /* file data type ID */ 
  hid_t      mtype1_id=-1;    /* memory data type ID */
  hid_t      mtype2_id=-1;    /* memory data type ID */
-	size_t     msize1;       /* memory size of memory type */
+ size_t     msize1;       /* memory size of memory type */
  size_t     msize2;       /* memory size of memory type */
  void       *buf1=NULL;   /* data buffer */
  void       *buf2=NULL;   /* data buffer */
@@ -61,9 +61,9 @@ int diff_attr(hid_t      loc1_id,
  int        rank2;        /* rank of dataset */
  hsize_t    dims1[H5S_MAX_RANK];/* dimensions of dataset */
  hsize_t    dims2[H5S_MAX_RANK];/* dimensions of dataset */
-	char       name1[255];
+ char       name1[255];
  char       name2[255];
-	int        n1, n2, i, j;
+ int        n1, n2, i, j;
  int        ret=0;
  hsize_t    nfound;
  int        cmp=1;
@@ -111,23 +111,23 @@ int diff_attr(hid_t      loc1_id,
    continue;
   }
   
-		/* get the file datatype  */
-		if ((ftype1_id = H5Aget_type( attr1_id )) < 0 )
-			goto error;
+  /* get the file datatype  */
+  if ((ftype1_id = H5Aget_type( attr1_id )) < 0 )
+   goto error;
   if ((ftype2_id = H5Aget_type( attr2_id )) < 0 )
-			goto error;
-		
-		/* get the dataspace handle  */
-		if ((space1_id = H5Aget_space( attr1_id )) < 0 )
-			goto error;
+   goto error;
+  
+  /* get the dataspace handle  */
+  if ((space1_id = H5Aget_space( attr1_id )) < 0 )
+   goto error;
   if ((space2_id = H5Aget_space( attr2_id )) < 0 )
-			goto error;
-		
-		/* get dimensions  */
-		if ( (rank1 = H5Sget_simple_extent_dims(space1_id, dims1, NULL)) < 0 )
-			goto error;
+   goto error;
+  
+  /* get dimensions  */
+  if ( (rank1 = H5Sget_simple_extent_dims(space1_id, dims1, NULL)) < 0 )
+   goto error;
   if ( (rank2 = H5Sget_simple_extent_dims(space2_id, dims2, NULL)) < 0 )
-			goto error;
+   goto error;
 
 
 /*-------------------------------------------------------------------------
@@ -153,7 +153,7 @@ int diff_attr(hid_t      loc1_id,
  */
  if (cmp) 
  {
-	
+ 
 /*-------------------------------------------------------------------------
  * read to memory
  *-------------------------------------------------------------------------
@@ -287,18 +287,18 @@ int diff_attr(hid_t      loc1_id,
  if (buf2)
   HDfree(buf2);
  } /* i */
-	
+ 
  return ret;
 
 error:
  H5E_BEGIN_TRY {
   H5Tclose(ftype1_id);
   H5Tclose(ftype2_id);
-		H5Tclose(mtype1_id);
+  H5Tclose(mtype1_id);
   H5Tclose(mtype2_id);
-		H5Sclose(space1_id);
+  H5Sclose(space1_id);
   H5Sclose(space2_id);
-		H5Aclose(attr1_id);
+  H5Aclose(attr1_id);
   H5Aclose(attr2_id);
   if (buf1)
    HDfree(buf1);
