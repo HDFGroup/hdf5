@@ -1826,6 +1826,12 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5_cpp
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hl
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -1838,6 +1844,12 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5_fortran
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hl
+    End Project Dependency
 }}}
 
 ###############################################################################
