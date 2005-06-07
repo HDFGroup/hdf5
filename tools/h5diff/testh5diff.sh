@@ -117,6 +117,7 @@ TOOLTEST() {
     expect="$srcdir/../testfiles/$1"
     actual="../testfiles/`basename $1 .txt`.out"
     actual_err="../testfiles/`basename $1 .txt`.err"
+    tmp_err=${actual_err}-tmp
     shift
     if test -n "$pmode"; then
 	RUNCMD=$RUNPARALLEL
@@ -139,8 +140,10 @@ TOOLTEST() {
 	    eval $RUNCMD $H5DIFF_BIN "$@"
 	fi
     ) >$actual 2>$actual_err
-    STDERR_FILTER $actual_err
-    cat $actual_err >> $actual
+    # save actual_err in case it is needed later.
+    cp $actual_err $tmp_err
+    STDERR_FILTER $tmp_err
+    cat $tmp_err >> $actual
 
     if $CMP $expect $actual; then
 	echo " PASSED"
@@ -169,13 +172,15 @@ TOOLTEST() {
 		sed 's/^/    /' < $actual 
 		echo "====The part that is actual stderr ($actual_err)"
 		sed 's/^/    /' < $actual_err 
+		echo "====End of actual stderr ($actual_err)"
+		echo ""
 	    fi
 	fi
     fi
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-	rm -f $actual $actual_err $actual_sorted $expect_sorted
+	rm -f $actual $actual_err $actual_sorted $tmp_err $expect_sorted
     fi
 }
 
