@@ -6144,7 +6144,7 @@ main(void)
     nerrors += test_conv_flt_1("sw", H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT);
     nerrors += test_conv_flt_1("sw", H5T_NATIVE_LDOUBLE, H5T_NATIVE_DOUBLE);
 #endif
-    
+
     if (nerrors) {
         printf("***** %lu FAILURE%s! *****\n",
                nerrors, 1==nerrors?"":"S");
