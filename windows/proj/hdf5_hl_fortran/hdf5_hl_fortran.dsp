@@ -52,7 +52,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\..\..\proj\hdf5_hl_fortran\Release\hdf5_hl_fortranr.lib"
 
 !ELSEIF  "$(CFG)" == "hdf5_hl_fortran - Win32 Debug"
 
@@ -95,7 +95,7 @@ SOURCE=..\..\..\hl\fortran\src\H5IMfc.c
 # Begin Source File
 
 SOURCE=..\..\..\hl\fortran\src\H5IMff.f90
-DEP_F90_H5IMF=\
+NODEP_F90_H5IMF=\
 	"..\..\..\proj\hdf5_fortran\Release\H5FORTRAN_TYPES.MOD"\
 	"..\..\..\proj\hdf5_fortran\Release\H5GLOBAL.mod"\
 	"..\..\..\proj\hdf5_fortran\Release\HDF5.MOD"\
@@ -108,7 +108,7 @@ SOURCE=..\..\..\hl\fortran\src\H5LTfc.c
 # Begin Source File
 
 SOURCE=..\..\..\hl\fortran\src\H5LTff.f90
-DEP_F90_H5LTF=\
+NODEP_F90_H5LTF=\
 	"..\..\..\proj\hdf5_fortran\Release\H5FORTRAN_TYPES.MOD"\
 	"..\..\..\proj\hdf5_fortran\Release\H5GLOBAL.mod"\
 	"..\..\..\proj\hdf5_fortran\Release\HDF5.MOD"\
@@ -121,7 +121,7 @@ SOURCE=..\..\..\hl\fortran\src\H5TBfc.c
 # Begin Source File
 
 SOURCE=..\..\..\hl\fortran\src\H5TBff.f90
-DEP_F90_H5TBF=\
+NODEP_F90_H5TBF=\
 	"..\..\..\proj\hdf5_fortran\Release\H5FORTRAN_TYPES.MOD"\
 	"..\..\..\proj\hdf5_fortran\Release\H5GLOBAL.mod"\
 	"..\..\..\proj\hdf5_fortran\Release\HDF5.MOD"\
