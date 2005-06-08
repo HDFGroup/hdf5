@@ -590,8 +590,7 @@
 ./fortran/src/H5f90i.h
 ./fortran/src/H5f90kit.c
 ./fortran/src/H5f90proto.h
-./fortran/src/H5fortran_detect.f90
-./fortran/src/H5fortran_detect_gen.f90
+./fortran/src/H5test_kind.f90
 ./fortran/src/H5fortran_flags.f90
 ./fortran/src/H5match_types.c
 ./fortran/src/HDF5.f90
