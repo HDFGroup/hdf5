@@ -24,7 +24,12 @@ fi
 # The default Fortran 90 compiler
 if test "X-" = "X-$FC"; then
     case $CC_BASENAME in
-        gcc*|pgcc*)
+        gcc*)
+            FC=g95
+            FCLIBS=-lgcc
+            FC_BASENAME=g95
+            ;;
+        pgcc*)
             FC=pgf90
             FC_BASENAME=pgf90
             ;;
@@ -42,7 +47,9 @@ else
         # The PGI and Intel compilers are automatically detected below
         ifc*|ifort*|pgf90*)
             ;;
-
+        g95)
+            FCLIBS=-lgcc
+            ;;
         *)
             # Figure out which compiler we are using: pgf90 or Absoft f95
             RM='rm -f'
