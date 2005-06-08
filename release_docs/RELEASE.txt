@@ -72,6 +72,8 @@ Bug Fixes since HDF5-1.6.4 release
 
     Library
     -------
+        - Fixed various errors in maintaining names for open objects in the
+            face of unusual mount & unmount operations.  QAK - 2005/06/08
         - "SEMI" and "STRONG" file close degree settings now apply only to the
             particular file ID being closed, instead of operating on all open
             file IDs for a given file.  QAK - 2005/06/01

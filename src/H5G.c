@@ -3649,25 +3649,27 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, void *key)
         *-------------------------------------------------------------------------
         */
         case OP_MOUNT:
-            if(ent->file->mtab.parent && H5RS_cmp(ent->user_path_r,ent->canon_path_r)) {
-                /* Find the "top" file in the chain of mounted files */
-                top_ent_file=ent->file->mtab.parent;
-                while(top_ent_file->mtab.parent!=NULL)
-                    top_ent_file=top_ent_file->mtab.parent;
-            } /* end if */
-            else
-                top_ent_file=ent->file;
+	    if(ent->user_path_r) {
+		if(ent->file->mtab.parent && H5RS_cmp(ent->user_path_r,ent->canon_path_r)) {
+		    /* Find the "top" file in the chain of mounted files */
+		    top_ent_file=ent->file->mtab.parent;
+		    while(top_ent_file->mtab.parent!=NULL)
+			top_ent_file=top_ent_file->mtab.parent;
+		} /* end if */
+		else
+		    top_ent_file=ent->file;
 
-            /* Check for entry being in correct file (or mounted file) */
-            if(top_ent_file->shared == names->loc->file->shared) {
-                /* Check if the source is along the entry's path */
-                /* (But not actually the entry itself) */
-                if(H5G_common_path(ent->user_path_r,names->src_name) &&
-                        H5RS_cmp(ent->user_path_r,names->src_name)!=0) {
-                    /* Hide the user path */
-                    ent->user_path_hidden++;
-                } /* end if */
-            } /* end if */
+		/* Check for entry being in correct file (or mounted file) */
+		if(top_ent_file->shared == names->loc->file->shared) {
+		    /* Check if the source is along the entry's path */
+		    /* (But not actually the entry itself) */
+		    if(H5G_common_path(ent->user_path_r,names->src_name) &&
+			    H5RS_cmp(ent->user_path_r,names->src_name)!=0) {
+			/* Hide the user path */
+			ent->user_path_hidden++;
+		    } /* end if */
+		} /* end if */
+	    } /* end if */
             break;
 
         /*-------------------------------------------------------------------------
@@ -3675,45 +3677,42 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, void *key)
         *-------------------------------------------------------------------------
         */
         case OP_UNMOUNT:
-            if(ent->file->mtab.parent) {
-                /* Find the "top" file in the chain of mounted files for the entry */
-                top_ent_file=ent->file->mtab.parent;
-                while(top_ent_file->mtab.parent!=NULL)
-                    top_ent_file=top_ent_file->mtab.parent;
-            } /* end if */
-            else
-                top_ent_file=ent->file;
+	    if(ent->user_path_r) {
+		if(ent->file->mtab.parent) {
+		    /* Find the "top" file in the chain of mounted files for the entry */
+		    top_ent_file=ent->file->mtab.parent;
+		    while(top_ent_file->mtab.parent!=NULL)
+			top_ent_file=top_ent_file->mtab.parent;
+		} /* end if */
+		else
+		    top_ent_file=ent->file;
 
-            if(names->loc->file->mtab.parent) {
-                /* Find the "top" file in the chain of mounted files for the location */
-                top_loc_file=names->loc->file->mtab.parent;
-                while(top_loc_file->mtab.parent!=NULL)
-                    top_loc_file=top_loc_file->mtab.parent;
-            } /* end if */
-            else
-                top_loc_file=names->loc->file;
+		if(names->loc->file->mtab.parent) {
+		    /* Find the "top" file in the chain of mounted files for the location */
+		    top_loc_file=names->loc->file->mtab.parent;
+		    while(top_loc_file->mtab.parent!=NULL)
+			top_loc_file=top_loc_file->mtab.parent;
+		} /* end if */
+		else
+		    top_loc_file=names->loc->file;
 
-            if(ent->user_path_hidden) {
-                /* If the ID's entry is not in the file we operated on, skip it */
-                if(top_ent_file->shared == top_loc_file->shared) {
-                    if(H5G_common_path(ent->user_path_r,names->src_name)) {
-                        /* Un-hide the user path */
-                        ent->user_path_hidden--;
-                    } /* end if */
-                } /* end if */
-            } /* end if */
-            else {
-                /* If the ID's entry is not in the file we operated on, skip it */
-                if(top_ent_file->shared == top_loc_file->shared) {
-                    if(ent->user_path_r && H5G_common_path(ent->user_path_r,names->src_name)) {
-                        /* Free user path */
-                        if(ent->user_path_r!=NULL) {
-                            H5RS_decr(ent->user_path_r);
-                            ent->user_path_r=NULL;
-                        } /* end if */
-                    } /* end if */
-                } /* end if */
-            } /* end else */
+		/* If the ID's entry is not in the file we operated on, skip it */
+		if(top_ent_file->shared == top_loc_file->shared) {
+		    if(ent->user_path_hidden) {
+			if(H5G_common_path(ent->user_path_r,names->src_name)) {
+			    /* Un-hide the user path */
+			    ent->user_path_hidden--;
+			} /* end if */
+		    } /* end if */
+		    else {
+			if(H5G_common_path(ent->user_path_r,names->src_name)) {
+			    /* Free user path */
+			    H5RS_decr(ent->user_path_r);
+			    ent->user_path_r=NULL;
+			} /* end if */
+		    } /* end else */
+		} /* end if */
+	    } /* end if */
             break;
 
         /*-------------------------------------------------------------------------
@@ -3722,26 +3721,22 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, void *key)
         */
         case OP_UNLINK:
             /* If the ID's entry is not in the file we operated on, skip it */
-            if(ent->file->shared == names->loc->file->shared) {
+            if(ent->file->shared == names->loc->file->shared && ent->user_path_r) {
                 /* Check if we are referring to the same object */
                 if(H5F_addr_eq(ent->header, names->loc->header)) {
                     /* Check if the object was opened with the same canonical path as the one being moved */
                     if(H5RS_cmp(ent->canon_path_r,names->loc->canon_path_r)==0) {
                         /* Free user path */
-                        if(ent->user_path_r!=NULL) {
-                            H5RS_decr(ent->user_path_r);
-                            ent->user_path_r=NULL;
-                        } /* end if */
+			H5RS_decr(ent->user_path_r);
+			ent->user_path_r=NULL;
                     } /* end if */
                 } /* end if */
                 else {
                     /* Check if the location being unlinked is in the canonical path for the current object */
                     if(H5G_common_path(ent->canon_path_r,names->loc->canon_path_r)) {
                         /* Free user path */
-                        if(ent->user_path_r!=NULL) {
-                            H5RS_decr(ent->user_path_r);
-                            ent->user_path_r=NULL;
-                        } /* end if */
+			H5RS_decr(ent->user_path_r);
+			ent->user_path_r=NULL;
                     } /* end if */
                 } /* end else */
             } /* end if */
@@ -3754,206 +3749,220 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, void *key)
         case OP_MOVE: /* H5Gmove case, check for relative names case */
             /* If the ID's entry is not in the file we operated on, skip it */
             if(ent->file->shared == names->loc->file->shared) {
-                H5RS_str_t *src_path_r; /* Full user path of source name */
-                H5RS_str_t *dst_path_r; /* Full user path of destination name */
-                H5RS_str_t *canon_src_path_r;   /* Copy of canonical part of source path */
-                H5RS_str_t *canon_dst_path_r;   /* Copy of canonical part of destination path */
+		if(ent->user_path_r && names->loc->user_path_r &&
+			names->src_loc->user_path_r && names->dst_loc->user_path_r) {
+		    H5RS_str_t *src_path_r; /* Full user path of source name */
+		    H5RS_str_t *dst_path_r; /* Full user path of destination name */
+		    H5RS_str_t *canon_src_path_r;   /* Copy of canonical part of source path */
+		    H5RS_str_t *canon_dst_path_r;   /* Copy of canonical part of destination path */
 
-                /* Make certain that the source and destination names are full (not relative) paths */
-                if(*(H5RS_get_str(names->src_name))!='/') {
-                    const char *src_name;         /* Pointer to raw string of src_name */
-                    char *src_path;         /* Full user path of source name */
-                    const char *src_user_path;    /* Pointer to raw string of src path */
-                    size_t src_path_len;    /* Length of the source path */
-                    unsigned need_sep;      /* Flag to indicate if separator is needed */
+		    /* Sanity check */
+		    HDassert(names->src_name);
+		    HDassert(names->dst_name);
 
-                    /* Get the pointer to the raw src user path */
-                    src_user_path=H5RS_get_str(names->src_loc->user_path_r);
+		    /* Make certain that the source and destination names are full (not relative) paths */
+		    if(*(H5RS_get_str(names->src_name))!='/') {
+			const char *src_name;         /* Pointer to raw string of src_name */
+			char *src_path;         /* Full user path of source name */
+			const char *src_user_path;    /* Pointer to raw string of src path */
+			size_t src_path_len;    /* Length of the source path */
+			unsigned need_sep;      /* Flag to indicate if separator is needed */
 
-                    /* Get the length of the name for the source group's user path */
-                    src_path_len=HDstrlen(src_user_path);
+			/* Get the pointer to the raw src user path */
+			src_user_path=H5RS_get_str(names->src_loc->user_path_r);
 
-                    /* Determine if there is a trailing separator in the name */
-                    if(src_user_path[src_path_len-1]=='/')
-                        need_sep=0;
-                    else
-                        need_sep=1;
+			/* Get the length of the name for the source group's user path */
+			src_path_len=HDstrlen(src_user_path);
 
-                    /* Get the pointer to the raw src user path */
-                    src_name=H5RS_get_str(names->src_name);
+			/* Determine if there is a trailing separator in the name */
+			if(src_user_path[src_path_len-1]=='/')
+			    need_sep=0;
+			else
+			    need_sep=1;
 
-                    /* Add in the length needed for the '/' separator and the relative path */
-                    src_path_len+=HDstrlen(src_name)+need_sep;
+			/* Get the pointer to the raw src user path */
+			src_name=H5RS_get_str(names->src_name);
 
-                    /* Allocate space for the path */
-                    if(NULL==(src_path = H5FL_BLK_MALLOC(str_buf,src_path_len+1)))
-                        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+			/* Add in the length needed for the '/' separator and the relative path */
+			src_path_len+=HDstrlen(src_name)+need_sep;
 
-                    HDstrcpy(src_path,src_user_path);
-                    if(need_sep)
-                        HDstrcat(src_path,"/");
-                    HDstrcat(src_path,src_name);
+			/* Allocate space for the path */
+			if(NULL==(src_path = H5FL_BLK_MALLOC(str_buf,src_path_len+1)))
+			    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
-                    /* Create reference counted string for src path */
-                    src_path_r=H5RS_own(src_path);
-                } /* end if */
-                else
-                    src_path_r=H5RS_dup(names->src_name);
-                if(*(H5RS_get_str(names->dst_name))!='/') {
-                    const char *dst_name;         /* Pointer to raw string of dst_name */
-                    char *dst_path;         /* Full user path of destination name */
-                    const char *dst_user_path;    /* Pointer to raw string of dst path */
-                    size_t dst_path_len;    /* Length of the destination path */
-                    unsigned need_sep;      /* Flag to indicate if separator is needed */
+			HDstrcpy(src_path,src_user_path);
+			if(need_sep)
+			    HDstrcat(src_path,"/");
+			HDstrcat(src_path,src_name);
 
-                    /* Get the pointer to the raw dst user path */
-                    dst_user_path=H5RS_get_str(names->dst_loc->user_path_r);
+			/* Create reference counted string for src path */
+			src_path_r=H5RS_own(src_path);
+		    } /* end if */
+		    else
+			    src_path_r=H5RS_dup(names->src_name);
+		    if(*(H5RS_get_str(names->dst_name))!='/') {
+			const char *dst_name;         /* Pointer to raw string of dst_name */
+			char *dst_path;         /* Full user path of destination name */
+			const char *dst_user_path;    /* Pointer to raw string of dst path */
+			size_t dst_path_len;    /* Length of the destination path */
+			unsigned need_sep;      /* Flag to indicate if separator is needed */
 
-                    /* Get the length of the name for the destination group's user path */
-                    dst_path_len=HDstrlen(dst_user_path);
+			/* Get the pointer to the raw dst user path */
+			dst_user_path=H5RS_get_str(names->dst_loc->user_path_r);
 
-                    /* Determine if there is a trailing separator in the name */
-                    if(dst_user_path[dst_path_len-1]=='/')
-                        need_sep=0;
-                    else
-                        need_sep=1;
+			/* Get the length of the name for the destination group's user path */
+			dst_path_len=HDstrlen(dst_user_path);
 
-                    /* Get the pointer to the raw dst user path */
-                    dst_name=H5RS_get_str(names->dst_name);
+			/* Determine if there is a trailing separator in the name */
+			if(dst_user_path[dst_path_len-1]=='/')
+			    need_sep=0;
+			else
+			    need_sep=1;
 
-                    /* Add in the length needed for the '/' separator and the relative path */
-                    dst_path_len+=HDstrlen(dst_name)+need_sep;
+			/* Get the pointer to the raw dst user path */
+			dst_name=H5RS_get_str(names->dst_name);
 
-                    /* Allocate space for the path */
-                    if(NULL==(dst_path = H5FL_BLK_MALLOC(str_buf,dst_path_len+1)))
-                        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+			/* Add in the length needed for the '/' separator and the relative path */
+			dst_path_len+=HDstrlen(dst_name)+need_sep;
 
-                    HDstrcpy(dst_path,dst_user_path);
-                    if(need_sep)
-                        HDstrcat(dst_path,"/");
-                    HDstrcat(dst_path,dst_name);
+			/* Allocate space for the path */
+			if(NULL==(dst_path = H5FL_BLK_MALLOC(str_buf,dst_path_len+1)))
+			    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
-                    /* Create reference counted string for dst path */
-                    dst_path_r=H5RS_own(dst_path);
-                } /* end if */
-                else
-                    dst_path_r=H5RS_dup(names->dst_name);
+			HDstrcpy(dst_path,dst_user_path);
+			if(need_sep)
+			    HDstrcat(dst_path,"/");
+			HDstrcat(dst_path,dst_name);
 
-                /* Get the canonical parts of the source and destination names */
+			/* Create reference counted string for dst path */
+			dst_path_r=H5RS_own(dst_path);
+		    } /* end if */
+		    else
+			    dst_path_r=H5RS_dup(names->dst_name);
 
-                /* Check if the object being moved was accessed through a mounted file */
-                if(H5RS_cmp(names->loc->user_path_r,names->loc->canon_path_r)!=0) {
-                    size_t non_canon_name_len;   /* Length of non-canonical part of name */
+		    /* Get the canonical parts of the source and destination names */
 
-                    /* Get current string lengths */
-                    non_canon_name_len=H5RS_len(names->loc->user_path_r)-H5RS_len(names->loc->canon_path_r);
+		    /* Check if the object being moved was accessed through a mounted file */
+		    if(H5RS_cmp(names->loc->user_path_r,names->loc->canon_path_r)!=0) {
+			size_t non_canon_name_len;   /* Length of non-canonical part of name */
 
-                    canon_src_path_r=H5RS_create(H5RS_get_str(src_path_r)+non_canon_name_len);
-                    canon_dst_path_r=H5RS_create(H5RS_get_str(dst_path_r)+non_canon_name_len);
-                } /* end if */
-                else {
-                    canon_src_path_r=H5RS_dup(src_path_r);
-                    canon_dst_path_r=H5RS_dup(dst_path_r);
-                } /* end else */
+			/* Get current string lengths */
+			non_canon_name_len=H5RS_len(names->loc->user_path_r)-H5RS_len(names->loc->canon_path_r);
 
-                /* Check if the link being changed in the file is along the canonical path for this object */
-                if(H5G_common_path(ent->canon_path_r,canon_src_path_r)) {
-                    size_t user_dst_len;    /* Length of destination user path */
-                    size_t canon_dst_len;   /* Length of destination canonical path */
-                    const char *old_user_path;    /* Pointer to previous user path */
-                    char *new_user_path;    /* Pointer to new user path */
-                    char *new_canon_path;   /* Pointer to new canonical path */
-                    const char *tail_path;  /* Pointer to "tail" of path */
-                    size_t tail_len;    /* Pointer to "tail" of path */
-                    char *src_canon_prefix;     /* Pointer to source canonical path prefix of component which is moving */
-                    size_t src_canon_prefix_len;/* Length of the source canonical path prefix */
-                    char *dst_canon_prefix;     /* Pointer to destination canonical path prefix of component which is moving */
-                    size_t dst_canon_prefix_len;/* Length of the destination canonical path prefix */
-                    char *user_prefix;      /* Pointer to user path prefix of component which is moving */
-                    size_t user_prefix_len; /* Length of the user path prefix */
-                    char *src_comp;     /* The source name of the component which is actually changing */
-                    char *dst_comp;     /* The destination name of the component which is actually changing */
-                    const char *canon_src_path;   /* pointer to canonical part of source path */
-                    const char *canon_dst_path;   /* pointer to canonical part of destination path */
+			canon_src_path_r=H5RS_create(H5RS_get_str(src_path_r)+non_canon_name_len);
+			canon_dst_path_r=H5RS_create(H5RS_get_str(dst_path_r)+non_canon_name_len);
+		    } /* end if */
+		    else {
+			canon_src_path_r=H5RS_dup(src_path_r);
+			canon_dst_path_r=H5RS_dup(dst_path_r);
+		    } /* end else */
 
-                    /* Get the pointers to the raw strings */
-                    canon_src_path=H5RS_get_str(canon_src_path_r);
-                    canon_dst_path=H5RS_get_str(canon_dst_path_r);
+		    /* Check if the link being changed in the file is along the canonical path for this object */
+		    if(H5G_common_path(ent->canon_path_r,canon_src_path_r)) {
+			size_t user_dst_len;    /* Length of destination user path */
+			size_t canon_dst_len;   /* Length of destination canonical path */
+			const char *old_user_path;    /* Pointer to previous user path */
+			char *new_user_path;    /* Pointer to new user path */
+			char *new_canon_path;   /* Pointer to new canonical path */
+			const char *tail_path;  /* Pointer to "tail" of path */
+			size_t tail_len;    /* Pointer to "tail" of path */
+			char *src_canon_prefix;     /* Pointer to source canonical path prefix of component which is moving */
+			size_t src_canon_prefix_len;/* Length of the source canonical path prefix */
+			char *dst_canon_prefix;     /* Pointer to destination canonical path prefix of component which is moving */
+			size_t dst_canon_prefix_len;/* Length of the destination canonical path prefix */
+			char *user_prefix;      /* Pointer to user path prefix of component which is moving */
+			size_t user_prefix_len; /* Length of the user path prefix */
+			char *src_comp;     /* The source name of the component which is actually changing */
+			char *dst_comp;     /* The destination name of the component which is actually changing */
+			const char *canon_src_path;   /* pointer to canonical part of source path */
+			const char *canon_dst_path;   /* pointer to canonical part of destination path */
 
-                    /* Get the source & destination components */
-                    src_comp=HDstrrchr(canon_src_path,'/');
-                    assert(src_comp);
-                    dst_comp=HDstrrchr(canon_dst_path,'/');
-                    assert(dst_comp);
+			/* Get the pointers to the raw strings */
+			canon_src_path=H5RS_get_str(canon_src_path_r);
+			canon_dst_path=H5RS_get_str(canon_dst_path_r);
 
-                    /* Find the canonical prefixes for the entry */
-                    src_canon_prefix_len=HDstrlen(canon_src_path)-HDstrlen(src_comp);
-                    if(NULL==(src_canon_prefix = H5MM_malloc(src_canon_prefix_len+1)))
-                        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-                    HDstrncpy(src_canon_prefix,canon_src_path,src_canon_prefix_len);
-                    src_canon_prefix[src_canon_prefix_len]='\0';
+			/* Get the source & destination components */
+			src_comp=HDstrrchr(canon_src_path,'/');
+			assert(src_comp);
+			dst_comp=HDstrrchr(canon_dst_path,'/');
+			assert(dst_comp);
 
-                    dst_canon_prefix_len=HDstrlen(canon_dst_path)-HDstrlen(dst_comp);
-                    if(NULL==(dst_canon_prefix = H5MM_malloc(dst_canon_prefix_len+1)))
-                        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-                    HDstrncpy(dst_canon_prefix,canon_dst_path,dst_canon_prefix_len);
-                    dst_canon_prefix[dst_canon_prefix_len]='\0';
+			/* Find the canonical prefixes for the entry */
+			src_canon_prefix_len=HDstrlen(canon_src_path)-HDstrlen(src_comp);
+			if(NULL==(src_canon_prefix = H5MM_malloc(src_canon_prefix_len+1)))
+			    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+			HDstrncpy(src_canon_prefix,canon_src_path,src_canon_prefix_len);
+			src_canon_prefix[src_canon_prefix_len]='\0';
 
-                    /* Hold this for later use */
-                    old_user_path=H5RS_get_str(ent->user_path_r);
+			dst_canon_prefix_len=HDstrlen(canon_dst_path)-HDstrlen(dst_comp);
+			if(NULL==(dst_canon_prefix = H5MM_malloc(dst_canon_prefix_len+1)))
+			    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+			HDstrncpy(dst_canon_prefix,canon_dst_path,dst_canon_prefix_len);
+			dst_canon_prefix[dst_canon_prefix_len]='\0';
 
-                    /* Find the user prefix for the entry */
-                    user_prefix_len=HDstrlen(old_user_path)-H5RS_len(ent->canon_path_r);
-                    if(NULL==(user_prefix = H5MM_malloc(user_prefix_len+1)))
-                        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-                    HDstrncpy(user_prefix,old_user_path,user_prefix_len);
-                    user_prefix[user_prefix_len]='\0';
+			/* Hold this for later use */
+			old_user_path=H5RS_get_str(ent->user_path_r);
 
-                    /* Set the tail path info */
-                    tail_path=old_user_path+user_prefix_len+src_canon_prefix_len+HDstrlen(src_comp);
-                    tail_len=HDstrlen(tail_path);
+			/* Find the user prefix for the entry */
+			user_prefix_len=HDstrlen(old_user_path)-H5RS_len(ent->canon_path_r);
+			if(NULL==(user_prefix = H5MM_malloc(user_prefix_len+1)))
+			    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+			HDstrncpy(user_prefix,old_user_path,user_prefix_len);
+			user_prefix[user_prefix_len]='\0';
 
-                    /* Get the length of the destination paths */
-                    user_dst_len=user_prefix_len+dst_canon_prefix_len+HDstrlen(dst_comp)+tail_len;
-                    canon_dst_len=dst_canon_prefix_len+HDstrlen(dst_comp)+tail_len;
+			/* Set the tail path info */
+			tail_path=old_user_path+user_prefix_len+src_canon_prefix_len+HDstrlen(src_comp);
+			tail_len=HDstrlen(tail_path);
 
-                    /* Allocate space for the new user path */
-                    if(NULL==(new_user_path = H5FL_BLK_MALLOC(str_buf,user_dst_len+1)))
-                        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-                    
-                    /* Allocate space for the new canonical path */
-                    if(NULL==(new_canon_path = H5FL_BLK_MALLOC(str_buf,canon_dst_len+1)))
-                        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-                    
-                    /* Create the new names */
-                    HDstrcpy(new_user_path,user_prefix);
-                    HDstrcat(new_user_path,dst_canon_prefix);
-                    HDstrcat(new_user_path,dst_comp);
-                    HDstrcat(new_user_path,tail_path);
-                    HDstrcpy(new_canon_path,dst_canon_prefix);
-                    HDstrcat(new_canon_path,dst_comp);
-                    HDstrcat(new_canon_path,tail_path);
+			/* Get the length of the destination paths */
+			user_dst_len=user_prefix_len+dst_canon_prefix_len+HDstrlen(dst_comp)+tail_len;
+			canon_dst_len=dst_canon_prefix_len+HDstrlen(dst_comp)+tail_len;
 
-                    /* Release the old user & canonical paths */
-                    H5RS_decr(ent->user_path_r);
-                    H5RS_decr(ent->canon_path_r);
+			/* Allocate space for the new user path */
+			if(NULL==(new_user_path = H5FL_BLK_MALLOC(str_buf,user_dst_len+1)))
+			    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+			
+			/* Allocate space for the new canonical path */
+			if(NULL==(new_canon_path = H5FL_BLK_MALLOC(str_buf,canon_dst_len+1)))
+			    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+			
+			/* Create the new names */
+			HDstrcpy(new_user_path,user_prefix);
+			HDstrcat(new_user_path,dst_canon_prefix);
+			HDstrcat(new_user_path,dst_comp);
+			HDstrcat(new_user_path,tail_path);
+			HDstrcpy(new_canon_path,dst_canon_prefix);
+			HDstrcat(new_canon_path,dst_comp);
+			HDstrcat(new_canon_path,tail_path);
 
-                    /* Take ownership of the new user & canonical paths */
-                    ent->user_path_r=H5RS_own(new_user_path);
-                    ent->canon_path_r=H5RS_own(new_canon_path);
+			/* Release the old user & canonical paths */
+			H5RS_decr(ent->user_path_r);
+			H5RS_decr(ent->canon_path_r);
 
-                    /* Free the extra paths allocated */
-                    H5MM_xfree(src_canon_prefix);
-                    H5MM_xfree(dst_canon_prefix);
-                    H5MM_xfree(user_prefix);
-                } /* end if */
+			/* Take ownership of the new user & canonical paths */
+			ent->user_path_r=H5RS_own(new_user_path);
+			ent->canon_path_r=H5RS_own(new_canon_path);
+
+			/* Free the extra paths allocated */
+			H5MM_xfree(src_canon_prefix);
+			H5MM_xfree(dst_canon_prefix);
+			H5MM_xfree(user_prefix);
+		    } /* end if */
 
 
-                /* Free the extra paths allocated */
-                H5RS_decr(src_path_r);
-                H5RS_decr(dst_path_r);
-                H5RS_decr(canon_src_path_r);
-                H5RS_decr(canon_dst_path_r);
+		    /* Free the extra paths allocated */
+		    H5RS_decr(src_path_r);
+		    H5RS_decr(dst_path_r);
+		    H5RS_decr(canon_src_path_r);
+		    H5RS_decr(canon_dst_path_r);
+		} /* end if */
+		else {
+		    /* Release the old user path */
+		    if(ent->user_path_r) {
+			H5RS_decr(ent->user_path_r);
+			ent->user_path_r = NULL;
+		    } /* end if */
+		} /* end else */
             } /* end if */
             break;
 
