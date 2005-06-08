@@ -33,9 +33,10 @@ const char *FILENAME[] = {
     "core_file",
     "family_file",
     "multi_file",
-    "family_v1.6_",
     NULL        
 };
+          
+#define COMPAT_BASENAME "family_v1.6_"
           
 
 /*-------------------------------------------------------------------------
@@ -468,7 +469,7 @@ test_family_compat(void)
     if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE2, H5P_DEFAULT)<0)
         goto error;
 
-    h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
+    h5_fixname(COMPAT_BASENAME, fapl, filename, sizeof filename);
 
     /* Generate correct name for test file by prepending the source path */
     if(srcdir && ((strlen(srcdir) + strlen(filename) + 1) < sizeof(pathname))) {
