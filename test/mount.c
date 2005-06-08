@@ -24,6 +24,7 @@ const char *FILENAME[] = {
     "mount_1",
     "mount_2",
     "mount_3",
+    "mount_4",
     NULL
 };
 
@@ -1248,6 +1249,274 @@ error:
     return 1;
 }
     
+
+/*-------------------------------------------------------------------------
+ * Function:	test_mount_after_unmount
+ *
+ * Purpose:	Test that the library handles mounting a file while holding
+ *				objects open in a file which has been unmounted.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, June  6, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_mount_after_unmount(hid_t fapl)
+{
+    hid_t	fid1=-1, fid2=-1, fid3=-1, fid4=-1;      /* File IDs */
+    hid_t       gidA=-1, gidB=-1, gidX=-1, gidY=-1, gidZ=-1;  	/* Group identifiers */
+    hid_t       gidBM=-1;  			/* Group identifiers */
+    hid_t       gidBMZ=-1;  			/* Group identifiers */
+    hid_t       gidAM=-1;  			/* Group identifiers */
+    hid_t       gidAMX=-1;  			/* Group identifiers */
+    hid_t       gidAMXX=-1;  			/* Group identifiers */
+    hid_t       gidAMXMY=-1;  			/* Group identifiers */
+    hid_t       gidXM=-1;  			/* Group identifiers */
+    hid_t       gidXX=-1;  			/* Group identifiers */
+    char	filename1[1024],
+		filename2[1024],
+		filename3[1024],
+		filename4[1024];       		/* Name of files to mount */
+    char        objname[NAME_BUF_SIZE];                 /* Name of object opened */
+    
+    TESTING("mounting after file is unmounted");
+    h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
+    h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
+    h5_fixname(FILENAME[2], fapl, filename3, sizeof filename3);
+    h5_fixname(FILENAME[3], fapl, filename4, sizeof filename4);
+    
+    /* Create first file and some groups in it. */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+        TEST_ERROR
+    if((gidAM = H5Gcreate(gidA, "M", (size_t)0)) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidAM) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidA) < 0)
+        TEST_ERROR
+    if((gidB = H5Gcreate(fid1, "B", (size_t)0)) < 0)
+        TEST_ERROR
+    if((gidBM = H5Gcreate(gidB, "M", (size_t)0)) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidBM) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidB) < 0)
+        TEST_ERROR
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+   /* Create second file and a group in it. */
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+    if((gidX = H5Gcreate(fid2, "/X", (size_t)0)) < 0)
+        TEST_ERROR
+    if((gidXM = H5Gcreate(gidX, "M", (size_t)0)) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidXM) < 0)
+        TEST_ERROR
+    if((gidXX = H5Gcreate(gidX, "X", (size_t)0)) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidXX) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidX) < 0)
+        TEST_ERROR
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+   /* Create third file and a group in it. */
+    if((fid3 = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+    if((gidY = H5Gcreate(fid3, "/Y", (size_t)0)) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidY) < 0)
+        TEST_ERROR
+    if(H5Fclose(fid3) < 0)
+        TEST_ERROR
+
+   /* Create fourth file and a group in it. */
+    if((fid4 = H5Fcreate(filename4, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+    if((gidZ = H5Gcreate(fid4, "/Z", (size_t)0)) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidZ) < 0)
+        TEST_ERROR
+    if(H5Fclose(fid4) < 0)
+        TEST_ERROR
+
+
+/* Beginning of the actual test code */
+
+   /*
+    * Reopen all three files
+    */
+    if((fid1 = H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0)
+        TEST_ERROR
+    if((fid2 = H5Fopen(filename2, H5F_ACC_RDWR, fapl)) < 0)
+        TEST_ERROR
+    if((fid3 = H5Fopen(filename3, H5F_ACC_RDWR, fapl)) < 0)
+        TEST_ERROR
+    if((fid4 = H5Fopen(filename4, H5F_ACC_RDWR, fapl)) < 0)
+        TEST_ERROR
+
+   /*
+    *  Open /A & /B to use as a mount points
+    */
+    if((gidA = H5Gopen(fid1, "/A")) < 0)
+        TEST_ERROR
+    if((gidB = H5Gopen(fid1, "/B")) < 0)
+        TEST_ERROR
+
+   /*
+    * Mount second file on /A/M in the first file.
+    */
+    if(H5Fmount(gidA, "M", fid2, H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Open group in mounted file */
+    /* (This shows we successfully mounted) */
+    if((gidAMXX = H5Gopen(gidA, "M/X/X")) < 0)
+        TEST_ERROR
+
+    /* Check name */
+    if(H5Iget_name( gidAMXX, objname, (size_t)NAME_BUF_SIZE ) < 0)
+        TEST_ERROR
+    if(HDstrcmp(objname, "/A/M/X/X"))
+        TEST_ERROR
+
+    /* Open group in mounted file #2 */
+    if((gidAMX = H5Gopen(gidA, "M/X")) < 0)
+        TEST_ERROR
+
+    /* Mount third file */
+    if(H5Fmount(gidAMX, "M", fid3, H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Open group in mounted file #3 */
+    /* (This shows we successfully mounted) */
+    if((gidAMXMY = H5Gopen(gidAMX, "M/Y")) < 0)
+        TEST_ERROR
+
+    /* Check name */
+    if(H5Iget_name( gidAMXMY, objname, (size_t)NAME_BUF_SIZE ) < 0)
+        TEST_ERROR
+    if(HDstrcmp(objname, "/A/M/X/M/Y"))
+        TEST_ERROR
+
+    /* Unmount second file */
+    if (H5Funmount(fid1, "/A/M")<0)
+	TEST_ERROR
+
+    /* Check name */
+    *objname = '\0';
+    if(H5Iget_name( gidAMXMY, objname, (size_t)NAME_BUF_SIZE ) < 0)
+        TEST_ERROR
+    if(HDstrcmp(objname, ""))
+        TEST_ERROR
+
+    /* Rename object in file #3 that is "disconnected" from name hiearchy */
+    /* (It is "disconnected" because it's parent file has been unmounted) */
+    if(H5Gmove2(gidAMX,"M/Y",gidAMX,"M/Z") < 0)
+	TEST_ERROR
+
+    /* Close group in file #3 */
+    if(H5Gclose(gidAMXMY) < 0)
+	TEST_ERROR
+
+    /* Re-open group in file #3 */
+    if((gidAMXMY = H5Gopen(gidAMX, "M/Z")) < 0)
+        TEST_ERROR
+
+    /* Check name again */
+    *objname = '\0';
+    if(H5Iget_name( gidAMXMY, objname, (size_t)NAME_BUF_SIZE ) < 0)
+	TEST_ERROR
+    if(HDstrcmp(objname, ""))
+	TEST_ERROR
+
+    /* Mount fourth file */
+    if(H5Fmount(gidB, "M", fid4, H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Open group in mounted file */
+    /* (This shows we successfully mounted) */
+    if((gidBMZ = H5Gopen(gidB, "M/Z")) < 0)
+        TEST_ERROR
+
+    /* Check name */
+    if(H5Iget_name( gidBMZ, objname, (size_t)NAME_BUF_SIZE ) < 0)
+        TEST_ERROR
+    if(HDstrcmp(objname, "/B/M/Z"))
+        TEST_ERROR
+
+    /* Unmount third file */
+    if (H5Funmount(fid2, "/X/M")<0)
+	TEST_ERROR
+
+    /* Unmount fourth file */
+    if (H5Funmount(fid1, "/B/M")<0)
+	TEST_ERROR
+
+    /* Close objects in mounted files */
+    if(H5Gclose(gidBMZ) < 0)
+	TEST_ERROR
+    if(H5Gclose(gidAMXMY) < 0)
+	TEST_ERROR
+    if(H5Gclose(gidAMXX) < 0)
+	TEST_ERROR
+    if(H5Gclose(gidAMX) < 0)
+	TEST_ERROR
+
+    /* Close objects in original file */
+    if(H5Gclose(gidB) < 0)
+	TEST_ERROR
+    if(H5Gclose(gidA) < 0)
+	TEST_ERROR
+
+    /* Close files */
+    if(H5Fclose(fid4) < 0)
+        TEST_ERROR
+    if(H5Fclose(fid3) < 0)
+        TEST_ERROR
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+    
+    /* Shut down */
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Gclose(gidZ);
+	H5Gclose(gidY);
+	H5Gclose(gidXX);
+	H5Gclose(gidXM);
+	H5Gclose(gidX);
+	H5Gclose(gidBMZ);
+	H5Gclose(gidBM);
+	H5Gclose(gidB);
+	H5Gclose(gidAMXMY);
+	H5Gclose(gidAMXX);
+	H5Gclose(gidAMX);
+	H5Gclose(gidAM);
+	H5Gclose(gidA);
+        H5Fclose(fid4);
+        H5Fclose(fid3);
+        H5Fclose(fid2);
+	H5Fclose(fid1);
+    } H5E_END_TRY;
+    return 1;
+}
     
 
 /*-------------------------------------------------------------------------
@@ -1290,6 +1559,7 @@ main(void)
     nerrors += test_uniformity(fapl);
     nerrors += test_close(fapl);
     nerrors += test_mount_after_close(fapl);
+    nerrors += test_mount_after_unmount(fapl);
     
     if (nerrors) goto error;
     puts("All mount tests passed.");
