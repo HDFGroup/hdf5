@@ -229,7 +229,8 @@ main (int argc, char *argv[])
 #endif
     hid_t       fapl;                   /*file access property list     */
     hid_t       file;
-    
+    hsize_t     hdsize;                 /*destination logical memb size */
+
     /*
      * Get the program name from argv[0]. Use only the last component.
      */
@@ -460,8 +461,10 @@ main (int argc, char *argv[])
         perror ("H5Pset_fapl_family");
         exit (1);
     }
-   
-    if(H5Pset(fapl, H5F_ACS_FAMILY_NEWSIZE_NAME, &dst_size) < 0) { 
+
+    /* Set the property as hsize_t */
+    hdsize = dst_size;
+    if(H5Pset(fapl, H5F_ACS_FAMILY_NEWSIZE_NAME, &hdsize) < 0) { 
         perror ("H5Pset_family_newsize");
         exit (1);
     }

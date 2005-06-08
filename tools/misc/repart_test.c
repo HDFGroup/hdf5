@@ -33,6 +33,9 @@ const char *FILENAME[] = {
     NULL        
 };
 
+herr_t
+test_family_h5repart_opens(void);
+
 
 /*-------------------------------------------------------------------------
  * Function:    test_family_h5repart_opens
@@ -49,19 +52,18 @@ const char *FILENAME[] = {
  * Modifications:
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 test_family_h5repart_opens(void)
 {
     hid_t       file=(-1), fapl=(-1);
-    char        filename[1024];
-
+    
     /* open 1st file(single member file) with correct family size(20000 byte) */
     if ((fapl=H5Pcreate(H5P_FILE_ACCESS))<0)
         goto error;
-    
+
     if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_H5REPART_SIZE1, H5P_DEFAULT)<0)
         goto error;
-
+    
     if((file=H5Fopen(FILENAME[0], H5F_ACC_RDWR, fapl))<0)
         goto error;
 
@@ -108,7 +110,7 @@ int
 main(void)
 {   
     int                 nerrors=0;
-               
+         
     nerrors += test_family_h5repart_opens()<0   ?1:0;
 
     if (nerrors) goto error;

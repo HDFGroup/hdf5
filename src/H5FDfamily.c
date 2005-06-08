@@ -250,15 +250,16 @@ H5FD_family_term(void)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size, hid_t memb_fapl_id)
+H5Pset_fapl_family(hid_t fapl_id, hsize_t msize, hid_t memb_fapl_id)
 {
     herr_t ret_value;
-    H5FD_family_fapl_t	fa;
+    H5FD_family_fapl_t	fa={0, -1};
     H5P_genplist_t *plist;      /* Property list pointer */
     
     FUNC_ENTER_API(H5Pset_fapl_family, FAIL)
-    H5TRACE3("e","ihi",fapl_id,memb_size,memb_fapl_id);
-    
+    H5TRACE3("e","ihi",fapl_id,msize,memb_fapl_id);
+
+   
     /* Check arguments */
     if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
@@ -272,7 +273,7 @@ H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size, hid_t memb_fapl_id)
      * Initialize driver specific information. No need to copy it into the FA
      * struct since all members will be copied by H5P_set_driver().
      */
-    fa.memb_size = memb_size;
+    fa.memb_size = msize;
     fa.memb_fapl_id = memb_fapl_id;
 
     if(NULL == (plist = H5I_object(fapl_id)))
@@ -307,7 +308,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size/*out*/,
+H5Pget_fapl_family(hid_t fapl_id, hsize_t *msize/*out*/,
 		   hid_t *memb_fapl_id/*out*/)
 {
     H5FD_family_fapl_t	*fa;
@@ -315,7 +316,7 @@ H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size/*out*/,
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_API(H5Pget_fapl_family, FAIL)
-    H5TRACE3("e","ixx",fapl_id,memb_size,memb_fapl_id);
+    H5TRACE3("e","ixx",fapl_id,msize,memb_fapl_id);
 
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list")
@@ -323,8 +324,8 @@ H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size/*out*/,
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
     if (NULL==(fa=H5P_get_driver_info(plist)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
-    if (memb_size)
-        *memb_size = fa->memb_size;
+    if (msize)
+        *msize = fa->memb_size;
     if (memb_fapl_id) {
         if(NULL == (plist = H5I_object(fa->memb_fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list")
@@ -617,6 +618,7 @@ H5FD_family_sb_encode(H5FD_t *_file, char *name/*out*/,
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
     unsigned char	*p = buf;
+    uint64_t            msize;
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_family_sb_encode, FAIL)
@@ -626,7 +628,8 @@ H5FD_family_sb_encode(H5FD_t *_file, char *name/*out*/,
     name[8] = '\0';
 
     /* copy member file size */
-    UINT64ENCODE(p, file->memb_size);
+    msize = (uint64_t)file->memb_size;
+    UINT64ENCODE(p, msize);
      
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -657,10 +660,10 @@ static herr_t
 H5FD_family_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
-    uint64_t             msize;
+    uint64_t            msize = 0;
     char                err_msg[128];
     herr_t ret_value=SUCCEED;   /* Return value */
-    
+   
     FUNC_ENTER_NOAPI(H5FD_family_sb_decode, FAIL)
 
     /* Read member file size. Skip name template for now although it's saved. */
@@ -681,7 +684,7 @@ H5FD_family_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
     }
 
     /* Check if member size from file access property is correct */
-    if(file->pmem_size != msize) {
+    if(msize != file->pmem_size) {
         sprintf(err_msg, "family member size should be %lu", msize);
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, err_msg)
     }
