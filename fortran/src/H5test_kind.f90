@@ -3,7 +3,7 @@
 ! This fortran program generates H5fortran_detect.f90
 !
          program test_kind
-         integer :: i, j, last, kind_numbers(10)
+         integer :: i, j, ii, last, kind_numbers(10)
          last = -1
          ii = 0
          j = selected_int_kind(18)
