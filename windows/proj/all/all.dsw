@@ -377,6 +377,12 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name hl_test_packet
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name h5repart_gentest
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name h5reparttst
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -1671,6 +1677,21 @@ Package=<4>
 
 ###############################################################################
 
+Project: "h5repart_gentest"=..\..\TOOLS\TESTFILES\h5repart_gentest\h5repart_gentest.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+}}}
+
+###############################################################################
+
 Project: "h5repartdll"=..\..\tools\h5repartdll\h5repartdll.dsp - Package Owner=<4>
 
 Package=<5>
@@ -1681,6 +1702,21 @@ Package=<4>
 {{{
     Begin Project Dependency
     Project_Dep_Name hdf5dll
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "h5reparttst"=..\..\TOOLS\TESTFILES\h5reparttst\h5reparttst.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5
     End Project Dependency
 }}}
 
