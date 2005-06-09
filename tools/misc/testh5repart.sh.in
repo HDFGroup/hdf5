@@ -41,21 +41,23 @@ TESTING() {
 }
 
 # Run a test and print PASS or *FAIL*.  If a test fails then increment
-# the `nerrors' global variable and (if $verbose is set) display the
-# difference between the actual output and the expected output. The
-# expected output is given as the first argument to this function and
-# the actual output file is calculated by replacing the `.ddl' with
-# `.out'.  The actual output is not removed if $HDF5_NOCLEANUP has a
-# non-zero value.
+# the `nerrors' global variable.
 #
 TOOLTEST() {
    # Run tool test.
    TESTING $REPART $@
    (
-      echo
+#      echo
       cd $srcdir/../testfiles
       $RUNSERIAL $REPART_BIN $@
    )
+
+   if test $? -eq 0; then
+       echo " PASSED"
+   else
+       echo " FAILED"
+       nerrors=`expr $nerrors + 1`
+   fi
 }
 
 OUTPUTTEST() {
@@ -65,6 +67,13 @@ OUTPUTTEST() {
       cd $actual_dir
       $RUNSERIAL $REPARTED_FAM_BIN $@
    )
+
+   if test $? -eq 0; then
+       echo " PASSED"
+   else
+       echo " FAILED"
+       nerrors=`expr $nerrors + 1`
+   fi
 }
 
 # Print a "SKIP" message
