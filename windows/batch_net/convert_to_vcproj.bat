@@ -12,6 +12,7 @@ echo This batch file will convert all .dsp files in HDF5 C,  >> convert.log
 echo C++ and Fortran library to .vcproj  format >> convert.log
 
 CScript //H:CScript //Nologo
+echo Start converting project files
 
 echo ************************************************************ >> convert.log
 echo Converting project files in directory %1\windows\proj >> convert.log
@@ -206,4 +207,4 @@ echo ************************************************************ >> convert.log
   convert.js %1\windows\tools\testfiles\h5reparttst\h5reparttst.dsp %1\windows\tools\testfiles\h5reparttst\h5reparttst.vcproj  >> convert.log  
   convert.js %1\windows\tools\toolslib\toolslib.dsp %1\windows\tools\toolslib\toolslib.vcproj  >> convert.log
   convert.js %1\windows\tools\toolslibD\toolslibD.dsp %1\windows\tools\toolslibD\toolslibD.vcproj  >> convert.log
-
+echo End converting project files.
