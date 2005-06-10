@@ -1,0 +1,25 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{EAF909A5-FA59-4C3D-9431-0FCC20D5BCF9}") = "h5tinit", "h5tinit\h5tinit.icproj", "{042099BB-201E-49B3-B80A-A09C0E3D2379}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{042099BB-201E-49B3-B80A-A09C0E3D2379}.Debug.ActiveCfg = Debug|Win32
+		{042099BB-201E-49B3-B80A-A09C0E3D2379}.Debug.Build.0 = Debug|Win32
+		{042099BB-201E-49B3-B80A-A09C0E3D2379}.Release.ActiveCfg = Release|Win32
+		{042099BB-201E-49B3-B80A-A09C0E3D2379}.Release.Build.0 = Release|Win32
+		{F0E7CEDD-E730-448D-B187-2CDB575A498C}.Release.Build.0 = Release|Win32
+		{F0E7CEDD-E730-448D-B187-2CDB575A498C}.Release.ActiveCfg = Release|Win32
+		{F0E7CEDD-E730-448D-B187-2CDB575A498C}.Debug.Build.0 = Debug|Win32
+		{F0E7CEDD-E730-448D-B187-2CDB575A498C}.Debug.ActiveCfg = Debug|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal
