@@ -763,7 +763,10 @@
 ./release_docs/INSTALL_parallel
 ./release_docs/INSTALL_Windows.txt
 ./release_docs/INSTALL_Windows_From_Command_Line.txt
-./release_docs/INSTALL_Windows_Short.txt
+./release_docs/INSTALL_Windows_Short_INTEL.TXT
+./release_docs/INSTALL_Windows_Short_MSVS6.0.TXT
+./release_docs/INSTALL_Windows_Short_NET.TXT
+
 ./release_docs/INSTALL_codewarrior.txt
 ./release_docs/HISTORY.txt
 ./release_docs/RELEASE.txt
@@ -1773,6 +1776,7 @@
 
 #windows misc
 ./windows/misc/typegen/typegen.dsw
+./windows/misc/typegen/typegen.sln
 ./windows/misc/typegen/h5tinit/h5tinit.dsp
 ./windows/misc/H5fortran_detect_gen/H5fortran_detect_gen.dsp
 ./windows/misc/H5fortran_detect_gen/H5fortran_detect_gen.dsw
@@ -1785,6 +1789,7 @@
 #windows hl proj
 ./windows/proj/all/all.dsp
 ./windows/proj/all/all.dsw
+./windows/proj/all/all.sln
 ./windows/proj/hdf5/hdf5.dsp
 ./windows/proj/hdf5_cpp/hdf5_cpp.dsp
 ./windows/proj/hdf5_cppdll/hdf5_cppdll.dsp
@@ -1942,6 +1947,13 @@
 ./windows/Installf90Examples.BAT
 ./windows/copy_hdf.bat
 ./windows/installhdf5lib.bat
+./windows/batch_intelc/convert_to_icproj.BAT
+./windows/batch_intelc/hdf5bt_intelc.BAT
+./windows/batch_intelc/hdf5build_intelc.BAT
+./windows/batch_net/convert.js
+./windows/batch_net/convert_to_vcproj.bat
+./windows/batch_net/hdf5bt_net.bat
+./windows/batch_net/hdf5build_net.bat
 
 #windows fortran examples
 ./windows/fortran/examples/allf90examples/allf90examples.dsp
