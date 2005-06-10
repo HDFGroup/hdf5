@@ -1,0 +1,259 @@
+HDF5 Build and Install Instructions for Windows XP with INTEL Compiler
+                          (Short Version)
+------------------------------------------------------------------------
+Note: This short instruction is written for users who want to quickly
+      build HDF5 library and tools from the HDF5 source code package
+      with Intel Compiler  but do not want to know HDF5 
+      building and installation details on Windows XP.
+         
+      For detailed HDF5 build and install information, or if you have
+      trouble following any steps in the instructions, please refer to
+      INSTALL_Windows.txt for further information.
+      
+      For users who would like to build and test HDF5 package from the
+      command line, please refer to
+      INSATLL_Windows_From_Command_Line.txt.
+        
+***************************WARNINGS*************************************
+Please read CAREFULLY about HDF5 build and install preconditions and 
+notes in INSTALL_Windows.txt before starting below procedures.
+************************************************************************
+
+Note: 
+      1. For Intel Compiler users, Intel 7.x works with MSVS 6.0 and
+         Intel 8.1 only works with MSVS .net 2003 when you build 
+         HDF5-1.8.x.
+          
+      2. HDF5 Fortran DLL Libraries is not supported with Intel Fortran 8.1
+         integration with Visual C++ .Net 2003 Environment.
+             
+      3. Szip library is different when using Intel compiler.
+         You should build Szip source codes with Intel
+         compiler or download binaries for Intel compiler
+         from ftp://ftp.ncsa.uiuc.edu/HDF/szip/bin/windows. 
+          
+      4. Set up path for external libraries and headers 
+           
+         Skip this part if you don't want to use ANY compression features
+         provided by HDF5.  Please do read section V.
+
+         You have to read this part even if you want to use only Zlib
+         or Szip.  You also need to read section V on INSTALL_Windows.txt
+
+         For users using Intel compiler 7.1 integration with MSVS 6.0, please refer 
+         to "Preconditions 6"  on INSTALL_Windows.txt to set up path for external
+         libraries and headers.
+        
+         For users using Intel compiler 8.1 integration with Visual C++ 7.0 2003, detailed
+         information about setting up external libraries and header will be given in 
+         Part II, 2.1.3 in this document.
+          
+      5. Part II, 2.1 will build ONLY HDF5 Static and DLL C and C++ 
+         Library using Intel C++ Compiler.  If you want to build HDF5 Static and 
+         DLL C and C++ Library as well as HDF5 Static Fortran Library, Please go to 
+         PartII, 2.2 directly!
+            
+      6. Only short information was given on test HDF5 Libraries. Users want to 
+         know detailed information about testing HDF5 Libraries and tools, please 
+         refer to document INSTALL_Windows.txt, section II, STEP 2 Testing HDF5  
+         libraries and tools.
+
+Part I. INTEL compiler 7.1 with MSVS 6.0
+
+     1.1. Intel C Compiler
+             Go to Tools-->Select Compiler
+             Check Intel box and click OK button.
+          
+     1.2. Intel Fortran Compiler
+             Go to Tools-->Select Compiler
+             Check Intel box and click OK button.
+             Go to Tools-->Customize-->Add-ins and Macro Files
+             and check Intel Fortran Compiler Build Tool
+                
+Part II. INTEL compiler 8.1 with Visual C++ .Net  2003 Environment
+			
+ 2.1 Intel C++ Compiler
+                
+      2.1.1 Open all.dsw
+      
+       Invoke Microsoft Visual C++ .Net 2003.  From the main 
+       menu, go to "File" and select "Open Solution". In
+       the "Open Solution" window, Change "Files of type" to
+       "All Project Files". Choose "all.dsw" under the directory
+       c:\MyHDFstuff\hdf5\windows\proj\all. In the pop up window,
+       choose "Yes To All" to convert all project files to Visual
+       C++ .Net project format.
+          	
+      2.1.2 Convert to Use Intel C++ Project System
+      
+      Right click on the solution name "all.sln" in the 
+      "Solution Explorer". From the pop-up menu select 
+      "Convert to use Intel C++ Project System" to convert 
+      all .Net project files to Intel C++ project files. 
+	                        
+      2.1.3 Set up path for external libraries and headers 
+      
+      Go to Tools > Options > Intel C++. In the left pane,
+      Click "General".
+            
+        a. In the right pane, under "Compiler selection",
+        choose Intel C++ 8.1.
+               
+        b. Click on "Intel C++ 8.1" to set the directories
+        and default options. In "Include", Add Zlib and Szip 
+        header path(c:\zlib122\include c:\szip\include). 
+        In "Library", Add Zlib and Szip Library Path
+        (c:\zlib122\lib, c:\szip\dll).
+               
+        c. Then click "OK".
+         
+      2.1.4 Building C and C++ Static and DLL Libraries and Tools
+      
+      Select "Build", then Select "Set Active Configuration".
+	       			
+      Select "all -- Win32 Debug" or "all -- Win32 Release"
+    	        
+      Disable all Fortran project files listed below:
+               
+             flush1_fortran
+             flush1_fortrandll
+             flush2_fortran
+             flush2_fortrandll
+             hdf5_f90cstub
+             hdf5_f90cstubdll
+             hdf5_fortran
+             hdf5_fortrandll
+             libtest_cstubdll
+             libtest_fortran
+             libtest_fortrandll
+             testhdf5_fortran
+             testhdf5_fortrandll
+             hdf5_hl_fortran
+             hl_test_image_fortran
+             hl_test_lite_fortran
+             hl_test_table_fortran 	 
+   	        
+    	        
+      Select "ok". Select "Build" -> "Build" or "Rebuild All" to
+      build debug version of project "all".   			
+   	     
+      2.1.5 Testing HDF5 C and C++ Libraries and Tools
+   	  
+      Under directory "hdf5", a batch file hdf5check.bat was provided to 
+      test HDF5 libraries and tools. 
+   	  
+      Invoke command prompt, go to directory "hdf5", type in the following
+      command to test HDF5 C and C++ Libraries.
+   	  
+   	                       hdf5check enablecpp
+   
+      Test results will be save into file check_results.txt under directory "hdf5"
+      Check check_results.txt, there should be no "failures" at all.
+       
+  2.2 Intel Fortran Compiler 8.1 under MSVS C++ .Net 2003 Environment
+       
+      Note: This step will build HDF5 Static and DLL C and C++ Library 
+            using Intel C++ 8.1 Compiler as well as HDF5 Static Fortran Library 
+            using Intel Fortran 8.1 Compiler. 
+             
+            Users who want to build ONLY HDF5 Static and DLL C and C++ 
+            Library please go to Part2, 2.1.
+          
+      2.2.1 Open all.dsw
+        
+      Invoke Microsoft Visual C++ .Net 2003.  From the main 
+      menu, go to "File" and select "Open Solution". In
+      the "Open Solution" window, Change "Files of type" to
+      "All Project Files". Choose "all.dsw" under the directory
+      c:\MyHDFstuff\hdf5\windows\proj\all. In the pop up window,
+      choose "Yes To All" to convert all project files to Visual
+      C++ .Net project format.
+         
+      2.2.2 Extract Compaq Visual Fortran Projects
+      
+        a. Select project "flush1_fortran" in the Solution 
+        Explorer window. In the Project menu, select 
+        "Extract Compaq Visual Fortran Project". 
+         		
+        Do the same thing for the following project files:
+         		
+     		flush2_fortran
+       		hdf5_fortran
+       		testhdf5_fortran
+       		hdf5_hl_fortran
+       		hl_test_image_fortran
+                hl_test_lite_fortran
+                hl_test_table_fortran
+         				       
+        b. Select project "libtest_fortran" in the Solution 
+        Explorer window. In the Project menu, select 
+        "Extract Compaq Visual Fortran Project".  Choose 
+        "The Intel Fortran project" as the the main project .
+      
+      2.2.3 Change project dependencies of "libtest_fortran"
+                     
+      Highlight project "libtest_fortran", choose "Project"->
+      "Project Dependencies", uncheck "libtest".
+               
+      2.2.4 Convert all.sln to Use Intel C++ Project System
+      
+      Right click on the solution name "all.sln" in the 
+      "Solution Explorer". From the pop-up menu select 
+      "Convert to use Intel C++ Project System" to convert 
+      all .Net C++ project files to Intel C++ project formats. 
+	      
+      2.2.5 Building C and C++ Static and DLL Libraries and  Static Fortran 
+      Libraries and Tools
+	  
+      Select "Build", then Select "Set Active Configuration".
+	             
+      Select "all -- Win32 Debug" or "all -- Win32 Release"
+    	        
+      Disable all Fortran DLL project files listed below:
+			            
+           flush1_fortrandll
+           flush2_fortrandll
+           hdf5_fortrandll
+           libtest_fortrandll
+           testhdf5_fortrandll
+	                	        
+      Select "ok". Select "Build" -> "Build" or "Rebuild All" to
+      build Debug or Release version of HDF5 C, C++ Static and DLL 
+      Library using Intel C++ 8.1 Compiler and HDF5 Static and High
+      Level Fortran Library using Intel Fortran 8.1 compiler.
+    	         
+      2.2.6 Test HDF5 Static and High Level Fortran Library
+    	
+    	a. Test HDF5 C and C++ Libraries
+    	
+    	Invoke command prompt, go to directory "hdf5", type in the following
+   	command to test HDF5 C and C++ Libraries.
+   	  
+                   hdf5check enablecpp
+   	                       
+   	Test results will be save into file check_results.txt under directory "hdf5"
+   	Check check_results.txt, there should be no "failures" at all.
+    	
+    	b. Test HDF5 Static Fortran Library
+    	
+    	Go to directory hdf5\fortran\test, run batch file testhdf5_fortran.bat 
+    	with the following two options to test fortran static library 
+    	   
+    	   testhdf5_fortran release >> "Your output file name"
+    	   testhdf5_fortran debug   >> "Your output file name"
+    	   
+    	Check your output files, there should be no "failures" at all.
+    	           	            	   
+        c. Test HDF5 High Level Fortran Library
+      
+        Go to directory hdf5\hl\fortran\test, run batch file testhdf5_fortran.bat 
+        with the following two options to test fortran high level  library :
+    	   
+    	   test_hdf5_hl_fortran release >> "Your output file name"
+    	   test_hdf5_hl_fortran debug   >> "Your output file name"
+    	   
+    	Check your output files, there should be no "failures" at all. 
+    	
+    	
+Please send email to hdfhelp@ncsa.uiuc.edu for further assistance.    	           	            	
+          
