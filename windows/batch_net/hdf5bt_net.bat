@@ -11,9 +11,9 @@
 @ECHO OFF
 
 type nul > hdf5_results_net.txt
-echo ***************************************************************************** >> hdf5_results.txt
-echo                         Build and Test HDF5 Library and Tools >> hdf5_results.txt
-echo ***************************************************************************** >> hdf5_results.txt
+echo ***************************************************************************** >> hdf5_results_net.txt
+echo                         Build and Test HDF5 Library and Tools >> hdf5_results_net.txt
+echo ***************************************************************************** >> hdf5_results_net.txt
 
 call hdf5build_net %1
 more build_results_net.txt >> hdf5_results_net.txt
