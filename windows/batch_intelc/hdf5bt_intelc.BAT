@@ -12,9 +12,9 @@
 @ECHO OFF
 
 type nul > hdf5_results_intelc.txt
-echo ***************************************************************************** >> hdf5_results.txt
-echo                         Build and Test HDF5 Library and Tools >> hdf5_results.txt
-echo ***************************************************************************** >> hdf5_results.txt
+echo ***************************************************************************** >> hdf5_results_intelc.txt
+echo                         Build and Test HDF5 Library and Tools >> hdf5_results_intelc.txt
+echo ***************************************************************************** >> hdf5_results_intelc.txt
 
 call hdf5build_intelc %1
 more build_results_intelc.txt >> hdf5_results_intelc.txt
