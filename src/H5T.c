@@ -675,9 +675,7 @@ H5T_init_interface(void)
     H5T_t       *native_ullong=NULL;    /* Datatype structure for native unsigned llong */
     H5T_t       *native_float=NULL;     /* Datatype structure for native float */
     H5T_t       *native_double=NULL;    /* Datatype structure for native double */
-#if H5_SW_LDOUBLE_TO_INTEGER_WORKS || H5_SW_INTEGER_TO_LDOUBLE_WORKS
     H5T_t       *native_ldouble=NULL;    /* Datatype structure for native double */
-#endif /*H5_SW_LDOUBLE_TO_INTEGER_WORKS || H5_SW_INTEGER_TO_LDOUBLE_WORKS */
     H5T_t       *std_u8le=NULL;         /* Datatype structure for unsigned 8-bit little-endian integer */
     H5T_t       *std_u8be=NULL;         /* Datatype structure for unsigned 8-bit big-endian integer */
     H5T_t       *std_u16le=NULL;        /* Datatype structure for unsigned 16-bit little-endian integer */
@@ -999,7 +997,11 @@ H5T_init_interface(void)
     /* floating point */
 #if H5_CONVERT_DENORMAL_FLOAT
     status |= H5T_register(H5T_PERS_HARD, "flt_dbl", native_float, native_double, H5T_conv_float_double, H5AC_dxpl_id);
+    status |= H5T_register(H5T_PERS_HARD, "flt_ldbl", native_float, native_ldouble, H5T_conv_float_ldouble, H5AC_dxpl_id);
     status |= H5T_register(H5T_PERS_HARD, "dbl_flt", native_double, native_float, H5T_conv_double_float, H5AC_dxpl_id);
+    status |= H5T_register(H5T_PERS_HARD, "dbl_ldbl", native_double, native_ldouble, H5T_conv_double_ldouble, H5AC_dxpl_id);
+    status |= H5T_register(H5T_PERS_HARD, "ldbl_flt", native_ldouble, native_float, H5T_conv_ldouble_float, H5AC_dxpl_id);
+    status |= H5T_register(H5T_PERS_HARD, "ldbl_dbl", native_ldouble, native_double, H5T_conv_ldouble_double, H5AC_dxpl_id);
 #endif /*H5_CONVERT_DENORMAL_FLOAT*/
 
     /* from long_long */
