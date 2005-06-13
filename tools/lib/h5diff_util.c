@@ -283,6 +283,9 @@ diff_basename(const char *name)
 {
  size_t i;
  
+ if (name==NULL)
+  return;
+
  /* Find the end of the base name */
  i = strlen(name);
  while (i>0 && '/'==name[i-1])
