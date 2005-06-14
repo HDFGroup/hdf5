@@ -980,10 +980,6 @@ H5T_init_interface(void)
     status |= H5T_register(H5T_PERS_SOFT, "array", array, array, H5T_conv_array, H5AC_dxpl_id);
     status |= H5T_register(H5T_PERS_SOFT, "objref", objref, objref, H5T_conv_order_opt, H5AC_dxpl_id);
 
-    /* Custom conversion for 32-bit ints to 64-bit floats (undocumented) */
-    status |= H5T_register(H5T_PERS_HARD, "u32le_f64le", std_u32le, ieee_f64le, H5T_conv_i32le_f64le, H5AC_dxpl_id);
-    status |= H5T_register(H5T_PERS_HARD, "i32le_f64le", std_i32le, ieee_f64le, H5T_conv_i32le_f64le, H5AC_dxpl_id);
-
     /*
      * Native conversions should be listed last since we can use hardware to
      * perform the conversion.  We list the odd types like `llong', `long',

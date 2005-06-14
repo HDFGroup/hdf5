@@ -2937,6 +2937,7 @@ H5FDset_eoa(H5FD_t *file, haddr_t addr)
     /* Check args */
     if (!file || !file->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
+
     if (!H5F_addr_defined(addr) || addr>file->maxaddr)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid end-of-address value")
 

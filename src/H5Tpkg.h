@@ -1179,12 +1179,6 @@ H5_DLL herr_t H5T_conv_ldouble_ullong(hid_t src_id, hid_t dst_id,
                                      void *buf, void *bkg,
                                      hid_t dset_xfer_plist);
 
-H5_DLL herr_t H5T_conv_i32le_f64le(hid_t src_id, hid_t dst_id,
-				    H5T_cdata_t *cdata, size_t nelmts,
-				    size_t buf_stride, size_t bkg_stride,
-                                    void *_buf, void *bkg,
-                                    hid_t dset_xfer_plist);
-
 /* Bit twiddling functions */
 H5_DLL void H5T_bit_copy(uint8_t *dst, size_t dst_offset, const uint8_t *src,
 			  size_t src_offset, size_t size);
