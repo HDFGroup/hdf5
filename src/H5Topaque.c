@@ -86,6 +86,8 @@ H5Tset_tag(hid_t type_id, const char *tag)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an opaque data type")
     if (!tag)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no tag")
+    if (HDstrlen(tag) >= H5T_OPAQUE_TAG_MAX)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "tag too long")
 
     /* Commit */
     H5MM_xfree(dt->shared->u.opaque.tag);
