@@ -405,7 +405,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 
 #define H5T_CONV_fF(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_xX, double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)	      \
+    H5T_CONV(H5T_CONV_xX, long double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)    \
 }
 
 /* Same as H5T_CONV_Xx_CORE, except that instead of using D_MAX and D_MIN
@@ -448,7 +448,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 
 #define H5T_CONV_Ff(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_Ff, double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)	      \
+    H5T_CONV(H5T_CONV_Ff, long double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)    \
 }
 
 #define H5T_CONV_xF(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
