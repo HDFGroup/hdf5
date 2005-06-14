@@ -129,6 +129,7 @@ static herr_t convert_opaque(hid_t UNUSED st, hid_t UNUSED dt,
 	       size_t UNUSED nelmts, size_t UNUSED buf_stride,
                size_t UNUSED bkg_stride, void UNUSED *_buf,
 	       void UNUSED *bkg, hid_t UNUSED dset_xfer_plid);
+static int opaque_long(void);
 
 
 /*-------------------------------------------------------------------------
@@ -4106,6 +4107,8 @@ test_opaque(void)
     num_errors += opaque_check(0);
     /* Test opaque types without tag */
     num_errors += opaque_check(1);
+    /* Test named opaque types with very long tag */
+    num_errors += opaque_long();
 
     if(num_errors)
         goto error;
@@ -4192,6 +4195,59 @@ opaque_check(int tag_it)
  error:
     if (st>0) H5Tclose(st);
     if (dt>0) H5Tclose(dt);
+    H5_FAILED();
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	opaque_long
+ *
+ * Purpose:	Test named (committed) opaque datatypes w/very long tags
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, June 14, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+opaque_long(void)
+{
+    char 	*long_tag = NULL;
+    hid_t	dt = -1;
+    herr_t      ret;
+
+    /* Build opaque type */
+    if ((dt=H5Tcreate(H5T_OPAQUE, 4))<0) TEST_ERROR
+
+    /* Create long tag */
+    long_tag = HDmalloc(16384+1);
+    HDmemset(long_tag, 'a', 16384);
+    long_tag[16384] = '\0';
+
+    /* Set opaque type's tag */
+    H5E_BEGIN_TRY {
+	ret = H5Tset_tag(dt, long_tag);
+    } H5E_END_TRY;
+    if(ret!=FAIL) TEST_ERROR
+    
+    /* Close datatype */
+    if(H5Tclose(dt) < 0) TEST_ERROR
+
+    /* Release memory for tag */
+    HDfree(long_tag);
+
+    return 0;
+
+ error:
+    if (dt>0) H5Tclose(dt);
+    if (long_tag != NULL) HDfree(long_tag);
     H5_FAILED();
     return 1;
 }

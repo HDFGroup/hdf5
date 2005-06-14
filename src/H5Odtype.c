@@ -136,7 +136,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
             /*
              * Opaque types...
              */
-            z = flags & 0xff;
+            z = flags & (H5T_OPAQUE_TAG_MAX - 1);
             assert(0==(z&0x7)); /*must be aligned*/
             if (NULL==(dt->shared->u.opaque.tag=H5MM_malloc(z+1)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
@@ -576,7 +576,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
              * null terminated).
              */
             z = HDstrlen(dt->shared->u.opaque.tag);
-            aligned = (z+7) & 0xf8;
+            aligned = (z+7) & (H5T_OPAQUE_TAG_MAX - 8);
             flags |= aligned;
             HDmemcpy(*pp, dt->shared->u.opaque.tag, MIN(z,aligned));
             for (n=MIN(z,aligned); n<aligned; n++) (*pp)[n] = 0;
@@ -995,7 +995,7 @@ H5O_dtype_size(const H5F_t *f, const void *mesg)
             break;
 
         case H5T_OPAQUE:
-            ret_value += (HDstrlen(dt->shared->u.opaque.tag)+7) & 0xf8;
+            ret_value += (HDstrlen(dt->shared->u.opaque.tag)+7) & (H5T_OPAQUE_TAG_MAX - 8);
             break;
 
         case H5T_FLOAT:
