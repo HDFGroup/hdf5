@@ -1,5 +1,4 @@
-Instructions for Building and Testing HDF5 
-from Command Line on Windows XP
+Instructions for Building and Testing HDF5 in Command Line on Windows XP
 
 ************************************************************************
 Note: This instruction is written for users who would like to build HDF5
@@ -29,7 +28,7 @@ Note: This instruction is written for users who would like to build HDF5
       
       Compiler Name                 Batch File to Be Used
       
-      MSVS 6.0                      hdf5bt.ba          hdf5build.bat
+      MSVS 6.0                      hdf5bt.bat         hdf5build.bat
       MSVS .Net                     hdf5bt_net.bat     hdf5build_net.bat
       Intel C++                     hdf5bt_intelc.bat  hdf5build_intelc.bat
       
@@ -186,17 +185,11 @@ Section I: Building and testing HDF5 on command line with Microsoft
             Invoke a command prompt window and run hdf5check with 
             appropriate options.
 
-            Test results are saved in two files:
-
-               c:\MyHDFstuff\hdf5\tests_results.txt   
+            Test results are saved into file:
 
                c:\MyHDFstuff\hdf5\check_results.txt.
 
-            In general, you only need to check tests_results.txt.  If
-            all the tests passed, then you do not have to check 
-            check_results.txt. If some tests failed, check 
-            check_results.txt can help you figure out what was wrong.
-
+            Check check_results.txt and there should be failers at all.
 
 3. Installing HDF5 Libraries
 
@@ -284,9 +277,9 @@ SECTION II: Building and testing HDF5 C and C++ Library on command line
 
             c:\MyHDFstuff\hdf5\hdf5_results_net.txt   
 
-            c:\MyHDFstuff\hdf5\tests_results_net.txt.
+            c:\MyHDFstuff\hdf5\tests_results.txt.
 
-      In general, you only need to check tests_results_net.txt.
+      In general, you only need to check tests_results.txt.
       If all the tests passed, then you do not have to check
       hdf5_results_net.txt.  If some tests failed, check
       hdf5_results_net.txt can help you figure out what was wrong.
@@ -302,7 +295,7 @@ SECTION II: Building and testing HDF5 C and C++ Library on command line
          directory is provided for users to build HDF5 library and 
          tools from command line.
 
-         hdf5build.bat has two options:
+         hdf5build_net.bat has two options:
   
              hdf5build_net             build HDF5 C library 
                                        and tools
@@ -310,7 +303,7 @@ SECTION II: Building and testing HDF5 C and C++ Library on command line
              hdf5build_net enablecpp   build HDF5 C/C++ libraries 
                                          and tools
 
-         Invoke a command prompt window and run hdf5build_net with 
+         Invoke a command prompt window and run hdf5build_net.bat with 
          appropriate options.  building results will be saved in 
          c:\MyHDFstuff\hdf5\build_results_net.txt.  You can check 
          the file to find out whether there are any compilation
@@ -328,7 +321,7 @@ SECTION II: Building and testing HDF5 C and C++ Library on command line
                                          
      Note: hdf5check.bat has ONLY TWO options listed above in this case.
      
-     Testing results will be saved in c:\MyHDFstuff\hdf5\check_results_net.txt. 
+     Testing results will be saved in c:\MyHDFstuff\hdf5\check_results.txt. 
      There should be no failures at all. 
      
      3.  Installing HDF5 Libraries
@@ -339,8 +332,8 @@ SECTION II: Building and testing HDF5 C and C++ Library on command line
 ***********************************************************************
          
 SECTION III: Building and testing HDF5 C and C++ Library on command 
-line with Intel C++ Compiler 8.1 integration with Microsoft 
-Visual C++ .Net 2003
+             line with Intel C++ Compiler 8.1 integration with 
+             Microsoft Visual C++ .Net 2003
 
 ************************************************************************
 
@@ -357,15 +350,29 @@ Visual C++ .Net 2003
       and Intel C++ 8.1 path (For example,
       C:\Program Files\Intel\CPP\Compiler80\Ia32\Bin)
       into "Variable Value" and click "OK". 
+   
+   1.2 Install ICProjConvert80 Utility and set its path
+      
+       Intel provided this utility to convert a solution or project(s)
+       in a solution from the Visual C++ .Net project system to the 
+       Intel C++ Compiler project system.
+       
+       Users who have not install this utility, can open 
+       IntelC++Compiler81 package, go to directory "IA32", 
+       open Data1.zip with winzip, find ICProjConvert80.exe and 
+       extract it to a corresponding directory. For example,
+       C:\Program Files\Intel\CPP\Compiler80\Ia32\Bin
 
-   1.2 Run batch file copy_hdf.bat.
+       Refer to 1.1 and set path for utility ICProjConvert80.
+       
+   1.3 Run batch file copy_hdf.bat.
     
   	Go to  c:\MyHDFstuff\hdf5\windows and run copy_hdf.bat. This process
    	will copy all the necessary batch files and text files saved under 
    	c:\MyHDFstuff\hdf5\windows directory to the directories where they 
    	will be used.
    	
-   1.3 Convert project files format from MSVS 6.0 to MSVS .Net Format
+   1.4 Convert project files format from MSVS 6.0 to MSVS .Net Format
 
        Go to directory  c:\MyHDFstuff\hdf5 and run convert_to_vcproj.bat
        in the following format:
@@ -406,19 +413,22 @@ Visual C++ .Net 2003
 
             c:\MyHDFstuff\hdf5\hdf5_results_intelc.txt   
 
-            c:\MyHDFstuff\hdf5\tests_results_intelc.txt.
+            c:\MyHDFstuff\hdf5\tests_results.txt.
             
          Project conversion results from MSVS .Net format to Intel C++ fomat 
          
          will be saved in 
          
-          c:\MyHDFstuff\hdf5\convert_intel.txt   
+          c:\MyHDFstuff\hdf5\convert_intel.log  
 
-         Check convert_intel.txt to see if all of the project files have been converted
-         successfully.  Conversion messages should look like:
+         Check convert_intel.log to see if all of the project files have
+         been converted successfully.  Conversion messages should look 
+         like:
          
+         "projname.vcproj": has been converted from Microsoft VC++
+         project system to the Intel C++ 8.x project system.
         
-         In general, you only need to check tests_results_intelc.txt.
+         In general, you only need to check tests_results.txt.
          If all the tests passed, then you do not have to check
          hdf5_results_intelc.txt.  If some tests failed, check
          hdf5_results_intelc.txt can help you figure out what was wrong.
@@ -457,10 +467,10 @@ Visual C++ .Net 2003
                hdf5check enablecpp       test HDF5 C/C++ libraries 
                                          and tools
                                          
-         Note: hdf5check.bat has ONLY TWO options listed above in this
-               case.
+         Notes: hdf5check.bat has ONLY TWO options listed above in this
+                case.
      
-     Testing results will be saved in c:\MyHDFstuff\hdf5\check_results_intelc.txt. 
+     Testing results will be saved in c:\MyHDFstuff\hdf5\check_results.txt. 
      There should be no failures at all. 
      
      3.  Installing HDF5 Libraries
