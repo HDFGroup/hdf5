@@ -21,20 +21,23 @@ notes in INSTALL_Windows.txt before starting below procedures.
 
 Preconditions:                                                           
                                                                          
-   a. Setup Szip Library for Visual Studio .Net 2003 Compiler.                             
-                                                                         
-   Szip source codes or binaries can be downloaded    
-   from the following address:                                           
-                                                                         
-   ftp://ftp.ncsa.uiuc.edu/HDF/szip/bin/windows.                         
+   a. Setup path Visual Studio .Net 2003 Compiler.  
+   
+     Open "System" in Control Panel.
+   
+      On the "Advanced" tab, click "Environment Variables", click 
+      "Path" in the "System variables" box, then click "Edit" and 
+      add your Visual C++ .Net path (For example, 
+      C:\Program Files\Microsoft Visual Studio .NET 2003\Common7\IDE)
+      into "Variable Value" and click "OK".                          
                                                                          
    b. Set up path for external libraries and headers                     
                                                                          
     Skip this part if you don't want to use ANY compression features     
-    provided by HDF5.  Please do read section V.                         
+    provided by HDF5.  Please do read Section V.                         
                                                                          
     You have to read this part even if you want to only use Zlib         
-    or Szip.  You also need to read section V.                           
+    or Szip.  You also need to read Section V.                           
                                                                          
     Invoke Microsoft Visual C++ .Net and go to "Tools" and select             
     "Options". In the left pane of  "Option" window poped up,
@@ -55,6 +58,9 @@ Preconditions:
 
 1. Open all.dsw workspace
    
+   Notes: all.sln is for command use only. Please open all.dsw 
+          not all.sln.
+
    Invoke Microsoft Visual C++ .Net 2003.  From the main        
    menu, go to "File" and select "Open Solution". In            
    the "Open Solution" window, Change "Files of type" to        
@@ -68,7 +74,7 @@ Preconditions:
    Users can choose the desirable libraries to be built according
    to the following describtion.
    
-   2.1 If you don't want to build HDF5 C++ Libraries,                          
+   2.1 If you don't want to build HDF5 C++ Libraries,              
    Go to "Build" and select "Configuration Manager". Choose "Release"      
    or "Debug" under "Active Solution Configuration"                        
                                                                            
@@ -196,7 +202,7 @@ If some tests failed, check check_results.txt can help you
 figure out what was wrong.
 
 If you want to test HDF5 libraries and tools one by one, please refer to
-section II, step 2 in INSTALL_Windows.txt.
+Section II, step 2 in INSTALL_Windows.txt.
 
 
 STEP 3: Installing HDF5 Libraries
@@ -207,6 +213,6 @@ all HDF5 libraries and tools into c:\MyHDFstuff\hdf5\hdf5lib directory.
 
 STEP 4: Building HDF5 Examples (Optional)
 
-Please read section II, step 4 in INSTALL_Windows.txt.
+Please read Section II, step 4 in INSTALL_Windows.txt.
 
 
