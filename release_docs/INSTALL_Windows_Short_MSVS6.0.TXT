@@ -27,6 +27,9 @@ STEP 1: Building HDF5 Libraries and Tools
 
 2. Open all.dsw workspace
     
+   Notes: all.sln is for command line use ONLY. Please make sure
+          open all.dsw not all.sln.
+ 
    Open the c:\MyHDFstuff\hdf5\windows\proj\all\all.dsw workspace. 
 
 3. (Optional) Add C++ and/or FORTRAN related projects
@@ -101,20 +104,14 @@ hdf5check.bat has four options:
 Invoke a command prompt window and run hdf5check with appropriate
 options.
 
-Test results are saved in two files:
-
-   c:\MyHDFstuff\hdf5\tests_results.txt   
+Test results are saved into file:
 
    c:\MyHDFstuff\hdf5\check_results.txt.
 
-In general, you only need to check tests_results.txt.  If all the
-tests passed, then you do not have to check check_results.txt.  
-If some tests failed, check check_results.txt can help you
-figure out what was wrong.
+Check check_results.txt and there should be no failures at all.
 
 If you want to test HDF5 libraries and tools one by one, please refer to
-section II, step 2 in INSTALL_Windows.txt.
-
+Section II, step 2 in INSTALL_Windows.txt.
 
 STEP 3: Installing HDF5 Libraries
 
@@ -125,5 +122,3 @@ all HDF5 libraries and tools into c:\MyHDFstuff\hdf5\hdf5lib directory.
 STEP 4: Building HDF5 Examples (Optional)
 
 Please read section II, step 4 in INSTALL_Windows.txt.
-
-
