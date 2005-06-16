@@ -73,7 +73,7 @@ Preconditions
         HDF5_EXT_SZIP
       
       In this section, Zlib and Szip compression packages are assumed
-      to be used.  Please read section V as well as this section if you
+      to be used.  Please read Section V as well as this section if you
       do not want to use compression feature inside HDF5.
       
       To define these environment variables:
@@ -105,10 +105,10 @@ Preconditions
    6. Set up path for external libraries and headers
     
       Skip this part if you don't want to use ANY compression features
-      provided by HDF5.  Please do read section V.
+      provided by HDF5.  Please do read Section V.
 
       You have to read this part even if you want to only use Zlib
-      or Szip.  You also need to read section V.
+      or Szip.  You also need to read Section V.
 
       Invoke Microsoft Visual C++ and go to "Tools" and select
       "Options", find "Directories";
@@ -127,37 +127,40 @@ Preconditions
           from the directory list, add the library path
           (c:\zlib122\lib, c:\szip\dll) to the library directories.
       
-Notes
+Notes:
    1. In release 1.8.0, all.zip is deprecated. Users should go to 
       hdf5/windows directory, run copy_hdf.bat first and then open 
       all.dsw under hdf5/windows/proj/all to start building process.
-
-   2. To build HDF5 C++ and FORTRAN libraries, please read through
+   
+   2. In release 1.8.0, all.sln was provided for command line use ONLY. 
+      all.sln should never be opened to start building HDF5 using IDE.
+ 
+   3. To build HDF5 C++ and FORTRAN libraries, please read through
       this document.
    
-   3. For users who want to quickly build HDF5 library or do not 
+   4. For users who want to quickly build HDF5 library or do not 
       want to know HDF5 building and installation details, please 
       read INSATLL_Windows_Short.txt.
 
-   4. For users who would like to build and test HDF5 package from the 
+   5. For users who would like to build and test HDF5 package from the 
       command line, please read INSATLL_Windows_From_Command_Line.txt.
    
-   5. HDF4-related tools are not built and released with HDF5 library
-      HD
+   6. HDF4-related tools are not built and released with HDF5 library
+      packages any more. To obtain HDF4 related tools, please check
       http://hdf.ncsa.uiuc.edu/h4toh5/ and 
       ftp://hdf.ncsa.uiuc.edu/HDF5/h4toh5/
 
-   6. For DLL users, please do read and follow "DLL hints"
+   7. For DLL users, please do read and follow "DLL hints"
       at Section IV.
 
-   7. For .NET users, please read section VI.
+   8. For .NET users, please read Section VI.
 
-   8. For users who would like to build, test and use HDF5 snapshot
+   9. For users who would like to build, test and use HDF5 snapshot
       release, please read Section VIII.
    
-   9. For Intel Compiler users, Intel 7.x works with MSVS 6.0 and
+   10. For Intel Compiler users, Intel 7.x works with MSVS 6.0 and
       Intel 8.1 only works with MSVS .net 2003 when you build 
-      HDF5-1.8.x.
+      HDF5-1.8.x, please read Section VII.
 
 ------------------------------------------------------------------------
 
@@ -312,7 +315,7 @@ STEP 1: Building HDF5 libraries and tools
              hl_test_lite_fortran
              hl_test_table_fortran
              
-      3.6 If you are using Intel compilers, please read section VII.
+      3.6 If you are using Intel compilers, please read Section VII.
                  
    4. Select "Build", then Select "Set Active Configuration".
    
@@ -681,7 +684,7 @@ We provide 2 options for users to test HDF5 libraries and tools.
       Skip this step UNLESS you have built HDF5 C++ libraries
       and want to test them.
      
-      DLLs listed below should be placed into to the Windows system
+      DLLs listed below should be placed into the Windows system
       directory.  A batch file named install_cppdll.bat is included in 
       c:\MyHDFstuff\hdf5 directory.  Run this batch file and the 
       following HDF5 C++ DLLs will be copied to the system directory.
@@ -705,7 +708,7 @@ We provide 2 options for users to test HDF5 libraries and tools.
       Skip this step UNLESS you have built HDF5 Fortran libraries     
       and want to test them.
      
-      DLLs listed below should be placed into to the Windows system
+      DLLs listed below should be placed into the Windows system
       directory.  A batch file named install_f90dll.bat is included in 
       c:\MyHDFstuff\hdf5 directory.  Run this batch file and the 
       following HDF5 Fortran DLLs will be copied to the system
@@ -1073,9 +1076,9 @@ To use HDF5 static library
 
     7. (optional) to use HDF5 Fortran static library, the location of 
        Fortran module files should be specified by following
-       Project->Settings->Fortran->Preprocessor,
-       and in a test-area labeled with "INCLUDE and USE Paths:", add
-       HDF5 Fortran module files directories.  For example:
+       Project->Settings->Fortran->Preprocessor, and in a test-area 
+       labeled with "INCLUDE and USE Paths:", add HDF5 Fortran module 
+       files directories.  For example:
 
           c:\MyHDFstuff\hdf5\hdf5lib\release\include
 
@@ -1279,7 +1282,7 @@ Warning: When you modify the H5pubconf.h file as described below,
 
       This message can be ignored.
 
-   Note:   
+   Notes:   
 
    To disable Gzip and Szip at the same time, just follow 1.1~1.2
    and 2.1~2.2 and run-compile HDF5 library according to section II.
@@ -1306,26 +1309,25 @@ Warning: When you modify the H5pubconf.h file as described below,
 Section VI: How to build HDF5 in Microsoft Visual Studio .Net 2003    
 ========================================================================
 
-Preconditions:                                                           
-                                                                         
-   a. Setup Szip Library for Visual Studio .Net 2003 Compiler.                             
-                                                                         
-   Intel compilers use different Szip library from other compilers.      
-   Szip source codes or binaries for Intel compiler can be downloaded    
-   from the following address:                                           
-                                                                         
-   ftp://ftp.ncsa.uiuc.edu/HDF/szip/bin/windows.                         
-                                                                         
-   The Szip library and header path should also be set up                
-   accordingly (refer to precondition 6).                                
-                                                                         
+Preconditions: 
+                                                          
+   a. Set up path for Microsoft Visual Studio .Net 2003 compiler
+      
+      Open "System" in Control Panel.
+   
+      On the "Advanced" tab, click "Environment Variables", click 
+      "Path" in the "System variables" box, then click "Edit" and 
+      add your Visual C++ .Net path (For example, 
+      C:\Program Files\Microsoft Visual Studio .NET 2003\Common7\IDE)
+      into "Variable Value" and click "OK". 
+                                                                        
    b. Set up path for external libraries and headers                     
                                                                          
     Skip this part if you don't want to use ANY compression features     
-    provided by HDF5.  Please do read section V.                         
+    provided by HDF5.  Please do read Section V.                         
                                                                          
     You have to read this part even if you want to only use Zlib         
-    or Szip.  You also need to read section V.                           
+    or Szip.  You also need to read Section V.                           
                                                                          
     Invoke Microsoft Visual C++ .Net and go to "Tools" and select             
     "Options". In the left pane of  "Option" window poped up,
@@ -1461,24 +1463,27 @@ libraries and tools) to test HDF5 C and C++ Libraries.
    there as in Microsoft Visual Studio 6.0.
    
 NOTE:  Please read section V if you do not want to use compression
-              feature inside HDF5.
+       feature inside HDF5.
              
  ************************************************************************
 
 
 Section VII: How to build HDF5 with INTEL Compiler    
 ======================================================================== 
-Note:  1. For Intel Compiler users, Intel 7.x works with MSVS 6.0 and
-          Intel 8.1 only works with MSVS .net 2003 when you build 
-          HDF5-1.8.x.
+Notes:  1. For Intel Compiler users, Intel 7.x works with MSVS 6.0 and
+           Intel 8.1 only works with MSVS .net 2003 when you build 
+           HDF5-1.8.x.
               
-       2. HDF5 Fortran DLL Libraries is not supported with Intel Fortran
-          8.1 integration with Visual C++ .Net 2003 Environment.
+        2. HDF5 Fortran DLL Libraries is not supported with Intel 
+	   Fortran 8.1 integration with Visual C++ .Net 2003 
+           Environment. But Release version of HDF5 Fortran DLL 
+           libraries works with Intel Fortran Compiler while Debug 
+           version doesn't. 
               
-       3. Szip library is different when using Intel compiler.
-          You should build Szip source codes with Inter compiler or 
-          download binaries for Intel compiler from 
-          ftp://ftp.ncsa.uiuc.edu/HDF/szip/bin/windows. 
+        3. Szip library is different when using Intel compiler.
+           You should build Szip source codes with Inter compiler or 
+           download binaries for Intel compiler from 
+           ftp://ftp.ncsa.uiuc.edu/HDF/szip/2.0/bin/windows. 
 
 1. INTEL compiler 7.1
 
@@ -1502,36 +1507,26 @@ Note:  1. For Intel Compiler users, Intel 7.x works with MSVS 6.0 and
      Szip source codes or binaries for Intel compiler can be downloaded
      from the following address:
      
-     ftp://ftp.ncsa.uiuc.edu/HDF/szip/bin/windows. 
+     ftp://ftp.ncsa.uiuc.edu/HDF/szip/2.0/bin/windows. 
          
      b. Set up path for external libraries and headers
     
       Skip this part if you don't want to use ANY compression features
-      provided by HDF5.  Please do read section V.
+      provided by HDF5.  Please do read Section V.
 
       You have to read this part even if you want to only use Zlib
-      or Szip.  You also need to read section V.
-
-      Invoke Microsoft Visual C++ and go to "Tools" and select
-      "Options", find "Directories";
+      or Szip.  You also need to read Section V.
       
-      Find the box "Show directories for", choose 
-      "Include files", if you can not find your Zlib and Szip 
-      header path 
-      (for example, c:\zlib122\include, c:\szip\include)
-      from the directory list, add the header path
-      (c:\zlib122\include, c:\szip\include) to the 
-      included directories.
-      
-      Find the box "Show directories for", choose "Library files",
-      If you cannot find your Zlib and Szip library path
-      (for example, c:\zlib122\lib, c:\szip\dll)
-      from the directory list, add the library path
-      (c:\zlib122\lib, c:\szip\dll) to the library directories.
+      Invoke Microsoft Visual C++ .Net 2003.  From the main 
+      menu, Go to Tools > Options > Intel C++. In the left pane,
+      Click on "Intel C++ 8.1" to set the directories and default 
+      options. In "Include", Add Zlib and Szip header path
+      (c:\zlib122\include c:\szip\include). In "Library", Add Zlib and
+      Szip Library Path (c:\zlib122\lib, c:\szip\dll). Then click "OK".
 
-  2.1 Intel C++ Compiler 8.1 under MSVS C++ .Net 2003 Environment
+   2.1 Intel C++ Compiler 8.1 under MSVS C++ .Net 2003 Environment
 			
-      Note: This step will build ONLY HDF5 Static and DLL C and C++ 
+      Notes: This step will build ONLY HDF5 Static and DLL C and C++ 
             Library using Intel C++ Compiler.
           
       If you want to build HDF5 Static and DLL C and C++ Library 
@@ -1557,22 +1552,11 @@ Note:  1. For Intel Compiler users, Intel 7.x works with MSVS 6.0 and
       "Convert to use Intel C++ Project System" to convert 
       all .Net project files to Intel C++ project files. 
 	                        
-      2.1.3 Choose Intel Compiler and Set up External Library and 
-            Header Path
+      2.1.3 Choose Intel Compiler 
      
-      Go to Tools > Options > Intel C++. In the left pane,
-      Click "General".
-            
-      a. In the right pane, under "Compiler selection",
-         choose Intel C++ 8.1.
-               
-      b. Click on "Intel C++ 8.1" to set the directories
-         and default options. In "Include", Add Zlib and Szip 
-         header path(c:\zlib122\include c:\szip\include). 
-         In "Library", Add Zlib and Szip Library Path
-         (c:\zlib122\lib, c:\szip\dll).
-               
-      c. Then click "OK".
+      Go to Tools > Options,  In the left pane, choose
+      "Intel C++", click "General". In the right pane, under 
+      "Compiler selection", choose "Intel C++ 8.1", then click "OK".
          
       2.1.4 Building HDF5 C and C++ Libraries and Tools
 
@@ -1598,8 +1582,7 @@ Note:  1. For Intel Compiler users, Intel 7.x works with MSVS 6.0 and
              hdf5_hl_fortran
              hl_test_image_fortran
              hl_test_lite_fortran
-             hl_test_table_fortran 	 
-   	        
+             hl_test_table_fortran 
     	        
       Select "ok". Select "Build" -> "Build" or "Rebuild All" to
       build debug version of project "all".   			
@@ -1655,7 +1638,7 @@ Note:  1. For Intel Compiler users, Intel 7.x works with MSVS 6.0 and
       
       2.2.3 Change project dependencies of "libtest_fortran"
                
-      Highlight project "libtest_fortran", choose "Project"->
+      Highlight project "libtest_fortran", choose tab "Project"->
       "Project Dependencies", uncheck "libtest".
                
       2.2.4 Convert to Use Intel C++ Project System
@@ -1686,16 +1669,16 @@ Note:  1. For Intel Compiler users, Intel 7.x works with MSVS 6.0 and
     	         
       2.2.6 Test HDF5 Static and High Level Fortran Library
     	
-    	a. Test HDF5 Static Fortran Library
+      a. Test HDF5 Static Fortran Library
     	
-    	Go to directory c:\myHDFstuff\hdf5\fortran\test, Run batch file
-    	testhdf5_fortran.bat with the following two options to test
-    	fortran static library 
+      Go to directory c:\myHDFstuff\hdf5\fortran\test, Run batch file
+      testhdf5_fortran.bat with the following two options to test
+      fortran static library 
     	   
     	   testhdf5_fortran release >> "Your output file name"
     	   testhdf5_fortran debug   >> "Your output file name"
     	   
-    	Check your output files, there should be no "failures" at all.
+      Check your output files, there should be no "failures" at all.
     	           	            	   
       b. Test HDF5 High Level Fortran Library
       
@@ -1718,11 +1701,11 @@ Note: This section is only for users who would like to build and test
       
 Step I: Generate H5Tinit.c using Microsoft Visual C++ 6.0
 
-For users who would like to build and test HDF5 C and C++ library, it 
-is necessary to manually generate H5Tinit.c before going to section II
-step 1(2). Follow the steps below to generate H5Tinit.c manually using
-Microsoft Visual C++ 6.0. We don't guarantee that H5Tinit.c can be 
-sucesessfully created by other compilers.
+For users who would like to build and test HDF5 C and C++ library ONLY, 
+it is necessary to manually generate H5Tinit.c before going to 
+Section II step 1(2). Follow the steps below to generate H5Tinit.c 
+manually using Microsoft Visual C++ 6.0. We don't guarantee that 
+H5Tinit.c can be sucesessfully created by other compilers.
  
  1. Previous step: section II, step 1(1).
  
@@ -1756,7 +1739,7 @@ Note: The users who don't want to build fortran library can skip
  We don't guarantee that these three files can be created sucessfully 
  by other compilers.
  
- 1) Previous step: section II, step 1(1)
+ 1) Previous step: Section II, step 1(1)
 
  2) Follow the steps in Section VIII, Step I to generate H5Tinit.c.
 
@@ -1794,7 +1777,7 @@ Note: The users who don't want to build fortran library can skip
    
      This step will generate H5f90i_gen.h and H5fortran_types.f90 automatically.
     
- 9) Go back to section II to build and test HDF5 Libraries and Tools
+ 9) Go back to Section II, step 1(2) to build and test HDF5 Libraries and Tools
 
 ************************************************************************
 
