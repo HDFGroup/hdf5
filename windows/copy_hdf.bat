@@ -1,6 +1,6 @@
 @REM File Name   : copy_hdf.bat
 @REM Purpose     : Copy all Files in the following formats from Windows to 
-                   approapriate directory: .bat .c .f90 .h .txt .js 
+@REM               approapriate directory: .bat .c .f90 .h .txt .js 
 @REM             : 
 @REM Written By  : Muqun Yang
 @REM Last Update : June 7, 2005 by Fang GUO
