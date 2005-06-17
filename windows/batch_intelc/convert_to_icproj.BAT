@@ -52,8 +52,8 @@ ICProjConvert80  windows\test\cmpd_dset\cmpd_dset.vcproj /IC  >> convert_intel.l
 ICProjConvert80  windows\test\cmpd_dsetdll\cmpd_dsetdll.vcproj /IC  >> convert_intel.log
 ICProjConvert80  windows\test\dangle\dangle.vcproj /IC  >> convert_intel.log
 ICProjConvert80  windows\test\dangledll\dangledll.vcproj /IC  >> convert_intel.log
-ICProjConvert80  windows\test\dt_atomic\dt_atomic.vcproj /IC  >> convert_intel.log
-ICProjConvert80  windows\test\dt_atomicdll\dt_atomicdll.vcproj /IC  >> convert_intel.log
+ICProjConvert80  windows\test\dt_arith\dt_arith.vcproj /IC  >> convert_intel.log
+ICProjConvert80  windows\test\dt_arithdll\dt_arithdll.vcproj /IC  >> convert_intel.log
 ICProjConvert80  windows\test\dsets\dsets.vcproj /IC  >> convert_intel.log
 ICProjConvert80  windows\test\dsetsdll\dsetsdll.vcproj /IC  >> convert_intel.log
 ICProjConvert80  windows\test\dtransform\dtransform.vcproj /IC  >> convert_intel.log

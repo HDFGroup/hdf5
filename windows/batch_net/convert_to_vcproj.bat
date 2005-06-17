@@ -51,8 +51,8 @@ echo ************************************************************ >> convert.log
   convert.js %1\windows\test\cmpd_dsetdll\cmpd_dsetdll.dsp  %1\windows\test\cmpd_dsetdll\cmpd_dsetdll.vcproj  >> convert.log
   convert.js %1\windows\test\dangle\dangle.dsp  %1\windows\test\dangle\dangle.vcproj  >> convert.log
   convert.js %1\windows\test\dangledll\dangledll.dsp  %1\windows\test\dangledll\dangledll.vcproj  >> convert.log
-  convert.js %1\windows\test\dt_atomic\dt_atomic.dsp  %1\windows\test\dt_atomic\dt_atomic.vcproj  >> convert.log
-  convert.js %1\windows\test\dt_atomicdll\dt_atomicdll.dsp  %1\windows\test\dt_atomicdll\dt_atomicdll.vcproj  >> convert.log
+  convert.js %1\windows\test\dt_arith\dt_arith.dsp  %1\windows\test\dt_arith\dt_arith.vcproj  >> convert.log
+  convert.js %1\windows\test\dt_arithdll\dt_arithdll.dsp  %1\windows\test\dt_arithdll\dt_arithdll.vcproj  >> convert.log
   convert.js %1\windows\test\dsets\dsets.dsp  %1\windows\test\dsets\dsets.vcproj  >> convert.log
   convert.js %1\windows\test\dsetsdll\dsetsdll.dsp  %1\windows\test\dsetsdll\dsetsdll.vcproj  >> convert.log
   convert.js %1\windows\test\dtransform\dtransform.dsp  %1\windows\test\dtransform\dtransform.vcproj  >> convert.log
