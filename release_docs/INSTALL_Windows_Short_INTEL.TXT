@@ -27,7 +27,7 @@ Notes:
       2. HDF5 Fortran DLL Libraries is not supported with Intel Fortran
          8.1 integration with Visual C++ .Net 2003 Environment. But 
          Release version of HDF5 Fortran DLL Libraries works with Intel
-         Fortran whilt Debug version doesn't.
+         Fortran while Debug version doesn't.
              
       3. Szip library is different when using Intel compiler.
          You should build Szip source codes with Intel
@@ -80,7 +80,7 @@ Part II. INTEL compiler 8.1 with Visual C++ .Net  2003 Environment
                 
       2.1.1 Open all.dsw
        
-       Notes: all.sln is for command line use only. please open
+       Notes: all.sln is for command line use only. Please open
               all.dsw not all.sln.
 
        Invoke Microsoft Visual C++ .Net 2003.  From the main 
@@ -230,7 +230,7 @@ Part II. INTEL compiler 8.1 with Visual C++ .Net  2003 Environment
       Library using Intel C++ 8.1 Compiler and HDF5 Static and High
       Level Fortran Library using Intel Fortran 8.1 compiler.
     	         
-      2.2.6 Test HDF5 Static and High Level Fortran Library
+      2.2.6 Test HDF5 C/C++ and Static Fortran Library
     	
     	a. Test HDF5 C and C++ Libraries
     	
