@@ -140,7 +140,9 @@ Notes:
    
    4. For users who want to quickly build HDF5 library or do not 
       want to know HDF5 building and installation details, please 
-      read INSATLL_Windows_Short.txt.
+      read INSATLL_Windows_Short_MSVS6.0.txt,
+      INSTALL_Windows_Short_Net.txt or INSTALL_Windows_Short_Intel.txt
+      based on the compiler to be used.
 
    5. For users who would like to build and test HDF5 package from the 
       command line, please read INSATLL_Windows_From_Command_Line.txt.
@@ -1155,7 +1157,7 @@ To use the DLL:
        e) The directories listed in the PATH environment variable.
  
     4. To modify your own application settings, please DO FOLLOW the 
-       "DLL Hints" at section IV "HELPFUL POINTERS".
+       "DLL Hints" at Section IV "HELPFUL POINTERS".
 
 ************************************************************************
 
@@ -1245,7 +1247,7 @@ Warning: When you modify the H5pubconf.h file as described below,
       1.2 Delete HDF5_EXT_ZLIB environment variable if you have
           set it in preconditions.
    
-      1.3 Run-compile HDF5 library according to section II.
+      1.3 Run-compile HDF5 library according to Section II.
 
       When you disable Gzip, you may get the following message
       when building HDF5 libraries:
@@ -1272,7 +1274,7 @@ Warning: When you modify the H5pubconf.h file as described below,
       2.2 Delete HDF5_EXT_SZIP environment variable if you have
           set it in preconditions.
 
-      2.3 Run-compile HDF5 library according to section II.
+      2.3 Run-compile HDF5 library according to Section II.
 
       When you disable Szip, you may get the following message 
       when building HDF5 libraries:
@@ -1285,7 +1287,7 @@ Warning: When you modify the H5pubconf.h file as described below,
    Notes:   
 
    To disable Gzip and Szip at the same time, just follow 1.1~1.2
-   and 2.1~2.2 and run-compile HDF5 library according to section II.
+   and 2.1~2.2 and run-compile HDF5 library according to Section II.
 
    3. Disable Szip encoder
 
@@ -1301,7 +1303,7 @@ Warning: When you modify the H5pubconf.h file as described below,
           The Szip library and header path should also be set up
           accordingly (refer to precondition 6).
    
-      3.2 Run-compile HDF5 library according to section II.
+      3.2 Run-compile HDF5 library according to Section II.
 
 ************************************************************************
 
@@ -1455,14 +1457,14 @@ Preconditions:
 
 3. Testing HDF5 Libraries and Tools. 
 
-Go back to section II, continue with STEP 2 (Testing HDF5 
+Go back to Section II, continue with STEP 2 (Testing HDF5 
 libraries and tools) to test HDF5 C and C++ Libraries.
   
 4. If you want to change some project setting, select the project and
    right click the button to choose Properties; find the similar menu
    there as in Microsoft Visual Studio 6.0.
    
-NOTE:  Please read section V if you do not want to use compression
+NOTE:  Please read Section V if you do not want to use compression
        feature inside HDF5.
              
  ************************************************************************
@@ -1588,7 +1590,7 @@ Notes:  1. For Intel Compiler users, Intel 7.x works with MSVS 6.0 and
       build debug version of project "all".   			
    	     
       2.1.5 Testing HDF5 C and C++ Libraries and Tools
-      Go back to section II, continue with STEP 2(Testing HDF5 
+      Go back to Section II, continue with STEP 2(Testing HDF5 
       libraries and tools) to test HDF5 C and C++ Libraries.
        
   2.2 Intel Fortran Compiler 8.1 under MSVS C++ .Net 2003 Environment
@@ -1707,7 +1709,7 @@ Section II step 1(2). Follow the steps below to generate H5Tinit.c
 manually using Microsoft Visual C++ 6.0. We don't guarantee that 
 H5Tinit.c can be sucesessfully created by other compilers.
  
- 1. Previous step: section II, step 1(1).
+ 1. Previous step: Section II, step 1(1).
  
  2. Extra steps:
 	1) Open c:\myHDFstuff\hdf5\windows\misc\typegen\typegen.dsw.
@@ -1718,7 +1720,7 @@ H5Tinit.c can be sucesessfully created by other compilers.
 		
 	4) type H5Tinit.exe >H5Tinit.c
 		
-	5) Go back to section II, continue with step 1(2).
+	5) Go back to Section II, continue with step 1(2).
 
 Step II: Generate H5f90i_gen.h and H5fortran_types.f90 using Compaq 
          Visual Fortran 6.6c
@@ -1728,7 +1730,7 @@ Note: The users who don't want to build fortran library can skip
 
  For users who would like to build and test HDF5 with Fortran library.
  It is necessary to manually generate the following three files with 
- the given compiler before go to section II:
+ the given compiler before go to Section II:
 
        Files to be Generated    Compiler to be Used 
 
