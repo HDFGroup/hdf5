@@ -100,6 +100,7 @@ extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 #define TESTING(WHAT)	{printf("Testing %-62s",WHAT); fflush(stdout);}
 #define PASSED()	{puts(" PASSED");fflush(stdout);}
 #define H5_FAILED()	{puts("*FAILED*");fflush(stdout);}
+#define H5_WARNING()	{puts("*WARNING*");fflush(stdout);}
 #define SKIPPED()	{puts(" -SKIP-");fflush(stdout);}
 #define TEST_ERROR      {H5_FAILED(); AT(); goto error;}
 

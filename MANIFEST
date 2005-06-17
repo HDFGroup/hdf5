@@ -1013,7 +1013,7 @@
 ./test/dangle.c
 ./test/deflate.h5
 ./test/dsets.c
-./test/dt_atomic.c
+./test/dt_arith.c
 ./test/dtypes.c
 ./test/dtransform.c
 ./test/enum.c
@@ -1822,8 +1822,8 @@
 ./windows/test/cmpd_dsetdll/cmpd_dsetdll.dsp
 ./windows/test/dangle/dangle.dsp
 ./windows/test/dangledll/dangledll.dsp
-./windows/test/dt_atomic/dt_atomic.dsp
-./windows/test/dt_atomicdll/dt_atomicdll.dsp
+./windows/test/dt_arith/dt_arith.dsp
+./windows/test/dt_arithdll/dt_arithdll.dsp
 ./windows/test/dsets/dsets.dsp
 ./windows/test/dsetsdll/dsetsdll.dsp
 ./windows/test/dtransform/dtransform.dsp

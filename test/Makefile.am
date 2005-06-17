@@ -30,7 +30,7 @@ check_SCRIPTS = $(TEST_SCRIPT)
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
 TEST_PROG=testhdf5 lheap ohdr stab gheap cache btree2 blocktrack sheap \
-           pool hyperslab istore bittests dt_atomic \
+           pool hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset extend external links unlink big mtime     \
            fillval mount flush1 flush2 enum \
            set_extent ttsafe stream_test \
@@ -78,9 +78,9 @@ timings _timings: testmeta
 # the temporary file name in ways that the makefile is not aware of.
 MOSTLYCLEANFILES=cmpd_dset.h5 compact_dataset.h5 dataset.h5 extend.h5 istore.h5\
             tfile[1-4].h5 th5s[1-3].h5 lheap.h5 ohdr.h5 stab[1-2].h5 \
-            extern_[1-3].h5 extern_[1-4][ab].raw gheap[0-4].h5 dt_atomic[1-2]\
+            extern_[1-3].h5 extern_[1-4][ab].raw gheap[0-4].h5 dt_arith[1-2]\
             links.h5 links[1-3].h5 big.data big[0-9][0-9][0-9][0-9][0-9].h5  \
-            dtypes[1-8].h5 dt_atomic[1-2].h5 tattr.h5 tselect.h5 mtime.h5 \
+            dtypes[1-8].h5 dt_arith[1-2].h5 tattr.h5 tselect.h5 mtime.h5 \
             unlink.h5 unicode.h5 \
             fillval_[0-9].h5 fillval.raw mount_[0-9].h5 testmeta.h5 ttime.h5 \
             trefer[1-3].h5 tvltypes.h5 tvlstr.h5 tvlstr2.h5 flush.h5         \
