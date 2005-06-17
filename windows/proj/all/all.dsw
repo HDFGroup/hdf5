@@ -360,12 +360,6 @@ Package=<4>
     Project_Dep_Name sheapdll
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name dt_atomic
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name dt_atomicdll
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name pool
     End Project Dependency
     Begin Project Dependency
@@ -382,6 +376,12 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name h5reparttst
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name dt_arith
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name dt_arithdll
     End Project Dependency
 }}}
 
@@ -735,7 +735,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "dt_atomic"=..\..\test\dt_atomic\dt_atomic.dsp - Package Owner=<4>
+Project: "dt_arith"=..\..\test\dt_arith\dt_arith.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -753,7 +753,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "dt_atomicdll"=..\..\test\dt_atomicdll\dt_atomicdll.dsp - Package Owner=<4>
+Project: "dt_arithdll"=..\..\test\dt_arithdll\dt_arithdll.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
