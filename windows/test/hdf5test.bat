@@ -93,10 +93,10 @@ bittests%2\%1\bittests%2
 
 echo.
 echo ============================
-echo Testing dt_atomic 
+echo Testing dt_arith 
 echo ============================
 
-dt_atomic%2\%1\dt_atomic%2
+dt_arith%2\%1\dt_arith%2
 
 echo.
 echo ============================
