@@ -258,7 +258,8 @@ H5_DLL htri_t H5S_hyper_intersect_block (H5S_t *space, hsize_t *start, hsize_t *
 H5_DLL herr_t H5S_hyper_adjust_u(H5S_t *space, const hsize_t *offset);
 H5_DLL herr_t H5S_hyper_adjust_s(H5S_t *space, const hssize_t *offset);
 H5_DLL herr_t H5S_hyper_move(H5S_t *space, const hssize_t *offset);
-H5_DLL herr_t H5S_hyper_normalize_offset(H5S_t *space);
+H5_DLL herr_t H5S_hyper_normalize_offset(H5S_t *space, hssize_t *old_offset);
+H5_DLL herr_t H5S_hyper_denormalize_offset(H5S_t *space, const hssize_t *old_offset);
 
 /* Operations on selection iterators */
 H5_DLL herr_t H5S_select_iter_init(H5S_sel_iter_t *iter, const H5S_t *space, size_t elmt_size);
