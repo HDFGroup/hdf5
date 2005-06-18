@@ -2014,7 +2014,7 @@ H5G_open_oid(H5G_entry_t *ent, hid_t dxpl_id)
     /* Open the object, making sure it's a group */
     if (NULL==(grp = H5FL_CALLOC(H5G_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    if (NULL==(grp->shared = H5FL_CALLOC(H5G_t)))
+    if (NULL==(grp->shared = H5FL_CALLOC(H5G_shared_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Copy over (take ownership) of the group entry object */
