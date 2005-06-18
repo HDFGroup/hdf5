@@ -3671,7 +3671,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static htri_t
-H5S_hyper_intersect_block_helper (const H5S_hyper_span_info_t *spans, hssize_t *offset, hsize_t *start, hsize_t *end)
+H5S_hyper_intersect_block_helper (const H5S_hyper_span_info_t *spans, hsize_t *start, hsize_t *end)
 {
     H5S_hyper_span_t *curr;     /* Pointer to current span in 1st span tree */
     htri_t status;              /* Status from recursive call */
@@ -3681,7 +3681,6 @@ H5S_hyper_intersect_block_helper (const H5S_hyper_span_info_t *spans, hssize_t *
 
     /* Sanity check */
     assert(spans);
-    assert(offset);
     assert(start);
     assert(end);
 
@@ -3691,11 +3690,11 @@ H5S_hyper_intersect_block_helper (const H5S_hyper_span_info_t *spans, hssize_t *
     /* Iterate over the spans in the tree */
     while(curr!=NULL) {
         /* Check for span entirely before block */
-        if(((hssize_t)curr->high+*offset)<(hssize_t)*start)
+        if(curr->high < *start)
             /* Advance to next span in this dimension */
             curr=curr->next;
         /* If this span is past the end of the block, then we're done in this dimension */
-        else if(((hssize_t)curr->low+*offset)>(hssize_t)*end)
+        else if(curr->low > *end)
             HGOTO_DONE(FALSE)
         /* block & span overlap */
         else {
@@ -3703,7 +3702,7 @@ H5S_hyper_intersect_block_helper (const H5S_hyper_span_info_t *spans, hssize_t *
                 HGOTO_DONE(TRUE)
             else {
                 /* Recursively check spans in next dimension down */
-                if((status=H5S_hyper_intersect_block_helper(curr->down,offset+1,start+1,end+1))<0)
+                if((status=H5S_hyper_intersect_block_helper(curr->down,start+1,end+1))<0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_BADSELECT, FAIL, "can't perform hyperslab intersection check");
 
                 /* If there is a span intersection in the down dimensions, the span trees overlap */
@@ -3763,7 +3762,7 @@ H5S_hyper_intersect_block (H5S_t *space, hsize_t *start, hsize_t *end)
             HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, FAIL, "dataspace does not have span tree");
 
     /* Perform the span-by-span intersection check */
-    if((ret_value=H5S_hyper_intersect_block_helper(space->select.sel_info.hslab->span_lst,space->select.offset,start,end))<0)
+    if((ret_value=H5S_hyper_intersect_block_helper(space->select.sel_info.hslab->span_lst,start,end))<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADSELECT, FAIL, "can't perform hyperslab intersection check");
 
 done:
@@ -4106,20 +4105,22 @@ done:
     "Normalize" a hyperslab selection by adjusting it's coordinates by the
     amount of the selection offset.
  USAGE
-    herr_t H5S_hyper_normalize_offset(space)
+    herr_t H5S_hyper_normalize_offset(space, old_offset)
         H5S_t *space;           IN/OUT: Pointer to dataspace to move
+        hssize_t *old_offset;   OUT: Pointer to space to store old offset
  RETURNS
     Non-negative on success, negative on failure
  DESCRIPTION
-    Moves the hyperslab selection by the selection offset and then resets
-    the selection offset to zeros.
+    Copies the current selection offset into the array provided, then
+    inverts the selection offset, subtracts the offset from the hyperslab
+    selection and resets the offset to zero.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_hyper_normalize_offset(H5S_t *space)
+H5S_hyper_normalize_offset(H5S_t *space, hssize_t *old_offset)
 {
     unsigned u;                         /* Local index variable */
     herr_t      ret_value=SUCCEED;       /* Return value */
@@ -4131,22 +4132,69 @@ H5S_hyper_normalize_offset(H5S_t *space)
     /* Check for 'all' selection, instead of a hyperslab selection */
     /* (Technically, this check shouldn't be in the "hyperslab" routines...) */
     if(H5S_GET_SELECT_TYPE(space)!=H5S_SEL_ALL) {
-        /* Invert the selection offset */
-        for(u=0; u<space->extent.rank; u++)
-            space->select.offset[u] =- space->select.offset[u];
+        /* Copy & invert the selection offset */
+        for(u=0; u<space->extent.rank; u++) {
+            old_offset[u] = space->select.offset[u];
+            space->select.offset[u] = -space->select.offset[u];
+        } /* end for */
 
         /* Call the existing 'adjust' routine */
         if(H5S_hyper_adjust_s(space, space->select.offset)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADSELECT, FAIL, "can't perform hyperslab normalization");
 
         /* Zero out the selection offset */
-        for(u=0; u<space->extent.rank; u++)
-            space->select.offset[u] = 0;
+        HDmemset(space->select.offset, 0, sizeof(hssize_t) * space->extent.rank);
     } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_normalize_offset() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_hyper_denormalize_offset
+ PURPOSE
+    "Denormalize" a hyperslab selection by reverse adjusting it's coordinates
+    by the amount of the former selection offset.
+ USAGE
+    herr_t H5S_hyper_normalize_offset(space, old_offset)
+        H5S_t *space;           IN/OUT: Pointer to dataspace to move
+        hssize_t *old_offset;   IN: Pointer to old offset array
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Subtracts the old offset from the current selection (canceling out the
+    effect of the "normalize" routine), then restores the old offset into
+    the dataspace.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_hyper_denormalize_offset(H5S_t *space, const hssize_t *old_offset)
+{
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5S_hyper_denormalize_offset);
+
+    assert(space);
+
+    /* Check for 'all' selection, instead of a hyperslab selection */
+    /* (Technically, this check shouldn't be in the "hyperslab" routines...) */
+    if(H5S_GET_SELECT_TYPE(space)!=H5S_SEL_ALL) {
+        /* Call the existing 'adjust' routine */
+        if(H5S_hyper_adjust_s(space, old_offset)<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADSELECT, FAIL, "can't perform hyperslab normalization");
+
+        /* Copy the selection offset over */
+        HDmemcpy(space->select.offset, old_offset, sizeof(hssize_t) * space->extent.rank);
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}   /* H5S_hyper_denormalize_offset() */
 
 
 /*--------------------------------------------------------------------------

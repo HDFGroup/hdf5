@@ -133,6 +133,11 @@
 #define SPACE11_DIM2    100
 #define SPACE11_NPOINTS 4
 
+/* Information for offsets w/chunks test #2 */
+#define SPACE12_RANK	        1
+#define SPACE12_DIM0            25
+#define SPACE12_CHUNK_DIM0      5
+
 /* Location comparison function */
 int compare_size_t(const void *s1, const void *s2);
 
@@ -6741,6 +6746,108 @@ test_select_hyper_chunk_offset(void)
 
 /****************************************************************
 **
+**  test_select_hyper_chunk_offset2(): Tests selections on dataspace,
+**      another test to verify that offsets for hyperslab selections are
+**      working in chunked datasets.
+** 
+****************************************************************/
+static void 
+test_select_hyper_chunk_offset2(void)
+{
+    hid_t       file, dataset;  /* handles */
+    hid_t       dataspace;   
+    hid_t       memspace; 
+    hid_t       dcpl;           /* Dataset creation property list */
+    herr_t      status;                             
+    unsigned    data_out[SPACE12_DIM0]; /* output buffer */
+    unsigned    data_in[SPACE12_CHUNK_DIM0]; /* input buffer */
+    hsize_t     dims[SPACE12_RANK]={SPACE12_DIM0};              /* Dimension size */
+    hsize_t     chunk_dims[SPACE12_RANK]={SPACE12_CHUNK_DIM0};  /* Chunk size */
+    hsize_t     start[SPACE12_RANK];    /* Start of hyperslab */
+    hsize_t     count[SPACE12_RANK];    /* Size of hyperslab */
+    hssize_t    offset[SPACE12_RANK];   /* hyperslab offset in the file */
+    unsigned    u, v;           /* Local index variables */
+
+    /* Output message about test being performed */
+    MESSAGE(6, ("Testing more hyperslab selections using offsets in chunked datasets\n"));
+
+    /* Initialize data to write out */
+    for (u = 0; u < SPACE12_DIM0; u++)
+        data_out[u] = u;
+
+    /* Create the file */
+    file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fcreate");
+
+    /* Create dataspace */
+    dataspace = H5Screate_simple(SPACE12_RANK, dims, NULL);
+    CHECK(dataspace, FAIL, "H5Screate_simple");
+
+    /* Create dataset creation property list */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate");
+
+    /* Set chunk sizes */
+    status = H5Pset_chunk(dcpl, SPACE12_RANK, chunk_dims);
+    CHECK(status, FAIL, "H5Pset_chunk");
+
+    /* Create dataset */
+    dataset = H5Dcreate(file, DATASETNAME, H5T_NATIVE_UINT, dataspace, dcpl);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    /* Close DCPL */
+    status = H5Pclose(dcpl);
+    CHECK(status, FAIL, "H5Pclose");
+
+    /* Write out entire dataset */
+    status = H5Dwrite(dataset, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_out);
+    CHECK(status, FAIL, "H5Dclose");
+
+    /* Create memory dataspace (same size as a chunk) */
+    memspace = H5Screate_simple(SPACE12_RANK, chunk_dims, NULL);
+    CHECK(dataspace, FAIL, "H5Screate_simple");
+
+    /* 
+     * Define hyperslab in the file dataspace. 
+     */
+    start[0] = 0;
+    count[0] = SPACE12_CHUNK_DIM0;
+    status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, start, NULL, count, NULL);
+    CHECK(status, FAIL, "H5Sselect_hyperslab");
+
+    /* Loop through retrieving data from file, checking it against data written */
+    for(u = 0; u < SPACE12_DIM0; u += SPACE12_CHUNK_DIM0) {
+        /* Set the offset of the file selection */
+        offset[0] = u;
+        status = H5Soffset_simple(dataspace, offset);
+        CHECK(status, FAIL, "H5Soffset_simple");
+        
+        /* Read in buffer of data */
+        status = H5Dread(dataset, H5T_NATIVE_UINT, memspace, dataspace,
+                H5P_DEFAULT, data_in);
+        CHECK(status, FAIL, "H5Dread");
+
+        /* Check data read in */
+        for(v = 0; v < SPACE12_CHUNK_DIM0; v++)
+            if(data_out[u + v] != data_in[v])
+                TestErrPrintf("Error! data_out[%u]=%u, data_in[%u]=%u\n",(unsigned)(u + v), data_out[u + v], v, data_in[v]);
+    } /* end for */
+
+    status = H5Dclose(dataset);
+    CHECK(status, FAIL, "H5Dclose");
+
+    status = H5Sclose(dataspace);
+    CHECK(status, FAIL, "H5Sclose");
+
+    status = H5Sclose(memspace);
+    CHECK(status, FAIL, "H5Sclose");
+
+    status = H5Fclose(file);
+    CHECK(status, FAIL, "H5Fclose");
+}   /* test_select_hyper_chunk_offset2() */
+
+/****************************************************************
+**
 **  test_select_bounds(): Tests selection bounds on dataspaces,
 **      both with and without offsets.
 ** 
@@ -7083,6 +7190,7 @@ test_select(void)
 
     /* Test using selection offset on hyperslab in chunked dataset */
     test_select_hyper_chunk_offset();
+    test_select_hyper_chunk_offset2();
 
     /* Test selection bounds with & without offsets */
     test_select_bounds();

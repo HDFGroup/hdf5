@@ -290,6 +290,11 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fixed bug with hyperslab selections that use selection offsets and
+            operate on chunked datasets going into infinite loop or dumping
+            core.  QAK - 2005/06/17
+        - Corrected memory leak and possible corruption when opening a group.
+            QAK - 2005/06/17
         - Added check for opaque datatype tags being too long (check against
             H5T_OPAQUE_TAG_MAX, currently set to 256).  QAK - 2005/06/14
         - Fixed various errors in maintaining names for open objects in the

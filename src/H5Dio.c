@@ -2358,6 +2358,8 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
     H5S_t *tmp_mspace=NULL;     /* Temporary memory dataspace */
     H5S_t *equiv_mspace=NULL;   /* Equivalent memory dataspace */
     hbool_t equiv_mspace_init=0;/* Equivalent memory dataspace was created */
+    hssize_t old_offset[H5O_LAYOUT_NDIMS];  /* Old selection offset */
+    hbool_t file_space_normalized = FALSE;  /* File dataspace was normalized */
     hid_t f_tid=(-1);           /* Temporary copy of file datatype for iteration */
     hbool_t iter_init=0;        /* Selection iteration info has been initialized */
     unsigned f_ndims;           /* The number of dimensions of the file's dataspace */
@@ -2403,6 +2405,16 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
 
     if(H5S_get_simple_extent_dims(file_space, fm->f_dims, NULL)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality")
+
+    /* Normalize hyperslab selections by adjusting them by the offset */
+    /* (It might be worthwhile to normalize both the file and memory dataspaces
+     * before any (contiguous, chunked, etc) file I/O operation, in order to
+     * speed up hyperslab calculations by removing the extra checks and/or
+     * additions involving the offset and the hyperslab selection -QAK)
+     */
+    if(H5S_hyper_normalize_offset(file_space, old_offset)<0)
+        HGOTO_ERROR (H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
+    file_space_normalized = TRUE;
 
     /* Decide the number of chunks in each dimension*/
     for(u=0; u<f_ndims; u++) {
@@ -2564,6 +2576,10 @@ done:
         if(H5I_dec_ref(f_tid)<0)
             HDONE_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
     } /* end if */
+    if(file_space_normalized) {
+        if(H5S_hyper_denormalize_offset(file_space, old_offset)<0)
+            HGOTO_ERROR (H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
+    } /* end if */
    
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_create_chunk_map() */
@@ -2720,12 +2736,6 @@ H5D_create_chunk_file_map_hyper(const fm_map *fm)
             if(H5S_hyper_convert(tmp_fchunk)<0) {
                 (void)H5S_close(tmp_fchunk);
                 HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to convert selection to span trees")
-            } /* end if */
-
-            /* Normalize hyperslab selections by adjusting them by the offset */
-            if(H5S_hyper_normalize_offset(tmp_fchunk)<0) {
-                (void)H5S_close(tmp_fchunk);
-                HGOTO_ERROR (H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
             } /* end if */
 
             /* "AND" temporary chunk and current chunk */
