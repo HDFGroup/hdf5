@@ -23,6 +23,8 @@
 #ifndef _h5cpputil_h
 #define _h5cpputil_h
 
+#include "h5test.h"
+
 #ifndef H5_NO_NAMESPACE
 using namespace H5;
 #endif
@@ -51,7 +53,19 @@ template <class Type1, class Type2>
         cerr << "*** UNEXPECTED VALUE from " << where << " should be "
 	     << value << ", but is " << x << " at line " << line
 	     << " in " << file_name << endl;
-        H5Eprint (stderr);
+	IncTestNumErrs();
+    }
+}
+
+template <class Type1, class Type2>
+    void verify_val(Type1 x, Type2 value, const char* msg, const char* file_name, int line)
+{
+    if (x != value)
+    {
+        cerr << "*** UNEXPECTED VALUE: " << file_name << ":line " << line 
+	     << ":" << msg << " different: " << x << ", should be " << value 
+	     << endl;
+	IncTestNumErrs();
     }
 }
 
