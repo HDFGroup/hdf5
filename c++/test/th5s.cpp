@@ -113,32 +113,29 @@ test_h5s_basic(void)
     hsize_t		dims3[H5S_MAX_RANK+1];
     hsize_t		tmax[4];
 
-    /* Output message about test being performed */
+    // Output message about test being performed
     MESSAGE(5, ("Testing Dataspace Manipulation\n"));
 
     try 
     { // beginning of first try block
 
-	/* Create file - removed this since the following operations don't
-	need the file to be opened */
-
 	// Create simple dataspace sid1
 	DataSpace sid1 (SPACE1_RANK, dims1 );
 
 	// Get simple extent npoints of the dataspace sid1 and verify it
-	hssize_t	n;	 	/* Number of dataspace elements */
+	hssize_t	n;	 	// Number of dataspace elements
 	n = sid1.getSimpleExtentNpoints();
 	verify_val((long)n, (long)(SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3),
 	   "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
 
 	// Get the logical rank of dataspace sid1 and verify it
-	int	rank;		/* Logical rank of dataspace	*/
+	int	rank;		// Logical rank of dataspace
 	rank = sid1.getSimpleExtentNdims();
 	verify_val(rank, SPACE1_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__);
 
 	// Retrieves dimension size of dataspace sid1 and verify it
-	int ndims;		/* Number of dimensions		*/
-	hsize_t	tdims[4];	/* Dimension array to test with */
+	int ndims;		// Number of dimensions
+	hsize_t	tdims[4];	// Dimension array to test with
 	ndims = sid1.getSimpleExtentDims( tdims );
 	verify_val(HDmemcmp(tdims, dims1, SPACE1_RANK * sizeof(unsigned)), 0,
 	   "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
@@ -240,7 +237,7 @@ test_h5s_basic(void)
     {
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
-}				/* test_h5s_basic() */
+}   // test_h5s_basic()
 
 /*-------------------------------------------------------------------------
  *  
@@ -265,8 +262,7 @@ test_h5s_basic(void)
 static void 
 test_h5s_scalar_write(void)
 {
-
-    /* Output message about test being performed */
+    // Output message about test being performed
     MESSAGE(5, ("Testing Scalar Dataspace Writing\n"));
 
     try
@@ -274,30 +270,30 @@ test_h5s_scalar_write(void)
 	// Create file
 	H5File fid1(DATAFILE, H5F_ACC_TRUNC);
 
-	/* Create scalar dataspace */
+	// Create scalar dataspace
 	DataSpace sid1(SPACE3_RANK, NULL);
 
 	//n = H5Sget_simple_extent_npoints(sid1);
-	hssize_t	n;	 	/* Number of dataspace elements */
+	hssize_t	n;	 	// Number of dataspace elements
 	n = sid1.getSimpleExtentNpoints();
 	verify_val((long)n, 1, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
 
-	int	rank;		/* Logical rank of dataspace	*/
+	int	rank;		// Logical rank of dataspace
 	rank = sid1.getSimpleExtentNdims();
 	verify_val(rank, SPACE3_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__);
 
 	// Retrieves dimension size of dataspace sid1 and verify it
-	int ndims;		/* Number of dimensions		*/
-	hsize_t	tdims[4];	/* Dimension array to test with */
+	int ndims;		// Number of dimensions
+	hsize_t	tdims[4];	// Dimension array to test with
 	ndims = sid1.getSimpleExtentDims( tdims );
 	verify_val(ndims, 0, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
 
-	/* Verify extent type */
-	H5S_class_t ext_type;   /* Extent type */
+	// Verify extent type
+	H5S_class_t ext_type;   // Extent type
 	ext_type = sid1.getSimpleExtentType();
 	verify_val(ext_type, H5S_SCALAR, "DataSpace::getSimpleExtentType", __LINE__, __FILE__);
 
-	/* Create a dataset */
+	// Create a dataset
 	DataSet dataset = fid1.createDataSet("Dataset1", PredType::NATIVE_UINT,sid1);
 
 	dataset.write(&space3_data, PredType::NATIVE_UINT);
@@ -306,7 +302,7 @@ test_h5s_scalar_write(void)
     {
 	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
-}				/* test_h5s_scalar_write() */
+}   // test_h5s_scalar_write()
 
 /*-------------------------------------------------------------------------
  *  
@@ -331,17 +327,17 @@ test_h5s_scalar_write(void)
 static void 
 test_h5s_scalar_read(void)
 {
-    hsize_t		tdims[4];	/* Dimension array to test with */
+    hsize_t		tdims[4];	// Dimension array to test with
 
-    /* Output message about test being performed */
+    // Output message about test being performed
     MESSAGE(5, ("Testing Scalar Dataspace Reading\n"));
 
     try
     {
-	/* Create file */
+	// Create file
 	H5File fid1(DATAFILE, H5F_ACC_RDWR);
 
-	/* Create a dataset */
+	// Create a dataset
 	DataSet dataset = fid1.openDataSet("Dataset1");
 
 	DataSpace sid1 = dataset.getSpace();
@@ -357,7 +353,7 @@ test_h5s_scalar_read(void)
 	ndims = sid1.getSimpleExtentDims(tdims);
 	verify_val(ndims, 0, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
 
-	unsigned      	rdata;      	/* Scalar data read in 		*/
+	unsigned      	rdata;      	// Scalar data read in
 	dataset.read(&rdata, PredType::NATIVE_UINT);
 	verify_val(rdata, space3_data, "DataSet::read", __LINE__, __FILE__);
     }   // end of try block
@@ -367,7 +363,7 @@ test_h5s_scalar_read(void)
 	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
     
-}				/* test_h5s_scalar_read() */
+}   // test_h5s_scalar_read()
 
 /*-------------------------------------------------------------------------
  *  
@@ -392,8 +388,7 @@ test_h5s_scalar_read(void)
 static void 
 test_h5s_null(void)
 {
-
-    /* Output message about test being performed */
+    // Output message about test being performed
     MESSAGE(5, ("Testing Null Dataspace Writing\n"));
 
     try
@@ -401,11 +396,10 @@ test_h5s_null(void)
 	// Create file
 	H5File fid1(DATAFILE, H5F_ACC_TRUNC);
 
-	/* Create scalar dataspace */
+	// Create scalar dataspace
 	DataSpace sid1(H5S_NULL);
 
-	//n = H5Sget_simple_extent_npoints(sid1);
-	hssize_t	n;	 	/* Number of dataspace elements */
+	hssize_t	n;	 	// Number of dataspace elements
 	n = sid1.getSimpleExtentNpoints();
 	verify_val((long)n, 0, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
 
@@ -423,7 +417,7 @@ test_h5s_null(void)
     {
 	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
-}				/* test_h5s_null() */
+}   // test_h5s_null()
 
 /*-------------------------------------------------------------------------
  *  
@@ -449,16 +443,15 @@ test_h5s_null(void)
 static void 
 test_h5s_compound_scalar_write(void)
 {
-
-    /* Output message about test being performed */
+    // Output message about test being performed
     MESSAGE(5, ("Testing Compound Dataspace Writing\n"));
 
     try
     {
-	/* Create file */
+	// Create file
 	H5File fid1(DATAFILE, H5F_ACC_TRUNC);
 
-	/* Create the compound datatype.  */
+	// Create the compound datatype.
 	CompType tid1(sizeof(struct space4_struct));
 	space4_field1_off=HOFFSET(struct space4_struct, c1);
 	tid1.insertMember(SPACE4_FIELDNAME1, space4_field1_off,
@@ -473,7 +466,7 @@ test_h5s_compound_scalar_write(void)
 	tid1.insertMember(SPACE4_FIELDNAME4, space4_field4_off,
 		    PredType::NATIVE_SCHAR);
 
-	/* Create scalar dataspace */
+	// Create scalar dataspace
 	DataSpace sid1(SPACE3_RANK, NULL);
 
 	// Get the number of dataspace elements
@@ -484,11 +477,11 @@ test_h5s_compound_scalar_write(void)
 	int ndims = sid1.getSimpleExtentNdims();
 	verify_val(ndims, SPACE3_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__);
 
-	hsize_t		tdims[4];	/* Dimension array to test with */
+	hsize_t		tdims[4];	// Dimension array to test with
 	ndims = sid1.getSimpleExtentDims(tdims);
 	verify_val(ndims, 0, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
 
-	/* Create a dataset */
+	// Create a dataset
 	DataSet dataset = fid1.createDataSet("Dataset1", tid1, sid1);
 
 	dataset.write(&space4_data, tid1);
@@ -498,8 +491,7 @@ test_h5s_compound_scalar_write(void)
 	// all the exceptions caused by negative returned values by C APIs
 	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
-
-}				/* test_h5s_compound_scalar_write() */
+}   // test_h5s_compound_scalar_write()
 
 /*-------------------------------------------------------------------------
  *  
@@ -525,16 +517,16 @@ test_h5s_compound_scalar_write(void)
 static void 
 test_h5s_compound_scalar_read(void)
 {
-    hsize_t		tdims[4];	/* Dimension array to test with */
+    hsize_t		tdims[4];	// Dimension array to test with
 
-    /* Output message about test being performed */
+    // Output message about test being performed
     MESSAGE(5, ("Testing Compound Dataspace Reading\n"));
     try
     {
-	/* Create file */
+	// Create file
 	H5File fid1(DATAFILE, H5F_ACC_RDWR);
 
-	/* Create a dataset */
+	// Create a dataset
 	DataSet dataset = fid1.openDataSet("Dataset1");
 
 	DataSpace sid1 = dataset.getSpace();
@@ -553,7 +545,7 @@ test_h5s_compound_scalar_read(void)
 	// Get the datatype of this dataset.
 	CompType type(dataset);
      
-	struct space4_struct rdata; 	/* Scalar data read in 		*/
+	struct space4_struct rdata; 	// Scalar data read in
 	dataset.read(&rdata, type);
 
 	// Verify read data
@@ -567,14 +559,14 @@ test_h5s_compound_scalar_read(void)
 		<< space4_data.f << ", read_data4.f=" << rdata.f << endl;
             TestErrPrintf("scalar data different: space4_data.c1=%c, read_data4.c1=%c\n",
 		space4_data.c1, rdata.c2);
-	} /* end if */
+	} // end if
     }   // end of try block
     catch (Exception E)
     {
 	// all the exceptions caused by negative returned values by C APIs
 	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
-}				/* test_h5s_compound_scalar_read() */
+}   // test_h5s_compound_scalar_read()
 
 /*-------------------------------------------------------------------------
  *  
@@ -593,16 +585,16 @@ test_h5s_compound_scalar_read(void)
 void 
 test_h5s(void)
 {
-    /* Output message about test being performed */
+    // Output message about test being performed
     MESSAGE(5, ("Testing Dataspaces\n"));
 
-    test_h5s_basic();		/* Test basic H5S code */
-    test_h5s_scalar_write();	/* Test scalar H5S writing code */
-    test_h5s_scalar_read();	/* Test scalar H5S reading code */
-    test_h5s_null();		/* Test null H5S code  */
-    test_h5s_compound_scalar_write();	/* Test compound datatype scalar H5S writing code */
-    test_h5s_compound_scalar_read();	/* Test compound datatype scalar H5S reading code */
-} /* test_h5s() */
+    test_h5s_basic();		// Test basic H5S code
+    test_h5s_scalar_write();	// Test scalar H5S writing code
+    test_h5s_scalar_read();	// Test scalar H5S reading code
+    test_h5s_null();		// Test null H5S code
+    test_h5s_compound_scalar_write();	// Test compound datatype scalar H5S writing code
+    test_h5s_compound_scalar_read();	// Test compound datatype scalar H5S reading code
+}   // test_h5s()
 
 
 /*-------------------------------------------------------------------------
@@ -623,5 +615,5 @@ void
 cleanup_h5s(void)
 {
     remove(DATAFILE.c_str());
-}
+}   // cleanup_h5s
 
