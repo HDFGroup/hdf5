@@ -37,6 +37,11 @@ FROM SASN100,
 1) cd <hdf5>
 
 2) CC=/usr/community/hdf5/tflop-mpich/bin/mpicc \
+      ./configure --host=tflops --with-zlib=/usr/community/hdf5/ZLIB
+
+   Alternately, you may specify the host explicitly:
+
+   CC=/usr/community/hdf5/tflop-mpich/bin/mpicc \
       ./configure --host=i386-intel-osf1 --with-zlib=/usr/community/hdf5/ZLIB
 
    Skip the "--with-zlib=..." option if you do not wish to include the zlib
@@ -112,7 +117,11 @@ FROM SASN100,
 
 1) cd <hdf5>
 
-2) ./configure --host=i386-intel-osf1 --with-zlib=/usr/community/hdf5/ZLIB
+2) ./configure --host=tflops --with-zlib=/usr/community/hdf5/ZLIB
+
+   Alternately, you may specify the host explicitly:
+
+   ./configure --host=i386-intel-osf1 --with-zlib=/usr/community/hdf5/ZLIB
 
    Skip the "--with-zlib=..." option if you do not wish to include the zlib
    compression feature.  Without the zlib compression feature, the library
