@@ -369,6 +369,8 @@ static int without_hardware_g = 0;
 void some_dummy_func(float x);
 static hbool_t overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits);
 static int my_isnan(dtype_t type, void *val);
+static int my_isinf(dtype_t type, int endian, unsigned char *val, size_t size, 
+        size_t mpos, size_t msize, size_t epos, size_t esize);
 
 /*-------------------------------------------------------------------------
  * Function:	fpe_handler
@@ -2378,6 +2380,43 @@ my_isnan(dtype_t type, void *val)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	my_isinf
+ *
+ * Purpose:	Determines whether VAL points to +/-infinity.
+ *
+ * Return:	TRUE or FALSE
+ *
+ * Programmer:	Raymond Lu
+ *              Monday, June 20, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+my_isinf(dtype_t type, int endian, unsigned char *val, size_t size, 
+        size_t mpos, size_t msize, size_t epos, size_t esize)
+{
+    unsigned char *bits;
+    int retval = 0;
+    int i;
+    ssize_t ret1=0, ret2=0;
+
+    bits = (unsigned char*)calloc(1, size);
+    for (i=0; i<size; i++)
+        bits[size-(i+1)] = *(val + ENDIAN(size, i));
+
+    if((ret1=H5T_bit_find(bits, mpos, msize, H5T_BIT_LSB, 1))<0 && 
+       (ret2=H5T_bit_find(bits, epos, esize, H5T_BIT_LSB, 0))<0)
+        retval = 1;
+
+    free(bits);
+
+    return retval;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_conv_flt_1
  *
  * Purpose:	Test conversion of floating point values from SRC to
@@ -2414,14 +2453,15 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
     unsigned char	*buf = NULL;		/*buffer for conversion	*/
     unsigned char	*saved = NULL;		/*original values	*/
     char		str[256];		/*hello string		*/
+    void		*aligned=NULL;		/*aligned buffer	*/
     float		hw_f;			/*hardware-converted 	*/
     double		hw_d;			/*hardware-converted	*/
-    void		*aligned=NULL;		/*aligned buffer	*/
 #if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
     long double		hw_ld;			/*hardware-converted	*/
 #endif
     unsigned char	*hw=NULL;		/*ptr to hardware-conv'd*/
     int			underflow;		/*underflow occurred	*/
+    int			overflow;		/*overflow occurred	*/
     int 		uflow=0;		/*underflow debug counters*/
     size_t		j, k;			/*counters		*/
     int			endian;			/*machine endianess	*/
@@ -2430,6 +2470,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
     size_t		src_esize;		/* Source type's exponent size */
     size_t		dst_epos;		/* Destination type's exponent position */
     size_t		dst_esize;		/* Destination type's exponent size */
+    size_t		dst_mpos;		/* Destination type's mantissa position */
     size_t		dst_msize;		/* Destination type's mantissa size */
     size_t		src_nbits;		/* source length in bits */
     size_t		dst_nbits;		/* dst length in bits */
@@ -2548,7 +2589,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
     dst_nbits = H5Tget_precision(dst); /* not 8*dst_size, esp on J90 - QAK */
     dst_ebias=H5Tget_ebias(dst);
     H5Tget_fields(src,NULL,&src_epos,&src_esize,NULL,NULL);
-    H5Tget_fields(dst,NULL,&dst_epos,&dst_esize,NULL,&dst_msize);
+    H5Tget_fields(dst,NULL,&dst_epos,&dst_esize,&dst_mpos,&dst_msize);
     endian = H5Tget_order(H5T_NATIVE_FLOAT);
 
     /* Allocate buffers */
@@ -2651,6 +2692,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 hw_f = (float)(*((double*)aligned));
                 hw = (unsigned char*)&hw_f;
                 underflow = HDfabs(*((double*)aligned)) < FLT_MIN;
+                overflow = HDfabs(*((double*)aligned)) > FLT_MAX;
             } else if (FLT_DOUBLE==dst_type) {
                 hw_d = *((double*)aligned);
                 hw = (unsigned char*)&hw_d;
@@ -2667,10 +2709,12 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 hw_f = *((long double*)aligned); 
                 hw = (unsigned char*)&hw_f;
                 underflow = HDfabsl(*((long double*)aligned)) < FLT_MIN;
+                overflow = HDfabsl(*((long double*)aligned)) > FLT_MAX;
             } else if (FLT_DOUBLE==dst_type) {
                 hw_d = *((long double*)aligned); 
                 hw = (unsigned char*)&hw_d;
                 underflow = HDfabsl(*((long double*)aligned)) < DBL_MIN;
+                overflow = HDfabsl(*((long double*)aligned)) > DBL_MAX;
             } else {
                 hw_ld = *((long double*)aligned);
                 hw = (unsigned char*)&hw_ld;
@@ -2740,6 +2784,10 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
          * If the src number is smaller than the dst MIN float number,
          * consider it okay if the converted sw and hw dst are both
          * less than or equal to the dst MIN float number.
+         * If overflow happens when the src value is greater than 
+         * the maximum dst value, the library assign INFINITY to dst.
+         * This might be different from what the compiler does, i.e.
+         * the SGI compiler assigns the dst's maximal value.
          */
         {
             double		check_mant[2];
@@ -2751,6 +2799,9 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 if (underflow &&
                         HDfabsf(x) <= FLT_MIN && HDfabsf(hw_f) <= FLT_MIN)
                     continue;	/* all underflowed, no error */
+                if (overflow && my_isinf(dst_type, endian, buf+j*sizeof(float), 
+                        dst_size, dst_mpos, dst_msize, dst_epos, dst_esize))
+                    continue;	/* all overflowed, no error */
                 check_mant[0] = HDfrexpf(x, check_expo+0);
                 check_mant[1] = HDfrexpf(hw_f, check_expo+1);
             } else if (FLT_DOUBLE==dst_type) {
@@ -2759,6 +2810,9 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 if (underflow &&
                         HDfabs(x) <= DBL_MIN && HDfabs(hw_d) <= DBL_MIN)
                     continue;	/* all underflowed, no error */
+                if (overflow && my_isinf(dst_type, endian, buf+j*sizeof(double), 
+                        dst_size, dst_mpos, dst_msize, dst_epos, dst_esize))
+                    continue;	/* all overflowed, no error */
                 check_mant[0] = HDfrexp(x, check_expo+0);
                 check_mant[1] = HDfrexp(hw_d, check_expo+1);
 #if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
