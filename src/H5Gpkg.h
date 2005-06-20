@@ -140,6 +140,8 @@ H5_DLL herr_t H5G_stab_find(H5G_entry_t *grp_ent, const char *name,
 			     H5G_entry_t *obj_ent/*out*/, hid_t dxpl_id);
 H5_DLL herr_t H5G_stab_insert(H5G_entry_t *grp_ent, const char *name,
 			       H5G_entry_t *obj_ent, hid_t dxpl_id);
+H5_DLL herr_t H5G_stab_insert_name(H5G_entry_t *loc, H5G_entry_t *obj,
+        const char *name);
 H5_DLL herr_t H5G_stab_delete(H5F_t *f, hid_t dxpl_id, haddr_t btree_addr, haddr_t heap_addr);
 H5_DLL herr_t H5G_stab_remove(H5G_entry_t *grp_ent, const char *name, hid_t dxpl_id);
 

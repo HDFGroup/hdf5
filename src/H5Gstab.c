@@ -33,8 +33,6 @@
 H5FL_BLK_EXTERN(str_buf);
 
 /* Private prototypes */
-static herr_t H5G_insert_name(H5G_entry_t *loc, H5G_entry_t *obj,
-        const char *name);
 
 
 /*-------------------------------------------------------------------------
@@ -171,12 +169,12 @@ H5G_stab_find(H5G_entry_t *grp_ent, const char *name,
     /* change OBJ_ENT only if found */
     else {
         if (obj_ent) {
-            /* do a NULL copy, since the obj_ent name will be constructed in H5G_insert_name() */
+            /* do a NULL copy, since the obj_ent name will be constructed in H5G_stab_insert_name() */
             if (H5G_ent_copy(obj_ent, &(udata.ent),H5G_COPY_NULL)<0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to copy entry");
 
             /* insert the name into the symbol entry OBJ_ENT */
-            if (H5G_insert_name( grp_ent, obj_ent, name ) < 0)
+            if (H5G_stab_insert_name( grp_ent, obj_ent, name ) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot insert name");
         } /* end if */
     } /* end else */
@@ -225,7 +223,7 @@ H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent, hi
 	HGOTO_ERROR(H5E_SYM, H5E_LINK, FAIL, "interfile hard links are not allowed");
 
     /* insert the name into the symbol entry OBJ_ENT */
-    if(H5G_insert_name(grp_ent, obj_ent, name) < 0)
+    if(H5G_stab_insert_name(grp_ent, obj_ent, name) < 0)
        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot insert name");
 
     /* initialize data to pass through B-tree */
@@ -293,7 +291,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5G_insert_name
+ * Function: H5G_stab_insert_name
  *
  * Purpose: Insert a name into the symbol entry OBJ, located at LOC
  *
@@ -309,13 +307,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t 
-H5G_insert_name(H5G_entry_t *loc, H5G_entry_t *obj, const char *name)
+herr_t 
+H5G_stab_insert_name(H5G_entry_t *loc, H5G_entry_t *obj, const char *name)
 {
     size_t  name_len;           /* Length of name to append */
     herr_t  ret_value = SUCCEED;       
  
-    FUNC_ENTER_NOAPI_NOINIT(H5G_insert_name);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_stab_insert_name);
 
     assert(loc);
     assert(obj);

@@ -210,7 +210,7 @@ H5D_init_interface(void)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
 
     /* Get the number of properties in the class */
-    if(H5P_get_nprops_pclass(xfer_pclass,&nprops)<0)
+    if(H5P_get_nprops_pclass(xfer_pclass,&nprops,FALSE)<0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't query number of properties")
 
     /* Assume that if there are properties in the class, they are the default ones */
@@ -302,7 +302,7 @@ H5D_init_interface(void)
        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
         
     /* Get the number of properties in the class */
-    if(H5P_get_nprops_pclass(crt_pclass,&nprops)<0)
+    if(H5P_get_nprops_pclass(crt_pclass,&nprops,FALSE)<0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't query number of properties")
 
     /* Assume that if there are properties in the class, they are the default ones */
@@ -2095,6 +2095,10 @@ done:
  *      Nat Furrer and James Laird
  *      June 7, 2004
  *      Added checked_filters flag
+ *
+ *      Peter X. Cao
+ *      May 09, 2005
+ *      Add property to create intermediate groups
  *	
  *-------------------------------------------------------------------------
  */
@@ -2373,7 +2377,7 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
      * "H5G_entry_t" object to the group this dataset is being initially
      * created in.
      */
-    if (H5G_insert(loc, name, &new_dset->ent, dxpl_id) < 0)
+    if (H5G_insert(loc, name, &new_dset->ent, dxpl_id, dc_plist) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to name dataset")
 
     /* Add the dataset to the list of opened objects in the file */

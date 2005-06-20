@@ -491,6 +491,7 @@ H5_DLL herr_t H5Tclose(hid_t type_id);
 H5_DLL htri_t H5Tequal(hid_t type1_id, hid_t type2_id);
 H5_DLL herr_t H5Tlock(hid_t type_id);
 H5_DLL herr_t H5Tcommit(hid_t loc_id, const char *name, hid_t type_id);
+H5_DLL herr_t H5Tcommit_expand(hid_t loc_id, const char *name, hid_t type_id, hid_t tcpl_id, hid_t tapl_id);
 H5_DLL htri_t H5Tcommitted(hid_t type_id);
 H5_DLL herr_t H5Tencode(hid_t obj_id, void *buf, size_t *nalloc);
 H5_DLL hid_t H5Tdecode(const void *buf);

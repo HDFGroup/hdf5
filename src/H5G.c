@@ -105,6 +105,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
+#include "H5Pprivate.h"         /* Property lists                       */
 
 /* Local macros */
 #define H5G_INIT_HEAP		8192
@@ -120,6 +121,7 @@
 #define H5G_TARGET_NORMAL	0x0000
 #define H5G_TARGET_SLINK	0x0001
 #define H5G_TARGET_MOUNT	0x0002
+#define H5G_CRT_INTMD_GROUP	0x0004
 
 /* Local typedefs */
 
@@ -165,7 +167,8 @@ H5FL_DEFINE(H5G_shared_t);
 H5FL_BLK_EXTERN(str_buf);
 
 /* Private prototypes */
-static H5G_t *H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint, hid_t dxpl_id);
+static H5G_t *H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint, 
+                                hid_t dxpl_id, hid_t gcpl_id, hid_t gapl_id);
 #ifdef NOT_YET
 static H5G_t *H5G_reopen(H5G_t *grp);
 #endif /* NOT_YET */
@@ -241,7 +244,8 @@ H5Gcreate(hid_t loc_id, const char *name, size_t size_hint)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name given");
     
     /* Create the group */
-    if (NULL == (grp = H5G_create(loc, name, size_hint, H5AC_dxpl_id)))
+    if (NULL == (grp = H5G_create(loc, name, size_hint, H5AC_dxpl_id,
+            H5P_GROUP_CREATE_DEFAULT, H5P_DEFAULT)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group");
     if ((ret_value = H5I_register(H5I_GROUP, grp)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group");
@@ -254,6 +258,81 @@ done:
 
     FUNC_LEAVE_API(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gcreate_expand
+ *
+ * Purpose:	Creates a new group relative to LOC_ID and gives it the
+ *		specified NAME, and creation property list GCPL_ID and access
+ *              property list GAPL_ID. 
+ *
+ *		The optional SIZE_HINT specifies how much file space to
+ *		reserve to store the names that will appear in this
+ *		group. If a non-positive value is supplied for the SIZE_HINT
+ *		then a default size is chosen.
+ *
+ *              Given the default setting, H5Gcreate_expand() will have the
+ *              same function of H5Gcreate() 
+ *
+ * See also:	H5Gcreate(), H5Dcreate_expand()
+ *
+ * Errors:
+ *
+ * Return:	Success:	The object ID of a new, empty group open for
+ *				writing.  Call H5Gclose() when finished with
+ *				the group.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:  Peter Cao	
+ *	        May 08, 2005	
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Gcreate_expand(hid_t loc_id, const char *name, size_t size_hint, hid_t gcpl_id, hid_t gapl_id)
+{
+    H5G_entry_t		   *loc = NULL;
+    H5G_t		   *grp = NULL;
+    hid_t		    ret_value;
+
+    FUNC_ENTER_API(H5Gcreate_expand, FAIL)
+
+    /* Check arguments */
+    if (NULL==(loc=H5G_loc (loc_id)))
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if (!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name given")
+    
+    /* Check group creation property list */
+    if(H5P_DEFAULT == gcpl_id)
+        gcpl_id = H5P_GROUP_CREATE_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(gcpl_id, H5P_GROUP_CREATE))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group create property list")
+
+#ifdef LATER
+    /* Check the group access property list */
+    if(H5P_DEFAULT == gapl_id)
+        gapl_id = H5P_GROUP_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(gapl_id, H5P_GROUP_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
+#endif /* LATER */
+
+    if (NULL == (grp = H5G_create(loc, name, size_hint, H5AC_dxpl_id, gcpl_id, gapl_id)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
+    if ((ret_value = H5I_register(H5I_GROUP, grp)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
+
+done:
+    if(ret_value<0) {
+        if(grp!=NULL)
+            H5G_close(grp);
+    } /* end if */
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Gcreate_expand() */
 
 
 /*-------------------------------------------------------------------------
@@ -970,7 +1049,8 @@ done:
 static herr_t
 H5G_init_interface(void)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t          ret_value=SUCCEED;       /* Return value */
+    H5P_genclass_t  *crt_pclass;
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_init_interface);
 
@@ -988,6 +1068,23 @@ H5G_init_interface(void)
     H5G_register_type(H5G_GROUP,   H5G_isa,  "group");
     H5G_register_type(H5G_DATASET, H5D_isa,  "dataset");
     H5G_register_type(H5G_LINK,    H5G_link_isa,  "link");
+
+    /* ========== group Creation Property Class Initialization ============*/
+    assert(H5P_CLS_GROUP_CREATE_g!=-1);
+
+    /* Get the pointer to group creation class */
+    if(NULL == (crt_pclass = H5I_object(H5P_CLS_GROUP_CREATE_g)))
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
+
+    /* Put group creation property insertion code here when it's needed. */
+    /* (See example in H5D_init_interface() ) */
+
+    /* Only register the default property list if it hasn't been created yet */
+    if(H5P_LST_GROUP_CREATE_g==(-1)) {
+        /* Register the default group creation property list */
+        if((H5P_LST_GROUP_CREATE_g = H5P_create_id(crt_pclass))<0)
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't insert property into class")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1494,11 +1591,35 @@ H5G_namei(const H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/
             case H5G_NAMEI_INSERT:
                 if(!last_comp) {
                     if (H5G_stab_find(grp_ent, H5G_comp_g, obj_ent/*out*/, dxpl_id )<0) {
-                        /*
-                         * Component was not found in the current symbol table, possibly
-                         * because GRP_ENT isn't a symbol table.
-                         */
-                        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found");
+                        /* If an intermediate group doesn't exist & flag is set, create the group */
+                        if (target & H5G_CRT_INTMD_GROUP) {
+                            H5G_entry_t new_ent;
+
+                            /* Reset group entry */
+                            HDmemset(&new_ent, 0, sizeof(H5G_entry_t));
+
+                            /* Create the group entry */
+                            if (H5G_stab_create(grp_ent->file, dxpl_id, 0, &new_ent/*out*/) < 0)
+                                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create grp");
+
+                            /* Insert new group into current group's symbol table */
+                            if (H5G_stab_insert(grp_ent, H5G_comp_g, &new_ent, dxpl_id))
+                                HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert intermediate group");
+
+                            /* Close new group entry */
+                            if (H5O_close(&new_ent) < 0)
+                                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close");
+
+                            /* Copy newly created group's entry, so we can traverse into it */
+                            if (H5G_ent_copy(obj_ent, &new_ent, H5G_COPY_NULL)<0)
+                                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to copy entry");
+
+                            /* Insert the name into the new symbol entry */
+                            if (H5G_stab_insert_name(grp_ent, obj_ent, H5G_comp_g ) < 0)
+                                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot insert name");
+                        }
+                        else
+                            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found");
                     }
                 } /* end if */
                 else {
@@ -1771,10 +1892,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5G_t *
-H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint, hid_t dxpl_id)
+H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint,
+                  hid_t dxpl_id, hid_t gcpl_id, hid_t UNUSED gapl_id)
 {
     H5G_t	*grp = NULL;	/*new group			*/
     H5F_t       *file = NULL;   /* File new group will be in    */
+    H5P_genplist_t  *gc_plist;  /* Property list created */
     unsigned    stab_init=0;    /* Flag to indicate that the symbol table was created successfully */
     H5G_t	*ret_value;	/* Return value */
 
@@ -1783,6 +1906,10 @@ H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint, hid_t dxpl_id)
     /* check args */
     assert(loc);
     assert(name && *name);
+    assert(gcpl_id != H5P_DEFAULT);
+#ifdef LATER
+    assert(gapl_id != H5P_DEFAULT);
+#endif /* LATER */
 
     /* create an open group */
     if (NULL==(grp = H5FL_CALLOC(H5G_t)))
@@ -1799,8 +1926,12 @@ H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint, hid_t dxpl_id)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create grp");
     stab_init=1;    /* Indicate that the symbol table information is valid */
     
+    /* Get the property list */
+    if (NULL == (gc_plist = H5I_object(gcpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list")
+
     /* insert child name into parent */
-    if(H5G_insert(loc,name,&(grp->ent), dxpl_id)<0)
+    if(H5G_insert(loc,name,&(grp->ent), dxpl_id, gc_plist)<0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, NULL, "can't insert group");
 
     /* Add group to list of open objects in file */
@@ -2219,12 +2350,17 @@ done:
  *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
  *      Added `id to name' support.
  *
+ *      Peter Cao
+ *      May 09, 2005
+ *      Add flag 'crt_intmd_group' to support creating missing groups
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_insert(H5G_entry_t *loc, const char *name, H5G_entry_t *ent, hid_t dxpl_id)
+H5G_insert(H5G_entry_t *loc, const char *name, H5G_entry_t *ent, hid_t dxpl_id, H5P_genplist_t *oc_plist)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
+    unsigned    target=H5G_TARGET_NORMAL;
 
     FUNC_ENTER_NOAPI(H5G_insert, FAIL);
 
@@ -2233,10 +2369,21 @@ H5G_insert(H5G_entry_t *loc, const char *name, H5G_entry_t *ent, hid_t dxpl_id)
     assert (name && *name);
     assert (ent);
 
+    /* Check for intermediate group creation flag present */
+    if(oc_plist != NULL) {
+        unsigned crt_intmd_group;
+
+        if(H5P_get(oc_plist, H5G_CRT_INTERMEDIATE_GROUP_NAME, &crt_intmd_group) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for creating missing groups");
+
+        if (crt_intmd_group > 0)
+            target |= H5G_CRT_INTMD_GROUP;
+    } /* end if */
+
     /*
      * Lookup and insert the name -- it shouldn't exist yet.
      */
-    if (H5G_namei(loc, name, NULL, NULL, NULL, H5G_TARGET_NORMAL, NULL, H5G_NAMEI_INSERT, ent, dxpl_id)<0)
+    if (H5G_namei(loc, name, NULL, NULL, NULL, target, NULL, H5G_NAMEI_INSERT, ent, dxpl_id)<0)
 	HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "already exists");
 
     /*
@@ -2547,7 +2694,7 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
             if (H5G_namei(cur_loc, norm_cur_name, NULL, NULL, &cur_obj, namei_flags, NULL, H5G_NAMEI_TRAVERSE, NULL, dxpl_id)<0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "source object not found");
             cur_obj_init=1;     /* Indicate that the cur_obj struct is initialized */
-            if (H5G_insert (new_loc, norm_new_name, &cur_obj, dxpl_id)<0)
+            if (H5G_insert (new_loc, norm_new_name, &cur_obj, dxpl_id, 0)<0)
                 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to create new name/link for object");
             break;
 

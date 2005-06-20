@@ -84,14 +84,24 @@ typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data);
 #define H5P_FILE_CREATE 		(H5OPEN H5P_CLS_FILE_CREATE_g)
 #define H5P_FILE_ACCESS 		(H5OPEN H5P_CLS_FILE_ACCESS_g)
 #define H5P_DATASET_CREATE     		(H5OPEN H5P_CLS_DATASET_CREATE_g)
+#define H5P_DATASET_ACCESS     		(H5OPEN H5P_CLS_DATASET_ACCESS_g)
 #define H5P_DATASET_XFER       		(H5OPEN H5P_CLS_DATASET_XFER_g)
 #define H5P_MOUNT       		(H5OPEN H5P_CLS_MOUNT_g)
+#define H5P_GROUP_CREATE 		(H5OPEN H5P_CLS_GROUP_CREATE_g)
+#define H5P_GROUP_ACCESS 		(H5OPEN H5P_CLS_GROUP_ACCESS_g)
+#define H5P_DATATYPE_CREATE 		(H5OPEN H5P_CLS_DATATYPE_CREATE_g)
+#define H5P_DATATYPE_ACCESS 		(H5OPEN H5P_CLS_DATATYPE_ACCESS_g)
 H5_DLLVAR hid_t H5P_CLS_NO_CLASS_g;
 H5_DLLVAR hid_t H5P_CLS_FILE_CREATE_g;
 H5_DLLVAR hid_t H5P_CLS_FILE_ACCESS_g;
 H5_DLLVAR hid_t H5P_CLS_DATASET_CREATE_g;
+H5_DLLVAR hid_t H5P_CLS_DATASET_ACCESS_g;
 H5_DLLVAR hid_t H5P_CLS_DATASET_XFER_g;
 H5_DLLVAR hid_t H5P_CLS_MOUNT_g;
+H5_DLLVAR hid_t H5P_CLS_GROUP_CREATE_g;
+H5_DLLVAR hid_t H5P_CLS_GROUP_ACCESS_g;
+H5_DLLVAR hid_t H5P_CLS_DATATYPE_CREATE_g;
+H5_DLLVAR hid_t H5P_CLS_DATATYPE_ACCESS_g;
 
 /*
  * The library created default property lists
@@ -100,17 +110,28 @@ H5_DLLVAR hid_t H5P_CLS_MOUNT_g;
  *
  */
 #define H5P_NO_CLASS_DEFAULT   		(H5OPEN H5P_LST_NO_CLASS_g)
+#define H5P_OBJ_CLASS_DEFAULT  		(H5OPEN H5P_LST_OBJ_CLASS_g)
 #define H5P_FILE_CREATE_DEFAULT		(H5OPEN H5P_LST_FILE_CREATE_g)
 #define H5P_FILE_ACCESS_DEFAULT 	(H5OPEN H5P_LST_FILE_ACCESS_g)
 #define H5P_DATASET_CREATE_DEFAULT  	(H5OPEN H5P_LST_DATASET_CREATE_g)
+#define H5P_DATASET_ACCESS_DEFAULT  	(H5OPEN H5P_LST_DATASET_ACCESS_g)
 #define H5P_DATASET_XFER_DEFAULT   	(H5OPEN H5P_LST_DATASET_XFER_g)
 #define H5P_MOUNT_DEFAULT       	(H5OPEN H5P_LST_MOUNT_g)
+#define H5P_GROUP_CREATE_DEFAULT	(H5OPEN H5P_LST_GROUP_CREATE_g)
+#define H5P_GROUP_ACCESS_DEFAULT 	(H5OPEN H5P_LST_GROUP_ACCESS_g)
+#define H5P_DATATYPE_CREATE_DEFAULT	(H5OPEN H5P_LST_DATATYPE_CREATE_g)
+#define H5P_DATATYPE_ACCESS_DEFAULT 	(H5OPEN H5P_LST_DATATYPE_ACCESS_g)
 H5_DLLVAR hid_t H5P_LST_NO_CLASS_g;
 H5_DLLVAR hid_t H5P_LST_FILE_CREATE_g;
 H5_DLLVAR hid_t H5P_LST_FILE_ACCESS_g;
 H5_DLLVAR hid_t H5P_LST_DATASET_CREATE_g;
+H5_DLLVAR hid_t H5P_LST_DATASET_ACCESS_g;
 H5_DLLVAR hid_t H5P_LST_DATASET_XFER_g;
 H5_DLLVAR hid_t H5P_LST_MOUNT_g;
+H5_DLLVAR hid_t H5P_LST_GROUP_CREATE_g;
+H5_DLLVAR hid_t H5P_LST_GROUP_ACCESS_g;
+H5_DLLVAR hid_t H5P_LST_DATATYPE_CREATE_g;
+H5_DLLVAR hid_t H5P_LST_DATATYPE_ACCESS_g;
 
 /* Public functions */
 H5_DLL hid_t H5Pcreate_class(hid_t parent, const char *name, 
@@ -305,6 +326,9 @@ H5_DLL herr_t H5Pget_small_data_block_size(hid_t fapl_id, hsize_t *size/*out*/);
 H5_DLL herr_t H5Premove_filter(hid_t plist_id, H5Z_filter_t filter);
 H5_DLL herr_t H5Pset_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t op, void* operate_data);
 H5_DLL herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, void** operate_data);
+
+H5_DLL herr_t H5Pset_create_intermediate_group(hid_t plist_id, unsigned crt_intmd);
+H5_DLL herr_t H5Pget_create_intermediate_group(hid_t plist_id, unsigned *crt_intmd /*out*/);
 
 #ifdef __cplusplus
 }

@@ -28,10 +28,12 @@
 #include "H5FOprivate.h"	/* File objects				*/
 #include "H5Iprivate.h"		/* IDs					*/
 #include "H5Oprivate.h"		/* Object headers			*/
+#include "H5Pprivate.h"         /* Property lists                       */
 #include "H5Tpkg.h"		/* Datatypes				*/
 
 /* Static local functions */
-static herr_t H5T_commit(H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id);
+static herr_t H5T_commit(H5G_entry_t *loc, const char *name, H5T_t *type,
+    hid_t dxpl_id, hid_t tcpl_id, hid_t tapl_id);
 
 
 /*--------------------------------------------------------------------------
@@ -90,7 +92,66 @@ H5Tcommit(hid_t loc_id, const char *name, hid_t type_id)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
     /* Commit the type */
-    if (H5T_commit (loc, name, type, H5AC_dxpl_id)<0)
+    if (H5T_commit(loc, name, type, H5AC_dxpl_id, H5P_DATATYPE_CREATE_DEFAULT,
+            H5P_DEFAULT)<0)
+	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tcommit_expand
+ *
+ * Purpose:	Save a transient datatype to a file and turn the type handle
+ *		into a named, immutable type.
+ *              Add property to create missing groups along the path.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Peter Cao	
+ *              May 17, 2005 
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tcommit_expand(hid_t loc_id, const char *name, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
+{
+    H5G_entry_t	*loc = NULL;
+    H5T_t	*type = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
+    
+    FUNC_ENTER_API(H5Tcommit_expand, FAIL)
+
+    /* Check arguments */
+    if (NULL==(loc=H5G_loc (loc_id)))
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if (!name || !*name)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+    if (NULL==(type=H5I_object_verify(type_id, H5I_DATATYPE)))
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == tcpl_id)
+        tcpl_id = H5P_DATATYPE_CREATE_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(tcpl_id, H5P_DATATYPE_CREATE))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not datatype create property list")
+
+#ifdef LATER
+    /* Get correct property list */
+    if(H5P_DEFAULT == tcpl_id)
+        tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(tapl_id, H5P_DATATYPE_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not datatype access property list")
+#endif /* LATER */
+
+    /* Commit the type */
+    if (H5T_commit(loc, name, type, H5AC_dxpl_id, tcpl_id, tapl_id)<0)
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
 done:
@@ -110,20 +171,29 @@ done:
  *              Monday, June  1, 1998
  *
  * Modifications:
+ *              Added datatype creation & access property lists
+ *              Peter Cao	
+ *              May 17, 2005 
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id)
+H5T_commit(H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id,
+    hid_t tcpl_id, hid_t UNUSED tapl_id)
 {
     H5F_t	*file = NULL;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    H5P_genplist_t  *tc_plist;          /* Property list created */
+    herr_t      ret_value=SUCCEED;      /* Return value */
     
     FUNC_ENTER_NOAPI_NOINIT(H5T_commit)
 
     HDassert (loc);
     HDassert (name && *name);
     HDassert (type);
+    HDassert (tcpl_id != H5P_DEFAULT);
+#ifdef LATER
+    HDassert (tapl_id != H5P_DEFAULT);
+#endif /* LATER */
 
     /*
      * Check arguments.  We cannot commit an immutable type because H5Tclose()
@@ -156,8 +226,14 @@ H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id)
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to create datatype object header")
     if (H5O_modify (&(type->ent), H5O_DTYPE_ID, 0, H5O_FLAG_CONSTANT, H5O_UPDATE_TIME, type, dxpl_id)<0)
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to update type header message")
-    if (H5G_insert (loc, name, &(type->ent), dxpl_id)<0)
+
+    /* Get the property list */
+    if (NULL == (tc_plist = H5I_object(tcpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list")
+
+    if (H5G_insert (loc, name, &(type->ent), dxpl_id, tc_plist)<0)
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to name datatype")
+
     type->shared->state = H5T_STATE_OPEN;
     type->shared->fo_count=1;
 

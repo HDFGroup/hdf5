@@ -45,7 +45,7 @@ H5_DLL herr_t H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
 H5_DLL herr_t H5P_remove(hid_t plist_id, H5P_genplist_t *plist, const char *name);
 H5_DLL htri_t H5P_exist_plist(H5P_genplist_t *plist, const char *name);
 H5_DLL char *H5P_get_class_name(H5P_genclass_t *pclass);
-H5_DLL herr_t H5P_get_nprops_pclass(H5P_genclass_t *pclass, size_t *nprops);
+H5_DLL herr_t H5P_get_nprops_pclass(H5P_genclass_t *pclass, size_t *nprops, hbool_t recurse);
 H5_DLL herr_t H5P_register(H5P_genclass_t *pclass, const char *name, size_t size,
             void *def_value, H5P_prp_create_func_t prp_create, H5P_prp_set_func_t prp_set,
             H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_delete,
@@ -58,7 +58,7 @@ H5_DLL herr_t H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id,
 H5_DLL herr_t H5P_set_vlen_mem_manager(H5P_genplist_t *plist,
         H5MM_allocate_t alloc_func, void *alloc_info, H5MM_free_t free_func,
         void *free_info);
-H5_DLL herr_t H5P_is_fill_value_defined(const struct H5O_fill_t *fill,
+H5_DLL herr_t H5P_is_fill_value_defined(const H5O_fill_t *fill,
         H5D_fill_value_t *status);
 
 /* *SPECIAL* Don't make more of these! -QAK */

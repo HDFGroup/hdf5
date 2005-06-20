@@ -244,7 +244,7 @@ H5F_init_interface(void)
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
 
     /* Get the number of properties in the class */
-    if(H5P_get_nprops_pclass(crt_pclass,&nprops)<0)
+    if(H5P_get_nprops_pclass(crt_pclass,&nprops,FALSE)<0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't query number of properties")
 
     /* Assume that if there are properties in the class, they are the default ones */
@@ -301,7 +301,7 @@ H5F_init_interface(void)
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
 
     /* Get the number of properties in the class */
-    if(H5P_get_nprops_pclass(acs_pclass,&nprops)<0)
+    if(H5P_get_nprops_pclass(acs_pclass,&nprops,FALSE)<0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't query number of properties")
 
     /* Assume that if there are properties in the class, they are the default ones */
@@ -387,7 +387,7 @@ H5F_init_interface(void)
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
 
     /* Get the number of properties in the class */
-    if(H5P_get_nprops_pclass(mnt_pclass,&nprops)<0)
+    if(H5P_get_nprops_pclass(mnt_pclass,&nprops,FALSE)<0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't query number of properties")
 
     /* Assume that if there are properties in the class, they are the default ones */

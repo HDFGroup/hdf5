@@ -699,6 +699,7 @@ H5T_init_interface(void)
     hsize_t     dim[1]={1};             /* Dimension info for array datatype */
     herr_t	status;
     unsigned    copied_dtype=1;         /* Flag to indicate whether datatype was copied or allocated (for error cleanup) */
+    H5P_genclass_t  *crt_pclass;        /* Property list class for datatype creation properties */
     herr_t	ret_value=SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT(H5T_init_interface);
@@ -1258,6 +1259,24 @@ H5T_init_interface(void)
     if (status<0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to register conversion function(s)");
     
+    /* ========== Datatype Creation Property Class Initialization ============*/
+    assert(H5P_CLS_DATATYPE_CREATE_g!=-1);
+
+    /* Get the pointer to group creation class */
+    if(NULL == (crt_pclass = H5I_object(H5P_CLS_DATATYPE_CREATE_g)))
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
+
+    /* Register datatype creation property class properties here.  See similar
+     * code in H5D_init_interface(), etc. for example.
+     */
+
+    /* Only register the default property list if it hasn't been created yet */
+    if(H5P_LST_DATATYPE_CREATE_g==(-1)) {
+        /* Register the default datatype creation property list */
+        if((H5P_LST_DATATYPE_CREATE_g = H5P_create_id(crt_pclass))<0)
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't insert property into class")
+    } /* end if */
+
 done:
     /* General cleanup */
     if (compound!=NULL)

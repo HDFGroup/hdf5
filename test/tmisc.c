@@ -245,7 +245,7 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 #define MISC21_CHUNK_DIM0       2048
 #define MISC21_CHUNK_DIM1       2048
 
-/* Definitions for misc. test #21 */
+/* Definitions for misc. test #22 */
 #define MISC22_FILE             "tmisc22.h5"
 #define MISC22_DSET_NAME        "Dataset"
 #define MISC22_SPACE_RANK       2
@@ -253,6 +253,9 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 #define MISC22_CHUNK_DIM1       512
 #define MISC22_SPACE_DIM0       639
 #define MISC22_SPACE_DIM1       1308
+
+/* Definitions for misc. test #23 */
+#define MISC23_FILE             "tmisc23.h5"
 
 /****************************************************************
 **
@@ -3705,6 +3708,239 @@ test_misc22(void)
 
 /****************************************************************
 **
+**  test_misc23(): Test intermediate group creation.
+**
+****************************************************************/
+static void
+test_misc23(void)
+{
+    herr_t      status;
+    hsize_t     dims[] = {10};
+    hid_t       file_id=0, group_id=0, type_id=0, space_id=0,
+                tmp_id=0, create_id=H5P_DEFAULT, access_id=H5P_DEFAULT;
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing intermediate group creation\n"));
+
+    /* Create a new file using default properties. */
+    file_id = H5Fcreate(MISC23_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file_id, FAIL, "H5Fcreate");
+
+
+    /* Build some infrastructure */
+    group_id = H5Gcreate(file_id, "/A", 0);
+    CHECK(group_id, FAIL, "H5Gcreate");
+
+    space_id = H5Screate_simple(1, dims, NULL);
+    CHECK(space_id, FAIL, "H5Screate_simple");
+
+    type_id = H5Tcopy( H5T_STD_I32BE);
+    CHECK(type_id, FAIL, "H5Tcopy");
+
+
+    /**********************************************************************
+    * test the old APIs 
+    **********************************************************************/
+
+    H5E_BEGIN_TRY {
+        tmp_id = H5Gcreate(file_id, "/A/B00a/grp", 0);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Gcreate");
+
+
+    tmp_id = H5Gcreate(file_id, "/A/grp", 0);
+    CHECK(tmp_id, FAIL, "H5Gcreate");
+
+    status = H5Gclose(tmp_id);
+    CHECK(status, FAIL, "H5Gclose");
+
+
+    H5E_BEGIN_TRY {
+        tmp_id = H5Dcreate(file_id, "/A/B00c/dset", type_id, space_id, create_id);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Dcreate");
+
+
+    tmp_id = H5Dcreate(file_id, "/A/dset", type_id, space_id, create_id);
+    CHECK(tmp_id, FAIL, "H5Dcreate");
+
+    status = H5Dclose(tmp_id);
+    CHECK(status, FAIL, "H5Dclose");
+
+    /**********************************************************************
+    * test H5Gcreate_expand() 
+    **********************************************************************/
+
+    /* Create group creation property list */
+    create_id = H5Pcreate(H5P_GROUP_CREATE);
+    CHECK(create_id, FAIL, "H5Pcreate");
+
+    /* Set flag for intermediate group creation */
+    status = H5Pset_create_intermediate_group(create_id, TRUE);
+    CHECK(status, FAIL, "H5Pset_create_intermediate_group");
+
+
+    tmp_id = H5Gcreate_expand(file_id, "/A/B01/grp", 0, create_id, access_id);
+    CHECK(tmp_id, FAIL, "H5Gcreate_expand");
+
+    status = H5Gclose(tmp_id);
+    CHECK(status, FAIL, "H5Gclose");
+
+
+    tmp_id = H5Gcreate_expand(file_id, "/A/B02/C02/grp", 0, create_id, access_id);
+    CHECK(tmp_id, FAIL, "H5Gcreate_expand");
+
+    status = H5Gclose(tmp_id);
+    CHECK(status, FAIL, "H5Gclose");
+
+
+    tmp_id = H5Gcreate_expand(group_id, "B03/grp/", 0, create_id, access_id);
+    CHECK(tmp_id, FAIL, "H5Gcreate_expand");
+
+    status = H5Gclose(tmp_id);
+    CHECK(status, FAIL, "H5Gclose");
+
+
+    if ( (tmp_id = H5Gcreate_expand(group_id, "/A/B04/grp/", 0, create_id, access_id)) < 0)
+    CHECK(tmp_id, FAIL, "H5Gcreate_expand");
+
+    status = H5Gclose(tmp_id);
+    CHECK(status, FAIL, "H5Gclose");
+
+
+    if ( (tmp_id = H5Gcreate_expand(file_id, "/A/B05/C05/A", 0, create_id, access_id)) < 0)
+    CHECK(tmp_id, FAIL, "H5Gcreate_expand");
+
+    status = H5Gclose(tmp_id);
+    CHECK(status, FAIL, "H5Gclose");
+
+
+    status = H5Pclose(create_id);
+    CHECK(status, FAIL, "H5Pclose");
+
+
+    /**********************************************************************
+    * test new H5Dcreate 
+    **********************************************************************/
+
+    /* Create dataset creation property list */
+    create_id = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(create_id, FAIL, "H5Pcreate");
+
+    /* Set flag for intermediate group creation */
+    status = H5Pset_create_intermediate_group(create_id, TRUE);
+    CHECK(status, FAIL, "H5Pset_create_intermediate_group");
+
+
+    tmp_id = H5Dcreate(file_id, "/A/B06/dset", type_id, space_id, create_id);
+    CHECK(tmp_id, FAIL, "H5Dcreate");
+
+    status = H5Dclose(tmp_id);
+    CHECK(status, FAIL, "H5Dclose");
+
+
+    tmp_id = H5Dcreate(file_id, "/A/B07/B07/dset", type_id, space_id, create_id);
+    CHECK(tmp_id, FAIL, "H5Dcreate");
+
+    status = H5Dclose(tmp_id);
+    CHECK(status, FAIL, "H5Dclose");
+
+
+    tmp_id = H5Dcreate(group_id, "B08/dset", type_id, space_id, create_id);
+    CHECK(tmp_id, FAIL, "H5Dcreate");
+
+    status = H5Dclose(tmp_id);
+    CHECK(status, FAIL, "H5Dclose");
+
+
+    tmp_id = H5Dcreate(group_id, "/A/B09/dset", type_id, space_id, create_id);
+    CHECK(tmp_id, FAIL, "H5Dcreate");
+
+    status = H5Dclose(tmp_id);
+    CHECK(status, FAIL, "H5Dclose");
+
+
+    tmp_id = H5Dcreate(file_id, "/A/B10/C10/A/dset", type_id, space_id, create_id);
+    CHECK(tmp_id, FAIL, "H5Dcreate");
+
+    status = H5Dclose(tmp_id);
+    CHECK(status, FAIL, "H5Dclose");
+
+
+    status = H5Pclose(create_id);
+    CHECK(status, FAIL, "H5Pclose");
+
+
+    /**********************************************************************
+    * test new H5Tcommit 
+    **********************************************************************/
+
+    /* Create datatype creation property list */
+    create_id = H5Pcreate(H5P_DATATYPE_CREATE);
+    CHECK(create_id, FAIL, "H5Pcreate");
+
+    /* Set flag for intermediate group creation */
+    status = H5Pset_create_intermediate_group(create_id, TRUE);
+    CHECK(status, FAIL, "H5Pset_create_intermediate_group");
+
+
+    tmp_id = H5Tcopy(H5T_NATIVE_INT16);
+    CHECK(tmp_id, FAIL, "H5Tcopy");
+
+    status = H5Tcommit_expand(file_id, "/A/B11/dtype", tmp_id, create_id, access_id);
+    CHECK(status, FAIL, "H5Tcommit_expand");
+
+    status = H5Tclose(tmp_id);
+    CHECK(status, FAIL, "H5Tclose");
+
+
+    tmp_id = H5Tcopy(H5T_NATIVE_INT32);
+    CHECK(tmp_id, FAIL, "H5Tcopy");
+
+    status = H5Tcommit_expand(file_id, "/A/B12/C12/dtype", tmp_id, create_id, access_id);
+    CHECK(status, FAIL, "H5Tcommit_expand");
+
+    status = H5Tclose(tmp_id);
+    CHECK(status, FAIL, "H5Tclose");
+
+
+    tmp_id = H5Tcopy(H5T_NATIVE_INT64);
+    CHECK(tmp_id, FAIL, "H5Tcopy");
+
+    status = H5Tcommit_expand(group_id, "B13/dtype", tmp_id, create_id, access_id);
+    CHECK(status, FAIL, "H5Tcommit_expand");
+
+    status = H5Tclose(tmp_id);
+    CHECK(status, FAIL, "H5Tclose");
+
+
+    tmp_id = H5Tcopy(H5T_NATIVE_FLOAT);
+    CHECK(tmp_id, FAIL, "H5Tcopy");
+
+    status = H5Tcommit_expand(group_id, "/A/B14/dtype", tmp_id, create_id, access_id);
+    CHECK(status, FAIL, "H5Tcommit_expand");
+
+    status = H5Tclose(tmp_id);
+    CHECK(status, FAIL, "H5Tclose");
+
+
+    tmp_id = H5Tcopy(H5T_NATIVE_DOUBLE);
+    CHECK(tmp_id, FAIL, "H5Tcopy");
+
+    status = H5Tcommit_expand(file_id, "/A/B15/C15/A/dtype", tmp_id, create_id, access_id);
+    CHECK(status, FAIL, "H5Tcommit_expand");
+
+    status = H5Tclose(tmp_id);
+    CHECK(status, FAIL, "H5Tclose");
+
+
+    status = H5Pclose(create_id);
+    CHECK(status, FAIL, "H5Pclose");
+
+} /* end test_misc23() */
+
+/****************************************************************
+**
 **  test_misc(): Main misc. test routine.
 ** 
 ****************************************************************/
@@ -3738,6 +3974,7 @@ test_misc(void)
     test_misc21();      /* Test that "late" allocation time is treated the same as "incremental", for chunked datasets w/a filters */
     test_misc22();     /* check szip bits per pixel */
 #endif /* H5_HAVE_FILTER_SZIP */
+    test_misc23();      /* Test intermediate group creation */
 
 } /* test_misc() */
 
@@ -3786,5 +4023,6 @@ cleanup_misc(void)
     HDremove(MISC21_FILE);
     HDremove(MISC22_FILE);
 #endif /* H5_HAVE_FILTER_SZIP */
+    HDremove(MISC23_FILE);
 }
 

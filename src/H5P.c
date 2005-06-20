@@ -43,11 +43,17 @@
  * H5P_init_interface() in this source file.
  */
 hid_t H5P_CLS_NO_CLASS_g            = FAIL;
+hid_t H5P_CLS_OBJ_CLASS_g           = FAIL;
 hid_t H5P_CLS_FILE_CREATE_g         = FAIL;
 hid_t H5P_CLS_FILE_ACCESS_g         = FAIL;
 hid_t H5P_CLS_DATASET_CREATE_g      = FAIL;
+hid_t H5P_CLS_DATASET_ACCESS_g      = FAIL;
 hid_t H5P_CLS_DATASET_XFER_g        = FAIL;
 hid_t H5P_CLS_MOUNT_g               = FAIL;
+hid_t H5P_CLS_GROUP_CREATE_g        = FAIL;
+hid_t H5P_CLS_GROUP_ACCESS_g        = FAIL;
+hid_t H5P_CLS_DATATYPE_CREATE_g     = FAIL;
+hid_t H5P_CLS_DATATYPE_ACCESS_g     = FAIL;
 
 /*
  * Predefined property lists for each predefined class. These are initialized
@@ -57,8 +63,13 @@ hid_t H5P_LST_NO_CLASS_g            = FAIL;
 hid_t H5P_LST_FILE_CREATE_g         = FAIL;
 hid_t H5P_LST_FILE_ACCESS_g         = FAIL;
 hid_t H5P_LST_DATASET_CREATE_g      = FAIL;
+hid_t H5P_LST_DATASET_ACCESS_g      = FAIL;
 hid_t H5P_LST_DATASET_XFER_g        = FAIL;
 hid_t H5P_LST_MOUNT_g               = FAIL;
+hid_t H5P_LST_GROUP_CREATE_g        = FAIL;
+hid_t H5P_LST_GROUP_ACCESS_g        = FAIL;
+hid_t H5P_LST_DATATYPE_CREATE_g       = FAIL;
+hid_t H5P_LST_DATATYPE_ACCESS_g       = FAIL;
 
 /* Track the revision count of a class, to make comparisons faster */
 static unsigned H5P_next_rev=0;
@@ -201,13 +212,25 @@ RETURNS
 DESCRIPTION
     Initializes any interface-specific data or routines.
 
+Modification:
+    
+    Peter Cao
+    May 08, 2005
+    Add Group creation property, Add object creation property class.
+    group, dataset and datatype creation property classes are inherited from
+    the object creation property class
+
 --------------------------------------------------------------------------*/
 static herr_t
 H5P_init_interface(void)
 {
     H5P_genclass_t  *root_class;    /* Pointer to root property list class created */
+    H5P_genclass_t  *obj_class;     /* Pointer to object(dataset, group, or datatype) property list class created */
     H5P_genclass_t  *pclass;        /* Pointer to property list class to create */
     herr_t      ret_value = SUCCEED;
+    unsigned  intmd_group = H5G_CRT_INTERMEDIATE_GROUP_DEF;
+    size_t    nprops;                 /* Number of properties */
+
 
     FUNC_ENTER_NOAPI_NOINIT(H5P_init_interface);
 
@@ -230,6 +253,29 @@ H5P_init_interface(void)
     if ((H5P_CLS_NO_CLASS_g = H5I_register (H5I_GENPROP_CLS, root_class))<0)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
+    /* Create object property  class */
+
+    /* Allocate the object class */
+    assert(H5P_CLS_OBJ_CLASS_g==(-1));
+    if (NULL==(obj_class = H5P_create_class (root_class,"object",1,NULL,NULL,NULL,NULL,NULL,NULL)))
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
+
+    /* Register the object class */
+    if ((H5P_CLS_OBJ_CLASS_g = H5I_register (H5I_GENPROP_CLS, obj_class))<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
+
+    /* Get the number of properties in the object class */
+    if(H5P_get_nprops_pclass(obj_class,&nprops,FALSE)<0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't query number of properties")
+
+    /* Assume that if there are properties in the class, they are the default ones */
+    if(nprops==0) {
+        /* register create intermediate groups */
+        if(H5P_register(obj_class,H5G_CRT_INTERMEDIATE_GROUP_NAME,H5G_CRT_INTERMEDIATE_GROUP_SIZE, 
+                 &intmd_group,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+    }
+
     /* Register the file creation and file access property classes */
 
     /* Allocate the file creation class */
@@ -250,15 +296,24 @@ H5P_init_interface(void)
     if ((H5P_CLS_FILE_ACCESS_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
-    /* Register the dataset creation and data xfer property classes */
+    /* Register the dataset creation, dataset access and data xfer property classes */
 
     /* Allocate the dataset creation class */
     assert(H5P_CLS_DATASET_CREATE_g==(-1));
-    if (NULL==(pclass = H5P_create_class (root_class,"dataset create",1,NULL,NULL,H5D_crt_copy,NULL,H5D_crt_close,NULL)))
+    if (NULL==(pclass = H5P_create_class (obj_class,"dataset create",1,NULL,NULL,H5D_crt_copy,NULL,H5D_crt_close,NULL)))
         HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
     /* Register the dataset creation class */
     if ((H5P_CLS_DATASET_CREATE_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
+
+    /* Allocate the dataset access class */
+    assert(H5P_CLS_DATASET_ACCESS_g==(-1));
+    if (NULL==(pclass = H5P_create_class (root_class,"dataset access",1,NULL,NULL,NULL,NULL,NULL,NULL)))
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
+
+    /* Register the dataset access class */
+    if ((H5P_CLS_DATASET_ACCESS_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
     /* Allocate the data xfer class */
@@ -277,6 +332,45 @@ H5P_init_interface(void)
 
     /* Register the mount class */
     if ((H5P_CLS_MOUNT_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
+
+
+    /* added by Peter Cao. To create missing groups. May 08, 2005 */
+
+    /* Allocate the group creation class */
+    assert(H5P_CLS_GROUP_CREATE_g==(-1));
+    if (NULL==(pclass = H5P_create_class (obj_class,"group create",1,NULL,NULL,NULL,NULL,NULL,NULL)))
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
+
+    /* Register the group creation class */
+    if ((H5P_CLS_GROUP_CREATE_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
+
+    /* Allocate the group access class */
+    assert(H5P_CLS_GROUP_ACCESS_g==(-1));
+    if (NULL==(pclass = H5P_create_class (root_class,"group access",1,NULL,NULL,NULL,NULL,NULL,NULL)))
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
+
+    /* Register the group access class */
+    if ((H5P_CLS_GROUP_ACCESS_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
+
+    /* Allocate the datatype creation class */
+    assert(H5P_CLS_DATATYPE_CREATE_g==(-1));
+    if (NULL==(pclass = H5P_create_class (obj_class,"datatype create",1,NULL,NULL,NULL,NULL,NULL,NULL)))
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
+
+    /* Register the datatype creation class */
+    if ((H5P_CLS_DATATYPE_CREATE_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
+
+    /* Allocate the datatype access class */
+    assert(H5P_CLS_DATATYPE_ACCESS_g==(-1));
+    if (NULL==(pclass = H5P_create_class (root_class,"datatype access",1,NULL /*H5T_acs_create*/,NULL,NULL /*H5T_acs_copy*/,NULL,NULL /*H5T_acs_close*/,NULL)))
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
+
+    /* Register the datatype access class */
+    if ((H5P_CLS_DATATYPE_ACCESS_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
 done:
@@ -330,7 +424,12 @@ H5P_term_interface(void)
                         H5P_LST_FILE_CREATE_g =
                         H5P_LST_FILE_ACCESS_g =
                         H5P_LST_DATASET_CREATE_g =
+                        H5P_LST_DATASET_ACCESS_g =
                         H5P_LST_DATASET_XFER_g =
+                        H5P_LST_GROUP_CREATE_g =
+                        H5P_LST_GROUP_ACCESS_g =
+                        H5P_LST_DATATYPE_CREATE_g =
+                        H5P_LST_DATATYPE_ACCESS_g =
                         H5P_LST_MOUNT_g = (-1);
                 } /* end if */
             } /* end if */
@@ -341,11 +440,17 @@ H5P_term_interface(void)
 
                 /* Reset the default property lists, if they've been closed */
                 if(H5I_nmembers(H5I_GENPROP_CLS)==0) {
-                    H5P_CLS_NO_CLASS_g =
+                        H5P_CLS_NO_CLASS_g =
+                        H5P_CLS_OBJ_CLASS_g =
                         H5P_CLS_FILE_CREATE_g =
                         H5P_CLS_FILE_ACCESS_g =
                         H5P_CLS_DATASET_CREATE_g =
+                        H5P_CLS_DATASET_ACCESS_g =
                         H5P_CLS_DATASET_XFER_g =
+                        H5P_CLS_GROUP_CREATE_g =
+                        H5P_CLS_GROUP_ACCESS_g =
+                        H5P_CLS_DATATYPE_CREATE_g =
+                        H5P_CLS_DATATYPE_ACCESS_g =
                         H5P_CLS_MOUNT_g = (-1);
                 } /* end if */
             } /* end if */
@@ -3243,11 +3348,12 @@ H5P_get_nprops_plist(H5P_genplist_t *plist, size_t *nprops)
     herr_t H5P_get_nprops_pclass(pclass, nprops)
         H5P_genclass_t *pclass;  IN: Property class to check
         size_t *nprops;         OUT: Number of properties in the property list
+        hbool_t recurse;        IN: Include properties in parent class(es) also
  RETURNS
-    Success: non-negative value
+    Success: non-negative value (can't fail)
     Failure: negative value
  DESCRIPTION
-        This routine retrieves the number of a properties in a property class.
+    This routine retrieves the number of a properties in a property class.
 
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -3255,20 +3361,27 @@ H5P_get_nprops_plist(H5P_genplist_t *plist, size_t *nprops)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5P_get_nprops_pclass(H5P_genclass_t *pclass, size_t *nprops)
+H5P_get_nprops_pclass(H5P_genclass_t *pclass, size_t *nprops, hbool_t recurse)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5P_get_nprops_pclass, FAIL);
+    FUNC_ENTER_NOAPI(H5P_get_nprops_pclass, FAIL)
 
     assert(pclass);
     assert(nprops);
 
-    /* Get property size */
+    /* Get number of properties */
     *nprops=pclass->nprops;
 
+    /* Check if the class is derived, and walk up the chain, if so */
+    if(recurse)
+	while(pclass->parent!=NULL) {
+	    pclass = pclass->parent;
+	    *nprops += pclass->nprops;
+	} /* end while */
+
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5P_get_nprops_pclass() */
 
 
@@ -3321,7 +3434,7 @@ H5Pget_nprops(hid_t id, size_t *nprops)
         if(H5I_GENPROP_CLS == H5I_get_type(id)) {
             if (NULL == (pclass = H5I_object(id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property class");
-            if (H5P_get_nprops_pclass(pclass,nprops)<0)
+            if (H5P_get_nprops_pclass(pclass,nprops,FALSE)<0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to query # of properties in pclass");
         } /* end if */
         else
