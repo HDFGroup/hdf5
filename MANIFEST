@@ -768,10 +768,9 @@
 ./release_docs/INSTALL_Windows_Short_NET.TXT
 ./release_docs/INSTALL_Windows.html
 ./release_docs/INSTALL_Windows_From_Command_Line.html
-./release_docs/INSTALL_Windows_Short_Intel.htm
 ./release_docs/INSTALL_Windows_Short_MSVS6.0.htm
 ./release_docs/INSTALL_Windows_Short_Net.htm
-
+./release_docs/INSTALL_Windows_Short_Intel.htm
 ./release_docs/INSTALL_codewarrior.txt
 ./release_docs/HISTORY.txt
 ./release_docs/RELEASE.txt
