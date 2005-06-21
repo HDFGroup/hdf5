@@ -126,8 +126,8 @@ echo.
   ICProjConvert80 windows\hl\test\hl_test_image\hl_test_image.vcproj /IC  >> convert_intel.log
   ICProjConvert80 windows\hl\test\hl_test_lite\hl_test_lite.vcproj /IC  >> convert_intel.log
   ICProjConvert80 windows\hl\test\hl_test_table\hl_test_table.vcproj /IC  >> convert_intel.log
-  ICProjConvert80 windows\hl\test\hl_test_table\hl_test_ds.vcproj /IC  >> convert_intel.log
-  ICProjConvert80 windows\hl\test\hl_test_table\hl_test_packet.vcproj /IC  >> convert_intel.log
+  ICProjConvert80 windows\hl\test\hl_test_ds\hl_test_ds.vcproj /IC  >> convert_intel.log
+  ICProjConvert80 windows\hl\test\hl_test_packet\hl_test_packet.vcproj /IC  >> convert_intel.log
 
 echo.
 echo Converting project files under directory windows\tools
