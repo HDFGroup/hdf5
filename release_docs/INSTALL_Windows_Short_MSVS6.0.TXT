@@ -104,14 +104,16 @@ hdf5check.bat has four options:
 Invoke a command prompt window and run hdf5check with appropriate
 options.
 
-Test results are saved into file:
+Test results are saved in two files:
+
+   c:\MyHDFstuff\hdf5\tests_results.txt   
 
    c:\MyHDFstuff\hdf5\check_results.txt.
 
-Check check_results.txt and there should be no failures at all.
-
-If you want to test HDF5 libraries and tools one by one, please refer to
-Section II, step 2 in INSTALL_Windows.txt.
+In general, you only need to check tests_results.txt.  If all the
+tests passed, then you do not have to check check_results.txt.  
+If some tests failed, check check_results.txt can help you
+figure out what was wrong.
 
 STEP 3: Installing HDF5 Libraries
 

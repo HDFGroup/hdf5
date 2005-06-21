@@ -41,7 +41,7 @@ Preconditions:
                                                                          
     Invoke Microsoft Visual C++ .Net and go to "Tools" and select             
     "Options". In the left pane of  "Option" window poped up,
-    choose and extend "Projects", Click on "VC++ Directories".
+    choose and expand "Projects", Click on "VC++ Directories".
     In the right pane, Find the box "Show directories for", choose                          
     "Include files", if you can not find your Zlib and Szip              
     header path                                                          

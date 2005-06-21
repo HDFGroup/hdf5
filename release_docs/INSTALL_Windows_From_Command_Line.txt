@@ -185,11 +185,16 @@ Section I: Building and testing HDF5 on command line with Microsoft
             Invoke a command prompt window and run hdf5check with 
             appropriate options.
 
-            Test results are saved into file:
+            Test results are saved in two files:
 
-               c:\MyHDFstuff\hdf5\check_results.txt.
-
-            Check check_results.txt and there should be failers at all.
+			   c:\MyHDFstuff\hdf5\tests_results.txt   
+			
+			   c:\MyHDFstuff\hdf5\check_results.txt.
+			
+			In general, you only need to check tests_results.txt.  If all the
+			tests passed, then you do not have to check check_results.txt.  
+			If some tests failed, check check_results.txt can help you
+			figure out what was wrong.
 
 3. Installing HDF5 Libraries
 
@@ -235,7 +240,8 @@ SECTION II: Building and testing HDF5 C and C++ Library on command line
    
    1.5 Convert project files format from MSVS 6.0 to MSVS .Net
     
-        Go to directory  c:\MyHDFstuff\hdf5 and run convert_to_vcproj.bat
+       Go to directory  c:\MyHDFstuff\hdf5 and run convert_to_vcproj.bat
+       in the following format 
       
        convert_to_vcproj "Absolute path of directory hdf5" 
        
@@ -247,7 +253,7 @@ SECTION II: Building and testing HDF5 C and C++ Library on command line
        the directory c:\MyHDFstuff\hdf5. The messages should look like
        
        Converting: c:\MyHDFstuff\hdf5\windows\proj\all\all.dsp
-       New Project Name: c:\MyHDFstuff\\hdf5\windows\proj\all\all.vcproj
+       New Project Name: c:\MyHDFstuff\hdf5\windows\proj\all\all.vcproj
        
        Note: all.sln was provided with HDF5-1.8.0 Release. Users don't need 
        to convert the workspace from MSVS 6.0 format to MSVS .Net
@@ -321,8 +327,16 @@ SECTION II: Building and testing HDF5 C and C++ Library on command line
                                          
      Note: hdf5check.bat has ONLY TWO options listed above in this case.
      
-     Testing results will be saved in c:\MyHDFstuff\hdf5\check_results.txt. 
-     There should be no failures at all. 
+		    Test results are saved in two files:
+		
+		   c:\MyHDFstuff\hdf5\tests_results.txt   
+		
+		   c:\MyHDFstuff\hdf5\check_results.txt.
+		
+		In general, you only need to check tests_results.txt.  If all the
+		tests passed, then you do not have to check check_results.txt.  
+		If some tests failed, check check_results.txt can help you
+		figure out what was wrong.
      
      3.  Installing HDF5 Libraries
 
@@ -470,8 +484,16 @@ SECTION III: Building and testing HDF5 C and C++ Library on command
          Notes: hdf5check.bat has ONLY TWO options listed above in this
                 case.
      
-     Testing results will be saved in c:\MyHDFstuff\hdf5\check_results.txt. 
-     There should be no failures at all. 
+	     Test results are saved in two files:
+	
+	   c:\MyHDFstuff\hdf5\tests_results.txt   
+	
+	   c:\MyHDFstuff\hdf5\check_results.txt.
+	
+	In general, you only need to check tests_results.txt.  If all the
+	tests passed, then you do not have to check check_results.txt.  
+	If some tests failed, check check_results.txt can help you
+	figure out what was wrong.
      
      3.  Installing HDF5 Libraries
 

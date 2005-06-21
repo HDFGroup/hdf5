@@ -239,9 +239,16 @@ Part II. INTEL compiler 8.1 with Visual C++ .Net  2003 Environment
    	  
                    hdf5check enablecpp
    	                       
-   	Test results will be save into file check_results.txt under 
-        directory "hdf5". Check check_results.txt, there should be no 
-        "failures" at all.
+   	Test results are saved in two files:
+
+   		c:\MyHDFstuff\hdf5\tests_results.txt   
+
+   		c:\MyHDFstuff\hdf5\check_results.txt.
+
+       In general, you only need to check tests_results.txt. If all the
+       tests passed, then you do not have to check check_results.txt.  
+       If some tests failed, check check_results.txt can help you
+       figure out what was wrong.
     	
     	b. Test HDF5 Static Fortran Library
     	
