@@ -6799,8 +6799,14 @@ END SUBROUTINE h5pset_fapl_core_f
     <dd><code>H5Pset_fapl_family</code> sets the file access property list 
         identifier, <code>fapl_id</code>, to use the family driver.
         <p>
-        <code>memb_size</code> is the size in bytes of each file member 
-        and is used only when creating a new file.
+        <code>memb_size</code> is the size in bytes of each file member.  This size
+        will be saved in the file when the property list <code>fapl_id</code> is used
+        to create a new file.  If <code>fapl_id</code> is used to open an existing
+        file, <code>memb_size</code> has to be equal to the original size saved in 
+        the file.  A failure with an errror message indicating the correct member 
+        size will be returned if <code>memb_size</code> does not match the size saved.
+        If any user does not know the original size, <code>H5F_FAMILY_DEFAULT</code>
+        can be passed in.  The library will retrieve the correct size saved in the file. 
         <p>
         <code>memb_fapl_id</code> is the identifier of the 
         file access property list to be used for each family member. 

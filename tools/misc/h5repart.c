@@ -65,9 +65,11 @@
 #   define MIN3(X,Y,Z)	MIN(MIN(X,Y),Z)
 #endif
 
-/*Make this private property(defined in H5Fprivate.h) available to h5repart, 
- *to update the member file size in the superblock.*/ 
+/*Make these 2 private properties(defined in H5Fprivate.h) available to h5repart. 
+ *The first one updates the member file size in the superblock.  The second one
+ *change file driver from family to sec2. */ 
 #define H5F_ACS_FAMILY_NEWSIZE_NAME            "family_newsize"
+#define H5F_ACS_FAMILY_TO_SEC2_NAME            "family_to_sec2"
 
 
 /*-------------------------------------------------------------------------
@@ -87,12 +89,13 @@
 static void
 usage (const char *progname)
 {
-    fprintf(stderr, "usage: %s [-v] [-V] [-[b|m] N[g|m|k]] SRC DST\n",
+    fprintf(stderr, "usage: %s [-v] [-V] [-[b|m] N[g|m|k]] [-family_to_sec2] SRC DST\n",
 	    progname);
     fprintf(stderr, "   -v     Produce verbose output\n");
     fprintf(stderr, "   -V     Print a version number and exit\n");
     fprintf(stderr, "   -b N   The I/O block size, defaults to 1kB\n");
     fprintf(stderr, "   -m N   The destination member size or 1GB\n");
+    fprintf(stderr, "   -family_to_sec2   Change file driver from family to sec2\n");
     fprintf(stderr, "   SRC    The name of the source file\n");
     fprintf(stderr, "   DST	The name of the destination files\n");
     fprintf(stderr, "Sizes may be suffixed with `g' for GB, `m' for MB or "
@@ -230,6 +233,7 @@ main (int argc, char *argv[])
     hid_t       fapl;                   /*file access property list     */
     hid_t       file;
     hsize_t     hdsize;                 /*destination logical memb size */
+    hbool_t     family_to_sec2=FALSE;   /*change family to sec2 driver? */
 
     /*
      * Get the program name from argv[0]. Use only the last component.
@@ -248,6 +252,9 @@ main (int argc, char *argv[])
 	    printf("This is %s version %u.%u release %u\n",
 		   prog_name, H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
 	    exit(0);
+        } else if (!strcmp (argv[argno], "-family_to_sec2")) {
+	    family_to_sec2 = TRUE;
+	    argno++;
 	} else if ('b'==argv[argno][1]) {
 	    blk_size = get_size (prog_name, &argno, argc, argv);
 	} else if ('m'==argv[argno][1]) {
@@ -449,36 +456,53 @@ main (int argc, char *argv[])
     }
     close (dst);
 
-    /* Modify family size saved in superblock through private property. It signals 
-     * library to save the new member size(specified in command line) in superblock.  
-     * This private property is for this tool only. */
+    /* Modify family driver information saved in superblock through private property. 
+     * These private properties are for this tool only. */
     if ((fapl=H5Pcreate(H5P_FILE_ACCESS))<0) {
         perror ("H5Pcreate");
         exit (1);
     }
 
-    if(H5Pset_fapl_family(fapl, H5F_FAMILY_DEFAULT, H5P_DEFAULT) < 0) {
-        perror ("H5Pset_fapl_family");
-        exit (1);
+    if(family_to_sec2) {
+        /* The user wants to change file driver from family to sec2. Open the file
+         * with sec2 driver.  This property signals the library to ignore the family
+         * driver information saved in the superblock. */
+        if(H5Pset(fapl, H5F_ACS_FAMILY_TO_SEC2_NAME, &family_to_sec2) < 0) { 
+            perror ("H5Pset");
+            exit (1);
+        }
+    } else {
+        /* Modify family size saved in superblock through private property. It signals 
+         * library to save the new member size(specified in command line) in superblock.  
+         * This private property is for this tool only. */
+        if(H5Pset_fapl_family(fapl, H5F_FAMILY_DEFAULT, H5P_DEFAULT) < 0) {
+            perror ("H5Pset_fapl_family");
+            exit (1);
+        }
+
+        /* Set the property of the new member size as hsize_t */
+        hdsize = dst_size;
+        if(H5Pset(fapl, H5F_ACS_FAMILY_NEWSIZE_NAME, &hdsize) < 0) { 
+            perror ("H5Pset");
+            exit (1);
+        }
     }
 
-    /* Set the property as hsize_t */
-    hdsize = dst_size;
-    if(H5Pset(fapl, H5F_ACS_FAMILY_NEWSIZE_NAME, &hdsize) < 0) { 
-        perror ("H5Pset_family_newsize");
-        exit (1);
-    }
-
-    /* Open file for "read and write" to flush metadata. Flushing metadata 
-     * will update the superblock to the new member size. */
-    if((file=H5Fopen(dst_gen_name, H5F_ACC_RDWR, fapl))<0) {
-        perror ("H5Fopen");
-        exit (1);
-    }
-  
-    if(H5Fclose(file)<0) {
-        perror ("H5Fclose");
-        exit (1);
+    /* If the new file is a family file, try to open file for "read and write" to 
+     * flush metadata. Flushing metadata will update the superblock to the new 
+     * member size.  If the original file is a family file and the new file is a sec2 
+     * file, the property FAMILY_TO_SEC2 will signal the library to switch to sec2 
+     * driver when the new file is opened.  If the original file is a sec2 file and the 
+     * new file can only be a sec2 file, reopen the new file should fail.  There's 
+     * nothing to do in this case. */
+    H5E_BEGIN_TRY {
+        file=H5Fopen(dst_gen_name, H5F_ACC_RDWR, fapl);
+    } H5E_END_TRY;
+    if(file>=0) { 
+        if(H5Fclose(file)<0) {
+            perror ("H5Fclose");
+            exit (1);
+        }
     }
 
     if(H5Pclose(fapl)<0) {

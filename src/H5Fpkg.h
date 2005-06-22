@@ -92,7 +92,8 @@ typedef struct H5F_file_t {
     haddr_t	base_addr;	/* Absolute base address for rel.addrs. */
     haddr_t	freespace_addr;	/* Relative address of free-space info	*/
     haddr_t	driver_addr;	/* File driver information block address*/
-
+    hbool_t     fam_to_sec2;    /* Is h5repart changing driver from family to sec2 */
+                                   
     unsigned	super_chksum;	/* Superblock checksum                  */
     unsigned	drvr_chksum;	/* Driver info block checksum           */
     H5AC_t      *cache;		/* The object cache			*/

@@ -30,11 +30,12 @@
 const char *FILENAME[] = {      
     "fst_family%05d.h5",
     "scd_family%05d.h5",
+    "family_to_sec2.h5",
     NULL        
 };
 
-herr_t
-test_family_h5repart_opens(void);
+herr_t test_family_h5repart_opens(void);
+herr_t test_sec2_h5repart_opens(void);
 
 
 /*-------------------------------------------------------------------------
@@ -91,6 +92,43 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_sec2_h5repart_opens
+ *
+ * Purpose:     Tries to reopen a sec2 file.
+ *
+ * Return:      Success:        exit(0)
+ *
+ *              Failure:        exit(1)
+ *
+ * Programmer:  Raymond Lu
+ *              June 21, 2005
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+herr_t
+test_sec2_h5repart_opens(void)
+{
+    hid_t       file=(-1);
+    
+    /* open the sec2 file */
+    if((file=H5Fopen(FILENAME[2], H5F_ACC_RDWR, H5P_DEFAULT))<0)
+        goto error;
+
+    if(H5Fclose(file)<0)
+        goto error;
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(file);
+    } H5E_END_TRY;
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:    main
  * 
  * Purpose:     Tests h5repart-ed family files 
@@ -112,6 +150,7 @@ main(void)
     int                 nerrors=0;
          
     nerrors += test_family_h5repart_opens()<0   ?1:0;
+    nerrors += test_sec2_h5repart_opens()<0     ?1:0;
 
     if (nerrors) goto error;
     

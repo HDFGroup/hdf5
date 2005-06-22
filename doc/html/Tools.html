@@ -893,16 +893,22 @@ installed with HDF5.
         [-v] 
         [-V] 
         [-[b|m]</code><em>N</em><code>[g|m|k]]</code>
+        [-family_to_sec2]
         <em>source_file
         dest_file</em>
 <dt><strong>Purpose:</strong>
     <dd>Repartitions a file or family of files.
 <dt><strong>Description:</strong>
-    <dd><code>h5repart</code> splits a single file into a family of 
-        files, joins a family of files into a single file, or copies 
-        one family of files to another while changing the size of the 
-        family members.  <code>h5repart</code> can also be used to 
-        copy a single file to a single file with holes.
+    <dd><code>h5repart</code> joins a family of files into a single file, 
+        or copies one family of files to another while changing the size 
+        of the family members.  <code>h5repart</code> can also be used to 
+        copy a single file to a single file with holes.  At this stage, 
+        <code>h5repart</code> can not split a single non-family file into
+        a family of file(s).
+        <p>
+        To convert a family of file(s) to a single non-family file 
+        (<code>sec2</code> file), the option <code>-family_to_sec2</code> 
+        has to be used.
         <p>
         Sizes associated with the <code>-b</code> and <code>-m</code> 
         options may be suffixed with <code>g</code> for gigabytes, 
@@ -925,6 +931,9 @@ installed with HDF5.
         <tr>
 		    <td valign="top"><code>-m</code><em>N</em></td>
             <td valign="top">The destination member size or 1GB</td></tr>
+        <tr>
+		    <td valign="top"><code>-family_to_sec2</code></td>
+            <td valign="top">Convert file driver from family to sec2</td></tr>
         <tr>
 		    <td valign="top"><em>source_file&nbsp;&nbsp;&nbsp;&nbsp;</em></td>
             <td valign="top">The name of the source file</td></tr>

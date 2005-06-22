@@ -398,6 +398,12 @@ typedef struct H5F_t H5F_t;
 #define H5F_ACS_FAMILY_NEWSIZE_SIZE            sizeof(hsize_t)
 #define H5F_ACS_FAMILY_NEWSIZE_DEF             0
     
+/* Definition for whether to conver family to sec2 driver. It's private 
+ * property only used by h5repart */
+#define H5F_ACS_FAMILY_TO_SEC2_NAME            "family_to_sec2"
+#define H5F_ACS_FAMILY_TO_SEC2_SIZE            sizeof(hbool_t)
+#define H5F_ACS_FAMILY_TO_SEC2_DEF             FALSE
+   
 /* Definition for data type in multi file driver */
 #define H5F_ACS_MULTI_TYPE_NAME                 "multi_type"
 #define H5F_ACS_MULTI_TYPE_SIZE                 sizeof(H5FD_mem_t)

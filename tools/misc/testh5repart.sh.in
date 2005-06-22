@@ -92,6 +92,8 @@ SKIP() {
 TOOLTEST -m 20000 family_file%05d.h5 $actual_dir/fst_family%05d.h5
 # repartition family member size to 5 KB.
 TOOLTEST -m 5k family_file%05d.h5 $actual_dir/scd_family%05d.h5
+# convert family file to sec2 file of 20,000 bytes
+TOOLTEST -m 20000 -family_to_sec2 family_file%05d.h5 $actual_dir/family_to_sec2.h5
 
 # test the output files repartitioned above.
 OUTPUTTEST
@@ -104,7 +106,7 @@ fi
 # Clean up output file
 if test -z "$HDF5_NOCLEANUP"; then
     cd $actual_dir
-    rm -f fst_family*.h5 scd_family*.h5
+    rm -f fst_family*.h5 scd_family*.h5 family_to_sec2.h5
 fi
 
 exit $nerrors

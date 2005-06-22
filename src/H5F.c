@@ -213,6 +213,7 @@ H5F_init_interface(void)
     H5F_close_degree_t close_degree     = H5F_CLOSE_DEGREE_DEF;
     hsize_t         family_offset       = H5F_ACS_FAMILY_OFFSET_DEF;
     hsize_t         family_newsize      = H5F_ACS_FAMILY_NEWSIZE_DEF;
+    hbool_t         family_to_sec2      = H5F_ACS_FAMILY_TO_SEC2_DEF;
     H5FD_mem_t      mem_type            = H5F_ACS_MULTI_TYPE_DEF;
 
     /* File mount property class variable. 
@@ -366,7 +367,11 @@ H5F_init_interface(void)
         /* Register the private property of new family file size. It's used by h5repart only. */
         if(H5P_register(acs_pclass,H5F_ACS_FAMILY_NEWSIZE_NAME,H5F_ACS_FAMILY_NEWSIZE_SIZE, &family_newsize,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-         
+
+        /* Register the private property of whether convert family to sec2 driver. It's used by h5repart only. */
+        if(H5P_register(acs_pclass,H5F_ACS_FAMILY_TO_SEC2_NAME,H5F_ACS_FAMILY_TO_SEC2_SIZE, &family_to_sec2,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        
         /* Register the data type of multi driver info */
         if(H5P_register(acs_pclass,H5F_ACS_MULTI_TYPE_NAME,H5F_ACS_MULTI_TYPE_SIZE, &mem_type,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
@@ -1789,6 +1794,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
     hbool_t             driver_has_cmp;     /*`cmp' callback defined?       */
     H5P_genplist_t     *a_plist;            /*file access property list     */
     H5F_close_degree_t  fc_degree;          /*file close degree             */
+    hbool_t             fam_sec2=FALSE;     /*change family to sec2 driver? */
     H5F_t              *ret_value;          /*actual return value           */
 
     FUNC_ENTER_NOAPI(H5F_open, NULL)
@@ -1906,6 +1912,20 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
      */
     file->intent = flags;
     file->name = H5MM_xstrdup(name);
+
+    if(NULL == (a_plist = H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
+
+    /* This step is for h5repart tool only. If user wants to change file driver from
+     * family to sec2 while using h5repart, this private property should be set so that
+     * in the later step, the library can ignore the family driver information saved 
+     * in the superblock.
+     */ 
+    if(H5P_exist_plist(a_plist, H5F_ACS_FAMILY_TO_SEC2_NAME) > 0)
+        if(H5P_get(a_plist, H5F_ACS_FAMILY_TO_SEC2_NAME, &fam_sec2) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property of changing family to sec2")
+
+    file->shared->fam_to_sec2 = fam_sec2;
 
     /*
      * Read or write the file superblock, depending on whether the file is
@@ -2047,8 +2067,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
      * second time or later, verify the access property list value matches
      * the degree in shared file structure.
      */
-    if(NULL == (a_plist = H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
     if(H5P_get(a_plist, H5F_CLOSE_DEGREE_NAME, &fc_degree) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file close degree")
 
@@ -2583,6 +2601,13 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent, haddr_t addr
     /* Set the super block checksum */
     shared->super_chksum = chksum;
 
+    /* This step is for h5repart tool only. If user wants to change file driver from
+     * family to sec2 while using h5repart, set the driver address to undefined to let
+     * the library ignore the family driver information saved in the superblock.
+     */ 
+    if(shared->fam_to_sec2)
+        shared->driver_addr = HADDR_UNDEF;
+            
     /* Decode the optional driver information block */
     if (H5F_addr_defined(shared->driver_addr)) {
         haddr_t drv_addr = shared->base_addr + shared->driver_addr;
