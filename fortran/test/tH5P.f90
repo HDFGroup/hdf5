@@ -44,6 +44,7 @@
                       !specified dataset
      INTEGER(SIZE_T) :: namesize
      INTEGER(HSIZE_T) :: size, buf_size
+     INTEGER :: idx
 
      buf_size = 4*1024*1024
 
@@ -95,10 +96,13 @@
      CALL check("h5pclose_f", error, total_error)
      CALL h5sclose_f(space_id, error)
      CALL check("h5sclose_f", error, total_error)
-     ! Read dataset creation information 
+     CALL h5fclose_f(file_id, error)
+
+     CALL h5fopen_f(fix_filename, H5F_ACC_RDWR_F, file_id, error)
      CALL h5dopen_f(file_id, "dset1", dataset_id, error)
      CALL check("h5dopen_f",error,total_error)
     
+     ! Read dataset creation information 
      CALL h5dget_create_plist_f(dataset_id, plist_id, error)
      CALL check("h5dget_create_plist_f",error,total_error)
      CALL h5pget_external_count_f(plist_id, count, error)
@@ -108,7 +112,8 @@
          total_error = total_error + 1
      end if
      namesize = 10
-     CALL h5pget_external_f(plist_id, 0, namesize, name, file_offset, &
+     idx = 0
+     CALL h5pget_external_f(plist_id, idx, namesize, name, file_offset, &
                             file_bytes, error)
      CALL check("h5pget_external_f",error,total_error)
      if(file_offset .ne. 0 ) then
@@ -282,7 +287,6 @@
               CALL check("h5fclose_f", error, total_error)
           CALL h5pclose_f(fapl, error)
               CALL check("h5pclose_f", error, total_error)
-
          ! 
           ! Open the existing file.
           !

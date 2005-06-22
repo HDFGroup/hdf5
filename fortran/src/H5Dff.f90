@@ -165,7 +165,7 @@
             INTEGER(HID_T), OPTIONAL, INTENT(IN) :: creation_prp 
                                                    ! Dataset creation propertly
                                                    ! list identifier
-            INTEGER :: creation_prp_default
+            INTEGER(HID_T) :: creation_prp_default
             INTEGER :: namelen                     ! Name length
 
 !            INTEGER, EXTERNAL :: h5dcreate_c
@@ -184,7 +184,7 @@
               INTEGER :: namelen
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER(HID_T), INTENT(IN) :: space_id
-              INTEGER :: creation_prp_default
+              INTEGER(HID_T) :: creation_prp_default
               INTEGER(HID_T), INTENT(OUT) :: dset_id
               END FUNCTION h5dcreate_c
             END INTERFACE
@@ -629,7 +629,6 @@
             if (present(xfer_prp)) xfer_prp_default = xfer_prp 
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
-
             hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, &
                                 buf, dims)

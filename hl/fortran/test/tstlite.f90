@@ -707,7 +707,6 @@ call test_begin(' Get dataset dimensions         ')
 !-------------------------------------------------------------------------
 
 call h5ltget_dataset_ndims_f(file_id, dsetname4, rankr, errcode)
-
 if ( rankr .ne. rank ) then
  print *, 'h5ltget_dataset_ndims_f return error'
  stop

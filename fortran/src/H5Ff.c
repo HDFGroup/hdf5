@@ -36,7 +36,7 @@ nh5fcreate_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f* crt_prp, h
 {
      int ret_value = -1;
      char *c_name;
-     int c_namelen;
+     int_f c_namelen;
      hid_t c_file_id;
      unsigned c_access_flags;
      hid_t c_crt_prp;
@@ -65,7 +65,7 @@ nh5fcreate_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f* crt_prp, h
       * Convert FORTRAN name to C name
       */
      c_namelen = *namelen;
-     c_name = (char *)HD5f2cstring(name, c_namelen); 
+     c_name = (char *)HD5f2cstring(name, (size_t)c_namelen); 
      if (c_name == NULL) return ret_value;
 
      /*
@@ -133,7 +133,7 @@ nh5fmount_c (hid_t_f *loc_id, _fcd dsetname, int_f *namelen, hid_t_f *file_id, h
 {
      int ret_value = -1;
      char *c_name;
-     int c_namelen;
+     int_f c_namelen;
      hid_t c_loc_id;
      hid_t c_file_id;
      hid_t c_acc_prp;
@@ -153,7 +153,7 @@ nh5fmount_c (hid_t_f *loc_id, _fcd dsetname, int_f *namelen, hid_t_f *file_id, h
       * Convert FORTRAN name to C name
       */
      c_namelen = *namelen;
-     c_name = (char *)HD5f2cstring(dsetname, c_namelen); 
+     c_name = (char *)HD5f2cstring(dsetname, (size_t)c_namelen); 
      if (c_name == NULL) return ret_value;
 
      /*
@@ -183,7 +183,7 @@ nh5funmount_c (hid_t_f *loc_id, _fcd dsetname, int_f *namelen)
 {
      int ret_value = -1;
      char *c_name;
-     int c_namelen;
+     int_f c_namelen;
      hid_t c_loc_id;
      htri_t status;
 
@@ -193,7 +193,7 @@ nh5funmount_c (hid_t_f *loc_id, _fcd dsetname, int_f *namelen)
       * Convert FORTRAN name to C name
       */
      c_namelen = *namelen;
-     c_name = (char *)HD5f2cstring(dsetname, c_namelen); 
+     c_name = (char *)HD5f2cstring(dsetname, (size_t)c_namelen); 
      if (c_name == NULL) return ret_value;
 
      /*
@@ -227,7 +227,7 @@ nh5fopen_c (_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *acc_prp, hi
 {
      int ret_value = -1;
      char *c_name;
-     int c_namelen;
+     int_f c_namelen;
      hid_t c_file_id;
      unsigned c_access_flags;
      hid_t c_acc_prp;
@@ -249,7 +249,7 @@ nh5fopen_c (_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *acc_prp, hi
       * Convert FORTRAN name to C name
       */
      c_namelen = *namelen;
-     c_name = (char *)HD5f2cstring(name, c_namelen); 
+     c_name = (char *)HD5f2cstring(name, (size_t)c_namelen); 
      if (c_name == NULL) return ret_value;
 
      /*
@@ -360,14 +360,14 @@ nh5fis_hdf5_c (_fcd name, int_f *namelen, int_f *flag)
 {
      int ret_value = -1;
      char *c_name;
-     int c_namelen;
+     int_f c_namelen;
      htri_t status;
 
      /*
       * Convert FORTRAN name to C name
       */
      c_namelen = *namelen;
-     c_name = (char *)HD5f2cstring(name, c_namelen); 
+     c_name = (char *)HD5f2cstring(name, (size_t)c_namelen); 
      if (c_name == NULL) return ret_value;
 
      /*

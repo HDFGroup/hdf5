@@ -1646,7 +1646,7 @@ nh5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f* name_size, _fcd name, 
       * Call H5Pget_external function.
       */
      c_prp_id = (hid_t)*prp_id;
-     c_idx = (unsigned)*idx;
+     c_idx = (unsigned)*idx; 
      status = H5Pget_external(c_prp_id, c_idx, c_namelen, c_name, &c_offset, &size );
 
      if (status < 0) goto DONE;

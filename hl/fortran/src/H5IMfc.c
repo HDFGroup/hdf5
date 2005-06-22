@@ -16,6 +16,7 @@
 
 #include "H5IM.h"
 #include "H5LTf90proto.h"
+#include "../../../fortran/src/H5f90i_gen.h"
 
 
 /*-------------------------------------------------------------------------
@@ -43,7 +44,7 @@ nh5immake_image_8bit_c (hid_t_f *loc_id,
                        _fcd name, 
                        hsize_t_f *width,
                        hsize_t_f *height, 
-                       void *buf)
+                       int_f *buf)
 {
  int     ret_value = -1;
  herr_t  ret;
@@ -54,7 +55,7 @@ nh5immake_image_8bit_c (hid_t_f *loc_id,
 /*
  * Convert FORTRAN name to C name
  */
- c_namelen = *namelen;
+ c_namelen = (int)*namelen;
  c_name = (char *)HD5f2cstring(name, c_namelen); 
  if (c_name == NULL) return ret_value;
 
@@ -62,7 +63,6 @@ nh5immake_image_8bit_c (hid_t_f *loc_id,
  * Call H5IMmake_image_8bitf function.
  */
  c_loc_id = (hid_t)*loc_id;
-
  ret = H5IMmake_image_8bitf(c_loc_id,c_name,*width,*height,buf);
 
  if (ret < 0) return ret_value;
@@ -93,7 +93,7 @@ int_f
 nh5imread_image_c (hid_t_f *loc_id, 
                    int_f *namelen,
                    _fcd name, 
-                   void *buf)
+                   int_f *buf)
 {
  int     ret_value = -1;
  herr_t  ret;
@@ -105,7 +105,7 @@ nh5imread_image_c (hid_t_f *loc_id,
 /*
  * Convert FORTRAN name to C name
  */
- c_namelen = *namelen;
+ c_namelen = (int)*namelen;
  c_name = (char *)HD5f2cstring(name, c_namelen); 
  if (c_name == NULL) return ret_value;
 

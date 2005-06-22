@@ -68,8 +68,8 @@
             INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp
                                                    ! File access property list
                                                    ! identifier
-            INTEGER :: creation_prp_default 
-            INTEGER :: access_prp_default
+            INTEGER(HID_T) :: creation_prp_default 
+            INTEGER(HID_T) :: access_prp_default
             INTEGER :: namelen ! Length of the name character string
 
 !            INTEGER, EXTERNAL :: h5fcreate_c
@@ -86,8 +86,8 @@
               CHARACTER(LEN=*), INTENT(IN) :: name
               INTEGER, INTENT(IN) :: access_flags
               INTEGER(HID_T), INTENT(OUT) :: file_id
-              INTEGER, INTENT(IN) :: creation_prp_default
-              INTEGER, INTENT(IN) :: access_prp_default
+              INTEGER(HID_T), INTENT(IN) :: creation_prp_default
+              INTEGER(HID_T), INTENT(IN) :: access_prp_default
               INTEGER :: namelen
               END FUNCTION h5fcreate_c
             END INTERFACE
@@ -223,7 +223,7 @@
             INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp
                                                    ! File access property list
                                                    ! identifier
-            INTEGER :: access_prp_default 
+            INTEGER(HID_T) :: access_prp_default 
             INTEGER :: namelen ! Length of the name character string
   
 !            INTEGER, EXTERNAL :: h5fmount_c
@@ -360,7 +360,7 @@
             INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp
                                                    ! File access property list
                                                    ! identifier
-            INTEGER :: access_prp_default 
+            INTEGER(HID_T) :: access_prp_default 
             INTEGER :: namelen ! Length of the name character string
 
 !            INTEGER, EXTERNAL :: h5fopen_c
@@ -377,7 +377,7 @@
               CHARACTER(LEN=*), INTENT(IN) :: name
               INTEGER :: namelen
               INTEGER, INTENT(IN) :: access_flags
-              INTEGER, INTENT(IN) :: access_prp_default
+              INTEGER(HID_T), INTENT(IN) :: access_prp_default
               INTEGER(HID_T), INTENT(OUT) :: file_id
               END FUNCTION h5fopen_c
             END INTERFACE

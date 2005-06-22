@@ -11,6 +11,8 @@
  ****************************************************************************/
 
 #include "H5IM.h"
+#include "../../fortran/src/H5f90i_gen.h"
+
 
 #include <string.h>
 #include <stdlib.h>
@@ -24,7 +26,7 @@ herr_t H5IM_get_palette( hid_t loc_id,
                          const char *image_name,
                          int pal_number,
                          hid_t tid,
-                         void *pal_data);
+                         int_f *pal_data);
 
 
 /*-------------------------------------------------------------------------
@@ -1292,7 +1294,7 @@ herr_t H5IMmake_image_8bitf( hid_t loc_id,
                              const char *dset_name, 
                              hsize_t width,
                              hsize_t height,
-                             void *buf )
+                             int_f *buf )
 {
  hid_t    did;                  /* dataset ID */
  hid_t    sid;                  /* space ID */
@@ -1313,13 +1315,24 @@ herr_t H5IMmake_image_8bitf( hid_t loc_id,
   return -1;
 
  /* create the dataset as H5T_NATIVE_UCHAR */
- if ((did=H5Dcreate(loc_id,dset_name,H5T_NATIVE_UCHAR,sid,H5P_DEFAULT))<0)
+ if ((did=H5Dcreate(loc_id,dset_name,H5T_NATIVE_UINT8,sid,H5P_DEFAULT))<0)
   return -1;
 
  /* write with memory type H5T_NATIVE_INT */
+ /* Use long type if Fortran integer is 8 bytes and C long long is also 8 bytes*/
+ /* Fail if otherwise */
  if (buf) 
  {
+  if (sizeof(int_f) == sizeof(int)) {
   if (H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+   return -1;}
+  else if (sizeof(int_f) == sizeof(long)) {
+  if (H5Dwrite(did,H5T_NATIVE_LONG,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+   return -1;}
+  else if (sizeof(int_f) == sizeof(long long)) {
+  if (H5Dwrite(did,H5T_NATIVE_LLONG,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+   return -1;}
+  else
    return -1;
  }
 
@@ -1382,7 +1395,7 @@ herr_t H5IMmake_image_24bitf( hid_t loc_id,
                               hsize_t width,
                               hsize_t height,
                               const char *interlace,
-                              void *buf)
+                              int_f *buf)
 {
  hid_t    did;                /* dataset ID */
  hid_t    sid;                /* space ID */
@@ -1425,7 +1438,16 @@ herr_t H5IMmake_image_24bitf( hid_t loc_id,
  /* write with memory type H5T_NATIVE_INT */
  if (buf) 
  {
+  if (sizeof(int_f) == sizeof(int)) {
   if (H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+   return -1;}
+  else if (sizeof(int_f) == sizeof(long)) {
+  if (H5Dwrite(did,H5T_NATIVE_LONG,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+   return -1;}
+  else if (sizeof(int_f) == sizeof(long long)) {
+  if (H5Dwrite(did,H5T_NATIVE_LLONG,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+   return -1;}
+  else
    return -1;
  }
 
@@ -1484,7 +1506,7 @@ herr_t H5IMmake_image_24bitf( hid_t loc_id,
 
 herr_t H5IMread_imagef( hid_t loc_id, 
                         const char *dset_name, 
-                        void *buf )
+                        int_f *buf )
 {
  hid_t   did;  
 
@@ -1493,13 +1515,21 @@ herr_t H5IMread_imagef( hid_t loc_id,
   return -1;
 
  /* read to memory type H5T_NATIVE_INT */
+ if (sizeof(int_f) == sizeof(int)){
  if ( H5Dread( did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf ) < 0 )
+  goto out;}
+ else if (sizeof(int_f) == sizeof(long)) {
+ if ( H5Dread( did, H5T_NATIVE_LONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf ) < 0 )
+  goto out;}
+ else if (sizeof(int_f) == sizeof(long long)) {
+ if ( H5Dread( did, H5T_NATIVE_LLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf ) < 0 )
+  goto out;}
+ else
   goto out;
 
  /* close */
  if ( H5Dclose( did ) )
   return -1;
-
  return 0;
 
 out:
@@ -1536,7 +1566,7 @@ out:
 herr_t H5IMmake_palettef( hid_t loc_id, 
                           const char *pal_name,
                           const hsize_t *pal_dims,
-                          void *pal_data ) 
+                          int_f *pal_data ) 
 
 {  
  
@@ -1567,7 +1597,16 @@ herr_t H5IMmake_palettef( hid_t loc_id,
  /* write with memory type H5T_NATIVE_INT */
  if (pal_data) 
  {
+  if (sizeof(int_f) == sizeof(int)) {
   if (H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,pal_data)<0)
+   return -1;}
+  else if (sizeof(int_f) == sizeof(long)) {
+  if (H5Dwrite(did,H5T_NATIVE_LONG,H5S_ALL,H5S_ALL,H5P_DEFAULT,pal_data)<0)
+   return -1;}
+  else if (sizeof(int_f) == sizeof(long long)) {
+  if (H5Dwrite(did,H5T_NATIVE_LLONG,H5S_ALL,H5S_ALL,H5P_DEFAULT,pal_data)<0)
+   return -1;}
+  else
    return -1;
  }
 
@@ -1622,9 +1661,17 @@ herr_t H5IMmake_palettef( hid_t loc_id,
 herr_t H5IMget_palettef( hid_t loc_id, 
                          const char *image_name,
                          int pal_number,
-                         void *pal_data )
+                         int_f *pal_data )
 {
- return H5IM_get_palette(loc_id,image_name,pal_number,H5T_NATIVE_INT,pal_data);
+ if(sizeof(int_f) == sizeof(int))
+  return H5IM_get_palette(loc_id,image_name,pal_number,H5T_NATIVE_INT,pal_data);
+ else if (sizeof(int_f) == sizeof(long))
+  return H5IM_get_palette(loc_id,image_name,pal_number,H5T_NATIVE_LONG,pal_data);
+ else if (sizeof(int_f) == sizeof(long long))
+  return H5IM_get_palette(loc_id,image_name,pal_number,H5T_NATIVE_LLONG,pal_data);
+ else
+  return -1;
+
 }
 
 /*-------------------------------------------------------------------------
@@ -1659,7 +1706,7 @@ herr_t H5IM_get_palette( hid_t loc_id,
                          const char *image_name,
                          int pal_number,
                          hid_t tid,
-                         void *pal_data)
+                         int_f *pal_data)
 {
  hid_t      image_id;
  int        has_pal;

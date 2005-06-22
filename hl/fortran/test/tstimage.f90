@@ -127,12 +127,10 @@ call test_begin(' Make/Read image 8bit           ')
 ! write image. 
 !
 call h5immake_image_8bit_f(file_id,dsetname1,width,height,buf1,errcode)
-
 !
 ! read image. 
 !
 call h5imread_image_f(file_id,dsetname1,bufr1,errcode)
-                            
 !
 ! compare read and write buffers.
 !

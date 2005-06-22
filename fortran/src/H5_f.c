@@ -43,7 +43,22 @@ nh5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertype
 
     int ret_value = -1;
     hid_t c_type_id;
+    size_t tmp_val;
+
+/* Fortran INTEGER is may not be the same as C in; do all checking to find
+   an appropriate size
+*/
+    if (sizeof(int_f) == sizeof(int)) {
     if ((types[0] = (hid_t_f)H5Tcopy(H5T_NATIVE_INT)) < 0) return ret_value;
+    } /*end if */
+    else if (sizeof(int_f) == sizeof(long)) {
+    if ((types[0] = (hid_t_f)H5Tcopy(H5T_NATIVE_LONG)) < 0) return ret_value;
+    } /*end if */
+    else
+    if (sizeof(int_f) == sizeof(long long)) {
+    if ((types[0] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
+    } /*end else */
+
     /* Accomodate Crays with this check */
     if(sizeof(real_f)==sizeof(double)) {
         if ((types[1] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
@@ -52,11 +67,13 @@ nh5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertype
         if ((types[1] = (hid_t_f)H5Tcopy(H5T_NATIVE_FLOAT)) < 0) return ret_value;
     } /* end else */
     if ((types[2] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
+
 /*
     if ((types[3] = H5Tcopy(H5T_NATIVE_UINT8)) < 0) return ret_value;
 */
     if ((c_type_id = H5Tcopy(H5T_FORTRAN_S1)) < 0) return ret_value;
-    if(H5Tset_size(c_type_id, 1) < 0) return ret_value;
+    tmp_val = 1;
+    if(H5Tset_size(c_type_id, tmp_val) < 0) return ret_value;
     if(H5Tset_strpad(c_type_id, H5T_STR_SPACEPAD) < 0) return ret_value;
     types[3] = (hid_t_f)c_type_id;
 
@@ -188,7 +205,7 @@ int_f
 nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
                  int_f *h5fd_flags, hid_t_f *h5fd_hid_flags, 
                  int_f *h5g_flags, int_f *h5i_flags,
-                 int_f *h5p_flags, int_f *h5r_flags, int_f *h5s_flags,
+                 hid_t_f *h5p_flags, int_f *h5r_flags, int_f *h5s_flags,
                  int_f *h5t_flags, int_f *h5z_flags)
 {
     int ret_value = -1;
@@ -317,7 +334,7 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
       h5s_flags[3] = H5S_SELECT_SET;
       h5s_flags[4] = H5S_SELECT_OR;
       h5s_flags[5] = (int_f)H5S_UNLIMITED;
-      h5s_flags[6] = H5S_ALL;
+      h5s_flags[6] = (int_f)H5S_ALL;
 
       h5s_flags[7] = H5S_SELECT_NOOP;
       h5s_flags[8] = H5S_SELECT_AND;

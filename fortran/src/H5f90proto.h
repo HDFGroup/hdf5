@@ -50,7 +50,7 @@ H5_FCDLL int_f nh5freopen_c (hid_t_f *file_id1, hid_t_f *file_id2);
 H5_FCDLL int_f nh5fget_create_plist_c (hid_t_f *file_id, hid_t_f *prop_id);
 H5_FCDLL int_f nh5fget_access_plist_c (hid_t_f *file_id, hid_t_f *access_id);
 H5_FCDLL int_f nh5fget_obj_count_c (hid_t_f *file_id, int_f *obj_type, int_f *obj_count);
-H5_FCDLL int_f nh5fget_obj_ids_c (hid_t_f *file_id, int_f *obj_type, int_f *max_objs, int_f *obj_ids);
+H5_FCDLL int_f nh5fget_obj_ids_c (hid_t_f *file_id, int_f *obj_type, int_f *max_objs, hid_t_f *obj_ids);
 H5_FCDLL int_f nh5fget_freespace_c (hid_t_f *file_id, hssize_t_f *free_space);
 H5_FCDLL int_f nh5fflush_c (hid_t_f *obj_id, int_f *scope);
 H5_FCDLL int_f nh5fget_name_c(hid_t_f *obj_id, size_t_f *size, _fcd buf, size_t_f *buflen);
@@ -653,7 +653,7 @@ H5_FCDLL int_f nh5close_types_c(hid_t_f *types, int_f *lentypes, hid_t_f * float
 H5_FCDLL int_f nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
                               int_f *h5fd_flags, hid_t_f *h5fd_hid_flags,
                               int_f *h5g_flags, int_f *h5i_flags,
-                              int_f *h5p_flags, int_f *h5r_flags, int_f *h5s_flags,
+                              hid_t_f *h5p_flags, int_f *h5r_flags, int_f *h5s_flags,
                               int_f *h5t_flags, int_f *h5z_flags); 
 H5_FCDLL int_f nh5init1_flags_c(int_f *h5lib_flags); 
 H5_FCDLL int_f nh5get_libversion_c(int_f *majnum, int_f *minnum, int_f *relnum);

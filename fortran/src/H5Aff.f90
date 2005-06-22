@@ -153,7 +153,7 @@
             INTEGER(HID_T), OPTIONAL, INTENT(IN) :: creation_prp
                                                 ! Attribute creation property 
                                                 ! list identifier 
-            INTEGER :: creation_prp_default 
+            INTEGER(HID_T) :: creation_prp_default 
             INTEGER(SIZE_T) :: namelen
 !            INTEGER, EXTERNAL :: h5acreate_c
 !  MS FORTRAN needs explicit interface for C functions called here.
@@ -171,7 +171,7 @@
               INTEGER(SIZE_T) :: namelen
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER(HID_T), INTENT(IN) :: space_id
-              INTEGER :: creation_prp_default
+              INTEGER(HID_T) :: creation_prp_default
               INTEGER(HID_T), INTENT(OUT) :: attr_id
               END FUNCTION h5acreate_c
             END INTERFACE

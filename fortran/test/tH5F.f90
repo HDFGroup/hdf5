@@ -678,8 +678,10 @@
                  write(*,*) "File should be closed at this point, error"
               endif 
 
-          if(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+          if(cleanup) then
+              CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
               CALL check("h5_cleanup_f", error, total_error)
+          endif
           deallocate(obj_ids)
           RETURN
 

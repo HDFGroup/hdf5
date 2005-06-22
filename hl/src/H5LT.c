@@ -1560,6 +1560,38 @@ herr_t H5LTset_attribute_long( hid_t loc_id,
  return 0;
 
 }
+/*-------------------------------------------------------------------------
+ * Function: H5LTset_attribute_long_long
+ *
+ * Purpose: Create and write an attribute.
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Elena Pourmal, epourmal@ncsa.uiuc.edu
+ *
+ * Date: June 17, 2005
+ *
+ * Comments: This function was added to support 8-bytes int_f type that
+ *           may correspond to INTEGER*8 in Fortran
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t H5LTset_attribute_long_long( hid_t loc_id, 
+                               const char *obj_name, 
+                               const char *attr_name,
+                               const long long *data,
+                               size_t size ) 
+{
+ 
+ if ( H5LT_set_attribute_numerical( loc_id, obj_name, attr_name, size, 
+      H5T_NATIVE_LLONG, data ) < 0 )
+  return -1;
+
+ return 0;
+
+}
+
 
 /*-------------------------------------------------------------------------
  * Function: H5LTset_attribute_ulong
@@ -2416,6 +2448,54 @@ herr_t H5LTget_attribute_long( hid_t loc_id,
  return 0;
 
 }
+/*-------------------------------------------------------------------------
+ * Function: H5LTget_attribute_long_long
+ *
+ * Purpose: Reads an attribute named attr_name
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Elena Pourmal, epourmal@ncsa.uiuc.edu
+ *
+ * Date: June 17, 2005
+ *
+ * Comments: This funstion was added to suuport INTEGER*8 Fortran types
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t H5LTget_attribute_long_long( hid_t loc_id, 
+                              const char *obj_name, 
+                              const char *attr_name,
+                              long long *data ) 
+{
+
+ /* identifiers */
+ hid_t      obj_id;
+ H5G_stat_t statbuf;
+
+ /* Get the type of object */
+ if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
+  return -1;
+ 
+ /* Open the object */
+ if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
+  return -1;
+
+ /* Get the attribute */
+ if ( H5LT_get_attribute_mem( obj_id, attr_name, H5T_NATIVE_LLONG, data ) < 0 )
+  return -1;
+
+ /* Close the object */
+ if ( H5LT_close_id( obj_id, statbuf.type ) < 0 )
+  return -1;
+
+ return 0;
+
+}
+
+/*-------------------------------------------------------------------------
 
 /*-------------------------------------------------------------------------
  * Function: H5LTget_attribute_ulong

@@ -257,13 +257,14 @@
 
      ! Close the file by decrementing the reference count
      CALL h5idec_ref_f(file_id, ref_count, error)
-     CALL check("h5iinc_ref_f",error,total_error)
+     CALL check("h5idec_ref_f",error,total_error)
      CALL verify("get file ref count wrong",ref_count,0,total_error)
-
      ! Try closing the file again (should fail)
+     CALL h5eset_auto_f(0, error)
      CALL h5fclose_f(file_id, error)
      CALL verify("file close should fail",error,-1,total_error)
      ! Clear the error stack from the file close failure
+     CALL h5eset_auto_f(1, error)
      CALL h5eclear_f(error)
 
       if(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)

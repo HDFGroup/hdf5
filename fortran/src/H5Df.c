@@ -91,6 +91,9 @@ nh5dopen_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *dset_id)
      int c_namelen;
      hid_t c_loc_id;
      hid_t c_dset_id;
+     hid_t plist;
+     off_t offset;
+     hsize_t size;
 
      /*
       * Convert FORTRAN name to C name
@@ -759,7 +762,7 @@ nh5dwrite_vl_integer_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_
   hid_t c_file_space_id;
   hid_t c_xfer_prp;
   herr_t status;
-  int *tmp;
+  int_f *tmp;
   size_t max_len;
 
   hvl_t *c_buf;
@@ -777,7 +780,7 @@ nh5dwrite_vl_integer_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_
 
   c_buf = (hvl_t *)malloc((size_t)num_elem * sizeof(hvl_t)); 
   if (c_buf == NULL) return ret_value;
-  tmp = (int *)buf; 
+  tmp = (int_f *)buf; 
   for (i=0; i < num_elem; i++) {
        c_buf[i].len = (size_t)len[i];  
        c_buf[i].p   = tmp;
@@ -849,7 +852,7 @@ nh5dread_vl_integer_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_s
  if ( status < 0 ) goto DONE;
   for (i=0; i < num_elem; i++) {
        len[i] = (size_t_f)c_buf[i].len;  
-       memcpy(&buf[i*max_len], c_buf[i].p, c_buf[i].len*sizeof(int));
+       memcpy(&buf[i*max_len], c_buf[i].p, c_buf[i].len*sizeof(int_f));
   }
   H5Dvlen_reclaim(c_mem_type_id, c_mem_space_id, H5P_DEFAULT, c_buf);
   ret_value = 0;

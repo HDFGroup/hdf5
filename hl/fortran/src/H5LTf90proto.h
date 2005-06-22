@@ -245,13 +245,13 @@ nh5immake_image_8bit_c (hid_t_f *loc_id,
                        _fcd name, 
                        hsize_t_f *width,
                        hsize_t_f *height, 
-                       void *buf);
+                       int_f *buf);
 H5_DLL
 int_f
 nh5imread_image_c (hid_t_f *loc_id, 
                    int_f *namelen,
                    _fcd name, 
-                   void *buf);
+                   int_f *buf);
 
 H5_DLL
 int_f
