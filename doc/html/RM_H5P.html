@@ -43,6 +43,11 @@ HDF5/H5P API Specification
 And in this document, the 
 <a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;&nbsp;
 <br>
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5im.html">H5IM</a>&nbsp;&nbsp;
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5lt.html">H5LT</a>&nbsp;&nbsp;
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5pt.html">H5PT</a>&nbsp;&nbsp;
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5tb.html">H5TB</a>&nbsp;&nbsp;
+<br>
 <a href="RM_H5.html">H5</a>&nbsp;&nbsp;
 <a href="RM_H5A.html">H5A</a>&nbsp;&nbsp;
 <a href="RM_H5D.html">H5D</a>&nbsp;&nbsp;
@@ -107,7 +112,14 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-CloseList">H5Pclose_list</a> 
     <li><a href="#Property-CloseClass">H5Pclose_class</a> 
     </ul>
-
+	
+!--
+    <p><i>Meta Data Cache Properties</i>
+    <ul>
+    <li><a href="#Property-GetMdcConfig">H5Pget_mdc_config</a>
+    <li><a href="#Property-SetMdcConfig">H5Pset_mdc_config</a>
+    </ul>
+-->
 
 <br>&nbsp;
 <br>&nbsp;
@@ -310,6 +322,14 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-CloseList">H5Pclose_list</a> 
     <li><a href="#Property-CloseClass">H5Pclose_class</a> 
   </ul>
+  
+<!--
+  <i>Meta Data Cache Properties</i>
+  <ul>
+    <li><a href="#Property-GetMdcConfig">H5Pget_mdc_config</a>
+    <li><a href="#Property-SetMdcConfig">H5Pset_mdc_config</a>
+  </ul>
+-->
 </td>
 <td valign="top" width="3%">&nbsp;</td>
 <td valign="top" width="32%">
@@ -541,6 +561,7 @@ See further notes in the description of each function.
       <li><a href="#Property-GetHyperVectorSize">H5Pget_hyper_vector_size</a>
       <li><a href="#Property-GetIstoreK">H5Pget_istore_k</a>
       <li><a href="#Property-GetLayout">H5Pget_layout</a>
+<!--  <li><a href="#Property-GetMdcConfig">H5Pget_mdc_config</a>                    -->
       <li><a href="#Property-GetMetaBlockSize">H5Pget_meta_block_size</a>
       <li><a href="#Property-GetMultiType">H5Pget_multi_type</a>
       <li><a href="#Property-GetNFilters">H5Pget_nfilters</a>
@@ -604,6 +625,7 @@ See further notes in the description of each function.
       <li><a href="#Property-SetHyperVectorSize">H5Pset_hyper_vector_size</a>
       <li><a href="#Property-SetIstoreK">H5Pset_istore_k</a>
       <li><a href="#Property-SetLayout">H5Pset_layout</a>
+<!--  <li><a href="#Property-SetMdcConfig">H5Pset_mdc_config</a>                    -->
       <li><a href="#Property-SetMetaBlockSize">H5Pset_meta_block_size</a>
       <li><a href="#Property-SetMultiType">H5Pset_multi_type</a>
       <li><a href="#Property-SetPreserve">H5Pset_preserve</a>
@@ -666,6 +688,12 @@ as the corresponding C function.
     <li><a href="#Property-CloseList">h5pclose_list_f</a>
     <li><a href="#Property-CloseClass">h5pclose_class_f</a>
     </ul>
+	
+<!--<p><i>Meta Data Cache Properties</i>                                -->
+<!--<ul>                                                                -->
+<!--<li><a href="#Property-GetMdcConfig">H5Pget_mdc_config_f</a></li>   -->
+<!--<li><a href="#Property-SetMdcConfig">H5Pset_mdc_config_f</a></li>   -->
+<!--</ul>                                                               -->
 
     <p><i>File Creation Properties</i>
     <ul>
@@ -3938,6 +3966,21 @@ END SUBROUTINE h5pget_layout_f
 </dl>
 
 <!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_mdc_config" -->
+<!--
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetMdcConfig">H5Pget_mdc_config</a>
+  <dt><strong>Signature:</strong>
+  <dt><strong>Purpose:</strong>
+  <dt><strong>Description:</strong>
+  <dt><strong>Parameters:</strong>
+  <dt><strong>Returns:</strong>
+  <dt><strong>Fortran90 Interface:</strong>
+</dl>
+-->
+
+<!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Pget_meta_block_size" -->
 <hr>
 <dl>
@@ -4486,6 +4529,8 @@ END SUBROUTINE h5pget_sym_k_f
         <img src="Graphics/C++.gif">
         -->
 </dl>
+
+
 
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Pget_userblock" -->
@@ -8614,6 +8659,21 @@ END SUBROUTINE h5pset_layout_f
 </dl>
 
 <!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_mdc_config" -->
+<!--
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetMdcConfig">H5Pset_mdc_config</a>
+  <dt><strong>Signature:</strong>
+  <dt><strong>Purpose:</strong>
+  <dt><strong>Description:</strong>
+  <dt><strong>Parameters:</strong>
+  <dt><strong>Returns:</strong>
+  <dt><strong>Fortran90 Interface:</strong>
+</dl>
+-->
+
+<!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Pset_meta_block_size" -->
 <hr>
 <dl>
@@ -9685,6 +9745,11 @@ END SUBROUTINE h5punregister_f
 And in this document, the 
 <a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;&nbsp;
 <br>
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5im.html">H5IM</a>&nbsp;&nbsp;
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5lt.html">H5LT</a>&nbsp;&nbsp;
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5pt.html">H5PT</a>&nbsp;&nbsp;
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5tb.html">H5TB</a>&nbsp;&nbsp;
+<br>
 <a href="RM_H5.html">H5</a>&nbsp;&nbsp;
 <a href="RM_H5A.html">H5A</a>&nbsp;&nbsp;
 <a href="RM_H5D.html">H5D</a>&nbsp;&nbsp;
@@ -9709,7 +9774,7 @@ And in this document, the
 Describes HDF5 Release 1.7, the unreleased development branch; working toward HDF5 Release 1.8.0
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 19 November 2004");
+document.writeln("Last modified: 23 June 2005");
 -->
 </SCRIPT>
  
