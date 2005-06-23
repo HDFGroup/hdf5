@@ -48,6 +48,11 @@ HDF5 API Specification
 And in this document, the 
 <a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;&nbsp;
 <br>
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5im.html">H5IM</a>&nbsp;&nbsp;
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5lt.html">H5LT</a>&nbsp;&nbsp;
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5pt.html">H5PT</a>&nbsp;&nbsp;
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5tb.html">H5TB</a>&nbsp;&nbsp;
+<br>
 <a href="RM_H5.html">H5</a>&nbsp;&nbsp;
 <a href="RM_H5A.html">H5A</a>&nbsp;&nbsp;
 <a href="RM_H5D.html">H5D</a>&nbsp;&nbsp;
@@ -80,62 +85,192 @@ document.writeln("See <a href="#F90andCPPlus">below</a> for the FORTRAN90 and C+
 -->
 </SCRIPT>
 
-<!-- FOR USE WITH PRINT VERSION ONLY ----------------------------------->
+<!-- FOR USE WITH PRINT VERSION ONLY -----------------------------------
 Notes regarding FORTRAN90 and C++ APIs appear on the next page.
 <!-- FOR USE WITH PRINT VERSION ONLY ----------------------------------->
 <p>
 
 <center>
-<table border=0 width=90%>
+<table border="1" width="80%">
+  <tr align="center" valign="middle">
+    <td width="33%"><a href="#HighLevelAPIs">High-level APIs</a></td>
+	<td width="34%"><a href="#LowLevelAPIs">Main HDF5 Library,
+                        <br>including Low-level APIs</a></td>
+	<td width="33%"><a href="#F90andCPPlus">Fortran and C++
+                        <br>Interfaces</a></td>
+  </tr>
+</table>
+</center>
+<br>
+<a name="HighLevelAPIs"><br></a>
 
-<tr><td valign=top><a href="RM_H5.html">Library Functions</a>
-    </td><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>The general-purpose <strong>H5</strong> functions.
-</td></tr>
-<tr><td valign=top><a href="RM_H5A.html">Attribute Interface</a>
-    </td><td></td><td valign=top>The <strong>H5A</strong> API for attributes.
-</td></tr>
-<tr><td valign=top><a href="RM_H5D.html">Dataset Interface</a>
-    </td><td></td><td valign=top>The <strong>H5D</strong> API for manipulating scientific datasets. 
-</td></tr>
-<tr><td valign=top><a href="RM_H5E.html">Error Interface</a>
-    </td><td></td><td valign=top>The <strong>H5E</strong> API for error handling.
-</td></tr>
-<tr><td valign=top><a href="RM_H5F.html">File Interface</a>
-    </td><td></td><td valign=top>The <strong>H5F</strong> API for accessing HDF files.
-</td></tr>
-<tr><td valign=top><a href="RM_H5G.html">Group Interface</a>
-    </td><td></td><td valign=top>The <strong>H5G</strong> API for creating physical groups of objects on disk.
-</td></tr>
-<tr><td valign=top><a href="RM_H5I.html">Identifier Interface</a>
-    </td><td></td><td valign=top>The <strong>H5I</strong> API for working with object identifiers.
-</td></tr>
-<tr><td valign=top><a href="RM_H5P.html">Property List Interface</a>
-    </td><td></td><td valign=top>The <strong>H5P</strong> API for manipulating object property lists.
-</td></tr>
-<tr><td valign=top><a href="RM_H5R.html">Reference Interface</a>
-    </td><td></td><td valign=top>The <strong>H5R</strong> API for references.
-</td></tr>
-<tr><td valign=top><a href="RM_H5S.html">Dataspace Interface</a>
-    </td><td></td><td valign=top>The <strong>H5S</strong> API for defining dataset dataspace.
-</td></tr>
-<tr><td valign=top><a href="RM_H5T.html">Datatype Interface</a>
-    </td><td></td><td valign=top>The <strong>H5T</strong> API for defining dataset element information.
-</td></tr>
-<tr><td valign=top><a href="RM_H5Z.html">Filters and</a><br>
-                                        &nbsp;&nbsp;<a href="RM_H5Z.html">Compression Interface</a>
-    </td><td></td><td valign=top>The <strong>H5Z</strong> API for inline data filters and data compression.
-</td></tr>
-<tr><td valign=top><a href="Tools.html">Tools</a>
-    </td><td></td><td valign=top>Interactive tools for the examination of existing HDF5 files.
-</td></tr>
-<tr><td valign=top><a href="PredefDTypes.html">Predefined Datatypes</a>
-    </td><td></td><td valign=top>Predefined datatypes in HDF5.
+
+<center>
+<table border=0 width="100%">
+  <tr>
+    <td valign="top" colspan="4">
+	<h3>High-level HDF5 APIs</h3>
+	  The HDF5 Library includes several sets of convenience and
+          standard-use APIs. 
+          The HDF5 Lite APIs are convenience functions designed to 
+          facilitate common HDF5 operations. 
+	  The HDF5 Image, HDF5 Table and HDF5 Packet Table APIs 
+          implement standardized approaches to common use cases 
+          with the intention of improving interoperability.
+	</td>
+  </tr>
+  <tr>
+    <td valign="top" width="10%">&nbsp;</td>
+    <td valign=top><a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5lt.html">Lite</a></td>
+	<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+    <td valign=top>The <strong>H5LT</strong>
+      API<b><strong> </strong></b>general higher-level functions</td>
+  </tr>
+  <tr>
+    <td valign="top" width="10%">&nbsp;</td>
+    <td valign=top><a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5im.html">Image</a></td>
+	<td>&nbsp;</td>
+    <td valign=top>The <strong>H5IM</strong> API for images</td>
+  </tr>
+  <tr>
+    <td valign="top" width="10%">&nbsp;</td>
+    <td valign=top><a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5tb.html">Table</a></td>
+	<td>&nbsp;</td>
+	<td valign=top>The <strong>H5TB</strong> API for manipulating
+    table datasets&nbsp;</td>
+  </tr>
+  <tr>
+    <!--   This row is formatted as it is in an attempt to set the     -->
+    <!--   format of the table containing the high- and low-level API  -->
+    <!--   section listings.                                           -->
+    <td valign="top" width="10%">&nbsp;</td>
+    <td valign=top>
+	  <a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5pt.html">Packet&nbsp;Table</a>
+    </td>
+	<td>&nbsp;</td>
+    <td valign=top>The&nbsp;<strong>H5PT</strong>&nbsp;API&nbsp;for&nbsp;managing&nbsp;packet&nbsp;tables&nbsp;(and&nbsp;<a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5pt_c++.html">C++&nbsp;H5PT&nbsp;wrappers</a>)
+    </td>
+  </tr>
+  <tr>
+    <td valign="top" width="10%">&nbsp;</td>
+    <td valign=top>
+	  <a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5ds.html">Dimension Scales</a></td>
+	<td>&nbsp;</td>
+	<td valign=top>The <strong>H5DS</strong> API for managing dimension scales&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" width="10%">&nbsp;</td>
+	<td>&nbsp;</td>
+	<td>&nbsp;</td>
+	<td><a name="LowLevelAPIs">&nbsp;</a></td>
+  </tr>
+  <tr>
+    <td valign="top" colspan="4">
+	  <h3>Main HDF5 Library, or Low-level APIs</h3>
+	  The main HDF5 Library includes all of the low-level APIs, 
+	  providing user applications with fine-grain control of 
+          HDF5 functionality. 
+	</td>
+  </tr>
+  <tr>
+    <td valign="top" width="10%">&nbsp;</td>
+    <td valign=top><a href="RM_H5.html">Library Functions</a></td>
+	<td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>The general-purpose 
+	  <strong>H5</strong> functions.</td>
+  </tr>
+  <tr>
+    <td valign="top" width="10%">&nbsp;</td>
+    <td valign=top><a href="RM_H5A.html">Attribute Interface</a></td>
+	<td>&nbsp;</td>
+	<td valign=top>The <strong>H5A</strong> API for attributes.</td>
+  </tr>
+  <tr>
+    <td valign="top" width="10%">&nbsp;</td>
+    <td valign=top><a href="RM_H5D.html">Dataset Interface</a></td>
+	<td>&nbsp;</td>
+	<td valign=top>The <strong>H5D</strong> API for manipulating 
+	  scientific datasets.</td>
+  </tr>
+  <tr>
+    <td valign="top" width="10%">&nbsp;</td>
+    <td valign=top><a href="RM_H5E.html">Error Interface</a></td>
+	<td>&nbsp;</td>
+	<td valign=top>The <strong>H5E</strong> API for error handling.</td>
+  </tr>
+  <tr>
+    <td valign="top" width="10%">&nbsp;</td>
+    <td valign=top><a href="RM_H5F.html">File Interface</a></td>
+	<td>&nbsp;</td>
+	<td valign=top>The <strong>H5F</strong> API for accessing HDF files.</td>
+  </tr>
+  <tr>
+    <td valign="top" width="10%">&nbsp;</td>
+    <td valign=top><a href="RM_H5G.html">Group Interface</a></td>
+	<td>&nbsp;</td>
+	<td valign=top>The <strong>H5G</strong> API for creating physical 
+	  groups of objects on disk.</td>
+  </tr>
+  <tr>
+    <td valign="top" width="10%">&nbsp;</td>
+    <td valign=top><a href="RM_H5I.html">Identifier Interface</a></td>
+	<td>&nbsp;</td>
+	<td valign=top>The <strong>H5I</strong> API for working with 
+	  object identifiers.</td>
+  </tr>
+  <tr>
+    <td valign="top" width="10%">&nbsp;</td>
+    <td valign=top><a href="RM_H5P.html">Property List Interface</a></td>
+	<td>&nbsp;</td>
+	<td valign=top>The <strong>H5P</strong> API for manipulating 
+	  object property lists.</td>
+  </tr>
+  <tr>
+    <td valign="top" width="10%">&nbsp;</td>
+    <td valign=top><a href="RM_H5R.html">Reference Interface</a></td>
+	<td>&nbsp;</td>
+	<td valign=top>The <strong>H5R</strong> API for references.</td>
+  </tr>
+  <tr>
+    <td valign="top" width="10%">&nbsp;</td>
+    <td valign=top><a href="RM_H5S.html">Dataspace Interface</a></td>
+	<td>&nbsp;</td>
+	<td valign=top>The <strong>H5S</strong> API for defining dataset 
+	  dataspace.</td>
+  </tr>
+  <tr>
+    <td valign="top" width="10%">&nbsp;</td>
+    <td valign=top><a href="RM_H5T.html">Datatype Interface</a></td>
+	<td>&nbsp;</td>
+	<td valign=top>The <strong>H5T</strong> API for defining dataset 
+	  element information.</td>
+  </tr>
+  <tr>
+    <td valign="top" width="10%">&nbsp;</td>
+    <td valign=top><a href="RM_H5Z.html">Filters and</a><br>
+      &nbsp;&nbsp;<a href="RM_H5Z.html">Compression&nbsp;Interface</a></td>
+    <td>&nbsp;</td>
+	<td valign=top>The <strong>H5Z</strong> API for inline data filters 
+	  and data compression.</td>
+  </tr>
+  <tr>
+    <td valign="top" width="10%">&nbsp;</td>
+    <td valign=top><a href="Tools.html">Tools</a></td>
+	<td>&nbsp;</td>
+	<td valign=top>Interactive tools for the examination 
+	  of existing HDF5 files.</td>
+  </tr>
+  <tr>
+    <td valign="top" width="10%">&nbsp;</td>
+    <td valign=top><a href="PredefDTypes.html">Predefined Datatypes</a></td>
+	<td>&nbsp;</td>
+	<td valign=top>Predefined datatypes in HDF5.
 <!--
 </td></tr>
 <tr><td valign=top><a href="Glossary.html">Glossary</a>
     </td><td></td><td valign=top>A glossary of data-types used in the APIs.
 -->
-</td></tr>
+    </td>
+  </tr>
 </table>
 </center>
 
@@ -224,6 +359,11 @@ which are described in the following documents.
 And in this document, the 
 <a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;&nbsp;
 <br>
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5im.html">H5IM</a>&nbsp;&nbsp;
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5lt.html">H5LT</a>&nbsp;&nbsp;
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5pt.html">H5PT</a>&nbsp;&nbsp;
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5tb.html">H5TB</a>&nbsp;&nbsp;
+<br>
 <a href="RM_H5.html">H5</a>&nbsp;&nbsp;
 <a href="RM_H5A.html">H5A</a>&nbsp;&nbsp;
 <a href="RM_H5D.html">H5D</a>&nbsp;&nbsp;
@@ -251,7 +391,7 @@ And in this document, the
 Describes HDF5 Release 1.7, the unreleased development branch; working toward HDF5 Release 1.8.0
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 24 February 2004");
+document.writeln("Last modified: 23 June 2005");
 -->
 </SCRIPT>
 
@@ -267,5 +407,3 @@ document.writeln("<a href=Copyright.html>Copyright</a>&nbsp;&nbsp;");
 
 </body>
 </html>
-
-
