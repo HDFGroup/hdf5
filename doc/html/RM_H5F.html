@@ -43,6 +43,11 @@ HDF5/H5F API Specification
 And in this document, the 
 <a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;&nbsp;
 <br>
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5im.html">H5IM</a>&nbsp;&nbsp;
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5lt.html">H5LT</a>&nbsp;&nbsp;
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5pt.html">H5PT</a>&nbsp;&nbsp;
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5tb.html">H5TB</a>&nbsp;&nbsp;
+<br>
 <a href="RM_H5.html">H5</a>&nbsp;&nbsp;
 <a href="RM_H5A.html">H5A</a>&nbsp;&nbsp;
 <a href="RM_H5D.html">H5D</a>&nbsp;&nbsp;
@@ -82,23 +87,28 @@ documented below.
     <li><a href="#File-Reopen">H5Freopen</a>
     <li><a href="#File-Close">H5Fclose</a>
     <li><a href="#File-Flush">H5Fflush</a>
+    <li><a href="#File-IsHDF5">H5Fis_hdf5</a>
+    <li><a href="#File-Mount">H5Fmount</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
-    <li><a href="#File-IsHDF5">H5Fis_hdf5</a>
-    <li><a href="#File-Mount">H5Fmount</a>
     <li><a href="#File-Unmount">H5Funmount</a>
     <li><a href="#File-GetVfdHandle">H5Fget_vfd_handle</a>
     <li><a href="#File-GetFilesize">H5Fget_filesize</a>
-</ul>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<ul>
     <li><a href="#File-GetCreatePlist">H5Fget_create_plist</a>
     <li><a href="#File-GetAccessPlist">H5Fget_access_plist</a>
     <li><a href="#File-GetName">H5Fget_name</a>
     <li><a href="#File-GetObjCount">H5Fget_obj_count</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
     <li><a href="#File-GetObjIDs">H5Fget_obj_ids</a>
     <li><a href="#File-GetFreeSpace">H5Fget_freespace</a>
+    <li><a href="#File-GetMdcConfig">H5Fget_mdc_config</a>
+    <li><a href="#File-GetMdcHitRate">H5Fget_mdc_hit_rate</a>
+    <li><a href="#File-GetMdcSize">H5Fget_mdc_size</a>
+    <li><a href="#File-ResetMdcHitRateStats">H5Freset_mdc_hit_rate_stats</a>
+    <li><a href="#File-SetMdcConfig">H5Fset_mdc_config</a>
 </ul>
 </td></tr>
 </table>
@@ -109,38 +119,43 @@ documented below.
 <table border="0">
   <tr>
     <td valign="top">
-	<ul>
+    <ul>
       <li><a href="#File-Close">H5Fclose</a>
       <li><a href="#File-Create">H5Fcreate</a>
       <li><a href="#File-Flush">H5Fflush</a>
       <li><a href="#File-GetAccessPlist">H5Fget_access_plist</a>
       <li><a href="#File-GetCreatePlist">H5Fget_create_plist</a>
       <li><a href="#File-GetFilesize">H5Fget_filesize</a>
+      <li><a href="#File-GetFreeSpace">H5Fget_freespace</a> 
     </ul>      
     </td>
     
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
     
     <td valign="top">
-	<ul>
-      <li><a href="#File-GetFreeSpace">H5Fget_freespace</a>
+    <ul>
+      <li><a href="#File-GetMdcConfig">H5Fget_mdc_config</a>
+      <li><a href="#File-GetMdcHitRate">H5Fget_mdc_hit_rate</a>
+      <li><a href="#File-GetMdcSize">H5Fget_mdc_size</a>
       <li><a href="#File-GetName">H5Fget_name</a>
       <li><a href="#File-GetObjCount">H5Fget_obj_count</a>
       <li><a href="#File-GetObjIDs">H5Fget_obj_ids</a>
       <li><a href="#File-GetVfdHandle">H5Fget_vfd_handle</a>
-	</ul>
+    </ul>
     </td>
     
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
     
     <td valign="top">
-	<ul>
+    <ul>
       <li><a href="#File-IsHDF5">H5Fis_hdf5</a>
       <li><a href="#File-Mount">H5Fmount</a>
       <li><a href="#File-Open">H5Fopen</a>
       <li><a href="#File-Reopen">H5Freopen</a>
+      <li><a href="#File-ResetMdcHitRateStats">H5Freset_mdc_hit_rate_stats</a>
+      <li><a href="#File-SetMdcConfig">H5Fset_mdc_config</a>
       <li><a href="#File-Unmount">H5Funmount</a>
-	</ul>
+    </ul>
     </td>
   </tr>
 </table>
@@ -160,10 +175,10 @@ as the corresponding C function.
     <li><a href="#File-Reopen">h5freopen_f</a>
     <li><a href="#File-Close">h5fclose_f</a>
     <li><a href="#File-Flush">h5fflush_f</a>
+    <li><a href="#File-IsHDF5">h5fis_hdf5_f</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
-    <li><a href="#File-IsHDF5">h5fis_hdf5_f</a>
     <li><a href="#File-Mount">h5fmount_f</a>
     <li><a href="#File-Unmount">h5funmount_f</a>
     <li><a href="#File-GetVfdHandle">h5fget_vfd_handle_f</a>
@@ -177,6 +192,11 @@ as the corresponding C function.
     <li><a href="#File-GetName">h5fget_name_f</a>
     <li><a href="#File-GetObjCount">h5fget_obj_count_f</a>
     <li><a href="#File-GetObjIDs">h5fget_obj_ids_f</a>
+<!--<li><a href="#File-GetMdcConfig">H5Fget_mdc_config_f</a>                    -->
+<!--<li><a href="#File-GetMdcHitRate">H5Fget_mdc_hit_rate_f</a>                 -->
+<!--<li><a href="#File-GetMdcSize">H5Fget_mdc_size_f</a>                        -->
+<!--<li><a href="#File-ResetMdcHitRateStats">H5Freset_mdc_hit_rate_stats_f</a>  -->
+<!--<li><a href="#File-SetMdcConfig">H5Fset_mdc_config_f</a>                    -->
 </ul>
 </td></tr>
 </table>
@@ -234,25 +254,25 @@ as the corresponding C function.
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em>&nbsp;<code>file_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
-            <td valign="top">IN: Identifier of a file to terminate access to.</td></tr>
+          <td valign="top"><em>hid_t</em>&nbsp;<code>file_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: Identifier of a file to terminate access to.</td></tr>
     </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5fclose_f
     <dd>
-	<pre>
+    <pre>
 SUBROUTINE h5fclose_f(file_id, hdferr) 
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: file_id ! File identifier
   INTEGER, INTENT(OUT) :: hdferr        ! Error code
                                         ! 0 on success and -1 on failure
 END SUBROUTINE h5fclose_f 
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
+    </pre>
+
+        <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
         
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -328,10 +348,10 @@ END SUBROUTINE h5fclose_f
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Name of the file to access.</td></tr>
         <tr>
-		    <td valign="top"><em>uintn</em> <code>flags</code></td>
+            <td valign="top"><em>uintn</em> <code>flags</code></td>
             <td valign="top">IN: File access flags.  Allowable values are:
                 <ul><dl>
                     <dt><code>H5F_ACC_TRUNC</code>
@@ -347,12 +367,12 @@ END SUBROUTINE h5fclose_f
                 developers; <i>it is neither tested nor supported</i> 
                 for use in applications.</td></tr>
         <tr>
-		    <td valign="top"><em>hid_t</em>&nbsp;<code>create_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>hid_t</em>&nbsp;<code>create_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: File creation property list identifier, used when modifying
                 default file meta-data.
                 Use <code>H5P_DEFAULT</code> for default file creation properties.</td></tr>
         <tr>
-		    <td valign="top"><em>hid_t</em> <code>access_id</code></td>
+            <td valign="top"><em>hid_t</em> <code>access_id</code></td>
             <td valign="top">IN: File access property list identifier.
                 If parallel file access is desired, this is a collective
                 call according to the communicator stored in the
@@ -364,7 +384,7 @@ END SUBROUTINE h5fclose_f
         otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5fcreate_f
     <dd>
-	<pre>
+    <pre>
 SUBROUTINE h5fcreate_f(name, access_flags, file_id, hdferr, &  
                        creation_prp, access_prp)
   IMPLICIT NONE 
@@ -390,10 +410,10 @@ SUBROUTINE h5fcreate_f(name, access_flags, file_id, hdferr, &
                                          ! specified its value is
                                          ! H5P_DEFAULT_F  
 END SUBROUTINE h5fcreate_f
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
+    </pre>
+
+        <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
         
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -441,10 +461,10 @@ END SUBROUTINE h5fcreate_f
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t </em><code>object_id</code></td>
+            <td valign="top"><em>hid_t </em><code>object_id</code></td>
             <td valign="top">IN: Identifier of object used to identify the file.</td></tr>
         <tr>
-		    <td valign="top"><em>H5F_scope_t</em>&nbsp;<code>scope&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>H5F_scope_t</em>&nbsp;<code>scope&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Specifies the scope of the flushing action.</td></tr>
     </table></ul>
 <dt><strong>Returns:</strong>
@@ -452,7 +472,7 @@ END SUBROUTINE h5fcreate_f
         otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5fflush_f
     <dd>
-	<pre>
+    <pre>
 SUBROUTINE h5fflush_f(obj_id, new_file_id, hdferr)
   IMPLICIT NONE 
   INTEGER(HID_T), INTENT(IN)  :: obj_id      ! Object identifier
@@ -462,10 +482,10 @@ SUBROUTINE h5fflush_f(obj_id, new_file_id, hdferr)
   INTEGER, INTENT(OUT)        :: hdferr      ! Error code 
                                              ! 0 on success and -1 on failure
 END SUBROUTINE h5fflush_f
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
+    </pre>
+
+        <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
         
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -495,7 +515,7 @@ END SUBROUTINE h5fflush_f
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em>&nbsp;<code>file_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>hid_t</em>&nbsp;<code>file_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Identifier of file to get access property list of</td></tr>
     </table></ul>
 <dt><strong>Returns:</strong>
@@ -503,7 +523,7 @@ END SUBROUTINE h5fflush_f
         otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5fget_access_plist_f
     <dd>
-	<pre>
+    <pre>
 SUBROUTINE h5fget_access_plist_f(file_id, fcpl_id, hdferr)
 
   IMPLICIT NONE 
@@ -512,10 +532,10 @@ SUBROUTINE h5fget_access_plist_f(file_id, fcpl_id, hdferr)
   INTEGER, INTENT(OUT)         :: hdferr  ! Error code 
                                           ! 0 on success and -1 on failure
 END SUBROUTINE h5fget_access_plist_f
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
+    </pre>
+
+        <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
         
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -548,7 +568,7 @@ END SUBROUTINE h5fget_access_plist_f
 <dt><strong>Parameters:</strong>
     <ul><table>
         <dt>
-		    <td valign="top"><em>hid_t</em>&nbsp;<code>file_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>hid_t</em>&nbsp;<code>file_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Identifier of the file to get creation property list of</td></tr>
     </table></ul>
 <dt><strong>Returns:</strong>
@@ -556,7 +576,7 @@ END SUBROUTINE h5fget_access_plist_f
         otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5fget_create_plist_f
     <dd>
-	<pre>
+    <pre>
 SUBROUTINE h5fget_create_plist_f(file_id, fcpl_id, hdferr)
 
   IMPLICIT NONE 
@@ -566,10 +586,10 @@ SUBROUTINE h5fget_create_plist_f(file_id, fcpl_id, hdferr)
   INTEGER, INTENT(OUT)         :: hdferr  ! Error code 
                                           ! 0 on success and -1 on failure
 END SUBROUTINE h5fget_create_plist_f
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
+    </pre>
+
+        <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
         
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -610,7 +630,7 @@ END SUBROUTINE h5fget_create_plist_f
         otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5fget_freespace_f
     <dd>
-	<pre>
+    <pre>
 SUBROUTINE h5fget_filesize_f(file_id, size, hdferr)
 
   IMPLICIT NONE
@@ -619,10 +639,10 @@ SUBROUTINE h5fget_filesize_f(file_id, size, hdferr)
   INTEGER, INTENT(OUT) :: hdferr           ! Error code: 0 on success,
                                            ! -1 if fail
 END SUBROUTINE h5fget_filesize_f 
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
+    </pre>
+
+        <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
         
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -641,7 +661,7 @@ END SUBROUTINE h5fget_filesize_f
         <dd>Returns the amount of free space in a file.
 <dt><strong>Description:</strong>
     <dd>Given the identifier of an open file, <code>file_id</code>, 
-	<code>H5Fget_freespace</code> returns the amount of space that is
+        <code>H5Fget_freespace</code> returns the amount of space that is
         unused by any objects in the file.
         <p>
         Currently, the HDF5 library only tracks free space in a file from a
@@ -651,7 +671,7 @@ END SUBROUTINE h5fget_filesize_f
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em>&nbsp;<code>file_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>hid_t</em>&nbsp;<code>file_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Identifier of a currently-open HDF5 file</td></tr>
     </table></ul>
 <dt><strong>Returns:</strong>
@@ -662,7 +682,7 @@ END SUBROUTINE h5fget_filesize_f
         otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5fget_freespace_f
     <dd>
-	<pre>
+    <pre>
 SUBROUTINE h5fget_freespace_f(file_id, free_space, hdferr)
 
   IMPLICIT NONE 
@@ -671,16 +691,302 @@ SUBROUTINE h5fget_freespace_f(file_id, free_space, hdferr)
   INTEGER, INTENT(OUT)        :: hdferr        ! Error code 
                                                ! 0 on success and -1 on failure
 END SUBROUTINE h5fget_freespace_f 
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
+    </pre>
+
+        <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
         
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
 </dl>
 
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fget_mdc_config" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-GetMdcConfig">H5Fget_mdc_config</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Fget_mdc_config</code>(<em>hid_t</em> 
+      <code>file_id</code>, <em>H5AC_cache_config_t *</em><code>config_ptr</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Obtain current metadata cache configuration for target file.
+<dt><strong>Description:</strong>
+    <dd><code>H5Fget_mdc_config</code> loads the current metadata cache 
+      configuration into the instance of <code>H5AC_cache_config_t</code> 
+      pointed to by the <code>config_ptr</code> parameter.
+
+    <p>Note that the version field of *<code>config_ptr</code> must 
+      be initialized --this allows the library to support old versions 
+      of the <code>H5AC_cache_config_t</code> structure.
+
+    <p>See the overview of the metadata cache in the special topics section 
+      of the user manual for details on metadata cache configuration. 
+      If you haven't read and understood that documentation, the results 
+      of this call will not make much sense.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em>&nbsp;<code>file_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the target file</td></tr>
+        <tr>
+            <td valign="top"><em>H5AC_cache_config_t&nbsp;*</em><code>config_ptr</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN/OUT: Pointer to the instance of H5AC_cache_config_t 
+              in which the current metadata cache configuration is to be reported. 
+              The fields of this structure are discussed below:</td></tr>
+        <tr>
+          <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+          <td colspan="2"><strong>General configuration section:</strong></td>
+        </tr>
+        <tr>
+            <td valign="top"><em>int</em> <code>version</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: Integer field indicating the the version 
+              of the H5AC_cache_config_t in use.  This field should be 
+              set to H5AC__CURR_CACHE_CONFIG_VERSION 
+              (defined in H5ACpublic.h).</td></tr>
+        <tr>
+            <td valign="top"><em>hbool_t</em> <code>rpt_fcn_enabled</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">OUT: Boolean flag indicating whether the adaptive 
+              cache resize report function is enabled.  This field should almost 
+              always be set to FALSE. Since resize algorithm activity is reported 
+              via stdout, it MUST be set to FALSE on Windows machines.
+              <p>The report function is not supported code, and can be 
+              expected to change between versions of the library.  
+              Use it at your own risk.</td></tr>
+        <tr>
+            <td valign="top"><em>hbool_t</em> <code>set_initial_size</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">OUT: Boolean flag indicating whether the cache 
+              should be created with a user specified initial maximum size.
+              <p>If the configuration is loaded from the cache, 
+              this flag will always be FALSE.</td></tr>
+        <tr>
+            <td valign="top"><em>size_t</em> <code>initial_size</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">OUT: Initial maximum size of the cache in bytes, 
+              if applicable.
+              <p>If the configuration is loaded from the cache, this 
+              field will contain the cache maximum size as of the 
+              time of the call.</td></tr>
+        <tr>
+            <td valign="top"><em>double</em> <code>min_clean_fraction</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">OUT: This field is only used in the parallel 
+              version of the library. It specifies the minimum fraction
+              of the cache that must be kept either clean or 
+              empty when possible.</td></tr>
+        <tr>
+            <td valign="top"><em>size_t</em> <code>max_size</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">OUT: Upper bound (in bytes) on the range of 
+              values that the adaptive cache resize code can select as 
+              the maximum cache size.</td></tr>
+        <tr>
+            <td valign="top"><em>size_t</em> <code>min_size</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">OUT: Lower bound (in bytes) on the range 
+              of values that the adaptive cache resize code can 
+              select as the maximum cache size.</td></tr>
+        <tr>
+            <td valign="top"><em>long int</em> <code>epoch_length</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">OUT: Number of cache accesses between runs 
+              of the adaptive cache resize code.</td></tr>
+        <tr>
+          <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+          <td colspan="2"><strong>Increment configuration section:</strong></td>
+        </tr>
+        <tr>
+            <td valign="top"><em>enum&nbsp;H5C_cache_incr_mode</em>&nbsp;<code>incr_mode</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">OUT: Enumerated value indicating the operational 
+              mode of the automatic cache size increase code.  At present,
+              only the following values are legal:
+              <p>H5C_incr__off: Automatic cache size increase is disabled.
+              <p>H5C_incr__threshold: Automatic cache size increase is 
+              enabled using the hit rate threshold algorithm.</td></tr>
+        <tr>
+            <td valign="top"><em>double</em> <code>lower_hr_threshold</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">OUT: Hit rate threshold used in the hit rate 
+              threshold cache size increase algorithm.</td></tr>
+        <tr>
+            <td valign="top"><em>double</em> <code>increment</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">OUT: The factor by which the current maximum 
+              cache size is multiplied to obtain an initial new maximum cache
+              size if a size increase is triggered in the hit rate 
+              threshold cache size increase algorithm.</td></tr>
+        <tr>
+            <td valign="top"><em>hbool_t</em> <code>apply_max_increment</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">OUT: Boolean flag indicating whether an upper 
+              limit will be applied to the size of cache size increases.</td></tr>
+        <tr>
+            <td valign="top"><em>size_t</em> <code>max_increment</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">OUT: The maximum number of bytes by which the 
+              maximum cache size can be increased in a single step -- if
+              applicable.</td></tr>
+        <tr>
+          <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+          <td colspan="2"><strong>Decrement configuration section:</strong></td>
+        </tr>
+        <tr>
+            <td valign="top"><em>enum&nbsp;H5C_cache_decr_mode</em>&nbsp;<code>decr_mode</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">OUT: Enumerated value indicating the operational 
+              mode of the automatic cache size decrease code.  At present,
+              the following values are legal:
+              <p>H5C_decr__off:  Automatic cache size decrease is disabled, 
+              and the remaining decrement fields are ignored.
+              <p>H5C_decr__threshold:  Automatic cache size decrease is 
+              enabled using the hit rate threshold algorithm.
+              <p>H5C_decr__age_out:  Automatic cache size decrease is enabled 
+              using the ageout algorithm.
+              <p>H5C_decr__age_out_with_threshold: Automatic cache size 
+              decrease is enabled using the ageout with hit rate 
+              threshold algorithm</td></tr>
+        <tr>
+            <td valign="top"><em>double</em> <code>upper_hr_threshold</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">OUT: Upper hit rate threshold. This value is only 
+              used if the decr_mode is either H5C_decr__threshold or 
+              H5C_decr__age_out_with_threshold.</td></tr>
+        <tr>
+            <td valign="top"><em>double</em> <code>decrement</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">OUT: Factor by which the current max cache size 
+              is multiplied to obtain an initial value for the new cache 
+              size when cache size reduction is triggered in the hit rate 
+              threshold cache size reduction algorithm.</td></tr>
+        <tr>
+            <td valign="top"><em>hbool_t</em> <code>apply_max_decrement</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">OUT: Boolean flag indicating whether an upper 
+              limit should be applied to the size of cache size 
+              decreases.</td></tr>
+        <tr>
+            <td valign="top"><em>size_t</em> <code>max_decrement</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">OUT: The maximum number of bytes by which cache 
+              size can be decreased if any single step, if applicable.</td></tr>
+        <tr>
+            <td valign="top"><em>int</em> <code>epochs_before_eviction</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">OUT: The minimum number of epochs that an entry 
+              must reside unaccessed in cache before being evicted under 
+              either of the ageout cache size reduction algorithms.</td></tr>
+        <tr>
+            <td valign="top"><em>hbool_t</em> <code>apply_empty_reserve</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">OUT: Boolean flag indicating whether an empty 
+              reserve should be maintained under either of the ageout 
+              cache size reduction algorithms.</td></tr>
+        <tr>
+            <td valign="top"><em>double</em> <code>empty_reserve</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">OUT: Empty reserve for use with the ageout 
+              cache size reduction algorithms, if applicable.</td></tr>
+
+    </table></ul>
+<dt><strong>Returns:</strong>
+  <dd>Returns a non-negative value if successful; otherwise returns a negative value.
+
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fget_mdc_hit_rate" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-GetMdcHitRate">H5Fget_mdc_hit_rate</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Fget_mdc_hit_rate</code>(<em>hid_t</em> 
+      <code>file_id</code>, <em>double *</em><code>hit_rate_ptr</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Obtain target file's metadata cache hit rate.
+<dt><strong>Description:</strong>
+    <dd>H5Fget_mdc_hit_rate queries the metadata cache of the target 
+      file to obtain its hit rate (cache hits / (cache hits + cache misses)) 
+      since the last time hit rate statistics were reset.  If the cache has 
+      not been accessed since the last time the hit rate stats were reset, 
+      the hit rate is defined to be 0.0.
+      <p>The hit rate stats can be reset either manually (via 
+      H5Freset_mdc_hit_rate_stats()), or automatically.  If the cache's 
+      adaptive resize code is enabled, the hit rate stats will be reset 
+      once per epoch.  If they are reset manually as well, 
+      the cache may behave oddly.
+      <p>See the overview of the metadata cache in the special 
+      topics section of the user manual for details on the metadata 
+      cache and its adaptive resize algorithms.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em> <code>file_id</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: Identifier of the target file.</td></tr>
+        <tr>
+            <td valign="top"><em>double&nbsp;*</em>&nbsp;<code>hit_rate_ptr</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">OUT: Pointer to the double in which the 
+              hit rate is returned.  Note that *<code>hit_rate_ptr</code> is 
+              undefined if the API call fails.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful; otherwise 
+      returns a negative value.
+
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fget_mdc_size" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-GetMdcSize">H5Fget_mdc_size</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Fget_mdc_size</code>(<em>hid_t</em> <code>file_id</code>,
+                               <em>size_t *</em><code>max_size_ptr</code>,
+                               <em>size_t *</em><code>min_clean_size_ptr</code>,
+                               <em>size_t *</em><code>cur_size_ptr</code>,
+                               <em>int *</em><code>cur_num_entries_ptr</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Obtain current metadata cache size data for specified file.
+<dt><strong>Description:</strong>
+    <dd>H5Fget_mdc_size queries the metadata cache of the target file 
+      for the desired size information, and returns this information in 
+      the locations indicated by the pointer parameters.  If any pointer 
+      parameter is NULL, the associated data is not returned.
+      <p>If the API call fails, the values returned via the pointer 
+      parameters are undefined.
+      <p>If adaptive cache resizing is enabled, the cache maximum size 
+      and minimum clean size may change at the end of each epoch. Current 
+      size and current number of entries can change on each cache access.
+      <p>Current size can exceed maximum size under certain conditions. 
+      See the overview of the metadata cache in the special topics 
+      section of the user manual for a discussion of this.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em> <code>file_id</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: Identifier of the target file.</td></tr>
+        <tr>
+            <td valign="top"><em>size_t *</em><code>max_size_ptr</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">OUT: Pointer to the location in which the 
+              current cache maximum size is to be returned, or NULL if 
+              this datum is not desired.</td></tr>
+        <tr>
+            <td valign="top"><em>size_t&nbsp;*</em><code>min_clean_size_ptr</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">OUT: Pointer to the location in which the 
+              current cache minimum clean size is to be returned, or 
+              NULL if that datum is not desired.</td></tr>
+        <tr>
+            <td valign="top"><em>size_t *</em><code>cur_size_ptr</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">OUT: Pointer to the location in which the 
+              current cache size is to be returned, or NULL if that 
+              datum is not desired.</td></tr>
+        <tr>
+            <td valign="top"><em>int&nbsp;*</em><code>cur_num_entries_ptr</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">OUT: Pointer to the location in which the 
+              current number of entries in the cache is to be returned, 
+              or NULL if that datum is not desired.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful; otherwise returns a
+        negative value.
+
+</dl>
 
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Fget_name" -->
@@ -735,7 +1041,7 @@ END SUBROUTINE h5fget_freespace_f
         otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5fget_name_f
     <dd>
-	<pre>
+    <pre>
 SUBROUTINE h5fget_name_f(obj_id, buf, size, hdferr)
 
   IMPLICIT NONE
@@ -745,9 +1051,9 @@ SUBROUTINE h5fget_name_f(obj_id, buf, size, hdferr)
   INTEGER, INTENT(OUT) :: hdferr           ! Error code: 0 on success,
                                            ! -1 if fail
 END SUBROUTINE h5fget_name_f
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
+    </pre>
+
+        <!--<dt><strong>Non-C API(s):</strong>
     	<dd>
         
         <img src="Graphics/Java.gif"> 
@@ -819,11 +1125,11 @@ END SUBROUTINE h5fget_name_f
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em> <code>file_id</code></td>
+            <td valign="top"><em>hid_t</em> <code>file_id</code></td>
             <td valign="top">IN: Identifier of a currently-open HDF5 file or 
 	        <code>H5F_OBJ_ALL</code> for all currently-open HDF5 files.</td></tr>
         <tr>
-		    <td valign="top"><em>unsigned&nbsp;int</em>&nbsp;<code>types&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>unsigned&nbsp;int</em>&nbsp;<code>types&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Type of object for which identifiers are to be returned.</td></tr>
     </table></ul>
 <dt><strong>Returns:</strong>
@@ -831,7 +1137,7 @@ END SUBROUTINE h5fget_name_f
         otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5fget_obj_count_f
     <dd>
-	<pre>
+    <pre>
 SUBROUTINE h5fget_obj_count_f(file_id, obj_type, obj_count, hdferr)
 
   IMPLICIT NONE 
@@ -846,9 +1152,9 @@ SUBROUTINE h5fget_obj_count_f(file_id, obj_type, obj_count, hdferr)
   INTEGER, INTENT(OUT)        :: hdferr    ! Error code 
                                            ! 0 on success and -1 on failure
 END SUBROUTINE h5fget_obj_count_f
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
+    </pre>
+
+        <!--<dt><strong>Non-C API(s):</strong>
     	<dd>
         
         <img src="Graphics/Java.gif"> 
@@ -888,18 +1194,18 @@ END SUBROUTINE h5fget_obj_count_f
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em> <code>file_id</code></td>
+            <td valign="top"><em>hid_t</em> <code>file_id</code></td>
             <td valign="top">IN: Identifier of a currently-open HDF5 file or 
 	        <code>H5F_OBJ_ALL</code> for all currently-open HDF5 files.</td></tr>
         <tr>
-		    <td valign="top"><em>unsigned int</em> <code>types</code></td>
+            <td valign="top"><em>unsigned int</em> <code>types</code></td>
             <td valign="top">IN: Type of object for which identifiers are to be returned.</td></tr> 
         <tr>
-		    <td valign="top"><em>int</em> <code>max_objs</code></td>
+            <td valign="top"><em>int</em> <code>max_objs</code></td>
             <td valign="top">IN: Maximum number of object identifiers to place into 
-			<code>obj_id_list</code>.</td></tr>
+            <code>obj_id_list</code>.</td></tr>
         <tr>
-		    <td valign="top"><em>hid_t&nbsp;*</em><code>obj_id_list&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>hid_t&nbsp;*</em><code>obj_id_list&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">OUT: Pointer to the returned list of open object identifiers.</td></tr>
     </table></ul>
 <dt><strong>Returns:</strong>
@@ -907,7 +1213,7 @@ END SUBROUTINE h5fget_obj_count_f
         otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5fget_obj_ids_f
     <dd>
-	<pre>
+    <pre>
 SUBROUTINE h5fget_obj_ids_f(file_id, obj_type, max_objs, obj_ids, hdferr)
 
   IMPLICIT NONE 
@@ -926,9 +1232,9 @@ SUBROUTINE h5fget_obj_ids_f(file_id, obj_type, max_objs, obj_ids, hdferr)
   INTEGER, INTENT(OUT)        :: hdferr    ! Error code 
                                            ! 0 on success and -1 on failure
 END SUBROUTINE h5fget_obj_ids_f
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
+    </pre>
+
+        <!--<dt><strong>Non-C API(s):</strong>
     	<dd>
         
         <img src="Graphics/Java.gif"> 
@@ -963,20 +1269,20 @@ END SUBROUTINE h5fget_obj_ids_f
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em> <code>file_id</code></td>
+            <td valign="top"><em>hid_t</em> <code>file_id</code></td>
             <td valign="top">IN: Identifier of the file to be queried.</td></tr>
         <tr>
-		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
             <td valign="top">IN: File access property list  identifier.
 	        For most drivers, the value will be <code>H5P_DEFAULT</code>. 
-		    For the <code>FAMILY</code> or <code>MULTI</code> drivers,
-		    this value should be defined through the property list
-		    functions: 
-		    <code>H5Pset_family_offset</code> for the <code>FAMILY</code> 
-		    driver and <code>H5Pset_multi_type</code> for the 
-		    <code>MULTI</code> driver.</td></tr>
+                For the <code>FAMILY</code> or <code>MULTI</code> drivers,
+                this value should be defined through the property list
+                functions: 
+                <code>H5Pset_family_offset</code> for the <code>FAMILY</code> 
+                driver and <code>H5Pset_multi_type</code> for the 
+                <code>MULTI</code> driver.</td></tr>
         <tr>
-		    <td valign="top"><em>void&nbsp;*</em><code>file_handle&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>void&nbsp;*</em><code>file_handle&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">OUT: Pointer to the file handle being used by 
 	        the low-level virtual file driver.</td></tr>
     </table></ul>
@@ -987,12 +1293,12 @@ END SUBROUTINE h5fget_obj_ids_f
     <dd>None.
 	
 <!--
-	<pre>
+    <pre>
 SUBROUTINE
-	</pre>
--->		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
+    </pre>
+-->
+
+        <!--<dt><strong>Non-C API(s):</strong>
     	<dd>
         
         <img src="Graphics/Java.gif"> 
@@ -1016,7 +1322,7 @@ SUBROUTINE
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: File name to check format.</td></tr>
     </table></ul>
 <dt><strong>Returns:</strong>
@@ -1025,7 +1331,7 @@ SUBROUTINE
         Otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5fis_hdf5_f
     <dd>
-	<pre>
+    <pre>
 SUBROUTINE h5fis_hdf5_f(name, status, hdferr)   
   IMPLICIT NONE 
   CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the file
@@ -1035,10 +1341,10 @@ SUBROUTINE h5fis_hdf5_f(name, status, hdferr)
   INTEGER, INTENT(OUT) :: hdferr         ! Error code 
                                          ! 0 on success and -1 on failure
 END SUBROUTINE h5fis_hdf5_f
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
+    </pre>
+
+        <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
         
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -1069,19 +1375,19 @@ END SUBROUTINE h5fis_hdf5_f
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+            <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
             <td valign="top">IN: Identifier for of file or group in 
                 which <code>name</code> is defined.</td>
         <tr>
-		    <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Name of the group onto which the 
                 file specified by <code>child_id</code> 
                 is to be mounted.</td>
         <tr>
-		    <td valign="top"><em>hid_t</em> <code>child_id</code></td>
+            <td valign="top"><em>hid_t</em> <code>child_id</code></td>
             <td valign="top">IN: Identifier of the file to be mounted.</td>
         <tr>
-		    <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
             <td valign="top">IN: Identifier of the property list to be used.</td>
     </table></ul>
 <dt><strong>Returns:</strong>
@@ -1089,7 +1395,7 @@ END SUBROUTINE h5fis_hdf5_f
         otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5fmount_f
     <dd>
-	<pre>
+    <pre>
 SUBROUTINE h5fmount_f(loc_id, name, child_id, hdferr)
   IMPLICIT NONE 
   INTEGER(HID_T), INTENT(IN)  :: loc_id      ! File or group identifier
@@ -1098,9 +1404,9 @@ SUBROUTINE h5fmount_f(loc_id, name, child_id, hdferr)
   INTEGER, INTENT(OUT)        :: hdferr      ! Error code 
                                              ! 0 on success and -1 on failure
 END SUBROUTINE h5fmount_f
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
+    </pre>
+
+        <!--<dt><strong>Non-C API(s):</strong>
     	<dd>
         
         <img src="Graphics/Java.gif"> 
@@ -1173,10 +1479,10 @@ END SUBROUTINE h5fmount_f
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Name of the file to access.</td></tr>
         <tr>
-		    <td valign="top"><em>unsigned</em> <code>flags</code></td>
+            <td valign="top"><em>unsigned</em> <code>flags</code></td>
             <td valign="top">IN: File access flags.  Allowable values are:
                 <ul><dl>
                     <dt><code>H5F_ACC_RDWR</code>
@@ -1193,7 +1499,7 @@ END SUBROUTINE h5fmount_f
                 </ul></td></tr>
 <!-- NEW PAGE -->
         <tr>
-		    <td valign="top"><em>hid_t</em>&nbsp;<code>access_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>hid_t</em>&nbsp;<code>access_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Identifier for the file access properties list.
                 If parallel file access is desired, this is a collective
                 call according to the communicator stored in the
@@ -1205,7 +1511,7 @@ END SUBROUTINE h5fmount_f
         otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5fopen_f
     <dd>
-	<pre>
+    <pre>
 SUBROUTINE h5fopen_f(name, access_flags, file_id, hdferr, &  
                      access_prp)
   IMPLICIT NONE 
@@ -1221,10 +1527,10 @@ SUBROUTINE h5fopen_f(name, access_flags, file_id, hdferr, &
                                          ! File access property list 
                                          ! identifier  
 END SUBROUTINE h5fopen_f
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
+    </pre>
+
+        <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
         
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -1261,7 +1567,7 @@ END SUBROUTINE h5fopen_f
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em>&nbsp;<code>file_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>hid_t</em>&nbsp;<code>file_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Identifier of a file for which an additional identifier 
                 is required.</td></tr>
     </table></ul>
@@ -1270,7 +1576,7 @@ END SUBROUTINE h5fopen_f
         otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5freopen_f
     <dd>
-	<pre>
+    <pre>
 SUBROUTINE h5freopen_f(file_id, new_file_id, hdferr)
   IMPLICIT NONE 
   INTEGER(HID_T), INTENT(IN)  :: file_id     ! File identifier 
@@ -1278,14 +1584,276 @@ SUBROUTINE h5freopen_f(file_id, new_file_id, hdferr)
   INTEGER, INTENT(OUT)        :: hdferr      ! Error code 
                                              ! 0 on success and -1 on failure
 END SUBROUTINE h5freopen_f 
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
+    </pre>
+
+        <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
         
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Freset_mdc_hit_rate_stats" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-ResetMdcHitRateStats">H5Freset_mdc_hit_rate_stats</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Freset_mdc_hit_rate_stats</code>(<em>hid_t</em> 
+      <code>file_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Reset hit rate statistics counters for the target file.
+<dt><strong>Description:</strong>
+    <dd>H5Freset_mdc_hit_rate_stats resets the hit rate statistics 
+      counters in the metadata cache associated with the specified 
+      file. 
+      <p>If the adaptive cache resizing code is enabled, the hit 
+      rate statistics are reset at the beginning of each epoch.  
+      This API call allows you to do the same thing from your program. 
+      <p>The adaptive cache resizing code may behave oddly if you use 
+      this call when adaptive cache resizing is enabled.  However, 
+      the call should be useful if you choose to control metadata 
+      cache size from your program. 
+      <p>See the overview of the metadata cache in the special topics 
+      section of the user manual for details of the metadata cache and 
+      the adaptive cache resizing algorithms.  If you haven't read, 
+      understood, and thought about the material covered in that 
+      documentation, you shouldn't be using this API call.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em>&nbsp;<code>file_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the target file.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful; otherwise returns a 
+      negative value.
+
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fset_mdc_config" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-SetMdcConfig">H5Fset_mdc_config</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Fset_mdc_config</code>(<em>hid_t</em> 
+      <code>file_id</code>, <em>H5AC_cache_config_t *</em><code>config_ptr</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Attempt to configure metadata cache of target file.
+<dt><strong>Description:</strong>
+    <dd>H5Fset_mdc_config attempts to configure the file's metadata cache 
+      according configuration supplied in *config_ptr. 
+      <p>See the overview of the metadata cache in the special topics 
+      section of the user manual for details on what is being configured.  
+      If you haven't read and understood that documentation, you really 
+      shouldn't be using this API call.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em>&nbsp;<code>file_id</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: Identifier of the target file</td></tr>
+        <tr>
+            <td valign="top"><em>H5AC_cache_config_t&nbsp;*</em><code>config_ptr</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: Pointer to the instance of H5AC_cache_config_t 
+              containing the desired configuration.  The fields of this structure 
+              are discussed below:</td></tr>
+        <tr>
+          <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+          <td colspan="2"><strong>General configuration section:</strong></td>
+        </tr>
+        <tr>
+            <td valign="top"><em>int</em> <code>version</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: Integer field indicating the the version of 
+              the H5AC_cache_config_t in use.  This field should be set to 
+              H5AC__CURR_CACHE_CONFIG_VERSION (defined in H5ACpublic.h).</td></tr>
+        <tr>
+            <td valign="top"><em>hbool_t</em> <code>rpt_fcn_enabled</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: Boolean flag indicating whether the adaptive 
+              cache resize report function is enabled.  This field should almost 
+              always be set to FALSE. Since resize algorithm activity is reported 
+              via stdout, it MUST be set to FALSE on Windows machines.
+              <p>The report function is not supported code, and can be expected to 
+              change between versions of the library.  Use it at your own risk.</td></tr>
+        <tr>
+            <td valign="top"><em>hbool_t</em> <code>set_initial_size</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: Boolean flag indicating whether the cache should be 
+              forced to the user specified initial size.</td></tr>
+        <tr>
+            <td valign="top"><em>size_t</em> <code>initial_size</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: If set_initial_size is TRUE, initial_size must 
+              contains the desired initial size in bytes.  This value must lie 
+              in the closed interval [min_size, max_size]. (see below)</td></tr>
+        <tr>
+            <td valign="top"><em>double</em> <code>min_clean_fraction</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: This field is only used in the parallel version 
+              of the library. It specifies the minimum fraction of the cache that 
+              must be kept either clean or empty.
+              <p>The value must lie in the interval [0.0, 1.0].  0.25 is a good place 
+              to start.</td></tr>
+        <tr>
+            <td valign="top"><em>size_t</em> <code>max_size</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: Upper bound (in bytes) on the range of values 
+              that the adaptive cache resize code can select as the maximum 
+              cache size.</td></tr>
+        <tr>
+            <td valign="top"><em>size_t</em> <code>min_size</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: Lower bound (in bytes) on the range of values 
+              that the adaptive cache resize code can select as the maximum 
+              cache size.</td></tr>
+        <tr>
+            <td valign="top"><em>long int</em> <code>epoch_length</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: Number of cache accesses between runs of the 
+              adaptive cache resize code. 50,000 is a good starting number.</td></tr>
+        <tr>
+          <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+          <td colspan="2"><strong>Increment configuration section:</strong></td>
+        </tr>
+        <tr>
+            <td valign="top"><em>enum&nbsp;H5C_cache_incr_mode</em>&nbsp;<code>incr_mode</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: Enumerated value indicating the operational mode 
+              of the automatic cache size increase code.  At present, only two 
+              values are legal:
+              <p>H5C_incr__off:  Automatic cache size increase is disabled, 
+              and the remaining increment fields are ignored.
+              <p>H5C_incr__threshold:  Automatic cache size increase is enabled 
+              using the hit rate threshold algorithm.</td></tr>
+        <tr>
+            <td valign="top"><em>double</em> <code>lower_hr_threshold</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: Hit rate threshold used by the hit rate threshold 
+              cache size increment algorithm.
+              <p>When the hit rate over an epoch is below this threshold and the 
+              cache is full, the maximum size of the cache is multiplied by 
+              increment (below), and then clipped as necessary to stay within 
+              max_size, and possibly max_increment.
+              <p>This field must lie in the interval [0.0, 1.0].  0.8 or 0.9 
+              is a good starting point.</td></tr>
+        <tr>
+            <td valign="top"><em>double</em> <code>increment</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: Factor by which the hit rate threshold cache 
+              size increment algorithm multiplies the current cache max size 
+              to obtain a tentative new cache size.
+              <p>The actual cache size increase will be clipped to satisfy the 
+              max_size specified in the general configuration, and possibly 
+              max_increment below.
+              <p>The parameter must be greater than or equal to 1.0 -- 2.0 
+              is a reasonable value.
+              <p>If you set it to 1.0, you will effectively disable cache size 
+              increases.</td></tr>
+        <tr>
+            <td valign="top"><em>hbool_t</em> <code>apply_max_increment</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: Boolean flag indicating whether an upper limit 
+              should be applied to the size of cache size increases.</td></tr>
+        <tr>
+            <td valign="top"><em>size_t</em> <code>max_increment</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: Maximum number of bytes by which cache size can 
+              be increased in a single step -- if applicable.</td></tr>
+        <tr>
+          <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+          <td colspan="2"><strong>Decrement configuration section:</strong></td>
+        </tr>
+        <tr>
+            <td valign="top"><em>enum&nbsp;H5C_cache_decr_mode</em>&nbsp;<code>decr_mode</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: Enumerated value indicating the operational 
+              mode of the automatic cache size decrease code.  At present,
+              the following values are legal:
+              <p>H5C_decr__off:  Automatic cache size decrease is disabled.
+              <p>H5C_decr__threshold:  Automatic cache size decrease is 
+              enabled using the hit rate threshold algorithm.
+              <p>H5C_decr__age_out:  Automatic cache size decrease is enabled 
+              using the ageout algorithm.
+              <p>H5C_decr__age_out_with_threshold:  Automatic cache size 
+              decrease is enabled using the ageout with hit rate threshold 
+              algorithm</td></tr>
+        <tr>
+            <td valign="top"><em>double</em> <code>upper_hr_threshold</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: Hit rate threshold for the hit rate threshold and 
+              ageout with hit rate threshold cache size decrement algorithms.
+              <p>When decr_mode is H5C_decr__threshold, and the hit rate over a 
+              given epoch exceeds the supplied threshold, the current maximum 
+              cache size is multiplied by decrement to obtain a tentative new
+              (and smaller) maximum cache size.
+              <p>When decr_mode is H5C_decr__age_out_with_threshold, there is no 
+              attempt to find and evict aged out entries unless the hit rate in 
+              the previous epoch exceeded the supplied threshold.
+              <p>This field must lie in the interval [0.0, 1.0].
+              <p>For H5C_incr__threshold, .9995 or .99995 is a good place to start.
+              <p>For H5C_decr__age_out_with_threshold, .999 might be 
+              more useful.</td></tr>
+        <tr>
+            <td valign="top"><em>double</em> <code>decrement</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: In the hit rate threshold cache size decrease 
+              algorithm, this parameter contains the factor by which the
+              current max cache size is multiplied to produce a tentative 
+              new cache size.
+              <p>The actual cache size decrease will be clipped to satisfy the 
+              min_size specified in the general configuration, and possibly 
+              max_decrement below.
+              <p>The parameter must be be in the interval [0.0, 1.0].
+              <p>If you set it to 1.0, you will effectively disable cache size
+              decreases.  0.9 is a reasonable starting point.</td></tr>
+        <tr>
+            <td valign="top"><em>hbool_t</em> <code>apply_max_decrement</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: Boolean flag indicating whether an upper limit 
+              should be applied to the size of cache size decreases.</td></tr>
+        <tr>
+            <td valign="top"><em>size_t</em> <code>max_decrement</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: Maximum number of bytes by which the maximum cache 
+              size can be decreased in any single step -- if applicable.</td></tr>
+        <tr>
+            <td valign="top"><em>int</em> <code>epochs_before_eviction</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: In the ageout based cache size reduction algorithms, 
+              this field contains the minimum number of epochs an entry must remain 
+              unaccessed in cache before the cache size reduction algorithm tries to 
+              evict it. 3 is a reasonable value.</td></tr>
+        <tr>
+            <td valign="top"><em>hbool_t</em> <code>apply_empty_reserve</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: Boolean flag indicating whether the ageout based 
+              decrement algorithms will maintain a empty reserve when decreasing 
+              cache size.</td></tr>
+        <tr>
+            <td valign="top"><em>double</em> <code>empty_reserve</code>
+              &nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top">IN: Empty reserve as a fraction of maximum cache 
+              size if applicable.
+              <p>When so directed, the ageout based algorithms will not decrease 
+              the maximum cache size unless the empty reserve can be met.
+              <p>The parameter must lie in the interval [0.0, 1.0].  
+              0.1 or 0.05 is a good place to start.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful; otherwise returns a
+        negative value.
+
 </dl>
 
 <!-- NEW PAGE -->
@@ -1317,11 +1885,11 @@ END SUBROUTINE h5freopen_f
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+            <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
             <td valign="top">IN: File or group identifier for the location at which
                 the specified file is to be unmounted.</td></tr>
         <tr>
-		    <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Name of the mount point.</td></tr>
     </table></ul>
 <dt><strong>Returns:</strong>
@@ -1329,7 +1897,7 @@ END SUBROUTINE h5freopen_f
         otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5funmount_f
     <dd>
-	<pre>
+    <pre>
 SUBROUTINE h5funmount_f(loc_id, name, child_id, hdferr)
   IMPLICIT NONE 
   INTEGER(HID_T), INTENT(IN)  :: loc_id      ! File or group identifier
@@ -1337,10 +1905,10 @@ SUBROUTINE h5funmount_f(loc_id, name, child_id, hdferr)
   INTEGER, INTENT(OUT)        :: hdferr      ! Error code 
                                              ! 0 on success and -1 on failure
 END SUBROUTINE h5funmount_f
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
+    </pre>
+
+        <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
         
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -1364,6 +1932,11 @@ END SUBROUTINE h5funmount_f
 <td valign=top align=right>
 And in this document, the 
 <a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;&nbsp;
+<br>
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5im.html">H5IM</a>&nbsp;&nbsp;
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5lt.html">H5LT</a>&nbsp;&nbsp;
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5pt.html">H5PT</a>&nbsp;&nbsp;
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5tb.html">H5TB</a>&nbsp;&nbsp;
 <br>
 <a href="RM_H5.html">H5</a>&nbsp;&nbsp;
 <a href="RM_H5A.html">H5A</a>&nbsp;&nbsp;
