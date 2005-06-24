@@ -220,7 +220,7 @@ static herr_t find_palette( hid_t loc_id, const char *name, void  *op_data )
  *-------------------------------------------------------------------------
  */
 
-static herr_t H5IM_find_palette( hid_t loc_id ) 
+herr_t H5IM_find_palette( hid_t loc_id ) 
 {
 
  unsigned int attr_num;     /* Starting attribute to look up */
