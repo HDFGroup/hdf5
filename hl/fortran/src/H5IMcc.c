@@ -19,6 +19,16 @@
 
 
 /*-------------------------------------------------------------------------
+ * private functions
+ *-------------------------------------------------------------------------
+ */
+herr_t H5IM_get_palette( hid_t loc_id, 
+                         const char *image_name,
+                         int pal_number,
+                         hid_t tid,
+                         void *pal_data);
+
+/*-------------------------------------------------------------------------
  * Function: H5IMmake_image_8bitf
  *
  * Purpose: Creates and writes an image an 8 bit image
@@ -420,5 +430,125 @@ herr_t H5IMget_palettef( hid_t loc_id,
   return H5IM_get_palette(loc_id,image_name,pal_number,H5T_NATIVE_LLONG,pal_data);
  else
   return -1;
+
+}
+
+/*-------------------------------------------------------------------------
+ * Function: H5IM_get_palette
+ *
+ * Purpose: private function that reads a palette to memory type TID
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ *
+ * Date: May 10, 2005
+ *
+ * Comments:
+ *  This function allows reading of an 8bit palette from disk disk
+ *   to memory type TID
+ *  The memory datatype can be H5T_NATIVE_INT or H5T_NATIVE_UCHAR currently. 
+ *   the H5T_NATIVE_INT is supposed to be called from
+ *   the FORTRAN interface where the image buffer is defined as type "integer"
+ *
+ * Comments:
+ *  based on HDF5 Image and Palette Specification  
+ *  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t H5IM_get_palette( hid_t loc_id, 
+                         const char *image_name,
+                         int pal_number,
+                         hid_t tid,
+                         void *pal_data)
+{
+ hid_t      image_id;
+ int        has_pal;
+ hid_t      attr_type;
+ hid_t      attr_id;
+ hid_t      attr_space_id;
+ hid_t      attr_class;
+ hssize_t   n_refs;
+ hsize_t    dim_ref;
+ hobj_ref_t *refbuf;     /* buffer to read references */
+ hid_t      pal_id;
+
+ /* Open the dataset. */
+ if ( (image_id = H5Dopen( loc_id, image_name )) < 0 )
+  return -1;
+
+ /* Try to find the attribute "PALETTE" on the >>image<< dataset */
+ has_pal = H5IM_find_palette( image_id );
+
+ if ( has_pal ==  1 )
+ {
+
+  if ( (attr_id = H5Aopen_name( image_id, "PALETTE" )) < 0 )
+   goto out;
+     
+  if ( (attr_type = H5Aget_type( attr_id )) < 0 )
+   goto out;
+
+  if ( (attr_class = H5Tget_class( attr_type )) < 0 )
+   goto out;
+
+  /* Check if it is really a reference */
+  if ( attr_class == H5T_REFERENCE )
+  {
+
+   /* Get the reference(s) */
+   if ( (attr_space_id = H5Aget_space( attr_id )) < 0 )
+    goto out;
+
+   n_refs = H5Sget_simple_extent_npoints( attr_space_id );
+
+   dim_ref = n_refs;
+
+   refbuf = malloc( sizeof(hobj_ref_t) * (int)dim_ref );
+
+   if ( H5Aread( attr_id, attr_type, refbuf ) < 0 )
+    goto out;
+
+   /* Get the palette id */
+   if ( (pal_id = H5Rdereference( image_id, H5R_OBJECT, &refbuf[pal_number] )) < 0 )
+    goto out;
+
+   /* Read the palette dataset using the memory type TID */
+   if ( H5Dread( pal_id, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, pal_data ) < 0 )
+    goto out;
+
+   if ( H5Sclose( attr_space_id ) < 0 )
+    goto out;
+
+   /* close the dereferenced dataset */
+   if (H5Dclose(pal_id)<0)
+    goto out;
+
+   free( refbuf );
+    
+  } /* H5T_REFERENCE */ 
+    
+  if ( H5Tclose( attr_type ) < 0 ) 
+   goto out;
+
+  /* Close the attribute. */  
+  if ( H5Aclose( attr_id ) < 0 )
+   goto out;
+
+ }
+
+ /* Close the image dataset. */
+ if ( H5Dclose( image_id ) < 0 )
+  return -1;
+
+ return 0;
+
+out:
+ H5Dclose( image_id );
+ return -1;
+
 
 }
