@@ -71,6 +71,11 @@ H5FL_DEFINE(H5SH_t);
  *		koziol@ncsa.uiuc.edu
  *		Mar 23 2005
  *
+ * Changes:	John Mainzer -- 6/7/05
+ *		Removed code modifying the is_dirty field of the cache 
+ *		info.  Management of this field is in the process of 
+ *		being moved to the H5C code.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -96,7 +101,6 @@ H5SH_create(H5F_t *f, hid_t dxpl_id, haddr_t *addr_p, H5SH_data_type_t heap_type
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for segmented heap info")
 
     /* Assign internal information */
-    sh->cache_info.is_dirty = TRUE;
     sh->heap_type = heap_type;
     if(sh->heap_type == H5SH_RAW)
         sh->file_mem_type = H5FD_MEM_DRAW;
@@ -229,11 +233,19 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Mar 25 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/16/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5SH_alloc(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t size, haddr_t *obj_addr_p)
 {
+    hbool_t sh_dirtied = FALSE;
     H5SH_t *sh = NULL;          /* Segmented heap info */
     haddr_t free_addr;          /* Address of free block */
     hsize_t free_len;           /* Address of free block */
@@ -318,7 +330,7 @@ H5SH_alloc(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t size, haddr_t *obj_add
 
 done:
     /* Release the block tracker info */
-    if (sh && H5AC_unprotect(f, dxpl_id, H5AC_SGHP, addr, sh, H5AC__NO_FLAGS_SET) < 0)
+    if (sh && H5AC_unprotect(f, dxpl_id, H5AC_SGHP, addr, sh, sh_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release segmented heap info")
 
     FUNC_LEAVE_NOAPI(ret_value)

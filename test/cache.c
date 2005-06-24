@@ -1160,6 +1160,7 @@ flush(H5F_t *f,
     HDassert( entry_ptr->addr == addr );
     HDassert( entry_ptr->header.size == entry_ptr->size );
     HDassert( entry_ptr->size == entry_sizes[entry_ptr->type] );
+    HDassert( entry_ptr->header.is_dirty == entry_ptr->is_dirty );
 
     entry_ptr->flushed = TRUE;
 
@@ -1296,6 +1297,7 @@ load(H5F_t UNUSED *f,
 
     entry_ptr->loaded = TRUE;
 
+    entry_ptr->header.is_dirty = FALSE;
     entry_ptr->is_dirty = FALSE;
 
     (entry_ptr->reads)++;
@@ -1901,6 +1903,10 @@ flush_cache(H5C_t * cache_ptr,
  *		Updated function for the flags parameter in 
  *		H5C_insert_entry(), and to allow access to this parameter.
  *
+ *		JRM -- 6/17/05
+ *		The interface no longer permits clean inserts.  
+ *		Accordingly, the dirty parameter is no longer meaningfull.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -1929,11 +1935,7 @@ insert_entry(H5C_t * cache_ptr,
         HDassert( entry_ptr == entry_ptr->self );
         HDassert( !(entry_ptr->is_protected) );
 
-        if ( dirty ) {
-
-            (entry_ptr->header).is_dirty = dirty;
-            entry_ptr->is_dirty = dirty;
-        }
+	entry_ptr->is_dirty = TRUE;
 
         result = H5C_insert_entry(NULL, -1, -1, cache_ptr, &(types[type]),
                                   entry_ptr->addr, (void *)entry_ptr, flags);
@@ -1964,6 +1966,7 @@ insert_entry(H5C_t * cache_ptr,
 #endif
         }
 
+        HDassert( entry_ptr->header.is_dirty );
         HDassert( ((entry_ptr->header).type)->id == type );
     }
 
@@ -1985,6 +1988,10 @@ insert_entry(H5C_t * cache_ptr,
  *              6/21/04
  *
  * Modifications:
+ *
+ *		JRM -- 6/17/05
+ *		Updated code to reflect the fact that renames automatically
+ *		dirty entries.
  *
  *-------------------------------------------------------------------------
  */
@@ -2038,6 +2045,8 @@ rename_entry(H5C_t * cache_ptr,
 
     if ( ! done ) {
 
+        entry_ptr->is_dirty = TRUE;
+
         result = H5C_rename_entry(cache_ptr, &(types[type]),
                                   old_addr, new_addr);
     }
@@ -2057,6 +2066,9 @@ rename_entry(H5C_t * cache_ptr,
     }
 
     HDassert( ((entry_ptr->header).type)->id == type );
+
+    HDassert( entry_ptr->header.is_dirty );
+    HDassert( entry_ptr->is_dirty );
 
     return;
 
@@ -2170,6 +2182,10 @@ protect_entry(H5C_t * cache_ptr,
  *		Updated for the replacement of the deleted parameter in 
  *		H5C_unprotect() with the new flags parameter.
  *
+ *		JRM - 6/17/05
+ *		Modified function to use the new dirtied parameter of 
+ *		H5C_unprotect().
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -2183,6 +2199,7 @@ unprotect_entry(H5C_t * cache_ptr,
                 unsigned int flags)
 {
     /* const char * fcn_name = "unprotect_entry()"; */
+    hbool_t dirtied = FALSE;
     herr_t result;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
@@ -2204,12 +2221,13 @@ unprotect_entry(H5C_t * cache_ptr,
 
         if ( ( dirty == TRUE ) || ( dirty == FALSE ) ) {
 
-            entry_ptr->header.is_dirty = dirty;
-            entry_ptr->is_dirty = dirty;
+            dirtied = dirty;
+            entry_ptr->is_dirty = (entry_ptr->is_dirty || dirty);
         }
 
         result = H5C_unprotect(NULL, -1, -1, cache_ptr, &(types[type]),
-                               entry_ptr->addr, (void *)entry_ptr, flags);
+                               entry_ptr->addr, (void *)entry_ptr, 
+                               dirtied, flags);
 
         if ( ( result < 0 ) ||
              ( entry_ptr->header.is_protected ) ||
@@ -2227,6 +2245,12 @@ unprotect_entry(H5C_t * cache_ptr,
         }
 
         HDassert( ((entry_ptr->header).type)->id == type );
+
+        if ( ( dirtied ) && ( (flags & H5C__DELETED_FLAG) == 0 ) ) {
+
+            HDassert( entry_ptr->header.is_dirty );
+            HDassert( entry_ptr->is_dirty );
+        }
     }
 
     return;
@@ -5428,6 +5452,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
         failure_mssg = "cache not empty at beginning of multi entry case.";
     }
 
+    if ( pass )
     {
         int test_num                         = 1;
         unsigned int flush_flags             = H5C__NO_FLAGS_SET;
@@ -5467,7 +5492,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* flags              = */ H5C__NO_FLAGS_SET,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
-            /* expected_flushed   = */ FALSE,
+            /* expected_flushed   = */ TRUE,
             /* expected_destroyed = */ FALSE
           },
           {
@@ -5515,7 +5540,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
-            /* expected_flushed   = */ FALSE,
+            /* expected_flushed   = */ TRUE,
             /* expected_destroyed = */ FALSE
           },
           {
@@ -5537,6 +5562,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
     }
 
 
+    if ( pass )
     {
         int test_num                         = 2;
         unsigned int flush_flags             = H5C__FLUSH_INVALIDATE_FLAG;
@@ -5646,6 +5672,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
     }
 
 
+    if ( pass )
     {
         int test_num                         = 3;
         unsigned int flush_flags             = H5C__FLUSH_CLEAR_ONLY_FLAG;
@@ -5684,7 +5711,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
             /* expected_loaded    = */ FALSE,
-            /* expected_cleared   = */ FALSE,
+            /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
             /* expected_destroyed = */ FALSE
           },
@@ -5732,7 +5759,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ FALSE,
-            /* expected_cleared   = */ FALSE,
+            /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
             /* expected_destroyed = */ FALSE
           },
@@ -5755,6 +5782,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
     }
 
 
+    if ( pass )
     {
         int test_num                         = 4;
         unsigned int flush_flags             = H5C__FLUSH_MARKED_ENTRIES_FLAG;
@@ -5842,7 +5870,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
-            /* expected_flushed   = */ FALSE,
+            /* expected_flushed   = */ TRUE,
             /* expected_destroyed = */ FALSE
           },
           {
@@ -5864,6 +5892,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
     }
 
 
+    if ( pass )
     {
         int test_num                         = 5;
         unsigned int flush_flags             = H5C__FLUSH_INVALIDATE_FLAG |
@@ -5974,6 +6003,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
     }
 
 
+    if ( pass )
     {
         int test_num                         = 6;
         unsigned int flush_flags             = H5C__FLUSH_INVALIDATE_FLAG |
@@ -6084,6 +6114,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
     }
 
 
+    if ( pass )
     {
         int test_num                         = 7;
         unsigned int flush_flags             = H5C__FLUSH_CLEAR_ONLY_FLAG |
@@ -6171,7 +6202,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ FALSE,
-            /* expected_cleared   = */ FALSE,
+            /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
             /* expected_destroyed = */ FALSE
           },
@@ -6194,6 +6225,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
     }
 
 
+    if ( pass )
     {
         int test_num                         = 8;
         unsigned int flush_flags             = H5C__FLUSH_INVALIDATE_FLAG |
@@ -6306,6 +6338,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
 
 
     /* verify that all other flags are ignored */
+    if ( pass )
     {
         int test_num                         = 9;
         unsigned int flush_flags             = (unsigned)
@@ -6348,7 +6381,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* flags              = */ H5C__NO_FLAGS_SET,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
-            /* expected_flushed   = */ FALSE,
+            /* expected_flushed   = */ TRUE,
             /* expected_destroyed = */ FALSE
           },
           {
@@ -6396,7 +6429,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
-            /* expected_flushed   = */ FALSE,
+            /* expected_flushed   = */ TRUE,
             /* expected_destroyed = */ FALSE
           },
           {
@@ -6462,6 +6495,7 @@ check_flush_cache__multi_entry_test(H5C_t * cache_ptr,
               ( cache_ptr->index_size != 0 ) ) {
 
         pass = FALSE;
+
         HDsnprintf(msg, (size_t)128,
                    "cache not empty at beginning of multi entry test #%d.",
                    test_num);
@@ -7309,7 +7343,7 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* flush_flags          */ H5C__NO_FLAGS_SET,
             /* expected_loaded      */ FALSE,
             /* expected_cleared     */ FALSE,
-            /* expected_flushed     */ FALSE,
+            /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ FALSE
         );
     }
@@ -7346,7 +7380,7 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* flags                */ H5C__NO_FLAGS_SET,
             /* flush_flags          */ H5C__FLUSH_CLEAR_ONLY_FLAG,
             /* expected_loaded      */ FALSE,
-            /* expected_cleared     */ FALSE,
+            /* expected_cleared     */ TRUE,
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
@@ -7623,7 +7657,7 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* flush_flags          */ H5C__NO_FLAGS_SET,
             /* expected_loaded      */ FALSE,
             /* expected_cleared     */ FALSE,
-            /* expected_flushed     */ FALSE,
+            /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ FALSE
         );
     }
@@ -7660,7 +7694,7 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_CLEAR_ONLY_FLAG,
             /* expected_loaded      */ FALSE,
-            /* expected_cleared     */ FALSE,
+            /* expected_cleared     */ TRUE,
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
@@ -7737,7 +7771,7 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG,
             /* expected_loaded      */ FALSE,
             /* expected_cleared     */ FALSE,
-            /* expected_flushed     */ FALSE,
+            /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ FALSE
         );
     }
@@ -7815,7 +7849,7 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG |
                                        H5C__FLUSH_CLEAR_ONLY_FLAG,
             /* expected_loaded      */ FALSE,
-            /* expected_cleared     */ FALSE,
+            /* expected_cleared     */ TRUE,
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
@@ -8492,6 +8526,10 @@ check_double_protect_err(void)
  *
  * Modifications:
  *
+ *		JRM -- 6/17/05
+ *		Modified function to use the new dirtied parameter in 
+ *		H5C_unprotect().
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -8530,7 +8568,7 @@ check_double_unprotect_err(void)
 
         result = H5C_unprotect(NULL, -1, -1, cache_ptr, &(types[0]),
                                entry_ptr->addr, (void *)entry_ptr, 
-                               H5C__NO_FLAGS_SET);
+                               FALSE, H5C__NO_FLAGS_SET);
 
         if ( result > 0 ) {
 
@@ -20482,6 +20520,7 @@ main(void)
 #else /* NDEBUG */
     run_full_test = FALSE;
 #endif /* NDEBUG */
+
 #if 1
     smoke_check_1();
     smoke_check_2();

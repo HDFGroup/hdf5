@@ -118,6 +118,9 @@ H5FL_BLK_DEFINE_STATIC(heap_chunk);
  *	Takes a flag that determines the type of heap that is
  *	created.
  *
+ *	John Mainzer, 6/7/05
+ *	Removed code modifying the is_dirty field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -168,7 +171,6 @@ H5HL_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, haddr_t *addr_p/*out*/)
     }
 
     /* add to cache */
-    heap->cache_info.is_dirty = TRUE;
     if (H5AC_set(f, dxpl_id, H5AC_LHEAP, *addr_p, heap, H5AC__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "unable to cache heap");
 
@@ -762,7 +764,7 @@ H5HL_read(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size, voi
 
 done:
     if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, 
-                               H5AC__NO_FLAGS_SET) != SUCCEED)
+                               FALSE, H5AC__NO_FLAGS_SET) != SUCCEED)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, NULL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -868,10 +870,18 @@ H5HL_offset_into(H5F_t *f, const H5HL_t *heap, size_t offset)
  *
  * Modifications:
  *
+ *		John Mainzer - 6/8/05/
+ *		Modified function to use the new dirtied parmeter of 
+ *		H5AC_unprotect(), which allows management of the is_dirty
+ *		field of the cache info to be moved into the cache code.
+ *
+ *		This required the addition of the heap_dirtied parameter 
+ *		to the function's parameter list.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HL_unprotect(H5F_t *f, hid_t dxpl_id, const H5HL_t *heap, haddr_t addr)
+H5HL_unprotect(H5F_t *f, hid_t dxpl_id, const H5HL_t *heap, haddr_t addr, hbool_t heap_dirtied)
 {
     herr_t  ret_value = SUCCEED;
 
@@ -882,7 +892,7 @@ H5HL_unprotect(H5F_t *f, hid_t dxpl_id, const H5HL_t *heap, haddr_t addr)
     assert(heap);
     assert(H5F_addr_defined(addr));
 
-    if (H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, (void *)heap, 
+    if (H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, (void *)heap, heap_dirtied,
                        H5AC__NO_FLAGS_SET) != SUCCEED)
         HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
 
@@ -937,11 +947,18 @@ H5HL_remove_free(H5HL_t *heap, H5HL_free_t *fl)
  * Modifications:
  *		Robb Matzke, 1999-07-28
  *		The ADDR argument is passed by value.
+ *
+ *		John Mainzer, 6/7/05
+ *		Modified code to use the dirtied parameter of 
+ *		H5AC_unprotect() instead of manipulating the is_dirty
+ *		field of the cache info directly.
+ *
  *-------------------------------------------------------------------------
  */
 size_t
 H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *buf)
 {
+    hbool_t	heap_dirtied = FALSE;
     H5HL_t	*heap = NULL;
     H5HL_free_t	*fl = NULL, *max_fl = NULL;
     size_t	offset = 0;
@@ -965,7 +982,7 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *
     if (NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, (size_t)(-1), "unable to load heap");
 
-    heap->cache_info.is_dirty=TRUE;
+    heap_dirtied = TRUE;
 
     /* Cache this for later */
     sizeof_hdr= H5HL_SIZEOF_HDR(f);
@@ -1099,7 +1116,7 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *
 
 done:
     if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, 
-                               H5AC__NO_FLAGS_SET) != SUCCEED)
+                               heap_dirtied, H5AC__NO_FLAGS_SET) != SUCCEED)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, (size_t)(-1), "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1127,12 +1144,19 @@ done:
  * Modifications:
  *		Robb Matzke, 1999-07-28
  *		The ADDR argument is passed by value.
+ *
+ *		John Mainzer, 6/7/05
+ *		Modified code to use the dirtied parameter of 
+ *		H5AC_unprotect() instead of manipulating the is_dirty
+ *		field of the cache info directly.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5HL_write(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size, const void *buf)
 {
-    H5HL_t *heap = NULL;
+    hbool_t	heap_dirtied = FALSE;
+    H5HL_t 	*heap = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5HL_write, FAIL);
@@ -1152,13 +1176,13 @@ H5HL_write(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size, co
     assert(offset < heap->mem_alloc);
     assert(offset + size <= heap->mem_alloc);
 
-    heap->cache_info.is_dirty=TRUE;
+    heap_dirtied = TRUE;
     HDmemcpy(heap->chunk + H5HL_SIZEOF_HDR(f) + offset, buf, size);
 
 done:
     if (heap && 
-        H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, H5AC__NO_FLAGS_SET) 
-            != SUCCEED && 
+        H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, heap_dirtied, 
+                       H5AC__NO_FLAGS_SET) != SUCCEED && 
         ret_value != FAIL)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
 
@@ -1192,11 +1216,18 @@ done:
  * Modifications:
  *		Robb Matzke, 1999-07-28
  *		The ADDR argument is passed by value.
+ *
+ *		John Mainzer, 6/7/05
+ *		Modified code to use the dirtied parameter of 
+ *		H5AC_unprotect() instead of manipulating the is_dirty
+ *		field of the cache info directly.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5HL_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size)
 {
+    hbool_t		heap_dirtied = FALSE;
     H5HL_t		*heap = NULL;
     H5HL_free_t		*fl = NULL, *fl2 = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
@@ -1221,7 +1252,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size)
     assert(offset + size <= heap->mem_alloc);
 
     fl = heap->freelist;
-    heap->cache_info.is_dirty=TRUE;
+    heap_dirtied = TRUE;
 
     /*
      * Check if this chunk can be prepended or appended to an already
@@ -1297,7 +1328,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size)
 
 done:
     if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, 
-                               H5AC__NO_FLAGS_SET) != SUCCEED)
+                               heap_dirtied, H5AC__NO_FLAGS_SET) != SUCCEED)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1317,11 +1348,17 @@ done:
  *
  * Modifications:
  *
+ *		John Mainzer - 6/17/05
+ *		Modified function to use the new dirtied parmeter of 
+ *		H5AC_unprotect(), which allows management of the is_dirty
+ *		field of the cache info to be moved into the cache code.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
 {
+    hbool_t	heap_dirtied = FALSE;
     H5HL_t	*heap = NULL;
     size_t      sizeof_hdr;     /* Cache H5HL header size for file */
     herr_t      ret_value=SUCCEED;       /* Return value */
@@ -1364,14 +1401,14 @@ H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
     } /* end else */
 
     /* Release the local heap metadata from the cache */
-    if (H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, H5C__DELETED_FLAG)<0) {
+    if (H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, heap_dirtied, H5C__DELETED_FLAG)<0) {
         heap = NULL;
         HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release local heap");
     }
     heap = NULL;
 
 done:
-    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, 
+    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, heap_dirtied,
                                H5AC__NO_FLAGS_SET)<0)
 	HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release local heap");
 

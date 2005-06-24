@@ -767,6 +767,7 @@ H5_DLL herr_t H5C_unprotect(H5F_t *             f,
                             const H5C_class_t * type,
                             haddr_t             addr,
                             void *              thing,
+                            hbool_t             dirtied,
                             unsigned int        flags);
 
 H5_DLL herr_t H5C_validate_resize_config(H5C_auto_size_ctl_t * config_ptr,

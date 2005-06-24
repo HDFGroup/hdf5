@@ -63,30 +63,32 @@ static herr_t H5B2_create_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 static int H5B2_locate_record(const H5B2_class_t *type, unsigned nrec,
     size_t *rec_off, const uint8_t *native, const void *udata, unsigned *idx);
 static herr_t H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2,
-    H5RC_t *bt2_shared);
+    hbool_t * bt2_dirtied_ptr, H5RC_t *bt2_shared);
 static herr_t H5B2_redistribute2(H5F_t *f, hid_t dxpl_id, unsigned depth,
     H5B2_internal_t *internal, unsigned idx);
 static herr_t H5B2_split2(H5F_t *f, hid_t dxpl_id, unsigned depth,
-    H5B2_node_ptr_t *curr_node_ptr, H5AC_info_t *parent_cache_info,
-    H5B2_internal_t *internal, unsigned idx);
+    H5B2_node_ptr_t *curr_node_ptr, hbool_t * parent_cache_info_dirtied_ptr, 
+    H5B2_internal_t *internal, hbool_t * internal_dirtied_ptr, unsigned idx);
 static herr_t H5B2_redistribute3(H5F_t *f, hid_t dxpl_id, unsigned depth,
-    H5B2_internal_t *internal, unsigned idx);
+    H5B2_internal_t *internal, hbool_t *internal_dirtied_ptr, unsigned idx);
 static herr_t H5B2_merge2(H5F_t *f, hid_t dxpl_id, unsigned depth,
-    H5B2_node_ptr_t *curr_node_ptr, H5AC_info_t *parent_cache_info,
-    H5B2_internal_t *internal, unsigned idx);
+    H5B2_node_ptr_t *curr_node_ptr, hbool_t * parent_cache_info_dirtied_ptr, 
+    H5B2_internal_t *internal, hbool_t * internal_dirtied_ptr, unsigned idx);
 static herr_t H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth,
-    H5B2_node_ptr_t *curr_node_ptr, H5AC_info_t *parent_cache_info,
-    H5B2_internal_t *internal, unsigned idx);
+    H5B2_node_ptr_t *curr_node_ptr, hbool_t * parent_cache_info_dirtied_ptr, 
+    H5B2_internal_t *internal, hbool_t * internal_dirtied_ptr, unsigned idx);
 static herr_t H5B2_swap_leaf(H5F_t *f, hid_t dxpl_id, unsigned depth,
-    H5B2_internal_t *internal, unsigned idx, void *swap_loc);
+    H5B2_internal_t *internal, hbool_t * internal_dirtied_ptr, 
+    unsigned idx, void *swap_loc);
 static herr_t H5B2_insert_internal(H5F_t *f, hid_t dxpl_id,
     H5RC_t *bt2_shared, unsigned depth, H5AC_info_t *parent_cache_info,
+    hbool_t * parent_cache_info_dirtied_ptr, 
     H5B2_node_ptr_t *curr_node_ptr, void *udata);
 static herr_t H5B2_insert_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     H5B2_node_ptr_t *curr_node_ptr, void *udata);
 static herr_t H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     hbool_t *depth_decreased, void *swap_loc, unsigned depth, H5AC_info_t *parent_cache_info,
-    H5B2_node_ptr_t *curr_node_ptr, void *udata);
+    hbool_t * parent_cache_info_dirtied_ptr, H5B2_node_ptr_t *curr_node_ptr, void *udata);
 static herr_t H5B2_remove_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     H5B2_node_ptr_t *curr_node_ptr, void *udata);
 static herr_t H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
@@ -286,6 +288,16 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Jan 31 2005
  *
+ *
+ * Modifications:
+ *
+ *              John Mainzer 6/10/05
+ *              Removed code setting the is_dirty field of the cache info.
+ *              This is no longer pemitted, as the cache code is now
+ *              manageing this field.  Since this function uses a call to
+ *              H5AC_set() (which marks the entry dirty automaticly), no
+ *              other change is required.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -317,7 +329,6 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
 
     /* Assign internal information */
     HDmemset(&bt2->cache_info,0,sizeof(H5AC_info_t));
-    bt2->cache_info.is_dirty = TRUE;
     bt2->depth = 0;
     bt2->root.addr = HADDR_UNDEF;
     bt2->root.node_nrec = 0;
@@ -404,14 +415,26 @@ H5B2_locate_record(const H5B2_class_t *type, unsigned nrec, size_t *rec_off,
  *		koziol@ncsa.uiuc.edu
  *		Feb  3 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/10/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
+ *              In this case, that required adding the new bt2_dirtied_ptr
+ *              parameter to the function's argument list.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, H5RC_t *bt2_shared)
+H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, hbool_t * bt2_dirtied_ptr, H5RC_t *bt2_shared)
 {
     const H5AC_class_t *child_class;    /* Pointer to child node's class info */
+    hbool_t new_root_dirtied = FALSE;
     H5B2_internal_t *new_root;          /* Pointer to new root node */
     haddr_t left_addr, right_addr;      /* Addresses of left & right child nodes */
+    hbool_t left_child_dirtied = FALSE, right_child_dirtied = FALSE;
     void *left_child, *right_child;     /* Pointers to child nodes */
     unsigned *left_nrec, *right_nrec;   /* Pointers to child # of records */
     uint8_t *left_native, *right_native;/* Pointers to childs' native records */
@@ -425,6 +448,7 @@ H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, H5RC_t *bt2_shared)
 
     HDassert(f);
     HDassert(bt2);
+    HDassert(bt2_dirtied_ptr);
     HDassert(bt2_shared);
 
     /* Get the pointer to the shared B-tree info */
@@ -432,6 +456,7 @@ H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, H5RC_t *bt2_shared)
     HDassert(shared);
 
     if(bt2->depth>0) {
+        hbool_t * old_int_dirtied_ptr = NULL, * new_int_dirtied_ptr = NULL;
         H5B2_internal_t *old_int=NULL, *new_int=NULL;       /* Pointers to old & new internal nodes */
         H5B2_node_ptr_t new_int_ptr;   /* Node pointer to manage new internal node */
 
@@ -452,7 +477,9 @@ H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, H5RC_t *bt2_shared)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* More setup for child nodes */
+        old_int_dirtied_ptr = &left_child_dirtied;
         left_child = old_int;
+        new_int_dirtied_ptr = &right_child_dirtied;
         right_child = new_int;
         left_nrec = &(old_int->nrec);
         right_nrec = &(new_int->nrec);
@@ -462,10 +489,11 @@ H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, H5RC_t *bt2_shared)
         right_node_ptrs = new_int->node_ptrs;
 
         /* Mark child nodes as dirty now */
-        old_int->cache_info.is_dirty = TRUE;
-        new_int->cache_info.is_dirty = TRUE;
+        *old_int_dirtied_ptr = TRUE;
+        *new_int_dirtied_ptr = TRUE;
     } /* end if */
     else {
+        hbool_t * old_leaf_dirtied_ptr = NULL, * new_leaf_dirtied_ptr = NULL;
         H5B2_leaf_t *old_leaf=NULL, *new_leaf=NULL;       /* Pointers to old & new leaf nodes */
         H5B2_node_ptr_t new_leaf_ptr;   /* Node pointer to manage new leaf node */
 
@@ -486,7 +514,9 @@ H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, H5RC_t *bt2_shared)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         /* More setup for child nodes */
+        old_leaf_dirtied_ptr = &left_child_dirtied;
         left_child = old_leaf;
+        new_leaf_dirtied_ptr = &right_child_dirtied;
         right_child = new_leaf;
         left_nrec = &(old_leaf->nrec);
         right_nrec = &(new_leaf->nrec);
@@ -494,8 +524,8 @@ H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, H5RC_t *bt2_shared)
         right_native = new_leaf->leaf_native;
 
         /* Mark child nodes as dirty now */
-        old_leaf->cache_info.is_dirty = TRUE;
-        new_leaf->cache_info.is_dirty = TRUE;
+        *old_leaf_dirtied_ptr = TRUE;
+        *new_leaf_dirtied_ptr = TRUE;
     } /* end if */
 
     /* Set the old number of records in root node */
@@ -557,7 +587,7 @@ H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, H5RC_t *bt2_shared)
     new_root->nrec = 1;
 
     /* Mark new internal node as dirty */
-    new_root->cache_info.is_dirty = TRUE;
+    new_root_dirtied = TRUE;
 
 #ifdef H5B2_DEBUG
     H5B2_assert_internal(bt2->root.all_nrec,shared,new_root);
@@ -571,13 +601,13 @@ H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, H5RC_t *bt2_shared)
     } /* end else */
 #endif /* H5B2_DEBUG */
     /* Release new internal node */
-    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, bt2->root.addr, new_root, H5AC__NO_FLAGS_SET) < 0)
+    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, bt2->root.addr, new_root, new_root_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree internal node")
 
     /* Release child nodes */
-    if (H5AC_unprotect(f, dxpl_id, child_class, left_addr, left_child, H5AC__NO_FLAGS_SET) < 0)
+    if (H5AC_unprotect(f, dxpl_id, child_class, left_addr, left_child, left_child_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree leaf node")
-    if (H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, H5AC__NO_FLAGS_SET) < 0)
+    if (H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, right_child_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree leaf node")
 
     /* Update depth of B-tree */
@@ -587,7 +617,7 @@ H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, H5RC_t *bt2_shared)
     bt2->root.node_nrec = 1;
 
     /* Mark B-tree header as dirty */
-    bt2->cache_info.is_dirty = TRUE;
+    *bt2_dirtied_ptr = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -607,6 +637,11 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Feb  9 2005
  *
+ *              John Mainzer, 6/14/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -614,6 +649,7 @@ H5B2_redistribute2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
 {
     const H5AC_class_t *child_class;    /* Pointer to child node's class info */
     haddr_t left_addr, right_addr;      /* Addresses of left & right child nodes */
+    hbool_t left_child_dirtied = FALSE, right_child_dirtied = FALSE;
     void *left_child, *right_child;     /* Pointers to child nodes */
     unsigned *left_nrec, *right_nrec;   /* Pointers to child # of records */
     uint8_t *left_native, *right_native;    /* Pointers to childs' native records */
@@ -633,6 +669,8 @@ H5B2_redistribute2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
 
     /* Check for the kind of B-tree node to redistribute */
     if(depth>1) {
+        hbool_t * left_internal_dirtied_ptr = NULL;
+        hbool_t * right_internal_dirtied_ptr = NULL;
         H5B2_internal_t *left_internal;         /* Pointer to left internal node */
         H5B2_internal_t *right_internal;        /* Pointer to right internal node */
 
@@ -648,7 +686,9 @@ H5B2_redistribute2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         /* More setup for child nodes */
+        left_internal_dirtied_ptr = &left_child_dirtied;
         left_child = left_internal;
+        right_internal_dirtied_ptr = &right_child_dirtied;
         right_child = right_internal;
         left_nrec = &(left_internal->nrec);
         right_nrec = &(right_internal->nrec);
@@ -658,10 +698,12 @@ H5B2_redistribute2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
         right_node_ptrs = right_internal->node_ptrs;
 
         /* Mark child nodes as dirty now */
-        left_internal->cache_info.is_dirty = TRUE;
-        right_internal->cache_info.is_dirty = TRUE;
+        *left_internal_dirtied_ptr = TRUE;
+        *right_internal_dirtied_ptr = TRUE;
     } /* end if */
     else {
+        hbool_t * left_leaf_dirtied_ptr = NULL;
+        hbool_t * right_leaf_dirtied_ptr = NULL;
         H5B2_leaf_t *left_leaf;         /* Pointer to left leaf node */
         H5B2_leaf_t *right_leaf;        /* Pointer to right leaf node */
 
@@ -677,7 +719,9 @@ H5B2_redistribute2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         /* More setup for child nodes */
+        left_leaf_dirtied_ptr = &left_child_dirtied;
         left_child = left_leaf;
+        right_leaf_dirtied_ptr = &right_child_dirtied;
         right_child = right_leaf;
         left_nrec = &(left_leaf->nrec);
         right_nrec = &(right_leaf->nrec);
@@ -685,8 +729,8 @@ H5B2_redistribute2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
         right_native = right_leaf->leaf_native;
 
         /* Mark child nodes as dirty now */
-        left_leaf->cache_info.is_dirty = TRUE;
-        right_leaf->cache_info.is_dirty = TRUE;
+        *left_leaf_dirtied_ptr = TRUE;
+        *right_leaf_dirtied_ptr = TRUE;
     } /* end else */
 
 #ifdef H5B2_DEBUG
@@ -814,9 +858,9 @@ H5B2_redistribute2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
 #endif /* H5B2_DEBUG */
 
     /* Unlock child nodes */
-    if (H5AC_unprotect(f, dxpl_id, child_class, left_addr, left_child, H5AC__NO_FLAGS_SET) < 0)
+    if (H5AC_unprotect(f, dxpl_id, child_class, left_addr, left_child, left_child_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
-    if (H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, H5AC__NO_FLAGS_SET) < 0)
+    if (H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, right_child_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
 done:
@@ -837,15 +881,28 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Feb  9 2005
  *
+ *              John Mainzer, 6/14/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
+ *              In this case, that required adding the new 
+ *		parent_cache_info_dirtied_ptr and internal_dirtied_ptr
+ *              parameters to the function's argument list.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5B2_split2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_ptr,
-    H5AC_info_t *parent_cache_info, H5B2_internal_t *internal, unsigned idx)
+    hbool_t * parent_cache_info_dirtied_ptr, H5B2_internal_t *internal, 
+    hbool_t * internal_dirtied_ptr, unsigned idx)
 {
     const H5AC_class_t *child_class;    /* Pointer to child node's class info */
     haddr_t left_addr, right_addr;      /* Addresses of left & right child nodes */
     haddr_t middle_addr;                /* Address of middle child node */
+    hbool_t left_child_dirtied = FALSE;
+    hbool_t right_child_dirtied = FALSE;
+    hbool_t middle_child_dirtied = FALSE;
     void *left_child, *right_child;     /* Pointers to left & right child nodes */
     void *middle_child;                 /* Pointer to middle child node */
     unsigned *left_nrec, *right_nrec;   /* Pointers to left & right child # of records */
@@ -862,7 +919,9 @@ H5B2_split2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
     FUNC_ENTER_NOAPI_NOINIT(H5B2_split2)
 
     HDassert(f);
+    HDassert(parent_cache_info_dirtied_ptr);
     HDassert(internal);
+    HDassert(internal_dirtied_ptr);
 
     /* Get the pointer to the shared B-tree info */
     shared=H5RC_GET_OBJ(internal->shared);
@@ -874,6 +933,9 @@ H5B2_split2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
 
     /* Check for the kind of B-tree node to split */
     if(depth>1) {
+        hbool_t * left_internal_dirtied_ptr = NULL;
+        hbool_t * middle_internal_dirtied_ptr = NULL;
+        hbool_t * right_internal_dirtied_ptr = NULL;
         H5B2_internal_t *left_internal;         /* Pointer to left internal node */
         H5B2_internal_t *middle_internal;       /* Pointer to middle internal node */
         H5B2_internal_t *right_internal;        /* Pointer to right internal node */
@@ -902,8 +964,11 @@ H5B2_split2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* More setup for accessing child node information */
+        left_internal_dirtied_ptr = &left_child_dirtied;
         left_child = left_internal;
+        middle_internal_dirtied_ptr = &middle_child_dirtied;
         middle_child = middle_internal;
+        right_internal_dirtied_ptr = &right_child_dirtied;
         right_child = right_internal;
         left_nrec = &(left_internal->nrec);
         middle_nrec = &(middle_internal->nrec);
@@ -916,11 +981,14 @@ H5B2_split2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
         right_node_ptrs = right_internal->node_ptrs;
 
         /* Mark child nodes as dirty now */
-        left_internal->cache_info.is_dirty = TRUE;
-        middle_internal->cache_info.is_dirty = TRUE;
-        right_internal->cache_info.is_dirty = TRUE;
+        *left_internal_dirtied_ptr = TRUE;
+        *middle_internal_dirtied_ptr = TRUE;
+        *right_internal_dirtied_ptr = TRUE;
     } /* end if */
     else {
+        hbool_t *left_leaf_dirtied_ptr = NULL;
+        hbool_t *middle_leaf_dirtied_ptr = NULL;
+        hbool_t *right_leaf_dirtied_ptr = NULL;
         H5B2_leaf_t *left_leaf;         /* Pointer to left leaf node */
         H5B2_leaf_t *middle_leaf;       /* Pointer to middle leaf node */
         H5B2_leaf_t *right_leaf;        /* Pointer to right leaf node */
@@ -949,8 +1017,11 @@ H5B2_split2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         /* More setup for accessing child node information */
+        left_leaf_dirtied_ptr = &left_child_dirtied;
         left_child = left_leaf;
+        middle_leaf_dirtied_ptr = &middle_child_dirtied;
         middle_child = middle_leaf;
+        right_leaf_dirtied_ptr = &right_child_dirtied;
         right_child = right_leaf;
         left_nrec = &(left_leaf->nrec);
         middle_nrec = &(middle_leaf->nrec);
@@ -960,9 +1031,9 @@ H5B2_split2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
         right_native = right_leaf->leaf_native;
 
         /* Mark child nodes as dirty now */
-        left_leaf->cache_info.is_dirty = TRUE;
-        middle_leaf->cache_info.is_dirty = TRUE;
-        right_leaf->cache_info.is_dirty = TRUE;
+        *left_leaf_dirtied_ptr = TRUE;
+        *middle_leaf_dirtied_ptr = TRUE;
+        *right_leaf_dirtied_ptr = TRUE;
     } /* end else */
 
     /* Redistribute records */
@@ -1065,13 +1136,13 @@ H5B2_split2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
     internal->nrec++;
 
     /* Mark parent as dirty */
-    internal->cache_info.is_dirty = TRUE;
+    *internal_dirtied_ptr = TRUE;
 
     /* Update grandparent info */
     curr_node_ptr->node_nrec++;
 
     /* Mark grandparent as dirty */
-    parent_cache_info->is_dirty = TRUE;
+    *parent_cache_info_dirtied_ptr = TRUE;
 
 #ifdef H5B2_DEBUG
     H5B2_assert_internal((hsize_t)0,shared,internal);
@@ -1089,11 +1160,11 @@ H5B2_split2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
 #endif /* H5B2_DEBUG */
 
     /* Unlock child nodes */
-    if (H5AC_unprotect(f, dxpl_id, child_class, left_addr, left_child, H5AC__NO_FLAGS_SET) < 0)
+    if (H5AC_unprotect(f, dxpl_id, child_class, left_addr, left_child, left_child_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
-    if (H5AC_unprotect(f, dxpl_id, child_class, middle_addr, middle_child, H5AC__NO_FLAGS_SET) < 0)
+    if (H5AC_unprotect(f, dxpl_id, child_class, middle_addr, middle_child, middle_child_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
-    if (H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, H5AC__NO_FLAGS_SET) < 0)
+    if (H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, right_child_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
 done:
@@ -1114,14 +1185,28 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Feb  9 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/14/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
+ *              In this case, that required adding the new 
+ *		internal_dirtied_ptr parameter to the function's 
+ *		argument list.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_redistribute3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *internal, unsigned idx)
+H5B2_redistribute3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *internal, hbool_t *internal_dirtied_ptr, unsigned idx)
 {
     const H5AC_class_t *child_class;    /* Pointer to child node's class info */
     haddr_t left_addr, right_addr;      /* Addresses of left & right child nodes */
     haddr_t middle_addr;                /* Address of middle child node */
+    hbool_t left_child_dirtied = FALSE;
+    hbool_t right_child_dirtied = FALSE;
+    hbool_t middle_child_dirtied = FALSE;
     void *left_child, *right_child;     /* Pointers to child nodes */
     void *middle_child;                 /* Pointers to middle child node */
     unsigned *left_nrec, *right_nrec;   /* Pointers to child # of records */
@@ -1146,6 +1231,9 @@ H5B2_redistribute3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
 
     /* Check for the kind of B-tree node to redistribute */
     if(depth>1) {
+        hbool_t * left_internal_dirtied_ptr = NULL;
+        hbool_t * middle_internal_dirtied_ptr = NULL;
+        hbool_t * right_internal_dirtied_ptr = NULL;
         H5B2_internal_t *left_internal;         /* Pointer to left internal node */
         H5B2_internal_t *middle_internal;       /* Pointer to middle internal node */
         H5B2_internal_t *right_internal;        /* Pointer to right internal node */
@@ -1165,8 +1253,11 @@ H5B2_redistribute3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* More setup for child nodes */
+        left_internal_dirtied_ptr = &left_child_dirtied;
         left_child = left_internal;
+        middle_internal_dirtied_ptr = &middle_child_dirtied;
         middle_child = middle_internal;
+        right_internal_dirtied_ptr = &right_child_dirtied;
         right_child = right_internal;
         left_nrec = &(left_internal->nrec);
         middle_nrec = &(middle_internal->nrec);
@@ -1179,11 +1270,14 @@ H5B2_redistribute3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
         right_node_ptrs = right_internal->node_ptrs;
 
         /* Mark child nodes as dirty now */
-        left_internal->cache_info.is_dirty = TRUE;
-        middle_internal->cache_info.is_dirty = TRUE;
-        right_internal->cache_info.is_dirty = TRUE;
+        *left_internal_dirtied_ptr = TRUE;
+        *middle_internal_dirtied_ptr = TRUE;
+        *right_internal_dirtied_ptr = TRUE;
     } /* end if */
     else {
+        hbool_t * left_leaf_dirtied_ptr = NULL;
+        hbool_t * middle_leaf_dirtied_ptr = NULL;
+        hbool_t * right_leaf_dirtied_ptr = NULL;
         H5B2_leaf_t *left_leaf;         /* Pointer to left leaf node */
         H5B2_leaf_t *middle_leaf;       /* Pointer to middle leaf node */
         H5B2_leaf_t *right_leaf;        /* Pointer to right leaf node */
@@ -1203,8 +1297,11 @@ H5B2_redistribute3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         /* More setup for child nodes */
+        left_leaf_dirtied_ptr = &left_child_dirtied;
         left_child = left_leaf;
+        middle_leaf_dirtied_ptr = &middle_child_dirtied;
         middle_child = middle_leaf;
+        right_leaf_dirtied_ptr = &right_child_dirtied;
         right_child = right_leaf;
         left_nrec = &(left_leaf->nrec);
         middle_nrec = &(middle_leaf->nrec);
@@ -1214,9 +1311,9 @@ H5B2_redistribute3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
         right_native = right_leaf->leaf_native;
 
         /* Mark child nodes as dirty now */
-        left_leaf->cache_info.is_dirty = TRUE;
-        middle_leaf->cache_info.is_dirty = TRUE;
-        right_leaf->cache_info.is_dirty = TRUE;
+        *left_leaf_dirtied_ptr = TRUE;
+        *middle_leaf_dirtied_ptr = TRUE;
+        *right_leaf_dirtied_ptr = TRUE;
     } /* end else */
 
     /* Redistribute records */
@@ -1409,7 +1506,7 @@ H5B2_redistribute3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
     } /* end else */
 
     /* Mark parent as dirty */
-    internal->cache_info.is_dirty = TRUE;
+    *internal_dirtied_ptr = TRUE;
 
 #ifdef QAK
 {
@@ -1467,11 +1564,11 @@ H5B2_redistribute3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
 #endif /* H5B2_DEBUG */
 
     /* Unlock child nodes */
-    if (H5AC_unprotect(f, dxpl_id, child_class, left_addr, left_child, H5AC__NO_FLAGS_SET) < 0)
+    if (H5AC_unprotect(f, dxpl_id, child_class, left_addr, left_child, left_child_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
-    if (H5AC_unprotect(f, dxpl_id, child_class, middle_addr, middle_child, H5AC__NO_FLAGS_SET) < 0)
+    if (H5AC_unprotect(f, dxpl_id, child_class, middle_addr, middle_child, middle_child_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
-    if (H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, H5AC__NO_FLAGS_SET) < 0)
+    if (H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, right_child_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
 done:
@@ -1492,16 +1589,33 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Feb 10 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/15/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
+ *              In this case, that required adding the new 
+ *		parent_cache_info_dirtied_ptr and internal_dirtied_ptr
+ *              parameters to the function's argument list.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_split3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_ptr,
-    H5AC_info_t *parent_cache_info, H5B2_internal_t *internal, unsigned idx)
+H5B2_split3(H5F_t *f, hid_t dxpl_id, unsigned depth, 
+    H5B2_node_ptr_t *curr_node_ptr,
+    hbool_t * parent_cache_info_dirtied_ptr, H5B2_internal_t *internal, 
+    hbool_t * internal_dirtied_ptr, unsigned idx)
 {
     const H5AC_class_t *child_class;    /* Pointer to child node's class info */
     haddr_t left_addr, right_addr;      /* Addresses of left & right child nodes */
     haddr_t middle_addr;                /* Address of middle child node */
     haddr_t new_addr;                   /* Address of new child node */
+    hbool_t left_child_dirtied = FALSE;
+    hbool_t middle_child_dirtied = FALSE;
+    hbool_t right_child_dirtied = FALSE;
+    hbool_t new_child_dirtied = FALSE;
     void *left_child, *right_child;     /* Pointers to left & right child nodes */
     void *middle_child;                 /* Pointer to middle child node */
     void *new_child;                    /* Pointer to new child node */
@@ -1535,6 +1649,10 @@ H5B2_split3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
 
     /* Check for the kind of B-tree node to split */
     if(depth>1) {
+        hbool_t * left_internal_dirtied_ptr = NULL;
+        hbool_t * right_internal_dirtied_ptr = NULL;
+        hbool_t * middle_internal_dirtied_ptr = NULL;
+        hbool_t * new_internal_dirtied_ptr = NULL;
         H5B2_internal_t *left_internal;         /* Pointer to left internal node */
         H5B2_internal_t *right_internal;        /* Pointer to right internal node */
         H5B2_internal_t *middle_internal;       /* Pointer to middle internal node */
@@ -1567,9 +1685,13 @@ H5B2_split3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* More setup for accessing child node information */
+        left_internal_dirtied_ptr = &left_child_dirtied;
         left_child = left_internal;
+        middle_internal_dirtied_ptr = &middle_child_dirtied;
         middle_child = middle_internal;
+        new_internal_dirtied_ptr = &new_child_dirtied;
         new_child = new_internal;
+        right_internal_dirtied_ptr = &right_child_dirtied;
         right_child = right_internal;
         left_nrec = &(left_internal->nrec);
         middle_nrec = &(middle_internal->nrec);
@@ -1585,12 +1707,16 @@ H5B2_split3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
         new_node_ptrs = new_internal->node_ptrs;
 
         /* Mark child nodes as dirty now */
-        left_internal->cache_info.is_dirty = TRUE;
-        middle_internal->cache_info.is_dirty = TRUE;
-        new_internal->cache_info.is_dirty = TRUE;
-        right_internal->cache_info.is_dirty = TRUE;
+        *left_internal_dirtied_ptr = TRUE;
+        *middle_internal_dirtied_ptr = TRUE;
+        *new_internal_dirtied_ptr = TRUE;
+        *right_internal_dirtied_ptr = TRUE;
     } /* end if */
     else {
+        hbool_t * left_leaf_dirtied_ptr = NULL;
+        hbool_t * right_leaf_dirtied_ptr = NULL;
+        hbool_t * middle_leaf_dirtied_ptr = NULL;
+        hbool_t * new_leaf_dirtied_ptr = NULL;
         H5B2_leaf_t *left_leaf;         /* Pointer to left leaf node */
         H5B2_leaf_t *right_leaf;        /* Pointer to right leaf node */
         H5B2_leaf_t *middle_leaf;       /* Pointer to middle leaf node */
@@ -1623,9 +1749,13 @@ H5B2_split3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         /* More setup for accessing child node information */
+        left_leaf_dirtied_ptr = &left_child_dirtied;
         left_child = left_leaf;
+        middle_leaf_dirtied_ptr = &middle_child_dirtied;
         middle_child = middle_leaf;
+        new_leaf_dirtied_ptr = &new_child_dirtied;
         new_child = new_leaf;
+        right_leaf_dirtied_ptr = &right_child_dirtied;
         right_child = right_leaf;
         left_nrec = &(left_leaf->nrec);
         middle_nrec = &(middle_leaf->nrec);
@@ -1637,10 +1767,10 @@ H5B2_split3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
         right_native = right_leaf->leaf_native;
 
         /* Mark child nodes as dirty now */
-        left_leaf->cache_info.is_dirty = TRUE;
-        middle_leaf->cache_info.is_dirty = TRUE;
-        new_leaf->cache_info.is_dirty = TRUE;
-        right_leaf->cache_info.is_dirty = TRUE;
+        *left_leaf_dirtied_ptr = TRUE;
+        *middle_leaf_dirtied_ptr = TRUE;
+        *new_leaf_dirtied_ptr = TRUE;
+        *right_leaf_dirtied_ptr = TRUE;
     } /* end else */
 
     /* Redistribute records */
@@ -1779,13 +1909,13 @@ H5B2_split3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
     internal->nrec++;
 
     /* Mark parent as dirty */
-    internal->cache_info.is_dirty = TRUE;
+    *internal_dirtied_ptr = TRUE;
 
     /* Update grandparent info */
     curr_node_ptr->node_nrec++;
 
     /* Mark grandparent as dirty */
-    parent_cache_info->is_dirty = TRUE;
+    *parent_cache_info_dirtied_ptr = TRUE;
 
 #ifdef H5B2_DEBUG
     H5B2_assert_internal((hsize_t)0,shared,internal);
@@ -1806,13 +1936,13 @@ H5B2_split3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
 #endif /* H5B2_DEBUG */
 
     /* Unlock child nodes */
-    if (H5AC_unprotect(f, dxpl_id, child_class, left_addr, left_child, H5AC__NO_FLAGS_SET) < 0)
+    if (H5AC_unprotect(f, dxpl_id, child_class, left_addr, left_child, left_child_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
-    if (H5AC_unprotect(f, dxpl_id, child_class, middle_addr, middle_child, H5AC__NO_FLAGS_SET) < 0)
+    if (H5AC_unprotect(f, dxpl_id, child_class, middle_addr, middle_child, middle_child_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
-    if (H5AC_unprotect(f, dxpl_id, child_class, new_addr, new_child, H5AC__NO_FLAGS_SET) < 0)
+    if (H5AC_unprotect(f, dxpl_id, child_class, new_addr, new_child, new_child_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
-    if (H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, H5AC__NO_FLAGS_SET) < 0)
+    if (H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, right_child_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
 done:
@@ -1833,14 +1963,26 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Mar  4 2005
  *
+ *              John Mainzer, 6/15/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
+ *              In this case, that required adding the new 
+ *		parent_cache_info_dirtied_ptr and internal_dirtied_ptr
+ *              parameters to the function's argument list.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_merge2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_ptr,
-    H5AC_info_t *parent_cache_info, H5B2_internal_t *internal, unsigned idx)
+H5B2_merge2(H5F_t *f, hid_t dxpl_id, unsigned depth, 
+    H5B2_node_ptr_t *curr_node_ptr, hbool_t * parent_cache_info_dirtied_ptr,
+    H5B2_internal_t *internal, hbool_t * internal_dirtied_ptr, unsigned idx)
 {
     const H5AC_class_t *child_class;    /* Pointer to child node's class info */
     haddr_t left_addr, right_addr;      /* Addresses of left & right child nodes */
+    hbool_t left_child_dirtied = FALSE;
+    hbool_t right_child_dirtied = FALSE;
     void *left_child, *right_child;     /* Pointers to left & right child nodes */
     unsigned *left_nrec, *right_nrec;   /* Pointers to left & right child # of records */
     uint8_t *left_native, *right_native;    /* Pointers to left & right children's native records */
@@ -1859,6 +2001,8 @@ H5B2_merge2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
 
     /* Check for the kind of B-tree node to split */
     if(depth>1) {
+        hbool_t * left_internal_dirtied_ptr = NULL;
+        hbool_t * right_internal_dirtied_ptr = NULL;
         H5B2_internal_t *left_internal;         /* Pointer to left internal node */
         H5B2_internal_t *right_internal;        /* Pointer to right internal node */
 
@@ -1874,7 +2018,9 @@ H5B2_merge2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* More setup for accessing child node information */
+        left_internal_dirtied_ptr = &left_child_dirtied;
         left_child = left_internal;
+        right_internal_dirtied_ptr = &right_child_dirtied;
         right_child = right_internal;
         left_nrec = &(left_internal->nrec);
         right_nrec = &(right_internal->nrec);
@@ -1884,10 +2030,12 @@ H5B2_merge2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
         right_node_ptrs = right_internal->node_ptrs;
 
         /* Mark child nodes as dirty now */
-        left_internal->cache_info.is_dirty = TRUE;
-        right_internal->cache_info.is_dirty = TRUE;
+        *left_internal_dirtied_ptr = TRUE;
+        *right_internal_dirtied_ptr = TRUE;
     } /* end if */
     else {
+        hbool_t * left_leaf_dirtied_ptr = NULL;
+        hbool_t * right_leaf_dirtied_ptr = NULL;
         H5B2_leaf_t *left_leaf;         /* Pointer to left leaf node */
         H5B2_leaf_t *right_leaf;        /* Pointer to right leaf node */
 
@@ -1903,7 +2051,9 @@ H5B2_merge2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         /* More setup for accessing child node information */
+        left_leaf_dirtied_ptr = &left_child_dirtied;
         left_child = left_leaf;
+        right_leaf_dirtied_ptr = &right_child_dirtied;
         right_child = right_leaf;
         left_nrec = &(left_leaf->nrec);
         right_nrec = &(right_leaf->nrec);
@@ -1911,8 +2061,8 @@ H5B2_merge2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
         right_native = right_leaf->leaf_native;
 
         /* Mark child nodes as dirty now */
-        left_leaf->cache_info.is_dirty = TRUE;
-        right_leaf->cache_info.is_dirty = TRUE;
+        *left_leaf_dirtied_ptr = TRUE;
+        *right_leaf_dirtied_ptr = TRUE;
     } /* end else */
 
     /* Redistribute records into left node */
@@ -1947,13 +2097,13 @@ H5B2_merge2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
     internal->nrec--;
 
     /* Mark parent as dirty */
-    internal->cache_info.is_dirty = TRUE;
+    *internal_dirtied_ptr = TRUE;
 
     /* Update grandparent info */
     curr_node_ptr->node_nrec--;
 
     /* Mark grandparent as dirty */
-    parent_cache_info->is_dirty = TRUE;
+    *parent_cache_info_dirtied_ptr = TRUE;
 
 #ifdef H5B2_DEBUG
     H5B2_assert_internal((hsize_t)0,shared,internal);
@@ -1966,13 +2116,13 @@ H5B2_merge2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
 #endif /* H5B2_DEBUG */
 
     /* Unlock left node */
-    if (H5AC_unprotect(f, dxpl_id, child_class, left_addr, left_child, H5AC__NO_FLAGS_SET) < 0)
+    if (H5AC_unprotect(f, dxpl_id, child_class, left_addr, left_child, left_child_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
     /* Delete right node & remove from cache */
     if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, right_addr, (hsize_t)shared->node_size)<0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree leaf node")
-    if (H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, H5AC__DELETED_FLAG) < 0)
+    if (H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, right_child_dirtied, H5AC__DELETED_FLAG) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
 done:
@@ -1993,15 +2143,30 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Mar  4 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/15/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
+ *              In this case, that required adding the new 
+ *		parent_cache_info_dirtied_ptr and internal_dirtied_ptr
+ *              parameters to the function's argument list.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_ptr,
-    H5AC_info_t *parent_cache_info, H5B2_internal_t *internal, unsigned idx)
+H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth, 
+    H5B2_node_ptr_t *curr_node_ptr, hbool_t * parent_cache_info_dirtied_ptr, 
+    H5B2_internal_t *internal, hbool_t * internal_dirtied_ptr, unsigned idx)
 {
     const H5AC_class_t *child_class;    /* Pointer to child node's class info */
     haddr_t left_addr, right_addr;      /* Addresses of left & right child nodes */
     haddr_t middle_addr;                /* Address of middle child node */
+    hbool_t left_child_dirtied = FALSE;
+    hbool_t right_child_dirtied = FALSE;
+    hbool_t middle_child_dirtied = FALSE;
     void *left_child, *right_child;     /* Pointers to left & right child nodes */
     void *middle_child;                 /* Pointer to middle child node */
     unsigned *left_nrec, *right_nrec;   /* Pointers to left & right child # of records */
@@ -2017,7 +2182,9 @@ H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
     FUNC_ENTER_NOAPI_NOINIT(H5B2_merge3)
 
     HDassert(f);
+    HDassert(parent_cache_info_dirtied_ptr);
     HDassert(internal);
+    HDassert(internal_dirtied_ptr);
 
     /* Get the pointer to the shared B-tree info */
     shared=H5RC_GET_OBJ(internal->shared);
@@ -2025,6 +2192,9 @@ H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
 
     /* Check for the kind of B-tree node to split */
     if(depth>1) {
+        hbool_t * left_internal_dirtied_ptr = NULL;
+        hbool_t * middle_internal_dirtied_ptr = NULL;
+        hbool_t * right_internal_dirtied_ptr = NULL;
         H5B2_internal_t *left_internal;         /* Pointer to left internal node */
         H5B2_internal_t *middle_internal;       /* Pointer to middle internal node */
         H5B2_internal_t *right_internal;        /* Pointer to right internal node */
@@ -2044,8 +2214,11 @@ H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* More setup for accessing child node information */
+        left_internal_dirtied_ptr = &left_child_dirtied;
         left_child = left_internal;
+        middle_internal_dirtied_ptr = &middle_child_dirtied;
         middle_child = middle_internal;
+        right_internal_dirtied_ptr = &right_child_dirtied;
         right_child = right_internal;
         left_nrec = &(left_internal->nrec);
         middle_nrec = &(middle_internal->nrec);
@@ -2058,11 +2231,14 @@ H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
         right_node_ptrs = right_internal->node_ptrs;
 
         /* Mark child nodes as dirty now */
-        left_internal->cache_info.is_dirty = TRUE;
-        middle_internal->cache_info.is_dirty = TRUE;
-        right_internal->cache_info.is_dirty = TRUE;
+        *left_internal_dirtied_ptr = TRUE;
+        *middle_internal_dirtied_ptr = TRUE;
+        *right_internal_dirtied_ptr = TRUE;
     } /* end if */
     else {
+        hbool_t * left_leaf_dirtied_ptr = NULL;
+        hbool_t * middle_leaf_dirtied_ptr = NULL;
+        hbool_t * right_leaf_dirtied_ptr = NULL;
         H5B2_leaf_t *left_leaf;         /* Pointer to left leaf node */
         H5B2_leaf_t *middle_leaf;       /* Pointer to middle leaf node */
         H5B2_leaf_t *right_leaf;        /* Pointer to right leaf node */
@@ -2082,8 +2258,11 @@ H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         /* More setup for accessing child node information */
+        left_leaf_dirtied_ptr = &left_child_dirtied;
         left_child = left_leaf;
+        middle_leaf_dirtied_ptr = &middle_child_dirtied;
         middle_child = middle_leaf;
+        right_leaf_dirtied_ptr = &right_child_dirtied;
         right_child = right_leaf;
         left_nrec = &(left_leaf->nrec);
         middle_nrec = &(middle_leaf->nrec);
@@ -2093,9 +2272,9 @@ H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
         right_native = right_leaf->leaf_native;
 
         /* Mark child nodes as dirty now */
-        left_leaf->cache_info.is_dirty = TRUE;
-        middle_leaf->cache_info.is_dirty = TRUE;
-        right_leaf->cache_info.is_dirty = TRUE;
+        *left_leaf_dirtied_ptr = TRUE;
+        *middle_leaf_dirtied_ptr = TRUE;
+        *right_leaf_dirtied_ptr = TRUE;
     } /* end else */
 
     /* Redistribute records into left node */
@@ -2173,13 +2352,13 @@ H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
     internal->nrec--;
 
     /* Mark parent as dirty */
-    internal->cache_info.is_dirty = TRUE;
+    *internal_dirtied_ptr = TRUE;
 
     /* Update grandparent info */
     curr_node_ptr->node_nrec--;
 
     /* Mark grandparent as dirty */
-    parent_cache_info->is_dirty = TRUE;
+    *parent_cache_info_dirtied_ptr = TRUE;
 
 #ifdef H5B2_DEBUG
     H5B2_assert_internal((hsize_t)0,shared,internal);
@@ -2194,15 +2373,15 @@ H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
 #endif /* H5B2_DEBUG */
 
     /* Unlock left & middle nodes */
-    if (H5AC_unprotect(f, dxpl_id, child_class, left_addr, left_child, H5AC__NO_FLAGS_SET) < 0)
+    if (H5AC_unprotect(f, dxpl_id, child_class, left_addr, left_child, left_child_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
-    if (H5AC_unprotect(f, dxpl_id, child_class, middle_addr, middle_child, H5AC__NO_FLAGS_SET) < 0)
+    if (H5AC_unprotect(f, dxpl_id, child_class, middle_addr, middle_child, middle_child_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
     /* Delete right node & remove from cache */
     if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, right_addr, (hsize_t)shared->node_size)<0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree leaf node")
-    if (H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, H5AC__DELETED_FLAG) < 0)
+    if (H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, right_child_dirtied, H5AC__DELETED_FLAG) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
 done:
@@ -2223,14 +2402,27 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Mar  4 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/15/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
+ *              In this case, that required adding the new 
+ *		internal_dirtied_ptr parameter to the function's 
+ *		argument list.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5B2_swap_leaf(H5F_t *f, hid_t dxpl_id, unsigned depth,
-    H5B2_internal_t *internal, unsigned idx, void *swap_loc)
+    H5B2_internal_t *internal, hbool_t * internal_dirtied_ptr, 
+    unsigned idx, void *swap_loc)
 {
     const H5AC_class_t *child_class;    /* Pointer to child node's class info */
     haddr_t child_addr;                 /* Address of child node */
+    hbool_t child_dirtied = FALSE;
     void *child;                        /* Pointer to child node */
     uint8_t *child_native;              /* Pointer to child's native records */
     H5B2_shared_t *shared;              /* B-tree's shared info */
@@ -2248,6 +2440,7 @@ H5B2_swap_leaf(H5F_t *f, hid_t dxpl_id, unsigned depth,
 
     /* Check for the kind of B-tree node to swap */
     if(depth>1) {
+        hbool_t * child_internal_dirtied_ptr = NULL;
         H5B2_internal_t *child_internal;        /* Pointer to internal node */
 
         /* Setup information for unlocking child node */
@@ -2259,13 +2452,15 @@ H5B2_swap_leaf(H5F_t *f, hid_t dxpl_id, unsigned depth,
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* More setup for accessing child node information */
+        child_internal_dirtied_ptr = &child_dirtied;
         child = child_internal;
         child_native = child_internal->int_native;
 
         /* Mark child node as dirty now */
-        child_internal->cache_info.is_dirty = TRUE;
+        *child_internal_dirtied_ptr = TRUE;
     } /* end if */
     else {
+        hbool_t * child_leaf_dirtied_ptr = NULL;
         H5B2_leaf_t *child_leaf;        /* Pointer to leaf node */
 
         /* Setup information for unlocking child nodes */
@@ -2277,11 +2472,12 @@ H5B2_swap_leaf(H5F_t *f, hid_t dxpl_id, unsigned depth,
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         /* More setup for accessing child node information */
+        child_leaf_dirtied_ptr = &child_dirtied;
         child = child_leaf;
         child_native = child_leaf->leaf_native;
 
         /* Mark child node as dirty now */
-        child_leaf->cache_info.is_dirty = TRUE;
+        *child_leaf_dirtied_ptr = TRUE;
     } /* end else */
 
     /* Swap records (use disk page as temporary buffer) */
@@ -2290,7 +2486,7 @@ H5B2_swap_leaf(H5F_t *f, hid_t dxpl_id, unsigned depth,
     HDmemcpy(swap_loc, shared->page, shared->type->nrec_size);
 
     /* Mark parent as dirty */
-    internal->cache_info.is_dirty = TRUE;
+    *internal_dirtied_ptr = TRUE;
 
 #ifdef H5B2_DEBUG
     H5B2_assert_internal((hsize_t)0,shared,internal);
@@ -2301,7 +2497,7 @@ H5B2_swap_leaf(H5F_t *f, hid_t dxpl_id, unsigned depth,
 #endif /* H5B2_DEBUG */
 
     /* Unlock child node */
-    if (H5AC_unprotect(f, dxpl_id, child_class, child_addr, child, H5AC__NO_FLAGS_SET) < 0)
+    if (H5AC_unprotect(f, dxpl_id, child_class, child_addr, child, child_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
 done:
@@ -2320,12 +2516,20 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Mar  3 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/15/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5B2_insert_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     H5B2_node_ptr_t *curr_node_ptr, void *udata)
 {
+    hbool_t leaf_dirtied = FALSE;
     H5B2_leaf_t *leaf;                  /* Pointer to leaf node */
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
     int         cmp;                    /* Comparison value of records */
@@ -2382,11 +2586,11 @@ H5B2_insert_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     leaf->nrec++;
 
     /* Mark node as dirty */
-    leaf->cache_info.is_dirty = TRUE;
+    leaf_dirtied = TRUE;
 
 done:
     /* Release the B-tree leaf node */
-    if (leaf && H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr->addr, leaf, H5AC__NO_FLAGS_SET) < 0)
+    if (leaf && H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr->addr, leaf, leaf_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release leaf B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2404,13 +2608,25 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Mar  2 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/14/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
+ *              In this case, that required adding the new dirtied_ptr
+ *              parameter to the function's argument list.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5B2_insert_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
-    unsigned depth, H5AC_info_t *parent_cache_info,
+    unsigned depth, H5AC_info_t *parent_cache_info, 
+    hbool_t * parent_cache_info_dirtied_ptr,
     H5B2_node_ptr_t *curr_node_ptr, void *udata)
 {
+    hbool_t internal_dirtied = FALSE;
     H5B2_internal_t *internal;          /* Pointer to internal node */
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
     unsigned    idx;                    /* Location of record which matches key */
@@ -2423,6 +2639,7 @@ H5B2_insert_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     HDassert(bt2_shared);
     HDassert(depth>0);
     HDassert(parent_cache_info);
+    HDassert(parent_cache_info_dirtied_ptr);
     HDassert(curr_node_ptr);
     HDassert(H5F_addr_defined(curr_node_ptr->addr));
 
@@ -2469,7 +2686,9 @@ H5B2_insert_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTREDISTRIBUTE, FAIL, "unable to redistribute child node records")
                 } /* end if */
                 else {
-                    if(H5B2_split2(f,dxpl_id,depth,curr_node_ptr,parent_cache_info,internal,idx)<0)
+                    if(H5B2_split2(f,dxpl_id,depth,curr_node_ptr,
+                                   parent_cache_info_dirtied_ptr,
+                                   internal,&internal_dirtied,idx)<0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to split child node")
                 } /* end else */
             } /* end if */
@@ -2479,18 +2698,22 @@ H5B2_insert_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTREDISTRIBUTE, FAIL, "unable to redistribute child node records")
                 } /* end if */
                 else {
-                    if(H5B2_split2(f,dxpl_id,depth,curr_node_ptr,parent_cache_info,internal,(idx-1))<0)
+                    if(H5B2_split2(f,dxpl_id,depth,curr_node_ptr,
+                                   parent_cache_info_dirtied_ptr, 
+                                   internal,&internal_dirtied,(idx-1))<0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to split child node")
                 } /* end else */
             } /* end if */
             else { /* Middle child */
                 if(retries>0 && ((internal->node_ptrs[idx+1].node_nrec < split_nrec) ||
                             (internal->node_ptrs[idx-1].node_nrec < split_nrec))) {
-                    if(H5B2_redistribute3(f,dxpl_id,depth,internal,idx)<0)
+                    if(H5B2_redistribute3(f,dxpl_id,depth,internal,&internal_dirtied,idx)<0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTREDISTRIBUTE, FAIL, "unable to redistribute child node records")
                 } /* end if */
                 else {
-                    if(H5B2_split3(f,dxpl_id,depth,curr_node_ptr,parent_cache_info,internal,idx)<0)
+                    if(H5B2_split3(f,dxpl_id,depth,curr_node_ptr,
+                                   parent_cache_info_dirtied_ptr,
+                                   internal,&internal_dirtied,idx)<0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to split child node")
                 } /* end else */
             } /* end else */
@@ -2509,7 +2732,8 @@ H5B2_insert_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
     /* Attempt to insert node */
     if(depth>1) {
-        if(H5B2_insert_internal(f,dxpl_id,bt2_shared,depth-1,&internal->cache_info,&internal->node_ptrs[idx],udata)<0)
+        if(H5B2_insert_internal(f,dxpl_id,bt2_shared,depth-1,&internal->cache_info,&internal_dirtied,
+                                &internal->node_ptrs[idx],udata)<0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert record into B-tree internal node")
     } /* end if */
     else {
@@ -2521,11 +2745,11 @@ H5B2_insert_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     curr_node_ptr->all_nrec++;
 
     /* Mark node as dirty */
-    internal->cache_info.is_dirty = TRUE;
+    internal_dirtied = TRUE;
 
 done:
     /* Release the B-tree internal node */
-    if (internal && H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr->addr, internal, H5AC__NO_FLAGS_SET) < 0)
+    if (internal && H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr->addr, internal, internal_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release internal B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2543,12 +2767,20 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Feb  2 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/10/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
            void *udata)
 {
+    hbool_t	bt2_dirtied = FALSE;
     H5B2_t	*bt2=NULL;              /* Pointer to the B-tree header */
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
     herr_t	ret_value = SUCCEED;
@@ -2575,19 +2807,19 @@ H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "unable to create root node")
 
         /* Mark B-tree header as dirty, since we updated the address of the root node */
-        bt2->cache_info.is_dirty = TRUE;
+        bt2_dirtied = TRUE;
     } /* end if */
     /* Check if we need to split the root node (equiv. to a 1->2 leaf node split) */
     else if((bt2->depth==0 && bt2->root.node_nrec==shared->split_leaf_nrec) ||
             (bt2->depth>0 && bt2->root.node_nrec==shared->split_int_nrec)) {
         /* Split root node */
-        if(H5B2_split_root(f, dxpl_id, bt2, bt2->shared)<0)
+        if(H5B2_split_root(f, dxpl_id, bt2, &bt2_dirtied, bt2->shared)<0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to split root node")
     } /* end if */
         
     /* Attempt to insert record into B-tree */
     if(bt2->depth>0) {
-        if(H5B2_insert_internal(f,dxpl_id,bt2->shared,bt2->depth,&(bt2->cache_info),&bt2->root,udata)<0)
+        if(H5B2_insert_internal(f,dxpl_id,bt2->shared,bt2->depth,&(bt2->cache_info),&bt2_dirtied,&bt2->root,udata)<0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert record into B-tree internal node")
     } /* end if */
     else {
@@ -2596,11 +2828,11 @@ H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     } /* end else */
 
     /* Mark parent node as dirty */
-    bt2->cache_info.is_dirty = TRUE;
+    bt2_dirtied = TRUE;
 
 done:
     /* Release the B-tree header info */
-    if (bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
+    if (bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, bt2_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2618,6 +2850,16 @@ done:
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Feb  2 2005
+ *
+ * Modifications:
+ *
+ *              John Mainzer, 6/15/05
+ *              Modified the function to avoid modifying the is_dirty 
+ *		field of the cache info, as that field is now maintained
+ *		by the cache code.  Since this function uses a call to
+ *		H5AC_set(), and that function presumes that the newly
+ *		inserted entry is dirty, we need only remove the reference
+ *		to the is_dirty field.
  *
  *-------------------------------------------------------------------------
  */
@@ -2641,7 +2883,6 @@ H5B2_create_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, H5B2_node_ptr_t *n
 
     /* Set metadata cache info */
     HDmemset(&leaf->cache_info,0,sizeof(H5AC_info_t));
-    leaf->cache_info.is_dirty = TRUE;
 
     /* Share common B-tree information */
     leaf->shared = bt2_shared;
@@ -2691,6 +2932,16 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Feb  3 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/15/05
+ *              Modified the function to avoid modifying the is_dirty 
+ *		field of the cache info, as that field is now maintained
+ *		by the cache code.  Since this function uses a call to
+ *		H5AC_set(), and that function presumes that the newly
+ *		inserted entry is dirty, we need only remove the reference
+ *		to the is_dirty field.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2713,7 +2964,6 @@ H5B2_create_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, H5B2_node_ptr_
 
     /* Set metadata cache info */
     HDmemset(&internal->cache_info,0,sizeof(H5AC_info_t));
-    internal->cache_info.is_dirty = TRUE;
 
     /* Share common B-tree information */
     internal->shared = bt2_shared;
@@ -2773,6 +3023,13 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Feb 11 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/16/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2781,6 +3038,7 @@ H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
 {
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
     const H5AC_class_t *curr_node_class=NULL; /* Pointer to current node's class info */
+    hbool_t node_dirtied = FALSE;
     void *node=NULL;                    /* Pointers to current node */
     uint8_t *native;                    /* Pointers to node's native records */
     H5B2_node_ptr_t *node_ptrs=NULL;    /* Pointers to node's node pointers */
@@ -2847,7 +3105,7 @@ H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
 done:
     /* Unlock current node */
     if(node)
-        if (H5AC_unprotect(f, dxpl_id, curr_node_class, curr_node->addr, node, H5AC__NO_FLAGS_SET) < 0)
+        if (H5AC_unprotect(f, dxpl_id, curr_node_class, curr_node->addr, node, node_dirtied, H5AC__NO_FLAGS_SET) < 0)
             HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2869,12 +3127,20 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Feb 11 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/16/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5B2_iterate(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     H5B2_operator_t op, void *op_data)
 {
+    hbool_t	bt2_dirtied = FALSE;
     H5B2_t	*bt2=NULL;              /* Pointer to the B-tree header */
     H5RC_t      *bt2_shared=NULL;       /* Pointer to ref-counter for shared B-tree info */
     hbool_t     incr_rc=FALSE;          /* Flag to indicate that we've incremented the B-tree's shared info reference count */
@@ -2906,7 +3172,7 @@ H5B2_iterate(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     depth=bt2->depth;
 
     /* Release header */
-    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
+    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, bt2_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
     bt2=NULL;
 
@@ -2948,12 +3214,20 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Feb 23 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/16/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     void *udata, H5B2_found_t op, void *op_data)
 {
+    hbool_t	bt2_dirtied = FALSE;
     H5B2_t	*bt2=NULL;              /* Pointer to the B-tree header */
     H5RC_t      *bt2_shared=NULL;       /* Pointer to ref-counter for shared B-tree info */
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
@@ -2987,7 +3261,7 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     depth=bt2->depth;
 
     /* Release header */
-    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
+    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, bt2_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
     bt2=NULL;
 
@@ -3002,8 +3276,11 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     /* Walk down B-tree to find record or leaf node where record is located */
     cmp = -1;
     while(depth>0 && cmp != 0) {
+        hbool_t internal_dirtied;
         H5B2_internal_t *internal;          /* Pointer to internal node in B-tree */
         H5B2_node_ptr_t next_node_ptr;      /* Node pointer info for next node */
+
+        internal_dirtied = FALSE;
 
         /* Lock B-tree current node */
         if (NULL == (internal = H5AC_protect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, &(curr_node_ptr.node_nrec), bt2_shared, H5AC_READ)))
@@ -3019,7 +3296,7 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
             next_node_ptr=internal->node_ptrs[idx];
 
             /* Unlock current node */
-            if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) < 0)
+            if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, internal_dirtied, H5AC__NO_FLAGS_SET) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
             /* Set pointer to next node to load */
@@ -3029,14 +3306,14 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
             /* Make callback for current record */
             if ( op && (op)(H5B2_INT_NREC(internal,shared,idx), op_data) <0) {
                 /* Unlock current node */
-                if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) < 0)
+                if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, internal_dirtied, H5AC__NO_FLAGS_SET) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
                 HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "'found' callback failed for B-tree find operation")
             } /* end if */
 
             /* Unlock current node */
-            if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) < 0)
+            if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, internal_dirtied, H5AC__NO_FLAGS_SET) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
             HGOTO_DONE(SUCCEED);
@@ -3047,6 +3324,7 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     } /* end while */
 
     {
+        hbool_t leaf_dirtied = FALSE;
         H5B2_leaf_t *leaf;          /* Pointer to leaf node in B-tree */
 
         /* Lock B-tree leaf node */
@@ -3058,7 +3336,7 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
 
         if(cmp != 0) {
             /* Unlock leaf node */
-            if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
+            if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, leaf_dirtied, H5AC__NO_FLAGS_SET) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
             /* Note: don't push error on stack, leave that to next higher level,
@@ -3075,7 +3353,7 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
             /* Make callback for current record */
             if ( op && (op)(H5B2_LEAF_NREC(leaf,shared,idx), op_data) <0) {
                 /* Unlock current node */
-                if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
+                if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, leaf_dirtied, H5AC__NO_FLAGS_SET) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
                 HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "'found' callback failed for B-tree find operation")
@@ -3083,7 +3361,7 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
         } /* end else */
 
         /* Unlock current node */
-        if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
+        if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, leaf_dirtied, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
     }
     
@@ -3112,12 +3390,20 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Feb 23 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/16/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5B2_index(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     hsize_t idx, H5B2_found_t op, void *op_data)
 {
+    hbool_t	bt2_dirtied = FALSE;
     H5B2_t	*bt2=NULL;              /* Pointer to the B-tree header */
     H5RC_t      *bt2_shared=NULL;       /* Pointer to ref-counter for shared B-tree info */
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
@@ -3150,7 +3436,7 @@ H5B2_index(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     depth=bt2->depth;
 
     /* Release header */
-    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
+    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, bt2_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
     bt2=NULL;
 
@@ -3168,9 +3454,12 @@ H5B2_index(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
 
     /* Walk down B-tree to find record or leaf node where record is located */
     while(depth>0) {
+        hbool_t internal_dirtied;
         H5B2_internal_t *internal;          /* Pointer to internal node in B-tree */
         H5B2_node_ptr_t next_node_ptr;      /* Node pointer info for next node */
         unsigned u;                         /* Local index variable */
+
+        internal_dirtied = FALSE;
 
         /* Lock B-tree current node */
         if (NULL == (internal = H5AC_protect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, &(curr_node_ptr.node_nrec), bt2_shared, H5AC_READ)))
@@ -3184,7 +3473,7 @@ H5B2_index(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
                 next_node_ptr=internal->node_ptrs[u];
 
                 /* Unlock current node */
-                if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) < 0)
+                if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, internal_dirtied, H5AC__NO_FLAGS_SET) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
                 /* Set pointer to next node to load */
@@ -3199,14 +3488,14 @@ H5B2_index(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
                 /* Make callback for current record */
                 if ((op)(H5B2_INT_NREC(internal,shared,u), op_data) <0) {
                     /* Unlock current node */
-                    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) < 0)
+                    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, internal_dirtied, H5AC__NO_FLAGS_SET) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
                     HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "'found' callback failed for B-tree find operation")
                 } /* end if */
 
                 /* Unlock current node */
-                if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) < 0)
+                if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, internal_dirtied, H5AC__NO_FLAGS_SET) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
                 HGOTO_DONE(SUCCEED);
@@ -3225,7 +3514,7 @@ H5B2_index(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
                 next_node_ptr=internal->node_ptrs[u];
 
                 /* Unlock current node */
-                if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) < 0)
+                if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, internal_dirtied, H5AC__NO_FLAGS_SET) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
                 /* Set pointer to next node to load */
@@ -3241,6 +3530,7 @@ H5B2_index(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     } /* end while */
 
     {
+        hbool_t leaf_dirtied = FALSE;
         H5B2_leaf_t *leaf;          /* Pointer to leaf node in B-tree */
 
         /* Lock B-tree leaf node */
@@ -3253,14 +3543,14 @@ H5B2_index(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
         /* Make callback for correct record */
         if ((op)(H5B2_LEAF_NREC(leaf,shared,idx), op_data) <0) {
             /* Unlock current node */
-            if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
+            if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, leaf_dirtied, H5AC__NO_FLAGS_SET) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
             HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "'found' callback failed for B-tree find operation")
         } /* end if */
 
         /* Unlock current node */
-        if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
+        if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, leaf_dirtied, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
     }
     
@@ -3284,12 +3574,20 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Mar  3 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/15/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5B2_remove_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     H5B2_node_ptr_t *curr_node_ptr, void *udata)
 {
+    hbool_t 	leaf_dirtied = FALSE;
     H5B2_leaf_t *leaf;                  /* Pointer to leaf node */
     haddr_t     leaf_addr=HADDR_UNDEF;  /* Leaf address on disk */
     unsigned    leaf_unprotect_flags=H5AC__NO_FLAGS_SET; /* Flags for unprotecting leaf node */
@@ -3330,7 +3628,7 @@ H5B2_remove_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     leaf->nrec--;
 
     /* Mark leaf node as dirty also */
-    leaf->cache_info.is_dirty = TRUE;
+    leaf_dirtied = TRUE;
 
     if(leaf->nrec > 0) {
         /* Pack record out of leaf */
@@ -3354,7 +3652,7 @@ H5B2_remove_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
 done:
     /* Release the B-tree leaf node */
-    if (leaf && H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, leaf_addr, leaf, leaf_unprotect_flags) < 0)
+    if (leaf && H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, leaf_addr, leaf, leaf_dirtied, leaf_unprotect_flags) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release leaf B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3372,15 +3670,29 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Mar  3 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/14/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
+ *              In this case, that required adding the new 
+ *		parent_cache_info_dirtied_ptr parameter to the 
+ *		function's argument list.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     hbool_t *depth_decreased, void *swap_loc, unsigned depth,
-    H5AC_info_t *parent_cache_info, H5B2_node_ptr_t *curr_node_ptr, void *udata)
+    H5AC_info_t *parent_cache_info, hbool_t * parent_cache_info_dirtied_ptr,
+    H5B2_node_ptr_t *curr_node_ptr, void *udata)
 {
+    hbool_t *new_cache_info_dirtied_ptr = NULL;
     H5AC_info_t *new_cache_info;        /* Pointer to new cache info */
     H5B2_node_ptr_t *new_node_ptr;      /* Pointer to new node pointer */
+    hbool_t internal_dirtied = FALSE;
     H5B2_internal_t *internal;          /* Pointer to internal node */
     haddr_t internal_addr;              /* Address of internal node */
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
@@ -3397,6 +3709,7 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     HDassert(bt2_shared);
     HDassert(depth>0);
     HDassert(parent_cache_info);
+    HDassert(parent_cache_info_dirtied_ptr);
     HDassert(curr_node_ptr);
     HDassert(H5F_addr_defined(curr_node_ptr->addr));
 
@@ -3421,7 +3734,9 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
             ((internal->node_ptrs[0].node_nrec + internal->node_ptrs[1].node_nrec) <= ((merge_nrec * 2) + 1))) {
 
         /* Merge children of root node */
-        if(H5B2_merge2(f,dxpl_id,depth,curr_node_ptr,parent_cache_info,internal,0)<0)
+        if(H5B2_merge2(f,dxpl_id,depth,curr_node_ptr,
+                       parent_cache_info_dirtied_ptr,
+                       internal,&internal_dirtied,0)<0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
 
         /* Release space for root B-tree node on disk */
@@ -3440,6 +3755,7 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
         /* Set pointers for advancing to child node */
         new_cache_info = parent_cache_info;
+        new_cache_info_dirtied_ptr = parent_cache_info_dirtied_ptr;
         new_node_ptr = curr_node_ptr;
 
         /* Set flag to indicate root was collapsed */
@@ -3476,7 +3792,9 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTREDISTRIBUTE, FAIL, "unable to redistribute child node records")
                 } /* end if */
                 else {
-                    if(H5B2_merge2(f,dxpl_id,depth,curr_node_ptr,parent_cache_info,internal,idx)<0)
+                    if(H5B2_merge2(f,dxpl_id,depth,curr_node_ptr,
+                                   parent_cache_info_dirtied_ptr,
+                                   internal,&internal_dirtied,idx)<0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
                 } /* end else */
             } /* end if */
@@ -3486,18 +3804,22 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTREDISTRIBUTE, FAIL, "unable to redistribute child node records")
                 } /* end if */
                 else {
-                    if(H5B2_merge2(f,dxpl_id,depth,curr_node_ptr,parent_cache_info,internal,(idx-1))<0)
+                    if(H5B2_merge2(f,dxpl_id,depth,curr_node_ptr,
+                                   parent_cache_info_dirtied_ptr,
+                                   internal,&internal_dirtied,(idx-1))<0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
                 } /* end else */
             } /* end if */
             else { /* Middle child */
                 if(retries>0 && ((internal->node_ptrs[idx+1].node_nrec > merge_nrec) ||
                             (internal->node_ptrs[idx-1].node_nrec > merge_nrec))) {
-                    if(H5B2_redistribute3(f,dxpl_id,depth,internal,idx)<0)
+                    if(H5B2_redistribute3(f,dxpl_id,depth,internal,&internal_dirtied,idx)<0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTREDISTRIBUTE, FAIL, "unable to redistribute child node records")
                 } /* end if */
                 else {
-                    if(H5B2_merge3(f,dxpl_id,depth,curr_node_ptr,parent_cache_info,internal,idx)<0)
+                    if(H5B2_merge3(f,dxpl_id,depth,curr_node_ptr,
+                                   parent_cache_info_dirtied_ptr,internal,
+                                   &internal_dirtied,idx)<0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
                 } /* end else */
             } /* end else */
@@ -3522,17 +3844,19 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
         /* Swap record to delete with record from leaf, if we are the last internal node */
         if(swap_loc && depth==1)
-            if(H5B2_swap_leaf(f,dxpl_id,depth,internal,idx,swap_loc) < 0)
+            if(H5B2_swap_leaf(f,dxpl_id,depth,internal,&internal_dirtied,idx,swap_loc) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTSWAP, FAIL, "Can't swap records in B-tree")
 
         /* Set pointers for advancing to child node */
+        new_cache_info_dirtied_ptr = &internal_dirtied;
         new_cache_info = &internal->cache_info;
         new_node_ptr = &internal->node_ptrs[idx];
     } /* end else */
 
     /* Attempt to remove node */
     if(depth>1) {
-        if(H5B2_remove_internal(f,dxpl_id,bt2_shared,depth_decreased, swap_loc, depth-1,new_cache_info,new_node_ptr,udata)<0)
+        if(H5B2_remove_internal(f,dxpl_id,bt2_shared,depth_decreased, swap_loc, depth-1,
+                                new_cache_info,new_cache_info_dirtied_ptr,new_node_ptr,udata)<0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree internal node")
     } /* end if */
     else {
@@ -3545,7 +3869,7 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
         new_node_ptr->all_nrec--;
 
     /* Mark node as dirty */
-    internal->cache_info.is_dirty = TRUE;
+    internal_dirtied = TRUE;
 
 #ifdef H5B2_DEBUG
     H5B2_assert_internal((!collapsed_root ? (curr_node_ptr->all_nrec-1) : new_node_ptr->all_nrec),shared,internal);
@@ -3553,7 +3877,7 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
 done:
     /* Release the B-tree internal node */
-    if (internal && H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, internal_addr, internal, internal_unprotect_flags) < 0)
+    if (internal && H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, internal_addr, internal, internal_dirtied, internal_unprotect_flags) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release internal B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3571,12 +3895,20 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Feb 25 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/15/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5B2_remove(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
            void *udata)
 {
+    hbool_t     bt2_dirtied = FALSE;
     H5B2_t	*bt2=NULL;              /* Pointer to the B-tree header */
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
     herr_t	ret_value = SUCCEED;
@@ -3604,7 +3936,8 @@ H5B2_remove(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     if(bt2->depth>0) {
         hbool_t depth_decreased=FALSE;  /* Flag to indicate whether the depth of the B-tree decreased */
 
-        if(H5B2_remove_internal(f,dxpl_id,bt2->shared, &depth_decreased, NULL, bt2->depth,&(bt2->cache_info),&bt2->root,udata)<0)
+        if(H5B2_remove_internal(f,dxpl_id,bt2->shared, &depth_decreased, NULL, bt2->depth,
+                                &(bt2->cache_info),&bt2_dirtied,&bt2->root,udata)<0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree internal node")
 
         bt2->depth -= depth_decreased;
@@ -3618,11 +3951,11 @@ H5B2_remove(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     bt2->root.all_nrec--;
 
     /* Mark parent node as dirty */
-    bt2->cache_info.is_dirty = TRUE;
+    bt2_dirtied = TRUE;
 
 done:
     /* Release the B-tree header info */
-    if (bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
+    if (bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, bt2_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3640,12 +3973,20 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Feb 25 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/16/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5B2_get_nrec(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
            hsize_t *nrec)
 {
+    hbool_t	bt2_dirtied = FALSE;
     H5B2_t	*bt2=NULL;              /* Pointer to the B-tree header */
     herr_t	ret_value = SUCCEED;
 
@@ -3666,7 +4007,7 @@ H5B2_get_nrec(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
 
 done:
     /* Release B-tree header node */
-    if (bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
+    if (bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, bt2_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3697,6 +4038,13 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Mar  9 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/16/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3704,6 +4052,7 @@ H5B2_neighbor_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     H5B2_node_ptr_t *curr_node_ptr, void *neighbor_loc,
     H5B2_compare_t comp, void *udata, H5B2_found_t op, void *op_data)
 {
+    hbool_t leaf_dirtied = FALSE;
     H5B2_leaf_t *leaf;                  /* Pointer to leaf node */
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
     unsigned    idx;                    /* Location of record which matches key */
@@ -3759,7 +4108,7 @@ H5B2_neighbor_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
 done:
     /* Release the B-tree internal node */
-    if (leaf && H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr->addr, leaf, H5AC__NO_FLAGS_SET) < 0)
+    if (leaf && H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr->addr, leaf, leaf_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree leaf node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3790,6 +4139,13 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Mar  9 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/16/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3797,6 +4153,7 @@ H5B2_neighbor_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     unsigned depth, H5B2_node_ptr_t *curr_node_ptr, void *neighbor_loc,
     H5B2_compare_t comp, void *udata, H5B2_found_t op, void *op_data)
 {
+    hbool_t internal_dirtied = FALSE;
     H5B2_internal_t *internal;          /* Pointer to internal node */
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
     unsigned    idx;                    /* Location of record which matches key */
@@ -3850,7 +4207,7 @@ H5B2_neighbor_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
 done:
     /* Release the B-tree internal node */
-    if (internal && H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr->addr, internal, H5AC__NO_FLAGS_SET) < 0)
+    if (internal && H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr->addr, internal, internal_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release internal B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3880,12 +4237,20 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Mar  8 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/16/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5B2_neighbor(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     H5B2_compare_t range, void *udata, H5B2_found_t op, void *op_data)
 {
+    hbool_t	bt2_dirtied = FALSE;
     H5B2_t	*bt2=NULL;              /* Pointer to the B-tree header */
     herr_t	ret_value = SUCCEED;
 
@@ -3917,7 +4282,7 @@ H5B2_neighbor(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
 
 done:
     /* Release the B-tree header info */
-    if (bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
+    if (bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, bt2_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3936,6 +4301,13 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Mar  9 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/16/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3944,6 +4316,7 @@ H5B2_delete_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
 {
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
     const H5AC_class_t *curr_node_class=NULL; /* Pointer to current node's class info */
+    hbool_t node_dirtied = FALSE;
     void *node=NULL;                    /* Pointers to current node */
     herr_t	ret_value = SUCCEED;
 
@@ -3994,7 +4367,7 @@ H5B2_delete_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
 done:
     /* Unlock & delete current node */
     if(node)
-        if (H5AC_unprotect(f, dxpl_id, curr_node_class, curr_node->addr, node, H5AC__DELETED_FLAG) < 0)
+        if (H5AC_unprotect(f, dxpl_id, curr_node_class, curr_node->addr, node, node_dirtied, H5AC__DELETED_FLAG) < 0)
             HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4012,11 +4385,19 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Mar  9 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/16/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5B2_delete(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr)
 {
+    hbool_t	bt2_dirtied = FALSE;
     H5B2_t	*bt2=NULL;              /* Pointer to the B-tree header */
     herr_t	ret_value = SUCCEED;
 
@@ -4042,7 +4423,7 @@ H5B2_delete(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr)
     
 done:
     /* Release the B-tree header info */
-    if (bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__DELETED_FLAG) < 0)
+    if (bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, bt2_dirtied, H5AC__DELETED_FLAG) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to delete B-tree header info")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4066,12 +4447,20 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Mar 10 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/16/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5B2_modify(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     void *udata, H5B2_modify_t op, void *op_data)
 {
+    hbool_t	bt2_dirtied = FALSE;
     H5B2_t	*bt2=NULL;              /* Pointer to the B-tree header */
     H5RC_t      *bt2_shared=NULL;       /* Pointer to ref-counter for shared B-tree info */
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
@@ -4106,7 +4495,7 @@ H5B2_modify(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     depth=bt2->depth;
 
     /* Release header */
-    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
+    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, bt2_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
     bt2=NULL;
 
@@ -4121,6 +4510,7 @@ H5B2_modify(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     /* Walk down B-tree to find record or leaf node where record is located */
     cmp = -1;
     while(depth>0 && cmp != 0) {
+        hbool_t internal_dirtied = FALSE;
         H5B2_internal_t *internal;          /* Pointer to internal node in B-tree */
         H5B2_node_ptr_t next_node_ptr;      /* Node pointer info for next node */
 
@@ -4138,7 +4528,7 @@ H5B2_modify(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
             next_node_ptr=internal->node_ptrs[idx];
 
             /* Unlock current node */
-            if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) < 0)
+            if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, internal_dirtied, H5AC__NO_FLAGS_SET) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
             /* Set pointer to next node to load */
@@ -4151,19 +4541,20 @@ H5B2_modify(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
             if ( (op)(H5B2_INT_NREC(internal,shared,idx), op_data, &changed) <0) {
                 /* Make certain that the callback didn't modify the value if it failed */
                 HDassert(changed==FALSE);
+                internal_dirtied = changed;
 
                 /* Unlock current node */
-                if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) < 0)
+                if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, internal_dirtied, H5AC__NO_FLAGS_SET) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTMODIFY, FAIL, "'modify' callback failed for B-tree find operation")
             } /* end if */
 
             /* Mark the node as dirty if it changed */
-            internal->cache_info.is_dirty = changed;
+            internal_dirtied = changed;
 
             /* Unlock current node */
-            if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) < 0)
+            if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, internal_dirtied, H5AC__NO_FLAGS_SET) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
             HGOTO_DONE(SUCCEED);
@@ -4174,6 +4565,7 @@ H5B2_modify(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     } /* end while */
 
     {
+        hbool_t leaf_dirtied = FALSE;
         H5B2_leaf_t *leaf;      /* Pointer to leaf node in B-tree */
         hbool_t changed;        /* Whether the 'modify' callback changed the record */
 
@@ -4186,7 +4578,7 @@ H5B2_modify(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
 
         if(cmp != 0) {
             /* Unlock leaf node */
-            if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
+            if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, leaf_dirtied, H5AC__NO_FLAGS_SET) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
             /* Note: don't push error on stack, leave that to next higher level,
@@ -4205,8 +4597,10 @@ H5B2_modify(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
                 /* Make certain that the callback didn't modify the value if it failed */
                 HDassert(changed==FALSE);
 
+                leaf_dirtied = changed;
+
                 /* Unlock current node */
-                if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
+                if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, leaf_dirtied, H5AC__NO_FLAGS_SET) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTMODIFY, FAIL, "'modify' callback failed for B-tree find operation")
@@ -4214,10 +4608,10 @@ H5B2_modify(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
         } /* end else */
 
         /* Mark the node as dirty if it changed */
-        leaf->cache_info.is_dirty = changed;
+        leaf_dirtied = changed;
 
         /* Unlock current node */
-        if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
+        if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, leaf_dirtied, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
     }
     

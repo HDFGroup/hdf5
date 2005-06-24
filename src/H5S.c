@@ -1089,10 +1089,16 @@ done:
  *
  * Modifications:
  *
+ *              John Mainzer, 6/6/05
+ *              Updated function to use the new dirtied parameter of
+ *              H5AC_unprotect() instead of manipulating the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, const H5S_t *ds)
+H5S_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, const H5S_t *ds, 
+           hbool_t * oh_dirtied_ptr)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -1101,12 +1107,13 @@ H5S_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, const H5S_t *ds)
     assert(f);
     assert(oh);
     assert(ds);
+    assert(oh_dirtied_ptr);
 
     switch (H5S_GET_EXTENT_TYPE(ds)) {
         case H5S_NULL:
         case H5S_SCALAR:
         case H5S_SIMPLE:
-            if (H5O_append(f, dxpl_id, oh, H5O_SDSPACE_ID, 0, &(ds->extent))<0)
+            if (H5O_append(f, dxpl_id, oh, H5O_SDSPACE_ID, 0, &(ds->extent), oh_dirtied_ptr)<0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update simple data space message");
             break;
 

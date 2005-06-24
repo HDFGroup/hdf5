@@ -607,6 +607,13 @@ done:
  *		code is to pass the flags parameter through to 
  *		H5C_insert_entry().
  *
+ *		JRM - 6/6/05
+ *		Added code to force newly inserted entries to be dirty
+ *		in the flexible parallel case.  The normal case is handled
+ *		in H5C.c.  This is part of a series of changes directed at
+ *		moving management of the dirty flag on cache entries into
+ *		the cache code.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -650,6 +657,9 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *
         lf = f->shared->lf;
 
         if ( H5FD_is_fphdf5_driver(lf) ) {
+            
+            /* Newly inserted entry are presumed to be dirty */
+    	    info->is_dirty = TRUE;
 
             /*
              * This is the FPHDF5 driver. Grab a lock for this piece of
@@ -784,6 +794,19 @@ H5AC_rename(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t new_ad
         lf = f->shared->lf;
 
         if ( H5FD_is_fphdf5_driver(lf) ) {
+
+            /* We really should mark the target entry as dirty here, but
+             * the parameter list doesn't give us the information we need
+             * to do the job easily.
+             *
+             * Fortunately, this function is called exactly once in the
+             * the library, so it may be possible to finesse the issue.
+             * If not, I'll have to fix this properly.
+             *
+             * In any case, don't check this code in without revisiting this
+             * issue.
+             *                                       JRM -- 6/6/05
+             */
 
             HGOTO_DONE(SUCCEED);
         }
@@ -1078,10 +1101,15 @@ done:
  *		parameter with the flags parameter in the call to 
  *		H5C_unprotect().
  *
+ *		JRM - 6/6/05
+ *		Added the dirtied parameter and supporting code.  This is 
+ *		part of a collection of changes directed at moving 
+ *		management of cache entry dirty flags into the H5C code.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *thing, unsigned int flags)
+H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *thing, hbool_t dirtied, unsigned int flags)
 {
     herr_t		result;
     herr_t              ret_value=SUCCEED;      /* Return value */
@@ -1119,6 +1147,10 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, 
             HDassert( ((H5AC_info_t *)thing)->is_protected );
 
             ((H5AC_info_t *)thing)->is_protected = FALSE;
+
+            /* mark the entry as dirty if appropriate. JRM - 6/6/05 */
+	    ((H5AC_info_t *)thing)->is_dirty = 
+		((H5AC_info_t *)thing)->is_dirty || dirtied;
 
             /*
              * FIXME: If the metadata is *really* deleted at this point
@@ -1174,6 +1206,7 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, 
                            type,
                            addr,
                            thing,
+                           dirtied,
                            flags);
 
     if ( result < 0 ) {

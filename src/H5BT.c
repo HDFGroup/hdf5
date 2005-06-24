@@ -69,6 +69,16 @@ H5FL_DEFINE(H5BT_t);
  *		koziol@ncsa.uiuc.edu
  *		Mar 10 2005
  *
+ * Modifications:
+ *
+ *
+ *              John Mainzer 6/8/05
+ *              Removed code setting the is_dirty field of the cache info.
+ *              This is no longer pemitted, as the cache code is now
+ *              manageing this field.  Since this function uses a call to
+ *              H5AC_set() (which marks the entry dirty automaticly), no
+ *              other change is required.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -91,7 +101,6 @@ H5BT_create(H5F_t *f, hid_t dxpl_id, haddr_t *addr_p)
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for block tracker info")
 
     /* Assign internal information */
-    bt->cache_info.is_dirty = TRUE;
     bt->max_block_size = 0;             /* Indicate that the value is invalid */
     bt->min_block_size = HSIZET_MAX;    /* Indicate that the value is invalid */
 
@@ -190,11 +199,19 @@ H5BT_insert_modify_cb(void *_record, void *_op_data, hbool_t *changed)
  *		koziol@ncsa.uiuc.edu
  *		Mar 10 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/8/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5BT_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, haddr_t offset, hsize_t length)
 {
+    hbool_t bt_dirtied = FALSE;
     H5BT_t *bt = NULL;                  /* The new B-tree header information */
     H5BT_blk_info_t lower, upper;       /* Info for blocks less than & greater than new block */
     hbool_t lower_valid = FALSE, upper_valid = FALSE;   /* Lower & upper blocks valid? */
@@ -405,7 +422,7 @@ H5BT_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, haddr_t offset, hsize_t lengt
 
 done:
     /* Release the block tracker info */
-    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__NO_FLAGS_SET) < 0)
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, bt_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
     
     FUNC_LEAVE_NOAPI(ret_value)
@@ -423,11 +440,19 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Mar 10 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/17/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5BT_get_total_size(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t *tot_size)
 {
+    hbool_t bt_dirtied = FALSE;
     H5BT_t *bt = NULL;                  /* The new B-tree header information */
     herr_t ret_value=SUCCEED;
 
@@ -449,7 +474,7 @@ H5BT_get_total_size(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t *tot_size)
 
 done:
     /* Release the block tracker info */
-    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__NO_FLAGS_SET) < 0)
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, bt_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
     
     FUNC_LEAVE_NOAPI(ret_value)
@@ -498,11 +523,19 @@ H5BT_remove_find_cb(const void *_record, void *_op_data)
  *		koziol@ncsa.uiuc.edu
  *		Mar 11 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/8/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5BT_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, haddr_t offset, hsize_t length)
 {
+    hbool_t bt_dirtied = FALSE;
     H5BT_t *bt = NULL;                  /* The new B-tree header information */
     H5BT_blk_info_t found;              /* Block info found */
     hsize_t nblks;                      /* Number of blocks tracked */
@@ -645,7 +678,7 @@ HGOTO_ERROR(H5E_BLKTRK, H5E_UNSUPPORTED, FAIL, "Couldn't find block to remove")
 
 done:
     /* Release the block tracker info */
-    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__NO_FLAGS_SET) < 0)
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, bt_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
     
     FUNC_LEAVE_NOAPI(ret_value)
@@ -700,11 +733,19 @@ H5BT_locate_cb(const void *_record, void *_op_data)
  *		koziol@ncsa.uiuc.edu
  *		Mar 24 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/8/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 htri_t
 H5BT_locate(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t size, haddr_t *locate_addr, hsize_t *locate_size)
 {
+    hbool_t bt_dirtied = FALSE;
     H5BT_t *bt = NULL;                  /* The new B-tree header information */
     H5BT_locate_t found;                /* Block info found */
     htri_t ret_value=TRUE;
@@ -739,7 +780,7 @@ H5BT_locate(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t size, haddr_t *locate
 
 done:
     /* Release the block tracker info */
-    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__NO_FLAGS_SET) < 0)
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, bt_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
     
     FUNC_LEAVE_NOAPI(ret_value)
@@ -760,11 +801,19 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Mar 25 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/8/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5BT_iterate(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5BT_operator_t op, void *op_data)
 {
+    hbool_t bt_dirtied = FALSE;
     H5BT_t *bt = NULL;                  /* The new B-tree header information */
     herr_t ret_value;
 
@@ -787,7 +836,7 @@ H5BT_iterate(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5BT_operator_t op, void *op
 
 done:
     /* Release the block tracker info */
-    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__NO_FLAGS_SET) < 0)
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, bt_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
     
     FUNC_LEAVE_NOAPI(ret_value)
@@ -836,12 +885,20 @@ H5BT_neighbor_cb(const void *_record, void *_op_data)
  *		koziol@ncsa.uiuc.edu
  *		Mar 28 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/8/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5BT_neighbor(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5BT_compare_t range,
     haddr_t range_addr, H5BT_blk_info_t *found_block)
 {
+    hbool_t bt_dirtied = FALSE;
     H5BT_t *bt = NULL;                  /* The new B-tree header information */
     H5BT_blk_info_t find;               /* Information for locating block */
     H5BT_blk_info_t found;              /* Block info found */
@@ -873,7 +930,7 @@ H5BT_neighbor(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5BT_compare_t range,
 
 done:
     /* Release the block tracker info */
-    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__NO_FLAGS_SET) < 0)
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, bt_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
     
     FUNC_LEAVE_NOAPI(ret_value)
@@ -891,11 +948,19 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Mar 14 2005
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/8/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5BT_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
 {
+    hbool_t bt_dirtied = FALSE;
     H5BT_t *bt = NULL;                  /* The new B-tree header information */
     herr_t ret_value=SUCCEED;
 
@@ -921,7 +986,7 @@ H5BT_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
     
 done:
     /* Release the block tracker info */
-    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__DELETED_FLAG) < 0)
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, bt_dirtied, H5AC__DELETED_FLAG) < 0)
         HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
     
     FUNC_LEAVE_NOAPI(ret_value)

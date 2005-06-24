@@ -200,7 +200,8 @@ H5_DLL int H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[]/*out*/,
 					hsize_t max_dims[]/*out*/);
 H5_DLL herr_t H5S_modify(struct H5G_entry_t *ent, const H5S_t *space,
         hbool_t update_time, hid_t dxpl_id);
-H5_DLL herr_t H5S_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, const H5S_t *ds);
+H5_DLL herr_t H5S_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, 
+                         const H5S_t *ds, hbool_t * oh_dirtied_ptr);
 H5_DLL size_t H5S_raw_size(const H5F_t *f, const H5S_t *space);
 H5_DLL H5S_t *H5S_read(struct H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL int H5S_extend(H5S_t *space, const hsize_t *size);

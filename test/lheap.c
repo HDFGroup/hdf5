@@ -136,7 +136,7 @@ main(void)
 	    goto error;
 	}
 
-        if (H5HL_unprotect(f, H5P_DATASET_XFER_DEFAULT, heap, heap_addr) < 0) {
+        if (H5HL_unprotect(f, H5P_DATASET_XFER_DEFAULT, heap, heap_addr, FALSE) < 0) {
 	    H5_FAILED();
 	    H5Eprint_stack(H5E_DEFAULT, stdout);
 	    goto error;

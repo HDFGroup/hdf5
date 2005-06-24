@@ -67,20 +67,23 @@ static int H5O_modify_real(H5G_entry_t *ent, const H5O_class_t *type,
     int overwrite, unsigned flags, unsigned update_flags, const void *mesg,
     hid_t dxpl_id);
 static int H5O_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
-    const H5O_class_t *type, unsigned flags, const void *mesg);
+    const H5O_class_t *type, unsigned flags, const void *mesg, 
+    hbool_t * oh_dirtied_ptr);
 static herr_t H5O_remove_real(H5G_entry_t *ent, const H5O_class_t *type,
     int sequence, hid_t dxpl_id);
 static unsigned H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type,
-		      size_t size);
+		      size_t size, hbool_t * oh_dirtied_ptr);
 static unsigned H5O_alloc_extend_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno, size_t size);
 static unsigned H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size);
 static herr_t H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
 static herr_t H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg);
 static unsigned H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *flags,
     const H5O_class_t *orig_type, const void *orig_mesg, H5O_shared_t *sh_mesg,
-    const H5O_class_t **new_type, const void **new_mesg, hid_t dxpl_id);
+    const H5O_class_t **new_type, const void **new_mesg, hid_t dxpl_id,
+    hbool_t * oh_dirtied_ptr);
 static herr_t H5O_write_mesg(H5O_t *oh, unsigned idx, const H5O_class_t *type,
-    const void *mesg, unsigned flags, unsigned update_flags);
+    const void *mesg, unsigned flags, unsigned update_flags, 
+    hbool_t * oh_dirtied_ptr);
 
 /* Metadata cache callbacks */
 static H5O_t *H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata1,
@@ -258,6 +261,11 @@ done:
  *
  * Modifications:
  *
+ *		JRM -- 6/6/05
+ *		Removed code modifying the is_dirty field of the 
+ *		cache_info.  This field is now managed by the cache
+ *		proper.  
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -281,7 +289,6 @@ H5O_init(H5F_t *f, hid_t dxpl_id, size_t size_hint, H5G_entry_t *ent/*out*/, had
     if (NULL == (oh = H5FL_MALLOC(H5O_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
-    oh->cache_info.is_dirty = TRUE;
     oh->version = H5O_VERSION;
     oh->nlink = 0;
 
@@ -1211,12 +1218,17 @@ done:
  *	if zero is passed for ADJUST.  If that's the case then we don't check
  *	for write access on the file.
  *
+ *	John Mainzer, 6/6/05
+ *	Modified function to use the new dirtied parameter to 
+ *	H5AC_unprotect() instead of modfying the is_dirty field.
+ *
  *-------------------------------------------------------------------------
  */
 int
 H5O_link(const H5G_entry_t *ent, int adjust, hid_t dxpl_id)
 {
     H5O_t	*oh = NULL;
+    hbool_t	oh_dirtied = FALSE;
     unsigned int flags=H5AC__NO_FLAGS_SET; /* used to indicate whether the 
                                             * object was deleted as a result 
                                             * of this action.
@@ -1242,7 +1254,7 @@ H5O_link(const H5G_entry_t *ent, int adjust, hid_t dxpl_id)
 	if (oh->nlink + adjust < 0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "link count would be negative");
 	oh->nlink += adjust;
-	oh->cache_info.is_dirty = TRUE;
+        oh_dirtied = TRUE;
 
         /* Check if the object should be deleted */
         if(oh->nlink==0) {
@@ -1273,14 +1285,14 @@ H5O_link(const H5G_entry_t *ent, int adjust, hid_t dxpl_id)
         } /* end if */
 
 	oh->nlink += adjust;
-	oh->cache_info.is_dirty = TRUE;
+        oh_dirtied = TRUE;
     }
 
     /* Set return value */
     ret_value = oh->nlink;
 
 done:
-    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, flags) < 0)
+    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, oh_dirtied, flags) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1353,6 +1365,7 @@ done:
 static int
 H5O_count_real (H5G_entry_t *ent, const H5O_class_t *type, hid_t dxpl_id)
 {
+    hbool_t 	oh_dirtied = FALSE;
     H5O_t	*oh = NULL;
     int	acc;
     unsigned	u;
@@ -1380,7 +1393,7 @@ H5O_count_real (H5G_entry_t *ent, const H5O_class_t *type, hid_t dxpl_id)
 
 done:
     if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, 
-                             H5AC__NO_FLAGS_SET) != SUCCEED)
+                             oh_dirtied, H5AC__NO_FLAGS_SET) != SUCCEED)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1453,11 +1466,16 @@ done:
  *
  * Modifications:
  *
+ *	John Mainzer, 6/6/05
+ *	Modified function to use the new dirtied parameter to 
+ *	H5AC_unprotect() instead of modfying the is_dirty field.
+ *
  *-------------------------------------------------------------------------
  */
 static htri_t
 H5O_exists_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, hid_t dxpl_id)
 {
+    hbool_t	oh_dirtied = FALSE;
     H5O_t	*oh=NULL;
     unsigned	u;
     htri_t      ret_value;       /* Return value */
@@ -1486,7 +1504,7 @@ H5O_exists_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, hid_t d
 
 done:
     if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, 
-                             H5AC__NO_FLAGS_SET) != SUCCEED)
+                             oh_dirtied, H5AC__NO_FLAGS_SET) != SUCCEED)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1570,17 +1588,24 @@ done:
  *		Aug  6 1997
  *
  * Modifications:
+ *
  *      Bill Wendling, 2003-09-30
  *      Protect the object header and pass it into the H5O_find_in_ohdr
  *      function. This is done because the H5O_find_in_ohdr used to
  *      protect the ohdr, find the message, and then unprotect it. This
  *      saves time and also helps the FPHDF5 stuff, where unprotecting
  *      actually destroys the object in the cache.
+ *
+ *	John Mainzer, 6/6/05
+ *	Modified function to use the new dirtied parameter to 
+ *	H5AC_unprotect() instead of modfying the is_dirty field.
+ *
  *-------------------------------------------------------------------------
  */
 void *
 H5O_read_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, void *mesg, hid_t dxpl_id)
 {
+    hbool_t        oh_dirtied = FALSE;
     H5O_t          *oh = NULL;
     int             idx;
     H5G_cache_t    *cache = NULL;
@@ -1637,7 +1662,7 @@ H5O_read_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, void *mes
 
 done:
     if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, 
-                             H5AC__NO_FLAGS_SET) < 0)
+                             oh_dirtied, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, NULL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1834,6 +1859,11 @@ done:
  *	constant it can never become non-constant.  Constant messages cannot
  *	be modified.
  *
+ *	John Mainzer, 6/6/05
+ *	Updated function to use the new dirtied parameter of 
+ *	H5AC_unprotect() instead of manipulating the is_dirty
+ *	field of the cache info directly.
+ *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1841,6 +1871,7 @@ H5O_modify_real(H5G_entry_t *ent, const H5O_class_t *type, int overwrite,
    unsigned flags, unsigned update_flags, const void *mesg, hid_t dxpl_id)
 {
     H5O_t		*oh=NULL;
+    hbool_t		oh_dirtied = FALSE;
     int		        sequence;
     unsigned		idx;            /* Index of message to modify */
     H5O_mesg_t         *idx_msg;        /* Pointer to message to modify */
@@ -1880,10 +1911,10 @@ H5O_modify_real(H5G_entry_t *ent, const H5O_class_t *type, int overwrite,
 	    HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "message not found");
     } /* end if */
 
-    /* Check for creating new message */
+    /* Check for creating new message */ 
     if (overwrite < 0) {
         /* Create a new message */
-        if((idx=H5O_new_mesg(ent->file,oh,&flags,type,mesg,&sh_mesg,&type,&mesg,dxpl_id))==UFAIL)
+        if((idx=H5O_new_mesg(ent->file,oh,&flags,type,mesg,&sh_mesg,&type,&mesg,dxpl_id,&oh_dirtied))==UFAIL)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to create new message");
 
         /* Set the correct sequence number for the message created */
@@ -1896,19 +1927,19 @@ H5O_modify_real(H5G_entry_t *ent, const H5O_class_t *type, int overwrite,
     }
     
     /* Write the information to the message */
-    if(H5O_write_mesg(oh,idx,type,mesg,flags,update_flags)<0)
+    if(H5O_write_mesg(oh,idx,type,mesg,flags,update_flags,&oh_dirtied)<0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to write message");
 
     /* Update the modification time message if any */
     if(update_flags&H5O_UPDATE_TIME)
-        H5O_touch_oh(ent->file, oh, FALSE);
+        H5O_touch_oh(ent->file, oh, FALSE, &oh_dirtied);
     
     /* Set return value */
     ret_value = sequence;
 
 done:
     if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, 
-                             H5AC__NO_FLAGS_SET) < 0)
+                             oh_dirtied, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
     
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1975,10 +2006,15 @@ done:
  *
  * Modifications:
  *
+ *		John Mainzer, 6/6/05
+ *		Updated function to use the new dirtied parameter of 
+ *		H5AC_unprotect() instead of manipulating the is_dirty
+ *		field of the cache info directly.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_unprotect(H5G_entry_t *ent, H5O_t *oh, hid_t dxpl_id)
+H5O_unprotect(H5G_entry_t *ent, H5O_t *oh, hid_t dxpl_id, hbool_t oh_dirtied)
 {
     herr_t ret_value=SUCCEED;      /* Return value */
 
@@ -1991,7 +2027,7 @@ H5O_unprotect(H5G_entry_t *ent, H5O_t *oh, hid_t dxpl_id)
     assert(oh);
 
     if (H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, 
-                       H5AC__NO_FLAGS_SET) < 0)
+                       oh_dirtied, H5AC__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
 done:
@@ -2020,11 +2056,16 @@ done:
  *              Quincey Koziol
  *		Feb 14 2003
  *
+ *		John Mainzer, 6/6/05
+ *		Updated function to use the new dirtied parameter of 
+ *		H5AC_unprotect() instead of manipulating the is_dirty
+ *		field of the cache info directly.
+ *
  *-------------------------------------------------------------------------
  */
 int
 H5O_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id, unsigned flags,
-    const void *mesg)
+    const void *mesg, hbool_t * oh_dirtied_ptr)
 {
     const H5O_class_t *type;            /* Actual H5O class type for the ID */
     int	ret_value;                      /* Return value */
@@ -2039,9 +2080,10 @@ H5O_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id, unsigned flags,
     assert(type);
     assert(0==(flags & ~H5O_FLAG_BITS));
     assert(mesg);
+    assert(oh_dirtied_ptr);
 
     /* Call the "real" append routine */
-    if((ret_value=H5O_append_real( f, dxpl_id, oh, type, flags, mesg))<0)
+    if((ret_value=H5O_append_real( f, dxpl_id, oh, type, flags, mesg, oh_dirtied_ptr))<0)
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to append to object header");
 
 done:
@@ -2066,11 +2108,16 @@ done:
  *
  * Modifications:
  *
+ *		John Mainzer, 6/6/05
+ *		Updated function to use the new dirtied parameter of 
+ *		H5AC_unprotect() instead of manipulating the is_dirty
+ *		of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 static int
 H5O_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_class_t *type, 
-    unsigned flags, const void *mesg)
+    unsigned flags, const void *mesg, hbool_t * oh_dirtied_ptr)
 {
     unsigned		idx;            /* Index of message to modify */
     H5O_shared_t	sh_mesg;
@@ -2084,13 +2131,14 @@ H5O_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_class_t *type,
     assert(type);
     assert(0==(flags & ~H5O_FLAG_BITS));
     assert(mesg);
+    assert(oh_dirtied_ptr);
 
     /* Create a new message */
-    if((idx=H5O_new_mesg(f,oh,&flags,type,mesg,&sh_mesg,&type,&mesg,dxpl_id))==UFAIL)
+    if((idx=H5O_new_mesg(f,oh,&flags,type,mesg,&sh_mesg,&type,&mesg,dxpl_id,oh_dirtied_ptr))==UFAIL)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to create new message");
 
     /* Write the information to the message */
-    if(H5O_write_mesg(oh,idx,type,mesg,flags,0)<0)
+    if(H5O_write_mesg(oh,idx,type,mesg,flags,0,oh_dirtied_ptr)<0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to write message");
 
     /* Set return value */
@@ -2114,12 +2162,18 @@ done:
  *
  * Modifications:
  *
+ *	John Mainzer, 6/7/05
+ *	Modified function to use the new dirtied parameter to 
+ *	H5AC_unprotect() instead of modfying the is_dirty field.
+ *      In this case, that requires the addition of the oh_dirtied_ptr
+ *	parameter to track whether *oh is dirty.
+ *
  *-------------------------------------------------------------------------
  */
 static unsigned
 H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *flags, const H5O_class_t *orig_type,
     const void *orig_mesg, H5O_shared_t *sh_mesg, const H5O_class_t **new_type,
-    const void **new_mesg, hid_t dxpl_id)
+    const void **new_mesg, hid_t dxpl_id, hbool_t * oh_dirtied_ptr)
 {
     size_t	size;                   /* Size of space allocated for object header */
     unsigned    ret_value=UFAIL;        /* Return value */
@@ -2135,6 +2189,7 @@ H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *flags, const H5O_class_t *orig_type,
     assert(sh_mesg);
     assert(new_mesg);
     assert(new_type);
+    assert(oh_dirtied_ptr);
 
     /* Check for shared message */
     if (*flags & H5O_FLAG_SHARED) {
@@ -2165,7 +2220,7 @@ H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *flags, const H5O_class_t *orig_type,
         HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, UFAIL, "object header message is too large (16k max)");
 
     /* Allocate space in the object headed for the message */
-    if ((ret_value = H5O_alloc(f, oh, orig_type, size)) == UFAIL)
+    if ((ret_value = H5O_alloc(f, oh, orig_type, size, oh_dirtied_ptr)) == UFAIL)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, UFAIL, "unable to allocate space for message");
 
     /* Increment any links in message */
@@ -2189,13 +2244,21 @@ done:
  *
  * Modifications:
  *
+ *	John Mainzer, 6/6/05
+ *	Modified function to use the new dirtied parameter to 
+ *	H5AC_unprotect() instead of modfying the is_dirty field.
+ *      In this case, that requires the addition of the oh_dirtied_ptr
+ *	parameter to track whether *oh is dirty.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5O_write_mesg(H5O_t *oh, unsigned idx, const H5O_class_t *type,
-    const void *mesg, unsigned flags, unsigned update_flags)
+    const void *mesg, unsigned flags, unsigned update_flags, 
+    hbool_t * oh_dirtied_ptr)
 {
     H5O_mesg_t         *idx_msg;        /* Pointer to message to modify */
+    
     herr_t      ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_write_mesg);
@@ -2204,6 +2267,7 @@ H5O_write_mesg(H5O_t *oh, unsigned idx, const H5O_class_t *type,
     assert(oh);
     assert(type);
     assert(mesg);
+    assert(oh_dirtied_ptr);
 
     /* Set pointer to the correct message */
     idx_msg=&oh->mesg[idx];
@@ -2218,7 +2282,7 @@ H5O_write_mesg(H5O_t *oh, unsigned idx, const H5O_class_t *type,
 
     idx_msg->flags = flags;
     idx_msg->dirty = TRUE;
-    oh->cache_info.is_dirty = TRUE;
+    *oh_dirtied_ptr = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -2239,10 +2303,16 @@ done:
  *
  * Modifications:
  *
+ *	John Mainzer, 6/6/05
+ *	Modified function to use the new dirtied parameter to 
+ *	H5AC_unprotect() instead of modfying the is_dirty field.
+ *      In this case, that requires the addition of the oh_dirtied_ptr
+ *	parameter to track whether *oh is dirty.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force)
+H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force, hbool_t * oh_dirtied_ptr)
 {
     unsigned	idx;
 #ifdef H5_HAVE_GETTIMEOFDAY
@@ -2255,6 +2325,7 @@ H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force)
     FUNC_ENTER_NOAPI_NOINIT(H5O_touch_oh);
 
     assert(oh);
+    assert(oh_dirtied_ptr);
 
     /* Look for existing message */
     for (idx=0; idx<oh->nmesgs; idx++) {
@@ -2274,7 +2345,7 @@ H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force)
 	if (!force)
             HGOTO_DONE(SUCCEED); /*nothing to do*/
 	size = (H5O_MTIME_NEW->raw_size)(f, &now);
-	if ((idx=H5O_alloc(f, oh, H5O_MTIME_NEW, size))==UFAIL)
+	if ((idx=H5O_alloc(f, oh, H5O_MTIME_NEW, size, oh_dirtied_ptr))==UFAIL)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to allocate space for modification time message");
     }
 
@@ -2285,7 +2356,7 @@ H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force)
     }
     *((time_t*)(oh->mesg[idx].native)) = now;
     oh->mesg[idx].dirty = TRUE;
-    oh->cache_info.is_dirty = TRUE;
+    *oh_dirtied_ptr = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -2307,11 +2378,16 @@ done:
  *
  * Modifications:
  *
+ *	John Mainzer, 6/16/05
+ *	Modified function to use the new dirtied parameter to 
+ *	H5AC_unprotect() instead of modfying the is_dirty field.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5O_touch(H5G_entry_t *ent, hbool_t force, hid_t dxpl_id)
 {
+    hbool_t 	oh_dirtied = FALSE;
     H5O_t	*oh = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
@@ -2329,12 +2405,12 @@ H5O_touch(H5G_entry_t *ent, hbool_t force, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header");
 
     /* Create/Update the modification time message */
-    if (H5O_touch_oh(ent->file, oh, force)<0)
+    if (H5O_touch_oh(ent->file, oh, force, &oh_dirtied)<0)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to update object modificaton time");
 
 done:
     if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, 
-                             H5AC__NO_FLAGS_SET)<0)
+                             oh_dirtied, H5AC__NO_FLAGS_SET)<0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -2355,10 +2431,16 @@ done:
  *
  * Modifications:
  *
+ *	John Mainzer, 6/16/05
+ *	Modified function to use the new dirtied parameter to 
+ *	H5AC_unprotect() instead of modfying the is_dirty field.
+ *      In this case, that requires the addition of the oh_dirtied_ptr
+ *	parameter to track whether *oh is dirty.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_bogus_oh(H5F_t *f, H5O_t *oh)
+H5O_bogus_oh(H5F_t *f, H5O_t *oh, hbool_t * oh_dirtied_ptr)
 {
     int	idx;
     size_t	size;
@@ -2368,6 +2450,7 @@ H5O_bogus_oh(H5F_t *f, H5O_t *oh)
 
     assert(f);
     assert(oh);
+    assert(oh_dirtied_ptr);
 
     /* Look for existing message */
     for (idx=0; idx<oh->nmesgs; idx++)
@@ -2377,7 +2460,7 @@ H5O_bogus_oh(H5F_t *f, H5O_t *oh)
     /* Create a new message */
     if (idx==oh->nmesgs) {
 	size = (H5O_BOGUS->raw_size)(f, NULL);
-	if ((idx=H5O_alloc(f, oh, H5O_BOGUS, size))<0)
+	if ((idx=H5O_alloc(f, oh, H5O_BOGUS, size, oh_dirtied_ptr))<0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to allocate space for 'bogus' message");
 
         /* Allocate the native message in memory */
@@ -2410,11 +2493,16 @@ done:
  *
  * Modifications:
  *
+ *	John Mainzer, 6/16/05
+ *	Modified function to use the new dirtied parameter to 
+ *	H5AC_unprotect() instead of modfying the is_dirty field.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5O_bogus(H5G_entry_t *ent, hid_t dxpl_id)
 {
+    hbool_t	oh_dirtied = FALSE;
     H5O_t	*oh = NULL;
     herr_t	ret_value = SUCCEED;
     
@@ -2434,12 +2522,12 @@ H5O_bogus(H5G_entry_t *ent, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header");
 
     /* Create the "bogus" message */
-    if (H5O_bogus_oh(ent->file, oh)<0)
+    if (H5O_bogus_oh(ent->file, oh, &oh_dirtied)<0)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to update object 'bogus' message");
 
 done:
     if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, 
-                             H5AC__NO_FLAGS_SET)<0)
+                             oh_dirtied, H5AC__NO_FLAGS_SET)<0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE(ret_value);
@@ -2525,12 +2613,17 @@ done:
  *	Robb Matzke, 7 Jan 1998
  *	Does not remove constant messages.
  *
+ *      John Mainzer, 6/6/05
+ *      Modified function to use the new dirtied parameter to
+ *      H5AC_unprotect() instead of modfying the is_dirty field.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5O_remove_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, hid_t dxpl_id)
 {
     H5O_t	*oh = NULL;
+    hbool_t      oh_dirtied = FALSE;
     H5O_mesg_t *curr_msg;       /* Pointer to current message being operated on */
     int		seq, nfailed = 0;
     unsigned	u;
@@ -2577,8 +2670,8 @@ H5O_remove_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, hid_t d
             else
                 curr_msg->native = H5O_free_real(type, curr_msg->native);
 	    curr_msg->dirty = TRUE;
-	    oh->cache_info.is_dirty = TRUE;
-	    H5O_touch_oh(ent->file, oh, FALSE);
+	    oh_dirtied = TRUE;
+	    H5O_touch_oh(ent->file, oh, FALSE, &oh_dirtied);
 	}
     }
 
@@ -2588,7 +2681,7 @@ H5O_remove_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, hid_t d
 
 done:
     if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, 
-                             H5AC__NO_FLAGS_SET) < 0)
+                             oh_dirtied, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -2959,10 +3052,16 @@ done:
  *
  * Modifications:
  *
+ *      John Mainzer, 6/7/05
+ *      Modified function to use the new dirtied parameter to
+ *      H5AC_unprotect() instead of modfying the is_dirty field.
+ *      In this case, that requires the addition of the oh_dirtied_ptr
+ *      parameter to track whether *oh is dirty.
+ *
  *-------------------------------------------------------------------------
  */
 static unsigned
-H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
+H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size, hbool_t * oh_dirtied_ptr)
 {
     unsigned	idx;
     H5O_mesg_t *msg;            /* Pointer to newly allocated message */
@@ -2974,6 +3073,7 @@ H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
     /* check args */
     assert (oh);
     assert (type);
+    assert (oh_dirtied_ptr);
 
     /* look for a null message which is large enough */
     for (idx = 0; idx < oh->nmesgs; idx++) {
@@ -3058,7 +3158,7 @@ H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
     msg->dirty = TRUE;
     msg->native = NULL;
 
-    oh->cache_info.is_dirty = TRUE;
+    *oh_dirtied_ptr = TRUE;
 
     /* Set return value */
     ret_value=idx;
@@ -3228,6 +3328,7 @@ done:
 herr_t
 H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
 {
+    hbool_t oh_dirtied = FALSE;
     H5O_t *oh=NULL;             /* Object header information */
     herr_t ret_value=SUCCEED;   /* Return value */
     
@@ -3247,7 +3348,7 @@ H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
 
 done:
     if (oh && 
-        H5AC_unprotect(f, dxpl_id, H5AC_OHDR, addr, oh, H5C__DELETED_FLAG)<0)
+        H5AC_unprotect(f, dxpl_id, H5AC_OHDR, addr, oh, oh_dirtied, H5C__DELETED_FLAG)<0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3389,11 +3490,16 @@ done:
  *
  * Modifications:
  *
+ *      John Mainzer, 6/16/05
+ *      Modified function to use the new dirtied parameter to
+ *      H5AC_unprotect() instead of modfying the is_dirty field.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5O_get_info(H5G_entry_t *ent, H5O_stat_t *ostat, hid_t dxpl_id)
 {
+    hbool_t oh_dirtied = FALSE;
     H5O_t *oh=NULL;             /* Object header information */
     H5O_mesg_t *curr_msg;       /* Pointer to current message being operated on */
     hsize_t total_size;         /* Total amount of space used in file */
@@ -3431,7 +3537,7 @@ H5O_get_info(H5G_entry_t *ent, H5O_stat_t *ostat, hid_t dxpl_id)
 
 done:
     if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, 
-                             H5AC__NO_FLAGS_SET)<0)
+                             oh_dirtied, H5AC__NO_FLAGS_SET)<0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3549,12 +3655,17 @@ done:
  *
  * Modifications:
  *
+ *      John Mainzer, 6/16/05
+ *      Modified function to use the new dirtied parameter to
+ *      H5AC_unprotect() instead of modfying the is_dirty field.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5O_iterate(const H5G_entry_t *ent, unsigned type_id, H5O_operator_t op,
     void *op_data, hid_t dxpl_id)
 {
+    hbool_t		oh_dirtied = FALSE;
     H5O_t		*oh=NULL;       /* Pointer to actual object header */
     const H5O_class_t *type;            /* Actual H5O class type for the ID */
     unsigned		idx;            /* Absolute index of current message in all messages */
@@ -3608,7 +3719,7 @@ H5O_iterate(const H5G_entry_t *ent, unsigned type_id, H5O_operator_t op,
 
 done:
     if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, 
-                             H5AC__NO_FLAGS_SET) < 0)
+                             oh_dirtied, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3673,11 +3784,16 @@ done:
  * Modifications:
  *		Robb Matzke, 1999-07-28
  *		The ADDR argument is passed by value.
+ *
+ *		John Mainzer, 6/16/05
+ *     	 	Modified function to use the new dirtied parameter to
+ *     		H5AC_unprotect() instead of modfying the is_dirty field.
  *-------------------------------------------------------------------------
  */
 herr_t
 H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth)
 {
+    hbool_t	oh_dirtied = FALSE;
     H5O_t	*oh = NULL;
     unsigned	i, chunkno;
     size_t	mesg_total = 0, chunk_total = 0;
@@ -3837,7 +3953,7 @@ H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
 
 done:
     if (oh && H5AC_unprotect(f, dxpl_id, H5AC_OHDR, addr, oh, 
-                             H5AC__NO_FLAGS_SET) < 0)
+                             oh_dirtied, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);

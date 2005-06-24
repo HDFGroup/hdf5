@@ -228,12 +228,18 @@ H5B2_test_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, int i
  *
  * Modifications:
  *
+ *              John Mainzer, 6/17/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5B2_get_root_addr(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, haddr_t *root_addr)
 {
+    hbool_t	bt2_dirtied = FALSE;
     H5B2_t	*bt2=NULL;              /* Pointer to the B-tree header */
     herr_t	ret_value = SUCCEED;
 
@@ -254,7 +260,7 @@ H5B2_get_root_addr(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
 
 done:
     /* Release B-tree header node */
-    if (bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
+    if (bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, bt2_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
 
     FUNC_LEAVE_NOAPI(ret_value)

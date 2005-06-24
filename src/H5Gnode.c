@@ -315,7 +315,7 @@ H5G_node_debug_key (FILE *stream, H5F_t *f, hid_t dxpl_id, int indent, int fwidt
     s = H5HL_offset_into(f, heap, key->offset);
     HDfprintf (stream, "%s\n", s);
 
-    if (H5HL_unprotect(f, dxpl_id, heap, udata->heap_addr) < 0)
+    if (H5HL_unprotect(f, dxpl_id, heap, udata->heap_addr, FALSE) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol name");
 
 done:
@@ -718,6 +718,13 @@ H5G_compute_size(const H5F_t *f, const H5G_node_t UNUSED *sym, size_t *size_ptr)
  *
  * Modifications:
  *
+ *              John Mainzer 6/8/05
+ *              Removed code setting the is_dirty field of the cache info.
+ *              This is no longer pemitted, as the cache code is now
+ *              manageing this field.  Since this function uses a call to
+ *              H5AC_set() (which marks the entry dirty automaticly), no
+ *              other change is required.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -743,7 +750,7 @@ H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t UNUSED op, void *_lt_key,
     size = H5G_node_size(f);
     if (HADDR_UNDEF==(*addr_p=H5MF_alloc(f, H5FD_MEM_BTREE, dxpl_id, size)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to allocate file space");
-    sym->cache_info.is_dirty = TRUE;
+
     sym->entry = H5FL_SEQ_CALLOC(H5G_entry_t,(2*H5F_SYM_LEAF_K(f)));
     if (NULL==sym->entry)
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
@@ -827,7 +834,7 @@ H5G_node_cmp2(H5F_t *f, hid_t dxpl_id, void *_lt_key, void *_udata, void *_rt_ke
     ret_value = HDstrcmp(s1, s2);
 
 done:
-    if (heap && H5HL_unprotect(f, dxpl_id, heap, udata->heap_addr) < 0)
+    if (heap && H5HL_unprotect(f, dxpl_id, heap, udata->heap_addr, FALSE) < 0)
 	HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol name");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -891,7 +898,7 @@ H5G_node_cmp3(H5F_t *f, hid_t dxpl_id, void *_lt_key, void *_udata, void *_rt_ke
 	HGOTO_DONE(1);
 
 done:
-    if (heap && H5HL_unprotect(f, dxpl_id, heap, udata->heap_addr) < 0)
+    if (heap && H5HL_unprotect(f, dxpl_id, heap, udata->heap_addr, FALSE) < 0)
 	HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol name");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -925,6 +932,12 @@ done:
  * Modifications:
  *		Robb Matzke, 1999-07-28
  *		The ADDR argument is passed by value.
+ *
+ *              John Mainzer, 6/17/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -932,6 +945,7 @@ H5G_node_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *_lt_key
 	       void *_udata)
 {
     H5G_bt_ud1_t	*bt_udata = (H5G_bt_ud1_t *) _udata;
+    hbool_t		sn_dirtied = FALSE;
     H5G_node_t		*sn = NULL;
     const H5HL_t        *heap = NULL;
     int		lt = 0, idx = 0, rt, cmp = 1;
@@ -976,7 +990,7 @@ H5G_node_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *_lt_key
 	}
     }
 
-    if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->heap_addr) < 0)
+    if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->heap_addr, FALSE) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol name");
     heap=NULL; base=NULL;
 
@@ -994,7 +1008,7 @@ H5G_node_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *_lt_key
 
 done:
     if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, 
-                             H5AC__NO_FLAGS_SET) < 0)
+                             sn_dirtied, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to release symbol table node");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1036,6 +1050,12 @@ done:
  * Modifications:
  *		Robb Matzke, 1999-07-28
  *		The ADDR argument is passed by value.
+ *
+ *              John Mainzer, 6/8/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 static H5B_ins_t
@@ -1048,6 +1068,7 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
     H5G_node_key_t	*rt_key = (H5G_node_key_t *) _rt_key;
     H5G_bt_ud1_t	*bt_udata = (H5G_bt_ud1_t *) _udata;
 
+    hbool_t		sn_dirtied = FALSE, snrt_dirtied = FALSE;
     H5G_node_t		*sn = NULL, *snrt = NULL;
     const H5HL_t        *heap = NULL;
     size_t		offset;			/*offset of name in heap */
@@ -1093,7 +1114,7 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
 	if (0 == (cmp = HDstrcmp(bt_udata->name, s))) /*already present */ {
             HCOMMON_ERROR(H5E_SYM, H5E_CANTINSERT, "symbol is already present in symbol table");
 
-            if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->heap_addr) < 0)
+            if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->heap_addr, FALSE) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to unprotect symbol name");
             heap=NULL; base=NULL;
 
@@ -1108,7 +1129,7 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
     }
     idx += cmp > 0 ? 1 : 0;
 
-    if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->heap_addr) < 0)
+    if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->heap_addr, FALSE) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to unprotect symbol name");
     heap=NULL; base=NULL;
 
@@ -1139,13 +1160,13 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
 	HDmemcpy(snrt->entry, sn->entry + H5F_SYM_LEAF_K(f),
 		 H5F_SYM_LEAF_K(f) * sizeof(H5G_entry_t));
 	snrt->nsyms = H5F_SYM_LEAF_K(f);
-	snrt->cache_info.is_dirty = TRUE;
+        snrt_dirtied = TRUE;
 
 	/* The left node */
 	HDmemset(sn->entry + H5F_SYM_LEAF_K(f), 0,
 		 H5F_SYM_LEAF_K(f) * sizeof(H5G_entry_t));
 	sn->nsyms = H5F_SYM_LEAF_K(f);
-	sn->cache_info.is_dirty = TRUE;
+        sn_dirtied = TRUE;
 
 	/* The middle key */
 	md_key->offset = sn->entry[sn->nsyms - 1].name_off;
@@ -1166,7 +1187,7 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
     } else {
 	/* Where to insert the new entry? */
 	ret_value = H5B_INS_NOOP;
-	sn->cache_info.is_dirty = TRUE;
+        sn_dirtied = TRUE;
 	insert_into = sn;
 	if (idx == sn->nsyms) {
 	    rt_key->offset = offset;
@@ -1184,10 +1205,10 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
 
 done:
     if (snrt && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, *new_node_p, snrt, 
-                               H5AC__NO_FLAGS_SET) < 0)
+                               snrt_dirtied, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node");
     if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, 
-                             H5AC__NO_FLAGS_SET) < 0)
+                             sn_dirtied, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1230,6 +1251,11 @@ done:
  *	Quincey Koziol, 2003-03-22
  *	Added support for deleting all the entries at once.
  *
+ *      John Mainzer, 6/8/05
+ *      Modified the function to use the new dirtied parameter of
+ *      of H5AC_unprotect() instead of modifying the is_dirty
+ *      field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 static H5B_ins_t
@@ -1241,6 +1267,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
     H5G_node_key_t	*lt_key = (H5G_node_key_t*)_lt_key;
     H5G_node_key_t	*rt_key = (H5G_node_key_t*)_rt_key;
     H5G_bt_ud1_t	*bt_udata = (H5G_bt_ud1_t*)_udata;
+    hbool_t		sn_dirtied = FALSE;
     H5G_node_t		*sn = NULL;
     const H5HL_t        *heap = NULL;
     int		lt=0, rt, idx=0, cmp=1;
@@ -1285,7 +1312,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
             }
         }
 
-        if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->heap_addr) < 0)
+        if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->heap_addr, FALSE) < 0)
             HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to unprotect symbol name");
         heap=NULL; base=NULL;
 
@@ -1305,7 +1332,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
             else
                 found=0;
 
-            if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->heap_addr) < 0)
+            if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->heap_addr, FALSE) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to unprotect symbol name");
             heap=NULL; s=NULL;
 
@@ -1333,7 +1360,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
         else
             found=0;
 
-        if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->heap_addr) < 0)
+        if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->heap_addr, FALSE) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to unprotect symbol name");
         heap=NULL; s=NULL;
 
@@ -1354,9 +1381,9 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
             *rt_key = *lt_key;
             *rt_key_changed = TRUE;
             sn->nsyms = 0;
-            sn->cache_info.is_dirty = TRUE;
+            sn_dirtied = TRUE;
             if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)H5G_node_size(f))<0
-                    || H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5C__DELETED_FLAG)<0) {
+                    || H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, sn_dirtied, H5C__DELETED_FLAG)<0) {
                 sn = NULL;
                 HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to free symbol table node");
             }
@@ -1370,7 +1397,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
              * change.
              */
             sn->nsyms -= 1;
-            sn->cache_info.is_dirty = TRUE;
+            sn_dirtied = TRUE;
             HDmemmove(sn->entry+idx, sn->entry+idx+1,
                       (sn->nsyms-idx)*sizeof(H5G_entry_t));
             ret_value = H5B_INS_NOOP;
@@ -1382,7 +1409,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
              * should be changed to reflect the new right-most entry.
              */
             sn->nsyms -= 1;
-            sn->cache_info.is_dirty = TRUE;
+            sn_dirtied = TRUE;
             rt_key->offset = sn->entry[sn->nsyms-1].name_off;
             *rt_key_changed = TRUE;
             ret_value = H5B_INS_NOOP;
@@ -1393,7 +1420,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
              * node.
              */
             sn->nsyms -= 1;
-            sn->cache_info.is_dirty = TRUE;
+            sn_dirtied = TRUE;
             HDmemmove(sn->entry+idx, sn->entry+idx+1,
                       (sn->nsyms-idx)*sizeof(H5G_entry_t));
             ret_value = H5B_INS_NOOP;
@@ -1420,9 +1447,9 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
         *rt_key = *lt_key;
         *rt_key_changed = TRUE;
         sn->nsyms = 0;
-        sn->cache_info.is_dirty = TRUE;
+        sn_dirtied = TRUE;
         if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)H5G_node_size(f))<0
-                || H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5C__DELETED_FLAG)<0) {
+                || H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, sn_dirtied, H5C__DELETED_FLAG)<0) {
             sn = NULL;
             HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to free symbol table node");
         }
@@ -1432,7 +1459,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
     
 done:
     if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, 
-                             H5AC__NO_FLAGS_SET)<0)
+                             sn_dirtied, H5AC__NO_FLAGS_SET)<0)
 	HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1456,6 +1483,12 @@ done:
  *
  *		Quincey Koziol, 2002-04-22
  *		Changed to callback from H5B_iterate
+ *
+ *              John Mainzer, 6/8/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 int
@@ -1463,6 +1496,7 @@ H5G_node_iterate (H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t a
 		  const void UNUSED *_rt_key, void *_udata)
 {
     H5G_bt_ud2_t	*bt_udata = (H5G_bt_ud2_t *)_udata;
+    hbool_t		sn_dirtied = FALSE;
     H5G_node_t		*sn = NULL;
     const H5HL_t        *heap = NULL;
     int		i, nsyms;
@@ -1492,7 +1526,7 @@ H5G_node_iterate (H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t a
     for (i=0; i<nsyms; i++)
         name_off[i] = sn->entry[i].name_off;
 
-    if (H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) 
+    if (H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, sn_dirtied, H5AC__NO_FLAGS_SET) 
         != SUCCEED) {
         sn = NULL;
         HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header");
@@ -1522,7 +1556,7 @@ H5G_node_iterate (H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t a
             }
             HDstrcpy (s, name);
 
-            if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->ent->cache.stab.heap_addr) < 0)
+            if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->ent->cache.stab.heap_addr, FALSE) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to unprotect symbol name");
             heap=NULL; name=NULL;
 
@@ -1539,10 +1573,10 @@ H5G_node_iterate (H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t a
         HERROR (H5E_SYM, H5E_CANTNEXT, "iteration operator failed");
 
 done:
-    if (heap && H5HL_unprotect(f, dxpl_id, heap, bt_udata->ent->cache.stab.heap_addr) < 0)
+    if (heap && H5HL_unprotect(f, dxpl_id, heap, bt_udata->ent->cache.stab.heap_addr, FALSE) < 0)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to unprotect symbol name");
 
-    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, 
+    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, sn_dirtied,
                              H5AC__NO_FLAGS_SET) != SUCCEED)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header");
 
@@ -1566,6 +1600,11 @@ done:
  *
  * Modifications:
  *
+ *              John Mainzer, 6/17/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 int
@@ -1573,6 +1612,7 @@ H5G_node_sumup(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr
 		  const void UNUSED *_rt_key, void *_udata)
 {
     hsize_t	        *num_objs = (hsize_t *)_udata;
+    hbool_t		sn_dirtied = FALSE;
     H5G_node_t		*sn = NULL;
     int                  ret_value = H5B_ITER_CONT;
 
@@ -1592,7 +1632,7 @@ H5G_node_sumup(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr
     *num_objs += sn->nsyms;
 
 done:
-    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, 
+    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, sn_dirtied,
                              H5AC__NO_FLAGS_SET) != SUCCEED)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header");
 
@@ -1614,6 +1654,11 @@ done:
  *
  * Modifications:
  *
+ *              John Mainzer, 6/17/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 int
@@ -1625,6 +1670,7 @@ H5G_node_name(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
     size_t		name_off;
     hsize_t             loc_idx;
     const char		*name;   
+    hbool_t		sn_dirtied = FALSE;
     H5G_node_t		*sn = NULL;
     int                 ret_value = H5B_ITER_CONT;
 
@@ -1653,7 +1699,7 @@ H5G_node_name(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
         bt_udata->name = H5MM_strdup (name);
         assert(bt_udata->name);
 
-        if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->ent->cache.stab.heap_addr) < 0)
+        if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->ent->cache.stab.heap_addr, FALSE) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to unprotect symbol name");
         heap=NULL; name=NULL;
 
@@ -1663,7 +1709,7 @@ H5G_node_name(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
     }
 
 done:
-    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, 
+    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, sn_dirtied, 
                              H5AC__NO_FLAGS_SET) != SUCCEED)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header");
 
@@ -1683,6 +1729,12 @@ done:
  * Programmer:  Raymond Lu	
  *              Nov 20, 2002
  *
+ * Modifications:
+ *
+ *              John Mainzer, 6/17/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
  *
  *-------------------------------------------------------------------------
  */
@@ -1692,6 +1744,7 @@ H5G_node_type(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
 {
     H5G_bt_ud3_t	*bt_udata = (H5G_bt_ud3_t*)_udata;
     hsize_t             loc_idx;
+    hbool_t		sn_dirtied = FALSE;
     H5G_node_t		*sn = NULL;
     int                 ret_value = H5B_ITER_CONT;
 
@@ -1715,7 +1768,7 @@ H5G_node_type(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
     }
 
 done:
-    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, 
+    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, sn_dirtied,
                              H5AC__NO_FLAGS_SET) != SUCCEED)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header");
     
@@ -1861,6 +1914,12 @@ H5G_node_shared_free (void *_shared)
  * Modifications:
  *		Robb Matzke, 1999-07-28
  *		The ADDR and HEAP arguments are passed by value.
+ *
+ *              John Mainzer, 6/8/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1868,6 +1927,7 @@ H5G_node_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
 	       int fwidth, haddr_t heap)
 {
     int			    i;
+    hbool_t                 sn_dirtied = FALSE;
     H5G_node_t		   *sn = NULL;
     const char		   *s;
     const H5HL_t           *heap_ptr = NULL;
@@ -1921,7 +1981,7 @@ H5G_node_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
             if (s)
                 fprintf(stream, "%*s%-*s `%s'\n", indent, "", fwidth, "Name:", s);
 
-            if (H5HL_unprotect(f, dxpl_id, heap_ptr, heap) < 0)
+            if (H5HL_unprotect(f, dxpl_id, heap_ptr, heap, FALSE) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol name");
             heap_ptr=NULL; s=NULL;
 	}
@@ -1932,7 +1992,7 @@ H5G_node_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
     }
 
 done:
-    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, 
+    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, sn_dirtied,
                              H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to release symbol table node");
 

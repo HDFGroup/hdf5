@@ -45,12 +45,18 @@
  *
  * Modifications:
  *
+ *              John Mainzer, 6/17/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5BT_get_max_info(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t *size,
     uint32_t *count, hbool_t *valid)
 {
+    hbool_t	bt_dirtied = FALSE;
     H5BT_t	*bt=NULL;               /* Pointer to the block tracker info */
     herr_t	ret_value = SUCCEED;
 
@@ -74,7 +80,7 @@ H5BT_get_max_info(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t *size,
 
 done:
     /* Release the block tracker info */
-    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__NO_FLAGS_SET) < 0)
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, bt_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -95,12 +101,18 @@ done:
  *
  * Modifications:
  *
+ *              John Mainzer, 6/17/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5BT_get_min_info(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t *size,
     uint32_t *count, hbool_t *valid)
 {
+    hbool_t	bt_dirtied = FALSE;
     H5BT_t	*bt=NULL;               /* Pointer to the block tracker info */
     herr_t	ret_value = SUCCEED;
 
@@ -124,7 +136,7 @@ H5BT_get_min_info(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t *size,
 
 done:
     /* Release the block tracker info */
-    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__NO_FLAGS_SET) < 0)
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, bt_dirtied, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
 
     FUNC_LEAVE_NOAPI(ret_value)

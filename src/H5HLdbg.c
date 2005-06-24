@@ -42,11 +42,18 @@
  * Modifications:
  *		Robb Matzke, 1999-07-28
  *		The ADDR argument is passed by value.
+ *
+ *              John Mainzer, 6/17/05
+ *              Modified the function to use the new dirtied parameter of
+ *              of H5AC_unprotect() instead of modifying the is_dirty
+ *              field of the cache info.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int fwidth)
 {
+    hbool_t		h_dirtied = FALSE;
     H5HL_t		*h = NULL;
     int			i, j, overlap, free_block;
     uint8_t		c;
@@ -162,7 +169,7 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int
     }
 
 done:
-    if (h && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, h, FALSE) != SUCCEED)
+    if (h && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, h, h_dirtied, FALSE) != SUCCEED)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
     H5MM_xfree(marker);
 
