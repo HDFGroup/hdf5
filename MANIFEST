@@ -1030,7 +1030,6 @@ a------------------------------------------------------------------------------
 ./test/family_v1.6_00001.h5
 ./test/family_v1.6_00002.h5
 ./test/family_v1.6_00003.h5
-./test/file_handle.c
 ./test/filename.c
 ./test/fill_old.h5
 ./test/fillval.c
@@ -1103,6 +1102,7 @@ a------------------------------------------------------------------------------
 ./test/tvlstr.c
 ./test/tvltypes.c
 ./test/unlink.c
+./test/vfd.c
 ./test/test_filters_le.hdf5
 ./test/test_filters_be.hdf5
 ./test/gen_filters.c
