@@ -302,6 +302,10 @@ Footnotes:  (1) Using mpich 1.2.6
 
 Known Problems
 ==============
+* For the version 6(6.02 and 6.04) of Portland Group compiler on AMD Opteron
+  processor, there's a bug in the compiler for optimization(-O2).  The library
+  failed in several tests but all related to multi driver.  The problem has 
+  been reported to the vendor.  
 * test/big fails sometimes with the message "Possible overlap with another
   region."  The test selects regions randomly, and this error occurs when
   two regions overlap each other; it is an bug in the test and not in
