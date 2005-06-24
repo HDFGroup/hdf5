@@ -298,7 +298,7 @@ Bug Fixes since HDF5-1.6.0 release
     -------
         - The library didn't save the information of family driver in file.
           The original file member size was lost after file was closed (see
-          bug #214).  This has been fixed by saving driver name and member
+          bug #213).  This has been fixed by saving driver name and member
           file size in the superblock.  SLU - 2005/6/24
         - Fixed bug with hyperslab selections that use selection offsets and
             operate on chunked datasets going into infinite loop or dumping
