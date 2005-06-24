@@ -90,7 +90,7 @@ LINK32=link.exe
 # Name "file_handledll - Win32 Debug"
 # Begin Source File
 
-SOURCE=..\..\..\test\file_handle.c
+SOURCE=..\..\..\test\vfd.c
 # End Source File
 # End Target
 # End Project
