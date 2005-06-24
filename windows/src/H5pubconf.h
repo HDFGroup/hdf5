@@ -100,6 +100,7 @@ in the file file_io.win32.c and including it on the projects
 #if _MSC_VER >= 1300 /* .Net supports FUNCTION */
 #define H5_HAVE_FUNCTION 1
 #define H5_ULLONG_TO_FP_CAST_WORKS 1
+#define H5_HW_FP_TO_LLONG_NOT_WORKS 1
 #if defined __INTEL_COMPILER
 #undef H5_LLONG_TO_FP_CAST_WORKS
 #else
