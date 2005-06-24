@@ -305,7 +305,7 @@ nh5ltset_attribute_int_c(hid_t_f *loc_id,
      ret = H5LTset_attribute_int(c_loc_id,c_name,c_attrname,buf,c_size);
  else if (sizeof(int_f) == sizeof(long))
     ret = H5LTset_attribute_long(c_loc_id,c_name,c_attrname,buf,c_size);
- else if (sizeof(int_f) == sizeof(long long))
+ else if (sizeof(int_f) == sizeof(long_long))
     ret = H5LTset_attribute_long_long(c_loc_id,c_name,c_attrname,buf,c_size);
  else
     return ret_value;
@@ -551,7 +551,7 @@ nh5ltget_attribute_int_c(hid_t_f *loc_id,
     ret = H5LTget_attribute_int(c_loc_id,c_name,c_attrname,buf);
  else if (sizeof(int_f) == sizeof(long))
     ret = H5LTget_attribute_long(c_loc_id,c_name,c_attrname,buf);
- else if (sizeof(int_f) == sizeof(long long))
+ else if (sizeof(int_f) == sizeof(long_long))
     ret = H5LTget_attribute_long_long(c_loc_id,c_name,c_attrname,buf);
  else
     return ret_value;

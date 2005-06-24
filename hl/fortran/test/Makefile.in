@@ -60,10 +60,10 @@ am__EXEEXT_1 = tstlite$(EXEEXT) tstimage$(EXEEXT) tsttable$(EXEEXT)
 am_tstimage_OBJECTS = tstimage.$(OBJEXT)
 tstimage_OBJECTS = $(am_tstimage_OBJECTS)
 tstimage_LDADD = $(LDADD)
-am__DEPENDENCIES_1 = $(top_builddir)/hl/src/libhdf5_hl.la
-am__DEPENDENCIES_2 =  \
+am__DEPENDENCIES_1 =  \
 	$(top_builddir)/hl/fortran/src/libhdf5hl_fortran.la
-am__DEPENDENCIES_3 = $(top_builddir)/fortran/src/libhdf5_fortran.la
+am__DEPENDENCIES_2 = $(top_builddir)/fortran/src/libhdf5_fortran.la
+am__DEPENDENCIES_3 = $(top_builddir)/hl/src/libhdf5_hl.la
 am__DEPENDENCIES_4 = $(top_builddir)/src/libhdf5.la
 tstimage_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
@@ -295,7 +295,7 @@ H5CC = $(bindir)/h5cc
 H5CC_PP = $(bindir)/h5pcc
 H5FC = $(bindir)/h5fc
 H5FC_PP = $(bindir)/h5pfc
-AM_CPPFLAGS = -I$(top_srcdir)/src $(top_builddir)/src
+AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_builddir)/src -I$(top_srcdir)/hl/src
 AM_FCFLAGS = -I$(top_builddir)/fortran/src -I$(top_builddir)/hl/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/hl/fortran/src
 
 # Fortran libraries are linked statically to solve a build problem.
@@ -303,7 +303,7 @@ AM_LDFLAGS = -static
 
 # Our main target, the test programs
 TEST_PROG = tstlite tstimage tsttable
-LDADD = $(LIBH5_HL) $(LIBH5F_HL) $(LIBH5F) $(LIBHDF5)
+LDADD = $(LIBH5F_HL) $(LIBH5F) $(LIBH5_HL)  $(LIBHDF5)
 
 # Source files for the programs
 tstlite_SOURCES = tstlite.f90

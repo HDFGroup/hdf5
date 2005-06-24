@@ -11,7 +11,7 @@
 
 include $(top_srcdir)/config/commence.am
 
-AM_CPPFLAGS=-I$(top_srcdir)/src $(top_builddir)/src
+AM_CPPFLAGS=-I$(top_srcdir)/src -I$(top_builddir)/src -I$(top_srcdir)/hl/src
 AM_FCFLAGS=-I$(top_builddir)/fortran/src -I$(top_builddir)/hl/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/hl/fortran/src
 
 # Fortran libraries are linked statically to solve a build problem.
@@ -21,7 +21,7 @@ AM_LDFLAGS=-static
 TEST_PROG=tstlite tstimage tsttable
 check_PROGRAMS=$(TEST_PROG)
 
-LDADD=$(LIBH5_HL) $(LIBH5F_HL) $(LIBH5F) $(LIBHDF5)
+LDADD= $(LIBH5F_HL) $(LIBH5F) $(LIBH5_HL)  $(LIBHDF5)
 
 # Source files for the programs
 tstlite_SOURCES=tstlite.f90

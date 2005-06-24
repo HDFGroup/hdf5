@@ -22,14 +22,14 @@ AM_LDFLAGS=-static
 lib_LTLIBRARIES=libhdf5hl_fortran.la
 
 # Source files for the library
-if BUILD_PARALLEL_CONDITIONAL
-    PARALLEL_COND_SRC=HDFDmpiof.c HDF5mpio.f90
-endif
+#if BUILD_PARALLEL_CONDITIONAL
+#    PARALLEL_COND_SRC=HDFDmpiof.c HDF5mpio.f90
+#endif
 
-libhdf5hl_fortran_la_SOURCES=H5LTfc.c H5IMfc.c H5TBfc.c H5LTff.f90  \
+libhdf5hl_fortran_la_SOURCES=H5LTfc.c  H5IMfc.c H5IMcc.c H5TBfc.c H5LTff.f90  \
                 H5IMff.f90 H5TBff.f90 
 
-libhdf5hl_fortran_la_LIBADD=$(LIBH5_HL)
+#libhdf5hl_fortran_la_LIBADD=$(LIBH5_HL)
 
 # Fortran module files can have different extensions and different names
 # (e.g., different capitalizations) on different platforms.  Write rules

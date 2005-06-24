@@ -214,7 +214,7 @@ herr_t H5LTset_attribute_long( hid_t loc_id,
 herr_t H5LTset_attribute_long_long( hid_t loc_id, 
                                const char *obj_name, 
                                const char *attr_name,
-                               const long long *buffer,
+                               const long_long *buffer,
                                size_t size );
 
 herr_t H5LTset_attribute_ulong( hid_t loc_id, 

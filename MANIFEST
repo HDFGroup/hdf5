@@ -1,4 +1,4 @@
-#------------------------------------------------------------------------------
+a------------------------------------------------------------------------------
 # This is the list of files that are part of HDF5 source distribution. 
 # All files have a `./' prefix and appear in lexicographic order.
 # Lines that end with _DO_NOT_DISTRIBUTE_ will not be included in a
@@ -1665,6 +1665,8 @@
 ./hl/test/earth.pal
 
 # hl fortran
+./hl/fortran/src/H5IMcc.c
+./hl/fortran/src/H5IMcc.h
 ./hl/fortran/src/H5IMfc.c
 ./hl/fortran/src/H5IMff.f90
 ./hl/fortran/src/H5LTf90proto.h

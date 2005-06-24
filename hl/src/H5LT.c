@@ -1571,8 +1571,7 @@ herr_t H5LTset_attribute_long( hid_t loc_id,
  *
  * Date: June 17, 2005
  *
- * Comments: This function was added to support 8-bytes int_f type that
- *           may correspond to INTEGER*8 in Fortran
+ * Comments: This function was added to support attributes of type long long
  *
  *-------------------------------------------------------------------------
  */
@@ -1580,7 +1579,7 @@ herr_t H5LTset_attribute_long( hid_t loc_id,
 herr_t H5LTset_attribute_long_long( hid_t loc_id, 
                                const char *obj_name, 
                                const char *attr_name,
-                               const long long *data,
+                               const long_long *data,
                                size_t size ) 
 {
  
@@ -2495,7 +2494,6 @@ herr_t H5LTget_attribute_long_long( hid_t loc_id,
 
 }
 
-/*-------------------------------------------------------------------------
 
 /*-------------------------------------------------------------------------
  * Function: H5LTget_attribute_ulong

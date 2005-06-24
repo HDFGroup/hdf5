@@ -65,10 +65,9 @@ am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 am__installdirs = "$(DESTDIR)$(libdir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
-am__DEPENDENCIES_1 = $(top_builddir)/hl/src/libhdf5_hl.la
-libhdf5hl_fortran_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
-am_libhdf5hl_fortran_la_OBJECTS = H5LTfc.lo H5IMfc.lo H5TBfc.lo \
-	H5LTff.lo H5IMff.lo H5TBff.lo
+libhdf5hl_fortran_la_LIBADD =
+am_libhdf5hl_fortran_la_OBJECTS = H5LTfc.lo H5IMfc.lo H5IMcc.lo \
+	H5TBfc.lo H5LTff.lo H5IMff.lo H5TBff.lo
 libhdf5hl_fortran_la_OBJECTS = $(am_libhdf5hl_fortran_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
@@ -309,11 +308,12 @@ AM_LDFLAGS = -static
 lib_LTLIBRARIES = libhdf5hl_fortran.la
 
 # Source files for the library
-@BUILD_PARALLEL_CONDITIONAL_TRUE@PARALLEL_COND_SRC = HDFDmpiof.c HDF5mpio.f90
-libhdf5hl_fortran_la_SOURCES = H5LTfc.c H5IMfc.c H5TBfc.c H5LTff.f90  \
+#if BUILD_PARALLEL_CONDITIONAL
+#    PARALLEL_COND_SRC=HDFDmpiof.c HDF5mpio.f90
+#endif
+libhdf5hl_fortran_la_SOURCES = H5LTfc.c  H5IMfc.c H5IMcc.c H5TBfc.c H5LTff.f90  \
                 H5IMff.f90 H5TBff.f90 
 
-libhdf5hl_fortran_la_LIBADD = $(LIBH5_HL)
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -396,6 +396,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5IMcc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5IMfc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5LTfc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5TBfc.Plo@am__quote@
@@ -616,6 +617,8 @@ uninstall-am: uninstall-info-am uninstall-libLTLIBRARIES \
 	tags uninstall uninstall-am uninstall-info-am \
 	uninstall-libLTLIBRARIES uninstall-local
 
+
+#libhdf5hl_fortran_la_LIBADD=$(LIBH5_HL)
 
 # Fortran module files can have different extensions and different names
 # (e.g., different capitalizations) on different platforms.  Write rules
