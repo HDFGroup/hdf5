@@ -296,6 +296,10 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - The library didn't save the information of family driver in file.
+          The original file member size was lost after file was closed (see
+          bug #214).  This has been fixed by saving driver name and member
+          file size in the superblock.  SLU - 2005/6/24
         - Fixed bug with hyperslab selections that use selection offsets and
             operate on chunked datasets going into infinite loop or dumping
             core.  QAK - 2005/06/17
@@ -717,6 +721,10 @@ Linux 2.4 IA64 Intel  y       n       y    n    y        y           y
 
 Known Problems
 ==============
+* For the version 6(6.02 and 6.04) of Portland Group compiler on AMD Opteron
+  processor, there's a bug in the compiler for optimization(-O2).  The library
+  failed in several tests but all related to multi driver.  The problem has 
+  been reported to the vendor.  
 * On windows XP, Fortran DLLs are not working with DEC Fortran 6.6c and Intel
   8.1.
 * On IBM AIX systems, parallel HDF5 mode will fail some tests with error
