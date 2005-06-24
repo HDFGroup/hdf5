@@ -29,7 +29,7 @@
 #
 # HDF5 Library Test Makefile(.in)
 #
-SOURCES = $(libh5test_la_SOURCES) big.c bittests.c blocktrack.c btree2.c cache.c cmpd_dset.c dangle.c dsets.c dt_arith.c dtransform.c dtypes.c enum.c err_compat.c error_test.c extend.c external.c file_handle.c filename.c fillval.c flush1.c flush2.c getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c mtime.c ntypes.c ohdr.c pool.c reserved.c set_extent.c sheap.c stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c
+SOURCES = $(libh5test_la_SOURCES) big.c bittests.c blocktrack.c btree2.c cache.c cmpd_dset.c dangle.c dsets.c dt_arith.c dtransform.c dtypes.c enum.c err_compat.c error_test.c extend.c external.c filename.c fillval.c flush1.c flush2.c getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c mtime.c ntypes.c ohdr.c pool.c reserved.c set_extent.c sheap.c stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -80,7 +80,7 @@ am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	fillval$(EXEEXT) mount$(EXEEXT) flush1$(EXEEXT) \
 	flush2$(EXEEXT) enum$(EXEEXT) set_extent$(EXEEXT) \
 	ttsafe$(EXEEXT) stream_test$(EXEEXT) getname$(EXEEXT) \
-	file_handle$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
+	vfd$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
 	dtransform$(EXEEXT) filename$(EXEEXT) reserved$(EXEEXT)
 big_SOURCES = big.c
 big_OBJECTS = big.$(OBJEXT)
@@ -146,10 +146,6 @@ external_SOURCES = external.c
 external_OBJECTS = external.$(OBJEXT)
 external_LDADD = $(LDADD)
 external_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
-file_handle_SOURCES = file_handle.c
-file_handle_OBJECTS = file_handle.$(OBJEXT)
-file_handle_LDADD = $(LDADD)
-file_handle_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
 filename_SOURCES = filename.c
 filename_OBJECTS = filename.$(OBJEXT)
 filename_LDADD = $(LDADD)
@@ -255,6 +251,10 @@ unlink_SOURCES = unlink.c
 unlink_OBJECTS = unlink.$(OBJEXT)
 unlink_LDADD = $(LDADD)
 unlink_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
+vfd_SOURCES = vfd.c
+vfd_OBJECTS = vfd.$(OBJEXT)
+vfd_LDADD = $(LDADD)
+vfd_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
@@ -269,19 +269,19 @@ LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 SOURCES = $(libh5test_la_SOURCES) big.c bittests.c blocktrack.c \
 	btree2.c cache.c cmpd_dset.c dangle.c dsets.c dt_arith.c \
 	dtransform.c dtypes.c enum.c err_compat.c error_test.c \
-	extend.c external.c file_handle.c filename.c fillval.c \
-	flush1.c flush2.c getname.c gheap.c hyperslab.c istore.c \
-	lheap.c links.c mount.c mtime.c ntypes.c ohdr.c pool.c \
-	reserved.c set_extent.c sheap.c stab.c stream_test.c \
-	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c
+	extend.c external.c filename.c fillval.c flush1.c flush2.c \
+	getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c \
+	mtime.c ntypes.c ohdr.c pool.c reserved.c set_extent.c sheap.c \
+	stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c \
+	$(ttsafe_SOURCES) unlink.c vfd.c
 DIST_SOURCES = $(libh5test_la_SOURCES) big.c bittests.c blocktrack.c \
 	btree2.c cache.c cmpd_dset.c dangle.c dsets.c dt_arith.c \
 	dtransform.c dtypes.c enum.c err_compat.c error_test.c \
-	extend.c external.c file_handle.c filename.c fillval.c \
-	flush1.c flush2.c getname.c gheap.c hyperslab.c istore.c \
-	lheap.c links.c mount.c mtime.c ntypes.c ohdr.c pool.c \
-	reserved.c set_extent.c sheap.c stab.c stream_test.c \
-	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c
+	extend.c external.c filename.c fillval.c flush1.c flush2.c \
+	getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c \
+	mtime.c ntypes.c ohdr.c pool.c reserved.c set_extent.c sheap.c \
+	stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c \
+	$(ttsafe_SOURCES) unlink.c vfd.c
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -504,7 +504,7 @@ TEST_PROG = testhdf5 lheap ohdr stab gheap cache btree2 blocktrack sheap \
            dtypes dsets cmpd_dset extend external links unlink big mtime     \
            fillval mount flush1 flush2 enum \
            set_extent ttsafe stream_test \
-           getname file_handle ntypes dangle dtransform filename reserved 
+           getname vfd ntypes dangle dtransform filename reserved 
 
 
 # The libh5test.a library provides common support code for the tests.
@@ -664,9 +664,6 @@ extend$(EXEEXT): $(extend_OBJECTS) $(extend_DEPENDENCIES)
 external$(EXEEXT): $(external_OBJECTS) $(external_DEPENDENCIES) 
 	@rm -f external$(EXEEXT)
 	$(LINK) $(external_LDFLAGS) $(external_OBJECTS) $(external_LDADD) $(LIBS)
-file_handle$(EXEEXT): $(file_handle_OBJECTS) $(file_handle_DEPENDENCIES) 
-	@rm -f file_handle$(EXEEXT)
-	$(LINK) $(file_handle_LDFLAGS) $(file_handle_OBJECTS) $(file_handle_LDADD) $(LIBS)
 filename$(EXEEXT): $(filename_OBJECTS) $(filename_DEPENDENCIES) 
 	@rm -f filename$(EXEEXT)
 	$(LINK) $(filename_LDFLAGS) $(filename_OBJECTS) $(filename_LDADD) $(LIBS)
@@ -739,6 +736,9 @@ ttsafe$(EXEEXT): $(ttsafe_OBJECTS) $(ttsafe_DEPENDENCIES)
 unlink$(EXEEXT): $(unlink_OBJECTS) $(unlink_DEPENDENCIES) 
 	@rm -f unlink$(EXEEXT)
 	$(LINK) $(unlink_LDFLAGS) $(unlink_OBJECTS) $(unlink_LDADD) $(LIBS)
+vfd$(EXEEXT): $(vfd_OBJECTS) $(vfd_DEPENDENCIES) 
+	@rm -f vfd$(EXEEXT)
+	$(LINK) $(vfd_LDFLAGS) $(vfd_OBJECTS) $(vfd_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -762,7 +762,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extend.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/external.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/file_handle.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/filename.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fillval.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flush1.Po@am__quote@
@@ -813,6 +812,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tvlstr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tvltypes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unlink.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vfd.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
