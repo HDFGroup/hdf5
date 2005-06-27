@@ -161,6 +161,8 @@ ICProjConvert80  windows\tools\testfiles\h5dumptst\h5dumptst.vcproj /IC	>>	conve
 ICProjConvert80  windows\tools\testfiles\h5importtst\h5importtst.vcproj /IC	>>	convert_intel.log
 ICProjConvert80  windows\tools\testfiles\h5jamtst\h5jamtst.vcproj /IC	>>	convert_intel.log
 ICProjConvert80  windows\tools\testfiles\h5repacktst\h5repacktst.vcproj /IC	>>	convert_intel.log
+ICProjConvert80  windows\tools\testfiles\h5repart_gentest\h5repart_gentest.vcproj /IC	>>	convert_intel.log
+ICProjConvert80  windows\tools\testfiles\h5reparttst\h5reparttst.vcproj /IC	>>	convert_intel.log
 ICProjConvert80  windows\tools\testfiles\testh5repack_detect_szip\testh5repack_detect_szip.vcproj /IC	>>	convert_intel.log
 ICProjConvert80  windows\tools\testfiles\testh5repack_detect_szipdll\testh5repack_detect_szipdll.vcproj /IC	>>	convert_intel.log
 ICProjConvert80  windows\tools\toolslib\toolslib.vcproj /IC	>>	convert_intel.log
