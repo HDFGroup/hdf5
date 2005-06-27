@@ -205,6 +205,9 @@ echo ************************************************************ >> convert.log
   convert.js %1\windows\tools\testfiles\testh5repack_detect_szip\testh5repack_detect_szip.dsp %1\windows\tools\testfiles\testh5repack_detect_szip\testh5repack_detect_szip.vcproj  >> convert.log
   convert.js %1\windows\tools\testfiles\h5repart_gentest\h5repart_gentest.dsp %1\windows\tools\testfiles\h5repart_gentest\h5repart_gentest.vcproj  >> convert.log
   convert.js %1\windows\tools\testfiles\h5reparttst\h5reparttst.dsp %1\windows\tools\testfiles\h5reparttst\h5reparttst.vcproj  >> convert.log  
+  convert.js %1\windows\tools\testfiles\testh5repack_detect_szipdll\testh5repack_detect_szipdll.dsp %1\windows\tools\testfiles\testh5repack_detect_szipdll\testh5repack_detect_szipdll.vcproj  >> convert.log  
   convert.js %1\windows\tools\toolslib\toolslib.dsp %1\windows\tools\toolslib\toolslib.vcproj  >> convert.log
   convert.js %1\windows\tools\toolslibD\toolslibD.dsp %1\windows\tools\toolslibD\toolslibD.vcproj  >> convert.log
-echo End converting project files.
+  
+  
+  echo End converting project files.
