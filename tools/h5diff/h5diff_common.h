@@ -1,3 +1,6 @@
+extern unsigned char g_Parallel;
+extern int g_nTasks;
+
 void usage(void);
 int check_n_input( const char* );
 int check_f_input( const char* );

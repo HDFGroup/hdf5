@@ -17,9 +17,6 @@
 #include "h5diff.h"
 #include "h5diff_common.h"
 
-extern int g_Parallel;
-extern int g_nTasks;
-
 /*-------------------------------------------------------------------------
  * Function: parse_input
  *
@@ -185,36 +182,35 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
 
 void  print_results(hsize_t nfound, diff_opt_t* options)
 {
-/*-------------------------------------------------------------------------
- * print how many differences were found
- *-------------------------------------------------------------------------
- */
- if (!options->m_quiet)
- {  
-  printf("----------------------------------------------------\n");
-  printf("Summary\n");
-  printf("----------------------------------------------------\n");
-
-  if (options->cmn_objs==0 && !options->err_stat)
-  {   
-   printf("No common objects found. Files are not comparable.\n");
-   if (!options->m_verbose)
-    printf("Use -v for a list of objects.\n");
-  }
-  else
-  { 
-   /* no errors found */
-   if (!options->err_stat)
-   { 
-    /* objects were not compared */ 
-    if (options->not_cmp==1)
-     printf("Some objects are not comparable\n");
-    else
-     /* objects were compared, print the number of differences */ 
-     print_found(nfound);
-   }
-  }
- }
+    /*-------------------------------------------------------------------------
+     * print how many differences were found
+     *-------------------------------------------------------------------------
+     */
+    if (!options->m_quiet)
+    {  
+	printf("----------------------------------------------------\n");
+	printf("Summary\n");
+	printf("----------------------------------------------------\n");
+	if (options->cmn_objs==0 && !options->err_stat)
+	{   
+	    printf("No common objects found. Files are not comparable.\n");
+	    if (!options->m_verbose)
+		printf("Use -v for a list of objects.\n");
+	}
+	else
+	{ 
+	    /* no errors found */
+	    if (!options->err_stat)
+	    { 
+		/* objects were not compared */ 
+		if (options->not_cmp==1)
+		    printf("Some objects are not comparable\n");
+		else
+		    /* objects were compared, print the number of differences */ 
+		    print_found(nfound);
+	    }
+	}
+    }
 }
 
 /*-------------------------------------------------------------------------

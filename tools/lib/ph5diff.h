@@ -44,6 +44,12 @@ struct diff_args
     diff_opt_t	options;
 };   
 
+struct diffs_found
+{
+    hsize_t nfound;
+    int	    not_cmp;
+};
+
 #ifdef H5_HAVE_PARALLEL
 #include <mpi.h>
 #endif

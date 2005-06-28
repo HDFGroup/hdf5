@@ -52,7 +52,7 @@ void phdiff_dismiss_workers(void)
 {
     int i;
     for(i=1; i<g_nTasks; i++)
- MPI_Send(NULL, 0, MPI_BYTE, i, MPI_TAG_END, MPI_COMM_WORLD);
+	MPI_Send(NULL, 0, MPI_BYTE, i, MPI_TAG_END, MPI_COMM_WORLD);
 }
 
 
@@ -72,31 +72,31 @@ void phdiff_dismiss_workers(void)
  */
 void print_manager_output(void)
 {
-      /* If there was something we buffered, let's print it now */
-      if( (outBuffOffset>0) && g_Parallel)
-      {
-   printf("%s", outBuff); 
+    /* If there was something we buffered, let's print it now */
+    if( (outBuffOffset>0) && g_Parallel)
+    {
+	printf("%s", outBuff); 
 
-   if(overflow_file)
-   {
-       int     tmp;
+	if(overflow_file)
+	{
+	    int     tmp;
 
-       rewind(overflow_file);
-       while((tmp = getc(overflow_file)) >= 0)
-    putchar(tmp);
+	    rewind(overflow_file);
+	    while((tmp = getc(overflow_file)) >= 0)
+		putchar(tmp);
 
-       fclose(overflow_file);
-       overflow_file = NULL;
-   }
+	    fclose(overflow_file);
+	    overflow_file = NULL;
+	}
 
-   fflush(stdout);
-   memset(outBuff, 0, OUTBUFF_SIZE);
-   outBuffOffset = 0;
-      }
-      else if( (outBuffOffset>0) && !g_Parallel)
-      {
-   printf("h5diff error: outBuffOffset>0, but we're not in parallel!\n");
-      }
+	fflush(stdout);
+	memset(outBuff, 0, OUTBUFF_SIZE);
+	outBuffOffset = 0;
+    }
+    else if( (outBuffOffset>0) && !g_Parallel)
+    {
+	fprintf(stderr, "h5diff error: outBuffOffset>0, but we're not in parallel!\n");
+    }
 }
 
 /*-------------------------------------------------------------------------
@@ -119,17 +119,17 @@ static void print_incoming_data(void)
     char data[PRINT_DATA_MAX_SIZE+1];
     int  incomingMessage;
     MPI_Status Status;
-    
+
     do
     {     
- MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_PRINT_DATA, MPI_COMM_WORLD, &incomingMessage, &Status);
- if(incomingMessage)
- {
-     memset(data, 0, PRINT_DATA_MAX_SIZE+1);
-     MPI_Recv(data, PRINT_DATA_MAX_SIZE, MPI_CHAR, Status.MPI_SOURCE, MPI_TAG_PRINT_DATA, MPI_COMM_WORLD, &Status);
+	MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_PRINT_DATA, MPI_COMM_WORLD, &incomingMessage, &Status);
+	if(incomingMessage)
+	{
+	    memset(data, 0, PRINT_DATA_MAX_SIZE+1);
+	    MPI_Recv(data, PRINT_DATA_MAX_SIZE, MPI_CHAR, Status.MPI_SOURCE, MPI_TAG_PRINT_DATA, MPI_COMM_WORLD, &Status);
 
-     printf("%s", data);
- }
+	    printf("%s", data);
+	}
     } while(incomingMessage);
 }
 #endif
@@ -163,6 +163,7 @@ h5diff (const char *fname1,
   hid_t        file1_id=(-1), file2_id=(-1); 
   char filenames[2][1024];
   hsize_t nfound = 0;
+  int not_cmp = 0;
  
   memset(filenames, 0, 1024*2);
 
@@ -308,7 +309,7 @@ h5diff (const char *fname1,
 
    if(  (strlen(fname1) > 1024) || (strlen(fname2) > 1024))
    {
-       printf("The parallel diff only supports path names up to 1024 characters\n");
+       fprintf(stderr, "The parallel diff only supports path names up to 1024 characters\n");
        MPI_Abort(MPI_COMM_WORLD, 0);
    }
 
@@ -323,6 +324,7 @@ h5diff (const char *fname1,
 #endif
       nfound = diff_match (file1_id, nobjects1, info1,
        file2_id, nobjects2, info2, options);
+
   }
 
 
@@ -475,7 +477,7 @@ diff_match (hid_t file1_id,
  char* workerTasks = malloc((g_nTasks-1) * sizeof(char));
  int n;
  int busyTasks=0;
- hsize_t nFoundbyWorker;
+ struct diffs_found nFoundbyWorker;
  struct diff_args args;
  int havePrintToken = 1;
  MPI_Status Status;
@@ -532,7 +534,8 @@ diff_match (hid_t file1_id,
    {
        workerTasks[Status.MPI_SOURCE-1] = 1;
        MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
-       nfound += nFoundbyWorker;
+       nfound += nFoundbyWorker.nfound;
+       options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
        busyTasks--;
    }
 
@@ -547,7 +550,8 @@ diff_match (hid_t file1_id,
        {
     workerTasks[Status.MPI_SOURCE-1] = 1;
     MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
-    nfound += nFoundbyWorker;
+    nfound += nFoundbyWorker.nfound;
+    options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
     busyTasks--;
     havePrintToken = 1;
        }
@@ -598,9 +602,10 @@ diff_match (hid_t file1_id,
     * if we don't have the token, some task is currently printing so we'll wait for that task to return it. */
    if(!havePrintToken)
    {
-       MPI_Recv(&nFoundbyWorker, sizeof(hsize_t), MPI_BYTE, MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
+       MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
        havePrintToken = 1;
-       nfound += nFoundbyWorker;
+       nfound += nFoundbyWorker.nfound;
+       options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
        /* send this task the work unit. */
        MPI_Send(&args, sizeof(struct diff_args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
    }
@@ -614,7 +619,8 @@ diff_match (hid_t file1_id,
        if(Status.MPI_TAG == MPI_TAG_DONE)
        {
     MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
-    nfound += nFoundbyWorker;
+    nfound += nFoundbyWorker.nfound;
+       options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
     MPI_Send(&args, sizeof(struct diff_args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
        }
        else if(Status.MPI_TAG == MPI_TAG_TOK_REQUEST)
@@ -623,7 +629,8 @@ diff_match (hid_t file1_id,
     MPI_Send(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_PRINT_TOK, MPI_COMM_WORLD);
 
     MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
-    nfound += nFoundbyWorker;
+    nfound += nFoundbyWorker.nfound;
+       options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
     MPI_Send(&args, sizeof(struct diff_args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
        }
        else
@@ -647,14 +654,16 @@ diff_match (hid_t file1_id,
   MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
   if(Status.MPI_TAG == MPI_TAG_DONE)
   {
-      MPI_Recv(&nFoundbyWorker, sizeof(hsize_t), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
-      nfound += nFoundbyWorker;
+      MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
+      nfound += nFoundbyWorker.nfound;
+      options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
       busyTasks--;
   }
   else if(Status.MPI_TAG == MPI_TAG_TOK_RETURN)
   {
       MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
-      nfound += nFoundbyWorker;
+      nfound += nFoundbyWorker.nfound;
+      options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
       busyTasks--;
       havePrintToken = 1;
   }
@@ -665,14 +674,16 @@ diff_match (hid_t file1_id,
       {
    MPI_Send(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_PRINT_TOK, MPI_COMM_WORLD);
    MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
-   nfound += nFoundbyWorker;
+   nfound += nFoundbyWorker.nfound;
+   options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
    busyTasks--;
       }
       else /* someone else must have it...wait for them to return it, then give it to the task that just asked for it. */
       {
    int source = Status.MPI_SOURCE;
    MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
-   nfound += nFoundbyWorker;
+   nfound += nFoundbyWorker.nfound;
+   options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
    busyTasks--;
    MPI_Send(NULL, 0, MPI_BYTE, source, MPI_TAG_PRINT_TOK, MPI_COMM_WORLD);
       }
@@ -680,7 +691,8 @@ diff_match (hid_t file1_id,
   else if(Status.MPI_TAG == MPI_TAG_TOK_RETURN)
   {
       MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
-      nfound += nFoundbyWorker;
+      nfound += nFoundbyWorker.nfound;
+      options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
       busyTasks--;
       havePrintToken = 1;
   }

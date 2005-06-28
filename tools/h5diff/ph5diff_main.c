@@ -131,6 +131,7 @@ ph5diff_worker(int nID)
     char	filenames[2][1024];
     char	out_data[PRINT_DATA_MAX_SIZE] = {0};
     hsize_t    nfound=0;
+    struct diffs_found	diffs;
     int i;
     MPI_Status Status;
 
@@ -169,6 +170,8 @@ ph5diff_worker(int nID)
 		MPI_Recv(&args, sizeof(struct diff_args), MPI_BYTE, 0, MPI_TAG_ARGS, MPI_COMM_WORLD, &Status);
 		/*Do the diff */
 		nfound = diff(file1_id, args.name, file2_id, args.name, &(args.options), args.type);
+		diffs.nfound = nfound;
+		diffs.not_cmp = args.options.not_cmp;
 
 		/*If print buffer has something in it, request print token.*/
 		if(outBuffOffset>0)
@@ -213,16 +216,10 @@ ph5diff_worker(int nID)
 		    memset(outBuff, 0, OUTBUFF_SIZE);
 		    outBuffOffset = 0;
 
-		    /* Since the data type of diff value is hsize_t which can
-		     * be arbitary large such that there is no MPI type that
-		     * matches it, the value is passed between processes as
-		     * an array of bytes in order to be portable.  But this
-		     * may not work in non-homogeneous MPI environments.
-		     */
-		    MPI_Send(&nfound, sizeof(nfound), MPI_BYTE, 0, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD);
+		    MPI_Send(&diffs, sizeof(diffs), MPI_BYTE, 0, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD);
 		}
 		else
-		    MPI_Send(&nfound, sizeof(nfound), MPI_BYTE, 0, MPI_TAG_DONE, MPI_COMM_WORLD);
+		    MPI_Send(&diffs, sizeof(diffs), MPI_BYTE, 0, MPI_TAG_DONE, MPI_COMM_WORLD);
 	    }
 	    else if(Status.MPI_TAG == MPI_TAG_END)
 	    {

@@ -64,7 +64,7 @@ void parallel_print(const char* format, ...)
 		
 		overflow_file = HDtmpfile(); 
 		if(overflow_file == NULL)
-		    printf("Warning: Could not create overflow file.  Output may be truncated.\n");
+		    fprintf(stderr, "Warning: Could not create overflow file.  Output may be truncated.\n");
 		else
 		    bytes_written = HDvfprintf(overflow_file, format, ap);
 	    }
