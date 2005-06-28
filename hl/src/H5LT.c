@@ -2467,7 +2467,7 @@ herr_t H5LTget_attribute_long( hid_t loc_id,
 herr_t H5LTget_attribute_long_long( hid_t loc_id, 
                               const char *obj_name, 
                               const char *attr_name,
-                              long long *data ) 
+                              long_long *data ) 
 {
 
  /* identifiers */
