@@ -145,7 +145,11 @@ TOOLTEST() {
     STDERR_FILTER $tmp_err
     cat $tmp_err >> $actual
 
-    if $CMP $expect $actual; then
+    if [ ! -f $expect ]; then
+    # Create the expect file if it doesn't yet exist.
+        echo " CREATED"
+	cp $actual $expect
+    elif $CMP $expect $actual; then
 	echo " PASSED"
     elif test -z "$pmode"; then
 	echo "*FAILED*"
