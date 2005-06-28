@@ -2,4 +2,7 @@
 Expected output for 'h5diff file3.h5 file3.h5 -v type type'
 #############################
 Datatype:    </type> and </type>
+----------------------------------------------------
+Summary
+----------------------------------------------------
 0 differences found

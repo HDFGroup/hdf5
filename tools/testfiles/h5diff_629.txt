@@ -2,5 +2,6 @@
 Expected output for 'h5diff file1.h6 file2.h6'
 #############################
 h5diff: <file1.h6>: unable to open file
-No common objects found. Files are not comparable.
-Use -v for a list of objects.
+----------------------------------------------------
+Summary
+----------------------------------------------------

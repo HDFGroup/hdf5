@@ -2,4 +2,7 @@
 Expected output for 'h5diff file1.h5 file2.h5 -n 200 g1/dset3 g1/dset4'
 #############################
 Dataset:     </g1/dset3> and </g1/dset4>
+----------------------------------------------------
+Summary
+----------------------------------------------------
 6 differences found

@@ -206,9 +206,10 @@ hsize_t diff_datasetid( hid_t dset1_id,
  storage_size2=H5Dget_storage_size(dset2_id);
  if (storage_size1<=0 && storage_size2<=0)
  {
-     if (options->m_verbose && obj1_name && obj2_name) 
-	 parallel_print("<%s> and <%s> are empty datasets\n", obj1_name, obj2_name);
-     cmp=0;
+  if (options->m_verbose && obj1_name && obj2_name) 
+   parallel_print("<%s> and <%s> are empty datasets\n", obj1_name, obj2_name);
+  cmp=0;
+  options->not_cmp=1;
  }
 
 
@@ -228,7 +229,10 @@ hsize_t diff_datasetid( hid_t dset1_id,
   obj1_name, 
   obj2_name, 
   options)!=1)
+ {
   cmp=0;
+  options->not_cmp=1;
+ }
 /*-------------------------------------------------------------------------
  * get number of elements
  *-------------------------------------------------------------------------
@@ -245,7 +249,9 @@ hsize_t diff_datasetid( hid_t dset1_id,
   nelmts2 *= dims2[i];
  }
 
- assert(nelmts1==nelmts2);
+ if (cmp)
+  /* onnly assert if the space is the same */
+  assert(nelmts1==nelmts2);
 
 /*-------------------------------------------------------------------------
  * check for equal file datatype; warning only
@@ -296,6 +302,7 @@ hsize_t diff_datasetid( hid_t dset1_id,
      }
 
      cmp=0;
+     options->not_cmp=1;
  }
 
 /*-------------------------------------------------------------------------

@@ -20,6 +20,14 @@
 extern int g_Parallel;
 extern int g_nTasks;
 
+/*-------------------------------------------------------------------------
+ * Function: parse_input
+ *
+ * Purpose: parse command line input
+ *
+ *-------------------------------------------------------------------------
+ */
+
 void parse_input(int argc, const char* argv[], const char** fname1, const char** fname2, const char** objname1, const char** objname2, diff_opt_t* options)
 {
     int        i;
@@ -34,12 +42,12 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
      */
 
     if ( argc==2 && (strcmp("-h",argv[1])==0) ) 
-	usage();
+ usage();
 
     if ( argc<3 ) 
     {
-	printf("Number of arguments is only %d\n", argc );
-	usage();
+ printf("Number of arguments is only %d\n", argc );
+ usage();
     }
 
     /*-------------------------------------------------------------------------
@@ -48,8 +56,8 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
      */
     if ( argc>=3 )
     {
-	*fname1 = argv[1];
-	*fname2 = argv[2];
+ *fname1 = argv[1];
+ *fname2 = argv[2];
     }
     /*-------------------------------------------------------------------------
      * parse command line options
@@ -57,138 +65,156 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
      */
     for (i=3; i<argc ; i++) 
     {
-	/* get the single-letter switches */
-	if ( '-'==argv[i][0] )
-	{
-	    for (s=argv[i]+1; *s; s++) 
-	    {
-		switch (*s) {
-		    default:
-			printf("-%s is an invalid option\n", s );
-			usage();
-			break;
-		    case 'h': 
-			usage();
-			break;
-		    case 'v': 
-			options->m_verbose = 1;
-			break;
-		    case 'q': 
-			/* use quiet mode; supress the message "0 differences found" */
-			options->m_quiet = 1;
-			break;
-		    case 'r': 
-			options->m_report = 1;
-			break;
-		    case 'd': 
-			/* if it is not another option */
-			if ( i<argc-1 &&'-' != argv[i+1][0] )
-			{
-			    options->d=1;
-			    if ( check_f_input(argv[i+1])==-1)
-			    {
-				printf("<-d %s> is not a valid option\n", argv[i+1] );
-				usage();
-			    }
-			    options->delta = atof(argv[i+1]);
-			    i++; /* go to next */
-			}
-			else
-			{
-			    printf("Not a valid -d option\n");
-			    usage();
-			}
-			break;
-		    case 'p': 
-			if ( i<argc-1 &&'-' !=argv[i+1][0] )
-			{
-			    options->p=1;
-			    if ( check_f_input(argv[i+1])==-1)
-			    {
-				printf("<-p %s> is not a valid option\n", argv[i+1] );
-				usage();
-			    }
-			    options->percent = atof(argv[i+1]);
-			    i++; /* go to next */
-			}
-			else
-			{
-			    printf("Not a valid -p option\n");
-			    usage();
-			}
-			break;
-		    case 'n': 
-			if ( i<argc-1 && '-' !=argv[i+1][0] )
-			{
-			    options->n=1;
-			    if ( check_n_input(argv[i+1])==-1)
-			    {
-				printf("<-n %s> is not a valid option\n", argv[i+1] );
-				usage();
-			    }
-			    options->count = atoi(argv[i+1]);
-			    i++; /* go to next */
-			}
-			else
-			{
-			    printf("Not a valid -n option\n");
-			    usage();
-			}
-			break;
-		} /*switch*/
-	    } /*for*/ 
-	} /*if*/
+ /* get the single-letter switches */
+ if ( '-'==argv[i][0] )
+ {
+     for (s=argv[i]+1; *s; s++) 
+     {
+  switch (*s) {
+      default:
+   printf("-%s is an invalid option\n", s );
+   usage();
+   break;
+      case 'h': 
+   usage();
+   break;
+      case 'v': 
+   options->m_verbose = 1;
+   break;
+      case 'q': 
+   /* use quiet mode; supress the message "0 differences found" */
+   options->m_quiet = 1;
+   break;
+      case 'r': 
+   options->m_report = 1;
+   break;
+      case 'd': 
+   /* if it is not another option */
+   if ( i<argc-1 &&'-' != argv[i+1][0] )
+   {
+       options->d=1;
+       if ( check_f_input(argv[i+1])==-1)
+       {
+    printf("<-d %s> is not a valid option\n", argv[i+1] );
+    usage();
+       }
+       options->delta = atof(argv[i+1]);
+       i++; /* go to next */
+   }
+   else
+   {
+       printf("Not a valid -d option\n");
+       usage();
+   }
+   break;
+      case 'p': 
+   if ( i<argc-1 &&'-' !=argv[i+1][0] )
+   {
+       options->p=1;
+       if ( check_f_input(argv[i+1])==-1)
+       {
+    printf("<-p %s> is not a valid option\n", argv[i+1] );
+    usage();
+       }
+       options->percent = atof(argv[i+1]);
+       i++; /* go to next */
+   }
+   else
+   {
+       printf("Not a valid -p option\n");
+       usage();
+   }
+   break;
+      case 'n': 
+   if ( i<argc-1 && '-' !=argv[i+1][0] )
+   {
+       options->n=1;
+       if ( check_n_input(argv[i+1])==-1)
+       {
+    printf("<-n %s> is not a valid option\n", argv[i+1] );
+    usage();
+       }
+       options->count = atoi(argv[i+1]);
+       i++; /* go to next */
+   }
+   else
+   {
+       printf("Not a valid -n option\n");
+       usage();
+   }
+   break;
+  } /*switch*/
+     } /*for*/ 
+ } /*if*/
 
-	else /* not single-letter switches */
+ else /* not single-letter switches */
 
-	{
-	    /* check if it is not a -d, -p parameter */
-	    if ( '-'==argv[i-1][0] && ('d'==argv[i-1][1] ||'p'==argv[i-1][1] ))
-		continue;
-	    else
-	    {
-		if ( *objname1==NULL )
-		    *objname1 = argv[i];
-		if ( *objname2==NULL )
-		{
-		    /* check if we have a second object name */
-		    if ( i+1<argc && '-' !=argv[i+1][0] ) {
-			/* yes */
-			*objname2 = argv[i+1];
-			i++; /* go to next */
-		    }
-		    else
-			/* no */
-			*objname2 = *objname1;
-		} /*objname2*/
-	    } /*else*/
-	} /*else*/
+ {
+     /* check if it is not a -d, -p parameter */
+     if ( '-'==argv[i-1][0] && ('d'==argv[i-1][1] ||'p'==argv[i-1][1] ))
+  continue;
+     else
+     {
+  if ( *objname1==NULL )
+      *objname1 = argv[i];
+  if ( *objname2==NULL )
+  {
+      /* check if we have a second object name */
+      if ( i+1<argc && '-' !=argv[i+1][0] ) {
+   /* yes */
+   *objname2 = argv[i+1];
+   i++; /* go to next */
+      }
+      else
+   /* no */
+   *objname2 = *objname1;
+  } /*objname2*/
+     } /*else*/
+ } /*else*/
 
     }/*for*/
 }
 
+/*-------------------------------------------------------------------------
+ * Function: print_results
+ *
+ * Purpose: print how many differences were found, if files were comparable or not
+ *
+ *-------------------------------------------------------------------------
+ */
+
 void  print_results(hsize_t nfound, diff_opt_t* options)
 {
-    /*-------------------------------------------------------------------------
-     * print how many differences were found
-     *-------------------------------------------------------------------------
-     */
-    if (!options->m_quiet)
-    {   
-	if (options->cmn_objs==0)
-	{   
-	    printf("No common objects found. Files are not comparable.\n");
-	    if (!options->m_verbose)
-		printf("Use -v for a list of objects.\n");
-	}
-	else
-	{   
-	    if (!options->err_stat)
-	    {   
-		print_found(nfound);
-	    }
-	}
-    }
+/*-------------------------------------------------------------------------
+ * print how many differences were found
+ *-------------------------------------------------------------------------
+ */
+ if (!options->m_quiet)
+ {  
+  printf("----------------------------------------------------\n");
+  printf("Summary\n");
+  printf("----------------------------------------------------\n");
+
+  if (options->cmn_objs==0 && !options->err_stat)
+  {   
+   printf("No common objects found. Files are not comparable.\n");
+   if (!options->m_verbose)
+    printf("Use -v for a list of objects.\n");
+  }
+  else
+  { 
+   /* no errors found */
+   if (!options->err_stat)
+   { 
+    /* objects were not compared */ 
+    if (options->not_cmp==1)
+     printf("Some objects are not comparable\n");
+    else
+     /* objects were compared, print the number of differences */ 
+     print_found(nfound);
+   }
+  }
+ }
 }
 
 /*-------------------------------------------------------------------------
@@ -215,15 +241,15 @@ int check_n_input( const char *str )
 
     for ( i = 0; i < strlen(str); i++)
     {
-	c = str[i];
-	if ( i==0 )
-	{
-	    if ( c < 49 || c > 57  ) /* ascii values between 1 and 9 */
-		return -1;
-	}
-	else
-	    if ( c < 48 || c > 57  ) /* 0 also */
-		return -1;
+ c = str[i];
+ if ( i==0 )
+ {
+     if ( c < 49 || c > 57  ) /* ascii values between 1 and 9 */
+  return -1;
+ }
+ else
+     if ( c < 48 || c > 57  ) /* 0 also */
+  return -1;
     }
     return 1;
 }
@@ -252,11 +278,11 @@ int check_f_input( const char *str )
        on some systems; we do a character check for this
      */
     if (strlen(str)>2 && str[0]=='0' && str[1]=='x')
-	return -1;
+ return -1;
 
     x=atof(str);
     if (x==0)
-	return -1;
+ return -1;
 
     return 1;
 }
@@ -321,7 +347,7 @@ void usage(void)
     printf("   to compare '/g1/dset1' and '/g1/dset2' in the same file\n");
 #ifdef H5_HAVE_PARALLEL
     if(g_Parallel)
-	h5diff_exit(0);
+ h5diff_exit(0);
     else
 #endif
     exit(0);
@@ -348,11 +374,11 @@ void h5diff_exit(int status)
 #ifdef H5_HAVE_PARALLEL
     /* if in parallel mode, dismiss workers, close down MPI, then exit */
     if((g_nTasks > 1) && g_Parallel) {
-	phdiff_dismiss_workers();
-	MPI_Barrier(MPI_COMM_WORLD);
+ phdiff_dismiss_workers();
+ MPI_Barrier(MPI_COMM_WORLD);
     }
     if(g_Parallel)
-	MPI_Finalize();
+ MPI_Finalize();
 #endif
     exit(status);
 }
