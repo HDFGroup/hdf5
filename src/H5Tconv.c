@@ -174,10 +174,18 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     *((DT*)D) = (DT)(*((ST*)S));					      \
 }
 
+/* Added a condition branch(else if (*((ST*)S) == (DT)(D_MAX))) which seems redundant.
+ * It handles a special situation when the source is "float" and assigned the value
+ * of "INT_MAX".  A compiler may do roundup making this value "INT_MAX+1".  However,
+ * when do comparison "if (*((ST*)S) > (DT)(D_MAX))", the compiler may consider them
+ * equal. SLU - 2005/06/29
+ */
 #define H5T_CONV_Xx_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
     if (*((ST*)S) > (DT)(D_MAX)) {					      \
         if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
             *((DT*)D) = (D_MAX);					      \
+    } else if (*((ST*)S) == (DT)(D_MAX)) {                                    \
+        *((DT*)D) = (D_MAX);			                              \
     } else if (*((ST*)S) < (D_MIN)) {					      \
         if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
             *((DT*)D) = (D_MIN);					      \
