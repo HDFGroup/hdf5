@@ -321,27 +321,44 @@ hsize_t diff_datum(void       *_mem1,
 	     *-------------------------------------------------------------------------
 	     */
 	case H5T_STRING:
-
-	    if(H5Tis_variable_str(m_type)) 
-		type_size = HDstrlen((char*)mem1);
-	    else 
-		type_size = H5Tget_size(m_type);
-
-	    for (u=0; u<type_size; u++)
-		nfound+=diff_char(
-			mem1 + u,
-			mem2 + u, /* offset */
-			i,        /* index position */
-			rank, 
-			acc,
-			pos,
-			options, 
-			obj1, 
-			obj2,
-			ph);
-
-
-	    break;
+  {
+   
+   H5T_str_t pad;
+   char      *s;
+   
+   if(H5Tis_variable_str(m_type)) 
+   {
+   /* mem1 is the pointer into the struct where a `char*' is stored. So we have
+    * to dereference the pointer to get the `char*' to pass to HDstrlen(). */
+    s = *(char**)mem1;
+    if(s!=NULL)
+     size = HDstrlen(s);
+   }
+   else 
+   {
+    s = mem1;
+    size = H5Tget_size(m_type);
+   }
+   
+   pad = H5Tget_strpad(m_type);
+   
+   /* check for NULL pointer for string */
+   if(s!=NULL)
+    for (u=0; u<size && (s[u] || pad!=H5T_STR_NULLTERM); u++)
+     nfound+=diff_char(
+     mem1 + u,
+     mem2 + u, /* offset */
+     i,        /* index position */
+     rank, 
+     acc,
+     pos,
+     options, 
+     obj1, 
+     obj2,
+     ph);
+    
+  }
+  break;
 
 	    /*-------------------------------------------------------------------------
 	     * H5T_BITFIELD
