@@ -9,7 +9,9 @@ file1     file2
 
 Dataset:     </dset> and </dset>
 </dset> and </dset> are empty datasets
+0 differences found
 Group:       </g1> and </g1>
+0 differences found
 Attribute:   <string of </g1>> and <string of </g1>>
 position        string of </g1> string of </g1> difference          
 ------------------------------------------------------------
@@ -575,6 +577,7 @@ position        float3D of </g1> float3D of </g1> difference
 [ 3 2 1 ]          24.000000       0.000000        24.000000      
 24 differences found
 Group:       </> and </>
+0 differences found
 Attribute:   <string of </>> and <string of </>>
 position        string of </>   string of </>   difference          
 ------------------------------------------------------------
@@ -1139,7 +1142,4 @@ position        float3D of </>  float3D of </>  difference
 [ 3 2 0 ]          23.000000       0.000000        23.000000      
 [ 3 2 1 ]          24.000000       0.000000        24.000000      
 24 differences found
-----------------------------------------------------
-Summary
-----------------------------------------------------
 Some objects are not comparable

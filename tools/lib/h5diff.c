@@ -855,41 +855,54 @@ diff (hid_t file1_id,
   * H5G_DATASET
   *-------------------------------------------------------------------------
   */
- case H5G_DATASET:
+    case H5G_DATASET:
 
-     /* always print name */
+ /*-------------------------------------------------------------------------
+  * verbose, always print name
+  *-------------------------------------------------------------------------
+  */
      if (options->m_verbose)
      {
-  if (print_objname (options, (hsize_t)1))
-      parallel_print("Dataset:     <%s> and <%s>\n", path1, path2);  
-  nfound = diff_dataset (file1_id, file2_id, path1, path2, options);
-
+      if (print_objname (options, (hsize_t)1))
+       parallel_print("Dataset:     <%s> and <%s>\n", path1, path2);  
+      nfound = diff_dataset (file1_id, file2_id, path1, path2, options);
+      /* always print the number of differences found */
+      print_found(nfound); 
      }
-     /* check first if we have differences */
+ /*-------------------------------------------------------------------------
+  * non verbose, check first if we have differences
+  *-------------------------------------------------------------------------
+  */
      else
      {
-  if (options->m_quiet == 0)
-  {
-      /* shut up temporarily */
-      options->m_quiet = 1;
-      nfound =
-   diff_dataset (file1_id, file2_id, path1, path2, options);
-      /* print again */
-      options->m_quiet = 0;
-      if (nfound)
+      if (options->m_quiet == 0)
       {
-   if (print_objname (options, nfound))
-       parallel_print("Dataset:     <%s> and <%s>\n", path1, path2);
-   nfound = diff_dataset (file1_id, file2_id, path1, path2, options);
-      }  /*if */
-  }   /*if */
-  /* in quiet mode, just count differences */
-  else
-  {
-      nfound = diff_dataset (file1_id, file2_id, path1, path2, options);
-  }
-     }   /*else */
+       /* shut up temporarily */
+       options->m_quiet = 1;
+       nfound = diff_dataset (file1_id, file2_id, path1, path2, options);
+       /* print again */
+       options->m_quiet = 0;
+       if (nfound)
+       {
+        if (print_objname (options, nfound))
+         parallel_print("Dataset:     <%s> and <%s>\n", path1, path2);
+        nfound = diff_dataset (file1_id, file2_id, path1, path2, options);
+        /* print the number of differences found only when found 
+           this is valid for the default mode and report mode */
+        print_found(nfound); 
+       }  /*if nfound */
+      }   /*if quiet */
 
+ /*-------------------------------------------------------------------------
+  * quiet mode, just count differences
+  *-------------------------------------------------------------------------
+  */
+      else
+      {
+       nfound = diff_dataset (file1_id, file2_id, path1, path2, options);
+      }
+     }   /*else verbose */
+     
      break;
 
      /*-------------------------------------------------------------------------
@@ -909,7 +922,11 @@ diff (hid_t file1_id,
      nfound = (ret > 0) ? 0 : 1;
 
      if (print_objname (options, nfound))
-  parallel_print("Datatype:    <%s> and <%s>\n", path1, path2);
+      parallel_print("Datatype:    <%s> and <%s>\n", path1, path2);
+
+     /* always print the number of differences found in verbose mode */
+     if (options->m_verbose)
+      print_found(nfound);
 
      /*-------------------------------------------------------------------------
       * compare attributes
@@ -942,7 +959,11 @@ diff (hid_t file1_id,
      nfound = (ret != 0) ? 1 : 0;
 
      if (print_objname (options, nfound))
-  parallel_print("Group:       <%s> and <%s>\n", path1, path2);
+      parallel_print("Group:       <%s> and <%s>\n", path1, path2);
+
+     /* always print the number of differences found in verbose mode */
+     if (options->m_verbose)
+      print_found(nfound);
 
      /*-------------------------------------------------------------------------
       * compare attributes

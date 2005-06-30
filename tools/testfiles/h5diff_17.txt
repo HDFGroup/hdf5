@@ -12,6 +12,7 @@ file1     file2
            x    /g2            
 
 Group:       </g1> and </g1>
+0 differences found
 Dataset:     </g1/dset1> and </g1/dset1>
 position        dset1           dset1           difference          
 ------------------------------------------------------------
@@ -19,8 +20,6 @@ position        dset1           dset1           difference
 [ 1 0 ]          1.000000        1.010000        0.010000       
 [ 1 1 ]          1.000000        1.001000        0.001000       
 [ 2 0 ]          1.000000        1.000100        0.000100       
-Group:       </> and </>
-----------------------------------------------------
-Summary
-----------------------------------------------------
 4 differences found
+Group:       </> and </>
+0 differences found
