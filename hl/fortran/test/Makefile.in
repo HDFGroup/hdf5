@@ -295,6 +295,11 @@ H5CC = $(bindir)/h5cc
 H5CC_PP = $(bindir)/h5pcc
 H5FC = $(bindir)/h5fc
 H5FC_PP = $(bindir)/h5pfc
+
+# .chkexe and .chksh files are used to mark tests that have run successfully.
+
+# Temporary files.
+MOSTLYCLEANFILES = *.chkexe *.chksh dsetf[1-4].h5 f1img.h5 f1tab.h5
 AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_builddir)/src -I$(top_srcdir)/hl/src
 AM_FCFLAGS = -I$(top_builddir)/fortran/src -I$(top_builddir)/hl/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/hl/fortran/src
 
@@ -310,9 +315,6 @@ tstlite_SOURCES = tstlite.f90
 tstimage_SOURCES = tstimage.f90
 tsttable_SOURCES = tsttable.f90
 
-# Temporary files.
-MOSTLYCLEANFILES = dsetf[1-4].h5 f1img.h5 f1tab.h5
-
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
 # lib_LIBRARIES are built for lib target), but EXTRA_LIB, EXTRA_PROG, and
@@ -325,6 +327,10 @@ PROGS = $(bin_PROGRAMS) $(bin_SCRIPTS) $(noinst_PROGRAMS) $(noinst_SCRIPTS)   \
         $(EXTRA_PROG)
 
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS) $(EXTRA_TEST) 
+TEST_PROG_CHKEXE = $(TEST_PROG:=.chkexe_)
+TEST_PROG_PARA_CHKEXE = $(TEST_PROG_PARA:=.chkexe_)
+TEST_SCRIPT_CHKSH = $(TEST_SCRIPT:=.chksh_)
+TEST_SCRIPT_PARA_CHKSH = $(TEST_SCRIPT_PARA:=.chksh_)
 all: all-am
 
 .SUFFIXES:
@@ -575,9 +581,9 @@ build-lib: $(LIB)
 build-progs: $(LIB) $(PROGS)
 build-tests: $(LIB) $(PROGS) $(TESTS)
 
-lib progs tests ::
-	@$(MAKE) $(AM_MAKEFLAGS) build-$@ || exit 1;                          \
-	for d in X $(SUBDIRS); do                                             \
+lib progs tests check-s check-p ::
+	@$(MAKE) $(AM_MAKEFLAGS) build-$@ || exit 1;
+	@for d in X $(SUBDIRS); do                                             \
 	    if test $$d != X -a $$d != .; then                                \
 	        (set -x; cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;     \
 	    fi;                                                               \
@@ -604,71 +610,83 @@ install-doc uninstall-doc:
 check-TESTS: test
 
 test _test:
-	$(MAKE) _check-s
-	$(MAKE) _check-p
-
-# Run check-s/check-p recursively down SUBDIRS
-check-s check-p:
-	@$(MAKE) $(AM_MAKEFLAGS) _$@ || exit 1;                          \
-	for d in X $(SUBDIRS); do                                             \
-	    if test $$d != X -a $$d != .; then                                \
-	        (set -x; cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;     \
-	    fi;                                                               \
-	done
+	@$(MAKE) build-check-s
+	@$(MAKE) build-check-p
 
 # Actual execution of check-s.
-_check-s: $(LIB) $(PROGS) $(TESTS)
+build-check-s: $(LIB) $(PROGS) $(TESTS)
 	@if test -n "$(TEST_PROG)$(TEST_SCRIPT)"; then      \
 	   echo "===Serial tests in `echo ${PWD} | sed -e s:.*/::` begin `date`==="; \
-        fi
-	@for test in $(TEST_PROG) dummy; do                                  \
-	   if test $$test != dummy; then                                      \
-	      echo "============================";                            \
-	      if test "X$(HDF_FORTRAN)" = "Xyes"; then                        \
-	         echo "Fortran API: Testing $$test $(TEST_FLAGS)";            \
-	      elif test "X$(HDF_CXX)" = "Xyes"; then                          \
-	         echo "C++ API: Testing $$test $(TEST_FLAGS)";                \
-	      else                                                            \
-	         echo "Testing $$test $(TEST_FLAGS)";                         \
-	      fi;                                                             \
-	      echo "============================";                            \
-	      srcdir="$(srcdir)"                                              \
-	         $(RUNTESTS) ./$$test $(TEST_FLAGS) ||                         \
-	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||     \
-	         break;                                                       \
-	      echo "";                                                        \
-	   fi;                                                                \
-	done;                                                                 \
-	test $$test = dummy || false
-	@for test in $(TEST_SCRIPT) dummy; do                                \
-	   if test $$test != dummy; then                                      \
-	      echo "============================";                            \
-	      if test "X$(HDF_FORTRAN)" = "Xyes"; then                        \
-	         echo "Fortran API: Testing $$test $(TEST_FLAGS)";            \
-	      elif test "X$(HDF_CXX)" = "Xyes"; then                          \
-	         echo "C++ API: Testing $$test $(TEST_FLAGS)";                \
-	      else                                                            \
-	         echo "Testing $$test $(TEST_FLAGS)";                         \
-	      fi;                                                             \
-	      echo "============================";                            \
-	      RUNSERIAL="$(RUNSERIAL)" RUNPARALLEL="$(RUNPARALLEL)"           \
-	         srcdir="$(srcdir)"                                           \
-	         /bin/sh $$test $(TEST_FLAGS) ||                              \
-	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||     \
-	         break;                                                       \
-	      echo "";                                                        \
-	  fi;                                                                 \
-	done;                                                                 \
-	test $$test = dummy || false
+	fi
+	@$(MAKE) $(AM_MAKEFLAGS) _exec_check-s
 	@if test -n "$(TEST_PROG)$(TEST_SCRIPT)"; then      \
 	    echo "===Serial tests in `echo ${PWD} | sed -e s:.*/::` ended `date`===";\
 	fi
 
+_exec_check-s: $(TEST_PROG_CHKEXE) $(TEST_SCRIPT_CHKSH)
+
+# The .chkexe_ here is the "dummy" that prevents the target from being
+# empty if there are no tests in the current directory.
+$(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) .chkexe_:
+	@if test "X$@" != "X.chkexe_"; then \
+	  echo "============================"; \
+	  if test -e $(@:.chkexe_=.chkexe) && \
+	          test $(@:.chkexe_=.chkexe) -nt $(@:.chkexe_=)$(EXEEXT); then \
+	    echo "No need to test $(@:.chkexe_=)$(EXEEXT) again."; \
+	  else \
+	    if test "X$(HDF_FORTRAN)" = "Xyes"; then \
+	      echo "Fortran API: Testing $(@:.chkexe_=)$(EXEEXT) $(TEST_FLAGS)"; \
+	    elif test "X$(HDF_CXX)" = "Xyes"; then \
+	      echo "C++ API: Testing $(@:.chkexe_=)$(EXEEXT) $(TEST_FLAGS)"; \
+	    else \
+	      echo "Testing $(@:.chkexe_=)$(EXEEXT) $(TEST_FLAGS)"; \
+	    fi; \
+	    echo "============================"; \
+	    srcdir="$(srcdir)" \
+	      $(RUNTESTS) ./$(@:.chkexe_=)$(EXEEXT) $(TEST_FLAGS) \
+	      && touch $(@:.chkexe_=.chkexe) || \
+	      (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
+	      exit 1; \
+	    echo ""; \
+	    echo "Finished testing $(@:.chkexe_=)$(EXEEXT) $(TEST_FLAGS)"; \
+	  fi; \
+	  echo "============================"; \
+	fi
+
+# The .chksh_ here is the "dummy" that prevents the target from being
+# empty if there are no tests in the current directory.
+$(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) .chksh_:
+	@if test "X$@" != "X.chksh_"; then \
+	  echo "============================"; \
+	  if test -e $(@:.chksh_=.chksh) && \
+	          test $(@:.chksh_=.chksh) -nt $(@:.chksh_=); then \
+	    echo "No need to test $(@:.chksh_=) again."; \
+	  else \
+	    if test "X$(HDF_FORTRAN)" = "Xyes"; then \
+	      echo "Fortran API: Testing $(@:.chksh_=) $(TEST_FLAGS)"; \
+	    elif test "X$(HDF_CXX)" = "Xyes"; then \
+	      echo "C++ API: Testing $(@:.chksh_=) $(TEST_FLAGS)"; \
+	    else \
+	      echo "Testing $(@:.chksh_=) $(TEST_FLAGS)"; \
+	    fi; \
+	    echo "============================"; \
+	    RUNSERIAL="$(RUNSERIAL)" RUNPARALLEL="$(RUNPARALLEL)"           \
+	    srcdir="$(srcdir)" \
+	      $(SHELL) ./$(@:.chksh_=) $(TEST_FLAGS) \
+	      && touch $(@:.chksh_=.chksh) || \
+	      (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
+	      exit 1; \
+	    echo ""; \
+	    echo "Finished testing $(@:.chksh_=) $(TEST_FLAGS)"; \
+	  fi; \
+	  echo "============================"; \
+	fi
+
 # Actual execution of check-p.
-_check-p: $(LIB) $(PROGS) $(TESTS)
+build-check-p: $(LIB) $(PROGS) $(TESTS)
 	@if test -n "$(TEST_PROG_PARA)$(TEST_SCRIPT_PARA)"; then      \
 	   echo "===Parallel tests in `echo ${PWD} | sed -e s:.*/::` begin `date`==="; \
-        fi
+	fi
 	@if test -n "$(TEST_PROG_PARA)"; then                                \
 	    echo "**** Hint ****";                                            \
 	    echo "Parallel test files reside in the current directory"        \
@@ -681,40 +699,14 @@ _check-p: $(LIB) $(PROGS) $(TESTS)
 	fi
 	@for test in $(TEST_PROG_PARA) dummy; do                             \
 	   if test $$test != dummy; then                                      \
-	      echo "============================";                            \
-	      if test "X$(HDF_FORTRAN)" = "Xyes"; then                        \
-	         echo "Fortran API: Testing $$test $(TEST_FLAGS)";            \
-	      elif test "X$(HDF_CXX)" = "Xyes"; then                          \
-	         echo "C++ API: Testing $$test $(TEST_FLAGS)";                \
-	      else                                                            \
-	         echo "Testing $$test $(TEST_FLAGS)";                         \
-	      fi;                                                             \
-	      echo "============================";                            \
-	      srcdir="$(srcdir)"                                              \
-	         $(RUNPARALLEL) ./$$test $(TEST_FLAGS) ||                     \
-	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||     \
-	         break;                                                       \
-	      echo "";                                                        \
+	      $(MAKE) $(AM_MAKEFLAGS) $$test.chkexe_ \
+	      RUNTESTS="$(RUNPARALLEL)"; \
 	   fi;                                                                \
 	done;                                                                 \
 	test $$test = dummy || false
 	@for test in $(TEST_SCRIPT_PARA) dummy; do                           \
-	   if test $$test != dummy; then                                      \
-	      echo "============================";                            \
-	      if test "X$(HDF_FORTRAN)" = "Xyes"; then                        \
-	         echo "Fortran API: Testing $$test $(TEST_FLAGS)";            \
-	      elif test "X$(HDF_CXX)" = "Xyes"; then                          \
-	         echo "C++ API: Testing $$test $(TEST_FLAGS)";                \
-	      else                                                            \
-	         echo "Testing $$test $(TEST_FLAGS)";                         \
-	      fi;                                                             \
-	      echo "============================";                            \
-	      RUNSERIAL="$(RUNSERIAL)" RUNPARALLEL="$(RUNPARALLEL)"           \
-	         srcdir="$(srcdir)"                                           \
-	         /bin/sh $$test $(TEST_FLAGS) ||                              \
-	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||     \
-	         break;                                                       \
-	      echo "";                                                        \
+	  if test $$test != dummy; then                                      \
+	    $(MAKE) $(AM_MAKEFLAGS) $$test.chksh_; \
 	  fi;                                                                 \
 	done;                                                                 \
 	test $$test = dummy || false

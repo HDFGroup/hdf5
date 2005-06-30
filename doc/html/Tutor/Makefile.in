@@ -282,6 +282,9 @@ H5CC = $(bindir)/h5cc
 H5CC_PP = $(bindir)/h5pcc
 H5FC = $(bindir)/h5fc
 H5FC_PP = $(bindir)/h5pfc
+
+# .chkexe and .chksh files are used to mark tests that have run successfully.
+MOSTLYCLEANFILES = *.chkexe *.chksh
 SUBDIRS = Graphics examples
 localdocdir = $(docdir)/hdf5/Tutor
 
@@ -553,6 +556,7 @@ install-strip:
 	  `test -z '$(STRIP)' || \
 	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
 mostlyclean-generic:
+	-test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
 
 clean-generic:
 

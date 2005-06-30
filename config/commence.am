@@ -53,3 +53,5 @@ AUTOHEADER=/afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoheade
 AUTOMAKE=/afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/automake
 AUTOCONF=/afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf
 
+# .chkexe and .chksh files are used to mark tests that have run successfully.
+MOSTLYCLEANFILES=*.chkexe *.chksh

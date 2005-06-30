@@ -55,7 +55,7 @@ LIBADD=$(LIBH5TEST) $(LIBHDF5) $(LIBH5F)
 LDADD=libh5test_fortran.la $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)
 
 # Temporary files
-MOSTLYCLEANFILES=*.h5 *.tmp
+MOSTLYCLEANFILES+=*.h5 *.tmp
 
 # Mark this directory as part of the Fortran API (this affects output
 # from tests in conclude.am)

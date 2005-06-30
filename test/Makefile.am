@@ -29,6 +29,7 @@ check_SCRIPTS = $(TEST_SCRIPT)
 
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
+# JAMES debug: removed btree2 and cache tests since they take so long.
 TEST_PROG=testhdf5 lheap ohdr stab gheap cache btree2 blocktrack sheap \
            pool hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset extend external links unlink big mtime     \
@@ -76,7 +77,7 @@ timings _timings: testmeta
 # specifying a file prefix or low-level driver.  Changing the file
 # prefix or low-level driver with environment variables will influence 
 # the temporary file name in ways that the makefile is not aware of.
-MOSTLYCLEANFILES=cmpd_dset.h5 compact_dataset.h5 dataset.h5 extend.h5 istore.h5\
+MOSTLYCLEANFILES+=cmpd_dset.h5 compact_dataset.h5 dataset.h5 extend.h5 istore.h5\
             tfile[1-4].h5 th5s[1-3].h5 lheap.h5 ohdr.h5 stab[1-2].h5 \
             extern_[1-3].h5 extern_[1-4][ab].raw gheap[0-4].h5 dt_arith[1-2]\
             links.h5 links[1-3].h5 big.data big[0-9][0-9][0-9][0-9][0-9].h5  \

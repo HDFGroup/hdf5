@@ -39,7 +39,7 @@ INSTALL_FILES=create.cpp readdata.cpp writedata.cpp compound.cpp         \
 # These are the files that 'make clean' (and derivatives) will remove from this
 # directory.  Since automake doesn't know about the examples, we need to
 # tell it to clean the example programs, too.
-MOSTLYCLEANFILES=*.h5
+MOSTLYCLEANFILES+=*.h5
 CLEANFILES=$(EXTRA_PROG)
 
 # Tell conclude.am that these are C++ tests.
