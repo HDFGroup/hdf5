@@ -721,6 +721,13 @@ Linux 2.4 IA64 Intel  y       n       y    n    y        y           y
 
 Known Problems
 ==============
+* The dataset created with the v1.6.2 library can't be read with the v1.6.3
+  library or after when Fletcher32 EDC(filter) is enabled.  There was a bug 
+  in the calculating code of the Fletcher32 checksum in the library before 
+  v1.6.3.  The checksum value wasn't consistent between big-endian and
+  little-endian systems.  This bug was fixed in Release 1.6.3.  However, after
+  fixing the bug, the checksum value is no longer the same as before on
+  little-endian system.  SLU - 2005/6/30
 * For the version 6(6.02 and 6.04) of Portland Group compiler on AMD Opteron
   processor, there's a bug in the compiler for optimization(-O2).  The library
   failed in several tests but all related to multi driver.  The problem has 
