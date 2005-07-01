@@ -19,10 +19,6 @@ REM testfiles\h5repacktst\%1\h5repacktst
 
 mkdir temptest
 type nul > temptest\empty.txt
-echo ---------------------------------------------------->>temptest\empty.txt
-echo Summary>>temptest\empty.txt
-echo ---------------------------------------------------->>temptest\empty.txt
-echo 0 differences found>> temptest\empty.txt
 type nul > repacktest%2_%1.txt
 echo ========================================== >> repacktest%2_%1.txt
 echo Testing repacktest.bat >> repacktest%2_%1.txt
