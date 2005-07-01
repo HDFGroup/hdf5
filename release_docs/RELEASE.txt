@@ -72,6 +72,8 @@ Bug Fixes since HDF5-1.6.4 release
 
     Library
     -------
+        - Fixed bug where unmounted files could cause the library to go into
+            an infinite loop when shutting down.  QAK - 2005/06/30
         - Fixed bug with hyperslab selections that use selection offsets and
             operate on chunked datasets going into infinite loop or dumping
             core.  QAK - 2005/06/17
