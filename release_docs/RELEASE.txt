@@ -36,6 +36,12 @@ New Features
 
     Configuration:
     --------------
+	- When make is invoked in parallel (using -j), sequential tests
+	  are now executed simultaneously.  This should make them execute
+	  more quickly on some machines.
+	  Also, when tests pass, they will create a foo.chkexe file.
+	  This prevents the test from executing again until the test or
+	  main library changes.
         - On windows, all.zip is deprecated. users should
              read INSTALL_Windows.txt to know the details.
              Reasons to deprecate all.zip:

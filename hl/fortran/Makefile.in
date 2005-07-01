@@ -660,10 +660,10 @@ _exec_check-s: $(TEST_PROG_CHKEXE) $(TEST_SCRIPT_CHKSH)
 
 # The .chkexe_ here is the "dummy" that prevents the target from being
 # empty if there are no tests in the current directory.
-$(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) .chkexe_:
-	@if test "X$@" != "X.chkexe_"; then \
+$(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
+	@if test "X$@" != "X.chkexe_" && test "X$@" != "Xdummy.chkexe_"; then \
 	  echo "============================"; \
-	  if test -e $(@:.chkexe_=.chkexe) && \
+	  if test -f $(@:.chkexe_=.chkexe) && \
 	          test $(@:.chkexe_=.chkexe) -nt $(@:.chkexe_=)$(EXEEXT); then \
 	    echo "No need to test $(@:.chkexe_=)$(EXEEXT) again."; \
 	  else \
@@ -688,10 +688,10 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) .chkexe_:
 
 # The .chksh_ here is the "dummy" that prevents the target from being
 # empty if there are no tests in the current directory.
-$(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) .chksh_:
-	@if test "X$@" != "X.chksh_"; then \
+$(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) dummy.chksh_:
+	@if test "X$@" != "X.chksh_" && test "X$@" != "Xdummy.chksh_"; then \
 	  echo "============================"; \
-	  if test -e $(@:.chksh_=.chksh) && \
+	  if test -f $(@:.chksh_=.chksh) && \
 	          test $(@:.chksh_=.chksh) -nt $(@:.chksh_=); then \
 	    echo "No need to test $(@:.chksh_=) again."; \
 	  else \
@@ -705,7 +705,7 @@ $(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) .chksh_:
 	    echo "============================"; \
 	    RUNSERIAL="$(RUNSERIAL)" RUNPARALLEL="$(RUNPARALLEL)"           \
 	    srcdir="$(srcdir)" \
-	      $(SHELL) ./$(@:.chksh_=) $(TEST_FLAGS) \
+	      $(SHELL) $(@:.chksh_=) $(TEST_FLAGS) \
 	      && touch $(@:.chksh_=.chksh) || \
 	      (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
 	      exit 1; \
