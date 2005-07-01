@@ -296,6 +296,8 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fixed bug where unmounted files could cause the library to go into
+            an infinite loop when shutting down.  QAK - 2005/06/30
         - The library didn't save the information of family driver in file.
           The original file member size was lost after file was closed (see
           bug #213).  This has been fixed by saving driver name and member

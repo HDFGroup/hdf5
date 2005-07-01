@@ -415,6 +415,53 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5F_term_unmount_cb 
+ *
+ * Purpose:	H5F_term_interface' callback function.  This routine
+ *              unmounts child files from files that are in the "closing"
+ *              state.
+ *
+ * Programmer:  Quincey Koziol
+ *              Thursday, Jun 30, 2005
+ *
+ * Modification:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5F_term_unmount_cb(void *obj_ptr, hid_t obj_id, void UNUSED *key)
+{
+    H5F_t *f = (H5F_t *)obj_ptr;    /* Alias for search info */
+    unsigned u;                     /* Local index */
+    int      ret_value = FALSE;     /* Return value */
+ 
+    FUNC_ENTER_NOAPI_NOINIT(H5F_term_unmount_cb)
+
+    assert(f);
+
+    if(f->mtab.nmounts) {
+        /* Unmount all child files */
+        for (u=0; u<f->mtab.nmounts; u++) {
+            f->mtab.child[u].file->mtab.parent = NULL;
+            if(H5G_close(f->mtab.child[u].group)<0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close child group")
+            if(H5F_close(f->mtab.child[u].file)<0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close child file")
+        } /* end if */
+        f->mtab.nmounts = 0;
+
+        /* Decrement reference count for file */
+        H5I_dec_ref(obj_id);
+    } /* end if */
+    else
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "no files to unmount")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5F_term_unmount_cb() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5F_term_interface
  *
  * Purpose:	Terminate this interface: free all memory and reset global
@@ -444,7 +491,11 @@ H5F_term_interface(void)
     if (H5_interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_FILE))!=0) {
             H5I_clear_type(H5I_FILE, FALSE);
-	} else if (0==(n=H5I_nmembers(H5I_FILE_CLOSING))) {
+	} else if ((n=H5I_nmembers(H5I_FILE_CLOSING))!=0) {
+            /* Attempt to unmount any child files from files that are closing */
+            (void)H5I_search(H5I_FILE_CLOSING, H5F_term_unmount_cb, NULL);
+	}
+        else {
 	    H5I_dec_type_ref(H5I_FILE);
 	    H5I_dec_type_ref(H5I_FILE_CLOSING);
 	    H5_interface_initialize_g = 0;

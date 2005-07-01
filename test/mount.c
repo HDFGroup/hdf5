@@ -1520,6 +1520,157 @@ error:
     
 
 /*-------------------------------------------------------------------------
+ * Function:	test_missing_unmount
+ *
+ * Purpose:	Test that the library correctly closes open files when they
+ *              have child files that have not been unmounted.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, June 30, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_missing_unmount(hid_t fapl)
+{
+    hid_t fid1=-1, fid2=-1, fid3=-1;    /* File IDs */
+    hid_t gidA=-1, gidE=-1, gidM=-1;    /* Group IDs */
+    hid_t gidAE=-1, gidAEM=-1;          /* Group IDs */
+    char	filename1[1024],
+		filename2[1024],
+		filename3[1024]; 	/* Name of files to mount */
+    
+    TESTING("missing unmount");
+
+    h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
+    h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
+    h5_fixname(FILENAME[2], fapl, filename3, sizeof filename3);
+    
+    /* Create file #1 */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidA) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+
+    /* Create file #2 */
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidE = H5Gcreate(fid2, "E", (size_t)0)) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidE) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+
+    /* Create file #3 */
+    if((fid3 = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidM = H5Gcreate(fid3, "M", (size_t)0)) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidM) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid3) < 0)
+        TEST_ERROR
+
+
+    /* Re-open files and mount file #2 in file #1 and file #3 in file #2 */
+    if((fid1 = H5Fopen(filename1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidA = H5Gopen(fid1, "A")) < 0)
+        TEST_ERROR
+
+    /* Close file #1 */
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+    if((fid2 = H5Fopen(filename2, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if(H5Fmount(gidA, ".", fid2, H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Open group in mounted file */
+    if((gidAE = H5Gopen(fid2, "A/E")) < 0)
+        TEST_ERROR
+
+    /* Close file #2 */
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+    if((fid3 = H5Fopen(filename3, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if(H5Fmount(gidAE, ".", fid3, H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Open group in mounted file */
+    if((gidAEM = H5Gopen(fid3, "A/E/M")) < 0)
+        TEST_ERROR
+
+    /* Close file #3 */
+    if(H5Fclose(fid3) < 0)
+        TEST_ERROR
+
+    /* (Still have all file #2 & #3 mounted and groups open in all three files) */
+
+    /* Unmount file #2 & #3 */
+    if(H5Funmount(gidAE,".") < 0)
+        TEST_ERROR
+
+    /* Skip unmounting file #2 from file #1 */
+
+    /* Close groups in mounted file */
+    if(H5Gclose(gidAEM) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidAE) < 0)
+        TEST_ERROR
+
+    /* Close group in top file */
+    if(H5Gclose(gidA) < 0)
+        TEST_ERROR
+    
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Gclose(gidM);
+	H5Gclose(gidE);
+	H5Gclose(gidAEM);
+	H5Gclose(gidAE);
+	H5Gclose(gidA);
+        H5Fclose(fid3);
+        H5Fclose(fid2);
+	H5Fclose(fid1);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_missing_unmount() */
+    
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Test file mounting
@@ -1560,6 +1711,7 @@ main(void)
     nerrors += test_close(fapl);
     nerrors += test_mount_after_close(fapl);
     nerrors += test_mount_after_unmount(fapl);
+    nerrors += test_missing_unmount(fapl);
     
     if (nerrors) goto error;
     puts("All mount tests passed.");
