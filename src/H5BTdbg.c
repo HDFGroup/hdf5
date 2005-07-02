@@ -54,7 +54,6 @@
 herr_t
 H5BT_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth)
 {
-    hbool_t	bt_dirtied = FALSE;
     H5BT_t	*bt = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -104,7 +103,7 @@ H5BT_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
 	      bt->bt2_addr);
 
 done:
-    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, bt_dirtied, H5AC__NO_FLAGS_SET) < 0)
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release block tracker info")
 
     FUNC_LEAVE_NOAPI(ret_value)

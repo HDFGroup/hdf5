@@ -211,7 +211,7 @@ H5BT_insert_modify_cb(void *_record, void *_op_data, hbool_t *changed)
 herr_t
 H5BT_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, haddr_t offset, hsize_t length)
 {
-    hbool_t bt_dirtied = FALSE;
+    unsigned bt_flags = H5AC__NO_FLAGS_SET;
     H5BT_t *bt = NULL;                  /* The new B-tree header information */
     H5BT_blk_info_t lower, upper;       /* Info for blocks less than & greater than new block */
     hbool_t lower_valid = FALSE, upper_valid = FALSE;   /* Lower & upper blocks valid? */
@@ -315,9 +315,12 @@ H5BT_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, haddr_t offset, hsize_t lengt
             if(new_block.len > bt->max_block_size) {
                 bt->max_block_size = new_block.len;
                 bt->max_block_cnt = 1;
+                bt_flags |= H5AC__DIRTIED_FLAG;
             } /* end if */
-            else if(new_block.len == bt->max_block_size)
+            else if(new_block.len == bt->max_block_size) {
                 bt->max_block_cnt++;
+                bt_flags |= H5AC__DIRTIED_FLAG;
+            }
 
             /* Check for adjusting the min. block size tracked */
             if(old_block->len < bt->min_block_size) {
@@ -327,6 +330,7 @@ H5BT_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, haddr_t offset, hsize_t lengt
                 if(new_block.len < bt->min_block_size) {
                     bt->min_block_size = new_block.len;
                     bt->min_block_cnt = 1;
+                    bt_flags |= H5AC__DIRTIED_FLAG;
                 } /* end if */
             } /* end if */
             else if(old_block->len == bt->min_block_size) {
@@ -336,10 +340,13 @@ H5BT_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, haddr_t offset, hsize_t lengt
                 if(bt->min_block_cnt == 1) {
                     bt->min_block_size = new_block.len;
                     bt->status &= ~H5BT_STATUS_MIN_VALID;
+                    bt_flags |= H5AC__DIRTIED_FLAG;
                 } /* end if */
-                else
+                else {
                     /* Decrement the ref. count for the min. block size */
                     bt->min_block_cnt--;
+                    bt_flags |= H5AC__DIRTIED_FLAG;
+                } /* end else */
             } /* end if */
         } /* end if */
         else if(merged == 2) {
@@ -347,9 +354,12 @@ H5BT_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, haddr_t offset, hsize_t lengt
             if(new_block.len > bt->max_block_size) {
                 bt->max_block_size = new_block.len;
                 bt->max_block_cnt = 1;
+                bt_flags |= H5AC__DIRTIED_FLAG;
             } /* end if */
-            else if(new_block.len == bt->max_block_size)
+            else if(new_block.len == bt->max_block_size) {
                 bt->max_block_cnt++;
+                bt_flags |= H5AC__DIRTIED_FLAG;
+            } /* end else */
 
             /* Check for adjusting the min. block size tracked */
             if(upper.len < bt->min_block_size || lower.len < bt->min_block_size) {
@@ -359,6 +369,7 @@ H5BT_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, haddr_t offset, hsize_t lengt
                 if(new_block.len < bt->min_block_size) {
                     bt->min_block_size = new_block.len;
                     bt->min_block_cnt = 1;
+                    bt_flags |= H5AC__DIRTIED_FLAG;
                 } /* end if */
             } /* end if */
             else if(upper.len == bt->min_block_size || lower.len == bt->min_block_size) {
@@ -368,10 +379,13 @@ H5BT_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, haddr_t offset, hsize_t lengt
                 if(bt->min_block_cnt == 1) {
                     bt->min_block_size = new_block.len;
                     bt->status &= ~H5BT_STATUS_MIN_VALID;
+                    bt_flags |= H5AC__DIRTIED_FLAG;
                 } /* end if */
-                else
+                else {
                     /* Decrement the ref. count for the min. block size */
                     bt->min_block_cnt--;
+                    bt_flags |= H5AC__DIRTIED_FLAG;
+                } /* end else */
             } /* end if */
         } /* end if */
     } /* end if */
@@ -397,23 +411,30 @@ H5BT_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, haddr_t offset, hsize_t lengt
             bt->min_block_size = length;
             bt->min_block_cnt = 1;
             bt->status |= H5BT_STATUS_MIN_VALID;
+            bt_flags |= H5AC__DIRTIED_FLAG;
         } /* end if */
         else {
             /* Update maximum block size */
             if (length > bt->max_block_size) {
                 bt->max_block_size = length;
                 bt->max_block_cnt = 1;
+                bt_flags |= H5AC__DIRTIED_FLAG;
             } /* end if */
-            else if (length == bt->max_block_size)
+            else if (length == bt->max_block_size) {
                 bt->max_block_cnt++;
+                bt_flags |= H5AC__DIRTIED_FLAG;
+            } /* end if */
 
             /* Update minimum block size */
             if (length < bt->min_block_size) {
                 bt->min_block_size = length;
                 bt->min_block_cnt = 1;
+                bt_flags |= H5AC__DIRTIED_FLAG;
             } /* end if */
-            else if (length == bt->min_block_size)
+            else if (length == bt->min_block_size) {
                 bt->min_block_cnt++;
+                bt_flags |= H5AC__DIRTIED_FLAG;
+            } /* end if */
         } /* end if */
     } /* end if */
 
@@ -422,7 +443,7 @@ H5BT_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, haddr_t offset, hsize_t lengt
 
 done:
     /* Release the block tracker info */
-    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, bt_dirtied, H5AC__NO_FLAGS_SET) < 0)
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, bt_flags) < 0)
         HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
     
     FUNC_LEAVE_NOAPI(ret_value)
@@ -452,7 +473,6 @@ done:
 herr_t
 H5BT_get_total_size(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t *tot_size)
 {
-    hbool_t bt_dirtied = FALSE;
     H5BT_t *bt = NULL;                  /* The new B-tree header information */
     herr_t ret_value=SUCCEED;
 
@@ -474,7 +494,7 @@ H5BT_get_total_size(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t *tot_size)
 
 done:
     /* Release the block tracker info */
-    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, bt_dirtied, H5AC__NO_FLAGS_SET) < 0)
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
     
     FUNC_LEAVE_NOAPI(ret_value)
@@ -535,7 +555,7 @@ H5BT_remove_find_cb(const void *_record, void *_op_data)
 herr_t
 H5BT_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, haddr_t offset, hsize_t length)
 {
-    hbool_t bt_dirtied = FALSE;
+    unsigned bt_flags = H5AC__NO_FLAGS_SET;
     H5BT_t *bt = NULL;                  /* The new B-tree header information */
     H5BT_blk_info_t found;              /* Block info found */
     hsize_t nblks;                      /* Number of blocks tracked */
@@ -621,6 +641,9 @@ HGOTO_ERROR(H5E_BLKTRK, H5E_UNSUPPORTED, FAIL, "Couldn't find block to remove")
 
             /* Decrement total amount of blocks tracked */
             bt->tot_block_size -= length;
+
+            /* Flag block tracker info as changed */
+            bt_flags |= H5AC__DIRTIED_FLAG;
         } /* end if */
         else if(found.len > length) {
             H5BT_blk_info_t new_block;              /* Updated block info */
@@ -668,6 +691,9 @@ HGOTO_ERROR(H5E_BLKTRK, H5E_UNSUPPORTED, FAIL, "Couldn't find block to remove")
 
             /* Decrement total amount of blocks tracked */
             bt->tot_block_size -= length;
+
+            /* Flag block tracker info as changed */
+            bt_flags |= H5AC__DIRTIED_FLAG;
         } /* end if */
         else {
             /* Check for blocks at higher address, if necessary */
@@ -678,7 +704,7 @@ HGOTO_ERROR(H5E_BLKTRK, H5E_UNSUPPORTED, FAIL, "Couldn't find block to remove")
 
 done:
     /* Release the block tracker info */
-    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, bt_dirtied, H5AC__NO_FLAGS_SET) < 0)
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, bt_flags) < 0)
         HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
     
     FUNC_LEAVE_NOAPI(ret_value)
@@ -745,7 +771,6 @@ H5BT_locate_cb(const void *_record, void *_op_data)
 htri_t
 H5BT_locate(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t size, haddr_t *locate_addr, hsize_t *locate_size)
 {
-    hbool_t bt_dirtied = FALSE;
     H5BT_t *bt = NULL;                  /* The new B-tree header information */
     H5BT_locate_t found;                /* Block info found */
     htri_t ret_value=TRUE;
@@ -780,7 +805,7 @@ H5BT_locate(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t size, haddr_t *locate
 
 done:
     /* Release the block tracker info */
-    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, bt_dirtied, H5AC__NO_FLAGS_SET) < 0)
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
     
     FUNC_LEAVE_NOAPI(ret_value)
@@ -813,7 +838,6 @@ done:
 herr_t
 H5BT_iterate(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5BT_operator_t op, void *op_data)
 {
-    hbool_t bt_dirtied = FALSE;
     H5BT_t *bt = NULL;                  /* The new B-tree header information */
     herr_t ret_value;
 
@@ -836,7 +860,7 @@ H5BT_iterate(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5BT_operator_t op, void *op
 
 done:
     /* Release the block tracker info */
-    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, bt_dirtied, H5AC__NO_FLAGS_SET) < 0)
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
     
     FUNC_LEAVE_NOAPI(ret_value)
@@ -898,7 +922,6 @@ herr_t
 H5BT_neighbor(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5BT_compare_t range,
     haddr_t range_addr, H5BT_blk_info_t *found_block)
 {
-    hbool_t bt_dirtied = FALSE;
     H5BT_t *bt = NULL;                  /* The new B-tree header information */
     H5BT_blk_info_t find;               /* Information for locating block */
     H5BT_blk_info_t found;              /* Block info found */
@@ -930,7 +953,7 @@ H5BT_neighbor(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5BT_compare_t range,
 
 done:
     /* Release the block tracker info */
-    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, bt_dirtied, H5AC__NO_FLAGS_SET) < 0)
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
     
     FUNC_LEAVE_NOAPI(ret_value)
@@ -960,7 +983,6 @@ done:
 herr_t
 H5BT_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
 {
-    hbool_t bt_dirtied = FALSE;
     H5BT_t *bt = NULL;                  /* The new B-tree header information */
     herr_t ret_value=SUCCEED;
 
@@ -986,7 +1008,7 @@ H5BT_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
     
 done:
     /* Release the block tracker info */
-    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, bt_dirtied, H5AC__DELETED_FLAG) < 0)
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG) < 0)
         HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
     
     FUNC_LEAVE_NOAPI(ret_value)

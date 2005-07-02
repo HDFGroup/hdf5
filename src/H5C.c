@@ -4186,7 +4186,6 @@ H5C_unprotect(H5F_t *		  f,
               const H5C_class_t * type, 
               haddr_t		  addr,
               void *		  thing, 
-              hbool_t             dirtied,
               unsigned int        flags)
 {
     hbool_t		deleted;
@@ -4221,7 +4220,7 @@ H5C_unprotect(H5F_t *		  f,
     }
 
     /* mark the entry as dirty if appropriate */
-    entry_ptr->is_dirty = ( (entry_ptr->is_dirty) || dirtied );
+    entry_ptr->is_dirty = ( (entry_ptr->is_dirty) || (flags & H5AC__DIRTIED_FLAG) );
 
     H5C__UPDATE_RP_FOR_UNPROTECT(cache_ptr, entry_ptr, FAIL)
 

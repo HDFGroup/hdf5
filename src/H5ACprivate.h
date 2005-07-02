@@ -213,6 +213,7 @@ extern hid_t H5AC_ind_dxpl_id;
 #define H5AC__NO_FLAGS_SET		H5C__NO_FLAGS_SET
 #define H5AC__SET_FLUSH_MARKER_FLAG	H5C__SET_FLUSH_MARKER_FLAG
 #define H5AC__DELETED_FLAG		H5C__DELETED_FLAG
+#define H5AC__DIRTIED_FLAG		H5C__DIRTIED_FLAG
 #define H5AC__FLUSH_INVALIDATE_FLAG	H5C__FLUSH_INVALIDATE_FLAG
 #define H5AC__FLUSH_CLEAR_ONLY_FLAG	H5C__FLUSH_CLEAR_ONLY_FLAG
 #define H5AC__FLUSH_MARKED_ENTRIES_FLAG	H5C__FLUSH_MARKED_ENTRIES_FLAG
@@ -228,7 +229,7 @@ H5_DLL void *H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
                           H5AC_protect_t rw);
 H5_DLL herr_t H5AC_unprotect(H5F_t *f, hid_t dxpl_id, 
                              const H5AC_class_t *type, haddr_t addr,
-			     void *thing, hbool_t dirtied,  unsigned int flags);
+			     void *thing, unsigned flags);
 H5_DLL herr_t H5AC_flush(H5F_t *f, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5AC_rename(H5F_t *f, const H5AC_class_t *type,
 			   haddr_t old_addr, haddr_t new_addr);

@@ -1829,7 +1829,6 @@ done:
 static herr_t
 H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *plist)
 {
-    hbool_t		oh_dirtied = FALSE;
     size_t              ohdr_size = H5D_MINHDR_SIZE;    /* Size of dataset's object header */
     H5G_entry_t        *ent=NULL;    /* Dataset's group entry */
     H5O_layout_t       *layout; /* Dataset's layout information */
@@ -1845,6 +1844,7 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
     H5D_fill_value_t	fill_status;
 
     struct H5O_t       *oh=NULL;        /* Pointer to dataset's object header */
+    unsigned		oh_flags = H5AC__DIRTIED_FLAG;
 
     /* return code */
     herr_t ret_value = SUCCEED;
@@ -1936,7 +1936,7 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT,FAIL, "unable to create dataset")
 
     /* Write new fill value message */
-    if (H5O_append(file, dxpl_id, oh, H5O_FILL_NEW_ID, H5O_FLAG_CONSTANT, &fill, &oh_dirtied) < 0)
+    if (H5O_append(file, dxpl_id, oh, H5O_FILL_NEW_ID, H5O_FLAG_CONSTANT, &fill, &oh_flags) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update fill value header message")
 
     /* If there is valid information for the old fill value struct, update it */
@@ -1950,7 +1950,7 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT,FAIL,"unable to copy fill value")
 
         /* Write old fill value */
-        if (fill_prop->buf && H5O_append(file, dxpl_id, oh, H5O_FILL_ID, H5O_FLAG_CONSTANT, fill_prop, &oh_dirtied) < 0)
+        if (fill_prop->buf && H5O_append(file, dxpl_id, oh, H5O_FILL_ID, H5O_FLAG_CONSTANT, fill_prop, &oh_flags) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update fill value header message")
 
         /* Update dataset creation property */
@@ -1960,8 +1960,8 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
     } /* end if */
 
     /* Update the type and space header messages */
-    if (H5O_append(file, dxpl_id, oh, H5O_DTYPE_ID, H5O_FLAG_CONSTANT | H5O_FLAG_SHARED, type, &oh_dirtied) < 0 ||
-            H5S_append(file, dxpl_id, oh, space, &oh_dirtied) < 0)
+    if (H5O_append(file, dxpl_id, oh, H5O_DTYPE_ID, H5O_FLAG_CONSTANT | H5O_FLAG_SHARED, type, &oh_flags) < 0 ||
+            H5S_append(file, dxpl_id, oh, space, &oh_flags) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update type or space header messages")
 
     /* Update the filters message, if this is a chunked dataset */
@@ -1971,7 +1971,7 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
         if (H5P_get(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve pipeline filter")
 
-        if (pline.nused > 0 && H5O_append(file, dxpl_id, oh, H5O_PLINE_ID, H5O_FLAG_CONSTANT, &pline, &oh_dirtied) < 0)
+        if (pline.nused > 0 && H5O_append(file, dxpl_id, oh, H5O_PLINE_ID, H5O_FLAG_CONSTANT, &pline, &oh_flags) < 0)
             HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update filter header message")
     } /* end if */
 
@@ -2007,14 +2007,14 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
             efl->slot[u].name_offset = offset;
         }
 
-        if (H5O_append(file, dxpl_id, oh, H5O_EFL_ID, H5O_FLAG_CONSTANT, efl, &oh_dirtied) < 0)
+        if (H5O_append(file, dxpl_id, oh, H5O_EFL_ID, H5O_FLAG_CONSTANT, efl, &oh_flags) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update external file list message")
     }
 
     /* Update layout message */
     /* (Don't make layout message constant unless allocation time is early, since space may not be allocated) */
     /* Note: this is relying on H5D_alloc_storage not calling H5O_modify during dataset creation */
-    if (H5D_COMPACT != layout->type && H5O_append(file, dxpl_id, oh, H5O_LAYOUT_ID, (alloc_time == H5D_ALLOC_TIME_EARLY ? H5O_FLAG_CONSTANT : 0), layout, &oh_dirtied) < 0)
+    if (H5D_COMPACT != layout->type && H5O_append(file, dxpl_id, oh, H5O_LAYOUT_ID, (alloc_time == H5D_ALLOC_TIME_EARLY ? H5O_FLAG_CONSTANT : 0), layout, &oh_flags) < 0)
          HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout")
 
 #ifdef H5O_ENABLE_BOGUS
@@ -2026,7 +2026,7 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
 #endif /* H5O_ENABLE_BOGUS */
     
     /* Add a modification time message. */
-    if (H5O_touch_oh(file, oh, TRUE, &oh_dirtied) < 0)
+    if (H5O_touch_oh(file, oh, TRUE, &oh_flags) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update modification time message")
 
 done:
@@ -2036,7 +2036,7 @@ done:
 
     /* Release pointer to object header itself */
     if(ent!=NULL && oh!=NULL)
-        if(H5O_unprotect(ent,oh, dxpl_id, oh_dirtied)<0)
+        if(H5O_unprotect(ent,oh, dxpl_id, oh_flags)<0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to unprotect dataset object header")
 
     FUNC_LEAVE_NOAPI(ret_value)

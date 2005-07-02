@@ -1715,8 +1715,8 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
     char		*linkval = NULL;	/*the copied link value	*/
     H5G_entry_t         tmp_grp_ent;            /* Temporary copy of group entry */
     H5RS_str_t          *tmp_user_path_r=NULL, *tmp_canon_path_r=NULL; /* Temporary pointer to object's user path & canonical path */
-    hbool_t		dirtied = FALSE;
     const H5HL_t        *heap;
+    unsigned		heap_flags = H5AC__NO_FLAGS_SET;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI_NOINIT(H5G_traverse_slink);
@@ -1736,7 +1736,7 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
     linkval = H5MM_xstrdup (clv);
     assert(linkval);
 
-    if (H5HL_unprotect(grp_ent->file, dxpl_id, heap, stab_mesg.heap_addr, dirtied) < 0)
+    if (H5HL_unprotect(grp_ent->file, dxpl_id, heap, stab_mesg.heap_addr, heap_flags) < 0)
 	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read unprotect link value")
 		
     /* Hold the entry's name (& old_name) to restore later */
@@ -2821,8 +2821,8 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
      */
     if (statbuf) {
 	if (H5G_CACHED_SLINK==obj_ent.type) {
-            hbool_t dirtied = FALSE;
             const H5HL_t *heap;
+            unsigned heap_flags = H5AC__NO_FLAGS_SET;
 
 	    /* Named object is a symbolic link */
 	    if (NULL == H5O_read(&grp_ent, H5O_STAB_ID, 0, &stab_mesg, dxpl_id))
@@ -2835,7 +2835,7 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 
 	    statbuf->linklen = HDstrlen(s) + 1; /*count the null terminator*/
 
-            if (H5HL_unprotect(grp_ent.file, dxpl_id, heap, stab_mesg.heap_addr, dirtied) < 0)
+            if (H5HL_unprotect(grp_ent.file, dxpl_id, heap, stab_mesg.heap_addr, heap_flags) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read unprotect link value")
 
 	    statbuf->objno = 0;
@@ -3065,8 +3065,8 @@ H5G_linkval (H5G_entry_t *loc, const char *name, size_t size, char *buf/*out*/, 
     const char		*s = NULL;
     H5G_entry_t		grp_ent, obj_ent;
     H5O_stab_t		stab_mesg;
-    hbool_t		dirtied = FALSE;
     const H5HL_t        *heap;
+    unsigned		heap_flags = H5AC__NO_FLAGS_SET;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_linkval, FAIL);
@@ -3097,7 +3097,7 @@ H5G_linkval (H5G_entry_t *loc, const char *name, size_t size, char *buf/*out*/, 
     if (size>0 && buf)
 	HDstrncpy (buf, s, size);
 
-    if (H5HL_unprotect(grp_ent.file, dxpl_id, heap, stab_mesg.heap_addr, dirtied) < 0)
+    if (H5HL_unprotect(grp_ent.file, dxpl_id, heap, stab_mesg.heap_addr, heap_flags) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read unprotect link value")
 
 done:

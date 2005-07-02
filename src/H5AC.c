@@ -1102,14 +1102,15 @@ done:
  *		H5C_unprotect().
  *
  *		JRM - 6/6/05
- *		Added the dirtied parameter and supporting code.  This is 
+ *		Added the dirtied flag and supporting code.  This is 
  *		part of a collection of changes directed at moving 
  *		management of cache entry dirty flags into the H5C code.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *thing, hbool_t dirtied, unsigned int flags)
+H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
+    void *thing, unsigned flags)
 {
     herr_t		result;
     herr_t              ret_value=SUCCEED;      /* Return value */
@@ -1149,8 +1150,8 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, 
             ((H5AC_info_t *)thing)->is_protected = FALSE;
 
             /* mark the entry as dirty if appropriate. JRM - 6/6/05 */
-	    ((H5AC_info_t *)thing)->is_dirty = 
-		((H5AC_info_t *)thing)->is_dirty || dirtied;
+	    ((H5AC_info_t *)thing)->is_dirty |= 
+		(flags & H5AC__DIRTIED_FLAG) ? TRUE : FALSE;
 
             /*
              * FIXME: If the metadata is *really* deleted at this point
@@ -1206,7 +1207,6 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, 
                            type,
                            addr,
                            thing,
-                           dirtied,
                            flags);
 
     if ( result < 0 ) {

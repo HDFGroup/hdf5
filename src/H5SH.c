@@ -245,7 +245,6 @@ done:
 herr_t
 H5SH_alloc(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t size, haddr_t *obj_addr_p)
 {
-    hbool_t sh_dirtied = FALSE;
     H5SH_t *sh = NULL;          /* Segmented heap info */
     haddr_t free_addr;          /* Address of free block */
     hsize_t free_len;           /* Address of free block */
@@ -330,7 +329,7 @@ H5SH_alloc(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t size, haddr_t *obj_add
 
 done:
     /* Release the block tracker info */
-    if (sh && H5AC_unprotect(f, dxpl_id, H5AC_SGHP, addr, sh, sh_dirtied, H5AC__NO_FLAGS_SET) < 0)
+    if (sh && H5AC_unprotect(f, dxpl_id, H5AC_SGHP, addr, sh, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release segmented heap info")
 
     FUNC_LEAVE_NOAPI(ret_value)

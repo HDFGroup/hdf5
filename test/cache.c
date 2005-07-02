@@ -2199,7 +2199,6 @@ unprotect_entry(H5C_t * cache_ptr,
                 unsigned int flags)
 {
     /* const char * fcn_name = "unprotect_entry()"; */
-    hbool_t dirtied = FALSE;
     herr_t result;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
@@ -2221,13 +2220,13 @@ unprotect_entry(H5C_t * cache_ptr,
 
         if ( ( dirty == TRUE ) || ( dirty == FALSE ) ) {
 
-            dirtied = dirty;
+            flags |= (dirty ? H5AC__DIRTIED_FLAG : H5AC__NO_FLAGS_SET);
             entry_ptr->is_dirty = (entry_ptr->is_dirty || dirty);
         }
 
         result = H5C_unprotect(NULL, -1, -1, cache_ptr, &(types[type]),
                                entry_ptr->addr, (void *)entry_ptr, 
-                               dirtied, flags);
+                               flags);
 
         if ( ( result < 0 ) ||
              ( entry_ptr->header.is_protected ) ||
@@ -2246,7 +2245,8 @@ unprotect_entry(H5C_t * cache_ptr,
 
         HDassert( ((entry_ptr->header).type)->id == type );
 
-        if ( ( dirtied ) && ( (flags & H5C__DELETED_FLAG) == 0 ) ) {
+        if ( ( flags & H5AC__DIRTIED_FLAG ) != 0
+                && ( (flags & H5C__DELETED_FLAG) == 0 ) ) {
 
             HDassert( entry_ptr->header.is_dirty );
             HDassert( entry_ptr->is_dirty );
@@ -8568,7 +8568,7 @@ check_double_unprotect_err(void)
 
         result = H5C_unprotect(NULL, -1, -1, cache_ptr, &(types[0]),
                                entry_ptr->addr, (void *)entry_ptr, 
-                               FALSE, H5C__NO_FLAGS_SET);
+                               H5C__NO_FLAGS_SET);
 
         if ( result > 0 ) {
 

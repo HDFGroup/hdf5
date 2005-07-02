@@ -675,7 +675,7 @@ H5HG_compute_size(const H5F_t UNUSED *f, const H5HG_heap_t *heap, size_t *size_p
  *-------------------------------------------------------------------------
  */
 static size_t
-H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, size_t size, hbool_t * heap_dirtied_ptr)
+H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, size_t size, unsigned * heap_flags_ptr)
 {
     size_t	idx;
     uint8_t	*p = NULL;
@@ -687,7 +687,7 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, size_t size, hbool_t * heap_dirtied_ptr
     /* Check args */
     assert (heap);
     assert (heap->obj[0].size>=need);
-    assert (heap_dirtied_ptr);
+    assert (heap_flags_ptr);
 
     /*
      * Find an ID for the new object. ID zero is reserved for the free space
@@ -763,7 +763,7 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, size_t size, hbool_t * heap_dirtied_ptr
     }
 
     /* Mark the heap as dirty */
-    *heap_dirtied_ptr = TRUE;
+    *heap_flags_ptr |= H5AC__DIRTIED_FLAG;
 
     /* Set the return value */
     ret_value=idx;
@@ -801,7 +801,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HG_extend (H5F_t *f, H5HG_heap_t *heap, size_t size, hbool_t * heap_dirtied_ptr)
+H5HG_extend (H5F_t *f, H5HG_heap_t *heap, size_t size, unsigned * heap_flags_ptr)
 {
     size_t  need;                   /* Actual space needed to store object */
     size_t  old_size;               /* Previous size of the heap's chunk */
@@ -815,7 +815,7 @@ H5HG_extend (H5F_t *f, H5HG_heap_t *heap, size_t size, hbool_t * heap_dirtied_pt
     /* Check args */
     assert (f);
     assert (heap);
-    assert (heap_dirtied_ptr);
+    assert (heap_flags_ptr);
 
     /* Compute total space need to add to this heap */
     need = H5HG_SIZEOF_OBJHDR(f) + H5HG_ALIGN(size);
@@ -866,7 +866,7 @@ HDmemset(new_chunk+heap->size,0,need);
     assert(H5HG_ISALIGNED(heap->obj[0].size));
 
     /* Mark the heap as dirty */
-    *heap_dirtied_ptr = TRUE;
+    *heap_flags_ptr |= H5AC__DIRTIED_FLAG;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -926,8 +926,8 @@ H5HG_insert (H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*
     int	cwfsno;
     size_t	idx;
     haddr_t	addr = HADDR_UNDEF;
-    hbool_t 	heap_dirtied = FALSE;
     H5HG_heap_t	*heap = NULL;
+    unsigned 	heap_flags = H5AC__NO_FLAGS_SET;
     hbool_t     found=0;        /* Flag to indicate a heap with enough space was found */
     herr_t      ret_value=SUCCEED;       /* Return value */
     
@@ -990,7 +990,7 @@ H5HG_insert (H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*
             new_need = MAX(f->shared->cwfs[cwfsno]->size, new_need);
 
             if((f->shared->cwfs[cwfsno]->size+new_need)<=H5HG_MAXSIZE && H5MF_can_extend(f,H5FD_MEM_GHEAP,f->shared->cwfs[cwfsno]->addr,(hsize_t)f->shared->cwfs[cwfsno]->size,(hsize_t)new_need)) {
-                if(H5HG_extend(f,f->shared->cwfs[cwfsno],size,&heap_dirtied)<0)
+                if(H5HG_extend(f,f->shared->cwfs[cwfsno],size, &heap_flags)<0)
                     HGOTO_ERROR (H5E_HEAP, H5E_CANTINIT, FAIL, "unable to extend global heap collection");
 	        addr = f->shared->cwfs[cwfsno]->addr;
                 found=1;
@@ -1031,7 +1031,7 @@ H5HG_insert (H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*
         HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap");
 
     /* Split the free space to make room for the new object */
-    idx = H5HG_alloc (f, heap, size, &heap_dirtied);
+    idx = H5HG_alloc (f, heap, size, &heap_flags);
     
     /* Copy data into the heap */
     if(size>0) {
@@ -1042,15 +1042,14 @@ H5HG_insert (H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*
                  need-(H5HG_SIZEOF_OBJHDR(f)+size));
 #endif /* OLD_WAY */
     } /* end if */
-    heap_dirtied = TRUE;
+    heap_flags |= H5AC__DIRTIED_FLAG;
 
     /* Return value */
     hobj->addr = heap->addr;
     hobj->idx = idx;
 
 done:
-    if ( heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, heap->addr, heap, 
-                                heap_dirtied, H5AC__NO_FLAGS_SET) < 0 )
+    if ( heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, heap->addr, heap, heap_flags) < 0 )
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to unprotect heap.");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1084,7 +1083,6 @@ done:
 void *
 H5HG_read (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object/*out*/)
 {
-    hbool_t	heap_dirtied = FALSE;
     H5HG_heap_t	*heap = NULL;
     int	i;
     size_t	size;
@@ -1129,8 +1127,7 @@ H5HG_read (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object/*out*/)
     ret_value=object;
 
 done:
-    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, heap_dirtied,
-                               H5AC__NO_FLAGS_SET)<0)
+    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, H5AC__NO_FLAGS_SET)<0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, NULL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1165,8 +1162,8 @@ done:
 int
 H5HG_link (H5F_t *f, hid_t dxpl_id, const H5HG_t *hobj, int adjust)
 {
-    hbool_t heap_dirtied = FALSE;
     H5HG_heap_t *heap = NULL;
+    unsigned heap_flags = H5AC__NO_FLAGS_SET;
     int ret_value;              /* Return value */
     
     FUNC_ENTER_NOAPI(H5HG_link, FAIL);
@@ -1189,15 +1186,14 @@ H5HG_link (H5F_t *f, hid_t dxpl_id, const H5HG_t *hobj, int adjust)
         if (heap->obj[hobj->idx].nrefs+adjust>H5HG_MAXLINK)
             HGOTO_ERROR (H5E_HEAP, H5E_BADVALUE, FAIL, "new link count would be out of range");
         heap->obj[hobj->idx].nrefs += adjust;
-        heap_dirtied = TRUE;
+        heap_flags |= H5AC__DIRTIED_FLAG;
     } /* end if */
 
     /* Set return value */
     ret_value=heap->obj[hobj->idx].nrefs;
 
 done:
-    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, 
-                               heap_dirtied, H5AC__NO_FLAGS_SET)<0)
+    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, heap_flags)<0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1227,7 +1223,6 @@ herr_t
 H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
 {
     uint8_t	*p=NULL, *obj_start=NULL;
-    hbool_t	heap_dirtied = FALSE;
     H5HG_heap_t	*heap = NULL;
     size_t	need;
     int	i;
@@ -1275,17 +1270,16 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
         H5F_ENCODE_LENGTH (f, p, heap->obj[0].size);
     }
     HDmemset (heap->obj+hobj->idx, 0, sizeof(H5HG_obj_t));
-    heap_dirtied = TRUE;
+    flags |= H5AC__DIRTIED_FLAG;
 
     if (heap->obj[0].size+H5HG_SIZEOF_HDR(f)==heap->size) {
         /*
          * The collection is empty. Remove it from the CWFS list and return it
          * to the file free list.
          */
-        heap_dirtied = TRUE;
         H5_CHECK_OVERFLOW(heap->size,size_t,hsize_t);
         H5MF_xfree(f, H5FD_MEM_GHEAP, dxpl_id, heap->addr, (hsize_t)heap->size);
-        flags=H5C__DELETED_FLAG; /* Indicate that the object was deleted, for the unprotect call */
+        flags |= H5C__DELETED_FLAG; /* Indicate that the object was deleted, for the unprotect call */
     } else {
         /*
          * If the heap is in the CWFS list then advance it one position.  The
@@ -1308,7 +1302,7 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
     }
     
 done:
-    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, heap_dirtied, flags) != SUCCEED)
+    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, flags) != SUCCEED)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);

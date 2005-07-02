@@ -123,7 +123,7 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *s
 
     assert (s && !*s);
 
-    if (H5HL_unprotect(f, dxpl_id, heap, mesg->heap_addr, FALSE) < 0)
+    if (H5HL_unprotect(f, dxpl_id, heap, mesg->heap_addr, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read unprotect link value")
 #endif
 
@@ -143,7 +143,7 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *s
 	mesg->slot[u].name = H5MM_xstrdup (s);
         assert(mesg->slot[u].name);
 
-        if (H5HL_unprotect(f, dxpl_id, heap, mesg->heap_addr, FALSE) < 0)
+        if (H5HL_unprotect(f, dxpl_id, heap, mesg->heap_addr, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read unprotect link value")
 	
 	/* File offset */

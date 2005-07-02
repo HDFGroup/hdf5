@@ -56,7 +56,6 @@ herr_t
 H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth,
     const H5B2_class_t *type)
 {
-    hbool_t	bt2_dirtied = FALSE;
     H5B2_t	*bt2 = NULL;
     H5B2_shared_t 	*shared;      /* Shared B-tree information */
     herr_t      ret_value=SUCCEED;       /* Return value */
@@ -137,7 +136,7 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
 	      shared->merge_leaf_nrec);
 
 done:
-    if (bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, bt2_dirtied, H5AC__NO_FLAGS_SET) < 0)
+    if (bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -168,9 +167,7 @@ herr_t
 H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth,
     const H5B2_class_t *type, haddr_t hdr_addr, unsigned nrec)
 {
-    hbool_t	bt2_dirtied = FALSE;
     H5B2_t	*bt2 = NULL;
-    hbool_t		internal_dirtied = FALSE;
     H5B2_internal_t	*internal = NULL;
     H5B2_shared_t 	*shared;        /* Shared B-tree information */
     unsigned		u;              /* Local index variable */
@@ -205,7 +202,7 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree internal node")
 
     /* Release the B-tree header */
-    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, bt2, bt2_dirtied, H5AC__NO_FLAGS_SET) < 0)
+    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, bt2, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree header")
     bt2 = NULL;
 
@@ -258,7 +255,7 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
               internal->node_ptrs[u].addr);
 
 done:
-    if (internal && H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, addr, internal, internal_dirtied, H5AC__NO_FLAGS_SET) < 0)
+    if (internal && H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, addr, internal, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree internal node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -289,9 +286,7 @@ herr_t
 H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth,
     const H5B2_class_t *type, haddr_t hdr_addr, unsigned nrec)
 {
-    hbool_t	bt2_dirtied = FALSE;
     H5B2_t	*bt2 = NULL;
-    hbool_t	leaf_dirtied = FALSE;
     H5B2_leaf_t	*leaf = NULL;
     H5B2_shared_t 	*shared;        /* Shared B-tree information */
     unsigned		u;              /* Local index variable */
@@ -326,7 +321,7 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree leaf node")
 
     /* Release the B-tree header */
-    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, bt2, bt2_dirtied, H5AC__NO_FLAGS_SET) < 0)
+    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, bt2, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree header")
     bt2 = NULL;
 
@@ -363,7 +358,7 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     } /* end for */
 
 done:
-    if (leaf && H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, addr, leaf, leaf_dirtied, H5AC__NO_FLAGS_SET) < 0)
+    if (leaf && H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, addr, leaf, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree leaf node")
 
     FUNC_LEAVE_NOAPI(ret_value)

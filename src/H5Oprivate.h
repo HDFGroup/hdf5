@@ -243,16 +243,16 @@ H5_DLL int H5O_modify(H5G_entry_t *ent, unsigned type_id,
     int overwrite, unsigned flags, unsigned update_flags, const void *mesg, hid_t dxpl_id);
 H5_DLL struct H5O_t * H5O_protect(H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL herr_t H5O_unprotect(H5G_entry_t *ent, struct H5O_t *oh, hid_t dxpl_id, 
-                            hbool_t oh_dirtied);
+                            unsigned oh_flags);
 H5_DLL int H5O_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, unsigned type_id, 
-    unsigned flags, const void *mesg, hbool_t * oh_dirtied_ptr);
+    unsigned flags, const void *mesg, unsigned * oh_flags_ptr);
 H5_DLL herr_t H5O_touch(H5G_entry_t *ent, hbool_t force, hid_t dxpl_id);
 H5_DLL herr_t H5O_touch_oh(H5F_t *f, struct H5O_t *oh, hbool_t force, 
-                           hbool_t * oh_dirtied_ptr);
+                           unsigned * oh_flags_ptr);
 #ifdef H5O_ENABLE_BOGUS
 H5_DLL herr_t H5O_bogus(H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL herr_t H5O_bogus_oh(H5F_t *f, struct H5O_t *oh, 
-                           hbool_t * oh_dirtied_ptr);
+                           unsigned * oh_flags_ptr);
 #endif /* H5O_ENABLE_BOGUS */
 H5_DLL herr_t H5O_remove(H5G_entry_t *ent, unsigned type_id, int sequence,
     hid_t dxpl_id);

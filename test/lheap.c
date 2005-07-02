@@ -19,6 +19,7 @@
  * Purpose:	Test local heaps used by symbol tables (groups).
  */
 #include "h5test.h"
+#include "H5ACprivate.h"
 #include "H5HLprivate.h"
 #include "H5Iprivate.h"
 
@@ -137,7 +138,7 @@ main(void)
 	    goto error;
 	}
 
-        if (H5HL_unprotect(f, H5P_DATASET_XFER_DEFAULT, heap, heap_addr, FALSE) < 0) {
+        if (H5HL_unprotect(f, H5P_DATASET_XFER_DEFAULT, heap, heap_addr, H5AC__NO_FLAGS_SET) < 0) {
 	    H5_FAILED();
 	    H5Eprint_stack(H5E_DEFAULT, stdout);
 	    goto error;

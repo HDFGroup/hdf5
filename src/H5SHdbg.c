@@ -54,7 +54,6 @@
 herr_t
 H5SH_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth)
 {
-    hbool_t	sh_dirtied = FALSE;
     H5SH_t	*sh = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -95,7 +94,7 @@ H5SH_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int 
 	      sh->bt_free_addr);
 
 done:
-    if (sh && H5AC_unprotect(f, dxpl_id, H5AC_SGHP, addr, sh, sh_dirtied, H5AC__NO_FLAGS_SET) < 0)
+    if (sh && H5AC_unprotect(f, dxpl_id, H5AC_SGHP, addr, sh, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release segmented heap info")
 
     FUNC_LEAVE_NOAPI(ret_value)

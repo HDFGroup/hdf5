@@ -58,7 +58,6 @@ H5HG_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
 {
     unsigned		u, nused, maxobj;
     unsigned		j, k;
-    hbool_t		h_dirtied = FALSE;
     H5HG_heap_t		*h = NULL;
     char		buf[64];
     uint8_t		*p = NULL;
@@ -132,7 +131,7 @@ H5HG_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     }
 
 done:
-    if (h && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, addr, h, h_dirtied, FALSE) != SUCCEED)
+    if (h && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, addr, h, H5AC__NO_FLAGS_SET) != SUCCEED)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);

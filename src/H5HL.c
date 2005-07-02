@@ -763,8 +763,7 @@ H5HL_read(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size, voi
     ret_value=buf;
 
 done:
-    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, 
-                               FALSE, H5AC__NO_FLAGS_SET) != SUCCEED)
+    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, H5AC__NO_FLAGS_SET) != SUCCEED)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, NULL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -881,7 +880,7 @@ H5HL_offset_into(H5F_t *f, const H5HL_t *heap, size_t offset)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HL_unprotect(H5F_t *f, hid_t dxpl_id, const H5HL_t *heap, haddr_t addr, hbool_t heap_dirtied)
+H5HL_unprotect(H5F_t *f, hid_t dxpl_id, const H5HL_t *heap, haddr_t addr, unsigned heap_flags)
 {
     herr_t  ret_value = SUCCEED;
 
@@ -892,8 +891,7 @@ H5HL_unprotect(H5F_t *f, hid_t dxpl_id, const H5HL_t *heap, haddr_t addr, hbool_
     assert(heap);
     assert(H5F_addr_defined(addr));
 
-    if (H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, (void *)heap, heap_dirtied,
-                       H5AC__NO_FLAGS_SET) != SUCCEED)
+    if (H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, (void *)heap, heap_flags) != SUCCEED)
         HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
 
 done:
@@ -958,8 +956,8 @@ H5HL_remove_free(H5HL_t *heap, H5HL_free_t *fl)
 size_t
 H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *buf)
 {
-    hbool_t	heap_dirtied = FALSE;
     H5HL_t	*heap = NULL;
+    unsigned	heap_flags = H5AC__NO_FLAGS_SET;
     H5HL_free_t	*fl = NULL, *max_fl = NULL;
     size_t	offset = 0;
     size_t	need_size, old_size, need_more;
@@ -982,7 +980,7 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *
     if (NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, (size_t)(-1), "unable to load heap");
 
-    heap_dirtied = TRUE;
+    heap_flags |= H5AC__DIRTIED_FLAG;
 
     /* Cache this for later */
     sizeof_hdr= H5HL_SIZEOF_HDR(f);
@@ -1115,8 +1113,7 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *
     ret_value=offset;
 
 done:
-    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, 
-                               heap_dirtied, H5AC__NO_FLAGS_SET) != SUCCEED)
+    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, heap_flags) != SUCCEED)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, (size_t)(-1), "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1155,8 +1152,8 @@ done:
 static herr_t
 H5HL_write(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size, const void *buf)
 {
-    hbool_t	heap_dirtied = FALSE;
     H5HL_t 	*heap = NULL;
+    unsigned	heap_flags = H5AC__NO_FLAGS_SET;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5HL_write, FAIL);
@@ -1176,14 +1173,12 @@ H5HL_write(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size, co
     assert(offset < heap->mem_alloc);
     assert(offset + size <= heap->mem_alloc);
 
-    heap_dirtied = TRUE;
+    heap_flags |= H5AC__DIRTIED_FLAG;
     HDmemcpy(heap->chunk + H5HL_SIZEOF_HDR(f) + offset, buf, size);
 
 done:
-    if (heap && 
-        H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, heap_dirtied, 
-                       H5AC__NO_FLAGS_SET) != SUCCEED && 
-        ret_value != FAIL)
+    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, heap_flags) != SUCCEED && 
+            ret_value != FAIL)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1227,8 +1222,8 @@ done:
 herr_t
 H5HL_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size)
 {
-    hbool_t		heap_dirtied = FALSE;
     H5HL_t		*heap = NULL;
+    unsigned		heap_flags = H5AC__NO_FLAGS_SET;
     H5HL_free_t		*fl = NULL, *fl2 = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -1252,7 +1247,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size)
     assert(offset + size <= heap->mem_alloc);
 
     fl = heap->freelist;
-    heap_dirtied = TRUE;
+    heap_flags |= H5AC__DIRTIED_FLAG;
 
     /*
      * Check if this chunk can be prepended or appended to an already
@@ -1327,8 +1322,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size)
     heap->freelist = fl;
 
 done:
-    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, 
-                               heap_dirtied, H5AC__NO_FLAGS_SET) != SUCCEED)
+    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, heap_flags) != SUCCEED)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1358,7 +1352,6 @@ done:
 herr_t
 H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
 {
-    hbool_t	heap_dirtied = FALSE;
     H5HL_t	*heap = NULL;
     size_t      sizeof_hdr;     /* Cache H5HL header size for file */
     herr_t      ret_value=SUCCEED;       /* Return value */
@@ -1401,15 +1394,14 @@ H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
     } /* end else */
 
     /* Release the local heap metadata from the cache */
-    if (H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, heap_dirtied, H5C__DELETED_FLAG)<0) {
+    if (H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, H5AC__DIRTIED_FLAG | H5C__DELETED_FLAG)<0) {
         heap = NULL;
         HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release local heap");
     }
     heap = NULL;
 
 done:
-    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, heap_dirtied,
-                               H5AC__NO_FLAGS_SET)<0)
+    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, H5AC__NO_FLAGS_SET)<0)
 	HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release local heap");
 
     FUNC_LEAVE_NOAPI(ret_value);
