@@ -57,6 +57,10 @@ else
 	$(H5CC) $(CFLAGS) -o $@ $(srcdir)/$@.c;
 endif
 
+# Two of the examples depend on files created by other examples.
+h5_read.chkexe_: h5_write.chkexe_
+h5_chunk_read.chkexe_: h5_extend_write.chkexe_
+
 # How to install examples
 # There are a lot of rules because automake does not know about
 # the examples programs, and does not recognize the install-examples

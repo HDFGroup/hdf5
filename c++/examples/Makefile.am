@@ -36,6 +36,10 @@ EXTRA_PROG=$(TEST_PROG)
 INSTALL_FILES=create.cpp readdata.cpp writedata.cpp compound.cpp         \
               extend_ds.cpp chunks.cpp h5group.cpp
 
+# Some of the examples depend on files created by running other examples
+readdata.chkexe_: create.chkexe_
+chunks.chkexe_: extend_ds.chkexe_
+
 # These are the files that 'make clean' (and derivatives) will remove from this
 # directory.  Since automake doesn't know about the examples, we need to
 # tell it to clean the example programs, too.

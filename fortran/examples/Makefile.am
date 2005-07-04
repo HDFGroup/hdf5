@@ -50,6 +50,10 @@ CLEANFILES=*.h5 $(EXTRA_PROG)
 # Mark this directory as part of the Fortran API
 HDF_FORTRAN=yes
 
+# Some examples depend on files created by other examples.
+rwdsetexample.chkexe_ attrexample.chkexe_: dsetexample.chkexe_
+grpdsetexample.chkexe_: grpsexample.chkexe_
+
 # Tell automake how to build examples using h5fc
 # Additional dependencies for the examples are listed below
 $(EXTRA_PROG): $(LIBHDF5) $(LIBH5F)

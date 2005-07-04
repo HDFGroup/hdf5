@@ -484,6 +484,10 @@ uninstall-am: uninstall-info-am uninstall-local
 	uninstall uninstall-am uninstall-info-am uninstall-local
 
 
+# Some of the examples depend on files created by running other examples
+readdata.chkexe_: create.chkexe_
+chunks.chkexe_: extend_ds.chkexe_
+
 $(EXAMPLEDIR):
 	-$(top_srcdir)/bin/mkdirs $@
 
