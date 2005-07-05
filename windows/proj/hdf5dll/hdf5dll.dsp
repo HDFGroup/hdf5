@@ -818,6 +818,21 @@ SOURCE=..\..\..\src\H5FL.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\H5Fmount.c
+
+!IF  "$(CFG)" == "hdf5dll - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\H5FO.c
 
 !IF  "$(CFG)" == "hdf5dll - Win32 Release"
@@ -827,6 +842,21 @@ SOURCE=..\..\..\src\H5FO.c
 !ELSEIF  "$(CFG)" == "hdf5dll - Win32 Debug"
 
 # PROP Intermediate_Dir "../../../proj/hdf5dll/Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5Fsuper.c
+
+!IF  "$(CFG)" == "hdf5dll - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 Debug"
 
 !ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaDbg"
 
