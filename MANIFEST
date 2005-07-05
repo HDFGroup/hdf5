@@ -1091,6 +1091,8 @@
 ./src/H5Epublic.h
 ./src/H5F.c
 ./src/H5Fdbg.c
+./src/H5Fmount.c
+./src/H5Fsuper.c
 ./src/H5Fpkg.h
 ./src/H5Fprivate.h
 ./src/H5Fpublic.h
