@@ -1406,7 +1406,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
+H5G_namei(const H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	  H5G_entry_t *grp_ent/*out*/, H5G_entry_t *obj_ent/*out*/,
 	  unsigned target, int *nlinks/*out*/, H5G_namei_act_t action,
           H5G_entry_t *ent, hid_t dxpl_id)
@@ -1559,7 +1559,7 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	if(H5G_CACHED_SLINK==obj_ent->type &&
                 (0==(target & H5G_TARGET_SLINK) || !last_comp)) {
 	    if ((*nlinks)-- <= 0)
-		HGOTO_ERROR (H5E_SYM, H5E_SLINK, FAIL, "too many symbolic links");
+		HGOTO_ERROR (H5E_SYM, H5E_SLINK, FAIL, "too many links");
 	    if (H5G_traverse_slink (grp_ent, obj_ent, nlinks, dxpl_id)<0)
 		HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "symbolic link traversal failed");
 	}
@@ -1633,7 +1633,7 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
     const H5HL_t        *heap;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
-    FUNC_ENTER_NOAPI(H5G_traverse_slink, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_traverse_slink);
 
     /* Portably initialize the temporary group entry */
     HDmemset(&tmp_grp_ent,0,sizeof(H5G_entry_t));
@@ -2158,6 +2158,11 @@ H5G_close(H5G_t *grp)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close");
         H5FL_FREE (H5G_shared_t, grp->shared);
     } else {
+        /* Check if this group was the last object holding open a mounted file
+         * hierarchy and close down the file hierarchy if so */
+        if(grp->shared->fo_count == 1)
+            H5F_check_mounts(grp->ent.file);
+
         if(H5G_free_ent_name(&(grp->ent))<0)
         {
             H5FL_FREE (H5G_t,grp);
@@ -3973,4 +3978,30 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, void *key)
 done:
     FUNC_LEAVE_NOAPI(ret_value); 
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_get_shared_count
+ *
+ * Purpose:	Queries the group object's "shared count"
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, July	 5, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_get_shared_count(H5G_t *grp)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_get_shared_count);
+
+    /* Check args */
+    assert(grp && grp->shared);
+
+    FUNC_LEAVE_NOAPI(grp->shared->fo_count);
+} /* end H5G_get_shared_count() */
 

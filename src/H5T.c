@@ -3679,7 +3679,7 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
             /* Compare the members */
             base_size = dt1->shared->parent->shared->size;
             for (u=0; u<dt1->shared->u.enumer.nmembs; u++) {
-                unsigned idx;
+                unsigned idx = 0;
 
                 if(superset) {
                     unsigned    lt = 0, rt;        /* Final, left & right key indices */

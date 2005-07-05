@@ -32,7 +32,7 @@ DISTCLEAN=libhdf5.settings
 ## Source and object files for the library (lexicographically)...
 LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5C.c H5D.c H5Dcontig.c H5Dcompact.c H5Defl.c \
         H5Dio.c H5Distore.c H5Dmpio.c H5Dselect.c H5Dtest.c H5E.c H5F.c       \
-        H5Fdbg.c H5FD.c \
+        H5Fdbg.c H5Fmount.c H5Fsuper.c H5FD.c \
         H5FDcore.c H5FDfamily.c H5FDgass.c H5FDlog.c H5FDmpi.c H5FDmpio.c     \
         H5FDmpiposix.c H5FDmulti.c H5FDsec2.c H5FDsrb.c H5FDstdio.c           \
         H5FDstream.c H5FL.c H5FO.c H5FS.c H5G.c H5Gent.c H5Gnode.c H5Gstab.c  \
