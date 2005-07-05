@@ -61,6 +61,7 @@
 
 use IO::Handle;
 use Getopt::Long;
+use List::Util qw[max];
 
 if ($#ARGV == -1) {
 	usage();
@@ -153,8 +154,6 @@ while (<INPUT>) {
 	    }
 	}
 }
-
-
 
 sub usage {
 	print "Usage: gen_reporl.pl [options] FILE
@@ -424,11 +423,13 @@ sub plot_default_graph1 {
 
 }
 
+
 sub plot_default_graph2 {
 	open(GNUPLOT_DATA_OUTPUT, ">gnuplot.data") or
 		die "error: cannot open file gnuplot.data: $!\n";
 	
-	$num_procs_graph = 1 if !$num_procs_graph;
+	$num_procs_graph = max(sort { $a <=> $b }( keys %results ));
+	print "min-rpocs: " . $num_procs_graph;
 	$data_type = "write-only" if !$data_type;
 
 	#set up the plot
@@ -441,7 +442,7 @@ sub plot_default_graph2 {
 #the next line attempts to hack gnuplot to get around it's inability to linearly scale, but logarithmically label an axis
 	print GNUPLOT_PIPE  "set xtics (\"4K\" 4*1024, \"8K\" 8*1024, \"16K\" 16*1024, \"32K\" 32*1024, \"64K\" 64*1024, \"128K\" 128*1024, \"256K\" 256*1024, \"512K\" 512*1024, \"1M\" 1024*1024, \"2M\" 2048*1024, \"4M\" 4096*1024, \"8M\" 8192*1024, \"16M\" 16384*1024)\n";
 
-	foreach $xfer (sort {$a <=> $b} ( keys %{$results{1}} )) 
+	foreach $xfer (sort {$a <=> $b} ( keys %{$results{$num_procs_graph}} )) 
 	{
 	    print GNUPLOT_DATA_OUTPUT $xfer . "\t";
 	    if($io_type & 1) {
