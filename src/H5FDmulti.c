@@ -54,10 +54,6 @@
 #endif
 
 /* Loop through all mapped files */
-#ifdef TMP 
-/*The -O2 optimization of the PGCC in mir has a bug for this macro.  A workaround
- *is provided here to avoid the problem temporarily until the compiler bug is fixed.
- *SLU - 2005/6/13 */
 #define UNIQUE_MEMBERS(MAP,LOOPVAR) {					      \
     H5FD_mem_t _unmapped, LOOPVAR;					      \
     hbool_t _seen[H5FD_MEM_NTYPES];					      \
@@ -68,23 +64,6 @@
 	if (H5FD_MEM_DEFAULT==LOOPVAR) LOOPVAR=_unmapped;		      \
 	assert(LOOPVAR>0 && LOOPVAR<H5FD_MEM_NTYPES);			      \
 	if (_seen[LOOPVAR]++) continue;
-#else /*TMP*/
-#define UNIQUE_MEMBERS(MAP,LOOPVAR) {					      \
-    H5FD_mem_t _unmapped, LOOPVAR;					      \
-    hbool_t _seen[H5FD_MEM_NTYPES];					      \
-									      \
-    memset(_seen, 0, sizeof _seen);					      \
-    for (_unmapped=H5FD_MEM_SUPER; _unmapped<H5FD_MEM_NTYPES; _unmapped=(H5FD_mem_t)(_unmapped+1)) {  \
-	LOOPVAR = MAP[_unmapped];					      \
-	if (H5FD_MEM_DEFAULT==LOOPVAR) LOOPVAR=_unmapped;		      \
-	assert(LOOPVAR>0 && LOOPVAR<H5FD_MEM_NTYPES);			      \
-                                                                              \
-        if(_seen[LOOPVAR]) {                                                  \
-            _seen[LOOPVAR]++;                                                 \
-            continue;                                                         \
-        }                                                                     \
-        _seen[LOOPVAR]++;
-#endif /*TMP*/
 
 #ifdef LATER
 #define MAPPED_MEMBERS(MAP,LOOPVAR) {					      \

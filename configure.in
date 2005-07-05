@@ -534,6 +534,15 @@ q
 EOF
 fi
 
+dnl ----------------------------------------------------------------------
+dnl pgcc version 6.0x have optimization (-O, -O2 or -O3) problem.  Detect
+dnl these versions and add option "-Mx,28,0x8" to the compiler to avoid
+dnl the problem if optimization is enable.
+dnl
+if (${CC-cc} -V 2>&1 | grep '^pgcc 6.0') > /dev/null && test "X$enable_production" = "Xyes"; then
+    CC="${CC-cc} -Mx,28,0x8"
+fi
+
 dnl Fix up the INSTALL macro if it's a relative path. We want the
 dnl full-path to the binary instead.
 case "$INSTALL" in
