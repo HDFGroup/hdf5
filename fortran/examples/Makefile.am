@@ -53,6 +53,7 @@ HDF_FORTRAN=yes
 # Some examples depend on files created by other examples.
 rwdsetexample.chkexe_ attrexample.chkexe_: dsetexample.chkexe_
 grpdsetexample.chkexe_: grpsexample.chkexe_
+refregexample.chkexe_: refobjexample.chkexe_
 
 # Tell automake how to build examples using h5fc
 # Additional dependencies for the examples are listed below
