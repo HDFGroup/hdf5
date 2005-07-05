@@ -7881,6 +7881,7 @@ EOF
     ;;
 esac
 
+
 case "$INSTALL" in
   *install-sh*)
     INSTALL='\${top_srcdir}/bin/install-sh -c'
@@ -36564,6 +36565,10 @@ else
 fi
 if test -n "$cc_vendor" && test -n "$cc_version"; then
   CC_VERSION="$CC_VERSION ($cc_vendor-$cc_version)"
+fi
+
+if (${CC-cc} -V 2>&1 | grep '^pgcc 6.0') > /dev/null && test "X$enable_production" = "Xyes"; then
+    CC="${CC-cc} -Mx,28,0x8"
 fi
 
 if test -x /bin/pwd; then
