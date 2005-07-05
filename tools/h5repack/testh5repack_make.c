@@ -1134,7 +1134,7 @@ int make_layout(hid_t loc_id)
  hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
  int      buf[DIM1][DIM2];
  int      i, j, n;
- char     name[5];
+ char     name[6];
 
 
  for (i=n=0; i<DIM1; i++){
