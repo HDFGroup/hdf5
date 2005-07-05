@@ -163,7 +163,21 @@ union H5D_storage_t;
 #ifdef NOT_YET
 H5_DLL void H5F_encode_length_unusual(const H5F_t *f, uint8_t **p, uint8_t *l);
 #endif /* NOT_YET */
+
+/* General routines */
+H5_DLL herr_t H5F_close(H5F_t *f);
+H5_DLL haddr_t H5F_locate_signature(H5FD_t *file, hid_t dxpl_id);
+
+/* File mount related routines */
 H5_DLL herr_t H5F_mountpoint(struct H5G_entry_t *find/*in,out*/);
+H5_DLL herr_t H5F_close_mounts(H5F_t *f);
+H5_DLL int H5F_term_unmount_cb(void *obj_ptr, hid_t obj_id, void *key);
+H5_DLL herr_t H5F_check_mounts(H5F_t *f);
+
+/* Superblock related routines */
+H5_DLL hsize_t H5F_init_superblock(const H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5F_write_superblock(H5F_t *f, hid_t dxpl_id, uint8_t *buf);
+H5_DLL herr_t H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent, haddr_t addr, uint8_t *buf, size_t buf_size);
 
 #endif
 

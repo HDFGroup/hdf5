@@ -2254,6 +2254,11 @@ H5G_close(H5G_t *grp)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close");
         H5FL_FREE (H5G_shared_t, grp->shared);
     } else {
+        /* Check if this group was the last object holding open a mounted file
+         * hierarchy and close down the file hierarchy if so */
+        if(grp->shared->fo_count == 1)
+            H5F_check_mounts(grp->ent.file);
+
         if(H5G_free_ent_name(&(grp->ent))<0)
         {
             H5FL_FREE (H5G_t,grp);
@@ -4093,4 +4098,30 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, void *key)
 done:
     FUNC_LEAVE_NOAPI(ret_value); 
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_get_shared_count
+ *
+ * Purpose:	Queries the group object's "shared count"
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, July	 5, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_get_shared_count(H5G_t *grp)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_get_shared_count);
+
+    /* Check args */
+    assert(grp && grp->shared);
+
+    FUNC_LEAVE_NOAPI(grp->shared->fo_count);
+} /* end H5G_get_shared_count() */
 

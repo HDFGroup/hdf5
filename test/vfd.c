@@ -451,10 +451,12 @@ error:
 static herr_t 
 test_family_compat(void)
 {
+#ifdef H5_WANT_H5_V1_6_COMPAT
     hid_t       file=(-1), fapl;
     char        filename[1024];
     char        pathname[1024];
     char       *srcdir = getenv("srcdir"); /*where the src code is located*/ 
+#endif /*H5_WANT_H5_V1_6_COMPAT*/
 
     TESTING("FAMILY file driver backward compatibility");
 

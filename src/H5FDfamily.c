@@ -576,12 +576,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static hsize_t
-H5FD_family_sb_size(H5FD_t *_file)
+H5FD_family_sb_size(H5FD_t UNUSED *_file)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
     hsize_t		ret_value = 0; /*size of header*/
 
-    FUNC_ENTER_NOAPI(H5FD_family_sb_size, FAIL)
+    FUNC_ENTER_NOAPI(H5FD_family_sb_size, UFAIL)
 
     /* 8 bytes field for the size of member file size field should be 
      * enough for now. */
@@ -657,7 +657,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_family_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
+H5FD_family_sb_decode(H5FD_t *_file, const char UNUSED *name, const unsigned char *buf)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
     uint64_t            msize = 0;
@@ -685,7 +685,7 @@ H5FD_family_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
 
     /* Check if member size from file access property is correct */
     if(msize != file->pmem_size) {
-        sprintf(err_msg, "family member size should be %lu", msize);
+        sprintf(err_msg, "family member size should be %lu", (unsigned long)msize);
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, err_msg)
     }
 
