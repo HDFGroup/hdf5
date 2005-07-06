@@ -804,6 +804,13 @@ a------------------------------------------------------------------------------
 ./src/H5B2private.h
 ./src/H5B2public.h
 ./src/H5B2test.c
+./src/H5BP.c
+./src/H5BPcache.c
+./src/H5BPdbg.c
+./src/H5BPpkg.h
+./src/H5BPprivate.h
+./src/H5BPpublic.h
+./src/H5BPtest.c
 ./src/H5BT.c
 ./src/H5BTbtree2.c
 ./src/H5BTcache.c
@@ -1010,6 +1017,7 @@ a------------------------------------------------------------------------------
 
 ./test/Makefile.am
 ./test/Makefile.in
+./test/b+tree.c
 ./test/big.c
 ./test/bittests.c
 ./test/blocktrack.c
