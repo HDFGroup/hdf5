@@ -512,7 +512,7 @@ sub plot_3d_graph3 {
 	unlink(GNUPLOT_DATA_OUTPUT);
 }
 
-open(GNUPLOT_PIPE, "| gnuplot -persist") || die "Couldn't run gnuplot: $!\n";
+open(GNUPLOT_PIPE, "| tee gnuplot.script | gnuplot -persist") || die "Couldn't run gnuplot: $!\n";
 GNUPLOT_PIPE->autoflush(1);
 
 write_excel_file;
