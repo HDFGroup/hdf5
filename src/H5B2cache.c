@@ -284,7 +284,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B_cache_hdr_dest
+ * Function:	H5B2_cache_hdr_dest
  *
  * Purpose:	Destroys a B-tree header in memory.
  *
@@ -556,7 +556,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B_cache_leaf_dest
+ * Function:	H5B2_cache_leaf_dest
  *
  * Purpose:	Destroys a B-tree leaf node in memory.
  *
@@ -874,7 +874,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B_cache_internal_dest
+ * Function:	H5B2_cache_internal_dest
  *
  * Purpose:	Destroys a B-tree internal node in memory.
  *

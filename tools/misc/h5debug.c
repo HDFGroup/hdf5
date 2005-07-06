@@ -28,12 +28,15 @@
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 #define H5B2_PACKAGE		/*suppress error about including H5B2pkg  */
 #define H5B2_TESTING		/*suppress warning about H5B2 testing funcs*/
+#define H5BP_PACKAGE		/*suppress error about including H5BPpkg  */
+#define H5BP_TESTING		/*suppress warning about H5BP testing funcs*/
 #define H5BT_PACKAGE		/*suppress error about including H5BTpkg  */
 #define H5SH_PACKAGE		/*suppress error about including H5SHpkg  */
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Bprivate.h"
 #include "H5B2pkg.h"		/* B-trees				*/
+#include "H5BPpkg.h"		/* B+ trees				*/
 #include "H5BTpkg.h"		/* Block tracker			*/
 #include "H5Dprivate.h"
 #include "H5Fpkg.h"
@@ -189,7 +192,7 @@ main(int argc, char *argv[])
          * subclass.  The subclass identifier is two bytes after the
          * B-tree signature.
          */
-        H5B2_subid_t subtype = (H5B_subid_t)sig[H5B2_SIZEOF_MAGIC+1];
+        H5B2_subid_t subtype = (H5B2_subid_t)sig[H5B2_SIZEOF_MAGIC+1];
 	
         switch (subtype) {
             case H5B2_TEST_ID:
@@ -211,7 +214,7 @@ main(int argc, char *argv[])
          * subclass.  The subclass identifier is two bytes after the
          * B-tree signature.
          */
-        H5B2_subid_t subtype = (H5B_subid_t)sig[H5B2_SIZEOF_MAGIC+1];
+        H5B2_subid_t subtype = (H5B2_subid_t)sig[H5B2_SIZEOF_MAGIC+1];
 	
         switch (subtype) {
             case H5B2_TEST_ID:
@@ -233,7 +236,7 @@ main(int argc, char *argv[])
          * subclass.  The subclass identifier is two bytes after the
          * B-tree signature.
          */
-        H5B2_subid_t subtype = (H5B_subid_t)sig[H5B2_SIZEOF_MAGIC+1];
+        H5B2_subid_t subtype = (H5B2_subid_t)sig[H5B2_SIZEOF_MAGIC+1];
 	
         switch (subtype) {
             case H5B2_TEST_ID:
@@ -260,6 +263,24 @@ main(int argc, char *argv[])
          * Debug a segmented heap info
          */
         status = H5SH_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
+
+    } else if (!HDmemcmp(sig, H5BP_HDR_MAGIC, H5BP_SIZEOF_MAGIC)) {
+        /*
+         * Debug a B+ tree.  B+ trees are debugged through the B+ tree
+         * subclass.  The subclass identifier is two bytes after the
+         * B+ tree signature.
+         */
+        H5BP_subid_t subtype = (H5BP_subid_t)sig[H5BP_SIZEOF_MAGIC+1];
+	
+        switch (subtype) {
+            case H5BP_TEST_ID:
+                status = H5BP_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5BP_TEST);
+                break;
+
+            default:
+                fprintf(stderr, "Unknown B+ tree subtype %u\n", (unsigned)(subtype));
+                HDexit(4);
+        } /* end switch */
 
     } else if (sig[0] == H5O_VERSION) {
         /*

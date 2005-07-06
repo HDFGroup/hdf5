@@ -29,8 +29,7 @@ check_SCRIPTS = $(TEST_SCRIPT)
 
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
-# JAMES debug: removed btree2 and cache tests since they take so long.
-TEST_PROG=testhdf5 lheap ohdr stab gheap cache btree2 blocktrack sheap \
+TEST_PROG=testhdf5 lheap ohdr stab gheap cache b+tree btree2 blocktrack sheap \
            pool hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset extend external links unlink big mtime     \
            fillval mount flush1 flush2 enum \
@@ -91,7 +90,7 @@ MOSTLYCLEANFILES+=cmpd_dset.h5 compact_dataset.h5 dataset.h5 extend.h5 istore.h5
             family_file000[0-3][0-9].h5 multi_file-[rs].h5 core_file         \
             new_move_[ab].h5 ntypes.h5 dangle.h5 error_test.h5 err_compat.h5 \
             dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
-            unlink_chunked.h5 btree2.h5 blocktrack.h5 sheap.h5
+            unlink_chunked.h5 btree2.h5 blocktrack.h5 sheap.h5 b+tree.h5
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tconfig.c tfile.c tgenprop.c \

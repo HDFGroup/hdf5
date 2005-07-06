@@ -103,6 +103,9 @@ extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 #define H5_WARNING()	{puts("*WARNING*");fflush(stdout);}
 #define SKIPPED()	{puts(" -SKIP-");fflush(stdout);}
 #define TEST_ERROR      {H5_FAILED(); AT(); goto error;}
+#define STACK_ERROR     {H5Eprint_stack(H5E_DEFAULT, stdout); goto error;}
+#define FAIL_STACK_ERROR {H5_FAILED(); AT(); \
+    H5Eprint_stack(H5E_DEFAULT, stdout); goto error;}
 
 #ifdef __cplusplus
 extern "C" {

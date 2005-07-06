@@ -83,8 +83,9 @@ libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libhdf5_la_LIBADD =
 am_libhdf5_la_OBJECTS = H5.lo H5A.lo H5AC.lo H5B.lo H5B2.lo \
-	H5B2cache.lo H5B2dbg.lo H5B2test.lo H5BT.lo H5BTbtree2.lo \
-	H5BTcache.lo H5BTdbg.lo H5BTtest.lo H5C.lo H5D.lo H5Dcontig.lo \
+	H5B2cache.lo H5B2dbg.lo H5B2test.lo H5BP.lo H5BPcache.lo \
+	H5BPdbg.lo H5BPtest.lo H5BT.lo H5BTbtree2.lo H5BTcache.lo \
+	H5BTdbg.lo H5BTtest.lo H5C.lo H5D.lo H5Dcontig.lo \
 	H5Dcompact.lo H5Defl.lo H5Dio.lo H5Distore.lo H5Dmpio.lo \
 	H5Dselect.lo H5Dtest.lo H5E.lo H5F.lo H5Fdbg.lo H5Fmount.lo \
 	H5Fsuper.lo H5FD.lo H5FDcore.lo H5FDfamily.lo H5FDfphdf5.lo \
@@ -362,7 +363,8 @@ DISTCLEAN = libhdf5.settings
 
 # library sources
 libhdf5_la_SOURCES = H5.c H5A.c H5AC.c H5B.c H5B2.c H5B2cache.c H5B2dbg.c      \
-        H5B2test.c H5BT.c H5BTbtree2.c H5BTcache.c H5BTdbg.c H5BTtest.c H5C.c \
+        H5B2test.c H5BP.c H5BPcache.c H5BPdbg.c H5BPtest.c \
+        H5BT.c H5BTbtree2.c H5BTcache.c H5BTdbg.c H5BTtest.c H5C.c \
         H5D.c \
         H5Dcontig.c \
         H5Dcompact.c \
@@ -392,7 +394,7 @@ libhdf5_la_SOURCES = H5.c H5A.c H5AC.c H5B.c H5B2.c H5B2cache.c H5B2dbg.c      \
 
 # Public headers
 include_HEADERS = H5public.h H5Apublic.h H5ACpublic.h H5Bpublic.h H5B2public.h \
-        H5BTpublic.h H5Cpublic.h H5Dpublic.h  \
+        H5BPpublic.h H5BTpublic.h H5Cpublic.h H5Dpublic.h  \
         H5Epubgen.h H5Epublic.h H5Fpublic.h H5FDpublic.h H5FDcore.h H5FDfamily.h          \
         H5FDfphdf5.h H5FDlog.h H5FDmpi.h H5FDmpio.h H5FDmpiposix.h              \
         H5FDmulti.h H5FDsec2.h  H5FDstdio.h H5FDstream.h H5FPpublic.h             \
@@ -529,6 +531,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5B2cache.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5B2dbg.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5B2test.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5BP.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5BPcache.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5BPdbg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5BPtest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5BT.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5BTbtree2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5BTcache.Plo@am__quote@

@@ -49,7 +49,9 @@
 #define H5AC_BT2_LEAF_ID 7	/*v2 B-tree leaf node			     */
 #define H5AC_BLTR_ID	8	/*block tracker				     */
 #define H5AC_SHEAP_ID	9	/*segmented heap			     */
-#define H5AC_NTYPES	10
+#define H5AC_BPT_HDR_ID	10	/*B+ tree header			     */
+#define H5AC_BPT_LEAF_ID 11	/*B+ tree leaf				     */
+#define H5AC_NTYPES	12
 
 /* H5AC_DUMP_STATS_ON_CLOSE should always be FALSE when 
  * H5C_COLLECT_CACHE_STATS is FALSE.  

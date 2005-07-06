@@ -29,7 +29,7 @@
 #
 # HDF5 Library Test Makefile(.in)
 #
-SOURCES = $(libh5test_la_SOURCES) big.c bittests.c blocktrack.c btree2.c cache.c cmpd_dset.c dangle.c dsets.c dt_arith.c dtransform.c dtypes.c enum.c err_compat.c error_test.c extend.c external.c filename.c fillval.c flush1.c flush2.c getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c mtime.c ntypes.c ohdr.c pool.c reserved.c set_extent.c sheap.c stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
+SOURCES = $(libh5test_la_SOURCES) b+tree.c big.c bittests.c blocktrack.c btree2.c cache.c cmpd_dset.c dangle.c dsets.c dt_arith.c dtransform.c dtypes.c enum.c err_compat.c error_test.c extend.c external.c filename.c fillval.c flush1.c flush2.c getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c mtime.c ntypes.c ohdr.c pool.c reserved.c set_extent.c sheap.c stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -71,17 +71,21 @@ libh5test_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_libh5test_la_OBJECTS = h5test.lo testframe.lo
 libh5test_la_OBJECTS = $(am_libh5test_la_OBJECTS)
 am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
-	stab$(EXEEXT) gheap$(EXEEXT) cache$(EXEEXT) btree2$(EXEEXT) \
-	blocktrack$(EXEEXT) sheap$(EXEEXT) pool$(EXEEXT) \
-	hyperslab$(EXEEXT) istore$(EXEEXT) bittests$(EXEEXT) \
-	dt_arith$(EXEEXT) dtypes$(EXEEXT) dsets$(EXEEXT) \
-	cmpd_dset$(EXEEXT) extend$(EXEEXT) external$(EXEEXT) \
-	links$(EXEEXT) unlink$(EXEEXT) big$(EXEEXT) mtime$(EXEEXT) \
-	fillval$(EXEEXT) mount$(EXEEXT) flush1$(EXEEXT) \
+	stab$(EXEEXT) gheap$(EXEEXT) cache$(EXEEXT) b+tree$(EXEEXT) \
+	btree2$(EXEEXT) blocktrack$(EXEEXT) sheap$(EXEEXT) \
+	pool$(EXEEXT) hyperslab$(EXEEXT) istore$(EXEEXT) \
+	bittests$(EXEEXT) dt_arith$(EXEEXT) dtypes$(EXEEXT) \
+	dsets$(EXEEXT) cmpd_dset$(EXEEXT) extend$(EXEEXT) \
+	external$(EXEEXT) links$(EXEEXT) unlink$(EXEEXT) big$(EXEEXT) \
+	mtime$(EXEEXT) fillval$(EXEEXT) mount$(EXEEXT) flush1$(EXEEXT) \
 	flush2$(EXEEXT) enum$(EXEEXT) set_extent$(EXEEXT) \
 	ttsafe$(EXEEXT) stream_test$(EXEEXT) getname$(EXEEXT) \
 	vfd$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
 	dtransform$(EXEEXT) filename$(EXEEXT) reserved$(EXEEXT)
+b_tree_SOURCES = b+tree.c
+b_tree_OBJECTS = b+tree.$(OBJEXT)
+b_tree_LDADD = $(LDADD)
+b_tree_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
 big_SOURCES = big.c
 big_OBJECTS = big.$(OBJEXT)
 big_LDADD = $(LDADD)
@@ -266,22 +270,22 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(libh5test_la_SOURCES) big.c bittests.c blocktrack.c \
-	btree2.c cache.c cmpd_dset.c dangle.c dsets.c dt_arith.c \
-	dtransform.c dtypes.c enum.c err_compat.c error_test.c \
-	extend.c external.c filename.c fillval.c flush1.c flush2.c \
-	getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c \
-	mtime.c ntypes.c ohdr.c pool.c reserved.c set_extent.c sheap.c \
-	stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c \
-	$(ttsafe_SOURCES) unlink.c vfd.c
-DIST_SOURCES = $(libh5test_la_SOURCES) big.c bittests.c blocktrack.c \
-	btree2.c cache.c cmpd_dset.c dangle.c dsets.c dt_arith.c \
-	dtransform.c dtypes.c enum.c err_compat.c error_test.c \
-	extend.c external.c filename.c fillval.c flush1.c flush2.c \
-	getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c \
-	mtime.c ntypes.c ohdr.c pool.c reserved.c set_extent.c sheap.c \
-	stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c \
-	$(ttsafe_SOURCES) unlink.c vfd.c
+SOURCES = $(libh5test_la_SOURCES) b+tree.c big.c bittests.c \
+	blocktrack.c btree2.c cache.c cmpd_dset.c dangle.c dsets.c \
+	dt_arith.c dtransform.c dtypes.c enum.c err_compat.c \
+	error_test.c extend.c external.c filename.c fillval.c flush1.c \
+	flush2.c getname.c gheap.c hyperslab.c istore.c lheap.c \
+	links.c mount.c mtime.c ntypes.c ohdr.c pool.c reserved.c \
+	set_extent.c sheap.c stab.c stream_test.c $(testhdf5_SOURCES) \
+	testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
+DIST_SOURCES = $(libh5test_la_SOURCES) b+tree.c big.c bittests.c \
+	blocktrack.c btree2.c cache.c cmpd_dset.c dangle.c dsets.c \
+	dt_arith.c dtransform.c dtypes.c enum.c err_compat.c \
+	error_test.c extend.c external.c filename.c fillval.c flush1.c \
+	flush2.c getname.c gheap.c hyperslab.c istore.c lheap.c \
+	links.c mount.c mtime.c ntypes.c ohdr.c pool.c reserved.c \
+	set_extent.c sheap.c stab.c stream_test.c $(testhdf5_SOURCES) \
+	testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -514,7 +518,7 @@ MOSTLYCLEANFILES = *.chkexe *.chksh cmpd_dset.h5 compact_dataset.h5 \
 	new_move_[ab].h5 ntypes.h5 dangle.h5 error_test.h5 \
 	err_compat.h5 dtransform.h5 test_filters.h5 get_file_name.h5 \
 	tstint[1-2].h5 unlink_chunked.h5 btree2.h5 blocktrack.h5 \
-	sheap.h5
+	sheap.h5 b+tree.h5
 INCLUDES = -I$(top_srcdir)/src -I$(top_builddir)/src
 
 # Test script for error_test and err_compat
@@ -523,8 +527,7 @@ check_SCRIPTS = $(TEST_SCRIPT)
 
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
-# JAMES debug: removed btree2 and cache tests since they take so long.
-TEST_PROG = testhdf5 lheap ohdr stab gheap cache btree2 blocktrack sheap \
+TEST_PROG = testhdf5 lheap ohdr stab gheap cache b+tree btree2 blocktrack sheap \
            pool hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset extend external links unlink big mtime     \
            fillval mount flush1 flush2 enum \
@@ -623,6 +626,9 @@ clean-checkPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
+b+tree$(EXEEXT): $(b_tree_OBJECTS) $(b_tree_DEPENDENCIES) 
+	@rm -f b+tree$(EXEEXT)
+	$(LINK) $(b_tree_LDFLAGS) $(b_tree_OBJECTS) $(b_tree_LDADD) $(LIBS)
 big$(EXEEXT): $(big_OBJECTS) $(big_DEPENDENCIES) 
 	@rm -f big$(EXEEXT)
 	$(LINK) $(big_LDFLAGS) $(big_OBJECTS) $(big_LDADD) $(LIBS)
@@ -753,6 +759,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/b+tree.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/big.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bittests.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/blocktrack.Po@am__quote@
