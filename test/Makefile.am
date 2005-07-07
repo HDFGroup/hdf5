@@ -71,6 +71,9 @@ timings _timings: testmeta
 	done;
 
 
+# The flush1 test must run before the flush2 test
+flush2.chkexe_: flush1.chkexe_
+
 # Temporary files.  These files are the ones created by setting the
 # HDF5_NOCLEANUP environment variable and running `make test' without
 # specifying a file prefix or low-level driver.  Changing the file
