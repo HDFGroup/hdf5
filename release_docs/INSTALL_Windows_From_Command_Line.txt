@@ -267,19 +267,14 @@ SECTION II: Building and testing HDF5 C and C++ Library on command line
       
       A batch file named hdf5bt_net.bat in c:\MyHDFstuff\hdf5 directory
       is provided for users to build and test HDF5 library and tools
-      together from command line.
+      together from command line. 
 
-      hdf5bt_net.bat has two options:
+      Invoke a command prompt window and run hdf5bt_net in the 
+      following format to build and test C/C++ libraries and tools.
 
-          hdf5bt_net                 build and test C library and tools
+          hdf5bt_net enablecpp       
 
-          hdf5bt_net enablecpp       build and test C/C++ libraries 
-                                       and tools
-
-      Invoke a command prompt window and run hdf5bt_net with
-      appropriate options.
-
-      Test results are saved in two files:
+       Test results are saved in two files:
 
             c:\MyHDFstuff\hdf5\hdf5_results_net.txt   
 
@@ -301,16 +296,12 @@ SECTION II: Building and testing HDF5 C and C++ Library on command line
          directory is provided for users to build HDF5 library and 
          tools from command line.
 
-         hdf5build_net.bat has two options:
+         Invoke a command prompt window and run hdf5build_net.bat in
+         the following format to build HDF5 C/C++ library and tools.
   
-             hdf5build_net             build HDF5 C library 
-                                       and tools
+             hdf5build_net enablecpp
 
-             hdf5build_net enablecpp   build HDF5 C/C++ libraries 
-                                         and tools
-
-         Invoke a command prompt window and run hdf5build_net.bat with 
-         appropriate options.  building results will be saved in 
+         Building results will be saved in 
          c:\MyHDFstuff\hdf5\build_results_net.txt.  You can check 
          the file to find out whether there are any compilation
          errors.
@@ -333,10 +324,10 @@ SECTION II: Building and testing HDF5 C and C++ Library on command line
 		
 		   c:\MyHDFstuff\hdf5\check_results.txt.
 		
-		In general, you only need to check tests_results.txt.  If all the
-		tests passed, then you do not have to check check_results.txt.  
-		If some tests failed, check check_results.txt can help you
-		figure out what was wrong.
+	In general, you only need to check tests_results.txt.  If all the
+	tests passed, then you do not have to check check_results.txt.  
+	If some tests failed, check check_results.txt can help you
+	figure out what was wrong.
      
      3.  Installing HDF5 Libraries
 
@@ -413,15 +404,10 @@ SECTION III: Building and testing HDF5 C and C++ Library on command
          is provided for users to build and test HDF5 library and tools
          together from command line.
 
-         hdf5bt_intelc.bat has two options:
+         Invoke a command prompt window and run hdf5bt_intelc in the
+         following format to build and test C/C++ libraries and tools.
 
-            hdf5bt_intelc                 build and test C library and tools
-
-            hdf5bt_intelc enablecpp       build and test C/C++ libraries 
-                                       and tools
-
-         Invoke a command prompt window and run hdf5bt_intelc with
-         appropriate options.
+            hdf5bt_intelc enablecpp       
 
          Test results will be saved in two files:
 
@@ -458,16 +444,13 @@ SECTION III: Building and testing HDF5 C and C++ Library on command
          directory is provided for users to build HDF5 library and 
          tools from command line.
 
-         hdf5build_intelc.bat has two options:
+         Invoke a command prompt window and run hdf5build_intelc 
+         in the following format to build HDF5 C/C++ libraries and 
+         tools.
   
-               hdf5build_intelc             build HDF5 C library 
-                                            and tools
-
-               hdf5build_intelc enablecpp   build HDF5 C/C++ libraries 
-                                            and tools
+                   hdf5build_intelc enablecpp   
              
-         Invoke a command prompt window and run hdf5build_intelc with 
-         appropriate options.  Compiling outputs are saved in 
+         Compiling outputs are saved in 
          c:\MyHDFstuff\hdf5\build_results_intelc.txt.  You can check 
          the file to find out whether there are any compiling errors.
          
