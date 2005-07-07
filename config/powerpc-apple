@@ -53,8 +53,6 @@ case $FC_BASENAME in
         ;;
 
     f95)
-        # Set required flag for compiling C stubs
-        CFLAGS="$CFLAGS -DH5_ABSOFT"
 
         F9XSUFFIXFLAG=""
 # We force compiler to use upper case for external names 
