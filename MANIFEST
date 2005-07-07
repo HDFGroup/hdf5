@@ -1830,6 +1830,8 @@ a------------------------------------------------------------------------------
 ./windows/test/bittestsdll/bittestsdll.dsp
 ./windows/test/blocktrack/blocktrack.dsp
 ./windows/test/blocktrackdll/blocktrackdll.dsp
+./windows/test/b_plus_treedll/b_plus_treedll.dsp
+./windows/test/b_plus_tree/b_plus_tree.dsp
 ./windows/test/btree2/btree2.dsp
 ./windows/test/btree2dll/btree2dll.dsp
 ./windows/test/cache/cache.dsp
