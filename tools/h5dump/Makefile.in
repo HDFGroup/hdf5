@@ -714,25 +714,25 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
 $(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) dummy.chksh_:
 	@if test "X$@" != "X.chksh_" && test "X$@" != "Xdummy.chksh_"; then \
 	  echo "============================"; \
-	  if $(top_srcdir)/bin/newer $(@:.chksh_=.chksh) $(@:.chksh_=); then \
-	    echo "No need to test $(@:.chksh_=) again."; \
+	  if $(top_srcdir)/bin/newer `basename $(@:.chksh_=.chksh)` $(@:.chksh_=); then \
+	    echo "No need to test `basename $(@:.chksh_=)` again."; \
 	  else \
 	    if test "X$(HDF_FORTRAN)" = "Xyes"; then \
-	      echo "Fortran API: Testing $(@:.chksh_=) $(TEST_FLAGS)"; \
+	      echo "Fortran API: Testing `basename $(@:.chksh_=)` $(TEST_FLAGS)"; \
 	    elif test "X$(HDF_CXX)" = "Xyes"; then \
-	      echo "C++ API: Testing $(@:.chksh_=) $(TEST_FLAGS)"; \
+	      echo "C++ API: Testing `basename $(@:.chksh_=)` $(TEST_FLAGS)"; \
 	    else \
-	      echo "Testing $(@:.chksh_=) $(TEST_FLAGS)"; \
+	      echo "Testing `basename $(@:.chksh_=)` $(TEST_FLAGS)"; \
 	    fi; \
 	    echo "============================"; \
 	    RUNSERIAL="$(RUNSERIAL)" RUNPARALLEL="$(RUNPARALLEL)"           \
 	    srcdir="$(srcdir)" \
 	      $(SHELL) $(@:.chksh_=) $(TEST_FLAGS) \
-	      && touch $(@:.chksh_=.chksh) || \
+	      && touch `basename $(@:.chksh_=.chksh)` || \
 	      (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
 	      exit 1; \
 	    echo ""; \
-	    echo "Finished testing $(@:.chksh_=) $(TEST_FLAGS)"; \
+	    echo "Finished testing `basename $(@:.chksh_=)` $(TEST_FLAGS)"; \
 	  fi; \
 	  echo "============================"; \
 	fi
