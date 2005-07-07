@@ -673,8 +673,7 @@ _exec_check-s: $(TEST_PROG_CHKEXE) $(TEST_SCRIPT_CHKSH)
 $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
 	@if test "X$@" != "X.chkexe_" && test "X$@" != "Xdummy.chkexe_"; then \
 	  echo "============================"; \
-	  if test -f $(@:.chkexe_=.chkexe) && \
-	          test $(@:.chkexe_=.chkexe) -nt $(@:.chkexe_=)$(EXEEXT); then \
+	  if $(top_srcdir)/bin/newer $(@:.chkexe_=.chkexe) $(@:.chkexe_=)$(EXEEXT); then \
 	    echo "No need to test $(@:.chkexe_=)$(EXEEXT) again."; \
 	  else \
 	    if test "X$(HDF_FORTRAN)" = "Xyes"; then \
@@ -701,8 +700,7 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
 $(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) dummy.chksh_:
 	@if test "X$@" != "X.chksh_" && test "X$@" != "Xdummy.chksh_"; then \
 	  echo "============================"; \
-	  if test -f $(@:.chksh_=.chksh) && \
-	          test $(@:.chksh_=.chksh) -nt $(@:.chksh_=); then \
+	  if $(top_srcdir)/bin/newer $(@:.chksh_=.chksh) $(@:.chksh_=); then \
 	    echo "No need to test $(@:.chksh_=) again."; \
 	  else \
 	    if test "X$(HDF_FORTRAN)" = "Xyes"; then \
