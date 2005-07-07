@@ -383,6 +383,48 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name dt_arithdll
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name b_plus_tree
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name b_plus_treedll
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "b_plus_tree"=..\..\TEST\b_plus_tree\b_plus_tree.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtest
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "b_plus_treedll"=..\..\TEST\b_plus_treedll\b_plus_treedll.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtestD
+    End Project Dependency
 }}}
 
 ###############################################################################
