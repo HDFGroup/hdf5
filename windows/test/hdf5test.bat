@@ -44,6 +44,13 @@ cache%2\%1\cache%2
 
 echo.
 echo ============================
+echo Testing b_plus_tree
+echo ============================
+
+b_plus_tree%2\%1\b_plus_tree%2
+
+echo.
+echo ============================
 echo Testing btree2 
 echo ============================
 
