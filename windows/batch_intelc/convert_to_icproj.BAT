@@ -44,6 +44,8 @@ ICProjConvert80  windows\test\blocktrack\blocktrack.vcproj /IC  >> convert_intel
 ICProjConvert80  windows\test\blocktrackdll\blocktrackdll.vcproj /IC  >> convert_intel.log
 ICProjConvert80  windows\test\btree2\btree2.vcproj /IC  >> convert_intel.log
 ICProjConvert80  windows\test\btree2dll\btree2dll.vcproj /IC  >> convert_intel.log
+ICProjConvert80  windows\test\b_plus_tree\b_plus_tree.vcproj /IC  >> convert_intel.log
+ICProjConvert80  windows\test\b_plus_treedll\b_plus_treedll.vcproj /IC  >> convert_intel.log
 ICProjConvert80  windows\test\cache\cache.vcproj /IC  >> convert_intel.log
 ICProjConvert80  windows\test\cachedll\cachedll.vcproj /IC  >> convert_intel.log
 ICProjConvert80  windows\test\chunk\chunk.vcproj /IC  >> convert_intel.log
