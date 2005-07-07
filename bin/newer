@@ -19,9 +19,11 @@
 # Programmer: Albert Cheng
 # Created Date: 2005/07/06
 
-if test -f $1 -a -f $2; then
-    if test X != X`find $1 -newer $2 -print`; then
-	exit 0
+if test $# -eq 2; then
+    if test -f $1 -a -f $2; then
+	if test X != X`find $1 -newer $2 -print`; then
+	    exit 0
+	fi
     fi
 fi
 exit 1
