@@ -137,6 +137,9 @@ H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned U
     void    *outbuf = NULL;     /* Pointer to new buffer */
     unsigned char *src = (unsigned char*)(*buf);
     uint32_t fletcher;          /* Checksum value */
+    uint32_t reversed_fletcher; /* Possible wrong checksum value */
+    uint8_t  c[4];
+    uint8_t  tmp;
     size_t   ret_value;         /* Return value */
     
     FUNC_ENTER_NOAPI(H5Z_filter_fletcher32, 0)
@@ -159,8 +162,28 @@ H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned U
             /* Compute checksum (can't fail) */
             fletcher = H5Z_filter_fletcher32_compute(src,src_nbytes);
 
+            /* The reversed checksum.  There was a bug in the calculating code of 
+             * the Fletcher32 checksum in the library before v1.6.3.  The checksum 
+             * value wasn't consistent between big-endian and little-endian systems.  
+             * This bug was fixed in Release 1.6.3.  However, after fixing the bug, 
+             * the checksum value is no longer the same as before on little-endian 
+             * system.  We'll check both the correct checksum and the wrong 
+             * checksum to be consistent with Release 1.6.2 and before. 
+             */ 
+            HDmemcpy(c, &fletcher, 4);
+
+            tmp  = c[1];
+            c[1] = c[0];
+            c[0] = tmp;
+            
+            tmp  = c[3];
+            c[3] = c[2];
+            c[2] = tmp;
+
+            HDmemcpy(&reversed_fletcher, c, 4);
+
             /* Verify computed checksum matches stored checksum */
-            if(stored_fletcher != fletcher)
+            if(stored_fletcher != fletcher && stored_fletcher != reversed_fletcher)
 	        HGOTO_ERROR(H5E_STORAGE, H5E_READERROR, 0, "data error detected by Fletcher32 checksum")
         }
         
