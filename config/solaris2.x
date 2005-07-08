@@ -25,6 +25,13 @@ if test "X-" = "X-$cc_flags_set"; then
   PROFILE_CFLAGS=-xpg
   PROFILE_CPPFLAGS=
   cc_flags_set=yes
+# Special linking flag is needed to build with Fortran on Solaris 5.9
+    system_version="`uname -r`"
+    case "$system_version" in
+	5.9*)
+	    LDFLAGS="$LDFLAGS -xopenmp=stubs"
+        ;;
+    esac
 
   # Turn off optimization flag for SUNpro compiler versions 4.x which
   # have an optimization bug.  Version 5.0 works.
