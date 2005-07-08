@@ -44,7 +44,7 @@ echo ************************************************************ >> convert.log
   convert.js %1\windows\test\btree2\btree2.dsp  %1\windows\test\btree2\btree2.vcproj  >> convert.log
   convert.js %1\windows\test\btree2dll\btree2dll.dsp  %1\windows\test\btree2dll\btree2dll.vcproj  >> convert.log
   convert.js %1\windows\test\b_plus_tree\b_plus_tree.dsp  %1\windows\test\b_plus_tree\b_plus_tree.vcproj  >> convert.log
-  convert.js %1\windows\test\b_plus_tree\b_plus_treedll.dsp  %1\windows\test\b_plus_tree\b_plus_treedll.vcproj  >> convert.log
+  convert.js %1\windows\test\b_plus_treedll\b_plus_treedll.dsp  %1\windows\test\b_plus_treedll\b_plus_treedll.vcproj  >> convert.log
   convert.js %1\windows\test\cache\cache.dsp  %1\windows\test\cache\cache.vcproj  >> convert.log
   convert.js %1\windows\test\cachedll\cachedll.dsp  %1\windows\test\cachedll\cachedll.vcproj  >> convert.log
   convert.js %1\windows\test\chunk\chunk.dsp  %1\windows\test\chunk\chunk.vcproj  >> convert.log
