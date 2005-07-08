@@ -126,7 +126,16 @@ H5Z_filter_fletcher32_compute(void *_src, size_t len)
  *              Jan 3, 2003
  *
  * Modifications:
- *
+ *              Raymond Lu
+ *              July 8, 2005
+ *              There was a bug in the calculating code of the Fletcher32 
+ *              checksum in the library before v1.6.3.  The checksum 
+ *              value wasn't consistent between big-endian and little-endian
+ *              systems.  This bug was fixed in Release 1.6.3.  However, 
+ *              after fixing the bug, the checksum value is no longer the 
+ *              same as before on little-endian system.  We'll check both 
+ *              the correct checksum and the wrong checksum to be consistent 
+ *              with Release 1.6.2 and before. 
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
