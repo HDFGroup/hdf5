@@ -29,8 +29,11 @@ if test "X-" = "X-$cc_flags_set"; then
     system_version="`uname -r`"
     case "$system_version" in
 	5.9*)
-	    LDFLAGS="$LDFLAGS -xopenmp=stubs"
-        ;;
+	    # Need the xopenmp flag to build the Fortran library
+	    if test X-$enable_fortran = X-yes; then
+		LDFLAGS="$LDFLAGS -xopenmp=stubs"
+	    fi
+	    ;;
     esac
 
   # Turn off optimization flag for SUNpro compiler versions 4.x which
