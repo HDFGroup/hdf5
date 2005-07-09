@@ -72,6 +72,8 @@ Bug Fixes since HDF5-1.6.4 release
 
     Library
     -------
+        - Dataset sieve buffer cache was inadvertantly disabled - re-enable 
+            it.  QAK - 2005/07/08
         - Don't unmount child files until the parent file actually closes.
             (Previously, if an object is holding open a file, the child files
             would get unmounted too early).  QAK - 2005/07/05
