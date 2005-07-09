@@ -729,7 +729,7 @@ H5D_crt_fill_value_cmp(const void *value1, const void *value2, size_t UNUSED siz
     if(fill1->type==NULL && fill2->type!=NULL) HGOTO_DONE(-1);
     if(fill1->type!=NULL && fill2->type==NULL) HGOTO_DONE(1);
     if(fill1->type!=NULL)
-        if((cmp_value=H5T_cmp(fill1->type,fill2->type,FALSE))!=0)
+        if((cmp_value=H5T_cmp(fill1->type,fill2->type, FALSE))!=0)
             HGOTO_DONE(cmp_value);
 
     /* Check the fill values in the buffers */
@@ -1688,7 +1688,7 @@ H5D_new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type)
     H5D_shared_t    *new_dset = NULL;   /* New dataset object */
     H5D_shared_t    *ret_value;         /* Return value */
     
-    FUNC_ENTER_NOAPI(H5D_new, NULL)
+    FUNC_ENTER_NOAPI_NOINIT(H5D_new)
 
     if (NULL==(new_dset = H5FL_MALLOC(H5D_shared_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
@@ -2285,6 +2285,9 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
                 tmp_size = H5S_GET_EXTENT_NPOINTS(new_dset->shared->space) *
                                         H5T_get_size(new_dset->shared->type);
                 H5_ASSIGN_OVERFLOW(new_dset->shared->layout.u.contig.size,tmp_size,hssize_t,hsize_t);
+
+                /* Get the sieve buffer size for this dataset */
+                new_dset->shared->cache.contig.sieve_buf_size = H5F_SIEVE_BUF_SIZE(loc->file);
             } /* end case */
             break;
 
@@ -2665,6 +2668,9 @@ H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id)
             /* Set the I/O functions for this layout type */
             dataset->shared->io_ops.readvv=H5D_contig_readvv;
             dataset->shared->io_ops.writevv=H5D_contig_writevv;
+
+            /* Get the sieve buffer size for this dataset */
+            dataset->shared->cache.contig.sieve_buf_size = H5F_SIEVE_BUF_SIZE(ent->file);
             break;
 
         case H5D_CHUNKED:
@@ -2876,7 +2882,18 @@ H5D_close(H5D_t *dataset)
         /* Free the data sieve buffer, if it's been allocated */
         if(dataset->shared->cache.contig.sieve_buf) {
             assert(dataset->shared->layout.type!=H5D_COMPACT);      /* We should never have a sieve buffer for compact storage */
-            assert(dataset->shared->cache.contig.sieve_dirty==0);    /* The buffer had better be flushed... */
+
+            /* Flush the raw data buffer, if its dirty */
+            if (dataset->shared->cache.contig.sieve_dirty) {
+                /* Write dirty data sieve buffer to file */
+                if (H5F_block_write(dataset->ent.file, H5FD_MEM_DRAW, dataset->shared->cache.contig.sieve_loc,
+                        dataset->shared->cache.contig.sieve_size, H5AC_dxpl_id, dataset->shared->cache.contig.sieve_buf) < 0)
+                    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed")
+
+                /* Reset sieve buffer dirty flag */
+                dataset->shared->cache.contig.sieve_dirty=0;
+            } /* end if */
+
             dataset->shared->cache.contig.sieve_buf = H5FL_BLK_FREE (sieve_buf,dataset->shared->cache.contig.sieve_buf);
         } /* end if */
 
