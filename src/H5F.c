@@ -3235,6 +3235,39 @@ H5F_grp_btree_shared(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5F_sieve_buf_size
+ *
+ * Purpose:	Replaced a macro to retrieve the dataset sieve buffer size
+ *              now that the generic properties are being used to store
+ *              the values.
+ *
+ * Return:	Success:	Non-void, and the dataset sieve buffer size
+ *                              is returned.
+ *
+ * 		Failure:	void (should not happen)
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Jul  8 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+size_t
+H5F_sieve_buf_size(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_sieve_buf_size)
+
+    assert(f);
+    assert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->sieve_buf_size)
+} /* end H5F_sieve_buf_size() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5F_block_read
  *
  * Purpose:	Reads some data from a file/server/etc into a buffer.
