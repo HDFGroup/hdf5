@@ -1,4 +1,4 @@
-HDF5 version 1.6.4-post3 released on Sun Jul  3 17:52:03 CDT 2005
+HDF5 version 1.6.4-post4 released on Sun Jul 10 17:50:56 CDT 2005
 ================================================================================
 
 INTRODUCTION
@@ -72,6 +72,11 @@ Bug Fixes since HDF5-1.6.4 release
 
     Library
     -------
+        - Dataset sieve buffer cache was inadvertantly disabled - re-enable 
+            it.  QAK - 2005/07/08
+        - Don't unmount child files until the parent file actually closes.
+            (Previously, if an object is holding open a file, the child files
+            would get unmounted too early).  QAK - 2005/07/05
         - Fixed bug where unmounted files could cause the library to go into
             an infinite loop when shutting down.  QAK - 2005/06/30
         - Fixed bug with hyperslab selections that use selection offsets and
@@ -304,13 +309,15 @@ Footnotes:  (1) Using mpich 1.2.6
 
 Known Problems
 ==============
-* The dataset created with the v1.6.2 library can't be read with the v1.6.3
-  library or after when Fletcher32 EDC(filter) is enabled.  There was a bug 
-  in the calculating code of the Fletcher32 checksum in the library before 
-  v1.6.3.  The checksum value wasn't consistent between big-endian and
-  little-endian systems.  This bug was fixed in Release 1.6.3.  However, after
-  fixing the bug, the checksum value is no longer the same as before on
-  little-endian system.  SLU - 2005/6/30
+* The dataset created or rewritten with the v1.6.3 library or after can't 
+  be read with the v1.6.2 library or before when Fletcher32 EDC(filter) is 
+  enabled.  There was a bug in the calculating code of the Fletcher32 
+  checksum in the library before v1.6.3.  The checksum value wasn't consistent 
+  between big-endian and little-endian systems.  This bug was fixed in 
+  Release 1.6.3.  However, after fixing the bug, the checksum value is no 
+  longer the same as before on little-endian system.  The library release 
+  after 1.6.4 can still read the dataset created or rewritten with the library
+  of v1.6.2 or before.  SLU - 2005/7/8
 * For the version 6(6.02 and 6.04) of Portland Group compiler on AMD Opteron
   processor, there's a bug in the compiler for optimization(-O2).  The library
   failed in several tests but all related to multi driver.  The problem has 
