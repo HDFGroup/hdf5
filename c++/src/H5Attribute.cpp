@@ -135,7 +135,7 @@ void Attribute::read( const DataType& mem_type, string& strg ) const
       throw AttributeIException("Attribute::read", "H5Aread failed");
    }
    strg = strg_C;
-   delete strg_C;
+   delete []strg_C;
 }
 
 //--------------------------------------------------------------------------
@@ -205,7 +205,7 @@ ssize_t Attribute::getName( size_t buf_size, string& attr_name ) const
    }
    // otherwise, convert the C attribute name and return 
    attr_name = name_C;
-   delete name_C;
+   delete []name_C;
    return( name_size );
 }
 
@@ -252,7 +252,7 @@ string Attribute::getName() const
    else
       attr_name = name_C;
 
-   delete name_C;
+   delete []name_C;
    return( attr_name ); 
 }
 
@@ -294,8 +294,8 @@ hsize_t Attribute::getStorageSize() const
 ///\brief	Properly terminates access to this attribute.
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//              Replaced resetIdComponent with decRefCount to use new ID
-//              reference counting mechanisms by Quincey Koziol, June 1, 2004
+//		Replaced resetIdComponent with decRefCount to use C library
+//		ID reference counting mechanism - June 1, 2004
 //--------------------------------------------------------------------------
 Attribute::~Attribute()
 {

@@ -30,7 +30,7 @@ namespace H5 {
 //--------------------------------------------------------------------------
 ///\brief	Constant for dataset creation default property
 //--------------------------------------------------------------------------
-const DSetCreatPropList DSetCreatPropList::DEFAULT( H5P_DEFAULT );
+const DSetCreatPropList DSetCreatPropList::DEFAULT;
 
 //--------------------------------------------------------------------------
 // Function:	DSetCreatPropList default constructor

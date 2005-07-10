@@ -27,7 +27,7 @@ namespace H5 {
 //--------------------------------------------------------------------------
 ///\brief	Constant for default property
 //--------------------------------------------------------------------------
-const FileAccPropList FileAccPropList::DEFAULT( H5P_DEFAULT );
+const FileAccPropList FileAccPropList::DEFAULT;
 
 //--------------------------------------------------------------------------
 // Function:	Default Constructor

@@ -27,7 +27,7 @@ namespace H5 {
 //--------------------------------------------------------------------------
 ///\brief	Constant for default dataset memory and transfer property list.
 //--------------------------------------------------------------------------
-const DSetMemXferPropList DSetMemXferPropList::DEFAULT( H5P_DEFAULT );
+const DSetMemXferPropList DSetMemXferPropList::DEFAULT;
 
 //--------------------------------------------------------------------------
 // Function	DSetMemXferPropList default constructor

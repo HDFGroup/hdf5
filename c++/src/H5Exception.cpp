@@ -85,7 +85,7 @@ string Exception::getMajorString( hid_t err_major ) const
 
    // Convert the C error description and return
    string major_str(mesg_C);
-   delete mesg_C;
+   delete []mesg_C;
    return( major_str );
 }
 
@@ -121,7 +121,7 @@ string Exception::getMinorString( hid_t err_minor ) const
 
    // Convert the C error description and return
    string minor_str(mesg_C);
-   delete mesg_C;
+   delete []mesg_C;
    return( minor_str );
 }
 

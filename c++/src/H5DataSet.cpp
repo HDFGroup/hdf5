@@ -117,7 +117,7 @@ DSetCreatPropList DataSet::getCreatePlist() const
 
 //--------------------------------------------------------------------------
 // Function:	DataSet::getStorageSize
-///\brief	Returns the amount of storage required for a dataset.  
+///\brief	Returns the amount of storage required for a dataset.
 ///\return	Size of the storage or 0, for no data
 ///\exception	H5::DataSetIException
 // Note:	H5Dget_storage_size returns 0 when there is no data.  This
@@ -260,7 +260,7 @@ void DataSet::read( string& strg, const DataType& mem_type, const DataSpace& mem
 
    // Get the String and clean up
    strg = strg_C;
-   delete strg_C;
+   delete []strg_C;
 }
 
 //--------------------------------------------------------------------------
@@ -413,7 +413,7 @@ void DataSet::fillMemBuf(void *buf, DataType& buf_type, DataSpace& space)
 ///\param	dataspace - IN: Dataspace with selection
 ///\param	ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
 ///\return	A reference
-///\exception	H5::ReferenceIException
+///\exception	H5::IdComponentException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void* DataSet::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type) const
@@ -428,7 +428,7 @@ void* DataSet::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_
 ///		a reference to an HDF5 object, not to a dataset region.
 ///\param	name - IN: Name of the object to be referenced
 ///\return	A reference
-///\exception	H5::ReferenceIException
+///\exception	H5::IdComponentException
 ///\par Description
 //		This function passes H5R_OBJECT and -1 to the protected 
 //		function for it to pass to the C API H5Rcreate
@@ -450,7 +450,7 @@ void* DataSet::Reference(const char* name) const
 //			H5G_GROUP Object is a group.  
 //			H5G_DATASET   Object is a dataset.  
 //			H5G_TYPE Object is a named datatype 
-// Exception	H5::ReferenceIException
+// Exception	H5::IdComponentException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 H5G_obj_t DataSet::getObjType(void *ref, H5R_type_t ref_type) const
@@ -465,7 +465,7 @@ H5G_obj_t DataSet::getObjType(void *ref, H5R_type_t ref_type) const
 ///		to H5R_DATASET_REGION
 ///\param	ref      - IN: Reference to get region of
 ///\return	DataSpace instance
-///\exception	H5::ReferenceIException
+///\exception	H5::IdComponentException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 DataSpace DataSet::getRegion(void *ref, H5R_type_t ref_type) const
@@ -497,12 +497,12 @@ void DataSet::close()
 ///\brief	Properly terminates access to this dataset.
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//              Replaced resetIdComponent with decRefCount to use new ID
-//              reference counting mechanisms by Quincey Koziol, June 1, 2004
+//		Replaced resetIdComponent with decRefCount to use C library
+//		ID reference counting mechanism - June 1, 2004
 //--------------------------------------------------------------------------
 DataSet::~DataSet()
 {
-   // The dataset id will be closed properly 
+    // The dataset id will be closed properly
     try {
         decRefCount();
     }

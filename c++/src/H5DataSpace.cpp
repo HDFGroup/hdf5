@@ -94,8 +94,8 @@ DataSpace::DataSpace( const DataSpace& original ) : IdComponent( original ) {}
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//              Replaced resetIdComponent with decRefCount to use new ID
-//              reference counting mechanisms by Quincey Koziol, June 1, 2004
+//		Replaced resetIdComponent with decRefCount to use C library
+//		ID reference counting mechanism - June 1, 2004
 //--------------------------------------------------------------------------
 void DataSpace::copy( const DataSpace& like_space )
 {
@@ -568,8 +568,8 @@ void DataSpace::close()
 ///\brief	Properly terminates access to this dataspace.
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//              Replaced resetIdComponent with decRefCount to use new ID
-//              reference counting mechanisms by Quincey Koziol, June 1, 2004
+//		Replaced resetIdComponent with decRefCount to use C library
+//		ID reference counting mechanism - June 1, 2004
 //--------------------------------------------------------------------------
 DataSpace::~DataSpace()
 {  

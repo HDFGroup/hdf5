@@ -87,8 +87,8 @@ PropList::PropList( const hid_t plist_id ) : IdComponent(0)
 ///\exception	H5::PropListIException
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//              Replaced resetIdComponent with decRefCount to use new ID
-//              reference counting mechanisms by Quincey Koziol, June 1, 2004
+//		Replaced resetIdComponent with decRefCount to use C library
+//		ID reference counting mechanism - June 1, 2004
 //--------------------------------------------------------------------------
 void PropList::copy( const PropList& like_plist )
 {
@@ -303,7 +303,7 @@ string PropList::getProperty(const char* name) const
 
    // Return propety value as a string after deleting temp C-string
    string prop_strg = string(prop_strg_C);
-   delete prop_strg_C;
+   delete []prop_strg_C;
    return (prop_strg);
 }
 //--------------------------------------------------------------------------
@@ -581,8 +581,8 @@ PropList PropList::getClassParent() const
 ///\brief	Properly terminates access to this property list.
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//		Replaced resetIdComponent with decRefCount to use new ID 
-//		reference counting mechanisms by Quincey Koziol, June 1, 2004
+//		Replaced resetIdComponent with decRefCount to use C library
+//		ID reference counting mechanism - June 1, 2004
 //--------------------------------------------------------------------------
 PropList::~PropList()
 {  

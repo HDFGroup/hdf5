@@ -119,8 +119,7 @@ void H5File::p_get_file(const char* name, unsigned int flags, const FileCreatPro
     // Open the file if none of the bits above are set.
     else
     {
-	// use create_plist for access plist because of the default argument
-	hid_t access_plist_id = create_plist.getId();
+	hid_t access_plist_id = access_plist.getId();
 	id = H5Fopen( name, flags, access_plist_id );
 	if( id <= 0 )  // throw an exception when open/create fail
 	{
@@ -182,11 +181,11 @@ bool H5File::isHdf5(const string& name )
 //		If this object has represented another HDF5 file, the previous
 //		HDF5 file need to be closed first.
 // Programmer	Binh-Minh Ribler - 2000
+// Note:        This wrapper doesn't seem right regarding the 'id' and should
+//              be investigated.  BMR - 2/20/2005
 // Modification
-//              Replaced resetIdComponent with decRefCount to use new ID
-//              reference counting mechanisms by Quincey Koziol, June 1, 2004
-// Note:	This wrapper doesn't seem right regarding the 'id' and should
-//		be investigated.  BMR - 2/20/2005
+//		Replaced resetIdComponent with decRefCount to use C library
+//		ID reference counting mechanism - June 1, 2004
 //--------------------------------------------------------------------------
 void H5File::reOpen()
 {
@@ -295,15 +294,15 @@ hssize_t H5File::getFreeSpace() const
 ///\return	Number of opened object IDs
 ///\exception	H5::FileIException
 ///\par Description
-///             The valid values for \a types include:
-///             \li \c H5F_OBJ_FILE	- Files only
-///             \li \c H5F_OBJ_DATASET	- Datasets only
-///             \li \c H5F_OBJ_GROUP	- Groups only
-///             \li \c H5F_OBJ_DATATYPE	- Named datatypes only
-///             \li \c H5F_OBJ_ATTR	- Attributes only
-///             \li \c H5F_OBJ_ALL    - All of the above, i.e., \c H5F_OBJ_FILE
-///					| \c H5F_OBJ_DATASET | \c H5F_OBJ_GROUP
-///					| \c H5F_OBJ_DATATYPE | \c H5F_OBJ_ATTR
+///		The valid values for \a types include:
+///		\li \c H5F_OBJ_FILE	- Files only  
+///		\li \c H5F_OBJ_DATASET	- Datasets only  
+///		\li \c H5F_OBJ_GROUP	- Groups only  
+///		\li \c H5F_OBJ_DATATYPE	- Named datatypes only  
+///		\li \c H5F_OBJ_ATTR	- Attributes only  
+///		\li \c H5F_OBJ_ALL    - All of the above, i.e., \c H5F_OBJ_FILE 
+///					| \c H5F_OBJ_DATASET | \c H5F_OBJ_GROUP 
+///					| \c H5F_OBJ_DATATYPE | \c H5F_OBJ_ATTR 
 ///\par
 /// Multiple object types can be combined with the logical OR operator (|).
 // Programmer   Binh-Minh Ribler - May 2004
@@ -347,15 +346,15 @@ int H5File::getObjCount() const
 ///\param	oid_list - List of open object identifiers
 ///\exception	H5::FileIException
 ///\par Description
-///             The valid values for \a types include:
-///             \li \c H5F_OBJ_FILE	- Files only
-///             \li \c H5F_OBJ_DATASET	- Datasets only
-///             \li \c H5F_OBJ_GROUP	- Groups only
-///             \li \c H5F_OBJ_DATATYPE	- Named datatypes only
-///             \li \c H5F_OBJ_ATTR	- Attributes only
-///             \li \c H5F_OBJ_ALL    - All of the above, i.e., \c H5F_OBJ_FILE
-///					| \c H5F_OBJ_DATASET | \c H5F_OBJ_GROUP
-///					| \c H5F_OBJ_DATATYPE | \c H5F_OBJ_ATTR
+///		The valid values for \a types include:
+///		\li \c H5F_OBJ_FILE	- Files only  
+///		\li \c H5F_OBJ_DATASET	- Datasets only  
+///		\li \c H5F_OBJ_GROUP	- Groups only  
+///		\li \c H5F_OBJ_DATATYPE	- Named datatypes only  
+///		\li \c H5F_OBJ_ATTR	- Attributes only  
+///		\li \c H5F_OBJ_ALL    - All of the above, i.e., \c H5F_OBJ_FILE 
+///					| \c H5F_OBJ_DATASET | \c H5F_OBJ_GROUP 
+///					| \c H5F_OBJ_DATATYPE | \c H5F_OBJ_ATTR 
 ///\par
 /// Multiple object types can be combined with the logical OR operator (|).
 //
@@ -438,7 +437,7 @@ string H5File::getFileName() const
 ///\param	dataspace - IN: Dataspace with selection
 ///\param	ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
 ///\return	A reference
-///\exception	H5::ReferenceIException
+///\exception	H5::IdComponentException
 ///\par Description
 ///		Note that name must be an absolute path to the object in the file.
 // Programmer	Binh-Minh Ribler - May, 2004
@@ -455,7 +454,7 @@ void* H5File::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_t
 ///		a reference to an HDF5 object, not to a dataset region.
 ///\param	name - IN: Name of the object to be referenced
 ///\return	A reference
-///\exception	H5::ReferenceIException
+///\exception	H5::IdComponentException
 ///\par Description
 //		This function passes H5R_OBJECT and -1 to the protected 
 //		function for it to pass to the C API H5Rcreate
@@ -480,7 +479,7 @@ void* H5File::Reference(const char* name) const
 ///		\li \c H5G_GROUP   - Object is a group.  
 ///		\li \c H5G_DATASET - Object is a dataset.  
 ///		\li \c H5G_TYPE    - Object is a named datatype 
-///\exception	H5::ReferenceIException
+///\exception	H5::IdComponentException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 H5G_obj_t H5File::getObjType(void *ref, H5R_type_t ref_type) const
@@ -494,7 +493,7 @@ H5G_obj_t H5File::getObjType(void *ref, H5R_type_t ref_type) const
 ///\param	ref      - IN: Reference to get region of
 ///\param	ref_type - IN: Type of reference to get region of - default
 ///\return	DataSpace instance
-///\exception	H5::ReferenceIException
+///\exception	H5::IdComponentException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 DataSpace H5File::getRegion(void *ref, H5R_type_t ref_type) const
@@ -581,8 +580,8 @@ void H5File::throwException(const string func_name, const string msg) const
 ///\brief	Properly terminates access to this file. 
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//              Replaced resetIdComponent with decRefCount to use new ID
-//              reference counting mechanisms by Quincey Koziol, June 1, 2004
+//		Replaced resetIdComponent with decRefCount to use C library
+//		ID reference counting mechanism - June 1, 2004
 //--------------------------------------------------------------------------
 H5File::~H5File() 
 {  

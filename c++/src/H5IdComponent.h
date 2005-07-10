@@ -25,18 +25,21 @@ namespace H5 {
 class H5_DLLCPP IdComponent {
    public:
 	// Increment reference counter.
-	void incRefCount();
+	void incRefCount(hid_t obj_id) const;
+	void incRefCount() const;
 
 	// Decrement reference counter.
-	void decRefCount();
+	void decRefCount(hid_t obj_id) const;
+	void decRefCount() const;
 
 	// Get the reference counter to this identifier.
-	int getCounter();
+	int getCounter(hid_t obj_id) const;
+	int getCounter() const;
 
 	// Assignment operator.
 	IdComponent& operator=( const IdComponent& rhs );
 
-	void reset();
+	//void reset();
 
 	// Sets the identifier of this object to a new value.
 	void setId( hid_t new_id );
@@ -49,6 +52,12 @@ class H5_DLLCPP IdComponent {
 
 	// Gets the value of IdComponent's data member.
 	virtual hid_t getId () const;
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+	// Pure virtual function for there are various H5*close for the
+	// subclasses.
+	virtual void close() = 0;
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 	// Destructor
 	virtual ~IdComponent();
@@ -78,6 +87,10 @@ class H5_DLLCPP IdComponent {
 
         // Retrieves a dataspace with the region pointed to selected.
         hid_t p_get_region(void *ref, H5R_type_t ref_type) const;
+
+	// Verifies that the given id is valid.
+	bool p_valid_id(hid_t obj_id) const;
+
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 }; // end class IdComponent
