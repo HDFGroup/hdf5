@@ -94,9 +94,9 @@ foreach my $arg (@ARGV) {
 
 		open(INPUT, "<$arg") or die "error: cannot open file $arg: $!\n";
 		open(ASCII_OUTPUT, ">$ascii_output") or
-				die "error: cannot open file $ascii_output: $!\n";
+		    die "error: cannot open file $ascii_output: $!\n";
 		open(EXCEL_OUTPUT, ">$excel_output") or
-				die "error: cannot open file $excel_output: $!\n";
+		    die "error: cannot open file $excel_output: $!\n";
 	} 
 	else
 	{
@@ -160,7 +160,7 @@ sub usage {
 	options are:\n
 	-data_type \"data_type\" plots the results for \"write-only\",\"read-only\", \"write-close\", or \"read-close\" (default is write-only)\n
 	-buffer_size \"buffer_size\" plots data from this buffer size (in kilobytes, default is 128)\n
-	-procs \"num_procs\" plots data from the run with num_procs processors (default is 1).\n
+	-procs \"num_procs\" plots data from the run with num_procs processors (default is the highest number of processors for which there is data).\n
 	-throughput \"throughput_type\" plots either the \"max\", \"min\", or \"average\" throughput (default is average)\n
 	-io_type  \"io_type\" where \"io_type\" is the bitwise or of the io_type for which plotting is desired (1 for POSIX, 2 for MPIO, 4 for PHDF5 (default is 7 (all))\n
 	-3d	if present, does a 3d plot in addition to the normal ones\n";
@@ -428,7 +428,7 @@ sub plot_default_graph2 {
 	open(GNUPLOT_DATA_OUTPUT, ">gnuplot.data") or
 		die "error: cannot open file gnuplot.data: $!\n";
 	
-	$num_procs_graph = max(sort { $a <=> $b }( keys %results ));
+	$num_procs_graph = max(sort { $a <=> $b }( keys %results )) if !$num_procs_graph;
 	print "min-rpocs: " . $num_procs_graph;
 	$data_type = "write-only" if !$data_type;
 
