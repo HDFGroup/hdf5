@@ -415,9 +415,11 @@ int main(int argc, char **argv)
     AddTest("fill", dataset_fillvalue, NULL, 
 	    "dataset fill value", PARATESTFILE);
 
+#if 0
     /* Collective Chunk IO are verified to work for 64 processes.
      * Add or skip depending on whether mpi_size is larger than 64.
      */
+
     if((mpi_size > 64) && MAINPROCESS) {
 	printf("Collective chunk IO tests haven't been tested \n");
 	printf("  for the number of process greater than 64.\n");
@@ -433,10 +435,39 @@ int main(int argc, char **argv)
 	coll_chunk3,NULL, "multi-chunk collective chunk io",PARATESTFILE);
     AddTest((mpi_size > 64) ? "-cchunk4" : "cchunk4",
 	coll_chunk4,NULL, "collective to independent chunk io",PARATESTFILE);
+#endif
 
-    /* Collective irregular chunk IO are verified to work for 3 processes.
-     * Add or skip depending on whether mpi_size is larger than 3.
-     */
+    AddTest("cchunk1",
+	coll_chunk1,NULL, "simple collective chunk io",PARATESTFILE);
+    AddTest("cchunk2",
+	coll_chunk2,NULL, "noncontiguous collective chunk io",PARATESTFILE);
+    AddTest("cchunk3",
+	coll_chunk3,NULL, "multi-chunk collective chunk io",PARATESTFILE);
+    AddTest("cchunk4",
+	coll_chunk4,NULL, "collective to independent chunk io",PARATESTFILE);
+
+/* irregular collective IO tests*/
+    AddTest("ccontw",
+	coll_irregular_cont_write,NULL,
+	"collective irregular contiguous write",PARATESTFILE);
+    AddTest("ccontr",
+	coll_irregular_cont_read,NULL,
+	"collective irregular contiguous read",PARATESTFILE);
+    AddTest("cschunkw",
+	coll_irregular_simple_chunk_write,NULL,
+	"collective irregular simple chunk write",PARATESTFILE);
+    AddTest("cschunkr",
+	coll_irregular_simple_chunk_read,NULL,
+	"collective irregular simple chunk read",PARATESTFILE);
+    AddTest("ccchunkw",
+	coll_irregular_complex_chunk_write,NULL,
+	"collective irregular complex chunk write",PARATESTFILE);
+    AddTest("ccchunkr",
+	coll_irregular_complex_chunk_read,NULL,
+	"collective irregular complex chunk read",PARATESTFILE);
+  
+
+#if 0
     if((mpi_size > 3) && MAINPROCESS) {
 	printf("Collective irregular chunk IO tests haven't been tested \n");
 	printf("  for the number of process greater than 3.\n");
@@ -462,6 +493,7 @@ int main(int argc, char **argv)
     AddTest((mpi_size > 3) ? "-ccchunkr" : "ccchunkr",
 	coll_irregular_complex_chunk_read,NULL,
 	"collective irregular complex chunk read",PARATESTFILE);
+#endif
 
 
     AddTest("null", null_dataset, NULL, 

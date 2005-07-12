@@ -86,6 +86,7 @@ coll_chunk3(void)
 
 }
 
+
 void
 coll_chunk4(void)
 {
@@ -166,7 +167,10 @@ coll_chunktest(const char* filename,int chunk_factor,int select_factor) {
  
     /* test1: chunk size is equal to dataset size */
     chunk_dims[0] = SPACE_DIM1/chunk_factor;
-    chunk_dims[1] = SPACE_DIM2/chunk_factor;
+
+    /* to decrease the testing time, maintain bigger chunk size */
+    if(chunk_factor >2) chunk_dims[1] = SPACE_DIM2/2;
+    else chunk_dims[1] = SPACE_DIM2/chunk_factor;
     status = H5Pset_chunk(crp_plist, 2, chunk_dims);
     VRFY((status >= 0),"chunk creation property list succeeded");
  
