@@ -19,6 +19,10 @@ REM testfiles\h5repacktst\%1\h5repacktst
 
 mkdir temptest
 type nul > temptest\empty.txt
+type nul > temptest\notcomparable.txt
+echo Some objects are not comparable>> temptest\notcomparable.txt
+echo Use -v for a list of objects.>> temptest\notcomparable.txt
+
 type nul > repacktest%2_%1.txt
 echo ========================================== >> repacktest%2_%1.txt
 echo Testing repacktest.bat >> repacktest%2_%1.txt
@@ -56,7 +60,7 @@ REM TOOLTEST test1.h5
 h5repack%2 -i ..\..\testfiles\test1.h5 -o ..\..\temptest\out.test1.h5
 ..\..\h5diff%2\%1\h5diff%2 ..\..\testfiles\test1.h5 ..\..\temptest\out.test1.h5 > ..\..\temptest\test1.results 2>..\..\temptest\test1_error.results
 more ..\..\temptest\test1_error.results >> ..\..\temptest\test1.results
-fc ..\..\temptest\test1.results ..\..\temptest\empty.txt >temp.txt
+fc ..\..\temptest\test1.results ..\..\temptest\notcomparable.txt >temp.txt
 if %ERRORLEVEL%==0 (
    echo Testing h5repack test1.h5                                              PASSED >> ..\..\repacktest%2_%1.txt
 ) else (
@@ -67,6 +71,22 @@ del temp.txt
 del ..\..\temptest\out.test1.h5
 del ..\..\temptest\test1.results
 del ..\..\temptest\test1_error.results
+
+REM TOOLTEST test2.h5
+h5repack%2 -i ..\..\testfiles\test2.h5 -o ..\..\temptest\out.test2.h5
+..\..\h5diff%2\%1\h5diff%2 ..\..\testfiles\test2.h5 ..\..\temptest\out.test2.h5 > ..\..\temptest\test2.results 2>..\..\temptest\test2_error.results
+more ..\..\temptest\test2_error.results >> ..\..\temptest\test2.results
+fc ..\..\temptest\test2.results ..\..\temptest\notcomparable.txt >temp.txt
+if %ERRORLEVEL%==0 (
+   echo Testing h5repack test2.h5                                              PASSED >> ..\..\repacktest%2_%1.txt
+) else (
+   echo Testing h5repack test2.h5                                              FAILED >> ..\..\repacktest%2_%1.txt
+   more temp.txt >> ..\..\repacktest%2_%1.txt
+)
+del temp.txt
+del ..\..\temptest\out.test2.h5
+del ..\..\temptest\test2.results
+del ..\..\temptest\test2_error.results
 
 REM TOOLTEST test3.h5
 h5repack%2 -i ..\..\testfiles\test3.h5 -o ..\..\temptest\out.test3.h5 
