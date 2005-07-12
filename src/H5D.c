@@ -2015,10 +2015,6 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
     assert (H5I_GENPROP_LST==H5I_get_type(dcpl_id));
     assert (H5I_GENPROP_LST==H5I_get_type(dxpl_id));
 
-    /* Check if the filters in the DCPL can be applied to this dataset */
-    if(H5Z_can_apply(dcpl_id,type_id)<0)
-        HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "I/O filters can't operate on this dataset")
-
     /* Get the dataset's datatype */
     if (NULL == (type = H5I_object(type_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
@@ -2045,16 +2041,6 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
     if(NULL == (new_dset->shared = H5D_new(dcpl_id,TRUE,has_vl_type)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    /*
-     * Set the dataset's checked_filters flag to enable writing.
-     * Make sure that H5Z_can_apply is called at the beginning of this function!
-     */
-    new_dset->shared->checked_filters = TRUE;
-
-    /* Make the "set local" filter callbacks for this dataset */
-    if(H5Z_set_local(new_dset->shared->dcpl_id,type_id)<0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set local filter parameters")
-
     /* What file is the dataset being added to? */
     if(NULL==(file=H5G_insertion_file(loc, name, dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to locate insertion point")
@@ -2063,6 +2049,13 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
     if(H5D_init_type(file, new_dset, type_id, type)<0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy datatype")
 
+    /* Check if the filters in the DCPL can be applied to this dataset */
+    if(H5Z_can_apply(new_dset->shared->dcpl_id,new_dset->shared->type_id)<0)
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "I/O filters can't operate on this dataset")
+
+    /* Set the dataset's checked_filters flag to enable writing */
+    new_dset->shared->checked_filters = TRUE;
+
     /* Copy dataspace for dataset */
     if((new_dset->shared->space = H5S_copy(space, FALSE))==NULL)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy dataspace")
@@ -2070,6 +2063,10 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
     /* Set the dataset's dataspace to 'all' selection */
     if(H5S_select_all(new_dset->shared->space,1)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection")
+
+    /* Make the "set local" filter callbacks for this dataset */
+    if(H5Z_set_local(new_dset->shared->dcpl_id,new_dset->shared->type_id)<0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set local filter parameters")
 
     /* Check if the dataset has a non-default DCPL & get important values, if so */
     if(new_dset->shared->dcpl_id!=H5P_DATASET_CREATE_DEFAULT) {
