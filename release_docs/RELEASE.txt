@@ -109,8 +109,8 @@ New Features
           Currently, not all MPI-IO packages support complicated MPI derived
                      datatype used in the implementation of irregular
                      selection INSIDE HDF5. 
-                     DEC 5.x is not supporting complicated derived datatype.
-                     For AIX 5.1,
+                     1) DEC 5.x is not supporting complicated derived datatype.
+                     2) For AIX 5.1 32-bit,
                      if your poe version number is 3.2.0.19 or lower,
                      please edit powerpc-ibm-aix5.x under hdf5/config,
                      Find the line with
@@ -118,15 +118,18 @@ New Features
                      and UNCOMMENT this line before the configure.
                      check poe version with the following command:
                      lpp -l all | grep ppe.poe
-                     with IRIX 6.5, 
-                     if your C compiler version is 7.4 or higher,
-                     please edit irix6.x under hdf5/config,
-                     Find the line with
-                            << hdf5_mpi_complex_derived_datatype_works>>
-                     and COMMENT out this line before the configure.
-                     check  cc version with the following command:
-                           cc -version
-                     KY - 2005/04/15
+                     For AIX 5.1 64-bit,
+                     regardless of poe version number, please UNCOMMENT
+                      << hdf5_mpi_complex_derived_datatype_works>> under hdf5/config.
+                      We suspect there are some problems  for MPI-IO implementation
+                      for 64-bit.
+                     3) For Linux cluster, 
+                        if mpich version is 1.2.5 or lower, collective irregular selection
+                        IO is not supported, internally independent IO is used.
+                     4) For IRIX 6.5,
+                        if C compiler version is 7.3 or lower, collective irregular selection
+                        IO is not supported, internally independent IO is used.
+                     KY - 2005/07/13
         - HDF5 N-bit filter 
           HDF5 support N-bit filter from this version,  
           The N-Bit filter is used effectively for compressing data of N-Bit
