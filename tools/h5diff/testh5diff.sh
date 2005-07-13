@@ -92,9 +92,10 @@ STDERR_FILTER() {
 	    < $tmp_file > $result_file
     fi
     # Filter LANL MPI messages
+    # and LLNL srun messages
     if test -n "$pmode"; then
 	cp $result_file $tmp_file
-	sed -e '/^LA-MPI:/d' \
+	sed -e '/^LA-MPI:/d' -e '/^srun:/d' \
 	    < $tmp_file > $result_file
     fi
     rm -f $tmp_file
