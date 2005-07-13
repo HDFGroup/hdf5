@@ -205,6 +205,7 @@ void coll_write_test(int chunk_factor)
 
   const char *filename;
   hid_t   acc_plist,xfer_plist;
+  hbool_t  use_gpfs = FALSE;
   hid_t   file, datasetc,dataseti;           /* File and dataset identifiers */
   hid_t   mspaceid1, mspaceid, fspaceid,fspaceid1; /* Dataspace identifiers */
   hid_t   plist;                   /* Dataset property list identifier */
@@ -252,12 +253,18 @@ void coll_write_test(int chunk_factor)
    */
   vector[0] = vector[MSPACE1_DIM - 1] = -1;
   for (i = 1; i < MSPACE1_DIM - 1; i++) vector[i] = i;
+  printf("sizeof(int) %d\n",sizeof(int));
 
+#if 0
   acc_plist = H5Pcreate(H5P_FILE_ACCESS);
   VRFY((acc_plist >= 0),""); 
 
   ret       = H5Pset_fapl_mpio(acc_plist,comm,info);
   VRFY((ret >= 0),"MPIO creation property list succeeded");
+#endif
+
+  acc_plist = create_faccess_plist(comm, info, facc_type, use_gpfs);    
+  VRFY((acc_plist >= 0),"");
    
   /*
    * Create a file.
@@ -360,8 +367,8 @@ void coll_write_test(int chunk_factor)
   VRFY((ret >= 0),"MPIO data transfer property list succeed"); 
 
 
-  ret = H5Dwrite(datasetc, H5T_NATIVE_INT, mspaceid1, fspaceid, xfer_plist, vector);
-  /*ret = H5Dwrite(datasetc, H5T_NATIVE_INT, mspaceid1, fspaceid, H5P_DEFAULT, vector);*/
+  ret = H5Dwrite(datasetc, H5T_NATIVE_INT, mspaceid1, fspaceid, xfer_plist, vector); 
+/* ret = H5Dwrite(datasetc, H5T_NATIVE_INT, mspaceid1, fspaceid, H5P_DEFAULT, vector);*/
   VRFY((ret >= 0),"dataset collective write succeed"); 
 
   ret = H5Sclose(mspaceid1);
@@ -400,11 +407,15 @@ void coll_write_test(int chunk_factor)
 
   /*** For testing collective hyperslab selection write ***/
 
+#if 0
   acc_plist = H5Pcreate(H5P_FILE_ACCESS);
   VRFY((acc_plist >= 0),""); 
 
   ret       = H5Pset_fapl_mpio(acc_plist,comm,info);
   VRFY((ret >= 0),"MPIO creation property list succeeded");
+#endif
+  acc_plist = create_faccess_plist(comm, info, facc_type, use_gpfs);    
+  VRFY((acc_plist >= 0),"");
    
   file = H5Fopen(filename, H5F_ACC_RDONLY, acc_plist);
   VRFY((file >= 0),"H5Fopen succeeded");
@@ -568,6 +579,7 @@ void coll_read_test(int chunk_factor)
   hid_t   acc_plist,xfer_plist;
   hid_t   file, dataseti;           /* File and dataset identifiers */
   hid_t   mspaceid, fspaceid1; /* Dataspace identifiers */
+  hbool_t use_gpfs;
  
   /* Dimension sizes of the dataset (on disk) */
   hsize_t mdim[] = {MSPACE_DIM1, MSPACE_DIM2}; /* Dimension sizes of the 
@@ -610,12 +622,17 @@ void coll_read_test(int chunk_factor)
 
   /*** For testing collective hyperslab selection read ***/
 
+#if 0
   acc_plist = H5Pcreate(H5P_FILE_ACCESS);
   VRFY((acc_plist >= 0),""); 
 
   ret       = H5Pset_fapl_mpio(acc_plist,comm,info);
   VRFY((ret >= 0),"MPIO creation property list succeeded");
+#endif
    
+  acc_plist = create_faccess_plist(comm, info, facc_type, use_gpfs);    
+  VRFY((acc_plist >= 0),"");
+
   file = H5Fopen(filename, H5F_ACC_RDONLY, acc_plist);
   VRFY((file >= 0),"H5Fopen succeeded");
 
