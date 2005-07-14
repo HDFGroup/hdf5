@@ -845,7 +845,7 @@ fix_order(int n, int first, int last, int *perm, const char **mesg)
 	    /*
 	     * Bi-endian machines like VAX.
 	     */
-	    assert(0 == n / 2);
+	    assert(0 == n % 2);
 	    if (mesg) *mesg = "VAX";
 	    for (i = 0; i < n; i += 2) {
 		perm[i] = (n - 2) - i;
