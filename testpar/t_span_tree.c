@@ -579,7 +579,7 @@ void coll_read_test(int chunk_factor)
   hid_t   acc_plist,xfer_plist;
   hid_t   file, dataseti;           /* File and dataset identifiers */
   hid_t   mspaceid, fspaceid1; /* Dataspace identifiers */
-  hbool_t use_gpfs;
+  hbool_t use_gpfs = FALSE;
  
   /* Dimension sizes of the dataset (on disk) */
   hsize_t mdim[] = {MSPACE_DIM1, MSPACE_DIM2}; /* Dimension sizes of the 
