@@ -78,9 +78,14 @@ H5F_close_mounts(H5F_t *f)
 
     /* Unmount all child files */
     for (u = 0; u < f->mtab.nmounts; u++) {
+        /* Detach the child file from the parent file */
         f->mtab.child[u].file->mtab.parent = NULL;
+
+        /* Close the internal group maintaining the mount point */
         if(H5G_close(f->mtab.child[u].group) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close child group")
+
+        /* Close the child file */
         if(H5F_close(f->mtab.child[u].file) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close child file")
     } /* end if */
@@ -633,13 +638,13 @@ done:
 static hbool_t
 H5F_check_mounts_recurse(H5F_t *f)
 {
-    hbool_t ret_value;          /* Return value */
+    hbool_t ret_value = FALSE;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_check_mounts_recurse)
 
     /* Check if this file is closing and if the only objects left open are
      * the mount points */
-    if(f->closing && f->nopen_objs == f->mtab.nmounts) {
+    if((f->closing || (f->nrefs == 1 && f->mtab.parent)) && f->nopen_objs == f->mtab.nmounts) {
         unsigned u;
 
         /* Iterate over files mounted in this file and check if all can be closed */
@@ -648,9 +653,10 @@ H5F_check_mounts_recurse(H5F_t *f)
                     || !H5F_check_mounts_recurse(f->mtab.child[u].file))
                 HGOTO_DONE(FALSE)
         } /* end for */
-    } /* end if */
 
-    ret_value = TRUE;
+        /* Set return value */
+        ret_value = TRUE;
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -682,6 +688,15 @@ H5F_check_mounts(H5F_t *f)
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5F_check_mounts, FAIL)
+#ifdef QAK
+HDfprintf(stderr, "%s: f->name=%s\n", FUNC, f->name);
+HDfprintf(stderr, "%s: f->nrefs=%u\n", FUNC, f->nrefs);
+HDfprintf(stderr, "%s: f->shared->nrefs=%u\n", FUNC, f->shared->nrefs);
+HDfprintf(stderr, "%s: f->mtab.parent=%p\n", FUNC, f->mtab.parent);
+HDfprintf(stderr, "%s: f->mtab.nmounts=%u\n", FUNC, f->mtab.nmounts);
+HDfprintf(stderr, "%s: f->nopen_objs=%u\n", FUNC, f->nopen_objs);
+HDfprintf(stderr, "%s: f->closing=%x\n", FUNC, f->closing);
+#endif /* QAK */
 
     /* Only try to close files for files involved in a mounting hierarchy */
     if(f->mtab.parent || f->mtab.nmounts) {
@@ -703,7 +718,8 @@ H5F_check_mounts(H5F_t *f)
             if(H5F_close_mounts(top) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't unmount child file")
 
-            H5I_dec_ref(top->closing);
+            if(H5I_dec_ref(top->closing) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't decrement file closing ID")
         } /* end if */
     } /* end if */
 

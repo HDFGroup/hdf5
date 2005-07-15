@@ -2161,7 +2161,8 @@ H5G_close(H5G_t *grp)
         /* Check if this group was the last object holding open a mounted file
          * hierarchy and close down the file hierarchy if so */
         if(grp->shared->fo_count == 1)
-            H5F_check_mounts(grp->ent.file);
+            if(H5F_check_mounts(grp->ent.file) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_MOUNT, FAIL, "problem checking mount hierarchy"); 
 
         if(H5G_free_ent_name(&(grp->ent))<0)
         {
