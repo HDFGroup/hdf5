@@ -414,6 +414,8 @@ if [ -n "$DEPLOYDIRNAME" ]; then
     if [ "$snapshot" = "yes" ]; then
 	TIMESTAMP "deploy"
 	if (cd ${TESTDIR} && ${CURRENT}/bin/deploy ${deploydir}/${DEPLOYDIRNAME}); then
+	    :	#continue
+	else
 	    errcode=$?
 	    exit $errcode
 	fi
