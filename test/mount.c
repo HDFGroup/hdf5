@@ -1680,7 +1680,7 @@ error:
     
 
 /*-------------------------------------------------------------------------
- * Function:	test_hold_open
+ * Function:	test_hold_open_file
  *
  * Purpose:	Test that the library correctly holds open files when they
  *              have child files that have not been unmounted.
@@ -1697,14 +1697,14 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_hold_open(hid_t fapl)
+test_hold_open_file(hid_t fapl)
 {
     hid_t fid1 = -1, fid2 = -1;           	/* File IDs */
     hid_t gidA = -1, gidM = -1, gidAM = -1;    	/* Group IDs */
     char	filename1[1024],
 		filename2[1024]; 	/* Name of files to mount */
     
-    TESTING("hold open");
+    TESTING("hold open w/file");
 
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
     h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
@@ -1791,6 +1791,14 @@ test_hold_open(hid_t fapl)
     if(H5Gclose(gidA) < 0)
         TEST_ERROR
 
+    /* Check that all file IDs have been closed */
+    if(H5I_nmembers(H5I_FILE) != 0)
+        TEST_ERROR
+
+    /* Check that all "file closing" IDs have been closed */
+    if(H5I_nmembers(H5I_FILE_CLOSING) != 0)
+        TEST_ERROR
+
     PASSED();
     return 0;
 
@@ -1803,7 +1811,142 @@ error:
 	H5Fclose(fid1);
     } H5E_END_TRY;
     return 1;
-} /* end test_hold_open() */
+} /* end test_hold_open_file() */
+    
+
+/*-------------------------------------------------------------------------
+ * Function:	test_hold_open_group
+ *
+ * Purpose:	Test that the library correctly holds open file mount
+ *              hierarchies when they have objects open.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, July 14, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_hold_open_group(hid_t fapl)
+{
+    hid_t fid1 = -1, fid2 = -1;           	/* File IDs */
+    hid_t gidA = -1, gidM = -1, gidAM = -1, gidAM2 = -1;    	/* Group IDs */
+    char	filename1[1024],
+		filename2[1024]; 	/* Name of files to mount */
+    
+    TESTING("hold open w/group");
+
+    h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
+    h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
+    
+    /* Create file #1 */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidA) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+
+    /* Create file #2 */
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidM = H5Gcreate(fid2, "M", (size_t)0)) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidM) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+
+    /* Re-open files and mount file #2 in file #1 */
+    if((fid1 = H5Fopen(filename1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidA = H5Gopen(fid1, "A")) < 0)
+        TEST_ERROR
+
+    if((fid2 = H5Fopen(filename2, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if(H5Fmount(gidA, ".", fid2, H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    if((gidAM = H5Gopen(fid1, "A/M")) < 0)
+        TEST_ERROR
+
+    /* Close file #2 */
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+    /* Close group in parent file */
+    if(H5Gclose(gidA) < 0)
+        TEST_ERROR
+
+    /* Keep fid1 & gidAM open, everything else closed */
+
+    /* Retry to opening group in mounted file */
+    /* (Should work because file is still mounted) */
+    if((gidAM2 = H5Gopen(fid1, "A/M")) < 0)
+        TEST_ERROR
+
+    /* Close group in mounted file */
+    if(H5Gclose(gidAM2) < 0)
+        TEST_ERROR
+
+    /* Close original group in mount file */
+    if(H5Gclose(gidAM) < 0)
+        TEST_ERROR
+
+    /* Attempt to open group in mounted file */
+    /* (Should work because file is still mounted) */
+    if((gidAM2 = H5Gopen(fid1, "/A/M")) < 0)
+        TEST_ERROR
+
+    /* Close group in mounted file */
+    if(H5Gclose(gidAM2) < 0)
+        TEST_ERROR
+
+    /* Close file #1 */
+    /* (should unmount file #2 also) */
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+    /* Check that all file IDs have been closed */
+    if(H5I_nmembers(H5I_FILE) != 0)
+        TEST_ERROR
+
+    /* Check that all "file closing" IDs have been closed */
+    if(H5I_nmembers(H5I_FILE_CLOSING) != 0)
+        TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Gclose(gidM);
+	H5Gclose(gidAM);
+	H5Gclose(gidAM2);
+	H5Gclose(gidA);
+        H5Fclose(fid2);
+	H5Fclose(fid1);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_hold_open_group() */
     
 
 /*-------------------------------------------------------------------------
@@ -1848,7 +1991,8 @@ main(void)
     nerrors += test_mount_after_close(fapl);
     nerrors += test_mount_after_unmount(fapl);
     nerrors += test_missing_unmount(fapl);
-    nerrors += test_hold_open(fapl);
+    nerrors += test_hold_open_file(fapl);
+    nerrors += test_hold_open_group(fapl);
     
     if (nerrors) goto error;
     puts("All mount tests passed.");

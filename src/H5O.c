@@ -428,8 +428,24 @@ H5O_close(H5G_entry_t *obj_ent)
      * pending then close the file and remove it from the H5I_FILE_CLOSING ID
      * group.
      */
-    if (obj_ent->file->mtab.nmounts==obj_ent->file->nopen_objs && obj_ent->file->closing)
-	H5I_dec_ref(obj_ent->file->closing);
+    /* Check for just mount points holding file open */
+    if(obj_ent->file->mtab.nmounts == obj_ent->file->nopen_objs && obj_ent->file->closing) {
+        unsigned u;             /* Local index variable */
+        hbool_t really_close;  /* Whether to delay the file close by going to a "closing" state */
+
+        /* Check for open groups on mount points */
+        really_close = TRUE;
+        for(u = 0; u < obj_ent->file->mtab.nmounts; u++) {
+            if(H5G_get_shared_count(obj_ent->file->mtab.child[u].group) > 1) {
+                really_close = FALSE;
+                break;
+            } /* end if */
+        } /* end for */
+
+        /* If we really want to close this file now */
+        if(really_close)
+            H5I_dec_ref(obj_ent->file->closing);
+    } /* end if */
 
     /* Free the ID to name buffers */
     H5G_free_ent_name(obj_ent);
