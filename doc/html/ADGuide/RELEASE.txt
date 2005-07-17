@@ -1,4 +1,4 @@
-HDF5 version 1.6.4-post4 released on Sun Jul 10 17:50:56 CDT 2005
+HDF5 version 1.6.4-post5 released on Sun Jul 17 17:58:20 CDT 2005
 ================================================================================
 
 INTRODUCTION
@@ -72,6 +72,8 @@ Bug Fixes since HDF5-1.6.4 release
 
     Library
     -------
+        - More bug fixes on holding open files that are mounted and have
+            IDs open.  QAK - 2005/07/14
         - Dataset sieve buffer cache was inadvertantly disabled - re-enable 
             it.  QAK - 2005/07/08
         - Don't unmount child files until the parent file actually closes.
