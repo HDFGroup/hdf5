@@ -196,7 +196,7 @@ H5_DLLVAR const H5O_class_t H5O_MTIME_NEW[1];
 H5_DLLVAR const H5O_class_t H5O_PLIST[1];
 
 /* Package-local function prototypes */
-H5_DLL void * H5O_read_real(H5G_entry_t *ent, const H5O_class_t *type,
+H5_DLL void * H5O_read_real(const H5G_entry_t *ent, const H5O_class_t *type,
         int sequence, void *mesg, hid_t dxpl_id);
 H5_DLL void * H5O_free_real(const H5O_class_t *type, void *mesg);
 

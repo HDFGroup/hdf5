@@ -1149,7 +1149,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5S_t *
-H5S_read(H5G_entry_t *ent, hid_t dxpl_id)
+H5S_read(const H5G_entry_t *ent, hid_t dxpl_id)
 {
     H5S_t		   *ds = NULL;          /* Dataspace to return */
     H5S_t		   *ret_value;   /* Return value */

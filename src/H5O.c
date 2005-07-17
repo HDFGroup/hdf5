@@ -355,7 +355,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_open(H5G_entry_t *obj_ent)
+H5O_open(const H5G_entry_t *obj_ent)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -1552,7 +1552,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5O_read(H5G_entry_t *ent, unsigned type_id, int sequence, void *mesg, hid_t dxpl_id)
+H5O_read(const H5G_entry_t *ent, unsigned type_id, int sequence, void *mesg, hid_t dxpl_id)
 {
     const H5O_class_t *type;            /* Actual H5O class type for the ID */
     void *ret_value;                    /* Return value */
@@ -1614,11 +1614,11 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5O_read_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, void *mesg, hid_t dxpl_id)
+H5O_read_real(const H5G_entry_t *ent, const H5O_class_t *type, int sequence, void *mesg, hid_t dxpl_id)
 {
     H5O_t          *oh = NULL;
     int             idx;
-    H5G_cache_t    *cache = NULL;
+    const H5G_cache_t    *cache = NULL;
     H5G_type_t      cache_type;
     void           *ret_value = NULL;
 

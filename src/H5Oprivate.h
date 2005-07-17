@@ -231,13 +231,13 @@ typedef herr_t (*H5O_operator_t)(const void *mesg/*in*/, unsigned idx,
 /* General message operators */
 H5_DLL herr_t H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint,
 			  H5G_entry_t *ent/*out*/);
-H5_DLL herr_t H5O_open(H5G_entry_t *ent);
+H5_DLL herr_t H5O_open(const H5G_entry_t *ent);
 H5_DLL herr_t H5O_close(H5G_entry_t *ent);
 H5_DLL int H5O_link(const H5G_entry_t *ent, int adjust, hid_t dxpl_id);
 H5_DLL int H5O_count(H5G_entry_t *ent, unsigned type_id, hid_t dxpl_id);
 H5_DLL htri_t H5O_exists(H5G_entry_t *ent, unsigned type_id, int sequence,
     hid_t dxpl_id);
-H5_DLL void *H5O_read(H5G_entry_t *ent, unsigned type_id, int sequence,
+H5_DLL void *H5O_read(const H5G_entry_t *ent, unsigned type_id, int sequence,
     void *mesg, hid_t dxpl_id);
 H5_DLL int H5O_modify(H5G_entry_t *ent, unsigned type_id,
     int overwrite, unsigned flags, unsigned update_flags, const void *mesg, hid_t dxpl_id);

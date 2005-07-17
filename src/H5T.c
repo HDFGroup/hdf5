@@ -1578,6 +1578,7 @@ H5Topen(hid_t loc_id, const char *name)
     H5T_t       *type = NULL;
     H5G_entry_t	*loc = NULL;
     H5G_entry_t  ent;
+    hbool_t      ent_found = FALSE;     /* Entry at 'name' found */
     hid_t        dxpl_id = H5AC_dxpl_id; /* dxpl to use to open datatype */
     hid_t        ret_value =FAIL;
     
@@ -1596,6 +1597,7 @@ H5Topen(hid_t loc_id, const char *name)
      */
     if (H5G_find (loc, name, NULL, &ent/*out*/, dxpl_id)<0)
         HGOTO_ERROR (H5E_DATATYPE, H5E_NOTFOUND, FAIL, "not found");
+    ent_found = TRUE;
 
     /* Check that the object found is the correct type */
     if (H5G_get_type(&ent, dxpl_id) != H5G_TYPE)
@@ -1610,9 +1612,14 @@ H5Topen(hid_t loc_id, const char *name)
         HGOTO_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register named data type");
 
 done:
-    if(ret_value<0)
+    if(ret_value<0) {
         if(type!=NULL)
             H5T_close(type);
+        else {
+            if(ent_found && ent.header)
+                H5G_free_ent_name(&ent);
+        } /* end else */
+    } /* end if */
 
     FUNC_LEAVE_API(ret_value);
 }
@@ -3052,7 +3059,7 @@ H5T_open (H5G_entry_t *ent, hid_t dxpl_id)
             HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL, "not found");
 
         /* Add the datatype to the list of opened objects in the file */
-        if(H5FO_insert(ent->file, ent->header, dt->shared)<0)
+        if(H5FO_insert(dt->ent.file, dt->ent.header, dt->shared)<0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, NULL, "can't insert datatype into list of open objects")
 
         /* Mark any datatypes as being in memory now */
