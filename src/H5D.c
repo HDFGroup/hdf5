@@ -1128,6 +1128,7 @@ H5Dopen(hid_t loc_id, const char *name)
     H5D_t       *dset = NULL;
     H5G_entry_t	*loc = NULL;		/*location holding the dataset	*/
     H5G_entry_t  ent;            	/*dataset symbol table entry	*/
+    hbool_t      ent_found = FALSE;     /* Entry at 'name' found */
     hid_t        dxpl_id = H5AC_dxpl_id;    /* dxpl to use to open datset */
     hid_t        ret_value;
 
@@ -1143,6 +1144,7 @@ H5Dopen(hid_t loc_id, const char *name)
     /* Find the dataset object */
     if (H5G_find(loc, name, NULL, &ent, dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found")
+    ent_found = TRUE;
 
     /* Check that the object found is the correct type */
     if (H5G_get_type(&ent, dxpl_id) != H5G_DATASET)
@@ -1157,10 +1159,16 @@ H5Dopen(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "can't register dataset atom")
 
 done:
-    if(ret_value < 0)
-        if(dset != NULL)
+    if(ret_value < 0) {
+        if(dset != NULL) {
             if(H5D_close(dset) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
+        } /* end if */
+        else {
+            if(ent_found && ent.header)
+                H5G_free_ent_name(&ent);
+        } /* end else */
+    } /* end if */
     FUNC_LEAVE_API(ret_value)
 }
 
@@ -2413,7 +2421,7 @@ H5D_open(const H5G_entry_t *ent, hid_t dxpl_id)
             HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, NULL, "not found")
 
         /* Add the dataset to the list of opened objects in the file */
-        if(H5FO_insert(ent->file,ent->header,dataset->shared)<0)
+        if(H5FO_insert(dataset->ent.file,dataset->ent.header,dataset->shared)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, NULL, "can't insert dataset into list of open objects")
 
         dataset->shared->fo_count = 1;
@@ -2558,7 +2566,7 @@ H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id)
             dataset->shared->io_ops.writevv=H5D_contig_writevv;
 
             /* Get the sieve buffer size for this dataset */
-            dataset->shared->cache.contig.sieve_buf_size = H5F_SIEVE_BUF_SIZE(ent->file);
+            dataset->shared->cache.contig.sieve_buf_size = H5F_SIEVE_BUF_SIZE(dataset->ent.file);
             break;
 
         case H5D_CHUNKED:

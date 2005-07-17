@@ -52,10 +52,10 @@ static herr_t H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type);
  *
  *-------------------------------------------------------------------------
  */
-H5G_cache_t            *
-H5G_ent_cache(H5G_entry_t *ent, H5G_type_t *cache_type)
+const H5G_cache_t *
+H5G_ent_cache(const H5G_entry_t *ent, H5G_type_t *cache_type)
 {
-    H5G_cache_t *ret_value;     /* Return value */
+    const H5G_cache_t *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_ent_cache, NULL);
 
@@ -65,7 +65,7 @@ H5G_ent_cache(H5G_entry_t *ent, H5G_type_t *cache_type)
         *cache_type = ent->type;
 
     /* Set return value */
-    ret_value=&(ent->cache);
+    ret_value=(const H5G_cache_t *)&(ent->cache);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -415,6 +415,9 @@ H5G_ent_copy(H5G_entry_t *dst, const H5G_entry_t *src, H5G_ent_copy_depth_t dept
     } else if(depth==H5G_COPY_NULL) {
         dst->user_path_r=NULL;
         dst->canon_path_r=NULL;
+    } else if(depth==H5G_COPY_SHALLOW) {
+        /* Discarding 'const' qualifier OK - QAK */
+        HDmemset(src, 0, sizeof(H5G_entry_t));
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED);
