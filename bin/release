@@ -184,9 +184,6 @@ for f in README.txt release_docs/RELEASE.txt; do
     chmod 644 $f
 done
 
-# synchronize the HISTORY.tx and RELEASE.tx files in the doc area
-cp release_docs/HISTORY.txt release_docs/RELEASE.txt doc/html/ADGuide/.
-
 # Create the tar file
 test "$verbose" && echo "   Running tar..." 1>&2
 ( \
