@@ -273,8 +273,9 @@ H5FC = $(bindir)/h5fc
 H5FC_PP = $(bindir)/h5pfc
 
 # .chkexe and .chksh files are used to mark tests that have run successfully.
-MOSTLYCLEANFILES = *.chkexe *.chksh
-@BUILD_PARALLEL_CONDITIONAL_FALSE@TEST_PROG_PARA = 
+
+# We need to tell automake what to clean
+MOSTLYCLEANFILES = *.chkexe *.chksh *.h5 *.raw *.meta *.clog *.o
 @BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_PROG_PARA = ph5example
 
 # Example programs.
@@ -298,9 +299,7 @@ INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
           h5_compound.c h5_group.c h5_select.c h5_attribute.c h5_mount.c \
           h5_reference.c h5_drivers.c ph5example.c
 
-
-# We need to tell automake what to clean
-CLEANFILES = *.h5 *.raw *.meta *.clog $(TEST_PROG) ph5example *.o
+CLEANFILES = $(TEST_PROG) $(TEST_PROG_PARA)
 
 # How to install examples
 # There are a lot of rules because automake does not know about
@@ -518,7 +517,7 @@ install-examples: $(EXAMPLEDIR) $(INSTALL_FILES)
 
 uninstall-examples:
 	@if test -n "$(INSTALL_FILES)" -a -d $(EXAMPLEDIR); then                                 \
-	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_FILES).c;              \
+	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_FILES);              \
 	fi
 
 check-install:

@@ -7,10 +7,12 @@ LT_VERS_AGE = 2
 ## If the API changes *at all*, increment LT_VERS_INTERFACE and
 ## reset LT_VERS_REVISION to 0.
 ##
-## If the API changes but no functions are removed, also increment
-## LT_VERS_AGE.
-## If any functions are removed from the API, reset LT_VERS_AGE
-## to 0.
+## If the API changes but no function signatures are removed or
+## changed, also increment LT_VERS_AGE.
+## If any functions are removed from the API, or their signatures
+## are changed reset LT_VERS_AGE to 0 to indicate that previous
+## versions of the API are not necessarily compatible with this
+## version.
 ##
 ## If the source changes but there are no API changes, increment
 ## LT_VERS_REVISION.  This will happen automatically when

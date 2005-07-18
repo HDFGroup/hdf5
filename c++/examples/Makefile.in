@@ -277,7 +277,7 @@ H5FC_PP = $(bindir)/h5pfc
 # These are the files that 'make clean' (and derivatives) will remove from this
 # directory.  Since automake doesn't know about the examples, we need to
 # tell it to clean the example programs, too.
-MOSTLYCLEANFILES = *.chkexe *.chksh *.h5
+MOSTLYCLEANFILES = *.chkexe *.chksh *.h5 $(EXTRA_PROG:=.o)
 
 # Use h5c++ to build examples, instead of reguar C++ compiler
 H5CPP = $(bindir)/h5c++

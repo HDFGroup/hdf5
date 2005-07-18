@@ -22,8 +22,6 @@ include $(top_srcdir)/config/commence.am
 
 if BUILD_PARALLEL_CONDITIONAL
   TEST_PROG_PARA = ph5example
-else
-  TEST_PROG_PARA =
 endif
 
 # Example programs.
@@ -47,7 +45,8 @@ INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
           h5_reference.c h5_drivers.c ph5example.c
 
 # We need to tell automake what to clean
-CLEANFILES=*.h5 *.raw *.meta *.clog $(TEST_PROG) ph5example *.o
+MOSTLYCLEANFILES+=*.h5 *.raw *.meta *.clog *.o
+CLEANFILES=$(TEST_PROG) $(TEST_PROG_PARA)
 
 # Additional dependencies for each program are listed below.
 $(EXTRA_PROG): $(LIBHDF5)
@@ -86,7 +85,7 @@ install-examples: $(EXAMPLEDIR) $(INSTALL_FILES)
 
 uninstall-examples:
 	@if test -n "$(INSTALL_FILES)" -a -d $(EXAMPLEDIR); then                                 \
-	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_FILES).c;              \
+	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_FILES);              \
 	fi
 
 check-install:
