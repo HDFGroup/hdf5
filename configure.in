@@ -2757,6 +2757,37 @@ else
 fi
 
 dnl ----------------------------------------------------------------------
+dnl Set the flag to indicate that the machine can handle overflow converting
+dnl all floating-point to all integer types.
+dnl (This flag should be set for all machines, except for Cray X1 where
+dnl floating exception is generated when the floating-point value is greater
+dnl than the maximal integer value).
+dnl
+AC_MSG_CHECKING([if overflows normally converting floating-point to integer values])
+
+AC_CACHE_VAL([hdf5_cv_fp_to_integer_overflow_works],
+    [AC_TRY_RUN([
+    int main(void)
+    {
+        float  f = 2147483648.0f;
+        int    i;
+
+        i = (int)f;
+
+done:
+        exit(0);
+    }
+    ], [hdf5_cv_fp_to_integer_overflow_works=yes], [hdf5_cv_fp_to_integer_overflow_works=no],)])
+
+if test ${hdf5_cv_fp_to_integer_overflow_works} = "yes"; then
+  AC_DEFINE([FP_TO_INTEGER_OVERFLOW_WORKS], [1],
+            [Define if your system can handle overflow converting floating-point to integer values.])
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
+
+dnl ----------------------------------------------------------------------
 dnl Set some variables for general configuration information to be saved
 dnl and installed with the libraries.
 dnl

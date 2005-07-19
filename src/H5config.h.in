@@ -25,6 +25,10 @@
 /* As FC_FUNC, but for C identifiers containing underscores. */
 #undef FC_FUNC_
 
+/* Define if your system can handle overflow converting floating-point to
+   integer values. */
+#undef FP_TO_INTEGER_OVERFLOW_WORKS
+
 /* Define if your system roundup accurately convert floating-point to unsigned
    long long values. */
 #undef FP_TO_ULLONG_BOTTOM_BIT_WORKS
