@@ -50757,7 +50757,7 @@ if test -n "$TESTPARALLEL"; then
   fi
 fi
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile testpar/Makefile testpar/testph5.sh perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5import/Makefile tools/h5diff/Makefile tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5ls/Makefile tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/misc/testh5repart.sh tools/gifconv/Makefile examples/Makefile doc/Makefile doc/html/Makefile doc/html/ed_libs/Makefile doc/html/ed_styles/Makefile doc/html/ADGuide/Makefile doc/html/Graphics/Makefile doc/html/Intro/Makefile doc/html/PSandPDF/Makefile doc/html/TechNotes/Makefile doc/html/Tutor/Makefile doc/html/Tutor/Graphics/Makefile doc/html/Tutor/examples/Makefile doc/html/cpplus/Makefile doc/html/fortran/Makefile c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/examples/Makefile fortran/Makefile fortran/src/h5fc fortran/src/libhdf5_fortran.settings fortran/src/Makefile fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile hl/Makefile hl/src/Makefile hl/test/Makefile hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                        ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile testpar/Makefile testpar/testph5.sh perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5import/Makefile tools/h5diff/Makefile tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5ls/Makefile tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/misc/testh5repart.sh tools/gifconv/Makefile examples/Makefile c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/examples/Makefile fortran/Makefile fortran/src/h5fc fortran/src/libhdf5_fortran.settings fortran/src/Makefile fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile hl/Makefile hl/src/Makefile hl/test/Makefile hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -51389,20 +51389,6 @@ do
   "tools/misc/testh5repart.sh" ) CONFIG_FILES="$CONFIG_FILES tools/misc/testh5repart.sh" ;;
   "tools/gifconv/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/gifconv/Makefile" ;;
   "examples/Makefile" ) CONFIG_FILES="$CONFIG_FILES examples/Makefile" ;;
-  "doc/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
-  "doc/html/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/html/Makefile" ;;
-  "doc/html/ed_libs/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/html/ed_libs/Makefile" ;;
-  "doc/html/ed_styles/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/html/ed_styles/Makefile" ;;
-  "doc/html/ADGuide/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/html/ADGuide/Makefile" ;;
-  "doc/html/Graphics/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/html/Graphics/Makefile" ;;
-  "doc/html/Intro/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/html/Intro/Makefile" ;;
-  "doc/html/PSandPDF/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/html/PSandPDF/Makefile" ;;
-  "doc/html/TechNotes/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/html/TechNotes/Makefile" ;;
-  "doc/html/Tutor/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/html/Tutor/Makefile" ;;
-  "doc/html/Tutor/Graphics/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/html/Tutor/Graphics/Makefile" ;;
-  "doc/html/Tutor/examples/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/html/Tutor/examples/Makefile" ;;
-  "doc/html/cpplus/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/html/cpplus/Makefile" ;;
-  "doc/html/fortran/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/html/fortran/Makefile" ;;
   "c++/Makefile" ) CONFIG_FILES="$CONFIG_FILES c++/Makefile" ;;
   "c++/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES c++/src/Makefile" ;;
   "c++/src/h5c++" ) CONFIG_FILES="$CONFIG_FILES c++/src/h5c++" ;;

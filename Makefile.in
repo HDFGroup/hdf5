@@ -334,9 +334,7 @@ MOSTLYCLEANFILES = *.chkexe *.chksh
 SUBDIRS = src test $(TESTPARALLEL_DIR) tools . $(CXX_DIR) $(FORTRAN_DIR) \
          $(HDF5_HL_DIR)
 
-DIST_SUBDIRS = src test testpar tools . c++ fortran hl perform examples  \
-          doc 
-
+DIST_SUBDIRS = src test testpar tools . c++ fortran hl perform examples
 
 # Some files generated during configure that should be cleaned
 DISTCLEANFILES = src/H5config.h src/H5pubconf.h config/stamp1 config/stamp2
@@ -786,29 +784,29 @@ install-exec-local:
 uninstall-local:
 	cd perform && $(MAKE) $(AM_MAKEFLAGS) uninstall
 
-# Clean and mostlyclean need to recurse into docs, examples, and perform
+# Clean and mostlyclean need to recurse into examples and perform
 # directories unless they've already been distcleaned.
 clean-local:
-	@@SETX@; for d in docs examples perform; do                     \
+	@@SETX@; for d in examples perform; do                          \
 	  if test -f $$d/Makefile; then                                 \
 	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) clean) || exit 1;        \
 	  fi;                                                           \
 	done
 
 mostlyclean-local:
-	@@SETX@; for d in docs examples perform; do                     \
+	@@SETX@; for d in examples perform; do                          \
 	  if test -f $$d/Makefile; then                                 \
 	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) mostlyclean) || exit 1;  \
 	  fi;                                                           \
 	done
 
-# 'make install-all' also installs docs and examples
+# 'make install-all' also installs examples
 install-all:
 	$(MAKE) $(AM_MAKEFLAGS) install
-	$(MAKE) $(AM_MAKEFLAGS) install-doc
+	$(MAKE) $(AM_MAKEFLAGS) install-examples
 uninstall-all:
 	$(MAKE) $(AM_MAKEFLAGS) uninstall
-	$(MAKE) $(AM_MAKEFLAGS) uninstall-doc
+	$(MAKE) $(AM_MAKEFLAGS) uninstall-examples
 
 # Install examples in this directory and recursively
 install-examples uninstall-examples:
@@ -816,14 +814,12 @@ install-examples uninstall-examples:
 	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;           \
 	done
 
-# Install documentation and examples
+# Placeholder to remind users that docs are now in a separate repository.
 install-doc:
-	$(MAKE) $(AM_MAKEFLAGS) install-examples
-	(cd doc && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
+	echo "docs no longer live in this tree.  Use install-examples to install examples."
 
 uninstall-doc:
-	$(MAKE) $(AM_MAKEFLAGS) uninstall-examples
-	(cd doc && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
+	echo "docs no longer live in this tree.  Use install-examples to install examples."
 
 # `make check-install' or `make installcheck' checks that examples can 
 #  be successfully built
