@@ -180,7 +180,7 @@ nh5ltget_attribute_string_c(hid_t_f *loc_id,
 
 H5_DLL
 int_f
-h5ltget_dataset_ndims_c(hid_t_f *loc_id, 
+nh5ltget_dataset_ndims_c(hid_t_f *loc_id, 
                         int_f *namelen,
                        _fcd name, 
                        int_f *rank);
