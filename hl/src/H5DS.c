@@ -22,8 +22,8 @@
 /*-------------------------------------------------------------------------
  * Function: H5DSset_scale
  *
- * Purpose: write the standard attributes for a Dimension Scale dataset;
- *  optionally set its name
+ * Purpose: Convert dataset DSID to a dimension scale, by writing the standard 
+ *  attributes for a Dimension Scale dataset; optionally set its name
  *
  * Return: Success: SUCCESS, Failure: FAIL
  *
@@ -93,8 +93,8 @@ herr_t H5DSset_scale(hid_t dsid,
  *   dataset DID
  *
  * Return:  
- *   Success: SUCCESS: both the DS and the dataset exist
- *   Failure: FAIL: if either one of them does not exist
+ *   Success: SUCCESS
+ *   Failure: FAIL
  *
  * Programmer: pvn@ncsa.uiuc.edu
  *
@@ -549,8 +549,8 @@ out:
  *   dataset DID
  *
  * Return:  
- *   Success: SUCCESS: both the DS and the dataset exist
- *   Failure: FAIL: if either one of them does not exist
+ *   Success: SUCCESS
+ *   Failure: FAIL
  *
  * Programmer: pvn@ncsa.uiuc.edu
  *
@@ -904,11 +904,11 @@ out:
 /*-------------------------------------------------------------------------
  * Function: H5DSget_num_scales
  *
- * Purpose: get the number of scales linked to the IDX dimension of DNAME 
+ * Purpose: get the number of scales linked to the IDX dimension of dataset DID 
  *
  * Return:  
- *   Success: SUCCESS: both the DS and the dataset exist
- *   Failure: FAIL: if either one of them does not exist
+ *   Success: number of scales 
+ *   Failure: FAIL
  *
  * Programmer: pvn@ncsa.uiuc.edu
  *
@@ -922,7 +922,7 @@ out:
  */
 
 int H5DSget_num_scales(hid_t did,
-                       unsigned int dim)
+                       unsigned int idx)
 { 
  int        has_dimlist;
  hid_t      sid;          /* space ID */
@@ -960,8 +960,8 @@ int H5DSget_num_scales(hid_t did,
  if (H5Sclose(sid)<0)
   goto out;
 
- /* DIM range checking */
- if (dim>=(unsigned int )rank)
+ /* dimemsion index IDX range checking */
+ if (idx>=(unsigned int )rank)
   return FAIL;
 
  /* try to find the attribute "DIMENSION_LIST" on the >>data<< dataset */
@@ -970,7 +970,7 @@ int H5DSget_num_scales(hid_t did,
 
  /* it does not exist */
  if (has_dimlist == 0)
-  return FAIL;
+  return 0;
 
 /*-------------------------------------------------------------------------
  * the attribute exists, open it 
@@ -996,7 +996,7 @@ int H5DSget_num_scales(hid_t did,
   if (H5Aread(aid,tid,buf)<0)
    goto out;
 
-  nscales=(int)buf[dim].len;
+  nscales=(int)buf[idx].len;
 
   /* close */
   if (H5Dvlen_reclaim(tid,sid,H5P_DEFAULT,buf)<0)
@@ -1028,7 +1028,7 @@ out:
 /*-------------------------------------------------------------------------
  * Function: H5DSset_label
  *
- * Purpose: set a label for dimension IDX 
+ * Purpose: Set label for the dimension IDX of dataset DID to the value LABEL
  *
  * Return: Success: SUCCESS, Failure: FAIL
  *
@@ -1193,7 +1193,7 @@ out:
 /*-------------------------------------------------------------------------
  * Function: H5DSget_label
  *
- * Purpose: get a label for dimension IDX 
+ * Purpose: Read the label LABEL for dimension IDX of datsset DID 
  *   Up to 'size' characters are stored in 'label' followed by a '\0' string
  *   terminator.  If the label is longer than 'size'-1,
  *   the string terminator is stored in the last position of the buffer to
@@ -1329,7 +1329,7 @@ out:
 /*-------------------------------------------------------------------------
  * Function: H5DSget_scale_name
  *
- * Purpose: get the scale name of DID
+ * Purpose: Read the name of dataset scale DID into buffer NAME
  *   Up to 'size' characters are stored in 'name' followed by a '\0' string
  *   terminator.  If the name is longer than 'size'-1,
  *   the string terminator is stored in the last position of the buffer to
@@ -1730,9 +1730,9 @@ out:
 /*-------------------------------------------------------------------------
  * Function: H5DSis_attached
  *
- * Purpose: Checks if the dataset named DNAME has a pointer in the REFERENCE_LIST
- *  attribute and the the dataset named DSNAME (scale ) has a pointer in the 
- *  DIMENSION_LIST attribute 
+ * Purpose: Report if dimension scale DSID is currently attached to 
+ *  dimension IDX of dataset DID by checking if DID has a pointer in the REFERENCE_LIST
+ *  attribute and DSID (scale ) has a pointer in the DIMENSION_LIST attribute 
  *
  * Return:  
  *   1: both the DS and the dataset pointers match

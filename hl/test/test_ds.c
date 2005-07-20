@@ -2130,7 +2130,7 @@ static int test_iterators(void)
   goto out;
 
  /* try to iterate trough the 1st dimension of "dset_a", return error */
- if (H5DSiterate_scales(did,0,NULL,verifiy_scale,NULL)==SUCCESS)
+ if (H5DSiterate_scales(did,0,NULL,verifiy_scale,NULL)<0)
   goto out;
 
  /* close */
