@@ -342,8 +342,6 @@ if [ "$cmd" = "all" -o -n "$cmdtest" -o -n "$cmddiff" ]; then
 	TESTDIR=${BASEDIR}/TestDir/${SRCDIRNAME}
 	test -d ${TESTDIR} || mkdir ${TESTDIR}
     fi
-    INSTALLDIR=${TESTDIR}/installdir
-    test -d $INSTALLDIR || mkdir $INSTALLDIR
     # Make sure current version exists and is clean
     if [ -d ${TESTDIR} ]; then
 	(cd ${TESTDIR} && ${MAKE} distclean)
@@ -386,7 +384,7 @@ if [ "$cmd" = "all" -o -n "$cmdtest" -o -n "$cmddiff" ]; then
     if [ "$snapshot" = "yes" ]; then
 	if (cd ${TESTDIR} && \
 	    TIMESTAMP "configure" && \
-	    ${srcdir:+${CURRENT}/}${CONFIGURE} --prefix=$INSTALLDIR && \
+	    ${srcdir:+${CURRENT}/}${CONFIGURE} && \
 	    TIMESTAMP "make" && \
 	    ${MAKE} && \
 	    TIMESTAMP "check" && \
