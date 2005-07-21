@@ -80,6 +80,19 @@
     }									      \
 } while(0)
 
+/* Used to make certain a string return value _is_ a value */
+#define VERIFY_STR(x, val, where) do {					      \
+    if (GetTestVerbosity()>=VERBO_HI) {				              \
+	print_func("   Call to routine: %15s at line %4d in %s had value "    \
+		   "%s \n", (where), (int)__LINE__, __FILE__, x);    \
+    }									      \
+    if (HDstrcmp(x, val)) {					              \
+	TestErrPrintf("*** UNEXPECTED VALUE from %s should be %s, but is %s at line %4d " \
+		   "in %s\n", where, val, x, (int)__LINE__, __FILE__);        \
+	H5Eprint_stack(H5E_DEFAULT, stdout);				      \
+    }									      \
+} while(0)
+
 /* Used to document process through a test and to check for errors */
 #define RESULT(ret,func) do {						      \
     if (GetTestVerbosity()>VERBO_MED) {					      \

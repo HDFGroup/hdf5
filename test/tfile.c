@@ -69,6 +69,15 @@
 #define DSET1   "Dataset1"
 #define DSET2   "/Group1/Dataset2"
 
+#define TESTA_GROUPNAME "group"
+#define TESTA_DSETNAME "dataset"
+#define TESTA_ATTRNAME "attribute"
+#define TESTA_DTYPENAME "compound"
+#define TESTA_NAME_BUF_SIZE     64
+#define TESTA_RANK 2
+#define TESTA_NX 4
+#define TESTA_NY 5
+
 static void
 create_objects(hid_t, hid_t, hid_t *, hid_t *, hid_t *, hid_t *);
 static void
@@ -1447,61 +1456,178 @@ test_file_open_overlap(void)
 
     /* Create file */
     fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    assert(fid1 > 0);
+    CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Open file also */
     fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
-    assert(fid2 > 0);
+    CHECK(fid2, FAIL, "H5Fopen");
 
     /* Create a group in file */
     gid = H5Gcreate(fid1, GROUP1, (size_t)0);
-    assert(gid > 0);
+    CHECK(gid, FAIL, "H5Gcreate");
 
     /* Create dataspace for dataset */
     sid = H5Screate(H5S_SCALAR);
-    assert(sid > 0);
+    CHECK(sid, FAIL, "H5Screate");
 
     /* Create dataset in group w/first file ID */
     did1 = H5Dcreate(gid, DSET1, H5T_NATIVE_INT, sid, H5P_DEFAULT);
-    assert(did1 > 0);
+    CHECK(did1, FAIL, "H5Dcreate");
 
     /* Check number of objects opened in first file */
     nobjs = H5Fget_obj_count(fid1, H5F_OBJ_LOCAL|H5F_OBJ_ALL);
-    assert(nobjs == 3);         /* 3 == file, dataset & group */
+    VERIFY(nobjs, 3, "H5Fget_obj_count");       /* 3 == file, dataset & group */
 
     /* Close dataset */
     ret = H5Dclose(did1);
-    assert(ret >= 0);
+    CHECK(ret, FAIL, "H5Dclose");
 
     /* Close group */
     ret = H5Gclose(gid);
-    assert(ret >= 0);
+    CHECK(ret, FAIL, "H5Gclose");
 
     /* Close first file ID */
     ret = H5Fclose(fid1);
-    assert(ret >= 0);
+    CHECK(ret, FAIL, "H5Fclose");
 
 
     /* Create dataset with second file ID */
     did2 = H5Dcreate(fid2, DSET2, H5T_NATIVE_INT, sid, H5P_DEFAULT);
-    assert(did2 > 0);
+    CHECK(did2, FAIL, "H5Dcreate");
 
     /* Check number of objects opened in first file */
     nobjs = H5Fget_obj_count(fid2, H5F_OBJ_ALL);
-    assert(nobjs == 2);         /* 2 == file & dataset */
+    VERIFY(nobjs, 2, "H5Fget_obj_count");       /* 3 == file & dataset */
 
     /* Close dataspace */
     ret = H5Sclose(sid);
-    assert(ret >= 0);
+    CHECK(ret, FAIL, "H5Sclose");
 
     /* Close second dataset */
     ret = H5Dclose(did2);
-    assert(ret >= 0);
+    CHECK(ret, FAIL, "H5Dclose");
 
     /* Close second file */
     ret = H5Fclose(fid2);
-    assert(ret >= 0);
+    CHECK(ret, FAIL, "H5Fclose");
 } /* end test_file_open_overlap() */
+
+/****************************************************************
+**
+**  test_file_getname(): low-level file test routine.  
+**      This test checks whether H5Fget_name works correctly.
+**
+*****************************************************************/
+static void 
+test_file_getname(void)
+{
+    /* Compound datatype */
+    typedef struct s1_t {
+        unsigned int a;
+        float        b;
+    } s1_t;
+
+    hid_t   file_id;
+    hid_t   group_id;
+    hid_t   dataset_id;
+    hid_t   space_id;  
+    hid_t   type_id;
+    hid_t   attr_id;
+    hsize_t dims[TESTA_RANK] = {TESTA_NX, TESTA_NY};
+    char    name[TESTA_NAME_BUF_SIZE];
+    ssize_t name_len;
+    herr_t ret;         /* Generic return value */
+ 
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing H5Fget_name() functionality\n"));
+
+    /* Create a new file_id using default properties. */
+    file_id = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
+    CHECK(file_id, FAIL, "H5Fcreate"); 
+
+    /* Get and verify file name */
+    name_len = H5Fget_name(file_id, name, TESTA_NAME_BUF_SIZE);
+    CHECK(name_len, FAIL, "H5Fget_name");
+    VERIFY_STR(name, FILE1, "H5Fget_name");
+
+    /* Create a group in the root group */
+    group_id = H5Gcreate(file_id, TESTA_GROUPNAME, 0);
+    CHECK(group_id, FAIL, "H5Gcreate"); 
+
+    /* Get and verify file name */
+    name_len = H5Fget_name(group_id, name, TESTA_NAME_BUF_SIZE);
+    CHECK(name_len, FAIL, "H5Fget_name");
+    VERIFY_STR(name, FILE1, "H5Fget_name");
+
+    /* Create the data space  */
+    space_id = H5Screate_simple(TESTA_RANK, dims, NULL);
+    CHECK(space_id, FAIL, "H5Screate_simple"); 
+
+    /* Try get file name from data space.  Supposed to fail because 
+     * it's illegal operation. */
+    H5E_BEGIN_TRY {
+        name_len = H5Fget_name(space_id, name, TESTA_NAME_BUF_SIZE);
+    } H5E_END_TRY;
+    VERIFY(name_len, FAIL, "H5Fget_name");
+
+    /* Create a new dataset */
+    dataset_id = H5Dcreate(file_id, TESTA_DSETNAME, H5T_NATIVE_INT, space_id, H5P_DEFAULT);
+    CHECK(dataset_id, FAIL, "H5Dcreate"); 
+
+    /* Get and verify file name */
+    name_len = H5Fget_name(dataset_id, name, TESTA_NAME_BUF_SIZE);
+    CHECK(name_len, FAIL, "H5Fget_name");
+    VERIFY_STR(name, FILE1, "H5Fget_name");
+
+    /* Create an attribute for the dataset */
+    attr_id = H5Acreate(dataset_id,TESTA_ATTRNAME,H5T_NATIVE_INT,space_id,H5P_DEFAULT);
+    CHECK(attr_id, FAIL, "H5Acreate");
+
+    /* Get and verify file name */
+    name_len = H5Fget_name(attr_id, name, TESTA_NAME_BUF_SIZE);
+    CHECK(name_len, FAIL, "H5Fget_name");
+    VERIFY_STR(name, FILE1, "H5Fget_name");
+
+    /* Create a compound datatype */
+    type_id = H5Tcreate(H5T_COMPOUND, sizeof(s1_t));
+    CHECK(type_id, FAIL, "H5Tcreate"); 
+
+    /* Insert fields */
+    ret = H5Tinsert (type_id, "a", HOFFSET(s1_t,a), H5T_NATIVE_INT);
+    CHECK(ret, FAIL, "H5Tinsert"); 
+
+    ret = H5Tinsert (type_id, "b", HOFFSET(s1_t,b), H5T_NATIVE_FLOAT);
+    CHECK(ret, FAIL, "H5Tinsert"); 
+  
+    /* Save it on file */
+    ret = H5Tcommit(file_id, TESTA_DTYPENAME, type_id);
+    CHECK(ret, FAIL, "H5Tcommit"); 
+
+    /* Get and verify file name */
+    name_len = H5Fget_name(type_id, name, TESTA_NAME_BUF_SIZE);
+    CHECK(name_len, FAIL, "H5Fget_name");
+    VERIFY_STR(name, FILE1, "H5Fget_name");
+
+    /* Close things down */
+    ret = H5Tclose(type_id);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    ret = H5Aclose(attr_id);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    ret = H5Dclose(dataset_id);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    ret = H5Sclose(space_id);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    ret = H5Gclose(group_id);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret = H5Fclose(file_id);
+    CHECK(ret, FAIL, "H5Fclose");
+
+} /* end test_file_getname() */
 
 /****************************************************************
 **
@@ -1525,6 +1651,7 @@ test_file(void)
     test_file_ishdf5();         /* Test detecting HDF5 files correctly */
     test_file_open_dot();       /* Test opening objects with "." for a name */
     test_file_open_overlap();   /* Test opening files in an overlapping manner */
+    test_file_getname();        /* Test basic H5Fget_name() functionality */
 }				/* test_file() */
 
 

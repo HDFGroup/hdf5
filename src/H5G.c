@@ -2091,7 +2091,8 @@ H5G_open(H5G_entry_t *ent, hid_t dxpl_id)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, NULL, "can't insert group into list of open objects")
         }
 
-        grp->shared->fo_count =1;
+        /* Set open object count */
+        grp->shared->fo_count = 1;
     }
     else {
         if(NULL == (grp = H5FL_CALLOC(H5G_t)))
@@ -2101,7 +2102,10 @@ H5G_open(H5G_entry_t *ent, hid_t dxpl_id)
         if(H5G_ent_copy(&(grp->ent), ent, H5G_COPY_SHALLOW)<0)
             HGOTO_ERROR (H5E_SYM, H5E_CANTCOPY, NULL, "can't copy group entry")
 
-        grp->shared=shared_fo;
+        /* Point to shared group info */
+        grp->shared = shared_fo;
+
+        /* Increment shared reference count */
         shared_fo->fo_count++;
     }
 
@@ -2254,11 +2258,14 @@ H5G_close(H5G_t *grp)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close");
         H5FL_FREE (H5G_shared_t, grp->shared);
     } else {
-        /* Check if this group was the last object holding open a mounted file
-         * hierarchy and close down the file hierarchy if so */
-        if(grp->shared->fo_count == 1)
-            if(H5F_check_mounts(grp->ent.file) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_MOUNT, FAIL, "problem checking mount hierarchy"); 
+        /* If this group is a mount point and the mount point is the last open
+         * reference to the group, then attempt to close down the file hierarchy
+         */
+        if(grp->shared->mounted && grp->shared->fo_count == 1) {
+            /* Attempt to close down the file hierarchy */
+            if(H5F_try_close(grp->ent.file) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problem attempting file close")
+        } /* end if */
 
         if(H5G_free_ent_name(&(grp->ent))<0)
         {
@@ -2271,7 +2278,7 @@ H5G_close(H5G_t *grp)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5G_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -2547,6 +2554,9 @@ H5G_loc (hid_t loc_id)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry for root group");
 
             /* Patch up root group's symbol table entry to reflect this file */
+            /* (Since the root group info is only stored once for files which
+             *  share an underlying low-level file)
+             */
             /* (but only for non-mounted files) */
             if(!f->mtab.parent)
                 ret_value->file = f;
@@ -4121,8 +4131,68 @@ H5G_get_shared_count(H5G_t *grp)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_get_shared_count);
 
     /* Check args */
-    assert(grp && grp->shared);
+    HDassert(grp && grp->shared);
 
     FUNC_LEAVE_NOAPI(grp->shared->fo_count);
 } /* end H5G_get_shared_count() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_mount
+ *
+ * Purpose:	Sets the 'mounted' flag for a group
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, July 19, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_mount(H5G_t *grp)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_mount);
+
+    /* Check args */
+    HDassert(grp && grp->shared);
+    HDassert(grp->shared->mounted == FALSE);
+
+    /* Set the 'mounted' flag */
+    grp->shared->mounted = TRUE;
+
+    FUNC_LEAVE_NOAPI(SUCCEED);
+} /* end H5G_mount() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_unmount
+ *
+ * Purpose:	Resets the 'mounted' flag for a group
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, July 19, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_unmount(H5G_t *grp)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_unmount);
+
+    /* Check args */
+    HDassert(grp && grp->shared);
+    HDassert(grp->shared->mounted == TRUE);
+
+    /* Reset the 'mounted' flag */
+    grp->shared->mounted = FALSE;
+
+    FUNC_LEAVE_NOAPI(SUCCEED);
+} /* end H5G_unmount() */
 

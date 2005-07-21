@@ -438,8 +438,8 @@ H5_DLL hid_t H5F_get_access_plist(H5F_t *f);
 H5_DLL unsigned H5F_get_intent(const H5F_t *f);
 H5_DLL herr_t H5F_get_fileno(const H5F_t *f, unsigned long *filenum);
 H5_DLL hid_t H5F_get_id(H5F_t *file);
-H5_DLL int H5F_get_obj_count(const H5F_t *f, unsigned types);
-H5_DLL int H5F_get_obj_ids(const H5F_t *f, unsigned types, int max_objs, hid_t *obj_id_list);
+H5_DLL unsigned H5F_get_obj_count(const H5F_t *f, unsigned types);
+H5_DLL unsigned H5F_get_obj_ids(const H5F_t *f, unsigned types, int max_objs, hid_t *obj_id_list);
 H5_DLL haddr_t H5F_get_base_addr(const H5F_t *f);
 H5_DLL haddr_t H5F_get_eoa(const H5F_t *f);
 #ifdef H5_HAVE_PARALLEL

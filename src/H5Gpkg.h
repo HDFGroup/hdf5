@@ -47,10 +47,11 @@ typedef struct H5G_node_t {
 } H5G_node_t;
 
 /*
- * Reference count shared between all instances of an open group
+ * Shared information for all open group objects
  */
 struct H5G_shared_t {
     int fo_count;                   /* open file object count */
+    hbool_t mounted;                /* Group is mount point */
 };
 
 /*

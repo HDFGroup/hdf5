@@ -125,7 +125,6 @@ H5FL_DEFINE_STATIC(H5I_id_info_t);
 /*--------------------- Local function prototypes ---------------------------*/
 static H5I_id_info_t *H5I_find_id(hid_t id);
 static hid_t H5I_get_file_id(hid_t obj_id);
-static int H5I_get_ref(hid_t id);
 #ifdef H5I_DEBUG_OUTPUT
 static herr_t H5I_debug(H5I_type_t type);
 #endif /* H5I_DEBUG_OUTPUT */
@@ -483,9 +482,6 @@ int
 H5I_nmembers(H5I_type_t type)
 {
     H5I_id_type_t	*type_ptr = NULL;
-    H5I_id_info_t	*cur=NULL;
-    int		n=0;
-    unsigned		i;
     int		ret_value;
 
     FUNC_ENTER_NOAPI(H5I_nmembers, FAIL);
@@ -495,12 +491,8 @@ H5I_nmembers(H5I_type_t type)
     if (NULL==(type_ptr=H5I_id_type_list_g[type]) || type_ptr->count<=0)
 	HGOTO_DONE(0);
 
-    for (i=0; i<type_ptr->hash_size; i++)
-	for (cur=type_ptr->id_list[i]; cur; cur=cur->next)
-	    n++;
-
     /* Set return value */
-    ret_value=n;
+    H5_ASSIGN_OVERFLOW(ret_value, type_ptr->ids, unsigned, int);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -971,18 +963,14 @@ void *H5Iobject_verify(hid_t id, H5I_type_t id_type)
   FUNC_ENTER_API(H5Iobject_verify, NULL);
 
   if( H5I_IS_LIB_TYPE( id_type ) )
-  {
-    HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "cannot call public function on library type");
-  }
+    HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "cannot call public function on library type")
 
   if(id_type < 1 || id_type >= H5I_next_type)
-  {
-    HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "identifier has invalid type");
-  }
+    HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "identifier has invalid type")
 
   ret_value = H5I_object_verify(id, id_type);
 
-  done:
+done:
     FUNC_LEAVE_API(ret_value);
 }
 
@@ -1127,9 +1115,7 @@ void *H5Iremove_verify(hid_t id, H5I_type_t id_type)
     FUNC_ENTER_API(H5Iremove_verify, NULL);
 
 	if( H5I_IS_LIB_TYPE( id_type ) )
-	{
-		HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "cannot call public function on library type");
-	}
+		HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "cannot call public function on library type")
 
 	/* Remove the id */
 	ret_value = H5I_remove_verify(id, id_type);
@@ -1516,7 +1502,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static int
+int
 H5I_get_ref(hid_t id)
 {
     H5I_type_t		type;		/*type the object is in*/
@@ -1906,20 +1892,23 @@ H5I_search(H5I_type_t type, H5I_search_func_t func, void *key)
     if (type_ptr == NULL || type_ptr->count <= 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "invalid type");
 
-    /* Start at the beginning of the array */
-    for (i=0; i<type_ptr->hash_size; i++) {
-	id_ptr = type_ptr->id_list[i];
-	while (id_ptr) {
-            next_id= id_ptr->next;      /* Protect against ID being deleted in callback */
-	    if ((*func)(id_ptr->obj_ptr, id_ptr->id, key))
-		HGOTO_DONE(id_ptr->obj_ptr);	/*found the item*/
-	    id_ptr = next_id;
-	}
-    }
+    /* Only iterate through hash table if there are IDs in group */
+    if(type_ptr->ids > 0) {
+        /* Start at the beginning of the array */
+        for (i=0; i<type_ptr->hash_size; i++) {
+            id_ptr = type_ptr->id_list[i];
+            while (id_ptr) {
+                next_id= id_ptr->next;      /* Protect against ID being deleted in callback */
+                if ((*func)(id_ptr->obj_ptr, id_ptr->id, key))
+                    HGOTO_DONE(id_ptr->obj_ptr);	/*found the item*/
+                id_ptr = next_id;
+            } /* end while */
+        } /* end for */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5I_search() */
 
 
 /*-------------------------------------------------------------------------

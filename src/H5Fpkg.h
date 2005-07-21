@@ -93,7 +93,7 @@ typedef struct H5F_file_t {
     haddr_t	freespace_addr;	/* Relative address of free-space info	*/
     haddr_t	driver_addr;	/* File driver information block address*/
     hbool_t     fam_to_sec2;    /* Is h5repart changing driver from family to sec2 */
-                                   
+
     unsigned	super_chksum;	/* Superblock checksum                  */
     unsigned	drvr_chksum;	/* Driver info block checksum           */
     H5AC_t      *cache;		/* The object cache			*/
@@ -144,13 +144,12 @@ typedef struct H5F_mtab_t {
  * indicate that the file is mounted on some other file).
  */
 struct H5F_t {
-    unsigned		nrefs;		/* Reference count		*/
     unsigned		intent;		/* The flags passed to H5F_open()*/
     char		*name;		/* Name used to open file	*/
     H5F_file_t		*shared;	/* The shared file info		*/
     unsigned		nopen_objs;	/* Number of open object headers*/
     hid_t               file_id;        /* ID of this file              */
-    hid_t		closing;	/* H5I_FILE_CLOSING ID or zero	*/
+    hbool_t             closing;        /* File is in the process of being closed */
     H5F_mtab_t		mtab;		/* File mount table		*/
 };
 
@@ -165,14 +164,14 @@ H5_DLL void H5F_encode_length_unusual(const H5F_t *f, uint8_t **p, uint8_t *l);
 #endif /* NOT_YET */
 
 /* General routines */
-H5_DLL herr_t H5F_close(H5F_t *f);
+H5_DLL herr_t H5F_try_close(H5F_t *f);
 H5_DLL haddr_t H5F_locate_signature(H5FD_t *file, hid_t dxpl_id);
 
 /* File mount related routines */
 H5_DLL herr_t H5F_mountpoint(struct H5G_entry_t *find/*in,out*/);
 H5_DLL herr_t H5F_close_mounts(H5F_t *f);
 H5_DLL int H5F_term_unmount_cb(void *obj_ptr, hid_t obj_id, void *key);
-H5_DLL herr_t H5F_check_mounts(H5F_t *f);
+H5_DLL herr_t H5F_mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs);
 
 /* Superblock related routines */
 H5_DLL hsize_t H5F_init_superblock(const H5F_t *f, hid_t dxpl_id);

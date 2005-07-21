@@ -4101,8 +4101,6 @@ done:
  *
  * Date:        August 14, 2002
  *
- * Comments:    Just flushing the compact data information currently.
- *
  * Modifications:
  *
  *-------------------------------------------------------------------------
@@ -4110,11 +4108,11 @@ done:
 herr_t
 H5D_flush(const H5F_t *f, hid_t dxpl_id, unsigned flags)
 {
-    int         num_dsets;      /* Number of datasets in file   */
+    unsigned    num_dsets;      /* Number of datasets in file   */
     hid_t       *id_list=NULL;  /* list of dataset IDs          */
     H5D_t       *dataset=NULL;  /* Dataset pointer              */
+    unsigned	u;              /* Index variable */
     herr_t      ret_value = SUCCEED;        /* Return value     */
-    int		j;              /* Index variable */
 
     FUNC_ENTER_NOAPI(H5D_flush, FAIL)
 
@@ -4122,18 +4120,17 @@ H5D_flush(const H5F_t *f, hid_t dxpl_id, unsigned flags)
     assert(f);
 
     /* Update layout message for compact dataset */
-    if((num_dsets=H5F_get_obj_count(f, H5F_OBJ_DATASET))<0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to get dataset count")
+    num_dsets=H5F_get_obj_count(f, H5F_OBJ_DATASET);
 
     /* Check for something to do */
     if(num_dsets>0) {
-        H5_CHECK_OVERFLOW(num_dsets,int,size_t);
+        H5_CHECK_OVERFLOW(num_dsets,unsigned,size_t);
         if(NULL==(id_list=H5MM_malloc((size_t)num_dsets*sizeof(hid_t))))
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to allocate memory for ID list")
-        if(H5F_get_obj_ids(f, H5F_OBJ_DATASET, -1, id_list)<0)
+        if(H5F_get_obj_ids(f, H5F_OBJ_DATASET, -1, id_list) != num_dsets)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to get dataset ID list")
-        for(j=0; j<num_dsets; j++) {
-            if(NULL==(dataset=H5I_object_verify(id_list[j], H5I_DATASET)))
+        for(u = 0; u < num_dsets; u++) {
+            if(NULL==(dataset=H5I_object_verify(id_list[u], H5I_DATASET)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to get dataset object")
 
             /* Flush the raw data buffer, if we have a dirty one */
