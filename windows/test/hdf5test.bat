@@ -262,13 +262,6 @@ dtransform%2\%1\dtransform%2
 
 echo.
 echo ============================
-echo Testing filename 
-echo ============================
-
-filename%2\%1\filename%2
-
-echo.
-echo ============================
 echo Testing reserved 
 echo ============================
 
