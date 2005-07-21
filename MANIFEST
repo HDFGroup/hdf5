@@ -1439,8 +1439,6 @@ a------------------------------------------------------------------------------
 ./windows/test/externaldll/externaldll.dsp
 ./windows/test/file_handle/file_handle.dsp
 ./windows/test/file_handledll/file_handledll.dsp
-./windows/test/filename/filename.dsp
-./windows/test/filenamedll/filenamedll.dsp
 ./windows/test/fillval/fillval.dsp
 ./windows/test/fillvaldll/fillvaldll.dsp
 ./windows/test/flush1/flush1.dsp
