@@ -20,9 +20,9 @@
 include $(top_srcdir)/config/commence.am
 
 # Include src directory in both Fortran and C flags (C compiler is used
-# for linking)
+# for linking).
 INCLUDES = -I$(top_srcdir)/src
-AM_FCFLAGS=-I$(top_srcdir)/src
+AM_FCFLAGS=-I$(top_srcdir)/src -I$(top_srcdir)/src/fortran
 
 AM_FCLIBS=$(LIBHDF5)
 
@@ -123,11 +123,6 @@ BUILT_SOURCES = H5f90i_gen.h
 H5fortran_types.f90 H5f90i_gen.h: H5match_types.c H5fort_type_defines.h
 	$(MAKE) $(AM_MAKEFLAGS) H5match_types$(EXEEXT)
 	$(RUNSERIAL) ./H5match_types$(EXEEXT)
-
-
-# JAMES: does it need to work like this?	$(MAKE) $(AM_MAKEFLAGS) H5fort_type_defines.h
-# JAMES	$(MAKE) $(AM_MAKEFLAGS) H5match_types$(EXEEXT)
-# JAMES	$(RUNSERIAL) ./H5match_types$(EXEEXT)
 
 # H5fort_type_defines.h is created by running H5fortran_detect.
 # Obviously, H5fortran_detect needs to be built first.

@@ -29,7 +29,9 @@ check_SCRIPTS = $(TEST_SCRIPT)
 
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
-TEST_PROG=testhdf5 lheap ohdr stab gheap cache b+tree btree2 blocktrack sheap \
+# As an exception, long-running tests should occur earlier in the list.
+# This gives them more time to run when tests are executing in parallel.
+TEST_PROG=testhdf5 lheap ohdr stab gheap btree2 cache b+tree blocktrack sheap \
            pool hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset extend external links unlink big mtime     \
            fillval mount flush1 flush2 enum \

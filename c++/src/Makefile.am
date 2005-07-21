@@ -53,6 +53,14 @@ include_HEADERS=H5Cpp.h H5AbstractDs.h H5AtomType.h H5Attribute.h H5Classes.h   
 # distclean.
 DISTCLEANFILES=h5c++ libhdf5.settings
 
+# Some C++ compilers/linkers (PGI?) create a directory named "ii_files" that
+# holds *.ii files, which are template entity instantiations.
+# This entire directory should be cleaned.
+mostlyclean-local:
+	if test -d ii_files; then                                       \
+	  $(RM) -rf ii_files;                                           \
+	fi
+
 # Mark this directory as part of the C++ API
 HDF_CXX=yes
 

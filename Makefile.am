@@ -113,12 +113,17 @@ clean-local:
 	  fi;                                                           \
 	done
 
+# Some C++ compilers/linkers will create a directory named ii_files in
+# the root directory, which should be cleaned.
 mostlyclean-local:
 	@@SETX@; for d in examples perform; do                          \
 	  if test -f $$d/Makefile; then                                 \
 	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) mostlyclean) || exit 1;  \
 	  fi;                                                           \
-	done
+	done;                                                           \
+	if test -d ii_files; then                                       \
+          $(RM) -rf ii_files;                                           \
+        fi
 
 # 'make install-all' also installs examples
 install-all:
@@ -143,9 +148,6 @@ uninstall-doc:
 
 # `make check-install' or `make installcheck' checks that examples can 
 #  be successfully built
-check-install:
-	$(MAKE) $(AM_MAKEFLAGS) installcheck
-
 installcheck-local:
 	(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
 
