@@ -35,7 +35,6 @@
 typedef enum {
     H5I_BADID		= (-1),	/*invalid Group				    */
     H5I_FILE		= 1,	/*group ID for File objects		    */
-    H5I_FILE_CLOSING,		/*files pending close due to open objhdrs   */
     H5I_GROUP,		        /*group ID for Group objects		    */
     H5I_DATATYPE,	        /*group ID for Datatype objects		    */
     H5I_DATASPACE,	        /*group ID for Dataspace objects	    */

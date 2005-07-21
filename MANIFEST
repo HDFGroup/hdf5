@@ -1267,7 +1267,6 @@
 ./test/family_v1.7_00002.h5
 ./test/family_v1.7_00003.h5
 ./test/file_handle.c
-./test/filename.c
 ./test/fill_old.h5
 ./test/fillval.c
 ./test/flush1.c

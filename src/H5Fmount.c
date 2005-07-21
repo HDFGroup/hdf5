@@ -86,7 +86,7 @@ H5F_close_mounts(H5F_t *f)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close child group")
 
         /* Close the child file */
-        if(H5F_close(f->mtab.child[u].file) < 0)
+        if(H5F_try_close(f->mtab.child[u].file) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close child file")
     } /* end if */
     f->mtab.nmounts = 0;
@@ -94,46 +94,6 @@ H5F_close_mounts(H5F_t *f)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_close_mounts() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_term_unmount_cb 
- *
- * Purpose:	H5F_term_interface' callback function.  This routine
- *              unmounts child files from files that are in the "closing"
- *              state.
- *
- * Programmer:  Quincey Koziol
- *              Thursday, Jun 30, 2005
- *
- * Modification:
- *
- *-------------------------------------------------------------------------
- */
-int
-H5F_term_unmount_cb(void *obj_ptr, hid_t obj_id, void UNUSED *key)
-{
-    H5F_t *f = (H5F_t *)obj_ptr;    /* Alias for search info */
-    int      ret_value = FALSE;     /* Return value */
- 
-    FUNC_ENTER_NOAPI_NOINIT(H5F_term_unmount_cb)
-
-    assert(f);
-
-    if(f->mtab.nmounts) {
-        /* Unmount all child files */
-        if(H5F_close_mounts(f) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't unmount child file")
-
-        /* Decrement reference count for file */
-        H5I_dec_ref(obj_id);
-    } /* end if */
-    else
-        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "no files to unmount")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5F_term_unmount_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -181,7 +141,8 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
     assert(TRUE==H5P_isa_class(plist_id,H5P_MOUNT));
 
     /*
-     * Check that the child isn't mounted, that the mount point exists, and
+     * Check that the child isn't mounted, that the mount point exists, that
+     * the parent & child files have the same file close degree, and
      * that the mount wouldn't introduce a cycle in the mount tree.
      */
     if (child->mtab.parent)
@@ -197,6 +158,9 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
 	if (ancestor==child)
 	    HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount would introduce a cycle")
     }
+
+    if(parent->shared->fc_degree != child->shared->fc_degree)
+        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mounted file has different file close degree than parent")
     
     /*
      * Use a binary search to locate the position that the child should be
@@ -239,7 +203,10 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
     parent->mtab.child[md].group = mount_point;
     parent->mtab.child[md].file = child;
     child->mtab.parent = parent;
-    child->nrefs++;
+
+    /* Set the group's mountpoint flag */
+    if(H5G_mount(parent->mtab.child[md].group)<0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to set group mounted flag")
 
     /* Search the open IDs and replace names for mount operation */
     /* We pass H5G_UNKNOWN as object type; search all IDs */
@@ -317,8 +284,7 @@ H5F_unmount(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
     mnt_ent = H5G_entof(mounted);
     ent = H5G_entof(child->shared->root_grp);
 
-    if (child->mtab.parent &&
-	H5F_addr_eq(mnt_ent->header, ent->header)) {
+    if (child->mtab.parent && H5F_addr_eq(mnt_ent->header, ent->header)) {
 	/*
 	 * We've been given the root group of the child.  We do a reverse
 	 * lookup in the parent's mount table to find the correct entry.
@@ -332,18 +298,21 @@ H5F_unmount(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
 
 		/* Unmount the child */
 		parent->mtab.nmounts -= 1;
+                if(H5G_unmount(parent->mtab.child[md].group)<0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to reset group mounted flag")
 		if(H5G_close(parent->mtab.child[i].group)<0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close unmounted group")
 		child->mtab.parent = NULL;
-		if(H5F_close(child)<0)
+		if(H5F_try_close(child)<0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close unmounted file")
+
+                /* Eliminate the mount point from the table */
 		HDmemmove(parent->mtab.child+i, parent->mtab.child+i+1,
                     (parent->mtab.nmounts-i)* sizeof(parent->mtab.child[0]));
 		ret_value = SUCCEED;
 	    }
 	}
-	assert(ret_value>=0);
-	
+	HDassert(ret_value>=0);
     } else {
 	/*
 	 * We've been given the mount point in the parent.  We use a binary
@@ -368,11 +337,15 @@ H5F_unmount(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
 
 	/* Unmount the child */
 	parent->mtab.nmounts -= 1;
+	if(H5G_unmount(parent->mtab.child[md].group)<0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to reset group mounted flag")
 	if(H5G_close(parent->mtab.child[md].group)<0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close unmounted group")
 	parent->mtab.child[md].file->mtab.parent = NULL;
-	if(H5F_close(parent->mtab.child[md].file)<0)
+	if(H5F_try_close(parent->mtab.child[md].file)<0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close unmounted file")
+
+        /* Eliminate the mount point from the table */
 	HDmemmove(parent->mtab.child+md, parent->mtab.child+md+1,
             (parent->mtab.nmounts-md)*sizeof(parent->mtab.child[0]));
 	ret_value = SUCCEED;
@@ -621,109 +594,89 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_check_mounts_recurse
+ * Function:	H5F_mount_count_ids_recurse
  *
- * Purpose:	Helper routine for checking for file mounting hierarchies to
- *              close.
+ * Purpose:	Helper routine for counting number of open IDs in mount
+ *              hierarchy.
  *
- * Return:	TRUE if entire hierarchy can be closed / FALSE otherwise
+ * Return:	<none>
  *
  * Programmer:	Quincey Koziol
- *              Saturday, July  2, 2005
+ *              Tuesday, July 19, 2005
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
-H5F_check_mounts_recurse(H5F_t *f)
+static void
+H5F_mount_count_ids_recurse(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs)
 {
-    hbool_t ret_value = FALSE;          /* Return value */
+    unsigned u;                         /* Local index value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_check_mounts_recurse)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_mount_count_ids_recurse)
 
-    /* Check if this file is closing and if the only objects left open are
-     * the mount points */
-    if((f->closing || (f->nrefs == 1 && f->mtab.parent)) && f->nopen_objs == f->mtab.nmounts) {
-        unsigned u;
+    /* Sanity check */
+    HDassert(f);
+    HDassert(nopen_files);
+    HDassert(nopen_objs);
 
-        /* Iterate over files mounted in this file and check if all can be closed */
-        for(u = 0; u < f->mtab.nmounts; u++) {
-            if(H5G_get_shared_count(f->mtab.child[u].group) > 1
-                    || !H5F_check_mounts_recurse(f->mtab.child[u].file))
-                HGOTO_DONE(FALSE)
-        } /* end for */
+    /* If this file is still open, increment number of file IDs open */
+    if(f->file_id > 0)
+        *nopen_files += 1;
 
-        /* Set return value */
-        ret_value = TRUE;
-    } /* end if */
+    /* Increment number of open objects in file 
+     * (Reduced by number of mounted files, we'll add back in the mount point's
+     *  groups later, if they are open)
+     */
+    *nopen_objs += (f->nopen_objs - f->mtab.nmounts);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_check_mounts_recurse() */
+    /* Iterate over files mounted in this file and add in their open ID counts also */
+    for(u = 0; u < f->mtab.nmounts; u++) {
+        /* Increment the open object count if the mount point group has an open ID */
+        if(H5G_get_shared_count(f->mtab.child[u].group) > 1)
+            *nopen_objs += 1;
+
+        H5F_mount_count_ids_recurse(f->mtab.child[u].file, nopen_files, nopen_objs);
+    } /* end for */
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5F_mount_count_ids_recurse() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_check_mounts
+ * Function:	H5F_mount_count_ids
  *
- * Purpose:	Check for file mounting hierarchies that have been created
- *              and that now are composed completely of files that are closing
- *              and have no more open objects in them.
+ * Purpose:	Count the number of open file & object IDs in a mount hierarchy
  *
- *              When such a mounting hierarchy is detected, unmount and close
- *              all the files involved.
- *
- * Return:	Non-negative on success/Negative on failure
+ * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *              Saturday, July  2, 2005
+ *              Tues, July 19, 2005
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_check_mounts(H5F_t *f)
+H5F_mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
     
-    FUNC_ENTER_NOAPI(H5F_check_mounts, FAIL)
-#ifdef QAK
-HDfprintf(stderr, "%s: f->name=%s\n", FUNC, f->name);
-HDfprintf(stderr, "%s: f->nrefs=%u\n", FUNC, f->nrefs);
-HDfprintf(stderr, "%s: f->shared->nrefs=%u\n", FUNC, f->shared->nrefs);
-HDfprintf(stderr, "%s: f->mtab.parent=%p\n", FUNC, f->mtab.parent);
-HDfprintf(stderr, "%s: f->mtab.nmounts=%u\n", FUNC, f->mtab.nmounts);
-HDfprintf(stderr, "%s: f->nopen_objs=%u\n", FUNC, f->nopen_objs);
-HDfprintf(stderr, "%s: f->closing=%x\n", FUNC, f->closing);
-#endif /* QAK */
+    FUNC_ENTER_NOAPI(H5F_mount_count_ids, FAIL)
 
-    /* Only try to close files for files involved in a mounting hierarchy */
-    if(f->mtab.parent || f->mtab.nmounts) {
-        H5F_t *top = f;         /* Pointer to the top file in the hierarchy */
+    /* Sanity check */
+    HDassert(f);
+    HDassert(nopen_files);
+    HDassert(nopen_objs);
 
-        /* Find the top file in the mounting hierarchy */
-        while(top->mtab.parent) {
-            /* Get out early if we detect that this hierarchy won't close */
-            if(top->nopen_objs != top->mtab.nmounts || !top->closing)
-                HGOTO_DONE(SUCCEED)
+    /* Find the top file in the mounting hierarchy */
+    while(f->mtab.parent)
+        f = f->mtab.parent;
 
-            /* Advance toward the top of the hierarchy */
-            top = top->mtab.parent;
-        } /* end while */
-
-        /* Check for closing the hierarchy */
-        if(H5F_check_mounts_recurse(top)) {
-            /* Unmount all child files */
-            if(H5F_close_mounts(top) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't unmount child file")
-
-            if(H5I_dec_ref(top->closing) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't decrement file closing ID")
-        } /* end if */
-    } /* end if */
+    /* Count open IDs in the hierarchy */
+    H5F_mount_count_ids_recurse(f, nopen_files, nopen_objs);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_check_mounts() */
+} /* end H5F_mount_count_ids() */
 

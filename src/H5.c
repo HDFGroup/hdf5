@@ -2054,9 +2054,6 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                         case H5I_FILE:
                             fprintf(out, "%ld (file)", (long)obj);
                             break;
-                        case H5I_FILE_CLOSING:
-                            fprintf(out, "%ld (file closing)", (long)obj);
-                            break;
                         case H5I_GROUP:
                             fprintf(out, "%ld (group)", (long)obj);
                             break;
@@ -2247,48 +2244,45 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		} else {
 		    H5I_type_t id_type = va_arg (ap, H5I_type_t); /*lint !e64 Type mismatch not really occuring */
 		    switch (id_type) {
-		    case H5I_BADID:
-			fprintf (out, "H5I_BADID");
-			break;
-		    case H5I_FILE:
-			fprintf (out, "H5I_FILE");
-			break;
-		    case H5I_FILE_CLOSING:
-			fprintf (out, "H5I_FILE_CLOSING");
-			break;
-		    case H5I_GROUP:
-			fprintf (out, "H5I_GROUP");
-			break;
-		    case H5I_DATATYPE:
-			fprintf (out, "H5I_DATATYPE");
-			break;
-		    case H5I_DATASPACE:
-			fprintf (out, "H5I_DATASPACE");
-			break;
-		    case H5I_DATASET:
-			fprintf (out, "H5I_DATASET");
-			break;
-		    case H5I_ATTR:
-			fprintf (out, "H5I_ATTR");
-			break;
-		    case H5I_REFERENCE:
-			fprintf (out, "H5I_REFERENCE");
-			break;
-		    case H5I_VFL:
-			fprintf (out, "H5I_VFL");
-			break;
-		    case H5I_GENPROP_CLS:
-			fprintf (out, "H5I_GENPROP_CLS");
-			break;
-		    case H5I_GENPROP_LST:
-			fprintf (out, "H5I_GENPROP_LST");
-			break;
-		    case H5I_NGROUPS:
-			fprintf (out, "H5I_NGROUPS");
-			break;
-		    default:
-			fprintf (out, "%ld", (long)id_type);
-			break;
+                        case H5I_BADID:
+                            fprintf (out, "H5I_BADID");
+                            break;
+                        case H5I_FILE:
+                            fprintf (out, "H5I_FILE");
+                            break;
+                        case H5I_GROUP:
+                            fprintf (out, "H5I_GROUP");
+                            break;
+                        case H5I_DATATYPE:
+                            fprintf (out, "H5I_DATATYPE");
+                            break;
+                        case H5I_DATASPACE:
+                            fprintf (out, "H5I_DATASPACE");
+                            break;
+                        case H5I_DATASET:
+                            fprintf (out, "H5I_DATASET");
+                            break;
+                        case H5I_ATTR:
+                            fprintf (out, "H5I_ATTR");
+                            break;
+                        case H5I_REFERENCE:
+                            fprintf (out, "H5I_REFERENCE");
+                            break;
+                        case H5I_VFL:
+                            fprintf (out, "H5I_VFL");
+                            break;
+                        case H5I_GENPROP_CLS:
+                            fprintf (out, "H5I_GENPROP_CLS");
+                            break;
+                        case H5I_GENPROP_LST:
+                            fprintf (out, "H5I_GENPROP_LST");
+                            break;
+                        case H5I_NGROUPS:
+                            fprintf (out, "H5I_NGROUPS");
+                            break;
+                        default:
+                            fprintf (out, "%ld", (long)id_type);
+                            break;
 		    }
 		}
 		break;

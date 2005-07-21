@@ -66,6 +66,7 @@ H5_DLL void *H5I_object_verify(hid_t id, H5I_type_t id_type);
 H5_DLL H5I_type_t H5I_get_type(hid_t id);
 H5_DLL void *H5I_remove(hid_t id);
 H5_DLL void *H5I_search(H5I_type_t grp, H5I_search_func_t func, void *key);
+H5_DLL int H5I_get_ref(hid_t id);
 H5_DLL int H5I_inc_ref(hid_t id);
 H5_DLL int H5I_dec_ref(hid_t id);
 #endif

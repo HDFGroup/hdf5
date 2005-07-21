@@ -124,15 +124,21 @@ test_basic(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
     h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
 
-    if ((file1=H5Fopen(filename1, H5F_ACC_RDONLY, fapl))<0 ||
-	(file2=H5Fopen(filename2, H5F_ACC_RDONLY, fapl))<0)
-	goto error;
-    if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT)<0) goto error;
-    if ((grp=H5Gopen(file1, "/mnt1/file2"))<0) goto error;
-    if (H5Gclose(grp)<0) goto error;
-    if (H5Funmount(file1, "/mnt1")<0) goto error;
-    if (H5Fclose(file1)<0) goto error;
-    if (H5Fclose(file2)<0) goto error;
+    if ((file1 = H5Fopen(filename1, H5F_ACC_RDONLY, fapl)) < 0 ||
+            (file2 = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR
+    if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT) < 0)
+        TEST_ERROR
+    if ((grp = H5Gopen(file1, "/mnt1/file2")) < 0)
+        TEST_ERROR
+    if (H5Gclose(grp) < 0)
+        TEST_ERROR
+    if (H5Funmount(file1, "/mnt1") < 0)
+        TEST_ERROR
+    if (H5Fclose(file1) < 0)
+        TEST_ERROR
+    if (H5Fclose(file2) < 0)
+        TEST_ERROR
 
     PASSED();
     return 0;
@@ -974,7 +980,6 @@ test_close(hid_t fapl)
 {
     hid_t	file1=-1, file2=-1;
     char	filename1[1024], filename2[1024];
-    herr_t	status;
     
     TESTING("file handle close");
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
@@ -987,20 +992,20 @@ test_close(hid_t fapl)
     if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT)<0) goto error;
 
     /*
-     * Close file1 unmounting it from the virtual file.  Objects in file2 are
-     * still accessible through the file2 handle, but nothing in file1 is
-     * accessible.
+     * Close file1 unmounting it from the virtual file.  Objects in file1 are
+     * still accessible through the file2 handle.
      */
     if (H5Fclose(file1)<0) goto error;
-    H5E_BEGIN_TRY {
-	status = H5Gget_objinfo(file2, "/mnt1", TRUE, NULL);
-    } H5E_END_TRY;
-    if (status>=0) {
+    if(H5Gget_objinfo(file2, "/mnt1", TRUE, NULL) < 0) {
 	H5_FAILED();
-	puts("    File1 contents are still accessible!");
+	puts("    File1 contents are not accessible!");
 	goto error;
     }
     if (H5Fclose(file2)<0) goto error;
+
+    /* Check that all file IDs have been closed */
+    if(H5I_nmembers(H5I_FILE) != 0)
+        TEST_ERROR
 
     /* Build the virtual file again */
     if ((file1=H5Fopen(filename1, H5F_ACC_RDWR, fapl))<0 ||
@@ -1015,6 +1020,10 @@ test_close(hid_t fapl)
     if (H5Gget_objinfo(file1, "/mnt1/file2", TRUE, NULL)<0) goto error;
     if (H5Fclose(file1)<0) goto error;
     
+    /* Check that all file IDs have been closed */
+    if(H5I_nmembers(H5I_FILE) != 0)
+        TEST_ERROR
+
     /* Shut down */
     PASSED();
     return 0;
@@ -1659,10 +1668,6 @@ test_missing_unmount(hid_t fapl)
     if(H5I_nmembers(H5I_FILE) != 0)
         TEST_ERROR
 
-    /* Check that all "file closing" IDs have been closed */
-    if(H5I_nmembers(H5I_FILE_CLOSING) != 0)
-        TEST_ERROR
-
     PASSED();
     return 0;
 
@@ -1797,10 +1802,6 @@ test_hold_open_file(hid_t fapl)
     if(H5I_nmembers(H5I_FILE) != 0)
         TEST_ERROR
 
-    /* Check that all "file closing" IDs have been closed */
-    if(H5I_nmembers(H5I_FILE_CLOSING) != 0)
-        TEST_ERROR
-
     PASSED();
     return 0;
 
@@ -1837,7 +1838,7 @@ static int
 test_hold_open_group(hid_t fapl)
 {
     hid_t fid1 = -1, fid2 = -1;           	/* File IDs */
-    hid_t gidA = -1, gidM = -1, gidAM = -1, gidAM2 = -1;    	/* Group IDs */
+    hid_t gid = -1, gidA = -1, gidM = -1, gidAM = -1, gidAM2 = -1;    	/* Group IDs */
     char	filename1[1024],
 		filename2[1024]; 	/* Name of files to mount */
     
@@ -1918,21 +1919,42 @@ test_hold_open_group(hid_t fapl)
     if((gidAM2 = H5Gopen(fid1, "/A/M")) < 0)
         TEST_ERROR
 
+    /* Close file #1 */
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+    /* Get ID of file #2 */
+    if((fid2 = H5Iget_file_id(gidAM2)) < 0)
+        TEST_ERROR
+
     /* Close group in mounted file */
     if(H5Gclose(gidAM2) < 0)
         TEST_ERROR
 
-    /* Close file #1 */
-    /* (should unmount file #2 also) */
-    if(H5Fclose(fid1) < 0)
+    /* Attempt to open group in mounted file */
+    /* (Should work because file is still mounted) */
+    if((gidAM2 = H5Gopen(fid2, "/A/M")) < 0)
+        TEST_ERROR
+
+    /* Close file #2 */
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+    /* Attempt to open group in parent file */
+    /* (Should work because files should be mounted together) */
+    if((gid = H5Gopen(gidAM2, "/")) < 0)
+        TEST_ERROR
+
+    /* Close group in mounted file */
+    if(H5Gclose(gidAM2) < 0)
+        TEST_ERROR
+
+    /* Close group in parent file */
+    if(H5Gclose(gid) < 0)
         TEST_ERROR
 
     /* Check that all file IDs have been closed */
     if(H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR
-
-    /* Check that all "file closing" IDs have been closed */
-    if(H5I_nmembers(H5I_FILE_CLOSING) != 0)
         TEST_ERROR
 
     PASSED();
@@ -1944,11 +1966,636 @@ error:
 	H5Gclose(gidAM);
 	H5Gclose(gidAM2);
 	H5Gclose(gidA);
+	H5Gclose(gid);
         H5Fclose(fid2);
 	H5Fclose(fid1);
     } H5E_END_TRY;
     return 1;
 } /* end test_hold_open_group() */
+    
+
+/*-------------------------------------------------------------------------
+ * Function:	test_fcdegree_same
+ *
+ * Purpose:	Test that the library will only allow files with same file
+ *              close degree to be mounted together.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, July 19, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_fcdegree_same(hid_t fapl)
+{
+    hid_t fid1 = -1, fid2 = -1;           	/* File IDs */
+    hid_t gidA = -1, gidM = -1, gidAM = -1;    	/* Group IDs */
+    hid_t fapl_id = -1;                         /* FAPL IDs */
+    herr_t ret;                                 /* Generic return value */
+    char	filename1[1024],
+		filename2[1024]; 	/* Name of files to mount */
+    
+    TESTING("file close degrees must be same");
+
+    h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
+    h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
+    
+    /* Create file #1 */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidA) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+
+    /* Create file #2 */
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidM = H5Gcreate(fid2, "M", (size_t)0)) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidM) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+
+    /* Re-open files and mount file #2 in file #1 */
+    if((fid1 = H5Fopen(filename1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidA = H5Gopen(fid1, "A")) < 0)
+        TEST_ERROR
+
+    /* Create FAPL & set file close degree for file #2 to be different */
+    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR
+
+    /* Set file close mode to H5F_CLOSE_STRONG */
+    if(H5Pset_fclose_degree(fapl_id, H5F_CLOSE_STRONG) < 0)
+        TEST_ERROR
+
+    if((fid2 = H5Fopen(filename2, H5F_ACC_RDONLY, fapl_id)) < 0)
+        TEST_ERROR
+
+    /* Try mounting file with different file close degree (should fail) */
+    H5E_BEGIN_TRY {
+        ret = H5Fmount(gidA, ".", fid2, H5P_DEFAULT);
+    } H5E_END_TRY;
+    if(ret >= 0)
+        TEST_ERROR
+
+    /* Set file close mode to H5F_CLOSE_WEAK */
+    if(H5Pset_fclose_degree(fapl_id, H5F_CLOSE_WEAK) < 0)
+        TEST_ERROR
+
+    /* Close file #2 & re-open with same file close degree as file #1 */
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+    if((fid2 = H5Fopen(filename2, H5F_ACC_RDONLY, fapl_id)) < 0)
+        TEST_ERROR
+
+    /* Try mounting files again (should work now) */
+    if(H5Fmount(gidA, ".", fid2, H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Verify opening group in mounted file */
+    if((gidAM = H5Gopen(fid1, "A/M")) < 0)
+        TEST_ERROR
+
+    /* Close group in mounted file */
+    if(H5Gclose(gidAM) < 0)
+        TEST_ERROR
+
+    /* Close group in parent file */
+    if(H5Gclose(gidA) < 0)
+        TEST_ERROR
+
+    /* Close file #2 */
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+    /* Close file #1 */
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+    /* Close FAPL ID */
+    if(H5Pclose(fapl_id) < 0)
+        TEST_ERROR
+
+    /* Check that all file IDs have been closed */
+    if(H5I_nmembers(H5I_FILE) != 0)
+        TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl_id);
+	H5Gclose(gidM);
+	H5Gclose(gidAM);
+	H5Gclose(gidA);
+        H5Fclose(fid2);
+	H5Fclose(fid1);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_fcdegree_same() */
+    
+
+/*-------------------------------------------------------------------------
+ * Function:	test_fcdegree_semi
+ *
+ * Purpose:	Test that the library perform correct actions when using
+ *              "semi" file close degree on mounted files
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, July 19, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_fcdegree_semi(hid_t fapl)
+{
+    hid_t fid1 = -1, fid2 = -1;           	/* File IDs */
+    hid_t gidA = -1, gidM = -1, gidAM = -1;    	/* Group IDs */
+    hid_t fapl_id = -1;                         /* FAPL IDs */
+    herr_t ret;                                 /* Generic return value */
+    char	filename1[1024],
+		filename2[1024]; 	/* Name of files to mount */
+    
+    TESTING("'semi' file close degree");
+
+    h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
+    h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
+    
+    /* Create file #1 */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidA) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+
+    /* Create file #2 */
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidM = H5Gcreate(fid2, "M", (size_t)0)) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidM) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+
+    /* Create FAPL & set file close degree to be "semi" */
+    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR
+
+    /* Set file close mode to H5F_CLOSE_SEMI */
+    if(H5Pset_fclose_degree(fapl_id, H5F_CLOSE_SEMI) < 0)
+        TEST_ERROR
+
+    /* Re-open files and mount file #2 in file #1 */
+    if((fid1 = H5Fopen(filename1, H5F_ACC_RDONLY, fapl_id)) < 0)
+        TEST_ERROR
+
+    if((gidA = H5Gopen(fid1, "A")) < 0)
+        TEST_ERROR
+
+    if((fid2 = H5Fopen(filename2, H5F_ACC_RDONLY, fapl_id)) < 0)
+        TEST_ERROR
+
+    /* Mount files together */
+    if(H5Fmount(gidA, ".", fid2, H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Verify opening group in mounted file */
+    if((gidAM = H5Gopen(fid1, "A/M")) < 0)
+        TEST_ERROR
+
+    /* Close file #1 (should succeed, since file #2 is open still) */
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+    /* Try closing file #2 (should fail, since there are still objects open) */
+    H5E_BEGIN_TRY {
+        ret = H5Fclose(fid2);
+    } H5E_END_TRY;
+    if(ret >= 0)
+        TEST_ERROR
+
+    /* Close group in parent file */
+    if(H5Gclose(gidA) < 0)
+        TEST_ERROR
+
+    /* Try closing file #2 (should still fail, since there are still objects open in child file) */
+    H5E_BEGIN_TRY {
+        ret = H5Fclose(fid2);
+    } H5E_END_TRY;
+    if(ret >= 0)
+        TEST_ERROR
+
+    /* Close group in mounted file */
+    if(H5Gclose(gidAM) < 0)
+        TEST_ERROR
+
+    /* Close file #2 (should succeed now) */
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+    /* Close FAPL ID */
+    if(H5Pclose(fapl_id) < 0)
+        TEST_ERROR
+
+    /* Check that all file IDs have been closed */
+    if(H5I_nmembers(H5I_FILE) != 0)
+        TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl_id);
+	H5Gclose(gidM);
+	H5Gclose(gidAM);
+	H5Gclose(gidA);
+        H5Fclose(fid2);
+	H5Fclose(fid1);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_fcdegree_semi() */
+    
+
+/*-------------------------------------------------------------------------
+ * Function:	test_fcdegree_strong
+ *
+ * Purpose:	Test that the library perform correct actions when using
+ *              "strong" file close degree on mounted files
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, July 19, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_fcdegree_strong(hid_t fapl)
+{
+    hid_t fid1 = -1, fid2 = -1;           	/* File IDs */
+    hid_t gidA = -1, gidM = -1, gidAM = -1;    	/* Group IDs */
+    hid_t fapl_id = -1;                         /* FAPL IDs */
+    herr_t ret;                                 /* Generic return value */
+    char	filename1[1024],
+		filename2[1024]; 	/* Name of files to mount */
+    
+    TESTING("'strong' file close degree");
+
+    h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
+    h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
+    
+    /* Create file #1 */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidA) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+
+    /* Create file #2 */
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidM = H5Gcreate(fid2, "M", (size_t)0)) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidM) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+
+    /* Create FAPL & set file close degree to be "strong" */
+    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR
+
+    /* Set file close mode to H5F_CLOSE_STRONG */
+    if(H5Pset_fclose_degree(fapl_id, H5F_CLOSE_STRONG) < 0)
+        TEST_ERROR
+
+    /* Re-open files and mount file #2 in file #1 */
+    if((fid1 = H5Fopen(filename1, H5F_ACC_RDONLY, fapl_id)) < 0)
+        TEST_ERROR
+
+    if((gidA = H5Gopen(fid1, "A")) < 0)
+        TEST_ERROR
+
+    if((fid2 = H5Fopen(filename2, H5F_ACC_RDONLY, fapl_id)) < 0)
+        TEST_ERROR
+
+    /* Mount files together */
+    if(H5Fmount(gidA, ".", fid2, H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Open group in mounted file */
+    if((gidAM = H5Gopen(fid1, "A/M")) < 0)
+        TEST_ERROR
+
+    /* Close file #1 */
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+    /* Check that objects are still open */
+    if (H5Gget_objinfo(gidA, ".", TRUE, NULL) < 0)
+        TEST_ERROR
+    if (H5Gget_objinfo(gidAM, ".", TRUE, NULL) < 0)
+        TEST_ERROR
+
+    /* Close file #2 (should close open objects also) */
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+    /* Check that objects are closed */
+    H5E_BEGIN_TRY {
+        ret = H5Gget_objinfo(gidA, ".", TRUE, NULL);
+    } H5E_END_TRY;
+    if(ret >= 0)
+        TEST_ERROR
+    H5E_BEGIN_TRY {
+        ret = H5Gget_objinfo(gidAM, ".", TRUE, NULL);
+    } H5E_END_TRY;
+    if(ret >= 0)
+        TEST_ERROR
+
+    /* Close FAPL ID */
+    if(H5Pclose(fapl_id) < 0)
+        TEST_ERROR
+
+    /* Check that all file IDs have been closed */
+    if(H5I_nmembers(H5I_FILE) != 0)
+        TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl_id);
+	H5Gclose(gidM);
+	H5Gclose(gidAM);
+	H5Gclose(gidA);
+        H5Fclose(fid2);
+	H5Fclose(fid1);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_fcdegree_strong() */
+    
+
+/*-------------------------------------------------------------------------
+ * Function:	test_acc_perm
+ *
+ * Purpose:	Test that the library correctly segregates operations in
+ *              parts of mounted file hierarchy with files that have different
+ *              R/W access permissions.
+ *
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, July 19, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_acc_perm(hid_t fapl)
+{
+    hid_t fid1 = -1, fid2 = -1, fid3 = -1;           	/* File IDs */
+    hid_t gidA = -1, gidB = -1, gidC = -1, gidM = -1, gidAM = -1, gidAMZ = -1;    	/* Group IDs */
+    hid_t bad_id = -1;                          /* Bad ID from object create */
+    char    name[NAME_BUF_SIZE];        /* Buffer for filename retrieved */
+    ssize_t name_len;                   /* Filename length */
+    char	filename1[1024],
+		filename2[1024],
+		filename3[1024]; 	/* Name of files to mount */
+    
+    TESTING("access permissions");
+
+    h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
+    h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
+    h5_fixname(FILENAME[2], fapl, filename3, sizeof filename3);
+    
+    /* Create file #1 */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidA) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+
+    /* Create file #2 */
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidM = H5Gcreate(fid2, "M", (size_t)0)) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidM) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+
+    /* Re-open files and mount file #2 in file #1 */
+    if((fid1 = H5Fopen(filename1, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidA = H5Gopen(fid1, "A")) < 0)
+        TEST_ERROR
+
+    /* Get and verify file name */
+    if((name_len = H5Fget_name(gidA, name, NAME_BUF_SIZE)) < 0)
+        TEST_ERROR
+    if(HDstrcmp(name, filename1) != 0)
+        TEST_ERROR
+
+    if((fid2 = H5Fopen(filename2, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Get and verify file name */
+    if((name_len = H5Fget_name(fid2, name, NAME_BUF_SIZE)) < 0)
+        TEST_ERROR
+    if(HDstrcmp(name, filename2) != 0)
+        TEST_ERROR
+
+    /* Mount files together */
+    if(H5Fmount(gidA, ".", fid2, H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Get and verify file name */
+    if((name_len = H5Fget_name(fid2, name, NAME_BUF_SIZE)) < 0)
+        TEST_ERROR
+    if(HDstrcmp(name, filename2) != 0)
+        TEST_ERROR
+
+    /* Open group in mounted file */
+    if((gidAM = H5Gopen(fid1, "A/M")) < 0)
+        TEST_ERROR
+
+    /* Get and verify file name */
+    if((name_len = H5Fget_name(gidAM, name, NAME_BUF_SIZE)) < 0)
+        TEST_ERROR
+    if(HDstrcmp(name, filename2) != 0)
+        TEST_ERROR
+
+    /* Attempt to create objects in read only file (should fail) */
+    H5E_BEGIN_TRY {
+        bad_id = H5Gcreate(gidAM, "Z", (size_t)0);
+    } H5E_END_TRY;
+    if(bad_id >= 0)
+        TEST_ERROR
+    H5E_BEGIN_TRY {
+        bad_id = H5Gcreate(fid1, "/A/L", (size_t)0);
+    } H5E_END_TRY;
+    if(bad_id >= 0)
+        TEST_ERROR
+
+    /* Attempt to create objects in read/write file (should succeed) */
+    if((gidB = H5Gcreate(fid2, "/B", (size_t)0)) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidB) < 0)
+        TEST_ERROR
+
+    /* (Note that this object should get created in the "hidden" group for "A" in parent file) */
+    if((gidC = H5Gcreate(gidA, "C", (size_t)0)) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidC) < 0)
+        TEST_ERROR
+
+    /* Create file #3 (it will have R/W permissions) */
+    if((fid3 = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Mount file #3 on file #2 */
+    if(H5Fmount(gidAM, ".", fid3, H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Attempt to create objects in read/write file (should succeed) */
+    if((gidAMZ = H5Gcreate(fid1, "/A/M/Z", (size_t)0)) < 0)
+        TEST_ERROR
+
+    /* Get and verify file name */
+    if((name_len = H5Fget_name(gidAMZ, name, NAME_BUF_SIZE)) < 0)
+        TEST_ERROR
+    if(HDstrcmp(name, filename3) != 0)
+        TEST_ERROR
+
+    /* Close object in file #3 */
+    if(H5Gclose(gidAMZ) < 0)
+        TEST_ERROR
+
+
+    /* Attempt to create objects in read only file again (should fail) */
+    H5E_BEGIN_TRY {
+        bad_id = H5Gcreate(fid1, "/A/L", (size_t)0);
+    } H5E_END_TRY;
+    if(bad_id >= 0)
+        TEST_ERROR
+
+    /* Close group in mounted file */
+    if(H5Gclose(gidAM) < 0)
+        TEST_ERROR
+
+    /* Close group in parent file */
+    if(H5Gclose(gidA) < 0)
+        TEST_ERROR
+
+    /* Close file #3 */
+    if(H5Fclose(fid3) < 0)
+        TEST_ERROR
+
+    /* Close file #2 */
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+    /* Close file #1 */
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+
+    /* Check that all file IDs have been closed */
+    if(H5I_nmembers(H5I_FILE) != 0)
+        TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Gclose(gidM);
+	H5Gclose(gidAMZ);
+	H5Gclose(gidAM);
+	H5Gclose(gidC);
+	H5Gclose(gidB);
+	H5Gclose(gidA);
+        H5Fclose(fid3);
+        H5Fclose(fid2);
+	H5Fclose(fid1);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_acc_perm() */
     
 
 /*-------------------------------------------------------------------------
@@ -1995,6 +2642,10 @@ main(void)
     nerrors += test_missing_unmount(fapl);
     nerrors += test_hold_open_file(fapl);
     nerrors += test_hold_open_group(fapl);
+    nerrors += test_fcdegree_same(fapl);
+    nerrors += test_fcdegree_semi(fapl);
+    nerrors += test_fcdegree_strong(fapl);
+    nerrors += test_acc_perm(fapl);
     
     if (nerrors) goto error;
     puts("All mount tests passed.");

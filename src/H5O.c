@@ -405,7 +405,7 @@ H5O_close(H5G_entry_t *obj_ent)
 
 #ifdef H5O_DEBUG
     if (H5DEBUG(O)) {
-	if (obj_ent->file->closing && 1==obj_ent->file->shared->nrefs) {
+	if (obj_ent->file->file_id < 0 && 1==obj_ent->file->shared->nrefs) {
 	    HDfprintf(H5DEBUG(O), "< %a auto %lu remaining\n",
 		      obj_ent->header,
 		      (unsigned long)(obj_ent->file->nopen_objs));
@@ -416,28 +416,13 @@ H5O_close(H5G_entry_t *obj_ent)
 #endif
     
     /*
-     * If the file open-lock count has reached the number of open mount points
-     * (each of which has a group open in the file) and the file has a close
-     * pending then close the file and remove it from the H5I_FILE_CLOSING ID
-     * group.
+     * If the file open object count has reached the number of open mount points
+     * (each of which has a group open in the file) attempt to close the file.
      */
-    /* Check for just mount points holding file open */
-    if(obj_ent->file->mtab.nmounts == obj_ent->file->nopen_objs && obj_ent->file->closing) {
-        unsigned u;             /* Local index variable */
-        hbool_t really_close;  /* Whether to delay the file close by going to a "closing" state */
-
-        /* Check for open groups on mount points */
-        really_close = TRUE;
-        for(u = 0; u < obj_ent->file->mtab.nmounts; u++) {
-            if(H5G_get_shared_count(obj_ent->file->mtab.child[u].group) > 1) {
-                really_close = FALSE;
-                break;
-            } /* end if */
-        } /* end for */
-
-        /* If we really want to close this file now */
-        if(really_close)
-            H5I_dec_ref(obj_ent->file->closing);
+    if(obj_ent->file->nopen_objs == obj_ent->file->mtab.nmounts) {
+        /* Attempt to close down the file hierarchy */
+        if(H5F_try_close(obj_ent->file) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problem attempting file close")
     } /* end if */
 
     /* Free the ID to name buffers */
@@ -445,7 +430,7 @@ H5O_close(H5G_entry_t *obj_ent)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5O_close() */
 
 
 /*-------------------------------------------------------------------------

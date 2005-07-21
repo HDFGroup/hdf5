@@ -28,7 +28,7 @@ TEST_PROGS=testhdf5 lheap ohdr stab gheap cache hyperslab istore bittests    \
     dtypes dsets cmpd_dset extend external links unlink big mtime fillval    \
     mount flush1 flush2 enum gass_write gass_read gass_append set_extent     \
     srb_write srb_append srb_read ttsafe stream_test getname file_handle     \
-    ntypes dangle filename reserved
+    ntypes dangle reserved
 
 TIMINGS=testmeta
 
@@ -61,7 +61,7 @@ MOSTLYCLEAN=cmpd_dset.h5 compact_dataset.h5 dataset.h5 extend.h5 istore.h5   \
             getname.h5 getname1.h5 getname2.h5 getname3.h5 sec2_file.h5      \
             family_file000[0-3][0-9].h5 multi_file-[rs].h5 core_file         \
             new_move_[ab].h5 ntypes.h5 dangle.h5 test_filters.h5 	     \
-	    get_file_name.h5 tstint[1-2].h5 unlink_chunked.h5
+	    tstint[1-2].h5 unlink_chunked.h5
 
 CLEAN=$(TIMINGS)
 
@@ -79,8 +79,7 @@ TEST_SRC=big.c bittests.c cache.c cmpd_dset.c dsets.c dtypes.c extend.c      \
     unlink.c enum.c ttsafe.c ttsafe_dcreate.c ttsafe_error.c                 \
     ttsafe_cancel.c ttsafe_acreate.c gass_write.c gass_read.c                \
     gass_append.c srb_read.c srb_write.c srb_append.c stream_test.c          \
-    set_extent.c getname.c file_handle.c ntypes.c dangle.c filename.c        \
-    reserved.c
+    set_extent.c getname.c file_handle.c ntypes.c dangle.c reserved.c
 
 TEST_OBJ=$(TEST_SRC:.c=.lo)
 
@@ -224,9 +223,6 @@ ntypes: ntypes.lo
 
 dangle: dangle.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ dangle.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
-
-filename: filename.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ filename.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 reserved: reserved.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ reserved.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)

@@ -72,6 +72,14 @@ Bug Fixes since HDF5-1.6.4 release
 
     Library
     -------
+        - Made H5Fget_name() be consistent and always return name of actual
+            file the ID is in.  (Instead of the name of the top file in a
+            file mounting hierarchy).  QAK - 2005/07/19
+        - Reworked internal file mounting semantics to hopefully eliminate
+            mounting problems.  We now require that files that are mounting
+            together all have the same "file close degree".  QAK - 2005/07/19
+        - More bug fixes on holding open files that are mounted and have
+            IDs open.  QAK - 2005/07/14
         - More bug fixes on holding open files that are mounted and have
             IDs open.  QAK - 2005/07/14
         - Dataset sieve buffer cache was inadvertantly disabled - re-enable 
