@@ -18,6 +18,8 @@ GOTO WRONG
 :BUILDC
 
 type nul > build_results_net.txt
+type nul > all_debug.log
+type nul >all_release.log
 echo ***************************************************************************** >> build_results_net.txt
 echo                         Build H5Tinit.exe >> build_results_net.txt
 echo ***************************************************************************** >> build_results_net.txt
@@ -38,8 +40,8 @@ h5tinit.exe > h5tinit.c
 echo Starting Building HDF5 C Libraries!
 
 cd ..\windows\proj\all
-devenv all.sln /rebuild debug /out ..\..\..\all_debug.log
-devenv all.sln /rebuild release /out >> ..\..\..\all_release.log
+devenv all.sln /rebuild debug >> ..\..\..\all_debug.log
+devenv all.sln /rebuild release >> ..\..\..\all_release.log
 cd ..\..\..\
 more all_debug.log >> build_results_net.txt
 more all_release.log >> build_results_net.txt
@@ -50,6 +52,8 @@ GOTO END
 :BUILDCPP
 
 type nul > build_results_net.txt
+type nul > all_debug.log
+type nul > all_release.log
 echo ***************************************************************************** >> build_results_net.txt
 echo                         Build H5Tinit.exe >> build_results_net.txt
 echo ***************************************************************************** >> build_results_net.txt
@@ -70,23 +74,29 @@ h5tinit.exe > h5tinit.c
 echo Starting Building HDF5 C and C++ Libraries!
 
 cd ..\windows\proj\all
-devenv all.sln /rebuild debug /out ..\..\..\all_debug.log
-devenv all.sln /rebuild release /out  ..\..\..\all_release.log
+devenv all.sln /rebuild debug >> ..\..\..\all_debug.log
+devenv all.sln /build debug /project hdf5_cppdll >>..\..\..\all_debug.log
+devenv all.sln /build debug /project hdf5_cpp >>..\..\..\all_debug.log
+devenv all.sln /build debug /project hdf5_hl_cpp >>..\..\..\all_debug.log
+::devenv all.sln /build debug /project hdf5_hl_cppdll >>..\..\..\all_debug.log
+devenv all.sln /build debug /project testhdf5_cpp  >>..\..\..\all_debug.log
+devenv all.sln /build debug /project testhdf5_cppdll  >>..\..\..\all_debug.log
+devenv all.sln /build debug /project dsets_cpp  >>..\..\..\all_debug.log
+devenv all.sln /build debug /project dsets_cppdll  >>..\..\..\all_debug.log
+devenv all.sln /build debug /project hl_test_table_cpp  >>..\..\..\all_debug.log
+::devenv all.sln /build debug /project hl_test_table_cppdll  >>..\..\..\all_debug.log
 
-devenv all.sln /build debug /project testhdf5_cppdll /out ..\..\..\all_debug.log
-devenv all.sln /build release /project testhdf5_cppdll /out ..\..\..\all_release.log
-
-devenv all.sln /build debug /project testhdf5_cpp /out ..\..\..\all_debug.log
-devenv all.sln /build release /project testhdf5_cpp /out ..\..\..\all_release.log
-
-devenv all.sln /build debug /project dsets_cppdll /out ..\..\..\all_debug.log
-devenv all.sln /build release /project dsets_cppdll /out ..\..\..\all_release.log
-
-devenv all.sln /build debug /project dsets_cpp /out ..\..\..\all_debug.log
-devenv all.sln /build release /project dsets_cpp /out ..\..\..\all_release.log
-
-devenv all.sln /build debug /project hl_test_table_cpp ..\..\..\all_debug.log
-devenv all.sln /build release /project hl_test_table_cpp ..\..\..\all_release.log
+devenv all.sln /rebuild release >>  ..\..\..\all_release.log
+devenv all.sln /build release /project hdf5_cppdll >>..\..\..\all_release.log
+devenv all.sln /build release /project hdf5_cpp >>..\..\..\all_release.log
+devenv all.sln /build release /project hdf5_hl_cpp >>..\..\..\all_release.log
+::devenv all.sln /build release /project hdf5_hl_cppdll >>..\..\..\all_release.log
+devenv all.sln /build release /project testhdf5_cpp  >>..\..\..\all_release.log
+devenv all.sln /build release /project testhdf5_cppdll  >>..\..\..\all_release.log
+devenv all.sln /build release /project dsets_cpp  >>..\..\..\all_release.log
+devenv all.sln /build release /project dsets_cppdll  >>..\..\..\all_release.log
+devenv all.sln /build release /project hl_test_table_cpp  >>..\..\..\all_release.log
+::devenv all.sln /build release /project hl_test_table_cppdll  >>..\..\..\all_release.log
 
 cd ..\..\..\
 
