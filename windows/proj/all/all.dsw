@@ -300,16 +300,10 @@ Package=<4>
     Project_Dep_Name dtransform
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name filename
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name dangledll
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name dtransformdll
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name filenamedll
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name talign
@@ -1012,42 +1006,6 @@ Package=<4>
 ###############################################################################
 
 Project: "file_handledll"=..\..\test\file_handledll\file_handledll.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name hdf5dll
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libtestD
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "filename"=..\..\TEST\filename\filename.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name hdf5
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libtest
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "filenamedll"=..\..\TEST\filenamedll\filenamedll.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
