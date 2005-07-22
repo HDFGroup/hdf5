@@ -1359,10 +1359,15 @@ a------------------------------------------------------------------------------
 ./windows/hl/fortran/test/hl_test_image_fortran/hl_test_image_fortran.dsp
 ./windows/hl/fortran/test/hl_test_lite_fortran/hl_test_lite_fortran.dsp
 ./windows/hl/fortran/test/hl_test_table_fortran/hl_test_table_fortran.dsp
+./windows/hl/fortran/test/hl_test_image_fortrandll/hl_test_image_fortrandll.dsp
+./windows/hl/fortran/test/hl_test_lite_fortrandll/hl_test_lite_fortrandll.dsp
+./windows/hl/fortran/test/hl_test_table_fortrandll/hl_test_table_fortrandll.dsp
+
 ./windows/hl/fortran/test/test_hdf5_hl_fortran.BAT
 
 #windows hl c++ test
 ./windows/hl/c++/test/hl_test_table_cpp/hl_test_table_cpp.dsp
+./windows/hl/c++/test/hl_test_table_cppdll/hl_test_table_cppdll.dsp
 ./windows/hl/c++/test/test_hdf5_hl_cpp.bat
 
 #windows hl test
@@ -1372,6 +1377,12 @@ a------------------------------------------------------------------------------
 ./windows/hl/test/hl_test_ds/hl_test_ds.dsp
 ./windows/hl/test/hl_test_packet/hl_test_packet.dsp
 ./windows/hl/test/test_hdf5_hl.BAT
+./windows/hl/test/hl_test_dsdll/hl_test_dsdll.dsp
+./windows/hl/test/hl_test_imagedll/hl_test_imagedll.dsp
+./windows/hl/test/hl_test_litedll/hl_test_litedll.dsp
+./windows/hl/test/hl_test_packetdll/hl_test_packetdll.dsp
+./windows/hl/test/hl_test_tabledll/hl_test_tabledll.dsp
+
 
 #windows misc
 ./windows/misc/typegen/typegen.dsw
@@ -1385,7 +1396,7 @@ a------------------------------------------------------------------------------
 ./windows/misc/matchtypegen/matchtypegen.dsw
 
 
-#windows hl proj
+#windows proj
 ./windows/proj/all/all.dsp
 ./windows/proj/all/all.dsw
 ./windows/proj/all/all.sln
@@ -1400,6 +1411,11 @@ a------------------------------------------------------------------------------
 ./windows/proj/hdf5_hl_fortran/hdf5_hl_fortran.dsp
 ./windows/proj/hdf5dll/hdf5dll.dsp
 ./windows/proj/hdf5_hl_cpp/hdf5_hl_cpp.dsp
+./windows/proj/hdf5_hldll/hdf5_hldll.dsp
+./windows/proj/hdf5_hl_cppdll/hdf5_hl_cppdll.dsp
+./windows/proj/hdf5_hl_f90cstubdll/hdf5_hl_f90cstubdll.dsp
+./windows/proj/hdf5_hl_fortrandll/hdf5_hl_fortrandll.dsp
+
 #windows src
 ./windows/src/H5pubconf.h
 ./windows/src/H5Tinit.c
@@ -1553,6 +1569,9 @@ a------------------------------------------------------------------------------
 ./windows/batch_net/convert_to_vcproj.bat
 ./windows/batch_net/hdf5bt_net.bat
 ./windows/batch_net/hdf5build_net.bat
+./windows/install_hldll.BAT
+./windows/install_hlf90dll.bat
+./windows/install_hlcppdll.BAT
 
 #windows fortran examples
 ./windows/fortran/examples/allf90examples/allf90examples.dsp
