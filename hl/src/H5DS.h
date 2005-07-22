@@ -26,7 +26,7 @@
 #define REFERENCE_LIST        "REFERENCE_LIST"
 #define DIMENSION_LABELS      "DIMENSION_LABELS"
 
-typedef herr_t (*H5DS_iterate_t)(hid_t dset, unsigned dim, hid_t scale, void *visitor_data); 
+typedef herr_t  (*H5DS_iterate_t)(hid_t dset, unsigned dim, hid_t scale, void *visitor_data); 
 
 
 /* attribute type of a DS dataset */
@@ -40,42 +40,42 @@ typedef struct ds_list_t {
 extern "C" {
 #endif
 
-herr_t H5DSattach_scale(hid_t did,
+H5_HLDLL herr_t  H5DSattach_scale( hid_t did,
                         hid_t dsid,
                         unsigned int idx);
 
-herr_t H5DSdetach_scale(hid_t did,
+H5_HLDLL herr_t  H5DSdetach_scale( hid_t did,
                         hid_t dsid,
                         unsigned int idx);
 
-herr_t H5DSset_scale(hid_t dsid, 
+H5_HLDLL herr_t  H5DSset_scale( hid_t dsid, 
                      char *dimname);
 
-int H5DSget_num_scales(hid_t did,
+H5_HLDLL int H5DSget_num_scales( hid_t did,
                        unsigned int dim);
 
-herr_t H5DSset_label(hid_t did, 
+H5_HLDLL herr_t  H5DSset_label( hid_t did, 
                      unsigned int idx,
                      char *label);
 
-ssize_t H5DSget_label(hid_t did, 
+H5_HLDLL ssize_t H5DSget_label( hid_t did, 
                       unsigned int idx,
                       char *label,
                       size_t size);
 
-ssize_t H5DSget_scale_name(hid_t did, 
+H5_HLDLL ssize_t H5DSget_scale_name( hid_t did, 
                            char *name,
                            size_t size);
 
-htri_t H5DSis_scale(hid_t did);
+H5_HLDLL htri_t H5DSis_scale( hid_t did);
 
-herr_t H5DSiterate_scales(hid_t did, 
+H5_HLDLL herr_t  H5DSiterate_scales( hid_t did, 
                           unsigned int dim, 
                           int *idx, 
                           H5DS_iterate_t visitor, 
                           void *visitor_data);
 
-htri_t H5DSis_attached(hid_t did,
+H5_HLDLL htri_t H5DSis_attached( hid_t did,
                        hid_t dsid,
                        unsigned int idx);
 
@@ -87,7 +87,7 @@ htri_t H5DSis_attached(hid_t did,
  */ 
 
 
-herr_t H5DS_is_reserved(hid_t did);
+H5_HLDLL herr_t  H5DS_is_reserved( hid_t did);
 
 
 
