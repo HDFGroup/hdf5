@@ -3651,7 +3651,7 @@ done:
 static herr_t
 H5F_shared_add(H5F_file_t *shared)
 {
-    H5F_sfile_node_t *new;              /* New shared file node */
+    H5F_sfile_node_t *new_shared;              /* New shared file node */
     herr_t ret_value = SUCCEED;         /* Return value */
     
     FUNC_ENTER_NOAPI_NOINIT(H5F_shared_add)
@@ -3660,15 +3660,15 @@ H5F_shared_add(H5F_file_t *shared)
     HDassert(shared);
 
     /* Allocate new shared file node */
-    if (NULL == (new = H5FL_CALLOC(H5F_sfile_node_t)))
+    if (NULL == (new_shared = H5FL_CALLOC(H5F_sfile_node_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Set shared file value */
-    new->shared = shared;
+    new_shared->shared = shared;
 
     /* Prepend to list of shared files open */
-    new->next = H5F_sfile_head_g;
-    H5F_sfile_head_g = new;
+    new_shared->next = H5F_sfile_head_g;
+    H5F_sfile_head_g = new_shared;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
