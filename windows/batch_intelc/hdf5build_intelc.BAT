@@ -85,25 +85,25 @@ devenv all.sln /rebuild debug /IntelSpecific Intel >> ..\..\..\all_debug.log
 devenv all.sln /build debug /project hdf5_cppdll /IntelSpecific Intel >> ..\..\..\all_debug.log
 devenv all.sln /build debug /project hdf5_cpp /IntelSpecific Intel >> ..\..\..\all_debug.log
 devenv all.sln /build debug /project hdf5_hl_cpp /IntelSpecific Intel >> ..\..\..\all_debug.log
-::devenv all.sln /build debug /project hdf5_hl_cppdll /IntelSpecific Intel >> ..\..\..\all_debug.log
+devenv all.sln /build debug /project hdf5_hl_cppdll /IntelSpecific Intel >> ..\..\..\all_debug.log
 devenv all.sln /build debug /project testhdf5_cpp  /IntelSpecific Intel >> ..\..\..\all_debug.log
 devenv all.sln /build debug /project testhdf5_cppdll  /IntelSpecific Intel >> ..\..\..\all_debug.log
 devenv all.sln /build debug /project dsets_cpp  /IntelSpecific Intel >> ..\..\..\all_debug.log
 devenv all.sln /build debug /project dsets_cppdll  /IntelSpecific Intel >> ..\..\..\all_debug.log
 devenv all.sln /build debug /project hl_test_table_cpp  /IntelSpecific Intel >> ..\..\..\all_debug.log
-::devenv all.sln /build debug /project hl_test_table_cppdll  /IntelSpecific Intel >> ..\..\..\all_debug.log
+devenv all.sln /build debug /project hl_test_table_cppdll  /IntelSpecific Intel >> ..\..\..\all_debug.log
 
 devenv all.sln /rebuild release /IntelSpecific Intel >> ..\..\..\all_release.log
 devenv all.sln /build release /project hdf5_cppdll /IntelSpecific Intel >>..\..\..\all_release.log
 devenv all.sln /build release /project hdf5_cpp /IntelSpecific Intel >>..\..\..\all_release.log
 devenv all.sln /build release /project hdf5_hl_cpp /IntelSpecific Intel >>..\..\..\all_release.log
-::devenv all.sln /build release /project hdf5_hl_cppdll /IntelSpecific Intel >>..\..\..\all_release.log
+devenv all.sln /build release /project hdf5_hl_cppdll /IntelSpecific Intel >>..\..\..\all_release.log
 devenv all.sln /build release /project testhdf5_cpp  /IntelSpecific Intel >>..\..\..\all_release.log
 devenv all.sln /build release /project testhdf5_cppdll  /IntelSpecific Intel >>..\..\..\all_release.log
 devenv all.sln /build release /project dsets_cpp  /IntelSpecific Intel >>..\..\..\all_release.log
 devenv all.sln /build release /project dsets_cppdll  /IntelSpecific Intel >>..\..\..\all_release.log
 devenv all.sln /build release /project hl_test_table_cpp  /IntelSpecific Intel >>..\..\..\all_release.log
-::devenv all.sln /build release /project hl_test_table_cppdll  /IntelSpecific Intel >>..\..\..\all_release.log
+devenv all.sln /build release /project hl_test_table_cppdll  /IntelSpecific Intel >>..\..\..\all_release.log
 
 cd ..\..\..\
 

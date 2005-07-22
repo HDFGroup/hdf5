@@ -78,25 +78,25 @@ devenv all.sln /rebuild debug >> ..\..\..\all_debug.log
 devenv all.sln /build debug /project hdf5_cppdll >>..\..\..\all_debug.log
 devenv all.sln /build debug /project hdf5_cpp >>..\..\..\all_debug.log
 devenv all.sln /build debug /project hdf5_hl_cpp >>..\..\..\all_debug.log
-::devenv all.sln /build debug /project hdf5_hl_cppdll >>..\..\..\all_debug.log
+devenv all.sln /build debug /project hdf5_hl_cppdll >>..\..\..\all_debug.log
 devenv all.sln /build debug /project testhdf5_cpp  >>..\..\..\all_debug.log
 devenv all.sln /build debug /project testhdf5_cppdll  >>..\..\..\all_debug.log
 devenv all.sln /build debug /project dsets_cpp  >>..\..\..\all_debug.log
 devenv all.sln /build debug /project dsets_cppdll  >>..\..\..\all_debug.log
 devenv all.sln /build debug /project hl_test_table_cpp  >>..\..\..\all_debug.log
-::devenv all.sln /build debug /project hl_test_table_cppdll  >>..\..\..\all_debug.log
+devenv all.sln /build debug /project hl_test_table_cppdll  >>..\..\..\all_debug.log
 
 devenv all.sln /rebuild release >>  ..\..\..\all_release.log
 devenv all.sln /build release /project hdf5_cppdll >>..\..\..\all_release.log
 devenv all.sln /build release /project hdf5_cpp >>..\..\..\all_release.log
 devenv all.sln /build release /project hdf5_hl_cpp >>..\..\..\all_release.log
-::devenv all.sln /build release /project hdf5_hl_cppdll >>..\..\..\all_release.log
+devenv all.sln /build release /project hdf5_hl_cppdll >>..\..\..\all_release.log
 devenv all.sln /build release /project testhdf5_cpp  >>..\..\..\all_release.log
 devenv all.sln /build release /project testhdf5_cppdll  >>..\..\..\all_release.log
 devenv all.sln /build release /project dsets_cpp  >>..\..\..\all_release.log
 devenv all.sln /build release /project dsets_cppdll  >>..\..\..\all_release.log
 devenv all.sln /build release /project hl_test_table_cpp  >>..\..\..\all_release.log
-::devenv all.sln /build release /project hl_test_table_cppdll  >>..\..\..\all_release.log
+devenv all.sln /build release /project hl_test_table_cppdll  >>..\..\..\all_release.log
 
 cd ..\..\..\
 
