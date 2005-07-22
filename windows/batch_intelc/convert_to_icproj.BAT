@@ -24,12 +24,11 @@ echo.
 
 
   ICProjConvert80 windows\proj\hdf5\hdf5.vcproj /IC  >> convert_intel.log
-  ICProjConvert80 windows\proj\hdf5_cpp\hdf5_cpp.vcproj /IC  >> convert_intel.log
-  ICProjConvert80 windows\proj\hdf5_cppdll\hdf5_cppdll.vcproj /IC  >> convert_intel.log
-  ICProjConvert80 windows\proj\hdf5_hl\hdf5_hl.vcproj /IC  >> convert_intel.log
-  ICProjConvert80 windows\proj\hdf5_hl_fortran\hdf5_hl_fortran.vcproj /IC  >> convert_intel.log
   ICProjConvert80 windows\proj\hdf5dll\hdf5dll.vcproj /IC  >> convert_intel.log
-  ICProjConvert80 windows\proj\hdf5_hl_cpp\hdf5_hl_cpp.vcproj /IC  >> convert_intel.log
+  ICProjConvert80 windows\proj\hdf5_hl\hdf5_hl.vcproj /IC  >> convert_intel.log
+  ICProjConvert80 windows\proj\hdf5_hldll\hdf5_hldll.vcproj /IC  >> convert_intel.log
+  
+  
 
 echo.
 echo Converting project files in directory windows\test
@@ -130,6 +129,12 @@ echo.
   ICProjConvert80 windows\hl\test\hl_test_table\hl_test_table.vcproj /IC  >> convert_intel.log
   ICProjConvert80 windows\hl\test\hl_test_ds\hl_test_ds.vcproj /IC  >> convert_intel.log
   ICProjConvert80 windows\hl\test\hl_test_packet\hl_test_packet.vcproj /IC  >> convert_intel.log
+  
+  ICProjConvert80 windows\hl\test\hl_test_imagedll\hl_test_imagedll.vcproj /IC  >> convert_intel.log
+  ICProjConvert80 windows\hl\test\hl_test_litedll\hl_test_litedll.vcproj /IC  >> convert_intel.log
+  ICProjConvert80 windows\hl\test\hl_test_tabledll\hl_test_tabledll.vcproj /IC  >> convert_intel.log
+  ICProjConvert80 windows\hl\test\hl_test_dsdll\hl_test_dsdll.vcproj /IC  >> convert_intel.log
+  ICProjConvert80 windows\hl\test\hl_test_packetdll\hl_test_packetdll.vcproj /IC  >> convert_intel.log
 
 echo.
 echo Converting project files under directory windows\tools
@@ -186,11 +191,13 @@ echo.
   ICProjConvert80 windows\proj\hdf5_cpp\hdf5_cpp.vcproj /IC  >> convert_intel.log
   ICProjConvert80 windows\proj\hdf5_cppdll\hdf5_cppdll.vcproj /IC  >> convert_intel.log
   ICProjConvert80 windows\proj\hdf5_hl_cpp\hdf5_hl_cpp.vcproj /IC  >> convert_intel.log
-  ICProjConvert80  windows\c++\test\dsets_cpp\dsets_cpp.vcproj /IC  >> convert_intel.log
-  ICProjConvert80  windows\c++\test\dsets_cppdll\dsets_cppdll.vcproj /IC  >> convert_intel.log
-  ICProjConvert80  windows\c++\test\testhdf5_cpp\testhdf5_cpp.vcproj /IC  >> convert_intel.log
-  ICProjConvert80  windows\c++\test\testhdf5_cppdll\testhdf5_cppdll.vcproj /IC  >> convert_intel.log
-  ICProjConvert80 windows\hl\c++\test\hl_test_table_cpp\hl_test_table_cpp.vcproj /IC  >> convert_intel.log
+  ICProjConvert80 windows\proj\hdf5_hl_cppdll\hdf5_hl_cppdll.vcproj /IC  >> convert_intel.log
+  ICProjConvert80 "windows\c++\test\dsets_cpp\dsets_cpp.vcproj" /IC  >> convert_intel.log
+  ICProjConvert80 "windows\c++\test\dsets_cppdll\dsets_cppdll.vcproj" /IC  >> convert_intel.log
+  ICProjConvert80 "windows\c++\test\testhdf5_cpp\testhdf5_cpp.vcproj" /IC  >> convert_intel.log
+  ICProjConvert80 "windows\c++\test\testhdf5_cppdll\testhdf5_cppdll.vcproj" /IC  >> convert_intel.log
+  ICProjConvert80 "windows\hl\c++\test\hl_test_table_cpp\hl_test_table_cpp.vcproj" /IC  >> convert_intel.log
+  ICProjConvert80 "windows\hl\c++\test\hl_test_table_cppdll\hl_test_table_cppdll.vcproj" /IC  >> convert_intel.log
       
 echo.
 echo End converting C++ project Files
