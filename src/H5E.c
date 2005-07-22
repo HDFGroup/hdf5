@@ -47,6 +47,7 @@
 #include "H5private.h"		/* Generic Functions			  */
 #include "H5Iprivate.h"		/* IDs                                    */
 #include "H5Eprivate.h"		/* Private error routines		  */
+#include "H5FLprivate.h"	/* Free lists                           */
 #include "H5MMprivate.h"	/* Memory management			  */
 
 /* HDF5 error class ID */
@@ -112,6 +113,15 @@ static herr_t  H5E_walk_stack(const H5E_t *estack, H5E_direction_t direction, H5
 static herr_t  H5E_walk_cb(unsigned n, const H5E_error_t *err_desc, void *client_data);
 static herr_t  H5E_get_auto_stack(const H5E_t *estack, hbool_t new_api, void **func, void **client_data);
 static herr_t  H5E_set_auto_stack(H5E_t *estack, hbool_t new_api, void *func, void *client_data);
+
+/* Declare a free list to manage the H5E_t struct */
+H5FL_DEFINE_STATIC(H5E_t);
+
+/* Declare a free list to manage the H5E_cls_t struct */
+H5FL_DEFINE_STATIC(H5E_cls_t);
+
+/* Declare a free list to manage the H5E_msg_t struct */
+H5FL_DEFINE_STATIC(H5E_msg_t);
 
 
 /*-------------------------------------------------------------------------
@@ -306,7 +316,7 @@ H5E_get_stack(void)
 
     if (!estack) {
         /* no associated value with current thread - create one */
-        estack = (H5E_t *)H5MM_malloc(sizeof(H5E_t));
+        estack = (H5E_t *)H5FL_MALLOC(H5E_t);
         estack->nused = 0;
         estack->new_api = TRUE;
         estack->u.func_stack = (H5E_auto_stack_t)H5Eprint_stack;
@@ -388,7 +398,7 @@ H5E_register_class(const char *cls_name, const char *lib_name, const char *versi
     assert(version);
 
     /* Allocate space for new error class */
-    if((cls = H5MM_malloc(sizeof(H5E_cls_t)))==NULL)
+    if((cls = H5FL_MALLOC(H5E_cls_t))==NULL)
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Duplicate string information */
@@ -478,7 +488,7 @@ H5E_unregister_class(H5E_cls_t *cls)
         H5MM_xfree((void*)cls->lib_name);
     if(cls->lib_vers)
         H5MM_xfree((void*)cls->lib_vers);
-    H5MM_xfree((void*)cls);
+    H5FL_FREE(H5E_cls_t, cls);
     
     FUNC_LEAVE_NOAPI(SUCCEED)
 }
@@ -658,7 +668,7 @@ H5E_close_msg(H5E_msg_t *err)
         H5MM_xfree((void*)err->msg);
     /* Don't free err->cls here */
 
-    H5MM_xfree((void*)err);
+    H5FL_FREE(H5E_msg_t, err);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }
@@ -737,7 +747,7 @@ H5E_create_msg(H5E_cls_t *cls, H5E_type_t msg_type, const char *msg_str)
     assert(msg_str);
 
     /* Allocate new message object */
-    if((msg = H5MM_malloc(sizeof(H5E_msg_t)))==NULL)
+    if((msg = H5FL_MALLOC(H5E_msg_t))==NULL)
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Fill new message object */
@@ -1002,7 +1012,7 @@ H5E_get_current_stack(void)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get current error stack")
 
     /* Allocate a new error stack */
-    if((estack_copy = H5MM_malloc(sizeof(H5E_t)))==NULL)
+    if((estack_copy = H5FL_MALLOC(H5E_t))==NULL)
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Make a copy of current error stack */
@@ -1042,7 +1052,7 @@ H5E_get_current_stack(void)
 done:
     if(ret_value==NULL) {
         if(estack_copy!=NULL)
-            H5MM_xfree((void*)estack_copy);
+            H5FL_FREE(H5E_t, estack_copy);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1214,7 +1224,7 @@ H5E_close_stack(H5E_t *estack)
     H5E_clear_stack(estack);
 
     /* Free the stack structure */
-    H5MM_xfree((void*)estack);
+    H5FL_FREE(H5E_t, estack);
     
     FUNC_LEAVE_NOAPI(SUCCEED)
 }
