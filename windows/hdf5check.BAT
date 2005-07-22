@@ -12,6 +12,10 @@
 @ECHO OFF
 echo install_dll
 call install_dll
+
+echo install_hldll
+call install_hldll
+
 type nul > check_results.txt
 echo ***************************************************************************** >> check_results.txt
 echo                         HDF5 C Library Tests -- Release>> check_results.txt
@@ -35,6 +39,10 @@ call testhdf5tools Release
 more toolstest_release.txt >> ..\check_results.txt
 del toolstest_release.txt
 cd ..
+
+echo ***************************************************************************** >> check_results.txt
+echo                         HDF5 High Level C Library Tests -- Release>> check_results.txt
+echo ***************************************************************************** >> check_results.txt
 
 cd hl\test
 echo test_hdf5_hl Release
@@ -65,6 +73,10 @@ more toolstest_debug.txt >> ..\check_results.txt
 del toolstest_debug.txt
 cd ..
 
+echo ***************************************************************************** >> check_results.txt
+echo                         HDF5 High Level C Library Tests -- Debug>> check_results.txt
+echo ***************************************************************************** >> check_results.txt
+
 cd hl\test
 echo test_hdf5_hl Debug
 call test_hdf5_hl Debug >> ..\..\check_results.txt
@@ -94,6 +106,17 @@ more toolstest_releasedll.txt >> ..\check_results.txt
 del toolstest_releasedll.txt
 cd ..
 echo. >> check_results.txt
+
+echo ***************************************************************************** >> check_results.txt
+echo                         HDF5 High Level C Library Tests -- Release DLL>> check_results.txt
+echo ***************************************************************************** >> check_results.txt
+
+cd hl\test
+echo test_hdf5_hl Release dll
+call test_hdf5_hl Release dll>> ..\..\check_results.txt
+cd ..\..
+
+echo. >> check_results.txt
 echo ***************************************************************************** >> check_results.txt
 echo                         HDF5 C Library Tests -- Debug DLL >> check_results.txt
 echo ***************************************************************************** >> check_results.txt
@@ -117,17 +140,33 @@ more toolstest_debugdll.txt >> ..\check_results.txt
 del toolstest_debugdll.txt
 cd ..
 
+echo ***************************************************************************** >> check_results.txt
+echo                         HDF5 High Level C Library Tests -- Debug DLL>> check_results.txt
+echo ***************************************************************************** >> check_results.txt
+
+cd hl\test
+echo test_hdf5_hl Debug dll
+call test_hdf5_hl Debug dll>> ..\..\check_results.txt
+cd ..\..
+
+echo. >> check_results.txt
 
 if "%1"=="enablecpp" (
 echo. >> check_results.txt
 echo install_cppdll
 call install_cppdll
+echo install_hlcppdll
+call install_hlcppdll
 cd c++\test
 echo ***************************************************************************** >> ..\..\check_results.txt
 echo                         HDF5 C++ Library Tests -- Release >> ..\..\check_results.txt
 echo ***************************************************************************** >> ..\..\check_results.txt
 echo hdf5cpptest release
 call hdf5cpptest release >> ..\..\check_results.txt
+
+echo ***************************************************************************** >> ..\..\check_results.txt
+echo                         HDF5 High Level C++ Library Tests -- Release >> ..\..\check_results.txt
+echo ***************************************************************************** >> ..\..\check_results.txt
 cd ..\..\hl\c++\test
 echo test_hdf5_hl_cpp Release
 call test_hdf5_hl_cpp Release >> ..\..\..\check_results.txt
@@ -138,6 +177,10 @@ echo                         HDF5 C++ Library Tests -- Debug >> ..\..\check_resu
 echo ***************************************************************************** >> ..\..\check_results.txt
 echo hdf5cpptest debug
 call hdf5cpptest debug >> ..\..\check_results.txt
+
+echo ***************************************************************************** >> ..\..\check_results.txt
+echo                         HDF5 High Level C++ Library Tests -- Debug >> ..\..\check_results.txt
+echo ***************************************************************************** >> ..\..\check_results.txt
 cd ..\..\hl\c++\test
 echo test_hdf5_hl_cpp Debug
 call test_hdf5_hl_cpp Debug >> ..\..\..\check_results.txt
@@ -149,12 +192,31 @@ echo ***************************************************************************
 echo hdf5cpptest release dll
 call hdf5cpptest release dll >> ..\..\check_results.txt
 echo. >> ..\..\check_results.txt
+
+echo ***************************************************************************** >> ..\..\check_results.txt
+echo                         HDF5 High Level C++ Library Tests -- Release DLL >> ..\..\check_results.txt
+echo ***************************************************************************** >> ..\..\check_results.txt
+cd ..\..\hl\c++\test
+echo test_hdf5_hl_cpp Release dll
+call test_hdf5_hl_cpp Release dll>> ..\..\..\check_results.txt
+cd ..\..\..\c++\test
+echo. >> ..\..\check_results.txt
+
 echo ***************************************************************************** >> ..\..\check_results.txt
 echo                         HDF5 C++ Library Tests -- Debug DLL >> ..\..\check_results.txt
 echo ***************************************************************************** >> ..\..\check_results.txt
 echo hdf5cpptest debug dll
 call hdf5cpptest debug dll >> ..\..\check_results.txt
-cd ..\..
+
+echo ***************************************************************************** >> ..\..\check_results.txt
+echo                         HDF5 High Level C++ Library Tests -- Debug DLL>> ..\..\check_results.txt
+echo ***************************************************************************** >> ..\..\check_results.txt
+cd ..\..\hl\c++\test
+echo test_hdf5_hl_cpp Debug dll
+call test_hdf5_hl_cpp Debug dll>> ..\..\..\check_results.txt
+echo. >> ..\..\check_results.txt
+
+cd ..\..\..\..\..\
 )
 
 
@@ -162,12 +224,18 @@ if "%1"=="enablefortran" (
 echo. >> check_results.txt
 echo install_f90dll
 call install_f90dll
+echo install_hlf90dll
+call install_hlf90dll
 cd fortran\test
 echo ***************************************************************************** >> ..\..\check_results.txt
 echo                         HDF5 Fortran Library Tests -- Release >> ..\..\check_results.txt
 echo ***************************************************************************** >> ..\..\check_results.txt
 echo testhdf5_fortran release
 call testhdf5_fortran release >> ..\..\check_results.txt
+
+echo ***************************************************************************** >> ..\..\check_results.txt
+echo                         HDF5 High Level Fortran Library Tests -- Release >> ..\..\check_results.txt
+echo ***************************************************************************** >> ..\..\check_results.txt
 
 cd ..\..\hl\fortran\test
 echo test_hdf5_hl_fortran Release
@@ -181,6 +249,10 @@ echo ***************************************************************************
 echo testhdf5_fortran debug
 call testhdf5_fortran debug >> ..\..\check_results.txt
 
+echo ***************************************************************************** >> ..\..\check_results.txt
+echo                         HDF5 High Level Fortran Library Tests -- Debug >> ..\..\check_results.txt
+echo ***************************************************************************** >> ..\..\check_results.txt
+
 cd ..\..\hl\fortran\test
 echo test_hdf5_hl_fortran Debug
 call test_hdf5_hl_fortran Debug >> ..\..\..\check_results.txt
@@ -193,12 +265,30 @@ echo ***************************************************************************
 echo testhdf5_fortran release dll
 call testhdf5_fortran release dll >> ..\..\check_results.txt
 echo. >> ..\..\check_results.txt
+
+echo ***************************************************************************** >> ..\..\check_results.txt
+echo                         HDF5 Hight Level Fortran Library Tests -- Release DLL >> ..\..\check_results.txt
+echo ***************************************************************************** >> ..\..\check_results.txt
+cd ..\..\hl\fortran\test
+echo test_hdf5_hl_fortran release dll
+call test_hdf5_hl_fortran release dll >> ..\..\..\check_results.txt
+cd ..\..\..\fortran\test
+echo. >> ..\..\check_results.txt
 echo ***************************************************************************** >> ..\..\check_results.txt
 echo                         HDF5 Fortran Library Tests -- Debug DLL >> ..\..\check_results.txt
 echo ***************************************************************************** >> ..\..\check_results.txt
 echo testhdf5_fortran debug dll
 call testhdf5_fortran debug dll >> ..\..\check_results.txt
-cd ..\..
+
+echo ***************************************************************************** >> ..\..\check_results.txt
+echo                         HDF5 Hight Level Fortran Library Tests -- Debug DLL >> ..\..\check_results.txt
+echo ***************************************************************************** >> ..\..\check_results.txt
+cd ..\..\hl\fortran\test
+echo test_hdf5_hl_fortran release dll
+call test_hdf5_hl_fortran release dll >> ..\..\..\check_results.txt
+
+echo. >> ..\..\..\check_results.txt
+cd ..\..\..\
 )
 
 
@@ -206,6 +296,8 @@ if "%1"=="enableall" (
 echo. >> check_results.txt
 echo install_cppdll
 call install_cppdll
+echo install_hlcppdll
+call install_hlcppdll
 cd c++\test
 echo ***************************************************************************** >> ..\..\check_results.txt
 echo                         HDF5 C++ Library Tests -- Release >> ..\..\check_results.txt
@@ -213,6 +305,9 @@ echo ***************************************************************************
 echo hdf5cpptest release
 call hdf5cpptest release >> ..\..\check_results.txt
 
+echo ***************************************************************************** >> ..\..\check_results.txt
+echo                         HDF5 High Level C++ Library Tests -- Release >> ..\..\check_results.txt
+echo ***************************************************************************** >> ..\..\check_results.txt
 cd ..\..\hl\c++\test
 echo test_hdf5_hl_cpp Release
 call test_hdf5_hl_cpp Release >> ..\..\..\check_results.txt
@@ -223,6 +318,10 @@ echo                         HDF5 C++ Library Tests -- Debug >> ..\..\check_resu
 echo ***************************************************************************** >> ..\..\check_results.txt
 echo hdf5cpptest debug
 call hdf5cpptest debug >> ..\..\check_results.txt
+
+echo ***************************************************************************** >> ..\..\check_results.txt
+echo                         HDF5 High Level C++ Library Tests -- Debug >> ..\..\check_results.txt
+echo ***************************************************************************** >> ..\..\check_results.txt
 cd ..\..\hl\c++\test
 echo test_hdf5_hl_cpp Debug
 call test_hdf5_hl_cpp Debug >> ..\..\..\check_results.txt
@@ -234,22 +333,46 @@ echo ***************************************************************************
 echo hdf5cpptest release dll
 call hdf5cpptest release dll >> ..\..\check_results.txt
 echo. >> ..\..\check_results.txt
+
+echo ***************************************************************************** >> ..\..\check_results.txt
+echo                         HDF5 High Level C++ Library Tests -- Release DLL >> ..\..\check_results.txt
+echo ***************************************************************************** >> ..\..\check_results.txt
+cd ..\..\hl\c++\test
+echo test_hdf5_hl_cpp Release dll
+call test_hdf5_hl_cpp Release dll>> ..\..\..\check_results.txt
+cd ..\..\..\c++\test
+echo. >> ..\..\check_results.txt
+
 echo ***************************************************************************** >> ..\..\check_results.txt
 echo                         HDF5 C++ Library Tests -- Debug DLL >> ..\..\check_results.txt
 echo ***************************************************************************** >> ..\..\check_results.txt
 echo hdf5cpptest debug dll
 call hdf5cpptest debug dll >> ..\..\check_results.txt
-cd ..\..
 
-echo. >> check_results.txt
+echo ***************************************************************************** >> ..\..\check_results.txt
+echo                         HDF5 High Level C++ Library Tests -- Debug DLL >> ..\..\check_results.txt
+echo ***************************************************************************** >> ..\..\check_results.txt
+cd ..\..\hl\c++\test
+echo test_hdf5_hl_cpp Debug dll
+call test_hdf5_hl_cpp Debug dll>> ..\..\..\check_results.txt
+echo. >> ..\..\..\check_results.txt
+
+cd ..\..\..\
+
 echo install_f90dll
 call install_f90dll
+echo install_hlf90dll
+call install_hlf90dll
 cd fortran\test
 echo ***************************************************************************** >> ..\..\check_results.txt
 echo                         HDF5 Fortran Library Tests -- Release >> ..\..\check_results.txt
 echo ***************************************************************************** >> ..\..\check_results.txt
 echo testhdf5_fortran release
 call testhdf5_fortran release >> ..\..\check_results.txt
+
+echo ***************************************************************************** >> ..\..\check_results.txt
+echo                         HDF5 High Level Fortran Library Tests -- Release >> ..\..\check_results.txt
+echo ***************************************************************************** >> ..\..\check_results.txt
 
 cd ..\..\hl\fortran\test
 echo test_hdf5_hl_fortran Release
@@ -263,6 +386,10 @@ echo ***************************************************************************
 echo testhdf5_fortran debug
 call testhdf5_fortran debug >> ..\..\check_results.txt
 
+echo ***************************************************************************** >> ..\..\check_results.txt
+echo                         HDF5 High Level Fortran Library Tests -- Debug >> ..\..\check_results.txt
+echo ***************************************************************************** >> ..\..\check_results.txt
+
 cd ..\..\hl\fortran\test
 echo test_hdf5_hl_fortran Debug
 call test_hdf5_hl_fortran Debug >> ..\..\..\check_results.txt
@@ -275,12 +402,30 @@ echo ***************************************************************************
 echo testhdf5_fortran release dll
 call testhdf5_fortran release dll >> ..\..\check_results.txt
 echo. >> ..\..\check_results.txt
+
+echo ***************************************************************************** >> ..\..\check_results.txt
+echo                         HDF5 Hight Level Fortran Library Tests -- Release DLL >> ..\..\check_results.txt
+echo ***************************************************************************** >> ..\..\check_results.txt
+cd ..\..\hl\fortran\test
+echo test_hdf5_hl_fortran release dll
+call test_hdf5_hl_fortran release dll >> ..\..\..\check_results.txt
+cd ..\..\..\fortran\test
+echo. >> ..\..\check_results.txt
 echo ***************************************************************************** >> ..\..\check_results.txt
 echo                         HDF5 Fortran Library Tests -- Debug DLL >> ..\..\check_results.txt
 echo ***************************************************************************** >> ..\..\check_results.txt
 echo testhdf5_fortran debug dll
 call testhdf5_fortran debug dll >> ..\..\check_results.txt
-cd ..\..
+
+echo ***************************************************************************** >> ..\..\check_results.txt
+echo                         HDF5 High Level Fortran Library Tests -- Debug DLL >> ..\..\check_results.txt
+echo ***************************************************************************** >> ..\..\check_results.txt
+cd ..\..\hl\fortran\test
+echo test_hdf5_hl_fortran release dll
+call test_hdf5_hl_fortran release dll >> ..\..\..\check_results.txt
+
+echo. >> ..\..\..\check_results.txt
+cd ..\..\..\
 )
 
 type nul > number_failed.txt
