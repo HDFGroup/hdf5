@@ -92,6 +92,14 @@ subroutine h5tbmake_table_f(table_title,&
                             errcode ) 
 
  implicit none
+
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tbmake_table_f
+!DEC$endif
+!
+
  character(len=*), intent(in) :: table_title                      ! name of the dataset 
  integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
  character(len=*), intent(in) :: dset_name                        ! name of the dataset 
@@ -198,6 +206,14 @@ subroutine h5tbwrite_field_name_f_int(loc_id,&
                                       errcode ) 
 
  implicit none
+ 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tbwrite_field_name_f_int
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
  character(len=*), intent(in) :: dset_name                        ! name of the dataset 
  character(len=*), intent(in) :: field_name                       ! name of the field
@@ -265,6 +281,14 @@ subroutine h5tbwrite_field_name_f_float(loc_id,&
                                       errcode ) 
 
  implicit none
+ 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tbwrite_field_name_f_float
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
  character(len=*), intent(in) :: dset_name                        ! name of the dataset 
  character(len=*), intent(in) :: field_name                       ! name of the field
@@ -334,6 +358,14 @@ subroutine h5tbwrite_field_name_f_double(loc_id,&
                                       errcode ) 
 
  implicit none
+ 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tbwrite_field_name_f_double
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
  character(len=*), intent(in) :: dset_name                        ! name of the dataset 
  character(len=*), intent(in) :: field_name                       ! name of the field
@@ -401,6 +433,14 @@ subroutine h5tbwrite_field_name_f_string(loc_id,&
                                       errcode ) 
 
  implicit none
+ 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tbwrite_field_name_f_string
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
  character(len=*), intent(in) :: dset_name                        ! name of the dataset 
  character(len=*), intent(in) :: field_name                       ! name of the field
@@ -469,6 +509,14 @@ subroutine h5tbread_field_name_f_int(loc_id,&
                                       errcode ) 
 
  implicit none
+ 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tbread_field_name_f_int
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
  character(len=*), intent(in) :: dset_name                        ! name of the dataset 
  character(len=*), intent(in) :: field_name                       ! name of the field
@@ -536,6 +584,14 @@ subroutine h5tbread_field_name_f_float(loc_id,&
                                       errcode ) 
 
  implicit none
+ 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tbread_field_name_f_float
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
  character(len=*), intent(in) :: dset_name                        ! name of the dataset 
  character(len=*), intent(in) :: field_name                       ! name of the field
@@ -603,6 +659,14 @@ subroutine h5tbread_field_name_f_double(loc_id,&
                                       errcode ) 
 
  implicit none
+ 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tbread_field_name_f_double
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
  character(len=*), intent(in) :: dset_name                        ! name of the dataset 
  character(len=*), intent(in) :: field_name                       ! name of the field
@@ -670,6 +734,14 @@ subroutine h5tbread_field_name_f_string(loc_id,&
                                       errcode ) 
 
  implicit none
+ 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tbread_field_name_f_string
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
  character(len=*), intent(in) :: dset_name                        ! name of the dataset 
  character(len=*), intent(in) :: field_name                       ! name of the field
@@ -738,6 +810,14 @@ subroutine h5tbwrite_field_index_f_int(loc_id,&
                                       errcode ) 
 
  implicit none
+ 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tbwrite_field_index_f_int
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
  character(len=*), intent(in) :: dset_name                        ! name of the dataset 
  integer, intent(in) :: field_index                               ! index
@@ -801,6 +881,14 @@ subroutine h5tbwrite_field_index_f_float(loc_id,&
                                       errcode ) 
 
  implicit none
+ 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tbwrite_field_index_f_float
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
  character(len=*), intent(in) :: dset_name                        ! name of the dataset 
  integer, intent(in) :: field_index                               ! index
@@ -866,6 +954,14 @@ subroutine h5tbwrite_field_index_f_double(loc_id,&
                                       errcode ) 
 
  implicit none
+ 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tbwrite_field_index_f_double
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
  character(len=*), intent(in) :: dset_name                        ! name of the dataset 
  integer, intent(in) :: field_index                               ! index
@@ -929,6 +1025,14 @@ subroutine h5tbwrite_field_index_f_string(loc_id,&
                                       errcode ) 
 
  implicit none
+ 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tbwrite_field_index_f_string
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
  character(len=*), intent(in) :: dset_name                        ! name of the dataset 
  integer, intent(in) :: field_index                               ! index
@@ -993,6 +1097,14 @@ subroutine h5tbread_field_index_f_int(loc_id,&
                                       errcode ) 
 
  implicit none
+ 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport ::h5tbread_field_index_f_int
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
  character(len=*), intent(in) :: dset_name                        ! name of the dataset 
  integer, intent(in) :: field_index                               ! index
@@ -1056,6 +1168,14 @@ subroutine h5tbread_field_index_f_float(loc_id,&
                                       errcode ) 
 
  implicit none
+ 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tbread_field_index_f_float
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
  character(len=*), intent(in) :: dset_name                        ! name of the dataset 
  integer, intent(in) :: field_index                               ! index
@@ -1119,6 +1239,14 @@ subroutine h5tbread_field_index_f_double(loc_id,&
                                       errcode ) 
 
  implicit none
+ 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tbread_field_index_f_double
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
  character(len=*), intent(in) :: dset_name                        ! name of the dataset 
  integer, intent(in) :: field_index                               ! index
@@ -1182,6 +1310,14 @@ subroutine h5tbread_field_index_f_string(loc_id,&
                                       errcode ) 
 
  implicit none
+ 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tbread_field_index_f_string
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
  character(len=*), intent(in) :: dset_name                        ! name of the dataset 
  integer, intent(in) :: field_index                               ! index
@@ -1244,6 +1380,14 @@ subroutine h5tbinsert_field_f_int(loc_id,&
                                   buf,&
                                   errcode ) 
  implicit none
+ 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tbinsert_field_f_int
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
  character(len=*), intent(in) :: dset_name                        ! name of the dataset 
  character(len=*), intent(in) :: field_name                       ! name of the field
@@ -1309,6 +1453,14 @@ subroutine h5tbinsert_field_f_float(loc_id,&
                                   buf,&
                                   errcode ) 
  implicit none
+ 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tbinsert_field_f_float
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
  character(len=*), intent(in) :: dset_name                        ! name of the dataset 
  character(len=*), intent(in) :: field_name                       ! name of the field
@@ -1374,6 +1526,14 @@ subroutine h5tbinsert_field_f_double(loc_id,&
                                   buf,&
                                   errcode ) 
  implicit none
+ 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tbinsert_field_f_double
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
  character(len=*), intent(in) :: dset_name                        ! name of the dataset 
  character(len=*), intent(in) :: field_name                       ! name of the field
@@ -1440,6 +1600,14 @@ subroutine h5tbinsert_field_f_string(loc_id,&
                                   buf,&
                                   errcode ) 
  implicit none
+ 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tbinsert_field_f_string
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
  character(len=*), intent(in) :: dset_name                        ! name of the dataset 
  character(len=*), intent(in) :: field_name                       ! name of the field
@@ -1503,6 +1671,14 @@ subroutine h5tbdelete_field_f(loc_id,&
                               field_name,&
                               errcode ) 
  implicit none
+ 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tbdelete_field_f
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
  character(len=*), intent(in) :: dset_name                        ! name of the dataset 
  character(len=*), intent(in) :: field_name                       ! name of the field
@@ -1561,6 +1737,14 @@ subroutine h5tbget_table_info_f(loc_id,&
                                 errcode ) 
 
  implicit none
+ 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tbget_table_info_f
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
  character(len=*), intent(in) :: dset_name          ! name of the dataset 
  integer(hsize_t), intent(inout):: nfields          ! nfields 
@@ -1616,6 +1800,14 @@ subroutine h5tbget_field_info_f(loc_id,&
                                 errcode ) 
 
  implicit none
+ 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tbget_field_info_f
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id                                ! file or group identifier 
  character(len=*), intent(in) :: dset_name                             ! name of the dataset 
  integer(hsize_t), intent(in):: nfields                                ! nfields 
