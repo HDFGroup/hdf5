@@ -30,6 +30,13 @@ echo ************************************************************ >> convert.log
   convert.js %1\windows\proj\hdf5_hl_fortran\hdf5_hl_fortran.dsp  %1\windows\proj\hdf5_hl_fortran\hdf5_hl_fortran.vcproj  >> convert.log
   convert.js %1\windows\proj\hdf5dll\hdf5dll.dsp  %1\windows\proj\hdf5dll\hdf5dll.vcproj  >> convert.log
   convert.js %1\windows\proj\hdf5_hl_cpp\hdf5_hl_cpp.dsp  %1\windows\proj\hdf5_hl_cpp\hdf5_hl_cpp.vcproj  >> convert.log
+  convert.js %1\windows\proj\hdf5_hldll\hdf5_hldll.dsp  %1\windows\proj\hdf5_hldll\hdf5_hldll.vcproj  >> convert.log
+  convert.js %1\windows\proj\hdf5_hl_fortrandll\hdf5_hl_fortrandll.dsp  %1\windows\proj\hdf5_hl_fortrandll\hdf5_hl_fortrandll.vcproj  >> convert.log
+  convert.js %1\windows\proj\hdf5_hl_cppdll\hdf5_hl_cppdll.dsp  %1\windows\proj\hdf5_hl_cppdll\hdf5_hl_cppdll.vcproj  >> convert.log
+  convert.js %1\windows\proj\hdf5_hl_f90cstubdll\hdf5_hl_f90cstubdll.dsp  %1\windows\proj\hdf5_hl_f90cstubdll\hdf5_hl_f90cstubdll.vcproj  >> convert.log
+  
+
+  
 
 echo ************************************************************  >> convert.log
 echo Converting project files in directory %1\windows\test >> convert.log
@@ -145,7 +152,8 @@ echo Converting project files under %1\windows\hl\c++\test >> convert.log
 echo ************************************************************ >> convert.log
 
 convert.js %1\windows\hl\c++\test\hl_test_table_cpp\hl_test_table_cpp.dsp  %1\windows\hl\c++\test\hl_test_table_cpp\hl_test_table_cpp.vcproj  >> convert.log
-  
+convert.js %1\windows\hl\c++\test\hl_test_table_cppdll\hl_test_table_cppdll.dsp  %1\windows\hl\c++\test\hl_test_table_cppdll\hl_test_table_cppdll.vcproj  >> convert.log
+
 echo ************************************************************ >> convert.log
 echo Converting project files under %1\windows\hl\fortran\test >> convert.log
 echo ************************************************************ >> convert.log
@@ -153,6 +161,10 @@ echo ************************************************************ >> convert.log
   convert.js %1\windows\hl\fortran\test\hl_test_image_fortran\hl_test_image_fortran.dsp  %1\windows\hl\fortran\test\hl_test_image_fortran\hl_test_image_fortran.vcproj  >> convert.log
   convert.js %1\windows\hl\fortran\test\hl_test_lite_fortran\hl_test_lite_fortran.dsp  %1\windows\hl\fortran\test\hl_test_lite_fortran\hl_test_lite_fortran.vcproj  >> convert.log
   convert.js %1\windows\hl\fortran\test\hl_test_table_fortran\hl_test_table_fortran.dsp  %1\windows\hl\fortran\test\hl_test_table_fortran\hl_test_table_fortran.vcproj  >> convert.log
+  
+  convert.js %1\windows\hl\fortran\test\hl_test_image_fortrandll\hl_test_image_fortrandll.dsp  %1\windows\hl\fortran\test\hl_test_image_fortrandll\hl_test_image_fortrandll.vcproj  >> convert.log
+  convert.js %1\windows\hl\fortran\test\hl_test_lite_fortrandll\hl_test_lite_fortrandll.dsp  %1\windows\hl\fortran\test\hl_test_lite_fortrandll\hl_test_lite_fortrandll.vcproj  >> convert.log
+  convert.js %1\windows\hl\fortran\test\hl_test_table_fortrandll\hl_test_table_fortrandll.dsp  %1\windows\hl\fortran\test\hl_test_table_fortrandll\hl_test_table_fortrandll.vcproj  >> convert.log
 
 echo ************************************************************ >> convert.log
 echo Converting project files under %1\windows\hl\test >> convert.log
@@ -163,6 +175,12 @@ echo ************************************************************ >> convert.log
   convert.js %1\windows\hl\test\hl_test_table\hl_test_table.dsp  %1\windows\hl\test\hl_test_table\hl_test_table.vcproj  >> convert.log
   convert.js %1\windows\hl\test\hl_test_ds\hl_test_ds.dsp  %1\windows\hl\test\hl_test_ds\hl_test_ds.vcproj  >> convert.log
   convert.js %1\windows\hl\test\hl_test_packet\hl_test_packet.dsp  %1\windows\hl\test\hl_test_packet\hl_test_packet.vcproj  >> convert.log
+
+  convert.js %1\windows\hl\test\hl_test_imagedll\hl_test_imagedll.dsp  %1\windows\hl\test\hl_test_imagedll\hl_test_imagedll.vcproj  >> convert.log
+  convert.js %1\windows\hl\test\hl_test_litedll\hl_test_litedll.dsp  %1\windows\hl\test\hl_test_litedll\hl_test_litedll.vcproj  >> convert.log
+  convert.js %1\windows\hl\test\hl_test_tabledll\hl_test_tabledll.dsp  %1\windows\hl\test\hl_test_tabledll\hl_test_tabledll.vcproj  >> convert.log
+  convert.js %1\windows\hl\test\hl_test_dsdll\hl_test_dsdll.dsp  %1\windows\hl\test\hl_test_dsdll\hl_test_dsdll.vcproj  >> convert.log
+  convert.js %1\windows\hl\test\hl_test_packetdll\hl_test_packetdll.dsp  %1\windows\hl\test\hl_test_packetdll\hl_test_packetdll.vcproj  >> convert.log
 
 echo ************************************************************ >> convert.log
 echo Converting project files under %1\windows\misc >> convert.log
