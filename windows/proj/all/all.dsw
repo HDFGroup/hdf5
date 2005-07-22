@@ -383,6 +383,24 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name b_plus_treedll
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hldll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hl_test_dsdll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hl_test_imagedll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hl_test_litedll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hl_test_packetdll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hl_test_tabledll
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -1872,6 +1890,42 @@ Package=<4>
 
 ###############################################################################
 
+Project: "hdf5_hl_cppdll"=..\hdf5_hl_cppdll\hdf5_hl_cppdll.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hldll
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "hdf5_hl_f90cstubdll"=..\hdf5_hl_f90cstubdll\hdf5_hl_f90cstubdll.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hldll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_f90cstubdll
+    End Project Dependency
+}}}
+
+###############################################################################
+
 Project: "hdf5_hl_fortran"=..\hdf5_hl_fortran\hdf5_hl_fortran.dsp - Package Owner=<4>
 
 Package=<5>
@@ -1881,10 +1935,46 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name hdf5_fortran
+    Project_Dep_Name hdf5_hl
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name hdf5_hl
+    Project_Dep_Name hdf5_fortran
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "hdf5_hl_fortrandll"=..\hdf5_hl_fortrandll\hdf5_hl_fortrandll.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hl_f90cstubdll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_fortrandll
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "hdf5_hldll"=..\hdf5_hldll\hdf5_hldll.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
     End Project Dependency
 }}}
 
@@ -1920,6 +2010,24 @@ Package=<4>
 
 ###############################################################################
 
+Project: "hl_test_dsdll"=..\..\hl\test\hl_test_dsdll\hl_test_dsdll.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hldll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
+    End Project Dependency
+}}}
+
+###############################################################################
+
 Project: "hl_test_image"=..\..\HL\TEST\hl_test_image\hl_test_image.dsp - Package Owner=<4>
 
 Package=<5>
@@ -1947,13 +2055,46 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name hdf5_hl
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name hdf5_fortran
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name hdf5_hl_fortran
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "hl_test_image_fortrandll"=..\..\HL\FORTRAN\TEST\hl_test_image_fortrandll\hl_test_image_fortrandll.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5_fortrandll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hl_fortrandll
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "hl_test_imagedll"=..\..\hl\test\hl_test_imagedll\hl_test_imagedll.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hldll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
     End Project Dependency
 }}}
 
@@ -1986,13 +2127,46 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name hdf5_hl
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name hdf5_hl_fortran
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name hdf5_fortran
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "hl_test_lite_fortrandll"=..\..\HL\FORTRAN\TEST\hl_test_lite_fortrandll\hl_test_lite_fortrandll.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5_fortrandll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hl_fortrandll
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "hl_test_litedll"=..\..\hl\test\hl_test_litedll\hl_test_litedll.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hldll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
     End Project Dependency
 }}}
 
@@ -2011,6 +2185,24 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name hdf5_hl
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "hl_test_packetdll"=..\..\hl\test\hl_test_packetdll\hl_test_packetdll.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hldll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
     End Project Dependency
 }}}
 
@@ -2046,10 +2238,25 @@ Package=<4>
     Project_Dep_Name hdf5_cpp
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name hdf5_hl
+    Project_Dep_Name hdf5_hl_cpp
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "hl_test_table_cppdll"="..\..\hl\c++\test\hl_test_table_cppdll\hl_test_table_cppdll.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hl_cppdll
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name hdf5_hl_cpp
+    Project_Dep_Name hdf5dll
     End Project Dependency
 }}}
 
@@ -2067,10 +2274,43 @@ Package=<4>
     Project_Dep_Name hdf5_fortran
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name hdf5_hl
+    Project_Dep_Name hdf5_hl_fortran
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "hl_test_table_fortrandll"=..\..\HL\FORTRAN\TEST\hl_test_table_fortrandll\hl_test_table_fortrandll.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5_fortrandll
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name hdf5_hl_fortran
+    Project_Dep_Name hdf5_hl_fortrandll
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "hl_test_tabledll"=..\..\hl\test\hl_test_tabledll\hl_test_tabledll.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hldll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
     End Project Dependency
 }}}
 
