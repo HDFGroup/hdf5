@@ -47,6 +47,14 @@ subroutine h5immake_image_8bit_f(loc_id,&
                                  errcode ) 
 
  implicit none
+
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5immake_image_8bit_f
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
  character(len=*), intent(in) :: dset_name          ! name of the dataset 
  integer(hsize_t), intent(in) :: width              ! width of image  
@@ -102,6 +110,13 @@ subroutine h5imread_image_f(loc_id,&
                             errcode ) 
 
  implicit none
+
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5imread_image_f
+!DEC$endif
+!
  integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
  character(len=*), intent(in) :: dset_name          ! name of the dataset 
  integer, intent(inout), dimension(*) :: buf        ! buffer 
@@ -154,6 +169,14 @@ subroutine h5immake_image_24bit_f(loc_id,&
                                  errcode ) 
 
  implicit none
+
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5immake_image_24bit_f
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
  character(len=*), intent(in) :: dset_name          ! name of the dataset 
  integer(hsize_t), intent(in) :: width              ! width of image  
@@ -219,6 +242,14 @@ subroutine h5imget_image_info_f(loc_id,&
                                 errcode ) 
 
  implicit none
+
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5imget_image_info_f
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
  character(len=*), intent(in) :: dset_name          ! name of the dataset 
  integer(hsize_t), intent(inout) :: width           ! width of image  
@@ -278,6 +309,14 @@ integer function h5imis_image_f(loc_id,&
                                 dset_name) 
 
  implicit none
+
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5imis_image_f
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
  character(len=*), intent(in) :: dset_name          ! name of the dataset 
  integer :: errcode                                 ! error code
@@ -327,6 +366,14 @@ subroutine h5immake_palette_f(loc_id,&
                               errcode ) 
 
  implicit none
+
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5immake_palette_f
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id                 ! file or group identifier 
  character(len=*), intent(in) :: dset_name              ! name of the dataset 
  integer(hsize_t), intent(in), dimension(*) :: pal_dims ! dimensions  
@@ -379,6 +426,13 @@ subroutine h5imlink_palette_f(loc_id,&
                               errcode ) 
 
  implicit none
+
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5imlink_palette_f
+!DEC$endif
+!
  integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
  character(len=*), intent(in) :: dset_name          ! name of the dataset 
  character(len=*), intent(in) :: pal_name           ! palette name 
@@ -432,6 +486,15 @@ subroutine h5imunlink_palette_f(loc_id,&
                               errcode ) 
 
  implicit none
+
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5imunlink_palette_f
+!DEC$endif
+!
+
+
  integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
  character(len=*), intent(in) :: dset_name          ! name of the dataset 
  character(len=*), intent(in) :: pal_name           ! palette name 
@@ -486,6 +549,14 @@ subroutine h5imget_npalettes_f(loc_id,&
                                errcode ) 
 
  implicit none
+
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5imget_npalettes_f
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
  character(len=*), intent(in) :: dset_name          ! name of the dataset 
  integer(hsize_t), intent(inout) :: npals           ! palettes
@@ -536,6 +607,15 @@ subroutine h5imget_palette_info_f(loc_id,&
                                   errcode ) 
 
  implicit none
+
+ 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5imget_palette_info_f
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id                ! file or group identifier 
  character(len=*), intent(in) :: dset_name             ! name of the dataset 
  integer, intent(in) :: pal_number                     ! palette number
@@ -590,6 +670,14 @@ subroutine h5imget_palette_f(loc_id,&
                              errcode ) 
 
  implicit none
+
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5imget_palette_f
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
  character(len=*), intent(in) :: dset_name          ! name of the dataset 
  integer, intent(in) :: pal_number                  ! palette number
@@ -639,6 +727,14 @@ integer function h5imis_palette_f(loc_id,&
                                   dset_name) 
 
  implicit none
+
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5imis_palette_f
+!DEC$endif
+!
+
  integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
  character(len=*), intent(in) :: dset_name          ! name of the dataset 
  integer :: errcode                                 ! error code
