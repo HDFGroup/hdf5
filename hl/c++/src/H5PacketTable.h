@@ -11,7 +11,7 @@
 
 #include "H5PT.h"
 
-class PacketTable
+class H5_HLCPPDLL  PacketTable
 {
 public:
     /* Null constructor
@@ -72,7 +72,7 @@ protected:
     hid_t table_id;
 };
 
-class FL_PacketTable : virtual public PacketTable
+class H5_HLCPPDLL FL_PacketTable : virtual public PacketTable
 {
 public:
     /* Constructor
@@ -136,7 +136,7 @@ public:
     int GetNextPackets(unsigned int numRecords, void * data);
 };
 
-class VL_PacketTable : virtual public PacketTable
+class H5_HLCPPDLL  VL_PacketTable : virtual public PacketTable
 {
 public:
     /* Constructor
