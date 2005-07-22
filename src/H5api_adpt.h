@@ -46,6 +46,34 @@
 #define H5TEST_DLLVAR extern
 #endif /* _HDF5TESTDLL_ */
 
+#if defined(_HDF5_HLDLL_EXPORTS_)
+#pragma warning(disable: 4273)	/* Disable the dll linkage warnings */
+#define H5_HLDLL __declspec(dllexport)
+#elif defined(_HDF5USEHLDLL_)
+#define H5_HLDLL __declspec(dllimport)
+#else
+#define H5_HLDLL
+#endif /* _HDF5_HLDLL_EXPORTS */
+
+#if defined(HDF5_HL_CPPDLL_EXPORTS)
+#pragma warning(disable: 4273)	/* Disable the dll linkage warnings */
+#define H5_HLCPPDLL __declspec(dllexport)
+#elif defined(HDF5USE_HLCPPDLL)
+#define H5_HLCPPDLL __declspec(dllimport)
+#else
+#define H5_HLCPPDLL
+#endif /*HDF5_HL_CPPDLL_EXPORTS*/
+
+#if defined(HDF5_HL_F90CSTUBDLL_EXPORTS)
+#pragma warning(disable: 4273)	/* Disable the dll linkage warnings */
+#define HDF5_HL_F90CSTUBDLL __declspec(dllexport)
+#elif defined(HDF5USE_HLF90CSTUBDLL)
+#define HDF5_HL_F90CSTUBDLL __declspec(dllimport)
+#else
+#define HDF5_HL_F90CSTUBDLL
+#endif /*HDF5_HL_F90CSTUBDLL_EXPORTS*/
+
+
 #if defined(HDF5FORT_CSTUB_DLL_EXPORTS)
 #pragma warning(disable: 4273)	/* Disable the dll linkage warnings */
 #define H5_FCDLL __declspec(dllexport)
@@ -70,8 +98,6 @@
 #define H5_FCTESTDLLVAR extern
 #endif /* _HDF5_FORTRANDLL_EXPORTS_ */
 
-
-
 /* Added to export or to import C++ APIs - BMR (02-15-2002) */
 #if defined(HDF5_CPPDLL_EXPORTS) /* this name is generated at creation */
 #define H5_DLLCPP __declspec(dllexport)
@@ -83,6 +109,9 @@
 
 #else /*WIN32*/
 #define H5_DLL
+#define H5_HLDLL
+#define H5_HLCPPDLL 
+#define HDF5_HL_F90CSTUBDLL
 #define H5_DLLVAR extern
 #define H5_DLLCPP
 #define H5TEST_DLL
