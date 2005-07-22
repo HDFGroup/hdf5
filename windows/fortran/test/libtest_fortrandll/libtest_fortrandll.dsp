@@ -96,7 +96,7 @@ LINK32=link.exe
 
 SOURCE=..\..\..\..\fortran\test\tf.f90
 NODEP_F90_TF_F9=\
-	"..\..\..\..\fortran\test\libtest_fortrandll\Debug\H5GLOBAL.mod"\
+	"..\..\..\..\fortran\test\libtest_fortrandll\Release\H5GLOBAL.mod"\
 	
 # End Source File
 # End Target

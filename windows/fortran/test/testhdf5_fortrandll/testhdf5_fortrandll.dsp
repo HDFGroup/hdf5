@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE F90 /compile_only /include:"Release/" /nologo /warn:nofileopt
-# ADD F90 /compile_only /debug:full /define:"HDF5F90_WINDOWS" /define:"BUILD_HDF5_DLL" /include:"Release/" /include:"..\..\..\proj\hdf5_fortrandll\Release/" /libs:dll /nologo /threads /warn:nofileopt /module:"..\..\..\..\proj\hdf5_fortrandll\Release/"
+# ADD F90 /compile_only /debug:full /include:"Release/" /include:"..\..\..\proj\hdf5_fortrandll\Release/" /libs:dll /nologo /threads /warn:nofileopt /module:"..\..\..\..\proj\hdf5_fortrandll\Release/"
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 # ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\..\..\src" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D "HDF5FORT_CSTUB_USEDLL" /YX /FD /c
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE F90 /check:bounds /compile_only /debug:full /include:"Debug/" /nologo /warn:argument_checking /warn:nofileopt
-# ADD F90 /check:bounds /compile_only /dbglibs /debug:full /define:"HDF5F90_WINDOWS" /define:"BUILD_HDF5_DLL" /include:"Debug/" /include:"..\..\..\proj\hdf5_fortrandll\Debug/" /libs:dll /nologo /threads /warn:argument_checking /warn:nofileopt /module:"..\..\..\..\proj\hdf5_fortrandll\Debug/"
+# ADD F90 /check:bounds /compile_only /dbglibs /debug:full /include:"Debug/" /include:"..\..\..\proj\hdf5_fortrandll\Debug/" /libs:dll /nologo /threads /warn:argument_checking /warn:nofileopt /module:"..\..\..\..\proj\hdf5_fortrandll\Debug/"
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
 # ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "..\..\..\..\src" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D "HDF5FORT_CSTUB_USEDLL" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -94,97 +94,97 @@ LINK32=link.exe
 
 SOURCE=..\..\..\..\fortran\test\fortranlib_test.f90
 NODEP_F90_FORTR=\
-	"..\..\..\..\fortran\test\testhdf5_fortrandll\Debug\HDF5.mod"\
+	"..\..\..\..\proj\hdf5_fortrandll\Debug\HDF5.MOD"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5A.f90
 NODEP_F90_TH5A_=\
-	"..\..\..\..\fortran\test\testhdf5_fortrandll\Debug\HDF5.mod"\
+	"..\..\..\..\proj\hdf5_fortrandll\Debug\HDF5.MOD"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5D.f90
 NODEP_F90_TH5D_=\
-	"..\..\..\..\fortran\test\testhdf5_fortrandll\Debug\HDF5.mod"\
+	"..\..\..\..\proj\hdf5_fortrandll\Debug\HDF5.MOD"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5E.f90
 NODEP_F90_TH5E_=\
-	"..\..\..\..\fortran\test\testhdf5_fortrandll\Debug\HDF5.mod"\
+	"..\..\..\..\proj\hdf5_fortrandll\Debug\HDF5.MOD"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5F.f90
 NODEP_F90_TH5F_=\
-	"..\..\..\..\fortran\test\testhdf5_fortrandll\Debug\HDF5.mod"\
+	"..\..\..\..\proj\hdf5_fortrandll\Debug\HDF5.MOD"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5G.f90
 NODEP_F90_TH5G_=\
-	"..\..\..\..\fortran\test\testhdf5_fortrandll\Debug\HDF5.mod"\
+	"..\..\..\..\proj\hdf5_fortrandll\Debug\HDF5.MOD"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5I.f90
 NODEP_F90_TH5I_=\
-	"..\..\..\..\fortran\test\testhdf5_fortrandll\Debug\HDF5.mod"\
+	"..\..\..\..\proj\hdf5_fortrandll\Debug\HDF5.MOD"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5P.f90
 NODEP_F90_TH5P_=\
-	"..\..\..\..\fortran\test\testhdf5_fortrandll\Debug\HDF5.mod"\
+	"..\..\..\..\proj\hdf5_fortrandll\Debug\HDF5.MOD"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5R.f90
 NODEP_F90_TH5R_=\
-	"..\..\..\..\fortran\test\testhdf5_fortrandll\Debug\HDF5.mod"\
+	"..\..\..\..\proj\hdf5_fortrandll\Debug\HDF5.MOD"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5S.f90
 NODEP_F90_TH5S_=\
-	"..\..\..\..\fortran\test\testhdf5_fortrandll\Debug\HDF5.mod"\
+	"..\..\..\..\proj\hdf5_fortrandll\Debug\HDF5.MOD"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5Sselect.f90
 NODEP_F90_TH5SS=\
-	"..\..\..\..\fortran\test\testhdf5_fortrandll\Debug\HDF5.mod"\
+	"..\..\..\..\proj\hdf5_fortrandll\Debug\HDF5.MOD"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5T.f90
 NODEP_F90_TH5T_=\
-	"..\..\..\..\fortran\test\testhdf5_fortrandll\Debug\HDF5.mod"\
+	"..\..\..\..\proj\hdf5_fortrandll\Debug\HDF5.MOD"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5VL.f90
 NODEP_F90_TH5VL=\
-	"..\..\..\..\fortran\test\testhdf5_fortrandll\Debug\HDF5.mod"\
+	"..\..\..\..\proj\hdf5_fortrandll\Debug\HDF5.MOD"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5Z.f90
-DEP_F90_TH5Z_=\
+NODEP_F90_TH5Z_=\
 	"..\..\..\..\proj\hdf5_fortrandll\Debug\HDF5.MOD"\
 	
 

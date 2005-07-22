@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE F90 /compile_only /include:"Release/" /nologo /warn:nofileopt
-# ADD F90 /compile_only /define:"HDF5F90_WINDOWS" /include:"Release/" /include:"..\..\..\..\proj\hdf5_fortran\Release/" /nologo /warn:nofileopt /module:"..\..\..\..\proj\hdf5_fortran\Release/"
+# ADD F90 /compile_only /include:"Release/" /include:"..\..\..\..\proj\hdf5_fortran\Release/" /nologo /warn:nofileopt /module:"..\..\..\..\proj\hdf5_fortran\Release/"
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 # ADD CPP /nologo /W3 /GX /O2 /I "..\..\..\..\src" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE F90 /check:bounds /compile_only /debug:full /include:"Debug/" /nologo /warn:argument_checking /warn:nofileopt
-# ADD F90 /check:bounds /compile_only /debug:full /define:"HDF5F90_WINDOWS" /include:"Debug/" /include:"..\..\..\..\proj\hdf5_fortran\Debug/" /nologo /warn:argument_checking /warn:nofileopt /module:"..\..\..\..\proj\hdf5_fortran\Debug/"
+# ADD F90 /check:bounds /compile_only /debug:full /include:"Debug/" /include:"..\..\..\..\proj\hdf5_fortran\Debug/" /nologo /warn:argument_checking /warn:nofileopt /module:"..\..\..\..\proj\hdf5_fortran\Debug/"
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
 # ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "..\..\..\..\src" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
