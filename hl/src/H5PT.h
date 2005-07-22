@@ -31,19 +31,19 @@ extern "C" {
  *-------------------------------------------------------------------------
  */
 
-hid_t H5PTcreate_fl ( hid_t loc_id,
+H5_HLDLL hid_t H5PTcreate_fl ( hid_t loc_id,
                       const char *dset_name,
                       hid_t dtype_id,
                       hsize_t chunk_size );
 
-hid_t H5PTcreate_vl ( hid_t loc_id,
+H5_HLDLL hid_t H5PTcreate_vl ( hid_t loc_id,
                       const char *dset_name,
                       hsize_t chunk_size );
 
-hid_t H5PTopen( hid_t loc_id,
+H5_HLDLL hid_t H5PTopen( hid_t loc_id,
                 char *dset_name );
 
-herr_t H5PTclose( hid_t table_id );
+H5_HLDLL herr_t  H5PTclose( hid_t table_id );
 
 
 /*-------------------------------------------------------------------------
@@ -53,7 +53,7 @@ herr_t H5PTclose( hid_t table_id );
  *-------------------------------------------------------------------------
  */
 
-herr_t H5PTappend( hid_t table_id,
+H5_HLDLL herr_t  H5PTappend( hid_t table_id,
                    hsize_t nrecords,
                    const void * data );
 
@@ -65,11 +65,11 @@ herr_t H5PTappend( hid_t table_id,
  */
 
 
-herr_t H5PTget_next( hid_t table_id,
+H5_HLDLL herr_t  H5PTget_next( hid_t table_id,
                      hsize_t nrecords,
                      void * data );
 
-herr_t H5PTread_packets( hid_t table_id,
+H5_HLDLL herr_t  H5PTread_packets( hid_t table_id,
                          hsize_t start,
                          hsize_t nrecords,
                          void *data );
@@ -82,12 +82,12 @@ herr_t H5PTread_packets( hid_t table_id,
  */
 
 
-herr_t H5PTget_num_packets( hid_t table_id,
+H5_HLDLL herr_t  H5PTget_num_packets( hid_t table_id,
                             hsize_t *nrecords );
 
-herr_t H5PTis_valid( hid_t table_id );
+H5_HLDLL herr_t  H5PTis_valid( hid_t table_id );
 
-herr_t H5PTis_varlen( hid_t table_id );
+H5_HLDLL herr_t  H5PTis_varlen( hid_t table_id );
 
 /*-------------------------------------------------------------------------
  * 
@@ -96,9 +96,9 @@ herr_t H5PTis_varlen( hid_t table_id );
  *-------------------------------------------------------------------------
  */
 
-herr_t H5PTcreate_index( hid_t table_id );
+H5_HLDLL herr_t  H5PTcreate_index( hid_t table_id );
 
-herr_t H5PTset_index( hid_t table_id,
+H5_HLDLL herr_t  H5PTset_index( hid_t table_id,
                              hsize_t pt_index );
 
 /*-------------------------------------------------------------------------
@@ -108,7 +108,7 @@ herr_t H5PTset_index( hid_t table_id,
  *-------------------------------------------------------------------------
  */
 
-herr_t H5PTfree_vlen_readbuff( hid_t table_id,
+H5_HLDLL herr_t  H5PTfree_vlen_readbuff( hid_t table_id,
                                hsize_t bufflen,
                                void * buff );
 
