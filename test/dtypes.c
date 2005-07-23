@@ -342,8 +342,8 @@ test_classes(void)
     hid_t vls_id;       /* VL string         */
     hid_t memb_id;      /* Compound member datatype */
     H5T_class_t         memb_cls;
-    H5T_class_t		tcls;
-    int                 nmembs, i;
+    H5T_class_t         tcls;
+    unsigned int        nmembs, i;
 
     TESTING("H5Tget_class()");
 
@@ -723,9 +723,9 @@ test_compound_2(void)
     TESTING("compound element reordering");
 
     /* Sizes should be the same, but be careful just in case */
-    buf = malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
-    bkg = malloc(nelmts * sizeof(struct dt));
-    orig = malloc(nelmts * sizeof(struct st));
+    buf = (unsigned char*)malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
+    bkg = (unsigned char*)malloc(nelmts * sizeof(struct dt));
+    orig = (unsigned char*)malloc(nelmts * sizeof(struct st));
     for (i=0; i<(int)nelmts; i++) {
 	s_ptr = ((struct st*)orig) + i;
 	s_ptr->a    = i*8+0;
@@ -840,9 +840,9 @@ test_compound_3(void)
     TESTING("compound subset conversions");
 
     /* Initialize */
-    buf = malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
-    bkg = malloc(nelmts * sizeof(struct dt));
-    orig = malloc(nelmts * sizeof(struct st));
+    buf = (unsigned char*)malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
+    bkg = (unsigned char*)malloc(nelmts * sizeof(struct dt));
+    orig = (unsigned char*)malloc(nelmts * sizeof(struct st));
     for (i=0; i<(int)nelmts; i++) {
         s_ptr = ((struct st*)orig) + i;
         s_ptr->a    = i*8+0;
@@ -958,9 +958,9 @@ test_compound_4(void)
     TESTING("compound element shrinking & reordering");
 
     /* Sizes should be the same, but be careful just in case */
-    buf = malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
-    bkg = malloc(nelmts * sizeof(struct dt));
-    orig = malloc(nelmts * sizeof(struct st));
+    buf = (unsigned char*)malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
+    bkg = (unsigned char*)malloc(nelmts * sizeof(struct dt));
+    orig = (unsigned char*)malloc(nelmts * sizeof(struct st));
     for (i=0; i<(int)nelmts; i++) {
         s_ptr = ((struct st*)orig) + i;
         s_ptr->a    = i*8+0;
@@ -1187,9 +1187,9 @@ test_compound_6(void)
     TESTING("compound element growing");
 
     /* Sizes should be the same, but be careful just in case */
-    buf = malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
-    bkg = malloc(nelmts * sizeof(struct dt));
-    orig = malloc(nelmts * sizeof(struct st));
+    buf = (unsigned char*)malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
+    bkg = (unsigned char*)malloc(nelmts * sizeof(struct dt));
+    orig = (unsigned char*)malloc(nelmts * sizeof(struct st));
     for (i=0; i<(int)nelmts; i++) {
         s_ptr = ((struct st*)orig) + i;
         s_ptr->b    = (i*8+1) & 0x7fff;
@@ -2028,19 +2028,23 @@ test_compound_11(void)
     /* Verify converted buffer is correct */
     for(u=0; u<NTESTELEM; u++) {
         if(((big_t *)buf_orig)[u].d1!=((little_t *)buf)[u].d1) {
-            printf("Error, line #%d: buf_orig[%u].d1=%f, buf[%u].d1=%f\n",__LINE__,(unsigned)u,((big_t *)buf_orig)[u].d1,(unsigned)u,((little_t *)buf)[u].d1);
+            printf("Error, line #%d: buf_orig[%u].d1=%f, buf[%u].d1=%f\n",__LINE__,
+                    (unsigned)u,((big_t *)buf_orig)[u].d1,(unsigned)u,((little_t *)buf)[u].d1);
             TEST_ERROR
         } /* end if */
         if(((big_t *)buf_orig)[u].i1!=((little_t *)buf)[u].i1) {
-            printf("Error, line #%d: buf_orig[%u].i1=%d, buf[%u].i1=%d\n",__LINE__,(unsigned)u,((big_t *)buf_orig)[u].i1,(unsigned)u,((little_t *)buf)[u].i1);
+            printf("Error, line #%d: buf_orig[%u].i1=%d, buf[%u].i1=%d\n",__LINE__,
+                    (unsigned)u,((big_t *)buf_orig)[u].i1,(unsigned)u,((little_t *)buf)[u].i1);
             TEST_ERROR
         } /* end if */
         if(((big_t *)buf_orig)[u].s1==NULL || ((little_t *)buf)[u].s1==NULL) {
-            printf("Error, line #%d: buf_orig[%u].s1=%p, buf[%u].s1=%p\n",__LINE__,(unsigned)u,((big_t *)buf_orig)[u].s1,(unsigned)u,((little_t *)buf)[u].s1);
+            printf("Error, line #%d: buf_orig[%u].s1=%p, buf[%u].s1=%p\n",__LINE__,
+                    (unsigned)u,((big_t *)buf_orig)[u].s1,(unsigned)u,((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
         else if(HDstrcmp(((big_t *)buf_orig)[u].s1,((little_t *)buf)[u].s1)) {
-            printf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n",__LINE__,(unsigned)u,((big_t *)buf_orig)[u].s1,(unsigned)u,((little_t *)buf)[u].s1);
+            printf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n",__LINE__,
+                    (unsigned)u,((big_t *)buf_orig)[u].s1,(unsigned)u,((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
         HDfree(((little_t *)buf)[u].s1);
@@ -2064,19 +2068,23 @@ test_compound_11(void)
     /* Verify converted buffer is correct */
     for(u=0; u<NTESTELEM; u++) {
         if(((big_t *)buf_orig)[u].d1!=((little_t *)buf)[u].d1) {
-            printf("Error, line #%d: buf_orig[%u].d1=%f, buf[%u].d1=%f\n",__LINE__,(unsigned)u,((big_t *)buf_orig)[u].d1,(unsigned)u,((little_t *)buf)[u].d1);
+            printf("Error, line #%d: buf_orig[%u].d1=%f, buf[%u].d1=%f\n",__LINE__,
+                    (unsigned)u,((big_t *)buf_orig)[u].d1,(unsigned)u,((little_t *)buf)[u].d1);
             TEST_ERROR
         } /* end if */
         if(((big_t *)buf_orig)[u].i1!=((little_t *)buf)[u].i1) {
-            printf("Error, line #%d: buf_orig[%u].i1=%d, buf[%u].i1=%d\n",__LINE__,(unsigned)u,((big_t *)buf_orig)[u].i1,(unsigned)u,((little_t *)buf)[u].i1);
+            printf("Error, line #%d: buf_orig[%u].i1=%d, buf[%u].i1=%d\n",__LINE__,
+                    (unsigned)u,((big_t *)buf_orig)[u].i1,(unsigned)u,((little_t *)buf)[u].i1);
             TEST_ERROR
         } /* end if */
         if(((big_t *)buf_orig)[u].s1==NULL || ((little_t *)buf)[u].s1==NULL) {
-            printf("Error, line #%d: buf_orig[%u].s1=%p, buf[%u].s1=%p\n",__LINE__,(unsigned)u,((big_t *)buf_orig)[u].s1,(unsigned)u,((little_t *)buf)[u].s1);
+            printf("Error, line #%d: buf_orig[%u].s1=%p, buf[%u].s1=%p\n",__LINE__,
+                    (unsigned)u,((big_t *)buf_orig)[u].s1,(unsigned)u,((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
         else if(HDstrcmp(((big_t *)buf_orig)[u].s1,((little_t *)buf)[u].s1)) {
-            printf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n",__LINE__,(unsigned)u,((big_t *)buf_orig)[u].s1,(unsigned)u,((little_t *)buf)[u].s1);
+            printf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n",__LINE__,
+                    (unsigned)u,((big_t *)buf_orig)[u].s1,(unsigned)u,((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
         HDfree(((little_t *)buf)[u].s1);
@@ -2094,19 +2102,23 @@ test_compound_11(void)
     /* Verify converted buffer is correct */
     for(u=0; u<NTESTELEM; u++) {
         if(((big_t *)buf_orig)[u].d1!=((little_t *)buf)[u].d1) {
-            printf("Error, line #%d: buf_orig[%u].d1=%f, buf[%u].d1=%f\n",__LINE__,(unsigned)u,((big_t *)buf_orig)[u].d1,(unsigned)u,((little_t *)buf)[u].d1);
+            printf("Error, line #%d: buf_orig[%u].d1=%f, buf[%u].d1=%f\n",__LINE__,
+                    (unsigned)u,((big_t *)buf_orig)[u].d1,(unsigned)u,((little_t *)buf)[u].d1);
             TEST_ERROR
         } /* end if */
         if(((big_t *)buf_orig)[u].i1!=((little_t *)buf)[u].i1) {
-            printf("Error, line #%d: buf_orig[%u].i1=%d, buf[%u].i1=%d\n",__LINE__,(unsigned)u,((big_t *)buf_orig)[u].i1,(unsigned)u,((little_t *)buf)[u].i1);
+            printf("Error, line #%d: buf_orig[%u].i1=%d, buf[%u].i1=%d\n",__LINE__,
+                    (unsigned)u,((big_t *)buf_orig)[u].i1,(unsigned)u,((little_t *)buf)[u].i1);
             TEST_ERROR
         } /* end if */
         if(((big_t *)buf_orig)[u].s1==NULL || ((little_t *)buf)[u].s1==NULL) {
-            printf("Error, line #%d: buf_orig[%u].s1=%p, buf[%u].s1=%p\n",__LINE__,(unsigned)u,((big_t *)buf_orig)[u].s1,(unsigned)u,((little_t *)buf)[u].s1);
+            printf("Error, line #%d: buf_orig[%u].s1=%p, buf[%u].s1=%p\n",__LINE__,
+                    (unsigned)u,((big_t *)buf_orig)[u].s1,(unsigned)u,((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
         else if(HDstrcmp(((big_t *)buf_orig)[u].s1,((little_t *)buf)[u].s1)) {
-            printf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n",__LINE__,(unsigned)u,((big_t *)buf_orig)[u].s1,(unsigned)u,((little_t *)buf)[u].s1);
+            printf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n",__LINE__,
+                    (unsigned)u,((big_t *)buf_orig)[u].s1,(unsigned)u,((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
         HDfree(((little_t *)buf)[u].s1);
@@ -2329,7 +2341,7 @@ test_query(void)
         goto error;
     } /* end if */
 
-    /* Query member number and member index by name, for enumeration type. */
+    /* Query member number and member index by member name, for enumeration type. */
     if(H5Tget_nmembers(tid2)!=5) {
         H5_FAILED();
         printf("Can't get member number\n");
@@ -3289,7 +3301,7 @@ test_transient (hid_t fapl)
 static int
 test_named (hid_t fapl)
 {
-    hid_t		file=-1, type=-1, space=-1, dset=-1, t2=-1, attr1=-1;
+    hid_t		file=-1, type=-1, space=-1, dset=-1, t2=-1, t3=-1, attr1=-1;
     herr_t		status;
     static hsize_t	ds_size[2] = {10, 20};
     hsize_t		i,j;
@@ -3413,9 +3425,7 @@ test_named (hid_t fapl)
      * first dataset.
      */
     if (H5Dclose (dset)<0) goto error;
-    if ((dset=H5Dcreate (file, "dset2", t2, space, H5P_DEFAULT))<0) {
-	goto error;
-    }
+    if ((dset=H5Dcreate (file, "dset2", t2, space, H5P_DEFAULT))<0) goto error;
 
     /* Reopen the second dataset and make sure the type is shared */
     if (H5Tclose (t2)<0) goto error;
@@ -3437,9 +3447,30 @@ test_named (hid_t fapl)
     if ((t2=H5Tcopy (dset))<0) goto error;
     if (H5Tset_precision (t2, 256)<0) goto error;
     if (H5Tclose (t2)<0) goto error;
+    if (H5Dclose (dset)<0) goto error;
+
+    /*
+     * Copy of committed type used as dataset type should not be name type
+     */
+    if ((t2 = H5Tcopy (type))<0) goto error;
+    if ((status=H5Tcommitted (t2))<0) goto error;
+    if (status) {
+	H5_FAILED();
+	HDputs ("    Copied type should not be a named type!");
+	goto error;
+    }
+    if ((dset=H5Dcreate (file, "dset3", t2, space, H5P_DEFAULT))<0) goto error;
+    if ((t3 = H5Dget_type (dset))<0) goto error;
+    if ((status=H5Tcommitted (t3))<0) goto error;
+    if (status) {
+	H5_FAILED();
+	HDputs ("    Datatype from dataset using copied type should not be a named type!");
+	goto error;
+    }
+    if (H5Tclose (t3)<0) goto error;
+    if (H5Dclose (dset)<0) goto error;
 
     /* Clean up */
-    if (H5Dclose (dset)<0) goto error;
     if (H5Tclose (type)<0) goto error;
     if (H5Sclose (space)<0) goto error;
     if (H5Fclose (file)<0) goto error;
@@ -3448,6 +3479,7 @@ test_named (hid_t fapl)
 
  error:
     H5E_BEGIN_TRY {
+	H5Tclose (t3);
 	H5Tclose (t2);
 	H5Tclose (type);
 	H5Sclose (space);
@@ -3516,7 +3548,7 @@ test_conv_str_1(void)
      */
     src_type = mkstr(10, H5T_STR_NULLTERM);
     dst_type = mkstr(5, H5T_STR_NULLTERM);
-    buf = HDcalloc(2, 10);
+    buf = (char*)HDcalloc(2, 10);
     HDmemcpy(buf, "abcdefghi\0abcdefghi\0", 20);
     if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcd\0abcd\0abcdefghi\0", 20)) {
@@ -3539,7 +3571,7 @@ test_conv_str_1(void)
      */
     src_type = mkstr(10, H5T_STR_NULLPAD);
     dst_type = mkstr(5, H5T_STR_NULLPAD);
-    buf = HDcalloc(2, 10);
+    buf = (char*)HDcalloc(2, 10);
     HDmemcpy(buf, "abcdefghijabcdefghij", 20);
     if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcdeabcdeabcdefghij", 20)) {
@@ -3562,7 +3594,7 @@ test_conv_str_1(void)
      */
     src_type = mkstr(10, H5T_STR_SPACEPAD);
     dst_type = mkstr(5, H5T_STR_SPACEPAD);
-    buf = HDcalloc(2, 10);
+    buf = (char*)HDcalloc(2, 10);
     HDmemcpy(buf, "abcdefghijabcdefghij", 20);
     if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcdeabcdeabcdefghij", 20)) {
@@ -3588,7 +3620,7 @@ test_conv_str_1(void)
      */
     src_type = mkstr(10, H5T_STR_NULLTERM);
     dst_type = mkstr(10, H5T_STR_NULLTERM);
-    buf = HDcalloc(2, 10);
+    buf = (char*)HDcalloc(2, 10);
     HDmemcpy(buf, "abcdefghijabcdefghij", 20);
     if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcdefghijabcdefghij", 20)) {
@@ -3621,7 +3653,7 @@ test_conv_str_1(void)
      */
     src_type = mkstr(10, H5T_STR_NULLTERM);
     dst_type = mkstr(10, H5T_STR_SPACEPAD);
-    buf = HDcalloc(2, 10);
+    buf = (char*)HDcalloc(2, 10);
     HDmemcpy(buf, "abcdefghi\0abcdefghi\0", 20);
     if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcdefghi abcdefghi ", 20)) {
@@ -3676,7 +3708,7 @@ test_conv_str_1(void)
      */
     src_type = mkstr(10, H5T_STR_NULLPAD);
     dst_type = mkstr(10, H5T_STR_SPACEPAD);
-    buf = HDcalloc(2, 10);
+    buf = (char*)HDcalloc(2, 10);
     HDmemcpy(buf, "abcdefghijabcdefghij", 20);
     if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcdefghijabcdefghij", 20)) {
@@ -3766,7 +3798,7 @@ test_conv_str_2(void)
      */
     c_type = mkstr(8, H5T_STR_NULLPAD);
     f_type = mkstr(8, H5T_STR_SPACEPAD);
-    buf = HDcalloc(nelmts, 8);
+    buf = (char*)HDcalloc(nelmts, 8);
     for (i=0; i<nelmts; i++) {
 	nchars = HDrand() % 8;
 	for (j=0; j<nchars; j++)
@@ -3837,7 +3869,7 @@ test_conv_enum_1(void)
     }
 
     /* Initialize the buffer */
-    buf = HDmalloc(nelmts*MAX(H5Tget_size(t1), H5Tget_size(t2)));
+    buf = (int*)HDmalloc(nelmts*MAX(H5Tget_size(t1), H5Tget_size(t2)));
     for (i=0; i<(int)nelmts; i++)
         buf[i] = HDrand() % 26;
 
@@ -3926,7 +3958,7 @@ test_conv_enum_2(void)
         H5Tenum_insert(dsttype, mname[i], &i);
 
     /* Source data */
-    data = malloc(NTESTELEM*sizeof(int));
+    data = (int*)malloc(NTESTELEM*sizeof(int));
     for (i=0; i<NTESTELEM; i++) {
         ((char*)data)[i*3+2] = i % 8;
         ((char*)data)[i*3+0] = 0;

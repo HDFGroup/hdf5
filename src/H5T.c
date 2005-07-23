@@ -429,10 +429,11 @@ static herr_t H5T_register(H5T_pers_t pers, const char *name, H5T_t *src,
     /* Allocate new datatype info */					      \
     if (NULL==(dt = H5FL_CALLOC(H5T_t)))				      \
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed") \
-    if (NULL==(dt->shared = H5FL_CALLOC(H5T_shared_t)))  {    \
-        H5FL_FREE(H5T_t, dt);                                 \
+    dt->ent.header = HADDR_UNDEF;					      \
+    if (NULL==(dt->shared = H5FL_CALLOC(H5T_shared_t)))  {		      \
+        H5FL_FREE(H5T_t, dt);						      \
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed") \
-    }                                                         \
+    }									      \
 }
 
 
@@ -2630,6 +2631,7 @@ H5T_create(H5T_class_t type, size_t size)
         case H5T_COMPOUND:
             if (NULL==(dt = H5FL_CALLOC(H5T_t)))
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+            dt->ent.header = HADDR_UNDEF;
             if (NULL==(dt->shared = H5FL_CALLOC(H5T_shared_t)))
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
             dt->shared->type = type;
@@ -2658,6 +2660,7 @@ H5T_create(H5T_class_t type, size_t size)
             }
             if (NULL==(dt = H5FL_CALLOC(H5T_t)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+            dt->ent.header = HADDR_UNDEF;
             if (NULL==(dt->shared = H5FL_CALLOC(H5T_shared_t)))
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
             dt->shared->type = type;
@@ -2911,8 +2914,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     if (NULL==(new_dt->shared = H5FL_MALLOC(H5T_shared_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-    /* Copy actual information */
-    new_dt->ent = old_dt->ent;
+    /* Copy shared information (entry information is copied last) */
     *(new_dt->shared) = *(old_dt->shared);
 
     /* Copy parent information */
@@ -2926,8 +2928,6 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
              * Return an unlocked transient type.
              */
             new_dt->shared->state = H5T_STATE_TRANSIENT;
-            HDmemset (&(new_dt->ent), 0, sizeof(new_dt->ent));
-            new_dt->ent.header = HADDR_UNDEF;
             break;
         
         case H5T_COPY_ALL:
@@ -2935,9 +2935,9 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
              * Return a transient type (locked or unlocked) or an unopened named
              * type.  Immutable transient types are degraded to read-only.
              */
-            if (H5T_STATE_OPEN==new_dt->shared->state) {
+            if (H5T_STATE_OPEN==old_dt->shared->state) {
                 new_dt->shared->state = H5T_STATE_NAMED;
-            } else if (H5T_STATE_IMMUTABLE==new_dt->shared->state) {
+            } else if (H5T_STATE_IMMUTABLE==old_dt->shared->state) {
                 new_dt->shared->state = H5T_STATE_RDONLY;
             }
             break;
@@ -2947,15 +2947,20 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
              * Return a transient type (locked or unlocked) or an opened named
              * type.  Immutable transient types are degraded to read-only.
              */
-            if (H5F_addr_defined(new_dt->ent.header)) {
+            if (H5F_addr_defined(old_dt->ent.header)) {
                 /* Check if the object is already open */
-                if((reopened_fo=H5FO_opened(new_dt->ent.file,new_dt->ent.header))==NULL) {
+                if((reopened_fo=H5FO_opened(old_dt->ent.file, old_dt->ent.header))==NULL) {
                     /* Clear any errors from H5FO_opened() */
                     H5E_clear();
-                    if (H5O_open (&(new_dt->ent))<0)
+
+                    /* Open named datatype again */
+                    if (H5O_open (&(old_dt->ent))<0)
                         HGOTO_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to reopen named data type");
-                    if(H5FO_insert(new_dt->ent.file, new_dt->ent.header,new_dt->shared)<0)
+
+                    /* Insert opened named datatype into opened object list for the file */
+                    if(H5FO_insert(old_dt->ent.file, old_dt->ent.header, new_dt->shared)<0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, NULL, "can't insert datatype into list of open objects")
+
                     new_dt->shared->fo_count=1;
                 } else {
                     /* The object is already open.  Free the H5T_shared_t struct
@@ -2966,7 +2971,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
                     reopened_fo->fo_count++;
                 }
                 new_dt->shared->state = H5T_STATE_OPEN;
-            } else if (H5T_STATE_IMMUTABLE==new_dt->shared->state) {
+            } else if (H5T_STATE_IMMUTABLE==old_dt->shared->state) {
                 new_dt->shared->state = H5T_STATE_RDONLY;
             }
             break;
@@ -3078,9 +3083,16 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     } /* end switch */
 
     /* Deep copy of the symbol table entry, if there was one */
-    if (H5F_addr_defined(old_dt->ent.header))
+    if ( new_dt->shared->state == H5T_STATE_NAMED || new_dt->shared->state == H5T_STATE_OPEN) {
+        if (!H5F_addr_defined(old_dt->ent.header))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "named dataype with invalid address");
         if (H5G_ent_copy(&(new_dt->ent), &(old_dt->ent),H5G_COPY_DEEP)<0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to copy entry");
+    } /* end if */
+    else {
+        HDmemset (&(new_dt->ent), 0, sizeof(new_dt->ent));
+        new_dt->ent.header = HADDR_UNDEF;
+    } /* end else */
 
     /* Set return value */
     ret_value=new_dt;

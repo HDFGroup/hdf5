@@ -72,6 +72,9 @@ Bug Fixes since HDF5-1.6.4 release
 
     Library
     -------
+        - Fixed a bug with named datatypes where a copy of a named datatype
+            used to create a dataset would accidentally use the original
+            named datatype for the dataset's datatype.  QAK - 2005/07/23
         - Made H5Fget_name() be consistent and always return name of actual
             file the ID is in.  (Instead of the name of the top file in a
             file mounting hierarchy).  QAK - 2005/07/19
