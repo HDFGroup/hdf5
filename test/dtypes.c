@@ -540,7 +540,7 @@ test_compound_2(void)
     const size_t	nelmts = NTESTELEM;
     const hsize_t	four = 4;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
-    hid_t		src_t=-1, dst_t=-1;
+    hid_t		st=-1, dt=-1;
     hid_t       array_dt;
     int			i;
 
@@ -565,27 +565,27 @@ test_compound_2(void)
 
     /* Build hdf5 datatypes */
     array_dt=H5Tarray_create(H5T_NATIVE_INT,1, &four, NULL);
-    if ((src_t=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
-            H5Tinsert(src_t, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(src_t, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(src_t, "c", HOFFSET(struct st, c), array_dt)<0 ||
-            H5Tinsert(src_t, "d", HOFFSET(struct st, d), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(src_t, "e", HOFFSET(struct st, e), H5T_NATIVE_INT)<0)
+    if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
+            H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(st, "c", HOFFSET(struct st, c), array_dt)<0 ||
+            H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(st, "e", HOFFSET(struct st, e), H5T_NATIVE_INT)<0)
         goto error;
     H5Tclose(array_dt);
     
     array_dt=H5Tarray_create(H5T_NATIVE_INT,1, &four, NULL);
-    if ((dst_t=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
-            H5Tinsert(dst_t, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(dst_t, "b", HOFFSET(struct dt, b), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(dst_t, "c", HOFFSET(struct dt, c), array_dt)<0 ||
-            H5Tinsert(dst_t, "d", HOFFSET(struct dt, d), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(dst_t, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT)<0)
+    if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
+            H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(dt, "b", HOFFSET(struct dt, b), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(dt, "c", HOFFSET(struct dt, c), array_dt)<0 ||
+            H5Tinsert(dt, "d", HOFFSET(struct dt, d), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(dt, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT)<0)
         goto error;
     H5Tclose(array_dt);
     
     /* Perform the conversion */
-    if (H5Tconvert(src_t, dst_t, nelmts, buf, bkg, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT)<0) goto error;
 
     /* Compare results */
     for (i=0; i<(int)nelmts; i++) {
@@ -615,7 +615,7 @@ test_compound_2(void)
     free(buf);
     free(bkg);
     free(orig);
-    if (H5Tclose(src_t)<0 || H5Tclose(dst_t)<0) goto error;
+    if (H5Tclose(st)<0 || H5Tclose(dt)<0) goto error;
 
     PASSED();
     reset_hdf5();
@@ -657,7 +657,7 @@ test_compound_3(void)
     const size_t	nelmts = NTESTELEM;
     const hsize_t	four = 4;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
-    hid_t		src_t=-1, dst_t=-1;
+    hid_t		st=-1, dt=-1;
     hid_t       array_dt;
     int			i;
 
@@ -682,25 +682,25 @@ test_compound_3(void)
 
     /* Build hdf5 datatypes */
     array_dt=H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
-    if ((src_t=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
-            H5Tinsert(src_t, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(src_t, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(src_t, "c", HOFFSET(struct st, c), array_dt)<0 ||
-            H5Tinsert(src_t, "d", HOFFSET(struct st, d), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(src_t, "e", HOFFSET(struct st, e), H5T_NATIVE_INT)<0)
+    if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
+            H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(st, "c", HOFFSET(struct st, c), array_dt)<0 ||
+            H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(st, "e", HOFFSET(struct st, e), H5T_NATIVE_INT)<0)
         goto error;
     H5Tclose(array_dt);
     
     array_dt=H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
-    if ((dst_t=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
-            H5Tinsert(dst_t, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(dst_t, "c", HOFFSET(struct dt, c), array_dt)<0 ||
-            H5Tinsert(dst_t, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT)<0)
+    if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
+            H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(dt, "c", HOFFSET(struct dt, c), array_dt)<0 ||
+            H5Tinsert(dt, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT)<0)
         goto error;
     H5Tclose(array_dt);
     
     /* Perform the conversion */
-    if (H5Tconvert(src_t, dst_t, nelmts, buf, bkg, H5P_DEFAULT)<0)
+    if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT)<0)
         goto error;
 
     /* Compare results */
@@ -729,7 +729,7 @@ test_compound_3(void)
     free(buf);
     free(bkg);
     free(orig);
-    if (H5Tclose(src_t)<0 || H5Tclose(dst_t)<0) goto error;
+    if (H5Tclose(st)<0 || H5Tclose(dt)<0) goto error;
 
     PASSED();
     reset_hdf5();
@@ -775,7 +775,7 @@ test_compound_4(void)
     const size_t	nelmts = NTESTELEM;
     const hsize_t	four = 4;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
-    hid_t		src_t=-1, dst_t=-1;
+    hid_t		st=-1, dt=-1;
     hid_t       array_dt;
     int			i;
 
@@ -800,27 +800,27 @@ test_compound_4(void)
 
     /* Build hdf5 datatypes */
     array_dt=H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
-    if ((src_t=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
-            H5Tinsert(src_t, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(src_t, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(src_t, "c", HOFFSET(struct st, c), array_dt)<0 ||
-            H5Tinsert(src_t, "d", HOFFSET(struct st, d), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(src_t, "e", HOFFSET(struct st, e), H5T_NATIVE_INT)<0)
+    if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
+            H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(st, "c", HOFFSET(struct st, c), array_dt)<0 ||
+            H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(st, "e", HOFFSET(struct st, e), H5T_NATIVE_INT)<0)
         goto error;
     H5Tclose(array_dt);
     
     array_dt=H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
-    if ((dst_t=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
-            H5Tinsert(dst_t, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(dst_t, "b", HOFFSET(struct dt, b), H5T_NATIVE_SHORT)<0 ||
-            H5Tinsert(dst_t, "c", HOFFSET(struct dt, c), array_dt)<0 ||
-            H5Tinsert(dst_t, "d", HOFFSET(struct dt, d), H5T_NATIVE_SHORT)<0 ||
-            H5Tinsert(dst_t, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT)<0)
+    if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
+            H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(dt, "b", HOFFSET(struct dt, b), H5T_NATIVE_SHORT)<0 ||
+            H5Tinsert(dt, "c", HOFFSET(struct dt, c), array_dt)<0 ||
+            H5Tinsert(dt, "d", HOFFSET(struct dt, d), H5T_NATIVE_SHORT)<0 ||
+            H5Tinsert(dt, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT)<0)
         goto error;
     H5Tclose(array_dt);
     
     /* Perform the conversion */
-    if (H5Tconvert(src_t, dst_t, nelmts, buf, bkg, H5P_DEFAULT)<0)
+    if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT)<0)
         goto error;
 
     /* Compare results */
@@ -851,7 +851,7 @@ test_compound_4(void)
     free(buf);
     free(bkg);
     free(orig);
-    if (H5Tclose(src_t)<0 || H5Tclose(dst_t)<0) goto error;
+    if (H5Tclose(st)<0 || H5Tclose(dt)<0) goto error;
 
     PASSED();
     reset_hdf5();
@@ -1005,7 +1005,7 @@ test_compound_6(void)
 
     const size_t	nelmts = NTESTELEM;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
-    hid_t		src_t=-1, dst_t=-1;
+    hid_t		st=-1, dt=-1;
     int			i;
 
     TESTING("compound element growing");
@@ -1022,22 +1022,22 @@ test_compound_6(void)
     HDmemcpy(buf, orig, nelmts*sizeof(struct st));
 
     /* Build hdf5 datatypes */
-    if ((src_t=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
-            H5Tinsert(src_t, "b", HOFFSET(struct st, b), H5T_NATIVE_SHORT)<0 ||
-            H5Tinsert(src_t, "d", HOFFSET(struct st, d), H5T_NATIVE_SHORT)<0) {
+    if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
+            H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_SHORT)<0 ||
+            H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_SHORT)<0) {
         H5_FAILED();
         goto error;
     }
     
-    if ((dst_t=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
-            H5Tinsert(dst_t, "b", HOFFSET(struct dt, b), H5T_NATIVE_LONG)<0 ||
-            H5Tinsert(dst_t, "d", HOFFSET(struct dt, d), H5T_NATIVE_LONG)<0) {
+    if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
+            H5Tinsert(dt, "b", HOFFSET(struct dt, b), H5T_NATIVE_LONG)<0 ||
+            H5Tinsert(dt, "d", HOFFSET(struct dt, d), H5T_NATIVE_LONG)<0) {
         H5_FAILED();
         goto error;
     }
     
     /* Perform the conversion */
-    if (H5Tconvert(src_t, dst_t, nelmts, buf, bkg, H5P_DEFAULT)<0) {
+    if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT)<0) {
         H5_FAILED();
         goto error;
     }
@@ -1062,7 +1062,7 @@ test_compound_6(void)
     free(buf);
     free(bkg);
     free(orig);
-    if (H5Tclose(src_t)<0 || H5Tclose(dst_t)<0) {
+    if (H5Tclose(st)<0 || H5Tclose(dt)<0) {
         H5_FAILED();
         goto error;
     }
@@ -2068,7 +2068,7 @@ test_compound_12(void)
  * Modifications:
  *              Raymond Lu
  *              Wednesday, Febuary 9, 2005
- *              Added test for H5Tenum_valueof, H5Tenum_nameof, and 
+ *              Added test for H5Tenum_valueof, H5Tenum_nameof, and
  *              H5Tget_member_value.
  *-------------------------------------------------------------------------
  */
@@ -2451,7 +2451,7 @@ test_transient (hid_t fapl)
 static int
 test_named (hid_t fapl)
 {
-    hid_t		file=-1, type=-1, space=-1, dset=-1, t2=-1, attr1=-1;
+    hid_t		file=-1, type=-1, space=-1, dset=-1, t2=-1, t3=-1, attr1=-1;
     herr_t		status;
     static hsize_t	ds_size[2] = {10, 20};
     hsize_t		i,j;
@@ -2575,9 +2575,7 @@ test_named (hid_t fapl)
      * first dataset.
      */
     if (H5Dclose (dset)<0) goto error;
-    if ((dset=H5Dcreate (file, "dset2", t2, space, H5P_DEFAULT))<0) {
-	goto error;
-    }
+    if ((dset=H5Dcreate (file, "dset2", t2, space, H5P_DEFAULT))<0) goto error;
 
     /* Reopen the second dataset and make sure the type is shared */
     if (H5Tclose (t2)<0) goto error;
@@ -2599,9 +2597,30 @@ test_named (hid_t fapl)
     if ((t2=H5Tcopy (dset))<0) goto error;
     if (H5Tset_precision (t2, 256)<0) goto error;
     if (H5Tclose (t2)<0) goto error;
+    if (H5Dclose (dset)<0) goto error;
+
+    /*
+     * Copy of committed type used as dataset type should not be name type
+     */
+    if ((t2 = H5Tcopy (type))<0) goto error;
+    if ((status=H5Tcommitted (t2))<0) goto error;
+    if (status) {
+	H5_FAILED();
+	HDputs ("    Copied type should not be a named type!");
+	goto error;
+    }
+    if ((dset=H5Dcreate (file, "dset3", t2, space, H5P_DEFAULT))<0) goto error;
+    if ((t3 = H5Dget_type (dset))<0) goto error;
+    if ((status=H5Tcommitted (t3))<0) goto error;
+    if (status) {
+	H5_FAILED();
+	HDputs ("    Datatype from dataset using copied type should not be a named type!");
+	goto error;
+    }
+    if (H5Tclose (t3)<0) goto error;
+    if (H5Dclose (dset)<0) goto error;
 
     /* Clean up */
-    if (H5Dclose (dset)<0) goto error;
     if (H5Tclose (type)<0) goto error;
     if (H5Sclose (space)<0) goto error;
     if (H5Fclose (file)<0) goto error;
@@ -2610,6 +2629,7 @@ test_named (hid_t fapl)
 
  error:
     H5E_BEGIN_TRY {
+	H5Tclose (t3);
 	H5Tclose (t2);
 	H5Tclose (type);
 	H5Sclose (space);

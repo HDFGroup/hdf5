@@ -1140,8 +1140,8 @@ H5O_dtype_get_share(H5F_t UNUSED *f, const void *_mesg,
     assert (sh);
 
     if (H5F_addr_defined (dt->ent.header)) {
-	if(H5T_STATE_NAMED!=dt->shared->state && H5T_STATE_OPEN!=dt->shared->state && H5T_STATE_TRANSIENT!=dt->shared->state)
-	    HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "datatype state is not valid");
+        /* If the address is defined, this had better be a named datatype */
+	HDassert (H5T_STATE_NAMED==dt->shared->state || H5T_STATE_OPEN==dt->shared->state);
 
 	sh->in_gh = FALSE;
 	sh->u.ent = dt->ent;
