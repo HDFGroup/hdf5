@@ -49913,6 +49913,10 @@ fi
 echo "$as_me:$LINENO: checking if accurately converting from long double to integers works" >&5
 echo $ECHO_N "checking if accurately converting from long double to integers works... $ECHO_C" >&6
 
+if test ${ac_cv_sizeof_long_double}=0; then
+   hdf5_cv_sw_ldouble_to_integer_works=${hdf5_cv_sw_ldouble_to_integer_works=no}
+fi
+
 if test "${hdf5_cv_sw_ldouble_to_integer_works+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
@@ -49993,6 +49997,12 @@ fi
 
 echo "$as_me:$LINENO: checking if accurately converting from integers to long double works" >&5
 echo $ECHO_N "checking if accurately converting from integers to long double works... $ECHO_C" >&6
+
+if test ${ac_cv_sizeof_long_double}=0; then
+   hdf5_cv_sw_integer_to_ldouble_works=${hdf5_cv_sw_integer_to_ldouble_works=no}
+fi
+
+
 if test "${hdf5_cv_sw_integer_to_ldouble_works+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
@@ -50302,6 +50312,10 @@ fi
 echo "$as_me:$LINENO: checking if converting long double to unsigned int values works" >&5
 echo $ECHO_N "checking if converting long double to unsigned int values works... $ECHO_C" >&6
 
+if test ${ac_cv_sizeof_long_double}=0; then
+   hdf5_cv_ldouble_to_uint_works=${hdf5_cv_ldouble_to_uint_works=no}
+fi
+
 if test "${hdf5_cv_ldouble_to_uint_works+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
@@ -50418,6 +50432,11 @@ fi
 
 echo "$as_me:$LINENO: checking if converting unsigned long long to long double with precision work" >&5
 echo $ECHO_N "checking if converting unsigned long long to long double with precision work... $ECHO_C" >&6
+
+if test ${ac_cv_sizeof_long_double}=0; then
+   hdf5_cv_ullong_to_ldouble_precision_works=${hdf5_cv_ullong_to_ldouble_precision_works=no}
+fi
+
 if test "${hdf5_cv_ullong_to_ldouble_precision_works+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else

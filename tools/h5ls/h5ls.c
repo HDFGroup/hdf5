@@ -320,8 +320,10 @@ display_native_type(hid_t type, int UNUSED ind)
  printf("native float");
     } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
  printf("native double");
+#if H5_SIZEOF_LONG_DOUBLE !=0
     } else if (H5Tequal(type, H5T_NATIVE_LDOUBLE)) {
  printf("native long double");
+#endif
     } else if (H5Tequal(type, H5T_NATIVE_INT8)) {
  printf("native int8_t");
     } else if (H5Tequal(type, H5T_NATIVE_UINT8)) {

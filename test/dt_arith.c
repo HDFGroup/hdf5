@@ -66,7 +66,10 @@ const char *FILENAME[] = {
 typedef enum dtype_t {
     INT_SCHAR, INT_UCHAR, INT_SHORT, INT_USHORT, INT_INT, INT_UINT,
     INT_LONG, INT_ULONG, INT_LLONG, INT_ULLONG, FLT_FLOAT, FLT_DOUBLE, 
-    FLT_LDOUBLE, OTHER
+#if H5_SIZEOF_LONG_DOUBLE !=0
+    FLT_LDOUBLE, 
+#endif
+    OTHER
 } dtype_t;
 
 /* Skip overflow tests if non-zero */
@@ -433,7 +436,9 @@ reset_hdf5(void)
     SET_ALIGNMENT(ULLONG,  H5_SIZEOF_LONG_LONG);
     SET_ALIGNMENT(FLOAT,   H5_SIZEOF_FLOAT);
     SET_ALIGNMENT(DOUBLE,  H5_SIZEOF_DOUBLE);
+#if H5_SIZEOF_LONG_DOUBLE !=0
     SET_ALIGNMENT(LDOUBLE, H5_SIZEOF_LONG_DOUBLE);
+#endif
 #endif
 
 }
@@ -2339,7 +2344,7 @@ my_isnan(dtype_t type, void *val)
 	double x;
 	HDmemcpy(&x, val, sizeof(double));
 	retval = (x!=x);
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
     } else if (FLT_LDOUBLE==type) {
 	long double x;
 	HDmemcpy(&x, val, sizeof(long double));
@@ -2362,7 +2367,7 @@ my_isnan(dtype_t type, void *val)
 	    double x;
 	    HDmemcpy(&x, val, sizeof(double));
 	    sprintf(s, "%g", x);
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
 	} else if (FLT_LDOUBLE==type) {
 	    long double x;
 	    HDmemcpy(&x, val, sizeof(long double));
@@ -2516,7 +2521,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
     } else if (H5Tequal(src, H5T_NATIVE_DOUBLE)) {
 	src_type_name = "double";
 	src_type = FLT_DOUBLE;
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
     } else if (H5Tequal(src, H5T_NATIVE_LDOUBLE)) {
 	src_type_name = "long double";
 	src_type = FLT_LDOUBLE;
@@ -2532,7 +2537,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
     } else if (H5Tequal(dst, H5T_NATIVE_DOUBLE)) {
 	dst_type_name = "double";
 	dst_type = FLT_DOUBLE;
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
     } else if (H5Tequal(dst, H5T_NATIVE_LDOUBLE)) {
 	dst_type_name = "long double";
 	dst_type = FLT_LDOUBLE;
@@ -2611,7 +2616,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
             } else if(src_type == FLT_DOUBLE) {
                 INIT_FP_NORM(double, DBL_MAX, DBL_MIN, DBL_MAX_10_EXP, DBL_MIN_10_EXP,
                         src_size, dst_size, buf, saved, nelmts);
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
             } else if(src_type == FLT_LDOUBLE) {
                 INIT_FP_NORM(long double, LDBL_MAX, LDBL_MIN, LDBL_MAX_10_EXP, LDBL_MIN_10_EXP,
                         src_size, dst_size, buf, saved, nelmts);
@@ -2627,7 +2632,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
             } else if(src_type == FLT_DOUBLE) {
                 INIT_FP_DENORM(double, DBL_MANT_DIG, src_size, src_nbits, endian, dst_size, 
                         buf, saved, nelmts);
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
             } else if(src_type == FLT_LDOUBLE) {
                 INIT_FP_DENORM(long double, LDBL_MANT_DIG, src_size, src_nbits, endian, dst_size, 
                         buf, saved, nelmts);
@@ -2644,7 +2649,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
             } else if(src_type == FLT_DOUBLE) {
                  INIT_FP_SPECIAL(src_size, src_nbits, endian, DBL_MANT_DIG, dst_size,
                         buf, saved, nelmts);
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
             } else if(src_type == FLT_LDOUBLE) {
                  INIT_FP_SPECIAL(src_size, src_nbits, endian, LDBL_MANT_DIG, dst_size,
                         buf, saved, nelmts);
@@ -2731,6 +2736,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
          * last few unused bytes may have garbage in them.  Clean them out with 
          * 0s before compare the values.
          */ 
+#if H5_SIZEOF_LONG_DOUBLE !=0
         if(endian==H5T_ORDER_LE && dst_type==FLT_LDOUBLE) {
             unsigned int q;
             for(q=dst_nbits/8; q<dst_size; q++) {
@@ -2738,6 +2744,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 hw[q] = 0x00;
             }
         }
+#endif
 
         /* Are the two results the same? */
         for (k=(dst_size-(dst_nbits/8)); k<dst_size; k++)
@@ -2760,7 +2767,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 my_isnan(dst_type, buf+j*sizeof(double)) &&
                 my_isnan(dst_type, hw)) {
             continue;
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
         } else if (FLT_LDOUBLE==dst_type &&
                 my_isnan(dst_type, buf+j*sizeof(long double)) &&
                 my_isnan(dst_type, hw)) {
@@ -3104,7 +3111,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
     } else if (H5Tequal(src, H5T_NATIVE_DOUBLE)) {
 	src_type_name = "double";
 	src_type = FLT_DOUBLE;
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
     } else if (H5Tequal(src, H5T_NATIVE_LDOUBLE)) {
 	src_type_name = "long double";
 	src_type = FLT_LDOUBLE;
@@ -3151,7 +3158,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
     } else if (H5Tequal(dst, H5T_NATIVE_DOUBLE)) {
 	dst_type_name = "double";
 	dst_type = FLT_DOUBLE;
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
     } else if (H5Tequal(dst, H5T_NATIVE_LDOUBLE)) {
 	dst_type_name = "long double";
 	dst_type = FLT_LDOUBLE;
@@ -3175,7 +3182,11 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
         INT_USHORT==src_type || INT_INT==src_type || INT_UINT==src_type ||
         INT_LONG==src_type || INT_ULONG==src_type || INT_LLONG==src_type ||
         INT_ULLONG==src_type) && 
-        (FLT_FLOAT!=dst_type && FLT_DOUBLE!=dst_type && FLT_LDOUBLE!=dst_type)) {
+        (FLT_FLOAT!=dst_type && FLT_DOUBLE!=dst_type
+#if H5_SIZEOF_LONG_DOUBLE !=0
+        && FLT_LDOUBLE!=dst_type
+#endif
+        )) {
 	sprintf(str, "Testing %s %s -> %s conversions",
 	    name, src_type_name, dst_type_name);
 	printf("%-70s", str);
@@ -3184,7 +3195,11 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
 	goto error;
     }
 
-    if ((FLT_FLOAT==src_type || FLT_DOUBLE==src_type || FLT_LDOUBLE==src_type)
+    if ((FLT_FLOAT==src_type || FLT_DOUBLE==src_type
+#if H5_SIZEOF_LONG_DOUBLE !=0
+        || FLT_LDOUBLE==src_type
+#endif
+        )
         && (INT_SCHAR!=dst_type && INT_UCHAR!=dst_type && INT_SHORT!=dst_type
         && INT_USHORT!=dst_type && INT_INT!=dst_type && INT_UINT!=dst_type
         && INT_LONG!=dst_type && INT_ULONG!=dst_type && INT_LLONG!=dst_type 
@@ -3307,7 +3322,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
         } else {
             INIT_FP_SPECIAL(src_size, src_nbits, endian, DBL_MANT_DIG, dst_size, buf, saved, nelmts);
         }
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
     } else if(src_type == FLT_LDOUBLE) {
         if(run_test==TEST_NORMAL) {
             INIT_FP_NORM(long double, LDBL_MAX, LDBL_MIN, LDBL_MAX_10_EXP, LDBL_MIN_10_EXP,
@@ -3328,7 +3343,11 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
 
     /* Check the results from the library against hardware */
     for (j=0; j<nelmts; j++) {
-        if(FLT_FLOAT==src_type || FLT_DOUBLE==src_type || FLT_LDOUBLE==src_type)
+        if(FLT_FLOAT==src_type || FLT_DOUBLE==src_type
+#if H5_SIZEOF_LONG_DOUBLE !=0
+            || FLT_LDOUBLE==src_type
+#endif
+            )
             if(my_isnan(src_type, saved+j*src_size))
                 continue;
 
@@ -3428,6 +3447,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             default:
                 break;
             }
+#if H5_SIZEOF_LONG_DOUBLE !=0
         } else if (FLT_LDOUBLE==dst_type) {
             hw = (unsigned char*)&hw_ldouble;
             switch (src_type) {
@@ -3476,6 +3496,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             default:
                 break;
             }
+#endif
         } else if (INT_SCHAR==dst_type) {
             hw = (unsigned char*)&hw_schar;
             switch (src_type) {
@@ -3487,10 +3508,12 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 HDmemcpy(aligned, saved+j*sizeof(double), sizeof(double));
                 hw_schar = (signed char)(*((double*)aligned));
                 break;
+#if H5_SIZEOF_LONG_DOUBLE !=0
             case FLT_LDOUBLE:
                 HDmemcpy(aligned, saved+j*sizeof(long double), sizeof(long double));
                 hw_schar = (signed char)(*((long double*)aligned));
                 break;
+#endif
             default:
                 break;
             }
@@ -3505,10 +3528,12 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 HDmemcpy(aligned, saved+j*sizeof(double), sizeof(double));
                 hw_uchar = (unsigned char)(*((double*)aligned));
                 break;
+#if H5_SIZEOF_LONG_DOUBLE !=0
             case FLT_LDOUBLE:
                 HDmemcpy(aligned, saved+j*sizeof(long double), sizeof(long double));
                 hw_uchar = (unsigned char)(*((long double*)aligned));
                 break;
+#endif
             default:
                 break;
             }
@@ -3523,10 +3548,12 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 HDmemcpy(aligned, saved+j*sizeof(double), sizeof(double));
                 hw_short = (short)(*((double*)aligned));
                 break;
+#if H5_SIZEOF_LONG_DOUBLE !=0
             case FLT_LDOUBLE:
                 HDmemcpy(aligned, saved+j*sizeof(long double), sizeof(long double));
                 hw_short = (short)(*((long double*)aligned));
                 break;
+#endif
             default:
                 break;
             }
@@ -3541,10 +3568,12 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 HDmemcpy(aligned, saved+j*sizeof(double), sizeof(double));
                 hw_ushort = (unsigned short)(*((double*)aligned));
                 break;
+#if H5_SIZEOF_LONG_DOUBLE !=0
             case FLT_LDOUBLE:
                 HDmemcpy(aligned, saved+j*sizeof(long double), sizeof(long double));
                 hw_ushort = (unsigned short)(*((long double*)aligned));
                 break;
+#endif
             default:
                 break;
             }
@@ -3559,10 +3588,12 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 HDmemcpy(aligned, saved+j*sizeof(double), sizeof(double));
                 hw_int = (int)(*((double*)aligned));
                 break;
+#if H5_SIZEOF_LONG_DOUBLE !=0
             case FLT_LDOUBLE:
                 HDmemcpy(aligned, saved+j*sizeof(long double), sizeof(long double));
                 hw_int = (int)(*((long double*)aligned));
                 break;
+#endif
             default:
                 break;
             }
@@ -3577,10 +3608,12 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 HDmemcpy(aligned, saved+j*sizeof(double), sizeof(double));
                 hw_uint = (unsigned int)(*((double*)aligned));
                 break;
+#if H5_SIZEOF_LONG_DOUBLE !=0
             case FLT_LDOUBLE:
                 HDmemcpy(aligned, saved+j*sizeof(long double), sizeof(long double));
                 hw_uint = (unsigned int)(*((long double*)aligned));
                 break;
+#endif
             default:
                 break;
             }
@@ -3595,10 +3628,12 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 HDmemcpy(aligned, saved+j*sizeof(double), sizeof(double));
                 hw_long = (long)(*((double*)aligned));
                 break;
+#if H5_SIZEOF_LONG_DOUBLE !=0
             case FLT_LDOUBLE:
                 HDmemcpy(aligned, saved+j*sizeof(long double), sizeof(long double));
                 hw_long = (long)(*((long double*)aligned));
                 break;
+#endif
             default:
                 break;
             }
@@ -3613,10 +3648,12 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 HDmemcpy(aligned, saved+j*sizeof(double), sizeof(double));
                 hw_ulong = (unsigned long)(*((double*)aligned));
                 break;
+#if H5_SIZEOF_LONG_DOUBLE !=0
             case FLT_LDOUBLE:
                 HDmemcpy(aligned, saved+j*sizeof(long double), sizeof(long double));
                 hw_ulong = (unsigned long)(*((long double*)aligned));
                 break;
+#endif
             default:
                 break;
             }
@@ -3631,10 +3668,12 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 HDmemcpy(aligned, saved+j*sizeof(double), sizeof(double));
                 hw_llong = (long_long)(*((double*)aligned));
                 break;
+#if H5_SIZEOF_LONG_DOUBLE !=0
             case FLT_LDOUBLE:
                 HDmemcpy(aligned, saved+j*sizeof(long double), sizeof(long double));
                 hw_llong = (long_long)(*((long double*)aligned));
                 break;
+#endif
             default:
                 break;
             }
@@ -3649,10 +3688,12 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 HDmemcpy(aligned, saved+j*sizeof(double), sizeof(double));
                 hw_ullong = (unsigned long_long)(*((double*)aligned));
                 break;
+#if H5_SIZEOF_LONG_DOUBLE !=0
             case FLT_LDOUBLE:
                 HDmemcpy(aligned, saved+j*sizeof(long double), sizeof(long double));
                 hw_ullong = (unsigned long_long)(*((long double*)aligned));
                 break;
+#endif
             default:
                 break;
             }
@@ -3667,12 +3708,14 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
          * bytes may have garbage in them.  Clean them out with 0s before compare 
          * the values.
          */ 
+#if H5_SIZEOF_LONG_DOUBLE !=0
         if(endian==H5T_ORDER_LE && dst_type==FLT_LDOUBLE) {
             unsigned int q;
             for(q=dst_nbits/8; q<dst_size; q++) {
                 buf[j*dst_size+q] = 0x00;
             }
         }
+#endif
 
         /* Are the two results the same? */
         for (k=(dst_size-(dst_nbits/8)); k<dst_size; k++)
@@ -3702,7 +3745,11 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
          * Try to follow the except_func callback function to check if the 
          * desired value was set.
          */
-        if ((FLT_FLOAT==src_type || FLT_DOUBLE==src_type || FLT_LDOUBLE==src_type)
+        if ((FLT_FLOAT==src_type || FLT_DOUBLE==src_type
+#if H5_SIZEOF_LONG_DOUBLE !=0
+                    || FLT_LDOUBLE==src_type
+#endif
+                    )
                 && (INT_SCHAR==dst_type || INT_SHORT==dst_type || INT_INT==dst_type 
                 || INT_LONG==dst_type || INT_LLONG==dst_type)) {
             if(0==H5T_bit_get_d(src_bits, src_nbits-1, 1) &&
@@ -3739,7 +3786,11 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             }
         }
 
-        if ((FLT_FLOAT==src_type || FLT_DOUBLE==src_type || FLT_LDOUBLE==src_type)
+        if ((FLT_FLOAT==src_type || FLT_DOUBLE==src_type
+#if H5_SIZEOF_LONG_DOUBLE !=0
+                    || FLT_LDOUBLE==src_type
+#endif
+                )
                 && (INT_UCHAR==dst_type || INT_USHORT==dst_type || INT_UINT==dst_type 
                 || INT_ULONG==dst_type || INT_ULLONG==dst_type)) {
             if (H5T_bit_get_d(src_bits, src_nbits-1, 1)) {
@@ -3820,6 +3871,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
 * to the 3rd last byte of mantissa.  So we only try to compare all but the last 3 bytes.
 */
 #ifndef H5_ULLONG_TO_LDOUBLE_PRECISION_WORKS
+#if H5_SIZEOF_LONG_DOUBLE !=0
         if(src_type==INT_ULLONG && dst_type==FLT_LDOUBLE) {
             long double tmp_s, tmp_h;
             HDmemcpy(&tmp_s,&buf[j*dst_size],sizeof(long double));
@@ -3828,6 +3880,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             if(!HDmemcmp(&tmp_s+4, &tmp_h+4, sizeof(long double)-4))
                 continue; /*no error*/
         }
+#endif
 #endif /*end H5_ULLONG_TO_LDOUBLE_PRECISION_WORKS*/
         
         /* Print errors */
@@ -3893,10 +3946,12 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 HDmemcpy(aligned, saved+j*sizeof(double), sizeof(double));
                 printf(" %29f\n", *((double*)aligned));
                 break;
+#if H5_SIZEOF_LONG_DOUBLE !=0
             case FLT_LDOUBLE:
                 HDmemcpy(aligned, saved+j*sizeof(long double), sizeof(long double));
                 printf(" %29Lf\n", *((long double*)aligned));
                 break;
+#endif
             case OTHER:
                 break;
         }
@@ -3954,10 +4009,12 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 HDmemcpy(aligned, buf+j*sizeof(double), sizeof(double));
                 printf(" %29f\n", *((double*)aligned));
                 break;
+#if H5_SIZEOF_LONG_DOUBLE !=0
             case FLT_LDOUBLE:
                 HDmemcpy(aligned, buf+j*sizeof(long double), sizeof(long double));
                 printf(" %29Lf\n", *((long double*)aligned));
                 break;
+#endif
             case OTHER:
                 break;
         }
@@ -4003,9 +4060,11 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             case FLT_DOUBLE:
                 printf(" %29f\n", *((double*)hw));
                 break;
+#if H5_SIZEOF_LONG_DOUBLE !=0
             case FLT_LDOUBLE:
                 printf(" %29Lf\n", *((long double*)hw));
                 break;
+#endif
             case OTHER:
                 break;
         }
@@ -4330,14 +4389,16 @@ run_fp_tests(const char *name)
     if(!strcmp(name, "noop")) {
         nerrors += test_conv_flt_1("noop", TEST_NOOP, H5T_NATIVE_FLOAT, H5T_NATIVE_FLOAT);
         nerrors += test_conv_flt_1("noop", TEST_NOOP, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE);
+#if H5_SIZEOF_LONG_DOUBLE !=0
         nerrors += test_conv_flt_1("noop", TEST_NOOP, H5T_NATIVE_LDOUBLE, H5T_NATIVE_LDOUBLE);
+#endif
         goto done;
     }
 
     /*Test normalized values.  TEST_NORMAL indicates normalized values.*/    
     nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE);
     nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_DOUBLE, H5T_NATIVE_FLOAT);
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE !=0
     nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_FLOAT, H5T_NATIVE_LDOUBLE);
     nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_DOUBLE, H5T_NATIVE_LDOUBLE);
     nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT);
@@ -4347,7 +4408,7 @@ run_fp_tests(const char *name)
     /*Test denormalized values.  TEST_DENORM indicates denormalized values.*/    
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE);
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_DOUBLE, H5T_NATIVE_FLOAT);
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_FLOAT, H5T_NATIVE_LDOUBLE);
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_DOUBLE, H5T_NATIVE_LDOUBLE);
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT);
@@ -4357,7 +4418,7 @@ run_fp_tests(const char *name)
     /*Test special values, +/-0, +/-infinity, +/-QNaN, +/-SNaN.*/
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE);
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_DOUBLE, H5T_NATIVE_FLOAT);
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_FLOAT, H5T_NATIVE_LDOUBLE);
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_DOUBLE, H5T_NATIVE_LDOUBLE);
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT);
@@ -4477,7 +4538,12 @@ run_int_fp_conv(const char *name)
                 name, "all integers", "long double");
         printf("%-70s", str);
         SKIPPED();
+#if H5_SIZEOF_LONG_DOUBLE !=0
         HDputs("    Test skipped due to hardware conversion error.");
+#else
+        HDputs("    Test skipped due to disabled long double.");
+#endif
+        
     }
 #endif /*H5_SW_INTEGER_TO_LDOUBLE_WORKS*/
 
@@ -4601,15 +4667,19 @@ run_fp_int_conv(const char *name)
                         name, "long double", "unsigned int");
                 printf("%-70s", str);
                 SKIPPED();
+#if H5_SIZEOF_LONG_DOUBLE!=0
                 HDputs("    Test skipped due to hardware conversion error.");
+#else
+                HDputs("    Test skipped due to disabled long double.");
+#endif
             }
 #endif /*H5_CV_LDOUBLE_TO_UINT_WORKS*/
-#if H5_SIZEOF_LONG!=H5_SIZEOF_INT
+#if H5_SIZEOF_LONG!=H5_SIZEOF_INT && H5_SIZEOF_LONG_DOUBLE!=0
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_LONG);
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_ULONG);
 #endif
 
-#if H5_SIZEOF_LONG_LONG!=H5_SIZEOF_LONG
+#if H5_SIZEOF_LONG_LONG!=H5_SIZEOF_LONG && H5_SIZEOF_LONG_DOUBLE!=0
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_LLONG);
 #ifdef H5_FP_TO_ULLONG_RIGHT_MAXIMUM
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_ULLONG);
@@ -4621,7 +4691,11 @@ run_fp_int_conv(const char *name)
                         name, "long double", "unsigned long long");
                 printf("%-70s", str);
                 SKIPPED();
+#if H5_SIZEOF_LONG_DOUBLE!=0
                 HDputs("    Test skipped due to hardware conversion error.");
+#else
+                HDputs("    Test skipped due to disabled long double.");
+#endif
             }
 #endif /*H5_FP_TO_ULLONG_RIGHT_MAXIMUM*/ 
 #endif
@@ -4634,7 +4708,11 @@ run_fp_int_conv(const char *name)
                         name, "long double", "all integers");
                 printf("%-70s", str);
                 SKIPPED();
+#if H5_SIZEOF_LONG_DOUBLE!=0
                 HDputs("    Test skipped due to hardware conversion error.");
+#else
+                HDputs("    Test skipped due to disabled long double.");
+#endif
             }
 #endif /*H5_SW_LDOUBLE_TO_INTEGER_WORKS*/
         }
@@ -4645,7 +4723,11 @@ run_fp_int_conv(const char *name)
                 name, "all floating-point numbers", "all integers");
         printf("%-70s", str);
         SKIPPED();
+#if H5_SIZEOF_LONG_DOUBLE!=0
         HDputs("    Test skipped due to hardware conversion error.");
+#else
+        HDputs("    Test skipped due to disbaled long double.");
+#endif
     }
 
     return nerrors;

@@ -16,7 +16,7 @@
 #ifndef _H5LTf90proto_H
 #define _H5LTf90proto_H
 
-#include "H5pubconf.h"
+#include "H5public.h"
 #include "H5f90i.h"
 #include <stdlib.h>  
 #include <string.h>

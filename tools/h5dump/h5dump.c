@@ -748,8 +748,10 @@ print_datatype(hid_t type,unsigned in_group)
                 printf("H5T_NATIVE_FLOAT");
             } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
                 printf("H5T_NATIVE_DOUBLE");
+#if H5_SIZEOF_LONG_DOUBLE !=0
             } else if (H5Tequal(type, H5T_NATIVE_LDOUBLE)) {
                 printf("H5T_NATIVE_LDOUBLE");
+#endif
             } else {
                 printf("undefined float");
                 d_status = EXIT_FAILURE;

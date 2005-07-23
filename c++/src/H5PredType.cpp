@@ -170,7 +170,9 @@ const PredType PredType::NATIVE_ULONG( E_NATIVE_ULONG );
 const PredType PredType::NATIVE_LLONG( E_NATIVE_LLONG );
 const PredType PredType::NATIVE_ULLONG( E_NATIVE_ULLONG );
 const PredType PredType::NATIVE_DOUBLE( E_NATIVE_DOUBLE );
+#if H5_SIZEOF_LONG_DOUBLE !=0
 const PredType PredType::NATIVE_LDOUBLE( E_NATIVE_LDOUBLE );
+#endif
 const PredType PredType::NATIVE_B8( E_NATIVE_B8 );
 const PredType PredType::NATIVE_B16( E_NATIVE_B16 );
 const PredType PredType::NATIVE_B32( E_NATIVE_B32 );
@@ -426,8 +428,10 @@ hid_t PredType::getId() const
 	    return( H5T_NATIVE_ULLONG );
 	case E_NATIVE_DOUBLE:
 	    return( H5T_NATIVE_DOUBLE );
+#if H5_SIZEOF_LONG_DOUBLE !=0
 	case E_NATIVE_LDOUBLE:
 	    return( H5T_NATIVE_LDOUBLE );
+#endif
 	case E_NATIVE_B8:
 	    return( H5T_NATIVE_B8 );
 	case E_NATIVE_B16:

@@ -2126,8 +2126,10 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                                 fprintf(out, "H5T_NATIVE_FLOAT");
                             } else if (obj==H5T_NATIVE_DOUBLE_g) {
                                 fprintf(out, "H5T_NATIVE_DOUBLE");
+#if H5_SIZEOF_LONG_DOUBLE !=0
                             } else if (obj==H5T_NATIVE_LDOUBLE_g) {
                                 fprintf(out, "H5T_NATIVE_LDOUBLE");
+#endif
                             } else if (obj==H5T_IEEE_F32BE_g) {
                                 fprintf(out, "H5T_IEEE_F32BE");
                             } else if (obj==H5T_IEEE_F32LE_g) {

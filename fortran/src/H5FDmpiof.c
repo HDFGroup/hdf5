@@ -16,7 +16,7 @@
 
 #include "H5f90.h"
 #include <mpi.h> 
-#include "H5pubconf.h"
+#include "H5public.h"
 
 
 /* Support for C to Fortran translation in MPI */

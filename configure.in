@@ -2382,6 +2382,10 @@ dnl Other HP-UX systems are unknown yet. (1/8/05 - SLU)
 
 AC_MSG_CHECKING([if accurately converting from long double to integers works])
 
+if test ${ac_cv_sizeof_long_double}=0; then
+   hdf5_cv_sw_ldouble_to_integer_works=${hdf5_cv_sw_ldouble_to_integer_works=no}
+fi
+
 AC_CACHE_VAL([hdf5_cv_sw_ldouble_to_integer_works],
     [AC_TRY_RUN([
     int main(void)
@@ -2423,6 +2427,12 @@ dnl incorrect and its cache value is set "no" in its config/irix6.x and
 dnl irix5.x) 
 dnl
 AC_MSG_CHECKING([if accurately converting from integers to long double works])
+
+if test ${ac_cv_sizeof_long_double}=0; then
+   hdf5_cv_sw_integer_to_ldouble_works=${hdf5_cv_sw_integer_to_ldouble_works=no}
+fi
+
+
 AC_CACHE_VAL([hdf5_cv_sw_integer_to_ldouble_works], [hdf5_cv_sw_integer_to_ldouble_works=yes])
 
 if test ${hdf5_cv_sw_integer_to_ldouble_works} = "yes"; then
@@ -2605,6 +2615,10 @@ dnl all machines, except for some Intel compilers on some Linux.)
 dnl
 AC_MSG_CHECKING([if converting long double to unsigned int values works])
 
+if test ${ac_cv_sizeof_long_double}=0; then
+   hdf5_cv_ldouble_to_uint_works=${hdf5_cv_ldouble_to_uint_works=no}
+fi
+
 AC_CACHE_VAL([hdf5_cv_ldouble_to_uint_works],
     [AC_TRY_RUN([
     int main(void)
@@ -2674,6 +2688,11 @@ dnl where the last 2 bytes of mantissa are lost when compiler tries to do
 dnl the conversion, and Cygwin where compiler doesn't do rounding correctly.)
 dnl
 AC_MSG_CHECKING([if converting unsigned long long to long double with precision work])
+
+if test ${ac_cv_sizeof_long_double}=0; then
+   hdf5_cv_ullong_to_ldouble_precision_works=${hdf5_cv_ullong_to_ldouble_precision_works=no}
+fi
+
 AC_CACHE_VAL([hdf5_cv_ullong_to_ldouble_precision_works],
     [AC_TRY_RUN([
     int main(void)

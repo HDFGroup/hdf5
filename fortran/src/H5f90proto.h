@@ -16,7 +16,7 @@
 #ifndef _H5f90proto_H
 #define _H5f90proto_H
 
-#include "H5pubconf.h"
+#include "H5public.h"
 
 H5_FCDLL char * HD5f2cstring (_fcd fdesc, size_t len);
 H5_FCDLL void HD5packFstring(char *src, char *dest, size_t len);

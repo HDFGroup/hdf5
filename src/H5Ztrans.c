@@ -170,7 +170,7 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
 #define H5Z_XFORM_LL_DO_OP1(RESL,RESR,TYPE,OP,SIZE)                     \
     H5Z_XFORM_DO_OP1(RESL,RESR,TYPE,OP,SIZE)
 #endif
-
+#if H5_SIZEOF_LONG_DOUBLE !=0
 #define H5Z_XFORM_TYPE_OP(RESL,RESR,TYPE,OP,SIZE)			\
 {									\
     if((TYPE) == H5T_NATIVE_CHAR)					\
@@ -202,6 +202,37 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
     else if((TYPE) == H5T_NATIVE_LDOUBLE)				\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), long double, OP, (SIZE))	\
 }
+#else
+#define H5Z_XFORM_TYPE_OP(RESL,RESR,TYPE,OP,SIZE)			\
+{									\
+    if((TYPE) == H5T_NATIVE_CHAR)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), char, OP, (SIZE))		\
+    else if((TYPE) == H5T_NATIVE_UCHAR)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned char, OP, (SIZE))	\
+    else if((TYPE) == H5T_NATIVE_SCHAR)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), signed char, OP, (SIZE))	\
+    else if((TYPE) == H5T_NATIVE_SHORT)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), short, OP, (SIZE))		\
+    else if((TYPE) == H5T_NATIVE_USHORT)				\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned short, OP, (SIZE))	\
+    else if((TYPE) == H5T_NATIVE_INT)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), int, OP, (SIZE))		\
+    else if((TYPE) == H5T_NATIVE_UINT)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned int, OP, (SIZE))	\
+    else if((TYPE) == H5T_NATIVE_LONG)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), long, OP, (SIZE))		\
+    else if((TYPE) == H5T_NATIVE_ULONG)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned long, OP, (SIZE))	\
+    else if((TYPE) == H5T_NATIVE_LLONG)					\
+	H5Z_XFORM_LL_DO_OP1((RESL), (RESR), long_long, OP, (SIZE))	\
+    else if((TYPE) == H5T_NATIVE_ULLONG)				\
+	H5Z_XFORM_ULL_DO_OP1((RESL), (RESR), unsigned long_long, OP, (SIZE)) \
+    else if((TYPE) == H5T_NATIVE_FLOAT)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), float, OP, (SIZE))		\
+    else if((TYPE) == H5T_NATIVE_DOUBLE)				\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), double, OP, (SIZE))		\
+}
+#endif /*H5_SIZEOF_LONG_DOUBLE */
 
 #define H5Z_XFORM_DO_OP3(OP)                                                                                                                    \
 {                                                                                                                                               \
@@ -917,8 +948,10 @@ H5Z_xform_eval(H5Z_data_xform_t *data_xform_prop, void* array, size_t array_size
             H5Z_XFORM_DO_OP5(float, array_size)
 	else if(array_type == H5T_NATIVE_DOUBLE)
             H5Z_XFORM_DO_OP5(double, array_size)
+#if H5_SIZEOF_LONG_DOUBLE !=0
 	else if(array_type == H5T_NATIVE_LDOUBLE)
             H5Z_XFORM_DO_OP5(long double, array_size)
+#endif
 
     }
     /* Otherwise, do the full data transform */
@@ -1140,10 +1173,11 @@ H5Z_xform_find_type(const H5T_t* type)
     else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_DOUBLE,H5I_DATATYPE), FALSE))==0)
 	HGOTO_DONE(H5T_NATIVE_DOUBLE)
 
-
+#if H5_SIZEOF_LONG_DOUBLE !=0
 	    /* Check for LONGDOUBLE type */
     else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_LDOUBLE,H5I_DATATYPE), FALSE))==0)
 	HGOTO_DONE(H5T_NATIVE_LDOUBLE)
+#endif
     else
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not find matching type");
 

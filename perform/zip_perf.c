@@ -35,6 +35,7 @@
 
 /* our header files */
 #include "hdf5.h"
+#include "H5private.h"
 #include "h5tools_utils.h"
 
 #ifdef H5_HAVE_FILTER_DEFLATE
@@ -454,7 +455,7 @@ fill_with_random_data(Bytef *src, uLongf src_len)
         printf("Using random() for random data\n");
 
         for (u = 0; u < src_len; ++u)
-            src[u] = (Bytef)(0xff & random());
+            src[u] = (Bytef)(0xff & HDrandom());
     }
 
     if (compress_percent) {

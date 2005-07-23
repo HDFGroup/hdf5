@@ -695,7 +695,9 @@ H5T_get_native_float(size_t size, H5T_direction_t direction, size_t *struct_alig
     enum match_type {           /* The different kinds of floating point types we can match */
         H5T_NATIVE_FLOAT_MATCH_FLOAT,
         H5T_NATIVE_FLOAT_MATCH_DOUBLE,
+#if H5_SIZEOF_LONG_DOUBLE !=0
         H5T_NATIVE_FLOAT_MATCH_LDOUBLE,
+#endif
         H5T_NATIVE_FLOAT_MATCH_UNKNOWN
     } match=H5T_NATIVE_FLOAT_MATCH_UNKNOWN;
     H5T_t       *ret_value;     /* Return value */
@@ -708,21 +710,33 @@ H5T_get_native_float(size_t size, H5T_direction_t direction, size_t *struct_alig
         if(size<=sizeof(float)) {
             match=H5T_NATIVE_FLOAT_MATCH_FLOAT;
 	    native_size = sizeof(float);	
-        } else if(size<=sizeof(double)) {
+        }
+        else if(size<=sizeof(double)) {
             match=H5T_NATIVE_FLOAT_MATCH_DOUBLE;
 	    native_size = sizeof(double);	
-        } else if(size<=sizeof(long double)) {
+        }
+#if H5_SIZEOF_LONG_DOUBLE !=0 
+        else if(size<=sizeof(long double)) {
             match=H5T_NATIVE_FLOAT_MATCH_LDOUBLE;
 	    native_size = sizeof(long double);	
-        } else {   /* If not match, return the biggest datatype */
+        } 
+#endif
+        else {   /* If not match, return the biggest datatype */
+#if H5_SIZEOF_LONG_DOUBLE !=0
             match=H5T_NATIVE_FLOAT_MATCH_LDOUBLE;
 	    native_size = sizeof(long double);
+#else
+            match=H5T_NATIVE_FLOAT_MATCH_DOUBLE;
+            native_size = sizeof(double);
+#endif
 	}	
     } else {
+#if H5_SIZEOF_LONG_DOUBLE !=0 
         if(size>=sizeof(long double)) {
             match=H5T_NATIVE_FLOAT_MATCH_LDOUBLE;
 	    native_size = sizeof(long double);	
-        } else if(size>=sizeof(double)) {
+        } 
+        else if(size>=sizeof(double)) {
             if(size==sizeof(double)) {
                 match=H5T_NATIVE_FLOAT_MATCH_DOUBLE;
 	    	native_size = sizeof(double);	
@@ -744,6 +758,25 @@ H5T_get_native_float(size_t size, H5T_direction_t direction, size_t *struct_alig
             match=H5T_NATIVE_FLOAT_MATCH_FLOAT;
 	    native_size = sizeof(float);
 	}	
+#else
+        if(size>=sizeof(double)) {
+            match=H5T_NATIVE_FLOAT_MATCH_DOUBLE;
+	    native_size = sizeof(double);	
+        }
+        else if(size>=sizeof(float)) {
+            if(size==sizeof(float)) {
+                match=H5T_NATIVE_FLOAT_MATCH_FLOAT;
+	    	native_size = sizeof(float);	
+            } else {
+                match=H5T_NATIVE_FLOAT_MATCH_DOUBLE;
+	    	native_size = sizeof(double);
+	    }	
+        }    
+        else {
+            match=H5T_NATIVE_FLOAT_MATCH_FLOAT;
+	    native_size = sizeof(float);
+	}	
+#endif
     }
 
     /* Set the appropriate native floating point information */
@@ -758,11 +791,12 @@ H5T_get_native_float(size_t size, H5T_direction_t direction, size_t *struct_alig
             align = H5T_NATIVE_DOUBLE_COMP_ALIGN_g;
             break;
 
+#if H5_SIZEOF_LONG_DOUBLE !=0 
         case H5T_NATIVE_FLOAT_MATCH_LDOUBLE:
             tid = H5T_NATIVE_LDOUBLE;
             align = H5T_NATIVE_LDOUBLE_COMP_ALIGN_g;
             break;
-
+#endif
         case H5T_NATIVE_FLOAT_MATCH_UNKNOWN:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "Unknown native floating-point match")
