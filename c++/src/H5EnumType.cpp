@@ -240,7 +240,7 @@ int EnumType::getNmembers() const
    int num_members = H5Tget_nmembers( id );
    if( num_members < 0 )
    {
-      throw DataTypeIException("CompType::getNmembers",
+      throw DataTypeIException("EnumType::getNmembers",
                 "H5Tget_nmembers returns negative number of members");
    }
    return( num_members );

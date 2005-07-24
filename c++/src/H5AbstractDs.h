@@ -24,6 +24,13 @@
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #endif
+class ArrayType;
+class CompType;
+class EnumType;
+class FloatType;
+class IntType;
+class StrType;
+class VarLenType;
 class H5_DLLCPP AbstractDs : public H5Object {
    public:
 	// Gets a copy the datatype of that this abstract dataset uses.
@@ -34,11 +41,13 @@ class H5_DLLCPP AbstractDs : public H5Object {
 	DataType getDataType() const;
 
         // Gets a copy of the specific datatype of this abstract dataset
-        EnumType getEnumType() const;
+        ArrayType getArrayType() const;
         CompType getCompType() const;
-        IntType getIntType() const;
+        EnumType getEnumType() const;
         FloatType getFloatType() const;
+        IntType getIntType() const;
         StrType getStrType() const;
+        VarLenType getVarLenType() const;
 
 	// Gets the dataspace of this abstract dataset - pure virtual
 	virtual DataSpace getSpace() const = 0;

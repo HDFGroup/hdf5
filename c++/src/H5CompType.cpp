@@ -245,22 +245,22 @@ DataType CompType::getMemberDataType( int member_num ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	CompType::getMemberDataType
-///\brief	Returns the enumeration datatype of the specified member in 
-///		this compound datatype. 
+// Function:	CompType::getMemberArrayType
+///\brief	Returns the array datatype of the specified member in this 
+///		compound datatype. 
 ///\param	member_num - IN: Zero-based index of the member
-///\return	EnumType instance
+///\return	ArrayType instance
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-EnumType CompType::getMemberEnumType( int member_num ) const
+ArrayType CompType::getMemberArrayType( int member_num ) const
 {
-   EnumType enumtype(p_get_member_type(member_num)); 
-   return(enumtype);
+   ArrayType arraytype(p_get_member_type(member_num)); 
+   return(arraytype);
 }
 
 //--------------------------------------------------------------------------
-// Function:	CompType::getMemberDataType
+// Function:	CompType::getMemberCompType
 ///\brief	Returns the compound datatype of the specified member in this 
 ///		compound datatype. 
 ///\param	member_num - IN: Zero-based index of the member
@@ -275,7 +275,22 @@ CompType CompType::getMemberCompType( int member_num ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	CompType::getMemberDataType
+// Function:	CompType::getMemberEnumType
+///\brief	Returns the enumeration datatype of the specified member in 
+///		this compound datatype. 
+///\param	member_num - IN: Zero-based index of the member
+///\return	EnumType instance
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+EnumType CompType::getMemberEnumType( int member_num ) const
+{
+   EnumType enumtype(p_get_member_type(member_num)); 
+   return(enumtype);
+}
+
+//--------------------------------------------------------------------------
+// Function:	CompType::getMemberIntType
 ///\brief	Returns the integer datatype of the specified member in this 
 ///		compound datatype. 
 ///\param	member_num - IN: Zero-based index of the member
@@ -290,7 +305,7 @@ IntType CompType::getMemberIntType( int member_num ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	CompType::getMemberDataType
+// Function:	CompType::getMemberFloatType
 ///\brief	Returns the floating-point datatype of the specified member 
 ///		in this compound datatype. 
 ///\param	member_num - IN: Zero-based index of the member
@@ -305,7 +320,7 @@ FloatType CompType::getMemberFloatType( int member_num ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	CompType::getMemberDataType
+// Function:	CompType::getMemberStrType
 ///\brief	Returns the string datatype of the specified member in this 
 ///		compound datatype. 
 ///\param	member_num - IN: Zero-based index of the member
@@ -318,6 +333,21 @@ StrType CompType::getMemberStrType( int member_num ) const
    StrType strtype(p_get_member_type(member_num)); 
    return(strtype);
 } 
+
+//--------------------------------------------------------------------------
+// Function:	CompType::getMemberVarLenType
+///\brief	Returns the variable length datatype of the specified member 
+///		in this compound datatype. 
+///\param	member_num - IN: Zero-based index of the member
+///\return	VarLenType instance
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+VarLenType CompType::getMemberVarLenType( int member_num ) const
+{
+   VarLenType varlentype(p_get_member_type(member_num)); 
+   return(varlentype);
+}
 
 /* old style of getMemberType - using overloads; new style above 
    returns the appropriate datatypes but has different named functions.

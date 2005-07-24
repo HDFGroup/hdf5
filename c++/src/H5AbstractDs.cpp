@@ -96,17 +96,17 @@ DataType AbstractDs::getDataType() const
 }
 
 //--------------------------------------------------------------------------
-// Function:	AbstractDs::getEnumType
-///\brief	Returns the enumeration datatype of this abstract dataset which 
+// Function:	AbstractDs::getArrayType
+///\brief	Returns the compound datatype of this abstract dataset which 
 ///		can be a dataset or an attribute.
-///\return	EnumType instance
+///\return	ArrayType instance
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-EnumType AbstractDs::getEnumType() const
+ArrayType AbstractDs::getArrayType() const
 {
-   EnumType enumtype(p_get_type());
-   return(enumtype);
+   ArrayType arraytype(p_get_type());
+   return(arraytype);
 }
 
 //--------------------------------------------------------------------------
@@ -124,17 +124,17 @@ CompType AbstractDs::getCompType() const
 }
 
 //--------------------------------------------------------------------------
-// Function:	AbstractDs::getIntType
-///\brief	Returns the integer datatype of this abstract dataset which 
+// Function:	AbstractDs::getEnumType
+///\brief	Returns the enumeration datatype of this abstract dataset which 
 ///		can be a dataset or an attribute.
-///\return	IntType instance
+///\return	EnumType instance
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-IntType AbstractDs::getIntType() const
+EnumType AbstractDs::getEnumType() const
 {
-   IntType inttype(p_get_type());
-   return(inttype);
+   EnumType enumtype(p_get_type());
+   return(enumtype);
 }
 
 //--------------------------------------------------------------------------
@@ -152,6 +152,20 @@ FloatType AbstractDs::getFloatType() const
 }
 
 //--------------------------------------------------------------------------
+// Function:	AbstractDs::getIntType
+///\brief	Returns the integer datatype of this abstract dataset which 
+///		can be a dataset or an attribute.
+///\return	IntType instance
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+IntType AbstractDs::getIntType() const
+{
+   IntType inttype(p_get_type());
+   return(inttype);
+}
+
+//--------------------------------------------------------------------------
 // Function:	AbstractDs::getStrType
 ///\brief	Returns the string datatype of this abstract dataset which 
 ///		can be a dataset or an attribute.
@@ -163,6 +177,20 @@ StrType AbstractDs::getStrType() const
 {
    StrType strtype(p_get_type());
    return(strtype);
+}
+
+//--------------------------------------------------------------------------
+// Function:	AbstractDs::getVarLenType
+///\brief	Returns the floating-point datatype of this abstract dataset,
+///		which can be a dataset or an attribute.
+///\return	VarLenType instance
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+VarLenType AbstractDs::getVarLenType() const
+{
+   VarLenType varlentype(p_get_type());
+   return(varlentype);
 }
 
 //--------------------------------------------------------------------------
