@@ -49,13 +49,17 @@ class H5_DLLCPP CompType : public DataType {
 	// Returns the name of a member of this compound datatype. 
 	string getMemberName( unsigned member_num ) const;
 
-	// Returns the compound datatype of the specified member in 
-	// this compound datatype.
-	CompType getMemberCompType( int member_num ) const;
-
 	// Returns the generic datatype of the specified member in 
 	// this compound datatype.
 	DataType getMemberDataType( int member_num ) const;
+
+	// Returns the array datatype of the specified member in 
+	// this compound datatype.
+	ArrayType getMemberArrayType( int member_num ) const;
+
+	// Returns the compound datatype of the specified member in 
+	// this compound datatype.
+	CompType getMemberCompType( int member_num ) const;
 
 	// Returns the enumeration datatype of the specified member in 
 	// this compound datatype.
@@ -72,6 +76,10 @@ class H5_DLLCPP CompType : public DataType {
 	// Returns the string datatype of the specified member in 
 	// this compound datatype.
 	StrType getMemberStrType( int member_num ) const;
+
+	// Returns the variable length datatype of the specified member in 
+	// this compound datatype.
+	VarLenType getMemberVarLenType( int member_num ) const;
 
 	// Returns the number of members in this compound datatype. 
 	int getNmembers() const;

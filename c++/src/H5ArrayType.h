@@ -37,15 +37,15 @@ class H5_DLLCPP ArrayType : public DataType {
 	// Copy constructor: makes copy of the original object.
 	ArrayType( const ArrayType& original );
 
+	// Constructor that takes an existing id
+	ArrayType( const hid_t existing_id );
+
 	// Noop destructor
 	virtual ~ArrayType();
 
    protected:
 	// Default constructor
 	ArrayType();
-
-	// Constructor that takes an existing id
-	ArrayType( const hid_t existing_id );
 
    private:
 	int rank;		// Rank of the array

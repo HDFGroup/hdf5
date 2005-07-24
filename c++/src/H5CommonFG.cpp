@@ -639,30 +639,30 @@ DataType CommonFG::openDataType( const string& name ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	CommonFG::openEnumType
-///\brief	Opens the named enumeration datatype at this location.
-///\param	name  - IN: Name of the enumeration datatype to open
-///\return	EnumType instance
+// Function:	CommonFG::openArrayType
+///\brief	Opens the named array datatype at this location.
+///\param	name  - IN: Name of the array datatype to open
+///\return	ArrayType instance
 ///\exception	H5::FileIException or H5::GroupIException
-// Programmer	Binh-Minh Ribler - 2000
+// Programmer	Binh-Minh Ribler - Jul, 2005
 //--------------------------------------------------------------------------
-EnumType CommonFG::openEnumType( const char* name ) const
+ArrayType CommonFG::openArrayType( const char* name ) const
 {
-   EnumType enum_type(p_open_data_type(name));
-   return(enum_type);
-}  
+   ArrayType array_type(p_open_data_type(name));
+   return(array_type);
+}
 
 //--------------------------------------------------------------------------
-// Function:	CommonFG::openEnumType
+// Function:	CommonFG::openArrayType
 ///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes an 
+///		It differs from the above function in that it takes an
 ///		\c std::string for \a name.
-// Programmer	Binh-Minh Ribler - 2000
+// Programmer	Binh-Minh Ribler - Jul, 2005
 //--------------------------------------------------------------------------
-EnumType CommonFG::openEnumType( const string& name ) const
+ArrayType CommonFG::openArrayType( const string& name ) const
 {
-   return( openEnumType( name.c_str()) );
-}  
+   return( openArrayType( name.c_str()) );
+}
 
 //--------------------------------------------------------------------------
 // Function:	CommonFG::openCompType
@@ -689,6 +689,32 @@ CompType CommonFG::openCompType( const string& name ) const
 {
    return( openCompType( name.c_str()) );
 }
+
+//--------------------------------------------------------------------------
+// Function:	CommonFG::openEnumType
+///\brief	Opens the named enumeration datatype at this location.
+///\param	name  - IN: Name of the enumeration datatype to open
+///\return	EnumType instance
+///\exception	H5::FileIException or H5::GroupIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+EnumType CommonFG::openEnumType( const char* name ) const
+{
+   EnumType enum_type(p_open_data_type(name));
+   return(enum_type);
+}  
+
+//--------------------------------------------------------------------------
+// Function:	CommonFG::openEnumType
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above function in that it takes an 
+///		\c std::string for \a name.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+EnumType CommonFG::openEnumType( const string& name ) const
+{
+   return( openEnumType( name.c_str()) );
+}  
 
 //--------------------------------------------------------------------------
 // Function:	CommonFG::openIntType
@@ -766,6 +792,32 @@ StrType CommonFG::openStrType( const char* name ) const
 StrType CommonFG::openStrType( const string& name ) const
 {
    return( openStrType( name.c_str()) );
+}
+
+//--------------------------------------------------------------------------
+// Function:	CommonFG::openVarLenType
+///\brief	Opens the named variable length datatype at this location.
+///\param	name  - IN: Name of the variable length datatype to open
+///\return	VarLenType instance
+///\exception	H5::FileIException or H5::GroupIException
+// Programmer	Binh-Minh Ribler - Jul, 2005
+//--------------------------------------------------------------------------
+VarLenType CommonFG::openVarLenType( const char* name ) const
+{
+   VarLenType varlen_type(p_open_data_type(name));
+   return(varlen_type);
+}
+
+//--------------------------------------------------------------------------
+// Function:	CommonFG::openVarLenType
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above function in that it takes an
+///		\c std::string for \a name.
+// Programmer	Binh-Minh Ribler - Jul, 2005
+//--------------------------------------------------------------------------
+VarLenType CommonFG::openVarLenType( const string& name ) const
+{
+   return( openVarLenType( name.c_str()) );
 }
 
 //--------------------------------------------------------------------------

@@ -26,6 +26,8 @@ namespace H5 {
 
 class Group;
 class H5File;
+class ArrayType;
+class VarLenType;
 class H5_DLLCPP CommonFG {
    public:
 	// Creates a new group at this location which can be a file 
@@ -111,13 +113,17 @@ class H5_DLLCPP CommonFG {
 	DataType openDataType(const char* name) const;
 	DataType openDataType(const string& name) const;
 
-	// Opens a named enumeration datatype in this location.
-	EnumType openEnumType(const char* name) const;
-	EnumType openEnumType(const string& name) const;
+	// Opens a named array datatype in this location.
+	ArrayType openArrayType(const char* name) const;
+	ArrayType openArrayType(const string& name) const;
 
 	// Opens a named compound datatype in this location.
 	CompType openCompType(const char* name) const;
 	CompType openCompType(const string& name) const;
+
+	// Opens a named enumeration datatype in this location.
+	EnumType openEnumType(const char* name) const;
+	EnumType openEnumType(const string& name) const;
 
 	// Opens a named integer datatype in this location.
 	IntType openIntType(const char* name) const;
@@ -130,6 +136,10 @@ class H5_DLLCPP CommonFG {
 	// Opens a named string datatype in this location.
 	StrType openStrType(const char* name) const;
 	StrType openStrType(const string& name) const;
+
+	// Opens a named variable length datatype in this location.
+	VarLenType openVarLenType(const char* name) const;
+	VarLenType openVarLenType(const string& name) const;
 
 	/// For subclasses, H5File and Group, to return the correct 
 	/// object id, i.e. file or group id.

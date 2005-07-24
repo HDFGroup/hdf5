@@ -96,17 +96,17 @@ DataType AbstractDs::getDataType() const
 }
 
 //--------------------------------------------------------------------------
-// Function:	AbstractDs::getEnumType
-///\brief	Returns the enumeration datatype of this abstract dataset which 
+// Function:	AbstractDs::getArrayType
+///\brief	Returns the compound datatype of this abstract dataset which
 ///		can be a dataset or an attribute.
-///\return	EnumType instance
+///\return	ArrayType instance
 ///\exception	H5::DataTypeIException
-// Programmer	Binh-Minh Ribler - 2000
+// Programmer	Binh-Minh Ribler - Jul, 2005
 //--------------------------------------------------------------------------
-EnumType AbstractDs::getEnumType() const
+ArrayType AbstractDs::getArrayType() const
 {
-   EnumType enumtype(p_get_type());
-   return(enumtype);
+   ArrayType arraytype(p_get_type());
+   return(arraytype);
 }
 
 //--------------------------------------------------------------------------
@@ -121,6 +121,20 @@ CompType AbstractDs::getCompType() const
 {
    CompType comptype(p_get_type());
    return(comptype);
+}
+
+//--------------------------------------------------------------------------
+// Function:	AbstractDs::getEnumType
+///\brief	Returns the enumeration datatype of this abstract dataset which 
+///		can be a dataset or an attribute.
+///\return	EnumType instance
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+EnumType AbstractDs::getEnumType() const
+{
+   EnumType enumtype(p_get_type());
+   return(enumtype);
 }
 
 //--------------------------------------------------------------------------
@@ -163,6 +177,20 @@ StrType AbstractDs::getStrType() const
 {
    StrType strtype(p_get_type());
    return(strtype);
+}
+
+//--------------------------------------------------------------------------
+// Function:	AbstractDs::getVarLenType
+///\brief	Returns the floating-point datatype of this abstract dataset,
+///		which can be a dataset or an attribute.
+///\return	VarLenType instance
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - Jul, 2005
+//--------------------------------------------------------------------------
+VarLenType AbstractDs::getVarLenType() const
+{
+   VarLenType varlentype(p_get_type());
+   return(varlentype);
 }
 
 //--------------------------------------------------------------------------
