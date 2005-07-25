@@ -37,7 +37,6 @@ using namespace H5;
 #include "h5cpputil.h"	// C++ utilility header file
 
 const string	FILENAME("tattr.h5");
-const size_t ATTR_NAME_LEN = 16;
 const size_t ATTR_MAX_DIMS = 7;
 const string	ATTR_TMP_NAME("temp_name");
 
@@ -556,9 +555,7 @@ test_attr_compound_read(void)
 static void 
 test_attr_scalar_write(void)
 {
-    hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-
-	// Output message about test being performed
+    // Output message about test being performed
     MESSAGE(5, ("Testing Basic Scalar Attribute Writing Functions\n"));
 
     try { 

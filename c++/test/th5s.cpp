@@ -65,7 +65,6 @@ unsigned space3_data=65;
 
 /* Scalar dataset with compound datatype */
 const string SPACE4_NAME("Scalar2");
-const int SPACE4_RANK = 0;
 const string SPACE4_FIELDNAME1("c1");
 const string SPACE4_FIELDNAME2("u");
 const string SPACE4_FIELDNAME3("f");
@@ -137,6 +136,7 @@ test_h5s_basic(void)
 	int ndims;		// Number of dimensions
 	hsize_t	tdims[4];	// Dimension array to test with
 	ndims = sid1.getSimpleExtentDims( tdims );
+	verify_val(ndims, SPACE1_RANK, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
 	verify_val(HDmemcmp(tdims, dims1, SPACE1_RANK * sizeof(unsigned)), 0,
 	   "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
 
