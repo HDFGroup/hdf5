@@ -92,7 +92,7 @@ ArrayType::ArrayType( const ArrayType& original ) : DataType( original )
 ArrayType::ArrayType(const DataType& base_type, int ndims, const hsize_t* dims) : DataType()
 {
    hid_t new_type_id = H5Tarray_create(base_type.getId(), ndims, dims, NULL);
-   if (new_type_id <= 0)
+   if (new_type_id < 0)
    {
       throw DataTypeIException("ArrayType constructor", "H5Tarray_create failed");
    }

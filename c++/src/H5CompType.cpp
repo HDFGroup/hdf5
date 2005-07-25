@@ -81,7 +81,7 @@ CompType::CompType( const DataSet& dataset ) : DataType()
    id = H5Dget_type( dataset.getId() );
 
    // If the datatype id is invalid, throw exception
-   if( id <= 0 )
+   if( id < 0 )
    {
       throw DataSetIException("CompType constructor", "H5Dget_type failed");
    }
@@ -195,7 +195,7 @@ H5T_class_t CompType::getMemberClass( unsigned member_num ) const
 {
    // get the member datatype first
    hid_t member_type_id = H5Tget_member_type( id, member_num );
-   if( member_type_id <= 0 )
+   if( member_type_id < 0 )
    {
       throw DataTypeIException("CompType::getMemberClass", 
 		"H5Tget_member_type failed");

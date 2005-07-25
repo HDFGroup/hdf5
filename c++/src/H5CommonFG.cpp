@@ -71,7 +71,7 @@ Group CommonFG::createGroup( const char* name, size_t size_hint ) const
    hid_t group_id = H5Gcreate( getLocId(), name, size_hint );
 
    // If the creation of the group failed, throw an exception
-   if( group_id <= 0 )
+   if( group_id < 0 )
    {
       throwException("createGroup", "H5Gcreate failed");
    }
@@ -109,7 +109,7 @@ Group CommonFG::openGroup( const char* name ) const
    hid_t group_id = H5Gopen( getLocId(), name );
 
    // If the opening of the group failed, throw an exception 
-   if( group_id <= 0 )
+   if( group_id < 0 )
    {
       throwException("openGroup", "H5Gopen failed");
    }
@@ -153,7 +153,7 @@ DataSet CommonFG::createDataSet( const char* name, const DataType& data_type, co
    hid_t dataset_id = H5Dcreate( getLocId(), name, type_id, space_id, create_plist_id );
 
    // If the creation of the dataset failed, throw an exception 
-   if( dataset_id <= 0 )
+   if( dataset_id < 0 )
    {
       throwException("createDataSet", "H5Dcreate failed");
    }
@@ -190,7 +190,7 @@ DataSet CommonFG::openDataSet( const char* name ) const
    hid_t dataset_id = H5Dopen( getLocId(), name );
 
    // If the dataset's opening failed, throw an exception
-   if( dataset_id <= 0 )
+   if( dataset_id < 0 )
    {
       throwException("openDataSet", "H5Dopen failed");
    }
@@ -598,7 +598,7 @@ hid_t CommonFG::p_open_data_type( const char* name ) const
    hid_t datatype_id = H5Topen( getLocId(), name );
    
    // If the datatype's opening failed, throw an exception
-   if( datatype_id <= 0 ) 
+   if( datatype_id < 0 ) 
    { 
       throwException("openDataType", "H5Topen failed");
    }  

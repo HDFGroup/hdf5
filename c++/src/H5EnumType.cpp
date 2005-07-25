@@ -82,7 +82,7 @@ EnumType::EnumType( const DataSet& dataset ) : DataType()
    id = H5Dget_type( dataset.getId() );
 
    // If the datatype id is not valid, throw an exception
-   if( id <= 0 )
+   if( id < 0 )
    {
       throw DataSetIException("EnumType constructor", "H5Dget_type failed");
    }
@@ -101,7 +101,7 @@ EnumType::EnumType( const IntType& data_type ) : DataType()
    id = H5Tenum_create( data_type.getId() );
 
    // If the datatype id is not valid, throw an exception
-   if( id <= 0 )
+   if( id < 0 )
    {
       throw DataSetIException("EnumType constructor", "H5Tenum_create failed");
    }

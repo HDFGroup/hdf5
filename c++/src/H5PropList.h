@@ -44,6 +44,10 @@ class H5_DLLCPP PropList : public IdComponent {
 	// Makes a copy of the given property list.
 	void copy( const PropList& like_plist );
 
+	// Copies a property from this property list or class to another
+	void copyProp( PropList& dest, const char* name) const;
+	void copyProp( PropList& dest, const string& name) const;
+
 	// Copies a property from one property list or property class to another
 	void copyProp( PropList& dest, PropList& src, const char* name) const;
 	void copyProp( PropList& dest, PropList& src, const string& name) const;

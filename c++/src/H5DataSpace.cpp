@@ -45,7 +45,7 @@ const DataSpace DataSpace::ALL( H5S_ALL );
 DataSpace::DataSpace( H5S_class_t type ) : IdComponent()
 {
    id = H5Screate( type );
-   if( id <= 0 )
+   if( id < 0 )
    {
       throw DataSpaceIException("DataSpace constructor", "H5Screate failed");
    }
@@ -63,7 +63,7 @@ DataSpace::DataSpace( H5S_class_t type ) : IdComponent()
 DataSpace::DataSpace( int rank, const hsize_t * dims, const hsize_t * maxdims) : IdComponent()
 {
    id = H5Screate_simple( rank, dims, maxdims );
-   if( id <= 0 )
+   if( id < 0 )
    {
       throw DataSpaceIException("DataSpace constructor", "H5Screate_simple failed");
    }
@@ -113,7 +113,7 @@ void DataSpace::copy( const DataSpace& like_space )
    // call C routine to copy the dataspace 
    id = H5Scopy( like_space.getId() );
 
-   if( id <= 0 )
+   if( id < 0 )
       throw DataSpaceIException("DataSpace::copy", "H5Scopy failed");
 }
 
