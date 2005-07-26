@@ -1616,11 +1616,9 @@ a------------------------------------------------------------------------------
 ./windows/hl/hl_c_examples/hl_c_examples/hl_c_examples.dsp
 ./windows/hl/hl_c_examples/hl_c_examples.dsw
 ./windows/hl/hl_c_examples/test_hl_cexamples.BAT
-
-#Windows High Level C Examples Source Codes
-./windows/hl/src/ex_lite.c
-./windows/hl/src/ex_images.c
-./windows/hl/src/ex_table.c
+./windows/hl/hl_c_examples/src/ex_lite.c
+./windows/hl/hl_c_examples/src/ex_images.c
+./windows/hl/hl_c_examples/src/ex_table.c
 
 
 
