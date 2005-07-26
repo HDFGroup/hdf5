@@ -12,6 +12,7 @@ copy fortran\src\H5fortran_types.f90 ..\fortran\src
 xcopy /e/i/Y *.bat ..\
 copy batch_net\convert.js ..\batch_net\
 copy examples\testExamples_exp_output.txt ..\examples
+copy hl\hl_c_examples\src\*.* ..\hl\hl_c_examples\src\
 
 cd ../batch_net
 copy *.* ..\
