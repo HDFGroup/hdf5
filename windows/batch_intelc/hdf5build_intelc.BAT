@@ -124,10 +124,8 @@ echo hdf5build [OPTION]
 echo.
 echo Please use one of the following options!
 echo.
-echo    hdf5build                   Build HDF5 C Library and Tools
-echo    hdf5build enablecpp         Build HDF5 C/C++ Libraries and Tools
-echo    hdf5build enablefortran     Build HDF5 C/Fortran Libraries and Tools
-echo    hdf5build enableall         Build HDF5 C/C++/Fortran Libraries and Tools
-echo    hdf5build /?                Help information
+echo    hdf5build_intelc                   Build HDF5 C Library and Tools
+echo    hdf5build_intelc enablecpp         Build HDF5 C/C++ Libraries and Tools
+echo    hdf5build_intelc /?                Help information
 
 :END
