@@ -1,0 +1,119 @@
+Microsoft Developer Studio Workspace File, Format Version 6.00
+# WARNING: DO NOT EDIT OR DELETE THIS WORKSPACE FILE!
+
+###############################################################################
+
+Project: "ex_images"=.\ex_images\ex_images.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "ex_imagesdll"=.\ex_imagesdll\ex_imagesdll.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "ex_lite"=.\ex_lite\ex_lite.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "ex_litedll"=.\ex_litedll\ex_litedll.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "ex_table"=.\ex_table\ex_table.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "ex_tabledll"=.\ex_tabledll\ex_tabledll.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "hl_c_examples"=.\hl_c_examples\hl_c_examples.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name ex_images
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ex_imagesdll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ex_lite
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ex_table
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ex_litedll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ex_tabledll
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Global:
+
+Package=<5>
+{{{
+}}}
+
+Package=<3>
+{{{
+}}}
+
+###############################################################################
+
