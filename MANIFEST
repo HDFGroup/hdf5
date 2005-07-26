@@ -1573,7 +1573,7 @@ a------------------------------------------------------------------------------
 ./windows/install_hldll.BAT
 ./windows/install_hlf90dll.bat
 ./windows/install_hlcppdll.BAT
-
+./windows/install_hlcexamples.BAT
 #windows fortran examples
 ./windows/fortran/examples/allf90examples/allf90examples.dsp
 ./windows/fortran/examples/allf90examples/allf90examples.dsw
@@ -1605,3 +1605,24 @@ a------------------------------------------------------------------------------
 ./windows/fortran/examples/rwdsetexampletestdll/rwdsetexampletestdll.dsp
 ./windows/fortran/examples/selecteletest/selecteletest.dsp
 ./windows/fortran/examples/selecteletestdll/selecteletestdll.dsp
+
+#Windows High Level C Examples
+./windows/hl/hl_c_examples/ex_images/ex_images.dsp
+./windows/hl/hl_c_examples/ex_imagesdll/ex_imagesdll.dsp
+./windows/hl/hl_c_examples/ex_lite/ex_lite.dsp
+./windows/hl/hl_c_examples/ex_litedll/ex_litedll.dsp
+./windows/hl/hl_c_examples/ex_table/ex_table.dsp
+./windows/hl/hl_c_examples/ex_tabledll/ex_tabledll.dsp
+./windows/hl/hl_c_examples/hl_c_examples/hl_c_examples.dsp
+./windows/hl/hl_c_examples/hl_c_examples.dsw
+./windows/hl/hl_c_examples/test_hl_cexamples.BAT
+
+#Windows High Level C Examples Source Codes
+./windows/hl/src/ex_lite.c
+./windows/hl/src/ex_images.c
+./windows/hl/src/ex_table.c
+
+
+
+
+
