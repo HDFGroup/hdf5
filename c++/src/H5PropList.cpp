@@ -60,7 +60,6 @@ PropList::PropList( const PropList& original ) : IdComponent( original ) {}
 //		property's id to H5P_DEFAULT, otherwise, to the given id.  
 //		Note: someone else added this code without comments and this 
 //		description was what I came up with from reading the code.
-//		BMR - 2004
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 PropList::PropList( const hid_t plist_id ) : IdComponent(0)
@@ -68,7 +67,7 @@ PropList::PropList( const hid_t plist_id ) : IdComponent(0)
     if (H5I_GENPROP_CLS == H5Iget_type(plist_id)) {
         // call C routine to create the new property
         id = H5Pcreate(plist_id);
-        if( id <= 0 )
+        if( id < 0 )
         {
             throw PropListIException("PropList constructor", "H5Pcreate failed");
         }
@@ -105,16 +104,16 @@ void PropList::copy( const PropList& like_plist )
    // call C routine to copy the property list
    id = H5Pcopy( like_plist.getId() );
 
-   if( id <= 0 )
+   if( id < 0 )
       throw PropListIException("PropList::copy", "H5Pcopy failed");
 }
 
 //--------------------------------------------------------------------------
-// Function:    PropList::operator=
-///\brief       Assignment operator.
-///\param       rhs - IN: Reference to the existing property list
+// Function:	PropList::operator=
+///\brief	Assignment operator.
+///\param	rhs - IN: Reference to the existing property list
 ///\return	Reference to PropList instance
-///\exception   H5::PropListIException
+///\exception	H5::PropListIException
 // Description
 //		Makes a copy of the property list on the right hand side 
 //		and stores the new id in the left hand side object.
@@ -128,10 +127,43 @@ PropList& PropList::operator=( const PropList& rhs )
 
 //--------------------------------------------------------------------------
 // Function:	PropList::copyProp
-///\brief	Copies a property from one list or class to another
+///\brief	Copies a property from this property list or class to another
+///\param	dest - IN: Destination property list or class
+///\param	name - IN: Name of the property to copy - \c char pointer
+///\exception	H5::PropListIException
+// Programmer	Binh-Minh Ribler - Jul, 2005
+//--------------------------------------------------------------------------
+void PropList::copyProp(PropList& dest, const char *name) const
+{
+   hid_t dst_id = dest.getId();
+   herr_t ret_value = H5Pcopy_prop(dst_id, id, name);
+   if( ret_value < 0 )
+   {
+      throw PropListIException("PropList::copyProp", "H5Pcopy_prop failed");
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:	PropList::copyProp
+///\brief	This is an overloaded member function, provided for convenience.
+/// 		It differs from the above function only in what arguments it 
+///		accepts.
+///\param	dest - IN: Destination property list or class
+///\param	name - IN: Name of the property to copy - \c std::string
+// Programmer	Binh-Minh Ribler - Jul, 2005
+//--------------------------------------------------------------------------
+void PropList::copyProp( PropList& dest, const string& name ) const
+{
+   copyProp( dest, name.c_str());
+}
+
+//--------------------------------------------------------------------------
+// Function:	PropList::copyProp
+///\brief	Copies a property from one list or class to another - Obsolete
 ///\param	dest - IN: Destination property list or class
 ///\param	src  - IN: Source property list or class
 ///\param	name - IN: Name of the property to copy - \c char pointer
+///\notes	This member function will be removed in the next release
 ///\exception	H5::PropListIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -148,14 +180,13 @@ void PropList::copyProp( PropList& dest, PropList& src, const char *name ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:    PropList::copyProp
-///\brief       This is an overloaded member function, provided for convenience.
-///             It differs from the above function only in what arguments it
-///             accepts.
-///\param       dest - IN: Destination property list or class
-///\param       src  - IN: Source property list or class
-///\param       name - IN: Name of the property to copy - \c std::string
-///\exception   H5::PropListIException
+// Function:	PropList::copyProp
+///\brief	This is an overloaded member function, provided for convenience.
+/// 		It differs from the above function only in what arguments it 
+///		accepts. - Obsolete
+///\param	dest - IN: Destination property list or class
+///\param	src  - IN: Source property list or class
+///\param	name - IN: Name of the property to copy - \c std::string
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void PropList::copyProp( PropList& dest, PropList& src, const string& name ) const

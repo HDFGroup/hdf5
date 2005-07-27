@@ -81,7 +81,7 @@ CompType::CompType( const DataSet& dataset ) : DataType()
    id = H5Dget_type( dataset.getId() );
 
    // If the datatype id is invalid, throw exception
-   if( id <= 0 )
+   if( id < 0 )
    {
       throw DataSetIException("CompType constructor", "H5Dget_type failed");
    }
@@ -195,7 +195,7 @@ H5T_class_t CompType::getMemberClass( unsigned member_num ) const
 {
    // get the member datatype first
    hid_t member_type_id = H5Tget_member_type( id, member_num );
-   if( member_type_id <= 0 )
+   if( member_type_id < 0 )
    {
       throw DataTypeIException("CompType::getMemberClass", 
 		"H5Tget_member_type failed");
@@ -205,9 +205,15 @@ H5T_class_t CompType::getMemberClass( unsigned member_num ) const
    H5T_class_t member_class = H5Tget_class( member_type_id );
    if( member_class == H5T_NO_CLASS )
    {
+      // close the member datatype, then throw excpetion
+      H5Tclose(member_type_id);
       throw DataTypeIException("CompType::getMemberClass", 
 		"H5Tget_class returns H5T_NO_CLASS");
    }
+
+   // close the member datatype
+   H5Tclose(member_type_id);
+
    return( member_class );
 }
 
@@ -246,8 +252,8 @@ DataType CompType::getMemberDataType( int member_num ) const
 
 //--------------------------------------------------------------------------
 // Function:	CompType::getMemberArrayType
-///\brief	Returns the array datatype of the specified member in this 
-///		compound datatype. 
+///\brief	Returns the array datatype of the specified member in this
+///		compound datatype.
 ///\param	member_num - IN: Zero-based index of the member
 ///\return	ArrayType instance
 ///\exception	H5::DataTypeIException
@@ -255,7 +261,7 @@ DataType CompType::getMemberDataType( int member_num ) const
 //--------------------------------------------------------------------------
 ArrayType CompType::getMemberArrayType( int member_num ) const
 {
-   ArrayType arraytype(p_get_member_type(member_num)); 
+   ArrayType arraytype(p_get_member_type(member_num));
    return(arraytype);
 }
 
@@ -336,8 +342,8 @@ StrType CompType::getMemberStrType( int member_num ) const
 
 //--------------------------------------------------------------------------
 // Function:	CompType::getMemberVarLenType
-///\brief	Returns the variable length datatype of the specified member 
-///		in this compound datatype. 
+///\brief	Returns the variable length datatype of the specified member
+///		in this compound datatype.
 ///\param	member_num - IN: Zero-based index of the member
 ///\return	VarLenType instance
 ///\exception	H5::DataTypeIException
@@ -345,7 +351,7 @@ StrType CompType::getMemberStrType( int member_num ) const
 //--------------------------------------------------------------------------
 VarLenType CompType::getMemberVarLenType( int member_num ) const
 {
-   VarLenType varlentype(p_get_member_type(member_num)); 
+   VarLenType varlentype(p_get_member_type(member_num));
    return(varlentype);
 }
 

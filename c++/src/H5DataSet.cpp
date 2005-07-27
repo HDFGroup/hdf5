@@ -73,7 +73,7 @@ DataSpace DataSet::getSpace() const
    hid_t dataspace_id = H5Dget_space( id );
 
    // If the dataspace id is invalid, throw an exception
-   if( dataspace_id <= 0 )
+   if( dataspace_id < 0 )
    {
       throw DataSetIException("DataSet::getSpace", "H5Dget_space failed");
    }
@@ -106,7 +106,7 @@ hid_t DataSet::p_get_type() const
 DSetCreatPropList DataSet::getCreatePlist() const
 {
    hid_t create_plist_id = H5Dget_create_plist( id );
-   if( create_plist_id <= 0 )
+   if( create_plist_id < 0 )
    {
       throw DataSetIException("DataSet::getCreatePlist", "H5Dget_create_plist failed");
    }

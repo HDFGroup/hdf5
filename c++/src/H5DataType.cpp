@@ -65,7 +65,7 @@ DataType::DataType( const H5T_class_t type_class, size_t size ) : H5Object(), is
 {
    // Call C routine to create the new datatype
    id = H5Tcreate( type_class, size );
-   if( id <= 0 )
+   if( id < 0 )
    {
       throw DataTypeIException("DataType constructor", "H5Tcreate failed");
    }
@@ -114,7 +114,7 @@ void DataType::copy( const DataType& like_type )
    // call C routine to copy the datatype
    id = H5Tcopy( like_type.getId() );
 
-   if( id <= 0 )
+   if( id < 0 )
       throw DataTypeIException("DataType::copy", "H5Tcopy failed");
 }
 

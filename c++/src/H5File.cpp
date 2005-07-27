@@ -111,7 +111,7 @@ void H5File::p_get_file(const char* name, unsigned int flags, const FileCreatPro
 	hid_t create_plist_id = create_plist.getId();
 	hid_t access_plist_id = access_plist.getId();
 	id = H5Fcreate( name, flags, create_plist_id, access_plist_id );
-	if( id <= 0 )  // throw an exception when open/create fail
+	if( id < 0 )  // throw an exception when open/create fail
 	{
 	    throw FileIException("H5File constructor", "H5Fcreate failed");
 	}
@@ -121,7 +121,7 @@ void H5File::p_get_file(const char* name, unsigned int flags, const FileCreatPro
     {
 	hid_t access_plist_id = access_plist.getId();
 	id = H5Fopen( name, flags, access_plist_id );
-	if( id <= 0 )  // throw an exception when open/create fail
+	if( id < 0 )  // throw an exception when open/create fail
 	{
 	    throw FileIException("H5File constructor", "H5Fopen failed");
 	}
@@ -201,7 +201,7 @@ void H5File::reOpen()
    // call C routine to reopen the file - Note: not sure about this
    // does id need to be closed later?  which id to be the parameter?
    id = H5Freopen( id );
-   if( id <= 0 ) // Raise exception when H5Freopen returns a neg value
+   if( id < 0 ) // Raise exception when H5Freopen returns a neg value
       throw FileIException("H5File::reOpen", "H5Freopen failed");
 }
 
