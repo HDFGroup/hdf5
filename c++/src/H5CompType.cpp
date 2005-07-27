@@ -176,7 +176,7 @@ size_t CompType::getMemberOffset( unsigned member_num ) const
 }
 
 // Returns the dimensionality of the member. 
-int CompType::getMemberDims( int member_num, size_t* dims, int* perm ) const
+int CompType::getMemberDims( unsigned member_num, size_t* dims, int* perm ) const
 {
    throw DataTypeIException( "Error: getMemberDims is no longer supported." );
    return (-1); // unreachable statement; but without it, the compiler 
@@ -190,31 +190,18 @@ int CompType::getMemberDims( int member_num, size_t* dims, int* perm ) const
 ///\return	Type class of the member
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//		Modified to use H5Tget_member_class instead. - Jul, 2005
 //--------------------------------------------------------------------------
 H5T_class_t CompType::getMemberClass( unsigned member_num ) const
 {
-   // get the member datatype first
-   hid_t member_type_id = H5Tget_member_type( id, member_num );
-   if( member_type_id < 0 )
-   {
-      throw DataTypeIException("CompType::getMemberClass", 
-		"H5Tget_member_type failed");
-   }
-
-   // then get its class
-   H5T_class_t member_class = H5Tget_class( member_type_id );
+   H5T_class_t member_class = H5Tget_member_class(id, member_num);
    if( member_class == H5T_NO_CLASS )
    {
-      // close the member datatype, then throw excpetion
-      H5Tclose(member_type_id);
       throw DataTypeIException("CompType::getMemberClass", 
-		"H5Tget_class returns H5T_NO_CLASS");
+		"H5Tget_member_class returns H5T_NO_CLASS");
    }
-
-   // close the member datatype
-   H5Tclose(member_type_id);
-
-   return( member_class );
+   return(member_class);
 }
 
 // This private member function calls the C API to get the identifier 
@@ -230,7 +217,7 @@ hid_t CompType::p_get_member_type(unsigned member_num) const
    else
    {
 	// p_get_member_type is private, use caller's function name for api
-      throw DataTypeIException("CompType::getMemberDataType", 
+      throw DataTypeIException("CompType::p_get_member_type", 
 		"H5Tget_member_type failed");
    }
 }
@@ -244,7 +231,7 @@ hid_t CompType::p_get_member_type(unsigned member_num) const
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataType CompType::getMemberDataType( int member_num ) const
+DataType CompType::getMemberDataType( unsigned member_num ) const
 {
    DataType datatype(p_get_member_type(member_num)); 
    return(datatype);
@@ -259,7 +246,7 @@ DataType CompType::getMemberDataType( int member_num ) const
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-ArrayType CompType::getMemberArrayType( int member_num ) const
+ArrayType CompType::getMemberArrayType( unsigned member_num ) const
 {
    ArrayType arraytype(p_get_member_type(member_num));
    return(arraytype);
@@ -274,7 +261,7 @@ ArrayType CompType::getMemberArrayType( int member_num ) const
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-CompType CompType::getMemberCompType( int member_num ) const
+CompType CompType::getMemberCompType( unsigned member_num ) const
 {
    CompType comptype(p_get_member_type(member_num)); 
    return(comptype);
@@ -289,7 +276,7 @@ CompType CompType::getMemberCompType( int member_num ) const
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-EnumType CompType::getMemberEnumType( int member_num ) const
+EnumType CompType::getMemberEnumType( unsigned member_num ) const
 {
    EnumType enumtype(p_get_member_type(member_num)); 
    return(enumtype);
@@ -304,7 +291,7 @@ EnumType CompType::getMemberEnumType( int member_num ) const
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-IntType CompType::getMemberIntType( int member_num ) const
+IntType CompType::getMemberIntType( unsigned member_num ) const
 {
    IntType inttype(p_get_member_type(member_num)); 
    return(inttype);
@@ -319,7 +306,7 @@ IntType CompType::getMemberIntType( int member_num ) const
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-FloatType CompType::getMemberFloatType( int member_num ) const
+FloatType CompType::getMemberFloatType( unsigned member_num ) const
 {
    FloatType floatype(p_get_member_type(member_num)); 
    return(floatype);
@@ -334,7 +321,7 @@ FloatType CompType::getMemberFloatType( int member_num ) const
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-StrType CompType::getMemberStrType( int member_num ) const
+StrType CompType::getMemberStrType( unsigned member_num ) const
 {
    StrType strtype(p_get_member_type(member_num)); 
    return(strtype);
@@ -349,7 +336,7 @@ StrType CompType::getMemberStrType( int member_num ) const
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-VarLenType CompType::getMemberVarLenType( int member_num ) const
+VarLenType CompType::getMemberVarLenType( unsigned member_num ) const
 {
    VarLenType varlentype(p_get_member_type(member_num));
    return(varlentype);
