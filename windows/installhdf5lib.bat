@@ -80,14 +80,47 @@ copy tools\h5repartdll\release\h5repartdll.exe hdf5lib\release\bindll
 
 @REM Install HDF5 High Level Libraries
 copy hl\src\*.h hdf5lib\debug\include
+copy "hl\c++\src\*.h" hdf5lib\debug\include
 copy proj\hdf5_hl_fortran\debug\*.mod  hdf5lib\debug\include
+copy proj\hdf5_hl_fortrandll\debug\*.mod  hdf5lib\debug\include
+
+
 copy proj\hdf5_hl\debug\hdf5_hld.lib hdf5lib\debug\lib
+copy proj\hdf5_hl_cpp\debug\hdf5_hl_cppd.lib hdf5lib\debug\lib
 copy proj\hdf5_hl_fortran\debug\hdf5_hl_fortrand.lib hdf5lib\debug\lib
 
+copy proj\hdf5_hldll\debug\hdf5_hldlld.lib hdf5lib\debug\dll
+copy proj\hdf5_hldll\debug\hdf5_hldlld.dll hdf5lib\debug\dll
+
+copy proj\hdf5_hl_cppdll\debug\hdf5_hl_cppdlld.lib hdf5lib\debug\dll
+copy proj\hdf5_hl_cppdll\debug\hdf5_hl_cppdlld.dll hdf5lib\debug\dll
+
+copy proj\hdf5_hl_fortrandll\debug\hdf5_hl_fortrandlld.lib hdf5lib\debug\dll
+copy proj\hdf5_hl_fortrandll\debug\hdf5_hl_fortrandlld.dll hdf5lib\debug\dll
+
+copy proj\hdf5_hl_f90cstubdll\debug\hdf5_hl_f90cstubdlld.lib hdf5lib\debug\dll
+copy proj\hdf5_hl_f90cstubdll\debug\hdf5_hl_f90cstubdlld.dll hdf5lib\debug\dll
+
 copy hl\src\*.h hdf5lib\release\include
+copy "hl\c++\src\*.h" hdf5lib\release\include
 copy proj\hdf5_hl_fortran\release\*.mod  hdf5lib\release\include
+copy proj\hdf5_hl_fortrandll\release\*.mod  hdf5lib\release\include
+
 copy proj\hdf5_hl\release\hdf5_hl.lib hdf5lib\release\lib
-copy proj\hdf5_hl_fortran\release\hdf5_hl_fortran.lib hdf5lib\release\lib
+copy proj\hdf5_hl_cpp\release\hdf5_hl_cpp.lib hdf5lib\release\lib
+copy proj\hdf5_hl_fortran\release\hdf5_hl_fortranr.lib hdf5lib\release\lib
+
+copy proj\hdf5_hldll\release\hdf5_hldll.lib hdf5lib\release\dll
+copy proj\hdf5_hldll\release\hdf5_hldll.dll hdf5lib\release\dll
+
+copy proj\hdf5_hl_cppdll\release\hdf5_hl_cppdll.lib hdf5lib\release\dll
+copy proj\hdf5_hl_cppdll\release\hdf5_hl_cppdll.dll hdf5lib\release\dll
+
+copy proj\hdf5_hl_fortrandll\release\hdf5_hl_fortrandll.lib hdf5lib\release\dll
+copy proj\hdf5_hl_fortrandll\release\hdf5_hl_fortrandll.dll hdf5lib\release\dll
+
+copy proj\hdf5_hl_f90cstubdll\release\hdf5_hl_f90cstubdll.lib hdf5lib\release\dll
+copy proj\hdf5_hl_f90cstubdll\release\hdf5_hl_f90cstubdll.dll hdf5lib\release\dll
 
 @REM Install C++ libraries and tools
 rename c++ cpp
@@ -111,6 +144,7 @@ copy proj\hdf5_fortran\debug\hdf5_fortrand.lib hdf5lib\debug\lib
 copy proj\hdf5_fortrandll\debug\*.mod hdf5lib\debug\include
 copy proj\hdf5_fortrandll\debug\hdf5_fortranddll.lib hdf5lib\debug\dll
 copy proj\hdf5_fortrandll\debug\hdf5_fortranddll.dll hdf5lib\debug\dll
+copy proj\hdf5_f90cstubdll\debug\hdf5_f90cstubddll.lib hdf5lib\debug\dll
 copy proj\hdf5_f90cstubdll\debug\hdf5_f90cstubddll.dll hdf5lib\debug\dll
 
 copy proj\hdf5_fortran\release\*.mod hdf5lib\release\include
@@ -118,4 +152,5 @@ copy proj\hdf5_fortran\release\hdf5_fortran.lib hdf5lib\release\lib
 copy proj\hdf5_fortrandll\release\*.mod hdf5lib\release\include
 copy proj\hdf5_fortrandll\release\hdf5_fortrandll.lib hdf5lib\release\dll
 copy proj\hdf5_fortrandll\release\hdf5_fortrandll.dll hdf5lib\release\dll
+copy proj\hdf5_f90cstubdll\release\hdf5_f90cstubdll.lib hdf5lib\release\dll
 copy proj\hdf5_f90cstubdll\release\hdf5_f90cstubdll.dll hdf5lib\release\dll
