@@ -214,9 +214,9 @@ echo ***************************************************************************
 cd ..\..\hl\c++\test
 echo test_hdf5_hl_cpp Debug dll
 call test_hdf5_hl_cpp Debug dll>> ..\..\..\check_results.txt
-echo. >> ..\..\check_results.txt
+echo. >> ..\..\..\check_results.txt
 
-cd ..\..\..\..\..\
+cd ..\..\..\
 )
 
 
