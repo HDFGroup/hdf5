@@ -1,5 +1,6 @@
 ***********************************************************************
-*  HDF5 Build and Install Instructions for Windows XP (Full Version)  *
+*        HDF5 Build and Install Instructions for Windows XP           *
+*                         (Full Version)                              *
 ***********************************************************************
 
 The following instructions assume that the HDF5 source code package from
@@ -10,7 +11,7 @@ Please read CAREFULLY about the following preconditions and notes first.
 
 Contents:
 
-   Preconditions :
+   Section       :  Preconditions and Notes
    Section I     :  What do we build and install
    Section II    :  How to build and test HDF5 libraries and tools
    Section III   :  How to build an application using the HDF5 library
@@ -24,9 +25,11 @@ Contents:
    Section X     :  Misc.
 
 
-***********************************************************************
-                             Preconditions 
 ========================================================================
+                       Preconditions and Notes
+========================================================================
+
+Preconditions:
 
    1. Installed Microsoft Visual C++ 6.0 or Intel C compiler and WinZip.
        
@@ -146,6 +149,7 @@ Contents:
           (c:\zlib122\lib, c:\szip\dll) to the library directories.
       
 Notes:
+
    1. In release 1.8.0, all.zip is deprecated. Users should go to 
       hdf5/windows directory, run copy_hdf.bat first and then open 
       all.dsw under hdf5/windows/proj/all to start building process.
@@ -186,7 +190,7 @@ Notes:
        release, please read Section IX.
 
 
-************************************************************************
+========================================================================
               Section I: What do we build and install? 
 ========================================================================
 
@@ -224,7 +228,7 @@ Notes:
       HDF5 examples:
            simple HDF5 C/C++/Fortran and High level C examples
 
-************************************************************************
+========================================================================
       Section II: How to build and test HDF5 libraries and tools 
 ========================================================================
 
@@ -1180,7 +1184,7 @@ To build and test HDF5 High Level C examples:
       Similar messages should be generated with another three options 
       If the high level C examples are built successfully.
 
-************************************************************************
+========================================================================
    Section III: Building an application using the HDF5 library or DLL
 ========================================================================
 
@@ -1325,7 +1329,7 @@ To use the DLL:
     4. To modify your own application settings, please DO FOLLOW the 
        "DLL Hints" at Section IV "HELPFUL POINTERS".
 
-************************************************************************
+========================================================================
                     Section IV: HELPFUL POINTERS
 ========================================================================
 
@@ -1397,7 +1401,7 @@ DLL... hints:
          General->Predefined Preprocess or Symbols, and add 
          "HDF5F90_WINDOWS" to use HDF5 Fortran DLL.
 
-************************************************************************
+========================================================================
          Section V: How to disable Gzip(Zlib)/Szip compression
 ========================================================================
 
@@ -1479,7 +1483,7 @@ Warning: When you modify the H5pubconf.h file as described below,
    
       3.2 Run-compile HDF5 library according to Section II.
 
-************************************************************************
+========================================================================
    Section VI: How to build HDF5 in Microsoft Visual Studio .Net 2003    
 ========================================================================
 
@@ -1659,9 +1663,8 @@ libraries and tools) to test HDF5 C and C++ Libraries.
 NOTE:  Please read Section V if you do not want to use compression
        feature inside HDF5.
              
-************************************************************************
-
-Section VII: How to build HDF5 with INTEL Compiler    
+======================================================================== 
+          Section VII: How to build HDF5 with INTEL Compiler    
 ======================================================================== 
 Notes:  1. For Intel Compiler users, Intel 7.x works with MSVS 6.0 and
            Intel 8.1 only works with MSVS .net 2003 when you build 
@@ -1676,7 +1679,9 @@ Notes:  1. For Intel Compiler users, Intel 7.x works with MSVS 6.0 and
         3. Szip library is different when using Intel compiler.
            You should build Szip source codes with Inter compiler or 
            download binaries for Intel compiler from 
-           ftp://ftp.ncsa.uiuc.edu/HDF/szip/2.0/bin/windows. 
+           ftp://ftp.ncsa.uiuc.edu/HDF/szip/2.0/bin/windows.
+        
+        4. Run hdf5/windows/copy_hdf.bat first before open all.dsw. 
 
 1. INTEL compiler 7.1
 
@@ -1893,7 +1898,7 @@ Notes:  1. For Intel Compiler users, Intel 7.x works with MSVS 6.0 and
       Check your output files, there should be no "failures" at all.
  
  
-************************************************************************
+========================================================================
    Section VIII : How to build Multi-threaded version of HDF5 library  
 ========================================================================
 
@@ -1949,9 +1954,9 @@ Notes: Preconditions and Section I also apply to this section. Users who
      
 5. Go back to Section II, Step 1 (4), continue to build and test HDF5 library.
       	
-************************************************************************
 
-Section IX: Building and testing HDF5 snapshot release
+========================================================================
+        Section IX: Building and testing HDF5 snapshot release
 ========================================================================
 
 Note: This section is only for users who would like to build and test 
@@ -2037,7 +2042,8 @@ by other compilers.
     
  9) Go back to Section II, step 1(2) to build and test HDF5 Libraries and Tools
 
-************************************************************************
+
+========================================================================
                             Section X: Misc.
 ========================================================================
 
@@ -2062,6 +2068,5 @@ by other compilers.
 
 
 
-========================================================================
-
+************************************************************************
  Please send email to hdfhelp@ncsa.uiuc.edu for further assistance.
