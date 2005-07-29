@@ -1,6 +1,8 @@
-HDF5 Build and Install Instructions for Windows XP with INTEL Compiler
-                          (Short Version)
-------------------------------------------------------------------------
+************************************************************************
+*HDF5 Build and Install Instructions for Windows XP with INTEL Compiler*
+*                          (Short Version)                             *
+************************************************************************
+
 Notes: This short instruction is written for users who want to quickly
        build HDF5 library and tools from the HDF5 source code package
        with Intel Compiler  but do not want to know HDF5 
@@ -14,12 +16,15 @@ Notes: This short instruction is written for users who want to quickly
        command line, please refer to
        INSATLL_Windows_From_Command_Line.txt.
         
-***************************WARNINGS*************************************
-Please read CAREFULLY about HDF5 build and install preconditions and 
-notes in INSTALL_Windows.txt before starting below procedures.
-************************************************************************
+WARNINGS:
+       Please read CAREFULLY about HDF5 build and install preconditions 
+       and notes in INSTALL_Windows.txt before starting reading this 
+       instruction.
 
-Notes: 
+========================================================================
+                      Extra Preconditions and Notes 
+========================================================================
+
       1. For Intel Compiler users, Intel 7.x works with MSVS 6.0 and
          Intel 8.1 only works with MSVS .net 2003 when you build 
          HDF5-1.8.x.
@@ -49,7 +54,7 @@ Notes:
         
          For users using Intel compiler 8.1 integration with Visual C++
          .Net 2003, detailed information about setting up external 
-         libraries and header will be given in Part II, 2.1.3 in this 
+         libraries and header will be given in Part II, 2.1.4 in this 
          document.
           
       5. Part II, 2.1 will build ONLY HDF5 Static and DLL C and C++ 
@@ -61,44 +66,53 @@ Notes:
 	 want to know detailed information about testing HDF5 Libraries
          and tools, please refer to document INSTALL_Windows.txt, 
          Section II, STEP 2 Testing HDF5 libraries and tools.
+  
+========================================================================
+               Part I. INTEL compiler 7.1 with MSVS 6.0
+========================================================================
 
-Part I. INTEL compiler 7.1 with MSVS 6.0
-
-     1.1. Intel C Compiler
-             Go to Tools-->Select Compiler
-             Check Intel box and click OK button.
+ 1.1. Intel C Compiler
+      Go to Tools-->Select Compiler
+      Check Intel box and click OK button.
           
-     1.2. Intel Fortran Compiler
-             Go to Tools-->Select Compiler
-             Check Intel box and click OK button.
-             Go to Tools-->Customize-->Add-ins and Macro Files
-             and check Intel Fortran Compiler Build Tool
+ 1.2. Intel Fortran Compiler
+      Go to Tools-->Select Compiler
+      Check Intel box and click OK button.
+      Go to Tools-->Customize-->Add-ins and Macro Files
+      and check Intel Fortran Compiler Build Tool
                 
-Part II. INTEL compiler 8.1 with Visual C++ .Net  2003 Environment
+========================================================================
+   Part II. INTEL compiler 8.1 with Visual C++ .Net  2003 Environment
+========================================================================
 			
  2.1 Intel C++ Compiler
                 
-      2.1.1 Open all.dsw
+      2.1.1 Run copy_hdf.bat
+      
+      Go to directory hdf5/windows/, run batch file copy_hdf.bat to
+      copy necessay files to the directory where they will be used.
+     
+      2.1.2 Open all.dsw
        
-       Notes: all.sln is for command line use only. Please open
-              all.dsw not all.sln.
+      Notes: all.sln is for command line use only. Please open
+             all.dsw not all.sln.
 
-       Invoke Microsoft Visual C++ .Net 2003.  From the main 
-       menu, go to "File" and select "Open Solution". In
-       the "Open Solution" window, Change "Files of type" to
-       "All Project Files". Choose "all.dsw" under the directory
-       c:\MyHDFstuff\hdf5\windows\proj\all. In the pop up window,
-       choose "Yes To All" to convert all project files to Visual
-       C++ .Net project format.
+      Invoke Microsoft Visual C++ .Net 2003.  From the main 
+      menu, go to "File" and select "Open Solution". In
+      the "Open Solution" window, Change "Files of type" to
+      "All Project Files". Choose "all.dsw" under the directory
+      c:\MyHDFstuff\hdf5\windows\proj\all. In the pop up window,
+      choose "Yes To All" to convert all project files to Visual
+      C++ .Net project format.
           	
-      2.1.2 Convert to Use Intel C++ Project System
+      2.1.3 Convert to Use Intel C++ Project System
       
       Right click on the solution name "all.sln" in the 
       "Solution Explorer". From the pop-up menu select 
       "Convert to use Intel C++ Project System" to convert 
       all .Net project files to Intel C++ project files. 
 	                        
-      2.1.3 Set up path for external libraries and headers 
+      2.1.4 Set up path for external libraries and headers 
       
       Go to Tools > Options > Intel C++. In the left pane,
       Click "General".
@@ -136,11 +150,15 @@ Part II. INTEL compiler 8.1 with Visual C++ .Net  2003 Environment
              testhdf5_fortran
              testhdf5_fortrandll
              hdf5_hl_fortran
+             hdf5_hl_fortrandll
+             hdf5_hl_f90cstubdll
              hl_test_image_fortran
+             hl_test_image_fortrandll
              hl_test_lite_fortran
+             hl_test_lite_fortrandll
              hl_test_table_fortran 	 
+             hl_test_table_fortrandll 	 
    	        
-    	        
       Select "ok". Select "Build" -> "Build" or "Rebuild All" to
       build debug version of project "all".   			
    	     
@@ -152,7 +170,7 @@ Part II. INTEL compiler 8.1 with Visual C++ .Net  2003 Environment
       Invoke command prompt, go to directory "hdf5", type in the 
       following command to test HDF5 C and C++ Libraries.
    	  
-   	                       hdf5check enablecpp
+              hdf5check enablecpp
    
       Test results will be save into file check_results.txt under 
       directory "hdf5". Check check_results.txt, there should be no 
@@ -167,16 +185,10 @@ Part II. INTEL compiler 8.1 with Visual C++ .Net  2003 Environment
             Users who want to build ONLY HDF5 Static and DLL C and C++ 
             Library please go to Part II, 2.1.
           
-      2.2.1 Open all.dsw
+      2.2.1 run copy_hdf.bat and Open all.dsw
         
-      Invoke Microsoft Visual C++ .Net 2003.  From the main 
-      menu, go to "File" and select "Open Solution". In
-      the "Open Solution" window, Change "Files of type" to
-      "All Project Files". Choose "all.dsw" under the directory
-      c:\MyHDFstuff\hdf5\windows\proj\all. In the pop up window,
-      choose "Yes To All" to convert all project files to Visual
-      C++ .Net project format.
-         
+      Same as 2.1.1 and 2.1.2.
+
       2.2.2 Extract Compaq Visual Fortran Projects
       
         a. Select project "flush1_fortran" in the Solution 
@@ -222,6 +234,11 @@ Part II. INTEL compiler 8.1 with Visual C++ .Net  2003 Environment
            flush1_fortrandll
            flush2_fortrandll
            hdf5_fortrandll
+           hdf5_hl_fortrandll
+           hdf5_hl_f90cstubdll
+           hl_test_image_fortrandll
+           hl_test_lite_fortrandll
+           hl_test_table_fortrandll
            libtest_fortrandll
            testhdf5_fortrandll
 	                	        
@@ -237,7 +254,7 @@ Part II. INTEL compiler 8.1 with Visual C++ .Net  2003 Environment
     	Invoke command prompt, go to directory "hdf5", type in the 
         following command to test HDF5 C and C++ Libraries.
    	  
-                   hdf5check enablecpp
+                hdf5check enablecpp
    	                       
    	Test results are saved in two files:
 
@@ -272,6 +289,7 @@ Part II. INTEL compiler 8.1 with Visual C++ .Net  2003 Environment
     	   
     	Check your output files, there should be no "failures" at all. 
     	
-    	
+
+***********************************************************************    	
 Please send email to hdfhelp@ncsa.uiuc.edu for further assistance.    	           	            	
           
