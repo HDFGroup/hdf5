@@ -1,7 +1,9 @@
-HDF5 Build and Install Instructions for Windows XP with MSVS 6.0
-                       (Short Version)
-------------------------------------------------------------------------
-Note: This short instruction is written for users who want to quickly
+************************************************************************
+*  HDF5 Build and Install Instructions for Windows XP with MSVS 6.0    *
+*                       (Short Version)                                *
+************************************************************************
+
+Notes: This short instruction is written for users who want to quickly
       build HDF5 library and tools from the HDF5 source code package
       with Microsoft Visual Studio 6.0 but do not want to know HDF5 
       building and installation details on Windows XP.
@@ -14,12 +16,14 @@ Note: This short instruction is written for users who want to quickly
       command line, please refer to
       INSATLL_Windows_From_Command_Line.txt.
         
-***************************WARNINGS*************************************
+WARNINGS:
+
 Please read CAREFULLY about HDF5 build and install preconditions and 
 notes in INSTALL_Windows.txt before starting below procedures.
-************************************************************************
 
-STEP 1: Building HDF5 Libraries and Tools
+========================================================================
+               STEP 1: Building HDF5 Libraries and Tools
+========================================================================
     
 1. Run batch file copy_hdf.bat.
  
@@ -44,7 +48,9 @@ STEP 1: Building HDF5 Libraries and Tools
           testhdf5_cpp
           testhdf5_cppdll
           hdf5_hl_cpp
+          hdf5_hl_cppdll
           hl_test_table_cpp
+          hl_test_table_cppdll
 
    3.2 Add the follwing projects to project "all" dependencies 
        ONLY if you want to build HDF5 FORTRAN libraries
@@ -58,9 +64,14 @@ STEP 1: Building HDF5 Libraries and Tools
          hdf5_fortran
          hdf5_fortrandll
          hdf5_hl_fortran
+         hdf5_hl_fortrandll
+         hdf5_hl_f90cstubdll
          hl_test_image_fortran
+         hl_test_image_fortrandll
          hl_test_lite_fortran
+         hl_test_lite_fortrandll
          hl_test_table_fortran
+         hl_test_table_fortrandll
          libtest_cstubdll
          libtest_fortran
          libtest_fortrandll
@@ -80,7 +91,9 @@ STEP 1: Building HDF5 Libraries and Tools
    Then build project "all".
 
 
-STEP 2: Testing HDF5 Libraries and Tools 
+========================================================================
+               STEP 2: Testing HDF5 Libraries and Tools 
+========================================================================
 
 HDF5 libraries and tools should be tested to make sure that they were
 built correctly.
@@ -115,12 +128,19 @@ tests passed, then you do not have to check check_results.txt.
 If some tests failed, check check_results.txt can help you
 figure out what was wrong.
 
-STEP 3: Installing HDF5 Libraries
+========================================================================
+                 STEP 3: Installing HDF5 Libraries
+========================================================================
 
 Run the batch file c:\MyHDFstuff\hdf5\installhdf5lib.bat to install 
 all HDF5 libraries and tools into c:\MyHDFstuff\hdf5\hdf5lib directory.
 
-
-STEP 4: Building HDF5 Examples (Optional)
+========================================================================
+               STEP 4: Building HDF5 Examples (Optional)
+========================================================================
 
 Please read section II, step 4 in INSTALL_Windows.txt.
+
+
+************************************************************************
+Please send email to hdfhelp@ncsa.uiuc.edu for further assistance
