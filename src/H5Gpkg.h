@@ -32,6 +32,7 @@
 
 /* Other private headers needed by this file */
 #include "H5ACprivate.h"	/* Metadata cache			  */
+#include "H5Oprivate.h"		/* Object headers		  	*/
 
 /*
  * A symbol table node is a collection of symbol table entries.  It can
@@ -113,7 +114,7 @@ typedef struct H5G_bt_ud2_t {
  */
 typedef struct H5G_bt_ud3_t {
     /* downward */
-    H5G_entry_t *ent;           /*the entry of group being queried           */
+    const H5O_stab_t *mesg;     /*the symbol table message of group being queried */
     hsize_t      idx;           /*index of group member to be queried        */
     hsize_t      num_objs;      /*the number of objects having been traversed*/
 
