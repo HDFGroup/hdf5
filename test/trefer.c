@@ -54,6 +54,11 @@ typedef struct s1_t {
     float c;
 } s1_t;
 
+#define GROUPNAME       "/group"
+#define GROUPNAME2      "group2"
+#define DSETNAME        "/dset"
+#define NAME_SIZE       16
+
 
 /****************************************************************
 **
@@ -910,6 +915,107 @@ test_reference_obj_deleted(void)
 
 /****************************************************************
 **
+**  test_reference_group_query(): Test H5R (reference) object reference code.
+**      Tests for correct behavior of query routines on dereferenced group
+** 
+****************************************************************/
+static void 
+test_reference_group_query(void)
+{
+    hid_t fid = -1;             /* File ID */
+    hid_t gid = -1, gid2 = -1;  /* Group IDs */
+    hid_t did;                  /* Dataset ID */
+    hid_t sid;                  /* Dataspace ID */
+    hsize_t nobjs;
+    hobj_ref_t wref;            /* Reference to write */
+    hobj_ref_t rref;            /* Reference to read */
+    char objname[NAME_SIZE];    /* Buffer to store name */
+    H5G_obj_t objtype;          /* Object type */
+    herr_t ret;
+    
+    /* Create file with a group and a dataset containing an object reference to the group */
+    fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create group to refer to */
+    gid = H5Gcreate(fid, GROUPNAME, (size_t)0);
+    CHECK(gid, FAIL, "H5Gcreate");
+
+    /* Create nested group */
+    gid2 = H5Gcreate(gid, GROUPNAME2, (size_t)0);
+    CHECK(gid2, FAIL, "H5Gcreate");
+    ret = H5Gclose(gid2);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Create dataspace to use for dataset */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create dataset */
+    did = H5Dcreate(fid, DSETNAME, H5T_STD_REF_OBJ, sid, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dcreate");
+
+    /* Create reference to group */
+    ret = H5Rcreate(&wref, fid, GROUPNAME, H5R_OBJECT, -1);
+    CHECK(ret, FAIL, "H5Rcreate");
+
+    /* Write reference to disk */
+    ret = H5Dwrite(did, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wref);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Close objects */
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Re-open file */
+    fid = H5Fopen(FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Re-open dataset */
+    did = H5Dopen(fid, DSETNAME);
+    CHECK(did, FAIL, "H5Dopen");
+
+    /* Read in the reference */
+    ret = H5Dread(did, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rref);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Dereference to get the group */
+    gid = H5Rdereference(did, H5R_OBJECT, &rref);
+    CHECK(gid, FAIL, "H5Rdereference");
+
+    /* Various queries on the group opened */
+    ret = H5Gget_num_objs(gid, &nobjs);
+    CHECK(ret, FAIL, "H5Gget_num_objs");
+
+    VERIFY(nobjs, 1, "H5Gget_num_objs");
+
+    ret = H5Gget_objname_by_idx(gid, (hsize_t)0, objname, NAME_SIZE);
+    CHECK(ret, FAIL, "H5Gget_objname_by_idx");
+
+    VERIFY_STR(objname, "group2", "H5Gget_objname_by_idx");
+
+    objtype = H5Gget_objtype_by_idx(gid, (hsize_t)0);
+    VERIFY(objtype, H5G_GROUP, "H5Gget_objtype_by_idx");
+
+    /* Close objects */
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+}   /* test_reference_group_query() */
+
+/****************************************************************
+**
 **  test_reference(): Main H5R reference testing routine.
 ** 
 ****************************************************************/
@@ -923,6 +1029,7 @@ test_reference(void)
     test_reference_region();    /* Test basic H5R dataset region reference code */
     test_reference_region_1D(); /* Test H5R dataset region reference code for 1-D datasets */
     test_reference_obj_deleted(); /* Test H5R object reference code for deleted objects */
+    test_reference_group_query();   /* Test queries on dereferenced groups */
 
 }   /* test_reference() */
 

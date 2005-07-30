@@ -1679,7 +1679,7 @@ H5G_node_name(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
         loc_idx = bt_udata->idx - bt_udata->num_objs; 
         name_off = sn->entry[loc_idx].name_off;  
 
-        if (NULL == (heap = H5HL_protect(f, dxpl_id, bt_udata->ent->cache.stab.heap_addr)))
+        if (NULL == (heap = H5HL_protect(f, dxpl_id, bt_udata->mesg->heap_addr)))
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_ITER_ERROR, "unable to protect symbol name");
 
         name = H5HL_offset_into(f, heap, name_off);
@@ -1687,7 +1687,7 @@ H5G_node_name(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
         bt_udata->name = H5MM_strdup (name);
         assert(bt_udata->name);
 
-        if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->ent->cache.stab.heap_addr, H5AC__NO_FLAGS_SET) < 0)
+        if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->mesg->heap_addr, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to unprotect symbol name");
         heap=NULL; name=NULL;
 
