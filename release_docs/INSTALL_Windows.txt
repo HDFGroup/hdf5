@@ -559,15 +559,15 @@ STEP 1: Building HDF5 libraries and tools
        The directories listed below will contain the following files
        ONLY when you choose to build HDF5 High Level Fortran libraries:
        
-            c:\MyHDFstuff\hdf5\proj\hdf5_f90cstubdll\Release -
+            c:\MyHDFstuff\hdf5\proj\hdf5_hl_f90cstubdll\Release -
             
-            hdf5_f90cstubdll.dll - HDF5 High Level C and Fortran stub DLL
-            hdf5_f90cstubdll.lib - HDF5 High Level C and Fortran stub export library
+            hdf5_hl_f90cstubdll.dll - HDF5 High Level C and Fortran stub DLL
+            hdf5_hl_f90cstubdll.lib - HDF5 High Level C and Fortran stub export library
             
-            c:\MyHDFstuff\hdf5\proj\hdf5_f90cstubdll\Debug -
+            c:\MyHDFstuff\hdf5\proj\hdf5_hl_f90cstubdll\Debug -
             
-            hdf5_f90cstubdlld.dll - HDF5 High Level C and Fortran stub DLL
-            hdf5_f90cstubdlld.lib - HDF5 High Level C and Fortran stub export library
+            hdf5_hl_f90cstubdlld.dll - HDF5 High Level C and Fortran stub DLL
+            hdf5_hl_f90cstubdlld.lib - HDF5 High Level C and Fortran stub export library
        
             c:\MyHDFstuff\hdf5\proj\hdf5_hl_fortran\Release - 
             
@@ -1150,14 +1150,15 @@ To build and test HDF5 High Level C examples:
    3. Invoke a command prompt window and run the batch file 
       Install_hlcexamples.bat which resides in the top level directory
       (c:\MyHDFstuff\hdf5).  This file creates 4 new directories, 
-      examplesRELEASE, examplesRELEASEDLL, examplesDEBUG, and 
-      examplesDEBUGDLL, in the c:\MyHDFstuff\hdf5\examples directory 
-      and places all the executables in it.  Both the release and debug 
-      versions of the examples should be built before this step is done.
+      HLCexamplesRELEASE, HLCexamplesRELEASEDLL, HLCexamplesDEBUG, and 
+      HLCexamplesDEBUGDLL, in the c:\MyHDFstuff\hdf5\hl\hl_c_examples 
+      directory and places all the executables in it. Both the release 
+      and debug versions of the examples should be built before this 
+      step is done.
 
    4. We provide a batch file named test_hl_cexamples.bat in 
-       c:\MyHDFstuff\hdf5\hl\hl_c_examples directory for you to test 
-       HDF5 high level C examples.
+      c:\MyHDFstuff\hdf5\hl\hl_c_examples directory for you to test 
+      HDF5 high level C examples.
       
       test_hl_cexamples.bat batch file has 4 options:
       
@@ -1172,8 +1173,10 @@ To build and test HDF5 High Level C examples:
          test_hl_cexamples debug dll    -- for debug DLL version
 
       Invoke a command prompt window and run test_hl_cexamples with
-      appropriate options.  when you run "test_hl_cexamples release", 
-      The output will look like:
+      appropriate options.
+
+      When you run "test_hl_cexamples release", the output will look 
+      like:
       
       Testing release  version of High Level examples
 
