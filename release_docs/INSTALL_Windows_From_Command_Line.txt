@@ -1,5 +1,6 @@
-Instructions for Building and Testing HDF5 in Command Line on Windows XP
-
+************************************************************************
+*      Instructions for Building and Testing HDF5 on Windows XP        *
+*                          (From Command Line)                         *
 ************************************************************************
 Note: This instruction is written for users who would like to build HDF5
       libraries and tools from the HDF5 source code package on command
@@ -35,14 +36,14 @@ Note: This instruction is written for users who would like to build HDF5
       Be careful to type in the corresponding command when you choose 
       a procedure below to build HDF5 Libraries.
                   
-*****************************WARNINGS***********************************
+WARNINGS:
 
 Please read CAREFULLY about HDF5 build and install preconditions and 
 notes in INSTALL_Windows.txt before starting below procedures.
 
-************************************************************************
-
-Preconditions
+========================================================================
+                             Preconditions
+========================================================================
 
    1. Add WinZip command line support (Optional)
       
@@ -65,17 +66,16 @@ Preconditions
           add your WinZip path (For example C:\Program Files\WinZip)
           into "Variable Value" and click "OK".
 
-      Note: 
+      Notes: 
          You can also extract zip files from interactive WinZip
          interface without the above two steps.
   
-***********************************************************************
 
-Section I: Building and testing HDF5 on command line with Microsoft 
-           Visual C++ 6.0 and Compaq Visual Fortran 6.0.
+========================================================================
+   Section I: Building and testing HDF5 on command line with Microsoft 
+              Visual C++ 6.0 and Compaq Visual Fortran 6.0.
+========================================================================
     
-***********************************************************************
-
 1. Extra Preconditions: 
 
    1.1 Set path for Visual C++ 6.0 and Compaq Visual Fortran 6.0
@@ -96,7 +96,7 @@ Section I: Building and testing HDF5 on command line with Microsoft
       
 2. Building and testing HDF5 libraries and tools
 
-   We provide 2 options for users to build test HDF5 libraries 
+   We provide 2 options for users to build and test HDF5 libraries 
    and tools.
       
     2.1 Options A: Build and test in one step 
@@ -170,31 +170,30 @@ Section I: Building and testing HDF5 on command line with Microsoft
             and tools from command line.
 
             hdf5check.bat has four options:
+            
+            hdf5check                 Test HDF5 C Libraries and Tools
 
-               hdf5check                 test HDF5 C library and tools
-      
-               hdf5check enablecpp       test HDF5 C/C++ libraries 
-                                         and tools
-      
-               hdf5check enablefortran   test HDF5 C/Fortran libraries
-                                         and tools
-      
-               hdf5check enableall       test HDF5 C/C++/Fortran 
-                                         libraries and tools
+            hdf5check enablecpp       Test HDF5 C/C++ Libraries and Tools
+
+            hdf5check enablefortran   Test HDF5 C/Fortran Libraries
+                                      and Tools
+
+            hdf5check enableall       Test HDF5 C/C++/Fortran Libraries
+                                      and Tools
 
             Invoke a command prompt window and run hdf5check with 
             appropriate options.
 
             Test results are saved in two files:
 
-			   c:\MyHDFstuff\hdf5\tests_results.txt   
+        	   c:\MyHDFstuff\hdf5\tests_results.txt   
+
+	           c:\MyHDFstuff\hdf5\check_results.txt.
 			
-			   c:\MyHDFstuff\hdf5\check_results.txt.
-			
-			In general, you only need to check tests_results.txt.  If all the
-			tests passed, then you do not have to check check_results.txt.  
-			If some tests failed, check check_results.txt can help you
-			figure out what was wrong.
+            In general, you only need to check tests_results.txt.  If 
+            all the tests passed, then you do not have to check 
+            check_results.txt. If some tests failed, check 
+            check_results.txt can help you figure out what was wrong.
 
 3. Installing HDF5 Libraries
 
@@ -203,12 +202,11 @@ HDF5 libraries and tools into c:\MyHDFstuff\hdf5\hdf5lib directory.
 
 For further information, please refer to INSTALL_WINDOWS.txt.        
 
-************************************************************************
-   
+
+========================================================================
 SECTION II: Building and testing HDF5 C and C++ Library on command line 
             with Microsoft Visual C++ .Net 2003
-
-***********************************************************************
+========================================================================
 
 1. Extra Preconditions:
     
@@ -216,20 +214,21 @@ SECTION II: Building and testing HDF5 C and C++ Library on command line
     
     1.2 Command-based script host (CScript.exe) installed
           
-        Cscript.exe is a command-line version of the Windows Script Host. Users can
-        check windows system directory to make sure Cscript.exe installed. Cscript.exe
-        will be used during converting project files from MSVS 6.0 Format to Visual C++
+        Cscript.exe is a command-line version of the Windows Script 
+        Host. Users can check windows system directory to make sure 
+        Cscript.exe installed. Cscript.exe will be used during 
+        converting project files from MSVS 6.0 Format to Visual C++ 
         .Net 2003 format.
 
     1.3 Set path for Microsoft Visual C++ .Net
    
-      Open "System" in Control Panel.
+        Open "System" in Control Panel.
    
-      On the "Advanced" tab, click "Environment Variables", click 
-      "Path" in the "System variables" box, then click "Edit" and 
-      add your Visual C++ .Net path (For example, 
-      C:\Program Files\Microsoft Visual Studio .NET 2003\Common7\IDE)
-      into "Variable Value" and click "OK". 
+        On the "Advanced" tab, click "Environment Variables", click 
+        "Path" in the "System variables" box, then click "Edit" and 
+        add your Visual C++ .Net path (For example, 
+        C:\Program Files\Microsoft Visual Studio .NET 2003\Common7\IDE)
+        into "Variable Value" and click "OK". 
     
     1.4 Run batch file copy_hdf.bat.
     
@@ -261,7 +260,7 @@ SECTION II: Building and testing HDF5 C and C++ Library on command line
       
 2. Building HDF5 C and C++ Libraries :
 
-  We provide 2 options for users to build HDF5 libraries and tools.
+  We provide 2 options for users to build and test HDF5 libraries and tools.
 
   2.1 Options A: Build and test in one step 
       
@@ -269,12 +268,13 @@ SECTION II: Building and testing HDF5 C and C++ Library on command line
       is provided for users to build and test HDF5 library and tools
       together from command line. 
 
-      Invoke a command prompt window and run hdf5bt_net in the 
-      following format to build and test C/C++ libraries and tools.
+      Invoke a command prompt window and run hdf5bt_net with one of the
+      options below to build and test desired library: 
 
-          hdf5bt_net enablecpp       
+      hdfbt_net             Build and Test HDF5 C Library and tools
+      hdf5bt_net enablecpp  Build and Test HDF5 C/C++ Library and tools     
 
-       Test results are saved in two files:
+      Test results are saved in two files:
 
             c:\MyHDFstuff\hdf5\hdf5_results_net.txt   
 
@@ -296,10 +296,11 @@ SECTION II: Building and testing HDF5 C and C++ Library on command line
          directory is provided for users to build HDF5 library and 
          tools from command line.
 
-         Invoke a command prompt window and run hdf5build_net.bat in
-         the following format to build HDF5 C/C++ library and tools.
-  
-             hdf5build_net enablecpp
+         Invoke a command prompt window and run hdf5build_net.bat with
+         the following options to build desired HDF5 Library:
+             
+         hdf5build_net            Build HDF5 C Library and Tools
+         hdf5build_net enablecpp  Build HDF5 C/C++ Library and Tools
 
          Building results will be saved in 
          c:\MyHDFstuff\hdf5\build_results_net.txt.  You can check 
@@ -311,36 +312,34 @@ SECTION II: Building and testing HDF5 C and C++ Library on command line
          Go to directory, run batch file hdf5check with the following 
          options:
      
-            hdf5check                 test HDF5 C library and tools
+         hdf5check                 Test HDF5 C Library and Tools
       
-            hdf5check enablecpp       test HDF5 C/C++ libraries 
-                                      and tools
+         hdf5check enablecpp       Test HDF5 C/C++ Libraries and Tools 
                                          
-     Note: hdf5check.bat has ONLY TWO options listed above in this case.
+         Note: hdf5check.bat has ONLY TWO options listed above in this case.
      
-		    Test results are saved in two files:
+         Test results are saved in two files:
 		
-		   c:\MyHDFstuff\hdf5\tests_results.txt   
+	 c:\MyHDFstuff\hdf5\tests_results.txt   
 		
-		   c:\MyHDFstuff\hdf5\check_results.txt.
+	 c:\MyHDFstuff\hdf5\check_results.txt.
 		
-	In general, you only need to check tests_results.txt.  If all the
+	In general, you only need to check tests_results.txt. If all the
 	tests passed, then you do not have to check check_results.txt.  
 	If some tests failed, check check_results.txt can help you
 	figure out what was wrong.
      
      3.  Installing HDF5 Libraries
 
-     Run the batch file c:\MyHDFstuff\hdf5\installhdf5lib.bat to install all
-     HDF5 libraries and tools into c:\MyHDFstuff\hdf5\hdf5lib directory.
+     Run the batch file c:\MyHDFstuff\hdf5\installhdf5lib.bat to install
+     all HDF5 libraries and tools into c:\MyHDFstuff\hdf5\hdf5lib 
+     directory.
      
-***********************************************************************
-         
-SECTION III: Building and testing HDF5 C and C++ Library on command 
-             line with Intel C++ Compiler 8.1 integration with 
-             Microsoft Visual C++ .Net 2003
-
-************************************************************************
+======================================================================== 
+  SECTION III: Building and testing HDF5 C and C++ Library on command 
+               line with Intel C++ Compiler 8.1 integration with 
+               Microsoft Visual C++ .Net 2003
+========================================================================
 
 1. Extra Preconditions:
 
@@ -372,10 +371,10 @@ SECTION III: Building and testing HDF5 C and C++ Library on command
        
    1.3 Run batch file copy_hdf.bat.
     
-  	Go to  c:\MyHDFstuff\hdf5\windows and run copy_hdf.bat. This process
-   	will copy all the necessary batch files and text files saved under 
-   	c:\MyHDFstuff\hdf5\windows directory to the directories where they 
-   	will be used.
+  	Go to  c:\MyHDFstuff\hdf5\windows and run copy_hdf.bat. This 
+        process will copy all the necessary batch files and text files 
+        saved under c:\MyHDFstuff\hdf5\windows directory to the 
+        directories where they will be used.
    	
    1.4 Convert project files format from MSVS 6.0 to MSVS .Net Format
 
@@ -400,14 +399,17 @@ SECTION III: Building and testing HDF5 C and C++ Library on command
       
      2.1 Options A: Build and test in one step 
       
-         A batch file named hdf5bt_intelc.bat in c:\MyHDFstuff\hdf5 directory
-         is provided for users to build and test HDF5 library and tools
-         together from command line.
+         A batch file named hdf5bt_intelc.bat in c:\MyHDFstuff\hdf5 
+         directory is provided for users to build and test HDF5 library
+         and tools together from command line.
 
-         Invoke a command prompt window and run hdf5bt_intelc in the
-         following format to build and test C/C++ libraries and tools.
+         Invoke a command prompt window and run hdf5bt_intelc.bat with  
+         one of the following options:
 
-            hdf5bt_intelc enablecpp       
+         hdf5bt_intelc            Build and Test HDF5 C Library and 
+                                  Tools
+         hdf5bt_intelc enablecpp  Build and Test HDF5 C/C++ Library  
+                                  and Tools   
 
          Test results will be saved in two files:
 
@@ -444,11 +446,11 @@ SECTION III: Building and testing HDF5 C and C++ Library on command
          directory is provided for users to build HDF5 library and 
          tools from command line.
 
-         Invoke a command prompt window and run hdf5build_intelc 
-         in the following format to build HDF5 C/C++ libraries and 
-         tools.
+         Invoke a command prompt window and run hdf5build_intelc.bat 
+         with one of the following options.
   
-                   hdf5build_intelc enablecpp   
+         hdf5build_intelc            Build HDF5 C Library and Tools
+         hdf5build_intelc enablecpp  Build HDF5 C/C++ Library and Tools
              
          Compiling outputs are saved in 
          c:\MyHDFstuff\hdf5\build_results_intelc.txt.  You can check 
@@ -459,31 +461,30 @@ SECTION III: Building and testing HDF5 C and C++ Library on command
          Go to directory, run batch file hdf5check with the following 
          options:
      
-               hdf5check                 test HDF5 C library and tools
-      
-               hdf5check enablecpp       test HDF5 C/C++ libraries 
-                                         and tools
+         hdf5check                 Test HDF5 C Libraries and Tools
+         hdf5check enablecpp       Test HDF5 C/C++ Libraries and Tools
                                          
          Notes: hdf5check.bat has ONLY TWO options listed above in this
                 case.
      
-	     Test results are saved in two files:
+	 Test results are saved in two files:
 	
 	   c:\MyHDFstuff\hdf5\tests_results.txt   
 	
 	   c:\MyHDFstuff\hdf5\check_results.txt.
 	
-	In general, you only need to check tests_results.txt.  If all the
+	In general, you only need to check tests_results.txt.  If all 
 	tests passed, then you do not have to check check_results.txt.  
 	If some tests failed, check check_results.txt can help you
 	figure out what was wrong.
      
      3.  Installing HDF5 Libraries
 
-     Run the batch file c:\MyHDFstuff\hdf5\installhdf5lib.bat to install all
-     HDF5 libraries and tools into c:\MyHDFstuff\hdf5\hdf5lib directory.
+     Run the batch file c:\MyHDFstuff\hdf5\installhdf5lib.bat to install
+     all HDF5 libraries and tools into c:\MyHDFstuff\hdf5\hdf5lib 
+     directory.
 
-  
+***********************************************************************  
 For further information, please refer to INSTALL_WINDOWS.txt.
 
 Please send email to hdfhelp@ncsa.uiuc.edu for further assistance.
