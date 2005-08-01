@@ -65,26 +65,26 @@ MOSTLYCLEANFILES+=H5fortran_types.f90 H5f90i_gen.h H5fort_type_defines.h \
 maintainer-clean-local: clean-local
 distclean-local: clean-local
 clean-local:
-	if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
+	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
 	  $(RM) *.$(F9XMODEXT);                                         \
 	fi
 
 install-data-local:
-	if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
+	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
 	  $(CP) $(top_builddir)/$(subdir)/*.$(F9XMODEXT) $(includedir)/. ; \
 	fi
 
 uninstall-local:
-	if test -n "$(F9XMODEXT)" -a "X$(F9XMODEXT)" != "Xo"; then      \
+	@if test -n "$(F9XMODEXT)" -a "X$(F9XMODEXT)" != "Xo"; then      \
 	  if test -f "$(includedir)/hdf5.$(F9XMODEXT)" -o -f "$(includedir)/HDF5.$(F9XMODEXT)"; then \
 	    set -x; $(RM) $(includedir)/*.$(F9XMODEXT);                 \
 	  fi;                                                           \
 	fi;								\
-	$(RM) $(bindir)/$(H5FC_NAME)
+	@$(RM) $(bindir)/$(H5FC_NAME)
 
 # Also install and uninstall (uninstall-local above) h5fc script
 install-exec-local:
-	$(INSTALL) h5fc $(bindir)/$(H5FC_NAME)   
+	@$(INSTALL) h5fc $(bindir)/$(H5FC_NAME)   
 
 # Install libhdf5_fortran.settings in lib directory
 settingsdir=$(libdir)

@@ -38,24 +38,24 @@ DIST_SUBDIRS=src test testpar examples
 
 # Clean and mostlyclean need to recurse into examples directory     
 clean-local:     
-	if test -f examples/Makefile; then                                \
+	@if test -f examples/Makefile; then                                \
 	  (cd examples && $(MAKE) $(AM_MAKEFLAGS) clean) || exit 1;       \
 	fi;
 mostlyclean-local:         
-	if test -f examples/Makefile; then                                \
+	@if test -f examples/Makefile; then                                \
 	  (cd examples && $(MAKE) $(AM_MAKEFLAGS) mostlyclean) || exit 1; \
 	fi; 
 
 # Install examples
 install-examples uninstall-examples:
-	(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
+	@(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
 
 
 # Check that examples can be successfully built 
 check-install:
-	$(MAKE) $(AM_MAKEFLAGS) installcheck 
+	@$(MAKE) $(AM_MAKEFLAGS) installcheck 
 
 installcheck-local:
-	(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
+	@(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
 
 include $(top_srcdir)/config/conclude.am

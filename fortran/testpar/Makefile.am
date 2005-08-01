@@ -42,10 +42,4 @@ LDADD=$(LIBH5FTEST) $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)
 # Mark this directory as part of the Fortran API
 HDF_FORTRAN=yes
 
-# Put in dependencies to the THDF5 module so that things will be built
-# in the correct order.
-#thdf5.lo:		   thdf5.o
-#thyperslab_wr.o:           $(srcdir)/thyperslab_wr.f90 thdf5.lo
-#ptesthdf5_fortran.o:       $(srcdir)/ptesthdf5_fortran.f90 thdf5.lo
-
 include $(top_srcdir)/config/conclude.am

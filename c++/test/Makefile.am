@@ -43,7 +43,7 @@ HDF_CXX=yes
 # holds *.ii files, which are template entity instantiations.
 # This entire directory should be cleaned.
 mostlyclean-local: 
-	if test -d ii_files; then                                       \
+	@if test -d ii_files; then                                       \
 	  $(RM) -rf ii_files;                                           \
 	fi
 

@@ -82,7 +82,7 @@ DISTCLEANFILES=src/H5config.h src/H5pubconf.h config/stamp1 config/stamp2
 # These simply involve recursing into subdirectories.
 test _test: check
 
-lib progs check-p check-s:
+lib progs check-p check-s check-clean:
 	@@SETX@; for d in $(SUBDIRS); do                                \
           if test $$d != .; then                                        \
 	   (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;            \
@@ -91,7 +91,7 @@ lib progs check-p check-s:
 
 # Make all, tests, and (un)install also recurse into perform directory
 all-local:
-	cd perform && $(MAKE) $(AM_MAKEFLAGS) all
+	@cd perform && $(MAKE) $(AM_MAKEFLAGS) all
 tests:
 	@@SETX@; for d in $(SUBDIRS) perform; do                        \
           if test $$d != .; then                                        \
@@ -100,9 +100,9 @@ tests:
 	done
 
 install-exec-local:
-	cd perform && $(MAKE) $(AM_MAKEFLAGS) install
+	@cd perform && $(MAKE) $(AM_MAKEFLAGS) install
 uninstall-local:
-	cd perform && $(MAKE) $(AM_MAKEFLAGS) uninstall
+	@cd perform && $(MAKE) $(AM_MAKEFLAGS) uninstall
 
 # Clean and mostlyclean need to recurse into examples and perform
 # directories unless they've already been distcleaned.
@@ -121,17 +121,17 @@ mostlyclean-local:
 	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) mostlyclean) || exit 1;  \
 	  fi;                                                           \
 	done;                                                           \
-	if test -d ii_files; then                                       \
+	@if test -d ii_files; then                                       \
           $(RM) -rf ii_files;                                           \
         fi
 
 # 'make install-all' also installs examples
 install-all:
-	$(MAKE) $(AM_MAKEFLAGS) install
-	$(MAKE) $(AM_MAKEFLAGS) install-examples
+	@$(MAKE) $(AM_MAKEFLAGS) install
+	@$(MAKE) $(AM_MAKEFLAGS) install-examples
 uninstall-all:
-	$(MAKE) $(AM_MAKEFLAGS) uninstall
-	$(MAKE) $(AM_MAKEFLAGS) uninstall-examples
+	@$(MAKE) $(AM_MAKEFLAGS) uninstall
+	@$(MAKE) $(AM_MAKEFLAGS) uninstall-examples
 
 # Install examples in this directory and recursively
 install-examples uninstall-examples:
@@ -141,15 +141,15 @@ install-examples uninstall-examples:
 
 # Placeholder to remind users that docs are now in a separate repository.
 install-doc:
-	echo "docs no longer live in this tree.  Use install-examples to install examples."
+	@echo "docs no longer live in this tree.  Use install-examples to install examples."
 
 uninstall-doc:
-	echo "docs no longer live in this tree.  Use install-examples to install examples."
+	@echo "docs no longer live in this tree.  Use install-examples to install examples."
 
 # `make check-install' or `make installcheck' checks that examples can 
 #  be successfully built
 installcheck-local:
-	(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
+	@(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
 
 # Automake wants to make config.status depend on configure.  This
 # makes sense, but config.status can't always be regenerated

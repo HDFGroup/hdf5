@@ -61,11 +61,4 @@ MOSTLYCLEANFILES+=*.h5 *.tmp
 # from tests in conclude.am)
 HDF_FORTRAN=yes
 
-## Fortran dependencies must be hardcoded, unfortunately.
-##FORTLIBTEST_OBJ= fortranlib_test.lo                                    \
-##        tH5F.lo tH5D.lo tH5R.lo tH5S.lo tH5T.lo tH5VL.lo tH5Z.lo       \
-##        tH5Sselect.lo tH5P.lo tH5A.lo tH5I.lo tH5G.lo tH5E.lo tf.lo    \
-##        t.lo
-##fortranlib_test$(EXEEXT): $(FORTLIBTEST_OBJ)
-
 include $(top_srcdir)/config/conclude.am

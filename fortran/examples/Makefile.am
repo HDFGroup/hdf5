@@ -75,9 +75,9 @@ $(EXAMPLEDIR):
 	-$(top_srcdir)/bin/mkdirs $@
 
 install-data-local:
-	$(MAKE) install-examples
+	@$(MAKE) install-examples
 uninstall-local:
-	$(MAKE) uninstall-examples
+	@$(MAKE) uninstall-examples
 
 # We're installing source files, not the example programs.  Add .f90 to each
 # example program to get its source (and do the same when uninstalling).
@@ -94,9 +94,9 @@ uninstall-examples:
 	fi
 
 check-install:
-	$(MAKE) installcheck
+	@$(MAKE) installcheck
 installcheck-local:
-	$(MAKE) check
+	@$(MAKE) check
 
 # List dependencies for each example.  Normally, automake would take
 # care of this for us, but if we tell automake about the programs it

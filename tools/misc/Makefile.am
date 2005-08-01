@@ -61,12 +61,12 @@ else
 endif
 
 install-exec-local:
-	$(INSTALL) h5cc $(bindir)/$(H5CC_NAME)
+	@$(INSTALL) h5cc $(bindir)/$(H5CC_NAME)
 uninstall-local:
-	$(RM) $(bindir)/$(H5CC_NAME)
+	@$(RM) $(bindir)/$(H5CC_NAME)
 
 # How to build h5redeploy script
 h5redeploy: h5redeploy.in
-	cp $(srcdir)/$@.in $@
+	@cp $(srcdir)/$@.in $@
 
 include $(top_srcdir)/config/conclude.am

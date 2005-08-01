@@ -56,9 +56,9 @@ $(EXAMPLEDIR):
 	-$(top_srcdir)/bin/mkdirs $@
 
 install-data-local:
-	$(MAKE) install-examples
+	@$(MAKE) install-examples
 uninstall-local:
-	$(MAKE) uninstall-examples
+	@$(MAKE) uninstall-examples
 
 # Install source files, which are the examples with .cpp suffixes.  Do the same
 # for uninstall.
@@ -75,9 +75,9 @@ uninstall-examples:
 	fi
 
 check-install:
-	$(MAKE) installcheck
+	@$(MAKE) $(AM_MAKEFLAGS) installcheck
 installcheck-local:
-	$(MAKE) check
+	@$(MAKE) $(AM_MAKEFLAGS) check
 
 # How to build programs using h5c++
 $(EXTRA_PROG): $(H5CPP) $(LIBHDF5) $(LIBH5CPP)

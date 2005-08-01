@@ -29,8 +29,6 @@ lib_LTLIBRARIES=libhdf5hl_fortran.la
 libhdf5hl_fortran_la_SOURCES=H5LTfc.c  H5IMfc.c H5IMcc.c H5TBfc.c H5LTff.f90  \
                 H5IMff.f90 H5TBff.f90 
 
-#libhdf5hl_fortran_la_LIBADD=$(LIBH5_HL)
-
 # Fortran module files can have different extensions and different names
 # (e.g., different capitalizations) on different platforms.  Write rules
 # for them explicitly rather than trying to teach automake about them.
@@ -38,17 +36,17 @@ libhdf5hl_fortran_la_SOURCES=H5LTfc.c  H5IMfc.c H5IMcc.c H5TBfc.c H5LTff.f90  \
 maintainer-clean-local: clean-local
 distclean-local: clean-local
 clean-local:
-	if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
+	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
 	  $(RM) *.$(F9XMODEXT);                                         \
 	fi
 
 install-data-local:
-	if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
+	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
 	  $(CP) $(top_builddir)/$(subdir)/*.$(F9XMODEXT) $(includedir)/. ; \
 	fi
 
 uninstall-local:
-	if test -n "$(F9XMODEXT)" -a "X$(F9XMODEXT)" != "Xo"; then      \
+	@if test -n "$(F9XMODEXT)" -a "X$(F9XMODEXT)" != "Xo"; then      \
 	  if test -f "$(includedir)/hdf5.$(F9XMODEXT)" -o -f "$(includedir)/HDF5.$(F9XMODEXT)"; then \
 	    set -x; $(RM) $(includedir)/*.$(F9XMODEXT);                 \
 	  fi;                                                           \
