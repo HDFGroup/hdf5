@@ -46,7 +46,7 @@ TEST_PROG=testhdf5 lheap ohdr stab gheap btree2 cache b+tree blocktrack sheap \
 check_PROGRAMS=$(TEST_PROG) error_test err_compat testmeta
 
 
-# The libh5test.a library provides common support code for the tests.
+# The libh5test library provides common support code for the tests.
 check_LTLIBRARIES=libh5test.la
 libh5test_la_SOURCES=h5test.c testframe.c
 libh5test_la_LIBADD=$(LIBHDF5)
@@ -81,7 +81,7 @@ flush2.chkexe_: flush1.chkexe_
 # specifying a file prefix or low-level driver.  Changing the file
 # prefix or low-level driver with environment variables will influence 
 # the temporary file name in ways that the makefile is not aware of.
-MOSTLYCLEANFILES+=cmpd_dset.h5 compact_dataset.h5 dataset.h5 extend.h5 istore.h5\
+CHECK_CLEANFILES+=cmpd_dset.h5 compact_dataset.h5 dataset.h5 extend.h5 istore.h5\
             tfile[1-4].h5 th5s[1-3].h5 lheap.h5 ohdr.h5 stab[1-2].h5 \
             extern_[1-3].h5 extern_[1-4][ab].raw gheap[0-4].h5 dt_arith[1-2]\
             links.h5 links[1-3].h5 big.data big[0-9][0-9][0-9][0-9][0-9].h5  \

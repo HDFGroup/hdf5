@@ -46,6 +46,9 @@ install-doc uninstall-doc:
 build-check-clean:
 	$(RM) $(CHECK_CLEANFILES)
 
+# run check-clean whenever mostlyclean is run
+mostlyclean-local: build-check-clean
+
 # Run each test in order, passing $(TEST_FLAGS) to the program.
 # Since tests are done in a shell loop, "make -i" does apply inside it.
 # Set HDF5_Make_Ignore to a non-blank string to ignore errors inside the loop.

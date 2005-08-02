@@ -66,8 +66,6 @@ CHECK_CLEANFILES=$(TEST_PROG_CHKEXE:.chkexe_=.chkexe)                    \
         $(TEST_PROG_PARA_CHKEXE:.chkexe_=.log)                           \
         *.chksh *.logsh
 
-MOSTLYCLEANFILES=$(CHECK_CLEANFILES)
-
 # check-install is a synonym for installcheck.
 # Add this build rule here (rather than in conclude.am, where build rules
 # normally go) because it should be included in the top-level Makefile.am

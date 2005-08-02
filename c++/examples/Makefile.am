@@ -43,7 +43,8 @@ chunks.chkexe_: extend_ds.chkexe_
 # These are the files that 'make clean' (and derivatives) will remove from this
 # directory.  Since automake doesn't know about the examples, we need to
 # tell it to clean the example programs, too.
-MOSTLYCLEANFILES+=*.h5 $(EXTRA_PROG:=.o)
+CHECK_CLEANFILES+=*.h5
+MOSTLYCLEANFILES=$(EXTRA_PROG:=.o)
 CLEANFILES=$(EXTRA_PROG)
 
 # Tell conclude.am that these are C++ tests.

@@ -82,7 +82,7 @@ DISTCLEANFILES=src/H5config.h src/H5pubconf.h config/stamp1 config/stamp2
 # These simply involve recursing into subdirectories.
 test _test: check
 
-lib progs check-p check-s check-clean:
+lib progs check-p check-s:
 	@@SETX@; for d in $(SUBDIRS); do                                \
           if test $$d != .; then                                        \
 	   (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;            \
@@ -92,7 +92,7 @@ lib progs check-p check-s check-clean:
 # Make all, tests, and (un)install also recurse into perform directory
 all-local:
 	@cd perform && $(MAKE) $(AM_MAKEFLAGS) all
-tests:
+tests check-clean:
 	@@SETX@; for d in $(SUBDIRS) perform; do                        \
           if test $$d != .; then                                        \
 	   (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;            \

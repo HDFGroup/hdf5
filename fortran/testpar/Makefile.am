@@ -30,8 +30,7 @@ TEST_PROG_PARA=parallel_test
 check_PROGRAMS=$(TEST_PROG_PARA)
 
 # Temporary files
-MOSTLYCLEAN=ParaEg[123].h5f
-DISTCLEAN=go
+CHECK_CLEANFILES+=parf[12].h5
 
 # Test source files
 parallel_test_SOURCES=ptest.f90 hyper.f90 mdset.f90
