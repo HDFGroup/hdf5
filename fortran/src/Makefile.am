@@ -80,7 +80,7 @@ uninstall-local:
 	    set -x; $(RM) $(includedir)/*.$(F9XMODEXT);                 \
 	  fi;                                                           \
 	fi;								\
-	@$(RM) $(bindir)/$(H5FC_NAME)
+	$(RM) $(bindir)/$(H5FC_NAME)
 
 # Also install and uninstall (uninstall-local above) h5fc script
 install-exec-local:
