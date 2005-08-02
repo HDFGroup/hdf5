@@ -121,7 +121,7 @@ mostlyclean-local:
 	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) mostlyclean) || exit 1;  \
 	  fi;                                                           \
 	done;                                                           \
-	@if test -d ii_files; then                                       \
+	if test -d ii_files; then                                       \
           $(RM) -rf ii_files;                                           \
         fi
 
