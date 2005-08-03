@@ -1,0 +1,163 @@
+#							-*- shell-script -*-
+#
+# This file is part of the HDF5 build script.  It is processed shortly
+# after configure starts and defines, among other things, flags for
+# the various compile modes.
+#
+# See BlankForm in this directory for details.
+
+# This is for the ASCI RED STORM machine
+
+# The default compiler is `cc'
+if test "X-" = "X-$CC"; then
+    CC=cc
+    CC_BASENAME=cc
+fi
+
+# There is no ranlib
+RANLIB=:
+
+# Additional libraries
+LIBS="$LIBS"
+
+# How to run serial and parallel test programs
+RUNSERIAL=${RUNSERIAL:-"yod -sz 1"}
+RUNPARALLEL=${RUNPARALLEL:-"yod -sz 3"}
+
+# CFLAGS must be set else configure set it to -g
+CFLAGS="$CFLAGS"
+
+# What must *always* be present for things to compile correctly?
+#CPPFLAGS="$CPPFLAGS -I."
+
+# What compiler flags should be used for code development?
+DEBUG_CFLAGS=-g
+DEBUG_CPPFLAGS=
+
+# What compiler flags should be used for building a production
+# library?
+PROD_CFLAGS=-O
+PROD_CPPFLAGS=
+
+# What compiler flags enable code profiling?
+PROFILE_CFLAGS=-pg
+PROFILE_CPPFLAGS=
+
+# Turn off shared lib option.  It does not work for Redstorm yet.
+enable_shared="${enable_shared:-no}"
+
+# Disable stream-vfd option.  It does not work for Redstorm.
+enable_stream_vfd="${enable_stream_vfd:-no}"
+
+# Set this to the width required by printf() to print type `long
+# long'.  For instance, if the format would be `%lld' then set it to
+# `ll' or if the format would be `%qd' set it to `q'.
+hdf5_cv_printf_ll=${hdf5_cv_printf_ll='ll'}
+
+# Cache the sizeof of the following types to save configure time.
+# These are verified in test/tconfig in case they change.
+ac_cv_type_char=${ac_cv_type_char=yes}
+ac_cv_sizeof_char=${ac_cv_sizeof_char='1'}
+ac_cv_type_short=${ac_cv_type_short=yes}
+ac_cv_sizeof_short=${ac_cv_sizeof_short='2'}
+ac_cv_type_int=${ac_cv_type_int=yes}
+ac_cv_sizeof_int=${ac_cv_sizeof_int='4'}
+ac_cv_type_long=${ac_cv_type_long=yes}
+ac_cv_sizeof_long=${ac_cv_sizeof_long='8'}
+ac_cv_type_float=${ac_cv_type_float=yes}
+ac_cv_sizeof_float=${ac_cv_sizeof_float='4'}
+ac_cv_type_double=${ac_cv_type_double=yes}
+ac_cv_sizeof_double=${ac_cv_sizeof_double='8'}
+ac_cv_type_long_double=${ac_cv_type_long_double=yes}
+ac_cv_sizeof_long_double=${ac_cv_sizeof_long_double='8'}
+ac_cv_type_long_long=${ac_cv_type_long_long=yes}
+ac_cv_sizeof_long_long=${ac_cv_sizeof_long_long='8'}
+ac_cv_type_size_t=${ac_cv_type_size_t=yes}
+ac_cv_sizeof_size_t=${ac_cv_sizeof_size_t='8'}
+ac_cv_type_ssize_t=${ac_cv_type_ssize_t=yes}
+ac_cv_sizeof_ssize_t=${ac_cv_sizeof_ssize_t='8'}
+ac_cv_type_off_t=${ac_cv_type_off_t=yes}
+ac_cv_sizeof_off_t=${ac_cv_sizeof_off_t='8'}
+
+# Hard set sizeof of the following types to 0 because they are not supported.
+#ac_cv_type___int64=${ac_cv_type___int64=no}
+#ac_cv_sizeof___int64=${ac_cv_sizeof___int64='0'}
+
+# Hard set malloc of zero bytes to no because it does not work.
+hdf5_cv_malloc_works=${hdf5_cv_malloc_works='no'}
+
+# Cache the sizeof of the following types to save configure time.
+# These are verified in test/tconfig in case they change.
+ac_cv_type_int8_t=${ac_cv_type_int8_t=yes}
+ac_cv_type_int16_t=${ac_cv_type_int16_t=yes}
+ac_cv_type_int32_t=${ac_cv_type_int32_t=yes}
+ac_cv_type_int64_t=${ac_cv_type_int64_t=yes}
+ac_cv_type_uint8_t=${ac_cv_type_uint8_t=yes}
+ac_cv_type_uint16_t=${ac_cv_type_uint16_t=yes}
+ac_cv_type_uint32_t=${ac_cv_type_uint32_t=yes}
+ac_cv_type_uint64_t=${ac_cv_type_uint64_t=yes}
+ac_cv_sizeof_int8_t=${ac_cv_sizeof_int8_t='1'}
+ac_cv_sizeof_int16_t=${ac_cv_sizeof_int16_t='2'}
+ac_cv_sizeof_int32_t=${ac_cv_sizeof_int32_t='4'}
+ac_cv_sizeof_int64_t=${ac_cv_sizeof_int64_t='8'}
+ac_cv_sizeof_uint8_t=${ac_cv_sizeof_uint8_t='1'}
+ac_cv_sizeof_uint16_t=${ac_cv_sizeof_uint16_t='2'}
+ac_cv_sizeof_uint32_t=${ac_cv_sizeof_uint32_t='4'}
+ac_cv_sizeof_uint64_t=${ac_cv_sizeof_uint64_t='8'}
+
+# Cache the sizeof of the following types to save configure time.
+# These are verified in test/tconfig in case they change.
+ac_cv_type_int_least8_t=${ac_cv_type_int_least8_t=yes}
+ac_cv_type_int_least16_t=${ac_cv_type_int_least16_t=yes}
+ac_cv_type_int_least32_t=${ac_cv_type_int_least32_t=yes}
+ac_cv_type_int_least64_t=${ac_cv_type_int_least64_t=yes}
+ac_cv_type_uint_least8_t=${ac_cv_type_uint_least8_t=yes}
+ac_cv_type_uint_least16_t=${ac_cv_type_uint_least16_t=yes}
+ac_cv_type_uint_least32_t=${ac_cv_type_uint_least32_t=yes}
+ac_cv_type_uint_least64_t=${ac_cv_type_uint_least64_t=yes}
+ac_cv_sizeof_int_least8_t=${ac_cv_sizeof_int_least8_t='1'}
+ac_cv_sizeof_int_least16_t=${ac_cv_sizeof_int_least16_t='2'}
+ac_cv_sizeof_int_least32_t=${ac_cv_sizeof_int_least32_t='4'}
+ac_cv_sizeof_int_least64_t=${ac_cv_sizeof_int_least64_t='8'}
+ac_cv_sizeof_uint_least8_t=${ac_cv_sizeof_uint_least8_t='1'}
+ac_cv_sizeof_uint_least16_t=${ac_cv_sizeof_uint_least16_t='2'}
+ac_cv_sizeof_uint_least32_t=${ac_cv_sizeof_uint_least32_t='4'}
+ac_cv_sizeof_uint_least64_t=${ac_cv_sizeof_uint_least64_t='8'}
+
+# Cache the sizeof of the following types to save configure time.
+# These are verified in test/tconfig in case they change.
+ac_cv_type_int_fast8_t=${ac_cv_type_int_fast8_t=yes}
+ac_cv_type_int_fast16_t=${ac_cv_type_int_fast16_t=yes}
+ac_cv_type_int_fast32_t=${ac_cv_type_int_fast32_t=yes}
+ac_cv_type_int_fast64_t=${ac_cv_type_int_fast64_t=yes}
+ac_cv_type_uint_fast8_t=${ac_cv_type_uint_fast8_t=yes}
+ac_cv_type_uint_fast16_t=${ac_cv_type_uint_fast16_t=yes}
+ac_cv_type_uint_fast32_t=${ac_cv_type_uint_fast32_t=yes}
+ac_cv_type_uint_fast64_t=${ac_cv_type_uint_fast64_t=yes}
+ac_cv_sizeof_int_fast8_t=${ac_cv_sizeof_int_fast8_t='1'}
+ac_cv_sizeof_int_fast16_t=${ac_cv_sizeof_int_fast16_t='8'}
+ac_cv_sizeof_int_fast32_t=${ac_cv_sizeof_int_fast32_t='8'}
+ac_cv_sizeof_int_fast64_t=${ac_cv_sizeof_int_fast64_t='8'}
+ac_cv_sizeof_uint_fast8_t=${ac_cv_sizeof_uint_fast8_t='1'}
+ac_cv_sizeof_uint_fast16_t=${ac_cv_sizeof_uint_fast16_t='8'}
+ac_cv_sizeof_uint_fast32_t=${ac_cv_sizeof_uint_fast32_t='8'}
+ac_cv_sizeof_uint_fast64_t=${ac_cv_sizeof_uint_fast64_t='8'}
+
+hdf5_cv_system_scope_threads=${hdf5_cv_system_scope_threads="no"}
+
+# Hard set MPI_File_set_size() working for files over 2GB to yes
+hdf5_cv_mpi_file_set_size_big=${hdf5_cv_mpi_file_set_size_big='yes'}
+
+# Hard set variables for v1.7 and higher.
+# Set gettimeofday_tz to yes.
+hdf5_cv_gettimeofday_tz=${hdf5_cv_gettimeofday_tz='yes'}
+hdf5_cv_convert_denormal_float=${hdf5_cv_convert_denormal_float='no'}
+hdf5_cv_fp_to_ullong_bottom_bit_works=${hdf5_cv_fp_to_ullong_bottom_bit_works='no'}
+hdf5_cv_fp_to_ullong_right_maximum=${hdf5_cv_fp_to_ullong_right_maximum='yes'}
+hdf5_cv_ldouble_to_uint_works=${hdf5_cv_ldouble_to_uint_works='yes'}
+hdf5_cv_sw_ldouble_to_integer_works=${hdf5_cv_sw_ldouble_to_integer_works='yes'}
+hdf5_cv_sw_ulong_to_fp_bottom_bit_works=${hdf5_cv_sw_ulong_to_fp_bottom_bit_works='no'}
+hdf5_cv_ullong_to_fp_cast_works=${hdf5_cv_ullong_to_fp_cast_works='yes'}
+hdf5_cv_ullong_to_ldouble_precision_works=${hdf5_cv_ullong_to_ldouble_precision_works='yes'}
+hdf5_cv_vsnprintf_works=${hdf5_cv_vsnprintf_works='yes'}
+hdf5_cv_fp_to_integer_overflow_works=${hdf5_cv_fp_to_integer_overflow_works='yes'}
