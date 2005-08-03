@@ -4,6 +4,15 @@
 <TITLE>Instructions for Building and Testing HDF5 from Command Line on Windows XP</TITLE>
 <style type="text/css">
 
+a {text-decoration:none}
+a:link {color:#0000FF;}
+a:visited {color:purple;}
+a:hover {background-color:#FAEBD7;}
+
+body {
+     margin-left:5%;
+     margin-right:5%
+     }
 h1 {
    font-family:font-family:times, arial, 'lucida console', sans-serif;
    font-size: 180%;
@@ -11,6 +20,7 @@ h1 {
    color:#0000FF;
    text-align:center;
    text-transform:capitalize;
+   margin-top:30
    }
 h2 {
    font-family:font-family:times, arial, 'lucida console', sans-serif;
@@ -19,6 +29,7 @@ h2 {
    color:#0000FF;
    text-align:center;
    text-transform:capitalize;
+   margin-top:20
    
    }
 h3 {
@@ -27,54 +38,63 @@ h3 {
    font-style:bold;
    color:#0000FF;
    text-transform:capitalize;
+   margin-top:15
    }
 h4 {
    font-family:font-family:times, arial, 'lucida console', sans-serif;
    font-size: 120%;
    font-style:bold;
    color:#0000FF;
+   margin-top:12
    }
 h5 {
    font-family:font-family:times, arial, 'lucida console', sans-serif;
    font-size: 110%;
    font-style:bold;
    color:#0000FF;
+   margin-top:10
    }
 
+hr.first {color:#0000FF; height:4px;width:100%;magin-top:10px;margin-bottom:10px;border:thick double blue;}
+hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;border:thin dotted;}
+
+li{ 
+   margin-top:12;
+   }
+    
 p.right{text-align:right;color:#A52A2A;}
+
 p {
    font-family:font-family:times, arial, 'lucida console', sans-serif;
    font-size: 110%;
    text-align:left;
-   
   }
+  
+p.center {text-align:center}
+  
 p.note{
    font-family:font-family:times, arial, 'lucida console', sans-serif;
    font-size: 110%;
    text-align:left;
    color:#FF0000
   }
-  
-ul.normal
+
+p.filename
 {
-margin-left:10%;
-list-style-type:none;
-margin-bottom:15px;
+   font-family:font-family:times, arial, 'lucida console', sans-serif;
+   font-size: 100%;
+   font-style:italic; color:#008000
+   text-align:center;
 }
-ul.intable
+   
+span.filename
 {
-text-align: left;
-list-style-type:none;
+   font-family:font-family:times, arial, 'lucida console', sans-serif;
+   font-size: 95%;
+   font-style:italic; color:#800000
+
 }
-td {font-family:font-family:times, arial, 'lucida console', sans-serif;
-   font-size: 110%;
-   text-align:left;
-	padding:10;
-	}
-a {text-decoration:none}
-a:link {color:#0000FF;}
-a:visited {color:purple;}
-a:hover {background-color:#FAEBD7;}
+
 table {
       font-family:font-family:times, arial, 'lucida console', sans-serif;
       font-size: 100%;
@@ -82,17 +102,33 @@ table {
       border:thin solid blue;
       }
       
-body {
-     margin-left:5%;
-     margin-right:5%
-     }
-hr.first {color:#0000FF; height:4px;width:100%;magin-top:10px;margin-bottom:10px;border:thick double blue;}
-hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;border:thin dotted;}
+td {
+   font-family:font-family:times, arial, 'lucida console', sans-serif;
+   font-size: 95%;
+   text-align:left;
+   padding:10;
+   }
+
+ul.normal
+{
+margin-left:10%;
+list-style-type:none;
+margin-bottom:15px;
+}
+
+ul.intable
+{
+text-align: left;
+list-style-type:none;
+}
 
 </style>
 </HEAD>
 <BODY>
-<h1>Instructions for Building and Testing HDF5 from Command Line on Windows XP</h1>
+<h1>Instructions for Building and Testing HDF5 on Windows XP </h1>
+
+<h1>from Command Line </h1>
+
 <hr class="first" >
 <p class="note">Notes:</p>
 <p>1. This instruction is written for users who would like to build HDF5
@@ -100,8 +136,8 @@ hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;b
       line.
 </p>
 <p>2. Currently, we support:</p>		
-			<ul class="intable">		
-					<li><p>(1) Building and testing HDF5 on command line with Microsoft Visual 
+		<ul class="intable">		
+		<li><p>(1) Building and testing HDF5 on command line with Microsoft Visual 
          C++ 6.0 and Compaq Visual Fortran 6.0.</p>		
          <li><p>(2) Building and testing HDF5 C and C++ Library on command line with
          Microsoft Visual C++ .Net (2003)</p>		
@@ -109,8 +145,8 @@ hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;b
          Intel C++ Compiler 8.1 integration with Microsoft Visual C++ .Net
          2003.</p>
          <p>For all other Windows development tools, HDF5 should be built in the development environment.  
-         Please refer to INSTALL_Windows.txt for detailed HDF5 building and installation information, or 
-					INSTALL_Windows_short.txt for quick HDF5 building and installation instructions.
+         Please refer to<span class="filename"> INSTALL_Windows.txt</span> for detailed HDF5 building and installation information, or 
+					<span class="filename">INSTALL_Windows_short_*.txt</span> for quick HDF5 building and installation instructions.
 				</p>		
 				<li><p>(4) Different compiler is using different batch files on command line 
 				to build HDF5 Libraries.</p>
@@ -147,7 +183,8 @@ hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;b
 				<p>Be careful to choose the corresponding batch file when you choose a procedure below to build HDF5 Libraries.</p>		
 			</li>	
 		</ul>
-	<p class="note">3. Please read CAREFULLY about HDF5 build and install preconditions and notes in INSTALL_Windows.txt before starting below procedures.	</p>	
+	<p class="note">3. Please read CAREFULLY about HDF5 build and install preconditions and notes in 
+    <span class="filename">INSTALL_Windows.txt</span> before starting below procedures.	</p>	
 	<hr class="second" >
 	<h2>Preconditions</h2>
 	<hr class="second" >
@@ -156,11 +193,15 @@ hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;b
 	<p>If you want to extract zip files on the command line, you should</p>	
 	<ul class="intable">		
 		<li><h4>1.1 Install WinZip command line support add-on 1.1</h4>			
-				<p>Download WinZip command line support add-on 1.1 from <a href="http://www.winzip.com" target="_blank">http://www.winzip.com</a>			   and install it.			 </p>		<li><h4>1.2 Add WinZip into environment path</h4>			<p>Open "System" in Control Panel.
-				On the "Advanced" tab, click "Environment Variables", click
-				"Path" in the "System variables" box, then click "Edit" and 
-				add your WinZip path (For example C:\Program Files\WinZip)
-				into "Variable Value" and click "OK".			</p>			
+				<p>Download WinZip command line support add-on 1.1 from <a href="http://www.winzip.com" target="_blank">http://www.winzip.com</a>			   and install it.			 </p>		<li><h4>1.2 Add WinZip into environment path</h4>			<p>Open 
+        <span class="filename">"System"</span> in Control Panel.
+				On the <span class="filename">"Advanced"</span> tab, click 
+        <span class="filename">"Environment Variables"</span>, click
+				<span class="filename">&quot;Path&quot; </span>in the<span class="filename"> 
+        &quot;System variables&quot;</span> box, then click <span class="filename">"Edit"</span> and 
+				add your WinZip path (For example <span class="filename">
+        C:\Program Files\WinZip) </span>into <span class="filename">&quot;Variable 
+        Value&quot; </span>and click <span class="filename">&quot;OK&quot;. </span>			</p>			
 				<p class="note">Notes:</p>			
 				<p>You can also extract zip files from interactive WinZip
 				interface without the above two steps.			</p>		
@@ -177,16 +218,23 @@ hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;b
 
    		<ul class="intable">
    				<li><h4>1.1 Set path for Visual C++ 6.0 and Compaq Visual Fortran 6.0</h4>
-   						<p>Open "System" in Control Panel.</p>
-   						<p>On the "Advanced" tab, click "Environment Variables", click 
-							   "Path" in the "System variables" box, then click "Edit" and 
+   						<p>Open <span class="filename">"System"</span> in Control Panel.</p>
+   						<p>On the <span class="filename">"Advanced"</span> tab, click 
+                        <span class="filename">&quot;Environment Variables&quot;, </span>
+                        click <span class="filename">&quot;Path&quot; </span>in the
+                        <span class="filename">&quot;System variables&quot; </span>box, 
+                        then click<span class="filename"> &quot;Edit&quot;</span> and 
 							   add your Visual C++ 6.0 path (For example, 
-							   C:\Program Files\Microsoft Visual Studio\Common\MSDev98\Bin\)
+							   <span class="filename">C:\Program Files\Microsoft Visual Studio\Common\MSDev98\Bin\</span>)
 							   and Compaq Visual Fortran 6.0 path (For example, 
-							   C:\Program Files\Microsoft Visual Studio\Common\MSDev98\Bin\)
-							   into "Variable Value" and click "OK".</p>
+							   <span class="filename">C:\Program Files\Microsoft 
+                        Visual Studio\Common\MSDev98\Bin\) </span>into<span class="filename"> 
+                        &quot;Variable Value&quot; </span>and click<span class="filename"> 
+                        &quot;OK&quot;.</span></p>
 					<li><h4>1.2 Run batch file copy_hdf.bat.</h4>
-							<p>Go to  c:\MyHDFstuff\hdf5\windows and run copy_hdf.bat. </p>
+							<p>Go to  <span class="filename">c:\MyHDFstuff\hdf5\windows 
+                            </span>and run<span class="filename"> copy_hdf.bat.
+                            </span> </p>
 					</li>
 			</ul>
       
@@ -195,11 +243,12 @@ hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;b
 			
 			<ul class="intable">
 					<li><h4>2.1 Options A: Build and test in one step</h4>
-							<p>A batch file named hdf5bt.bat in c:\MyHDFstuff\hdf5 directory
+							<p>A batch file named <span class="filename">hdf5bt.bat 
+                            </span>in<span class="filename"> c:\MyHDFstuff\hdf5</span> directory
 				         is provided for users to build and test HDF5 library and tools
 				         together from command line.
 				      </p>
-				     	<p>hdf5bt.bat has four options:</p>
+				     	<p><span class="filename">hdf5bt.bat</span> has four options:</p>
 				     	<div style="TEXT-ALIGN: center">
 				     	<table border="1">
 				     			<tr>
@@ -232,20 +281,24 @@ hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;b
  
 				     			<li>c:\MyHDFstuff\hdf5\tests_results.txt.</li>
 				     	</ul>
-				     	<p>In general, you only need to check tests_results.txt.
+				     	<p>In general, you only need to check 
+                        <span class="filename">tests_results.txt</span>.
 				         If all the tests passed, then you do not have to check
-				         hdf5_results.txt.  If some tests failed, check
-				         hdf5_results.txt can help you figure out what was wrong.</p>
+				         <span class="filename">hdf5_results.txt</span>.  If some tests failed, check
+				         <span class="filename">hdf5_results.tx</span>t can help you figure out what was wrong.</p>
 				  </li>
 				  <li><h4>2.2 Options B: Build and test in two steps</h4>
 				  
-				  		<p>We also provide users with the option to build and test HDF5 libraries and tools seperately.</p>
+				  		<p>We also provide users with the option to build and test HDF5 libraries and tools 
+                        separately.</p>
 				  		<ul class="intable">
 				  				<li><h4>Step 1) Build HDF5 Libraries and Tools</h4>
-				  						<p>A batch file named hdf5build.bat in c:\MyHDFstuff\hdf5 
+				  						<p>A batch file named 
+                                        <span class="filename">hdf5build.bat 
+                                        </span>in<span class="filename"> c:\MyHDFstuff\hdf5</span> 
 							            directory is provided for users to build HDF5 library and 
 							            tools from command line.</p>
-							        <p>hdf5build.bat has four options:</p>
+							        <p><span class="filename">hdf5build.bat</span> has four options:</p>
 							        <div style="TEXT-ALIGN: center">
 								     	<table border="1">
 								     			<tr>
@@ -272,15 +325,16 @@ hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;b
 								     	</div>
 								     	<p>Invoke a command prompt window and run hdf5build with 
 							            appropriate options.  Compiling outputs are saved in 
-							            c:\MyHDFstuff\hdf5\build_results.txt.  You can check 
+							            <span class="filename">c:\MyHDFstuff\hdf5\build_results.txt</span>.  You can check 
 							            the file to find out whether there are any compilation
 							            errors.</p>
 							    </li>
 							    <li><h4>Step 2) Test HDF5 Libraries and Tools</h4>
-							    		<p>A batch file named hdf5check.bat in c:\MyHDFstuff\hdf5
+							    		<p>A batch file named hdf5check.bat in 
+                                        <span class="filename">c:\MyHDFstuff\hdf5</span>
 							            directory is provided for users to test HDF5 library 
 							            and tools from command line.</p>
-							        <p>hdf5check.bat has four options:</p>
+							        <p><span class="filename">hdf5check.bat</span> has four options:</p>
 							        
 							        <div style="TEXT-ALIGN: center">
 								     	<table border="1">
@@ -313,18 +367,20 @@ hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;b
 						          <ul class="normal">
 						          		<li>c:\MyHDFstuff\hdf5\check_results.txt.</li>
 						          </ul>
-						          <p>In general, you only need to check tests_results.txt.  If
+						          <p>In general, you only need to check 
+                                  <span class="filename">tests_results.txt</span>.  If
 						            all the tests passed, then you do not have to check 
-						            check_results.txt. If some tests failed, check 
-						            check_results.txt can help you figure out what was wrong.</p>
+						            <span class="filename">check_results.txt</span>. If some tests failed, check 
+						            <span class="filename">check_results.txt</span> can help you figure out what was wrong.</p>
 						      </li>
 						  </ul>
 				<h3>3. Installing HDF5 Libraries</h3>
 
-						<p>Run the batch file c:\MyHDFstuff\hdf5\installhdf5lib.bat to install all
-							HDF5 libraries and tools into c:\MyHDFstuff\hdf5\hdf5lib directory.</p>
+						<p>Run the batch file <span class="filename">c:\MyHDFstuff\hdf5\installhdf5lib.bat</span> to install all
+							HDF5 libraries and tools into <span class="filename">c:\MyHDFstuff\hdf5\hdf5lib</span> directory.</p>
 							
-						<p>For further information, please refer to INSTALL_WINDOWS.txt.</p>
+						<p>For further information, please refer to 
+                        <span class="filename">INSTALL_WINDOWS.txt</span>.</p>
 
 <hr class="second" >   
 <h2>SECTION II: Building and testing HDF5 C and C++ Library with Microsoft Visual C++ .Net 2003</h2>
@@ -334,24 +390,31 @@ hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;b
 			<ul class="intable">
 					<li><h4>1.1 Microsoft Visual C++ .Net 2003 Installed</h4></li>
 					<li><h4>1.2 Command-based script host (CScript.exe) installed</h4>
-							<p>Cscript.exe is a command-line version of the Windows Script Host. Users can
-					        check windows system directory to make sure Cscript.exe installed. Cscript.exe
-					        will be used during converting project files from MSVS 6.0 Format to Visual C++
+							<p><span class="filename">Cscript.exe</span> is a command-line version of the Windows Script Host. Users can
+					        check windows system directory to make sure 
+                            <span class="filename">Cscript.exe</span> installed. 
+                            <span class="filename">Cscript.exe </span>will be used during converting project files from MSVS 6.0 Format to Visual C++
 					        .Net 2003 format from command line.</p></li>
 					<li><h4>1.3 Set path for Microsoft Visual C++ .Net</h4>
 							<p>Open "System" in Control Panel.</p>
-							<p>On the "Advanced" tab, click "Environment Variables", click 
-						      "Path" in the "System variables" box, then click "Edit" and 
+							<p>On the <span class="filename">"Advanced"</span> tab, click 
+                            <span class="filename">"Environment Variables"</span>, click 
+						      <span class="filename">"Path"</span> in the 
+                            <span class="filename">"System variables"</span> box, then click<span class="filename"> "Edit"</span> and 
 						      add your Visual C++ .Net path (For example, 
-						      C:\Program Files\Microsoft Visual Studio .NET 2003\Common7\IDE)
-						      into "Variable Value" and click "OK".</p></li>
-					<li><h4>1.4 Run batch file copy_hdf.bat.</h4>
-							<p>Go to  c:\MyHDFstuff\hdf5\windows and run copy_hdf.bat. This process
+						      <span class="filename">C:\Program Files\Microsoft 
+                            Visual Studio .NET 2003\Common7\IDE) </span>into<span class="filename"> 
+                            &quot;Variable Value&quot; </span>and click<span class="filename"> 
+                            &quot;OK&quot;.</span></p></li>
+					<li><h4>1.4 Run batch file <span class="filename">copy_hdf.bat.</span></h4>
+							<p>Go to  <span class="filename">c:\MyHDFstuff\hdf5\windows</span> and run
+                            <span class="filename">copy_hdf.bat</span>. This process
 							   	will copy all the necessary batch files and text files saved under 
-							   	c:\MyHDFstuff\hdf5\windows directory to the directories where they 
+							   	<span class="filename">c:\MyHDFstuff\hdf5\windows</span> directory to the directories where they 
 							   	will be used.</p></li>
 					<li><h4>1.5 Convert project files format from MSVS 6.0 to MSVS .Net</h4>
-							<p>Go to directory  c:\MyHDFstuff\hdf5 and run convert_to_vcproj.bat in the following format:</p>
+							<p>Go to directory  <span class="filename">c:\MyHDFstuff\hdf5</span> and run
+                            <span class="filename">convert_to_vcproj.bat</span> in the following format:</p>
 							<ul class="normal">
 									<li>convert_to_vcproj "Absolute path of directory hdf5" </li>
 							</ul>
@@ -359,7 +422,9 @@ hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;b
 							<ul class="normal">
 									<li>convert_to_vcproj c:\MyHDFstuff\hdf5</li>
 							</ul>
-							<p>The converting results will be saved into file convert.log under the directory c:\MyHDFstuff\hdf5. 
+							<p>The converting results will be saved into file 
+                            <span class="filename">convert.log</span> under the directory 
+                            <span class="filename">c:\MyHDFstuff\hdf5</span>. 
 									The messages should look like</p>
 							<ul class="normal">
 									<li>Converting: c:\MyHDFstuff\hdf5\windows\proj\all\all.dsp </li>
@@ -367,7 +432,7 @@ hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;b
 									<li>New Project Name: c:\MyHDFstuff\\hdf5\windows\proj\all\all.vcproj</li>
 							</ul>
 							<p class="note">Notes:</p>
-							<p>all.sln was provided with HDF5-1.8.0 Release. Users don't need 
+							<p><span class="filename">all.sln</span> was provided with HDF5-1.8.0 Release. Users don't need 
 					       to convert the workspace from MSVS 6.0 format to MSVS .Net
 					       Format
 					    </p></li>
@@ -377,12 +442,14 @@ hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;b
 					 		 <p>We provide 2 options for users to build HDF5 libraries and tools.</p>
 					 		 <ul class="intable">
 					 		 			<li><h4>2.1 Options A: Build and test in one step</h4>
-					 		 					<p>A batch file named hdf5bt_net.bat in c:\MyHDFstuff\hdf5 directory
+					 		 					<p>A batch file named 
+                                                <span class="filename">hdf5bt_net.bat</span> in 
+                                                <span class="filename">c:\MyHDFstuff\hdf5</span> directory
 											      is provided for users to build and test HDF5 library and tools
 											      together from command line.
 											  </p>
-											  <p>hdf5bt_net.bat has only one 
-                                              option:</p>
+											  <p><span class="filename">hdf5bt_net.bat</span> has two 
+                                              options:</p>
 											  <div style="TEXT-ALIGN: center">
 										     	<table border="1">
 										     			<tr>
@@ -390,14 +457,19 @@ hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;b
 										     				<th>Illustration</th>
 										     			</tr>
 										     			<tr>
+										     				<td>hdf5bt_net </td>
+										     				<td>build and test C 
+                                                            libraries and tools</td>
+										     			</tr>
+										     	        <tr>
 										     				<td>hdf5bt_net enablecpp</td>
 										     				<td>build and test C/C++ libraries and tools</td>
 										     			</tr>
 										     	</table>
 										     	</div>
 											  <p>Invoke a command prompt window 
-                                              and run hdf5bt_net with this 
-                                              option.</p>
+                                              and run hdf5bt_net with one of the 
+                                              options.</p>
       									<p>Test results are saved in two files:</p>
       									<ul class="normal">
 									     			<li>c:\MyHDFstuff\hdf5\hdf5_results_net.txt 
@@ -405,21 +477,25 @@ hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;b
 									     			<li>c:\MyHDFstuff\hdf5\tests_results.txt.</li>
 							     			</ul>	
 
-										    <p>In general, you only need to check tests_results.txt.
+										    <p>In general, you only need to check 
+                                            <span class="filename">tests_results.txt</span>.
 										      If all the tests passed, then you do not have to check
-										      hdf5_results_net.txt.  If some tests failed, check
-										      hdf5_results_net.txt can help you figure out what was wrong.</p>
+										      <span class="filename">hdf5_results_net.txt</span>.  If some tests failed, check
+										      <span class="filename">hdf5_results_net.txt</span> can help you figure out what was wrong.</p>
 										 </li>
 										 <li><h4>2.2 Options B: Build and test in two steps</h4>
-										 			<p>We also provide users with the option to build and test HDF5 libraries and tools seperately.</p>
+										 			<p>We also provide users with the option to build and test HDF5 libraries and tools 
+                                                    separately.</p>
 										 			<ul class="intable">
 										 					<li><h4>Step 1)  Build HDF5 Libraries and Tools</h4>
-										 							<p>A batch file named hdf5build_net.bat in c:\MyHDFstuff\hdf5 
+										 							<p>A batch file named hdf5build_net.bat in 
+                                                                    <span class="filename">c:\MyHDFstuff\hdf5</span> 
 														         directory is provided for users to build HDF5 library and 
 														         tools from command line.</p>
-														         <p>hdf5build_net.bat has 
-                                                                 only one 
-                                                                 option:</p>
+														         <p>
+                                                                 <span class="filename">hdf5build_net.bat</span> has 
+                                                                 two 
+                                                                 options:</p>
 														         <div style="TEXT-ALIGN: center">
 																     	<table border="1">
 																     			<tr>
@@ -427,19 +503,26 @@ hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;b
 																     				<th>Illustration</th>
 																     			</tr>
 																     			<tr>
+																     				<td>hdf5build_net</td>
+																     				<td>build C libraries and tools</td>
+																     			</tr>
+																     	        <tr>
 																     				<td>hdf5build_net enablecpp</td>
 																     				<td>build C/C++ libraries and tools</td>
 																     			</tr>
 																     	</table>
 																     	</div>
 														  
-														         <p>Invoke a command prompt window and run hdf5build_net with 
-														         this option.  building results will be saved in 
-														         c:\MyHDFstuff\hdf5\build_results_net.txt.  You can check 
+														         <p>Invoke a command prompt window and run<span class="filename"> hdf5build_net
+                                                                 </span>with 
+														         one of the 
+                                                                 options.  building results will be saved in
+                                                                 <span class="filename">c:\MyHDFstuff\hdf5\build_results_net.txt</span>.  You can check 
 														         the file to find out whether there are any compilation
 														         errors.</p></li>
 														    <li><h4>Step 2)  Build HDF5 Libraries and Tools</h4>
-														    		<p>Go to directory, run batch file hdf5check with the following options:</p>
+														    		<p>Go to directory, run batch file 
+                                                                    <span class="filename">hdf5check.bat</span> with the following options:</p>
 														    		<div style="TEXT-ALIGN: center">
 																     	<table border="1">
 																     			<tr>
@@ -457,8 +540,10 @@ hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;b
 																     	</table>
 																     	</div>
 																   		<p class="note">Notes:</p>
-																   		<p>hdf5check.bat has ONLY TWO options listed above in this case.</p>
-																   		<p>Testing results will be saved in c:\MyHDFstuff\hdf5\check_results.txt.
+																   		<p>
+                                                                        <span class="filename">hdf5check.bat</span> has ONLY TWO options listed above in this case.</p>
+																   		<p>Testing results will be saved in 
+                                                                        <span class="filename">c:\MyHDFstuff\hdf5\check_results.txt</span>.
 																   			There should be no failures at all. </p>
 																 </li>
 														</ul>
@@ -466,8 +551,8 @@ hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;b
 										</ul>
 <h3>3.  Installing HDF5 Libraries</h3>
 
-     			<p>Run the batch file c:\MyHDFstuff\hdf5\installhdf5lib.bat to install all HDF5 libraries and tools into 
-     				c:\MyHDFstuff\hdf5\hdf5lib directory.</p>
+     			<p>Run the batch file <span class="filename">c:\MyHDFstuff\hdf5\installhdf5lib.bat</span> to install all HDF5 libraries and tools into<span class="filename"> 
+     				c:\MyHDFstuff\hdf5\hdf5lib </span>directory.</p>
      
 <hr class="second" >         
 <h2>SECTION III: Building and testing HDF5 C and C++ Library with Intel C++ Compiler 8.1 integration with Microsoft Visual C++ .Net 2003</h2>
@@ -476,23 +561,26 @@ hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;b
 <h3>1. Extra Preconditions:</h3>
 			<ul class="intable">
 					<li><h4>1.1 Set path for Microsoft Visual C++ .Net and Intel C++ 8.1</h4>
-							<p>Open "System" in Control Panel.</p>
-							<p>On the "Advanced" tab, click "Environment Variables", click 
-					      "Path" in the "System variables" box, then click "Edit" and 
+							<p>Open <span class="filename">"System"</span> in Control Panel.</p>
+							<p>On the <span class="filename">"Advanced"</span> tab, click 
+                            <span class="filename">"Environment Variables"</span>, click 
+						      <span class="filename">"Path"</span> in the 
+                            <span class="filename">"System variables"</span> box, then click<span class="filename"> "Edit"</span>&nbsp; and 
 					      add your Visual C++ .Net path (For example, 
-					      C:\Program Files\Microsoft Visual Studio .NET 2003\Common7\IDE)
+					        <span class="filename">C:\Program Files\Microsoft Visual Studio .NET 2003\Common7\IDE</span>)
 					      and Intel C++ 8.1 path (For example,
-					      C:\Program Files\Intel\CPP\Compiler80\Ia32\Bin)
-					      into "Variable Value" and click "OK". 
-					     </p></li>
+					        <span class="filename">C:\Program Files\Intel\CPP\Compiler80\Ia32\Bin</span>)
+					      into <span class="filename">"Variable Value" and click "OK"</span>. </p></li>
 					<li><h4>1.2 Run batch file copy_hdf.bat.</h4>
-							<p>Go to  c:\MyHDFstuff\hdf5\windows and run copy_hdf.bat. This process
+							<p>Go to  <span class="filename">c:\MyHDFstuff\hdf5\windows 
+                            </span>and run<span class="filename"> copy_hdf.bat</span>. This process
 						   	will copy all the necessary batch files and text files saved under 
-						   	c:\MyHDFstuff\hdf5\windows directory to the directories where they 
+						   	<span class="filename">c:\MyHDFstuff\hdf5\windows</span> directory to the directories where they 
 						   	will be used.
 						  </p></li>
 					<li><h4>1.3 Convert project files format from MSVS 6.0 to MSVS .Net Format</h4>
-							<p>Go to directory  c:\MyHDFstuff\hdf5 and run convert_to_vcproj.bat
+							<p>Go to directory  <span class="filename">c:\MyHDFstuff\hdf5</span> and run
+                            <span class="filename">convert_to_vcproj.bat</span>
        					in the following format:</p>
        				<ul class="normal">
        						<li>convert_to_vcproj "Absolute path of directory hdf5" </li>
@@ -501,8 +589,9 @@ hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;b
        				<ul class="normal">
        						<li>convert_to_vcproj c:\MyHDFstuff\hdf5</li>
        				</ul>
-       				<p>The converting results will be saved into file convert.log under 
-       						the directory c:\MyHDFstuff\hdf5. The messages should look like</p>
+       				<p>The converting results will be saved into file 
+                    <span class="filename">convert.log </span>under 
+       						the directory<span class="filename"> c:\MyHDFstuff\hdf5</span>. The messages should look like</p>
        				<ul class="normal">
        						<li>Converting: c:\MyHDFstuff\hdf5\windows\proj\all\all.dsp </li>
  
@@ -514,11 +603,12 @@ hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;b
       		<p>We provide 2 options for users to build HDF5 libraries and tools.</p>
       		<ul class="intable">
       				<li><h4>2.1 Options A: Build and test in one step</h4>
-      						<p>A batch file named hdf5bt_intelc.bat in c:\MyHDFstuff\hdf5 directory
+      						<p>A batch file named <span class="filename">hdf5bt_intelc.bat 
+                            </span>in<span class="filename"> c:\MyHDFstuff\hdf5</span> directory
          						is provided for users to build and test HDF5 library and tools
          						together from command line.
          					</p>
-         					<p>hdf5bt_intelc.bat has only one option:</p>
+         					<p><span class="filename">hdf5bt_intelc.bat</span> has two options:</p>
          					<div style="TEXT-ALIGN: center">
 											<table border="1">
 												<tr>
@@ -526,46 +616,55 @@ hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;b
 														<th>Illustration</th>
 												</tr>
 												<tr>
+														<td>hdf5bt_intelc</td>
+														<td>build and test C libraries and tools</td>
+												</tr>
+											    <tr>
 														<td>hdf5bt_intelc enablecpp</td>
 														<td>build and test C/C++ libraries and tools</td>
 												</tr>
 											</table>
 										</div>
 										<p>Invoke a command prompt window and run hdf5bt_intelc with
-         							    this option.</p>
+         							    one of the options.</p>
          							<p>Test results will be saved in two files:</p>
          							<ul class="normal">
-         									<li>c:\MyHDFstuff\hdf5\hdf5_results_intelc.txt 
+         									<li><span class="filename">c:\MyHDFstuff\hdf5\hdf5_results_intelc.txt
+                                            </span> 
 
  
-         									<li>c:\MyHDFstuff\hdf5\tests_results.txt.</li>
+         									<li><span class="filename">c:\MyHDFstuff\hdf5\tests_results.txt.</span></li>
          							</ul>
          							<p>Project conversion results from MSVS .Net format to Intel C++ fomat 
          								 will be saved in </p>
          								<ul class="normal">
-         										<li>c:\MyHDFstuff\hdf5\convert_intel.txt</li>
+         										<li><span class="filename">c:\MyHDFstuff\hdf5\convert_intel.txt</span></li>
          								</ul>
-         								<p>Check convert_intel.txt to see if all of the project files have been converted
+         								<p>Check <span class="filename">convert_intel.txt</span> to see if all of the project files have been converted
          								successfully.  Conversion messages should look like:</p>
          								<ul class="normal">
          										<li>"projname.vcproj": has been converted from Microsoft VC++ project system to the Intel C++ 8.x project system.</li>
          								</ul>
-         								<p>In general, you only need to check tests_results.txt.
+         								<p>In general, you only need to check 
+                                        <span class="filename">tests_results.txt</span>.
 								         If all the tests passed, then you do not have to check
-								         hdf5_results_intelc.txt.  If some tests failed, check
-								         hdf5_results_intelc.txt can help you figure out what was wrong.
+								         <span class="filename">hdf5_results_intelc.txt</span>.  If some tests failed, check
+								         <span class="filename">hdf5_results_intelc.txt</span> can help you figure out what was wrong.
 								        </p>
 								    </li>
 								    <li><h4>2.2  Options B: Build and test in two steps </h4>
-								    		<p>We also provide users with the option to build and test HDF5 libraries and tools seperately.</p>
+								    		<p>We also provide users with the option to build and test HDF5 libraries and tools 
+                                            separately.</p>
 								    		<ul class="intable">
 								    				<li><h4>Step 1) Build HDF5 Libraries and Tools</h4>
-								    						<p>A batch file named hdf5build_intelc.bat in c:\MyHDFstuff\hdf5 
+								    						<p>A batch file named 
+                                                            <span class="filename">hdf5build_intelc.bat 
+                                                            </span>in<span class="filename"> c:\MyHDFstuff\hdf5</span> 
 													         directory is provided for users to build HDF5 library and 
 													         tools from command line.
 													      </p>
 													      <p>
-                                                          hdf5build_intelc.bat 
+                                                          <span class="filename">hdf5build_intelc.bat</span> 
                                                           has only one option:</p>
 													      <div style="TEXT-ALIGN: center">
 																     	<table border="1">
@@ -574,20 +673,26 @@ hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;b
 																     				<th>Illustration</th>
 																     			</tr>
 																     			<tr>
+														<td>hdf5build_intelc</td>
+														<td>build C libraries and tools</td>
+												                                </tr>
+																     			<tr>
 																     				<td>hdf5build_intelc enablecpp</td>
 																     				<td>build C/C++ libraries and tools</td>
 																     			</tr>
 																     	</table>
 																  </div>
-																  <p>Invoke a command prompt window and run hdf5build_intelc with 
+																  <p>Invoke a command prompt window and run 
+                                                                  <span class="filename">hdf5build_intelc</span> with 
 														          this option.  Compiling outputs are saved in 
-														         c:\MyHDFstuff\hdf5\build_results_intelc.txt.  You can check 
+														          <span class="filename">c:\MyHDFstuff\hdf5\build_results_intelc.txt.</span>  You can check 
 														         the file to find out whether there are any compiling errors.
 														      </p>
 														  </li>
 														  <li><h4>Step 2) Testing HDF5 Libraries and Tools</h4>
-														  		<p>Go to directory, run batch file hdf5check with the following options:
-														  		<div style="TEXT-ALIGN: center">
+														  		<p>Go to directory, run batch file 
+                                                                <span class="filename">hdf5check</span> with the following options:
+														  		<p>&nbsp;<div style="TEXT-ALIGN: center">
 																     	<table border="1">
 																     			<tr>
 																     				<th>Options</th>
@@ -605,23 +710,27 @@ hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;b
 																  </div>
      
                										<p class="note">Notes:</p>
-               										<p>hdf5check.bat has ONLY TWO options listed above in this case.</p>
-               										<p>Testing results will be saved in c:\MyHDFstuff\hdf5\check_results.txt. 
+               										<p><span class="filename">hdf5check.bat</span> has ONLY TWO options listed above in this case.</p>
+               										<p>Testing results will be saved in c<span class="filename">:\MyHDFstuff\hdf5\check_results.txt</span>. 
      																There should be no failures at all. </p>
      													</li>
      											</ul>
      										</li>
      								</ul>
  <h3>3.  Installing HDF5 Libraries</h3>
-     													<p>Run the batch file c:\MyHDFstuff\hdf5\installhdf5lib.bat to install all
-     														HDF5 libraries and tools into c:\MyHDFstuff\hdf5\hdf5lib directory.
+     													<p>Run the batch file 
+                                                        <span class="filename">c:\MyHDFstuff\hdf5\installhdf5lib.bat</span> to install all
+     														HDF5 libraries and tools into 
+                                                        <span class="filename">c:\MyHDFstuff\hdf5\hdf5lib</span> directory.
      													</p>
      				
      													
 <hr class="first" >
-<h4 style="COLOR: white; BACKGROUND-COLOR: green">Thank you for using Hierarchical Data Format (HDF). For users who need further assistance, please
-send email to <A href="mailto:hdfhelp@ncsa.uiuc.edu">hdfhelp@ncsa.uiuc.edu</A></h4>
+<h4>Need further assistance? email to <a href="mailto:hdfhelp@ncsa.uiuc.edu">hdfhelp@ncsa.uiuc.edu</a> or go to
+    <a href="http://hdf.ncsa.uiuc.edu/windows/">http://hdf.ncsa.uiuc.edu/windows/questions</a> to get help on windows</h4>
+    <h4 style="background-color:green;color:white;text-align:center;letter-spacing:5;">Thank&nbsp; you&nbsp; for&nbsp; using&nbsp; Hierarchical&nbsp; Data&nbsp; Format&nbsp; (HDF)</h4>
+    <p>&nbsp;</p>
 <p>&nbsp;</p>
-<p>&nbsp;</p>
+                    </ul>
 </BODY>
 </HTML>
