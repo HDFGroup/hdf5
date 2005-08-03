@@ -1,9 +1,18 @@
 <HTML>
 <HEAD>
-<META NAME="GENERATOR" Content="Microsoft Visual Studio 6.0">
+<META NAME="GENERATOR" Content="Microsoft FrontPage 5.0">
 <TITLE>HDF5 Build and Install Instructions for Windows XP with MSVS .NET 2003</TITLE>
 <style type="text/css">
 
+a {text-decoration:none}
+a:link {color:#0000FF;}
+a:visited {color:purple;}
+a:hover {background-color:#FAEBD7;}
+
+body {
+     margin-left:5%;
+     margin-right:5%
+     }
 h1 {
    font-family:font-family:times, arial, 'lucida console', sans-serif;
    font-size: 180%;
@@ -11,6 +20,7 @@ h1 {
    color:#0000FF;
    text-align:center;
    text-transform:capitalize;
+   margin-top:30
    }
 h2 {
    font-family:font-family:times, arial, 'lucida console', sans-serif;
@@ -19,6 +29,7 @@ h2 {
    color:#0000FF;
    text-align:center;
    text-transform:capitalize;
+   margin-top:20
    
    }
 h3 {
@@ -27,54 +38,63 @@ h3 {
    font-style:bold;
    color:#0000FF;
    text-transform:capitalize;
+   margin-top:15
    }
 h4 {
    font-family:font-family:times, arial, 'lucida console', sans-serif;
    font-size: 120%;
    font-style:bold;
    color:#0000FF;
+   margin-top:12
    }
 h5 {
    font-family:font-family:times, arial, 'lucida console', sans-serif;
    font-size: 110%;
    font-style:bold;
    color:#0000FF;
+   margin-top:10
    }
 
+hr.first {color:#0000FF; height:4px;width:100%;magin-top:10px;margin-bottom:10px;border:thick double blue;}
+hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;border:thin dotted;}
+
+li{ 
+   margin-top:12;
+   }
+    
 p.right{text-align:right;color:#A52A2A;}
+
 p {
    font-family:font-family:times, arial, 'lucida console', sans-serif;
    font-size: 110%;
    text-align:left;
-   
   }
+  
+p.center {text-align:center}
+  
 p.note{
    font-family:font-family:times, arial, 'lucida console', sans-serif;
    font-size: 110%;
    text-align:left;
    color:#FF0000
   }
-  
-ul.normal
+
+p.filename
 {
-margin-left:10%;
-list-style-type:none;
-margin-bottom:15px;
+   font-family:font-family:times, arial, 'lucida console', sans-serif;
+   font-size: 100%;
+   font-style:italic; color:#008000
+   text-align:center;
 }
-ul.intable
+   
+span.filename
 {
-text-align: left;
-list-style-type:none;
+   font-family:font-family:times, arial, 'lucida console', sans-serif;
+   font-size: 95%;
+   font-style:italic; color:#800000
+
 }
-td {font-family:font-family:times, arial, 'lucida console', sans-serif;
-   font-size: 110%;
-   text-align:left;
-	padding:10;
-	}
-a {text-decoration:none}
-a:link {color:#0000FF;}
-a:visited {color:purple;}
-a:hover {background-color:#FAEBD7;}
+
 table {
       font-family:font-family:times, arial, 'lucida console', sans-serif;
       font-size: 100%;
@@ -82,18 +102,31 @@ table {
       border:thin solid blue;
       }
       
-body {
-     margin-left:5%;
-     margin-right:5%
-     }
-hr.first {color:#0000FF; height:4px;width:100%;magin-top:10px;margin-bottom:10px;border:thick double blue;}
-hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;border:thin dotted;}
+td {
+   font-family:font-family:times, arial, 'lucida console', sans-serif;
+   font-size: 95%;
+   text-align:left;
+   padding:10;
+   }
+
+ul.normal
+{
+margin-left:10%;
+list-style-type:none;
+margin-bottom:15px;
+}
+
+ul.intable
+{
+text-align: left;
+list-style-type:none;
+}
 
 </style>
 </HEAD>
 <BODY>
 <h1>HDF5 Build and Install Instructions for Windows XP with MSVS .NET 2003</h1>
-<p style="TEXT-ALIGN: center">(Short Version)</p>
+<h1>(Short Version)</h1>
 <hr class="first" >
 <p class="note">Notes:</p>
 
@@ -161,7 +194,8 @@ HDF5 build and install preconditions and notes</a> before starting below procedu
       						<li>testhdf5_cpp 
       						<li>testhdf5_cppdll 
       						<li>hdf5_hl_cpp 
-      						<li>hl_test_table_cpp</li>
+      						<li>hdf5_hl_cppdll<li>hl_test_table_cpp</li> 
+      						<li>hl_test_table_cppdll</li>
       			</ul>      		
       			<p>Click on "OK", From the main menu, choose "Build"-&gt; "Build" or  
 				"Rebuild ALL" to build both release and debug version of HDF5 
@@ -182,10 +216,11 @@ HDF5 build and install preconditions and notes</a> before starting below procedu
       						<li>hdf5_fortran 
       						<li>hdf5_fortrandll 
       						<li>hdf5_hl_fortran 
-      						<li>hl_test_image_fortran 
-      						<li>hl_test_lite_fortran 
-      						<li>hl_test_table_fortran 
-      						<li>libtest_cstubdll 
+      						<li>hdf5_hl_fortrandll 
+      						<li>hdf5_hl_f90cstubdll<li>hl_test_image_fortran 
+      						<li>hl_test_image_fortrandll<li>hl_test_lite_fortran 
+      						<li>hl_test_lite_fortrandll<li>hl_test_table_fortran 
+      						<li>hl_test_table_fortrandll<li>libtest_cstubdll 
       						<li>libtest_fortran 
       						<li>libtest_fortrandll 
       						<li>testhdf5_fortran 
@@ -195,24 +230,28 @@ HDF5 build and install preconditions and notes</a> before starting below procedu
 				"Rebuild ALL" to build both release and debug version of HDF5   
 				Libraries. 			</p>		<li><h4>2.3 If you don't want to build HDF5 High-Level Libraries</h4>			<P>Go to "Build" and select "Configuration Manager". Choose "Release"      
 				or "Debug" under "Active Solution Configuration"			</P>			<p>Disable the following projects:</p>				<ul class="normal">					<li>hdf5_hl 
-    					<li>hl_test_image 
+    					<li>hdf5_hldll<li>hl_test_image<li>hl_test_imagedll 
     					<li>hl_test_lite 
     
-					<li>hl_test_table 
-    					<li>hl_test_ds 
-    					<li>hl_test_packet</li>
+						<li>hl_test_litedll<li>hl_test_table 
+    					    
+					<li>hl_test_tabledll<li>hl_test_ds 
+    					<li>hl_test_dsdll<li>hl_test_packet</li> 
+    					<li>hl_test_packetdll</li>
 				</ul>			<p>Click on "OK", From the main menu, choose "Build"-&gt; "Build" or  
 				"Rebuild ALL" to build both release and debug version of HDF5   
 				Libraries. 			</p>		<li><h4>2.4 If you don't want to build HDF5 C++ High-Level&nbsp;Libraries</h4>			<p>Go to "Build" and select "Configuration Manager".        
 				Choose "Release" or "Debug" under "Active Solution Configuration"			</p>  
 				                                                                        
 			<p>Disable the following projects:</p>				<ul class="normal">						<li>hdf5_hl_cpp 
-    						<li>hl_test_table_cpp</li>				</ul>			<p>Click on "OK", From the main menu, choose "Build"-&gt; "Build" or  
+    						<li>hdf5_hl_cppdll<li>hl_test_table_cpp</li> 
+    						<li>hl_test_table_cppdll</li>				</ul>			<p>Click on "OK", From the main menu, choose "Build"-&gt; "Build" or  
 				"Rebuild ALL" to build both release and debug version of HDF5   
 				Libraries.			</p>		<li><h4>2.5 If you don't want to build HDF5 Fortran High-Level Libraries</h4>			<p>Go to "Build" and select "Configuration Manager". Choose "Release" or "Debug" under "Active Solution Configuration".</p>			<p>Disable the following projects:</p>				<ul class="normal">					<li>hdf5_hl_fortran 
-    					<li>hl_test_image_fortran 
-    					<li>hl_test_lite_fortran 
-    					<li>hl_test_table_fortran</li>				</ul>			<p>Click on "OK", From the main menu, choose "Build"-&gt; "Build" or 
+    					<li>hdf5_hl_fortrandll<li>hdf5_hl_f90cstubdll<li>hl_test_image_fortran 
+      						<li>hl_test_image_fortrandll<li>hl_test_lite_fortran 
+      						<li>hl_test_lite_fortrandll<li>hl_test_table_fortran 
+      						<li>hl_test_table_fortrandll</ul>			<p>Click on "OK", From the main menu, choose "Build"-&gt; "Build" or 
 				"Rebuild ALL" to build both release and debug version of HDF5
 				Libraries.			</p>		</li>	</ul><hr class="second" >
 
@@ -275,9 +314,16 @@ all HDF5 libraries and tools into c:\MyHDFstuff\hdf5\hdf5lib directory.</p>
 <hr class="second" >
 <p>Please read <A href="http://hdf.ncsa.uiuc.edu/windows/INSTALL_Windows.html#step4_section2" target=_blank>section II, step 4 in INSTALL_Windows.html.</A></p>
 
-<h4 style="COLOR: white; BACKGROUND-COLOR: green">Thank you for using Hierarchical Data Format (HDF). For users who need further assistance, please
-send email to <A href="mailto:hdfhelp@ncsa.uiuc.edu">hdfhelp@ncsa.uiuc.edu</A></h4>
+    				
+     													
+<hr class="first" >
+<h4>Need further assistance? email to 
+<a href="mailto:hdfhelp@ncsa.uiuc.edu" style="text-decoration: none">hdfhelp@ncsa.uiuc.edu</a> or go to
+    <a href="http://hdf.ncsa.uiuc.edu/windows/" style="text-decoration: none">http://hdf.ncsa.uiuc.edu/windows/questions</a> to get help on windows</h4>
+    <h4 style="background-color:green;color:white;text-align:center;letter-spacing:5;">Thank&nbsp; you&nbsp; for&nbsp; using&nbsp; Hierarchical&nbsp; Data&nbsp; Format&nbsp; (HDF)</h4>
+    <p>&nbsp;</p>
 <p>&nbsp;</p>
+                
 <p>&nbsp;</p>
 
 
