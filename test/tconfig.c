@@ -156,7 +156,7 @@ test_config_ctypes(void)
 #endif
 
 #if H5_SIZEOF_INT_FAST16_T > 0
-    vrfy_cint_type(int_fast16_t, int_fast16_t, H5_SIZEOF_INT_FAST16_T);
+    vrfy_cint_type(int_fast16_t, uint_fast16_t, H5_SIZEOF_INT_FAST16_T);
 #endif
 
 #if H5_SIZEOF_INT_FAST32_T > 0
