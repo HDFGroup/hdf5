@@ -95,8 +95,9 @@
           CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
           if (error .ne. 0) then
               write(*,*) "Cannot modify filename"
-              stop
+              CALL h5_exit_f (1)
           endif
+	  print *, "filename=", filename, "fix_filename=", fix_filename
      CALL h5fopen_f(fix_filename, H5F_ACC_RDONLY_F, file_id, error)
           CALL check("h5fopen_f",error,total_error)
 
@@ -139,11 +140,9 @@
           CALL check("h5gopen_f",error,total_error)
     
      !
-     !In case error happens, jump to stop.
+     !In case error happens, exit.
      !
-     IF (error == -1) THEN
-          001 STOP
-     END IF
+     IF (error == -1) CALL h5_exit_f (1)
     
      !
      !Close the datatype

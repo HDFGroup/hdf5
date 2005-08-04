@@ -107,7 +107,7 @@
           CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
           if (error .ne. 0) then
               write(*,*) "Cannot modify filename"
-              stop
+              CALL h5_exit_f (1)
           endif
      CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
           CALL check("h5fcreate_f",error,total_error)
