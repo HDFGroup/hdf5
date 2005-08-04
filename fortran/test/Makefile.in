@@ -824,6 +824,9 @@ uninstall-am: uninstall-info-am uninstall-libLTLIBRARIES
 # as well.
 check-install: installcheck
 
+# fflush2 depends on files created by fflush1
+fflush2.chkexe_: fflush1.chkexe_
+
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
 # BUILT_SOURCES contain targets that need to be built before anything else
