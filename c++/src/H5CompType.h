@@ -37,7 +37,7 @@ class H5_DLLCPP CompType : public DataType {
 	H5T_class_t getMemberClass( unsigned member_num ) const;
 
 	// Returns the dimensionality of the specified member. 
-	int getMemberDims( int member_num, size_t* dims, int* perm ) const;
+	int getMemberDims( unsigned member_num, size_t* dims, int* perm ) const;
 
 	// Returns the index of a member in this compound data type.
 	int getMemberIndex(const char* name) const;
@@ -51,35 +51,35 @@ class H5_DLLCPP CompType : public DataType {
 
 	// Returns the generic datatype of the specified member in 
 	// this compound datatype.
-	DataType getMemberDataType( int member_num ) const;
+	DataType getMemberDataType( unsigned member_num ) const;
 
 	// Returns the array datatype of the specified member in 
 	// this compound datatype.
-	ArrayType getMemberArrayType( int member_num ) const;
+	ArrayType getMemberArrayType( unsigned member_num ) const;
 
 	// Returns the compound datatype of the specified member in 
 	// this compound datatype.
-	CompType getMemberCompType( int member_num ) const;
+	CompType getMemberCompType( unsigned member_num ) const;
 
 	// Returns the enumeration datatype of the specified member in 
 	// this compound datatype.
-	EnumType getMemberEnumType( int member_num ) const;
+	EnumType getMemberEnumType( unsigned member_num ) const;
 
 	// Returns the integer datatype of the specified member in 
 	// this compound datatype.
-	IntType getMemberIntType( int member_num ) const;
+	IntType getMemberIntType( unsigned member_num ) const;
 
 	// Returns the floating-point datatype of the specified member in 
 	// this compound datatype.
-	FloatType getMemberFloatType( int member_num ) const;
+	FloatType getMemberFloatType( unsigned member_num ) const;
 
 	// Returns the string datatype of the specified member in 
 	// this compound datatype.
-	StrType getMemberStrType( int member_num ) const;
+	StrType getMemberStrType( unsigned member_num ) const;
 
 	// Returns the variable length datatype of the specified member in 
 	// this compound datatype.
-	VarLenType getMemberVarLenType( int member_num ) const;
+	VarLenType getMemberVarLenType( unsigned member_num ) const;
 
 	// Returns the number of members in this compound datatype. 
 	int getNmembers() const;
