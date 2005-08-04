@@ -95,6 +95,9 @@ hid_t H5E_CANTSENDMDATA_g  = FAIL;      /* Can't send metadata message */
 hid_t H5E_CANTCHANGE_g     = FAIL;      /* Can't register change with server */
 hid_t H5E_CANTALLOC_g      = FAIL;      /* Can't allocate from file */
 
+/* System level errors */
+hid_t H5E_SYSERRSTR_g      = FAIL;      /* System error message */
+
 /* I/O pipeline errors */
 hid_t H5E_NOFILTER_g       = FAIL;      /* Requested filter is not available */
 hid_t H5E_CALLBACK_g       = FAIL;      /* Callback failed */

@@ -92,6 +92,7 @@ SECTION, HEAP, Heap errors
 SECTION, FPH5, FPHDF5 errors
 SECTION, PIPELINE, I/O pipeline errors
 SECTION, BLKTRK, Block tracker errors
+SECTION, SYSTEM, System level errors
 
 # Minor errors
 
@@ -223,3 +224,5 @@ MINOR, PIPELINE, H5E_NOENCODER, Filter present but encoding disabled
 # Block tracker errors
 MINOR, BLKTRK, H5E_OVERLAPS, Blocks overlap
 
+# System level errors
+MINOR, SYSTEM, H5E_SYSERRSTR, System error message

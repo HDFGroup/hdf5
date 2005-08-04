@@ -97,6 +97,9 @@ H5E_CANTSENDMDATA_g=
 H5E_CANTCHANGE_g=    
 H5E_CANTALLOC_g=
 
+/* System level errors */    
+H5E_SYSERRSTR_g=
+
 /* I/O pipeline errors */    
 H5E_NOFILTER_g=    
 H5E_CALLBACK_g=    

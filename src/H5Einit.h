@@ -333,6 +333,13 @@ if((msg = H5E_create_msg(cls, H5E_MINOR, "Can't allocate from file"))==NULL)
 if((H5E_CANTALLOC_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
+/* System level errors */
+assert(H5E_SYSERRSTR_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "System error message"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_SYSERRSTR_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+
 /* I/O pipeline errors */
 assert(H5E_NOFILTER_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MINOR, "Requested filter is not available"))==NULL)

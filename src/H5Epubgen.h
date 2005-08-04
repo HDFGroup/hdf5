@@ -158,6 +158,10 @@ H5_DLLVAR hid_t H5E_CANTSENDMDATA_g; /* Can't send metadata message */
 H5_DLLVAR hid_t H5E_CANTCHANGE_g;    /* Can't register change with server */
 H5_DLLVAR hid_t H5E_CANTALLOC_g;     /* Can't allocate from file */
 
+/* System level errors */
+#define H5E_SYSERRSTR        (H5OPEN H5E_SYSERRSTR_g)
+H5_DLLVAR hid_t H5E_SYSERRSTR_g;     /* System error message */
+
 /* I/O pipeline errors */
 #define H5E_NOFILTER         (H5OPEN H5E_NOFILTER_g)
 #define H5E_CALLBACK         (H5OPEN H5E_CALLBACK_g)
