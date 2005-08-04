@@ -362,11 +362,10 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
     if (H5F_ACC_EXCL & flags) o_flags |= O_EXCL;
 
     /* Open the file */
-    if ((fd=HDopen(name, o_flags, 0666))<0){
+    if ((fd=HDopen(name, o_flags, 0666))<0)
         HSYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
-    }
     if (HDfstat(fd, &sb)<0)
-        HGOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file")
+        HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file")
 
     /* Create the new file struct */
     if (NULL==(file=H5FL_CALLOC(H5FD_sec2_t)))

@@ -127,7 +127,7 @@ H5_DLL herr_t  H5E_dump_api_stack(int is_api);
  * stack.
  */
 #define	HSYS_ERROR(errnum){						      \
-    HERROR(H5E_INTERNAL, H5E_SYSERRSTR, strerror(errnum));                    \
+    HERROR(H5E_INTERNAL, H5E_SYSERRSTR, HDstrerror(errnum));                  \
 }
 #define	HSYS_DONE_ERROR(majorcode, minorcode, retcode, str){				      \
     HSYS_ERROR(errno);							      \
