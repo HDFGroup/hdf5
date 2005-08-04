@@ -120,7 +120,9 @@ test_config_ctypes(void)
     vrfy_cint_type(long, unsigned long, H5_SIZEOF_LONG);
     vrfy_ctype(float, H5_SIZEOF_FLOAT);
     vrfy_ctype(double, H5_SIZEOF_DOUBLE);
+#if H5_SIZEOF_LONG_DOUBLE >0
     vrfy_ctype(long double, H5_SIZEOF_LONG_DOUBLE);
+#endif
 
     /* standard C99 basic types */
 #if H5_SIZEOF_LONG_LONG > 0
@@ -154,7 +156,7 @@ test_config_ctypes(void)
 #endif
 
 #if H5_SIZEOF_INT_FAST16_T > 0
-    vrfy_cint_type(int_fast16_t, int_fast16_t, H5_SIZEOF_INT_FAST16_T);
+    vrfy_cint_type(int_fast16_t, uint_fast16_t, H5_SIZEOF_INT_FAST16_T);
 #endif
 
 #if H5_SIZEOF_INT_FAST32_T > 0
