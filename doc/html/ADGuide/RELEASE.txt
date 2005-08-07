@@ -1,4 +1,4 @@
-HDF5 version 1.6.4-post6 released on Sun Jul 24 20:08:54 CDT 2005
+HDF5 version 1.6.4-post7 released on Sun Aug  7 17:47:52 CDT 2005
 ================================================================================
 
 INTRODUCTION
@@ -58,6 +58,17 @@ New Features
                                             EIP 2005/04/06
     C++ API:
     --------
+	- Added missing member functions
+		H5::CompType::getMemberArrayType
+		H5::CompType::getMemberVarLenType
+		H5::AbstractDs::getArrayType
+		H5::AbstractDs::getVarLenType
+		H5::CommonFG::openArrayType
+		H5::CommonFG::openVarLenType
+		H5::PropList::copyProp -- this will replace the current
+			H5::PropList::copyProp in later releases due
+			to incorrect prototype.
+		BMR - 2005/07/27
 
 
 Support for new platforms, languages and compilers.
@@ -72,6 +83,8 @@ Bug Fixes since HDF5-1.6.4 release
 
     Library
     -------
+        - Corrected errors when querying information about a group opened
+            by dereferencing an object reference.  QAK - 2005/07/30
         - Fixed a bug with named datatypes where a copy of a named datatype
             used to create a dataset would accidentally use the original
             named datatype for the dataset's datatype.  QAK - 2005/07/23
@@ -129,6 +142,16 @@ Bug Fixes since HDF5-1.6.4 release
 
     C++ API
     -------
+	- Several member functions' prototype changed due to the 
+	  "int -> unsigned" change in the main library.  They are:
+		H5::CompType::getMemberDataType(unsigned member_num)
+		H5::CompType::getMemberCompType(unsigned member_num)
+		H5::CompType::getMemberEnumType(unsigned member_num)
+		H5::CompType::getMemberIntType(unsigned member_num)
+		H5::CompType::getMemberFloatType(unsigned member_num)
+		H5::CompType::getMemberStrType(unsigned member_num)
+		BMR - 2005/07/27
+
 
 
 Documentation
