@@ -1,7 +1,7 @@
 # Add libtool shared library version numbers to the HDF5 library
 # See libtool versioning documentation online.
 LT_VERS_INTERFACE = 2
-LT_VERS_REVISION = 3
+LT_VERS_REVISION = 4
 LT_VERS_AGE = 2
 
 ## If the API changes *at all*, increment LT_VERS_INTERFACE and
