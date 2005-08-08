@@ -139,7 +139,7 @@ H5Tcommit_expand(hid_t loc_id, const char *name, hid_t type_id, hid_t tcpl_id, h
         tcpl_id = H5P_DATATYPE_CREATE_DEFAULT;
     else
         if(TRUE != H5P_isa_class(tcpl_id, H5P_DATATYPE_CREATE))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not datatype create property list")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype create property list")
 
 #ifdef LATER
     /* Get correct property list */
@@ -147,7 +147,7 @@ H5Tcommit_expand(hid_t loc_id, const char *name, hid_t type_id, hid_t tcpl_id, h
         tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
     else
         if(TRUE != H5P_isa_class(tapl_id, H5P_DATATYPE_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not datatype access property list")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
 #endif /* LATER */
 
     /* Commit the type */
@@ -229,7 +229,7 @@ H5T_commit(H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id,
 
     /* Get the property list */
     if (NULL == (tc_plist = H5I_object(tcpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     if (H5G_insert (loc, name, &(type->ent), dxpl_id, tc_plist)<0)
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to name datatype")

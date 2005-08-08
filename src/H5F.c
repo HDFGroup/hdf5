@@ -61,19 +61,16 @@ typedef struct H5F_olist_t {
 } H5F_olist_t;    
 
 /* PRIVATE PROTOTYPES */
-
 #ifdef NOT_YET
-static herr_t H5F_flush_all(hbool_t invalidate);
 static int H5F_flush_all_cb(void *f, hid_t fid, void *_invalidate);
 #endif /* NOT_YET */
-
-static herr_t H5F_close(H5F_t *f);
-static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id);
-static herr_t H5F_dest(H5F_t *f, hid_t dxpl_id);
-static herr_t H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags);
 static unsigned H5F_get_objects(const H5F_t *f, unsigned types, int max_objs, hid_t *obj_id_list);
 static int H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void** file_handle);
+static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id);
+static herr_t H5F_dest(H5F_t *f, hid_t dxpl_id);
+static herr_t H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags);
+static herr_t H5F_close(H5F_t *f);
 
 /* Declare a free list to manage the H5F_t struct */
 H5FL_DEFINE_STATIC(H5F_t);
@@ -619,7 +616,7 @@ H5F_flush_all_cb(void *_f, hid_t UNUSED fid, void *_invalidate)
     H5F_t *f=(H5F_t *)_f;
     unsigned    invalidate = (*((hbool_t*)_invalidate);
 
-    FUNC_ENTER_NOAPI_NOINIT(H5F_flush_all_cb)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_flush_all_cb)
 
     H5F_flush(f, H5F_SCOPE_LOCAL, (invalidate ? H5F_FLUSH_INVALIDATE : H5F_FLUSH_NONE));
 
@@ -1441,6 +1438,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 
     if (NULL==(f=H5FL_CALLOC(H5F_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    f->file_id = -1;
 
     if (shared) {
 	f->shared = shared;
@@ -1584,10 +1582,9 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
 
     if (1==f->shared->nrefs) {
         /* Remove shared file struct from list of open files */
-        if(H5F_sfile_remove(f->shared) < 0) {
-            HERROR(H5E_FILE, H5E_CANTRELEASE, "problems closing file");
-            ret_value = FAIL; /*but keep going*/
-        } /* end if */
+        if(H5F_sfile_remove(f->shared) < 0)
+            /* Push error, but keep going*/
+            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
 
         /*
          * Do not close the root group since we didn't count it, but free
@@ -1595,47 +1592,39 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
          */
         if (f->shared->root_grp) {
             /* Free the ID to name buffer */
-            if(H5G_free_grp_name(f->shared->root_grp)<0) {
-                HERROR(H5E_FILE, H5E_CANTRELEASE, "problems closing file");
-                ret_value = FAIL; /*but keep going*/
-            } /* end if */
+            if(H5G_free_grp_name(f->shared->root_grp)<0)
+                /* Push error, but keep going*/
+                HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
 
             /* Free the memory for the root group */
-            if(H5G_free(f->shared->root_grp)<0) {
-                HERROR(H5E_FILE, H5E_CANTRELEASE, "problems closing file");
-                ret_value = FAIL; /*but keep going*/
-            } /* end if */
+            if(H5G_free(f->shared->root_grp)<0)
+                /* Push error, but keep going*/
+                HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
             f->shared->root_grp=NULL;
         }
-        if (H5AC_dest(f, dxpl_id)) {
-            HERROR(H5E_FILE, H5E_CANTRELEASE, "problems closing file");
-            ret_value = FAIL; /*but keep going*/
-        }
-        if (H5FO_dest(f)<0) {
-            HERROR(H5E_FILE, H5E_CANTRELEASE, "problems closing file");
-            ret_value = FAIL; /*but keep going*/
-        } /* end if */
+        if (H5AC_dest(f, dxpl_id))
+            /* Push error, but keep going*/
+            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
+        if (H5FO_dest(f)<0)
+            /* Push error, but keep going*/
+            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
         f->shared->cwfs = H5MM_xfree (f->shared->cwfs);
-        if (H5G_node_close(f)<0) {
-            HERROR(H5E_FILE, H5E_CANTRELEASE, "problems closing file");
-            ret_value = FAIL; /*but keep going*/
-        } /* end if */
+        if (H5G_node_close(f)<0)
+            /* Push error, but keep going*/
+            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
 
         /* Destroy file creation properties */
-        if(H5I_GENPROP_LST != H5I_get_type(f->shared->fcpl_id)) {
-            HERROR(H5E_PLIST, H5E_BADTYPE, "not a property list");
-            ret_value = FAIL; /*but keep going*/
-        } /* end if */
-        if((ret_value=H5I_dec_ref(f->shared->fcpl_id)) < 0) {
-            HERROR(H5E_PLIST, H5E_CANTFREE, "can't close property list");
-            ret_value = FAIL; /*but keep going*/
-        } /* end if */
+        if(H5I_GENPROP_LST != H5I_get_type(f->shared->fcpl_id))
+            /* Push error, but keep going*/
+            HDONE_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a property list")
+        if((ret_value=H5I_dec_ref(f->shared->fcpl_id)) < 0)
+            /* Push error, but keep going*/
+            HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close property list")
 
         /* Close low-level file */
-        if (H5FD_close(f->shared->lf)<0) {
-            HERROR(H5E_FILE, H5E_CANTINIT, "problems closing file");
-            ret_value = FAIL; /*but keep going*/
-        }
+        if (H5FD_close(f->shared->lf)<0)
+            /* Push error, but keep going*/
+            HDONE_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "problems closing file")
 
         /* Destroy shared file struct */
         f->shared = H5FL_FREE(H5F_file_t,f->shared);
@@ -2551,7 +2540,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5F_close(H5F_t *f)
 {
     herr_t	        ret_value = SUCCEED;    /* Return value */

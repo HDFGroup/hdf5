@@ -166,35 +166,41 @@ H5FL_DEFINE(H5G_shared_t);
 H5FL_BLK_EXTERN(str_buf);
 
 /* Private prototypes */
+static herr_t H5G_register_type(H5G_obj_t type, htri_t(*isa)(H5G_entry_t*, hid_t),
+				 const char *desc);
+static const char * H5G_component(const char *name, size_t *size_p);
+static const char * H5G_basename(const char *name, size_t *size_p);
+static char * H5G_normalize(const char *name);
+static herr_t H5G_namei(const H5G_entry_t *loc_ent, const char *name,
+    const char **rest/*out*/, H5G_entry_t *grp_ent/*out*/, H5G_entry_t *obj_ent/*out*/,
+    unsigned target, int *nlinks/*out*/, H5G_namei_act_t action,
+    H5G_entry_t *ent, hid_t dxpl_id);
+static herr_t H5G_traverse_slink(H5G_entry_t *grp_ent/*in,out*/,
+    H5G_entry_t *obj_ent/*in,out*/, int *nlinks/*in,out*/, hid_t dxpl_id);
 static H5G_t *H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint, 
-                                hid_t dxpl_id, hid_t gcpl_id, hid_t gapl_id);
-#ifdef NOT_YET
-static H5G_t *H5G_reopen(H5G_t *grp);
-#endif /* NOT_YET */
+    hid_t dxpl_id, hid_t gcpl_id, hid_t gapl_id);
 static htri_t H5G_isa(H5G_entry_t *ent, hid_t dxpl_id);
 static htri_t H5G_link_isa(H5G_entry_t *ent, hid_t dxpl_id);
+static H5G_t * H5G_open_oid(H5G_entry_t *ent, hid_t dxpl_id);
+static H5G_t *H5G_rootof(H5F_t *f);
 static herr_t H5G_link(H5G_entry_t *cur_loc, const char *cur_name, 
 			H5G_entry_t *new_loc, const char *new_name, 
 			H5G_link_t type, unsigned namei_flags, hid_t dxpl_id);
-static herr_t H5G_linkval(H5G_entry_t *loc, const char *name, size_t size,
-			   char *buf/*out*/, hid_t dxpl_id);
-static herr_t H5G_move(H5G_entry_t *src_loc, const char *src_name,
-			H5G_entry_t *dst_loc, const char *dst_name, hid_t dxpl_it);
-static H5G_t * H5G_open_oid(H5G_entry_t *ent, hid_t dxpl_id);
-static herr_t H5G_unlink(H5G_entry_t *loc, const char *name, hid_t dxpl_id);
 static herr_t H5G_get_num_objs(H5G_entry_t *grp, hsize_t *num_objs, hid_t dxpl_id);
 static ssize_t H5G_get_objname_by_idx(H5G_entry_t *loc, hsize_t idx, char* name, size_t size, hid_t dxpl_id);
 static H5G_obj_t H5G_get_objtype_by_idx(H5G_entry_t *loc, hsize_t idx, hid_t dxpl_id);
-static int H5G_replace_ent(void *obj_ptr, hid_t obj_id, void *key);
-static herr_t H5G_traverse_slink(H5G_entry_t *grp_ent/*in,out*/,
-                  H5G_entry_t *obj_ent/*in,out*/, int *nlinks/*in,out*/, hid_t dxpl_id);
+static herr_t H5G_linkval(H5G_entry_t *loc, const char *name, size_t size,
+			   char *buf/*out*/, hid_t dxpl_id);
 static herr_t H5G_set_comment(H5G_entry_t *loc, const char *name,
 			       const char *buf, hid_t dxpl_id);
 static int H5G_get_comment(H5G_entry_t *loc, const char *name,
 			     size_t bufsize, char *buf, hid_t dxpl_id);
-static herr_t H5G_register_type(H5G_obj_t type, htri_t(*isa)(H5G_entry_t*, hid_t),
-				 const char *desc);
-static H5G_t *H5G_rootof(H5F_t *f);
+static herr_t H5G_unlink(H5G_entry_t *loc, const char *name, hid_t dxpl_id);
+static herr_t H5G_move(H5G_entry_t *src_loc, const char *src_name,
+			H5G_entry_t *dst_loc, const char *dst_name, hid_t dxpl_it);
+static htri_t H5G_common_path(const H5RS_str_t *fullpath_r,
+    const H5RS_str_t *prefix_r);
+static int H5G_replace_ent(void *obj_ptr, hid_t obj_id, void *key);
 
 
 /*-------------------------------------------------------------------------
@@ -1140,7 +1146,7 @@ H5G_register_type(H5G_obj_t type, htri_t(*isa)(H5G_entry_t*, hid_t), const char 
     size_t	i;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
-    FUNC_ENTER_NOAPI(H5G_register_type, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_register_type);
 
     assert(type>=0);
     assert(isa);
@@ -1685,7 +1691,6 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
     H5G_entry_t         tmp_grp_ent;            /* Temporary copy of group entry */
     H5RS_str_t          *tmp_user_path_r=NULL, *tmp_canon_path_r=NULL; /* Temporary pointer to object's user path & canonical path */
     const H5HL_t        *heap;
-    unsigned		heap_flags = H5AC__NO_FLAGS_SET;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI_NOINIT(H5G_traverse_slink);
@@ -1705,7 +1710,7 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
     linkval = H5MM_xstrdup (clv);
     assert(linkval);
 
-    if (H5HL_unprotect(grp_ent->file, dxpl_id, heap, stab_mesg.heap_addr, heap_flags) < 0)
+    if (H5HL_unprotect(grp_ent->file, dxpl_id, heap, stab_mesg.heap_addr, H5AC__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read unprotect link value")
 		
     /* Hold the entry's name (& old_name) to restore later */
@@ -1732,7 +1737,7 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
     tmp_user_path_r=NULL;
     obj_ent->canon_path_r = tmp_canon_path_r;
     tmp_canon_path_r=NULL;
-	
+
 done:
     /* Error cleanup */
     if(tmp_user_path_r)
@@ -1876,7 +1881,7 @@ H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint,
     unsigned    stab_init=0;    /* Flag to indicate that the symbol table was created successfully */
     H5G_t	*ret_value;	/* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_create, NULL);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_create);
 
     /* check args */
     assert(loc);
@@ -2116,7 +2121,7 @@ H5G_open_oid(H5G_entry_t *ent, hid_t dxpl_id)
     H5G_t		*ret_value = NULL;
     H5O_stab_t		mesg;
 
-    FUNC_ENTER_NOAPI(H5G_open_oid, NULL);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_open_oid);
 
     /* Check args */
     assert(ent);
@@ -2150,44 +2155,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value);
 }
-
-#ifdef NOT_YET
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_reopen
- *
- * Purpose:	Reopens a group by incrementing the open count.
- *
- * Return:	Success:	The GRP argument.
- *
- *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *		Monday, January	 5, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-H5G_t *
-H5G_reopen(H5G_t *grp)
-{
-    H5G_t *ret_value;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5G_reopen, NULL);
-
-    assert(grp);
-    assert(grp->nref > 0);
-
-    grp->nref++;
-
-    /* Set return value */
-    ret_value=grp;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-#endif /* NOT_YET */
 
 
 /*-------------------------------------------------------------------------
@@ -2307,17 +2274,12 @@ done:
 static H5G_t *
 H5G_rootof(H5F_t *f)
 {
-    H5G_t *ret_value;   /* Return value */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_rootof);
 
-    FUNC_ENTER_NOAPI(H5G_rootof, NULL);
     while (f->mtab.parent)
         f = f->mtab.parent;
 
-    /* Set return value */
-    ret_value=f->shared->root_grp;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(f->shared->root_grp);
 }
 
 
@@ -2616,7 +2578,7 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
     size_t		offset;		/*offset to sym-link value	*/
     herr_t      ret_value=SUCCEED;       /* Return value */
     
-    FUNC_ENTER_NOAPI(H5G_link, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_link);
 
     /* Check args */
     assert (cur_loc);
@@ -2783,9 +2745,7 @@ herr_t
 H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 		 H5G_stat_t *statbuf/*out*/, hid_t dxpl_id)
 {
-    H5O_stab_t		stab_mesg;
     H5G_entry_t		grp_ent, obj_ent;
-    const char		*s = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_get_objinfo, FAIL);
@@ -2806,8 +2766,9 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
      */
     if (statbuf) {
 	if (H5G_CACHED_SLINK==obj_ent.type) {
-            const H5HL_t *heap;
-            unsigned heap_flags = H5AC__NO_FLAGS_SET;
+            H5O_stab_t	stab_mesg;      /* Symbol table message info */
+            const H5HL_t *heap;         /* Pointer to local heap for group */
+            const char	*s;             /* Pointer to link value */
 
 	    /* Named object is a symbolic link */
 	    if (NULL == H5O_read(&grp_ent, H5O_STAB_ID, 0, &stab_mesg, dxpl_id))
@@ -2820,13 +2781,11 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 
 	    statbuf->linklen = HDstrlen(s) + 1; /*count the null terminator*/
 
-            if (H5HL_unprotect(grp_ent.file, dxpl_id, heap, stab_mesg.heap_addr, heap_flags) < 0)
+            if (H5HL_unprotect(grp_ent.file, dxpl_id, heap, stab_mesg.heap_addr, H5AC__NO_FLAGS_SET) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read unprotect link value")
 
-	    statbuf->objno = 0;
-	    statbuf->nlink = 0;
+            /* Set object type */
 	    statbuf->type = H5G_LINK;
-	    statbuf->mtime = 0;
 	} else {
 	    /* Some other type of object */
 	    statbuf->objno = obj_ent.header;
@@ -2838,6 +2797,7 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
                     statbuf->mtime = 0;
                 }
 	    }
+            /* Get object type */
 	    statbuf->type = H5G_get_type(&obj_ent, dxpl_id);
 	    H5E_clear_stack(NULL); /*clear errors resulting from checking type*/
 
@@ -2849,7 +2809,7 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
         /* Common code to retrieve the file's fileno */
         if(H5F_get_fileno(obj_ent.file,&statbuf->fileno)<0)
             HGOTO_ERROR (H5E_FILE, H5E_BADVALUE, FAIL, "unable to read fileno");
-    }
+    } /* end if */
 
 done:
     /* Free the ID to name buffers */
@@ -2884,7 +2844,7 @@ H5G_get_num_objs(H5G_entry_t *loc, hsize_t *num_objs, hid_t dxpl_id)
     H5O_stab_t		stab_mesg;		/*info about B-tree	*/
     herr_t		ret_value;
     
-    FUNC_ENTER_NOAPI(H5G_get_num_objs, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_get_num_objs);
 
     /* Sanity check */
     assert(loc);
@@ -2931,7 +2891,7 @@ H5G_get_objname_by_idx(H5G_entry_t *loc, hsize_t idx, char* name, size_t size, h
     H5G_bt_ud3_t	udata;          /* Iteration information */
     ssize_t		ret_value;      /* Return value */
     
-    FUNC_ENTER_NOAPI(H5G_get_objname_by_idx, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_get_objname_by_idx);
 
     /* Sanity check */
     assert(loc);
@@ -2997,7 +2957,7 @@ H5G_get_objtype_by_idx(H5G_entry_t *loc, hsize_t idx, hid_t dxpl_id)
     H5G_bt_ud3_t	udata;          /* User data for B-tree callback */
     H5G_obj_t		ret_value;      /* Return value */
     
-    FUNC_ENTER_NOAPI(H5G_get_objtype_by_idx, H5G_UNKNOWN);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_get_objtype_by_idx);
     
     /* Sanity check */
     assert(loc);
@@ -3063,10 +3023,9 @@ H5G_linkval (H5G_entry_t *loc, const char *name, size_t size, char *buf/*out*/, 
     H5G_entry_t		grp_ent, obj_ent;
     H5O_stab_t		stab_mesg;
     const H5HL_t        *heap;
-    unsigned		heap_flags = H5AC__NO_FLAGS_SET;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
-    FUNC_ENTER_NOAPI(H5G_linkval, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_linkval);
 
     /*
      * Get the symbol table entry for the link head and the symbol table
@@ -3094,7 +3053,7 @@ H5G_linkval (H5G_entry_t *loc, const char *name, size_t size, char *buf/*out*/, 
     if (size>0 && buf)
 	HDstrncpy (buf, s, size);
 
-    if (H5HL_unprotect(grp_ent.file, dxpl_id, heap, stab_mesg.heap_addr, heap_flags) < 0)
+    if (H5HL_unprotect(grp_ent.file, dxpl_id, heap, stab_mesg.heap_addr, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read unprotect link value")
 
 done:
@@ -3130,7 +3089,7 @@ H5G_set_comment(H5G_entry_t *loc, const char *name, const char *buf, hid_t dxpl_
     H5O_name_t	comment;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
-    FUNC_ENTER_NOAPI(H5G_set_comment, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_set_comment);
 
     /* Get the symbol table entry for the object */
     if (H5G_namei(loc, name, NULL, NULL, &obj_ent/*out*/, H5G_TARGET_NORMAL,
@@ -3185,7 +3144,7 @@ H5G_get_comment(H5G_entry_t *loc, const char *name, size_t bufsize, char *buf, h
     H5G_entry_t	obj_ent;
     int	ret_value;
     
-    FUNC_ENTER_NOAPI(H5G_get_comment, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_get_comment);
 
     /* Get the symbol table entry for the object */
     if (H5G_namei(loc, name, NULL, NULL, &obj_ent/*out*/, H5G_TARGET_NORMAL,
@@ -3241,7 +3200,9 @@ H5G_unlink(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
     H5RS_str_t          *name_r;        /* Ref-counted version of name */
     herr_t      ret_value=SUCCEED;       /* Return value */
     
-    FUNC_ENTER_NOAPI(H5G_unlink, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_unlink);
+
+    /* Sanity check */
     assert(loc);
     assert(name && *name);
 
@@ -3322,7 +3283,9 @@ H5G_move(H5G_entry_t *src_loc, const char *src_name, H5G_entry_t *dst_loc,
     H5RS_str_t         *dst_name_r;     /* Ref-counted version of dest name */
     herr_t      ret_value=SUCCEED;      /* Return value */
     
-    FUNC_ENTER_NOAPI(H5G_move, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_move);
+
+    /* Sanity check */
     assert(src_loc);
     assert(dst_loc);
     assert(src_name && *src_name);
