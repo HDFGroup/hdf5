@@ -79,14 +79,6 @@ TEST_SCRIPT_CHKSH=$(TEST_SCRIPT:=.chksh_)
 TEST_SCRIPT_PARA_CHKSH=$(TEST_SCRIPT_PARA:=.chksh_)
 
 _exec_check-s: $(TEST_PROG_CHKEXE) $(TEST_SCRIPT_CHKSH)
-	@for d in dummy $(TEST_PROG_CHKEXE:.chkexe_=.log)            \
-	          $(TEST_SCRIPT_CHKSH:.chksh_=.logsh); do            \
-	   if test $$d != dummy && test $$d != .log &&               \
-	                           test $$d != .logsh; then          \
-	      cat `basename $$d`;                                    \
-	   fi;                                                       \
-	done
-
 
 # The dummy.chkexe here prevents the target from being
 # empty if there are no tests in the current directory.
@@ -121,6 +113,7 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
 	      echo "Finished testing $${tname} $(TEST_FLAGS)" >> $${log}; \
 	      echo "============================" >> $${log}; \
 	      echo "Finished testing $${tname} $(TEST_FLAGS)"; \
+	      cat $${log}; \
 	   fi; \
 	   echo "============================"; \
 	fi
@@ -159,6 +152,7 @@ $(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) dummy.chksh_:
 	      echo "Finished testing $${tname} $(TEST_FLAGS)" >> $${log}; \
 	      echo "============================" >> $${log}; \
 	      echo "Finished testing $${tname} $(TEST_FLAGS)"; \
+	      cat $${log}; \
 	   fi; \
 	   echo "============================"; \
 	fi
