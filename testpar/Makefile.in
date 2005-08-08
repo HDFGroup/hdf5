@@ -29,7 +29,7 @@
 #
 # hdf5 Parallel Library Test Makefile(.in)
 #
-SOURCES = t_fphdf5.c t_mpi.c $(testphdf5_SOURCES)
+SOURCES = t_chunk_alloc.c t_fphdf5.c t_mpi.c $(testphdf5_SOURCES)
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -65,12 +65,18 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES = testph5.sh
-am__EXEEXT_1 = t_mpi$(EXEEXT) t_fphdf5$(EXEEXT) testphdf5$(EXEEXT)
+am__EXEEXT_1 = t_mpi$(EXEEXT) t_fphdf5$(EXEEXT) testphdf5$(EXEEXT) \
+	t_chunk_alloc$(EXEEXT)
+t_chunk_alloc_SOURCES = t_chunk_alloc.c
+t_chunk_alloc_OBJECTS = t_chunk_alloc.$(OBJEXT)
+t_chunk_alloc_LDADD = $(LDADD)
+am__DEPENDENCIES_1 = $(top_builddir)/src/libhdf5.la
+am__DEPENDENCIES_2 = $(top_builddir)/test/libh5test.la
+t_chunk_alloc_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_2)
 t_fphdf5_SOURCES = t_fphdf5.c
 t_fphdf5_OBJECTS = t_fphdf5.$(OBJEXT)
 t_fphdf5_LDADD = $(LDADD)
-am__DEPENDENCIES_1 = $(top_builddir)/src/libhdf5.la
-am__DEPENDENCIES_2 = $(top_builddir)/test/libh5test.la
 t_fphdf5_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
 t_mpi_SOURCES = t_mpi.c
 t_mpi_OBJECTS = t_mpi.$(OBJEXT)
@@ -93,8 +99,8 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = t_fphdf5.c t_mpi.c $(testphdf5_SOURCES)
-DIST_SOURCES = t_fphdf5.c t_mpi.c $(testphdf5_SOURCES)
+SOURCES = t_chunk_alloc.c t_fphdf5.c t_mpi.c $(testphdf5_SOURCES)
+DIST_SOURCES = t_chunk_alloc.c t_fphdf5.c t_mpi.c $(testphdf5_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -326,7 +332,7 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test
 
 # Test programs and scripts.  These are our main targets.
 #
-TEST_PROG_PARA = t_mpi t_fphdf5 testphdf5
+TEST_PROG_PARA = t_mpi t_fphdf5 testphdf5 t_chunk_alloc
 TEST_SCRIPT_PARA = testph5.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 testphdf5_SOURCES = testphdf5.c t_dset.c t_file.c t_mdset.c t_ph5basic.c \
@@ -396,6 +402,9 @@ clean-checkPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
+t_chunk_alloc$(EXEEXT): $(t_chunk_alloc_OBJECTS) $(t_chunk_alloc_DEPENDENCIES) 
+	@rm -f t_chunk_alloc$(EXEEXT)
+	$(LINK) $(t_chunk_alloc_LDFLAGS) $(t_chunk_alloc_OBJECTS) $(t_chunk_alloc_LDADD) $(LIBS)
 t_fphdf5$(EXEEXT): $(t_fphdf5_OBJECTS) $(t_fphdf5_DEPENDENCIES) 
 	@rm -f t_fphdf5$(EXEEXT)
 	$(LINK) $(t_fphdf5_LDFLAGS) $(t_fphdf5_OBJECTS) $(t_fphdf5_LDADD) $(LIBS)
@@ -412,6 +421,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_chunk_alloc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_coll_chunk.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_dset.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_file.Po@am__quote@
@@ -701,69 +711,77 @@ _exec_check-s: $(TEST_PROG_CHKEXE) $(TEST_SCRIPT_CHKSH)
 
 # The dummy.chkexe here prevents the target from being
 # empty if there are no tests in the current directory.
+# $${log} is the log file.
+# $${tname} is the name of test.
 $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
 	@if test "X$@" != "X.chkexe_" && test "X$@" != "Xdummy.chkexe_"; then \
-	  echo "============================"; \
-	  if $(top_srcdir)/bin/newer $(@:.chkexe_=.chkexe) $(@:.chkexe_=)$(EXEEXT); then \
-	    echo "No need to test $(@:.chkexe_=)$(EXEEXT) again."; \
-	  else \
-	    echo "============================" > $(@:.chkexe_=.log); \
-	    if test "X$(HDF_FORTRAN)" = "Xyes"; then \
-	      echo "Fortran API: Testing $(@:.chkexe_=)$(EXEEXT) $(TEST_FLAGS)"; \
-	      echo "Fortran API: $(@:.chkexe_=)$(EXEEXT) $(TEST_FLAGS) Test Log" >> $(@:.chkexe_=.log); \
-	    elif test "X$(HDF_CXX)" = "Xyes"; then \
-	      echo "C++ API: Testing $(@:.chkexe_=)$(EXEEXT) $(TEST_FLAGS)"; \
-	      echo "C++ API: $(@:.chkexe_=)$(EXEEXT) $(TEST_FLAGS) Test Log" >> $(@:.chkexe_=.log);\
-	    else \
-	      echo "Testing $(@:.chkexe_=)$(EXEEXT) $(TEST_FLAGS)"; \
-	      echo "$(@:.chkexe_=)$(EXEEXT) $(TEST_FLAGS) Test Log" >> $(@:.chkexe_=.log); \
-	    fi; \
-	    echo "============================" >> $(@:.chkexe_=.log); \
-	    srcdir="$(srcdir)" \
-	      $(RUNTESTS) ./$(@:.chkexe_=)$(EXEEXT) $(TEST_FLAGS) 2>&1 >> $(@:.chkexe_=.log) \
-	      && touch $(@:.chkexe_=.chkexe) || \
-	      (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
-	      (cat $(@:.chkexe_=.log) && false) || exit 1; \
-	    echo "" >> $(@:.chkexe_=.log); \
-	    echo "Finished testing $(@:.chkexe_=)$(EXEEXT) $(TEST_FLAGS)" >> $(@:.chkexe_=.log); \
-	    echo "============================" >> $(@:.chkexe_=.log); \
-	    echo "Finished testing $(@:.chkexe_=)$(EXEEXT) $(TEST_FLAGS)"; \
-	  fi; \
-	  echo "============================"; \
+	   tname=$(@:.chkexe_=)$(EXEEXT);\
+	   log=$(@:.chkexe_=.log); \
+	   echo "============================"; \
+	   if $(top_srcdir)/bin/newer $(@:.chkexe_=.chkexe) $${tname}; then \
+	      echo "No need to test $${tname} again."; \
+	   else \
+	      echo "============================" > $${log}; \
+	      if test "X$(HDF_FORTRAN)" = "Xyes"; then \
+	         echo "Fortran API: Testing $${tname} $(TEST_FLAGS)"; \
+	         echo "Fortran API: $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+	      elif test "X$(HDF_CXX)" = "Xyes"; then \
+	         echo "C++ API: Testing $${tname} $(TEST_FLAGS)"; \
+	         echo "C++ API: $${tname} $(TEST_FLAGS) Test Log" >> $${log};\
+	      else \
+	         echo "Testing $${tname} $(TEST_FLAGS)"; \
+	         echo "$${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+	      fi; \
+	      echo "============================" >> $${log}; \
+	      srcdir="$(srcdir)" \
+	         $(RUNTESTS) ./$${tname} $(TEST_FLAGS) >> $${log} 2>&1 \
+	         && touch $(@:.chkexe_=.chkexe) || \
+	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
+	         (cat $${log} && false) || exit 1; \
+	      echo "" >> $${log}; \
+	      echo "Finished testing $${tname} $(TEST_FLAGS)" >> $${log}; \
+	      echo "============================" >> $${log}; \
+	      echo "Finished testing $${tname} $(TEST_FLAGS)"; \
+	   fi; \
+	   echo "============================"; \
 	fi
 
 # The dummy.chksh here prevents the target from being
 # empty if there are no tests in the current directory.
+# $${log} is the log file.
+# $${tname} is the name of test.
 $(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) dummy.chksh_:
 	@if test "X$@" != "X.chksh_" && test "X$@" != "Xdummy.chksh_"; then \
-	  echo "============================"; \
-	  if $(top_srcdir)/bin/newer `basename $(@:.chksh_=.chksh)` $(@:.chksh_=); then \
-	    echo "No need to test `basename $(@:.chksh_=)` again."; \
-	  else \
-	    echo "============================" > `basename $(@:.chksh_=.logsh)`; \
-	    if test "X$(HDF_FORTRAN)" = "Xyes"; then \
-	      echo "Fortran API: Testing `basename $(@:.chksh_=)` $(TEST_FLAGS)"; \
-	      echo "Fortran API: `basename $(@:.chksh_=)` $(TEST_FLAGS) Test Log" >> `basename $(@:.chksh_=.logsh)`; \
-	    elif test "X$(HDF_CXX)" = "Xyes"; then \
-	      echo "C++ API: Testing `basename $(@:.chksh_=)` $(TEST_FLAGS)"; \
-	      echo "C++ API: `basename $(@:.chksh_=)` $(TEST_FLAGS) Test Log" >> `baename $(@:.chksh_=.logsh)`; \
-	    else \
-	      echo "Testing `basename $(@:.chksh_=)` $(TEST_FLAGS)"; \
-	      echo "`basename $(@:.chksh_=)` $(TEST_FLAGS) Test Log" >> `basename $(@:.chksh_=.logsh)`; \
-	    fi; \
-	    echo "============================" >> `basename $(@:.chksh_=.logsh)`; \
-	    RUNSERIAL="$(RUNSERIAL)" RUNPARALLEL="$(RUNPARALLEL)"           \
-	    srcdir="$(srcdir)" \
-	      $(SHELL) $(@:.chksh_=) $(TEST_FLAGS) 2>&1 >> `basename $(@:.chksh_=.logsh)` \
-	      && touch `basename $(@:.chksh_=.chksh)` || \
-	      (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
-	      (cat `basename $(@:.chksh_=.logsh)` && false) || exit 1; \
-	    echo "" >> `basename $(@:.chksh_=.logsh)`; \
-	    echo "Finished testing `basename $(@:.chksh_=)` $(TEST_FLAGS)" >> `basename $(@:.chksh_=.logsh)`; \
-	    echo "============================" >> `basename $(@:.chksh_=.logsh)`; \
-	    echo "Finished testing `basename $(@:.chksh_=)` $(TEST_FLAGS)"; \
-	  fi; \
-	  echo "============================"; \
+	   tname=`basename $(@:.chksh_=)`;\
+	   log=`basename $(@:.chksh_=.logsh)`; \
+	   echo "============================"; \
+	   if $(top_srcdir)/bin/newer `basename $(@:.chksh_=.chksh)` $(@:.chksh_=); then \
+	      echo "No need to test $${tname} again."; \
+	   else \
+	      echo "============================" > $${log}; \
+	      if test "X$(HDF_FORTRAN)" = "Xyes"; then \
+	         echo "Fortran API: Testing $${tname} $(TEST_FLAGS)"; \
+	         echo "Fortran API: $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+	      elif test "X$(HDF_CXX)" = "Xyes"; then \
+	         echo "C++ API: Testing $${tname} $(TEST_FLAGS)"; \
+	         echo "C++ API: $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+	      else \
+	         echo "Testing $${tname} $(TEST_FLAGS)"; \
+	         echo "$${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+	      fi; \
+	      echo "============================" >> $${log}; \
+	      RUNSERIAL="$(RUNSERIAL)" RUNPARALLEL="$(RUNPARALLEL)"           \
+	      srcdir="$(srcdir)" \
+	         $(SHELL) $(@:.chksh_=) $(TEST_FLAGS) >> $${log} 2>&1 \
+	         && touch `basename $(@:.chksh_=.chksh)` || \
+	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
+	         (cat $${log} && false) || exit 1; \
+	      echo "" >> $${log}; \
+	      echo "Finished testing $${tname} $(TEST_FLAGS)" >> $${log}; \
+	      echo "============================" >> $${log}; \
+	      echo "Finished testing $${tname} $(TEST_FLAGS)"; \
+	   fi; \
+	   echo "============================"; \
 	fi
 
 # Actual execution of check-p.

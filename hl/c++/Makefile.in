@@ -701,69 +701,77 @@ _exec_check-s: $(TEST_PROG_CHKEXE) $(TEST_SCRIPT_CHKSH)
 
 # The dummy.chkexe here prevents the target from being
 # empty if there are no tests in the current directory.
+# $${log} is the log file.
+# $${tname} is the name of test.
 $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
 	@if test "X$@" != "X.chkexe_" && test "X$@" != "Xdummy.chkexe_"; then \
-	  echo "============================"; \
-	  if $(top_srcdir)/bin/newer $(@:.chkexe_=.chkexe) $(@:.chkexe_=)$(EXEEXT); then \
-	    echo "No need to test $(@:.chkexe_=)$(EXEEXT) again."; \
-	  else \
-	    echo "============================" > $(@:.chkexe_=.log); \
-	    if test "X$(HDF_FORTRAN)" = "Xyes"; then \
-	      echo "Fortran API: Testing $(@:.chkexe_=)$(EXEEXT) $(TEST_FLAGS)"; \
-	      echo "Fortran API: $(@:.chkexe_=)$(EXEEXT) $(TEST_FLAGS) Test Log" >> $(@:.chkexe_=.log); \
-	    elif test "X$(HDF_CXX)" = "Xyes"; then \
-	      echo "C++ API: Testing $(@:.chkexe_=)$(EXEEXT) $(TEST_FLAGS)"; \
-	      echo "C++ API: $(@:.chkexe_=)$(EXEEXT) $(TEST_FLAGS) Test Log" >> $(@:.chkexe_=.log);\
-	    else \
-	      echo "Testing $(@:.chkexe_=)$(EXEEXT) $(TEST_FLAGS)"; \
-	      echo "$(@:.chkexe_=)$(EXEEXT) $(TEST_FLAGS) Test Log" >> $(@:.chkexe_=.log); \
-	    fi; \
-	    echo "============================" >> $(@:.chkexe_=.log); \
-	    srcdir="$(srcdir)" \
-	      $(RUNTESTS) ./$(@:.chkexe_=)$(EXEEXT) $(TEST_FLAGS) 2>&1 >> $(@:.chkexe_=.log) \
-	      && touch $(@:.chkexe_=.chkexe) || \
-	      (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
-	      (cat $(@:.chkexe_=.log) && false) || exit 1; \
-	    echo "" >> $(@:.chkexe_=.log); \
-	    echo "Finished testing $(@:.chkexe_=)$(EXEEXT) $(TEST_FLAGS)" >> $(@:.chkexe_=.log); \
-	    echo "============================" >> $(@:.chkexe_=.log); \
-	    echo "Finished testing $(@:.chkexe_=)$(EXEEXT) $(TEST_FLAGS)"; \
-	  fi; \
-	  echo "============================"; \
+	   tname=$(@:.chkexe_=)$(EXEEXT);\
+	   log=$(@:.chkexe_=.log); \
+	   echo "============================"; \
+	   if $(top_srcdir)/bin/newer $(@:.chkexe_=.chkexe) $${tname}; then \
+	      echo "No need to test $${tname} again."; \
+	   else \
+	      echo "============================" > $${log}; \
+	      if test "X$(HDF_FORTRAN)" = "Xyes"; then \
+	         echo "Fortran API: Testing $${tname} $(TEST_FLAGS)"; \
+	         echo "Fortran API: $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+	      elif test "X$(HDF_CXX)" = "Xyes"; then \
+	         echo "C++ API: Testing $${tname} $(TEST_FLAGS)"; \
+	         echo "C++ API: $${tname} $(TEST_FLAGS) Test Log" >> $${log};\
+	      else \
+	         echo "Testing $${tname} $(TEST_FLAGS)"; \
+	         echo "$${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+	      fi; \
+	      echo "============================" >> $${log}; \
+	      srcdir="$(srcdir)" \
+	         $(RUNTESTS) ./$${tname} $(TEST_FLAGS) >> $${log} 2>&1 \
+	         && touch $(@:.chkexe_=.chkexe) || \
+	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
+	         (cat $${log} && false) || exit 1; \
+	      echo "" >> $${log}; \
+	      echo "Finished testing $${tname} $(TEST_FLAGS)" >> $${log}; \
+	      echo "============================" >> $${log}; \
+	      echo "Finished testing $${tname} $(TEST_FLAGS)"; \
+	   fi; \
+	   echo "============================"; \
 	fi
 
 # The dummy.chksh here prevents the target from being
 # empty if there are no tests in the current directory.
+# $${log} is the log file.
+# $${tname} is the name of test.
 $(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) dummy.chksh_:
 	@if test "X$@" != "X.chksh_" && test "X$@" != "Xdummy.chksh_"; then \
-	  echo "============================"; \
-	  if $(top_srcdir)/bin/newer `basename $(@:.chksh_=.chksh)` $(@:.chksh_=); then \
-	    echo "No need to test `basename $(@:.chksh_=)` again."; \
-	  else \
-	    echo "============================" > `basename $(@:.chksh_=.logsh)`; \
-	    if test "X$(HDF_FORTRAN)" = "Xyes"; then \
-	      echo "Fortran API: Testing `basename $(@:.chksh_=)` $(TEST_FLAGS)"; \
-	      echo "Fortran API: `basename $(@:.chksh_=)` $(TEST_FLAGS) Test Log" >> `basename $(@:.chksh_=.logsh)`; \
-	    elif test "X$(HDF_CXX)" = "Xyes"; then \
-	      echo "C++ API: Testing `basename $(@:.chksh_=)` $(TEST_FLAGS)"; \
-	      echo "C++ API: `basename $(@:.chksh_=)` $(TEST_FLAGS) Test Log" >> `baename $(@:.chksh_=.logsh)`; \
-	    else \
-	      echo "Testing `basename $(@:.chksh_=)` $(TEST_FLAGS)"; \
-	      echo "`basename $(@:.chksh_=)` $(TEST_FLAGS) Test Log" >> `basename $(@:.chksh_=.logsh)`; \
-	    fi; \
-	    echo "============================" >> `basename $(@:.chksh_=.logsh)`; \
-	    RUNSERIAL="$(RUNSERIAL)" RUNPARALLEL="$(RUNPARALLEL)"           \
-	    srcdir="$(srcdir)" \
-	      $(SHELL) $(@:.chksh_=) $(TEST_FLAGS) 2>&1 >> `basename $(@:.chksh_=.logsh)` \
-	      && touch `basename $(@:.chksh_=.chksh)` || \
-	      (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
-	      (cat `basename $(@:.chksh_=.logsh)` && false) || exit 1; \
-	    echo "" >> `basename $(@:.chksh_=.logsh)`; \
-	    echo "Finished testing `basename $(@:.chksh_=)` $(TEST_FLAGS)" >> `basename $(@:.chksh_=.logsh)`; \
-	    echo "============================" >> `basename $(@:.chksh_=.logsh)`; \
-	    echo "Finished testing `basename $(@:.chksh_=)` $(TEST_FLAGS)"; \
-	  fi; \
-	  echo "============================"; \
+	   tname=`basename $(@:.chksh_=)`;\
+	   log=`basename $(@:.chksh_=.logsh)`; \
+	   echo "============================"; \
+	   if $(top_srcdir)/bin/newer `basename $(@:.chksh_=.chksh)` $(@:.chksh_=); then \
+	      echo "No need to test $${tname} again."; \
+	   else \
+	      echo "============================" > $${log}; \
+	      if test "X$(HDF_FORTRAN)" = "Xyes"; then \
+	         echo "Fortran API: Testing $${tname} $(TEST_FLAGS)"; \
+	         echo "Fortran API: $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+	      elif test "X$(HDF_CXX)" = "Xyes"; then \
+	         echo "C++ API: Testing $${tname} $(TEST_FLAGS)"; \
+	         echo "C++ API: $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+	      else \
+	         echo "Testing $${tname} $(TEST_FLAGS)"; \
+	         echo "$${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+	      fi; \
+	      echo "============================" >> $${log}; \
+	      RUNSERIAL="$(RUNSERIAL)" RUNPARALLEL="$(RUNPARALLEL)"           \
+	      srcdir="$(srcdir)" \
+	         $(SHELL) $(@:.chksh_=) $(TEST_FLAGS) >> $${log} 2>&1 \
+	         && touch `basename $(@:.chksh_=.chksh)` || \
+	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
+	         (cat $${log} && false) || exit 1; \
+	      echo "" >> $${log}; \
+	      echo "Finished testing $${tname} $(TEST_FLAGS)" >> $${log}; \
+	      echo "============================" >> $${log}; \
+	      echo "Finished testing $${tname} $(TEST_FLAGS)"; \
+	   fi; \
+	   echo "============================"; \
 	fi
 
 # Actual execution of check-p.
