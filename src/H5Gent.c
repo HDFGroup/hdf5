@@ -203,21 +203,21 @@ H5G_ent_decode(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
 
     /* decode scratch-pad */
     switch (ent->type) {
-    case H5G_NOTHING_CACHED:
-        break;
+        case H5G_NOTHING_CACHED:
+            break;
 
-    case H5G_CACHED_STAB:
-        assert(2 * H5F_SIZEOF_ADDR(f) <= H5G_SIZEOF_SCRATCH);
-        H5F_addr_decode(f, pp, &(ent->cache.stab.btree_addr));
-        H5F_addr_decode(f, pp, &(ent->cache.stab.heap_addr));
-        break;
+        case H5G_CACHED_STAB:
+            assert(2 * H5F_SIZEOF_ADDR(f) <= H5G_SIZEOF_SCRATCH);
+            H5F_addr_decode(f, pp, &(ent->cache.stab.btree_addr));
+            H5F_addr_decode(f, pp, &(ent->cache.stab.heap_addr));
+            break;
 
-    case H5G_CACHED_SLINK:
-	UINT32DECODE (*pp, ent->cache.slink.lval_offset);
-	break;
+        case H5G_CACHED_SLINK:
+            UINT32DECODE (*pp, ent->cache.slink.lval_offset);
+            break;
 
-    default:
-        HDabort();
+        default:
+            HDabort();
     }
 
     *pp = p_ret + H5G_SIZEOF_ENTRY(f);
@@ -486,8 +486,8 @@ H5G_ent_debug(H5F_t UNUSED *f, hid_t dxpl_id, const H5G_entry_t *ent, FILE * str
 
         case H5G_CACHED_SLINK:
             HDfprintf (stream, "Symbolic Link\n");
-            HDfprintf(stream, "%*s%-*s ", indent, "", fwidth,
-                      "Cached information:\n");
+            HDfprintf(stream, "%*s%-*s\n", indent, "", fwidth,
+                      "Cached information:");
             HDfprintf (stream, "%*s%-*s %lu\n", nested_indent, "", nested_fwidth,
                        "Link value offset:",
                        (unsigned long)(ent->cache.slink.lval_offset));
