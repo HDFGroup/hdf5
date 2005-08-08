@@ -41,6 +41,9 @@ New Features
 
     Library:
     --------
+       - Added HSYS_ERROR which retrieves the system error message and pushes
+         it to the error stack.  This gives more information of the failed
+	 system call. AKC - 2005/08/04
        - Added H5F_OBJ_LOCAL flag to H5Fget_obj_count() & H5Fget_obj_ids(), to
           allow querying for objects in file that were opened with a particular
           file ID, instead of all objects opened in file with any file ID.

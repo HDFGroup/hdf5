@@ -104,6 +104,26 @@ H5_DLL herr_t H5E_push (H5E_major_t maj_num, H5E_minor_t min_num,
 H5_DLL herr_t H5E_clear (void);
 H5_DLL herr_t H5E_dump_api_stack (int is_api);
 
+/*
+ * Macros handling system error messages as described in C standard.
+ * These macros assume errnum is a valid system error code.
+ */
+
+/* Retrieve the error code description string and push it onto the error
+ * stack.
+ */
+#define	HSYS_ERROR(errnum){						      \
+    HERROR(H5E_INTERNAL, H5E_SYSERRSTR, HDstrerror(errnum));                  \
+}
+#define	HSYS_DONE_ERROR(majorcode, minorcode, retcode, str){				      \
+    HSYS_ERROR(errno);							      \
+    HDONE_ERROR(majorcode, minorcode, retcode, str);			      \
+}
+#define	HSYS_GOTO_ERROR(majorcode, minorcode, retcode, str){				      \
+    HSYS_ERROR(errno);							      \
+    HGOTO_ERROR(majorcode, minorcode, retcode, str);			      \
+}
+
 #ifdef H5_HAVE_PARALLEL
 /*
  * MPI error handling macros.

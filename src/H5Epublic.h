@@ -228,7 +228,10 @@ typedef enum H5E_minor_t {
     H5E_CALLBACK,               /*callback failed                            */
     H5E_CANAPPLY,               /*error from filter "can apply" callback     */
     H5E_SETLOCAL,               /*error from filter "set local" callback     */
-    H5E_NOENCODER               /* Filter present, but encoding disabled     */
+    H5E_NOENCODER,              /* Filter present, but encoding disabled     */
+
+    /* System level errors */
+    H5E_SYSERRSTR               /* System error message			     */
 } H5E_minor_t;
 
 /* Information about an error */

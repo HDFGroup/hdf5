@@ -200,8 +200,10 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
     {H5E_CALLBACK,      "Callback failed"},
     {H5E_CANAPPLY,      "Error from filter \"can apply\" callback"},
     {H5E_SETLOCAL,      "Error from filter \"set local\" callback"},
-    {H5E_NOENCODER,     "Filter present, but encoder not enabled"}
+    {H5E_NOENCODER,     "Filter present, but encoder not enabled"},
 
+    /* I/O pipeline errors */
+    {H5E_SYSERRSTR,     "System error message"}
 };
 
 /* Interface initialization? */
