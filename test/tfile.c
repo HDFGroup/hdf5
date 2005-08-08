@@ -584,6 +584,10 @@ test_file_close(void)
     ret = H5Fclose(fid2);
     VERIFY(ret, FAIL, "H5Fclose");
 
+    /* Same check with H5Idec_ref() (should fail also) */
+    ret = H5Idec_ref(fid2);
+    VERIFY(ret, FAIL, "H5Idec_ref");
+
     ret = H5Gclose(group_id3);
     CHECK(ret, FAIL, "H5Gclose");
 

@@ -173,5 +173,10 @@ H5_DLL herr_t H5F_init_superblock(const H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5F_write_superblock(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent);
 
+/* Shared file list related routines */
+H5_DLL herr_t H5F_sfile_add(H5F_file_t *shared);
+H5_DLL H5F_file_t * H5F_sfile_search(H5FD_t *lf);
+H5_DLL herr_t H5F_sfile_remove(H5F_file_t *shared);
+
 #endif
 

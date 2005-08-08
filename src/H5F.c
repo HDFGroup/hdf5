@@ -61,12 +61,6 @@ typedef struct H5F_olist_t {
     int   max_index;            /* Maximum # of IDs to put into array */
 } H5F_olist_t;    
 
-/* Struct for tracking "shared" file structs */
-typedef struct H5F_sfile_node_t {
-    H5F_file_t *shared;         /* Pointer to "shared" struct */
-    struct H5F_sfile_node_t *next;   /* Pointer to next node */
-} H5F_sfile_node_t;
-
 /* PRIVATE PROTOTYPES */
 static H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id, 
 			hid_t fapl_id, hid_t dxpl_id);
@@ -84,22 +78,11 @@ static unsigned H5F_get_objects(const H5F_t *f, unsigned types, int max_objs, hi
 static int H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void** file_handle);
 
-/* Routines to operate on the shared file list */
-static herr_t H5F_shared_add(H5F_file_t *shared);
-static H5F_file_t * H5F_shared_search(H5FD_t *lf);
-static herr_t H5F_shared_remove(H5F_file_t *shared);
-
 /* Declare a free list to manage the H5F_t struct */
 H5FL_DEFINE_STATIC(H5F_t);
 
 /* Declare a free list to manage the H5F_file_t struct */
 H5FL_DEFINE_STATIC(H5F_file_t);
-
-/* Declare a free list to manage the H5F_sfile_node_t struct */
-H5FL_DEFINE_STATIC(H5F_sfile_node_t);
-
-/* Declare a local variable to track the shared file information */
-H5F_sfile_node_t *H5F_sfile_head_g = NULL;
 
 
 /*-------------------------------------------------------------------------
@@ -443,7 +426,7 @@ H5F_term_interface(void)
             H5I_clear_group(H5I_FILE, FALSE);
 	} else {
             /* Make certain we've cleaned up all the shared file objects */
-            HDassert(H5F_sfile_head_g == NULL);
+            H5F_sfile_assert_num(0);
 
 	    H5I_destroy_group(H5I_FILE);
 	    H5_interface_initialize_g = 0;
@@ -1477,7 +1460,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create open object data structure")
 
         /* Add new "shared" struct to list of open files */
-        if(H5F_shared_add(f->shared) < 0)
+        if(H5F_sfile_add(f->shared) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to append to list of open files")
     } /* end else */
     
@@ -1543,7 +1526,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
 
     if (1==f->shared->nrefs) {
         /* Remove shared file struct from list of open files */
-        if(H5F_shared_remove(f->shared) < 0) {
+        if(H5F_sfile_remove(f->shared) < 0) {
             HERROR(H5E_FILE, H5E_CANTRELEASE, "problems closing file");
             ret_value = FAIL; /*but keep going*/
         } /* end if */
@@ -1752,7 +1735,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
     } /* end if */
 
     /* Is the file already open? */
-    if ((shared = H5F_shared_search(lf)) != NULL) {
+    if ((shared = H5F_sfile_search(lf)) != NULL) {
 	/*
 	 * The file is already open, so use that one instead of the one we
 	 * just opened. We only one one H5FD_t* per file so one doesn't
@@ -2365,6 +2348,24 @@ H5F_close(H5F_t *f)
     HDassert(f);
     HDassert(f->file_id > 0);   /* This routine should only be called when a file ID's ref count drops to zero */
 
+    /* Perform checks for "semi" file close degree here, since closing the
+     * file is not allowed if there are objects still open */
+    if(f->shared->fc_degree == H5F_CLOSE_SEMI) {
+        unsigned nopen_files = 0;       /* Number of open files in file/mount hierarchy */
+        unsigned nopen_objs = 0;        /* Number of open objects in file/mount hierarchy */
+
+        /* Get the number of open objects and open files on this file/mount hierarchy */
+        if(H5F_mount_count_ids(f, &nopen_files, &nopen_objs) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_MOUNT, FAIL, "problem checking mount hierarchy")
+
+        /* If there are no other file IDs open on this file/mount hier., but
+         * there are still open objects, issue an error and bail out now,
+         * without decrementing the file ID's reference count and triggering
+         * a "real" attempt at closing the file */
+        if(nopen_files == 1 && nopen_objs > 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file, there are objects still open")
+    } /* end if */
+
     /* Reset the file ID for this file */
     f->file_id = -1;
 
@@ -2545,42 +2546,14 @@ done:
 herr_t
 H5Fclose(hid_t file_id)
 {
-    H5F_t	*f;
     herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5Fclose, FAIL)
     H5TRACE1("e","i",file_id);
 
     /* Check/fix arguments. */
-    if (NULL == (f = H5I_object_verify(file_id,H5I_FILE)))
+    if (H5I_FILE != H5I_get_type(file_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID")
-
-    /* Perform checks for "semi" file close degree here, since closing the
-     * file ID will mess things up if we need to return FAIL */
-    if(f->shared->fc_degree == H5F_CLOSE_SEMI) {
-        int ref_count;                  /* Reference count for file's ID */
-
-        /* Get the reference count for this ID */
-        if((ref_count = H5I_get_ref(file_id)) < 0)
-            HGOTO_ERROR (H5E_ATOM, H5E_CANTGET, FAIL, "can't get ID ref count")
-
-        /* If we will be decrementing the reference count to zero, check for objects open */
-        if(ref_count == 1) {
-            unsigned nopen_files = 0;       /* Number of open files in file/mount hierarchy */
-            unsigned nopen_objs = 0;        /* Number of open objects in file/mount hierarchy */
-
-            /* Get the number of open objects and open files on this file/mount hierarchy */
-            if(H5F_mount_count_ids(f, &nopen_files, &nopen_objs) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_MOUNT, FAIL, "problem checking mount hierarchy")
-
-            /* If there are no other file IDs open on this file/mount hier., but
-             * there are still open objects, issue an error and bail out now,
-             * before decrementing the file ID's reference count and triggering
-             * a "real" attempt at closing the file */
-            if(nopen_files == 1 && nopen_objs > 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file, there are objects still open")
-        } /* end if */
-    } /* end if */
 
     /*
      * Decrement reference count on atom.  When it reaches zero the file will
@@ -3632,143 +3605,4 @@ H5Fget_name(hid_t obj_id, char *name/*out*/, size_t size)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_name() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_shared_add
- *
- * Purpose:	Add a "shared" file struct to the list of open files
- *
- * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *              Monday, July 18, 2005
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5F_shared_add(H5F_file_t *shared)
-{
-    H5F_sfile_node_t *new_shared;              /* New shared file node */
-    herr_t ret_value = SUCCEED;         /* Return value */
-    
-    FUNC_ENTER_NOAPI_NOINIT(H5F_shared_add)
-
-    /* Sanity check */
-    HDassert(shared);
-
-    /* Allocate new shared file node */
-    if (NULL == (new_shared = H5FL_CALLOC(H5F_sfile_node_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-    /* Set shared file value */
-    new_shared->shared = shared;
-
-    /* Prepend to list of shared files open */
-    new_shared->next = H5F_sfile_head_g;
-    H5F_sfile_head_g = new_shared;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_shared_add() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_shared_search
- *
- * Purpose:	Search for a "shared" file with low-level file info that
- *              matches
- *
- * Return:	Non-NULL on success / NULL on failure
- *
- * Programmer:	Quincey Koziol
- *              Monday, July 18, 2005
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static H5F_file_t *
-H5F_shared_search(H5FD_t *lf)
-{
-    H5F_sfile_node_t *curr;             /* Current shared file node */
-    H5F_file_t *ret_value = NULL;       /* Return value */
-    
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_shared_search)
-
-    /* Sanity check */
-    HDassert(lf);
-
-    /* Iterate through low-level files for matching low-level file info */
-    curr = H5F_sfile_head_g;
-    while(curr) {
-        /* Check for match */
-        if(0==H5FD_cmp(curr->shared->lf, lf))
-            HGOTO_DONE(curr->shared)
-
-        /* Advance to next shared file node */
-        curr = curr->next;
-    } /* end while */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_shared_search() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_shared_remove
- *
- * Purpose:	Remove a "shared" file struct from the list of open files
- *
- * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *              Monday, July 18, 2005
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5F_shared_remove(H5F_file_t *shared)
-{
-    H5F_sfile_node_t *curr;             /* Current shared file node */
-    H5F_sfile_node_t *last;             /* Last shared file node */
-    herr_t ret_value = SUCCEED;         /* Return value */
-    
-    FUNC_ENTER_NOAPI_NOINIT(H5F_shared_remove)
-
-    /* Sanity check */
-    HDassert(shared);
-
-    /* Locate shared file node with correct shared file */
-    last = NULL;
-    curr = H5F_sfile_head_g;
-    while(curr && curr->shared != shared) {
-        /* Advance to next node */
-        last = curr;
-        curr = curr->next;
-    } /* end while */
-
-    /* Indicate error if the node wasn't found */
-    if(curr == NULL)
-	HGOTO_ERROR(H5E_FILE, H5E_NOTFOUND, FAIL, "can't find shared file info")
-
-    /* Remove node found from list */
-    if(last != NULL)
-        /* Removing middle or tail node in list */
-        last->next = curr->next;
-    else
-        /* Removing head node in list */
-        H5F_sfile_head_g = curr->next;
-
-    /* Release the shared file node struct */
-    /* (the shared file info itself is freed elsewhere) */
-    H5FL_FREE(H5F_sfile_node_t, curr);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_shared_remove() */
 
