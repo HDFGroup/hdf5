@@ -59,7 +59,7 @@ typedef struct {
  int    p;         /* relative error to compare*/
  double percent;   /* relative error value */
  int    n;         /* count, compare up to count */
- int    count;     /* count value */
+ hsize_t count;    /* count value */
  int    err_stat;  /* an error ocurred (1, error, 0, no error) */
  int    cmn_objs;  /* do we have comparable objects */
  int    not_cmp;   /* are the objects comparable */

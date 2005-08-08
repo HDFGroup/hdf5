@@ -34,7 +34,7 @@
 NAME
    H5F_init_mount_interface -- Initialize interface-specific information
 USAGE
-    herr_t H5T_init_mount_interface()
+    herr_t H5F_init_mount_interface()
    
 RETURNS
     Non-negative on success/Negative on failure
@@ -256,15 +256,15 @@ static herr_t
 H5F_unmount(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
 {
     H5G_t	*mounted = NULL;	/*mount point group		*/
+    H5G_t	*child_group = NULL;	/* Child's group in parent mtab	*/
+    H5F_t	*child_file = NULL;	/* Child's file in parent mtab	*/
     H5G_entry_t	*mnt_ent = NULL;	/*mounted symbol table entry	*/
     H5F_t	*child = NULL;		/*mounted file			*/
     H5F_t	*parent = NULL;		/*file where mounted		*/
     H5G_entry_t	*ent = NULL;		/*temporary symbol table entry	*/
-    H5G_entry_t mnt_open_ent;       /* entry used to open mount point*/
-    herr_t	ret_value = FAIL;	/*return value			*/
-    unsigned	i;			/*coutners			*/
-    unsigned	lt, rt, md=0;	        /*binary search indices		*/
-    int 	cmp;		        /*binary search comparison value*/
+    H5G_entry_t mnt_open_ent;           /* entry used to open mount point*/
+    int         child_idx;              /* Index of child in parent's mtab */
+    herr_t	ret_value = SUCCEED;	/*return value			*/
     
     FUNC_ENTER_NOAPI_NOINIT(H5F_unmount)
 
@@ -283,37 +283,27 @@ H5F_unmount(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
     child = H5G_fileof(mounted);
     mnt_ent = H5G_entof(mounted);
     ent = H5G_entof(child->shared->root_grp);
+    child_idx = -1;
 
     if (child->mtab.parent && H5F_addr_eq(mnt_ent->header, ent->header)) {
+        unsigned	u;		/*counters			*/
+
 	/*
 	 * We've been given the root group of the child.  We do a reverse
 	 * lookup in the parent's mount table to find the correct entry.
 	 */
 	parent = child->mtab.parent;
-	for (i=0; i<parent->mtab.nmounts; i++) {
-	    if (parent->mtab.child[i].file==child) {
-                /* Search the open IDs replace names to reflect unmount operation */
-                if (H5G_replace_name( H5G_UNKNOWN, mnt_ent, mnt_ent->user_path_r, NULL, NULL, NULL, OP_UNMOUNT )<0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to replace name ")
-
-		/* Unmount the child */
-		parent->mtab.nmounts -= 1;
-                if(H5G_unmount(parent->mtab.child[md].group)<0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to reset group mounted flag")
-		if(H5G_close(parent->mtab.child[i].group)<0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close unmounted group")
-		child->mtab.parent = NULL;
-		if(H5F_try_close(child)<0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close unmounted file")
-
-                /* Eliminate the mount point from the table */
-		HDmemmove(parent->mtab.child+i, parent->mtab.child+i+1,
-                    (parent->mtab.nmounts-i)* sizeof(parent->mtab.child[0]));
-		ret_value = SUCCEED;
+	for (u=0; u<parent->mtab.nmounts; u++) {
+	    if (parent->mtab.child[u].file==child) {
+                /* Found the correct index */
+                child_idx = u;
+                break;
 	    }
 	}
-	HDassert(ret_value>=0);
     } else {
+        unsigned lt, rt, md=0;	        /*binary search indices		*/
+        int 	cmp;		        /*binary search comparison value*/
+
 	/*
 	 * We've been given the mount point in the parent.  We use a binary
 	 * search in the parent to locate the mounted file, if any.
@@ -335,22 +325,37 @@ H5F_unmount(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
 	if (cmp)
 	    HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "not a mount point")
 
-	/* Unmount the child */
-	parent->mtab.nmounts -= 1;
-	if(H5G_unmount(parent->mtab.child[md].group)<0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to reset group mounted flag")
-	if(H5G_close(parent->mtab.child[md].group)<0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close unmounted group")
-	parent->mtab.child[md].file->mtab.parent = NULL;
-	if(H5F_try_close(parent->mtab.child[md].file)<0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close unmounted file")
-
-        /* Eliminate the mount point from the table */
-	HDmemmove(parent->mtab.child+md, parent->mtab.child+md+1,
-            (parent->mtab.nmounts-md)*sizeof(parent->mtab.child[0]));
-	ret_value = SUCCEED;
+        /* Found the correct index */
+        child_idx = md;
+        mnt_ent = ent;
     }
-    
+
+    HDassert(child_idx >= 0);
+
+    /* Search the open IDs replace names to reflect unmount operation */
+    if (H5G_replace_name(H5G_UNKNOWN, mnt_ent, mnt_ent->user_path_r, NULL, NULL, NULL, OP_UNMOUNT )<0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to replace name ")
+
+    /* Save the information about the child from the mount table */
+    child_group = parent->mtab.child[child_idx].group;
+    child_file = parent->mtab.child[child_idx].file;
+
+    /* Eliminate the mount point from the table */
+    HDmemmove(parent->mtab.child+child_idx, parent->mtab.child+child_idx+1,
+        (parent->mtab.nmounts-child_idx)*sizeof(parent->mtab.child[0]));
+    parent->mtab.nmounts -= 1;
+
+    /* Unmount the child file from the parent file */
+    if(H5G_unmount(child_group)<0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to reset group mounted flag")
+    if(H5G_close(child_group)<0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close unmounted group")
+
+    /* Detach child file from parent & see if it should close */
+    child_file->mtab.parent = NULL;
+    if(H5F_try_close(child_file)<0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close unmounted file")
+
 done:
     if (mounted)
         if(H5G_close(mounted)<0 && ret_value>=0)

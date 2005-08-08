@@ -19,6 +19,7 @@
  * Purpose:	Tests file mounting.
  */
 #include "h5test.h"
+#include "H5Fprivate.h"		/* File access				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 
 const char *FILENAME[] = {
@@ -26,6 +27,9 @@ const char *FILENAME[] = {
     "mount_2",
     "mount_3",
     "mount_4",
+    "mount_5",
+    "mount_6",
+    "mount_7",
     NULL
 };
 
@@ -1004,6 +1008,8 @@ test_close(hid_t fapl)
     /* Check that all file IDs have been closed */
     if(H5I_nmembers(H5I_FILE) != 0)
         TEST_ERROR
+    if(H5F_sfile_assert_num(0) != 0)
+        TEST_ERROR
 
     /* Build the virtual file again */
     if ((file1=H5Fopen(filename1, H5F_ACC_RDWR, fapl))<0 ||
@@ -1020,6 +1026,8 @@ test_close(hid_t fapl)
     
     /* Check that all file IDs have been closed */
     if(H5I_nmembers(H5I_FILE) != 0)
+        TEST_ERROR
+    if(H5F_sfile_assert_num(0) != 0)
         TEST_ERROR
 
     /* Shut down */
@@ -1665,6 +1673,8 @@ test_missing_unmount(hid_t fapl)
     /* Check that all file IDs have been closed */
     if(H5I_nmembers(H5I_FILE) != 0)
         TEST_ERROR
+    if(H5F_sfile_assert_num(0) != 0)
+        TEST_ERROR
 
     PASSED();
     return 0;
@@ -1798,6 +1808,8 @@ test_hold_open_file(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if(H5I_nmembers(H5I_FILE) != 0)
+        TEST_ERROR
+    if(H5F_sfile_assert_num(0) != 0)
         TEST_ERROR
 
     PASSED();
@@ -1954,6 +1966,8 @@ test_hold_open_group(hid_t fapl)
     /* Check that all file IDs have been closed */
     if(H5I_nmembers(H5I_FILE) != 0)
         TEST_ERROR
+    if(H5F_sfile_assert_num(0) != 0)
+        TEST_ERROR
 
     PASSED();
     return 0;
@@ -2098,6 +2112,8 @@ test_fcdegree_same(hid_t fapl)
     /* Check that all file IDs have been closed */
     if(H5I_nmembers(H5I_FILE) != 0)
         TEST_ERROR
+    if(H5F_sfile_assert_num(0) != 0)
+        TEST_ERROR
 
     PASSED();
     return 0;
@@ -2238,6 +2254,8 @@ test_fcdegree_semi(hid_t fapl)
     /* Check that all file IDs have been closed */
     if(H5I_nmembers(H5I_FILE) != 0)
         TEST_ERROR
+    if(H5F_sfile_assert_num(0) != 0)
+        TEST_ERROR
 
     PASSED();
     return 0;
@@ -2373,6 +2391,8 @@ test_fcdegree_strong(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if(H5I_nmembers(H5I_FILE) != 0)
+        TEST_ERROR
+    if(H5F_sfile_assert_num(0) != 0)
         TEST_ERROR
 
     PASSED();
@@ -2576,6 +2596,8 @@ test_acc_perm(hid_t fapl)
     /* Check that all file IDs have been closed */
     if(H5I_nmembers(H5I_FILE) != 0)
         TEST_ERROR
+    if(H5F_sfile_assert_num(0) != 0)
+        TEST_ERROR
 
     PASSED();
     return 0;
@@ -2594,7 +2616,1183 @@ error:
     } H5E_END_TRY;
     return 1;
 } /* end test_acc_perm() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_mult_mount
+ *
+ * Purpose:	Test that the library correctly handles mounting a file
+ *              multiple times at different locations in the parent file(s)
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, July 25, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_mult_mount(hid_t fapl)
+{
+    hid_t fid1 = -1, fid2 = -1, fid3 = -1, fid3_2 = -1;	/* File IDs */
+    hid_t gidA = -1, gidB = -1;         /* Group IDs in file #1 */
+    hid_t gidM = -1, gidN = -1, gidAM = -1;         /* Group IDs in file #2 */
+    hid_t gidS = -1, gidT = -1, gidU = -1, gidBS = -1, gidAMT = -1;	/* Group IDs in file #3 */
+    char    name[NAME_BUF_SIZE];        /* Buffer for filename retrieved */
+    char	filename1[1024],
+		filename2[1024],
+		filename3[1024]; 	/* Name of files to mount */
     
+    TESTING("multiple mounts");
+
+    h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
+    h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
+    h5_fixname(FILENAME[2], fapl, filename3, sizeof filename3);
+    
+    /* Create file #1 */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidA) < 0)
+        TEST_ERROR
+
+    if((gidB = H5Gcreate(fid1, "B", (size_t)0)) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidB) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+
+    /* Create file #2 */
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidM = H5Gcreate(fid2, "M", (size_t)0)) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidM) < 0)
+        TEST_ERROR
+
+    if((gidN = H5Gcreate(fid2, "N", (size_t)0)) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidN) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+
+    /* Create file #3 */
+    if((fid3 = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidS = H5Gcreate(fid3, "S", (size_t)0)) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidS) < 0)
+        TEST_ERROR
+
+    if((gidT = H5Gcreate(fid3, "T", (size_t)0)) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidT) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid3) < 0)
+        TEST_ERROR
+
+
+    /* Re-open files and mount file #2 in file #1 */
+    if((fid1 = H5Fopen(filename1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidA = H5Gopen(fid1, "A")) < 0)
+        TEST_ERROR
+
+    if((gidB = H5Gopen(fid1, "B")) < 0)
+        TEST_ERROR
+
+    if((fid2 = H5Fopen(filename2, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Mount files together */
+    if(H5Fmount(gidA, ".", fid2, H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Open group in mounted file */
+    if((gidAM = H5Gopen(fid1, "A/M")) < 0)
+        TEST_ERROR
+
+    /* Open file #3 again */
+    if((fid3 = H5Fopen(filename3, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Mount file #3 on file #2 */
+    if(H5Fmount(gidAM, ".", fid3, H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Re-open file #3 */
+    if((fid3_2 = H5Freopen(fid3)) < 0)
+        TEST_ERROR
+
+    /* Mount file #3 on file #1 also */
+    if(H5Fmount(gidB, ".", fid3_2, H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Open object in file #3 through file #2 mount path */
+    if((gidAMT = H5Gopen(fid1, "A/M/T")) < 0)
+        TEST_ERROR
+
+    /* Check name */
+    if(H5Iget_name(gidAMT, name, (size_t)NAME_BUF_SIZE ) < 0)
+        TEST_ERROR
+    if(HDstrcmp(name, "/A/M/T"))
+        TEST_ERROR
+
+    /* Create object in file #3 */
+    if((gidU = H5Gcreate(gidAMT, "U", (size_t)0)) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidU) < 0)
+        TEST_ERROR
+
+    /* Open object in file #3 through file #1 mount path */
+    if((gidBS = H5Gopen(fid1, "B/S")) < 0)
+        TEST_ERROR
+
+    /* Check name */
+    if(H5Iget_name(gidBS, name, (size_t)NAME_BUF_SIZE ) < 0)
+        TEST_ERROR
+    if(HDstrcmp(name, "/B/S"))
+        TEST_ERROR
+
+    /* Re-open object created in file #3 through file #1 mount path */
+    if((gidU = H5Gopen(gidBS, "/B/T/U")) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidU) < 0)
+        TEST_ERROR
+
+    /* Close groups in file #3 */
+    if(H5Gclose(gidBS) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidAMT) < 0)
+        TEST_ERROR
+
+    /* Close group in file #2 */
+    if(H5Gclose(gidAM) < 0)
+        TEST_ERROR
+
+    /* Close groups in file #1 */
+    if(H5Gclose(gidA) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidB) < 0)
+        TEST_ERROR
+
+    /* Close file #3 IDs */
+    if(H5Fclose(fid3) < 0)
+        TEST_ERROR
+    if(H5Fclose(fid3_2) < 0)
+        TEST_ERROR
+
+    /* Close file #2 */
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+    /* Close file #1 */
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+
+    /* Check that all file IDs have been closed */
+    if(H5I_nmembers(H5I_FILE) != 0)
+        TEST_ERROR
+    if(H5F_sfile_assert_num(0) != 0)
+        TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Gclose(gidU);
+	H5Gclose(gidAMT);
+	H5Gclose(gidT);
+	H5Gclose(gidBS);
+	H5Gclose(gidS);
+	H5Gclose(gidAM);
+	H5Gclose(gidN);
+	H5Gclose(gidM);
+	H5Gclose(gidB);
+	H5Gclose(gidA);
+        H5Fclose(fid3_2);
+        H5Fclose(fid3);
+        H5Fclose(fid2);
+	H5Fclose(fid1);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_mult_mount() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_nested_survive
+ *
+ * Purpose:	Test that the library correctly handles unmounting & remounting
+ *              a file with files mounted on it
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, July 25, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_nested_survive(hid_t fapl)
+{
+    hid_t fid1 = -1, fid2 = -1, fid3 = -1;	/* File IDs */
+    hid_t gidA = -1;                    /* Group IDs in file #1 */
+    hid_t gidM = -1, gidAM = -1;        /* Group IDs in file #2 */
+    hid_t gidS = -1, gidMS = -1, gidAMS = -1;	/* Group IDs in file #3 */
+    char    name[NAME_BUF_SIZE];        /* Buffer for filename retrieved */
+    ssize_t name_len;                   /* Filename length */
+    char	filename1[1024],
+		filename2[1024],
+		filename3[1024]; 	/* Name of files to mount */
+    
+    TESTING("nested mounts survive");
+
+    h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
+    h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
+    h5_fixname(FILENAME[2], fapl, filename3, sizeof filename3);
+    
+    /* Create file #1 */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidA) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+
+    /* Create file #2 */
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidM = H5Gcreate(fid2, "M", (size_t)0)) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidM) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+
+    /* Create file #3 */
+    if((fid3 = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidS = H5Gcreate(fid3, "S", (size_t)0)) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidS) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid3) < 0)
+        TEST_ERROR
+
+
+    /* Re-open files and mount file #2 in file #1 */
+    if((fid1 = H5Fopen(filename1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidA = H5Gopen(fid1, "A")) < 0)
+        TEST_ERROR
+
+    if((fid2 = H5Fopen(filename2, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Mount files together */
+    if(H5Fmount(gidA, ".", fid2, H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Open group in mounted file */
+    if((gidAM = H5Gopen(fid1, "A/M")) < 0)
+        TEST_ERROR
+
+    /* Open file #3 again */
+    if((fid3 = H5Fopen(filename3, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Mount file #3 on file #2 */
+    if(H5Fmount(gidAM, ".", fid3, H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Open object in file #3 through file #1 mount path */
+    if((gidAMS = H5Gopen(fid1, "A/M/S")) < 0)
+        TEST_ERROR
+
+    /* Close group in file #3 */
+    if(H5Gclose(gidAMS) < 0)
+        TEST_ERROR
+
+    /* Check name */
+    if((name_len = H5Iget_name(gidAM, name, (size_t)NAME_BUF_SIZE )) < 0)
+        TEST_ERROR
+    if(name_len == 0 || HDstrcmp(name, "/A/M"))
+        TEST_ERROR
+
+    /* Unmount file #2 from file #1 */
+    if(H5Funmount(gidA, ".") < 0)
+        TEST_ERROR
+
+    /* Check name (should be unavailable) */
+    if((name_len = H5Iget_name(gidAM, name, (size_t)NAME_BUF_SIZE )) < 0)
+        TEST_ERROR
+    if(name_len != 0)
+        TEST_ERROR
+
+    /* Open object in file #3 through file #1 mount path (should fail) */
+    H5E_BEGIN_TRY {
+        gidAMS = H5Gopen(fid1, "A/M/S");
+    } H5E_END_TRY;
+    if(gidAMS >= 0)
+        TEST_ERROR
+
+    /* Open object in file #3 through file #2 mount path */
+    if((gidMS = H5Gopen(fid2, "M/S")) < 0)
+        TEST_ERROR
+
+    /* Check name */
+    if(H5Iget_name(gidMS, name, (size_t)NAME_BUF_SIZE ) < 0)
+        TEST_ERROR
+    if(HDstrcmp(name, "/M/S"))
+        TEST_ERROR
+
+    /* Close group in file #3 */
+    if(H5Gclose(gidMS) < 0)
+        TEST_ERROR
+
+    /* Re-mount file #2 on file #1 */
+    if(H5Fmount(gidA, ".", fid2, H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Open object in file #3 through file #1 mount path again */
+    if((gidAMS = H5Gopen(fid1, "A/M/S")) < 0)
+        TEST_ERROR
+
+    /* Check name */
+    if(H5Iget_name(gidAMS, name, (size_t)NAME_BUF_SIZE ) < 0)
+        TEST_ERROR
+    if(HDstrcmp(name, "/A/M/S"))
+        TEST_ERROR
+
+    /* Close group in file #3 */
+    if(H5Gclose(gidAMS) < 0)
+        TEST_ERROR
+
+    /* Close group in file #2 */
+    if(H5Gclose(gidAM) < 0)
+        TEST_ERROR
+
+    /* Close groups in file #1 */
+    if(H5Gclose(gidA) < 0)
+        TEST_ERROR
+
+    /* Close file #3 IDs */
+    if(H5Fclose(fid3) < 0)
+        TEST_ERROR
+
+    /* Close file #2 */
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+    /* Close file #1 */
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+
+    /* Check that all file IDs have been closed */
+    if(H5I_nmembers(H5I_FILE) != 0)
+        TEST_ERROR
+    if(H5F_sfile_assert_num(0) != 0)
+        TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Gclose(gidAMS);
+	H5Gclose(gidMS);
+	H5Gclose(gidS);
+	H5Gclose(gidAM);
+	H5Gclose(gidM);
+	H5Gclose(gidA);
+        H5Fclose(fid3);
+        H5Fclose(fid2);
+	H5Fclose(fid1);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_nested_survive() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_close_parent
+ *
+ * Purpose:	Test that the library correctly handles holding open a child
+ *              file while unmounting & closing parent.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, July 25, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_close_parent(hid_t fapl)
+{
+    hid_t fid1 = -1, fid2 = -1;		/* File IDs */
+    hid_t gidA = -1;                    /* Group IDs in file #1 */
+    hid_t gidM = -1;                    /* Group IDs in file #2 */
+    char    name[NAME_BUF_SIZE];        /* Buffer for filename retrieved */
+    ssize_t name_len;                   /* Filename length */
+    char	filename1[1024],
+		filename2[1024]; 	/* Name of files to mount */
+    
+    TESTING("close parent");
+
+    h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
+    h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
+    
+    /* Create file #1 */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidA) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+
+    /* Create file #2 */
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidM = H5Gcreate(fid2, "M", (size_t)0)) < 0)
+        TEST_ERROR
+
+    if(H5Gclose(gidM) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+
+    /* Re-open files and mount file #2 in file #1 */
+    if((fid1 = H5Fopen(filename1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidA = H5Gopen(fid1, "A")) < 0)
+        TEST_ERROR
+
+    if((fid2 = H5Fopen(filename2, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Mount files together */
+    if(H5Fmount(gidA, ".", fid2, H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Open group in mounted file */
+    if((gidM = H5Gopen(fid1, "A/M")) < 0)
+        TEST_ERROR
+
+    /* Close group in file #1 */
+    if(H5Gclose(gidA) < 0)
+        TEST_ERROR
+
+    /* Close files #1 & #2 */
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+    /* Check that all file IDs have been closed */
+    if(H5I_nmembers(H5I_FILE) != 0)
+        TEST_ERROR
+
+    /* Both underlying shared files should be open still */
+    if(H5F_sfile_assert_num(2) != 0)
+        TEST_ERROR
+
+    /* Check the name of "M" is still defined */
+    if((name_len = H5Iget_name(gidM, name, (size_t)NAME_BUF_SIZE )) < 0)
+        TEST_ERROR
+    if(name_len == 0 || HDstrcmp(name, "/A/M"))
+        TEST_ERROR
+
+    /* Unmount file #2 from file #1, closing file #1 */
+    if(H5Funmount(gidM, "/A") < 0)
+        TEST_ERROR
+
+    /* Check the name of "M" is not defined any longer */
+    if((name_len = H5Iget_name(gidM, name, (size_t)NAME_BUF_SIZE )) < 0)
+        TEST_ERROR
+    if(name_len != 0)
+        TEST_ERROR
+
+    /* Just file #2's underlying shared file should be open still */
+    if(H5F_sfile_assert_num(1) != 0)
+        TEST_ERROR
+
+    /* Close group in file #2, letting file #2 close */
+    if(H5Gclose(gidM) < 0)
+        TEST_ERROR
+
+    /* All underlying shared file structs should be closed */
+    if(H5F_sfile_assert_num(0) != 0)
+        TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Gclose(gidM);
+	H5Gclose(gidA);
+        H5Fclose(fid2);
+	H5Fclose(fid1);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_close_parent() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_cut_graph
+ *
+ * Purpose:	Test that the library correctly handles cutting a graph of
+ *              mounted files.
+ *
+ *              Initial file mounting graph is built up to this:
+ *
+ *                              [1]
+ *                             /   \
+ *                            /     \
+ *                          "A"     "B"
+ *                          /         \
+ *                         /           \
+ *                       [2]           [3]
+ *                       /  \         /   \
+ *                     "D"  "E"     "H"   "I"
+ *                     /      \     /       \
+ *                   [4]      [5] [6]       [7]
+ *                    |        |   |         |
+ *                   "K"      "M" "O"       "Q"
+ *
+ *              ( where [n] is a file in mounting hierarchy and "X" is a group
+ *               in a file )
+ *
+ *              Objects in file #5 & file #7 are opened and all other
+ *              file & object IDs to the hierarchy are closed.
+ *
+ *              Then file #2 is unmounted from file #1, which should make a
+ *              small tree of files 2, 4 & 5 and a larger tree of files 1, 3,
+ *              6 & 7.
+ *
+ *              Then, the object in file #5 is closed, which should release its
+ *              small tree of files.
+ *
+ *              Then, file #3 is unmounted from file #1, making it's tree
+ *              only 3, 6 & 7.
+ *
+ *              Then, the object in file #7 is closed, which should release the
+ *              remaining small tree of files.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, July 25, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_cut_graph(hid_t fapl)
+{
+    hid_t fid1 = -1, fid2 = -1, fid3 = -1,
+        fid4 = -1, fid5 = -1, fid6 = -1, fid7 = -1;	/* File IDs */
+    hid_t gidA = -1, gidB = -1;         /* Group IDs in file #1 */
+    hid_t gidD = -1, gidE = -1;         /* Group IDs in file #2 */
+    hid_t gidH = -1, gidI = -1;         /* Group IDs in file #3 */
+    hid_t gidK = -1;                    /* Group IDs in file #4 */
+    hid_t gidM = -1;                    /* Group IDs in file #5 */
+    hid_t gidO = -1;                    /* Group IDs in file #6 */
+    hid_t gidQ = -1;                    /* Group IDs in file #7 */
+    char    name[NAME_BUF_SIZE];        /* Buffer for filename retrieved */
+    ssize_t name_len;                   /* Filename length */
+    int obj_count;                      /* Number of objects open */
+    char	filename1[NAME_BUF_SIZE],
+		filename2[NAME_BUF_SIZE],
+		filename3[NAME_BUF_SIZE],
+		filename4[NAME_BUF_SIZE],
+		filename5[NAME_BUF_SIZE],
+		filename6[NAME_BUF_SIZE],
+		filename7[NAME_BUF_SIZE]; 	/* Name of files to mount */
+    
+    TESTING("cutting mount graph");
+
+    h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
+    h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
+    h5_fixname(FILENAME[2], fapl, filename3, sizeof filename3);
+    h5_fixname(FILENAME[3], fapl, filename4, sizeof filename3);
+    h5_fixname(FILENAME[4], fapl, filename5, sizeof filename3);
+    h5_fixname(FILENAME[5], fapl, filename6, sizeof filename3);
+    h5_fixname(FILENAME[6], fapl, filename7, sizeof filename3);
+    
+    /* Create file #1 & it's groups */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidA) < 0)
+        TEST_ERROR
+
+    if((gidB = H5Gcreate(fid1, "B", (size_t)0)) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidB) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+
+    /* Create file #2 & it's groups */
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidD = H5Gcreate(fid2, "D", (size_t)0)) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidD) < 0)
+        TEST_ERROR
+
+    if((gidE = H5Gcreate(fid2, "E", (size_t)0)) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidE) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+
+    /* Create file #3 & it's groups */
+    if((fid3 = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidH = H5Gcreate(fid3, "H", (size_t)0)) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidH) < 0)
+        TEST_ERROR
+
+    if((gidI = H5Gcreate(fid3, "I", (size_t)0)) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidI) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid3) < 0)
+        TEST_ERROR
+
+    /* Create file #4 & it's group */
+    if((fid4 = H5Fcreate(filename4, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidK = H5Gcreate(fid4, "K", (size_t)0)) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidK) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid4) < 0)
+        TEST_ERROR
+
+    /* Create file #5 & it's group */
+    if((fid5 = H5Fcreate(filename5, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidM = H5Gcreate(fid5, "M", (size_t)0)) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidM) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid5) < 0)
+        TEST_ERROR
+
+    /* Create file #6 & it's group */
+    if((fid6 = H5Fcreate(filename6, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidO = H5Gcreate(fid6, "O", (size_t)0)) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidO) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid6) < 0)
+        TEST_ERROR
+
+    /* Create file #7 & it's group */
+    if((fid7 = H5Fcreate(filename7, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidQ = H5Gcreate(fid7, "Q", (size_t)0)) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidQ) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid7) < 0)
+        TEST_ERROR
+
+
+    /* Re-open files and build mount hierarchy */
+    if((fid1 = H5Fopen(filename1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Mount file #2 at /A */
+    if((fid2 = H5Fopen(filename2, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if(H5Fmount(fid1, "/A", fid2, H5P_DEFAULT) < 0)
+        TEST_ERROR
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+    /* Mount file #3 at /B */
+    if((fid3 = H5Fopen(filename3, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if(H5Fmount(fid1, "/B", fid3, H5P_DEFAULT) < 0)
+        TEST_ERROR
+    if(H5Fclose(fid3) < 0)
+        TEST_ERROR
+
+    /* Mount file #4 at /A/D */
+    if((fid4 = H5Fopen(filename4, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if(H5Fmount(fid1, "/A/D", fid4, H5P_DEFAULT) < 0)
+        TEST_ERROR
+    if(H5Fclose(fid4) < 0)
+        TEST_ERROR
+
+    /* Mount file #5 at /A/E */
+    if((fid5 = H5Fopen(filename5, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if(H5Fmount(fid1, "/A/E", fid5, H5P_DEFAULT) < 0)
+        TEST_ERROR
+    if(H5Fclose(fid5) < 0)
+        TEST_ERROR
+
+    /* Mount file #6 at /B/H */
+    if((fid6 = H5Fopen(filename6, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if(H5Fmount(fid1, "/B/H", fid6, H5P_DEFAULT) < 0)
+        TEST_ERROR
+    if(H5Fclose(fid6) < 0)
+        TEST_ERROR
+
+    /* Mount file #7 at /B/H */
+    if((fid7 = H5Fopen(filename7, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if(H5Fmount(fid1, "/B/I", fid7, H5P_DEFAULT) < 0)
+        TEST_ERROR
+    if(H5Fclose(fid7) < 0)
+        TEST_ERROR
+
+    /* Open object in file #5 */
+    if((gidM = H5Gopen(fid1, "A/E/M")) < 0)
+        TEST_ERROR
+
+    /* Check name */
+    if((name_len = H5Iget_name(gidM, name, (size_t)NAME_BUF_SIZE )) < 0)
+        TEST_ERROR
+    if(name_len == 0 || HDstrcmp(name, "/A/E/M"))
+        TEST_ERROR
+
+    /* Open object in file #7 */
+    if((gidQ = H5Gopen(fid1, "B/I/Q")) < 0)
+        TEST_ERROR
+
+    /* Check name */
+    if((name_len = H5Iget_name(gidQ, name, (size_t)NAME_BUF_SIZE )) < 0)
+        TEST_ERROR
+    if(name_len == 0 || HDstrcmp(name, "/B/I/Q"))
+        TEST_ERROR
+
+    /* Close file #1 */
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+
+    /* Get a new file ID for file #5 */
+    if((fid5 = H5Iget_file_id(gidM)) < 0)
+        TEST_ERROR
+
+    /* Check the number of objects currently open */
+    if((obj_count = H5Fget_obj_count(fid5, H5F_OBJ_ALL)) < 0)
+        TEST_ERROR
+    if(obj_count != 2)  /* one object and the file ID */
+        TEST_ERROR
+
+    /* Close ID on file #5 */
+    if(H5Fclose(fid5) < 0)
+        TEST_ERROR
+
+
+    /* Get a new file ID for file #7 */
+    if((fid7 = H5Iget_file_id(gidQ)) < 0)
+        TEST_ERROR
+
+    /* Check the number of objects currently open */
+    if((obj_count = H5Fget_obj_count(fid7, H5F_OBJ_ALL)) < 0)
+        TEST_ERROR
+    if(obj_count != 2)  /* one object and the file ID */
+        TEST_ERROR
+
+    /* Close ID on file #7 */
+    if(H5Fclose(fid7) < 0)
+        TEST_ERROR
+
+    /* Check that all file IDs have been closed */
+    if(H5I_nmembers(H5I_FILE) != 0)
+        TEST_ERROR
+
+
+    /* Unmount file #2 from file #1, cutting the graph */
+    if(H5Funmount(gidM, "/A") < 0)
+        TEST_ERROR
+
+    /* Attempt to open an object in file #4, from file #1 */
+    H5E_BEGIN_TRY {
+        gidK = H5Gopen(gidQ, "/A/D/K");
+    } H5E_END_TRY;
+    if(gidK >= 0)
+        TEST_ERROR
+
+    /* Open object in file #4 from file #5 */
+    if((gidK = H5Gopen(gidM, "/D/K")) < 0)
+        TEST_ERROR
+
+    /* Check the name of "K" is correct */
+    if((name_len = H5Iget_name(gidK, name, (size_t)NAME_BUF_SIZE )) < 0)
+        TEST_ERROR
+    if(name_len == 0 || HDstrcmp(name, "/D/K"))
+        TEST_ERROR
+
+    if(H5Gclose(gidK) < 0)
+        TEST_ERROR
+
+    /* Attempt to open an object in file #6, from file #5 */
+    H5E_BEGIN_TRY {
+        gidO = H5Gopen(gidM, "/B/H/O");
+    } H5E_END_TRY;
+    if(gidO >= 0)
+        TEST_ERROR
+
+    /* Open object in file #6 from file #7 */
+    if((gidO = H5Gopen(gidQ, "/B/H/O")) < 0)
+        TEST_ERROR
+
+    /* Check the name of "O" is correct */
+    if((name_len = H5Iget_name(gidO, name, (size_t)NAME_BUF_SIZE )) < 0)
+        TEST_ERROR
+    if(name_len == 0 || HDstrcmp(name, "/B/H/O"))
+        TEST_ERROR
+
+    if(H5Gclose(gidO) < 0)
+        TEST_ERROR
+
+    /* Check the name of "M" is not defined any longer */
+    if((name_len = H5Iget_name(gidM, name, (size_t)NAME_BUF_SIZE )) < 0)
+        TEST_ERROR
+    if(name_len != 0)
+        TEST_ERROR
+
+    /* Check the name of "Q" is still defined */
+    if((name_len = H5Iget_name(gidQ, name, (size_t)NAME_BUF_SIZE )) < 0)
+        TEST_ERROR
+    if(name_len == 0 || HDstrcmp(name, "/B/I/Q"))
+        TEST_ERROR
+
+    /* Check that all seven underlying files are still opened */
+    if(H5F_sfile_assert_num(7) != 0)
+        TEST_ERROR
+
+    /* Close "M" in file #5, which should close files 2, 4 & 5 */
+    if(H5Gclose(gidM) < 0)
+        TEST_ERROR
+
+    /* Check that only four underlying files are still opened */
+    if(H5F_sfile_assert_num(4) != 0)
+        TEST_ERROR
+
+    /* Unmount file #3 from file #1, cutting the graph */
+    if(H5Funmount(gidQ, "/B") < 0)
+        TEST_ERROR
+
+    /* Check that only three underlying files are still opened */
+    /* (File #1 should close after being cut off from the graph) */
+    if(H5F_sfile_assert_num(3) != 0)
+        TEST_ERROR
+
+    /* Check the name of "Q" is not defined any longer */
+    if((name_len = H5Iget_name(gidQ, name, (size_t)NAME_BUF_SIZE )) < 0)
+        TEST_ERROR
+    if(name_len != 0)
+        TEST_ERROR
+
+    /* Open object in file #6 from file #7 */
+    if((gidO = H5Gopen(gidQ, "/H/O")) < 0)
+        TEST_ERROR
+
+    /* Check the name of "O" is correct */
+    if((name_len = H5Iget_name(gidO, name, (size_t)NAME_BUF_SIZE )) < 0)
+        TEST_ERROR
+    if(name_len == 0 || HDstrcmp(name, "/H/O"))
+        TEST_ERROR
+
+    if(H5Gclose(gidO) < 0)
+        TEST_ERROR
+
+    /* Close last object and let files 3, 6 & 7 close */
+    if(H5Gclose(gidQ) < 0)
+        TEST_ERROR
+
+    /* Verify that all underlying shared files have been closed now */
+    if(H5F_sfile_assert_num(0) != 0)
+        TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Gclose(gidQ);
+	H5Gclose(gidO);
+	H5Gclose(gidM);
+	H5Gclose(gidK);
+	H5Gclose(gidI);
+	H5Gclose(gidH);
+	H5Gclose(gidE);
+	H5Gclose(gidD);
+	H5Gclose(gidB);
+	H5Gclose(gidA);
+        H5Fclose(fid7);
+        H5Fclose(fid6);
+        H5Fclose(fid5);
+        H5Fclose(fid4);
+        H5Fclose(fid3);
+        H5Fclose(fid2);
+	H5Fclose(fid1);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_cut_graph() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_symlink
+ *
+ * Purpose:	Test that the library correctly handles symlinks across
+ *              mounted files.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, July 25, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_symlink(hid_t fapl)
+{
+    hid_t fid1 = -1, fid2 = -1, fid3 = -1; /* File IDs */
+    hid_t gidA = -1, gidB = -1;         /* Group IDs in file #1 */
+    hid_t gidD = -1, gidE = -1;         /* Group IDs in file #2 */
+    hid_t gidH = -1, gidI = -1;         /* Group IDs in file #3 */
+    hid_t gidL = -1;         		/* Group IDs through soft link to file #3 */
+    char    name[NAME_BUF_SIZE];        /* Buffer for filename retrieved */
+    ssize_t name_len;                   /* Filename length */
+    char	filename1[NAME_BUF_SIZE],
+		filename2[NAME_BUF_SIZE],
+		filename3[NAME_BUF_SIZE]; 	/* Name of files to mount */
+    
+    TESTING("symlinks");
+
+    h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
+    h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
+    h5_fixname(FILENAME[2], fapl, filename3, sizeof filename3);
+    
+    /* Create file #1 & it's groups */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidA) < 0)
+        TEST_ERROR
+
+    if((gidB = H5Gcreate(fid1, "B", (size_t)0)) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidB) < 0)
+        TEST_ERROR
+
+    /* Create soft link to mounted object */
+    if(H5Glink(fid1, H5G_LINK_SOFT, "./A/D/H", "L") < 0) /* Soft link */
+        TEST_ERROR
+
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+
+    /* Create file #2 & it's groups */
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidD = H5Gcreate(fid2, "D", (size_t)0)) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidD) < 0)
+        TEST_ERROR
+
+    if((gidE = H5Gcreate(fid2, "E", (size_t)0)) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidE) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+
+    /* Create file #3 & it's groups */
+    if((fid3 = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((gidH = H5Gcreate(fid3, "H", (size_t)0)) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidH) < 0)
+        TEST_ERROR
+
+    if((gidI = H5Gcreate(fid3, "I", (size_t)0)) < 0)
+        TEST_ERROR
+    if(H5Gclose(gidI) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(fid3) < 0)
+        TEST_ERROR
+
+
+    /* Re-open files and build mount hierarchy */
+    if((fid1 = H5Fopen(filename1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Mount file #2 at /A */
+    if((fid2 = H5Fopen(filename2, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if(H5Fmount(fid1, "/A", fid2, H5P_DEFAULT) < 0)
+        TEST_ERROR
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+    /* Attempt to open an object in file #3 (should fail) */
+    H5E_BEGIN_TRY {
+        gidL = H5Gopen(fid1, "L");
+    } H5E_END_TRY;
+    if(gidL >= 0)
+        TEST_ERROR
+
+    /* Mount file #3 at /A/D */
+    if((fid3 = H5Fopen(filename3, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if(H5Fmount(fid1, "/A/D", fid3, H5P_DEFAULT) < 0)
+        TEST_ERROR
+    if(H5Fclose(fid3) < 0)
+        TEST_ERROR
+
+    /* Open soft link to object in file #3 */
+    if((gidL = H5Gopen(fid1, "L")) < 0)
+        TEST_ERROR
+
+    /* Check the name of "L" is correct */
+    if((name_len = H5Iget_name(gidL, name, (size_t)NAME_BUF_SIZE )) < 0)
+        TEST_ERROR
+    if(name_len == 0 || HDstrcmp(name, "/L"))
+        TEST_ERROR
+
+    /* Close file #1 */
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+    /* Verify that all 3 underlying shared files are still open */
+    if(H5F_sfile_assert_num(3) != 0)
+        TEST_ERROR
+
+    /* Close object opened through soft link */
+    if(H5Gclose(gidL) < 0)
+        TEST_ERROR
+
+    /* Verify that all underlying shared files have been closed now */
+    if(H5F_sfile_assert_num(0) != 0)
+        TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Gclose(gidL);
+	H5Gclose(gidI);
+	H5Gclose(gidH);
+	H5Gclose(gidE);
+	H5Gclose(gidD);
+	H5Gclose(gidB);
+	H5Gclose(gidA);
+        H5Fclose(fid3);
+        H5Fclose(fid2);
+	H5Fclose(fid1);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_symlink() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -2644,6 +3842,11 @@ main(void)
     nerrors += test_fcdegree_semi(fapl);
     nerrors += test_fcdegree_strong(fapl);
     nerrors += test_acc_perm(fapl);
+    nerrors += test_mult_mount(fapl);
+    nerrors += test_nested_survive(fapl);
+    nerrors += test_close_parent(fapl);
+    nerrors += test_cut_graph(fapl);
+    nerrors += test_symlink(fapl);
     
     if (nerrors) goto error;
     puts("All mount tests passed.");

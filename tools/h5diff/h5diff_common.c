@@ -131,7 +131,7 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
     printf("<-n %s> is not a valid option\n", argv[i+1] );
     usage();
        }
-       options->count = atoi(argv[i+1]);
+       options->count = atol(argv[i+1]);
        i++; /* go to next */
    }
    else
