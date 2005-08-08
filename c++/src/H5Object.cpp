@@ -111,7 +111,7 @@ Attribute H5Object::createAttribute( const char* name, const DataType& data_type
    }
    else
    {
-      throw AttributeIException("H5Object::createAttribute", "H5Acreate failed");
+      throw AttributeIException(inMemFunc("createAttribute"), "H5Acreate failed");
    }
 }
 
@@ -145,7 +145,7 @@ Attribute H5Object::openAttribute( const char* name ) const
    }
    else
    {
-      throw AttributeIException("H5Object::openAttribute", "H5Aopen_name failed");
+      throw AttributeIException(inMemFunc("openAttribute"), "H5Aopen_name failed");
    }
 }
 
@@ -179,7 +179,7 @@ Attribute H5Object::openAttribute( const unsigned int idx ) const
    }
    else
    {
-      throw AttributeIException("H5Object::openAttribute", "H5Aopen_idx failed");
+      throw AttributeIException(inMemFunc("openAttribute"), "H5Aopen_idx failed");
    }
 }
 
@@ -217,7 +217,7 @@ int H5Object::iterateAttrs( attr_operator_t user_op, unsigned * idx, void *op_da
       return( ret_value );
    else  // raise exception when H5Aiterate returns a negative value
    {
-      throw AttributeIException("H5Object::iterateAttrs", "H5Aiterate failed");
+      throw AttributeIException(inMemFunc("iterateAttrs"), "H5Aiterate failed");
    }
 }
 
@@ -233,7 +233,7 @@ int H5Object::getNumAttrs() const
    int num_attrs = H5Aget_num_attrs( id );
    if( num_attrs < 0 )
    {
-      throw AttributeIException("H5Object::getNumAttrs", 
+      throw AttributeIException(inMemFunc("getNumAttrs"), 
 		"H5Aget_num_attrs failed - returned negative number of attributes");
    }
    else
@@ -252,7 +252,7 @@ void H5Object::removeAttr( const char* name ) const
    herr_t ret_value = H5Adelete( id, name );
    if( ret_value < 0 )
    {
-      throw AttributeIException("H5Object::removeAttr", "H5Adelete failed");
+      throw AttributeIException(inMemFunc("removeAttr"), "H5Adelete failed");
    }
 }
 
@@ -281,7 +281,7 @@ void H5Object::renameAttr(const char* oldname, const char* newname) const
    herr_t ret_value = H5Arename(id, oldname, newname);
    if (ret_value < 0)
    {
-      throw AttributeIException("H5Object::renameAttr", "H5Arename failed");
+      throw AttributeIException(inMemFunc("renameAttr"), "H5Arename failed");
    }
 }
 
@@ -314,7 +314,7 @@ void H5Object::flush(H5F_scope_t scope ) const
    herr_t ret_value = H5Fflush( id, scope );
    if( ret_value < 0 )
    {
-      throw FileIException("H5Object::flush", "H5Fflush failed");
+      throw FileIException(inMemFunc("flush"), "H5Fflush failed");
    }
 }
 
@@ -331,7 +331,7 @@ string H5Object::getFileName() const
       return(p_get_file_name());
    }
    catch (IdComponentException E) {
-      throw FileIException("H5Object::getFileName", E.getDetailMsg());
+      throw FileIException(inMemFunc("getFileName"), E.getDetailMsg());
    }
 }
 

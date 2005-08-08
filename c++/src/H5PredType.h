@@ -179,6 +179,10 @@ class H5_DLLCPP PredType : public AtomType {
 	static const PredType NATIVE_UINT_FAST64;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+
+	// Returns this class name
+	virtual string fromClass () const { return ("PredType"); }
+
 	// These dummy functions do not inherit from DataType - they'll
 	// throw a DataTypeIException if invoked.
 	void commit( H5Object& loc, const string& name );

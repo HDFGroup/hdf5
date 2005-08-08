@@ -98,14 +98,14 @@ void PropList::copy( const PropList& like_plist )
         decRefCount();
     }
     catch (Exception close_error) {
-        throw PropListIException("PropList::copy", close_error.getDetailMsg());
+        throw PropListIException(inMemFunc("copy"), close_error.getDetailMsg());
     }
 
    // call C routine to copy the property list
    id = H5Pcopy( like_plist.getId() );
 
    if( id < 0 )
-      throw PropListIException("PropList::copy", "H5Pcopy failed");
+      throw PropListIException(inMemFunc("copy"), "H5Pcopy failed");
 }
 
 //--------------------------------------------------------------------------
@@ -139,7 +139,7 @@ void PropList::copyProp(PropList& dest, const char *name) const
    herr_t ret_value = H5Pcopy_prop(dst_id, id, name);
    if( ret_value < 0 )
    {
-      throw PropListIException("PropList::copyProp", "H5Pcopy_prop failed");
+      throw PropListIException(inMemFunc("copyProp"), "H5Pcopy_prop failed");
    }
 }
 
@@ -174,7 +174,7 @@ void PropList::copyProp( PropList& dest, PropList& src, const char *name ) const
    herr_t ret_value = H5Pcopy_prop(dst_id, src_id, name);
    if( ret_value < 0 )
    {
-      throw PropListIException("PropList::copyProp", "H5Pcopy_prop failed");
+      throw PropListIException(inMemFunc("copyProp"), "H5Pcopy_prop failed");
    }
 
 }
@@ -208,13 +208,13 @@ void PropList::close()
       herr_t ret_value = H5Pclose( id );
       if( ret_value < 0 )
       {
-         throw PropListIException("PropList::close", "H5Pclose failed");
+         throw PropListIException(inMemFunc("close"), "H5Pclose failed");
       }
       // reset the id because the property list that it represents is now closed
       id = 0;
    }
    else
-      throw PropListIException("PropList::close", "Cannot close a constant");
+      throw PropListIException(inMemFunc("close"), "Cannot close a constant");
 }
 
 //--------------------------------------------------------------------------
@@ -229,7 +229,7 @@ hid_t PropList::getClass() const
    hid_t plist_class = H5Pget_class( id );
    if( plist_class == H5P_NO_CLASS )
    {
-      throw PropListIException("PropList::getClass", 
+      throw PropListIException(inMemFunc("getClass"), 
 		"H5Pget_class failed - returned H5P_NO_CLASS");
    }
    return( plist_class );
@@ -259,7 +259,7 @@ bool PropList::propExist(const char* name ) const
       return false;
    else // Raise exception when H5Pexist returns a negative value
    {
-      throw PropListIException("PropList::propExist", "H5Pexist failed");
+      throw PropListIException(inMemFunc("propExist"), "H5Pexist failed");
    }
 }
 //--------------------------------------------------------------------------
@@ -290,7 +290,7 @@ void PropList::closeClass() const
    herr_t ret_value = H5Pclose_class(id);
    if( ret_value < 0 )
    {
-      throw PropListIException("PropList::closeClass", "H5Pclose_class failed");
+      throw PropListIException(inMemFunc("closeClass"), "H5Pclose_class failed");
    }
 }
 
@@ -311,7 +311,7 @@ void PropList::getProperty(const char* name, void* value) const
    herr_t ret_value = H5Pget(id, name, value);
    if (ret_value < 0)
    {
-      throw PropListIException("PropList::getProperty", "H5Pget failed");
+      throw PropListIException(inMemFunc("getProperty"), "H5Pget failed");
    }
 }
 //--------------------------------------------------------------------------
@@ -333,7 +333,7 @@ string PropList::getProperty(const char* name) const
    // Throw exception if H5Pget returns failure
    if (ret_value < 0)
    {
-      throw PropListIException("PropList::getProperty", "H5Pget failed");
+      throw PropListIException(inMemFunc("getProperty"), "H5Pget failed");
    }
 
    // Return propety value as a string after deleting temp C-string
@@ -387,7 +387,7 @@ size_t PropList::getPropSize(const char *name) const
    herr_t ret_value = H5Pget_size(id, name, &prop_size);
    if (ret_value < 0)
    {
-      throw PropListIException("PropList::getPropSize", "H5Pget_size failed");
+      throw PropListIException(inMemFunc("getPropSize"), "H5Pget_size failed");
    }
    return(prop_size);
 }
@@ -439,7 +439,7 @@ size_t PropList::getNumProps() const
    herr_t ret_value = H5Pget_nprops (id, &nprops);
    if (ret_value < 0)
    {
-      throw PropListIException("PropList::getNumProps", "H5Pget_nprops failed");
+      throw PropListIException(inMemFunc("getNumProps"), "H5Pget_nprops failed");
    }
    return (nprops);
 }
@@ -457,7 +457,7 @@ void PropList::setProperty(const char* name, void* value) const
    herr_t ret_value = H5Pset(id, name, value);
    if (ret_value < 0)
    {
-      throw PropListIException("PropList::setProperty", "H5Pset failed");
+      throw PropListIException(inMemFunc("setProperty"), "H5Pset failed");
    }
 }
 //--------------------------------------------------------------------------
@@ -474,7 +474,7 @@ void PropList::setProperty(const char* name, const char* charptr) const
    herr_t ret_value = H5Pset(id, name, (void*) charptr);
    if (ret_value < 0)
    {
-      throw PropListIException("PropList::setProperty", "H5Pset failed");
+      throw PropListIException(inMemFunc("setProperty"), "H5Pset failed");
    }
 }
 //--------------------------------------------------------------------------
@@ -537,7 +537,7 @@ bool PropList::isAClass(const PropList& prop_class) const
       return false;
    else // Raise exception when H5Pisa_class returns a negative value
    {
-      throw PropListIException("PropList::isAClass", "H5Pisa_class failed");
+      throw PropListIException(inMemFunc("isAClass"), "H5Pisa_class failed");
    }
 
 }
@@ -554,7 +554,7 @@ void PropList::removeProp(const char *name) const
    herr_t ret_value = H5Premove(id, name);
    if (ret_value < 0)
    {
-      throw PropListIException("PropList::removeProp", "H5Premove failed");
+      throw PropListIException(inMemFunc("removeProp"), "H5Premove failed");
    }
 }
 
@@ -589,7 +589,7 @@ bool PropList::operator==(const PropList& rhs) const
       return false;
    else // Raise exception when H5Pequal returns a negative value
    {
-      throw PropListIException("PropList::operator==", "H5Pequal failed");
+      throw PropListIException(inMemFunc("operator=="), "H5Pequal failed");
    }
 }
 
@@ -605,7 +605,7 @@ PropList PropList::getClassParent() const
    hid_t class_id = H5Pget_class_parent(id);
    if (class_id <= 0)
    {
-      throw PropListIException("PropList::getClassParent", "H5Pget_class_parent failed");
+      throw PropListIException(inMemFunc("getClassParent"), "H5Pget_class_parent failed");
    }
    PropList pclass(class_id);
    return(pclass);

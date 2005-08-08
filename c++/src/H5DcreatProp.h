@@ -100,6 +100,9 @@ class H5_DLLCPP DSetCreatPropList : public PropList {
 	// Sets method of the shuffle filter.
 	void setShuffle();
 
+	// Returns this class name
+	virtual string fromClass () const { return ("DSetCreatPropList"); }
+
 	// Default constructor: creates a stub dataset creation property list.
 	DSetCreatPropList();
 

@@ -94,6 +94,9 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
 	// Determines whether error-detection is enabled for dataset reads.
 	H5Z_EDC_t getEDCCheck();
 
+	// Returns this class name
+	virtual string fromClass () const { return ("DSetMemXferPropList"); }
+
 	// Creates a copy of an existing dataset memory and transfer 
 	// property list using the property list id.
 	DSetMemXferPropList (const hid_t plist_id);

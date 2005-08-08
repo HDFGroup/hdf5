@@ -119,6 +119,9 @@ class H5_DLLCPP FileAccPropList : public PropList {
 	// Returns garbage collecting references setting.
 	unsigned getGcReferences() const;
 
+	// Returns this class name
+	virtual string fromClass () const { return ("FileAccPropList"); }
+
 	// Creates a file access property list.
 	FileAccPropList();
 

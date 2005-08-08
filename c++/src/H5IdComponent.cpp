@@ -53,7 +53,7 @@ void IdComponent::incRefCount(const hid_t obj_id) const
 {
     if (p_valid_id(obj_id))
 	if (H5Iinc_ref(obj_id) < 0)
-            throw IdComponentException("IdComponent::incRefCount", "incrementing object ref count failed");
+            throw IdComponentException(inMemFunc("incRefCount"), "incrementing object ref count failed");
 }
 
 //--------------------------------------------------------------------------
@@ -79,10 +79,10 @@ void IdComponent::decRefCount(const hid_t obj_id) const
     if (p_valid_id(obj_id))
         if (H5Idec_ref(obj_id) < 0)
 	    if (H5Iget_ref(obj_id) <= 0)
-		throw IdComponentException("IdComponent::decRefCount", 
+		throw IdComponentException(inMemFunc("decRefCount"), 
 					"object ref count is 0 or negative");
 	    else
-		throw IdComponentException("IdComponent::decRefCount", 
+		throw IdComponentException(inMemFunc("decRefCount"), 
 					"decrementing object ref count failed");
 }
 
@@ -109,7 +109,7 @@ int IdComponent::getCounter(const hid_t obj_id) const
     {
 	counter = H5Iget_ref(obj_id);
 	if (counter < 0)
-            throw IdComponentException("IdComponent::incRefCount", "incrementing object ref count failed");
+            throw IdComponentException(inMemFunc("incRefCount"), "incrementing object ref count failed");
     }
     return (counter);
 }
