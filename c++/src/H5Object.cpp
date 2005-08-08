@@ -327,7 +327,12 @@ void H5Object::flush(H5F_scope_t scope ) const
 //--------------------------------------------------------------------------
 string H5Object::getFileName() const
 {
-   return(p_get_file_name());
+   try {
+      return(p_get_file_name());
+   }
+   catch (IdComponentException E) {
+      throw FileIException("H5Object::getFileName", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------

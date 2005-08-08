@@ -141,9 +141,12 @@ class H5_DLLCPP CommonFG {
 	VarLenType openVarLenType(const char* name) const;
 	VarLenType openVarLenType(const string& name) const;
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	/// For subclasses, H5File and Group, to return the correct 
 	/// object id, i.e. file or group id.
 	virtual hid_t getLocId() const = 0; 
+
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 	/// For subclasses, H5File and Group, to throw appropriate exception.
 	virtual void throwException(const string func_name, const string msg) const = 0;
@@ -153,10 +156,6 @@ class H5_DLLCPP CommonFG {
 
 	// Noop destructor.
 	virtual ~CommonFG();
-
-   private:
-	// Common code for member functions openXxxType 
-	hid_t p_open_data_type(const char* name) const;
 
 }; // end of CommonFG declaration
 

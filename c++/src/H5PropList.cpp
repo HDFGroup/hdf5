@@ -112,6 +112,7 @@ void PropList::copy( const PropList& like_plist )
 // Function:	PropList::operator=
 ///\brief	Assignment operator.
 ///\param	rhs - IN: Reference to the existing property list
+///\return	Reference to PropList instance
 ///\exception	H5::PropListIException
 // Description
 //		Makes a copy of the property list on the right hand side 
@@ -320,6 +321,7 @@ void PropList::getProperty(const char* name, void* value) const
 ///		accepts.
 ///\param	name -  IN: Name of property to query - \c char pointer
 ///\return	The property that is a \c std::string.
+///\exception	H5::PropListIException
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
 string PropList::getProperty(const char* name) const
@@ -344,7 +346,7 @@ string PropList::getProperty(const char* name) const
 ///\brief	This is an overloaded member function, provided for convenience.
 ///   		It differs from the above function only in what arguments it 
 ///		accepts.
-///\param	name -   IN: Name of property to query - \c str::string
+///\param	name -   IN: Name of property to query - \c std::string
 ///\param	value - OUT: Pointer to the buffer for the property value
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------

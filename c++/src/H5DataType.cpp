@@ -107,7 +107,7 @@ void DataType::copy( const DataType& like_type )
             decRefCount();
         }
         catch (Exception close_error) {
-            throw DataTypeIException("DataType::copy", close_error.getDetailMsg());
+            throw DataTypeIException(inMemFunc("copy"), close_error.getDetailMsg());
         }
     }
 
@@ -115,7 +115,7 @@ void DataType::copy( const DataType& like_type )
    id = H5Tcopy( like_type.getId() );
 
    if( id < 0 )
-      throw DataTypeIException("DataType::copy", "H5Tcopy failed");
+      throw DataTypeIException(inMemFunc("copy"), "H5Tcopy failed");
 }
 
 //--------------------------------------------------------------------------
@@ -155,8 +155,7 @@ bool DataType::operator==(const DataType& compared_type ) const
       return false;
    else
    {
-      throw DataTypeIException("DataType::operator==", 
-		"H5Tequal returns negative value");
+      throw DataTypeIException(inMemFunc("operator=="), "H5Tequal returns negative value");
    }
 }
 
@@ -177,7 +176,7 @@ void DataType::commit(CommonFG& loc, const char* name) const
    herr_t ret_value = H5Tcommit( loc_id, name, id );
    if( ret_value < 0 )
    {
-      throw DataTypeIException("DataType::commit", "H5Tcommit failed");
+      throw DataTypeIException(inMemFunc("commit"), "H5Tcommit failed");
    }
 }
 
@@ -211,7 +210,7 @@ bool DataType::committed() const
       return false;
    else
    {
-      throw DataTypeIException("DataType::committed", "H5Tcommitted return negative value");
+      throw DataTypeIException(inMemFunc("committed"), "H5Tcommitted return negative value");
    }
 }
 
@@ -231,7 +230,7 @@ H5T_conv_t DataType::find( const DataType& dest, H5T_cdata_t **pcdata ) const
    H5T_conv_t func = H5Tfind( id, dest.getId(), pcdata );
    if( func == NULL )
    {
-      throw DataTypeIException("DataType::find", "H5Tfind returns a NULL function");
+      throw DataTypeIException(inMemFunc("find"), "H5Tfind returns a NULL function");
    }
    return( func );
 }
@@ -260,7 +259,7 @@ void DataType::convert( const DataType& dest, size_t nelmts, void *buf, void *ba
    ret_value = H5Tconvert( id, dest_id, nelmts, buf, background, plist_id );
    if( ret_value < 0 )
    {
-      throw DataTypeIException("DataType::convert", "H5Tconvert failed");
+      throw DataTypeIException(inMemFunc("convert"), "H5Tconvert failed");
    }
 }
 
@@ -284,7 +283,7 @@ void DataType::lock() const
    herr_t ret_value = H5Tlock( id );
    if( ret_value < 0 )
    {
-      throw DataTypeIException("DataType::lock", "H5Tlock failed");
+      throw DataTypeIException(inMemFunc("lock"), "H5Tlock failed");
    }
 }
 
@@ -302,8 +301,7 @@ H5T_class_t DataType::getClass() const
    // Return datatype class identifier if successful
    if( type_class == H5T_NO_CLASS )
    {
-      throw DataTypeIException("DataType::getClass", 
-		"H5Tget_class returns H5T_NO_CLASS");
+      throw DataTypeIException(inMemFunc("getClass"), "H5Tget_class returns H5T_NO_CLASS");
    }
    return( type_class );
 }
@@ -321,8 +319,7 @@ size_t DataType::getSize() const
    size_t type_size = H5Tget_size( id );
    if( type_size <= 0 ) // valid data types are never zero size
    {
-      throw DataTypeIException("DataType::getSize", 
-		"H5Tget_size returns invalid datatype size");
+      throw DataTypeIException(inMemFunc("getSize"), "H5Tget_size returns invalid datatype size");
    }
    return( type_size );
 }
@@ -349,7 +346,7 @@ DataType DataType::getSuper() const
    }
    else
    {
-      throw DataTypeIException("DataType::getSuper", "H5Tget_super failed");
+      throw DataTypeIException(inMemFunc("getSuper"), "H5Tget_super failed");
    }
 }
 
@@ -377,7 +374,7 @@ void DataType::registerFunc( H5T_pers_t pers, const char* name, const DataType& 
    herr_t ret_value = H5Tregister( pers, name, id, dest_id, func );
    if( ret_value < 0 )
    {
-      throw DataTypeIException("DataType::registerFunc", "H5Tregister failed");
+      throw DataTypeIException(inMemFunc("registerFunc"), "H5Tregister failed");
    }
 }
 
@@ -414,7 +411,7 @@ void DataType::unregister( H5T_pers_t pers, const char* name, const DataType& de
    herr_t ret_value = H5Tunregister( pers, name, id, dest_id, func );
    if( ret_value < 0 )
    {
-      throw DataTypeIException("DataType::unregister", "H5Tunregister failed");
+      throw DataTypeIException(inMemFunc("unregister"), "H5Tunregister failed");
    }
 }
 
@@ -444,7 +441,7 @@ void DataType::setTag( const char* tag ) const
    herr_t ret_value = H5Tset_tag( id, tag );
    if( ret_value < 0 )
    {
-      throw DataTypeIException("DataType::setTag", "H5Tset_tag failed");
+      throw DataTypeIException(inMemFunc("setTag"), "H5Tset_tag failed");
    }
 }
 
@@ -481,8 +478,7 @@ string DataType::getTag() const
    }
    else
    {
-      throw DataTypeIException("DataType::getTag", 
-		"H5Tget_tag returns NULL for tag");
+      throw DataTypeIException(inMemFunc("getTag"), "H5Tget_tag returns NULL for tag");
    }
 }
 
@@ -504,8 +500,7 @@ bool DataType::detectClass(H5T_class_t cls) const
       return false;
    else
    {
-      throw DataTypeIException("DataType::detectClass", 
-		"H5Tdetect_class returns negative value");
+      throw DataTypeIException(inMemFunc("detectClass"), "H5Tdetect_class returns negative value");
    }
 }
 
@@ -526,8 +521,7 @@ bool DataType::isVariableStr() const
       return false;
    else
    {
-      throw DataTypeIException("DataType::isVariableStr",
-                "H5Tis_variable_str returns negative value");
+      throw DataTypeIException(inMemFunc("isVariableStr"), "H5Tis_variable_str returns negative value");
    }
 }
 
@@ -538,12 +532,17 @@ bool DataType::isVariableStr() const
 ///\param	dataspace - IN: Dataspace with selection
 ///\param	ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
 ///\return	A reference
-///\exception	H5::IdComponentException
+///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void* DataType::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type) const
 {
-   return(p_reference(name, dataspace.getId(), ref_type));
+   try {
+      return(p_reference(name, dataspace.getId(), ref_type));
+   }
+   catch (IdComponentException E) {
+      throw DataTypeIException(inMemFunc("Reference"), E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -553,7 +552,7 @@ void* DataType::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref
 ///		a reference to an HDF5 object, not to a dataset region.
 ///\param	name - IN: Name of the object to be referenced
 ///\return	A reference
-///\exception	H5::IdComponentException
+///\exception	H5::DataTypeIException
 ///\par Description
 //		This function passes H5R_OBJECT and -1 to the protected 
 //		function for it to pass to the C API H5Rcreate
@@ -562,7 +561,26 @@ void* DataType::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref
 //--------------------------------------------------------------------------
 void* DataType::Reference(const char* name) const
 {
-   return(p_reference(name, -1, H5R_OBJECT));
+   try {
+      return(p_reference(name, -1, H5R_OBJECT));
+   }
+   catch (IdComponentException E) {
+      throw DataTypeIException(inMemFunc("Reference"), E.getDetailMsg());
+   }
+
+}
+
+//--------------------------------------------------------------------------
+// Function:	DataType::Reference
+///\brief	This is an overloaded function, provided for your convenience.
+///		It differs from the above function in that it takes an
+///		\c std::string for the object's name.
+///\param	name - IN: Name of the object to be referenced - \c std::string
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void* DataType::Reference(const string& name) const
+{
+   return(Reference(name.c_str()));
 }
 
 //--------------------------------------------------------------------------
@@ -575,12 +593,17 @@ void* DataType::Reference(const char* name) const
 ///			\li \c H5G_GROUP Object is a group.  
 ///			\li \c H5G_DATASET   Object is a dataset.  
 ///			\li \c H5G_TYPE Object is a named datatype 
-///\exception	H5::IdComponentException
+///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 H5G_obj_t DataType::getObjType(void *ref, H5R_type_t ref_type) const
 {
-   return(p_get_obj_type(ref, ref_type));
+   try {
+      return(p_get_obj_type(ref, ref_type));
+   }
+   catch (IdComponentException E) {
+      throw DataTypeIException(inMemFunc("getObjType"), E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -589,13 +612,18 @@ H5G_obj_t DataType::getObjType(void *ref, H5R_type_t ref_type) const
 ///\param	ref      - IN: Reference to get region of
 ///\param	ref_type - IN: Type of reference to get region of - default
 ///\return	DataSpace instance
-///\exception	H5::IdComponentException
+///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 DataSpace DataType::getRegion(void *ref, H5R_type_t ref_type) const
 {
-   DataSpace dataspace(p_get_region(ref, ref_type));
-   return(dataspace);
+   try {
+      DataSpace dataspace(p_get_region(ref, ref_type));
+      return(dataspace);
+   }
+   catch (IdComponentException E) {
+      throw DataTypeIException(inMemFunc("getRegion"), E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -613,7 +641,7 @@ void DataType::close()
       herr_t ret_value = H5Tclose(id);
       if( ret_value < 0 )
       {
-         throw DataTypeIException("DataType::close", "H5Tclose failed");
+         throw DataTypeIException(inMemFunc("close"), "H5Tclose failed");
       }
       // reset the id because the datatype that it represents is now closed
       id = 0;
@@ -638,7 +666,7 @@ DataType::~DataType()
             decRefCount();
         }
         catch (Exception close_error) {
-            cerr << "DataType::~DataType - " << close_error.getDetailMsg() << endl;
+            cerr << inMemFunc("~DataType - ") << close_error.getDetailMsg() << endl;
         }
     }
 }  

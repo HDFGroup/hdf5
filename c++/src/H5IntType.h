@@ -33,6 +33,9 @@ class H5_DLLCPP IntType : public AtomType {
 	// Sets the sign proprety for an integer type. 
 	void setSign( H5T_sign_t sign ) const;
 
+	// Returns this class name
+        virtual string fromClass () const { return("IntType"); }
+
 	// Default constructor
 	IntType();
 

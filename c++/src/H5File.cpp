@@ -427,7 +427,12 @@ void H5File::getVFDHandle(void **file_handle) const
 //--------------------------------------------------------------------------
 string H5File::getFileName() const
 {
-   return(p_get_file_name());
+   try {
+      return(p_get_file_name());
+   }
+   catch (IdComponentException E) {
+      throw FileIException("H5File::getFileName", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -444,7 +449,12 @@ string H5File::getFileName() const
 //--------------------------------------------------------------------------
 void* H5File::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type) const
 {
-   return(p_reference(name, dataspace.getId(), ref_type));
+   try {
+      return(p_reference(name, dataspace.getId(), ref_type));
+   }
+   catch (IdComponentException E) {
+      throw FileIException("H5File::Reference", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -466,7 +476,25 @@ void* H5File::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_t
 //--------------------------------------------------------------------------
 void* H5File::Reference(const char* name) const
 {
-   return(p_reference(name, -1, H5R_OBJECT));
+   try {
+      return(p_reference(name, -1, H5R_OBJECT));
+   }
+   catch (IdComponentException E) {
+      throw FileIException("H5File::Reference", E.getDetailMsg());
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:	H5File::Reference
+///\brief	This is an overloaded function, provided for your convenience.
+///		It differs from the above function in that it takes an
+///		\c std::string for the object's name.
+///\param	name - IN: Name of the object to be referenced - \c std::string
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void* H5File::Reference(const string& name) const
+{
+   return(Reference(name.c_str()));
 }
 
 //--------------------------------------------------------------------------
@@ -484,7 +512,12 @@ void* H5File::Reference(const char* name) const
 //--------------------------------------------------------------------------
 H5G_obj_t H5File::getObjType(void *ref, H5R_type_t ref_type) const
 {
-   return(p_get_obj_type(ref, ref_type));
+   try {
+      return(p_get_obj_type(ref, ref_type));
+   }
+   catch (IdComponentException E) {
+      throw FileIException("H5File::getObjType", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -498,8 +531,13 @@ H5G_obj_t H5File::getObjType(void *ref, H5R_type_t ref_type) const
 //--------------------------------------------------------------------------
 DataSpace H5File::getRegion(void *ref, H5R_type_t ref_type) const
 {
-   DataSpace dataspace(p_get_region(ref, ref_type));
-   return(dataspace);
+   try {
+      DataSpace dataspace(p_get_region(ref, ref_type));
+      return(dataspace);
+   }
+   catch (IdComponentException E) {
+      throw FileIException("H5File::getRegion", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------

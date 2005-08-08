@@ -81,12 +81,17 @@ Group::Group( const hid_t group_id ) : H5Object( group_id ) {}
 ///\param	dataspace - IN: Dataspace with selection
 ///\param	ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
 ///\return	A reference
-///\exception	H5::IdComponentException
+///\exception	H5::GroupIException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void* Group::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type) const
 {
-   return(p_reference(name, dataspace.getId(), ref_type));
+   try {
+      return(p_reference(name, dataspace.getId(), ref_type));
+   }
+   catch (IdComponentException E) {
+      throw GroupIException("Group::Reference", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -96,7 +101,7 @@ void* Group::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_ty
 ///		a reference to an HDF5 object, not to a dataset region.
 ///\param	name - IN: Name of the object to be referenced
 ///\return	A reference
-///\exception	H5::IdComponentException
+///\exception	H5::GroupIException
 ///\par Description
 //		This function passes H5R_OBJECT and -1 to the protected 
 //		function for it to pass to the C API H5Rcreate
@@ -105,7 +110,25 @@ void* Group::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_ty
 //--------------------------------------------------------------------------
 void* Group::Reference(const char* name) const
 {
-   return(p_reference(name, -1, H5R_OBJECT));
+   try {
+      return(p_reference(name, -1, H5R_OBJECT));
+   }
+   catch (IdComponentException E) {
+      throw GroupIException("Group::Reference", E.getDetailMsg());
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:	Group::Reference
+///\brief	This is an overloaded function, provided for your convenience.
+///		It differs from the above function in that it takes an
+///		\c std::string for the object's name.
+///\param	name - IN: Name of the object to be referenced
+// Programmer   Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void* Group::Reference(const string& name) const
+{
+   return(Reference(name.c_str()));
 }
 
 //--------------------------------------------------------------------------
@@ -113,17 +136,22 @@ void* Group::Reference(const char* name) const
 ///\brief	Retrieves the type of object that an object reference points to.
 ///\param		ref      - IN: Reference to query
 ///\param		ref_type - IN: Type of reference to query
-// Return	An object type, which can be one of the following:
+///\return	An object type, which can be one of the following:
 //			H5G_LINK Object is a symbolic link.  
 //			H5G_GROUP Object is a group.  
 //			H5G_DATASET   Object is a dataset.  
 //			H5G_TYPE Object is a named datatype 
-// Exception	H5::IdComponentException
+///\exception	H5::GroupIException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 H5G_obj_t Group::getObjType(void *ref, H5R_type_t ref_type) const
 {
-   return(p_get_obj_type(ref, ref_type));
+   try {
+      return(p_get_obj_type(ref, ref_type));
+   }
+   catch (IdComponentException E) {
+      throw GroupIException("Group::getObjType", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -132,13 +160,18 @@ H5G_obj_t Group::getObjType(void *ref, H5R_type_t ref_type) const
 ///\param	ref      - IN: Reference to get region of
 ///\param	ref_type - IN: Type of reference to get region of - default
 ///\return	DataSpace instance
-///\exception	H5::IdComponentException
+///\exception	H5::GroupIException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 DataSpace Group::getRegion(void *ref, H5R_type_t ref_type) const
 {
-   DataSpace dataspace(p_get_region(ref, ref_type));
-   return(dataspace);
+   try {
+      DataSpace dataspace(p_get_region(ref, ref_type));
+      return(dataspace);
+   }
+   catch (IdComponentException E) {
+      throw GroupIException("Group::getRegion", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------

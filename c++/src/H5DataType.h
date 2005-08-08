@@ -92,6 +92,7 @@ class H5_DLLCPP DataType : public H5Object {
 
 	// Creates a reference to a named Hdf5 object in this object.
 	void* Reference(const char* name) const;
+	void* Reference(const string& name) const;
 
 	// Creates a reference to a named Hdf5 object or to a dataset region
 	// in this object.
@@ -102,6 +103,8 @@ class H5_DLLCPP DataType : public H5Object {
 
 	// Retrieves a dataspace with the region pointed to selected.
 	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
+
+	virtual string fromClass () const { return ("DataType"); }
 
 	// Creates a copy of an existing DataType using its id 
 	DataType( const hid_t type_id, bool predtype = false );

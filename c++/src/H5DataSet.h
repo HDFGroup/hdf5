@@ -81,6 +81,10 @@ class H5_DLLCPP DataSet : public AbstractDs {
 
 	// Creates a reference to a named Hdf5 object in this object.
 	void* Reference(const char* name) const;
+	void* Reference(const string& name) const;
+
+	// Returns this class name
+	virtual string fromClass () const { return ("DataSet"); }
 
 	// Creates a copy of an existing DataSet using its id.
 	DataSet(const hid_t existing_id);

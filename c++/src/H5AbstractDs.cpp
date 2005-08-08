@@ -62,15 +62,24 @@ H5T_class_t AbstractDs::getTypeClass() const
    // Gets the datatype used by this dataset or attribute.
    // p_get_type calls either H5Dget_type or H5Aget_type depending on 
    // which object invokes getTypeClass
-   DataType datatype(p_get_type());
+   hid_t datatype_id;
+   try {
+      datatype_id = p_get_type();  // returned value is already validated
+   }
+   catch (DataSetIException E) {
+      throw DataTypeIException("DataSet::getTypeClass", E.getDetailMsg());
+   }
+   catch (AttributeIException E) {
+      throw DataTypeIException("Attribute::getTypeClass", E.getDetailMsg());
+   }
 
    // Gets the class of the datatype and validate it before returning
-   H5T_class_t type_class = H5Tget_class( datatype.getId());
+   H5T_class_t type_class = H5Tget_class(datatype_id);
    if( type_class != H5T_NO_CLASS )
       return( type_class );
    else
    {
-      throw DataTypeIException("AbstractDs::getTypeClass", 
+      throw DataTypeIException(inMemFunc("getTypeClass"), 
 		"H5Tget_class returns H5T_NO_CLASS");
    }
 }
@@ -85,19 +94,25 @@ H5T_class_t AbstractDs::getTypeClass() const
 //--------------------------------------------------------------------------
 DataType AbstractDs::getDataType() const
 {
-   // Gets the id of the datatype used by this dataset or attribute.
-   // p_get_type calls either H5Dget_type or H5Aget_type depending on 
-   // which object invokes getTypeClass
-   hid_t datatype_id = p_get_type();  // returned value is already validated
-
-   // Create and return the DataType object
-   DataType datatype( datatype_id );
-   return( datatype );
+   // Gets the id of the datatype used by this dataset or attribute using
+   // p_get_type.  p_get_type calls either H5Dget_type or H5Aget_type 
+   // depending on which object invokes getDataType.  Then, create and 
+   // return the DataType object
+   try {
+      DataType datatype(p_get_type());
+      return(datatype);
+   }
+   catch (DataSetIException E) {
+      throw DataTypeIException("DataSet::getDataType", E.getDetailMsg());
+   }
+   catch (AttributeIException E) {
+      throw DataTypeIException("Attribute::getDataType", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
 // Function:	AbstractDs::getArrayType
-///\brief	Returns the compound datatype of this abstract dataset which
+///\brief	Returns the array datatype of this abstract dataset which
 ///		can be a dataset or an attribute.
 ///\return	ArrayType instance
 ///\exception	H5::DataTypeIException
@@ -105,8 +120,20 @@ DataType AbstractDs::getDataType() const
 //--------------------------------------------------------------------------
 ArrayType AbstractDs::getArrayType() const
 {
-   ArrayType arraytype(p_get_type());
-   return(arraytype);
+   // Gets the id of the datatype used by this dataset or attribute using
+   // p_get_type.  p_get_type calls either H5Dget_type or H5Aget_type 
+   // depending on which object invokes getArrayType.  Then, create and 
+   // return the ArrayType object
+   try {
+      ArrayType arraytype(p_get_type());
+      return(arraytype);
+   }
+   catch (DataSetIException E) {
+      throw DataTypeIException("DataSet::getArrayType", E.getDetailMsg());
+   }
+   catch (AttributeIException E) {
+      throw DataTypeIException("Attribute::getArrayType", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -119,8 +146,20 @@ ArrayType AbstractDs::getArrayType() const
 //--------------------------------------------------------------------------
 CompType AbstractDs::getCompType() const
 {
-   CompType comptype(p_get_type());
-   return(comptype);
+   // Gets the id of the datatype used by this dataset or attribute using
+   // p_get_type.  p_get_type calls either H5Dget_type or H5Aget_type 
+   // depending on which object invokes getCompType.  Then, create and 
+   // return the CompType object
+   try {
+      CompType comptype(p_get_type());
+      return(comptype);
+   }
+   catch (DataSetIException E) {
+      throw DataTypeIException("DataSet::getCompType", E.getDetailMsg());
+   }
+   catch (AttributeIException E) {
+      throw DataTypeIException("Attribute::getCompType", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -133,8 +172,20 @@ CompType AbstractDs::getCompType() const
 //--------------------------------------------------------------------------
 EnumType AbstractDs::getEnumType() const
 {
-   EnumType enumtype(p_get_type());
-   return(enumtype);
+   // Gets the id of the datatype used by this dataset or attribute using
+   // p_get_type.  p_get_type calls either H5Dget_type or H5Aget_type 
+   // depending on which object invokes getEnumType.  Then, create and 
+   // return the EnumType object
+   try {
+      EnumType enumtype(p_get_type());
+      return(enumtype);
+   }
+   catch (DataSetIException E) {
+      throw DataTypeIException("DataSet::getEnumType", E.getDetailMsg());
+   }
+   catch (AttributeIException E) {
+      throw DataTypeIException("Attribute::getEnumType", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -147,8 +198,20 @@ EnumType AbstractDs::getEnumType() const
 //--------------------------------------------------------------------------
 IntType AbstractDs::getIntType() const
 {
-   IntType inttype(p_get_type());
-   return(inttype);
+   // Gets the id of the datatype used by this dataset or attribute using
+   // p_get_type.  p_get_type calls either H5Dget_type or H5Aget_type 
+   // depending on which object invokes getIntType.  Then, create and 
+   // return the IntType object
+   try {
+      IntType inttype(p_get_type());
+      return(inttype);
+   }
+   catch (DataSetIException E) {
+      throw DataTypeIException("DataSet::getIntType", E.getDetailMsg());
+   }
+   catch (AttributeIException E) {
+      throw DataTypeIException("Attribute::getIntType", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -161,8 +224,20 @@ IntType AbstractDs::getIntType() const
 //--------------------------------------------------------------------------
 FloatType AbstractDs::getFloatType() const
 {
-   FloatType floatype(p_get_type());
-   return(floatype);
+   // Gets the id of the datatype used by this dataset or attribute using
+   // p_get_type.  p_get_type calls either H5Dget_type or H5Aget_type 
+   // depending on which object invokes getFloatType.  Then, create and 
+   // return the FloatType object
+   try {
+      FloatType floatype(p_get_type());
+      return(floatype);
+   }
+   catch (DataSetIException E) {
+      throw DataTypeIException("DataSet::getFloatType", E.getDetailMsg());
+   }
+   catch (AttributeIException E) {
+      throw DataTypeIException("Attribute::getFloatType", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -175,8 +250,20 @@ FloatType AbstractDs::getFloatType() const
 //--------------------------------------------------------------------------
 StrType AbstractDs::getStrType() const
 {
-   StrType strtype(p_get_type());
-   return(strtype);
+   // Gets the id of the datatype used by this dataset or attribute using
+   // p_get_type.  p_get_type calls either H5Dget_type or H5Aget_type 
+   // depending on which object invokes getStrType.  Then, create and 
+   // return the StrType object
+   try {
+      StrType strtype(p_get_type());
+      return(strtype);
+   }
+   catch (DataSetIException E) {
+      throw DataTypeIException("DataSet::getStrType", E.getDetailMsg());
+   }
+   catch (AttributeIException E) {
+      throw DataTypeIException("Attribute::getStrType", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -189,8 +276,20 @@ StrType AbstractDs::getStrType() const
 //--------------------------------------------------------------------------
 VarLenType AbstractDs::getVarLenType() const
 {
-   VarLenType varlentype(p_get_type());
-   return(varlentype);
+   // Gets the id of the datatype used by this dataset or attribute using
+   // p_get_type.  p_get_type calls either H5Dget_type or H5Aget_type 
+   // depending on which object invokes getVarLenType.  Then, create and 
+   // return the VarLenType object
+   try {
+      VarLenType varlentype(p_get_type());
+      return(varlentype);
+   }
+   catch (DataSetIException E) {
+      throw DataTypeIException("DataSet::getVarLenType", E.getDetailMsg());
+   }
+   catch (AttributeIException E) {
+      throw DataTypeIException("Attribute::getVarLenType", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------

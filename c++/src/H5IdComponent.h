@@ -25,24 +25,25 @@ namespace H5 {
 class H5_DLLCPP IdComponent {
    public:
 	// Increment reference counter.
-	void incRefCount(hid_t obj_id) const;
+	void incRefCount(const hid_t obj_id) const;
 	void incRefCount() const;
 
 	// Decrement reference counter.
-	void decRefCount(hid_t obj_id) const;
+	void decRefCount(const hid_t obj_id) const;
 	void decRefCount() const;
 
 	// Get the reference counter to this identifier.
-	int getCounter(hid_t obj_id) const;
+	int getCounter(const hid_t obj_id) const;
 	int getCounter() const;
+
+	// Returns an HDF object type, given the object id.
+	static H5I_type_t getHDFObjType(const hid_t obj_id);
 
 	// Assignment operator.
 	IdComponent& operator=( const IdComponent& rhs );
 
-	//void reset();
-
 	// Sets the identifier of this object to a new value.
-	void setId( hid_t new_id );
+	void setId(const hid_t new_id);
 
 	// Creates an object to hold an HDF5 identifier.
 	IdComponent( const hid_t h5_id );
@@ -57,6 +58,14 @@ class H5_DLLCPP IdComponent {
 	// Pure virtual function for there are various H5*close for the
 	// subclasses.
 	virtual void close() = 0;
+
+	// Makes and returns the string "<class-name>::<func_name>";
+	// <class-name> is returned by fromClass().
+	string inMemFunc(const char* func_name) const;
+
+	// Returns this class name.
+        virtual string fromClass() const {return ("IdComponent");}
+
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 	// Destructor
@@ -89,7 +98,7 @@ class H5_DLLCPP IdComponent {
         hid_t p_get_region(void *ref, H5R_type_t ref_type) const;
 
 	// Verifies that the given id is valid.
-	bool p_valid_id(hid_t obj_id) const;
+	bool p_valid_id(const hid_t obj_id) const;
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 

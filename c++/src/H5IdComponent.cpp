@@ -49,7 +49,7 @@ IdComponent::IdComponent( const IdComponent& original )
 ///\brief	Increment reference counter for a given id.
 // Programmer	Binh-Minh Ribler - May 2005
 //--------------------------------------------------------------------------
-void IdComponent::incRefCount(hid_t obj_id) const
+void IdComponent::incRefCount(const hid_t obj_id) const
 {
     if (p_valid_id(obj_id))
 	if (H5Iinc_ref(obj_id) < 0)
@@ -74,7 +74,7 @@ void IdComponent::incRefCount() const
 //		Added the check for ref counter to give a little more info
 //		on why H5Idec_ref fails in some cases - BMR 5/19/2005
 //--------------------------------------------------------------------------
-void IdComponent::decRefCount(hid_t obj_id) const
+void IdComponent::decRefCount(const hid_t obj_id) const
 {
     if (p_valid_id(obj_id))
         if (H5Idec_ref(obj_id) < 0)
@@ -102,7 +102,7 @@ void IdComponent::decRefCount() const
 ///\return	Reference count
 // Programmer	Binh-Minh Ribler - May 2005
 //--------------------------------------------------------------------------
-int IdComponent::getCounter(hid_t obj_id) const
+int IdComponent::getCounter(const hid_t obj_id) const
 {
     int counter = 0;
     if (p_valid_id(obj_id))
@@ -123,6 +123,29 @@ int IdComponent::getCounter(hid_t obj_id) const
 int IdComponent::getCounter() const
 {
     return (getCounter(id));
+}
+
+//--------------------------------------------------------------------------
+// Function:    hdfObjectType
+///\brief       Given an id, returns the type of the object.
+///return       a valid HDF object type, which may be one of the following:
+///		\li \c H5I_FILE
+///		\li \c H5I_GROUP
+///		\li \c H5I_DATATYPE
+///		\li \c H5I_DATASPACE
+///		\li \c H5I_DATASET
+///		\li \c H5I_ATTR
+///		\li or \c H5I_BADID, if no valid type can be determined or the
+///				input object id is invalid.
+// Programmer   Binh-Minh Ribler - Jul, 2005
+//--------------------------------------------------------------------------
+H5I_type_t IdComponent::getHDFObjType(const hid_t obj_id)
+{
+    H5I_type_t id_type = H5Iget_type(obj_id);
+    if (id_type <= H5I_BADID || id_type >= H5I_NTYPES)
+        return H5I_BADID; // invalid
+    else
+        return id_type; // valid type
 }
 
 //--------------------------------------------------------------------------
@@ -166,7 +189,7 @@ IdComponent& IdComponent::operator=( const IdComponent& rhs )
 // 		Then the object's id is reset to the new id.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void IdComponent::setId( hid_t new_id )
+void IdComponent::setId(const hid_t new_id)
 {
    // handling references to this id
    decRefCount();
@@ -223,6 +246,26 @@ IdComponent::~IdComponent() {
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
+// Function:	IdComponent::inMemFunc
+///\brief	Makes and returns string "<class-name>::<func_name>"
+///\param	func_name - Name of the function where failure occurs
+// Description
+///		Concatenates the class name of this object with the 
+///		passed-in function name to create a string that indicates 
+///		where the failure occurs.  The class-name is provided by 
+///		fromClass().  This string will be used by a base class when
+///		an exception is thrown.
+// Programmer	Binh-Minh Ribler - Aug 6, 2005
+//--------------------------------------------------------------------------
+string IdComponent::inMemFunc(const char* func_name) const
+{
+   string full_name = func_name;
+   full_name.insert(0, "::");
+   full_name.insert(0, fromClass());
+   return (full_name);
+}
+
+//--------------------------------------------------------------------------
 // Function:	IdComponent default constructor - private
 ///\brief	Default constructor.
 // Programmer	Binh-Minh Ribler - 2000
@@ -230,7 +273,7 @@ IdComponent::~IdComponent() {
 IdComponent::IdComponent() : id(-1) {}
 
 //--------------------------------------------------------------------------
-// Function:	IdComponent::p_get_file_name
+// Function:	IdComponent::p_get_file_name (protected)
 // Purpose:	Gets the name of the file, in which this object belongs.
 // Exception:	H5::IdComponentException
 // Description:
@@ -247,8 +290,7 @@ string IdComponent::p_get_file_name() const
    // If H5Aget_name returns a negative value, raise an exception,
    if( name_size < 0 )
    {
-      throw IdComponentException("IdComponent::p_get_file_name", 
-				"H5Fget_name failed");
+      throw IdComponentException("", "H5Fget_name failed");
    }
 
    // Call H5Fget_name again to get the actual file name
@@ -258,8 +300,7 @@ string IdComponent::p_get_file_name() const
    // Check for failure again
    if( name_size < 0 )
    {
-      throw IdComponentException("IdComponent::p_get_file_name", 
-				"H5Fget_name failed");
+      throw IdComponentException("", "H5Fget_name failed");
    }
 
    // Convert the C file name and return
@@ -285,8 +326,7 @@ void* IdComponent::p_reference(const char* name, hid_t space_id, H5R_type_t ref_
    herr_t ret_value = H5Rcreate(ref, id, name, ref_type, space_id);
    if (ret_value < 0)
    {
-      throw IdComponentException("IdComponent::p_reference",
-                "H5Rcreate failed");
+      throw IdComponentException("", "H5Rcreate failed");
    }
    return(ref);
 }
@@ -310,8 +350,7 @@ H5G_obj_t IdComponent::p_get_obj_type(void *ref, H5R_type_t ref_type) const
    H5G_obj_t obj_type = H5Rget_obj_type(id, ref_type, ref);
    if (obj_type == H5G_UNKNOWN)
    {
-      throw IdComponentException("IdComponent::p_get_obj_type",
-                "H5R_get_obj_type failed");
+      throw IdComponentException("", "H5R_get_obj_type failed");
    }
    return(obj_type);
 }
@@ -332,8 +371,7 @@ hid_t IdComponent::p_get_region(void *ref, H5R_type_t ref_type) const
    hid_t space_id = H5Rget_region(id, ref_type, ref);
    if (space_id < 0)
    {
-      throw IdComponentException("IdComponent::p_get_region",
-                "H5Rget_region failed");
+      throw IdComponentException("", "H5Rget_region failed");
    }
    return(space_id);
 }
@@ -349,7 +387,7 @@ hid_t IdComponent::p_get_region(void *ref, H5R_type_t ref_type) const
 // Return	true if id is valid, false, otherwise
 // Programmer	Binh-Minh Ribler - May, 2005
 //--------------------------------------------------------------------------
-bool IdComponent::p_valid_id(hid_t obj_id) const
+bool IdComponent::p_valid_id(const hid_t obj_id) const
 {
     H5I_type_t id_type = H5Iget_type(obj_id);
     if (id_type <= H5I_BADID || id_type >= H5I_NTYPES)
