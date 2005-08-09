@@ -666,3 +666,28 @@ add_obj(table_t *table, haddr_t objno, char *objname)
     table->objs[i].objname = HDstrdup(objname);
 }
 
+
+#ifndef H5_HAVE_TMPFILE
+/*-------------------------------------------------------------------------
+ * Function:    tmpfile
+ *
+ * Purpose:     provide tmpfile() function when it is not supported by the
+ *              system.  Always return NULL for now.
+ *
+ * Return:      a stream description when succeeds.
+ *              NULL if fails.
+ *
+ * Programmer:  Albert Cheng, 2005/8/9
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static 
+FILE *
+tmpfile(void)
+{
+    return NULL;
+}
+
+#endif

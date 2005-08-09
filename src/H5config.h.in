@@ -320,6 +320,9 @@
 /* Define if the ioctl TIOGWINSZ is defined */
 #undef HAVE_TIOCGWINSZ
 
+/* Define to 1 if you have the `tmpfile' function. */
+#undef HAVE_TMPFILE
+
 /* Define if `tm_gmtoff' is a member of `struct tm' */
 #undef HAVE_TM_GMTOFF
 
