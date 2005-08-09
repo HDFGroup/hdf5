@@ -31,7 +31,7 @@
 #
 
 
-SOURCES = h5debug.c h5repart.c h5repart_gentest.c pdb2hdf5.c
+SOURCES = h5debug.c h5repart.c h5repart_gentest.c pdb2hdf5.c repart_test.c
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -60,7 +60,8 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
 check_PROGRAMS = $(am__EXEEXT_2)
-bin_PROGRAMS = h5debug$(EXEEXT) h5repart$(EXEEXT) $(am__EXEEXT_1)
+bin_PROGRAMS = h5debug$(EXEEXT) h5repart$(EXEEXT) $(am__EXEEXT_1) \
+	repart_test$(EXEEXT)
 subdir = tools/misc
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
@@ -93,6 +94,10 @@ pdb2hdf5_SOURCES = pdb2hdf5.c
 pdb2hdf5_OBJECTS = pdb2hdf5.$(OBJEXT)
 pdb2hdf5_LDADD = $(LDADD)
 pdb2hdf5_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+repart_test_SOURCES = repart_test.c
+repart_test_OBJECTS = repart_test.$(OBJEXT)
+repart_test_LDADD = $(LDADD)
+repart_test_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
 binSCRIPT_INSTALL = $(INSTALL_SCRIPT)
 SCRIPTS = $(bin_SCRIPTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/src
@@ -106,8 +111,10 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = h5debug.c h5repart.c h5repart_gentest.c pdb2hdf5.c
-DIST_SOURCES = h5debug.c h5repart.c h5repart_gentest.c pdb2hdf5.c
+SOURCES = h5debug.c h5repart.c h5repart_gentest.c pdb2hdf5.c \
+	repart_test.c
+DIST_SOURCES = h5debug.c h5repart.c h5repart_gentest.c pdb2hdf5.c \
+	repart_test.c
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -461,6 +468,9 @@ h5repart_gentest$(EXEEXT): $(h5repart_gentest_OBJECTS) $(h5repart_gentest_DEPEND
 pdb2hdf5$(EXEEXT): $(pdb2hdf5_OBJECTS) $(pdb2hdf5_DEPENDENCIES) 
 	@rm -f pdb2hdf5$(EXEEXT)
 	$(LINK) $(pdb2hdf5_LDFLAGS) $(pdb2hdf5_OBJECTS) $(pdb2hdf5_LDADD) $(LIBS)
+repart_test$(EXEEXT): $(repart_test_OBJECTS) $(repart_test_DEPENDENCIES) 
+	@rm -f repart_test$(EXEEXT)
+	$(LINK) $(repart_test_LDFLAGS) $(repart_test_OBJECTS) $(repart_test_LDADD) $(LIBS)
 install-binSCRIPTS: $(bin_SCRIPTS)
 	@$(NORMAL_INSTALL)
 	test -z "$(bindir)" || $(mkdir_p) "$(DESTDIR)$(bindir)"
@@ -491,6 +501,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repart.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repart_gentest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pdb2hdf5.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/repart_test.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
