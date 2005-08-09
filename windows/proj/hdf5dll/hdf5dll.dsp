@@ -912,6 +912,21 @@ SOURCE=..\..\..\src\H5FO.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\H5Fsfile.c
+
+!IF  "$(CFG)" == "hdf5dll - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\H5Fsuper.c
 
 !IF  "$(CFG)" == "hdf5dll - Win32 Release"
