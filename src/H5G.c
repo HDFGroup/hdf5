@@ -389,6 +389,7 @@ herr_t
 H5Giterate(hid_t loc_id, const char *name, int *idx_p,
 	    H5G_iterate_t op, void *op_data)
 {
+    H5O_stab_t		stab_mesg;		/*info about B-tree	*/
     int			idx;
     H5G_bt_ud2_t	udata;
     H5G_t		*grp = NULL;
@@ -419,9 +420,13 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p,
         HGOTO_ERROR (H5E_ATOM, H5E_BADATOM, FAIL, "bad group atom");
     }
 
+    /* Get the B-tree info */
+    if (NULL==H5O_read (&(grp->ent), H5O_STAB_ID, 0, &stab_mesg, H5AC_dxpl_id))
+	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address")
+
     /* Build udata to pass through H5B_iterate() to H5G_node_iterate() */
     udata.skip = idx;
-    udata.ent = &(grp->ent);
+    udata.stab = &stab_mesg;
     udata.op = op;
     udata.op_data = op_data;
 
@@ -430,7 +435,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p,
 
     /* Iterate over the group members */
     if ((ret_value = H5B_iterate (H5G_fileof(grp), H5AC_dxpl_id, H5B_SNODE,
-              H5G_node_iterate, udata.ent->cache.stab.btree_addr, &udata))<0)
+              H5G_node_iterate, stab_mesg.btree_addr, &udata))<0)
         HERROR (H5E_SYM, H5E_CANTNEXT, "iteration operator failed");
 
     H5I_dec_ref (udata.group_id); /*also closes 'grp'*/
