@@ -1533,7 +1533,7 @@ H5G_node_iterate (H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t a
         if (bt_udata->skip>0) {
             --bt_udata->skip;
         } else {
-            if (NULL == (heap = H5HL_protect(f, dxpl_id, bt_udata->ent->cache.stab.heap_addr)))
+            if (NULL == (heap = H5HL_protect(f, dxpl_id, bt_udata->stab->heap_addr)))
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_ITER_ERROR, "unable to protect symbol name");
 
             name = H5HL_offset_into(f, heap, name_off[i]);
@@ -1548,7 +1548,7 @@ H5G_node_iterate (H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t a
             }
             HDstrcpy (s, name);
 
-            if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->ent->cache.stab.heap_addr, H5AC__NO_FLAGS_SET) < 0)
+            if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->stab->heap_addr, H5AC__NO_FLAGS_SET) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to unprotect symbol name");
             heap=NULL; name=NULL;
 
@@ -1565,7 +1565,7 @@ H5G_node_iterate (H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t a
         HERROR (H5E_SYM, H5E_CANTNEXT, "iteration operator failed");
 
 done:
-    if (heap && H5HL_unprotect(f, dxpl_id, heap, bt_udata->ent->cache.stab.heap_addr, H5AC__NO_FLAGS_SET) < 0)
+    if (heap && H5HL_unprotect(f, dxpl_id, heap, bt_udata->stab->heap_addr, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to unprotect symbol name");
 
     if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) != SUCCEED)
