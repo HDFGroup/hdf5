@@ -1185,6 +1185,10 @@ H5Eclose_stack(hid_t stack_id)
     H5TRACE1("e","i",stack_id);
 
     if(H5E_DEFAULT != stack_id) {
+        /* Check arguments */
+        if (H5I_ERROR_STACK != H5I_get_type(stack_id))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
+
         /*
          * Decrement the counter on the error stack.  It will be freed if the count
          * reaches zero.
