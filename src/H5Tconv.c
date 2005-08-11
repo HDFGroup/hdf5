@@ -208,7 +208,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
             *((DT*)D) = (D_MAX);					      \
     } else if (*((ST*)S) == (DT)(D_MAX)) {                                    \
         *((DT*)D) = (D_MAX);			                              \
-    } else if (*((ST*)S) < (D_MIN)) {                                         \
+    } else if (*((ST*)S) < (DT)(D_MIN)) {                                     \
         if(cb_struct.func) {			                              \
             H5T_conv_ret_t      except_ret;     /*callback return*/           \
                                                                               \
