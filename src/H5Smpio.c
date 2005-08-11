@@ -462,190 +462,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
-
-/*-------------------------------------------------------------------------
- * Function:	H5S_mpio_space_type
- *
- * Purpose:	Translate an HDF5 dataspace selection into an MPI type.
- *		Currently handle only hyperslab and "all" selections.
- *
- * Return:	non-negative on success, negative on failure.
- *
- * Outputs:	*new_type	  the MPI type corresponding to the selection
- *		*count		  how many objects of the new_type in selection
- *				  (useful if this is the buffer type for xfer)
- *		*extra_offset     Number of bytes of offset within dataset
- *		*is_derived_type  0 if MPI primitive type, 1 if derived
- *
- * Programmer:	rky 980813
- *
- * Modifications:
- *
- *      Quincey Koziol, June 18, 2002
- *      Added 'extra_offset' parameter
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5S_mpio_space_type( const H5S_t *space, size_t elmt_size,
-		     /* out: */
-		     MPI_Datatype *new_type,
-		     size_t *count,
-		     hsize_t *extra_offset,
-		     hbool_t *is_derived_type )
-{
-    herr_t	ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5S_mpio_space_type);
-
-    /* Check args */
-    assert (space);
-
-    /* Creat MPI type based on the kind of selection */
-    switch (H5S_GET_EXTENT_TYPE(space)) {
-        case H5S_NULL:
-        case H5S_SCALAR:
-        case H5S_SIMPLE:
-            switch(H5S_GET_SELECT_TYPE(space)) {
-                case H5S_SEL_NONE:
-                    if ( H5S_mpio_none_type( space, elmt_size,
-                        /* out: */ new_type, count, extra_offset, is_derived_type ) <0)
-                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert \"all\" selection to MPI type");
-                    break;
-
-                case H5S_SEL_ALL:
-                    if ( H5S_mpio_all_type( space, elmt_size,
-                        /* out: */ new_type, count, extra_offset, is_derived_type ) <0)
-                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert \"all\" selection to MPI type");
-                    break;
-
-                case H5S_SEL_POINTS:
-                    /* not yet implemented */
-                    ret_value = FAIL;
-                    break;
-
-                case H5S_SEL_HYPERSLABS:
-                    if(H5S_mpio_hyper_type( space, elmt_size,
-                            /* out: */ new_type, count, extra_offset, is_derived_type )<0)
-                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert \"all\" selection to MPI type");
-                    break;
-
-                default:
-                    assert("unknown selection type" && 0);
-                    break;
-            } /* end switch */
-            break;
-
-        case H5S_COMPLEX:
-            /* not yet implemented */
-            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "complex data spaces are not supported yet");
-
-        default:
-            assert("unknown data space type" && 0);
-            break;
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5S_mpio_space_span_type
- *
- * Purpose:	Translate an HDF5 dataspace selection into a general
-                MPI derived datatype, the selection is implemented with 
-		span-tree.
- *             
- *		Currently handle only hyperslab and "all" selections.
- *
- * Return:	non-negative on success, negative on failure.
- *
- * Outputs:	*new_type	  the MPI type corresponding to the selection
- *		*count		  how many objects of the new_type in selection
- *				  (useful if this is the buffer type for xfer)
- *		*extra_offset     Number of bytes of offset within dataset
- *		*is_derived_type  0 if MPI primitive type, 1 if derived
- *
- * Programmer:	KY
- *
- * Modifications:
- *
- *      Quincey Koziol, June 18, 2002
- *      Added 'extra_offset' parameter
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5S_mpio_space_span_type( const H5S_t *space, 
-			  size_t elmt_size,/* out: */
-			  MPI_Datatype *new_type,
-			  size_t *count,
-			  hsize_t *extra_offset,
-			  hbool_t *is_derived_type )
-{
-    herr_t	ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT(H5S_mpio_space_span_type);
-
-    /* Check args */
-    assert (space);
-
-    /* Creat MPI type based on the kind of selection */
-    switch (H5S_GET_EXTENT_TYPE(space)) {
-        case H5S_NULL:
-        case H5S_SCALAR:
-        case H5S_SIMPLE:
-            switch(H5S_GET_SELECT_TYPE(space)) {
-                case H5S_SEL_NONE:
-                    if ( H5S_mpio_none_type( space, elmt_size,
-                        /* out: */ new_type, count, extra_offset, is_derived_type ) <0)
-                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert \"all\" selection to MPI type");
-                    break;
-
-                case H5S_SEL_ALL:
-                    if ( H5S_mpio_all_type( space, elmt_size,
-                        /* out: */ new_type, count, extra_offset, is_derived_type ) <0)
-                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert \"all\" selection to MPI type");
-                    break;
-
-                case H5S_SEL_POINTS:
-                    /* not yet implemented */
-                    ret_value = FAIL;
-                    break;
-
-                case H5S_SEL_HYPERSLABS:
-                    if(H5S_mpio_span_hyper_type( space, elmt_size,
-                            /* out: */ new_type, count, extra_offset, is_derived_type )<0)
-                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert \"all\" selection to MPI type");
-                    break;
-
-                default:
-                    assert("unknown selection type" && 0);
-                    break;
-            } /* end switch */
-            break;
-
-        case H5S_COMPLEX:
-            /* not yet implemented */
-            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "complex data spaces are not supported yet");
-
-        default:
-            assert("unknown data space type" && 0);
-            break;
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-
-
-/* The following codes have been used by Kent to test
-   general collective derived datatype functionality. 
-   It should NOT be called by other routines except with
-   macro #ifdef KENT #endif
-   Nov. 11th, 2004 */
 
 
 
@@ -682,20 +499,24 @@ H5S_mpio_span_hyper_type( const           H5S_t *space,
   herr_t                ret_value = SUCCEED;
   MPI_Aint              extent,lb;
 
+  
   FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_mpio_span_hyper_type);
 
   /* Check args */
     assert (space);
  
  /* assert(sizeof(MPI_Aint) >= sizeof(elmt_size)); not sure the reason*/
-    
+
+
     rank = space->extent.rank;
 
     /*    size = HDcalloc((size_t)rank,sizeof(hsize_t));  */ 
     if (0==elmt_size)
         goto empty;
     size = space->extent.size;
-
+    if(size == 0) 
+        goto empty;
+ 
     odown = space->select.sel_info.hslab->span_lst;
     if(odown == NULL) 
       goto empty;
@@ -902,6 +723,101 @@ static herr_t H5S_obtain_datatype(const hsize_t size[],
   HDfree(disp);
  done: 
   FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_mpio_space_type
+ *
+ * Purpose:	Translate an HDF5 dataspace selection into an MPI type.
+ *		Currently handle only hyperslab and "all" selections.
+ *
+ * Return:	non-negative on success, negative on failure.
+ *
+ * Outputs:	*new_type	  the MPI type corresponding to the selection
+ *		*count		  how many objects of the new_type in selection
+ *				  (useful if this is the buffer type for xfer)
+ *		*extra_offset     Number of bytes of offset within dataset
+ *		*is_derived_type  0 if MPI primitive type, 1 if derived
+ *
+ * Programmer:	rky 980813
+ *
+ * Modifications:
+ *
+ *      Quincey Koziol, June 18, 2002
+ *      Added 'extra_offset' parameter
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5S_mpio_space_type( const H5S_t *space, size_t elmt_size,
+		     /* out: */
+		     MPI_Datatype *new_type,
+		     size_t *count,
+		     hsize_t *extra_offset,
+		     hbool_t *is_derived_type )
+{
+    herr_t	ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5S_mpio_space_type);
+
+    /* Check args */
+    assert (space);
+
+    /* Creat MPI type based on the kind of selection */
+    switch (H5S_GET_EXTENT_TYPE(space)) {
+        case H5S_NULL:
+        case H5S_SCALAR:
+        case H5S_SIMPLE:
+            switch(H5S_GET_SELECT_TYPE(space)) {
+                case H5S_SEL_NONE:
+                    if ( H5S_mpio_none_type( space, elmt_size,
+                        /* out: */ new_type, count, extra_offset, is_derived_type ) <0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert \"all\" selection to MPI type");
+                    break;
+
+                case H5S_SEL_ALL:
+                    if ( H5S_mpio_all_type( space, elmt_size,
+                        /* out: */ new_type, count, extra_offset, is_derived_type ) <0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert \"all\" selection to MPI type");
+                    break;
+
+                case H5S_SEL_POINTS:
+                    /* not yet implemented */
+                    ret_value = FAIL;
+                    break;
+
+                case H5S_SEL_HYPERSLABS:
+		  if((H5S_SELECT_IS_REGULAR(space) == TRUE)) {
+		    if(H5S_mpio_hyper_type( space, elmt_size,
+                            /* out: */ new_type, count, extra_offset, is_derived_type )<0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert \"all\" selection to MPI type");
+		    }
+		     else {
+		       if(H5S_mpio_span_hyper_type( space, elmt_size,
+                            /* out: */ new_type, count, extra_offset, is_derived_type )<0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert \"all\" selection to MPI type");
+		     }
+                    break;
+
+                default:
+                    assert("unknown selection type" && 0);
+                    break;
+            } /* end switch */
+            break;
+
+        case H5S_COMPLEX:
+            /* not yet implemented */
+            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "complex data spaces are not supported yet");
+
+        default:
+            assert("unknown data space type" && 0);
+            break;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 #endif  /* H5_HAVE_PARALLEL */

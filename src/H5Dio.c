@@ -108,13 +108,24 @@ static htri_t
 H5D_get_collective_io_consensus(const H5F_t *file,
             const htri_t local_opinion,
             const unsigned flags);
+
+static herr_t  H5D_mpio_get_mini_chunk(const H5D_t *dset,
+                                       const H5S_t *mem_space,
+                                       const H5S_t *file_space,
+                                       int *min_chunkf);
+static herr_t  
+H5D_obtain_duplicate_pid(hid_t dxpl_id,
+		    hid_t* dp_id, 
+		    H5D_dxpl_cache_t **cache);
+
 #endif /* H5_HAVE_PARALLEL */
 
 /* I/O info operations */
 static herr_t 
 H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
-    const H5S_t *mem_space, const H5S_t *file_space,
-    unsigned flags, hbool_t *use_par_opt_io, H5D_io_info_t *io_info);
+		hid_t dp_dxpl_id, H5D_dxpl_cache_t *dp_dxpl_cache,
+		const H5S_t *mem_space, const H5S_t *file_space,
+		unsigned flags, hbool_t *use_par_opt_io, H5D_io_info_t *io_info);
 
 /* Chunk operations */
 static herr_t H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type,
@@ -648,8 +659,13 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     const H5T_t	*mem_type = NULL;       /* Memory datatype */
     H5D_io_info_t io_info;              /* Dataset I/O info     */
     hbool_t     use_par_opt_io=FALSE;   /* Whether the 'optimized' I/O routines with be parallel */
+    H5D_dxpl_cache_t _dp_dxpl_cache;                 /* Data transfer property cache buffer */
+    H5D_dxpl_cache_t *dp_dxpl_cache=&_dp_dxpl_cache;   /* Data transfer property cache */
+    hid_t            dp_id;
 #ifdef H5_HAVE_PARALLEL
-    hbool_t     xfer_mode_changed=FALSE;    /* Whether the transfer mode was changed */
+    hbool_t     xfer_mode_changed=FALSE;    /* Whether the transfer mode was changed */  
+    H5FD_mpio_xfer_t xfer_mode; 
+
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
     int         prop_value,new_value;
     htri_t      check_prop;
@@ -659,6 +675,8 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     H5D_dxpl_cache_t *dxpl_cache=&_dxpl_cache;   /* Data transfer property cache */
     unsigned	sconv_flags=0;	        /* Flags for the space conversion */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
+
+
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_read)
 
@@ -682,6 +700,7 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
 #ifdef H5_HAVE_PARALLEL
+
     /* Collective access is not permissible without a MPI based VFD */
     if (dxpl_cache->xfer_mode==H5FD_MPIO_COLLECTIVE && !IS_H5FD_MPI(dataset->ent.file))
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPI-based drivers only")
@@ -765,8 +784,15 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
             assert(0 && "Unhandled layout type!");
     } /* end switch */
 
+#ifdef H5_HAVE_PARALLEL
+    /* Obtain duplicate property list id. This is used to handle 
+       collective chunk IO. */
+
+   if(H5D_obtain_duplicate_pid(dxpl_id,&dp_id,&dp_dxpl_cache)<0)                            
+     HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't obtain duplicated property id")
+#endif 
     /* Set up I/O operation */
-    if(H5D_ioinfo_init(dataset,dxpl_cache,dxpl_id,mem_space,file_space,sconv_flags,&use_par_opt_io,&io_info)<0)
+    if(H5D_ioinfo_init(dataset,dxpl_cache,dxpl_id,dp_id,dp_dxpl_cache,mem_space,file_space,sconv_flags,&use_par_opt_io,&io_info)<0)
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to set up I/O operation")
 
 #ifdef H5_HAVE_PARALLEL
@@ -877,8 +903,13 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     const H5T_t	*mem_type = NULL;       /* Memory datatype */
     H5D_io_info_t io_info;              /* Dataset I/O info     */
     hbool_t     use_par_opt_io=FALSE;   /* Whether the 'optimized' I/O routines with be parallel */
+    hid_t       dp_id;
+    H5D_dxpl_cache_t _dp_dxpl_cache;                 /* Data transfer property cache buffer */
+    H5D_dxpl_cache_t *dp_dxpl_cache=&_dp_dxpl_cache;   /* Data transfer property cache */
 #ifdef H5_HAVE_PARALLEL
-    hbool_t     xfer_mode_changed=FALSE;    /* Whether the transfer mode was changed */
+    hbool_t     xfer_mode_changed=FALSE; /* Whether the transfer mode was changed */    
+    H5FD_mpio_xfer_t xfer_mode; 
+    int mpi_rank;
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
     int         prop_value,new_value;
     htri_t      check_prop;
@@ -1013,9 +1044,12 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         default:
             assert(0 && "Unhandled layout type!");
     } /* end switch */
-
+#ifdef H5_HAVE_PARALLEL
+     if(H5D_obtain_duplicate_pid(dxpl_id,&dp_id,&dp_dxpl_cache)<0)
+       HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't obtain duplicated property id")
+#endif
     /* Set up I/O operation */
-    if(H5D_ioinfo_init(dataset,dxpl_cache,dxpl_id,mem_space,file_space,sconv_flags,&use_par_opt_io,&io_info)<0)
+    if(H5D_ioinfo_init(dataset,dxpl_cache,dxpl_id,dp_id,dp_dxpl_cache,mem_space,file_space,sconv_flags,&use_par_opt_io,&io_info)<0)
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to set up I/O operation")
         
 #ifdef H5_HAVE_PARALLEL
@@ -1654,6 +1688,12 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
+#ifdef H5_HAVE_PARALLEL
+    int count_chunk,mpi_rank, mpi_code,min_num_chunk,is_regular,all_regular;
+    hid_t temp_id;   
+    MPI_Comm comm;
+#endif
+
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_read)
     
     /* Map elements between file and memory for each chunk*/
@@ -1679,7 +1719,13 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
 
         /* Get first node in chunk skip list */
         chunk_node=H5SL_first(fm.fsel);
-
+#ifdef H5_HAVE_PARALLEL
+        if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE) {
+       	if(H5D_mpio_get_mini_chunk(dataset,mem_space,file_space,&min_num_chunk)<0)
+		HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get minimum number of chunk")
+		  }
+        count_chunk = 0;
+#endif
         /* Iterate through chunks to be operated on */
         while(chunk_node) {
             H5D_chunk_info_t *chunk_info;   /* chunk information */
@@ -1691,15 +1737,148 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
             store.chunk.offset = chunk_info->coords;
             store.chunk.index = chunk_info->index;
 
-            /* Perform the actual read operation */
-            status = (io_info->ops.read)(io_info,
+#ifdef H5_HAVE_PARALLEL
+
+	     count_chunk++;
+             if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE) {
+	       /* If the number of chunk is greater than minimum number of chunk,
+		  Do independent read */
+
+             if(count_chunk <= min_num_chunk) {
+#ifndef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
+              if(H5S_SELECT_IS_REGULAR(chunk_info->fspace) == TRUE &&
+                 H5S_SELECT_IS_REGULAR(chunk_info->mspace) == TRUE)
+                   is_regular = 1;
+              else is_regular = 0;
+
+        /* Getting MPI communicator and rank */
+        if((comm = H5F_mpi_get_comm(dataset->ent.file))==MPI_COMM_NULL)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve MPI communicator")
+        if((mpi_rank = H5F_mpi_get_rank(dataset->ent.file))<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve MPI rank")
+
+               if (MPI_SUCCESS != (mpi_code= MPI_Reduce(&all_regular,&is_regular,1,MPI_INT,MPI_MIN,0,comm)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Reduce failed", mpi_code) 
+               if (MPI_SUCCESS != (mpi_code= MPI_Bcast(&all_regular,1,MPI_INT,0,comm)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
+#endif
+             }
+
+	       if(count_chunk > min_num_chunk) {
+		  temp_id = io_info->dxpl_id;
+		  io_info->dxpl_id = io_info->dp_dxpl_id;
+		  status = (io_info->ops_sca.read)(io_info,
+			   chunk_info->chunk_points, H5T_get_size(dataset->shared->type),
+			    chunk_info->fspace, chunk_info->mspace,
+                            buf);
+		 /* Check return value from optimized read */
+		 if (status<0)
+		   HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "optimized read failed")
+                    io_info->dxpl_id = temp_id;
+	       }
+
+       
+	       else if((H5S_SELECT_IS_REGULAR(chunk_info->fspace) == FALSE)||
+	              (H5S_SELECT_IS_REGULAR(chunk_info->mspace) == FALSE)){
+
+#ifndef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
+	       /* Perform the independent read operation */
+                temp_id = io_info->dxpl_id;
+                io_info->dxpl_id = io_info->dp_dxpl_id;
+		status = (io_info->ops_sca.read)(io_info, 
                 chunk_info->chunk_points, H5T_get_size(dataset->shared->type),
                 chunk_info->fspace, chunk_info->mspace,
                 buf);
-        
-            /* Check return value from optimized read */
-            if (status<0)
-                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "optimized read failed")
+		/* Check return value from optimized read */
+		if (status<0)
+		  HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "optimized read failed")
+                io_info->dxpl_id = temp_id;
+#else
+	   
+		  /* Perform the actual collective read operation */
+		  status = (io_info->ops.read)(io_info, 
+		    chunk_info->chunk_points, H5T_get_size(dataset->shared->type),
+                    chunk_info->fspace, chunk_info->mspace,
+                    buf);
+	       /* Check return value from optimized read */
+               if (status<0)
+		 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "optimized read failed")
+#endif
+		   }
+	     
+	       else { 
+		 /* For regular selection, 
+		    if MPI_COMPLEX_DERIVED_DATATYPE is not defined,
+                    unless spaces for all processors are regular, independent read operation should be performed.*/
+
+#ifndef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
+                if(!all_regular) {
+
+	       /* Perform the independent read operation */
+                temp_id = io_info->dxpl_id;
+                io_info->dxpl_id = io_info->dp_dxpl_id;
+		status = (io_info->ops_sca.read)(io_info, 
+                chunk_info->chunk_points, H5T_get_size(dataset->shared->type),
+                chunk_info->fspace, chunk_info->mspace,
+                buf);
+		/* Check return value from optimized read */
+		if (status<0)
+		  HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "optimized read failed")
+                io_info->dxpl_id = temp_id;
+		   }
+	     
+	        else { 
+	         /* For  regular collective read in parallel*/
+	        /* Perform the  read operation */
+		   status = (io_info->ops.read)(io_info, 
+						chunk_info->chunk_points, 
+						H5T_get_size(dataset->shared->type),
+						chunk_info->fspace, chunk_info->mspace,
+						buf);
+	        /* Check return value from optimized read */
+                if (status<0)
+		 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "optimized read failed")
+		   }
+#else 
+              
+	         /* For  regular collective read in parallel*/
+	        /* Perform the  read operation */
+		   status = (io_info->ops.read)(io_info, 
+						chunk_info->chunk_points, 
+						H5T_get_size(dataset->shared->type),
+						chunk_info->fspace, chunk_info->mspace,
+						buf);
+	        /* Check return value from optimized read */
+                if (status<0)
+		 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "optimized read failed")
+#endif
+		   }
+               
+          }
+          else { 
+		 /* For  regular independent read in parallel*/
+	        /* Perform the  read operation */
+		   status = (io_info->ops.read)(io_info, 
+						chunk_info->chunk_points, 
+						H5T_get_size(dataset->shared->type),
+						chunk_info->fspace, chunk_info->mspace,
+						buf);
+	        /* Check return value from optimized read */
+                if (status<0)
+		 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "optimized read failed")
+		   }
+                
+#else	
+		  /* Perform the actual read operation for sequential*/
+		  status = (io_info->ops.read)(io_info, 
+					       chunk_info->chunk_points, 
+					       H5T_get_size(dataset->shared->type),
+					       chunk_info->fspace, chunk_info->mspace,
+					       buf);
+	       /* Check return value from optimized read */
+               if (status<0)
+		 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "optimized read failed")
+#endif        
 
             /* Get the next chunk node in the skip list */
             chunk_node=H5SL_next(chunk_node);
@@ -1937,6 +2116,8 @@ done:
  *      Hacked on it a lot. :-)
  *      Leon Arber: 4/20/04
  *      Added support for data transforms.
+ *      Kent Yang: 8/10/04
+ *      Added support for collective chunk IO.
  *
  *-------------------------------------------------------------------------
  */
@@ -1973,6 +2154,13 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
+#ifdef H5_HAVE_PARALLEL
+    hid_t temp_id;
+    int count_chunk,mpi_rank,mpi_code,min_num_chunk,is_regular,all_regular = 0;
+    MPI_Comm comm;
+    
+#endif
+
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_write)
     
     /* Map elements between file and memory for each chunk*/
@@ -1990,6 +2178,14 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
+
+#ifdef H5_HAVE_PARALLEL
+        if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE) {
+	  if(H5D_mpio_get_mini_chunk(dataset,mem_space,file_space,&min_num_chunk)<0)
+		HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get minimum number of chunk")
+		  }
+        count_chunk = 0;
+#endif
         /* Get first node in chunk skip list */
         chunk_node=H5SL_first(fm.fsel);
 
@@ -2004,15 +2200,136 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
             store.chunk.offset = chunk_info->coords;
             store.chunk.index = chunk_info->index;
 
-            /* Perform the actual write operation */
-            status = (io_info->ops.write)(io_info, 
+#ifdef H5_HAVE_PARALLEL
+
+	     count_chunk++;
+             if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE) {
+	       /* If the number of chunk is greater than minimum number of chunk,
+		  Do independent write */
+
+              if(count_chunk <= min_num_chunk) {
+#ifndef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
+              if(H5S_SELECT_IS_REGULAR(chunk_info->fspace) == TRUE &&
+                 H5S_SELECT_IS_REGULAR(chunk_info->mspace) == TRUE)
+                   is_regular = 1;
+              else is_regular = 0;
+        /* Getting MPI communicator and rank */
+        if((comm = H5F_mpi_get_comm(dataset->ent.file))==MPI_COMM_NULL)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve MPI communicator")
+        if((mpi_rank = H5F_mpi_get_rank(dataset->ent.file))<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve MPI rank")
+               if (MPI_SUCCESS != (mpi_code= MPI_Reduce(&all_regular,&is_regular,1,MPI_INT,MPI_MIN,0,comm)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Reduce failed", mpi_code) 
+               if (MPI_SUCCESS != (mpi_code= MPI_Bcast(&all_regular,1,MPI_INT,0,comm)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
+#endif
+             }
+	       if(count_chunk > min_num_chunk) {
+		  temp_id = io_info->dxpl_id;
+		  io_info->dxpl_id = io_info->dp_dxpl_id;
+                  fflush(stdout);
+		  status = (io_info->ops_sca.write)(io_info,
+			   chunk_info->chunk_points, H5T_get_size(dataset->shared->type),
+			    chunk_info->fspace, chunk_info->mspace,
+                            buf);
+		 /* Check return value from optimized write */
+		 if (status<0)
+		   HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "optimized write failed")
+                    io_info->dxpl_id = temp_id;
+	       }
+
+       
+	       else if((H5S_SELECT_IS_REGULAR(chunk_info->fspace) == FALSE)||
+	              (H5S_SELECT_IS_REGULAR(chunk_info->mspace) == FALSE)){
+
+#ifndef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
+	       /* Perform the independent write operation */
+                
+	        temp_id = io_info->dxpl_id;
+	        io_info->dxpl_id = io_info->dp_dxpl_id;
+		status = (io_info->ops_sca.write)(io_info, 
                 chunk_info->chunk_points, H5T_get_size(dataset->shared->type),
                 chunk_info->fspace, chunk_info->mspace,
                 buf);
-        
-            /* Check return value from optimized write */
-            if (status<0)
-                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "optimized write failed")
+                 
+		/* Check return value from optimized write */
+		if (status<0)
+		  HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "optimized write failed")
+                io_info->dxpl_id = temp_id;
+#else
+	   
+		  /* Perform the actual collective write operation */
+		  status = (io_info->ops.write)(io_info, 
+		    chunk_info->chunk_points, H5T_get_size(dataset->shared->type),
+                    chunk_info->fspace, chunk_info->mspace,
+                    buf);
+	       /* Check return value from optimized write */
+               if (status<0)
+		 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "optimized write failed")
+#endif
+		   }
+	     
+	       else { 
+#ifndef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
+                if(!all_regular) {
+
+	       /* Perform the independent write operation */
+                temp_id = io_info->dxpl_id;
+                io_info->dxpl_id = io_info->dp_dxpl_id;
+		status = (io_info->ops_sca.write)(io_info, 
+                chunk_info->chunk_points, H5T_get_size(dataset->shared->type),
+                chunk_info->fspace, chunk_info->mspace,
+                buf);
+		/* Check return value from optimized read */
+		if (status<0)
+		  HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "optimized read failed")
+                io_info->dxpl_id = temp_id;
+		   }
+                  else {
+		 /* For regular selection, perform the collective  write operation */
+		   status = (io_info->ops.write)(io_info, 
+		    chunk_info->chunk_points, H5T_get_size(dataset->shared->type),
+                    chunk_info->fspace, chunk_info->mspace,
+                    buf);
+	        /* Check return value from optimized write */
+                if (status<0)
+		 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "optimized write failed")
+                  }
+#else
+
+		   status = (io_info->ops.write)(io_info, 
+		    chunk_info->chunk_points, H5T_get_size(dataset->shared->type),
+                    chunk_info->fspace, chunk_info->mspace,
+                    buf);
+	        /* Check return value from optimized write */
+                if (status<0)
+		 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "optimized write failed")
+               
+#endif
+              }
+	      } 
+	     else { 
+		 /* For independent  parallel write*/
+	        /* Perform the write operation */
+		   status = (io_info->ops.write)(io_info, 
+		    chunk_info->chunk_points, H5T_get_size(dataset->shared->type),
+                    chunk_info->fspace, chunk_info->mspace,
+                    buf);
+	        /* Check return value from optimized write */
+                if (status<0)
+		 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "optimized write failed")
+		   }
+
+#else	
+		  /* Perform the actual write operation for sequential*/
+		  status = (io_info->ops.write)(io_info, 
+		    chunk_info->chunk_points, H5T_get_size(dataset->shared->type),
+                    chunk_info->fspace, chunk_info->mspace,
+                    buf);
+	       /* Check return value from optimized write */
+               if (status<0)
+		 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "optimized write failed")
+#endif
 
             /* Get the next chunk node in the skip list */
             chunk_node=H5SL_next(chunk_node);
@@ -3270,7 +3587,16 @@ done:
  */
 static herr_t 
 H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
-    const H5S_t 
+    hid_t
+#if !(defined H5_HAVE_PARALLEL || defined H5S_DEBUG)
+    UNUSED
+#endif /* H5_HAVE_PARALLEL */
+    dp_dxpl_id, H5D_dxpl_cache_t 
+
+#if !(defined H5_HAVE_PARALLEL || defined H5S_DEBUG)
+    UNUSED
+#endif /* H5_HAVE_PARALLEL */
+*dp_dxpl_cache,const H5S_t 
 #if !(defined H5_HAVE_PARALLEL || defined H5S_DEBUG)
     UNUSED
 #endif /* H5_HAVE_PARALLEL */
@@ -3320,6 +3646,9 @@ H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     /*
      * Check if we can set direct MPI-IO read/write functions
      */
+    io_info->dp_dxpl_id = dp_dxpl_id;
+    io_info->dp_dxpl_cache = dp_dxpl_cache;
+
     opt=H5D_mpio_opt_possible(dset,mem_space,file_space,flags);
     if(opt==FAIL)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for direct IO dataspace ");
@@ -3333,27 +3662,19 @@ H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     /* Check if we can use the optimized parallel I/O routines */
     if(opt==TRUE) {
         /* Set the pointers to the MPI-specific routines */
-      if((H5S_SELECT_IS_REGULAR(file_space) == TRUE) &&
-	 (H5S_SELECT_IS_REGULAR(mem_space)  == TRUE)){
-        io_info->ops.read = H5D_mpio_spaces_read;
-        io_info->ops.write = H5D_mpio_spaces_write;
-      }
-
-    #ifdef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
-      else {
-	io_info->ops.read = H5D_mpio_spaces_span_read;
-	io_info->ops.write = H5D_mpio_spaces_span_write;
-      }
-    #endif
-        /* Indicate that the I/O will be parallel */
-        *use_par_opt_io=TRUE;
-    } /* end if */
+ 	io_info->ops.read =  H5D_mpio_select_read;
+	io_info->ops.write = H5D_mpio_select_write;
+	io_info->ops_sca.read  = H5D_select_read;
+	io_info->ops_sca.write = H5D_select_write;
+	*use_par_opt_io=TRUE;
+        /* Indicate that the I/O will use collective */
+    }
+     /* end if */
     else {
-        /* Indicate that the I/O will _NOT_ be parallel */
+        /* Indicate that the I/O will _NOT_ be parallel, use independent IO */
         *use_par_opt_io=FALSE;
         io_info->ops.read = H5D_select_read;
         io_info->ops.write = H5D_select_write;
-
 
     } /* end else */
 #else
@@ -3372,3 +3693,136 @@ done:
 #endif /* H5_HAVE_PARALLEL || H5S_DEBUG */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_ioinfo_init() */
+
+
+#ifdef H5_HAVE_PARALLEL
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_mpio_get_mini_chunk
+ *
+ * Purpose:	Routine for obtaining minimum number of chunks to cover
+                hyperslab selection selected by all processors.
+ *          
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	
+ *		
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t  H5D_mpio_get_mini_chunk(const H5D_t *dset,
+				       const H5S_t *mem_space, 
+				       const H5S_t *file_space,
+				       int *min_chunkf) {
+
+  
+  hsize_t chunk_dim[H5O_LAYOUT_NDIMS];        /* Chunk dimensions */
+  hsize_t startf[H5S_MAX_RANK],      /* Selection start bounds */
+          endf[H5S_MAX_RANK];     /* Selection end bounds */
+        unsigned dim_rankf;         /* Number of dimensions of file dataspace */
+        int pcheck_hyper,check_hyper,   /* Flags for checking if selection is in one chunk */
+            tnum_chunkf,            /* Number of chunks selection overlaps */
+            max_chunkf,             /* Maximum number of chunks selection overlaps */
+            num_chunks_same;        /* Flag indicating whether all processes have the same # of                                    chunks to operate on */
+        unsigned dim_chunks;        /* Temporary number of chunks in a dimension */
+        MPI_Comm comm;              /* MPI communicator for file */
+        int mpi_rank;               /* Rank in MPI communicator */
+        int mpi_code;               /* MPI return code */
+        unsigned u;                 /* Local index variable */
+	herr_t ret_value;
+
+	ret_value = SUCCEED;
+	FUNC_ENTER_NOAPI_NOINIT(H5D_mpio_get_mini_chunk);
+        /* Getting MPI communicator and rank */
+        if((comm = H5F_mpi_get_comm(dset->ent.file))==MPI_COMM_NULL)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve MPI communicator")
+        if((mpi_rank = H5F_mpi_get_rank(dset->ent.file))<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve MPI rank")
+
+
+        dim_rankf = H5S_GET_EXTENT_NDIMS(file_space);
+
+        if(H5S_SELECT_BOUNDS(file_space,startf,endf)==FAIL)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE,FAIL, "invalid check for single selection blocks");
+
+        for(u=0; u < dset->shared->layout.u.chunk.ndims; u++) 
+            chunk_dim[u] = dset->shared->layout.u.chunk.dim[u];
+
+
+        /* Compute the number of chunks covered by the selection on this process */
+        tnum_chunkf = 1;
+        for (u=0; u<dim_rankf; u++) {
+            dim_chunks = (endf[u]/chunk_dim[u]-startf[u]/chunk_dim[u])+1;
+            tnum_chunkf = dim_chunks*tnum_chunkf;
+        }
+
+        /* Determine the minimum and maximum # of chunks for all processes */
+
+        if (MPI_SUCCESS != (mpi_code= MPI_Reduce(&tnum_chunkf,min_chunkf,1,MPI_INT,MPI_MIN,0,comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Reduce failed", mpi_code)
+  
+                    
+        /* Broadcast the flag indicating the number of chunks are the same */
+        if (MPI_SUCCESS != (mpi_code= MPI_Bcast(min_chunkf,1,MPI_INT,0,comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
+
+ done:
+	FUNC_LEAVE_NOAPI(ret_value);
+	
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_obtain_duplicate_pid
+ *
+ * Purpose:	Routine for obtaining a copy property list ID of 
+                data transfer property.
+                
+ *          
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	
+ *		
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t  H5D_obtain_duplicate_pid(hid_t dxpl_id,
+				        hid_t* dp_id, 
+				        H5D_dxpl_cache_t **cache)
+{
+
+  H5FD_mpio_xfer_t xfer_mode; 
+  H5P_genplist_t   *dp_dx_plist;           /* Data transer property list */
+  herr_t           ret_value=SUCCEED;
+  
+  FUNC_ENTER_NOAPI_NOINIT(H5D_obtain_duplicate_pid)
+
+   *dp_id = H5Pcopy(dxpl_id);
+    
+  /*  printf("inside function dp id %d\n",*dp_id);*/
+    /* Get the dataset transfer property list */
+    if (NULL == (dp_dx_plist = H5I_object(*dp_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list")
+
+    xfer_mode = H5FD_MPIO_INDEPENDENT;
+    if(H5P_set (dp_dx_plist, H5D_XFER_IO_XFER_MODE_NAME, &xfer_mode) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set transfer mode")   
+    
+    /* Fill the DXPL cache values for later use */
+    if (H5D_get_dxpl_cache(*dp_id,cache)<0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
+
+  done:
+    FUNC_LEAVE_NOAPI(ret_value)
+  
+}           
+#endif /*H5_HAVE_PARALLEL*/

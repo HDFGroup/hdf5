@@ -100,8 +100,13 @@ typedef struct H5D_io_info_t {
     H5D_t *dset;                /* Pointer to dataset being operated on */
     const H5D_dxpl_cache_t *dxpl_cache; /* Pointer to cache DXPL info */
     hid_t dxpl_id;              /* Original DXPL ID */
+#ifdef H5_HAVE_PARALLEL
+    hid_t dp_dxpl_id;
+    H5D_dxpl_cache_t *dp_dxpl_cache;
+#endif
     const H5D_storage_t *store; /* Dataset storage info */
     H5D_io_ops_t ops;           /* I/O operation function pointers */
+    H5D_io_ops_t ops_sca;
 #ifdef H5S_DEBUG
     H5S_iostats_t *stats;       /* I/O statistics */
 #endif /* H5S_DEBUG */
@@ -276,6 +281,20 @@ H5_DLL ssize_t H5D_efl_writevv(const H5D_io_info_t *io_info,
     const void *buf);
 
 #ifdef H5_HAVE_PARALLEL
+
+/* MPI-IO function to read , it will select either regular or irregular read */
+H5_DLL herr_t H5D_mpio_select_read(H5D_io_info_t *io_info,
+    size_t nelmts, size_t elmt_size,
+    const struct H5S_t *file_space, const struct H5S_t *mem_space,
+    void *buf/*out*/);
+
+/* MPI-IO function to read , it will select either regular or irregular read */
+H5_DLL herr_t H5D_mpio_select_write(H5D_io_info_t *io_info,
+    size_t nelmts, size_t elmt_size,
+    const struct H5S_t *file_space, const struct H5S_t *mem_space,
+    const void *buf);
+
+
 /* MPI-IO function to read directly from app buffer to file rky980813 */
 H5_DLL herr_t H5D_mpio_spaces_read(H5D_io_info_t *io_info,
     size_t nelmts, size_t elmt_size,
