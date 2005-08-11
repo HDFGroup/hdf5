@@ -443,8 +443,10 @@ int main(int argc, char **argv)
 	coll_chunk2,NULL, "noncontiguous collective chunk io",PARATESTFILE);
     AddTest("cchunk3",
 	coll_chunk3,NULL, "multi-chunk collective chunk io",PARATESTFILE);
+#if 0
     AddTest("cchunk4",
 	coll_chunk4,NULL, "collective to independent chunk io",PARATESTFILE);
+#endif
 
 /* irregular collective IO tests*/
     AddTest("ccontw",
