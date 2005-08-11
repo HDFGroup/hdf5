@@ -730,6 +730,10 @@ H5close(void)
 }
 
 
+/* disable the code of HDsnprintf and HDvsnprintf below to see if they
+ * still needed by how what platforms. AKC 2005/8/11.
+ */
+#if 0
 #ifndef H5_HAVE_SNPRINTF
 /*-------------------------------------------------------------------------
  * Function:	HDsnprintf
@@ -806,6 +810,7 @@ HDvsnprintf(char *buf, size_t UNUSED size, const char *fmt, va_list ap)
     return HDvsprintf(buf, fmt, ap);
 }
 #endif /* H5_HAVE_VSNPRINTF */
+#endif /* 0 */
 
 
 /*-------------------------------------------------------------------------
