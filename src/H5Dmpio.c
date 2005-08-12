@@ -40,7 +40,7 @@
 static herr_t
 H5D_mpio_spaces_xfer(H5D_io_info_t *io_info, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
-                     void *buf/*out*/, 
+                     void *buf/*out*/,
 		     hbool_t do_write);
 
 
@@ -60,7 +60,6 @@ H5D_mpio_spaces_xfer(H5D_io_info_t *io_info, size_t elmt_size,
  *
  *-------------------------------------------------------------------------
  */
-
 htri_t
 H5D_mpio_opt_possible( const H5D_t *dset, const H5S_t *mem_space, const H5S_t *file_space, const unsigned flags)
 {
@@ -88,16 +87,16 @@ H5D_mpio_opt_possible( const H5D_t *dset, const H5S_t *mem_space, const H5S_t *f
         HGOTO_DONE(FALSE);
 
     /* Dataset storage must be contiguous or chunked */
-    if ((flags&H5S_CONV_STORAGE_MASK)!=H5S_CONV_STORAGE_CONTIGUOUS && 
+    if ((flags&H5S_CONV_STORAGE_MASK)!=H5S_CONV_STORAGE_CONTIGUOUS &&
             (flags&H5S_CONV_STORAGE_MASK)!=H5S_CONV_STORAGE_CHUNKED)
         HGOTO_DONE(FALSE);
 
-    /*The handling of memory space is different for chunking 
+    /*The handling of memory space is different for chunking
 	  and contiguous storage,
 	  For contigous storage, mem_space and file_space won't
 	  change when it it is doing disk IO.
 	  For chunking storage, mem_space will change for different
-	  chunks. So for chunking storage, whether we can use 
+	  chunks. So for chunking storage, whether we can use
 	  collective IO will defer until the each chunk IO is reached.
 	  For contiguous storage, if we find the MPI-IO cannot
 	  support complicated MPI derived data type, we will
@@ -111,16 +110,13 @@ H5D_mpio_opt_possible( const H5D_t *dset, const H5S_t *mem_space, const H5S_t *f
 	   HGOTO_DONE(FALSE);
 #endif
     }
-    
-    if(dset->shared->layout.type == H5D_CHUNKED) 
-      if(dset->shared->dcpl_cache.pline.nused>0)
-	   HGOTO_DONE(FALSE); /* Perform the independent write operation */
 
-
+    if(dset->shared->layout.type == H5D_CHUNKED)
+        if(dset->shared->dcpl_cache.pline.nused>0)
+            HGOTO_DONE(FALSE); /* Perform the independent write operation */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-
 } /* H5D_mpio_opt_possible() */
 
 
@@ -219,7 +215,7 @@ H5D_mpio_spaces_xfer(H5D_io_info_t *io_info, size_t elmt_size,
     else {
         haddr_t   chunk_addr; /* for collective chunk IO */
 
-        assert(io_info->dset->shared->layout.type == H5D_CHUNKED); 
+        assert(io_info->dset->shared->layout.type == H5D_CHUNKED);
         chunk_addr=H5D_istore_get_addr(io_info,NULL);
         addr = H5F_BASE_ADDR(io_info->dset->ent.file) + chunk_addr + mpi_file_offset;
     }
@@ -288,8 +284,7 @@ H5D_mpio_select_read(H5D_io_info_t *io_info,
 
     FUNC_ENTER_NOAPI_NOFUNC(H5D_mpio_select_read);
 
-           
-      ret_value = H5D_mpio_spaces_xfer(io_info, elmt_size, file_space,
+    ret_value = H5D_mpio_spaces_xfer(io_info, elmt_size, file_space,
         mem_space, buf, 0/*read*/);
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -321,11 +316,10 @@ H5D_mpio_select_write(H5D_io_info_t *io_info,
     FUNC_ENTER_NOAPI_NOFUNC(H5D_mpio_select_write);
 
     /*OKAY: CAST DISCARDS CONST QUALIFIER*/
-       ret_value = H5D_mpio_spaces_xfer(io_info, elmt_size, file_space,
+    ret_value = H5D_mpio_spaces_xfer(io_info, elmt_size, file_space,
                     mem_space, (void*)buf, 1/*write*/);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D_mpio_spaces_write() */
-
-
 #endif  /* H5_HAVE_PARALLEL */
+
