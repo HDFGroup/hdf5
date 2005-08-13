@@ -105,7 +105,6 @@ typedef struct H5D_io_info_t {
     hid_t dxpl_id;              /* Original DXPL ID */
 #ifdef H5_HAVE_PARALLEL
     MPI_Comm comm;              /* MPI communicator for file */
-    hbool_t use_par_opt_io;     /* Whether the 'optimized' I/O routines with be parallel */
     hbool_t xfer_mode_changed;  /* Whether the transfer mode was changed */
 #endif /* H5_HAVE_PARALLEL */
     const H5D_storage_t *store; /* Dataset storage info */
@@ -324,8 +323,8 @@ H5_DLL herr_t H5D_mpio_spaces_span_write(H5D_io_info_t *io_info,
 
 /* MPI-IO function to check if a direct I/O transfer is possible between
  * memory and the file */
-H5_DLL htri_t H5D_mpio_opt_possible(const H5D_t *dset, const H5S_t *mem_space,
-    const H5S_t *file_space, const unsigned flags);
+H5_DLL htri_t H5D_mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *mem_space,
+    const H5S_t *file_space, const H5T_path_t *tpath);
 #endif /* H5_HAVE_PARALLEL */
 
 /* Testing functions */

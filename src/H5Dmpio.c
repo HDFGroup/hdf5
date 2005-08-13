@@ -24,7 +24,6 @@
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 
 
-
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -61,35 +60,51 @@ H5D_mpio_spaces_xfer(H5D_io_info_t *io_info, size_t elmt_size,
  *-------------------------------------------------------------------------
  */
 htri_t
-H5D_mpio_opt_possible( const H5D_t *dset, const H5S_t *mem_space, const H5S_t *file_space, const unsigned flags)
+H5D_mpio_opt_possible( const H5D_io_info_t *io_info,
+    const H5S_t *mem_space, const H5S_t *file_space, const H5T_path_t *tpath)
 {
+    int         local_opinion = TRUE;   /* This process's idea of whether to perform collective I/O or not */
+    int         consensus;              /* Consensus opinion of all processes */
+    int         mpi_code;               /* MPI error code */
     htri_t ret_value=TRUE;
 
     FUNC_ENTER_NOAPI(H5D_mpio_opt_possible, FAIL);
 
     /* Check args */
-    assert(dset);
+    assert(io_info);
     assert(mem_space);
     assert(file_space);
 
-    /* Parallel I/O conversion flag must be set, if it is not collective IO, go to false. */
-    if(!(flags&H5S_CONV_PAR_IO_POSSIBLE))
+    /* For independent I/O, get out quickly and don't try to form consensus */
+    if (io_info->dxpl_cache->xfer_mode==H5FD_MPIO_INDEPENDENT)
         HGOTO_DONE(FALSE);
+
+    /* Optimized MPI types flag must be set and it is must be collective IO */
+    /* (Don't allow parallel I/O for the MPI-posix driver, since it doesn't do real collective I/O) */
+    if (!(H5S_mpi_opt_types_g && io_info->dxpl_cache->xfer_mode==H5FD_MPIO_COLLECTIVE && !IS_H5FD_MPIPOSIX(io_info->dset->ent.file))) {
+        local_opinion = FALSE;
+        goto broadcast;
+    } /* end if */
 
     /* Check whether these are both simple or scalar dataspaces */
     if (!((H5S_SIMPLE==H5S_GET_EXTENT_TYPE(mem_space) || H5S_SCALAR==H5S_GET_EXTENT_TYPE(mem_space))
-            && (H5S_SIMPLE==H5S_GET_EXTENT_TYPE(file_space) || H5S_SCALAR==H5S_GET_EXTENT_TYPE(file_space))))
-        HGOTO_DONE(FALSE);
-
+            && (H5S_SIMPLE==H5S_GET_EXTENT_TYPE(file_space) || H5S_SCALAR==H5S_GET_EXTENT_TYPE(file_space)))) {
+        local_opinion = FALSE;
+        goto broadcast;
+    } /* end if */
 
     /* Can't currently handle point selections */
-    if (H5S_SEL_POINTS==H5S_GET_SELECT_TYPE(mem_space) || H5S_SEL_POINTS==H5S_GET_SELECT_TYPE(file_space))
-        HGOTO_DONE(FALSE);
+    if (H5S_SEL_POINTS==H5S_GET_SELECT_TYPE(mem_space) || H5S_SEL_POINTS==H5S_GET_SELECT_TYPE(file_space)) {
+        local_opinion = FALSE;
+        goto broadcast;
+    } /* end if */
 
     /* Dataset storage must be contiguous or chunked */
-    if ((flags&H5S_CONV_STORAGE_MASK)!=H5S_CONV_STORAGE_CONTIGUOUS &&
-            (flags&H5S_CONV_STORAGE_MASK)!=H5S_CONV_STORAGE_CHUNKED)
-        HGOTO_DONE(FALSE);
+    if (!(io_info->dset->shared->layout.type == H5D_CONTIGUOUS ||
+            io_info->dset->shared->layout.type == H5D_CHUNKED)) {
+        local_opinion = FALSE;
+        goto broadcast;
+    } /* end if */
 
     /*The handling of memory space is different for chunking
 	  and contiguous storage,
@@ -102,18 +117,41 @@ H5D_mpio_opt_possible( const H5D_t *dset, const H5S_t *mem_space, const H5S_t *f
 	  support complicated MPI derived data type, we will
 	  set use_par_opt_io = FALSE.
 	*/
-    if(dset->shared->layout.type == H5D_CONTIGUOUS) {
-
 #ifndef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
-       if((H5S_SELECT_IS_REGULAR(file_space) != TRUE) ||
-	  (H5S_SELECT_IS_REGULAR(mem_space)  != TRUE))
-	   HGOTO_DONE(FALSE);
+    if(io_info->dset->shared->layout.type == H5D_CONTIGUOUS)
+        if((H5S_SELECT_IS_REGULAR(file_space) != TRUE) ||
+                (H5S_SELECT_IS_REGULAR(mem_space) != TRUE)) {
+            local_opinion = FALSE;
+            goto broadcast;
+        } /* end if */
 #endif
-    }
 
-    if(dset->shared->layout.type == H5D_CHUNKED)
-        if(dset->shared->dcpl_cache.pline.nused>0)
-            HGOTO_DONE(FALSE); /* Perform the independent write operation */
+    /* Don't allow collective operations if filters need to be applied */
+    if(io_info->dset->shared->layout.type == H5D_CHUNKED)
+        if(io_info->dset->shared->dcpl_cache.pline.nused>0) {
+            local_opinion = FALSE;
+            goto broadcast;
+        } /* end if */
+
+    /* Don't allow collective operations if datatype conversions need to happen */
+    if(!H5T_path_noop(tpath)) {
+        local_opinion = FALSE;
+        goto broadcast;
+    } /* end if */
+
+    /* Don't allow collective operations if data transform operations should occur */
+    if(!H5Z_xform_noop(io_info->dxpl_cache->data_xform_prop)) {
+        local_opinion = FALSE;
+        goto broadcast;
+    } /* end if */
+
+broadcast:
+    /* Form consensus opinion among all processes about whether to perform
+     * collective I/O */
+    if (MPI_SUCCESS != (mpi_code = MPI_Allreduce(&local_opinion, &consensus, 1, MPI_INT, MPI_LAND, io_info->comm)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
+
+    ret_value = consensus > 0 ? TRUE : FALSE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
