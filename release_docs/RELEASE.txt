@@ -285,6 +285,7 @@ New Features
 
     Tools:
     ------
+        - Added a standalone mode for building h5perf.  AKC - 2005/08/12
         - new tool, h5jam. See reference manual.  2004/10/08
         - h5repack.sh did not report errors encountered during tests.  It does
             now.  AKC - 2004/04/02
