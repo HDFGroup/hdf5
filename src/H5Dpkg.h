@@ -98,15 +98,18 @@ typedef struct H5D_io_ops_t {
 /* Typedef for raw data I/O operation info */
 typedef struct H5D_io_info_t {
     H5D_t *dset;                /* Pointer to dataset being operated on */
-    const H5D_dxpl_cache_t *dxpl_cache; /* Pointer to cache DXPL info */
+#ifndef H5_HAVE_PARALLEL
+    const
+#endif /* H5_HAVE_PARALLEL */
+        H5D_dxpl_cache_t *dxpl_cache; /* Pointer to cache DXPL info */
     hid_t dxpl_id;              /* Original DXPL ID */
 #ifdef H5_HAVE_PARALLEL
-    hid_t dp_dxpl_id;
-    H5D_dxpl_cache_t *dp_dxpl_cache;
-#endif
+    MPI_Comm comm;              /* MPI communicator for file */
+    hbool_t use_par_opt_io;     /* Whether the 'optimized' I/O routines with be parallel */
+    hbool_t xfer_mode_changed;  /* Whether the transfer mode was changed */
+#endif /* H5_HAVE_PARALLEL */
     const H5D_storage_t *store; /* Dataset storage info */
     H5D_io_ops_t ops;           /* I/O operation function pointers */
-    H5D_io_ops_t ops_sca;
 #ifdef H5S_DEBUG
     H5S_iostats_t *stats;       /* I/O statistics */
 #endif /* H5S_DEBUG */
