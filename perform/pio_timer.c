@@ -202,3 +202,6 @@ get_time(pio_time *pt, timer_type t)
 }
 
 #endif /* H5_HAVE_PARALLEL */
+#ifdef STANDALONE
+#include "pio_standalone.c"
+#endif

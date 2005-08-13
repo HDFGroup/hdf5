@@ -69,7 +69,6 @@
 #include <mpi.h>
 
 /* our header files */
-#include "h5tools_utils.h"
 #include "pio_perf.h"
 
 /* useful macros */
