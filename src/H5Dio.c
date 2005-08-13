@@ -804,9 +804,9 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
 done:
 #ifdef H5_HAVE_PARALLEL
-    /* Restore xfer_mode due to the kludge */
-    if (io_info.xfer_mode_changed)
-        H5D_ioinfo_term(&io_info);
+    /* Shut down io_info struct */
+    if (H5D_ioinfo_term(&io_info) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't shut down io_info")
 #endif /*H5_HAVE_PARALLEL*/
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1061,9 +1061,9 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
 done:
 #ifdef H5_HAVE_PARALLEL
-    /* Restore xfer_mode due to the kludge */
-    if (io_info.xfer_mode_changed)
-        H5D_ioinfo_term(&io_info);
+    /* Shut down io_info struct */
+    if (H5D_ioinfo_term(&io_info) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't shut down io_info")
 #endif /*H5_HAVE_PARALLEL*/
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3364,68 +3364,81 @@ H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     io_info->ops=dset->shared->io_ops;
 
 #ifdef H5_HAVE_PARALLEL
-    /* Get MPI communicator */
-    if((io_info->comm = H5F_mpi_get_comm(dset->ent.file)) == MPI_COMM_NULL)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve MPI communicator")
+    if(IS_H5FD_MPI(dset->ent.file)) {
+        /* Get MPI communicator */
+        if((io_info->comm = H5F_mpi_get_comm(dset->ent.file)) == MPI_COMM_NULL)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve MPI communicator")
 
-    /*
-     * Check if we can set direct MPI-IO read/write functions
-     */
-    opt=H5D_mpio_opt_possible(dset,mem_space,file_space,flags);
-    if(opt==FAIL)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for direct IO dataspace ");
+        /*
+         * Check if we can set direct MPI-IO read/write functions
+         */
+        opt=H5D_mpio_opt_possible(dset,mem_space,file_space,flags);
+        if(opt==FAIL)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for direct IO dataspace ");
 
-    opt = H5D_get_collective_io_consensus(dset->ent.file, opt, flags);
-    if ( opt == FAIL )
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "check for collective I/O consensus failed.");
+        opt = H5D_get_collective_io_consensus(dset->ent.file, opt, flags);
+        if ( opt == FAIL )
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "check for collective I/O consensus failed.");
 
-    /* Check if we can use the optimized parallel I/O routines */
-    if(opt==TRUE) {
-        /* Set the pointers to the MPI-specific routines */
- 	io_info->ops.read = H5D_mpio_select_read;
-	io_info->ops.write = H5D_mpio_select_write;
+        /* Check if we can use the optimized parallel I/O routines */
+        if(opt==TRUE) {
+            /* Set the pointers to the MPI-specific routines */
+            io_info->ops.read = H5D_mpio_select_read;
+            io_info->ops.write = H5D_mpio_select_write;
 
-        /* Indicate that the I/O will use collective */
-	io_info->use_par_opt_io=TRUE;
+            /* Indicate that the I/O will use collective */
+            io_info->use_par_opt_io=TRUE;
+        } /* end if */
+        else {
+            /* Set the pointers to the non-MPI-specific routines */
+            io_info->ops.read = H5D_select_read;
+            io_info->ops.write = H5D_select_write;
+
+            /* Indicate that the I/O will _NOT_ be parallel, use independent IO */
+            io_info->use_par_opt_io=FALSE;
+        } /* end else */
+
+        /* Start in the "not modified" state */
+        io_info->xfer_mode_changed=FALSE;
+
+        /* If we can't or won't be doing collective I/O, but the user
+         * asked for collective I/O, change the request to use independent I/O
+         */
+        if(!(io_info->use_par_opt_io && H5T_path_noop(tpath) &&
+                    H5Z_xform_noop(dxpl_cache->data_xform_prop))
+                && io_info->dxpl_cache->xfer_mode==H5FD_MPIO_COLLECTIVE) {
+            H5P_genplist_t *dx_plist;           /* Data transer property list */
+
+            /* Get the dataset transfer property list */
+            if (NULL == (dx_plist = H5I_object(dxpl_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list")
+
+            /* Change the xfer_mode to independent for handling the I/O */
+            io_info->dxpl_cache->xfer_mode = H5FD_MPIO_INDEPENDENT;
+            if(H5P_set (dx_plist, H5D_XFER_IO_XFER_MODE_NAME, &io_info->dxpl_cache->xfer_mode) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set transfer mode")
+
+            /* Set the pointers to the non-MPI-specific routines */
+            io_info->ops.read = H5D_select_read;
+            io_info->ops.write = H5D_select_write;
+
+            /* Indicate that the transfer mode should be restored before returning
+             * to user.
+             */
+            io_info->xfer_mode_changed=TRUE;
+        } /* end if */
     } /* end if */
     else {
-        /* Set the pointers to the non-MPI-specific routines */
-        io_info->ops.read = H5D_select_read;
-        io_info->ops.write = H5D_select_write;
-
-        /* Indicate that the I/O will _NOT_ be parallel, use independent IO */
+        /* Indicate that the I/O will _NOT_ be parallel */
         io_info->use_par_opt_io=FALSE;
-    } /* end else */
-
-    /* Start in the "not modified" state */
-    io_info->xfer_mode_changed=FALSE;
-
-    /* If we can't or won't be doing collective I/O, but the user
-     * asked for collective I/O, change the request to use independent I/O
-     */
-    if(!(io_info->use_par_opt_io && H5T_path_noop(tpath) &&
-                H5Z_xform_noop(dxpl_cache->data_xform_prop))
-            && io_info->dxpl_cache->xfer_mode==H5FD_MPIO_COLLECTIVE) {
-        H5P_genplist_t *dx_plist;           /* Data transer property list */
-
-        /* Get the dataset transfer property list */
-        if (NULL == (dx_plist = H5I_object(dxpl_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list")
-
-	/* Change the xfer_mode to independent for handling the I/O */
-	io_info->dxpl_cache->xfer_mode = H5FD_MPIO_INDEPENDENT;
-        if(H5P_set (dx_plist, H5D_XFER_IO_XFER_MODE_NAME, &io_info->dxpl_cache->xfer_mode) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set transfer mode")
 
         /* Set the pointers to the non-MPI-specific routines */
         io_info->ops.read = H5D_select_read;
         io_info->ops.write = H5D_select_write;
 
-        /* Indicate that the transfer mode should be restored before returning
-         * to user.
-         */
-	io_info->xfer_mode_changed=TRUE;
-    } /* end if */
+        /* Set the "not modified" state */
+        io_info->xfer_mode_changed=FALSE;
+    } /* end else */
 #else /* H5_HAVE_PARALLEL */
     io_info->ops.read = H5D_select_read;
     io_info->ops.write = H5D_select_write;
@@ -3562,14 +3575,17 @@ H5D_ioinfo_term(H5D_io_info_t *io_info)
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_ioinfo_term)
 
-    /* Get the dataset transfer property list */
-    if (NULL == (dx_plist = H5I_object(io_info->dxpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
+    /* Check if we need to revert the change to the xfer mode */
+    if (io_info->use_par_opt_io && io_info->xfer_mode_changed) {
+        /* Get the dataset transfer property list */
+        if (NULL == (dx_plist = H5I_object(io_info->dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
 
-    /* Restore the original parallel I/O mode */
-    io_info->dxpl_cache->xfer_mode = H5FD_MPIO_COLLECTIVE;
-    if(H5P_set (dx_plist, H5D_XFER_IO_XFER_MODE_NAME, &io_info->dxpl_cache->xfer_mode) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set transfer mode")
+        /* Restore the original parallel I/O mode */
+        io_info->dxpl_cache->xfer_mode = H5FD_MPIO_COLLECTIVE;
+        if(H5P_set (dx_plist, H5D_XFER_IO_XFER_MODE_NAME, &io_info->dxpl_cache->xfer_mode) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set transfer mode")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
