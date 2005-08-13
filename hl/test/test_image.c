@@ -53,7 +53,7 @@ static int read_data(const char* file_name, hsize_t *width, hsize_t *height );
 static int read_palette(const char* file_name, rgb_t *palette, int palette_size);
 
 /* globals */
-unsigned char *image_data = NULL;            
+unsigned char *image_data = NULL;
 
 /*-------------------------------------------------------------------------
  * the main program
@@ -71,7 +71,7 @@ int main(void)
  if (nerrors) goto error;
  printf("All image tests passed.\n");
  return 0;
- 
+
 error:
  printf("***** %d IMAGE TEST%s FAILED! *****\n",nerrors, 1 == nerrors ? "" : "S");
  return 1;
@@ -113,13 +113,13 @@ static int test_simple(void)
  252,252,84,   /* yellow */
  252,168,0,    /* orange */
  252,0,0};     /* red */
-  
+
  /* create an image of 9 values divided evenly by the array */
  space = WIDTH*HEIGHT / PAL_ENTRIES;
  for (i=0, j=0, n=0; i < WIDTH*HEIGHT; i++, j++ )
  {
   image_in1[i] = n;
-  if ( j > space ) 
+  if ( j > space )
   {
    n++;
    j=0;
@@ -130,14 +130,14 @@ static int test_simple(void)
  for (i=0, j=0, n=0; i < WIDTH*HEIGHT*3; i++, j++)
  {
   image_in2[i] = n;
-  if (j==3) 
+  if (j==3)
   {
    n++;
    j=0;
   }
   if (n>255) n=0;
  }
- 
+
  /* create a file using default properties */
  if ((fid=H5Fcreate(FILE1,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   goto out;
@@ -163,7 +163,7 @@ static int test_simple(void)
  /* attach the palette to the image dataset */
  if (H5IMlink_palette(fid,"image1","palette")<0)
   goto out;
- 
+
  /* get info */
  if (H5IMget_image_info(fid,"image1",&width,&height,&planes,interlace,&npals)<0)
   goto out;
@@ -180,11 +180,11 @@ static int test_simple(void)
  /* read image */
  if (H5IMread_image(fid,"image1",image_out1)<0)
   goto out;
- 
+
  /* check */
- for (i = 0; i < height*width*planes; i++) 
+ for (i = 0; i < height*width*planes; i++)
  {
-  if ( image_in1[i] != image_out1[i] ) 
+  if ( image_in1[i] != image_out1[i] )
   {
    goto out;
   }
@@ -199,7 +199,7 @@ static int test_simple(void)
  */
 
  TESTING2("true color image");
- 
+
  /* write image */
  if (H5IMmake_image_24bit(fid,"image2",WIDTH,HEIGHT,"INTERLACE_PIXEL",image_in2))
   goto out;
@@ -220,9 +220,9 @@ static int test_simple(void)
   goto out;
 
  /* check */
- for (i = 0; i < height*width*planes; i++) 
+ for (i = 0; i < height*width*planes; i++)
  {
-  if ( image_in2[i] != image_out2[i] ) 
+  if ( image_in2[i] != image_out2[i] )
   {
     goto out;
   }
@@ -252,9 +252,9 @@ static int test_simple(void)
   goto out;
 
  /* check */
- for (i = 0; i < 2; i++) 
+ for (i = 0; i < 2; i++)
  {
-  if ( pal_dims[i] != pal_dims_out[i] ) 
+  if ( pal_dims[i] != pal_dims_out[i] )
   {
    goto out;
   }
@@ -269,9 +269,9 @@ static int test_simple(void)
   goto out;
 
  /* check */
- for (i = 0; i < PAL_ENTRIES*3; i++) 
+ for (i = 0; i < PAL_ENTRIES*3; i++)
  {
-  if ( pal_data_in[i] != pal_data_out[i] ) 
+  if ( pal_data_in[i] != pal_data_out[i] )
   {
    goto out;
   }
@@ -308,14 +308,14 @@ static int test_simple(void)
  PASSED();
 
 /*-------------------------------------------------------------------------
- * close 
+ * close
  *-------------------------------------------------------------------------
- */ 
+ */
  if (H5Fclose(fid)<0)
   goto out;
 
  return 0;
-  
+
  /* error zone, gracefully close */
 out:
  H5E_BEGIN_TRY {
@@ -354,7 +354,7 @@ static int test_data(void)
 
  TESTING2("make indexed image");
 
- /* read first data file */   
+ /* read first data file */
  if (read_data(DATA_FILE1,&width,&height)<0)
   goto out;
 
@@ -371,11 +371,11 @@ static int test_data(void)
  * palette #1. rainbow palette. data is contained in "pal_rgb.h"
  *-------------------------------------------------------------------------
  */
-    
+
  /* initialize the palette data */
  pal_dims[0] = 256;
  pal_dims[1] = 3;
- 
+
  /* make a palette */
  if (H5IMmake_palette(fid,PAL1_NAME,pal_dims,pal_rgb)<0)
   goto out;
@@ -385,7 +385,7 @@ static int test_data(void)
   goto out;
 
 /*-------------------------------------------------------------------------
- * palette #2. sepia palette. 
+ * palette #2. sepia palette.
  * read a PAL file and attach the palette to the HDF5 file
  *-------------------------------------------------------------------------
  */
@@ -411,7 +411,7 @@ static int test_data(void)
   goto out;
 
 /*-------------------------------------------------------------------------
- * palette #3. earth palette. 
+ * palette #3. earth palette.
  * read a PAL file and attach the palette to the HDF5 file
  *-------------------------------------------------------------------------
  */
@@ -440,7 +440,7 @@ static int test_data(void)
 
 
 /*-------------------------------------------------------------------------
- * palette #4. blue-red 
+ * palette #4. blue-red
  * make a palette whith blue to red colors
  *-------------------------------------------------------------------------
  */
@@ -467,16 +467,16 @@ static int test_data(void)
 
  TESTING2("make true color image with pixel interlace");
 
- /* read second data file */  
+ /* read second data file */
  if ((read_data(DATA_FILE2,&width,&height))<0)
   goto out;
- 
+
  /* make image */
  if ((H5IMmake_image_24bit(fid,IMAGE2_NAME,width,height,"INTERLACE_PIXEL",image_data))<0)
   goto out;
 
  PASSED();
- 
+
 /*-------------------------------------------------------------------------
  * True color image example with plane interlace
  *-------------------------------------------------------------------------
@@ -484,26 +484,26 @@ static int test_data(void)
 
  TESTING2("make true color image with plane interlace");
 
- /* read third data file */  
+ /* read third data file */
  if ((read_data(DATA_FILE3,&width,&height))<0)
   goto out;
- 
+
  /* make image */
  if ((H5IMmake_image_24bit(fid,IMAGE3_NAME,width,height,"INTERLACE_PLANE",image_data))<0)
   goto out;
 
  PASSED();
- 
+
 
 /*-------------------------------------------------------------------------
- * close 
+ * close
  *-------------------------------------------------------------------------
- */ 
+ */
  if (H5Fclose(fid)<0)
   goto out;
 
  return 0;
-  
+
  /* error zone, gracefully close */
 out:
  H5E_BEGIN_TRY {
@@ -515,23 +515,23 @@ out:
 
 
  /*
- The following test provides an examples of how to generate HDF5 image data from 
- floating point data.  In the example we use real life topographic data 
- (from the North American hemisphere). In the dataset sea values are represented 
- as negative numbers and land values are represented as positive numbers. 
- The example generates 3 HDF5 images, one that generates an image from all the values, 
- another that generates an image from the land values and another that generates an 
+ The following test provides an examples of how to generate HDF5 image data from
+ floating point data.  In the example we use real life topographic data
+ (from the North American hemisphere). In the dataset sea values are represented
+ as negative numbers and land values are represented as positive numbers.
+ The example generates 3 HDF5 images, one that generates an image from all the values,
+ another that generates an image from the land values and another that generates an
  image from the sea values.
    For the example we used data from MODB, the Mediterranean Oceanic Data Base
    http://modb.oce.ulg.ac.be/
-   
+
 */
 
 static int test_generate(void)
 {
  hid_t    fid;
  hsize_t  pal_dims[2] = { 256, 3 };
- float    *data; 
+ float    *data;
  int      imax, jmax, kmax;
  float    valex, xmin, xmax, value;
  FILE     *f;
@@ -555,7 +555,7 @@ static int test_generate(void)
   strcat(data_file, "/");
  }
  strcat(data_file,DATA_FILE4);
- 
+
 /*-------------------------------------------------------------------------
  * read data; the file data format is described below
  *-------------------------------------------------------------------------
@@ -570,14 +570,14 @@ static int test_generate(void)
  }
 
 /*
-!The first line of the ASCII file contains the dimension of the array : 
-! IMAX, JMAX, KMAX. The integers are stored with the FORTRAN format I5. 
-!The second line contains the exclusion value, the minimum and the maximum value of this 
-! file. These numbers are stored with the FORTRAN format E12.5. 
-! The remaining lines contains the data of the array, with 5 numbers per line 
-! (except the last line for each I-line). 
-! The array is stored in horizontal slices from sea surface to sea bottom and from 
-! north to south. So the indexes go from : 
+!The first line of the ASCII file contains the dimension of the array :
+! IMAX, JMAX, KMAX. The integers are stored with the FORTRAN format I5.
+!The second line contains the exclusion value, the minimum and the maximum value of this
+! file. These numbers are stored with the FORTRAN format E12.5.
+! The remaining lines contains the data of the array, with 5 numbers per line
+! (except the last line for each I-line).
+! The array is stored in horizontal slices from sea surface to sea bottom and from
+! north to south. So the indexes go from :
 !
 !   DO K = KMAX to 1
 !       DO J = JMAX to 1
@@ -586,7 +586,7 @@ static int test_generate(void)
 !           OD
 !       OD
 !   OD
-! 
+!
 !              ____________________________
 !             /                           /| (imax,jmax,kmax)
 !            /        sea surface        / |
@@ -603,21 +603,21 @@ static int test_generate(void)
 !     i
 !
 */
- 
- 
- fscanf( f, "%d %d %d", &imax, &jmax, &kmax ); 
- fscanf( f, "%f %f %f", &valex, &xmin, &xmax ); 
- 
+
+
+ fscanf( f, "%d %d %d", &imax, &jmax, &kmax );
+ fscanf( f, "%f %f %f", &valex, &xmin, &xmax );
+
  data = (float*) malloc ( imax * jmax * kmax * sizeof( float ));
  image_data = (unsigned char*) malloc ( imax * jmax * kmax * sizeof( unsigned char ));
- 
- for ( i = 0; i < imax * jmax * kmax; i++ ) 
+
+ for ( i = 0; i < imax * jmax * kmax; i++ )
  {
-  fscanf( f, "%f ", &value ); 
+  fscanf( f, "%f ", &value );
   data[i] = value;
  }
  fclose( f );
-  
+
 /*-------------------------------------------------------------------------
  * transform the data from floating point to unsigend char
  * we are processing all the data here
@@ -625,18 +625,18 @@ static int test_generate(void)
  */
 
  TESTING2("make indexed image from all the data");
- 
- for ( i = 0; i < imax * jmax * kmax; i++ ) 
+
+ for ( i = 0; i < imax * jmax * kmax; i++ )
  {
   image_data[i] = (unsigned char)(( 255 * (data[i] - xmin ) ) / (xmax - xmin ));
  }
- 
+
  /* Make the image */
  if ((H5IMmake_image_8bit(fid,"All data",(hsize_t)imax,(hsize_t)jmax,image_data))<0)
   goto out;
 
  PASSED();
- 
+
 /*-------------------------------------------------------------------------
  * transform the data from floating point to unsigend char
  * here we just process the land data
@@ -644,21 +644,21 @@ static int test_generate(void)
  */
 
  TESTING2("make indexed image from land data");
- 
- for ( i = 0; i < imax * jmax * kmax; i++ ) 
+
+ for ( i = 0; i < imax * jmax * kmax; i++ )
  {
   if ( data[i] < 0 )
    image_data[i] = 0;
   else
    image_data[i] = (unsigned char)(( 255 * (data[i] ) ) / xmax );
  }
- 
+
  /* make the image */
  if ((H5IMmake_image_8bit(fid,"Land data",(hsize_t)imax,(hsize_t)jmax,image_data))<0)
   goto out;
 
  PASSED();
- 
+
 /*-------------------------------------------------------------------------
  * transform the data from floating point to unsigend char
  * here we just process the sea data
@@ -666,32 +666,32 @@ static int test_generate(void)
  */
 
  TESTING2("make indexed image from sea data");
- 
- for ( i = 0; i < imax * jmax * kmax; i++ ) 
+
+ for ( i = 0; i < imax * jmax * kmax; i++ )
  {
   if ( data[i] > 0 )
    image_data[i] = 0;
   else
    image_data[i] = (unsigned char)(( 255 * (data[i] - xmin ) ) / xmin );
  }
- 
+
  /* make the image */
  if ((H5IMmake_image_8bit(fid,"Sea data",(hsize_t)imax,(hsize_t)jmax,image_data))<0)
   goto out;
 
  PASSED();
- 
+
 /*-------------------------------------------------------------------------
  * make a palette and attach it to the datasets
  *-------------------------------------------------------------------------
  */
 
  TESTING2("attaching palettes");
- 
+
  /* make a palette */
  if ((H5IMmake_palette(fid,PAL1_NAME,pal_dims,pal_rgb))<0)
   goto out;
- 
+
  /* attach the palette to the image datasets */
  if ((H5IMlink_palette(fid,"All data",PAL1_NAME))<0)
   goto out;
@@ -701,17 +701,17 @@ static int test_generate(void)
   goto out;
 
  PASSED();
- 
+
 
 /*-------------------------------------------------------------------------
- * close 
+ * close
  *-------------------------------------------------------------------------
- */ 
+ */
  if (H5Fclose(fid)<0)
   goto out;
 
  return 0;
-  
+
  /* error zone, gracefully close */
 out:
  H5E_BEGIN_TRY {
@@ -733,7 +733,7 @@ out:
  *   n
  *   width
  *   n
- * 
+ *
  * followed by the image data
  *
  *-------------------------------------------------------------------------
@@ -778,10 +778,10 @@ static int read_data( const char* fname, /*IN*/
  fscanf( f, "%s", str );
  fscanf( f, "%d", &color_planes );
  fscanf( f, "%s", str );
- fscanf( f, "%d", &h); 
+ fscanf( f, "%d", &h);
  fscanf( f, "%s", str );
- fscanf( f, "%d", &w); 
- 
+ fscanf( f, "%d", &w);
+
  *width = (hsize_t)w;
  *height = (hsize_t)h;
 
@@ -811,7 +811,7 @@ static int read_data( const char* fname, /*IN*/
  * Read an ASCII palette file .PAL into an array
  * the files have a header of the type
  *
- * Parameters:          
+ * Parameters:
  *  fname - name of file to read.
  *  palette - array of rgb_t to store the read palette.
  *  palette_size - number of elements in 'palette' array
@@ -825,8 +825,8 @@ static int read_data( const char* fname, /*IN*/
 #define STRING_CWPAL  "CWPAL"
 #define VERSION_CWPAL "100"
 
-static int read_palette(const char* fname, 
-                        rgb_t *palette, 
+static int read_palette(const char* fname,
+                        rgb_t *palette,
                         int palette_size)
 {
  FILE          *file;
@@ -850,42 +850,42 @@ static int read_palette(const char* fname,
   strcat(data_file, "/");
  }
  strcat(data_file,fname);
- 
+
  /* ensure the given palette is valid */
  if (!palette)
   return -1;
- 
+
  /* open the input file */
  if (!(file = fopen(data_file, "r")))
  {
   printf( "Could not open file %s. Try set $srcdir \n", data_file );
   return -1;
  }
- 
+
  /* read the file ident string */
  if (fgets(buffer, sizeof(buffer), file) == NULL)
  {
   fclose(file);
   return -1;
  }
- 
+
  /* ensure it matches the palette file ident string */
- if ( strncmp(buffer, STRING_JASC, sizeof(STRING_JASC) - 1) != 0 && 
+ if ( strncmp(buffer, STRING_JASC, sizeof(STRING_JASC) - 1) != 0 &&
       strncmp(buffer, STRING_CWPAL, sizeof(STRING_CWPAL) - 1) != 0 )
  {
   fclose(file);
   return -1;
  }
-  
+
  /* read the version string */
  if (fgets(buffer, sizeof(buffer), file) == NULL)
  {
   fclose(file);
   return -1;
  }
- 
- /* ensure it matches the palette file version string */ 
- if ( strncmp(buffer, VERSION_JASC, sizeof(VERSION_JASC) - 1) != 0 && 
+
+ /* ensure it matches the palette file version string */
+ if ( strncmp(buffer, VERSION_JASC, sizeof(VERSION_JASC) - 1) != 0 &&
       strncmp(buffer, VERSION_CWPAL, sizeof(VERSION_CWPAL) - 1) != 0 )
  {
   fclose(file);
@@ -898,31 +898,31 @@ static int read_palette(const char* fname,
   fclose(file);
   return -1;
  }
- 
- 
- /* extract the number of colors. 
+
+
+ /* extract the number of colors.
     check for missing version or number of colors
     in this case it reads the first entry
     */
- if ( strlen( buffer ) > 4 ) 
+ if ( strlen( buffer ) > 4 )
  {
   fclose(file);
   return -1;
  }
- 
+
  if (sscanf(buffer, "%d", &nentries) != 1)
  {
   fclose(file);
   return -1;
  }
- 
- /* ensure there are a sensible number of colors in the palette */ 
+
+ /* ensure there are a sensible number of colors in the palette */
  if ((nentries < 0) || (nentries > 256) || (nentries > palette_size))
  {
   fclose(file);
   return(-1);
  }
-  
+
  /* read the palette entries */
  for (i = 0; i < nentries; i++)
  {
@@ -940,7 +940,7 @@ static int read_palette(const char* fname,
 
  /* close file */
  fclose(file);
- 
+
  return nentries;
 }
 

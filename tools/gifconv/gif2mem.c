@@ -100,7 +100,7 @@ Gif2Mem(BYTE *MemGif)
 
     /* Read the GIF image file header information */
     ReadGifHeader(gifHead, &MemGif);
-	
+
     /* Check for FILE stream error */
 #if 0
     if (ferror(fpGif))
@@ -121,7 +121,7 @@ Gif2Mem(BYTE *MemGif)
 
     for (;;) {
         Identifier = *MemGif++;
-		
+
         switch (Identifier) {
             case 0x3B:  /* Trailer */
                 /*
@@ -140,16 +140,16 @@ Gif2Mem(BYTE *MemGif)
                 GifMemoryStruct.GifApplicationExtension = gifApplication;
                 GifMemoryStruct.GifCommentExtension = gifComment;
                 GifMemoryStruct.GifGraphicControlExtension = gifGraphicControl;
-                
+
                 /* return the struct */
                 return GifMemoryStruct;
 
             case 0x2C:  /* Image Descriptor */
                 /*
                  * If there was no image descriptor before this increase image
-                 * count. If an imagedescriptor was present, reset GCEflag 
+                 * count. If an imagedescriptor was present, reset GCEflag
                  */
-                if (GCEflag == 0) 
+                if (GCEflag == 0)
                     ImageCount++;
                 else
                     GCEflag = 0;
@@ -180,17 +180,17 @@ Gif2Mem(BYTE *MemGif)
                     printf("Out of memory!");
                     exit(-1);
                 }
-                
+
 
                 if (ReadGifImageDesc(gifImageDesc[ImageCount-1], &MemGif) == -1)
                     fputs("Error reading Image Descriptor information\n", stderr);
-        
+
                 /* Decompress the Image */
                 gifImageDesc[ImageCount-1]->Image = Decompress(gifImageDesc[ImageCount-1],
                                                                gifHead);
                 free(gifImageDesc[ImageCount-1]->GIFImage);
 
-                /* 
+                /*
                  * Convert the local palette into an HDF compatible palette In
                  * case the local color table is present, it is written out as
                  * the HDFPalette If it is absent the global table is written
@@ -213,8 +213,8 @@ Gif2Mem(BYTE *MemGif)
                 }
 
                 break;
-                    
-            case 0x21:  /* Extension Block */  
+
+            case 0x21:  /* Extension Block */
                     Label = *MemGif++;
 
                     switch (Label) {
@@ -240,7 +240,7 @@ Gif2Mem(BYTE *MemGif)
                                     "Error reading Plain Text Extension information.\n");
 
                         break;
-                            
+
                     case 0xFE:  /* Comment Extension */
                         CommentCount++;
 
@@ -251,19 +251,19 @@ Gif2Mem(BYTE *MemGif)
                             printf("Out of memory!");
                             exit(-1);
                         }
-                        
+
                         if(!(gifComment[CommentCount - 1] = (GIFCOMMENT *)malloc(sizeof(GIFCOMMENT)))) {
                             printf("Out of memory!");
                             exit(-1);
                         }
-                        
+
 
                         if (ReadGifComment(gifComment[CommentCount - 1], &MemGif))
                             fprintf(stderr,
                                     "Error reading Comment Extension information\n");
 
                         break;
-                            
+
                     case 0xF9:  /* Graphic Control Extension */
                         if (GCEflag == 0 )
                             ImageCount++;
@@ -289,17 +289,17 @@ Gif2Mem(BYTE *MemGif)
                                 gifImageDesc[j]      = NULL;
                             }
                         }
-                        
+
                         if(!(gifGraphicControl[ImageCount-1] = (GIFGRAPHICCONTROL*)malloc(sizeof(GIFGRAPHICCONTROL)))) {
                             printf("Out of memory!");
                             exit(-1);
                         }
-                        
-                        
+
+
                         if (ReadGifGraphicControl(gifGraphicControl[ImageCount-1], &MemGif))
                             fprintf(stderr,
                                     "Error reading Graphic Control Extension information\n");
-                        
+
                         if (!*MemGif++ == 0)
                             fprintf(stderr,
                                     "Error reading Graphic Control Extension\n");
@@ -311,18 +311,18 @@ Gif2Mem(BYTE *MemGif)
 
                         if (ApplicationCount > ApplicationArray)
                             ApplicationArray = (ApplicationArray << 1) + 1;
-                        
+
                         if (!(gifApplication = (GIFAPPLICATION **)realloc(gifApplication , sizeof(GIFAPPLICATION *) * ApplicationArray))) {
                             printf("Out of memory!");
                             exit(-1);
                         }
-                        
+
                         if(!(gifApplication[ApplicationCount - 1] = (GIFAPPLICATION *)malloc(sizeof(GIFAPPLICATION)))) {
                             printf("Out of memory!");
                             exit(-1);
                         }
 
-                        
+
                         if (ReadGifApplication(gifApplication[ApplicationCount - 1], &MemGif))
                             fprintf(stderr,
                                     "Error reading Application Extension information\n");

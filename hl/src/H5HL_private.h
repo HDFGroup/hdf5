@@ -28,7 +28,7 @@ extern "C" {
  */
 
 herr_t H5TBcommon_append_records( hid_t dataset_id,
-                                  hid_t mem_type_id, 
+                                  hid_t mem_type_id,
                                   hsize_t nrecords,
                                   hsize_t orig_table_size,
                                   const void * data);

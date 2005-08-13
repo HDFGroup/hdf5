@@ -63,7 +63,7 @@ main(void)
     /* Open the file */
     h5_fixname(FILENAME[0], fapl, name, sizeof name);
     if ((file=H5Fopen(name, H5F_ACC_RDONLY, fapl))<0) goto error;
-    
+
     /* Open the dataset */
     if ((dset=H5Dopen(file, "dset"))<0) goto error;
     if ((space=H5Dget_space(dset))<0) goto error;
@@ -111,6 +111,6 @@ main(void)
     return 1;
 }
 
-    
-    
-	
+
+
+

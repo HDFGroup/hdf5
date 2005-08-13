@@ -106,7 +106,7 @@ done:
  *              each other and putting them together will increase compression.
  *
  * Return:	Success: Size of buffer filtered
- *		Failure: 0	
+ *		Failure: 0
  *
  * Programmer:	Kent Yang
  *              Wednesday, November 13, 2002
@@ -118,7 +118,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], 
+H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
                    size_t nbytes, size_t *buf_size, void **buf)
 {
     void *dest = NULL;          /* Buffer to deposit [un]shuffled bytes into */
@@ -202,7 +202,7 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
 #undef DUFF_GUTS
             } /* end for */
 
-            /* Add leftover to the end of data */ 
+            /* Add leftover to the end of data */
             if(leftover>0) {
                 /* Adjust back to end of shuffled bytes */
                 _dest -= (bytesoftype - 1);     /*lint !e794 _dest is initialized */
@@ -257,7 +257,7 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
 #undef DUFF_GUTS
             } /* end for */
 
-            /* Add leftover to the end of data */ 
+            /* Add leftover to the end of data */
             if(leftover>0) {
                 /* Adjust back to end of shuffled bytes */
                 _src -= (bytesoftype - 1);      /*lint !e794 _src is initialized */

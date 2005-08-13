@@ -48,7 +48,7 @@ static int check_name( char *name, const char* check )
  int ret = HDstrcmp( name, check );
  HDstrcpy( name, "" );
  return ret;
-  
+
 }
 
 #define NAME_BUF_SIZE   40
@@ -64,7 +64,7 @@ int main( void )
  hid_t   file_id, file1_id, file2_id, file3_id;
  hid_t   group_id, group2_id, group3_id, group4_id, group5_id, group6_id, group7_id;
  hid_t   dataset_id, dataset2_id;
- hid_t   space_id;  
+ hid_t   space_id;
  hid_t   type_id, type2_id;
  hsize_t dims[1] = { 5 };
 
@@ -89,7 +89,7 @@ int main( void )
  h5_fixname(FILENAME[1], fapl, filename1, sizeof filename1);
  h5_fixname(FILENAME[2], fapl, filename2, sizeof filename2);
  h5_fixname(FILENAME[3], fapl, filename3, sizeof filename3);
- 
+
  /* Create a new file_id using default properties. */
  if ((file_id = H5Fcreate( filename0, H5F_ACC_TRUNC, H5P_DEFAULT, fapl ))<0) goto out;
 
@@ -106,7 +106,7 @@ int main( void )
 
  /* Get name */
  if (H5Iget_name( group_id, name, size )<0) goto out;
-  
+
  /* Verify */
  if (check_name( name, "/g0" )!=0) goto out;
 
@@ -132,18 +132,18 @@ int main( void )
 
  /* Get name */
  if (H5Iget_name( group_id, name, size )<0) goto out;
-  
+
  /* Verify */
  if (check_name( name, "/g1" )!=0)
   goto out;
 
  /* Get name */
  if (H5Iget_name( group2_id, name, size )<0) goto out;
- 
+
  /* Verify */
  if (check_name( name, "/g1/g2" )!=0)
   goto out;
-  
+
  /* Close */
  H5Gclose( group_id );
  H5Gclose( group2_id );
@@ -154,7 +154,7 @@ int main( void )
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with H5Gopen
  *-------------------------------------------------------------------------
- */  
+ */
 
  TESTING("H5Iget_name with H5Gopen");
 
@@ -170,14 +170,14 @@ int main( void )
  /* Verify */
  if (check_name( name, "/g1" )!=0)
   goto out;
- 
+
  /* Get name */
  if (H5Iget_name( group2_id, name, size )<0) goto out;
 
  /* Verify */
  if (check_name( name, "/g1/g2" )!=0)
   goto out;
- 
+
  /* Close */
  H5Gclose( group_id );
  H5Gclose( group2_id );
@@ -193,12 +193,12 @@ int main( void )
  */
 
  TESTING("H5Iget_name with H5Dcreate");
-  
+
  /* Create the data space  */
  if ((space_id = H5Screate_simple( 1, dims, NULL ))<0) goto out;
 
  /* Create a new dataset */
- if ((dataset_id = H5Dcreate( file_id , "d1", H5T_NATIVE_INT, space_id, 
+ if ((dataset_id = H5Dcreate( file_id , "d1", H5T_NATIVE_INT, space_id,
   H5P_DEFAULT ))<0) goto out;
 
  /* Get name */
@@ -207,27 +207,27 @@ int main( void )
  /* Verify */
  if (check_name( name, "/d1" )!=0)
   goto out;
-  
+
  /* Close */
- H5Dclose( dataset_id ); 
+ H5Dclose( dataset_id );
 
  /* Reopen the group */
  if ((group_id = H5Gopen( file_id, "g1" ))<0) goto out;
 
  /* Create a new dataset inside "g1" */
- if ((dataset_id = H5Dcreate( group_id , "d1", H5T_NATIVE_INT, space_id, 
+ if ((dataset_id = H5Dcreate( group_id , "d1", H5T_NATIVE_INT, space_id,
   H5P_DEFAULT ))<0) goto out;
- 
+
  /* Get name */
  if (H5Iget_name( dataset_id, name, size )<0) goto out;
 
  /* Verify */
  if (check_name( name, "/g1/d1" )!=0)
   goto out;
- 
+
  /* Close */
  H5Gclose( group_id );
- H5Dclose( dataset_id ); 
+ H5Dclose( dataset_id );
  H5Sclose( space_id );
 
  PASSED();
@@ -252,7 +252,7 @@ int main( void )
   goto out;
 
  /* Close */
- H5Dclose( dataset_id ); 
+ H5Dclose( dataset_id );
 
 
  /* Reopen the group */
@@ -269,7 +269,7 @@ int main( void )
   goto out;
 
  /* Close */
- H5Dclose( dataset_id ); 
+ H5Dclose( dataset_id );
  H5Gclose( group_id );
 
  PASSED();
@@ -287,14 +287,14 @@ int main( void )
  if ((group_id = H5Gcreate( file_id, "g2", 0 ))<0) goto out;
  if ((group2_id = H5Gcreate( file_id, "g2/bar", 0 ))<0) goto out;
  if ((group3_id = H5Gcreate( file_id, "g2/bar/baz", 0 ))<0) goto out;
-  
+
  /* Create a dataset */
  if ((space_id = H5Screate_simple( 1, dims, NULL ))<0) goto out;
- if ((dataset_id = H5Dcreate( group3_id , "d1", H5T_NATIVE_INT, space_id, 
+ if ((dataset_id = H5Dcreate( group3_id , "d1", H5T_NATIVE_INT, space_id,
   H5P_DEFAULT ))<0) goto out;
-  
+
  /* Close */
- H5Dclose( dataset_id ); 
+ H5Dclose( dataset_id );
  H5Sclose( space_id );
  H5Gclose( group_id );
  H5Gclose( group2_id );
@@ -330,10 +330,10 @@ int main( void )
  if (H5Tinsert (type_id, "a", HOFFSET(s1_t,a), H5T_NATIVE_INT)<0) goto out;
  if (H5Tinsert (type_id, "b", HOFFSET(s1_t,b), H5T_NATIVE_INT)<0) goto out;
  if (H5Tinsert (type_id, "c", HOFFSET(s1_t,c), H5T_NATIVE_FLOAT)<0) goto out;
-  
+
  /* Save datatype for later */
  if (H5Tcommit (file_id, "t1", type_id)<0) goto out;
- 
+
  /* Get name */
  if (H5Iget_name( type_id, name, size )<0) goto out;
 
@@ -347,7 +347,7 @@ int main( void )
  PASSED();
 
 /*-------------------------------------------------------------------------
- * Test H5Iget_name with H5Topen 
+ * Test H5Iget_name with H5Topen
  *-------------------------------------------------------------------------
  */
 
@@ -355,7 +355,7 @@ int main( void )
 
  /* Open the named datatype */
  if((type_id=H5Topen(file_id, "t1"))<0) goto out;
- 
+
  /* Get name */
  if (H5Iget_name( type_id, name, size )<0) goto out;
 
@@ -389,7 +389,7 @@ int main( void )
 
  /* Verify */
  if (check_name( name, "/g1a" )!=0) goto out;
- 
+
  /* Close */
  H5Gclose( group_id );
 
@@ -419,7 +419,7 @@ int main( void )
   goto out;
 
  /* Close */
- H5Dclose( dataset_id ); 
+ H5Dclose( dataset_id );
 
  PASSED();
 
@@ -438,7 +438,7 @@ int main( void )
 
  /* Rename datatype */
  if (H5Gmove( file_id, "/t1", "/t1a" )<0) goto out;
- 
+
  /* Get name */
  if (H5Iget_name( type_id, name, size )<0) goto out;
 
@@ -460,7 +460,7 @@ int main( void )
  TESTING("H5Iget_name with H5Gmove and relative names");
 
  /* Create group "/g3" */
- if ((group_id = H5Gcreate( file_id, "/g3", 0 ))<0) goto out;  
+ if ((group_id = H5Gcreate( file_id, "/g3", 0 ))<0) goto out;
 
  /* Create group "/g3/foo" using absolute name */
  if ((group2_id = H5Gcreate( file_id, "/g3/foo1", 0 ))<0) goto out;
@@ -473,7 +473,7 @@ int main( void )
 
  /* Get name */
  if (H5Iget_name( group_id, name, size )<0) goto out;
- 
+
  /* Verify */
  if (check_name( name, "/g3" )!=0) goto out;
 
@@ -494,7 +494,7 @@ int main( void )
 
  /* Get name */
  if (H5Iget_name( group_id, name, size )<0) goto out;
- 
+
  /* Verify */
  if (check_name( name, "/g3" )!=0) goto out;
 
@@ -515,7 +515,7 @@ int main( void )
  H5Gclose( group2_id );
  H5Gclose( group3_id );
 
- 
+
  PASSED();
 
 
@@ -548,7 +548,7 @@ int main( void )
 
  /* Get name */
  if (H5Iget_name( group3_id, name, size )<0) goto out;
- 
+
  /* Verify */
  if (check_name( name, "/g5/C/D" )!=0) goto out;
 
@@ -611,16 +611,16 @@ int main( void )
 
  /* Get name */
  if (H5Iget_name( group2_id, name, size )<0) goto out;
- 
+
  /* Verify */
  if (check_name( name, "/g7/C" )!=0) goto out;
-  
+
  /* Get name */
  if (H5Iget_name( group3_id, name, size )<0) goto out;
- 
+
  /* Verify */
  if (check_name( name, "/g7/C/B" )!=0) goto out;
-  
+
  /* Close */
  H5Gclose( group_id );
  H5Gclose( group2_id );
@@ -630,7 +630,7 @@ int main( void )
  PASSED();
 
 /*-------------------------------------------------------------------------
- * Test H5Iget_name with H5Gunlink 
+ * Test H5Iget_name with H5Gunlink
  *-------------------------------------------------------------------------
  */
 
@@ -641,7 +641,7 @@ int main( void )
 
  /* Delete */
  if (H5Gunlink( file_id, "/g8")<0) goto out;
- 
+
  /* Get name */
  if (H5Iget_name( group_id, name, size )<0) goto out;
 
@@ -759,7 +759,7 @@ int main( void )
   /* Create group "g11/g" */
  if ((group_id = H5Gcreate( file_id, "g11", 0 ))<0) goto out;
  if ((group2_id = H5Gcreate( file_id, "g11/g", 0 ))<0) goto out;
-  
+
  /* Create two datasets "g11/d" and "g11/g/d"*/
  if ((space_id = H5Screate_simple( 1, dims, NULL ))<0) goto out;
  if ((dataset_id = H5Dcreate( group_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT ))<0) goto out;
@@ -779,9 +779,9 @@ int main( void )
 
  /* Verify */
  if (check_name( name, "/g11/g/d" )!=0) goto out;
-  
+
  /* Close */
- H5Dclose( dataset_id ); 
+ H5Dclose( dataset_id );
  H5Dclose( dataset2_id );
  H5Sclose( space_id );
  H5Gclose( group_id );
@@ -799,7 +799,7 @@ int main( void )
 
  /* Create a group "g12" in the first file */
  if ((group_id = H5Gcreate( file_id, "/g12", 0 ))<0) goto out;
- 
+
  /* Close */
  H5Gclose( group_id );
 
@@ -808,7 +808,7 @@ int main( void )
 
  /* Create a data space  */
  if ((space_id = H5Screate_simple( 1, dims, NULL ))<0) goto out;
- 
+
  /* Create the dataset */
  if ((dataset_id = H5Dcreate( file1_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT ))<0) goto out;
 
@@ -826,7 +826,7 @@ int main( void )
 
  /* Verify */
  if (check_name( name, "/g12/d" )!=0) goto out;
- 
+
  if (H5Funmount(file_id, "/g12")<0) goto out;
 
  /* Close */
@@ -849,7 +849,7 @@ int main( void )
  if ((group_id = H5Gcreate( file_id, "/g13", 0 ))<0) goto out;
  if ((group2_id = H5Gcreate( file_id, "/g13/g1", 0 ))<0) goto out;
  if ((group3_id = H5Gcreate( file_id, "/g13/g1/g2", 0 ))<0) goto out;
- 
+
  /* Close */
  H5Gclose( group_id );
  H5Gclose( group2_id );
@@ -1066,7 +1066,7 @@ int main( void )
 
 
 /*-------------------------------------------------------------------------
- * Test H5Iget_name with H5Funmount 
+ * Test H5Iget_name with H5Funmount
  *-------------------------------------------------------------------------
  */
 
@@ -1077,7 +1077,7 @@ int main( void )
  if ((group2_id = H5Gcreate( file_id, "/g15/g1", 0 ))<0) goto out;
  if ((group3_id = H5Gcreate( file_id, "/g15/g1/g2", 0 ))<0) goto out;
  if ((group4_id = H5Gcreate( file_id, "/g15/g1/g2/g3", 0 ))<0) goto out;
- 
+
  /* Close */
  H5Gclose( group_id );
  H5Gclose( group2_id );
@@ -1098,13 +1098,13 @@ int main( void )
 
  /* Access group in the first file */
  if ((group_id = H5Gopen( file_id, "/g15/g1/g2/g3"))<0) goto out;
- 
+
  /* Mount second file under "/g13/g1" in the first file */
  if (H5Fmount(file_id, "/g15/g1", file1_id, H5P_DEFAULT)<0) goto out;
 
  /* Access group in the second file */
  if ((group2_id = H5Gopen( file_id, "/g15/g1/g16/g4/g5"))<0) goto out;
- 
+
  /* Get name */
  if (H5Iget_name( group_id, name, size )< 0) goto out;
 
@@ -1161,7 +1161,7 @@ int main( void )
 
   /* Create group "g17" */
  if ((group_id = H5Gcreate( file_id, "g17", 0 ))<0) goto out;
-  
+
  /* Save datatype for later */
  if (H5Tcommit (group_id, "t", type_id)<0) goto out;
 
@@ -1169,18 +1169,18 @@ int main( void )
  if ((space_id = H5Screate_simple( 1, dims, NULL ))<0) goto out;
 
  /* Create a new dataset */
- if ((dataset_id = H5Dcreate( group_id , "d", type_id, space_id, 
+ if ((dataset_id = H5Dcreate( group_id , "d", type_id, space_id,
   H5P_DEFAULT ))<0) goto out;
-   
+
  /* Close */
- H5Dclose( dataset_id ); 
+ H5Dclose( dataset_id );
  H5Tclose( type_id );
  H5Sclose( space_id );
  H5Gclose( group_id );
 
  /* Open the named datatype */
  if((type_id=H5Topen(file_id, "/g17/t"))<0) goto out;
- 
+
  /* Get name */
  if (H5Iget_name( type_id, name, size )<0) goto out;
 
@@ -1243,7 +1243,7 @@ PASSED();
  */
 
  TESTING("H5Iget_name with different files");
- 
+
  /* Create a new file using default properties. */
  if ((file2_id = H5Fcreate( filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl ))<0) goto out;
 
@@ -1261,7 +1261,7 @@ PASSED();
 
  /* Delete */
  if (H5Gunlink( file2_id, "/d")<0) goto out;
- 
+
  /* Get name */
  if (H5Iget_name( dataset_id, name, size )<0) goto out;
 
@@ -1273,14 +1273,14 @@ PASSED();
 
  /* Verify */
  if (check_name( name, "/d" )!=0) goto out;
-  
+
  /* Close */
- H5Dclose( dataset_id ); 
- H5Dclose( dataset2_id ); 
+ H5Dclose( dataset_id );
+ H5Dclose( dataset2_id );
  H5Sclose( space_id );
  H5Fclose( file2_id );
  H5Fclose( file3_id );
- 
+
  PASSED();
 
 
@@ -1290,7 +1290,7 @@ PASSED();
  */
 
  TESTING("H5Iget_name with different files #2");
- 
+
  /* Create a new file using default properties. */
  if ((file2_id = H5Fcreate( filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl ))<0) goto out;
 
@@ -1308,7 +1308,7 @@ PASSED();
 
  /* Delete */
  if (H5Gunlink( file3_id, "/d")<0) goto out;
- 
+
  /* Get name */
  if (H5Iget_name( dataset_id, name, size )<0) goto out;
 
@@ -1320,20 +1320,20 @@ PASSED();
 
  /* Verify */
  if (check_name( name, "" )!=0) goto out;
-  
+
  /* Close */
- H5Dclose( dataset_id ); 
- H5Dclose( dataset2_id ); 
+ H5Dclose( dataset_id );
+ H5Dclose( dataset2_id );
  H5Sclose( space_id );
  H5Fclose( file2_id );
  H5Fclose( file3_id );
- 
+
  PASSED();
 
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with a small buffer for name
  *-------------------------------------------------------------------------
- */  
+ */
 
  TESTING("H5Iget_name with a small buffer for name");
 
@@ -1349,7 +1349,7 @@ PASSED();
 
  /* Verify */
  if (check_name( name, "/g17" )!=0) goto out;
-  
+
  /* Close */
  H5Gclose( group_id );
 
@@ -1359,7 +1359,7 @@ PASSED();
  /*-------------------------------------------------------------------------
  * Test H5Iget_name with a dynamic buffer for name
  *-------------------------------------------------------------------------
- */  
+ */
 
  TESTING("H5Iget_name with a dynamic buffer for name");
 
@@ -1371,7 +1371,7 @@ PASSED();
 
  /* Include the extra null character */
  name3 = malloc(name_len+1);
-  
+
  /* Get name */
  if (H5Iget_name( group_id, name3, name_len+1 )<0) goto out;
 
@@ -1388,7 +1388,7 @@ PASSED();
 
  if ( name3 )
   free(name3);
-  
+
  /* Close */
  H5Gclose( group_id );
 
@@ -1402,7 +1402,7 @@ PASSED();
 
 
  TESTING("H5Iget_name with invalid IDs");
-  
+
  /* Create a data space  */
  if ((space_id = H5Screate_simple( 1, dims, NULL ))<0) goto out;
 
@@ -1410,7 +1410,7 @@ PASSED();
  if ((type_id = H5Tcopy(H5T_NATIVE_INT))<0) goto out;
 
  /* Create a new dataset */
- if ((dataset_id = H5Dcreate( file_id , "d2", type_id, space_id, 
+ if ((dataset_id = H5Dcreate( file_id , "d2", type_id, space_id,
   H5P_DEFAULT ))<0) goto out;
 
  /* Get name for non commited datatype, it should fail */
@@ -1420,7 +1420,7 @@ PASSED();
  if (H5Iget_name( space_id, name, size ) >0) goto out;
 
  /* Close */
- H5Dclose( dataset_id ); 
+ H5Dclose( dataset_id );
  H5Sclose( space_id );
  H5Tclose( type_id );
 
@@ -1437,11 +1437,11 @@ PASSED();
  /* Create a group "g18/g2" in the first file */
  if ((group_id = H5Gcreate( file_id, "/g18", 0 ))<0) goto out;
  if ((group2_id = H5Gcreate( file_id, "/g18/g2", 0 ))<0) goto out;
- 
+
  /* Also create a dataset and a datatype */
  if ((space_id = H5Screate_simple( 1, dims, NULL ))<0) goto out;
  if ((type_id = H5Tcopy(H5T_NATIVE_INT))<0) goto out;
- if ((dataset_id = H5Dcreate( file_id, "g18/d2", type_id, space_id, 
+ if ((dataset_id = H5Dcreate( file_id, "g18/d2", type_id, space_id,
   H5P_DEFAULT ))<0) goto out;
 
  if (H5Tcommit(file_id, "g18/t2", type_id) <0) goto out;
@@ -1528,7 +1528,7 @@ PASSED();
  H5Fclose( file1_id );
 
 PASSED();
-  
+
 
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with H5Fclose
@@ -1536,7 +1536,7 @@ PASSED();
  */
 
  TESTING("H5Iget_name with H5Fclose");
- 
+
  /* Create a file and group "/g1/g2" in it */
  file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
  if ((group_id = H5Gcreate( file1_id, "/g1", 0 ))<0) goto out;
@@ -1562,7 +1562,7 @@ PASSED();
  /* Close */
  H5Gclose( group_id );
  H5Gclose( group2_id );
- 
+
  PASSED();
 
 
@@ -1577,7 +1577,7 @@ PASSED();
  file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
  if ((group_id = H5Gcreate( file1_id, "/g1", 0 ))<0) goto out;
  if ((group2_id = H5Gcreate( file1_id, "/g1/g2", 0 ))<0) goto out;
- 
+
  /* Create a new file and group "/g3/g4" in it */
  if ((file2_id = H5Fcreate( filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl ))<0) goto out;
  if ((group3_id = H5Gcreate( file2_id, "/g3", 0 ))<0) goto out;
@@ -1585,7 +1585,7 @@ PASSED();
 
  /* Mount first file at "/g3/g4" in the second file */
  if(H5Fmount(file2_id, "/g3/g4", file1_id, H5P_DEFAULT)<0) goto out;
- 
+
  /* Open the mounted group */
  if ((group5_id = H5Gopen( file2_id, "/g3/g4/g1/g2" ))<0) goto out;
 
@@ -1597,7 +1597,7 @@ PASSED();
 
  /* Delete */
  if (H5Gunlink( file1_id, "/g3/g4/g1/g2")<0) goto out;
- 
+
  /* Get name */
  if (H5Iget_name( group5_id, name, size )<0) goto out;
 
@@ -1609,7 +1609,7 @@ PASSED();
 
  /* Verify */
  if (check_name( name, "" )!=0) goto out;
-  
+
  /* Close */
  H5Gclose( group_id );
  H5Gclose( group2_id );
@@ -1618,7 +1618,7 @@ PASSED();
  H5Gclose( group5_id );
  H5Fclose( file1_id );
  H5Fclose( file2_id );
- 
+
  PASSED();
 
 
@@ -1634,7 +1634,7 @@ PASSED();
  file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
  if ((group_id = H5Gcreate( file1_id, "/g1", 0 ))<0) goto out;
  if ((group2_id = H5Gcreate( file1_id, "/g1/g2", 0 ))<0) goto out;
- 
+
  /* Create a new file and group "/g3/g4" in it */
  if ((file2_id = H5Fcreate( filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl ))<0) goto out;
  if ((group3_id = H5Gcreate( file2_id, "/g3", 0 ))<0) goto out;
@@ -1642,7 +1642,7 @@ PASSED();
 
  /* Mount first file at "g3/g4" in the second file */
  if(H5Fmount(file2_id, "/g3/g4", file1_id, H5P_DEFAULT)<0) goto out;
- 
+
  /* Get name */
  if (H5Iget_name( group4_id, name, size )<0) goto out;
 
@@ -1669,7 +1669,7 @@ PASSED();
 
  /* Rename group */
  if (H5Gmove( file2_id, "/g3/g4/g1/g2", "/g3/g4/g1/g5" )<0)  goto out;
-  
+
  /* Get name */
  if (H5Iget_name( group5_id, name, size )<0) goto out;
 
@@ -1681,10 +1681,10 @@ PASSED();
 
  /* Verify */
  if (check_name( name, "/g1/g5" )!=0) goto out;
-  
+
  /* Rename group */
  if (H5Gmove( file2_id, "/g3/g4/g1", "/g3/g4/g1a" )<0)  goto out;
-  
+
  /* Get name */
  if (H5Iget_name( group5_id, name, size )<0) goto out;
 
@@ -1696,22 +1696,22 @@ PASSED();
 
  /* Verify */
  if (check_name( name, "/g1a/g5" )!=0) goto out;
-  
+
  /* Get name */
  if (H5Iget_name( group6_id, name, size )<0) goto out;
 
  /* Verify */
  if (check_name( name, "/g3/g4/g1a" )!=0) goto out;
-  
+
  /* Get name */
  if (H5Iget_name( group_id, name, size )<0) goto out;
 
  /* Verify */
  if (check_name( name, "/g1a" )!=0) goto out;
-  
+
  /* Rename middle group back, using relative path */
  if (H5Gmove( group3_id, "g4/g1a", "g4/g1" )<0)  goto out;
-  
+
  /* Get name */
  if (H5Iget_name( group5_id, name, size )<0) goto out;
 
@@ -1723,22 +1723,22 @@ PASSED();
 
  /* Verify */
  if (check_name( name, "/g1/g5" )!=0) goto out;
-  
+
  /* Get name */
  if (H5Iget_name( group6_id, name, size )<0) goto out;
 
  /* Verify */
  if (check_name( name, "/g3/g4/g1" )!=0) goto out;
-  
+
  /* Get name */
  if (H5Iget_name( group_id, name, size )<0) goto out;
 
  /* Verify */
  if (check_name( name, "/g1" )!=0) goto out;
-  
+
  /* Rename end group back, using relative path */
  if (H5Gmove( group3_id, "g4/g1/g5", "g4/g1/g2" )<0)  goto out;
-  
+
  /* Get name */
  if (H5Iget_name( group5_id, name, size )<0) goto out;
 
@@ -1750,19 +1750,19 @@ PASSED();
 
  /* Verify */
  if (check_name( name, "/g1/g2" )!=0) goto out;
-  
+
  /* Get name */
  if (H5Iget_name( group6_id, name, size )<0) goto out;
 
  /* Verify */
  if (check_name( name, "/g3/g4/g1" )!=0) goto out;
-  
+
  /* Get name */
  if (H5Iget_name( group_id, name, size )<0) goto out;
 
  /* Verify */
  if (check_name( name, "/g1" )!=0) goto out;
-  
+
  /* Close */
  H5Gclose( group_id );
  H5Gclose( group2_id );
@@ -1772,9 +1772,9 @@ PASSED();
  H5Gclose( group6_id );
  H5Fclose( file1_id );
  H5Fclose( file2_id );
- 
+
  PASSED();
- 
+
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with H5Glink hard
  *-------------------------------------------------------------------------
@@ -1910,7 +1910,7 @@ PASSED();
  H5Gclose( group_id );
  H5Gclose( group2_id );
  H5Gclose( group3_id );
- 
+
  PASSED();
 
 
@@ -1948,7 +1948,7 @@ PASSED();
  H5Gclose( group_id );
  H5Gclose( group2_id );
  H5Gclose( group3_id );
- 
+
  PASSED();
 
 
@@ -1994,7 +1994,7 @@ PASSED();
  H5Gclose( group_id );
  H5Gclose( group2_id );
  H5Gclose( group3_id );
- 
+
  PASSED();
 
 
@@ -2055,7 +2055,7 @@ PASSED();
  H5Gclose( group_id );
  H5Gclose( group2_id );
  H5Gclose( group3_id );
- 
+
  PASSED();
 
 
@@ -2096,7 +2096,7 @@ PASSED();
  H5Gclose( group_id );
  H5Gclose( group2_id );
  H5Gclose( group3_id );
- 
+
  PASSED();
 
 /*-------------------------------------------------------------------------
@@ -2135,9 +2135,9 @@ PASSED();
  H5Gclose( group_id );
  H5Gclose( group2_id );
  H5Gclose( group3_id );
- 
+
  PASSED();
- 
+
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with several nested mounted files
  *-------------------------------------------------------------------------
@@ -2149,7 +2149,7 @@ PASSED();
  if ((group_id = H5Gcreate( file_id, "/g25", 0 ))<0) goto out;
  if ((group2_id = H5Gcreate( file_id, "/g25/g1", 0 ))<0) goto out;
  if ((group3_id = H5Gcreate( file_id, "/g25/g1/g2", 0 ))<0) goto out;
- 
+
  /* Close */
  H5Gclose( group_id );
  H5Gclose( group2_id );
@@ -2344,7 +2344,7 @@ PASSED();
  if ((group3_id = H5Gcreate( file_id, "/g29/g1/g2", 0 ))<0) goto out;
  if ((group4_id = H5Gcreate( file_id, "/g29/g1/g2/g1", 0 ))<0) goto out;
  if ((group5_id = H5Gcreate( file_id, "/g29/g1/g2/g1/g2", 0 ))<0) goto out;
- 
+
  /* Rename group */
  if (H5Gmove( file_id, "/g29/g1/g2/g1/g2", "/g29/g1/g2/g1/g3" )<0)  goto out;
 
@@ -2405,7 +2405,7 @@ PASSED();
  if ((group_id = H5Gcreate( file_id, "/g30", 0 ))<0) goto out;
  if ((group2_id = H5Gcreate( file_id, "/g30/g1", 0 ))<0) goto out;
  if ((group3_id = H5Gcreate( file_id, "/g30/g1/g2", 0 ))<0) goto out;
- 
+
  /* Close */
  H5Gclose( group_id );
  H5Gclose( group2_id );
@@ -2683,7 +2683,7 @@ PASSED();
  H5Gclose( group3_id );
  H5Gclose( group4_id );
  H5Fclose( file1_id );
- 
+
  PASSED();
 
 
@@ -2803,14 +2803,14 @@ PASSED();
  H5Gclose( group5_id );
 
  if (H5Funmount(file_id, "/g36/g1")<0) goto out;
- 
+
  /* Close */
  H5Gclose( group_id );
  H5Gclose( group2_id );
  H5Gclose( group3_id );
  H5Gclose( group4_id );
  H5Fclose( file1_id );
- 
+
  PASSED();
 
 
@@ -2916,7 +2916,7 @@ PASSED();
  H5Fclose( file1_id );
  H5Fclose( file2_id );
  H5Fclose( file3_id );
- 
+
  PASSED();
 
 /*-------------------------------------------------------------------------
@@ -2977,15 +2977,15 @@ PASSED();
  H5Gclose( group2_id );
  H5Fclose( file1_id );
  H5Fclose( file2_id );
- 
+
  PASSED();
 
 /*-------------------------------------------------------------------------
- * end tests 
+ * end tests
  *-------------------------------------------------------------------------
  */
 
- 
+
  /* Close file */
  H5Fclose( file_id );
  puts("All getname tests passed.");

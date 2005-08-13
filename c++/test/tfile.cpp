@@ -84,7 +84,7 @@ const string    FILE4("tfile4.h5");
  *
  *-------------------------------------------------------------------------
  */
-static void 
+static void
 test_file_create(void)
 {
     // Output message about test being performed
@@ -114,13 +114,13 @@ test_file_create(void)
 	catch( FileIException E ) // catch truncating existing file
 	{} // do nothing, FAIL expected
 
-	// Close file1 
+	// Close file1
 	delete file1;
 	file1 = NULL;
 
-	// Try again with H5F_ACC_EXCL. This should fail because the file 
+	// Try again with H5F_ACC_EXCL. This should fail because the file
 	// already exists from the previous steps.
-	try { 
+	try {
 	    H5File file2(FILE1, H5F_ACC_EXCL);  // should throw E
 
 	    // Should FAIL but didn't, so throw an invalid action exception
@@ -291,7 +291,7 @@ test_file_create(void)
  *
  *-------------------------------------------------------------------------
  */
-static void 
+static void
 test_file_open(void)
 {
     // Output message about test being performed
@@ -329,7 +329,7 @@ test_file_open(void)
 /*-------------------------------------------------------------------------
  * Function:    test_file_size
  *
- * Purpose:     Test file size.  
+ * Purpose:     Test file size.
  *
  * Return:      None
  *
@@ -340,7 +340,7 @@ test_file_open(void)
  *
  *-------------------------------------------------------------------------
  */
-static void 
+static void
 test_file_size(void)
 {
     // Output message about test being performed
@@ -376,14 +376,14 @@ test_file_size(void)
 
     // use C test utility routine to close property list.
     H5Pclose(fapl_id);
-    
+
 }   // test_file_size()
 
 
 /*-------------------------------------------------------------------------
  * Function:    test_file_name
  *
- * Purpose:     Test getting file's name.  
+ * Purpose:     Test getting file's name.
  *
  * Return:      None
  *
@@ -408,7 +408,7 @@ typedef struct s1_t {
     float        b;
 } s1_t;
 
-static void 
+static void
 test_file_name()
 {
     // Output message about test being performed
@@ -484,7 +484,7 @@ test_file_name()
  *
  *-------------------------------------------------------------------------
  */
-void 
+void
 test_file(void)
 {
     // Output message about test being performed

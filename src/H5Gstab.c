@@ -238,7 +238,7 @@ H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent, hi
     /* insert */
     if (H5B_insert(grp_ent->file, dxpl_id, H5B_SNODE, stab.btree_addr, &udata) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert entry");
-    
+
     /* update the name offset in the entry */
     obj_ent->name_off = udata.ent.name_off;
 
@@ -267,7 +267,7 @@ H5G_stab_remove(H5G_entry_t *grp_ent, const char *name, hid_t dxpl_id)
     H5O_stab_t		stab;		/*symbol table message		*/
     H5G_bt_ud1_t	udata;		/*data to pass through B-tree	*/
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5G_stab_remove, FAIL);
 
     assert(grp_ent && grp_ent->file);
@@ -307,18 +307,18 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
+herr_t
 H5G_stab_insert_name(H5G_entry_t *loc, H5G_entry_t *obj, const char *name)
 {
     size_t  name_len;           /* Length of name to append */
-    herr_t  ret_value = SUCCEED;       
- 
+    herr_t  ret_value = SUCCEED;
+
     FUNC_ENTER_NOAPI_NOINIT(H5G_stab_insert_name);
 
     assert(loc);
     assert(obj);
     assert(name);
- 
+
     /* Reset the object's previous names, if they exist */
     if(obj->user_path_r) {
         H5RS_decr(obj->user_path_r);
@@ -430,8 +430,8 @@ herr_t
 H5G_stab_delete(H5F_t *f, hid_t dxpl_id, haddr_t btree_addr, haddr_t heap_addr)
 {
     H5G_bt_ud1_t	udata;		/*data to pass through B-tree	*/
-    herr_t  ret_value = SUCCEED;       
- 
+    herr_t  ret_value = SUCCEED;
+
     FUNC_ENTER_NOAPI(H5G_stab_delete, FAIL);
 
     assert(f);

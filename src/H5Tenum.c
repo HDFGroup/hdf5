@@ -46,7 +46,7 @@ NAME
    H5T_init_enum_interface -- Initialize interface-specific information
 USAGE
     herr_t H5T_init_enum_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -86,7 +86,7 @@ H5Tenum_create(hid_t parent_id)
     H5T_t	*parent = NULL;		/*base integer data type	*/
     H5T_t	*dt = NULL;		/*new enumeration data type	*/
     hid_t	ret_value;	        /*return value			*/
-    
+
     FUNC_ENTER_API(H5Tenum_create, FAIL)
     H5TRACE1("i","i",parent_id);
 
@@ -109,16 +109,16 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_enum_create
  *
- * Purpose:	Private function for H5Tenum_create.  Create a new 
+ * Purpose:	Private function for H5Tenum_create.  Create a new
  *              enumeration data type based on the specified
  *		TYPE, which must be an integer type.
  *
  * Return:	Success:	new enumeration data type
  *
- *		Failure:        NULL	
+ *		Failure:        NULL
  *
  * Programmer:	Raymond Lu
- *              October 9, 2002 
+ *              October 9, 2002
  *
  * Modifications:
  *
@@ -128,7 +128,7 @@ H5T_t *
 H5T_enum_create(const H5T_t *parent)
 {
     H5T_t	*ret_value;		/*new enumeration data type	*/
-    
+
     FUNC_ENTER_NOAPI(H5T_enum_create, NULL)
 
     assert(parent);
@@ -177,7 +177,7 @@ H5Tenum_insert(hid_t type, const char *name, const void *value)
 {
     H5T_t	*dt=NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_API(H5Tenum_insert, FAIL)
     H5TRACE3("e","isx",type,name,value);
 
@@ -226,7 +226,7 @@ H5T_enum_insert(const H5T_t *dt, const char *name, const void *value)
     char	**names=NULL;
     uint8_t	*values=NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5T_enum_insert, FAIL)
 
     assert(dt);
@@ -287,7 +287,7 @@ H5Tget_member_value(hid_t type, unsigned membno, void *value/*out*/)
 {
     H5T_t	*dt=NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_API(H5Tget_member_value, FAIL)
     H5TRACE3("e","iIux",type,membno,value);
 
@@ -310,7 +310,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_get_member_value
  *
- * Purpose:	Private function for H5T_get_member_value.  Return the 
+ * Purpose:	Private function for H5T_get_member_value.  Return the
  *              value for an enumeration data type member.
  *
  * Return:	Success:	non-negative with the member value copied
@@ -319,7 +319,7 @@ done:
  *		Failure:	negative, VALUE memory is undefined.
  *
  * Programmer:	Raymond Lu
- *              October 9, 2002 
+ *              October 9, 2002
  *
  * Modifications:
  *
@@ -329,7 +329,7 @@ herr_t
 H5T_get_member_value(const H5T_t *dt, unsigned membno, void *value/*out*/)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5T_get_member_value, FAIL)
 
     assert(dt);
@@ -427,7 +427,7 @@ H5T_enum_nameof(const H5T_t *dt, const void *value, char *name/*out*/, size_t si
     int	cmp=(-1);		        /*comparison result		*/
     H5T_t       *copied_dt = NULL;      /*do sorting in copied datatype */
     char *ret_value;                    /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5T_enum_nameof, NULL)
 
     /* Check args */
@@ -561,7 +561,7 @@ H5T_enum_valueof(const H5T_t *dt, const char *name, void *value/*out*/)
     int	cmp=(-1);		        /*comparison result		*/
     H5T_t       *copied_dt = NULL;      /*do sorting in copied datatype */
     herr_t      ret_value=SUCCEED;      /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5T_enum_valueof, FAIL)
 
     /* Check args */

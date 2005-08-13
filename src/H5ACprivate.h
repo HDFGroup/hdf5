@@ -53,8 +53,8 @@
 #define H5AC_BPT_LEAF_ID 11	/*B+ tree leaf				     */
 #define H5AC_NTYPES	12
 
-/* H5AC_DUMP_STATS_ON_CLOSE should always be FALSE when 
- * H5C_COLLECT_CACHE_STATS is FALSE.  
+/* H5AC_DUMP_STATS_ON_CLOSE should always be FALSE when
+ * H5C_COLLECT_CACHE_STATS is FALSE.
  *
  * When H5C_COLLECT_CACHE_STATS is TRUE, H5AC_DUMP_STATS_ON_CLOSE must
  * be FALSE for "make check" to succeed, but may be set to TRUE at other
@@ -208,7 +208,7 @@ extern hid_t H5AC_ind_dxpl_id;
  */
 
 /* #defines of flags used in the flags parameters in some of the
- * following function calls.  Note that they are just copies of 
+ * following function calls.  Note that they are just copies of
  * the equivalent flags from H5Cprivate.h.
  */
 
@@ -224,12 +224,12 @@ extern hid_t H5AC_ind_dxpl_id;
 
 H5_DLL herr_t H5AC_init(void);
 H5_DLL herr_t H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr);
-H5_DLL herr_t H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, 
+H5_DLL herr_t H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
                        haddr_t addr, void *thing, unsigned int flags);
 H5_DLL void *H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
                           haddr_t addr, const void *udata1, void *udata2,
                           H5AC_protect_t rw);
-H5_DLL herr_t H5AC_unprotect(H5F_t *f, hid_t dxpl_id, 
+H5_DLL herr_t H5AC_unprotect(H5F_t *f, hid_t dxpl_id,
                              const H5AC_class_t *type, haddr_t addr,
 			     void *thing, unsigned flags);
 H5_DLL herr_t H5AC_flush(H5F_t *f, hid_t dxpl_id, unsigned flags);

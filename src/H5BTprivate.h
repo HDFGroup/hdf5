@@ -45,7 +45,7 @@
 #define H5BT_ITER_CONT   H5B2_ITER_CONT
 #define H5BT_ITER_STOP   H5B2_ITER_STOP
 
-     
+
 /****************************/
 /* Library Private Typedefs */
 /****************************/

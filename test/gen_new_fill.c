@@ -14,15 +14,15 @@
 
 /*
  * Programmer:  Raymond Lu <slu@ncsa.uiuc.edu>
- *              Feb 27, 2002 
+ *              Feb 27, 2002
  *
  * Purpose:     This program is run to generate a HDF5 data file with fill
  *              value property.  A new fill value design has been put into
  *              library v1.5.  To test compatibility between v1.4 and v1.5,
  *              compile and run this program, it will generate a file called
- *              fill_new.h5.  You need to move it to the /test directory 
+ *              fill_new.h5.  You need to move it to the /test directory
  *              in HDF5 v1.4 source codes.  The fillval.c program will read it.
- *       
+ *
  */
 
 #include "h5test.h"
@@ -46,16 +46,16 @@ int main()
   if(H5Pset_fill_time(dcpl, H5D_ALLOC) < 0) goto error;
   if(H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fill_val1)<0) goto error;
   if((dset1 = H5Dcreate(file, "dset1", H5T_NATIVE_INT, space, dcpl))<0)
-        goto error; 
+        goto error;
   if (H5Dget_space_status(dset1, &allocation)<0) goto error;
   if (allocation == H5D_SPACE_STATUS_NOT_ALLOCATED) {
         puts("    Got unallocated space instead of allocated.");
         printf("    Got %d\n", allocation);
         goto error;
   }
-  if(H5Dclose(dset1)<0) goto error; 
+  if(H5Dclose(dset1)<0) goto error;
 
-  /* Create a dataset with space allocation being delayed */  
+  /* Create a dataset with space allocation being delayed */
   if(H5Pset_space_time(dcpl, H5D_LATE) < 0) goto error;
   if(H5Pset_fill_time(dcpl, H5D_ALLOC) < 0) goto error;
   if(H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fill_val2)<0) goto error;

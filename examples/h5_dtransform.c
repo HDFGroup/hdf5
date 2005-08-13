@@ -12,8 +12,8 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*  
- *  This example demonstrates how the data transform features of 
+/*
+ *  This example demonstrates how the data transform features of
  *  HDF5 works.
  *
  * (1)
@@ -31,7 +31,7 @@
  *  (4)
  *  Get the transform from the property using H5Pget_data_transform.
  */
- 
+
 #include "hdf5.h"
 
 #define ROWS    12
@@ -63,7 +63,7 @@ const float windchillF[ROWS][COLS] =
 }
 
 
-	
+
 
 int
 main (void)
@@ -71,8 +71,8 @@ main (void)
     hid_t       file, dataset;         /* file and dataset handles */
     hid_t       dataspace;   /* handles */
     hsize_t     dimsf[2];              /* dataset dimensions */
-    herr_t      status;      
-    hid_t	dxpl_id_f_to_c, dxpl_id_c_to_f;	/* data transform handles */                       
+    herr_t      status;
+    hid_t	dxpl_id_f_to_c, dxpl_id_c_to_f;	/* data transform handles */
     const char* f_to_c = "(5/9.0)*(x-32)";
     const char* c_to_f =  "(9/5.0)*x + 32";
     char*	transform;
@@ -88,11 +88,11 @@ main (void)
 
     /*
      * Describe the size of the array and create the data space for fixed
-     * size dataset. 
+     * size dataset.
      */
     dimsf[0] = ROWS;
     dimsf[1] = COLS;
-    dataspace = H5Screate_simple(2, dimsf, NULL); 
+    dataspace = H5Screate_simple(2, dimsf, NULL);
 
     /*
      * Create a new dataset within the file using defined dataspace and
@@ -125,11 +125,11 @@ main (void)
     /* Print the data from the read*/
     printf("\nData with no write transform, but a read transform: \n");
     PRINT(windchillC);
-    
+
 
 /****************  PART 2 **************/
     /*
-     * Write the data to the dataset with the f_to_c transform set 
+     * Write the data to the dataset with the f_to_c transform set
      */
     status = H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL,
 		      dxpl_id_f_to_c, windchillF);
@@ -142,8 +142,8 @@ main (void)
     PRINT(windchillC);
 
 /************** PART 3 ***************/
- 
- 
+
+
     /* Create the dataset transfer property list */
     dxpl_id_c_to_f = H5Pcreate(H5P_DATASET_XFER);
 
@@ -156,7 +156,7 @@ main (void)
      */
     status = H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL,
 		      dxpl_id_f_to_c, windchillF);
-    
+
     /* Read the data with the c_to_f data transform */
     H5Dread(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_c_to_f, windchillC);
 
@@ -168,9 +168,9 @@ main (void)
     transform_size = H5Pget_data_transform(dxpl_id_f_to_c, NULL, 0);
     transform = (char*) malloc(transform_size+1);
     H5Pget_data_transform(dxpl_id_f_to_c, transform, transform_size+1);
-    
+
     printf("\nTransform string (from dxpl_id_f_to_c) is: %s\n", transform);
-    
+
     /*
      * Close/release resources.
      */
@@ -179,6 +179,6 @@ main (void)
     H5Sclose(dataspace);
     H5Dclose(dataset);
     H5Fclose(file);
- 
+
     return 0;
-}     
+}

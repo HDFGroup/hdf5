@@ -28,7 +28,7 @@
  */
 int make_dset(hid_t loc_id,
               const char *name,
-              hid_t sid, 
+              hid_t sid,
               hid_t dcpl,
               void *buf)
 {
@@ -67,37 +67,37 @@ int make_dset(hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-int write_dset( hid_t loc_id, 
-                int rank, 
-                hsize_t *dims, 
+int write_dset( hid_t loc_id,
+                int rank,
+                hsize_t *dims,
                 const char *dset_name,
-                hid_t type_id, 
+                hid_t type_id,
                 void *buf )
 {
  hid_t   dset_id;
- hid_t   space_id;  
- 
+ hid_t   space_id;
+
  /* Create a buf space  */
  if ((space_id = H5Screate_simple(rank,dims,NULL))<0)
   return -1;
- 
+
  /* Create a dataset */
  if ((dset_id = H5Dcreate(loc_id,dset_name,type_id,space_id,H5P_DEFAULT))<0)
   return -1;
- 
+
  /* Write the buf */
  if ( buf )
   if (H5Dwrite(dset_id,type_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
    return -1;
-  
+
  /* Close */
  if (H5Dclose(dset_id)<0)
   return -1;
  if (H5Sclose(space_id)<0)
   return -1;
-  
+
  return 0;
-  
+
 }
 
 
@@ -112,37 +112,37 @@ int write_dset( hid_t loc_id,
  *
  *-------------------------------------------------------------------------
  */
- 
-int make_attr(hid_t loc_id, 
-               int rank, 
-               hsize_t *dims, 
+
+int make_attr(hid_t loc_id,
+               int rank,
+               hsize_t *dims,
                const char *attr_name,
-               hid_t type_id, 
+               hid_t type_id,
                void *buf)
 {
  hid_t   attr_id;
- hid_t   space_id;  
- 
+ hid_t   space_id;
+
  /* create a space  */
  if ((space_id = H5Screate_simple(rank,dims,NULL))<0)
   return -1;
- 
+
  /* create the attribute */
  if ((attr_id = H5Acreate(loc_id,attr_name,type_id,space_id,H5P_DEFAULT))<0)
   goto out;
- 
+
  /* write the buffer */
  if ( buf )
  {
   if (H5Awrite(attr_id,type_id,buf)<0)
    goto out;
  }
- 
+
  /* close */
  H5Aclose(attr_id);
  H5Sclose(space_id);
  return 0;
- 
+
 out:
  H5E_BEGIN_TRY {
   H5Aclose(attr_id);

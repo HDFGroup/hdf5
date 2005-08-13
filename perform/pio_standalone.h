@@ -50,7 +50,7 @@
 #define HDstrdup(S)				   _strdup(S)
 #else /* WIN32 */
 
-#if !defined strdup && !defined H5_HAVE_STRDUP 
+#if !defined strdup && !defined H5_HAVE_STRDUP
 extern char *strdup(const char *s);
 #endif
 
@@ -58,9 +58,9 @@ extern char *strdup(const char *s);
 
 #endif /* WIN32 */
 
-#define HDstrcmp(S,T)			  strcmp(S,T)			  
+#define HDstrcmp(S,T)			  strcmp(S,T)
 #define HDstrlen(S)				  strlen(S)
-#define HDstrncmp(S,T,L)		  strncmp(S,T,L)	      
+#define HDstrncmp(S,T,L)		  strncmp(S,T,L)
 #define HDstrncpy(X,Y,Z)		  strncpy(X,Y,Z)
 #define HDstrchr(S,C)			  strchr(S,C)
 #define HDfree(M)				  free(M)
@@ -74,7 +74,7 @@ extern char *strdup(const char *s);
 #define HDclose(F)				  close(F)
 
 #ifdef WIN32
-     #ifdef __MWERKS__    
+     #ifdef __MWERKS__
         #define HDlseek(F,O,W)  lseek(F,O,W)
      #else /*MSVS */
         #define HDlseek(F,O,W)  _lseeki64(F,O,W)

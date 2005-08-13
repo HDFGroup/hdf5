@@ -162,10 +162,10 @@ H5_DLL herr_t H5Eauto_is_stack(hid_t err_stack, unsigned *is_stack);
 
 /* These old APIs are kept for backward compatibility.  They don't have
  * the error stack in the parameters. */
-H5_DLL herr_t H5Epush(const char *file, const char *func, unsigned line, 
+H5_DLL herr_t H5Epush(const char *file, const char *func, unsigned line,
                         H5E_major_t maj, H5E_minor_t min, const char *str);
 H5_DLL herr_t  H5Eprint(FILE *stream);
-H5_DLL herr_t  H5Ewalk(H5E_direction_t direction, H5E_walk_t func, 
+H5_DLL herr_t  H5Ewalk(H5E_direction_t direction, H5E_walk_t func,
                             void *client_data);
 H5_DLL herr_t  H5Eget_auto(H5E_auto_t *func, void **client_data);
 H5_DLL herr_t  H5Eset_auto(H5E_auto_t func, void *client_data);
@@ -173,12 +173,12 @@ H5_DLL herr_t  H5Eclear(void);
 H5_DLL const char * H5Eget_major(H5E_major_t maj);
 H5_DLL const char * H5Eget_minor(H5E_minor_t min);
 
-/* New APIs function the same as the old ones above, with the error stack 
+/* New APIs function the same as the old ones above, with the error stack
  * in the parameters */
-H5_DLL herr_t  H5Epush_stack(hid_t err_stack, const char *file, const char *func, unsigned line, 
+H5_DLL herr_t  H5Epush_stack(hid_t err_stack, const char *file, const char *func, unsigned line,
                         hid_t cls_id, hid_t maj_id, hid_t min_id, const char *msg, ...);
 H5_DLL herr_t  H5Eprint_stack(hid_t err_stack, FILE *stream);
-H5_DLL herr_t  H5Ewalk_stack(hid_t err_stack, H5E_direction_t direction, H5E_walk_t func, 
+H5_DLL herr_t  H5Ewalk_stack(hid_t err_stack, H5E_direction_t direction, H5E_walk_t func,
                             void *client_data);
 H5_DLL herr_t  H5Eget_auto_stack(hid_t estack_id, H5E_auto_stack_t *func, void **client_data);
 H5_DLL herr_t  H5Eset_auto_stack(hid_t estack_id, H5E_auto_stack_t func, void *client_data);

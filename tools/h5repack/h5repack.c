@@ -17,7 +17,7 @@
 
 /*-------------------------------------------------------------------------
  * File: h5repack.c
- * Purpose: Public API functions 
+ * Purpose: Public API functions
  *-------------------------------------------------------------------------
  */
 
@@ -37,7 +37,7 @@ static void aux_initglb_filter(pack_opt_t *options)
 {
  int k;
  options->filter_g.filtn  = -1;
- for ( k=0; k<CDVALUES; k++) 
+ for ( k=0; k<CDVALUES; k++)
   options->filter_g.cd_values[k] = -1;
 }
 
@@ -45,12 +45,12 @@ static void aux_initglb_filter(pack_opt_t *options)
 /*-------------------------------------------------------------------------
  * Function: h5repack
  *
- * Purpose: locate all high-level HDF5 objects in the file 
+ * Purpose: locate all high-level HDF5 objects in the file
  *  and compress/chunk them using options
  *
  * Algorythm: 2 traversals are made to the file; the 1st builds a list of
  *  the objects, the 2nd makes a copy of them, using the options;
- *  the reason for the 1st traversal is to check for invalid 
+ *  the reason for the 1st traversal is to check for invalid
  *  object name requests
  *
  * Return: 0, ok, -1, fail
@@ -61,23 +61,23 @@ static void aux_initglb_filter(pack_opt_t *options)
  *
  *-------------------------------------------------------------------------
  */
-int h5repack(const char* infile, 
-             const char* outfile, 
+int h5repack(const char* infile,
+             const char* outfile,
              pack_opt_t *options)
 {
  /* check input */
  if (check_options(options)<0)
   return -1;
- 
+
  /* check for objects in input that are in the file */
  if (check_objects(infile,options)<0)
   return -1;
- 
+
  /* copy the objects  */
  if (copy_objects(infile,outfile,options)<0)
   return -1;
 
- 
+
  return 0;
 }
 
@@ -93,7 +93,7 @@ int h5repack(const char* infile,
  *-------------------------------------------------------------------------
  */
 
-int h5repack_init (pack_opt_t *options, 
+int h5repack_init (pack_opt_t *options,
                    int verbose)
 {
  memset(options,0,sizeof(pack_opt_t));
@@ -118,7 +118,7 @@ int h5repack_end  (pack_opt_t *options)
 /*-------------------------------------------------------------------------
  * Function: h5repack_addfilter
  *
- * Purpose: add a compression -f option to table 
+ * Purpose: add a compression -f option to table
  *   Example: -f dset:GZIP=6
  *
  * Return: 0, ok, -1, fail
@@ -126,7 +126,7 @@ int h5repack_end  (pack_opt_t *options)
  *-------------------------------------------------------------------------
  */
 
-int h5repack_addfilter(const char* str, 
+int h5repack_addfilter(const char* str,
                        pack_opt_t *options)
 {
  obj_list_t      *obj_list=NULL; /*one object list for the -f and -c option entry */
@@ -172,10 +172,10 @@ int h5repack_addfilter(const char* str,
  */
 
 
-int h5repack_addlayout(const char* str, 
+int h5repack_addlayout(const char* str,
                        pack_opt_t *options)
 {
-  
+
  obj_list_t  *obj_list=NULL;     /*one object list for the -t and -c option entry */
  int         n_objs;             /*number of objects in the current -t or -c option entry */
  pack_info_t pack;               /*info about layout to extract from parse */
@@ -188,7 +188,7 @@ int h5repack_addlayout(const char* str,
    is present with other objects <%s>\n",str);
   return -1;
  }
- 
+
  /* parse the layout option */
  obj_list=parse_layout(str,&n_objs,&pack,options);
  if (obj_list==NULL)
@@ -198,7 +198,7 @@ int h5repack_addlayout(const char* str,
  if (options->all_layout==1 )
  {
   options->layout_g=pack.layout;
-  if (pack.layout==H5D_CHUNKED) 
+  if (pack.layout==H5D_CHUNKED)
   {
    /* -2 means the NONE option, remove chunking
       and set the global layout to contiguous */
@@ -210,7 +210,7 @@ int h5repack_addlayout(const char* str,
    else
    {
     options->chunk_g.rank=pack.chunk.rank;
-    for (j = 0; j < pack.chunk.rank; j++) 
+    for (j = 0; j < pack.chunk.rank; j++)
      options->chunk_g.chunk_lengths[j] = pack.chunk.chunk_lengths[j];
    }
   }
@@ -249,7 +249,7 @@ static int check_options(pack_opt_t *options)
  * objects to layout
  *-------------------------------------------------------------------------
  */
- if (options->verbose) 
+ if (options->verbose)
  {
   printf("Objects to modify layout are...\n");
   if (options->all_layout==1)  {
@@ -271,22 +271,22 @@ static int check_options(pack_opt_t *options)
    printf(" Apply %s layout to all\n", slayout);
    if (H5D_CHUNKED==options->layout_g) {
     printf("with dimension [");
-    for ( j = 0; j < options->chunk_g.rank; j++)  
+    for ( j = 0; j < options->chunk_g.rank; j++)
      printf("%d ",(int)options->chunk_g.chunk_lengths[j]);
     printf("]\n");
    }
   }
  }/* verbose */
 
- for ( i = 0; i < options->op_tbl->nelems; i++) 
+ for ( i = 0; i < options->op_tbl->nelems; i++)
  {
   char* name=options->op_tbl->objs[i].path;
-  
+
   if (options->op_tbl->objs[i].chunk.rank>0)
   {
    if (options->verbose){
-    printf(" <%s> with chunk size ",name); 
-    for ( k = 0; k < options->op_tbl->objs[i].chunk.rank; k++) 
+    printf(" <%s> with chunk size ",name);
+    for ( k = 0; k < options->op_tbl->objs[i].chunk.rank; k++)
      printf("%d ",(int)options->op_tbl->objs[i].chunk.chunk_lengths[k]);
     printf("\n");
    }
@@ -295,26 +295,26 @@ static int check_options(pack_opt_t *options)
   else if (options->op_tbl->objs[i].chunk.rank==-2)
   {
    if (options->verbose)
-    printf(" <%s> %s\n",name,"NONE (contigous)"); 
+    printf(" <%s> %s\n",name,"NONE (contigous)");
    has_ck=1;
   }
  }
- 
+
  if (options->all_layout==1 && has_ck){
   printf("Error: Invalid chunking input: all option\
    is present with other objects\n");
   return -1;
  }
- 
+
 /*-------------------------------------------------------------------------
  * objects to filter
  *-------------------------------------------------------------------------
  */
- 
- if (options->verbose) 
+
+ if (options->verbose)
  {
   printf("Objects to apply filter are...\n");
-  if (options->all_filter==1) 
+  if (options->all_filter==1)
   {
    H5Z_filter_t filtn=options->filter_g.filtn;
    switch (filtn)
@@ -336,14 +336,14 @@ static int check_options(pack_opt_t *options)
   }
  } /* verbose */
 
- for ( i = 0; i < options->op_tbl->nelems; i++) 
+ for ( i = 0; i < options->op_tbl->nelems; i++)
  {
   pack_info_t pack  = options->op_tbl->objs[i];
   char*       name  = pack.path;
 
   for ( j=0; j<pack.nfilters; j++)
   {
-   if (options->verbose) 
+   if (options->verbose)
    {
     printf(" <%s> with %s filter\n",
      name,
@@ -354,13 +354,13 @@ static int check_options(pack_opt_t *options)
 
   } /* j */
  } /* i */
- 
+
  if (options->all_filter==1 && has_cp){
   printf("Error: Invalid compression input: all option\
    is present with other objects\n");
   return -1;
  }
- 
+
 
  return 0;
 }
@@ -380,7 +380,7 @@ static int check_options(pack_opt_t *options)
  */
 
 void read_info(const char *filename,
-               pack_opt_t *options) 
+               pack_opt_t *options)
 {
 
  char stype[10];
@@ -390,15 +390,15 @@ void read_info(const char *filename,
  int  i, rc=1;
  char  *srcdir = getenv("srcdir"); /* the source directory */
  char  data_file[512]="";          /* buffer to hold name of existing file */
- 
+
  /* compose the name of the file to open, using the srcdir, if appropriate */
  if (srcdir){
   strcpy(data_file,srcdir);
   strcat(data_file,"/");
- } 
+ }
  strcat(data_file,filename);
 
- 
+
  if ((fp = fopen(data_file, "r")) == (FILE *)NULL) {
   printf( "Cannot open options file %s", filename);
   exit(1);
@@ -410,12 +410,12 @@ void read_info(const char *filename,
   rc=fscanf(fp, "%s", stype);
   if (rc==-1)
    break;
-   
+
  /*-------------------------------------------------------------------------
   * filter
   *-------------------------------------------------------------------------
   */
-  if (strcmp(stype,"-f") == 0) { 
+  if (strcmp(stype,"-f") == 0) {
 
    /* find begining of info */
    i=0; c='0';
@@ -434,7 +434,7 @@ void read_info(const char *filename,
     if (feof(fp)) break;
     if (c==10 /*eol*/) break;
    }
-   comp_info[i-1]='\0'; /*cut the last " */    
+   comp_info[i-1]='\0'; /*cut the last " */
 
    if (h5repack_addfilter(comp_info,options)==-1){
     printf( "Could not add compression option. Exiting\n");
@@ -445,8 +445,8 @@ void read_info(const char *filename,
   * layout
   *-------------------------------------------------------------------------
   */
-  else if (strcmp(stype,"-l") == 0) { 
-   
+  else if (strcmp(stype,"-l") == 0) {
+
    /* find begining of info */
    i=0; c='0';
    while( c!=' ' )
@@ -464,7 +464,7 @@ void read_info(const char *filename,
     if (feof(fp)) break;
     if (c==10 /*eol*/) break;
    }
-   comp_info[i-1]='\0'; /*cut the last " */    
+   comp_info[i-1]='\0'; /*cut the last " */
 
    if (h5repack_addlayout(comp_info,options)==-1){
     printf( "Could not add chunck option. Exiting\n");

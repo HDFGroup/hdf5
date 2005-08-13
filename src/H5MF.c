@@ -65,20 +65,20 @@ haddr_t
 H5MF_alloc(H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 {
     haddr_t	ret_value;
-    
+
     FUNC_ENTER_NOAPI(H5MF_alloc, HADDR_UNDEF);
 
     /* check arguments */
     assert(f);
     assert(size > 0);
-    
+
     /* Fail if we don't have write access */
     if (0==(f->intent & H5F_ACC_RDWR))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, HADDR_UNDEF, "file is read-only");
 
     /* Check that the file can address the new space */
     if( H5MF_alloc_overflow(f, size) )
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "not enough address space in file"); 
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "not enough address space in file");
 
     /* Allocate space from the virtual file layer */
     if (HADDR_UNDEF==(ret_value=H5FD_alloc(f->shared->lf, type, dxpl_id, size)))
@@ -187,7 +187,7 @@ H5MF_realloc(H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, haddr_t old_addr, hsize_t
 	     hsize_t new_size)
 {
     haddr_t	ret_value;
-    
+
     FUNC_ENTER_NOAPI(H5MF_realloc, HADDR_UNDEF);
 
     /* Convert old relative address to absolute address */
@@ -331,7 +331,7 @@ H5MF_alloc_overflow(H5F_t *f, hsize_t size)
 
     /* Also add space that is "reserved" for data to be flushed
      * to disk (e.g., for object headers and the heap).
-     * This is the total amount of file space that will be 
+     * This is the total amount of file space that will be
      * allocated.
      */
     space_needed += f->shared->lf->reserved_alloc;

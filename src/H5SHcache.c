@@ -289,7 +289,7 @@ H5SH_cache_clear(H5F_t *f, H5SH_t *sh, hbool_t destroy)
 
     /* Reset the dirty flag.  */
     sh->cache_info.is_dirty = FALSE;
- 
+
     if (destroy)
         if (H5SH_cache_dest(f, sh) < 0)
 	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy segmented heap info")
@@ -303,7 +303,7 @@ done:
  * Function:	H5SH_cache_size
  *
  * Purpose:	Compute the size in bytes of a segmented heap info
- *		on disk, and return it in *size_ptr.  On failure, 
+ *		on disk, and return it in *size_ptr.  On failure,
  *		the value of *size_ptr is undefined.
  *
  * Return:	Non-negative on success/Negative on failure

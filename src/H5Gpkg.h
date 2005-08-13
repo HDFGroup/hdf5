@@ -105,7 +105,7 @@ typedef struct H5G_bt_ud2_t {
 
     /* upward */
     int		final_ent;	/*final entry looked at                      */
-    
+
 } H5G_bt_ud2_t;
 
 /*

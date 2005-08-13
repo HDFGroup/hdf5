@@ -69,7 +69,7 @@ static int basic_id_test(void)
 	VERIFY(testPtr, NULL, "H5Iobject_verify");
 	if(testPtr != NULL)
 		goto out;
-       
+
 		/* Register a type */
 	myType = H5Iregister_type(64, 0, (H5I_free_t) free );
 
@@ -410,7 +410,7 @@ out:
     /* Cleanup.  For simplicity, just destroy all types and ignore errors. */
 	H5E_BEGIN_TRY
 		for(i = H5I_NTYPES; i < MAX_NUM_TYPES; i++)
-			H5Idestroy_type((H5I_type_t) i);	
+			H5Idestroy_type((H5I_type_t) i);
 	H5E_END_TRY
 	return -1;
 }

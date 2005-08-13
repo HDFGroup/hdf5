@@ -25,12 +25,12 @@ int main(int UNUSED argc, const UNUSED char *argv[])
  test_native("file4.h5",NULL);
 
  /* generate 2 files with attribute differences */
- test_attr("file5.h5",0); 
- test_attr("file6.h5",1); 
+ test_attr("file5.h5",0);
+ test_attr("file6.h5",1);
 
  /* generate 2 files with all datatype differences */
- test_dsetall("file7.h5",0); 
- test_dsetall("file8.h5",1); 
+ test_dsetall("file7.h5",0);
+ test_dsetall("file8.h5",1);
  return 0;
 }
 

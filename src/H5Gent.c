@@ -117,7 +117,7 @@ done:
  *              symbol table entries.
  *
  * Errors:
- *              SYM       CANTDECODE    Can't decode. 
+ *              SYM       CANTDECODE    Can't decode.
  *
  * Return:      Success:        Non-negative, with *pp pointing to the first byte
  *                              after the last symbol.
@@ -233,7 +233,7 @@ H5G_ent_decode(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
  *              symbol table entries.
  *
  * Errors:
- *              SYM       CANTENCODE    Can't encode. 
+ *              SYM       CANTENCODE    Can't encode.
  *
  * Return:      Success:        Non-negative, with *pp pointing to the first byte
  *                              after the last symbol.
@@ -344,7 +344,7 @@ H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
     /* fill with zero */
     while (*pp < p_ret) *(*pp)++ = 0;
     *pp = p_ret;
-    
+
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
@@ -360,7 +360,7 @@ H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
  *
  * Date: August 2002
  *
- * Comments: 
+ * Comments:
  *
  * Modifications:
  *      Quincey Koziol, Sept. 25, 2002:
@@ -448,7 +448,7 @@ H5G_ent_debug(H5F_t UNUSED *f, hid_t dxpl_id, const H5G_entry_t *ent, FILE * str
 {
     const char		*lval = NULL;
     int nested_indent, nested_fwidth;
-    
+
     FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_debug);
 
     /* Calculate the indent & field width values for nested information */
@@ -504,7 +504,7 @@ H5G_ent_debug(H5F_t UNUSED *f, hid_t dxpl_id, const H5G_entry_t *ent, FILE * str
             else
                 HDfprintf(stream, "%*s%-*s\n", nested_indent, "", nested_fwidth, "Warning: Invalid heap address given, name not displayed!");
             break;
-            
+
         default:
             HDfprintf(stream, "*** Unknown symbol type %d\n", ent->type);
             break;

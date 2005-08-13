@@ -67,25 +67,25 @@ static herr_t H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2,
 static herr_t H5B2_redistribute2(H5F_t *f, hid_t dxpl_id, unsigned depth,
     H5B2_internal_t *internal, unsigned idx);
 static herr_t H5B2_split2(H5F_t *f, hid_t dxpl_id, unsigned depth,
-    H5B2_node_ptr_t *curr_node_ptr, unsigned * parent_cache_info_flags_ptr, 
+    H5B2_node_ptr_t *curr_node_ptr, unsigned * parent_cache_info_flags_ptr,
     H5B2_internal_t *internal, unsigned *internal_flags_ptr, unsigned idx);
-static herr_t H5B2_split3(H5F_t *f, hid_t dxpl_id, unsigned depth, 
+static herr_t H5B2_split3(H5F_t *f, hid_t dxpl_id, unsigned depth,
     H5B2_node_ptr_t *curr_node_ptr, unsigned *parent_cache_info_flags,
     H5B2_internal_t *internal, unsigned *internal_flags, unsigned idx);
 static herr_t H5B2_redistribute3(H5F_t *f, hid_t dxpl_id, unsigned depth,
     H5B2_internal_t *internal, unsigned *internal_flags_ptr, unsigned idx);
 static herr_t H5B2_merge2(H5F_t *f, hid_t dxpl_id, unsigned depth,
-    H5B2_node_ptr_t *curr_node_ptr, unsigned *parent_cache_info_flags_ptr, 
+    H5B2_node_ptr_t *curr_node_ptr, unsigned *parent_cache_info_flags_ptr,
     H5B2_internal_t *internal, unsigned *internal_flags_ptr, unsigned idx);
 static herr_t H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth,
-    H5B2_node_ptr_t *curr_node_ptr, unsigned *parent_cache_info_flags_ptr, 
+    H5B2_node_ptr_t *curr_node_ptr, unsigned *parent_cache_info_flags_ptr,
     H5B2_internal_t *internal, unsigned *internal_flags_ptr, unsigned idx);
 static herr_t H5B2_swap_leaf(H5F_t *f, hid_t dxpl_id, unsigned depth,
-    H5B2_internal_t *internal, unsigned *internal_flags_ptr, 
+    H5B2_internal_t *internal, unsigned *internal_flags_ptr,
     unsigned idx, void *swap_loc);
 static herr_t H5B2_insert_internal(H5F_t *f, hid_t dxpl_id,
     H5RC_t *bt2_shared, unsigned depth, H5AC_info_t *parent_cache_info,
-    unsigned *parent_cache_info_flags_ptr, 
+    unsigned *parent_cache_info_flags_ptr,
     H5B2_node_ptr_t *curr_node_ptr, void *udata);
 static herr_t H5B2_insert_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     H5B2_node_ptr_t *curr_node_ptr, void *udata);
@@ -354,7 +354,7 @@ done:
 	if (bt2)
             (void)H5B2_cache_hdr_dest(f,bt2);
     } /* end if */
-    
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2_create() */
 
@@ -854,7 +854,7 @@ done:
  *              of H5AC_unprotect() instead of modifying the is_dirty
  *              field of the cache info.
  *
- *              In this case, that required adding the new 
+ *              In this case, that required adding the new
  *		parent_cache_info_dirtied_ptr and internal_dirtied_ptr
  *              parameters to the function's argument list.
  *
@@ -862,7 +862,7 @@ done:
  */
 static herr_t
 H5B2_split2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_ptr,
-    unsigned *parent_cache_info_flags_ptr, H5B2_internal_t *internal, 
+    unsigned *parent_cache_info_flags_ptr, H5B2_internal_t *internal,
     unsigned *internal_flags_ptr, unsigned idx)
 {
     const H5AC_class_t *child_class;    /* Pointer to child node's class info */
@@ -1135,8 +1135,8 @@ done:
  *              of H5AC_unprotect() instead of modifying the is_dirty
  *              field of the cache info.
  *
- *              In this case, that required adding the new 
- *		internal_dirtied_ptr parameter to the function's 
+ *              In this case, that required adding the new
+ *		internal_dirtied_ptr parameter to the function's
  *		argument list.
  *
  *-------------------------------------------------------------------------
@@ -1516,16 +1516,16 @@ done:
  *              of H5AC_unprotect() instead of modifying the is_dirty
  *              field of the cache info.
  *
- *              In this case, that required adding the new 
+ *              In this case, that required adding the new
  *		parent_cache_info_dirtied_ptr and internal_dirtied_ptr
  *              parameters to the function's argument list.
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_split3(H5F_t *f, hid_t dxpl_id, unsigned depth, 
+H5B2_split3(H5F_t *f, hid_t dxpl_id, unsigned depth,
     H5B2_node_ptr_t *curr_node_ptr,
-    unsigned *parent_cache_info_flags_ptr, H5B2_internal_t *internal, 
+    unsigned *parent_cache_info_flags_ptr, H5B2_internal_t *internal,
     unsigned *internal_flags_ptr, unsigned idx)
 {
     const H5AC_class_t *child_class;    /* Pointer to child node's class info */
@@ -1711,7 +1711,7 @@ H5B2_split3(H5F_t *f, hid_t dxpl_id, unsigned depth,
 
             /* Move records from middle node to new node */
             HDmemcpy(H5B2_NAT_NREC(new_native,shared,0),H5B2_NAT_NREC(middle_native,shared,(*middle_nrec-new_nrec_move)),shared->type->nrec_size*new_nrec_move);
-            
+
             /* Move record from middle node up to parent node */
             HDmemcpy(H5B2_INT_NREC(internal,shared,idx),H5B2_NAT_NREC(middle_native,shared,((*middle_nrec-new_nrec_move)-1)),shared->type->nrec_size);
 
@@ -1856,14 +1856,14 @@ done:
  *              of H5AC_unprotect() instead of modifying the is_dirty
  *              field of the cache info.
  *
- *              In this case, that required adding the new 
+ *              In this case, that required adding the new
  *		parent_cache_info_dirtied_ptr and internal_dirtied_ptr
  *              parameters to the function's argument list.
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_merge2(H5F_t *f, hid_t dxpl_id, unsigned depth, 
+H5B2_merge2(H5F_t *f, hid_t dxpl_id, unsigned depth,
     H5B2_node_ptr_t *curr_node_ptr, unsigned *parent_cache_info_flags_ptr,
     H5B2_internal_t *internal, unsigned *internal_flags_ptr, unsigned idx)
 {
@@ -2023,15 +2023,15 @@ done:
  *              of H5AC_unprotect() instead of modifying the is_dirty
  *              field of the cache info.
  *
- *              In this case, that required adding the new 
+ *              In this case, that required adding the new
  *		parent_cache_info_dirtied_ptr and internal_dirtied_ptr
  *              parameters to the function's argument list.
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth, 
-    H5B2_node_ptr_t *curr_node_ptr, unsigned *parent_cache_info_flags_ptr, 
+H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth,
+    H5B2_node_ptr_t *curr_node_ptr, unsigned *parent_cache_info_flags_ptr,
     H5B2_internal_t *internal, unsigned *internal_flags_ptr, unsigned idx)
 {
     const H5AC_class_t *child_class;    /* Pointer to child node's class info */
@@ -2258,15 +2258,15 @@ done:
  *              of H5AC_unprotect() instead of modifying the is_dirty
  *              field of the cache info.
  *
- *              In this case, that required adding the new 
- *		internal_dirtied_ptr parameter to the function's 
+ *              In this case, that required adding the new
+ *		internal_dirtied_ptr parameter to the function's
  *		argument list.
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5B2_swap_leaf(H5F_t *f, hid_t dxpl_id, unsigned depth,
-    H5B2_internal_t *internal, unsigned *internal_flags_ptr, 
+    H5B2_internal_t *internal, unsigned *internal_flags_ptr,
     unsigned idx, void *swap_loc)
 {
     const H5AC_class_t *child_class;    /* Pointer to child node's class info */
@@ -2457,7 +2457,7 @@ done:
  */
 static herr_t
 H5B2_insert_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
-    unsigned depth, H5AC_info_t *parent_cache_info, 
+    unsigned depth, H5AC_info_t *parent_cache_info,
     unsigned *parent_cache_info_flags_ptr,
     H5B2_node_ptr_t *curr_node_ptr, void *udata)
 {
@@ -2648,7 +2648,7 @@ H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
         if(H5B2_split_root(f, dxpl_id, bt2, &bt2_flags, bt2->shared)<0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to split root node")
     } /* end if */
-        
+
     /* Attempt to insert record into B-tree */
     if(bt2->depth>0) {
         if(H5B2_insert_internal(f,dxpl_id,bt2->shared,bt2->depth,&(bt2->cache_info),&bt2_flags,&bt2->root,udata)<0)
@@ -2686,7 +2686,7 @@ done:
  * Modifications:
  *
  *              John Mainzer, 6/15/05
- *              Modified the function to avoid modifying the is_dirty 
+ *              Modified the function to avoid modifying the is_dirty
  *		field of the cache info, as that field is now maintained
  *		by the cache code.  Since this function uses a call to
  *		H5AC_set(), and that function presumes that the newly
@@ -2767,7 +2767,7 @@ done:
  * Modifications:
  *
  *              John Mainzer, 6/15/05
- *              Modified the function to avoid modifying the is_dirty 
+ *              Modified the function to avoid modifying the is_dirty
  *		field of the cache info, as that field is now maintained
  *		by the cache code.  Since this function uses a call to
  *		H5AC_set(), and that function presumes that the newly
@@ -3030,7 +3030,7 @@ done:
  *		UDATA pointer depending on the type of leaf node
  *		requested.  The UDATA can point to additional data passed
  *		to the key comparison function.
- *              
+ *
  *              The 'OP' routine is called with the record found and the
  *              OP_DATA pointer, to allow caller to return information about
  *              the record.
@@ -3189,7 +3189,7 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
         if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
     }
-    
+
 done:
     /* Check if we need to decrement the reference count for the B-tree's shared info */
     if(incr_rc)
@@ -3204,7 +3204,7 @@ done:
  *
  * Purpose:	Locate the IDX'th record in a B-tree according to the
  *              ordering used by the B-tree.  The IDX values are 0-based.
- *              
+ *
  *              The 'OP' routine is called with the record found and the
  *              OP_DATA pointer, to allow caller to return information about
  *              the record.
@@ -3373,7 +3373,7 @@ H5B2_index(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
         if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
     }
-    
+
 done:
     /* Check if we need to decrement the reference count for the B-tree's shared info */
     if(incr_rc)
@@ -3458,7 +3458,7 @@ H5B2_remove_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
         /* Release space for B-tree node on disk */
         if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, leaf_addr, (hsize_t)shared->node_size)<0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree leaf node")
-    
+
         /* Let the cache know that the object is deleted */
         leaf_flags |= H5AC__DELETED_FLAG;
 
@@ -3496,8 +3496,8 @@ done:
  *              of H5AC_unprotect() instead of modifying the is_dirty
  *              field of the cache info.
  *
- *              In this case, that required adding the new 
- *		parent_cache_info_dirtied_ptr parameter to the 
+ *              In this case, that required adding the new
+ *		parent_cache_info_dirtied_ptr parameter to the
  *		function's argument list.
  *
  *-------------------------------------------------------------------------
@@ -3559,7 +3559,7 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
         /* Release space for root B-tree node on disk */
         if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, internal_addr, (hsize_t)shared->node_size)<0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree leaf node")
-    
+
         /* Let the cache know that the object is deleted */
         internal_flags |= H5AC__DELETED_FLAG;
 
@@ -3702,7 +3702,7 @@ done:
  * Function:	H5B2_remove
  *
  * Purpose:	Removes a record from a B-tree.
- *              
+ *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
@@ -3780,7 +3780,7 @@ done:
  * Function:	H5B2_get_nrec
  *
  * Purpose:	Retrieves the number of records in a B-tree
- *              
+ *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
@@ -3836,7 +3836,7 @@ done:
  *              caller-supplied UDATA pointer depending on the type of leaf node
  *		requested.  The UDATA can point to additional data passed
  *		to the key comparison function.
- *              
+ *
  *              The 'OP' routine is called with the record found and the
  *              OP_DATA pointer, to allow caller to return information about
  *              the record.
@@ -3936,7 +3936,7 @@ done:
  *              caller-supplied UDATA pointer depending on the type of leaf node
  *		requested.  The UDATA can point to additional data passed
  *		to the key comparison function.
- *              
+ *
  *              The 'OP' routine is called with the record found and the
  *              OP_DATA pointer, to allow caller to return information about
  *              the record.
@@ -4033,7 +4033,7 @@ done:
  *              caller-supplied UDATA pointer depending on the type of leaf node
  *		requested.  The UDATA can point to additional data passed
  *		to the key comparison function.
- *              
+ *
  *              The 'OP' routine is called with the record found and the
  *              OP_DATA pointer, to allow caller to return information about
  *              the record.
@@ -4228,7 +4228,7 @@ H5B2_delete(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr)
     /* Release space for B-tree node on disk */
     if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)H5B2_HEADER_SIZE(f))<0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree header info")
-    
+
 done:
     /* Release the B-tree header info */
     if (bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__DELETED_FLAG) < 0)
@@ -4244,7 +4244,7 @@ done:
  * Purpose:	Locate the specified information in a B-tree and modify it.
  *		The UDATA can point to additional data passed
  *		to the key comparison function.
- *              
+ *
  *              The 'OP' routine is called with the record found and the
  *              OP_DATA pointer, to allow caller to modify information about
  *              the record.
@@ -4418,7 +4418,7 @@ H5B2_modify(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
         if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, leaf_flags) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
     }
-    
+
 done:
     /* Check if we need to decrement the reference count for the B-tree's shared info */
     if(incr_rc)

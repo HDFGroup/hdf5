@@ -65,7 +65,7 @@ typedef struct H5FD_core_fapl_t {
 /*
  * These macros check for overflow of various quantities.  These macros
  * assume that file_offset_t is signed and haddr_t and size_t are unsigned.
- * 
+ *
  * ADDR_OVERFLOW:	Checks whether a file address of type `haddr_t'
  *			is too large to be represented by the second argument
  *			of the file seek function.
@@ -137,7 +137,7 @@ NAME
    H5FD_core_init_interface -- Initialize interface-specific information
 USAGE
     herr_t H5FD_core_init_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -221,7 +221,7 @@ H5FD_core_term(void)
  * Purpose:	Modify the file access property list to use the H5FD_CORE
  *		driver defined in this source file.  The INCREMENT specifies
  *		how much to grow the memory each time we need more.
- *		
+ *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
@@ -277,7 +277,7 @@ done:
  * Modifications:
  *		Robb Matzke, 1999-10-19
  *		Added the BACKING_STORE argument.
- *		
+ *
  *		Raymond Lu
  *		2001-10-25
  *		Changed file access list to the new generic property list.
@@ -301,12 +301,12 @@ H5Pget_fapl_core(hid_t fapl_id, size_t *increment/*out*/,
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
     if (NULL==(fa=H5P_get_driver_info(plist)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
-    
+
     if (increment)
         *increment = fa->increment;
     if (backing_store)
         *backing_store = fa->backing_store;
-    
+
 done:
     FUNC_LEAVE_API(ret_value)
 }
@@ -381,7 +381,7 @@ H5FD_core_open(const char *name, unsigned UNUSED flags, hid_t fapl_id,
     H5FD_t		*ret_value;
 
     FUNC_ENTER_NOAPI(H5FD_core_open, NULL)
-    
+
     /* Check arguments */
     if (!(H5F_ACC_CREAT & flags))
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, NULL, "must create core files, not open them")
@@ -499,7 +499,7 @@ H5FD_core_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
             HGOTO_DONE(1)
         HGOTO_DONE(0)
     }
-    
+
     if (NULL==f1->name)
         HGOTO_DONE(-1)
     if (NULL==f2->name)
@@ -536,7 +536,7 @@ H5FD_core_get_eoa(const H5FD_t *_file)
     haddr_t ret_value;   /* Return value */
 
     const H5FD_core_t	*file = (const H5FD_core_t*)_file;
-    
+
     FUNC_ENTER_NOAPI(H5FD_core_get_eoa, HADDR_UNDEF)
 
     /* Set return value */
@@ -622,25 +622,25 @@ done:
 
 /*-------------------------------------------------------------------------
  * Function:       H5FD_core_get_handle
- * 
+ *
  * Purpose:        Returns the file handle of CORE file driver.
- * 
+ *
  * Returns:        Non-negative if succeed or negative if fails.
- * 
+ *
  * Programmer:     Raymond Lu
  *                 Sept. 16, 2002
- *                 
- * Modifications:  
- * 
+ *
+ * Modifications:
+ *
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
 static herr_t
 H5FD_core_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
-{   
+{
     H5FD_core_t         *file = (H5FD_core_t *)_file;
     herr_t              ret_value = SUCCEED;
-                                                   
+
     FUNC_ENTER_NOAPI(H5FD_core_get_handle, FAIL)
 
     if(!file_handle)
@@ -648,9 +648,9 @@ H5FD_core_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
 
     *file_handle = &(file->mem);
 
-done:   
+done:
     FUNC_LEAVE_NOAPI(ret_value)
-}   
+}
 
 
 /*-------------------------------------------------------------------------
@@ -679,7 +679,7 @@ H5FD_core_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
 {
     H5FD_core_t	*file = (H5FD_core_t*)_file;
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5FD_core_read, FAIL)
 
     assert(file && file->pub.cls);
@@ -746,7 +746,7 @@ H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
 {
     H5FD_core_t		*file = (H5FD_core_t*)_file;
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5FD_core_write, FAIL)
 
     assert(file && file->pub.cls);
@@ -814,7 +814,7 @@ H5FD_core_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
 {
     H5FD_core_t	*file = (H5FD_core_t*)_file;
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5FD_core_flush, FAIL)
 
     /* Write to backing store */

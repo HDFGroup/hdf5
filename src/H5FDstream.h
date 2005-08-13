@@ -18,7 +18,7 @@
 
 #ifdef H5_HAVE_STREAM
 #   define H5FD_STREAM	(H5FD_stream_init())
-#else 
+#else
 #   define H5FD_STREAM (-1)
 #endif /*H5_HAVE_STREAM */
 

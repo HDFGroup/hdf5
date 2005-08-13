@@ -17,9 +17,9 @@
 /*----------------------------------------------------------------------------
  * Name:        h5_fixname_c
  * Purpose:     Call h5_fixname to modify file name
- * Inputs:      base_name - name of the file     
+ * Inputs:      base_name - name of the file
  *              base_namelen - name length
- *              fapl - file access property list 
+ *              fapl - file access property list
  *              full_name - buffer to return full name
  *              full_namelen - name length
  * Returns:     0 on success, -1 on failure
@@ -42,7 +42,7 @@ nh5_fixname_c(_fcd base_name, size_t_f *base_namelen, hid_t_f* fapl, _fcd full_n
      /*
       * Convert FORTRAN name to C name
       */
-     c_base_name = (char *)HD5f2cstring(base_name, (size_t)*base_namelen); 
+     c_base_name = (char *)HD5f2cstring(base_name, (size_t)*base_namelen);
      if (c_base_name == NULL) goto DONE;
      c_full_name = (char *) HDmalloc((size_t)*full_namelen + 1);
      if (c_full_name == NULL) goto DONE;
@@ -51,7 +51,7 @@ nh5_fixname_c(_fcd base_name, size_t_f *base_namelen, hid_t_f* fapl, _fcd full_n
       * Call h5_fixname function.
       */
      if (NULL != h5_fixname(c_base_name, c_fapl, c_full_name, (size_t)*full_namelen + 1)) {
-         HD5packFstring(c_full_name, _fcdtocp(full_name), (size_t)*full_namelen);         
+         HD5packFstring(c_full_name, _fcdtocp(full_name), (size_t)*full_namelen);
          ret_value = 0;
          goto DONE;
      }
@@ -59,15 +59,15 @@ nh5_fixname_c(_fcd base_name, size_t_f *base_namelen, hid_t_f* fapl, _fcd full_n
 DONE:
      if (NULL != c_base_name) HDfree(c_base_name);
      if (NULL != c_full_name) HDfree(c_full_name);
-     return ret_value; 
-} 
+     return ret_value;
+}
 
 /*----------------------------------------------------------------------------
  * Name:        h5_cleanup_c
  * Purpose:     Call h5_cleanup to clean temporary files.
- * Inputs:      base_name - name of the file     
+ * Inputs:      base_name - name of the file
  *              base_namelen - name length
- *              fapl - file access property list 
+ *              fapl - file access property list
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
  *              Thursday, September 19, 2002
@@ -89,7 +89,7 @@ nh5_cleanup_c(_fcd base_name, size_t_f *base_namelen, hid_t_f* fapl)
      /*
       * Convert FORTRAN name to C name
       */
-     c_base_name[0] = (char *)HD5f2cstring(base_name, (size_t)*base_namelen); 
+     c_base_name[0] = (char *)HD5f2cstring(base_name, (size_t)*base_namelen);
      if (c_base_name[0] == NULL) goto DONE;
 
      /*
@@ -100,19 +100,19 @@ nh5_cleanup_c(_fcd base_name, size_t_f *base_namelen, hid_t_f* fapl)
      goto DONE;
      }
 */
-     h5_fixname(c_base_name[0], c_fapl, filename, sizeof(filename)); 
+     h5_fixname(c_base_name[0], c_fapl, filename, sizeof(filename));
      HDremove(filename);
      ret_value =0;
 
 DONE:
      if (NULL != c_base_name[0]) HDfree(c_base_name[0]);
-     return ret_value; 
-    
-} 
+     return ret_value;
+
+}
 
 /*----------------------------------------------------------------------------
  * Name:        h5_exit_c
- * Purpose:     Call 'exit()' to terminate application.  Be careful not to 
+ * Purpose:     Call 'exit()' to terminate application.  Be careful not to
  *              overflow the exit value range since UNIX supports a very
  *              small range such as 1 byte.  Therefore, exit(256) may end
  *              up as exit(0).

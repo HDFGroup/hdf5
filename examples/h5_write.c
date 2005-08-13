@@ -12,15 +12,15 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*  
+/*
  *  This example writes data to the HDF5 file.
- *  Data conversion is performed during write operation.  
+ *  Data conversion is performed during write operation.
  */
- 
+
 #include "hdf5.h"
 
 #define H5FILE_NAME        "SDS.h5"
-#define DATASETNAME "IntArray" 
+#define DATASETNAME "IntArray"
 #define NX     5                      /* dataset dimensions */
 #define NY     6
 #define RANK   2
@@ -31,19 +31,19 @@ main (void)
     hid_t       file, dataset;         /* file and dataset handles */
     hid_t       datatype, dataspace;   /* handles */
     hsize_t     dimsf[2];              /* dataset dimensions */
-    herr_t      status;                             
+    herr_t      status;
     int         data[NX][NY];          /* data to write */
     int         i, j;
 
-    /* 
-     * Data  and output buffer initialization. 
+    /*
+     * Data  and output buffer initialization.
      */
     for (j = 0; j < NX; j++) {
 	for (i = 0; i < NY; i++)
 	    data[j][i] = i + j;
-    }     
+    }
     /*
-     * 0 1 2 3 4 5 
+     * 0 1 2 3 4 5
      * 1 2 3 4 5 6
      * 2 3 4 5 6 7
      * 3 4 5 6 7 8
@@ -59,13 +59,13 @@ main (void)
 
     /*
      * Describe the size of the array and create the data space for fixed
-     * size dataset. 
+     * size dataset.
      */
     dimsf[0] = NX;
     dimsf[1] = NY;
-    dataspace = H5Screate_simple(RANK, dimsf, NULL); 
+    dataspace = H5Screate_simple(RANK, dimsf, NULL);
 
-    /* 
+    /*
      * Define datatype for the data in the file.
      * We will store little endian INT numbers.
      */
@@ -92,6 +92,6 @@ main (void)
     H5Tclose(datatype);
     H5Dclose(dataset);
     H5Fclose(file);
- 
+
     return 0;
-}     
+}

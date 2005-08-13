@@ -59,7 +59,7 @@ typedef struct h5dump_t {
      *   fmt_uchar:  The printf() format to use when rendering data which is
      *               typed `unsigned char'. The default is `%u'. This format
      *               is used only if the `ascii' field is zero.
-     *   
+     *
      *   fmt_short:  The printf() format to use when rendering data which is
      *               typed `short'. The default is `%d'.
      *
@@ -82,7 +82,7 @@ typedef struct h5dump_t {
      *
      *   fmt_double: The printf() format to use when rendering data which is
      *               typed `double'. The default is `%g'.
-     * 
+     *
      *   fmt_float:  The printf() format to use when rendering data which is
      *               typed `float'. The default is `%g'.
      *
@@ -142,7 +142,7 @@ typedef struct h5dump_t {
     const char  *arr_sep;
     const char  *arr_suf;
     int         arr_linebreak;
-    
+
     /*
      * Fields associated with compound data types.
      *
@@ -161,8 +161,8 @@ typedef struct h5dump_t {
      *
      *   suf:       A string to print at the end of each compound type.  The
      *              default is  right curly brace.
-     *              
-     *   end:       a string to print after we reach the last element of 
+     *
+     *   end:       a string to print after we reach the last element of
      *              each compound type. prints out before the suf.
      */
     const char  *cmpd_name;
@@ -184,8 +184,8 @@ typedef struct h5dump_t {
      *
      *   suf:       A string to print at the end of each vlen type.  The
      *              default is a right parentheses.
-     *              
-     *   end:       a string to print after we reach the last element of 
+     *
+     *   end:       a string to print after we reach the last element of
      *              each compound type. prints out before the suf.
      */
     const char  *vlen_sep;
@@ -210,7 +210,7 @@ typedef struct h5dump_t {
     const char  *elmt_fmt;
     const char  *elmt_suf1;
     const char  *elmt_suf2;
-    
+
     /*
      * Fields associated with the index values printed at the left edge of
      * each line of output.
@@ -231,7 +231,7 @@ typedef struct h5dump_t {
     const char  *idx_n_fmt;             /*index number format           */
     const char  *idx_sep;               /*separator between numbers     */
     const char  *idx_fmt;               /*entire index format           */
-    
+
     /*
      * Fields associated with entire lines.
      *
@@ -259,7 +259,7 @@ typedef struct h5dump_t {
      *   suf:       This character string will be appended to each line of
      *              output.  It should not contain line feeds.  The default
      *              is the empty string.
-     *   
+     *
      *   sep:       A character string to be printed after every line feed
      *              defaulting to the empty string.  It should end with a
      *              line feed.
@@ -282,7 +282,7 @@ typedef struct h5dump_t {
      *              should the following element begin on the next line? The
      *              default is to start the next element on the same line
      *              unless it wouldn't fit.
-     *              
+     *
      * indentlevel: a string that shows how far to indent if extra spacing
      *              is needed. dumper uses it.
      */
@@ -419,7 +419,7 @@ typedef struct h5tools_context_t {
     hsize_t sm_pos;                   /* current stripmine element position */
 } h5tools_context_t;
 
-   
+
 
 /* a structure to hold the subsetting particulars for a dataset */
 struct subset_t {

@@ -38,10 +38,10 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
      *-------------------------------------------------------------------------
      */
 
-    if ( argc==2 && (strcmp("-h",argv[1])==0) ) 
+    if ( argc==2 && (strcmp("-h",argv[1])==0) )
  usage();
 
-    if ( argc<3 ) 
+    if ( argc<3 )
     {
  printf("Number of arguments is only %d\n", argc );
  usage();
@@ -60,32 +60,32 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
      * parse command line options
      *-------------------------------------------------------------------------
      */
-    for (i=3; i<argc ; i++) 
+    for (i=3; i<argc ; i++)
     {
  /* get the single-letter switches */
  if ( '-'==argv[i][0] )
  {
-     for (s=argv[i]+1; *s; s++) 
+     for (s=argv[i]+1; *s; s++)
      {
   switch (*s) {
       default:
    printf("-%s is an invalid option\n", s );
    usage();
    break;
-      case 'h': 
+      case 'h':
    usage();
    break;
-      case 'v': 
+      case 'v':
    options->m_verbose = 1;
    break;
-      case 'q': 
+      case 'q':
    /* use quiet mode; supress the message "0 differences found" */
    options->m_quiet = 1;
    break;
-      case 'r': 
+      case 'r':
    options->m_report = 1;
    break;
-      case 'd': 
+      case 'd':
    /* if it is not another option */
    if ( i<argc-1 &&'-' != argv[i+1][0] )
    {
@@ -104,7 +104,7 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
        usage();
    }
    break;
-      case 'p': 
+      case 'p':
    if ( i<argc-1 &&'-' !=argv[i+1][0] )
    {
        options->p=1;
@@ -122,7 +122,7 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
        usage();
    }
    break;
-      case 'n': 
+      case 'n':
    if ( i<argc-1 && '-' !=argv[i+1][0] )
    {
        options->n=1;
@@ -141,7 +141,7 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
    }
    break;
   } /*switch*/
-     } /*for*/ 
+     } /*for*/
  } /*if*/
 
  else /* not single-letter switches */
@@ -184,21 +184,21 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
  {
   if (options->m_quiet || options->err_stat)
    return;
- 
+
   if (options->cmn_objs==0)
-  {   
+  {
    printf("No common objects found. Files are not comparable.\n");
    if (!options->m_verbose)
     printf("Use -v for a list of objects.\n");
   }
-  
+
   if (options->not_cmp==1)
   {
    printf("Some objects are not comparable\n");
    if (!options->m_verbose)
     printf("Use -v for a list of objects.\n");
   }
-  
+
  }
 
 /*-------------------------------------------------------------------------
@@ -257,8 +257,8 @@ int check_f_input( const char *str )
 {
     double x;
 
-    /* 
-       the atof return value on a hexadecimal input is different 
+    /*
+       the atof return value on a hexadecimal input is different
        on some systems; we do a character check for this
      */
     if (strlen(str)>2 && str[0]=='0' && str[1]=='x')
@@ -274,7 +274,7 @@ int check_f_input( const char *str )
 /*-------------------------------------------------------------------------
  * Function: usage
  *
- * Purpose: print a usage message  
+ * Purpose: print a usage message
  *
  * Return: void
  *

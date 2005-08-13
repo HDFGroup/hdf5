@@ -54,8 +54,8 @@ herr_t H5PT_set_index(htbl_t *table_id, hsize_t pt_index);
  *
  * Date: March 12, 2004
  *
- * Comments: This function does not handle compression or fill data 
- *           currently.  Fill data is not necessary because the 
+ * Comments: This function does not handle compression or fill data
+ *           currently.  Fill data is not necessary because the
  *           table is initially of size 0.
  *
  * Modifications:
@@ -112,7 +112,7 @@ hid_t H5PTcreate_fl ( hid_t loc_id,
   /* Create the table identifier */
   table->dset_id = dset_id;
 
-  if((table->type_id = H5Tcopy(dtype_id)) <0)  
+  if((table->type_id = H5Tcopy(dtype_id)) <0)
     goto out;
 
   H5PT_create_index(table);
@@ -152,8 +152,8 @@ hid_t H5PTcreate_fl ( hid_t loc_id,
  *
  * Date: April 12, 2004
  *
- * Comments: This function does not handle compression or fill data 
- *           currently.  Fill data is not necessary because the 
+ * Comments: This function does not handle compression or fill data
+ *           currently.  Fill data is not necessary because the
  *           table is initially of size 0.
  *
  * Modifications:
@@ -200,7 +200,7 @@ out:
  *
  * Date: March 10, 2004
  *
- * Comments: 
+ * Comments:
  *
  * Modifications:
  *
@@ -273,7 +273,7 @@ out:
 /*-------------------------------------------------------------------------
  * Function: H5PT_close
  *
- * Purpose: Closes a table (i.e. cleans up all open resources used by a 
+ * Purpose: Closes a table (i.e. cleans up all open resources used by a
  *          table).
  *
  * Return: Success: 0, Failure: -1
@@ -283,7 +283,7 @@ out:
  *
  * Date: March 10, 2004
  *
- * Comments: 
+ * Comments:
  *
  * Modifications:
  *
@@ -321,7 +321,7 @@ out:
 /*-------------------------------------------------------------------------
  * Function: H5PTclose
  *
- * Purpose: Closes a table (i.e. cleans up all open resources used by a 
+ * Purpose: Closes a table (i.e. cleans up all open resources used by a
  *          table).
  *
  * Return: Success: 0, Failure: -1
@@ -331,7 +331,7 @@ out:
  *
  * Date: April 21, 2004
  *
- * Comments: 
+ * Comments:
  *
  * Modifications:
  *
@@ -386,7 +386,7 @@ out:
  *
  * Date: March 12, 2004
  *
- * Comments: 
+ * Comments:
  *
  * Modifications:
  *
@@ -406,7 +406,7 @@ herr_t H5PTappend( hid_t table_id,
   if (nrecords == 0)
     return 0;
 
-  if((H5TBcommon_append_records(table->dset_id, table->type_id, 
+  if((H5TBcommon_append_records(table->dset_id, table->type_id,
   			nrecords, table->size, data)) <0)
     goto out;
 
@@ -427,9 +427,9 @@ out:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5PTget_next 
+ * Function: H5PTget_next
  *
- * Purpose: Reads packets starting at the current index and updates 
+ * Purpose: Reads packets starting at the current index and updates
  *          that index
  *
  * Return: Success: 0, Failure: -1
@@ -441,7 +441,7 @@ out:
  *
  * Comments:
  *
- * Modifications: 
+ * Modifications:
  *
  *
  *-------------------------------------------------------------------------
@@ -460,7 +460,7 @@ herr_t H5PTget_next( hid_t table_id,
   if (nrecords == 0)
     return 0;
 
-  if((H5TBcommon_read_records(table->dset_id, table->type_id, 
+  if((H5TBcommon_read_records(table->dset_id, table->type_id,
                               table->current_index, nrecords, table->size, data)) < 0)
     goto out;
 
@@ -473,7 +473,7 @@ out:
 }
 
 /*-------------------------------------------------------------------------
- * Function: H5PTread_packets 
+ * Function: H5PTread_packets
  *
  * Purpose: Reads packets from anywhere in a packet table
  *
@@ -484,9 +484,9 @@ out:
  *
  * Date: March 12, 2004
  *
- * Comments: 
+ * Comments:
  *
- * Modifications: 
+ * Modifications:
  *
  *
  *-------------------------------------------------------------------------
@@ -507,7 +507,7 @@ herr_t H5PTread_packets( hid_t table_id,
   if (nrecords == 0)
     return 0;
 
-  if( H5TBcommon_read_records(table->dset_id, table->type_id, 
+  if( H5TBcommon_read_records(table->dset_id, table->type_id,
                               start, nrecords, table->size, data) < 0)
     goto out;
 
@@ -518,9 +518,9 @@ out:
 }
 
 /*-------------------------------------------------------------------------
- * 
+ *
  * Table attribute functions
- * 
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -536,9 +536,9 @@ out:
  *
  * Date: March 12, 2004
  *
- * Comments: 
+ * Comments:
  *
- * Modifications: 
+ * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -578,9 +578,9 @@ herr_t H5PT_set_index(htbl_t *table, hsize_t index)
  *
  * Date: April 23, 2004
  *
- * Comments: 
+ * Comments:
  *
- * Modifications: 
+ * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -613,7 +613,7 @@ herr_t H5PTset_index(hid_t table_id, hsize_t pt_index)
  */
 
 /*-------------------------------------------------------------------------
- * Function: H5PTget_num_packets 
+ * Function: H5PTget_num_packets
  *
  * Purpose: Returns by reference the number of packets in the dataset
  *
@@ -626,7 +626,7 @@ herr_t H5PTset_index(hid_t table_id, hsize_t pt_index)
  *
  * Comments:
  *
- * Modifications: 
+ * Modifications:
  *
  *
  *-------------------------------------------------------------------------
@@ -648,7 +648,7 @@ out:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5PTis_valid 
+ * Function: H5PTis_valid
  *
  * Purpose: Validates a table identifier
  *
@@ -661,7 +661,7 @@ out:
  *
  * Comments:
  *
- * Modifications: 
+ * Modifications:
  *
  *
  *-------------------------------------------------------------------------
@@ -676,7 +676,7 @@ herr_t H5PTis_valid(hid_t table_id)
 }
 
 /*-------------------------------------------------------------------------
- * Function: H5PTis_varlen 
+ * Function: H5PTis_varlen
  *
  * Purpose: Returns 1 if a table_id corresponds to a packet table of variable-
  *          length records or 0 for fixed-length records.
@@ -690,7 +690,7 @@ herr_t H5PTis_valid(hid_t table_id)
  *
  * Comments:
  *
- * Modifications: 
+ * Modifications:
  *
  *
  *-------------------------------------------------------------------------
@@ -716,16 +716,16 @@ out:
 }
 
 /*-------------------------------------------------------------------------
- * 
+ *
  * Memory Management functions
- * 
+ *
  *-------------------------------------------------------------------------
  */
 
 /*-------------------------------------------------------------------------
  * Function: H5PTfree_vlen_readbuff
  *
- * Purpose: Frees memory used when reading from a variable length packet 
+ * Purpose: Frees memory used when reading from a variable length packet
  *          table.
  *
  * Return: Success: 0, Failure: -1
@@ -738,7 +738,7 @@ out:
  *
  * Comments:
  *
- * Modifications: 
+ * Modifications:
  *
  *
  *-------------------------------------------------------------------------

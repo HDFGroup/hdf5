@@ -42,11 +42,11 @@ static void access_dset(hid_t loc, const char *dset_name);
 static void slab_set(hsize_t start[], hsize_t count[],
                      hsize_t stride[], hsize_t block[]);
 static void fill_data(void);
-static void write_data(hid_t loc, const char *dset_name, 
+static void write_data(hid_t loc, const char *dset_name,
                        hsize_t start[], hsize_t count[],
                        hsize_t stride[], hsize_t block[]);
 static void verify_complete_dataset(hid_t loc, const char *dset_name);
-static void verify_partial_dataset(hid_t loc, const char *dset_name, 
+static void verify_partial_dataset(hid_t loc, const char *dset_name,
                                    hsize_t start[], hsize_t count[],
                                    hsize_t stride[], hsize_t block[],
                                    int * buf, hsize_t buf_len);
@@ -59,7 +59,7 @@ static void usage(const char *prog);
 /*===----------------------------------------------------------------------===
  *                                Filenames
  *===----------------------------------------------------------------------===
- * The names of the test files for 
+ * The names of the test files for
  */
 static const char *FILENAME[2] = {  /* List of files we want to create      */
     "FPHDF5Test",
@@ -120,20 +120,20 @@ static char        dset_name[128];
 static const char *grp_tmpl        = "Process %d's Datasets";
 static char        grp_name[128];
 
-#if 0 
-/* A useful debugging function, but no need to compile it unless 
+#if 0
+/* A useful debugging function, but no need to compile it unless
  * we are going to use it.              JRM - 4/13/4
  */
 /*-------------------------------------------------------------------------
  * Function:	check_globals
- * Purpose:	Debugging Function.  Check the current values of some 
- *		globals, and generate a message when they change.  
+ * Purpose:	Debugging Function.  Check the current values of some
+ *		globals, and generate a message when they change.
  * Return:	void
  * Programmer:	John Mainzer - 3/3/04
- * Modifications: 
+ * Modifications:
  *-------------------------------------------------------------------------
  */
-static void 
+static void
 check_globals(char * location_name)
 {
     static hsize_t local_dims[RANK] = {0,0};
@@ -178,23 +178,23 @@ check_globals(char * location_name)
     }
     return;
 } /* check_globals() */
-#endif 
+#endif
 
 
-#if 0 
-/* Another useful debugging function, again no need to compile it unless 
+#if 0
+/* Another useful debugging function, again no need to compile it unless
  * we are going to use it.              JRM - 4/13/04
  */
 /*-------------------------------------------------------------------------
  * Function:	print_globals
- * Purpose:	Debugging Function.  Display the current values of some 
- *		globals.  
+ * Purpose:	Debugging Function.  Display the current values of some
+ *		globals.
  * Return:	void
  * Programmer:	John Mainzer - 3/9/04
- * Modifications: 
+ * Modifications:
  *-------------------------------------------------------------------------
  */
-static void 
+static void
 print_globals(void)
 {
     printf("%d: dims=[%d,%d], start=[%d,%d], count=[%d, %d], stride=[%d,%d], block=[%d,%d]\n",
@@ -258,9 +258,9 @@ create_group(hid_t loc, const char *group_name, size_t size_hint)
  *              Failure:    Aborts
  * Programmer:	Bill Wendling
  *              29. October 2003
- * Modifications: 
+ * Modifications:
  *		Altered function to use the global dims array, instead
- *		of a locally declared and initialized version.  
+ *		of a locally declared and initialized version.
  *						JRM - 3/3/04
  *-------------------------------------------------------------------------
  */
@@ -342,11 +342,11 @@ slab_set(hsize_t my_start[], hsize_t my_count[], hsize_t my_stride[], hsize_t my
  *              13. November 2003
  * Modifications:
  *		Complete re-write of function.  The orig_data array is
- *		now allocated (in main) with size equal the size of the 
- *		array on file, and is loaded with the data we expect to 
+ *		now allocated (in main) with size equal the size of the
+ *		array on file, and is loaded with the data we expect to
  *		find there.
  *
- *		The new local_orig_data array is allocated to match the 
+ *		The new local_orig_data array is allocated to match the
  *		size of this processes contribution to the on file data
  *		set, and is loaded with this processes data.
  *
@@ -374,8 +374,8 @@ fill_data(void)
                 }
             } else if ( proc_num == mpi_rank ) {
                 for ( col = 0; col < DIM1; col++ ) {
-                    local_orig_data[local_offset++] = 
-                        orig_data[offset++] = 
+                    local_orig_data[local_offset++] =
+                        orig_data[offset++] =
                             (proc_num * 1000) + (row * 100) + col;
                 }
             } else {
@@ -450,7 +450,7 @@ write_data(hid_t loc, const char *dataset_name, hsize_t my_start[], hsize_t my_c
 
 /*-------------------------------------------------------------------------
  * Function:	verify_complete_dataset
- * Purpose:	Verify that all the data in the dataset is correct -- 
+ * Purpose:	Verify that all the data in the dataset is correct --
  *		including that written by other processes.
  * Return:	Nothing
  * Programmer:	John Mainzer
@@ -482,7 +482,7 @@ verify_complete_dataset(hid_t loc, const char *dataset_name)
     /* Read the dataset */
     VRFY((H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
                   H5P_DEFAULT, data_array) >= 0), "H5Dread");
-    
+
 
     /* Verify the contents of the dataset */
     for ( row = 0; row < dims[0]; row++ ) {
@@ -499,8 +499,8 @@ verify_complete_dataset(hid_t loc, const char *dataset_name)
     }
     VRFY((offset == (mpi_size * DIM0 * DIM1)), "offset OK");
 
-    if (vrfyerrs) { 
-        fprintf(stdout, "%d: %d errors found in verify_complete_dataset\n", 
+    if (vrfyerrs) {
+        fprintf(stdout, "%d: %d errors found in verify_complete_dataset\n",
                 mpi_rank, vrfyerrs);
         ++nerrors;
     }
@@ -510,14 +510,14 @@ verify_complete_dataset(hid_t loc, const char *dataset_name)
     if ( data_array != NULL ) {
         free(data_array);
     }
- 
+
     return;
 
 } /* verify_complete_dataset() */
 
 /*-------------------------------------------------------------------------
  * Function:	verify_partial_dataset
- * Purpose:	Verify that the data in the specified section of the 
+ * Purpose:	Verify that the data in the specified section of the
  *		dataset matches the contents of the provided buffer.
  * Return:	Nothing
  * Programmer:	John Mainzer
@@ -527,7 +527,7 @@ verify_complete_dataset(hid_t loc, const char *dataset_name)
  *-------------------------------------------------------------------------
  */
 static void
-verify_partial_dataset(hid_t loc, const char *dataset_name, 
+verify_partial_dataset(hid_t loc, const char *dataset_name,
                        hsize_t my_start[], hsize_t my_count[],
                        hsize_t my_stride[], hsize_t my_block[],
                        int * buf, hsize_t buf_len)
@@ -546,7 +546,7 @@ verify_partial_dataset(hid_t loc, const char *dataset_name,
     file_dataspace = H5Dget_space(dataset);
     VRFY((file_dataspace >= 0), "H5Dget_space");
     VRFY((H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET,
-                              my_start, my_stride, my_count, my_block) >= 0), 
+                              my_start, my_stride, my_count, my_block) >= 0),
          "H5Sselect_hyperslab in verify_partial_dataset");
 
     /* Create a memory dataspace */
@@ -556,8 +556,8 @@ verify_partial_dataset(hid_t loc, const char *dataset_name,
 
     /* Read the dataset */
     VRFY((dims[0] != 0), "dims array initialized.");
-    data_array = (int *)malloc(((size_t)block[0]) * 
-                               ((size_t)block[1]) * 
+    data_array = (int *)malloc(((size_t)block[0]) *
+                               ((size_t)block[1]) *
                                sizeof(int));
     VRFY((H5Dread(dataset, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
                   H5P_DEFAULT, data_array) >= 0), "H5Dread");
@@ -578,7 +578,7 @@ verify_partial_dataset(hid_t loc, const char *dataset_name,
     VRFY((offset == buf_len), "offset OK");
 
     if (vrfyerrs) {
-	fprintf(stdout, "%d: %d errors found in verify_partial_dataset\n", 
+	fprintf(stdout, "%d: %d errors found in verify_partial_dataset\n",
                 mpi_rank, vrfyerrs);
         ++nerrors;
     }
@@ -718,7 +718,7 @@ test_dataset_access(hid_t loc)
  * Programmer:	Bill Wendling
  *              11. November 2003
  * Modifications:
- *		Replaced calls to verify_dataset() with calls to 
+ *		Replaced calls to verify_dataset() with calls to
  *		verify_partial_dataset().  In the absence of a barrier,
  *		we don't know that the other processes have done their
  *		writes to the datasets as well.  Thus we only check the
@@ -745,45 +745,45 @@ test_dataset_write(hid_t loc)
 
             /* Write to this dataset */
             sprintf(dset_name, dset_tmpl, 0);
-            printf("%d: Writing to \"/%s/%s\"\n", 
+            printf("%d: Writing to \"/%s/%s\"\n",
                    mpi_rank, grp_name, dset_name);
             write_data(group, dset_name, start, count, stride, block);
-            printf("%d: Verifying dataset \"/%s/%s\"\n", 
+            printf("%d: Verifying dataset \"/%s/%s\"\n",
                    mpi_rank, grp_name, dset_name);
-            verify_partial_dataset(group, dset_name, 
+            verify_partial_dataset(group, dset_name,
                                    start, count, stride, block,
                                    local_orig_data, (block[0] * block[1]));
 
             sprintf(dset_name, dset_tmpl, 1);
-            printf("%d: Writing to \"/%s/%s\"\n", 
+            printf("%d: Writing to \"/%s/%s\"\n",
                    mpi_rank, grp_name, dset_name);
             write_data(group, dset_name, start, count, stride, block);
-            printf("%d: Verifying dataset \"/%s/%s\"\n", 
+            printf("%d: Verifying dataset \"/%s/%s\"\n",
                    mpi_rank, grp_name, dset_name);
-            verify_partial_dataset(group, dset_name, 
+            verify_partial_dataset(group, dset_name,
                                    start, count, stride, block,
                                    local_orig_data, (block[0] * block[1]));
 
             sprintf(dset_name, dset_tmpl, 2);
-            printf("%d: Writing to \"/%s/%s\"\n", 
+            printf("%d: Writing to \"/%s/%s\"\n",
                    mpi_rank, grp_name, dset_name);
             write_data(group, dset_name, start, count, stride, block);
-            printf("%d: Verifying dataset \"/%s/%s\"\n", 
+            printf("%d: Verifying dataset \"/%s/%s\"\n",
                    mpi_rank, grp_name, dset_name);
-            verify_partial_dataset(group, dset_name, 
+            verify_partial_dataset(group, dset_name,
                                    start, count, stride, block,
                                    local_orig_data, (block[0] * block[1]));
 
             sprintf(dset_name, dset_tmpl, 3);
-            printf("%d: Writing to \"/%s/%s\"\n", 
+            printf("%d: Writing to \"/%s/%s\"\n",
                    mpi_rank, grp_name, dset_name);
             write_data(group, dset_name, start, count, stride, block);
-            printf("%d: Verifying dataset \"/%s/%s\"\n", 
+            printf("%d: Verifying dataset \"/%s/%s\"\n",
                    mpi_rank, grp_name, dset_name);
-            verify_partial_dataset(group, dset_name, 
-                                   start, count, stride, block, 
+            verify_partial_dataset(group, dset_name,
+                                   start, count, stride, block,
                                    local_orig_data, (block[0] * block[1]));
-            
+
             /* Close the group */
             VRFY((H5Gclose(group) >= 0), "H5Gclose");
         }
@@ -830,7 +830,7 @@ usage(const char *prog)
  *		This array is used to store the data written by this
  *		process.			JRM - 3/5/04
  *
- *		Replaced calls to verify_dataset() with calls to 
+ *		Replaced calls to verify_dataset() with calls to
  *		verify_complete_dataset().	JRM - 3/8/04
  *-------------------------------------------------------------------------
  */
@@ -848,7 +848,7 @@ main(int argc, char *argv[])
     H5open();
 
     for (nargs = argc; nargs > 1; --nargs)
-        if (strcmp(argv[nargs - 1], "-v") == 0 || 
+        if (strcmp(argv[nargs - 1], "-v") == 0 ||
                 strcmp(argv[nargs - 1], "--verbose") == 0 ||
                 strcmp(argv[nargs - 1], "--verbos") == 0 ||
                 strcmp(argv[nargs - 1], "--verbo") == 0 ||
@@ -899,14 +899,14 @@ main(int argc, char *argv[])
         slab_set(start, count, stride, block);
 
         VRFY((dims[0] != 0), "dims array initialized.");
-        orig_data = (int *)malloc(((size_t)dims[0]) * 
-                                  ((size_t)dims[1]) * 
+        orig_data = (int *)malloc(((size_t)dims[0]) *
+                                  ((size_t)dims[1]) *
                                   sizeof(int));
         VRFY((orig_data != NULL), "orig_data malloc succeeded");
 
         VRFY((block[0] != 0), "block array initialized.");
-        local_orig_data = (int *)malloc(((size_t)block[0]) * 
-                                        ((size_t)block[1]) * 
+        local_orig_data = (int *)malloc(((size_t)block[0]) *
+                                        ((size_t)block[1]) *
                                         sizeof(int));
         VRFY((orig_data != NULL), "local_orig_data malloc succeeded");
 
@@ -969,7 +969,7 @@ main(int argc, char *argv[])
                     printf("%d: Reverifying dataset \"/%s/%s\"\n", mpi_rank,
                            grp_name, dset_name);
                     verify_complete_dataset(group, dset_name);
-                    
+
                     /* Close the group */
 		    printf("%d: Closing group.", mpi_rank);
                     VRFY((H5Gclose(group) >= 0), "H5Gclose");
@@ -985,9 +985,9 @@ main(int argc, char *argv[])
 	if ( local_orig_data != NULL ) {
 	    free(local_orig_data);
 	}
-#if 1  
-        /* It is useful to keep the hdf file created by this test for 
-         * debugging purposes.  However, this code should always be 
+#if 1
+        /* It is useful to keep the hdf file created by this test for
+         * debugging purposes.  However, this code should always be
          * turned on for checkin.                 JRM - 4/13/04
          */
         if (fapl > -1)

@@ -553,7 +553,7 @@ H5_DLL hid_t H5Tget_member_type(hid_t type_id, unsigned membno);
 H5_DLL herr_t H5Tget_member_value(hid_t type_id, unsigned membno, void *value/*out*/);
 H5_DLL H5T_cset_t H5Tget_cset(hid_t type_id);
 H5_DLL htri_t H5Tis_variable_str(hid_t type_id);
-H5_DLL hid_t H5Tget_native_type(hid_t type_id, H5T_direction_t direction); 
+H5_DLL hid_t H5Tget_native_type(hid_t type_id, H5T_direction_t direction);
 
 /* Setting property values */
 H5_DLL herr_t H5Tset_size(hid_t type_id, size_t size);

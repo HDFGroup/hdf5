@@ -57,7 +57,7 @@ const H5Z_class_t H5Z_DEFLATE[1] = {{
  *              libz
  *
  * Return:	Success: Size of buffer filtered
- *		Failure: 0	
+ *		Failure: 0
  *
  * Programmer:	Robb Matzke
  *              Thursday, April 16, 1998
@@ -74,7 +74,7 @@ H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
     void	*outbuf = NULL;         /* Pointer to new buffer */
     int		status;                 /* Status from zlib operation */
     size_t	ret_value;              /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5Z_filter_deflate, 0)
 
     /* Check arguments */
@@ -131,7 +131,7 @@ H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
                 }
             } /* end else */
 	} while(status==Z_OK);
-	
+
         /* Free the input buffer */
 	H5MM_xfree(*buf);
 
@@ -155,7 +155,7 @@ H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
 	uLongf	     z_dst_nbytes = (uLongf)H5Z_DEFLATE_SIZE_ADJUST(nbytes);
 	uLong	     z_src_nbytes = (uLong)nbytes;
         int          aggression;     /* Compression aggression setting */
-    
+
         /* Set the compression aggression level */
         H5_ASSIGN_OVERFLOW(aggression,cd_values[0],unsigned,int);
 

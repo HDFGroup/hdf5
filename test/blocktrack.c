@@ -100,7 +100,7 @@ test_create(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -194,7 +194,7 @@ test_insert_one(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -294,7 +294,7 @@ test_insert_few(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -531,7 +531,7 @@ test_insert_many(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -628,7 +628,7 @@ test_insert_overlap(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -738,7 +738,7 @@ test_insert_merge(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -938,7 +938,7 @@ test_remove_whole(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -1217,7 +1217,7 @@ test_remove_partial_begin(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -1490,7 +1490,7 @@ test_locate(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -1605,7 +1605,7 @@ test_neighbor(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -1698,7 +1698,7 @@ test_iterate(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -1793,7 +1793,7 @@ test_delete(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -1829,7 +1829,7 @@ test_delete(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -1885,9 +1885,9 @@ error:
  *
  * Purpose:	Test the block tracker code
  *
- * Return:	Success:	
+ * Return:	Success:
  *
- *		Failure:	
+ *		Failure:
  *
  * Programmer:	Quincey Koziol
  *              Wednesday, March  9, 2005

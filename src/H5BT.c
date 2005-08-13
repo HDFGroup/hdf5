@@ -121,7 +121,7 @@ done:
 	if (bt)
             (void)H5BT_cache_dest(f,bt);
     } /* end if */
-    
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5BT_create() */
 
@@ -445,7 +445,7 @@ done:
     /* Release the block tracker info */
     if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, bt_flags) < 0)
         HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
-    
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5BT_insert() */
 
@@ -496,7 +496,7 @@ done:
     /* Release the block tracker info */
     if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
-    
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5BT_get_total_size() */
 
@@ -706,7 +706,7 @@ done:
     /* Release the block tracker info */
     if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, bt_flags) < 0)
         HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
-    
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5BT_remove() */
 
@@ -807,7 +807,7 @@ done:
     /* Release the block tracker info */
     if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
-    
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5BT_locate() */
 
@@ -862,7 +862,7 @@ done:
     /* Release the block tracker info */
     if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
-    
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5BT_iterate() */
 
@@ -955,7 +955,7 @@ done:
     /* Release the block tracker info */
     if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
-    
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5BT_neighbor() */
 
@@ -1005,12 +1005,12 @@ H5BT_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
     /* Release space for block tracker info on disk */
     if (H5MF_xfree(f, H5FD_MEM_BLKTRK, dxpl_id, addr, (hsize_t)H5BT_SIZE(f))<0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free block tracker info")
-    
+
 done:
     /* Release the block tracker info */
     if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG) < 0)
         HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
-    
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5BT_remove() */
 

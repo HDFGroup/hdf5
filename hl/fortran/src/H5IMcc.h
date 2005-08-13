@@ -31,29 +31,29 @@ extern "C" {
 
 
 
-herr_t H5IMmake_image_8bitf( hid_t loc_id, 
-                             const char *dset_name, 
+herr_t H5IMmake_image_8bitf( hid_t loc_id,
+                             const char *dset_name,
                              hsize_t width,
                              hsize_t height,
                              int_f *buf );
 
-herr_t H5IMmake_image_24bitf( hid_t loc_id, 
-                              const char *dset_name, 
+herr_t H5IMmake_image_24bitf( hid_t loc_id,
+                              const char *dset_name,
                               hsize_t width,
                               hsize_t height,
                               const char *interlace,
                               int_f *buf);
 
-herr_t H5IMread_imagef( hid_t loc_id, 
-                        const char *dset_name, 
+herr_t H5IMread_imagef( hid_t loc_id,
+                        const char *dset_name,
                         int_f *buf );
 
-herr_t H5IMmake_palettef( hid_t loc_id, 
+herr_t H5IMmake_palettef( hid_t loc_id,
                           const char *pal_name,
                           const hsize_t *pal_dims,
                           int_f *pal_data );
 
-herr_t H5IMget_palettef( hid_t loc_id, 
+herr_t H5IMget_palettef( hid_t loc_id,
                          const char *image_name,
                          int pal_number,
                          int_f *pal_data );

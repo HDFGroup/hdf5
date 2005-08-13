@@ -57,9 +57,9 @@
 **
 **  test_array_atomic_1d(): Test basic array datatype code.
 **      Tests 1-D array of atomic datatypes
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_array_atomic_1d(void)
 {
     int wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
@@ -114,7 +114,7 @@ test_array_atomic_1d(void)
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
@@ -179,9 +179,9 @@ test_array_atomic_1d(void)
 **
 **  test_array_atomic_3d(): Test basic array datatype code.
 **      Tests 3-D array of atomic datatypes
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_array_atomic_3d(void)
 {
     int wdata[SPACE1_DIM1][ARRAY2_DIM1][ARRAY2_DIM2][ARRAY2_DIM3];   /* Information to write */
@@ -238,7 +238,7 @@ test_array_atomic_3d(void)
     /* Close disk dataspace */
     ret = H5Sclose(sid);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close file */
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
@@ -307,9 +307,9 @@ test_array_atomic_3d(void)
 **
 **  test_array_array_atomic(): Test basic array datatype code.
 **      Tests 1-D array 2-D arrays of atomic datatypes
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_array_array_atomic(void)
 {
     int wdata[SPACE1_DIM1][ARRAY1_DIM1][ARRAY3_DIM1][ARRAY3_DIM2];   /* Information to write */
@@ -376,7 +376,7 @@ test_array_array_atomic(void)
     /* Close disk dataspace */
     ret = H5Sclose(sid);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close file */
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
@@ -466,9 +466,9 @@ test_array_array_atomic(void)
 **
 **  test_array_compound_atomic(): Test basic array datatype code.
 **      Tests 1-D array of compound datatypes (with no array fields)
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_array_compound_atomic(void)
 {
     typedef struct {        /* Typedef for compound datatype */
@@ -550,7 +550,7 @@ test_array_compound_atomic(void)
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
@@ -669,9 +669,9 @@ test_array_compound_atomic(void)
 **
 **  test_array_compound_array(): Test basic array datatype code.
 **      Tests 1-D array of compound datatypes (with array fields)
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_array_compound_array(void)
 {
     typedef struct {        /* Typedef for compound datatype */
@@ -764,7 +764,7 @@ test_array_compound_array(void)
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
@@ -919,7 +919,7 @@ void test_array_free_custom(void *mem, void *info);
 **      allocation routines.  This routine just uses malloc to
 **      allocate the memory and increments the amount of memory
 **      allocated.
-** 
+**
 ****************************************************************/
 void *test_array_alloc_custom(size_t size, void *info)
 {
@@ -947,7 +947,7 @@ void *test_array_alloc_custom(size_t size, void *info)
 **      allocation routines.  This routine just uses free to
 **      release the memory and decrements the amount of memory
 **      allocated.
-** 
+**
 ****************************************************************/
 void test_array_free_custom(void *_mem, void *info)
 {
@@ -972,9 +972,9 @@ void test_array_free_custom(void *_mem, void *info)
 **
 **  test_array_vlen_atomic(): Test basic array datatype code.
 **      Tests 1-D array of atomic VL datatypes
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_array_vlen_atomic(void)
 {
     hvl_t wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
@@ -1047,7 +1047,7 @@ test_array_vlen_atomic(void)
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
@@ -1163,7 +1163,7 @@ test_array_vlen_atomic(void)
     /* Close dataset transfer property list */
     ret = H5Pclose(xfer_pid);
     CHECK(ret, FAIL, "H5Pclose");
-    
+
     /* Close Datatype */
     ret = H5Tclose(tid1);
     CHECK(ret, FAIL, "H5Tclose");
@@ -1182,9 +1182,9 @@ test_array_vlen_atomic(void)
 **
 **  test_array_vlen_array(): Test basic array datatype code.
 **      Tests 1-D array of 1-D array VL datatypes
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_array_vlen_array(void)
 {
     hvl_t wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
@@ -1267,7 +1267,7 @@ test_array_vlen_array(void)
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
@@ -1413,7 +1413,7 @@ test_array_vlen_array(void)
     /* Close dataset transfer property list */
     ret = H5Pclose(xfer_pid);
     CHECK(ret, FAIL, "H5Pclose");
-    
+
     /* Close Datatype */
     ret = H5Tclose(tid1);
     CHECK(ret, FAIL, "H5Tclose");
@@ -1429,7 +1429,7 @@ test_array_vlen_array(void)
 } /* end test_array_vlen_array() */
 
 #define FIELDNAME  "ArrayofStructures"
-#define LENGTH     5 
+#define LENGTH     5
 #define ALEN       10
 #define RANK       1
 #define NMAX       100
@@ -1448,50 +1448,50 @@ typedef struct
 **  test_array_bkg(): Test basic array datatype code.
 **      Tests reading compound datatype with array fields and
 **          writing partial fields.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_array_bkg(void)
 {
     herr_t       status = -1;
-    
+
     hid_t        fid, array_dt;
     hid_t        space;
     hid_t        type;
     hid_t        dataset;
-    
+
     hsize_t      dim[] = {LENGTH};
     hsize_t      dima[] = {ALEN};
 
-    int          i, j;    
+    int          i, j;
     int          ndims[3] = {1,1,1};
-    
+
     typedef struct
     {
 	  int      a[ALEN];
 	  float    b[ALEN];
 	  double   c[ALEN];
     } CmpField;
-    
+
     CmpField     cf[LENGTH];
     CmpField     cfr[LENGTH];
     CmpDTSinfo   dtsinfo;
-    
+
     typedef struct
     {
       float   b[ALEN];
     } fld_t;
-  
-    fld_t   fld[LENGTH]; 
-    fld_t   fldr[LENGTH]; 
-     
+
+    fld_t   fld[LENGTH];
+    fld_t   fldr[LENGTH];
+
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Partial I/O of Array Fields in Compound Datatype Functionality\n"));
 
-    /* Initialize the data */    
+    /* Initialize the data */
     /* ------------------- */
     for (i = 0; i < LENGTH; i++)
-	  {        
+	  {
 		for (j = 0; j < ALEN; j++)
 		  {
 			cf[i].a[j] = 100*(i+1) + j;
@@ -1500,7 +1500,7 @@ test_array_bkg(void)
 		  }
 	  }
 
-	    
+
     /* Set the number of data members */
     /* ------------------------------ */
     dtsinfo.nsubfields = 3;
@@ -1512,21 +1512,21 @@ test_array_bkg(void)
     dtsinfo.offset[2]   = HOFFSET(CmpField, c);
 
     /* Initialize the data type IDs */
-    /* ---------------------------- */    
+    /* ---------------------------- */
     dtsinfo.datatype[0] = H5T_NATIVE_INT;
     dtsinfo.datatype[1] = H5T_NATIVE_FLOAT;
     dtsinfo.datatype[2] = H5T_NATIVE_DOUBLE;
-       
+
 
     /* Initialize the names of data members */
-    /* ------------------------------------ */    
+    /* ------------------------------------ */
     for (i = 0; i < dtsinfo.nsubfields; i++)
-      dtsinfo.name[i] = (char *)calloc(20, sizeof(char));	  
-	
+      dtsinfo.name[i] = (char *)calloc(20, sizeof(char));
+
 	strcpy(dtsinfo.name[0], "One");
 	strcpy(dtsinfo.name[1], "Two");
 	strcpy(dtsinfo.name[2], "Three");
-    
+
 
     /* Create file */
     /* ----------- */
@@ -1543,11 +1543,11 @@ test_array_bkg(void)
     type   = H5Tcreate(H5T_COMPOUND, sizeof(CmpField));
     CHECK(type, FAIL, "H5Tcreate");
 
-    
+
     /* Add  members to the compound data type */
     /* -------------------------------------- */
     for ( i = 0; i < dtsinfo.nsubfields; i++)
-    {  
+    {
         array_dt = H5Tarray_create (dtsinfo.datatype[i], ndims[i], dima, NULL);
         CHECK(array_dt, FAIL, "H5Tarray_create");
 
@@ -1557,7 +1557,7 @@ test_array_bkg(void)
         status = H5Tclose(array_dt);
         CHECK(status, FAIL, "H5Tclose");
     }
-	
+
     /* Create the dataset */
     /* ------------------ */
     dataset = H5Dcreate(fid, FIELDNAME, type, space, H5P_DEFAULT);
@@ -1567,13 +1567,13 @@ test_array_bkg(void)
     /* ------------------------- */
     status = H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, cf);
     CHECK(status, FAIL, "H5Dwrite");
-    
+
     status = H5Dread(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, cfr);
     CHECK(status, FAIL, "H5Dread");
 
-    /* Verify correct data */    
+    /* Verify correct data */
     /* ------------------- */
-    for (i = 0; i < LENGTH; i++) {        
+    for (i = 0; i < LENGTH; i++) {
         for (j = 0; j < ALEN; j++) {
             if(cf[i].a[j]!=cfr[i].a[j]) {
                 TestErrPrintf("Field a data doesn't match, cf[%d].a[%d]=%d, cfr[%d].a[%d]=%d\n",(int)i,(int)j,(int)cf[i].a[j],(int)i,(int)j,(int)cfr[i].a[j]);
@@ -1601,7 +1601,7 @@ test_array_bkg(void)
     /* ----------- */
     status = H5Tclose(type);
     CHECK(status, FAIL, "H5Tclose");
-   
+
     status = H5Sclose(space);
     CHECK(status, FAIL, "H5Sclose");
 
@@ -1610,7 +1610,7 @@ test_array_bkg(void)
 
     status = H5Fclose(fid);
     CHECK(status, FAIL, "H5Fclose");
-    
+
 
 /******************************/
 /* Reopen the file and update */
@@ -1621,7 +1621,7 @@ test_array_bkg(void)
 
     dataset = H5Dopen(fid, FIELDNAME );
     CHECK(dataset, FAIL, "H5Dopen");
-    
+
     type = H5Tcreate(H5T_COMPOUND, sizeof(fld_t));
     CHECK(type, FAIL, "H5Tcreate");
 
@@ -1631,7 +1631,7 @@ test_array_bkg(void)
     status = H5Tinsert (type, "Two", HOFFSET(fld_t, b), array_dt);
     CHECK(status, FAIL, "H5Tinsert");
 
-    /* Initialize the data to overwrite */    
+    /* Initialize the data to overwrite */
     /* -------------------------------- */
     for (i=0; i< LENGTH; i++)
         for (j = 0; j < ALEN; j++)
@@ -1643,17 +1643,17 @@ test_array_bkg(void)
     /* Read just the field changed */
     status = H5Dread (dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, fldr);
     CHECK(status, FAIL, "H5Dread");
-   
-    for (i=0; i< LENGTH; i++) 
+
+    for (i=0; i< LENGTH; i++)
         for (j = 0; j < ALEN; j++)
             if(fld[i].b[j]!=fldr[i].b[j]) {
                 TestErrPrintf("Field data doesn't match, fld[%d].b[%d]=%f, fldr[%d].b[%d]=%f\n",(int)i,(int)j,(float)fld[i].b[j],(int)i,(int)j,(float)fldr[i].b[j]);
                 continue;
             }
-    
+
     status = H5Tclose (type);
     CHECK(status, FAIL, "H5Tclose");
-  
+
     status = H5Tclose (array_dt);
     CHECK(status, FAIL, "H5Tclose");
 
@@ -1664,9 +1664,9 @@ test_array_bkg(void)
     status = H5Dread(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, cfr);
     CHECK(status, FAIL, "H5Dread");
 
-    /* Verify correct data */    
+    /* Verify correct data */
     /* ------------------- */
-    for (i = 0; i < LENGTH; i++) {        
+    for (i = 0; i < LENGTH; i++) {
         for (j = 0; j < ALEN; j++) {
             if(cf[i].a[j]!=cfr[i].a[j]) {
                 TestErrPrintf("Field a data doesn't match, cf[%d].a[%d]=%d, cfr[%d].a[%d]=%d\n",(int)i,(int)j,(int)cf[i].a[j],(int)i,(int)j,(int)cfr[i].a[j]);
@@ -1688,7 +1688,7 @@ test_array_bkg(void)
 
     status = H5Tclose (type);
     CHECK(status, FAIL, "H5Tclose");
-  
+
     status = H5Fclose(fid);
     CHECK(status, FAIL, "H5Fclose");
 
@@ -1701,21 +1701,21 @@ test_array_bkg(void)
 
     dataset = H5Dopen(fid, FIELDNAME );
     CHECK(dataset, FAIL, "H5Dopen");
-    
+
     type = H5Dget_type(dataset);
     CHECK(type, FAIL, "H5Dget_type");
 
 
-    /* Reset the data to read in */    
+    /* Reset the data to read in */
     /* ------------------------- */
     memset(cfr, 0, sizeof(CmpField)*LENGTH);
 
     status = H5Dread(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, cfr);
     CHECK(status, FAIL, "H5Dread");
 
-    /* Verify correct data */    
+    /* Verify correct data */
     /* ------------------- */
-    for (i = 0; i < LENGTH; i++) {        
+    for (i = 0; i < LENGTH; i++) {
         for (j = 0; j < ALEN; j++) {
             if(cf[i].a[j]!=cfr[i].a[j]) {
                 TestErrPrintf("Field a data doesn't match, cf[%d].a[%d]=%d, cfr[%d].a[%d]=%d\n",(int)i,(int)j,(int)cf[i].a[j],(int)i,(int)j,(int)cfr[i].a[j]);
@@ -1737,7 +1737,7 @@ test_array_bkg(void)
 
     status = H5Tclose (type);
     CHECK(status, FAIL, "H5Tclose");
-  
+
     status = H5Fclose(fid);
     CHECK(status, FAIL, "H5Fclose");
 } /* end test_array_bkg() */
@@ -1748,9 +1748,9 @@ test_array_bkg(void)
 **      Reads file containing old version of datatype object header
 **      messages for compound datatypes and verifies reading the older
 **      version of the is working correctly.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_compat(void)
 {
     typedef struct {        /* Typedef for compound datatype */
@@ -1785,7 +1785,7 @@ test_compat(void)
     MESSAGE(5, ("Testing Array Datatypes Compatibility Functionality\n"));
 
     /*
-     * Try reading a file that has been prepared that has datasets with 
+     * Try reading a file that has been prepared that has datasets with
      * compound datatypes which use an older version (version 1) of the
      * datatype object header message for describing the datatype.
      *
@@ -2052,9 +2052,9 @@ test_compat(void)
 /****************************************************************
 **
 **  test_array(): Main array datatype testing routine.
-** 
+**
 ****************************************************************/
-void 
+void
 test_array(void)
 {
     /* Output message about test being performed */

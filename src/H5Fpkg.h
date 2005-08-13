@@ -123,7 +123,7 @@ typedef struct H5F_mount_t {
     struct H5G_t	*group;	/* Mount point group held open		*/
     struct H5F_t	*file;	/* File mounted at that point		*/
 } H5F_mount_t;
-    
+
 /*
  * The mount table describes what files are attached to (mounted on) the file
  * to which this table belongs.

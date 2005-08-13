@@ -44,11 +44,11 @@
 /*-------------------------------------------------------------------------
  * Function:	main
  *
- * Purpose:	
+ * Purpose:
  *
- * Return:	Success:	
+ * Return:	Success:
  *
- *		Failure:	
+ *		Failure:
  *
  * Programmer:	Robb Matzke
  *              Monday, October 26, 1998

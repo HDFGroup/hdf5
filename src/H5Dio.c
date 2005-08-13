@@ -1136,7 +1136,7 @@ H5D_contig_read(H5D_io_info_t *io_info, hsize_t nelmts,
         /* Go figure out how many elements to read from the file */
         assert(H5S_SELECT_ITER_NELMTS(&file_iter)==(nelmts-smine_start));
         smine_nelmts = (size_t)MIN(request_nelmts, (nelmts-smine_start));
-	
+
         /*
          * Gather the data from disk into the data type conversion
          * buffer. Also gather data from application to background buffer
@@ -1161,7 +1161,7 @@ H5D_contig_read(H5D_io_info_t *io_info, hsize_t nelmts,
 #endif
 	if (n!=smine_nelmts)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed")
-	
+
         if (H5T_BKG_YES==need_bkg) {
 #ifdef H5S_DEBUG
             H5_timer_begin(&timer);
@@ -1176,7 +1176,7 @@ H5D_contig_read(H5D_io_info_t *io_info, hsize_t nelmts,
             if (n!=smine_nelmts)
                 HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL, "mem gather failed")
         } /* end if */
-	
+
 	/*
          * Perform data type conversion.
          */
@@ -1203,7 +1203,7 @@ H5D_contig_read(H5D_io_info_t *io_info, hsize_t nelmts,
 #endif
 	if (status<0)
             HGOTO_ERROR (H5E_DATASET, H5E_READERROR, FAIL, "scatter failed")
-	
+
     } /* end for */
 
 done:
@@ -1397,7 +1397,7 @@ H5D_contig_write(H5D_io_info_t *io_info, hsize_t nelmts,
         /* Go figure out how many elements to read from the file */
         assert(H5S_SELECT_ITER_NELMTS(&file_iter)==(nelmts-smine_start));
         smine_nelmts = (size_t)MIN(request_nelmts, (nelmts-smine_start));
-	
+
         /*
          * Gather data from application buffer into the data type conversion
          * buffer. Also gather data from the file into the background buffer
@@ -1432,7 +1432,7 @@ H5D_contig_write(H5D_io_info_t *io_info, hsize_t nelmts,
             if (n!=smine_nelmts)
                 HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "file gather failed")
         } /* end if */
-	
+
 	/*
          * Perform data type conversion.
          */
@@ -3383,7 +3383,7 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	
+ * Programmer:
  *
  * Modifications:
  *

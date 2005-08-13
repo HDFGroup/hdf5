@@ -67,9 +67,9 @@ static int tst_strcmp(const void *_s1, const void *_s2)
 **
 **  test_tst_init(): Test basic H5ST (ternary search tree) selection code.
 **      Initialize data for TST testing
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_tst_init(void)
 {
     time_t curr_time;   /* Current time, for seeding random number generator */
@@ -143,9 +143,9 @@ test_tst_init(void)
 **
 **  test_tst_create(): Test basic H5ST (ternary search tree) selection code.
 **      Tests creating and closing TSTs.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_tst_create(void)
 {
     H5ST_tree_t *tree;   /* TST created */
@@ -173,9 +173,9 @@ test_tst_create(void)
 **
 **  test_tst_insert(): Test basic H5ST (ternary search tree) selection code.
 **      Tests inserting key/value pairs into TST
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_tst_insert(void)
 {
     H5ST_tree_t *tree;  /* TST created */
@@ -235,9 +235,9 @@ test_tst_insert(void)
 **
 **  test_tst_iterate(): Test basic H5ST (ternary search tree) code.
 **      Tests iterating through key/value pairs in TST
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_tst_iterate(void)
 {
     H5ST_tree_t *tree;  /* TST created */
@@ -281,9 +281,9 @@ test_tst_iterate(void)
 **
 **  test_tst_remove(): Test basic H5ST (ternary search tree) code.
 **      Tests removing key/value pairs by string value in TST
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_tst_remove(void)
 {
     H5ST_tree_t *tree;  /* TST created */
@@ -354,9 +354,9 @@ test_tst_remove(void)
 **
 **  test_tst_finalize(): Test basic H5ST (ternary search tree) selection code.
 **      Wrap up data for TST testing
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_tst_finalize(void)
 {
     /* Release memory for unordered, randomized and sorted order unique words */
@@ -368,7 +368,7 @@ test_tst_finalize(void)
 /****************************************************************
 **
 **  test_tst(): Main H5ST selection testing routine.
-** 
+**
 ****************************************************************/
 void
 test_tst(void)

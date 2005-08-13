@@ -16,7 +16,7 @@
  * Programmer:  Raymond Lu <slu@ncsa.uiuc.edu>
  *              June 1, 2005
  *
- * Purpose:	This program tests family files after being repartitioned 
+ * Purpose:	This program tests family files after being repartitioned
  *              by h5repart.  It simply tries to reopen the files with
  *              correct family driver and member size.
  */
@@ -27,11 +27,11 @@
 #define FAMILY_H5REPART_SIZE2   (5*KB)
 #define MAX(a,b) (a>b ? a:b)
 
-const char *FILENAME[] = {      
+const char *FILENAME[] = {
     "fst_family%05d.h5",
     "scd_family%05d.h5",
     "family_to_sec2.h5",
-    NULL        
+    NULL
 };
 
 herr_t test_family_h5repart_opens(void);
@@ -57,14 +57,14 @@ herr_t
 test_family_h5repart_opens(void)
 {
     hid_t       file=(-1), fapl=(-1);
-    
+
     /* open 1st file(single member file) with correct family size(20000 byte) */
     if ((fapl=H5Pcreate(H5P_FILE_ACCESS))<0)
         goto error;
 
     if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_H5REPART_SIZE1, H5P_DEFAULT)<0)
         goto error;
-    
+
     if((file=H5Fopen(FILENAME[0], H5F_ACC_RDWR, fapl))<0)
         goto error;
 
@@ -110,7 +110,7 @@ herr_t
 test_sec2_h5repart_opens(void)
 {
     hid_t       file=(-1);
-    
+
     /* open the sec2 file */
     if((file=H5Fopen(FILENAME[2], H5F_ACC_RDWR, H5P_DEFAULT))<0)
         goto error;
@@ -130,30 +130,30 @@ error:
 
 /*-------------------------------------------------------------------------
  * Function:    main
- * 
- * Purpose:     Tests h5repart-ed family files 
- * 
+ *
+ * Purpose:     Tests h5repart-ed family files
+ *
  * Return:      Success:        exit(0)
- *              
+ *
  *              Failure:        exit(1)
- * 
+ *
  * Programmer:  Raymond Lu
  *              June 1, 2005
- * 
+ *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 int
 main(void)
-{   
+{
     int                 nerrors=0;
-         
+
     nerrors += test_family_h5repart_opens()<0   ?1:0;
     nerrors += test_sec2_h5repart_opens()<0     ?1:0;
 
     if (nerrors) goto error;
-    
+
     return 0;
 
 error:

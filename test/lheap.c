@@ -123,7 +123,7 @@ main(void)
 	    H5Eprint_stack(H5E_DEFAULT, stdout);
 	    goto error;
 	}
-        
+
         if (NULL == (s = H5HL_offset_into(f, heap, obj[i]))) {
 	    H5_FAILED();
 	    H5Eprint_stack(H5E_DEFAULT, stdout);

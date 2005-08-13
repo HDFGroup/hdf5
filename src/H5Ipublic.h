@@ -47,7 +47,7 @@ typedef enum H5I_type_t {
     H5I_GENPROP_LST,            /*type ID for generic property lists        */
     H5I_ERROR_CLASS,            /*type ID for error classes		    */
     H5I_ERROR_MSG,              /*type ID for error messages		    */
-    H5I_ERROR_STACK,            /*type ID for error stacks		    */    
+    H5I_ERROR_STACK,            /*type ID for error stacks		    */
     H5I_NTYPES		        /*number of library types, MUST BE LAST!    */
 } H5I_type_t;
 

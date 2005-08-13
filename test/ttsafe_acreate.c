@@ -80,7 +80,7 @@ void tts_acreate(void)
     int     data;			/* data to write */
     int     buffer, ret, i;
 
-    ttsafe_name_data_t *attrib_data; 
+    ttsafe_name_data_t *attrib_data;
 
     /*
      * Create an HDF5 file using H5F_ACC_TRUNC access, default file

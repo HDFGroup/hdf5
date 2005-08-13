@@ -96,7 +96,7 @@ write_data(const char *msg, hid_t file, const char *name, hid_t cparms, hid_t me
 	    offset[1] = j * NY/2;
 	    if (H5Sselect_hyperslab (file_space, H5S_SELECT_SET, offset,
 				     NULL, half_dims, NULL)<0) TEST_ERROR;
-	    
+
 	    /* Read */
 	    if (H5Dread (dataset, H5T_NATIVE_INT, half_space, file_space,
 			 H5P_DEFAULT, buf2)<0) TEST_ERROR;
@@ -114,7 +114,7 @@ write_data(const char *msg, hid_t file, const char *name, hid_t cparms, hid_t me
 	    }
 	}
     }
-    
+
 
     /* Cleanup */
     if (H5Dclose (dataset)<0) TEST_ERROR;
@@ -175,7 +175,7 @@ main (void)
     /* Create the file */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if ((file = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-    
+
     /* Create the dataset which is originally NX by NY */
     if((cparms = H5Pcreate(H5P_DATASET_CREATE))<0) TEST_ERROR;
     if (H5Pset_chunk (cparms, 2, chunk_dims)<0) TEST_ERROR;

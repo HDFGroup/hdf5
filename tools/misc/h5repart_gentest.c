@@ -12,11 +12,11 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*  
- * Programmer:  Raymond Lu<slu@ncsa.uiuc.edu> 
+/*
+ * Programmer:  Raymond Lu<slu@ncsa.uiuc.edu>
  *              June 1, 2005
- * 
- * Purpose:     Generate a family file of 1024 bytes for each member 
+ *
+ * Purpose:     Generate a family file of 1024 bytes for each member
  *              for h5repart test.
  */
 #include "hdf5.h"
@@ -71,23 +71,23 @@ int main(void)
         perror ("H5Dwrite");
         exit (1);
     }
-  
+
 
     if(H5Sclose(space)<0) {
         perror ("H5Sclose");
         exit (1);
     }
-    
+
     if(H5Dclose(dset)<0) {
         perror ("H5Dclose");
         exit (1);
     }
-    
+
     if(H5Pclose(fapl)<0) {
         perror ("H5Pclose");
         exit (1);
     }
-     
+
     if(H5Fclose(file)<0) {
         perror ("H5Fclose");
         exit (1);

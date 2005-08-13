@@ -19,7 +19,7 @@
 /*-------------------------------------------------------------------------
  * Function: write_dset_in
  *
- * Purpose: write datasets in LOC_ID 
+ * Purpose: write datasets in LOC_ID
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -28,28 +28,28 @@
  *-------------------------------------------------------------------------
  */
 
- 
-static void write_dset_in(hid_t loc_id, 
+
+static void write_dset_in(hid_t loc_id,
                    const char* dset_name, /* for saving reference to dataset*/
                    hid_t file_id,
                    int make_diffs /* flag to modify data buffers */)
 {
  /* Compound datatype */
- typedef struct s_t 
+ typedef struct s_t
  {
   char   a;
   double b;
  } s_t;
 
- typedef enum 
+ typedef enum
  {
   RED,
   GREEN
  } e_t;
 
  hid_t   dset_id;
- hid_t   space_id;  
- hid_t   type_id;  
+ hid_t   space_id;
+ hid_t   type_id;
  hid_t   plist_id;
  herr_t  status;
  int     val, i, j, k, n;
@@ -95,22 +95,22 @@ static void write_dset_in(hid_t loc_id,
 
 
 /*-------------------------------------------------------------------------
- * 1D 
+ * 1D
  *-------------------------------------------------------------------------
  */
- 
+
 /*-------------------------------------------------------------------------
  * H5T_STRING
  *-------------------------------------------------------------------------
  */
 
- 
+
  if (make_diffs)
  {
   for (i=0; i<2; i++)
    for (j=0; j<2; j++)
    {
-    buf1[i][j]='z'; 
+    buf1[i][j]='z';
    }
  }
 
@@ -163,7 +163,7 @@ static void write_dset_in(hid_t loc_id,
  {
   for (i=0; i<2; i++)
   {
-   buf45[i]=GREEN; 
+   buf45[i]=GREEN;
   }
  }
 
@@ -172,7 +172,7 @@ static void write_dset_in(hid_t loc_id,
  H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_DOUBLE);
  write_dset(loc_id,1,dims,"compound",type_id,buf3);
  status = H5Tclose(type_id);
- 
+
 /*-------------------------------------------------------------------------
  * H5T_REFERENCE
  *-------------------------------------------------------------------------
@@ -199,7 +199,7 @@ static void write_dset_in(hid_t loc_id,
  * H5T_VLEN
  *-------------------------------------------------------------------------
  */
- 
+
  /* Allocate and initialize VL dataset to write */
 
  buf5[0].len = 1;
@@ -238,7 +238,7 @@ static void write_dset_in(hid_t loc_id,
   for (i=0; i<2; i++)
    for (j=0; j<3; j++)
    {
-    buf6[i][j]=0; 
+    buf6[i][j]=0;
    }
  }
 
@@ -255,8 +255,8 @@ static void write_dset_in(hid_t loc_id,
  {
   for (i=0; i<2; i++)
   {
-   buf7[i]=0; 
-   buf8[i]=0; 
+   buf7[i]=0;
+   buf8[i]=0;
   }
  }
 
@@ -265,7 +265,7 @@ static void write_dset_in(hid_t loc_id,
 
 
 /*-------------------------------------------------------------------------
- * 2D 
+ * 2D
  *-------------------------------------------------------------------------
  */
 
@@ -290,7 +290,7 @@ static void write_dset_in(hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
- 
+
  if (make_diffs)
  {
   memset(buf22,0,sizeof buf22);
@@ -324,7 +324,7 @@ static void write_dset_in(hid_t loc_id,
  H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_DOUBLE);
  write_dset(loc_id,2,dims2,"compound2D",type_id,buf32);
  status = H5Tclose(type_id);
- 
+
 /*-------------------------------------------------------------------------
  * H5T_REFERENCE
  *-------------------------------------------------------------------------
@@ -368,7 +368,7 @@ static void write_dset_in(hid_t loc_id,
     else ((int *)buf52[i][j].p)[l] = n++;
   }
  }
- 
+
  space_id = H5Screate_simple(2,dims2,NULL);
  type_id = H5Tvlen_create(H5T_NATIVE_INT);
  dset_id = H5Dcreate(loc_id,"vlen2D",type_id,space_id,H5P_DEFAULT);
@@ -400,7 +400,7 @@ static void write_dset_in(hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
- 
+
  if (make_diffs)
  {
   memset(buf72,0,sizeof buf72);
@@ -424,9 +424,9 @@ static void write_dset_in(hid_t loc_id,
 
  write_dset(loc_id,2,dims2,"float2D",H5T_NATIVE_FLOAT,buf82);
 
- 
+
 /*-------------------------------------------------------------------------
- * 3D 
+ * 3D
  *-------------------------------------------------------------------------
  */
 
@@ -502,7 +502,7 @@ static void write_dset_in(hid_t loc_id,
  H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_DOUBLE);
  write_dset(loc_id,3,dims3,"compound3D",type_id,buf33);
  status = H5Tclose(type_id);
- 
+
 /*-------------------------------------------------------------------------
  * H5T_REFERENCE
  *-------------------------------------------------------------------------
@@ -534,7 +534,7 @@ static void write_dset_in(hid_t loc_id,
  * H5T_VLEN
  *-------------------------------------------------------------------------
  */
- 
+
  /* Allocate and initialize VL dataset to write */
  n=0;
  for (i = 0; i < 4; i++) {
@@ -549,7 +549,7 @@ static void write_dset_in(hid_t loc_id,
    }
   }
  }
- 
+
  space_id = H5Screate_simple(3,dims3,NULL);
  type_id = H5Tvlen_create(H5T_NATIVE_INT);
  dset_id = H5Dcreate(loc_id,"vlen3D",type_id,space_id,H5P_DEFAULT);
@@ -611,11 +611,11 @@ static void write_dset_in(hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
- 
+
 int test_dsetall(const char *file,
                  int make_diffs /* flag to modify data buffers */)
 {
- hid_t   file_id; 
+ hid_t   file_id;
  hid_t   dset_id;
  hid_t   group_id;
  hid_t   space_id;
@@ -643,7 +643,7 @@ int test_dsetall(const char *file,
  group_id  = H5Gcreate(file_id,"g1",0);
 
 /*-------------------------------------------------------------------------
- * write a series of datasets on the group 
+ * write a series of datasets on the group
  *-------------------------------------------------------------------------
  */
 

@@ -21,7 +21,7 @@
  *
  * When writing in single file mode, the assertion errors still occur
  * but the H5Gcreate error does not.
- */ 
+ */
 
 
 #include "hdf5.h"
@@ -57,7 +57,7 @@ int main(void)
 
     /* Create a file */
     file_id = H5Fcreate(FILEN, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    
+
     /* Create a dataset to hold the number of data objects */
     /* Create the data space */
     dataspace_id = H5Screate(H5S_SCALAR);
@@ -65,11 +65,11 @@ int main(void)
     /* Create dataset */
     dataset_id = H5Dcreate(file_id, "/NumDataObj",
                                     H5T_NATIVE_UINT, dataspace_id, H5P_DEFAULT);
-            
+
     /* Write value to NumDataObj dataset */
     status = H5Dwrite(dataset_id, H5T_NATIVE_UINT, H5S_ALL,
             H5S_ALL, H5P_DEFAULT, &numdataobj);
-    
+
     /* Close the identifiers */
     status = H5Dclose(dataset_id);
     status = H5Sclose(dataspace_id);
@@ -79,27 +79,27 @@ int main(void)
     prop_id = H5Pcreate(H5P_DATASET_CREATE);
     dims[0] = CHUNK_SIZE;
     status = H5Pset_chunk(prop_id, 1, dims);
-            
+
     /* Create dataspace */
     dims[0]=1;
     maxdims[0]=H5S_UNLIMITED;
     dataspace_id = H5Screate_simple(1, dims, maxdims);
-                    
+
     for(i=0; i<NEXTARRAYS; i++)
     {
         /* Create dataset */
         sprintf(name, "/ExtArray%06d", i);
         dataset_id = H5Dcreate(file_id, name,
                 H5T_NATIVE_FLOAT, dataspace_id, prop_id);
-                
+
         /* Close the identifier */
         status = H5Dclose(dataset_id);
     }
-            
+
     /* Close the identifiers */
     status = H5Sclose(dataspace_id);
     status = H5Pclose(prop_id);
-    
+
     /* Create group to hold data object data arrays */
     group_id = H5Gcreate(file_id, "/DataArray", 0);
     H5Gclose(group_id);
@@ -108,7 +108,7 @@ int main(void)
     {
         printf("\rWriting Object #%d of %d", j+1, NDATAOBJECTS);
         fflush(stdout);
-        
+
         floatval = (float)j;
 
         /* Create group to hold data arrays for this object */
@@ -116,11 +116,11 @@ int main(void)
         group_id = H5Gcreate(file_id, name, 0);
         if(group_id < 0)
         {
-            fprintf(stderr, "Failed to create DataArray group.\n"); 
+            fprintf(stderr, "Failed to create DataArray group.\n");
             status = H5Fclose(file_id);
             return -1;
         }
-        
+
         /* Loop over data arrays */
         for(i=0; i<NDATAARRAYS; i++)
         {
@@ -128,57 +128,57 @@ int main(void)
             dims[0]=NPOINTS;
             maxdims[0]=NPOINTS;
             dataspace_id = H5Screate_simple(1 ,dims, maxdims);
-            
+
             /* Create dataset */
             sprintf(name, "DataArray%06d", i);
             dataset_id = H5Dcreate(group_id, name,
                     H5T_NATIVE_FLOAT, dataspace_id, H5P_DEFAULT);
             if(dataset_id < 0)
             {
-                fprintf(stderr, "Failed to create DataArray dataset.\n"); 
+                fprintf(stderr, "Failed to create DataArray dataset.\n");
                 status = H5Fclose(file_id);
                 return -1;
             }
-            
+
             /* Write the data array data */
             status = H5Dwrite(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL,
                     H5S_ALL, H5P_DEFAULT, data);
             if(status < 0)
             {
-                fprintf(stderr, "Failed to write DataArray dataset.\n"); 
+                fprintf(stderr, "Failed to write DataArray dataset.\n");
                 status = H5Fclose(file_id);
                 return -1;
             }
-            
+
             /* Close the identifiers */
             status = H5Dclose(dataset_id);
             status = H5Sclose(dataspace_id);
         }
-        
+
         /* Open NumDataObj dataset */
         dataset_id = H5Dopen(file_id, "/NumDataObj");
         if(dataset_id < 0)
         {
-            fprintf(stderr, "Failed to open NumDataObj dataset.\n"); 
+            fprintf(stderr, "Failed to open NumDataObj dataset.\n");
             status = H5Fclose(file_id);
             return -1;
         }
-        
+
         /* Write value to NumDataObj dataset */
         numdataobj = j + 1;
         status = H5Dwrite(dataset_id, H5T_NATIVE_UINT, H5S_ALL,
                 H5S_ALL, H5P_DEFAULT, &numdataobj);
         if(status < 0)
         {
-            fprintf(stderr, "Failed to write NumDataObj dataset.\n"); 
+            fprintf(stderr, "Failed to write NumDataObj dataset.\n");
             status = H5Fclose(file_id);
             return -1;
         }
-        
+
         /* Close identifiers */
         status = H5Dclose(dataset_id);
         status = H5Gclose(group_id);
-        
+
         /* Extend attribute arrays */
         for(i=0; i<NEXTARRAYS; i++)
         {
@@ -187,21 +187,21 @@ int main(void)
             dataset_id = H5Dopen(file_id, name);
             if(dataset_id < 0)
             {
-                fprintf(stderr, "Failed to open ExtArray dataset.\n"); 
+                fprintf(stderr, "Failed to open ExtArray dataset.\n");
                 status = H5Fclose(file_id);
                 return -1;
             }
-    
+
             /* Extend attribute dataset */
             dims[0] = (hsize_t)j + 1;
             status = H5Dextend(dataset_id, dims);
             if(status < 0)
             {
-                fprintf(stderr, "Failed to extend DataArray dataset.\n"); 
+                fprintf(stderr, "Failed to extend DataArray dataset.\n");
                 status = H5Fclose(file_id);
                 return -1;
             }
-    
+
             /* Select element and write value to attribute dataset */
             dims[0] = 1;
             memspace_id = H5Screate_simple(1, dims, dims);
@@ -218,7 +218,7 @@ int main(void)
                     dataspace_id, H5P_DEFAULT, &floatval);
             if(status < 0)
             {
-                fprintf(stderr, "Failed to write DataArray dataset.\n"); 
+                fprintf(stderr, "Failed to write DataArray dataset.\n");
                 status = H5Fclose(file_id);
                 return -1;
             }
@@ -231,10 +231,10 @@ int main(void)
         }
     }
 
-    
+
     /* Close the file */
     status = H5Fclose(file_id);
-    
+
     printf("\n");
 
     return 0;

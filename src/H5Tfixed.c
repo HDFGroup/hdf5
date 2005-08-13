@@ -34,7 +34,7 @@ NAME
    H5T_init_fixed_interface -- Initialize interface-specific information
 USAGE
     herr_t H5T_init_fixed_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -80,7 +80,7 @@ H5Tget_sign(hid_t type_id)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_SGN_ERROR, "not an integer datatype")
-        
+
     ret_value = H5T_get_sign(dt);
 
 done:
@@ -91,7 +91,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_get_sign
  *
- * Purpose:	Private function for H5Tget_sign.  Retrieves the sign type 
+ * Purpose:	Private function for H5Tget_sign.  Retrieves the sign type
  *              for an integer type.
  *
  * Return:	Success:	The sign type.
@@ -121,7 +121,7 @@ H5T_get_sign(H5T_t const *dt)
     /* Check args */
     if (H5T_INTEGER!=dt->shared->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_SGN_ERROR, "operation not defined for datatype class")
-    
+
     /* Sign */
     ret_value = dt->shared->u.atomic.u.i.sign;
 
@@ -169,7 +169,7 @@ H5Tset_sign(hid_t type_id, H5T_sign_t sign)
         dt = dt->shared->parent; /*defer to parent*/
     if (H5T_INTEGER!=dt->shared->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for datatype class")
-    
+
     /* Commit */
     dt->shared->u.atomic.u.i.sign = sign;
 

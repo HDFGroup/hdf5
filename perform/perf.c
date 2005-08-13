@@ -12,9 +12,9 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* 
+/*
  * Author: Albert Cheng of NCSA, May 1, 2001.
- * This is derived from code given to me by Robert Ross. 
+ * This is derived from code given to me by Robert Ross.
  *
  * NOTE: This code assumes that all command line arguments make it out to all
  * the processes that make up the parallel job, which isn't always the case.
@@ -119,11 +119,11 @@ int main(int argc, char **argv)
 
 	if (mynod == 0) printf("# Using hdf5-io calls.\n");
 
-	
-	/* kindof a weird hack- if the location of the pvfstab file was 
+
+	/* kindof a weird hack- if the location of the pvfstab file was
 	 * specified on the command line, then spit out this location into
 	 * the appropriate environment variable: */
-	
+
 #if H5_HAVE_SETENV
 /* no setenv or unsetenv */
 	if (opt_pvfstab_set) {
@@ -133,12 +133,12 @@ int main(int argc, char **argv)
 		}
 	}
 #endif
-	
+
 	/* this is how much of the file data is covered on each iteration of
 	 * the test.  used to help determine the seek offset on each
 	 * iteration */
 	iter_jump = nprocs * opt_block;
-		
+
 	/* setup a buffer of data to write */
 	if (!(tmp = (char *) malloc(opt_block + 256))) {
 		perror("malloc");
@@ -161,7 +161,7 @@ int main(int argc, char **argv)
 
 	mpio_pl = H5Pcreate (H5P_FILE_ACCESS);
 	VRFY((acc_tpl >= 0), "", H5FATAL);
-	ret = H5Pset_fapl_mpio(mpio_pl, MPI_COMM_WORLD, MPI_INFO_NULL);     
+	ret = H5Pset_fapl_mpio(mpio_pl, MPI_COMM_WORLD, MPI_INFO_NULL);
 	VRFY((ret >= 0), "", H5FATAL);
 
 	/* set optional allocation alignment */
@@ -179,7 +179,7 @@ int main(int argc, char **argv)
 	/* setup file access template */
 	acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
 	VRFY((acc_tpl >= 0), "", H5FATAL);
-	ret = H5Pset_fapl_mpio(acc_tpl, MPI_COMM_WORLD, MPI_INFO_NULL);     
+	ret = H5Pset_fapl_mpio(acc_tpl, MPI_COMM_WORLD, MPI_INFO_NULL);
 	VRFY((ret >= 0), "", H5FATAL);
 
 	/* set optional allocation alignment */
@@ -216,7 +216,7 @@ int main(int argc, char **argv)
 	    start[0] = (j*iter_jump)+(mynod*opt_block);
 	    stride[0] = block[0] = opt_block;
 	    count[0]= 1;
-	    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block); 
+	    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
 	    VRFY((ret >= 0), "H5Sset_hyperslab succeeded", H5FATAL);
 
 		if (opt_correct) /* fill in buffer for iteration */ {
@@ -229,21 +229,21 @@ int main(int argc, char **argv)
 
     /* write data */
     ret = H5Dwrite(dataset, H5T_NATIVE_CHAR, mem_dataspace, file_dataspace,
-	    H5P_DEFAULT, buf);					    
+	    H5P_DEFAULT, buf);
     VRFY((ret >= 0), "H5Dwrite dataset1 succeeded", !H5FATAL);
 
 		/* discover the ending time of the operation */
 	   etim = MPI_Wtime();
 
 	   write_tim += (etim - stim);
-		
+
 		/* we are done with this "write" iteration */
 	}
 
-    /* close dataset and file */					    
+    /* close dataset and file */
     ret=H5Dclose(dataset);
     VRFY((ret >= 0), "H5Dclose succeeded", H5FATAL);
-    ret=H5Fclose(fid);							    
+    ret=H5Fclose(fid);
     VRFY((ret >= 0), "H5Fclose succeeded", H5FATAL);
 
 
@@ -269,7 +269,7 @@ int main(int argc, char **argv)
 	    start[0] = (j*iter_jump)+(mynod*opt_block);
 	    stride[0] = block[0] = opt_block;
 	    count[0]= 1;
-	    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block); 
+	    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
 	    VRFY((ret >= 0), "H5Sset_hyperslab succeeded", H5FATAL);
 		/* seek to the appropriate spot give the current iteration and
 		 * rank within the MPI processes */
@@ -282,11 +282,11 @@ int main(int argc, char **argv)
 		/* read in the file data */
 		if (!opt_correct){
     ret = H5Dread(dataset, H5T_NATIVE_CHAR, mem_dataspace, file_dataspace,
-	    H5P_DEFAULT, buf);					    
+	    H5P_DEFAULT, buf);
 		}
 		else{
     ret = H5Dread(dataset, H5T_NATIVE_CHAR, mem_dataspace, file_dataspace,
-	    H5P_DEFAULT, buf2);					    
+	    H5P_DEFAULT, buf2);
 		}
 		myerrno = errno;
 		/* discover the end time */
@@ -310,10 +310,10 @@ int main(int argc, char **argv)
 		/* we are done with this read iteration */
 	}
 
-    /* close dataset and file */					    
+    /* close dataset and file */
     ret=H5Dclose(dataset);
     VRFY((ret >= 0), "H5Dclose succeeded", H5FATAL);
-    ret=H5Fclose(fid);							    
+    ret=H5Fclose(fid);
     VRFY((ret >= 0), "H5Fclose succeeded", H5FATAL);
 
 	/* compute the read and write times */
@@ -325,7 +325,7 @@ int main(int argc, char **argv)
 		MPI_COMM_WORLD);
 
 	/* calculate the average from the sum */
-	ave_read_tim = ave_read_tim / nprocs; 
+	ave_read_tim = ave_read_tim / nprocs;
 
 	MPI_Allreduce(&write_tim, &max_write_tim, 1, MPI_DOUBLE, MPI_MAX,
 		MPI_COMM_WORLD);
@@ -335,33 +335,33 @@ int main(int argc, char **argv)
 		MPI_COMM_WORLD);
 
 	/* calculate the average from the sum */
-	ave_write_tim = ave_write_tim / nprocs; 
-	
+	ave_write_tim = ave_write_tim / nprocs;
+
 	/* print out the results on one node */
 	if (mynod == 0) {
 	   read_bw = ((int64_t)(opt_block*nprocs*opt_iter))/(max_read_tim*1000000.0);
 	   write_bw = ((int64_t)(opt_block*nprocs*opt_iter))/(max_write_tim*1000000.0);
-		
+
 			printf("nr_procs = %d, nr_iter = %d, blk_sz = %ld\n", nprocs,
 		opt_iter, (long)opt_block);
-			
+
 			printf("# total_size = %ld\n", (long)(opt_block*nprocs*opt_iter));
-			
-			printf("# Write:  min_time = %f, max_time = %f, mean_time = %f\n", 
+
+			printf("# Write:  min_time = %f, max_time = %f, mean_time = %f\n",
 				min_write_tim, max_write_tim, ave_write_tim);
-			printf("# Read:  min_time = %f, max_time = %f, mean_time = %f\n", 
+			printf("# Read:  min_time = %f, max_time = %f, mean_time = %f\n",
 				min_read_tim, max_read_tim, ave_read_tim);
-		
+
 	   printf("Write bandwidth = %f Mbytes/sec\n", write_bw);
 	   printf("Read bandwidth = %f Mbytes/sec\n", read_bw);
-		
+
 		if (opt_correct) {
 			printf("Correctness test %s.\n", correct ? "passed" : "failed");
 		}
 	}
 
 
-die_jar_jar_die:	
+die_jar_jar_die:
 
 #if H5_HAVE_SETENV
 /* no setenv or unsetenv */
@@ -370,7 +370,7 @@ die_jar_jar_die:
 		unsetenv("PVFSTAB_FILE");
 	}
 #endif
-	
+
 	free(tmp);
 	if (opt_correct) free(tmp2);
 	MPI_Finalize();
@@ -380,7 +380,7 @@ die_jar_jar_die:
 int parse_args(int argc, char **argv)
 {
 	int c;
-	
+
 	while ((c = getopt(argc, argv, "s:b:i:f:p:a:2:c")) != EOF) {
 		switch (c) {
 			case 's': /* stripe */
@@ -444,7 +444,7 @@ int parse_args(int argc, char **argv)
 double Wtime()
 {
 	struct timeval t;
-	
+
 	gettimeofday(&t, NULL);
 	return((double)t.tv_sec + (double)t.tv_usec / 1000000);
 }

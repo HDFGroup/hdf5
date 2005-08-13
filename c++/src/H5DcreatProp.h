@@ -21,11 +21,11 @@ namespace H5 {
 #endif
 
 class H5_DLLCPP DSetCreatPropList : public PropList {
-   public: 
+   public:
 	// Default dataset creation property list.
 	static const DSetCreatPropList DEFAULT;
 
-	// Queries whether all the filters set in this property list are 
+	// Queries whether all the filters set in this property list are
 	// available currently.
 	bool allFiltersAvail();
 
@@ -69,7 +69,7 @@ class H5_DLLCPP DSetCreatPropList : public PropList {
 	// property list.
 	H5D_layout_t getLayout() const;
 
-	// Sets the type of storage used to store the raw data for the 
+	// Sets the type of storage used to store the raw data for the
 	// dataset that uses this property list.
 	void setLayout(H5D_layout_t layout) const;
 
@@ -109,7 +109,7 @@ class H5_DLLCPP DSetCreatPropList : public PropList {
 	// Copy constructor: creates a copy of a DSetCreatPropList object.
 	DSetCreatPropList(const DSetCreatPropList& orig);
 
-	// Creates a copy of an existing dataset creation property list 
+	// Creates a copy of an existing dataset creation property list
 	// using the property list id.
 	DSetCreatPropList(const hid_t plist_id);
 

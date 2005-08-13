@@ -84,7 +84,7 @@ int BasicTest()
     wrapper.AppendPacket(&myRecord);
 
     /* get number of records test */
-    count = wrapper.GetPacketCount();    
+    count = wrapper.GetPacketCount();
     if(count != 2)
       goto out;
 
@@ -374,7 +374,7 @@ int SystemTest()
     hid_t dtypeID1, dtypeID2;
     unsigned int count;
 
-    /* Creating two inter-related datatypes.  Create two datasets and put 
+    /* Creating two inter-related datatypes.  Create two datasets and put
      * one datatype in each. */
     typedef struct compoundType
     {

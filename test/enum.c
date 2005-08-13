@@ -55,7 +55,7 @@ test_named(hid_t file)
     hid_t	type=-1, cwg=-1;
     c_e1	val;
     signed char	val8;
-    
+
     TESTING("named enumeration types");
     if ((cwg=H5Gcreate(file, "test_named", 0))<0) goto error;
 
@@ -92,7 +92,7 @@ test_named(hid_t file)
     if (H5Tenum_insert(type, "BLACK", CPTR(val8, E1_BLACK))<0) goto error;
     if (H5Tcommit(cwg, "e1_c", type)<0) goto error;
     if (H5Tclose(type)<0) goto error;
-    
+
     if (H5Gclose(cwg)<0) goto error;
     PASSED();
     return 0;
@@ -159,7 +159,7 @@ test_noconv(hid_t file)
 	    goto error;
 	}
     }
-    
+
     if (H5Dclose(dset)<0) goto error;
     if (H5Sclose(space)<0) goto error;
     if (H5Tclose(type)<0) goto error;
@@ -241,7 +241,7 @@ test_tr1(hid_t file)
 	    goto error;
 	}
     }
-    
+
     if (H5Dclose(dset)<0) goto error;
     if (H5Sclose(space)<0) goto error;
     if (H5Tclose(m_type)<0) goto error;
@@ -260,7 +260,7 @@ test_tr1(hid_t file)
     } H5E_END_TRY;
     return 1;
 }
-    
+
 
 /*-------------------------------------------------------------------------
  * Function:	test_tr2
@@ -321,7 +321,7 @@ test_tr2(hid_t file)
 	    goto error;
 	}
     }
-    
+
     if (H5Dclose(dset)<0) goto error;
     if (H5Sclose(space)<0) goto error;
     if (H5Tclose(m_type)<0) goto error;
@@ -340,7 +340,7 @@ test_tr2(hid_t file)
     } H5E_END_TRY;
     return 1;
 }
-    
+
 
 /*-------------------------------------------------------------------------
  * Function:	test_value_dsnt_exist
@@ -348,8 +348,8 @@ test_tr2(hid_t file)
  * Purpose:	Create an enumeration datatype with "gaps in values"
  *              and then request a name of non-existing value within
  *              an existing range by calling H5Tenum_nameof function.
- *              Function should fail instead of succeeding and returning 
- *              a name of one of the existing values. 
+ *              Function should fail instead of succeeding and returning
+ *              a name of one of the existing values.
  *              Request a value by supplying non-existing name by calling
  *              H5Tenum_nameof function. Function should fail.
  *
@@ -375,15 +375,15 @@ test_value_dsnt_exist(void)
     size_t size = 100;
     TESTING("for non-existing name and value");
     /* Turn off error reporting since we expect failure in this test */
- 
-    if (H5Eset_auto_stack(H5E_DEFAULT, NULL, NULL) < 0) goto error; 
+
+    if (H5Eset_auto_stack(H5E_DEFAULT, NULL, NULL) < 0) goto error;
 
     if ((datatype_id = H5Tenum_create(H5T_NATIVE_INT))< 0) goto error;
 
-    /* These calls should fail, since no memebrs exist yet */ 
-    if (H5Tenum_valueof(datatype_id, "SAX", &val) >= 0) goto error; 
+    /* These calls should fail, since no memebrs exist yet */
+    if (H5Tenum_valueof(datatype_id, "SAX", &val) >= 0) goto error;
     val = 3;
-    if (H5Tenum_nameof(datatype_id, &val, nam, size) >= 0) goto error; 
+    if (H5Tenum_nameof(datatype_id, &val, nam, size) >= 0) goto error;
 
     val = 2;
     if (H5Tenum_insert(datatype_id, "TWO", (int *)&val) < 0) goto error;
@@ -391,32 +391,32 @@ test_value_dsnt_exist(void)
     if (H5Tenum_insert(datatype_id, "SIX", (int *)&val) < 0) goto error;
     val = 10;
     if (H5Tenum_insert(datatype_id, "TEN", (int *)&val) < 0) goto error;
- 
+
     /* This call should fail since we did not create a member with value = 3*/
     val = 3;
-    if (H5Tenum_nameof(datatype_id, &val, nam, size) >= 0) goto error; 
+    if (H5Tenum_nameof(datatype_id, &val, nam, size) >= 0) goto error;
 
     /* This call should fail since we did not create a member with value = 11*/
     val = 11;
-    if (H5Tenum_nameof(datatype_id, &val, nam, size) >= 0) goto error; 
+    if (H5Tenum_nameof(datatype_id, &val, nam, size) >= 0) goto error;
 
     /* This call should fail since we did not create a member with value = 0*/
     val = 0;
-    if (H5Tenum_nameof(datatype_id, &val, nam, size) >= 0) goto error; 
+    if (H5Tenum_nameof(datatype_id, &val, nam, size) >= 0) goto error;
 
     /* This call should fail since we do not have SAX name in the type */
-    if (H5Tenum_valueof(datatype_id, "SAX", &val) >= 0) goto error; 
+    if (H5Tenum_valueof(datatype_id, "SAX", &val) >= 0) goto error;
 
     /* This call should fail since we do not have TEEN name in the type */
-    if (H5Tenum_valueof(datatype_id, "TEEN", &val) >= 0) goto error; 
+    if (H5Tenum_valueof(datatype_id, "TEEN", &val) >= 0) goto error;
 
     /* This call should fail since we do not have A name in the type */
-    if (H5Tenum_valueof(datatype_id, "A", &val) >= 0) goto error; 
+    if (H5Tenum_valueof(datatype_id, "A", &val) >= 0) goto error;
 
     if (H5Tclose(datatype_id) < 0) goto error;
     PASSED();
     return 0;
- 
+
  error:
     H5E_BEGIN_TRY {
 	H5Tclose(datatype_id);
@@ -428,11 +428,11 @@ test_value_dsnt_exist(void)
 /*-------------------------------------------------------------------------
  * Function:	main
  *
- * Purpose:	
+ * Purpose:
  *
- * Return:	Success:	
+ * Return:	Success:
  *
- *		Failure:	
+ *		Failure:
  *
  * Programmer:	Robb Matzke
  *              Tuesday, December 22, 1998
@@ -447,7 +447,7 @@ main(void)
     hid_t	fapl=-1, file=-1;
     char	name[1024];
     int		nerrors=0;
-    
+
     h5_reset();
     fapl = h5_fileaccess();
 
@@ -461,9 +461,9 @@ main(void)
     nerrors += test_tr1(file);
     nerrors += test_tr2(file);
     nerrors += test_value_dsnt_exist();
-    
+
   	H5Fclose(file);
-  
+
     if (nerrors) goto error;
     puts("All enum tests passed.");
     h5_cleanup(FILENAME, fapl);

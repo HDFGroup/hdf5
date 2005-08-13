@@ -49,7 +49,7 @@ DSetCreatPropList::DSetCreatPropList( const DSetCreatPropList& orig ) : PropList
 
 //--------------------------------------------------------------------------
 // Function:	DSetCreatPropList overloaded constructor
-///\brief	Creates a DSetCreatPropList object using the id of an 
+///\brief	Creates a DSetCreatPropList object using the id of an
 ///		existing dataset creation property list.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -93,7 +93,7 @@ int DSetCreatPropList::getChunk( int max_ndims, hsize_t* dim ) const
    int chunk_size = H5Pget_chunk( id, max_ndims, dim );
    if( chunk_size < 0 )
    {
-      throw PropListIException("DSetCreatPropList::getChunk", 
+      throw PropListIException("DSetCreatPropList::getChunk",
 		"H5Pget_chunk returns negative chunk size");
    }
    return( chunk_size );
@@ -140,7 +140,7 @@ H5D_layout_t DSetCreatPropList::getLayout() const
    H5D_layout_t layout = H5Pget_layout( id );
    if( layout == H5D_LAYOUT_ERROR )
    {
-      throw PropListIException("DSetCreatPropList::getLayout", 
+      throw PropListIException("DSetCreatPropList::getLayout",
 		"H5Pget_layout returns H5D_LAYOUT_ERROR");
    }
    return( layout );
@@ -314,10 +314,10 @@ int DSetCreatPropList::getNfilters() const
 //--------------------------------------------------------------------------
 // Function:	DSetCreatPropList::getFilter
 ///\brief	Returns information about a filter in a pipeline
-///\param	filter_number  - IN: Filter to get, range [0..N-1], where 
+///\param	filter_number  - IN: Filter to get, range [0..N-1], where
 ///				     N is returned by H5Pget_nfilters()
 ///\param	flags         - OUT: General properties of the filter
-///\param	cd_nelmts  - IN/OUT: Number of elements in \a cd_values /Number 
+///\param	cd_nelmts  - IN/OUT: Number of elements in \a cd_values /Number
 ///				     of values defined by the filter
 ///\param	cd_values     - OUT: Array to hold the data; allocated by the user
 ///\param	namelen       - OUT: Length of \a name
@@ -333,7 +333,7 @@ H5Z_filter_t DSetCreatPropList::getFilter(int filter_number, unsigned int &flags
                                           unsigned int& filter_config) const
 {
    H5Z_filter_t filter_id;
-   filter_id = H5Pget_filter( id, filter_number, &flags, &cd_nelmts, 
+   filter_id = H5Pget_filter( id, filter_number, &flags, &cd_nelmts,
 				cd_values, namelen, name, &filter_config);
    if( filter_id == H5Z_FILTER_ERROR )
    {
@@ -350,7 +350,7 @@ H5Z_filter_t DSetCreatPropList::getFilter(int filter_number, unsigned int &flags
 ///		filter id
 ///\param	filter_id -      IN: Filter to get
 ///\param	flags     -     OUT: General properties of the filter
-///\param	cd_nelmts -  IN/OUT: Number of elements in \a cd_values /Number 
+///\param	cd_nelmts -  IN/OUT: Number of elements in \a cd_values /Number
 ///				     of values defined by the filter
 ///\param	cd_values -     OUT: Array to hold the data; allocated by the user
 ///\param	namelen   -      IN: Length of \a name
@@ -363,7 +363,7 @@ void DSetCreatPropList::getFilterById(H5Z_filter_t filter_id, unsigned int &flag
                                       unsigned int* cd_values, size_t namelen, char name[],
                                       unsigned int &filter_config) const
 {
-   herr_t ret_value = H5Pget_filter_by_id(id, filter_id, &flags, &cd_nelmts, 
+   herr_t ret_value = H5Pget_filter_by_id(id, filter_id, &flags, &cd_nelmts,
 				cd_values, namelen, name, &filter_config );
    if (ret_value < 0)
    {

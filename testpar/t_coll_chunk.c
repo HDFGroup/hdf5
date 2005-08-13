@@ -26,13 +26,13 @@
 static void ccslab_set(int mpi_rank,int mpi_size,hsize_t start[],hsize_t count[],
 		hsize_t stride[],hsize_t block[],int mode);
 
-static void ccdataset_fill(hsize_t start[],hsize_t count[],             
-                 hsize_t stride[],hsize_t block[],DATATYPE*dataset);    
+static void ccdataset_fill(hsize_t start[],hsize_t count[],
+                 hsize_t stride[],hsize_t block[],DATATYPE*dataset);
 
 static void ccdataset_print(hsize_t start[],hsize_t block[],DATATYPE*dataset);
 
-static int ccdataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[],     
-                 hsize_t block[], DATATYPE *dataset, DATATYPE *original); 
+static int ccdataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[],
+                 hsize_t block[], DATATYPE *dataset, DATATYPE *original);
 
 static void coll_chunktest(const char* filename,int chunk_factor,int select_factor);
 
@@ -94,7 +94,7 @@ coll_chunk4(void)
   const char *filename;
   int mpi_size;
   MPI_Comm comm = MPI_COMM_WORLD;
-  MPI_Comm_size(comm,&mpi_size);           
+  MPI_Comm_size(comm,&mpi_size);
   filename = GetTestParameters();
   coll_chunktest(filename,mpi_size*2,BYROW_DISCONT);
 
@@ -106,7 +106,7 @@ coll_chunktest(const char* filename,int chunk_factor,int select_factor) {
   hid_t	   file,dataset, file_dataspace;
   hid_t    acc_plist,xfer_plist,crp_plist;
   hsize_t  dims[RANK], chunk_dims[RANK];
-  int*     data_array1  = NULL;    
+  int*     data_array1  = NULL;
   int*     data_origin1 = NULL;
   herr_t   status;
   hsize_t start[RANK];
@@ -129,7 +129,7 @@ coll_chunktest(const char* filename,int chunk_factor,int select_factor) {
 
   status = H5Pset_fapl_mpio(acc_plist,comm,info);
   VRFY((acc_plist >= 0),"MPIO creation property list succeeded");
-  
+
   file = H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_plist);
   VRFY((file >= 0),"H5Fcreate succeeded");
 
@@ -137,11 +137,11 @@ coll_chunktest(const char* filename,int chunk_factor,int select_factor) {
   VRFY((status >= 0),"");
 
   /* setup dimensionality object */
-   
+
     dims[0] = SPACE_DIM1;
     dims[1] = SPACE_DIM2;
 
-  /* each process takes a slab of rows 
+  /* each process takes a slab of rows
     stride[0] = 1;
     stride[1] = 1;
     count[0]  = SPACE_DIM1/mpi_size;
@@ -164,7 +164,7 @@ coll_chunktest(const char* filename,int chunk_factor,int select_factor) {
 
     crp_plist = H5Pcreate(H5P_DATASET_CREATE);
     VRFY((crp_plist >= 0),"");
- 
+
     /* test1: chunk size is equal to dataset size */
     chunk_dims[0] = SPACE_DIM1/chunk_factor;
 
@@ -173,9 +173,9 @@ coll_chunktest(const char* filename,int chunk_factor,int select_factor) {
     else chunk_dims[1] = SPACE_DIM2/chunk_factor;
     status = H5Pset_chunk(crp_plist, 2, chunk_dims);
     VRFY((status >= 0),"chunk creation property list succeeded");
- 
+
     dataset = H5Dcreate(file,DSET_COLLECTIVE_CHUNK_NAME,H5T_NATIVE_INT,
-			file_dataspace,crp_plist); 
+			file_dataspace,crp_plist);
     VRFY((dataset >= 0),"dataset created succeeded");
 /*    H5Sclose(file_dataspace); */
 
@@ -225,19 +225,19 @@ coll_chunktest(const char* filename,int chunk_factor,int select_factor) {
     }
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
     status = H5Dclose(dataset);
-    VRFY((status >= 0),""); 
+    VRFY((status >= 0),"");
 
     /* check whether using collective IO */
     /* Should use H5Pget and H5Pinsert to handle this test. */
 
     status = H5Pclose(xfer_plist);
-    VRFY((status >= 0),"property list closed"); 
+    VRFY((status >= 0),"property list closed");
 
     status = H5Sclose(file_dataspace);
-    VRFY((status >= 0),""); 
+    VRFY((status >= 0),"");
 
     status = H5Fclose(file);
-    VRFY((status >= 0),""); 
+    VRFY((status >= 0),"");
 
     if (data_array1) free(data_array1);
 
@@ -257,7 +257,7 @@ coll_chunktest(const char* filename,int chunk_factor,int select_factor) {
 
     status = H5Pset_fapl_mpio(acc_plist,comm,info);
     VRFY((acc_plist >= 0),"MPIO creation property list succeeded");
-  
+
     file = H5Fopen(filename,H5F_ACC_RDONLY,acc_plist);
     VRFY((file >= 0),"H5Fcreate succeeded");
 
@@ -279,8 +279,8 @@ coll_chunktest(const char* filename,int chunk_factor,int select_factor) {
 
     /* fill dataset with test data */
     ccdataset_fill(start, stride,count,block, data_origin1);
-    xfer_plist = H5Pcreate (H5P_DATASET_XFER);              
-    VRFY((xfer_plist >= 0),"");          
+    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
+    VRFY((xfer_plist >= 0),"");
     status = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((status>= 0),"MPIO collective transfer property succeeded");
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
@@ -329,7 +329,7 @@ coll_chunktest(const char* filename,int chunk_factor,int select_factor) {
     /* release data buffers */
     if (data_array1) free(data_array1);
     if (data_origin1) free(data_origin1);
-    
+
 }
 
 
@@ -409,11 +409,11 @@ ccdataset_fill(hsize_t start[], hsize_t stride[], hsize_t count[], hsize_t block
 
             dataptr = tmptr + ((start[0]+k1*stride[0]+i)*SPACE_DIM2+
 			       start[1]+k2*stride[1]+j);
-             
+
 	      *dataptr = (DATATYPE)(k1+k2+i+j);
           }
          }
-      } 
+      }
     }
 
 }
@@ -469,7 +469,7 @@ ccdataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block
     }
 
     vrfyerrs = 0;
-    
+
     for (k1 = 0; k1 < count[0];k1++) {
       for(i = 0;i < block[0];i++) {
         for(k2 = 0; k2<count[1];k2++) {
@@ -479,7 +479,7 @@ ccdataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block
 			       start[1]+k2*stride[1]+j);
 	     oriptr =  original + ((start[0]+k1*stride[0]+i)*SPACE_DIM2+
 			       start[1]+k2*stride[1]+j);
-    
+
 	    if (*dataptr != *oriptr){
 		if (vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED){
 		    printf("Dataset Verify failed at [%lu][%lu]: expect %d, got %d\n",

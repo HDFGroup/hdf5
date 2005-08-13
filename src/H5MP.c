@@ -265,7 +265,7 @@ HDfprintf(stderr,"%s: request = %Zu, needed = %Zu\n", FUNC, request, needed);
         size_t page_size;       /* Size of page needed */
 
         /* Check if the request is too large for a standard page */
-        page_size = (needed > mp->max_size) ? 
+        page_size = (needed > mp->max_size) ?
             (needed + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_t))) : mp->page_size;
 
         /* Allocate new page */

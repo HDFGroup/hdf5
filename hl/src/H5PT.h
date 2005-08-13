@@ -90,9 +90,9 @@ H5_HLDLL herr_t  H5PTis_valid( hid_t table_id );
 H5_HLDLL herr_t  H5PTis_varlen( hid_t table_id );
 
 /*-------------------------------------------------------------------------
- * 
+ *
  * Packet Table "current index" functions
- * 
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -102,9 +102,9 @@ H5_HLDLL herr_t  H5PTset_index( hid_t table_id,
                              hsize_t pt_index );
 
 /*-------------------------------------------------------------------------
- * 
+ *
  * Memory Management functions
- * 
+ *
  *-------------------------------------------------------------------------
  */
 

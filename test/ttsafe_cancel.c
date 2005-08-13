@@ -24,7 +24,7 @@
  *
  * The cancellation should only work after the child thread has safely
  * left the H5Diterate call.
- * 
+ *
  * Temporary files generated:
  *   ttsafe_cancel.h5
  *

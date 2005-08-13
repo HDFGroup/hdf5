@@ -58,7 +58,7 @@ const H5O_class_t H5O_LAYOUT[1] = {{
     H5O_layout_debug,       	/*debug the message             */
 }};
 
-/* For forward and backward compatibility.  Version is 1 when space is 
+/* For forward and backward compatibility.  Version is 1 when space is
  * allocated; 2 when space is delayed for allocation; 3 is default now and
  * is revised to just store information needed for each storage type. */
 #define H5O_LAYOUT_VERSION_1	1
@@ -352,7 +352,7 @@ H5O_layout_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
     assert(mesg);
     if (!dest && NULL==(dest=H5FL_MALLOC(H5O_layout_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    
+
     /* copy */
     *dest = *mesg;
 
@@ -376,20 +376,20 @@ done:
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_layout_meta_size
- * 
+ *
  * Purpose:     Returns the size of the raw message in bytes except raw data
- *              part for compact dataset.  This function doesn't take into 
+ *              part for compact dataset.  This function doesn't take into
  *              account message alignment.
- *              
+ *
  * Return:      Success:        Message data size in bytes(except raw data
  *                              for compact dataset)
  *              Failure:        0
- *              
+ *
  * Programmer:  Raymond Lu
- *              August 14, 2002 
- *              
+ *              August 14, 2002
+ *
  * Modifications:
- * 
+ *
  *-------------------------------------------------------------------------
  */
 size_t
@@ -397,20 +397,20 @@ H5O_layout_meta_size(const H5F_t *f, const void *_mesg)
 {
     const H5O_layout_t      *mesg = (const H5O_layout_t *) _mesg;
     size_t                  ret_value;
-     
+
     FUNC_ENTER_NOAPI_NOINIT(H5O_layout_meta_size);
-                                
+
     /* check args */
     assert(f);
     assert(mesg);
-                     
+
     ret_value = 1 +                     /* Version number                       */
                 1;                      /* layout class type                    */
 
     switch(mesg->type) {
         case H5D_CONTIGUOUS:
-            ret_value += H5F_SIZEOF_ADDR(f);    /* Address of data */ 
-            ret_value += H5F_SIZEOF_SIZE(f);    /* Length of data */ 
+            ret_value += H5F_SIZEOF_ADDR(f);    /* Address of data */
+            ret_value += H5F_SIZEOF_SIZE(f);    /* Length of data */
             break;
 
         case H5D_CHUNKED:
@@ -419,7 +419,7 @@ H5O_layout_meta_size(const H5F_t *f, const void *_mesg)
             ret_value++;
 
             /* B-tree address */
-            ret_value += H5F_SIZEOF_ADDR(f);    /* Address of data */ 
+            ret_value += H5F_SIZEOF_ADDR(f);    /* Address of data */
 
             /* Dimension sizes */
             ret_value += mesg->u.chunk.ndims*4;
@@ -434,15 +434,15 @@ H5O_layout_meta_size(const H5F_t *f, const void *_mesg)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, 0, "Invalid layout class");
     } /* end switch */
 
-done:                
+done:
     FUNC_LEAVE_NOAPI(ret_value);
-}   
-                 
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_layout_size
  *
- * Purpose:     Returns the size of the raw message in bytes.  If it's 
+ * Purpose:     Returns the size of the raw message in bytes.  If it's
  *              compact dataset, the data part is also included.
  *              This function doesn't take into account message alignment.
  *

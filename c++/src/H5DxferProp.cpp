@@ -41,7 +41,7 @@ DSetMemXferPropList::DSetMemXferPropList() : PropList(H5P_DATASET_XFER) {}
 // Function	DSetMemXferPropList copy constructor
 ///\brief	Copy constructor: makes a copy of the original
 ///		DSetMemXferPropList object
-///\param	orig - IN: The original dataset memory and transfer property 
+///\param	orig - IN: The original dataset memory and transfer property
 ///				list object to copy
 // Programmer:	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -222,7 +222,7 @@ void DSetMemXferPropList::getTypeConvCB( H5T_conv_except_func_t *op, void **user
 //--------------------------------------------------------------------------
 void DSetMemXferPropList::setVlenMemManager( H5MM_allocate_t alloc_func, void* alloc_info, H5MM_free_t free_func, void* free_info ) const
 {
-   herr_t ret_value = H5Pset_vlen_mem_manager( id, alloc_func, alloc_info, 
+   herr_t ret_value = H5Pset_vlen_mem_manager( id, alloc_func, alloc_info,
 						free_func, free_info );
    if( ret_value < 0 )
    {
@@ -233,7 +233,7 @@ void DSetMemXferPropList::setVlenMemManager( H5MM_allocate_t alloc_func, void* a
 
 //--------------------------------------------------------------------------
 // Function:	DSetMemXferPropList::setVlenMemManager
-///\brief	Sets the memory manager for variable-length datatype 
+///\brief	Sets the memory manager for variable-length datatype
 ///		allocation - system \c malloc and \c free will be used.
 ///
 ///\exception	H5::PropListIException
@@ -246,7 +246,7 @@ void DSetMemXferPropList::setVlenMemManager() const
 
 //--------------------------------------------------------------------------
 // Function:	DSetMemXferPropList::getVlenMemManager
-///\brief	Gets the memory manager for variable-length datatype allocation 
+///\brief	Gets the memory manager for variable-length datatype allocation
 ///\param	alloc_func - OUT: User's allocate routine
 ///\param	alloc_info - OUT: User's allocation parameters
 ///\param	free_func  - OUT: User's free routine
@@ -270,7 +270,7 @@ void DSetMemXferPropList::getVlenMemManager( H5MM_allocate_t& alloc_func, void**
 ///\param	memb_dxpl - OUT: Array of data access property lists
 ///\exception	H5::PropListIException
 ///\par Description
-///		This function can only be used after the member map has 
+///		This function can only be used after the member map has
 ///		been set with FileAccPropList::setMulti (not done - BMR.)
 // Programmer:	Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
@@ -304,7 +304,7 @@ void DSetMemXferPropList::getMulti(hid_t *memb_dxpl)
 //--------------------------------------------------------------------------
 // Function:	DSetMemXferPropList::setSmallDataBlockSize
 ///\brief	Sets the size of a contiguous block reserved for small data.
-///\param	size - IN: Maximum size, in bytes, of the small data block. 
+///\param	size - IN: Maximum size, in bytes, of the small data block.
 ///\exception	H5::PropListIException
 ///\par Description
 ///		For detail, please refer to the C layer Reference Manual at:
@@ -363,7 +363,7 @@ void DSetMemXferPropList::setHyperVectorSize(size_t vector_size)
 
 //--------------------------------------------------------------------------
 // Function:	DSetMemXferPropList::getSmallDataBlockSize
-///\brief	Returns the number of I/O vectors to be read/written in 
+///\brief	Returns the number of I/O vectors to be read/written in
 ///		hyperslab I/O.
 ///\return	Number of I/O vectors
 ///\exception	H5::PropListIException
@@ -389,14 +389,14 @@ size_t DSetMemXferPropList::getHyperVectorSize()
 ///				disabled
 ///\exception	H5::PropListIException
 ///\par Description
-///		The error detection algorithm used is the algorithm previously 
-///		specified in the corresponding dataset creation property 
-///		list.  This function does not affect the use of error 
+///		The error detection algorithm used is the algorithm previously
+///		specified in the corresponding dataset creation property
+///		list.  This function does not affect the use of error
 ///		detection in the writing process.
 ///\par
 ///		Valid values are as follows:
-///		\li \c H5Z_ENABLE_EDC   (default) 
-///		\li \c H5Z_DISABLE_EDC  
+///		\li \c H5Z_ENABLE_EDC   (default)
+///		\li \c H5Z_DISABLE_EDC
 // Programmer:	Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
 void DSetMemXferPropList::setEDCCheck(H5Z_EDC_t check)

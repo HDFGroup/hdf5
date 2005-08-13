@@ -178,7 +178,7 @@ H5O_pline_encode (H5F_t UNUSED *f, uint8_t *p/*out*/, const void *mesg)
     size_t		i, j, name_length;
     const char		*name=NULL;
     H5Z_class_t		*cls=NULL;
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_pline_encode);
 
     /* Check args */
@@ -251,7 +251,7 @@ H5O_pline_copy (const void *_src, void *_dst/*out*/, unsigned UNUSED update_flag
     H5O_pline_t		*dst = (H5O_pline_t *)_dst;
     size_t		i;
     H5O_pline_t		*ret_value;
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5O_pline_copy);
 
     if (!dst && NULL==(dst = H5FL_MALLOC (H5O_pline_t)))
@@ -266,7 +266,7 @@ H5O_pline_copy (const void *_src, void *_dst/*out*/, unsigned UNUSED update_flag
     } else {
 	dst->filter = NULL;
     }
-    
+
     for (i=0; i<src->nused; i++) {
 	dst->filter[i] = src->filter[i];
 	if (src->filter[i].name) {
@@ -326,7 +326,7 @@ H5O_pline_size (const H5F_t UNUSED *f, const void *mesg)
     const char		*name = NULL;
     H5Z_class_t		*cls = NULL;
     size_t ret_value;           /* Return value */
-        
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_pline_size);
 
     /* Message header */
@@ -340,14 +340,14 @@ H5O_pline_size (const H5F_t UNUSED *f, const void *mesg)
                 (cls=H5Z_find(pline->filter[i].id)))
 	    name = cls->name;
 	name_len = name ? HDstrlen(name)+1 : 0;
-	
+
 
 	ret_value += 2 +		/*filter identification number	*/
 		2 +			/*name length			*/
 		2 +			/*flags				*/
 		2 +			/*number of client data values	*/
 		H5O_ALIGN(name_len);	/*length of the filter name	*/
-	
+
 	ret_value += pline->filter[i].cd_nelmts * 4;
 	if (pline->filter[i].cd_nelmts % 2)
             ret_value += 4;
@@ -377,7 +377,7 @@ H5O_pline_reset (void *mesg)
 {
     H5O_pline_t	*pline = (H5O_pline_t*)mesg;
     size_t	i;
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_pline_reset);
 
     assert (pline);
@@ -487,6 +487,6 @@ H5O_pline_debug (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *mesg, FILE *
 		    (unsigned long)(pline->filter[i].cd_values[j]));
 	}
     }
-    
+
     FUNC_LEAVE_NOAPI(SUCCEED);
 }

@@ -18,8 +18,8 @@
 
 #include "H5Classes.h"		// constains forward class declarations
 
-// H5Object is a baseclass.  It has these subclasses: 
-// Group, AbstractDs, and DataType. 
+// H5Object is a baseclass.  It has these subclasses:
+// Group, AbstractDs, and DataType.
 // AbstractDs, in turn, has subclasses DataSet and Attribute.
 // DataType, in turn, has several specific datatypes as subclasses.
 
@@ -31,8 +31,8 @@ namespace H5 {
 class H5_DLLCPP H5Object;  // forward declaration for UserData4Aiterate
 
 // Define the operator function pointer for H5Aiterate().
-typedef void (*attr_operator_t)( H5Object& loc/*in*/, 
-				 const string attr_name/*in*/, 
+typedef void (*attr_operator_t)( H5Object& loc/*in*/,
+				 const string attr_name/*in*/,
 				 void *operator_data/*in,out*/);
 
 class UserData4Aiterate { // user data for attribute iteration

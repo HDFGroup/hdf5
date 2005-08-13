@@ -62,7 +62,7 @@ void test_config_ctypes(void);
  *
  *-------------------------------------------------------------------------
  */
-void 
+void
 test_configure(void)
 {
     /* Output message about test being performed */
@@ -108,7 +108,7 @@ cleanup_configure(void)
  *
  *-------------------------------------------------------------------------
  */
-void 
+void
 test_config_ctypes(void)
 {
     /* standard C89 basic types */

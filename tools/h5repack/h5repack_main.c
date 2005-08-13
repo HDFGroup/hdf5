@@ -22,7 +22,7 @@ static void usage(void);
  *
  * Purpose: h5repack main program
  *
- * Return: 1, error, 0, no error 
+ * Return: 1, error, 0, no error
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
  /* initialize options  */
  h5repack_init (&options,0);
 
- for ( i = 1; i < argc; i++) 
+ for ( i = 1; i < argc; i++)
  {
   if (strcmp(argv[i], "-h") == 0) {
     usage();
@@ -56,14 +56,14 @@ int main(int argc, char **argv)
   if (strcmp(argv[i], "-i") == 0) {
    infile = argv[++i];
   }
-  else if (strcmp(argv[i], "-o") == 0) {       
-   outfile = argv[++i]; 
+  else if (strcmp(argv[i], "-o") == 0) {
+   outfile = argv[++i];
   }
-  else if (strcmp(argv[i], "-v") == 0) {       
+  else if (strcmp(argv[i], "-v") == 0) {
    options.verbose = 1;
   }
-  else if (strcmp(argv[i], "-f") == 0) {  
-   
+  else if (strcmp(argv[i], "-f") == 0) {
+
    /* add the -f filter option */
    if (h5repack_addfilter(argv[i+1],&options)<0)
     exit(1);
@@ -71,17 +71,17 @@ int main(int argc, char **argv)
    /* jump to next */
    ++i;
   }
-  else if (strcmp(argv[i], "-l") == 0) {       
-   
+  else if (strcmp(argv[i], "-l") == 0) {
+
    /* parse the -l layout option */
    if (h5repack_addlayout(argv[i+1],&options)<0)
     exit(1);
-   
+
    /* jump to next */
    ++i;
   }
 
-  else if (strcmp(argv[i], "-m") == 0) {       
+  else if (strcmp(argv[i], "-m") == 0) {
    options.threshold = parse_number(argv[i+1]);
    if ((int)options.threshold==-1) {
     printf("Error: Invalid treshold size <%s>\n",argv[i+1]);
@@ -89,23 +89,23 @@ int main(int argc, char **argv)
    }
    ++i;
   }
-  
-  else if (strcmp(argv[i], "-e") == 0) {       
+
+  else if (strcmp(argv[i], "-e") == 0) {
    read_info(argv[++i],&options);
   }
-  
+
   else if (argv[i][0] == '-') {
    usage();
    exit(1);
   }
  }
 
- if (infile == NULL || outfile == NULL) 
+ if (infile == NULL || outfile == NULL)
  {
   usage();
   exit(1);
  }
- 
+
  /* pack it */
  ret=h5repack(infile,outfile,&options);
 
@@ -128,7 +128,7 @@ int main(int argc, char **argv)
  *-------------------------------------------------------------------------
  */
 
-static 
+static
 void usage(void)
 {
  printf("h5repack -i input -o output [-h] [-v] [-f 'filter'] [-l 'layout'][-m number][-e file] \n");

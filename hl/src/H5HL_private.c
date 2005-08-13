@@ -37,9 +37,9 @@
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5TBcommon_append_records( hid_t dataset_id, 
-                                  hid_t mem_type_id, 
-                                  hsize_t nrecords, 
+herr_t H5TBcommon_append_records( hid_t dataset_id,
+                                  hid_t mem_type_id,
+                                  hsize_t nrecords,
                                   hsize_t orig_table_size,
                                   const void * data)
 {
@@ -71,7 +71,7 @@ herr_t H5TBcommon_append_records( hid_t dataset_id,
     goto out;
 
   /* Write the records */
-  if ( H5Dwrite( dataset_id, mem_type_id, mem_space_id, space_id, H5P_DEFAULT, data ) < 
+  if ( H5Dwrite( dataset_id, mem_type_id, mem_space_id, space_id, H5P_DEFAULT, data ) <
 0 )
     goto out;
 
@@ -94,7 +94,7 @@ out:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5TBcommon_read_records 
+ * Function: H5TBcommon_read_records
  *
  * Purpose: Common code for reading records shared between H5PT and H5TB
  *
@@ -107,7 +107,7 @@ out:
  *
  * Comments: Called by H5TBread_records and H5PTread_records
  *
- * Modifications: 
+ * Modifications:
  *
  *
  *-------------------------------------------------------------------------
@@ -118,8 +118,8 @@ herr_t H5TBcommon_read_records( hid_t dataset_id,
                                                         hsize_t nrecords,
                                                         hsize_t table_size,
                                                         void *data)
-{  
-  hsize_t  count[1];    
+{
+  hsize_t  count[1];
   hsize_t offset[1];
   hid_t    space_id = H5I_BADID;
   hid_t    mem_space_id = H5I_BADID;
@@ -129,7 +129,7 @@ herr_t H5TBcommon_read_records( hid_t dataset_id,
   if ( start + nrecords > table_size )
     goto out;
 
-  /* Get the dataspace handle */  
+  /* Get the dataspace handle */
   if ( (space_id = H5Dget_space( dataset_id )) < 0 )
     goto out;
 

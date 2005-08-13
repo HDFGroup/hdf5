@@ -18,7 +18,7 @@
 #define PRINT_DATA_MAX_SIZE 	512
 #define OUTBUFF_SIZE 		PRINT_DATA_MAX_SIZE*4
 /* Send from manager to workers */
-#define MPI_TAG_ARGS		1	
+#define MPI_TAG_ARGS		1
 #define MPI_TAG_PRINT_TOK	2
 
 /*Sent from workers to manager */
@@ -40,9 +40,9 @@ extern FILE*		overflow_file;
 struct diff_args
 {
     char	name[256];
-    H5G_obj_t   type;   
+    H5G_obj_t   type;
     diff_opt_t	options;
-};   
+};
 
 struct diffs_found
 {

@@ -64,9 +64,9 @@ double          prop4_def=1.41;   /* Property 4 default value */
 **
 **  test_genprop_basic_class(): Test basic generic property list code.
 **      Tests creating new generic classes.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_genprop_basic_class(void)
 {
     hid_t		cid1;		/* Generic Property class ID */
@@ -153,9 +153,9 @@ test_genprop_basic_class(void)
 **
 **  test_genprop_basic_class_prop(): Test basic generic property list code.
 **      Tests adding properties to generic classes.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_genprop_basic_class_prop(void)
 {
     hid_t		cid1;		/* Generic Property class ID */
@@ -300,9 +300,9 @@ test_genprop_basic_class_prop(void)
 /****************************************************************
 **
 **  test_genprop_iter1(): Property iterator for test_genprop_class_iter
-** 
+**
 ****************************************************************/
-static int 
+static int
 test_genprop_iter1(hid_t id, const char *name, void *iter_data)
 {
     struct {                /* Struct for iterations */
@@ -320,9 +320,9 @@ test_genprop_iter1(hid_t id, const char *name, void *iter_data)
 **
 **  test_genprop_class_iter(): Test basic generic property list code.
 **      Tests iterating over properties in a generic class.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_genprop_class_iter(void)
 {
     hid_t		cid1;		/* Generic Property class ID */
@@ -403,9 +403,9 @@ test_genprop_class_iter(void)
 /****************************************************************
 **
 **  test_genprop_cls_cb1(): Property List callback for test_genprop_class_callback
-** 
+**
 ****************************************************************/
-static herr_t 
+static herr_t
 test_genprop_cls_cb1(hid_t list_id, void *create_data)
 {
     struct {                /* Struct for iterations */
@@ -419,7 +419,7 @@ test_genprop_cls_cb1(hid_t list_id, void *create_data)
     return(SUCCEED);
 }
 
-static herr_t 
+static herr_t
 test_genprop_cls_cb2(hid_t new_list_id, hid_t UNUSED old_list_id, void *create_data)
 {
     struct {                /* Struct for iterations */
@@ -436,9 +436,9 @@ test_genprop_cls_cb2(hid_t new_list_id, hid_t UNUSED old_list_id, void *create_d
 **
 **  test_genprop_class_callback(): Test basic generic property list code.
 **      Tests callbacks for property lists in a generic class.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_genprop_class_callback(void)
 {
     hid_t	cid1;		/* Generic Property class ID */
@@ -552,9 +552,9 @@ test_genprop_class_callback(void)
 **
 **  test_genprop_basic_list(): Test basic generic property list code.
 **      Tests creating new generic property lists.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_genprop_basic_list(void)
 {
     hid_t		cid1;		/* Generic Property class ID */
@@ -662,9 +662,9 @@ test_genprop_basic_list(void)
 **  test_genprop_basic_list_prop(): Test basic generic property list code.
 **      Tests creating new generic property lists and adding and
 **      removing properties from them.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_genprop_basic_list_prop(void)
 {
     hid_t		cid1;		/* Generic Property class ID */
@@ -807,9 +807,9 @@ test_genprop_basic_list_prop(void)
 /****************************************************************
 **
 **  test_genprop_iter2(): Property iterator for test_genprop_list_iter
-** 
+**
 ****************************************************************/
-static int 
+static int
 test_genprop_iter2(hid_t id, const char *name, void *iter_data)
 {
     struct {                /* Struct for iterations */
@@ -827,9 +827,9 @@ test_genprop_iter2(hid_t id, const char *name, void *iter_data)
 **
 **  test_genprop_list_iter(): Test basic generic property list code.
 **      Tests iterating over generic property list properties.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_genprop_list_iter(void)
 {
     hid_t		cid1;		/* Generic Property class ID */
@@ -972,9 +972,9 @@ prop_cb_info prop2_cb_info;     /* Callback statistics for property #2 */
 /****************************************************************
 **
 **  test_genprop_prop_crt_cb1(): Property creation callback for test_genprop_list_callback
-** 
+**
 ****************************************************************/
-static herr_t 
+static herr_t
 test_genprop_prop_crt_cb1(const char *name, size_t size, void *def_value)
 {
     /* Set the information from the creation call */
@@ -989,9 +989,9 @@ test_genprop_prop_crt_cb1(const char *name, size_t size, void *def_value)
 /****************************************************************
 **
 **  test_genprop_prop_set_cb1(): Property set callback for test_genprop_list_callback
-** 
+**
 ****************************************************************/
-static herr_t 
+static herr_t
 test_genprop_prop_set_cb1(hid_t plist_id, const char *name, size_t size, void *value)
 {
     /* Set the information from the set call */
@@ -1009,9 +1009,9 @@ test_genprop_prop_set_cb1(hid_t plist_id, const char *name, size_t size, void *v
 /****************************************************************
 **
 **  test_genprop_prop_get_cb1(): Property get callback for test_genprop_list_callback
-** 
+**
 ****************************************************************/
-static herr_t 
+static herr_t
 test_genprop_prop_get_cb1(hid_t plist_id, const char *name, size_t size, void *value)
 {
     /* Set the information from the get call */
@@ -1029,9 +1029,9 @@ test_genprop_prop_get_cb1(hid_t plist_id, const char *name, size_t size, void *v
 /****************************************************************
 **
 **  test_genprop_prop_cop_cb1(): Property copy callback for test_genprop_list_callback
-** 
+**
 ****************************************************************/
-static herr_t 
+static herr_t
 test_genprop_prop_cop_cb1(const char *name, size_t size, void *value)
 {
     /* Set the information from the get call */
@@ -1049,9 +1049,9 @@ test_genprop_prop_cop_cb1(const char *name, size_t size, void *value)
 /****************************************************************
 **
 **  test_genprop_prop_cmp_cb1(): Property comparison callback for test_genprop_list_callback
-** 
+**
 ****************************************************************/
-static int 
+static int
 test_genprop_prop_cmp_cb1(const void UNUSED *value1, const void UNUSED *value2, size_t UNUSED size)
 {
     /* Set the information from the comparison call */
@@ -1064,9 +1064,9 @@ test_genprop_prop_cmp_cb1(const void UNUSED *value1, const void UNUSED *value2, 
 /****************************************************************
 **
 **  test_genprop_prop_cls_cb1(): Property close callback for test_genprop_list_callback
-** 
+**
 ****************************************************************/
-static herr_t 
+static herr_t
 test_genprop_prop_cls_cb1(const char *name, size_t size, void *value)
 {
     /* Set the information from the close call */
@@ -1083,9 +1083,9 @@ test_genprop_prop_cls_cb1(const char *name, size_t size, void *value)
 /****************************************************************
 **
 **  test_genprop_prop_del_cb2(): Property delete callback for test_genprop_list_callback
-** 
+**
 ****************************************************************/
-static herr_t 
+static herr_t
 test_genprop_prop_del_cb2(hid_t plist_id, const char *name, size_t size, void *value)
 {
     /* Set the information from the delete call */
@@ -1102,9 +1102,9 @@ test_genprop_prop_del_cb2(hid_t plist_id, const char *name, size_t size, void *v
 **
 **  test_genprop_list_callback(): Test basic generic property list code.
 **      Tests callbacks for properties in a generic property list.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_genprop_list_callback(void)
 {
     hid_t	cid1;		/* Generic Property class ID */
@@ -1313,9 +1313,9 @@ test_genprop_list_callback(void)
 **  test_genprop_list_addprop(): Test adding properties to a
 **      standard HDF5 property list and verify that the library
 **      ignores the extra properties.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_genprop_list_addprop(void)
 {
     hid_t fid;          /* File ID */
@@ -1336,7 +1336,7 @@ test_genprop_list_addprop(void)
     /* Create a dataset creation property list */
     pid = H5Pcreate(H5P_DATASET_CREATE);
     CHECK(pid, FAIL, "H5Pcreate");
-    
+
     /* Insert temporary property into class (with no callbacks) */
 #ifdef H5_WANT_H5_V1_6_COMPAT
     ret = H5Pinsert(pid,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
@@ -1370,11 +1370,11 @@ test_genprop_list_addprop(void)
     /* Close property list */
     ret = H5Pclose(pid);
     CHECK(ret, FAIL, "H5Pclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(did);
     CHECK(ret, FAIL, "H5Dclose");
@@ -1391,9 +1391,9 @@ test_genprop_list_addprop(void)
 **      standard HDF5 property class and verify that the library
 **      ignores the extra properties and continues to recognize the
 **      derived class as a valid version of the derived-from class.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_genprop_class_addprop(void)
 {
     hid_t fid;          /* File ID */
@@ -1431,7 +1431,7 @@ test_genprop_class_addprop(void)
     /* Create a derived dataset creation property list */
     pid = H5Pcreate(cid);
     CHECK(pid, FAIL, "H5Pcreate");
-    
+
     /* Check existence of an original property */
     ret = H5Pexist(pid,H5D_CRT_DATA_PIPELINE_NAME);
     VERIFY(ret, 1, "H5Pexist");
@@ -1461,15 +1461,15 @@ test_genprop_class_addprop(void)
     /* Close property class */
     ret = H5Pclose_class(cid);
     CHECK(ret, FAIL, "H5Pclose");
-    
+
     /* Close property list */
     ret = H5Pclose(pid);
     CHECK(ret, FAIL, "H5Pclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(did);
     CHECK(ret, FAIL, "H5Dclose");
@@ -1484,9 +1484,9 @@ test_genprop_class_addprop(void)
 **
 **  test_genprop_equal(): Test basic generic property list code.
 **      More tests for H5Pequal()
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_genprop_equal(void)
 {
     hid_t		cid1;		/* Generic Property class ID */
@@ -1539,9 +1539,9 @@ test_genprop_equal(void)
 **
 **  test_genprop_path(): Test basic generic property list code.
 **      Tests for class paths
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_genprop_path(void)
 {
     hid_t		cid1;		/* Generic Property class ID */
@@ -1619,9 +1619,9 @@ test_genprop_path(void)
 **
 **  test_genprop_refcount(): Test basic generic property list code.
 **      Tests for correct reference counting
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_genprop_refcount(void)
 {
     hid_t		cid1;		/* Generic Property class ID */
@@ -1694,9 +1694,9 @@ test_genprop_refcount(void)
 /****************************************************************
 **
 **  test_genprop(): Main generic property testing routine.
-** 
+**
 ****************************************************************/
-void 
+void
 test_genprop(void)
 {
     /* Output message about test being performed */

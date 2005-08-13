@@ -608,7 +608,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
         pio_time_destroy(res.timers);
     }
 
-    /* 
+    /*
      * Show various statistics
      */
     /* Write statistics	*/
@@ -721,7 +721,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
 
 /*
  * Function:    output_all_info
- * Purpose:     
+ * Purpose:
  * Return:      Nothing
  * Programmer:  Bill Wendling, 29. January 2002
  * Modifications:
@@ -776,7 +776,7 @@ accumulate_minmax_stuff(minmax *mm, int count)
 {
     int i;
     minmax total_mm;
-    
+
     total_mm.sum = 0.0;
     total_mm.max = -DBL_MAX;
     total_mm.min = DBL_MAX;

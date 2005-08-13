@@ -36,7 +36,7 @@
 #define H5S_VALID_MAX	0x01
 #define H5S_VALID_PERM	0x02
 
-/* 
+/*
  * Dataspace extent information
  */
 /* Extent container */
@@ -49,7 +49,7 @@ typedef struct {
     hsize_t *max;       /* Maximum size of the dimensions */
 } H5S_extent_t;
 
-/* 
+/*
  * Dataspace selection information
  */
 /* Node in point selection list (typedef'd in H5Sprivate.h) */
@@ -79,7 +79,7 @@ struct H5S_hyper_span_info_t {
     unsigned count;                    /* Ref. count of number of spans which share this span */
     struct H5S_hyper_span_info_t *scratch;  /* Scratch pointer
                                              * (used during copies, as mark
-                                             * during precomputes for I/O & 
+                                             * during precomputes for I/O &
                                              * to point to the last span in a
                                              * list during single element adds)
                                              */

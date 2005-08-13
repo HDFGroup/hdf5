@@ -98,7 +98,7 @@ usage: %s [OPTIONS] [PDBFILE ...]\n\
    the characters \".h5\". For example, \"/tmp/test/eos.data\" would result\n\
    in an HDF5 file called \"eos.h5\" in the current directory.\n",
 	    progname);
-    
+
 }
 
 
@@ -150,7 +150,7 @@ fix_name(const char *pdb_name, char *hdf_name, size_t size)
 {
     char	*s;
     const char	*ext;
-    
+
     if (!pdb_name || !hdf_name) return NULL;
     if ((s=strrchr(pdb_name, '/'))) pdb_name = s;
     if (NULL==(ext=strrchr(pdb_name, '.'))) ext = pdb_name + strlen(pdb_name);
@@ -189,15 +189,15 @@ fix_type(PDBfile *pdb, const char *s)
     assert(d);
     assert(d->size>0);
     if (d->onescmp) return -1;
-    
-    
+
+
     if (!strcmp(s, "char")) {
 	/*
 	 * Character datatypes. Use whatever sign the native system uses by
 	 * default.
 	 */
 	type = H5Tcopy(H5T_NATIVE_CHAR);
-	
+
     } else if (!strcmp(s, "integer")) {
 	/*
 	 * Integer datatypes. PDB supports various sizes of signed or
@@ -209,7 +209,7 @@ fix_type(PDBfile *pdb, const char *s)
 	assert(NORMAL_ORDER==d->order_flag || REVERSE_ORDER==d->order_flag);
 	H5Tset_order(type,
 		     NORMAL_ORDER==d->order_flag?H5T_ORDER_BE:H5T_ORDER_LE);
-	
+
     } else if (!strcmp(s, "float") || !strcmp(s, "double")) {
 	/*
 	 * Floating-point datatypes
@@ -221,14 +221,14 @@ fix_type(PDBfile *pdb, const char *s)
 	H5Tset_precision(type, 8*d->size);
 	assert(d->order);
 	H5Tset_order(type, 1==d->order[0]?H5T_ORDER_BE:H5T_ORDER_LE);
-	
+
 	/*
-	 * format[0] = # of bits per number                     
-	 * format[1] = # of bits in exponent                    
-	 * format[2] = # of bits in mantissa                    
-	 * format[3] = start bit of sign                        
-	 * format[4] = start bit of exponent                    
-	 * format[5] = start bit of mantissa                    
+	 * format[0] = # of bits per number
+	 * format[1] = # of bits in exponent
+	 * format[2] = # of bits in mantissa
+	 * format[3] = start bit of sign
+	 * format[4] = start bit of exponent
+	 * format[5] = start bit of mantissa
 	 * format[6] = high order mantissa bit (CRAY needs this)
 	 * format[7] = bias of exponent
 	 */
@@ -298,7 +298,7 @@ fix_external(hid_t dcpl, const char *pdb_file_name, long nelmts,
 	     hsize_t elmt_size, symblock *block)
 {
     int		i;
-    
+
     for (i=0; nelmts>0; i++) {
 	hsize_t nbytes = block[i].number * elmt_size;
 	H5Pset_external(dcpl, pdb_file_name, block[i].diskaddr, nbytes);
@@ -344,7 +344,7 @@ traverse(PDBfile *pdb, const char *pdb_file_name, hid_t hdf)
 	    printf("%s %s\n", _PD_fixname(pdb, list[i]), ep->type);
 	    fflush(stdout);
 	}
-	
+
 
 	if ('/'==list[i][strlen(list[i])-1]) {
 	    /*
@@ -361,14 +361,14 @@ traverse(PDBfile *pdb, const char *pdb_file_name, hid_t hdf)
 	    } else {
 		in_subdir = TRUE;
 	    }
-	    
+
 	    traverse(pdb, pdb_file_name, group);
 	    if (!PD_cd(pdb, "..")) {
 		fprintf(stderr, "cannot traverse out of PDB %s\n", list[i]);
 		goto error;
 	    }
 	    H5Gclose(group);
-	    
+
 	} else {
 	    /* This is some non-directory PDB object */
 
@@ -401,7 +401,7 @@ traverse(PDBfile *pdb, const char *pdb_file_name, hid_t hdf)
 	    H5Sclose(h_space);
 	    H5Tclose(h_type);
 	}
-	
+
     }
 
     for (i=0; i<nitems; i++) {
@@ -505,7 +505,7 @@ main(int argc, char *argv[])
 		exit(1);
 	    }
 	    H5Pclose(fapl);
-	    
+
 	    /*
 	     * Traverse the PDB file to create the HDF5 file.
 	     */

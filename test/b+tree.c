@@ -65,7 +65,7 @@ test_create(hid_t fapl)
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
         STACK_ERROR
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file)))
 	STACK_ERROR
@@ -123,7 +123,7 @@ test_insert_basic(hid_t fapl)
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
         STACK_ERROR
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file)))
         STACK_ERROR
@@ -160,9 +160,9 @@ error:
  *
  * Purpose:	Test the B+ tree code
  *
- * Return:	Success:	
+ * Return:	Success:
  *
- *		Failure:	
+ *		Failure:
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, April 19, 2005

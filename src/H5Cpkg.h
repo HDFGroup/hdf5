@@ -16,14 +16,14 @@
  * Programmer: John Mainzer -- 10/12/04
  *
  * Purpose:     This file contains declarations which are normally visible
- *              only within the H5C package (just H5C.c at present). 
+ *              only within the H5C package (just H5C.c at present).
  *
- *		Source files outside the H5C package should include 
+ *		Source files outside the H5C package should include
  *		H5Cprivate.h instead.
  *
  *		The one exception to this rule is test/cache.c.  The test
- *		code is easier to write if it can look at the cache's 
- *		internal data structures.  Indeed, this is the main 
+ *		code is easier to write if it can look at the cache's
+ *		internal data structures.  Indeed, this is the main
  *		reason why this file was created.
  */
 
@@ -50,27 +50,27 @@
  *
  * structure H5C_t
  *
- * Catchall structure for all variables specific to an instance of the cache.  
+ * Catchall structure for all variables specific to an instance of the cache.
  *
- * While the individual fields of the structure are discussed below, the 
+ * While the individual fields of the structure are discussed below, the
  * following overview may be helpful.
  *
  * Entries in the cache are stored in an instance of H5TB_TREE, indexed on
- * the entry's disk address.  While the H5TB_TREE is less efficient than 
+ * the entry's disk address.  While the H5TB_TREE is less efficient than
  * hash table, it keeps the entries in address sorted order.  As flushes
- * in parallel mode are more efficient if they are issued in increasing 
+ * in parallel mode are more efficient if they are issued in increasing
  * address order, this is a significant benefit.  Also the H5TB_TREE code
  * was readily available, which reduced development time.
  *
  * While the cache was designed with multiple replacement policies in mind,
- * at present only a modified form of LRU is supported.  
+ * at present only a modified form of LRU is supported.
  *
  *                                              JRM - 4/26/04
  *
  * Profiling has indicated that searches in the instance of H5TB_TREE are
- * too expensive.  To deal with this issue, I have augmented the cache 
- * with a hash table in which all entries will be stored.  Given the 
- * advantages of flushing entries in increasing address order, the TBBT 
+ * too expensive.  To deal with this issue, I have augmented the cache
+ * with a hash table in which all entries will be stored.  Given the
+ * advantages of flushing entries in increasing address order, the TBBT
  * is retained, but only dirty entries are stored in it.  At least for
  * now, we will leave entries in the TBBT after they are flushed.
  *
@@ -83,12 +83,12 @@
  *		field is used to validate pointers to instances of H5C_t.
  *
  * max_type_id:	Integer field containing the maximum type id number assigned
- *		to a type of entry in the cache.  All type ids from 0 to 
- *		max_type_id inclusive must be defined.  The names of the 
+ *		to a type of entry in the cache.  All type ids from 0 to
+ *		max_type_id inclusive must be defined.  The names of the
  *		types are stored in the type_name_table discussed below, and
  *		indexed by the ids.
  *
- * type_name_table_ptr: Pointer to an array of pointer to char of length 
+ * type_name_table_ptr: Pointer to an array of pointer to char of length
  *		max_type_id + 1.  The strings pointed to by the entries
  *		in the array are the names of the entry types associated
  *		with the indexing type IDs.
@@ -103,11 +103,11 @@
  *                 max_cache_size, it will do so.  The cache will attempt
  *                 to reduce its size as entries are unprotected.
  *
- *              b) When running in parallel mode, the cache may not be 
- *		   permitted to flush a dirty entry in response to a read.  
- *		   If there are no clean entries available to evict, the 
- *		   cache will exceed its maximum size.  Again the cache 
- *                 will attempt to reduce its size to the max_cache_size 
+ *              b) When running in parallel mode, the cache may not be
+ *		   permitted to flush a dirty entry in response to a read.
+ *		   If there are no clean entries available to evict, the
+ *		   cache will exceed its maximum size.  Again the cache
+ *                 will attempt to reduce its size to the max_cache_size
  *                 limit on the next cache write.
  *
  * min_clean_size: Nominal minimum number of clean bytes in the cache.
@@ -116,11 +116,11 @@
  *              a soft limit.
  *
  *
- * In addition to the call back functions required for each entry, the 
+ * In addition to the call back functions required for each entry, the
  * cache requires the following call back functions for this instance of
  * the cache as a whole:
- * 
- * check_write_permitted:  In certain applications, the cache may not 
+ *
+ * check_write_permitted:  In certain applications, the cache may not
  *		be allowed to write to disk at certain time.  If specified,
  *		the check_write_permitted function is used to determine if
  *		a write is permissible at any given point in time.
@@ -132,7 +132,7 @@
  * The cache requires an index to facilitate searching for entries.  The
  * following fields support that index.
  *
- * index_len:   Number of entries currently in the hash table used to index 
+ * index_len:   Number of entries currently in the hash table used to index
  *		the cache.
  *
  * index_size:  Number of bytes of cache entries currently stored in the
@@ -146,16 +146,16 @@
  *
  * index:	Array of pointer to H5C_cache_entry_t of size
  *		H5C__HASH_TABLE_LEN.  At present, this value is a power
- *		of two, not the usual prime number.  
+ *		of two, not the usual prime number.
  *
- *		I hope that the variable size of cache elements, the large 
+ *		I hope that the variable size of cache elements, the large
  *		hash table size, and the way in which HDF5 allocates space
- *		will combine to avoid problems with periodicity.  If so, we 
- *		can use a trivial hash function (a bit-and and a 3 bit left 
- *		shift) with some small savings.  
+ *		will combine to avoid problems with periodicity.  If so, we
+ *		can use a trivial hash function (a bit-and and a 3 bit left
+ *		shift) with some small savings.
  *
  *		If not, it will become evident in the statistics. Changing
- *		to the usual prime number length hash table will require 
+ *		to the usual prime number length hash table will require
  *		changing the H5C__HASH_FCN macro and the deletion of the
  *		H5C__HASH_MASK #define.  No other changes should be required.
  *
@@ -330,7 +330,7 @@
  * Automatic cache size adjustment:
  *
  * While the default cache size is adequate for most cases, we can run into
- * cases where the default is too small.  Ideally, we will let the user 
+ * cases where the default is too small.  Ideally, we will let the user
  * adjust the cache size as required.  However, this is not possible in all
  * cases.  Thus I have added automatic cache size adjustment code.
  *
@@ -349,25 +349,25 @@
  *              all the ways this can happen, we simply set this flag when
  *              we receive a new configuration.
  *
- * cache_full:	Boolean flag used to keep track of whether the cache is 
- *		full, so we can refrain from increasing the size of a 
+ * cache_full:	Boolean flag used to keep track of whether the cache is
+ *		full, so we can refrain from increasing the size of a
  *		cache which hasn't used up the space alotted to it.
  *
  *		The field is initialized to FALSE, and then set to TRUE
  *		whenever we attempt to make space in the cache.
  *
  * resize_enabled:  This is another convenience flag which is set whenever
- *		a new set of values for resize_ctl are provided.  Very 
- *		simply, 
+ *		a new set of values for resize_ctl are provided.  Very
+ *		simply,
  *
- *		    resize_enabled = size_increase_possible || 
+ *		    resize_enabled = size_increase_possible ||
  *                                   size_decrease_possible;
  *
- * size_decreased:  Boolean flag set to TRUE whenever the maximun cache 
- *		size is decreased.  The flag triggers a call to 
+ * size_decreased:  Boolean flag set to TRUE whenever the maximun cache
+ *		size is decreased.  The flag triggers a call to
  *		H5C_make_space_in_cache() on the next call to H5C_protect().
  *
- * resize_ctl:	Instance of H5C_auto_size_ctl_t containing configuration 
+ * resize_ctl:	Instance of H5C_auto_size_ctl_t containing configuration
  * 		data for automatic cache resizing.
  *
  * epoch_markers_active:  Integer field containing the number of epoch
@@ -381,37 +381,37 @@
  * epoch_marker_ringbuf:  Array of int of length H5C__MAX_EPOCH_MARKERS + 1.
  *
  *		To manage the epoch marker cache entries, it is necessary
- *		to track their order in the LRU list.  This is done with 
- *		epoch_marker_ringbuf.  When markers are inserted at the 
- *		head of the LRU list, the index of the marker in the 
+ *		to track their order in the LRU list.  This is done with
+ *		epoch_marker_ringbuf.  When markers are inserted at the
+ *		head of the LRU list, the index of the marker in the
  *		epoch_markers array is inserted at the tail of the ring
  *		buffer.  When it becomes the epoch_marker_active'th marker
  *		in the LRU list, it will have worked its way to the head
- *		of the ring buffer as well.  This allows us to remove it 
+ *		of the ring buffer as well.  This allows us to remove it
  *		without scanning the LRU list if such is required.
  *
  * epoch_marker_ringbuf_first: Integer field containing the index of the
  *		first entry in the ring buffer.
  *
- * epoch_marker_ringbuf_last: Integer field containing the index of the 
+ * epoch_marker_ringbuf_last: Integer field containing the index of the
  *		last entry in the ring buffer.
  *
  * epoch_marker_ringbuf_size: Integer field containing the number of entries
  *		in the ring buffer.
- * 
+ *
  * epoch_markers:  Array of instances of H5C_cache_entry_t of length
  *		H5C__MAX_EPOCH_MARKERS.  The entries are used as markers
  *		in the LRU list to identify cache entries that haven't
- *		been accessed for some (small) specified number of 
- *		epochs.  These entries (if any) can then be evicted and 
+ *		been accessed for some (small) specified number of
+ *		epochs.  These entries (if any) can then be evicted and
  *		the cache size reduced -- ideally without evicting any
  *		of the current working set.  Needless to say, the epoch
  *		length and the number of epochs before an unused entry
  *		must be chosen so that all, or almost all, the working
  *		set will be accessed before the limit.
  *
- *		Epoch markers only appear in the LRU list, never in 
- *		the index or slist.  While they are of type 
+ *		Epoch markers only appear in the LRU list, never in
+ *		the index or slist.  While they are of type
  *		H5C__EPOCH_MARKER_TYPE, and have associated class
  *		functions, these functions should never be called.
  *
@@ -419,7 +419,7 @@
  *		are set to the index of the instance in the epoch_markers
  *		array, the size is set to 0, and the type field points
  *		to the constant structure epoch_marker_class defined
- *		in H5C.c.  The next and prev fields are used as usual 
+ *		in H5C.c.  The next and prev fields are used as usual
  *		to link the entry into the LRU list.
  *
  *		All other fields are unused.
@@ -427,18 +427,18 @@
  *
  * Cache hit rate collection fields:
  *
- * We supply the current cache hit rate on request, so we must keep a 
- * simple cache hit rate computation regardless of whether statistics 
+ * We supply the current cache hit rate on request, so we must keep a
+ * simple cache hit rate computation regardless of whether statistics
  * collection is enabled.  The following fields support this capability.
  *
- * cache_hits: Number of cache hits since the last time the cache hit 
- *	rate statistics were reset.  Note that when automatic cache 
- *	re-sizing is enabled, this field will be reset every automatic 
+ * cache_hits: Number of cache hits since the last time the cache hit
+ *	rate statistics were reset.  Note that when automatic cache
+ *	re-sizing is enabled, this field will be reset every automatic
  *	resize epoch.
  *
  * cache_accesses: Number of times the cache has been accessed while
- *	since the last since the last time the cache hit rate statistics 
- *	were reset.  Note that when automatic cache re-sizing is enabled, 
+ *	since the last since the last time the cache hit rate statistics
+ *	were reset.  Note that when automatic cache re-sizing is enabled,
  *	this field will be reset every automatic resize epoch.
  *
  *
@@ -448,39 +448,39 @@
  * below.  The first set are collected only when H5C_COLLECT_CACHE_STATS
  * is true.
  *
- * hits:        Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells 
- *		are used to record the number of times an entry with type id 
- *		equal to the array index has been in cache when requested in 
+ * hits:        Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
+ *		are used to record the number of times an entry with type id
+ *		equal to the array index has been in cache when requested in
  *		the current epoch.
  *
- * misses:      Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells 
- *		are used to record the number of times an entry with type id 
- *		equal to the array index has not been in cache when 
+ * misses:      Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
+ *		are used to record the number of times an entry with type id
+ *		equal to the array index has not been in cache when
  *		requested in the current epoch.
  *
- * insertions:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells 
- *		are used to record the number of times an entry with type 
- *		id equal to the array index has been inserted into the 
+ * insertions:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
+ *		are used to record the number of times an entry with type
+ *		id equal to the array index has been inserted into the
  *		cache in the current epoch.
  *
- * clears:      Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells 
- *		are used to record the number of times an entry with type 
- *		id equal to the array index has been cleared in the current 
+ * clears:      Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
+ *		are used to record the number of times an entry with type
+ *		id equal to the array index has been cleared in the current
  *		epoch.
  *
- * flushes:     Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells 
- *		are used to record the number of times an entry with type id 
+ * flushes:     Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
+ *		are used to record the number of times an entry with type id
  *		equal to the array index has been written to disk in the
  *              current epoch.
  *
- * evictions:   Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells 
- *		are used to record the number of times an entry with type id 
- *		equal to the array index has been evicted from the cache in 
+ * evictions:   Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
+ *		are used to record the number of times an entry with type id
+ *		equal to the array index has been evicted from the cache in
  *		the current epoch.
  *
- * renames:     Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells 
- *		are used to record the number of times an entry with type 
- *		id equal to the array index has been renamed in the current 
+ * renames:     Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
+ *		are used to record the number of times an entry with type
+ *		id equal to the array index has been renamed in the current
  *		epoch.
  *
  * total_ht_insertions: Number of times entries have been inserted into the
@@ -489,10 +489,10 @@
  * total_ht_deletions: Number of times entries have been deleted from the
  *              hash table in the current epoch.
  *
- * successful_ht_searches: int64 containing the total number of successful 
+ * successful_ht_searches: int64 containing the total number of successful
  *		searches of the hash table in the current epoch.
  *
- * total_successful_ht_search_depth: int64 containing the total number of 
+ * total_successful_ht_search_depth: int64 containing the total number of
  *		entries other than the targets examined in successful
  *		searches of the hash table in the current epoch.
  *
@@ -500,7 +500,7 @@
  *              searches of the hash table in the current epoch.
  *
  * total_failed_ht_search_depth: int64 containing the total number of
- *              entries examined in unsuccessful searches of the hash 
+ *              entries examined in unsuccessful searches of the hash
  *		table in the current epoch.
  *
  * max_index_len:  Largest value attained by the index_len field in the
@@ -524,28 +524,28 @@
  * The remaining stats are collected only when both H5C_COLLECT_CACHE_STATS
  * and H5C_COLLECT_CACHE_ENTRY_STATS are true.
  *
- * max_accesses: Array of int32 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells 
- *		are used to record the maximum number of times any single 
- *		entry with type id equal to the array index has been 
+ * max_accesses: Array of int32 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
+ *		are used to record the maximum number of times any single
+ *		entry with type id equal to the array index has been
  *		accessed in the current epoch.
  *
- * min_accesses: Array of int32 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells 
- *		are used to record the minimum number of times any single 
- *		entry with type id equal to the array index has been 
+ * min_accesses: Array of int32 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
+ *		are used to record the minimum number of times any single
+ *		entry with type id equal to the array index has been
  *		accessed in the current epoch.
  *
- * max_clears:  Array of int32 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells 
- *		are used to record the maximum number of times any single 
- *		entry with type id equal to the array index has been cleared 
+ * max_clears:  Array of int32 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
+ *		are used to record the maximum number of times any single
+ *		entry with type id equal to the array index has been cleared
  *		in the current epoch.
  *
- * max_flushes: Array of int32 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells 
- *		are used to record the maximum number of times any single 
- *		entry with type id equal to the array index has been 
+ * max_flushes: Array of int32 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
+ *		are used to record the maximum number of times any single
+ *		entry with type id equal to the array index has been
  *		flushed in the current epoch.
  *
  * max_size:	Array of size_t of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
- *              are used to record the maximum size of any single entry 
+ *              are used to record the maximum size of any single entry
  *		with type id equal to the array index that has resided in
  *		the cache in the current epoch.
  *
@@ -563,9 +563,9 @@
  *		When this flag is set, all sanity checks on the file
  *		parameters are skipped.  The field defaults to FALSE.
  *
- * skip_dxpl_id_checks:  Boolean flag used to skip sanity checks on the 
+ * skip_dxpl_id_checks:  Boolean flag used to skip sanity checks on the
  *		dxpl_id parameters passed to the cache.  These are not
- *		used directly by the cache, so skipping the checks 
+ *		used directly by the cache, so skipping the checks
  *		simplifies the test bed.
  *
  *		When this flag is set, all sanity checks on the dxpl_id

@@ -31,7 +31,7 @@ public:
     ~PacketTable();
 
     /* IsValid
-     * Returns true if this packet table is valid, false otherwise.  
+     * Returns true if this packet table is valid, false otherwise.
      * Use this after the constructor to ensure HDF did not have
      * any trouble making or opening the packet table.
      */
@@ -78,7 +78,7 @@ public:
     /* Constructor
      * Creates a packet table in which to store fixed length records.
      * Takes the ID of the file the packet table will be created in, the name of
-     * the packet table, the ID of the datatype of the set, and the size 
+     * the packet table, the ID of the datatype of the set, and the size
      * of a memory chunk used in chunking.
      */
     FL_PacketTable(hid_t fileID, char* name, hid_t dtypeID, int chunkSize);

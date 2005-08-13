@@ -12,50 +12,50 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*  
+/*
  *   This example shows how to read data from a chunked dataset.
- *   We will read from the file created by h5_extend_write.c 
+ *   We will read from the file created by h5_extend_write.c
  */
- 
+
 #include "hdf5.h"
 
 #define H5FILE_NAME        "SDSextendible.h5"
-#define DATASETNAME "ExtendibleArray" 
+#define DATASETNAME "ExtendibleArray"
 #define RANK         2
 #define RANKC        1
 #define NX           10
-#define NY           5 
+#define NY           5
 
 int
 main (void)
 {
     hid_t       file;                        /* handles */
-    hid_t       dataset;  
-    hid_t       filespace;                   
-    hid_t       memspace;                  
-    hid_t       cparms;                   
-    hsize_t     dims[2];                     /* dataset and chunk dimensions*/ 
+    hid_t       dataset;
+    hid_t       filespace;
+    hid_t       memspace;
+    hid_t       cparms;
+    hsize_t     dims[2];                     /* dataset and chunk dimensions*/
     hsize_t     chunk_dims[2];
     hsize_t     col_dims[1];
     hsize_t     count[2];
     hsize_t     offset[2];
 
-    herr_t      status, status_n;                             
+    herr_t      status, status_n;
 
     int         data_out[NX][NY];  /* buffer for dataset to be read */
     int         chunk_out[2][5];   /* buffer for chunk to be read */
     int         column[10];        /* buffer for column to be read */
     int         rank, rank_chunk;
     hsize_t	i, j;
-    
 
- 
+
+
     /*
      * Open the file and the dataset.
      */
     file = H5Fopen(H5FILE_NAME, H5F_ACC_RDONLY, H5P_DEFAULT);
     dataset = H5Dopen(file, DATASETNAME);
- 
+
     /*
      * Get dataset rank and dimension.
      */
@@ -70,7 +70,7 @@ main (void)
      * Define the memory space to read dataset.
      */
     memspace = H5Screate_simple(RANK,dims,NULL);
- 
+
     /*
      * Read dataset back and display.
      */
@@ -81,7 +81,7 @@ main (void)
     for (j = 0; j < dims[0]; j++) {
 	for (i = 0; i < dims[1]; i++) printf("%d ", data_out[j][i]);
 	printf("\n");
-    }     
+    }
 
     /*
      * Close/release resources.
@@ -89,20 +89,20 @@ main (void)
     H5Sclose(memspace);
 
     /*
-     *	    dataset rank 2, dimensions 10 x 5 
-     *	    chunk rank 2, dimensions 2 x 5 
+     *	    dataset rank 2, dimensions 10 x 5
+     *	    chunk rank 2, dimensions 2 x 5
 
      *	    Dataset:
-     *	    1 1 1 3 3 
-     *	    1 1 1 3 3 
-     *	    1 1 1 0 0 
-     *	    2 0 0 0 0 
-     *	    2 0 0 0 0 
-     *	    2 0 0 0 0 
-     *	    2 0 0 0 0 
-     *	    2 0 0 0 0 
-     *	    2 0 0 0 0 
-     *	    2 0 0 0 0 
+     *	    1 1 1 3 3
+     *	    1 1 1 3 3
+     *	    1 1 1 0 0
+     *	    2 0 0 0 0
+     *	    2 0 0 0 0
+     *	    2 0 0 0 0
+     *	    2 0 0 0 0
+     *	    2 0 0 0 0
+     *	    2 0 0 0 0
+     *	    2 0 0 0 0
      */
 
     /*
@@ -136,17 +136,17 @@ main (void)
     H5Sclose(memspace);
 
     /*
-     *	    Third column: 
-     *	    1 
-     *	    1 
-     *	    1 
-     *	    0 
-     *	    0 
-     *	    0 
-     *	    0 
-     *	    0 
-     *	    0 
-     *	    0 
+     *	    Third column:
+     *	    1
+     *	    1
+     *	    1
+     *	    0
+     *	    0
+     *	    0
+     *	    0
+     *	    0
+     *	    0
+     *	    0
      */
 
     /*
@@ -175,7 +175,7 @@ main (void)
         offset[1] = 0;
         count[0]  = chunk_dims[0];
         count[1]  = chunk_dims[1];
-        status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL, 
+        status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL,
                                      count, NULL);
 
         /*
@@ -188,11 +188,11 @@ main (void)
         for (j = 0; j < chunk_dims[0]; j++) {
             for (i = 0; i < chunk_dims[1]; i++) printf("%d ", chunk_out[j][i]);
             printf("\n");
-        }     
+        }
         /*
-         *	 Chunk: 
-         *	 1 1 1 0 0 
-         *	 2 0 0 0 0 
+         *	 Chunk:
+         *	 1 1 1 0 0
+         *	 2 0 0 0 0
          */
 
         /*
@@ -210,4 +210,4 @@ main (void)
     H5Fclose(file);
 
     return 0;
-}     
+}

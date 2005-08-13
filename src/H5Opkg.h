@@ -124,8 +124,8 @@ H5_DLLVAR const H5O_class_t H5O_DTYPE[1];
 H5_DLLVAR const H5O_class_t H5O_FILL[1];
 
 /*
- * New Fill Value Message.  The new fill value message is fill value plus 
- * space allocation time and fill value writing time and whether fill 
+ * New Fill Value Message.  The new fill value message is fill value plus
+ * space allocation time and fill value writing time and whether fill
  * value is defined.
  */
 H5_DLLVAR const H5O_class_t H5O_FILL_NEW[1];

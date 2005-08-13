@@ -36,7 +36,7 @@
 /* ANY new test needs to have a prototype in testhdf5.h */
 #include "testhdf5.h"
 
-int 
+int
 main(int argc, char *argv[])
 {
     /* Initialize testing framework */

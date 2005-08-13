@@ -38,17 +38,17 @@
 
 /* a list of names */
 typedef struct {
- char obj[MAX_NC_NAME]; 
+ char obj[MAX_NC_NAME];
 } obj_list_t;
 
-/* 
- the type of filter and additional parameter 
+/*
+ the type of filter and additional parameter
  type can be one of the filters
  H5Z_FILTER_NONE       0,  uncompress if compressed
- H5Z_FILTER_DEFLATE	   1 , deflation like gzip	   
+ H5Z_FILTER_DEFLATE	   1 , deflation like gzip
  H5Z_FILTER_SHUFFLE    2 , shuffle the data
  H5Z_FILTER_FLETCHER32 3 , letcher32 checksum of EDC
- H5Z_FILTER_SZIP       4 , szip compression 
+ H5Z_FILTER_SZIP       4 , szip compression
 */
 
 #define CDVALUES 2
@@ -57,15 +57,15 @@ typedef struct {
  H5Z_filter_t filtn;               /* filter identification number */
  int          cd_values[CDVALUES]; /* filter client data values */
  /* extra input for szip, selects the coding method
-    entropy coding method: EC=0 
-    nearest neighbor coding method: NN=1 
+    entropy coding method: EC=0
+    nearest neighbor coding method: NN=1
  */
- int          szip_coding;         
+ int          szip_coding;
 } filter_info_t;
 
 /* chunk lengths along each dimension and rank */
 typedef struct {
- hsize_t chunk_lengths[MAX_VAR_DIMS]; 
+ hsize_t chunk_lengths[MAX_VAR_DIMS];
  int     rank;
 } chunk_info_t;
 
@@ -141,29 +141,29 @@ int h5repack_cmpdcpl   (const char *fname1,
  */
 
 
-int check_objects(const char* fname, 
+int check_objects(const char* fname,
                   pack_opt_t *options);
 
-int copy_objects(const char* fnamein, 
+int copy_objects(const char* fnamein,
                  const char* fnameout,
                  pack_opt_t *options);
 
-void print_objlist(const char *filename, 
-                   int nobjects, 
+void print_objlist(const char *filename,
+                   int nobjects,
                    trav_info_t *travi );
 
-int do_copy_objects(hid_t fidin, 
-                    hid_t fidout, 
+int do_copy_objects(hid_t fidin,
+                    hid_t fidout,
                     trav_table_t *travt,
                     pack_opt_t *options);
 
-int copy_attr(hid_t loc_in, 
-              hid_t loc_out, 
+int copy_attr(hid_t loc_in,
+              hid_t loc_out,
               pack_opt_t *options
               );
 
-int do_copy_refobjs(hid_t fidin, 
-                    hid_t fidout, 
+int do_copy_refobjs(hid_t fidin,
+                    hid_t fidout,
                     trav_table_t *travt,
                     pack_opt_t *options); /* repack options */
 
@@ -235,13 +235,13 @@ pack_info_t* options_get_object( const char *path,
  *-------------------------------------------------------------------------
  */
 
-obj_list_t* parse_filter(const char *str, 
-                         int *n_objs, 
+obj_list_t* parse_filter(const char *str,
+                         int *n_objs,
                          filter_info_t *filt,
                          pack_opt_t *options);
 
-obj_list_t* parse_layout(const char *str, 
-                         int *n_objs, 
+obj_list_t* parse_layout(const char *str,
+                         int *n_objs,
                          pack_info_t *pack,    /* info about object */
                          pack_opt_t *options);
 
@@ -283,23 +283,23 @@ int         parse_number(char *str);
 
 int make_testfiles(void);
 
-int write_dset( hid_t loc_id, 
-                int rank, 
-                hsize_t *dims, 
+int write_dset( hid_t loc_id,
+                int rank,
+                hsize_t *dims,
                 const char *dset_name,
-                hid_t type_id, 
+                hid_t type_id,
                 void *buf );
-int write_attr(hid_t loc_id, 
-               int rank, 
-               hsize_t *dims, 
+int write_attr(hid_t loc_id,
+               int rank,
+               hsize_t *dims,
                const char *attr_name,
-               hid_t type_id, 
+               hid_t type_id,
                void *buf);
-void write_attr_in(hid_t loc_id, 
+void write_attr_in(hid_t loc_id,
                    const char* dset_name, /* for saving reference to dataset*/
                    hid_t fid, /* for reference create */
                    int make_diffs /* flag to modify data buffers */);
-void write_dset_in(hid_t loc_id, 
+void write_dset_in(hid_t loc_id,
                    const char* dset_name, /* for saving reference to dataset*/
                    hid_t file_id,
                    int make_diffs /* flag to modify data buffers */);
@@ -312,15 +312,15 @@ void write_dset_in(hid_t loc_id,
  */
 int make_dset(hid_t loc_id,
               const char *name,
-              hid_t sid, 
+              hid_t sid,
               hid_t dcpl,
               void *buf);
 
-int make_attr(hid_t loc_id, 
-               int rank, 
-               hsize_t *dims, 
+int make_attr(hid_t loc_id,
+               int rank,
+               hsize_t *dims,
                const char *attr_name,
-               hid_t type_id, 
+               hid_t type_id,
                void *buf);
 
 

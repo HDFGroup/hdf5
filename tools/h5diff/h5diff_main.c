@@ -22,7 +22,7 @@
  *
  * Purpose: h5diff main program
  *
- * Return: An  exit status of 0 means no differences were found, 1 means some 
+ * Return: An  exit status of 0 means no differences were found, 1 means some
  *   differences were found.
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
@@ -36,7 +36,7 @@
  *   Normal mode: print the number of differences found and where they occured
  *   Report mode: print the above plus the differences
  *   Verbose mode: print the above plus a list of objects and warnings
- *   Quiet mode: do not print output 
+ *   Quiet mode: do not print output
  *
  * November 2004: Leon Arber (larber@uiuc.edu)
  * 		  Additions that allow h5diff to be run in parallel
@@ -64,9 +64,9 @@ int main(int argc, const char *argv[])
     nfound = h5diff(fname1,fname2,objname1,objname2,&options);
 
     print_results(nfound, &options);
-    
+
     /*-------------------------------------------------------------------------
-     * exit code 
+     * exit code
      *   >0 if differences, 0 if no differences, <0 if error
      *-------------------------------------------------------------------------
      */

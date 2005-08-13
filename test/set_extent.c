@@ -26,7 +26,7 @@
 
 /*-------------------------------------------------------------------------
  *
- * Tests the function H5Dset_extent. In the current version of the library 
+ * Tests the function H5Dset_extent. In the current version of the library
  * the dataset MUST be chunked.
  *
  *-------------------------------------------------------------------------
@@ -41,7 +41,7 @@ int main( void )
 
     hid_t   file_id;
     hid_t   dataset_id=(-1);
-    hid_t   space_id=(-1);  
+    hid_t   space_id=(-1);
     hid_t   plist_id=(-1);
     hid_t   fcpl;               /* File creation property list */
     hsize_t dims[RANK] = { 90, 90 };
@@ -92,7 +92,7 @@ int main( void )
     if (H5Dwrite( dataset_id , H5T_NATIVE_INT, space_id, H5S_ALL, H5P_DEFAULT, data )<0) TEST_ERROR;
 
     /*-------------------------------------------------------------------------
-    * Set new dimensions for the array; shrink it 
+    * Set new dimensions for the array; shrink it
     *-------------------------------------------------------------------------
     */
 
@@ -129,7 +129,7 @@ int main( void )
 
 
     /*-------------------------------------------------------------------------
-    * Set new dimensions for the array; expand it again 
+    * Set new dimensions for the array; expand it again
     *-------------------------------------------------------------------------
     */
 
@@ -198,7 +198,7 @@ int main( void )
     if (H5Dwrite( dataset_id , H5T_NATIVE_INT, space_id, H5S_ALL, H5P_DEFAULT, data )<0) TEST_ERROR;
 
     /*-------------------------------------------------------------------------
-    * Set new dimensions for the array; shrink it 
+    * Set new dimensions for the array; shrink it
     *-------------------------------------------------------------------------
     */
 
@@ -230,7 +230,7 @@ int main( void )
 
 
     /*-------------------------------------------------------------------------
-    * Set new dimensions for the array; expand it again 
+    * Set new dimensions for the array; expand it again
     *-------------------------------------------------------------------------
     */
 
@@ -348,7 +348,7 @@ int main( void )
             if (  buf1[i][j] != data[i][j] )    TEST_ERROR;
 
     /*-------------------------------------------------------------------------
-    * Set new dimensions for the array; expand it again 
+    * Set new dimensions for the array; expand it again
     *-------------------------------------------------------------------------
     */
 
@@ -439,7 +439,7 @@ int main( void )
             if (  buf1[i][j] != data[i][j] ) TEST_ERROR;
 
     /*-------------------------------------------------------------------------
-    * Set new dimensions for the array; expand it again 
+    * Set new dimensions for the array; expand it again
     *-------------------------------------------------------------------------
     */
 

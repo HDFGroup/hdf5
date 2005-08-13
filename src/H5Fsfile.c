@@ -105,7 +105,7 @@ H5F_sfile_add(H5F_file_t *shared)
 {
     H5F_sfile_node_t *new_shared;              /* New shared file node */
     herr_t ret_value = SUCCEED;         /* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5F_sfile_add)
 
     /* Sanity check */
@@ -147,7 +147,7 @@ H5F_sfile_search(H5FD_t *lf)
 {
     H5F_sfile_node_t *curr;             /* Current shared file node */
     H5F_file_t *ret_value = NULL;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_sfile_search)
 
     /* Sanity check */
@@ -189,7 +189,7 @@ H5F_sfile_remove(H5F_file_t *shared)
     H5F_sfile_node_t *curr;             /* Current shared file node */
     H5F_sfile_node_t *last;             /* Last shared file node */
     herr_t ret_value = SUCCEED;         /* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5F_sfile_remove)
 
     /* Sanity check */

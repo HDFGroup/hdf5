@@ -22,7 +22,7 @@
 /*-------------------------------------------------------------------------
  * Function: H5LTmake_dataset_c
  *
- * Purpose: Call H5LTmake_dataset 
+ * Purpose: Call H5LTmake_dataset
  *
  * Return: Success: 0, Failure: -1
  *
@@ -39,12 +39,12 @@
  */
 
 int_f
-nh5ltmake_dataset_c (hid_t_f *loc_id, 
+nh5ltmake_dataset_c (hid_t_f *loc_id,
                      int_f *namelen,
-                     _fcd name, 
-                     int_f *rank, 
+                     _fcd name,
+                     int_f *rank,
                      hsize_t_f *dims,
-                     hid_t_f *type_id, 
+                     hid_t_f *type_id,
                      void *buf)
 {
  int     ret_value = -1;
@@ -60,7 +60,7 @@ nh5ltmake_dataset_c (hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = *namelen;
- c_name = (char *)HD5f2cstring(name, c_namelen); 
+ c_name = (char *)HD5f2cstring(name, c_namelen);
  if (c_name == NULL) return ret_value;
 
  c_dims =  malloc(sizeof(hsize_t) * (*rank ));
@@ -82,17 +82,17 @@ nh5ltmake_dataset_c (hid_t_f *loc_id,
  ret = H5LTmake_dataset(c_loc_id, c_name, *rank, c_dims, c_type_id, buf );
 
  free (c_dims);
- 
+
  if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
-}      
+}
 
 
 /*-------------------------------------------------------------------------
  * Function: H5LTread_dataset_c
  *
- * Purpose: Call H5LTmake_dataset 
+ * Purpose: Call H5LTmake_dataset
  *
  * Return: Success: 0, Failure: -1
  *
@@ -109,10 +109,10 @@ nh5ltmake_dataset_c (hid_t_f *loc_id,
  */
 
 int_f
-nh5ltread_dataset_c (hid_t_f *loc_id, 
+nh5ltread_dataset_c (hid_t_f *loc_id,
                      int_f *namelen,
-                     _fcd name, 
-                     hid_t_f *type_id, 
+                     _fcd name,
+                     hid_t_f *type_id,
                      void *buf,
                      hsize_t_f *dims)
 {
@@ -127,7 +127,7 @@ nh5ltread_dataset_c (hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = *namelen;
- c_name = (char *)HD5f2cstring(name, c_namelen); 
+ c_name = (char *)HD5f2cstring(name, c_namelen);
  if (c_name == NULL) return ret_value;
 
 /*
@@ -141,13 +141,13 @@ nh5ltread_dataset_c (hid_t_f *loc_id,
  if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
-}   
+}
 
 
 /*-------------------------------------------------------------------------
  * Function: H5LTmake_dataset_string_c
  *
- * Purpose: Call H5LTmake_dataset 
+ * Purpose: Call H5LTmake_dataset
  *
  * Return: Success: 0, Failure: -1
  *
@@ -164,9 +164,9 @@ nh5ltread_dataset_c (hid_t_f *loc_id,
  */
 
 int_f
-nh5ltmake_dataset_string_c (hid_t_f *loc_id, 
+nh5ltmake_dataset_string_c (hid_t_f *loc_id,
                             int_f *namelen,
-                            _fcd name, 
+                            _fcd name,
                             char *buf)
 {
  int     ret_value = -1;
@@ -179,7 +179,7 @@ nh5ltmake_dataset_string_c (hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = *namelen;
- c_name = (char *)HD5f2cstring(name, c_namelen); 
+ c_name = (char *)HD5f2cstring(name, c_namelen);
  if (c_name == NULL) return ret_value;
 
 /*
@@ -192,13 +192,13 @@ nh5ltmake_dataset_string_c (hid_t_f *loc_id,
  if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
-}  
+}
 
 
 /*-------------------------------------------------------------------------
  * Function: H5LTread_dataset_string_c
  *
- * Purpose: Call H5LTread_dataset_string 
+ * Purpose: Call H5LTread_dataset_string
  *
  * Return: Success: 0, Failure: -1
  *
@@ -215,9 +215,9 @@ nh5ltmake_dataset_string_c (hid_t_f *loc_id,
  */
 
 int_f
-nh5ltread_dataset_string_c (hid_t_f *loc_id, 
+nh5ltread_dataset_string_c (hid_t_f *loc_id,
                             int_f *namelen,
-                            _fcd name, 
+                            _fcd name,
                             char *buf)
 {
  int     ret_value = -1;
@@ -230,7 +230,7 @@ nh5ltread_dataset_string_c (hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = *namelen;
- c_name = (char *)HD5f2cstring(name, c_namelen); 
+ c_name = (char *)HD5f2cstring(name, c_namelen);
  if (c_name == NULL) return ret_value;
 
 /*
@@ -243,14 +243,14 @@ nh5ltread_dataset_string_c (hid_t_f *loc_id,
  if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
-}   
-    
+}
+
 
 
 /*-------------------------------------------------------------------------
  * Function: H5LTset_attribute_int_c
  *
- * Purpose: Call H5LTset_attribute_int 
+ * Purpose: Call H5LTset_attribute_int
  *
  * Return: Success: 0, Failure: -1
  *
@@ -267,11 +267,11 @@ nh5ltread_dataset_string_c (hid_t_f *loc_id,
  */
 
 int_f
-nh5ltset_attribute_int_c(hid_t_f *loc_id, 
+nh5ltset_attribute_int_c(hid_t_f *loc_id,
                           int_f *namelen,
-                          _fcd dsetname, 
+                          _fcd dsetname,
                           int_f *attrnamelen,
-                          _fcd attrname, 
+                          _fcd attrname,
                           size_t_f *size,
                           void *buf)
 {
@@ -288,11 +288,11 @@ nh5ltset_attribute_int_c(hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = *namelen;
- c_name = (char *)HD5f2cstring(dsetname, c_namelen); 
+ c_name = (char *)HD5f2cstring(dsetname, c_namelen);
  if (c_name == NULL) return ret_value;
 
  c_attrnamelen = (int)*attrnamelen;
- c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen); 
+ c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen);
  if (c_attrname == NULL) return ret_value;
 
 /*
@@ -301,7 +301,7 @@ nh5ltset_attribute_int_c(hid_t_f *loc_id,
  c_loc_id = (hid_t)*loc_id;
  c_size   = (size_t)*size;
 
- if (sizeof(int_f) == sizeof(int)) 
+ if (sizeof(int_f) == sizeof(int))
      ret = H5LTset_attribute_int(c_loc_id,c_name,c_attrname,buf,c_size);
  else if (sizeof(int_f) == sizeof(long))
     ret = H5LTset_attribute_long(c_loc_id,c_name,c_attrname,buf,c_size);
@@ -313,7 +313,7 @@ nh5ltset_attribute_int_c(hid_t_f *loc_id,
  if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
-}  
+}
 
 /*-------------------------------------------------------------------------
  * Function: H5LTset_attribute_float_c
@@ -335,11 +335,11 @@ nh5ltset_attribute_int_c(hid_t_f *loc_id,
  */
 
 int_f
-nh5ltset_attribute_float_c(hid_t_f *loc_id, 
+nh5ltset_attribute_float_c(hid_t_f *loc_id,
                           int_f *namelen,
-                          _fcd dsetname, 
+                          _fcd dsetname,
                           int_f *attrnamelen,
-                          _fcd attrname, 
+                          _fcd attrname,
                           size_t_f *size,
                           void *buf)
 {
@@ -356,11 +356,11 @@ nh5ltset_attribute_float_c(hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = *namelen;
- c_name = (char *)HD5f2cstring(dsetname, c_namelen); 
+ c_name = (char *)HD5f2cstring(dsetname, c_namelen);
  if (c_name == NULL) return ret_value;
 
  c_attrnamelen = *attrnamelen;
- c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen); 
+ c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen);
  if (c_attrname == NULL) return ret_value;
 
 /*
@@ -370,11 +370,11 @@ nh5ltset_attribute_float_c(hid_t_f *loc_id,
  c_size   = (size_t)*size;
 
  ret = H5LTset_attribute_float(c_loc_id,c_name,c_attrname,buf,c_size);
- 
+
  if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
-}  
+}
 
 
 /*-------------------------------------------------------------------------
@@ -397,11 +397,11 @@ nh5ltset_attribute_float_c(hid_t_f *loc_id,
  */
 
 int_f
-nh5ltset_attribute_double_c(hid_t_f *loc_id, 
+nh5ltset_attribute_double_c(hid_t_f *loc_id,
                           int_f *namelen,
-                          _fcd dsetname, 
+                          _fcd dsetname,
                           int_f *attrnamelen,
-                          _fcd attrname, 
+                          _fcd attrname,
                           size_t_f *size,
                           void *buf)
 {
@@ -418,11 +418,11 @@ nh5ltset_attribute_double_c(hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = *namelen;
- c_name = (char *)HD5f2cstring(dsetname, c_namelen); 
+ c_name = (char *)HD5f2cstring(dsetname, c_namelen);
  if (c_name == NULL) return ret_value;
 
  c_attrnamelen = *attrnamelen;
- c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen); 
+ c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen);
  if (c_attrname == NULL) return ret_value;
 
 /*
@@ -432,11 +432,11 @@ nh5ltset_attribute_double_c(hid_t_f *loc_id,
  c_size   = (size_t)*size;
 
  ret = H5LTset_attribute_double(c_loc_id,c_name,c_attrname,buf,c_size);
- 
+
  if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
-}  
+}
 
 /*-------------------------------------------------------------------------
  * Function: H5LTset_attribute_string_c
@@ -458,11 +458,11 @@ nh5ltset_attribute_double_c(hid_t_f *loc_id,
  */
 
 int_f
-nh5ltset_attribute_string_c(hid_t_f *loc_id, 
+nh5ltset_attribute_string_c(hid_t_f *loc_id,
                           int_f *namelen,
-                          _fcd dsetname, 
+                          _fcd dsetname,
                           int_f *attrnamelen,
-                          _fcd attrname, 
+                          _fcd attrname,
                           void *buf)
 {
  int     ret_value = -1;
@@ -477,11 +477,11 @@ nh5ltset_attribute_string_c(hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = *namelen;
- c_name = (char *)HD5f2cstring(dsetname, c_namelen); 
+ c_name = (char *)HD5f2cstring(dsetname, c_namelen);
  if (c_name == NULL) return ret_value;
 
  c_attrnamelen = *attrnamelen;
- c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen); 
+ c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen);
  if (c_attrname == NULL) return ret_value;
 
 /*
@@ -490,16 +490,16 @@ nh5ltset_attribute_string_c(hid_t_f *loc_id,
  c_loc_id = (hid_t)*loc_id;
 
  ret = H5LTset_attribute_string(c_loc_id,c_name,c_attrname,buf);
- 
+
  if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
-}  
+}
 
 /*-------------------------------------------------------------------------
  * Function: H5LTget_attribute_int_c
  *
- * Purpose: Call H5LTget_attribute_int 
+ * Purpose: Call H5LTget_attribute_int
  *
  * Return: Success: 0, Failure: -1
  *
@@ -516,11 +516,11 @@ nh5ltset_attribute_string_c(hid_t_f *loc_id,
  */
 
 int_f
-nh5ltget_attribute_int_c(hid_t_f *loc_id, 
+nh5ltget_attribute_int_c(hid_t_f *loc_id,
                           int_f *namelen,
-                          _fcd dsetname, 
+                          _fcd dsetname,
                           int_f *attrnamelen,
-                          _fcd attrname, 
+                          _fcd attrname,
                           void *buf)
 {
  int     ret_value = -1;
@@ -535,18 +535,18 @@ nh5ltget_attribute_int_c(hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = (int)*namelen;
- c_name = (char *)HD5f2cstring(dsetname, c_namelen); 
+ c_name = (char *)HD5f2cstring(dsetname, c_namelen);
  if (c_name == NULL) return ret_value;
 
  c_attrnamelen = (int)*attrnamelen;
- c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen); 
+ c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen);
  if (c_attrname == NULL) return ret_value;
 
 /*
  * Call H5LTget_attribute_int function.
  */
  c_loc_id = (hid_t)*loc_id;
- 
+
  if(sizeof(int_f) == sizeof(int))
     ret = H5LTget_attribute_int(c_loc_id,c_name,c_attrname,buf);
  else if (sizeof(int_f) == sizeof(long))
@@ -555,17 +555,17 @@ nh5ltget_attribute_int_c(hid_t_f *loc_id,
     ret = H5LTget_attribute_long_long(c_loc_id,c_name,c_attrname,buf);
  else
     return ret_value;
- 
+
  if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
-}                
+}
 
 
 /*-------------------------------------------------------------------------
  * Function: H5LTget_attribute_float_c
  *
- * Purpose: Call H5LTget_attribute_float 
+ * Purpose: Call H5LTget_attribute_float
  *
  * Return: Success: 0, Failure: -1
  *
@@ -582,11 +582,11 @@ nh5ltget_attribute_int_c(hid_t_f *loc_id,
  */
 
 int_f
-nh5ltget_attribute_float_c(hid_t_f *loc_id, 
+nh5ltget_attribute_float_c(hid_t_f *loc_id,
                           int_f *namelen,
-                          _fcd dsetname, 
+                          _fcd dsetname,
                           int_f *attrnamelen,
-                          _fcd attrname, 
+                          _fcd attrname,
                           void *buf)
 {
  int     ret_value = -1;
@@ -601,11 +601,11 @@ nh5ltget_attribute_float_c(hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = (int)*namelen;
- c_name = (char *)HD5f2cstring(dsetname, c_namelen); 
+ c_name = (char *)HD5f2cstring(dsetname, c_namelen);
  if (c_name == NULL) return ret_value;
 
  c_attrnamelen = (int)*attrnamelen;
- c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen); 
+ c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen);
  if (c_attrname == NULL) return ret_value;
 
 /*
@@ -614,16 +614,16 @@ nh5ltget_attribute_float_c(hid_t_f *loc_id,
  c_loc_id = (hid_t)*loc_id;
 
  ret = H5LTget_attribute_float(c_loc_id,c_name,c_attrname,buf);
- 
+
  if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
-}                
+}
 
 /*-------------------------------------------------------------------------
  * Function: H5LTget_attribute_double_c
  *
- * Purpose: Call H5LTget_attribute_double 
+ * Purpose: Call H5LTget_attribute_double
  *
  * Return: Success: 0, Failure: -1
  *
@@ -640,11 +640,11 @@ nh5ltget_attribute_float_c(hid_t_f *loc_id,
  */
 
 int_f
-nh5ltget_attribute_double_c(hid_t_f *loc_id, 
+nh5ltget_attribute_double_c(hid_t_f *loc_id,
                           int_f *namelen,
-                          _fcd dsetname, 
+                          _fcd dsetname,
                           int_f *attrnamelen,
-                          _fcd attrname, 
+                          _fcd attrname,
                           void *buf)
 {
  int     ret_value = -1;
@@ -659,11 +659,11 @@ nh5ltget_attribute_double_c(hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = (int)*namelen;
- c_name = (char *)HD5f2cstring(dsetname, c_namelen); 
+ c_name = (char *)HD5f2cstring(dsetname, c_namelen);
  if (c_name == NULL) return ret_value;
 
  c_attrnamelen = (int)*attrnamelen;
- c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen); 
+ c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen);
  if (c_attrname == NULL) return ret_value;
 
 /*
@@ -672,16 +672,16 @@ nh5ltget_attribute_double_c(hid_t_f *loc_id,
  c_loc_id = (hid_t)*loc_id;
 
  ret = H5LTget_attribute_double(c_loc_id,c_name,c_attrname,buf);
- 
+
  if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
-}                
+}
 
 /*-------------------------------------------------------------------------
  * Function: H5LTget_attribute_string_c
  *
- * Purpose: Call H5LTget_attribute_string 
+ * Purpose: Call H5LTget_attribute_string
  *
  * Return: Success: 0, Failure: -1
  *
@@ -698,11 +698,11 @@ nh5ltget_attribute_double_c(hid_t_f *loc_id,
  */
 
 int_f
-nh5ltget_attribute_string_c(hid_t_f *loc_id, 
+nh5ltget_attribute_string_c(hid_t_f *loc_id,
                           int_f *namelen,
-                          _fcd dsetname, 
+                          _fcd dsetname,
                           int_f *attrnamelen,
-                          _fcd attrname, 
+                          _fcd attrname,
                           void *buf)
 {
  int     ret_value = -1;
@@ -717,11 +717,11 @@ nh5ltget_attribute_string_c(hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = (int)*namelen;
- c_name = (char *)HD5f2cstring(dsetname, c_namelen); 
+ c_name = (char *)HD5f2cstring(dsetname, c_namelen);
  if (c_name == NULL) return ret_value;
 
  c_attrnamelen = (int)*attrnamelen;
- c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen); 
+ c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen);
  if (c_attrname == NULL) return ret_value;
 
 /*
@@ -730,17 +730,17 @@ nh5ltget_attribute_string_c(hid_t_f *loc_id,
  c_loc_id = (hid_t)*loc_id;
 
  ret = H5LTget_attribute_string(c_loc_id,c_name,c_attrname,buf);
- 
+
  if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
-}                
+}
 
 
 /*-------------------------------------------------------------------------
  * Function: H5LTget_dataset_ndims_c
  *
- * Purpose: Call H5LTget_dataset_ndims 
+ * Purpose: Call H5LTget_dataset_ndims
  *
  * Return: Success: 0, Failure: -1
  *
@@ -757,9 +757,9 @@ nh5ltget_attribute_string_c(hid_t_f *loc_id,
  */
 
 int_f
-nh5ltget_dataset_ndims_c(hid_t_f *loc_id, 
+nh5ltget_dataset_ndims_c(hid_t_f *loc_id,
                          int_f *namelen,
-                         _fcd name, 
+                         _fcd name,
                          int_f *rank)
 {
  int     ret_value = -1;
@@ -773,7 +773,7 @@ nh5ltget_dataset_ndims_c(hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = (int)*namelen;
- c_name = (char *)HD5f2cstring(name, c_namelen); 
+ c_name = (char *)HD5f2cstring(name, c_namelen);
  if (c_name == NULL) return ret_value;
 
 /*
@@ -782,12 +782,12 @@ nh5ltget_dataset_ndims_c(hid_t_f *loc_id,
  c_loc_id = (hid_t)*loc_id;
 
  ret = H5LTget_dataset_ndims(c_loc_id, c_name, &c_rank);
- 
+
  if (ret < 0) return ret_value;
  *rank = (int_f)c_rank;
  ret_value = 0;
  return ret_value;
-}         
+}
 
 
 /*-------------------------------------------------------------------------
@@ -810,7 +810,7 @@ nh5ltget_dataset_ndims_c(hid_t_f *loc_id,
  */
 
 int_f
-nh5ltfind_dataset_c(hid_t_f *loc_id, 
+nh5ltfind_dataset_c(hid_t_f *loc_id,
                     int_f *namelen,
                     _fcd name)
 {
@@ -822,7 +822,7 @@ nh5ltfind_dataset_c(hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = (int)*namelen;
- c_name = (char *)HD5f2cstring(name, c_namelen); 
+ c_name = (char *)HD5f2cstring(name, c_namelen);
  if (c_name == NULL) return -1;
 
 /*
@@ -831,13 +831,13 @@ nh5ltfind_dataset_c(hid_t_f *loc_id,
  c_loc_id = (hid_t)*loc_id;
 
  return( H5LTfind_dataset(c_loc_id, c_name));
- 
-}         
+
+}
 
 /*-------------------------------------------------------------------------
  * Function: h5ltget_dataset_info_c
  *
- * Purpose: Call H5LTget_dataset_info 
+ * Purpose: Call H5LTget_dataset_info
  *
  * Return: Success: 0, Failure: -1
  *
@@ -854,7 +854,7 @@ nh5ltfind_dataset_c(hid_t_f *loc_id,
  */
 
 int_f
-nh5ltget_dataset_info_c(hid_t_f *loc_id, 
+nh5ltget_dataset_info_c(hid_t_f *loc_id,
                         int_f *namelen,
                         _fcd name,
                         hsize_t_f *dims,
@@ -875,7 +875,7 @@ nh5ltget_dataset_info_c(hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = (int)*namelen;
- c_name = (char *)HD5f2cstring(name, c_namelen); 
+ c_name = (char *)HD5f2cstring(name, c_namelen);
  if (c_name == NULL) return ret_value;
 
 /*
@@ -891,16 +891,16 @@ nh5ltget_dataset_info_c(hid_t_f *loc_id,
   dims[i] = (hsize_t_f) c_dims[i];
  }
 
- 
+
  if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
-}         
+}
 
 /*-------------------------------------------------------------------------
  * Function: h5ltget_attribute_ndims_c
  *
- * Purpose: Call H5LTget_attribute_ndims 
+ * Purpose: Call H5LTget_attribute_ndims
  *
  * Return: Success: 0, Failure: -1
  *
@@ -917,11 +917,11 @@ nh5ltget_dataset_info_c(hid_t_f *loc_id,
  */
 
 int_f
-nh5ltget_attribute_ndims_c(hid_t_f *loc_id, 
+nh5ltget_attribute_ndims_c(hid_t_f *loc_id,
                           int_f *namelen,
-                          _fcd dsetname, 
+                          _fcd dsetname,
                           int_f *attrnamelen,
-                          _fcd attrname, 
+                          _fcd attrname,
                           int_f *rank)
 {
  int     ret_value = -1;
@@ -937,11 +937,11 @@ nh5ltget_attribute_ndims_c(hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen =(int) *namelen;
- c_name = (char *)HD5f2cstring(dsetname, c_namelen); 
+ c_name = (char *)HD5f2cstring(dsetname, c_namelen);
  if (c_name == NULL) return ret_value;
 
  c_attrnamelen = (int)*attrnamelen;
- c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen); 
+ c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen);
  if (c_attrname == NULL) return ret_value;
 
 /*
@@ -950,18 +950,18 @@ nh5ltget_attribute_ndims_c(hid_t_f *loc_id,
  c_loc_id = (hid_t)*loc_id;
 
  ret = H5LTget_attribute_ndims(c_loc_id,c_name,c_attrname,&c_rank);
- 
+
  if (ret < 0) return ret_value;
  *rank = (int_f)c_rank;
  ret_value = 0;
  return ret_value;
-}  
+}
 
 
 /*-------------------------------------------------------------------------
  * Function: h5ltget_attribute_info_c
  *
- * Purpose: Call H5LTget_attribute_info 
+ * Purpose: Call H5LTget_attribute_info
  *
  * Return: Success: 0, Failure: -1
  *
@@ -978,11 +978,11 @@ nh5ltget_attribute_ndims_c(hid_t_f *loc_id,
  */
 
 int_f
-nh5ltget_attribute_info_c(hid_t_f *loc_id, 
+nh5ltget_attribute_info_c(hid_t_f *loc_id,
                         int_f *namelen,
                         _fcd name,
                         int_f *attrnamelen,
-                        _fcd attrname, 
+                        _fcd attrname,
                         hsize_t_f *dims,
                         int_f *type_class,
                         size_t_f *type_size)
@@ -1003,11 +1003,11 @@ nh5ltget_attribute_info_c(hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = (int)*namelen;
- c_name = (char *)HD5f2cstring(name, c_namelen); 
+ c_name = (char *)HD5f2cstring(name, c_namelen);
  if (c_name == NULL) return ret_value;
 
  c_attrnamelen = (int)*attrnamelen;
- c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen); 
+ c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen);
  if (c_attrname == NULL) return ret_value;
 
 /*
@@ -1023,8 +1023,8 @@ nh5ltget_attribute_info_c(hid_t_f *loc_id,
   dims[i] = (hsize_t_f) c_dims[i];
  }
 
- 
+
  if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
-}         
+}

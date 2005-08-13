@@ -37,7 +37,7 @@ NAME
    H5T_init_precis_interface -- Initialize interface-specific information
 USAGE
     herr_t H5T_init_precis_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -92,7 +92,7 @@ H5Tget_precision(hid_t type_id)
         dt = dt->shared->parent;	/*defer to parent*/
     if (!H5T_IS_ATOMIC(dt->shared))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, 0, "operation not defined for specified datatype")
-    
+
     /* Precision */
     ret_value = dt->shared->u.atomic.prec;
 
@@ -246,7 +246,7 @@ H5T_set_precision(const H5T_t *dt, size_t prec)
                             dt->shared->u.atomic.u.f.epos + dt->shared->u.atomic.u.f.esize > prec+offset ||
                             dt->shared->u.atomic.u.f.mpos + dt->shared->u.atomic.u.f.msize > prec+offset)
                         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "adjust sign, mantissa, and exponent fields first")
-                    break; 
+                    break;
                 default:
                     HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "operation not defined for datatype class")
 	    } /* end switch */ /*lint !e788 All appropriate cases are covered */
@@ -259,7 +259,7 @@ H5T_set_precision(const H5T_t *dt, size_t prec)
         else
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for specified datatype")
     } /* end else */
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }

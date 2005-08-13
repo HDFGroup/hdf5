@@ -53,7 +53,7 @@ typedef struct thread_info {
 	int id;
 	hid_t file;
 	const char *dsetname;
-} thread_info; 
+} thread_info;
 
 /*
  * Set individual dataset names (rather than generated the names

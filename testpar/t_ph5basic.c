@@ -88,7 +88,7 @@ test_fapl_mpio_dup(void)
     VRFY((ret >= 0), "");
 
     /* Case 1:
-     * Free the created communicator and INFO object. 
+     * Free the created communicator and INFO object.
      * Check if the access property list is still valid and can return
      * valid communicator and INFO object.
      */
@@ -247,7 +247,7 @@ test_fapl_mpiposix_dup(void)
     VRFY((ret >= 0), "");
 
     /* Case 1:
-     * Free the created communicator object. 
+     * Free the created communicator object.
      * Check if the access property list is still valid and can return
      * valid communicator object.
      */
@@ -290,7 +290,7 @@ test_fapl_mpiposix_dup(void)
     VRFY((mpi_rank_tmp==mpi_rank), "MPI_Comm_rank");
 
     /* Case 3:
-     * Close the property list and verify the retrieved communicator 
+     * Close the property list and verify the retrieved communicator
      * object is still valid.
      */
     H5Pclose(acc_pl);

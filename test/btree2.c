@@ -189,7 +189,7 @@ test_insert_basic(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -234,7 +234,7 @@ test_insert_basic(hid_t fapl)
     if(ret != FAIL) TEST_ERROR;
 
     /*
-     * Test inserting record into v2 B-tree 
+     * Test inserting record into v2 B-tree
      */
     TESTING("B-tree insert: several records");
     record=42;
@@ -387,7 +387,7 @@ test_insert_split_root(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -404,7 +404,7 @@ test_insert_split_root(hid_t fapl)
     }
 
     /*
-     * Test inserting many records into v2 B-tree 
+     * Test inserting many records into v2 B-tree
      */
     TESTING("B-tree insert: split root");
 
@@ -524,7 +524,7 @@ test_insert_level1_2leaf_redistrib(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -532,7 +532,7 @@ test_insert_level1_2leaf_redistrib(hid_t fapl)
     }
 
     /*
-     * Create v2 B-tree 
+     * Create v2 B-tree
      */
     if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
 	H5_FAILED();
@@ -541,7 +541,7 @@ test_insert_level1_2leaf_redistrib(hid_t fapl)
     }
 
     /*
-     * Test inserting many records into v2 B-tree 
+     * Test inserting many records into v2 B-tree
      */
     TESTING("B-tree insert: redistribute 2 leaves in level 1 B-tree (l->r)");
 
@@ -567,7 +567,7 @@ test_insert_level1_2leaf_redistrib(hid_t fapl)
     PASSED();
 
     /*
-     * Create v2 B-tree 
+     * Create v2 B-tree
      */
     if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
 	H5_FAILED();
@@ -576,7 +576,7 @@ test_insert_level1_2leaf_redistrib(hid_t fapl)
     }
 
     /*
-     * Test inserting many records into v2 B-tree 
+     * Test inserting many records into v2 B-tree
      */
     TESTING("B-tree insert: redistribute 2 leaves in level 1 B-tree (r->l)");
 
@@ -647,7 +647,7 @@ test_insert_level1_2leaf_split(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -655,7 +655,7 @@ test_insert_level1_2leaf_split(hid_t fapl)
     }
 
     /*
-     * Create v2 B-tree 
+     * Create v2 B-tree
      */
     if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
 	H5_FAILED();
@@ -664,7 +664,7 @@ test_insert_level1_2leaf_split(hid_t fapl)
     }
 
     /*
-     * Test inserting many records into v2 B-tree 
+     * Test inserting many records into v2 B-tree
      */
     TESTING("B-tree insert: split 2 leaves to 3 in level 1 B-tree (l->r)");
 
@@ -690,7 +690,7 @@ test_insert_level1_2leaf_split(hid_t fapl)
     PASSED();
 
     /*
-     * Create v2 B-tree 
+     * Create v2 B-tree
      */
     if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
 	H5_FAILED();
@@ -699,7 +699,7 @@ test_insert_level1_2leaf_split(hid_t fapl)
     }
 
     /*
-     * Test inserting many records into v2 B-tree 
+     * Test inserting many records into v2 B-tree
      */
     TESTING("B-tree insert: split 2 leaves to 3 in level 1 B-tree (r->l)");
 
@@ -772,7 +772,7 @@ test_insert_level1_3leaf_redistrib(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -780,7 +780,7 @@ test_insert_level1_3leaf_redistrib(hid_t fapl)
     }
 
     /*
-     * Create v2 B-tree 
+     * Create v2 B-tree
      */
     if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
 	H5_FAILED();
@@ -789,7 +789,7 @@ test_insert_level1_3leaf_redistrib(hid_t fapl)
     }
 
     /*
-     * Test inserting many records into v2 B-tree 
+     * Test inserting many records into v2 B-tree
      */
     TESTING("B-tree insert: redistribute 3 leaves in level 1 B-tree");
 
@@ -873,7 +873,7 @@ test_insert_level1_3leaf_split(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -881,7 +881,7 @@ test_insert_level1_3leaf_split(hid_t fapl)
     }
 
     /*
-     * Create v2 B-tree 
+     * Create v2 B-tree
      */
     if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
 	H5_FAILED();
@@ -890,7 +890,7 @@ test_insert_level1_3leaf_split(hid_t fapl)
     }
 
     /*
-     * Test inserting many records into v2 B-tree 
+     * Test inserting many records into v2 B-tree
      */
     TESTING("B-tree insert: split 3 leaves to 4 in level 1 B-tree");
 
@@ -960,7 +960,7 @@ test_insert_make_level2(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -968,7 +968,7 @@ test_insert_make_level2(hid_t fapl)
     }
 
     /*
-     * Create v2 B-tree 
+     * Create v2 B-tree
      */
     if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
 	H5_FAILED();
@@ -977,7 +977,7 @@ test_insert_make_level2(hid_t fapl)
     }
 
     /*
-     * Test inserting many records into v2 B-tree 
+     * Test inserting many records into v2 B-tree
      */
     TESTING("B-tree insert: make level 2 B-tree");
 
@@ -1126,7 +1126,7 @@ test_insert_level2_leaf_redistrib(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -1134,7 +1134,7 @@ test_insert_level2_leaf_redistrib(hid_t fapl)
     }
 
     /*
-     * Create v2 B-tree 
+     * Create v2 B-tree
      */
     if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
 	H5_FAILED();
@@ -1143,7 +1143,7 @@ test_insert_level2_leaf_redistrib(hid_t fapl)
     }
 
     /*
-     * Test inserting many records into v2 B-tree 
+     * Test inserting many records into v2 B-tree
      */
     TESTING("B-tree insert: redistrib right-most leaf in level 2 B-tree");
 
@@ -1252,7 +1252,7 @@ test_insert_level2_leaf_split(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -1260,7 +1260,7 @@ test_insert_level2_leaf_split(hid_t fapl)
     }
 
     /*
-     * Create v2 B-tree 
+     * Create v2 B-tree
      */
     if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
 	H5_FAILED();
@@ -1269,7 +1269,7 @@ test_insert_level2_leaf_split(hid_t fapl)
     }
 
     /*
-     * Test inserting many records into v2 B-tree 
+     * Test inserting many records into v2 B-tree
      */
     TESTING("B-tree insert: split right-most leaf in level 2 B-tree");
 
@@ -1379,7 +1379,7 @@ test_insert_level2_2internal_redistrib(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -1387,7 +1387,7 @@ test_insert_level2_2internal_redistrib(hid_t fapl)
     }
 
     /*
-     * Create v2 B-tree 
+     * Create v2 B-tree
      */
     if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
 	H5_FAILED();
@@ -1396,7 +1396,7 @@ test_insert_level2_2internal_redistrib(hid_t fapl)
     }
 
     /*
-     * Test inserting many records into v2 B-tree 
+     * Test inserting many records into v2 B-tree
      */
     TESTING("B-tree insert: redist. 2 internal (r->l) in level 2 B-tree");
 
@@ -1484,7 +1484,7 @@ test_insert_level2_2internal_split(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -1492,7 +1492,7 @@ test_insert_level2_2internal_split(hid_t fapl)
     }
 
     /*
-     * Create v2 B-tree 
+     * Create v2 B-tree
      */
     if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
 	H5_FAILED();
@@ -1501,7 +1501,7 @@ test_insert_level2_2internal_split(hid_t fapl)
     }
 
     /*
-     * Test inserting many records into v2 B-tree 
+     * Test inserting many records into v2 B-tree
      */
     TESTING("B-tree insert: split 2 internals to 3 in level 2 B-tree (r->l)");
 
@@ -1590,7 +1590,7 @@ test_insert_level2_3internal_redistrib(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -1598,7 +1598,7 @@ test_insert_level2_3internal_redistrib(hid_t fapl)
     }
 
     /*
-     * Create v2 B-tree 
+     * Create v2 B-tree
      */
     if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
 	H5_FAILED();
@@ -1607,7 +1607,7 @@ test_insert_level2_3internal_redistrib(hid_t fapl)
     }
 
     /*
-     * Test inserting many records into v2 B-tree 
+     * Test inserting many records into v2 B-tree
      */
     TESTING("B-tree insert: redistrib 3 internals in level 2 B-tree");
 
@@ -1693,7 +1693,7 @@ test_insert_level2_3internal_split(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -1701,7 +1701,7 @@ test_insert_level2_3internal_split(hid_t fapl)
     }
 
     /*
-     * Create v2 B-tree 
+     * Create v2 B-tree
      */
     if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
 	H5_FAILED();
@@ -1710,7 +1710,7 @@ test_insert_level2_3internal_split(hid_t fapl)
     }
 
     /*
-     * Test inserting many records into v2 B-tree 
+     * Test inserting many records into v2 B-tree
      */
     TESTING("B-tree insert: split 3 internals to 4 in level 2 B-tree");
 
@@ -1822,7 +1822,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -1830,7 +1830,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     }
 
     /*
-     * Create v2 B-tree 
+     * Create v2 B-tree
      */
     if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
 	H5_FAILED();
@@ -1839,7 +1839,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     }
 
     /*
-     * Test inserting many records into v2 B-tree 
+     * Test inserting many records into v2 B-tree
      */
     TESTING("B-tree insert: create random level 4 B-tree");
 
@@ -1974,7 +1974,7 @@ test_remove_basic(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -2304,7 +2304,7 @@ test_remove_level1_noredistrib(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -2487,7 +2487,7 @@ test_remove_level1_redistrib(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -2655,7 +2655,7 @@ test_remove_level1_2leaf_merge(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -2809,7 +2809,7 @@ test_remove_level1_3leaf_merge(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -2925,7 +2925,7 @@ test_remove_level1_promote(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -3087,7 +3087,7 @@ test_remove_level1_promote_2leaf_redistrib(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -3225,7 +3225,7 @@ test_remove_level1_promote_3leaf_redistrib(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -3363,7 +3363,7 @@ test_remove_level1_promote_2leaf_merge(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -3501,7 +3501,7 @@ test_remove_level1_promote_3leaf_merge(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -3639,7 +3639,7 @@ test_remove_level1_collapse(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -3755,7 +3755,7 @@ test_remove_level2_promote(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -3961,7 +3961,7 @@ test_remove_level2_promote_2internal_redistrib(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -4097,7 +4097,7 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -4233,7 +4233,7 @@ test_remove_level2_promote_2internal_merge(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -4369,7 +4369,7 @@ test_remove_level2_promote_3internal_merge(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -4505,7 +4505,7 @@ test_remove_level2_2internal_merge_left(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -4621,7 +4621,7 @@ test_remove_level2_2internal_merge_right(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -4737,7 +4737,7 @@ test_remove_level2_3internal_merge(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -4853,7 +4853,7 @@ test_remove_level2_collapse_right(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -4997,7 +4997,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -5005,7 +5005,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     }
 
     /*
-     * Create v2 B-tree 
+     * Create v2 B-tree
      */
     if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
 	H5_FAILED();
@@ -5014,7 +5014,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     }
 
     /*
-     * Test inserting many records into v2 B-tree 
+     * Test inserting many records into v2 B-tree
      */
     TESTING("B-tree remove: create random level 4 B-tree and delete all records");
 
@@ -5120,7 +5120,7 @@ test_find_neighbor(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -5128,7 +5128,7 @@ test_find_neighbor(hid_t fapl)
     }
 
     /*
-     * Create v2 B-tree 
+     * Create v2 B-tree
      */
     if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
 	H5_FAILED();
@@ -5306,7 +5306,7 @@ test_delete(hid_t fapl)
     } /* end if */
 
     /*
-     * Create v2 B-tree 
+     * Create v2 B-tree
      */
     if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
 	H5_FAILED();
@@ -5315,7 +5315,7 @@ test_delete(hid_t fapl)
     } /* end if */
 
     /*
-     * Delete v2 B-tree 
+     * Delete v2 B-tree
      */
     if (H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr)<0) {
 	H5_FAILED();
@@ -5346,7 +5346,7 @@ test_delete(hid_t fapl)
     } /* end if */
 
     /*
-     * Create v2 B-tree 
+     * Create v2 B-tree
      */
     if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
 	H5_FAILED();
@@ -5365,7 +5365,7 @@ test_delete(hid_t fapl)
     } /* end for */
 
     /*
-     * Delete v2 B-tree 
+     * Delete v2 B-tree
      */
     if (H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr)<0) {
 	H5_FAILED();
@@ -5396,7 +5396,7 @@ test_delete(hid_t fapl)
     } /* end if */
 
     /*
-     * Create v2 B-tree 
+     * Create v2 B-tree
      */
     if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
 	H5_FAILED();
@@ -5415,7 +5415,7 @@ test_delete(hid_t fapl)
     } /* end for */
 
     /*
-     * Delete v2 B-tree 
+     * Delete v2 B-tree
      */
     if (H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr)<0) {
 	H5_FAILED();
@@ -5446,7 +5446,7 @@ test_delete(hid_t fapl)
     } /* end if */
 
     /*
-     * Create v2 B-tree 
+     * Create v2 B-tree
      */
     if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
 	H5_FAILED();
@@ -5465,7 +5465,7 @@ test_delete(hid_t fapl)
     } /* end for */
 
     /*
-     * Delete v2 B-tree 
+     * Delete v2 B-tree
      */
     if (H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr)<0) {
 	H5_FAILED();
@@ -5527,7 +5527,7 @@ test_modify(hid_t fapl)
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-	
+
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -5535,7 +5535,7 @@ test_modify(hid_t fapl)
     } /* end if */
 
     /*
-     * Create v2 B-tree 
+     * Create v2 B-tree
      */
     if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
 	H5_FAILED();
@@ -5642,9 +5642,9 @@ error:
  *
  * Purpose:	Test the B-tree v2 code
  *
- * Return:	Success:	
+ * Return:	Success:
  *
- *		Failure:	
+ *		Failure:
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, February  1, 2005

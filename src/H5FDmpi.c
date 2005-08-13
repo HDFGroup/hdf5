@@ -62,7 +62,7 @@ H5FD_mpi_get_rank(const H5FD_t *file)
 
     assert(file && cls);
     assert(cls->get_rank);        /* All MPI drivers must implement this */
-    
+
     /* Dispatch to driver */
     if ((ret_value=(cls->get_rank)(file))<0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_rank request failed")
@@ -98,7 +98,7 @@ H5FD_mpi_get_size(const H5FD_t *file)
 
     assert(file && cls);
     assert(cls->get_size);        /* All MPI drivers must implement this */
-    
+
     /* Dispatch to driver */
     if ((ret_value=(cls->get_size)(file))<0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_size request failed")
@@ -134,7 +134,7 @@ H5FD_mpi_get_comm(const H5FD_t *file)
 
     assert(file && cls);
     assert(cls->get_comm);        /* All MPI drivers must implement this */
-    
+
     /* Dispatch to driver */
     if ((ret_value=(cls->get_comm)(file))==MPI_COMM_NULL)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, MPI_COMM_NULL, "driver get_comm request failed")
@@ -151,7 +151,7 @@ done:
  *
  * Return:      Success:	The haddr_t equivalent of the MPI_OFF
  *				argument.
- *				
+ *
  *              Failure:	HADDR_UNDEF
  *
  * Programmer:  Unknown
@@ -164,7 +164,7 @@ done:
  *
  * 		Robb Matzke, 1999-08-06
  *		Modified to work with the virtual file layer.
- *------------------------------------------------------------------------- 
+ *-------------------------------------------------------------------------
  */
 haddr_t
 H5FD_mpi_MPIOff_to_haddr(MPI_Offset mpi_off)
@@ -255,7 +255,7 @@ H5FD_mpi_comm_info_dup(MPI_Comm comm, MPI_Info info, MPI_Comm *comm_new, MPI_Inf
     MPI_Comm	comm_dup=MPI_COMM_NULL;
     MPI_Info	info_dup=MPI_INFO_NULL;
     int		mpi_code;
-    
+
     FUNC_ENTER_NOAPI(H5FD_mpi_comm_info_dup, FAIL)
 
     /* Check arguments */
@@ -297,7 +297,7 @@ done:
  *
  * Purpose:     Free the communicator and Info object.
  * 		If comm or info is in fact MPI_COMM_NULL or MPI_INFO_NULL
- * 		respectively, no action occurs to it. 
+ * 		respectively, no action occurs to it.
  *
  * Return:      Success:	Non-negative.  The values the pointers refer
  * 				to will be set to the corresponding NULL
@@ -381,7 +381,7 @@ H5FD_mpio_wait_for_left_neighbor(H5FD_t *_file)
 			file->mpi_rank-1, MPI_ANY_TAG, file->comm, &rcvstat )))
             HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mpi_code)
     }
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }

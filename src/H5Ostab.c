@@ -20,7 +20,7 @@
  *
  * Purpose:             Symbol table messages.
  *
- * Modifications:       
+ * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -231,7 +231,7 @@ H5O_stab_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
     assert(stab);
     if (!dest && NULL==(dest = H5FL_MALLOC(H5O_stab_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    
+
     /* copy */
     *dest = *stab;
 

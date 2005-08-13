@@ -32,7 +32,7 @@
  *      Turned on "H5AC_SORT_BY_ADDR"
  *
  *	John Mainzer, 5/19/04
- * 	Complete redesign and rewrite.  See the header comments for 
+ * 	Complete redesign and rewrite.  See the header comments for
  *      H5AC_t for an overview of what is going on.
  *
  *	John Mainzer, 6/4/04
@@ -86,7 +86,7 @@ hid_t H5AC_ind_dxpl_id=(-1);
  * Private file-scope function declarations:
  */
 
-static herr_t H5AC_check_if_write_permitted(const H5F_t *f, 
+static herr_t H5AC_check_if_write_permitted(const H5F_t *f,
                                             hid_t dxpl_id,
                                             hbool_t * write_permitted_ptr);
 
@@ -318,10 +318,10 @@ H5AC_term_interface(void)
  * Modifications:
  *
  *		Complete re-design and re-write to support the re-designed
- *		metadata cache.  
+ *		metadata cache.
  *
- *		At present, the size_hint is ignored, and the 
- *		max_cache_size and min_clean_size fields are hard 
+ *		At present, the size_hint is ignored, and the
+ *		max_cache_size and min_clean_size fields are hard
  *		coded.  This should be fixed, but a parameter
  *		list change will be required, so I will leave it
  *		for now.
@@ -331,17 +331,17 @@ H5AC_term_interface(void)
  *						JRM - 4/28/04
  *
  *		Reworked the function again after abstracting its guts to
- *		the similar function in H5C.c.  The function is now a 
+ *		the similar function in H5C.c.  The function is now a
  *		wrapper for H5C_create().
  *						JRM - 6/4/04
  *
- *		Deleted the old size_hint parameter and added the 
+ *		Deleted the old size_hint parameter and added the
  *		max_cache_size, and min_clean_size parameters.
  *
  *                                              JRM - 3/10/05
  *
  *		Deleted the max_cache_size, and min_clean_size parameters,
- *		and added the config_ptr parameter.  Added code to 
+ *		and added the config_ptr parameter.  Added code to
  *		validate the resize configuration before we do anything.
  *
  *						JRM - 3/24/05
@@ -371,7 +371,7 @@ static const char * H5AC_entry_type_names[H5AC_NTYPES] =
 };
 
 herr_t
-H5AC_create(const H5F_t *f, 
+H5AC_create(const H5F_t *f,
             H5AC_cache_config_t *config_ptr)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
@@ -390,7 +390,7 @@ H5AC_create(const H5F_t *f,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad cache configuration");
     }
 
-    /* The default max cache size and min clean size will frequently be 
+    /* The default max cache size and min clean size will frequently be
      * overwritten shortly by the subsequent set resize config call.
      *                                             -- JRM
      */
@@ -437,14 +437,14 @@ done:
  * Modifications:
  *
  *		Complete re-design and re-write to support the re-designed
- *		metadata cache.  
+ *		metadata cache.
  *                                                 JRM - 5/12/04
  *
  *		Abstracted the guts of the function to H5C_dest() in H5C.c,
  *		and then re-wrote the function as a wrapper for H5C_dest().
  *
  *                                                 JRM - 6/7/04
- *		
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -477,34 +477,34 @@ done:
  * Function:    H5AC_flush
  *
  * Purpose:	Flush (and possibly destroy) the metadata cache associated
- *		with the specified file.  
+ *		with the specified file.
  *
  *		This is a re-write of an earlier version of the function
  *		which was reputedly capable of flushing (and destroying
- *		if requested) individual entries, individual entries if 
- *		they match the supplied type, all entries of a given type, 
- *		as well as all entries in the cache.  
+ *		if requested) individual entries, individual entries if
+ *		they match the supplied type, all entries of a given type,
+ *		as well as all entries in the cache.
  *
  *		As only this last capability is actually used at present,
- *		I have not implemented the other capabilities in this 
- *		version of the function.  
+ *		I have not implemented the other capabilities in this
+ *		version of the function.
  *
- *		The type and addr parameters are retained to avoid source 
- *		code changed, but values other than NULL and HADDR_UNDEF 
- *		respectively are errors.  If all goes well, they should 
+ *		The type and addr parameters are retained to avoid source
+ *		code changed, but values other than NULL and HADDR_UNDEF
+ *		respectively are errors.  If all goes well, they should
  *		be removed, and the function renamed to something more
  *		descriptive -- perhaps H5AC_flush_cache.
  *
  *		If the cache contains protected entries, the function will
- *		fail, as protected entries cannot be flushed.  However 
- *		all unprotected entries should be flushed before the 
+ *		fail, as protected entries cannot be flushed.  However
+ *		all unprotected entries should be flushed before the
  *		function returns failure.
- *		
- *		For historical purposes, the original version of the 
+ *
+ *		For historical purposes, the original version of the
  *		purpose section is reproduced below:
  *
  *              ============ Original Version of "Purpose:" ============
- *		
+ *
  *              Flushes (and destroys if DESTROY is non-zero) the specified
  *              entry from the cache.  If the entry TYPE is CACHE_FREE and
  *              ADDR is HADDR_UNDEF then all types of entries are
@@ -547,10 +547,10 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, unsigned flags)
     HDassert(f);
     HDassert(f->shared->cache);
 
-    status = H5C_flush_cache(f, 
-                             dxpl_id, 
-                             H5AC_noblock_dxpl_id, 
-                             f->shared->cache, 
+    status = H5C_flush_cache(f,
+                             dxpl_id,
+                             H5AC_noblock_dxpl_id,
+                             f->shared->cache,
                              flags);
 
     if ( status < 0 ) {
@@ -597,16 +597,16 @@ done:
  *		at the beginning of the function.
  *
  *		JRM - 6/7/04
- *		Abstracted the guts of the function to H5C_insert_entry() 
- *		in H5C.c, and then re-wrote the function as a wrapper for 
+ *		Abstracted the guts of the function to H5C_insert_entry()
+ *		in H5C.c, and then re-wrote the function as a wrapper for
  *		H5C_insert_entry().
  *
  *		JRM - 1/6/05
  *		Added the flags parameter.  At present, this parameter is
  *		only used to set the new flush_marker field on the new
  *		entry.  Since this doesn't apply to the SAP code, no change
- *		is needed there.  Thus the only change to the body of the 
- *		code is to pass the flags parameter through to 
+ *		is needed there.  Thus the only change to the body of the
+ *		code is to pass the flags parameter through to
  *		H5C_insert_entry().
  *
  *		JRM - 6/6/05
@@ -659,7 +659,7 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *
         lf = f->shared->lf;
 
         if ( H5FD_is_fphdf5_driver(lf) ) {
-            
+
             /* Newly inserted entry are presumed to be dirty */
     	    info->is_dirty = TRUE;
 
@@ -667,7 +667,7 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *
              * This is the FPHDF5 driver. Grab a lock for this piece of
              * metadata from the SAP. Bail-out quickly if we're unable to do
              * that. In the case of the FPHDF5 driver, the local cache is
-             * turned off. We lock the address then write the data to the SAP. 
+             * turned off. We lock the address then write the data to the SAP.
              * We do this because the cache is off and thus cannot retain the
              * data which has just been added to it.  We will get it from the
              * SAP as needed in the future.
@@ -719,7 +719,7 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *
 
     result = H5C_insert_entry(f,
                               dxpl_id,
-                              H5AC_noblock_dxpl_id, 
+                              H5AC_noblock_dxpl_id,
                               cache,
                               type,
                               addr,
@@ -762,8 +762,8 @@ done:
  *		Complete rewrite for the new meta-data cache.
  *
  *		JRM - 6/7/04
- *		Abstracted the guts of the function to H5C_rename_entry() 
- *		in H5C.c, and then re-wrote the function as a wrapper for 
+ *		Abstracted the guts of the function to H5C_rename_entry()
+ *		in H5C.c, and then re-wrote the function as a wrapper for
  *		H5C_rename_entry().
  *
  *-------------------------------------------------------------------------
@@ -785,7 +785,7 @@ H5AC_rename(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t new_ad
 
 #ifdef H5_HAVE_PARALLEL
 #ifdef H5_HAVE_FPHDF5
-    /* In the flexible parallel case, the cache is always empty.  
+    /* In the flexible parallel case, the cache is always empty.
      * Thus H5AC_rename() has nothing to do by definition.
      */
     {
@@ -837,7 +837,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5AC_protect
  *
- * Purpose:     If the target entry is not in the cache, load it.  If 
+ * Purpose:     If the target entry is not in the cache, load it.  If
  *		necessary, attempt to evict one or more entries to keep
  *		the cache within its maximum size.
  *
@@ -845,8 +845,8 @@ done:
  *		to the caller.  The caller must call H5AC_unprotect() when
  *		finished with the entry.
  *
- *		While it is protected, the entry may not be either evicted 
- *		or flushed -- nor may it be accessed by another call to 
+ *		While it is protected, the entry may not be either evicted
+ *		or flushed -- nor may it be accessed by another call to
  *		H5AC_protect.  Any attempt to do so will result in a failure.
  *
  *		This comment is a re-write of the original Purpose: section.
@@ -887,19 +887,19 @@ done:
  *		Purpose section above.
  *
  *		JRM - 6/7/04
- *		Abstracted the guts of the function to H5C_protect() 
- *		in H5C.c, and then re-wrote the function as a wrapper for 
+ *		Abstracted the guts of the function to H5C_protect()
+ *		in H5C.c, and then re-wrote the function as a wrapper for
  *		H5C_protect().
  *
  *-------------------------------------------------------------------------
  */
 void *
-H5AC_protect(H5F_t *f, 
-             hid_t dxpl_id, 
-             const H5AC_class_t *type, 
+H5AC_protect(H5F_t *f,
+             hid_t dxpl_id,
+             const H5AC_class_t *type,
              haddr_t addr,
-	     const void *udata1, 
-             void *udata2, 
+	     const void *udata1,
+             void *udata2,
              H5AC_protect_t
 #ifndef H5_HAVE_FPHDF5
              UNUSED
@@ -957,7 +957,7 @@ H5AC_protect(H5F_t *f,
                  * by some other process, we can loop and wait or bail
                  * out of this function
                  */
-                HDfprintf(stderr, 
+                HDfprintf(stderr,
                           "Couldn't get lock for metadata at address %a\n",
                           addr);
 #endif /* 0 */
@@ -966,7 +966,7 @@ H5AC_protect(H5F_t *f,
             }
 
             /* Load a thing from the SAP. */
-            if ( NULL == (thing = type->load(f, dxpl_id, addr, 
+            if ( NULL == (thing = type->load(f, dxpl_id, addr,
                                              udata1, udata2)) ) {
 
 #if 0
@@ -985,7 +985,7 @@ H5AC_protect(H5F_t *f,
 
                 HGOTO_DONE(NULL)
             }
-        
+
             info = (H5AC_info_t *)thing;
 
             HDassert(info->is_dirty == FALSE);
@@ -1000,7 +1000,7 @@ H5AC_protect(H5F_t *f,
                             "Can't get size of thing")
             }
 
-            HDassert(info->size < H5C_MAX_ENTRY_SIZE); 
+            HDassert(info->size < H5C_MAX_ENTRY_SIZE);
 
             info->next = NULL;
             info->prev = NULL;
@@ -1015,7 +1015,7 @@ H5AC_protect(H5F_t *f,
 
     thing = H5C_protect(f,
                         dxpl_id,
-                        H5AC_noblock_dxpl_id, 
+                        H5AC_noblock_dxpl_id,
                         f->shared->cache,
                         type,
                         addr,
@@ -1045,15 +1045,15 @@ done:
  *		and give it back to the replacement policy.
  *
  *		The TYPE and ADDR arguments must be the same as those in
- *		the corresponding call to H5AC_protect() and the THING 
- *		argument must be the value returned by that call to 
+ *		the corresponding call to H5AC_protect() and the THING
+ *		argument must be the value returned by that call to
  *		H5AC_protect().
  *
  *		If the deleted flag is TRUE, simply remove the target entry
- *		from the cache, clear it, and free it without writing it to 
+ *		from the cache, clear it, and free it without writing it to
  *		disk.
  *
- *		This verion of the function is a complete re-write to 
+ *		This verion of the function is a complete re-write to
  *		use the new metadata cache.  While there isn't all that
  *		much difference between the old and new Purpose sections,
  *		the original version is given below.
@@ -1092,20 +1092,20 @@ done:
  *		Complete re-write for the new metadata cache.
  *
  *		JRM - 6/7/04
- *		Abstracted the guts of the function to H5C_unprotect() 
- *		in H5C.c, and then re-wrote the function as a wrapper for 
+ *		Abstracted the guts of the function to H5C_unprotect()
+ *		in H5C.c, and then re-wrote the function as a wrapper for
  *		H5C_unprotect().
- *	
+ *
  *		JRM - 1/6/05
  *		Replaced the deleted parameter with the new flags parameter.
  *		Since the deleted parameter is not used by the FPHDF5 code,
- *		the only change in the body is to replace the deleted 
- *		parameter with the flags parameter in the call to 
+ *		the only change in the body is to replace the deleted
+ *		parameter with the flags parameter in the call to
  *		H5C_unprotect().
  *
  *		JRM - 6/6/05
- *		Added the dirtied flag and supporting code.  This is 
- *		part of a collection of changes directed at moving 
+ *		Added the dirtied flag and supporting code.  This is
+ *		part of a collection of changes directed at moving
  *		management of cache entry dirty flags into the H5C code.
  *
  *-------------------------------------------------------------------------
@@ -1152,7 +1152,7 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
             ((H5AC_info_t *)thing)->is_protected = FALSE;
 
             /* mark the entry as dirty if appropriate. JRM - 6/6/05 */
-	    ((H5AC_info_t *)thing)->is_dirty |= 
+	    ((H5AC_info_t *)thing)->is_dirty |=
 		(flags & H5AC__DIRTIED_FLAG) ? TRUE : FALSE;
 
             /*
@@ -1160,7 +1160,7 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
              * (deleted == TRUE), we need to send a request to the SAP
              * telling it to remove that bit of metadata from its cache.
              */
-            /* the deleted parameter has been replaced with the flags 
+            /* the deleted parameter has been replaced with the flags
              * parameter.  The actual value of deleted is still passed
              * in as a bit in flags.  If it is needed, it can be extracted
              * as follows:
@@ -1204,7 +1204,7 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 
     result = H5C_unprotect(f,
                            dxpl_id,
-                           H5AC_noblock_dxpl_id, 
+                           H5AC_noblock_dxpl_id,
                            f->shared->cache,
                            type,
                            addr,
@@ -1239,8 +1239,8 @@ done:
  *		Re-write to support the new metadata cache.
  *
  *		JRM - 6/7/04
- *		Abstracted the guts of the function to H5C_stats() 
- *		in H5C.c, and then re-wrote the function as a wrapper for 
+ *		Abstracted the guts of the function to H5C_stats()
+ *		in H5C.c, and then re-wrote the function as a wrapper for
  *		H5C_stats().
  *
  *-------------------------------------------------------------------------
@@ -1334,7 +1334,7 @@ H5AC_get_cache_auto_resize_config(H5AC_t * cache_ptr,
     config_ptr->decrement              = internal_config.decrement;
     config_ptr->apply_max_decrement    = internal_config.apply_max_decrement;
     config_ptr->max_decrement          = internal_config.max_decrement;
-    config_ptr->epochs_before_eviction = 
+    config_ptr->epochs_before_eviction =
                                   (int)(internal_config.epochs_before_eviction);
     config_ptr->apply_empty_reserve    = internal_config.apply_empty_reserve;
     config_ptr->empty_reserve          = internal_config.empty_reserve;
@@ -1522,7 +1522,7 @@ H5AC_set_cache_auto_resize_config(H5AC_t * cache_ptr,
     if ( ( config_ptr->rpt_fcn_enabled != TRUE ) &&
          ( config_ptr->rpt_fcn_enabled != FALSE ) ) {
 
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, 
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                     "config_ptr->rpt_fcn_enabled must be either TRUE or FALSE.")
     }
 
@@ -1536,13 +1536,13 @@ H5AC_set_cache_auto_resize_config(H5AC_t * cache_ptr,
 
         internal_config.rpt_fcn            = NULL;
     }
-    
+
     internal_config.set_initial_size       = config_ptr->set_initial_size;
     internal_config.initial_size           = config_ptr->initial_size;
     internal_config.min_clean_fraction     = config_ptr->min_clean_fraction;
     internal_config.max_size               = config_ptr->max_size;
     internal_config.min_size               = config_ptr->min_size;
-    internal_config.epoch_length           = 
+    internal_config.epoch_length           =
                                             (int64_t)(config_ptr->epoch_length);
 
     internal_config.incr_mode              = config_ptr->incr_mode;
@@ -1556,12 +1556,12 @@ H5AC_set_cache_auto_resize_config(H5AC_t * cache_ptr,
     internal_config.decrement              = config_ptr->decrement;
     internal_config.apply_max_decrement    = config_ptr->apply_max_decrement;
     internal_config.max_decrement          = config_ptr->max_decrement;
-    internal_config.epochs_before_eviction = 
+    internal_config.epochs_before_eviction =
                                   (int32_t)(config_ptr->epochs_before_eviction);
     internal_config.apply_empty_reserve    = config_ptr->apply_empty_reserve;
     internal_config.empty_reserve          = config_ptr->empty_reserve;
 
-    result = H5C_set_cache_auto_resize_config((H5C_t *)cache_ptr, 
+    result = H5C_set_cache_auto_resize_config((H5C_t *)cache_ptr,
                                               &internal_config);
     if ( result < 0 ) {
 
@@ -1579,7 +1579,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5AC_validate_config()
  *
- * Purpose:     Run a sanity check on the contents of the supplied 
+ * Purpose:     Run a sanity check on the contents of the supplied
  *		instance of H5AC_cache_config_t.
  *
  *              Do nothing and return SUCCEED if no errors are detected,
@@ -1587,7 +1587,7 @@ done:
  *
  *		At present, this function operates by packing the data
  *		from the instance of H5AC_cache_config_t into an instance
- *		of H5C_auto_size_ctl_t, and then calling 
+ *		of H5C_auto_size_ctl_t, and then calling
  *		H5C_validate_resize_config().  As H5AC_cache_config_t and
  *		H5C_auto_size_ctl_t diverge, we may have to change this.
  *
@@ -1640,13 +1640,13 @@ H5AC_validate_config(H5AC_cache_config_t * config_ptr)
 
         internal_config.rpt_fcn            = NULL;
     }
-    
+
     internal_config.set_initial_size       = config_ptr->set_initial_size;
     internal_config.initial_size           = config_ptr->initial_size;
     internal_config.min_clean_fraction     = config_ptr->min_clean_fraction;
     internal_config.max_size               = config_ptr->max_size;
     internal_config.min_size               = config_ptr->min_size;
-    internal_config.epoch_length           = 
+    internal_config.epoch_length           =
                                             (int64_t)(config_ptr->epoch_length);
 
     internal_config.incr_mode              = config_ptr->incr_mode;
@@ -1660,7 +1660,7 @@ H5AC_validate_config(H5AC_cache_config_t * config_ptr)
     internal_config.decrement              = config_ptr->decrement;
     internal_config.apply_max_decrement    = config_ptr->apply_max_decrement;
     internal_config.max_decrement          = config_ptr->max_decrement;
-    internal_config.epochs_before_eviction = 
+    internal_config.epochs_before_eviction =
                                   (int32_t)(config_ptr->epochs_before_eviction);
     internal_config.apply_empty_reserve    = config_ptr->apply_empty_reserve;
     internal_config.empty_reserve          = config_ptr->empty_reserve;
@@ -1688,10 +1688,10 @@ done:
  *
  * Function:    H5AC_check_if_write_permitted
  *
- * Purpose:     Determine if a write is permitted under the current 
- *		circumstances, and set *write_permitted_ptr accordingly.  
- *		As a general rule it is, but when we are running in parallel 
- *		mode with collective I/O, we must ensure that a read cannot 
+ * Purpose:     Determine if a write is permitted under the current
+ *		circumstances, and set *write_permitted_ptr accordingly.
+ *		As a general rule it is, but when we are running in parallel
+ *		mode with collective I/O, we must ensure that a read cannot
  *		cause a write.
  *
  *		In the event of failure, the value of *write_permitted_ptr

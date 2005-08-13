@@ -55,18 +55,18 @@ static struct long_options l_opts[] = {
   {"delet", no_arg, 'd'},
   {"dele", no_arg, 'd'},
   {"del", no_arg, 'd'},
-  {"de", no_arg, 'd'},	
+  {"de", no_arg, 'd'},
     { NULL, 0, '\0' }
 };
 
 /*-------------------------------------------------------------------------
  * Function:    usage
  *
- * Purpose:     Print the usage message 
+ * Purpose:     Print the usage message
  *
  * Return:      void
  *
- * Programmer:  
+ * Programmer:
  *
  * Modifications:
  *
@@ -89,11 +89,11 @@ usage(const char *prog)
  *
  * Purpose:     Parse the command line for the h5dumper.
  *
- * Return:      Success:    
+ * Return:      Success:
  *
  *              Failure:    Exits program with EXIT_FAILURE value.
  *
- * Programmer:  
+ * Programmer:
  *
  * Modifications:
  *
@@ -148,7 +148,7 @@ parse_command_line(int argc, const char *argv[])
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  
+ * Programmer:
  *
  * Modifications:
  *
@@ -207,7 +207,7 @@ main(int argc, const char *argv[])
 	/* no user block to remove: message? */
         error_msg(progname, "\"%s\" has no user block: no change to file\n", input_file);
         exit(EXIT_SUCCESS);
-	
+
     }
 
     res = stat(input_file, &sbuf);
@@ -260,14 +260,14 @@ main(int argc, const char *argv[])
     }
 
 
-    /* copy from 0 to 'usize - 1' into ufid */ 
+    /* copy from 0 to 'usize - 1' into ufid */
     if (!do_delete) {
 	    copy_to_file( ifid, ufid, 0, (ssize_t) usize);
     }
 
-    /* copy from usize to end of file into h5fid, 
+    /* copy from usize to end of file into h5fid,
      * starting at end of user block if present
-     */ 
+     */
     copy_to_file( ifid, h5fid, (ssize_t) usize, (ssize_t)(fsize - (ssize_t)usize) );
 
 
@@ -279,12 +279,12 @@ main(int argc, const char *argv[])
 }
 
 /*
- *  Copy 'how_much' bytes from the input file to the output file, 
+ *  Copy 'how_much' bytes from the input file to the output file,
  *  starting at byte 'where' in the input file.
- *  
+ *
  *  Returns the size of the output file.
  */
-hsize_t 
+hsize_t
 copy_to_file( int infid, int ofid, ssize_t where, ssize_t how_much ) {
 	char buf[1024];
 	off_t to;

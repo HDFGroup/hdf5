@@ -103,7 +103,7 @@ void* Group::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_ty
 ///\return	A reference
 ///\exception	H5::GroupIException
 ///\par Description
-//		This function passes H5R_OBJECT and -1 to the protected 
+//		This function passes H5R_OBJECT and -1 to the protected
 //		function for it to pass to the C API H5Rcreate
 //		to create a reference to the named object.
 // Programmer	Binh-Minh Ribler - May, 2004
@@ -137,10 +137,10 @@ void* Group::Reference(const string& name) const
 ///\param		ref      - IN: Reference to query
 ///\param		ref_type - IN: Type of reference to query
 ///\return	An object type, which can be one of the following:
-//			H5G_LINK Object is a symbolic link.  
-//			H5G_GROUP Object is a group.  
-//			H5G_DATASET   Object is a dataset.  
-//			H5G_TYPE Object is a named datatype 
+//			H5G_LINK Object is a symbolic link.
+//			H5G_GROUP Object is a group.
+//			H5G_DATASET   Object is a dataset.
+//			H5G_TYPE Object is a named datatype
 ///\exception	H5::GroupIException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
@@ -222,16 +222,16 @@ void Group::throwException(const string func_name, const string msg) const
 //		ID reference counting mechanism - June 1, 2004
 //--------------------------------------------------------------------------
 Group::~Group()
-{  
+{
    // The group id will be closed properly
     try {
         decRefCount();
     }
-    catch (Exception close_error) { 
+    catch (Exception close_error) {
         cerr << "Group::~Group - " << close_error.getDetailMsg() << endl;
     }
 
-}  
+}
 
 #ifndef H5_NO_NAMESPACE
 } // end namespace

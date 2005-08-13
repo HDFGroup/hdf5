@@ -39,7 +39,7 @@ typedef enum H5D_alloc_time_t {
     H5D_ALLOC_TIME_EARLY	=1,
     H5D_ALLOC_TIME_LATE	=2,
     H5D_ALLOC_TIME_INCR	=3
-} H5D_alloc_time_t;   
+} H5D_alloc_time_t;
 
 /* Values for the status of space allocation */
 typedef enum H5D_space_status_t {
@@ -78,7 +78,7 @@ H5_DLL hid_t H5Dcreate (hid_t file_id, const char *name, hid_t type_id,
 H5_DLL hid_t H5Dopen (hid_t file_id, const char *name);
 H5_DLL herr_t H5Dclose (hid_t dset_id);
 H5_DLL hid_t H5Dget_space (hid_t dset_id);
-H5_DLL herr_t H5Dget_space_status(hid_t dset_id, 
+H5_DLL herr_t H5Dget_space_status(hid_t dset_id,
 				H5D_space_status_t *allocation);
 H5_DLL hid_t H5Dget_type (hid_t dset_id);
 H5_DLL hid_t H5Dget_create_plist (hid_t dset_id);

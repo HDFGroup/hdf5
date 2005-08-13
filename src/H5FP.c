@@ -335,7 +335,7 @@ done:
 
 /*
  * Function:    H5FP_commit_sap_datatypes
- * Purpose:     Commit the H5FP_request, H5FP_reply, H5FP_read, 
+ * Purpose:     Commit the H5FP_request, H5FP_reply, H5FP_read,
  *              H5FP_alloc, H5FP_eoa and H5FP_super structure datatypes
  *              to MPI.
  * Return:      Success:    SUCCEED

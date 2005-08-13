@@ -17,7 +17,7 @@
  *              Tuesday, January  6, 2004
  *
  * Purpose:	Provides support functions for the testing framework.
- *		
+ *
  */
 
 #include "testhdf5.h"
@@ -66,7 +66,7 @@ static int (*TestPrivateParser)(int ac, char *av[]) = NULL;
  * Parameters--pointer to extra parameters. Use NULL if none used.
  *    Since only the pointer is copied, the contents should not change.
  */
-void 
+void
 AddTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), const char *TheDescr, const void *Parameters)
 {
     /* Sanity checking */
@@ -438,7 +438,7 @@ const void *GetTestParameters(void)
  * This routine is designed to provide equivalent functionality to 'printf'
  * and also increment the error count for the testing framework.
  */
-int 
+int
 TestErrPrintf(const char *format, ...)
 {
     va_list arglist;
@@ -457,7 +457,7 @@ TestErrPrintf(const char *format, ...)
 }
 
 
-/* 
+/*
  * Set (control) which test will be tested.
  * SKIPTEST: skip this test
  * ONLYTEST: do only this test

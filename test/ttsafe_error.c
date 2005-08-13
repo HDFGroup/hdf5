@@ -66,7 +66,7 @@ typedef struct err_num_struct {
     hid_t min_num;
 } err_num_t;
 
-err_num_t expected[8]; 
+err_num_t expected[8];
 
 int error_flag = 0;
 int error_count = 0;
@@ -82,28 +82,28 @@ void tts_error(void)
     /* Must initialize these at runtime */
     expected[0].maj_num = H5E_DATASET;
     expected[0].min_num = H5E_CANTINIT;
-    
+
     expected[1].maj_num = H5E_DATASET;
     expected[1].min_num = H5E_CANTINIT;
-    
+
     expected[2].maj_num = H5E_SYM;
     expected[2].min_num = H5E_EXISTS;
-    
+
     expected[3].maj_num = H5E_SYM;
     expected[3].min_num = H5E_CANTINSERT;
-    
+
     expected[4].maj_num = H5E_SYM;
     expected[4].min_num = H5E_CANTINSERT;
-    
+
     expected[5].maj_num = H5E_BTREE;
     expected[5].min_num = H5E_CANTINIT;
-    
+
     expected[6].maj_num = H5E_BTREE;
     expected[6].min_num = H5E_CANTINSERT;
 
     expected[7].maj_num = H5E_SYM;
     expected[7].min_num = H5E_CANTINSERT;
-    
+
     /* set up mutex for global count of errors */
     pthread_mutex_init(&error_mutex, NULL);
 
@@ -201,7 +201,7 @@ herr_t walk_error_callback(unsigned n, const H5E_error_t *err_desc, void UNUSED 
     if (err_desc) {
         maj_num = err_desc->maj_num;
         min_num = err_desc->min_num;
-        
+
         if (n < EXPECTED_ERROR_DEPTH && maj_num == expected[n].maj_num &&
                 min_num == expected[n].min_num)
             return SUCCEED;

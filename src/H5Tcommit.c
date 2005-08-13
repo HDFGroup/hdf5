@@ -41,7 +41,7 @@ NAME
    H5T_init_commit_interface -- Initialize interface-specific information
 USAGE
     herr_t H5T_init_commit_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -79,7 +79,7 @@ H5Tcommit(hid_t loc_id, const char *name, hid_t type_id)
     H5G_entry_t	*loc = NULL;
     H5T_t	*type = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_API(H5Tcommit, FAIL)
     H5TRACE3("e","isi",loc_id,name,type_id);
 
@@ -110,8 +110,8 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao	
- *              May 17, 2005 
+ * Programmer:  Peter Cao
+ *              May 17, 2005
  *
  * Modifications:
  *
@@ -123,7 +123,7 @@ H5Tcommit_expand(hid_t loc_id, const char *name, hid_t type_id, hid_t tcpl_id, h
     H5G_entry_t	*loc = NULL;
     H5T_t	*type = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_API(H5Tcommit_expand, FAIL)
 
     /* Check arguments */
@@ -172,8 +172,8 @@ done:
  *
  * Modifications:
  *              Added datatype creation & access property lists
- *              Peter Cao	
- *              May 17, 2005 
+ *              Peter Cao
+ *              May 17, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -184,7 +184,7 @@ H5T_commit(H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id,
     H5F_t	*file = NULL;
     H5P_genplist_t  *tc_plist;          /* Property list created */
     herr_t      ret_value=SUCCEED;      /* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5T_commit)
 
     HDassert (loc);
@@ -282,7 +282,7 @@ H5Tcommitted(hid_t type_id)
 {
     H5T_t	*type = NULL;
     htri_t      ret_value;       /* Return value */
-    
+
     FUNC_ENTER_API(H5Tcommitted, FAIL)
     H5TRACE1("t","i",type_id);
 

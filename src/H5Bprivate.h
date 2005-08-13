@@ -47,7 +47,7 @@
 #endif
 #define H5B_MAGIC	"TREE"		/*tree node magic number	     */
 #define H5B_SIZEOF_MAGIC 4		/*size of magic number		     */
-     
+
 typedef enum H5B_ins_t {
     H5B_INS_ERROR	 = -1,	/*error return value			     */
     H5B_INS_NOOP	 = 0,	/*insert made no changes		     */
@@ -103,7 +103,7 @@ typedef struct H5B_class_t {
     int         (*cmp2)(H5F_t*, hid_t, void*, void*, void*);	    /*compare 2 keys */
     int         (*cmp3)(H5F_t*, hid_t, void*, void*, void*);	    /*compare 3 keys */
     herr_t	(*found)(H5F_t*, hid_t, haddr_t, const void*, void*);
-    
+
     /* insert new data */
     H5B_ins_t	(*insert)(H5F_t*, hid_t, haddr_t, void*, hbool_t*, void*, void*,
 			  void*, hbool_t*, haddr_t*);
@@ -111,7 +111,7 @@ typedef struct H5B_class_t {
     /* min insert uses min leaf, not new(), similarily for max insert */
     hbool_t	follow_min;
     hbool_t	follow_max;
-    
+
     /* remove existing data */
     H5B_ins_t	(*remove)(H5F_t*, hid_t, haddr_t, void*, hbool_t*, void*, void*,
 			  hbool_t*);

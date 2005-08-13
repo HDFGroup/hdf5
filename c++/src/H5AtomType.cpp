@@ -55,7 +55,7 @@ AtomType::AtomType( const AtomType& original ) : DataType( original ) {}
 
 //--------------------------------------------------------------------------
 // Function:	AtomType::setSize
-///\brief	Sets the total size for an atomic datatype. 
+///\brief	Sets the total size for an atomic datatype.
 ///\param	size - IN: Size to set
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
@@ -88,7 +88,7 @@ H5T_order_t AtomType::getOrder() const
    // return a byte order constant if successful
    if( type_order == H5T_ORDER_ERROR )
    {
-      throw DataTypeIException(inMemFunc("getOrder"), 
+      throw DataTypeIException(inMemFunc("getOrder"),
 		"H5Tget_order returns H5T_ORDER_ERROR");
    }
    return( type_order );
@@ -148,12 +148,12 @@ void AtomType::setOrder( H5T_order_t order ) const
 
 //--------------------------------------------------------------------------
 // Function:	AtomType::getPrecision
-///\brief	Returns the precision of an atomic datatype. 
-///\return	Number of significant bits 
+///\brief	Returns the precision of an atomic datatype.
+///\return	Number of significant bits
 ///\exception	H5::DataTypeIException
 ///\par Description
-///		The precision is the number of significant bits which, 
-///		unless padding is present, is 8 times larger than the 
+///		The precision is the number of significant bits which,
+///		unless padding is present, is 8 times larger than the
 ///		value returned by \c DataType::getSize().
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -172,7 +172,7 @@ size_t AtomType::getPrecision() const
 
 //--------------------------------------------------------------------------
 // Function:	AtomType::setPrecision
-///\brief	Sets the precision of an atomic datatype. 
+///\brief	Sets the precision of an atomic datatype.
 ///\param	precision - IN: Number of bits of precision
 ///\exception	H5::DataTypeIException
 ///\par Description
@@ -192,7 +192,7 @@ void AtomType::setPrecision( size_t precision ) const
 
 //--------------------------------------------------------------------------
 // Function:	AtomType::getOffset
-///\brief	Retrieves the bit offset of the first significant bit. 
+///\brief	Retrieves the bit offset of the first significant bit.
 ///\return	Offset value
 ///\exception	H5::DataTypeIException
 ///\par Description
@@ -219,7 +219,7 @@ int AtomType::getOffset() const
 
 //--------------------------------------------------------------------------
 // Function:	AtomType::setOffset
-///\brief	Sets the bit offset of the first significant bit. 
+///\brief	Sets the bit offset of the first significant bit.
 ///\param	offset - IN: Offset of first significant bit
 ///\exception	H5::DataTypeIException
 ///\par Description
@@ -239,16 +239,16 @@ void AtomType::setOffset( size_t offset ) const
 
 //--------------------------------------------------------------------------
 // Function:	AtomType::getPad
-///\brief	Retrieves the padding type of the least and most-significant 
-///		bit padding. 
+///\brief	Retrieves the padding type of the least and most-significant
+///		bit padding.
 ///\param	lsb - OUT: Least-significant bit padding type
 ///\param	msb - OUT: Most-significant bit padding type
 ///\exception	H5::DataTypeIException
 ///\par Description
 ///		Possible values for \a lsb and \a msb include:
-///		\li \c H5T_PAD_ZERO (0) - Set background to zeros. 
-///		\li \c H5T_PAD_ONE (1) - Set background to ones. 
-///		\li \c H5T_PAD_BACKGROUND (2) - Leave background alone. 
+///		\li \c H5T_PAD_ZERO (0) - Set background to zeros.
+///		\li \c H5T_PAD_ONE (1) - Set background to ones.
+///		\li \c H5T_PAD_BACKGROUND (2) - Leave background alone.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void AtomType::getPad( H5T_pad_t& lsb, H5T_pad_t& msb ) const
@@ -269,9 +269,9 @@ void AtomType::getPad( H5T_pad_t& lsb, H5T_pad_t& msb ) const
 ///\exception	H5::DataTypeIException
 ///\par Description
 ///		Valid values for \a lsb and \a msb include:
-///		\li \c H5T_PAD_ZERO (0) - Set background to zeros. 
-///		\li \c H5T_PAD_ONE (1) - Set background to ones. 
-///		\li \c H5T_PAD_BACKGROUND (2) - Leave background alone. 
+///		\li \c H5T_PAD_ZERO (0) - Set background to zeros.
+///		\li \c H5T_PAD_ONE (1) - Set background to ones.
+///		\li \c H5T_PAD_BACKGROUND (2) - Leave background alone.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void AtomType::setPad( H5T_pad_t lsb, H5T_pad_t msb ) const

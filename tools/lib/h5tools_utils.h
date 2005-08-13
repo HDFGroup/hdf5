@@ -60,7 +60,7 @@ enum {
  * and can have more than one short named option specified at one time:
  *
  * 	-aw80
- * 
+ *
  * in which case those options which expect an argument need to come at the
  * end.
  */
@@ -95,7 +95,7 @@ typedef struct table_t {
 
 /*this struct stores the information that is passed to the find_objs function*/
 typedef struct find_objs_t {
-    size_t prefix_len; 
+    size_t prefix_len;
     char *prefix;
     unsigned int threshold; /* should be 0 or 1 */
     table_t *group_table;

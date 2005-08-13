@@ -184,7 +184,7 @@ H5FP_sap_receive_loop(void)
     herr_t ret_value = SUCCEED;
     int comm_size;
     int stop = 0;
-    H5FP_request_t req; 
+    H5FP_request_t req;
 
     FUNC_ENTER_NOAPI(H5FP_sap_receive_loop, FAIL)
 
@@ -318,7 +318,7 @@ H5FP_new_object_lock(hobj_ref_t oid, unsigned rank, H5FP_obj_t obj_type,
 {
     int                 comm_size;
     H5FP_object_lock   *ret_value = NULL;
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5FP_new_object_lock)
 
     if (MPI_Comm_size(H5FP_SAP_COMM, &comm_size) != MPI_SUCCESS)
@@ -547,7 +547,7 @@ H5FP_merge_mod_node_with_next(H5SL_t *slist, H5SL_node_t *node_ptr)
         unsigned offset;
         unsigned i,j;
 
-        /* The next node address range is not completely subsumed in 
+        /* The next node address range is not completely subsumed in
          * that of the current node.  Must allocate a new buffer, and
          * copy over the contents of the two buffers.  Where the buffers
          * overlap, give precidence to the data from *node_ptr
@@ -565,7 +565,7 @@ H5FP_merge_mod_node_with_next(H5SL_t *slist, H5SL_node_t *node_ptr)
             combined_metadata_ptr[i++] = (mod_ptr->metadata)[j];
 
         offset = (mod_ptr->addr + mod_ptr->md_size) - next_mod_ptr->addr;
-        
+
         for ( j = offset; j < next_mod_ptr->md_size; j++ )
             combined_metadata_ptr[i++] = (next_mod_ptr->metadata)[j];
 
@@ -583,7 +583,7 @@ H5FP_merge_mod_node_with_next(H5SL_t *slist, H5SL_node_t *node_ptr)
     H5SL_remove(slist, &next_mod_ptr->addr);
 
     H5FP_free_mod_node(next_mod_ptr);
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FP_merge_mod_node_with_next() */
@@ -631,7 +631,7 @@ H5FP_merge_mod_node_with_prev(H5SL_t *slist, H5SL_node_t *node_ptr)
         char *combined_metadata_ptr;
         unsigned limit;
 
-        /* The node address range is not completely subsumed in 
+        /* The node address range is not completely subsumed in
          * that of the previous node.  Must allocate a new buffer, and
          * copy over the contents of the two buffers.  Where the buffers
          * overlap, give precidence to the data from *node_ptr
@@ -661,7 +661,7 @@ H5FP_merge_mod_node_with_prev(H5SL_t *slist, H5SL_node_t *node_ptr)
         prev_mod_ptr->md_size = combined_md_size;
     } else { /* supplied node is completely inside previous node */
         /* no need to allocate a new buffer.  Just copy data from
-         * mod_ptr->metadata to the appropriate locations in 
+         * mod_ptr->metadata to the appropriate locations in
          * prev_mod_ptr->metadata.
          */
 
@@ -673,15 +673,15 @@ H5FP_merge_mod_node_with_prev(H5SL_t *slist, H5SL_node_t *node_ptr)
         HDassert(i <= prev_mod_ptr->md_size);
     } /* end else */
 
-    /* We have copied metadata from the current node into the previous 
-     * node.  All that remains is to delete the current node from the 
+    /* We have copied metadata from the current node into the previous
+     * node.  All that remains is to delete the current node from the
      * tree and free it.
      */
 
     H5SL_remove(slist, &mod_ptr->addr);
 
     H5FP_free_mod_node(mod_ptr);
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FP_merge_mod_node_with_prev() */
@@ -689,9 +689,9 @@ done:
 /*
  * Function:	H5FP_mod_node_overlaps_with_next
  *
- * Purpose:	Given a node in a mod tree, see if there is an overlap 
- *		between the address range of the supplied node, and that 
- *		of the next node in the tree (if any).  
+ * Purpose:	Given a node in a mod tree, see if there is an overlap
+ *		between the address range of the supplied node, and that
+ *		of the next node in the tree (if any).
  *
  * Return:	TRUE if there is an overlap, and FALSE if there
  *		isn't.
@@ -715,7 +715,7 @@ H5FP_mod_node_overlaps_with_next(H5SL_node_t *node_ptr)
     next_node_ptr = H5SL_next(node_ptr);
 
     if ( next_node_ptr != NULL ) {
-#if 0 
+#if 0
         if ( ( ((H5FP_mdata_mod *)H5SL_item(node_ptr))->addr > 100000 ) ||
              ( (((H5FP_mdata_mod *)H5SL_item(node_ptr))->md_size) > 1024 ) ) {
             HDfprintf(stdout, "%s: addr = %a, size = %u, mem_type = %d.\n",
@@ -726,7 +726,7 @@ H5FP_mod_node_overlaps_with_next(H5SL_node_t *node_ptr)
         }
 
         if ( (((H5FP_mdata_mod *)H5SL_item(node_ptr))->addr)
-             >= 
+             >=
              (((H5FP_mdata_mod *)H5SL_item(next_node_ptr))->addr)
            ) {
             HDfprintf(stdout, "%s: addr,len = %a,%u, next_addr,len =  %a,%u.\n",
@@ -736,7 +736,7 @@ H5FP_mod_node_overlaps_with_next(H5SL_node_t *node_ptr)
                      (((H5FP_mdata_mod *)H5SL_item(next_node_ptr))->addr),
                      ((H5FP_mdata_mod *)H5SL_item(next_node_ptr))->md_size);
 
-            HDassert((((H5FP_mdata_mod *)H5SL_item(node_ptr))->addr) 
+            HDassert((((H5FP_mdata_mod *)H5SL_item(node_ptr))->addr)
                      <
                      (((H5FP_mdata_mod *)H5SL_item(next_node_ptr))->addr)
                     );
@@ -745,15 +745,15 @@ H5FP_mod_node_overlaps_with_next(H5SL_node_t *node_ptr)
         if ( ( (((H5FP_mdata_mod *)H5SL_item(node_ptr))->addr)
                +
                (((H5FP_mdata_mod *)H5SL_item(node_ptr))->md_size)
-             ) 
+             )
              >
              (((H5FP_mdata_mod *)H5SL_item(next_node_ptr))->addr)
            ) {
-#if 0 
+#if 0
             /* This is useful debugging code -- keep it around for
              * a while.                     JRM -- 4/13/03
              */
-            HDfprintf(stdout, 
+            HDfprintf(stdout,
                "H5FP_mod_node_overlaps_with_next: addr = %a, next_addr = %a.\n",
                (((H5FP_mdata_mod *)(node_ptr->data))->addr),
                (((H5FP_mdata_mod *)(next_node_ptr->data))->addr));
@@ -768,9 +768,9 @@ H5FP_mod_node_overlaps_with_next(H5SL_node_t *node_ptr)
 /*
  * Function:	H5FP_mod_node_overlaps_with_prev
  *
- * Purpose:	Givena node in a mod tree, see if there is an overlap 
- *		between the address range of the supplied node, and that 
- *		of the previous node in the tree (if any).  
+ * Purpose:	Givena node in a mod tree, see if there is an overlap
+ *		between the address range of the supplied node, and that
+ *		of the previous node in the tree (if any).
  *
  * Return:	TRUE if there is an overlap, and FALSE if there
  *		isn't.
@@ -795,7 +795,7 @@ H5FP_mod_node_overlaps_with_prev(H5SL_node_t *node_ptr)
 
     if ( prev_node_ptr != NULL )
     {
-        HDassert((((H5FP_mdata_mod *)H5SL_item(node_ptr))->addr) 
+        HDassert((((H5FP_mdata_mod *)H5SL_item(node_ptr))->addr)
                  >
                  (((H5FP_mdata_mod *)H5SL_item(prev_node_ptr))->addr)
                 );
@@ -803,15 +803,15 @@ H5FP_mod_node_overlaps_with_prev(H5SL_node_t *node_ptr)
         if ( ( (((H5FP_mdata_mod *)H5SL_item(prev_node_ptr))->addr)
                +
                (((H5FP_mdata_mod *)H5SL_item(prev_node_ptr))->md_size)
-             ) 
+             )
              >
              (((H5FP_mdata_mod *)H5SL_item(node_ptr))->addr)
            ) {
-#if 0 
+#if 0
             /* This is useful debugging code -- keep it around for
              * a while.                        JRM - 4/13/04
              */
-            HDfprintf(stdout, 
+            HDfprintf(stdout,
                "H5FP_mod_node_overlaps_with_prev: addr = %a, prev_addr = %a.\n",
                (((H5FP_mdata_mod *)(node_ptr->data))->addr),
                (((H5FP_mdata_mod *)(prev_node_ptr->data))->addr));
@@ -839,7 +839,7 @@ H5FP_mod_node_overlaps_with_prev(H5SL_node_t *node_ptr)
  *						JRM -- 3/29/04
  */
 static herr_t
-H5FP_add_file_mod_to_list(H5FP_file_info *info, H5FD_mem_t mem_type, 
+H5FP_add_file_mod_to_list(H5FP_file_info *info, H5FD_mem_t mem_type,
                           haddr_t addr, unsigned md_size,
                           char *metadata)
 {
@@ -853,13 +853,13 @@ H5FP_add_file_mod_to_list(H5FP_file_info *info, H5FD_mem_t mem_type,
     assert(info);
 
 #if 0
-    /* This is useful debugging code -- keep it around for a 
+    /* This is useful debugging code -- keep it around for a
      * while.                         JRM -- 4/13/04
      */
-    HDfprintf(stdout, 
-              "H5FP_add_file_mod_to_list: Adding chunk at %a of length %u.\n", 
+    HDfprintf(stdout,
+              "H5FP_add_file_mod_to_list: Adding chunk at %a of length %u.\n",
               addr, md_size);
-#endif 
+#endif
     if ((node = H5SL_find(info->mod_list, &addr)) != NULL) {
         /*
          * The metadata is in the cache already. All we have to do is
@@ -883,7 +883,7 @@ H5FP_add_file_mod_to_list(H5FP_file_info *info, H5FD_mem_t mem_type,
 
                 (info->num_mods)--; /* since we just merged */
             }
-        } else { /* fm->md_size == md_size */ 
+        } else { /* fm->md_size == md_size */
             HDfree(fm->metadata);
             fm->metadata = metadata;
         }
@@ -907,7 +907,7 @@ H5FP_add_file_mod_to_list(H5FP_file_info *info, H5FD_mem_t mem_type,
         }
 
         /* if the tree was valid to begin with, we must merge with at
-         * most one previous node.  
+         * most one previous node.
          */
         if ( H5FP_mod_node_overlaps_with_prev(node) ) {
             if ( H5FP_merge_mod_node_with_prev(info->mod_list, node) < 0 )
@@ -1313,7 +1313,7 @@ H5FP_sap_handle_lock_request(H5FP_request_t *req)
             exit_state = H5FP_STATUS_BAD_FILE_ID;
             HGOTO_DONE(FAIL)
         }
-        
+
         if (oids[j].info->closing) {
             /* we're closing the file - don't accept anymore locks */
             exit_state = H5FP_STATUS_FILE_CLOSING;
@@ -1446,7 +1446,7 @@ assert(0);
     HDfree(oids);
     H5FP_send_reply(req->proc_rank, req->req_id, req->file_id, exit_state);
     FUNC_LEAVE_NOAPI(ret_value)
-} 
+}
 
 /*
  * Function:    H5FP_sap_handle_release_lock_request
@@ -1575,10 +1575,10 @@ H5FP_sap_handle_read_request(H5FP_request_t *req)
     int mrc;
 
     FUNC_ENTER_NOAPI_NOINIT(H5FP_sap_handle_read_request)
-#if 0 
+#if 0
     /* More useful debugging code to keep for a time.  JRM - 4/13/04 */
-    HDfprintf(stdout, 
-              "H5FP_sap_handle_read_request: req->addr = %a.\n", 
+    HDfprintf(stdout,
+              "H5FP_sap_handle_read_request: req->addr = %a.\n",
               req->addr);
 #endif
 
@@ -1659,8 +1659,8 @@ H5FP_sap_handle_write_request(H5FP_request_t *req, char *mdata, unsigned md_size
     FUNC_ENTER_NOAPI_NOINIT(H5FP_sap_handle_write_request)
 #if 0
     /* Debugging code -- lets keep it for a time.  JRM -- 4/13/04 */
-    HDfprintf(stdout, 
-              "H5FP_sap_handle_write_request: addr = %a, md_size = %d.\n", 
+    HDfprintf(stdout,
+              "H5FP_sap_handle_write_request: addr = %a, md_size = %d.\n",
               (haddr_t)(req->addr), (int)md_size);
 #endif
     if ((info = H5SL_search(file_info_list,&req->file_id)) != NULL) {
@@ -1850,9 +1850,9 @@ H5FP_sap_handle_alloc_request(H5FP_request_t *req)
         sap_alloc.eoa = HADDR_UNDEF;
         sap_alloc.status = H5FP_STATUS_CANT_ALLOC;
     }
-#if 0 
+#if 0
     /* Debugging code -- lets keep it for a time.  JRM -- 4/13/04 */
-    HDfprintf(stdout, 
+    HDfprintf(stdout,
               "%s: req_size = %d, req_type = %d, addr = %a, eoa = %a, status = %d, rp_rank = %d.\n",
               "H5FP_sap_handle_alloc_request",
               (int)(req->meta_block_size),
@@ -1897,7 +1897,7 @@ H5FP_sap_handle_free_request(H5FP_request_t *req)
 
 #if 0
     /* Debugging code -- lets keep it for a time.  JRM -- 4/13/04 */
-    HDfprintf(stdout, 
+    HDfprintf(stdout,
         "%s: addr = %a, block_size = %a, mem_type = %d, rp_rank = %d.\n",
               "H5FP_sap_handle_free_request",
               req->addr,
@@ -2006,10 +2006,10 @@ H5FP_sap_handle_set_eoa_request(H5FP_request_t *req)
 
     if ((info = H5SL_search(file_info_list,&req->file_id)) != NULL) {
 
-#if 0 
+#if 0
     /* Debugging code -- lets keep it for a time.  JRM -- 4/13/04 */
     if ( req->addr < ((H5FD_fphdf5_t*)&info->file)->eoa ) {
-        HDfprintf(stdout, 
+        HDfprintf(stdout,
                   "%s: old eoa = %a, new eoa = %a, rp_rank = %d. %s\n",
                   "H5FP_sap_handle_set_eoa_request",
                   ((H5FD_fphdf5_t*)&info->file)->eoa,
@@ -2019,14 +2019,14 @@ H5FP_sap_handle_set_eoa_request(H5FP_request_t *req)
     }
 #if 0
     else {
-        HDfprintf(stdout, 
+        HDfprintf(stdout,
                   "%s: old eoa = %a, new eoa = %a, rp_rank = %d.\n",
                   "H5FP_sap_handle_set_eoa_request",
                   ((H5FD_fphdf5_t*)&info->file)->eoa,
                   req->addr,
                   (int)(req->proc_rank));
     }
-#endif 
+#endif
 #endif
 
         /* Get the EOA. */
@@ -2035,7 +2035,7 @@ H5FP_sap_handle_set_eoa_request(H5FP_request_t *req)
     } else {
 #if 1
     /* Debugging code -- lets keep it for a time.  JRM -- 4/13/04 */
-    HDfprintf(stdout, 
+    HDfprintf(stdout,
               "%s: Function failed -- Couldn't get info.  new eoa = %a.\n",
               "H5FP_sap_handle_set_eoa_request",
               req->addr);

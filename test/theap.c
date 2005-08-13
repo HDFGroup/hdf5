@@ -82,9 +82,9 @@ static int tst_inc_sort(const void *_i1, const void *_i2)
 **
 **  test_heap_init(): Test H5HP (heap) code.
 **      Initialize data for Heap testing
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_heap_init(void)
 {
     time_t curr_time;   /* Current time, for seeding random number generator */
@@ -110,9 +110,9 @@ test_heap_init(void)
 **
 **  test_heap_create(): Test basic H5HP (heap) code.
 **      Tests creating and closing heaps.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_heap_create(void)
 {
     H5HP_t *heap;       /* Heap created */
@@ -143,9 +143,9 @@ test_heap_create(void)
 **
 **  test_heap_insert_min(): Test H5HP (heap) code.
 **      Tests basic inserting objects into minimum heaps.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_heap_insert_min(void)
 {
     H5HP_t *heap;       /* Heap created */
@@ -217,9 +217,9 @@ test_heap_insert_min(void)
 **
 **  test_heap_insert(): Test H5HP (heap) code.
 **      Tests basic inserting objects into maximum heaps.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_heap_insert_max(void)
 {
     H5HP_t *heap;       /* Heap created */
@@ -291,9 +291,9 @@ test_heap_insert_max(void)
 **
 **  test_heap_insert(): Test H5HP (heap) code.
 **      Tests basic inserting objects into heaps.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_heap_insert(void)
 {
     /* Output message about test being performed */
@@ -308,7 +308,7 @@ test_heap_insert(void)
 **
 **  test_heap_insert_many_core (): Tests H5HP (heap) code.
 **      "Core" routine called by test_heap_insert_many() routine.
-** 
+**
 ****************************************************************/
 static void test_heap_insert_many_core(H5HP_type_t heap_type, test_obj *arr, size_t nelem, int top_val)
 {
@@ -351,9 +351,9 @@ static void test_heap_insert_many_core(H5HP_type_t heap_type, test_obj *arr, siz
 **
 **  test_heap_insert_many (): Test H5HP (heap) code.
 **      Tests inserting many objects into heaps.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_heap_insert_many(void)
 {
     /* Output message about test being performed */
@@ -383,9 +383,9 @@ test_heap_insert_many(void)
 **
 **  test_heap_remove_min(): Test H5HP (heap) code.
 **      Tests basic removal of objects from minimum heaps.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_heap_remove_min(void)
 {
     H5HP_t *heap;       /* Heap created */
@@ -457,9 +457,9 @@ test_heap_remove_min(void)
 **
 **  test_heap_remove_max(): Test H5HP (heap) code.
 **      Tests basic removal of objects from maximum heaps.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_heap_remove_max(void)
 {
     H5HP_t *heap;       /* Heap created */
@@ -531,9 +531,9 @@ test_heap_remove_max(void)
 **
 **  test_heap_remove(): Test H5HP (heap) code.
 **      Tests basic removal of objects from minimum & maximum heaps.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_heap_remove(void)
 {
     /* Output message about test being performed */
@@ -548,7 +548,7 @@ test_heap_remove(void)
 **
 **  test_heap_remove_many_core (): Tests H5HP (heap) code.
 **      "Core" routine called by test_heap_remove_many() routine.
-** 
+**
 ****************************************************************/
 static void test_heap_remove_many_core(H5HP_type_t heap_type, test_obj *arr, size_t nelem)
 {
@@ -661,9 +661,9 @@ static void test_heap_remove_many_core(H5HP_type_t heap_type, test_obj *arr, siz
 **
 **  test_heap_remove_many (): Test H5HP (heap) code.
 **      Tests removing many objects into heaps.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_heap_remove_many(void)
 {
     /* Output message about test being performed */
@@ -693,9 +693,9 @@ test_heap_remove_many(void)
 **
 **  test_heap_change_min (): Test H5HP (heap) code.
 **      Tests changing the priority of an object in a minimum heap
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_heap_change_min(void)
 {
     H5HP_t *heap;       /* Heap created */
@@ -767,9 +767,9 @@ test_heap_change_min(void)
 **
 **  test_heap_change_max (): Test H5HP (heap) code.
 **      Tests changing the priority of an object in a maximumheap
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_heap_change_max(void)
 {
     H5HP_t *heap;       /* Heap created */
@@ -841,9 +841,9 @@ test_heap_change_max(void)
 **
 **  test_heap_change (): Test H5HP (heap) code.
 **      Tests changing the priority of an object in maximum & minimum heaps
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_heap_change(void)
 {
     /* Output message about test being performed */
@@ -859,9 +859,9 @@ test_heap_change(void)
 **  test_heap_incdec_min (): Test H5HP (heap) code.
 **      Tests incrementing & decrementing priority of objects on
 **      a minimum heap.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_heap_incdec_min(void)
 {
     H5HP_t *heap;       /* Heap created */
@@ -934,9 +934,9 @@ test_heap_incdec_min(void)
 **  test_heap_incdec_max (): Test H5HP (heap) code.
 **      Tests incrementing & decrementing priority of objects on
 **      a maximum heap.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_heap_incdec_max(void)
 {
     H5HP_t *heap;       /* Heap created */
@@ -1009,9 +1009,9 @@ test_heap_incdec_max(void)
 **  test_heap_incdec (): Test H5HP (heap) code.
 **      Tests incrementing & decrementing priority of objects on
 **      maximum & minimum heaps.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_heap_incdec(void)
 {
     /* Output message about test being performed */
@@ -1025,7 +1025,7 @@ test_heap_incdec(void)
 /****************************************************************
 **
 **  test_heap(): Main H5HP testing routine.
-** 
+**
 ****************************************************************/
 void
 test_heap(void)

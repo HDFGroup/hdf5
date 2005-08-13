@@ -110,7 +110,7 @@
 #else /*WIN32*/
 #define H5_DLL
 #define H5_HLDLL
-#define H5_HLCPPDLL 
+#define H5_HLCPPDLL
 #define HDF5_HL_F90CSTUBDLL
 #define H5_DLLVAR extern
 #define H5_DLLCPP

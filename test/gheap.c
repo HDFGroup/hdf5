@@ -80,7 +80,7 @@ test_1 (hid_t fapl)
 	puts("    Unable to create file");
 	goto error;
     }
-    
+
     /*
      * Write the objects, monotonically increasing in length.  Since this is
      * a clean file, the addresses allocated for the collections should also
@@ -119,7 +119,7 @@ test_1 (hid_t fapl)
 	    nerrors++;
 	}
     }
-    
+
     if (H5Fclose(file)<0) goto error;
     if (nerrors) goto error;
     PASSED();
@@ -174,7 +174,7 @@ test_2 (hid_t fapl)
 	puts("    Unable to create file");
 	goto error;
     }
-    
+
     /*
      * Write the objects, monotonically decreasing in length.
      */
@@ -206,7 +206,7 @@ test_2 (hid_t fapl)
 	    nerrors++;
 	}
     }
-    
+
     if (H5Fclose(file)<0) goto error;
     if (nerrors) goto error;
     PASSED();
@@ -284,7 +284,7 @@ test_3 (hid_t fapl)
 	    nerrors++;
 	}
     }
-    
+
     if (H5Fclose(file)<0) goto error;
     if (nerrors) goto error;
     PASSED();
@@ -357,7 +357,7 @@ test_4 (hid_t fapl)
 	 * Remove every third one beginning with the second, but after the
 	 * next one has already been inserted.  That is, insert A, B, C;
 	 * remove B, insert D, E, F; remove E; etc.
-	 */ 
+	 */
 	if (1==i%3) {
 	    H5Eclear_stack(H5E_DEFAULT);
 	    status = H5HG_remove (f, H5P_DATASET_XFER_DEFAULT, obj+i-1);
@@ -381,7 +381,7 @@ test_4 (hid_t fapl)
     } H5E_END_TRY;
     return MAX(1, nerrors);
 }
-    
+
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -407,7 +407,7 @@ main (void)
 
     h5_reset();
     fapl = h5_fileaccess();
-    
+
     nerrors += test_1(fapl);
     nerrors += test_2(fapl);
     nerrors += test_3(fapl);

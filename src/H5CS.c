@@ -16,7 +16,7 @@
  * Purpose:	Provides internal function tracing in the form of a stack.
  *		The FUNC_ENTER() macro adds the function name to the function
  *              stack whenever a function is entered.
- *		As the functions return with FUNC_LEAVE, 
+ *		As the functions return with FUNC_LEAVE,
  *		entries are removed from the stack.
  *
  *		A function stack has a fixed maximum size.  If this size is
@@ -112,10 +112,10 @@ H5FS_print(FILE *stream)
     H5FS_t	*fstack = H5FS_get_my_stack (); /* Get the correct function stack */
     const int	indent = 2;             /* Indention level */
     int         i;                      /* Local index ariable */
-    
+
     /* Don't push this function on the function stack... :-) */
     FUNC_ENTER_NOAPI_NOFUNC_NOFS(H5FS_print);
-    
+
     /* Sanity check */
     assert(fstack);
 
@@ -136,7 +136,7 @@ H5FS_print(FILE *stream)
 
     for (i=fstack->nused-1; i>=0; --i)
         HDfprintf(stream, "%*s#%03d: Routine: %s\n", indent, "", i, fstack->slot[i]);
-    
+
     FUNC_LEAVE_NOAPI_NOFS(SUCCEED);
 } /* end H5FS_print() */
 
@@ -160,7 +160,7 @@ herr_t
 H5FS_push(const char *func_name)
 {
     H5FS_t	*fstack = H5FS_get_my_stack ();
-    
+
     /* Don't push this function on the function stack... :-) */
     FUNC_ENTER_NOAPI_NOFUNC_NOFS(H5FS_push);
 
@@ -174,7 +174,7 @@ H5FS_push(const char *func_name)
     if (fstack->nused<H5FS_NSLOTS)
 	fstack->slot[fstack->nused] = func_name;
     fstack->nused++;
-    
+
     FUNC_LEAVE_NOAPI_NOFS(SUCCEED);
 } /* end H5FS_push() */
 
@@ -197,7 +197,7 @@ herr_t
 H5FS_pop(void)
 {
     H5FS_t	*fstack = H5FS_get_my_stack ();
-    
+
     /* Don't push this function on the function stack... :-) */
     FUNC_ENTER_NOAPI_NOFUNC_NOFS(H5FS_pop);
 
@@ -207,7 +207,7 @@ H5FS_pop(void)
 
     /* Pop the function. */
     fstack->nused--;
-    
+
     FUNC_LEAVE_NOAPI_NOFS(SUCCEED);
 } /* end H5FS_pop() */
 

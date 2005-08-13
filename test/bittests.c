@@ -50,7 +50,7 @@ test_find (void)
     uint8_t	v1[8];
     int	i;
     ssize_t	n;
-    
+
     TESTING("bit search operations");
 
     /* The zero length buffer */
@@ -67,7 +67,7 @@ test_find (void)
 	puts ("    Zero length test failed (msb)!");
 	goto failed;
     }
-    
+
 
     /* The zero buffer */
     memset (v1, 0, sizeof v1);
@@ -101,7 +101,7 @@ test_find (void)
 	    goto failed;
 	}
     }
-    
+
     /* The one buffer */
     memset (v1, 0xff, sizeof v1);
     n = H5T_bit_find (v1, 0, 8*sizeof(v1), H5T_BIT_LSB, FALSE);
@@ -134,7 +134,7 @@ test_find (void)
 	    goto failed;
 	}
     }
-    
+
 
     PASSED();
     return 0;
@@ -170,7 +170,7 @@ test_copy (void)
     size_t	s_offset, d_offset, size;
     int	i, j;
     ssize_t	n;
-    
+
     TESTING("bit copy operations");
 
     for (i=0; i<NTESTS; i++) {
@@ -180,7 +180,7 @@ test_copy (void)
 	size = MIN3 (size, 8*sizeof(v1)-s_offset, 8*sizeof(v2)-d_offset);
 	memset (v1, 0xff, sizeof v1);
 	memset (v2, 0x00, sizeof v2);
-	
+
 	/* Copy some bits to v2 and make sure something was copied */
 	H5T_bit_copy (v2, d_offset, v1, s_offset, size);
 	for (j=0; j<(int)sizeof(v2); j++) if (v2[j]) break;
@@ -194,7 +194,7 @@ test_copy (void)
 	    puts ("    Found copied bits when we shouldn't have");
 	    goto failed;
 	}
-	
+
 
 	/* Look for the zeros and ones */
 	n = H5T_bit_find (v2, 0, 8*sizeof(v2), H5T_BIT_LSB, 1);
@@ -292,7 +292,7 @@ test_shift (void)
     size_t	offset, size;
     int	        i, j;
     ssize_t	shift_dist, n;
-    
+
     TESTING("bit shift operations");
 
     for (i=0; i<NTESTS; i++) {
@@ -359,10 +359,10 @@ test_shift (void)
         /*-------- Shift the bits out of sight --------*/
         /* A sequence 111111 will be 000000 if shift_dist=6 */
 
-        /* Randomly decide shift direction */ 
+        /* Randomly decide shift direction */
         if(size % 2 == 0)
             shift_dist = size;
-        else 
+        else
             shift_dist = -((ssize_t)size);
 
 	memset (vector, 0x00, sizeof vector);
@@ -378,8 +378,8 @@ test_shift (void)
 		    "(n=%d)\n", (int)n);
 	    goto failed;
 	}
-    
-        /* Look from the other direction */    
+
+        /* Look from the other direction */
 	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_MSB, 1);
 	if (n >= 0) {
 	    H5_FAILED();
@@ -425,7 +425,7 @@ test_increment (void)
     size_t	offset, size;
     int	        i, j;
     ssize_t	n;
-    
+
     TESTING("bit increment operations");
 
     for (i=0; i<NTESTS; i++) {
@@ -512,7 +512,7 @@ test_decrement (void)
     size_t	offset, size;
     int	        i, j;
     ssize_t	n;
-    
+
     TESTING("bit decrement operations");
 
     for (i=0; i<NTESTS; i++) {
@@ -584,7 +584,7 @@ test_negate (void)
     size_t	offset, size;
     int	        i, j;
     ssize_t	n;
-    
+
     TESTING("bit negate operations");
 
     for (i=0; i<NTESTS; i++) {
@@ -595,7 +595,7 @@ test_negate (void)
 
         /* All-zero sequence will become 111111(size=6) after negating */
 	memset (vector, 0x00, sizeof vector);
-        
+
 	/* negate the sequence */
         H5T_bit_neg (vector, offset, size);
 
@@ -684,7 +684,7 @@ test_set (void)
     size_t	d_offset, size;
     int	i, j;
     ssize_t	n;
-    
+
     TESTING("bit set operations");
 
     for (i=0; i<NTESTS; i++) {
@@ -692,7 +692,7 @@ test_set (void)
 	size = (unsigned)HDrand() % (8*sizeof(v2));
 	size = MIN (size, 8*sizeof(v2)-d_offset);
 	memset (v2, 0x00, sizeof v2);
-	
+
 	/* Set some bits in v2 */
 	H5T_bit_set (v2, d_offset, size, TRUE);
 	for (j=0; j<(int)sizeof(v2); j++) if (v2[j]) break;
@@ -706,7 +706,7 @@ test_set (void)
 	    puts ("    Found set bits when we shouldn't have");
 	    goto failed;
 	}
-	
+
 
 	/* Look for the zeros and ones */
 	n = H5T_bit_find (v2, 0, 8*sizeof(v2), H5T_BIT_LSB, 1);
@@ -801,7 +801,7 @@ test_clear (void)
     size_t	d_offset, size;
     int	i, j;
     ssize_t	n;
-    
+
     TESTING("bit clear operations");
 
     for (i=0; i<NTESTS; i++) {
@@ -809,7 +809,7 @@ test_clear (void)
 	size = (unsigned)HDrand() % (8*sizeof(v2));
 	size = MIN (size, 8*sizeof(v2)-d_offset);
 	memset (v2, 0xff, sizeof v2);
-	
+
 	/* Clear some bits in v2 */
 	H5T_bit_set (v2, d_offset, size, FALSE);
 	for (j=0; j<(int)sizeof(v2); j++) if (0xff!=v2[j]) break;
@@ -823,7 +823,7 @@ test_clear (void)
 	    puts ("    Found cleared bits when we shouldn't have");
 	    goto failed;
 	}
-	
+
 
 	/* Look for the zeros and ones */
 	n = H5T_bit_find (v2, 0, 8*sizeof(v2), H5T_BIT_LSB, 0);
@@ -898,11 +898,11 @@ test_clear (void)
 /*-------------------------------------------------------------------------
  * Function:	main
  *
- * Purpose:	
+ * Purpose:
  *
- * Return:	Success:	
+ * Return:	Success:
  *
- *		Failure:	
+ *		Failure:
  *
  * Programmer:	Robb Matzke
  *              Tuesday, June 16, 1998

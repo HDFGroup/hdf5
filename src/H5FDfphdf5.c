@@ -122,7 +122,7 @@ NAME
    H5FD_fphdf5_init_interface -- Initialize interface-specific information
 USAGE
     herr_t H5FD_fphdf5_init_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -231,7 +231,7 @@ H5Pset_fapl_fphdf5(hid_t fapl_id, MPI_Comm comm, MPI_Comm barrier_comm,
     H5P_genplist_t     *plist;
     int                 mrc, comm_size;
     herr_t              ret_value;
-    
+
     FUNC_ENTER_API(H5Pset_fapl_fphdf5, FAIL)
     H5TRACE5("e","iMcMcMiIu",fapl_id,comm,barrier_comm,info,sap_rank);
 
@@ -284,7 +284,7 @@ H5Pget_fapl_fphdf5(hid_t fapl_id, MPI_Comm *comm, MPI_Comm *barrier_comm,
     H5FD_fphdf5_fapl_t *fa;
     H5P_genplist_t     *plist;
     herr_t              ret_value = SUCCEED;
-    
+
     FUNC_ENTER_API(H5Pget_fapl_fphdf5, FAIL)
     H5TRACE6("e","i*Mc*Mc*Mi*Iu*Iu",fapl_id,comm,barrier_comm,info,sap_rank,
              capt_rank);
@@ -332,7 +332,7 @@ unsigned
 H5FD_fphdf5_file_id(H5FD_t *_file)
 {
     H5FD_fphdf5_t  *file = (H5FD_fphdf5_t*)_file;
-    unsigned        ret_value; 
+    unsigned        ret_value;
 
     FUNC_ENTER_NOAPI(H5FD_fphdf5_file_id, 0)
 
@@ -464,7 +464,7 @@ H5Pset_dxpl_fphdf5(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode)
 
     FUNC_ENTER_API(H5Pset_dxpl_fphdf5, FAIL)
     H5TRACE2("e","iDt",dxpl_id,xfer_mode);
-    
+
     if (dxpl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
 
@@ -950,17 +950,17 @@ done:
  * Modifications:
  *-------------------------------------------------------------------------
 */
-static herr_t  
+static herr_t
 H5FD_fphdf5_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
-{   
+{
     H5FD_fphdf5_t  *file = (H5FD_fphdf5_t *)_file;
     herr_t          ret_value = SUCCEED;
-                            
+
     FUNC_ENTER_NOAPI(H5FD_fphdf5_get_handle, FAIL)
 
     /* check args */
     assert(file);
-                                    
+
     if (!file_handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid")
 
@@ -1496,7 +1496,7 @@ static int
 H5FD_fphdf5_mpi_size(const H5FD_t *_file)
 {
     const H5FD_fphdf5_t  *file = (const H5FD_fphdf5_t*)_file;
-    int             ret_value; 
+    int             ret_value;
 
     FUNC_ENTER_NOAPI(H5FD_fphdf5_mpi_size, FAIL)
 

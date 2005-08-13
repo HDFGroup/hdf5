@@ -33,7 +33,7 @@ Exception::Exception() : detail_message(""), func_name("") {}
 
 //--------------------------------------------------------------------------
 // Function:	Exception overloaded constructor
-///\brief	Creates an exception with the name of the function, 
+///\brief	Creates an exception with the name of the function,
 ///		in which the failure occurs, and an optional detailed message.
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
@@ -71,7 +71,7 @@ string Exception::getMajorString( hid_t err_major ) const
 
    // If H5Eget_msg() returns a negative value, raise an exception,
    if( mesg_size < 0 )
-      throw IdComponentException("Exception::getMajorString", 
+      throw IdComponentException("Exception::getMajorString",
 				"H5Eget_msg failed");
 
    // Call H5Eget_msg again to get the actual message
@@ -80,7 +80,7 @@ string Exception::getMajorString( hid_t err_major ) const
 
    // Check for failure again
    if( mesg_size < 0 )
-      throw IdComponentException("Exception::getMajorString", 
+      throw IdComponentException("Exception::getMajorString",
 				"H5Eget_msg failed");
 
    // Convert the C error description and return
@@ -107,7 +107,7 @@ string Exception::getMinorString( hid_t err_minor ) const
 
    // If H5Eget_msg() returns a negative value, raise an exception,
    if( mesg_size < 0 )
-      throw IdComponentException("Exception::getMinorString", 
+      throw IdComponentException("Exception::getMinorString",
 				"H5Eget_msg failed");
 
    // Call H5Eget_msg again to get the actual message
@@ -116,7 +116,7 @@ string Exception::getMinorString( hid_t err_minor ) const
 
    // Check for failure again
    if( mesg_size < 0 )
-      throw IdComponentException("Exception::getMinorString", 
+      throw IdComponentException("Exception::getMinorString",
 				"H5Eget_msg failed");
 
    // Convert the C error description and return
@@ -132,7 +132,7 @@ string Exception::getMinorString( hid_t err_minor ) const
 ///\param	client_data - IN: Data passed to the error function
 ///\par Description
 ///		When the library is first initialized the auto printing
-///		function, \a func, is set to the C API \c H5Eprint and 
+///		function, \a func, is set to the C API \c H5Eprint and
 ///		\a client_data is the standard error stream pointer, \c stderr.
 ///		Automatic stack traversal is always in the \c H5E_WALK_DOWNWARD
 ///		direction.
@@ -168,16 +168,16 @@ void Exception::dontPrint()
 // Function:	Exception::getAutoPrint
 ///\brief	Retrieves the current settings for the automatic error
 ///		stack traversal function and its data.
-///\param	func        - OUT: Current setting for the function to be 
+///\param	func        - OUT: Current setting for the function to be
 ///					called upon an error condition
-///\param	client_data - OUT: Current setting for the data passed to 
+///\param	client_data - OUT: Current setting for the data passed to
 ///					the error function
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void Exception::getAutoPrint( H5E_auto_stack_t& func, void** client_data )
 {
    // calls the C API routine H5Eget_auto to get the current setting of
-   // the automatic error printing 
+   // the automatic error printing
    herr_t ret_value = H5Eget_auto_stack( H5E_DEFAULT, &func, client_data );
    if( ret_value < 0 )
       throw Exception( "Exception::getAutoPrint", "H5Eget_auto failed" );
@@ -325,7 +325,7 @@ Exception::~Exception() {}
 FileIException::FileIException():Exception(){}
 //--------------------------------------------------------------------------
 // Function:	FileIException overloaded constructor
-///\brief	Creates a FileIException with the name of the function, 
+///\brief	Creates a FileIException with the name of the function,
 ///		in which the failure occurs, and an optional detailed message.
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
@@ -348,7 +348,7 @@ FileIException::~FileIException() {}
 GroupIException::GroupIException():Exception(){}
 //--------------------------------------------------------------------------
 // Function:	GroupIException overloaded constructor
-///\brief	Creates a GroupIException with the name of the function, 
+///\brief	Creates a GroupIException with the name of the function,
 ///		in which the failure occurs, and an optional detailed message.
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
@@ -371,7 +371,7 @@ GroupIException::~GroupIException() {}
 DataSpaceIException::DataSpaceIException():Exception(){}
 //--------------------------------------------------------------------------
 // Function:	DataSpaceIException overloaded constructor
-///\brief	Creates a DataSpaceIException with the name of the function, 
+///\brief	Creates a DataSpaceIException with the name of the function,
 ///		in which the failure occurs, and an optional detailed message.
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
@@ -394,7 +394,7 @@ DataSpaceIException::~DataSpaceIException() {}
 DataTypeIException::DataTypeIException():Exception(){}
 //--------------------------------------------------------------------------
 // Function:	DataTypeIException overloaded constructor
-///\brief	Creates a DataTypeIException with the name of the function, 
+///\brief	Creates a DataTypeIException with the name of the function,
 ///		in which the failure occurs, and an optional detailed message.
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
@@ -417,7 +417,7 @@ DataTypeIException::~DataTypeIException() {}
 PropListIException::PropListIException():Exception(){}
 //--------------------------------------------------------------------------
 // Function:	PropListIException overloaded constructor
-///\brief	Creates a PropListIException with the name of the function, 
+///\brief	Creates a PropListIException with the name of the function,
 ///		in which the failure occurs, and an optional detailed message.
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
@@ -440,7 +440,7 @@ PropListIException::~PropListIException() {}
 DataSetIException::DataSetIException():Exception(){}
 //--------------------------------------------------------------------------
 // Function:	DataSetIException overloaded constructor
-///\brief	Creates a DataSetIException with the name of the function, 
+///\brief	Creates a DataSetIException with the name of the function,
 ///		in which the failure occurs, and an optional detailed message.
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
@@ -463,7 +463,7 @@ DataSetIException::~DataSetIException() {}
 AttributeIException::AttributeIException():Exception(){}
 //--------------------------------------------------------------------------
 // Function:	AttributeIException overloaded constructor
-///\brief	Creates an AttributeIException with the name of the function, 
+///\brief	Creates an AttributeIException with the name of the function,
 ///		in which the failure occurs, and an optional detailed message.
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
@@ -486,7 +486,7 @@ AttributeIException::~AttributeIException() {}
 ReferenceException::ReferenceException():Exception(){}
 //--------------------------------------------------------------------------
 // Function:	ReferenceException overloaded constructor
-///\brief	Creates a ReferenceException with the name of the function, 
+///\brief	Creates a ReferenceException with the name of the function,
 ///		in which the failure occurs, and an optional detailed message.
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
@@ -509,7 +509,7 @@ ReferenceException::~ReferenceException() {}
 LibraryIException::LibraryIException():Exception(){}
 //--------------------------------------------------------------------------
 // Function:	LibraryIException overloaded constructor
-///\brief	Creates a LibraryIException with the name of the function, 
+///\brief	Creates a LibraryIException with the name of the function,
 ///		in which the failure occurs, and an optional detailed message.
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
@@ -532,7 +532,7 @@ LibraryIException::~LibraryIException() {}
 IdComponentException::IdComponentException(): Exception() {}
 //--------------------------------------------------------------------------
 // Function:	IdComponentException overloaded constructor
-///\brief	Creates a IdComponentException with the name of the function, 
+///\brief	Creates a IdComponentException with the name of the function,
 ///		in which the failure occurs, and an optional detailed message.
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure

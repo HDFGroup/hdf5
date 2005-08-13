@@ -123,10 +123,10 @@ test_dangle_dataset(H5F_close_degree_t degree)
     /* Clean up temporary file */
     HDremove(filename);
 
-    PASSED();                                                 
-    return 0;                                                 
-                                                                      
-error:                                                       
+    PASSED();
+    return 0;
+
+error:
     return 1;
 }
 
@@ -216,10 +216,10 @@ test_dangle_group(H5F_close_degree_t degree)
     /* Clean up temporary file */
     HDremove(filename);
 
-    PASSED();                                                 
-    return 0;                                                 
-                                                                      
-error:                                                       
+    PASSED();
+    return 0;
+
+error:
     return 1;
 }
 
@@ -313,10 +313,10 @@ test_dangle_datatype(H5F_close_degree_t degree)
     /* Clean up temporary file */
     HDremove(filename);
 
-    PASSED();                                                 
-    return 0;                                                 
-                                                                      
-error:                                                       
+    PASSED();
+    return 0;
+
+error:
     return 1;
 }
 
@@ -421,10 +421,10 @@ test_dangle_attribute(H5F_close_degree_t degree)
     /* Clean up temporary file */
     HDremove(filename);
 
-    PASSED();                                                 
-    return 0;                                                 
-                                                                      
-error:                                                       
+    PASSED();
+    return 0;
+
+error:
     return 1;
 }
 

@@ -328,7 +328,7 @@ H5BP_cache_hdr_clear(H5F_t *f, H5BP_t *bpt, hbool_t destroy)
 
     /* Reset the dirty flag.  */
     bpt->cache_info.is_dirty = FALSE;
- 
+
     if (destroy)
         if (H5BP_cache_hdr_dest(f, bpt) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B+ tree header")
@@ -342,7 +342,7 @@ done:
  * Function:	H5BP_cache_hdr_size
  *
  * Purpose:	Compute the size in bytes of a B+ tree header
- *		on disk, and return it in *size_ptr.  On failure, 
+ *		on disk, and return it in *size_ptr.  On failure,
  *		the value of *size_ptr is undefined.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -662,7 +662,7 @@ H5BP_cache_leaf_clear(H5F_t *f, H5BP_leaf_t *leaf, hbool_t destroy)
 
     /* Reset the dirty flag.  */
     leaf->cache_info.is_dirty = FALSE;
- 
+
     if (destroy)
         if (H5BP_cache_leaf_dest(f, leaf) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B+ tree leaf node")
@@ -676,7 +676,7 @@ done:
  * Function:	H5BP_cache_leaf_size
  *
  * Purpose:	Compute the size in bytes of a B+ tree leaf node
- *		on disk, and return it in *size_ptr.  On failure, 
+ *		on disk, and return it in *size_ptr.  On failure,
  *		the value of *size_ptr is undefined.
  *
  * Return:	Non-negative on success/Negative on failure

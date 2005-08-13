@@ -13,13 +13,13 @@
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * This example creates a group in the file and dataset in the group. 
+ * This example creates a group in the file and dataset in the group.
  * Hard link to the group object is created and the dataset is accessed
- * under different names. 
+ * under different names.
  * Iterator function is used to find the object names in the root group.
  * Note that the C++ API iterator function is not completed yet, thus
  * the C version is used in this example.
- */ 
+ */
 #include <string>
 
 #ifdef OLD_HEADER_FILENAME
@@ -67,9 +67,9 @@ int main(void)
 
       /*
        * Create dataset "Compressed Data" in the group using absolute
-       * name. Dataset creation property list is modified to use 
-       * GZIP compression with the compression effort set to 6. 
-       * Note that compression can be used only when dataset is chunked. 
+       * name. Dataset creation property list is modified to use
+       * GZIP compression with the compression effort set to 6.
+       * Note that compression can be used only when dataset is chunked.
        */
       dims[0] = 1000;
       dims[1] = 20;
@@ -92,13 +92,13 @@ int main(void)
       delete file;
 
       /*
-       * Now reopen the file and group in the file. 
+       * Now reopen the file and group in the file.
        */
       file = new H5File( FILE_NAME, H5F_ACC_RDWR );
       group = new Group( file->openGroup( "Data" ));
 
       /*
-       * Access "Compressed_Data" dataset in the group. 
+       * Access "Compressed_Data" dataset in the group.
        */
       try {  // to determine if the dataset exists in the group
          dataset = new DataSet( group->openDataSet( "Compressed_Data" ));
@@ -121,11 +121,11 @@ int main(void)
 
       /*
        * We can access "Compressed_Data" dataset using created
-       * hard link "Data_new". 
+       * hard link "Data_new".
        */
       try {  // to determine if the dataset exists in the file
          dataset = new DataSet( file->openDataSet( "/Data_new/Compressed_Data" ));
-      } 
+      }
       catch( FileIException not_found_error )
       {
          cout << " Dataset is not found." << endl;
@@ -150,9 +150,9 @@ int main(void)
        * of the objects in the file root direvtory.
        */
       cout << "Unlinking..." << endl;
-      try {  // attempt to unlink the dataset 
+      try {  // attempt to unlink the dataset
          file->unlink( "Data" );
-      } 
+      }
       catch( FileIException unlink_error )
       {
          cout << " unlink failed." << endl;
@@ -211,12 +211,12 @@ file_info(hid_t loc_id, const char *name, void *opdata)
      * Open the group using its name.
      */
     group = H5Gopen(loc_id, name);
- 
+
     /*
      * Display group name.
      */
     cout << "Name : " << name << endl;
-    
+
     H5Gclose(group);
     return 0;
  }

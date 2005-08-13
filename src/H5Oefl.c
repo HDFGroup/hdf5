@@ -73,7 +73,7 @@ const H5O_class_t H5O_EFL[1] = {{
  * Modifications:
  *	Robb Matzke, 1998-07-20
  *	Rearranged the message to add a version number near the beginning.
- *	
+ *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -118,7 +118,7 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *s
 
     if (NULL == (heap = H5HL_protect(f, dxpl_id, mesg->heap_addr)))
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read protect link value")
-    
+
     s = H5HL_offset_into(f, heap, 0);
 
     assert (s && !*s);
@@ -137,7 +137,7 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *s
 
         if (NULL == (heap = H5HL_protect(f, dxpl_id, mesg->heap_addr)))
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read protect link value")
-    
+
         s = H5HL_offset_into(f, heap, mesg->slot[u].name_offset);
 	assert (s && *s);
 	mesg->slot[u].name = H5MM_xstrdup (s);
@@ -145,7 +145,7 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *s
 
         if (H5HL_unprotect(f, dxpl_id, heap, mesg->heap_addr, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read unprotect link value")
-	
+
 	/* File offset */
 	H5F_DECODE_LENGTH (f, p, mesg->slot[u].offset);
 
@@ -184,7 +184,7 @@ done:
  *	Entering the name into the local heap happens when the dataset is
  *	created. Otherwise we could end up in infinite recursion if the heap
  *	happens to hash to the same cache slot as the object header.
- *	
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -267,7 +267,7 @@ H5O_efl_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
 	if (NULL==(dest = H5MM_calloc(sizeof(H5O_efl_t))) ||
                 NULL==(dest->slot=H5MM_malloc(mesg->nalloc* sizeof(H5O_efl_entry_t))))
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-	
+
     } else if (dest->nalloc<mesg->nalloc) {
 	H5MM_xfree(dest->slot);
 	if (NULL==(dest->slot = H5MM_malloc(mesg->nalloc*
@@ -354,7 +354,7 @@ H5O_efl_reset(void *_mesg)
 {
     H5O_efl_t	*mesg = (H5O_efl_t *) _mesg;
     size_t	u;              /* Local index variable */
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_efl_reset);
 
     /* check args */
@@ -393,7 +393,7 @@ hsize_t
 H5O_efl_total_size (H5O_efl_t *efl)
 {
     hsize_t	ret_value = 0, tmp;
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5O_efl_total_size);
 
     if (efl->nused>0 &&
@@ -455,11 +455,11 @@ H5O_efl_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * s
     for (u = 0; u < mesg->nused; u++) {
 	sprintf (buf, "File %u", (unsigned)u);
 	HDfprintf (stream, "%*s%s:\n", indent, "", buf);
-	
+
 	HDfprintf(stream, "%*s%-*s \"%s\"\n", indent+3, "", MAX (fwidth-3, 0),
 		  "Name:",
 		  mesg->slot[u].name);
-	
+
 	HDfprintf(stream, "%*s%-*s %lu\n", indent+3, "", MAX (fwidth-3, 0),
 		  "Name offset:",
 		  (unsigned long)(mesg->slot[u].name_offset));

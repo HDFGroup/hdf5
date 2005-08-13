@@ -402,7 +402,7 @@ done:
 --------------------------------------------------------------------------*/
 static H5ST_ptr_t
 H5ST_findfirst_internal(H5ST_ptr_t p)
-{   
+{
     H5ST_ptr_t ret_value=NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5ST_findfirst_internal);
@@ -422,7 +422,7 @@ H5ST_findfirst_internal(H5ST_ptr_t p)
             p=p->eqkid;
         } /* end else */
     } /* end while */
-            
+
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5ST_findfirst_internal() */
@@ -448,14 +448,14 @@ done:
 --------------------------------------------------------------------------*/
 H5ST_ptr_t
 H5ST_findfirst(H5ST_tree_t *tree)
-{   
+{
     H5ST_ptr_t ret_value;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5ST_findfirst,NULL);
 
     if((ret_value=H5ST_findfirst_internal(tree->root))==NULL)
         HGOTO_ERROR(H5E_TST,H5E_NOTFOUND,NULL,"no nodes in TST");
-            
+
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5ST_findfirst() */
@@ -539,7 +539,7 @@ done:
 --------------------------------------------------------------------------*/
 H5ST_ptr_t
 H5ST_findnext(H5ST_ptr_t p)
-{   
+{
     H5ST_ptr_t q;               /* Temporary pointer to TST node */
     H5ST_ptr_t ret_value=NULL;  /* Return value */
 
@@ -582,7 +582,7 @@ done:
 --------------------------------------------------------------------------*/
 static herr_t
 H5ST_delete_internal(H5ST_ptr_t *root, H5ST_ptr_t p)
-{   
+{
     H5ST_ptr_t q,               /* Temporary pointer to TST node */
         newp;                   /* Pointer to node which will replace deleted node in tree */
 
@@ -658,7 +658,7 @@ H5ST_delete_internal(H5ST_ptr_t *root, H5ST_ptr_t p)
 --------------------------------------------------------------------------*/
 herr_t
 H5ST_delete(H5ST_tree_t *tree, H5ST_ptr_t p)
-{   
+{
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5ST_delete,FAIL);

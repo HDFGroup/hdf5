@@ -38,20 +38,20 @@
  * structure used for some tests, a particle
  *-------------------------------------------------------------------------
  */
-typedef struct particle_t 
+typedef struct particle_t
 {
  char   name[16];
  int    lati;
  int    longi;
  float  pressure;
- double temperature; 
+ double temperature;
 } particle_t;
 
 /*-------------------------------------------------------------------------
  * a static array of particles for writing and checking reads
  *-------------------------------------------------------------------------
  */
-static particle_t testPart[NRECORDS] = { 
+static particle_t testPart[NRECORDS] = {
     {"zero", 0,0, 0.0f, 0.0},
     {"one",  10,10, 1.0f, 10.0},
     {"two",  20,20, 2.0f, 20.0},
@@ -122,14 +122,14 @@ static int create_hl_table(hid_t fid)
                                   HOFFSET( particle_t, temperature )};
 
     /* Define field information */
-    const char *field_names[NFIELDS]  = 
+    const char *field_names[NFIELDS]  =
 		  { "Name","Latitude", "Longitude", "Pressure", "Temperature" };
     hid_t      field_type[NFIELDS];
     hid_t      string_type;
     hsize_t    chunk_size = 10;
     int        *fill_data = NULL;
     int        compress  = 0;
-    herr_t     status; 
+    herr_t     status;
 
     /* Initialize the field field_type */
     string_type = H5Tcopy( H5T_C_S1 );
@@ -142,13 +142,13 @@ static int create_hl_table(hid_t fid)
 
 
   /*------------------------------------------------------------------------
-  * H5TBmake_table 
+  * H5TBmake_table
   *-------------------------------------------------------------------------
   */
 
   status=H5TBmake_table( "Table Title", fid, H5TB_TABLE_NAME, (hsize_t) NFIELDS,
-                        (hsize_t)NRECORDS, sizeof(particle_t), 
-                        field_names, part_offset, field_type, 
+                        (hsize_t)NRECORDS, sizeof(particle_t),
+                        field_names, part_offset, field_type,
                         chunk_size, fill_data, compress, testPart  );
 
 if(status<0)
@@ -750,7 +750,7 @@ int    test_opaque(hid_t fid)
  *
  * ensures that the packet table API throws the correct errors used on
  * objects that are not packet tables.
- * 
+ *
  *-------------------------------------------------------------------------
  */
 int test_error(hid_t fid)
@@ -807,7 +807,7 @@ int test_error(hid_t fid)
   if(H5PTread_packets(id, 0, 1, readBuf) >= 0)
     goto out;
   if(H5PTcreate_index(id) >= 0)
-    goto out;  
+    goto out;
   H5E_END_TRY
 
   id_open=0;
@@ -833,7 +833,7 @@ int test_error(hid_t fid)
   if(H5PTread_packets(id, 0, 1, readBuf) >= 0)
     goto out;
   if(H5PTcreate_index(id) >= 0)
-    goto out;  
+    goto out;
   H5E_END_TRY
 
   PASSED();
@@ -882,7 +882,7 @@ int main(void)
 /*-------------------------------------------------------------------------
  * Packet test: test each function of the packet table
  *-------------------------------------------------------------------------
- */  
+ */
 
  /* create a file using default properties */
  fid=H5Fcreate(TEST_FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);

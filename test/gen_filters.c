@@ -31,19 +31,19 @@ test_filters_endianess(void)
 {
     hid_t     fid;                   /* file ID */
     hid_t     dsid;                  /* dataset ID */
-    hid_t     sid;                   /* dataspace ID */ 
+    hid_t     sid;                   /* dataspace ID */
     hid_t     dcpl;                  /* dataset creation property list ID */
     hsize_t   dims[1]={20};           /* dataspace dimensions */
     hsize_t   chunk_dims[1]={10};     /* chunk dimensions */
     int       buf[20];
     int       rank=1;
     int       i;
-    
+
     for (i=0; i<20; i++){
      buf[i]=1;
     }
-    
-#if defined H5_HAVE_FILTER_FLETCHER32 
+
+#if defined H5_HAVE_FILTER_FLETCHER32
     /* create a file using default properties */
     fid=H5Fcreate(TESTFILE,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT);
 
@@ -89,7 +89,7 @@ error:
  *
  * Purpose:	call the generator function
  *
- * Return:	Success:	
+ * Return:	Success:
  *
  * Modifications:
  *

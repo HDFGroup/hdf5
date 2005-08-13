@@ -25,7 +25,7 @@ static void ph5diff_worker(int );
  *
  * Purpose: h5diff/ph5diff main program
  *
- * Return: An  exit status of 0 means no differences were found, 1 means some 
+ * Return: An  exit status of 0 means no differences were found, 1 means some
  *   differences were found.
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
@@ -39,12 +39,12 @@ static void ph5diff_worker(int );
  *   Normal mode: print the number of differences found and where they occured
  *   Report mode: print the above plus the differences
  *   Verbose mode: print the above plus a list of objects and warnings
- *   Quiet mode: do not print output 
+ *   Quiet mode: do not print output
  *
  * November 2004: Leon Arber (larber@uiuc.edu)
  * 		  Additions that allow h5diff to be run in parallel
  *
- * This function drives the diff process and will do a serial or parallel diff depending 
+ * This function drives the diff process and will do a serial or parallel diff depending
  * on the value of the global variable g_Parallel (default is 0), set to 1 when the program
  * is run as "ph5diff"
  *-------------------------------------------------------------------------
@@ -60,7 +60,7 @@ int main(int argc, const char *argv[])
     const char *objname2  = NULL;
     hsize_t    nfound=0;
     diff_opt_t options;
- 
+
     outBuffOffset = 0;
     g_Parallel = 1;
 
@@ -74,11 +74,11 @@ int main(int argc, const char *argv[])
 	printf("Only 1 task available...doing serial diff\n");
 
 	g_Parallel = 0;
-	
+
 	parse_input(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
-	
+
 	nfound = h5diff(fname1,fname2,objname1,objname2,&options);
-	
+
 	print_results(nfound, &options);
 
 	MPI_Finalize();
@@ -90,13 +90,13 @@ int main(int argc, const char *argv[])
     if(nID == 0)
     {
 	parse_input(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
-	
+
 	nfound = h5diff(fname1,fname2,objname1,objname2,&options);
-	
+
 	MPI_Barrier(MPI_COMM_WORLD);
 
 	print_results(nfound, &options);
-	print_manager_output();  
+	print_manager_output();
 
 	MPI_Finalize();
 
@@ -125,9 +125,9 @@ int main(int argc, const char *argv[])
  */
 static void
 ph5diff_worker(int nID)
-{	
+{
     struct diff_args args;
-    hid_t file1_id, file2_id;	
+    hid_t file1_id, file2_id;
     char	filenames[2][1024];
     char	out_data[PRINT_DATA_MAX_SIZE] = {0};
     hsize_t    nfound=0;
@@ -137,7 +137,7 @@ ph5diff_worker(int nID)
 
     MPI_Comm_rank(MPI_COMM_WORLD, &nID);
     outBuffOffset = 0;
-    
+
     MPI_Recv(filenames, 1024*2, MPI_CHAR, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
     if(Status.MPI_TAG == MPI_TAG_PARALLEL)
     {
@@ -180,19 +180,19 @@ ph5diff_worker(int nID)
 
 		    /*Wait for print token. */
 		    MPI_Recv(NULL, 0, MPI_BYTE, 0, MPI_TAG_PRINT_TOK, MPI_COMM_WORLD, &Status);
-	
+
 		    /*When get token, send all of our output to the manager task and then return the token */
 		    for(i=0; i<outBuffOffset; i+=PRINT_DATA_MAX_SIZE)
 			MPI_Send(outBuff+i, PRINT_DATA_MAX_SIZE, MPI_BYTE, 0, MPI_TAG_PRINT_DATA, MPI_COMM_WORLD);
 
-			
+
 		    /* An overflow file exists, so we send it's output to the manager too and then delete it */
 		    if(overflow_file)
 		    {
     			int	tmp;
 			memset(out_data, 0, PRINT_DATA_MAX_SIZE);
 			i=0;
-			
+
 			rewind(overflow_file);
 			while((tmp = getc(overflow_file)) >= 0)
 			{
@@ -211,7 +211,7 @@ ph5diff_worker(int nID)
 			fclose(overflow_file);
 			overflow_file = NULL;
 		    }
-		    
+
 		    fflush(stdout);
 		    memset(outBuff, 0, OUTBUFF_SIZE);
 		    outBuffOffset = 0;
@@ -224,7 +224,7 @@ ph5diff_worker(int nID)
 	    else if(Status.MPI_TAG == MPI_TAG_END)
 	    {
 		MPI_Recv(NULL, 0, MPI_BYTE, 0, MPI_TAG_END, MPI_COMM_WORLD, &Status);
-	/*	printf("exiting..., task: %d\n", nID); 
+	/*	printf("exiting..., task: %d\n", nID);
 		fflush(stdout);*/
 		break;
 	    }
@@ -238,6 +238,6 @@ ph5diff_worker(int nID)
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
-    MPI_Finalize();	
+    MPI_Finalize();
 }
 

@@ -33,17 +33,17 @@
  * Predefined test verbosity levels.
  *
  * Convention:
- * 
+ *
  * The higher the verbosity value, the more information printed.
  * So, output for higher verbosity also include output of all lower
  * verbosity.
- * 
+ *
  *  Value     Description
  *  0         None:   No informational message.
  *  1                 "All tests passed"
  *  2                 Header of overall test
  *  3         Default: header and results of individual test
- *  4         
+ *  4
  *  5         Low:    Major category of tests.
  *  6
  *  7         Medium: Minor category of tests such as functions called.
@@ -75,7 +75,7 @@
 
 /*
  * This contains the filename prefix specificied as command line option for
- * the parallel test files. 
+ * the parallel test files.
  */
 extern char *paraprefix;
 #ifdef H5_HAVE_PARALLEL
@@ -125,7 +125,7 @@ H5TEST_DLL int print_func(const char *format, ...);
 /* Routines for operating on the list of tests (for the "all in one" tests) */
 H5TEST_DLL void TestUsage(void);
 H5TEST_DLL void AddTest(const char *TheName, void (*TheCall) (void),
-	     void (*Cleanup) (void), const char *TheDescr, 
+	     void (*Cleanup) (void), const char *TheDescr,
 	     const void *Parameters);
 H5TEST_DLL void TestInfo(const char *ProgName);
 H5TEST_DLL void TestParseCmdLine(int argc, char *argv[]);
@@ -145,7 +145,7 @@ H5TEST_DLL int  TestErrPrintf(const char *format, ...);
 H5TEST_DLL void SetTest(const char *testname, int action);
 
 
-#ifdef H5_HAVE_FILTER_SZIP 
+#ifdef H5_HAVE_FILTER_SZIP
 H5TEST_DLL int h5_szip_can_encode(void);
 #endif /* H5_HAVE_FILTER_SZIP */
 

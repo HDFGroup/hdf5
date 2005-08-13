@@ -20,11 +20,11 @@
 /*----------------------------------------------------------------------------
  * Name:        h5fcreate_c
  * Purpose:     Call H5Fcreate to create the file
- * Inputs:      name - name of the file     
+ * Inputs:      name - name of the file
  *              namelen - name length
  *              access_flags - file access  flags
  *              crt_pr  - identifier of creation property list
- *              acc_prp - identifier of access property list 
+ *              acc_prp - identifier of access property list
  * Outputs:     file_id - file identifier
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
@@ -65,7 +65,7 @@ nh5fcreate_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f* crt_prp, h
       * Convert FORTRAN name to C name
       */
      c_namelen = *namelen;
-     c_name = (char *)HD5f2cstring(name, (size_t)c_namelen); 
+     c_name = (char *)HD5f2cstring(name, (size_t)c_namelen);
      if (c_name == NULL) return ret_value;
 
      /*
@@ -78,15 +78,15 @@ nh5fcreate_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f* crt_prp, h
      HDfree(c_name);
      ret_value = 0;
      return ret_value;
-} 
-     
+}
+
 /*----------------------------------------------------------------------------
  * Name:        h5fflush_c
  * Purpose:     Call H5Fflush to flush the object
  * Inputs:      object_id - identifier of either a file, a dataset,
- *                          a group, an attribute or a named data type       
+ *                          a group, an attribute or a named data type
  *              scope - integer to specify the flushing action, either
- *                      H5F_SCOPE_GLOBAL or H5F_SCOPE_LOCAL 
+ *                      H5F_SCOPE_GLOBAL or H5F_SCOPE_LOCAL
  * Returns:     0 on success, -1 on failure
  * Programmer:  Xiangyang Su
  *              Friday, November 5, 1999
@@ -112,17 +112,17 @@ nh5fflush_c (hid_t_f *object_id, int_f *scope)
      if (status >= 0)  ret_value = 0;
 
      return ret_value;
-}      
+}
 
 
 /*----------------------------------------------------------------------------
  * Name:        h5fmount_c
  * Purpose:     Call H5Fmount to mount the file
  * Inputs:      loc_id - Identifier for file or group
- *              dsetname - name of dataset    
+ *              dsetname - name of dataset
  *              namelen - dsetname length
  *              file_id - file identifier for the file to be mounted
- *              acc_prp - identifier of access property list 
+ *              acc_prp - identifier of access property list
  * Returns:     0 on success, -1 on failure
  * Programmer:  Xiangyang Su
  *              Monday, October 25, 1999
@@ -153,7 +153,7 @@ nh5fmount_c (hid_t_f *loc_id, _fcd dsetname, int_f *namelen, hid_t_f *file_id, h
       * Convert FORTRAN name to C name
       */
      c_namelen = *namelen;
-     c_name = (char *)HD5f2cstring(dsetname, (size_t)c_namelen); 
+     c_name = (char *)HD5f2cstring(dsetname, (size_t)c_namelen);
      if (c_name == NULL) return ret_value;
 
      /*
@@ -165,13 +165,13 @@ nh5fmount_c (hid_t_f *loc_id, _fcd dsetname, int_f *namelen, hid_t_f *file_id, h
 
      HDfree(c_name);
      return ret_value;
-}      
+}
 
 /*----------------------------------------------------------------------------
  * Name:        h5funmount_c
  * Purpose:     Call H5Funmount to unmount the file
  * Inputs:      loc_id - Identifier for file or group
- *              dsetname - name of dataset    
+ *              dsetname - name of dataset
  *              namelen - dsetname length
  * Returns:     0 on success, -1 on failure
  * Programmer:  Xiangyang Su
@@ -193,7 +193,7 @@ nh5funmount_c (hid_t_f *loc_id, _fcd dsetname, int_f *namelen)
       * Convert FORTRAN name to C name
       */
      c_namelen = *namelen;
-     c_name = (char *)HD5f2cstring(dsetname, (size_t)c_namelen); 
+     c_name = (char *)HD5f2cstring(dsetname, (size_t)c_namelen);
      if (c_name == NULL) return ret_value;
 
      /*
@@ -205,17 +205,17 @@ nh5funmount_c (hid_t_f *loc_id, _fcd dsetname, int_f *namelen)
 
      HDfree(c_name);
      return ret_value;
-}      
+}
 
 
 
 /*----------------------------------------------------------------------------
  * Name:        h5fopen_c
  * Purpose:     Call H5Fopen to open the file
- * Inputs:      name - name of the file     
+ * Inputs:      name - name of the file
  *              namelen - name length
  *              access_flags - file access  flags
- *              acc_prp - identifier of access property list 
+ *              acc_prp - identifier of access property list
  * Outputs:     file_id - file identifier
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
@@ -249,7 +249,7 @@ nh5fopen_c (_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *acc_prp, hi
       * Convert FORTRAN name to C name
       */
      c_namelen = *namelen;
-     c_name = (char *)HD5f2cstring(name, (size_t)c_namelen); 
+     c_name = (char *)HD5f2cstring(name, (size_t)c_namelen);
      if (c_name == NULL) return ret_value;
 
      /*
@@ -263,7 +263,7 @@ nh5fopen_c (_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *acc_prp, hi
      HDfree(c_name);
      ret_value = 0;
      return ret_value;
-}      
+}
 
 /*----------------------------------------------------------------------------
  * Name:        h5freopen_c
@@ -289,7 +289,7 @@ nh5freopen_c (hid_t_f *file_id1, hid_t_f *file_id2)
 
      ret_value = 0;
      return ret_value;
-}      
+}
 
 /*----------------------------------------------------------------------------
  * Name:        h5fget_create_plist_c
@@ -315,7 +315,7 @@ nh5fget_create_plist_c (hid_t_f *file_id, hid_t_f *prop_id)
 
      ret_value = 0;
      return ret_value;
-}      
+}
 
 /*----------------------------------------------------------------------------
  * Name:        h5fget_access_plist_c
@@ -341,15 +341,15 @@ nh5fget_access_plist_c (hid_t_f *file_id, hid_t_f *access_id)
 
      ret_value = 0;
      return ret_value;
-}      
-      
+}
+
 /*----------------------------------------------------------------------------
  * Name:        h5fis_hdf5_c
  * Purpose:     Call H5Fis_hdf5 to determone if the file is an HDF5 file
- * Inputs:      name - name of the file     
+ * Inputs:      name - name of the file
  *              namelen - name length
  * Outputs:     flag - 0 if file is not HDF5 file , positive if a file
- *                     is an HDF5 file, and negative on failure. 
+ *                     is an HDF5 file, and negative on failure.
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
  *              Tuesday, August 3, 1999
@@ -367,7 +367,7 @@ nh5fis_hdf5_c (_fcd name, int_f *namelen, int_f *flag)
       * Convert FORTRAN name to C name
       */
      c_namelen = *namelen;
-     c_name = (char *)HD5f2cstring(name, (size_t)c_namelen); 
+     c_name = (char *)HD5f2cstring(name, (size_t)c_namelen);
      if (c_name == NULL) return ret_value;
 
      /*
@@ -379,7 +379,7 @@ nh5fis_hdf5_c (_fcd name, int_f *namelen, int_f *flag)
 
      HDfree(c_name);
      return ret_value;
-}      
+}
 /*----------------------------------------------------------------------------
  * Name:        h5fclose_c
  * Purpose:     Call H5Fclose to close the file
@@ -390,7 +390,7 @@ nh5fis_hdf5_c (_fcd name, int_f *namelen, int_f *flag)
  * Modifications:
  *---------------------------------------------------------------------------*/
 
-int_f 
+int_f
 nh5fclose_c ( hid_t_f *file_id )
 {
   int ret_value = 0;
@@ -405,21 +405,21 @@ nh5fclose_c ( hid_t_f *file_id )
  * Purpose:     Call H5Fget_obj_count to get number of open objects within a file
  * Inputs:      file_id - identifier of the file to be closed
  *              obj_type - type of the object
- * Returns:     obj_count - number of objects 
+ * Returns:     obj_count - number of objects
  *              0 on success, -1 on failure
  * Programmer:  Elena Pourmal
  *              Monday, September 30, 2002
  * Modifications:
  *---------------------------------------------------------------------------*/
 
-int_f 
+int_f
 nh5fget_obj_count_c ( hid_t_f *file_id , int_f *obj_type, int_f * obj_count)
 {
   int ret_value = 0;
   hid_t c_file_id;
   unsigned c_obj_type;
   int c_obj_count;
-  
+
 
   c_file_id = (hid_t)*file_id;
   c_obj_type = (unsigned) *obj_type;
@@ -439,7 +439,7 @@ nh5fget_obj_count_c ( hid_t_f *file_id , int_f *obj_type, int_f * obj_count)
  * Modifications:
  *---------------------------------------------------------------------------*/
 
-int_f 
+int_f
 nh5fget_obj_ids_c ( hid_t_f *file_id , int_f *obj_type, int_f *max_objs, hid_t_f *obj_ids)
 {
   int ret_value = 0;
@@ -464,7 +464,7 @@ nh5fget_obj_ids_c ( hid_t_f *file_id , int_f *obj_type, int_f *max_objs, hid_t_f
  * Modifications:
  *---------------------------------------------------------------------------*/
 
-int_f 
+int_f
 nh5fget_freespace_c ( hid_t_f *file_id , hssize_t_f *free_space)
 {
   int ret_value = 0;
@@ -479,9 +479,9 @@ nh5fget_freespace_c ( hid_t_f *file_id , hssize_t_f *free_space)
 
 /*----------------------------------------------------------------------------
  * Name:        h5fget_name_c
- * Purpose:     Call H5Fget_name to get file's name 
- * Inputs:      obj_id - object identifier 
- *              buflen -size of the buffer 
+ * Purpose:     Call H5Fget_name to get file's name
+ * Inputs:      obj_id - object identifier
+ *              buflen -size of the buffer
  * Outputs:     buf - buffer to hold the name
  *              size - size of the file's name
  * Returns:     0 on success, -1 on failure
@@ -501,7 +501,7 @@ nh5fget_name_c(hid_t_f *obj_id, size_t_f *size, _fcd buf, size_t_f *buflen)
       */
      if ((c_buf = HDmalloc((size_t)*buflen +1)) == NULL)
          HGOTO_DONE(FAIL);
- 
+
      /*
       * Call H5Aget_name function
       */
@@ -522,7 +522,7 @@ done:
 /*----------------------------------------------------------------------------
  * Name:        h5fget_filesize_c
  * Purpose:     Call H5Fget_filesize to get file size
- * Inputs:      file_id - file identifier 
+ * Inputs:      file_id - file identifier
  * Outputs:     size - size of the file
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal

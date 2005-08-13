@@ -438,7 +438,7 @@ done:
  *		will be filled with VAL begins at byte offset OFFSET[] from
  *		the minimum corner of BUF and continues for SIZE[] bytes in
  *		each dimension.
- *		
+ *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
@@ -545,7 +545,7 @@ H5V_hyper_copy(unsigned n, const hsize_t *_size,
     hsize_t	dst_start, src_start;		/*offset to start at	*/
     hsize_t	elmt_size = 1;			/*element size in bytes */
     herr_t	ret_value;			/*return status		*/
-#ifndef NDEBUG		
+#ifndef NDEBUG
     unsigned	u;
 #endif
 
@@ -1190,7 +1190,7 @@ H5V_array_calc(hsize_t offset, unsigned n, const hsize_t *total_size, hsize_t *c
  *              a "chunk index" for the chunk that the coordinate offset is
  *              located in.
  *
- *              The chunk index starts at 0 and increases according to the 
+ *              The chunk index starts at 0 and increases according to the
  *              fastest changing dimension, then the next fastest, etc.
  *
  *              For example, with a 3x5 chunk size and 6 chunks in the fastest

@@ -86,7 +86,7 @@ typedef enum H5F_scope_t {
 
 /* How does file close behave?
  * H5F_CLOSE_DEFAULT - Use the degree pre-defined by underlining VFL
- * H5F_CLOSE_WEAK    - file closes only after all opened objects are closed 
+ * H5F_CLOSE_WEAK    - file closes only after all opened objects are closed
  * H5F_CLOSE_SEMI    - if no opened objects, file is close; otherwise, file
 		       close fails
  * H5F_CLOSE_STRONG  - if there are opened objects, close them first, then
@@ -121,7 +121,7 @@ H5_DLL herr_t H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist);
 H5_DLL herr_t H5Funmount(hid_t loc, const char *name);
 H5_DLL hssize_t H5Fget_freespace(hid_t file_id);
 H5_DLL herr_t H5Fget_filesize(hid_t file_id, hsize_t *size);
-H5_DLL herr_t H5Fget_mdc_config(hid_t file_id, 
+H5_DLL herr_t H5Fget_mdc_config(hid_t file_id,
 				H5AC_cache_config_t * config_ptr);
 H5_DLL herr_t H5Fset_mdc_config(hid_t file_id,
 				H5AC_cache_config_t * config_ptr);

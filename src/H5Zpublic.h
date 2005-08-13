@@ -55,11 +55,11 @@ typedef int H5Z_filter_t;
  * include directly due to the duplication of various symbols with the zlib.h
  * header file] */
 #define H5_SZIP_ALLOW_K13_OPTION_MASK   1
-#define H5_SZIP_CHIP_OPTION_MASK        2 
+#define H5_SZIP_CHIP_OPTION_MASK        2
 #define H5_SZIP_EC_OPTION_MASK          4
 #define H5_SZIP_NN_OPTION_MASK          32
 #define H5_SZIP_MAX_PIXELS_PER_BLOCK    32
- 
+
 /* Special parameters for ScaleOffset filter*/
 #define H5_SO_FLOAT_DSCALE 0
 #define H5_SO_FLOAT_ESCALE 1
@@ -75,7 +75,7 @@ typedef enum H5Z_EDC_t {
     H5Z_DISABLE_EDC     = 0,
     H5Z_ENABLE_EDC      = 1,
     H5Z_NO_EDC          = 2     /* must be the last */
-} H5Z_EDC_t;    
+} H5Z_EDC_t;
 
 /* Bit flags for H5Zget_filter_info */
 #define H5Z_FILTER_CONFIG_ENCODE_ENABLED (0x0001)
@@ -108,18 +108,18 @@ extern "C" {
  * in the dataset creation property list are called
  * with the dataset's dataset creation property list, the dataset's datatype and
  * a dataspace describing a chunk (for chunked dataset storage).
- * 
+ *
  * The "can_apply" callback must determine if the combination of the dataset
  * creation property list setting, the datatype and the dataspace represent a
  * valid combination to apply this filter to.  For example, some cases of
  * invalid combinations may involve the filter not operating correctly on
  * certain datatypes (or certain datatype sizes), or certain sizes of the chunk
  * dataspace.
- * 
+ *
  * The "can_apply" callback can be the NULL pointer, in which case, the library
  * will assume that it can apply to any combination of dataset creation
  * property list values, datatypes and dataspaces.
- * 
+ *
  * The "can_apply" callback returns positive a valid combination, zero for an
  * invalid combination and negative for an error.
  */
@@ -133,16 +133,16 @@ typedef herr_t (*H5Z_can_apply_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space
  * list passed in to H5Dcreate) and the datatype ID passed in to H5Dcreate
  * (which is not copied and should not be modified) and a dataspace describing
  * the chunk (for chunked dataset storage) (which should also not be modified).
- * 
+ *
  * The "set_local" callback must set any parameters that are specific to this
  * dataset, based on the combination of the dataset creation property list
  * values, the datatype and the dataspace.  For example, some filters perform
  * different actions based on different datatypes (or datatype sizes) or
  * different number of dimensions or dataspace sizes.
- * 
+ *
  * The "set_local" callback can be the NULL pointer, in which case, the library
  * will assume that there are no dataset-specific settings for this filter.
- * 
+ *
  * The "set_local" callback must return non-negative on success and negative
  * for an error.
  */

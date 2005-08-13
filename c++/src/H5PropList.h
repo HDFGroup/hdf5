@@ -25,7 +25,7 @@ class H5_DLLCPP PropList : public IdComponent {
 	// Default property list
         static const PropList DEFAULT;
 
-	// Creates a property list of a given type or creates a copy of an 
+	// Creates a property list of a given type or creates a copy of an
 	// existing property list giving the property list id.
 	PropList(const hid_t plist_id);
 

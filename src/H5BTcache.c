@@ -289,7 +289,7 @@ H5BT_cache_clear(H5F_t *f, H5BT_t *bt, hbool_t destroy)
 
     /* Reset the dirty flag.  */
     bt->cache_info.is_dirty = FALSE;
- 
+
     if (destroy)
         if (H5BT_cache_dest(f, bt) < 0)
 	    HGOTO_ERROR(H5E_BLKTRK, H5E_CANTFREE, FAIL, "unable to destroy block tracker info")
@@ -303,7 +303,7 @@ done:
  * Function:	H5BT_cache_size
  *
  * Purpose:	Compute the size in bytes of a block tracker info
- *		on disk, and return it in *size_ptr.  On failure, 
+ *		on disk, and return it in *size_ptr.  On failure,
  *		the value of *size_ptr is undefined.
  *
  * Return:	Non-negative on success/Negative on failure

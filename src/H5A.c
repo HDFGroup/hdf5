@@ -60,7 +60,7 @@ NAME
    H5A_init_interface -- Initialize interface-specific information
 USAGE
     herr_t H5A_init_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -79,7 +79,7 @@ H5A_init_interface(void)
      */
     if (H5I_register_type(H5I_ATTR, (size_t)H5I_ATTRID_HASHSIZE, H5A_RESERVED_ATOMS, (H5I_free_t)H5A_close)<H5I_FILE)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to initialize interface")
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -107,7 +107,7 @@ H5A_term_interface(void)
     int	n=0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_term_interface)
-    
+
     if (H5_interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_ATTR))>0) {
 	    (void)H5I_clear_type(H5I_ATTR, FALSE);
@@ -135,7 +135,7 @@ H5A_term_interface(void)
         hid_t plist_id;     IN: ID of creation property list (currently not used)
  RETURNS
     Non-negative on success/Negative on failure
- 
+
  ERRORS
 
  DESCRIPTION
@@ -158,7 +158,7 @@ H5A_term_interface(void)
  * Modifications:
  * 	Robb Matzke, 5 Jun 1998
  *	The LOC_ID can also be a committed datatype.
- *	
+ *
 --------------------------------------------------------------------------*/
 /* ARGSUSED */
 hid_t
@@ -197,7 +197,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5A_create
  *
- * Purpose:	
+ * Purpose:
  *      This is the guts of the H5Acreate function.
  * Usage:
  *  hid_t H5A_create (ent, name, type, space)
@@ -297,7 +297,7 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
     attr->ent_opened=1;
 
     /* Create the attribute message and save the attribute index */
-    if (H5O_modify(&(attr->ent), H5O_ATTR_ID, H5O_NEW_MESG, 0, H5O_UPDATE_TIME, attr, dxpl_id) < 0) 
+    if (H5O_modify(&(attr->ent), H5O_ATTR_ID, H5O_NEW_MESG, 0, H5O_UPDATE_TIME, attr, dxpl_id) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to update attribute header messages")
 
     /* Register the new attribute and get an ID for it */
@@ -329,7 +329,7 @@ done:
         void *op_data;          IN: Op data passed in
  RETURNS
     Non-negative on success, negative on failure
- 
+
  ERRORS
 
  DESCRIPTION
@@ -374,7 +374,7 @@ H5A_find_idx_by_name(const void *_mesg, unsigned idx, void *_op_data)
         const char *name;    IN: Name of dataset to find
  RETURNS
     non-negative on success, negative on failure
- 
+
  ERRORS
 
  DESCRIPTION
@@ -419,7 +419,7 @@ done:
         const char *name;   IN: Name of attribute to locate and open
  RETURNS
     ID of attribute on success, negative on failure
- 
+
  ERRORS
 
  DESCRIPTION
@@ -459,7 +459,7 @@ H5Aopen_name(hid_t loc_id, const char *name)
     /* Go do the real work for opening the attribute */
     if ((ret_value=H5A_open(ent, (unsigned)idx, H5AC_dxpl_id))<0)
 	HGOTO_ERROR (H5E_ATTR, H5E_CANTINIT, FAIL, "unable to open attribute")
-    
+
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aopen_name() */
@@ -476,7 +476,7 @@ done:
         unsigned idx;       IN: Index (0-based) attribute to open
  RETURNS
     ID of attribute on success, negative on failure
- 
+
  ERRORS
 
  DESCRIPTION
@@ -490,7 +490,7 @@ done:
  * Modifications:
  * 	Robb Matzke, 5 Jun 1998
  *	The LOC_ID can also be a named (committed) datatype.
- *	
+ *
 --------------------------------------------------------------------------*/
 hid_t
 H5Aopen_idx(hid_t loc_id, unsigned idx)
@@ -510,7 +510,7 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
     /* Go do the real work for opening the attribute */
     if ((ret_value=H5A_open(ent, idx, H5AC_dxpl_id))<0)
 	HGOTO_ERROR (H5E_ATTR, H5E_CANTINIT, FAIL, "unable to open attribute")
-    
+
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aopen_idx() */
@@ -519,7 +519,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5A_open
  *
- * Purpose:	
+ * Purpose:
  *      This is the guts of the H5Aopen_xxx functions
  * Usage:
  *  herr_t H5A_open (ent, idx)
@@ -554,7 +554,7 @@ H5A_open(H5G_entry_t *ent, unsigned idx, hid_t dxpl_id)
     if (NULL==(attr=H5O_read(ent, H5O_ATTR_ID, (int)idx, NULL, dxpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to load attribute info from dataset header")
     attr->initialized=1;
-   
+
     /* Deep copy of the symbol table entry */
     if (H5G_ent_copy(&(attr->ent),ent,H5G_COPY_DEEP)<0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to copy entry")
@@ -590,7 +590,7 @@ done:
         const void *buf;     IN: Buffer of data to write
  RETURNS
     Non-negative on success/Negative on failure
- 
+
  ERRORS
 
  DESCRIPTION
@@ -635,7 +635,7 @@ done:
         const void *buf;           IN: Buffer of data to write
  RETURNS
     Non-negative on success/Negative on failure
- 
+
  ERRORS
 
  DESCRIPTION
@@ -720,7 +720,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
             HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL, "attribute not found")
 
         /* Modify the attribute data */
-        if (H5O_modify(&(attr->ent), H5O_ATTR_ID, idx, 0, H5O_UPDATE_DATA_ONLY|H5O_UPDATE_TIME, attr, dxpl_id) < 0) 
+        if (H5O_modify(&(attr->ent), H5O_ATTR_ID, idx, 0, H5O_UPDATE_DATA_ONLY|H5O_UPDATE_TIME, attr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to update attribute header messages")
     } /* end if */
 
@@ -729,9 +729,9 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
 
 done:
     /* Release resources */
-    if (src_id >= 0) 
+    if (src_id >= 0)
         (void)H5I_dec_ref(src_id);
-    if (dst_id >= 0) 
+    if (dst_id >= 0)
         (void)H5I_dec_ref(dst_id);
     if (bkg_buf)
         H5FL_BLK_FREE(attr_buf, bkg_buf);
@@ -752,7 +752,7 @@ done:
         void *buf;           IN: Buffer for data to read
  RETURNS
     Non-negative on success/Negative on failure
- 
+
  ERRORS
 
  DESCRIPTION
@@ -797,7 +797,7 @@ done:
         void *buf;           IN: Buffer for data to read
  RETURNS
     Non-negative on success/Negative on failure
- 
+
  ERRORS
 
  DESCRIPTION
@@ -876,9 +876,9 @@ H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
 
 done:
     /* Release resources */
-    if (src_id >= 0) 
+    if (src_id >= 0)
         (void)H5I_dec_ref(src_id);
-    if (dst_id >= 0) 
+    if (dst_id >= 0)
         (void)H5I_dec_ref(dst_id);
     if (tconv_buf)
         H5FL_BLK_FREE(attr_buf, tconv_buf);
@@ -899,7 +899,7 @@ done:
         hid_t attr_id;       IN: Attribute to get dataspace of
  RETURNS
     A dataspace ID on success, negative on failure
- 
+
  ERRORS
 
  DESCRIPTION
@@ -944,7 +944,7 @@ done:
         hid_t attr_id;       IN: Attribute to get datatype of
  RETURNS
     A datatype ID on success, negative on failure
- 
+
  ERRORS
 
  DESCRIPTION
@@ -986,7 +986,7 @@ H5Aget_type(hid_t attr_id)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location")
     if (H5T_lock(dst, FALSE)<0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to lock transient datatype")
-    
+
     /* Atomize */
     if ((ret_value=H5I_register(H5I_DATATYPE, dst))<0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype atom")
@@ -1014,7 +1014,7 @@ done:
  RETURNS
     This function returns the length of the attribute's name (which may be
     longer than 'buf_size') on success or negative for failure.
- 
+
  ERRORS
 
  DESCRIPTION
@@ -1067,10 +1067,10 @@ done:
  * Function:	H5Aget_storage_size
  *
  * Purpose:	Returns the amount of storage size that is required for this
- *		attribute. 
+ *		attribute.
  *
  * Return:	Success:	The amount of storage size allocated for the
- *				attribute.  The return value may be zero 
+ *				attribute.  The return value may be zero
  *                              if no data has been stored.
  *
  *		Failure:	Zero
@@ -1087,7 +1087,7 @@ H5Aget_storage_size(hid_t attr_id)
 {
     H5A_t	*attr=NULL;
     hsize_t	ret_value;      /* Return value */
-    
+
     FUNC_ENTER_API(H5Aget_storage_size, 0)
     H5TRACE1("h","i",attr_id);
 
@@ -1106,12 +1106,12 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5A_get_storage_size
  *
- * Purpose:	Private function for H5Aget_storage_size.  Returns the 
+ * Purpose:	Private function for H5Aget_storage_size.  Returns the
  *              amount of storage size that is required for this
- *		attribute. 
+ *		attribute.
  *
  * Return:	Success:	The amount of storage size allocated for the
- *				attribute.  The return value may be zero 
+ *				attribute.  The return value may be zero
  *                              if no data has been stored.
  *
  *		Failure:	Zero
@@ -1127,7 +1127,7 @@ static hsize_t
 H5A_get_storage_size(const H5A_t *attr)
 {
     hsize_t	ret_value;      /* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_get_storage_size)
 
     /* Set return value */
@@ -1135,7 +1135,7 @@ H5A_get_storage_size(const H5A_t *attr)
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
- 
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -1147,7 +1147,7 @@ H5A_get_storage_size(const H5A_t *attr)
         hid_t loc_id;       IN: Object (dataset or group) to be queried
  RETURNS
     Number of attributes on success, negative on failure
- 
+
  ERRORS
 
  DESCRIPTION
@@ -1199,9 +1199,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Arename
  *
- * Purpose:     Rename an attribute	
+ * Purpose:     Rename an attribute
  *
- * Return:	Success:             Non-negative	
+ * Return:	Success:             Non-negative
  *
  *		Failure:             Negative
  *
@@ -1217,7 +1217,7 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
 {
     H5G_entry_t	*ent = NULL;	/*symtab ent of object to attribute */
     herr_t	ret_value;      /* Return value */
-    
+
     FUNC_ENTER_API(H5Arename, FAIL)
     H5TRACE3("e","iss",loc_id,old_name,new_name);
 
@@ -1240,9 +1240,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5A_rename
  *
- * Purpose:     Private function for H5Arename.  Rename an attribute	
+ * Purpose:     Private function for H5Arename.  Rename an attribute
  *
- * Return:	Success:             Non-negative	
+ * Return:	Success:             Non-negative
  *
  *		Failure:             Negative
  *
@@ -1259,14 +1259,14 @@ H5A_rename(H5G_entry_t *ent, const char *old_name, const char *new_name, hid_t d
     int         seq, idx=FAIL;  /* Index of attribute being querried */
     H5A_t       found_attr;     /* Attribute with OLD_NAME */
     herr_t	ret_value=SUCCEED;      /* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5A_rename)
 
     /* Check arguments */
     assert(ent);
     assert(old_name);
     assert(new_name);
-    
+
     /* Read in the existing attributes to check for duplicates */
     seq=0;
     while(H5O_read(ent, H5O_ATTR_ID, seq, &found_attr, dxpl_id)!=NULL) {
@@ -1284,12 +1284,12 @@ H5A_rename(H5G_entry_t *ent, const char *old_name, const char *new_name, hid_t d
     H5E_clear_stack(NULL);
     if(idx<0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "attribute cannot be found")
-        
+
     /* Copy the attribute name. */
     if(found_attr.name)
         HDfree(found_attr.name);
-    found_attr.name = HDstrdup(new_name); 
-    if(!found_attr.name) 
+    found_attr.name = HDstrdup(new_name);
+    if(!found_attr.name)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "String copy failed")
 
     /* Indicate entry is not opened and the attribute doesn't need fill-values. */
@@ -1297,9 +1297,9 @@ H5A_rename(H5G_entry_t *ent, const char *old_name, const char *new_name, hid_t d
     found_attr.initialized=TRUE;
 
     /* Modify the attribute message */
-    if (H5O_modify(ent, H5O_ATTR_ID, idx, 0, H5O_UPDATE_TIME, &found_attr, dxpl_id) < 0) 
+    if (H5O_modify(ent, H5O_ATTR_ID, idx, 0, H5O_UPDATE_TIME, &found_attr, dxpl_id) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to update attribute header messages")
-   
+
     /* Close the attribute */
     if(H5A_free(&found_attr)<0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "unable to close renamed attribute")
@@ -1323,7 +1323,7 @@ done:
  RETURNS
         Returns a negative value if something is wrong, the return value of the
     last operator if it was non-zero, or zero if all attributes were processed.
- 
+
  ERRORS
 
  DESCRIPTION
@@ -1337,7 +1337,7 @@ done:
     over ('loc_id'), the name of the current attribute about the object
     ('attr_name') and the pointer to the operator data passed in to H5Aiterate
     ('op_data').  The return values from an operator are:
-        A. Zero causes the iterator to continue, returning zero when all 
+        A. Zero causes the iterator to continue, returning zero when all
             attributes have been processed.
         B. Positive causes the iterator to immediately return that positive
             value, indicating short-circuit success.  The iterator can be
@@ -1353,7 +1353,7 @@ done:
  * 	Robb Matzke, 5 Jun 1998
  *	Like the group iterator, if ATTR_NUM is the null pointer then all
  *	attributes are processed.
- *	
+ *
 --------------------------------------------------------------------------*/
 herr_t
 H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
@@ -1418,19 +1418,19 @@ done:
         const char *name;   IN: Name of attribute to delete
  RETURNS
     Non-negative on success/Negative on failure
- 
+
  ERRORS
 
  DESCRIPTION
         This function removes the named attribute from a dataset or group.
     This function should not be used when attribute IDs are open on 'loc_id'
-    as it may cause the internal indexes of the attributes to change and future 
+    as it may cause the internal indexes of the attributes to change and future
     writes to the open attributes to produce incorrect results.
  *
  * Modifications:
  * 	Robb Matzke, 5 Jun 1998
  *	The LOC_ID can also be a named (committed) datatype.
- *	
+ *
 --------------------------------------------------------------------------*/
 herr_t
 H5Adelete(hid_t loc_id, const char *name)
@@ -1457,7 +1457,7 @@ H5Adelete(hid_t loc_id, const char *name)
     /* Delete the attribute from the location */
     if ((ret_value=H5O_remove(ent, H5O_ATTR_ID, found, H5AC_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute header message")
-    
+
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Adelete() */
@@ -1473,7 +1473,7 @@ done:
         hid_t attr_id;       IN: Attribute to release access to
  RETURNS
     Non-negative on success/Negative on failure
- 
+
  ERRORS
 
  DESCRIPTION
@@ -1563,7 +1563,7 @@ H5A_copy(H5A_t *_new_attr, const H5A_t *old_attr, unsigned update_flags)
 
     /* Set the return value */
     ret_value=new_attr;
-    
+
 done:
     if(ret_value==NULL) {
         if(new_attr!=NULL && allocated_attr)
@@ -1618,7 +1618,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5A_close
  *
- * Purpose:	Frees an attribute and all associated memory.  
+ * Purpose:	Frees an attribute and all associated memory.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1662,7 +1662,7 @@ H5A_close(H5A_t *attr)
 	    HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release object header info")
 
     H5FL_FREE(H5A_t, attr);
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_close() */

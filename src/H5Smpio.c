@@ -530,7 +530,7 @@ H5S_mpio_span_hyper_type( const           H5S_t *space,
 
     *new_type = span_type;
     /* fill in the remaining return values */
-    *count = 1;		
+    *count = 1;
     *extra_offset = 0;
     *is_derived_type = 1;
 

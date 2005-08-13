@@ -71,7 +71,7 @@ void test_fl_string(hid_t fid, const char *string)
   char read_buf[MAX_STRING_LENGTH];
   H5T_cset_t cset;
   herr_t ret;
-  
+
   /* Create the datatype, ensure that the character set behaves
    * correctly (it should default to ASCII and can be set to UTF8)
    */
@@ -221,7 +221,7 @@ void test_strpad(hid_t UNUSED fid, const char *string)
   }
 
   /* Create a src_type that holds the UTF-8 string */
-  big_len = length; 
+  big_len = length;
   src_type = mkstr(big_len, H5T_STR_NULLPAD);
   CHECK(src_type, FAIL, "mkstr");
   /* Create a dst_type that holds half of the UTF-8 string */
@@ -689,7 +689,7 @@ void test_enum(hid_t UNUSED fid, const char * string)
 
 /*
  * test_opaque
- * Test comments on opaque datatypes 
+ * Test comments on opaque datatypes
  */
 void test_opaque(hid_t UNUSED fid, const char * string)
 {
@@ -773,7 +773,7 @@ void dump_string(const char * string)
   printf("The string was:\n");
   printf(string);
   printf("Or in hex:\n");
- 
+
   length = strlen(string);
 
     for(x=0; x<length; x++)

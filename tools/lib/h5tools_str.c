@@ -37,7 +37,7 @@
  * Otherwise the format is more Perl-like
  *
  * 	'A'*10
- * 
+ *
  */
 #define REPEAT_VERBOSE
 
@@ -156,7 +156,7 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
 	    (0==nchars && (strcmp(fmt,"%s") ))) {
 	   /* Truncation return value as documented by C99, or zero return value with either of the
             * following conditions, each of which indicates that the proper C99 return value probably
-            *  should have been positive when the format string is 
+            *  should have been positive when the format string is
             *  something other than "%s"
             * Alocate at least twice as much space and try again.
             */
@@ -403,7 +403,7 @@ h5tools_str_dump_region(h5tools_str_t *str, hid_t region, const h5dump_t *info)
             h5tools_str_append(str, info->dset_blockformat_pre,
                                i ? "," OPTIONAL_LINE_BREAK " " : "",
                                (unsigned long)i);
-            
+
             /* Start coordinates and opposite corner */
             for (j = 0; j < ndims; j++)
                 h5tools_str_append(str, "%s%lu", j ? "," : "(",
@@ -435,7 +435,7 @@ h5tools_str_dump_region(h5tools_str_t *str, hid_t region, const h5dump_t *info)
             h5tools_str_append(str, info->dset_ptformat_pre ,
                                i ? "," OPTIONAL_LINE_BREAK " " : "",
                                (unsigned long)i);
-            
+
             for (j = 0; j < ndims; j++)
                 h5tools_str_append(str, "%s%lu", j ? "," : "(",
                                    (unsigned long)(ptdata[i * ndims + j]));
@@ -445,7 +445,7 @@ h5tools_str_dump_region(h5tools_str_t *str, hid_t region, const h5dump_t *info)
 
         free(ptdata);
     }
-    
+
     h5tools_str_append(str, "}");
     return 0;
 }
@@ -523,7 +523,7 @@ h5tools_print_char(h5tools_str_t *str, const h5dump_t *info, unsigned char ch)
         default:
             if (isprint(ch))
                 h5tools_str_append(str, "%c", (char)ch);
-            else 
+            else
                 h5tools_str_append(str, "\\%03o", ch);
 
             break;
@@ -596,7 +596,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
     int                tempint;
     unsigned short     tempushort;
     short              tempshort;
- 
+
     /* Build default formats for long long types */
     if (!fmt_llong[0]) {
         sprintf(fmt_llong, "%%%sd", H5_PRINTF_LL_WIDTH);
@@ -618,10 +618,10 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
             }
         }
     } else if (H5Tequal(type, H5T_NATIVE_FLOAT)) {
-        memcpy(&tempfloat, vp, sizeof(float));	
+        memcpy(&tempfloat, vp, sizeof(float));
         h5tools_str_append(str, OPT(info->fmt_float, "%g"), tempfloat);
     } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
-        memcpy(&tempdouble, vp, sizeof(double)); 
+        memcpy(&tempdouble, vp, sizeof(double));
         h5tools_str_append(str, OPT(info->fmt_double, "%g"), tempdouble);
     } else if (info->ascii && (H5Tequal(type, H5T_NATIVE_SCHAR) ||
                                H5Tequal(type, H5T_NATIVE_UCHAR))) {
@@ -660,7 +660,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
                 if (info->str_repeat > 0)
                     while (i + j < size && s[i] == s[i + j])
                         j++;
-                
+
                 /*
                  * Print the opening quote.  If the repeat count is high enough to
                  * warrant printing the number of repeats instead of enumerating
@@ -677,10 +677,10 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
                     quote = '"';
                     h5tools_str_append(str, "%s%c", i ? " " : "", quote);
                 }
-                    
+
                 /* Print the character */
                 h5tools_print_char(str, info, (unsigned char)(s[i]));
-                
+
                 /* Print the repeat count */
                 if (info->str_repeat && j > info->str_repeat) {
 #ifdef REPEAT_VERBOSE
@@ -731,7 +731,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
         h5tools_str_append(str, OPT(info->fmt_ullong, fmt_ullong), tempullong);
     } else if (H5Tequal(type, H5T_NATIVE_HSSIZE)) {
         if (sizeof(hssize_t) == sizeof(int)) {
-            memcpy(&tempint, vp, sizeof(int));	  
+            memcpy(&tempint, vp, sizeof(int));
             h5tools_str_append(str, OPT(info->fmt_int, "%d"), tempint);
         } else if (sizeof(hssize_t) == sizeof(long)) {
             memcpy(&templong, vp, sizeof(long));
@@ -910,7 +910,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
 			temp_nelmts *= dims[k];
 			assert(temp_nelmts==(hsize_t)((size_t)temp_nelmts));
             nelmts = (size_t)temp_nelmts;
-		}	
+		}
         /* Print the opening bracket */
         h5tools_str_append(str, "%s", OPT(info->arr_pre, "["));
 

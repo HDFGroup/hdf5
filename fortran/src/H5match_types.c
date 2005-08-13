@@ -221,13 +221,13 @@ int main()
 #endif
 
   /* int */
-#if defined H5_FORTRAN_HAS_NATIVE_8 
+#if defined H5_FORTRAN_HAS_NATIVE_8
       writeToFiles("INT", "int_f", 8);
-#elif defined H5_FORTRAN_HAS_NATIVE_4 
+#elif defined H5_FORTRAN_HAS_NATIVE_4
       writeToFiles("INT", "int_f", 4);
-#elif defined H5_FORTRAN_HAS_NATIVE_2 
+#elif defined H5_FORTRAN_HAS_NATIVE_2
       writeToFiles("INT", "int_f", 2);
-#elif defined H5_FORTRAN_HAS_NATIVE_1 
+#elif defined H5_FORTRAN_HAS_NATIVE_1
       writeToFiles("INT", "int_f", 1);
 #else
     /* Error: couldn't find a size for int */

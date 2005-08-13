@@ -75,7 +75,7 @@ void print_manager_output(void)
     /* If there was something we buffered, let's print it now */
     if( (outBuffOffset>0) && g_Parallel)
     {
-	printf("%s", outBuff); 
+	printf("%s", outBuff);
 
 	if(overflow_file)
 	{
@@ -121,7 +121,7 @@ static void print_incoming_data(void)
     MPI_Status Status;
 
     do
-    {     
+    {
 	MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_PRINT_DATA, MPI_COMM_WORLD, &incomingMessage, &Status);
 	if(incomingMessage)
 	{
@@ -160,11 +160,11 @@ h5diff (const char *fname1,
   int nobjects1, nobjects2;
   trav_info_t *info1 = NULL;
   trav_info_t *info2 = NULL;
-  hid_t        file1_id=(-1), file2_id=(-1); 
+  hid_t        file1_id=(-1), file2_id=(-1);
   char filenames[2][1024];
   hsize_t nfound = 0;
   int not_cmp = 0;
- 
+
   memset(filenames, 0, 1024*2);
 
 
@@ -276,10 +276,10 @@ h5diff (const char *fname1,
  * object name was supplied
  *-------------------------------------------------------------------------
  */
- 
+
   if (objname1)
     {
- 
+
 #ifdef H5_HAVE_PARALLEL
  if(g_Parallel)
  {
@@ -348,8 +348,8 @@ out:
 /*-------------------------------------------------------------------------
  * Function: diff_match
  *
- * Purpose: Find common objects; the algorithm used for this search is the 
- *  cosequential match algorithm and is described in 
+ * Purpose: Find common objects; the algorithm used for this search is the
+ *  cosequential match algorithm and is described in
  *  Folk, Michael; Zoellick, Bill. (1992). File Structures. Addison-Wesley.
  *
  * Return: Number of differences found
@@ -357,7 +357,7 @@ out:
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
  * Date: May 9, 2003
- * 
+ *
  * Modifications: Jan 2005 Leon Arber, larber@uiuc.edu
  *    Added support for parallel diffing
  *
@@ -481,7 +481,7 @@ diff_match (hid_t file1_id,
  struct diff_args args;
  int havePrintToken = 1;
  MPI_Status Status;
- 
+
  /*set all tasks as free */
  memset(workerTasks, 1, g_nTasks-1);
 #endif
@@ -512,13 +512,13 @@ diff_match (hid_t file1_id,
        * may not work in non-homogeneous MPI environments.
        */
 
-      /*Set up args to pass to worker task. */ 
+      /*Set up args to pass to worker task. */
       if(strlen(table->objs[i].name) > 255)
       {
    printf("The parallel diff only supports object names up to 255 characters\n");
    MPI_Abort(MPI_COMM_WORLD, 0);
       }
-      
+
       strcpy(args.name, table->objs[i].name);
       args.options = *options;
       args.type= table->objs[i].type;
@@ -571,11 +571,11 @@ diff_match (hid_t file1_id,
    }
 
    /* Print all the data in our incoming queue */
-   print_incoming_data();  
+   print_incoming_data();
       }
 
       /* check array of tasks to see which ones are free.
-       * Manager task never does work, so freeTasks[0] is really 
+       * Manager task never does work, so freeTasks[0] is really
        * worker task 0. */
 
       for(n=1; (n<g_nTasks) && !workerFound; n++)
@@ -613,7 +613,7 @@ diff_match (hid_t file1_id,
    else
    {
        /* But first print all the data in our incoming queue */
-       print_incoming_data(); 
+       print_incoming_data();
 
        MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
        if(Status.MPI_TAG == MPI_TAG_DONE)
@@ -670,7 +670,7 @@ diff_match (hid_t file1_id,
   else if(Status.MPI_TAG == MPI_TAG_TOK_REQUEST)
   {
       MPI_Recv(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_REQUEST, MPI_COMM_WORLD, &Status);
-      if(havePrintToken) 
+      if(havePrintToken)
       {
    MPI_Send(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_PRINT_TOK, MPI_COMM_WORLD);
    MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
@@ -700,9 +700,9 @@ diff_match (hid_t file1_id,
   {
       char  data[PRINT_DATA_MAX_SIZE+1];
       memset(data, 0, PRINT_DATA_MAX_SIZE+1);
- 
+
       MPI_Recv(data, PRINT_DATA_MAX_SIZE, MPI_CHAR, Status.MPI_SOURCE, MPI_TAG_PRINT_DATA, MPI_COMM_WORLD, &Status);
-      
+
       printf("%s", data);
   }
   else
@@ -729,7 +729,7 @@ diff_match (hid_t file1_id,
 
     /*-------------------------------------------------------------------------
      * do the diff for the root.
-     * this is a special case, we get an ID for the root group and call diff() 
+     * this is a special case, we get an ID for the root group and call diff()
      * with this ID; it compares only the root group attributes
      *-------------------------------------------------------------------------
      */
@@ -819,10 +819,10 @@ diff_compare (hid_t file1_id,
  *
  * Purpose: switch between types and choose the diff function
  * TYPE is either
- *  H5G_LINK     Object is a symbolic link 
- *  H5G_GROUP    Object is a group  
- *  H5G_DATASET  Object is a dataset  
- *  H5G_TYPE     Object is a named data type 
+ *  H5G_LINK     Object is a symbolic link
+ *  H5G_GROUP    Object is a group
+ *  H5G_DATASET  Object is a dataset
+ *  H5G_TYPE     Object is a named data type
  *
  * Return: Number of differences found
  *
@@ -864,10 +864,10 @@ diff (hid_t file1_id,
      if (options->m_verbose)
      {
       if (print_objname (options, (hsize_t)1))
-       parallel_print("Dataset:     <%s> and <%s>\n", path1, path2);  
+       parallel_print("Dataset:     <%s> and <%s>\n", path1, path2);
       nfound = diff_dataset (file1_id, file2_id, path1, path2, options);
       /* always print the number of differences found */
-      print_found(nfound); 
+      print_found(nfound);
      }
  /*-------------------------------------------------------------------------
   * non verbose, check first if we have differences
@@ -887,9 +887,9 @@ diff (hid_t file1_id,
         if (print_objname (options, nfound))
          parallel_print("Dataset:     <%s> and <%s>\n", path1, path2);
         nfound = diff_dataset (file1_id, file2_id, path1, path2, options);
-        /* print the number of differences found only when found 
+        /* print the number of differences found only when found
            this is valid for the default mode and report mode */
-        print_found(nfound); 
+        print_found(nfound);
        }  /*if nfound */
       }   /*if quiet */
 
@@ -902,7 +902,7 @@ diff (hid_t file1_id,
        nfound = diff_dataset (file1_id, file2_id, path1, path2, options);
       }
      }   /*else verbose */
-     
+
      break;
 
      /*-------------------------------------------------------------------------
@@ -934,7 +934,7 @@ diff (hid_t file1_id,
       *-------------------------------------------------------------------------
       */
          if (path1)
-    diff_attr (type1_id, type2_id, path1, path2, options); 
+    diff_attr (type1_id, type2_id, path1, path2, options);
 
      if (H5Tclose (type1_id) < 0)
   goto out;
@@ -1029,7 +1029,7 @@ diff (hid_t file1_id,
   parallel_print("Comparison not supported: <%s> and <%s> are of type %s\n",
    path1, path2, get_type (type));
   options->not_cmp=1;
-     } 
+     }
 
      break;
     }

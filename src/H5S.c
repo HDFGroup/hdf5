@@ -72,7 +72,7 @@ NAME
    H5S_init_interface -- Initialize interface-specific information
 USAGE
     herr_t H5S_init_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -182,8 +182,8 @@ H5S_term_interface(void)
 				      "%10s\n", "gather",
 				      path->stats[j].gath_nbytes,
 				      path->stats[j].gath_ncalls,
-				      path->stats[j].gath_timer.utime, 
-				      path->stats[j].gath_timer.stime, 
+				      path->stats[j].gath_timer.utime,
+				      path->stats[j].gath_timer.stime,
 				      path->stats[j].gath_timer.etime,
 				      buf);
 			}
@@ -198,8 +198,8 @@ H5S_term_interface(void)
 				      "%10s\n", "scatter",
 				      path->stats[j].scat_nbytes,
 				      path->stats[j].scat_ncalls,
-				      path->stats[j].scat_timer.utime, 
-				      path->stats[j].scat_timer.stime, 
+				      path->stats[j].scat_timer.utime,
+				      path->stats[j].scat_timer.stime,
 				      path->stats[j].scat_timer.etime,
 				      buf);
 			}
@@ -214,8 +214,8 @@ H5S_term_interface(void)
 				      "%10s\n", "background",
 				      path->stats[j].bkg_nbytes,
 				      path->stats[j].bkg_ncalls,
-				      path->stats[j].bkg_timer.utime, 
-				      path->stats[j].bkg_timer.stime, 
+				      path->stats[j].bkg_timer.utime,
+				      path->stats[j].bkg_timer.stime,
 				      path->stats[j].bkg_timer.etime,
 				      buf);
 			}
@@ -235,7 +235,7 @@ H5S_term_interface(void)
 				      path->stats[j].read_timer.etime,
 				      buf);
 			}
-			
+
 			/* Write */
 			if (path->stats[j].write_ncalls) {
 			    H5_bandwidth(buf,
@@ -272,7 +272,7 @@ H5S_term_interface(void)
 	    n = 1; /*H5I*/
 	}
     }
-    
+
     FUNC_LEAVE_NOAPI(n);
 }
 
@@ -514,7 +514,7 @@ H5Scopy(hid_t space_id)
     H5S_t	*src = NULL;
     H5S_t	*dst = NULL;
     hid_t	ret_value;
-    
+
     FUNC_ENTER_API(H5Scopy, FAIL);
     H5TRACE1("i","i",space_id);
 
@@ -560,7 +560,7 @@ H5Sextent_copy(hid_t dst_id,hid_t src_id)
     H5S_t	*src = NULL;
     H5S_t	*dst = NULL;
     hid_t	ret_value = SUCCEED;
-    
+
     FUNC_ENTER_API(H5Sextent_copy, FAIL);
     H5TRACE2("e","ii",dst_id,src_id);
 
@@ -1097,7 +1097,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, const H5S_t *ds, 
+H5S_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, const H5S_t *ds,
            unsigned * oh_flags_ptr)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
@@ -1404,7 +1404,7 @@ done:
  * Purpose:	Given two data spaces (MEM_SPACE and FILE_SPACE) this
  *		function returns a pointer to the conversion path information,
  *		creating a new conversion path entry if necessary.
- *		
+ *
  * Return:	Success:	Ptr to a conversion path entry
  *
  *		Failure:	NULL
@@ -1427,7 +1427,7 @@ done:
  *	statistics).
  *
  *	John Mainzer, 8/30/04
- *	Modified code to check with all other processes that have the 
+ *	Modified code to check with all other processes that have the
  *	file open before OKing collective I/O.
  *
  *-------------------------------------------------------------------------
@@ -1438,7 +1438,7 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
     H5S_iostats_t	*path=NULL;  /* Space conversion path */
     size_t	u;      /* Index variable */
     H5S_iostats_t *ret_value;   /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5S_find, NULL);
 
     /* Check args */
@@ -1457,7 +1457,7 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
         if (H5S_iostats_g[u]->ftype==H5S_GET_SELECT_TYPE(file_space) &&
                 H5S_iostats_g[u]->mtype==H5S_GET_SELECT_TYPE(mem_space))
             HGOTO_DONE(H5S_iostats_g[u]);
-    
+
     /*
      * The path wasn't found.  Create a new path.
      */
@@ -1517,7 +1517,7 @@ H5S_extend (H5S_t *space, const hsize_t *size)
 {
     int	ret_value=0;
     unsigned	u;
-    
+
     FUNC_ENTER_NOAPI(H5S_extend, FAIL);
 
     /* Check args */
@@ -1619,11 +1619,11 @@ H5Screate_simple(int rank, const hsize_t dims[/*rank*/],
     /* Create the space and set the extent */
     if(NULL==(space=H5S_create_simple((unsigned)rank,dims,maxdims)))
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
-    
+
     /* Atomize */
     if ((ret_value=H5I_register (H5I_DATASPACE, space))<0)
         HGOTO_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID");
-    
+
 done:
     if (ret_value<0) {
         if (space!=NULL)
@@ -1669,7 +1669,7 @@ H5S_create_simple(unsigned rank, const hsize_t dims[/*rank*/],
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCREATE, NULL, "can't create simple dataspace");
     if(H5S_set_extent_simple(ret_value,rank,dims,maxdims)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, NULL, "can't set dimensions");
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_create_simple() */
@@ -1698,7 +1698,7 @@ H5Sencode(hid_t obj_id, void *buf, size_t *nalloc)
 {
     H5S_t       *dspace;
     herr_t      ret_value=SUCCEED;
-    
+
     FUNC_ENTER_API (H5Sencode, FAIL);
     H5TRACE3("e","ix*z",obj_id,buf,nalloc);
 
@@ -1717,8 +1717,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5S_encode
  *
- * Purpose:	Private function for H5Sencode.  Converts an object 
- *              description for data space and its selection into binary 
+ * Purpose:	Private function for H5Sencode.  Converts an object
+ *              description for data space and its selection into binary
  *              in a buffer.
  *
  * Return:	Success:	non-negative
@@ -1762,7 +1762,7 @@ H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc)
         *nalloc = extent_size+select_size+1+1+1+4;
 	HGOTO_DONE(ret_value);
     }
-   
+
     /* Encode the type of the information */
     *buf++ = H5O_SDSPACE_ID;
 
@@ -1774,7 +1774,7 @@ H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc)
 
     /* Encode size of extent information. Pointer is actually moved in this macro. */
     UINT32ENCODE(buf, extent_size);
-   
+
     /* Encode the extent part of dataspace */
     if(H5O_encode(&f, buf, obj, H5O_SDSPACE_ID)<0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode extent space");
@@ -1795,7 +1795,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Sdecode
  *
- * Purpose:	Decode a binary object description of data space and 
+ * Purpose:	Decode a binary object description of data space and
  *              return a new object handle.
  *
  * Return:	Success:	dataspace ID(non-negative)
@@ -1815,7 +1815,7 @@ H5Sdecode(const void *buf)
 {
     H5S_t       *ds;
     hid_t       ret_value;
-    
+
     FUNC_ENTER_API (H5Sdecode, FAIL);
     H5TRACE1("i","x",buf);
 
@@ -1824,7 +1824,7 @@ H5Sdecode(const void *buf)
 
     if((ds = H5S_decode(buf))==NULL)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, FAIL, "can't decode object");
-    
+
     /* Register the type and return the ID */
     if ((ret_value=H5I_register (H5I_DATASPACE, ds))<0)
 	HGOTO_ERROR (H5E_DATASPACE, H5E_CANTREGISTER, FAIL, "unable to register dataspace");
@@ -1838,7 +1838,7 @@ done:
  * Function:	H5S_decode
  *
  * Purpose:	Private function for H5Sdecode.  Reconstructs a binary
- *              description of dataspace and returns a new object handle. 
+ *              description of dataspace and returns a new object handle.
  *
  * Return:	Success:	dataspace ID(non-negative)
  *
@@ -1882,7 +1882,7 @@ H5S_decode(const unsigned char *buf)
 
     /* Decode size of extent information */
     UINT32DECODE(buf, extent_size);
-     
+
     /* Decode the extent part of dataspace */
     if((extent = H5O_decode(&f, buf, H5O_SDSPACE_ID))==NULL)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "can't decode object");
@@ -1978,7 +1978,7 @@ H5S_get_simple_extent_type(const H5S_t *space)
     assert(space);
 
     ret_value=H5S_GET_EXTENT_TYPE(space);
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
@@ -2016,7 +2016,7 @@ H5Sget_simple_extent_type(hid_t sid)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5S_NO_CLASS, "not a dataspace");
 
     ret_value=H5S_GET_EXTENT_TYPE(space);
-    
+
 done:
     FUNC_LEAVE_API(ret_value);
 }
@@ -2123,7 +2123,7 @@ H5S_set_extent( H5S_t *space, const hsize_t *size )
 {
     unsigned u;
     herr_t ret_value=0;
-       
+
     FUNC_ENTER_NOAPI( H5S_set_extent, FAIL );
 
     /* Check args */
@@ -2200,7 +2200,7 @@ H5S_set_extent_real( H5S_t *space, const hsize_t *size )
     hsize_t nelem;      /* Number of elements in extent */
     unsigned u;         /* Local index variable */
     herr_t ret_value=SUCCEED;   /* Return value */
-       
+
     FUNC_ENTER_NOAPI(H5S_set_extent_real, FAIL );
 
     /* Check args */
@@ -2243,9 +2243,9 @@ H5S_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream, int indent, 
 {
     const H5S_t	*mesg = (const H5S_t*)_mesg;
     herr_t ret_value=SUCCEED;   /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5S_debug, FAIL);
-    
+
     switch (H5S_GET_EXTENT_TYPE(mesg)) {
         case H5S_NULL:
             fprintf(stream, "%*s%-*s H5S_NULL\n", indent, "", fwidth,
@@ -2256,14 +2256,14 @@ H5S_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream, int indent, 
             fprintf(stream, "%*s%-*s H5S_SCALAR\n", indent, "", fwidth,
                     "Space class:");
             break;
-            
+
         case H5S_SIMPLE:
             fprintf(stream, "%*s%-*s H5S_SIMPLE\n", indent, "", fwidth,
                     "Space class:");
             H5O_debug_id(H5O_SDSPACE_ID, f, dxpl_id, &(mesg->extent), stream,
                                  indent+3, MAX(0, fwidth-3));
             break;
-            
+
         default:
             fprintf(stream, "%*s%-*s **UNKNOWN-%ld**\n", indent, "", fwidth,
                     "Space class:", (long)(H5S_GET_EXTENT_TYPE(mesg)));

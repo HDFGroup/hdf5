@@ -39,7 +39,7 @@
 /* Definitions for storage layout property */
 #define H5D_CRT_LAYOUT_NAME        "layout"
 #define H5D_CRT_LAYOUT_SIZE        sizeof(H5D_layout_t)
-#define H5D_CRT_LAYOUT_DEF         H5D_CONTIGUOUS    
+#define H5D_CRT_LAYOUT_DEF         H5D_CONTIGUOUS
 /* Definitions for chunk dimensionality property */
 #define H5D_CRT_CHUNK_DIM_NAME     "chunk_ndims"
 #define H5D_CRT_CHUNK_DIM_SIZE     sizeof(unsigned)
@@ -49,7 +49,7 @@
 #define H5D_CRT_CHUNK_SIZE_SIZE    sizeof(size_t[H5O_LAYOUT_NDIMS])
 #define H5D_CRT_CHUNK_SIZE_DEF     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,\
                                    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
-/* Definitions for fill value.  size=0 means fill value will be 0 as 
+/* Definitions for fill value.  size=0 means fill value will be 0 as
  * library default; size=-1 means fill value is undefined. */
 #define H5D_CRT_FILL_VALUE_NAME    "fill_value"
 #define H5D_CRT_FILL_VALUE_SIZE    sizeof(H5O_fill_t)
@@ -65,7 +65,7 @@
 /* Definitions for time of fill value writing */
 #define H5D_CRT_FILL_TIME_NAME     "fill_time"
 #define H5D_CRT_FILL_TIME_SIZE     sizeof(H5D_fill_time_t)
-#define H5D_CRT_FILL_TIME_DEF      H5D_FILL_TIME_IFSET 
+#define H5D_CRT_FILL_TIME_DEF      H5D_FILL_TIME_IFSET
 /* Definitions for external file list */
 #define H5D_CRT_EXT_FILE_LIST_NAME "efl"
 #define H5D_CRT_EXT_FILE_LIST_SIZE sizeof(H5O_efl_t)
@@ -74,7 +74,7 @@
 /* Definitions for data filter pipeline */
 #define H5D_CRT_DATA_PIPELINE_NAME "pline"
 #define H5D_CRT_DATA_PIPELINE_SIZE sizeof(H5O_pline_t)
-#define H5D_CRT_DATA_PIPELINE_DEF  {0, 0, NULL} 
+#define H5D_CRT_DATA_PIPELINE_DEF  {0, 0, NULL}
 #define H5D_CRT_DATA_PIPELINE_CMP  H5D_crt_data_pipeline_cmp
 
 /* ======== Data transfer properties ======== */
@@ -216,11 +216,11 @@ H5_DLL herr_t H5D_close(H5D_t *dataset);
 H5_DLL htri_t H5D_isa(H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL H5G_entry_t *H5D_entof(H5D_t *dataset);
 H5_DLL H5T_t *H5D_typeof(const H5D_t *dset);
-H5_DLL herr_t H5D_crt_copy(hid_t new_plist_t, hid_t old_plist_t, 
+H5_DLL herr_t H5D_crt_copy(hid_t new_plist_t, hid_t old_plist_t,
                             void *copy_data);
 H5_DLL herr_t H5D_crt_close(hid_t dxpl_id, void *close_data);
 H5_DLL herr_t H5D_xfer_create(hid_t dxpl_id, void *create_data);
-H5_DLL herr_t H5D_xfer_copy(hid_t new_plist_id, hid_t old_plist_id, 
+H5_DLL herr_t H5D_xfer_copy(hid_t new_plist_id, hid_t old_plist_id,
                              void *copy_data);
 H5_DLL herr_t H5D_xfer_close(hid_t dxpl_id, void *close_data);
 H5_DLL herr_t H5D_flush(const H5F_t *f, hid_t dxpl_id, unsigned flags);

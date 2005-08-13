@@ -37,7 +37,7 @@ NAME
    H5T_init_offset_interface -- Initialize interface-specific information
 USAGE
     herr_t H5T_init_offset_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -104,7 +104,7 @@ H5Tget_offset(hid_t type_id)
         dt = dt->shared->parent; /*defer to parent*/
     if (!H5T_IS_ATOMIC(dt->shared))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for specified data type")
-    
+
     /* Offset */
     ret_value = (int)dt->shared->u.atomic.offset;
 
@@ -139,7 +139,7 @@ done:
  *		the value from hanging over the edge of the data type.
  *
  *		The offset of an H5T_STRING cannot be set to anything but
- *		zero. 
+ *		zero.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -208,7 +208,7 @@ done:
  *		the value from hanging over the edge of the data type.
  *
  *		The offset of an H5T_STRING cannot be set to anything but
- *		zero. 
+ *		zero.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -250,7 +250,7 @@ H5T_set_offset(const H5T_t *dt, size_t offset)
             dt->shared->size = (offset + dt->shared->u.atomic.prec + 7) / 8;
         dt->shared->u.atomic.offset = offset;
     }
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }

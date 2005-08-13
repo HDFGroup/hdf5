@@ -314,7 +314,7 @@ done:
  * Purpose:	Gathers dataset elements from application memory BUF and
  *		copies them into the gather buffer TGATH_BUF.
  *		Each element is ELMT_SIZE bytes and arranged in application
- *		memory according to SPACE.  
+ *		memory according to SPACE.
  *		The caller is requesting that at most NELMTS be gathered.
  *
  * Return:	Success:	Number of elements copied.
@@ -447,7 +447,7 @@ H5D_select_read(H5D_io_info_t *io_info,
     assert(io_info->store);
     assert(buf);
     assert(TRUE==H5P_isa_class(io_info->dxpl_id,H5P_DATASET_XFER));
-    
+
     /* Initialize file iterator */
     if (H5S_select_iter_init(&file_iter, file_space, elmt_size)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
@@ -591,7 +591,7 @@ H5D_select_write(H5D_io_info_t *io_info,
     assert(io_info->store);
     assert(TRUE==H5P_isa_class(io_info->dxpl_id,H5P_DATASET_XFER));
     assert(buf);
-    
+
     /* Allocate the vector I/O arrays */
     if(io_info->dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
         if((mem_len = H5FL_SEQ_MALLOC(size_t,io_info->dxpl_cache->vec_size))==NULL)
@@ -619,7 +619,7 @@ H5D_select_write(H5D_io_info_t *io_info,
     if (H5S_select_iter_init(&mem_iter, mem_space, elmt_size)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
     mem_iter_init=1;	/* Memory selection iteration info has been initialized */
-    
+
     /* Initialize sequence counts */
     curr_mem_seq=curr_file_seq=0;
     mem_nseq=file_nseq=0;

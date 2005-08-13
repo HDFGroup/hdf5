@@ -14,17 +14,17 @@
 
 /*
  * FILE:	H5I.c - Internal storage routines for handling "IDs"
- *     
+ *
  * REMARKS:	ID's which allow objects (void *'s currently) to be bundled
  *		into "types" for more general storage.
- * 
+ *
  * DESIGN:	The types are stored in an array of pointers to store each
  *		type in an element. Each "type" node contains a link to a
  *		hash table to manage the IDs in each type.  Allowed types are
  *		values within the range 1 to MAX_NUM_TYPES and are given out
  *		at run-time.  Types used by the library are stored in global
  *		variables defined in H5Ipublic.h.
- *		
+ *
  * AUTHOR:	Quincey Koziol
  *
  * MODIFICATIONS:
@@ -109,7 +109,7 @@ typedef struct {
 /*-------------------- Locally scoped variables -----------------------------*/
 
 /* Array of pointers to atomic types */
-static H5I_id_type_t *H5I_id_type_list_g[MAX_NUM_TYPES];  
+static H5I_id_type_t *H5I_id_type_list_g[MAX_NUM_TYPES];
 
 /* Variable to keep track of the number of types allocated.  Its value is the */
 /* next type ID to be handed out, so it is always one greater than the number */
@@ -135,7 +135,7 @@ NAME
    H5I_init_interface -- Initialize interface-specific information
 USAGE
     herr_t H5I_init_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -163,7 +163,7 @@ H5I_init_interface(void)
  *
  * 		Failure:	Negative.
  *
- * Programmer:	
+ * Programmer:
  *
  * Modifications:
  *
@@ -205,10 +205,10 @@ H5I_term_interface(void)
  * Function:	H5Iregister_type
  *
  * Purpose:	Public interface to H5I_register_type.  Creates a new type
- *		of ID's to give out.  A specific number (RESERVED) of type 
- *		entries may be reserved to enable "constant" values to be handed 
- *		out which are valid IDs in the type, but which do not map to any 
- *		data structures and are not allocated dynamically later. HASH_SIZE is 
+ *		of ID's to give out.  A specific number (RESERVED) of type
+ *		entries may be reserved to enable "constant" values to be handed
+ *		out which are valid IDs in the type, but which do not map to any
+ *		data structures and are not allocated dynamically later. HASH_SIZE is
  *		the minimum hash table size to use for the type. FREE_FUNC is
  *		called with an object pointer when the object is removed from
  *		the type.
@@ -322,7 +322,7 @@ H5I_type_t H5I_register_type(H5I_type_t type_id, size_t hash_size, unsigned rese
 	{
 		ret_value = type_id;
 	}
-	
+
 	/* Initialize the type */
     /* Check arguments */
 #ifdef HASH_SIZE_POWER_2
@@ -372,10 +372,10 @@ H5I_type_t H5I_register_type(H5I_type_t type_id, size_t hash_size, unsigned rese
 /*-------------------------------------------------------------------------
  * Function:	H5Itype_exists
  *
- * Purpose:     Query function to inform the user if a given type is 
- *              currently registered with the library. 
+ * Purpose:     Query function to inform the user if a given type is
+ *              currently registered with the library.
  *
- * Return:	Success:        1 if the type is registered, 0 if it is not	
+ * Return:	Success:        1 if the type is registered, 0 if it is not
  *
  *		Failure:	Negative
  *
@@ -579,7 +579,7 @@ H5I_clear_type(H5I_type_t type, hbool_t force)
 
     if (type <= H5I_BADID || type >= H5I_next_type)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number");
-    
+
     type_ptr = H5I_id_type_list_g[type];
     if (type_ptr == NULL || type_ptr->count <= 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type");
@@ -666,7 +666,7 @@ H5I_clear_type(H5I_type_t type, hbool_t force)
             } /* end else */
         } /* end for */
     } /* end for */
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
@@ -680,7 +680,7 @@ done:
  *		involves calling the free-func for each ID's object and
  *		then adding the ID struct to the ID free list.  Public
  *		interface to H5I_destroy_type.
- *		
+ *
  * Return:	Zero on success/Negative on failure
  *
  * Programmer:	Nathaniel Furrer
@@ -807,7 +807,7 @@ hid_t H5Iregister(H5I_type_t type, void *object)
  *
  *-------------------------------------------------------------------------
  */
-hid_t 
+hid_t
 H5I_register(H5I_type_t type, void *object)
 {
     H5I_id_type_t	*type_ptr=NULL;	/*ptr to the type		*/
@@ -818,7 +818,7 @@ H5I_register(H5I_type_t type, void *object)
     hid_t		ret_value=SUCCEED; /*return value		*/
     H5I_id_info_t	*curr_id;	/*ptr to the current atom	*/
     unsigned		i;		/*counter			*/
-    
+
     FUNC_ENTER_NOAPI(H5I_register, FAIL);
 
     /* Check arguments */
@@ -911,13 +911,13 @@ H5I_register(H5I_type_t type, void *object)
  *
  *		Failure:	NULL
  *
- * Programmer:	
+ * Programmer:
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-void * 
+void *
 H5I_object(hid_t id)
 {
     H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new atom	*/
@@ -940,7 +940,7 @@ done:
  * Function:	H5Iobject_verify
  *
  * Purpose:	Find an object pointer for the specified ID, verifying that
- *                  its in a particular type.  Public interface to 
+ *                  its in a particular type.  Public interface to
  *					H5I_object_verify.
  *
  * Return:	Success:	Non-null object pointer associated with the
@@ -993,7 +993,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-void * 
+void *
 H5I_object_verify(hid_t id, H5I_type_t id_type)
 {
     H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new atom	*/
@@ -1033,7 +1033,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5I_type_t 
+H5I_type_t
 H5I_get_type(hid_t id)
 {
     H5I_type_t		ret_value = H5I_BADID;
@@ -1062,7 +1062,7 @@ done:
  *
  *		Failure:	H5I_BADID, a negative value
  *
- * Programmer:	
+ * Programmer:
  *
  * Modifications:
  *		Robb Matzke, 1999-08-23
@@ -1144,7 +1144,7 @@ void *H5Iremove_verify(hid_t id, H5I_type_t id_type)
  *
  *-------------------------------------------------------------------------
  */
-void * 
+void *
 H5I_remove_verify(hid_t id, H5I_type_t id_type)
 {
     void * ret_value = NULL;	/*return value			*/
@@ -1176,13 +1176,13 @@ done:
  *
  *		Failure:	NULL
  *
- * Programmer:	
+ * Programmer:
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-void * 
+void *
 H5I_remove(hid_t id)
 {
     H5I_id_type_t	*type_ptr = NULL;/*ptr to the atomic type	*/
@@ -1334,7 +1334,7 @@ H5I_dec_ref(hid_t id)
     type_ptr = H5I_id_type_list_g[type];
     if (type_ptr == NULL || type_ptr->count <= 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number");
-    
+
     /* General lookup of the ID */
     if ((id_ptr=H5I_find_id(id))==NULL)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't locate ID");
@@ -1632,7 +1632,7 @@ done:
  *		return value of 0 means that the type will have to be
  *		re-initialized before it can be used again (and should probably
  *		be set to H5I_UNINIT).
- *		
+ *
  * Return:	Number of references to type on success/Negative on failure
  *
  * Programmer:	Nathaniel Furrer
@@ -1673,7 +1673,7 @@ herr_t H5Idec_type_ref(H5I_type_t type)
  *		return value of 0 means that the type will have to be
  *		re-initialized before it can be used again (and should probably
  *		be set to H5I_UNINIT).
- *		
+ *
  * Return:	Number of references to type on success/Negative on failure
  *
  * Programmer:	Unknown
@@ -1716,7 +1716,7 @@ H5I_dec_type_ref(H5I_type_t type)
         --(type_ptr->count);
 		ret_value = type_ptr->count;
     }
-    
+
   done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
@@ -1921,7 +1921,7 @@ done:
  *
  *		Failure:	NULL
  *
- * Programmer:	
+ * Programmer:
  *
  * Modifications:
  *
@@ -1976,10 +1976,10 @@ H5I_find_id(hid_t id)
 /*-------------------------------------------------------------------------
  * Function: H5Iget_name
  *
- * Purpose: Gets a name of an object from its ID. 
+ * Purpose: Gets a name of an object from its ID.
  *
  * Return: Success: The length of name.
- * 
+ *
  *         Failure: -1
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
@@ -2126,14 +2126,14 @@ done:
  * Function:	H5Iget_file_id
  *
  * Purpose:	The public version of H5I_get_file_id(), obtains the file
- *              ID given an object ID.  User has to close this ID. 
+ *              ID given an object ID.  User has to close this ID.
  *
  * Return:	Success:	file ID
  *
  *		Failure:	a negative value
  *
  * Programmer:  Raymond Lu
- *              Oct 27, 2003	
+ *              Oct 27, 2003
  *
  * Modifications:
  *
@@ -2159,14 +2159,14 @@ done:
  * Function:	H5I_get_file_id
  *
  * Purpose:	The private version of H5Iget_file_id(), obtains the file
- *              ID given an object ID. 
+ *              ID given an object ID.
  *
  * Return:	Success:	file ID
  *
  *		Failure:	a negative value
  *
  * Programmer:  Raymond Lu
- *              Oct 27, 2003	
+ *              Oct 27, 2003
  *
  * Modifications:
  *
@@ -2185,7 +2185,7 @@ H5I_get_file_id(hid_t obj_id)
     type = H5I_TYPE(obj_id);
     if(type == H5I_FILE) {
         ret_value = obj_id;
-        
+
         /* Increment reference count on atom. */
         if (H5I_inc_ref(ret_value)<0)
             HGOTO_ERROR (H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed");

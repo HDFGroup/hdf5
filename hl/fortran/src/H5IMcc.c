@@ -22,7 +22,7 @@
  * private functions
  *-------------------------------------------------------------------------
  */
-herr_t H5IM_get_palette( hid_t loc_id, 
+herr_t H5IM_get_palette( hid_t loc_id,
                          const char *image_name,
                          int pal_number,
                          hid_t tid,
@@ -49,8 +49,8 @@ herr_t H5IM_get_palette( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-herr_t H5IMmake_image_8bitf( hid_t loc_id, 
-                             const char *dset_name, 
+herr_t H5IMmake_image_8bitf( hid_t loc_id,
+                             const char *dset_name,
                              hsize_t width,
                              hsize_t height,
                              int_f *buf )
@@ -58,17 +58,17 @@ herr_t H5IMmake_image_8bitf( hid_t loc_id,
  hid_t    did;                  /* dataset ID */
  hid_t    sid;                  /* space ID */
  hsize_t  dims[IMAGE8_RANK];  /* dimensions */
- 
+
  /* initialize the image dimensions */
- dims[0] = height; 
- dims[1] = width; 
- dims[2] = 1; 
+ dims[0] = height;
+ dims[1] = width;
+ dims[2] = 1;
 
 /*-------------------------------------------------------------------------
  * create and write the dataset
  *-------------------------------------------------------------------------
  */
-  
+
  /* create the data space for the dataset. */
  if ((sid=H5Screate_simple(IMAGE8_RANK,dims,NULL))<0)
   return -1;
@@ -80,7 +80,7 @@ herr_t H5IMmake_image_8bitf( hid_t loc_id,
  /* write with memory type H5T_NATIVE_INT */
  /* Use long type if Fortran integer is 8 bytes and C long long is also 8 bytes*/
  /* Fail if otherwise */
- if (buf) 
+ if (buf)
  {
   if (sizeof(int_f) == sizeof(int)) {
   if (H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
@@ -105,7 +105,7 @@ herr_t H5IMmake_image_8bitf( hid_t loc_id,
  * attach the specification attributes
  *-------------------------------------------------------------------------
  */
-  
+
  /* attach the CLASS attribute */
  if ( H5LTset_attribute_string( loc_id, dset_name, "CLASS", IMAGE_CLASS ) < 0 )
   return -1;
@@ -139,9 +139,9 @@ herr_t H5IMmake_image_8bitf( hid_t loc_id,
  *  The memory datatype is H5T_NATIVE_INT. It is supposed to be called from
  *  the FORTRAN interface where the image buffer is defined as type "integer"
  *
- * Interlace Mode Dimensions in the Dataspace 
- * INTERLACE_PIXEL [height][width][pixel components] 
- * INTERLACE_PLANE [pixel components][height][width] 
+ * Interlace Mode Dimensions in the Dataspace
+ * INTERLACE_PIXEL [height][width][pixel components]
+ * INTERLACE_PLANE [pixel components][height][width]
  *
  *
  * Modifications:
@@ -149,8 +149,8 @@ herr_t H5IMmake_image_8bitf( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-herr_t H5IMmake_image_24bitf( hid_t loc_id, 
-                              const char *dset_name, 
+herr_t H5IMmake_image_24bitf( hid_t loc_id,
+                              const char *dset_name,
                               hsize_t width,
                               hsize_t height,
                               const char *interlace,
@@ -164,28 +164,28 @@ herr_t H5IMmake_image_24bitf( hid_t loc_id,
  * attach the image dimensions according to the interlace mode
  *-------------------------------------------------------------------------
  */
- if ( strcmp( interlace, "INTERLACE_PIXEL" ) == 0 ) 
+ if ( strcmp( interlace, "INTERLACE_PIXEL" ) == 0 )
  {
   /* Number of color planes is defined as the third dimension */
-  dims[0] = height; 
-  dims[1] = width; 
-  dims[2] = IMAGE24_RANK; 
+  dims[0] = height;
+  dims[1] = width;
+  dims[2] = IMAGE24_RANK;
  }
  else
- if ( strcmp( interlace, "INTERLACE_PLANE" ) == 0 ) 
+ if ( strcmp( interlace, "INTERLACE_PLANE" ) == 0 )
  {
   /* Number of color planes is defined as the first dimension */
-  dims[0] = IMAGE24_RANK; 
-  dims[1] = height; 
-  dims[2] = width; 
+  dims[0] = IMAGE24_RANK;
+  dims[1] = height;
+  dims[2] = width;
  }
  else return -1;
- 
+
 /*-------------------------------------------------------------------------
  * create and write the dataset
  *-------------------------------------------------------------------------
  */
-  
+
  /* create the data space for the dataset. */
  if ((sid=H5Screate_simple(IMAGE24_RANK,dims,NULL))<0)
   return -1;
@@ -195,7 +195,7 @@ herr_t H5IMmake_image_24bitf( hid_t loc_id,
   return -1;
 
  /* write with memory type H5T_NATIVE_INT */
- if (buf) 
+ if (buf)
  {
   if (sizeof(int_f) == sizeof(int)) {
   if (H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
@@ -263,11 +263,11 @@ herr_t H5IMmake_image_24bitf( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-herr_t H5IMread_imagef( hid_t loc_id, 
-                        const char *dset_name, 
+herr_t H5IMread_imagef( hid_t loc_id,
+                        const char *dset_name,
                         int_f *buf )
 {
- hid_t   did;  
+ hid_t   did;
 
  /* open the dataset */
  if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
@@ -314,7 +314,7 @@ out:
  *  The memory datatype is H5T_NATIVE_INT. It is supposed to be called from
  *  the FORTRAN interface where the image buffer is defined as type "integer"
  *
- *  based on HDF5 Image and Palette Specification  
+ *  based on HDF5 Image and Palette Specification
  *  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
  *
  * Modifications:
@@ -322,20 +322,20 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5IMmake_palettef( hid_t loc_id, 
+herr_t H5IMmake_palettef( hid_t loc_id,
                           const char *pal_name,
                           const hsize_t *pal_dims,
-                          int_f *pal_data ) 
+                          int_f *pal_data )
 
-{  
- 
+{
+
  hid_t did;                /* dataset ID */
  hid_t sid;                /* space ID */
  int   has_pal;
- 
+
  /* Check if the dataset already exists */
  has_pal = H5LTfind_dataset( loc_id, pal_name );
- 
+
  /* It exists. Return */
  if ( has_pal == 1 )
   return 0;
@@ -344,7 +344,7 @@ herr_t H5IMmake_palettef( hid_t loc_id,
  * create and write the dataset
  *-------------------------------------------------------------------------
  */
-  
+
  /* create the data space for the dataset. */
  if ((sid=H5Screate_simple(2,pal_dims,NULL))<0)
   return -1;
@@ -354,7 +354,7 @@ herr_t H5IMmake_palettef( hid_t loc_id,
   return -1;
 
  /* write with memory type H5T_NATIVE_INT */
- if (pal_data) 
+ if (pal_data)
  {
   if (sizeof(int_f) == sizeof(int)) {
   if (H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,pal_data)<0)
@@ -387,7 +387,7 @@ herr_t H5IMmake_palettef( hid_t loc_id,
  /* Attach the attribute "PAL_VERSION" to the >>palette<< dataset*/
  if ( H5LTset_attribute_string( loc_id, pal_name, "PAL_VERSION", "1.2" ) < 0 )
   return -1;
- 
+
  return 0;
 
 }
@@ -409,7 +409,7 @@ herr_t H5IMmake_palettef( hid_t loc_id,
  *  The memory datatype is H5T_NATIVE_INT. It is supposed to be called from
  *  the FORTRAN interface where the image buffer is defined as type "integer"
  *
- *  based on HDF5 Image and Palette Specification  
+ *  based on HDF5 Image and Palette Specification
  *  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
  *
  * Modifications:
@@ -417,7 +417,7 @@ herr_t H5IMmake_palettef( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-herr_t H5IMget_palettef( hid_t loc_id, 
+herr_t H5IMget_palettef( hid_t loc_id,
                          const char *image_name,
                          int pal_number,
                          int_f *pal_data )
@@ -447,19 +447,19 @@ herr_t H5IMget_palettef( hid_t loc_id,
  * Comments:
  *  This function allows reading of an 8bit palette from disk disk
  *   to memory type TID
- *  The memory datatype can be H5T_NATIVE_INT or H5T_NATIVE_UCHAR currently. 
+ *  The memory datatype can be H5T_NATIVE_INT or H5T_NATIVE_UCHAR currently.
  *   the H5T_NATIVE_INT is supposed to be called from
  *   the FORTRAN interface where the image buffer is defined as type "integer"
  *
  * Comments:
- *  based on HDF5 Image and Palette Specification  
+ *  based on HDF5 Image and Palette Specification
  *  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5IM_get_palette( hid_t loc_id, 
+herr_t H5IM_get_palette( hid_t loc_id,
                          const char *image_name,
                          int pal_number,
                          hid_t tid,
@@ -488,7 +488,7 @@ herr_t H5IM_get_palette( hid_t loc_id,
 
   if ( (attr_id = H5Aopen_name( image_id, "PALETTE" )) < 0 )
    goto out;
-     
+
   if ( (attr_type = H5Aget_type( attr_id )) < 0 )
    goto out;
 
@@ -528,13 +528,13 @@ herr_t H5IM_get_palette( hid_t loc_id,
     goto out;
 
    free( refbuf );
-    
-  } /* H5T_REFERENCE */ 
-    
-  if ( H5Tclose( attr_type ) < 0 ) 
+
+  } /* H5T_REFERENCE */
+
+  if ( H5Tclose( attr_type ) < 0 )
    goto out;
 
-  /* Close the attribute. */  
+  /* Close the attribute. */
   if ( H5Aclose( attr_id ) < 0 )
    goto out;
 

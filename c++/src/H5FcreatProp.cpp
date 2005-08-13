@@ -38,7 +38,7 @@ FileCreatPropList::FileCreatPropList() : PropList( H5P_FILE_CREATE ) {}
 
 //--------------------------------------------------------------------------
 // Function:	FileCreatPropList copy constructor
-///\brief	Copy constructor: makes a copy of the original 
+///\brief	Copy constructor: makes a copy of the original
 ///		FileCreatPropList object.
 ///\param	original - IN: FileCreatPropList instance to copy
 // Programmer	Binh-Minh Ribler - 2000
@@ -71,7 +71,7 @@ void FileCreatPropList::getVersion(unsigned& super, unsigned& freelist, unsigned
    herr_t ret_value = H5Pget_version( id, &super, &freelist, &stab, &shhdr );
    if( ret_value < 0 )
    {
-      throw PropListIException("FileCreatPropList::getVersion", 
+      throw PropListIException("FileCreatPropList::getVersion",
 		"H5Pget_version failed");
    }
 }
@@ -82,7 +82,7 @@ void FileCreatPropList::getVersion(unsigned& super, unsigned& freelist, unsigned
 ///\param	size - IN: User block size to be set, in bytes
 ///\exception	H5::PropListIException
 ///\par Description
-///		The default user block size is 0; it may be set to any power 
+///		The default user block size is 0; it may be set to any power
 ///		of 2 equal to 512 or greater (512, 1024, 2048, etc.)
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -91,7 +91,7 @@ void FileCreatPropList::setUserblock( hsize_t size ) const
    herr_t ret_value = H5Pset_userblock( id, size);
    if( ret_value < 0 )
    {
-      throw PropListIException("FileCreatPropList::setUserblock", 
+      throw PropListIException("FileCreatPropList::setUserblock",
 		"H5Pset_userblock failed");
    }
 }
@@ -109,7 +109,7 @@ hsize_t FileCreatPropList::getUserblock() const
    herr_t ret_value = H5Pget_userblock( id, &userblock_size );
    if( ret_value < 0 )
    {
-      throw PropListIException("FileCreatPropList::getUserblock", 
+      throw PropListIException("FileCreatPropList::getUserblock",
 		"H5Pget_userblock failed");
    }
    return( userblock_size );
@@ -117,10 +117,10 @@ hsize_t FileCreatPropList::getUserblock() const
 
 //--------------------------------------------------------------------------
 // Function:	FileCreatPropList::setSizes
-///\brief	Sets the byte size of the offsets and lengths used to 
+///\brief	Sets the byte size of the offsets and lengths used to
 ///		address objects in an HDF5 file.
 ///\param	sizeof_addr - IN: Size of an object offset in bytes
-///\param	sizeof_size - IN: Size of an object length in bytes. 
+///\param	sizeof_size - IN: Size of an object length in bytes.
 ///\exception	H5::PropListIException
 ///\par Description
 ///		For information on setting sizes, please refer to the
@@ -133,14 +133,14 @@ void FileCreatPropList::setSizes( size_t sizeof_addr, size_t sizeof_size ) const
    herr_t ret_value = H5Pset_sizes( id, sizeof_addr, sizeof_size );
    if( ret_value < 0 )
    {
-      throw PropListIException("FileCreatPropList::setSizes", 
+      throw PropListIException("FileCreatPropList::setSizes",
 		"H5Pset_sizes failed");
    }
 }
 
 //--------------------------------------------------------------------------
 // Function:	FileCreatPropList::getSizes
-///\brief	Retrieves the size of the offsets and lengths used in an 
+///\brief	Retrieves the size of the offsets and lengths used in an
 ///		HDF5 file.
 ///
 ///\exception	H5::PropListIException
@@ -151,14 +151,14 @@ void FileCreatPropList::getSizes( size_t& sizeof_addr, size_t& sizeof_size ) con
    herr_t ret_value = H5Pget_sizes( id, &sizeof_addr, &sizeof_size );
    if( ret_value < 0 )
    {
-      throw PropListIException("FileCreatPropList::getSizes", 
+      throw PropListIException("FileCreatPropList::getSizes",
 		"H5Pget_sizes failed");
    }
 }
 
 //--------------------------------------------------------------------------
 // Function:	FileCreatPropList::setSymk
-///\brief	Sets the size of parameters used to control the symbol table 
+///\brief	Sets the size of parameters used to control the symbol table
 ///		nodes.
 ///\param	ik - IN: Symbol table tree rank
 ///\param	lk - IN: Symbol table node size
@@ -173,14 +173,14 @@ void FileCreatPropList::setSymk( unsigned ik, unsigned lk ) const
    herr_t ret_value = H5Pset_sym_k( id, ik, lk );
    if( ret_value < 0 )
    {
-      throw PropListIException("FileCreatPropList::setSymk", 
+      throw PropListIException("FileCreatPropList::setSymk",
 		"H5Pset_sym_k failed");
    }
 }
 
 //--------------------------------------------------------------------------
 // Function:	FileCreatPropList::getSymk
-///\brief	Retrieves the size of the symbol table B-tree 1/2 rank and 
+///\brief	Retrieves the size of the symbol table B-tree 1/2 rank and
 ///		the symbol table leaf node 1/2 size.
 ///
 ///\exception	H5::PropListIException
@@ -194,14 +194,14 @@ void FileCreatPropList::getSymk( unsigned& ik, unsigned& lk ) const
    herr_t ret_value = H5Pget_sym_k( id, &ik, &lk );
    if( ret_value < 0 )
    {
-      throw PropListIException("FileCreatPropList::getSymk", 
+      throw PropListIException("FileCreatPropList::getSymk",
 		"H5Pget_sym_k failed");
    }
 }
 
 //--------------------------------------------------------------------------
 // Function:	FileCreatPropList::setIstorek
-///\brief	Sets the size of the parameter used to control the B-trees 
+///\brief	Sets the size of the parameter used to control the B-trees
 ///		for indexing chunked datasets.
 ///\param	ik - IN: 1/2 rank of chunked storage B-tree
 ///\exception	H5::PropListIException
@@ -215,7 +215,7 @@ void FileCreatPropList::setIstorek( unsigned ik ) const
    herr_t ret_value = H5Pset_istore_k( id, ik );
    if( ret_value < 0 )
    {
-      throw PropListIException("FileCreatPropList::setIstorek", 
+      throw PropListIException("FileCreatPropList::setIstorek",
 		"H5Pset_istore_k failed");
    }
 }
@@ -236,7 +236,7 @@ unsigned FileCreatPropList::getIstorek() const
    herr_t ret_value = H5Pget_istore_k( id, &ik );
    if( ret_value < 0 )
    {
-      throw PropListIException("FileCreatPropList::getIstorek", 
+      throw PropListIException("FileCreatPropList::getIstorek",
 		"H5Pget_istore_k failed");
    }
    return( ik );

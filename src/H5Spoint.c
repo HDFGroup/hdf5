@@ -125,7 +125,7 @@ H5S_point_iter_init(H5S_sel_iter_t *iter, const H5S_t *space)
 
     /* Start at the head of the list of points */
     iter->u.pnt.curr=space->select.sel_info.pnt_lst->head;
-    
+
     /* Initialize type of selection iterator */
     iter->type=H5S_sel_iter_point;
 
@@ -430,7 +430,7 @@ H5S_point_add (H5S_t *space, H5S_seloper_t op, size_t num_elem, const hsize_t **
             /* Append new list to point selection */
             new_node->next=top;
         } /* end if */
-        else 
+        else
             space->select.sel_info.pnt_lst->head=top;
     } /* end else */
 
@@ -480,14 +480,14 @@ H5S_point_release (H5S_t *space)
         H5FL_FREE(H5S_pnt_node_t,curr);
         curr=next;
     } /* end while */
-    
+
     /* Free & reset the point list header */
     H5FL_FREE(H5S_pnt_list_t,space->select.sel_info.pnt_lst);
     space->select.sel_info.pnt_lst=NULL;
 
     /* Reset the number of elements in the selection */
     space->select.num_elem=0;
-    
+
     FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* H5S_point_release() */
 
@@ -741,7 +741,7 @@ H5S_point_serial_size (const H5S_t *space)
     assert(space);
 
     /* Basic number of bytes required to serialize point selection:
-     *  <type (4 bytes)> + <version (4 bytes)> + <padding (4 bytes)> + 
+     *  <type (4 bytes)> + <version (4 bytes)> + <padding (4 bytes)> +
      *      <length (4 bytes)> + <rank (4 bytes)> + <# of points (4 bytes)> = 24 bytes
      */
     ret_value=24;
@@ -819,7 +819,7 @@ H5S_point_serialize (const H5S_t *space, uint8_t *buf)
 
     /* Encode length */
     UINT32ENCODE(lenp, (uint32_t)len);  /* Store the length of the extra information */
-    
+
     FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* H5S_point_serialize() */
 
@@ -869,7 +869,7 @@ H5S_point_deserialize (H5S_t *space, const uint8_t *buf)
     /* Allocate space for the coordinates */
     if((coord = H5MM_malloc(num_elem*rank*sizeof(hsize_t)))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate coordinate information");
-    
+
     /* Retrieve the coordinates from the buffer */
     for(tcoord=coord,i=0; i<num_elem; i++)
         for(j=0; j<(unsigned)rank; j++,tcoord++)

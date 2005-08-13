@@ -84,7 +84,7 @@ struct space4_struct {
 int space5_data = 7;
 
 /*-------------------------------------------------------------------------
- *  
+ *
  * Function:	test_h5s_basic
  *
  * Purpose:	Test basic H5S (dataspace) code
@@ -103,7 +103,7 @@ int space5_data = 7;
  *		       with a special routine.
  *-------------------------------------------------------------------------
  */
-static void 
+static void
 test_h5s_basic(void)
 {
     hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
@@ -115,7 +115,7 @@ test_h5s_basic(void)
     // Output message about test being performed
     MESSAGE(5, ("Testing Dataspace Manipulation\n"));
 
-    try 
+    try
     { // beginning of first try block
 
 	// Create simple dataspace sid1
@@ -153,7 +153,7 @@ test_h5s_basic(void)
 	rank = sid2.getSimpleExtentNdims();
 	verify_val(rank, SPACE2_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__);
 
-	// Retrieves dimension size and max size of dataspace sid2 and 
+	// Retrieves dimension size and max size of dataspace sid2 and
 	// verify them
 	ndims = sid2.getSimpleExtentDims( tdims, tmax );
 	verify_val(HDmemcmp(tdims, dims2, SPACE2_RANK * sizeof(unsigned)), 0,
@@ -163,7 +163,7 @@ test_h5s_basic(void)
 
 	// Check to be sure we can't create a simple data space that has too
 	// many dimensions.
-	try { 
+	try {
 	    DataSpace manydims_ds(H5S_MAX_RANK+1, dims3, NULL);
 
 	    // Should FAIL but didn't, so throw an invalid action exception
@@ -190,10 +190,10 @@ test_h5s_basic(void)
 	// Create file
 	H5File fid1(testfile, H5F_ACC_RDONLY);
 
-	// Try to open the dataset that has higher dimensionality than 
+	// Try to open the dataset that has higher dimensionality than
 	// what the library can handle and this operation should fail.
 	try {
-	    DataSet dset1 = fid1.openDataSet( "dset" ); 
+	    DataSet dset1 = fid1.openDataSet( "dset" );
 
 	    // Should FAIL but didn't, so throw an invalid action exception
 	    throw InvalidActionException("H5File::openDataSet", "Opening a dataset with higher dimensionality than what the library can handle");
@@ -207,7 +207,7 @@ test_h5s_basic(void)
     // Verify that incorrect dimensions don't work
 	dims1[0] = 0;
 	try {
-	    DataSpace wrongdim_ds (SPACE1_RANK, dims1); 
+	    DataSpace wrongdim_ds (SPACE1_RANK, dims1);
 
 	    // Should FAIL but didn't, so throw an invalid action exception
 	    throw InvalidActionException("DataSpace constructor", "Attempted to use incorrect dimensions");
@@ -233,14 +233,14 @@ test_h5s_basic(void)
         cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
     }
     // catch all other exceptions
-    catch (Exception E) 
+    catch (Exception E)
     {
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_h5s_basic()
 
 /*-------------------------------------------------------------------------
- *  
+ *
  * Function:	test_h5s_scalar_write
  *
  * Purpose:	Test scalar H5S (dataspace) writing code
@@ -259,7 +259,7 @@ test_h5s_basic(void)
  *		       with a special routine.
  *-------------------------------------------------------------------------
  */
-static void 
+static void
 test_h5s_scalar_write(void)
 {
     // Output message about test being performed
@@ -305,7 +305,7 @@ test_h5s_scalar_write(void)
 }   // test_h5s_scalar_write()
 
 /*-------------------------------------------------------------------------
- *  
+ *
  * Function:	test_h5s_scalar_read
  *
  * Purpose:	Test scalar H5S (dataspace) reading code
@@ -324,7 +324,7 @@ test_h5s_scalar_write(void)
  *		       with a special routine.
  *-------------------------------------------------------------------------
  */
-static void 
+static void
 test_h5s_scalar_read(void)
 {
     hsize_t		tdims[4];	// Dimension array to test with
@@ -362,11 +362,11 @@ test_h5s_scalar_read(void)
 	// all the exceptions caused by negative returned values by C APIs
 	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
-    
+
 }   // test_h5s_scalar_read()
 
 /*-------------------------------------------------------------------------
- *  
+ *
  * Function:	test_h5s_null
  *
  * Purpose:	Test null H5S (dataspace) code
@@ -385,7 +385,7 @@ test_h5s_scalar_read(void)
  *		       with a special routine.
  *-------------------------------------------------------------------------
  */
-static void 
+static void
 test_h5s_null(void)
 {
     // Output message about test being performed
@@ -403,7 +403,7 @@ test_h5s_null(void)
 	n = sid1.getSimpleExtentNpoints();
 	verify_val((long)n, 0, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
 
-	// Create a dataset 
+	// Create a dataset
 	DataSet dataset = fid1.createDataSet("Dataset1", PredType::NATIVE_UINT,sid1);
 
         // Try to write nothing to the dataset
@@ -420,10 +420,10 @@ test_h5s_null(void)
 }   // test_h5s_null()
 
 /*-------------------------------------------------------------------------
- *  
+ *
  * Function:	test_h5s_compound_scalar_write
  *
- * Purpose:	Test scalar H5S (dataspace) writing for compound 
+ * Purpose:	Test scalar H5S (dataspace) writing for compound
  *		datatypes
  *
  * Return:	none
@@ -440,7 +440,7 @@ test_h5s_null(void)
  *		       with a special routine.
  *-------------------------------------------------------------------------
  */
-static void 
+static void
 test_h5s_compound_scalar_write(void)
 {
     // Output message about test being performed
@@ -494,10 +494,10 @@ test_h5s_compound_scalar_write(void)
 }   // test_h5s_compound_scalar_write()
 
 /*-------------------------------------------------------------------------
- *  
+ *
  * Function:	test_h5s_compound_scalar_read
  *
- * Purpose:	Test scalar H5S (dataspace) reading for compound 
+ * Purpose:	Test scalar H5S (dataspace) reading for compound
  *		datatypes
  *
  * Return:	none
@@ -514,7 +514,7 @@ test_h5s_compound_scalar_write(void)
  *		       with a special routine.
  *-------------------------------------------------------------------------
  */
-static void 
+static void
 test_h5s_compound_scalar_read(void)
 {
     hsize_t		tdims[4];	// Dimension array to test with
@@ -544,14 +544,14 @@ test_h5s_compound_scalar_read(void)
 
 	// Get the datatype of this dataset.
 	CompType type(dataset);
-     
+
 	struct space4_struct rdata; 	// Scalar data read in
 	dataset.read(&rdata, type);
 
 	// Verify read data
 	if(HDmemcmp(&space4_data,&rdata,sizeof(struct space4_struct)))
 	{
-            cerr << "scalar data different: space4_data.c1=" 
+            cerr << "scalar data different: space4_data.c1="
 		<< space4_data.c1 << ", read_data4.c1=" << rdata.c1 << endl;
             cerr << "scalar data different: space4_data.u="
 		<< space4_data.u << ", read_data4.u=" << rdata.u << endl;
@@ -569,7 +569,7 @@ test_h5s_compound_scalar_read(void)
 }   // test_h5s_compound_scalar_read()
 
 /*-------------------------------------------------------------------------
- *  
+ *
  * Function:	test_h5s
  *
  * Purpose:	Main dataspace testing routine
@@ -582,7 +582,7 @@ test_h5s_compound_scalar_read(void)
  * Modifications:
  *-------------------------------------------------------------------------
  */
-void 
+void
 test_h5s(void)
 {
     // Output message about test being performed

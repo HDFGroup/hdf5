@@ -870,11 +870,11 @@ H5HL_offset_into(H5F_t *f, const H5HL_t *heap, size_t offset)
  * Modifications:
  *
  *		John Mainzer - 6/8/05/
- *		Modified function to use the new dirtied parmeter of 
+ *		Modified function to use the new dirtied parmeter of
  *		H5AC_unprotect(), which allows management of the is_dirty
  *		field of the cache info to be moved into the cache code.
  *
- *		This required the addition of the heap_dirtied parameter 
+ *		This required the addition of the heap_dirtied parameter
  *		to the function's parameter list.
  *
  *-------------------------------------------------------------------------
@@ -947,7 +947,7 @@ H5HL_remove_free(H5HL_t *heap, H5HL_free_t *fl)
  *		The ADDR argument is passed by value.
  *
  *		John Mainzer, 6/7/05
- *		Modified code to use the dirtied parameter of 
+ *		Modified code to use the dirtied parameter of
  *		H5AC_unprotect() instead of manipulating the is_dirty
  *		field of the cache info directly.
  *
@@ -1100,7 +1100,7 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *
 				   (sizeof_hdr + heap->mem_alloc));
 	if (NULL==heap->chunk)
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, (size_t)(-1), "memory allocation failed");
-	
+
 	/* clear new section so junk doesn't appear in the file */
 	HDmemset(heap->chunk + sizeof_hdr + old_size, 0, need_more);
     }
@@ -1143,7 +1143,7 @@ done:
  *		The ADDR argument is passed by value.
  *
  *		John Mainzer, 6/7/05
- *		Modified code to use the dirtied parameter of 
+ *		Modified code to use the dirtied parameter of
  *		H5AC_unprotect() instead of manipulating the is_dirty
  *		field of the cache info directly.
  *
@@ -1177,7 +1177,7 @@ H5HL_write(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size, co
     HDmemcpy(heap->chunk + H5HL_SIZEOF_HDR(f) + offset, buf, size);
 
 done:
-    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, heap_flags) != SUCCEED && 
+    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, heap_flags) != SUCCEED &&
             ret_value != FAIL)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
 
@@ -1213,7 +1213,7 @@ done:
  *		The ADDR argument is passed by value.
  *
  *		John Mainzer, 6/7/05
- *		Modified code to use the dirtied parameter of 
+ *		Modified code to use the dirtied parameter of
  *		H5AC_unprotect() instead of manipulating the is_dirty
  *		field of the cache info directly.
  *
@@ -1343,7 +1343,7 @@ done:
  * Modifications:
  *
  *		John Mainzer - 6/17/05
- *		Modified function to use the new dirtied parmeter of 
+ *		Modified function to use the new dirtied parmeter of
  *		H5AC_unprotect(), which allows management of the is_dirty
  *		field of the cache info to be moved into the cache code.
  *

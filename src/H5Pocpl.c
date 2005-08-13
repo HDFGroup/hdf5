@@ -26,15 +26,15 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Pset_create_intermediate_group 
+ * Function:    H5Pset_create_intermediate_group
  *
  * Purpose:     set crt_intmd_group so that H5Gcreate(), H5Dcreate, etc.
  *              will create missing groups along the given path "name"
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao 
- *              May 08, 2005 
+ * Programmer:  Peter Cao
+ *              May 08, 2005
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -60,15 +60,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Pget_create_intermediate_group 
+ * Function:    H5Pget_create_intermediate_group
  *
- * Purpose:     Returns the crt_intmd_group, which is set at H5Gcreate(hid_t loc_id, 
+ * Purpose:     Returns the crt_intmd_group, which is set at H5Gcreate(hid_t loc_id,
  *              const char* name, ... ) for create missing groups
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao 
- *              May 08, 2005 
+ * Programmer:  Peter Cao
+ *              May 08, 2005
  *-------------------------------------------------------------------------
  */
 herr_t

@@ -12,11 +12,11 @@
   * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*  
+/*
  *   This example shows how to read data from a chunked dataset.
- *   We will read from the file created by extend.C 
+ *   We will read from the file created by extend.C
  */
- 
+
 #include <string>
 
 #ifdef OLD_HEADER_FILENAME
@@ -55,7 +55,7 @@ int main (void)
        */
       H5File file( FILE_NAME, H5F_ACC_RDONLY );
       DataSet dataset = file.openDataSet( DATASET_NAME );
- 
+
       /*
        * Get filespace for rank and dimension
        */
@@ -69,18 +69,18 @@ int main (void)
       /*
        * Get and print the dimension sizes of the file dataspace
        */
-      hsize_t     dims[2];       // dataset dimensions 
+      hsize_t     dims[2];       // dataset dimensions
       rank = filespace.getSimpleExtentDims( dims );
-      cout << "dataset rank = " << rank << ", dimensions " 
+      cout << "dataset rank = " << rank << ", dimensions "
 	<< (unsigned long)(dims[0]) << " x " << (unsigned long)(dims[1])
 	<< endl;
 
       /*
        * Get creation properties list.
        */
-      DSetCreatPropList cparms = dataset.getCreatePlist(); 
+      DSetCreatPropList cparms = dataset.getCreatePlist();
 
-      /* 
+      /*
        * Check if dataset is chunked.
        */
       hsize_t     chunk_dims[2];
@@ -91,16 +91,16 @@ int main (void)
 	  * Get chunking information: rank and dimensions
 	  */
 	 rank_chunk = cparms.getChunk( 2, chunk_dims);
-         cout << "chunk rank " << rank_chunk << "dimensions " 
-	   << (unsigned long)(chunk_dims[0]) << " x " 
+         cout << "chunk rank " << rank_chunk << "dimensions "
+	   << (unsigned long)(chunk_dims[0]) << " x "
 	   << (unsigned long)(chunk_dims[1]) << endl;
       }
- 
+
       /*
        * Define the memory space to read dataset.
        */
       DataSpace mspace1( RANK, dims );
- 
+
       /*
        * Read dataset back and display.
        */
@@ -113,23 +113,23 @@ int main (void)
 	 for (i = 0; i < dims[1]; i++)
 	    cout << data_out[j][i] << " ";
 	 cout << endl;
-      }     
+      }
 
       /*
-       *	    dataset rank 2, dimensions 10 x 5 
-       *	    chunk rank 2, dimensions 2 x 5 
+       *	    dataset rank 2, dimensions 10 x 5
+       *	    chunk rank 2, dimensions 2 x 5
 
        *	    Dataset:
-       *	    1 1 1 3 3 
-       *	    1 1 1 3 3 
-       *	    1 1 1 0 0 
-       *	    2 0 0 0 0 
-       *	    2 0 0 0 0 
-       *	    2 0 0 0 0 
-       *	    2 0 0 0 0 
-       *	    2 0 0 0 0 
-       *	    2 0 0 0 0 
-       *	    2 0 0 0 0 
+       *	    1 1 1 3 3
+       *	    1 1 1 3 3
+       *	    1 1 1 0 0
+       *	    2 0 0 0 0
+       *	    2 0 0 0 0
+       *	    2 0 0 0 0
+       *	    2 0 0 0 0
+       *	    2 0 0 0 0
+       *	    2 0 0 0 0
+       *	    2 0 0 0 0
        */
 
       /*
@@ -157,17 +157,17 @@ int main (void)
 	 cout << column[i] << endl;
 
       /*
-       *	    Third column: 
-       *	    1 
-       *	    1 
-       *	    1 
-       *	    0 
-       *	    0 
-       *	    0 
-       *	    0 
-       *	    0 
-       *	    0 
-       *	    0 
+       *	    Third column:
+       *	    1
+       *	    1
+       *	    1
+       *	    0
+       *	    0
+       *	    0
+       *	    0
+       *	    0
+       *	    0
+       *	    0
        */
 
       /*
@@ -196,11 +196,11 @@ int main (void)
 	 for (i = 0; i < chunk_dims[1]; i++)
 	    cout << chunk_out[j][i] << " ";
 	 cout << endl;
-      }     
+      }
       /*
-       *	 Chunk: 
-       *	 1 1 1 0 0 
-       *	 2 0 0 0 0 
+       *	 Chunk:
+       *	 1 1 1 0 0
+       *	 2 0 0 0 0
        */
    }  // end of try block
 

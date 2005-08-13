@@ -34,7 +34,7 @@ NAME
    H5T_init_strpad_interface -- Initialize interface-specific information
 USAGE
     herr_t H5T_init_strpad_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -58,7 +58,7 @@ H5T_init_strpad_interface(void)
  *		programming language: C usually null terminates strings while
  *		Fortran left-justifies and space-pads strings.	This property
  *		defines the storage mechanism for the string.
- *		
+ *
  * Return:	Success:	The character set of a string type.
  *
  *		Failure:	H5T_STR_ERROR (Negative)
@@ -88,7 +88,7 @@ H5Tget_strpad(hid_t type_id)
         dt = dt->shared->parent;  /*defer to parent*/
     if (!H5T_IS_STRING(dt->shared))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, H5T_STR_ERROR, "operation not defined for datatype class")
-    
+
     /* result */
     if(H5T_IS_FIXED_STRING(dt->shared))
         ret_value = dt->shared->u.atomic.u.s.pad;
@@ -149,7 +149,7 @@ H5Tset_strpad(hid_t type_id, H5T_str_t strpad)
         dt = dt->shared->parent;  /*defer to parent*/
     if (!H5T_IS_STRING(dt->shared))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for datatype class")
-    
+
     /* Commit */
     if(H5T_IS_FIXED_STRING(dt->shared))
         dt->shared->u.atomic.u.s.pad = strpad;

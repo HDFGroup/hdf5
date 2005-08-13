@@ -60,7 +60,7 @@ void test_vlstr_free_custom(void *mem, void *info);
 **      allocation routines.  This routine just uses malloc to
 **      allocate the memory and increments the amount of memory
 **      allocated.
-** 
+**
 ****************************************************************/
 void *test_vlstr_alloc_custom(size_t size, void *info)
 {
@@ -88,7 +88,7 @@ void *test_vlstr_alloc_custom(size_t size, void *info)
 **      allocation routines.  This routine just uses free to
 **      release the memory and decrements the amount of memory
 **      allocated.
-** 
+**
 ****************************************************************/
 void test_vlstr_free_custom(void *_mem, void *info)
 {
@@ -113,7 +113,7 @@ void test_vlstr_free_custom(void *_mem, void *info)
 **
 **  test_vlstrings_basic(): Test basic VL string code.
 **      Tests simple VL string I/O
-** 
+**
 ****************************************************************/
 static void
 test_vlstrings_basic(void)
@@ -166,7 +166,7 @@ test_vlstrings_basic(void)
     CHECK(ret, FAIL, "H5Dwrite");
 
     dataspace = H5Screate(H5S_SCALAR);
-    
+
     dataset2=H5Dcreate(fid1,"Dataset2",tid1,dataspace,H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate");
 
@@ -175,7 +175,7 @@ test_vlstrings_basic(void)
 
     ret=H5Dwrite(dataset2,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,&wdata2);
     CHECK(ret, FAIL, "H5Dwrite");
-    
+
     H5Sclose(dataspace);
     H5Dclose(dataset2);
     HDfree(wdata2);
@@ -235,11 +235,11 @@ test_vlstrings_basic(void)
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close dataset transfer property list */
     ret = H5Pclose(xfer_pid);
     CHECK(ret, FAIL, "H5Pclose");
-    
+
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
@@ -248,9 +248,9 @@ test_vlstrings_basic(void)
 
 /****************************************************************
 **
-**  test_vlstrings_special(): Test VL string code for special 
+**  test_vlstrings_special(): Test VL string code for special
 **      string cases, nil and zero-sized.
-** 
+**
 ****************************************************************/
 static void
 test_vlstrings_special(void)
@@ -298,7 +298,7 @@ test_vlstrings_special(void)
     for(i=0; i<SPACE1_DIM1; i++)
         if(rdata[i]!=NULL)
             TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n",(int)i,rdata[i]);
-    
+
     /* Write dataset to disk */
     ret=H5Dwrite(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
     CHECK(ret, FAIL, "H5Dwrite");
@@ -318,7 +318,7 @@ test_vlstrings_special(void)
             continue;
         } /* end if */
     } /* end for */
-    
+
     /* Reclaim the read VL data */
     ret=H5Dvlen_reclaim(tid1,sid1,H5P_DEFAULT,rdata);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
@@ -342,7 +342,7 @@ test_vlstrings_special(void)
     /* Close dataset creation property list */
     ret = H5Pclose(dcpl);
     CHECK(ret, FAIL, "H5Pclose");
-    
+
     /* Read from dataset before writing data */
     ret=H5Dread(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,rdata);
     CHECK(ret, FAIL, "H5Dread");
@@ -351,7 +351,7 @@ test_vlstrings_special(void)
     for(i=0; i<SPACE1_DIM1; i++)
         if(rdata[i]!=NULL)
             TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n",(int)i,rdata[i]);
-    
+
     /* Try to write nil strings to disk. */
     ret=H5Dwrite(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata2);
     CHECK(ret, FAIL, "H5Dwrite");
@@ -364,7 +364,7 @@ test_vlstrings_special(void)
     for(i=0; i<SPACE1_DIM1; i++)
         if(rdata[i]!=NULL)
             TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n",(int)i,rdata[i]);
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -376,7 +376,7 @@ test_vlstrings_special(void)
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
@@ -385,7 +385,7 @@ test_vlstrings_special(void)
 /****************************************************************
 **
 **  test_vlstring_type(): Test VL string type.
-**      Tests if VL string is treated as string. 
+**      Tests if VL string is treated as string.
 **
 ****************************************************************/
 static void test_vlstring_type(void)
@@ -407,7 +407,7 @@ static void test_vlstring_type(void)
     tid_vlstr = H5Tcopy(H5T_C_S1);
     CHECK(tid_vlstr, FAIL, "H5Tcopy");
 
-    /* Change padding and verify it */ 
+    /* Change padding and verify it */
     ret = H5Tset_strpad(tid_vlstr, H5T_STR_NULLPAD);
     CHECK(ret, FAIL, "H5Tset_strpad");
     pad = H5Tget_strpad(tid_vlstr);
@@ -422,7 +422,7 @@ static void test_vlstring_type(void)
     VERIFY(ret, H5T_STRING, "H5Tget_class");
     ret = H5Tis_variable_str(tid_vlstr);
     VERIFY(ret, TRUE, "H5Tis_variable_str");
-    
+
     /* Check default character set and padding */
     cset = H5Tget_cset(tid_vlstr);
     VERIFY(cset, H5T_CSET_ASCII, "H5Tget_cset");
@@ -436,25 +436,25 @@ static void test_vlstring_type(void)
     /* Close datatype */
     ret = H5Tclose(tid_vlstr);
     CHECK(ret, FAIL, "H5Tclose");
-    
+
     tid_vlstr = H5Topen(fid, VLSTR_TYPE);
     CHECK(tid_vlstr, FAIL, "H5Topen");
 
     ret = H5Tclose(tid_vlstr);
     CHECK(ret, FAIL, "H5Tclose");
-    
+
     ret = H5Fclose(fid);
-    CHECK(ret, FAIL, "H5Fclose");   
+    CHECK(ret, FAIL, "H5Fclose");
 
 
     fid = H5Fopen(DATAFILE, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fopen");
-    
-    /* Open the variable-length string datatype just created */ 
+
+    /* Open the variable-length string datatype just created */
     tid_vlstr = H5Topen(fid, VLSTR_TYPE);
     CHECK(tid_vlstr, FAIL, "H5Topen");
 
-    /* Verify character set and padding */ 
+    /* Verify character set and padding */
     cset = H5Tget_cset(tid_vlstr);
     VERIFY(cset, H5T_CSET_ASCII, "H5Tget_cset");
     pad = H5Tget_strpad(tid_vlstr);
@@ -464,7 +464,7 @@ static void test_vlstring_type(void)
     ret = H5Tclose(tid_vlstr);
     CHECK(ret, FAIL, "H5Tclose");
     ret = H5Fclose(fid);
-    CHECK(ret, FAIL, "H5Fclose");    
+    CHECK(ret, FAIL, "H5Fclose");
 
 } /* end test_vlstring_type() */
 
@@ -472,7 +472,7 @@ static void test_vlstring_type(void)
 **
 **  test_compact_vlstring(): Test code for storing VL strings in
 **      compact datasets.
-** 
+**
 ****************************************************************/
 static void
 test_compact_vlstring(void)
@@ -511,7 +511,7 @@ test_compact_vlstring(void)
 
     ret = H5Pset_layout(plist, H5D_COMPACT);
     CHECK(ret, FAIL, "H5Pset_layout");
-    
+
     /* Create a dataset */
     dataset=H5Dcreate(fid1,"Dataset5",tid1,sid1,plist);
     CHECK(dataset, FAIL, "H5Dcreate");
@@ -535,7 +535,7 @@ test_compact_vlstring(void)
             continue;
         } /* end if */
     } /* end for */
-    
+
     /* Reclaim the read VL data */
     ret=H5Dvlen_reclaim(tid1,sid1,H5P_DEFAULT,rdata);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
@@ -551,11 +551,11 @@ test_compact_vlstring(void)
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close dataset create property list */
     ret = H5Pclose(plist);
     CHECK(ret, FAIL, "H5Pclose");
-    
+
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
@@ -565,7 +565,7 @@ test_compact_vlstring(void)
 **
 **  test_write_vl_string_attribute(): Test basic VL string code.
 **      Tests writing VL strings as attributes
-** 
+**
 ****************************************************************/
 static void test_write_vl_string_attribute(void)
 {
@@ -651,7 +651,7 @@ static void test_write_vl_string_attribute(void)
 **
 **  test_read_vl_string_attribute(): Test basic VL string code.
 **      Tests reading VL strings from attributes
-** 
+**
 ****************************************************************/
 static void test_read_vl_string_attribute(void)
 {
@@ -677,7 +677,7 @@ static void test_read_vl_string_attribute(void)
     /* Test reading "normal" sized string attribute */
     att = H5Aopen_name(root, "test_scalar");
     CHECK(att, FAIL, "H5Aopen_name");
-    
+
     ret = H5Aread(att, type, &string_att_check);
     CHECK(ret, FAIL, "H5Aread");
 
@@ -692,7 +692,7 @@ static void test_read_vl_string_attribute(void)
     /* Test reading "large" sized string attribute */
     att = H5Aopen_name(root, "test_scalar_large");
     CHECK(att, FAIL, "H5Aopen_name");
-    
+
     ret = H5Aread(att, type, &string_att_check);
     CHECK(ret, FAIL, "H5Aread");
 
@@ -760,7 +760,7 @@ static void read_scalar_dset(hid_t file, hid_t type, hid_t space, char *name, ch
 **  test_vl_rewrite(): Test basic VL string code.
 **      Tests I/O on VL strings when lots of objects in the file
 **      have been linked/unlinked.
-** 
+**
 ****************************************************************/
 static void test_vl_rewrite(void)
 {
@@ -841,9 +841,9 @@ static void test_vl_rewrite(void)
 /****************************************************************
 **
 **  test_vlstrings(): Main VL string testing routine.
-** 
+**
 ****************************************************************/
-void 
+void
 test_vlstrings(void)
 {
     /* Output message about test being performed */
@@ -853,8 +853,8 @@ test_vlstrings(void)
     /* Test basic VL string datatype */
     test_vlstrings_basic();
     test_vlstrings_special();
-    test_vlstring_type();         
-    test_compact_vlstring();         
+    test_vlstring_type();
+    test_compact_vlstring();
 
     /* Test using VL strings in attributes */
     test_write_vl_string_attribute();

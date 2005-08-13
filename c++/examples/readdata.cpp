@@ -12,10 +12,10 @@
   * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-//  
+//
 //      This example reads hyperslab from the SDS.h5 file into
-//      two-dimensional plane of a three-dimensional array.  Various 
-//      information about the dataset in the SDS.h5 file is obtained. 
+//      two-dimensional plane of a three-dimensional array.  Various
+//      information about the dataset in the SDS.h5 file is obtained.
 //
 
 #include <string>
@@ -54,7 +54,7 @@ int main (void)
  	 for (k = 0; k < NZ ; k++)
 	    data_out[j][i][k] = 0;
       }
-   } 
+   }
 
    /*
     * Try block to detect exceptions raised by any of the calls inside it
@@ -125,7 +125,7 @@ int main (void)
 	      (unsigned long)(dims_out[1]) << endl;
 
       /*
-       * Define hyperslab in the dataset; implicitly giving strike and 
+       * Define hyperslab in the dataset; implicitly giving strike and
        * block NULL.
        */
       hsize_t      offset[2];	// hyperslab offset in the file
@@ -143,10 +143,10 @@ int main (void)
       dimsm[0] = NX;
       dimsm[1] = NY;
       dimsm[2] = NZ ;
-      DataSpace memspace( RANK_OUT, dimsm );   
+      DataSpace memspace( RANK_OUT, dimsm );
 
       /*
-       * Define memory hyperslab. 
+       * Define memory hyperslab.
        */
       hsize_t      offset_out[3];	// hyperslab offset in memory
       hsize_t      count_out[3];	// size of the hyperslab in memory
@@ -159,7 +159,7 @@ int main (void)
       memspace.selectHyperslab( H5S_SELECT_SET, count_out, offset_out );
 
       /*
-       * Read data from hyperslab in the file into the hyperslab in 
+       * Read data from hyperslab in the file into the hyperslab in
        * memory and display the data.
        */
       dataset.read( data_out, PredType::NATIVE_INT, memspace, dataspace );
@@ -174,7 +174,7 @@ int main (void)
        * 0 0 0 0 0 0 0
        * 0 0 0 0 0 0 0
        * 0 0 0 0 0 0 0
-       * 3 4 5 6 0 0 0  
+       * 3 4 5 6 0 0 0
        * 4 5 6 7 0 0 0
        * 5 6 7 8 0 0 0
        * 0 0 0 0 0 0 0
@@ -210,5 +210,5 @@ int main (void)
    }
 
    return 0;  // successfully terminated
-}    
+}
 

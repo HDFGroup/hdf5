@@ -42,7 +42,7 @@ int make_fill(hid_t loc_id);
 /*-------------------------------------------------------------------------
  * Function: make_testfiles
  *
- * Purpose: make a test file with all types of HDF5 objects, 
+ * Purpose: make a test file with all types of HDF5 objects,
  *   datatypes and filters
  *
  *-------------------------------------------------------------------------
@@ -54,7 +54,7 @@ int make_testfiles(void)
  TESTING("    generating datasets");
 
 /*-------------------------------------------------------------------------
- * create a file for general copy test 
+ * create a file for general copy test
  *-------------------------------------------------------------------------
  */
  if((loc_id = H5Fcreate(FNAME0,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
@@ -187,11 +187,11 @@ int make_testfiles(void)
   goto out;
  if(H5Fclose(loc_id)<0)
   return -1;
- 
- 
- PASSED();   
- return 0;                                                 
- 
+
+
+ PASSED();
+ return 0;
+
 out:
   H5Fclose(loc_id);
  return -1;
@@ -202,7 +202,7 @@ out:
 /*-------------------------------------------------------------------------
  * Function: make_all_objects
  *
- * Purpose: make a test file with all types of HDF5 objects, datatypes 
+ * Purpose: make a test file with all types of HDF5 objects, datatypes
  *
  *-------------------------------------------------------------------------
  */
@@ -210,17 +210,17 @@ int make_all_objects(hid_t loc_id)
 {
  hid_t   dset_id;
  hid_t   group_id;
- hid_t   type_id;  
+ hid_t   type_id;
  hid_t   root_id;
  hid_t   space_id;
  hsize_t dims[1]={2};
  /* Compound datatype */
- typedef struct s_t 
+ typedef struct s_t
  {
   int    a;
   float  b;
  } s_t;
- 
+
 /*-------------------------------------------------------------------------
  * H5G_DATASET
  *-------------------------------------------------------------------------
@@ -232,7 +232,7 @@ int make_all_objects(hid_t loc_id)
 /*-------------------------------------------------------------------------
  * H5G_GROUP
  *-------------------------------------------------------------------------
- */ 
+ */
  group_id  = H5Gcreate(loc_id,"g1",0);
  root_id   = H5Gopen(loc_id, "/");
 
@@ -248,16 +248,16 @@ int make_all_objects(hid_t loc_id)
  /* Commit compound datatype and close it */
  H5Tcommit(loc_id, "type", type_id);
  H5Tclose(type_id);
- 
+
 /*-------------------------------------------------------------------------
  * H5G_LINK
  *-------------------------------------------------------------------------
  */
- 
+
  H5Glink(loc_id, H5G_LINK_SOFT, "dset", "link");
 
 /*-------------------------------------------------------------------------
- * write a series of datasetes 
+ * write a series of datasetes
  *-------------------------------------------------------------------------
  */
 
@@ -268,15 +268,15 @@ int make_all_objects(hid_t loc_id)
  H5Gclose(group_id);
  H5Gclose(root_id);
 
- return 0;                                                 
- 
+ return 0;
+
 }
 
 
 /*-------------------------------------------------------------------------
  * Function: make_attributes
  *
- * Purpose: make a test file with all types of attributes 
+ * Purpose: make a test file with all types of attributes
  *
  *-------------------------------------------------------------------------
  */
@@ -287,8 +287,8 @@ int make_attributes(hid_t loc_id)
  hid_t   root_id;
  hid_t   space_id;
  hsize_t dims[1]={2};
- 
- 
+
+
 /*-------------------------------------------------------------------------
  * H5G_DATASET
  *-------------------------------------------------------------------------
@@ -301,7 +301,7 @@ int make_attributes(hid_t loc_id)
 /*-------------------------------------------------------------------------
  * H5G_GROUP
  *-------------------------------------------------------------------------
- */ 
+ */
  group_id  = H5Gcreate(loc_id,"g1",0);
  root_id   = H5Gopen(loc_id, "/");
 
@@ -319,8 +319,8 @@ int make_attributes(hid_t loc_id)
  H5Gclose(group_id);
  H5Gclose(root_id);
 
- return 0;                                                 
- 
+ return 0;
+
 }
 
 /*-------------------------------------------------------------------------
@@ -336,7 +336,7 @@ int make_hlinks(hid_t loc_id)
  hid_t   group2_id;
  hid_t   group3_id;
  hsize_t dims[2]={3,2};
- int     buf[3][2]= {{1,1},{1,2},{2,2}};  
+ int     buf[3][2]= {{1,1},{1,2},{2,2}};
 
 /*-------------------------------------------------------------------------
  * create a dataset and some hard links to it
@@ -356,8 +356,8 @@ int make_hlinks(hid_t loc_id)
 /*-------------------------------------------------------------------------
  * create a group and some hard links to it
  *-------------------------------------------------------------------------
- */ 
- 
+ */
+
  if ((group1_id = H5Gcreate(loc_id,"g1",0))<0)
   return -1;
  if ((group2_id = H5Gcreate(group1_id,"g2",0))<0)
@@ -369,13 +369,13 @@ int make_hlinks(hid_t loc_id)
   return -1;
  if (H5Glink2(group1_id, "g2", H5G_LINK_HARD, group3_id, "link1 to g2")<0)
   return -1;
- 
+
  H5Gclose(group1_id);
  H5Gclose(group2_id);
  H5Gclose(group3_id);
 
- return 0;                                                 
- 
+ return 0;
+
 }
 
 
@@ -436,9 +436,9 @@ if (szip_can_encode) {
   goto out;
  if(H5Pclose(dcpl)<0)
   goto out;
- 
- return 0;                                                 
- 
+
+ return 0;
+
 out:
  H5E_BEGIN_TRY {
   H5Pclose(dcpl);
@@ -471,7 +471,7 @@ int make_deflate(hid_t loc_id)
    buf[i][j]=n++;
   }
  }
- 
+
  /* create a space */
  if((sid = H5Screate_simple(RANK, dims, NULL))<0)
   return -1;
@@ -501,9 +501,9 @@ int make_deflate(hid_t loc_id)
   goto out;
  if(H5Pclose(dcpl)<0)
   goto out;
- 
- return 0;                                                 
- 
+
+ return 0;
+
 out:
  H5E_BEGIN_TRY {
   H5Pclose(dcpl);
@@ -550,7 +550,7 @@ int make_shuffle(hid_t loc_id)
  */
 #if defined (H5_HAVE_FILTER_SHUFFLE)
  /* set the shuffle filter */
- if (H5Pset_shuffle(dcpl)<0) 
+ if (H5Pset_shuffle(dcpl)<0)
   goto out;
  if (make_dset(loc_id,"dset_shuffle",sid,dcpl,buf)<0)
   goto out;
@@ -564,9 +564,9 @@ int make_shuffle(hid_t loc_id)
   goto out;
  if(H5Pclose(dcpl)<0)
   goto out;
- 
- return 0;                                                 
- 
+
+ return 0;
+
 out:
  H5E_BEGIN_TRY {
   H5Pclose(dcpl);
@@ -613,10 +613,10 @@ int make_fletcher32(hid_t loc_id)
  */
 #if defined (H5_HAVE_FILTER_FLETCHER32)
  /* remove the filters from the dcpl */
- if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0) 
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0)
   goto out;
  /* set the checksum filter */
- if (H5Pset_fletcher32(dcpl)<0) 
+ if (H5Pset_fletcher32(dcpl)<0)
   goto out;
  if (make_dset(loc_id,"dset_fletcher32",sid,dcpl,buf)<0)
   goto out;
@@ -630,9 +630,9 @@ int make_fletcher32(hid_t loc_id)
   goto out;
  if(H5Pclose(dcpl)<0)
   goto out;
- 
- return 0;                                                 
- 
+
+ return 0;
+
 out:
  H5E_BEGIN_TRY {
   H5Pclose(dcpl);
@@ -653,8 +653,8 @@ int make_nbit(hid_t loc_id)
 {
  hid_t    dcpl; /* dataset creation property list */
  hid_t    sid;  /* dataspace ID */
- hid_t    dtid;  
- hid_t    dsid; 
+ hid_t    dtid;
+ hid_t    dsid;
  hsize_t  dims[RANK]={DIM1,DIM2};
  hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
  int      buf[DIM1][DIM2];
@@ -684,12 +684,12 @@ int make_nbit(hid_t loc_id)
 
 #if defined (H5_HAVE_FILTER_NBIT)
  /* remove the filters from the dcpl */
- if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0) 
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0)
  {
   H5Tclose(dtid);
   goto out;
  }
- if (H5Pset_nbit(dcpl)<0) 
+ if (H5Pset_nbit(dcpl)<0)
  {
   H5Tclose(dtid);
   goto out;
@@ -706,7 +706,7 @@ int make_nbit(hid_t loc_id)
  }
  H5Dclose(dsid);
 
- if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0) 
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0)
  {
   H5Tclose(dtid);
   goto out;
@@ -732,9 +732,9 @@ int make_nbit(hid_t loc_id)
   goto out;
  if(H5Pclose(dcpl)<0)
   goto out;
- 
- return 0;                                                 
- 
+
+ return 0;
+
 out:
  H5E_BEGIN_TRY {
   H5Pclose(dcpl);
@@ -755,8 +755,8 @@ int make_scaleoffset(hid_t loc_id)
 {
  hid_t    dcpl; /* dataset creation property list */
  hid_t    sid;  /* dataspace ID */
- hid_t    dtid;  
- hid_t    dsid; 
+ hid_t    dtid;
+ hid_t    dsid;
  hsize_t  dims[RANK]={DIM1,DIM2};
  hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
  int      buf[DIM1][DIM2];
@@ -781,12 +781,12 @@ int make_scaleoffset(hid_t loc_id)
 
 #if defined (H5_HAVE_FILTER_NBIT)
  /* remove the filters from the dcpl */
- if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0) 
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0)
  {
   H5Tclose(dtid);
   goto out;
  }
- if (H5Pset_scaleoffset(dcpl,31,2)<0) 
+ if (H5Pset_scaleoffset(dcpl,31,2)<0)
  {
   H5Tclose(dtid);
   goto out;
@@ -824,9 +824,9 @@ int make_scaleoffset(hid_t loc_id)
   goto out;
  if(H5Pclose(dcpl)<0)
   goto out;
- 
- return 0;                                                 
- 
+
+ return 0;
+
 out:
  H5E_BEGIN_TRY {
   H5Pclose(dcpl);
@@ -847,8 +847,8 @@ int make_all(hid_t loc_id)
 {
  hid_t    dcpl; /* dataset creation property list */
  hid_t    sid;  /* dataspace ID */
- hid_t    dtid;  
- hid_t    dsid;  
+ hid_t    dtid;
+ hid_t    dsid;
 #if defined (H5_HAVE_FILTER_SZIP)
  unsigned szip_options_mask=H5_SZIP_ALLOW_K13_OPTION_MASK|H5_SZIP_NN_OPTION_MASK;
  unsigned szip_pixels_per_block=8;
@@ -875,16 +875,16 @@ int make_all(hid_t loc_id)
  /* set up chunk */
  if(H5Pset_chunk(dcpl, RANK, chunk_dims)<0)
   goto out;
- 
+
 #if defined (H5_HAVE_FILTER_SHUFFLE)
  /* set the shuffle filter */
- if (H5Pset_shuffle(dcpl)<0) 
+ if (H5Pset_shuffle(dcpl)<0)
   goto out;
 #endif
 
 #if defined (H5_HAVE_FILTER_FLETCHER32)
  /* set the checksum filter */
- if (H5Pset_fletcher32(dcpl)<0) 
+ if (H5Pset_fletcher32(dcpl)<0)
   goto out;
 #endif
 
@@ -916,10 +916,10 @@ if (szip_can_encode) {
  */
 #if defined (H5_HAVE_FILTER_FLETCHER32)
  /* remove the filters from the dcpl */
- if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0) 
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0)
   goto out;
  /* set the checksum filter */
- if (H5Pset_fletcher32(dcpl)<0) 
+ if (H5Pset_fletcher32(dcpl)<0)
   goto out;
  if (make_dset(loc_id,"dset_fletcher32",sid,dcpl,buf)<0)
   goto out;
@@ -933,7 +933,7 @@ if (szip_can_encode) {
 #if defined (H5_HAVE_FILTER_SZIP)
 if (szip_can_encode) {
  /* remove the filters from the dcpl */
- if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0) 
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0)
   goto out;
  /* set szip data */
  if(H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block)<0)
@@ -951,10 +951,10 @@ if (szip_can_encode) {
  */
 #if defined (H5_HAVE_FILTER_SHUFFLE)
  /* remove the filters from the dcpl */
- if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0) 
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0)
   goto out;
  /* set the shuffle filter */
- if (H5Pset_shuffle(dcpl)<0) 
+ if (H5Pset_shuffle(dcpl)<0)
   goto out;
  if (make_dset(loc_id,"dset_shuffle",sid,dcpl,buf)<0)
   goto out;
@@ -966,7 +966,7 @@ if (szip_can_encode) {
  */
 #if defined (H5_HAVE_FILTER_DEFLATE)
  /* remove the filters from the dcpl */
- if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0) 
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0)
   goto out;
  /* set deflate data */
  if(H5Pset_deflate(dcpl, 1)<0)
@@ -982,10 +982,10 @@ if (szip_can_encode) {
  */
 #if defined (H5_HAVE_FILTER_NBIT)
  /* remove the filters from the dcpl */
- if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0) 
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0)
   goto out;
  /* set the shuffle filter */
- if (H5Pset_nbit(dcpl)<0) 
+ if (H5Pset_nbit(dcpl)<0)
   goto out;
  dtid = H5Tcopy(H5T_NATIVE_INT);
  H5Tset_precision(dtid,(H5Tget_precision(dtid)-1));
@@ -1009,9 +1009,9 @@ if (szip_can_encode) {
   goto out;
  if(H5Pclose(dcpl)<0)
   goto out;
- 
- return 0;                                                 
- 
+
+ return 0;
+
 out:
  H5E_BEGIN_TRY {
   H5Pclose(dcpl);
@@ -1025,7 +1025,7 @@ out:
 /*-------------------------------------------------------------------------
  * Function: make_early
  *
- * Purpose: create a file for the H5D_ALLOC_TIME_EARLY test 
+ * Purpose: create a file for the H5D_ALLOC_TIME_EARLY test
  *
  *-------------------------------------------------------------------------
  */
@@ -1033,10 +1033,10 @@ int make_early(void)
 {
  hsize_t dims[1] ={3000};
  hsize_t cdims[1]={30};
- hid_t   fid=-1;  
+ hid_t   fid=-1;
  hid_t   dset_id=-1;
- hid_t   sid=-1;  
- hid_t   tid=-1;  
+ hid_t   sid=-1;
+ hid_t   tid=-1;
  hid_t   dcpl=-1;
  int     i;
  char    name[10];
@@ -1046,7 +1046,7 @@ int make_early(void)
   return -1;
  if (H5Fclose(fid)<0)
   goto out;
- 
+
  if ((sid = H5Screate_simple(1, dims, NULL))<0)
   goto out;
  if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
@@ -1055,47 +1055,47 @@ int make_early(void)
   goto out;
  if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY)<0)
   goto out;
- 
+
  for (i=0; i<iter; i++)
  {
   if ((fid = H5Fopen(FNAME5,H5F_ACC_RDWR,H5P_DEFAULT))<0)
    goto out;
   if ((dset_id = H5Dcreate(fid,"early",H5T_NATIVE_DOUBLE,sid,dcpl))<0)
    goto out;
-  if ((tid = H5Tcopy(H5T_NATIVE_DOUBLE))<0) 
+  if ((tid = H5Tcopy(H5T_NATIVE_DOUBLE))<0)
    goto out;
   sprintf(name,"%d", i);
-  if ((H5Tcommit(fid,name,tid))<0) 
+  if ((H5Tcommit(fid,name,tid))<0)
    goto out;
-  if (H5Tclose(tid)<0) 
+  if (H5Tclose(tid)<0)
    goto out;
-  if (H5Dclose(dset_id)<0) 
+  if (H5Dclose(dset_id)<0)
    goto out;
-  if (H5Gunlink(fid,"early")<0) 
+  if (H5Gunlink(fid,"early")<0)
    goto out;
   if (H5Fclose(fid)<0)
    goto out;
  }
- 
+
 /*-------------------------------------------------------------------------
  * do the same without close/opening the file and creating the dataset
  *-------------------------------------------------------------------------
  */
- 
+
  if ((fid = H5Fcreate(FNAME6,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   return -1;
 
  for (i=0; i<iter; i++)
  {
-  if ((tid = H5Tcopy(H5T_NATIVE_DOUBLE))<0) 
+  if ((tid = H5Tcopy(H5T_NATIVE_DOUBLE))<0)
    goto out;
   sprintf(name,"%d", i);
-  if ((H5Tcommit(fid,name,tid))<0) 
+  if ((H5Tcommit(fid,name,tid))<0)
    goto out;
-  if (H5Tclose(tid)<0) 
+  if (H5Tclose(tid)<0)
    goto out;
  }
- 
+
  if (H5Sclose(sid)<0)
   goto out;
  if (H5Pclose(dcpl)<0)
@@ -1103,9 +1103,9 @@ int make_early(void)
  if (H5Fclose(fid)<0)
   goto out;
 
- 
- return 0;                                                 
- 
+
+ return 0;
+
 out:
  H5E_BEGIN_TRY {
   H5Tclose(tid);
@@ -1201,9 +1201,9 @@ int make_layout(hid_t loc_id)
   goto out;
  if(H5Pclose(dcpl)<0)
   goto out;
- 
- return 0;                                                 
- 
+
+ return 0;
+
 out:
  H5E_BEGIN_TRY {
   H5Pclose(dcpl);
@@ -1219,7 +1219,7 @@ out:
 /*-------------------------------------------------------------------------
  * Function: make a file with an integer dataset with a fill value
  *
- * Purpose: test copy of fill values 
+ * Purpose: test copy of fill values
  *
  *-------------------------------------------------------------------------
  */
@@ -1229,9 +1229,9 @@ int make_fill(hid_t loc_id)
  hid_t   sid;
  hid_t   dcpl;
  hsize_t dims[2]={3,2};
- int     buf[3][2]= {{1,1},{1,2},{2,2}};  
+ int     buf[3][2]= {{1,1},{1,2},{2,2}};
  int     fillvalue=2;
- 
+
 /*-------------------------------------------------------------------------
  * H5T_INTEGER, write a fill value
  *-------------------------------------------------------------------------
@@ -1246,7 +1246,7 @@ int make_fill(hid_t loc_id)
 	H5Dclose(did);
  H5Sclose(sid);
 
- return 0;                                                 
- 
+ return 0;
+
 }
 

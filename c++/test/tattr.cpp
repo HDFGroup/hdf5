@@ -103,9 +103,9 @@ int attr_data1a[ATTR1_DIM1]={256,11945,-22107};
 **
 **  test_attr_basic_write(): Test basic write attribute.
 **      Tests integer attributes on both datasets and groups
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_attr_basic_write(void)
 {
     hsize_t dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
@@ -114,10 +114,10 @@ test_attr_basic_write(void)
     int     read_data1[ATTR1_DIM1]={0}; // Buffer for reading 1st attribute
     int     i;
 
-    // Output message about test being performed 
+    // Output message about test being performed
     MESSAGE(5, ("Testing Basic Attribute Writing Functions\n"));
 
-    try { 
+    try {
 	// Create file
 	H5File fid1 (FILENAME, H5F_ACC_TRUNC);
 
@@ -133,12 +133,12 @@ test_attr_basic_write(void)
 	// Create an attribute for the dataset
 	Attribute ds_attr1 = dataset.createAttribute (ATTR1_NAME, PredType::NATIVE_INT, att_space);
 
-	// Try creating an attribute that already exists.  This should fail 
-	// since two attributes cannot have the same name.  If an exception 
-	// is not thrown for this action by createAttribute, then throw an 
+	// Try creating an attribute that already exists.  This should fail
+	// since two attributes cannot have the same name.  If an exception
+	// is not thrown for this action by createAttribute, then throw an
 	// invalid action exception.
 	try {
-	    Attribute invalid_attr = dataset.createAttribute (ATTR1_NAME, PredType::NATIVE_INT, att_space); 
+	    Attribute invalid_attr = dataset.createAttribute (ATTR1_NAME, PredType::NATIVE_INT, att_space);
 
 	    // continuation here, that means no exception has been thrown
 	    throw InvalidActionException("H5File::createDataSet", "Library allowed overwrite of existing dataset");
@@ -197,7 +197,7 @@ test_attr_basic_write(void)
 	try {
 	    Attribute invalid_attr = group.createAttribute (ATTR2_NAME, PredType::NATIVE_INT, sid3);
             // continuation here, that means no exception has been thrown
-            throw InvalidActionException("H5Group::createAttribute", 
+            throw InvalidActionException("H5Group::createAttribute",
 			"Attempting to create an existing attribute");
 	}
         catch (AttributeIException E) // catching invalid creating attribute
@@ -208,7 +208,7 @@ test_attr_basic_write(void)
 
 	// Check storage size for attribute
 	attr_size = gr_attr.getStorageSize();
-	verify_val((long)attr_size, (long)(ATTR2_DIM1*ATTR2_DIM2*sizeof(int)), 
+	verify_val((long)attr_size, (long)(ATTR2_DIM1*ATTR2_DIM2*sizeof(int)),
 			"Attribute::getStorageSize",  __LINE__, __FILE__);
     } // end try block
 
@@ -220,9 +220,9 @@ test_attr_basic_write(void)
 /****************************************************************
 **
 **  test_attr_rename(): Test renaming attribute function.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_attr_rename(void)
 {
     int read_data1[ATTR1_DIM1]={0}; // Buffer for reading the attribute
@@ -276,7 +276,7 @@ test_attr_rename(void)
 	    if(attr_data1a[i]!=read_data1[i])
 		TestErrPrintf("%d: attribute data different: attr_data1a[%d]=%d,read_data1[%d]=%d\n",__LINE__,i,attr_data1a[i],i,read_data1[i]);
 
-	// Close attribute 
+	// Close attribute
 	attr2.close();
 
 	// Change first attribute back to the original name
@@ -291,9 +291,9 @@ test_attr_rename(void)
 /********************************************************************
 **
 **  test_attr_basic_read(): Test basic read attribute.
-** 
+**
 ********************************************************************/
-static void 
+static void
 test_attr_basic_read(void)
 {
     int i, j;
@@ -301,7 +301,7 @@ test_attr_basic_read(void)
     // Output message about test being performed
     MESSAGE(5, ("Testing Basic Attribute Reading Functions\n"));
 
-    try { 
+    try {
 	// Open file
 	H5File fid1(FILENAME, H5F_ACC_RDWR);
 
@@ -321,7 +321,7 @@ test_attr_basic_read(void)
 
 	// Verify values read in
 	for(i=0; i<ATTR1_DIM1; i++)
-            if(attr_data1[i]!=read_data1[i]) 
+            if(attr_data1[i]!=read_data1[i])
 		TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
 
 	/*
@@ -358,16 +358,16 @@ test_attr_basic_read(void)
 /****************************************************************
 **
 **  test_attr_compound_write(): Tests compound datatype attributes
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_attr_compound_write(void)
 {
 
 	// Output message about test being performed
     MESSAGE(5, ("Testing Multiple Attribute Functions\n"));
 
-    try { 
+    try {
 	// Create file
 	H5File fid1(FILENAME.c_str(), H5F_ACC_TRUNC);
 
@@ -378,7 +378,7 @@ test_attr_compound_write(void)
 	// Create a dataset
 	DataSet dataset = fid1.createDataSet(DSET1_NAME, PredType::NATIVE_UCHAR,sid1);
 
-	// Create the attribute datatype. 
+	// Create the attribute datatype.
 	CompType comp_type(sizeof(struct attr4_struct));
 
 	attr4_field1_off = HOFFSET(struct attr4_struct, i);
@@ -416,9 +416,9 @@ test_attr_compound_write(void)
 /****************************************************************
 **
 **  test_attr_compound_read(): Test basic H5A (attribute) code.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_attr_compound_read(void)
 {
     hsize_t dims[ATTR_MAX_DIMS];	// Attribute dimensions
@@ -430,8 +430,8 @@ test_attr_compound_read(void)
     // Output message about test being performed
     MESSAGE(5, ("Testing Basic Attribute Functions\n"));
 
-    try { 
-	// Open file 
+    try {
+	// Open file
 	H5File fid1(FILENAME, H5F_ACC_RDWR);
 
 	// Open the dataset
@@ -441,7 +441,7 @@ test_attr_compound_read(void)
 	int num_attrs = dataset.getNumAttrs();
 	verify_val(num_attrs, 1, "H5Object::getNumAttrs", __LINE__, __FILE__);
 
-	// Open 1st attribute for the dataset 
+	// Open 1st attribute for the dataset
 	Attribute attr = dataset.openAttribute((unsigned)0);
 
 	/* Verify Dataspace */
@@ -472,12 +472,12 @@ test_attr_compound_read(void)
 	int fields = datatype.getNmembers();
 	verify_val(fields, 3, "CompType::getNmembers", __LINE__, __FILE__);
 
-	// Verify that the fields have the same names as when the type 
+	// Verify that the fields have the same names as when the type
 	// was created
-	for(i=0; i<fields; i++) 
+	for(i=0; i<fields; i++)
 	{
 	    string fieldname = datatype.getMemberName(i);
-	    if(!((fieldname == ATTR4_FIELDNAME1) || 
+	    if(!((fieldname == ATTR4_FIELDNAME1) ||
 		(fieldname == ATTR4_FIELDNAME2) ||
 		(fieldname == ATTR4_FIELDNAME3)))
             TestErrPrintf("%d:invalid field name for field #%d: %s\n",__LINE__,i,fieldname.c_str());
@@ -550,15 +550,15 @@ test_attr_compound_read(void)
 /****************************************************************
 **
 **  test_attr_scalar_write(): Test scalar attribute writing functionality.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_attr_scalar_write(void)
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing Basic Scalar Attribute Writing Functions\n"));
 
-    try { 
+    try {
 	// Create file
 	H5File fid1(FILENAME, H5F_ACC_TRUNC);
 
@@ -578,12 +578,12 @@ test_attr_scalar_write(void)
 	// Create an attribute for the dataset
 	Attribute ds_attr = dataset.createAttribute (ATTR5_NAME, PredType::NATIVE_FLOAT, att_space);
 
-	// Try creating an attribute that already exists.  This should fail 
-	// since two attributes cannot have the same name.  If an exception 
-	// is not thrown for this action by createAttribute, then throw an 
+	// Try creating an attribute that already exists.  This should fail
+	// since two attributes cannot have the same name.  If an exception
+	// is not thrown for this action by createAttribute, then throw an
 	// invalid action exception.
 	try {
-	    Attribute invalid_attr = dataset.createAttribute (ATTR5_NAME, PredType::NATIVE_FLOAT, att_space); 
+	    Attribute invalid_attr = dataset.createAttribute (ATTR5_NAME, PredType::NATIVE_FLOAT, att_space);
 
 	    // continuation here, that means no exception has been thrown
 	    throw InvalidActionException("H5File::createDataSet", "Library allowed overwrite of existing dataset");
@@ -603,15 +603,15 @@ test_attr_scalar_write(void)
 /****************************************************************
 **
 **  test_attr_scalar_read(): Test scalar attribute reading functionality.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_attr_scalar_read(void)
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing Basic Scalar Attribute Reading Functions\n"));
 
-    try { 
+    try {
 	// Open file
 	H5File fid1(FILENAME, H5F_ACC_RDWR);
 
@@ -646,9 +646,9 @@ test_attr_scalar_read(void)
 /****************************************************************
 **
 **  test_attr_mult_write(): Test multiple attributes
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_attr_mult_write(void)
 {
     // Output message about test being performed
@@ -692,12 +692,12 @@ test_attr_mult_write(void)
 	// Create 3rd attribute for the dataset
 	Attribute ds_attr3 = dataset.createAttribute (ATTR3_NAME, PredType::NATIVE_DOUBLE, att3_space);
 
-	// Try creating an attribute that already exists.  This should fail 
-	// since two attributes cannot have the same name.  If an exception 
-	// is not thrown for this action by createAttribute, then throw an 
+	// Try creating an attribute that already exists.  This should fail
+	// since two attributes cannot have the same name.  If an exception
+	// is not thrown for this action by createAttribute, then throw an
 	// invalid action exception.
 	try {
-	    Attribute invalid_attr = dataset.createAttribute (ATTR3_NAME, PredType::NATIVE_DOUBLE, att3_space); 
+	    Attribute invalid_attr = dataset.createAttribute (ATTR3_NAME, PredType::NATIVE_DOUBLE, att3_space);
 
 	    // continuation here, that means no exception has been thrown
 	    throw InvalidActionException("DataSet::createAttribute", "Attempting to create a duplicate attribute");
@@ -717,9 +717,9 @@ test_attr_mult_write(void)
 /****************************************************************
 **
 **  test_attr_mult_read(): Test reading multiple attributes.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_attr_mult_read(void)
 {
     int     read_data1[ATTR1_DIM1]={0}; // Buffer for reading 1st attribute
@@ -730,8 +730,8 @@ test_attr_mult_read(void)
 	// Output message about test being performed
     MESSAGE(5, ("Testing Multiple Attribute Reading Functions\n"));
 
-    try { 
-	// Open file 
+    try {
+	// Open file
 	H5File fid1(FILENAME, H5F_ACC_RDWR);
 
 	// Open the dataset
@@ -741,7 +741,7 @@ test_attr_mult_read(void)
 	int num_attrs = dataset.getNumAttrs();
 	verify_val(num_attrs, 3, "H5Object::getNumAttrs", __LINE__, __FILE__);
 
-	// Open 1st attribute for the dataset 
+	// Open 1st attribute for the dataset
 	Attribute attr = dataset.openAttribute((unsigned)0);
 
 	/* Verify Dataspace */
@@ -793,7 +793,7 @@ test_attr_mult_read(void)
 	attr.close();
 	space.close();
 
-	// Open 2nd attribute for the dataset 
+	// Open 2nd attribute for the dataset
 	attr = dataset.openAttribute((unsigned)1);
 
 	/* Verify Dataspace */
@@ -847,7 +847,7 @@ test_attr_mult_read(void)
 	attr.close();
 	space.close();
 
-	// Open 3rd attribute for the dataset 
+	// Open 3rd attribute for the dataset
 	attr = dataset.openAttribute((unsigned)2);
 
 	/* Verify Dataspace */
@@ -906,11 +906,11 @@ test_attr_mult_read(void)
 
 /****************************************************************
 **
-**  test_attr_delete(): Test deleting attribute from different 
+**  test_attr_delete(): Test deleting attribute from different
 **			hdf5 objects.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_attr_delete(void)
 {
     string  attr_name; // Buffer for attribute names
@@ -918,8 +918,8 @@ test_attr_delete(void)
 	// Output message about test being performed
     MESSAGE(5, ("Testing Removing Attribute Function\n"));
 
-    try { 
-	// Open file 
+    try {
+	// Open file
 	H5File fid1(FILENAME, H5F_ACC_RDWR);
 
 	// Open the dataset
@@ -950,7 +950,7 @@ test_attr_delete(void)
 	num_attrs = dataset.getNumAttrs();
 	verify_val(num_attrs, 2, "H5Object::getNumAttrs", __LINE__, __FILE__);
 
-	// Open 1st attribute for the dataset 
+	// Open 1st attribute for the dataset
 	Attribute attr = dataset.openAttribute((unsigned)0);
 
 	// Verify Name
@@ -1001,9 +1001,9 @@ test_attr_delete(void)
 /****************************************************************
 **
 **  test_attr(): Main attribute testing routine.
-** 
+**
 ****************************************************************/
-void 
+void
 test_attr(void)
 {
     // Output message about test being performed

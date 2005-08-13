@@ -87,8 +87,8 @@ const H5O_class_t H5O_FILL_NEW[1] = {{
 /* Initial version of the "old" fill value information */
 #define H5O_FILL_VERSION 	1
 /* Revised version of the "new" fill value information */
-#define H5O_FILL_VERSION_2 	2	
- 
+#define H5O_FILL_VERSION_2 	2
+
 /* Declare a free list to manage the H5O_fill_new_t struct */
 H5FL_DEFINE(H5O_fill_new_t);
 
@@ -99,16 +99,16 @@ H5FL_DEFINE(H5O_fill_t);
 /*-------------------------------------------------------------------------
  * Function:	H5O_fill_new_decode
  *
- * Purpose:	Decode a new fill value message.  The new fill value 
- * 		message is fill value plus space allocation time and 
+ * Purpose:	Decode a new fill value message.  The new fill value
+ * 		message is fill value plus space allocation time and
  * 		fill value writing time and whether fill value is defined.
  *
  * Return:	Success:	Ptr to new message in native struct.
  *
  *		Failure:	NULL
  *
- * Programmer:  Raymond Lu	
- *              Feb 26, 2002 
+ * Programmer:  Raymond Lu
+ *              Feb 26, 2002
  *
  * Modifications:
  *
@@ -121,7 +121,7 @@ H5O_fill_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
     H5O_fill_new_t	*mesg=NULL;
     int			version;
     void		*ret_value;
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5O_fill_new_decode);
 
     assert(f);
@@ -130,12 +130,12 @@ H5O_fill_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
 
     if (NULL==(mesg=H5FL_CALLOC(H5O_fill_new_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value message");
- 
+
     /* Version */
     version = *p++;
     if( version != H5O_FILL_VERSION && version !=H5O_FILL_VERSION_2)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for fill value message");
-    
+
     /* Space allocation time */
     mesg->alloc_time = (H5D_alloc_time_t)*p++;
 
@@ -160,7 +160,7 @@ H5O_fill_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
 
     /* Set return value */
     ret_value = (void*)mesg;
-    
+
 done:
     if (!ret_value && mesg) {
         if(mesg->buf)
@@ -194,7 +194,7 @@ H5O_fill_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
 {
     H5O_fill_t  *mesg=NULL;
     void        *ret_value;
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5O_fill_decode);
 
     assert(f);
@@ -209,10 +209,10 @@ H5O_fill_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value");
         HDmemcpy(mesg->buf, p, mesg->size);
     }
-    
+
     /* Set return value */
     ret_value = (void*)mesg;
-    
+
 done:
     if (!ret_value && mesg) {
         if(mesg->buf)
@@ -233,8 +233,8 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  Raymond Lu	
- *              Feb 26, 2002 
+ * Programmer:  Raymond Lu
+ *              Feb 26, 2002
  *
  * Modifications:
  *
@@ -244,7 +244,7 @@ static herr_t
 H5O_fill_new_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
 {
     const H5O_fill_new_t	*mesg = (const H5O_fill_new_t *)_mesg;
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_new_encode);
 
     assert(f);
@@ -311,16 +311,16 @@ H5O_fill_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
  * Function:	H5O_fill_new_copy
  *
  * Purpose:	Copies a message from _MESG to _DEST, allocating _DEST if
- *		necessary.  The new fill value message is fill value plus 
- *		space allocation time and fill value writing time and 
+ *		necessary.  The new fill value message is fill value plus
+ *		space allocation time and fill value writing time and
  *		whether fill value is defined.
  *
  * Return:	Success:	Ptr to _DEST
  *
  *		Failure:	NULL
  *
- * Programmer:  Raymond Lu	
- *              Feb 26, 2002 
+ * Programmer:  Raymond Lu
+ *              Feb 26, 2002
  *
  * Modifications:
  *
@@ -450,7 +450,7 @@ done:
  *
  * Purpose:	Returns the size of the raw message in bytes not counting the
  *		message type or size fields, but only the data fields.  This
- *		function doesn't take into account alignment.  The new fill 
+ *		function doesn't take into account alignment.  The new fill
  *		value message is fill value plus space allocation time and
  *              fill value writing time and whether fill value is defined.
  *
@@ -470,7 +470,7 @@ H5O_fill_new_size(const H5F_t UNUSED *f, const void *_mesg)
 {
     const H5O_fill_new_t	*mesg = (const H5O_fill_new_t *)_mesg;
     size_t			ret_value;
- 
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_new_size);
 
     assert(f);
@@ -510,7 +510,7 @@ static size_t
 H5O_fill_size(const H5F_t UNUSED *f, const void *_mesg)
 {
     const H5O_fill_t    *mesg = (const H5O_fill_t *)_mesg;
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_size);
 
     assert(f);
@@ -544,8 +544,8 @@ H5O_fill_new_reset(void *_mesg)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_new_reset);
 
     assert(mesg);
-    
-    if(mesg->buf) 
+
+    if(mesg->buf)
         mesg->buf = H5MM_xfree(mesg->buf);
     mesg->size = -1;
     if (mesg->type) {
@@ -582,15 +582,15 @@ H5O_fill_reset(void *_mesg)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_reset);
 
     assert(mesg);
-    
-    if(mesg->buf) 
+
+    if(mesg->buf)
         mesg->buf = H5MM_xfree(mesg->buf);
     mesg->size = 0;
     if (mesg->type) {
         H5T_close(mesg->type);
         mesg->type = NULL;
     }
-    
+
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
@@ -669,7 +669,7 @@ H5O_fill_new_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FIL
 {
     const H5O_fill_new_t	*mesg = (const H5O_fill_new_t *)_mesg;
     H5D_fill_value_t fill_status;       /* Whether the fill value is defined */
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_new_debug);
 
     assert(f);
@@ -747,7 +747,7 @@ H5O_fill_new_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FIL
     } else {
 	fprintf(stream, "<dataset type>\n");
     }
-    
+
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
@@ -771,7 +771,7 @@ H5O_fill_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *s
 	       int indent, int fwidth)
 {
     const H5O_fill_t	*mesg = (const H5O_fill_t *)_mesg;
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_debug);
 
     assert(f);
@@ -789,7 +789,7 @@ H5O_fill_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *s
     } else {
 	fprintf(stream, "<dataset type>\n");
     }
-    
+
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
 

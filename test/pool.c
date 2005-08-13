@@ -730,9 +730,9 @@ error:
  *
  * Purpose:	Test the memory pool code
  *
- * Return:	Success:	
+ * Return:	Success:
  *
- *		Failure:	
+ *		Failure:
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, May 3, 2005

@@ -40,7 +40,7 @@ using namespace H5;
  * Function:	test_report
  *
  * Purpose:	Prints out the number of errors for the tests indicated
- * 		by 'testname,' if there were any failures occurred.  If 
+ * 		by 'testname,' if there were any failures occurred.  If
  * 		no failure, test_report prints out the tests passed message.
  *
  * Return:	if any failure has occurred:	1
@@ -67,7 +67,7 @@ int test_report( int nerrors, const string& testname )
 					<< " TESTS FAILED! *****" << endl;
       return 1;
    }
-   else 
+   else
    {
       cerr << "All" << testname << " tests passed." << endl;
       return 0;
@@ -86,7 +86,7 @@ int test_report( int nerrors, const string& testname )
  *
  *-------------------------------------------------------------------------
  */
-void issue_fail_msg(const char* where, int line, const char* file_name, 
+void issue_fail_msg(const char* where, int line, const char* file_name,
 		    const char* message)
 {
     if (GetTestVerbosity()>=VERBO_HI)
@@ -105,11 +105,11 @@ InvalidActionException::InvalidActionException():Exception(){}
 // Function:    InvalidActionException overloaded constructor
 //
 // Purpose:	Creates an InvalidActionException with the name of the function,
-//              which the failure should have occurred but didn't, and a 
+//              which the failure should have occurred but didn't, and a
 //		message explaining why it should fail.
 // Parameters
 //		func_name - IN: Name of the function where failure should occur
-//		message   - IN: Message 
+//		message   - IN: Message
 //--------------------------------------------------------------------------
 InvalidActionException::InvalidActionException(const string func_name, const string message) : Exception(func_name, message) {}
 

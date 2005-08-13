@@ -158,7 +158,7 @@ HDfprintf(stderr,"%s: page_free = %Zu, page->free_size = %Zu\n", "H5MP_pool_is_f
         page = page->next;
     } /* end while */
 
-    /* Check that the free space from the pages 
+    /* Check that the free space from the pages
      * corresponds to free space in pool */
 #ifdef QAK
 HDfprintf(stderr,"%s: pool_free = %Zu, mp->free_size = %Zu\n", "H5MP_pool_is_free_size_correct", pool_free, mp->free_size);

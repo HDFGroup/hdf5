@@ -68,7 +68,7 @@ class H5_DLLCPP DataSpace : public IdComponent {
 	int getSimpleExtentNdims() const;
 
 	// Gets the number of elements in this dataspace.
-	// 12/05/00 - changed return type to hssize_t from hsize_t - C API 
+	// 12/05/00 - changed return type to hssize_t from hsize_t - C API
 	hssize_t getSimpleExtentNpoints() const;
 
 	// Gets the current class of this dataspace.
@@ -83,7 +83,7 @@ class H5_DLLCPP DataSpace : public IdComponent {
 	// Selects the entire dataspace.
 	void selectAll() const;
 
-	// Selects array elements to be included in the selection for 
+	// Selects array elements to be included in the selection for
 	// this dataspace.
 	void selectElements( H5S_seloper_t op, const size_t num_elements, const hsize_t *coord[ ] ) const;
 

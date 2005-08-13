@@ -55,7 +55,7 @@ extern "C" {
  *      version number, or an error will be flagged.
  *
  * rpt_fcn_enabled: Boolean field used to enable and disable the default
- *	reporting function.  This function is invoked every time the 
+ *	reporting function.  This function is invoked every time the
  *	automatic cache resize code is run, and reports on its activities.
  *
  *	This is a debugging function, and should normally be turned off.

@@ -33,17 +33,17 @@ namespace H5 {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:	PredType overloaded constructor
-///\brief	Creates a PredType object using the id of an existing 
+///\brief	Creates a PredType object using the id of an existing
 ///		predefined datatype.
 ///\param	predtype_id - IN: Id of a predefined datatype
 // Description
-// 		This constructor creates a predefined datatype, so it sets 
+// 		This constructor creates a predefined datatype, so it sets
 // 		DataType::is_predtype to true.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 PredType::PredType( const hid_t predtype_id ) : AtomType( predtype_id )
-{ 
-   is_predtype = true; 
+{
+   is_predtype = true;
 }
 
 //--------------------------------------------------------------------------
@@ -64,7 +64,7 @@ PredType::PredType( const PredType& original ) : AtomType( original ) {}
 const PredType PredType::NotAtexit;	// only for atexit/global dest. problem
 
 // Definition of pre-defined types
-// Note: the parameter E_xxxx_yyyy is the enum value that represents 
+// Note: the parameter E_xxxx_yyyy is the enum value that represents
 // the corresponding HDF5 predefined type H5T_xxxx_yyyy.  This enum value
 // is stored in PredType::id since it is a PredType object id, in a way.
 // In addition, this storage makes things safely simpler.  When a PredType
@@ -514,18 +514,18 @@ hid_t PredType::getId() const
 void PredType::commit( H5Object& loc, const char* name )
 {
    throw DataTypeIException("PredType::commit", "Attempting to commit a predefined datatype.  This operation is invalid" );
-}  
+}
 
 void PredType::commit( H5Object& loc, const string& name )
 {
    commit( loc, name.c_str());
-}  
+}
 
 bool PredType::committed()
 {
    throw DataTypeIException("PredType::committed", "Error: Attempting to check for commit status on a predefined datatype." );
    return (0);
-}  
+}
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 // Default destructor

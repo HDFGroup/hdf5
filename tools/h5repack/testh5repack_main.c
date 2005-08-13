@@ -40,7 +40,7 @@ int main (void)
 {
  pack_opt_t  pack_options;
  diff_opt_t  diff_options;
-#if defined (H5_HAVE_FILTER_SZIP) 
+#if defined (H5_HAVE_FILTER_SZIP)
  int szip_can_encode = 0;
 #endif
  memset(&diff_options, 0, sizeof (diff_opt_t));
@@ -54,10 +54,10 @@ int main (void)
   goto error;
 
 /*-------------------------------------------------------------------------
- * Format of the tests: 
+ * Format of the tests:
  *
- * 1) make a copy of the file with h5repack 
- * 2) use the h5diff utility to compare the input and output file; 
+ * 1) make a copy of the file with h5repack
+ * 2) use the h5diff utility to compare the input and output file;
  *     it returns RET==0 if the objects have the same data
  *-------------------------------------------------------------------------
  */
@@ -101,7 +101,7 @@ int main (void)
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
  PASSED();
- 
+
 /*-------------------------------------------------------------------------
  * file with attributes
  *-------------------------------------------------------------------------
@@ -157,7 +157,7 @@ int main (void)
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
-  PASSED();  
+  PASSED();
 
 /*-------------------------------------------------------------------------
  * the remaining files differ in the dcpl's
@@ -191,7 +191,7 @@ int main (void)
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
- PASSED();  
+ PASSED();
 #else
  SKIPPED();
 #endif
@@ -220,7 +220,7 @@ int main (void)
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
 
- PASSED();  
+ PASSED();
 #else
  SKIPPED();
 #endif
@@ -232,7 +232,7 @@ int main (void)
 
  TESTING("    adding szip filter");
 
-#if defined (H5_HAVE_FILTER_SZIP) 
+#if defined (H5_HAVE_FILTER_SZIP)
 if (h5tools_can_encode(H5Z_FILTER_SZIP) == 1) {
    szip_can_encode = 1;
 }
@@ -241,7 +241,7 @@ if (h5tools_can_encode(H5Z_FILTER_SZIP) == 1) {
  * test an individual object option
  *-------------------------------------------------------------------------
  */
- 
+
 if (szip_can_encode) {
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
@@ -273,7 +273,7 @@ if (szip_can_encode) {
  */
 TESTING("    adding szip filter to all");
 
-#if defined (H5_HAVE_FILTER_SZIP) 
+#if defined (H5_HAVE_FILTER_SZIP)
 if (szip_can_encode) {
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
@@ -287,7 +287,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
- 
+
  PASSED();
 } else {
  SKIPPED();
@@ -321,7 +321,7 @@ if (szip_can_encode) {
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
 
- PASSED();  
+ PASSED();
 #else
  SKIPPED();
 #endif
@@ -349,14 +349,14 @@ TESTING("    addding shuffle filter to all");
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
- 
- PASSED();  
+
+ PASSED();
 #else
  SKIPPED();
 #endif
 
 
- 
+
  TESTING("    adding checksum filter");
 
 #ifdef H5_HAVE_FILTER_FLETCHER32
@@ -380,8 +380,8 @@ TESTING("    addding shuffle filter to all");
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
- 
- PASSED();  
+
+ PASSED();
 #else
  SKIPPED();
 #endif
@@ -391,7 +391,7 @@ TESTING("    addding shuffle filter to all");
  *-------------------------------------------------------------------------
  */
 
- 
+
  TESTING("    adding checksum filter to all");
 
 #ifdef H5_HAVE_FILTER_FLETCHER32
@@ -410,13 +410,13 @@ TESTING("    addding shuffle filter to all");
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
- 
- PASSED();  
+
+ PASSED();
 #else
  SKIPPED();
 #endif
 
- 
+
  TESTING("    filter queue fletcher, shuffle, deflate, szip");
 
 /*-------------------------------------------------------------------------
@@ -443,7 +443,7 @@ TESTING("    addding shuffle filter to all");
 if (szip_can_encode) {
  if (h5repack_addfilter("dset1:SZIP=8,NN",&pack_options)<0)
   TEST_ERROR;
-} 
+}
 #endif
 
 #ifdef H5_HAVE_FILTER_DEFLATE
@@ -460,7 +460,7 @@ if (szip_can_encode) {
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
 
- PASSED();  
+ PASSED();
 
 
  TESTING("    adding layout chunked");
@@ -482,7 +482,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
- PASSED(); 
+ PASSED();
 
 /*-------------------------------------------------------------------------
  * test all objects option
@@ -503,7 +503,7 @@ if (szip_can_encode) {
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
 
- PASSED();  
+ PASSED();
 
  TESTING("    adding layout contiguous");
 
@@ -524,7 +524,7 @@ if (szip_can_encode) {
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
 
- PASSED();  
+ PASSED();
 
  TESTING("    adding layout contiguous to all");
 
@@ -544,8 +544,8 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
- 
- PASSED();  
+
+ PASSED();
 
  TESTING("    adding layout compact");
 
@@ -566,7 +566,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
- PASSED();  
+ PASSED();
 
  TESTING("    adding layout compact to all");
 
@@ -587,8 +587,8 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
- 
- PASSED();  
+
+ PASSED();
 
 
  TESTING("    layout compact to contiguous conversion");
@@ -609,8 +609,8 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
-  PASSED(); 
-  
+  PASSED();
+
  TESTING("    layout compact to chunk conversion");
 
 /*-------------------------------------------------------------------------
@@ -632,7 +632,7 @@ if (szip_can_encode) {
   PASSED();
 
   TESTING("    layout compact to compact conversion");
-  
+
 /*-------------------------------------------------------------------------
  * layout compact to compact conversion
  *-------------------------------------------------------------------------
@@ -649,8 +649,8 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
-  PASSED(); 
-  
+  PASSED();
+
  TESTING("    layout contiguous to compact conversion");
 /*-------------------------------------------------------------------------
  * layout contiguous to compact conversion
@@ -668,8 +668,8 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
-  PASSED(); 
-  
+  PASSED();
+
  TESTING("    layout contiguous to chunk conversion");
 /*-------------------------------------------------------------------------
  * layout contiguous to chunk conversion
@@ -687,7 +687,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
-  PASSED();  
+  PASSED();
 
   TESTING("    layout contiguous to contiguous conversion");
 
@@ -707,7 +707,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
-  PASSED(); 
+  PASSED();
 
  TESTING("    layout chunked to compact conversion");
 /*-------------------------------------------------------------------------
@@ -726,7 +726,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
-  PASSED();  
+  PASSED();
 
  TESTING("    layout chunked to contiguous conversion");
 
@@ -746,7 +746,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
-  PASSED();  
+  PASSED();
 
  TESTING("    layout chunked to chunk conversion");
 /*-------------------------------------------------------------------------
@@ -765,9 +765,9 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
-  PASSED();  
+  PASSED();
 
-  
+
 /*-------------------------------------------------------------------------
  * the following tests assume the input files have filters
  * FNAME7     "test_szip.h5"
@@ -778,10 +778,10 @@ if (szip_can_encode) {
  *-------------------------------------------------------------------------
  */
 
-  
+
  TESTING("    copy of szip filter");
- 
-#if defined (H5_HAVE_FILTER_SZIP) 
+
+#if defined (H5_HAVE_FILTER_SZIP)
 if (szip_can_encode) {
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
@@ -804,7 +804,7 @@ if (szip_can_encode) {
 
   TESTING("    removing szip filter");
 
-#if defined (H5_HAVE_FILTER_SZIP) 
+#if defined (H5_HAVE_FILTER_SZIP)
 if (szip_can_encode) {
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
@@ -829,7 +829,7 @@ if (szip_can_encode) {
 
 
   TESTING("    copy of deflate filter");
- 
+
 #ifdef H5_HAVE_FILTER_DEFLATE
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
@@ -864,7 +864,7 @@ if (szip_can_encode) {
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
 
- PASSED();  
+ PASSED();
 #else
  SKIPPED();
 #endif
@@ -872,7 +872,7 @@ if (szip_can_encode) {
 
 
  TESTING("    copy of shuffle filter");
- 
+
 #ifdef H5_HAVE_FILTER_SHUFFLE
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
@@ -889,7 +889,7 @@ if (szip_can_encode) {
 #else
  SKIPPED();
 #endif
- 
+
  TESTING("    removing shuffle filter");
 
 #ifdef H5_HAVE_FILTER_SHUFFLE
@@ -906,13 +906,13 @@ if (szip_can_encode) {
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
 
- PASSED();  
+ PASSED();
 #else
  SKIPPED();
 #endif
 
  TESTING("    copy of fletcher filter");
- 
+
 #ifdef H5_HAVE_FILTER_FLETCHER32
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
@@ -946,14 +946,14 @@ if (szip_can_encode) {
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
 
- PASSED();  
+ PASSED();
 #else
  SKIPPED();
 #endif
 
- 
+
  TESTING("    copy of nbit filter");
- 
+
 #ifdef H5_HAVE_FILTER_NBIT
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
@@ -987,7 +987,7 @@ if (szip_can_encode) {
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
 
- PASSED();  
+ PASSED();
 #else
  SKIPPED();
 #endif
@@ -1008,12 +1008,12 @@ if (szip_can_encode) {
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
 
- PASSED();  
+ PASSED();
 #else
  SKIPPED();
 #endif
  TESTING("    copy of scaleoffset filter");
- 
+
 #ifdef H5_HAVE_FILTER_SCALEOFFSET
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
@@ -1047,7 +1047,7 @@ if (szip_can_encode) {
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
 
- PASSED();  
+ PASSED();
 #else
  SKIPPED();
 #endif
@@ -1068,13 +1068,13 @@ if (szip_can_encode) {
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
 
- PASSED();  
+ PASSED();
 #else
  SKIPPED();
 #endif
 
 /*-------------------------------------------------------------------------
- * file with all filters 
+ * file with all filters
  *  dset_all
  *  dset_deflate
  *  dset_szip
@@ -1082,7 +1082,7 @@ if (szip_can_encode) {
  *  dset_fletcher32
  *-------------------------------------------------------------------------
  */
- 
+
 
  TESTING("    filter conversion from deflate to szip");
 
@@ -1140,7 +1140,7 @@ if (szip_can_encode) {
  SKIPPED();
 #endif
 
-  
+
 /*-------------------------------------------------------------------------
  * test the NONE global option
  *-------------------------------------------------------------------------
@@ -1168,17 +1168,17 @@ if (szip_can_encode) {
 #else
  SKIPPED();
 #endif
- 
-  
+
+
 /*-------------------------------------------------------------------------
  * end
  *-------------------------------------------------------------------------
  */
 
  puts("All h5repack tests passed.");
- 
+
  return 0;
- 
+
 error:
  puts("***** H5REPACK TESTS FAILED *****");
  return 1;

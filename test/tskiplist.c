@@ -58,9 +58,9 @@ static int tst_rev_sort(const void *i1, const void *i2)
 **
 **  test_skiplist_init(): Test H5SL (skiplist) code.
 **      Initialize data for skip list testing
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_skiplist_init(void)
 {
     time_t curr_time;   /* Current time, for seeding random number generator */
@@ -108,9 +108,9 @@ test_skiplist_init(void)
 **
 **  test_skiplist_create(): Test basic H5SL (skiplist) code.
 **      Tests creating and closing skip lists.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_skiplist_create(void)
 {
     H5SL_t *slist;      /* Skip list created */
@@ -133,9 +133,9 @@ test_skiplist_create(void)
 **
 **  test_skiplist_insert(): Test H5SL (skip list) code.
 **      Tests inserting single object into skip list.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_skiplist_insert(void)
 {
     H5SL_t *slist;      /* Skip list created */
@@ -196,9 +196,9 @@ test_skiplist_insert(void)
 **
 **  test_skiplist_insert_many(): Test H5SL (skip list) code.
 **      Tests inserting many objects into skip list.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_skiplist_insert_many(void)
 {
     H5SL_t *slist;      /* Skip list created */
@@ -267,9 +267,9 @@ test_skiplist_insert_many(void)
 **
 **  test_skiplist_remove(): Test H5SL (skip list) code.
 **      Tests basic object removal from skip list.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_skiplist_remove(void)
 {
     H5SL_t *slist;      /* Skip list created */
@@ -298,15 +298,15 @@ test_skiplist_remove(void)
     VERIFY(found_item, NULL, "H5SL_remove");
 
     /* Insert three objects into the skip list */
-    key1=15; 
+    key1=15;
     ret=H5SL_insert(slist,&key1,&key1);
     CHECK(ret, FAIL, "H5SL_insert");
 
-    key2=10; 
+    key2=10;
     ret=H5SL_insert(slist,&key2,&key2);
     CHECK(ret, FAIL, "H5SL_insert");
 
-    key3=20; 
+    key3=20;
     ret=H5SL_insert(slist,&key3,&key3);
     CHECK(ret, FAIL, "H5SL_insert");
 
@@ -349,9 +349,9 @@ test_skiplist_remove(void)
 **
 **  test_skiplist_remove_many(): Test H5SL (skip list) code.
 **      Tests removing many objects from skip list.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_skiplist_remove_many(void)
 {
     H5SL_t *slist;      /* Skip list created */
@@ -448,9 +448,9 @@ test_skiplist_remove_many(void)
 **
 **  test_skiplist_firstnext(): Test H5SL (skip list) code.
 **      Tests iterating over nodes in skip list with first/next calls.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_skiplist_firstnext(void)
 {
     H5SL_t *slist;      /* Skip list created */
@@ -514,9 +514,9 @@ test_skiplist_firstnext(void)
 **
 **  test_skiplist_string(): Test H5SL (skip list) code.
 **      Tests using strings for keys in skip lists.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_skiplist_string(void)
 {
     H5SL_t *slist;      /* Skip list created */
@@ -604,9 +604,9 @@ test_skiplist_iter(void *item, void UNUSED *key, void *op_data)
 **
 **  test_skiplist_iterate(): Test H5SL (skip list) code.
 **      Tests iterating over nodes in skip list with callbacks.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_skiplist_iterate(void)
 {
     H5SL_t *slist;      /* Skip list created */
@@ -650,9 +650,9 @@ test_skiplist_iterate(void)
 **
 **  test_skiplist_hsize(): Test H5SL (skip list) code.
 **      Tests using hsize_t for keys in skip lists.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_skiplist_hsize(void)
 {
     H5SL_t *slist;      /* Skip list created */
@@ -705,9 +705,9 @@ test_skiplist_hsize(void)
 **
 **  test_skiplist_unsigned(): Test H5SL (skip list) code.
 **      Tests using unsigned for keys in skip lists.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_skiplist_unsigned(void)
 {
     H5SL_t *slist;      /* Skip list created */
@@ -760,9 +760,9 @@ test_skiplist_unsigned(void)
 **
 **  test_skiplist_lastprev(): Test H5SL (skip list) code.
 **      Tests iterating over nodes in skip list with last/prev calls.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_skiplist_lastprev(void)
 {
     H5SL_t *slist;      /* Skip list created */
@@ -826,9 +826,9 @@ test_skiplist_lastprev(void)
 **
 **  test_skiplist_find(): Test H5SL (skip list) code.
 **      Tests 'find' operation in skip lists.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_skiplist_find(void)
 {
     H5SL_t *slist;      /* Skip list created */
@@ -882,9 +882,9 @@ test_skiplist_find(void)
 **
 **  test_skiplist_add(): Test H5SL (skip list) code.
 **      Tests 'add' operation in skip lists.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_skiplist_add(void)
 {
     H5SL_t *slist;      /* Skip list created */
@@ -948,9 +948,9 @@ test_skiplist_destroy_free(void *item, void UNUSED *key, void *op_data)
 **
 **  test_skiplist_destroy(): Test H5SL (skip list) code.
 **      Tests 'destroy' operation in skip lists.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_skiplist_destroy(void)
 {
     H5SL_t *slist;      /* Skip list created */
@@ -983,9 +983,9 @@ test_skiplist_destroy(void)
 **
 **  test_skiplist_free(): Test H5SL (skip list) code.
 **      Tests 'free' operation in skip lists.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_skiplist_free(void)
 {
     H5SL_t *slist;      /* Skip list created */
@@ -1037,9 +1037,9 @@ test_skiplist_free(void)
 **
 **  test_skiplist_less(): Test H5SL (skip list) code.
 **      Tests 'less' operation in skip lists.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_skiplist_less(void)
 {
     H5SL_t *slist;      /* Skip list created */
@@ -1100,7 +1100,7 @@ test_skiplist_less(void)
 /****************************************************************
 **
 **  test_skiplist(): Main H5SL testing routine.
-** 
+**
 ****************************************************************/
 void
 test_skiplist(void)

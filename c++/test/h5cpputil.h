@@ -62,8 +62,8 @@ template <class Type1, class Type2>
 {
     if (x != value)
     {
-        cerr << "*** UNEXPECTED VALUE: " << file_name << ":line " << line 
-	     << ":" << msg << " different: " << x << ", should be " << value 
+        cerr << "*** UNEXPECTED VALUE: " << file_name << ":line " << line
+	     << ":" << msg << " different: " << x << ", should be " << value
 	     << endl;
 	IncTestNumErrs();
     }

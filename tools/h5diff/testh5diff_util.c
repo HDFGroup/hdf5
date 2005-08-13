@@ -27,16 +27,16 @@
  *-------------------------------------------------------------------------
  */
 
- 
-int write_attr(hid_t loc_id, 
-               int rank, 
-               hsize_t *dims, 
+
+int write_attr(hid_t loc_id,
+               int rank,
+               hsize_t *dims,
                const char *attr_name,
-               hid_t type_id, 
+               hid_t type_id,
                void *buf)
 {
  hid_t   attr_id;
- hid_t   space_id;  
+ hid_t   space_id;
  herr_t  status;
 
  /* Create a buf space  */
@@ -44,7 +44,7 @@ int write_attr(hid_t loc_id,
 
  /* Create the attribute */
  attr_id = H5Acreate(loc_id,attr_name,type_id,space_id,H5P_DEFAULT);
-  
+
  /* Write the buf */
  if ( buf )
   status = H5Awrite(attr_id,type_id,buf);
@@ -68,15 +68,15 @@ int write_attr(hid_t loc_id,
  */
 
 
-int write_dset( hid_t loc_id, 
-                int rank, 
-                hsize_t *dims, 
+int write_dset( hid_t loc_id,
+                int rank,
+                hsize_t *dims,
                 const char *dset_name,
-                hid_t type_id, 
+                hid_t type_id,
                 void *buf )
 {
  hid_t   dset_id;
- hid_t   space_id;  
+ hid_t   space_id;
  herr_t  status;
 
  /* Create a buf space  */
@@ -84,7 +84,7 @@ int write_dset( hid_t loc_id,
 
  /* Create a dataset */
  dset_id = H5Dcreate(loc_id,dset_name,type_id,space_id,H5P_DEFAULT);
-  
+
  /* Write the buf */
  if ( buf )
   status = H5Dwrite(dset_id,type_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf);

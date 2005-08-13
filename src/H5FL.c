@@ -118,7 +118,7 @@ NAME
    H5FL_init_interface -- Initialize interface-specific information
 USAGE
     herr_t H5FL_init_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -151,7 +151,7 @@ H5FL_init_interface(void)
  *              Tuesday, August 1, 2000
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -190,7 +190,7 @@ done:
  *              Friday, March 24, 2000
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -236,7 +236,7 @@ done:
  *              Friday, March 24, 2000
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 void *
@@ -302,7 +302,7 @@ done:
  *              Friday, March 24, 2000
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 void *
@@ -362,7 +362,7 @@ done:
  *              Monday, December 23, 2002
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 void *
@@ -399,7 +399,7 @@ done:
  *              Tuesday, July 25, 2000
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -408,7 +408,7 @@ H5FL_reg_gc_list(H5FL_reg_head_t *head)
     H5FL_reg_node_t *free_list; /* Pointer to nodes in free list being garbage collected */
     void *tmp;          /* Temporary node pointer */
     size_t total_mem;   /* Total memory used on list */
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FL_reg_gc_list)
 
     /* Calculate the total memory used on this list */
@@ -458,7 +458,7 @@ H5FL_reg_gc_list(H5FL_reg_head_t *head)
  * Modifications:
  *  Broke into two parts, one for looping over all the free lists and
  *      another for freeing each list - QAK 7/25/00
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -466,7 +466,7 @@ H5FL_reg_gc(void)
 {
     H5FL_reg_gc_node_t *gc_node;    /* Pointer into the list of things to garbage collect */
     herr_t ret_value=SUCCEED;   /* return value*/
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5FL_reg_gc)
 
     /* Walk through all the free lists, free()'ing the nodes */
@@ -618,7 +618,7 @@ H5FL_blk_find_list(H5FL_blk_node_t **head, size_t size)
             temp=temp->next;
         } /* end while */
     } /* end if */
-    
+
     FUNC_LEAVE_NOAPI(temp)
 } /* end H5FL_blk_find_list() */
 
@@ -651,7 +651,7 @@ H5FL_blk_create_list(H5FL_blk_node_t **head, size_t size)
     /* Allocate room for the new free list node */
     if(NULL==(temp=H5FL_MALLOC(H5FL_blk_node_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for chunk info")
-    
+
     /* Set the correct values for the new free list */
     temp->size=size;
     temp->list=NULL;
@@ -688,7 +688,7 @@ done:
  *              Saturday, March 25, 2000
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -814,7 +814,7 @@ H5FL_blk_malloc(H5FL_blk_head_t *head, size_t size)
 
     } /* end if */
     /* No free list available, or there are no nodes on the list, allocate a new node to give to the user */
-    else { 
+    else {
         /* Allocate new node, with room for the page info header and the actual page data */
         if(NULL==(temp=H5FL_malloc(sizeof(H5FL_blk_list_t)+size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for chunk")
@@ -1034,7 +1034,7 @@ H5FL_blk_unlink(H5FL_blk_head_t *pq)
     herr_t ret_value=SUCCEED;	/* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5FL_blk_unlink)
-    
+
     /* Find the node to remove from the global list */
     last=NULL;
     tmp=H5FL_blk_gc_head.first;
@@ -1079,7 +1079,7 @@ done:
  *              Thursday, March 23, 2000
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1088,7 +1088,7 @@ H5FL_blk_gc_list(H5FL_blk_head_t *head)
     H5FL_blk_list_t *list; /* The free list of native nodes of a particular size */
     void *next;     /* Temp. ptr to the free list list node */
     void *temp;     /* Temp. ptr to the free list page node */
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FL_blk_gc_list)
 
     /* Loop through all the nodes in the block free list queue */
@@ -1143,7 +1143,7 @@ H5FL_blk_gc_list(H5FL_blk_head_t *head)
  *              Saturday, March 25, 2000
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1151,7 +1151,7 @@ H5FL_blk_gc(void)
 {
     H5FL_blk_gc_node_t *gc_node;    /* Pointer into the list of things to garbage collect */
     herr_t ret_value=SUCCEED;   /* return value*/
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5FL_blk_gc)
 
     /* Walk through all the free lists, free()'ing the nodes */
@@ -1199,7 +1199,7 @@ H5FL_blk_term(void)
     H5FL_blk_gc_node_t *tmp;    /* Temporary pointer to a garbage collection node */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FL_blk_term)
-    
+
     /* Free the nodes on the garbage collection list, keeping nodes with allocations outstanding */
     left=NULL;
     while(H5FL_blk_gc_head.first!=NULL) {
@@ -1229,7 +1229,7 @@ printf("H5FL_blk_term: head->name=%s, head->allocated=%d\n", H5FL_blk_gc_head.fi
 
     /* Point to the list of nodes left with allocations open, if any */
     H5FL_blk_gc_head.first=left;
-    
+
     FUNC_LEAVE_NOAPI(H5FL_blk_gc_head.first!=NULL ? 1 : 0)
 }   /* end H5FL_blk_term() */
 
@@ -1247,7 +1247,7 @@ printf("H5FL_blk_term: head->name=%s, head->allocated=%d\n", H5FL_blk_gc_head.fi
  *              Saturday, March 25, 2000
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1277,7 +1277,7 @@ H5FL_arr_init(H5FL_arr_head_t *head)
     /* Initialize the size of each array */
     for(u = 0; u<(size_t)head->maxelem; u++)
         head->list_arr[u].size = head->base_size + (head->elem_size * u);
-    
+
     /* Indicate that the free list is initialized */
     head->init=1;
 
@@ -1298,7 +1298,7 @@ done:
  *              Friday, March 24, 2000
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1374,7 +1374,7 @@ done:
  *              Saturday, March 25, 2000
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1449,7 +1449,7 @@ done:
  *              Monday, December 23, 2002
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1487,7 +1487,7 @@ done:
  *              Saturday, March 25, 2000
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1548,7 +1548,7 @@ done:
  *              Tuesday, July 25, 2000
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1558,7 +1558,7 @@ H5FL_arr_gc_list(H5FL_arr_head_t *head)
     void *tmp;      /* Temporary node pointer */
     unsigned u;     /* Counter for array of free lists */
     size_t total_mem;   /* Total memory used on list */
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FL_arr_gc_list)
 
     /* Walk through the array of free lists */
@@ -1610,7 +1610,7 @@ H5FL_arr_gc_list(H5FL_arr_head_t *head)
  *              Saturday, March 25, 2000
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1618,7 +1618,7 @@ H5FL_arr_gc(void)
 {
     H5FL_gc_arr_node_t *gc_arr_node;    /* Pointer into the list of things to garbage collect */
     herr_t ret_value=SUCCEED;   /* return value*/
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5FL_arr_gc)
 
     /* Walk through all the free lists, free()'ing the nodes */
@@ -1664,7 +1664,7 @@ H5FL_arr_term(void)
 {
     H5FL_gc_arr_node_t *left;   /* pointer to garbage collection lists with work left */
     H5FL_gc_arr_node_t *tmp;    /* Temporary pointer to a garbage collection node */
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FL_arr_term)
 
     /* Free the nodes on the garbage collection list, keeping nodes with allocations outstanding */
@@ -1698,7 +1698,7 @@ printf("H5FL_arr_term: head->name=%s, head->allocated=%d\n", H5FL_arr_gc_head.fi
 
     /* Point to the list of nodes left with allocations open, if any */
     H5FL_arr_gc_head.first=left;
-    
+
     FUNC_LEAVE_NOAPI(H5FL_arr_gc_head.first!=NULL ? 1 : 0)
 }   /* end H5FL_arr_term() */
 
@@ -1715,7 +1715,7 @@ printf("H5FL_arr_term: head->name=%s, head->allocated=%d\n", H5FL_arr_gc_head.fi
  *              Saturday, April 3, 2004
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1749,7 +1749,7 @@ H5FL_seq_free(H5FL_seq_head_t *head, void *obj)
  *              Saturday, April 3, 2004
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1783,7 +1783,7 @@ done:
  *              Saturday, April 3, 2004
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1817,7 +1817,7 @@ done:
  *              Saturday, April 3, 2004
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1851,7 +1851,7 @@ done:
  *              Wednesday, February 2, 2005
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 H5FL_fac_head_t *
@@ -1868,7 +1868,7 @@ H5FL_fac_init(size_t size)
     /* Allocate room for the new factory */
     if(NULL==(factory=H5FL_MALLOC(H5FL_fac_head_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for factory object")
-    
+
     /* Initialize block header information */
     HDmemset(&(factory->queue),0,sizeof(H5FL_blk_head_t));
 
@@ -1895,7 +1895,7 @@ done:
  *              Wednesday, February 2, 2005
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1929,7 +1929,7 @@ H5FL_fac_free(H5FL_fac_head_t *head, void *obj)
  *              Wednesday, February 2, 2005
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1962,7 +1962,7 @@ done:
  *              Wednesday, February 2, 2005
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1995,7 +1995,7 @@ done:
  *              Wednesday, February 2, 2005
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2039,7 +2039,7 @@ done:
  *              Friday, March 24, 2000
  *
  * Modifications:
- * 	
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2095,7 +2095,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
+herr_t
 H5FL_set_free_list_limits(int reg_global_lim, int reg_list_lim, int arr_global_lim,
     int arr_list_lim, int blk_global_lim, int blk_list_lim)
 {
@@ -2145,7 +2145,7 @@ int
 H5FL_term_interface(void)
 {
     int ret_value=0;
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FL_term_interface)
 
     /* Garbage collect any nodes on the free lists */

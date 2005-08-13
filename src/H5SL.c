@@ -1231,7 +1231,7 @@ H5SL_item(H5SL_node_t *slist_node)
     The operator callback receives a pointer to the item and key for the list
     being iterated over ('mesg'), and the pointer to the operator data passed
     in to H5SL_iterate ('op_data').  The return values from an operator are:
-        A. Zero causes the iterator to continue, returning zero when all 
+        A. Zero causes the iterator to continue, returning zero when all
             nodes of that type have been processed.
         B. Positive causes the iterator to immediately return that positive
             value, indicating short-circuit success.

@@ -229,7 +229,7 @@ done:
 	if (bpt)
             (void)H5BP_cache_hdr_dest(f,bpt);
     } /* end if */
-    
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5BP_create() */
 
@@ -443,7 +443,7 @@ HDfprintf(stderr,"%s: attempting to split root node\n",FUNC);
 HGOTO_ERROR(H5E_BTREE, H5E_UNSUPPORTED, FAIL, "Can't split root yet!")
 #endif /* LATER */
     } /* end if */
-        
+
     /* Attempt to insert record into B+ tree */
     if(bpt->depth>0) {
 #ifdef LATER

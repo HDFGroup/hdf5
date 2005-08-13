@@ -46,7 +46,7 @@ static void H5TS_mutex_init(H5TS_mutex_t *mutex);
  *
  * USAGE
  *    H5TS_key_destructor()
- * 
+ *
  * RETURNS
  *
  * DESCRIPTION
@@ -75,7 +75,7 @@ H5TS_key_destructor(void *key_val)
  *
  * USAGE
  *    H5TS_first_thread_init()
- * 
+ *
  * RETURNS
  *
  * DESCRIPTION
@@ -119,7 +119,7 @@ H5TS_first_thread_init(void)
  *
  * USAGE
  *    H5TS_mutex_lock(&mutex_var)
- * 
+ *
  * RETURNS
  *    0 on success and non-zero on error.
  *
@@ -156,7 +156,7 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
 	mutex->owner_thread = H5MM_malloc(sizeof(pthread_t));
 
 	if (!mutex->owner_thread) {
-	    H5E_push_stack(NULL, "H5TS_mutex_lock", __FILE__, __LINE__, 
+	    H5E_push_stack(NULL, "H5TS_mutex_lock", __FILE__, __LINE__,
                     H5E_ERR_CLS_g, H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed");
 	    return FAIL;
 	}
@@ -193,7 +193,7 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
  *
  * USAGE
  *    H5TS_mutex_unlock(&mutex_var)
- * 
+ *
  * RETURNS
  *    0 on success and non-zero on error.
  *
@@ -245,7 +245,7 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
  *
  * USAGE
  *    H5TS_cancel_count_inc()
- * 
+ *
  * RETURNS
  *    0 on success non-zero error code on error.
  *
@@ -309,7 +309,7 @@ H5TS_cancel_count_inc(void)
  *
  * USAGE
  *    H5TS_cancel_count_dec()
- *   
+ *
  * RETURNS
  *    0 on success and a non-zero error code on error.
  *

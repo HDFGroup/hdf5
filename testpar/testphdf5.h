@@ -60,94 +60,94 @@
 
 /*Constants for MPI derived data type generated from span tree */
 
-#define MSPACE1_RANK     1          /* Rank of the first dataset in memory */                            
-#define MSPACE1_DIM      27000      /* Dataset size in memory */                                                                                                                                                  
-#define FSPACE_RANK      2        /* Dataset rank as it is stored in the file */                       
-#define FSPACE_DIM1      9       /* Dimension sizes of the dataset as it is                                                                  stored in the file */                                             
-#define FSPACE_DIM2      3600                                                                                         /* We will read dataset back from the file                                         to the dataset in memory with these                                                                      dataspace parameters. */                                          
-#define MSPACE_RANK      2                                                    
-#define MSPACE_DIM1      9                                
-#define MSPACE_DIM2      3600                                                                                                         
-#define FHCOUNT0           1         /* Count of the first dimension of the first hyperslab selection*/										    
-#define FHCOUNT1           768       /* Count of the second dimension of the first hyperslab selection*/		
-#define FHSTRIDE0          4        /* Stride of the first dimension of the first hyperslab selection*/		
-#define FHSTRIDE1          3        /* Stride of the second dimension of the first hyperslab selection*/		
-#define FHBLOCK0           3        /* Block of the first dimension of the first hyperslab selection*/		
-#define FHBLOCK1           2        /* Block of the second dimension of the first hyperslab selection*/		
-#define FHSTART0           0        /* start of the first dimension of the first hyperslab selection*/	
-#define FHSTART1           1        /* start of the second dimension of the first hyperslab selection*/	
+#define MSPACE1_RANK     1          /* Rank of the first dataset in memory */
+#define MSPACE1_DIM      27000      /* Dataset size in memory */
+#define FSPACE_RANK      2        /* Dataset rank as it is stored in the file */
+#define FSPACE_DIM1      9       /* Dimension sizes of the dataset as it is                                                                  stored in the file */
+#define FSPACE_DIM2      3600                                                                                         /* We will read dataset back from the file                                         to the dataset in memory with these                                                                      dataspace parameters. */
+#define MSPACE_RANK      2
+#define MSPACE_DIM1      9
+#define MSPACE_DIM2      3600
+#define FHCOUNT0           1         /* Count of the first dimension of the first hyperslab selection*/
+#define FHCOUNT1           768       /* Count of the second dimension of the first hyperslab selection*/
+#define FHSTRIDE0          4        /* Stride of the first dimension of the first hyperslab selection*/
+#define FHSTRIDE1          3        /* Stride of the second dimension of the first hyperslab selection*/
+#define FHBLOCK0           3        /* Block of the first dimension of the first hyperslab selection*/
+#define FHBLOCK1           2        /* Block of the second dimension of the first hyperslab selection*/
+#define FHSTART0           0        /* start of the first dimension of the first hyperslab selection*/
+#define FHSTART1           1        /* start of the second dimension of the first hyperslab selection*/
 
-#define SHCOUNT0           1         /* Count of the first dimension of the first hyperslab selection*/																       
-#define SHCOUNT1           1       /* Count of the second dimension of the first hyperslab selection*/		
-#define SHSTRIDE0          1        /* Stride of the first dimension of the first hyperslab selection*/		
-#define SHSTRIDE1          1        /* Stride of the second dimension of the first hyperslab selection*/		
-#define SHBLOCK0           3        /* Block of the first dimension of the first hyperslab selection*/		
-#define SHBLOCK1           768        /* Block of the second dimension of the first hyperslab selection*/	
-#define SHSTART0           4        /* start of the first dimension of the first hyperslab selection*/	
-#define SHSTART1           0        /* start of the second dimension of the first hyperslab selection*/	
+#define SHCOUNT0           1         /* Count of the first dimension of the first hyperslab selection*/
+#define SHCOUNT1           1       /* Count of the second dimension of the first hyperslab selection*/
+#define SHSTRIDE0          1        /* Stride of the first dimension of the first hyperslab selection*/
+#define SHSTRIDE1          1        /* Stride of the second dimension of the first hyperslab selection*/
+#define SHBLOCK0           3        /* Block of the first dimension of the first hyperslab selection*/
+#define SHBLOCK1           768        /* Block of the second dimension of the first hyperslab selection*/
+#define SHSTART0           4        /* start of the first dimension of the first hyperslab selection*/
+#define SHSTART1           0        /* start of the second dimension of the first hyperslab selection*/
 
-#define MHCOUNT0           6912         /* Count of the first dimension of the first hyperslab selection*/																	    
-#define MHSTRIDE0          1        /* Stride of the first dimension of the first hyperslab selection*/		
-#define MHBLOCK0           1        /* Block of the first dimension of the first hyperslab selection*/		
-#define MHSTART0           1        /* start of the first dimension of the first hyperslab selection*/	
-
-
-
-#define RFFHCOUNT0           3       /* Count of the first dimension of the first hyperslab selection*/																	
-#define RFFHCOUNT1           768       /* Count of the second dimension of the first hyperslab selection*/		
-#define RFFHSTRIDE0          1        /* Stride of the first dimension of the first hyperslab selection*/		
-#define RFFHSTRIDE1          1        /* Stride of the second dimension of the first hyperslab selection*/		
-#define RFFHBLOCK0           1        /* Block of the first dimension of the first hyperslab selection*/		
-#define RFFHBLOCK1           1        /* Block of the second dimension of the first hyperslab selection*/	
-#define RFFHSTART0           1        /* start of the first dimension of the first hyperslab selection*/	
-#define RFFHSTART1           2        /* start of the second dimension of the first hyperslab selection*/	
+#define MHCOUNT0           6912         /* Count of the first dimension of the first hyperslab selection*/
+#define MHSTRIDE0          1        /* Stride of the first dimension of the first hyperslab selection*/
+#define MHBLOCK0           1        /* Block of the first dimension of the first hyperslab selection*/
+#define MHSTART0           1        /* start of the first dimension of the first hyperslab selection*/
 
 
-#define RFSHCOUNT0           3       /* Count of the first dimension of the first hyperslab selection*/																	
-#define RFSHCOUNT1           1536    /* Count of the second dimension of the first hyperslab selection*/		
-#define RFSHSTRIDE0          1        /* Stride of the first dimension of the first hyperslab selection*/		
-#define RFSHSTRIDE1          1        /* Stride of the second dimension of the first hyperslab selection*/		
-#define RFSHBLOCK0           1        /* Block of the first dimension of the first hyperslab selection*/		
-#define RFSHBLOCK1           1        /* Block of the second dimension of the first hyperslab selection*/	
-#define RFSHSTART0           2        /* start of the first dimension of the first hyperslab selection*/	
-#define RFSHSTART1           4        /* start of the second dimension of the first hyperslab selection*/                                                      
+
+#define RFFHCOUNT0           3       /* Count of the first dimension of the first hyperslab selection*/
+#define RFFHCOUNT1           768       /* Count of the second dimension of the first hyperslab selection*/
+#define RFFHSTRIDE0          1        /* Stride of the first dimension of the first hyperslab selection*/
+#define RFFHSTRIDE1          1        /* Stride of the second dimension of the first hyperslab selection*/
+#define RFFHBLOCK0           1        /* Block of the first dimension of the first hyperslab selection*/
+#define RFFHBLOCK1           1        /* Block of the second dimension of the first hyperslab selection*/
+#define RFFHSTART0           1        /* start of the first dimension of the first hyperslab selection*/
+#define RFFHSTART1           2        /* start of the second dimension of the first hyperslab selection*/
 
 
-#define RMFHCOUNT0           3       /* Count of the first dimension of the first hyperslab selection*/																	
-#define RMFHCOUNT1           768       /* Count of the second dimension of the first hyperslab selection*/		
-#define RMFHSTRIDE0          1        /* Stride of the first dimension of the first hyperslab selection*/		
-#define RMFHSTRIDE1          1        /* Stride of the second dimension of the first hyperslab selection*/		
-#define RMFHBLOCK0           1        /* Block of the first dimension of the first hyperslab selection*/		
-#define RMFHBLOCK1           1        /* Block of the second dimension of the first hyperslab selection*/	
-#define RMFHSTART0           0        /* start of the first dimension of the first hyperslab selection*/	
-#define RMFHSTART1           0        /* start of the second dimension of the first hyperslab selection*/	
-
-#define RMSHCOUNT0           3       /* Count of the first dimension of the first hyperslab selection*/																	
-#define RMSHCOUNT1           1536    /* Count of the second dimension of the first hyperslab selection*/		
-#define RMSHSTRIDE0          1        /* Stride of the first dimension of the first hyperslab selection*/		
-#define RMSHSTRIDE1          1        /* Stride of the second dimension of the first hyperslab selection*/		
-#define RMSHBLOCK0           1        /* Block of the first dimension of the first hyperslab selection*/		
-#define RMSHBLOCK1           1        /* Block of the second dimension of the first hyperslab selection*/	
-#define RMSHSTART0           1        /* start of the first dimension of the first hyperslab selection*/	
-#define RMSHSTART1           2        /* start of the second dimension of the first hyperslab selection*/   
+#define RFSHCOUNT0           3       /* Count of the first dimension of the first hyperslab selection*/
+#define RFSHCOUNT1           1536    /* Count of the second dimension of the first hyperslab selection*/
+#define RFSHSTRIDE0          1        /* Stride of the first dimension of the first hyperslab selection*/
+#define RFSHSTRIDE1          1        /* Stride of the second dimension of the first hyperslab selection*/
+#define RFSHBLOCK0           1        /* Block of the first dimension of the first hyperslab selection*/
+#define RFSHBLOCK1           1        /* Block of the second dimension of the first hyperslab selection*/
+#define RFSHSTART0           2        /* start of the first dimension of the first hyperslab selection*/
+#define RFSHSTART1           4        /* start of the second dimension of the first hyperslab selection*/
 
 
-#define NPOINTS          4          /* Number of points that will be selected  
-                                                                and overwritten */  
+#define RMFHCOUNT0           3       /* Count of the first dimension of the first hyperslab selection*/
+#define RMFHCOUNT1           768       /* Count of the second dimension of the first hyperslab selection*/
+#define RMFHSTRIDE0          1        /* Stride of the first dimension of the first hyperslab selection*/
+#define RMFHSTRIDE1          1        /* Stride of the second dimension of the first hyperslab selection*/
+#define RMFHBLOCK0           1        /* Block of the first dimension of the first hyperslab selection*/
+#define RMFHBLOCK1           1        /* Block of the second dimension of the first hyperslab selection*/
+#define RMFHSTART0           0        /* start of the first dimension of the first hyperslab selection*/
+#define RMFHSTART1           0        /* start of the second dimension of the first hyperslab selection*/
+
+#define RMSHCOUNT0           3       /* Count of the first dimension of the first hyperslab selection*/
+#define RMSHCOUNT1           1536    /* Count of the second dimension of the first hyperslab selection*/
+#define RMSHSTRIDE0          1        /* Stride of the first dimension of the first hyperslab selection*/
+#define RMSHSTRIDE1          1        /* Stride of the second dimension of the first hyperslab selection*/
+#define RMSHBLOCK0           1        /* Block of the first dimension of the first hyperslab selection*/
+#define RMSHBLOCK1           1        /* Block of the second dimension of the first hyperslab selection*/
+#define RMSHSTART0           1        /* start of the first dimension of the first hyperslab selection*/
+#define RMSHSTART1           2        /* start of the second dimension of the first hyperslab selection*/
+
+
+#define NPOINTS          4          /* Number of points that will be selected
+                                                                and overwritten */
 
 /* Don't erase these lines, they are put here for debugging purposes */
 /*
-#define MSPACE1_RANK     1                                     
-#define MSPACE1_DIM      50                                                                                                                                                       
-#define MSPACE2_RANK     1                                    
-#define MSPACE2_DIM      4                                                                                                                                                         
-#define FSPACE_RANK      2                            
-#define FSPACE_DIM1      8                                              
-#define FSPACE_DIM2      12                                                                                                                                                                                                                                                              
-#define MSPACE_RANK      2                                                                               
-#define MSPACE_DIM1      8                                                                               
-#define MSPACE_DIM2      9                                                                                                                                                                                        
-#define NPOINTS          4              
+#define MSPACE1_RANK     1
+#define MSPACE1_DIM      50
+#define MSPACE2_RANK     1
+#define MSPACE2_DIM      4
+#define FSPACE_RANK      2
+#define FSPACE_DIM1      8
+#define FSPACE_DIM2      12
+#define MSPACE_RANK      2
+#define MSPACE_DIM1      8
+#define MSPACE_DIM2      9
+#define NPOINTS          4
 
 
 */ /* end of debugging macro */

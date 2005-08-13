@@ -53,7 +53,7 @@
  *
  * 		Raymond Lu, Oct 14, 2001
  * 		Change to the new generic property list.
- *	
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -104,7 +104,7 @@ done:
  *
  *		Raymond Lu, Oct 14, 2001
  * 		Changed to the new generic property list.
- *	
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -157,7 +157,7 @@ done:
  *
  *		Raymond Lu, Oct 14, 2001
  *		Changed to the new generic property list.
- *	
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -308,7 +308,7 @@ done:
  * Modifications:
  *
  *		Raymond Lu, Oct 14, 2001
- *         	Changed to the new generic property list. 
+ *         	Changed to the new generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -325,7 +325,7 @@ H5Pset_sym_k(hid_t plist_id, unsigned ik, unsigned lk)
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-   
+
     /* Set values */
     if (ik > 0) {
         if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
@@ -360,7 +360,7 @@ done:
  *
  *		Raymond Lu
  *		Changed to the new generic property list.
- *	
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -408,7 +408,7 @@ done:
  *
  *		Raymond Lu, Oct 14, 2001
  *		Changed to the new generic property list.
- *	
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -459,7 +459,7 @@ done:
  *
  *		Raymond Lu, Oct 14, 2001
  *		Changed to the new generic property list.
- *	
+ *
  *-------------------------------------------------------------------------
  */
 herr_t

@@ -327,7 +327,7 @@ H5FP_request_read_metadata(H5FD_t *file, unsigned file_id, hid_t dxpl_id,
         HDmemset(&mpi_status, 0, sizeof(mpi_status));
 
         /* the following code is a bit odd and doubtless needs a bit
-         * of explanation.  I certainly stumbled over it the first 
+         * of explanation.  I certainly stumbled over it the first
          * time I read it.
          *
          * For reasons unknown, read requests sent to the SAP only
@@ -345,7 +345,7 @@ H5FP_request_read_metadata(H5FD_t *file, unsigned file_id, hid_t dxpl_id,
          *
          *					JRM - 4/13/04
          */
-        if (size < sap_read.md_size) 
+        if (size < sap_read.md_size)
         {
             char *mdata;
 
@@ -361,7 +361,7 @@ HDfprintf(stderr, "Metadata Read Failed!!!!\n");
                                 H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
                 HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
         } else {
-	    HDfprintf(stdout, 
+	    HDfprintf(stdout,
                     "H5FP_request_read_metadata: size = %d > md_size = %d.\n",
                     (int)size, (int)(sap_read.md_size));
             HDfprintf(stdout, "Mssg received from SAP is too small!!!!\n");
@@ -569,7 +569,7 @@ H5FP_request_flush_metadata(H5FD_t *file, unsigned file_id, hid_t dxpl_id,
         if ((mrc = MPI_Recv(&sap_reply, 1, H5FP_reply, (int)H5FP_sap_rank,
                             H5FP_TAG_REPLY, H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
             HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
-        
+
         if (sap_reply.status != H5FP_STATUS_OK)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCHANGE, FAIL, "can't write metadata to server");
 
@@ -649,15 +649,15 @@ done:
 /*
  * Function:    H5FP_client_alloc
  * Purpose:     Handle the client side of an allocation in the FP case.
- *		In essence, this is simply a matter of referring the 
+ *		In essence, this is simply a matter of referring the
  *		request to the SAP, and then returning the reply.
  *
  *		A modified version of this code used to live in H5FD_alloc(),
  *		but I move it here to encapsulate it and generally tidy up.
- *		
- *		One can argue that we should all be done in an alloc 
- *		routine in H5FDfdhdf5.c, but this invlves a smaller 
- *		change to the code, and thus a smaller loss if I missed 
+ *
+ *		One can argue that we should all be done in an alloc
+ *		routine in H5FDfdhdf5.c, but this invlves a smaller
+ *		change to the code, and thus a smaller loss if I missed
  *		a major gotcha.  If things go well, and we don't heave
  *		the current implementation of FP, I'll probably go that
  *		route eventually.
@@ -707,14 +707,14 @@ H5FP_client_alloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     if ( !capt_only || H5FD_fphdf5_is_captain(file) ) {
         /* Send the request to the SAP */
         if ( H5FP_request_allocate(file, type, size, &fp_alloc.addr,
-                                   &fp_alloc.eoa, &req_id, &status) 
+                                   &fp_alloc.eoa, &req_id, &status)
              != SUCCEED ) {
                 HGOTO_ERROR(H5E_FPHDF5, H5E_CANTALLOC, HADDR_UNDEF,
                             "server couldn't allocate from file")
         }
     }
 
-    /* It should be impossible for this assertion to fail, but then 
+    /* It should be impossible for this assertion to fail, but then
      * that is what assertions are for.
      */
     HDassert(status == H5FP_STATUS_OK);
@@ -730,7 +730,7 @@ H5FP_client_alloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     }
 
     /* we used to send the eoa to the sap here, but that is silly,
-     * as the sap already knows, and it is possible that another 
+     * as the sap already knows, and it is possible that another
      * interleaving allocation will result in a corrupted eoa.
      *
      *                                     JRM - 4/7/04
@@ -745,7 +745,7 @@ done:
 } /* H5FP_client_alloc() */
 
 
-/* This function is now called only by H5FP_client_alloc() above.  
+/* This function is now called only by H5FP_client_alloc() above.
  * Should we make it a private function only accessible from this
  * file?                                 JRM - 4/8/04
  */
@@ -964,8 +964,8 @@ H5FP_request_set_eoa(H5FD_t *file, haddr_t eoa, unsigned *req_id, H5FP_status_t 
     req.proc_rank = H5FD_mpi_get_rank(file);
     req.addr = eoa;
 
-#if 0 
-    /* This is useful debugging code -- lets keep for a while. 
+#if 0
+    /* This is useful debugging code -- lets keep for a while.
      *                                     JRM -- 4/13/04
      */
     /* dump stack each time we set the eoa */
@@ -974,7 +974,7 @@ H5FP_request_set_eoa(H5FD_t *file, haddr_t eoa, unsigned *req_id, H5FP_status_t 
 
         MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
-        HDfprintf(stdout, 
+        HDfprintf(stdout,
                   "%d: %s: setting eoa: last eoa = %a, new eoa = %a.\n",
                   mpi_rank, "H5FP_request_set_eoa", last_eoa_received, eoa);
         H5FS_print(stdout);
@@ -1051,7 +1051,7 @@ H5FP_request_update_eoma_eosda(H5FD_t *file, unsigned *req_id, H5FP_status_t *st
                          H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed!", mrc);
 
-#if 0 
+#if 0
     /* The following set_eoa just parrots back to the SAP the eoa
      * we just received from it.  While I don't think it is a problem
      * in this case, there are obvious potentials for race conditions,
@@ -1096,7 +1096,7 @@ H5FP_gen_request_id()
 
 /*
  * Function:    H5FP_dump_to_file
- * Purpose:     Dump the updated metadata to the file. 
+ * Purpose:     Dump the updated metadata to the file.
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
  * Programmer:  Bill Wendling, 03. February 2003

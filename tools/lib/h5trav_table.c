@@ -14,7 +14,7 @@
 
 
 #include "h5trav.h"
-#include "H5private.h" 
+#include "H5private.h"
 
 /*-------------------------------------------------------------------------
  * Function: trav_table_search
@@ -33,11 +33,11 @@
 int trav_table_search(haddr_t objno, trav_table_t *table )
 {
  int i;
- 
+
  for (i = 0; i < table->nobjs; i++)
   if (table->objs[i].objno == objno)
    return i;
-  
+
   return -1;
 }
 
@@ -56,18 +56,18 @@ int trav_table_search(haddr_t objno, trav_table_t *table )
  *-------------------------------------------------------------------------
  */
 
-void trav_table_add(haddr_t objno, 
-                    char *name, 
-                    H5G_obj_t type, 
+void trav_table_add(haddr_t objno,
+                    char *name,
+                    H5G_obj_t type,
                     trav_table_t *table)
 {
  int i;
- 
+
  if (table->nobjs == table->size) {
   table->size *= 2;
-  table->objs = 
+  table->objs =
    (trav_obj_t*)HDrealloc(table->objs, table->size * sizeof(trav_obj_t));
-  
+
   for (i = table->nobjs; i < table->size; i++) {
    table->objs[i].objno = 0;
    table->objs[i].flags[0] = table->objs[i].flags[1] = 0;
@@ -79,7 +79,7 @@ void trav_table_add(haddr_t objno,
    table->objs[i].sizelinks = 0;
   }
  }
- 
+
  i = table->nobjs++;
  table->objs[i].objno = objno;
  table->objs[i].flags[0] = table->objs[i].flags[1] = 0;
@@ -105,18 +105,18 @@ void trav_table_add(haddr_t objno,
  *-------------------------------------------------------------------------
  */
 
-void trav_table_addflags(unsigned *flags, 
-                         char *name, 
-                         H5G_obj_t type, 
+void trav_table_addflags(unsigned *flags,
+                         char *name,
+                         H5G_obj_t type,
                          trav_table_t *table)
 {
  int i;
- 
+
  if (table->nobjs == table->size) {
   table->size *= 2;
-  table->objs = 
+  table->objs =
    (trav_obj_t*)HDrealloc(table->objs, table->size * sizeof(trav_obj_t));
-  
+
   for (i = table->nobjs; i < table->size; i++) {
    table->objs[i].objno = 0;
    table->objs[i].flags[0] = table->objs[i].flags[1] = 0;
@@ -128,7 +128,7 @@ void trav_table_addflags(unsigned *flags,
    table->objs[i].sizelinks = 0;
   }
  }
- 
+
  i = table->nobjs++;
  table->objs[i].objno = 0;
  table->objs[i].flags[0] = flags[0];
@@ -144,7 +144,7 @@ void trav_table_addflags(unsigned *flags,
 /*-------------------------------------------------------------------------
  * Function: trav_table_init
  *
- * Purpose: Initialize the table 
+ * Purpose: Initialize the table
  *
  * Return: void
  *
@@ -159,12 +159,12 @@ void trav_table_init( trav_table_t **tbl )
 {
  int i;
  trav_table_t* table = (trav_table_t*) HDmalloc(sizeof(trav_table_t));
- 
+
  table->size = 20;
  table->nobjs = 0;
- table->objs = 
+ table->objs =
   (trav_obj_t*)HDmalloc(table->size * sizeof(trav_obj_t));
- 
+
  for (i = 0; i < table->size; i++) {
   table->objs[i].objno = 0;
   table->objs[i].flags[0] = table->objs[i].flags[1] = 0;
@@ -175,7 +175,7 @@ void trav_table_init( trav_table_t **tbl )
   table->objs[i].nlinks = 0;
   table->objs[i].sizelinks = 0;
  }
- 
+
  *tbl = table;
 }
 
@@ -230,7 +230,7 @@ void trav_table_free( trav_table_t *table )
  *-------------------------------------------------------------------------
  */
 
-void trav_table_addlink(trav_table_t *table, 
+void trav_table_addlink(trav_table_t *table,
                         int j /* the object index */,
                         char *path )
 {
@@ -243,8 +243,8 @@ void trav_table_addlink(trav_table_t *table,
  /* allocate space if necessary */
  if (table->objs[j].nlinks == table->objs[j].sizelinks) {
   table->objs[j].sizelinks += 2;
-  table->objs[j].links = 
-   (trav_link_t*)HDrealloc(table->objs[j].links, 
+  table->objs[j].links =
+   (trav_link_t*)HDrealloc(table->objs[j].links,
    table->objs[j].sizelinks * sizeof(trav_link_t));
  }
 

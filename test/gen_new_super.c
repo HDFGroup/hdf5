@@ -36,8 +36,8 @@
  *
  * Purpose:	Create a file with a new version (>0) of the superblock
  *
- * Return:	Success:	
- *		Failure:	
+ * Return:	Success:
+ *		Failure:
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, July 15, 2003

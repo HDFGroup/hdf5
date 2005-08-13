@@ -72,8 +72,8 @@ H5FL_DEFINE(H5SH_t);
  *		Mar 23 2005
  *
  * Changes:	John Mainzer -- 6/7/05
- *		Removed code modifying the is_dirty field of the cache 
- *		info.  Management of this field is in the process of 
+ *		Removed code modifying the is_dirty field of the cache
+ *		info.  Management of this field is in the process of
  *		being moved to the H5C code.
  *
  *-------------------------------------------------------------------------
@@ -173,7 +173,7 @@ H5SH_alloc_extend_cb(const H5BT_blk_info_t *record, void *_op_data)
                 H5BT_COMPARE_LESS, (record->addr + record->len + 1),
                 &free_block) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, H5BT_ITER_ERROR, "can't search for free space")
-            
+
         /* Check if we can use free space for part of block to allocate */
         if(H5F_addr_defined(free_block.addr) &&
                 (free_block.addr + free_block.len) == (record->addr + record->len)) {

@@ -28,7 +28,7 @@ namespace H5 {
 class H5_DLLCPP PredType : public AtomType {
    public:
 	// Makes a copy of the predefined type and stores the new
-	// id in the left hand side object.  
+	// id in the left hand side object.
 	PredType& operator=( const PredType& rhs );
 
 	// Copy constructor - makes copy of the original object
@@ -191,7 +191,7 @@ class H5_DLLCPP PredType : public AtomType {
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
    private:
-	// added this to work around the atexit/global destructor problem 
+	// added this to work around the atexit/global destructor problem
 	// temporarily - it'll prevent the use of atexit to clean up
 	static const PredType NotAtexit;	// not working yet
 
@@ -207,7 +207,7 @@ class H5_DLLCPP PredType : public AtomType {
 	    E_STD_I8BE, E_STD_I8LE, E_STD_I16BE, E_STD_I16LE, E_STD_I32BE,
 	    E_STD_I32LE, E_STD_I64BE, E_STD_I64LE, E_STD_U8BE, E_STD_U8LE,
 	    E_STD_U16BE, E_STD_U16LE, E_STD_U32BE, E_STD_U32LE, E_STD_U64BE,
-	    E_STD_U64LE, E_STD_B8BE, E_STD_B8LE, E_STD_B16BE, E_STD_B16LE, 
+	    E_STD_U64LE, E_STD_B8BE, E_STD_B8LE, E_STD_B16BE, E_STD_B16LE,
 	    E_STD_B32BE, E_STD_B32LE, E_STD_B64BE, E_STD_B64LE, E_STD_REF_OBJ,
 	    E_STD_REF_DSETREG,
 
@@ -223,8 +223,8 @@ class H5_DLLCPP PredType : public AtomType {
 	    E_ALPHA_U16, E_ALPHA_U32, E_ALPHA_U64, E_ALPHA_B8, E_ALPHA_B16,
 	    E_ALPHA_B32, E_ALPHA_B64, E_ALPHA_F32, E_ALPHA_F64,
 
-	    E_MIPS_I8, E_MIPS_I16, E_MIPS_I32, E_MIPS_I64, E_MIPS_U8, 
-	    E_MIPS_U16, E_MIPS_U32, E_MIPS_U64, E_MIPS_B8, E_MIPS_B16, 
+	    E_MIPS_I8, E_MIPS_I16, E_MIPS_I32, E_MIPS_I64, E_MIPS_U8,
+	    E_MIPS_U16, E_MIPS_U32, E_MIPS_U64, E_MIPS_B8, E_MIPS_B16,
 	    E_MIPS_B32, E_MIPS_B64, E_MIPS_F32, E_MIPS_F64,
 
 	    E_NATIVE_CHAR, E_NATIVE_INT, E_NATIVE_FLOAT, E_NATIVE_SCHAR,

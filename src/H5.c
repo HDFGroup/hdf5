@@ -61,7 +61,7 @@ static void		H5_debug_mask(const char*);
  *   H5_init_library -- Initialize library-global information
  * USAGE
  *    herr_t H5_init_library()
- *   
+ *
  * RETURNS
  *    Non-negative on success/Negative on failure
  *
@@ -70,7 +70,7 @@ static void		H5_debug_mask(const char*);
  *
  *--------------------------------------------------------------------------
  */
-herr_t 
+herr_t
 H5_init_library(void)
 {
     herr_t ret_value=SUCCEED;
@@ -132,7 +132,7 @@ H5_init_library(void)
      * Initialize interfaces that might not be able to initialize themselves
      * soon enough.  The file & dataset interfaces must be initialized because
      * calling H5P_create() might require the file/dataset property classes to be
-     * initialized.  The property interface must be initialized before the file 
+     * initialized.  The property interface must be initialized before the file
      * & dataset interfaces though, in order to provide them with the proper
      * property classes.
      */
@@ -181,7 +181,7 @@ H5_term_library(void)
     unsigned	at=0;
     char	loop[1024];
     H5E_auto_stack_t func;
-    
+
 #ifdef H5_HAVE_THREADSAFE
     /* explicit locking of the API */
     H5_FIRST_THREAD_INIT
@@ -209,7 +209,7 @@ H5_term_library(void)
      (sprintf(loop+at, "..."),						      \
       at += HDstrlen(loop+at),						      \
      n):n))
-    
+
     do {
 	pending = 0;
         /* Try to organize these so the "higher" level components get shut
@@ -274,7 +274,7 @@ H5_term_library(void)
 	H5_MPEinit_g = FALSE;	/* turn it off no matter what */
     }
 #endif
-    
+
     /* Mark library as closed */
     H5_INIT_GLOBAL = FALSE;
 done:
@@ -448,7 +448,7 @@ H5_debug_mask(const char *s)
     char	pkg_name[32], *rest;
     size_t	i;
     int		clear;
-	
+
     while (s && *s) {
 	if (HDisalpha(*s) || '-'==*s || '+'==*s) {
 	    /* Enable or Disable debugging? */
@@ -501,7 +501,7 @@ H5_debug_mask(const char *s)
 	}
     }
 }
-    
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5get_libversion
@@ -577,11 +577,11 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 
     FUNC_ENTER_API_NOINIT(H5check_version)
     H5TRACE3("e","IuIuIu",majnum,minnum,relnum);
-    
+
     /* Don't check again, if we already have */
     if (checked)
 	HGOTO_DONE(SUCCEED)
-    
+
     {    const char *s;  /* Environment string for disabling version check */
 
         /* Allow different versions of the header files and library? */
@@ -606,7 +606,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 		     stderr);
 	    /* Mention the versions we are referring to */
 	    HDfprintf (stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n",
-		     majnum, minnum, relnum, 
+		     majnum, minnum, relnum,
 		     (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
 
 	    /* Bail out now. */
@@ -626,7 +626,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
                      "continue.\n", stderr);
 	    /* Mention the versions we are referring to */
 	    HDfprintf (stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n",
-		     majnum, minnum, relnum, 
+		     majnum, minnum, relnum,
 		     (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
 	    break;
         } /* end switch */
@@ -855,7 +855,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
     char	*rest, format_templ[128];
     const char	*s;
     va_list	ap;
-    
+
     assert (stream);
     assert (fmt);
 
@@ -894,7 +894,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 		} /*lint !e744 Switch statement doesn't _need_ default */
 		s++;
 	    }
-	    
+
 	    /* Field width */
 	    if (HDisdigit (*s)) {
 		zerofill = ('0'==*s);
@@ -986,7 +986,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 	    if (*modifier)
 		sprintf (format_templ+HDstrlen(format_templ), "%s", modifier);
 	    sprintf (format_templ+HDstrlen(format_templ), "%c", conv);
-	    
+
 
 	    /* Conversion */
 	    switch (conv) {
@@ -1173,13 +1173,13 @@ HDstrtoll(const char *s, const char **rest, int base)
 {
     int64_t	sign=1, acc=0;
     hbool_t	overflow = FALSE;
-    
+
     errno = 0;
     if (!s || (base && (base<2 || base>36))) {
 	if (rest) *rest = s;
 	return 0;
     }
-    
+
     /* Skip white space */
     while (HDisspace (*s)) s++;
 
@@ -1188,7 +1188,7 @@ HDstrtoll(const char *s, const char **rest, int base)
 	s++;
     } else if ('-'==*s) {
 	sign = -1;
-	s++; 
+	s++;
     }
 
     /* Zero base prefix */
@@ -1201,7 +1201,7 @@ HDstrtoll(const char *s, const char **rest, int base)
     } else if (0==base) {
 	base = 10;
     }
-    
+
     /* Digits */
     while ((base<=10 && *s>='0' && *s<'0'+base) ||
 	   (base>10 && ((*s>='0' && *s<='9') ||
@@ -1328,7 +1328,7 @@ void
 H5_timer_end (H5_timer_t *sum/*in,out*/, H5_timer_t *timer/*in,out*/)
 {
     H5_timer_t		now;
-    
+
     assert (timer);
     H5_timer_begin (&now);
 
@@ -1361,7 +1361,7 @@ H5_timer_end (H5_timer_t *sum/*in,out*/, H5_timer_t *timer/*in,out*/)
  *			1.2345e-10	For bandwidth less than 1
  *			6.7893e+94	For exceptionally large values
  *			6.678e+106	For really big values
- *			
+ *
  * Return:	void
  *
  * Programmer:	Robb Matzke
@@ -1504,7 +1504,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
     } else {
         HDmemset(&event_time, 0, sizeof event_time);
     }
-    
+
     /* Print the first part of the line.  This is the indication of the
      * nesting depth followed by the function name and either start of
      * argument list or start of return value.  If this call is for a
@@ -1537,7 +1537,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
             fputc('+', out);
         fprintf(out, "%*s%s(", 2*current_depth, "", func);
     }
-    
+
     /* Clear array sizes */
     for (i=0; i<(hssize_t)NELMTS(asize); i++) asize[i] = -1;
 
@@ -1559,7 +1559,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 	} else {
 	    asize_idx = -1;
 	}
-	
+
 	/*
 	 * The argument name.  Leave off the `_id' part.  If the argument
 	 * name is the null pointer then don't print the argument or the
@@ -1736,7 +1736,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		    }
 		}
 		break;
-		
+
 	    case 's':
 		if (ptr) {
 		    if (vp) {
@@ -1765,7 +1765,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		    }
 		}
 		break;
-		
+
 	    case 't':
 		if (ptr) {
 		    if (vp) {
@@ -1788,7 +1788,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		    }
 		}
 		break;
-		
+
 	    default:
 		fprintf (out, "BADTYPE(D%c)", type[1]);
 		goto error;
@@ -1808,7 +1808,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		else fprintf (out, "FAIL");
 	    }
 	    break;
-	    
+
 	case 'E':
 	    switch (type[1]) {
 	    case 'd':
@@ -1833,7 +1833,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		    }
 		}
 		break;
-		
+
 	    case 'e':
 		if (ptr) {
 		    if (vp) {
@@ -1869,7 +1869,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		    }
 		}
 		break;
-		
+
 	    default:
 		fprintf (out, "BADTYPE(E%c)", type[1]);
 		goto error;
@@ -2072,7 +2072,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		    asize[argno] = (hssize_t)hssize;
 		}
 		break;
-		
+
 	    default:
 		fprintf (out, "BADTYPE(H%c)", type[1]);
 		goto error;
@@ -2271,7 +2271,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		    asize[argno] = is;
 		}
 		break;
-		
+
 	    case 'u':
 		if (ptr) {
 		    if (vp) {
@@ -2528,7 +2528,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                         }
                     }
                     break;
-                            
+
                 default:
                     fprintf(out, "BADTYPE(S%c)", type[1]);
                     goto error;
@@ -2568,7 +2568,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		    }
 		}
 		break;
-			
+
 	    case 's':
 		if (ptr) {
 		    if (vp) {

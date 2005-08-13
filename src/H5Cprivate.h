@@ -51,10 +51,10 @@
 #define H5C_COLLECT_CACHE_STATS	0
 
 /* H5C_COLLECT_CACHE_ENTRY_STATS controls collection of statistics
- * in individual cache entries.  
- * 
- * H5C_COLLECT_CACHE_ENTRY_STATS should only be defined to true if 
- * H5C_COLLECT_CACHE_STATS is also defined to true.  
+ * in individual cache entries.
+ *
+ * H5C_COLLECT_CACHE_ENTRY_STATS should only be defined to true if
+ * H5C_COLLECT_CACHE_STATS is also defined to true.
  */
 #if H5C_COLLECT_CACHE_STATS
 
@@ -114,23 +114,23 @@ typedef struct H5C_t H5C_t;
  *		Note that the space allocated on disk may not be contiguous.
  */
 
-typedef void *(*H5C_load_func_t)(H5F_t *f, 
-                                 hid_t dxpl_id, 
-                                 haddr_t addr, 
-                                 const void *udata1, 
+typedef void *(*H5C_load_func_t)(H5F_t *f,
+                                 hid_t dxpl_id,
+                                 haddr_t addr,
+                                 const void *udata1,
                                  void *udata2);
-typedef herr_t (*H5C_flush_func_t)(H5F_t *f, 
-                                   hid_t dxpl_id, 
-                                   hbool_t dest, 
-                                   haddr_t addr, 
+typedef herr_t (*H5C_flush_func_t)(H5F_t *f,
+                                   hid_t dxpl_id,
+                                   hbool_t dest,
+                                   haddr_t addr,
                                    void *thing);
-typedef herr_t (*H5C_dest_func_t)(H5F_t *f, 
+typedef herr_t (*H5C_dest_func_t)(H5F_t *f,
                                   void *thing);
-typedef herr_t (*H5C_clear_func_t)(H5F_t *f, 
-                                   void *thing, 
+typedef herr_t (*H5C_clear_func_t)(H5F_t *f,
+                                   void *thing,
                                    hbool_t dest);
-typedef herr_t (*H5C_size_func_t)(const H5F_t *f, 
-                                  const void *thing, 
+typedef herr_t (*H5C_size_func_t)(const H5F_t *f,
+                                  const void *thing,
                                   size_t *size_ptr);
 
 typedef struct H5C_class_t {
@@ -153,8 +153,8 @@ typedef herr_t (*H5C_write_permitted_func_t)(const H5F_t *f,
  * out of a hat -- you should be able to change them as necessary.
  *
  * However, if you need a very big cache, you should also increase the
- * size of the hash table (H5C__HASH_TABLE_LEN in H5Cpkg.h).  The current 
- * upper bound on cache size is rather large for the current hash table 
+ * size of the hash table (H5C__HASH_TABLE_LEN in H5Cpkg.h).  The current
+ * upper bound on cache size is rather large for the current hash table
  * size.
  */
 
@@ -174,11 +174,11 @@ typedef herr_t (*H5C_write_permitted_func_t)(const H5F_t *f,
  *
  * structure H5C_cache_entry_t
  *
- * Instances of the H5C_cache_entry_t structure are used to store cache 
- * entries in a hash table and sometimes in a skip list.  
+ * Instances of the H5C_cache_entry_t structure are used to store cache
+ * entries in a hash table and sometimes in a skip list.
  * See H5SL.c for the particulars of the skip list.
  *
- * In typical application, this structure is the first field in a 
+ * In typical application, this structure is the first field in a
  * structure to be cached.  For historical reasons, the external module
  * is responsible for managing the is_dirty field.  All other fields are
  * managed by the cache.
@@ -212,12 +212,12 @@ typedef herr_t (*H5C_write_permitted_func_t)(const H5F_t *f,
  *
  *		NOTE: For historical reasons, this field is not maintained
  *		      by the cache.  Instead, the module using the cache
- *		      sets this flag when it modifies the entry, and the 
+ *		      sets this flag when it modifies the entry, and the
  *		      flush and clear functions supplied by that module
  *		      reset the dirty when appropriate.
  *
  *		      This is a bit quirky, so we may want to change this
- *		      someday.  However it will require a change in the 
+ *		      someday.  However it will require a change in the
  *		      cache interface.
  *
  * is_protected: Boolean flag indicating whether this entry is protected
@@ -235,7 +235,7 @@ typedef herr_t (*H5C_write_permitted_func_t)(const H5F_t *f,
  *              being flushed.
  *
  * flush_marker:  Boolean flag indicating that the entry is to be flushed
- *		the next time H5C_flush_cache() is called with the 
+ *		the next time H5C_flush_cache() is called with the
  *		H5AC__FLUSH_MARKED_ENTRIES_FLAG.  The flag is reset when
  *		the entry is flushed for whatever reason.
  *
@@ -248,63 +248,63 @@ typedef herr_t (*H5C_write_permitted_func_t)(const H5F_t *f,
  *
  * ht_next:	Next pointer used by the hash table to store multiple
  *		entries in a single hash bin.  This field points to the
- *		next entry in the doubly linked list of entries in the 
+ *		next entry in the doubly linked list of entries in the
  *		hash bin, or NULL if there is no next entry.
  *
  * ht_prev:     Prev pointer used by the hash table to store multiple
  *              entries in a single hash bin.  This field points to the
- *              previous entry in the doubly linked list of entries in 
+ *              previous entry in the doubly linked list of entries in
  *		the hash bin, or NULL if there is no previuos entry.
  *
  *
  * Fields supporting replacement policies:
  *
- * The cache must have a replacement policy, and it will usually be 
+ * The cache must have a replacement policy, and it will usually be
  * necessary for this structure to contain fields supporting that policy.
  *
- * While there has been interest in several replacement policies for 
+ * While there has been interest in several replacement policies for
  * this cache, the initial development schedule is tight.  Thus I have
  * elected to support only a modified LRU policy for the first cut.
  *
  * When additional replacement policies are added, the fields in this
- * section will be used in different ways or not at all.  Thus the 
+ * section will be used in different ways or not at all.  Thus the
  * documentation of these fields is repeated for each replacement policy.
- * 
+ *
  * Modified LRU:
- * 
+ *
  * When operating in parallel mode, we must ensure that a read does not
  * cause a write.  If it does, the process will hang, as the write will
  * be collective and the other processes will not know to participate.
  *
  * To deal with this issue, I have modified the usual LRU policy by adding
- * clean and dirty LRU lists to the usual LRU list.  When reading in 
+ * clean and dirty LRU lists to the usual LRU list.  When reading in
  * parallel mode, we evict from the clean LRU list only.  This implies
- * that we must try to ensure that the clean LRU list is reasonably well 
+ * that we must try to ensure that the clean LRU list is reasonably well
  * stocked.  See the comments on H5C_t in H5Cpkg.h for more details.
- * 
+ *
  * Note that even if we start with a completely clean cache, a sequence
  * of protects without unprotects can empty the clean LRU list.  In this
- * case, the cache must grow temporarily.  At the next write, we will 
+ * case, the cache must grow temporarily.  At the next write, we will
  * attempt to evict enough entries to get the cache down to its nominal
  * maximum size.
  *
  * The use of the replacement policy fields under the Modified LRU policy
  * is discussed below:
  *
- * next:	Next pointer in either the LRU or the protected list, 
- *		depending on the current value of protected.  If there 
- *		is no next entry on the list, this field should be set 
+ * next:	Next pointer in either the LRU or the protected list,
+ *		depending on the current value of protected.  If there
+ *		is no next entry on the list, this field should be set
  *		to NULL.
  *
- * prev:	Prev pointer in either the LRU or the protected list, 
- *		depending on the current value of protected.  If there 
- *		is no previous entry on the list, this field should be 
+ * prev:	Prev pointer in either the LRU or the protected list,
+ *		depending on the current value of protected.  If there
+ *		is no previous entry on the list, this field should be
  *		set to NULL.
  *
  * aux_next:	Next pointer on either the clean or dirty LRU lists.
  *		This entry should be NULL when protected is true.  When
  *		protected is false, and dirty is true, it should point
- *		to the next item on the dirty LRU list.  When protected 
+ *		to the next item on the dirty LRU list.  When protected
  *		is false, and dirty is false, it should point to the
  *		next item on the clean LRU list.  In either case, when
  *		there is no next item, it should be NULL.
@@ -312,7 +312,7 @@ typedef herr_t (*H5C_write_permitted_func_t)(const H5F_t *f,
  * aux_prev:	Previous pointer on either the clean or dirty LRU lists.
  *		This entry should be NULL when protected is true.  When
  *		protected is false, and dirty is true, it should point
- *		to the previous item on the dirty LRU list.  When protected 
+ *		to the previous item on the dirty LRU list.  When protected
  *		is false, and dirty is false, it should point to the
  *		previous item on the clean LRU list.  In either case, when
  *		there is no previous item, it should be NULL.
@@ -322,7 +322,7 @@ typedef herr_t (*H5C_write_permitted_func_t)(const H5F_t *f,
  *
  * These fields should only be compiled in when both H5C_COLLECT_CACHE_STATS
  * and H5C_COLLECT_CACHE_ENTRY_STATS are true.  When present, they allow
- * collection of statistics on individual cache entries.  
+ * collection of statistics on individual cache entries.
  *
  * accesses:	int32_t containing the number of times this cache entry has
  *		been referenced in its lifetime.
@@ -331,8 +331,8 @@ typedef herr_t (*H5C_write_permitted_func_t)(const H5F_t *f,
  *              been cleared in its life time.
  *
  * flushes:	int32_t containing the number of times this cache entry has
- *              been flushed to file in its life time. 
- *		
+ *              been flushed to file in its life time.
+ *
  ****************************************************************************/
 
 typedef struct H5C_cache_entry_t
@@ -367,7 +367,7 @@ typedef struct H5C_cache_entry_t
 
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
 
-} H5C_cache_entry_t; 
+} H5C_cache_entry_t;
 
 
 /****************************************************************************
@@ -375,13 +375,13 @@ typedef struct H5C_cache_entry_t
  * structure H5C_auto_size_ctl_t
  *
  * Instances of H5C_auto_size_ctl_t are used to get and set the control
- * fields for automatic cache re-sizing.  
+ * fields for automatic cache re-sizing.
  *
  * The fields of the structure are discussed individually below:
  *
- * version: Integer field containing the version number of this version 
- *	of the H5C_auto_size_ctl_t structure.  Any instance of 
- *	H5C_auto_size_ctl_t passed to the cache must have a known 
+ * version: Integer field containing the version number of this version
+ *	of the H5C_auto_size_ctl_t structure.  Any instance of
+ *	H5C_auto_size_ctl_t passed to the cache must have a known
  *	version number, or an error will be flagged.
  *
  * report_fcn:  Pointer to the function that is to be called to report
@@ -391,9 +391,9 @@ typedef struct H5C_cache_entry_t
  *	If the field is not NULL, it must contain the address of a function
  *	of type H5C_auto_resize_report_fcn.
  *
- * set_initial_size: Boolean flag indicating whether the size of the 
- *	initial size of the cache is to be set to the value given in 
- *	the initial_size field.  If set_initial_size is FALSE, the 
+ * set_initial_size: Boolean flag indicating whether the size of the
+ *	initial size of the cache is to be set to the value given in
+ *	the initial_size field.  If set_initial_size is FALSE, the
  *	initial_size field is ignored.
  *
  * initial_size: If enabled, this field contain the size the cache is
@@ -404,21 +404,21 @@ typedef struct H5C_cache_entry_t
  *	of the cache that is to be kept clean.  This field is only used
  *	in parallel mode.  Typical values are 0.1 to 0.5.
  *
- * max_size: Maximum size to which the cache can be adjusted.  The 
+ * max_size: Maximum size to which the cache can be adjusted.  The
  *	supplied value must fall in the closed interval
- *	[MIN_MAX_CACHE_SIZE, MAX_MAX_CACHE_SIZE].  Also, max_size must 
+ *	[MIN_MAX_CACHE_SIZE, MAX_MAX_CACHE_SIZE].  Also, max_size must
  *	be greater than or equal to min_size.
  *
  * min_size: Minimum size to which the cache can be adjusted.  The
  *      supplied value must fall in the closed interval
- *      [MIN_MAX_CACHE_SIZE, MAX_MAX_CACHE_SIZE].  Also, min_size must 
+ *      [MIN_MAX_CACHE_SIZE, MAX_MAX_CACHE_SIZE].  Also, min_size must
  *	be less than or equal to max_size.
  *
  * epoch_length: Number of accesses on the cache over which to collect
  *	hit rate stats before running the automatic cache resize code,
- *      if it is enabled.  
- *	
- *	At the end of an epoch, we discard prior hit rate data and start 
+ *      if it is enabled.
+ *
+ *	At the end of an epoch, we discard prior hit rate data and start
  * 	collecting afresh.  The epoch_length must lie in the closed
  *	interval [H5C__MIN_AR_EPOCH_LENGTH, H5C__MAX_AR_EPOCH_LENGTH].
  *
@@ -429,15 +429,15 @@ typedef struct H5C_cache_entry_t
  *	value indicates how we determine whether the cache size should be
  *	increased.  At present there are two possible values:
  *
- *	H5C_incr__off:	Don't attempt to increase the size of the cache 
+ *	H5C_incr__off:	Don't attempt to increase the size of the cache
  *		automatically.
  *
  *		When this increment mode is selected, the remaining fields
  *		in the cache size increase section ar ignored.
  *
- *	H5C_incr__threshold: Attempt to increase the size of the cache 
- *		whenever the average hit rate over the last epoch drops 
- *		below the value supplied in the lower_hr_threshold 
+ *	H5C_incr__threshold: Attempt to increase the size of the cache
+ *		whenever the average hit rate over the last epoch drops
+ *		below the value supplied in the lower_hr_threshold
  *		field.
  *
  *		Note that this attempt will fail if the cache is already
@@ -445,9 +445,9 @@ typedef struct H5C_cache_entry_t
  *		all available space.
  *
  * lower_hr_threshold: Lower hit rate threshold.  If the increment mode
- *	(incr_mode) is H5C_incr__threshold and the hit rate drops below the 
- *	value supplied in this field in an epoch, increment the cache size by 
- *	size_increment.  Note that cache size may not be incremented above 
+ *	(incr_mode) is H5C_incr__threshold and the hit rate drops below the
+ *	value supplied in this field in an epoch, increment the cache size by
+ *	size_increment.  Note that cache size may not be incremented above
  *	max_size, and that the increment may be further restricted by the
  *	max_increment field if it is enabled.
  *
@@ -460,73 +460,73 @@ typedef struct H5C_cache_entry_t
  *      The increment must be greater than 1.0, and should not exceed 2.0.
  *
  *	The new cache size is obtained by multiplying the current max cache
- *	size by the increment, and then clamping to max_size and to stay 
+ *	size by the increment, and then clamping to max_size and to stay
  *	within the max_increment as necessary.
  *
  * apply_max_increment:  Boolean flag indicating whether the max_increment
  *	field should be used to limit the maximum cache size increment.
  *
- * max_increment: If enabled by the apply_max_increment field described 
- *	above, this field contains the maximum number of bytes by which the 
- *	cache size can be increased in a single re-size.  
+ * max_increment: If enabled by the apply_max_increment field described
+ *	above, this field contains the maximum number of bytes by which the
+ *	cache size can be increased in a single re-size.
  *
  *
  * Cache size decrease control fields:
  *
- * decr_mode: Instance of the H5C_cache_decr_mode enumerated type whose 
+ * decr_mode: Instance of the H5C_cache_decr_mode enumerated type whose
  *	value indicates how we determine whether the cache size should be
  *	decreased.  At present there are four possibilities.
  *
- *	H5C_decr__off:	Don't attempt to decrease the size of the cache 
+ *	H5C_decr__off:	Don't attempt to decrease the size of the cache
  *		automatically.
  *
  *		When this increment mode is selected, the remaining fields
  *		in the cache size decrease section are ignored.
  *
- *	H5C_decr__threshold: Attempt to decrease the size of the cache 
- *		whenever the average hit rate over the last epoch rises 
- *		above the value	supplied in the upper_hr_threshold 
+ *	H5C_decr__threshold: Attempt to decrease the size of the cache
+ *		whenever the average hit rate over the last epoch rises
+ *		above the value	supplied in the upper_hr_threshold
  *		field.
  *
- *	H5C_decr__age_out:  At the end of each epoch, search the cache for 
- *		entries that have not been accessed for at least the number 
+ *	H5C_decr__age_out:  At the end of each epoch, search the cache for
+ *		entries that have not been accessed for at least the number
  *		of epochs specified in the epochs_before_eviction field, and
- *		evict these entries.  Conceptually, the maximum cache size 
+ *		evict these entries.  Conceptually, the maximum cache size
  *		is then decreased to match the new actual cache size.  However,
- *		this reduction may be modified by the min_size, the 
+ *		this reduction may be modified by the min_size, the
  *		max_decrement, and/or the empty_reserve.
  *
- *	H5C_decr__age_out_with_threshold:  Same as age_out, but we only 
- *		attempt to reduce the cache size when the hit rate observed 
- *		over the last epoch exceeds the value provided in the 
+ *	H5C_decr__age_out_with_threshold:  Same as age_out, but we only
+ *		attempt to reduce the cache size when the hit rate observed
+ *		over the last epoch exceeds the value provided in the
  *		upper_hr_threshold field.
  *
  * upper_hr_threshold: Upper hit rate threshold.  The use of this field
  *	varies according to the current decr_mode:
  *
- *	H5C_decr__off or H5C_decr__age_out:  The value of this field is 
+ *	H5C_decr__off or H5C_decr__age_out:  The value of this field is
  *		ignored.
  *
- *	H5C_decr__threshold:  If the hit rate exceeds this threshold in any 
+ *	H5C_decr__threshold:  If the hit rate exceeds this threshold in any
  *		epoch, attempt to decrement the cache size by size_decrement.
  *
  *		Note that cache size may not be decremented below min_size.
  *
- *		Note also that if the upper_threshold is 1.0, the cache size 
+ *		Note also that if the upper_threshold is 1.0, the cache size
  *		will never be reduced.
  *
- *	H5C_decr__age_out_with_threshold:  If the hit rate exceeds this 
- *		threshold in any epoch, attempt to reduce the cache size 
- *		by evicting entries that have not been accessed for more 
+ *	H5C_decr__age_out_with_threshold:  If the hit rate exceeds this
+ *		threshold in any epoch, attempt to reduce the cache size
+ *		by evicting entries that have not been accessed for more
  *		than the specified number of epochs.
  *
- * decrement: This field is only used when the decr_mode is 
+ * decrement: This field is only used when the decr_mode is
  *	H5C_decr__threshold.
  *
- *	The field is a double containing the multiplier used to derive the 
- *	new cache size from the old if a cache size decrement is triggered.  
+ *	The field is a double containing the multiplier used to derive the
+ *	new cache size from the old if a cache size decrement is triggered.
  *	The decrement must be in the range 0.0 (in which case the cache will
- *      try to contract to its minimum size) to 1.0 (in which case the 
+ *      try to contract to its minimum size) to 1.0 (in which case the
  *      cache will never shrink).
  *
  * apply_max_decrement:  Boolean flag used to determine whether decrements
@@ -537,21 +537,21 @@ typedef struct H5C_cache_entry_t
  *	restricted by the min_size of the cache, and (in age out modes) by
  *	the empty_reserve field.
  *
- * epochs_before_eviction:  Integer field used in H5C_decr__age_out and 
+ * epochs_before_eviction:  Integer field used in H5C_decr__age_out and
  *	H5C_decr__age_out_with_threshold decrement modes.
  *
- *	This field contains the number of epochs an entry must remain 
- *	unaccessed before it is evicted in an attempt to reduce the 
+ *	This field contains the number of epochs an entry must remain
+ *	unaccessed before it is evicted in an attempt to reduce the
  *	cache size.  If applicable, this field must lie in the range
  *	[1, H5C__MAX_EPOCH_MARKERS].
  *
  * apply_empty_reserve:  Boolean field controlling whether the empty_reserve
- *	field is to be used in computing the new cache size when the 
+ *	field is to be used in computing the new cache size when the
  *	decr_mode is H5C_decr__age_out or H5C_decr__age_out_with_threshold.
  *
  * empty_reserve:  To avoid a constant racheting down of cache size by small
- *	amounts in the H5C_decr__age_out and H5C_decr__age_out_with_threshold 
- *	modes, this field allows one to require that any cache size 
+ *	amounts in the H5C_decr__age_out and H5C_decr__age_out_with_threshold
+ *	modes, this field allows one to require that any cache size
  *	reductions leave the specified fraction of unused space in the cache.
  *
  *	The value of this field must be in the range [0.0, 1.0].  I would
@@ -639,7 +639,7 @@ typedef struct H5C_auto_size_ctl_t
 
     hbool_t			apply_max_increment;
     size_t			max_increment;
-    
+
 
     /* size decrease control fields: */
     enum H5C_cache_decr_mode	decr_mode;
@@ -663,7 +663,7 @@ typedef struct H5C_auto_size_ctl_t
  * Library prototypes.
  */
 
-/* #defines of flags used in the flags parameters in some of the 
+/* #defines of flags used in the flags parameters in some of the
  * following function calls.  Note that not all flags are applicable
  * to all function calls.  Flags that don't apply to a particular
  * function are ignored in that function.

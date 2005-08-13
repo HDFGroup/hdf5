@@ -35,7 +35,7 @@ NAME
    H5F_init_mount_interface -- Initialize interface-specific information
 USAGE
     herr_t H5F_init_mount_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -71,7 +71,7 @@ H5F_close_mounts(H5F_t *f)
 {
     unsigned u;                 /* Local index */
     herr_t ret_value=SUCCEED;   /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5F_close_mounts, FAIL)
 
     HDassert(f);
@@ -132,7 +132,7 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
     H5G_entry_t  mp_open_ent;     /* entry of moint point to be opened */
     H5RS_str_t  *name_r;                /* Ref-counted version of name */
     herr_t	ret_value = SUCCEED;	/*return value			*/
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5F_mount)
 
     assert(loc);
@@ -161,7 +161,7 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
 
     if(parent->shared->fc_degree != child->shared->fc_degree)
         HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mounted file has different file close degree than parent")
-    
+
     /*
      * Use a binary search to locate the position that the child should be
      * inserted into the parent mount table.  At the end of this paragraph
@@ -184,7 +184,7 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
         md++;
     if (!cmp)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point is already in use")
-    
+
     /* Make room in the table */
     if (parent->mtab.nmounts>=parent->mtab.nalloc) {
 	unsigned n = MAX(16, 2*parent->mtab.nalloc);
@@ -249,7 +249,7 @@ done:
  *
  *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
  *      Added `id to name' support.
- * 
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -265,7 +265,7 @@ H5F_unmount(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
     H5G_entry_t mnt_open_ent;           /* entry used to open mount point*/
     int         child_idx;              /* Index of child in parent's mtab */
     herr_t	ret_value = SUCCEED;	/*return value			*/
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5F_unmount)
 
     assert(loc);
@@ -391,7 +391,7 @@ H5F_mountpoint(H5G_entry_t *find/*in,out*/)
     int cmp;
     H5G_entry_t	*ent = NULL;
     herr_t ret_value=SUCCEED;   /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5F_mountpoint, FAIL)
 
     assert(find);
@@ -432,7 +432,7 @@ H5F_mountpoint(H5G_entry_t *find/*in,out*/)
 	    parent = ent->file;
 	}
     } while (!cmp);
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -457,7 +457,7 @@ htri_t
 H5F_has_mount(const H5F_t *file)
 {
     htri_t ret_value;   /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5F_has_mount, FAIL)
 
     assert(file);
@@ -466,7 +466,7 @@ H5F_has_mount(const H5F_t *file)
         ret_value=TRUE;
     else
         ret_value=FALSE;
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_has_mount() */
@@ -491,7 +491,7 @@ htri_t
 H5F_is_mount(const H5F_t *file)
 {
     htri_t ret_value;   /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5F_is_mount, FAIL)
 
     assert(file);
@@ -500,7 +500,7 @@ H5F_is_mount(const H5F_t *file)
         ret_value=TRUE;
     else
         ret_value=FALSE;
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_is_mount() */
@@ -527,7 +527,7 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
     H5G_entry_t		*loc = NULL;
     H5F_t		*child = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_API(H5Fmount, FAIL)
     H5TRACE4("e","isii",loc_id,name,child_id,plist_id);
 
@@ -579,7 +579,7 @@ H5Funmount(hid_t loc_id, const char *name)
 {
     H5G_entry_t		*loc = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_API(H5Funmount, FAIL)
     H5TRACE2("e","is",loc_id,name);
 
@@ -629,7 +629,7 @@ H5F_mount_count_ids_recurse(H5F_t *f, unsigned *nopen_files, unsigned *nopen_obj
     if(f->file_id > 0)
         *nopen_files += 1;
 
-    /* Increment number of open objects in file 
+    /* Increment number of open objects in file
      * (Reduced by number of mounted files, we'll add back in the mount point's
      *  groups later, if they are open)
      */
@@ -666,7 +666,7 @@ herr_t
 H5F_mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5F_mount_count_ids, FAIL)
 
     /* Sanity check */

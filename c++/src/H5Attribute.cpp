@@ -52,7 +52,7 @@ Attribute::Attribute( const Attribute& original ) : AbstractDs( original ) {}
 
 //--------------------------------------------------------------------------
 // Function:	Attribute overloaded constructor
-///\brief	Creates an Attribute object using the id of an existing 
+///\brief	Creates an Attribute object using the id of an existing
 ///		attribute.
 ///\param	existing_id - IN: Id of an existing attribute
 ///\exception	H5::AttributeIException
@@ -203,7 +203,7 @@ ssize_t Attribute::getName( size_t buf_size, string& attr_name ) const
    {
       throw AttributeIException("Attribute::getName", "H5Aget_name failed");
    }
-   // otherwise, convert the C attribute name and return 
+   // otherwise, convert the C attribute name and return
    attr_name = name_C;
    delete []name_C;
    return( name_size );
@@ -212,7 +212,7 @@ ssize_t Attribute::getName( size_t buf_size, string& attr_name ) const
 //--------------------------------------------------------------------------
 // Function:	Attribute::getName
 ///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it returns the 
+///		It differs from the above function in that it returns the
 ///		attribute's name, not the length.
 ///\return	Name of the attribute
 ///\param	buf_size  -  IN: Desired length of the name
@@ -223,7 +223,7 @@ string Attribute::getName( size_t buf_size ) const
 {
    string attr_name;
    ssize_t name_size = getName( buf_size, attr_name );
-   return( attr_name ); 
+   return( attr_name );
    // let caller catch exception if any
 }
 
@@ -238,8 +238,8 @@ string Attribute::getName( size_t buf_size ) const
 //--------------------------------------------------------------------------
 string Attribute::getName() const
 {
-   // Try with 256 characters for the name first, if the name's length 
-   // returned is more than that then, read the name again with the 
+   // Try with 256 characters for the name first, if the name's length
+   // returned is more than that then, read the name again with the
    // appropriate space allocation
    char* name_C = new char[256];  // temporary C-string for C API
    ssize_t name_size = H5Aget_name(id, 255, name_C);
@@ -248,12 +248,12 @@ string Attribute::getName() const
    if (name_size >= 256)
       name_size = getName(name_size, attr_name);
 
-   // otherwise, convert the C attribute name and return 
+   // otherwise, convert the C attribute name and return
    else
       attr_name = name_C;
 
    delete []name_C;
-   return( attr_name ); 
+   return( attr_name );
 }
 
 //--------------------------------------------------------------------------

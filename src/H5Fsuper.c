@@ -34,7 +34,7 @@ NAME
    H5F_init_super_interface -- Initialize interface-specific information
 USAGE
     herr_t H5T_init_super_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -69,10 +69,10 @@ H5F_init_super_interface(void)
  * Modifications:
  *              Raymond Lu
  *              May 24, 2005
- *              Started to check if driver(only family and multi drivers) 
+ *              Started to check if driver(only family and multi drivers)
  *              matches driver information saved in the superblock.  Wrong
  *              driver will result in a failure.
- * 
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -138,21 +138,21 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent, haddr_t addr
 
     /* Superblock version */
     super_vers = *p++;
-    if (super_vers > HDF5_SUPERBLOCK_VERSION_MAX) 
+    if (super_vers > HDF5_SUPERBLOCK_VERSION_MAX)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "bad superblock version number")
     if (H5P_set(c_plist, H5F_CRT_SUPER_VERS_NAME, &super_vers) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set superblock version")
 
     /* Freespace version */
     freespace_vers = *p++;
-    if (HDF5_FREESPACE_VERSION != freespace_vers) 
+    if (HDF5_FREESPACE_VERSION != freespace_vers)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "bad free space version number")
     if (H5P_set(c_plist, H5F_CRT_FREESPACE_VERS_NAME, &freespace_vers) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to free space version")
 
     /* Root group version number */
     obj_dir_vers = *p++;
-    if (HDF5_OBJECTDIR_VERSION != obj_dir_vers) 
+    if (HDF5_OBJECTDIR_VERSION != obj_dir_vers)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "bad object directory version number")
     if (H5P_set(c_plist, H5F_CRT_OBJ_DIR_VERS_NAME, &obj_dir_vers) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set object directory version")
@@ -162,7 +162,7 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent, haddr_t addr
 
     /* Shared header version number */
     share_head_vers = *p++;
-    if (HDF5_SHAREDHEADER_VERSION != share_head_vers) 
+    if (HDF5_SHAREDHEADER_VERSION != share_head_vers)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "bad shared-header format version number")
     if (H5P_set(c_plist, H5F_CRT_SHARE_HEAD_VERS_NAME, &share_head_vers) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set shared-header format version")
@@ -184,7 +184,7 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent, haddr_t addr
     if (H5P_set(c_plist, H5F_CRT_OBJ_BYTE_NUM_NAME, &sizeof_size) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set byte number for object size")
     shared->sizeof_size = sizeof_size;  /* Keep a local copy also */
-    
+
     /* Skip over reserved byte */
     p++;
 
@@ -277,10 +277,10 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent, haddr_t addr
     /* This step is for h5repart tool only. If user wants to change file driver from
      * family to sec2 while using h5repart, set the driver address to undefined to let
      * the library ignore the family driver information saved in the superblock.
-     */ 
+     */
     if(shared->fam_to_sec2)
         shared->driver_addr = HADDR_UNDEF;
-            
+
     /* Decode the optional driver information block */
     if (H5F_addr_defined(shared->driver_addr)) {
         haddr_t drv_addr = shared->base_addr + shared->driver_addr;
@@ -324,13 +324,13 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent, haddr_t addr
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to read file driver information")
         } /* end if */
 
-        /* Check if driver matches driver information saved. Unfortunately, we can't push this 
+        /* Check if driver matches driver information saved. Unfortunately, we can't push this
          * function to each specific driver because we're checking if the driver is correct.*/
         if(!HDstrncmp(driver_name, "NCSAfami", 8) && HDstrcmp(lf->cls->name, "family"))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "family driver should be used")
         if(!HDstrncmp(driver_name, "NCSAmult", 8) && HDstrcmp(lf->cls->name, "multi"))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "multi driver should be used")
-           
+
         if (H5FD_sb_decode(lf, driver_name, p) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to decode driver information")
 
@@ -342,7 +342,7 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent, haddr_t addr
         /* Set the driver info block checksum */
         shared->drvr_chksum = chksum;
     } /* end if */
-    
+
     /*
      * The user-defined data is the area of the file before the base
      * address.
@@ -363,7 +363,7 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent, haddr_t addr
 #endif  /* !H5_HAVE_FPHDF5 */
         if (eof < stored_eoa)
             HGOTO_ERROR(H5E_FILE, H5E_TRUNCATED, FAIL, "truncated file")
-    
+
     /*
      * Tell the file driver how much address space has already been
      * allocated so that it knows how to allocate additional memory.
@@ -545,7 +545,7 @@ H5F_write_superblock(H5F_t *f, hid_t dxpl_id, uint8_t *buf)
     *p++ = 0;   /* reserved */
     UINT16ENCODE(p, f->shared->sym_leaf_k);
     UINT16ENCODE(p, f->shared->btree_k[H5B_SNODE_ID]);
-    UINT32ENCODE(p, f->shared->consist_flags);    
+    UINT32ENCODE(p, f->shared->consist_flags);
 
     /*
      * Versions of the superblock >0 have the indexed storage B-tree

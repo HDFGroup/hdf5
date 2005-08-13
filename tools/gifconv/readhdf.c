@@ -30,17 +30,17 @@ cleanup(BYTE *ptr)
 **              BYTE  palette[256][3] - the corresponding palette
 **              hsize_t* image_size - the size of each dimension of the image
 **
-** Future Notes: 
-** The way readHDF works right now is that it expects the user 
+** Future Notes:
+** The way readHDF works right now is that it expects the user
 ** to know the exact path to the HDF image. Thus it does not
 ** parse the HDF file looking for image datasets and corresponding
-** palettes. Also it takes in the default palette for the image 
+** palettes. Also it takes in the default palette for the image
 ** specified, if the palette is missing, it makes a default greyscale
 ** palette and throws it in.
 **
 */
 int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
-            CHAR *h5_file, CHAR *dset_name, CHAR *pal_name) 
+            CHAR *h5_file, CHAR *dset_name, CHAR *pal_name)
 {
     hid_t fHfile;       /* H5 file to open                              */
     hid_t dspace;       /* dataspace identifier for the the dataset     */
@@ -130,7 +130,7 @@ int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
             pal_exist = 0;
             return -1;
         }
-        
+
         pal_dtype = H5Dget_type(pal_set);
         if (dtype < 0) {
             fprintf(stderr , "Unable to open palette datatype\n");
@@ -151,7 +151,7 @@ int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
             pal_exist = 0;
             return -1;
         }
-        
+
         /* get the dimension size of the palette. */
         if (H5Sget_simple_extent_dims(pal_space , loc_pal_size , NULL) !=2 ) {
             fprintf(stderr , "Unable to get dimension info\n");

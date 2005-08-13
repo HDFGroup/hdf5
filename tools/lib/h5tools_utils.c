@@ -66,7 +66,7 @@ error_msg(const char *progname, const char *fmt, ...)
     HDfflush(stdout);
     HDfprintf(stderr, "%s error: ", progname);
     HDvfprintf(stderr, fmt, ap);
-    
+
     va_end(ap);
 }
 
@@ -298,7 +298,7 @@ print_version(const char *progname)
 /*-------------------------------------------------------------------------
  * Function:    init_table
  *
- * Purpose:     allocate and initialize tables for shared groups, datasets, 
+ * Purpose:     allocate and initialize tables for shared groups, datasets,
  *              and committed types
  *
  * Return:      void
@@ -353,7 +353,7 @@ init_prefix(char **prefix, size_t prefix_len)
 /*-------------------------------------------------------------------------
  * Function:    free_table
  *
- * Purpose:     free tables for shared groups, datasets, 
+ * Purpose:     free tables for shared groups, datasets,
  *              and committed types
  *
  * Return:      void
@@ -386,7 +386,7 @@ free_table(table_t **table)
  *
  *-------------------------------------------------------------------------
  */
-int 
+int
 search_obj(table_t *table, haddr_t objno)
 {
     int i;
@@ -394,13 +394,13 @@ search_obj(table_t *table, haddr_t objno)
     for (i = 0; i < table->nobjs; i++)
         if (table->objs[i].objno == objno)
 	    return i;
-  
+
     return FAIL;
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:    find_objs 
+ * Function:    find_objs
  *
  * Purpose:     Find objects, committed types and store them in tables
  *
@@ -430,7 +430,7 @@ find_objs(hid_t group, const char *name, void *op_data)
     H5Gget_objinfo(group, name, TRUE, &statbuf);
 
     tmp = HDmalloc(HDstrlen(info->prefix) + HDstrlen(name) + 2);
-    HDstrcpy(tmp, info->prefix); 
+    HDstrcpy(tmp, info->prefix);
 
     switch (statbuf.type) {
         case H5G_GROUP:
@@ -445,7 +445,7 @@ find_objs(hid_t group, const char *name, void *op_data)
 
                 if (statbuf.nlink > info->threshold) {
                     if (search_obj(info->group_table, statbuf.objno) == FAIL) {
-                        add_obj(info->group_table, statbuf.objno, info->prefix); 
+                        add_obj(info->group_table, statbuf.objno, info->prefix);
                         H5Giterate(obj, ".", NULL, find_objs, (void *)info);
                     }
                 } else {
@@ -468,7 +468,7 @@ find_objs(hid_t group, const char *name, void *op_data)
                             search_obj(info->dset_table, statbuf.objno) == FAIL)
                 add_obj(info->dset_table, statbuf.objno, tmp);
 
-            if ((obj = H5Dopen (group, name)) >= 0) {              
+            if ((obj = H5Dopen (group, name)) >= 0) {
                 type = H5Dget_type(obj);
 
                 if (H5Tcommitted(type) > 0) {
@@ -485,7 +485,7 @@ find_objs(hid_t group, const char *name, void *op_data)
             } else {
                 info->status = 1;
             }
-                
+
             break;
 
         case H5G_TYPE:
@@ -504,9 +504,9 @@ find_objs(hid_t group, const char *name, void *op_data)
             } else {
                 free(info->type_table->objs[i].objname);
                 info->type_table->objs[i].objname = HDstrdup(tmp);
-                info->type_table->objs[i].recorded = 1; 
+                info->type_table->objs[i].recorded = 1;
 
-                /* named data type */  
+                /* named data type */
                 info->type_table->objs[info->type_table->nobjs-1].objflag = 1;
             }
 
@@ -534,7 +534,7 @@ find_objs(hid_t group, const char *name, void *op_data)
  *
  *-------------------------------------------------------------------------
  */
-void 
+void
 dump_table(char* tablename, table_t *table)
 {
     int i;
@@ -683,7 +683,7 @@ add_obj(table_t *table, haddr_t objno, char *objname)
  *
  *-------------------------------------------------------------------------
  */
-static 
+static
 FILE *
 tmpfile(void)
 {

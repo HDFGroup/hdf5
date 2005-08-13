@@ -32,7 +32,7 @@ class H5_DLLCPP DataSet : public AbstractDs {
 
 	// Fills a selection in memory with a value
 	void fillMemBuf(const void *fill, DataType& fill_type, void *buf, DataType& buf_type, DataSpace& space);
-	// Fills a selection in memory with zero 
+	// Fills a selection in memory with zero
 	void fillMemBuf(void *buf, DataType& buf_type, DataSpace& space);
 
 	// Gets the creation property list of this dataset.
@@ -40,7 +40,7 @@ class H5_DLLCPP DataSet : public AbstractDs {
 
 	// Returns the address of this dataset in the file.
 	haddr_t getOffset() const;
-	
+
 	// Gets the dataspace of this dataset.
 	virtual DataSpace getSpace() const;
 
@@ -100,7 +100,7 @@ class H5_DLLCPP DataSet : public AbstractDs {
 
    private:
         // This function contains the common code that is used by
-        // getTypeClass and various API functions getXxxType 
+        // getTypeClass and various API functions getXxxType
         // defined in AbstractDs for generic datatype and specific
         // sub-types
 	virtual hid_t p_get_type() const;

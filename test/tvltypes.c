@@ -28,7 +28,7 @@
 
 /* 1-D dataset with fixed dimensions */
 #define SPACE1_RANK	1
-#define SPACE1_DIM1     4 
+#define SPACE1_DIM1     4
 
 /* 2-D dataset with fixed dimensions */
 #define SPACE2_RANK	2
@@ -39,7 +39,7 @@
 #define SPACE3_RANK	1
 #define SPACE3_DIM1     128
 #define L1_INCM         16
-#define L2_INCM         8 
+#define L2_INCM         8
 
 void *test_vltypes_alloc_custom(size_t size, void *info);
 void test_vltypes_free_custom(void *mem, void *info);
@@ -50,7 +50,7 @@ void test_vltypes_free_custom(void *mem, void *info);
 **      allocation routines.  This routine just uses malloc to
 **      allocate the memory and increments the amount of memory
 **      allocated.
-** 
+**
 ****************************************************************/
 void *test_vltypes_alloc_custom(size_t size, void *info)
 {
@@ -78,7 +78,7 @@ void *test_vltypes_alloc_custom(size_t size, void *info)
 **      allocation routines.  This routine just uses free to
 **      release the memory and decrements the amount of memory
 **      allocated.
-** 
+**
 ****************************************************************/
 void test_vltypes_free_custom(void *_mem, void *info)
 {
@@ -101,8 +101,8 @@ void test_vltypes_free_custom(void *_mem, void *info)
 
 /****************************************************************
 **
-**  test_vltypes_data_create(): Dataset of VL is supposed to 
-**      fail when fill value is never written to dataset. 
+**  test_vltypes_data_create(): Dataset of VL is supposed to
+**      fail when fill value is never written to dataset.
 **
 ****************************************************************/
 static void
@@ -142,7 +142,7 @@ test_vltypes_dataset_create(void)
     /* Create a dataset, supposed to fail */
     H5E_BEGIN_TRY {
     	dataset=H5Dcreate(fid1,"Dataset1",tid1,sid1,dcpl);
-    } H5E_END_TRY;    
+    } H5E_END_TRY;
     VERIFY(dataset, FAIL, "H5Dcreate");
 
     /* Close datatype */
@@ -166,9 +166,9 @@ test_vltypes_dataset_create(void)
 **
 **  test_vltypes_vlen_atomic(): Test basic VL datatype code.
 **      Tests VL datatypes of atomic datatypes
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_vltypes_vlen_atomic(void)
 {
     hvl_t wdata[SPACE1_DIM1];   /* Information to write */
@@ -226,7 +226,7 @@ test_vltypes_vlen_atomic(void)
     for(i=0; i<SPACE1_DIM1; i++)
         if(rdata[i].len!=0 || rdata[i].p!=NULL)
             TestErrPrintf("VL doesn't match!, rdata[%d].len=%u, rdata[%d].p=%p\n",(int)i,(unsigned)rdata[i].len,(int)i,rdata[i].p);
-    
+
     /* Write "nil" data to disk */
     ret=H5Dwrite(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata2);
     CHECK(ret, FAIL, "H5Dwrite");
@@ -239,7 +239,7 @@ test_vltypes_vlen_atomic(void)
     for(i=0; i<SPACE1_DIM1; i++)
         if(rdata[i].len!=0 || rdata[i].p!=NULL)
             TestErrPrintf("VL doesn't match!, rdata[%d].len=%u, rdata[%d].p=%p\n",(int)i,(unsigned)rdata[i].len,(int)i,rdata[i].p);
-    
+
     /* Write dataset to disk */
     ret=H5Dwrite(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
     CHECK(ret, FAIL, "H5Dwrite");
@@ -264,7 +264,7 @@ test_vltypes_vlen_atomic(void)
     /* Close dataset creation property list */
     ret = H5Pclose(dcpl_pid);
     CHECK(ret, FAIL, "H5Pclose");
-    
+
     /* Read from dataset before writing data */
     ret=H5Dread(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,rdata);
     CHECK(ret, FAIL, "H5Dread");
@@ -273,7 +273,7 @@ test_vltypes_vlen_atomic(void)
     for(i=0; i<SPACE1_DIM1; i++)
         if(rdata[i].len!=0 || rdata[i].p!=NULL)
             TestErrPrintf("VL doesn't match!, rdata[%d].len=%u, rdata[%d].p=%p\n",(int)i,(unsigned)rdata[i].len,(int)i,rdata[i].p);
-    
+
     /* Write "nil" data to disk */
     ret=H5Dwrite(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata2);
     CHECK(ret, FAIL, "H5Dwrite");
@@ -286,7 +286,7 @@ test_vltypes_vlen_atomic(void)
     for(i=0; i<SPACE1_DIM1; i++)
         if(rdata[i].len!=0 || rdata[i].p!=NULL)
             TestErrPrintf("VL doesn't match!, rdata[%d].len=%u, rdata[%d].p=%p\n",(int)i,(unsigned)rdata[i].len,(int)i,rdata[i].p);
-    
+
     /* Write data to disk */
     ret=H5Dwrite(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
     CHECK(ret, FAIL, "H5Dwrite");
@@ -378,11 +378,11 @@ test_vltypes_vlen_atomic(void)
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close dataset transfer property list */
     ret = H5Pclose(xfer_pid);
     CHECK(ret, FAIL, "H5Pclose");
-    
+
 
     /* Open second dataset */
     dataset=H5Dopen(fid1,"Dataset2");
@@ -471,11 +471,11 @@ test_vltypes_vlen_atomic(void)
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close dataset transfer property list */
     ret = H5Pclose(xfer_pid);
     CHECK(ret, FAIL, "H5Pclose");
-    
+
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
@@ -643,9 +643,9 @@ rewrite_vltypes_vlen_atomic(void)
 **
 **  test_vltypes_vlen_compound(): Test basic VL datatype code.
 **      Test VL datatypes of compound datatypes
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_vltypes_vlen_compound(void)
 {
     typedef struct {             /* Struct that the VL sequences are composed of */
@@ -774,11 +774,11 @@ test_vltypes_vlen_compound(void)
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close dataset transfer property list */
     ret = H5Pclose(xfer_pid);
     CHECK(ret, FAIL, "H5Pclose");
-    
+
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
@@ -934,9 +934,9 @@ rewrite_vltypes_vlen_compound(void)
 **
 **  test_vltypes_compound_vlen_vlen(): Test basic VL datatype code.
 **      Tests compound datatypes with VL datatypes of VL datatypes.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_vltypes_compound_vlen_vlen(void)
 {
     typedef struct {                    /* Struct that the compound type are composed of */
@@ -1024,7 +1024,7 @@ test_vltypes_compound_vlen_vlen(void)
     /* Open a dataset */
     dataset=H5Dopen(fid1,"Dataset1");
     CHECK(dataset, FAIL, "H5Dopen");
-    
+
     /* Read dataset from disk */
     ret=H5Dread(dataset,tid2,H5S_ALL,H5S_ALL,H5P_DEFAULT,rdata);
     CHECK(ret, FAIL, "H5Dread");
@@ -1039,7 +1039,7 @@ test_vltypes_compound_vlen_vlen(void)
             TestErrPrintf("Float components don't match!, wdata[%d].f=%f, rdata[%d].f=%f\n",(int)i,(double)wdata[i].f,(int)i,(double)rdata[i].f);
             continue;
         } /* end if */
-        
+
         if(wdata[i].v.len!=rdata[i].v.len) {
             TestErrPrintf("%d: VL data length don't match!, wdata[%d].v.len=%d, rdata[%d].v.len=%d\n",__LINE__,(int)i,(int)wdata[i].v.len,(int)i,(int)rdata[i].v.len);
             continue;
@@ -1062,7 +1062,7 @@ test_vltypes_compound_vlen_vlen(void)
     /* Reclaim the VL data */
     ret=H5Dvlen_reclaim(tid2,sid1,H5P_DEFAULT,rdata);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
-    
+
     /* Reclaim the write VL data */
     ret=H5Dvlen_reclaim(tid2,sid1,H5P_DEFAULT,wdata);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
@@ -1082,7 +1082,7 @@ test_vltypes_compound_vlen_vlen(void)
     /* Close datatype */
     ret = H5Tclose(tid1);
     CHECK(ret, FAIL, "H5Tclose");
-    
+
     /* Close datatype */
     ret = H5Tclose(tid3);
     CHECK(ret, FAIL, "H5Tclose");
@@ -1096,9 +1096,9 @@ test_vltypes_compound_vlen_vlen(void)
 **
 **  test_vltypes_compound_vlen_atomic(): Test basic VL datatype code.
 **      Tests compound datatypes with VL datatypes of atomic datatypes.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_vltypes_compound_vlen_atomic(void)
 {
     typedef struct {             /* Struct that the VL sequences are composed of */
@@ -1236,7 +1236,7 @@ test_vltypes_compound_vlen_atomic(void)
     /* Close dataset creation property list */
     ret = H5Pclose(dcpl_pid);
     CHECK(ret, FAIL, "H5Pclose");
-    
+
     /* Read from dataset before writing data */
     ret=H5Dread(dataset,tid2,H5S_ALL,H5S_ALL,H5P_DEFAULT,rdata);
     CHECK(ret, FAIL, "H5Dread");
@@ -1245,7 +1245,7 @@ test_vltypes_compound_vlen_atomic(void)
     for(i=0; i<SPACE1_DIM1; i++)
         if(rdata[i].i!=0 || rdata[i].f!=0.0 || rdata[i].v.len!=0 || rdata[i].v.p!=NULL)
             TestErrPrintf("VL doesn't match!, rdata[%d].i=%d, rdata[%d].f=%f, rdata[%d].v.len=%u, rdata[%d].v.p=%p\n",(int)i,rdata[i].i,(int)i,rdata[i].f,(int)i,(unsigned)rdata[i].v.len,(int)i,rdata[i].v.p);
-    
+
     /* Write dataset to disk */
     ret=H5Dwrite(dataset,tid2,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
     CHECK(ret, FAIL, "H5Dwrite");
@@ -1299,11 +1299,11 @@ test_vltypes_compound_vlen_atomic(void)
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close dataset transfer property list */
     ret = H5Pclose(xfer_pid);
     CHECK(ret, FAIL, "H5Pclose");
-    
+
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
@@ -1312,9 +1312,9 @@ test_vltypes_compound_vlen_atomic(void)
 
 /****************************************************************
 **
-**  rewrite_vltypes_compound_vlen_atomic(): Check memory leak for 
+**  rewrite_vltypes_compound_vlen_atomic(): Check memory leak for
 **	basic VL datatype code.
-**      Check memory leak for compound datatypes with VL datatypes 
+**      Check memory leak for compound datatypes with VL datatypes
 **	of atomic datatypes.
 **
 ****************************************************************/
@@ -1469,7 +1469,7 @@ rewrite_vltypes_compound_vlen_atomic(void)
 **
 **  vlen_size_func(): Test basic VL datatype code.
 **      Tests VL datatype with VL datatypes of atomic datatypes.
-** 
+**
 ****************************************************************/
 static size_t vlen_size_func(unsigned long n)
 {
@@ -1489,9 +1489,9 @@ static size_t vlen_size_func(unsigned long n)
 **
 **  test_vltypes_vlen_vlen_atomic(): Test basic VL datatype code.
 **      Tests VL datatype with VL datatypes of atomic datatypes.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_vltypes_vlen_vlen_atomic(void)
 {
     hvl_t wdata[SPACE1_DIM1];   /* Information to write */
@@ -1570,7 +1570,7 @@ test_vltypes_vlen_vlen_atomic(void)
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
@@ -1665,11 +1665,11 @@ test_vltypes_vlen_vlen_atomic(void)
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close dataset transfer property list */
     ret = H5Pclose(xfer_pid);
     CHECK(ret, FAIL, "H5Pclose");
-    
+
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
@@ -1845,7 +1845,7 @@ rewrite_longer_vltypes_vlen_vlen_atomic(void)
     /* Close dataset transfer property list */
     ret = H5Pclose(xfer_pid);
     CHECK(ret, FAIL, "H5Pclose");
-   
+
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
@@ -1987,7 +1987,7 @@ rewrite_shorter_vltypes_vlen_vlen_atomic(void)
                 continue;
             } /* end if */
             for(k=0; k<t2->len; k++) {
-                if( ((unsigned int *)t1->p)[k] != ((unsigned int *)t2->p)[k] ) { 
+                if( ((unsigned int *)t1->p)[k] != ((unsigned int *)t2->p)[k] ) {
                     TestErrPrintf("VL data values don't match!, t1->p[%d]=%d, t2->p[%d]=%d\n",(int)k, (int)((unsigned int *)t1->p)[k], (int)k, (int)((unsigned int *)t2->p)[k]);
                     continue;
                 } /* end if */
@@ -2031,9 +2031,9 @@ rewrite_shorter_vltypes_vlen_vlen_atomic(void)
 /****************************************************************
 **
 **  test_vltypes(): Main VL datatype testing routine.
-** 
+**
 ****************************************************************/
-void 
+void
 test_vltypes(void)
 {
     /* Output message about test being performed */

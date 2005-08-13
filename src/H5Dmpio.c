@@ -306,7 +306,7 @@ done:
  *
  * Return:	non-negative on success, negative on failure.
  *
- * Programmer:	
+ * Programmer:
  *
  * Modifications:
  *
@@ -336,7 +336,7 @@ H5D_mpio_select_read(H5D_io_info_t *io_info,
  *
  * Return:	non-negative on success, negative on failure.
  *
- * Programmer:	
+ * Programmer:
  *
  * Modifications:
  *

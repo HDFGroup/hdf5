@@ -58,9 +58,9 @@ class H5_DLLCPP FileAccPropList : public PropList {
 	FileAccPropList getFamily(hsize_t& memb_size) const;
 
 	// Emulates the old split file driver,
-	void setSplit( FileAccPropList& meta_plist, FileAccPropList& raw_plist, 
+	void setSplit( FileAccPropList& meta_plist, FileAccPropList& raw_plist,
 	     const char* meta_ext = ".meta", const char* raw_ext = ".raw" ) const;
-	void setSplit( FileAccPropList& meta_plist, FileAccPropList& raw_plist, 
+	void setSplit( FileAccPropList& meta_plist, FileAccPropList& raw_plist,
 	     const string& meta_ext, const string& raw_ext ) const;
 
 #ifdef H5_HAVE_STREAM // for Stream Virtual File Driver

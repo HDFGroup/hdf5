@@ -76,37 +76,37 @@ typedef struct {
 #define MISC5_DBGELVAL3         777777777
 
 typedef struct
-{   
+{
     int st1_el1;
     hvl_t st1_el2;
 } misc5_struct1;
 
 typedef struct
-{   
+{
     int st2_el1;
     hvl_t st2_el2;
 } misc5_struct2;
 
 typedef struct
-{   
+{
     int st3_el1;
 } misc5_struct3;
 
 typedef struct
-{   
+{
     hid_t         st3h_base;
     hid_t         st3h_id;
 } misc5_struct3_hndl;
 
 typedef struct
-{   
+{
     hid_t         st2h_base;
     hid_t         st2h_id;
     misc5_struct3_hndl *st2h_st3hndl;
 } misc5_struct2_hndl;
 
 typedef struct
-{   
+{
     hid_t         st1h_base;
     hid_t         st1h_id;
     misc5_struct2_hndl *st1h_st2hndl;
@@ -139,7 +139,7 @@ typedef struct
 #define MISC8_DSETNAME10        "Dataset10"
 #define MISC8_RANK              2
 #define MISC8_DIM0              50
-#define MISC8_DIM1              50 
+#define MISC8_DIM1              50
 #define MISC8_CHUNK_DIM0        10
 #define MISC8_CHUNK_DIM1        10
 
@@ -200,7 +200,7 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 
 /* Definitions for misc. test #16 */
 #define MISC16_FILE             "tmisc16.h5"
-#define MISC16_SPACE_DIM        4 
+#define MISC16_SPACE_DIM        4
 #define MISC16_SPACE_RANK       1
 #define MISC16_STR_SIZE         8
 #define MISC16_DSET_NAME        "Dataset"
@@ -208,8 +208,8 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 /* Definitions for misc. test #17 */
 #define MISC17_FILE             "tmisc17.h5"
 #define MISC17_SPACE_RANK       2
-#define MISC17_SPACE_DIM1       4 
-#define MISC17_SPACE_DIM2       8 
+#define MISC17_SPACE_DIM1       4
+#define MISC17_SPACE_DIM2       8
 #define MISC17_DSET_NAME        "Dataset"
 
 /* Definitions for misc. test #18 */
@@ -529,15 +529,15 @@ test_misc3(void)
 
     /* Create a dataset creation property list */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    CHECK(dcpl, FAIL, "H5Pcreate"); 
+    CHECK(dcpl, FAIL, "H5Pcreate");
 
     /* Set the chunk information */
     ret = H5Pset_chunk(dcpl,rank,chunk_dims);
-    CHECK(dcpl, FAIL, "H5Pset_chunk"); 
+    CHECK(dcpl, FAIL, "H5Pset_chunk");
 
     /* Set the fill-value information */
     ret = H5Pset_fill_value(dcpl,H5T_NATIVE_INT,&fill);
-    CHECK(dcpl, FAIL, "H5Pset_fill_value"); 
+    CHECK(dcpl, FAIL, "H5Pset_fill_value");
 
     /* Create the dataset */
     dataset = H5Dcreate(file, MISC3_DSET_NAME, H5T_NATIVE_INT, dataspace, dcpl);
@@ -662,7 +662,7 @@ create_struct3(void)
     return(str3hndl);
 }
 
-static void 
+static void
 delete_struct3(misc5_struct3_hndl *str3hndl)
 {
     herr_t ret;                         /* For error checking */
@@ -676,7 +676,7 @@ delete_struct3(misc5_struct3_hndl *str3hndl)
     free(str3hndl);
 }
 
-static void 
+static void
 set_struct3(misc5_struct3 *buf)
 {
     buf->st3_el1=MISC5_DBGELVAL3;
@@ -779,7 +779,7 @@ create_struct1(void)
 
 static void
 delete_struct1(misc5_struct1_hndl *str1hndl)
-{   
+{
     herr_t ret;                         /* For error checking */
 
     ret=H5Tclose(str1hndl->st1h_id);
@@ -795,7 +795,7 @@ delete_struct1(misc5_struct1_hndl *str1hndl)
 
 static void
 set_struct1(misc5_struct1 *buf)
-{   
+{
     unsigned i;         /* Local index variable */
 
     buf->st1_el1=MISC5_DBGELVAL1;
@@ -1193,7 +1193,7 @@ test_misc8(void)
 
     /* Create a file acccess property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
-    CHECK(fapl, FAIL, "H5Pcreate"); 
+    CHECK(fapl, FAIL, "H5Pcreate");
 
     /* Get the default file access properties for caching */
     ret=H5Pget_cache(fapl,&mdc_nelmts,&rdcc_nelmts,&rdcc_nbytes,&rdcc_w0);
@@ -1227,16 +1227,16 @@ test_misc8(void)
 
     /* Create a dataset creation property list */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    CHECK(dcpl, FAIL, "H5Pcreate"); 
+    CHECK(dcpl, FAIL, "H5Pcreate");
 
     /*          I.  contiguous dataset tests    */
 
     ret = H5Pset_layout(dcpl, H5D_CONTIGUOUS);
-    CHECK(ret, FAIL, "H5Pset_layout");   
+    CHECK(ret, FAIL, "H5Pset_layout");
 
     /* Set the space allocation time to early */
     ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_EARLY);
-    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
+    CHECK(ret, FAIL, "H5Pset_alloc_time");
 
     /* Create a contiguous dataset, with space allocation early */
     did = H5Dcreate(fid, MISC8_DSETNAME1, H5T_NATIVE_INT, sid, dcpl);
@@ -1254,7 +1254,7 @@ test_misc8(void)
 #ifndef H5_HAVE_PARALLEL
     /* Set the space allocation time to late */
     ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_LATE);
-    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
+    CHECK(ret, FAIL, "H5Pset_alloc_time");
 
     /* Create a contiguous dataset, with space allocation late */
     did = H5Dcreate(fid, MISC8_DSETNAME2, H5T_NATIVE_INT, sid, dcpl);
@@ -1279,7 +1279,7 @@ test_misc8(void)
 
     /* Set the space allocation time to incremental */
     ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_INCR);
-    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
+    CHECK(ret, FAIL, "H5Pset_alloc_time");
 
     /* Create a contiguous dataset, with space allocation late */
     did = H5Dcreate(fid, MISC8_DSETNAME3, H5T_NATIVE_INT, sid, dcpl);
@@ -1305,11 +1305,11 @@ test_misc8(void)
 
     /*          II.     compact dataset tests           */
     ret = H5Pset_layout(dcpl, H5D_COMPACT);
-    CHECK(ret, FAIL, "H5Pset_layout");   
+    CHECK(ret, FAIL, "H5Pset_layout");
 
     /* Set the space allocation time to late */
     ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_LATE);
-    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
+    CHECK(ret, FAIL, "H5Pset_alloc_time");
 
     /* Create a contiguous dataset, with space allocation late */
     /* Should fail */
@@ -1318,7 +1318,7 @@ test_misc8(void)
 
     /* Set the space allocation time to incremental */
     ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_INCR);
-    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
+    CHECK(ret, FAIL, "H5Pset_alloc_time");
 
     /* Create a contiguous dataset, with space allocation incremental */
     /* Should fail */
@@ -1327,11 +1327,11 @@ test_misc8(void)
 
     /* Set the space allocation time to early */
     ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_EARLY);
-    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
+    CHECK(ret, FAIL, "H5Pset_alloc_time");
 
     /* Set the fill time to allocation */
     ret = H5Pset_fill_time(dcpl,H5D_FILL_TIME_ALLOC);
-    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
+    CHECK(ret, FAIL, "H5Pset_alloc_time");
 
     /* Create a contiguous dataset, with space allocation early */
     did = H5Dcreate(fid, MISC8_DSETNAME4, H5T_NATIVE_INT, sid, dcpl);
@@ -1350,15 +1350,15 @@ test_misc8(void)
     /*          III.    chunked dataset tests           */
 
     ret = H5Pset_layout(dcpl, H5D_CHUNKED);
-    CHECK(ret, FAIL, "H5Pset_layout");   
+    CHECK(ret, FAIL, "H5Pset_layout");
 
     /* Set the space allocation time to early */
     ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_EARLY);
-    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
+    CHECK(ret, FAIL, "H5Pset_alloc_time");
 
     /* Use chunked storage for this dataset */
     ret = H5Pset_chunk(dcpl,rank,chunk_dims);
-    CHECK(ret, FAIL, "H5Pset_chunk"); 
+    CHECK(ret, FAIL, "H5Pset_chunk");
 
     /* Create a chunked dataset, with space allocation early */
     did = H5Dcreate(fid, MISC8_DSETNAME5, H5T_NATIVE_INT, sid, dcpl);
@@ -1376,11 +1376,11 @@ test_misc8(void)
 #ifndef H5_HAVE_PARALLEL
     /* Set the space allocation time to late */
     ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_LATE);
-    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
+    CHECK(ret, FAIL, "H5Pset_alloc_time");
 
     /* Use chunked storage for this dataset */
     ret = H5Pset_chunk(dcpl,rank,chunk_dims);
-    CHECK(ret, FAIL, "H5Pset_chunk"); 
+    CHECK(ret, FAIL, "H5Pset_chunk");
 
     /* Create a chunked dataset, with space allocation late */
     did = H5Dcreate(fid, MISC8_DSETNAME6, H5T_NATIVE_INT, sid, dcpl);
@@ -1405,7 +1405,7 @@ test_misc8(void)
 
     /* Set the space allocation time to incremental */
     ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_INCR);
-    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
+    CHECK(ret, FAIL, "H5Pset_alloc_time");
 
     /* Create a chunked dataset, with space allocation incremental */
     did = H5Dcreate(fid, MISC8_DSETNAME7, H5T_NATIVE_INT, sid, dcpl);
@@ -1453,12 +1453,12 @@ test_misc8(void)
 
     /* Set the space allocation time to early */
     ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_EARLY);
-    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
+    CHECK(ret, FAIL, "H5Pset_alloc_time");
 
     /* Use compression as well as chunking for these datasets */
 #ifdef H5_HAVE_FILTER_DEFLATE
     ret = H5Pset_deflate(dcpl,9);
-    CHECK(ret, FAIL, "H5Pset_deflate"); 
+    CHECK(ret, FAIL, "H5Pset_deflate");
 #endif /* end H5_HAVE_FILTER_DEFLATE */
 
     /* Create a chunked dataset, with space allocation early */
@@ -1487,7 +1487,7 @@ test_misc8(void)
 #ifndef H5_HAVE_PARALLEL
     /* Set the space allocation time to late */
     ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_LATE);
-    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
+    CHECK(ret, FAIL, "H5Pset_alloc_time");
 
     /* Create a chunked dataset, with space allocation late */
     did = H5Dcreate(fid, MISC8_DSETNAME9, H5T_NATIVE_INT, sid, dcpl);
@@ -1547,7 +1547,7 @@ test_misc8(void)
 
     /* Set the space allocation time to incremental */
     ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_INCR);
-    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
+    CHECK(ret, FAIL, "H5Pset_alloc_time");
 
     /* Create a chunked dataset, with space allocation incremental */
     did = H5Dcreate(fid, MISC8_DSETNAME10, H5T_NATIVE_INT, sid, dcpl);
@@ -1673,7 +1673,7 @@ test_misc10(void)
     hid_t       space, type;    /* Old dataset's dataspace & datatype */
     char testfile[512]="";          /* Character buffer for corrected test file name */
     char *srcdir = getenv("srcdir");    /* Pointer to the directory the source code is located within */
-    herr_t      ret;                             
+    herr_t      ret;
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing using old dataset creation property list\n"));
@@ -1790,20 +1790,20 @@ test_misc11(void)
 
     /* Create a file creation property list */
     fcpl = H5Pcreate(H5P_FILE_CREATE);
-    CHECK(fcpl, FAIL, "H5Pcreate"); 
+    CHECK(fcpl, FAIL, "H5Pcreate");
 
     /* Set all the properties in the FCPL */
     ret=H5Pset_userblock(fcpl,(hsize_t)MISC11_USERBLOCK);
-    CHECK(ret, FAIL, "H5Pset_userblock"); 
+    CHECK(ret, FAIL, "H5Pset_userblock");
 
     ret=H5Pset_sizes(fcpl,MISC11_SIZEOF_OFF,MISC11_SIZEOF_LEN);
-    CHECK(ret, FAIL, "H5Pset_sizes"); 
+    CHECK(ret, FAIL, "H5Pset_sizes");
 
     ret=H5Pset_sym_k(fcpl,MISC11_SYM_IK,MISC11_SYM_LK);
-    CHECK(ret, FAIL, "H5Pset_sym_k"); 
+    CHECK(ret, FAIL, "H5Pset_sym_k");
 
     ret=H5Pset_istore_k(fcpl,MISC11_ISTORE_IK);
-    CHECK(ret, FAIL, "H5Pset_istore_k"); 
+    CHECK(ret, FAIL, "H5Pset_istore_k");
 
     /* Creating a file with the non-default file creation property list should
      * create a version 1 superblock
@@ -1855,22 +1855,22 @@ test_misc11(void)
 
     /* Retrieve all the property values & check them */
     ret=H5Pget_userblock(fcpl,&userblock);
-    CHECK(ret, FAIL, "H5Pget_userblock"); 
-    VERIFY(userblock, MISC11_USERBLOCK, "H5Pget_userblock"); 
+    CHECK(ret, FAIL, "H5Pget_userblock");
+    VERIFY(userblock, MISC11_USERBLOCK, "H5Pget_userblock");
 
     ret=H5Pget_sizes(fcpl,&off_size,&len_size);
-    CHECK(ret, FAIL, "H5Pget_sizes"); 
-    VERIFY(off_size, MISC11_SIZEOF_OFF, "H5Pget_sizes"); 
-    VERIFY(len_size, MISC11_SIZEOF_LEN, "H5Pget_sizes"); 
+    CHECK(ret, FAIL, "H5Pget_sizes");
+    VERIFY(off_size, MISC11_SIZEOF_OFF, "H5Pget_sizes");
+    VERIFY(len_size, MISC11_SIZEOF_LEN, "H5Pget_sizes");
 
     ret=H5Pget_sym_k(fcpl,&sym_ik,&sym_lk);
-    CHECK(ret, FAIL, "H5Pget_sym_k"); 
-    VERIFY(sym_ik, MISC11_SYM_IK, "H5Pget_sym_k"); 
-    VERIFY(sym_lk, MISC11_SYM_LK, "H5Pget_sym_k"); 
+    CHECK(ret, FAIL, "H5Pget_sym_k");
+    VERIFY(sym_ik, MISC11_SYM_IK, "H5Pget_sym_k");
+    VERIFY(sym_lk, MISC11_SYM_LK, "H5Pget_sym_k");
 
     ret=H5Pget_istore_k(fcpl,&istore_ik);
-    CHECK(ret, FAIL, "H5Pget_istore_k"); 
-    VERIFY(istore_ik, MISC11_ISTORE_IK, "H5Pget_istore_k"); 
+    CHECK(ret, FAIL, "H5Pget_istore_k");
+    VERIFY(istore_ik, MISC11_ISTORE_IK, "H5Pget_istore_k");
 
     /* Close file */
     ret=H5Fclose(file);
@@ -1895,19 +1895,19 @@ test_misc12(void)
         "conceived in liberty and dedicated to the proposition that all men are created equal.",
         "Now we are engaged in a great civil war,",
         "testing whether that nation or any nation so conceived and so dedicated can long endure."
-        };   
+        };
     const char *wdata1 [MISC12_APPEND_SIZE]= {
        "O Gloria inmarcesible! O Jubilo inmortal! En surcos de dolores, el",
        "bien germina ya! Ceso la horrible noche, La libertad sublime",
        "derrama las auroras de su invencible luz.",
-       "La humanidad entera, que entre cadenas gime, comprende", 
+       "La humanidad entera, que entre cadenas gime, comprende",
        "las palabras del que murio en la cruz."
         };
     char        *rdata [MISC12_SPACE1_DIM1+MISC12_APPEND_SIZE]; /* Information read in */
-    hid_t		fid1;		      
-    hid_t		dataset;	    
+    hid_t		fid1;
+    hid_t		dataset;
     hid_t		sid1, space, memspace;
-    hid_t		tid1, cparms;  
+    hid_t		tid1, cparms;
     hsize_t		dims1[] = {MISC12_SPACE1_DIM1};
     hsize_t		dimsn[] = {MISC12_APPEND_SIZE};
     hsize_t		maxdims1[1] = {H5S_UNLIMITED};
@@ -1953,7 +1953,7 @@ test_misc12(void)
     /* Write dataset to disk */
     ret = H5Dwrite (dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
     CHECK(ret, FAIL, "H5Dwrite");
-    
+
     /* Extend dataset */
     ret = H5Dextend (dataset, newsize);
     CHECK(ret, FAIL, "H5Dextend");
@@ -2625,8 +2625,8 @@ test_misc15(void)
 
 /****************************************************************
 **
-**  test_misc16(): Test array of NULL-terminated 
-**  fixed-length string.  It creates a dataset of fixed-length 
+**  test_misc16(): Test array of NULL-terminated
+**  fixed-length string.  It creates a dataset of fixed-length
 **  strings.  Each string is MISC16_STR_SIZE long.  There are
 **  totally MISC16_SPACE_DIM by MISC16_SPACE_RANK strings.
 **
@@ -2636,7 +2636,7 @@ test_misc16(void)
 {
     hid_t file;         /* File ID */
     herr_t ret;         /* Generic return value */
-    const char wdata[MISC16_SPACE_DIM][MISC16_STR_SIZE] = 
+    const char wdata[MISC16_SPACE_DIM][MISC16_STR_SIZE] =
                         {"1234567", "1234567\0", "12345678", {NULL}};
     char rdata[MISC16_SPACE_DIM][MISC16_STR_SIZE];  /* Information read in */
     hid_t		dataset;	/* Dataset ID			*/
@@ -2659,7 +2659,7 @@ test_misc16(void)
 
     ret = H5Tset_size (tid,MISC16_STR_SIZE);
     CHECK(ret, FAIL, "H5Tset_size");
-    
+
     /*ret = H5Tset_strpad (tid,H5T_STR_NULLPAD);
     CHECK(ret, FAIL, "H5Tset_strpad");*/
 
@@ -2705,8 +2705,8 @@ test_misc16(void)
 
 /****************************************************************
 **
-**  test_misc17(): Test array of characters.  It creates a dataset 
-**  of ASCII characters, with dimensionality of MISC17_SPACE_DIM1 
+**  test_misc17(): Test array of characters.  It creates a dataset
+**  of ASCII characters, with dimensionality of MISC17_SPACE_DIM1
 **  by MISC17_SPACE_DIM2.
 **
 ****************************************************************/
@@ -2715,7 +2715,7 @@ test_misc17(void)
 {
     hid_t file;         /* File ID */
     herr_t ret;         /* Generic return value */
-    const char wdata[MISC17_SPACE_DIM1][MISC17_SPACE_DIM2] = 
+    const char wdata[MISC17_SPACE_DIM1][MISC17_SPACE_DIM2] =
                         {"1234567", "1234567\0", "12345678", {NULL}};
     char rdata[MISC17_SPACE_DIM1][MISC17_SPACE_DIM2];  /* Information read in */
     hid_t		dataset;	/* Dataset ID			*/
@@ -3346,11 +3346,11 @@ test_misc20(void)
 
     /* Create a dataset creation property list */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    CHECK(dcpl, FAIL, "H5Pcreate"); 
+    CHECK(dcpl, FAIL, "H5Pcreate");
 
     /* Use chunked storage for this dataset */
     ret = H5Pset_chunk(dcpl,rank,big_dims);
-    VERIFY(ret, FAIL, "H5Pset_chunk"); 
+    VERIFY(ret, FAIL, "H5Pset_chunk");
 
     /* Verify that the storage for the dataset is the correct size and hasn't
      * been truncated.
@@ -3366,7 +3366,7 @@ test_misc20(void)
 
     /* Make certain that the dataset's storage doesn't get allocated :-) */
     ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_LATE);
-    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
+    CHECK(ret, FAIL, "H5Pset_alloc_time");
 
     /* Create dataset with big dataspace */
     did = H5Dcreate(fid, MISC20_DSET_NAME, H5T_NATIVE_INT, sid, dcpl);
@@ -3487,12 +3487,12 @@ test_misc20(void)
 
 } /* end test_misc20() */
 
-/* 
-   test_misc21 and test_misc22 should be executed when SZIP is present 
+/*
+   test_misc21 and test_misc22 should be executed when SZIP is present
    and encoder is available.
                             EIP 2004/8/04
-*/    
-#if defined H5_HAVE_FILTER_SZIP 
+*/
+#if defined H5_HAVE_FILTER_SZIP
 
 /****************************************************************
 **
@@ -3530,9 +3530,9 @@ test_misc21(void)
     /* Set custom DCPL properties */
     ret = H5Pset_chunk (dcpl, MISC21_SPACE_RANK, chunk_size);
     CHECK(ret, FAIL, "H5Pset_chunk");
-    ret = H5Pset_szip (dcpl, H5_SZIP_NN_OPTION_MASK, 8); 
+    ret = H5Pset_szip (dcpl, H5_SZIP_NN_OPTION_MASK, 8);
     CHECK(ret, FAIL, "H5Pset_deflate");
-    ret = H5Pset_alloc_time (dcpl, H5D_ALLOC_TIME_LATE); 
+    ret = H5Pset_alloc_time (dcpl, H5D_ALLOC_TIME_LATE);
     CHECK(ret, FAIL, "H5Pset_alloc_time");
 
     /* Create the dataspace for the dataset */
@@ -3559,11 +3559,11 @@ test_misc21(void)
 
     HDfree(buf);
 } /* end test_misc21() */
-    
+
 /****************************************************************
 **
 **  test_misc22(): Test SZIP bits-per-pixel paramter.
-**                      This should be set according to the datatype. 
+**                      This should be set according to the datatype.
 **                      Tests for precision and offset combo's.
 **
 ****************************************************************/
@@ -3579,8 +3579,8 @@ test_misc22(void)
     /* should extend test to signed ints */
     hid_t idts[4];
 /*  do the same for floats
-    hid_t fdts[2]={H5T_NATIVE_FLOAT32,  
-              H5T_NATIVE_FLOAT64}  
+    hid_t fdts[2]={H5T_NATIVE_FLOAT32,
+              H5T_NATIVE_FLOAT64}
 */
     int prec[4] = {3,11,19,27};
     int offsets[5] = {0,3,11,19,27};
@@ -3623,14 +3623,14 @@ test_misc22(void)
                 /* Create the DCPL */
                 dcpl = H5Pcreate (H5P_DATASET_CREATE);
                 CHECK(dcpl, FAIL, "H5Pcreate");
-            
+
                 /* Set DCPL properties */
                 ret = H5Pset_chunk (dcpl, MISC22_SPACE_RANK, chunk_size);
                 CHECK(ret, FAIL, "H5Pset_chunk");
                 /* Set custom DCPL properties */
                 ret = H5Pset_szip (dcpl, H5_SZIP_NN_OPTION_MASK, 32);  /* vary the PPB */
                 CHECK(ret, FAIL, "H5Pset_szip");
-            
+
                 /* set up the datatype according to the loop */
                 dtype = H5Tcopy(idts[i]);
                 CHECK(dtype, FAIL, "H5Tcopy");
@@ -3641,7 +3641,7 @@ test_misc22(void)
 
                 /* compute the correct PPB that should be set by SZIP */
                 if (offsets[k] == 0) {
-            	    correct=prec[j];	
+            	    correct=prec[j];
                 } else {
                     correct=H5Tget_size(idts[i])*8;
                 }
@@ -3649,15 +3649,15 @@ test_misc22(void)
             	    if (correct <= 32) correct=32;
             	    else if (correct <= 64) correct=64;
                 }
-            
+
                 /* Create the dataset */
                 dsid = H5Dcreate (fid, MISC22_DSET_NAME, dtype, sid, dcpl);
                 CHECK(dsid, FAIL, "H5Dwrite");
-            
+
                 /* Write out the whole dataset */
                 ret = H5Dwrite (dsid, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
                 CHECK(ret, FAIL, "H5Dwrite");
-            
+
                 /* Close everything */
                 ret = H5Dclose (dsid);
                 CHECK(ret, FAIL, "H5Dclose");
@@ -3665,25 +3665,25 @@ test_misc22(void)
                 CHECK(ret, FAIL, "H5Tclose");
                 ret = H5Pclose (dcpl);
                 CHECK(ret, FAIL, "H5Pclose");
-            
+
                 dsid = H5Dopen (fid, MISC22_DSET_NAME);
                 CHECK(dsid, FAIL, "H5Topen");
-            
+
                 dcpl2 = H5Dget_create_plist(dsid);
                 CHECK(dcpl2, FAIL, "H5Dget_create_plist");
-            
-                ret= H5Pget_filter_by_id( dcpl2, H5Z_FILTER_SZIP, &flags, 
+
+                ret= H5Pget_filter_by_id( dcpl2, H5Z_FILTER_SZIP, &flags,
                       &cd_nelmts, cd_values, 0, NULL , NULL );
                 CHECK(ret, FAIL, "H5Pget_filter_by_id");
-            
+
                 VERIFY(cd_values[2], correct, "SZIP filter returned value for precision");
-            
+
                 ret = H5Dclose (dsid);
                 CHECK(ret, FAIL, "H5Dclose");
 
                 ret = H5Gunlink (fid, MISC22_DSET_NAME );
                 CHECK(ret, FAIL, "H5Dunlink");
-            
+
                 ret = H5Pclose (dcpl2);
                 CHECK(ret, FAIL, "H5Pclose");
             }
@@ -3739,7 +3739,7 @@ test_misc23(void)
 
 
     /**********************************************************************
-    * test the old APIs 
+    * test the old APIs
     **********************************************************************/
 
     H5E_BEGIN_TRY {
@@ -3768,7 +3768,7 @@ test_misc23(void)
     CHECK(status, FAIL, "H5Dclose");
 
     /**********************************************************************
-    * test H5Gcreate_expand() 
+    * test H5Gcreate_expand()
     **********************************************************************/
 
     /* Create group creation property list */
@@ -3820,7 +3820,7 @@ test_misc23(void)
 
 
     /**********************************************************************
-    * test new H5Dcreate 
+    * test new H5Dcreate
     **********************************************************************/
 
     /* Create dataset creation property list */
@@ -3872,7 +3872,7 @@ test_misc23(void)
 
 
     /**********************************************************************
-    * test new H5Tcommit 
+    * test new H5Tcommit
     **********************************************************************/
 
     /* Create datatype creation property list */
@@ -3942,9 +3942,9 @@ test_misc23(void)
 /****************************************************************
 **
 **  test_misc(): Main misc. test routine.
-** 
+**
 ****************************************************************/
-void 
+void
 test_misc(void)
 {
     /* Output message about test being performed */
@@ -3970,7 +3970,7 @@ test_misc(void)
     test_misc18();      /* Test new object header information in H5G_stat_t struct */
     test_misc19();      /* Test incrementing & decrementing ref count on IDs */
     test_misc20();      /* Test problems with truncated dimensions in version 2 of storage layout message */
-#if defined H5_HAVE_FILTER_SZIP 
+#if defined H5_HAVE_FILTER_SZIP
     test_misc21();      /* Test that "late" allocation time is treated the same as "incremental", for chunked datasets w/a filters */
     test_misc22();     /* check szip bits per pixel */
 #endif /* H5_HAVE_FILTER_SZIP */
@@ -4019,7 +4019,7 @@ cleanup_misc(void)
     HDremove(MISC18_FILE);
     HDremove(MISC19_FILE);
     HDremove(MISC20_FILE);
-#if defined H5_HAVE_FILTER_SZIP 
+#if defined H5_HAVE_FILTER_SZIP
     HDremove(MISC21_FILE);
     HDremove(MISC22_FILE);
 #endif /* H5_HAVE_FILTER_SZIP */

@@ -317,14 +317,14 @@ extern herr_t H5FP_request_flush_metadata(H5FD_t *file, unsigned file_id,
 extern herr_t H5FP_request_close(H5FD_t *file, unsigned sap_file_id,
                                  unsigned *req_id, H5FP_status_t *status);
 
-/* the following function should probably become a private function 
+/* the following function should probably become a private function
  * in H5FPclient.c if H5FP_client_alloc() does the job.  -- JRM
  */
 extern herr_t H5FP_request_allocate(H5FD_t *file, H5FD_mem_t mem_type,
                                     hsize_t size, haddr_t *addr,
                                     haddr_t *eoa, unsigned *req_id,
                                     H5FP_status_t *status);
-extern haddr_t H5FP_client_alloc(H5FD_t *file, H5FD_mem_t type, 
+extern haddr_t H5FP_client_alloc(H5FD_t *file, H5FD_mem_t type,
                                  hid_t dxpl_id, hsize_t size);
 extern herr_t H5FP_request_free(H5FD_t *file, H5FD_mem_t mem_type,
                                 haddr_t addr, hsize_t size,

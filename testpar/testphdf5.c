@@ -70,7 +70,7 @@ void pause_proc(void)
 
     /* mpi variables */
     int  mpi_size, mpi_rank;
-    int  mpi_namelen;		
+    int  mpi_namelen;
     char mpi_name[MPI_MAX_PROCESSOR_NAME];
 
     pid = getpid();
@@ -113,7 +113,7 @@ usage(void)
     printf("\t-m<n_datasets>"
 	"\tset number of datasets for the multiple dataset test\n");
     printf("\t-n<n_groups>"
-        "\tset number of groups for the multiple group test\n");  
+        "\tset number of groups for the multiple group test\n");
     printf("\t-f <prefix>\tfilename prefix\n");
     printf("\t-2\t\tuse Split-file together with MPIO\n");
     printf("\t-p\t\tuse combo MPI-POSIX driver\n");
@@ -269,7 +269,7 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type,
 
     if (l_facc_type == FACC_MPIO){
 	/* set Parallel access with communicator */
-	ret = H5Pset_fapl_mpio(ret_pl, comm, info);     
+	ret = H5Pset_fapl_mpio(ret_pl, comm, info);
 	VRFY((ret >= 0), "");
 	return(ret_pl);
     }
@@ -280,7 +280,7 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type,
 	mpio_pl = H5Pcreate (H5P_FILE_ACCESS);
 	VRFY((mpio_pl >= 0), "");
 	/* set Parallel access with communicator */
-	ret = H5Pset_fapl_mpio(mpio_pl, comm, info);     
+	ret = H5Pset_fapl_mpio(mpio_pl, comm, info);
 	VRFY((ret >= 0), "");
 
 	/* setup file access template */
@@ -353,66 +353,66 @@ int main(int argc, char **argv)
     TestInit(argv[0], usage, parse_options);
 
     /* Tests are generally arranged from least to most complexity... */
-    AddTest("mpiodup", test_fapl_mpio_dup, NULL, 
+    AddTest("mpiodup", test_fapl_mpio_dup, NULL,
 	    "fapl_mpio duplicate", NULL);
-    AddTest("posixdup", test_fapl_mpiposix_dup, NULL, 
+    AddTest("posixdup", test_fapl_mpiposix_dup, NULL,
 	    "fapl_mpiposix duplicate", NULL);
 
-    AddTest("split", test_split_comm_access, NULL, 
+    AddTest("split", test_split_comm_access, NULL,
 	    "dataset using split communicators", PARATESTFILE);
 
-    AddTest("idsetw", dataset_writeInd, NULL, 
+    AddTest("idsetw", dataset_writeInd, NULL,
 	    "dataset independent write", PARATESTFILE);
-    AddTest("idsetr", dataset_readInd, NULL, 
+    AddTest("idsetr", dataset_readInd, NULL,
 	    "dataset independent read", PARATESTFILE);
 
-    AddTest("cdsetw", dataset_writeAll, NULL, 
+    AddTest("cdsetw", dataset_writeAll, NULL,
 	    "dataset collective write", PARATESTFILE);
-    AddTest("cdsetr", dataset_readAll, NULL, 
+    AddTest("cdsetr", dataset_readAll, NULL,
 	    "dataset collective read", PARATESTFILE);
 
-    AddTest("eidsetw", extend_writeInd, NULL, 
+    AddTest("eidsetw", extend_writeInd, NULL,
 	    "extendible dataset independent write", PARATESTFILE);
-    AddTest("eidsetr", extend_readInd, NULL, 
+    AddTest("eidsetr", extend_readInd, NULL,
 	    "extendible dataset independent read", PARATESTFILE);
-    AddTest("ecdsetw", extend_writeAll, NULL, 
+    AddTest("ecdsetw", extend_writeAll, NULL,
 	    "extendible dataset collective write", PARATESTFILE);
-    AddTest("ecdsetr", extend_readAll, NULL, 
+    AddTest("ecdsetr", extend_readAll, NULL,
 	    "extendible dataset collective read", PARATESTFILE);
-    AddTest("eidsetw2", extend_writeInd2, NULL, 
+    AddTest("eidsetw2", extend_writeInd2, NULL,
 	    "extendible dataset independent write #2", PARATESTFILE);
 
 #ifdef H5_HAVE_FILTER_DEFLATE
-    AddTest("cmpdsetr", compress_readAll, NULL, 
+    AddTest("cmpdsetr", compress_readAll, NULL,
 	    "compressed dataset collective read", PARATESTFILE);
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
     ndsets_params.name = PARATESTFILE;
     ndsets_params.count = ndatasets;
-    AddTest("ndsetw", multiple_dset_write, NULL, 
+    AddTest("ndsetw", multiple_dset_write, NULL,
 	    "multiple datasets write", &ndsets_params);
 
     ngroups_params.name = PARATESTFILE;
     ngroups_params.count = ngroups;
-    AddTest("ngrpw", multiple_group_write, NULL, 
+    AddTest("ngrpw", multiple_group_write, NULL,
 	    "multiple groups write", &ngroups_params);
-    AddTest("ngrpr", multiple_group_read, NULL, 
+    AddTest("ngrpr", multiple_group_read, NULL,
 	    "multiple groups read", &ngroups_params);
 
-    AddTest("compact", compact_dataset, NULL, 
+    AddTest("compact", compact_dataset, NULL,
 	    "compact dataset test", PARATESTFILE);
 
     collngroups_params.name = PARATESTFILE;
     collngroups_params.count = ngroups;
-    AddTest("cngrpw", collective_group_write, NULL, 
+    AddTest("cngrpw", collective_group_write, NULL,
 	    "collective group and dataset write", &collngroups_params);
-    AddTest("ingrpr", independent_group_read, NULL, 
+    AddTest("ingrpr", independent_group_read, NULL,
 	    "independent group and dataset read", &collngroups_params);
 
     /* By default, do not run big dataset. */
-    AddTest("-bigdset", big_dataset, NULL, 
+    AddTest("-bigdset", big_dataset, NULL,
 	    "big dataset test", PARATESTFILE);
-    AddTest("fill", dataset_fillvalue, NULL, 
+    AddTest("fill", dataset_fillvalue, NULL,
 	    "dataset fill value", PARATESTFILE);
 
 #if 0
@@ -467,7 +467,7 @@ int main(int argc, char **argv)
     AddTest("ccchunkr",
 	coll_irregular_complex_chunk_read,NULL,
 	"collective irregular complex chunk read",PARATESTFILE);
-  
+
 
 #if 0
     if((mpi_size > 3) && MAINPROCESS) {
@@ -498,14 +498,14 @@ int main(int argc, char **argv)
 #endif
 
 
-    AddTest("null", null_dataset, NULL, 
+    AddTest("null", null_dataset, NULL,
 	    "null dataset test", PARATESTFILE);
 
     io_mode_confusion_params.name  = PARATESTFILE;
     io_mode_confusion_params.count = 0; /* value not used */
 
-    AddTest("I/Omodeconf", io_mode_confusion, NULL, 
-	    "I/O mode confusion test -- hangs quickly on failure", 
+    AddTest("I/Omodeconf", io_mode_confusion, NULL,
+	    "I/O mode confusion test -- hangs quickly on failure",
             &io_mode_confusion_params);
 
     /* Display testing information */

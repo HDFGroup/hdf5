@@ -41,7 +41,7 @@ NAME
    H5T_init_compound_interface -- Initialize interface-specific information
 USAGE
     herr_t H5T_init_compound_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -104,7 +104,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_get_member_offset
  *
- * Purpose:	Private function for H5Tget_member_offset.  Returns the byte 
+ * Purpose:	Private function for H5Tget_member_offset.  Returns the byte
  *              offset of the beginning of a member with respect to the
  *              beginning of the compound datatype datum.
  *
@@ -221,7 +221,7 @@ H5Tget_member_type(hid_t type_id, unsigned membno)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to retrieve member type")
     if ((ret_value = H5I_register(H5I_DATATYPE, memb_dt)) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable register datatype atom")
-    
+
 done:
     if(ret_value<0) {
         if(memb_dt!=NULL)
@@ -236,17 +236,17 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_get_member_type
  *
- * Purpose:	Private function for H5Tget_member_type.  Returns the data 
+ * Purpose:	Private function for H5Tget_member_type.  Returns the data
  *              type of the specified member.
  *
  * Return:	Success:	A copy of the member datatype;
  *				modifying the returned datatype does not
  *				modify the member type.
  *
- *		Failure:        NULL	
+ *		Failure:        NULL
  *
  * Programmer:	Raymond Lu
- *	        October 8, 2002	
+ *	        October 8, 2002
  *
  * Modifications:
  *
@@ -261,11 +261,11 @@ H5T_get_member_type(const H5T_t *dt, unsigned membno)
 
     assert(dt);
     assert(membno < dt->shared->u.compnd.nmembs);
-    
+
     /* Copy datatype into an atom */
     if (NULL == (ret_value = H5T_copy(dt->shared->u.compnd.memb[membno].type, H5T_COPY_REOPEN)))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy member datatype")
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -296,7 +296,7 @@ H5T_get_member_size(const H5T_t *dt, unsigned membno)
 
     assert(dt);
     assert(membno < dt->shared->u.compnd.nmembs);
-    
+
     /* Value */
     ret_value = dt->shared->u.compnd.memb[membno].type->shared->size;
 
@@ -390,7 +390,7 @@ H5Tpack(hid_t type_id)
     /* Pack */
     if (H5T_pack(dt) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to pack compound datatype")
-   
+
 done:
     FUNC_LEAVE_API(ret_value)
 }
@@ -420,7 +420,7 @@ H5T_insert(const H5T_t *parent, const char *name, size_t offset, const H5T_t *me
     unsigned	idx, i;
     size_t	total_size;
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5T_insert, FAIL)
 
     /* check args */
@@ -572,7 +572,7 @@ H5T_pack(const H5T_t *dt)
             dt->shared->u.compnd.packed=TRUE;
         } /* end if */
     } /* end if */
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }

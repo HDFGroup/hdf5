@@ -14,7 +14,7 @@
 
 /*
  * Programmer:	Raymond Lu
- *              October 14, 2001	
+ *              October 14, 2001
  *
  * Purpose:	Tests Error API
  */
@@ -23,7 +23,7 @@
 #ifndef H5_WANT_H5_V1_6_COMPAT
 int main(void)
 {
-    printf("Test skipped because backward compatbility with v1.6 is NOT configured in\n"); 
+    printf("Test skipped because backward compatbility with v1.6 is NOT configured in\n");
     return 0;
 }
 #else
@@ -39,7 +39,7 @@ const char *FILENAME[] = {
 int	ipoints2[DIM0][DIM1], icheck2[DIM0][DIM1];
 
 #define DSET_NAME               "a_dataset"
-#define FAKE_ID                 -1 
+#define FAKE_ID                 -1
 
 herr_t custom_print_cb(int n, H5E_error_t *err_desc, void* client_data);
 
@@ -69,10 +69,10 @@ test_error(hid_t file)
     const char          *FUNC_test_error="test_error";
     H5E_auto_t          old_func;
     void                *old_data;
-    
+
     TESTING("error API based on data I/O");
     fprintf(stderr, "\n");
-    
+
     /* Create the data space */
     dims[0] = DIM0;
     dims[1] = DIM1;
@@ -82,11 +82,11 @@ test_error(hid_t file)
     H5E_BEGIN_TRY {
         dataset = H5Dcreate(FAKE_ID, DSET_NAME, H5T_STD_I32BE, space, H5P_DEFAULT);
     } H5E_END_TRY;
-    
+
     /* Create the dataset */
     if ((dataset = H5Dcreate(file, DSET_NAME, H5T_STD_I32BE, space,
 			     H5P_DEFAULT))<0) {
-        H5Epush(__FILE__, FUNC_test_error, __LINE__, H5E_ERROR, H5E_CANTCREATE, 
+        H5Epush(__FILE__, FUNC_test_error, __LINE__, H5E_ERROR, H5E_CANTCREATE,
                 "H5Dcreate failed");
         goto error;
     }
@@ -94,9 +94,9 @@ test_error(hid_t file)
     /* Test enabling and disabling default printing */
     if (H5Eget_auto(&old_func, &old_data)<0)
 	TEST_ERROR;
-    if (old_data != NULL) 
+    if (old_data != NULL)
 	TEST_ERROR;
-    if (!old_func) 
+    if (!old_func)
 	TEST_ERROR;
     if (old_func != (H5E_auto_t)H5Eprint)
 	TEST_ERROR;
@@ -106,7 +106,7 @@ test_error(hid_t file)
 
     /* Make H5Dwrite fail, verify default print is disabled */
     if (H5Dwrite(FAKE_ID, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ipoints2)<0) {
-        H5Epush(__FILE__, FUNC_test_error, __LINE__, H5E_ERROR, H5E_WRITEERROR, 
+        H5Epush(__FILE__, FUNC_test_error, __LINE__, H5E_ERROR, H5E_WRITEERROR,
                 "H5Dwrite shouldn't succeed");
         goto error;
     }
@@ -116,8 +116,8 @@ test_error(hid_t file)
 
     /* In case program comes to this point, close dataset */
     if(H5Dclose(dataset)<0) TEST_ERROR;
-        
-    TEST_ERROR; 
+
+    TEST_ERROR;
 
   error:
     return -1;
@@ -125,7 +125,7 @@ test_error(hid_t file)
 
 
 /*-------------------------------------------------------------------------
- * Function:    dump_error	
+ * Function:    dump_error
  *
  * Purpose:	Prints error stack in default and customized ways.
  *
@@ -141,19 +141,19 @@ test_error(hid_t file)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t 
+static herr_t
 dump_error(void)
 {
     /* Print errors in library default way */
     fprintf(stderr, "********* Print error stack in HDF5 default way *********\n");
     if(H5Eprint(stderr)<0)
         TEST_ERROR;
-    
+
     /* Customized way to print errors */
     fprintf(stderr, "\n********* Print error stack in customized way *********\n");
     if(H5Ewalk(H5E_WALK_UPWARD, custom_print_cb, stderr)<0)
         TEST_ERROR;
-    
+
     return 0;
 
   error:
@@ -177,7 +177,7 @@ dump_error(void)
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
+herr_t
 custom_print_cb(int n, H5E_error_t *err_desc, void* client_data)
 {
     FILE		*stream  = (FILE *)client_data;
@@ -204,7 +204,7 @@ custom_print_cb(int n, H5E_error_t *err_desc, void* client_data)
   error:
     return -1;
 }
-    
+
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -227,17 +227,17 @@ main(void)
 
     fprintf(stderr, "   This program tests the Error API compatible with HDF5 v1.6.  There're supposed to be some error messages\n");
     fapl = h5_fileaccess();
-    
+
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
 	TEST_ERROR ;
 
-    /* Test error stack */ 
+    /* Test error stack */
 
     /* Push an error onto error stack */
-    H5Epush(__FILE__, FUNC_main, __LINE__, H5E_ERROR, H5E_BADVALUE, 
+    H5Epush(__FILE__, FUNC_main, __LINE__, H5E_ERROR, H5E_BADVALUE,
             "Error test failed");
-    
+
     /* Print out the errors on stack */
     dump_error();
 
@@ -246,7 +246,7 @@ main(void)
 
     /* Test error API */
     if(test_error(file)<0) {
-        H5Epush(__FILE__, FUNC_main, __LINE__, H5E_ERROR, H5E_BADMESG, 
+        H5Epush(__FILE__, FUNC_main, __LINE__, H5E_ERROR, H5E_BADMESG,
                 "Error test failed");
         H5Eprint(stderr);
     }

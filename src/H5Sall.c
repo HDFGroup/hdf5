@@ -377,7 +377,7 @@ H5S_all_release (H5S_t UNUSED * space)
 
     /* Reset the number of elements in the selection */
     space->select.num_elem=0;
-    
+
     FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* H5S_all_release() */
 
@@ -474,7 +474,7 @@ H5S_all_serial_size (const H5S_t UNUSED *space)
     assert(space);
 
     /* Basic number of bytes required to serialize point selection:
-     *  <type (4 bytes)> + <version (4 bytes)> + <padding (4 bytes)> + 
+     *  <type (4 bytes)> + <version (4 bytes)> + <padding (4 bytes)> +
      *      <length (4 bytes)> = 16 bytes
      */
     FUNC_LEAVE_NOAPI(16);

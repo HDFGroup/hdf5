@@ -22,7 +22,7 @@
 /*-------------------------------------------------------------------------
  * Function: h5immake_image_8bit_c
  *
- * Purpose: Call H5IMmake_image_8bit 
+ * Purpose: Call H5IMmake_image_8bit
  *
  * Return: Success: 0, Failure: -1
  *
@@ -39,11 +39,11 @@
  */
 
 int_f
-nh5immake_image_8bit_c (hid_t_f *loc_id, 
+nh5immake_image_8bit_c (hid_t_f *loc_id,
                        int_f *namelen,
-                       _fcd name, 
+                       _fcd name,
                        hsize_t_f *width,
-                       hsize_t_f *height, 
+                       hsize_t_f *height,
                        int_f *buf)
 {
  int     ret_value = -1;
@@ -56,7 +56,7 @@ nh5immake_image_8bit_c (hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = (int)*namelen;
- c_name = (char *)HD5f2cstring(name, c_namelen); 
+ c_name = (char *)HD5f2cstring(name, c_namelen);
  if (c_name == NULL) return ret_value;
 
 /*
@@ -68,12 +68,12 @@ nh5immake_image_8bit_c (hid_t_f *loc_id,
  if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
-}      
+}
 
 /*-------------------------------------------------------------------------
  * Function: h5imread_image_c
  *
- * Purpose: Call H5IMread_image 
+ * Purpose: Call H5IMread_image
  *
  * Return: Success: 0, Failure: -1
  *
@@ -90,9 +90,9 @@ nh5immake_image_8bit_c (hid_t_f *loc_id,
  */
 
 int_f
-nh5imread_image_c (hid_t_f *loc_id, 
+nh5imread_image_c (hid_t_f *loc_id,
                    int_f *namelen,
-                   _fcd name, 
+                   _fcd name,
                    int_f *buf)
 {
  int     ret_value = -1;
@@ -106,7 +106,7 @@ nh5imread_image_c (hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = (int)*namelen;
- c_name = (char *)HD5f2cstring(name, c_namelen); 
+ c_name = (char *)HD5f2cstring(name, c_namelen);
  if (c_name == NULL) return ret_value;
 
 /*
@@ -119,12 +119,12 @@ nh5imread_image_c (hid_t_f *loc_id,
  if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
-}      
+}
 
 /*-------------------------------------------------------------------------
  * Function: h5immake_image_24bit_c
  *
- * Purpose: Call H5IMmake_image_24bit 
+ * Purpose: Call H5IMmake_image_24bit
  *
  * Return: Success: 0, Failure: -1
  *
@@ -141,11 +141,11 @@ nh5imread_image_c (hid_t_f *loc_id,
  */
 
 int_f
-nh5immake_image_24bit_c (hid_t_f *loc_id, 
+nh5immake_image_24bit_c (hid_t_f *loc_id,
                          int_f *namelen,
                          _fcd name,
                           int_f *ilen,
-                         _fcd il, 
+                         _fcd il,
                          hsize_t_f *width,
                          hsize_t_f *height,
                          void *buf)
@@ -162,11 +162,11 @@ nh5immake_image_24bit_c (hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = *namelen;
- c_name = (char *)HD5f2cstring(name, c_namelen); 
+ c_name = (char *)HD5f2cstring(name, c_namelen);
  if (c_name == NULL) return ret_value;
 
  c_ilen = *ilen;
- c_il = (char *)HD5f2cstring(il, c_ilen); 
+ c_il = (char *)HD5f2cstring(il, c_ilen);
  if (c_il == NULL) return ret_value;
 
 /*
@@ -179,12 +179,12 @@ nh5immake_image_24bit_c (hid_t_f *loc_id,
  if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
-}      
+}
 
 /*-------------------------------------------------------------------------
  * Function: h5imget_image_info_c
  *
- * Purpose: Call H5IMget_image_info 
+ * Purpose: Call H5IMget_image_info
  *
  * Return: Success: 0, Failure: -1
  *
@@ -201,7 +201,7 @@ nh5immake_image_24bit_c (hid_t_f *loc_id,
  */
 
 int_f
-nh5imget_image_info_c(hid_t_f *loc_id, 
+nh5imget_image_info_c(hid_t_f *loc_id,
                         int_f *namelen,
                         _fcd name,
                         hsize_t_f *width,
@@ -226,7 +226,7 @@ nh5imget_image_info_c(hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = *namelen;
- c_name = (char *)HD5f2cstring(name, c_namelen); 
+ c_name = (char *)HD5f2cstring(name, c_namelen);
  if (c_name == NULL) return ret_value;
 
 /*
@@ -239,14 +239,14 @@ nh5imget_image_info_c(hid_t_f *loc_id,
  * Call H5IMget_image_info function.
  */
  c_loc_id = (hid_t)*loc_id;
- 
+
  ret = H5IMget_image_info(c_loc_id,c_name,&c_width,&c_height,&c_planes,c_buf,&c_npals);
 
  *width  = (hsize_t_f) c_width;
  *height = (hsize_t_f) c_height;
  *planes = (hsize_t_f) c_planes;
  *npals  = (hsize_t_f) c_npals;
- 
+
 
 /*
  * Convert C name to FORTRAN and place it in the given buffer
@@ -254,11 +254,11 @@ nh5imget_image_info_c(hid_t_f *loc_id,
  HD5packFstring(c_buf, _fcdtocp(interlace), (size_t)*ilen);
 
  if(c_buf) free(c_buf);
- 
+
  if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
-}         
+}
 
 
 /*-------------------------------------------------------------------------
@@ -281,7 +281,7 @@ nh5imget_image_info_c(hid_t_f *loc_id,
  */
 
 int_f
-nh5imis_image_c(hid_t_f *loc_id, 
+nh5imis_image_c(hid_t_f *loc_id,
                 int_f *namelen,
                 _fcd name)
 {
@@ -293,7 +293,7 @@ nh5imis_image_c(hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = *namelen;
- c_name = (char *)HD5f2cstring(name, c_namelen); 
+ c_name = (char *)HD5f2cstring(name, c_namelen);
  if (c_name == NULL) return -1;
 
 /*
@@ -302,14 +302,14 @@ nh5imis_image_c(hid_t_f *loc_id,
  c_loc_id = (hid_t)*loc_id;
 
  return( H5IMis_image(c_loc_id, c_name));
- 
-}         
+
+}
 
 
 /*-------------------------------------------------------------------------
  * Function: h5immake_palette_c
  *
- * Purpose: Call H5IMmake_palette 
+ * Purpose: Call H5IMmake_palette
  *
  * Return: Success: 0, Failure: -1
  *
@@ -326,9 +326,9 @@ nh5imis_image_c(hid_t_f *loc_id,
  */
 
 int_f
-nh5immake_palette_c (hid_t_f *loc_id, 
+nh5immake_palette_c (hid_t_f *loc_id,
                      int_f *namelen,
-                     _fcd name, 
+                     _fcd name,
                      hsize_t_f *dims,
                      void *buf)
 {
@@ -345,7 +345,7 @@ nh5immake_palette_c (hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = *namelen;
- c_name = (char *)HD5f2cstring(name, c_namelen); 
+ c_name = (char *)HD5f2cstring(name, c_namelen);
  if (c_name == NULL) return ret_value;
 
  c_dims =  malloc(sizeof(hsize_t) * (rank ));
@@ -367,13 +367,13 @@ nh5immake_palette_c (hid_t_f *loc_id,
  if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
-}      
+}
 
 
 /*-------------------------------------------------------------------------
  * Function: h5imlink_palette_c
  *
- * Purpose: Call H5IMlink_palette 
+ * Purpose: Call H5IMlink_palette
  *
  * Return: Success: 0, Failure: -1
  *
@@ -390,9 +390,9 @@ nh5immake_palette_c (hid_t_f *loc_id,
  */
 
 int_f
-nh5imlink_palette_c (hid_t_f *loc_id, 
+nh5imlink_palette_c (hid_t_f *loc_id,
                      int_f *namelen,
-                     _fcd name, 
+                     _fcd name,
                      int_f *ilen,
                      _fcd pal_name)
 {
@@ -409,11 +409,11 @@ nh5imlink_palette_c (hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = *namelen;
- c_name = (char *)HD5f2cstring(name, c_namelen); 
+ c_name = (char *)HD5f2cstring(name, c_namelen);
  if (c_name == NULL) return ret_value;
 
  c_namelenpal = *ilen;
- c_namepal = (char *)HD5f2cstring(pal_name, c_namelenpal); 
+ c_namepal = (char *)HD5f2cstring(pal_name, c_namelenpal);
  if (c_namepal == NULL) return ret_value;
 
 /*
@@ -427,13 +427,13 @@ nh5imlink_palette_c (hid_t_f *loc_id,
  if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
-}    
+}
 
 
 /*-------------------------------------------------------------------------
  * Function: h5imunlink_palette_c
  *
- * Purpose: Call H5IMunlink_palette 
+ * Purpose: Call H5IMunlink_palette
  *
  * Return: Success: 0, Failure: -1
  *
@@ -450,9 +450,9 @@ nh5imlink_palette_c (hid_t_f *loc_id,
  */
 
 int_f
-nh5imunlink_palette_c (hid_t_f *loc_id, 
+nh5imunlink_palette_c (hid_t_f *loc_id,
                      int_f *namelen,
-                     _fcd name, 
+                     _fcd name,
                      int_f *ilen,
                      _fcd pal_name)
 {
@@ -469,11 +469,11 @@ nh5imunlink_palette_c (hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = *namelen;
- c_name = (char *)HD5f2cstring(name, c_namelen); 
+ c_name = (char *)HD5f2cstring(name, c_namelen);
  if (c_name == NULL) return ret_value;
 
  c_namelenpal = *ilen;
- c_namepal = (char *)HD5f2cstring(pal_name, c_namelenpal); 
+ c_namepal = (char *)HD5f2cstring(pal_name, c_namelenpal);
  if (c_namepal == NULL) return ret_value;
 
 /*
@@ -487,14 +487,14 @@ nh5imunlink_palette_c (hid_t_f *loc_id,
  if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
-}      
-  
+}
+
 
 
 /*-------------------------------------------------------------------------
  * Function: h5imget_npalettes_c
  *
- * Purpose: Call H5IMget_npalettes 
+ * Purpose: Call H5IMget_npalettes
  *
  * Return: Success: 0, Failure: -1
  *
@@ -511,7 +511,7 @@ nh5imunlink_palette_c (hid_t_f *loc_id,
  */
 
 int_f
-nh5imget_npalettes_c(hid_t_f *loc_id, 
+nh5imget_npalettes_c(hid_t_f *loc_id,
                      int_f *namelen,
                      _fcd name,
                      hsize_t_f *npals)
@@ -527,7 +527,7 @@ nh5imget_npalettes_c(hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = *namelen;
- c_name = (char *)HD5f2cstring(name, c_namelen); 
+ c_name = (char *)HD5f2cstring(name, c_namelen);
  if (c_name == NULL) return ret_value;
 
  /*
@@ -538,18 +538,18 @@ nh5imget_npalettes_c(hid_t_f *loc_id,
  ret = H5IMget_npalettes(c_loc_id,c_name,&c_npals);
 
  *npals  = (hsize_t_f) c_npals;
-  
+
  if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
-}         
+}
 
 
 
 /*-------------------------------------------------------------------------
  * Function: h5imget_palette_info_c
  *
- * Purpose: Call H5IMget_palette_info 
+ * Purpose: Call H5IMget_palette_info
  *
  * Return: Success: 0, Failure: -1
  *
@@ -567,7 +567,7 @@ nh5imget_npalettes_c(hid_t_f *loc_id,
 
 
 int_f
-nh5imget_palette_info_c(hid_t_f *loc_id, 
+nh5imget_palette_info_c(hid_t_f *loc_id,
                         int_f *namelen,
                        _fcd name,
                        int_f *pal_number,
@@ -585,7 +585,7 @@ nh5imget_palette_info_c(hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = *namelen;
- c_name = (char *)HD5f2cstring(name, c_namelen); 
+ c_name = (char *)HD5f2cstring(name, c_namelen);
  if (c_name == NULL) return ret_value;
 
  /*
@@ -599,17 +599,17 @@ nh5imget_palette_info_c(hid_t_f *loc_id,
   dims[i] = (hsize_t_f) c_dims[i];
  }
 
-  
+
  if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
-}    
+}
 
 
 /*-------------------------------------------------------------------------
  * Function: h5imget_palette_c
  *
- * Purpose: Call H5IMget_palette 
+ * Purpose: Call H5IMget_palette
  *
  * Return: Success: 0, Failure: -1
  *
@@ -627,7 +627,7 @@ nh5imget_palette_info_c(hid_t_f *loc_id,
 
 
 int_f
-nh5imget_palette_c(hid_t_f *loc_id, 
+nh5imget_palette_c(hid_t_f *loc_id,
                         int_f *namelen,
                         _fcd name,
                         int_f *pal_number,
@@ -643,7 +643,7 @@ nh5imget_palette_c(hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = *namelen;
- c_name = (char *)HD5f2cstring(name, c_namelen); 
+ c_name = (char *)HD5f2cstring(name, c_namelen);
  if (c_name == NULL) return ret_value;
 
  /*
@@ -652,13 +652,13 @@ nh5imget_palette_c(hid_t_f *loc_id,
  c_loc_id = (hid_t)*loc_id;
 
  ret = H5IMget_palettef(c_loc_id,c_name,*pal_number,buf);
-  
+
  if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
-}    
+}
 
-     
+
 /*-------------------------------------------------------------------------
  * Function: h5imis_palette_c
  *
@@ -679,7 +679,7 @@ nh5imget_palette_c(hid_t_f *loc_id,
  */
 
 int_f
-nh5imis_palette_c(hid_t_f *loc_id, 
+nh5imis_palette_c(hid_t_f *loc_id,
                   int_f *namelen,
                  _fcd name)
 {
@@ -691,7 +691,7 @@ nh5imis_palette_c(hid_t_f *loc_id,
  * Convert FORTRAN name to C name
  */
  c_namelen = *namelen;
- c_name = (char *)HD5f2cstring(name, c_namelen); 
+ c_name = (char *)HD5f2cstring(name, c_namelen);
  if (c_name == NULL) return -1;
 
 /*
@@ -700,5 +700,5 @@ nh5imis_palette_c(hid_t_f *loc_id,
  c_loc_id = (hid_t)*loc_id;
 
  return( H5IMis_palette(c_loc_id, c_name));
- 
-}         
+
+}

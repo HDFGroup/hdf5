@@ -88,7 +88,7 @@ static hid_t create_fapl(MPI_Comm comm, MPI_Info info, int acc_type )
 
     /* set parallel access with communicator, using MPI-I/O driver */
     if (acc_type == FACC_MPIO) {
-	ret = H5Pset_fapl_mpio(fapl, comm, info);     
+	ret = H5Pset_fapl_mpio(fapl, comm, info);
         assert(ret>=0);
     } /* end if */
 
@@ -279,7 +279,7 @@ int main(int argc, char *argv[])
         printf("rank=%d, error, slice dim larger than rank: slice_dim=%d, rank=%d\n",mpi_rank,slice_dim,rank);
         goto done;
     } /* end if */
-    
+
     /* Set rest of defaults */
     if(file_name==NULL) {
         char *login;    /* Pointer to login name */

@@ -13,12 +13,12 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * This program creates a group in the file and two datasets in the group. 
+ * This program creates a group in the file and two datasets in the group.
  * Hard link to the group object is created and one of the datasets is accessed
- * under new name. 
+ * under new name.
  * Iterator functions are used to find information about the objects
- * in the root group and in the created group. 
- */ 
+ * in the root group and in the created group.
+ */
 
 
 #include "hdf5.h"
@@ -38,12 +38,12 @@ main(void)
     hid_t    file;
     hid_t    grp;
     hid_t    dataset, dataspace;
-    hid_t    plist; 
+    hid_t    plist;
 
     herr_t   status;
     hsize_t  dims[2];
     hsize_t  cdims[2];
- 
+
     int      idx_f, idx_g;
 
     /*
@@ -52,15 +52,15 @@ main(void)
     file = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
-     * Create a group in the file. 
+     * Create a group in the file.
      */
     grp = H5Gcreate(file, "/Data", 0);
 
     /*
      * Create dataset "Compressed Data" in the group using absolute
-     * name. Dataset creation property list is modified to use 
-     * GZIP compression with the compression effort set to 6. 
-     * Note that compression can be used only when dataset is chunked. 
+     * name. Dataset creation property list is modified to use
+     * GZIP compression with the compression effort set to 6.
+     * Note that compression can be used only when dataset is chunked.
      */
     dims[0] = 1000;
     dims[1] = 20;
@@ -69,16 +69,16 @@ main(void)
     dataspace = H5Screate_simple(RANK, dims, NULL);
     plist     = H5Pcreate(H5P_DATASET_CREATE);
                 H5Pset_chunk(plist, 2, cdims);
-                H5Pset_deflate( plist, 6); 
-    dataset = H5Dcreate(file, "/Data/Compressed_Data", H5T_NATIVE_INT, 
-                        dataspace, plist); 
-    /* 
+                H5Pset_deflate( plist, 6);
+    dataset = H5Dcreate(file, "/Data/Compressed_Data", H5T_NATIVE_INT,
+                        dataspace, plist);
+    /*
      * Close the first dataset .
      */
     H5Sclose(dataspace);
     H5Dclose(dataset);
 
-    /* 
+    /*
      * Create the second dataset.
      */
     dims[0] = 500;
@@ -87,7 +87,7 @@ main(void)
     dataset = H5Dcreate(file, "/Data/Float_Data", H5T_NATIVE_FLOAT,
 			dataspace, H5P_DEFAULT);
 
-    /* 
+    /*
      *Close the second dataset and file.
      */
     H5Sclose(dataspace);
@@ -96,13 +96,13 @@ main(void)
     H5Fclose(file);
 
     /*
-     * Now reopen the file and group in the file. 
+     * Now reopen the file and group in the file.
      */
     file = H5Fopen(H5FILE_NAME, H5F_ACC_RDWR, H5P_DEFAULT);
     grp  = H5Gopen(file, "Data");
 
-    /* 
-     * Access "Compressed_Data" dataset in the group. 
+    /*
+     * Access "Compressed_Data" dataset in the group.
      */
     dataset = H5Dopen(grp, "Compressed_Data");
     if( dataset < 0) printf(" Dataset 'Compressed-Data' is not found. \n");
@@ -118,9 +118,9 @@ main(void)
      */
     status = H5Glink(file, H5G_LINK_HARD, "Data", "Data_new");
 
-    /* 
+    /*
      * We can access "Compressed_Data" dataset using created
-     * hard link "Data_new". 
+     * hard link "Data_new".
      */
     dataset = H5Dopen(file, "/Data_new/Compressed_Data");
     if( dataset < 0) printf(" Dataset is not found. \n");
@@ -132,7 +132,7 @@ main(void)
     status = H5Dclose(dataset);
 
 
-    /* 
+    /*
      * Use iterator to see the names of the objects in the root group.
      */
     idx_f = H5Giterate(file, "/", NULL, file_info, NULL);
@@ -141,15 +141,15 @@ main(void)
      * Unlink  name "Data" and use iterator to see the names
      * of the objects in the file root direvtory.
      */
-    if (H5Gunlink(file, "Data") < 0)  
+    if (H5Gunlink(file, "Data") < 0)
       printf(" H5Gunlink failed \n");
-    else  
+    else
       printf("\"Data\" is unlinked \n");
 
     idx_f = H5Giterate(file, "/", NULL, file_info, NULL);
 
-    /* 
-     * Use iterator to see the names of the objects in the group 
+    /*
+     * Use iterator to see the names of the objects in the group
      * /Data_new.
      */
     idx_g = H5Giterate(grp, "/Data_new", NULL, group_info, NULL);
@@ -157,7 +157,7 @@ main(void)
     /*
      * Close the file.
      */
-     
+
     status = H5Fclose(file);
 
     return 0;
@@ -173,13 +173,13 @@ herr_t file_info(hid_t loc_id, const char *name, void *opdata)
     opdata = opdata;
 
     /*
-     * Display group name. The name is passed to the function by 
+     * Display group name. The name is passed to the function by
      * the Library. Some magic :-)
      */
     printf("\n");
     printf("Name : ");
     puts(name);
-    
+
     return 0;
  }
 
@@ -204,20 +204,20 @@ herr_t group_info(hid_t loc_id, const char *name, void *opdata)
    * Open the datasets using their names.
    */
   did = H5Dopen(loc_id, name);
- 
+
   /*
    * Display dataset name.
    */
   printf("\n");
   printf("Name : ");
   puts(name);
-  
-  /*    
+
+  /*
    * Display dataset information.
    */
   tid = H5Dget_type(did);  /* get datatype*/
   pid = H5Dget_create_plist(did); /* get creation property list */
-  
+
   /*
    * Check if dataset is chunked.
    */
@@ -226,13 +226,13 @@ herr_t group_info(hid_t loc_id, const char *name, void *opdata)
      * get chunking information: rank and dimensions.
      */
     rank_chunk = H5Pget_chunk(pid, 2, chunk_dims_out);
-    printf("chunk rank %d, dimensions %lu x %lu\n", rank_chunk, 
+    printf("chunk rank %d, dimensions %lu x %lu\n", rank_chunk,
 	   (unsigned long)(chunk_dims_out[0]),
 	   (unsigned long)(chunk_dims_out[1]));
-  } 
+  }
   else{
     t_class = H5Tget_class(tid);
-    if(t_class < 0){ 
+    if(t_class < 0){
       puts(" Invalid datatype.\n");
     }
     else {
@@ -250,7 +250,7 @@ herr_t group_info(hid_t loc_id, const char *name, void *opdata)
       puts(" Datatype is 'H5T_NATIVE_COMPOUND'.\n");
     }
   }
-    
+
 
   H5Dclose(did);
   H5Pclose(pid);

@@ -20,7 +20,7 @@
  *
  * Purpose:             Debugs an existing HDF5 file at a low level.
  *
- * Modifications:       
+ * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -116,7 +116,7 @@ main(int argc, char *argv[])
         fprintf(stderr, "cannot obtain H5F_t pointer\n");
         HDexit(2);
     }
-    
+
     /*
      * Parse command arguments.
      */
@@ -149,7 +149,7 @@ main(int argc, char *argv[])
          * Debug a local heap.
          */
         status = H5HL_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
-	
+
     } else if (!HDmemcmp (sig, H5HG_MAGIC, H5HG_SIZEOF_MAGIC)) {
 	/*
 	 * Debug a global heap collection.
@@ -170,7 +170,7 @@ main(int argc, char *argv[])
          */
         H5B_subid_t subtype = (H5B_subid_t)sig[H5B_SIZEOF_MAGIC];
         unsigned    ndims;
-	
+
         switch (subtype) {
         case H5B_SNODE_ID:
             status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
@@ -193,7 +193,7 @@ main(int argc, char *argv[])
          * B-tree signature.
          */
         H5B2_subid_t subtype = (H5B2_subid_t)sig[H5B2_SIZEOF_MAGIC+1];
-	
+
         switch (subtype) {
             case H5B2_TEST_ID:
                 status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5B2_TEST);
@@ -215,7 +215,7 @@ main(int argc, char *argv[])
          * B-tree signature.
          */
         H5B2_subid_t subtype = (H5B2_subid_t)sig[H5B2_SIZEOF_MAGIC+1];
-	
+
         switch (subtype) {
             case H5B2_TEST_ID:
                 status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5B2_TEST, extra, (unsigned)extra2);
@@ -237,7 +237,7 @@ main(int argc, char *argv[])
          * B-tree signature.
          */
         H5B2_subid_t subtype = (H5B2_subid_t)sig[H5B2_SIZEOF_MAGIC+1];
-	
+
         switch (subtype) {
             case H5B2_TEST_ID:
                 status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5B2_TEST, extra, (unsigned)extra2);
@@ -271,7 +271,7 @@ main(int argc, char *argv[])
          * B+ tree signature.
          */
         H5BP_subid_t subtype = (H5BP_subid_t)sig[H5BP_SIZEOF_MAGIC+1];
-	
+
         switch (subtype) {
             case H5BP_TEST_ID:
                 status = H5BP_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5BP_TEST);

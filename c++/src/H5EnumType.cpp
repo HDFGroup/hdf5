@@ -117,7 +117,7 @@ EnumType::EnumType( const IntType& data_type ) : DataType()
 //--------------------------------------------------------------------------
 void EnumType::insert( const char* name, void *value ) const
 {
-   // Calls C routine H5Tenum_insert to insert the new enum datatype member. 
+   // Calls C routine H5Tenum_insert to insert the new enum datatype member.
    herr_t ret_value = H5Tenum_insert( id, name, value );
    if( ret_value < 0 )
    {
@@ -128,7 +128,7 @@ void EnumType::insert( const char* name, void *value ) const
 //--------------------------------------------------------------------------
 // Function:	EnumType::insert
 ///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function only in the type of 
+///		It differs from the above function only in the type of
 ///		argument \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -139,8 +139,8 @@ void EnumType::insert( const string& name, void *value ) const
 
 //--------------------------------------------------------------------------
 // Function:	EnumType::nameOf
-///\brief	Returns the symbol name corresponding to a specified member 
-///		of this enumeration datatype. 
+///\brief	Returns the symbol name corresponding to a specified member
+///		of this enumeration datatype.
 ///\param	value - IN: Pointer to the value of the enum datatype
 ///\param	size  - IN: Size for the name
 ///\exception	H5::DataTypeIException
@@ -166,8 +166,8 @@ string EnumType::nameOf( void *value, size_t size ) const
 
 //--------------------------------------------------------------------------
 // Function:	EnumType::valueOf
-///\brief	Retrieves the value corresponding to a member of this 
-///		enumeration datatype, given the member's name. 
+///\brief	Retrieves the value corresponding to a member of this
+///		enumeration datatype, given the member's name.
 ///\param	name  -  IN: Name of the queried member
 ///\param	value - OUT: Pointer to the retrieved value
 ///\exception	H5::DataTypeIException
@@ -186,7 +186,7 @@ void EnumType::valueOf( const char* name, void *value ) const
 //--------------------------------------------------------------------------
 // Function:	EnumType::valueOf
 ///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function only in the type of 
+///		It differs from the above function only in the type of
 ///		argument \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -200,7 +200,7 @@ void EnumType::valueOf( const string& name, void *value ) const
 ///\brief	Returns the index of a member in this enumeration datatype.
 ///\param	name - IN: Name of the queried member
 ///\return	Index of the member if it exists.  Index will have the value
-///		between 0 and \c N-1, where \c N is the value returned by the 
+///		between 0 and \c N-1, where \c N is the value returned by the
 ///		member function \c EnumType::getNmembers.
 ///\exception	H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - May 16, 2002
@@ -219,7 +219,7 @@ int EnumType::getMemberIndex(const char *name) const
 //--------------------------------------------------------------------------
 // Function:	EnumType::getMemberIndex
 ///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function only in the type of 
+///		It differs from the above function only in the type of
 ///		argument \a name.
 // Programmer   Binh-Minh Ribler - May 16, 2002
 //--------------------------------------------------------------------------
@@ -248,7 +248,7 @@ int EnumType::getNmembers() const
 
 //--------------------------------------------------------------------------
 // Function:	EnumType::getMemberValue
-///\brief	Retrieves the value of a member in this enumeration datatype, 
+///\brief	Retrieves the value of a member in this enumeration datatype,
 ///		given the member's index.
 ///\param	memb_no - IN: Index of the queried member
 ///\param	value   - OUT: Pointer to the retrieved value

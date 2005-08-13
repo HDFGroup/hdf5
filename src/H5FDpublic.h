@@ -115,7 +115,7 @@ typedef enum H5FD_mem_t {
      * the library will attempt to cache metadata as it is written to the file
      * and build up a larger block of metadata to eventually pass to the VFL
      * 'write' routine.
-     * 
+     *
      * Distinguish between updating the metadata accumulator on writes and
      * reads.  This is particularly (perhaps only, even) important for MPI-I/O
      * where we guarantee that writes are collective, but reads may not be.
@@ -139,7 +139,7 @@ typedef enum H5FD_mem_t {
      * and then sub-allocate "small" raw data requests from that larger block.
      */
 #define H5FD_FEAT_AGGREGATE_SMALLDATA   0x00000010
-	
+
 
 /* Forward declaration */
 typedef struct H5FD_t H5FD_t;

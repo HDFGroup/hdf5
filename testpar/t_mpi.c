@@ -99,7 +99,7 @@ test_mpio_overlap_writes(char *filename)
 	    mrc = MPI_File_write_at(fh, mpi_off, buf, (int)stride, MPI_BYTE,
 		    &mpi_stat);
 	    VRFY((mrc==MPI_SUCCESS), "");
-	    
+
 	    /* move the offset pointer to last byte written by all processes */
 	    mpi_off += (mpi_size - 1 - mpi_rank) * stride;
 
@@ -116,7 +116,7 @@ test_mpio_overlap_writes(char *filename)
 	VRFY((mrc==MPI_SUCCESS), "MPI_FILE_CLOSE");
 	mrc = MPI_Comm_free(&comm);
 	VRFY((mrc==MPI_SUCCESS), "MPI_Comm_free");
-    
+
 	/* sync with the other waiting processes */
 	mrc = MPI_Barrier(MPI_COMM_WORLD);
 	VRFY((mrc==MPI_SUCCESS), "Sync after writes");
@@ -181,10 +181,10 @@ test_mpio_overlap_writes(char *filename)
  * Print any failure as information only, not as an error so that this
  * won't abort the remaining test or other separated tests.
  *
- * Test if MPIO can write file from under 2GB to over 2GB and then 
+ * Test if MPIO can write file from under 2GB to over 2GB and then
  * from under 4GB to over 4GB.
  * Each process writes 1MB in round robin fashion.
- * Then reads the file back in by reverse order, that is process 0 
+ * Then reads the file back in by reverse order, that is process 0
  * reads the data of process n-1 and vice versa.
  */
 static int
@@ -321,7 +321,7 @@ test_mpio_gb_file(char *filename)
 	/* close file and free the communicator */
 	mrc = MPI_File_close(&fh);
 	VRFY((mrc==MPI_SUCCESS), "MPI_FILE_CLOSE");
-	
+
 	mrc = MPI_Barrier(MPI_COMM_WORLD);
 	VRFY((mrc==MPI_SUCCESS), "Sync after writes");
 
@@ -419,7 +419,7 @@ test_mpio_1wMr(char *filename, int special_request)
     int  mpi_err;
     unsigned char writedata[DIMSIZE], readdata[DIMSIZE];
     unsigned char expect_val;
-    int  i, irank; 
+    int  i, irank;
     int  nerrs = 0;		/* number of errors */
     int  atomicity;
     MPI_Offset  mpi_off;
@@ -591,36 +591,36 @@ if (special_request & USEFSYNC){
     return nerrs;
 }
 
-/* 
+/*
 
 Function: test_mpio_derived_dtype
 
-Test Whether the Displacement of MPI derived datatype 
-(+ File_set_view + MPI_write)works or not on this MPI-IO package 
+Test Whether the Displacement of MPI derived datatype
+(+ File_set_view + MPI_write)works or not on this MPI-IO package
 and this platform.
 
-1. Details for the test: 
+1. Details for the test:
 1) Create two derived datatypes with MPI_Type_hindexed:
-        datatype1: 
-	count = 1, blocklens = 1, offsets = 0, 
+        datatype1:
+	count = 1, blocklens = 1, offsets = 0,
 	base type = MPI_BYTE(essentially a char)
-        datatype2: 
-	count = 1, blocklens = 1, offsets = 1(byte), 
+        datatype2:
+	count = 1, blocklens = 1, offsets = 1(byte),
 	base type = MPI_BYTE
-        
+
 2) Using these two derived datatypes,
    Build another derived datatype with MPI_Type_struct:
         advtype: derived from datatype1 and datatype2
-        advtype: 
-	count = 2, blocklens[0] = 1, blocklens[1]=1, 
-	offsets[0] = 0, offsets[1] = 1(byte), 
-        bas_type[0]=datatype1, 
+        advtype:
+	count = 2, blocklens[0] = 1, blocklens[1]=1,
+	offsets[0] = 0, offsets[1] = 1(byte),
+        bas_type[0]=datatype1,
         bas_type[1] = datatype2;
 
 3) Setting MPI file view with advtype
 4) Writing 2 bytes 1 to 2 using MPI_File_write to a file
 5) File content:
-Supposed the file value of the file is 0(most machines indeed do so) 
+Supposed the file value of the file is 0(most machines indeed do so)
 and Fill value is embraced with "() in the following output:
 Expected output should be:
 1,0,2
@@ -629,14 +629,14 @@ Expected output should be:
 
 However, at some platforms, for example, IBM AIX(at March 23rd, 2005):
 the following values were obtained:
-1,2,0 
+1,2,0
 
 The problem is that the displacement of the second derived datatype(datatype2) which formed the final derived datatype(advtype)
  has been put after the basic datatype(MPI_BYTE) of datatype2. This is a bug.
 
 
 2. This test will verify whether the complicated derived datatype is working on
-the current platform. 
+the current platform.
 
 If this bug has been fixed in the previous not-working package, this test will issue a printf message to tell the developer to change
 the configuration specific file of HDF5 so that we can change our configurationsetting to support collective IO for irregular selections.
@@ -651,7 +651,7 @@ static int test_mpio_derived_dtype(char *filename) {
     char mpi_err_str[MPI_MAX_ERROR_STRING];
     int  mpi_err_strlen;
     int  mpi_err;
-    int  i; 
+    int  i;
     int  nerrors = 0;		/* number of errors */
     MPI_Datatype  etype,filetype;
     MPI_Datatype  adv_filetype,bas_filetype[2];
@@ -673,9 +673,9 @@ static int test_mpio_derived_dtype(char *filename) {
     for(i=0;i<2;i++)
       buf[i] = i+1;
 
-  
+
     if ((mpi_err = MPI_File_open(MPI_COMM_WORLD, filename,
-				 MPI_MODE_RDWR | MPI_MODE_CREATE, 
+				 MPI_MODE_RDWR | MPI_MODE_CREATE,
 				 MPI_INFO_NULL, &fh))
 	    != MPI_SUCCESS){
 	MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
@@ -766,7 +766,7 @@ static int test_mpio_derived_dtype(char *filename) {
 	printf("MPI_File_open failed (%s)\n", mpi_err_str);
 	return 1;
     }
-    
+
     if((mpi_err = MPI_File_set_view(fh,0,MPI_BYTE,MPI_BYTE,"native",MPI_INFO_NULL))!= MPI_SUCCESS){
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
 	printf("MPI_File_set_view failed (%s)\n", mpi_err_str);
@@ -797,7 +797,7 @@ static int test_mpio_derived_dtype(char *filename) {
 	return 1;
     }
 
-    
+
     mpi_err = MPI_Barrier(MPI_COMM_WORLD);
     return ret;
 }
@@ -925,11 +925,11 @@ main(int argc, char **argv)
     }else{
 	MPI_BANNER("MPIO complicated derived datatype test...");
 	ret_code = test_mpio_derived_dtype(filenames[0]);
-#ifdef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS 
+#ifdef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
 	if(ret_code == -1) {
 	  if(mpi_rank == 0) {
-	    printf("Complicated derived datatype is NOT working at this platform\n"); 
-	    printf("Go back to hdf5/config and find the corresponding\n");  
+	    printf("Complicated derived datatype is NOT working at this platform\n");
+	    printf("Go back to hdf5/config and find the corresponding\n");
 	    printf("configure-specific file (for example, powerpc-ibm-aix5.x) and add\n");
 	    printf("hdf5_mpi_complex_derived_datatype_works=${hdf5_mpi_complex_derived_datatype-works='no'}\n");
 	    printf(" at the end of the file.\n");

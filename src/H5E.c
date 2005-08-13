@@ -93,7 +93,7 @@ int	H5E_mpi_error_str_len;
 #endif
 
 /* Static function declarations */
-static H5E_cls_t *H5E_register_class(const char *cls_name, const char *lib_name, 
+static H5E_cls_t *H5E_register_class(const char *cls_name, const char *lib_name,
                                 const char *version);
 static herr_t  H5E_unregister_class(H5E_cls_t *cls);
 static ssize_t H5E_get_class_name(const H5E_cls_t *cls, char *name, size_t size);
@@ -108,7 +108,7 @@ static ssize_t H5E_get_num(const H5E_t *err_stack);
 static herr_t  H5E_pop(H5E_t *err_stack, size_t count);
 static herr_t  H5E_clear_entries(H5E_t *estack, size_t nentries);
 static herr_t  H5E_print_stack(const H5E_t *estack, FILE *stream);
-static herr_t  H5E_walk_stack(const H5E_t *estack, H5E_direction_t direction, H5E_walk_t func, 
+static herr_t  H5E_walk_stack(const H5E_t *estack, H5E_direction_t direction, H5E_walk_t func,
                              void *client_data);
 static herr_t  H5E_walk_cb(unsigned n, const H5E_error_t *err_desc, void *client_data);
 static herr_t  H5E_get_auto_stack(const H5E_t *estack, hbool_t new_api, void **func, void **client_data);
@@ -161,7 +161,7 @@ done:
  *
  * Programmer:  Raymond Lu
  *              Friday, July 11, 2003
- *               
+ *
  *--------------------------------------------------------------------------
  */
 static herr_t
@@ -175,15 +175,15 @@ H5E_init_interface(void)
     FUNC_ENTER_NOAPI_NOINIT(H5E_init_interface)
 
     /* Initialize the atom group for the error class IDs */
-    if(H5I_register_type(H5I_ERROR_CLASS, H5I_ERRCLS_HASHSIZE, H5E_RESERVED_ATOMS, 
+    if(H5I_register_type(H5I_ERROR_CLASS, H5I_ERRCLS_HASHSIZE, H5E_RESERVED_ATOMS,
                     (H5I_free_t)H5E_unregister_class)<H5I_FILE)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
     /* Initialize the atom group for the major error IDs */
-    if(H5I_register_type(H5I_ERROR_MSG, H5I_ERRMSG_HASHSIZE, H5E_RESERVED_ATOMS, 
+    if(H5I_register_type(H5I_ERROR_MSG, H5I_ERRMSG_HASHSIZE, H5E_RESERVED_ATOMS,
                     (H5I_free_t)H5E_close_msg)<H5I_FILE)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
     /* Initialize the atom group for the error stacks */
-    if(H5I_register_type(H5I_ERROR_STACK, H5I_ERRSTK_HASHSIZE, H5E_RESERVED_ATOMS, 
+    if(H5I_register_type(H5I_ERROR_STACK, H5I_ERRSTK_HASHSIZE, H5E_RESERVED_ATOMS,
                     (H5I_free_t)H5E_close_stack)<H5I_FILE)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
 
@@ -226,10 +226,10 @@ done:
  * 		Failure:	Negative.
  *
  * Programmer:	Raymond Lu
- *	        Tuesday, July 22, 2003	
+ *	        Tuesday, July 22, 2003
  *
  * Modifications:
- *              
+ *
  *-------------------------------------------------------------------------
  */
 int
@@ -250,20 +250,20 @@ H5E_term_interface(void)
             /* Clear any outstanding error stacks */
             if (nstk>0)
 	        H5I_clear_type(H5I_ERROR_STACK, FALSE);
-        
+
             /* Clear all the error classes */
 	    if (ncls>0) {
 	        H5I_clear_type(H5I_ERROR_CLASS, FALSE);
-                
+
                 /* Reset the HDF5 error class, if its been closed */
                 if(H5I_nmembers(H5I_ERROR_CLASS)==0)
                     H5E_ERR_CLS_g = -1;
             }
-            
+
             /* Clear all the error messages */
 	    if (nmsg>0) {
 	        H5I_clear_type(H5I_ERROR_MSG, FALSE);
-                
+
                 /* Reset the HDF5 error messages, if they've been closed */
                 if(H5I_nmembers(H5I_ERROR_MSG)==0) {
                     /* Include the automatically generated error code termination */
@@ -352,7 +352,7 @@ H5Eregister_class(const char *cls_name, const char *lib_name, const char *versio
 
     FUNC_ENTER_API(H5Eregister_class, FAIL)
     H5TRACE3("i","sss",cls_name,lib_name,version);
-    
+
     /* Check arguments */
     if (cls_name==NULL || lib_name==NULL || version==NULL)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid string")
@@ -389,9 +389,9 @@ H5E_register_class(const char *cls_name, const char *lib_name, const char *versi
 {
     H5E_cls_t   *cls;        /* Pointer to error class */
     H5E_cls_t   *ret_value;  /* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5E_register_class)
-    
+
     /* Check arguments */
     assert(cls_name);
     assert(lib_name);
@@ -438,7 +438,7 @@ H5Eunregister_class(hid_t class_id)
 
     FUNC_ENTER_API(H5Eunregister_class, FAIL)
     H5TRACE1("e","i",class_id);
-    
+
     /* Check arguments */
     if (H5I_ERROR_CLASS != H5I_get_type(class_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an error class")
@@ -482,14 +482,14 @@ H5E_unregister_class(H5E_cls_t *cls)
     (void)H5I_search(H5I_ERROR_MSG, H5E_close_msg_cb, cls);
 
     /* Free error class structure */
-    if(cls->cls_name)    
+    if(cls->cls_name)
         H5MM_xfree((void*)cls->cls_name);
     if(cls->lib_name)
         H5MM_xfree((void*)cls->lib_name);
     if(cls->lib_vers)
         H5MM_xfree((void*)cls->lib_vers);
     H5FL_FREE(H5E_cls_t, cls);
-    
+
     FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
@@ -500,7 +500,7 @@ H5E_unregister_class(H5E_cls_t *cls)
  * Purpose:	Retrieves error class name.
  *
  * Return:      Non-negative for name length if succeeds(zero means no name);
- *              otherwise returns negative value.	
+ *              otherwise returns negative value.
  *
  * Programmer:	Raymond Lu
  *              Friday, July 11, 2003
@@ -517,7 +517,7 @@ H5Eget_class_name(hid_t class_id, char *name, size_t size)
 
     FUNC_ENTER_API(H5Eget_class_name, FAIL)
     H5TRACE3("Zs","isz",class_id,name,size);
-    
+
     /* Get the error class */
     if(NULL==(cls = H5I_object_verify(class_id, H5I_ERROR_CLASS)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error class ID")
@@ -535,9 +535,9 @@ done:
  * Function:	H5E_get_class_name
  *
  * Purpose:	Private function to retrieve error class name.
- * 
+ *
  * Return:      Non-negative for name length if succeeds(zero means no name);
- *              otherwise returns negative value.	
+ *              otherwise returns negative value.
  *
  * Programmer:	Raymond Lu
  *              Friday, July 11, 2003
@@ -550,7 +550,7 @@ static ssize_t
 H5E_get_class_name(const H5E_cls_t *cls, char *name, size_t size)
 {
     ssize_t       len;          /* Length of rror class's name */
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_get_class_name)
 
     /* Check arguments */
@@ -564,8 +564,8 @@ H5E_get_class_name(const H5E_cls_t *cls, char *name, size_t size)
        HDstrncpy(name, cls->cls_name, MIN((size_t)(len+1), size));
        if((size_t)len >= size)
           name[size-1]='\0';
-    } 
-    
+    }
+
     /* Return the full length */
     FUNC_LEAVE_NOAPI(len)
 }
@@ -579,7 +579,7 @@ H5E_get_class_name(const H5E_cls_t *cls, char *name, size_t size)
  *
  * Programmer:  Raymond Lu
  *              July 14, 2003
- *              
+ *
  * Return:	Non-negative value on success/Negative on failure
  *
  * Modifications:
@@ -592,9 +592,9 @@ H5E_close_msg_cb(void *obj_ptr, hid_t obj_id, void *key)
     H5E_msg_t   *err_msg = (H5E_msg_t*)obj_ptr;
     H5E_cls_t   *cls = (H5E_cls_t*)key;
     herr_t      ret_value = SUCCEED;       /* Return value */
-        
+
     FUNC_ENTER_NOAPI_NOINIT(H5E_close_msg_cb)
-  
+
     /* Check arguments */
     assert(err_msg);
 
@@ -602,7 +602,7 @@ H5E_close_msg_cb(void *obj_ptr, hid_t obj_id, void *key)
     if(err_msg->cls == cls)
         if(H5I_dec_ref(obj_id)<0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error message")
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -626,7 +626,7 @@ herr_t
 H5Eclose_msg(hid_t err_id)
 {
     herr_t       ret_value = SUCCEED;   /* Return value */
-    
+
     FUNC_ENTER_API(H5Eclose_msg, FAIL)
     H5TRACE1("e","i",err_id);
 
@@ -664,7 +664,7 @@ H5E_close_msg(H5E_msg_t *err)
     /* Check arguments */
     assert(err);
 
-    if(err->msg)    
+    if(err->msg)
         H5MM_xfree((void*)err->msg);
     /* Don't free err->cls here */
 
@@ -693,10 +693,10 @@ H5Ecreate_msg(hid_t class_id, H5E_type_t msg_type, const char *msg_str)
     H5E_cls_t   *cls;           /* Pointer to error class */
     H5E_msg_t   *msg;           /* Pointer to new error message */
     hid_t       ret_value;      /* Return value */
-    
+
     FUNC_ENTER_API(H5Ecreate_msg, FAIL)
     H5TRACE3("i","iEts",class_id,msg_type,msg_str);
-    
+
     /* Check arguments */
     if(msg_type!=H5E_MAJOR && msg_type!=H5E_MINOR)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid message type")
@@ -738,9 +738,9 @@ H5E_create_msg(H5E_cls_t *cls, H5E_type_t msg_type, const char *msg_str)
 {
     H5E_msg_t   *msg;           /* Pointer to new error message */
     H5E_msg_t   *ret_value;     /* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5E_create_msg)
-   
+
     /* Check arguments */
     assert(cls);
     assert(msg_type==H5E_MAJOR || msg_type==H5E_MINOR);
@@ -770,7 +770,7 @@ done:
  * Purpose:	Retrieves a major error message.
  *
  * Return:      Returns message if succeeds.
- *              otherwise returns NULL.	
+ *              otherwise returns NULL.
  *
  * Programmer:	Raymond Lu
  *              Friday, July 14, 2003
@@ -789,7 +789,7 @@ H5Eget_major(H5E_major_t maj)
     char        *ret_value = NULL;
 
     FUNC_ENTER_API_NOCLEAR(H5Eget_major,NULL)
-    
+
     /* Get the message object */
     if((msg = H5I_object_verify(maj, H5I_ERROR_MSG))==NULL)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a error message ID")
@@ -797,7 +797,7 @@ H5Eget_major(H5E_major_t maj)
     /* Get the message's text */
     if((size = H5E_get_msg(msg, &type, NULL, 0))<0)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text");
-  
+
     if(type != H5E_MAJOR)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "Error message isn't a major one");
 
@@ -808,7 +808,7 @@ H5Eget_major(H5E_major_t maj)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text")
 
     ret_value = msg_str;
-    
+
 done:
     FUNC_LEAVE_API(ret_value)
 }
@@ -820,7 +820,7 @@ done:
  * Purpose:	Retrieves a minor error message.
  *
  * Return:      Returns message if succeeds.
- *              otherwise returns NULL.	
+ *              otherwise returns NULL.
  *
  * Programmer:	Raymond Lu
  *              Friday, July 14, 2003
@@ -839,7 +839,7 @@ H5Eget_minor(H5E_minor_t min)
     char        *ret_value = NULL;
 
     FUNC_ENTER_API_NOCLEAR(H5Eget_minor,NULL)
-    
+
     /* Get the message object */
     if((msg = H5I_object_verify(min, H5I_ERROR_MSG))==NULL)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a error message ID")
@@ -847,10 +847,10 @@ H5Eget_minor(H5E_minor_t min)
     /* Get the message's text */
     if((size = H5E_get_msg(msg, &type, NULL, 0))<0)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text");
-  
+
     if(type != H5E_MINOR)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "Error message isn't a minor one");
-    
+
     /* Don't know who is going to free it */
     msg_str = (char*)H5MM_malloc((size_t)(++size)*sizeof(char));
 
@@ -858,7 +858,7 @@ H5Eget_minor(H5E_minor_t min)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text")
 
     ret_value = msg_str;
-    
+
 done:
     FUNC_LEAVE_API(ret_value)
 }
@@ -870,7 +870,7 @@ done:
  * Purpose:	Retrieves an error message.
  *
  * Return:      Non-negative for message length if succeeds(zero means no message);
- *              otherwise returns negative value.	
+ *              otherwise returns negative value.
  *
  * Programmer:	Raymond Lu
  *              Friday, July 14, 2003
@@ -887,7 +887,7 @@ H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg_str, size_t size)
 
     FUNC_ENTER_API(H5Eget_msg, FAIL)
     H5TRACE4("Zs","i*Etsz",msg_id,type,msg_str,size);
-    
+
     /* Get the message object */
     if((msg = H5I_object_verify(msg_id, H5I_ERROR_MSG))==NULL)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error message ID")
@@ -905,9 +905,9 @@ done:
  * Function:	H5E_get_msg
  *
  * Purpose:	Private function to retrieve an error message.
- * 
+ *
  * Return:      Non-negative for name length if succeeds(zero means no name);
- *              otherwise returns negative value.	
+ *              otherwise returns negative value.
  *
  * Programmer:	Raymond Lu
  *              Friday, July 14, 2003
@@ -920,7 +920,7 @@ static ssize_t
 H5E_get_msg(const H5E_msg_t *msg, H5E_type_t *type, char *msg_str, size_t size)
 {
     ssize_t       len;          /* Length of rror class's name */
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_get_msg)
 
     /* Check arguments */
@@ -934,8 +934,8 @@ H5E_get_msg(const H5E_msg_t *msg, H5E_type_t *type, char *msg_str, size_t size)
        HDstrncpy(msg_str, msg->msg, MIN((size_t)(len+1), size));
        if((size_t)len >= size)
           msg_str[size-1]='\0';
-    } 
-    
+    }
+
     /* Give the message type, if asked */
     if(type)
         *type = msg->type;
@@ -969,7 +969,7 @@ H5Eget_current_stack(void)
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Eget_current_stack, FAIL)
     H5TRACE0("i","");
-    
+
     /* Get the current stack */
     if((stk=H5E_get_current_stack())==NULL)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTCREATE, FAIL, "can't create error stack")
@@ -1004,7 +1004,7 @@ H5E_get_current_stack(void)
     H5E_t	*estack_copy=NULL;   /* Pointer to new error stack to return */
     unsigned    u;              /* Local index variable */
     H5E_t      *ret_value;   /* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5E_get_current_stack)
 
     /* Get a pointer to the current error stack */
@@ -1016,24 +1016,24 @@ H5E_get_current_stack(void)
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Make a copy of current error stack */
-    estack_copy->nused = current_stack->nused; 
+    estack_copy->nused = current_stack->nused;
     for(u=0; u<current_stack->nused; u++) {
         H5E_error_t *current_error, *new_error; /* Pointers to errors on each stack */
 
         /* Get pointers into the current error stack location */
         current_error = &(current_stack->slot[u]);
         new_error = &(estack_copy->slot[u]);
-       
+
         /* Increment the IDs to indicate that they are used in this stack */
         if(H5I_inc_ref(current_error->cls_id)<0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, NULL, "unable to increment ref count on error class")
-        new_error->cls_id = current_error->cls_id;       
+        new_error->cls_id = current_error->cls_id;
         if(H5I_inc_ref(current_error->maj_num)<0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, NULL, "unable to increment ref count on error message")
-        new_error->maj_num = current_error->maj_num;       
+        new_error->maj_num = current_error->maj_num;
         if(H5I_inc_ref(current_error->min_num)<0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, NULL, "unable to increment ref count on error message")
-        new_error->min_num = current_error->min_num;       
+        new_error->min_num = current_error->min_num;
         if((new_error->func_name = HDstrdup(current_error->func_name))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
         if((new_error->file_name = HDstrdup(current_error->file_name))==NULL)
@@ -1042,10 +1042,10 @@ H5E_get_current_stack(void)
         if((new_error->desc = HDstrdup(current_error->desc))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     } /* end for */
-   
-    /* Empty current error stack */ 
+
+    /* Empty current error stack */
     H5E_clear_stack(current_stack);
-   
+
     /* Set the return value */
     ret_value = estack_copy;
 
@@ -1062,7 +1062,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Eset_current_stack
  *
- * Purpose:     Replaces current stack with specified stack.	
+ * Purpose:     Replaces current stack with specified stack.
  *
  * Return:	Non-negative value on success/Negative on failure
  *
@@ -1078,10 +1078,10 @@ H5Eset_current_stack(hid_t err_stack)
 {
     H5E_t      *estack;
     herr_t         ret_value = SUCCEED;   /* Return value */
-    
+
     FUNC_ENTER_API(H5Eset_current_stack, FAIL)
     H5TRACE1("e","i",err_stack);
-    
+
     if(err_stack != H5E_DEFAULT) {
         if((estack = H5I_object_verify(err_stack, H5I_ERROR_STACK))==NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
@@ -1116,7 +1116,7 @@ H5E_set_current_stack(H5E_t *estack)
     H5E_t	*current_stack;         /* Default error stack */
     unsigned     u;                     /* Local index variable */
     herr_t       ret_value = SUCCEED;   /* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5E_set_current_stack)
 
     /* Sanity check */
@@ -1126,18 +1126,18 @@ H5E_set_current_stack(H5E_t *estack)
     if((current_stack = H5E_get_my_stack ())==NULL) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
 
-    /* Empty current error stack */ 
+    /* Empty current error stack */
     H5E_clear_stack(current_stack);
 
     /* Copy new stack to current error stack */
-    current_stack->nused = estack->nused; 
+    current_stack->nused = estack->nused;
     for(u=0; u<current_stack->nused; u++) {
         H5E_error_t *current_error, *new_error; /* Pointers to errors on each stack */
 
         /* Get pointers into the current error stack location */
         current_error = &(current_stack->slot[u]);
         new_error = &(estack->slot[u]);
-       
+
         /* Increment the IDs to indicate that they are used in this stack */
         if(H5I_inc_ref(new_error->cls_id)<0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "unable to decrement ref count on error class")
@@ -1220,7 +1220,7 @@ static herr_t
 H5E_close_stack(H5E_t *estack)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_close_stack)
-    
+
     /* Sanity check */
     assert(estack);
 
@@ -1229,7 +1229,7 @@ H5E_close_stack(H5E_t *estack)
 
     /* Free the stack structure */
     H5FL_FREE(H5E_t, estack);
-    
+
     FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
@@ -1260,7 +1260,7 @@ H5Eget_num(hid_t error_stack_id)
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Eget_num, FAIL)
     H5TRACE1("Is","i",error_stack_id);
-   
+
     /* Need to check for errors */
     if(error_stack_id == H5E_DEFAULT) {
     	if((estack = H5E_get_my_stack())==NULL) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
@@ -1274,7 +1274,7 @@ H5Eget_num(hid_t error_stack_id)
         if((estack = H5I_object_verify(error_stack_id, H5I_ERROR_STACK))==NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
     } /* end else */
-    
+
     /* Get the number of errors on stack */
     if((ret_value=H5E_get_num(estack))<0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get number of errors")
@@ -1305,8 +1305,8 @@ static ssize_t
 H5E_get_num(const H5E_t *estack)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_get_num)
- 
-    assert(estack);   
+
+    assert(estack);
 
     FUNC_LEAVE_NOAPI((ssize_t)estack->nused)
 }
@@ -1335,7 +1335,7 @@ H5Epop(hid_t err_stack, size_t count)
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Epop, FAIL)
     H5TRACE2("e","iz",err_stack,count);
-   
+
     /* Need to check for errors */
     if(err_stack == H5E_DEFAULT) {
     	if((estack = H5E_get_my_stack())==NULL) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
@@ -1382,7 +1382,7 @@ static herr_t
 H5E_pop(H5E_t *estack, size_t count)
 {
     herr_t      ret_value = SUCCEED;   /* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5E_pop)
 
     /* Sanity check */
@@ -1403,17 +1403,17 @@ done:
  *
  * Purpose:	This function definition is for backward compatibility only.
  *              It doesn't have error stack and error class as parameters.
- *              The old definition of major and minor is casted as HID_T 
- *              in H5Epublic.h 
+ *              The old definition of major and minor is casted as HID_T
+ *              in H5Epublic.h
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Raymond Lu
  *		Tuesday, Sep 16, 2003
  *
- * Notes: 	Basically a public API wrapper around the H5E_push_stack 
+ * Notes: 	Basically a public API wrapper around the H5E_push_stack
  *              function.  For backward compatibility, it maintains the
- *              same parameter as the old function, in contrary to 
+ *              same parameter as the old function, in contrary to
  *              H5Epush_stack.
  *
  * Modifications:
@@ -1421,7 +1421,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Epush(const char *file, const char *func, unsigned line, 
+H5Epush(const char *file, const char *func, unsigned line,
         H5E_major_t maj, H5E_minor_t min, const char *str)
 {
     H5E_t       *estack = NULL;         /* Default error stack */
@@ -1430,7 +1430,7 @@ H5Epush(const char *file, const char *func, unsigned line,
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Epush, FAIL)
     H5TRACE6("e","ssIuiis",file,func,line,maj,min,str);
-    
+
     /* Push the error on the stack */
     if(H5E_push_stack(estack, file, func, line, H5E_ERR_CLS_g, maj, min, str)<0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't push error on stack")
@@ -1456,7 +1456,7 @@ done:
  * Programmer:	Quincey Koziol
  *		Monday, October 18, 1999
  *
- * Notes: 	Basically a new public API wrapper around the H5E_push_stack 
+ * Notes: 	Basically a new public API wrapper around the H5E_push_stack
  *              function.
  *
  * Modifications:
@@ -1470,7 +1470,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Epush_stack(hid_t err_stack, const char *file, const char *func, unsigned line, 
+H5Epush_stack(hid_t err_stack, const char *file, const char *func, unsigned line,
         hid_t cls_id, hid_t maj_id, hid_t min_id, const char *fmt, ...)
 {
     va_list     ap;             /* Varargs info */
@@ -1486,7 +1486,7 @@ H5Epush_stack(hid_t err_stack, const char *file, const char *func, unsigned line
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Epush_stack, FAIL)
     H5TRACE7("e","issIuiis",err_stack,file,func,line,maj_id,min_id,fmt);
-    
+
     if(err_stack == H5E_DEFAULT)
     	estack = NULL;
     else {
@@ -1497,7 +1497,7 @@ H5Epush_stack(hid_t err_stack, const char *file, const char *func, unsigned line
         if((estack = H5I_object_verify(err_stack, H5I_ERROR_STACK))==NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
     } /* end else */
-    
+
     /* Check for mis-matches in major & minor error classes */
     if((maj_ptr = H5I_object_verify(maj_id, H5I_ERROR_MSG))==NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error message ID")
@@ -1581,10 +1581,10 @@ done:
  * Programmer:	Robb Matzke
  *		Friday, December 12, 1997
  *
- * Modifications: 
+ * Modifications:
  *              Raymond Lu
  *              Tuesday, July 15, 2003
- *               
+ *
  *              Added the ID of the error stack to which the error is pushed
  *              on.  The error message can be appended more message in the
  *              same control format as printf and fprintf.
@@ -1592,7 +1592,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5E_push_stack(H5E_t *estack, const char *file, const char *func, unsigned line, 
+H5E_push_stack(H5E_t *estack, const char *file, const char *func, unsigned line,
         hid_t cls_id, hid_t maj_id, hid_t min_id, const char *desc)
 {
     herr_t	ret_value=SUCCEED;      /* Return value */
@@ -1675,7 +1675,7 @@ H5Eclear(void)
 {
     H5E_t   *estack = NULL;     /* Default error stack to operate on */
     herr_t ret_value=SUCCEED;   /* Return value */
-    
+
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Eclear, FAIL)
     H5TRACE0("e","");
@@ -1708,7 +1708,7 @@ H5Eclear_stack(hid_t err_stack)
 {
     H5E_t   *estack;            /* Error stack to operate on */
     herr_t ret_value=SUCCEED;   /* Return value */
-    
+
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Eclear_stack, FAIL)
     H5TRACE1("e","i",err_stack);
@@ -1723,7 +1723,7 @@ H5Eclear_stack(hid_t err_stack)
         if((estack = H5I_object_verify(err_stack, H5I_ERROR_STACK))==NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
     } /* end else */
- 
+
     /* Clear the error stack */
     if(H5E_clear_stack(estack)<0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't clear error stack")
@@ -1761,7 +1761,7 @@ H5E_clear_entries(H5E_t *estack, size_t nentries)
     assert(estack);
     assert(estack->nused>=nentries);
 
-    /* Empty the error stack from the top down */ 
+    /* Empty the error stack from the top down */
     for(u=0; nentries>0; nentries--,u++) {
         error = &(estack->slot[estack->nused-(u+1)]);
 
@@ -1785,7 +1785,7 @@ H5E_clear_entries(H5E_t *estack, size_t nentries)
 
     /* Decrement number of errors on stack */
     estack->nused-=u;
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -1818,12 +1818,12 @@ H5E_clear_stack(H5E_t *estack)
     	if((estack = H5E_get_my_stack())==NULL) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
             HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
 
-    /* Empty the error stack */ 
+    /* Empty the error stack */
     assert(estack);
     if(estack->nused)
         if(H5E_clear_entries(estack, estack->nused)<0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't clear error stack")
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -1855,14 +1855,14 @@ H5Eprint(FILE *stream)
 {
     H5E_t   *estack;            /* Error stack to operate on */
     herr_t ret_value=SUCCEED;   /* Return value */
-    
+
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Eprint, FAIL)
     /*NO TRACE*/
 
     if((estack = H5E_get_my_stack())==NULL) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
- 
+
     /* Print error stack */
     if(H5E_print_stack(estack, stream)<0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't display error stack")
@@ -1895,7 +1895,7 @@ done:
  *      Print for specified error stack.  A line will appear before the error
  *      messages of each error class.  It states the information of library
  *      name, version number and thread ID.
- *      
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1903,7 +1903,7 @@ H5Eprint_stack(hid_t err_stack, FILE *stream)
 {
     H5E_t   *estack;            /* Error stack to operate on */
     herr_t ret_value=SUCCEED;   /* Return value */
-    
+
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Eprint_stack, FAIL)
     /*NO TRACE*/
@@ -1920,7 +1920,7 @@ H5Eprint_stack(hid_t err_stack, FILE *stream)
         if((estack = H5I_object_verify(err_stack, H5I_ERROR_STACK))==NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
     } /* end else */
- 
+
     /* Print error stack */
     if(H5E_print_stack(estack, stream)<0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't display error stack")
@@ -1933,10 +1933,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5E_print_stack
  *
- * Purpose:	Private function to print the error stack in some default 
+ * Purpose:	Private function to print the error stack in some default
  *              way.  This is just a convenience function for H5Ewalk() and
- *              H5Ewalk_stack() with a function that prints error messages.  
- *              Users are encouraged to write there own more specific error 
+ *              H5Ewalk_stack() with a function that prints error messages.
+ *              Users are encouraged to write there own more specific error
  *              handlers.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -1954,7 +1954,7 @@ done:
  *      Print for specified error stack.  A line will appear before the error
  *      messages of each error class.  It states the information of library
  *      name, version number and thread ID.
- *      
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1965,23 +1965,23 @@ H5E_print_stack(const H5E_t *estack, FILE *stream)
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_NOAPI_NOINIT(H5E_print_stack)
-    
+
     /* Sanity check */
     assert(estack);
 
     /* If no stream was given, use stderr */
-    if (!stream) 
+    if (!stream)
         eprint.stream = stderr;
     else
         eprint.stream = stream;
 
     /* Reset the original error class information */
     HDmemset(&eprint.cls,0,sizeof(H5E_cls_t));
-    
+
     /* Walk the error stack */
     if(H5E_walk_stack(estack, H5E_WALK_DOWNWARD, H5E_walk_cb, (void*)&eprint)<0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
-  
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -2041,7 +2041,7 @@ done:
  *              Raymond Lu
  *              Wednesday, July 16, 2003
  *              Let it walk through specified error stack.
- *              
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2104,7 +2104,7 @@ done:
  *              Raymond Lu
  *              Wednesday, July 16, 2003
  *              Let it walk through specified error stack.
- *              
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2138,7 +2138,7 @@ H5E_walk_stack(const H5E_t *estack, H5E_direction_t direction, H5E_walk_t func, 
         if(status<0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
     } /* end if */
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -2197,7 +2197,7 @@ H5E_walk_cb(unsigned n, const H5E_error_t *err_desc, void *client_data)
     /* If no client data was passed, output to stderr */
     if (!client_data) stream = stderr;
     else stream = eprint->stream;
-    
+
     /* Get descriptions for the major and minor error numbers */
     maj_ptr = H5I_object_verify(err_desc->maj_num, H5I_ERROR_MSG);
     min_ptr = H5I_object_verify(err_desc->min_num, H5I_ERROR_MSG);
@@ -2209,7 +2209,7 @@ H5E_walk_cb(unsigned n, const H5E_error_t *err_desc, void *client_data)
 
     /* Get error class info */
     cls_ptr = maj_ptr->cls;
-    
+
     /* Print error class header if new class */
     if(eprint->cls.lib_name==NULL || HDstrcmp(cls_ptr->lib_name, eprint->cls.lib_name)) {
         /* update to the new class information */
@@ -2218,7 +2218,7 @@ H5E_walk_cb(unsigned n, const H5E_error_t *err_desc, void *client_data)
         if(cls_ptr->lib_vers) eprint->cls.lib_vers = cls_ptr->lib_vers;
 
         fprintf (stream, "%s-DIAG: Error detected in %s (%s) ", cls_ptr->cls_name, cls_ptr->lib_name, cls_ptr->lib_vers);
-        
+
         /* try show the process or thread id in multiple processes cases*/
 #ifdef H5_HAVE_PARALLEL
         {   int mpi_rank, mpi_initialized;
@@ -2262,15 +2262,15 @@ H5E_walk_cb(unsigned n, const H5E_error_t *err_desc, void *client_data)
  *
  * Purpose:	This function is for backward compatbility.
  *              Returns the current settings for the automatic error stack
- *		traversal function and its data for specific error stack.  
- *		Either (or both) arguments may be null in which case the 
+ *		traversal function and its data for specific error stack.
+ *		Either (or both) arguments may be null in which case the
  *		value is not returned.
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Raymond Lu
  *              Sep 16, 2003
- *              
+ *
  * Modifications:
  *
  *-------------------------------------------------------------------------
@@ -2280,11 +2280,11 @@ H5Eget_auto(H5E_auto_t *func, void **client_data)
 {
     H5E_t   *estack;            /* Error stack to operate on */
     herr_t ret_value=SUCCEED;   /* Return value */
-    
+
     FUNC_ENTER_API(H5Eget_auto, FAIL)
     H5TRACE2("e","*xx",func,client_data);
 
-    /* Retrieve default error stack */    
+    /* Retrieve default error stack */
     if((estack = H5E_get_my_stack())==NULL) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
 
@@ -2301,8 +2301,8 @@ done:
  * Function:	H5Eget_auto_stack
  *
  * Purpose:	Returns the current settings for the automatic error stack
- *		traversal function and its data for specific error stack.  
- *		Either (or both) arguments may be null in which case the 
+ *		traversal function and its data for specific error stack.
+ *		Either (or both) arguments may be null in which case the
  *		value is not returned.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -2313,7 +2313,7 @@ done:
  * Modifications:
  *              Raymond Lu
  *              July 18, 2003
- *              Added error stack in the parameters.  It returns the 
+ *              Added error stack in the parameters.  It returns the
  *              traversal function and data for that error stack.
  *
  *-------------------------------------------------------------------------
@@ -2323,10 +2323,10 @@ H5Eget_auto_stack(hid_t estack_id, H5E_auto_stack_t *func, void **client_data)
 {
     H5E_t   *estack;            /* Error stack to operate on */
     herr_t ret_value=SUCCEED;   /* Return value */
-    
+
     FUNC_ENTER_API(H5Eget_auto_stack, FAIL)
     H5TRACE3("e","i*xx",estack_id,func,client_data);
-    
+
     if(estack_id == H5E_DEFAULT) {
     	if((estack = H5E_get_my_stack())==NULL) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
             HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
@@ -2347,9 +2347,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5E_get_auto_stack
  *
- * Purpose:	Private function to return the current settings for the 
- *              automatic error stack traversal function and its data 
- *              for specific error stack. Either (or both) arguments may 
+ * Purpose:	Private function to return the current settings for the
+ *              automatic error stack traversal function and its data
+ *              for specific error stack. Either (or both) arguments may
  *              be null in which case the value is not returned.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -2367,7 +2367,7 @@ H5E_get_auto_stack(const H5E_t *estack, hbool_t new_api, void * *func, void **cl
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_get_auto_stack)
 
     assert (estack);
-        
+
     /* Retrieve the requested information */
     if(func)
         *func = new_api ? (void *)estack->u.func_stack : (void *)estack->u.func;
@@ -2382,8 +2382,8 @@ H5E_get_auto_stack(const H5E_t *estack, hbool_t new_api, void * *func, void **cl
  * Function:	H5Eset_auto
  *
  * Purpose:	This function is for backward compatbility.
- *              Turns on or off automatic printing of errors for certain 
- *              error stack.  When turned on (non-null FUNC pointer) any 
+ *              Turns on or off automatic printing of errors for certain
+ *              error stack.  When turned on (non-null FUNC pointer) any
  *              API function which returns an error indication will first
  *              call FUNC passing it CLIENT_DATA as an argument.
  *
@@ -2393,7 +2393,7 @@ H5E_get_auto_stack(const H5E_t *estack, hbool_t new_api, void * *func, void **cl
  *
  *		Automatic stack traversal is always in the H5E_WALK_DOWNWARD
  *		direction.
- *		
+ *
  * See Also:	H5Ewalk()
  *
  * Return:	Non-negative on success/Negative on failure
@@ -2410,13 +2410,13 @@ H5Eset_auto(H5E_auto_t func, void *client_data)
 {
     H5E_t   *estack;            /* Error stack to operate on */
     herr_t ret_value=SUCCEED;   /* Return value */
-    
+
     FUNC_ENTER_API(H5Eset_auto, FAIL)
     H5TRACE2("e","xx",func,client_data);
 
     if((estack = H5E_get_my_stack())==NULL) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
-   
+
     /* Set the automatic error reporting information */
     if(H5E_set_auto_stack(estack, FALSE, (void *)func, client_data)<0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't set automatic error info")
@@ -2429,8 +2429,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Eset_auto_stack
  *
- * Purpose:	Turns on or off automatic printing of errors for certain 
- *              error stack.  When turned on (non-null FUNC pointer) any 
+ * Purpose:	Turns on or off automatic printing of errors for certain
+ *              error stack.  When turned on (non-null FUNC pointer) any
  *              API function which returns an error indication will first
  *              call FUNC passing it CLIENT_DATA as an argument.
  *
@@ -2440,7 +2440,7 @@ done:
  *
  *		Automatic stack traversal is always in the H5E_WALK_DOWNWARD
  *		direction.
- *		
+ *
  * See Also:	H5Ewalk()
  *
  * Return:	Non-negative on success/Negative on failure
@@ -2457,7 +2457,7 @@ H5Eset_auto_stack(hid_t estack_id, H5E_auto_stack_t func, void *client_data)
 {
     H5E_t   *estack;            /* Error stack to operate on */
     herr_t ret_value=SUCCEED;   /* Return value */
-    
+
     FUNC_ENTER_API(H5Eset_auto_stack, FAIL)
     H5TRACE3("e","ixx",estack_id,func,client_data);
 
@@ -2468,7 +2468,7 @@ H5Eset_auto_stack(hid_t estack_id, H5E_auto_stack_t func, void *client_data)
     else
         if((estack = H5I_object_verify(estack_id, H5I_ERROR_STACK))==NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
-    
+
     /* Set the automatic error reporting information */
     if(H5E_set_auto_stack(estack, TRUE, (void *)func, client_data)<0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't set automatic error info")
@@ -2481,10 +2481,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5E_set_auto_stack
  *
- * Purpose:	Private function to turn on or off automatic printing of 
- *              errors for certain error stack.  When turned on (non-null 
- *              FUNC pointer) any API function which returns an error 
- *              indication will first call FUNC passing it CLIENT_DATA 
+ * Purpose:	Private function to turn on or off automatic printing of
+ *              errors for certain error stack.  When turned on (non-null
+ *              FUNC pointer) any API function which returns an error
+ *              indication will first call FUNC passing it CLIENT_DATA
  *              as an argument.
  *
  *		The default values before this function is called are
@@ -2493,7 +2493,7 @@ done:
  *
  *		Automatic stack traversal is always in the H5E_WALK_DOWNWARD
  *		direction.
- *		
+ *
  * See Also:	H5Ewalk()
  *
  * Return:	Non-negative on success/Negative on failure
@@ -2530,7 +2530,7 @@ H5E_set_auto_stack(H5E_t *estack, hbool_t new_api, void *func, void *client_data
  * Purpose:	Private function to dump the error stack during an error in
  *              an API function if a callback function is defined for the
  *              current error stack.
- *		
+ *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
@@ -2574,7 +2574,7 @@ done:
  *              error stack conforms to the H5E_auto_stack_t typedef
  *              or the H5E_auto_t typedef.  The IS_STACK parameter is set
  *              to 1 for the first case and 0 for the latter case.
- *		
+ *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
@@ -2589,7 +2589,7 @@ H5Eauto_is_stack(hid_t estack_id, unsigned *is_stack)
 {
     H5E_t   *estack;            /* Error stack to operate on */
     herr_t ret_value=SUCCEED;   /* Return value */
-    
+
     FUNC_ENTER_API(H5Eauto_is_stack, FAIL)
     H5TRACE2("e","i*Iu",estack_id,is_stack);
 
@@ -2600,7 +2600,7 @@ H5Eauto_is_stack(hid_t estack_id, unsigned *is_stack)
     else
         if((estack = H5I_object_verify(estack_id, H5I_ERROR_STACK))==NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
-    
+
     /* Check if the error stack reporting function is the "newer" stack type */
     if(is_stack)
         *is_stack=estack->new_api;
