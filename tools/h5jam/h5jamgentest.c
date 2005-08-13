@@ -237,7 +237,7 @@ float dset2_1[10], dset2_2[3][5];
   H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_1);
   H5Sclose(space);
   H5Dclose(dataset);
- 
+
   /* dset2.2 */
   dims[0] = 3; dims[1] = 5;
   space = H5Screate_simple(2, dims, NULL);
@@ -367,7 +367,7 @@ char *bp;
   H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_1);
   H5Sclose(space);
   H5Dclose(dataset);
- 
+
   /* dset2.2 */
   dims[0] = 3; dims[1] = 5;
   space = H5Screate_simple(2, dims, NULL);
@@ -392,7 +392,7 @@ char *bp;
 	memset(buf,'\0',512);
 	bp = buf;
 	for (u = 0; u < strlen(pattern); u++) {
-		*bp++ = pattern[u%10];	
+		*bp++ = pattern[u%10];
 	}
 
 	HDwrite(fd,buf,512);
@@ -511,7 +511,7 @@ char *bp;
   H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_1);
   H5Sclose(space);
   H5Dclose(dataset);
- 
+
   /* dset2.2 */
   dims[0] = 3; dims[1] = 5;
   space = H5Screate_simple(2, dims, NULL);
@@ -536,7 +536,7 @@ char *bp;
 	memset(buf,'\0',1024);
 	bp = buf;
 	for (i = 0; i < 513; i++) {
-		*bp++ = pattern[i%10];	
+		*bp++ = pattern[i%10];
 	}
 
 	HDwrite(fd,buf,1024);
@@ -567,10 +567,10 @@ char *bp;
 	/* fill buf with pattern */
 	bp = buf;
 	for (i = 0; i < size; i++) {
-		*bp++ = pattern[i%10];	
+		*bp++ = pattern[i%10];
 	}
 
-	
+
 	HDwrite(fd,buf,size);
 
 	close(fd);
@@ -597,9 +597,9 @@ char *bp;
 	/* fill buf with pattern */
 	bp = buf;
 	for (i = 0; i < size; i++) {
-		*bp++ = (char) i & 0xff;	
+		*bp++ = (char) i & 0xff;
 	}
-	
+
 	HDwrite(fd,buf,size);
 
 	close(fd);

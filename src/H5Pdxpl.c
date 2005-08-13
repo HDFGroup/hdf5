@@ -352,7 +352,7 @@ H5Pset_preserve(hid_t plist_id, hbool_t status)
     H5T_bkg_t need_bkg;         /* Value for background buffer type */
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* return value */
-    
+
     FUNC_ENTER_API(H5Pset_preserve, FAIL);
     H5TRACE2("e","ib",plist_id,status);
 
@@ -392,7 +392,7 @@ H5Pget_preserve(hid_t plist_id)
     H5T_bkg_t need_bkg;         /* Background value */
     H5P_genplist_t *plist;      /* Property list pointer */
     int ret_value;              /* return value */
-    
+
     FUNC_ENTER_API(H5Pget_preserve, FAIL);
     H5TRACE1("Is","i",plist_id);
 
@@ -415,9 +415,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_edc_check
  *
- * Purpose:     Enable or disable error-detecting for a dataset reading 
- *              process.  This error-detecting algorithm is whichever 
- *              user chooses earlier.  This function cannot control 
+ * Purpose:     Enable or disable error-detecting for a dataset reading
+ *              process.  This error-detecting algorithm is whichever
+ *              user chooses earlier.  This function cannot control
  *              writing process.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -434,14 +434,14 @@ H5Pset_edc_check(hid_t plist_id, H5Z_EDC_t check)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* return value */
-    
+
     FUNC_ENTER_API(H5Pset_edc_check, FAIL);
     H5TRACE2("e","iZe",plist_id,check);
 
     /* Check argument */
     if (check != H5Z_ENABLE_EDC && check != H5Z_DISABLE_EDC)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid value");
-        
+
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
@@ -449,7 +449,7 @@ H5Pset_edc_check(hid_t plist_id, H5Z_EDC_t check)
     /* Update property list */
     if (H5P_set(plist,H5D_XFER_EDC_NAME,&check)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
- 
+
 done:
     FUNC_LEAVE_API(ret_value);
 }
@@ -458,9 +458,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_edc_check
  *
- * Purpose:     Enable or disable error-detecting for a dataset reading 
- *              process.  This error-detecting algorithm is whichever 
- *              user chooses earlier.  This function cannot control 
+ * Purpose:     Enable or disable error-detecting for a dataset reading
+ *              process.  This error-detecting algorithm is whichever
+ *              user chooses earlier.  This function cannot control
  *              writing process.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -477,7 +477,7 @@ H5Pget_edc_check(hid_t plist_id)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     H5Z_EDC_t      ret_value;   /* return value */
-    
+
     FUNC_ENTER_API(H5Pget_edc_check, H5Z_ERROR_EDC);
     H5TRACE1("Ze","i",plist_id);
 
@@ -496,7 +496,7 @@ H5Pget_edc_check(hid_t plist_id)
 done:
     FUNC_LEAVE_API(ret_value);
 }
- 
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_filter_callback
@@ -520,7 +520,7 @@ H5Pset_filter_callback(hid_t plist_id, H5Z_filter_func_t func, void *op_data)
     H5P_genplist_t      *plist;      /* Property list pointer */
     herr_t              ret_value=SUCCEED;   /* return value */
     H5Z_cb_t            cb_struct;
-    
+
     FUNC_ENTER_API(H5Pset_filter_callback, FAIL);
     H5TRACE3("e","ixx",plist_id,func,op_data);
 
@@ -531,7 +531,7 @@ H5Pset_filter_callback(hid_t plist_id, H5Z_filter_func_t func, void *op_data)
     /* Update property list */
     cb_struct.func = func;
     cb_struct.op_data = op_data;
-    
+
     if (H5P_set(plist,H5D_XFER_FILTER_CB_NAME,&cb_struct)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
@@ -626,7 +626,7 @@ H5Pset_btree_ratios(hid_t plist_id, double left, double middle,
     if (left<0.0 || left>1.0 || middle<0.0 || middle>1.0 ||
             right<0.0 || right>1.0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "split ratio must satisfy 0.0<=X<=1.0");
-    
+
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");

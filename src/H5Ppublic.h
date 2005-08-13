@@ -58,7 +58,7 @@ extern "C" {
 
 /* Define property list class callback function pointer types */
 typedef herr_t (*H5P_cls_create_func_t)(hid_t prop_id, void *create_data);
-typedef herr_t (*H5P_cls_copy_func_t)(hid_t new_prop_id, hid_t old_prop_id, 
+typedef herr_t (*H5P_cls_copy_func_t)(hid_t new_prop_id, hid_t old_prop_id,
                                       void *copy_data);
 typedef herr_t (*H5P_cls_close_func_t)(hid_t prop_id, void *close_data);
 
@@ -74,7 +74,7 @@ typedef int (*H5P_prp_compare_func_t)(const void *value1, const void *value2, si
 typedef H5P_prp_cb1_t H5P_prp_close_func_t;
 
 /* Define property list iteration function type */
-typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data); 
+typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data);
 
 /*
  * The library created property list classes
@@ -124,7 +124,7 @@ H5_DLLVAR hid_t H5P_LST_DATASET_XFER_g;
 H5_DLLVAR hid_t H5P_LST_MOUNT_g;
 
 /* Public functions */
-H5_DLL hid_t H5Pcreate_class(hid_t parent, const char *name, 
+H5_DLL hid_t H5Pcreate_class(hid_t parent, const char *name,
             H5P_cls_create_func_t cls_create, void *create_data,
             H5P_cls_copy_func_t cls_copy, void *copy_data,
             H5P_cls_close_func_t cls_close, void *close_data);
@@ -133,7 +133,7 @@ H5_DLL hid_t H5Pcreate(hid_t cls_id);
 H5_DLL herr_t H5Pregister(hid_t cls_id, const char *name, size_t size,
             void *def_value, H5P_prp_create_func_t prp_create,
             H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
-            H5P_prp_delete_func_t prp_del, 
+            H5P_prp_delete_func_t prp_del,
             H5P_prp_copy_func_t prp_copy,
             H5P_prp_close_func_t prp_close);
 H5_DLL herr_t H5Pinsert(hid_t plist_id, const char *name, size_t size,
@@ -236,7 +236,7 @@ H5_DLL herr_t H5Pset_shuffle(hid_t plist_id);
 H5_DLL herr_t H5Pset_fletcher32(hid_t plist_id);
 H5_DLL herr_t H5Pset_edc_check(hid_t plist_id, H5Z_EDC_t check);
 H5_DLL H5Z_EDC_t H5Pget_edc_check(hid_t plist_id);
-H5_DLL herr_t H5Pset_filter_callback(hid_t plist_id, H5Z_filter_func_t func, 
+H5_DLL herr_t H5Pset_filter_callback(hid_t plist_id, H5Z_filter_func_t func,
                                      void* op_data);
 #ifdef H5_WANT_H5_V1_4_COMPAT
 H5_DLL herr_t H5Pset_cache(hid_t plist_id, int mdc_nelmts, int rdcc_nelmts,
@@ -267,12 +267,12 @@ H5_DLL herr_t H5Pset_fill_value(hid_t plist_id, hid_t type_id,
 H5_DLL herr_t H5Pget_fill_value(hid_t plist_id, hid_t type_id,
      void *value/*out*/);
 H5_DLL herr_t H5Pfill_value_defined(hid_t plist, H5D_fill_value_t *status);
-H5_DLL herr_t H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t 
+H5_DLL herr_t H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t
 	alloc_time);
-H5_DLL herr_t H5Pget_alloc_time(hid_t plist_id, H5D_alloc_time_t 
+H5_DLL herr_t H5Pget_alloc_time(hid_t plist_id, H5D_alloc_time_t
 	*alloc_time/*out*/);
 H5_DLL herr_t H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time);
-H5_DLL herr_t H5Pget_fill_time(hid_t plist_id, H5D_fill_time_t 
+H5_DLL herr_t H5Pget_fill_time(hid_t plist_id, H5D_fill_time_t
 	*fill_time/*out*/);
 H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
 H5_DLL herr_t H5Pget_gc_references(hid_t fapl_id, unsigned *gc_ref/*out*/);

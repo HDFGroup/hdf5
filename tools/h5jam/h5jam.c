@@ -63,11 +63,11 @@ static struct long_options l_opts[] = {
 /*-------------------------------------------------------------------------
  * Function:    usage
  *
- * Purpose:     Print the usage message 
+ * Purpose:     Print the usage message
  *
  * Return:      void
  *
- * Programmer:  
+ * Programmer:
  *
  * Modifications:
  *
@@ -94,11 +94,11 @@ usage (const char *prog)
  *
  * Purpose:     Parse the command line for the h5dumper.
  *
- * Return:      Success:    
+ * Return:      Success:
  *
  *              Failure:    Exits program with EXIT_FAILURE value.
  *
- * Programmer:  
+ * Programmer:
  *
  * Modifications:
  *
@@ -146,7 +146,7 @@ parse_command_line (int argc, const char *argv[])
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  
+ * Programmer:
  *
  * Modifications:
  *
@@ -315,7 +315,7 @@ main (int argc, const char *argv[])
 	}
     }
 
-  /* copy the HDF5 from starting at usize to starting at newubsize: 
+  /* copy the HDF5 from starting at usize to starting at newubsize:
    *  makes room at 'from' for new ub */
   /* if no current ub, usize is 0 */
   copy_some_to_file (h5fid, ofid, usize, newubsize,
@@ -362,7 +362,7 @@ main (int argc, const char *argv[])
  * Return:      Success:    last byte written in the output.
  *              Failure:    Exits program with EXIT_FAILURE value.
  *
- * Programmer:  
+ * Programmer:
  *
  * Modifications:
  *
@@ -478,10 +478,10 @@ copy_some_to_file (int infid, int outfid, hsize_t startin, hsize_t startout,
 /*-------------------------------------------------------------------------
  * Function:    compute_user_block_size
  *
- * Purpose:     Find the offset of the HDF5 header after the user block: 
+ * Purpose:     Find the offset of the HDF5 header after the user block:
  *                 align at 0, 512, 1024, etc.
  *			ublock_size: the size of the user block (bytes).
- *		
+ *
  * Return:      Success:    the location of the header == the size of the
  *				padded user block.
  *              Failure:    none
@@ -489,7 +489,7 @@ copy_some_to_file (int infid, int outfid, hsize_t startin, hsize_t startout,
  * Return:      Success:    last byte written in the output.
  *              Failure:    Exits program with EXIT_FAILURE value.
  *
- * Programmer:  
+ * Programmer:
  *
  * Modifications:
  *

@@ -23,7 +23,7 @@ namespace H5 {
 class H5_DLLCPP EnumType : public DataType {
 
    public:
-	// Creates an empty enumeration datatype based on a native signed 
+	// Creates an empty enumeration datatype based on a native signed
 	// integer type, whose size is given by size.
 	EnumType( size_t size );
 
@@ -43,16 +43,16 @@ class H5_DLLCPP EnumType : public DataType {
 	// Returns the value of an enumeration datatype member
 	void getMemberValue( unsigned memb_no, void *value ) const;
 
-	// Inserts a new member to this enumeration type. 
+	// Inserts a new member to this enumeration type.
 	void insert( const char* name, void *value ) const;
 	void insert( const string& name, void *value ) const;
 
-	// Returns the symbol name corresponding to a specified member 
-	// of this enumeration datatype. 
+	// Returns the symbol name corresponding to a specified member
+	// of this enumeration datatype.
 	string nameOf( void *value, size_t size ) const;
 
-	// Returns the value corresponding to a specified member of this 
-	// enumeration datatype. 
+	// Returns the value corresponding to a specified member of this
+	// enumeration datatype.
 	void valueOf( const char* name, void *value ) const;
 	void valueOf( const string& name, void *value ) const;
 

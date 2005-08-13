@@ -45,7 +45,7 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
         size_t getBuffer( void** tconv, void** bkg ) const;
 #endif /* H5_WANT_H5_V1_4_COMPAT */
 
-	// Sets B-tree split ratios for a dataset transfer property list 
+	// Sets B-tree split ratios for a dataset transfer property list
 	void setBtreeRatios( double left, double middle, double right ) const;
 
 	// Gets B-tree split ratios for a dataset transfer property list
@@ -57,18 +57,18 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
 	// Checks status of the dataset transfer property list.
 	bool getPreserve() const;
 
-	// Sets the memory manager for variable-length datatype 
+	// Sets the memory manager for variable-length datatype
 	// allocation in H5Dread and H5Dvlen_reclaim
-	void setVlenMemManager( H5MM_allocate_t alloc, void* alloc_info, 
+	void setVlenMemManager( H5MM_allocate_t alloc, void* alloc_info,
 				H5MM_free_t free, void* free_info ) const;
 
-	// alloc and free are set to NULL, indicating that system 
+	// alloc and free are set to NULL, indicating that system
 	// malloc and free are to be used
 	void setVlenMemManager() const;
 
-	// Gets the memory manager for variable-length datatype 
+	// Gets the memory manager for variable-length datatype
 	// allocation in H5Dread and H5Tvlen_reclaim
-	void getVlenMemManager( H5MM_allocate_t& alloc, void** alloc_info, 
+	void getVlenMemManager( H5MM_allocate_t& alloc, void** alloc_info,
 				H5MM_free_t& free, void** free_info ) const;
 
 	// Sets the data transfer property list for the multi-file driver.
@@ -103,7 +103,7 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
 	// Copy constructor: makes a copy of a DSetMemXferPropList object.
 	DSetMemXferPropList(const DSetMemXferPropList& orig);
 
-	// Creates a copy of an existing dataset memory and transfer 
+	// Creates a copy of an existing dataset memory and transfer
 	// property list using the property list id.
 	DSetMemXferPropList (const hid_t plist_id);
 

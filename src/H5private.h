@@ -175,11 +175,11 @@
 #endif /* H5_HAVE_DMALLOC_H */
 
 /*
- * NT doesn't define SIGBUS, but since NT only runs on processors             
- * that do not have alignment constraints a SIGBUS would never be              
- * raised, so we just replace it with SIGILL (which also should               
- * never be raised by the hdf5 library).                                       
- */  
+ * NT doesn't define SIGBUS, but since NT only runs on processors
+ * that do not have alignment constraints a SIGBUS would never be
+ * raised, so we just replace it with SIGILL (which also should
+ * never be raised by the hdf5 library).
+ */
 #ifndef SIGBUS
 #	define SIGBUS SIGILL
 #endif
@@ -669,7 +669,7 @@ typedef off_t                   h5_stat_size_t;
 #define HDlog10(X)		log10(X)
 #define HDlongjmp(J,N)		longjmp(J,N)
 #ifdef WIN32
-     #ifdef __MWERKS__    
+     #ifdef __MWERKS__
         #define HDlseek(F,O,W)  lseek(F,O,W)
      #else /*MSVS */
         #define HDlseek(F,O,W)  _lseeki64(F,O,W)
@@ -866,7 +866,7 @@ H5_DLL int64_t HDstrtoll (const char *s, const char **rest, int base);
 #define HDstrdup(S)    _strdup(S)
 #else /* WIN32 */
 
-#if !defined strdup && !defined H5_HAVE_STRDUP 
+#if !defined strdup && !defined H5_HAVE_STRDUP
 extern char *strdup(const char *s);
 #endif
 
@@ -941,7 +941,7 @@ extern H5_debug_t		H5_debug_g;
  * Programmer:	Robb Matzke
  *
  * Modifications:
- *------------------------------------------------------------------------- 
+ *-------------------------------------------------------------------------
  */
 #ifdef H5_DEBUG_API
 #define H5TRACE_DECL			   const char *RTYPE=NULL;                                      \
@@ -1227,10 +1227,10 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
  *              initialized.
  *      - functions which are called during library shutdown, since we don't
  *              want to re-initialize the library.
- * 
+ *
  * This macro is used for functions which fit the above categories _and_
  * also don't use the 'FUNC' variable (i.e. don't push errors on the error stack)
- * 
+ *
  */
 #define FUNC_ENTER_NOAPI_NOINIT_NOFUNC(func_name) {                           \
     FUNC_ENTER_COMMON_NOFUNC(func_name,!H5_IS_API(#func_name));               \
@@ -1241,10 +1241,10 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
  * Use this macro for non-API functions which fall into these categories:
  *      - functions which shouldn't push their name on the function stack
  *              (so far, just the H5FS routines themselves)
- * 
+ *
  * This macro is used for functions which fit the above categories _and_
  * also don't use the 'FUNC' variable (i.e. don't push errors on the error stack)
- * 
+ *
  */
 #define FUNC_ENTER_NOAPI_NOFUNC_NOFS(func_name) {                             \
     FUNC_ENTER_COMMON_NOFUNC(func_name,!H5_IS_API(#func_name));               \

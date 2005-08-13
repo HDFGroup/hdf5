@@ -59,7 +59,7 @@ typedef struct H5F_olist_t {
     } file_info;
     unsigned   list_index;      /* Current index in open ID array */
     int   max_index;            /* Maximum # of IDs to put into array */
-} H5F_olist_t;    
+} H5F_olist_t;
 
 /* PRIVATE PROTOTYPES */
 #ifdef NOT_YET
@@ -70,7 +70,7 @@ static int H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void** file_handle);
 static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id);
 static herr_t H5F_dest(H5F_t *f, hid_t dxpl_id);
-static H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id, 
+static H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id,
 			hid_t fapl_id, hid_t dxpl_id);
 static herr_t H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags);
 static herr_t H5F_close(H5F_t *f);
@@ -144,7 +144,7 @@ done:
  *	Change File creation property list to generic property list mechanism.
  *-------------------------------------------------------------------------
  */
-static herr_t 
+static herr_t
 H5F_init_interface(void)
 {
     size_t      nprops;                 /* Number of properties */
@@ -152,7 +152,7 @@ H5F_init_interface(void)
 
     /* File creation property class variables.  In sequence, they are
      * - File create property list class to modify
-     * - Default value for size of file user block 
+     * - Default value for size of file user block
      * - Default value for 1/2 rank for symbol table leaf nodes
      * - Default value for 1/2 rank for btree internal nodes
      * - Default value for byte number in an address
@@ -160,7 +160,7 @@ H5F_init_interface(void)
      * - Default value for version number of superblock
      * - Default value for free-space version number
      * - Default value for object directory version number
-     * - Default value for share-header format version 
+     * - Default value for share-header format version
      */
     H5P_genclass_t  *crt_pclass;
     hsize_t         userblock_size      = H5F_CRT_USER_BLOCK_DEF;
@@ -172,7 +172,7 @@ H5F_init_interface(void)
     unsigned        freespace_ver       = H5F_CRT_FREESPACE_VERS_DEF;
     unsigned        objectdir_ver       = H5F_CRT_OBJ_DIR_VERS_DEF;
     unsigned        sharedheader_ver    = H5F_CRT_SHARE_HEAD_VERS_DEF;
-    /* File access property class variables.  In sequence, they are 
+    /* File access property class variables.  In sequence, they are
      * - File access property class to modify
      * - Size of meta data cache(elements)
      * - Size of raw data chunk cache(elements)
@@ -184,7 +184,7 @@ H5F_init_interface(void)
      * - Maximum sieve buffer size
      * - Garbage-collect reference
      * - File driver ID
-     * - File driver info 
+     * - File driver info
      */
     H5P_genclass_t  *acs_pclass;
     int             mdc_nelmts          = H5F_ACS_META_CACHE_SIZE_DEF;
@@ -203,13 +203,13 @@ H5F_init_interface(void)
     hsize_t         family_offset       = H5F_ACS_FAMILY_OFFSET_DEF;
     H5FD_mem_t      mem_type            = H5F_ACS_MULTI_TYPE_DEF;
 
-    /* File mount property class variable. 
+    /* File mount property class variable.
      * - Mount property class to modify
-     * - whether absolute symlinks is local to file 
+     * - whether absolute symlinks is local to file
      */
     H5P_genclass_t  *mnt_pclass;
     hbool_t 	    local		= H5F_MNT_SYM_LOCAL_DEF;
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5F_init_interface)
 
     /*
@@ -222,8 +222,8 @@ H5F_init_interface(void)
      */
     if (H5I_init_group(H5I_FILE, (size_t)H5I_FILEID_HASHSIZE, 0, (H5I_free_t)H5F_close)<0)
         HGOTO_ERROR (H5E_FILE, H5E_CANTINIT, FAIL, "unable to initialize interface")
-   
-    /* ========== File Creation Property Class Initialization ============*/ 
+
+    /* ========== File Creation Property Class Initialization ============*/
     assert(H5P_CLS_FILE_CREATE_g!=-1);
 
     /* Get the pointer to file creation class */
@@ -237,39 +237,39 @@ H5F_init_interface(void)
     /* Assume that if there are properties in the class, they are the default ones */
     if(nprops==0) {
         /* Register the user block size */
-        if(H5P_register(crt_pclass,H5F_CRT_USER_BLOCK_NAME,H5F_CRT_USER_BLOCK_SIZE, &userblock_size,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+        if(H5P_register(crt_pclass,H5F_CRT_USER_BLOCK_NAME,H5F_CRT_USER_BLOCK_SIZE, &userblock_size,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
         /* Register the 1/2 rank for symbol table leaf nodes */
-        if(H5P_register(crt_pclass,H5F_CRT_SYM_LEAF_NAME,H5F_CRT_SYM_LEAF_SIZE, &sym_leaf_k,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+        if(H5P_register(crt_pclass,H5F_CRT_SYM_LEAF_NAME,H5F_CRT_SYM_LEAF_SIZE, &sym_leaf_k,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
         /* Register the 1/2 rank for btree internal nodes */
-        if(H5P_register(crt_pclass,H5F_CRT_BTREE_RANK_NAME,H5F_CRT_BTREE_RANK_SIZE, btree_k,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+        if(H5P_register(crt_pclass,H5F_CRT_BTREE_RANK_NAME,H5F_CRT_BTREE_RANK_SIZE, btree_k,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
         /* Register the byte number for an address */
-        if(H5P_register(crt_pclass,H5F_CRT_ADDR_BYTE_NUM_NAME, H5F_CRT_ADDR_BYTE_NUM_SIZE, &sizeof_addr,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+        if(H5P_register(crt_pclass,H5F_CRT_ADDR_BYTE_NUM_NAME, H5F_CRT_ADDR_BYTE_NUM_SIZE, &sizeof_addr,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
         /* Register the byte number for object size */
-        if(H5P_register(crt_pclass,H5F_CRT_OBJ_BYTE_NUM_NAME, H5F_CRT_OBJ_BYTE_NUM_SIZE,&sizeof_size,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+        if(H5P_register(crt_pclass,H5F_CRT_OBJ_BYTE_NUM_NAME, H5F_CRT_OBJ_BYTE_NUM_SIZE,&sizeof_size,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
         /* Register the superblock version number */
-        if(H5P_register(crt_pclass,H5F_CRT_SUPER_VERS_NAME,H5F_CRT_SUPER_VERS_SIZE, &superblock_ver,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+        if(H5P_register(crt_pclass,H5F_CRT_SUPER_VERS_NAME,H5F_CRT_SUPER_VERS_SIZE, &superblock_ver,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
         /* Register the free-space version number */
-        if(H5P_register(crt_pclass,H5F_CRT_FREESPACE_VERS_NAME, H5F_CRT_FREESPACE_VERS_SIZE,&freespace_ver,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+        if(H5P_register(crt_pclass,H5F_CRT_FREESPACE_VERS_NAME, H5F_CRT_FREESPACE_VERS_SIZE,&freespace_ver,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
         /* Register the object directory version number */
-        if(H5P_register(crt_pclass,H5F_CRT_OBJ_DIR_VERS_NAME, H5F_CRT_OBJ_DIR_VERS_SIZE,&objectdir_ver,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+        if(H5P_register(crt_pclass,H5F_CRT_OBJ_DIR_VERS_NAME, H5F_CRT_OBJ_DIR_VERS_SIZE,&objectdir_ver,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
         /* Register the shared-header version number */
-        if(H5P_register(crt_pclass,H5F_CRT_SHARE_HEAD_VERS_NAME, H5F_CRT_SHARE_HEAD_VERS_SIZE, &sharedheader_ver,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+        if(H5P_register(crt_pclass,H5F_CRT_SHARE_HEAD_VERS_NAME, H5F_CRT_SHARE_HEAD_VERS_SIZE, &sharedheader_ver,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
     } /* end if */
 
@@ -294,51 +294,51 @@ H5F_init_interface(void)
     /* Assume that if there are properties in the class, they are the default ones */
     if(nprops==0) {
         /* Register the size of meta data cache(elements) */
-        if(H5P_register(acs_pclass,H5F_ACS_META_CACHE_SIZE_NAME,H5F_ACS_META_CACHE_SIZE_SIZE, &mdc_nelmts,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+        if(H5P_register(acs_pclass,H5F_ACS_META_CACHE_SIZE_NAME,H5F_ACS_META_CACHE_SIZE_SIZE, &mdc_nelmts,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
         /* Register the size of raw data chunk cache (elements) */
-        if(H5P_register(acs_pclass,H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME,H5F_ACS_DATA_CACHE_ELMT_SIZE_SIZE, &rdcc_nelmts,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+        if(H5P_register(acs_pclass,H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME,H5F_ACS_DATA_CACHE_ELMT_SIZE_SIZE, &rdcc_nelmts,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
         /* Register the size of raw data chunk cache(bytes) */
-        if(H5P_register(acs_pclass,H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME,H5F_ACS_DATA_CACHE_BYTE_SIZE_SIZE, &rdcc_nbytes,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+        if(H5P_register(acs_pclass,H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME,H5F_ACS_DATA_CACHE_BYTE_SIZE_SIZE, &rdcc_nbytes,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
         /* Register the preemption for reading chunks */
-        if(H5P_register(acs_pclass,H5F_ACS_PREEMPT_READ_CHUNKS_NAME,H5F_ACS_PREEMPT_READ_CHUNKS_SIZE, &rdcc_w0,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+        if(H5P_register(acs_pclass,H5F_ACS_PREEMPT_READ_CHUNKS_NAME,H5F_ACS_PREEMPT_READ_CHUNKS_SIZE, &rdcc_w0,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
         /* Register the threshold for alignment */
-        if(H5P_register(acs_pclass,H5F_ACS_ALIGN_THRHD_NAME,H5F_ACS_ALIGN_THRHD_SIZE, &threshold,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+        if(H5P_register(acs_pclass,H5F_ACS_ALIGN_THRHD_NAME,H5F_ACS_ALIGN_THRHD_SIZE, &threshold,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
         /* Register the alignment */
-        if(H5P_register(acs_pclass,H5F_ACS_ALIGN_NAME,H5F_ACS_ALIGN_SIZE, &alignment,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+        if(H5P_register(acs_pclass,H5F_ACS_ALIGN_NAME,H5F_ACS_ALIGN_SIZE, &alignment,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
         /* Register the minimum metadata allocation block size */
-        if(H5P_register(acs_pclass,H5F_ACS_META_BLOCK_SIZE_NAME,H5F_ACS_META_BLOCK_SIZE_SIZE, &meta_block_size,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+        if(H5P_register(acs_pclass,H5F_ACS_META_BLOCK_SIZE_NAME,H5F_ACS_META_BLOCK_SIZE_SIZE, &meta_block_size,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
         /* Register the maximum sieve buffer size */
-        if(H5P_register(acs_pclass,H5F_ACS_SIEVE_BUF_SIZE_NAME,H5F_ACS_SIEVE_BUF_SIZE_SIZE, &sieve_buf_size,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+        if(H5P_register(acs_pclass,H5F_ACS_SIEVE_BUF_SIZE_NAME,H5F_ACS_SIEVE_BUF_SIZE_SIZE, &sieve_buf_size,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
         /* Register the minimum "small data" allocation block size */
-        if(H5P_register(acs_pclass,H5F_ACS_SDATA_BLOCK_SIZE_NAME,H5F_ACS_SDATA_BLOCK_SIZE_SIZE, &sdata_block_size,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+        if(H5P_register(acs_pclass,H5F_ACS_SDATA_BLOCK_SIZE_NAME,H5F_ACS_SDATA_BLOCK_SIZE_SIZE, &sdata_block_size,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
         /* Register the garbage collection reference */
-        if(H5P_register(acs_pclass,H5F_ACS_GARBG_COLCT_REF_NAME,H5F_ACS_GARBG_COLCT_REF_SIZE, &gc_ref,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+        if(H5P_register(acs_pclass,H5F_ACS_GARBG_COLCT_REF_NAME,H5F_ACS_GARBG_COLCT_REF_SIZE, &gc_ref,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
         /* Register the file driver ID */
-        if(H5P_register(acs_pclass,H5F_ACS_FILE_DRV_ID_NAME,H5F_ACS_FILE_DRV_ID_SIZE, &driver_id,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+        if(H5P_register(acs_pclass,H5F_ACS_FILE_DRV_ID_NAME,H5F_ACS_FILE_DRV_ID_SIZE, &driver_id,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
         /* Register the file driver info */
-        if(H5P_register(acs_pclass,H5F_ACS_FILE_DRV_INFO_NAME,H5F_ACS_FILE_DRV_INFO_SIZE, &driver_info,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+        if(H5P_register(acs_pclass,H5F_ACS_FILE_DRV_INFO_NAME,H5F_ACS_FILE_DRV_INFO_SIZE, &driver_info,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
         /* Register the file close degree */
@@ -375,7 +375,7 @@ H5F_init_interface(void)
     /* Assume that if there are properties in the class, they are the default ones */
     if(nprops==0) {
         /* Register property of whether symlinks is local to file */
-        if(H5P_register(mnt_pclass,H5F_MNT_SYM_LOCAL_NAME,H5F_MNT_SYM_LOCAL_SIZE, &local,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+        if(H5P_register(mnt_pclass,H5F_MNT_SYM_LOCAL_NAME,H5F_MNT_SYM_LOCAL_SIZE, &local,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
     } /* end if */
 
@@ -436,15 +436,15 @@ H5F_term_interface(void)
 
 /*----------------------------------------------------------------------------
  * Function:	H5F_acs_create
- * 
- * Purpose:	Callback routine which is called whenever a file access 
+ *
+ * Purpose:	Callback routine which is called whenever a file access
  *		property list is closed.  This routine performs any generic
  * 		initialization needed on the properties the library put into
  * 		the list.
- *		
+ *
  * Return:	Success:		Non-negative
  * 		Failure:		Negative
- * 
+ *
  * Programmer:	Raymond Lu
  *		Tuesday, Oct 23, 2001
  *
@@ -453,7 +453,7 @@ H5F_term_interface(void)
  *----------------------------------------------------------------------------
  */
 /* ARGSUSED */
-herr_t 
+herr_t
 H5F_acs_create(hid_t fapl_id, void UNUSED *copy_data)
 {
     hid_t          driver_id;
@@ -472,7 +472,7 @@ H5F_acs_create(hid_t fapl_id, void UNUSED *copy_data)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get drver ID")
     if(H5P_get(plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get drver info")
-    
+
     if(driver_id > 0) {
         /* Set the driver for the property list */
         if(H5FD_fapl_open(plist, driver_id, driver_info)<0)
@@ -487,7 +487,7 @@ done:
 /*--------------------------------------------------------------------------
  * Function:	H5F_acs_copy
  *
- * Purpose:	Callback routine which is called whenever a file access 
+ * Purpose:	Callback routine which is called whenever a file access
  * 		property list is copied.  This routine performs any generic
  * 	 	copy needed on the properties.
  *
@@ -496,12 +496,12 @@ done:
  * Programmer:	Raymond Lu
  *		Tuesday, Oct 23, 2001
  *
- * Modifications:	
+ * Modifications:
  *
  *--------------------------------------------------------------------------
- */	
+ */
 /* ARGSUSED */
-herr_t 
+herr_t
 H5F_acs_copy(hid_t new_fapl_id, hid_t old_fapl_id, void UNUSED *copy_data)
 {
     hid_t          driver_id;
@@ -522,7 +522,7 @@ H5F_acs_copy(hid_t new_fapl_id, hid_t old_fapl_id, void UNUSED *copy_data)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get drver ID")
     if(H5P_get(old_plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get drver info")
-    
+
     if(driver_id > 0) {
         /* Set the driver for the property list */
         if(H5FD_fapl_open(new_plist, driver_id, driver_info)<0)
@@ -536,24 +536,24 @@ done:
 
 /*--------------------------------------------------------------------------
  * Function:	H5F_acs_close
- * 
- * Purpose:	Callback routine which is called whenever a file access 
- *		property list is closed.  This routine performs any generic 
+ *
+ * Purpose:	Callback routine which is called whenever a file access
+ *		property list is closed.  This routine performs any generic
  *		cleanup needed on the properties.
  *
  * Return:	Success:	Non-negative
- * 		
+ *
  * 		Failure:	Negative
  *
  * Programmer:	Raymond Lu
  *		Tuesday, Oct 23, 2001
- * 
+ *
  * Modifications:
  *
  *---------------------------------------------------------------------------
- */ 
+ */
 /* ARGSUSED */
-herr_t 
+herr_t
 H5F_acs_close(hid_t fapl_id, void UNUSED *close_data)
 {
     hid_t      driver_id;
@@ -664,7 +664,7 @@ done:
  DESCRIPTION
     Encode non-standard (i.e. not 2, 4 or 8-byte) lengths in file meta-data.
 --------------------------------------------------------------------------*/
-void 
+void
 H5F_encode_length_unusual(const H5F_t *f, uint8_t **p, uint8_t *l)
 {
     int		    i = (int)H5F_SIZEOF_SIZE(f)-1;
@@ -723,11 +723,11 @@ H5Fget_create_plist(hid_t file_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
     if(NULL == (plist = H5I_object(file->shared->fcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
-    
+
     /* Create the property list object to return */
     if((ret_value=H5P_copy_plist(plist)) < 0)
 	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to copy file creation properties")
-    
+
 done:
     FUNC_LEAVE_API(ret_value)
 }
@@ -754,14 +754,14 @@ done:
  *
  * Modifications:
  *		Raymond Lu, Oct 23, 2001
- *		Changed file access property list to the new generic 
+ *		Changed file access property list to the new generic
  * 		property list.
  *
  *              Bill Wendling, Apr 21, 2003
  *              Fixed bug where the driver ID and info in the property
  *              list were being overwritten but the original ID and info
  *              weren't being close.
- * 		
+ *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -771,8 +771,8 @@ H5Fget_access_plist(hid_t file_id)
     H5P_genplist_t *new_plist;              /* New property list */
     H5P_genplist_t *old_plist;              /* Old property list */
     hid_t		ret_value = SUCCEED;
-    void		*driver_info=NULL;   
- 
+    void		*driver_info=NULL;
+
     FUNC_ENTER_API(H5Fget_access_plist, FAIL)
     H5TRACE1("i","i",file_id);
 
@@ -835,7 +835,7 @@ H5Fget_access_plist(hid_t file_id)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file close degree")
     } else if(f->shared->fc_degree != H5F_CLOSE_DEFAULT && H5P_set(new_plist, H5F_CLOSE_DEGREE_NAME, &(f->shared->fc_degree)) < 0) {
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file close degree")
-    } 
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -845,11 +845,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Fget_obj_count
  *
- * Purpose:	Public function returning the number of opened object IDs 
- *		(files, datasets, groups and datatypes) in the same file. 
+ * Purpose:	Public function returning the number of opened object IDs
+ *		(files, datasets, groups and datatypes) in the same file.
  *
  * Return:	Non-negative on success; negative on failure.
- * 
+ *
  * Programmer:	Raymond Lu
  *		Wednesday, Dec 5, 2001
  *
@@ -948,20 +948,20 @@ done:
  *
  * Purpose:     Private function to return a list of opened object IDs.
  *
- * Return:      Non-negative on success; negative on failure.   
- *      
- * Programmer:  Raymond Lu      
- *              Wednesday, Dec 5, 2001  
- *      
- * Modification:        
- *      
+ * Return:      Non-negative on success; negative on failure.
+ *
+ * Programmer:  Raymond Lu
+ *              Wednesday, Dec 5, 2001
+ *
+ * Modification:
+ *
  *-------------------------------------------------------------------------
  */
 unsigned
 H5F_get_obj_ids(const H5F_t *f, unsigned types, int max_objs, hid_t *oid_list)
 {
     unsigned ret_value;              /* Return value */
- 
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_obj_ids)
 
     ret_value = H5F_get_objects(f, types, max_objs, oid_list);
@@ -973,10 +973,10 @@ H5F_get_obj_ids(const H5F_t *f, unsigned types, int max_objs, hid_t *oid_list)
 /*---------------------------------------------------------------------------
  * Function:	H5F_get_objects
  *
- * Purpose:	This function is called by H5F_get_obj_count or 
- *		H5F_get_obj_ids to get number of object IDs and/or a 
+ * Purpose:	This function is called by H5F_get_obj_count or
+ *		H5F_get_obj_ids to get number of object IDs and/or a
  *		list of opened object IDs (in return value).
- * Return:	Non-negative on success; negative on failure. 
+ * Return:	Non-negative on success; negative on failure.
  *
  * Programmer:  Raymond Lu
  *              Wednesday, Dec 5, 2001
@@ -1017,28 +1017,28 @@ H5F_get_objects(const H5F_t *f, unsigned types, int max_index, hid_t *obj_id_lis
         (void)H5I_search(H5I_FILE, H5F_get_objects_cb, &olist);
     } /* end if */
 
-    /* Search through dataset IDs to count number of datasets, and put their 
+    /* Search through dataset IDs to count number of datasets, and put their
      * IDs on the object list */
     if( (max_index < 0 || (int)olist.list_index < max_index) && (types & H5F_OBJ_DATASET) ) {
         olist.obj_type = H5I_DATASET;
         (void)H5I_search(H5I_DATASET, H5F_get_objects_cb, &olist);
     }
 
-    /* Search through group IDs to count number of groups, and put their 
+    /* Search through group IDs to count number of groups, and put their
      * IDs on the object list */
     if( (max_index < 0 || (int)olist.list_index < max_index) && (types & H5F_OBJ_GROUP) ) {
         olist.obj_type = H5I_GROUP;
         (void)H5I_search(H5I_GROUP, H5F_get_objects_cb, &olist);
     }
 
-    /* Search through datatype IDs to count number of named datatypes, and put their 
+    /* Search through datatype IDs to count number of named datatypes, and put their
      * IDs on the object list */
     if( (max_index < 0 || (int)olist.list_index < max_index) && (types & H5F_OBJ_DATATYPE) ) {
         olist.obj_type = H5I_DATATYPE;
         (void)H5I_search(H5I_DATATYPE, H5F_get_objects_cb, &olist);
     }
 
-    /* Search through attribute IDs to count number of attributes, and put their 
+    /* Search through attribute IDs to count number of attributes, and put their
      * IDs on the object list */
     if( (max_index < 0 || (int)olist.list_index < max_index) && (types & H5F_OBJ_ATTR) ) {
         olist.obj_type = H5I_ATTR;
@@ -1053,9 +1053,9 @@ H5F_get_objects(const H5F_t *f, unsigned types, int max_index, hid_t *obj_id_lis
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_objects_cb 
+ * Function:	H5F_get_objects_cb
  *
- * Purpose:	H5F_get_objects' callback function.  It verifies if an 
+ * Purpose:	H5F_get_objects' callback function.  It verifies if an
  * 		object is in the file, and either count it or put its ID
  *		on the list.
  *
@@ -1071,13 +1071,13 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 {
     H5F_olist_t *olist = (H5F_olist_t *)key;    /* Alias for search info */
     int      ret_value = FALSE;    /* Return value */
- 
+
     FUNC_ENTER_NOAPI_NOINIT(H5F_get_objects_cb)
 
     assert(obj_ptr);
     assert(olist);
 
-    /* Count file IDs */ 
+    /* Count file IDs */
     if(olist->obj_type == H5I_FILE) {
         if((olist->file_info.local &&
                         (!olist->file_info.ptr.file || (olist->file_info.ptr.file && (H5F_t*)obj_ptr == olist->file_info.ptr.file) ))
@@ -1121,12 +1121,12 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 	}
 
         if((olist->file_info.local &&
-                    ( (!olist->file_info.ptr.file && olist->obj_type==H5I_DATATYPE && H5T_is_immutable((H5T_t*)obj_ptr)==FALSE) 
-                            || (!olist->file_info.ptr.file && olist->obj_type!=H5I_DATATYPE) 
+                    ( (!olist->file_info.ptr.file && olist->obj_type==H5I_DATATYPE && H5T_is_immutable((H5T_t*)obj_ptr)==FALSE)
+                            || (!olist->file_info.ptr.file && olist->obj_type!=H5I_DATATYPE)
                             || (ent && ent->file == olist->file_info.ptr.file) ))
                 || (!olist->file_info.local &&
-                    ((!olist->file_info.ptr.shared && olist->obj_type==H5I_DATATYPE && H5T_is_immutable((H5T_t*)obj_ptr)==FALSE) 
-                            || (!olist->file_info.ptr.shared && olist->obj_type!=H5I_DATATYPE) 
+                    ((!olist->file_info.ptr.shared && olist->obj_type==H5I_DATATYPE && H5T_is_immutable((H5T_t*)obj_ptr)==FALSE)
+                            || (!olist->file_info.ptr.shared && olist->obj_type!=H5I_DATATYPE)
                             || (ent && ent->file && ent->file->shared == olist->file_info.ptr.shared) ))) {
             /* Add the object's ID to the ID list, if appropriate */
             if(olist->obj_id_list) {
@@ -1155,10 +1155,10 @@ done:
  * Purpose:     Returns a pointer to the file handle of the low-level file
  *              driver.
  *
- * Return:      Success:        non-negative value. 
+ * Return:      Success:        non-negative value.
  *
- *              Failture:       negative. 
- * 
+ *              Failture:       negative.
+ *
  * Programmer:  Raymond Lu
  *              Sep. 16, 2002
  *
@@ -1171,7 +1171,7 @@ H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void **file_handle)
 {
     H5F_t               *file=NULL;
     herr_t              ret_value;
-    
+
     FUNC_ENTER_API(H5Fget_vfd_handle, FAIL)
     H5TRACE3("e","iix",file_id,fapl,file_handle);
 
@@ -1205,7 +1205,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void**file_handle) 
+H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void**file_handle)
 {
     herr_t ret_value;
 
@@ -1361,7 +1361,7 @@ done:
  * Modifications:
  *
  *		Raymond Lu, Oct 14, 2001
- *		Changed the file creation and access property list to the 
+ *		Changed the file creation and access property list to the
  *		new generic property list.
  *
  *-------------------------------------------------------------------------
@@ -1371,7 +1371,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 {
     H5F_t	*f=NULL, *ret_value;
     H5P_genplist_t *plist;              /* Property list */
- 
+
     FUNC_ENTER_NOAPI_NOINIT(H5F_new)
 
     if (NULL==(f=H5FL_CALLOC(H5F_t)))
@@ -1388,7 +1388,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 	f->shared->base_addr = HADDR_UNDEF;
 	f->shared->freespace_addr = HADDR_UNDEF;
 	f->shared->driver_addr = HADDR_UNDEF;
-    
+
 	/*
 	 * Copy the file creation and file access property lists into the
 	 * new file handle.  We do this early because some values might need
@@ -1433,7 +1433,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get data cache cache size")
         if(H5P_get(plist, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, &(f->shared->rdcc_w0)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get preempt read chunk")
-  
+
         if(H5P_get(plist, H5F_ACS_ALIGN_THRHD_NAME, &(f->shared->threshold))<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment threshold")
         if(H5P_get(plist, H5F_ACS_ALIGN_NAME, &(f->shared->alignment)) < 0)
@@ -1461,7 +1461,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
         if(H5F_sfile_add(f->shared) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to append to list of open files")
     } /* end else */
-    
+
     f->shared->nrefs++;
 
     /* Set return value */
@@ -1473,7 +1473,7 @@ done:
             H5FL_FREE(H5F_file_t,f->shared);
 	H5FL_FREE(H5F_t,f);
     }
-    
+
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -1516,7 +1516,7 @@ static herr_t
 H5F_dest(H5F_t *f, hid_t dxpl_id)
 {
     herr_t	   ret_value = SUCCEED;
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5F_dest)
 
     /* Sanity check */
@@ -1570,7 +1570,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
 
         /* Destroy shared file struct */
         f->shared = H5FL_FREE(H5F_file_t,f->shared);
-        
+
     } else if (f->shared->nrefs>0) {
         /*
          * There are other references to the shared part of the file.
@@ -1660,7 +1660,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
  *		arguments would be the same.
  *
  *		Raymond Lu, 2001-10-14
- *		Changed the file creation and access property lists to the 
+ *		Changed the file creation and access property lists to the
  *		new generic property list.
  *
  *		Bill Wendling, 2003-03-18
@@ -1828,7 +1828,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
 
     /*
      * Decide the file close degree.  If it's the first time to open the
-     * file, set the degree to access property list value; if it's the 
+     * file, set the degree to access property list value; if it's the
      * second time or later, verify the access property list value matches
      * the degree in shared file structure.
      */
@@ -1891,10 +1891,10 @@ done:
  *		File struct creation and destruction is through H5F_new() and
  *		H5F_dest(). Writing the root symbol table entry is done with
  *		H5G_encode().
- *	
+ *
  *  		Robb Matzke, 1997-08-29
  *		Moved creation of the boot block to H5F_flush().
- *	
+ *
  *  		Robb Matzke, 1997-09-23
  *		Most of the work is now done by H5F_open() since H5Fcreate()
  *		and H5Fopen() originally contained almost identical code.
@@ -1908,9 +1908,9 @@ done:
  * 		Robb Matzke, 1999-08-02
  *		The file creation and file access property lists are passed
  *		to the H5F_open() as object IDs.
- *	
+ *
  *		Raymond Lu, 2001-10-14
- *              Changed the file creation and access property list to the 
+ *              Changed the file creation and access property list to the
  * 		new generic property list.
  *
  *-------------------------------------------------------------------------
@@ -2000,7 +2000,7 @@ done:
  *		File struct creation and destruction is through H5F_new() and
  *		H5F_dest(). Reading the root symbol table entry is done with
  *		H5G_decode().
- *	
+ *
  *  		Robb Matzke, 1997-09-23
  *		Most of the work is now done by H5F_open() since H5Fcreate()
  *		and H5Fopen() originally contained almost identical code.
@@ -2088,7 +2088,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
     H5A_t	*attr = NULL;
     H5G_entry_t	*ent = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_API(H5Fflush, FAIL)
     H5TRACE2("e","iFs",object_id,scope);
 
@@ -2176,10 +2176,10 @@ done:
  * 		Robb Matzke, 1999-08-16
  *		The driver information block is encoded and either allocated
  *		or written to disk.
- *   
+ *
  *		Raymond Lu, 2001-10-14
  *              Changed to new generic property list.
- *   
+ *
  *		Quincey Koziol, 2002-05-20
  *              Added 'closing' parameter
  *
@@ -2190,7 +2190,7 @@ done:
  *		Quincey Koziol, 2002-06-06
  *              Return the remainders of the metadata & "small data" blocks to
  *              the free list of blocks for the file.
- *              
+ *
  *              Bill Wendling, 2003-03-18
  *              Modified the flags being passed in to be one flag instead
  *              of several.
@@ -2412,16 +2412,16 @@ H5F_try_close(H5F_t *f)
      *  H5F_CLOSE_SEMI:	if there are still objects open, return fail;
      *			otherwise, close file.
      *  H5F_CLOSE_STRONG:	if there are still objects open, close them
-     *			first, then close file. 
-     */ 
+     *			first, then close file.
+     */
     switch(f->shared->fc_degree) {
         case H5F_CLOSE_WEAK:
             /*
-             * If file or object IDS are still open then delay deletion of 
-             * resources until they have all been closed.  Flush all 
+             * If file or object IDS are still open then delay deletion of
+             * resources until they have all been closed.  Flush all
              * caches and update the object header anyway so that failing to
              * close all objects isn't a major problem.
-             */ 
+             */
             if ((nopen_files + nopen_objs) > 0)
                 HGOTO_DONE(SUCCEED)
             break;
@@ -2465,7 +2465,7 @@ H5F_try_close(H5F_t *f)
 
             /* Get the list of IDs of open dataset, group, named datatype & attribute objects */
             while((obj_count = H5F_get_obj_ids(f, H5F_OBJ_LOCAL|H5F_OBJ_DATASET|H5F_OBJ_GROUP|H5F_OBJ_DATATYPE|H5F_OBJ_ATTR, (int)(sizeof(objs)/sizeof(objs[0])), objs)) != 0) {
-           
+
                 /* Try to close all the open objects in this file */
                 for(u = 0; u < obj_count; u++)
                     if(H5I_dec_ref(objs[u]) < 0)
@@ -2584,7 +2584,7 @@ H5Freopen(hid_t file_id)
     H5F_t	*old_file=NULL;
     H5F_t	*new_file=NULL;
     hid_t	ret_value;
-    
+
     FUNC_ENTER_API(H5Freopen, FAIL)
     H5TRACE1("i","i",file_id);
 
@@ -2989,7 +2989,7 @@ hid_t
 H5F_get_id(H5F_t *file)
 {
     hid_t       ret_value;
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5F_get_id)
 
     assert(file);
@@ -3003,7 +3003,7 @@ H5F_get_id(H5F_t *file)
         if (H5I_inc_ref(file->file_id)<0)
             HGOTO_ERROR (H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
     }
-    
+
     ret_value = file->file_id;
 
 done:
@@ -3027,7 +3027,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-haddr_t 
+haddr_t
 H5F_get_base_addr(const H5F_t *f)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
@@ -3054,7 +3054,7 @@ H5F_get_base_addr(const H5F_t *f)
  *
  *-------------------------------------------------------------------------
  */
-haddr_t 
+haddr_t
 H5F_get_eoa(const H5F_t *f)
 {
     haddr_t	ret_value;
@@ -3098,7 +3098,7 @@ H5F_mpi_get_rank(const H5F_t *f)
     FUNC_ENTER_NOAPI(H5F_mpi_get_rank, FAIL)
 
     assert(f && f->shared);
-    
+
     /* Dispatch to driver */
     if ((ret_value=H5FD_mpi_get_rank(f->shared->lf))<0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_rank request failed")
@@ -3132,7 +3132,7 @@ H5F_mpi_get_comm(const H5F_t *f)
     FUNC_ENTER_NOAPI(H5F_mpi_get_comm, MPI_COMM_NULL)
 
     assert(f && f->shared);
-    
+
     /* Dispatch to driver */
     if ((ret_value=H5FD_mpi_get_comm(f->shared->lf))==MPI_COMM_NULL)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, MPI_COMM_NULL, "driver get_comm request failed")
@@ -3217,7 +3217,7 @@ H5F_sieve_buf_size(const H5F_t *f)
  *		address for the file.
  *
  * Errors:
- *		IO	  READERROR	Low-level read failed. 
+ *		IO	  READERROR	Low-level read failed.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -3272,8 +3272,8 @@ done:
  *		address.
  *
  * Errors:
- *		IO	  WRITEERROR	Low-level write failed. 
- *		IO	  WRITEERROR	No write intent. 
+ *		IO	  WRITEERROR	Low-level write failed.
+ *		IO	  WRITEERROR	No write intent.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -3445,7 +3445,7 @@ H5F_addr_pack(H5F_t UNUSED *f, haddr_t *addr_p/*out*/,
 #if H5_SIZEOF_LONG<H5_SIZEOF_UINT64_T
     *addr_p |= ((uint64_t)objno[1]) << (8*sizeof(long));
 #endif
-    
+
     FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
@@ -3493,7 +3493,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_filesize
  *
- * Purpose:     Retrieves the file size of the HDF5 file. This function 
+ * Purpose:     Retrieves the file size of the HDF5 file. This function
  *              is called after an existing file is opened in order
  *		to learn the true size of the underlying file.
  *
@@ -3543,8 +3543,8 @@ done:
  *              just returning the number of characters required to store the name.
  *              If an error occurs then the buffer pointed to by `name' (NULL or non-NULL)
  *              is unchanged and the function returns a negative value.
- *              
- * Return:      Success:        The length of the file name 
+ *
+ * Return:      Success:        The length of the file name
  *              Failure:        Negative
  *
  * Programmer:  Raymond Lu

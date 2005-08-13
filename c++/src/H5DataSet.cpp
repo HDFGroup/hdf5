@@ -82,7 +82,7 @@ DataSpace DataSet::getSpace() const
    return( data_space );
 }
 
-// This private member function calls the C API to get the identifier 
+// This private member function calls the C API to get the identifier
 // of the datatype that is used by this dataset.  It is used
 // by the various AbstractDs functions to get the specific datatype.
 hid_t DataSet::p_get_type() const
@@ -110,7 +110,7 @@ DSetCreatPropList DataSet::getCreatePlist() const
    {
       throw DataSetIException("DataSet::getCreatePlist", "H5Dget_create_plist failed");
    }
-   // create and return the DSetCreatPropList object 
+   // create and return the DSetCreatPropList object
    DSetCreatPropList create_plist( create_plist_id );
    return( create_plist );
 }
@@ -190,9 +190,9 @@ hsize_t DataSet::getVlenBufSize( DataType& type, DataSpace& space ) const
 
 //--------------------------------------------------------------------------
 // Function:	DataSet::vlenReclaim
-///\brief	Reclaims VL datatype memory buffers. 
+///\brief	Reclaims VL datatype memory buffers.
 ///\param	type - IN: Datatype, which is the datatype stored in the buffer
-///\param	space - IN: Selection for the memory buffer to free the 
+///\param	space - IN: Selection for the memory buffer to free the
 ///		VL datatypes within
 ///\param	xfer_plist - IN: Property list used to create the buffer
 ///\param	buf - IN: Pointer to the buffer to be reclaimed
@@ -223,9 +223,9 @@ void DataSet::vlenReclaim( DataType& type, DataSpace& space, DSetMemXferPropList
 ///\param	xfer_plist - IN: Transfer property list for this I/O operation
 ///\exception	H5::DataSetIException
 ///\par Description
-///		This function reads raw data from this dataset into the 
-///		buffer \a buf, converting from file datatype and dataspace 
-///		to memory datatype \a mem_type and dataspace \a mem_space. 
+///		This function reads raw data from this dataset into the
+///		buffer \a buf, converting from file datatype and dataspace
+///		to memory datatype \a mem_type and dataspace \a mem_space.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataSet::read( void* buf, const DataType& mem_type, const DataSpace& mem_space, const DataSpace& file_space, const DSetMemXferPropList& xfer_plist ) const
@@ -273,9 +273,9 @@ void DataSet::read( string& strg, const DataType& mem_type, const DataSpace& mem
 ///\param	xfer_plist - IN: Transfer property list for this I/O operation
 ///\exception	H5::DataSetIException
 ///\par Description
-///		This function writes raw data from an application buffer 
-///		\a buf to a dataset, converting from memory datatype 
-///		\a mem_type and dataspace \a mem_space to file datatype 
+///		This function writes raw data from an application buffer
+///		\a buf to a dataset, converting from memory datatype
+///		\a mem_type and dataspace \a mem_space to file datatype
 ///		and dataspace.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -312,18 +312,18 @@ void DataSet::write( const string& strg, const DataType& mem_type, const DataSpa
 
 //--------------------------------------------------------------------------
 // Function:	DataSet::iterateElems
-///\brief	Iterates over all selected elements in a dataspace. 
-///\param	buf - IN/OUT: Pointer to the buffer in memory containing the 
+///\brief	Iterates over all selected elements in a dataspace.
+///\param	buf - IN/OUT: Pointer to the buffer in memory containing the
 ///		elements to iterate over
 ///\param	type - IN: Datatype for the elements stored in \a buf
-///\param	space - IN: Dataspace for \a buf. Also contains the selection 
+///\param	space - IN: Dataspace for \a buf. Also contains the selection
 ///		to iterate over.
-///\param	op - IN: Function pointer to the routine to be called for 
+///\param	op - IN: Function pointer to the routine to be called for
 ///		each element in \a buf iterated over
-///\param	op_data - IN/OUT: Pointer to any user-defined data associated 
+///\param	op_data - IN/OUT: Pointer to any user-defined data associated
 ///		with the operation
 ///\exception	H5::DataSetIException
-///\note	This function may not work correctly yet - it's still 
+///\note	This function may not work correctly yet - it's still
 ///		under development.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -430,7 +430,7 @@ void* DataSet::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_
 ///\return	A reference
 ///\exception	H5::IdComponentException
 ///\par Description
-//		This function passes H5R_OBJECT and -1 to the protected 
+//		This function passes H5R_OBJECT and -1 to the protected
 //		function for it to pass to the C API H5Rcreate
 //		to create a reference to the named object.
 // Programmer	Binh-Minh Ribler - May, 2004
@@ -446,10 +446,10 @@ void* DataSet::Reference(const char* name) const
 ///\param		ref_type - IN: Type of reference to query
 ///\param		ref      - IN: Reference to query
 // Return	An object type, which can be one of the following:
-//			H5G_LINK Object is a symbolic link.  
-//			H5G_GROUP Object is a group.  
-//			H5G_DATASET   Object is a dataset.  
-//			H5G_TYPE Object is a named datatype 
+//			H5G_LINK Object is a symbolic link.
+//			H5G_GROUP Object is a group.
+//			H5G_DATASET   Object is a dataset.
+//			H5G_TYPE Object is a named datatype
 // Exception	H5::IdComponentException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------

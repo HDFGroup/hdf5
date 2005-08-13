@@ -124,7 +124,7 @@ H5D_contig_fill(H5D_t *dset, hid_t dxpl_id)
 #endif /* H5_HAVE_PARALLEL */
     int         non_zero_fill_f=(-1);   /* Indicate that a non-zero fill-value was used */
     herr_t	ret_value=SUCCEED;	/* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5D_contig_fill, FAIL)
 
     /* Check args */
@@ -215,7 +215,7 @@ H5D_contig_fill(H5D_t *dset, hid_t dxpl_id)
         /* Indicate that a zero fill buffer was used */
         non_zero_fill_f=0;
     } /* end else */
-     
+
     /* Start at the beginning of the dataset */
     offset = 0;
 
@@ -248,7 +248,7 @@ H5D_contig_fill(H5D_t *dset, hid_t dxpl_id)
           npoints -= MIN(ptsperbuf, npoints);
           offset += size;
       } /* end while */
-            
+
 #ifdef H5_HAVE_PARALLEL
     /* Only need to block at the barrier if we actually wrote fill values */
     /* And if we are using an MPI-capable file driver */
@@ -421,7 +421,7 @@ H5D_contig_readvv(const H5D_io_info_t *io_info,
     size_t u;                   /* Counting variable */
     size_t v;                   /* Counting variable */
     ssize_t ret_value;          /* Return value */
-   
+
     FUNC_ENTER_NOAPI(H5D_contig_readvv, FAIL)
 
     /* Check args */
@@ -688,7 +688,7 @@ H5D_contig_writevv(const H5D_io_info_t *io_info,
     size_t u;                   /* Counting variable */
     size_t v;                   /* Counting variable */
     ssize_t ret_value;          /* Return value */
-   
+
     FUNC_ENTER_NOAPI(H5D_contig_writevv, FAIL)
 
     /* Check args */
@@ -716,7 +716,7 @@ H5D_contig_writevv(const H5D_io_info_t *io_info,
             sieve_size=dset_contig->sieve_size;
             sieve_end=sieve_start+sieve_size;
         } /* end if */
-        
+
         /* Works through sequences as fast as possible */
         for(; u<dset_max_nseq && v<mem_max_nseq; ) {
             /* Choose smallest buffer to write */
@@ -834,7 +834,7 @@ H5D_contig_writevv(const H5D_io_info_t *io_info,
 
                                 /* Adjust sieve location */
                                 dset_contig->sieve_loc=addr;
-                                
+
                             } /* end if */
                             /* Append to existing sieve buffer */
                             else {
@@ -844,7 +844,7 @@ H5D_contig_writevv(const H5D_io_info_t *io_info,
 
                             /* Adjust sieve size */
                             dset_contig->sieve_size += size;
-                            
+
                             /* Update local copies of sieve information */
                             sieve_start=dset_contig->sieve_loc;
                             sieve_size=dset_contig->sieve_size;

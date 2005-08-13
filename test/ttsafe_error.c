@@ -186,7 +186,7 @@ herr_t walk_error_callback(int n, H5E_error_t *err_desc, void UNUSED *client_dat
     if (err_desc) {
         maj_num = err_desc->maj_num;
         min_num = err_desc->min_num;
-        
+
         if (n < EXPECTED_ERROR_DEPTH && maj_num == expected[n].maj_num &&
                 min_num == expected[n].min_num)
             return SUCCEED;

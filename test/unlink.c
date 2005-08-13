@@ -92,7 +92,7 @@ test_one(hid_t file)
 {
     hid_t	work=-1, grp=-1;
     herr_t	status;
-    
+
     /* Create a test group */
     if ((work=H5Gcreate(file, "/test_one", 0))<0) goto error;
 
@@ -160,7 +160,7 @@ test_many(hid_t file)
     int		i;
     const int	how_many=500;
     char	name[32];
-    
+
     /* Create a test group */
     if ((work=H5Gcreate(file, "/test_many", 0))<0) goto error;
     if ((grp = H5Gcreate(work, "/test_many_foo", 0))<0) goto error;
@@ -205,7 +205,7 @@ test_many(hid_t file)
 	if (H5Gunlink(work, name)<0) goto error;
     }
     PASSED();
-    
+
     /* Create a bunch of names and unlink them from the midle */
     TESTING("outward unlink");
     for (i=0; i<how_many; i++) {
@@ -221,12 +221,12 @@ test_many(hid_t file)
 	if (H5Gunlink(work, name)<0) goto error;
     }
     PASSED();
-    
+
 
     /* Cleanup */
     if (H5Gclose(work)<0) goto error;
     return 0;
-    
+
  error:
     H5E_BEGIN_TRY {
 	H5Gclose(work);
@@ -258,7 +258,7 @@ test_symlink(hid_t file)
     hid_t	work=-1;
 
     TESTING("symlink removal");
-    
+
     /* Create a test group and symlink */
     if ((work=H5Gcreate(file, "/test_symlink", 0))<0) goto error;
     if (H5Glink(work, H5G_LINK_SOFT, "link_value", "link")<0) goto error;
@@ -268,7 +268,7 @@ test_symlink(hid_t file)
     if (H5Gclose(work)<0) goto error;
     PASSED();
     return 0;
-    
+
  error:
     H5E_BEGIN_TRY {
 	H5Gclose(work);
@@ -319,7 +319,7 @@ test_rename(hid_t file)
     /* Cleanup */
     if (H5Gclose(work)<0) goto error;
     return 0;
-    
+
  error:
     H5E_BEGIN_TRY {
 	H5Gclose(work);
@@ -329,7 +329,7 @@ test_rename(hid_t file)
     return 1;
 }
 
-    
+
 /*-------------------------------------------------------------------------
  * Function:    test_new_move
  *
@@ -339,8 +339,8 @@ test_rename(hid_t file)
  *
  *              Failure:        number of errors
  *
- * Programmer:  Raymond Lu 
- *              Thursday, April 25, 2002 
+ * Programmer:  Raymond Lu
+ *              Thursday, April 25, 2002
  *
  * Modifications:
  *
@@ -354,8 +354,8 @@ test_new_move(void)
     char 	filename[1024];
 
     TESTING("new move");
-   
-    /* Create a second file */ 
+
+    /* Create a second file */
     fapl = h5_fileaccess();
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
     if ((file_a=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
@@ -370,7 +370,7 @@ test_new_move(void)
     if((grp_move=H5Gcreate(grp_1, "group_move", 0))<0) goto error;
 
     /* Create hard and soft links. */
-    if(H5Glink2(grp_1, "group_move", H5G_LINK_HARD, H5G_SAME_LOC, "hard")<0) 
+    if(H5Glink2(grp_1, "group_move", H5G_LINK_HARD, H5G_SAME_LOC, "hard")<0)
 	goto error;
     if(H5Glink2(grp_1, "/group1/group_move", H5G_LINK_SOFT, grp_2, "soft")<0)
 	goto error;
@@ -387,13 +387,13 @@ test_new_move(void)
         if(H5Gmove2(grp_1, "group_move", file_b, "group_new_name")!=FAIL)
 	    goto error;
     } H5E_END_TRY;
-    
+
     /* Move a group across groups in the same file. */
     if(H5Gmove2(grp_1, "group_move", grp_2, "group_new_name")<0)
 	goto error;
 
     /* Open the group just moved to the new location. */
-    if((moved_grp = H5Gopen(grp_2, "group_new_name"))<0) 
+    if((moved_grp = H5Gopen(grp_2, "group_new_name"))<0)
 	goto error;
 
     H5Gclose(grp_1);
@@ -464,8 +464,8 @@ check_new_move(void)
         puts("    Unexpected object type, should have been a group");
         goto error;
     }
-    if( sb_hard1.objno[0]!=sb_hard2.objno[0] || 
-        sb_hard1.objno[1]!=sb_hard2.objno[1] ) { 
+    if( sb_hard1.objno[0]!=sb_hard2.objno[0] ||
+        sb_hard1.objno[1]!=sb_hard2.objno[1] ) {
         H5_FAILED();
         puts("    Hard link test failed.  Link seems not to point to the ");
         puts("    expected file location.");
@@ -1258,7 +1258,7 @@ static int test_create_unlink(const char *msg, hid_t fapl)
     char	filename[1024];
 
     TESTING(msg);
-   
+
     /* Create file */
     h5_fixname(FILENAME[3], fapl, filename, sizeof filename);
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
@@ -1336,7 +1336,7 @@ test_link_slashes(void)
     char	filename[1024];
 
     TESTING("creating links with multiple slashes");
-   
+
     /* Create file */
     fapl = h5_fileaccess();
     h5_fixname(FILENAME[5], fapl, filename, sizeof filename);
@@ -1406,7 +1406,7 @@ test_unlink_slashes(void)
     char	filename[1024];
 
     TESTING("deleting links with multiple slashes");
-   
+
     /* Create file */
     fapl = h5_fileaccess();
     h5_fixname(FILENAME[5], fapl, filename, sizeof filename);
@@ -2022,7 +2022,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_unlink_chunked_dataset
  *
- * Purpose:     Tests deleting a chunked dataset 
+ * Purpose:     Tests deleting a chunked dataset
  *
  * Return:      Success:        0
  *              Failure:        number of errors
@@ -2191,7 +2191,7 @@ main(void)
     nerrors += test_resurrect_dataset();
     nerrors += test_resurrect_datatype();
     nerrors += test_resurrect_group();
- 
+
     /* Test unlinking chunked datasets */
     nerrors += test_unlink_chunked_dataset();
 

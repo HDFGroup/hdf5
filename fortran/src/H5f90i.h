@@ -16,8 +16,8 @@
 #ifndef _H5f90i_H
 #define _H5f90i_H
 
-/* 
- * Standard header files needed all the time 
+/*
+ * Standard header files needed all the time
  */
 
 #include "H5private.h"
@@ -34,7 +34,7 @@ typedef long               size_t_f;
 typedef long               int_f;
 typedef long               hid_t_f;
 typedef double             real_f;
-#define DF_CAPFNAMES 
+#define DF_CAPFNAMES
 /*#define _fcdtocp(desc) (desc)*/
 
 #endif /* UNICOS */
@@ -62,7 +62,7 @@ typedef int               size_t_f;
 typedef int               int_f;
 typedef int               hid_t_f;
 typedef float             real_f;
-#define FNAME(x) x 
+#define FNAME(x) x
 #if defined H5_ABSOFT
 #define DF_CAPFNAMES
 #endif /*H5_ABSOFT*/

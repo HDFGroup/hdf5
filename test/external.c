@@ -61,7 +61,7 @@ same_contents (const char *name1, const char *name2)
 	assert (n1>=0 && (size_t)n1<=sizeof(buf1));
 	assert (n2>=0 && (size_t)n2<=sizeof(buf2));
 	assert (n1==n2);
-	
+
 	if (n1<=0 && n2<=0) break;
 	if (memcmp (buf1, buf2, (size_t)n1)) {
 	    close (fd1);
@@ -103,7 +103,7 @@ test_1a(hid_t file)
     char	name[256];		/*external file name		*/
     off_t	file_offset;		/*external file offset		*/
     hsize_t	file_size;		/*sizeof external file segment	*/
-    
+
     TESTING("fixed-size data space, exact storage");
 
     /* Create the dataset */
@@ -123,7 +123,7 @@ test_1a(hid_t file)
 
     /* Test dataset address.  Should be undefined. */
     if (H5Dget_offset(dset)!=HADDR_UNDEF) goto error;
-        
+
     if ((dcpl = H5Dget_create_plist (dset))<0) goto error;
     if ((n=H5Pget_external_count (dcpl))<0) goto error;
     if (1!=n) {
@@ -369,7 +369,7 @@ test_1e(hid_t file)
     if (H5Dclose (dset)<0) goto error;
     if (H5Sclose (space)<0) goto error;
     if (H5Pclose (dcpl)<0) goto error;
-    
+
     /* Read dataset creation information */
     if ((dset = H5Dopen (file, "dset5"))<0) goto error;
     if ((dcpl = H5Dget_create_plist (dset))<0) goto error;
@@ -540,7 +540,7 @@ test_1h(void)
 {
     hid_t	dcpl=-1;		/*dataset creation properties	*/
     herr_t	status;			/*return status			*/
-    
+
     TESTING("address overflow in external files");
     if((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5Pset_external(dcpl, "ext1.data", (off_t)0, H5F_UNLIMITED-1)<0) goto error;
@@ -617,7 +617,7 @@ test_2 (hid_t fapl)
 	assert (n==sizeof(part));
 	close (fd);
     }
-    
+
     /*
      * Create the file and an initial group.  This causes messages about
      * debugging to be emitted before we start playing games with what the
@@ -640,7 +640,7 @@ test_2 (hid_t fapl)
     cur_size = 100;
     if ((space=H5Screate_simple (1, &cur_size, NULL))<0) goto error;
     if ((dset=H5Dcreate(file, "dset1", H5T_NATIVE_INT, space, dcpl))<0)
-	goto error; 
+	goto error;
 
     /*
      * Read the entire dataset and compare with the original
@@ -673,7 +673,7 @@ test_2 (hid_t fapl)
 	    goto error;
 	}
     }
-    
+
     if (H5Dclose(dset)<0) goto error;
     if (H5Pclose(dcpl)<0) goto error;
     if (H5Sclose(space)<0) goto error;
@@ -750,7 +750,7 @@ test_3 (hid_t fapl)
 	    printf("    cannot open %s: %s\n", filename, strerror(errno));
 	    goto error;
 	}
-	
+
 	write(fd, temparray, (i-1)*10);
 	close (fd);
     }
@@ -833,7 +833,7 @@ main (void)
     char	filename[1024];		/*file name for test_1* funcs	*/
     hid_t	grp=-1;			/*group to emit diagnostics	*/
     int		nerrors=0;		/*number of errors		*/
-    
+
     h5_reset();
     fapl = h5_fileaccess();
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);

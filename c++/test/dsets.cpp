@@ -50,7 +50,7 @@ const string	DSET_BOGUS_NAME	("bogus");
 const int H5Z_FILTER_BOGUS = 305;
 
 // Local prototypes
-static size_t bogus(unsigned int flags, size_t cd_nelmts, 
+static size_t bogus(unsigned int flags, size_t cd_nelmts,
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
 void cleanup_dsets(void);
 
@@ -85,7 +85,7 @@ test_create( H5File& file)
 	dims[1] = 512;
 	DataSpace space (2, dims, NULL);
 
-	// Create a dataset using the default dataset creation properties.	
+	// Create a dataset using the default dataset creation properties.
 	// We're not sure what they are, so we won't check.
 	dataset = new DataSet (file.createDataSet
 		(DSET_DEFAULT_NAME, PredType::NATIVE_DOUBLE, space));
@@ -101,7 +101,7 @@ test_create( H5File& file)
 	// dataset can only be created once.  If an exception is not thrown for
 	// this action by createDataSet, then throw an invalid action exception.
 	try {
-	    dataset = new DataSet (file.createDataSet 
+	    dataset = new DataSet (file.createDataSet
 			(DSET_DEFAULT_NAME, PredType::NATIVE_DOUBLE, space));
 
 	    // continuation here, that means no exception has been thrown
@@ -140,7 +140,7 @@ test_create( H5File& file)
 	csize[1] = 100;
 	create_parms.setChunk( 2, csize );
 
-	dataset = new DataSet (file.createDataSet 
+	dataset = new DataSet (file.createDataSet
 		(DSET_CHUNKED_NAME, PredType::NATIVE_DOUBLE, space, create_parms));
 	// Note: this one has no error message in C when failure occurs?
 
@@ -176,7 +176,7 @@ test_create( H5File& file)
 /*-------------------------------------------------------------------------
  * Function:	check_values
  *
- * Purpose:	Checks a read value against the written value.  If they are 
+ * Purpose:	Checks a read value against the written value.  If they are
  *		different, the function will print out a message and the
  *		different values.  This function is made to reuse the code
  *		segment that is used in various places throughout
@@ -195,13 +195,13 @@ test_create( H5File& file)
  *
  *-------------------------------------------------------------------------
  */
-static int 
+static int
 check_values (hsize_t i, hsize_t j, int apoint, int acheck)
 {
     if (apoint != acheck)
     {
 	cerr << "    Read different values than written.\n" << endl;
-	cerr << "    At index " << (unsigned long)i << "," << 
+	cerr << "    At index " << (unsigned long)i << "," <<
    	(unsigned long)j << endl;
 	return -1;
     }
@@ -245,7 +245,7 @@ test_simple_io( H5File& file)
     }
 
     char* tconv_buf = new char [1000];
-    try 
+    try
     {
 	// Create the data space
 	hsize_t	dims[2];
@@ -322,7 +322,7 @@ test_tconv( H5File& file)
     //assert (in);
 
     TESTING("data type conversion");
-    
+
     // Initialize the dataset
     for (int i = 0; i < 1000000; i++) {
 	out[i*4+0] = 0x11;
@@ -352,7 +352,7 @@ test_tconv( H5File& file)
 	    if (in[4*i+0]!=out[4*i+3] ||
 		in[4*i+1]!=out[4*i+2] ||
 		in[4*i+2]!=out[4*i+1] ||
-		in[4*i+3]!=out[4*i+0]) 
+		in[4*i+3]!=out[4*i+0])
 	    {
 		throw Exception("DataSet::read", "Read with byte order conversion failed");
 	    }
@@ -453,7 +453,7 @@ test_compression(H5File& file)
     }
     char* tconv_buf = new char [1000];
     DataSet* dataset = NULL;
-    try 
+    try
     {
 	const hsize_t	size[2] = {100, 200};
 	// Create the data space
@@ -463,37 +463,37 @@ test_compression(H5File& file)
 	DSetMemXferPropList xfer;
 
 	xfer.setBuffer (1000, tconv_buf, NULL);
-  
+
 	// Use chunked storage with compression
 	DSetCreatPropList dscreatplist;
 
 	const hsize_t	chunk_size[2] = {2, 25};
 	dscreatplist.setChunk (2, chunk_size);
 	dscreatplist.setDeflate (6);
-  
+
 #ifdef H5_HAVE_FILTER_DEFLATE
 	TESTING("compression (setup)");
-    
+
 	// Create the dataset
-	dataset = new DataSet (file.createDataSet 
+	dataset = new DataSet (file.createDataSet
 	    (DSET_COMPRESS_NAME, PredType::NATIVE_INT, space1, dscreatplist));
-  
+
 	PASSED();
 
 	/*----------------------------------------------------------------------
 	* STEP 1: Read uninitialized data.  It should be zero.
-	*---------------------------------------------------------------------- 
+	*----------------------------------------------------------------------
 	*/
 	TESTING("compression (uninitialized read)");
-  
+
 	dataset->read ((void*) check, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
-    
+
 	for (i=0; i<size[0]; i++) {
 	    for (j=0; j<size[1]; j++) {
 		if (0!=check[i][j]) {
 		    H5_FAILED();
 		    cerr << "    Read a non-zero value." << endl;
-		    cerr << "    At index " << (unsigned long)i << "," << 
+		    cerr << "    At index " << (unsigned long)i << "," <<
 		   (unsigned long)j << endl;
 		    throw Exception("test_compression", "Failed in uninitialized read");
 		}
@@ -504,13 +504,13 @@ test_compression(H5File& file)
 	/*----------------------------------------------------------------------
 	* STEP 2: Test compression by setting up a chunked dataset and writing
 	* to it.
-	*---------------------------------------------------------------------- 
+	*----------------------------------------------------------------------
 	*/
 	TESTING("compression (write)");
-    
+
 	for (i=n=0; i<size[0]; i++)
 	{
-	    for (j=0; j<size[1]; j++) 
+	    for (j=0; j<size[1]; j++)
 	    {
 		points[i][j] = n++;
 	    }
@@ -522,7 +522,7 @@ test_compression(H5File& file)
 
 	/*----------------------------------------------------------------------
 	* STEP 3: Try to read the data we just wrote.
-	*---------------------------------------------------------------------- 
+	*----------------------------------------------------------------------
 	*/
 	TESTING("compression (read)");
 
@@ -545,13 +545,13 @@ test_compression(H5File& file)
 	* random thus not very compressible, and will cause the chunks to move
 	* around as they grow.  We only change values for the left half of the
 	* dataset although we rewrite the whole thing.
-	*---------------------------------------------------------------------- 
+	*----------------------------------------------------------------------
 	*/
 	TESTING("compression (modify)");
-    
+
 	for (i=0; i<size[0]; i++)
 	{
-	    for (j=0; j<size[1]/2; j++) 
+	    for (j=0; j<size[1]/2; j++)
 	    {
 	    	points[i][j] = rand ();
 	    }
@@ -576,13 +576,13 @@ test_compression(H5File& file)
 	* STEP 5: Close the dataset and then open it and read it again.  This
 	* insures that the compression message is picked up properly from the
 	* object header.
-	*---------------------------------------------------------------------- 
+	*----------------------------------------------------------------------
 	*/
 	TESTING("compression (re-open)");
-    
+
 	// close this dataset to reuse the var
 	delete dataset;
-    
+
 	dataset = new DataSet (file.openDataSet (DSET_COMPRESS_NAME));
 	dataset->read ((void*)check, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
@@ -596,13 +596,13 @@ test_compression(H5File& file)
 	    }
 
 	PASSED();
-    
+
 
 	/*----------------------------------------------------------------------
 	* STEP 6: Test partial I/O by writing to and then reading from a
 	* hyperslab of the dataset.  The hyperslab does not line up on chunk
 	* boundaries (we know that case already works from above tests).
-	*---------------------------------------------------------------------- 
+	*----------------------------------------------------------------------
 	*/
 	TESTING("compression (partial I/O)");
 
@@ -616,7 +616,7 @@ test_compression(H5File& file)
 	space1.selectHyperslab( H5S_SELECT_SET, hs_size, hs_offset );
 	dataset->write ((void*)points, PredType::NATIVE_INT, space1, space1, xfer);
 	dataset->read ((void*)check, PredType::NATIVE_INT, space1, space1, xfer);
-    
+
 	// Check that the values read are the same as the values written
 	for (i=0; i<hs_size[0]; i++) {
 	for (j=0; j<hs_size[1]; j++) {
@@ -624,9 +624,9 @@ test_compression(H5File& file)
 		check[hs_offset[0]+i][hs_offset[1]+j]) {
 		H5_FAILED();
 		cerr << "    Read different values than written.\n" << endl;
-		cerr << "    At index " << (unsigned long)(hs_offset[0]+i) << 
+		cerr << "    At index " << (unsigned long)(hs_offset[0]+i) <<
 		   "," << (unsigned long)(hs_offset[1]+j) << endl;
-		
+
 		cerr << "    At original: " << (int)points[hs_offset[0]+i][hs_offset[1]+j] << endl;
 		cerr << "    At returned: " << (int)check[hs_offset[0]+i][hs_offset[1]+j] << endl;
 		throw Exception("test_compression", "Failed in partial I/O");
@@ -648,7 +648,7 @@ test_compression(H5File& file)
 	/*----------------------------------------------------------------------
 	* STEP 7: Register an application-defined compression method and use it
 	* to write and then read the dataset.
-	*---------------------------------------------------------------------- 
+	*----------------------------------------------------------------------
 	*/
 	TESTING("compression (app-defined method)");
 
@@ -668,21 +668,21 @@ test_compression(H5File& file)
 
 	dataset->write ((void*)points, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 	dataset->read ((void*)check, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
-    
+
 	// Check that the values read are the same as the values written
 	for (i = 0; i < size[0]; i++)
 	    for (j = 0; j < size[1]; j++)
 	    {
 		int status = check_values (i, j, points[i][j], check[i][j]);
-		if (status == -1) 
+		if (status == -1)
 		    throw Exception("test_compression", "Failed in app-defined method");
 	    }
 
 	PASSED();
-  
+
 	/*----------------------------------------------------------------------
 	* Cleanup
-	*---------------------------------------------------------------------- 
+	*----------------------------------------------------------------------
 	*/
 	delete dataset;
 	delete [] tconv_buf;
@@ -745,7 +745,7 @@ test_multiopen (H5File& file)
 
 	// Create first dataset
 	DataSet dset1 = file.createDataSet ("multiopen", PredType::NATIVE_INT, *space, dcpl);
-    
+
 	// Open again the first dataset from the file to another DataSet object.
 	DataSet dset2 = file.openDataSet ("multiopen");
 
@@ -762,13 +762,13 @@ test_multiopen (H5File& file)
 
 	hsize_t		tmp_size[1];
 	space->getSimpleExtentDims (tmp_size);
-	if (cur_size[0]!=tmp_size[0]) 
+	if (cur_size[0]!=tmp_size[0])
 	{
-	    cerr << "    Got " << (int)tmp_size[0] << " instead of " 
+	    cerr << "    Got " << (int)tmp_size[0] << " instead of "
 		    << (int)cur_size[0] << "!" << endl;
 	    throw Exception("test_multiopen", "Failed in multi-open with extending");
 	}
-    
+
 	// clean up and return with success
 	delete space;
 	PASSED();
@@ -849,7 +849,7 @@ test_types(H5File& file)
 	    dset = new DataSet(grp.createDataSet("bitfield_1", type, space));
 
 	    // Fill buffer
-	    for (i=0; i<sizeof buf; i++) 
+	    for (i=0; i<sizeof buf; i++)
 	    	buf[i] = (unsigned char)0xff ^ (unsigned char)i;
 
 	    // Write data from buf using all default dataspaces and property list
@@ -860,7 +860,7 @@ test_types(H5File& file)
 	} // end try block of bitfield_1
 
 	// catch exceptions thrown in try block of bitfield_1
-	catch (Exception E) 
+	catch (Exception E)
 	{
 	    cerr << " FAILED" << endl;
 	    cerr << "    <<<  " << "bitfield_1: " << E.getFuncName()
@@ -878,7 +878,7 @@ test_types(H5File& file)
 	    dset = new DataSet(grp.createDataSet("bitfield_2", type, space));
 
 	    // Fill buffer
-	    for (i=0; i<sizeof(buf); i++) 
+	    for (i=0; i<sizeof(buf); i++)
 		buf[i] = (unsigned char)0xff ^ (unsigned char)i;
 
 	    // Write data from buf using all default dataspaces and property
@@ -911,7 +911,7 @@ test_types(H5File& file)
 	    dset = new DataSet(grp.createDataSet("opaque_1", *optype, space));
 
 	    // Fill buffer
-	    for (i=0; i<sizeof buf; i++) 
+	    for (i=0; i<sizeof buf; i++)
 		buf[i] = (unsigned char)0xff ^ (unsigned char)i;
 
 	    // Write data from buf using all default dataspaces and property
@@ -934,7 +934,7 @@ test_types(H5File& file)
 		delete optype;
 	    throw E; // propagate the exception
 	}
-    
+
 	/* opaque_2 */
 	try { // block opaque_2
 	    nelmts = sizeof(buf)/4;
@@ -944,7 +944,7 @@ test_types(H5File& file)
 	    dset = new DataSet(grp.createDataSet("opaque_2", *optype, space));
 
 	    // Fill buffer
-	    for (i=0; i<sizeof(buf); i++) 
+	    for (i=0; i<sizeof(buf); i++)
 		buf[i] = (unsigned char)0xff ^ (unsigned char)i;
 
 	    // Write data from buf using all default dataspaces and property
@@ -967,7 +967,7 @@ test_types(H5File& file)
 		delete optype;
 	    throw E; // propagate the exception
 	}
-    
+
 	PASSED();
 	return 0;
     } // end top try block
@@ -994,7 +994,7 @@ test_types(H5File& file)
  *	Nov 12, 01:
  *		- moved h5_cleanup to outside of try block because
  *		  dataset.h5 cannot be removed until "file" is out of
- *		  scope and dataset.h5 is closed. 
+ *		  scope and dataset.h5 is closed.
  *	Feb 20, 05:
  *		- cleanup_dsets took care of the cleanup now.
  *
@@ -1007,11 +1007,11 @@ main(void)
 
     hid_t	fapl_id;
     fapl_id = h5_fileaccess(); // in h5test.c, returns a file access template
-    
+
     int		nerrors=0;	// keep track of number of failures occurr
-    try 
+    try
     {
-	// Turn of the auto-printing when failure occurs so that we can 
+	// Turn of the auto-printing when failure occurs so that we can
 	// handle the errors appropriately since sometime failures are
 	// caused deliberately and expected.
 	Exception::dontPrint();
@@ -1021,7 +1021,7 @@ main(void)
 	FileAccPropList fapl(fapl_id);
 
 	H5File file(FILE1, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
-       
+
 	// Cause the library to emit initial messages
 	Group grp = file.createGroup( "emit diagnostics", 0);
 	grp.setComment( ".", "Causes diagnostic messages to be emitted");
@@ -1033,7 +1033,7 @@ main(void)
 	nerrors += test_multiopen (file)<0	?1:0;
 	nerrors += test_types(file)<0       ?1:0;
     }
-    catch (Exception E) 
+    catch (Exception E)
     {
 	return(test_report(nerrors, string(" Dataset")));
     }
@@ -1041,7 +1041,7 @@ main(void)
     // Clean up data file
     cleanup_dsets();
 
-    // Print out dsets test results 
+    // Print out dsets test results
     cerr << endl << endl;
     return(test_report(nerrors, string(" Dataset")));
 }   // main

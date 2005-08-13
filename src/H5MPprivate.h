@@ -22,7 +22,7 @@
 /*------------------------------------------------------------------------
  * Purpose:    Begin to collect MPE log information for a function. It should
  *             be ahead of the actual function's process.
- * 
+ *
  * Programmer: Long Wang
  *
  *------------------------------------------------------------------------
@@ -34,7 +34,7 @@
  */
 #define eventa(func_name)   h5_mpe_eventa
 #define eventb(func_name)   h5_mpe_eventb
-#define COLOR(func_name)    color_ ## func_name 
+#define COLOR(func_name)    color_ ## func_name
 #define MPE_LOG_VARS(func_name)                                               \
     static int eventa(func_name) = -1;                                        \
     static int eventb(func_name) = -1;                                        \
@@ -54,7 +54,7 @@
 
 
 /*------------------------------------------------------------------------
- * Purpose:   Finish the collection of MPE log information for a function. 
+ * Purpose:   Finish the collection of MPE log information for a function.
  *            It should be after the actual function's process.
  *
  * Programmer: Long Wang
@@ -394,9 +394,9 @@
 #define color_H5Zget_filter_info "red"
 
 #else
-#define MPE_LOG_VARS(func_name) /* void */   
-#define BEGIN_MPE_LOG(func_name) /* void */  
-#define FINISH_MPE_LOG   /* void */ 
+#define MPE_LOG_VARS(func_name) /* void */
+#define BEGIN_MPE_LOG(func_name) /* void */
+#define FINISH_MPE_LOG   /* void */
 
 #endif
 

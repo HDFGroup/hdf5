@@ -86,7 +86,7 @@ mklinks(hid_t fapl)
 		 "/grp1/recursive")<0) {
 	goto error;
     }
-	
+
     /* Close */
     if (H5Sclose (scalar)<0) goto error;
     if (H5Fclose (file)<0) goto error;
@@ -108,8 +108,8 @@ mklinks(hid_t fapl)
  *
  *              Failure:        -1
  *
- * Programmer:  Raymond Lu 
- *              Friday, April 19, 2002 
+ * Programmer:  Raymond Lu
+ *              Friday, April 19, 2002
  *
  * Modifications:
  *
@@ -122,7 +122,7 @@ new_links(hid_t fapl)
     hid_t		grp1_a=(-1), grp1_b=(-1), grp2_a=(-1), grp2_b=(-1);
     hid_t		scalar=(-1);
     hid_t		dset1=(-1), dset2=(-1);
-    char		filename[1024]; 
+    char		filename[1024];
     hsize_t             size[1] = {1};
 
     TESTING("H5Glink2 function");
@@ -145,7 +145,7 @@ new_links(hid_t fapl)
     if ((grp2_b=H5Gcreate (file_b, "grp2", (size_t)0))<0) goto error;
 
     /* Create datasets */
-    if((dset1=H5Dcreate(file_a, "dataset1", H5T_NATIVE_INT, scalar, 
+    if((dset1=H5Dcreate(file_a, "dataset1", H5T_NATIVE_INT, scalar,
 	H5P_DEFAULT))<0) {
 	goto error;
     }
@@ -154,27 +154,27 @@ new_links(hid_t fapl)
         goto error;
     }
 
-    /* Create links within a file.  Both of source and destination use 
+    /* Create links within a file.  Both of source and destination use
      * H5G_SAME_LOC.  Both hard and soft links should fail. */
     H5E_BEGIN_TRY {
-        if(H5Glink2(H5G_SAME_LOC, "dataset1", H5G_LINK_HARD , H5G_SAME_LOC, 
+        if(H5Glink2(H5G_SAME_LOC, "dataset1", H5G_LINK_HARD , H5G_SAME_LOC,
 		"hard")!=FAIL) goto error;
     } H5E_END_TRY;
     H5E_BEGIN_TRY {
-        if(H5Glink2(H5G_SAME_LOC, "dataset1", H5G_LINK_SOFT , H5G_SAME_LOC, 
+        if(H5Glink2(H5G_SAME_LOC, "dataset1", H5G_LINK_SOFT , H5G_SAME_LOC,
         	"soft")!=FAIL) goto error;
     } H5E_END_TRY;
 
     /* Create links across files.  Both hard and soft links should fail. */
     H5E_BEGIN_TRY {
-        if(H5Glink2(file_a, "dataset1", H5G_LINK_HARD , file_b, 
+        if(H5Glink2(file_a, "dataset1", H5G_LINK_HARD , file_b,
         	"hard")!=FAIL) goto error;
     } H5E_END_TRY;
     H5E_BEGIN_TRY {
         if(H5Glink2(file_a, "dataset1", H5G_LINK_SOFT, file_b, "soft")!=FAIL)
             goto error;
     } H5E_END_TRY;
-    
+
     /* Create links to test H5G_SAME_LOC, H5G_LINK_HARD, H5G_LINK_SOFT. */
     if(H5Glink2(grp1_a, "dataset2", H5G_LINK_HARD , H5G_SAME_LOC,
         "hard1")<0) {
@@ -185,7 +185,7 @@ new_links(hid_t fapl)
         goto error;
     }
 
-    /* Create links to test H5G_LINK_HARD, H5G_LINK_SOFT across different 
+    /* Create links to test H5G_LINK_HARD, H5G_LINK_SOFT across different
      * locations. */
     if(H5Glink2(grp1_a, "dataset2", H5G_LINK_HARD, grp2_a, "hard2")<0) {
         goto error;
@@ -364,7 +364,7 @@ cklinks(hid_t fapl)
  *              Failure:        -1
  *
  * Programmer:  Raymond Lu
- *              Thursday, April 25, 2002 
+ *              Thursday, April 25, 2002
  *
  * Modifications:
  *
@@ -386,8 +386,8 @@ ck_new_links(hid_t fapl)
         goto error;
     }
 
-    /* Get hard link info */    
-    if(H5Gget_objinfo(file, "/grp1/dataset2", TRUE, &sb_dset)<0) 
+    /* Get hard link info */
+    if(H5Gget_objinfo(file, "/grp1/dataset2", TRUE, &sb_dset)<0)
 	goto error;
     if(H5Gget_objinfo(file, "/grp1/hard1", TRUE, &sb_hard1)<0)
 	goto error;
@@ -400,7 +400,7 @@ ck_new_links(hid_t fapl)
 	puts("    Unexpected object type, should have been a dataset");
 	goto error;
     }
-    if( sb_dset.objno[0]!=sb_hard1.objno[0] || 
+    if( sb_dset.objno[0]!=sb_hard1.objno[0] ||
         sb_dset.objno[1]!=sb_hard1.objno[1] ||
         sb_dset.objno[0]!=sb_hard2.objno[0] ||
         sb_dset.objno[1]!=sb_hard2.objno[1] ) {
@@ -474,7 +474,7 @@ long_links(hid_t fapl)
     hid_t		gid2 = (-1);    /* Datatype ID */
     char               *objname = NULL; /* Name of object [Long] */
     size_t              u;              /* Local index variable */
-    char		filename[1024]; 
+    char		filename[1024];
 
     TESTING("long names for objects & links");
 

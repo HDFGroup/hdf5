@@ -348,7 +348,7 @@ H5D_istore_decode_key(const H5F_t UNUSED *f, const H5B_t *bt, const uint8_t *raw
  *		Friday, October 10, 1997
  *
  * Modifications:
- *	
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -403,7 +403,7 @@ H5D_istore_debug_key (FILE *stream, H5F_t UNUSED *f, hid_t UNUSED dxpl_id, int i
     const H5D_istore_key_t	*key = (const H5D_istore_key_t *)_key;
     const H5D_istore_ud1_t	*udata = (const H5D_istore_ud1_t *)_udata;
     unsigned		u;
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_debug_key)
 
     assert (key);
@@ -486,7 +486,7 @@ H5D_istore_cmp2(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_uda
  *				would describe the UDATA min_corner address
  *				would fall lexicographically between LT_KEY
  *				and RT_KEY.
- *				
+ *
  *		Failure:	FAIL (same as UDATA < LT_KEY)
  *
  * Programmer:	Robb Matzke
@@ -746,7 +746,7 @@ H5D_istore_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
     if (cmp < 0) {
         /* Negative indices not supported yet */
         HGOTO_ERROR(H5E_STORAGE, H5E_UNSUPPORTED, H5B_INS_ERROR, "internal error")
-	
+
     } else if (H5V_vector_eq_u (udata->mesg->u.chunk.ndims,
 				udata->key.offset, lt_key->offset) &&
 	       lt_key->nbytes>0) {
@@ -758,7 +758,7 @@ H5D_istore_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
 /* Currently, the old chunk data is "thrown away" after the space is reallocated,
  * so avoid data copy in H5MF_realloc() call by just free'ing the space and
  * allocating new space.
- * 
+ *
  * This should keep the file smaller also, by freeing the space and then
  * allocating new space, instead of vice versa (in H5MF_realloc).
  *
@@ -842,7 +842,7 @@ done:
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
-static int 
+static int
 H5D_istore_iter_allocated (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_lt_key, haddr_t UNUSED addr,
 		    const void UNUSED *_rt_key, void *_udata)
 {
@@ -931,7 +931,7 @@ H5D_istore_init (const H5F_t *f, const H5D_t *dset)
 {
     H5D_rdcc_t	*rdcc = &(dset->shared->cache.chunk);
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5D_istore_init, FAIL)
 
     if (H5F_RDCC_NBYTES(f)>0 && H5F_RDCC_NELMTS(f)>0) {
@@ -975,7 +975,7 @@ H5D_istore_flush_entry(const H5D_io_info_t *io_info, H5D_rdcc_ent_t *ent, hbool_
     void		*buf=NULL;	/*temporary buffer		*/
     size_t		alloc;		/*bytes allocated for BUF	*/
     hbool_t		point_of_no_return = FALSE;
-   
+
     FUNC_ENTER_NOAPI_NOINIT(H5D_istore_flush_entry)
 
     assert(io_info);
@@ -1018,7 +1018,7 @@ H5D_istore_flush_entry(const H5D_io_info_t *io_info, H5D_rdcc_ent_t *ent, hbool_
                 point_of_no_return = TRUE;
                 ent->chunk = NULL;
             }
-            if (H5Z_pipeline(&(io_info->dset->shared->dcpl_cache.pline), 0, &(udata.key.filter_mask), io_info->dxpl_cache->err_detect, 
+            if (H5Z_pipeline(&(io_info->dset->shared->dcpl_cache.pline), 0, &(udata.key.filter_mask), io_info->dxpl_cache->err_detect,
                      io_info->dxpl_cache->filter_cb, &(udata.key.nbytes), &alloc, &buf)<0)
                 HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "output pipeline failed")
         }
@@ -1038,7 +1038,7 @@ H5D_istore_flush_entry(const H5D_io_info_t *io_info, H5D_rdcc_ent_t *ent, hbool_
         io_info->dset->shared->cache.chunk.nflushes++;
 #endif /* H5D_ISTORE_DEBUG */
     } /* end if */
-    
+
     /* Reset, but do not free or removed from list */
     if (reset) {
         point_of_no_return = FALSE;
@@ -1047,12 +1047,12 @@ H5D_istore_flush_entry(const H5D_io_info_t *io_info, H5D_rdcc_ent_t *ent, hbool_
         if(ent->chunk!=NULL)
             ent->chunk = H5D_istore_chunk_xfree(ent->chunk,&(io_info->dset->shared->dcpl_cache.pline));
     } /* end if */
-    
+
 done:
     /* Free the temp buffer only if it's different than the entry chunk */
     if (buf!=ent->chunk)
         H5MM_xfree(buf);
-    
+
     /*
      * If we reached the point of no return then we have no choice but to
      * reset the entry.  This can only happen if RESET is true but the
@@ -1081,7 +1081,7 @@ done:
  *
  * Modifications:
  *      Pedro Vicente, March 28, 2002
- *      Added flush parameter that switches the call to H5F_istore_flush_entry 
+ *      Added flush parameter that switches the call to H5F_istore_flush_entry
  *      The call with FALSE is used by the H5F_istore_prune_by_extent function
  *
  *-------------------------------------------------------------------------
@@ -1162,7 +1162,7 @@ H5D_istore_flush (H5D_t *dset, hid_t dxpl_id, unsigned flags)
     int		nerrors=0;
     H5D_rdcc_ent_t	*ent=NULL, *next=NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5D_istore_flush, FAIL)
 
     /* Fill the DXPL cache values for later use */
@@ -1186,7 +1186,7 @@ H5D_istore_flush (H5D_t *dset, hid_t dxpl_id, unsigned flags)
 		nerrors++;
 	}
     } /* end for */
-    
+
     if (nerrors)
 	HGOTO_ERROR (H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks")
 
@@ -1222,7 +1222,7 @@ H5D_istore_dest (H5D_t *dset, hid_t dxpl_id)
     int		nerrors=0;
     H5D_rdcc_ent_t	*ent=NULL, *next=NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5D_istore_dest, FAIL)
 
     assert(dset);
@@ -1407,7 +1407,7 @@ H5D_istore_prune (const H5D_io_info_t *io_info, size_t size)
 	for (i=0; i<nmeth-1; i++)
             if (0==w[i])
                 p[i+1] = rdcc->head;
-	
+
 	/* Compute next value for each pointer */
 	for (i=0; i<nmeth; i++)
             n[i] = p[i] ? p[i]->next : NULL;
@@ -1428,7 +1428,7 @@ H5D_istore_prune (const H5D_io_info_t *io_info, size_t size)
 		HDputc('.', stderr);
 		HDfflush(stderr);
 #endif
-		
+
 	    } else if (1==i && p[1] && !p[1]->locked) {
 		/*
 		 * Method 1: Preempt the entry without regard to
@@ -1440,7 +1440,7 @@ H5D_istore_prune (const H5D_io_info_t *io_info, size_t size)
 		HDputc(':', stderr);
 		HDfflush(stderr);
 #endif
-		
+
 	    } else {
 		/* Nothing to preempt at this point */
 		cur= NULL;
@@ -1457,7 +1457,7 @@ H5D_istore_prune (const H5D_io_info_t *io_info, size_t size)
                     nerrors++;
 	    }
 	}
-	
+
 	/* Advance pointers */
 	for (i=0; i<nmeth; i++)
             p[i] = n[i];
@@ -1526,7 +1526,7 @@ H5D_istore_lock(const H5D_io_info_t *io_info,
     void		*ret_value;	        /*return value		*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_istore_lock)
-    
+
     assert(io_info);
     assert(dset);
     assert(io_info->dxpl_cache);
@@ -1541,7 +1541,7 @@ H5D_istore_lock(const H5D_io_info_t *io_info,
     if (rdcc->nslots>0) {
         idx=H5D_HASH(dset->shared,io_info->store->chunk.index);
         ent = rdcc->slot[idx];
-        
+
         if (ent) {
             for (u=0, found=TRUE; u<layout->u.chunk.ndims; u++) {
                 if (io_info->store->chunk.offset[u]!=ent->offset[u]) {
@@ -1574,7 +1574,7 @@ H5D_istore_lock(const H5D_io_info_t *io_info,
 #endif
         if (NULL==(chunk=H5D_istore_chunk_alloc (chunk_size,pline)))
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk")
-        
+
     } else {
         H5D_istore_ud1_t tmp_udata;		/*B-tree pass-through	*/
         haddr_t chunk_addr;             /* Address of chunk on disk */
@@ -1607,7 +1607,7 @@ H5D_istore_lock(const H5D_io_info_t *io_info,
                 HGOTO_ERROR (H5E_IO, H5E_READERROR, NULL, "unable to read raw data chunk")
 
             if (pline->nused)
-                if (H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &(udata->key.filter_mask), io_info->dxpl_cache->err_detect, 
+                if (H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &(udata->key.filter_mask), io_info->dxpl_cache->err_detect,
                          io_info->dxpl_cache->filter_cb, &(udata->key.nbytes), &chunk_alloc, &chunk)<0) {
                     HGOTO_ERROR(H5E_PLINE, H5E_READERROR, NULL, "data pipeline read failed")
                 }
@@ -1657,7 +1657,7 @@ else
         } /* end else */
     }
     assert (found || chunk_size>0);
-    
+
     if (!found && rdcc->nslots>0 && chunk_size<=rdcc->nbytes &&
             (!ent || !ent->locked)) {
         /*
@@ -1686,7 +1686,7 @@ else
         ent->rd_count = chunk_size;
         ent->wr_count = chunk_size;
         ent->chunk = chunk;
-        
+
         /* Add it to the cache */
         assert(NULL==rdcc->slot[idx]);
         rdcc->slot[idx] = ent;
@@ -1749,7 +1749,7 @@ else
 
     /* Set return value */
     ret_value = chunk;
-    
+
 done:
     if (!ret_value)
         if(chunk)
@@ -1793,7 +1793,7 @@ H5D_istore_unlock(const H5D_io_info_t *io_info,
     H5D_rdcc_ent_t	*ent = NULL;
     unsigned		u;
     herr_t              ret_value=SUCCEED;      /* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5D_istore_unlock)
 
     assert(io_info);
@@ -1842,7 +1842,7 @@ H5D_istore_unlock(const H5D_io_info_t *io_info,
         }
         ent->locked = FALSE;
     }
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_istore_unlock() */
@@ -1874,7 +1874,7 @@ H5D_istore_readvv(const H5D_io_info_t *io_info,
     haddr_t	        chunk_addr;     /* Chunk address on disk */
     size_t		u;              /* Local index variables */
     ssize_t             ret_value;      /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5D_istore_readvv, FAIL)
 
     /* Check args */
@@ -1956,7 +1956,7 @@ HDfprintf(stderr,"%s: buf=%p\n",FUNC,buf);
             if (rdcc->nslots>0) {
                 unsigned idx=H5D_HASH(dset->shared,io_info->store->chunk.index); /* Cache entry index */
                 H5D_rdcc_ent_t	*ent = rdcc->slot[idx]; /* Cache entry */
-                
+
                 /* Potential match... */
                 if (ent) {
                     for (u=0, found=TRUE; u<dset->shared->layout.u.chunk.ndims; u++) {
@@ -2035,7 +2035,7 @@ HDfprintf(stderr,"%s: buf=%p\n",FUNC,buf);
         /* Set return value */
         ret_value=naccessed;
     } /* end else */
-        
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_istore_readvv() */
@@ -2067,7 +2067,7 @@ H5D_istore_writevv(const H5D_io_info_t *io_info,
     haddr_t	        chunk_addr;     /* Chunk address on disk */
     size_t		u;              /* Local index variables */
     ssize_t             ret_value;      /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5D_istore_writevv, FAIL)
 
     /* Check args */
@@ -2185,7 +2185,7 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
         /* Set return value */
         ret_value=naccessed;
     } /* end else */
-        
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_istore_writevv() */
@@ -2236,7 +2236,7 @@ H5D_istore_create(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout /*out */ )
 
     if (H5B_create(f, dxpl_id, H5B_ISTORE, &udata, &(layout->u.chunk.addr)/*out*/) < 0)
 	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "can't create B-tree")
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_istore_create() */
@@ -2328,7 +2328,7 @@ H5D_istore_get_addr(const H5D_io_info_t *io_info, H5D_istore_ud1_t *_udata)
     H5D_istore_ud1_t	*udata;         /* Pointer to information about a chunk */
     unsigned	u;
     haddr_t	ret_value;		/* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_get_addr)
 
     assert(io_info);
@@ -2388,7 +2388,7 @@ static void *
 H5D_istore_chunk_alloc(size_t size, const H5O_pline_t *pline)
 {
     void *ret_value=NULL;		/* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_chunk_alloc)
 
     assert(size);
@@ -2513,7 +2513,7 @@ H5D_istore_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
     int         space_ndims;    /* Dataset's space rank */
     hsize_t     space_dim[H5O_LAYOUT_NDIMS];    /* Dataset's dataspace dimensions */
     herr_t	ret_value=SUCCEED;	/* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5D_istore_allocate, FAIL)
 
     /* Check args */
@@ -2682,7 +2682,7 @@ H5D_istore_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
 #endif /* H5_HAVE_PARALLEL */
             } /* end if */
         } /* end if */
-	
+
         /* Increment indices */
         for (i=(int)dset->shared->layout.u.chunk.ndims-1, carry=1; i>=0 && carry; --i) {
             chunk_offset[i] += dset->shared->layout.u.chunk.dim[i];
@@ -2719,7 +2719,7 @@ done:
  * Function: H5D_istore_prune_by_extent
  *
  * Purpose: This function searches for chunks that are no longer necessary both in the
- *  raw data cache and in the B-tree. 
+ *  raw data cache and in the B-tree.
  *
  * Return: Success: 0, Failure: -1
  *
@@ -2732,12 +2732,12 @@ done:
  *
  *  For chunks that are no longer necessary:
  *
- *  1. Search in the raw data cache for each chunk 
+ *  1. Search in the raw data cache for each chunk
  *  2. If found then preempt it from the cache
- *  3. Search in the B-tree for each chunk 
+ *  3. Search in the B-tree for each chunk
  *  4. If found then remove it from the B-tree and deallocate file storage for the chunk
  *
- * This example shows a 2d dataset of 90x90 with a chunk size of 20x20. 
+ * This example shows a 2d dataset of 90x90 with a chunk size of 20x20.
  *
  *
  *     0         20        40        60        80    90   100
@@ -2763,7 +2763,7 @@ done:
  *      |         :         :::::::::::         :     |   :
  *    80+.........:.........:::::::::::.........:.....+...:   O  Fill Val
  *      |         :         :         :::::::::::     |   :      Explicitly
- *      |         :         :         ::::::X::::     |   :      Written    
+ *      |         :         :         ::::::X::::     |   :      Written
  *    90+---------+---------+---------+---------+-----+   :
  *      :         :         :         :::::::::::         :
  *   100:.........:.........:.........:::::::::::.........:
@@ -2780,27 +2780,27 @@ done:
  *      0         20        40        60   70   80    90   100
  *    0 +---------+---------+---------+----+----+-----+...+
  *      |:::::X::::::::::::::         :    |    :     |   :
- *      |:::::::X::::::::::::         :    |    :     |   :    Key           
- *      |::::::::::X:::::::::         :    |    :     |   :    --------      
- *      |::::::::::::X:::::::         :    |    :     |   :   +-+ Dataset    
- *    20+::::::::::::::::::::.........:....+....:.....|...:   | | Extent     
- *      |         :::::X:::::         :    |    :     |   :   +-+            
- *      |         :::::::::::         :    |    :     |   :                  
- *      |         :::::::::::         :    |    :     |   :   ... Chunk      
- *      |         :::::::X:::         :    |    :     |   :   : : Boundary   
- *    40+.........:::::::::::.........:....+....:.....|...:   :.:            
- *      |         :         :         :    |    :     |   :                  
- *      |         :         :         :    |    :     |   :   ... Allocated  
- *      |         :         :         :    |    :     |   :   ::: & Filled   
- *      |         :         :         :    |    :     |   :   ::: Chunk      
- *    60+.........:.........:.........:....+....:.....|...:                  
- *      |         :         :::::::X:::    |    :     |   :    X  Element    
- *      |         :         :::::::::::    |    :     |   :       Written    
- *      +---------+---------+---------+----+    :     |   :                  
- *      |         :         :::::::::::         :     |   :                  
- *    80+.........:.........:::::::::X:.........:.....|...:    O  Fill Val   
- *      |         :         :         :::::::::::     |   :       Explicitly 
- *      |         :         :         ::::::X::::     |   :       Written    
+ *      |:::::::X::::::::::::         :    |    :     |   :    Key
+ *      |::::::::::X:::::::::         :    |    :     |   :    --------
+ *      |::::::::::::X:::::::         :    |    :     |   :   +-+ Dataset
+ *    20+::::::::::::::::::::.........:....+....:.....|...:   | | Extent
+ *      |         :::::X:::::         :    |    :     |   :   +-+
+ *      |         :::::::::::         :    |    :     |   :
+ *      |         :::::::::::         :    |    :     |   :   ... Chunk
+ *      |         :::::::X:::         :    |    :     |   :   : : Boundary
+ *    40+.........:::::::::::.........:....+....:.....|...:   :.:
+ *      |         :         :         :    |    :     |   :
+ *      |         :         :         :    |    :     |   :   ... Allocated
+ *      |         :         :         :    |    :     |   :   ::: & Filled
+ *      |         :         :         :    |    :     |   :   ::: Chunk
+ *    60+.........:.........:.........:....+....:.....|...:
+ *      |         :         :::::::X:::    |    :     |   :    X  Element
+ *      |         :         :::::::::::    |    :     |   :       Written
+ *      +---------+---------+---------+----+    :     |   :
+ *      |         :         :::::::::::         :     |   :
+ *    80+.........:.........:::::::::X:.........:.....|...:    O  Fill Val
+ *      |         :         :         :::::::::::     |   :       Explicitly
+ *      |         :         :         ::::::X::::     |   :       Written
  *    90+---------+---------+---------+---------+-----+   :
  *      :         :         :         :::::::::::         :
  *   100:.........:.........:.........:::::::::::.........:
@@ -2808,7 +2808,7 @@ done:
  *
  * That means that the nine chunks along the bottom and right side should
  * no longer exist. Of those nine chunks, (0,80), (20,80), (40,80),
- * (60,80), (80,80), (80,60), (80,40), (80,20), and (80,0), one is actually allocated 
+ * (60,80), (80,80), (80,60), (80,40), (80,20), and (80,0), one is actually allocated
  * that needs to be released.
  * To release the chunks, we traverse the B-tree to obtain a list of unused
  * allocated chunks, and then call H5B_remove() for each chunk.
@@ -2840,7 +2840,7 @@ H5D_istore_prune_by_extent(const H5D_io_info_t *io_info)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions")
 
  /*-------------------------------------------------------------------------
-  * Figure out what chunks are no longer in use for the specified extent 
+  * Figure out what chunks are no longer in use for the specified extent
   * and release them from the linked list raw data cache
   *-------------------------------------------------------------------------
   */
@@ -2892,7 +2892,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function: H5D_istore_prune_extent
  *
- * Purpose: Search for chunks that are no longer necessary in the B-tree. 
+ * Purpose: Search for chunks that are no longer necessary in the B-tree.
  *
  * Return: Success: 0, Failure: -1
  *
@@ -2917,7 +2917,7 @@ H5D_istore_prune_extent(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t UN
     H5D_istore_ud1_t        udata;
     int                     ret_value=H5B_ITER_CONT;       /* Return value */
 
-    /* The LT_KEY is the left key (the one that describes the chunk). It points to a chunk of 
+    /* The LT_KEY is the left key (the one that describes the chunk). It points to a chunk of
      * storage that contains the beginning of the logical address space represented by UDATA.
      */
 
@@ -2951,7 +2951,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function: H5D_istore_remove
  *
- * Purpose: Removes chunks that are no longer necessary in the B-tree. 
+ * Purpose: Removes chunks that are no longer necessary in the B-tree.
  *
  * Return: Success: 0, Failure: -1
  *
@@ -2996,7 +2996,7 @@ done:
  * Function: H5D_istore_initialize_by_extent
  *
  * Purpose:  This function searches for chunks that have to be initialized with the fill
- *   value both in the raw data cache and in the B-tree. 
+ *   value both in the raw data cache and in the B-tree.
  *
  * Return: Success: 0, Failure: -1
  *
@@ -3004,12 +3004,12 @@ done:
  *
  * Date: April 4, 2002
  *
- * Comments: 
+ * Comments:
  *
  * (See the example of H5D_istore_prune_by_extent)
  * Next, there are seven chunks where the database extent boundary is
  * within the chunk. We find those seven just like we did with the previous nine.
- * Fot the ones that are allocated we initialize the part that lies outside the boundary 
+ * Fot the ones that are allocated we initialize the part that lies outside the boundary
  * with the fill value.
  *
  * Modifications:
@@ -3121,8 +3121,8 @@ H5D_istore_initialize_by_extent(H5D_io_info_t *io_info)
 	    naccessed *= sub_size[u];
 	} /* end for */
 
-	/* 
-	 * Figure out what chunks have to be initialized. These are the chunks where the dataspace 
+	/*
+	 * Figure out what chunks have to be initialized. These are the chunks where the dataspace
 	 * extent boundary is within the chunk
 	 */
 	for(u = 0, found = 0; u < rank; u++) {
@@ -3410,7 +3410,7 @@ H5D_istore_stats (H5D_t *dset, hbool_t headers)
     double	miss_rate;
     char	ascii[32];
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5D_istore_stats, FAIL)
 
     if (!H5DEBUG(AC))
@@ -3474,7 +3474,7 @@ H5D_istore_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int inden
     H5O_layout_t        layout;
     H5D_istore_ud1_t	udata;
     herr_t      ret_value=SUCCEED;      /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5D_istore_debug,FAIL)
 
     layout.u.chunk.ndims = ndims;

@@ -25,31 +25,31 @@ class H5_DLLCPP FloatType : public AtomType {
         // Creates a floating-point type using a predefined type
         FloatType( const PredType& pred_type );
 
-	// Gets the floating-point datatype of the specified dataset        
+	// Gets the floating-point datatype of the specified dataset
 	FloatType( const DataSet& dataset );
 
-	// Retrieves the exponent bias of a floating-point type. 
+	// Retrieves the exponent bias of a floating-point type.
 	size_t getEbias() const;
 
-	// Sets the exponent bias of a floating-point type. 
+	// Sets the exponent bias of a floating-point type.
 	void setEbias( size_t ebias ) const;
 
-	// Retrieves floating point datatype bit field information. 
+	// Retrieves floating point datatype bit field information.
 	void getFields( size_t& spos, size_t& epos, size_t& esize, size_t& mpos, size_t& msize ) const;
 
-	// Sets locations and sizes of floating point bit fields. 
+	// Sets locations and sizes of floating point bit fields.
 	void setFields( size_t spos, size_t epos, size_t esize, size_t mpos, size_t msize ) const;
 
-	// Retrieves the internal padding type for unused bits in floating-point datatypes. 
+	// Retrieves the internal padding type for unused bits in floating-point datatypes.
 	H5T_pad_t getInpad( string& pad_string ) const;
-	
-	// Fills unused internal floating point bits. 
+
+	// Fills unused internal floating point bits.
 	void setInpad( H5T_pad_t inpad ) const;
 
-	// Retrieves mantissa normalization of a floating-point datatype. 
+	// Retrieves mantissa normalization of a floating-point datatype.
 	H5T_norm_t getNorm( string& norm_string ) const;
 
-	// Sets the mantissa normalization of a floating-point datatype. 
+	// Sets the mantissa normalization of a floating-point datatype.
 	void setNorm( H5T_norm_t norm ) const;
 
 	// Default constructor

@@ -79,10 +79,10 @@ void IdComponent::decRefCount(hid_t obj_id) const
     if (p_valid_id(obj_id))
         if (H5Idec_ref(obj_id) < 0)
 	    if (H5Iget_ref(obj_id) <= 0)
-		throw IdComponentException("IdComponent::decRefCount", 
+		throw IdComponentException("IdComponent::decRefCount",
 					"object ref count is 0 or negative");
 	    else
-		throw IdComponentException("IdComponent::decRefCount", 
+		throw IdComponentException("IdComponent::decRefCount",
 					"decrementing object ref count failed");
 }
 
@@ -135,8 +135,8 @@ int IdComponent::getCounter() const
 // Description
 // 		The underlaying reference counting in the C library ensures
 // 		that the current valid id of this object is properly closed.
-//		Copy the id from rhs to this object, then increment the 
-//		reference counter of the id to indicate that another object 
+//		Copy the id from rhs to this object, then increment the
+//		reference counter of the id to indicate that another object
 //		is referencing it.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -177,7 +177,7 @@ void IdComponent::setId( hid_t new_id )
 
 //--------------------------------------------------------------------------
 // Function:	IdComponent::getId
-///\brief	Returns the id of this object 
+///\brief	Returns the id of this object
 ///\return	HDF5 id
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -193,8 +193,8 @@ hid_t IdComponent::getId () const
 //--------------------------------------------------------------------------
 IdComponent::~IdComponent() {
 
-/* uncomment this block and complete it when deciding to use dontAtExit 
-   unless the atexit/global destructor problem is fixed, then 
+/* uncomment this block and complete it when deciding to use dontAtExit
+   unless the atexit/global destructor problem is fixed, then
    remove it- BMR 11/14/00
 
    if( id == NOTATEXIT )
@@ -219,7 +219,7 @@ IdComponent::~IdComponent() {
 
 //
 // Implementation of protected functions for HDF5 Reference Interface.
-// 
+//
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
@@ -235,7 +235,7 @@ IdComponent::IdComponent() : id(-1) {}
 // Exception:	H5::IdComponentException
 // Description:
 // 		This function is protected so that the user applications can
-// 		only have access to its code via allowable classes, namely, 
+// 		only have access to its code via allowable classes, namely,
 // 		H5File and H5Object subclasses.
 // Programmer	Binh-Minh Ribler - Jul, 2004
 //--------------------------------------------------------------------------
@@ -247,7 +247,7 @@ string IdComponent::p_get_file_name() const
    // If H5Aget_name returns a negative value, raise an exception,
    if( name_size < 0 )
    {
-      throw IdComponentException("IdComponent::p_get_file_name", 
+      throw IdComponentException("IdComponent::p_get_file_name",
 				"H5Fget_name failed");
    }
 
@@ -258,7 +258,7 @@ string IdComponent::p_get_file_name() const
    // Check for failure again
    if( name_size < 0 )
    {
-      throw IdComponentException("IdComponent::p_get_file_name", 
+      throw IdComponentException("IdComponent::p_get_file_name",
 				"H5Fget_name failed");
    }
 
@@ -298,10 +298,10 @@ void* IdComponent::p_reference(const char* name, hid_t space_id, H5R_type_t ref_
 //		ref      - IN: Reference to query
 //		ref_type - IN: Type of reference to query
 // Return	An object type, which can be one of the following:
-//			H5G_LINK Object is a symbolic link.  
-//			H5G_GROUP Object is a group.  
-//			H5G_DATASET   Object is a dataset.  
-//			H5G_TYPE Object is a named datatype 
+//			H5G_LINK Object is a symbolic link.
+//			H5G_GROUP Object is a group.
+//			H5G_DATASET   Object is a dataset.
+//			H5G_TYPE Object is a named datatype
 // Exception	H5::IdComponentException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
@@ -340,7 +340,7 @@ hid_t IdComponent::p_get_region(void *ref, H5R_type_t ref_type) const
 
 //
 // Local functions used in this class
-// 
+//
 
 //--------------------------------------------------------------------------
 // Function:	p_valid_id

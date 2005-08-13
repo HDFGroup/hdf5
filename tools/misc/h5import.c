@@ -67,7 +67,7 @@ usage (const char *argv0)
 /*-------------------------------------------------------------------------
  * Function:	main
  *
- * Purpose:	
+ * Purpose:
  *
  * Return:	Success:	0
  *
@@ -104,7 +104,7 @@ main (int argc, char *argv[])
 	    exit (1);
 	}
     } H5E_END_TRY;
-    
+
     /* process files from command-line */
     for (argno=3;  argno<argc; argno++) {
 
@@ -129,8 +129,8 @@ main (int argc, char *argv[])
 	if ((dset=H5Dcreate (file, dset_name, H5T_NATIVE_SCHAR,
 			     space, H5P_DEFAULT))<0) goto next;
 
-	
-	
+
+
     next:
 	if (fd>=0) close (fd);
 	fd = -1;

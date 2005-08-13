@@ -62,7 +62,7 @@ H5D_efl_read (const H5O_efl_t *efl, haddr_t addr, size_t size, uint8_t *buf)
     ssize_t	n;
     size_t      u;                      /* Local index variable */
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5D_efl_read)
 
     /* Check args */
@@ -79,7 +79,7 @@ H5D_efl_read (const H5O_efl_t *efl, haddr_t addr, size_t size, uint8_t *buf)
 	}
   	cur += efl->slot[u].size;
     }
-    
+
     /* Read the data */
     while (size) {
         assert(buf);
@@ -110,14 +110,14 @@ H5D_efl_read (const H5O_efl_t *efl, haddr_t addr, size_t size, uint8_t *buf)
 	skip = 0;
 	u++;
     }
-    
+
 done:
     if (fd>=0)
         HDclose (fd);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
-	
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5D_efl_write
@@ -149,7 +149,7 @@ H5D_efl_write (const H5O_efl_t *efl, haddr_t addr, size_t size, const uint8_t *b
     hsize_t     skip=0;
     size_t	u;                      /* Local index variable */
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5D_efl_write)
 
     /* Check args */
@@ -166,7 +166,7 @@ H5D_efl_write (const H5O_efl_t *efl, haddr_t addr, size_t size, const uint8_t *b
 	}
 	cur += efl->slot[u].size;
     }
-    
+
     /* Write the data */
     while (size) {
         assert(buf);
@@ -199,14 +199,14 @@ H5D_efl_write (const H5O_efl_t *efl, haddr_t addr, size_t size, const uint8_t *b
 	skip = 0;
 	u++;
     }
-    
+
 done:
     if (fd>=0)
         HDclose (fd);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
-	
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5D_efl_readvv
@@ -239,7 +239,7 @@ H5D_efl_readvv(const H5D_io_info_t *io_info,
     size_t u;                   /* Counting variable */
     size_t v;                   /* Counting variable */
     ssize_t ret_value;          /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5D_efl_readvv, FAIL)
 
     /* Check args */
@@ -290,7 +290,7 @@ H5D_efl_readvv(const H5D_io_info_t *io_info,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_efl_readvv() */
-	
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5D_efl_writevv
@@ -323,7 +323,7 @@ H5D_efl_writevv(const H5D_io_info_t *io_info,
     size_t u;                   /* Counting variable */
     size_t v;                   /* Counting variable */
     ssize_t ret_value;          /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5D_efl_writevv, FAIL)
 
     /* Check args */
@@ -374,4 +374,4 @@ H5D_efl_writevv(const H5D_io_info_t *io_info,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_efl_writevv() */
-	
+

@@ -31,7 +31,7 @@
  * BUGS/LIMITATIONS
  *
  * EXPORTED ROUTINES/VARIABLES:
- * 
+ *
  */
 
 #include "h5test.h"

@@ -92,7 +92,7 @@ setup(hid_t fapl)
     if (H5Fclose(file)<0) goto error;
 
     return 0;
-    
+
  error:
     H5E_BEGIN_TRY {
 	H5Fclose(file);
@@ -146,7 +146,7 @@ test_basic(hid_t fapl)
 
     PASSED();
     return 0;
-    
+
  error:
     H5E_BEGIN_TRY {
 	H5Fclose(file1);
@@ -184,7 +184,7 @@ test_illegal(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
     h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
     h5_fixname(FILENAME[2], fapl, filename3, sizeof filename3);
-    
+
 
     /* Open the files */
     if ((file1=H5Fopen(filename1, H5F_ACC_RDONLY, fapl))<0 ||
@@ -219,7 +219,7 @@ test_illegal(hid_t fapl)
     }
     if (H5Funmount(mnt, ".")<0) goto error;
     if (H5Gclose(mnt)<0) goto error;
-    
+
 
     /* Close everything and return */
     if (H5Fclose(file1)<0) goto error;
@@ -267,14 +267,14 @@ test_hide(hid_t fapl)
     TESTING("name hiding under mount point");
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
     h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
-    
+
     if ((file1=H5Fopen(filename1, H5F_ACC_RDONLY, fapl))<0 ||
 	(file2=H5Fopen(filename2, H5F_ACC_RDONLY, fapl))<0)
 	goto error;
 
     /* Get information about file1:/mnt1/file1 for later */
     if (H5Gget_objinfo(file1, "/mnt1/file1", TRUE, &sb1)<0) goto error;
-    
+
     /* Build the virtual file */
     if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT)<0) goto error;
 
@@ -340,11 +340,11 @@ test_assoc(hid_t fapl)
     hid_t	file1=-1, file2=-1;
     H5G_stat_t	sb1, sb2;
     char	filename1[1024], filename2[1024];
-    
+
     TESTING("mount point open");
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
     h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
-    
+
     /* Open the files */
     if ((file1=H5Fopen(filename1, H5F_ACC_RDONLY, fapl))<0 ||
 	(file2=H5Fopen(filename2, H5F_ACC_RDONLY, fapl))<0)
@@ -367,7 +367,7 @@ test_assoc(hid_t fapl)
 	puts("    Association failed.");
 	goto error;
     }
-    
+
     /* Shut down */
     if (H5Funmount(file1, "/mnt1_link")<0) goto error;
     if (H5Fclose(file1)<0) goto error;
@@ -412,7 +412,7 @@ test_mntlnk(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
     h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
 
-    
+
     /* Build the virtual file */
     if ((file1=H5Fopen(filename1, H5F_ACC_RDONLY, fapl))<0 ||
 	(file2=H5Fopen(filename2, H5F_ACC_RDONLY, fapl))<0)
@@ -469,11 +469,11 @@ test_move(hid_t fapl)
     hid_t	file1=-1, file2=-1;
     herr_t	status;
     char	filename1[1024], filename2[1024];
-    
+
     TESTING("object renaming");
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
     h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
-    
+
     /* Build the virtual file */
     if ((file1=H5Fopen(filename1, H5F_ACC_RDWR, fapl))<0 ||
 	(file2=H5Fopen(filename2, H5F_ACC_RDWR, fapl))<0)
@@ -533,14 +533,14 @@ test_preopen(hid_t fapl)
     TESTING("preopening objects under the mount point");
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
     h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
-    
+
     if ((file1=H5Fopen(filename1, H5F_ACC_RDONLY, fapl))<0 ||
 	(file2=H5Fopen(filename2, H5F_ACC_RDONLY, fapl))<0)
 	goto error;
 
     /* Open something under the mount point */
     if ((grp=H5Gopen(file1, "/mnt1/file1"))<0) goto error;
-    
+
     /* Build the virtual file */
     if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT)<0) goto error;
 
@@ -586,7 +586,7 @@ test_preopen(hid_t fapl)
 static int
 test_postopen(hid_t fapl)
 {
-    
+
     hid_t	file1=-1, file2=-1, grp=-1;
     char	filename1[1024], filename2[1024];
 
@@ -605,7 +605,7 @@ test_postopen(hid_t fapl)
 
     /* Unmount the file */
     if (H5Funmount(file1, "/mnt1")<0) goto error;
-    
+
     /* Now access the thing we previously opened */
     if (H5Gget_objinfo(grp, ".", TRUE, NULL)<0) goto error;
 
@@ -690,7 +690,7 @@ test_unlink(hid_t fapl)
 	puts("    Incorrect traversal from mount point!");
 	goto error;
     }
-    
+
     /* Unlink the mount point */
     if (H5Gunlink(file1, "/mnt_unlink")<0) goto error;
 
@@ -738,7 +738,7 @@ test_unlink(hid_t fapl)
 	goto error;
     }
     if (H5Funmount(mnt, ".")<0) goto error;
-    
+
     /* Close files */
     if (H5Gclose(mnt)<0) goto error;
     if (H5Gclose(root)<0) goto error;
@@ -779,11 +779,11 @@ test_mvmpt(hid_t fapl)
 {
     hid_t	file1=-1, file2=-1;
     char	filename1[1024], filename2[1024];
-    
+
     TESTING("mount point renaming");
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
     h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
-    
+
     /* Build the virtual file */
     if ((file1=H5Fopen(filename1, H5F_ACC_RDWR, fapl))<0 ||
 	(file2=H5Fopen(filename2, H5F_ACC_RDWR, fapl))<0)
@@ -835,11 +835,11 @@ test_interlink(hid_t fapl)
     char	filename1[1024], filename2[1024];
     herr_t	status;
     hsize_t	cur_dims[1] = {2};
-    
+
     TESTING("interfile hard links");
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
     h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
-    
+
     /* Build the virtual file */
     if ((file1=H5Fopen(filename1, H5F_ACC_RDWR, fapl))<0 ||
 	(file2=H5Fopen(filename2, H5F_ACC_RDWR, fapl))<0)
@@ -878,7 +878,7 @@ test_interlink(hid_t fapl)
 	puts("    Dataset and shared type must be in the same file!");
 	goto error;
     }
-    
+
     /* Shut down */
     if (H5Sclose(space)<0) goto error;
     if (H5Tclose(type)<0) goto error;
@@ -922,11 +922,11 @@ test_uniformity(hid_t fapl)
 {
     hid_t	file1=-1, file2=-1;
     char	filename1[1024], filename2[1024];
-    
+
     TESTING("file handle uniformity");
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
     h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
-    
+
     /* Build the virtual file */
     if ((file1=H5Fopen(filename1, H5F_ACC_RDWR, fapl))<0 ||
 	(file2=H5Fopen(filename2, H5F_ACC_RDWR, fapl))<0)
@@ -939,7 +939,7 @@ test_uniformity(hid_t fapl)
     if (H5Gget_objinfo(file1, "mnt1", TRUE, NULL)<0) TEST_ERROR;
     if (H5Gget_objinfo(file1, "/mnt1/file2", TRUE, NULL)<0) TEST_ERROR;
     if (H5Gget_objinfo(file1, "mnt1/file2", TRUE, NULL)<0) TEST_ERROR;
-    
+
     /* Access the same things from the file2 handle */
     if (H5Gget_objinfo(file2, "/", TRUE, NULL)<0) TEST_ERROR;
     if (H5Gget_objinfo(file2, "/mnt1", TRUE, NULL)<0) TEST_ERROR;
@@ -984,11 +984,11 @@ test_close(hid_t fapl)
 {
     hid_t	file1=-1, file2=-1;
     char	filename1[1024], filename2[1024];
-    
+
     TESTING("file handle close");
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
     h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
-    
+
     /* Build the virtual file */
     if ((file1=H5Fopen(filename1, H5F_ACC_RDWR, fapl))<0 ||
 	(file2=H5Fopen(filename2, H5F_ACC_RDWR, fapl))<0)
@@ -1021,11 +1021,11 @@ test_close(hid_t fapl)
 
     /*
      * Close file2.  It is not actually closed because it's a child of file1.
-     */    
+     */
     if (H5Fclose(file2)<0) goto error;
     if (H5Gget_objinfo(file1, "/mnt1/file2", TRUE, NULL)<0) goto error;
     if (H5Fclose(file1)<0) goto error;
-    
+
     /* Check that all file IDs have been closed */
     if(H5I_nmembers(H5I_FILE) != 0)
         TEST_ERROR
@@ -1043,7 +1043,7 @@ test_close(hid_t fapl)
     } H5E_END_TRY;
     return 1;
 }
-    
+
 
 /*-------------------------------------------------------------------------
  * Function:	test_mount_after_close
@@ -1074,11 +1074,11 @@ test_mount_after_close(hid_t fapl)
     char        objname[NAME_BUF_SIZE];                 /* Name of object opened */
     hsize_t     dims[] = {NX,NY};                       /* Dataset dimensions */
     int         i, j;                                   /* Local index variable */
-    
+
     TESTING("mounting on group after file is closed");
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
     h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
-    
+
     /*
     * Initialization of buffer matrix "bm"
     */
@@ -1245,7 +1245,7 @@ test_mount_after_close(hid_t fapl)
         TEST_ERROR
     if(H5Fclose(fid2) < 0)
         TEST_ERROR
-    
+
     /* Shut down */
     PASSED();
     return 0;
@@ -1268,7 +1268,7 @@ error:
     } H5E_END_TRY;
     return 1;
 }
-    
+
 
 /*-------------------------------------------------------------------------
  * Function:	test_mount_after_unmount
@@ -1305,13 +1305,13 @@ test_mount_after_unmount(hid_t fapl)
 		filename3[1024],
 		filename4[1024];       		/* Name of files to mount */
     char        objname[NAME_BUF_SIZE];                 /* Name of object opened */
-    
+
     TESTING("mounting after file is unmounted");
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
     h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
     h5_fixname(FILENAME[2], fapl, filename3, sizeof filename3);
     h5_fixname(FILENAME[3], fapl, filename4, sizeof filename4);
-    
+
     /* Create first file and some groups in it. */
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR
@@ -1510,7 +1510,7 @@ test_mount_after_unmount(hid_t fapl)
         TEST_ERROR
     if(H5Fclose(fid1) < 0)
         TEST_ERROR
-    
+
     /* Shut down */
     PASSED();
     return 0;
@@ -1537,7 +1537,7 @@ error:
     } H5E_END_TRY;
     return 1;
 }
-    
+
 
 /*-------------------------------------------------------------------------
  * Function:	test_missing_unmount
@@ -1565,13 +1565,13 @@ test_missing_unmount(hid_t fapl)
     char	filename1[1024],
 		filename2[1024],
 		filename3[1024]; 	/* Name of files to mount */
-    
+
     TESTING("missing unmount");
 
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
     h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
     h5_fixname(FILENAME[2], fapl, filename3, sizeof filename3);
-    
+
     /* Create file #1 */
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
@@ -1694,7 +1694,7 @@ error:
     } H5E_END_TRY;
     return 1;
 } /* end test_missing_unmount() */
-    
+
 
 /*-------------------------------------------------------------------------
  * Function:	test_hold_open_file
@@ -1720,12 +1720,12 @@ test_hold_open_file(hid_t fapl)
     hid_t gidA = -1, gidM = -1, gidAM = -1;    	/* Group IDs */
     char	filename1[1024],
 		filename2[1024]; 	/* Name of files to mount */
-    
+
     TESTING("hold open w/file");
 
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
     h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
-    
+
     /* Create file #1 */
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
@@ -1827,7 +1827,7 @@ error:
     } H5E_END_TRY;
     return 1;
 } /* end test_hold_open_file() */
-    
+
 
 /*-------------------------------------------------------------------------
  * Function:	test_hold_open_group
@@ -1853,12 +1853,12 @@ test_hold_open_group(hid_t fapl)
     hid_t gid = -1, gidA = -1, gidM = -1, gidAM = -1, gidAM2 = -1;    	/* Group IDs */
     char	filename1[1024],
 		filename2[1024]; 	/* Name of files to mount */
-    
+
     TESTING("hold open w/group");
 
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
     h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
-    
+
     /* Create file #1 */
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
@@ -1986,7 +1986,7 @@ error:
     } H5E_END_TRY;
     return 1;
 } /* end test_hold_open_group() */
-    
+
 
 /*-------------------------------------------------------------------------
  * Function:	test_fcdegree_same
@@ -2014,12 +2014,12 @@ test_fcdegree_same(hid_t fapl)
     herr_t ret;                                 /* Generic return value */
     char	filename1[1024],
 		filename2[1024]; 	/* Name of files to mount */
-    
+
     TESTING("file close degrees must be same");
 
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
     h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
-    
+
     /* Create file #1 */
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
@@ -2131,7 +2131,7 @@ error:
     } H5E_END_TRY;
     return 1;
 } /* end test_fcdegree_same() */
-    
+
 
 /*-------------------------------------------------------------------------
  * Function:	test_fcdegree_semi
@@ -2159,12 +2159,12 @@ test_fcdegree_semi(hid_t fapl)
     herr_t ret;                                 /* Generic return value */
     char	filename1[1024],
 		filename2[1024]; 	/* Name of files to mount */
-    
+
     TESTING("'semi' file close degree");
 
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
     h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
-    
+
     /* Create file #1 */
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
@@ -2273,7 +2273,7 @@ error:
     } H5E_END_TRY;
     return 1;
 } /* end test_fcdegree_semi() */
-    
+
 
 /*-------------------------------------------------------------------------
  * Function:	test_fcdegree_strong
@@ -2301,12 +2301,12 @@ test_fcdegree_strong(hid_t fapl)
     herr_t ret;                                 /* Generic return value */
     char	filename1[1024],
 		filename2[1024]; 	/* Name of files to mount */
-    
+
     TESTING("'strong' file close degree");
 
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
     h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
-    
+
     /* Create file #1 */
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
@@ -2411,7 +2411,7 @@ error:
     } H5E_END_TRY;
     return 1;
 } /* end test_fcdegree_strong() */
-    
+
 
 /*-------------------------------------------------------------------------
  * Function:	test_acc_perm
@@ -2443,13 +2443,13 @@ test_acc_perm(hid_t fapl)
     char	filename1[1024],
 		filename2[1024],
 		filename3[1024]; 	/* Name of files to mount */
-    
+
     TESTING("access permissions");
 
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
     h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
     h5_fixname(FILENAME[2], fapl, filename3, sizeof filename3);
-    
+
     /* Create file #1 */
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
@@ -2648,13 +2648,13 @@ test_mult_mount(hid_t fapl)
     char	filename1[1024],
 		filename2[1024],
 		filename3[1024]; 	/* Name of files to mount */
-    
+
     TESTING("multiple mounts");
 
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
     h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
     h5_fixname(FILENAME[2], fapl, filename3, sizeof filename3);
-    
+
     /* Create file #1 */
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
@@ -2876,7 +2876,7 @@ test_nested_survive(hid_t fapl)
     char	filename1[1024],
 		filename2[1024],
 		filename3[1024]; 	/* Name of files to mount */
-    
+
     TESTING("nested mounts survive");
 
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
@@ -3087,12 +3087,12 @@ test_close_parent(hid_t fapl)
     ssize_t name_len;                   /* Filename length */
     char	filename1[1024],
 		filename2[1024]; 	/* Name of files to mount */
-    
+
     TESTING("close parent");
 
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
     h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
-    
+
     /* Create file #1 */
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
@@ -3273,7 +3273,7 @@ test_cut_graph(hid_t fapl)
 		filename5[NAME_BUF_SIZE],
 		filename6[NAME_BUF_SIZE],
 		filename7[NAME_BUF_SIZE]; 	/* Name of files to mount */
-    
+
     TESTING("cutting mount graph");
 
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
@@ -3283,7 +3283,7 @@ test_cut_graph(hid_t fapl)
     h5_fixname(FILENAME[4], fapl, filename5, sizeof filename3);
     h5_fixname(FILENAME[5], fapl, filename6, sizeof filename3);
     h5_fixname(FILENAME[6], fapl, filename7, sizeof filename3);
-    
+
     /* Create file #1 & it's groups */
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
@@ -3658,13 +3658,13 @@ test_symlink(hid_t fapl)
     char	filename1[NAME_BUF_SIZE],
 		filename2[NAME_BUF_SIZE],
 		filename3[NAME_BUF_SIZE]; 	/* Name of files to mount */
-    
+
     TESTING("symlinks");
 
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
     h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
     h5_fixname(FILENAME[2], fapl, filename3, sizeof filename3);
-    
+
     /* Create file #1 & it's groups */
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
@@ -3849,12 +3849,12 @@ main(void)
     nerrors += test_close_parent(fapl);
     nerrors += test_cut_graph(fapl);
     nerrors += test_symlink(fapl);
-    
+
     if (nerrors) goto error;
     puts("All mount tests passed.");
     h5_cleanup(FILENAME, fapl);
     return 0;
-    
+
  error:
     puts("***** MOUNT ERRORS *****");
     return 1;

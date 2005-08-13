@@ -1,7 +1,7 @@
 /*
  * Copyright © 2000 The author.
  * The author prefers this code not be used for military purposes.
- *                  
+ *
  *
  * Author:  Thomas Radke <tradke@aei-potsdam.mpg.de>
  *          Tuesday, September 12, 2000
@@ -126,7 +126,7 @@ static const H5FD_stream_fapl_t default_fapl =
 /*
  * These macros check for overflow of various quantities.  These macros
  * assume that file_offset_t is signed and haddr_t and size_t are unsigned.
- * 
+ *
  * ADDR_OVERFLOW:        Checks whether a file address of type `haddr_t'
  *                        is too large to be represented by the second argument
  *                        of the file seek function.
@@ -207,7 +207,7 @@ NAME
    H5FD_stream_init_interface -- Initialize interface-specific information
 USAGE
     herr_t H5FD_stream_init_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -300,7 +300,7 @@ H5FD_stream_term(void)
  *                If a valid socket argument is given this will be used
  *                by the driver instead of parsing the 'hostname:port' filename
  *                and opening a socket internally.
- *                
+ *
  * Return:        Success:        Non-negative
  *                Failure:        Negative
  *
@@ -426,7 +426,7 @@ H5FD_stream_open_socket (const char *filename, int o_flags,
   H5FD_STREAM_SOCKET_TYPE sock=H5FD_STREAM_INVALID_SOCKET;
   char *hostname=NULL;
   unsigned short int first_port;
-  const char *separator, *tmp; 
+  const char *separator, *tmp;
   int on = 1;
   H5FD_STREAM_SOCKET_TYPE ret_value=H5FD_STREAM_INVALID_SOCKET;
 
@@ -446,7 +446,7 @@ H5FD_stream_open_socket (const char *filename, int o_flags,
         HGOTO_ERROR(H5E_ARGS,H5E_BADVALUE,H5FD_STREAM_INVALID_SOCKET,"invalid port number")
     }
   }
-  
+
   hostname = (char *) H5MM_malloc ((size_t)(separator - filename + 1));
 
   /* Return if out of memory */
@@ -986,7 +986,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t  
+static herr_t
 H5FD_stream_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
 {
     H5FD_stream_t       *file = (H5FD_stream_t *)_file;

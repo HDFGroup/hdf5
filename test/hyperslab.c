@@ -115,7 +115,7 @@ print_array(uint8_t *array, size_t nx, size_t ny, size_t nz)
  *
  * Return:	Success:	0
  *
- *		Failure:	
+ *		Failure:
  *
  * Programmer:	Robb Matzke
  *		Friday, October 10, 1997
@@ -611,7 +611,7 @@ test_multifill(size_t nx)
     hsize_t		    src_stride;
     hsize_t		    dst_stride;
     char		    s[64];
-	
+
     struct a_struct {
 	int			left;
 	double			mid;
@@ -686,7 +686,7 @@ test_multifill(size_t nx)
 	    goto error;
 	}
     }
-	
+
     puts(" PASSED");
     HDfree(src);
     HDfree(dst);
@@ -1238,9 +1238,9 @@ main(int argc, char *argv[])
 #endif  /* H5_HAVE_THREADSAFE */
 
     /*
-     *------------------------------ 
+     *------------------------------
      * TEST HYPERSLAB FILL OPERATION
-     *------------------------------ 
+     *------------------------------
      */
     if (size_of_test & TEST_SMALL) {
 	status = test_fill(11, 0, 0, 1, 1, 1, 1, 1, 1);
@@ -1260,7 +1260,7 @@ main(int argc, char *argv[])
     }
    /*------------------------------
     * TEST HYPERSLAB COPY OPERATION
-    *------------------------------ 
+    *------------------------------
     */
 
     /* exhaustive, one-dimensional test */
@@ -1325,7 +1325,7 @@ main(int argc, char *argv[])
     }
    /*---------------------
     * TEST MULTI-BYTE FILL
-    *--------------------- 
+    *---------------------
     */
 
     if (size_of_test & TEST_SMALL) {
@@ -1359,7 +1359,7 @@ main(int argc, char *argv[])
     }
    /*-------------------------
     * TEST SAMPLING OPERATIONS
-    *------------------------- 
+    *-------------------------
     */
 
     if (size_of_test & TEST_SMALL) {
@@ -1372,7 +1372,7 @@ main(int argc, char *argv[])
     }
    /*-------------------------
     * TEST ARRAY FILL OPERATIONS
-    *------------------------- 
+    *-------------------------
     */
 
     if (size_of_test & TEST_SMALL) {
@@ -1385,7 +1385,7 @@ main(int argc, char *argv[])
     }
    /*-------------------------
     * TEST ARRAY OFFSET OPERATIONS
-    *------------------------- 
+    *-------------------------
     */
 
     if (size_of_test & TEST_SMALL) {

@@ -150,7 +150,7 @@ typedef struct H5FD_log_t {
 /*
  * These macros check for overflow of various quantities.  These macros
  * assume that file_offset_t is signed and haddr_t and size_t are unsigned.
- * 
+ *
  * ADDR_OVERFLOW:	Checks whether a file address of type `haddr_t'
  *			is too large to be represented by the second argument
  *			of the file seek function.
@@ -242,7 +242,7 @@ NAME
    H5FD_log_init_interface -- Initialize interface-specific information
 USAGE
     herr_t H5FD_log_init_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -327,7 +327,7 @@ H5FD_log_term(void)
  * Purpose:	Modify the file access property list to use the H5FD_LOG
  *		driver defined in this source file.  There are no driver
  *		specific properties.
- *		
+ *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
@@ -338,7 +338,7 @@ H5FD_log_term(void)
  *
  * 		Raymond Lu, 2001-10-25
  *		Changed the file access list to the new generic property list.
- *	
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -350,7 +350,7 @@ H5Pset_fapl_log(hid_t fapl_id, const char *logfile, int verbosity)
 
     FUNC_ENTER_API(H5Pset_fapl_log, FAIL)
     H5TRACE3("e","isIs",fapl_id,logfile,verbosity);
-    
+
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
@@ -374,7 +374,7 @@ done:
  * Purpose:	Modify the file access property list to use the H5FD_LOG
  *		driver defined in this source file.  There are no driver
  *		specific properties.
- *		
+ *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
@@ -385,7 +385,7 @@ done:
  *
  * 		Raymond Lu, 2001-10-25
  *		Changed the file access list to the new generic property list.
- *	
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -397,10 +397,10 @@ H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned flags, size_t buf_s
 
     FUNC_ENTER_API(H5Pset_fapl_log, FAIL)
     H5TRACE4("e","isIuz",fapl_id,logfile,flags,buf_size);
-    
+
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-       
+
     fa.logfile=(char*)logfile;
     fa.flags=flags;
     fa.buf_size=buf_size;
@@ -469,7 +469,7 @@ H5FD_log_fapl_copy(const void *_old_fa)
     const H5FD_log_fapl_t *old_fa = (const H5FD_log_fapl_t*)_old_fa;
     H5FD_log_fapl_t *new_fa = H5MM_malloc(sizeof(H5FD_log_fapl_t));
     void *ret_value;    /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5FD_log_fapl_copy, NULL)
 
     assert(new_fa);
@@ -1025,36 +1025,36 @@ done:
 
 /*-------------------------------------------------------------------------
  * Function:       H5FD_log_get_handle
- * 
+ *
  * Purpose:        Returns the file handle of LOG file driver.
- * 
+ *
  * Returns:        Non-negative if succeed or negative if fails.
- * 
+ *
  * Programmer:     Raymond Lu
  *                 Sept. 16, 2002
- *                 
- * Modifications:  
- * 
+ *
+ * Modifications:
+ *
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
 static herr_t
 H5FD_log_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
-{   
+{
     H5FD_log_t          *file = (H5FD_log_t *)_file;
     herr_t              ret_value = SUCCEED;
-                                                   
+
     FUNC_ENTER_NOAPI(H5FD_log_get_handle, FAIL)
 
     if(!file_handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid")
 
     *file_handle = &(file->fd);
-                                                                                                                                     
-done:   
+
+done:
     FUNC_LEAVE_NOAPI(ret_value)
-}   
-            
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5FD_log_read
@@ -1083,7 +1083,7 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr
     H5FD_log_t		*file = (H5FD_log_t*)_file;
     ssize_t		nbytes;
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5FD_log_read, FAIL)
 
     assert(file && file->pub.cls);
@@ -1160,7 +1160,7 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr
         addr += (haddr_t)nbytes;
         buf = (char*)buf + nbytes;
     }
-    
+
     /* Update current position */
     file->pos = addr;
     file->op = OP_READ;
@@ -1202,7 +1202,7 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t add
     struct timeval timeval_diff;
 #endif /* H5_HAVE_GETTIMEOFDAY */
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5FD_log_write, FAIL)
 
     assert(file && file->pub.cls);
@@ -1214,13 +1214,13 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t add
     assert(type==H5FD_MEM_DEFAULT || type==(H5FD_mem_t)file->flavor[(addr+size)-1] || (H5FD_mem_t)file->flavor[(addr+size)-1]==H5FD_MEM_DEFAULT);
 
     /* Check for overflow conditions */
-    if (HADDR_UNDEF==addr) 
+    if (HADDR_UNDEF==addr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined")
     if (REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow")
     if (addr+size>file->eoa)
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow")
-    
+
     /* Log the I/O information about the write */
     if(file->fa.flags&H5FD_LOG_FILE_WRITE) {
         size_t tmp_size=size;
@@ -1261,7 +1261,7 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t add
                  } /* end if */
                 HDfprintf(file->logfp," (%f s)\n",(double)timeval_diff.tv_sec+((double)timeval_diff.tv_usec/(double)1000000.0));
             } /* end if */
-            else 
+            else
                 HDfprintf(file->logfp,"\n");
 #else /* H5_HAVE_GETTIMEOFDAY */
             HDfprintf(file->logfp,"Seek: From %10a To %10a\n",file->pos,addr);
@@ -1301,7 +1301,7 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t add
     if(file->fa.flags&H5FD_LOG_TIME_WRITE)
         HDgettimeofday(&timeval_stop,NULL);
 #endif /* H5_HAVE_GETTIMEOFDAY */
-    
+
     /* Log information about the write */
     if(file->fa.flags&H5FD_LOG_LOC_WRITE) {
         /* Output the flavor information, if desired */

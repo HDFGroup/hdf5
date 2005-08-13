@@ -78,16 +78,16 @@ randll(hsize_t limit, int current_index)
         for(i = 0; i < current_index; i++)
         {
             if((acc >= values_used[i]) && (acc < values_used[i]+WRT_SIZE))
-                overlap = 1; 
+                overlap = 1;
             if((acc+WRT_SIZE >= values_used[i]) && (acc+WRT_SIZE < values_used[i
 ]+WRT_SIZE))
-                overlap = 1; 
+                overlap = 1;
         }
         tries++;
     }
 
     values_used[current_index]=acc;
-    
+
     return acc;
 }
 
@@ -115,7 +115,7 @@ is_sparse(void)
 {
     int		fd;
     h5_stat_t	sb;
-    
+
     if ((fd=HDopen("x.h5", O_RDWR|O_TRUNC|O_CREAT, 0666))<0) return 0;
     if (HDlseek(fd, (off_t)(1024*1024), SEEK_SET)!=1024*1024) return 0;
     if (5!=HDwrite(fd, "hello", 5)) return 0;
@@ -185,7 +185,7 @@ enough_room(hid_t fapl)
             ret_value=0;
 	HDunlink(name);
     }
-    
+
     return ret_value;
 }
 
@@ -223,7 +223,7 @@ writer (hid_t fapl, int wrt_n)
     hid_t       dcpl;
 
     TESTING("large dataset write");
-    
+
     /*
      * We might be on a machine that has 32-bit files, so create an HDF5 file
      * which is a family of files.  Each member of the family will be 1GB
@@ -232,15 +232,15 @@ writer (hid_t fapl, int wrt_n)
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
 	goto error;
     }
-    
+
     /* Create simple data spaces according to the size specified above. */
     if ((space1 = H5Screate_simple (4, size1, size1))<0 ||
 	(space2 = H5Screate_simple (1, size2, size2))<0) {
 	goto error;
     }
-    
+
     /* Create the datasets */
-/* 
+/*
  *  The fix below is provided for bug#921
  *  H5Dcreate with H5P_DEFAULT creation properties
  *  will create a set of solid 1GB files; test will crash if quotas are enforced
@@ -260,7 +260,7 @@ writer (hid_t fapl, int wrt_n)
 	(d2=H5Dcreate (file, "d2", H5T_NATIVE_INT, space2, dcpl))<0) {
 	goto error;
     }
-    
+
 
     /* Write some things to them randomly */
     hs_size[0] = WRT_SIZE;
@@ -276,7 +276,7 @@ writer (hid_t fapl, int wrt_n)
 	if (H5Dwrite (d2, H5T_NATIVE_INT, mem_space, space2,
 		      H5P_DEFAULT, buf)<0) goto error;
     }
-	
+
     if (H5Dclose (d1)<0) goto error;
     if (H5Dclose (d2)<0) goto error;
     if (H5Sclose (mem_space)<0) goto error;
@@ -434,11 +434,11 @@ usage(void)
 /*-------------------------------------------------------------------------
  * Function:	main
  *
- * Purpose:	
+ * Purpose:
  *
- * Return:	Success:	
+ * Return:	Success:
  *
- *		Failure:	
+ *		Failure:
  *
  * Programmer:	Robb Matzke
  *              Friday, April 10, 1998
@@ -459,7 +459,7 @@ main (int ac, char **av)
     hsize_t	family_size_def;	/* default family file size */
     double	family_size_def_dbl;	/* default family file size */
     int		cflag=1;		/* check file system before test */
-    
+
     /* parameters setup */
     family_size_def = FAMILY_SIZE;
 
@@ -541,7 +541,7 @@ main (int ac, char **av)
 	    goto quit;
 	}
     }
-    
+
     /* Do the test */
     if (writer(fapl, WRT_N)) goto error;
     if (reader(fapl)) goto error;

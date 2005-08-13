@@ -33,7 +33,7 @@ main(void)
     typedef struct s1_t {
 	int    a;
 	float  b;
-	double c; 
+	double c;
     } s1_t;
     s1_t       s1[LENGTH];
     hid_t      s1_tid;     /* File datatype identifier */
@@ -76,20 +76,20 @@ main(void)
     file = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
-     * Create the memory data type. 
+     * Create the memory data type.
      */
     s1_tid = H5Tcreate (H5T_COMPOUND, sizeof(s1_t));
     H5Tinsert(s1_tid, "a_name", HOFFSET(s1_t, a), H5T_NATIVE_INT);
     H5Tinsert(s1_tid, "c_name", HOFFSET(s1_t, c), H5T_NATIVE_DOUBLE);
     H5Tinsert(s1_tid, "b_name", HOFFSET(s1_t, b), H5T_NATIVE_FLOAT);
 
-    /* 
+    /*
      * Create the dataset.
      */
     dataset = H5Dcreate(file, DATASETNAME, s1_tid, space, H5P_DEFAULT);
 
     /*
-     * Wtite data to the dataset; 
+     * Wtite data to the dataset;
      */
     status = H5Dwrite(dataset, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1);
 
@@ -100,15 +100,15 @@ main(void)
     H5Sclose(space);
     H5Dclose(dataset);
     H5Fclose(file);
- 
+
     /*
      * Open the file and the dataset.
      */
     file = H5Fopen(H5FILE_NAME, H5F_ACC_RDONLY, H5P_DEFAULT);
- 
+
     dataset = H5Dopen(file, DATASETNAME);
 
-    /* 
+    /*
      * Create a data type for s2
      */
     s2_tid = H5Tcreate(H5T_COMPOUND, sizeof(s2_t));
@@ -135,7 +135,7 @@ main(void)
     for( i = 0; i < LENGTH; i++) printf("%d ", s2[i].a);
     printf("\n");
 
-    /* 
+    /*
      * Create a data type for s3.
      */
     s3_tid = H5Tcreate(H5T_COMPOUND, sizeof(float));

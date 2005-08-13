@@ -26,33 +26,33 @@ namespace H5 {
 #endif
 class H5_DLLCPP AtomType : public DataType {
    public:
-	// Returns the byte order of an atomic datatype. 
+	// Returns the byte order of an atomic datatype.
 	H5T_order_t getOrder( string& order_string ) const;
 	H5T_order_t getOrder() const;
 
-	// Sets the byte ordering of an atomic datatype. 
+	// Sets the byte ordering of an atomic datatype.
 	void setOrder( H5T_order_t order ) const;
 
-	// Retrieves the bit offset of the first significant bit. 
+	// Retrieves the bit offset of the first significant bit.
 	// 12/05/00 - changed return type to int from size_t - C API
 	int getOffset() const;
 
-	// Sets the bit offset of the first significant bit. 
+	// Sets the bit offset of the first significant bit.
 	void setOffset( size_t offset ) const;
 
-	// Retrieves the padding type of the least and most-significant bit padding. 
+	// Retrieves the padding type of the least and most-significant bit padding.
 	void getPad( H5T_pad_t& lsb, H5T_pad_t& msb ) const;
 
 	// Sets the least and most-significant bits padding types
 	void setPad( H5T_pad_t lsb, H5T_pad_t msb ) const;
 
-	// Returns the precision of an atomic datatype. 
+	// Returns the precision of an atomic datatype.
 	size_t getPrecision() const;
 
-	// Sets the precision of an atomic datatype. 
+	// Sets the precision of an atomic datatype.
 	void setPrecision( size_t precision ) const;
 
-	// Sets the total size for an atomic datatype. 
+	// Sets the total size for an atomic datatype.
 	void setSize( size_t size ) const;
 
 	// Copy constructor - makes copy of the original object

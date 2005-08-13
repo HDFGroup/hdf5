@@ -129,7 +129,7 @@ get_size (const char *progname, int *argno, int argc, char *argv[])
 {
     off_t	retval=-1;
     char	*suffix;
-    
+
     if (isdigit ((int)(argv[*argno][2]))) {
 	retval = strtol (argv[*argno]+2, &suffix, 10);
 	(*argno)++;
@@ -168,9 +168,9 @@ get_size (const char *progname, int *argno, int argc, char *argv[])
  *
  * Purpose:	Split an hdf5 file
  *
- * Return:	Success:	
+ * Return:	Success:
  *
- *		Failure:	
+ *		Failure:
  *
  * Programmer:	Robb Matzke
  *              Wednesday, May 13, 1998
@@ -202,7 +202,7 @@ main (int argc, char *argv[])
 
     int		src_is_family;		/*is source name a family name?	*/
     int		src_membno=0;		/*source member number		*/
-  
+
     const char	*dst_gen_name;		/*general destination name	*/
     char	dst_name[NAMELEN];	/*destination member name	*/
     int		dst_is_family;		/*is dst name a family name?	*/
@@ -223,7 +223,7 @@ main (int argc, char *argv[])
     off_t	src_act_size;		/*source actual member size	*/
     off_t	dst_size=1 GB;		/*destination logical memb size	*/
 #endif
-	
+
     /*
      * Get the program name from argv[0]. Use only the last component.
      */
@@ -441,7 +441,7 @@ main (int argc, char *argv[])
 	}
     }
     close (dst);
-    
+
     /* Free resources and return */
     free (buf);
     return 0;

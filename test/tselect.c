@@ -107,21 +107,21 @@
 #define POINT1_NPOINTS 10
 
 /* Chunked dataset information */
-#define DATASETNAME "ChunkArray" 
-#define NX_SUB   87                     /* hyperslab dimensions */ 
-#define NY_SUB   61 
-#define NZ_SUB  181 
-#define NX       87                     /* output buffer dimensions */ 
-#define NY       61 
-#define NZ      181 
+#define DATASETNAME "ChunkArray"
+#define NX_SUB   87                     /* hyperslab dimensions */
+#define NY_SUB   61
+#define NZ_SUB  181
+#define NX       87                     /* output buffer dimensions */
+#define NY       61
+#define NZ      181
 #define RANK_F     3                    /* File dataspace rank */
 #define RANK_M     3                    /* Memory dataspace rank */
 #define X    87                         /* dataset dimensions */
-#define Y    61   
-#define Z   181  
+#define Y    61
+#define Z   181
 #define CHUNK_X   87                    /* chunk dimensions */
-#define CHUNK_Y   61    
-#define CHUNK_Z  181    
+#define CHUNK_Y   61
+#define CHUNK_Z  181
 
 /* Basic chunk size */
 #define SPACE10_DIM1    180
@@ -151,9 +151,9 @@ herr_t test_select_hyper_iter3(void *elem,hid_t type_id, unsigned ndim, const hs
 /****************************************************************
 **
 **  test_select_hyper_iter1(): Iterator for checking hyperslab iteration
-** 
+**
 ****************************************************************/
-herr_t 
+herr_t
 test_select_hyper_iter1(void *_elem, hid_t UNUSED type_id, unsigned UNUSED ndim, const hsize_t UNUSED *point, void *_operator_data)
 {
     uint8_t *tbuf=(uint8_t *)_elem,     /* temporary buffer pointer */
@@ -171,9 +171,9 @@ test_select_hyper_iter1(void *_elem, hid_t UNUSED type_id, unsigned UNUSED ndim,
 **
 **  test_select_hyper(): Test basic H5S (dataspace) selection code.
 **      Tests hyperslabs of various sizes and dimensionalities.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_hyper(hid_t xfer_plist)
 {
     hid_t	fid1;		/* HDF5 File IDs		*/
@@ -312,11 +312,11 @@ test_select_hyper(hid_t xfer_plist)
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -340,15 +340,15 @@ struct pnt_iter {
 **
 **  test_select_point_iter1(): Iterator for checking point iteration
 **  (This is really ugly code, not a very good example of correct usage - QAK)
-** 
+**
 ****************************************************************/
-herr_t 
+herr_t
 test_select_point_iter1(void *_elem, hid_t UNUSED type_id, unsigned UNUSED ndim, const hsize_t UNUSED *point, void *_operator_data)
 {
     uint8_t *elem=(uint8_t *)_elem;  /* Pointer to the element to examine */
     uint8_t *tmp;                       /* temporary ptr to element in operator data */
     struct pnt_iter *pnt_info=(struct pnt_iter *)_operator_data;
-    
+
     tmp=pnt_info->buf+(pnt_info->coord[pnt_info->offset][0]*SPACE2_DIM2)+pnt_info->coord[pnt_info->offset][1];
     if(*elem!=*tmp)
         return(-1);
@@ -363,9 +363,9 @@ test_select_point_iter1(void *_elem, hid_t UNUSED type_id, unsigned UNUSED ndim,
 **  test_select_point(): Test basic H5S (dataspace) selection code.
 **      Tests element selections between dataspaces of various sizes
 **      and dimensionalities.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_point(hid_t xfer_plist)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -592,11 +592,11 @@ test_select_point(hid_t xfer_plist)
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -613,10 +613,10 @@ test_select_point(hid_t xfer_plist)
 /****************************************************************
 **
 **  test_select_all_iter1(): Iterator for checking all iteration
-**  
-** 
+**
+**
 ****************************************************************/
-herr_t 
+herr_t
 test_select_all_iter1(void *_elem, hid_t UNUSED type_id, unsigned UNUSED ndim, const hsize_t UNUSED *point, void *_operator_data)
 {
     uint8_t *tbuf=(uint8_t *)_elem,     /* temporary buffer pointer */
@@ -634,9 +634,9 @@ test_select_all_iter1(void *_elem, hid_t UNUSED type_id, unsigned UNUSED ndim, c
 **
 **  test_select_none_iter1(): Iterator for checking none iteration
 **      (This is never supposed to be called, so it always returns -1)
-** 
+**
 ****************************************************************/
-herr_t 
+herr_t
 test_select_none_iter1(void UNUSED *_elem, hid_t UNUSED type_id, unsigned UNUSED ndim, const hsize_t UNUSED *point, void UNUSED *_operator_data)
 {
     return(-1);
@@ -646,9 +646,9 @@ test_select_none_iter1(void UNUSED *_elem, hid_t UNUSED type_id, unsigned UNUSED
 **
 **  test_select_all(): Test basic H5S (dataspace) selection code.
 **      Tests "all" selections.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_all(hid_t xfer_plist)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -706,7 +706,7 @@ test_select_all(hid_t xfer_plist)
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -724,9 +724,9 @@ test_select_all(hid_t xfer_plist)
 **
 **  test_select_all_hyper(): Test basic H5S (dataspace) selection code.
 **      Tests "all" and hyperslab selections.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_all_hyper(hid_t xfer_plist)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -839,11 +839,11 @@ test_select_all_hyper(hid_t xfer_plist)
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -862,9 +862,9 @@ test_select_all_hyper(hid_t xfer_plist)
 **  test_select_combo(): Test basic H5S (dataspace) selection code.
 **      Tests combinations of element and hyperslab selections between
 **      dataspaces of various sizes and dimensionalities.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_combo(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -969,11 +969,11 @@ test_select_combo(void)
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -987,7 +987,7 @@ test_select_combo(void)
     HDfree(rbuf);
 }   /* test_select_combo() */
 
-int 
+int
 compare_size_t(const void *s1, const void *s2)
 {
     if(*(const size_t *)s1<*(const size_t *)s2)
@@ -1003,9 +1003,9 @@ compare_size_t(const void *s1, const void *s2)
 **
 **  test_select_hyper_stride(): Test H5S (dataspace) selection code.
 **      Tests strided hyperslabs of various sizes and dimensionalities.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_hyper_stride(hid_t xfer_plist)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -1133,11 +1133,11 @@ test_select_hyper_stride(hid_t xfer_plist)
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -1155,9 +1155,9 @@ test_select_hyper_stride(hid_t xfer_plist)
 **
 **  test_select_hyper_contig(): Test H5S (dataspace) selection code.
 **      Tests contiguous hyperslabs of various sizes and dimensionalities.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_hyper_contig(hid_t dset_type, hid_t xfer_plist)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -1262,11 +1262,11 @@ test_select_hyper_contig(hid_t dset_type, hid_t xfer_plist)
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -1284,9 +1284,9 @@ test_select_hyper_contig(hid_t dset_type, hid_t xfer_plist)
 **
 **  test_select_hyper_contig2(): Test H5S (dataspace) selection code.
 **      Tests more contiguous hyperslabs of various sizes and dimensionalities.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_hyper_contig2(hid_t dset_type, hid_t xfer_plist)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -1383,11 +1383,11 @@ test_select_hyper_contig2(hid_t dset_type, hid_t xfer_plist)
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -1408,9 +1408,9 @@ test_select_hyper_contig2(hid_t dset_type, hid_t xfer_plist)
 **  This test uses a hyperslab that is contiguous in the lowest dimension,
 **  not contiguous in a dimension, then has a selection across the entire next
 **  dimension (which should be "flattened" out also).
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_hyper_contig3(hid_t dset_type, hid_t xfer_plist)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -1518,11 +1518,11 @@ test_select_hyper_contig3(hid_t dset_type, hid_t xfer_plist)
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -1540,9 +1540,9 @@ test_select_hyper_contig3(hid_t dset_type, hid_t xfer_plist)
 **
 **  test_select_hyper_copy(): Test H5S (dataspace) selection code.
 **      Tests copying hyperslab selections
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_hyper_copy(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -1667,15 +1667,15 @@ test_select_hyper_copy(void)
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close 2nd memory dataspace */
     ret = H5Sclose(sid3);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(data1);
     CHECK(ret, FAIL, "H5Dclose");
@@ -1698,9 +1698,9 @@ test_select_hyper_copy(void)
 **
 **  test_select_point_copy(): Test H5S (dataspace) selection code.
 **      Tests copying point selections
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_point_copy(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -1835,15 +1835,15 @@ test_select_point_copy(void)
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close 2nd memory dataspace */
     ret = H5Sclose(sid3);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(data1);
     CHECK(ret, FAIL, "H5Dclose");
@@ -1867,9 +1867,9 @@ test_select_point_copy(void)
 **  test_select_hyper_offset(): Test basic H5S (dataspace) selection code.
 **      Tests hyperslabs of various sizes and dimensionalities with selection
 **      offsets.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_hyper_offset(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -2004,11 +2004,11 @@ test_select_hyper_offset(void)
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -2026,9 +2026,9 @@ test_select_hyper_offset(void)
 **
 **  test_select_hyper_offset2(): Test basic H5S (dataspace) selection code.
 **      Tests optimized hyperslab I/O with selection offsets.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_hyper_offset2(void)
 {
     hid_t	fid1;		/* HDF5 File IDs		*/
@@ -2121,11 +2121,11 @@ test_select_hyper_offset2(void)
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -2144,9 +2144,9 @@ test_select_hyper_offset2(void)
 **  test_select_point_offset(): Test basic H5S (dataspace) selection code.
 **      Tests element selections between dataspaces of various sizes
 **      and dimensionalities with selection offsets.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_point_offset(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -2291,11 +2291,11 @@ test_select_point_offset(void)
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -2313,9 +2313,9 @@ test_select_point_offset(void)
 **
 **  test_select_hyper_union(): Test basic H5S (dataspace) selection code.
 **      Tests unions of hyperslabs of various sizes and dimensionalities.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_hyper_union(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -2439,11 +2439,11 @@ test_select_hyper_union(void)
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -2532,11 +2532,11 @@ test_select_hyper_union(void)
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -2621,11 +2621,11 @@ test_select_hyper_union(void)
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -2723,11 +2723,11 @@ test_select_hyper_union(void)
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -2807,11 +2807,11 @@ test_select_hyper_union(void)
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -2829,9 +2829,9 @@ test_select_hyper_union(void)
 **
 **  test_select_hyper_and_2d(): Test basic H5S (dataspace) selection code.
 **      Tests 'and' of hyperslabs in 2-D
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_hyper_and_2d(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -2933,11 +2933,11 @@ test_select_hyper_and_2d(void)
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -2955,9 +2955,9 @@ test_select_hyper_and_2d(void)
 **
 **  test_select_hyper_xor_2d(): Test basic H5S (dataspace) selection code.
 **      Tests 'xor' of hyperslabs in 2-D
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_hyper_xor_2d(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -3061,11 +3061,11 @@ test_select_hyper_xor_2d(void)
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -3083,9 +3083,9 @@ test_select_hyper_xor_2d(void)
 **
 **  test_select_hyper_notb_2d(): Test basic H5S (dataspace) selection code.
 **      Tests 'notb' of hyperslabs in 2-D
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_hyper_notb_2d(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -3188,11 +3188,11 @@ test_select_hyper_notb_2d(void)
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -3210,9 +3210,9 @@ test_select_hyper_notb_2d(void)
 **
 **  test_select_hyper_nota_2d(): Test basic H5S (dataspace) selection code.
 **      Tests 'nota' of hyperslabs in 2-D
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_hyper_nota_2d(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -3315,11 +3315,11 @@ test_select_hyper_nota_2d(void)
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -3336,9 +3336,9 @@ test_select_hyper_nota_2d(void)
 /****************************************************************
 **
 **  test_select_hyper_iter2(): Iterator for checking hyperslab iteration
-** 
+**
 ****************************************************************/
-herr_t 
+herr_t
 test_select_hyper_iter2(void *_elem, hid_t UNUSED type_id, unsigned ndim, const hsize_t *point, void *_operator_data)
 {
     int *tbuf=(int *)_elem,     /* temporary buffer pointer */
@@ -3367,9 +3367,9 @@ test_select_hyper_iter2(void *_elem, hid_t UNUSED type_id, unsigned ndim, const 
 **
 **  test_select_hyper_union_random_5d(): Test basic H5S (dataspace) selection code.
 **      Tests random unions of 5-D hyperslabs
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_hyper_union_random_5d(hid_t read_plist)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -3531,7 +3531,7 @@ printf("random I/O, after H5Dread()\n");
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -3549,9 +3549,9 @@ printf("random I/O, after H5Dread()\n");
 **
 **  test_select_hyper_chunk(): Test basic H5S (dataspace) selection code.
 **      Tests large hyperslab selection in chunked dataset
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_hyper_chunk(hid_t fapl_plist, hid_t xfer_plist)
 {
     hsize_t     dimsf[3];              /* dataset dimensions */
@@ -3559,20 +3559,20 @@ test_select_hyper_chunk(hid_t fapl_plist, hid_t xfer_plist)
     short      *data;                   /* data to write */
     short      *tmpdata;                /* data to write */
 
-    /* 
-     * Data  and output buffer initialization. 
+    /*
+     * Data  and output buffer initialization.
      */
     hid_t       file, dataset;         /* handles */
-    hid_t       dataspace;   
-    hid_t       memspace; 
-    hid_t       plist;                 
+    hid_t       dataspace;
+    hid_t       memspace;
+    hid_t       plist;
     hsize_t     dimsm[3];              /* memory space dimensions */
-    hsize_t     dims_out[3];           /* dataset dimensions */      
-    herr_t      status;                             
+    hsize_t     dims_out[3];           /* dataset dimensions */
+    herr_t      status;
 
     short         *data_out; /* output buffer */
     short         *tmpdata_out; /* output buffer */
-   
+
     hsize_t     count[3];              /* size of the hyperslab in the file */
     hsize_t     offset[3];             /* hyperslab offset in the file */
     hsize_t     count_out[3];          /* size of the hyperslab in memory */
@@ -3585,9 +3585,9 @@ test_select_hyper_chunk(hid_t fapl_plist, hid_t xfer_plist)
     /* Allocate the transfer buffers */
     data = HDmalloc(sizeof(short)*X*Y*Z);
     data_out = HDcalloc(NX*NY*NZ,sizeof(short));
- 
-    /* 
-     * Data buffer initialization. 
+
+    /*
+     * Data buffer initialization.
      */
     tmpdata = data;
     for (j = 0; j < X; j++)
@@ -3605,12 +3605,12 @@ test_select_hyper_chunk(hid_t fapl_plist, hid_t xfer_plist)
 
     /*
      * Describe the size of the array and create the data space for fixed
-     * size dataset. 
+     * size dataset.
      */
     dimsf[0] = X;
     dimsf[1] = Y;
     dimsf[2] = Z;
-    dataspace = H5Screate_simple (RANK_F, dimsf, NULL); 
+    dataspace = H5Screate_simple (RANK_F, dimsf, NULL);
     CHECK(dataspace, FAIL, "H5Screate_simple");
 
     /*
@@ -3621,11 +3621,11 @@ test_select_hyper_chunk(hid_t fapl_plist, hid_t xfer_plist)
     CHECK(plist, FAIL, "H5Pcreate");
     status = H5Pset_chunk (plist, RANK_F, chunk_dimsf);
     CHECK(status, FAIL, "H5Pset_chunk");
-    dataset = H5Dcreate (file, DATASETNAME, H5T_NATIVE_UCHAR, dataspace, plist); 
+    dataset = H5Dcreate (file, DATASETNAME, H5T_NATIVE_UCHAR, dataspace, plist);
     CHECK(dataset, FAIL, "H5Dcreate");
 
-    /* 
-     * Define hyperslab in the dataset. 
+    /*
+     * Define hyperslab in the dataset.
      */
     offset[0] = 0;
     offset[1] = 0;
@@ -3633,7 +3633,7 @@ test_select_hyper_chunk(hid_t fapl_plist, hid_t xfer_plist)
     count[0]  = NX_SUB;
     count[1]  = NY_SUB;
     count[2]  = NZ_SUB;
-    status = H5Sselect_hyperslab (dataspace, H5S_SELECT_SET, offset, NULL, 
+    status = H5Sselect_hyperslab (dataspace, H5S_SELECT_SET, offset, NULL,
                                   count, NULL);
     CHECK(status, FAIL, "H5Sselect_hyperslab");
 
@@ -3643,11 +3643,11 @@ test_select_hyper_chunk(hid_t fapl_plist, hid_t xfer_plist)
     dimsm[0] = NX;
     dimsm[1] = NY;
     dimsm[2] = NZ;
-    memspace = H5Screate_simple (RANK_M, dimsm, NULL);   
+    memspace = H5Screate_simple (RANK_M, dimsm, NULL);
     CHECK(memspace, FAIL, "H5Screate_simple");
 
-    /* 
-     * Define memory hyperslab. 
+    /*
+     * Define memory hyperslab.
      */
     offset_out[0] = 0;
     offset_out[1] = 0;
@@ -3655,7 +3655,7 @@ test_select_hyper_chunk(hid_t fapl_plist, hid_t xfer_plist)
     count_out[0]  = NX_SUB;
     count_out[1]  = NY_SUB;
     count_out[2]  = NZ_SUB;
-    status = H5Sselect_hyperslab (memspace, H5S_SELECT_SET, offset_out, NULL, 
+    status = H5Sselect_hyperslab (memspace, H5S_SELECT_SET, offset_out, NULL,
                                   count_out, NULL);
     CHECK(status, FAIL, "H5Sselect_hyperslab");
 
@@ -3679,16 +3679,16 @@ test_select_hyper_chunk(hid_t fapl_plist, hid_t xfer_plist)
     CHECK(status, FAIL, "H5Dclose");
     status=H5Fclose (file);
     CHECK(status, FAIL, "H5Fclose");
- 
 
-/*************************************************************  
 
-  This reads the hyperslab from the test.h5 file just 
-  created, into a 3-dimensional plane of the 3-dimensional 
+/*************************************************************
+
+  This reads the hyperslab from the test.h5 file just
+  created, into a 3-dimensional plane of the 3-dimensional
   array.
 
- ************************************************************/  
- 
+ ************************************************************/
+
     /*
      * Open the file and the dataset.
      */
@@ -3707,8 +3707,8 @@ test_select_hyper_chunk(hid_t fapl_plist, hid_t xfer_plist)
     VERIFY(dims_out[1], dimsf[1], "Dataset dimensions");
     VERIFY(dims_out[2], dimsf[2], "Dataset dimensions");
 
-    /* 
-     * Define hyperslab in the dataset. 
+    /*
+     * Define hyperslab in the dataset.
      */
     offset[0] = 0;
     offset[1] = 0;
@@ -3716,7 +3716,7 @@ test_select_hyper_chunk(hid_t fapl_plist, hid_t xfer_plist)
     count[0]  = NX_SUB;
     count[1]  = NY_SUB;
     count[2]  = NZ_SUB;
-    status = H5Sselect_hyperslab (dataspace, H5S_SELECT_SET, offset, NULL, 
+    status = H5Sselect_hyperslab (dataspace, H5S_SELECT_SET, offset, NULL,
                                   count, NULL);
     CHECK(status, FAIL, "H5Sselect_hyperslab");
 
@@ -3726,11 +3726,11 @@ test_select_hyper_chunk(hid_t fapl_plist, hid_t xfer_plist)
     dimsm[0] = NX;
     dimsm[1] = NY;
     dimsm[2] = NZ;
-    memspace = H5Screate_simple (RANK_M, dimsm, NULL);   
+    memspace = H5Screate_simple (RANK_M, dimsm, NULL);
     CHECK(memspace, FAIL, "H5Screate_simple");
 
-    /* 
-     * Define memory hyperslab. 
+    /*
+     * Define memory hyperslab.
      */
     offset_out[0] = 0;
     offset_out[1] = 0;
@@ -3738,12 +3738,12 @@ test_select_hyper_chunk(hid_t fapl_plist, hid_t xfer_plist)
     count_out[0]  = NX_SUB;
     count_out[1]  = NY_SUB;
     count_out[2]  = NZ_SUB;
-    status = H5Sselect_hyperslab (memspace, H5S_SELECT_SET, offset_out, NULL, 
+    status = H5Sselect_hyperslab (memspace, H5S_SELECT_SET, offset_out, NULL,
                                   count_out, NULL);
     CHECK(status, FAIL, "H5Sselect_hyperslab");
 
     /*
-     * Read data from hyperslab in the file into the hyperslab in 
+     * Read data from hyperslab in the file into the hyperslab in
      * memory and display.
      */
     status = H5Dread (dataset, H5T_NATIVE_SHORT, memspace, dataspace,
@@ -3780,9 +3780,9 @@ test_select_hyper_chunk(hid_t fapl_plist, hid_t xfer_plist)
 **  test_select_point_chunk(): Test basic H5S (dataspace) selection code.
 **      Tests combinations of hyperslab and point selections on
 **      chunked datasets.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_point_chunk(void)
 {
     hsize_t     dimsf[SPACE7_RANK];     /* dataset dimensions */
@@ -3790,23 +3790,23 @@ test_select_point_chunk(void)
     unsigned    *data;                   /* data to write */
     unsigned    *tmpdata;                /* data to write */
 
-    /* 
-     * Data  and output buffer initialization. 
+    /*
+     * Data  and output buffer initialization.
      */
     hid_t       file, dataset;         /* handles */
-    hid_t       dataspace;   
+    hid_t       dataspace;
     hid_t       pnt1_space;                     /* Dataspace to hold 1st point selection */
     hid_t       pnt2_space;                     /* Dataspace to hold 2nd point selection */
     hid_t       hyp1_space;                     /* Dataspace to hold 1st hyperslab selection */
     hid_t       hyp2_space;                     /* Dataspace to hold 2nd hyperslab selection */
-    hid_t       dcpl;                 
+    hid_t       dcpl;
     herr_t      ret;                            /* Generic return value */
 
     unsigned    *data_out;			/* output buffer */
 #ifdef LATER
     unsigned    *tmpdata_out;			/* output buffer */
 #endif /* LATER */
-   
+
     hsize_t     start[SPACE7_RANK];             /* hyperslab offset */
     hsize_t     count[SPACE7_RANK];             /* size of the hyperslab */
     hsize_t     points[SPACE7_NPOINTS][SPACE7_RANK];   /* points for selection */
@@ -3818,9 +3818,9 @@ test_select_point_chunk(void)
     /* Allocate the transfer buffers */
     data = (unsigned*)HDmalloc(sizeof(unsigned)*SPACE7_DIM1*SPACE7_DIM2);
     data_out = (unsigned*)HDcalloc(SPACE7_DIM1*SPACE7_DIM2,sizeof(unsigned));
- 
-    /* 
-     * Data buffer initialization. 
+
+    /*
+     * Data buffer initialization.
      */
     tmpdata = data;
     for (i = 0; i < SPACE7_DIM1; i++)
@@ -3838,7 +3838,7 @@ test_select_point_chunk(void)
     /* Create file dataspace */
     dimsf[0] = SPACE7_DIM1;
     dimsf[1] = SPACE7_DIM2;
-    dataspace = H5Screate_simple (SPACE7_RANK, dimsf, NULL); 
+    dataspace = H5Screate_simple (SPACE7_RANK, dimsf, NULL);
     CHECK(dataspace, FAIL, "H5Screate_simple");
 
     /*
@@ -3849,7 +3849,7 @@ test_select_point_chunk(void)
     CHECK(dcpl, FAIL, "H5Pcreate");
     ret = H5Pset_chunk (dcpl, SPACE7_RANK, chunk_dimsf);
     CHECK(ret, FAIL, "H5Pset_chunk");
-    dataset = H5Dcreate (file, DATASETNAME, H5T_NATIVE_UCHAR, dataspace, dcpl); 
+    dataset = H5Dcreate (file, DATASETNAME, H5T_NATIVE_UCHAR, dataspace, dcpl);
     CHECK(dataset, FAIL, "H5Dcreate");
 
     /* Create 1st point selection */
@@ -3974,9 +3974,9 @@ test_select_point_chunk(void)
 **
 **  test_select_sclar_chunk(): Test basic H5S (dataspace) selection code.
 **      Tests using a scalar dataspace (in memory) to access chunked datasets.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_scalar_chunk(void)
 {
     hid_t file_id;              /* File ID */
@@ -4040,9 +4040,9 @@ test_select_scalar_chunk(void)
 **
 **  test_select_valid(): Test basic H5S (dataspace) selection code.
 **      Tests selection validity
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_valid(void)
 {
     herr_t error;
@@ -4136,9 +4136,9 @@ test_select_valid(void)
 **  test_select_combine(): Test basic H5S (dataspace) selection code.
 **      Tests combining "all" and "none" selections with hyperslab
 **      operations.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_combine(void)
 {
     hid_t base_id;      /* Base dataspace for test */
@@ -4502,9 +4502,9 @@ typedef struct {
 /****************************************************************
 **
 **  test_select_hyper_iter3(): Iterator for checking hyperslab iteration
-** 
+**
 ****************************************************************/
-herr_t 
+herr_t
 test_select_hyper_iter3(void *_elem, hid_t UNUSED type_id, unsigned ndim, const hsize_t *point, void *_operator_data)
 {
     unsigned short *tbuf=(unsigned short *)_elem;     /* temporary buffer pointer */
@@ -4536,9 +4536,9 @@ test_select_hyper_iter3(void *_elem, hid_t UNUSED type_id, unsigned ndim, const 
 **
 **  test_select_fill_all(): Test basic H5S (dataspace) selection code.
 **      Tests filling "all" selections
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_fill_all(void)
 {
     hid_t	sid1;           /* Dataspace ID */
@@ -4600,7 +4600,7 @@ test_select_fill_all(void)
     /* Close dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Free memory buffers */
     HDfree(wbuf);
 }   /* test_select_fill_all() */
@@ -4609,9 +4609,9 @@ test_select_fill_all(void)
 **
 **  test_select_fill_point(): Test basic H5S (dataspace) selection code.
 **      Tests filling "point" selections
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_fill_point(hssize_t *offset)
 {
     hid_t	sid1;           /* Dataspace ID */
@@ -4694,7 +4694,7 @@ test_select_fill_point(hssize_t *offset)
     /* Close dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Free memory buffers */
     HDfree(wbuf);
 }   /* test_select_fill_point() */
@@ -4703,9 +4703,9 @@ test_select_fill_point(hssize_t *offset)
 **
 **  test_select_fill_hyper_simple(): Test basic H5S (dataspace) selection code.
 **      Tests filling "simple" (i.e. one block) hyperslab selections
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_fill_hyper_simple(hssize_t *offset)
 {
     hid_t	sid1;           /* Dataspace ID */
@@ -4793,7 +4793,7 @@ test_select_fill_hyper_simple(hssize_t *offset)
     /* Close dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Free memory buffers */
     HDfree(wbuf);
 }   /* test_select_fill_hyper_simple() */
@@ -4802,9 +4802,9 @@ test_select_fill_hyper_simple(hssize_t *offset)
 **
 **  test_select_fill_hyper_regular(): Test basic H5S (dataspace) selection code.
 **      Tests filling "regular" (i.e. strided block) hyperslab selections
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_fill_hyper_regular(hssize_t *offset)
 {
     hid_t	sid1;           /* Dataspace ID */
@@ -4900,7 +4900,7 @@ test_select_fill_hyper_regular(hssize_t *offset)
     /* Close dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Free memory buffers */
     HDfree(wbuf);
 }   /* test_select_fill_hyper_regular() */
@@ -4909,9 +4909,9 @@ test_select_fill_hyper_regular(hssize_t *offset)
 **
 **  test_select_fill_hyper_irregular(): Test basic H5S (dataspace) selection code.
 **      Tests filling "irregular" (i.e. combined blocks) hyperslab selections
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_fill_hyper_irregular(hssize_t *offset)
 {
     hid_t	sid1;           /* Dataspace ID */
@@ -5031,9 +5031,9 @@ test_select_fill_hyper_irregular(hssize_t *offset)
 **
 **  test_select_none(): Test basic H5S (dataspace) selection code.
 **      Tests I/O on 0-sized point selections
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_none(void)
 {
     hid_t	fid1;		/* HDF5 File IDs		*/
@@ -5105,11 +5105,11 @@ test_select_none(void)
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -5127,9 +5127,9 @@ test_select_none(void)
 **
 **  test_scalar_select(): Test basic H5S (dataspace) selection code.
 **      Tests selections on scalar dataspaces
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_scalar_select(void)
 {
     hid_t	fid1;		/* HDF5 File IDs		*/
@@ -5255,11 +5255,11 @@ test_scalar_select(void)
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -5276,11 +5276,11 @@ test_scalar_select(void)
 /****************************************************************
 **
 **  test_scalar_select2(): Tests selections on scalar dataspace,
-**	verify H5Shyperslab and H5Sselect_elements fails for 
+**	verify H5Shyperslab and H5Sselect_elements fails for
 **	scalar dataspace.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_scalar_select2(void)
 {
     hid_t	sid;		/* Dataspace ID			*/
@@ -5314,7 +5314,7 @@ test_scalar_select2(void)
     /* Select no elements in memory & file with "none" selection */
     ret = H5Sselect_none(sid);
     CHECK(ret, FAIL, "H5Sselect_none");
-    
+
     /* Select all elements in memory & file with "all" selection */
     ret = H5Sselect_all(sid);
     CHECK(ret, FAIL, "H5Sselect_none");
@@ -5328,9 +5328,9 @@ test_scalar_select2(void)
 **
 **  test_shape_same(): Tests selections on dataspace, verify that
 **	"shape same" routine is working correctly.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_shape_same(void)
 {
     hid_t	all_sid;	/* Dataspace ID	with "all" selection */
@@ -6183,9 +6183,9 @@ test_shape_same(void)
 **  test_select_hyper_chunk_offset(): Tests selections on dataspace,
 **      verify that offsets for hyperslab selections are working in
 **      chunked datasets.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_hyper_chunk_offset(void)
 {
     hid_t fid;          /* File ID  */
@@ -6232,7 +6232,7 @@ test_select_hyper_chunk_offset(void)
     /* Set the chunk size */
     ret=H5Pset_chunk (dcpl, 1, chunks);
     CHECK(ret, FAIL, "H5Pset_chunk");
-    
+
     /* Create dataspace for memory */
     msid = H5Screate_simple (1, mem_dims, NULL);
     CHECK(msid, FAIL, "H5Screate_simple");
@@ -6398,16 +6398,16 @@ test_select_hyper_chunk_offset(void)
 **  test_select_hyper_chunk_offset2(): Tests selections on dataspace,
 **      another test to verify that offsets for hyperslab selections are
 **      working in chunked datasets.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_hyper_chunk_offset2(void)
 {
     hid_t       file, dataset;  /* handles */
-    hid_t       dataspace;   
-    hid_t       memspace; 
+    hid_t       dataspace;
+    hid_t       memspace;
     hid_t       dcpl;           /* Dataset creation property list */
-    herr_t      status;                             
+    herr_t      status;
     unsigned    data_out[SPACE12_DIM0]; /* output buffer */
     unsigned    data_in[SPACE12_CHUNK_DIM0]; /* input buffer */
     hsize_t     dims[SPACE12_RANK]={SPACE12_DIM0};              /* Dimension size */
@@ -6456,8 +6456,8 @@ test_select_hyper_chunk_offset2(void)
     memspace = H5Screate_simple(SPACE12_RANK, chunk_dims, NULL);
     CHECK(dataspace, FAIL, "H5Screate_simple");
 
-    /* 
-     * Define hyperslab in the file dataspace. 
+    /*
+     * Define hyperslab in the file dataspace.
      */
     start[0] = 0;
     count[0] = SPACE12_CHUNK_DIM0;
@@ -6470,7 +6470,7 @@ test_select_hyper_chunk_offset2(void)
         offset[0] = u;
         status = H5Soffset_simple(dataspace, offset);
         CHECK(status, FAIL, "H5Soffset_simple");
-        
+
         /* Read in buffer of data */
         status = H5Dread(dataset, H5T_NATIVE_UINT, memspace, dataspace,
                 H5P_DEFAULT, data_in);
@@ -6499,9 +6499,9 @@ test_select_hyper_chunk_offset2(void)
 **
 **  test_select_bounds(): Tests selection bounds on dataspaces,
 **      both with and without offsets.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_select_bounds(void)
 {
     hid_t sid;          /* Dataspace ID */
@@ -6702,9 +6702,9 @@ test_select_bounds(void)
 /****************************************************************
 **
 **  test_select(): Main H5S selection testing routine.
-** 
+**
 ****************************************************************/
-void 
+void
 test_select(void)
 {
     hid_t plist_id;     /* Property list for reading random hyperslabs */

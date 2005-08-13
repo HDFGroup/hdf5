@@ -44,7 +44,7 @@ test_time_commit(void)
     /* Create a new file using default properties. */
     file_id = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(file_id, FAIL, "H5Fcreate");
- 
+
     tid = H5Tcopy (H5T_UNIX_D32LE);
     CHECK(tid, FAIL, "H5Tcopy");
     status = H5Tcommit(file_id, "Committed D32LE type", tid);
@@ -72,53 +72,53 @@ test_time_commit(void)
     CHECK(status, FAIL, "H5Tcommit");
     status = H5Tclose (tid);
     CHECK(status, FAIL, "H5Tclose");
- 
+
     /* Close the file. */
     status = H5Fclose(file_id);
     CHECK(status, FAIL, "H5Fclose");
-    
+
     file_id = H5Fopen(DATAFILE, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(file_id, FAIL, "H5Fopen");
-   
+
     tid = H5Topen(file_id, "Committed D32LE type");
     CHECK(tid, FAIL, "H5Topen");
- 
+
     if(!H5Tequal(tid, H5T_UNIX_D32LE))
         TestErrPrintf("H5T_UNIX_D32LE datatype not found\n");
- 
+
     status = H5Tclose (tid);
     CHECK(status, FAIL, "H5Tclose");
 
     tid = H5Topen(file_id, "Committed D32BE type");
     CHECK(tid, FAIL, "H5Topen");
- 
+
     if(!H5Tequal(tid, H5T_UNIX_D32BE))
         TestErrPrintf("H5T_UNIX_D32BE datatype not found\n");
- 
+
     status = H5Tclose (tid);
     CHECK(status, FAIL, "H5Tclose");
 
     tid = H5Topen(file_id, "Committed D64LE type");
     CHECK(tid, FAIL, "H5Topen");
- 
+
     if(!H5Tequal(tid, H5T_UNIX_D64LE))
         TestErrPrintf("H5T_UNIX_D64LE datatype not found");
- 
+
     status = H5Tclose (tid);
     CHECK(status, FAIL, "H5Tclose");
 
     tid = H5Topen(file_id, "Committed D64BE type");
     CHECK(tid, FAIL, "H5Topen");
- 
+
     if(!H5Tequal(tid, H5T_UNIX_D64BE))
         TestErrPrintf("H5T_UNIX_D64BE datatype not found");
- 
+
     status = H5Tclose (tid);
     CHECK(status, FAIL, "H5Tclose");
 
     status = H5Fclose(file_id);
     CHECK(status, FAIL, "H5Fclose");
- 
+
 }
 
 #ifdef NOT_YET
@@ -143,7 +143,7 @@ test_time_io(void)
     /* Create a new file using default properties. */
     fid = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
- 
+
     /* Create a scalar dataspace */
     sid = H5Screate(H5S_SCALAR);
     CHECK(sid, FAIL, "H5Screate");
@@ -192,16 +192,16 @@ fprintf(stderr,"time written was: %s\n", HDctime(&timethen));
 
     status = H5Fclose(fid);
     CHECK(status, FAIL, "H5Fclose");
- 
+
 }
 #endif /* NOT_YET */
 
 /****************************************************************
 **
 **  test_time(): Main time datatype testing routine.
-** 
+**
 ****************************************************************/
-void 
+void
 test_time(void)
 {
     /* Output message about test being performed */
@@ -211,7 +211,7 @@ test_time(void)
 #ifdef NOT_YET
     test_time_io();             /* Test writing time data to a dataset */
 #endif /* NOT_YET */
- 
+
 }   /* test_time() */
 
 

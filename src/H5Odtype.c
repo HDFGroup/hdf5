@@ -207,7 +207,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
                 UINT32DECODE(*pp, dt->shared->u.compnd.memb[i].offset);
 
                 /* Older versions of the library allowed a field to have
-                 * intrinsic 'arrayness'.  Newer versions of the library 
+                 * intrinsic 'arrayness'.  Newer versions of the library
                  * use the separate array datatypes. */
                 if(version==H5O_DTYPE_VERSION_COMPAT) {
                     /* Decode the number of dimensions */
@@ -220,7 +220,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
 
                     /* Skip reserved bytes */
                     *pp += 4;
-                    
+
                     /* Decode array dimension sizes */
                     for (j=0; j<4; j++)
                         UINT32DECODE(*pp, dim[j]);
@@ -261,7 +261,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
 
                         /* Close the base type for the array */
                         H5T_close(temp_type);
-                        
+
                         /* Make the array type the type that is set for the field */
                         temp_type=array_dt;
                     } /* end if */
@@ -714,7 +714,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
             /* Parent type */
             if (H5O_dtype_encode_helper(pp, dt->shared->parent)<0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode parent data type");
-            
+
             /* Names, each a multiple of eight bytes */
             for (i=0; i<dt->shared->u.enumer.nmembs; i++) {
                 HDstrcpy((char*)(*pp), dt->shared->u.enumer.name[i]);
@@ -728,11 +728,11 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
             HDmemcpy(*pp, dt->shared->u.enumer.value, dt->shared->u.enumer.nmembs * dt->shared->parent->shared->size);
             *pp += dt->shared->u.enumer.nmembs * dt->shared->parent->shared->size;
             break;
-        
+
         case H5T_REFERENCE:
             flags |= (dt->shared->u.atomic.u.r.rtype & 0x0f);
             break;
-            
+
         case H5T_STRING:
             /*
              * Character string types... (not fully implemented)
@@ -871,7 +871,7 @@ done:
  NAME
     H5O_dtype_encode
  PURPOSE
-    Encode a simple datatype message 
+    Encode a simple datatype message
  USAGE
     herr_t H5O_dtype_encode(f, raw_size, p, mesg)
 	H5F_t *f;	  IN: pointer to the HDF5 file struct
@@ -914,9 +914,9 @@ done:
  USAGE
     void *H5O_dtype_copy(mesg, dest)
 	const void *mesg;	IN: Pointer to the source simple datatype
-				    struct 
+				    struct
 	const void *dest;	IN: Pointer to the destination simple
-				    datatype struct 
+				    datatype struct
  RETURNS
     Pointer to DEST on success, NULL on failure
  DESCRIPTION
@@ -1124,7 +1124,7 @@ H5O_dtype_get_share(H5F_t UNUSED *f, const void *_mesg,
 {
     const H5T_t	*dt = (const H5T_t *)_mesg;
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_get_share);
 
     assert (dt);
@@ -1166,7 +1166,7 @@ H5O_dtype_set_share (H5F_t UNUSED *f, void *_mesg/*in,out*/,
 		     const H5O_shared_t *sh)
 {
     H5T_t	*dt = (H5T_t *)_mesg;
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_set_share);
 
     assert (dt);
@@ -1199,7 +1199,7 @@ H5O_dtype_set_share (H5F_t UNUSED *f, void *_mesg/*in,out*/,
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
-	This function prints debugging output to the stream passed as a 
+	This function prints debugging output to the stream passed as a
     parameter.
 --------------------------------------------------------------------------*/
 static herr_t
@@ -1211,7 +1211,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
     char		buf[256];
     unsigned		i;
     size_t		k;
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_debug);
 
     /* check args */
@@ -1302,7 +1302,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
 	    }
 	    fprintf(stream, "\n");
 	}
-	
+
     } else if (H5T_OPAQUE==dt->shared->type) {
 	fprintf(stream, "%*s%-*s \"%s\"\n", indent, "", fwidth,
 		"Tag:", dt->shared->u.opaque.tag);

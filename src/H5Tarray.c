@@ -39,7 +39,7 @@ NAME
    H5T_init_array_interface -- Initialize interface-specific information
 USAGE
     herr_t H5T_init_array_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -88,7 +88,7 @@ H5Tarray_create(hid_t base_id, int ndims, const hsize_t dim[/* ndims */],
     H5T_t	*dt = NULL;		    /* new array data type	*/
     int    i;                  /* local index variable */
     hid_t	ret_value;	/* return value			*/
-    
+
     FUNC_ENTER_API(H5Tarray_create, FAIL);
     H5TRACE4("i","iIs*h*Is",base_id,ndims,dim,perm);
 
@@ -210,7 +210,7 @@ H5Tget_array_ndims(hid_t type_id)
 {
     H5T_t	*dt = NULL;		    /* pointer to array data type	*/
     int	ret_value;	    /* return value			*/
-    
+
     FUNC_ENTER_API(H5Tget_array_ndims, FAIL);
     H5TRACE1("Is","i",type_id);
 
@@ -231,7 +231,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_get_array_ndims
  *
- * Purpose:	Private function for H5T_get_array_ndims.  Query the number 
+ * Purpose:	Private function for H5T_get_array_ndims.  Query the number
  *              of dimensions for an array datatype.
  *
  * Return:	Success:	Number of dimensions of the array datatype
@@ -248,7 +248,7 @@ int
 H5T_get_array_ndims(H5T_t *dt)
 {
     int	ret_value;	    /* return value			*/
-    
+
     FUNC_ENTER_NOAPI(H5T_get_array_ndims, FAIL);
 
     assert(dt);
@@ -282,7 +282,7 @@ H5Tget_array_dims(hid_t type_id, hsize_t dims[], int perm[])
 {
     H5T_t	*dt = NULL;		    /* pointer to array data type	*/
     int	ret_value;	/* return value			*/
-    
+
     FUNC_ENTER_API(H5Tget_array_dims, FAIL);
     H5TRACE3("Is","i*h*Is",type_id,dims,perm);
 
@@ -303,7 +303,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_get_array_dims
  *
- * Purpose:	Private function for H5T_get_array_dims.  Query the sizes 
+ * Purpose:	Private function for H5T_get_array_dims.  Query the sizes
  *              of dimensions for an array datatype.
  *
  * Return:	Success:	Number of dimensions of the array type
@@ -321,19 +321,19 @@ H5T_get_array_dims(H5T_t *dt, hsize_t dims[], int perm[])
 {
     int	ret_value;	/* return value			*/
     int    i;                  /* Local index variable */
-    
+
     FUNC_ENTER_NOAPI(H5T_get_array_dims, FAIL);
 
     assert(dt);
     assert(dt->shared->type==H5T_ARRAY);
 
     /* Retrieve the sizes of the dimensions */
-    if(dims) 
+    if(dims)
         for(i=0; i<dt->shared->u.array.ndims; i++)
             dims[i]=dt->shared->u.array.dim[i];
 
     /* Retrieve the dimension permutations */
-    if(perm) 
+    if(perm)
         for(i=0; i<dt->shared->u.array.ndims; i++)
             perm[i]=dt->shared->u.array.perm[i];
 

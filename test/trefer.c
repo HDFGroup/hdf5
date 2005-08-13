@@ -65,9 +65,9 @@ typedef struct s1_t {
 **
 **  test_reference_obj(): Test basic H5R (reference) object reference code.
 **      Tests references to various kinds of objects
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_reference_obj(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -214,7 +214,7 @@ test_reference_obj(void)
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -242,7 +242,7 @@ test_reference_obj(void)
     /* Check information in referenced dataset */
     sid1 = H5Dget_space(dset2);
     CHECK(sid1, FAIL, "H5Dget_space");
-    
+
     ret=(int)H5Sget_simple_extent_npoints(sid1);
     VERIFY(ret, 4, "H5Sget_simple_extent_npoints");
 
@@ -310,9 +310,9 @@ test_reference_obj(void)
 **
 **  test_reference_region(): Test basic H5R (reference) object reference code.
 **      Tests references to various kinds of objects
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_reference_region(void)
 {
     hid_t	fid1;		/* HDF5 File IDs		*/
@@ -425,7 +425,7 @@ test_reference_region(void)
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dset1);
     CHECK(ret, FAIL, "H5Dclose");
@@ -433,7 +433,7 @@ test_reference_region(void)
     /* Close uint8 dataset dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
@@ -571,9 +571,9 @@ test_reference_region(void)
 **
 **  test_reference_region_1D(): Test H5R (reference) object reference code.
 **      Tests 1-D references to various kinds of objects
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_reference_region_1D(void)
 {
     hid_t	fid1;           /* HDF5 File IDs		*/
@@ -686,7 +686,7 @@ test_reference_region_1D(void)
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dset1);
     CHECK(ret, FAIL, "H5Dclose");
@@ -694,7 +694,7 @@ test_reference_region_1D(void)
     /* Close uint8 dataset dataspace */
     ret = H5Sclose(sid3);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
@@ -844,9 +844,9 @@ test_reference_region_1D(void)
 **
 **  test_reference_obj_deleted(): Test H5R (reference) object reference code.
 **      Tests for correct failures for deleted and non-existent objects
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_reference_obj_deleted(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -902,7 +902,7 @@ test_reference_obj_deleted(void)
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    
+
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
@@ -943,9 +943,9 @@ test_reference_obj_deleted(void)
 **
 **  test_deref_iter_op(): Iterator callback for test_reference_group_iterate()
 **      test.
-** 
+**
 ****************************************************************/
-static herr_t 
+static herr_t
 test_deref_iter_op(hid_t UNUSED group, const char *name, void *op_data)
 {
     int *count = (int *)op_data;        /* Pointer to name counter */
@@ -976,9 +976,9 @@ test_deref_iter_op(hid_t UNUSED group, const char *name, void *op_data)
 **
 **  test_reference_group(): Test H5R (reference) object reference code.
 **      Tests for correct behavior of various routines on dereferenced group
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_reference_group(void)
 {
     hid_t fid = -1;             /* File ID */
@@ -992,7 +992,7 @@ test_reference_group(void)
     H5G_obj_t objtype;          /* Object type */
     int count = 0;              /* Count within iterated group */
     herr_t ret;
-    
+
     /* Create file with a group and a dataset containing an object reference to the group */
     fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
@@ -1090,9 +1090,9 @@ test_reference_group(void)
 /****************************************************************
 **
 **  test_reference(): Main H5R reference testing routine.
-** 
+**
 ****************************************************************/
-void 
+void
 test_reference(void)
 {
     /* Output message about test being performed */

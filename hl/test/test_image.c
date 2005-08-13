@@ -49,12 +49,12 @@ int main( void )
  150,150,150,
  175,175,175,
  200,200,200};
-    
+
  for (i = 0; i < WIDTH*HEIGHT; i++ )
   image_in1[i] = (unsigned char)i;
  for (i = 0; i < WIDTH*HEIGHT*3; i++)
   image_in2[i] = (unsigned char)i;
- 
+
  /* Create a new HDF5 file using default properties. */
  file_id = H5Fcreate(FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
 
@@ -76,7 +76,7 @@ int main( void )
   /* Attach a palette to the image dataset */
  if ( H5IMlink_palette( file_id, "Image1", "Pallete" ) < 0 )
   goto out;
- 
+
  /* Read image */
  if ( H5IMget_image_info( file_id, "Image1", &width, &height, &planes, interlace, &npals ) < 0 )
   goto out;
@@ -99,7 +99,7 @@ int main( void )
  */
 
  TESTING("true color image");
- 
+
  /* Write image */
  if ( H5IMmake_image_24bit( file_id, "Image2", WIDTH, HEIGHT, "INTERLACE_PIXEL", image_in2 ) )
   goto out;

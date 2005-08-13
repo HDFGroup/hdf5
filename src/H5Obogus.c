@@ -24,7 +24,7 @@
  *                      correct operation when parsing unknown object header
  *                      messages.
  *
- * Modifications:       
+ * Modifications:
  *
  *-------------------------------------------------------------------------
  */

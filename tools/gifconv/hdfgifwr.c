@@ -13,13 +13,13 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * hdfgifwr.c  - handles writing of GIF files.  
- * 
- * Contains: 
+ * hdfgifwr.c  - handles writing of GIF files.
+ *
+ * Contains:
  *   hdfWriteGIF(fp, pic, ptype, w, h, rmap, gmap, bmap, numcols, colorstyle,
  *               comment)
  *
- * Note: slightly brain-damaged, in that it'll only write non-interlaced 
+ * Note: slightly brain-damaged, in that it'll only write non-interlaced
  *       GIF files (in the interests of speed, or something)
  */
 
@@ -44,7 +44,7 @@
  *	James A. Woods          (decvax!ihnp4!ames!jaw)
  *	Joe Orost               (decvax!vax135!petsd!joe)
  *****************************************************************/
- 
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -125,7 +125,7 @@ int hdfWriteGIF(FILE *fp, byte *pic, int ptype, int w, int h, byte *rmap,
     Background = 0;
 #endif /* UNUSED */
 
-    for (i = 0; i < 256; i++) { 
+    for (i = 0; i < 256; i++) {
       pc2nc[i] = pc2ncmap[i];
 #ifdef UNUSED
       r1[i] = rmap[i];
@@ -325,7 +325,7 @@ probe:
             continue;
         }
 
-        if ((long)HashTabOf (i) >= 0) 
+        if ((long)HashTabOf (i) >= 0)
             goto probe;
 
 nomatch:
@@ -380,7 +380,7 @@ output(int code)
         cur_accum |= ((long)code << cur_bits);
     else
         cur_accum = code;
-        
+
     cur_bits += n_bits;
 
     while( cur_bits >= 8 ) {
@@ -406,7 +406,7 @@ output(int code)
                 maxcode = MAXCODE(n_bits);
         }
     }
-        
+
     if (code == EOFCode) {
         /* At EOF, write the rest of the buffer */
         while( cur_bits > 0 ) {

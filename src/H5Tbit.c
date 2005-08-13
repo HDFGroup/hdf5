@@ -57,7 +57,7 @@ H5T_bit_copy (uint8_t *dst, size_t dst_offset, const uint8_t *src,
     d_idx = (int)dst_offset / 8;
     src_offset %= 8;
     dst_offset %= 8;
-    
+
     /*
      * Get things rolling. This means copying bits until we're aligned on a
      * source byte.  This the following example, five bits are copied to the
@@ -93,7 +93,7 @@ H5T_bit_copy (uint8_t *dst, size_t dst_offset, const uint8_t *src,
 	}
 	size -= nbits;
     }
-	
+
     /*
      * The middle bits. We are aligned on a source byte which needs to be
      * copied to two (or one in the degenerate case) destination bytes.
@@ -109,7 +109,7 @@ H5T_bit_copy (uint8_t *dst, size_t dst_offset, const uint8_t *src,
      *   +---------------+---------------+
      *     dst[d_idx+1]      dst[d_idx]
      *
-     *		 
+     *
      * Calculate shifts and masks.  See diagrams below.  MASK_LO in this
      * example is 0x1f (the low five bits) and MASK_HI is 0xe0 (the high three
      * bits). SHIFT is three since the source must be shifted right three bits
@@ -118,7 +118,7 @@ H5T_bit_copy (uint8_t *dst, size_t dst_offset, const uint8_t *src,
     shift = (int)dst_offset;
     mask_lo = (1<<(8-shift))-1;
     mask_hi = (~mask_lo) & 0xff;
-    
+
     for (/*void*/; size>8; size-=8, d_idx++, s_idx++) {
 	if (shift) {
 	    dst[d_idx+0] &= ~(mask_lo<<shift);
@@ -177,7 +177,7 @@ H5T_bit_get_d (uint8_t *buf, size_t offset, size_t size)
     hsize_t	val=0;
     size_t	i, hs;
     hsize_t	ret_value;      /* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOFUNC(H5T_bit_get_d);
 
     assert (8*sizeof(val)>=size);
@@ -224,7 +224,7 @@ void
 H5T_bit_set_d (uint8_t *buf, size_t offset, size_t size, hsize_t val)
 {
     size_t	i, hs;
-    
+
     assert (8*sizeof(val)>=size);
 
     switch (H5T_native_order_g) {
@@ -282,7 +282,7 @@ H5T_bit_set (uint8_t *buf, size_t offset, size_t size, hbool_t value)
 	}
 	size -= nbits;
     }
-    
+
     /* The middle bytes */
     while (size>=8) {
 	buf[idx++] = value ? 0xff : 0x00;
@@ -307,7 +307,7 @@ H5T_bit_set (uint8_t *buf, size_t offset, size_t size, hbool_t value)
  *		of a bit vector.  The region begins at OFFSET and continues
  *		for SIZE bits, but the region can be searched from the least
  *		significat end toward the most significant end(H5T_BIT_LSB
- *		as DIRECTION), or from the most significant end to the least 
+ *		as DIRECTION), or from the most significant end to the least
  *		significant end(H5T_BIT_MSB as DIRECTION).
  *
  * Return:	Success:	The position of the bit found, relative to
@@ -342,7 +342,7 @@ H5T_bit_find (uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction,
 	/* Calculate index */
 	idx = (ssize_t)(offset / 8);
 	offset %= 8;
-	
+
 	/* Beginning */
 	if (offset) {
 	    for (iu=offset; iu<8 && size>0; iu++, size--) {
@@ -374,7 +374,7 @@ H5T_bit_find (uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction,
 	/* Calculate index */
 	idx = (ssize_t)((offset+size-1) / 8);
 	offset %= 8;
-	
+
 	/* Beginning */
 	if (size>8-offset && (offset+size)%8) {
 	    for (iu=(offset+size)%8; iu>0; --iu, --size) {
@@ -403,7 +403,7 @@ H5T_bit_find (uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction,
 	}
 	break;
     }
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
@@ -412,10 +412,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_bit_inc
  *
- * Purpose:	Increment part of a bit field by adding 1.  The bit field 
+ * Purpose:	Increment part of a bit field by adding 1.  The bit field
  *              starts with bit position START and is SIZE bits long.
  *
- * Return:	Success:        The carry-out value.  One if overflows, 
+ * Return:	Success:        The carry-out value.  One if overflows,
  *                              zero otherwise.
  *
  *		Failure:	Negative

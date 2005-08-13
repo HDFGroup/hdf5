@@ -60,7 +60,7 @@
 #ifndef TRUE
 #define TRUE		1
 #endif /* TRUE */
- 
+
 typedef enum fill_t {
     FILL_ALL,
     FILL_FORWARD,
@@ -224,13 +224,13 @@ test(fill_t fill_style, const double splits[],
     if ((dset=H5Dcreate(file, "chunked", H5T_NATIVE_INT,
 			fspace, dcpl))<0) goto error;
 
-#if !defined( __MWERKS__)	
+#if !defined( __MWERKS__)
 
- /* 
+ /*
   workaround for a bug in the Metrowerks version 6.0 open function
-  */		
+  */
     if ((fd=HDopen(FILE_NAME_1, O_RDONLY, 0666))<0) goto error;
-#endif  
+#endif
 
     for (i=1; i<=cur_size[0]; i++) {
 
@@ -266,7 +266,7 @@ test(fill_t fill_style, const double splits[],
 	}
 
 
-#if !defined( __MWERKS__)			
+#if !defined( __MWERKS__)
 
 	/* Determine overhead */
 	if (verbose) {
@@ -281,9 +281,9 @@ test(fill_t fill_style, const double splits[],
 		   (unsigned long)i,
 		   (double)(hssize_t)(sb.st_size-i*sizeof(int))/(hssize_t)i);
 	}
-#endif    
-	
-	
+#endif
+
+
     }
 
     H5Dclose(dset);
@@ -313,15 +313,15 @@ test(fill_t fill_style, const double splits[],
 	case FILL_ALL:
 	    abort();
 	}
-	
+
 #if !defined( __MWERKS__)
-	
+
 	if (HDfstat(fd, &sb)<0) goto error;
 		printf("%-7s %8.3f\n", sname,
 	       (double)(hssize_t)(sb.st_size-cur_size[0]*sizeof(int))/
 	           (hssize_t)cur_size[0]);
 #endif
-	          
+
     }
 
 
@@ -347,7 +347,7 @@ test(fill_t fill_style, const double splits[],
 /*-------------------------------------------------------------------------
  * Function:	main
  *
- * Purpose:	
+ * Purpose:
  *
  * Return:	Success:        zero
  *
@@ -376,7 +376,7 @@ main(int argc, char *argv[])
 	goto error;
     }
     if (H5Pclose(xfer)<0) goto error;
-    
+
     /* Parse command-line options */
     for (i=1, j=0; i<argc; i++) {
 	if (!strcmp(argv[i], "forward")) {

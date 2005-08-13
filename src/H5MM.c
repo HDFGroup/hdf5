@@ -20,7 +20,7 @@
  *
  * Purpose:		Memory management functions.
  *
- * Modifications:	
+ * Modifications:
  *
  *-------------------------------------------------------------------------
  */

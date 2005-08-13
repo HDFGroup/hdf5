@@ -36,58 +36,58 @@ class H5_DLLCPP CompType : public DataType {
 	// to create another datatype of the same class
 	H5T_class_t getMemberClass( unsigned member_num ) const;
 
-	// Returns the dimensionality of the specified member. 
+	// Returns the dimensionality of the specified member.
 	int getMemberDims( unsigned member_num, size_t* dims, int* perm ) const; // obsolete
 
 	// Returns the index of a member in this compound data type.
 	int getMemberIndex(const char* name) const;
 	int getMemberIndex(const string& name) const;
 
-	// Returns the offset of a member of this compound datatype. 
+	// Returns the offset of a member of this compound datatype.
 	size_t getMemberOffset( unsigned memb_no ) const;
 
-	// Returns the name of a member of this compound datatype. 
+	// Returns the name of a member of this compound datatype.
 	string getMemberName( unsigned member_num ) const;
 
-	// Returns the generic datatype of the specified member in 
+	// Returns the generic datatype of the specified member in
 	// this compound datatype.
 	DataType getMemberDataType( unsigned member_num ) const;
 
-	// Returns the compound datatype of the specified member in 
+	// Returns the compound datatype of the specified member in
 	// this compound datatype.
 	ArrayType getMemberArrayType( unsigned member_num ) const;
 
-	// Returns the compound datatype of the specified member in 
+	// Returns the compound datatype of the specified member in
 	// this compound datatype.
 	CompType getMemberCompType( unsigned member_num ) const;
 
-	// Returns the enumeration datatype of the specified member in 
+	// Returns the enumeration datatype of the specified member in
 	// this compound datatype.
 	EnumType getMemberEnumType( unsigned member_num ) const;
 
-	// Returns the integer datatype of the specified member in 
+	// Returns the integer datatype of the specified member in
 	// this compound datatype.
 	IntType getMemberIntType( unsigned member_num ) const;
 
-	// Returns the floating-point datatype of the specified member in 
+	// Returns the floating-point datatype of the specified member in
 	// this compound datatype.
 	FloatType getMemberFloatType( unsigned member_num ) const;
 
-	// Returns the string datatype of the specified member in 
+	// Returns the string datatype of the specified member in
 	// this compound datatype.
 	StrType getMemberStrType( unsigned member_num ) const;
 
-	// Returns the compound datatype of the specified member in 
+	// Returns the compound datatype of the specified member in
 	// this compound datatype.
 	VarLenType getMemberVarLenType( unsigned member_num ) const;
 
-	// Returns the number of members in this compound datatype. 
+	// Returns the number of members in this compound datatype.
 	int getNmembers() const;
 
 	// Adds a new member to this compound datatype.
 	void insertMember( const string& name, size_t offset, const DataType& new_member ) const;
 
-	// Recursively removes padding from within this compound datatype. 
+	// Recursively removes padding from within this compound datatype.
 	void pack() const;
 
 	// Default constructor
@@ -105,7 +105,7 @@ class H5_DLLCPP CompType : public DataType {
    private:
 	// Contains common code that is used by the member functions
 	// getMemberXxxType
-	hid_t p_get_member_type(unsigned member_num) const; 
+	hid_t p_get_member_type(unsigned member_num) const;
 };
 #ifndef H5_NO_NAMESPACE
 }

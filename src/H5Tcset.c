@@ -34,7 +34,7 @@ NAME
    H5T_init_cset_interface -- Initialize interface-specific information
 USAGE
     herr_t H5T_init_cset_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -57,7 +57,7 @@ H5T_init_cset_interface(void)
  * Purpose:	HDF5 is able to distinguish between character sets of
  *		different nationalities and to convert between them to the
  *		extent possible.
- *		
+ *
  * Return:	Success:	The character set of a string type.
  *
  *		Failure:	H5T_CSET_ERROR (Negative)
@@ -87,11 +87,11 @@ H5Tget_cset(hid_t type_id)
         dt = dt->shared->parent;  /*defer to parent*/
     if (!H5T_IS_STRING(dt->shared))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, H5T_CSET_ERROR, "operation not defined for data type class")
-    
+
     /* result */
     if(H5T_IS_FIXED_STRING(dt->shared))
         ret_value = dt->shared->u.atomic.u.s.cset;
-    else 
+    else
         ret_value = dt->shared->u.vlen.cset;
 
 done:
@@ -137,11 +137,11 @@ H5Tset_cset(hid_t type_id, H5T_cset_t cset)
         dt = dt->shared->parent;  /*defer to parent*/
     if (!H5T_IS_STRING(dt->shared))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for data type class")
-    
+
     /* Commit */
     if(H5T_IS_FIXED_STRING(dt->shared))
         dt->shared->u.atomic.u.s.cset = cset;
-    else 
+    else
         dt->shared->u.vlen.cset = cset;
 
 done:

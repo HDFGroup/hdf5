@@ -62,7 +62,7 @@ static herr_t H5P_get_multi_type(H5P_genplist_t *plist, H5FD_mem_t *type);
  *
  *		Raymond Lu
  *		Tuesday, Oct 23, 2001
- *		Changed file access property list mechanism to the new 
+ *		Changed file access property list mechanism to the new
  *		generic property list.
  *-------------------------------------------------------------------------
  */
@@ -71,7 +71,7 @@ H5Pset_alignment(hid_t fapl_id, hsize_t threshold, hsize_t alignment)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* return value */
-    
+
     FUNC_ENTER_API(H5Pset_alignment, FAIL);
     H5TRACE3("e","ihh",fapl_id,threshold,alignment);
 
@@ -108,9 +108,9 @@ done:
  *
  * Modifications:
  *
- *		Raymond Lu 
+ *		Raymond Lu
  *		Tuesday, Oct 23, 2001
- *		Changed the file access list design to the new generic 
+ *		Changed the file access list design to the new generic
  *		property list.
  *
  *-------------------------------------------------------------------------
@@ -164,7 +164,7 @@ done:
  *
  * 		Raymond Lu
  * 		Tuesday, Oct 23, 2001
- *		Changed the file access list design to the new generic 
+ *		Changed the file access list design to the new generic
  *		property list.
  *
  *-------------------------------------------------------------------------
@@ -175,7 +175,7 @@ H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id, const void *new_drive
     hid_t driver_id;            /* VFL driver ID */
     void *driver_info;          /* VFL driver info */
     herr_t ret_value=SUCCEED;   /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5P_set_driver, FAIL);
 
     if (NULL==H5I_object_verify(new_driver_id, H5I_VFL))
@@ -240,7 +240,7 @@ done:
  *
  * 		Raymond Lu
  * 		Tuesday, Oct 23, 2001
- *		Changed the file access list design to the new generic 
+ *		Changed the file access list design to the new generic
  *		property list.
  *
  *-------------------------------------------------------------------------
@@ -250,7 +250,7 @@ H5Pset_driver(hid_t plist_id, hid_t new_driver_id, const void *new_driver_info)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* Return value */
-    
+
     FUNC_ENTER_API(H5Pset_driver, FAIL);
     H5TRACE3("e","iix",plist_id,new_driver_id,new_driver_info);
 
@@ -290,15 +290,15 @@ done:
  *		Rewritten to use the virtual file layer.
  *
  * 		Robb Matzke, 1999-08-05
- *		If the driver ID is H5FD_VFD_DEFAULT then substitute the 
+ *		If the driver ID is H5FD_VFD_DEFAULT then substitute the
  *              current value of H5FD_SEC2.
  *
  * 		Quincey Koziol 2000-11-28
  *		Added internal function..
  *
  *		Raymond Lu, 2001-10-23
- *		Changed the file access list design to the new generic 
- *		property list. 
+ *		Changed the file access list design to the new generic
+ *		property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -396,9 +396,9 @@ done:
  *
  *		Raymond Lu
  *		Tuesday, Oct 23, 2001
- *		Changed the file access list design to the new generic 
+ *		Changed the file access list design to the new generic
  *		property list.
- *	
+ *
  *-------------------------------------------------------------------------
  */
 void *
@@ -418,7 +418,7 @@ H5P_get_driver_info(H5P_genplist_t *plist)
     } else {
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access or data transfer property list");
     }
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5P_get_driver_info() */
@@ -445,9 +445,9 @@ done:
  *
  *		Raymond Lu
  *		Tuesday, Oct 23, 2001
- *		Changed the file access list design to the new generic 
+ *		Changed the file access list design to the new generic
  *		property list.
- *	
+ *
  *-------------------------------------------------------------------------
  */
 void *
@@ -463,7 +463,7 @@ H5Pget_driver_info(hid_t plist_id)
 
     if((ret_value=H5P_get_driver_info(plist))==NULL)
         HGOTO_ERROR(H5E_PLIST,H5E_CANTGET,NULL,"can't get driver info");
-    
+
 done:
     FUNC_LEAVE_API(ret_value);
 } /* end H5Pget_driver_info() */
@@ -471,20 +471,20 @@ done:
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_family_offset
- * 
+ *
  * Purpose:     Set offset for family driver.  This file access property
  *              list will be passed to H5Fget_vfd_handle or H5FDget_vfd_handle
  *              to retrieve VFD file handle.
- *              
- * Return:      Success:        Non-negative value. 
- *                              
- *              Failure:        Negative value. 
- *                              
- * Programmer:  Raymond Lu     
- *              Sep 17, 2002 
- *              
+ *
+ * Return:      Success:        Non-negative value.
+ *
+ *              Failure:        Negative value.
+ *
+ * Programmer:  Raymond Lu
+ *              Sep 17, 2002
+ *
  * Modifications:
- * 
+ *
  *-------------------------------------------------------------------------
 */
 herr_t
@@ -504,7 +504,7 @@ H5Pset_family_offset(hid_t fapl_id, hsize_t offset)
     /* Set values */
     if((ret_value=H5P_set_family_offset(plist, offset)) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set family offset");
-                    
+
 done:
     FUNC_LEAVE_API(ret_value);
 }
@@ -512,19 +512,19 @@ done:
 
 /*-------------------------------------------------------------------------
  * Function:    H5P_set_family_offset
- * 
- * Purpose:     Set offset for family driver.  Private function for 
+ *
+ * Purpose:     Set offset for family driver.  Private function for
  *              H5Pset_family_offset
- *              
+ *
  * Return:      Success:        Non-negative value.
- *                              
+ *
  *              Failure:        Negative value.
- *                          
- * Programmer:  Raymond Lu  
+ *
+ * Programmer:  Raymond Lu
  *              Sep 17, 2002
- *              
+ *
  * Modifications:
- * 
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -544,24 +544,24 @@ H5P_set_family_offset(H5P_genplist_t *plist, hsize_t offset)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
- 
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_family_offset
- * 
+ *
  * Purpose:     Get offset for family driver.  This file access property
  *              list will be passed to H5Fget_vfd_handle or H5FDget_vfd_handle
  *              to retrieve VFD file handle.
- *              
+ *
  * Return:      Success:        Non-negative value.
- *                              
+ *
  *              Failure:        Negative value.
- *                              
- * Programmer:  Raymond Lu      
- *              Sep 17, 2002    
- *              
+ *
+ * Programmer:  Raymond Lu
+ *              Sep 17, 2002
+ *
  * Modifications:
- * 
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -569,10 +569,10 @@ H5Pget_family_offset(hid_t fapl_id, hsize_t *offset)
 {
     H5P_genplist_t      *plist;                 /* Property list pointer */
     herr_t              ret_value=SUCCEED;      /* return value */
-                               
+
     FUNC_ENTER_API(H5Pget_family_offset, FAIL);
     H5TRACE2("e","i*h",fapl_id,offset);
-                                            
+
     /* Get the plist structure */
     if(H5P_DEFAULT == fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list");
@@ -581,64 +581,64 @@ H5Pget_family_offset(hid_t fapl_id, hsize_t *offset)
     /* Set values */
     if((ret_value=H5P_get_family_offset(plist, offset)) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get family offset");
-                                                                                                          
-done:               
+
+done:
     FUNC_LEAVE_API(ret_value);
-}   
+}
 
 
 /*-------------------------------------------------------------------------
  * Function:    H5P_get_family_offset
- * 
+ *
  * Purpose:     Get offset for family driver.  Private function for
  *              H5Pget_family_offset
- *              
+ *
  * Return:      Success:        Non-negative value.
- *                              
+ *
  *              Failure:        Negative value.
- *                              
- * Programmer:  Raymond Lu      
- *              Sep 17, 2002    
- *              
+ *
+ * Programmer:  Raymond Lu
+ *              Sep 17, 2002
+ *
  * Modifications:
- * 
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5P_get_family_offset(H5P_genplist_t *plist, hsize_t *offset)
 {
     herr_t      ret_value=SUCCEED;
-                            
+
     FUNC_ENTER_NOAPI(H5P_get_family_offset, FAIL);
-                                    
+
     if( TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
         if(H5P_get(plist, H5F_ACS_FAMILY_OFFSET_NAME, offset) < 0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL,"can't set offset for family file");
-    } else {  
+    } else {
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access or data transfer property list");
-    }    
-                                                                                               
+    }
+
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}   
-                
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_multi_type
- * 
+ *
  * Purpose:     Set data type for multi driver.  This file access property
  *              list will be passed to H5Fget_vfd_handle or H5FDget_vfd_handle
  *              to retrieve VFD file handle.
- *              
+ *
  * Return:      Success:        Non-negative value.
- *                              
+ *
  *              Failure:        Negative value.
- *                          
- * Programmer:  Raymond Lu  
+ *
+ * Programmer:  Raymond Lu
  *              Sep 17, 2002
- *              
+ *
  * Modifications:
- * 
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -658,7 +658,7 @@ H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type)
     /* Set values */
     if((ret_value=H5P_set_multi_type(plist, type)) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set data type for multi driver");
-                                                  
+
 done:
     FUNC_LEAVE_API(ret_value);
 }
@@ -666,19 +666,19 @@ done:
 
 /*-------------------------------------------------------------------------
  * Function:    H5P_set_multi_type
- *  
+ *
  * Purpose:     Set data type for multi file driver.  Private function for
  *              H5Pset_multi_type.
- *              
+ *
  * Return:      Success:        Non-negative value.
- *                              
+ *
  *              Failure:        Negative value.
- *                              
- * Programmer:  Raymond Lu              
+ *
+ * Programmer:  Raymond Lu
  *              Sep 17, 2002
- *              
+ *
  * Modifications:
- * 
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -697,25 +697,25 @@ H5P_set_multi_type(H5P_genplist_t *plist, H5FD_mem_t type)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}               
+}
 
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_multi_type
- * 
+ *
  * Purpose:     Get data type for multi driver.  This file access property
  *              list will be passed to H5Fget_vfd_handle or H5FDget_vfd_handle
  *              to retrieve VFD file handle.
- *              
+ *
  * Return:      Success:        Non-negative value.
- *                              
+ *
  *              Failure:        Negative value.
- *                              
- * Programmer:  Raymond Lu      
- *              Sep 17, 2002    
- *              
+ *
+ * Programmer:  Raymond Lu
+ *              Sep 17, 2002
+ *
  * Modifications:
- * 
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -723,10 +723,10 @@ H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type)
 {
     H5P_genplist_t      *plist;                 /* Property list pointer */
     herr_t              ret_value=SUCCEED;      /* return value */
-                                
+
     FUNC_ENTER_API(H5Pget_multi_type, FAIL);
     H5TRACE2("e","i*Mt",fapl_id,type);
-                                        
+
     /* Get the plist structure */
     if(H5P_DEFAULT == fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list");
@@ -735,46 +735,46 @@ H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type)
     /* Set values */
     if((ret_value=H5P_get_multi_type(plist, type)) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get data type for multi driver");
-                                                                                                                                     
-done:                                              
-    FUNC_LEAVE_API(ret_value);                         
-}   
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
 
 
 /*-------------------------------------------------------------------------
  * Function:    H5P_get_multi_type
- *  
+ *
  * Purpose:     Get data type for multi file driver.  Private function for
  *              H5Pget_multi_type.
- *              
+ *
  * Return:      Success:        Non-negative value.
- *                              
+ *
  *              Failure:        Negative value.
- *                              
- * Programmer:  Raymond Lu      
- *              Sep 17, 2002    
- *              
+ *
+ * Programmer:  Raymond Lu
+ *              Sep 17, 2002
+ *
  * Modifications:
- * 
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5P_get_multi_type(H5P_genplist_t *plist, H5FD_mem_t *type)
 {
     herr_t      ret_value=SUCCEED;
-                           
+
     FUNC_ENTER_NOAPI(H5P_get_multi_type, FAIL);
-                                    
+
     if( TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
-         if(H5P_get(plist, H5F_ACS_MULTI_TYPE_NAME, type) < 0) 
-             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL,"can't get type for multi driver");    
-    } else {    
-         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");    
-    }    
-                                                                                          
+         if(H5P_get(plist, H5F_ACS_MULTI_TYPE_NAME, type) < 0)
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL,"can't get type for multi driver");
+    } else {
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+    }
+
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}               
+}
 
 
 #ifdef H5_WANT_H5_V1_4_COMPAT
@@ -800,10 +800,10 @@ done:
  *
  * Modifications:
  *
- *		Raymond Lu 
+ *		Raymond Lu
  *		Tuesday, Oct 23, 2001
  *		Changed the file access list to the new generic property list.
- *	
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -813,7 +813,7 @@ H5Pset_cache(hid_t plist_id, int mdc_nelmts,
     H5P_genplist_t *plist;      /* Property list pointer */
     size_t rdcc_nelmts=(size_t)_rdcc_nelmts;    /* Work around variable changing size */
     herr_t ret_value=SUCCEED;   /* return value */
-    
+
     FUNC_ENTER_API(H5Pset_cache, FAIL);
     H5TRACE5("e","iIsIszd",plist_id,mdc_nelmts,_rdcc_nelmts,rdcc_nbytes,
              rdcc_w0);
@@ -861,9 +861,9 @@ done:
  *
  *		Raymond Lu
  *		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property 
+ *		Changed the file access list to the new generic property
  *		list.
- *	
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -873,7 +873,7 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
     H5P_genplist_t *plist;      /* Property list pointer */
     size_t rdcc_nelmts;         /* Work around variable changing size */
     herr_t ret_value=SUCCEED;   /* return value */
-    
+
     FUNC_ENTER_API(H5Pget_cache, FAIL);
     H5TRACE5("e","i*Is*Is*z*d",plist_id,mdc_nelmts,_rdcc_nelmts,rdcc_nbytes,
              rdcc_w0);
@@ -926,10 +926,10 @@ done:
  *
  * Modifications:
  *
- *		Raymond Lu 
+ *		Raymond Lu
  *		Tuesday, Oct 23, 2001
  *		Changed the file access list to the new generic property list.
- *	
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -938,7 +938,7 @@ H5Pset_cache(hid_t plist_id, int mdc_nelmts,
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* return value */
-    
+
     FUNC_ENTER_API(H5Pset_cache, FAIL);
     H5TRACE5("e","iIszzd",plist_id,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,rdcc_w0);
 
@@ -985,9 +985,9 @@ done:
  *
  *		Raymond Lu
  *		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property 
+ *		Changed the file access list to the new generic property
  *		list.
- *	
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -996,7 +996,7 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* return value */
-    
+
     FUNC_ENTER_API(H5Pget_cache, FAIL);
     H5TRACE5("e","i*Is*z*z*d",plist_id,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,
              rdcc_w0);
@@ -1049,11 +1049,11 @@ done:
  *
  * Modifications:
  *
- *		Raymond Lu 
+ *		Raymond Lu
  * 		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property 
+ *		Changed the file access list to the new generic property
  *		list.
- *	
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1093,9 +1093,9 @@ done:
  *
  *		Raymond Lu
  *		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property 
+ *		Changed the file access list to the new generic property
  *		list.
- *	
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1128,8 +1128,8 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Raymond Lu 
- *              November, 2001 
+ * Programmer:  Raymond Lu
+ *              November, 2001
  *
  * Modifications:
  *
@@ -1160,12 +1160,12 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_fclose_degree
  *
- * Purpose:     Returns the degree for the file close behavior. 
+ * Purpose:     Returns the degree for the file close behavior.
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Raymond Lu 
- *              November, 2001 
+ * Programmer:  Raymond Lu
+ *              November, 2001
  *
  * Modifications:
  *
@@ -1182,12 +1182,12 @@ herr_t H5Pget_fclose_degree(hid_t plist_id, H5F_close_degree_t *degree)
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
-    if( degree && (H5P_get(plist, H5F_CLOSE_DEGREE_NAME, degree) < 0) ) 
+    if( degree && (H5P_get(plist, H5F_CLOSE_DEGREE_NAME, degree) < 0) )
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file close degree");
 
 done:
     FUNC_LEAVE_API(ret_value);
-} 
+}
 
 
 /*-------------------------------------------------------------------------
@@ -1198,7 +1198,7 @@ done:
  *      Each "raw" metadata block is allocated to be this size and then
  *      specific pieces of metadata (object headers, local heaps, B-trees, etc)
  *      are sub-allocated from this block.
- *      
+ *
  *		The default value is set to 2048 (bytes), indicating that metadata
  *      will be attempted to be bunched together in (at least) 2K blocks in
  *      the file.  Setting the value to 0 with this API function will
@@ -1214,8 +1214,8 @@ done:
  *
  *		Raymond Lu
  *		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property 
- *		list. 
+ *		Changed the file access list to the new generic property
+ *		list.
  *
  *-------------------------------------------------------------------------
  */
@@ -1254,9 +1254,9 @@ done:
  *
  * Modifications:
  *
- *		Raymond Lu 
+ *		Raymond Lu
  * 		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property 
+ *		Changed the file access list to the new generic property
  *		list.
  *
  *-------------------------------------------------------------------------
@@ -1295,7 +1295,7 @@ done:
  *      buffer which is large anough to hold several pieces of the dataset
  *      being read in for hyperslab selections boosts performance by quite a
  *      bit.
- *      
+ *
  *		The default value is set to 64KB, indicating that file I/O for raw data
  *      reads and writes will occur in at least 64KB blocks.
  *      Setting the value to 0 with this API function will turn off the
@@ -1308,9 +1308,9 @@ done:
  *
  * Modifications:
  *
- *		Raymond Lu 
+ *		Raymond Lu
  * 		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property 
+ *		Changed the file access list to the new generic property
  *		list.
  *
  *-------------------------------------------------------------------------
@@ -1321,7 +1321,7 @@ H5Pset_sieve_buf_size(hid_t plist_id, hsize_t _size)
     H5P_genplist_t *plist;      /* Property list pointer */
     size_t size=(size_t)_size;  /* Work around size difference */
     herr_t ret_value=SUCCEED;   /* return value */
-    
+
     FUNC_ENTER_API(H5Pset_sieve_buf_size, FAIL);
     H5TRACE2("e","ih",plist_id,_size);
 
@@ -1351,9 +1351,9 @@ done:
  *
  * Modifications:
  *
- *		Raymond Lu 
+ *		Raymond Lu
  * 		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property 
+ *		Changed the file access list to the new generic property
  *		list.
  *
  *-------------------------------------------------------------------------
@@ -1393,7 +1393,7 @@ done:
  *      buffer which is large anough to hold several pieces of the dataset
  *      being read in for hyperslab selections boosts performance by quite a
  *      bit.
- *      
+ *
  *		The default value is set to 64KB, indicating that file I/O for raw data
  *      reads and writes will occur in at least 64KB blocks.
  *      Setting the value to 0 with this API function will turn off the
@@ -1406,9 +1406,9 @@ done:
  *
  * Modifications:
  *
- *		Raymond Lu 
+ *		Raymond Lu
  * 		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property 
+ *		Changed the file access list to the new generic property
  *		list.
  *
  *-------------------------------------------------------------------------
@@ -1418,7 +1418,7 @@ H5Pset_sieve_buf_size(hid_t plist_id, size_t size)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* return value */
-    
+
     FUNC_ENTER_API(H5Pset_sieve_buf_size, FAIL);
     H5TRACE2("e","iz",plist_id,size);
 
@@ -1448,9 +1448,9 @@ done:
  *
  * Modifications:
  *
- *		Raymond Lu 
+ *		Raymond Lu
  * 		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property 
+ *		Changed the file access list to the new generic property
  *		list.
  *
  *-------------------------------------------------------------------------
@@ -1487,7 +1487,7 @@ done:
  *      Each "small" raw data block is allocated to be this size and then
  *      pieces of raw data which are small enough to fit are sub-allocated from
  *      this block.
- *      
+ *
  *	The default value is set to 2048 (bytes), indicating that raw data
  *      smaller than this value will be attempted to be bunched together in (at
  *      least) 2K blocks in the file.  Setting the value to 0 with this API

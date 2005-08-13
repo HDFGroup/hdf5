@@ -57,9 +57,9 @@ class H5_DLLCPP Attribute : public AbstractDs {
 	virtual ~Attribute();
 
    private:
-	// This function contains the common code that is used by 
-	// getTypeClass and various API functions getXxxType 
-	// defined in AbstractDs for generic datatype and specific 
+	// This function contains the common code that is used by
+	// getTypeClass and various API functions getXxxType
+	// defined in AbstractDs for generic datatype and specific
 	// sub-types
 	virtual hid_t p_get_type() const;
 

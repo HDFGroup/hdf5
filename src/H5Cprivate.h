@@ -51,10 +51,10 @@
 #define H5C_COLLECT_CACHE_STATS	0
 
 /* H5C_COLLECT_CACHE_ENTRY_STATS controls collection of statistics
- * in individual cache entries.  
- * 
- * H5C_COLLECT_CACHE_ENTRY_STATS should only be defined to true if 
- * H5C_COLLECT_CACHE_STATS is also defined to true.  
+ * in individual cache entries.
+ *
+ * H5C_COLLECT_CACHE_ENTRY_STATS should only be defined to true if
+ * H5C_COLLECT_CACHE_STATS is also defined to true.
  */
 #if H5C_COLLECT_CACHE_STATS
 
@@ -109,23 +109,23 @@
  *		Note that the space allocated on disk may not be contiguous.
  */
 
-typedef void *(*H5C_load_func_t)(H5F_t *f, 
-                                 hid_t dxpl_id, 
-                                 haddr_t addr, 
-                                 const void *udata1, 
+typedef void *(*H5C_load_func_t)(H5F_t *f,
+                                 hid_t dxpl_id,
+                                 haddr_t addr,
+                                 const void *udata1,
                                  void *udata2);
-typedef herr_t (*H5C_flush_func_t)(H5F_t *f, 
-                                   hid_t dxpl_id, 
-                                   hbool_t dest, 
-                                   haddr_t addr, 
+typedef herr_t (*H5C_flush_func_t)(H5F_t *f,
+                                   hid_t dxpl_id,
+                                   hbool_t dest,
+                                   haddr_t addr,
                                    void *thing);
-typedef herr_t (*H5C_dest_func_t)(H5F_t *f, 
+typedef herr_t (*H5C_dest_func_t)(H5F_t *f,
                                   void *thing);
-typedef herr_t (*H5C_clear_func_t)(H5F_t *f, 
-                                   void *thing, 
+typedef herr_t (*H5C_clear_func_t)(H5F_t *f,
+                                   void *thing,
                                    hbool_t dest);
-typedef herr_t (*H5C_size_func_t)(const H5F_t *f, 
-                                  const void *thing, 
+typedef herr_t (*H5C_size_func_t)(const H5F_t *f,
+                                  const void *thing,
                                   size_t *size_ptr);
 
 typedef struct H5C_class_t {
@@ -157,11 +157,11 @@ typedef herr_t (*H5C_write_permitted_func_t)(const H5F_t *f,
  *
  * structure H5C_cache_entry_t
  *
- * Instances of the H5C_cache_entry_t structure are used to store cache 
- * entries in a hash table and sometimes in a skip list.  
+ * Instances of the H5C_cache_entry_t structure are used to store cache
+ * entries in a hash table and sometimes in a skip list.
  * See H5SL.c for the particulars of the skip list.
  *
- * In typical application, this structure is the first field in a 
+ * In typical application, this structure is the first field in a
  * structure to be cached.  For historical reasons, the external module
  * is responsible for managing the is_dirty field.  All other fields are
  * managed by the cache.
@@ -191,12 +191,12 @@ typedef herr_t (*H5C_write_permitted_func_t)(const H5F_t *f,
  *
  *		NOTE: For historical reasons, this field is not maintained
  *		      by the cache.  Instead, the module using the cache
- *		      sets this flag when it modifies the entry, and the 
+ *		      sets this flag when it modifies the entry, and the
  *		      flush and clear functions supplied by that module
  *		      reset the dirty when appropriate.
  *
  *		      This is a bit quirky, so we may want to change this
- *		      someday.  However it will require a change in the 
+ *		      someday.  However it will require a change in the
  *		      cache interface.
  *
  * is_protected: Boolean flag indicating whether this entry is protected
@@ -222,63 +222,63 @@ typedef herr_t (*H5C_write_permitted_func_t)(const H5F_t *f,
  *
  * ht_next:	Next pointer used by the hash table to store multiple
  *		entries in a single hash bin.  This field points to the
- *		next entry in the doubly linked list of entries in the 
+ *		next entry in the doubly linked list of entries in the
  *		hash bin, or NULL if there is no next entry.
  *
  * ht_prev:     Prev pointer used by the hash table to store multiple
  *              entries in a single hash bin.  This field points to the
- *              previous entry in the doubly linked list of entries in 
+ *              previous entry in the doubly linked list of entries in
  *		the hash bin, or NULL if there is no previuos entry.
  *
  *
  * Fields supporting replacement policies:
  *
- * The cache must have a replacement policy, and it will usually be 
+ * The cache must have a replacement policy, and it will usually be
  * necessary for this structure to contain fields supporting that policy.
  *
- * While there has been interest in several replacement policies for 
+ * While there has been interest in several replacement policies for
  * this cache, the initial development schedule is tight.  Thus I have
  * elected to support only a modified LRU policy for the first cut.
  *
  * When additional replacement policies are added, the fields in this
- * section will be used in different ways or not at all.  Thus the 
+ * section will be used in different ways or not at all.  Thus the
  * documentation of these fields is repeated for each replacement policy.
- * 
+ *
  * Modified LRU:
- * 
+ *
  * When operating in parallel mode, we must ensure that a read does not
  * cause a write.  If it does, the process will hang, as the write will
  * be collective and the other processes will not know to participate.
  *
  * To deal with this issue, I have modified the usual LRU policy by adding
- * clean and dirty LRU lists to the usual LRU list.  When reading in 
+ * clean and dirty LRU lists to the usual LRU list.  When reading in
  * parallel mode, we evict from the clean LRU list only.  This implies
- * that we must try to ensure that the clean LRU list is reasonably well 
+ * that we must try to ensure that the clean LRU list is reasonably well
  * stocked.  See the comments on H5C_t in H5C.c for more details.
- * 
+ *
  * Note that even if we start with a completely clean cache, a sequence
  * of protects without unprotects can empty the clean LRU list.  In this
- * case, the cache must grow temporarily.  At the next write, we will 
+ * case, the cache must grow temporarily.  At the next write, we will
  * attempt to evict enough entries to get the cache down to its nominal
  * maximum size.
  *
  * The use of the replacement policy fields under the Modified LRU policy
  * is discussed below:
  *
- * next:	Next pointer in either the LRU or the protected list, 
- *		depending on the current value of protected.  If there 
- *		is no next entry on the list, this field should be set 
+ * next:	Next pointer in either the LRU or the protected list,
+ *		depending on the current value of protected.  If there
+ *		is no next entry on the list, this field should be set
  *		to NULL.
  *
- * prev:	Prev pointer in either the LRU or the protected list, 
- *		depending on the current value of protected.  If there 
- *		is no previous entry on the list, this field should be 
+ * prev:	Prev pointer in either the LRU or the protected list,
+ *		depending on the current value of protected.  If there
+ *		is no previous entry on the list, this field should be
  *		set to NULL.
  *
  * aux_next:	Next pointer on either the clean or dirty LRU lists.
  *		This entry should be NULL when protected is true.  When
  *		protected is false, and dirty is true, it should point
- *		to the next item on the dirty LRU list.  When protected 
+ *		to the next item on the dirty LRU list.  When protected
  *		is false, and dirty is false, it should point to the
  *		next item on the clean LRU list.  In either case, when
  *		there is no next item, it should be NULL.
@@ -286,7 +286,7 @@ typedef herr_t (*H5C_write_permitted_func_t)(const H5F_t *f,
  * aux_prev:	Previous pointer on either the clean or dirty LRU lists.
  *		This entry should be NULL when protected is true.  When
  *		protected is false, and dirty is true, it should point
- *		to the previous item on the dirty LRU list.  When protected 
+ *		to the previous item on the dirty LRU list.  When protected
  *		is false, and dirty is false, it should point to the
  *		previous item on the clean LRU list.  In either case, when
  *		there is no previous item, it should be NULL.
@@ -296,7 +296,7 @@ typedef herr_t (*H5C_write_permitted_func_t)(const H5F_t *f,
  *
  * These fields should only be compiled in when both H5C_COLLECT_CACHE_STATS
  * and H5C_COLLECT_CACHE_ENTRY_STATS are true.  When present, they allow
- * collection of statistics on individual cache entries.  
+ * collection of statistics on individual cache entries.
  *
  * accesses:	int32_t containing the number of times this cache entry has
  *		been referenced in its lifetime.
@@ -305,8 +305,8 @@ typedef herr_t (*H5C_write_permitted_func_t)(const H5F_t *f,
  *              been cleared in its life time.
  *
  * flushes:	int32_t containing the number of times this cache entry has
- *              been flushed to file in its life time. 
- *		
+ *              been flushed to file in its life time.
+ *
  ****************************************************************************/
 
 typedef struct H5C_cache_entry_t
@@ -340,7 +340,7 @@ typedef struct H5C_cache_entry_t
 
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
 
-} H5C_cache_entry_t; 
+} H5C_cache_entry_t;
 
 
 /* Typedef for the main structure for the cache (defined in H5C.c) */

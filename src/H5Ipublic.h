@@ -44,7 +44,7 @@ typedef enum {
     H5I_VFL,			/*group ID for virtual file layer	    */
     H5I_GENPROP_CLS,            /*group ID for generic property list classes */
     H5I_GENPROP_LST,            /*group ID for generic property lists       */
-    
+
     H5I_NGROUPS		        /*number of valid groups, MUST BE LAST!	    */
 } H5I_type_t;
 

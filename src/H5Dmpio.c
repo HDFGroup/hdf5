@@ -40,14 +40,14 @@
 static herr_t
 H5D_mpio_spaces_xfer(H5D_io_info_t *io_info, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
-                     void *buf/*out*/, 
+                     void *buf/*out*/,
 		     hbool_t do_write);
 
 /* For irregular hyperslab selection. */
 static herr_t
 H5D_mpio_spaces_span_xfer(H5D_io_info_t *io_info, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
-                     void *buf/*out*/, 
+                     void *buf/*out*/,
 		     hbool_t do_write);
 
 /*-------------------------------------------------------------------------
@@ -102,7 +102,7 @@ H5D_mpio_opt_possible( const H5D_t *dset, const H5S_t *mem_space, const H5S_t *f
         HGOTO_DONE(FALSE);
 
     /* Dataset storage must be contiguous or chunked */
-    if ((flags&H5S_CONV_STORAGE_MASK)!=H5S_CONV_STORAGE_CONTIGUOUS && 
+    if ((flags&H5S_CONV_STORAGE_MASK)!=H5S_CONV_STORAGE_CONTIGUOUS &&
             (flags&H5S_CONV_STORAGE_MASK)!=H5S_CONV_STORAGE_CHUNKED)
         HGOTO_DONE(FALSE);
 
@@ -132,11 +132,11 @@ H5D_mpio_opt_possible( const H5D_t *dset, const H5S_t *mem_space, const H5S_t *f
         if((mpi_rank = H5F_mpi_get_rank(dset->ent.file))<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve MPI rank")
 
-      /* Currently collective chunking storage 
+      /* Currently collective chunking storage
 	 inside HDF5 is supported for either one of the following two cases:
 	 1. All the hyperslabs for one process is inside one chunk.
-	 2. For single hyperslab selection, the number of chunks that covered 
-	    the single selection for all processes should be equal. 
+	 2. For single hyperslab selection, the number of chunks that covered
+	    the single selection for all processes should be equal.
 	    KY, 2004/7/14
       */
 
@@ -145,7 +145,7 @@ H5D_mpio_opt_possible( const H5D_t *dset, const H5S_t *mem_space, const H5S_t *f
 	 space, the collective IO can work. Otherwise, SELECT_POINT will be reached,collective
 	 IO shouldn't work.
 	 Please clarify and correct the code on the following,
-         Quincey said that it was probably okay if only one data space is SCALAR, 
+         Quincey said that it was probably okay if only one data space is SCALAR,
          Still keep the code here until we added more tests later.
 	 Kent */
         if(H5S_SCALAR==H5S_GET_EXTENT_TYPE(mem_space) || H5S_SCALAR ==H5S_GET_EXTENT_TYPE(file_space)) {
@@ -160,7 +160,7 @@ H5D_mpio_opt_possible( const H5D_t *dset, const H5S_t *mem_space, const H5S_t *f
         if(H5S_SELECT_BOUNDS(file_space,startf,endf)==FAIL)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE,FAIL, "invalid check for single selection blocks");
 
-        for(u=0; u < dset->shared->layout.u.chunk.ndims; u++) 
+        for(u=0; u < dset->shared->layout.u.chunk.ndims; u++)
             chunk_dim[u] = dset->shared->layout.u.chunk.dim[u];
 
         /* Case 1: check whether all hyperslab in this process is inside one chunk.
@@ -174,7 +174,7 @@ H5D_mpio_opt_possible( const H5D_t *dset, const H5S_t *mem_space, const H5S_t *f
                 pcheck_hyper = 0;
                 break;
             }
-      
+
         if (MPI_SUCCESS != (mpi_code= MPI_Reduce(&pcheck_hyper,&check_hyper,1,MPI_INT,MPI_LAND,0,comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Reduce failed", mpi_code)
         if (MPI_SUCCESS != (mpi_code= MPI_Bcast(&check_hyper,1,MPI_INT,0,comm)))
@@ -183,13 +183,13 @@ H5D_mpio_opt_possible( const H5D_t *dset, const H5S_t *mem_space, const H5S_t *f
         /*if check_hyper is true, condition for collective IO case is fulfilled, no
          need to do further test. */
         if(check_hyper)
-            HGOTO_DONE(TRUE); 
-    
+            HGOTO_DONE(TRUE);
+
       /* Case 2:Check whether the number of chunks that covered the single hyperslab is the same.
-	 If not,no collective chunk IO. 
+	 If not,no collective chunk IO.
 	 KY, 2004/7/14
       */
-	 
+
         c1 = H5S_SELECT_IS_SINGLE(file_space);
         c2 = H5S_SELECT_IS_SINGLE(mem_space);
 
@@ -210,11 +210,11 @@ H5D_mpio_opt_possible( const H5D_t *dset, const H5S_t *mem_space, const H5S_t *f
             HMPI_GOTO_ERROR(FAIL, "MPI_Reduce failed", mpi_code)
         if (MPI_SUCCESS != (mpi_code= MPI_Reduce(&tnum_chunkf,&min_chunkf,1,MPI_INT,MPI_MIN,0,comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Reduce failed", mpi_code)
-  
+
         /* Let the rank==0 process determine if the same number of chunks will be operated on by all processes */
         if(mpi_rank == 0)
             num_chunks_same = (max_chunkf==min_chunkf);
-                    
+
         /* Broadcast the flag indicating the number of chunks are the same */
         if (MPI_SUCCESS != (mpi_code= MPI_Bcast(&num_chunks_same,1,MPI_INT,0,comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
@@ -324,7 +324,7 @@ H5D_mpio_spaces_xfer(H5D_io_info_t *io_info, size_t elmt_size,
     else {
         haddr_t   chunk_addr; /* for collective chunk IO */
 
-        assert(io_info->dset->shared->layout.type == H5D_CHUNKED); 
+        assert(io_info->dset->shared->layout.type == H5D_CHUNKED);
         chunk_addr=H5D_istore_get_addr(io_info,NULL);
         addr = H5F_BASE_ADDR(io_info->dset->ent.file) + chunk_addr + mpi_file_offset;
     }
@@ -374,11 +374,11 @@ done:
     function until you don't see this line. Nov. 11,2004, KY**/
 
 static herr_t
-H5D_mpio_spaces_span_xfer(H5D_io_info_t *io_info, 
+H5D_mpio_spaces_span_xfer(H5D_io_info_t *io_info,
 			  size_t elmt_size,
-			  const H5S_t *file_space, 
+			  const H5S_t *file_space,
 			  const H5S_t *mem_space,
-			  void *_buf /*out*/, 
+			  void *_buf /*out*/,
 			  hbool_t do_write )
 {
     haddr_t	 addr;                              /* Address of dataset (or selection) within file */
@@ -427,7 +427,7 @@ H5D_mpio_spaces_span_xfer(H5D_io_info_t *io_info,
     printf("mpi_buf_count %d\n",mpi_buf_count);
     /* create the MPI file type */
 
-   if(H5S_SELECT_IS_REGULAR(file_space)== TRUE){ 
+   if(H5S_SELECT_IS_REGULAR(file_space)== TRUE){
      if ( H5S_mpio_space_type( file_space, elmt_size,
 			       /* out: */
 			       &mpi_file_type,
@@ -452,7 +452,7 @@ H5D_mpio_spaces_span_xfer(H5D_io_info_t *io_info,
     else {
         haddr_t   chunk_addr; /* for collective chunk IO */
 
-        assert(io_info->dset->shared->layout.type == H5D_CHUNKED); 
+        assert(io_info->dset->shared->layout.type == H5D_CHUNKED);
         chunk_addr=H5D_istore_get_addr(io_info,NULL);
         addr = H5F_BASE_ADDR(io_info->dset->ent.file) + chunk_addr + mpi_file_offset;
     }
@@ -472,7 +472,7 @@ H5D_mpio_spaces_span_xfer(H5D_io_info_t *io_info,
    if (do_write) {
        if (H5F_block_write(io_info->dset->ent.file, H5FD_MEM_DRAW, addr, mpi_buf_count, io_info->dxpl_id, buf) <0)
 	   HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,"MPI write failed");
-    } 
+    }
    else {
     	if (H5F_block_read (io_info->dset->ent.file, H5FD_MEM_DRAW, addr, mpi_buf_count, io_info->dxpl_id, buf) <0)
 	    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL,"MPI read failed");
@@ -600,9 +600,9 @@ H5D_mpio_spaces_write(H5D_io_info_t *io_info,
  */
 herr_t
 H5D_mpio_spaces_span_read(H5D_io_info_t *io_info,
-			  size_t UNUSED nelmts, 
+			  size_t UNUSED nelmts,
 			  size_t elmt_size,
-			  const H5S_t *file_space, 
+			  const H5S_t *file_space,
 			  const H5S_t *mem_space,
 			  void *buf/*out*/)
 {
@@ -627,7 +627,7 @@ H5D_mpio_spaces_span_read(H5D_io_info_t *io_info,
  * Programmer:	KY
  * Note:        Don't call this funtion until you don't see this line.
  *              KY,  11/11/04
-                 
+
  *
  * Modifications:
  *
@@ -642,9 +642,9 @@ H5D_mpio_spaces_span_read(H5D_io_info_t *io_info,
  */
 herr_t
 H5D_mpio_spaces_span_write(H5D_io_info_t *io_info,
-			   size_t UNUSED nelmts, 
+			   size_t UNUSED nelmts,
 			   size_t elmt_size,
-			   const H5S_t *file_space, 
+			   const H5S_t *file_space,
 			   const H5S_t *mem_space,
 			   const void *buf)
 {

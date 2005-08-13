@@ -12,13 +12,13 @@
   * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*  
+/*
  *   This example shows how to work with extendible dataset.
  *   In the current version of the library dataset MUST be
  *   chunked.
- *   
+ *
  */
- 
+
 #include <string>
 
 #ifdef OLD_HEADER_FILENAME
@@ -52,18 +52,18 @@ int main (void)
       Exception::dontPrint();
 
       /*
-       * Create the data space with unlimited dimensions. 
+       * Create the data space with unlimited dimensions.
        */
-      hsize_t      dims[2]  = { 3, 3};  // dataset dimensions at creation 
+      hsize_t      dims[2]  = { 3, 3};  // dataset dimensions at creation
       hsize_t      maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
-      DataSpace mspace1( RANK, dims, maxdims); 
+      DataSpace mspace1( RANK, dims, maxdims);
 
       /*
        * Create a new file. If file exists its contents will be overwritten.
        */
       H5File file( FILE_NAME, H5F_ACC_TRUNC );
 
-      /* 
+      /*
        * Modify dataset creation properties, i.e. enable chunking.
        */
       DSetCreatPropList cparms;
@@ -87,8 +87,8 @@ int main (void)
        * Extend the dataset. This call assures that dataset is at least 3 x 3.
        */
       hsize_t      size[2];
-      size[0]   = 3; 
-      size[1]   = 3; 
+      size[0]   = 3;
+      size[1]   = 3;
       dataset.extend( size );
 
       /*
@@ -98,24 +98,24 @@ int main (void)
       hsize_t     offset[2];
       offset[0] = 0;
       offset[1] = 0;
-      hsize_t      dims1[2] = { 3, 3};            /* data1 dimensions */ 
-      fspace1.selectHyperslab( H5S_SELECT_SET, dims1, offset );  
+      hsize_t      dims1[2] = { 3, 3};            /* data1 dimensions */
+      fspace1.selectHyperslab( H5S_SELECT_SET, dims1, offset );
 
       /*
        * Write the data to the hyperslab.
        */
       int       data1[3][3] = { {1, 1, 1},       /* data to write */
 				{1, 1, 1},
-				{1, 1, 1} };        
+				{1, 1, 1} };
       dataset.write( data1, PredType::NATIVE_INT, mspace1, fspace1 );
 
       /*
        * Extend the dataset. Dataset becomes 10 x 3.
        */
-      hsize_t   dims2[2] = { 7, 1};            /* data2 dimensions */  
+      hsize_t   dims2[2] = { 7, 1};            /* data2 dimensions */
       dims[0]   = dims1[0] + dims2[0];
-      size[0]   = dims[0];  
-      size[1]   = dims[1]; 
+      size[0]   = dims[0];
+      size[1]   = dims[1];
       dataset.extend( size );
 
       /*
@@ -124,12 +124,12 @@ int main (void)
       DataSpace fspace2 = dataset.getSpace ();
       offset[0] = 3;
       offset[1] = 0;
-      fspace2.selectHyperslab( H5S_SELECT_SET, dims2, offset );  
+      fspace2.selectHyperslab( H5S_SELECT_SET, dims2, offset );
 
       /*
        * Define memory space
        */
-      DataSpace mspace2( RANK, dims2 ); 
+      DataSpace mspace2( RANK, dims2 );
 
       /*
        * Write the data to the hyperslab.
@@ -140,10 +140,10 @@ int main (void)
       /*
        * Extend the dataset. Dataset becomes 10 x 5.
        */
-      hsize_t   dims3[2] = { 2, 2};            /* data3 dimensions */ 
+      hsize_t   dims3[2] = { 2, 2};            /* data3 dimensions */
       dims[1]   = dims1[1] + dims3[1];
-      size[0]   = dims[0];  
-      size[1]   = dims[1]; 
+      size[0]   = dims[0];
+      size[1]   = dims[1];
       dataset.extend( size );
 
       /*
@@ -152,12 +152,12 @@ int main (void)
       DataSpace fspace3 = dataset.getSpace ();
       offset[0] = 0;
       offset[1] = 3;
-      fspace3.selectHyperslab( H5S_SELECT_SET, dims3, offset );  
+      fspace3.selectHyperslab( H5S_SELECT_SET, dims3, offset );
 
       /*
        * Define memory space.
        */
-      DataSpace mspace3( RANK, dims3 ); 
+      DataSpace mspace3( RANK, dims3 );
 
       /*
        * Write the data to the hyperslab.
@@ -178,7 +178,7 @@ int main (void)
       dataset.read( data_out, PredType::NATIVE_INT );
       /*
        * Resulting dataset
-       * 
+       *
        *	 1 1 1 3 3
        *	 1 1 1 3 3
        *	 1 1 1 0 0
@@ -229,4 +229,4 @@ int main (void)
       return -1;
    }
    return 0;
-}       
+}

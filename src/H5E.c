@@ -336,7 +336,7 @@ H5E_get_stack(void)
  *
  *		Automatic stack traversal is always in the H5E_WALK_DOWNWARD
  *		direction.
- *		
+ *
  * See Also:	H5Ewalk()
  *
  * Return:	Non-negative on success/Negative on failure
@@ -360,7 +360,7 @@ H5Eset_auto(H5E_auto_t func, void *client_data)
     /* Get the thread-specific error stack */
     if((estack = H5E_get_my_stack())==NULL) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
-    
+
     /* Set the automatic error reporting info */
     estack->auto_func = func;
     estack->auto_data = client_data;
@@ -398,7 +398,7 @@ H5Eget_auto(H5E_auto_t *func, void **client_data)
     /* Get the thread-specific error stack */
     if((estack = H5E_get_my_stack())==NULL) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
-    
+
     /* Set the automatic error reporting info */
     if (func) *func = estack->auto_func;
     if (client_data) *client_data = estack->auto_data;
@@ -463,11 +463,11 @@ H5Eprint(FILE *stream)
 {
     H5E_t	*estack = H5E_get_my_stack ();
     herr_t	ret_value = FAIL;
-    
+
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Eprint, FAIL)
     /*NO TRACE*/
-    
+
     if (!stream) stream = stderr;
     fprintf (stream, "HDF5-DIAG: Error detected in %s ", H5_lib_vers_info_g);
     /* try show the process or thread id in multiple processes cases*/
@@ -489,7 +489,7 @@ H5Eprint(FILE *stream)
     HDfputc ('\n', stream);
 
     ret_value = H5E_walk (H5E_WALK_DOWNWARD, H5E_walk_cb, (void*)stream);
-    
+
 done:
     FUNC_LEAVE_API(ret_value)
 }
@@ -613,7 +613,7 @@ H5Eget_major (H5E_major_t n)
 {
     unsigned	i;
     const char *ret_value="Invalid major error number";
-    
+
     /*
      * WARNING: Do not call the FUNC_ENTER() or FUNC_LEAVE() macros since
      *		they might interact badly with the error stack.  We are
@@ -654,7 +654,7 @@ H5Eget_minor (H5E_minor_t n)
 {
     unsigned	i;
     const char *ret_value="Invalid minor error number";
-    
+
     /*
      * WARNING: Do not call the FUNC_ENTER() or FUNC_LEAVE() macros since
      *		they might interact badly with the error stack.  We are
@@ -700,7 +700,7 @@ H5E_push(H5E_major_t maj_num, H5E_minor_t min_num, const char *function_name,
 	 const char *file_name, unsigned line, const char *desc)
 {
     H5E_t	*estack = H5E_get_my_stack ();
-    
+
     /*
      * WARNING: We cannot call HERROR() from within this function or else we
      *		could enter infinite recursion.  Furthermore, we also cannot
@@ -731,7 +731,7 @@ H5E_push(H5E_major_t maj_num, H5E_minor_t min_num, const char *function_name,
 	estack->slot[estack->nused].desc = desc;
 	estack->nused++;
     }
-    
+
     FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
@@ -763,7 +763,7 @@ H5Epush(const char *file, const char *func, unsigned line, H5E_major_t maj,
 	H5E_minor_t min, const char *str)
 {
     herr_t	ret_value;
-    
+
     FUNC_ENTER_API(H5Epush, FAIL)
     H5TRACE6("e","ssIuEjEns",file,func,line,maj,min,str);
 
@@ -855,7 +855,7 @@ H5E_walk (H5E_direction_t direction, H5E_walk_t func, void *client_data)
 	    status = (func)(estack->nused-(i+1), estack->slot+i, client_data);
 	}
     }
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -863,23 +863,23 @@ done:
 
 /*-------------------------------------------------------------------------
  * Function:    H5E_dump_api_stack
- *      
+ *
  * Purpose:     Private function to dump the error stack during an error in
  *              an API function if a callback function is defined for the
- *              current error stack.    
- *      
+ *              current error stack.
+ *
  * Return:      Non-negative on success/Negative on failure
- * 
+ *
  * Programmer:  Quincey Koziol
  *              Thursday, January 20, 2005
  *
  * Modifications:
- *  
+ *
  *-------------------------------------------------------------------------
- */ 
-herr_t  
+ */
+herr_t
 H5E_dump_api_stack(int is_api)
-{       
+{
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5E_dump_api_stack, FAIL)

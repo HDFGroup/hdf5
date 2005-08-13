@@ -62,7 +62,7 @@ static int test_dsets( void )
  char    data_char_out[DIM];
  short   data_short_in[DIM]   = {1,2,3,4,5,6};
  short   data_short_out[DIM];
- int     data_int_in[DIM]     = {1,2,3,4,5,6};   
+ int     data_int_in[DIM]     = {1,2,3,4,5,6};
  int     data_int_out[DIM];
  long    data_long_in[DIM]    = {1,2,3,4,5,6};
  long    data_long_out[DIM];
@@ -74,7 +74,7 @@ static int test_dsets( void )
 	char    data_string_out[20];
  int     i;
 
- 
+
  /* Create a new file using default properties. */
  file_id = H5Fcreate( FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
 
@@ -91,13 +91,13 @@ static int test_dsets( void )
 
  /* Read dataset using the basic HDF5 API */
 
- if ( ( dataset_id = H5Dopen ( file_id, DSET0_NAME) ) < 0 ) 
+ if ( ( dataset_id = H5Dopen ( file_id, DSET0_NAME) ) < 0 )
   goto out;
 
- if ( H5Dread ( dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_int_out ) < 0 ) 
+ if ( H5Dread ( dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_int_out ) < 0 )
   goto out;
 
- if ( H5Dclose( dataset_id ) < 0 ) 
+ if ( H5Dclose( dataset_id ) < 0 )
   goto out;
 
  for (i = 0; i < DIM; i++)
@@ -110,7 +110,7 @@ static int test_dsets( void )
  PASSED();
 
 /*-------------------------------------------------------------------------
- * read using the LT function H5LTread_dataset 
+ * read using the LT function H5LTread_dataset
  *-------------------------------------------------------------------------
  */
 
@@ -127,7 +127,7 @@ static int test_dsets( void )
  }
 
  PASSED();
- 
+
 /*-------------------------------------------------------------------------
  * test the H5LTmake_dataset_ functions
  *-------------------------------------------------------------------------
@@ -135,7 +135,7 @@ static int test_dsets( void )
 
 
 /*-------------------------------------------------------------------------
- * H5LTmake_dataset_char 
+ * H5LTmake_dataset_char
  *-------------------------------------------------------------------------
  */
 
@@ -171,7 +171,7 @@ static int test_dsets( void )
 
 
 /*-------------------------------------------------------------------------
- * H5LTmake_dataset_short 
+ * H5LTmake_dataset_short
  *-------------------------------------------------------------------------
  */
 
@@ -206,7 +206,7 @@ static int test_dsets( void )
  PASSED();
 
 /*-------------------------------------------------------------------------
- * H5LTmake_dataset_int 
+ * H5LTmake_dataset_int
  *-------------------------------------------------------------------------
  */
 
@@ -219,14 +219,14 @@ static int test_dsets( void )
  /* Read dataset */
  if ( H5LTread_dataset( file_id, DSET3_NAME, H5T_NATIVE_INT, data_int_out ) < 0 )
   goto out;
- 
+
  for (i = 0; i < DIM; i++)
  {
   if ( data_int_in[i] != data_int_out[i] ) {
     goto out;
   }
  }
- 
+
  /* Read dataset */
  if ( H5LTread_dataset_int( file_id, DSET3_NAME, data_int_out ) < 0 )
   goto out;
@@ -242,7 +242,7 @@ static int test_dsets( void )
 
 
 /*-------------------------------------------------------------------------
- * H5LTmake_dataset_long 
+ * H5LTmake_dataset_long
  *-------------------------------------------------------------------------
  */
 
@@ -278,7 +278,7 @@ static int test_dsets( void )
 
 
 /*-------------------------------------------------------------------------
- * H5LTmake_dataset_float 
+ * H5LTmake_dataset_float
  *-------------------------------------------------------------------------
  */
 
@@ -314,7 +314,7 @@ static int test_dsets( void )
 
 
 /*-------------------------------------------------------------------------
- * H5LTmake_dataset_double 
+ * H5LTmake_dataset_double
  *-------------------------------------------------------------------------
  */
 
@@ -327,7 +327,7 @@ static int test_dsets( void )
  /* Read dataset */
  if ( H5LTread_dataset( file_id, DSET6_NAME, H5T_NATIVE_DOUBLE, data_double_out ) < 0 )
   goto out;
- 
+
  for (i = 0; i < DIM; i++)
  {
   if ( data_double_in[i] != data_double_out[i] ) {
@@ -350,7 +350,7 @@ static int test_dsets( void )
 
 
 /*-------------------------------------------------------------------------
- * H5LTmake_dataset_string 
+ * H5LTmake_dataset_string
  *-------------------------------------------------------------------------
  */
 
@@ -363,17 +363,17 @@ static int test_dsets( void )
  /* Read dataset */
  if ( H5LTread_dataset_string(file_id,DSET7_NAME,data_string_out) < 0 )
   goto out;
- 
-	if ( strcmp(data_string_in,data_string_out) != 0 ) 
-		goto out;
- 
 
- 
+	if ( strcmp(data_string_in,data_string_out) != 0 )
+		goto out;
+
+
+
 /*-------------------------------------------------------------------------
  * end tests
  *-------------------------------------------------------------------------
  */
- 
+
  /* Close the file. */
  H5Fclose( file_id );
 
@@ -399,7 +399,7 @@ static int test_attr( void )
  hid_t   file_id;
  hid_t   dataset_id;
  hid_t   group_id;
- hid_t   space_id;  
+ hid_t   space_id;
  hsize_t dims[1] = { 5 };
 
  /* Create a new file using default properties. */
@@ -414,7 +414,7 @@ static int test_attr( void )
  if ((space_id = H5Screate_simple( 1, dims, NULL ))<0) goto out;
 
  /* Create the dataset */
- if ((dataset_id = H5Dcreate( file_id , "dset", H5T_NATIVE_INT, space_id, 
+ if ((dataset_id = H5Dcreate( file_id , "dset", H5T_NATIVE_INT, space_id,
   H5P_DEFAULT ))<0) goto out;
 
  /* Close */
@@ -426,33 +426,33 @@ static int test_attr( void )
  */
 
  /* Create a group. */
- if ((group_id = H5Gcreate( file_id, "grp", 0 ))<0) 
+ if ((group_id = H5Gcreate( file_id, "grp", 0 ))<0)
   goto out;
-  
+
  /* Close */
  H5Gclose( group_id );
-	
+
 /*-------------------------------------------------------------------------
- * 
+ *
  * Create attributes in the root group
-	* Note that we are calling the H5LTset_attribute functions with the name "." 
- * 
+	* Note that we are calling the H5LTset_attribute functions with the name "."
+ *
  *-------------------------------------------------------------------------
  */
  if (make_attributes( file_id, "." )<0)
   goto out;
-	
+
 /*-------------------------------------------------------------------------
- * 
+ *
  * Create attributes in the dataset "dset"
- * 
+ *
  *-------------------------------------------------------------------------
  */
  if (make_attributes( file_id, "dset" )<0)
   goto out;
-	
+
 /*-------------------------------------------------------------------------
- * 
+ *
  * Create attributes in the group "grp"
 	*
  *-------------------------------------------------------------------------
@@ -519,7 +519,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
  */
 
  TESTING("H5LTset_attribute_string");
- 
+
  /* Set the attribute */
  if ( H5LTset_attribute_string( loc_id, obj_name, ATTR1_NAME, attr_str_in ) < 0 )
   return -1;
@@ -533,12 +533,12 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
 
 	TESTING("H5LTget_attribute_string");
 
- 
+
  /* Get the attribute */
  if ( H5LTget_attribute_string( loc_id, obj_name, ATTR1_NAME, attr_str_out ) < 0 )
   return -1;
 
- if ( strcmp( attr_str_in, attr_str_out ) != 0 ) 
+ if ( strcmp( attr_str_in, attr_str_out ) != 0 )
  {
   return -1;
  }
@@ -994,13 +994,13 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
 
 
 /*-------------------------------------------------------------------------
- * H5LTget_attribute_ndims test 
+ * H5LTget_attribute_ndims test
  *-------------------------------------------------------------------------
  */
 
 
  TESTING("H5LTget_attribute_ndims");
- 
+
  if ( H5LTget_attribute_ndims( loc_id, obj_name, ATTR2_NAME, &rank_out ) < 0 )
   return -1;
 
@@ -1011,7 +1011,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
  PASSED();
 
 /*-------------------------------------------------------------------------
- * H5LTget_attribute_info test 
+ * H5LTget_attribute_info test
  *-------------------------------------------------------------------------
  */
 
@@ -1060,12 +1060,12 @@ int main( void )
  /* check for errors */
  if (nerrors)
   goto error;
- 
+
  return 0;
- 
+
 error:
  return 1;
 
- 
+
 }
 

@@ -32,7 +32,7 @@
  *      Turned on "H5AC_SORT_BY_ADDR"
  *
  *	John Mainzer, 5/19/04
- * 	Complete redesign and rewrite.  See the header comments for 
+ * 	Complete redesign and rewrite.  See the header comments for
  *      H5AC_t for an overview of what is going on.
  *
  *	John Mainzer, 6/4/04
@@ -81,7 +81,7 @@ hid_t H5AC_ind_dxpl_id=(-1);
  * Private file-scope function declarations:
  */
 
-static herr_t H5AC_check_if_write_permitted(const H5F_t *f, 
+static herr_t H5AC_check_if_write_permitted(const H5F_t *f,
                                             hid_t dxpl_id,
                                             hbool_t * write_permitted_ptr);
 
@@ -313,10 +313,10 @@ H5AC_term_interface(void)
  * Modifications:
  *
  *		Complete re-design and re-write to support the re-designed
- *		metadata cache.  
+ *		metadata cache.
  *
- *		At present, the size_hint is ignored, and the 
- *		max_cache_size and min_clean_size fields are hard 
+ *		At present, the size_hint is ignored, and the
+ *		max_cache_size and min_clean_size fields are hard
  *		coded.  This should be fixed, but a parameter
  *		list change will be required, so I will leave it
  *		for now.
@@ -326,7 +326,7 @@ H5AC_term_interface(void)
  *						JRM - 4/28/04
  *
  *		Reworked the function again after abstracting its guts to
- *		the similar function in H5C.c.  The function is now a 
+ *		the similar function in H5C.c.  The function is now a
  *		wrapper for H5C_create().
  *						JRM - 6/4/04
  *-------------------------------------------------------------------------
@@ -390,14 +390,14 @@ done:
  * Modifications:
  *
  *		Complete re-design and re-write to support the re-designed
- *		metadata cache.  
+ *		metadata cache.
  *                                                 JRM - 5/12/04
  *
  *		Abstracted the guts of the function to H5C_dest() in H5C.c,
  *		and then re-wrote the function as a wrapper for H5C_dest().
  *
  *                                                 JRM - 6/7/04
- *		
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -430,34 +430,34 @@ done:
  * Function:    H5AC_flush
  *
  * Purpose:	Flush (and possibly destroy) the metadata cache associated
- *		with the specified file.  
+ *		with the specified file.
  *
  *		This is a re-write of an earlier version of the function
  *		which was reputedly capable of flushing (and destroying
- *		if requested) individual entries, individual entries if 
- *		they match the supplied type, all entries of a given type, 
- *		as well as all entries in the cache.  
+ *		if requested) individual entries, individual entries if
+ *		they match the supplied type, all entries of a given type,
+ *		as well as all entries in the cache.
  *
  *		As only this last capability is actually used at present,
- *		I have not implemented the other capabilities in this 
- *		version of the function.  
+ *		I have not implemented the other capabilities in this
+ *		version of the function.
  *
- *		The type and addr parameters are retained to avoid source 
- *		code changed, but values other than NULL and HADDR_UNDEF 
- *		respectively are errors.  If all goes well, they should 
+ *		The type and addr parameters are retained to avoid source
+ *		code changed, but values other than NULL and HADDR_UNDEF
+ *		respectively are errors.  If all goes well, they should
  *		be removed, and the function renamed to something more
  *		descriptive -- perhaps H5AC_flush_cache.
  *
  *		If the cache contains protected entries, the function will
- *		fail, as protected entries cannot be flushed.  However 
- *		all unprotected entries should be flushed before the 
+ *		fail, as protected entries cannot be flushed.  However
+ *		all unprotected entries should be flushed before the
  *		function returns failure.
- *		
- *		For historical purposes, the original version of the 
+ *
+ *		For historical purposes, the original version of the
  *		purpose section is reproduced below:
  *
  *              ============ Original Version of "Purpose:" ============
- *		
+ *
  *              Flushes (and destroys if DESTROY is non-zero) the specified
  *              entry from the cache.  If the entry TYPE is CACHE_FREE and
  *              ADDR is HADDR_UNDEF then all types of entries are
@@ -500,10 +500,10 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, unsigned flags)
     HDassert(f);
     HDassert(f->shared->cache);
 
-    status = H5C_flush_cache(f, 
-                             dxpl_id, 
-                             H5AC_noblock_dxpl_id, 
-                             f->shared->cache, 
+    status = H5C_flush_cache(f,
+                             dxpl_id,
+                             H5AC_noblock_dxpl_id,
+                             f->shared->cache,
                              flags);
 
     if ( status < 0 ) {
@@ -550,8 +550,8 @@ done:
  *		at the beginning of the function.
  *
  *		JRM - 6/7/04
- *		Abstracted the guts of the function to H5C_insert_entry() 
- *		in H5C.c, and then re-wrote the function as a wrapper for 
+ *		Abstracted the guts of the function to H5C_insert_entry()
+ *		in H5C.c, and then re-wrote the function as a wrapper for
  *		H5C_insert_entry().
  *
  *-------------------------------------------------------------------------
@@ -584,7 +584,7 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *
 
     result = H5C_insert_entry(f,
                               dxpl_id,
-                              H5AC_noblock_dxpl_id, 
+                              H5AC_noblock_dxpl_id,
                               cache,
                               type,
                               addr,
@@ -626,8 +626,8 @@ done:
  *		Complete rewrite for the new meta-data cache.
  *
  *		JRM - 6/7/04
- *		Abstracted the guts of the function to H5C_rename_entry() 
- *		in H5C.c, and then re-wrote the function as a wrapper for 
+ *		Abstracted the guts of the function to H5C_rename_entry()
+ *		in H5C.c, and then re-wrote the function as a wrapper for
  *		H5C_rename_entry().
  *
  *-------------------------------------------------------------------------
@@ -668,7 +668,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5AC_protect
  *
- * Purpose:     If the target entry is not in the cache, load it.  If 
+ * Purpose:     If the target entry is not in the cache, load it.  If
  *		necessary, attempt to evict one or more entries to keep
  *		the cache within its maximum size.
  *
@@ -676,8 +676,8 @@ done:
  *		to the caller.  The caller must call H5AC_unprotect() when
  *		finished with the entry.
  *
- *		While it is protected, the entry may not be either evicted 
- *		or flushed -- nor may it be accessed by another call to 
+ *		While it is protected, the entry may not be either evicted
+ *		or flushed -- nor may it be accessed by another call to
  *		H5AC_protect.  Any attempt to do so will result in a failure.
  *
  *		This comment is a re-write of the original Purpose: section.
@@ -718,19 +718,19 @@ done:
  *		Purpose section above.
  *
  *		JRM - 6/7/04
- *		Abstracted the guts of the function to H5C_protect() 
- *		in H5C.c, and then re-wrote the function as a wrapper for 
+ *		Abstracted the guts of the function to H5C_protect()
+ *		in H5C.c, and then re-wrote the function as a wrapper for
  *		H5C_protect().
  *
  *-------------------------------------------------------------------------
  */
 void *
-H5AC_protect(H5F_t *f, 
-             hid_t dxpl_id, 
-             const H5AC_class_t *type, 
+H5AC_protect(H5F_t *f,
+             hid_t dxpl_id,
+             const H5AC_class_t *type,
              haddr_t addr,
-	     const void *udata1, 
-             void *udata2, 
+	     const void *udata1,
+             void *udata2,
              H5AC_protect_t
              UNUSED
              rw)
@@ -751,7 +751,7 @@ H5AC_protect(H5F_t *f,
 
     thing = H5C_protect(f,
                         dxpl_id,
-                        H5AC_noblock_dxpl_id, 
+                        H5AC_noblock_dxpl_id,
                         f->shared->cache,
                         type,
                         addr,
@@ -781,15 +781,15 @@ done:
  *		and give it back to the replacement policy.
  *
  *		The TYPE and ADDR arguments must be the same as those in
- *		the corresponding call to H5AC_protect() and the THING 
- *		argument must be the value returned by that call to 
+ *		the corresponding call to H5AC_protect() and the THING
+ *		argument must be the value returned by that call to
  *		H5AC_protect().
  *
  *		If the deleted flag is TRUE, simply remove the target entry
- *		from the cache, clear it, and free it without writing it to 
+ *		from the cache, clear it, and free it without writing it to
  *		disk.
  *
- *		This verion of the function is a complete re-write to 
+ *		This verion of the function is a complete re-write to
  *		use the new metadata cache.  While there isn't all that
  *		much difference between the old and new Purpose sections,
  *		the original version is given below.
@@ -828,8 +828,8 @@ done:
  *		Complete re-write for the new metadata cache.
  *
  *		JRM - 6/7/04
- *		Abstracted the guts of the function to H5C_unprotect() 
- *		in H5C.c, and then re-wrote the function as a wrapper for 
+ *		Abstracted the guts of the function to H5C_unprotect()
+ *		in H5C.c, and then re-wrote the function as a wrapper for
  *		H5C_unprotect().
  *
  *-------------------------------------------------------------------------
@@ -854,7 +854,7 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, 
 
     result = H5C_unprotect(f,
                            dxpl_id,
-                           H5AC_noblock_dxpl_id, 
+                           H5AC_noblock_dxpl_id,
                            f->shared->cache,
                            type,
                            addr,
@@ -889,8 +889,8 @@ done:
  *		Re-write to support the new metadata cache.
  *
  *		JRM - 6/7/04
- *		Abstracted the guts of the function to H5C_stats() 
- *		in H5C.c, and then re-wrote the function as a wrapper for 
+ *		Abstracted the guts of the function to H5C_stats()
+ *		in H5C.c, and then re-wrote the function as a wrapper for
  *		H5C_stats().
  *
  *-------------------------------------------------------------------------
@@ -921,10 +921,10 @@ done:
  *
  * Function:    H5AC_check_if_write_permitted
  *
- * Purpose:     Determine if a write is permitted under the current 
- *		circumstances, and set *write_permitted_ptr accordingly.  
- *		As a general rule it is, but when we are running in parallel 
- *		mode with collective I/O, we must ensure that a read cannot 
+ * Purpose:     Determine if a write is permitted under the current
+ *		circumstances, and set *write_permitted_ptr accordingly.
+ *		As a general rule it is, but when we are running in parallel
+ *		mode with collective I/O, we must ensure that a read cannot
  *		cause a write.
  *
  *		In the event of failure, the value of *write_permitted_ptr

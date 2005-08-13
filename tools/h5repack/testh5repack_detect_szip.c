@@ -24,15 +24,15 @@
  * Purpose: detects szip encoder, prints "yes" or "no" to stdout.
  *          Intended to be used in test scripts.
  *
- * Return: 
+ * Return:
  *
- * Programmer: 
+ * Programmer:
  *
- * Date: 
+ * Date:
  *
  * Comments:
  *
- * Modifications: 
+ * Modifications:
  *
  *-------------------------------------------------------------------------
  */

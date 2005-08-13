@@ -49,11 +49,11 @@ static int write_text_attribute(hid_t dataset_id , const char *attr_name,
                              attr_dataspace_id , H5P_DEFAULT);
 
     /* write out the attribute data */
-    if (H5Awrite(attr_attr_id , attr_type_id , attr_value) < 0) 
+    if (H5Awrite(attr_attr_id , attr_type_id , attr_value) < 0)
         return -1;
 
     /* close the attribute */
-    if (H5Aclose(attr_attr_id) < 0) 
+    if (H5Aclose(attr_attr_id) < 0)
         return -1;
 
     /* close the dataspace */
@@ -192,12 +192,12 @@ WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName , char *GIFFileName)
             return -1;
         }
 
-        /* write the reference out */	
+        /* write the reference out */
         if (H5Dwrite(ref_dataset_id , H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL , H5P_DEFAULT, &pal_ref) < 0) {
             fprintf(stderr , "Unable to write Palette Reference");
             return -1;
         }
-        
+
         /* close dataset */
         if (H5Dclose(ref_dataset_id) < 0) {
             fprintf(stderr , "Unable to close palette dataset.\n");
@@ -271,7 +271,7 @@ WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName , char *GIFFileName)
         /* This info is available at http://hdf.ncsa.uiuc.edu/HDF5/doc/ImageSpec.html */
         /* The following attributes must be set for each image:
         ** ---------------------------------------
-        ** Attribute Name			Value 
+        ** Attribute Name			Value
         **		CLASS				IMAGE
         **		IMAGE_VERSION		1.0
         **		IMAGE_SUBCLASS		IMAGE_BITMAP
@@ -324,7 +324,7 @@ WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName , char *GIFFileName)
         ** Attribute: PALETTE
         ** Value	: Reference to Palette
         *****************************************/
-        
+
         /**** MAKE SURE PALETTE EXISTS!!! ****/
         if (gifHead.PackedField & 0x80) {
             /* global palette exists */

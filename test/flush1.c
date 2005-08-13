@@ -65,7 +65,7 @@ main(void)
     /* Create the file */
     h5_fixname(FILENAME[0], fapl, name, sizeof name);
     if ((file=H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) goto error;
-    
+
     /* Create a chunked dataset */
     if ((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5Pset_chunk(dcpl, 2, ch_size)<0) goto error;

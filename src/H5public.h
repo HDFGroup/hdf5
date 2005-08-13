@@ -43,8 +43,8 @@
 #   include <stdint.h>		/*for C9x types				     */
 #endif
 #endif
-#ifdef H5_HAVE_INTTYPES_H 
-#   include <inttypes.h>        /* For uint64_t on some platforms            */ 
+#ifdef H5_HAVE_INTTYPES_H
+#   include <inttypes.h>        /* For uint64_t on some platforms            */
 #endif
 #ifdef H5_HAVE_STDDEF_H
 #   include <stddef.h>
@@ -203,7 +203,7 @@ typedef ssize_t			hssize_t;
 #   define H5_PRINTF_HADDR_FMT  "%lu"
 #elif H5_SIZEOF_HADDR_T ==H5_SIZEOF_LONG_LONG
 #   define H5_PRINTF_HADDR_FMT  "%"H5_PRINTF_LL_WIDTH"u"
-#elif H5_SIZEOF_HADDR_T ==H5_SIZEOF___INT64 
+#elif H5_SIZEOF_HADDR_T ==H5_SIZEOF___INT64
 #   define H5_PRINTF_HADDR_FMT  "%"H5_PRINTF_LL_WIDTH"u"
 #else
 #   error "nothing appropriate for H5_PRINTF_HADDR_FMT"

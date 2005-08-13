@@ -150,7 +150,7 @@ typedef struct H5FD_mpiposix_t {
 /*
  * These macros check for overflow of various quantities.  These macros
  * assume that file_offset_t is signed and haddr_t and size_t are unsigned.
- * 
+ *
  * ADDR_OVERFLOW:	Checks whether a file address of type `haddr_t'
  *			is too large to be represented by the second argument
  *			of the file seek function.
@@ -243,7 +243,7 @@ NAME
    H5FD_mpiposix_init_interface -- Initialize interface-specific information
 USAGE
     herr_t H5FD_mpiposix_init_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -358,7 +358,7 @@ H5Pset_fapl_mpiposix(hid_t fapl_id, MPI_Comm comm)
     H5FD_mpiposix_fapl_t	fa;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value;
-    
+
     FUNC_ENTER_API(H5Pset_fapl_mpiposix, FAIL)
     H5TRACE2("e","iMc",fapl_id,comm);
 
@@ -389,7 +389,7 @@ done:
  *		of the application to free the returned communicator.
  *
  * Return:	Success:	Non-negative with the communicator and
- *				information returned through the COMM 
+ *				information returned through the COMM
  *				argument if non-null.  Since it is a duplicate
  *				of the stored object, future modifications to
  *				the access property list do not affect it and
@@ -417,7 +417,7 @@ H5Pget_fapl_mpiposix(hid_t fapl_id, MPI_Comm *comm/*out*/)
     H5P_genplist_t *plist;      /* Property list pointer */
     int		mpi_code;		/* mpi return code */
     herr_t      ret_value=SUCCEED;      /* Return value */
-    
+
     FUNC_ENTER_API(H5Pget_fapl_mpiposix, FAIL)
     H5TRACE2("e","ix",fapl_id,comm);
 
@@ -479,7 +479,7 @@ H5Pset_fapl_mpiposix(hid_t fapl_id, MPI_Comm comm, hbool_t use_gpfs)
     H5FD_mpiposix_fapl_t	fa;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value;
-    
+
     FUNC_ENTER_API(H5Pset_fapl_mpiposix, FAIL)
     H5TRACE3("e","iMcb",fapl_id,comm,use_gpfs);
 
@@ -510,7 +510,7 @@ done:
  *		of the application to free the returned communicator.
  *
  * Return:	Success:	Non-negative with the communicator and
- *				information returned through the COMM 
+ *				information returned through the COMM
  *				argument if non-null.  Since it is a duplicate
  *				of the stored object, future modifications to
  *				the access property list do not affect it and
@@ -538,7 +538,7 @@ H5Pget_fapl_mpiposix(hid_t fapl_id, MPI_Comm *comm/*out*/, hbool_t *use_gpfs/*ou
     H5P_genplist_t *plist;      /* Property list pointer */
     int		mpi_code;		/* mpi return code */
     herr_t      ret_value=SUCCEED;      /* Return value */
-    
+
     FUNC_ENTER_API(H5Pget_fapl_mpiposix, FAIL)
     H5TRACE3("e","ixx",fapl_id,comm,use_gpfs);
 
@@ -604,7 +604,7 @@ H5FD_mpiposix_fapl_get(H5FD_t *_file)
     /* Duplicate the communicator. */
     if (MPI_SUCCESS != (mpi_code=MPI_Comm_dup(file->comm, &fa->comm)))
 	HMPI_GOTO_ERROR(NULL, "MPI_Comm_dup failed", mpi_code)
-    
+
     fa->use_gpfs = file->use_gpfs;
 
     /* Set return value */
@@ -638,7 +638,7 @@ H5FD_mpiposix_fapl_copy(const void *_old_fa)
     const H5FD_mpiposix_fapl_t *old_fa = (const H5FD_mpiposix_fapl_t*)_old_fa;
     H5FD_mpiposix_fapl_t	*new_fa = NULL;
     int		mpi_code;	/* MPI return code */
-    
+
     FUNC_ENTER_NOAPI(H5FD_mpiposix_fapl_copy, NULL)
 
     if (NULL==(new_fa=H5MM_malloc(sizeof(H5FD_mpiposix_fapl_t))))
@@ -740,7 +740,7 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
 #ifdef WIN32
     HFILE filehandle;
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
-    int results;   
+    int results;
 #endif
     H5FD_t                     *ret_value=NULL; /* Return value */
     MPI_Comm                    comm_dup=MPI_COMM_NULL;
@@ -853,7 +853,7 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
         hint.fr.structType = GPFS_FREE_RANGE;
         hint.fr.start = 0;
         hint.fr.length = 0;
-        
+
         if (gpfs_fcntl(fd, &hint)<0)
             HGOTO_ERROR(H5E_FILE, H5E_FCNTL, NULL, "failed to send hints to GPFS")
     }
@@ -1167,26 +1167,26 @@ done:
 
 /*-------------------------------------------------------------------------
  * Function:       H5FD_mpiposix_get_handle
- * 
+ *
  * Purpose:        Returns the file handle of MPI-POSIX file driver.
- * 
+ *
  * Returns:        Non-negative if succeed or negative if fails.
- * 
+ *
  * Programmer:     Raymond Lu
  *                 Sept. 16, 2002
- * 
+ *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t  
+static herr_t
 H5FD_mpiposix_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
-{   
+{
     H5FD_mpiposix_t       *file = (H5FD_mpiposix_t *)_file;
     herr_t                ret_value = SUCCEED;
-                             
+
     FUNC_ENTER_NOAPI(H5FD_mpiposix_get_handle, FAIL)
-                                    
+
     if(!file_handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid")
 
@@ -1276,7 +1276,7 @@ H5FD_mpiposix_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, 
         addr += (haddr_t)nbytes;
         buf = (char*)buf + nbytes;
     }
-    
+
     /* Update current position */
     file->pos = addr;
     file->op = OP_READ;
@@ -1336,13 +1336,13 @@ H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     assert(buf);
 
     /* Check for overflow conditions */
-    if (HADDR_UNDEF==addr) 
+    if (HADDR_UNDEF==addr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined")
     if (REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow")
     if (addr+size>file->eoa)
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow")
-    
+
     /* Obtain the data transfer properties */
     if(NULL == (plist = H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
@@ -1407,7 +1407,7 @@ H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
         }
 #endif  /* H5_HAVE_GPFS */
     }
-    
+
     /* Seek to the correct location */
     if ((addr!=file->pos || OP_WRITE!=file->op) &&
             file_seek(file->fd, (file_offset_t)addr, SEEK_SET)<0)

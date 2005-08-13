@@ -28,7 +28,7 @@
  * Date: June 13, 2001
  *
  * Comments:
- *  based on HDF5 Image and Palette Specification  
+ *  based on HDF5 Image and Palette Specification
  *  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
  *
  * Modifications:
@@ -36,18 +36,18 @@
  *-------------------------------------------------------------------------
  */
 
-herr_t H5IMmake_image_8bit( hid_t loc_id, 
-                            const char *dset_name, 
+herr_t H5IMmake_image_8bit( hid_t loc_id,
+                            const char *dset_name,
                             hsize_t width,
                             hsize_t height,
                             const unsigned char *buffer )
 {
  int      rank = 3;
  hsize_t  dims[3];
- 
+
   /* Initialize the image dimensions */
- dims[0] = height; 
- dims[1] = width; 
+ dims[0] = height;
+ dims[1] = width;
  dims[2] = 1;
 
  /* Make the dataset */
@@ -83,12 +83,12 @@ herr_t H5IMmake_image_8bit( hid_t loc_id,
  * Date: June 13, 2001
  *
  * Comments:
- *  based on HDF5 Image and Palette Specification  
+ *  based on HDF5 Image and Palette Specification
  *  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
  *
- * Interlace Mode Dimensions in the Dataspace 
- * INTERLACE_PIXEL [height][width][pixel components] 
- * INTERLACE_PLANE [pixel components][height][width] 
+ * Interlace Mode Dimensions in the Dataspace
+ * INTERLACE_PIXEL [height][width][pixel components]
+ * INTERLACE_PLANE [pixel components][height][width]
  *
  *
  * Modifications:
@@ -96,8 +96,8 @@ herr_t H5IMmake_image_8bit( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-herr_t H5IMmake_image_24bit( hid_t loc_id, 
-                             const char *dset_name, 
+herr_t H5IMmake_image_24bit( hid_t loc_id,
+                             const char *dset_name,
                              hsize_t width,
                              hsize_t height,
                              const char *interlace,
@@ -105,26 +105,26 @@ herr_t H5IMmake_image_24bit( hid_t loc_id,
 {
  int      rank = 3;
  hsize_t  dims[3];
- 
+
  /* Initialize the image dimensions */
 
- if ( strcmp( interlace, "INTERLACE_PIXEL" ) == 0 ) 
+ if ( strcmp( interlace, "INTERLACE_PIXEL" ) == 0 )
  {
   /* Number of color planes is defined as the third dimension */
-  dims[0] = height; 
-  dims[1] = width; 
-  dims[2] = 3; 
+  dims[0] = height;
+  dims[1] = width;
+  dims[2] = 3;
  }
  else
- if ( strcmp( interlace, "INTERLACE_PLANE" ) == 0 ) 
+ if ( strcmp( interlace, "INTERLACE_PLANE" ) == 0 )
  {
   /* Number of color planes is defined as the first dimension */
-  dims[0] = 3; 
-  dims[1] = height; 
-  dims[2] = width; 
+  dims[0] = 3;
+  dims[1] = height;
+  dims[2] = width;
  }
  else return -1;
- 
+
  /* Make the dataset */
  if ( H5LTmake_dataset( loc_id, dset_name, rank, dims, H5T_NATIVE_UCHAR, buffer ) < 0 )
   return -1;
@@ -156,7 +156,7 @@ herr_t H5IMmake_image_24bit( hid_t loc_id,
  *
  * Purpose: operator function used by H5LT_find_palette
  *
- * Return: 
+ * Return:
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -172,33 +172,33 @@ herr_t H5IMmake_image_24bit( hid_t loc_id,
 static herr_t find_palette( hid_t loc_id, const char *name, void  *op_data )
 {
 
- /* Define a default zero value for return. This will cause the iterator to continue if 
+ /* Define a default zero value for return. This will cause the iterator to continue if
   * the palette attribute is not found yet.
   */
 
- int ret = 0;   
+ int ret = 0;
 
  /* Shut compiler */
  loc_id=loc_id;
  op_data=op_data;
- 
- /* Define a positive value for return value if the attribute was found. This will 
-  * cause the iterator to immediately return that positive value, 
-  * indicating short-circuit success 
+
+ /* Define a positive value for return value if the attribute was found. This will
+  * cause the iterator to immediately return that positive value,
+  * indicating short-circuit success
   */
- 
- if( strcmp( name, "PALETTE" ) == 0 ) 
+
+ if( strcmp( name, "PALETTE" ) == 0 )
   ret = 1;
 
 
  return ret;
-} 
+}
 
 
 /*-------------------------------------------------------------------------
  * Function: H5IM_find_palette
  *
- * Purpose: Private function. Find the attribute "PALETTE" in the image dataset 
+ * Purpose: Private function. Find the attribute "PALETTE" in the image dataset
  *
  * Return: Success: 1, Failure: 0
  *
@@ -214,7 +214,7 @@ static herr_t find_palette( hid_t loc_id, const char *name, void  *op_data )
  *-------------------------------------------------------------------------
  */
 
-static herr_t H5IM_find_palette( hid_t loc_id ) 
+static herr_t H5IM_find_palette( hid_t loc_id )
 {
 
  unsigned int attr_num;     /* Starting attribute to look up */
@@ -230,7 +230,7 @@ static herr_t H5IM_find_palette( hid_t loc_id )
 /*-------------------------------------------------------------------------
  * Function: H5IMget_image_info
  *
- * Purpose: Gets information about an image dataset (dimensions, interlace mode 
+ * Purpose: Gets information about an image dataset (dimensions, interlace mode
  *          and number of associated palettes).
  *
  * Return: Success: 0, Failure: -1
@@ -240,7 +240,7 @@ static herr_t H5IM_find_palette( hid_t loc_id )
  * Date: July 25, 2001
  *
  * Comments:
- *  based on HDF5 Image and Palette Specification  
+ *  based on HDF5 Image and Palette Specification
  *  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
  *
  * Modifications:
@@ -248,18 +248,18 @@ static herr_t H5IM_find_palette( hid_t loc_id )
  *-------------------------------------------------------------------------
  */
 
-herr_t H5IMget_image_info( hid_t loc_id, 
-                     const char *dset_name, 
+herr_t H5IMget_image_info( hid_t loc_id,
+                     const char *dset_name,
                      hsize_t *width,
                      hsize_t *height,
                      hsize_t *planes,
                      char *interlace,
                      hssize_t *npals )
 {
- hid_t   did, sid;  
+ hid_t   did, sid;
  hsize_t dims[3];
  hid_t   attr_id;
- hid_t   attr_type;  
+ hid_t   attr_type;
  int     has_attr;
  hid_t   attr_space_id;
  hid_t   attr_class;
@@ -294,7 +294,7 @@ herr_t H5IMget_image_info( hid_t loc_id,
   if ( H5Aclose( attr_id )  < 0 )
    goto out;
  }
- 
+
  /* Get the dataspace handle */
  if ( (sid = H5Dget_space( did )) < 0 )
   goto out;
@@ -309,18 +309,18 @@ herr_t H5IMget_image_info( hid_t loc_id,
  /* This is a 24 bit image */
  {
 
-  if ( strcmp( interlace, "INTERLACE_PIXEL" ) == 0 ) 
+  if ( strcmp( interlace, "INTERLACE_PIXEL" ) == 0 )
   {
    /* Number of color planes is defined as the third dimension */
-   *height = dims[0]; 
+   *height = dims[0];
    *width  = dims[1];
    *planes = dims[2];
   }
   else
-  if ( strcmp( interlace, "INTERLACE_PLANE" ) == 0 ) 
+  if ( strcmp( interlace, "INTERLACE_PLANE" ) == 0 )
   {
    /* Number of color planes is defined as the first dimension */
-   *planes = dims[0]; 
+   *planes = dims[0];
    *height = dims[1];
    *width  = dims[2];
   }
@@ -329,7 +329,7 @@ herr_t H5IMget_image_info( hid_t loc_id,
  else
  /* This is a 8 bit image */
  {
-  *height = dims[0]; 
+  *height = dims[0];
   *width  = dims[1];
   *planes = dims[2];
  }
@@ -350,7 +350,7 @@ herr_t H5IMget_image_info( hid_t loc_id,
 
   if ( (attr_id = H5Aopen_name( did, "PALETTE" )) < 0 )
    goto out;
-     
+
   if ( (attr_type = H5Aget_type( attr_id )) < 0 )
    goto out;
 
@@ -371,13 +371,13 @@ herr_t H5IMget_image_info( hid_t loc_id,
 
    if ( H5Sclose( attr_space_id ) < 0 )
     goto out;
-   
-  } /* H5T_REFERENCE */ 
-    
-  if ( H5Tclose( attr_type ) < 0 ) 
+
+  } /* H5T_REFERENCE */
+
+  if ( H5Tclose( attr_type ) < 0 )
    goto out;
 
-  /* Close the attribute. */  
+  /* Close the attribute. */
   if ( H5Aclose( attr_id ) < 0 )
    goto out;
 
@@ -408,7 +408,7 @@ out:
  * Date: June 13, 2001
  *
  * Comments:
- *  based on HDF5 Image and Palette Specification  
+ *  based on HDF5 Image and Palette Specification
  *  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
  *
  * Modifications:
@@ -416,11 +416,11 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5IMread_image( hid_t loc_id, 
-                       const char *dset_name, 
+herr_t H5IMread_image( hid_t loc_id,
+                       const char *dset_name,
                        unsigned char *buffer )
 {
- hid_t   did;  
+ hid_t   did;
 
  /* Open the dataset. */
  if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
@@ -455,7 +455,7 @@ out:
  * Date: May 01, 2001
  *
  * Comments:
- *  based on HDF5 Image and Palette Specification  
+ *  based on HDF5 Image and Palette Specification
  *  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
  *
  * Modifications:
@@ -463,18 +463,18 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5IMmake_palette( hid_t loc_id, 
+herr_t H5IMmake_palette( hid_t loc_id,
                          const char *pal_name,
                          const hsize_t *pal_dims,
-                         const unsigned char *pal_data ) 
+                         const unsigned char *pal_data )
 
-{  
- 
+{
+
  int has_pal;
- 
+
  /* Check if the dataset already exists */
  has_pal = H5LTfind_dataset( loc_id, pal_name );
- 
+
  /* It exists. Return */
  if ( has_pal == 1 )
   return 0;
@@ -490,7 +490,7 @@ herr_t H5IMmake_palette( hid_t loc_id,
  /* Attach the attribute "PAL_VERSION" to the >>palette<< dataset*/
  if ( H5LTset_attribute_string( loc_id, pal_name, "PAL_VERSION", "1.2" ) < 0 )
   return -1;
- 
+
  return 0;
 
 }
@@ -508,23 +508,23 @@ herr_t H5IMmake_palette( hid_t loc_id,
  * Date: May 01, 2001
  *
  * Comments:
- *  based on HDF5 Image and Palette Specification  
+ *  based on HDF5 Image and Palette Specification
  *  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
- *  
- *  An image (dataset) within an HDF5 file may optionally specify an array of 
- *  palettes to be viewed with. The dataset will have an attribute 
- *  which contains an array of object reference pointers which refer to palettes in the file. 
+ *
+ *  An image (dataset) within an HDF5 file may optionally specify an array of
+ *  palettes to be viewed with. The dataset will have an attribute
+ *  which contains an array of object reference pointers which refer to palettes in the file.
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 
-herr_t H5IMlink_palette( hid_t loc_id, 
-                         const char *image_name, 
-                         const char *pal_name ) 
+herr_t H5IMlink_palette( hid_t loc_id,
+                         const char *image_name,
+                         const char *pal_name )
 
-{                       
+{
 
  hid_t       image_id;
  hid_t       attr_type;
@@ -537,12 +537,12 @@ herr_t H5IMlink_palette( hid_t loc_id,
  hsize_t     dim_ref;
  int         ok_pal;
 
- /* The image dataset may or not have the attribute "PALETTE" 
+ /* The image dataset may or not have the attribute "PALETTE"
   * First we try to open to see if it is already there; if not, it is created.
-  * If it exists, the array of references is extended to hold the reference 
+  * If it exists, the array of references is extended to hold the reference
   * to the new palette
   */
- 
+
  /* First we get the image id */
  if ( (image_id = H5Dopen( loc_id, image_name )) < 0 )
   return -1;
@@ -556,11 +556,11 @@ herr_t H5IMlink_palette( hid_t loc_id,
 
   if ( (attr_space_id = H5Screate( H5S_SCALAR )) < 0 )
    goto out;
-  
+
   /* Create the attribute type for the reference */
   if ( (attr_type = H5Tcopy( H5T_STD_REF_OBJ )) < 0 )
    goto out;
- 
+
   /* Create the attribute "PALETTE" to be attached to the image*/
   if ( (attr_id = H5Acreate( image_id, "PALETTE", attr_type, attr_space_id, H5P_DEFAULT )) < 0 )
    goto out;
@@ -586,7 +586,7 @@ herr_t H5IMlink_palette( hid_t loc_id,
 
   if ( (attr_id = H5Aopen_name( image_id, "PALETTE" )) < 0 )
    goto out;
-     
+
   if ( (attr_type = H5Aget_type( attr_id )) < 0 )
    goto out;
 
@@ -620,7 +620,7 @@ herr_t H5IMlink_palette( hid_t loc_id,
     goto out;
 
    /* Create a new reference for this palette. */
-   if ( H5Rcreate( &ref, loc_id, pal_name, H5R_OBJECT, -1 ) < 0 ) 
+   if ( H5Rcreate( &ref, loc_id, pal_name, H5R_OBJECT, -1 ) < 0 )
     goto out;
 
    refbuf[n_refs] = ref;
@@ -641,22 +641,22 @@ herr_t H5IMlink_palette( hid_t loc_id,
     goto out;
 
    free( refbuf );
-    
-  } /* H5T_REFERENCE */ 
-    
-  if ( H5Tclose( attr_type ) < 0 ) 
+
+  } /* H5T_REFERENCE */
+
+  if ( H5Tclose( attr_type ) < 0 )
    goto out;
 
-  /* Close the attribute. */  
+  /* Close the attribute. */
   if ( H5Aclose( attr_id ) < 0 )
    goto out;
 
  }
- 
+
   /* Close the image dataset. */
  if ( H5Dclose( image_id ) < 0 )
   return -1;
- 
+
  return 0;
 
 out:
@@ -678,7 +678,7 @@ out:
  * Date: September 10, 2001
  *
  * Comments:
- *  based on HDF5 Image and Palette Specification  
+ *  based on HDF5 Image and Palette Specification
  *  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
  *
  * Modifications:
@@ -686,10 +686,10 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5IMunlink_palette( hid_t loc_id, 
-                           const char *image_name, 
-                           const char *pal_name ) 
-{                       
+herr_t H5IMunlink_palette( hid_t loc_id,
+                           const char *image_name,
+                           const char *pal_name )
+{
  hid_t       image_id;
  hid_t       attr_type;
  hid_t       attr_id;
@@ -698,17 +698,17 @@ herr_t H5IMunlink_palette( hid_t loc_id,
 
  /* Try to find the palette dataset */
  has_pal = H5LTfind_dataset( loc_id, pal_name );
- 
+
  /* It does not exist. Return */
  if ( has_pal == 0 )
   return -1;
 
- /* The image dataset may or not have the attribute "PALETTE" 
+ /* The image dataset may or not have the attribute "PALETTE"
   * First we try to open to see if it is already there; if not, it is created.
-  * If it exists, the array of references is extended to hold the reference 
+  * If it exists, the array of references is extended to hold the reference
   * to the new palette
   */
- 
+
  /* First we get the image id */
  if ( (image_id = H5Dopen( loc_id, image_name )) < 0 )
   return -1;
@@ -725,7 +725,7 @@ herr_t H5IMunlink_palette( hid_t loc_id,
  {
   if ( (attr_id = H5Aopen_name( image_id, "PALETTE" )) < 0 )
    goto out;
-     
+
   if ( (attr_type = H5Aget_type( attr_id )) < 0 )
    goto out;
 
@@ -740,21 +740,21 @@ herr_t H5IMunlink_palette( hid_t loc_id,
    if ( H5Adelete( image_id, "PALETTE" ) < 0 )
     goto out;
 
-  }  /* H5T_REFERENCE */ 
+  }  /* H5T_REFERENCE */
 
-  if ( H5Tclose( attr_type ) < 0 ) 
+  if ( H5Tclose( attr_type ) < 0 )
    goto out;
 
-  /* Close the attribute. */  
+  /* Close the attribute. */
   if ( H5Aclose( attr_id ) < 0 )
    goto out;
 
  } /* ok_pal */
- 
+
   /* Close the image dataset. */
  if ( H5Dclose( image_id ) < 0 )
   return -1;
- 
+
  return 0;
 
 out:
@@ -781,8 +781,8 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5IMget_npalettes( hid_t loc_id, 
-                          const char *image_name,  
+herr_t H5IMget_npalettes( hid_t loc_id,
+                          const char *image_name,
                           hssize_t *npals )
 {
  hid_t      image_id;
@@ -807,7 +807,7 @@ herr_t H5IMget_npalettes( hid_t loc_id,
 
   if ( (attr_id = H5Aopen_name( image_id, "PALETTE" )) < 0 )
    goto out;
-     
+
   if ( (attr_type = H5Aget_type( attr_id )) < 0 )
    goto out;
 
@@ -825,13 +825,13 @@ herr_t H5IMget_npalettes( hid_t loc_id,
 
    if ( H5Sclose( attr_space_id ) < 0 )
     goto out;
-   
-  } /* H5T_REFERENCE */ 
-    
-  if ( H5Tclose( attr_type ) < 0 ) 
+
+  } /* H5T_REFERENCE */
+
+  if ( H5Tclose( attr_type ) < 0 )
    goto out;
 
-  /* Close the attribute. */  
+  /* Close the attribute. */
   if ( H5Aclose( attr_id ) < 0 )
    goto out;
 
@@ -848,7 +848,7 @@ out:
  return -1;
 
 }
-  
+
 
 /*-------------------------------------------------------------------------
  * Function: H5IMget_palette_info
@@ -862,7 +862,7 @@ out:
  * Date: July 22, 2001
  *
  * Comments:
- *  based on HDF5 Image and Palette Specification  
+ *  based on HDF5 Image and Palette Specification
  *  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
  *
  * Modifications:
@@ -870,7 +870,7 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5IMget_palette_info( hid_t loc_id, 
+herr_t H5IMget_palette_info( hid_t loc_id,
                         const char *image_name,
                         int pal_number,
                         hsize_t *pal_dims )
@@ -900,7 +900,7 @@ herr_t H5IMget_palette_info( hid_t loc_id,
 
   if ( (attr_id = H5Aopen_name( image_id, "PALETTE" )) < 0 )
    goto out;
-     
+
   if ( (attr_type = H5Aget_type( attr_id )) < 0 )
    goto out;
 
@@ -936,7 +936,7 @@ herr_t H5IMget_palette_info( hid_t loc_id,
 
   if ( H5Sget_simple_extent_ndims( pal_space_id ) < 0 )
    goto out;
-  
+
   if ( H5Sget_simple_extent_dims( pal_space_id, pal_dims, pal_maxdims ) < 0 )
    goto out;
 
@@ -947,18 +947,18 @@ herr_t H5IMget_palette_info( hid_t loc_id,
    goto out;
 
    free( refbuf );
-    
-  } /* H5T_REFERENCE */ 
-    
-  if ( H5Tclose( attr_type ) < 0 ) 
+
+  } /* H5T_REFERENCE */
+
+  if ( H5Tclose( attr_type ) < 0 )
    goto out;
 
-  /* Close the attribute. */  
+  /* Close the attribute. */
   if ( H5Aclose( attr_id ) < 0 )
    goto out;
 
  }
-     
+
 	/* Close the image dataset. */
  if ( H5Dclose( image_id ) < 0 )
   return -1;
@@ -970,7 +970,7 @@ out:
  return -1;
 
 }
-  
+
 
 /*-------------------------------------------------------------------------
  * Function: H5IMget_palette
@@ -984,7 +984,7 @@ out:
  * Date: August 30, 2001
  *
  * Comments:
- *  based on HDF5 Image and Palette Specification  
+ *  based on HDF5 Image and Palette Specification
  *  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
  *
  * Modifications:
@@ -992,7 +992,7 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5IMget_palette( hid_t loc_id, 
+herr_t H5IMget_palette( hid_t loc_id,
                         const char *image_name,
                         int pal_number,
                         unsigned char *pal_data )
@@ -1020,7 +1020,7 @@ herr_t H5IMget_palette( hid_t loc_id,
 
   if ( (attr_id = H5Aopen_name( image_id, "PALETTE" )) < 0 )
    goto out;
-     
+
   if ( (attr_type = H5Aget_type( attr_id )) < 0 )
    goto out;
 
@@ -1058,13 +1058,13 @@ herr_t H5IMget_palette( hid_t loc_id,
     goto out;
 
    free( refbuf );
-    
-  } /* H5T_REFERENCE */ 
-    
-  if ( H5Tclose( attr_type ) < 0 ) 
+
+  } /* H5T_REFERENCE */
+
+  if ( H5Tclose( attr_type ) < 0 )
    goto out;
 
-  /* Close the attribute. */  
+  /* Close the attribute. */
   if ( H5Aclose( attr_id ) < 0 )
    goto out;
 
@@ -1082,7 +1082,7 @@ out:
  return -1;
 
 }
-  
+
 /*-------------------------------------------------------------------------
  * Function: H5IMis_image
  *
@@ -1095,7 +1095,7 @@ out:
  * Date: August 30, 2001
  *
  * Comments:
- *  based on HDF5 Image and Palette Specification  
+ *  based on HDF5 Image and Palette Specification
  *  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
  *
  * Modifications:
@@ -1103,7 +1103,7 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5IMis_image( hid_t loc_id, 
+herr_t H5IMis_image( hid_t loc_id,
                      const char *dset_name )
 {
  hid_t      did;
@@ -1134,7 +1134,7 @@ herr_t H5IMis_image( hid_t loc_id,
 
   if ( (attr_id = H5Aopen_name( did, "CLASS" )) < 0 )
    goto out;
-     
+
   if ( (attr_type = H5Aget_type( attr_id )) < 0 )
    goto out;
 
@@ -1144,12 +1144,12 @@ herr_t H5IMis_image( hid_t loc_id,
   if ( H5Aread( attr_id, attr_type, attr_data ) < 0 )
     goto out;
 
-  if( strcmp( attr_data, "IMAGE" ) == 0 ) 
+  if( strcmp( attr_data, "IMAGE" ) == 0 )
    ret = 1;
   else
    ret = 0;
-    
-  if ( H5Tclose( attr_type ) < 0 ) 
+
+  if ( H5Tclose( attr_type ) < 0 )
    goto out;
 
   if ( H5Aclose( attr_id ) < 0 )
@@ -1183,7 +1183,7 @@ out:
  * Date: August 30, 2001
  *
  * Comments:
- *  based on HDF5 Image and Palette Specification  
+ *  based on HDF5 Image and Palette Specification
  *  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
  *
  * Modifications:
@@ -1191,7 +1191,7 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5IMis_palette( hid_t loc_id, 
+herr_t H5IMis_palette( hid_t loc_id,
                        const char *dset_name )
 {
  hid_t      did;
@@ -1222,7 +1222,7 @@ herr_t H5IMis_palette( hid_t loc_id,
 
   if ( (attr_id = H5Aopen_name( did, "CLASS" )) < 0 )
    goto out;
-     
+
   if ( (attr_type = H5Aget_type( attr_id )) < 0 )
    goto out;
 
@@ -1232,12 +1232,12 @@ herr_t H5IMis_palette( hid_t loc_id,
   if ( H5Aread( attr_id, attr_type, attr_data ) < 0 )
     goto out;
 
-  if( strcmp( attr_data, "PALETTE" ) == 0 ) 
+  if( strcmp( attr_data, "PALETTE" ) == 0 )
    ret = 1;
   else
    ret = 0;
-    
-  if ( H5Tclose( attr_type ) < 0 ) 
+
+  if ( H5Tclose( attr_type ) < 0 )
    goto out;
 
   if ( H5Aclose( attr_id ) < 0 )

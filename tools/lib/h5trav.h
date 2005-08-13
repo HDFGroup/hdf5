@@ -24,12 +24,12 @@
 
 /*-------------------------------------------------------------------------
  * public struct to store name and type of an object
- * the TYPE can be: 
- *    H5G_UNKNOWN = -1,		
- *    H5G_LINK,		        Object is a symbolic link	
- *    H5G_GROUP,		    Object is a group		
- *    H5G_DATASET,		    Object is a dataset		
- *    H5G_TYPE,			    Object is a named data type	
+ * the TYPE can be:
+ *    H5G_UNKNOWN = -1,
+ *    H5G_LINK,		        Object is a symbolic link
+ *    H5G_GROUP,		    Object is a group
+ *    H5G_DATASET,		    Object is a dataset
+ *    H5G_TYPE,			    Object is a named data type
  *-------------------------------------------------------------------------
  */
 
@@ -124,21 +124,21 @@ void trav_table_init(trav_table_t **table);
 
 void trav_table_free(trav_table_t *table);
 
-int  trav_table_search(unsigned long *objno, 
+int  trav_table_search(unsigned long *objno,
                        trav_table_t *table );
 
-void trav_table_add(unsigned long *objno, 
-                    char *objname, 
-                    H5G_obj_t1 type, 
+void trav_table_add(unsigned long *objno,
+                    char *objname,
+                    H5G_obj_t1 type,
                     trav_table_t *table);
 
-void trav_table_addflags(unsigned *flags, 
-                         char *objname, 
-                         H5G_obj_t1 type, 
+void trav_table_addflags(unsigned *flags,
+                         char *objname,
+                         H5G_obj_t1 type,
                          trav_table_t *table);
 
 
-void trav_table_addlink(trav_table_t *table, 
+void trav_table_addlink(trav_table_t *table,
                         int j /* the object index */,
                         char *path );
 

@@ -75,7 +75,7 @@ NAME
    H5T_init_vlen_interface -- Initialize interface-specific information
 USAGE
     herr_t H5T_init_vlen_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -115,7 +115,7 @@ H5Tvlen_create(hid_t base_id)
     H5T_t	*base = NULL;		/*base datatype	*/
     H5T_t	*dt = NULL;		/*new datatype	*/
     hid_t	ret_value;	        /*return value			*/
-    
+
     FUNC_ENTER_API(H5Tvlen_create, FAIL)
     H5TRACE1("i","i",base_id);
 
@@ -158,7 +158,7 @@ H5T_vlen_create(const H5T_t *base)
 {
     H5T_t	*dt = NULL;		/*new VL datatype	*/
     H5T_t	*ret_value;	/*return value			*/
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5T_vlen_create)
 
     /* Check args */
@@ -201,7 +201,7 @@ done:
  *
  * Purpose:	Sets the location of a VL datatype to be either on disk or in memory
  *
- * Return:	
+ * Return:
  *  One of two values on success:
  *      TRUE - If the location of any vlen types changed
  *      FALSE - If the location of any vlen types is the same
@@ -273,7 +273,7 @@ H5T_vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
                 /* Mark this type as being stored on disk */
                 dt->shared->u.vlen.loc=H5T_VLEN_DISK;
 
-                /* 
+                /*
                  * Size of element on disk is 4 bytes for the length, plus the size
                  * of an address in this file, plus 4 bytes for the size of a heap
                  * ID.  Memory size is different
@@ -833,7 +833,7 @@ H5T_vlen_disk_read(H5F_t *f, hid_t dxpl_id, void *_vl, void *buf, size_t UNUSED 
 
     /* Skip the length of the sequence */
     vl += 4;
-    
+
     /* Get the heap information */
     H5F_addr_decode(f,(const uint8_t **)&vl,&(hobjid.addr));
     INT32DECODE(vl,hobjid.idx);
@@ -884,7 +884,7 @@ H5T_vlen_disk_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t UNUSED 
     assert(vl);
     assert(seq_len==0 || buf);
     assert(f);
-    
+
     /* Free heap object for old data.  */
     if(bg!=NULL) {
         H5HG_t bg_hobjid;       /* "Background" VL info sequence's ID info */
@@ -906,7 +906,7 @@ H5T_vlen_disk_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t UNUSED 
 
     /* Set the length of the sequence */
     UINT32ENCODE(vl, seq_len);
-    
+
     /* Write the VL information to disk (allocates space also) */
     len=(seq_len*base_size);
     if(H5HG_insert(f,dxpl_id,len,buf,&hobjid)<0)
@@ -948,7 +948,7 @@ H5T_vlen_disk_setnull(H5F_t *f, hid_t dxpl_id, void *_vl, void *_bg)
     /* check parameters */
     assert(f);
     assert(vl);
-    
+
     /* Free heap object for old data.  */
     if(bg!=NULL) {
         H5HG_t bg_hobjid;       /* "Background" VL info sequence's ID info */
@@ -970,7 +970,7 @@ H5T_vlen_disk_setnull(H5F_t *f, hid_t dxpl_id, void *_vl, void *_bg)
 
     /* Set the length of the sequence */
     UINT32ENCODE(vl, seq_len);
-    
+
     /* Encode the "nil" heap pointer information */
     H5F_addr_encode(f,&vl,(haddr_t)0);
     INT32ENCODE(vl,0);
@@ -989,7 +989,7 @@ done:
     herr_t H5T_vlen_reclaim(elem,dt)
         void *elem;  IN/OUT: Pointer to the dataset element
         H5T_t *dt;   IN: Datatype of dataset element
-        
+
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
@@ -1001,7 +1001,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t 
+static herr_t
 H5T_vlen_reclaim_recurse(void *elem, const H5T_t *dt, H5MM_free_t free_func, void *free_info)
 {
     unsigned i;     /* local index variable */
@@ -1101,7 +1101,7 @@ done:
         unsigned ndim;    IN: Number of dimensions in dataspace
         hsize_t *point; IN: Coordinate location of element in dataspace
         void *op_data    IN: Operator data
-        
+
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
@@ -1114,7 +1114,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 /* ARGSUSED */
-herr_t 
+herr_t
 H5T_vlen_reclaim(void *elem, hid_t type_id, unsigned UNUSED ndim, const hsize_t UNUSED *point, void *op_data)
 {
     H5T_vlen_alloc_info_t *vl_alloc_info = (H5T_vlen_alloc_info_t *)op_data; /* VL allocation info from iterator */
@@ -1147,8 +1147,8 @@ done:
  USAGE
     herr_t H5T_vlen_get_alloc_info(dxpl_id,vl_alloc_info)
         hid_t dxpl_id;   IN: Data transfer property list to query
-        H5T_vlen_alloc_info_t *vl_alloc_info;  IN/OUT: Pointer to VL allocation information to fill 
-        
+        H5T_vlen_alloc_info_t *vl_alloc_info;  IN/OUT: Pointer to VL allocation information to fill
+
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
@@ -1162,7 +1162,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t 
+herr_t
 H5T_vlen_get_alloc_info(hid_t dxpl_id, H5T_vlen_alloc_info_t **vl_alloc_info)
 {
     H5P_genplist_t *plist;              /* DX property list */
@@ -1207,7 +1207,7 @@ done:
         H5T_t *dt;              IN/OUT: Pointer to the datatype to mark
         H5F_t *dt;              IN: Pointer to the file the datatype is in
         H5T_vlen_type_t loc     IN: location of VL type
-        
+
  RETURNS
     One of two values on success:
         TRUE - If the location of any vlen types changed
@@ -1249,7 +1249,7 @@ H5T_vlen_mark(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
                 if(vlen_changed>0)
                     ret_value=vlen_changed;
-                
+
                 /* Check if the field changed size */
                 if(old_size != dt->shared->parent->shared->size) {
                     /* Adjust the size of the array */
@@ -1263,7 +1263,7 @@ H5T_vlen_mark(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
             if(dt->shared->force_conv) {
                 /* Sort the fields based on offsets */
                 H5T_sort_value(dt,NULL);
-        
+
                 for (i=0; i<dt->shared->u.compnd.nmembs; i++) {
                     /* Apply the accumulated size change to the offset of the field */
                     dt->shared->u.compnd.memb[i].offset += accum_change;
@@ -1279,7 +1279,7 @@ H5T_vlen_mark(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
                         if(vlen_changed>0)
                             ret_value=vlen_changed;
-                        
+
                         /* Check if the field changed size */
                         if(old_size != dt->shared->u.compnd.memb[i].type->shared->size) {
                             /* Adjust the size of the member */

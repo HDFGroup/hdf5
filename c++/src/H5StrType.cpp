@@ -60,18 +60,18 @@ StrType::StrType( const PredType& pred_type ) : AtomType()
 ///\param	existing_id - IN: Id of an existing datatype
 ///\exception	H5::DataTypeIException
 // Description
-// 		The 1st argument could have been skipped, but this 
-// 		constructor will collide with the one that takes an 
+// 		The 1st argument could have been skipped, but this
+// 		constructor will collide with the one that takes an
 // 		existing id.
 //
 // 		Update: by passing 'size' by reference will avoid the
 // 		clashing problem, so the 1st argument can actually be
-// 		omitted.  This constructor should be replaced by the 
+// 		omitted.  This constructor should be replaced by the
 // 		other after announcing. - May, 2004
-///\note		
+///\note
 ///		This constructor will be obsolete in later releases,
 ///		please use StrType( const size_t& size ) instead.
-// Programmer	Binh-Minh Ribler - 2000 
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 StrType::StrType( const PredType& pred_type, const size_t size ) : AtomType()
 {
@@ -124,7 +124,7 @@ StrType::StrType( const DataSet& dataset ) : AtomType ()
 
 //--------------------------------------------------------------------------
 // Function:	StrType::getCset
-///\brief	Retrieves the character set type of this string datatype. 
+///\brief	Retrieves the character set type of this string datatype.
 ///\return	Character set type, which can be:
 ///		\li \c H5T_CSET_ASCII (0) - Character set is US ASCII.
 ///\exception	H5::DataTypeIException
@@ -144,7 +144,7 @@ H5T_cset_t StrType::getCset() const
 
 //--------------------------------------------------------------------------
 // Function:	StrType::setCset
-///\brief	Sets character set to be used. 
+///\brief	Sets character set to be used.
 ///\param	cset - IN: character set type
 ///\exception	H5::DataTypeIException
 ///		\li \c H5T_CSET_ASCII (0) - Character set is US ASCII.
@@ -162,7 +162,7 @@ void StrType::setCset( H5T_cset_t cset ) const
 
 //--------------------------------------------------------------------------
 // Function:	StrType::getCset
-///\brief	Retrieves the storage mechanism for of this string datatype. 
+///\brief	Retrieves the storage mechanism for of this string datatype.
 ///\return	String storage mechanism, which can be:
 ///		\li \c H5T_STR_NULLTERM (0) - Null terminate (as C does)
 ///		\li \c H5T_STR_NULLPAD (0) - Pad with zeros
@@ -177,7 +177,7 @@ H5T_str_t StrType::getStrpad() const
    // Returns a valid string padding type if successful
    if( strpad == H5T_STR_ERROR )
    {
-      throw DataTypeIException("StrType::getStrpad", 
+      throw DataTypeIException("StrType::getStrpad",
 		"H5Tget_strpad failed - returned H5T_STR_ERROR");
    }
    return( strpad );

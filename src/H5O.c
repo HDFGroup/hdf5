@@ -20,7 +20,7 @@
  *
  * Purpose:		Object header virtual functions.
  *
- * Modifications:	
+ * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -299,7 +299,7 @@ H5O_init(H5F_t *f, hid_t dxpl_id, size_t size_hint, H5G_entry_t *ent/*out*/, had
 
     if (NULL == (oh->chunk[0].image = H5FL_BLK_CALLOC(chunk_image, size_hint)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-    
+
     /* create the message list and initialize the first message */
     oh->nmesgs = 1;
     oh->alloc_nmesgs = H5O_NMESGS;
@@ -414,7 +414,7 @@ H5O_close(H5G_entry_t *obj_ent)
 	}
     }
 #endif
-    
+
     /*
      * If the file open object count has reached the number of open mount points
      * (each of which has a group open in the file) attempt to close the file.
@@ -502,10 +502,10 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
     oh->version = *p++;
     if (H5O_VERSION != oh->version)
 	HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "bad object header version number");
-    
+
     /* reserved */
     p++;
-    
+
     /* decode number of messages */
     UINT16DECODE(p, nmesgs);
 
@@ -533,7 +533,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 	    oh->alloc_nchunks = na;
 	    oh->chunk = x;
 	}
-	
+
 	/* read the chunk raw data */
 	chunkno = oh->nchunks++;
 	oh->chunk[chunkno].dirty = FALSE;
@@ -544,7 +544,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 	if (H5F_block_read(f, H5FD_MEM_OHDR, chunk_addr, chunk_size, dxpl_id,
 			   oh->chunk[chunkno].image) < 0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to read object header data");
-	
+
 	/* load messages from this chunk */
 	for (p = oh->chunk[chunkno].image; p < oh->chunk[chunkno].image + chunk_size; p += mesg_size) {
 	    UINT16DECODE(p, id);
@@ -687,11 +687,11 @@ H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh)
             combine=1;
         } /* end if */
         else {
-            if (H5F_block_write(f, H5FD_MEM_OHDR, addr, (size_t)H5O_SIZEOF_HDR(f), 
+            if (H5F_block_write(f, H5FD_MEM_OHDR, addr, (size_t)H5O_SIZEOF_HDR(f),
                         dxpl_id, buf) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to write object header hdr to disk");
         } /* end else */
-            
+
 	/* encode messages */
 	for (u = 0, curr_msg=&oh->mesg[0]; u < oh->nmesgs; u++,curr_msg++) {
 	    if (curr_msg->dirty) {
@@ -705,7 +705,7 @@ H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh)
                 *p++ = 0; /*reserved*/
                 *p++ = 0; /*reserved*/
                 *p++ = 0; /*reserved*/
-                
+
                 if (curr_msg->native) {
                     assert(curr_msg->type->encode);
 
@@ -724,7 +724,7 @@ H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh)
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate space for object header data");
                         oh->chunk[cont->chunkno].addr = cont->addr;
                     }
-                    
+
                     /*
                      * Encode the message.  If the message is shared then we
                      * encode a Shared Object message instead of the object
@@ -910,7 +910,7 @@ done:
  *		The value returned will probably be low unless the object
  *		has just been flushed, as we simply total up the size of
  *		the header with the sizes of the chunks.  Thus any message
- *		that has been added since the last flush will not be 
+ *		that has been added since the last flush will not be
  *		reflected in the total.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -937,7 +937,7 @@ H5O_compute_size(const H5F_t *f, const H5O_t *oh, size_t *size_ptr)
 
     size = H5O_SIZEOF_HDR(f);
 
-    for (u = 0; u < oh->nchunks; u++) 
+    for (u = 0; u < oh->nchunks; u++)
         size += oh->chunk[u].size;
 
     HDassert(size >= H5O_SIZEOF_HDR(f));
@@ -1061,7 +1061,7 @@ H5O_free (unsigned type_id, void *mesg)
     assert(type_id<NELMTS(message_type_g));
     type=message_type_g[type_id];    /* map the type ID to the actual type object */
     assert(type);
-    
+
     /* Call the "real" free routine */
     ret_value=H5O_free_real(type, mesg);
 
@@ -1093,7 +1093,7 @@ H5O_free_real(const H5O_class_t *type, void *mesg)
     void * ret_value=NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_free_real);
-    
+
     /* check args */
     assert(type);
 
@@ -1135,7 +1135,7 @@ H5O_copy (unsigned type_id, const void *mesg, void *dst)
 {
     const H5O_class_t *type;            /* Actual H5O class type for the ID */
     void	*ret_value;             /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5O_copy, NULL);
 
     /* check args */
@@ -1173,7 +1173,7 @@ static void *
 H5O_copy_real (const H5O_class_t *type, const void *mesg, void *dst)
 {
     void	*ret_value = NULL;
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5O_copy_real);
 
     /* check args */
@@ -1311,7 +1311,7 @@ H5O_count (H5G_entry_t *ent, unsigned type_id, hid_t dxpl_id)
 {
     const H5O_class_t *type;            /* Actual H5O class type for the ID */
     int	ret_value;                      /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5O_count, FAIL);
 
     /* Check args */
@@ -1355,7 +1355,7 @@ H5O_count_real (H5G_entry_t *ent, const H5O_class_t *type, hid_t dxpl_id)
     int	acc;
     unsigned	u;
     int	ret_value;
-    
+
     FUNC_ENTER_NOAPI(H5O_count_real, FAIL);
 
     /* Check args */
@@ -1413,7 +1413,7 @@ H5O_exists(H5G_entry_t *ent, unsigned type_id, int sequence, hid_t dxpl_id)
 {
     const H5O_class_t *type;            /* Actual H5O class type for the ID */
     htri_t      ret_value;              /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5O_exists, FAIL);
 
     assert(ent);
@@ -1458,7 +1458,7 @@ H5O_exists_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, hid_t d
     H5O_t	*oh=NULL;
     unsigned	u;
     htri_t      ret_value;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5O_exists_real);
 
     assert(ent);
@@ -1883,13 +1883,13 @@ H5O_modify_real(H5G_entry_t *ent, const H5O_class_t *type, int overwrite,
 
         /* Set the correct sequence number for the message created */
 	sequence++;
-	    
+
     } else if (oh->mesg[idx].flags & H5O_FLAG_CONSTANT) {
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to modify constant message");
     } else if (oh->mesg[idx].flags & H5O_FLAG_SHARED) {
 	HGOTO_ERROR (H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to modify shared (constant) message");
     }
-    
+
     /* Write the information to the message */
     if(H5O_write_mesg(oh,idx,type,mesg,flags,update_flags)<0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to write message");
@@ -1897,14 +1897,14 @@ H5O_modify_real(H5G_entry_t *ent, const H5O_class_t *type, int overwrite,
     /* Update the modification time message if any */
     if(update_flags&H5O_UPDATE_TIME)
         H5O_touch_oh(ent->file, oh, FALSE);
-    
+
     /* Set return value */
     ret_value = sequence;
 
 done:
     if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, FALSE) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
-    
+
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5O_modify_real() */
 
@@ -2062,7 +2062,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5O_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_class_t *type, 
+H5O_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_class_t *type,
     unsigned flags, const void *mesg)
 {
     unsigned		idx;            /* Index of message to modify */
@@ -2244,7 +2244,7 @@ H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force)
     time_t	now;
     size_t	size;
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5O_touch_oh);
 
     assert(oh);
@@ -2307,7 +2307,7 @@ H5O_touch(H5G_entry_t *ent, hbool_t force, hid_t dxpl_id)
 {
     H5O_t	*oh = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5O_touch, FAIL);
 
     /* check args */
@@ -2355,7 +2355,7 @@ H5O_bogus_oh(H5F_t *f, H5O_t *oh)
     int	idx;
     size_t	size;
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER(H5O_bogus_oh, FAIL);
 
     assert(f);
@@ -2409,7 +2409,7 @@ H5O_bogus(H5G_entry_t *ent, hid_t dxpl_id)
 {
     H5O_t	*oh = NULL;
     herr_t	ret_value = SUCCEED;
-    
+
     FUNC_ENTER(H5O_bogus, FAIL);
 
     /* check args */
@@ -2541,7 +2541,7 @@ H5O_remove_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, hid_t d
     /* load the object header */
     if (NULL == (oh = H5AC_protect(ent->file, dxpl_id, H5AC_OHDR, ent->header, NULL, NULL, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header");
-    
+
     for (u = seq = 0, curr_msg=&oh->mesg[0]; u < oh->nmesgs; u++,curr_msg++) {
 	if (type->id != curr_msg->type->id)
             continue;
@@ -2714,7 +2714,7 @@ H5O_alloc_extend_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno, size_t size)
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, UFAIL, "memory allocation failed");
     HDmemset(oh->chunk[chunkno].image+old_size, 0,
 	     oh->chunk[chunkno].size - old_size);
-    
+
     /* adjust raw addresses for messages of this chunk */
     if (old_addr != oh->chunk[chunkno].image) {
 	for (u = 0; u < oh->nmesgs; u++) {
@@ -2845,7 +2845,7 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
     oh->chunk[chunkno].size = size;
     if (NULL==(oh->chunk[chunkno].image = p = H5FL_BLK_CALLOC(chunk_image,size)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, UFAIL, "memory allocation failed");
-    
+
     /*
      * Make sure we have enough space for all possible new messages
      * that could be generated below.
@@ -3083,7 +3083,7 @@ H5O_share (H5F_t *f, hid_t dxpl_id, const H5O_class_t *type, const void *mesg,
     size_t	size;
     void	*buf = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5O_share);
 
     /* Check args */
@@ -3132,7 +3132,7 @@ H5O_raw_size(unsigned type_id, const H5F_t *f, const void *mesg)
 {
     const H5O_class_t *type;            /* Actual H5O class type for the ID */
     size_t      ret_value;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5O_raw_size,0);
 
     /* Check args */
@@ -3176,7 +3176,7 @@ H5O_get_share(unsigned type_id, H5F_t *f, const void *mesg, H5O_shared_t *share)
 {
     const H5O_class_t *type;    /* Actual H5O class type for the ID */
     herr_t ret_value;           /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5O_get_share,FAIL);
 
     /* Check args */
@@ -3220,7 +3220,7 @@ H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
 {
     H5O_t *oh=NULL;             /* Object header information */
     herr_t ret_value=SUCCEED;   /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5O_delete,FAIL);
 
     /* Check args */
@@ -3269,7 +3269,7 @@ H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
     H5O_chunk_t *curr_chk;      /* Pointer to current chunk being operated on */
     unsigned	u;
     herr_t ret_value=SUCCEED;   /* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5O_delete_oh);
 
     /* Check args */
@@ -3331,7 +3331,7 @@ H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg)
 {
     const H5O_class_t	*type;  /* Type of object to free */
     herr_t ret_value=SUCCEED;   /* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5O_delete_mesg);
 
     /* Check args */
@@ -3389,7 +3389,7 @@ H5O_get_info(H5G_entry_t *ent, H5O_stat_t *ostat, hid_t dxpl_id)
     hsize_t free_space;         /* Free space in object header */
     unsigned u;                 /* Local index variable */
     herr_t ret_value=SUCCEED;   /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5O_get_info,FAIL);
 
     /* Check args */
@@ -3448,7 +3448,7 @@ done:
  *  object being iterated over ('mesg'), and the pointer to the operator data
  *  passed in to H5O_iterate ('op_data').  The return values from an operator
  *  are:
- *      A. Zero causes the iterator to continue, returning zero when all 
+ *      A. Zero causes the iterator to continue, returning zero when all
  *          object headers of that type have been processed.
  *      B. Positive causes the iterator to immediately return that positive
  *          value, indicating short-circuit success.
@@ -3543,7 +3543,7 @@ H5O_debug_id(hid_t type_id, H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *str
 {
     const H5O_class_t *type;            /* Actual H5O class type for the ID */
     herr_t      ret_value;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5O_debug_id,FAIL);
 
     /* Check args */
@@ -3677,7 +3677,7 @@ H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
 		  "Constant:",
 		  (oh->mesg[i].flags & H5O_FLAG_CONSTANT) ? "Yes" : "No");
 	if (oh->mesg[i].flags & ~H5O_FLAG_BITS) {
-	    HDfprintf (stream, "%*s%-*s 0x%02x\n", indent+3,"",MAX(0,fwidth-3), 
+	    HDfprintf (stream, "%*s%-*s 0x%02x\n", indent+3,"",MAX(0,fwidth-3),
 		       "*** ADDITIONAL UNKNOWN FLAGS --->",
 		       oh->mesg[i].flags & ~H5O_FLAG_BITS);
 	}
@@ -3690,14 +3690,14 @@ H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
 	chunkno = oh->mesg[i].chunkno;
 	if (chunkno >= oh->nchunks)
 	    HDfprintf(stream, "*** BAD CHUNK NUMBER\n");
-	
+
 	/* check the size */
 	if ((oh->mesg[i].raw + oh->mesg[i].raw_size >
                  oh->chunk[chunkno].image + oh->chunk[chunkno].size) ||
                 (oh->mesg[i].raw < oh->chunk[chunkno].image)) {
 	    HDfprintf(stream, "*** BAD MESSAGE RAW ADDRESS\n");
 	}
-	
+
 	/* decode the message */
 	if (oh->mesg[i].flags & H5O_FLAG_SHARED) {
 	    decode = H5O_SHARED->decode;
@@ -3710,7 +3710,7 @@ H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
 	    oh->mesg[i].native = (decode)(f, dxpl_id, oh->mesg[i].raw, NULL);
 	if (NULL==oh->mesg[i].native)
 	    debug = NULL;
-	
+
 	/* print the message */
 	HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
 		  "Message Information:");

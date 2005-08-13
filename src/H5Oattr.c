@@ -143,7 +143,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *
     UINT16DECODE(p, name_len); /*including null*/
     UINT16DECODE(p, attr->dt_size);
     UINT16DECODE(p, attr->ds_size);
-    
+
     /* Decode and store the name */
     if (NULL==(attr->name=H5MM_strdup((const char *)p)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
@@ -179,7 +179,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *
     /* decode the attribute dataspace */
     if (NULL==(attr->ds = H5FL_CALLOC(H5S_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    
+
     if((extent=(H5O_SDSPACE->decode)(f,dxpl_id,p,NULL))==NULL)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute dataspace");
 
@@ -188,7 +188,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *
 
     /* Release temporary extent information */
     H5FL_FREE(H5S_extent_t,extent);
-   
+
     /* Default to entire dataspace being selected */
     if(H5S_select_all(attr->ds,0)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
@@ -210,7 +210,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *
 
     /* Indicate that the fill values aren't to be written out */
     attr->initialized=1;
-    
+
     /* Set return value */
     ret_value=attr;
 
@@ -223,7 +223,7 @@ done:
  NAME
     H5O_attr_encode
  PURPOSE
-    Encode a simple attribute message 
+    Encode a simple attribute message
  USAGE
     herr_t H5O_attr_encode(f, raw_size, p, mesg)
         H5F_t *f;         IN: pointer to the HDF5 file struct
@@ -243,7 +243,7 @@ done:
  *	Added a version number at the beginning.
  *
  *	Raymond Lu, 8 April 2004
- *	For data space, changed the operation on H5S_simple_t to 
+ *	For data space, changed the operation on H5S_simple_t to
  *	H5S_extent_t
  *
 --------------------------------------------------------------------------*/
@@ -341,7 +341,7 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
     } /* end if */
     else
         p += attr->ds_size;
-    
+
     /* Store attribute data */
     if(attr->data)
         HDmemcpy(p,attr->data,attr->data_size);
@@ -360,8 +360,8 @@ done:
     Copies a message from MESG to DEST, allocating DEST if necessary.
  USAGE
     void *H5O_attr_copy(mesg, dest)
-        const void *mesg;       IN: Pointer to the source attribute struct 
-        const void *dest;       IN: Pointer to the destination attribute struct 
+        const void *mesg;       IN: Pointer to the source attribute struct
+        const void *dest;       IN: Pointer to the destination attribute struct
  RETURNS
     Pointer to DEST on success, NULL on failure
  DESCRIPTION
@@ -609,7 +609,7 @@ done:
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
-        This function prints debugging output to the stream passed as a 
+        This function prints debugging output to the stream passed as a
     parameter.
 --------------------------------------------------------------------------*/
 static herr_t
@@ -642,7 +642,7 @@ H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream, int in
     fprintf(stream, "%*sSymbol table entry...\n", indent, "");
     H5G_ent_debug(f, dxpl_id, &(mesg->ent), stream, indent+3, MAX(0, fwidth-3),
 		  HADDR_UNDEF);
-    
+
     fprintf(stream, "%*sData type...\n", indent, "");
     fprintf(stream, "%*s%-*s %lu\n", indent+3, "", MAX(0,fwidth-3),
 	    "Size:",

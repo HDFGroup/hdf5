@@ -81,7 +81,7 @@ int  numused;
  * our location in the Raster array as a BIT Offset.  We compute the BYTE
  * Offset WORDo the raster array by dividing this by 8, pick up three BYTEs,
  * compute the bit Offset WORDo our 24-bit chunk, shift to bring the desired
- * code to the bottom, then mask it off and return it. 
+ * code to the bottom, then mask it off and return it.
  */
 static int
 ReadCode(void)
@@ -166,39 +166,39 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
 {
     int i;
 
-    XC = 0; 
+    XC = 0;
     YC = 0;
     Pass = 0;
     OutCount = 0;
     BitOffset = 0;
-    
+
     DataMask = (1 << ((GifHead->PackedField & 0x07) +1)) -1;
     Raster = GifImageDesc->GIFImage;
 
     /* Check for image seperator */
-    
+
     /* Now read in values from the image descriptor */
     IWidth = GifImageDesc->ImageWidth;
     IHeight = GifImageDesc->ImageHeight;
     Interlace = GifImageDesc->PackedField & 0x40;
-    
+
     /*
      * Note that I ignore the possible existence of a local color map.  I'm
      * told there aren't many files around that use them, and the spec says
      * it's defined for future use.  This could lead to an error reading some
-     * files. 
+     * files.
      */
-    
+
     /*
      * Start reading the raster data. First we get the WORDial code size and
      * compute decompressor constant values, based on this code size.
      */
-    
+
     CodeSize = GifImageDesc->CodeSize;
     ClearCode = (1 << CodeSize);
     EOFCode = ClearCode + 1;
     FreeCode = FirstFree = ClearCode + 2;
-    
+
     /*
      * The GIF spec has it that the code size is the code size used to compute
      * the above values is the code size given in the file, but the code size
@@ -218,19 +218,19 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
      */
 
     /* Allocate the Image */
-    
+
     if (!(Image = (BYTE *)malloc((size_t)IWidth*(size_t)IHeight))) {
         printf("Out of memory");
         exit(-1);
     }
-    
+
     BytesPerScanline = IWidth;
-    
+
     /*
      * Decompress the file, continuing until you see the GIF EOF code.  One
      * obvious enhancement is to add checking for corrupt files here.
      */
-    
+
     Code = ReadCode();
 
     while (Code != EOFCode) {
@@ -269,7 +269,7 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
              */
             while (CurCode > DataMask) {
                 if (OutCount > 1024) {
-                    /*return error message*/	
+                    /*return error message*/
                 }
 
                 OutCode[OutCount++] = Suffix[CurCode];
@@ -316,5 +316,5 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
         Code = ReadCode();
     }
 
-    return Image;	
+    return Image;
 }

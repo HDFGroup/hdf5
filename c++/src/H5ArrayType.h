@@ -24,7 +24,7 @@ namespace H5 {
 #endif
 class H5_DLLCPP ArrayType : public DataType {
    public:
-	// Constructor that creates a new array data type based on the 
+	// Constructor that creates a new array data type based on the
 	// specified base type.
 	ArrayType(const DataType& base_type, int ndims, const hsize_t* dims);
 

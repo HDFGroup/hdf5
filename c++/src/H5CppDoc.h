@@ -17,7 +17,7 @@
 #define _H5CPPDOC_H
 
 //-------------------------------------------------------------------------
-// The following section will be used to generate the 'Mainpage' 
+// The following section will be used to generate the 'Mainpage'
 // and the 'Examples' for the RM.
 // ------------------------------------------------------------------------
 
@@ -26,15 +26,15 @@
  * \section intro_sec Introduction
  *
  * The C++ API provides C++ wrappers for the HDF5 C library.
- * It is assumed that the user has knowledge of the HDF5 file format 
+ * It is assumed that the user has knowledge of the HDF5 file format
  * and its components.  If you are not familiar with HDF5 file format,
  * and would like to find out more, please refer to the HDF5 documentation
  * at http://hdf.ncsa.uiuc.edu/HDF5/doc/H5.intro.html
  *
- * Because the HDF5 library maps very well to 
- * the object oriented design approach, classes in the C++ API can 
+ * Because the HDF5 library maps very well to
+ * the object oriented design approach, classes in the C++ API can
  * closely represent the interfaces of the HDF5 APIs, as followed:
- * 
+ *
  * \verbatim
  	HDF5 C APIs				C++ Classes
  	-----------				-----------
@@ -54,7 +54,7 @@
  * under the top directory for information about installing, building,
  * and testing the C++ API.
  *
- *  
+ *
  */
 
 ///	This example shows how to create datasets.

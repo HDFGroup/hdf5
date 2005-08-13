@@ -39,7 +39,7 @@
 /* Local variables */
 
 /*
- * Predefined property list classes. These are initialized at runtime by 
+ * Predefined property list classes. These are initialized at runtime by
  * H5P_init_interface() in this source file.
  */
 hid_t H5P_CLS_NO_CLASS_g            = FAIL;
@@ -195,7 +195,7 @@ NAME
    H5P_init_interface -- Initialize interface-specific information
 USAGE
     herr_t H5P_init_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -393,7 +393,7 @@ H5P_copy_pclass(H5P_genclass_t *pclass)
 
     assert(pclass);
 
-    /* 
+    /*
      * Create new property class object
      */
 
@@ -469,12 +469,12 @@ H5P_copy_plist(H5P_genplist_t *old_plist)
     size_t nseen;               /* Number of items 'seen' */
     hbool_t has_parent_class;   /* Flag to indicate that this property list's class has a parent */
     hid_t ret_value=FAIL;       /* return value */
- 
+
     FUNC_ENTER_NOAPI(H5P_copy_plist, FAIL);
 
     assert(old_plist);
 
-    /* 
+    /*
      * Create new property list object
      */
 
@@ -1428,7 +1428,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 hid_t
-H5Pcreate_class(hid_t parent, const char *name, 
+H5Pcreate_class(hid_t parent, const char *name,
     H5P_cls_create_func_t cls_create, void *create_data,
     H5P_cls_copy_func_t cls_copy, void *copy_data,
     H5P_cls_close_func_t cls_close, void *close_data
@@ -1451,7 +1451,7 @@ H5Pcreate_class(hid_t parent, const char *name,
             || (copy_data!=NULL && cls_copy==NULL)
             || (close_data!=NULL && cls_close==NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "data specified, but no callback provided");
-    
+
     /* Get the pointer to the parent class */
     if(parent==H5P_DEFAULT)
         par_class=NULL;
@@ -1512,7 +1512,7 @@ H5P_create(H5P_genclass_t *pclass)
 
     assert(pclass);
 
-    /* 
+    /*
      * Create new property list object
      */
 
@@ -2262,7 +2262,7 @@ done:
     transformation, etc.  A single 'get' or 'set' callback could handle
     multiple properties by performing different actions based on the property
     name or other properties in the property list.
-        
+
         There is no 'create' callback routine for temporary property list
     objects, the initial value is assumed to have any necessary setup already
     performed on it.
@@ -2280,7 +2280,7 @@ done:
 herr_t
 H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
     void *value, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
-    H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy, 
+    H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy,
     H5P_prp_compare_func_t prp_cmp, H5P_prp_close_func_t prp_close)
 {
     H5P_genprop_t *new_prop=NULL;       /* Temporary property pointer */
@@ -2460,7 +2460,7 @@ done:
     transformation, etc.  A single 'get' or 'set' callback could handle
     multiple properties by performing different actions based on the property
     name or other properties in the property list.
-        
+
         There is no 'create' callback routine for temporary property list
     objects, the initial value is assumed to have any necessary setup already
     performed on it.
@@ -2478,7 +2478,7 @@ done:
 herr_t
 H5Pinsert(hid_t plist_id, const char *name, size_t size, void *value,
     H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
-    H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy, 
+    H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy,
     H5P_prp_close_func_t prp_close)
 {
     H5P_genplist_t	*plist;    /* Property list to modify */
@@ -2869,7 +2869,7 @@ H5Pexist(hid_t id, const char *name)
         if ((ret_value=H5P_exist_plist(plist,name))<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property does not exist in list");
     } /* end if */
-    else 
+    else
         if(H5I_GENPROP_CLS == H5I_get_type(id)) {
             if (NULL == (pclass = H5I_object(id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property class");
@@ -3025,7 +3025,7 @@ H5Pget_size(hid_t id, const char *name, size_t *size)
         if ((ret_value=H5P_get_size_plist(plist,name,size))<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to query size in plist");
     } /* end if */
-    else 
+    else
         if (H5I_GENPROP_CLS == H5I_get_type(id)) {
             if (NULL == (pclass = H5I_object(id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
@@ -3034,7 +3034,7 @@ H5Pget_size(hid_t id, const char *name, size_t *size)
             if ((ret_value=H5P_get_size_pclass(pclass,name,size))<0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to query size in plist");
         } /* end if */
-        else 
+        else
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property object");
 
 done:
@@ -3249,7 +3249,7 @@ H5Pget_nprops(hid_t id, size_t *nprops)
         if (H5P_get_nprops_plist(plist,nprops)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to query # of properties in plist");
     } /* end if */
-    else 
+    else
         if(H5I_GENPROP_CLS == H5I_get_type(id)) {
             if (NULL == (pclass = H5I_object(id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property class");
@@ -3358,7 +3358,7 @@ done:
  NAME
     H5P_cmp_class
  PURPOSE
-    Internal routine to compare two generic property classes 
+    Internal routine to compare two generic property classes
  USAGE
     int H5P_cmp_class(pclass1, pclass2)
         H5P_genclass_t *pclass1;    IN: 1st property class to compare
@@ -3464,7 +3464,7 @@ done:
  NAME
     H5P_cmp_plist
  PURPOSE
-    Internal routine to compare two generic property lists 
+    Internal routine to compare two generic property lists
  USAGE
     int H5P_cmp_plist(plist1, plist2)
         H5P_genplist_t *plist1;    IN: 1st property list to compare
@@ -3837,27 +3837,27 @@ The iteration begins with the IDX property in the object and the next element
 to be processed by the operator is returned in IDX.  If IDX is NULL, then the
 iterator starts at the first property; since no stopping point is returned in
 this case, the iterator cannot be restarted if one of the calls to its operator
-returns non-zero. 
+returns non-zero.
 
-The prototype for H5P_iterate_t is: 
-    typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data); 
+The prototype for H5P_iterate_t is:
+    typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data);
 The operation receives the property list or class identifier for the object
 being iterated over, ID, the name of the current property within the object,
-NAME, and the pointer to the operator data passed in to H5Piterate, ITER_DATA. 
+NAME, and the pointer to the operator data passed in to H5Piterate, ITER_DATA.
 
-The return values from an operator are: 
+The return values from an operator are:
     Zero causes the iterator to continue, returning zero when all properties
-        have been processed. 
+        have been processed.
     Positive causes the iterator to immediately return that positive value,
         indicating short-circuit success. The iterator can be restarted at the
-        index of the next property. 
+        index of the next property.
     Negative causes the iterator to immediately return that value, indicating
         failure. The iterator can be restarted at the index of the next
         property.
 
 H5Piterate assumes that the properties in the object identified by ID remains
 unchanged through the iteration.  If the membership changes during the
-iteration, the function's behavior is undefined. 
+iteration, the function's behavior is undefined.
 
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -3995,27 +3995,27 @@ The iteration begins with the IDX property in the object and the next element
 to be processed by the operator is returned in IDX.  If IDX is NULL, then the
 iterator starts at the first property; since no stopping point is returned in
 this case, the iterator cannot be restarted if one of the calls to its operator
-returns non-zero. 
+returns non-zero.
 
-The prototype for H5P_iterate_t is: 
-    typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data); 
+The prototype for H5P_iterate_t is:
+    typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data);
 The operation receives the property list or class identifier for the object
 being iterated over, ID, the name of the current property within the object,
-NAME, and the pointer to the operator data passed in to H5Piterate, ITER_DATA. 
+NAME, and the pointer to the operator data passed in to H5Piterate, ITER_DATA.
 
-The return values from an operator are: 
+The return values from an operator are:
     Zero causes the iterator to continue, returning zero when all properties
-        have been processed. 
+        have been processed.
     Positive causes the iterator to immediately return that positive value,
         indicating short-circuit success. The iterator can be restarted at the
-        index of the next property. 
+        index of the next property.
     Negative causes the iterator to immediately return that value, indicating
         failure. The iterator can be restarted at the index of the next
         property.
 
 H5Piterate assumes that the properties in the object identified by ID remains
 unchanged through the iteration.  If the membership changes during the
-iteration, the function's behavior is undefined. 
+iteration, the function's behavior is undefined.
 
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -4099,25 +4099,25 @@ is returned in this case, the iterator cannot be restarted if one of the calls
 to its operator returns non-zero.  The IDX value is 0-based (ie. to start at
 the "first" property, the IDX value should be 0).
 
-The prototype for H5P_iterate_t is: 
-    typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data); 
+The prototype for H5P_iterate_t is:
+    typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data);
 The operation receives the property list or class identifier for the object
 being iterated over, ID, the name of the current property within the object,
-NAME, and the pointer to the operator data passed in to H5Piterate, ITER_DATA. 
+NAME, and the pointer to the operator data passed in to H5Piterate, ITER_DATA.
 
-The return values from an operator are: 
+The return values from an operator are:
     Zero causes the iterator to continue, returning zero when all properties
-        have been processed. 
+        have been processed.
     Positive causes the iterator to immediately return that positive value,
         indicating short-circuit success. The iterator can be restarted at the
-        index of the next property. 
+        index of the next property.
     Negative causes the iterator to immediately return that value, indicating
         failure. The iterator can be restarted at the index of the next
         property.
 
 H5Piterate assumes that the properties in the object identified by ID remains
 unchanged through the iteration.  If the membership changes during the
-iteration, the function's behavior is undefined. 
+iteration, the function's behavior is undefined.
 
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -4144,13 +4144,13 @@ H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func, void *iter_data)
         if ((ret_value=H5P_iterate_plist(id,(idx ? idx : &fake_idx),iter_func,iter_data))<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to iterate over list");
     } /* end if */
-    else 
+    else
         if (H5I_GENPROP_CLS == H5I_get_type(id)) {
             /* Iterate over a property class */
             if ((ret_value=H5P_iterate_pclass(id,(idx ? idx : &fake_idx),iter_func,iter_data))<0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to iterate over class");
         } /* end if */
-        else 
+        else
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property object");
 
 done:
@@ -4736,7 +4736,7 @@ done:
     Failure: negative value.
  DESCRIPTION
     Copies a property from one property list to another.
-    
+
     If a property is copied from one list to another, the property will be
     first deleted from the destination list (generating a call to the 'close'
     callback for the property, if one exists) and then the property is copied
@@ -4845,12 +4845,12 @@ done:
     Failure: negative value.
  DESCRIPTION
     Copies a property from one property class to another.
-    
+
     If a property is copied from one class to another, all the property
     information will be first deleted from the destination class and then the
     property information will be copied from the source class into the
     destination class.
-    
+
     If the property does not exist in the destination class or list, this call
     is equivalent to calling H5Pregister.
 
@@ -4908,12 +4908,12 @@ done:
     Failure: negative value.
  DESCRIPTION
     Copies a property from one property list or class to another.
-    
+
     If a property is copied from one class to another, all the property
     information will be first deleted from the destination class and then the
     property information will be copied from the source class into the
     destination class.
-    
+
     If a property is copied from one list to another, the property will be
     first deleted from the destination list (generating a call to the 'close'
     callback for the property, if one exists) and then the property is copied

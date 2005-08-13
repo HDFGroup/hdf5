@@ -26,7 +26,7 @@
  * each dataset in an independent mode and prints them out.
  * All processes collectively close the datasets and the file.
  *
- * The need of requirement of parallel file prefix is that in general 
+ * The need of requirement of parallel file prefix is that in general
  * the current working directory in which compiling is done, is not suitable
  * for parallel I/O and there is no standard pathname for parallel file
  * systems.  In some cases, the parallel file name may even needs some
@@ -250,7 +250,7 @@ phdf5writeInd(char *filename)
     hsize_t count[SPACE1_RANK], stride[SPACE1_RANK];	/* for hyperslab setting */
 
     herr_t ret;         	/* Generic return value */
-    
+
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
@@ -258,14 +258,14 @@ phdf5writeInd(char *filename)
 	printf("Independent write test on file %s\n", filename);
 
     /* -------------------
-     * START AN HDF5 FILE 
+     * START AN HDF5 FILE
      * -------------------*/
     /* setup file access template with parallel IO access. */
     acc_tpl1 = H5Pcreate (H5P_FILE_ACCESS);
     assert(acc_tpl1 != FAIL);
     MESG("H5Pcreate access succeed");
     /* set Parallel access with communicator */
-    ret = H5Pset_fapl_mpio(acc_tpl1, comm, info);     
+    ret = H5Pset_fapl_mpio(acc_tpl1, comm, info);
     assert(ret != FAIL);
     MESG("H5Pset_fapl_mpio succeed");
 
@@ -288,7 +288,7 @@ phdf5writeInd(char *filename)
     assert (sid1 != FAIL);
     MESG("H5Screate_simple succeed");
 
-    
+
     /* create a dataset collectively */
     dataset1 = H5Dcreate(fid1, DATASETNAME1, H5T_NATIVE_INT, sid1,
 			H5P_DEFAULT);
@@ -321,8 +321,8 @@ if (verbose)
     MESG("data_array initialized");
 
     /* create a file dataspace independently */
-    file_dataspace = H5Dget_space (dataset1);				    
-    assert(file_dataspace != FAIL);					    
+    file_dataspace = H5Dget_space (dataset1);
+    assert(file_dataspace != FAIL);
     MESG("H5Dget_space succeed");
     ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride,
 	    count, NULL);
@@ -334,21 +334,21 @@ if (verbose)
     assert (mem_dataspace != FAIL);
 
     /* write data independently */
-    ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,	    
-	    H5P_DEFAULT, data_array1);					    
+    ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+	    H5P_DEFAULT, data_array1);
     assert(ret != FAIL);
     MESG("H5Dwrite succeed");
 
     /* write data independently */
-    ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,	    
-	    H5P_DEFAULT, data_array1);					    
+    ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+	    H5P_DEFAULT, data_array1);
     assert(ret != FAIL);
     MESG("H5Dwrite succeed");
 
     /* release dataspace ID */
     H5Sclose(file_dataspace);
 
-    /* close dataset collectively */					    
+    /* close dataset collectively */
     ret=H5Dclose(dataset1);
     assert(ret != FAIL);
     MESG("H5Dclose1 succeed");
@@ -359,8 +359,8 @@ if (verbose)
     /* release all IDs created */
     H5Sclose(sid1);
 
-    /* close the file collectively */					    
-    H5Fclose(fid1);							    
+    /* close the file collectively */
+    H5Fclose(fid1);
 }
 
 /* Example of using the parallel HDF5 library to read a dataset */
@@ -390,7 +390,7 @@ phdf5readInd(char *filename)
     acc_tpl1 = H5Pcreate (H5P_FILE_ACCESS);
     assert(acc_tpl1 != FAIL);
     /* set Parallel access with communicator */
-    ret = H5Pset_fapl_mpio(acc_tpl1, comm, info);     
+    ret = H5Pset_fapl_mpio(acc_tpl1, comm, info);
     assert(ret != FAIL);
 
 
@@ -497,7 +497,7 @@ phdf5writeAll(char *filename)
     hsize_t count[SPACE1_RANK], stride[SPACE1_RANK];	/* for hyperslab setting */
 
     herr_t ret;         	/* Generic return value */
-    
+
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
@@ -505,14 +505,14 @@ phdf5writeAll(char *filename)
 	printf("Collective write test on file %s\n", filename);
 
     /* -------------------
-     * START AN HDF5 FILE 
+     * START AN HDF5 FILE
      * -------------------*/
     /* setup file access template with parallel IO access. */
     acc_tpl1 = H5Pcreate (H5P_FILE_ACCESS);
     assert(acc_tpl1 != FAIL);
     MESG("H5Pcreate access succeed");
     /* set Parallel access with communicator */
-    ret = H5Pset_fapl_mpio(acc_tpl1, comm, info);     
+    ret = H5Pset_fapl_mpio(acc_tpl1, comm, info);
     assert(ret != FAIL);
     MESG("H5Pset_fapl_mpio succeed");
 
@@ -535,7 +535,7 @@ phdf5writeAll(char *filename)
     assert (sid1 != FAIL);
     MESG("H5Screate_simple succeed");
 
-    
+
     /* create a dataset collectively */
     dataset1 = H5Dcreate(fid1, DATASETNAME1, H5T_NATIVE_INT, sid1, H5P_DEFAULT);
     assert(dataset1 != FAIL);
@@ -559,8 +559,8 @@ if (verbose)
         (unsigned long)(count[0]*count[1]));
 
     /* create a file dataspace independently */
-    file_dataspace = H5Dget_space (dataset1);				    
-    assert(file_dataspace != FAIL);					    
+    file_dataspace = H5Dget_space (dataset1);
+    assert(file_dataspace != FAIL);
     MESG("H5Dget_space succeed");
     ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride,
 	    count, NULL);
@@ -588,7 +588,7 @@ if (verbose)
 
     /* write data collectively */
     ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);					    
+	    xfer_plist, data_array1);
     assert(ret != FAIL);
     MESG("H5Dwrite succeed");
 
@@ -616,8 +616,8 @@ if (verbose)
     }
 
     /* create a file dataspace independently */
-    file_dataspace = H5Dget_space (dataset1);				    
-    assert(file_dataspace != FAIL);					    
+    file_dataspace = H5Dget_space (dataset1);
+    assert(file_dataspace != FAIL);
     MESG("H5Dget_space succeed");
     ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride,
 	    count, NULL);
@@ -645,7 +645,7 @@ if (verbose)
 
     /* write data independently */
     ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);					    
+	    xfer_plist, data_array1);
     assert(ret != FAIL);
     MESG("H5Dwrite succeed");
 
@@ -657,7 +657,7 @@ if (verbose)
 
     /*
      * All writes completed.  Close datasets collectively
-     */					    
+     */
     ret=H5Dclose(dataset1);
     assert(ret != FAIL);
     MESG("H5Dclose1 succeed");
@@ -668,8 +668,8 @@ if (verbose)
     /* release all IDs created */
     H5Sclose(sid1);
 
-    /* close the file collectively */					    
-    H5Fclose(fid1);							    
+    /* close the file collectively */
+    H5Fclose(fid1);
 }
 
 /*
@@ -705,14 +705,14 @@ phdf5readAll(char *filename)
 	printf("Collective read test on file %s\n", filename);
 
     /* -------------------
-     * OPEN AN HDF5 FILE 
+     * OPEN AN HDF5 FILE
      * -------------------*/
     /* setup file access template with parallel IO access. */
     acc_tpl1 = H5Pcreate (H5P_FILE_ACCESS);
     assert(acc_tpl1 != FAIL);
     MESG("H5Pcreate access succeed");
     /* set Parallel access with communicator */
-    ret = H5Pset_fapl_mpio(acc_tpl1, comm, info);     
+    ret = H5Pset_fapl_mpio(acc_tpl1, comm, info);
     assert(ret != FAIL);
     MESG("H5Pset_fapl_mpio succeed");
 
@@ -752,8 +752,8 @@ if (verbose)
         (unsigned long)(count[0]*count[1]));
 
     /* create a file dataspace independently */
-    file_dataspace = H5Dget_space (dataset1);				    
-    assert(file_dataspace != FAIL);					    
+    file_dataspace = H5Dget_space (dataset1);
+    assert(file_dataspace != FAIL);
     MESG("H5Dget_space succeed");
     ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride,
 	    count, NULL);
@@ -781,7 +781,7 @@ if (verbose)
 
     /* read data collectively */
     ret = H5Dread(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);					    
+	    xfer_plist, data_array1);
     assert(ret != FAIL);
     MESG("H5Dread succeed");
 
@@ -805,8 +805,8 @@ if (verbose)
         (unsigned long)(count[0]*count[1]));
 
     /* create a file dataspace independently */
-    file_dataspace = H5Dget_space (dataset1);				    
-    assert(file_dataspace != FAIL);					    
+    file_dataspace = H5Dget_space (dataset1);
+    assert(file_dataspace != FAIL);
     MESG("H5Dget_space succeed");
     ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride,
 	    count, NULL);
@@ -834,7 +834,7 @@ if (verbose)
 
     /* read data independently */
     ret = H5Dread(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);					    
+	    xfer_plist, data_array1);
     assert(ret != FAIL);
     MESG("H5Dread succeed");
 
@@ -850,7 +850,7 @@ if (verbose)
 
     /*
      * All reads completed.  Close datasets collectively
-     */					    
+     */
     ret=H5Dclose(dataset1);
     assert(ret != FAIL);
     MESG("H5Dclose1 succeed");
@@ -858,8 +858,8 @@ if (verbose)
     assert(ret != FAIL);
     MESG("H5Dclose2 succeed");
 
-    /* close the file collectively */					    
-    H5Fclose(fid1);							    
+    /* close the file collectively */
+    H5Fclose(fid1);
 }
 
 /*
@@ -903,9 +903,9 @@ test_split_comm_access(char filenames[][PATH_MAX])
 	/* setup file access template */
 	acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
 	assert(acc_tpl != FAIL);
-	
+
 	/* set Parallel access with communicator */
-	ret = H5Pset_fapl_mpio(acc_tpl, comm, info);     
+	ret = H5Pset_fapl_mpio(acc_tpl, comm, info);
 	assert(ret != FAIL);
 
 	/* create the file collectively */
@@ -1055,7 +1055,7 @@ cleanup(void)
 int
 main(int argc, char **argv)
 {
-    int mpi_namelen;		
+    int mpi_namelen;
     char mpi_name[MPI_MAX_PROCESSOR_NAME];
     int i, n;
 

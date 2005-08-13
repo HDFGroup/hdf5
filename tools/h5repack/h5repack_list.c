@@ -34,21 +34,21 @@
  *
  *-------------------------------------------------------------------------
  */
-int check_objects(const char* fname, 
+int check_objects(const char* fname,
                   pack_opt_t *options)
 {
- hid_t         fid; 
+ hid_t         fid;
  int           i;
  trav_table_t  *travt=NULL;
 
 /*-------------------------------------------------------------------------
- * open the file 
+ * open the file
  *-------------------------------------------------------------------------
  */
 
  /* disable out reporting */
  H5E_BEGIN_TRY {
- 
+
  /* Open the files */
  if ((fid=H5Fopen(fname,H5F_ACC_RDONLY,H5P_DEFAULT))<0 ){
   printf("h5repack: <%s>: %s\n", fname, H5FOPENERROR );
@@ -74,18 +74,18 @@ int check_objects(const char* fname,
  * compare with user supplied list
  *-------------------------------------------------------------------------
  */
- 
+
  if (options->verbose)
  {
   printf("Opening file <%s>. Searching for objects to modify...\n",fname);
  }
- 
- for ( i = 0; i < options->op_tbl->nelems; i++) 
+
+ for ( i = 0; i < options->op_tbl->nelems; i++)
  {
   char* name=options->op_tbl->objs[i].path;
   if (options->verbose)
    printf(" <%s>",name);
-  
+
   /* the input object names are present in the file and are valid */
   if (h5trav_getindext(name,travt)<0)
   {
@@ -109,41 +109,41 @@ int check_objects(const char* fname,
     int     ppb=options->op_tbl->objs[i].filter->cd_values[0];
     hsize_t dims[H5S_MAX_RANK];
     int     rank;
-    hid_t   did;     
-    hid_t   sid;    
+    hid_t   did;
+    hid_t   sid;
 
     if (options->op_tbl->objs[i].chunk.rank>0)
     {
      rank=options->op_tbl->objs[i].chunk.rank;
-     for (j=0; j<rank; j++) 
+     for (j=0; j<rank; j++)
       csize*=(int)options->op_tbl->objs[i].chunk.chunk_lengths[j];
     }
     else
     {
-     if ((did=H5Dopen(fid,travt->objs[i].name))<0) 
+     if ((did=H5Dopen(fid,travt->objs[i].name))<0)
       goto out;
-     if ((sid=H5Dget_space(did))<0) 
+     if ((sid=H5Dget_space(did))<0)
       goto out;
      if ( (rank=H5Sget_simple_extent_ndims(sid))<0)
       goto out;
      HDmemset(dims, 0, sizeof dims);
      if ( H5Sget_simple_extent_dims(sid,dims,NULL)<0)
       goto out;
-     for (j=0; j<rank; j++) 
+     for (j=0; j<rank; j++)
       csize*=(int)dims[j];
-     if (H5Sclose(sid)<0) 
+     if (H5Sclose(sid)<0)
       goto out;
-     if (H5Dclose(did)<0) 
+     if (H5Dclose(did)<0)
       goto out;
-    }      
-        
+    }
+
     if (csize < ppb )
     {
      printf("Warning: SZIP settins, chunk size is smaller than pixels per block...Exiting\n");
      goto out;
     }
-    
-    
+
+
    }
    break;
 
@@ -181,8 +181,8 @@ out:
  *
  *-------------------------------------------------------------------------
  */
-void print_objlist(const char *filename, 
-                   int nobjects, 
+void print_objlist(const char *filename,
+                   int nobjects,
                    trav_info_t *info )
 {
  int i;

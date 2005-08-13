@@ -46,7 +46,7 @@
  file1.h5 file2.h5 -r g1/dset1 g1/dset2
 
 # 1.6
- file1.h5 file2.h5 
+ file1.h5 file2.h5
 
 # ##############################################################################
 # # basic types
@@ -122,13 +122,13 @@
 
 
 # 6.0: Check if the command line number of arguments is less than 3
- h5diff_test1.h5 
+ h5diff_test1.h5
 
 # 6.1: Check for invalid options
- h5diff_test1.h5 h5diff_test2.h5 -x 
+ h5diff_test1.h5 h5diff_test2.h5 -x
 
 # ##############################################################################
-# # -d 
+# # -d
 # ##############################################################################
 
 # 6.2: no value
@@ -238,11 +238,11 @@
  * Basic review tests
  *-------------------------------------------------------------------------
  */
- 
+
 int test_basic(const char *file1, const char *file2)
 {
 
- hid_t   file1_id, file2_id; 
+ hid_t   file1_id, file2_id;
  hid_t   group1_id, group2_id, group3_id;
  herr_t  status;
  hsize_t dims[2] = { 3,2 };
@@ -257,9 +257,9 @@ int test_basic(const char *file1, const char *file2)
  * Create two files
  *-------------------------------------------------------------------------
  */
-  
- file1_id = H5Fcreate (file1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT); 
- file2_id = H5Fcreate (file2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT); 
+
+ file1_id = H5Fcreate (file1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ file2_id = H5Fcreate (file2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
  /* Create groups */
  group1_id = H5Gcreate(file1_id, "g1", 0);
@@ -273,7 +273,7 @@ int test_basic(const char *file1, const char *file2)
  write_dset(group2_id,2,dims,"dset1",H5T_NATIVE_DOUBLE,data2);
 
 /*-------------------------------------------------------------------------
- * Close 
+ * Close
  *-------------------------------------------------------------------------
  */
  status = H5Gclose(group1_id);
@@ -288,28 +288,28 @@ int test_basic(const char *file1, const char *file2)
  * Compare different types: H5G_DATASET, H5G_TYPE, H5G_GROUP, H5G_LINK
  *-------------------------------------------------------------------------
  */
- 
+
 int test_types(const char *file1, const char UNUSED *file2)
 {
 
- hid_t   file1_id; 
+ hid_t   file1_id;
  hid_t   group_id;
- hid_t   type_id;  
+ hid_t   type_id;
  herr_t  status;
  hsize_t dims[1]={1};
  /* Compound datatype */
- typedef struct s_t 
+ typedef struct s_t
  {
   int    a;
   float  b;
  } s_t;
- 
+
 
 /*-------------------------------------------------------------------------
  * Create one file
  *-------------------------------------------------------------------------
  */
- file1_id = H5Fcreate (file1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT); 
+ file1_id = H5Fcreate (file1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
 /*-------------------------------------------------------------------------
  * H5G_DATASET
@@ -336,16 +336,16 @@ int test_types(const char *file1, const char UNUSED *file2)
  /* Commit compound datatype and close it */
  H5Tcommit(file1_id, "type", type_id);
  H5Tclose(type_id);
- 
+
 /*-------------------------------------------------------------------------
  * H5G_LINK
  *-------------------------------------------------------------------------
  */
- 
+
  status = H5Glink(file1_id, H5G_LINK_SOFT, "dset", "link");
 
 /*-------------------------------------------------------------------------
- * Close 
+ * Close
  *-------------------------------------------------------------------------
  */
  status = H5Fclose(file1_id);
@@ -357,14 +357,14 @@ int test_types(const char *file1, const char UNUSED *file2)
 
 
 /*-------------------------------------------------------------------------
- * Datasets datatypes 
+ * Datasets datatypes
  *-------------------------------------------------------------------------
  */
- 
+
 int test_native(const char *file1, const char UNUSED *file2)
 {
 
- hid_t   file1_id; 
+ hid_t   file1_id;
  hsize_t dims[2]={3,2};
  herr_t  status;
  char    buf1a[3][2] = {{1,1},{1,1},{1,1}};
@@ -381,12 +381,12 @@ int test_native(const char *file1, const char UNUSED *file2)
  double  buf6b[3][2] = {{1,1},{3,4},{5,6}};
 
  /*unsigned/signed test
-   signed char -128 to 127 
-   unsigned char 0 to 255 
+   signed char -128 to 127
+   unsigned char 0 to 255
   */
  char          buf7a[3][2] = {{-1,-128},{-1,-1},{-1,-1}};
  unsigned char buf7b[3][2] = {{1,128},{1,1},{1,1}};
- 
+
  /* long_long test */
  long_long            buf8a[3][2] = {{1,1},{1,1},{1,1}};
  long_long            buf8b[3][2] = {{1,1},{3,4},{5,6}};
@@ -395,8 +395,8 @@ int test_native(const char *file1, const char UNUSED *file2)
 
  unsigned int    buf10a[3][2] = {{UIMAX,1},{1,1},{1,1}};
  unsigned int    buf10b[3][2] = {{UIMAX-1,1},{3,4},{5,6}};
- 
- 
+
+
 /*-------------------------------------------------------------------------
  * Create a file
  *-------------------------------------------------------------------------
@@ -410,16 +410,16 @@ int test_native(const char *file1, const char UNUSED *file2)
 
  write_dset(file1_id,2,dims,"dset0a",H5T_STD_I16LE,buf2a);
  write_dset(file1_id,2,dims,"dset0b",H5T_STD_I32LE,buf3b);
- 
+
 /*-------------------------------------------------------------------------
- * Check H5T_NATIVE_CHAR 
+ * Check H5T_NATIVE_CHAR
  *-------------------------------------------------------------------------
  */
  write_dset(file1_id,2,dims,"dset1a",H5T_NATIVE_CHAR,buf1a);
  write_dset(file1_id,2,dims,"dset1b",H5T_NATIVE_CHAR,buf1b);
 
 /*-------------------------------------------------------------------------
- * Check H5T_NATIVE_SHORT 
+ * Check H5T_NATIVE_SHORT
  *-------------------------------------------------------------------------
  */
  write_dset(file1_id,2,dims,"dset2a",H5T_NATIVE_SHORT,buf2a);
@@ -447,7 +447,7 @@ int test_native(const char *file1, const char UNUSED *file2)
  write_dset(file1_id,2,dims,"dset5b",H5T_NATIVE_FLOAT,buf5b);
 
 /*-------------------------------------------------------------------------
- * Check H5T_NATIVE_DOUBLE 
+ * Check H5T_NATIVE_DOUBLE
  *-------------------------------------------------------------------------
  */
 
@@ -488,7 +488,7 @@ int test_native(const char *file1, const char UNUSED *file2)
 
 
 /*-------------------------------------------------------------------------
- * Close 
+ * Close
  *-------------------------------------------------------------------------
  */
  status = H5Fclose(file1_id);

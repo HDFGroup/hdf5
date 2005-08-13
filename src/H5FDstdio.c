@@ -114,7 +114,7 @@ typedef struct H5FD_stdio_t {
 /*
  * These macros check for overflow of various quantities.  These macros
  * assume that file_offset_t is signed and haddr_t and size_t are unsigned.
- * 
+ *
  * ADDR_OVERFLOW:	Checks whether a file address of type `haddr_t'
  *			is too large to be represented by the second argument
  *			of the file seek function.
@@ -253,7 +253,7 @@ H5FD_stdio_term(void)
  * Purpose:	Modify the file access property list to use the H5FD_STDIO
  *		driver defined in this source file.  There are no driver
  *		specific properties.
- *		
+ *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
@@ -276,7 +276,7 @@ H5Pset_fapl_stdio(hid_t fapl_id)
 
     if(0 == H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
         H5Epush_ret(func, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1)
-    
+
     return H5Pset_driver(fapl_id, H5FD_STDIO, NULL);
 }
 
@@ -290,10 +290,10 @@ H5Pset_fapl_stdio(hid_t fapl_id)
  *
  * Errors:
  *		IO	  CANTOPENFILE	File doesn't exist and CREAT wasn't
- *					specified. 
- *		IO	  CANTOPENFILE	Fopen failed. 
+ *					specified.
+ *		IO	  CANTOPENFILE	Fopen failed.
  *		IO	  FILEEXISTS	File exists but CREAT and EXCL were
- *					specified. 
+ *					specified.
  *
  * Return:	Success:	A pointer to a new file data structure. The
  *				public fields will be initialized by the
@@ -401,7 +401,7 @@ H5FD_stdio_open( const char *name, unsigned flags, hid_t fapl_id,
  * Purpose:	Closes a file.
  *
  * Errors:
- *		IO	  CLOSEERROR	Fclose failed. 
+ *		IO	  CLOSEERROR	Fclose failed.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -621,34 +621,34 @@ H5FD_stdio_get_eof(H5FD_t *_file)
 
 /*-------------------------------------------------------------------------
  * Function:       H5FD_stdio_get_handle
- * 
+ *
  * Purpose:        Returns the file handle of stdio file driver.
- * 
+ *
  * Returns:        Non-negative if succeed or negative if fails.
- * 
+ *
  * Programmer:     Raymond Lu
  *                 Sept. 16, 2002
- * 
+ *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t  
+static herr_t
 H5FD_stdio_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
-{   
+{
     H5FD_stdio_t       *file = (H5FD_stdio_t *)_file;
     static const char  *func="H5FD_stdio_get_handle";  /* Function Name for error reporting */
 
     /* Shut compiler up */
     fapl=fapl;
-   
+
     /* Clear the error stack */
     H5Eclear();
 
     *file_handle = &(file->fp);
     if(*file_handle==NULL)
         H5Epush_ret(func, H5E_IO, H5E_WRITEERROR, "get handle failed", -1)
-    return(0); 
+    return(0);
 }
 
 
@@ -660,8 +660,8 @@ H5FD_stdio_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
  *		physical end of file returns zeros instead of failing.
  *
  * Errors:
- *		IO	  READERROR	Fread failed. 
- *		IO	  SEEKERROR	Fseek failed. 
+ *		IO	  READERROR	Fread failed.
+ *		IO	  SEEKERROR	Fseek failed.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -692,7 +692,7 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, siz
     H5Eclear();
 
     /* Check for overflow */
-    if (HADDR_UNDEF==addr) 
+    if (HADDR_UNDEF==addr)
         H5Epush_ret (func, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1)
     if (REGION_OVERFLOW(addr, size))
         H5Epush_ret (func, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1)
@@ -728,7 +728,7 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, siz
         memset((unsigned char *)buf + size - nbytes, 0, nbytes);
         size -= nbytes;
     }
-    
+
     /*
      * Read the data.  Since we're reading single-byte values, a partial read
      * will advance the file position by N.  If N is zero or an error
@@ -742,7 +742,7 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, siz
     } else if (n < size) {
         memset((unsigned char *)buf + n, 0, (size - n));
     }
-    
+
     /*
      * Update the file position data.
      */
@@ -759,8 +759,8 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, siz
  *		file address ADDR.
  *
  * Errors:
- *		IO	  SEEKERROR	Fseek failed. 
- *		IO	  WRITEERROR	Fwrite failed. 
+ *		IO	  SEEKERROR	Fseek failed.
+ *		IO	  WRITEERROR	Fwrite failed.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -796,7 +796,7 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
         H5Epush_ret (func, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1)
     if (addr+size>file->eoa)
         H5Epush_ret (func, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1)
-    
+
     /*
      * Seek to the correct file position.
      */
@@ -809,7 +809,7 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
         }
         file->pos = addr;
     }
-    
+
     /*
      * Write the buffer.  On successful return, the file position will be
      * advanced by the number of bytes read.  Otherwise nobody knows where it
@@ -820,7 +820,7 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
         file->pos = HADDR_UNDEF;
         H5Epush_ret(func, H5E_IO, H5E_WRITEERROR, "fwrite failed", -1)
     }
-    
+
     /*
      * Update seek optimizing data.
      */
@@ -841,8 +841,8 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
  * Purpose:	Makes sure that all data is on disk.
  *
  * Errors:
- *		IO	  SEEKERROR     fseek failed. 
- *		IO	  WRITEERROR    fflush or fwrite failed. 
+ *		IO	  SEEKERROR     fseek failed.
+ *		IO	  WRITEERROR    fflush or fwrite failed.
  *
  * Return:	Non-negative on success/Negative on failure
  *

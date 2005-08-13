@@ -128,7 +128,7 @@ done:
  *                of any shape and size with only one restriction: the number
  *                of elements in the chunk has to be not less than number
  *                of elements (pixels) in the block (cd_values[H5Z_SZIP_PARM_PPB]
- *                parameter). 
+ *                parameter).
  *                           Elena Pourmal, July 20, 2004
  *
  *-------------------------------------------------------------------------
@@ -187,8 +187,8 @@ H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     /* (Use the chunk's fastest changing dimension size) */
     assert(ndims>0);
     scanline=dims[ndims-1];
-    
-    /* Adjust scanline if it is smaller than number of pixels per block or 
+
+    /* Adjust scanline if it is smaller than number of pixels per block or
        if it is bigger than maximum pixels per scanline, or there are more than
        SZ_MAX_BLOCKS_PER_SCANLINE blocks per scanline  */
 
@@ -196,12 +196,12 @@ H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     if(scanline<cd_values[H5Z_SZIP_PARM_PPB]) {
         hssize_t npoints;                   /* Number of points in the dataspace */
 
-        /* Get number of elements for the dataspace;  use 
+        /* Get number of elements for the dataspace;  use
            total number of elements in the chunk to define the new 'scanline' size */
         if ((npoints=H5Sget_simple_extent_npoints(space_id))<0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get number of points in the dataspace")
         if(npoints<cd_values[H5Z_SZIP_PARM_PPB])
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "pixels per block greater than total number of elements in the chunk")         
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "pixels per block greater than total number of elements in the chunk")
         scanline = MIN((cd_values[H5Z_SZIP_PARM_PPB] * SZ_MAX_BLOCKS_PER_SCANLINE), npoints);
     }
     else {
@@ -250,7 +250,7 @@ done:
  *              libsz
  *
  * Return:	Success: Size of buffer filtered
- *		Failure: 0	
+ *		Failure: 0
  *
  * Programmer:	Kent Yang
  *              Tuesday, April 1, 2003
@@ -262,7 +262,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5Z_filter_szip (unsigned flags, size_t cd_nelmts, const unsigned cd_values[], 
+H5Z_filter_szip (unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
     size_t nbytes, size_t *buf_size, void **buf)
 {
     size_t ret_value = 0;       /* Return value */
@@ -302,7 +302,7 @@ H5Z_filter_szip (unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
         newbuf = *buf;
         UINT32DECODE(newbuf,stored_nalloc);
         H5_ASSIGN_OVERFLOW(nalloc,stored_nalloc,uint32_t,size_t);
-        
+
         /* Allocate space for the uncompressed buffer */
         if(NULL==(outbuf = H5MM_malloc(nalloc)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for szip decompression")
@@ -350,7 +350,7 @@ H5Z_filter_szip (unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
         ret_value = size_out+4;
     }
 
-done: 
+done:
     if(outbuf)
         H5MM_xfree(outbuf);
     FUNC_LEAVE_NOAPI(ret_value)

@@ -83,7 +83,7 @@ H5FL_ARR_EXTERN(hsize_t);
 	Robb Matzke, 1998-04-09
 	The current and maximum dimensions are now H5F_SIZEOF_SIZET bytes
 	instead of just four bytes.
- 
+
   	Robb Matzke, 1998-07-20
         Added a version number and reformatted the message for aligment.
 --------------------------------------------------------------------------*/
@@ -94,7 +94,7 @@ H5O_sdspace_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p, H5O_shared_
     void		*ret_value;
     unsigned		i;		/* local counting variable */
     unsigned		flags, version;
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5O_sdspace_decode);
 
     /* check args */
@@ -145,7 +145,7 @@ H5O_sdspace_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p, H5O_shared_
 
     /* Set return value */
     ret_value = (void*)sdim;	/*success*/
-    
+
 done:
     if (!ret_value && sdim) {
         H5S_extent_release(sdim);
@@ -160,7 +160,7 @@ done:
  NAME
     H5O_sdspace_encode
  PURPOSE
-    Encode a simple dimensionality message 
+    Encode a simple dimensionality message
  USAGE
     herr_t H5O_sdspace_encode(f, raw_size, p, mesg)
 	H5F_t *f;	        IN: pointer to the HDF5 file struct
@@ -177,7 +177,7 @@ done:
 	Robb Matzke, 1998-04-09
 	The current and maximum dimensions are now H5F_SIZEOF_SIZET bytes
 	instead of just four bytes.
- 
+
   	Robb Matzke, 1998-07-20
         Added a version number and reformatted the message for aligment.
 --------------------------------------------------------------------------*/
@@ -213,7 +213,7 @@ H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *mesg)
         for (u = 0; u < sdim->rank; u++)
             H5F_ENCODE_LENGTH (f, p, sdim->size[u]);
         if (flags & H5S_VALID_MAX) {
-            for (u = 0; u < sdim->rank; u++) 
+            for (u = 0; u < sdim->rank; u++)
                 H5F_ENCODE_LENGTH (f, p, sdim->max[u]);
         }
     }
@@ -293,7 +293,7 @@ static size_t
 H5O_sdspace_size(const H5F_t *f, const void *mesg)
 {
     const H5S_extent_t	   *space = (const H5S_extent_t *) mesg;
-    
+
     /*
      * All dimensionality messages are at least 8 bytes long.
      */
@@ -330,7 +330,7 @@ static herr_t
 H5O_sdspace_reset(void *_mesg)
 {
     H5S_extent_t	*mesg = (H5S_extent_t*)_mesg;
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_reset);
 
     H5S_extent_release(mesg);
@@ -381,7 +381,7 @@ H5O_sdspace_free (void *mesg)
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
-	This function prints debugging output to the stream passed as a 
+	This function prints debugging output to the stream passed as a
     parameter.
 --------------------------------------------------------------------------*/
 static herr_t
@@ -403,13 +403,13 @@ H5O_sdspace_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *mesg,
     HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	    "Rank:",
 	    (unsigned long) (sdim->rank));
-    
+
     if(sdim->rank>0) {
         HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Size:");
         for (u = 0; u < sdim->rank; u++)
             HDfprintf (stream, "%s%Hu", u?", ":"", sdim->size[u]);
         HDfprintf (stream, "}\n");
-        
+
         HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Dim Max:");
         if (sdim->max) {
             HDfprintf (stream, "{");

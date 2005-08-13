@@ -36,7 +36,7 @@ const DataSpace DataSpace::ALL( H5S_ALL );
 //--------------------------------------------------------------------------
 // Function:	DataSpace constructor
 ///\brief	Creates a new dataspace given a dataspace type.
-///\param	type - IN: Type of the dataspace to be created, which 
+///\param	type - IN: Type of the dataspace to be created, which
 ///		currently can be either \c H5S_SCALAR or \c H5S_SIMPLE;
 ///		default to \c H5S_SCALAR.
 ///\exception	H5::DataSpaceIException
@@ -54,9 +54,9 @@ DataSpace::DataSpace( H5S_class_t type ) : IdComponent()
 //--------------------------------------------------------------------------
 // Function:	DataSpace overloaded constructor
 ///\brief	Creates a new simple dataspace.
-///\param	rank - IN: Number of dimensions of dataspace. 
-///\param	dims - IN: An array of the size of each dimension. 
-///\param	maxdims - IN: An array of the maximum size of each dimension. 
+///\param	rank - IN: Number of dimensions of dataspace.
+///\param	dims - IN: An array of the size of each dimension.
+///\param	maxdims - IN: An array of the maximum size of each dimension.
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -71,7 +71,7 @@ DataSpace::DataSpace( int rank, const hsize_t * dims, const hsize_t * maxdims) :
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace overloaded constructor
-///\brief	Creates a DataSpace object using the id of an existing 
+///\brief	Creates a DataSpace object using the id of an existing
 ///		dataspace.
 ///\param	existing_id - IN: Id of an existing dataspace
 ///\exception	H5::DataSpaceIException
@@ -94,7 +94,7 @@ DataSpace::DataSpace( const DataSpace& original ) : IdComponent( original ) {}
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//		Replaced resetIdComponent with decRefCount to use C library 
+//		Replaced resetIdComponent with decRefCount to use C library
 //		ID reference counting mechanism - BMR, Feb 20, 2005
 //--------------------------------------------------------------------------
 void DataSpace::copy( const DataSpace& like_space )
@@ -137,7 +137,7 @@ DataSpace& DataSpace::operator=( const DataSpace& rhs )
 //--------------------------------------------------------------------------
 // Function:	DataSpace::isSimple
 ///\brief	Determines whether this dataspace is a simple dataspace.
-///\return	\c true if the dataspace is a simple dataspace, and \c false, 
+///\return	\c true if the dataspace is a simple dataspace, and \c false,
 ///		otherwise
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
@@ -151,7 +151,7 @@ bool DataSpace::isSimple () const
       return false;
    else
    {
-      throw DataSpaceIException("DataSpace::isSimple", 
+      throw DataSpaceIException("DataSpace::isSimple",
 		"H5Sis_simple returns negative value");
    }
 }
@@ -162,9 +162,9 @@ bool DataSpace::isSimple () const
 ///\param	offset  - IN: Offset to position the selection at
 ///\exception	H5::DataSpaceIException
 ///\par Description
-///		This function creates an offset for the selection within 
-///		an extent, allowing the same shaped selection to be moved 
-///		to different locations within a dataspace without requiring 
+///		This function creates an offset for the selection within
+///		an extent, allowing the same shaped selection to be moved
+///		to different locations within a dataspace without requiring
 ///		it to be re-defined.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -182,7 +182,7 @@ void DataSpace::offsetSimple ( const hssize_t* offset ) const
 ///\brief	Retrieves dataspace dimension size and maximum size.
 ///\param	dims  - IN: Name of the new member
 ///\param	maxdims - IN: Pointer to the value of the new member
-///\return	Number of dimensions, the same value as returned by 
+///\return	Number of dimensions, the same value as returned by
 ///		\c DataSpace::getSimpleExtentNdims()
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
@@ -192,7 +192,7 @@ int DataSpace::getSimpleExtentDims ( hsize_t *dims, hsize_t *maxdims ) const
    int ndims = H5Sget_simple_extent_dims( id, dims, maxdims );
    if( ndims < 0 )
    {
-      throw DataSpaceIException("DataSpace::getSimpleExtentDims", 
+      throw DataSpaceIException("DataSpace::getSimpleExtentDims",
 		"H5Sget_simple_extent_dims returns negative number of dimensions");
    }
    return( ndims );
@@ -210,7 +210,7 @@ int DataSpace::getSimpleExtentNdims () const
    int ndims = H5Sget_simple_extent_ndims( id );
    if( ndims < 0 )
    {
-      throw DataSpaceIException("DataSpace::getSimpleExtentNdims", 
+      throw DataSpaceIException("DataSpace::getSimpleExtentNdims",
 		"H5Sget_simple_extent_ndims returns negative value for dimensionality of the dataspace");
    }
    return( ndims );
@@ -235,7 +235,7 @@ hssize_t DataSpace::getSimpleExtentNpoints () const
       return( num_elements );
    else
    {
-      throw DataSpaceIException("DataSpace::getSimpleExtentNpoints", 
+      throw DataSpaceIException("DataSpace::getSimpleExtentNpoints",
 	"H5Sget_simple_extent_npoints returns negative value for the number of elements in the dataspace");
    }
 }
@@ -252,7 +252,7 @@ H5S_class_t DataSpace::getSimpleExtentType () const
    H5S_class_t class_name = H5Sget_simple_extent_type( id );
    if( class_name == H5S_NO_CLASS )
    {
-      throw DataSpaceIException("DataSpace::getSimpleExtentType", 
+      throw DataSpaceIException("DataSpace::getSimpleExtentType",
 		"H5Sget_simple_extent_type returns H5S_NO_CLASS");
    }
    return( class_name );
@@ -322,7 +322,7 @@ hssize_t DataSpace::getSelectNpoints () const
    hssize_t num_elements = H5Sget_select_npoints( id );
    if( num_elements < 0 )
    {
-      throw DataSpaceIException("DataSpace::getSelectNpoints", 
+      throw DataSpaceIException("DataSpace::getSelectNpoints",
 		"H5Sget_select_npoints returns negative value for number of elements in the dataspace selection");
    }
    return( num_elements );
@@ -340,7 +340,7 @@ hssize_t DataSpace::getSelectHyperNblocks () const
    hssize_t num_blocks = H5Sget_select_hyper_nblocks( id );
    if( num_blocks < 0 )
    {
-      throw DataSpaceIException("DataSpace::getSelectHyperNblocks", 
+      throw DataSpaceIException("DataSpace::getSelectHyperNblocks",
 		"H5Sget_select_hyper_nblocks returns negative value for the number of hyperslab blocks");
    }
    return( num_blocks );
@@ -361,7 +361,7 @@ void DataSpace::getSelectHyperBlocklist( hsize_t startblock, hsize_t numblocks, 
    ret_value = H5Sget_select_hyper_blocklist( id, startblock, numblocks, buf );
    if( ret_value < 0 )
    {
-      throw DataSpaceIException("DataSpace::getSelectHyperBlocklist", 
+      throw DataSpaceIException("DataSpace::getSelectHyperBlocklist",
 		"H5Sget_select_hyper_blocklist failed");
    }
 }
@@ -378,7 +378,7 @@ hssize_t DataSpace::getSelectElemNpoints () const
    hssize_t num_points = H5Sget_select_elem_npoints( id );
    if( num_points < 0 )
    {
-      throw DataSpaceIException("DataSpace::getSelectElemNpoints", 
+      throw DataSpaceIException("DataSpace::getSelectElemNpoints",
 		"H5Sget_select_elem_npoints failed");
    }
    return( num_points );
@@ -412,7 +412,7 @@ void DataSpace::getSelectElemPointlist ( hsize_t startpoint, hsize_t numpoints, 
 // Function:	DataSpace::getSelectBounds
 ///\brief	Gets the bounding box containing the current selection.
 ///\param	start  - IN: Starting coordinates of the bounding box
-///\param	end - IN: Ending coordinates of the bounding box, i.e., 
+///\param	end - IN: Ending coordinates of the bounding box, i.e.,
 ///		the coordinates of the diagonally opposite corner
 ///\exception	H5::DataSpaceIException
 ///\par Description
@@ -433,12 +433,12 @@ void DataSpace::getSelectBounds ( hsize_t* start, hsize_t* end ) const
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace::H5Sselect_elements
-///\brief	Selects array elements to be included in the selection for 
+///\brief	Selects array elements to be included in the selection for
 ///		this dataspace.
-///\param	op  - IN: Operator specifying how the new selection is to be 
+///\param	op  - IN: Operator specifying how the new selection is to be
 ///		combined with the existing selection for the dataspace
 ///\param	num_elements  - IN: Number of elements to be selected
-///\param	coord  - IN: A 2-dimensional array of 0-based values 
+///\param	coord  - IN: A 2-dimensional array of 0-based values
 ///		specifying the coordinates of the elements being selected
 ///\exception	H5::DataSpaceIException
 ///\par Description
@@ -493,7 +493,7 @@ void DataSpace::selectNone () const
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace::selectValid
-///\brief	Verifies that the selection is within the extent of the 
+///\brief	Verifies that the selection is within the extent of the
 ///		dataspace.
 ///\return	\c true if the selection is within the extent of the
 ///		dataspace, and \c false, otherwise
@@ -525,7 +525,7 @@ bool DataSpace::selectValid () const
 ///\exception	H5::DataSpaceIException
 ///\par Description
 ///		For more information, please refer to the C layer Reference
-///		Manual at: 
+///		Manual at:
 /// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5S.html#Dataspace-SelectHyperslab
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -568,11 +568,11 @@ void DataSpace::close()
 ///\brief	Properly terminates access to this dataspace.
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//		Replaced resetIdComponent with decRefCount to use C library 
+//		Replaced resetIdComponent with decRefCount to use C library
 //		ID reference counting mechanism - BMR, Feb 20, 2005
 //--------------------------------------------------------------------------
 DataSpace::~DataSpace()
-{  
+{
    // If this object has a valid id, appropriately decrement reference
    // counter and close the id.
    if( id != H5S_ALL ) {
@@ -583,7 +583,7 @@ DataSpace::~DataSpace()
 	 cerr << "DataSpace::~DataSpace - " << close_error.getDetailMsg() << endl;
       }
    }  // if
-}  
+}
 
 #ifndef H5_NO_NAMESPACE
 } // end namespace

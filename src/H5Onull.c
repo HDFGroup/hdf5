@@ -20,7 +20,7 @@
  *
  * Purpose:             The null message.
  *
- * Modifications:       
+ * Modifications:
  *
  *-------------------------------------------------------------------------
  */

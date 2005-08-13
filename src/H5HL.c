@@ -1083,7 +1083,7 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *
 				   (sizeof_hdr + heap->mem_alloc));
 	if (NULL==heap->chunk)
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, (size_t)(-1), "memory allocation failed");
-	
+
 	/* clear new section so junk doesn't appear in the file */
 	HDmemset(heap->chunk + sizeof_hdr + old_size, 0, need_more);
     }

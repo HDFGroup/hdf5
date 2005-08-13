@@ -43,9 +43,9 @@ H5FL_BLK_EXTERN(str_buf);
 **
 **  test_refstr_init(): Test basic H5RS (ref-counted strings) code.
 **      Initialize data for RS testing
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_refstr_init(void)
 {
 } /* end test_refstr_init() */
@@ -54,9 +54,9 @@ test_refstr_init(void)
 **
 **  test_refstr_create(): Test basic H5RS (ref-counted strings) code.
 **      Tests creating and closing ref-counted strings.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_refstr_create(void)
 {
     H5RS_str_t *rs;     /* Ref-counted string created */
@@ -84,9 +84,9 @@ test_refstr_create(void)
 **
 **  test_refstr_count(): Test basic H5RS (ref-counted strings) code.
 **      Tests reference counting on ref-counted strings.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_refstr_count(void)
 {
     H5RS_str_t *rs;     /* Ref-counted string created */
@@ -130,9 +130,9 @@ test_refstr_count(void)
 **
 **  test_refstr_dup(): Test basic H5RS (ref-counted strings) code.
 **      Tests duplicating ref-counted strings.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_refstr_dup(void)
 {
     H5RS_str_t *rs1;    /* Ref-counted string created */
@@ -179,9 +179,9 @@ test_refstr_dup(void)
 **
 **  test_refstr_cmp(): Test basic H5RS (ref-counted strings) code.
 **      Tests comparing ref-counted strings.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_refstr_cmp(void)
 {
     H5RS_str_t *rs1;    /* Ref-counted string created */
@@ -228,9 +228,9 @@ test_refstr_cmp(void)
 **
 **  test_refstr_wrap(): Test basic H5RS (ref-counted strings) code.
 **      Tests wrapping ref-counted strings around existing strings.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_refstr_wrap(void)
 {
     H5RS_str_t *rs;     /* Ref-counted string created */
@@ -284,9 +284,9 @@ test_refstr_wrap(void)
 **  test_refstr_own(): Test basic H5RS (ref-counted strings) code.
 **      Tests transferring ownership of dynamically allocated strings
 **      to ref-counted strings.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_refstr_own(void)
 {
     H5RS_str_t *rs;     /* Ref-counted string created */
@@ -339,9 +339,9 @@ test_refstr_own(void)
 **
 **  test_refstr_finalize(): Test basic H5RS (ref-counted strings) code.
 **      Wrap up data for ref-counted string testing
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_refstr_finalize(void)
 {
 } /* end test_refstr_finalize() */
@@ -349,7 +349,7 @@ test_refstr_finalize(void)
 /****************************************************************
 **
 **  test_refstr(): Main H5RS testing routine.
-** 
+**
 ****************************************************************/
 void
 test_refstr(void)

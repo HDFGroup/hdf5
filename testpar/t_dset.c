@@ -2153,7 +2153,7 @@ compress_readAll(void)
         VRFY((dataspace > 0), "H5Screate_simple succeeded");
 
         /* Create dataset */
-        dataset = H5Dcreate(fid, "compressed_data", H5T_NATIVE_INT, dataspace, dcpl); 
+        dataset = H5Dcreate(fid, "compressed_data", H5T_NATIVE_INT, dataspace, dcpl);
         VRFY((dataset > 0), "H5Screate_simple succeeded");
 
         /* Write compressed data */

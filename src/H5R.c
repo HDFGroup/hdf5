@@ -43,7 +43,7 @@ NAME
    H5R_init_interface -- Initialize interface-specific information
 USAGE
     herr_t H5R_init_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -90,7 +90,7 @@ H5R_term_interface(void)
     int	n=0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5R_term_interface);
-    
+
     if (H5_interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_REFERENCE))) {
 	    H5I_clear_group(H5I_REFERENCE, FALSE);
@@ -100,7 +100,7 @@ H5R_term_interface(void)
 	    n = 1; /*H5I*/
 	}
     }
-    
+
     FUNC_LEAVE_NOAPI(n);
 }
 
@@ -119,7 +119,7 @@ H5R_term_interface(void)
         H5R_type_t ref_type;    IN: Type of reference to create
         H5S_t *space;       IN: Dataspace ID with selection, used for Dataset
                                     Region references.
-        
+
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -183,7 +183,7 @@ H5R_create(void *_ref, H5G_entry_t *loc, const char *name, H5R_type_t ref_type, 
                         heapid_found=1;
                         break;
                     } /* end if */
-                
+
                 if(heapid_found!=0) {
 /* Return heap block to free list */
                 } /* end if */
@@ -257,7 +257,7 @@ done:
         H5R_type_t ref_type;    IN: Type of reference to create
         hid_t space_id;     IN: Dataspace ID with selection, used for Dataset
                                     Region references.
-        
+
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -313,7 +313,7 @@ done:
         H5F_t *file;        IN: File the object being dereferenced is within
         H5R_type_t ref_type;    IN: Type of reference
         void *ref;          IN: Reference to open.
-        
+
  RETURNS
     Valid ID on success, Negative on failure
  DESCRIPTION
@@ -456,7 +456,7 @@ done:
                             object that the dataset is located within.
         H5R_type_t ref_type;    IN: Type of reference to create
         void *ref;      IN: Reference to open.
-        
+
  RETURNS
     Valid ID on success, Negative on failure
  DESCRIPTION
@@ -507,7 +507,7 @@ done:
         H5F_t *file;        IN: File the object being dereferenced is within
         H5R_type_t ref_type;    UNUSED
         void *ref;          IN: Reference to open.
-        
+
  RETURNS
     Pointer to the dataspace on success, NULL on failure
  DESCRIPTION
@@ -580,7 +580,7 @@ done:
                             object that the dataset is located within.
         H5R_type_t ref_type;    IN: Type of reference to get region of
         void *ref;        IN: Reference to open.
-        
+
  RETURNS
     Valid ID on success, Negative on failure
  DESCRIPTION
@@ -637,7 +637,7 @@ done:
     int H5R_get_object_type(file, ref)
         H5F_t *file;        IN: File the object being dereferenced is within
         void *ref;          IN: Reference to query.
-        
+
  RETURNS
     Success:	An object type defined in H5Gpublic.h
     Failure:	H5G_UNKNOWN
@@ -691,7 +691,7 @@ done:
         hid_t id;       IN: Dataset reference object is in or location ID of
                             object that the dataset is located within.
         void *ref;          IN: Reference to query.
-        
+
  RETURNS
     Success:	An object type defined in H5Gpublic.h
     Failure:	H5G_UNKNOWN
@@ -725,7 +725,7 @@ H5Rget_object_type(hid_t id, void *_ref)
     /* Get the object information */
     if ((ret_value=H5R_get_object_type(file,H5AC_ind_dxpl_id,_ref))<0)
 	HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, H5G_UNKNOWN, "unable to determine object type");
-    
+
 done:
     FUNC_LEAVE_API(ret_value);
 }   /* end H5Rget_object_type() */
@@ -742,7 +742,7 @@ done:
         H5F_t *file;        IN: File the object being dereferenced is within
         H5R_type_t ref_type;    IN: Type of reference to query
         void *ref;          IN: Reference to query.
-        
+
  RETURNS
     Success:	An object type defined in H5Gpublic.h
     Failure:	H5G_UNKNOWN
@@ -839,7 +839,7 @@ done:
                             object that the dataset is located within.
         H5R_type_t ref_type;    IN: Type of reference to query
         void *ref;          IN: Reference to query.
-        
+
  RETURNS
     Success:	An object type defined in H5Gpublic.h
     Failure:	H5G_UNKNOWN
@@ -888,7 +888,7 @@ H5Rget_obj_type(hid_t id, H5R_type_t ref_type, void *_ref)
 #endif /* H5_WANT_H5_V1_4_COMPAT */
 		H5R_get_obj_type(file,H5AC_ind_dxpl_id,ref_type,_ref))<0)
 	HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, H5G_UNKNOWN, "unable to determine object type");
-    
+
 done:
     FUNC_LEAVE_API(ret_value);
 }   /* end H5Rget_obj_type() */

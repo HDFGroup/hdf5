@@ -44,10 +44,10 @@
 #define H5AC_LHEAP_ID	2	/*local heap				     */
 #define H5AC_GHEAP_ID	3	/*global heap				     */
 #define H5AC_OHDR_ID	4	/*object header				     */
-#define H5AC_NTYPES	5	
+#define H5AC_NTYPES	5
 
-/* H5AC_DUMP_STATS_ON_CLOSE should always be FALSE when 
- * H5C_COLLECT_CACHE_STATS is FALSE.  
+/* H5AC_DUMP_STATS_ON_CLOSE should always be FALSE when
+ * H5C_COLLECT_CACHE_STATS is FALSE.
  *
  * When H5C_COLLECT_CACHE_STATS is TRUE, H5AC_DUMP_STATS_ON_CLOSE must
  * be FALSE for "make check" to succeed, but may be set to TRUE at other

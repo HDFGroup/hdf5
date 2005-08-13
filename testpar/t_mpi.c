@@ -99,7 +99,7 @@ test_mpio_overlap_writes(char *filename)
 	    mrc = MPI_File_write_at(fh, mpi_off, buf, (int)stride, MPI_BYTE,
 		    &mpi_stat);
 	    VRFY((mrc==MPI_SUCCESS), "");
-	    
+
 	    /* move the offset pointer to last byte written by all processes */
 	    mpi_off += (mpi_size - 1 - mpi_rank) * stride;
 
@@ -116,7 +116,7 @@ test_mpio_overlap_writes(char *filename)
 	VRFY((mrc==MPI_SUCCESS), "MPI_FILE_CLOSE");
 	mrc = MPI_Comm_free(&comm);
 	VRFY((mrc==MPI_SUCCESS), "MPI_Comm_free");
-    
+
 	/* sync with the other waiting processes */
 	mrc = MPI_Barrier(MPI_COMM_WORLD);
 	VRFY((mrc==MPI_SUCCESS), "Sync after writes");
@@ -181,10 +181,10 @@ test_mpio_overlap_writes(char *filename)
  * Print any failure as information only, not as an error so that this
  * won't abort the remaining test or other separated tests.
  *
- * Test if MPIO can write file from under 2GB to over 2GB and then 
+ * Test if MPIO can write file from under 2GB to over 2GB and then
  * from under 4GB to over 4GB.
  * Each process writes 1MB in round robin fashion.
- * Then reads the file back in by reverse order, that is process 0 
+ * Then reads the file back in by reverse order, that is process 0
  * reads the data of process n-1 and vice versa.
  */
 static int
@@ -321,7 +321,7 @@ test_mpio_gb_file(char *filename)
 	/* close file and free the communicator */
 	mrc = MPI_File_close(&fh);
 	VRFY((mrc==MPI_SUCCESS), "MPI_FILE_CLOSE");
-	
+
 	mrc = MPI_Barrier(MPI_COMM_WORLD);
 	VRFY((mrc==MPI_SUCCESS), "Sync after writes");
 
@@ -419,7 +419,7 @@ test_mpio_1wMr(char *filename, int special_request)
     int  mpi_err;
     unsigned char writedata[DIMSIZE], readdata[DIMSIZE];
     unsigned char expect_val;
-    int  i, irank; 
+    int  i, irank;
     int  nerrs = 0;		/* number of errors */
     int  atomicity;
     MPI_Offset  mpi_off;

@@ -51,7 +51,7 @@
 using namespace H5;
 #endif  /* !H5_NO_NAMESPACE */
 
-int 
+int
 main(int argc, char *argv[])
 {
     /* Initialize testing framework */

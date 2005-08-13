@@ -15,16 +15,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "hdf5.h"
-#include "H5private.h" 
+#include "H5private.h"
 
 
-int test_basic(const char *file1, 
+int test_basic(const char *file1,
                const char *file2);
 
-int test_types(const char *file1, 
+int test_types(const char *file1,
                const char *file2);
 
-int test_native(const char *file1, 
+int test_native(const char *file1,
                 const char *file2);
 
 
@@ -35,19 +35,19 @@ int test_attr(const char *file,
               int make_diffs /* flag to modify data buffers */);
 
 
-int write_attr(hid_t loc_id, 
-               int rank, 
-               hsize_t *dims, 
+int write_attr(hid_t loc_id,
+               int rank,
+               hsize_t *dims,
                const char *attr_name,
-               hid_t type_id, 
+               hid_t type_id,
                void *buf);
 
 
-int write_dset( hid_t loc_id, 
-                int rank, 
-                hsize_t *dims, 
+int write_dset( hid_t loc_id,
+                int rank,
+                hsize_t *dims,
                 const char *dset_name,
-                hid_t type_id, 
+                hid_t type_id,
                 void *buf );
 
 

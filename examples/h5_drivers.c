@@ -12,13 +12,13 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*  
+/*
  * This shows how to use the hdf5 virtual file drivers.
  * The example codes here do not check return values for the
  * sake of simplicity.  As in all proper programs, return codes
  * should be checked.
  */
- 
+
 #include "hdf5.h"
 #include "stdlib.h"
 
@@ -96,8 +96,8 @@ split_file(void)
 int
 main (void)
 {
-    
+
     split_file();
 
     return(0);
-}     
+}

@@ -26,11 +26,11 @@
 
 #include <string.h>
 
-#ifdef H5_HAVE_GASS 
+#ifdef H5_HAVE_GASS
 #define H5FD_GASS        (H5FD_gass_init())
 #else
 #define H5FD_GASS        (-1)
-#endif   
+#endif
 
 #ifdef H5_HAVE_GASS
 /* Define the GASS info object. (Will be added to later as more GASS

@@ -20,7 +20,7 @@
  *
  * Purpose:             Object name message.
  *
- * Modifications:       
+ * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -176,7 +176,7 @@ H5O_name_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
     assert(mesg);
     if (!dest && NULL==(dest = H5MM_calloc(sizeof(H5O_name_t))))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    
+
     /* copy */
     *dest = *mesg;
     if((dest->s = H5MM_xstrdup(mesg->s))==NULL)

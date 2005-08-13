@@ -19,13 +19,13 @@
  *              John Mainzer
  *
  * Purpose:     Functions in this file implement a generic cache for
- *              things which exist on disk, and which may be 
+ *              things which exist on disk, and which may be
  *	 	unambiguously referenced by their disk addresses.
  *
- *              The code in this module was initially written in 
+ *              The code in this module was initially written in
  *		support of a complete re-write of the metadata cache
  *		in H5AC.c  However, other uses for the cache code
- *		suggested themselves, and thus this file was created 
+ *		suggested themselves, and thus this file was created
  *		in an attempt to support re-use.
  *
  *		For a detailed overview of the cache, please see the
@@ -57,7 +57,7 @@
  *	   unprotect -- or some other way should be found to advise the
  *	   cache of changes in entry size.
  *
- *	 - Flush entries in increasing address order in 
+ *	 - Flush entries in increasing address order in
  *	   H5C_make_space_in_cache().
  *
  *	 - Also in H5C_make_space_in_cache(), use high and low water marks
@@ -98,11 +98,11 @@
 
 /****************************************************************************
  *
- * We maintain doubly linked lists of instances of H5C_cache_entry_t for a 
- * variety of reasons -- protected list, LRU list, and the clean and dirty 
- * LRU lists at present.  The following macros support linking and unlinking 
- * of instances of H5C_cache_entry_t by both their regular and auxilary next 
- * and previous pointers.  
+ * We maintain doubly linked lists of instances of H5C_cache_entry_t for a
+ * variety of reasons -- protected list, LRU list, and the clean and dirty
+ * LRU lists at present.  The following macros support linking and unlinking
+ * of instances of H5C_cache_entry_t by both their regular and auxilary next
+ * and previous pointers.
  *
  * The size and length fields are also maintained.
  *
@@ -436,7 +436,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
         if ( (cache_ptr)->slist_len > (cache_ptr)->max_slist_len )   \
 	    (cache_ptr)->max_slist_len = (cache_ptr)->slist_len;     \
         if ( (cache_ptr)->slist_size > (cache_ptr)->max_slist_size ) \
-	    (cache_ptr)->max_slist_size = (cache_ptr)->slist_size; 
+	    (cache_ptr)->max_slist_size = (cache_ptr)->slist_size;
 
 #define H5C__UPDATE_STATS_FOR_RENAME(cache_ptr, entry_ptr) \
 	(((cache_ptr)->renames)[(entry_ptr)->type->id])++;
@@ -521,16 +521,16 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 
 #else /* H5C_COLLECT_CACHE_ENTRY_STATS */
 
-#define H5C__RESET_CACHE_ENTRY_STATS(entry_ptr) 
+#define H5C__RESET_CACHE_ENTRY_STATS(entry_ptr)
 
 #define H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr) \
-	(((cache_ptr)->clears)[(entry_ptr)->type->id])++; 
+	(((cache_ptr)->clears)[(entry_ptr)->type->id])++;
 
 #define H5C__UPDATE_STATS_FOR_FLUSH(cache_ptr, entry_ptr) \
-	(((cache_ptr)->flushes)[(entry_ptr)->type->id])++; 
+	(((cache_ptr)->flushes)[(entry_ptr)->type->id])++;
 
 #define H5C__UPDATE_STATS_FOR_EVICTION(cache_ptr, entry_ptr) \
-	(((cache_ptr)->evictions)[(entry_ptr)->type->id])++; 
+	(((cache_ptr)->evictions)[(entry_ptr)->type->id])++;
 
 #define H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit)     \
 	if ( hit )                                                   \
@@ -550,7 +550,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 
 #else /* H5C_COLLECT_CACHE_STATS */
 
-#define H5C__RESET_CACHE_ENTRY_STATS(entry_ptr) 
+#define H5C__RESET_CACHE_ENTRY_STATS(entry_ptr)
 #define H5C__UPDATE_STATS_FOR_UNPROTECT(cache_ptr)
 #define H5C__UPDATE_STATS_FOR_RENAME(cache_ptr, entry_ptr)
 #define H5C__UPDATE_STATS_FOR_HT_INSERTION(cache_ptr)
@@ -745,12 +745,12 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
         }                                                                   \
     }                                                                       \
     H5C__UPDATE_STATS_FOR_HT_SEARCH(cache_ptr, (entry_ptr != NULL), depth)  \
-} 
+}
 
 
 /**************************************************************************
  *
- * Skip list insertion and deletion macros:  
+ * Skip list insertion and deletion macros:
  *
  * These used to be functions, but I converted them to macros to avoid some
  * function call overhead.
@@ -761,7 +761,7 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  *
  * Macro:	H5C__INSERT_ENTRY_IN_SLIST
  *
- * Purpose:     Insert the specified instance of H5C_cache_entry_t into 
+ * Purpose:     Insert the specified instance of H5C_cache_entry_t into
  *		the skip list in the specified instance of H5C_t.  Update
  *		the associated length and size fields.
  *
@@ -773,8 +773,8 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  *
  *		JRM -- 7/21/04
  *		Updated function to set the in_tree flag when inserting
- *		an entry into the tree.  Also modified the function to 
- *		update the tree size and len fields instead of the similar 
+ *		an entry into the tree.  Also modified the function to
+ *		update the tree size and len fields instead of the similar
  *		index fields.
  *
  *		All of this is part of the modifications to support the
@@ -782,7 +782,7 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  *
  *		JRM -- 7/27/04
  *		Converted the function H5C_insert_entry_in_tree() into
- *		the macro H5C__INSERT_ENTRY_IN_TREE in the hopes of 
+ *		the macro H5C__INSERT_ENTRY_IN_TREE in the hopes of
  *		wringing a little more speed out of the cache.
  *
  *		Note that we don't bother to check if the entry is already
@@ -820,7 +820,7 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  *
  * Function:    H5C__REMOVE_ENTRY_FROM_SLIST
  *
- * Purpose:     Remove the specified instance of H5C_cache_entry_t from the 
+ * Purpose:     Remove the specified instance of H5C_cache_entry_t from the
  *		index skip list in the specified instance of H5C_t.  Update
  *		the associated length and size fields.
  *
@@ -870,7 +870,7 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
 
 /**************************************************************************
  *
- * Replacement policy update macros:  
+ * Replacement policy update macros:
  *
  * These used to be functions, but I converted them to macros to avoid some
  * function call overhead.
@@ -881,10 +881,10 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  *
  * Macro:	H5C__UPDATE_RP_FOR_EVICTION
  *
- * Purpose:     Update the replacement policy data structures for an 
+ * Purpose:     Update the replacement policy data structures for an
  *		eviction of the specified cache entry.
  *
- *		At present, we only support the modified LRU policy, so 
+ *		At present, we only support the modified LRU policy, so
  *		this function deals with that case unconditionally.  If
  *		we ever support other replacement policies, the function
  *		should switch on the current policy and act accordingly.
@@ -978,10 +978,10 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  *
  * Macro:	H5C__UPDATE_RP_FOR_FLUSH
  *
- * Purpose:     Update the replacement policy data structures for a flush 
+ * Purpose:     Update the replacement policy data structures for a flush
  *		of the specified cache entry.
  *
- *		At present, we only support the modified LRU policy, so 
+ *		At present, we only support the modified LRU policy, so
  *		this function deals with that case unconditionally.  If
  *		we ever support other replacement policies, the function
  *		should switch on the current policy and act accordingly.
@@ -1098,7 +1098,7 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  * Purpose:     Update the replacement policy data structures for an
  *		insertion of the specified cache entry.
  *
- *		At present, we only support the modified LRU policy, so 
+ *		At present, we only support the modified LRU policy, so
  *		this function deals with that case unconditionally.  If
  *		we ever support other replacement policies, the function
  *		should switch on the current policy and act accordingly.
@@ -1193,14 +1193,14 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  *
  * Macro:	H5C__UPDATE_RP_FOR_PROTECT
  *
- * Purpose:     Update the replacement policy data structures for a 
+ * Purpose:     Update the replacement policy data structures for a
  *		protect of the specified cache entry.
  *
- *		To do this, unlink the specified entry from any data 
+ *		To do this, unlink the specified entry from any data
  *		structures used by the replacement policy, and add the
  *		entry to the protected list.
  *
- *		At present, we only support the modified LRU policy, so 
+ *		At present, we only support the modified LRU policy, so
  *		this function deals with that case unconditionally.  If
  *		we ever support other replacement policies, the function
  *		should switch on the current policy and act accordingly.
@@ -1314,10 +1314,10 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  *
  * Macro:	H5C__UPDATE_RP_FOR_RENAME
  *
- * Purpose:     Update the replacement policy data structures for a 
+ * Purpose:     Update the replacement policy data structures for a
  *		rename of the specified cache entry.
  *
- *		At present, we only support the modified LRU policy, so 
+ *		At present, we only support the modified LRU policy, so
  *		this function deals with that case unconditionally.  If
  *		we ever support other replacement policies, the function
  *		should switch on the current policy and act accordingly.
@@ -1440,7 +1440,7 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  *		list, and re-insert it in the data structures used by the
  *		current replacement policy.
  *
- *		At present, we only support the modified LRU policy, so 
+ *		At present, we only support the modified LRU policy, so
  *		this function deals with that case unconditionally.  If
  *		we ever support other replacement policies, the function
  *		should switch on the current policy and act accordingly.
@@ -1452,8 +1452,8 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  * Modifications:
  *
  *		JRM - 7/27/04
- *		Converted the function H5C_update_rp_for_unprotect() to 
- *		the macro H5C__UPDATE_RP_FOR_UNPROTECT in an effort to 
+ *		Converted the function H5C_update_rp_for_unprotect() to
+ *		the macro H5C__UPDATE_RP_FOR_UNPROTECT in an effort to
  *		squeeze a bit more performance out of the cache.
  *
  *		At least for the first cut, I am leaving the comments and
@@ -1554,27 +1554,27 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  *
  * structure H5C_t
  *
- * Catchall structure for all variables specific to an instance of the cache.  
+ * Catchall structure for all variables specific to an instance of the cache.
  *
- * While the individual fields of the structure are discussed below, the 
+ * While the individual fields of the structure are discussed below, the
  * following overview may be helpful.
  *
  * Entries in the cache are stored in an instance of H5TB_TREE, indexed on
- * the entry's disk address.  While the H5TB_TREE is less efficient than 
+ * the entry's disk address.  While the H5TB_TREE is less efficient than
  * hash table, it keeps the entries in address sorted order.  As flushes
- * in parallel mode are more efficient if they are issued in increasing 
+ * in parallel mode are more efficient if they are issued in increasing
  * address order, this is a significant benefit.  Also the H5TB_TREE code
  * was readily available, which reduced development time.
  *
  * While the cache was designed with multiple replacement policies in mind,
- * at present only a modified form of LRU is supported.  
+ * at present only a modified form of LRU is supported.
  *
  *                                              JRM - 4/26/04
  *
  * Profiling has indicated that searches in the instance of H5TB_TREE are
- * too expensive.  To deal with this issue, I have augmented the cache 
- * with a hash table in which all entries will be stored.  Given the 
- * advantages of flushing entries in increasing address order, the TBBT 
+ * too expensive.  To deal with this issue, I have augmented the cache
+ * with a hash table in which all entries will be stored.  Given the
+ * advantages of flushing entries in increasing address order, the TBBT
  * is retained, but only dirty entries are stored in it.  At least for
  * now, we will leave entries in the TBBT after they are flushed.
  *
@@ -1591,7 +1591,7 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  *           *********************************************
  *
  * WARNING:  A copy of H5C_t is in tst/cache.c (under the name "local_H5C_t"
- *	     to allow the test code to access the internal fields of the 
+ *	     to allow the test code to access the internal fields of the
  *	     cache.  If you modify H5C_t, be sure to update local_H5C_t
  *	     in cache.c as well.
  *
@@ -1601,12 +1601,12 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  *		field is used to validate pointers to instances of H5C_t.
  *
  * max_type_id:	Integer field containing the maximum type id number assigned
- *		to a type of entry in the cache.  All type ids from 0 to 
- *		max_type_id inclusive must be defined.  The names of the 
+ *		to a type of entry in the cache.  All type ids from 0 to
+ *		max_type_id inclusive must be defined.  The names of the
  *		types are stored in the type_name_table discussed below, and
  *		indexed by the ids.
  *
- * type_name_table_ptr: Pointer to an array of pointer to char of length 
+ * type_name_table_ptr: Pointer to an array of pointer to char of length
  *		max_type_id + 1.  The strings pointed to by the entries
  *		in the array are the names of the entry types associated
  *		with the indexing type IDs.
@@ -1621,11 +1621,11 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  *                 max_cache_size, it will do so.  The cache will attempt
  *                 to reduce its size as entries are unprotected.
  *
- *              b) When running in parallel mode, the cache may not be 
- *		   permitted to flush a dirty entry in response to a read.  
- *		   If there are no clean entries available to evict, the 
- *		   cache will exceed its maximum size.  Again the cache 
- *                 will attempt to reduce its size to the max_cache_size 
+ *              b) When running in parallel mode, the cache may not be
+ *		   permitted to flush a dirty entry in response to a read.
+ *		   If there are no clean entries available to evict, the
+ *		   cache will exceed its maximum size.  Again the cache
+ *                 will attempt to reduce its size to the max_cache_size
  *                 limit on the next cache write.
  *
  * min_clean_size: Nominal minimum number of clean bytes in the cache.
@@ -1634,11 +1634,11 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  *              a soft limit.
  *
  *
- * In addition to the call back functions required for each entry, the 
+ * In addition to the call back functions required for each entry, the
  * cache requires the following call back functions for this instance of
  * the cache as a whole:
- * 
- * check_write_permitted:  In certain applications, the cache may not 
+ *
+ * check_write_permitted:  In certain applications, the cache may not
  *		be allowed to write to disk at certain time.  If specified,
  *		the check_write_permitted function is used to determine if
  *		a write is permissible at any given point in time.
@@ -1650,7 +1650,7 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  * The cache requires an index to facilitate searching for entries.  The
  * following fields support that index.
  *
- * index_len:   Number of entries currently in the hash table used to index 
+ * index_len:   Number of entries currently in the hash table used to index
  *		the cache.
  *
  * index_size:  Number of bytes of cache entries currently stored in the
@@ -1664,16 +1664,16 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  *
  * index:	Array of pointer to H5C_cache_entry_t of size
  *		H5C__HASH_TABLE_LEN.  At present, this value is a power
- *		of two, not the usual prime number.  
+ *		of two, not the usual prime number.
  *
- *		I hope that the variable size of cache elements, the large 
+ *		I hope that the variable size of cache elements, the large
  *		hash table size, and the way in which HDF5 allocates space
- *		will combine to avoid problems with periodicity.  If so, we 
- *		can use a trivial hash function (a bit-and and a 3 bit left 
- *		shift) with some small savings.  
+ *		will combine to avoid problems with periodicity.  If so, we
+ *		can use a trivial hash function (a bit-and and a 3 bit left
+ *		shift) with some small savings.
  *
  *		If not, it will become evident in the statistics. Changing
- *		to the usual prime number length hash table will require 
+ *		to the usual prime number length hash table will require
  *		changing the H5C__HASH_FCN macro and the deletion of the
  *		H5C__HASH_MASK #define.  No other changes should be required.
  *
@@ -1688,7 +1688,7 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  * are flushed.
  *
  * slist_len:    Number of entries currently in the skip list
- *              used to maintain a sorted list of dirty entries in the 
+ *              used to maintain a sorted list of dirty entries in the
  *		cache.
  *
  * slist_size:   Number of bytes of cache entries currently stored in the
@@ -1851,39 +1851,39 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  * below.  The first set are collected only when H5C_COLLECT_CACHE_STATS
  * is true.
  *
- * hits:        Array of int64 of length H5C__MAX_NUM_TYPE_IDS.  The cells 
- *		are used to record the number of times an entry with type id 
- *		equal to the array index has been in cache when requested in 
+ * hits:        Array of int64 of length H5C__MAX_NUM_TYPE_IDS.  The cells
+ *		are used to record the number of times an entry with type id
+ *		equal to the array index has been in cache when requested in
  *		the current epoch.
  *
- * misses:      Array of int64 of length H5C__MAX_NUM_TYPE_IDS.  The cells 
- *		are used to record the number of times an entry with type id 
- *		equal to the array index has not been in cache when 
+ * misses:      Array of int64 of length H5C__MAX_NUM_TYPE_IDS.  The cells
+ *		are used to record the number of times an entry with type id
+ *		equal to the array index has not been in cache when
  *		requested in the current epoch.
  *
- * insertions:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS.  The cells 
- *		are used to record the number of times an entry with type 
- *		id equal to the array index has been inserted into the 
+ * insertions:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS.  The cells
+ *		are used to record the number of times an entry with type
+ *		id equal to the array index has been inserted into the
  *		cache in the current epoch.
  *
- * clears:      Array of int64 of length H5C__MAX_NUM_TYPE_IDS.  The cells 
- *		are used to record the number of times an entry with type 
- *		id equal to the array index has been cleared in the current 
+ * clears:      Array of int64 of length H5C__MAX_NUM_TYPE_IDS.  The cells
+ *		are used to record the number of times an entry with type
+ *		id equal to the array index has been cleared in the current
  *		epoch.
  *
- * flushes:     Array of int64 of length H5C__MAX_NUM_TYPE_IDS.  The cells 
- *		are used to record the number of times an entry with type id 
+ * flushes:     Array of int64 of length H5C__MAX_NUM_TYPE_IDS.  The cells
+ *		are used to record the number of times an entry with type id
  *		equal to the array index has been written to disk in the
  *              current epoch.
  *
- * evictions:   Array of int64 of length H5C__MAX_NUM_TYPE_IDS.  The cells 
- *		are used to record the number of times an entry with type id 
- *		equal to the array index has been evicted from the cache in 
+ * evictions:   Array of int64 of length H5C__MAX_NUM_TYPE_IDS.  The cells
+ *		are used to record the number of times an entry with type id
+ *		equal to the array index has been evicted from the cache in
  *		the current epoch.
  *
- * renames:     Array of int64 of length H5C__MAX_NUM_TYPE_IDS.  The cells 
- *		are used to record the number of times an entry with type 
- *		id equal to the array index has been renamed in the current 
+ * renames:     Array of int64 of length H5C__MAX_NUM_TYPE_IDS.  The cells
+ *		are used to record the number of times an entry with type
+ *		id equal to the array index has been renamed in the current
  *		epoch.
  *
  * total_ht_insertions: Number of times entries have been inserted into the
@@ -1892,10 +1892,10 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  * total_ht_deletions: Number of times entries have been deleted from the
  *              hash table in the current epoch.
  *
- * successful_ht_searches: int64 containing the total number of successful 
+ * successful_ht_searches: int64 containing the total number of successful
  *		searches of the hash table in the current epoch.
  *
- * total_successful_ht_search_depth: int64 containing the total number of 
+ * total_successful_ht_search_depth: int64 containing the total number of
  *		entries other than the targets examined in successful
  *		searches of the hash table in the current epoch.
  *
@@ -1903,7 +1903,7 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  *              searches of the hash table in the current epoch.
  *
  * total_failed_ht_search_depth: int64 containing the total number of
- *              entries examined in unsuccessful searches of the hash 
+ *              entries examined in unsuccessful searches of the hash
  *		table in the current epoch.
  *
  * max_index_len:  Largest value attained by the index_len field in the
@@ -1927,28 +1927,28 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  * The remaining stats are collected only when both H5C_COLLECT_CACHE_STATS
  * and H5C_COLLECT_CACHE_ENTRY_STATS are true.
  *
- * max_accesses: Array of int32 of length H5C__MAX_NUM_TYPE_IDS.  The cells 
- *		are used to record the maximum number of times any single 
- *		entry with type id equal to the array index has been 
+ * max_accesses: Array of int32 of length H5C__MAX_NUM_TYPE_IDS.  The cells
+ *		are used to record the maximum number of times any single
+ *		entry with type id equal to the array index has been
  *		accessed in the current epoch.
  *
- * min_accesses: Array of int32 of length H5C__MAX_NUM_TYPE_IDS.  The cells 
- *		are used to record the minimum number of times any single 
- *		entry with type id equal to the array index has been 
+ * min_accesses: Array of int32 of length H5C__MAX_NUM_TYPE_IDS.  The cells
+ *		are used to record the minimum number of times any single
+ *		entry with type id equal to the array index has been
  *		accessed in the current epoch.
  *
- * max_clears:  Array of int32 of length H5C__MAX_NUM_TYPE_IDS.  The cells 
- *		are used to record the maximum number of times any single 
- *		entry with type id equal to the array index has been cleared 
+ * max_clears:  Array of int32 of length H5C__MAX_NUM_TYPE_IDS.  The cells
+ *		are used to record the maximum number of times any single
+ *		entry with type id equal to the array index has been cleared
  *		in the current epoch.
  *
- * max_flushes: Array of int32 of length H5C__MAX_NUM_TYPE_IDS.  The cells 
- *		are used to record the maximum number of times any single 
- *		entry with type id equal to the array index has been 
+ * max_flushes: Array of int32 of length H5C__MAX_NUM_TYPE_IDS.  The cells
+ *		are used to record the maximum number of times any single
+ *		entry with type id equal to the array index has been
  *		flushed in the current epoch.
  *
  * max_size:	Array of size_t of length H5C__MAX_NUM_TYPE_IDS.  The cells
- *              are used to record the maximum size of any single entry 
+ *              are used to record the maximum size of any single entry
  *		with type id equal to the array index that has resided in
  *		the cache in the current epoch.
  *
@@ -1966,9 +1966,9 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  *		When this flag is set, all sanity checks on the file
  *		parameters are skipped.  The field defaults to FALSE.
  *
- * skip_dxpl_id_checks:  Boolean flag used to skip sanity checks on the 
+ * skip_dxpl_id_checks:  Boolean flag used to skip sanity checks on the
  *		dxpl_id parameters passed to the cache.  These are not
- *		used directly by the cache, so skipping the checks 
+ *		used directly by the cache, so skipping the checks
  *		simplifies the test bed.
  *
  *		When this flag is set, all sanity checks on the dxpl_id
@@ -2105,16 +2105,16 @@ static herr_t H5C_make_space_in_cache(H5F_t * f,
 /*-------------------------------------------------------------------------
  * Function:    H5C_create
  *
- * Purpose:     Allocate, initialize, and return the address of a new 
+ * Purpose:     Allocate, initialize, and return the address of a new
  *		instance of H5C_t.
  *
- *		In general, the max_cache_size parameter must be positive, 
- *		and the min_clean_size parameter must lie in the closed 
- *		interval [0, max_cache_size]. 
+ *		In general, the max_cache_size parameter must be positive,
+ *		and the min_clean_size parameter must lie in the closed
+ *		interval [0, max_cache_size].
  *
  *		The check_write_permitted parameter must either be NULL,
  *		or point to a function of type H5C_write_permitted_func_t.
- *		If it is NULL, the cache will presume that writes are 
+ *		If it is NULL, the cache will presume that writes are
  *		always permitted.
  *
  * Return:      Success:        Pointer to the new instance.
@@ -2165,7 +2165,7 @@ H5C_create(size_t		      max_cache_size,
                     "memory allocation failed")
     }
 
-    if ( (cache_ptr->slist_ptr = H5SL_create(H5SL_TYPE_HADDR,0.5,16)) 
+    if ( (cache_ptr->slist_ptr = H5SL_create(H5SL_TYPE_HADDR,0.5,16))
          == NULL ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, NULL, "can't create skip list.")
@@ -2254,11 +2254,11 @@ done:
  *              This function fails if any object are protected since the
  *              resulting file might not be consistent.
  *
- *		The primary_dxpl_id and secondary_dxpl_id parameters 
+ *		The primary_dxpl_id and secondary_dxpl_id parameters
  *		specify the dxpl_ids used on the first write occasioned
- *		by the destroy (primary_dxpl_id), and on all subsequent 
- *		writes (secondary_dxpl_id).  This is useful in the metadata 
- *		cache, but may not be needed elsewhere.  If so, just use the 
+ *		by the destroy (primary_dxpl_id), and on all subsequent
+ *		writes (secondary_dxpl_id).  This is useful in the metadata
+ *		cache, but may not be needed elsewhere.  If so, just use the
  *		same dxpl_id for both parameters.
  *
  *		Note that *cache_ptr has been freed upon successful return.
@@ -2273,9 +2273,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_dest(H5F_t * f, 
-         hid_t	 primary_dxpl_id, 
-         hid_t	 secondary_dxpl_id, 
+H5C_dest(H5F_t * f,
+         hid_t	 primary_dxpl_id,
+         hid_t	 secondary_dxpl_id,
          H5C_t * cache_ptr)
 {
     herr_t ret_value=SUCCEED;      /* Return value */
@@ -2286,7 +2286,7 @@ H5C_dest(H5F_t * f,
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
     HDassert( cache_ptr->skip_file_checks || f );
 
-    if ( H5C_flush_cache(f, primary_dxpl_id, secondary_dxpl_id, 
+    if ( H5C_flush_cache(f, primary_dxpl_id, secondary_dxpl_id,
                          cache_ptr, H5F_FLUSH_INVALIDATE) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
@@ -2336,8 +2336,8 @@ H5C_dest_empty(H5C_t * cache_ptr)
     /* This would normally be an assert, but we need to use an HGOTO_ERROR
      * call to shut up the compiler.
      */
-    if ( ( ! cache_ptr ) || 
-         ( cache_ptr->magic != H5C__H5C_T_MAGIC ) || 
+    if ( ( ! cache_ptr ) ||
+         ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ||
          ( cache_ptr->index_len != 0 ) ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
@@ -2368,18 +2368,18 @@ done:
  *		specified cache.
  *
  *		If the cache contains protected entries, the function will
- *		fail, as protected entries cannot be flushed.  However 
- *		all unprotected entries should be flushed before the 
+ *		fail, as protected entries cannot be flushed.  However
+ *		all unprotected entries should be flushed before the
  *		function returns failure.
  *
- *		The primary_dxpl_id and secondary_dxpl_id parameters 
+ *		The primary_dxpl_id and secondary_dxpl_id parameters
  *		specify the dxpl_ids used on the first write occasioned
- *		by the flush (primary_dxpl_id), and on all subsequent 
- *		writes (secondary_dxpl_id).  This is useful in the metadata 
- *		cache, but may not be needed elsewhere.  If so, just use the 
+ *		by the flush (primary_dxpl_id), and on all subsequent
+ *		writes (secondary_dxpl_id).  This is useful in the metadata
+ *		cache, but may not be needed elsewhere.  If so, just use the
  *		same dxpl_id for both parameters.
- *		
- * Return:      Non-negative on success/Negative on failure or if there was 
+ *
+ * Return:      Non-negative on success/Negative on failure or if there was
  *		a request to flush all items and something was protected.
  *
  * Programmer:  John Mainzer
@@ -2393,9 +2393,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_flush_cache(H5F_t *  f, 
-                hid_t    primary_dxpl_id, 
-                hid_t    secondary_dxpl_id, 
+H5C_flush_cache(H5F_t *  f,
+                hid_t    primary_dxpl_id,
+                hid_t    secondary_dxpl_id,
                 H5C_t *  cache_ptr,
                 unsigned flags)
 {
@@ -2443,24 +2443,24 @@ H5C_flush_cache(H5F_t *  f,
 
         if ( entry_ptr->is_protected ) {
 
-            /* we have major problems -- but lets flush everything 
+            /* we have major problems -- but lets flush everything
              * we can before we flag an error.
              */
 	    protected_entries++;
 
-        } else { 
+        } else {
 
-            status = H5C_flush_single_entry(f, 
-                                            primary_dxpl_id, 
-                                            secondary_dxpl_id, 
+            status = H5C_flush_single_entry(f,
+                                            primary_dxpl_id,
+                                            secondary_dxpl_id,
                                             cache_ptr,
-                                            NULL, 
-                                            entry_ptr->addr, 
-                                            flags, 
-                                            &first_flush, 
+                                            NULL,
+                                            entry_ptr->addr,
+                                            flags,
+                                            &first_flush,
                                             FALSE);
             if ( status < 0 ) {
-                
+
                 /* This shouldn't happen -- if it does, we are toast so
                  * just scream and die.
                  */
@@ -2505,7 +2505,7 @@ H5C_flush_cache(H5F_t *  f,
                     /* we have major problems -- but lets flush and destroy
                      * everything we can before we flag an error.
                      */
-                    
+
                     H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr)
 
                     if ( !entry_ptr->in_slist ) {
@@ -2518,17 +2518,17 @@ H5C_flush_cache(H5F_t *  f,
                     HDassert( !(entry_ptr->is_dirty) );
                     HDassert( !(entry_ptr->in_slist) );
 
-                    status = H5C_flush_single_entry(f, 
-                                                    primary_dxpl_id, 
-                                                    secondary_dxpl_id, 
+                    status = H5C_flush_single_entry(f,
+                                                    primary_dxpl_id,
+                                                    secondary_dxpl_id,
                                                     cache_ptr,
-                                                    NULL, 
-                                                    entry_ptr->addr, 
-                                                    flags, 
-                                                    &first_flush, 
+                                                    NULL,
+                                                    entry_ptr->addr,
+                                                    flags,
+                                                    &first_flush,
                                                     FALSE);
                     if ( status < 0 ) {
-                
+
                         /* This shouldn't happen -- if it does, we are toast so
                          * just scream and die.
                          */
@@ -2543,10 +2543,10 @@ H5C_flush_cache(H5F_t *  f,
 
         if ( protected_entries > 0 )
         {
-            /* the caller asked us to flush and destroy a cache that 
+            /* the caller asked us to flush and destroy a cache that
              * contains one or more protected entries.  Since we can't
              * flush protected entries, we haven't destroyed them either.
-             * Since they are all on the protected list, just re-insert 
+             * Since they are all on the protected list, just re-insert
              * them into the cache before we flag an error.
              */
             entry_ptr = cache_ptr->pl_head_ptr;
@@ -2587,15 +2587,15 @@ done:
  *              exist on disk yet, but it must have an address and disk
  *              space reserved.
  *
- *		The primary_dxpl_id and secondary_dxpl_id parameters 
+ *		The primary_dxpl_id and secondary_dxpl_id parameters
  *		specify the dxpl_ids used on the first write occasioned
- *		by the insertion (primary_dxpl_id), and on all subsequent 
- *		writes (secondary_dxpl_id).  This is useful in the 
- *		metadata cache, but may not be needed elsewhere.  If so, 
+ *		by the insertion (primary_dxpl_id), and on all subsequent
+ *		writes (secondary_dxpl_id).  This is useful in the
+ *		metadata cache, but may not be needed elsewhere.  If so,
  *		just use the same dxpl_id for both parameters.
  *
- *		The primary_dxpl_id is the dxpl_id passed to the 
- *		check_write_permitted function if such a function has been 
+ *		The primary_dxpl_id is the dxpl_id passed to the
+ *		check_write_permitted function if such a function has been
  *		provided.
  *
  *		Observe that this function cannot occasion a read.
@@ -2614,12 +2614,12 @@ done:
  */
 
 herr_t
-H5C_insert_entry(H5F_t * 	     f, 
-                 hid_t		     primary_dxpl_id, 
-                 hid_t		     secondary_dxpl_id, 
+H5C_insert_entry(H5F_t * 	     f,
+                 hid_t		     primary_dxpl_id,
+                 hid_t		     secondary_dxpl_id,
                  H5C_t *	     cache_ptr,
-                 const H5C_class_t * type, 
-                 haddr_t 	     addr, 
+                 const H5C_class_t * type,
+                 haddr_t 	     addr,
                  void *		     thing)
 {
     herr_t		result;
@@ -2650,7 +2650,7 @@ H5C_insert_entry(H5F_t * 	     f,
                     "Can't get size of thing")
     }
 
-    HDassert( entry_ptr->size < H5C_MAX_ENTRY_SIZE ); 
+    HDassert( entry_ptr->size < H5C_MAX_ENTRY_SIZE );
 
     entry_ptr->in_slist = FALSE;
 
@@ -2658,12 +2658,12 @@ H5C_insert_entry(H5F_t * 	     f,
     entry_ptr->ht_prev = NULL;
 
     entry_ptr->next = NULL;
-    entry_ptr->prev = NULL; 
+    entry_ptr->prev = NULL;
 
     entry_ptr->aux_next = NULL;
     entry_ptr->aux_prev = NULL;
 
-    H5C__RESET_CACHE_ENTRY_STATS(entry_ptr) 
+    H5C__RESET_CACHE_ENTRY_STATS(entry_ptr)
 
     if ((cache_ptr->index_size + entry_ptr->size) > cache_ptr->max_cache_size) {
 
@@ -2671,8 +2671,8 @@ H5C_insert_entry(H5F_t * 	     f,
 
         if ( cache_ptr->check_write_permitted != NULL ) {
 
-            result = (cache_ptr->check_write_permitted)(f, 
-                                                        primary_dxpl_id, 
+            result = (cache_ptr->check_write_permitted)(f,
+                                                        primary_dxpl_id,
                                                         &write_permitted);
 
             if ( result < 0 ) {
@@ -2711,11 +2711,11 @@ H5C_insert_entry(H5F_t * 	     f,
          * check on space_needed here.
          */
 
-        result = H5C_make_space_in_cache(f, 
-                                         primary_dxpl_id, 
+        result = H5C_make_space_in_cache(f,
+                                         primary_dxpl_id,
                                          secondary_dxpl_id,
-                                         cache_ptr, 
-                                         space_needed, 
+                                         cache_ptr,
+                                         space_needed,
                                          write_permitted);
 
         if ( result < 0 ) {
@@ -2746,7 +2746,7 @@ H5C_insert_entry(H5F_t * 	     f,
     }
 
     /* we don't initialize the protected field until here as it is
-     * possible that the entry is already in the cache, and already 
+     * possible that the entry is already in the cache, and already
      * protected.  If it is, we don't want to make things worse by
      * marking it unprotected.
      */
@@ -2793,7 +2793,7 @@ done:
 
 herr_t
 H5C_rename_entry(H5C_t *	     cache_ptr,
-                 const H5C_class_t * type, 
+                 const H5C_class_t * type,
                  haddr_t 	     old_addr,
 	         haddr_t 	     new_addr)
 {
@@ -2824,7 +2824,7 @@ H5C_rename_entry(H5C_t *	     cache_ptr,
     H5C__SEARCH_INDEX(cache_ptr, new_addr, test_entry_ptr, FAIL)
 
     if ( test_entry_ptr != NULL ) { /* we are hosed */
-        
+
         if ( test_entry_ptr->type == type ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTRENAME, FAIL, \
@@ -2838,7 +2838,7 @@ H5C_rename_entry(H5C_t *	     cache_ptr,
     }
 
     /* If we get this far, we have work to do.  Remove *entry_ptr from
-     * the hash table (and skip list if necessary), change its address to the 
+     * the hash table (and skip list if necessary), change its address to the
      * new address, and then re-insert.
      *
      * Update the replacement policy for a hit to avoid an eviction before
@@ -2879,7 +2879,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5C_protect
  *
- * Purpose:     If the target entry is not in the cache, load it.  If 
+ * Purpose:     If the target entry is not in the cache, load it.  If
  *		necessary, attempt to evict one or more entries to keep
  *		the cache within its maximum size.
  *
@@ -2887,20 +2887,20 @@ done:
  *		to the caller.  The caller must call H5C_unprotect() when
  *		finished with the entry.
  *
- *		While it is protected, the entry may not be either evicted 
- *		or flushed -- nor may it be accessed by another call to 
+ *		While it is protected, the entry may not be either evicted
+ *		or flushed -- nor may it be accessed by another call to
  *		H5C_protect.  Any attempt to do so will result in a failure.
  *
- *		The primary_dxpl_id and secondary_dxpl_id parameters 
+ *		The primary_dxpl_id and secondary_dxpl_id parameters
  *		specify the dxpl_ids used on the first write occasioned
- *		by the insertion (primary_dxpl_id), and on all subsequent 
- *		writes (secondary_dxpl_id).  This is useful in the 
- *		metadata cache, but may not be needed elsewhere.  If so, 
+ *		by the insertion (primary_dxpl_id), and on all subsequent
+ *		writes (secondary_dxpl_id).  This is useful in the
+ *		metadata cache, but may not be needed elsewhere.  If so,
  *		just use the same dxpl_id for both parameters.
  *
  *		All reads are performed with the primary_dxpl_id.
  *
- *		Similarly, the primary_dxpl_id is passed to the 
+ *		Similarly, the primary_dxpl_id is passed to the
  *		check_write_permitted function if it is called.
  *
  * Return:      Success:        Ptr to the desired entry
@@ -2918,13 +2918,13 @@ done:
  */
 
 void *
-H5C_protect(H5F_t *	       f, 
-           hid_t	       primary_dxpl_id, 
-           hid_t	       secondary_dxpl_id, 
+H5C_protect(H5F_t *	       f,
+           hid_t	       primary_dxpl_id,
+           hid_t	       secondary_dxpl_id,
            H5C_t *	       cache_ptr,
-           const H5C_class_t * type, 
+           const H5C_class_t * type,
            haddr_t 	       addr,
-           const void *	       udata1, 
+           const void *	       udata1,
            void *	       udata2)
 {
     hbool_t		hit = FALSE;
@@ -2965,7 +2965,7 @@ H5C_protect(H5F_t *	       f,
         entry_ptr = (H5C_cache_entry_t *)thing;
 
         /* try to free up some space if necessay */
-        if ( (cache_ptr->index_size + entry_ptr->size) > 
+        if ( (cache_ptr->index_size + entry_ptr->size) >
               cache_ptr->max_cache_size ) {
 
             hbool_t write_permitted = TRUE;
@@ -2974,8 +2974,8 @@ H5C_protect(H5F_t *	       f,
 
             if ( cache_ptr->check_write_permitted != NULL ) {
 
-                result = (cache_ptr->check_write_permitted)(f, 
-                                                            primary_dxpl_id, 
+                result = (cache_ptr->check_write_permitted)(f,
+                                                            primary_dxpl_id,
                                                             &write_permitted);
 
                 if ( result < 0 ) {
@@ -2990,8 +2990,8 @@ H5C_protect(H5F_t *	       f,
             space_needed = (cache_ptr->index_size + entry_ptr->size) -
                            cache_ptr->max_cache_size;
 
-            /* It would be nice to be able to do a tight sanity check on 
-             * space_needed here, but it is hard to assign an upper bound on 
+            /* It would be nice to be able to do a tight sanity check on
+             * space_needed here, but it is hard to assign an upper bound on
              * its value other than then value assigned to it.
              *
              * This fact springs from several features of the cache:
@@ -3002,8 +3002,8 @@ H5C_protect(H5F_t *	       f,
              * Second, when writes are not permitted it is also possible
              * for the cache to grow without bound.
              *
-             * Finally, we don't check to see if the cache is oversized 
-             * at the end of an unprotect.  As a result, it is possible 
+             * Finally, we don't check to see if the cache is oversized
+             * at the end of an unprotect.  As a result, it is possible
              * to have a vastly oversized cache with no protected entries
              * as long as all the protects preceed the unprotects.
              *
@@ -3014,8 +3014,8 @@ H5C_protect(H5F_t *	       f,
              * check on space_needed here.
              */
 
-            result = H5C_make_space_in_cache(f, primary_dxpl_id, 
-                                             secondary_dxpl_id, cache_ptr, 
+            result = H5C_make_space_in_cache(f, primary_dxpl_id,
+                                             secondary_dxpl_id, cache_ptr,
                                              space_needed, write_permitted);
 
             if ( result < 0 ) {
@@ -3025,7 +3025,7 @@ H5C_protect(H5F_t *	       f,
             }
         }
 
-        /* Insert the entry in the hash table.  It can't be dirty yet, so 
+        /* Insert the entry in the hash table.  It can't be dirty yet, so
          * we don't even check to see if it should go in the skip list.
          */
         H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, NULL)
@@ -3070,17 +3070,17 @@ done:
  *		and give it back to the replacement policy.
  *
  *		The TYPE and ADDR arguments must be the same as those in
- *		the corresponding call to H5C_protect() and the THING 
- *		argument must be the value returned by that call to 
+ *		the corresponding call to H5C_protect() and the THING
+ *		argument must be the value returned by that call to
  *		H5C_protect().
  *
- *		The primary_dxpl_id and secondary_dxpl_id parameters 
+ *		The primary_dxpl_id and secondary_dxpl_id parameters
  *		specify the dxpl_ids used on the first write occasioned
- *		by the unprotect (primary_dxpl_id), and on all subsequent 
- *		writes (secondary_dxpl_id).  Since an uprotect cannot 
- *		occasion a write at present, all this is moot for now.  
- *		However, things change, and in any case, 
- *		H5C_flush_single_entry() needs primary_dxpl_id and 
+ *		by the unprotect (primary_dxpl_id), and on all subsequent
+ *		writes (secondary_dxpl_id).  Since an uprotect cannot
+ *		occasion a write at present, all this is moot for now.
+ *		However, things change, and in any case,
+ *		H5C_flush_single_entry() needs primary_dxpl_id and
  *		secondary_dxpl_id in its parameter list.
  *
  *		The function can't cause a read either, so the dxpl_id
@@ -3089,7 +3089,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  *		If the deleted flag is TRUE, simply remove the target entry
- *		from the cache, clear it, and free it without writing it to 
+ *		from the cache, clear it, and free it without writing it to
  *		disk.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -3107,13 +3107,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_unprotect(H5F_t *		  f, 
-              hid_t		  primary_dxpl_id, 
-              hid_t		  secondary_dxpl_id, 
+H5C_unprotect(H5F_t *		  f,
+              hid_t		  primary_dxpl_id,
+              hid_t		  secondary_dxpl_id,
               H5C_t *		  cache_ptr,
-              const H5C_class_t * type, 
+              const H5C_class_t * type,
               haddr_t		  addr,
-              void *		  thing, 
+              void *		  thing,
               hbool_t		  deleted)
 {
     herr_t              ret_value = SUCCEED;    /* Return value */
@@ -3144,7 +3144,7 @@ H5C_unprotect(H5F_t *		  f,
 
     H5C__UPDATE_RP_FOR_UNPROTECT(cache_ptr, entry_ptr, FAIL)
 
-    entry_ptr->is_protected = FALSE;    
+    entry_ptr->is_protected = FALSE;
 
     /* add the entry to the skip list if it is dirty, and it isn't already in
      * the list.
@@ -3158,9 +3158,9 @@ H5C_unprotect(H5F_t *		  f,
     /* this implementation of the "deleted" option is a bit inefficient, as
      * we re-insert the entry to be deleted into the replacement policy
      * data structures, only to remove them again.  Depending on how often
-     * we do this, we may want to optimize a bit.  
+     * we do this, we may want to optimize a bit.
      *
-     * On the other hand, this implementation is reasonably clean, and 
+     * On the other hand, this implementation is reasonably clean, and
      * makes good use of existing code.
      *                                             JRM - 5/19/04
      */
@@ -3188,14 +3188,14 @@ H5C_unprotect(H5F_t *		  f,
                         "hash table contains multiple entries for addr?!?.")
         }
 
-        if ( H5C_flush_single_entry(f, 
-                                    primary_dxpl_id, 
-                                    secondary_dxpl_id, 
+        if ( H5C_flush_single_entry(f,
+                                    primary_dxpl_id,
+                                    secondary_dxpl_id,
                                     cache_ptr,
-                                    type, 
-                                    addr, 
+                                    type,
+                                    addr,
                                     (H5F_FLUSH_CLEAR_ONLY|H5F_FLUSH_INVALIDATE),
-                                    &dummy_first_flush, 
+                                    &dummy_first_flush,
                                     TRUE) < 0 ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "Can't flush.")
@@ -3264,8 +3264,8 @@ H5C_stats(H5C_t * cache_ptr,
     /* This would normally be an assert, but we need to use an HGOTO_ERROR
      * call to shut up the compiler.
      */
-    if ( ( ! cache_ptr ) || 
-         ( cache_ptr->magic != H5C__H5C_T_MAGIC ) || 
+    if ( ( ! cache_ptr ) ||
+         ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ||
          ( !cache_name ) ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr or cache_name")
@@ -3288,7 +3288,7 @@ H5C_stats(H5C_t * cache_ptr,
     if ( aggregate_min_accesses > aggregate_max_accesses )
         aggregate_min_accesses = aggregate_max_accesses;
     if ( aggregate_min_accesses > cache_ptr->min_accesses[i] )
-        aggregate_min_accesses = cache_ptr->min_accesses[i]; 
+        aggregate_min_accesses = cache_ptr->min_accesses[i];
     if ( aggregate_max_clears < cache_ptr->max_clears[i] )
         aggregate_max_clears = cache_ptr->max_clears[i];
     if ( aggregate_max_flushes < cache_ptr->max_flushes[i] )
@@ -3308,54 +3308,54 @@ H5C_stats(H5C_t * cache_ptr,
 
     if ( cache_ptr->successful_ht_searches > 0 ) {
 
-        average_successful_search_depth = 
+        average_successful_search_depth =
             ((double)(cache_ptr->total_successful_ht_search_depth)) /
             ((double)(cache_ptr->successful_ht_searches));
     }
 
     if ( cache_ptr->failed_ht_searches > 0 ) {
 
-        average_failed_search_depth = 
+        average_failed_search_depth =
             ((double)(cache_ptr->total_failed_ht_search_depth)) /
             ((double)(cache_ptr->failed_ht_searches));
     }
-        
+
 
     HDfprintf(stdout, "\nH5C: cache statistics for %s\n",
               cache_name);
 
     HDfprintf(stdout, "\n");
 
-    HDfprintf(stdout, 
+    HDfprintf(stdout,
               "  hash table insertion / deletions   = %ld / %ld\n",
               (long)(cache_ptr->total_ht_insertions),
               (long)(cache_ptr->total_ht_deletions));
 
-    HDfprintf(stdout, 
+    HDfprintf(stdout,
               "  HT successful / failed searches    = %ld / %ld\n",
               (long)(cache_ptr->successful_ht_searches),
               (long)(cache_ptr->failed_ht_searches));
 
-    HDfprintf(stdout, 
+    HDfprintf(stdout,
               "  Av. HT suc / failed search depth   = %f / %f\n",
               average_successful_search_depth,
               average_failed_search_depth);
 
-    HDfprintf(stdout, 
+    HDfprintf(stdout,
               "  current (max) index size / length  = %ld (%ld) / %ld (%ld)\n",
               (long)(cache_ptr->index_size),
               (long)(cache_ptr->max_index_size),
               (long)(cache_ptr->index_len),
               (long)(cache_ptr->max_index_len));
 
-    HDfprintf(stdout, 
+    HDfprintf(stdout,
               "  current (max) skip list size / length   = %ld (%ld) / %ld (%ld)\n",
               (long)(cache_ptr->slist_size),
               (long)(cache_ptr->max_slist_size),
               (long)(cache_ptr->slist_len),
               (long)(cache_ptr->max_slist_len));
 
-    HDfprintf(stdout, 
+    HDfprintf(stdout,
               "  current (max) PL size / length     = %ld (%ld) / %ld (%ld)\n",
               (long)(cache_ptr->pl_size),
               (long)(cache_ptr->max_pl_size),
@@ -3377,13 +3377,13 @@ H5C_stats(H5C_t * cache_ptr,
               (long)(cache_ptr->dLRU_list_size),
               (long)(cache_ptr->dLRU_list_len));
 
-    HDfprintf(stdout, 
+    HDfprintf(stdout,
               "  Total hits / misses / hit_rate     = %ld / %ld / %f\n",
-              (long)total_hits, 
-              (long)total_misses, 
+              (long)total_hits,
+              (long)total_misses,
               hit_rate);
 
-    HDfprintf(stdout, 
+    HDfprintf(stdout,
               "  Total clears / flushes / evictions = %ld / %ld / %ld\n",
               (long)total_clears,
               (long)total_flushes,
@@ -3416,7 +3416,7 @@ H5C_stats(H5C_t * cache_ptr,
 
             HDfprintf(stdout, "\n");
 
-            HDfprintf(stdout, "  Stats on %s:\n", 
+            HDfprintf(stdout, "  Stats on %s:\n",
                       ((cache_ptr->type_name_table_ptr))[i]);
 
             if ( ( cache_ptr->hits[i] > 0 ) || ( cache_ptr->misses[i] > 0 ) ) {
@@ -3427,36 +3427,36 @@ H5C_stats(H5C_t * cache_ptr,
                 hit_rate = 0.0;
             }
 
-            HDfprintf(stdout, 
-                      "    hits / misses / hit_rate       = %ld / %ld / %f\n", 
+            HDfprintf(stdout,
+                      "    hits / misses / hit_rate       = %ld / %ld / %f\n",
                       (long)(cache_ptr->hits[i]),
                       (long)(cache_ptr->misses[i]),
                       hit_rate);
 
-            HDfprintf(stdout, 
+            HDfprintf(stdout,
                       "    clears / flushes / evictions   = %ld / %ld / %ld\n",
                       (long)(cache_ptr->clears[i]),
                       (long)(cache_ptr->flushes[i]),
                       (long)(cache_ptr->evictions[i]));
 
-            HDfprintf(stdout, 
+            HDfprintf(stdout,
                       "    insertions / renames           = %ld / %ld\n",
                       (long)(cache_ptr->insertions[i]),
                       (long)(cache_ptr->renames[i]));
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
 
-            HDfprintf(stdout, 
+            HDfprintf(stdout,
                       "    entry max / min accesses       = %d / %d\n",
                       cache_ptr->max_accesses[i],
                       cache_ptr->min_accesses[i]);
 
-            HDfprintf(stdout, 
+            HDfprintf(stdout,
                       "    entry max_clears / max_flushes = %d / %d\n",
                       cache_ptr->max_clears[i],
                       cache_ptr->max_flushes[i]);
 
-            HDfprintf(stdout, 
+            HDfprintf(stdout,
                       "    entry max_size                 = %d\n",
                       (int)(cache_ptr->max_size[i]));
 
@@ -3537,7 +3537,7 @@ H5C_stats__reset(H5C_t * cache_ptr)
     for ( i = 0; i <= cache_ptr->max_type_id; i++ )
     {
         cache_ptr->max_accesses[i]		= 0;
-        cache_ptr->min_accesses[i]		= 1000000; 
+        cache_ptr->min_accesses[i]		= 1000000;
         cache_ptr->max_clears[i]		= 0;
         cache_ptr->max_flushes[i]		= 0;
         cache_ptr->max_size[i]			= (size_t)0;
@@ -3555,9 +3555,9 @@ H5C_stats__reset(H5C_t * cache_ptr)
  * Function:    H5C_set_skip_flags
  *
  * Purpose:     Set the values of the skip sanity check flags.
- *		
+ *
  *		This function and the skip sanity check flags were created
- *		for the convenience of the test bed.  However it is 
+ *		for the convenience of the test bed.  However it is
  *		possible that there may be other uses for the flags.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -3604,24 +3604,24 @@ done:
  *
  * Function:    H5C_flush_single_entry
  *
- * Purpose:     Flush or clear (and evict if requested) the cache entry 
+ * Purpose:     Flush or clear (and evict if requested) the cache entry
  *		with the specified address and type.  If the type is NULL,
- *		any unprotected entry at the specified address will be 
+ *		any unprotected entry at the specified address will be
  *		flushed (and possibly evicted).
  *
- *		Attempts to flush a protected entry will result in an 
+ *		Attempts to flush a protected entry will result in an
  *		error.
  *
- *		*first_flush_ptr should be true if only one 
+ *		*first_flush_ptr should be true if only one
  *		flush is contemplated before the next load, or if this
- *		is the first of a sequence of flushes that will be 
+ *		is the first of a sequence of flushes that will be
  *		completed before the next load.  *first_flush_ptr is set
- *		to false if a flush actually takes place, and should be 
+ *		to false if a flush actually takes place, and should be
  *		left false until the end of the sequence.
  *
  *		The primary_dxpl_id is used if *first_flush_ptr is TRUE
- *		on entry, and a flush actually takes place.  The 
- *		secondary_dxpl_id is used in any subsequent flush where 
+ *		on entry, and a flush actually takes place.  The
+ *		secondary_dxpl_id is used in any subsequent flush where
  *		*first_flush_ptr is FALSE on entry.
  *
  *		If the H5F_FLUSH_CLEAR_ONLY flag is set, the entry will
@@ -3629,17 +3629,17 @@ done:
  *		primary_dxpl_id, and secondary_dxpl_id are all irrelevent,
  *		and the call can't be part of a sequence of flushes.
  *
- *		If the caller knows the address of the TBBT node at 
- *		which the target entry resides, it can avoid a lookup 
+ *		If the caller knows the address of the TBBT node at
+ *		which the target entry resides, it can avoid a lookup
  *		by supplying that address in the tgt_node_ptr parameter.
  *		If this parameter is NULL, the function will do a TBBT
  *		search for the entry instead.
  *
  *		The function does nothing silently if there is no entry
- *		at the supplied address, or if the entry found has the 
+ *		at the supplied address, or if the entry found has the
  *		wrong type.
  *
- * Return:      Non-negative on success/Negative on failure or if there was 
+ * Return:      Non-negative on success/Negative on failure or if there was
  *		an attempt to flush a protected item.
  *
  * Programmer:  John Mainzer, 5/5/04
@@ -3655,18 +3655,18 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C_flush_single_entry(H5F_t *		   f, 
-                       hid_t 		   primary_dxpl_id, 
-                       hid_t 		   secondary_dxpl_id, 
+H5C_flush_single_entry(H5F_t *		   f,
+                       hid_t 		   primary_dxpl_id,
+                       hid_t 		   secondary_dxpl_id,
                        H5C_t *		   cache_ptr,
-                       const H5C_class_t * type_ptr, 
-                       haddr_t		   addr, 
+                       const H5C_class_t * type_ptr,
+                       haddr_t		   addr,
                        unsigned		   flags,
                        hbool_t *	   first_flush_ptr,
                        hbool_t		   del_entry_from_slist_on_destroy)
 {
     hbool_t		destroy = ( (flags & H5F_FLUSH_INVALIDATE) != 0 );
-    hbool_t		clear_only = ( (flags & H5F_FLUSH_CLEAR_ONLY) != 0);  
+    hbool_t		clear_only = ( (flags & H5F_FLUSH_CLEAR_ONLY) != 0);
     herr_t		ret_value = SUCCEED;      /* Return value */
     herr_t		status;
     H5C_cache_entry_t *	entry_ptr = NULL;
@@ -3714,12 +3714,12 @@ H5C_flush_single_entry(H5F_t *		   f,
     {
         /* we have work to do */
 
-#ifdef H5_HAVE_PARALLEL  
+#ifdef H5_HAVE_PARALLEL
 #ifndef NDEBUG
 
         /* If MPI based VFD is used, do special parallel I/O sanity checks.
          * Note that we only do these sanity checks when the clear_only flag
-         * is not set, and the entry to be flushed is dirty.  Don't bother 
+         * is not set, and the entry to be flushed is dirty.  Don't bother
          * otherwise as no file I/O can result.
          *
          * There are also cases (testing for instance) where it is convenient
@@ -3727,9 +3727,9 @@ H5C_flush_single_entry(H5F_t *		   f,
          * this isn't a problem -- but we do have to turn off sanity checks
          * involving them.  We use cache_ptr->skip_dxpl_id_checks to do this.
          */
-        if ( ( ! cache_ptr->skip_dxpl_id_checks ) && 
-             ( ! clear_only ) && 
-             ( entry_ptr->is_dirty ) && 
+        if ( ( ! cache_ptr->skip_dxpl_id_checks ) &&
+             ( ! clear_only ) &&
+             ( entry_ptr->is_dirty ) &&
              ( IS_H5FD_MPI(f) ) ) {
 
             H5P_genplist_t *dxpl;           /* Dataset transfer property list */
@@ -3766,12 +3766,12 @@ H5C_flush_single_entry(H5F_t *		   f,
             H5C__UPDATE_STATS_FOR_EVICTION(cache_ptr, entry_ptr)
         }
 
-        /* Always remove the entry from the hash table on a destroy.  On a 
+        /* Always remove the entry from the hash table on a destroy.  On a
          * flush with destroy, it is cheaper to discard the skip list all at once
          * rather than remove the entries one by one, so we only delete from
          * the list if requested.
          *
-         * We must do deletions now as the callback routines will free the 
+         * We must do deletions now as the callback routines will free the
          * entry if destroy is true.
          */
         if ( destroy ) {
@@ -3785,7 +3785,7 @@ H5C_flush_single_entry(H5F_t *		   f,
         }
 
         /* Update the replacement policy for the flush or eviction.
-         * Again, do this now so we don't have to reference freed 
+         * Again, do this now so we don't have to reference freed
          * memory in the destroy case.
          */
         if ( destroy ) { /* AKA eviction */
@@ -3805,16 +3805,16 @@ H5C_flush_single_entry(H5F_t *		   f,
             }
         } else {
 
-            /* Only block for all the processes on the first piece of metadata 
+            /* Only block for all the processes on the first piece of metadata
              */
 
             if ( *first_flush_ptr && entry_ptr->is_dirty ) {
-                status = (entry_ptr->type->flush)(f, primary_dxpl_id, destroy, 
+                status = (entry_ptr->type->flush)(f, primary_dxpl_id, destroy,
                                                  entry_ptr->addr, entry_ptr);
                 *first_flush_ptr = FALSE;
             } else {
-                status = (entry_ptr->type->flush)(f, secondary_dxpl_id, 
-                                                 destroy, entry_ptr->addr, 
+                status = (entry_ptr->type->flush)(f, secondary_dxpl_id,
+                                                 destroy, entry_ptr->addr,
                                                  entry_ptr);
             }
 
@@ -3825,7 +3825,7 @@ H5C_flush_single_entry(H5F_t *		   f,
         }
 
         if ( ! destroy ) {
-        
+
             HDassert( !(entry_ptr->is_dirty) );
         }
     }
@@ -3846,7 +3846,7 @@ done:
  *		return the in memory address of the entry.  Return NULL
  *		on failure.
  *
- *		Note that this function simply loads the entry into 
+ *		Note that this function simply loads the entry into
  *		core.  It does not insert it into the cache.
  *
  * Return:      Non-NULL on success / NULL on failure.
@@ -3862,11 +3862,11 @@ done:
  */
 
 static void *
-H5C_load_entry(H5F_t *             f, 
-               hid_t               dxpl_id, 
-               const H5C_class_t * type, 
+H5C_load_entry(H5F_t *             f,
+               hid_t               dxpl_id,
+               const H5C_class_t * type,
                haddr_t             addr,
-               const void *        udata1, 
+               const void *        udata1,
                void *              udata2,
                hbool_t		   skip_file_checks)
 {
@@ -3903,7 +3903,7 @@ H5C_load_entry(H5F_t *             f,
                     "Can't get size of thing")
     }
 
-    HDassert( entry_ptr->size < H5C_MAX_ENTRY_SIZE ); 
+    HDassert( entry_ptr->size < H5C_MAX_ENTRY_SIZE );
 
     entry_ptr->ht_next = NULL;
     entry_ptr->ht_prev = NULL;
@@ -3932,24 +3932,24 @@ done:
  * Purpose:     Attempt to evict cache entries until the index_size
  *		is at least needed_space below max_cache_size.
  *
- *		In passing, also attempt to bring cLRU_list_size to a 
+ *		In passing, also attempt to bring cLRU_list_size to a
  *		value greater than min_clean_size.
  *
  *		Depending on circumstances, both of these goals may
  *		be impossible, as in parallel mode, we must avoid generating
  *		a write as part of a read (to avoid deadlock in collective
  *		I/O), and in all cases, it is possible (though hopefully
- *		highly unlikely) that the protected list may exceed the 
+ *		highly unlikely) that the protected list may exceed the
  *		maximum size of the cache.
- *		
+ *
  *		Thus the function simply does its best, returning success
  *		unless an error is encountered.
  *
- *		The primary_dxpl_id and secondary_dxpl_id parameters 
+ *		The primary_dxpl_id and secondary_dxpl_id parameters
  *		specify the dxpl_ids used on the first write occasioned
- *		by the call (primary_dxpl_id), and on all subsequent 
- *		writes (secondary_dxpl_id).  This is useful in the metadata 
- *		cache, but may not be needed elsewhere.  If so, just use the 
+ *		by the call (primary_dxpl_id), and on all subsequent
+ *		writes (secondary_dxpl_id).  This is useful in the metadata
+ *		cache, but may not be needed elsewhere.  If so, just use the
  *		same dxpl_id for both parameters.
  *
  *		Observe that this function cannot occasion a read.
@@ -3993,8 +3993,8 @@ H5C_make_space_in_cache(H5F_t *	f,
         initial_list_len = cache_ptr->LRU_list_len;
         entry_ptr = cache_ptr->LRU_tail_ptr;
 
-        while ( ( (cache_ptr->index_size + space_needed) 
-                  > 
+        while ( ( (cache_ptr->index_size + space_needed)
+                  >
                   cache_ptr->max_cache_size
                 )
                 &&
@@ -4009,25 +4009,25 @@ H5C_make_space_in_cache(H5F_t *	f,
 
             if ( entry_ptr->is_dirty ) {
 
-                result = H5C_flush_single_entry(f, 
-                                                primary_dxpl_id, 
+                result = H5C_flush_single_entry(f,
+                                                primary_dxpl_id,
                                                 secondary_dxpl_id,
                                                 cache_ptr,
-                                                entry_ptr->type, 
-                                                entry_ptr->addr, 
-                                                (unsigned)0, 
-                                                &first_flush, 
+                                                entry_ptr->type,
+                                                entry_ptr->addr,
+                                                (unsigned)0,
+                                                &first_flush,
                                                 FALSE);
             } else {
 
-                result = H5C_flush_single_entry(f, 
-                                                primary_dxpl_id, 
+                result = H5C_flush_single_entry(f,
+                                                primary_dxpl_id,
                                                 secondary_dxpl_id,
                                                 cache_ptr,
-                                                entry_ptr->type, 
-                                                entry_ptr->addr, 
+                                                entry_ptr->type,
+                                                entry_ptr->addr,
                                                 H5F_FLUSH_INVALIDATE,
-                                                &first_flush, 
+                                                &first_flush,
                                                 TRUE);
             }
 
@@ -4056,14 +4056,14 @@ H5C_make_space_in_cache(H5F_t *	f,
 
             prev_ptr = entry_ptr->aux_prev;
 
-            result = H5C_flush_single_entry(f, 
-                                            primary_dxpl_id, 
+            result = H5C_flush_single_entry(f,
+                                            primary_dxpl_id,
                                             secondary_dxpl_id,
                                             cache_ptr,
-                                            entry_ptr->type, 
-                                            entry_ptr->addr, 
-                                            (unsigned)0, 
-                                            &first_flush, 
+                                            entry_ptr->type,
+                                            entry_ptr->addr,
+                                            (unsigned)0,
+                                            &first_flush,
                                             FALSE);
 
             if ( result < 0 ) {
@@ -4084,12 +4084,12 @@ H5C_make_space_in_cache(H5F_t *	f,
         initial_list_len = cache_ptr->cLRU_list_len;
         entry_ptr = cache_ptr->cLRU_tail_ptr;
 
-        while ( ( (cache_ptr->index_size + space_needed) 
-                  > 
+        while ( ( (cache_ptr->index_size + space_needed)
+                  >
                   cache_ptr->max_cache_size
                 )
                 &&
-                ( entries_examined <= initial_list_len ) 
+                ( entries_examined <= initial_list_len )
                 &&
                 ( entry_ptr != NULL )
               )
@@ -4099,14 +4099,14 @@ H5C_make_space_in_cache(H5F_t *	f,
 
             prev_ptr = entry_ptr->aux_prev;
 
-            result = H5C_flush_single_entry(f, 
-                                            primary_dxpl_id, 
+            result = H5C_flush_single_entry(f,
+                                            primary_dxpl_id,
                                             secondary_dxpl_id,
                                             cache_ptr,
-                                            entry_ptr->type, 
-                                            entry_ptr->addr, 
+                                            entry_ptr->type,
+                                            entry_ptr->addr,
                                             H5F_FLUSH_INVALIDATE,
-                                            &first_flush, 
+                                            &first_flush,
                                             TRUE);
 
             if ( result < 0 ) {

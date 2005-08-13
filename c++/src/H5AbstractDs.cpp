@@ -51,7 +51,7 @@ AbstractDs::AbstractDs( const AbstractDs& original ) : H5Object( original ) {}
 
 //--------------------------------------------------------------------------
 // Function:	AbstractDs::getTypeClass
-///\brief	Returns the class of the datatype that is used by this 
+///\brief	Returns the class of the datatype that is used by this
 ///		object, which can be a dataset or an attribute.
 ///\return	Datatype class identifier
 ///\exception	H5::DataTypeIException
@@ -60,7 +60,7 @@ AbstractDs::AbstractDs( const AbstractDs& original ) : H5Object( original ) {}
 H5T_class_t AbstractDs::getTypeClass() const
 {
    // Gets the datatype used by this dataset or attribute.
-   // p_get_type calls either H5Dget_type or H5Aget_type depending on 
+   // p_get_type calls either H5Dget_type or H5Aget_type depending on
    // which object invokes getTypeClass
    DataType datatype(p_get_type());
 
@@ -70,7 +70,7 @@ H5T_class_t AbstractDs::getTypeClass() const
       return( type_class );
    else
    {
-      throw DataTypeIException("AbstractDs::getTypeClass", 
+      throw DataTypeIException("AbstractDs::getTypeClass",
 		"H5Tget_class returns H5T_NO_CLASS");
    }
 }
@@ -86,7 +86,7 @@ H5T_class_t AbstractDs::getTypeClass() const
 DataType AbstractDs::getDataType() const
 {
    // Gets the id of the datatype used by this dataset or attribute.
-   // p_get_type calls either H5Dget_type or H5Aget_type depending on 
+   // p_get_type calls either H5Dget_type or H5Aget_type depending on
    // which object invokes getTypeClass
    hid_t datatype_id = p_get_type();  // returned value is already validated
 
@@ -97,7 +97,7 @@ DataType AbstractDs::getDataType() const
 
 //--------------------------------------------------------------------------
 // Function:	AbstractDs::getArrayType
-///\brief	Returns the compound datatype of this abstract dataset which 
+///\brief	Returns the compound datatype of this abstract dataset which
 ///		can be a dataset or an attribute.
 ///\return	ArrayType instance
 ///\exception	H5::DataTypeIException
@@ -111,7 +111,7 @@ ArrayType AbstractDs::getArrayType() const
 
 //--------------------------------------------------------------------------
 // Function:	AbstractDs::getCompType
-///\brief	Returns the compound datatype of this abstract dataset which 
+///\brief	Returns the compound datatype of this abstract dataset which
 ///		can be a dataset or an attribute.
 ///\return	CompType instance
 ///\exception	H5::DataTypeIException
@@ -125,7 +125,7 @@ CompType AbstractDs::getCompType() const
 
 //--------------------------------------------------------------------------
 // Function:	AbstractDs::getEnumType
-///\brief	Returns the enumeration datatype of this abstract dataset which 
+///\brief	Returns the enumeration datatype of this abstract dataset which
 ///		can be a dataset or an attribute.
 ///\return	EnumType instance
 ///\exception	H5::DataTypeIException
@@ -153,7 +153,7 @@ FloatType AbstractDs::getFloatType() const
 
 //--------------------------------------------------------------------------
 // Function:	AbstractDs::getIntType
-///\brief	Returns the integer datatype of this abstract dataset which 
+///\brief	Returns the integer datatype of this abstract dataset which
 ///		can be a dataset or an attribute.
 ///\return	IntType instance
 ///\exception	H5::DataTypeIException
@@ -167,7 +167,7 @@ IntType AbstractDs::getIntType() const
 
 //--------------------------------------------------------------------------
 // Function:	AbstractDs::getStrType
-///\brief	Returns the string datatype of this abstract dataset which 
+///\brief	Returns the string datatype of this abstract dataset which
 ///		can be a dataset or an attribute.
 ///\return	StrType instance
 ///\exception	H5::DataTypeIException

@@ -71,7 +71,7 @@ void FileAccPropList::setStdio() const
 //--------------------------------------------------------------------------
 // Function:	FileAccPropList::getDriver
 ///\brief	  Return the ID of the low-level file driver.
-///\return	A low-level driver ID which is the same ID used when the 
+///\return	A low-level driver ID which is the same ID used when the
 ///		driver was set for the property list.  The driver ID is
 ///		only valid as long as the file driver remains registered.
 ///		Valid driver identifiers can be found at:
@@ -96,7 +96,7 @@ hid_t FileAccPropList::getDriver() const
 ///\param	new_driver_info - IN: Struct containing the driver-specific properites
 ///\exception	H5::PropListIException
 ///\par Description
-///		For a list of valid driver identifiers, please see the C 
+///		For a list of valid driver identifiers, please see the C
 ///		layer Reference Manual at:
 /// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-GetDriver
 // Programmer:  Binh-Minh Ribler - April, 2004
@@ -148,13 +148,13 @@ hsize_t FileAccPropList::getFamilyOffset() const
 // Function:	FileAccPropList::setCore
 ///\brief	Modifies this file access property list to use the \c H5FD_CORE
 ///		driver.
-///\param	increment - IN: Specifies how much memory to increase each 
+///\param	increment - IN: Specifies how much memory to increase each
 ///				time more memory is needed, in bytes
-///\param	backing_store - IN: Indicating whether to write the file 
+///\param	backing_store - IN: Indicating whether to write the file
 ///				contents to disk when the file is closed
 ///\exception	H5::PropListIException
 ///\par Description
-///		For more details on the use of \c H5FD_CORE driver, please 
+///		For more details on the use of \c H5FD_CORE driver, please
 ///		refer to
 /// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetFaplCore
 // Programmer:  Binh-Minh Ribler - April, 2004
@@ -172,7 +172,7 @@ void FileAccPropList::setCore (size_t increment, hbool_t backing_store) const
 // Function:	FileAccPropList::getCore
 ///\brief	Queries core file driver properties.
 ///\param	increment - OUT: Size of memory increment, in bytes
-///\param	backing_store - OUT: Indicating whether to write the file 
+///\param	backing_store - OUT: Indicating whether to write the file
 ///				contents to disk when the file is closed
 ///\exception	H5::PropListIException
 // Programmer:  Binh-Minh Ribler - April, 2004
@@ -251,7 +251,7 @@ FileAccPropList FileAccPropList::getFamily(hsize_t& memb_size) const
 
 //--------------------------------------------------------------------------
 // Function:	FileAccPropList::setSplit
-///\brief	Emulates the old split file driver, which stored meta data 
+///\brief	Emulates the old split file driver, which stored meta data
 ///		in one file and raw data in another file.
 ///\param	meta_plist  - IN: File access plist for the metadata file
 ///\param	raw_plist   - IN: File access plist for the raw data file
@@ -374,7 +374,7 @@ void FileAccPropList::setSieveBufSize(size_t bufsize) const
 //--------------------------------------------------------------------------
 // Function:	FileAccPropList::setMetaBlockSize
 ///\brief	Sets the minimum size of metadata block allocations.
-///\param	block_size - IN: Minimum size, in bytes, of metadata 
+///\param	block_size - IN: Minimum size, in bytes, of metadata
 ///		block allocations
 ///\exception	H5::PropListIException
 ///\par Description
@@ -470,9 +470,9 @@ void FileAccPropList::setSec2() const
 ///\param	alignment - IN: Alignment value
 ///\exception	H5::PropListIException
 ///\par Description
-///		The parameter \a threshold must have a non-negative value.  
-///		Note that setting the threshold value to 0 (zero) has the 
-///		effect of a special case, forcing everything to be aligned.  
+///		The parameter \a threshold must have a non-negative value.
+///		Note that setting the threshold value to 0 (zero) has the
+///		effect of a special case, forcing everything to be aligned.
 ///		The parameter \a alignment must have a positive value.
 ///
 ///		For detail on \a setting alignment, please refer to
@@ -490,7 +490,7 @@ void FileAccPropList::setAlignment( hsize_t threshold, hsize_t alignment ) const
 
 //--------------------------------------------------------------------------
 // Function:	FileAccPropList::getAlignment
-///\brief	Returns the current settings for alignment properties from 
+///\brief	Returns the current settings for alignment properties from
 ///		this property list.
 ///\param	threshold - OUT: Retrieved threshold value for file object size
 ///\param	alignment - OUT: Retrieved alignment value
@@ -555,12 +555,12 @@ H5FD_mem_t FileAccPropList::getMultiType() const
 ///\param	rdcc_w0 - IN: Preemption policy
 ///\exception   H5::PropListIException
 ///\par Description
-///		The argument \a rdcc_w0 should hold a value between 0 and 1 
-///		inclusive.  This value indicates how much chunks that have 
-///		been fully read are favored for preemption. A value of zero 
-///		means fully read chunks are treated no differently than other 
-///		chunks (the preemption is strictly LRU) while a value of one 
-///		means fully read chunks are always preempted before other chunks. 
+///		The argument \a rdcc_w0 should hold a value between 0 and 1
+///		inclusive.  This value indicates how much chunks that have
+///		been fully read are favored for preemption. A value of zero
+///		means fully read chunks are treated no differently than other
+///		chunks (the preemption is strictly LRU) while a value of one
+///		means fully read chunks are always preempted before other chunks.
 //--------------------------------------------------------------------------
 #ifdef H5_WANT_H5_V1_4_COMPAT
 void FileAccPropList::setCache( int mdc_nelmts, int rdcc_nelmts, size_t rdcc_nbytes, double rdcc_w0 ) const
@@ -599,12 +599,12 @@ void FileAccPropList::getCache( int& mdc_nelmts, int& rdcc_nelmts, size_t& rdcc_
 ///\param	rdcc_w0 - IN: Preemption policy
 ///\exception   H5::PropListIException
 ///\par Description
-///		The argument \a rdcc_w0 should hold a value between 0 and 1 
-///		inclusive.  This value indicates how much chunks that have 
-///		been fully read are favored for preemption. A value of zero 
-///		means fully read chunks are treated no differently than other 
-///		chunks (the preemption is strictly LRU) while a value of one 
-///		means fully read chunks are always preempted before other chunks. 
+///		The argument \a rdcc_w0 should hold a value between 0 and 1
+///		inclusive.  This value indicates how much chunks that have
+///		been fully read are favored for preemption. A value of zero
+///		means fully read chunks are treated no differently than other
+///		chunks (the preemption is strictly LRU) while a value of one
+///		means fully read chunks are always preempted before other chunks.
 // Programmer:	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void FileAccPropList::setCache( int mdc_nelmts, size_t rdcc_nelmts, size_t rdcc_nbytes, double rdcc_w0 ) const
@@ -639,7 +639,7 @@ void FileAccPropList::getCache( int& mdc_nelmts, size_t& rdcc_nelmts, size_t& rd
 //--------------------------------------------------------------------------
 // Function:	FileAccPropList::setFcloseDegree
 ///\brief	Sets the degree for the file close behavior.
-///\param	degree - IN: 
+///\param	degree - IN:
 ///\exception	H5::PropListIException
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
@@ -673,8 +673,8 @@ H5F_close_degree_t FileAccPropList::getFcloseDegree()
 //--------------------------------------------------------------------------
 // Function:	FileAccPropList::setGcReferences
 ///\brief	Sets garbage collecting references flag.
-///\param	gc_ref - IN: Flag setting reference garbage collection to 
-///				on (1) or off (0). 
+///\param	gc_ref - IN: Flag setting reference garbage collection to
+///				on (1) or off (0).
 ///\exception	H5::PropListIException
 ///\par Description
 ///		For detail on \a fapl, please refer to

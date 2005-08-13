@@ -25,7 +25,7 @@ class H5_DLLCPP FileCreatPropList : public PropList {
    public:
 	// Default file creation property list.
 	static const FileCreatPropList DEFAULT;
-	
+
 	// Retrieves version information for various parts of a file.
 	void getVersion( unsigned& super, unsigned& freelist, unsigned& stab, unsigned& shhdr ) const;
 
@@ -35,7 +35,7 @@ class H5_DLLCPP FileCreatPropList : public PropList {
 	// Gets the size of a user block in this file creation property list.
 	hsize_t getUserblock() const;
 
-	// Retrieves the size-of address and size quantities stored in a 
+	// Retrieves the size-of address and size quantities stored in a
 	// file according to this file creation property list.
 	void getSizes( size_t& sizeof_addr, size_t& sizeof_size ) const;
 

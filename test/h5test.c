@@ -17,7 +17,7 @@
  *              Thursday, November 19, 1998
  *
  * Purpose:	Provides support functions for most of the hdf5 tests cases.
- *		
+ *
  */
 
 #undef NDEBUG			/*override -DNDEBUG			*/
@@ -208,7 +208,7 @@ void
 h5_reset(void)
 {
     char	filename[1024];
-    
+
     HDfflush(stdout);
     HDfflush(stderr);
     H5close();
@@ -270,7 +270,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
     char           *ptr, last = '\0';
     size_t          i, j;
     hid_t           driver = -1;
-    
+
     if (!base_name || !fullname || size < 1)
         return NULL;
 
@@ -286,7 +286,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 	else if (H5FD_CORE == driver || H5FD_MULTI == driver)
 	    suffix = NULL;
     }
-    
+
     /* Use different ones depending on parallel or serial driver used. */
     if (H5P_DEFAULT != fapl && H5FD_MPIO == driver){
 #ifdef H5_HAVE_PARALLEL
@@ -297,7 +297,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 	 */
         static int explained = 0;
 
-	prefix = (paraprefix ? paraprefix : getenv_all(MPI_COMM_WORLD, 0, "HDF5_PARAPREFIX")); 
+	prefix = (paraprefix ? paraprefix : getenv_all(MPI_COMM_WORLD, 0, "HDF5_PARAPREFIX"));
 
 	if (!prefix && !explained) {
 	    /* print hint by process 0 once. */
@@ -446,7 +446,7 @@ h5_fileaccess(void)
     const char	*name;
     char s[1024];
     hid_t fapl = -1;
-    
+
     /* First use the environment variable, then the constant */
     val = HDgetenv("HDF5_DRIVER");
 #ifdef HDF5_DRIVER
@@ -455,7 +455,7 @@ h5_fileaccess(void)
 
     if ((fapl=H5Pcreate(H5P_FILE_ACCESS))<0) return -1;
     if (!val || !*val) return fapl; /*use default*/
-    
+
     HDstrncpy(s, val, sizeof s);
     s[sizeof(s)-1] = '\0';
     if (NULL==(name=HDstrtok(s, " \t\n\r"))) return fapl;
@@ -584,7 +584,7 @@ h5_show_hostname(void)
 
     /* try show the process or thread id in multiple processes cases*/
 #ifdef H5_HAVE_PARALLEL
-    {   
+    {
 	int mpi_rank, mpi_initialized;
 
 	MPI_Initialized(&mpi_initialized);
@@ -606,18 +606,18 @@ h5_show_hostname(void)
     /* could not find a usable WinSock DLL */
     return;
    }
- 
+
 /* Confirm that the WinSock DLL supports 2.2.*/
 /* Note that if the DLL supports versions greater    */
 /* than 2.2 in addition to 2.2, it will still return */
 /* 2.2 in wVersion since that is the version we      */
 /* requested.                                        */
- 
+
    if ( LOBYTE( wsaData.wVersion ) != 2 ||
         HIBYTE( wsaData.wVersion ) != 2 ) {
     /* could not find a usable WinSock DLL */
      WSACleanup( );
-     return; 
+     return;
    }
 
 #endif
@@ -794,7 +794,7 @@ h5_get_file_size(const char *filename)
  * and allow easy replacement for environments which don't have stdin/stdout
  * available. (i.e. Windows & the Mac)
  */
-int 
+int
 print_func(const char *format, ...)
 {
 	va_list arglist;
@@ -806,7 +806,7 @@ print_func(const char *format, ...)
 	return ret_value;
 }
 
-#ifdef H5_HAVE_FILTER_SZIP 
+#ifdef H5_HAVE_FILTER_SZIP
 
 
 /*-------------------------------------------------------------------------
@@ -819,36 +819,36 @@ print_func(const char *format, ...)
  *		0:  only decode is enabled
  *              -1: other
  *
- * Programmer:	
+ * Programmer:
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-int h5_szip_can_encode(void ) 
+int h5_szip_can_encode(void )
 {
 
  herr_t       status;
  unsigned int filter_config_flags;
 
    status =H5Zget_filter_info(H5Z_FILTER_SZIP, &filter_config_flags);
-   if ((filter_config_flags & 
+   if ((filter_config_flags &
           (H5Z_FILTER_CONFIG_ENCODE_ENABLED|H5Z_FILTER_CONFIG_DECODE_ENABLED)) == 0) {
     /* filter present but neither encode nor decode is supported (???) */
     return -1;
-   } else if ((filter_config_flags & 
-          (H5Z_FILTER_CONFIG_ENCODE_ENABLED|H5Z_FILTER_CONFIG_DECODE_ENABLED)) == 
+   } else if ((filter_config_flags &
+          (H5Z_FILTER_CONFIG_ENCODE_ENABLED|H5Z_FILTER_CONFIG_DECODE_ENABLED)) ==
     H5Z_FILTER_CONFIG_DECODE_ENABLED) {
      /* decoder only: read but not write */
     return 0;
-   } else if ((filter_config_flags & 
-          (H5Z_FILTER_CONFIG_ENCODE_ENABLED|H5Z_FILTER_CONFIG_DECODE_ENABLED)) == 
+   } else if ((filter_config_flags &
+          (H5Z_FILTER_CONFIG_ENCODE_ENABLED|H5Z_FILTER_CONFIG_DECODE_ENABLED)) ==
     H5Z_FILTER_CONFIG_ENCODE_ENABLED) {
      /* encoder only: write but not read (???) */
      return -1;
-   } else if ((filter_config_flags & 
-          (H5Z_FILTER_CONFIG_ENCODE_ENABLED|H5Z_FILTER_CONFIG_DECODE_ENABLED)) == 
-          (H5Z_FILTER_CONFIG_ENCODE_ENABLED|H5Z_FILTER_CONFIG_DECODE_ENABLED)) { 
+   } else if ((filter_config_flags &
+          (H5Z_FILTER_CONFIG_ENCODE_ENABLED|H5Z_FILTER_CONFIG_DECODE_ENABLED)) ==
+          (H5Z_FILTER_CONFIG_ENCODE_ENABLED|H5Z_FILTER_CONFIG_DECODE_ENABLED)) {
     return 1;
    }
    return(-1);
@@ -886,12 +886,12 @@ char* getenv_all(MPI_Comm comm, int root, const char* name)
     int len = -1;
     static char* env = NULL;
     MPI_Status Status;
-    
-    assert(name);
-   
-    MPI_Comm_rank(comm, &nID); 
 
-    /* The root task does the getenv call 
+    assert(name);
+
+    MPI_Comm_rank(comm, &nID);
+
+    /* The root task does the getenv call
      * and sends the result to the other tasks */
     if(nID == root)
     {

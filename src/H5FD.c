@@ -399,9 +399,9 @@ done:
  *
  * Modifications:
  *
- *		Raymond Lu 
+ *		Raymond Lu
  * 		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property 
+ *		Changed the file access list to the new generic property
  *		list.
  *
  *-------------------------------------------------------------------------
@@ -462,7 +462,7 @@ hsize_t
 H5FD_sb_size(H5FD_t *file)
 {
     hsize_t	ret_value=0;
-    
+
     FUNC_ENTER_NOAPI(H5FD_sb_size, 0)
 
     assert(file && file->cls);
@@ -507,7 +507,7 @@ H5FD_sb_encode(H5FD_t *file, char *name/*out*/, uint8_t *buf)
     if (file->cls->sb_encode &&
             (file->cls->sb_encode)(file, name/*out*/, buf/*out*/)<0)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver sb_encode request failed")
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -569,7 +569,7 @@ H5FD_pl_copy(void *(*copy_func)(const void *), size_t pl_size, const void *old_p
 {
     void *new_pl = NULL;        /* Copy of property list */
     herr_t ret_value=SUCCEED;   /* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5FD_pl_copy)
 
     /* Copy old pl, if one exists */
@@ -663,7 +663,7 @@ void *
 H5FD_fapl_get(H5FD_t *file)
 {
     void	*ret_value=NULL;
-    
+
     FUNC_ENTER_NOAPI(H5FD_fapl_get, NULL)
 
     assert(file);
@@ -697,7 +697,7 @@ H5FD_fapl_open(H5P_genplist_t *plist, hid_t driver_id, const void *driver_info)
 {
     void *copied_driver_info;           /* Temporary VFL driver info */
     herr_t ret_value=SUCCEED;   /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5FD_fapl_open, FAIL)
 
     /* Increment the reference count on driver and copy driver info */
@@ -739,7 +739,7 @@ H5FD_fapl_copy(hid_t driver_id, const void *old_fapl, void **copied_fapl)
 {
     H5FD_class_t	*driver=NULL;
     herr_t ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5FD_fapl_copy, FAIL)
 
     /* Check args */
@@ -782,7 +782,7 @@ H5FD_fapl_close(hid_t driver_id, void *fapl)
     if(driver_id>0) {
         if (NULL==(driver=H5I_object(driver_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID")
-        
+
         /* Close the driver for the property list */
         if(H5FD_pl_close(driver_id,driver->fapl_free,fapl)<0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver fapl_free request failed")
@@ -814,7 +814,7 @@ H5FD_dxpl_open(H5P_genplist_t *plist, hid_t driver_id, const void *driver_info)
 {
     void *copied_driver_info;           /* Temporary VFL driver info */
     herr_t ret_value=SUCCEED;   /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5FD_dxpl_open, FAIL)
 
     /* Increment the reference count on the driver and copy the driver info */
@@ -822,7 +822,7 @@ H5FD_dxpl_open(H5P_genplist_t *plist, hid_t driver_id, const void *driver_info)
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINC, FAIL, "can't increment VFL driver ID")
     if(H5FD_dxpl_copy(driver_id, driver_info, &copied_driver_info)<0)
         HGOTO_ERROR (H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy VFL driver")
-    
+
     /* Set the driver information for the new property list */
     if(H5P_set(plist, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "can't set VFL driver ID")
@@ -856,7 +856,7 @@ H5FD_dxpl_copy(hid_t driver_id, const void *old_dxpl, void **copied_dxpl)
 {
     H5FD_class_t	*driver=NULL;
     herr_t ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5FD_dxpl_copy, FAIL)
 
     /* Check args */
@@ -899,7 +899,7 @@ H5FD_dxpl_close(hid_t driver_id, void *dxpl)
     if(driver_id>0) {
         if (NULL==(driver=H5I_object(driver_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID")
-        
+
         /* Close the driver for the property list */
         if(H5FD_pl_close(driver_id,driver->dxpl_free,dxpl)<0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver fapl_free request failed")
@@ -1001,9 +1001,9 @@ done:
  *
  * Modifications:
  *
- *		Raymond Lu 
+ *		Raymond Lu
  * 		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property 
+ *		Changed the file access list to the new generic property
  *		list.
  *
  *-------------------------------------------------------------------------
@@ -1014,17 +1014,17 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     H5FD_class_t	*driver;
     H5FD_t		*file=NULL;
     hid_t               driver_id = -1;
-    hsize_t             meta_block_size=0;    
-    hsize_t             sdata_block_size=0;    
+    hsize_t             meta_block_size=0;
+    hsize_t             sdata_block_size=0;
     H5P_genplist_t *plist;      /* Property list pointer */
     H5FD_t		*ret_value;
-    
+
     FUNC_ENTER_NOAPI(H5FD_open, NULL)
 
     /* Get file access property list */
     if(NULL == (plist = H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
- 
+
     if (0==maxaddr)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "zero format address range")
 
@@ -1036,7 +1036,7 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 	HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "invalid driver ID in file access property list")
     if (NULL==driver->open)
 	HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL, "file driver has no `open' method")
-    
+
     /* Dispatch to file driver */
     if (HADDR_UNDEF==maxaddr)
         maxaddr = driver->maxaddr;
@@ -1155,7 +1155,7 @@ H5FD_close(H5FD_t *file)
 {
     const H5FD_class_t *driver;
     herr_t              ret_value = SUCCEED;
-    
+
     FUNC_ENTER_NOAPI(H5FD_close, FAIL)
 
     /* check args */
@@ -1281,10 +1281,10 @@ int
 H5FDcmp(const H5FD_t *f1, const H5FD_t *f2)
 {
     int	ret_value;
-    
+
     FUNC_ENTER_API(H5FDcmp, -1) /*return value is arbitrary*/
     H5TRACE2("Is","xx",f1,f2);
-    
+
     ret_value = H5FD_cmp(f1, f2);
 
 done:
@@ -1365,10 +1365,10 @@ H5FDquery(const H5FD_t *f, unsigned long *flags/*out*/)
 
     FUNC_ENTER_API(H5FDquery, FAIL)
     H5TRACE2("Is","xx",f,flags);
-    
+
     assert(f);
     assert(flags);
-    
+
     ret_value = H5FD_query(f, flags);
 
 done:
@@ -1401,7 +1401,7 @@ H5FD_query(const H5FD_t *f, unsigned long *flags/*out*/)
 
     assert(f);
     assert(flags);
-    
+
     /* Check for query driver and call it */
     if (f->cls->query)
         ret_value = (f->cls->query)(f, flags);
@@ -1458,7 +1458,7 @@ haddr_t
 H5FDalloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 {
     haddr_t	ret_value = HADDR_UNDEF;
-    
+
     FUNC_ENTER_API(H5FDalloc, HADDR_UNDEF)
     H5TRACE4("a","xMtih",file,type,dxpl_id,size);
 
@@ -1532,7 +1532,7 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     if ((ret_value = H5FD_alloc_from_free_list(file, type,
                                                mapped_type, size)) != HADDR_UNDEF)
         HGOTO_DONE(ret_value)
-        
+
 #ifdef H5F_DEBUG
     if (H5DEBUG(F))
 	HDfprintf(H5DEBUG(F), "%s: Could not allocate from freelists\n", FUNC);
@@ -1749,7 +1749,7 @@ H5FD_alloc_from_free_list(H5FD_t *file, H5FD_mem_t type,
                         H5F_addr_overlap(ret_value, size, file->accum_loc, file->accum_size)) {
                     ret_value = HADDR_UNDEF;
                 } else {
-                    /* Attempt to allocate memory for temporary node */ 
+                    /* Attempt to allocate memory for temporary node */
                     if((tmp = H5FL_MALLOC(H5FD_free_t))==NULL)
                         HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF, "free block allocation failed")
 
@@ -2031,7 +2031,7 @@ H5FD_real_alloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     assert(file->cls);
     assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
     assert(size > 0);
-    
+
     /*
      * Dispatch to driver `alloc' callback or extend the end-of-address
      * marker
@@ -2163,7 +2163,7 @@ H5FDfree(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t siz
 
     FUNC_ENTER_API(H5FDfree, FAIL)
     H5TRACE5("e","xMtiah",file,type,dxpl_id,addr,size);
-    
+
     /* Check args */
     if (!file || !file->cls)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
@@ -2209,7 +2209,7 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t si
 {
     H5FD_mem_t		mapped_type;
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5FD_free, FAIL)
 
     /* Check args */
@@ -2398,7 +2398,7 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t si
         /* Check if we increased the size of the largest block on the list */
         file->maxsize = MAX(file->maxsize, last->size);
 
-        /* Check if this free block is at the end of file allocated space.  
+        /* Check if this free block is at the end of file allocated space.
          * Truncate it if this is true. */
         if(file->cls->get_eoa) {
             haddr_t     eoa;
@@ -2414,7 +2414,7 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t si
                     file->maxsize=0; /*unknown*/
                 H5FL_FREE(H5FD_free_t, last);
             }
-        }    
+        }
     } else if (file->cls->free) {
         if ((file->cls->free)(file, type, dxpl_id, addr, size)<0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver free request failed")
@@ -2497,12 +2497,12 @@ H5FD_realloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t old_addr, hsi
     uint8_t	_buf[8192];
     uint8_t	*buf=_buf;
     haddr_t      ret_value;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5FD_realloc, HADDR_UNDEF)
 
     if (new_size==old_size) {
         /*nothing to do*/
-	
+
     } else if (0==old_size) {
         /* allocate memory */
         assert(!H5F_addr_defined(old_addr));
@@ -2514,7 +2514,7 @@ H5FD_realloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t old_addr, hsi
         if(H5FD_free(file, type, dxpl_id, old_addr, old_size)<0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, HADDR_UNDEF, "file deallocation request failed")
         new_addr = HADDR_UNDEF;
-        
+
     } else if (new_size<old_size) {
         /* free the end of the block */
         if(H5FD_free(file, type, dxpl_id, old_addr+old_size, old_size-new_size)<0)
@@ -2541,7 +2541,7 @@ H5FD_realloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t old_addr, hsi
                 H5MM_xfree(buf);
             HGOTO_ERROR(H5E_FILE, H5E_READERROR, HADDR_UNDEF, "unable to move file block")
         }
-        
+
         if (buf!=_buf)
             H5MM_xfree(buf);
         if(H5FD_free(file, type, dxpl_id, old_addr, old_size)<0)
@@ -2582,7 +2582,7 @@ H5FD_can_extend(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size, hsize
 {
     haddr_t     eoa;                    /* End of address space in the file */
     htri_t      ret_value=FALSE;        /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5FD_can_extend, FAIL)
 
     /* Retrieve the end of the address space */
@@ -2651,7 +2651,7 @@ H5FD_extend(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size, hsize_t e
     hbool_t     update_eoma=FALSE;      /* Whether we need to update the eoma */
     hbool_t     update_eosda=FALSE;     /* Whether we need to update the eosda */
     herr_t      ret_value=SUCCEED;      /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5FD_extend, FAIL)
 
     /* Retrieve the end of the address space */
@@ -2772,10 +2772,10 @@ haddr_t
 H5FD_get_eoa(H5FD_t *file)
 {
     haddr_t	ret_value;
-    
+
     FUNC_ENTER_NOAPI(H5FD_get_eoa, HADDR_UNDEF)
     assert(file && file->cls);
-    
+
     /* Dispatch to driver */
     if (HADDR_UNDEF==(ret_value=(file->cls->get_eoa)(file)))
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed")
@@ -2860,7 +2860,7 @@ H5FD_set_eoa(H5FD_t *file, haddr_t addr)
 
     assert(file && file->cls);
     assert(H5F_addr_defined(addr) && addr<=file->maxaddr);
-    
+
     /* Dispatch to driver */
     if ((file->cls->set_eoa)(file, addr)<0)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver set_eoa request failed")
@@ -2900,7 +2900,7 @@ haddr_t
 H5FDget_eof(H5FD_t *file)
 {
     haddr_t	ret_value;
-    
+
     FUNC_ENTER_API(H5FDget_eof, HADDR_UNDEF)
     H5TRACE1("a","x",file);
 
@@ -2941,7 +2941,7 @@ H5FD_get_eof(H5FD_t *file)
     FUNC_ENTER_NOAPI(H5FD_get_eof, HADDR_UNDEF)
 
     assert(file && file->cls);
-    
+
     /* Dispatch to driver */
     if (file->cls->get_eof) {
 	if (HADDR_UNDEF==(ret_value=(file->cls->get_eof)(file)))
@@ -3269,7 +3269,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
     assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
     assert(buf);
-    
+
 #ifndef H5_HAVE_PARALLEL
     /* Do not return early for Parallel mode since the I/O could be a */
     /* collective transfer. */
@@ -3619,7 +3619,7 @@ done:
 /*--------------------------------------------------------------------------
  * Function:    H5FDget_vfd_handle
  *
- * Purpose:     Returns a pointer to the file handle of low-level virtual 
+ * Purpose:     Returns a pointer to the file handle of low-level virtual
  *              file driver.
  *
  * Return:      Non-negative if succeed; negative otherwise.
@@ -3636,7 +3636,7 @@ herr_t H5FDget_vfd_handle(H5FD_t *file, hid_t fapl, void** file_handle)
     herr_t              ret_value;
 
     FUNC_ENTER_API(H5FDget_vfd_handle, FAIL)
-    
+
     /* Check arguments */
     assert(file);
     assert(file_handle);
@@ -3653,7 +3653,7 @@ done:
  * Purpose:     Retrieve the file handle for file driver.
  *
  * Return:      Non-negative if succeed; negative if fails.
- * 
+ *
  * Programmer:  Raymond Lu
  *              Sep. 16, 2002
  *
@@ -3664,7 +3664,7 @@ done:
 herr_t H5FD_get_vfd_handle(H5FD_t *file, hid_t fapl, void** file_handle)
 {
     herr_t ret_value = SUCCEED;
-    
+
     FUNC_ENTER_NOAPI(H5FD_get_vfd_handle, FAIL)
 
     assert(file_handle);
@@ -3673,7 +3673,7 @@ herr_t H5FD_get_vfd_handle(H5FD_t *file, hid_t fapl, void** file_handle)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}    
+}
 
 
 /*-------------------------------------------------------------------------

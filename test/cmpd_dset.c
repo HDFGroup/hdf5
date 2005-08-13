@@ -114,11 +114,11 @@ main (int argc, char *argv[])
     /* Third dataset */
     static s3_t		s3[NX*NY];
     hid_t		s3_tid;
-    
+
     /* Fourth dataset */
     static s4_t		s4[NX*NY];
     hid_t		s4_tid;
-    
+
     /* Fifth dataset */
     static s5_t		s5[NX*NY];
     hid_t		s5_tid;
@@ -160,14 +160,14 @@ main (int argc, char *argv[])
 	}
 	H5Tunregister(H5T_PERS_DONTCARE, NULL, -1, -1, H5T_conv_struct_opt);
     }
-	
+
     /* Create the file */
     fapl = h5_fileaccess();
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
     if ((file = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
 	goto error;
     }
-    
+
     /* Create the data space */
     if ((space = H5Screate_simple (2, dim, NULL))<0) goto error;
 
@@ -180,7 +180,7 @@ main (int argc, char *argv[])
      * STEP 1: Save the original dataset natively.
      */
     TESTING("basic compound write");
-    
+
     /* Initialize the dataset */
     for (i=0; i<NX*NY; i++) {
 	s1[i].a = 8*i+0;
@@ -223,7 +223,7 @@ main (int argc, char *argv[])
      *	       in fact, we could have used s1_tid.
      */
     TESTING("basic compound read");
-    
+
     /* Create a data type for s2 */
     if ((s2_tid = H5Tcreate (H5T_COMPOUND, sizeof(s2_t)))<0)
         goto error;
@@ -235,7 +235,7 @@ main (int argc, char *argv[])
             H5Tinsert (s2_tid, "e", HOFFSET(s2_t,e), H5T_NATIVE_INT)<0)
         goto error;
     H5Tclose(array_dt);
-    
+
     /* Read the data */
     if (H5Dread (dataset, s2_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s2)<0) {
 	goto error;
@@ -257,7 +257,7 @@ main (int argc, char *argv[])
 	}
     }
     PASSED();
-    
+
     /*
      *######################################################################
      * STEP 3: Read the dataset back into a third memory buffer. This buffer
@@ -265,7 +265,7 @@ main (int argc, char *argv[])
      *	       data type is a struct whose members are in the opposite order.
      */
     TESTING("reversal of struct members");
-    
+
     /* Create a data type for s3 */
     if ((s3_tid = H5Tcreate (H5T_COMPOUND, sizeof(s3_t)))<0)
         goto error;
@@ -277,7 +277,7 @@ main (int argc, char *argv[])
             H5Tinsert (s3_tid, "e", HOFFSET(s3_t,e), H5T_NATIVE_INT)<0)
         goto error;
     H5Tclose(array_dt);
-    
+
     /* Read the data */
     if (H5Dread (dataset, s3_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s3)<0) {
 	goto error;
@@ -342,7 +342,7 @@ main (int argc, char *argv[])
 	s5[i].mid2 = 1002+4*i;
 	s5[i].post = 1003+4*i;
     }
-    
+
     /* Create a data type for s5 */
     if ((s5_tid = H5Tcreate (H5T_COMPOUND, sizeof(s5_t)))<0)
         goto error;
@@ -354,7 +354,7 @@ main (int argc, char *argv[])
             H5Tinsert (s5_tid, "e", HOFFSET(s5_t,e), H5T_NATIVE_INT))
         goto error;
     H5Tclose(array_dt);
-	
+
     /* Read the data */
     if (H5Dread (dataset, s5_tid, H5S_ALL, H5S_ALL, PRESERVE, s5)<0) {
 	goto error;
@@ -434,7 +434,7 @@ main (int argc, char *argv[])
 	}
     }
     PASSED();
-    
+
     /*
      *######################################################################
      * STEP 7. Read the original dataset with an explicit data space.  Even
@@ -445,7 +445,7 @@ main (int argc, char *argv[])
 
     /* Create the data space */
     if ((s7_sid = H5Screate_simple (2, dim, NULL))<0) goto error;
-    
+
     /* Read the dataset */
     if (H5Dread (dataset, s2_tid, s7_sid, H5S_ALL, H5P_DEFAULT, s2)<0) {
 	goto error;
@@ -467,7 +467,7 @@ main (int argc, char *argv[])
 	}
     }
     PASSED();
-    
+
 
     /*
      *######################################################################
@@ -533,7 +533,7 @@ main (int argc, char *argv[])
 	s2[i].a = s2[i].b = s2[i].d = s2[i].e = (unsigned)(-1);
 	s2[i].c[0] = s2[i].c[1] = s2[i].c[2] = s2[i].c[3] = (unsigned)(-1);
     }
-    
+
     /* Read the hyperslab */
     if (H5Dread (dataset, s2_tid, s8_f_sid, s8_f_sid, H5P_DEFAULT, s2)<0) {
 	goto error;
@@ -577,7 +577,7 @@ main (int argc, char *argv[])
 	}
     }
     PASSED();
-    
+
     /*
      *######################################################################
      * STEP 10. Same as step 9 except the memory array contains some members
@@ -591,7 +591,7 @@ main (int argc, char *argv[])
 	s5[i].c[0] = s5[i].c[1] = s5[i].c[2] = s5[i].c[3] = (unsigned)(-1);
 	s5[i].pre = s5[i].mid1 = s5[i].mid2 = s5[i].post = (unsigned)(-1);
     }
-    
+
     /* Read the hyperslab */
     if (H5Dread (dataset, s5_tid, s8_f_sid, s8_f_sid, PRESERVE, s5)<0) {
 	goto error;
@@ -643,14 +643,14 @@ main (int argc, char *argv[])
 	}
     }
     PASSED();
-		
+
     /*
      *######################################################################
      * Step 11: Write an array into the middle third of the dataset
      * initializeing only members `b' and `d' to -1.
      */
     TESTING("hyperslab part initialized write");
-    
+
     /* Create the memory array and initialize all fields to zero */
     f_offset[0] = NX/3;
     f_offset[1] = NY/3;
@@ -663,7 +663,7 @@ main (int argc, char *argv[])
     for (i=0; i<h_size[0]*h_size[1]; i++) {
 	s11[i].b = s11[i].d = (unsigned)(-1);
     }
-    
+
     /* Write to disk */
     if (H5Dwrite (dataset, s4_tid, s8_m_sid, s8_f_sid, PRESERVE, s11)<0) {
 	goto error;
@@ -680,7 +680,7 @@ main (int argc, char *argv[])
     for (i=0; i<NX; i++) {
 	for (j=0; j<NY; j++) {
 	    s1_t *ps1 = s1 + i*NY + j;
-	    
+
 	    if (ps1->a != 8*(i*NY+j)+0 ||
 		ps1->c[0] != 8*(i*NY+j)+2 ||
 		ps1->c[1] != 8*(i*NY+j)+3 ||
@@ -691,7 +691,7 @@ main (int argc, char *argv[])
 		puts("    Write clobbered values");
 		goto error;
 	    }
-	    
+
 	    if (i>=f_offset[0] &&
 		i<f_offset[0]+h_size[0] &&
 		j>=f_offset[1] &&
@@ -714,7 +714,7 @@ main (int argc, char *argv[])
     }
     PASSED();
 
-    
+
     /*
      * Release resources.
      */

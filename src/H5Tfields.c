@@ -35,7 +35,7 @@ NAME
    H5T_init_fields_interface -- Initialize interface-specific information
 USAGE
     herr_t H5T_init_fields_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -87,7 +87,7 @@ H5Tget_nmembers(hid_t type_id)
 
     if((ret_value = H5T_get_nmembers(dt))<0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot return member number")
-    
+
 done:
     FUNC_LEAVE_API(ret_value)
 }
@@ -96,7 +96,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_get_nmembers
  *
- * Purpose:	Private function for H5Tget_nmembers.  Determines how many 
+ * Purpose:	Private function for H5Tget_nmembers.  Determines how many
  *              members DTYPE has.  The type must be either a compound data
  *              type or an enumeration datatype.
  *
@@ -106,8 +106,8 @@ done:
  *
  * Errors:
  *
- * Programmer:  Raymond Lu	
- *	        October 8, 2002	
+ * Programmer:  Raymond Lu
+ *	        October 8, 2002
  *
  * Modifications:
  *
@@ -128,7 +128,7 @@ H5T_get_nmembers(const H5T_t *dt)
 	ret_value = (int)dt->shared->u.enumer.nmembs;
     else
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "operation not supported for type class")
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -178,9 +178,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_get_member_name
  *
- * Purpose:	Private function for H5Tget_member_name.  Returns the name 
+ * Purpose:	Private function for H5Tget_member_name.  Returns the name
  *              of a member of a compound or enumeration datatype. Members
- *              are stored in no particular order with numbers 0 through 
+ *              are stored in no particular order with numbers 0 through
  *              N-1 where N is the value returned by H5Tget_nmembers().
  *
  * Return:	Success:	Ptr to a string allocated with malloc().  The
@@ -189,7 +189,7 @@ done:
  *		Failure:	NULL
  *
  * Programmer:	Raymond Lu
- *              October 9, 2002	
+ *              October 9, 2002
  *
  * Modifications:
  *-------------------------------------------------------------------------
@@ -215,7 +215,7 @@ H5T_get_member_name(H5T_t const *dt, unsigned membno)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid member number")
             ret_value = H5MM_xstrdup(dt->shared->u.enumer.name[membno]);
             break;
-            
+
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "operation not supported for type class")
     } /*lint !e788 All appropriate cases are covered */
@@ -229,10 +229,10 @@ done:
  * Function:    H5Tget_member_index
  *
  * Purpose:     Returns the index of a member in a compound or enumeration
- *              datatype by given name.Members are stored in no particular 
- *              order with numbers 0 through N-1 where N is the value 
+ *              datatype by given name.Members are stored in no particular
+ *              order with numbers 0 through N-1 where N is the value
  *              returned by H5Tget_nmembers().
- *      
+ *
  * Return:      Success:        index of the member if exists.
  *              Failure:        -1.
  *
@@ -265,7 +265,7 @@ H5Tget_member_index(hid_t type_id, const char *name)
                 if(!HDstrcmp(dt->shared->u.compnd.memb[i].name, name))
                     HGOTO_DONE((int)i)
             }
-            break;  
+            break;
         case H5T_ENUM:
             for(i=0; i< dt->shared->u.enumer.nmembs; i++) {
                 if(!HDstrcmp(dt->shared->u.enumer.name[i], name))
@@ -364,7 +364,7 @@ H5T_sort_value(const H5T_t *dt, int *map)
 			HDmemcpy(dt->shared->u.enumer.value+j*size,
 				 dt->shared->u.enumer.value+(j+1)*size, size);
 			HDmemcpy(dt->shared->u.enumer.value+(j+1)*size, tbuf, size);
-			
+
 			/* Swap map */
 			if (map) {
 			    int x = map[j];
@@ -386,7 +386,7 @@ H5T_sort_value(const H5T_t *dt, int *map)
 #endif
 	}
     }
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -449,7 +449,7 @@ H5T_sort_name(const H5T_t *dt, int *map)
 #ifndef NDEBUG
 	    /* I never trust a sort :-) -RPM */
 	    for (i=0; i<nmembs-1; i++) {
-		assert(HDstrcmp(dt->shared->u.compnd.memb[i].name, 
+		assert(HDstrcmp(dt->shared->u.compnd.memb[i].name,
 				dt->shared->u.compnd.memb[i+1].name)<0);
 	    }
 #endif
@@ -493,7 +493,7 @@ H5T_sort_name(const H5T_t *dt, int *map)
 #endif
 	}
     }
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }

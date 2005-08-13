@@ -47,8 +47,8 @@ typedef unsigned char boolean;
 ** Set EndianOrder = 0 if machine is little endian
 **     EndianOrder = 1 if machine is big endian.
 */
-extern int  EndianOrder;	
-                                                            
+extern int  EndianOrder;
+
 /*
 **  The GIF header format.
 **
@@ -63,9 +63,9 @@ typedef struct _GifHeader { /* Offset   Description                         */
     BYTE ApplicationCount;
     BYTE PlainTextCount;
     BYTE HDFPalette[256][3];
-    BYTE HeaderDump[6];     /* BYTE array to dump header contents           */	
+    BYTE HeaderDump[6];     /* BYTE array to dump header contents           */
     BYTE LSDDump[7];        /* Logical Screen Descriptor dump               */
-} GIFHEAD;                      
+} GIFHEAD;
 
 
 /*
@@ -122,9 +122,9 @@ typedef struct _GifCommentExtension {
 
 /*
 ** GIF to HDF Memory Struct
-** Purpose : The gif to hdf structure is used to pass all the 
+** Purpose : The gif to hdf structure is used to pass all the
 **           gif data to the memory, which gets caught by the hdf driver
-**           Its the drivers job to put the data in the appropriate places 
+**           Its the drivers job to put the data in the appropriate places
 **           in the HDF file.
 **           I have assumed that the ImageDescriptors and GraphicControls follow
 **           one another, ie. I have not associated them with each other. The driver

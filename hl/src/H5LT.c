@@ -15,23 +15,23 @@
 #include <stdlib.h>
 
 /*-------------------------------------------------------------------------
- * 
+ *
  * Private functions
- * 
+ *
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LT_open_id( hid_t loc_id, 
-                     const char *obj_name, 
+herr_t H5LT_open_id( hid_t loc_id,
+                     const char *obj_name,
                      int obj_type );
 
 herr_t H5LT_close_id( hid_t obj_id,
                       int obj_type );
 
 /*-------------------------------------------------------------------------
- * 
+ *
  * Public functions
- * 
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -54,16 +54,16 @@ herr_t H5LT_close_id( hid_t obj_id,
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTmake_dataset( hid_t loc_id, 
-                         const char *dset_name, 
-                         int rank, 
+herr_t H5LTmake_dataset( hid_t loc_id,
+                         const char *dset_name,
+                         int rank,
                          const hsize_t *dims,
                          hid_t tid,
-                         const void *data ) 
+                         const void *data )
 {
 
- hid_t   did, sid;  
- 
+ hid_t   did, sid;
+
  /* Create the data space for the dataset. */
  if ( (sid = H5Screate_simple( rank, dims, NULL )) < 0 )
   return -1;
@@ -74,7 +74,7 @@ herr_t H5LTmake_dataset( hid_t loc_id,
 
  /* Write the dataset only if there is data to write */
 
- if ( data ) 
+ if ( data )
  {
   if ( H5Dwrite( did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, data ) < 0 )
    goto out;
@@ -84,7 +84,7 @@ herr_t H5LTmake_dataset( hid_t loc_id,
  if ( H5Dclose( did ) < 0 )
   return -1;
 
- /* Terminate access to the data space. */ 
+ /* Terminate access to the data space. */
  if ( H5Sclose( sid ) < 0 )
   return -1;
 
@@ -115,15 +115,15 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTmake_dataset_char( hid_t loc_id, 
-                              const char *dset_name, 
-                              int rank, 
+herr_t H5LTmake_dataset_char( hid_t loc_id,
+                              const char *dset_name,
+                              int rank,
                               const hsize_t *dims,
-                              const char *data ) 
+                              const char *data )
 {
 
- hid_t   did, sid;  
- 
+ hid_t   did, sid;
+
  /* Create the data space for the dataset. */
  if ( (sid = H5Screate_simple( rank, dims, NULL )) < 0 )
   return -1;
@@ -134,7 +134,7 @@ herr_t H5LTmake_dataset_char( hid_t loc_id,
 
  /* Write the dataset only if there is data to write */
 
- if ( data ) 
+ if ( data )
  {
   if ( H5Dwrite( did, H5T_NATIVE_CHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, data ) < 0 )
    goto out;
@@ -144,7 +144,7 @@ herr_t H5LTmake_dataset_char( hid_t loc_id,
  if ( H5Dclose( did ) < 0 )
   return -1;
 
- /* Terminate access to the data space. */ 
+ /* Terminate access to the data space. */
  if ( H5Sclose( sid ) < 0 )
   return -1;
 
@@ -177,15 +177,15 @@ out:
  */
 
 
-herr_t H5LTmake_dataset_short( hid_t loc_id, 
-                               const char *dset_name, 
-                               int rank, 
+herr_t H5LTmake_dataset_short( hid_t loc_id,
+                               const char *dset_name,
+                               int rank,
                                const hsize_t *dims,
-                               const short *data ) 
+                               const short *data )
 {
 
- hid_t   did, sid;  
- 
+ hid_t   did, sid;
+
  /* Create the data space for the dataset. */
  if ( (sid = H5Screate_simple( rank, dims, NULL )) < 0 )
   return -1;
@@ -196,7 +196,7 @@ herr_t H5LTmake_dataset_short( hid_t loc_id,
 
  /* Write the dataset only if there is data to write */
 
- if ( data ) 
+ if ( data )
  {
   if ( H5Dwrite( did, H5T_NATIVE_SHORT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data ) < 0 )
    goto out;
@@ -206,7 +206,7 @@ herr_t H5LTmake_dataset_short( hid_t loc_id,
  if ( H5Dclose( did ) < 0 )
   return -1;
 
- /* Terminate access to the data space. */ 
+ /* Terminate access to the data space. */
  if ( H5Sclose( sid ) < 0 )
   return -1;
 
@@ -238,15 +238,15 @@ out:
  */
 
 
-herr_t H5LTmake_dataset_int( hid_t loc_id, 
-                             const char *dset_name, 
-                             int rank, 
+herr_t H5LTmake_dataset_int( hid_t loc_id,
+                             const char *dset_name,
+                             int rank,
                              const hsize_t *dims,
-                             const int *data ) 
+                             const int *data )
 {
 
- hid_t   did, sid;  
- 
+ hid_t   did, sid;
+
  /* Create the data space for the dataset. */
  if ( (sid = H5Screate_simple( rank, dims, NULL )) < 0 )
   return -1;
@@ -257,7 +257,7 @@ herr_t H5LTmake_dataset_int( hid_t loc_id,
 
  /* Write the dataset only if there is data to write */
 
- if ( data ) 
+ if ( data )
  {
   if ( H5Dwrite( did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data ) < 0 )
    goto out;
@@ -267,7 +267,7 @@ herr_t H5LTmake_dataset_int( hid_t loc_id,
  if ( H5Dclose( did ) < 0 )
   return -1;
 
- /* Terminate access to the data space. */ 
+ /* Terminate access to the data space. */
  if ( H5Sclose( sid ) < 0 )
   return -1;
 
@@ -301,15 +301,15 @@ out:
  */
 
 
-herr_t H5LTmake_dataset_long( hid_t loc_id, 
-                              const char *dset_name, 
-                              int rank, 
+herr_t H5LTmake_dataset_long( hid_t loc_id,
+                              const char *dset_name,
+                              int rank,
                               const hsize_t *dims,
-                              const long *data ) 
+                              const long *data )
 {
 
- hid_t   did, sid;  
- 
+ hid_t   did, sid;
+
  /* Create the data space for the dataset. */
  if ( (sid = H5Screate_simple( rank, dims, NULL )) < 0 )
   return -1;
@@ -320,7 +320,7 @@ herr_t H5LTmake_dataset_long( hid_t loc_id,
 
  /* Write the dataset only if there is data to write */
 
- if ( data ) 
+ if ( data )
  {
   if ( H5Dwrite( did, H5T_NATIVE_LONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, data ) < 0 )
    goto out;
@@ -330,7 +330,7 @@ herr_t H5LTmake_dataset_long( hid_t loc_id,
  if ( H5Dclose( did ) < 0 )
   return -1;
 
- /* Terminate access to the data space. */ 
+ /* Terminate access to the data space. */
  if ( H5Sclose( sid ) < 0 )
   return -1;
 
@@ -362,15 +362,15 @@ out:
  */
 
 
-herr_t H5LTmake_dataset_float( hid_t loc_id, 
-                               const char *dset_name, 
-                               int rank, 
+herr_t H5LTmake_dataset_float( hid_t loc_id,
+                               const char *dset_name,
+                               int rank,
                                const hsize_t *dims,
-                               const float *data ) 
+                               const float *data )
 {
 
- hid_t   did, sid;  
- 
+ hid_t   did, sid;
+
  /* Create the data space for the dataset. */
  if ( (sid = H5Screate_simple( rank, dims, NULL )) < 0 )
   return -1;
@@ -381,7 +381,7 @@ herr_t H5LTmake_dataset_float( hid_t loc_id,
 
  /* Write the dataset only if there is data to write */
 
- if ( data ) 
+ if ( data )
  {
   if ( H5Dwrite( did, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data ) < 0 )
    goto out;
@@ -391,7 +391,7 @@ herr_t H5LTmake_dataset_float( hid_t loc_id,
  if ( H5Dclose( did ) < 0 )
   return -1;
 
- /* Terminate access to the data space. */ 
+ /* Terminate access to the data space. */
  if ( H5Sclose( sid ) < 0 )
   return -1;
 
@@ -425,15 +425,15 @@ out:
  */
 
 
-herr_t H5LTmake_dataset_double( hid_t loc_id, 
-                                const char *dset_name, 
-                                int rank, 
+herr_t H5LTmake_dataset_double( hid_t loc_id,
+                                const char *dset_name,
+                                int rank,
                                 const hsize_t *dims,
-                                const double *data ) 
+                                const double *data )
 {
 
- hid_t   did, sid;  
- 
+ hid_t   did, sid;
+
  /* Create the data space for the dataset. */
  if ( (sid = H5Screate_simple( rank, dims, NULL )) < 0 )
   return -1;
@@ -444,7 +444,7 @@ herr_t H5LTmake_dataset_double( hid_t loc_id,
 
  /* Write the dataset only if there is data to write */
 
- if ( data ) 
+ if ( data )
  {
   if ( H5Dwrite( did, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data ) < 0 )
    goto out;
@@ -454,7 +454,7 @@ herr_t H5LTmake_dataset_double( hid_t loc_id,
  if ( H5Dclose( did ) < 0 )
   return -1;
 
- /* Terminate access to the data space. */ 
+ /* Terminate access to the data space. */
  if ( H5Sclose( sid ) < 0 )
   return -1;
 
@@ -487,12 +487,12 @@ out:
  */
 
 
-herr_t H5LTmake_dataset_string(hid_t loc_id, 
-                               const char *dset_name, 
-                               const char *buf ) 
+herr_t H5LTmake_dataset_string(hid_t loc_id,
+                               const char *dset_name,
+                               const char *buf )
 {
 
- hid_t   did=-1;  
+ hid_t   did=-1;
 	hid_t   sid=-1;
 	hid_t   tid;
 	size_t  size;
@@ -508,7 +508,7 @@ herr_t H5LTmake_dataset_string(hid_t loc_id,
 
  if ( H5Tset_strpad(tid,H5T_STR_NULLTERM ) < 0 )
   goto out;
- 
+
  /* Create the data space for the dataset. */
  if ( (sid = H5Screate( H5S_SCALAR )) < 0 )
   goto out;
@@ -519,7 +519,7 @@ herr_t H5LTmake_dataset_string(hid_t loc_id,
 
  /* Write the dataset only if there is data to write */
 
- if (buf) 
+ if (buf)
  {
   if ( H5Dwrite(did,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0 )
    goto out;
@@ -557,12 +557,12 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTread_dataset( hid_t loc_id, 
+herr_t H5LTread_dataset( hid_t loc_id,
                          const char *dset_name,
                          hid_t tid,
                          void *data )
 {
- hid_t   did;  
+ hid_t   did;
 
  /* Open the dataset. */
  if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
@@ -583,7 +583,7 @@ out:
  return -1;
 
 }
-  
+
 
 /*-------------------------------------------------------------------------
  * Function: H5LTread_dataset_char
@@ -599,11 +599,11 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTread_dataset_char( hid_t loc_id, 
+herr_t H5LTread_dataset_char( hid_t loc_id,
                               const char *dset_name,
                               char *data )
 {
- hid_t   did;  
+ hid_t   did;
 
  /* Open the dataset. */
  if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
@@ -639,11 +639,11 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTread_dataset_short( hid_t loc_id, 
+herr_t H5LTread_dataset_short( hid_t loc_id,
                                const char *dset_name,
                                short *data )
 {
- hid_t   did;  
+ hid_t   did;
 
  /* Open the dataset. */
  if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
@@ -679,11 +679,11 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTread_dataset_int( hid_t loc_id, 
+herr_t H5LTread_dataset_int( hid_t loc_id,
                              const char *dset_name,
                              int *data )
 {
- hid_t   did;  
+ hid_t   did;
 
  /* Open the dataset. */
  if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
@@ -719,11 +719,11 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTread_dataset_long( hid_t loc_id, 
+herr_t H5LTread_dataset_long( hid_t loc_id,
                               const char *dset_name,
                               long *data )
 {
- hid_t   did;  
+ hid_t   did;
 
  /* Open the dataset. */
  if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
@@ -759,11 +759,11 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTread_dataset_float( hid_t loc_id, 
+herr_t H5LTread_dataset_float( hid_t loc_id,
                                const char *dset_name,
                                float *data )
 {
- hid_t   did;  
+ hid_t   did;
 
  /* Open the dataset. */
  if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
@@ -800,11 +800,11 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTread_dataset_double( hid_t loc_id, 
+herr_t H5LTread_dataset_double( hid_t loc_id,
                                 const char *dset_name,
                                 double *data )
 {
- hid_t   did;  
+ hid_t   did;
 
  /* Open the dataset. */
  if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
@@ -841,11 +841,11 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTread_dataset_string( hid_t loc_id, 
+herr_t H5LTread_dataset_string( hid_t loc_id,
                                 const char *dset_name,
                                 char *buf )
 {
- hid_t   did;  
+ hid_t   did;
 	hid_t   tid;
 
  /* Open the dataset. */
@@ -889,12 +889,12 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTget_dataset_ndims( hid_t loc_id, 
+herr_t H5LTget_dataset_ndims( hid_t loc_id,
                               const char *dset_name,
                               int *rank )
 {
- hid_t       did;  
- hid_t       sid; 
+ hid_t       did;
+ hid_t       sid;
 
  /* Open the dataset. */
  if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
@@ -940,15 +940,15 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTget_dataset_info( hid_t loc_id, 
+herr_t H5LTget_dataset_info( hid_t loc_id,
                              const char *dset_name,
                              hsize_t *dims,
                              H5T_class_t *type_class,
                              size_t *type_size )
 {
- hid_t       did;  
+ hid_t       did;
  hid_t       tid;
- hid_t       sid; 
+ hid_t       sid;
 
  /* Open the dataset. */
  if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
@@ -1011,42 +1011,42 @@ out:
 static herr_t find_dataset( hid_t loc_id, const char *name, void *op_data)
 {
 
- /* Define a default zero value for return. This will cause the iterator to continue if 
+ /* Define a default zero value for return. This will cause the iterator to continue if
   * the dataset is not found yet.
   */
 
- int ret = 0;   
+ int ret = 0;
 
  char *dset_name = (char*)op_data;
- 
+
  /* Shut the compiler up */
  loc_id=loc_id;
 
- /* Define a positive value for return value if the dataset was found. This will 
-  * cause the iterator to immediately return that positive value, 
-  * indicating short-circuit success 
+ /* Define a positive value for return value if the dataset was found. This will
+  * cause the iterator to immediately return that positive value,
+  * indicating short-circuit success
   */
 
- if( strcmp( name, dset_name ) == 0 ) 
+ if( strcmp( name, dset_name ) == 0 )
   ret = 1;
 
 
  return ret;
-} 
+}
 
 
 
 /*-------------------------------------------------------------------------
  * Function: H5LTfind_dataset
  *
- * Purpose:  Inquires if a dataset named dset_name exists attached 
+ * Purpose:  Inquires if a dataset named dset_name exists attached
  *           to the object loc_id.
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
  * Date: July 15, 2001
  *
- * Return:  
+ * Return:
  *     Success: The return value of the first operator that
  *              returns non-zero, or zero if all members were
  *              processed with no operator returning non-zero.
@@ -1058,7 +1058,7 @@ static herr_t find_dataset( hid_t loc_id, const char *name, void *op_data)
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTfind_dataset( hid_t loc_id, const char *dset_name ) 
+herr_t H5LTfind_dataset( hid_t loc_id, const char *dset_name )
 {
 
  herr_t  ret;
@@ -1070,17 +1070,17 @@ herr_t H5LTfind_dataset( hid_t loc_id, const char *dset_name )
 
 
 /*-------------------------------------------------------------------------
- * 
+ *
  * Set attribute functions
- * 
+ *
  *-------------------------------------------------------------------------
  */
- 
+
 
 /*-------------------------------------------------------------------------
  * Function: H5LTset_attribute_string
  *
- * Purpose: Creates and writes a string attribute named attr_name and attaches 
+ * Purpose: Creates and writes a string attribute named attr_name and attaches
  *          it to the object specified by the name obj_name.
  *
  * Return: Success: 0, Failure: -1
@@ -1096,20 +1096,20 @@ herr_t H5LTfind_dataset( hid_t loc_id, const char *dset_name )
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTset_attribute_string( hid_t loc_id, 
-                                 const char *obj_name, 
+herr_t H5LTset_attribute_string( hid_t loc_id,
+                                 const char *obj_name,
                                  const char *attr_name,
-                                 const char *attr_data ) 
+                                 const char *attr_data )
 {
  hid_t      attr_type;
  hid_t      attr_space_id;
  hid_t      attr_id;
- hid_t      obj_id;  
+ hid_t      obj_id;
  int        has_attr;
  H5G_stat_t statbuf;
 	size_t     attr_size;
 
- 
+
  /* Get the type of object */
  if (H5Gget_objinfo( loc_id, obj_name, 1, &statbuf )<0)
   return -1;
@@ -1150,10 +1150,10 @@ herr_t H5LTset_attribute_string( hid_t loc_id,
 
  if ( H5Awrite( attr_id, attr_type, attr_data ) < 0 )
   goto out;
-   
+
  if ( H5Aclose( attr_id ) < 0 )
   goto out;
- 
+
  if ( H5Sclose( attr_space_id ) < 0 )
   goto out;
 
@@ -1193,23 +1193,23 @@ out:
  */
 
 
-herr_t H5LT_set_attribute_numerical( hid_t loc_id, 
-                                     const char *obj_name, 
+herr_t H5LT_set_attribute_numerical( hid_t loc_id,
+                                     const char *obj_name,
                                      const char *attr_name,
                                      size_t size,
                                      hid_t tid,
-                                     const void *data ) 
+                                     const void *data )
 {
 
- hid_t      obj_id, sid, attr_id;  
+ hid_t      obj_id, sid, attr_id;
  hsize_t    dim_size=size;
  int        has_attr;
  H5G_stat_t statbuf;
- 
+
  /* Get the type of object */
  if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
   return -1;
- 
+
  /* Open the object */
  if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
   return -1;
@@ -1271,17 +1271,17 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LT_open_id( hid_t loc_id, 
-                     const char *obj_name, 
-                     int obj_type /*basic object type*/ ) 
+herr_t H5LT_open_id( hid_t loc_id,
+                     const char *obj_name,
+                     int obj_type /*basic object type*/ )
 {
 
- hid_t   obj_id = -1;  
- 
+ hid_t   obj_id = -1;
+
  switch ( obj_type )
  {
   case H5G_DATASET:
-    
+
    /* Open the dataset. */
    if ( (obj_id = H5Dopen( loc_id, obj_name )) < 0 )
     return -1;
@@ -1295,10 +1295,10 @@ herr_t H5LT_open_id( hid_t loc_id,
    break;
 
   default:
-   return -1; 
+   return -1;
  }
 
- return obj_id; 
+ return obj_id;
 
 }
 
@@ -1320,27 +1320,27 @@ herr_t H5LT_open_id( hid_t loc_id,
  */
 
 herr_t H5LT_close_id( hid_t obj_id,
-                      int obj_type /*basic object type*/ ) 
+                      int obj_type /*basic object type*/ )
 {
  switch ( obj_type )
  {
   case H5G_DATASET:
    /* Close the dataset. */
    if ( H5Dclose( obj_id ) < 0 )
-    return -1; 
+    return -1;
    break;
 
   case H5G_GROUP:
   /* Close the group. */
    if ( H5Gclose( obj_id ) < 0 )
-    return -1; 
+    return -1;
    break;
 
   default:
-   return -1; 
+   return -1;
  }
 
- return 0; 
+ return 0;
 }
 
 
@@ -1360,14 +1360,14 @@ herr_t H5LT_close_id( hid_t obj_id,
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTset_attribute_char( hid_t loc_id, 
-                               const char *obj_name, 
+herr_t H5LTset_attribute_char( hid_t loc_id,
+                               const char *obj_name,
                                const char *attr_name,
                                const char *data,
-                               size_t size ) 
+                               size_t size )
 {
- 
- if ( H5LT_set_attribute_numerical( loc_id, obj_name, attr_name, size, 
+
+ if ( H5LT_set_attribute_numerical( loc_id, obj_name, attr_name, size,
       H5T_NATIVE_CHAR, data ) < 0 )
   return -1;
 
@@ -1390,14 +1390,14 @@ herr_t H5LTset_attribute_char( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTset_attribute_uchar( hid_t loc_id, 
-                                const char *obj_name, 
+herr_t H5LTset_attribute_uchar( hid_t loc_id,
+                                const char *obj_name,
                                 const char *attr_name,
                                 const unsigned char *data,
-                                size_t size ) 
+                                size_t size )
 {
- 
- if ( H5LT_set_attribute_numerical( loc_id, obj_name, attr_name, size, 
+
+ if ( H5LT_set_attribute_numerical( loc_id, obj_name, attr_name, size,
       H5T_NATIVE_UCHAR, data ) < 0 )
   return -1;
 
@@ -1421,14 +1421,14 @@ herr_t H5LTset_attribute_uchar( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTset_attribute_short( hid_t loc_id, 
-                                const char *obj_name, 
+herr_t H5LTset_attribute_short( hid_t loc_id,
+                                const char *obj_name,
                                 const char *attr_name,
                                 const short *data,
-                                size_t size ) 
+                                size_t size )
 {
- 
- if ( H5LT_set_attribute_numerical( loc_id, obj_name, attr_name, size, 
+
+ if ( H5LT_set_attribute_numerical( loc_id, obj_name, attr_name, size,
       H5T_NATIVE_SHORT, data ) < 0 )
   return -1;
 
@@ -1452,14 +1452,14 @@ herr_t H5LTset_attribute_short( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTset_attribute_ushort( hid_t loc_id, 
-                                const char *obj_name, 
+herr_t H5LTset_attribute_ushort( hid_t loc_id,
+                                const char *obj_name,
                                 const char *attr_name,
                                 const unsigned short *data,
-                                size_t size ) 
+                                size_t size )
 {
- 
- if ( H5LT_set_attribute_numerical( loc_id, obj_name, attr_name, size, 
+
+ if ( H5LT_set_attribute_numerical( loc_id, obj_name, attr_name, size,
       H5T_NATIVE_USHORT, data ) < 0 )
   return -1;
 
@@ -1483,14 +1483,14 @@ herr_t H5LTset_attribute_ushort( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTset_attribute_int( hid_t loc_id, 
-                              const char *obj_name, 
+herr_t H5LTset_attribute_int( hid_t loc_id,
+                              const char *obj_name,
                               const char *attr_name,
                               const int *data,
-                              size_t size ) 
+                              size_t size )
 {
- 
- if ( H5LT_set_attribute_numerical( loc_id, obj_name, attr_name, size, 
+
+ if ( H5LT_set_attribute_numerical( loc_id, obj_name, attr_name, size,
       H5T_NATIVE_INT, data ) < 0 )
   return -1;
 
@@ -1514,14 +1514,14 @@ herr_t H5LTset_attribute_int( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTset_attribute_uint( hid_t loc_id, 
-                              const char *obj_name, 
+herr_t H5LTset_attribute_uint( hid_t loc_id,
+                              const char *obj_name,
                               const char *attr_name,
                               const unsigned int *data,
-                              size_t size ) 
+                              size_t size )
 {
- 
- if ( H5LT_set_attribute_numerical( loc_id, obj_name, attr_name, size, 
+
+ if ( H5LT_set_attribute_numerical( loc_id, obj_name, attr_name, size,
       H5T_NATIVE_UINT, data ) < 0 )
   return -1;
 
@@ -1546,14 +1546,14 @@ herr_t H5LTset_attribute_uint( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTset_attribute_long( hid_t loc_id, 
-                               const char *obj_name, 
+herr_t H5LTset_attribute_long( hid_t loc_id,
+                               const char *obj_name,
                                const char *attr_name,
                                const long *data,
-                               size_t size ) 
+                               size_t size )
 {
- 
- if ( H5LT_set_attribute_numerical( loc_id, obj_name, attr_name, size, 
+
+ if ( H5LT_set_attribute_numerical( loc_id, obj_name, attr_name, size,
       H5T_NATIVE_LONG, data ) < 0 )
   return -1;
 
@@ -1577,14 +1577,14 @@ herr_t H5LTset_attribute_long( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTset_attribute_ulong( hid_t loc_id, 
-                               const char *obj_name, 
+herr_t H5LTset_attribute_ulong( hid_t loc_id,
+                               const char *obj_name,
                                const char *attr_name,
                                const unsigned long *data,
-                               size_t size ) 
+                               size_t size )
 {
- 
- if ( H5LT_set_attribute_numerical( loc_id, obj_name, attr_name, size, 
+
+ if ( H5LT_set_attribute_numerical( loc_id, obj_name, attr_name, size,
       H5T_NATIVE_ULONG, data ) < 0 )
   return -1;
 
@@ -1610,14 +1610,14 @@ herr_t H5LTset_attribute_ulong( hid_t loc_id,
  */
 
 
-herr_t H5LTset_attribute_float( hid_t loc_id, 
-                                const char *obj_name, 
+herr_t H5LTset_attribute_float( hid_t loc_id,
+                                const char *obj_name,
                                 const char *attr_name,
                                 const float *data,
                                 size_t size )
 {
 
- if ( H5LT_set_attribute_numerical( loc_id, obj_name, attr_name, size, 
+ if ( H5LT_set_attribute_numerical( loc_id, obj_name, attr_name, size,
       H5T_NATIVE_FLOAT, data ) < 0 )
   return -1;
 
@@ -1642,14 +1642,14 @@ herr_t H5LTset_attribute_float( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTset_attribute_double( hid_t loc_id, 
-                                 const char *obj_name, 
+herr_t H5LTset_attribute_double( hid_t loc_id,
+                                 const char *obj_name,
                                  const char *attr_name,
                                  const double *data,
-                                 size_t size ) 
+                                 size_t size )
 {
- 
- if ( H5LT_set_attribute_numerical( loc_id, obj_name, attr_name, size, 
+
+ if ( H5LT_set_attribute_numerical( loc_id, obj_name, attr_name, size,
       H5T_NATIVE_DOUBLE, data ) < 0 )
   return -1;
 
@@ -1678,28 +1678,28 @@ herr_t H5LTset_attribute_double( hid_t loc_id,
 static herr_t find_attr( hid_t loc_id, const char *name, void *op_data)
 {
 
- /* Define a default zero value for return. This will cause the iterator to continue if 
+ /* Define a default zero value for return. This will cause the iterator to continue if
   * the palette attribute is not found yet.
   */
 
- int ret = 0;   
+ int ret = 0;
 
  char *attr_name = (char*)op_data;
- 
+
  /* Shut the compiler up */
  loc_id=loc_id;
 
- /* Define a positive value for return value if the attribute was found. This will 
-  * cause the iterator to immediately return that positive value, 
-  * indicating short-circuit success 
+ /* Define a positive value for return value if the attribute was found. This will
+  * cause the iterator to immediately return that positive value,
+  * indicating short-circuit success
   */
 
- if( strcmp( name, attr_name ) == 0 ) 
+ if( strcmp( name, attr_name ) == 0 )
   ret = 1;
 
 
  return ret;
-} 
+}
 
 
 /*-------------------------------------------------------------------------
@@ -1714,7 +1714,7 @@ static herr_t find_attr( hid_t loc_id, const char *name, void *op_data)
  * Comments:
  *  The function uses H5Aiterate with the operator function find_attr
  *
- * Return:  
+ * Return:
  *  Success: The return value of the first operator that
  *              returns non-zero, or zero if all members were
  *              processed with no operator returning non-zero.
@@ -1726,10 +1726,10 @@ static herr_t find_attr( hid_t loc_id, const char *name, void *op_data)
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LT_find_attribute( hid_t loc_id, const char* attr_name ) 
+herr_t H5LT_find_attribute( hid_t loc_id, const char* attr_name )
 {
 
- unsigned int attr_num;     
+ unsigned int attr_num;
  herr_t       ret;
 
  attr_num = 0;
@@ -1754,16 +1754,16 @@ herr_t H5LT_find_attribute( hid_t loc_id, const char* attr_name )
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTget_attribute_ndims( hid_t loc_id, 
-                                const char *obj_name, 
+herr_t H5LTget_attribute_ndims( hid_t loc_id,
+                                const char *obj_name,
                                 const char *attr_name,
                                 int *rank )
 {
- hid_t       attr_id;  
- hid_t       sid; 
+ hid_t       attr_id;
+ hid_t       sid;
  H5G_stat_t  statbuf;
- hid_t       obj_id;  
- 
+ hid_t       obj_id;
+
  /* Get the type of object */
  if (H5Gget_objinfo( loc_id, obj_name, 1, &statbuf )<0)
   return -1;
@@ -1823,19 +1823,19 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTget_attribute_info( hid_t loc_id, 
-                               const char *obj_name, 
+herr_t H5LTget_attribute_info( hid_t loc_id,
+                               const char *obj_name,
                                const char *attr_name,
                                hsize_t *dims,
                                H5T_class_t *type_class,
                                size_t *type_size )
 {
- hid_t       attr_id;  
+ hid_t       attr_id;
  hid_t       tid;
- hid_t       sid; 
+ hid_t       sid;
  H5G_stat_t  statbuf;
- hid_t       obj_id;  
- 
+ hid_t       obj_id;
+
  /* Get the type of object */
  if (H5Gget_objinfo( loc_id, obj_name, 1, &statbuf )<0)
   return -1;
@@ -1905,7 +1905,7 @@ out:
 /*-------------------------------------------------------------------------
  * Function: H5LTcreate_compound_type
  *
- * Purpose: 
+ * Purpose:
  *
  * Return: Success: 0, Failure: -1
  *
@@ -1921,19 +1921,19 @@ out:
  *-------------------------------------------------------------------------
  */
 
-hid_t H5LTcreate_compound_type( hsize_t nfields, size_t size, const char *field_names[], 
-                                const size_t *field_offset, const hid_t *field_types ) 
+hid_t H5LTcreate_compound_type( hsize_t nfields, size_t size, const char *field_names[],
+                                const size_t *field_offset, const hid_t *field_types )
 {
 
- hid_t   tid; 
+ hid_t   tid;
  hsize_t i;
- 
+
  /* Create the memory data type. */
  if ((tid = H5Tcreate (H5T_COMPOUND, size )) < 0 )
   goto out;
 
  /* Insert fields. */
- for ( i = 0; i < nfields; i++) 
+ for ( i = 0; i < nfields; i++)
  {
   if ( H5Tinsert(tid, field_names[i], field_offset[i], field_types[i] ) < 0 )
    goto out;
@@ -1953,7 +1953,7 @@ out:
  * Function: H5LTrepack
  *
  * Purpose: Packs/Unpacks data from buffers. This function transfers data from a packed
- * data, src_buf, to a "natural byte aligned" (an n-byte item at an n-byte boundary) 
+ * data, src_buf, to a "natural byte aligned" (an n-byte item at an n-byte boundary)
  * data, dst_buf, and vice-versa.
  *
  * Return: Success: 0, Failure: -1
@@ -1962,7 +1962,7 @@ out:
  *
  * Date: January 17, 2002
  *
- * Comments: 
+ * Comments:
  *
  * Modifications:
  *
@@ -1970,16 +1970,16 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTrepack( hsize_t nfields, 
-                   hsize_t nrecords, 
-                   size_t src_size, 
-                   const size_t *src_offset, 
-                   const size_t *src_sizes, 
-                   size_t dst_size, 
-                   const size_t *dst_offset, 
+herr_t H5LTrepack( hsize_t nfields,
+                   hsize_t nrecords,
+                   size_t src_size,
+                   const size_t *src_offset,
+                   const size_t *src_sizes,
+                   size_t dst_size,
+                   const size_t *dst_offset,
                    const size_t *dst_sizes,
-                   unsigned char *src_buf, 
-                   unsigned char *dst_buf )  
+                   unsigned char *src_buf,
+                   unsigned char *dst_buf )
 {
  hsize_t   i, j;
  /* size of each field of destination data counting with padding */
@@ -2011,12 +2011,12 @@ herr_t H5LTrepack( hsize_t nfields,
    src_buf += src_sizes[j];
 
   }
- 
+
  }
- 
+
  if ( size_pad != NULL )
   free( size_pad );
-  
+
 return 0;
 
 out:
@@ -2026,9 +2026,9 @@ out:
 
 
 /*-------------------------------------------------------------------------
- * 
+ *
  * Get attribute functions
- * 
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -2052,10 +2052,10 @@ out:
  */
 
 
-herr_t H5LTget_attribute_string( hid_t loc_id, 
-                                 const char *obj_name, 
+herr_t H5LTget_attribute_string( hid_t loc_id,
+                                 const char *obj_name,
                                  const char *attr_name,
-                                 char *data ) 
+                                 char *data )
 {
 
  /* identifiers */
@@ -2065,7 +2065,7 @@ herr_t H5LTget_attribute_string( hid_t loc_id,
  /* Get the type of object */
  if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
   return -1;
- 
+
  /* Open the object */
  if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
   return -1;
@@ -2099,10 +2099,10 @@ herr_t H5LTget_attribute_string( hid_t loc_id,
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5LTget_attribute_char( hid_t loc_id, 
-                                const char *obj_name, 
+herr_t H5LTget_attribute_char( hid_t loc_id,
+                                const char *obj_name,
                                 const char *attr_name,
-                                char *data ) 
+                                char *data )
 {
 
  /* identifiers */
@@ -2112,7 +2112,7 @@ herr_t H5LTget_attribute_char( hid_t loc_id,
  /* Get the type of object */
  if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
   return -1;
- 
+
  /* Open the object */
  if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
   return -1;
@@ -2146,10 +2146,10 @@ herr_t H5LTget_attribute_char( hid_t loc_id,
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5LTget_attribute_uchar( hid_t loc_id, 
-                                const char *obj_name, 
+herr_t H5LTget_attribute_uchar( hid_t loc_id,
+                                const char *obj_name,
                                 const char *attr_name,
-                                unsigned char *data ) 
+                                unsigned char *data )
 {
 
  /* identifiers */
@@ -2159,7 +2159,7 @@ herr_t H5LTget_attribute_uchar( hid_t loc_id,
  /* Get the type of object */
  if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
   return -1;
- 
+
  /* Open the object */
  if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
   return -1;
@@ -2195,10 +2195,10 @@ herr_t H5LTget_attribute_uchar( hid_t loc_id,
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5LTget_attribute_short( hid_t loc_id, 
-                                const char *obj_name, 
+herr_t H5LTget_attribute_short( hid_t loc_id,
+                                const char *obj_name,
                                 const char *attr_name,
-                                short *data ) 
+                                short *data )
 {
 
  /* identifiers */
@@ -2208,7 +2208,7 @@ herr_t H5LTget_attribute_short( hid_t loc_id,
  /* Get the type of object */
  if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
   return -1;
- 
+
  /* Open the object */
  if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
   return -1;
@@ -2242,10 +2242,10 @@ herr_t H5LTget_attribute_short( hid_t loc_id,
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5LTget_attribute_ushort( hid_t loc_id, 
-                                const char *obj_name, 
+herr_t H5LTget_attribute_ushort( hid_t loc_id,
+                                const char *obj_name,
                                 const char *attr_name,
-                                unsigned short *data ) 
+                                unsigned short *data )
 {
 
  /* identifiers */
@@ -2255,7 +2255,7 @@ herr_t H5LTget_attribute_ushort( hid_t loc_id,
  /* Get the type of object */
  if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
   return -1;
- 
+
  /* Open the object */
  if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
   return -1;
@@ -2291,10 +2291,10 @@ herr_t H5LTget_attribute_ushort( hid_t loc_id,
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5LTget_attribute_int( hid_t loc_id, 
-                              const char *obj_name, 
+herr_t H5LTget_attribute_int( hid_t loc_id,
+                              const char *obj_name,
                               const char *attr_name,
-                              int *data ) 
+                              int *data )
 {
 
  /* identifiers */
@@ -2304,7 +2304,7 @@ herr_t H5LTget_attribute_int( hid_t loc_id,
  /* Get the type of object */
  if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
   return -1;
- 
+
  /* Open the object */
  if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
   return -1;
@@ -2338,10 +2338,10 @@ herr_t H5LTget_attribute_int( hid_t loc_id,
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5LTget_attribute_uint( hid_t loc_id, 
-                              const char *obj_name, 
+herr_t H5LTget_attribute_uint( hid_t loc_id,
+                              const char *obj_name,
                               const char *attr_name,
-                              unsigned int *data ) 
+                              unsigned int *data )
 {
 
  /* identifiers */
@@ -2351,7 +2351,7 @@ herr_t H5LTget_attribute_uint( hid_t loc_id,
  /* Get the type of object */
  if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
   return -1;
- 
+
  /* Open the object */
  if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
   return -1;
@@ -2387,10 +2387,10 @@ herr_t H5LTget_attribute_uint( hid_t loc_id,
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5LTget_attribute_long( hid_t loc_id, 
-                              const char *obj_name, 
+herr_t H5LTget_attribute_long( hid_t loc_id,
+                              const char *obj_name,
                               const char *attr_name,
-                              long *data ) 
+                              long *data )
 {
 
  /* identifiers */
@@ -2400,7 +2400,7 @@ herr_t H5LTget_attribute_long( hid_t loc_id,
  /* Get the type of object */
  if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
   return -1;
- 
+
  /* Open the object */
  if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
   return -1;
@@ -2434,10 +2434,10 @@ herr_t H5LTget_attribute_long( hid_t loc_id,
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5LTget_attribute_ulong( hid_t loc_id, 
-                              const char *obj_name, 
+herr_t H5LTget_attribute_ulong( hid_t loc_id,
+                              const char *obj_name,
                               const char *attr_name,
-                              unsigned long *data ) 
+                              unsigned long *data )
 {
 
  /* identifiers */
@@ -2447,7 +2447,7 @@ herr_t H5LTget_attribute_ulong( hid_t loc_id,
  /* Get the type of object */
  if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
   return -1;
- 
+
  /* Open the object */
  if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
   return -1;
@@ -2484,10 +2484,10 @@ herr_t H5LTget_attribute_ulong( hid_t loc_id,
  */
 
 
-herr_t H5LTget_attribute_float( hid_t loc_id, 
-                                const char *obj_name, 
+herr_t H5LTget_attribute_float( hid_t loc_id,
+                                const char *obj_name,
                                 const char *attr_name,
-                                float *data ) 
+                                float *data )
 {
 
  /* identifiers */
@@ -2497,7 +2497,7 @@ herr_t H5LTget_attribute_float( hid_t loc_id,
  /* Get the type of object */
  if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
   return -1;
- 
+
  /* Open the object */
  if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
   return -1;
@@ -2534,10 +2534,10 @@ herr_t H5LTget_attribute_float( hid_t loc_id,
  */
 
 
-herr_t H5LTget_attribute_double( hid_t loc_id, 
-                                 const char *obj_name, 
+herr_t H5LTget_attribute_double( hid_t loc_id,
+                                 const char *obj_name,
                                  const char *attr_name,
-                                 double *data ) 
+                                 double *data )
 {
 
  /* identifiers */
@@ -2547,7 +2547,7 @@ herr_t H5LTget_attribute_double( hid_t loc_id,
  /* Get the type of object */
  if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
   return -1;
- 
+
  /* Open the object */
  if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
   return -1;
@@ -2584,11 +2584,11 @@ herr_t H5LTget_attribute_double( hid_t loc_id,
  */
 
 
-herr_t H5LTget_attribute( hid_t loc_id, 
-                          const char *obj_name, 
+herr_t H5LTget_attribute( hid_t loc_id,
+                          const char *obj_name,
                           const char *attr_name,
                           hid_t mem_type_id,
-                          void *data ) 
+                          void *data )
 {
 
  /* identifiers */
@@ -2598,7 +2598,7 @@ herr_t H5LTget_attribute( hid_t loc_id,
  /* Get the type of object */
  if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
   return -1;
- 
+
  /* Open the object */
  if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
   return -1;
@@ -2637,10 +2637,10 @@ herr_t H5LTget_attribute( hid_t loc_id,
  */
 
 
-herr_t H5LT_get_attribute_mem( hid_t obj_id, 
+herr_t H5LT_get_attribute_mem( hid_t obj_id,
                            const char *attr_name,
                            hid_t mem_type_id,
-                           void *data ) 
+                           void *data )
 {
 
  /* identifiers */
@@ -2680,9 +2680,9 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LT_get_attribute_disk( hid_t loc_id, 
+herr_t H5LT_get_attribute_disk( hid_t loc_id,
                           const char *attr_name,
-                          void *attr_out ) 
+                          void *attr_out )
 {
  /* identifiers */
  hid_t      attr_id;
@@ -2696,7 +2696,7 @@ herr_t H5LT_get_attribute_disk( hid_t loc_id,
 
  if ( H5Aread( attr_id, attr_type, attr_out ) < 0 )
   goto out;
- 
+
  if ( H5Tclose( attr_type )  < 0 )
   goto out;
 

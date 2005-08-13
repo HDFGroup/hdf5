@@ -64,7 +64,7 @@ usage(void)
 FILE *fpGif = NULL;
 int main(int argc , char **argv)
 {
-    
+
 
     hsize_t dim_sizes[2];
     BYTE *Image;
@@ -180,7 +180,7 @@ int main(int argc , char **argv)
 
         return -1;
     }
-            
+
     /* we shall always have a palette - read hdf will see to that */
     has_local_palette = true;
 
@@ -188,12 +188,12 @@ int main(int argc , char **argv)
     idx = 0x0001;
     b = (BYTE *) &idx;
     EndianOrder = (b[0] ? 1:0);
-    
+
     if (!(fpGif = fopen(GIFName , "wb"))) {
         printf("Error opening gif file for output. Aborting.\n");
         return -1;
     }
-    
+
     /* hardwire n_images to 1 for now. */
     n_images = number_of_images;
 
@@ -249,7 +249,7 @@ int main(int argc , char **argv)
                 Blue[i] = GlobalPalette[i][2];
             }
         }
-        
+
         for (i = 0; i < 256; i++) {
             pc2nc[i] = r1[i] = g1[i] = b1[i] = 0;
         }
@@ -288,7 +288,7 @@ int main(int argc , char **argv)
 #ifdef UNUSED
         CountDown = w * h;  /* # of pixels we'll be doing */
 #endif /* UNUSED */
-        
+
         if (BitsPerPixel <= 1)
             InitCodeSize = 2;
         else
@@ -305,7 +305,7 @@ int main(int argc , char **argv)
 
         /*
          * If it is the first image we do all the header stuff that isn't
-         * required for the rest of the images. 
+         * required for the rest of the images.
          */
         if (idx == 0) {
             /* Write out the GIF header and logical screen descriptor */
@@ -379,7 +379,7 @@ int main(int argc , char **argv)
         i = hdfWriteGIF(fpGif , Image , 0 , (int)dim_sizes[0] ,
                         (int)dim_sizes[1] , r1, g1 , b1 , pc2nc , 256 , 8 ,
                         BitsPerPixel);
-        fputc(0x00, fpGif);		
+        fputc(0x00, fpGif);
         free(Image);
     }
 

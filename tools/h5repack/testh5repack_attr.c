@@ -19,7 +19,7 @@
 /*-------------------------------------------------------------------------
  * Function: write_attr_in
  *
- * Purpose: write attributes in LOC_ID (dataset, group, named datatype) 
+ * Purpose: write attributes in LOC_ID (dataset, group, named datatype)
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -28,28 +28,28 @@
  *-------------------------------------------------------------------------
  */
 
- 
-void write_attr_in(hid_t loc_id, 
+
+void write_attr_in(hid_t loc_id,
                    const char* dset_name, /* for saving reference to dataset*/
                    hid_t fid, /* for reference create */
                    int make_diffs /* flag to modify data buffers */)
 {
  /* Compound datatype */
- typedef struct s_t 
+ typedef struct s_t
  {
   char   a;
   double b;
  } s_t;
 
- typedef enum 
+ typedef enum
  {
   RED,
   GREEN
  } e_t;
 
  hid_t   attr_id;
- hid_t   space_id;  
- hid_t   type_id;  
+ hid_t   space_id;
+ hid_t   type_id;
  herr_t  status;
  int     val, i, j, k, n;
  float   f;
@@ -98,7 +98,7 @@ void write_attr_in(hid_t loc_id,
  * 1D attributes
  *-------------------------------------------------------------------------
  */
- 
+
 /*-------------------------------------------------------------------------
  * H5T_STRING
  *-------------------------------------------------------------------------
@@ -109,11 +109,11 @@ void write_attr_in(hid_t loc_id,
   for (i=0; i<2; i++)
    for (j=0; j<2; j++)
    {
-    buf1[i][j]='z'; 
+    buf1[i][j]='z';
    }
  }
- /* 
- buf1[2][2]= {"ab","de"}; 
+ /*
+ buf1[2][2]= {"ab","de"};
  $h5diff file7.h5 file6.h5 g1 g1 -v
  Group:       </g1> and </g1>
  Attribute:   <string> and <string>
@@ -139,8 +139,8 @@ void write_attr_in(hid_t loc_id,
   for (i=0; i<2; i++)
    buf2[i]=buf2[1]=0;
  }
- /* 
- buf2[2]= {1,2};   
+ /*
+ buf2[2]= {1,2};
  $h5diff file7.h5 file6.h5 g1 g1 -v
  Group:       </g1> and </g1>
  Attribute:   <bitfield> and <bitfield>
@@ -160,8 +160,8 @@ void write_attr_in(hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
- /* 
- buf2[2]= {1,2};   
+ /*
+ buf2[2]= {1,2};
  $h5diff file7.h5 file6.h5 g1 g1 -v
  Group:       </g1> and </g1>
  Attribute:   <opaque> and <opaque>
@@ -181,7 +181,7 @@ void write_attr_in(hid_t loc_id,
  * H5T_COMPOUND
  *-------------------------------------------------------------------------
  */
- 
+
  if (make_diffs)
  {
   for (i=0; i<2; i++)
@@ -189,9 +189,9 @@ void write_attr_in(hid_t loc_id,
    buf3[i].a=0; buf3[i].b=0;
   }
  }
- 
- /* 
- buf3[2]= {{1,2},{3,4}}; 
+
+ /*
+ buf3[2]= {{1,2},{3,4}};
  $h5diff file7.h5 file6.h5 g1 g1 -v
  Group:       </g1> and </g1>
  Attribute:   <compound> and <compound>
@@ -208,7 +208,7 @@ void write_attr_in(hid_t loc_id,
  H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_DOUBLE);
  make_attr(loc_id,1,dims,"compound",type_id,buf3);
  status = H5Tclose(type_id);
- 
+
 /*-------------------------------------------------------------------------
  * H5T_REFERENCE
  *-------------------------------------------------------------------------
@@ -230,10 +230,10 @@ void write_attr_in(hid_t loc_id,
  {
   for (i=0; i<2; i++)
   {
-   buf45[i]=GREEN; 
+   buf45[i]=GREEN;
   }
  }
- /* 
+ /*
  buf45[2]= {RED,RED};
  $h5diff file7.h5 file6.h5 g1 g1 -v
  Group:       </g1> and </g1>
@@ -253,7 +253,7 @@ void write_attr_in(hid_t loc_id,
  * H5T_VLEN
  *-------------------------------------------------------------------------
  */
- 
+
  /* Allocate and initialize VL dataset to write */
 
  buf5[0].len = 1;
@@ -270,7 +270,7 @@ void write_attr_in(hid_t loc_id,
   ((int *)buf5[1].p)[0]=0;
   ((int *)buf5[1].p)[1]=0;
  }
- /* 
+ /*
  $h5diff file7.h5 file6.h5 g1 g1 -v
  Group:       </g1> and </g1>
  position        vlen of </g1>   vlen of </g1>   difference
@@ -301,10 +301,10 @@ void write_attr_in(hid_t loc_id,
   for (i=0; i<2; i++)
    for (j=0; j<3; j++)
    {
-    buf6[i][j]=0; 
+    buf6[i][j]=0;
    }
  }
- /* 
+ /*
  buf6[2][3]= {{1,2,3},{4,5,6}};
  $h5diff file7.h5 file6.h5 g1 g1 -v
  Group:       </g1> and </g1>
@@ -331,12 +331,12 @@ position        array of </g1>  array of </g1>  difference
  {
   for (i=0; i<2; i++)
   {
-   buf7[i]=0; 
-   buf8[i]=0; 
+   buf7[i]=0;
+   buf8[i]=0;
   }
  }
- /* 
- buf7[2]= {1,2};   
+ /*
+ buf7[2]= {1,2};
  buf8[2]= {1,2};
  $h5diff file7.h5 file6.h5 g1 g1 -v
  Group:       </g1> and </g1>
@@ -367,7 +367,7 @@ position        array of </g1>  array of </g1>  difference
   memset(buf12, 'z', sizeof buf12);
  }
 
- /* 
+ /*
  buf12[6][2]= {"ab","cd","ef","gh","ij","kl"};
  $h5diff file7.h5 file6.h5 g1 g1 -v
  Attribute:   <string2D> and <string2D>
@@ -402,8 +402,8 @@ position        array of </g1>  array of </g1>  difference
   memset(buf22,0,sizeof buf22);
  }
 
- /* 
- buf22[3][2]= {{1,2},{3,4},{5,6}}; 
+ /*
+ buf22[3][2]= {{1,2},{3,4},{5,6}};
  $h5diff file7.h5 file6.h5 g1 g1 -v
  Attribute:   <bitfield2D> and <bitfield2D>
  position        bitfield2D of </g1> bitfield2D of </g1> difference
@@ -426,8 +426,8 @@ position        array of </g1>  array of </g1>  difference
  *-------------------------------------------------------------------------
  */
 
- /* 
- buf22[3][2]= {{1,2},{3,4},{5,6}}; 
+ /*
+ buf22[3][2]= {{1,2},{3,4},{5,6}};
  $h5diff file7.h5 file6.h5 g1 g1 -v
  Attribute:   <opaque2D> and <opaque2D>
  position        opaque2D of </g1> opaque2D of </g1> difference
@@ -453,7 +453,7 @@ position        array of </g1>  array of </g1>  difference
   memset(buf32,0,sizeof buf32);
  }
 
- /* 
+ /*
  buf32[6]= {{1,2},{3,4},{5,6},{7,8},{9,10},{11,12}};
  $h5diff file7.h5 file6.h5 g1 g1 -v
  Attribute:   <opaque2D> and <opaque2D>
@@ -473,7 +473,7 @@ position        array of </g1>  array of </g1>  difference
  H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_DOUBLE);
  make_attr(loc_id,2,dims2,"compound2D",type_id,buf32);
  status = H5Tclose(type_id);
- 
+
 /*-------------------------------------------------------------------------
  * H5T_REFERENCE
  *-------------------------------------------------------------------------
@@ -496,7 +496,7 @@ position        array of </g1>  array of </g1>  difference
  for (i=0; i<3; i++)
   for (j=0; j<2; j++)
   {
-   if (make_diffs) buf452[i][j]=GREEN; else buf452[i][j]=RED; 
+   if (make_diffs) buf452[i][j]=GREEN; else buf452[i][j]=RED;
   }
 
 /*
@@ -550,7 +550,7 @@ position        enum2D of </g1> enum2D of </g1> difference
 [ 2 1 ]          10              0               10
 [ 2 1 ]          11              0               11
 */
- 
+
  space_id = H5Screate_simple(2,dims2,NULL);
  type_id = H5Tvlen_create(H5T_NATIVE_INT);
  attr_id = H5Acreate(loc_id,"vlen2D",type_id,space_id,H5P_DEFAULT);
@@ -571,8 +571,8 @@ position        enum2D of </g1> enum2D of </g1> difference
  {
   memset(buf62,0,sizeof buf62);
  }
- /* 
- buf62[6][3]= {{1,2,3},{4,5,6},{7,8,9},{10,11,12},{13,14,15},{16,17,18}}; 
+ /*
+ buf62[6][3]= {{1,2,3},{4,5,6},{7,8,9},{10,11,12},{13,14,15},{16,17,18}};
  $h5diff file7.h5 file6.h5 g1 g1 -v
  Group:       </g1> and </g1>
 Attribute:   <array2D> and <array2D>
@@ -636,7 +636,7 @@ position        float2D of </g1> float2D of </g1> difference
  make_attr(loc_id,2,dims2,"integer2D",H5T_NATIVE_INT,buf72);
  make_attr(loc_id,2,dims2,"float2D",H5T_NATIVE_FLOAT,buf82);
 
- 
+
 /*-------------------------------------------------------------------------
  * 3D attributes
  *-------------------------------------------------------------------------
@@ -850,7 +850,7 @@ position        bitfield3D of </g1> bitfield3D of </g1> difference
  H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_DOUBLE);
  make_attr(loc_id,3,dims3,"compound3D",type_id,buf33);
  status = H5Tclose(type_id);
- 
+
 /*-------------------------------------------------------------------------
  * H5T_REFERENCE
  *-------------------------------------------------------------------------
@@ -920,7 +920,7 @@ position        enum3D of </g1> enum3D of </g1> difference
  * H5T_VLEN
  *-------------------------------------------------------------------------
  */
- 
+
  /* Allocate and initialize VL dataset to write */
  n=0;
  for (i = 0; i < 4; i++) {
@@ -949,7 +949,7 @@ position        vlen3D of </g1> vlen3D of </g1> difference
 [ 1 0 1 ]          9               0               9
 [ 1 1 0 ]          10              0               10
 etc
-*/ 
+*/
  space_id = H5Screate_simple(3,dims3,NULL);
  type_id = H5Tvlen_create(H5T_NATIVE_INT);
  attr_id = H5Acreate(loc_id,"vlen3D",type_id,space_id,H5P_DEFAULT);
@@ -1023,7 +1023,7 @@ etc
 [ 1 1 0 ]          9               0               9
 [ 1 1 1 ]          10              0               10
 etc
-*/     
+*/
  make_attr(loc_id,3,dims3,"integer3D",H5T_NATIVE_INT,buf73);
  make_attr(loc_id,3,dims3,"float3D",H5T_NATIVE_FLOAT,buf83);
 }

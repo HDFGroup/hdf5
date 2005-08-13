@@ -19,7 +19,7 @@
  *
  * Description:
  *      This program creates that can be
- *      used to test the h5import program.  
+ *      used to test the h5import program.
  *
  */
 /*
@@ -38,24 +38,24 @@ main(void)
     float     rowo4 = (float)11.0e0, colo4 = (float)21.0e0, plno4 = (float)51.0e0;
     float     rowi4 = (float)1.0e0, coli4 = (float)2.0e0, plni4 = (float)5.0e0;
 
-    int     b32i3[5][3][4];          
+    int     b32i3[5][3][4];
     int     row4i[3], col4i[4], pln4i[5];
     int     rowo4i = (int)11 , colo4i = (int)21 , plno4i = (int)51 ;
     int     rowi4i = (int)1 , coli4i = (int)2 , plni4i = (int)5 ;
 
 #ifndef WIN32
-    long_long     b64i2[3][4], b64i3[5][3][4];          
+    long_long     b64i2[3][4], b64i3[5][3][4];
     long_long     row4i64[3], col4i64[4], pln4i64[5];
     long_long     rowo4i64 = (long_long)11 , colo4i64 = (long_long)21 , plno4i64 = (long_long)51 ;
     long_long     rowi4i64 = (long_long)1 , coli4i64 = (long_long)2 , plni4i64 = (long_long)5 ;
 #endif
 
-    short     b16i3[5][3][4];          
+    short     b16i3[5][3][4];
     short     row4i16[3], col4i16[4], pln4i16[5];
     short     rowo4i16 = (short)11 , colo4i16 = (short)21 , plno4i16 = (short)51 ;
     short     rowi4i16 = (short)1 , coli4i16 = (short)2 , plni4i16 = (short)5 ;
 
-    char     b8i3[5][3][4];          
+    char     b8i3[5][3][4];
     char     row4i8[3], col4i8[4], pln4i8[5];
     char     rowo4i8 = (char)11 , colo4i8 = (char)21 , plno4i8 = (char)51 ;
     char     rowi4i8 = (char)1 , coli4i8 = (char)2 , plni4i8 = (char)5 ;
@@ -65,7 +65,7 @@ main(void)
     double     rowo8 = 11.0e0, colo8 = 21.0e0, plno8 = 51.0e0;
 	double     rowi8 = 1.0e0, coli8 = 2.0e0, plni8 = 5.0e0;
 
-    
+
     /*
      * initialize the row, column, and plane vectors
      *
@@ -74,7 +74,7 @@ main(void)
      * plane values start at 51 and increment by 5 => 51, 56, 61, 66, 71
      */
 
-    
+
     /*
      * build array elements - rank 2
      *
@@ -84,16 +84,16 @@ main(void)
     row4[0] = rowo4;
     col4[0] = colo4;
     pln4[0] = plno4;
-    
+
     row8[0] = rowo8;
     col8[0] = colo8;
     pln8[0] = plno8;
-    
+
     row4i[0] = rowo4i;
     col4i[0] = colo4i;
     pln4i[0] = plno4i;
 
-#ifndef WIN32 
+#ifndef WIN32
     row4i64[0] = rowo4i64;
     col4i64[0] = colo4i64;
     pln4i64[0] = plno4i64;
@@ -102,11 +102,11 @@ main(void)
     row4i16[0] = rowo4i16;
     col4i16[0] = colo4i16;
     pln4i16[0] = plno4i16;
-    
+
     row4i8[0] = rowo4i8;
     col4i8[0] = colo4i8;
     pln4i8[0] = plno4i8;
-    
+
     for (i = 1; i < nrow; i++)
     {
         row4[i] = row4[i - 1] + rowi4;
@@ -116,18 +116,18 @@ main(void)
 	row4i64[i] = row4i64[i - 1] + rowi4i64;
 #endif
 	row4i16[i] = row4i16[i - 1] + rowi4i16;
-	row4i8[i] = row4i8[i - 1] + rowi4i8;      
+	row4i8[i] = row4i8[i - 1] + rowi4i8;
     }
-	    
+
     for (j = 1; j < ncol; j++)
     {
           col4[j] = col4[j - 1] + coli4;
           col8[j] = col8[j - 1] + coli8;
 	  col4i[j] = col4i[j - 1] + coli4i;
 #ifndef WIN32
-          col4i64[j] = col4i64[j - 1] + coli4i64;             
+          col4i64[j] = col4i64[j - 1] + coli4i64;
 #endif
-	  col4i16[j] = col4i16[j - 1] + coli4i16;	    
+	  col4i16[j] = col4i16[j - 1] + coli4i16;
 	  col4i8[j] = col4i8[j - 1] + coli4i8;
     }
     for (k = 1; k < npln; k++)
@@ -138,7 +138,7 @@ main(void)
 #ifndef WIN32
     	  pln4i64[k] = pln4i64[k - 1] + plni4i64;
 #endif
-	  pln4i16[k] = pln4i16[k - 1] + plni4i16;	    
+	  pln4i16[k] = pln4i16[k - 1] + plni4i16;
 	  pln4i8[k] = pln4i8[k - 1] + plni4i8;
    }
 
@@ -147,7 +147,7 @@ main(void)
      for (j = 0; j < ncol; j++)
      {
 #ifndef WIN32
-  	b64i2[i][j] = row4i64[i] + col4i64[j];  
+  	b64i2[i][j] = row4i64[i] + col4i64[j];
 #endif
      }
    }
@@ -175,13 +175,13 @@ main(void)
                   }
             }
       }
-    
+
     /*
      * binary 32-bit file - rank 2 & 3
      */
 
 #ifndef UNICOS
-    
+
 
     	sp = fopen("txtin16", "w");
 	for (k = 0; k < npln; k++)
@@ -204,7 +204,7 @@ main(void)
       (void) fclose(sp);
 
     sp = fopen("bin32", "w");
-    for (k = 0; k < npln; k++) 
+    for (k = 0; k < npln; k++)
     for (i = 0; i < nrow; i++)
         for (j = 0; j < ncol; j++)
             (void) fwrite((char *) &b32i3[k][i][j], sizeof(int), 1, sp);
@@ -212,7 +212,7 @@ main(void)
 
 
     sp = fopen("buin32", "w");
-    for (k = 0; k < npln; k++) 
+    for (k = 0; k < npln; k++)
     for (i = 0; i < nrow; i++)
         for (j = 0; j < ncol; j++)
             (void) fwrite((char *) &b32i3[k][i][j], sizeof(unsigned int), 1, sp);
@@ -234,7 +234,7 @@ main(void)
                 (void) fwrite((char *) &b32r3[k][i][j],
                               sizeof(float), 1, sp);
     (void) fclose(sp);
- 
+
         sp = fopen("bin16", "w");
 	for (k = 0; k < npln; k++)
     	for (i = 0; i < nrow; i++)
@@ -261,7 +261,7 @@ main(void)
                           sp);
     (void) fclose(sp);
 #endif
-    
+
     sp = fopen("bin8", "w");
     for (k = 0; k < npln; k++)
     	for (i = 0; i < nrow; i++)
@@ -269,13 +269,13 @@ main(void)
             (void) fwrite((char *) &b8i3[k][i][j], sizeof(char), 1,
                           sp);
     (void) fclose(sp);
-  
+
 #endif
 
     /*
      * binary 64-bit file - rank 2 & 3
      */
-    
+
     sp = fopen("bfp64", "w");
     for (k = 0; k < npln; k++)
         for (i = 0; i < nrow; i++)

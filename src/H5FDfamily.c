@@ -30,7 +30,7 @@
  *		(actually, this happens when the file family is flushed, and
  *		can be quite time consuming on file systems that don't
  *		implement holes, like nfs).
- *		
+ *
  */
 
 /* Interface initialization */
@@ -138,7 +138,7 @@ NAME
    H5FD_family_init_interface -- Initialize interface-specific information
 USAGE
     herr_t H5FD_family_init_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -234,9 +234,9 @@ H5FD_family_term(void)
  *
  * Modifications:
  *
- *		Raymond Lu 
+ *		Raymond Lu
  * 		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property 
+ *		Changed the file access list to the new generic property
  *		list.
  *
  *-------------------------------------------------------------------------
@@ -247,10 +247,10 @@ H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size, hid_t memb_fapl_id)
     herr_t ret_value;
     H5FD_family_fapl_t	fa;
     H5P_genplist_t *plist;      /* Property list pointer */
-    
+
     FUNC_ENTER_API(H5Pset_fapl_family, FAIL)
     H5TRACE3("e","ihi",fapl_id,memb_size,memb_fapl_id);
-    
+
     /* Check arguments */
     if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
@@ -291,9 +291,9 @@ done:
  *
  * Modifications:
  *
- *		Raymond Lu 
+ *		Raymond Lu
  * 		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property 
+ *		Changed the file access list to the new generic property
  *		list.
  *
  *-------------------------------------------------------------------------
@@ -305,7 +305,7 @@ H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size/*out*/,
     H5FD_family_fapl_t	*fa;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_API(H5Pget_fapl_family, FAIL)
     H5TRACE3("e","ixx",fapl_id,memb_size,memb_fapl_id);
 
@@ -567,9 +567,9 @@ done:
  *              Raymond Lu
  *              Thursday, November 18, 2004
  *              When file is re-opened, member size passed in from access property
- *              is checked to see if it's reasonable.  If there is only 1 member 
- *              file, member size can't be smaller than current member size. 
- *              If there are at least 2 member files, member size can only be equal 
+ *              is checked to see if it's reasonable.  If there is only 1 member
+ *              file, member size can't be smaller than current member size.
+ *              If there are at least 2 member files, member size can only be equal
  *              the 1st member size.
  *
  *-------------------------------------------------------------------------
@@ -621,7 +621,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
     }
     file->name = H5MM_strdup(name);
     file->flags = flags;
-    
+
     /* Check that names are unique */
     sprintf(memb_name, name, 0);
     sprintf(temp, name, 1);
@@ -642,7 +642,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
             file->amembs = n;
             file->memb = x;
         }
-        
+
         /*
          * Attempt to open file. If the first file cannot be opened then fail;
          * otherwise an open failure means that we've reached the last member.
@@ -661,23 +661,23 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
         file->nmembs++;
     }
 
-    /* 
-     * Get file size of the first 2 member files if exist.  Check if user sets 
-     * reasonable member size.   
+    /*
+     * Get file size of the first 2 member files if exist.  Check if user sets
+     * reasonable member size.
      */
     if(HADDR_UNDEF==(eof1 = H5FD_get_eof(file->memb[0])))
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "file get eof1 request failed")
     if(file->memb[1] && (HADDR_UNDEF==(eof2 = H5FD_get_eof(file->memb[1]))))
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "file get eof2 request failed")
-            
-    if(eof1 && (eof2==HADDR_UNDEF || !eof2)) {  
-        /* If there is only 1 member file, new member size can't be smaller than 
-         * current member size. 
+
+    if(eof1 && (eof2==HADDR_UNDEF || !eof2)) {
+        /* If there is only 1 member file, new member size can't be smaller than
+         * current member size.
          */
         if(file->memb_size<eof1)
             file->memb_size = eof1;
-    } else if(eof1 && eof2) { 
-        /* If there are at least 2 member files, new member size can only be equal 
+    } else if(eof1 && eof2) {
+        /* If there are at least 2 member files, new member size can only be equal
          * to the 1st member size
          */
         file->memb_size = eof1;
@@ -793,7 +793,7 @@ H5FD_family_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     assert(f1->nmembs>=1 && f1->memb[0]);
     assert(f2->nmembs>=1 && f2->memb[0]);
-    
+
     ret_value= H5FDcmp(f1->memb[0], f2->memb[0]);
 
 done:
@@ -830,7 +830,7 @@ H5FD_family_query(const H5FD_t UNUSED * _f, unsigned long *flags /* out */)
     if(flags) {
         *flags=0;
         *flags|=H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
-        /**flags|=H5FD_FEAT_ACCUMULATE_METADATA;*/ /* OK to accumulate metadata for faster writes. 
+        /**flags|=H5FD_FEAT_ACCUMULATE_METADATA;*/ /* OK to accumulate metadata for faster writes.
                                                     * - Turn it off temporarily because there's a bug
                                                     * when trying to flush metadata during closing. */
         *flags|=H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
@@ -928,7 +928,7 @@ H5FD_family_set_eoa(H5FD_t *_file, haddr_t eoa)
             if (NULL==file->memb[u])
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open member file")
         }
-        
+
         /* Set the EOA marker for the member */
         H5_CHECK_OVERFLOW(file->memb_size,hsize_t,haddr_t);
         if (addr>(haddr_t)file->memb_size) {
@@ -1007,27 +1007,27 @@ done:
 
 /*-------------------------------------------------------------------------
  * Function:       H5FD_family_get_handle
- * 
+ *
  * Purpose:        Returns the file handle of FAMILY file driver.
- * 
+ *
  * Returns:        Non-negative if succeed or negative if fails.
- * 
+ *
  * Programmer:     Raymond Lu
  *                 Sept. 16, 2002
- *  
+ *
  * Modifications:
- *  
+ *
  *-------------------------------------------------------------------------
- */ 
-static herr_t  
+ */
+static herr_t
 H5FD_family_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
-{   
+{
     H5FD_family_t       *file = (H5FD_family_t *)_file;
     H5P_genplist_t      *plist;
     hsize_t             offset;
     int                 memb;
     herr_t              ret_value;
-                              
+
     FUNC_ENTER_NOAPI(H5FD_family_get_handle, FAIL)
 
     /* Get the plist structure and family offset */
@@ -1103,7 +1103,7 @@ H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, si
         sub = addr % file->memb_size;
 
 	/* This check is for mainly for IA32 architecture whose size_t's size
-	 * is 4 bytes, to prevent overflow when user application is trying to 
+	 * is 4 bytes, to prevent overflow when user application is trying to
 	 * write files bigger than 4GB. */
         tempreq = file->memb_size-sub;
   	if(tempreq > SIZET_MAX)
@@ -1180,7 +1180,7 @@ H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, s
         sub = addr % file->memb_size;
 
         /* This check is for mainly for IA32 architecture whose size_t's size
-         * is 4 bytes, to prevent overflow when user application is trying to 
+         * is 4 bytes, to prevent overflow when user application is trying to
          * write files bigger than 4GB. */
         tempreq = file->memb_size-sub;
 	if(tempreq > SIZET_MAX)

@@ -20,7 +20,7 @@
  *                Modified to work with VFL (HDF51.3).
  */
 
-/* Test the following functionality of the GASS driver. 
+/* Test the following functionality of the GASS driver.
    1. Open a remote file for read (the dataset was written using gass_write.c).
    2. Create a memory buffer to hold the dataset.
    3. Read the dataset into the memory buffer.
@@ -41,11 +41,11 @@ int main(void)
 /*#define URL    "http://paz.ncsa.uiuc.edu:8080/test/a.h5"*/
 #define URL    "http://hdf.ncsa.uiuc.edu/GLOBUS/a.h5"
 /* #define DATASETNAME "Int1Array"  */
-#define NX_SUB  3           /* hyperslab dimensions */ 
-#define NY_SUB  4 
-#define NX 7           /* output buffer dimensions */ 
-#define NY 7 
-#define NZ  3 
+#define NX_SUB  3           /* hyperslab dimensions */
+#define NY_SUB  4
+#define NX 7           /* output buffer dimensions */
+#define NY 7
+#define NZ  3
 #define RANK         2
 #define RANK_OUT     3
 
@@ -54,27 +54,27 @@ main (int argc, char **argv)
 {
     hid_t       fapl =  -1, file, dataset;         /* handles */
     char        DATASETNAME[32];
-    hid_t       datatype, dataspace;   
-    hid_t       memspace; 
+    hid_t       datatype, dataspace;
+    hid_t       memspace;
     H5T_class_t class;                 /* data type class */
     H5T_order_t order;                 /* data order */
     size_t      size;                  /*
-				        * size of the data element	       
+				        * size of the data element
 				        * stored in file
 				        */
     hsize_t     dimsm[3];              /* memory space dimensions */
-    hsize_t     dims_out[2];           /* dataset dimensions */      
-    herr_t      status;                             
+    hsize_t     dims_out[2];           /* dataset dimensions */
+    herr_t      status;
 
     int         data_out[NX][NY][NZ ]; /* output buffer */
-   
+
     hsize_t      count[2];              /* size of the hyperslab in the file */
     hssize_t     offset[2];             /* hyperslab offset in the file */
     hsize_t      count_out[3];          /* size of the hyperslab in memory */
     hssize_t     offset_out[3];         /* hyperslab offset in memory */
     int          i, j, k, status_n, rank;
     GASS_Info    ginf;
-    
+
     if (argc > 2) {
       printf ("Incorrect command line. \n");
       printf ("Correct command line: %s [DATASET NAME] \n", argv[0]);
@@ -82,40 +82,40 @@ main (int argc, char **argv)
 	      "\"Int1Array\"\n");
       exit(1);
     }
-    
+
     printf ("Correct command line: %s [DATASET NAME] \n", argv[0]);
     printf ("The two datasets present in the file are: \"IntArray\" and "
 	    "\"Int1Array\"\n");
     printf ("Default dataset is IntArray. \n");
-    
-    if (argc == 1) 
+
+    if (argc == 1)
       strcpy (DATASETNAME, "IntArray");
     else if (!strcmp(argv[1],"IntArray") || !strcmp(argv[1],"Int1Array"))
       strcpy (DATASETNAME, argv[1]);
     else
       strcpy (DATASETNAME, "IntArray");
     printf ("\n Reading dataset %s \n\n", DATASETNAME);
-    
+
     for (j = 0; j < NX; j++) {
 	for (i = 0; i < NY; i++) {
 	    for (k = 0; k < NZ ; k++)
 		data_out[j][i][k] = 0;
 	}
-    } 
- 
+    }
+
      /* Create access property list and set the driver to GASS */
     fapl = H5Pcreate (H5P_FILE_ACCESS);
     if (fapl < 0) {
       printf (" H5Pcreate failed. \n");
       return -1;
     }
-    
-   
+
+
     ginf.block_size = 0;
     ginf.max_length =0;
-   
+
     /* ginf = GASS_INFO_NULL; */
-    
+
     status = H5Pset_fapl_gass (fapl, ginf);
     if (status < 0) {
       printf ("H5Pset_fapl_gass failed. \n");
@@ -132,7 +132,7 @@ main (int argc, char **argv)
      * Get datatype and dataspace handles and then query
      * dataset class, order, size, rank and dimensions.
      */
-    datatype  = H5Dget_type(dataset);     /* datatype handle */ 
+    datatype  = H5Dget_type(dataset);     /* datatype handle */
     class     = H5Tget_class(datatype);
     if (class == H5T_INTEGER) printf("Data set has INTEGER type \n");
     order     = H5Tget_order(datatype);
@@ -147,14 +147,14 @@ main (int argc, char **argv)
     printf("rank %d, dimensions %lu x %lu \n", rank,
 	   (unsigned long)(dims_out[0]), (unsigned long)(dims_out[1]));
 
-    /* 
-     * Define hyperslab in the dataset. 
+    /*
+     * Define hyperslab in the dataset.
      */
     offset[0] = 1;
     offset[1] = 2;
     count[0]  = NX_SUB;
     count[1]  = NY_SUB;
-    status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset, NULL, 
+    status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset, NULL,
 				 count, NULL);
 
     /*
@@ -163,10 +163,10 @@ main (int argc, char **argv)
     dimsm[0] = NX;
     dimsm[1] = NY;
     dimsm[2] = NZ ;
-    memspace = H5Screate_simple(RANK_OUT,dimsm,NULL);   
+    memspace = H5Screate_simple(RANK_OUT,dimsm,NULL);
 
-    /* 
-     * Define memory hyperslab. 
+    /*
+     * Define memory hyperslab.
      */
     offset_out[0] = 3;
     offset_out[1] = 0;
@@ -174,11 +174,11 @@ main (int argc, char **argv)
     count_out[0]  = NX_SUB;
     count_out[1]  = NY_SUB;
     count_out[2]  = 1;
-    status = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_out, NULL, 
+    status = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_out, NULL,
 				 count_out, NULL);
 
     /*
-     * Read data from hyperslab in the file into the hyperslab in 
+     * Read data from hyperslab in the file into the hyperslab in
      * memory and display.
      */
     status = H5Dread(dataset, H5T_NATIVE_INT, memspace, dataspace,
@@ -191,7 +191,7 @@ main (int argc, char **argv)
      * 0 0 0 0 0 0 0
      * 0 0 0 0 0 0 0
      * 0 0 0 0 0 0 0
-     * 3 4 5 6 0 0 0  
+     * 3 4 5 6 0 0 0
      * 4 5 6 7 0 0 0
      * 5 6 7 8 0 0 0
      * 0 0 0 0 0 0 0
@@ -206,7 +206,7 @@ main (int argc, char **argv)
     H5Sclose(memspace);
     H5Fclose(file);
     H5Pclose(fapl);
-    
+
     return 0;
-}     
+}
 #endif

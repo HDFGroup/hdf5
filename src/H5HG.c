@@ -176,14 +176,14 @@ H5FL_BLK_DEFINE_STATIC(heap_chunk);
  *		Modified function to return the disk address of the new
  *		global heap collection, or HADDR_UNDEF on failure.  This
  *		is necessary, as in some cases (i.e. flexible parallel)
- *		H5AC_set() will imediately flush and destroy the in memory 
- *		version of the new collection.  For the same reason, I 
+ *		H5AC_set() will imediately flush and destroy the in memory
+ *		version of the new collection.  For the same reason, I
  *		moved the code which places the new collection on the cwfs
  *		list to just before the call to H5AC_set().
  *
  *-------------------------------------------------------------------------
  */
-static haddr_t 
+static haddr_t
 H5HG_create (H5F_t *f, hid_t dxpl_id, size_t size)
 {
     H5HG_heap_t	*heap = NULL;
@@ -191,7 +191,7 @@ H5HG_create (H5F_t *f, hid_t dxpl_id, size_t size)
     uint8_t	*p = NULL;
     haddr_t	addr;
     size_t	n;
-    
+
     FUNC_ENTER_NOAPI(H5HG_create, HADDR_UNDEF);
 
     /* Check args */
@@ -268,7 +268,7 @@ HDmemset(heap->chunk,0,size);
 	f->shared->cwfs[0] = heap;
 	f->shared->ncwfs = 1;
     } else {
-	HDmemmove (f->shared->cwfs+1, f->shared->cwfs, 
+	HDmemmove (f->shared->cwfs+1, f->shared->cwfs,
                    MIN (f->shared->ncwfs, H5HG_NCWFS-1)*sizeof(H5HG_heap_t*));
 	f->shared->cwfs[0] = heap;
 	f->shared->ncwfs = MIN (H5HG_NCWFS, f->shared->ncwfs+1);
@@ -323,7 +323,7 @@ H5HG_load (H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
     size_t	nalloc, need;
     size_t      max_idx=0;              /* The maximum index seen */
     H5HG_heap_t	*ret_value = NULL;      /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5HG_load, NULL);
 
     /* check arguments */
@@ -469,9 +469,9 @@ H5HG_load (H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
 	    f->shared->cwfs[0] = heap;
 	}
     }
-    
+
     ret_value = heap;
-    
+
 done:
     if (!ret_value && heap) {
         if(H5HG_dest(f,heap)<0)
@@ -505,7 +505,7 @@ static herr_t
 H5HG_flush (H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HG_heap_t *heap)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5HG_flush, FAIL);
 
     /* Check arguments */
@@ -548,7 +548,7 @@ static herr_t
 H5HG_dest (H5F_t *f, H5HG_heap_t *heap)
 {
     int		i;
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HG_dest);
 
     /* Check arguments */
@@ -721,7 +721,7 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, size_t size)
 	 */
 	heap->obj[0].size = 0;
 	heap->obj[0].begin = NULL;
-		
+
     } else if (heap->obj[0].size-need >= H5HG_SIZEOF_OBJHDR (f)) {
 	/*
 	 * Some free space remains and it's larger than a heap object header,
@@ -735,7 +735,7 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, size_t size)
 	UINT32ENCODE(p, 0);	/*reserved*/
 	H5F_ENCODE_LENGTH (f, p, heap->obj[0].size);
 	assert(H5HG_ISALIGNED(heap->obj[0].size));
-		
+
     } else {
 	/*
 	 * Some free space remains but it's smaller than a heap object header,
@@ -881,7 +881,7 @@ done:
  *
  *		John Mainzer - 5/26/04
  *		Modified H5HG_create() to return the disk address of the
- *		new collection, instead of the address of its 
+ *		new collection, instead of the address of its
  *		representation in core.  This was necessary as in FP
  *		mode, the cache will immediately flush and destroy any
  *		entry inserted in it via H5AC_set().  I then modified
@@ -899,7 +899,7 @@ H5HG_insert (H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*
     H5HG_heap_t	*heap = NULL;
     hbool_t     found=0;        /* Flag to indicate a heap with enough space was found */
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5HG_insert, FAIL);
 
     /* Check args */
@@ -913,24 +913,24 @@ H5HG_insert (H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*
     /* Find a large enough collection on the CWFS list */
     need = H5HG_SIZEOF_OBJHDR(f) + H5HG_ALIGN(size);
 
-    /* Note that we don't have metadata cache locks on the entries in 
-     * f->shared->cwfs.  
+    /* Note that we don't have metadata cache locks on the entries in
+     * f->shared->cwfs.
      *
      * In the current situation, this doesn't matter, as we are single
-     * threaded, and as best I can tell, entries are added to and deleted 
-     * from f->shared->cwfs as they are added to and deleted from the 
+     * threaded, and as best I can tell, entries are added to and deleted
+     * from f->shared->cwfs as they are added to and deleted from the
      * metadata cache.
      *
      * To be proper, we should either lock each entry in f->shared->cwfs
-     * as we examine it, or lock the whole array.  However, at present 
+     * as we examine it, or lock the whole array.  However, at present
      * I don't see the point as there will be significant overhead,
-     * and protecting and unprotecting all the collections in the global 
+     * and protecting and unprotecting all the collections in the global
      * heap on a regular basis will skew the replacement policy.
      *
-     * However, there is a bigger issue -- as best I can tell, we only look 
-     * for free space in global heap chunks that are in cache.  If we can't 
+     * However, there is a bigger issue -- as best I can tell, we only look
+     * for free space in global heap chunks that are in cache.  If we can't
      * find any, we allocate a new chunk.  This may be a problem in FP mode,
-     * as the metadata cache is disabled.  Do we allocate a new heap 
+     * as the metadata cache is disabled.  Do we allocate a new heap
      * collection for every entry in this case?
      *
      * Note that all this comes from a cursory read of the source.  Don't
@@ -983,8 +983,8 @@ H5HG_insert (H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*
     } /* end if */
     else {
 
-        /* Move the collection forward in the CWFS list, if it's not 
-         * already at the front 
+        /* Move the collection forward in the CWFS list, if it's not
+         * already at the front
          */
         if (cwfsno>0) {
             H5HG_heap_t *tmp = f->shared->cwfs[cwfsno];
@@ -995,13 +995,13 @@ H5HG_insert (H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*
     } /* end else */
 
     HDassert(H5F_addr_defined(addr));
-    
+
     if ( NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_GHEAP, addr, NULL, NULL, H5AC_WRITE)) )
         HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap");
 
     /* Split the free space to make room for the new object */
     idx = H5HG_alloc (f, heap, size);
-    
+
     /* Copy data into the heap */
     if(size>0) {
         HDmemcpy(heap->obj[idx].begin+H5HG_SIZEOF_OBJHDR(f), obj, size);
@@ -1052,7 +1052,7 @@ H5HG_read (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object/*out*/)
     size_t	size;
     uint8_t	*p = NULL;
     void	*ret_value;
-    
+
     FUNC_ENTER_NOAPI(H5HG_read, NULL);
 
     /* Check args */
@@ -1123,9 +1123,9 @@ H5HG_link (H5F_t *f, hid_t dxpl_id, const H5HG_t *hobj, int adjust)
 {
     H5HG_heap_t *heap = NULL;
     int ret_value;              /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5HG_link, FAIL);
-    
+
     /* Check args */
     assert (f);
     assert (hobj);
@@ -1182,7 +1182,7 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
     unsigned	u;
     hbool_t     deleted=FALSE;          /* Whether the heap gets deleted */
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5HG_remove, FAIL);
 
     /* Check args */
@@ -1200,7 +1200,7 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
     obj_start = heap->obj[hobj->idx].begin;
     /* Include object header size */
     need = H5HG_ALIGN(heap->obj[hobj->idx].size)+H5HG_SIZEOF_OBJHDR(f);
-    
+
     /* Move the new free space to the end of the heap */
     for (u=0; u<heap->nused; u++) {
         if (heap->obj[u].begin > heap->obj[hobj->idx].begin)
@@ -1254,7 +1254,7 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
             f->shared->cwfs[f->shared->ncwfs-1] = heap;
         }
     }
-    
+
 done:
     if (heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, deleted) != SUCCEED)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");

@@ -53,7 +53,7 @@ test_misc(hid_t file)
 {
     hid_t	g1=-1, g2=-1, g3=-1;
     char	comment[64];
-    
+
     /* Test current working groups */
     TESTING("miscellaneous group tests");
 
@@ -65,7 +65,7 @@ test_misc(hid_t file)
     if (H5Gclose(g1)<0) goto error;
     if (H5Gclose(g2)<0) goto error;
     if (H5Gclose(g3)<0) goto error;
-    
+
     /* Open all groups with absolute names to check for exsistence */
     if ((g1=H5Gopen(file, "/test_1a"))<0) goto error;
     if ((g2=H5Gopen(file, "/test_1a/sub_1"))<0) goto error;
@@ -123,7 +123,7 @@ test_long(hid_t file)
     hid_t       g1=-1, g2=-1;
     char        *name1=NULL, *name2=NULL;
     size_t      namesize=40960, i;
-    
+
     TESTING("long names");
 
     /* Group names */
@@ -145,7 +145,7 @@ test_long(hid_t file)
     if ((g2=H5Gopen(file, name2))<0) goto error;
     H5Gclose(g1);
     H5Gclose(g2);
-    
+
     PASSED();
     return 0;
 
@@ -248,7 +248,7 @@ main(void)
 #if 0
     H5Pset_sym_k(fcpl, 16, 16);
 #endif
-    
+
     /* Open the file */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl))<0)

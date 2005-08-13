@@ -46,7 +46,7 @@ static const char *FileHeader = "\n\
  *		features which aren't available.  We're not
  *		running on a Vax or other machine with mixed
  *		endianess.
- *		
+ *
  * Modifications:
  *
  *-------------------------------------------------------------------------
@@ -75,10 +75,10 @@ typedef struct detected_t {
     size_t		comp_align;	/*alignment for structure       */
 } detected_t;
 
-/* This structure holds structure alignment for pointers, hvl_t, hobj_ref_t, 
+/* This structure holds structure alignment for pointers, hvl_t, hobj_ref_t,
  * hdset_reg_ref_t */
 typedef struct malign_t {
-    const char          *name;      
+    const char          *name;
     size_t              comp_align;         /*alignment for structure   */
 } malign_t;
 
@@ -86,7 +86,7 @@ typedef struct malign_t {
 static detected_t	d_g[MAXDETECT];
 static malign_t        m_g[MAXDETECT];
 static volatile int	nd_g = 0, na_g = 0;
-   
+
 static void print_results(int nd, detected_t *d, int na, malign_t *m);
 static void iprint(detected_t *);
 static int byte_cmp(int, void *, void *);
@@ -127,7 +127,7 @@ static void
 precision (detected_t *d)
 {
     int		n;
-    
+
     if (0==d->msize) {
 	/*
 	 * An integer.	The permutation can have negative values at the
@@ -322,7 +322,7 @@ precision (detected_t *d)
  * Function:	DETECT_M
  *
  * Purpose:	This macro takes only miscellaneous structures or pointer
- *              (pointer, hvl_t, hobj_ref_t, hdset_reg_ref_t).  It  
+ *              (pointer, hvl_t, hobj_ref_t, hdset_reg_ref_t).  It
  *		constructs the names and decides the alignment in structure.
  *
  * Return:	void
@@ -462,7 +462,7 @@ sigsegv_handler(int UNUSED signo)
     signal(SIGSEGV, sigsegv_handler);
     longjmp(jbuf_g, 1);
 }
-    
+
 
 /*-------------------------------------------------------------------------
  * Function:	sigbus_handler
@@ -487,7 +487,7 @@ sigbus_handler(int UNUSED signo)
     signal(SIGBUS, sigbus_handler);
     longjmp(jbuf_g, 1);
 }
-    
+
 
 /*-------------------------------------------------------------------------
  * Function:	print_results
@@ -549,7 +549,7 @@ H5TN_init_interface(void)\n\
                 break;
             }
         }
-                
+
 	/* Print a comment to describe this section of definitions. */
 	printf("\n   /*\n");
 	iprint(d+i);
@@ -614,10 +614,10 @@ H5TN_init_interface(void)\n\
 	       d[i].varname, (unsigned long)(d[i].align));
 
         /* Variables for alignment of compound datatype */
-        if(!strcmp(d[i].varname, "SCHAR")  || !strcmp(d[i].varname, "SHORT") || 
-            !strcmp(d[i].varname, "INT")   || !strcmp(d[i].varname, "LONG")  || 
-            !strcmp(d[i].varname, "LLONG") || !strcmp(d[i].varname, "FLOAT") || 
-            !strcmp(d[i].varname, "DOUBLE") || !strcmp(d[i].varname, "LDOUBLE")) { 
+        if(!strcmp(d[i].varname, "SCHAR")  || !strcmp(d[i].varname, "SHORT") ||
+            !strcmp(d[i].varname, "INT")   || !strcmp(d[i].varname, "LONG")  ||
+            !strcmp(d[i].varname, "LLONG") || !strcmp(d[i].varname, "FLOAT") ||
+            !strcmp(d[i].varname, "DOUBLE") || !strcmp(d[i].varname, "LDOUBLE")) {
             printf("    H5T_NATIVE_%s_COMP_ALIGN_g = %lu;\n",
                     d[i].varname, (unsigned long)(d[i].comp_align));
         }
@@ -632,7 +632,7 @@ H5TN_init_interface(void)\n\
     printf("\n    /* Structure alignment for pointers, hvl_t, hobj_ref_t, hdset_reg_ref_t */\n");
     for(j=0; j<na; j++)
         printf("    H5T_%s_COMP_ALIGN_g = %lu;\n", misc_align[j].name, (unsigned long)(misc_align[j].comp_align));
-        
+
     printf("\
 \n\
 done:\n\
@@ -875,7 +875,7 @@ fix_order(int n, int first, int last, int *perm, const char **mesg)
  *		order bits than the mantissa and that the most significant
  *		bit of the mantissa is next to the least signficant bit
  *		of the exponent.
- *		
+ *
  *
  * Return:	Success:	Non-zero if the most significant bit
  *				of the mantissa is discarded (ie, the
@@ -932,7 +932,7 @@ imp_bit(int n, int *perm, void *_a, void *_b)
  *
  * Return:	Success:	The exponent bias.
  *
- *		Failure:	
+ *		Failure:
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -1067,7 +1067,7 @@ bit.\n";
      * The FQDM of this host or the empty string.
      */
 #ifdef H5_HAVE_GETHOSTNAME
-#ifdef WIN32 
+#ifdef WIN32
 /* windows DLL cannot recognize gethostname, so turn off on windows for the time being!
     KY, 2003-1-14 */
     host_name[0] = '\0';
@@ -1079,7 +1079,7 @@ bit.\n";
 #else
     host_name[0] = '\0';
 #endif
-    
+
     /*
      * The file header: warning, copyright notice, build information.
      */
@@ -1134,7 +1134,7 @@ detect_C89_integers(void)
 {
     DETECT_I(signed char,	  SCHAR,        d_g[nd_g]); nd_g++;
     DETECT_I(unsigned char,	  UCHAR,        d_g[nd_g]); nd_g++;
-    DETECT_I(short,		  SHORT,        d_g[nd_g]); nd_g++; 
+    DETECT_I(short,		  SHORT,        d_g[nd_g]); nd_g++;
     DETECT_I(unsigned short,	  USHORT,       d_g[nd_g]); nd_g++;
     DETECT_I(int,		  INT,	        d_g[nd_g]); nd_g++;
     DETECT_I(unsigned int,	  UINT,	        d_g[nd_g]); nd_g++;
@@ -1314,7 +1314,7 @@ detect_C99_integers64(void)
 #if H5_SIZEOF_UINT_FAST64_T>0
     DETECT_I(uint_fast64_t, 	  UINT_FAST64,  d_g[nd_g]); nd_g++;
 #endif
-    
+
 #if H5_SIZEOF_LONG_LONG>0
     DETECT_I(long_long,		  LLONG,        d_g[nd_g]); nd_g++;
     DETECT_I(unsigned long_long,  ULLONG,       d_g[nd_g]); nd_g++;
@@ -1437,7 +1437,7 @@ detect_alignments(void)
 int
 main(void)
 {
-    
+
 #if defined(H5_HAVE_SETSYSINFO) && defined(SSI_NVPAIRS)
 #if defined(UAC_NOPRINT) && defined(UAC_SIGBUS)
     /*
@@ -1453,7 +1453,7 @@ main(void)
     }
 #endif
 #endif
-    
+
     print_header();
 
     /* C89 integer types */
@@ -1470,8 +1470,8 @@ main(void)
 
     /* Detect structure alignment */
     detect_alignments();
-    
+
     print_results (nd_g, d_g, na_g, m_g);
-    
+
     return 0;
 }

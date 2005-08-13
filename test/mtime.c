@@ -39,9 +39,9 @@ const char *FILENAME[] = {
  *
  * Purpose:	H5O_mtime_decode() test.
  *
- * Return:	Success:	
+ * Return:	Success:
  *
- *		Failure:	
+ *		Failure:
  *
  * Programmer:	Robb Matzke
  *              Thursday, July 30, 1998
@@ -68,9 +68,9 @@ main(void)
 
     h5_reset();
     fapl = h5_fileaccess();
-    
+
     TESTING("modification time messages");
-    
+
     /* Create the file, create a dataset, then close the file */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
@@ -105,7 +105,7 @@ main(void)
 	puts("    name.");
 	goto error;
     }
-    
+
     /* Compare times -- they must be within 60 seconds of one another */
     if (0==sb1.mtime) {
 	SKIPPED();
@@ -123,12 +123,12 @@ main(void)
 	goto error;
     }
     PASSED();
-    
+
     /* Check opening existing file with old-style modification time information
      * and make certain that the time is correct
      */
     TESTING("accessing old modification time messages");
-    
+
     {
     char testfile[512]="";
     char *srcdir = HDgetenv("srcdir");
@@ -163,7 +163,7 @@ main(void)
      * and make certain that the time is correct
      */
     TESTING("accessing new modification time messages");
-    
+
     {
     char testfile[512]="";
     char *srcdir = HDgetenv("srcdir");
@@ -203,4 +203,4 @@ main(void)
 }
 
 
-    
+

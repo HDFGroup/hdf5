@@ -54,7 +54,7 @@ int attr_data1[ATTR1_DIM1]={512,-234,98123}; /* Test data for 1st attribute */
 
 /* rank & dimensions for another attribute */
 #define ATTR1A_NAME  "Attr1_a"
-int attr_data1a[ATTR1_DIM1]={256,11945,-22107}; 
+int attr_data1a[ATTR1_DIM1]={256,11945,-22107};
 
 #define ATTR2_NAME  "Attr2"
 #define ATTR2_RANK	2
@@ -96,9 +96,9 @@ herr_t attr_op1(hid_t loc_id, const char *name, void *op_data);
 **
 **  test_attr_basic_write(): Test basic H5A (attribute) code.
 **      Tests integer attributes on both datasets and groups
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_attr_basic_write(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -154,11 +154,11 @@ test_attr_basic_write(void)
     /* Create an another attribute for the dataset */
     attr2=H5Acreate(dataset,ATTR1A_NAME,H5T_NATIVE_INT,sid2,H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate");
-    
+
     /* Write attribute information */
     ret=H5Awrite(attr2,H5T_NATIVE_INT,attr_data1a);
     CHECK(ret, FAIL, "H5Awrite");
-    
+
     /* Check storage size for attribute */
     attr_size=H5Aget_storage_size(attr);
     VERIFY(attr_size, (ATTR1_DIM1*sizeof(int)), "H5A_get_storage_size");
@@ -191,10 +191,10 @@ test_attr_basic_write(void)
     /* Verify new attribute name */
     attr_name_size = H5Aget_name(attr, 0, NULL);
     CHECK(attr_name_size, FAIL, "H5Aget_name");
-    
+
     if(attr_name_size>0)
         attr_name = (char*)HDcalloc((size_t)(attr_name_size+1), sizeof(char));
-    
+
     ret=(herr_t)H5Aget_name(attr, (size_t)(attr_name_size+1), attr_name);
     CHECK(ret, FAIL, "H5Aget_name");
     ret=HDstrcmp(attr_name, ATTR_TMP_NAME);
@@ -218,16 +218,16 @@ test_attr_basic_write(void)
 
 
     /* Open the second attribute again */
-    attr2=H5Aopen_name(dataset, ATTR1A_NAME); 
+    attr2=H5Aopen_name(dataset, ATTR1A_NAME);
     CHECK(attr, FAIL, "H5Aopen_name");
 
     /* Verify new attribute name */
     attr_name_size = H5Aget_name(attr2, 0, NULL);
     CHECK(attr_name_size, FAIL, "H5Aget_name");
-    
+
     if(attr_name_size>0)
         attr_name = (char*)HDcalloc((size_t)(attr_name_size+1), sizeof(char));
-    
+
     ret=(herr_t)H5Aget_name(attr2, (size_t)(attr_name_size+1), attr_name);
     CHECK(ret, FAIL, "H5Aget_name");
     ret=HDstrcmp(attr_name, ATTR1A_NAME);
@@ -248,7 +248,7 @@ test_attr_basic_write(void)
     /* Close attribute */
     ret=H5Aclose(attr2);
     CHECK(ret, FAIL, "H5Aclose");
-    
+
     /* change first attribute back to the original name */
     ret=H5Arename(dataset, ATTR_TMP_NAME, ATTR1_NAME);
     CHECK(ret, FAIL, "H5Arename");
@@ -277,7 +277,7 @@ test_attr_basic_write(void)
     /* Check storage size for attribute */
     attr_size=H5Aget_storage_size(attr);
     VERIFY(attr_size, (ATTR2_DIM1*ATTR2_DIM2*sizeof(int)), "H5Aget_storage_size");
-    
+
     /* Try to create the same attribute again (should fail) */
     ret=H5Acreate(group,ATTR2_NAME,H5T_NATIVE_INT,sid2,H5P_DEFAULT);
     VERIFY(ret, FAIL, "H5Acreate");
@@ -289,7 +289,7 @@ test_attr_basic_write(void)
     /* Check storage size for attribute */
     attr_size=H5Aget_storage_size(attr);
     VERIFY(attr_size, (ATTR2_DIM1*ATTR2_DIM2*sizeof(int)), "H5A_get_storage_size");
-    
+
     /* Close attribute */
     ret=H5Aclose(attr);
     CHECK(ret, FAIL, "H5Aclose");
@@ -310,9 +310,9 @@ test_attr_basic_write(void)
 /****************************************************************
 **
 **  test_attr_basic_read(): Test basic H5A (attribute) code.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_attr_basic_read(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -397,9 +397,9 @@ test_attr_basic_read(void)
 **
 **  test_attr_flush(): Test H5A (attribute) code for performing
 **                      I/O when H5Fflush is used.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_attr_flush(void)
 {
     hid_t fil,          /* File ID */
@@ -463,9 +463,9 @@ test_attr_flush(void)
 **
 **  test_attr_compound_write(): Test H5A (attribute) code.
 **      Tests compound datatype attributes
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_attr_compound_write(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -550,9 +550,9 @@ test_attr_compound_write(void)
 /****************************************************************
 **
 **  test_attr_compound_read(): Test basic H5A (attribute) code.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_attr_compound_read(void)
 {
     hid_t   fid1;		/* HDF5 File IDs		*/
@@ -565,7 +565,7 @@ test_attr_compound_read(void)
     hsize_t dims[ATTR_MAX_DIMS];    /* Attribute dimensions */
     H5T_class_t t_class;  /* Attribute datatype class */
     H5T_order_t order;  /* Attribute datatype order */
-    size_t      size;   /* Attribute datatype size as stored in file */ 
+    size_t      size;   /* Attribute datatype size as stored in file */
     int     fields;     /* # of Attribute datatype fields */
     char *fieldname;    /* Name of a field */
     size_t      offset; /* Attribute datatype field offset */
@@ -616,7 +616,7 @@ test_attr_compound_read(void)
     VERIFY(fields, 3, "H5Tget_nmembers");
     for(i=0; i<fields; i++) {
         fieldname=H5Tget_member_name(type,(unsigned)i);
-        if(!(HDstrcmp(fieldname,ATTR4_FIELDNAME1) || 
+        if(!(HDstrcmp(fieldname,ATTR4_FIELDNAME1) ||
                 HDstrcmp(fieldname,ATTR4_FIELDNAME2) ||
                 HDstrcmp(fieldname,ATTR4_FIELDNAME3)))
             TestErrPrintf("invalid field name for field #%d: %s\n",i,fieldname);
@@ -697,9 +697,9 @@ test_attr_compound_read(void)
 /****************************************************************
 **
 **  test_attr_scalar_write(): Test scalar H5A (attribute) writing code.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_attr_scalar_write(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -761,9 +761,9 @@ test_attr_scalar_write(void)
 /****************************************************************
 **
 **  test_attr_scalar_read(): Test scalar H5A (attribute) reading code.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_attr_scalar_read(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -826,9 +826,9 @@ test_attr_scalar_read(void)
 **
 **  test_attr_mult_write(): Test basic H5A (attribute) code.
 **      Tests integer attributes on both datasets and groups
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_attr_mult_write(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -944,9 +944,9 @@ test_attr_mult_write(void)
 /****************************************************************
 **
 **  test_attr_mult_read(): Test basic H5A (attribute) code.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_attr_mult_read(void)
 {
     hid_t   fid1;		/* HDF5 File IDs		*/
@@ -960,7 +960,7 @@ test_attr_mult_read(void)
     hsize_t dims[ATTR_MAX_DIMS];    /* Attribute dimensions */
     H5T_class_t t_class;              /* Attribute datatype class */
     H5T_order_t order;              /* Attribute datatype order */
-    size_t      size;               /* Attribute datatype size as stored in file */ 
+    size_t      size;               /* Attribute datatype size as stored in file */
     int   read_data1[ATTR1_DIM1]={0}; /* Buffer for reading 1st attribute */
     int   read_data2[ATTR2_DIM1][ATTR2_DIM2]={{0}}; /* Buffer for reading 2nd attribute */
     double  read_data3[ATTR3_DIM1][ATTR3_DIM2][ATTR3_DIM3]={{{0}}}; /* Buffer for reading 3rd attribute */
@@ -1163,7 +1163,7 @@ test_attr_mult_read(void)
 /****************************************************************
 **
 **  attr_op1(): Attribute operator
-** 
+**
 ****************************************************************/
 herr_t attr_op1(hid_t UNUSED loc_id, const char *name, void *op_data)
 {
@@ -1188,7 +1188,7 @@ herr_t attr_op1(hid_t UNUSED loc_id, const char *name, void *op_data)
                 TestErrPrintf("attribute name different: name=%s, should be %s\n",name,ATTR3_NAME);
              (*count)++;
              break;
-        
+
         default:
             ret=-1;
             break;
@@ -1200,9 +1200,9 @@ herr_t attr_op1(hid_t UNUSED loc_id, const char *name, void *op_data)
 /****************************************************************
 **
 **  test_attr_iterate(): Test H5A (attribute) iterator code.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_attr_iterate(void)
 {
     hid_t   file;		/* HDF5 File ID 		*/
@@ -1271,9 +1271,9 @@ test_attr_iterate(void)
 /****************************************************************
 **
 **  test_attr_delete(): Test H5A (attribute) code for deleting objects.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_attr_delete(void)
 {
     hid_t   fid1;		/* HDF5 File ID 		*/
@@ -1385,9 +1385,9 @@ test_attr_delete(void)
 **
 **  test_attr_dtype_shared(): Test H5A (attribute) code for using
 **                              shared datatypes in attributes.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_attr_dtype_shared(void)
 {
     hid_t file_id;              /* File ID */
@@ -1558,9 +1558,9 @@ test_attr_dtype_shared(void)
 /****************************************************************
 **
 **  test_attr(): Main H5A (attribute) testing routine.
-** 
+**
 ****************************************************************/
-void 
+void
 test_attr(void)
 {
     /* Output message about test being performed */

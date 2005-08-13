@@ -39,7 +39,7 @@ NAME
    H5T_init_commit_interface -- Initialize interface-specific information
 USAGE
     herr_t H5T_init_commit_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -77,7 +77,7 @@ H5Tcommit(hid_t loc_id, const char *name, hid_t type_id)
     H5G_entry_t	*loc = NULL;
     H5T_t	*type = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_API(H5Tcommit, FAIL)
     H5TRACE3("e","isi",loc_id,name,type_id);
 
@@ -118,7 +118,7 @@ H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id)
 {
     H5F_t	*file = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5T_commit)
 
     HDassert (loc);
@@ -164,7 +164,7 @@ H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id)
     if(H5FO_insert(type->ent.file, type->ent.header, type->shared)<0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "can't insert datatype into list of open objects")
 
-    /* Mark datatype as being on memory now because this datatype may be still used in 
+    /* Mark datatype as being on memory now because this datatype may be still used in
      * memory after committed to disk.  So we need to change its size back. */
     if (H5T_vlen_mark(type, NULL, H5T_VLEN_MEMORY)<0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype in memory")
@@ -205,7 +205,7 @@ H5Tcommitted(hid_t type_id)
 {
     H5T_t	*type = NULL;
     htri_t      ret_value;       /* Return value */
-    
+
     FUNC_ENTER_API(H5Tcommitted, FAIL)
     H5TRACE1("t","i",type_id);
 

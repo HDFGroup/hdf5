@@ -74,7 +74,7 @@ typedef enum H5G_obj_t {
     H5G_RESERVED_5,		/* Reserved for future use	*/
     H5G_RESERVED_6,		/* Reserved for future use	*/
     H5G_RESERVED_7		/* Reserved for future use	*/
-} H5G_obj_t;    
+} H5G_obj_t;
 #endif /*H5_WANT_H5_V1_4_COMPAT*/
 
 #define H5G_NTYPES	256		/* Max possible number of types	*/
@@ -96,7 +96,7 @@ typedef struct H5G_stat_t {
     size_t		linklen;	/*symbolic link value length	*/
     H5O_stat_t          ohdr;           /* Object header information    */
 } H5G_stat_t;
-    
+
 #define H5G_SAME_LOC 0
 #define H5Glink(cur_loc_id, type, cur_name, new_name) \
     H5Glink2(cur_loc_id, cur_name, type, H5G_SAME_LOC, new_name)
@@ -118,7 +118,7 @@ H5_DLL int H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx);
 #else /*H5_WANT_H5_V1_4_COMPAT*/
 H5_DLL H5G_obj_t H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx);
 #endif /*H5_WANT_H5_V1_4_COMPAT*/
-H5_DLL herr_t H5Gmove2(hid_t src_loc, const char *src, hid_t dst_loc, 
+H5_DLL herr_t H5Gmove2(hid_t src_loc, const char *src, hid_t dst_loc,
 			const char *dst);
 H5_DLL herr_t H5Glink2(hid_t src_loc, const char *cur_name, H5G_link_t type,
 		        hid_t dst_loc, const char *new_name);

@@ -43,11 +43,11 @@ const char *FILENAME[] = {
 /*-------------------------------------------------------------------------
  * Function:	main
  *
- * Purpose:	
+ * Purpose:
  *
- * Return:	Success:	
+ * Return:	Success:
  *
- *		Failure:	
+ *		Failure:
  *
  * Programmer:	Robb Matzke
  *              Tuesday, November 24, 1998
@@ -172,7 +172,7 @@ main(void)
 	goto error;
     }
     PASSED();
-	
+
     /*
      * Test modification of the second message with a symbol table.
      */
@@ -272,7 +272,7 @@ main(void)
 	goto error;
     }
     PASSED();
-    
+
 
     /* release resources */
     TESTING("object header closing");

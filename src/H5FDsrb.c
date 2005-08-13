@@ -71,7 +71,7 @@ static hid_t H5FD_SRB_g = 0;
 /*
  * These macros check for overflow of various quantities.  These macros
  * assume that file_offset_t is signed and haddr_t and size_t are unsigned.
- * 
+ *
  * ADDR_OVERFLOW:	Checks whether a file address of type `haddr_t'
  *			is too large to be represented by the second argument
  *			of the file seek function.
@@ -107,7 +107,7 @@ static herr_t  H5FD_srb_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, had
 			      size_t size, const void *buf);
 static herr_t  H5FD_srb_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
 
-/* The description of a file belonging to this driver. */ 
+/* The description of a file belonging to this driver. */
 typedef struct H5FD_srb_t {
     H5FD_t	pub;			/*public stuff, must be first	*/
     int		fd;			/*file descriptor    		*/
@@ -115,7 +115,7 @@ typedef struct H5FD_srb_t {
     SRB_Info    info;                   /*file information              */
     haddr_t	eoa;			/*end of allocated region	*/
     haddr_t	eof;			/*end of file; current file size*/
-    haddr_t	pos;			/*current file I/O position	*/  
+    haddr_t	pos;			/*current file I/O position	*/
 } H5FD_srb_t;
 
 /* SRB-specific file access properties */
@@ -163,7 +163,7 @@ NAME
    H5FD_srb_init_interface -- Initialize interface-specific information
 USAGE
     herr_t H5FD_srb_init_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -196,7 +196,7 @@ H5FD_srb_init_interface(void)
  *
  *-------------------------------------------------------------------------
  */
-hid_t 
+hid_t
 H5FD_srb_init(void)
 {
     hid_t ret_value=H5FD_SRB_g; /* Return value */
@@ -243,10 +243,10 @@ H5FD_srb_term(void)
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_fapl_srb
  *
- * Purpose:     Store srb connection(client to server) handler SRB_CONN 
- *              after connected and user supplied INFO in the file access 
+ * Purpose:     Store srb connection(client to server) handler SRB_CONN
+ *              after connected and user supplied INFO in the file access
  *              property list FAPL_ID, which can be used to create or open
- *              file.  
+ *              file.
  *
  * Return:      Success:        Non-negative
  *
@@ -259,14 +259,14 @@ H5FD_srb_term(void)
  *
  *		Raymond Lu, 2001-10-25
  *		Use the new generic property list for argument checking.
- *	
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_fapl_srb(hid_t fapl_id, SRB_Info info)
 {
     H5FD_srb_fapl_t fa;
-    int srb_status;   
+    int srb_status;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value;
 
@@ -288,7 +288,7 @@ H5Pset_fapl_srb(hid_t fapl_id, SRB_Info info)
 
     fa.info = info;
     ret_value = H5P_set_driver(plist, H5FD_SRB, &fa);
- 
+
 done:
     FUNC_LEAVE_API(ret_value)
 }
@@ -298,8 +298,8 @@ done:
  * Function:    H5Pget_fapl_srb
  *
  * Purpose:     If the file access property list is set to the H5FD_SRB
- *              driver then this function returns the srb file INFO. 
- * 
+ *              driver then this function returns the srb file INFO.
+ *
  * Return:      Success:        File INFO is returned.
  *              Failure:        Negative
  *
@@ -311,7 +311,7 @@ done:
  *		Raymond Lu, 2001-10-25
  *		Use the new generic property list for checking property list
  *		ID.
- *	
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -382,7 +382,7 @@ H5FD_srb_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
     if(H5P_FILE_ACCESS_DEFAULT==fapl_id || H5FD_SRB!=H5P_get_driver(plist)) {
-        HDmemset((void*)&_fa, 0, sizeof(H5FD_srb_fapl_t));        
+        HDmemset((void*)&_fa, 0, sizeof(H5FD_srb_fapl_t));
         fa = &_fa;
     }
     else {
@@ -393,39 +393,39 @@ H5FD_srb_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     /* When I come down here, the possible flag values and the correct
      * responses are given here :-
      *
-     * 1. H5F_ACC_CREAT | H5F_ACC_RDWR | H5F_ACC_EXCL : The file is 
-     *    a new one. Go ahead and open it with srbObjCreate. 
+     * 1. H5F_ACC_CREAT | H5F_ACC_RDWR | H5F_ACC_EXCL : The file is
+     *    a new one. Go ahead and open it with srbObjCreate.
      * 2. H5F_ACC_CREAT | H5F_ACC_RDWR | H5F_ACC_TRUNC : how do I handle this?
-     *    srbObjCreate doesn't support truncate while srbObjOpen doesn't 
+     *    srbObjCreate doesn't support truncate while srbObjOpen doesn't
      *    support create.  Try to call both srbFileCreate and srbFileOpen!
      * 3. H5F_ACC_RDWR | H5F_ACC_TRUNC : Use O_RDWR | O_TRUNC with srbObjOpen.
      * 4. H5F_ACC_RDWR : Use O_RDWR with srbObjOpen.
-     * 5. Flag is not set : Use O_RDONLY with srbObjOpen. 
+     * 5. Flag is not set : Use O_RDONLY with srbObjOpen.
      *
-     * (In srbObjOpen, O_CREATE is not supported.  For file creation, use 
+     * (In srbObjOpen, O_CREATE is not supported.  For file creation, use
      *  srbObjCreate.)
-     */ 
+     */
 
-    if((flags & H5F_ACC_CREAT) && (flags & H5F_ACC_RDWR) && 
+    if((flags & H5F_ACC_CREAT) && (flags & H5F_ACC_RDWR) &&
        (flags & H5F_ACC_EXCL))
-        srb_fid = srbFileCreate(fa->srb_conn, fa->info.storSysType, 
-            fa->info.srbHost, name, fa->info.mode, fa->info.size);             
-    else if((flags & H5F_ACC_CREAT) && (flags & H5F_ACC_RDWR) && 
+        srb_fid = srbFileCreate(fa->srb_conn, fa->info.storSysType,
+            fa->info.srbHost, name, fa->info.mode, fa->info.size);
+    else if((flags & H5F_ACC_CREAT) && (flags & H5F_ACC_RDWR) &&
 	    (flags & H5F_ACC_TRUNC)) {
-        if( (srb_fid = srbFileCreate(fa->srb_conn, fa->info.storSysType, 
+        if( (srb_fid = srbFileCreate(fa->srb_conn, fa->info.storSysType,
             fa->info.srbHost, name, fa->info.mode, fa->info.size)) < 0 ) {
-            srb_fid = srbFileOpen(fa->srb_conn, fa->info.storSysType, 
+            srb_fid = srbFileOpen(fa->srb_conn, fa->info.storSysType,
                  fa->info.srbHost, name, O_RDWR|O_TRUNC, fa->info.mode);
-	} 
+	}
     }
     else if((flags & H5F_ACC_RDWR) && (flags & H5F_ACC_TRUNC))
-        srb_fid = srbFileOpen(fa->srb_conn, fa->info.storSysType, 
+        srb_fid = srbFileOpen(fa->srb_conn, fa->info.storSysType,
             fa->info.srbHost, name, O_RDWR|O_TRUNC, fa->info.mode);
     else if(flags & H5F_ACC_RDWR)
-        srb_fid = srbFileOpen(fa->srb_conn, fa->info.storSysType, 
+        srb_fid = srbFileOpen(fa->srb_conn, fa->info.storSysType,
             fa->info.srbHost, name, O_RDWR, fa->info.mode);
     else
-        srb_fid = srbFileOpen(fa->srb_conn, fa->info.storSysType, 
+        srb_fid = srbFileOpen(fa->srb_conn, fa->info.storSysType,
             fa->info.srbHost, name, O_RDONLY, fa->info.mode);
 
 
@@ -433,7 +433,7 @@ H5FD_srb_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 #ifdef OLD_WAY
         fprintf(stderr, "cannot open file %s\n", name);
         fprintf(stderr,"%s",clErrorMessage(fa->srb_conn));
-        clFinish(fa->srb_conn);       
+        clFinish(fa->srb_conn);
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "cannot open file")
 #else /* OLD_WAY */
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, clErrorMessage(fa->srb_conn))
@@ -444,7 +444,7 @@ H5FD_srb_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
             &srb_stat)!=0) {
 #ifdef OLD_WAY
         srbFileClose(fa->srb_conn, srb_fid);
-        clFinish(fa->srb_conn);    
+        clFinish(fa->srb_conn);
         HGOTO_ERROR(H5E_IO, H5E_BADFILE, NULL, "SRB file stat failed")
 #else /* OLD_WAY */
         HGOTO_ERROR(H5E_IO, H5E_BADFILE, NULL, "SRB file stat failed")
@@ -466,7 +466,7 @@ H5FD_srb_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 done:
     if(ret_value==NULL) {
         if(fa!=NULL)
-            clFinish(fa->srb_conn);       
+            clFinish(fa->srb_conn);
         if(srb_fid>=0)
             srbFileClose(fa->srb_conn, srb_fid);
     } /* end if */
@@ -567,7 +567,7 @@ H5FD_srb_get_eoa(H5FD_t *_file)
     FUNC_ENTER_NOAPI(H5FD_srb_get_eoa, HADDR_UNDEF)
 
     /* Set return value */
-    ret_value=file->eoa; 
+    ret_value=file->eoa;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -632,7 +632,7 @@ H5FD_srb_get_eof(H5FD_t *_file)
     FUNC_ENTER_NOAPI(H5FD_srb_get_eof, HADDR_UNDEF)
 
     /* Set return value */
-    ret_value=file->eof; 
+    ret_value=file->eof;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -641,24 +641,24 @@ done:
 
 /*-------------------------------------------------------------------------
  * Function:       H5FD_srb_get_handle
- * 
+ *
  * Purpose:        Returns the file handle of SRB file driver.
- * 
+ *
  * Returns:        Non-negative if succeed or negative if fails.
- * 
+ *
  * Programmer:     Raymond Lu
  *                 Sept. 16, 2002
- * 
+ *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t  
+static herr_t
 H5FD_srb_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
-{   
+{
     H5FD_srb_t          *file = (H5FD_srb_t *)_file;
     herr_t              ret_value = SUCCEED;
-                            
+
     FUNC_ENTER_NOAPI(H5FD_srb_get_eof, FAIL)
 
     if(!file_handle)
@@ -686,7 +686,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_srb_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr_t addr, 
+H5FD_srb_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr_t addr,
               size_t size, void *buf)
 {
     H5FD_srb_t *file = (H5FD_srb_t*)_file;
@@ -727,7 +727,7 @@ H5FD_srb_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr
 
     /* Update current position */
     file->pos = addr;
-  
+
 done:
     if(ret_value<0) {
         /* Reset file position */
@@ -735,7 +735,7 @@ done:
 
         /* Close connection, etc. */
         srbFileClose(file->srb_conn, file->fd);
-        clFinish(file->srb_conn);    
+        clFinish(file->srb_conn);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -758,7 +758,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_srb_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr_t addr, 
+H5FD_srb_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr_t addr,
                size_t size, const void *buf)
 {
     H5FD_srb_t *file = (H5FD_srb_t*)_file;
@@ -782,8 +782,8 @@ H5FD_srb_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
     while(size>0) {
         if( (nbytes=srbFileWrite(file->srb_conn, (int)file->fd, (char*)buf, size)) < 0 )
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "srb file write failed")
-      
-        size -= nbytes; 
+
+        size -= nbytes;
         addr += (haddr_t)nbytes;
         buf  =  (const char*)buf + nbytes;
     }
@@ -800,7 +800,7 @@ done:
 
         /* Close connection, etc. */
         srbFileClose(file->srb_conn, file->fd);
-        clFinish(file->srb_conn);    
+        clFinish(file->srb_conn);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -834,7 +834,7 @@ H5FD_srb_flush(H5FD_t *_file, hid_t dxpl_id, unsigned UNUSED closing)
 done:
     if(ret_value<0) {
         srbFileClose(file->srb_conn, file->fd);
-        clFinish(file->srb_conn);    
+        clFinish(file->srb_conn);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)

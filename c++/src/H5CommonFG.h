@@ -30,12 +30,12 @@ class ArrayType;
 class VarLenType;
 class H5_DLLCPP CommonFG {
    public:
-	// Creates a new group at this location which can be a file 
+	// Creates a new group at this location which can be a file
 	// or another group.
 	Group createGroup(const char* name, size_t size_hint = 0) const;
 	Group createGroup(const string& name, size_t size_hint = 0) const;
 
-	// Opens an existing group in a location which can be a file 
+	// Opens an existing group in a location which can be a file
 	// or another group.
 	Group openGroup(const char* name) const;
 	Group openGroup(const string& name) const;
@@ -68,7 +68,7 @@ class H5_DLLCPP CommonFG {
 	// Returns the number of objects in this group.
 	hsize_t getNumObjs() const;
 
-	// Returns information about an HDF5 object, given by its name, 
+	// Returns information about an HDF5 object, given by its name,
 	// at this location.
 	void getObjinfo(const char* name, hbool_t follow_link, H5G_stat_t& statbuf) const;
 	void getObjinfo(const string& name, hbool_t follow_link, H5G_stat_t& statbuf) const;
@@ -141,9 +141,9 @@ class H5_DLLCPP CommonFG {
 	VarLenType openVarLenType(const char* name) const;
 	VarLenType openVarLenType(const string& name) const;
 
-	/// For subclasses, H5File and Group, to return the correct 
+	/// For subclasses, H5File and Group, to return the correct
 	/// object id, i.e. file or group id.
-	virtual hid_t getLocId() const = 0; 
+	virtual hid_t getLocId() const = 0;
 
 	/// For subclasses, H5File and Group, to throw appropriate exception.
 	virtual void throwException(const string func_name, const string msg) const = 0;
@@ -155,7 +155,7 @@ class H5_DLLCPP CommonFG {
 	virtual ~CommonFG();
 
    private:
-	// Common code for member functions openXxxType 
+	// Common code for member functions openXxxType
 	hid_t p_open_data_type(const char* name) const;
 
 }; // end of CommonFG declaration

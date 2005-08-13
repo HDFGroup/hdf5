@@ -17,10 +17,10 @@
  *              Wednesday, August 11, 1999.
  *
  * Modifications: Saurabh Bagchi (Aug 17, 1999)
- *                Modified to work with VFL (HDF51.3). 
+ *                Modified to work with VFL (HDF51.3).
  */
 
-/* Test the following functionality of the GASS driver. 
+/* Test the following functionality of the GASS driver.
    1. Open a remote file for append.
    2. Create a new dataset within the file.
    3. Create a local memory buffer to hold the data.
@@ -50,44 +50,44 @@ int main (void)
   hid_t         fapl =-1, file;
   hid_t         dataspace, datatype, dataset;
   hsize_t       dimsf[2];
-  
+
   herr_t        status = 0;
   int           data[NX][NY];          /* data to write */
   int           i, j;
   GASS_Info     ginf;
-  
-  /* 
-   * Data  and output buffer initialization. 
+
+  /*
+   * Data  and output buffer initialization.
    */
   for (j = 0; j < NX; j++) {
     for (i = 0; i < NY; i++)
       data[j][i] = i*i + j*j;
-  }     
+  }
   /*
-   *  0   1  4  9 16 25 
+   *  0   1  4  9 16 25
    *  1   2  5 10 17 26
    *  4   5  8 13 20 29
    *  9  10 13 18 25 34
    * 16  17 20 25 32 41
    */
-  
+
   /* Create access property list and set the driver to GASS */
   fapl = H5Pcreate (H5P_FILE_ACCESS);
   if (fapl < 0) {
     printf (" H5Pcreate failed. \n");
     return -1;
   }
- 
+
   ginf.block_size = 0;
   ginf.max_length =0;
   /* ginf = GASS_INFO_NULL; */
-  
+
   status = H5Pset_fapl_gass (fapl, ginf);
   if (status < 0) {
     printf ("H5Pset_fapl_gass failed. \n");
     return -1;
   }
-  
+
   /*
    * Open an existing file using H5F_ACC_RDWR access,
    * and gass file access properties.
@@ -97,20 +97,20 @@ int main (void)
     printf ("H5Fopen failed. \n");
     return -1;
   }
-  
+
   /*
    * Describe the size of the array and create the data space for fixed
-   * size dataset. 
+   * size dataset.
    */
   dimsf[0] = NX;
   dimsf[1] = NY;
-    dataspace = H5Screate_simple(RANK, dimsf, NULL); 
+    dataspace = H5Screate_simple(RANK, dimsf, NULL);
     if (dataspace < 0) {
       printf ("H5Screate failed. \n");
       return -1;
     }
 
-    /* 
+    /*
      * Define datatype for the data in the file.
      * We will store little endian INT numbers.
      */
@@ -119,7 +119,7 @@ int main (void)
       printf ("H5Tcopy failed. \n");
       return -1;
     }
-    
+
     status = H5Tset_order(datatype, H5T_ORDER_LE);
     if (status < 0) {
       printf ("H5Tset_order failed. \n");
@@ -155,9 +155,9 @@ int main (void)
     H5Dclose(dataset);
     H5Fclose(file);
     H5Pclose(fapl);
-    
+
     return 0;
-}     
+}
 
 #else
 int main(void)
@@ -165,5 +165,5 @@ int main(void)
     printf("Test skipped because append depends on web server!\n");
     return 0;
 }
-#endif   
+#endif
 #endif

@@ -19,9 +19,9 @@
 
 /*----------------------------------------------------------------------------
  * Name:        h5iget_type_c
- * Purpose:     Call H5Iget_type to get the type of an object 
- * Inputs:      obj_id - object identifier 
- * Outputs:     type - object type 
+ * Purpose:     Call H5Iget_type to get the type of an object
+ * Inputs:      obj_id - object identifier
+ * Outputs:     type - object type
  * Returns:     0 on success, -1 on failure
  * Programmer:  Xiangyang Su
  *              Thursday, March 24, 2000
@@ -46,9 +46,9 @@ nh5iget_type_c (hid_t_f *obj_id, int_f *type)
 }
 /*----------------------------------------------------------------------------
  * Name:        h5iget_name_c
- * Purpose:     Call H5Iget_name to get object's name 
- * Inputs:      obj_id - object identifier 
- *              buf_size - size of the buffer 
+ * Purpose:     Call H5Iget_name to get object's name
+ * Inputs:      obj_id - object identifier
+ *              buf_size - size of the buffer
  * Outputs:     buf - buffer to hold the name
  * Returns:     length of the name on success, -1 on failure
  * Programmer:  Elena Pourmal
@@ -69,8 +69,8 @@ nh5iget_name_c(hid_t_f *obj_id, _fcd buf, size_t_f *buf_size, size_t_f *name_siz
       */
      c_buf_size = (size_t)*buf_size;
      c_buf = (char *)HDmalloc(c_buf_size +1);
-     if (c_buf == NULL) return ret_value; 
- 
+     if (c_buf == NULL) return ret_value;
+
      /*
       * Call H5IAget_name function
       */
@@ -93,7 +93,7 @@ DONE:
 /*----------------------------------------------------------------------------
  * Name:        h5iinc_ref_c
  * Purpose:     Call H5Iinc_ref to increment object's reference count
- * Inputs:      obj_id - object identifier 
+ * Inputs:      obj_id - object identifier
  * Outputs:     ref_count - Reference count of ID
  * Returns:     current reference count on success, -1 on failure
  * Programmer:  Quincey Koziol
@@ -122,7 +122,7 @@ done:
 /*----------------------------------------------------------------------------
  * Name:        h5idec_ref_c
  * Purpose:     Call H5Idec_ref to decrement object's reference count
- * Inputs:      obj_id - object identifier 
+ * Inputs:      obj_id - object identifier
  * Outputs:     ref_count - Reference count of ID
  * Returns:     current reference count on success, -1 on failure
  * Programmer:  Quincey Koziol
@@ -151,7 +151,7 @@ done:
 /*----------------------------------------------------------------------------
  * Name:        h5iget_ref_c
  * Purpose:     Call H5Iget_ref to retrieve object's reference count
- * Inputs:      obj_id - object identifier 
+ * Inputs:      obj_id - object identifier
  * Outputs:     ref_count - Reference count of ID
  * Returns:     current reference count on success, -1 on failure
  * Programmer:  Quincey Koziol
@@ -180,7 +180,7 @@ done:
 /*----------------------------------------------------------------------------
  * Name:        h5iget_file_id_c
  * Purpose:     Call H5Iget_file_id to obtain file identifier from object identifier
- * Inputs:      obj_id - object identifier 
+ * Inputs:      obj_id - object identifier
  * Outputs:     file_id - file identifier
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal

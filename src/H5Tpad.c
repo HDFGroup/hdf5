@@ -34,7 +34,7 @@ NAME
    H5T_init_pad_interface -- Initialize interface-specific information
 USAGE
     herr_t H5T_init_pad_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -85,7 +85,7 @@ H5Tget_pad(hid_t type_id, H5T_pad_t *lsb/*out*/, H5T_pad_t *msb/*out*/)
         dt = dt->shared->parent; /*defer to parent*/
     if (!H5T_IS_ATOMIC(dt->shared))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for specified data type")
-    
+
     /* Get values */
     if (lsb)
         *lsb = dt->shared->u.atomic.lsb_pad;
@@ -110,7 +110,7 @@ done:
  * Modifications:
  *	Robb Matzke, 22 Dec 1998
  *	Also works with derived data types.
- *	
+ *
  *-------------------------------------------------------------------------
  */
 herr_t

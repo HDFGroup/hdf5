@@ -43,7 +43,7 @@ class H5_DLLCPP Exception {
 	string getDetailMsg() const;
 	const char* getCDetailMsg() const;	// C string of detailed message
 	string getFuncName() const;	// function name as a string object
-	const char* getCFuncName() const;	// function name as a char string 
+	const char* getCFuncName() const;	// function name as a char string
 
 	// Turns on the automatic error printing.
 	static void setAutoPrint( H5E_auto_t& func, void* client_data);
@@ -51,16 +51,16 @@ class H5_DLLCPP Exception {
 	// Turns off the automatic error printing.
 	static void dontPrint();
 
-	// Retrieves the current settings for the automatic error stack 
+	// Retrieves the current settings for the automatic error stack
 	// traversal function and its data.
 	static void getAutoPrint( H5E_auto_t& func, void** client_data);
 
 	// Clears the error stack for the current thread.
 	static void clearErrorStack();
 
-	// Walks the error stack for the current thread, calling the 
+	// Walks the error stack for the current thread, calling the
 	// specified function.
-	static void walkErrorStack( H5E_direction_t direction, 
+	static void walkErrorStack( H5E_direction_t direction,
 				H5E_walk_t func, void* client_data);
 
 	// Prints the error stack in a default manner.
@@ -77,7 +77,7 @@ class H5_DLLCPP Exception {
 
    private:
 // Because 'string' is not instantiated at compilation time, this
-// warning is displayed when building DLL; but the class is exported 
+// warning is displayed when building DLL; but the class is exported
 // so the warning is harmless
 #if defined(WIN32)
 #pragma warning(disable: 4251)

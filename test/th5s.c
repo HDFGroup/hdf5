@@ -84,9 +84,9 @@ struct space4_struct {
 /****************************************************************
 **
 **  test_h5s_basic(): Test basic H5S (dataspace) code.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_h5s_basic(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -301,9 +301,9 @@ test_h5s_basic(void)
 /****************************************************************
 **
 **  test_h5s_scalar_write(): Test scalar H5S (dataspace) writing code.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_h5s_scalar_write(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -364,9 +364,9 @@ test_h5s_scalar_write(void)
 /****************************************************************
 **
 **  test_h5s_scalar_read(): Test scalar H5S (dataspace) reading code.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_h5s_scalar_read(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -411,7 +411,7 @@ test_h5s_scalar_read(void)
     ret = H5Dread(dataset, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
     VERIFY(rdata, space3_data, "H5Dread");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -429,9 +429,9 @@ test_h5s_scalar_read(void)
 **
 **  test_h5s_compound_scalar_write(): Test scalar H5S (dataspace) writing for
 **          compound datatypes.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_h5s_compound_scalar_write(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -509,9 +509,9 @@ test_h5s_compound_scalar_write(void)
 **
 **  test_h5s_compound_scalar_read(): Test scalar H5S (dataspace) reading for
 **          compound datatypes.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_h5s_compound_scalar_read(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -551,7 +551,7 @@ test_h5s_compound_scalar_read(void)
 
     type=H5Dget_type(dataset);
     CHECK(type, FAIL, "H5Dget_type");
-     
+
     ret = H5Dread(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
     if(HDmemcmp(&space4_data,&rdata,sizeof(struct space4_struct))) {
@@ -560,7 +560,7 @@ test_h5s_compound_scalar_read(void)
         printf("scalar data different: space4_data.f=%f, read_data4.f=%f\n",space4_data.f,rdata.f);
         TestErrPrintf("scalar data different: space4_data.c1=%c, read_data4.c1=%c\n",space4_data.c1,rdata.c2);
      } /* end if */
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -583,9 +583,9 @@ float  chunk_data_flt[50000][3];
 **  test_h5s_chunk(): Exercise chunked I/O, testing when data conversion
 **      is necessary and the entire chunk read in doesn't fit into the
 **      conversion buffer
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_h5s_chunk(void)
 {
     herr_t status;
@@ -665,9 +665,9 @@ test_h5s_chunk(void)
 **  test_h5s_null_space(): Attempt to access dataset and attribute
 **      with null dataspace.  This should fail, since the 1.6.x
 **      branch doesn't understand null dataspaces.
-** 
+**
 ****************************************************************/
-static void 
+static void
 test_h5s_null_space(void)
 {
     hid_t fid;                  /* File ID */
@@ -723,9 +723,9 @@ test_h5s_null_space(void)
 /****************************************************************
 **
 **  test_h5s(): Main H5S (dataspace) testing routine.
-** 
+**
 ****************************************************************/
-void 
+void
 test_h5s(void)
 {
     /* Output message about test being performed */

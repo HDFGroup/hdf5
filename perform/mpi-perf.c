@@ -99,11 +99,11 @@ int main(int argc, char **argv)
 
 	if (mynod == 0) printf("# Using mpi-io calls.\n");
 
-	
-	/* kindof a weird hack- if the location of the pvfstab file was 
+
+	/* kindof a weird hack- if the location of the pvfstab file was
 	 * specified on the command line, then spit out this location into
 	 * the appropriate environment variable: */
-	
+
 #if H5_HAVE_SETENV
 /* no setenv or unsetenv */
 	if (opt_pvfstab_set) {
@@ -113,12 +113,12 @@ int main(int argc, char **argv)
 		}
 	}
 #endif
-	
+
 	/* this is how much of the file data is covered on each iteration of
 	 * the test.  used to help determine the seek offset on each
 	 * iteration */
 	iter_jump = nprocs * opt_block;
-		
+
 	/* setup a buffer of data to write */
 	if (!(tmp = (char *) malloc(opt_block + 256))) {
 		perror("malloc");
@@ -136,7 +136,7 @@ int main(int argc, char **argv)
 	}
 
 	/* open the file for writing */
-	err = MPI_File_open(MPI_COMM_WORLD, opt_file, 
+	err = MPI_File_open(MPI_COMM_WORLD, opt_file,
 	MPI_MODE_CREATE | MPI_MODE_RDWR, MPI_INFO_NULL, &fh);
 	if (err < 0) {
 		fprintf(stderr, "node %d, open error: %s\n", mynod, strerror(errno));
@@ -163,7 +163,7 @@ int main(int argc, char **argv)
 		nchars = opt_block/sizeof(char);
 		err = MPI_File_write_at(fh, seek_position, buf, nchars, MPI_CHAR, &status);
 		if(err){
-			fprintf(stderr, "node %d, write error: %s\n", mynod, 
+			fprintf(stderr, "node %d, write error: %s\n", mynod,
 			strerror(errno));
 		}
 
@@ -171,7 +171,7 @@ int main(int argc, char **argv)
 	   etim = MPI_Wtime();
 
 	   write_tim += (etim - stim);
-		
+
 		/* we are done with this "write" iteration */
 	}
 
@@ -179,12 +179,12 @@ int main(int argc, char **argv)
 	if(err){
 		fprintf(stderr, "node %d, close error after write\n", mynod);
 	}
-	 
+
 	/* wait for everyone to synchronize at this point */
 	MPI_Barrier(MPI_COMM_WORLD);
 
 	/* reopen the file to read the data back out */
-	err = MPI_File_open(MPI_COMM_WORLD, opt_file, 
+	err = MPI_File_open(MPI_COMM_WORLD, opt_file,
 	MPI_MODE_CREATE | MPI_MODE_RDWR, MPI_INFO_NULL, &fh);
 	if (err < 0) {
 		fprintf(stderr, "node %d, open error: %s\n", mynod, strerror(errno));
@@ -246,7 +246,7 @@ int main(int argc, char **argv)
 		MPI_COMM_WORLD);
 
 	/* calculate the average from the sum */
-	ave_read_tim = ave_read_tim / nprocs; 
+	ave_read_tim = ave_read_tim / nprocs;
 
 	MPI_Allreduce(&write_tim, &max_write_tim, 1, MPI_DOUBLE, MPI_MAX,
 		MPI_COMM_WORLD);
@@ -256,33 +256,33 @@ int main(int argc, char **argv)
 		MPI_COMM_WORLD);
 
 	/* calculate the average from the sum */
-	ave_write_tim = ave_write_tim / nprocs; 
-	
+	ave_write_tim = ave_write_tim / nprocs;
+
 	/* print out the results on one node */
 	if (mynod == 0) {
 	   read_bw = ((int64_t)(opt_block*nprocs*opt_iter))/(max_read_tim*1000000.0);
 	   write_bw = ((int64_t)(opt_block*nprocs*opt_iter))/(max_write_tim*1000000.0);
-		
+
 			printf("nr_procs = %d, nr_iter = %d, blk_sz = %ld\n", nprocs,
 		opt_iter, (long)opt_block);
-			
+
 			printf("# total_size = %ld\n", (long)(opt_block*nprocs*opt_iter));
-			
-			printf("# Write:  min_time = %f, max_time = %f, mean_time = %f\n", 
+
+			printf("# Write:  min_time = %f, max_time = %f, mean_time = %f\n",
 				min_write_tim, max_write_tim, ave_write_tim);
-			printf("# Read:  min_time = %f, max_time = %f, mean_time = %f\n", 
+			printf("# Read:  min_time = %f, max_time = %f, mean_time = %f\n",
 				min_read_tim, max_read_tim, ave_read_tim);
-		
+
 	   printf("Write bandwidth = %f Mbytes/sec\n", write_bw);
 	   printf("Read bandwidth = %f Mbytes/sec\n", read_bw);
-		
+
 		if (opt_correct) {
 			printf("Correctness test %s.\n", correct ? "passed" : "failed");
 		}
 	}
 
 
-die_jar_jar_die:	
+die_jar_jar_die:
 
 #if H5_HAVE_SETENV
 /* no setenv or unsetenv */
@@ -291,7 +291,7 @@ die_jar_jar_die:
 		unsetenv("PVFSTAB_FILE");
 	}
 #endif
-	
+
 	free(tmp);
 	if (opt_correct) free(tmp2);
 	MPI_Finalize();
@@ -301,7 +301,7 @@ die_jar_jar_die:
 int parse_args(int argc, char **argv)
 {
 	int c;
-	
+
 	while ((c = getopt(argc, argv, "s:b:i:f:p:c")) != EOF) {
 		switch (c) {
 			case 's': /* stripe */
@@ -335,7 +335,7 @@ int parse_args(int argc, char **argv)
 double Wtime()
 {
 	struct timeval t;
-	
+
 	gettimeofday(&t, NULL);
 	return((double)t.tv_sec + (double)t.tv_usec / 1000000);
 }

@@ -26,7 +26,7 @@
 #include "H5MMprivate.h"
 #include "H5Opkg.h"             /* Object header functions                  */
 
-#if defined (WIN32) && !defined (__MWERKS__) 
+#if defined (WIN32) && !defined (__MWERKS__)
 #include <sys/types.h>
 #include <sys/timeb.h>
 #endif
@@ -83,8 +83,8 @@ const H5O_class_t H5O_MTIME_NEW[1] = {{
 }};
 
 /* Current version of new mtime information */
-#define H5O_MTIME_VERSION 	1	
- 
+#define H5O_MTIME_VERSION 	1
+
 /* Track whether tzset routine was called */
 static int	ntzset=0;
 
@@ -243,12 +243,12 @@ H5O_mtime_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
 
 	the_time -= tz.tz_minuteswest * 60 - (tm.tm_isdst ? 3600 : 0);
     }
-#elif defined (WIN32) 
+#elif defined (WIN32)
   #if !defined (__MWERKS__) /* MSVC */
     {
      struct timeb timebuffer;
      long  tz;
-     
+
      ftime(&timebuffer);
      tz = timebuffer.timezone;
      /* daylight is not handled properly. Currently we just hard-code
@@ -272,7 +272,7 @@ H5O_mtime_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
     /* Irix64 */
     HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to obtain local timezone information");
 #endif
-    
+
     /* The return value */
     if (NULL==(mesg = H5FL_MALLOC(time_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
@@ -305,7 +305,7 @@ static herr_t
 H5O_mtime_new_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
 {
     const time_t	*mesg = (const time_t *) _mesg;
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mtime_new_encode);
 
     /* check args */
@@ -348,7 +348,7 @@ H5O_mtime_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
 {
     const time_t	*mesg = (const time_t *) _mesg;
     struct tm		*tm;
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mtime_encode);
 
     /* check args */
@@ -397,7 +397,7 @@ H5O_mtime_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
     assert(mesg);
     if (!dest && NULL==(dest = H5FL_MALLOC(time_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    
+
     /* copy */
     *dest = *mesg;
 
@@ -548,7 +548,7 @@ H5O_mtime_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *
     const time_t	*mesg = (const time_t *)_mesg;
     struct tm		*tm;
     char		buf[128];
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mtime_debug);
 
     /* check args */
@@ -560,7 +560,7 @@ H5O_mtime_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *
 
     /* debug */
     tm = HDlocaltime(mesg);
-    
+
     HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	    "Time:", buf);

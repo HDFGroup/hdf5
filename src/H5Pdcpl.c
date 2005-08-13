@@ -112,7 +112,7 @@ done:
  *
  *              Raymond Lu
  *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for 
+ *              Changed the way to check parameter and set property for
  *              generic property list.
  *
  *-------------------------------------------------------------------------
@@ -159,7 +159,7 @@ done:
  *
  *              Raymond Lu
  *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and get property for 
+ *              Changed the way to check parameter and get property for
  *              generic property list.
  *
  *-------------------------------------------------------------------------
@@ -205,7 +205,7 @@ done:
  *
  *              Raymond Lu
  *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for 
+ *              Changed the way to check parameter and set property for
  *              generic property list.
  *
  *-------------------------------------------------------------------------
@@ -274,7 +274,7 @@ done:
  *
  *              Raymond Lu
  *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for 
+ *              Changed the way to check parameter and set property for
  *              generic property list.
  *
  *-------------------------------------------------------------------------
@@ -295,10 +295,10 @@ H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     if(H5P_get(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't get layout"); 
-    if(H5D_CHUNKED != layout) 
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't get layout");
+    if(H5D_CHUNKED != layout)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a chunked storage layout");
-   
+
     if(H5P_get(plist, H5D_CRT_CHUNK_DIM_NAME, &ndims) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get chunk dimensionality");
 
@@ -347,7 +347,7 @@ done:
  *
  *              Raymond Lu
  *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for 
+ *              Changed the way to check parameter and set property for
  *              generic property list.
  *
  *-------------------------------------------------------------------------
@@ -388,7 +388,7 @@ H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
                 HGOTO_ERROR (H5E_EFL, H5E_OVERFLOW, FAIL, "total external data size overflowed");
         } /* end for */
     } /* end if */
-    
+
 
     /* Add to the list */
     if (efl.nused >= efl.nalloc) {
@@ -406,7 +406,7 @@ H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
     efl.slot[idx].offset = offset;
     efl.slot[idx].size = size;
     efl.nused++;
-    
+
     if(H5P_set(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set external file list");
 
@@ -431,7 +431,7 @@ done:
  *
  *              Raymond Lu
  *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for 
+ *              Changed the way to check parameter and set property for
  *              generic property list.
  *
  *-------------------------------------------------------------------------
@@ -445,7 +445,7 @@ H5Pget_external_count(hid_t plist_id)
 
     FUNC_ENTER_API(H5Pget_external_count, FAIL);
     H5TRACE1("Is","i",plist_id);
-    
+
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
@@ -453,10 +453,10 @@ H5Pget_external_count(hid_t plist_id)
     /* Get value */
     if(H5P_get(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file list");
-    
+
     /* Set return value */
     ret_value=(int)efl.nused;
-    
+
 done:
     FUNC_LEAVE_API(ret_value);
 }
@@ -488,7 +488,7 @@ done:
  *
  *              Raymond Lu
  *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and get property for 
+ *              Changed the way to check parameter and get property for
  *              generic property list.
  *
  *-------------------------------------------------------------------------
@@ -503,7 +503,7 @@ H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size, char *name/*out*
 
     FUNC_ENTER_API(H5Pget_external, FAIL);
     H5TRACE6("e","iIuzxxx",plist_id,idx,name_size,name,offset,size);
-    
+
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
@@ -511,7 +511,7 @@ H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size, char *name/*out*
     /* Get value */
     if(H5P_get(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file list");
-    
+
     if (idx>=efl.nused)
         HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL, "external file index is out of range");
 
@@ -644,7 +644,7 @@ done:
  *
  *              Raymond Lu
  *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for  
+ *              Changed the way to check parameter and set property for
  *              generic property list.
  *
  *-------------------------------------------------------------------------
@@ -752,7 +752,7 @@ done:
  *		value between zero and N-1 as described for H5Pget_nfilters()
  *		and the function will return failure if the filter number is
  *		out or range.
- * 
+ *
  * Return:	Success:	Filter identification number.
  *
  *		Failure:	H5Z_FILTER_ERROR (Negative)
@@ -764,8 +764,8 @@ done:
  *
  *              Raymond Lu
  *              Tuesday, October 2, 2001
- *              Changed the way to check paramter and set property for 
- *              generic property list. 
+ *              Changed the way to check paramter and set property for
+ *              generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -779,7 +779,7 @@ H5Pget_filter(hid_t plist_id, unsigned idx, unsigned int *flags/*out*/,
     H5P_genplist_t *plist;      /* Property list pointer */
     size_t		i;      /* Local index variable */
     H5Z_filter_t ret_value;     /* return value */
-    
+
     FUNC_ENTER_API(H5Pget_filter, H5Z_FILTER_ERROR);
     H5TRACE7("Zf","iIux*zxzx",plist_id,idx,flags,cd_nelmts,cd_values,namelen,
              name);
@@ -843,7 +843,7 @@ H5Pget_filter(hid_t plist_id, unsigned idx, unsigned int *flags/*out*/,
         else
             name[0] = '\0';
     }
-    
+
     /* Set return value */
     ret_value=filter->id;
 
@@ -864,7 +864,7 @@ done:
  *		number of values defined by the filter.  The ID should be the
  *              filter ID to retrieve the parameters for.  If the filter is not
  *              set for the property list, an error will be returned.
- * 
+ *
  * Return:	Success:	Non-negative
  *		Failure:	Negative
  *
@@ -885,11 +885,11 @@ H5Pget_filter_by_id(hid_t plist_id, H5Z_filter_t id, unsigned int *flags/*out*/,
     H5P_genplist_t *plist;      /* Property list pointer */
     size_t		i;      /* Local index variable */
     herr_t ret_value=SUCCEED;   /* Return value */
-    
+
     FUNC_ENTER_API(H5Pget_filter_by_id, FAIL);
     H5TRACE7("e","iZfx*zxzx",plist_id,id,flags,cd_nelmts,cd_values,namelen,
              name);
-    
+
     /* Check args */
     if (cd_nelmts || cd_values) {
         if (cd_nelmts && *cd_nelmts>256)
@@ -957,7 +957,7 @@ done:
  *
  * Purpose:	This is a query routine to verify that all the filters set
  *              in the dataset creation property list are available currently.
- * 
+ *
  * Return:	Success:	TRUE if all filters available, FALSE if one or
  *                              more filters not currently available.
  *		Failure:	FAIL on error
@@ -975,10 +975,10 @@ H5Pall_filters_avail(hid_t plist_id)
     H5O_pline_t         pline;  /* Filter pipeline */
     H5P_genplist_t *plist;      /* Property list pointer */
     hbool_t ret_value=TRUE;     /* return value */
-    
+
     FUNC_ENTER_API(H5Pall_filters_avail, UFAIL);
     H5TRACE1("t","i",plist_id);
-    
+
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, UFAIL, "can't find object for ID");
@@ -1016,8 +1016,8 @@ done:
  *
  *              Raymond Lu
  *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for 
- *              generic property list. 
+ *              Changed the way to check parameter and set property for
+ *              generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -1027,14 +1027,14 @@ H5Pset_deflate(hid_t plist_id, unsigned level)
     H5O_pline_t         pline;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* return value */
-    
+
     FUNC_ENTER_API(H5Pset_deflate, FAIL);
     H5TRACE2("e","iIu",plist_id,level);
 
     /* Check arguments */
     if (level>9)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid deflate level");
-   
+
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
@@ -1081,7 +1081,7 @@ H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels_per_block)
     H5P_genplist_t *plist;      /* Property list pointer */
     unsigned cd_values[2];      /* Filter parameters */
     herr_t ret_value=SUCCEED;   /* return value */
-    
+
     FUNC_ENTER_API(H5Pset_szip, FAIL);
     H5TRACE3("e","iIuIu",plist_id,options_mask,pixels_per_block);
 
@@ -1095,7 +1095,7 @@ H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels_per_block)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "pixels_per_block is not even");
     if (pixels_per_block>H5_SZIP_MAX_PIXELS_PER_BLOCK)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "pixels_per_block is too large");
-   
+
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
@@ -1131,10 +1131,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_shuffle
  *
- * Purpose:	Sets the shuffling method for a permanent 
+ * Purpose:	Sets the shuffling method for a permanent
  *		filter to H5Z_FILTER_SHUFFLE
- *		and bytes of the datatype of the array to be shuffled 
- *              
+ *		and bytes of the datatype of the array to be shuffled
+ *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Kent Yang
@@ -1150,14 +1150,14 @@ H5Pset_shuffle(hid_t plist_id)
     H5O_pline_t         pline;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* return value */
-    
+
     FUNC_ENTER_API(H5Pset_shuffle, FAIL);
     H5TRACE1("e","i",plist_id);
 
     /* Check arguments */
     if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
         HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
-   
+
     /* Get the plist structure */
     if(NULL == (plist = H5I_object(plist_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
@@ -1178,7 +1178,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_fletcher32
  *
- * Purpose:	Sets Fletcher32 checksum of EDC for a dataset creation 
+ * Purpose:	Sets Fletcher32 checksum of EDC for a dataset creation
  *              property list.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -1196,10 +1196,10 @@ H5Pset_fletcher32(hid_t plist_id)
     H5O_pline_t         pline;
     H5P_genplist_t      *plist;      /* Property list pointer */
     herr_t              ret_value=SUCCEED;   /* return value */
-    
+
     FUNC_ENTER_API(H5Pset_fletcher32, FAIL);
     H5TRACE1("e","i",plist_id);
-   
+
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
@@ -1224,7 +1224,7 @@ done:
  *		VALUE is interpretted as being of type TYPE, which need not
  *		be the same type as the dataset but the library must be able
  *		to convert VALUE to the dataset type when the dataset is
- *		created.  If VALUE is NULL, it will be interpreted as 
+ *		created.  If VALUE is NULL, it will be interpreted as
  *		undefining fill value.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -1236,8 +1236,8 @@ done:
  *
  *              Raymond Lu
  *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for 
- *              generic property list. 
+ *              Changed the way to check parameter and set property for
+ *              generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -1248,7 +1248,7 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
     H5T_t		*type = NULL;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* return value */
-   
+
     FUNC_ENTER_API(H5Pset_fill_value, FAIL);
     H5TRACE3("e","iix",plist_id,type_id,value);
 
@@ -1282,7 +1282,7 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
 
     if(H5P_set(plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set fill value");
-  	     
+
 done:
     FUNC_LEAVE_API(ret_value);
 }
@@ -1306,7 +1306,7 @@ done:
  *
  *              Raymond Lu
  *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and get property for 
+ *              Changed the way to check parameter and get property for
  *              generic property list.
  *
  *-------------------------------------------------------------------------
@@ -1322,7 +1322,7 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
     hid_t		src_id = -1;		/*source data type id	*/
     herr_t              ret_value=SUCCEED;      /* Return value */
     H5P_genplist_t *plist;      /* Property list pointer */
-    
+
     FUNC_ENTER_API(H5Pget_fill_value, FAIL);
     H5TRACE3("e","iix",plist_id,type_id,value);
 
@@ -1331,7 +1331,7 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     if (!value)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,"no fill value output buffer");
- 
+
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
@@ -1343,14 +1343,14 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
      * is undefined, also return error.
      */
     if(H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value"); 
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value");
     if(fill.size == (size_t)-1)
 	HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "fill value is undefined");
 
     if(fill.size == 0) {
 	HDmemset(value, 0, H5T_get_size(type));
    	HGOTO_DONE(SUCCEED);
-    } 	    
+    }
      /*
      * Can we convert between the source and destination data types?
      */
@@ -1365,7 +1365,7 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
      * other than the fill value buffer that is large enough for both source
      * and destination.  The app-supplied buffer might do okay.
      */
-    if (H5T_get_size(type)>=H5T_get_size(fill.type)) {    
+    if (H5T_get_size(type)>=H5T_get_size(fill.type)) {
         buf = value;
         if (H5T_path_bkg(tpath) && NULL==(bkg=H5MM_malloc(H5T_get_size(type))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
@@ -1376,7 +1376,7 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
             bkg = value;
     }
     HDmemcpy(buf, fill.buf, H5T_get_size(fill.type));
-        
+
     /* Do the conversion */
     if (H5T_convert(tpath, src_id, type_id, 1, 0, 0, buf, bkg, H5AC_dxpl_id)<0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
@@ -1398,7 +1398,7 @@ done:
  * Function:    H5P_is_fill_value_defined
  *
  * Purpose:	Check if fill value is defined.  Internal version of function
- * 
+ *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:  Raymond Lu
@@ -1430,7 +1430,7 @@ H5P_is_fill_value_defined(const struct H5O_fill_t *fill, H5D_fill_value_t *statu
 	*status = H5D_FILL_VALUE_USER_DEFINED;
     else {
 	*status = H5D_FILL_VALUE_ERROR;
-        HGOTO_ERROR(H5E_PLIST, H5E_BADRANGE, FAIL, "invalid combination of fill-value info"); 
+        HGOTO_ERROR(H5E_PLIST, H5E_BADRANGE, FAIL, "invalid combination of fill-value info");
     }
 
 done:
@@ -1442,14 +1442,14 @@ done:
  * Function:    H5Pfill_value_defined
  *
  * Purpose:	Check if fill value is defined.
- * 
+ *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:  Raymond Lu
  *              Wednesday, January 16, 2002
  *
  * Modifications:
- *              
+ *
  *
  *-------------------------------------------------------------------------
  */
@@ -1471,11 +1471,11 @@ H5Pfill_value_defined(hid_t plist_id, H5D_fill_value_t *status)
 
     /* Get the fill value struct */
     if(H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value"); 
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value");
 
     /* Get the fill-value status */
     if(H5P_is_fill_value_defined(&fill, status) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't check fill value status"); 
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't check fill value status");
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -1488,14 +1488,14 @@ done:
  * Purpose:     Set space allocation time for dataset during creation.
  *		Valid values are H5D_ALLOC_TIME_DEFAULT, H5D_ALLOC_TIME_EARLY,
  *			H5D_ALLOC_TIME_LATE, H5D_ALLOC_TIME_INCR
- * 
+ *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Raymond Lu
  * 		Wednesday, January 16, 2002
  *
  * Modifications:
- *		
+ *
  *
  *-------------------------------------------------------------------------
  */
@@ -1516,7 +1516,7 @@ H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t alloc_time)
     /* Check for resetting to default for layout type */
     if(alloc_time==H5D_ALLOC_TIME_DEFAULT) {
         H5D_layout_t layout;            /* Type of storage layout */
-        
+
         /* Retrieve the storage layout */
         if(H5P_get(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get layout");
@@ -1553,7 +1553,7 @@ H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t alloc_time)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set space allocation time");
 
 done:
-    FUNC_LEAVE_API(ret_value);  
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1563,14 +1563,14 @@ done:
  * Purpose:     Get space allocation time for dataset creation.
  *		Valid values are H5D_ALLOC_TIME_DEFAULT, H5D_ALLOC_TIME_EARLY,
  *			H5D_ALLOC_TIME_LATE, H5D_ALLOC_TIME_INCR
- * 
+ *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Raymond Lu
  *              Wednesday, January 16, 2002
  *
  * Modifications:
- *              
+ *
  *
  *-------------------------------------------------------------------------
  */
@@ -1678,8 +1678,8 @@ done:
  * Function: H5Premove_filter
  *
  * Purpose: Deletes a filter from the dataset creation property list;
- *  deletes all filters if FILTER is H5Z_FILTER_NONE  
- *  
+ *  deletes all filters if FILTER is H5Z_FILTER_NONE
+ *
  * Return: Non-negative on success/Negative on failure
  *
  * Programmer: Pedro Vicente

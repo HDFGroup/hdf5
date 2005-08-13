@@ -40,11 +40,11 @@ int data[SPACE_DIM1][SPACE_DIM2];
 /*-------------------------------------------------------------------------
  * Function:	main
  *
- * Purpose:	
+ * Purpose:
  *
- * Return:	Success:	
+ * Return:	Success:
  *
- *		Failure:	
+ *		Failure:
  *
  * Programmer:	Quincey Koziol
  *              Thursday, November 14, 2002

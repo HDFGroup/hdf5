@@ -300,7 +300,7 @@ H5G_node_debug_key (FILE *stream, H5F_t *f, hid_t dxpl_id, int indent, int fwidt
     const H5HL_t           *heap = NULL;
     const char		   *s;
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5G_node_debug_key);
     assert (key);
 
@@ -462,7 +462,7 @@ done:
  *
  *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
  *      Added `id to name' support.
- * 
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -679,7 +679,7 @@ done:
  *		5/13/04
  *
  * Modifications:
- * 
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1316,7 +1316,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
             if (H5O_link(sn->entry+idx, -1, dxpl_id)<0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5B_INS_ERROR, "unable to decrement object link count");
         }
-        
+
         /* Remove the name from the local heap */
         if (NULL == (heap = H5HL_protect(f, dxpl_id, bt_udata->heap_addr)))
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR, "unable to protect symbol name");
@@ -1359,7 +1359,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
             }
             sn = NULL;
             ret_value = H5B_INS_REMOVE;
-            
+
         } else if (0==idx) {
             /*
              * We are about to remove the left-most entry from the symbol table
@@ -1371,7 +1371,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
             HDmemmove(sn->entry+idx, sn->entry+idx+1,
                       (sn->nsyms-idx)*sizeof(H5G_entry_t));
             ret_value = H5B_INS_NOOP;
-            
+
         } else if (idx+1==sn->nsyms) {
             /*
              * We are about to remove the right-most entry from the symbol table
@@ -1383,7 +1383,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
             rt_key->offset = sn->entry[sn->nsyms-1].name_off;
             *rt_key_changed = TRUE;
             ret_value = H5B_INS_NOOP;
-            
+
         } else {
             /*
              * We are about to remove an entry from the middle of a symbol table
@@ -1426,7 +1426,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
         sn = NULL;
         ret_value = H5B_INS_REMOVE;
     } /* end else */
-    
+
 done:
     if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE)<0)
 	HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node");
@@ -1551,7 +1551,7 @@ done:
  * Function:	H5G_node_sumup
  *
  * Purpose:	This function gets called during a group iterate operation
- *              to return total number of members in the group. 
+ *              to return total number of members in the group.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1599,10 +1599,10 @@ done:
  * Purpose:	This function gets called during a group iterate operation
  *              to return object name by giving idx.
  *
- * Return:	0 if object isn't found in this node; 1 if object is found; 
+ * Return:	0 if object isn't found in this node; 1 if object is found;
  *              Negative on failure
  *
- * Programmer:  Raymond Lu	
+ * Programmer:  Raymond Lu
  *              Nov 20, 2002
  *
  * Modifications:
@@ -1617,7 +1617,7 @@ H5G_node_name(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
     const H5HL_t        *heap = NULL;
     size_t		name_off;
     hsize_t             loc_idx;
-    const char		*name;   
+    const char		*name;
     H5G_node_t		*sn = NULL;
     int                 ret_value = H5B_ITER_CONT;
 
@@ -1632,11 +1632,11 @@ H5G_node_name(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
 
     if (NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_ITER_ERROR, "unable to load symbol table node");
-    
-    /* Find the node, locate the object symbol table entry and retrieve the name */ 
+
+    /* Find the node, locate the object symbol table entry and retrieve the name */
     if(bt_udata->idx >= bt_udata->num_objs && bt_udata->idx < (bt_udata->num_objs+sn->nsyms)) {
-        loc_idx = bt_udata->idx - bt_udata->num_objs; 
-        name_off = sn->entry[loc_idx].name_off;  
+        loc_idx = bt_udata->idx - bt_udata->num_objs;
+        name_off = sn->entry[loc_idx].name_off;
 
         if (NULL == (heap = H5HL_protect(f, dxpl_id, bt_udata->mesg->heap_addr)))
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_ITER_ERROR, "unable to protect symbol name");
@@ -1672,7 +1672,7 @@ done:
  * Return:	0 if object isn't found in this node; 1 if found;
  *              Negative on failure
  *
- * Programmer:  Raymond Lu	
+ * Programmer:  Raymond Lu
  *              Nov 20, 2002
  *
  *
@@ -1694,13 +1694,13 @@ H5G_node_type(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
     assert(H5F_addr_defined(addr));
     assert(bt_udata);
 
-    /* Find the node, locate the object symbol table entry and retrieve the type */ 
+    /* Find the node, locate the object symbol table entry and retrieve the type */
     if (NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_ITER_ERROR, "unable to load symbol table node");
 
     if(bt_udata->idx >= bt_udata->num_objs && bt_udata->idx < (bt_udata->num_objs+sn->nsyms)) {
-        loc_idx = bt_udata->idx - bt_udata->num_objs; 
-        bt_udata->type = H5G_get_type(&(sn->entry[loc_idx]), dxpl_id); 
+        loc_idx = bt_udata->idx - bt_udata->num_objs;
+        bt_udata->type = H5G_get_type(&(sn->entry[loc_idx]), dxpl_id);
         ret_value = H5B_ITER_STOP;
     } else {
         bt_udata->num_objs += sn->nsyms;
@@ -1709,7 +1709,7 @@ H5G_node_type(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
 done:
     if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE) != SUCCEED)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header");
-    
+
     FUNC_LEAVE_NOAPI(ret_value);
 }
 

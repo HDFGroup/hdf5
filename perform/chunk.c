@@ -158,7 +158,7 @@ create_dataset (void)
     H5Zregister (H5Z_COUNTER);
 #endif /* H5_WANT_H5_V1_4_COMPAT */
     H5Pset_filter (dcpl, FILTER_COUNTER, 0, 0, NULL);
-        
+
     /* The dataset */
     dset = H5Dcreate (file, "dset", H5T_NATIVE_SCHAR, space, dcpl);
     assert (dset>=0);
@@ -244,8 +244,8 @@ test_rowmaj (int op, size_t cache_size, size_t io_size)
 	    H5Sclose (mem_space);
 	}
     }
-    
-    free (buf); 
+
+    free (buf);
     H5Sclose (file_space);
     H5Dclose (dset);
     H5Fclose (file);
@@ -300,7 +300,7 @@ test_diag (int op, size_t cache_size, size_t io_size, size_t offset)
     dset = H5Dopen (file, "dset");
     file_space = H5Dget_space (dset);
     nio_g = 0;
-    
+
     for (i=0, hs_size[0]=io_size; hs_size[0]==io_size; i+=offset) {
 	hs_offset[0] = hs_offset[1] = i;
 	hs_size[0] = hs_size[1] = MIN (io_size, CH_SIZE*DS_SIZE-i);
@@ -338,9 +338,9 @@ test_diag (int op, size_t cache_size, size_t io_size, size_t offset)
  *
  * Purpose:	See file prologue.
  *
- * Return:	Success:	
+ * Return:	Success:
  *
- *		Failure:	
+ *		Failure:
  *
  * Programmer:	Robb Matzke
  *              Thursday, May 14, 1998
@@ -416,7 +416,7 @@ main (void)
     fclose (d);
     fprintf (f, "pause -1\n");
 #endif
-    
+
 #if 1
     /*
      * Test row-major writing of the dataset with various sizes of request

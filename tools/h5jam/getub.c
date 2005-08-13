@@ -39,11 +39,11 @@ static struct long_options l_opts[] = {
 /*-------------------------------------------------------------------------
  * Function:    usage
  *
- * Purpose:     Print the usage message 
+ * Purpose:     Print the usage message
  *
  * Return:      void
  *
- * Programmer:  
+ * Programmer:
  *
  * Modifications:
  *
@@ -62,11 +62,11 @@ usage (const char *prog)
  *
  * Purpose:     Parse the command line for the h5dumper.
  *
- * Return:      Success:    
+ * Return:      Success:
  *
  *              Failure:    Exits program with EXIT_FAILURE value.
  *
- * Programmer:  
+ * Programmer:
  *
  * Modifications:
  *

@@ -614,7 +614,7 @@ main(int argc, char *argv[])
 	printf("Cannot create file %s; test aborted\n", filename);
 	exit(1);
     }
-    
+
     /*
      * For testing file families, fool the library into thinking it already
      * allocated a whole bunch of data.
@@ -682,7 +682,7 @@ main(int argc, char *argv[])
     /* Close the test file and exit */
     H5Pclose(fcpl);
     H5Fclose(file);
-    
+
     if (nerrors) {
 	printf("***** %d I-STORE TEST%s FAILED! *****\n",
 	       nerrors, 1 == nerrors ? "" : "S");

@@ -155,7 +155,7 @@ NAME
    H5FD_mpio_init_interface -- Initialize interface-specific information
 USAGE
     herr_t H5FD_mpio_init_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -217,7 +217,7 @@ H5FD_mpio_init(void)
 	H5FD_mpio_Debug_inited++;
     }
 #endif /* H5FDmpio_DEBUG */
-    
+
     /* Set return value */
     ret_value=H5FD_MPIO_g;
 
@@ -300,7 +300,7 @@ H5FD_mpio_term(void)
  *		Modified to work with the virtual file layer.
  *
  *		Raymond Lu, 2001-10-23
- *		Changed the file access list to the new generic property 
+ *		Changed the file access list to the new generic property
  *		list.
  *
  *		Albert Cheng, 2003-04-17
@@ -317,7 +317,7 @@ H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
     H5FD_mpio_fapl_t	fa;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value;
-    
+
     FUNC_ENTER_API(H5Pset_fapl_mpio, FAIL)
     H5TRACE3("e","iMcMi",fapl_id,comm,info);
 
@@ -372,7 +372,7 @@ done:
  *	        read/write calls.
  *
  *		Raymond Lu, 2001-10-23
- *		Changed the file access list to the new generic property 
+ *		Changed the file access list to the new generic property
  *		list.
  *
  *		Albert Cheng, 2003-04-17
@@ -388,7 +388,7 @@ H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm/*out*/, MPI_Info *info/*out*/)
     MPI_Comm	comm_tmp=MPI_COMM_NULL;
     int		mpi_code;		/* mpi return code */
     herr_t      ret_value=SUCCEED;      /* Return value */
-    
+
     FUNC_ENTER_API(H5Pget_fapl_mpio, FAIL)
     H5TRACE3("e","ixx",fapl_id,comm,info);
 
@@ -407,7 +407,7 @@ H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm/*out*/, MPI_Info *info/*out*/)
 	if (MPI_SUCCESS != (mpi_code=MPI_Comm_dup(fa->comm, &comm_tmp)))
 	    HMPI_GOTO_ERROR(FAIL, "MPI_Comm_dup failed", mpi_code)
     }
-    
+
     if (info){
 	if (MPI_INFO_NULL != fa->info){
 	    if (MPI_SUCCESS != (mpi_code=MPI_Info_dup(fa->info, info)))
@@ -444,7 +444,7 @@ done:
  *
  * 		H5FD_MPIO_COLLECTIVE:
  *			Use collective I/O access.
- *			
+ *
  * Return:	Success:	Non-negative
  *
  * 		Failure:	Negative
@@ -465,7 +465,7 @@ H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode)
 
     FUNC_ENTER_API(H5Pset_dxpl_mpio, FAIL)
     H5TRACE2("e","iDt",dxpl_id,xfer_mode);
-    
+
     if(dxpl_id==H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
 
@@ -601,7 +601,7 @@ H5FD_mpio_fapl_copy(const void *_old_fa)
     void		*ret_value = NULL;
     const H5FD_mpio_fapl_t *old_fa = (const H5FD_mpio_fapl_t*)_old_fa;
     H5FD_mpio_fapl_t	*new_fa = NULL;
-    
+
     FUNC_ENTER_NOAPI(H5FD_mpio_fapl_copy, NULL)
 #ifdef H5FDmpio_DEBUG
 if (H5FD_mpio_Debug[(int)'t'])
@@ -692,7 +692,7 @@ fprintf(stderr, "leaving H5FD_mpio_fapl_free\n");
  *
  *              Failure:        NULL
  *
- * Programmer:  
+ * Programmer:
  *              January 30, 1998
  *
  * Modifications:
@@ -710,7 +710,7 @@ fprintf(stderr, "leaving H5FD_mpio_fapl_free\n");
  *		Added barrier after MPI_File_set_size to prevent race
  *		condition -- subsequent writes were being truncated, causing
  *		holes in file.
- *		
+ *
  * 		Robb Matzke, 1999-08-06
  *		Modified to work with the virtual file layer.
  *
@@ -1087,26 +1087,26 @@ done:
 
 /*-------------------------------------------------------------------------
  * Function:       H5FD_mpio_get_handle
- * 
+ *
  * Purpose:        Returns the file handle of MPIO file driver.
- * 
+ *
  * Returns:        Non-negative if succeed or negative if fails.
- * 
+ *
  * Programmer:     Raymond Lu
  *                 Sept. 16, 2002
- * 
+ *
  * Modifications:
  *
  *-------------------------------------------------------------------------
 */
-static herr_t  
+static herr_t
 H5FD_mpio_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
-{   
+{
     H5FD_mpio_t         *file = (H5FD_mpio_t *)_file;
     herr_t              ret_value = SUCCEED;
-                            
+
     FUNC_ENTER_NOAPI(H5FD_mpio_get_handle, FAIL)
-                                    
+
     if(!file_handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid")
 
@@ -1115,7 +1115,7 @@ H5FD_mpio_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
-             
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5FD_mpio_read
@@ -1159,7 +1159,7 @@ done:
  *
  * 		Robb Matzke, 1999-07-28
  *		The ADDR argument is passed by value.
- *		
+ *
  * 		Robb Matzke, 1999-08-06
  *		Modified to work with the virtual file layer.
  *
@@ -1240,7 +1240,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
         if(NULL == (plist = H5I_object(dxpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
         xfer_mode=(H5FD_mpio_xfer_t)H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
-    
+
         /*
          * Set up for a fancy xfer using complex types, or single byte block. We
          * wouldn't need to rely on the use_view field if MPI semantics allowed
@@ -1412,7 +1412,7 @@ done:
  *
  *		Kim Yates, Pat Weidhaas,  2000-09-26
  *		Move block of coding where only p0 writes after the
- *              MPI_File_set_view call. 
+ *              MPI_File_set_view call.
  *
  *		Quincey Koziol,  2002-05-10
  *		Instead of always writing metadata from process 0, spread the
@@ -1498,7 +1498,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     /* Obtain the data transfer properties */
     if(NULL == (plist = H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-    
+
     if(type==H5FD_MEM_DRAW) {
         H5FD_mpio_xfer_t            xfer_mode;   /* I/O tranfer mode */
 
@@ -1614,7 +1614,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 
     /* Forget the EOF value (see H5FD_mpio_get_eof()) --rpm 1999-08-06 */
     file->eof = HADDR_UNDEF;
-    
+
 done:
     /* if only one process writes, need to broadcast the ret_value to other processes */
     if (type!=H5FD_MEM_DRAW) {
@@ -1655,7 +1655,7 @@ done:
  *              allocated byte.
  *
  *              Quincey Koziol, 2002-06-??
- *              Changed file extension method to use MPI_File_set_size instead 
+ *              Changed file extension method to use MPI_File_set_size instead
  *              read->write method.
  *
  *-------------------------------------------------------------------------

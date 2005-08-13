@@ -178,8 +178,8 @@ rsrv_ohdr(void)
     if( file_id < 0) TEST_ERROR;
 
     /* Create the data space for the dataset. */
-    dims[0] = 4; 
-    dims[1] = 6; 
+    dims[0] = 4;
+    dims[1] = 6;
     dataspace_id = H5Screate_simple(2, dims, NULL);
     if( dataspace_id < 0) TEST_ERROR;
 
@@ -207,7 +207,7 @@ rsrv_ohdr(void)
 
         if(status < 0)
             break;
-    } 
+    }
 
     /* The loop should have broken before completing--the file should not have had
      * enough address space to hold 2000 attributes (or this test needs to be updated
@@ -265,7 +265,7 @@ rsrv_ohdr(void)
  *              enough file address space exists before writing.
  *		This function does this by creating a dataset containing
  *              variable length data past the limit of the file, then
- *              ensuring that an error (not an assert) was generated and 
+ *              ensuring that an error (not an assert) was generated and
  *              that the file is readable.
  *
  * Return:	Success:	0
@@ -308,7 +308,7 @@ rsrv_vlen(void)
     if( file_id < 0) TEST_ERROR;
 
     /* Create the data space for the dataset. */
-    dims[0] = 2000; 
+    dims[0] = 2000;
     dataspace_id = H5Screate_simple(1, dims, NULL);
     if( dataspace_id < 0) TEST_ERROR;
 
@@ -327,13 +327,13 @@ rsrv_vlen(void)
 
     /* Create a memory dataspace for writing */
     dims[0] = 1;
-    mem_space_id = H5Screate_simple(1, dims, NULL); 
+    mem_space_id = H5Screate_simple(1, dims, NULL);
     if( mem_space_id < 0) TEST_ERROR;
 
     /* Create a selection to write to */
     start[0] = 0;
     count[0] = 1;
-    if( H5Sselect_hyperslab(dataspace_id, H5S_SELECT_SET, 
+    if( H5Sselect_hyperslab(dataspace_id, H5S_SELECT_SET,
                             start, NULL, count, NULL)  < 0) TEST_ERROR;
 
     for (i = 0; i< 2000; i++)
@@ -341,7 +341,7 @@ rsrv_vlen(void)
         vlen_data.len = (i%20) + 1;
 
         offset[0] = i;
-        if( H5Soffset_simple(dataspace_id, offset) <0) TEST_ERROR; 
+        if( H5Soffset_simple(dataspace_id, offset) <0) TEST_ERROR;
 
         H5E_BEGIN_TRY
             status = H5Dwrite(dataset_id, type_id, mem_space_id, dataspace_id, H5P_DEFAULT, &vlen_data);
@@ -349,7 +349,7 @@ rsrv_vlen(void)
 
         if(status < 0)
             break;
-    } 
+    }
 
     /* The loop should have broken before completing--the file should not have had
      * enough address space to hold 2000 attributes (or this test needs to be updated!).
@@ -406,11 +406,11 @@ rsrv_vlen(void)
 /*-------------------------------------------------------------------------
  * Function:	main
  *
- * Purpose:	
+ * Purpose:
  *
- * Return:	Success:	
+ * Return:	Success:
  *
- *		Failure:	
+ *		Failure:
  *
  * Programmer:	Nat Furrer and James Laird
  *              Thursday, July 1, 2004

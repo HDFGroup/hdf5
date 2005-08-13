@@ -31,22 +31,22 @@ class H5_DLLCPP StrType : public AtomType {
 	// Creates a string type with specified length - will be obsolete
 	StrType(const PredType& pred_type, const size_t size);
 
-        // Gets the string datatype of the specified dataset 
+        // Gets the string datatype of the specified dataset
 	StrType(const DataSet& dataset);
 
-	// Retrieves the character set type of this string datatype. 
+	// Retrieves the character set type of this string datatype.
 	H5T_cset_t getCset() const;
 
-	// Sets character set to be used. 
+	// Sets character set to be used.
 	void setCset(H5T_cset_t cset) const;
 
-	// Retrieves the string padding method for this string datatype. 
+	// Retrieves the string padding method for this string datatype.
 	H5T_str_t getStrpad() const;
 
-	// Defines the storage mechanism for character strings. 
+	// Defines the storage mechanism for character strings.
 	void setStrpad(H5T_str_t strpad) const;
 
-	// default constructor 
+	// default constructor
 	StrType();
 
 	// Creates a string datatype using an existing id

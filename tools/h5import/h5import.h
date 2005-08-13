@@ -13,9 +13,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * 
- * Data and structure definitions for h5import 
- * 
+ *
+ * Data and structure definitions for h5import
+ *
  */
 
 /*
@@ -39,7 +39,7 @@
 #define MAX_NUM_DIMENSION  32
 #define BASE_10 10
 
-#define CHUNK            0 
+#define CHUNK            0
 #define COMPRESS         1
 #define EXTEND           2
 #define EXTERNAL         3
@@ -51,8 +51,8 @@
 #define OUTPUT_CLASS     9
 #define OUTPUT_SIZE     10
 #define OUTPUT_ARCH     11
-#define OUTPUT_B_ORDER  12    
-#define COMPRESS_PARAM  13    
+#define OUTPUT_B_ORDER  12
+#define COMPRESS_PARAM  13
 
 /* data types */
 #define H5DT_INT8      signed char
@@ -75,7 +75,7 @@ struct path_info
 
 struct Input
 {
-  struct path_info path; 
+  struct path_info path;
   int inputClass;
   int inputSize;
   int rank;
@@ -85,7 +85,7 @@ struct Input
   int outputArchitecture;
   int outputByteOrder;
   hsize_t* sizeOfChunk;
-  hsize_t* maxsizeOfDimension;  
+  hsize_t* maxsizeOfDimension;
   int compressionType;
   int compressionParam;
   char *externFilename;
@@ -105,7 +105,7 @@ struct Options
 {
   struct infilesformat  infiles[30];  /* structure to hold the list of input file names. Limited to 30*/
   char   outfile[256];  /* output file name */
-  int    fcount;       /* number of input files */      
+  int    fcount;       /* number of input files */
 };
 
 char keytable[NUM_KEYS][30] = {
@@ -147,7 +147,7 @@ static int  state_table[15][8] =
 
   /* state 5: outfile */
   {ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
-   
+
   /* state 6: -h[elp] */
   {ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
 
@@ -177,9 +177,9 @@ static int  state_table[15][8] =
 
 };
 
-/* 
+/*
  *
- *  Function declarations for h5import 
+ *  Function declarations for h5import
  *
  */
 void  usage(char *);

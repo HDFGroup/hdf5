@@ -20,7 +20,7 @@
  *
  * Purpose:             Debugs an existing HDF5 file at a low level.
  *
- * Modifications:       
+ * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -107,7 +107,7 @@ main(int argc, char *argv[])
         fprintf(stderr, "cannot obtain H5F_t pointer\n");
         HDexit(2);
     }
-    
+
     /*
      * Parse command arguments.
      */
@@ -137,7 +137,7 @@ main(int argc, char *argv[])
          * Debug a local heap.
          */
         status = H5HL_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
-	
+
     } else if (!HDmemcmp (sig, H5HG_MAGIC, H5HG_SIZEOF_MAGIC)) {
 	/*
 	 * Debug a global heap collection.
@@ -157,7 +157,7 @@ main(int argc, char *argv[])
          * after the B-tree signature.
          */
         H5B_subid_t subtype = (H5B_subid_t)sig[H5B_SIZEOF_MAGIC];
-	
+
         switch (subtype) {
         case H5B_SNODE_ID:
             status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);

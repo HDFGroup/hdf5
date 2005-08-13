@@ -34,9 +34,9 @@ class VarLenType;
 class H5_DLLCPP AbstractDs : public H5Object {
    public:
 	// Gets a copy the datatype of that this abstract dataset uses.
-	// Note that this datatype is a generic one and can only be accessed 
-	// via generic member functions, i.e., member functions belong 
-	// to DataType.  To get specific datatype, i.e. EnumType, FloatType, 
+	// Note that this datatype is a generic one and can only be accessed
+	// via generic member functions, i.e., member functions belong
+	// to DataType.  To get specific datatype, i.e. EnumType, FloatType,
 	// etc..., use the specific functions, that follow, instead .
 	DataType getDataType() const;
 
@@ -52,8 +52,8 @@ class H5_DLLCPP AbstractDs : public H5Object {
 	// Gets the dataspace of this abstract dataset - pure virtual
 	virtual DataSpace getSpace() const = 0;
 
-        // Gets the class of the datatype that is used by this abstract 
-	// dataset        
+        // Gets the class of the datatype that is used by this abstract
+	// dataset
 	H5T_class_t getTypeClass() const;
 
 	// Returns the amount of storage size required for this abstract
@@ -63,7 +63,7 @@ class H5_DLLCPP AbstractDs : public H5Object {
 	// Copy constructor
 	AbstractDs( const AbstractDs& original );
 
-	virtual ~AbstractDs(); 
+	virtual ~AbstractDs();
 
    protected:
 	// Default constructor

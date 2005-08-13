@@ -23,7 +23,7 @@
  *                      the H5O package.  Therefore, do not change
  *                      any definitions in this file!
  *
- * Modifications:       
+ * Modifications:
  *
  *-------------------------------------------------------------------------
  */

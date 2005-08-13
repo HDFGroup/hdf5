@@ -12,15 +12,15 @@
   * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* 
+/*
  *  This program shows how the select_hyperslab and select_elements
  *  functions are used to write selected data from memory to the file.
  *  Program takes 48 elements from the linear buffer and writes them into
- *  the matrix using 3x2 blocks, (4,3) stride and (2,4) count. 
- *  Then four elements  of the matrix are overwritten with the new values and 
+ *  the matrix using 3x2 blocks, (4,3) stride and (2,4) count.
+ *  Then four elements  of the matrix are overwritten with the new values and
  *  file is closed. Program reopens the file and reads and displays the result.
- */ 
- 
+ */
+
 #include <string>
 
 #ifdef OLD_HEADER_FILENAME
@@ -29,7 +29,7 @@
 #include <iostream>
 #endif
 #include "H5Cpp.h"
- 
+
 #ifndef H5_NO_NAMESPACE
 using namespace H5;
 #endif
@@ -42,7 +42,7 @@ const int   MSPACE2_RANK = 1;	// Rank of the second dataset in memory
 const int   MSPACE2_DIM = 4;	// Dataset size in memory
 const int   FSPACE_RANK = 2;	// Dataset rank as it is stored in the file
 const int   FSPACE_DIM1 = 8;	// Dimension sizes of the dataset as it is...
-const int   FSPACE_DIM2 = 12;	// ...stored in the file 
+const int   FSPACE_DIM2 = 12;	// ...stored in the file
 const int   MSPACE_DIM1 = 8;	// We will read dataset back from the file...
 const int   MSPACE_DIM2 = 12;	// ...to the dataset in memory with these ...
 				// ...dataspace parameters
@@ -90,12 +90,12 @@ int main (void)
       /*
        * Create dataset and write it into the file.
        */
-      DataSet* dataset = new DataSet( 
+      DataSet* dataset = new DataSet(
             file->createDataSet( DATASET_NAME, PredType::NATIVE_INT, fspace ));
       dataset->write( matrix, PredType::NATIVE_INT );
 
       /*
-       * Select hyperslab for the dataset in the file, using 3x2 blocks, 
+       * Select hyperslab for the dataset in the file, using 3x2 blocks,
        * (4,3) stride and (2,4) count starting at the position (0,1).
        */
       hsize_t start[2]; // Start of hyperslab
@@ -104,20 +104,20 @@ int main (void)
       hsize_t block[2];  // Block sizes
       start[0]  = 0; start[1]  = 1;
       stride[0] = 4; stride[1] = 3;
-      count[0]  = 2; count[1]  = 4;    
+      count[0]  = 2; count[1]  = 4;
       block[0]  = 3; block[1]  = 2;
       fspace.selectHyperslab( H5S_SELECT_SET, count, start, stride, block);
 
       /*
        * Create dataspace for the first dataset.
        */
-      hsize_t dim1[] = {MSPACE1_DIM};  /* Dimension size of the first dataset 
-                                         (in memory) */ 
+      hsize_t dim1[] = {MSPACE1_DIM};  /* Dimension size of the first dataset
+                                         (in memory) */
       DataSpace mspace1( MSPACE1_RANK, dim1 );
 
       /*
-       * Select hyperslab. 
-       * We will use 48 elements of the vector buffer starting at the 
+       * Select hyperslab.
+       * We will use 48 elements of the vector buffer starting at the
        * second element.  Selected elements are 1 2 3 . . . 48
        */
       start[0]  = 1;
@@ -125,12 +125,12 @@ int main (void)
       count[0]  = 48;
       block[0]  = 1;
       mspace1.selectHyperslab( H5S_SELECT_SET, count, start, stride, block);
- 
+
       /*
        * Write selection from the vector buffer to the dataset in the file.
        *
-       * File dataset should look like this:       
-       *                    0  1  2  0  3  4  0  5  6  0  7  8 
+       * File dataset should look like this:
+       *                    0  1  2  0  3  4  0  5  6  0  7  8
        *                    0  9 10  0 11 12  0 13 14  0 15 16
        *                    0 17 18  0 19 20  0 21 22  0 23 24
        *                    0  0  0  0  0  0  0  0  0  0  0  0
@@ -150,14 +150,14 @@ int main (void)
        * Create dataspace for the second dataset.
        */
       hsize_t dim2[] = {MSPACE2_DIM};  /* Dimension size of the second dataset
-                                         (in memory */ 
+                                         (in memory */
       DataSpace mspace2( MSPACE2_RANK, dim2 );
 
       /*
        * Select sequence of NPOINTS points in the file dataspace.
        */
-      hsize_t coord[NPOINTS][FSPACE_RANK]; /* Array to store selected points 
-                                              from the file dataspace */ 
+      hsize_t coord[NPOINTS][FSPACE_RANK]; /* Array to store selected points
+                                              from the file dataspace */
       coord[0][0] = 0; coord[0][1] = 0;
       coord[1][0] = 3; coord[1][1] = 3;
       coord[2][0] = 3; coord[2][1] = 5;
@@ -169,11 +169,11 @@ int main (void)
        * Write new selection of points to the dataset.
        */
       int    values[] = {53, 59, 61, 67};  /* New values to be written */
-      dataset->write( values, PredType::NATIVE_INT, mspace2, fspace );   
+      dataset->write( values, PredType::NATIVE_INT, mspace2, fspace );
 
       /*
-       * File dataset should look like this:     
-       *                   53  1  2  0  3  4  0  5  6  0  7  8 
+       * File dataset should look like this:
+       *                   53  1  2  0  3  4  0  5  6  0  7  8
        *                    0  9 10  0 11 12  0 13 14  0 15 16
        *                    0 17 18  0 19 20  0 21 22  0 23 24
        *                    0  0  0 59  0 61  0  0  0  0  0  0
@@ -181,7 +181,7 @@ int main (void)
        *                    0 33 34  0 35 36 67 37 38  0 39 40
        *                    0 41 42  0 43 44  0 45 46  0 47 48
        *                    0  0  0  0  0  0  0  0  0  0  0  0
-       *                                        
+       *
        */
 
       /*

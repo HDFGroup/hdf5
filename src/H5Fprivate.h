@@ -279,7 +279,7 @@ typedef struct H5F_t H5F_t;
 #else
 #   define H5F_OVERFLOW_HSIZET2OFFT(X) 0
 #endif
-    
+
 /* ========= File Creation properties ============ */
 /* Definitions for the size of the file user block in bytes */
 #define H5F_CRT_USER_BLOCK_NAME      "block_size"
@@ -314,7 +314,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_CRT_OBJ_DIR_VERS_SIZE     sizeof(unsigned)
 #define H5F_CRT_OBJ_DIR_VERS_DEF      HDF5_OBJECTDIR_VERSION
 /* Definitions for shared-header format version             */
-#define H5F_CRT_SHARE_HEAD_VERS_NAME  "share_head_version"  
+#define H5F_CRT_SHARE_HEAD_VERS_NAME  "share_head_version"
 #define H5F_CRT_SHARE_HEAD_VERS_SIZE  sizeof(unsigned)
 #define H5F_CRT_SHARE_HEAD_VERS_DEF   HDF5_SHAREDHEADER_VERSION
 
@@ -337,7 +337,7 @@ typedef struct H5F_t H5F_t;
 /* Definition for preemption read chunks first */
 #define H5F_ACS_PREEMPT_READ_CHUNKS_NAME        "rdcc_w0"
 #define H5F_ACS_PREEMPT_READ_CHUNKS_SIZE        sizeof(double)
-#define H5F_ACS_PREEMPT_READ_CHUNKS_DEF         0.75  
+#define H5F_ACS_PREEMPT_READ_CHUNKS_DEF         0.75
 
 /* Definition for threshold for alignment */
 #define H5F_ACS_ALIGN_THRHD_NAME                "threshold"
@@ -355,7 +355,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_ACS_META_BLOCK_SIZE_SIZE            sizeof(hsize_t)
 #define H5F_ACS_META_BLOCK_SIZE_DEF             2048
 
-/* Definition for maximum sieve buffer size (when data sieving 
+/* Definition for maximum sieve buffer size (when data sieving
    is allowed by file driver */
 #define H5F_ACS_SIEVE_BUF_SIZE_NAME             "sieve_buf_size"
 #define H5F_ACS_SIEVE_BUF_SIZE_SIZE             sizeof(size_t)
@@ -400,8 +400,8 @@ typedef struct H5F_t H5F_t;
 /* ======================== File Mount properties ====================*/
 /* Definition for whether absolute symlinks local to file. */
 #define H5F_MNT_SYM_LOCAL_NAME 		"local"
-#define H5F_MNT_SYM_LOCAL_SIZE		sizeof(hbool_t) 	
-#define H5F_MNT_SYM_LOCAL_DEF	 	FALSE	
+#define H5F_MNT_SYM_LOCAL_SIZE		sizeof(hbool_t)
+#define H5F_MNT_SYM_LOCAL_DEF	 	FALSE
 
 #ifdef H5_HAVE_PARALLEL
 /* Which process writes metadata */
@@ -462,7 +462,7 @@ H5_DLL herr_t H5F_addr_pack(H5F_t *f, haddr_t *addr_p /*out*/,
 /* Callback functions for file access class */
 H5_DLL herr_t H5F_acs_create(hid_t fapl_id, void *close_data);
 H5_DLL herr_t H5F_acs_close(hid_t fapl_id, void *close_data);
-H5_DLL herr_t H5F_acs_copy(hid_t new_fapl_id, hid_t old_fapl_id, 
+H5_DLL herr_t H5F_acs_copy(hid_t new_fapl_id, hid_t old_fapl_id,
                             void *close_data);
 
 /* Shared file list related routines */

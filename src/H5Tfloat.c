@@ -34,7 +34,7 @@ NAME
    H5T_init_float_interface -- Initialize interface-specific information
 USAGE
     herr_t H5T_init_float_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -92,7 +92,7 @@ H5Tget_fields(hid_t type_id, size_t *spos/*out*/,
         dt = dt->shared->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->shared->type)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for datatype class")
-    
+
     /* Get values */
     if (spos) *spos = dt->shared->u.atomic.u.f.sign;
     if (epos) *epos = dt->shared->u.atomic.u.f.epos;
@@ -115,7 +115,7 @@ done:
  *
  *		Fields are not allowed to extend beyond the number of bits of
  *		precision, nor are they allowed to overlap with one another.
- *		
+ *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
@@ -124,7 +124,7 @@ done:
  * Modifications:
  *	Robb Matzke, 22 Dec 1998
  *	Also works for derived datatypes.
- *	
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -152,7 +152,7 @@ H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mantissa bit field size/location is invalid")
     if (spos >= dt->shared->u.atomic.prec)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sign location is not valid")
-    
+
     /* Check for overlap */
     if (spos >= epos && spos < epos + esize)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sign bit appears within exponent field")
@@ -161,7 +161,7 @@ H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize,
     if ((mpos < epos && mpos + msize > epos) ||
             (epos < mpos && epos + esize > mpos))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "exponent and mantissa fields overlap")
-    
+
     /* Commit */
     dt->shared->u.atomic.u.f.sign = spos;
     dt->shared->u.atomic.u.f.epos = epos;
@@ -207,7 +207,7 @@ H5Tget_ebias(hid_t type_id)
         dt = dt->shared->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->shared->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, 0, "operation not defined for datatype class")
-    
+
     /* bias */
     H5_ASSIGN_OVERFLOW(ret_value,dt->shared->u.atomic.u.f.ebias,uint64_t,size_t);
 
@@ -294,7 +294,7 @@ H5Tget_norm(hid_t type_id)
         dt = dt->shared->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->shared->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_NORM_ERROR, "operation not defined for datatype class")
-    
+
     /* norm */
     ret_value = dt->shared->u.atomic.u.f.norm;
 
@@ -340,7 +340,7 @@ H5Tset_norm(hid_t type_id, H5T_norm_t norm)
         dt = dt->shared->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->shared->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for datatype class")
-    
+
     /* Commit */
     dt->shared->u.atomic.u.f.norm = norm;
 
@@ -386,7 +386,7 @@ H5Tget_inpad(hid_t type_id)
         dt = dt->shared->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->shared->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_PAD_ERROR, "operation not defined for datatype class")
-    
+
     /* pad */
     ret_value = dt->shared->u.atomic.u.f.pad;
 
@@ -434,7 +434,7 @@ H5Tset_inpad(hid_t type_id, H5T_pad_t pad)
         dt = dt->shared->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->shared->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for datatype class")
-    
+
     /* Commit */
     dt->shared->u.atomic.u.f.pad = pad;
 

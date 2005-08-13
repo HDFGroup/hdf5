@@ -133,7 +133,7 @@ typedef struct H5FL_blk_head_t {
 } H5FL_blk_head_t;
 
 /*
- * Macros for defining & using priority queues 
+ * Macros for defining & using priority queues
  */
 #define H5FL_BLK_NAME(t)        H5_##t##_blk_free_list
 #ifndef H5_NO_BLK_FREE_LISTS

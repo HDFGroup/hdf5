@@ -34,9 +34,9 @@
  *  SZIP, to apply the HDF5 SZIP filter (SZIP compression)
  *  SHUF, to apply the HDF5 shuffle filter
  *  FLET, to apply the HDF5 checksum filter
- *  NONE, to remove the filter 
+ *  NONE, to remove the filter
  *
- * Examples: 
+ * Examples:
  * "GZIP=6"
  * "A,B:NONE"
  *
@@ -48,8 +48,8 @@
  */
 
 
-obj_list_t* parse_filter(const char *str, 
-                         int *n_objs, 
+obj_list_t* parse_filter(const char *str,
+                         int *n_objs,
                          filter_info_t *filt,
                          pack_opt_t *options)
 {
@@ -57,10 +57,10 @@ obj_list_t* parse_filter(const char *str,
  char        c;
  size_t      len=strlen(str);
  int         j, m, n, k, l, end_obj=-1, no_param=0;
- char        sobj[MAX_NC_NAME]; 
+ char        sobj[MAX_NC_NAME];
  char        scomp[10];
  char        stype[5];
- char        smask[3]; 
+ char        smask[3];
  obj_list_t* obj_list=NULL;
  unsigned    pixels_per_block;
 
@@ -89,7 +89,7 @@ obj_list_t* parse_filter(const char *str,
   /* apply to all objects */
   options->all_filter=1;
  }
-  
+
  n++;
  obj_list=malloc(n*sizeof(obj_list_t));
  if (obj_list==NULL)
@@ -104,7 +104,7 @@ obj_list_t* parse_filter(const char *str,
  {
   c = str[j];
   sobj[k]=c;
-  if ( c==',' || j==end_obj-1) 
+  if ( c==',' || j==end_obj-1)
   {
    if ( c==',') sobj[k]='\0'; else sobj[k+1]='\0';
    strcpy(obj_list[n].obj,sobj);
@@ -128,7 +128,7 @@ obj_list_t* parse_filter(const char *str,
  {
   c = str[i];
   scomp[k]=c;
-  if ( c=='=' || i==len-1) 
+  if ( c=='=' || i==len-1)
   {
    if ( c=='=') {      /*one more parameter */
     scomp[k]='\0';     /*cut space */
@@ -137,11 +137,11 @@ obj_list_t* parse_filter(const char *str,
       SZIP=8,EC
       SZIP=8,NN
       */
-   
+
     if (strcmp(scomp,"SZIP")==0)
     {
      l=-1; /* mask index check */
-     for ( m=0,u=i+1; u<len; u++,m++) 
+     for ( m=0,u=i+1; u<len; u++,m++)
      {
       if (str[u]==',')
       {
@@ -157,7 +157,7 @@ obj_list_t* parse_filter(const char *str,
       }
       if (l==-1)
        stype[m]=c;
-      else 
+      else
       {
        smask[l]=c;
        l++;
@@ -166,7 +166,7 @@ obj_list_t* parse_filter(const char *str,
         smask[l]='\0';
         i=len-1; /* end */
         (*n_objs)--; /* we counted an extra ',' */
-        if (strcmp(smask,"NN")==0) 
+        if (strcmp(smask,"NN")==0)
          filt->szip_coding=0;
         else if (strcmp(smask,"EC")==0)
          filt->szip_coding=1;
@@ -175,17 +175,17 @@ obj_list_t* parse_filter(const char *str,
          printf("Input Error: szip mask must be 'NN' or 'EC' \n");
          exit(1);
         }
-        
+
        }
       }
-      
+
      }  /* u */
     } /*if */
-    
+
     else
     {
      /* here we could have 1 or 2 digits  */
-     for ( m=0,u=i+1; u<len; u++,m++) 
+     for ( m=0,u=i+1; u<len; u++,m++)
      {
       c = str[u];
       if (!isdigit(c)){
@@ -200,7 +200,7 @@ obj_list_t* parse_filter(const char *str,
     } /*if */
 
 
-    
+
     filt->cd_values[j++]=atoi(stype);
     i+=m; /* jump */
    }
@@ -285,7 +285,7 @@ obj_list_t* parse_filter(const char *str,
 
  switch (filt->filtn)
  {
-  
+
  case H5Z_FILTER_DEFLATE:
   if (filt->cd_values[0]<0 || filt->cd_values[0]>9 ){
    if (obj_list) free(obj_list);
@@ -293,8 +293,8 @@ obj_list_t* parse_filter(const char *str,
    exit(1);
   }
   break;
-  
-  
+
+
  case H5Z_FILTER_SZIP:
   pixels_per_block=filt->cd_values[0];
   if ((pixels_per_block%2)==1) {
@@ -346,7 +346,7 @@ const char* get_sfilter(H5Z_filter_t filtn)
   exit(1);
  }
  return NULL;
-} 
+}
 
 
 /*-------------------------------------------------------------------------
@@ -354,14 +354,14 @@ const char* get_sfilter(H5Z_filter_t filtn)
  *
  * Purpose: read layout info
  *
- * Return: a list of names, the number of names and its chunking info for 
+ * Return: a list of names, the number of names and its chunking info for
  *  chunked. NULL, on error
  * the layout type can be:
  *  CHUNK, to apply chunking layout
  *  CONTI, to apply continuous layout
  *  COMPA, to apply compact layout
  *
- * Example: 
+ * Example:
  * "AA,B,CDE:CHUNK=10X10"
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
@@ -370,8 +370,8 @@ const char* get_sfilter(H5Z_filter_t filtn)
  *
  *-------------------------------------------------------------------------
  */
-obj_list_t* parse_layout(const char *str, 
-                         int *n_objs, 
+obj_list_t* parse_layout(const char *str,
+                         int *n_objs,
                          pack_info_t *pack,    /* info about layout needed */
                          pack_opt_t *options)
 {
@@ -380,7 +380,7 @@ obj_list_t* parse_layout(const char *str,
  char        c;
  size_t      len=strlen(str);
  int         j, n, k, end_obj=-1, c_index;
- char        sobj[MAX_NC_NAME]; 
+ char        sobj[MAX_NC_NAME];
  char        sdim[10];
  char        slayout[10];
 
@@ -388,7 +388,7 @@ obj_list_t* parse_layout(const char *str,
  memset(sdim, '\0', sizeof(sdim));
  memset(sobj, '\0', sizeof(sobj));
  memset(slayout, '\0', sizeof(slayout));
- 
+
  /* check for the end of object list and number of objects */
  for ( i=0, n=0; i<len; i++)
  {
@@ -406,7 +406,7 @@ obj_list_t* parse_layout(const char *str,
  if (end_obj==-1) { /* missing : chunk all */
   options->all_layout=1;
  }
-  
+
  n++;
  obj_list=malloc(n*sizeof(obj_list_t));
  if (obj_list==NULL)
@@ -421,7 +421,7 @@ obj_list_t* parse_layout(const char *str,
  {
   c = str[j];
   sobj[k]=c;
-  if ( c==',' || j==end_obj-1) 
+  if ( c==',' || j==end_obj-1)
   {
    if ( c==',') sobj[k]='\0'; else sobj[k+1]='\0';
    strcpy(obj_list[n].obj,sobj);
@@ -442,11 +442,11 @@ obj_list_t* parse_layout(const char *str,
  /* get layout info */
  for ( j=end_obj+1, n=0; n<=5; j++,n++)
  {
-  if (n==5) 
+  if (n==5)
   {
    slayout[n]='\0';  /*cut string */
    if (strcmp(slayout,"COMPA")==0)
-    pack->layout=H5D_COMPACT;  
+    pack->layout=H5D_COMPACT;
    else if (strcmp(slayout,"CONTI")==0)
     pack->layout=H5D_CONTIGUOUS;
    else if (strcmp(slayout,"CHUNK")==0)
@@ -462,7 +462,7 @@ obj_list_t* parse_layout(const char *str,
    slayout[n]=c;
   }
  } /* j */
- 
+
 
  if ( pack->layout==H5D_CHUNKED )
  {
@@ -471,7 +471,7 @@ obj_list_t* parse_layout(const char *str,
  * get chunk info
  *-------------------------------------------------------------------------
  */
-   k=0; 
+   k=0;
 
    if (j>(int)len)
    {
@@ -485,8 +485,8 @@ obj_list_t* parse_layout(const char *str,
     c = str[i];
     sdim[k]=c;
     k++; /*increment sdim index */
-    
-    if (!isdigit(c) && c!='x' 
+
+    if (!isdigit(c) && c!='x'
      && c!='N' && c!='O' && c!='N' && c!='E'
      ){
      if (obj_list) free(obj_list);
@@ -494,11 +494,11 @@ obj_list_t* parse_layout(const char *str,
       sdim,str);
      exit(1);
     }
-    
-    if ( c=='x' || i==len-1) 
+
+    if ( c=='x' || i==len-1)
     {
-     if ( c=='x') {  
-      sdim[k-1]='\0';  
+     if ( c=='x') {
+      sdim[k-1]='\0';
       k=0;
       pack->chunk.chunk_lengths[c_index]=atoi(sdim);
       if (pack->chunk.chunk_lengths[c_index]==0) {
@@ -510,7 +510,7 @@ obj_list_t* parse_layout(const char *str,
       c_index++;
      }
      else if (i==len-1) { /*no more parameters */
-      sdim[k]='\0';  
+      sdim[k]='\0';
       k=0;
       if (strcmp(sdim,"NONE")==0)
       {
@@ -531,10 +531,10 @@ obj_list_t* parse_layout(const char *str,
     } /*if c=='x' || i==len-1 */
    } /*i*/
 
-  
+
  } /*H5D_CHUNKED*/
 
- 
+
  return obj_list;
 }
 
@@ -561,7 +561,7 @@ int parse_number(char *str)
  int         n;
  char        c;
  size_t      len=strlen(str);
-  
+
  for ( i=0; i<len; i++)
  {
   c = str[i];
@@ -569,7 +569,7 @@ int parse_number(char *str)
    return -1;
   }
  }
- str[i]='\0';     
+ str[i]='\0';
  n=atoi(str);
  return n;
 }

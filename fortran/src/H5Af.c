@@ -19,9 +19,9 @@
 
 /*----------------------------------------------------------------------------
  * Name:        h5acreate_c
- * Purpose:     Call H5Acreate to create an attribute 
- * Inputs:      obj_id - object identifier 
- *              name - name of the attribute     
+ * Purpose:     Call H5Acreate to create an attribute
+ * Inputs:      obj_id - object identifier
+ *              name - name of the attribute
  *              namelen - name length
  *              type_id - datatype identifier
  *              space_id - dataspace identifier
@@ -53,13 +53,13 @@ nh5acreate_c (hid_t_f *obj_id, _fcd name, size_t_f *namelen, hid_t_f *type_id, h
 done:
     if(c_name) HDfree(c_name);
     return ret_value;
-}      
+}
 
 /*----------------------------------------------------------------------------
  * Name:        h5aopen_name _c
- * Purpose:     Call H5Aopen_name to open an attribute 
- * Inputs:      obj_id - object identifier 
- *              name - name of the attribute     
+ * Purpose:     Call H5Aopen_name to open an attribute
+ * Inputs:      obj_id - object identifier
+ *              name - name of the attribute
  *              namelen - name length
  * Outputs:     attr_id - dataset identifier
  * Returns:     0 on success, -1 on failure
@@ -88,12 +88,12 @@ nh5aopen_name_c (hid_t_f *obj_id, _fcd name, size_t_f *namelen, hid_t_f *attr_id
 done:
     if(c_name) HDfree(c_name);
     return ret_value;
-}      
+}
 
 /*----------------------------------------------------------------------------
  * Name:        h5awritec_c
  * Purpose:     Call h5awrite_c to write a character  attribute
- * Inputs:      attr_id - dataset identifier 
+ * Inputs:      attr_id - dataset identifier
  *              mem_type_id - memory datatype identifier
  *              buf      - character data buffer
  *              dims     - array to store dimensions sizes of buf; used only
@@ -113,8 +113,8 @@ nh5awritec_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
 
 /*----------------------------------------------------------------------------
  * Name:        h5awrite_c
- * Purpose:     Call H5Awrite to write a attribute 
- * Inputs:      attr_id - attribute identifier 
+ * Purpose:     Call H5Awrite to write a attribute
+ * Inputs:      attr_id - attribute identifier
  *              mem_type_id - memory datatype identifier
  *              buf      - data buffer
  *              dims     - array to store dimensions sizes of buf; used only
@@ -136,12 +136,12 @@ nh5awrite_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dim
 
 done:
      return ret_value;
-}      
+}
 
 /*----------------------------------------------------------------------------
  * Name:        h5areadc_c
  * Purpose:     Call h5aread_c to read character  attribute
- * Inputs:      dset_id - dataset identifier 
+ * Inputs:      dset_id - dataset identifier
  *              mem_type_id - memory datatype identifier
  *              dims     - array to store dimensions sizes of buf; used only
  *                         by Fortran routine.
@@ -161,8 +161,8 @@ nh5areadc_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
 
 /*----------------------------------------------------------------------------
  * Name:        h5aread_c
- * Purpose:     Call H5Aread to read an attribute 
- * Inputs:      dset_id - dataset identifier 
+ * Purpose:     Call H5Aread to read an attribute
+ * Inputs:      dset_id - dataset identifier
  *              mem_type_id - memory datatype identifier
  *              dims     - array to store dimensions sizes of buf; used only
  *                         by Fortran routine.
@@ -188,7 +188,7 @@ done:
 
 /*----------------------------------------------------------------------------
  * Name:        h5aclose_c
- * Purpose:     Call H5Aclose to close an attribute 
+ * Purpose:     Call H5Aclose to close an attribute
  * Inputs:      attr_id - identifier of an attribute to be closed
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
@@ -196,7 +196,7 @@ done:
  * Modifications:
  *---------------------------------------------------------------------------*/
 
-int_f 
+int_f
 nh5aclose_c ( hid_t_f *attr_id )
 {
     int_f ret_value=0;          /* Return value */
@@ -210,9 +210,9 @@ done:
 
 /*----------------------------------------------------------------------------
  * Name:        h5adelete_c
- * Purpose:     Call H5Adelete to delete an attribute 
- * Inputs:      obj_id - object identifier 
- *              name - name of the attribute     
+ * Purpose:     Call H5Adelete to delete an attribute
+ * Inputs:      obj_id - object identifier
+ *              name - name of the attribute
  *              namelen - name length
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
@@ -240,13 +240,13 @@ nh5adelete_c (hid_t_f *obj_id, _fcd name, size_t_f *namelen)
 done:
     if(c_name) HDfree(c_name);
     return ret_value;
-}      
+}
 
 
 /*----------------------------------------------------------------------------
  * Name:        h5aopen_idx_c
- * Purpose:     Call H5Aopen_idx to open an attribute 
- * Inputs:      obj_id - object identifier 
+ * Purpose:     Call H5Aopen_idx to open an attribute
+ * Inputs:      obj_id - object identifier
  *              idx    - attribute index ( zero based)
  * Outputs:     attr_id - attribute identifier
  * Returns:     0 on success, -1 on failure
@@ -267,13 +267,13 @@ nh5aopen_idx_c (hid_t_f *obj_id, int_f *idx, hid_t_f *attr_id)
 
 done:
      return ret_value;
-}      
+}
 
 
 /*----------------------------------------------------------------------------
  * Name:        h5aget_space_c
- * Purpose:     Call H5Aget_space to get attribute's dataspace 
- * Inputs:      attr_id - attribute identifier 
+ * Purpose:     Call H5Aget_space to get attribute's dataspace
+ * Inputs:      attr_id - attribute identifier
  * Outputs:     space_id - dataspace identifier
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
@@ -293,12 +293,12 @@ nh5aget_space_c (hid_t_f *attr_id, hid_t_f *space_id)
 
 done:
      return ret_value;
-}      
+}
 
 /*----------------------------------------------------------------------------
  * Name:        h5aget_type_c
- * Purpose:     Call H5Aget_space to get attribute's datatype 
- * Inputs:      attr_id - attribute identifier 
+ * Purpose:     Call H5Aget_space to get attribute's datatype
+ * Inputs:      attr_id - attribute identifier
  * Outputs:     type_id - datatype identifier
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
@@ -318,14 +318,14 @@ nh5aget_type_c (hid_t_f *attr_id, hid_t_f *type_id)
 
 done:
      return ret_value;
-}      
+}
 
 /*----------------------------------------------------------------------------
  * Name:        h5aget_num_attrs_c
- * Purpose:     Call H5Aget_num_attrs to determine number of 
- *              attributes of an object 
- * Inputs:      obj_id - object identifier 
- *              attr_num - number of attributes 
+ * Purpose:     Call H5Aget_num_attrs to determine number of
+ *              attributes of an object
+ * Inputs:      obj_id - object identifier
+ *              attr_num - number of attributes
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
  *              Thursday, August 12, 1999
@@ -344,13 +344,13 @@ nh5aget_num_attrs_c (hid_t_f *obj_id, int_f *attr_num)
 
 done:
      return ret_value;
-}      
+}
 
 /*----------------------------------------------------------------------------
  * Name:        h5aget_name_c
- * Purpose:     Call H5Aget_name to get attribute's name 
- * Inputs:      attr_id - attribute identifier 
- *              bufsize -size of the buffer 
+ * Purpose:     Call H5Aget_name to get attribute's name
+ * Inputs:      attr_id - attribute identifier
+ *              bufsize -size of the buffer
  * Outputs:     buf - buffer to hold the name
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
@@ -368,7 +368,7 @@ nh5aget_name_c(hid_t_f *attr_id, size_t_f *bufsize, _fcd buf)
       */
      if ((c_buf = HDmalloc((size_t)*bufsize +1)) == NULL)
          HGOTO_DONE(FAIL);
- 
+
      /*
       * Call H5Aget_name function
       */

@@ -46,7 +46,7 @@
  * Modifications:
  *		Robb Matzke, 1999-07-28
  *		The ADDR argument is passed by value.
- * 		
+ *
  *		Raymond Lu, 2001-10-14
  * 		Changed to the new generic property list.
  *

@@ -49,7 +49,7 @@ const H5Z_class_t H5Z_FLETCHER32[1] = {{
  *
  * Purpose:	Implement an Fletcher32 Checksum using 1's complement.
  *
- * Return:	Success: Fletcher32 value	
+ * Return:	Success: Fletcher32 value
  *
  *		Failure: Can't fail
  *
@@ -117,7 +117,7 @@ H5Z_filter_fletcher32_compute(void *_src, size_t len)
  * Purpose:	Implement an I/O filter of Fletcher32 Checksum
  *
  * Return:	Success: Size of buffer filtered
- *		Failure: 0	
+ *		Failure: 0
  *
  * Programmer:	Raymond Lu
  *              Jan 3, 2003
@@ -125,20 +125,20 @@ H5Z_filter_fletcher32_compute(void *_src, size_t len)
  * Modifications:
  *              Raymond Lu
  *              July 8, 2005
- *              There was a bug in the calculating code of the Fletcher32 
- *              checksum in the library before v1.6.3.  The checksum 
+ *              There was a bug in the calculating code of the Fletcher32
+ *              checksum in the library before v1.6.3.  The checksum
  *              value wasn't consistent between big-endian and little-endian
- *              systems.  This bug was fixed in Release 1.6.3.  However, 
- *              after fixing the bug, the checksum value is no longer the 
- *              same as before on little-endian system.  We'll check both 
- *              the correct checksum and the wrong checksum to be consistent 
- *              with Release 1.6.2 and before. 
+ *              systems.  This bug was fixed in Release 1.6.3.  However,
+ *              after fixing the bug, the checksum value is no longer the
+ *              same as before on little-endian system.  We'll check both
+ *              the correct checksum and the wrong checksum to be consistent
+ *              with Release 1.6.2 and before.
  *
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
 static size_t
-H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned UNUSED cd_values[], 
+H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned UNUSED cd_values[],
                      size_t nbytes, size_t *buf_size, void **buf)
 {
     void    *outbuf = NULL;     /* Pointer to new buffer */
@@ -148,11 +148,11 @@ H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned U
     uint8_t  c[4];
     uint8_t  tmp;
     size_t   ret_value;         /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5Z_filter_fletcher32, 0)
 
     assert(sizeof(uint32_t)>=4);
-   
+
     if (flags & H5Z_FLAG_REVERSE) { /* Read */
         /* Do checksum if it's enabled for read; otherwise skip it
          * to save performance. */
@@ -169,20 +169,20 @@ H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned U
             /* Compute checksum (can't fail) */
             fletcher = H5Z_filter_fletcher32_compute(src,src_nbytes);
 
-            /* The reversed checksum.  There was a bug in the calculating code of 
-             * the Fletcher32 checksum in the library before v1.6.3.  The checksum 
-             * value wasn't consistent between big-endian and little-endian systems.  
-             * This bug was fixed in Release 1.6.3.  However, after fixing the bug, 
-             * the checksum value is no longer the same as before on little-endian 
-             * system.  We'll check both the correct checksum and the wrong 
-             * checksum to be consistent with Release 1.6.2 and before. 
-             */ 
+            /* The reversed checksum.  There was a bug in the calculating code of
+             * the Fletcher32 checksum in the library before v1.6.3.  The checksum
+             * value wasn't consistent between big-endian and little-endian systems.
+             * This bug was fixed in Release 1.6.3.  However, after fixing the bug,
+             * the checksum value is no longer the same as before on little-endian
+             * system.  We'll check both the correct checksum and the wrong
+             * checksum to be consistent with Release 1.6.2 and before.
+             */
             HDmemcpy(c, &fletcher, 4);
 
             tmp  = c[1];
             c[1] = c[0];
             c[0] = tmp;
-            
+
             tmp  = c[3];
             c[3] = c[2];
             c[2] = tmp;
@@ -193,7 +193,7 @@ H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned U
             if(stored_fletcher != fletcher && stored_fletcher != reversed_fletcher)
 	        HGOTO_ERROR(H5E_STORAGE, H5E_READERROR, 0, "data error detected by Fletcher32 checksum")
         }
-        
+
         /* Set return values */
         /* (Re-use the input buffer, just note that the size is smaller by the size of the checksum) */
         ret_value = nbytes-FLETCHER_LEN;
@@ -202,10 +202,10 @@ H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned U
 
         /* Compute checksum (can't fail) */
         fletcher = H5Z_filter_fletcher32_compute(src,nbytes);
-        
+
 	if (NULL==(dst=outbuf=H5MM_malloc(nbytes+FLETCHER_LEN)))
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "unable to allocate Fletcher32 checksum destination buffer")
-        
+
         /* Copy raw data */
         HDmemcpy((void*)dst, (void*)(*buf), nbytes);
 
@@ -220,7 +220,7 @@ H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned U
         *buf_size = nbytes + FLETCHER_LEN;
 	*buf = outbuf;
 	outbuf = NULL;
-	ret_value = *buf_size;           
+	ret_value = *buf_size;
     }
 
 done:

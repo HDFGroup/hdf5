@@ -29,13 +29,13 @@
  *
  *-------------------------------------------------------------------------
  */
-void print_pos( int        *ph, 
-                int        per, 
-                hsize_t    curr_pos, 
-                hsize_t    *acc, 
-                hsize_t    *pos, 
-                int        rank, 
-                const char *obj1, 
+void print_pos( int        *ph,
+                int        per,
+                hsize_t    curr_pos,
+                hsize_t    *acc,
+                hsize_t    *pos,
+                int        rank,
+                const char *obj1,
                 const char *obj2 )
 {
  int i;
@@ -46,19 +46,19 @@ void print_pos( int        *ph,
   *ph=0;
   if (per)
   {
-   printf("%-15s %-15s %-15s %-15s %-15s\n", 
-    "position", 
-    (obj1!=NULL) ? obj1 : " ", 
+   printf("%-15s %-15s %-15s %-15s %-15s\n",
+    "position",
+    (obj1!=NULL) ? obj1 : " ",
     (obj2!=NULL) ? obj2 : " ",
-    "difference", 
+    "difference",
     "relative");
    printf("------------------------------------------------------------------------\n");
   }
   else
   {
-   printf("%-15s %-15s %-15s %-20s\n", 
-    "position", 
-    (obj1!=NULL) ? obj1 : " ", 
+   printf("%-15s %-15s %-15s %-20s\n",
+    "position",
+    (obj1!=NULL) ? obj1 : " ",
     (obj2!=NULL) ? obj2 : " ",
     "difference");
    printf("------------------------------------------------------------\n");
@@ -72,7 +72,7 @@ void print_pos( int        *ph,
  }
  assert( curr_pos == 0 );
 
- printf("[ " );  
+ printf("[ " );
  for ( i = 0; i < rank; i++)
  {
   HDfprintf(stdout,"%Hu ", pos[i]  );
@@ -94,8 +94,8 @@ void print_pos( int        *ph,
 void print_dims( int r, hsize_t *d )
 {
  int i;
- printf("[ " );  
- for ( i=0; i<r; i++ ) 
+ printf("[ " );
+ for ( i=0; i<r; i++ )
   printf("%d ",(int)d[i]  );
  printf("] " );
 }
@@ -104,7 +104,7 @@ void print_dims( int r, hsize_t *d )
 /*-------------------------------------------------------------------------
  * Function: print_type
  *
- * Purpose: Print name of datatype 
+ * Purpose: Print name of datatype
  *
  * Return: void
  *
@@ -118,7 +118,7 @@ void print_dims( int r, hsize_t *d )
  */
 void print_type(hid_t type)
 {
- switch (H5Tget_class(type)) 
+ switch (H5Tget_class(type))
  {
  default:
   return;
@@ -179,7 +179,7 @@ void print_type(hid_t type)
    printf("undefined integer");
   }
   break;
-  
+
  case H5T_FLOAT:
   if (H5Tequal(type, H5T_IEEE_F32BE)) {
    printf("H5T_IEEE_F32BE");
@@ -199,7 +199,7 @@ void print_type(hid_t type)
    printf("undefined float");
   }
   break;
-   
+
  }/*switch*/
 }
 
@@ -208,7 +208,7 @@ void print_type(hid_t type)
 /*-------------------------------------------------------------------------
  * Function: diff_basename
  *
- * Purpose: Returns a pointer to the last component absolute name 
+ * Purpose: Returns a pointer to the last component absolute name
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -222,17 +222,17 @@ diff_basename(const char *name)
  size_t i;
 
  if (name==NULL)
-  return;	 
- 
+  return;
+
  /* Find the end of the base name */
  i = strlen(name);
  while (i>0 && '/'==name[i-1])
   --i;
- 
+
  /* Skip backward over base name */
  while (i>0 && '/'!=name[i-1])
   --i;
- 
+
  return(name+i);
 }
 
@@ -262,7 +262,7 @@ get_type(int type)
   return("H5G_LINK");
  default:
   return("user defined type");
- } 
+ }
 }
 
 /*-------------------------------------------------------------------------
@@ -274,7 +274,7 @@ get_type(int type)
  *
  * Date: May 9, 2003
  *
- * Comments: 
+ * Comments:
  *
  *-------------------------------------------------------------------------
  */
@@ -289,7 +289,7 @@ get_sign(H5T_sign_t sign)
   return("H5T_SGN_NONE");
  case H5T_SGN_2:
   return("H5T_SGN_2");
- } 
+ }
 }
 
 
@@ -307,7 +307,7 @@ get_sign(H5T_sign_t sign)
 const char*
 get_class(H5T_class_t tclass)
 {
- switch (tclass) 
+ switch (tclass)
  {
  default:
   return("Invalid class");
@@ -359,7 +359,7 @@ void print_found(hsize_t nfound)
 #if defined (H5DIFF_DEBUG)
 void print_sizes( const char *obj1, const char *obj2,
                   hid_t f_type1, hid_t f_type2,
-                  hid_t m_type1, hid_t m_type2 )      
+                  hid_t m_type1, hid_t m_type2 )
 {
  size_t  f_size1, f_size2;       /* size of type in file */
  size_t  m_size1, m_size2;       /* size of type in memory */

@@ -58,7 +58,7 @@ VarLenType::VarLenType(const VarLenType& original) : DataType(original) {}
 ///\param	base_type - IN: Pointer to existing datatype
 ///\exception	H5::DataTypeIException
 // Description
-//		DataType passed by pointer to avoid clashing with copy 
+//		DataType passed by pointer to avoid clashing with copy
 //		constructor.
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------

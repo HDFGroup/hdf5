@@ -64,7 +64,7 @@ IntType::IntType( const PredType& pred_type ) : AtomType()
 
 //--------------------------------------------------------------------------
 // Function:	IntType overloaded constructor
-///\brief	Creates an integer datatype using the id of an existing 
+///\brief	Creates an integer datatype using the id of an existing
 ///		datatype.
 ///\param	existing_id - IN: Id of an existing datatype
 ///\exception	H5::DataTypeIException
@@ -80,7 +80,7 @@ IntType::IntType( const hid_t existing_id ) : AtomType( existing_id ) {}
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 IntType::IntType( const DataSet& dataset ) : AtomType()
-{  
+{
    // Calls C function H5Dget_type to get the id of the datatype
    id = H5Dget_type( dataset.getId() );
 
@@ -88,7 +88,7 @@ IntType::IntType( const DataSet& dataset ) : AtomType()
    {
       throw DataSetIException("IntType constructor", "H5Dget_type failed");
    }
-}  
+}
 
 //--------------------------------------------------------------------------
 // Function:	IntType::getSign
@@ -104,7 +104,7 @@ H5T_sign_t IntType::getSign() const
    // Returns a valid sign type if no errors
    if( type_sign == H5T_SGN_ERROR )
    {
-      throw DataTypeIException("IntType::getSign", 
+      throw DataTypeIException("IntType::getSign",
 		"H5Tget_sign failed - returned H5T_SGN_ERROR for the sign type");
    }
    return( type_sign );
@@ -112,7 +112,7 @@ H5T_sign_t IntType::getSign() const
 
 //--------------------------------------------------------------------------
 // Function:	IntType::getSign
-///\brief	Sets the sign property for an integer type. 
+///\brief	Sets the sign property for an integer type.
 ///\param	sign - IN: Sign type
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000

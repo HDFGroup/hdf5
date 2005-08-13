@@ -48,12 +48,12 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	// Returns the amount of free space in the file.
 	hssize_t getFreeSpace() const;
 
-	// Returns the number of opened object IDs (files, datasets, groups 
+	// Returns the number of opened object IDs (files, datasets, groups
 	// and datatypes) in the same file.
 	int getObjCount(unsigned types) const;
 	int getObjCount() const;
 
-	// Retrieves a list of opened object IDs (files, datasets, groups 
+	// Retrieves a list of opened object IDs (files, datasets, groups
 	// and datatypes) in the same file.
 	void getObjIDs(unsigned types, int max_objs, hid_t *oid_list) const;
 
@@ -75,7 +75,7 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	void reOpen();	// added for better name
 	void reopen();
 
-	// Creates a reference to a named Hdf5 object or to a dataset region 
+	// Creates a reference to a named Hdf5 object or to a dataset region
 	// in this object.
 	void* Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type = H5R_DATASET_REGION) const;
 

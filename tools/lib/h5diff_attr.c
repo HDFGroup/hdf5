@@ -14,19 +14,19 @@
 
 #include "h5tools.h"
 #include "h5diff.h"
-#include "H5private.h" 
+#include "H5private.h"
 
 
 /*-------------------------------------------------------------------------
  * Function: diff_attr
  *
- * Purpose: compare attributes located in LOC1_ID and LOC2_ID, which are 
- *  obtained either from 
+ * Purpose: compare attributes located in LOC1_ID and LOC2_ID, which are
+ *  obtained either from
  * loc_id = H5Gopen( fid, name);
  * loc_id = H5Dopen( fid, name);
  * loc_id = H5Topen( fid, name);
  *
- * Return: 
+ * Return:
  *  0 : no differences found
  *  1 : differences found
  *
@@ -37,19 +37,19 @@
  *-------------------------------------------------------------------------
  */
 
-int diff_attr(hid_t      loc1_id, 
-              hid_t      loc2_id, 
-              const char *path1, 
-              const char *path2, 
+int diff_attr(hid_t      loc1_id,
+              hid_t      loc2_id,
+              const char *path1,
+              const char *path2,
               diff_opt_t *options
               )
 {
- hid_t      attr1_id=-1;     /* attr ID */ 
- hid_t      attr2_id=-1;     /* attr ID */ 
- hid_t      space1_id=-1;    /* space ID */ 
- hid_t      space2_id=-1;    /* space ID */ 
- hid_t      ftype1_id=-1;    /* file data type ID */ 
- hid_t      ftype2_id=-1;    /* file data type ID */ 
+ hid_t      attr1_id=-1;     /* attr ID */
+ hid_t      attr2_id=-1;     /* attr ID */
+ hid_t      space1_id=-1;    /* space ID */
+ hid_t      space2_id=-1;    /* space ID */
+ hid_t      ftype1_id=-1;    /* file data type ID */
+ hid_t      ftype2_id=-1;    /* file data type ID */
  hid_t      mtype1_id=-1;    /* memory data type ID */
  hid_t      mtype2_id=-1;    /* memory data type ID */
  size_t     msize1;       /* memory size of memory type */
@@ -68,40 +68,40 @@ int diff_attr(hid_t      loc1_id,
  hsize_t    nfound;
  int        cmp=1;
 
- if ((n1 = H5Aget_num_attrs(loc1_id))<0) 
+ if ((n1 = H5Aget_num_attrs(loc1_id))<0)
   goto error;
- if ((n2 = H5Aget_num_attrs(loc2_id))<0) 
+ if ((n2 = H5Aget_num_attrs(loc2_id))<0)
   goto error;
 
  if (n1!=n2)
   return 1;
- 
+
  for ( i = 0; i < n1; i++)
  {
 
   /* reset buffers for every attribute, we might goto out and call free */
-  buf1=NULL;   
-  buf2=NULL;   
+  buf1=NULL;
+  buf2=NULL;
 
 /*-------------------------------------------------------------------------
  * open
  *-------------------------------------------------------------------------
  */
   /* open attribute */
-  if ((attr1_id = H5Aopen_idx(loc1_id, (unsigned)i))<0) 
+  if ((attr1_id = H5Aopen_idx(loc1_id, (unsigned)i))<0)
    goto error;
-  if ((attr2_id = H5Aopen_idx(loc2_id, (unsigned)i))<0) 
+  if ((attr2_id = H5Aopen_idx(loc2_id, (unsigned)i))<0)
    goto error;
-  
+
   /* get name */
-  if (H5Aget_name( attr1_id, 255, name1 )<0) 
+  if (H5Aget_name( attr1_id, 255, name1 )<0)
    goto error;
-  if (H5Aget_name( attr2_id, 255, name2 )<0) 
+  if (H5Aget_name( attr2_id, 255, name2 )<0)
    goto error;
 
   if (HDstrcmp(name1,name2)!=0)
   {
-   if (options->m_verbose) 
+   if (options->m_verbose)
    {
     printf("Different name for attributes: <%s> and <%s>\n", name1, name2);
    }
@@ -110,19 +110,19 @@ int diff_attr(hid_t      loc1_id,
    ret=1;
    continue;
   }
-  
+
   /* get the file datatype  */
   if ((ftype1_id = H5Aget_type( attr1_id )) < 0 )
    goto error;
   if ((ftype2_id = H5Aget_type( attr2_id )) < 0 )
    goto error;
-  
+
   /* get the dataspace handle  */
   if ((space1_id = H5Aget_space( attr1_id )) < 0 )
    goto error;
   if ((space2_id = H5Aget_space( attr2_id )) < 0 )
    goto error;
-  
+
   /* get dimensions  */
   if ( (rank1 = H5Sget_simple_extent_dims(space1_id, dims1, NULL)) < 0 )
    goto error;
@@ -135,33 +135,33 @@ int diff_attr(hid_t      loc1_id,
  *-------------------------------------------------------------------------
  */
 
- if (diff_can_type(ftype1_id, 
-  ftype2_id, 
-  rank1, 
+ if (diff_can_type(ftype1_id,
+  ftype2_id,
+  rank1,
   rank2,
-  dims1, 
+  dims1,
   dims2,
-  NULL, 
   NULL,
-  name1, 
-  name2, 
+  NULL,
+  name1,
+  name2,
   options)!=1)
    cmp=0;
 /*-------------------------------------------------------------------------
- * only attempt to compare if possible 
+ * only attempt to compare if possible
  *-------------------------------------------------------------------------
  */
- if (cmp) 
+ if (cmp)
  {
- 
+
 /*-------------------------------------------------------------------------
  * read to memory
  *-------------------------------------------------------------------------
  */
  nelmts1=1;
- for (j=0; j<rank1; j++) 
+ for (j=0; j<rank1; j++)
   nelmts1*=dims1[j];
- 
+
  if ((mtype1_id=h5tools_get_native_type(ftype1_id))<0)
     goto error;
 
@@ -172,9 +172,9 @@ int diff_attr(hid_t      loc1_id,
   goto error;
  if ((msize2=H5Tget_size(mtype2_id))==0)
   goto error;
- 
+
  assert(msize1==msize2);
- 
+
  buf1=(void *) HDmalloc((unsigned)(nelmts1*msize1));
  buf2=(void *) HDmalloc((unsigned)(nelmts1*msize2));
  if ( buf1==NULL || buf2==NULL){
@@ -186,7 +186,7 @@ int diff_attr(hid_t      loc1_id,
  if (H5Aread(attr2_id,mtype2_id,buf2)<0)
   goto error;
 
-   
+
 /*-------------------------------------------------------------------------
  * array compare
  *-------------------------------------------------------------------------
@@ -197,8 +197,8 @@ int diff_attr(hid_t      loc1_id,
  /* always print name */
  if (options->m_verbose)
  {
-  printf( "Attribute:   <%s> and <%s>\n",name1,name2); 
-  nfound = diff_array(buf1, 
+  printf( "Attribute:   <%s> and <%s>\n",name1,name2);
+  nfound = diff_array(buf1,
                      buf2,
                      nelmts1,
                      rank1,
@@ -210,7 +210,7 @@ int diff_attr(hid_t      loc1_id,
                      attr1_id,
                      attr2_id);
   print_found(nfound);
-  
+
  }
  /* check first if we have differences */
  else
@@ -219,7 +219,7 @@ int diff_attr(hid_t      loc1_id,
   {
    /* shut up temporarily */
    options->m_quiet=1;
-   nfound = diff_array(buf1, 
+   nfound = diff_array(buf1,
                      buf2,
                      nelmts1,
                      rank1,
@@ -232,10 +232,10 @@ int diff_attr(hid_t      loc1_id,
                      attr2_id);
    /* print again */
    options->m_quiet=0;
-   if (nfound) 
+   if (nfound)
    {
-    printf( "Attribute:   <%s> and <%s>\n",name1,name2); 
-    nfound = diff_array(buf1, 
+    printf( "Attribute:   <%s> and <%s>\n",name1,name2);
+    nfound = diff_array(buf1,
                      buf2,
                      nelmts1,
                      rank1,
@@ -252,7 +252,7 @@ int diff_attr(hid_t      loc1_id,
   /* in quiet mode, just count differences */
   else
   {
-   nfound = diff_array(buf1, 
+   nfound = diff_array(buf1,
                      buf2,
                      nelmts1,
                      rank1,
@@ -287,7 +287,7 @@ int diff_attr(hid_t      loc1_id,
  if (buf2)
   HDfree(buf2);
  } /* i */
- 
+
  return ret;
 
 error:
@@ -305,7 +305,7 @@ error:
   if (buf2)
    HDfree(buf2);
  } H5E_END_TRY;
-     
+
  options->err_stat=1;
  return 0;
 }

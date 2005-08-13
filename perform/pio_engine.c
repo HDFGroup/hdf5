@@ -621,7 +621,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                     h5count[0] = buf_size/blk_size;
                 } /* end else */
                 hrc = H5Sselect_hyperslab(h5dset_space_id, H5S_SELECT_SET,
-                          h5start, h5stride, h5count, h5block); 
+                          h5start, h5stride, h5count, h5block);
                 VRFY((hrc >= 0), "H5Sselect_hyperslab");
             } /* end if */
             else {
@@ -1097,7 +1097,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                     h5count[0] = buf_size/blk_size;
                 } /* end else */
                 hrc = H5Sselect_hyperslab(h5dset_space_id, H5S_SELECT_SET,
-                          h5start, h5stride, h5count, h5block); 
+                          h5start, h5stride, h5count, h5block);
                 VRFY((hrc >= 0), "H5Sselect_hyperslab");
             } /* end if */
             else {
@@ -1462,7 +1462,7 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
             GOTOERROR(FAIL);
         }
 
-         
+
         /* The perils of POSIX I/O in a parallel environment. The problem is:
          *
          *      - Process n opens a file with truncation and then starts
@@ -1528,7 +1528,7 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
         } /* end if */
         else {
             /* Set the file driver to the MPI-I/O driver */
-            hrc = H5Pset_fapl_mpio(acc_tpl, pio_comm_g, h5_io_info_g);     
+            hrc = H5Pset_fapl_mpio(acc_tpl, pio_comm_g, h5_io_info_g);
             if (hrc < 0) {
                 fprintf(stderr, "HDF5 Property List Set failed\n");
                 GOTOERROR(FAIL);
@@ -1563,7 +1563,7 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
         }
 
         break;
-    } 
+    }
 
 done:
     return ret_code;
@@ -1636,10 +1636,10 @@ do_cleanupfile(iotype iot, char *fname)
 {
     if (pio_mpi_rank_g != 0)
         return;
-    
+
     if (clean_file_g == -1)
         clean_file_g = (getenv("HDF5_NOCLEANUP")==NULL) ? 1 : 0;
-    
+
     if (clean_file_g){
         switch (iot){
         case POSIXIO:

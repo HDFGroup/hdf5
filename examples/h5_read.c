@@ -12,22 +12,22 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*  
- *   This example reads hyperslab from the SDS.h5 file 
+/*
+ *   This example reads hyperslab from the SDS.h5 file
  *   created by h5_write.c program into two-dimensional
- *   plane of the three-dimensional array. 
- *   Information about dataset in the SDS.h5 file is obtained. 
+ *   plane of the three-dimensional array.
+ *   Information about dataset in the SDS.h5 file is obtained.
  */
- 
+
 #include "hdf5.h"
 
 #define H5FILE_NAME        "SDS.h5"
-#define DATASETNAME "IntArray" 
-#define NX_SUB  3           /* hyperslab dimensions */ 
-#define NY_SUB  4 
-#define NX 7           /* output buffer dimensions */ 
-#define NY 7 
-#define NZ  3 
+#define DATASETNAME "IntArray"
+#define NX_SUB  3           /* hyperslab dimensions */
+#define NY_SUB  4
+#define NX 7           /* output buffer dimensions */
+#define NY 7
+#define NZ  3
 #define RANK         2
 #define RANK_OUT     3
 
@@ -35,20 +35,20 @@ int
 main (void)
 {
     hid_t       file, dataset;         /* handles */
-    hid_t       datatype, dataspace;   
-    hid_t       memspace; 
+    hid_t       datatype, dataspace;
+    hid_t       memspace;
     H5T_class_t t_class;                 /* data type class */
     H5T_order_t order;                 /* data order */
     size_t      size;                  /*
-				        * size of the data element	       
+				        * size of the data element
 				        * stored in file
 				        */
     hsize_t     dimsm[3];              /* memory space dimensions */
-    hsize_t     dims_out[2];           /* dataset dimensions */      
-    herr_t      status;                             
+    hsize_t     dims_out[2];           /* dataset dimensions */
+    herr_t      status;
 
     int         data_out[NX][NY][NZ ]; /* output buffer */
-   
+
     hsize_t      count[2];              /* size of the hyperslab in the file */
     hsize_t      offset[2];             /* hyperslab offset in the file */
     hsize_t      count_out[3];          /* size of the hyperslab in memory */
@@ -60,8 +60,8 @@ main (void)
 	    for (k = 0; k < NZ ; k++)
 		data_out[j][i][k] = 0;
 	}
-    } 
- 
+    }
+
     /*
      * Open the file and the dataset.
      */
@@ -72,7 +72,7 @@ main (void)
      * Get datatype and dataspace handles and then query
      * dataset class, order, size, rank and dimensions.
      */
-    datatype  = H5Dget_type(dataset);     /* datatype handle */ 
+    datatype  = H5Dget_type(dataset);     /* datatype handle */
     t_class     = H5Tget_class(datatype);
     if (t_class == H5T_INTEGER) printf("Data set has INTEGER type \n");
     order     = H5Tget_order(datatype);
@@ -87,14 +87,14 @@ main (void)
     printf("rank %d, dimensions %lu x %lu \n", rank,
 	   (unsigned long)(dims_out[0]), (unsigned long)(dims_out[1]));
 
-    /* 
-     * Define hyperslab in the dataset. 
+    /*
+     * Define hyperslab in the dataset.
      */
     offset[0] = 1;
     offset[1] = 2;
     count[0]  = NX_SUB;
     count[1]  = NY_SUB;
-    status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset, NULL, 
+    status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset, NULL,
 				 count, NULL);
 
     /*
@@ -103,10 +103,10 @@ main (void)
     dimsm[0] = NX;
     dimsm[1] = NY;
     dimsm[2] = NZ ;
-    memspace = H5Screate_simple(RANK_OUT,dimsm,NULL);   
+    memspace = H5Screate_simple(RANK_OUT,dimsm,NULL);
 
-    /* 
-     * Define memory hyperslab. 
+    /*
+     * Define memory hyperslab.
      */
     offset_out[0] = 3;
     offset_out[1] = 0;
@@ -114,11 +114,11 @@ main (void)
     count_out[0]  = NX_SUB;
     count_out[1]  = NY_SUB;
     count_out[2]  = 1;
-    status = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_out, NULL, 
+    status = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_out, NULL,
 				 count_out, NULL);
 
     /*
-     * Read data from hyperslab in the file into the hyperslab in 
+     * Read data from hyperslab in the file into the hyperslab in
      * memory and display.
      */
     status = H5Dread(dataset, H5T_NATIVE_INT, memspace, dataspace,
@@ -131,7 +131,7 @@ main (void)
      * 0 0 0 0 0 0 0
      * 0 0 0 0 0 0 0
      * 0 0 0 0 0 0 0
-     * 3 4 5 6 0 0 0  
+     * 3 4 5 6 0 0 0
      * 4 5 6 7 0 0 0
      * 5 6 7 8 0 0 0
      * 0 0 0 0 0 0 0
@@ -147,4 +147,4 @@ main (void)
     H5Fclose(file);
 
     return 0;
-}     
+}

@@ -1043,7 +1043,7 @@ H5S_hyper_new_span (hsize_t low, hsize_t high, H5S_hyper_span_info_t *down, H5S_
     /* Allocate a new span node */
     if((ret_value = H5FL_MALLOC(H5S_hyper_span_t))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab span");
-       
+
     /* Copy the span's basic information */
     ret_value->low=low;
     ret_value->high=high;
@@ -1254,7 +1254,7 @@ H5S_hyper_copy_span_helper (H5S_hyper_span_info_t *spans)
         /* Allocate a new span_info node */
         if((ret_value = H5FL_MALLOC(H5S_hyper_span_info_t))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab span");
-           
+
         /* Copy the span_info information */
         ret_value->count=1;
         ret_value->scratch=NULL;
@@ -1370,7 +1370,7 @@ H5S_hyper_cmp_spans (H5S_hyper_span_info_t *span_info1, H5S_hyper_span_info_t *s
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_hyper_cmp_spans);
 
     /* Check for redundant comparison */
-    if(span_info1==span_info2) 
+    if(span_info1==span_info2)
         ret_value=TRUE;
     else {
         /* Check for both spans being NULL */
@@ -1779,7 +1779,7 @@ H5S_hyper_span_nblocks (H5S_hyper_span_info_t *spans)
             /* If there are no down spans, just count the block in this span */
             else
                 ret_value++;
-            
+
             /* Advance to next span */
             span=span->next;
         } /* end while */
@@ -1899,7 +1899,7 @@ H5S_hyper_serial_size (const H5S_t *space)
     assert(space);
 
     /* Basic number of bytes required to serialize hyperslab selection:
-     *  <type (4 bytes)> + <version (4 bytes)> + <padding (4 bytes)> + 
+     *  <type (4 bytes)> + <version (4 bytes)> + <padding (4 bytes)> +
      *      <length (4 bytes)> + <rank (4 bytes)> + <# of blocks (4 bytes)> = 24 bytes
      */
     ret_value=24;
@@ -2120,7 +2120,7 @@ H5S_hyper_serialize (const H5S_t *space, uint8_t *buf)
 
                     /* Reset the block count in this dimension */
                     tmp_count[temp_dim]=diminfo[temp_dim].count;
-                
+
                     /* Wrapped a dimension, go up to next dimension */
                     temp_dim--;
                 } /* end while */
@@ -2153,7 +2153,7 @@ H5S_hyper_serialize (const H5S_t *space, uint8_t *buf)
 
     /* Encode length */
     UINT32ENCODE(lenp, (uint32_t)len);  /* Store the length of the extra information */
-    
+
     FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* H5S_hyper_serialize() */
 
@@ -2473,7 +2473,7 @@ H5S_get_select_hyper_blocklist(H5S_t *space, hbool_t internal, hsize_t startbloc
 
                     /* Reset the block count in this dimension */
                     tmp_count[temp_dim]=diminfo[temp_dim].count;
-                
+
                     /* Wrapped a dimension, go up to next dimension */
                     temp_dim--;
                 } /* end while */
@@ -2486,7 +2486,7 @@ H5S_get_select_hyper_blocklist(H5S_t *space, hbool_t internal, hsize_t startbloc
             } /* end for */
         } /* end while */
     } /* end if */
-    else 
+    else
         ret_value=H5S_hyper_span_blocklist(space->select.sel_info.hslab->span_lst,start,end,(hsize_t)0,&startblock,&numblocks,&buf);
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -2923,7 +2923,7 @@ H5S_hyper_is_single(const H5S_t *space)
     } /* end if */
     else {
         /*
-         * For a region to be single, it must have only one block 
+         * For a region to be single, it must have only one block
          */
         /* Get information for slowest changing information */
         spans=space->select.sel_info.hslab->span_lst;
@@ -3213,7 +3213,7 @@ H5S_hyper_add_span_element_helper(H5S_hyper_span_info_t *span_tree, unsigned ran
         /* Before we create another span at this level in the tree, check if
          * the last span's "down tree" was equal to any other spans in this
          * list of spans in the span tree.
-         * 
+         *
          * If so, release last span information and make last span merge into
          * previous span (if possible), or at least share their "down tree"
          * information.
@@ -3279,7 +3279,7 @@ H5S_hyper_add_span_element_helper(H5S_hyper_span_info_t *span_tree, unsigned ran
                 /* Before we create another span at this level in the tree, check if
                  * the last span's "down tree" was equal to any other spans in this
                  * list of spans in the span tree.
-                 * 
+                 *
                  * If so, release last span information and make last span merge into
                  * previous span (if possible), or at least share their "down tree"
                  * information.
@@ -3616,7 +3616,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-htri_t 
+htri_t
 H5S_hyper_intersect (H5S_t *space1, H5S_t *space2)
 {
     htri_t ret_value=FAIL;      /* Return value */
@@ -3735,7 +3735,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-htri_t 
+htri_t
 H5S_hyper_intersect_block (H5S_t *space, hsize_t *start, hsize_t *end)
 {
     htri_t ret_value=FAIL;      /* Return value */
@@ -4231,7 +4231,7 @@ H5S_hyper_append_span (H5S_hyper_span_t **prev_span, H5S_hyper_span_info_t ** sp
         /* Allocate new span node to append to list */
         if((new_span = H5S_hyper_new_span(low,high,down,next))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab span");
-           
+
         /* Make first node in span list */
 
         /* Check that we haven't already allocated a span tree */
@@ -4240,7 +4240,7 @@ H5S_hyper_append_span (H5S_hyper_span_t **prev_span, H5S_hyper_span_info_t ** sp
         /* Allocate a new span_info node */
         if((*span_tree = H5FL_MALLOC(H5S_hyper_span_info_t))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab span");
-           
+
         /* Set the span tree's basic information */
         (*span_tree)->count=1;
         (*span_tree)->scratch=NULL;
@@ -4252,7 +4252,7 @@ H5S_hyper_append_span (H5S_hyper_span_t **prev_span, H5S_hyper_span_info_t ** sp
     /* Merge or append to existing merged spans list */
     else {
         /* Check if span can just extend the previous merged span */
-        if((((*prev_span)->high+1)==low) && 
+        if((((*prev_span)->high+1)==low) &&
                 H5S_hyper_cmp_spans(down,(*prev_span)->down)==TRUE) {
             /* Extend previous merged span to include new high bound */
             (*prev_span)->high=high;
@@ -4262,7 +4262,7 @@ H5S_hyper_append_span (H5S_hyper_span_t **prev_span, H5S_hyper_span_info_t ** sp
             /* Allocate new span node to append to list */
             if((new_span = H5S_hyper_new_span(low,high,down,next))==NULL)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab span");
-           
+
             /* Check if there is actually a down span */
             if(new_span->down) {
                 /* Check if the down spans for the new span node are the same as the previous span node */
@@ -4439,7 +4439,7 @@ H5S_hyper_clip_spans (H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                         /* Check for overlaps in the 'down spans' of span 'a' & 'b' */
                         if(H5S_hyper_clip_spans(span_a->down,span_b->down,&down_a_not_b,&down_a_and_b,&down_b_not_a)<0)
                             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL, "can't clip hyperslab information");
-                        
+
                         /* Check for additions to the a_not_b list */
                         if(down_a_not_b!=NULL) {
                             /* Merge/add overlapped part with/to a_not_b list */
@@ -4526,7 +4526,7 @@ H5S_hyper_clip_spans (H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                         /* Check for overlaps in the 'down spans' of span 'a' & 'b' */
                         if(H5S_hyper_clip_spans(span_a->down,span_b->down,&down_a_not_b,&down_a_and_b,&down_b_not_a)<0)
                             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL, "can't clip hyperslab information");
-                        
+
                         /* Check for additions to the a_not_b list */
                         if(down_a_not_b!=NULL) {
                             /* Merge/add overlapped part with/to a_not_b list */
@@ -4609,7 +4609,7 @@ H5S_hyper_clip_spans (H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                         /* Check for overlaps in the 'down spans' of span 'a' & 'b' */
                         if(H5S_hyper_clip_spans(span_a->down,span_b->down,&down_a_not_b,&down_a_and_b,&down_b_not_a)<0)
                             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL, "can't clip hyperslab information");
-                        
+
                         /* Check for additions to the a_not_b list */
                         if(down_a_not_b!=NULL) {
                             /* Merge/add overlapped part with/to a_not_b list */
@@ -4701,7 +4701,7 @@ H5S_hyper_clip_spans (H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                         /* Check for overlaps in the 'down spans' of span 'a' & 'b' */
                         if(H5S_hyper_clip_spans(span_a->down,span_b->down,&down_a_not_b,&down_a_and_b,&down_b_not_a)<0)
                             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL, "can't clip hyperslab information");
-                        
+
                         /* Check for additions to the a_not_b list */
                         if(down_a_not_b!=NULL) {
                             /* Merge/add overlapped part with/to a_not_b list */
@@ -5085,7 +5085,7 @@ H5S_hyper_merge_spans_helper (H5S_hyper_span_info_t *a_spans, H5S_hyper_span_inf
                 H5S_hyper_recover_span(&recover_a,&span_a,span_a->next);
             } /* end while */
         } /* end if */
-        
+
         /* Clean up 'b' spans which haven't been added to the list of merged spans */
         if(span_a==NULL && span_b!=NULL) {
             while(span_b!=NULL) {
@@ -5206,7 +5206,7 @@ H5S_hyper_spans_nelem (H5S_hyper_span_info_t *spans)
             /* If there are no down spans, just count the elements in this span */
             else
                 ret_value+=span->nelem;
-            
+
             /* Advance to next span */
             span=span->next;
         } /* end while */
@@ -5288,7 +5288,7 @@ H5S_hyper_make_spans (unsigned rank, const hsize_t *start, const hsize_t *stride
                 head=span;
             else
                 last_span->next=span;
-            
+
             /* Move current pointer */
             last_span=span;
 
@@ -5536,7 +5536,7 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
     assert(stride);
     assert(count);
     assert(block);
-    
+
     /* Generate span tree for new hyperslab information */
     if((new_spans=H5S_hyper_make_spans(space->extent.rank,start,stride,count,block))==NULL)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't create hyperslab information");
@@ -5782,7 +5782,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     assert(start);
     assert(count);
     assert(op>H5S_SELECT_NOOP && op<H5S_SELECT_INVALID);
-    
+
     /* Point to the correct stride values */
     if(stride==NULL)
         stride = _ones;
@@ -6327,7 +6327,7 @@ partial_done:   /* Yes, goto's are evil, so sue me... :-) */
                 else {
                     off[curr_seq]=loc_off;
                     len[curr_seq]=span_size;
-                
+
                     /* Increment the number of sequences in arrays */
                     curr_seq++;
                 } /* end else */
@@ -6359,7 +6359,7 @@ partial_done:   /* Yes, goto's are evil, so sue me... :-) */
                 else {
                     off[curr_seq]=loc_off;
                     len[curr_seq]=span_size;
-                
+
                     /* Increment the number of sequences in arrays */
                     curr_seq++;
                 } /* end else */

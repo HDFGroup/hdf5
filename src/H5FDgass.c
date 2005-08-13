@@ -63,8 +63,8 @@ typedef struct H5FD_gass_t {
     haddr_t	eof;			/*end of file; current file size*/
     haddr_t	pos;			/*current file I/O position	*/
     int		op;			/*last operation		*/
-    
-  
+
+
 } H5FD_gass_t;
 
 /*
@@ -101,7 +101,7 @@ typedef struct H5FD_gass_t {
 /*
  * These macros check for overflow of various quantities.  These macros
  * assume that file_offset_t is signed and haddr_t and size_t are unsigned.
- * 
+ *
  * ADDR_OVERFLOW:	Checks whether a file address of type `haddr_t'
  *			is too large to be represented by the second argument
  *			of the file seek function.
@@ -180,7 +180,7 @@ NAME
    H5FD_gass_init_interface -- Initialize interface-specific information
 USAGE
     herr_t H5FD_gass_init_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -266,7 +266,7 @@ H5FD_gass_term(void)
  *
  * Purpose:	Store the user supplied GASS INFO in
  *		the file access property list FAPL_ID which can then be used
- *		to create and/or open the file. 
+ *		to create and/or open the file.
  *
  *		GASS info object to be used for file open using GASS.
  *              Any modification to info after
@@ -295,10 +295,10 @@ H5Pset_fapl_gass(hid_t fapl_id, GASS_Info info)
     H5FD_gass_fapl_t	fa;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value;
-    
+
     FUNC_ENTER_API(H5Pset_fapl_gass, FAIL)
     /*NO TRACE*/
-    
+
     /* Check arguments */
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
@@ -324,8 +324,8 @@ done:
  *		driver then this function returns the GASS info object
  *		through the INFO pointer.
  *
- * Return:	Success:	Non-negative with the info object returned 
- *                              through the INFO arguments if non-null. 
+ * Return:	Success:	Non-negative with the info object returned
+ *                              through the INFO arguments if non-null.
  *				The information is copied and it is therefore
  *				valid only until the file access property
  *				list is modified or closed.
@@ -348,7 +348,7 @@ H5Pget_fapl_gass(hid_t fapl_id, GASS_Info *info/*out*/)
     H5FD_gass_fapl_t	*fa;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_API(H5Pget_fapl_gass, FAIL)
     H5TRACE2("e","ix",fapl_id,info);
 
@@ -402,7 +402,7 @@ H5FD_gass_open(const char *name, unsigned flags, hid_t fapl_id,
     H5P_genplist_t *plist;      /* Property list pointer */
     h5_stat_t sb;
     H5FD_t	*ret_value;
-    
+
     FUNC_ENTER_NOAPI(H5FD_gass_open, NULL)
 
     /* fprintf(stdout, "Entering H5FD_gass_open name=%s flags=0x%x\n", name, flags); */
@@ -416,7 +416,7 @@ H5FD_gass_open(const char *name, unsigned flags, hid_t fapl_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr")
 
     strcpy (filename, name);
-    
+
     /* Obtain a pointer to gass-specific file access properties */
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
@@ -429,18 +429,18 @@ H5FD_gass_open(const char *name, unsigned flags, hid_t fapl_id,
         fa = H5P_get_driver_info(plist);
         assert(fa);
     }
-    
+
     /* When I come down here, the possible flag values and the correct
        responses are given here :-
 
-       1. H5F_ACC_CREAT | H5F_ACC_RDWR | H5F_ACC_EXCL : The file is 
-          a new one. Go ahead and open it in O_RDWR. 
+       1. H5F_ACC_CREAT | H5F_ACC_RDWR | H5F_ACC_EXCL : The file is
+          a new one. Go ahead and open it in O_RDWR.
 
        2. H5F_ACC_CREAT | H5F_ACC_RDWR | H5F_ACC_TRUNC : Use
           O_RDWR | O_TRUNC with gass_open.
 
        3. H5F_ACC_RDWR | H5F_ACC_TRUNC : File already exists. Truncate it.
-	  
+
        4. H5F_ACC_RDWR : Use O_RDWR with gass_open
 
        5. H5F_ACC_RDWR is not set : Use O_RDONLY with gass_open
@@ -449,7 +449,7 @@ H5FD_gass_open(const char *name, unsigned flags, hid_t fapl_id,
        is that gass_open does not support many of them (e.g., O_CREAT)
     */
 
-    
+
     if ((flags & H5F_ACC_CREAT) && (flags & H5F_ACC_RDWR) && (flags & H5F_ACC_EXCL)) {
         if ((fd = globus_gass_open (filename, O_RDWR|O_TRUNC)) < 0)
             HGOTO_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL, "open failed")
@@ -457,24 +457,24 @@ H5FD_gass_open(const char *name, unsigned flags, hid_t fapl_id,
     else if ((flags & H5F_ACC_CREAT) && (flags & H5F_ACC_RDWR) && (flags & H5F_ACC_TRUNC)) {
         if ((fd = globus_gass_open (filename, O_RDWR|O_TRUNC)) < 0)
             HGOTO_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL, "open failed")
-      
+
     }
     else if ((flags & H5F_ACC_RDWR) && (flags & H5F_ACC_TRUNC)) {
         if ((fd = globus_gass_open (filename, O_RDWR|O_TRUNC)) < 0)
             HGOTO_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL, "open failed")
-    
+
     }
     else if (flags & H5F_ACC_RDWR) {
         if ((fd = globus_gass_open (filename, O_RDWR)) < 0)
             HGOTO_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL, "open failed")
-      
+
     }
     else { /* This is case where H5F_ACC_RDWR is not set */
         if ((fd = globus_gass_open (filename, O_RDONLY)) < 0)
             HGOTO_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL, "open failed")
-      
+
     }
-   
+
     if (HDfstat(fd, &sb)<0) {
         close(fd);
         HGOTO_ERROR(H5E_IO, H5E_BADFILE, NULL, "fstat failed")
@@ -491,7 +491,7 @@ H5FD_gass_open(const char *name, unsigned flags, hid_t fapl_id,
 
     /* Set return value */
     ret_value=(H5FD_t*)file;
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -523,7 +523,7 @@ H5FD_gass_close (H5FD_t *_file)
 
     if (file == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file handle")
-    
+
     if (globus_gass_close (file->fd) < 0)
         HGOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "can't close GASS file")
 
@@ -673,24 +673,24 @@ done:
 
 /*-------------------------------------------------------------------------
  * Function:       H5FD_gass_get_handle
- * 
+ *
  * Purpose:        Returns the file handle of GASS file driver.
- * 
+ *
  * Returns:        Non-negative if succeed or negative if fails.
- * 
+ *
  * Programmer:     Raymond Lu
  *                 Sept. 16, 2002
- *                 
- * Modifications:  
- * 
+ *
+ * Modifications:
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5FD_gass_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
-{   
+{
     H5FD_gass_t         *file = (H5FD_gass_t *)_file;
     herr_t              ret_value = SUCCEED;
-                                                   
+
     FUNC_ENTER_NOAPI(H5FD_gass_get_handle, FAIL)
 
     if(!file_handle)
@@ -698,10 +698,10 @@ H5FD_gass_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
 
     *file_handle = &(file->fd);
 
-done:   
+done:
     FUNC_LEAVE_NOAPI(ret_value)
-}   
-            
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_gass_read
@@ -755,7 +755,7 @@ H5FD_gass_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id/*unused*/, h
      * and the end of the file.
      */
     while (size>0) {
-        do 
+        do
             nbytes = read(file->fd, buf, size);
         while (-1==nbytes && EINTR==errno);
 

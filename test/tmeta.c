@@ -49,9 +49,9 @@ uint8_t                   encode_buffer[sizeof(compar_buffer)];
 /****************************************************************
 **
 **  test_metadata(): Main meta-data encode/decode testing routine.
-** 
+**
 ****************************************************************/
-void 
+void
 test_metadata(void)
 {
     int16_t     ei16 = TEST_INT16_VALUE;    /* variables to hold the values to encode */

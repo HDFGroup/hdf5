@@ -15,7 +15,7 @@
 /* Programmer:  John Mainzer
  *              6/9/04
  *
- *		This file contains tests for the cache implemented in 
+ *		This file contains tests for the cache implemented in
  *		H5C.c
  */
 #include "h5test.h"
@@ -102,20 +102,20 @@ const char *FILENAME[] = {
 #define MONSTER_ALT_BASE_ADDR	(haddr_t)(HUGE_ALT_BASE_ADDR + \
                                       (HUGE_ENTRY_SIZE * NUM_HUGE_ENTRIES))
 
-typedef struct test_entry_t 
+typedef struct test_entry_t
 {
-    H5C_cache_entry_t	  header;	/* entry data used by the cache 
-					 * -- must be first 
+    H5C_cache_entry_t	  header;	/* entry data used by the cache
+					 * -- must be first
                                		 */
     struct test_entry_t * self; 	/* pointer to this entry -- used for
 					 * sanity checking.
                                          */
-    haddr_t		  addr;         /* where the cache thinks this entry 
-                                         * is located 
+    haddr_t		  addr;         /* where the cache thinks this entry
+                                         * is located
                                          */
     hbool_t		  at_main_addr;	/* boolean flag indicating whether
 					 * the entry is supposed to be at
-					 * either its main or alternate 
+					 * either its main or alternate
 					 * address.
      					 */
     haddr_t		  main_addr;    /* initial location of the entry
@@ -123,29 +123,29 @@ typedef struct test_entry_t
     haddr_t		  alt_addr;	/* location to which the entry
 					 * can be relocated or "renamed"
                                          */
-    size_t		  size;         /* how big the cache thinks this 
-                                         * entry is 
+    size_t		  size;         /* how big the cache thinks this
+                                         * entry is
                                          */
-    int32_t		  type;		/* indicates which entry array this 
-					 * entry is in 
+    int32_t		  type;		/* indicates which entry array this
+					 * entry is in
                                          */
-    int32_t		  index;	/* index in its entry array 
+    int32_t		  index;	/* index in its entry array
                                          */
     int32_t		  reads;	/* number of times this entry has
 					 * been loaded.
                                          */
-    int32_t		  writes;	/* number of times this entry has 
-                                         * been written 
+    int32_t		  writes;	/* number of times this entry has
+                                         * been written
                                          */
-    hbool_t		  is_dirty;	/* entry has been modified since 
-                                         * last write 
+    hbool_t		  is_dirty;	/* entry has been modified since
+                                         * last write
                                          */
-    hbool_t		  is_protected;	/* entry should currently be on 
+    hbool_t		  is_protected;	/* entry should currently be on
 					 * the cache's protected list.
                                          */
 } test_entry_t;
 
-/* The following is a cut down copy of the hash table manipulation 
+/* The following is a cut down copy of the hash table manipulation
  * macros from H5C.c, which have been further modified to avoid references
  * to the error reporting macros.  Needless to say, these macros must be
  * updated as necessary.
@@ -217,7 +217,7 @@ if ( ( (cache_ptr) == NULL ) ||                                   \
 }
 
 
-/* The following is a local copy of the H5C_t structure -- any changes in 
+/* The following is a local copy of the H5C_t structure -- any changes in
  * that structure must be reproduced here.  The typedef is used to allow
  * local access to the cache's private data.
  */
@@ -358,11 +358,11 @@ const size_t entry_sizes[NUMBER_OF_ENTRY_TYPES] =
     PICO_ENTRY_SIZE,
     NANO_ENTRY_SIZE,
     MICRO_ENTRY_SIZE,
-    TINY_ENTRY_SIZE, 
+    TINY_ENTRY_SIZE,
     SMALL_ENTRY_SIZE,
     MEDIUM_ENTRY_SIZE,
     LARGE_ENTRY_SIZE,
-    HUGE_ENTRY_SIZE, 
+    HUGE_ENTRY_SIZE,
     MONSTER_ENTRY_SIZE
 };
 
@@ -438,49 +438,49 @@ herr_t huge_dest(H5F_t * f, void *  thing);
 herr_t monster_dest(H5F_t * f, void *  thing);
 
 
-static herr_t flush(H5F_t *f, hid_t UNUSED dxpl_id, hbool_t dest, 
+static herr_t flush(H5F_t *f, hid_t UNUSED dxpl_id, hbool_t dest,
                     haddr_t addr, void *thing);
 
-herr_t pico_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, 
+herr_t pico_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
                   haddr_t addr, void *thing);
-herr_t nano_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, 
+herr_t nano_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
                   haddr_t addr, void *thing);
-herr_t micro_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, 
+herr_t micro_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
                    haddr_t addr, void *thing);
-herr_t tiny_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, 
+herr_t tiny_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
                   haddr_t addr, void *thing);
-herr_t small_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, 
+herr_t small_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
                    haddr_t addr, void *thing);
-herr_t medium_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, 
+herr_t medium_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
                     haddr_t addr, void *thing);
-herr_t large_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, 
+herr_t large_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
                    haddr_t addr, void *thing);
-herr_t huge_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, 
+herr_t huge_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
                   haddr_t addr, void *thing);
-herr_t monster_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, 
+herr_t monster_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
                      haddr_t addr, void *thing);
 
 
 static void * load(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
                    const void UNUSED *udata1, void UNUSED *udata2);
 
-void * pico_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+void * pico_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
                  const void *udata1, void *udata2);
-void * nano_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+void * nano_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
                  const void *udata1, void *udata2);
-void * micro_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+void * micro_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
                   const void *udata1, void *udata2);
-void * tiny_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+void * tiny_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
                  const void *udata1, void *udata2);
-void * small_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+void * small_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
                   const void *udata1, void *udata2);
-void * medium_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+void * medium_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
                    const void *udata1, void *udata2);
-void * large_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+void * large_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
                   const void *udata1, void *udata2);
-void * huge_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+void * huge_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
                  const void *udata1, void *udata2);
-void * monster_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+void * monster_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
                     const void *udata1, void *udata2);
 
 
@@ -578,12 +578,12 @@ static const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
 
 /* private function declarations: */
 
-static void addr_to_type_and_index(haddr_t addr, 
-                                   int32_t * type_ptr, 
+static void addr_to_type_and_index(haddr_t addr,
+                                   int32_t * type_ptr,
                                    int32_t * index_ptr);
 
 #if 0 /* keep this for a while -- it may be useful */
-static haddr_t type_and_index_to_addr(int32_t type, 
+static haddr_t type_and_index_to_addr(int32_t type,
                                       int32_t idx);
 #endif
 
@@ -669,8 +669,8 @@ static void check_rename_err(void);
 static void check_double_protect_err(void);
 static void check_double_unprotect_err(void);
 
-static void takedown_cache(H5C_t * cache_ptr, 
-                           hbool_t dump_stats, 
+static void takedown_cache(H5C_t * cache_ptr,
+                           hbool_t dump_stats,
                            hbool_t dump_detailed_stats);
 
 static void flush_cache(H5C_t * cache_ptr,
@@ -695,7 +695,7 @@ static void verify_unprotected(void);
 /*-------------------------------------------------------------------------
  * Function:	addr_to_type_and_index
  *
- * Purpose:	Given an address, compute the type and index of the 
+ * Purpose:	Given an address, compute the type and index of the
  *		associated entry.
  *
  * Return:	void
@@ -719,7 +719,7 @@ addr_to_type_and_index(haddr_t addr,
     HDassert( type_ptr );
     HDassert( index_ptr );
 
-    /* we only have a small number of entry types, so just do a 
+    /* we only have a small number of entry types, so just do a
      * linear search.  If NUMBER_OF_ENTRY_TYPES grows, we may want
      * to do a binary search instead.
      */
@@ -770,13 +770,13 @@ addr_to_type_and_index(haddr_t addr,
 } /* addr_to_type_and_index() */
 
 
-#if 0 /* This function has never been used, but we may want it 
+#if 0 /* This function has never been used, but we may want it
        * some time.  Lets keep it for now.
        */
 /*-------------------------------------------------------------------------
  * Function:	type_and_index_to_addr
  *
- * Purpose:	Given a type and index of an entry, compute the associated 
+ * Purpose:	Given a type and index of an entry, compute the associated
  *		addr and return that value.
  *
  * Return:	computed addr
@@ -858,7 +858,7 @@ check_write_permitted(const H5F_t UNUSED * f,
 /*-------------------------------------------------------------------------
  * Function:	clear & friends
  *
- * Purpose:	clear the entry.  The helper functions verify that the 
+ * Purpose:	clear the entry.  The helper functions verify that the
  *		correct version of clear is being called, and then call
  *		clear proper.
  *
@@ -872,7 +872,7 @@ check_write_permitted(const H5F_t UNUSED * f,
  *-------------------------------------------------------------------------
  */
 
-static herr_t 
+static herr_t
 clear(H5F_t * f,
       void *  thing,
       hbool_t dest)
@@ -906,74 +906,74 @@ clear(H5F_t * f,
 
 } /* clear() */
 
-herr_t 
+herr_t
 pico_clear(H5F_t * f, void *  thing, hbool_t dest)
 {
     HDassert ( ((test_entry_t *)thing)->type == PICO_ENTRY_TYPE );
     return(clear(f, thing, dest));
-} 
+}
 
-herr_t 
+herr_t
 nano_clear(H5F_t * f, void *  thing, hbool_t dest)
 {
     HDassert ( ((test_entry_t *)thing)->type == NANO_ENTRY_TYPE );
     return(clear(f, thing, dest));
-} 
+}
 
-herr_t 
+herr_t
 micro_clear(H5F_t * f, void *  thing, hbool_t dest)
 {
     HDassert ( ((test_entry_t *)thing)->type == MICRO_ENTRY_TYPE );
     return(clear(f, thing, dest));
-} 
+}
 
-herr_t 
+herr_t
 tiny_clear(H5F_t * f, void *  thing, hbool_t dest)
 {
     HDassert ( ((test_entry_t *)thing)->type == TINY_ENTRY_TYPE );
     return(clear(f, thing, dest));
-} 
+}
 
-herr_t 
+herr_t
 small_clear(H5F_t * f, void *  thing, hbool_t dest)
 {
     HDassert ( ((test_entry_t *)thing)->type == SMALL_ENTRY_TYPE );
     return(clear(f, thing, dest));
-} 
+}
 
-herr_t 
+herr_t
 medium_clear(H5F_t * f, void *  thing, hbool_t dest)
 {
     HDassert ( ((test_entry_t *)thing)->type == MEDIUM_ENTRY_TYPE );
     return(clear(f, thing, dest));
-} 
+}
 
-herr_t 
+herr_t
 large_clear(H5F_t * f, void *  thing, hbool_t dest)
 {
     HDassert ( ((test_entry_t *)thing)->type == LARGE_ENTRY_TYPE );
     return(clear(f, thing, dest));
-} 
+}
 
-herr_t 
+herr_t
 huge_clear(H5F_t * f, void *  thing, hbool_t dest)
 {
     HDassert ( ((test_entry_t *)thing)->type == HUGE_ENTRY_TYPE );
     return(clear(f, thing, dest));
-} 
+}
 
-herr_t 
+herr_t
 monster_clear(H5F_t * f, void *  thing, hbool_t dest)
 {
     HDassert ( ((test_entry_t *)thing)->type == MONSTER_ENTRY_TYPE );
     return(clear(f, thing, dest));
-} 
+}
 
 
 /*-------------------------------------------------------------------------
  * Function:	dest & friends
  *
- * Purpose:	Destroy the entry.  The helper functions verify that the 
+ * Purpose:	Destroy the entry.  The helper functions verify that the
  *		correct version of dest is being called, and then call
  *		dest proper.
  *
@@ -987,7 +987,7 @@ monster_clear(H5F_t * f, void *  thing, hbool_t dest)
  *-------------------------------------------------------------------------
  */
 
-static herr_t 
+static herr_t
 destroy(H5F_t UNUSED * f,
         void *         thing)
 {
@@ -1014,75 +1014,75 @@ destroy(H5F_t UNUSED * f,
 
 } /* dest() */
 
-herr_t 
+herr_t
 pico_dest(H5F_t * f, void * thing)
 {
     HDassert ( ((test_entry_t *)thing)->type == PICO_ENTRY_TYPE );
     return(destroy(f, thing));
-} 
+}
 
-herr_t 
+herr_t
 nano_dest(H5F_t * f, void * thing)
 {
     HDassert ( ((test_entry_t *)thing)->type == NANO_ENTRY_TYPE );
     return(destroy(f, thing));
-} 
+}
 
-herr_t 
+herr_t
 micro_dest(H5F_t * f, void * thing)
 {
     HDassert ( ((test_entry_t *)thing)->type == MICRO_ENTRY_TYPE );
     return(destroy(f, thing));
-} 
+}
 
-herr_t 
+herr_t
 tiny_dest(H5F_t * f, void * thing)
 {
     HDassert ( ((test_entry_t *)thing)->type == TINY_ENTRY_TYPE );
     return(destroy(f, thing));
-} 
+}
 
-herr_t 
+herr_t
 small_dest(H5F_t * f, void * thing)
 {
     HDassert ( ((test_entry_t *)thing)->type == SMALL_ENTRY_TYPE );
     return(destroy(f, thing));
-} 
+}
 
-herr_t 
+herr_t
 medium_dest(H5F_t * f, void * thing)
 {
     HDassert ( ((test_entry_t *)thing)->type == MEDIUM_ENTRY_TYPE );
     return(destroy(f, thing));
-} 
+}
 
-herr_t 
+herr_t
 large_dest(H5F_t * f, void * thing)
 {
     HDassert ( ((test_entry_t *)thing)->type == LARGE_ENTRY_TYPE );
     return(destroy(f, thing));
-} 
+}
 
-herr_t 
+herr_t
 huge_dest(H5F_t * f, void *  thing)
 {
     HDassert ( ((test_entry_t *)thing)->type == HUGE_ENTRY_TYPE );
     return(destroy(f, thing));
-} 
+}
 
-herr_t 
+herr_t
 monster_dest(H5F_t * f, void *  thing)
 {
     HDassert ( ((test_entry_t *)thing)->type == MONSTER_ENTRY_TYPE );
     return(destroy(f, thing));
-} 
+}
 
 
 /*-------------------------------------------------------------------------
  * Function:	flush & friends
  *
- * Purpose:	flush the entry and mark it as clean.  The helper functions 
- *              verify that the correct version of flush is being called, 
+ * Purpose:	flush the entry and mark it as clean.  The helper functions
+ *              verify that the correct version of flush is being called,
  *		and then call flush proper.
  *
  * Return:	SUCCEED
@@ -1095,7 +1095,7 @@ monster_dest(H5F_t * f, void *  thing)
  *-------------------------------------------------------------------------
  */
 
-static herr_t 
+static herr_t
 flush(H5F_t *f,
       hid_t UNUSED dxpl_id,
       hbool_t dest,
@@ -1142,74 +1142,74 @@ flush(H5F_t *f,
 
 } /* flush() */
 
-herr_t 
+herr_t
 pico_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, void *thing)
 {
     HDassert ( ((test_entry_t *)thing)->type == PICO_ENTRY_TYPE );
     return(flush(f, dxpl_id, dest, addr, thing));
-} 
+}
 
-herr_t 
+herr_t
 nano_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, void *thing)
 {
     HDassert ( ((test_entry_t *)thing)->type == NANO_ENTRY_TYPE );
     return(flush(f, dxpl_id, dest, addr, thing));
-} 
+}
 
-herr_t 
+herr_t
 micro_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, void *thing)
 {
     HDassert ( ((test_entry_t *)thing)->type == MICRO_ENTRY_TYPE );
     return(flush(f, dxpl_id, dest, addr, thing));
-} 
+}
 
-herr_t 
+herr_t
 tiny_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, void *thing)
 {
     HDassert ( ((test_entry_t *)thing)->type == TINY_ENTRY_TYPE );
     return(flush(f, dxpl_id, dest, addr, thing));
-} 
+}
 
-herr_t 
+herr_t
 small_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, void *thing)
 {
     HDassert ( ((test_entry_t *)thing)->type == SMALL_ENTRY_TYPE );
     return(flush(f, dxpl_id, dest, addr, thing));
-} 
+}
 
-herr_t 
+herr_t
 medium_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, void *thing)
 {
     HDassert ( ((test_entry_t *)thing)->type == MEDIUM_ENTRY_TYPE );
     return(flush(f, dxpl_id, dest, addr, thing));
-} 
+}
 
-herr_t 
+herr_t
 large_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, void *thing)
 {
     HDassert ( ((test_entry_t *)thing)->type == LARGE_ENTRY_TYPE );
     return(flush(f, dxpl_id, dest, addr, thing));
-} 
+}
 
-herr_t 
+herr_t
 huge_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, void *thing)
 {
     HDassert ( ((test_entry_t *)thing)->type == HUGE_ENTRY_TYPE );
     return(flush(f, dxpl_id, dest, addr, thing));
-} 
+}
 
-herr_t 
+herr_t
 monster_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, void *thing)
 {
     HDassert ( ((test_entry_t *)thing)->type == MONSTER_ENTRY_TYPE );
     return(flush(f, dxpl_id, dest, addr, thing));
-} 
+}
 
 
 /*-------------------------------------------------------------------------
  * Function:	load & friends
  *
- * Purpose:	"load" the requested entry and mark it as clean.  The 
+ * Purpose:	"load" the requested entry and mark it as clean.  The
  *		helper functions verify that the correct version of load
  *		 is being called, and then call load proper.
  *
@@ -1258,75 +1258,75 @@ load(H5F_t UNUSED *f,
 
 } /* load() */
 
-void * 
-pico_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+void *
+pico_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
           const void *udata1, void *udata2)
 {
     return(load(f, dxpl_id, addr, udata1, udata2));
-} 
+}
 
 void *
-nano_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+nano_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
           const void *udata1, void *udata2)
 {
     return(load(f, dxpl_id, addr, udata1, udata2));
-} 
+}
 
 void *
-micro_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+micro_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
            const void *udata1, void *udata2)
 {
     return(load(f, dxpl_id, addr, udata1, udata2));
-} 
+}
 
 void *
-tiny_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+tiny_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
           const void *udata1, void *udata2)
 {
     return(load(f, dxpl_id, addr, udata1, udata2));
-} 
+}
 
 void *
-small_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+small_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
            const void *udata1, void *udata2)
 {
     return(load(f, dxpl_id, addr, udata1, udata2));
-} 
+}
 
 void *
-medium_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+medium_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
             const void *udata1, void *udata2)
 {
     return(load(f, dxpl_id, addr, udata1, udata2));
-} 
+}
 
 void *
-large_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+large_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
            const void *udata1, void *udata2)
 {
     return(load(f, dxpl_id, addr, udata1, udata2));
-} 
+}
 
 void *
-huge_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+huge_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
           const void *udata1, void *udata2)
 {
     return(load(f, dxpl_id, addr, udata1, udata2));
-} 
+}
 
 void *
-monster_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+monster_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
              const void *udata1, void *udata2)
 {
     return(load(f, dxpl_id, addr, udata1, udata2));
-} 
+}
 
 
 /*-------------------------------------------------------------------------
  * Function:	size & friends
  *
- * Purpose:	Get the size of the specified entry.  The helper functions 
- *		verify that the correct version of size is being called, 
+ * Purpose:	Get the size of the specified entry.  The helper functions
+ *		verify that the correct version of size is being called,
  *		and then call size proper.
  *
  * Return:	SUCCEED
@@ -1339,7 +1339,7 @@ monster_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
  *-------------------------------------------------------------------------
  */
 
-static herr_t 
+static herr_t
 size(H5F_t UNUSED *  f,
      void *   thing,
      size_t * size_ptr)
@@ -1366,68 +1366,68 @@ size(H5F_t UNUSED *  f,
 
 } /* size() */
 
-herr_t 
+herr_t
 pico_size(H5F_t * f, void * thing, size_t * size_ptr)
 {
     HDassert ( ((test_entry_t *)thing)->type == PICO_ENTRY_TYPE );
     return(size(f, thing, size_ptr));
-} 
+}
 
-herr_t 
+herr_t
 nano_size(H5F_t * f, void * thing, size_t * size_ptr)
 {
     HDassert ( ((test_entry_t *)thing)->type == NANO_ENTRY_TYPE );
     return(size(f, thing, size_ptr));
-} 
+}
 
-herr_t 
+herr_t
 micro_size(H5F_t * f, void * thing, size_t * size_ptr)
 {
     HDassert ( ((test_entry_t *)thing)->type == MICRO_ENTRY_TYPE );
     return(size(f, thing, size_ptr));
-} 
+}
 
-herr_t 
+herr_t
 tiny_size(H5F_t * f, void * thing, size_t * size_ptr)
 {
     HDassert ( ((test_entry_t *)thing)->type == TINY_ENTRY_TYPE );
     return(size(f, thing, size_ptr));
-} 
+}
 
-herr_t 
+herr_t
 small_size(H5F_t * f, void * thing, size_t * size_ptr)
 {
     HDassert ( ((test_entry_t *)thing)->type == SMALL_ENTRY_TYPE );
     return(size(f, thing, size_ptr));
-} 
+}
 
-herr_t 
+herr_t
 medium_size(H5F_t * f, void * thing, size_t * size_ptr)
 {
     HDassert ( ((test_entry_t *)thing)->type == MEDIUM_ENTRY_TYPE );
     return(size(f, thing, size_ptr));
-} 
+}
 
-herr_t 
+herr_t
 large_size(H5F_t * f, void * thing, size_t * size_ptr)
 {
     HDassert ( ((test_entry_t *)thing)->type == LARGE_ENTRY_TYPE );
     return(size(f, thing, size_ptr));
-} 
+}
 
-herr_t 
+herr_t
 huge_size(H5F_t * f, void * thing, size_t * size_ptr)
 {
     HDassert ( ((test_entry_t *)thing)->type == HUGE_ENTRY_TYPE );
     return(size(f, thing, size_ptr));
-} 
+}
 
-herr_t 
+herr_t
 monster_size(H5F_t * f, void * thing, size_t * size_ptr)
 {
     HDassert ( ((test_entry_t *)thing)->type == MONSTER_ENTRY_TYPE );
     return(size(f, thing, size_ptr));
-} 
+}
 
 
 /**************************************************************************/
@@ -1439,7 +1439,7 @@ monster_size(H5F_t * f, void * thing, size_t * size_ptr)
 /*-------------------------------------------------------------------------
  * Function:	entry_in_cache
  *
- * Purpose:	Given a pointer to a cache, an entry type, and an index, 
+ * Purpose:	Given a pointer to a cache, an entry type, and an index,
  *		determine if the entry is currently in the cache.
  *
  * Return:	TRUE if the entry is in the cache, and FALSE otherwise.
@@ -1603,7 +1603,7 @@ verify_clean(void)
             for ( j = 0; j <= max_index; j++ )
             {
                 if ( ( base_addr[j].header.is_dirty ) || ( base_addr[j].is_dirty ) ) {
-            
+
                     dirty_count++;
                 }
             }
@@ -1624,7 +1624,7 @@ verify_clean(void)
 /*-------------------------------------------------------------------------
  * Function:	verify_unprotected
  *
- * Purpose:	Verify that no cache entries are marked as protected.  If 
+ * Purpose:	Verify that no cache entries are marked as protected.  If
  *		any are, set pass to FALSE.
  *
  *		Do nothing if pass is FALSE on entry.
@@ -1660,12 +1660,12 @@ verify_unprotected(void)
 
             for ( j = 0; j <= max_index; j++ )
             {
-                HDassert( base_addr[j].header.is_protected == 
+                HDassert( base_addr[j].header.is_protected ==
                           base_addr[j].is_protected );
 
-                if ( ( base_addr[j].header.is_protected ) || 
+                if ( ( base_addr[j].header.is_protected ) ||
                      ( base_addr[j].is_protected ) ) {
-            
+
                     protected_count++;
                 }
             }
@@ -1706,7 +1706,7 @@ setup_cache(size_t max_cache_size,
 {
     H5C_t * cache_ptr = NULL;
 
-    cache_ptr = H5C_create(max_cache_size, 
+    cache_ptr = H5C_create(max_cache_size,
                            min_clean_size,
                            (NUMBER_OF_ENTRY_TYPES - 1),
 			   (const char **)entry_type_names,
@@ -1768,7 +1768,7 @@ takedown_cache(H5C_t * cache_ptr,
 /*-------------------------------------------------------------------------
  * Function:	flush_cache()
  *
- * Purpose:	Flush the specified cache, destroying all entries if 
+ * Purpose:	Flush the specified cache, destroying all entries if
                 requested.  If requested, dump stats first.
  *
  * Return:	void
@@ -1797,7 +1797,7 @@ flush_cache(H5C_t * cache_ptr,
 
         if ( destroy_entries ) {
 
-            result = H5C_flush_cache(NULL, -1, -1, cache_ptr, 
+            result = H5C_flush_cache(NULL, -1, -1, cache_ptr,
                                      H5F_FLUSH_INVALIDATE);
 
         } else {
@@ -1938,7 +1938,7 @@ rename_entry(H5C_t * cache_ptr,
     HDassert( !(entry_ptr->is_protected) );
     HDassert( !(entry_ptr->header.is_protected) );
 
-    if ( entry_ptr->at_main_addr && !main_addr ) { 
+    if ( entry_ptr->at_main_addr && !main_addr ) {
 
         /* rename to alt addr */
 
@@ -1948,7 +1948,7 @@ rename_entry(H5C_t * cache_ptr,
         old_addr = entry_ptr->addr;
         new_addr = entry_ptr->alt_addr;
 
-    } else if ( !(entry_ptr->at_main_addr) && main_addr ) { 
+    } else if ( !(entry_ptr->at_main_addr) && main_addr ) {
 
         /* rename to main addr */
 
@@ -2212,7 +2212,7 @@ row_major_scan_forward(H5C_t * cache_ptr,
                  ( ( (idx + lag - 2) % 3 ) == 0 ) ) {
 
                 if ( verbose )
-                    HDfprintf(stdout, "(u, %d, %d) ", type, (idx + lag - 2)); 
+                    HDfprintf(stdout, "(u, %d, %d) ", type, (idx + lag - 2));
 
                 unprotect_entry(cache_ptr, type, idx+lag-2, NO_CHANGE, FALSE);
             }
@@ -2222,7 +2222,7 @@ row_major_scan_forward(H5C_t * cache_ptr,
                  ( (idx + lag - 2) <= max_indices[type] ) &&
                  ( ( (idx + lag - 2) % 3 ) == 0 ) ) {
 
-                rename_entry(cache_ptr, type, (idx + lag - 2), 
+                rename_entry(cache_ptr, type, (idx + lag - 2),
                              rename_to_main_addr);
             }
 
@@ -2250,7 +2250,7 @@ row_major_scan_forward(H5C_t * cache_ptr,
             if ( ( pass ) && ( idx >= 0 ) && ( idx <= max_indices[type] ) ) {
 
                 if ( verbose )
-                    HDfprintf(stdout, "(p, %d, %d) ", type, idx); 
+                    HDfprintf(stdout, "(p, %d, %d) ", type, idx);
 
                 protect_entry(cache_ptr, type, idx);
             }
@@ -2332,11 +2332,11 @@ row_major_scan_forward(H5C_t * cache_ptr,
                     if ( verbose )
                         HDfprintf(stdout, "(u, %d, %d) ", type, (idx - lag));
 
-                    unprotect_entry(cache_ptr, type, idx - lag, 
+                    unprotect_entry(cache_ptr, type, idx - lag,
                                     dirty_unprotects, FALSE);
                 }
             }
-            
+
             if ( verbose )
                 HDfprintf(stdout, "\n");
 
@@ -2359,7 +2359,7 @@ row_major_scan_forward(H5C_t * cache_ptr,
  * Function:	row_major_scan_backward()
  *
  * Purpose:	Do a sequence of inserts, protects, unprotects, renames,
- *		destroys while scanning backwards through the set of 
+ *		destroys while scanning backwards through the set of
  *		entries.  If pass is false on entry, do nothing.
  *
  * Return:	void
@@ -2387,7 +2387,7 @@ row_major_scan_backward(H5C_t * cache_ptr,
                         int dirty_destroys,
                         int dirty_unprotects)
 {
-    const char * fcn_name = "row_major_scan_backward"; 
+    const char * fcn_name = "row_major_scan_backward";
     int32_t type;
     int32_t idx;
 
@@ -2436,7 +2436,7 @@ row_major_scan_backward(H5C_t * cache_ptr,
                  ( ( (idx - lag + 2) % 3 ) == 0 ) ) {
 
                 if ( verbose )
-                    HDfprintf(stdout, "(u, %d, %d) ", type, (idx - lag + 2)); 
+                    HDfprintf(stdout, "(u, %d, %d) ", type, (idx - lag + 2));
 
                 unprotect_entry(cache_ptr, type, idx-lag+2, NO_CHANGE, FALSE);
             }
@@ -2446,7 +2446,7 @@ row_major_scan_backward(H5C_t * cache_ptr,
                  ( (idx - lag + 2) <= max_indices[type] ) &&
                  ( ( (idx - lag + 2) % 3 ) == 0 ) ) {
 
-                rename_entry(cache_ptr, type, (idx - lag + 2), 
+                rename_entry(cache_ptr, type, (idx - lag + 2),
                              rename_to_main_addr);
             }
 
@@ -2474,7 +2474,7 @@ row_major_scan_backward(H5C_t * cache_ptr,
             if ( ( pass ) && ( idx >= 0 ) && ( idx <= max_indices[type] ) ) {
 
                 if ( verbose )
-                    HDfprintf(stdout, "(p, %d, %d) ", type, idx); 
+                    HDfprintf(stdout, "(p, %d, %d) ", type, idx);
 
                 protect_entry(cache_ptr, type, idx);
             }
@@ -2555,11 +2555,11 @@ row_major_scan_backward(H5C_t * cache_ptr,
                     if ( verbose )
                         HDfprintf(stdout, "(u, %d, %d) ", type, (idx - lag));
 
-                    unprotect_entry(cache_ptr, type, idx + lag, 
+                    unprotect_entry(cache_ptr, type, idx + lag,
                                     dirty_unprotects, FALSE);
                 }
             }
-            
+
             if ( verbose )
                 HDfprintf(stdout, "\n");
 
@@ -2655,10 +2655,10 @@ col_major_scan_forward(H5C_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "(u, %d, %d) ", type, (idx - lag));
 
-                unprotect_entry(cache_ptr, type, idx - lag, 
+                unprotect_entry(cache_ptr, type, idx - lag,
                                 dirty_unprotects, FALSE);
             }
-            
+
             if ( verbose )
                 HDfprintf(stdout, "\n");
 
@@ -2682,7 +2682,7 @@ col_major_scan_forward(H5C_t * cache_ptr,
  * Function:	col_major_scan_backward()
  *
  * Purpose:	Do a sequence of inserts, protects, and unprotects
- *		while scanning backwards through the set of 
+ *		while scanning backwards through the set of
  *		entries.  If pass is false on entry, do nothing.
  *
  * Return:	void
@@ -2758,10 +2758,10 @@ col_major_scan_backward(H5C_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "(u, %d, %d) ", type, (idx + lag));
 
-                unprotect_entry(cache_ptr, type, idx + lag, 
+                unprotect_entry(cache_ptr, type, idx + lag,
                                 dirty_unprotects, FALSE);
             }
-            
+
             if ( verbose )
                 HDfprintf(stdout, "\n");
 
@@ -2796,8 +2796,8 @@ col_major_scan_backward(H5C_t * cache_ptr,
 /*-------------------------------------------------------------------------
  * Function:	smoke_check_1()
  *
- * Purpose:	A basic functional test, inserts, destroys, and renames in 
- *              the mix, along with repeated protects and unprotects.  
+ * Purpose:	A basic functional test, inserts, destroys, and renames in
+ *              the mix, along with repeated protects and unprotects.
  *		All entries are marked as clean.
  *
  * Return:	void
@@ -2828,20 +2828,20 @@ smoke_check_1(void)
     pass = TRUE;
 
     if ( show_progress ) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     reset_entries();
 
     if ( show_progress ) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     cache_ptr = setup_cache((size_t)(4 * 1024 * 1024),
                             (size_t)(2 * 1024 * 1024));
 
     if ( show_progress ) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* cache_ptr              */ cache_ptr,
@@ -2859,7 +2859,7 @@ smoke_check_1(void)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     row_major_scan_backward(/* cache_ptr              */ cache_ptr,
@@ -2877,7 +2877,7 @@ smoke_check_1(void)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* cache_ptr              */ cache_ptr,
@@ -2895,18 +2895,18 @@ smoke_check_1(void)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
-    flush_cache(/* cache_ptr           */ cache_ptr, 
+    flush_cache(/* cache_ptr           */ cache_ptr,
                 /* destroy_entries     */ TRUE,
                 /* dump_stats          */ FALSE,
                 /* dump_detailed_stats */ FALSE);
 
     if ( show_progress ) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* cache_ptr              */ cache_ptr,
@@ -2920,18 +2920,18 @@ smoke_check_1(void)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
-    flush_cache(/* cache_ptr           */ cache_ptr, 
+    flush_cache(/* cache_ptr           */ cache_ptr,
                 /* destroy_entries     */ FALSE,
                 /* dump_stats          */ FALSE,
                 /* dump_detailed_stats */ FALSE);
 
     if ( show_progress ) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     col_major_scan_backward(/* cache_ptr              */ cache_ptr,
@@ -2945,13 +2945,13 @@ smoke_check_1(void)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     takedown_cache(cache_ptr, display_stats, TRUE);
 
     if ( show_progress ) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     verify_clean();
@@ -2960,7 +2960,7 @@ smoke_check_1(void)
     if ( pass ) { PASSED(); } else { H5_FAILED(); }
 
     if ( ! pass )
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", 
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n",
                   fcn_name, failure_mssg);
 
 } /* smoke_check_1() */
@@ -2969,9 +2969,9 @@ smoke_check_1(void)
 /*-------------------------------------------------------------------------
  * Function:	smoke_check_2()
  *
- * Purpose:	A basic functional test, with inserts, destroys, and 
- *		renames in the mix, along with some repeated protects 
- *		and unprotects.  About half the entries are marked as 
+ * Purpose:	A basic functional test, with inserts, destroys, and
+ *		renames in the mix, along with some repeated protects
+ *		and unprotects.  About half the entries are marked as
  *		dirty.
  *
  * Return:	void
@@ -3002,20 +3002,20 @@ smoke_check_2(void)
     pass = TRUE;
 
     if ( show_progress ) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     reset_entries();
 
     if ( show_progress ) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     cache_ptr = setup_cache((size_t)(4 * 1024 * 1024),
                             (size_t)(2 * 1024 * 1024));
 
     if ( show_progress ) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* cache_ptr              */ cache_ptr,
@@ -3033,7 +3033,7 @@ smoke_check_2(void)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     row_major_scan_backward(/* cache_ptr              */ cache_ptr,
@@ -3051,7 +3051,7 @@ smoke_check_2(void)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* cache_ptr              */ cache_ptr,
@@ -3069,18 +3069,18 @@ smoke_check_2(void)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
-    flush_cache(/* cache_ptr           */ cache_ptr, 
+    flush_cache(/* cache_ptr           */ cache_ptr,
                 /* destroy_entries     */ TRUE,
                 /* dump_stats          */ FALSE,
                 /* dump_detailed_stats */ FALSE);
 
     if ( show_progress ) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* cache_ptr              */ cache_ptr,
@@ -3094,18 +3094,18 @@ smoke_check_2(void)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
-    flush_cache(/* cache_ptr           */ cache_ptr, 
+    flush_cache(/* cache_ptr           */ cache_ptr,
                 /* destroy_entries     */ FALSE,
                 /* dump_stats          */ FALSE,
                 /* dump_detailed_stats */ FALSE);
 
     if ( show_progress ) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     col_major_scan_backward(/* cache_ptr              */ cache_ptr,
@@ -3119,13 +3119,13 @@ smoke_check_2(void)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     takedown_cache(cache_ptr, display_stats, TRUE);
 
     if ( show_progress ) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     verify_clean();
@@ -3134,7 +3134,7 @@ smoke_check_2(void)
     if ( pass ) { PASSED(); } else { H5_FAILED(); }
 
     if ( ! pass )
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", 
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n",
                   fcn_name, failure_mssg);
 
 } /* smoke_check_2() */
@@ -3143,9 +3143,9 @@ smoke_check_2(void)
 /*-------------------------------------------------------------------------
  * Function:	smoke_check_3()
  *
- * Purpose:	A basic functional test on a tiny cache, with inserts, 
- *		destroys, and renames in the mix, along with repeated 
- *		protects and unprotects.  All entries are marked as clean.  
+ * Purpose:	A basic functional test on a tiny cache, with inserts,
+ *		destroys, and renames in the mix, along with repeated
+ *		protects and unprotects.  All entries are marked as clean.
  *
  * Return:	void
  *
@@ -3175,20 +3175,20 @@ smoke_check_3(void)
     pass = TRUE;
 
     if ( show_progress ) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     reset_entries();
 
     if ( show_progress ) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     cache_ptr = setup_cache((size_t)(2 * 1024),
                             (size_t)(1 * 1024));
 
     if ( show_progress ) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* cache_ptr              */ cache_ptr,
@@ -3206,7 +3206,7 @@ smoke_check_3(void)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     row_major_scan_backward(/* cache_ptr              */ cache_ptr,
@@ -3224,7 +3224,7 @@ smoke_check_3(void)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* cache_ptr              */ cache_ptr,
@@ -3242,18 +3242,18 @@ smoke_check_3(void)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
-    flush_cache(/* cache_ptr           */ cache_ptr, 
+    flush_cache(/* cache_ptr           */ cache_ptr,
                 /* destroy_entries     */ TRUE,
                 /* dump_stats          */ FALSE,
                 /* dump_detailed_stats */ FALSE);
 
     if ( show_progress ) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* cache_ptr              */ cache_ptr,
@@ -3267,18 +3267,18 @@ smoke_check_3(void)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
-    flush_cache(/* cache_ptr           */ cache_ptr, 
+    flush_cache(/* cache_ptr           */ cache_ptr,
                 /* destroy_entries     */ FALSE,
                 /* dump_stats          */ FALSE,
                 /* dump_detailed_stats */ FALSE);
 
     if ( show_progress ) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     col_major_scan_backward(/* cache_ptr              */ cache_ptr,
@@ -3292,13 +3292,13 @@ smoke_check_3(void)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     takedown_cache(cache_ptr, display_stats, TRUE);
 
     if ( show_progress ) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     verify_clean();
@@ -3307,7 +3307,7 @@ smoke_check_3(void)
     if ( pass ) { PASSED(); } else { H5_FAILED(); }
 
     if ( ! pass )
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", 
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n",
                   fcn_name, failure_mssg);
 
 } /* smoke_check_3() */
@@ -3317,8 +3317,8 @@ smoke_check_3(void)
  * Function:	smoke_check_4()
  *
  * Purpose:	A basic functional test on a tiny cache, with inserts,
- *	 	destroys, and renames in the mix, along with repeated 
- *		protects and unprotects.  About half the entries are 
+ *	 	destroys, and renames in the mix, along with repeated
+ *		protects and unprotects.  About half the entries are
  *		marked as dirty.
  *
  * Return:	void
@@ -3349,20 +3349,20 @@ smoke_check_4(void)
     pass = TRUE;
 
     if ( show_progress ) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     reset_entries();
 
     if ( show_progress ) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     cache_ptr = setup_cache((size_t)(2 * 1024),
                             (size_t)(1 * 1024));
 
     if ( show_progress ) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* cache_ptr              */ cache_ptr,
@@ -3380,7 +3380,7 @@ smoke_check_4(void)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     row_major_scan_backward(/* cache_ptr              */ cache_ptr,
@@ -3398,7 +3398,7 @@ smoke_check_4(void)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* cache_ptr              */ cache_ptr,
@@ -3416,18 +3416,18 @@ smoke_check_4(void)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
-    flush_cache(/* cache_ptr           */ cache_ptr, 
+    flush_cache(/* cache_ptr           */ cache_ptr,
                 /* destroy_entries     */ TRUE,
                 /* dump_stats          */ FALSE,
                 /* dump_detailed_stats */ FALSE);
 
     if ( show_progress ) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* cache_ptr              */ cache_ptr,
@@ -3441,18 +3441,18 @@ smoke_check_4(void)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
-    flush_cache(/* cache_ptr           */ cache_ptr, 
+    flush_cache(/* cache_ptr           */ cache_ptr,
                 /* destroy_entries     */ FALSE,
                 /* dump_stats          */ FALSE,
                 /* dump_detailed_stats */ FALSE);
 
     if ( show_progress ) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     col_major_scan_backward(/* cache_ptr              */ cache_ptr,
@@ -3466,13 +3466,13 @@ smoke_check_4(void)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     takedown_cache(cache_ptr, display_stats, TRUE);
 
     if ( show_progress ) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     verify_clean();
@@ -3481,7 +3481,7 @@ smoke_check_4(void)
     if ( pass ) { PASSED(); } else { H5_FAILED(); }
 
     if ( ! pass )
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", 
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n",
                   fcn_name, failure_mssg);
 
 } /* smoke_check_4() */
@@ -3491,8 +3491,8 @@ smoke_check_4(void)
  * Function:	write_permitted_check()
  *
  * Purpose:	A basic test of the write permitted function.  In essence,
- *		we load the cache up with dirty entryies, set 
- *		write_permitted to FALSE, and then protect a bunch of 
+ *		we load the cache up with dirty entryies, set
+ *		write_permitted to FALSE, and then protect a bunch of
  *		entries.  If there are any writes while write_permitted is
  *		FALSE, the test will fail.
  *
@@ -3528,20 +3528,20 @@ write_permitted_check(void)
     pass = TRUE;
 
     if ( show_progress ) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     reset_entries();
 
     if ( show_progress ) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     cache_ptr = setup_cache((size_t)(1 * 1024 * 1024),
                             (size_t)(0));
 
     if ( show_progress ) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* cache_ptr              */ cache_ptr,
@@ -3559,7 +3559,7 @@ write_permitted_check(void)
                            /* dirty_unprotects       */ TRUE);
 
     if ( show_progress ) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     write_permitted = FALSE;
@@ -3579,7 +3579,7 @@ write_permitted_check(void)
                             /* dirty_unprotects       */ NO_CHANGE);
 
     if ( show_progress ) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     write_permitted = TRUE;
@@ -3599,18 +3599,18 @@ write_permitted_check(void)
                            /* dirty_unprotects       */ TRUE);
 
     if ( show_progress ) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
-    flush_cache(/* cache_ptr           */ cache_ptr, 
+    flush_cache(/* cache_ptr           */ cache_ptr,
                 /* destroy_entries     */ TRUE,
                 /* dump_stats          */ FALSE,
                 /* dump_detailed_stats */ FALSE);
 
     if ( show_progress ) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* cache_ptr              */ cache_ptr,
@@ -3624,7 +3624,7 @@ write_permitted_check(void)
                            /* dirty_unprotects       */ TRUE);
 
     if ( show_progress ) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     write_permitted = FALSE;
@@ -3642,13 +3642,13 @@ write_permitted_check(void)
     write_permitted = TRUE;
 
     if ( show_progress ) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     takedown_cache(cache_ptr, display_stats, TRUE);
 
     if ( show_progress ) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
     verify_clean();
@@ -3657,7 +3657,7 @@ write_permitted_check(void)
     if ( pass ) { PASSED(); } else { H5_FAILED(); }
 
     if ( ! pass )
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", 
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n",
                   fcn_name, failure_mssg);
 
 #else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
@@ -3735,7 +3735,7 @@ check_flush_protected_err(void)
     if ( pass ) { PASSED(); } else { H5_FAILED(); }
 
     if ( ! pass )
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", 
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n",
                   fcn_name, failure_mssg);
 
 } /* check_flush_protected_err() */
@@ -3795,14 +3795,14 @@ check_destroy_protected_err(void)
                 pass = FALSE;
                 failure_mssg = "destroy failed after unprotect.\n";
 
-            } 
+            }
         }
     }
 
     if ( pass ) { PASSED(); } else { H5_FAILED(); }
 
     if ( ! pass )
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", 
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n",
                   fcn_name, failure_mssg);
 
 } /* check_destroy_protected_err() */
@@ -3811,7 +3811,7 @@ check_destroy_protected_err(void)
 /*-------------------------------------------------------------------------
  * Function:	check_duplicate_insert_err()
  *
- * Purpose:	Verify that an attempt to insert and entry that is 
+ * Purpose:	Verify that an attempt to insert and entry that is
  *		alread in the cache will generate an error.
  *
  * Return:	void
@@ -3838,7 +3838,7 @@ check_duplicate_insert_err(void)
     pass = TRUE;
 
     /* allocate a cache, protect an entry, and then try to insert
-     * the entry again.  This should fail.  Unprotect the entry and 
+     * the entry again.  This should fail.  Unprotect the entry and
      * destroy the cache -- should succeed.
      */
 
@@ -3856,7 +3856,7 @@ check_duplicate_insert_err(void)
             base_addr = entries[0];
             entry_ptr = &(base_addr[0]);
 
-            result = H5C_insert_entry(NULL, -1, -1, cache_ptr, 
+            result = H5C_insert_entry(NULL, -1, -1, cache_ptr,
                                       &(types[0]), entry_ptr->addr,
                                       (void *)entry_ptr);
 
@@ -3877,7 +3877,7 @@ check_duplicate_insert_err(void)
     if ( pass ) { PASSED(); } else { H5_FAILED(); }
 
     if ( ! pass )
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", 
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n",
                   fcn_name, failure_mssg);
 
 } /* check_duplicate_insert_err() */
@@ -3966,7 +3966,7 @@ check_rename_err(void)
     if ( pass ) { PASSED(); } else { H5_FAILED(); }
 
     if ( ! pass )
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", 
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
                   fcn_name, failure_mssg);
 
 } /* check_rename_err() */
@@ -4001,7 +4001,7 @@ check_double_protect_err(void)
     pass = TRUE;
 
     /* allocate a cache, protect an entry, and then try to protect
-     * the entry again.  This should fail.  Unprotect the entry and 
+     * the entry again.  This should fail.  Unprotect the entry and
      * destroy the cache -- should succeed.
      */
 
@@ -4042,7 +4042,7 @@ check_double_protect_err(void)
     if ( pass ) { PASSED(); } else { H5_FAILED(); }
 
     if ( ! pass )
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", 
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
                   fcn_name, failure_mssg);
 
 } /* check_double_protect_err() */
@@ -4076,8 +4076,8 @@ check_double_unprotect_err(void)
 
     pass = TRUE;
 
-    /* allocate a cache, protect an entry, unprotect it, and then try to 
-     * unprotect the entry again.  This should fail.  Destroy the cache 
+    /* allocate a cache, protect an entry, unprotect it, and then try to
+     * unprotect the entry again.  This should fail.  Destroy the cache
      * -- should succeed.
      */
 
@@ -4103,7 +4103,7 @@ check_double_unprotect_err(void)
         if ( result > 0 ) {
 
             pass = FALSE;
-            failure_mssg = 
+            failure_mssg =
                 "attempt to unprotect an unprotected entry succeeded.\n";
         }
     }
@@ -4116,7 +4116,7 @@ check_double_unprotect_err(void)
     if ( pass ) { PASSED(); } else { H5_FAILED(); }
 
     if ( ! pass )
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", 
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
                   fcn_name, failure_mssg);
 
 } /* check_double_unprotect_err() */
@@ -4127,9 +4127,9 @@ check_double_unprotect_err(void)
  *
  * Purpose:	Run tests on the cache code contained in H5C.c
  *
- * Return:	Success:	
+ * Return:	Success:
  *
- *		Failure:	
+ *		Failure:
  *
  * Programmer:	John Mainzer
  *              6/24/04

@@ -34,7 +34,7 @@ NAME
    H5T_init_order_interface -- Initialize interface-specific information
 USAGE
     herr_t H5T_init_order_interface()
-   
+
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
