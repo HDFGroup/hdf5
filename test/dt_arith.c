@@ -463,7 +463,7 @@ reset_hdf5(void)
  *-------------------------------------------------------------------------
  */
 static H5T_conv_ret_t
-except_func(int except_type, hid_t UNUSED src_id, hid_t UNUSED dst_id, void UNUSED *src_buf,
+except_func(H5T_conv_except_t except_type, hid_t UNUSED src_id, hid_t UNUSED dst_id, void UNUSED *src_buf,
 		 void *dst_buf, void *user_data)
 {
     H5T_conv_ret_t      ret = H5T_CONV_HANDLED;
