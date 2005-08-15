@@ -116,3 +116,4 @@ in the file file_io.win32.c and including it on the projects
 #define H5_FC_FUNC_(name, NAME) NAME
 #define FC_FUNC_(name, NAME) NAME
 
+#define H5_HAVE_TMPFILE 1
