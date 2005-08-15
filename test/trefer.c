@@ -989,7 +989,11 @@ test_reference_group(void)
     hobj_ref_t rref;            /* Reference to read */
     hsize_t nobjs;
     char objname[NAME_SIZE];    /* Buffer to store name */
+#ifdef H5_WANT_H5_V1_4_COMPAT
+    int objtype;          /* Object type */
+#else /* H5_WANT_H5_V1_4_COMPAT */
     H5G_obj_t objtype;          /* Object type */
+#endif /* H5_WANT_H5_V1_4_COMPAT */
     int count = 0;              /* Count within iterated group */
     herr_t ret;
 
