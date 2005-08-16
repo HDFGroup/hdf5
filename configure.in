@@ -67,7 +67,7 @@ dnl For machines on which HDF5 is often configured, it can be convenient
 dnl to specify the name of the machine rather than its canonical type.
 case $host_alias in
   tflops)
-    host_alias=i386-intel-osfl
+    host_alias=i386-intel-osf1
     ;;
 esac
 

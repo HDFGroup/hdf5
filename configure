@@ -2047,7 +2047,7 @@ fi
 
 case $host_alias in
   tflops)
-    host_alias=i386-intel-osfl
+    host_alias=i386-intel-osf1
     ;;
 esac
 
