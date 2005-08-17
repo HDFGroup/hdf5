@@ -731,9 +731,13 @@ H5close(void)
 
 
 /* disable the code of HDsnprintf and HDvsnprintf below to see if they
- * still needed by how what platforms. AKC 2005/8/11.
+ * are still needed by what platforms. AKC 2005/8/11.
+ * Turn it on for the Tflops (__PUMAGON__) machine. AKC 2005/8/12.
+ * The SN_SIZ_MIN is an attempt to require the minimum amount of space needed,
+ * hoping vsnprintf/snprintf do not print larger than it per request.
  */
-#if 0
+#ifdef __PUMAGON__
+#define H5_SN_SIZE_MIN	256
 #ifndef H5_HAVE_SNPRINTF
 /*-------------------------------------------------------------------------
  * Function:	HDsnprintf
@@ -770,9 +774,15 @@ HDsnprintf(char *buf, size_t UNUSED size, const char *fmt, ...)
     int		n;
     va_list	ap;
 
+    if (size < H5_SN_SIZE_MIN)  /* Not safe to call vsprintf */
+	return -1;
     va_start(ap, fmt);
     n = HDvsprintf(buf, fmt, ap);
     va_end(ap);
+    if (n >= size){
+	/* buffer overflow has occurred. Attempt to report an error. */
+	return -1;
+    }
     return n;
 }
 #endif /* H5_HAVE_SNPRINTF */
@@ -807,10 +817,18 @@ HDsnprintf(char *buf, size_t UNUSED size, const char *fmt, ...)
 int
 HDvsnprintf(char *buf, size_t UNUSED size, const char *fmt, va_list ap)
 {
-    return HDvsprintf(buf, fmt, ap);
+    int         n;
+    if (size < H5_SN_SIZE_MIN)  /* Not safe to call vsprintf */
+	return -1;
+    n = HDvsprintf(buf, fmt, ap);
+    if (n >= size){
+	/* buffer overflow has occurred. Attempt to report an error. */
+	return -1;
+    }
+    return n;
 }
 #endif /* H5_HAVE_VSNPRINTF */
-#endif /* 0 */
+#endif /* __PUMAGON__ */
 
 
 /*-------------------------------------------------------------------------
