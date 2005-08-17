@@ -59,9 +59,8 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/h5cc.in $(srcdir)/testh5repart.sh.in \
 	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
-check_PROGRAMS = $(am__EXEEXT_2)
-bin_PROGRAMS = h5debug$(EXEEXT) h5repart$(EXEEXT) $(am__EXEEXT_1) \
-	repart_test$(EXEEXT)
+check_PROGRAMS = $(am__EXEEXT_2) repart_test$(EXEEXT)
+bin_PROGRAMS = h5debug$(EXEEXT) h5repart$(EXEEXT) $(am__EXEEXT_1)
 subdir = tools/misc
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in

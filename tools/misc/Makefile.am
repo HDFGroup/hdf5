@@ -26,7 +26,7 @@ INCLUDES=-I$(top_srcdir)/src
 TEST_PROG=h5repart_gentest
 TEST_SCRIPT=testh5repart.sh
 
-check_PROGRAMS=$(TEST_PROG)
+check_PROGRAMS=$(TEST_PROG) repart_test
 check_SCRIPTS=$(TEST_SCRIPT)
 
 # Build pdb2hdf5 if LLNL's PDB is present (checked in configure)
@@ -35,7 +35,7 @@ if BUILD_PDB2HDF_CONDITIONAL
 endif
 
 # These are our main targets, the tools
-bin_PROGRAMS=h5debug h5repart $(PDB2HDF) repart_test
+bin_PROGRAMS=h5debug h5repart $(PDB2HDF)
 bin_SCRIPTS=h5redeploy
 
 # Tell automake to clean h5redeploy script
