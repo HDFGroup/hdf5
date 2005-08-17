@@ -177,7 +177,6 @@ ph5diff_worker(int nID)
 		if(outBuffOffset>0)
 		{
 		    MPI_Send(NULL, 0, MPI_BYTE, 0, MPI_TAG_TOK_REQUEST, MPI_COMM_WORLD);
-
 		    /*Wait for print token. */
 		    MPI_Recv(NULL, 0, MPI_BYTE, 0, MPI_TAG_PRINT_TOK, MPI_COMM_WORLD, &Status);
 

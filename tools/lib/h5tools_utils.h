@@ -121,5 +121,8 @@ extern herr_t   find_objs(hid_t group, const char *name, void *op_data);
 extern int      search_obj(table_t *temp, haddr_t objno);
 extern void     init_table(table_t **tbl);
 extern void     init_prefix(char **temp, size_t);
+#ifndef H5_HAVE_TMPFILE
+extern FILE *	tmpfile(void);
+#endif
 
 #endif	/* H5TOOLS_UTILS_H__ */

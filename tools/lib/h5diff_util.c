@@ -20,7 +20,7 @@
 int      g_nTasks = 1;
 unsigned char	 g_Parallel = 0;  /*0 for serial, 1 for parallel */
 char    outBuff[OUTBUFF_SIZE];
-unsigned int     outBuffOffset;
+int     outBuffOffset;
 FILE*	overflow_file	      = NULL;
 
 /*-------------------------------------------------------------------------
@@ -48,16 +48,27 @@ void parallel_print(const char* format, ...)
 
 	if(overflow_file == NULL) /*no overflow has occurred yet */
 	{
+#if 0
+printf("calling HDvsnprintf: OUTBUFF_SIZE=%ld, outBuffOffset=%ld, ", (long)OUTBUFF_SIZE, (long)outBuffOffset);
+#endif
 	    bytes_written = HDvsnprintf(outBuff+outBuffOffset, OUTBUFF_SIZE-outBuffOffset, format, ap);
-
+#if 0
+printf("bytes_written=%ld\n", (long)bytes_written);
+#endif
             va_end(ap);
 	    va_start(ap, format);
 
-#ifdef H5_VSNPRINTF_WORKS
-	    if(bytes_written >= (OUTBUFF_SIZE-outBuffOffset))
-#else
-	    if((bytes_written+1) == (OUTBUFF_SIZE-outBuffOffset))
+#if 0
+printf("Result: bytes_written=%ld, OUTBUFF_SIZE-outBuffOffset=%ld\n", (long)bytes_written, (long)OUTBUFF_SIZE-outBuffOffset);
 #endif
+
+	    if ((bytes_written < 0) ||
+#ifdef H5_VSNPRINTF_WORKS
+		(bytes_written >= (OUTBUFF_SIZE-outBuffOffset))
+#else
+		((bytes_written+1) == (OUTBUFF_SIZE-outBuffOffset))
+#endif
+		)
 	    {
 		/* Terminate the outbuff at the end of the previous output */
 		outBuff[outBuffOffset] = '\0';

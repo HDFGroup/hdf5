@@ -683,7 +683,6 @@ add_obj(table_t *table, haddr_t objno, char *objname)
  *
  *-------------------------------------------------------------------------
  */
-static
 FILE *
 tmpfile(void)
 {

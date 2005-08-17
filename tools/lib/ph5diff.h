@@ -15,8 +15,13 @@
 #ifndef _PH5DIFF_H__
 #define _PH5DIFF_H__
 
+/* use a larger output buffer for Tflops which does not support vsnprintf. */
+#ifdef __PUMAGON__
 #define PRINT_DATA_MAX_SIZE 	512
-#define OUTBUFF_SIZE 		PRINT_DATA_MAX_SIZE*4
+#else
+#define PRINT_DATA_MAX_SIZE 	512
+#endif
+#define OUTBUFF_SIZE 		(PRINT_DATA_MAX_SIZE*4)
 /* Send from manager to workers */
 #define MPI_TAG_ARGS		1
 #define MPI_TAG_PRINT_TOK	2
@@ -34,7 +39,7 @@
 extern int	g_nTasks;
 extern unsigned char g_Parallel;
 extern char    outBuff[];
-extern unsigned int	outBuffOffset;
+extern int	outBuffOffset;
 extern FILE*		overflow_file;
 
 struct diff_args
