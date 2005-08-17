@@ -328,7 +328,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
         }                                                                     \
         else                                                                  \
             *((DT*)D) = 0;					              \
-    } else if (sizeof(ST)>sizeof(DT) && *((ST*)S) > (D_MAX)) {                \
+    } else if (sizeof(ST)>sizeof(DT) && *((ST*)S) > (DT)(D_MAX)) {            \
         if(cb_struct.func) {                                                  \
             H5T_conv_ret_t      except_ret;     /*callback return*/           \
                                                                               \
@@ -389,7 +389,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 
 #define H5T_CONV_us_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
     /* Assumes memory format of unsigned & signed integers is same */	      \
-    if (*((ST*)S) > (D_MAX)) {                                                \
+    if (*((ST*)S) > (DT)(D_MAX)) {                                            \
         if(cb_struct.func) {                                                  \
             H5T_conv_ret_t      except_ret;     /*callback return*/           \
                                                                               \
@@ -436,7 +436,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
         }                                                                     \
         else                                                                  \
             *((DT*)D) = (H5T_NATIVE_FLOAT_POS_INF_g);			      \
-    } else if (*((ST*)S) < (D_MIN)) {                                         \
+    } else if (*((ST*)S) < (DT)(D_MIN)) {                                     \
         if(cb_struct.func) {			                              \
             H5T_conv_ret_t      except_ret;     /*callback return*/           \
                                                                               \
