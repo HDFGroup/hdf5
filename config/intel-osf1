@@ -33,7 +33,9 @@ RUNPARALLEL=${RUNPARALLEL:-"yod -sz 8"}
 CFLAGS="$CFLAGS"
 
 # What must *always* be present for things to compile correctly?
-#CPPFLAGS="$CPPFLAGS -I."
+# -DH5_TFLOPS: for the Sandia Tflops machine.  Had used the builtin
+# __PUMAGON__ but H5_TFLOPS is more meaningful.
+CPPFLAGS="$CPPFLAGS -DH5_TFLOPS"
 
 # What compiler flags should be used for code development?
 DEBUG_CFLAGS=-g
@@ -161,3 +163,4 @@ hdf5_cv_sw_ldouble_to_integer_works=${hdf5_cv_sw_ldouble_to_integer_works='yes'}
 hdf5_cv_sw_ulong_to_fp_bottom_bit_works=${hdf5_cv_sw_ulong_to_fp_bottom_bit_works='no'}
 hdf5_cv_ullong_to_fp_cast_works=${hdf5_cv_ullong_to_fp_cast_works='yes'}
 hdf5_cv_ullong_to_ldouble_precision_works=${hdf5_cv_ullong_to_ldouble_precision_works='yes'}
+hdf5_cv_fp_to_integer_overflow_works=${hdf5_cv_fp_to_integer_overflow_works='yes'}
