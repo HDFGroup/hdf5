@@ -187,7 +187,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
             *((DT*)D) = (D_MAX);					      \
     } else if (*((ST*)S) == (DT)(D_MAX)) {                                    \
         *((DT*)D) = (D_MAX);			                              \
-    } else if (*((ST*)S) < (D_MIN)) {					      \
+    } else if (*((ST*)S) < (DT)(D_MIN)) {			              \
         if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
             *((DT*)D) = (D_MIN);					      \
     } else								      \
@@ -195,7 +195,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 }
 
 #define H5T_CONV_Ux_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (*((ST*)S) > (D_MAX)) {						      \
+    if (*((ST*)S) > (DT)(D_MAX)) {				              \
         if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
             *((DT*)D) = (D_MAX);					      \
     } else								      \
@@ -221,7 +221,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 }
 
 #define H5T_CONV_uS_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (sizeof(ST)==sizeof(DT) && *((ST*)S) > (D_MAX)) {						      \
+    if (sizeof(ST)==sizeof(DT) && *((ST*)S) > (DT)(D_MAX)) {		      \
         if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
             *((DT*)D) = (D_MAX);					      \
     } else								      \
@@ -285,7 +285,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 
 #define H5T_CONV_us_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
     /* Assumes memory format of unsigned & signed integers is same */	      \
-    if (*((ST*)S) > (D_MAX)) {						      \
+    if (*((ST*)S) > (DT)(D_MAX)) {					      \
         if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
             *((DT*)D) = (D_MAX);					      \
     }									      \
@@ -308,7 +308,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     if (*((ST*)S) > (DT)(D_MAX)) {					      \
         if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
             *((DT*)D) = (H5T_NATIVE_FLOAT_POS_INF_g);			      \
-    } else if (*((ST*)S) < (D_MIN)) {					      \
+    } else if (*((ST*)S) < (DT)(D_MIN)) {				      \
         if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
             *((DT*)D) = (H5T_NATIVE_FLOAT_NEG_INF_g);			      \
     } else								      \
