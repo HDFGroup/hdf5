@@ -190,6 +190,13 @@ TOOLTEST() {
 }
 
 
+# Print a "SKIP" message
+SKIP() {
+	 TESTING $H5DIFF $@
+	  echo  " -SKIP-"
+}
+
+
 ##############################################################################
 ##############################################################################
 ###			  T H E   T E S T S                                            ###
@@ -407,7 +414,7 @@ TOOLTEST h5diff_70.txt file5.h5 file6.h5 -v
 # # all dataset datatypes
 # ##############################################################################
 
-TOOLTEST h5diff_80.txt file7.h5 file8.h5 -v
+SKIP h5diff_80.txt file7.h5 file8.h5 -v
 
 
 
