@@ -15,6 +15,8 @@
 # Tests for the h5diff tool
 #
 # Modification:
+#   Albert Cheng, 2005/08/17
+#   Added the SKIP feature.
 #   Albert Cheng, 2005/2/3
 #   Added -p option for parallel h5diff tests.
 
@@ -82,6 +84,8 @@ TESTING() {
 #    LA-MPI: *** 3 process(es) on 2 host(s): 2*fln21 1*fln22
 #    LA-MPI: *** libmpi (1.5.10)
 #    LA-MPI: *** Copyright 2001-2004, ACL, Los Alamos National Laboratory
+# 3. h5diff debug output:
+#    Debug output all have prefix "h5diff debug: ".
 STDERR_FILTER() {
     result_file=$1
     tmp_file=/tmp/h5diff_tmp_$$
@@ -98,6 +102,11 @@ STDERR_FILTER() {
 	sed -e '/^LA-MPI:/d' -e '/^srun:/d' \
 	    < $tmp_file > $result_file
     fi
+    # Filter h5diff debug output
+	cp $result_file $tmp_file
+	sed -e '/^h5diff debug: /d' \
+	    < $tmp_file > $result_file
+    # clean up temporary files.
     rm -f $tmp_file
 }
 
@@ -414,7 +423,7 @@ TOOLTEST h5diff_70.txt file5.h5 file6.h5 -v
 # # all dataset datatypes
 # ##############################################################################
 
-SKIP h5diff_80.txt file7.h5 file8.h5 -v
+TOOLTEST h5diff_80.txt file7.h5 file8.h5 -v
 
 
 
