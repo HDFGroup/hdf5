@@ -38,6 +38,9 @@
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
+#ifndef H5_NO_STD
+    using namespace std;
+#endif  // H5_NO_STD
 #endif
 
 //--------------------------------------------------------------------------

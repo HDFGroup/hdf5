@@ -61,10 +61,18 @@ class H5_DLLCPP IdComponent {
 
 	// Makes and returns the string "<class-name>::<func_name>";
 	// <class-name> is returned by fromClass().
+#ifdef H5_NO_STD
 	string inMemFunc(const char* func_name) const;
+#else
+	std::string inMemFunc(const char* func_name) const;
+#endif  // H5_NO_STD
 
 	// Returns this class name.
+#ifdef H5_NO_STD
         virtual string fromClass() const {return ("IdComponent");}
+#else
+        virtual std::string fromClass() const {return ("IdComponent");}
+#endif  // H5_NO_STD
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
