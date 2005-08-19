@@ -117,3 +117,16 @@ in the file file_io.win32.c and including it on the projects
 #define FC_FUNC_(name, NAME) NAME
 
 #define H5_HAVE_TMPFILE 1
+
+/*Users want to build and test hdf5 library with thread safe enabled,
+  Make the following block active
+*/
+/* 
+#if defined _DLL
+#define H5_HAVE_THREADSAFE 1
+#define H5_HAVE_SYSTEM_SCOPE_THREADS 1
+#if defined TTSAFE_H
+#define sleep Sleep
+#endif
+#endif
+*/
