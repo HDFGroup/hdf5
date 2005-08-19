@@ -32,6 +32,10 @@
 
 #ifndef H5_NO_NAMESPACE
 using namespace H5;
+#ifndef H5_NO_STD
+    using std::cout;
+    using std::endl;
+#endif  // H5_NO_STD
 #endif
 
 const string FILE_NAME( "Select.h5" );
