@@ -145,7 +145,15 @@ New Features
                      4) For IRIX 6.5,
                         if C compiler version is 7.3 or lower, collective irregular selection
                         IO is not supported, internally independent IO is used.
-                     KY - 2005/07/13
+                     5) For platforms which internally used mpich, if the
+                        mpich version is 1.2.5 or lower, please find the 
+                        corresponding config file and add
+                        hdf5_mpi_complex_derived_datatype_works='no' at the
+                        end of the configuration file. For example, at NCSA
+                        SGI Altix, the internal mpich library is 1.2.5. So 
+                        hdf5_mpi_complex_derived_datatype_works='no' should be
+                        added at the end of the config file ia64-linux-gnu.
+                     KY - 2005/08/19
         - HDF5 N-bit filter 
           HDF5 support N-bit filter from this version,  
           The N-Bit filter is used effectively for compressing data of N-Bit
