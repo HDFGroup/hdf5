@@ -47,6 +47,7 @@ typedef struct parameters_ {
     size_t 	blk_size;       /* Block size                           */
     unsigned    interleaved;    /* Interleaved vs. contiguous blocks    */
     unsigned    collective;     /* Collective vs. independent I/O       */
+    unsigned    dim2d;          /* 1D vs. 2D                            */
     hsize_t 	h5_align;       /* HDF5 object alignment                */
     hsize_t 	h5_thresh;      /* HDF5 object alignment threshold      */
     int 	h5_use_chunks;  /* Make HDF5 dataset chunked            */
