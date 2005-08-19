@@ -87,10 +87,12 @@ void tts_acreate(void)
      * creation plist and default file access plist
      */
     file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+	assert(file>=0);
 
     /* create a simple dataspace for the dataset */
     dimsf[0] = 1;
     dataspace = H5Screate_simple(1, dimsf, NULL);
+	assert(dataspace>=0);
 
     /* define datatype for the data using native little endian integers */
     datatype = H5Tcopy(H5T_NATIVE_INT);
@@ -98,11 +100,13 @@ void tts_acreate(void)
 
     /* create a new dataset within the file */
     dataset = H5Dcreate(file, DATASETNAME, datatype, dataspace, H5P_DEFAULT);
+	assert(dataset>=0);
 
     /* initialize data for dataset and write value to dataset */
     data = NUM_THREADS;
-    H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-    H5P_DEFAULT, &data);
+    ret=H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+        H5P_DEFAULT, &data);
+	assert(ret>=0);
 
     /*
      * Simultaneously create a large number of attributes to be associated
@@ -114,11 +118,15 @@ void tts_acreate(void)
         attrib_data->datatype = datatype;
         attrib_data->dataspace = dataspace;
         attrib_data->current_index = i;
-        pthread_create(&threads[i], NULL, tts_acreate_thread, attrib_data);
+        ret=pthread_create(&threads[i], NULL, tts_acreate_thread, attrib_data);
+		assert(ret==0);
     }
 
-    for (i = 0; i < NUM_THREADS; i++)
-        pthread_join(threads[i], NULL);
+    for (i = 0; i < NUM_THREADS; i++) {
+        ret=pthread_join(threads[i], NULL);
+		assert(ret==0);
+	}
+
 
     /* verify the correctness of the test */
     for (i = 0; i < NUM_THREADS; i++) {
@@ -128,7 +136,7 @@ void tts_acreate(void)
             TestErrPrintf("unable to open appropriate attribute.  Test failed!\n");
         else {
             ret = H5Aread(attribute, H5T_NATIVE_INT, &buffer);
-
+			
             if (ret < 0 || buffer != i)
                 TestErrPrintf("wrong data values. Test failed!\n");
 
