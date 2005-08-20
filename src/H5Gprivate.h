@@ -187,9 +187,10 @@ H5_DLL herr_t H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent);
 H5_DLL herr_t H5G_ent_decode(H5F_t *f, const uint8_t **pp,
 			      H5G_entry_t *ent/*out*/);
 H5_DLL const H5G_cache_t *H5G_ent_cache(const H5G_entry_t *ent, H5G_type_t *cache_type);
-H5_DLL  herr_t H5G_ent_copy(H5G_entry_t *dst, const H5G_entry_t *src,
+H5_DLL herr_t H5G_ent_copy(H5G_entry_t *dst, const H5G_entry_t *src,
             H5G_ent_copy_depth_t depth);
-H5_DLL  herr_t H5G_free_ent_name(H5G_entry_t *ent);
+H5_DLL herr_t H5G_ent_reset(H5G_entry_t *ent);
+H5_DLL herr_t H5G_free_ent_name(H5G_entry_t *ent);
 H5_DLL herr_t H5G_ent_debug(H5F_t *f, hid_t dxpl_id, const H5G_entry_t *ent, FILE * stream,
 			     int indent, int fwidth, haddr_t heap);
 #endif

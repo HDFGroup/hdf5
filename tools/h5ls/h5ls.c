@@ -154,16 +154,15 @@ sym_insert(H5G_stat_t *sb, const char *name)
 
     /* Extend the table */
     if (idtab_g.nobjs>=idtab_g.nalloc) {
- idtab_g.nalloc = MAX(256, 2*idtab_g.nalloc);
- idtab_g.obj = realloc(idtab_g.obj,
-         idtab_g.nalloc*sizeof(idtab_g.obj[0]));
+        idtab_g.nalloc = MAX(256, 2*idtab_g.nalloc);
+        idtab_g.obj = realloc(idtab_g.obj,
+            idtab_g.nalloc*sizeof(idtab_g.obj[0]));
     }
 
     /* Insert the entry */
     n = idtab_g.nobjs++;
     idtab_g.obj[n].id = sb->objno;
-    idtab_g.obj[n].name = malloc(strlen(name)+1);
-    strcpy(idtab_g.obj[n].name, name);
+    idtab_g.obj[n].name = HDstrdup(name);
 }
 
 
@@ -190,8 +189,8 @@ sym_lookup(H5G_stat_t *sb)
 
     if (sb->nlink<2) return NULL; /*only one name possible*/
     for (n=0; n<idtab_g.nobjs; n++) {
-     if (idtab_g.obj[n].id==sb->objno)
-         return idtab_g.obj[n].name;
+        if (idtab_g.obj[n].id==sb->objno)
+            return idtab_g.obj[n].name;
     }
     return NULL;
 }
@@ -219,56 +218,56 @@ display_string(FILE *stream, const char *s, hbool_t escape_spaces)
     int  nprint=0;
 
     for (/*void*/; s && *s; s++) {
- switch (*s) {
- case '"':
-     if (stream) fprintf(stream, "\\\"");
-     nprint += 2;
-     break;
- case '\\':
-     if (stream) fprintf(stream, "\\\\");
-     nprint += 2;
-     break;
- case '\b':
-     if (stream) fprintf(stream, "\\b");
-     nprint += 2;
-     break;
- case '\f':
-     if (stream) fprintf(stream, "\\f");
-     nprint += 2;
-     break;
- case '\n':
-     if (stream) fprintf(stream, "\\n");
-     nprint += 2;
-     break;
- case '\r':
-     if (stream) fprintf(stream, "\\r");
-     nprint += 2;
-     break;
- case '\t':
-     if (stream) fprintf(stream, "\\t");
-     nprint += 2;
-     break;
- case ' ':
-     if (escape_spaces) {
-  if (stream) fprintf(stream, "\\ ");
-  nprint += 2;
-     } else {
-  if (stream) fprintf(stream, " ");
-  nprint++;
-     }
-     break;
- default:
-     if (isprint((int)*s)) {
-  if (stream) putc(*s, stream);
-  nprint++;
-     } else {
-  if (stream) {
-      fprintf(stream, "\\%03o", *((const unsigned char*)s));
-  }
-  nprint += 4;
-     }
-     break;
- }
+        switch (*s) {
+            case '"':
+                if (stream) fprintf(stream, "\\\"");
+                nprint += 2;
+                break;
+            case '\\':
+                if (stream) fprintf(stream, "\\\\");
+                nprint += 2;
+                break;
+            case '\b':
+                if (stream) fprintf(stream, "\\b");
+                nprint += 2;
+                break;
+            case '\f':
+                if (stream) fprintf(stream, "\\f");
+                nprint += 2;
+                break;
+            case '\n':
+                if (stream) fprintf(stream, "\\n");
+                nprint += 2;
+                break;
+            case '\r':
+                if (stream) fprintf(stream, "\\r");
+                nprint += 2;
+                break;
+            case '\t':
+                if (stream) fprintf(stream, "\\t");
+                nprint += 2;
+                break;
+            case ' ':
+                if (escape_spaces) {
+                    if (stream) fprintf(stream, "\\ ");
+                    nprint += 2;
+                } else {
+                    if (stream) fprintf(stream, " ");
+                    nprint++;
+                }
+                break;
+            default:
+                if (isprint((int)*s)) {
+                    if (stream) putc(*s, stream);
+                    nprint++;
+                } else {
+                    if (stream) {
+                        fprintf(stream, "\\%03o", *((const unsigned char*)s));
+                    }
+                    nprint += 4;
+                }
+                break;
+        }
     }
     return nprint;
 }
@@ -1670,8 +1669,8 @@ group_list2(hid_t grp, const char *name)
     iter_t iter;
 
     if (recursive_g) {
- iter.container = name;
- H5Giterate(grp, ".", NULL, list, &iter);
+        iter.container = name;
+        H5Giterate(grp, ".", NULL, list, &iter);
     }
     return 0;
 }
@@ -1773,51 +1772,51 @@ list (hid_t group, const char *name, void *_iter)
     /* Print the object name, either full name or base name */
     fullname = fix_name(iter->container, name);
     if (fullname_g) {
- n = display_string(stdout, fullname, TRUE);
- printf("%*s ", MAX(0, 24-n), "");
+        n = display_string(stdout, fullname, TRUE);
+        printf("%*s ", MAX(0, 24-n), "");
     } else {
- n = display_string(stdout, name, TRUE);
- printf("%*s ", MAX(0, 24-n), "");
+        n = display_string(stdout, name, TRUE);
+        printf("%*s ", MAX(0, 24-n), "");
     }
 
     /* Get object information */
     H5E_BEGIN_TRY {
- status = H5Gget_objinfo(group, name, FALSE, &sb);
+        status = H5Gget_objinfo(group, name, FALSE, &sb);
     } H5E_END_TRY;
     if (status<0) {
- puts("**NOT FOUND**");
- return 0;
+        puts("**NOT FOUND**");
+        return 0;
     } else if (sb.type<0 || sb.type>=H5G_NTYPES) {
- printf("Unknown type(%d)", sb.type);
- sb.type = H5G_UNKNOWN;
+        printf("Unknown type(%d)", sb.type);
+        sb.type = H5G_UNKNOWN;
     }
     if (sb.type>=0 && dispatch_g[sb.type].name) {
- fputs(dispatch_g[sb.type].name, stdout);
+        fputs(dispatch_g[sb.type].name, stdout);
     }
 
     /* If the object has already been printed then just show the object ID
      * and return. */
     if ((s=sym_lookup(&sb))) {
- printf(", same as ");
- display_string(stdout, s, TRUE);
- printf("\n");
- goto done;
+        printf(", same as ");
+        display_string(stdout, s, TRUE);
+        printf("\n");
+        goto done;
     } else {
- sym_insert(&sb, fullname);
+        sym_insert(&sb, fullname);
     }
 
     /* Open the object.  Not all objects can be opened.  If this is the case
      * then return right away. */
     if (sb.type>=0 &&
- (NULL==dispatch_g[sb.type].open ||
-  (obj=(dispatch_g[sb.type].open)(group, name))<0)) {
- printf(" *ERROR*\n");
- goto done;
+            (NULL==dispatch_g[sb.type].open ||
+            (obj=(dispatch_g[sb.type].open)(group, name))<0)) {
+        printf(" *ERROR*\n");
+        goto done;
     }
 
     /* List the first line of information for the object. */
     if (sb.type>=0 && dispatch_g[sb.type].list1) {
- (dispatch_g[sb.type].list1)(obj);
+        (dispatch_g[sb.type].list1)(obj);
     }
     putchar('\n');
 
@@ -1832,27 +1831,27 @@ list (hid_t group, const char *name, void *_iter)
             if (simple_output_g) tm=gmtime(&(sb.mtime));
             else tm=localtime(&(sb.mtime));
             if (tm) {
-     strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
-     printf("    %-10s %s\n", "Modified:", buf);
- }
- }
- comment[0] = '\0';
- H5Gget_comment(group, name, sizeof(comment), comment);
- strcpy(comment+sizeof(comment)-4, "...");
- if (comment[0]) {
-     printf("    %-10s \"", "Comment:");
-     display_string(stdout, comment, FALSE);
-     puts("\"");
- }
+                strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+                printf("    %-10s %s\n", "Modified:", buf);
+            }
+        }
+        comment[0] = '\0';
+        H5Gget_comment(group, name, sizeof(comment), comment);
+        strcpy(comment+sizeof(comment)-4, "...");
+        if (comment[0]) {
+            printf("    %-10s \"", "Comment:");
+            display_string(stdout, comment, FALSE);
+            puts("\"");
+        }
     }
     if (sb.type>=0 && dispatch_g[sb.type].list2) {
- (dispatch_g[sb.type].list2)(obj, fullname);
+        (dispatch_g[sb.type].list2)(obj, fullname);
     }
 
     /* Close the object. */
- done:
+done:
     if (sb.type>=0 && obj>=0 && dispatch_g[sb.type].close) {
- (dispatch_g[sb.type].close)(obj);
+        (dispatch_g[sb.type].close)(obj);
     }
     if (fullname) free(fullname);
     return 0;
@@ -1880,25 +1879,28 @@ list (hid_t group, const char *name, void *_iter)
 static char *
 fix_name(const char *path, const char *base)
 {
-    size_t n = (path?strlen(path):0) + (base?strlen(base):0) + 3;
-    char *s = malloc(n), prev='\0';
-    int  len=0;
+    size_t n = (path ? HDstrlen(path) : 0) + (base ? HDstrlen(base) : 0) + 3;
+    char *s = HDmalloc(n), prev='\0';
+    size_t len = 0;
 
     if (path) {
- /* Path, followed by slash */
- for (/*void*/; *path; path++) {
-     if ('/'!=*path || '/'!=prev) prev = s[len++] = *path;
- }
- if ('/'!=prev) prev = s[len++] = '/';
+        /* Path, followed by slash */
+        for (/*void*/; *path; path++)
+            if ('/'!=*path || '/'!=prev)
+                prev = s[len++] = *path;
+        if ('/' != prev)
+            prev = s[len++] = '/';
     }
 
     if (base) {
- /* Base name w/o trailing slashes */
- const char *end = base + strlen(base);
- while (end>base && '/'==end[-1]) --end;
- for (/*void*/; base<end; base++) {
-     if ('/'!=*base || '/'!=prev) prev = s[len++] = *base;
- }
+        /* Base name w/o trailing slashes */
+        const char *end = base + HDstrlen(base);
+        while (end > base && '/' == end[-1])
+            --end;
+
+        for (/*void*/; base < end; base++)
+            if ('/' != *base || '/' != prev)
+                prev = s[len++] = *base;
     }
 
     s[len] = '\0';

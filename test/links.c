@@ -27,6 +27,8 @@ const char *FILENAME[] = {
     NULL
 };
 
+#define LINK_BUF_SIZE   1024
+#define NAME_BUF_SIZE   1024
 #define MAX_NAME_LEN    ((64*1024)+1024)
 
 
@@ -51,7 +53,7 @@ mklinks(hid_t fapl)
 {
     hid_t		file, scalar, grp, d1;
     hsize_t	        size[1] = {1};
-    char		filename[1024];
+    char		filename[NAME_BUF_SIZE];
 
     TESTING("link creation");
 
@@ -122,7 +124,7 @@ new_links(hid_t fapl)
     hid_t		grp1_a=(-1), grp1_b=(-1), grp2_a=(-1), grp2_b=(-1);
     hid_t		scalar=(-1);
     hid_t		dset1=(-1), dset2=(-1);
-    char		filename[1024];
+    char		filename[NAME_BUF_SIZE];
     hsize_t             size[1] = {1};
 
     TESTING("H5Glink2 function");
@@ -246,8 +248,8 @@ cklinks(hid_t fapl)
 {
     hid_t		file;
     H5G_stat_t		sb1, sb2;
-    char		linkval[1024];
-    char		filename[1024];
+    char		linkval[LINK_BUF_SIZE];
+    char		filename[NAME_BUF_SIZE];
     herr_t		status;
 
     TESTING("link queries");
@@ -289,7 +291,7 @@ cklinks(hid_t fapl)
     if (H5Gget_linkval(file, "grp1/soft", sizeof linkval, linkval)<0) {
 	goto error;
     }
-    if (strcmp(linkval, "/d1")) {
+    if (HDstrcmp(linkval, "/d1")) {
 	H5_FAILED();
 	puts("    Soft link test failed. Wrong link value");
 	goto error;
@@ -313,7 +315,7 @@ cklinks(hid_t fapl)
     if (H5Gget_linkval(file, "grp1/dangle", sizeof linkval, linkval)<0) {
 	goto error;
     }
-    if (strcmp(linkval, "foobar")) {
+    if (HDstrcmp(linkval, "foobar")) {
 	H5_FAILED();
 	puts("    Dangling link test failed. Wrong link value");
 	goto error;
@@ -337,7 +339,7 @@ cklinks(hid_t fapl)
     if (H5Gget_linkval(file, "grp1/recursive", sizeof linkval, linkval)<0) {
 	goto error;
     }
-    if (strcmp(linkval, "/grp1/recursive")) {
+    if (HDstrcmp(linkval, "/grp1/recursive")) {
 	H5_FAILED();
 	puts("   Recursive link test failed. Wrong link value");
 	goto error;
@@ -375,8 +377,8 @@ ck_new_links(hid_t fapl)
 {
     hid_t 		file;
     H5G_stat_t		sb_dset, sb_hard1, sb_hard2, sb_soft1, sb_soft2;
-    char 		filename[1024];
-    char 		linkval[1024];
+    char 		filename[NAME_BUF_SIZE];
+    char 		linkval[LINK_BUF_SIZE];
 
     TESTING("new link queries");
 
@@ -428,7 +430,7 @@ ck_new_links(hid_t fapl)
     if (H5Gget_linkval(file, "grp2/soft2", sizeof linkval, linkval)<0) {
         goto error;
     }
-    if (strcmp(linkval, "/grp1/dataset2")) {
+    if (HDstrcmp(linkval, "/grp1/dataset2")) {
         H5_FAILED();
         puts("    Soft link test failed. Wrong link value");
         goto error;
@@ -468,7 +470,7 @@ long_links(hid_t fapl)
     hid_t		gid2 = (-1);    /* Datatype ID */
     char               *objname = NULL; /* Name of object [Long] */
     size_t              u;              /* Local index variable */
-    char		filename[1024];
+    char		filename[NAME_BUF_SIZE];
 
     TESTING("long names for objects & links");
 

@@ -184,20 +184,20 @@ static htri_t H5G_link_isa(H5G_entry_t *ent, hid_t dxpl_id);
 static H5G_t * H5G_open_oid(H5G_entry_t *ent, hid_t dxpl_id);
 static H5G_t *H5G_rootof(H5F_t *f);
 static herr_t H5G_link(H5G_entry_t *cur_loc, const char *cur_name,
-			H5G_entry_t *new_loc, const char *new_name,
-			H5G_link_t type, unsigned namei_flags, hid_t dxpl_id);
+    H5G_entry_t *new_loc, const char *new_name, H5G_link_t type,
+    unsigned namei_flags, hid_t dxpl_id);
 static herr_t H5G_get_num_objs(H5G_entry_t *grp, hsize_t *num_objs, hid_t dxpl_id);
 static ssize_t H5G_get_objname_by_idx(H5G_entry_t *loc, hsize_t idx, char* name, size_t size, hid_t dxpl_id);
 static H5G_obj_t H5G_get_objtype_by_idx(H5G_entry_t *loc, hsize_t idx, hid_t dxpl_id);
 static herr_t H5G_linkval(H5G_entry_t *loc, const char *name, size_t size,
-			   char *buf/*out*/, hid_t dxpl_id);
+    char *buf/*out*/, hid_t dxpl_id);
 static herr_t H5G_set_comment(H5G_entry_t *loc, const char *name,
-			       const char *buf, hid_t dxpl_id);
+    const char *buf, hid_t dxpl_id);
 static int H5G_get_comment(H5G_entry_t *loc, const char *name,
-			     size_t bufsize, char *buf, hid_t dxpl_id);
+    size_t bufsize, char *buf, hid_t dxpl_id);
 static herr_t H5G_unlink(H5G_entry_t *loc, const char *name, hid_t dxpl_id);
 static herr_t H5G_move(H5G_entry_t *src_loc, const char *src_name,
-			H5G_entry_t *dst_loc, const char *dst_name, hid_t dxpl_it);
+    H5G_entry_t *dst_loc, const char *dst_name, hid_t dxpl_id);
 static htri_t H5G_common_path(const H5RS_str_t *fullpath_r,
     const H5RS_str_t *prefix_r);
 static H5RS_str_t *H5G_build_fullpath(const H5RS_str_t *prefix_r, const H5RS_str_t *name_r);
@@ -1501,12 +1501,11 @@ H5G_namei(const H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/
         loc_ent=&(tmp_grp->ent);
     } /* end if */
 
-    /* Deep copy of the symbol table entry */
+    /* Deep copy of the symbol table entry (duplicates strings) */
     if (H5G_ent_copy(obj_ent, loc_ent,H5G_COPY_DEEP)<0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to copy entry");
 
-    HDmemset(grp_ent, 0, sizeof(H5G_entry_t));
-    grp_ent->header = HADDR_UNDEF;
+    H5G_ent_reset(grp_ent);
 
     /* traverse the name */
     while ((name = H5G_component(name, &nchars)) && *name) {
@@ -1548,8 +1547,7 @@ H5G_namei(const H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/
 
         /* Transfer "ownership" of the entry's information to the group entry */
         H5G_ent_copy(grp_ent,obj_ent,H5G_COPY_SHALLOW);
-	HDmemset(obj_ent, 0, sizeof(H5G_entry_t));
-	obj_ent->header = HADDR_UNDEF;
+        H5G_ent_reset(obj_ent);
 
 	/* Set flag that we've copied a new entry into the group entry */
 	group_copy =1;
@@ -1577,7 +1575,7 @@ H5G_namei(const H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/
                             H5G_entry_t new_ent;
 
                             /* Reset group entry */
-                            HDmemset(&new_ent, 0, sizeof(H5G_entry_t));
+                            H5G_ent_reset(&new_ent);
 
                             /* Create the group entry */
                             if (H5G_stab_create(grp_ent->file, dxpl_id, 0, &new_ent/*out*/) < 0)
@@ -1702,7 +1700,7 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
     FUNC_ENTER_NOAPI_NOINIT(H5G_traverse_slink);
 
     /* Portably initialize the temporary group entry */
-    HDmemset(&tmp_grp_ent,0,sizeof(H5G_entry_t));
+    H5G_ent_reset(&tmp_grp_ent);
 
     /* Get the link value */
     if (NULL==H5O_read (grp_ent, H5O_STAB_ID, 0, &stab_mesg, dxpl_id))
@@ -1806,7 +1804,7 @@ H5G_mkroot (H5F_t *f, hid_t dxpl_id, H5G_entry_t *ent)
      */
     if (!ent) {
 	ent = &new_root;
-        HDmemset(ent, 0, sizeof(H5G_entry_t));
+        H5G_ent_reset(ent);
 	if (H5G_stab_create (f, dxpl_id, (size_t)H5G_SIZE_HINT, ent/*out*/)<0)
 	    HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to create root group");
 	if (1 != H5O_link (ent, 1, dxpl_id))
@@ -2631,8 +2629,7 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
              * Create a symbol table entry for the link.  The object header is
              * undefined and the cache contains the link-value offset.
              */
-            HDmemset (&cur_obj, 0, sizeof cur_obj);
-            cur_obj.header = HADDR_UNDEF;
+            H5G_ent_reset(&cur_obj);
             cur_obj.file = grp_ent.file;
             cur_obj.type = H5G_CACHED_SLINK;
             cur_obj.cache.slink.lval_offset = offset;
@@ -2771,15 +2768,21 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
      * length is specific to symbolic links.
      */
     if (statbuf) {
+        /* Common code to retrieve the file's fileno */
+        if(H5F_get_fileno(obj_ent.file,&statbuf->fileno)<0)
+            HGOTO_ERROR (H5E_FILE, H5E_BADVALUE, FAIL, "unable to read fileno");
+
+        /* Retrieve information specific to each type of entry */
 	if (H5G_CACHED_SLINK==obj_ent.type) {
             H5O_stab_t	stab_mesg;      /* Symbol table message info */
-            const H5HL_t *heap;         /* Pointer to local heap for group */
             const char	*s;             /* Pointer to link value */
+            const H5HL_t *heap;         /* Pointer to local heap for group */
 
 	    /* Named object is a symbolic link */
 	    if (NULL == H5O_read(&grp_ent, H5O_STAB_ID, 0, &stab_mesg, dxpl_id))
 		HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read symbolic link value")
 
+            /* Lock the local heap */
             if (NULL == (heap = H5HL_protect(grp_ent.file, dxpl_id, stab_mesg.heap_addr)))
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read protect link value")
 
@@ -2787,6 +2790,7 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 
 	    statbuf->linklen = HDstrlen(s) + 1; /*count the null terminator*/
 
+            /* Release the local heap */
             if (H5HL_unprotect(grp_ent.file, dxpl_id, heap, stab_mesg.heap_addr, H5AC__NO_FLAGS_SET) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read unprotect link value")
 
@@ -2811,10 +2815,6 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
             if(H5O_get_info(&obj_ent, &(statbuf->ohdr), dxpl_id)<0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get object header information")
 	}
-
-        /* Common code to retrieve the file's fileno */
-        if(H5F_get_fileno(obj_ent.file,&statbuf->fileno)<0)
-            HGOTO_ERROR (H5E_FILE, H5E_BADVALUE, FAIL, "unable to read fileno");
     } /* end if */
 
 done:
@@ -3199,10 +3199,9 @@ static herr_t
 H5G_unlink(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
 {
     H5G_entry_t		grp_ent, obj_ent;
-    size_t		len;
     const char		*base=NULL;
     char		*norm_name = NULL;	/* Pointer to normalized name */
-    H5G_stat_t		statbuf;        /* Info about object to unlink */
+    H5G_obj_t           obj_type;       /* Object type */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_unlink);
@@ -3216,12 +3215,8 @@ H5G_unlink(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
         HGOTO_ERROR (H5E_SYM, H5E_BADVALUE, FAIL, "can't normalize name");
 
     /* Reset the group entries to known values in a portable way */
-    HDmemset(&grp_ent,0,sizeof(H5G_entry_t));
-    HDmemset(&obj_ent,0,sizeof(H5G_entry_t));
-
-    /* Get object type before unlink */
-    if (H5G_get_objinfo(loc, norm_name, FALSE, &statbuf, dxpl_id)<0)
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
+    H5G_ent_reset(&grp_ent);
+    H5G_ent_reset(&obj_ent);
 
     /* Get the entry for the group that contains the object to be unlinked */
     if (H5G_namei(loc, norm_name, NULL, &grp_ent, &obj_ent,
@@ -3229,15 +3224,19 @@ H5G_unlink(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
     if (!H5F_addr_defined(grp_ent.header))
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "no containing group specified");
-    if (NULL==(base=H5G_basename(norm_name, &len)) || '/'==*base)
+    if (NULL==(base=H5G_basename(norm_name, NULL)) || '/'==*base)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "problems obtaining object base name");
+
+    /* Get object type before unlink */
+    if((obj_type = H5G_get_type(&obj_ent, dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't determine object type");
 
     /* Remove the name from the symbol table */
     if (H5G_stab_remove(&grp_ent, base, dxpl_id)<0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to unlink name from symbol table");
 
     /* Search the open IDs and replace names for unlinked object */
-    if (H5G_replace_name(statbuf.type, &obj_ent, NULL, NULL, NULL, NULL, OP_UNLINK )<0)
+    if (H5G_replace_name(obj_type, &obj_ent, NULL, NULL, NULL, NULL, OP_UNLINK )<0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to replace name");
 
 done:

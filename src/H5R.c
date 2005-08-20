@@ -336,7 +336,7 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref)
     assert(file);
 
     /* Initialize the symbol table entry */
-    HDmemset(&ent,0,sizeof(H5G_entry_t));
+    H5G_ent_reset(&ent);
     ent.type=H5G_NOTHING_CACHED;
     ent.file=file;
 
@@ -524,7 +524,7 @@ H5R_get_region(H5F_t *file, hid_t dxpl_id, H5R_type_t UNUSED ref_type, void *_re
     assert(file);
 
     /* Initialize the symbol table entry */
-    HDmemset(&ent,0,sizeof(H5G_entry_t));
+    H5G_ent_reset(&ent);
     ent.type=H5G_NOTHING_CACHED;
     ent.file=file;
 
@@ -650,7 +650,7 @@ H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref)
     assert(_ref);
 
     /* Initialize the symbol table entry */
-    HDmemset(&ent,0,sizeof(H5G_entry_t));
+    H5G_ent_reset(&ent);
     ent.type=H5G_NOTHING_CACHED;
     ent.file=file;
 
