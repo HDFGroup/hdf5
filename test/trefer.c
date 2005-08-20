@@ -58,6 +58,7 @@ typedef struct s1_t {
 #define GROUPNAME2      "group2"
 #define GROUPNAME3      "group3"
 #define DSETNAME        "/dset"
+#define DSETNAME2       "dset2"
 #define NAME_SIZE       16
 
 
@@ -953,12 +954,18 @@ test_deref_iter_op(hid_t UNUSED group, const char *name, void *op_data)
 
     /* Simple check for correct names */
     if(*count == 0) {
-        if(HDstrcmp(name, GROUPNAME2) == 0)
+        if(HDstrcmp(name, DSETNAME2) == 0)
             ret_value = 0;
         else
             ret_value = -1;
     } /* end if */
     else if(*count == 1) {
+        if(HDstrcmp(name, GROUPNAME2) == 0)
+            ret_value = 0;
+        else
+            ret_value = -1;
+    } /* end if */
+    else if(*count == 2) {
         if(HDstrcmp(name, GROUPNAME3) == 0)
             ret_value = 0;
         else
@@ -1001,6 +1008,10 @@ test_reference_group(void)
     fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
 
+    /* Create dataspace to use for dataset */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
     /* Create group to refer to */
     gid = H5Gcreate(fid, GROUPNAME, (size_t)0);
     CHECK(gid, FAIL, "H5Gcreate");
@@ -1016,12 +1027,14 @@ test_reference_group(void)
     ret = H5Gclose(gid2);
     CHECK(ret, FAIL, "H5Gclose");
 
+    /* Create bottom dataset */
+    did = H5Dcreate(gid, DSETNAME2, H5T_NATIVE_INT, sid, H5P_DEFAULT);
+    assert(did > 0);
+    ret = H5Dclose(did);
+    assert(ret >= 0);
+
     ret = H5Gclose(gid);
     CHECK(ret, FAIL, "H5Gclose");
-
-    /* Create dataspace to use for dataset */
-    sid = H5Screate(H5S_SCALAR);
-    CHECK(sid, FAIL, "H5Screate");
 
     /* Create dataset */
     did = H5Dcreate(fid, DSETNAME, H5T_STD_REF_OBJ, sid, H5P_DEFAULT);
@@ -1068,19 +1081,23 @@ test_reference_group(void)
     ret = H5Gget_num_objs(gid, &nobjs);
     CHECK(ret, FAIL, "H5Gget_num_objs");
 
-    VERIFY(nobjs, 2, "H5Gget_num_objs");
+    VERIFY(nobjs, 3, "H5Gget_num_objs");
 
     ret = H5Gget_objname_by_idx(gid, (hsize_t)0, objname, NAME_SIZE);
     CHECK(ret, FAIL, "H5Gget_objname_by_idx");
 
-    VERIFY_STR(objname, GROUPNAME2, "H5Gget_objname_by_idx");
+    VERIFY_STR(objname, DSETNAME2, "H5Gget_objname_by_idx");
 
     objtype = H5Gget_objtype_by_idx(gid, (hsize_t)0);
-    VERIFY(objtype, H5G_GROUP, "H5Gget_objtype_by_idx");
+    VERIFY(objtype, H5G_DATASET, "H5Gget_objtype_by_idx");
 
     /* Unlink one of the objects in the dereferenced group */
     ret = H5Gunlink(gid, GROUPNAME2);
     CHECK(ret, FAIL, "H5Gunlink");
+
+    /* Delete dataset object in dereferenced group (with other dataset still open) */
+    ret = H5Gunlink(gid, DSETNAME2);
+    assert(ret >= 0);
 
     /* Close objects */
     ret = H5Dclose(did);

@@ -197,6 +197,7 @@ static herr_t H5G_move(H5G_entry_t *src_loc, const char *src_name,
 			H5G_entry_t *dst_loc, const char *dst_name, hid_t dxpl_it);
 static htri_t H5G_common_path(const H5RS_str_t *fullpath_r,
     const H5RS_str_t *prefix_r);
+static H5RS_str_t *H5G_build_fullpath(const H5RS_str_t *prefix_r, const H5RS_str_t *name_r);
 static int H5G_replace_ent(void *obj_ptr, hid_t obj_id, void *key);
 
 
@@ -2688,7 +2689,7 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
         /* Common code to retrieve the file's fileno */
         if(H5F_get_fileno(obj_ent.file,statbuf->fileno)<0)
             HGOTO_ERROR (H5E_FILE, H5E_BADVALUE, FAIL, "unable to read fileno");
-    }
+    } /* end if */
 
 done:
     /* Free the ID to name buffers */
@@ -3071,7 +3072,6 @@ H5G_unlink(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
     const char		*base=NULL;
     char		*norm_name = NULL;	/* Pointer to normalized name */
     H5G_stat_t		statbuf;        /* Info about object to unlink */
-    H5RS_str_t          *name_r;        /* Ref-counted version of name */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_unlink);
@@ -3106,11 +3106,8 @@ H5G_unlink(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to unlink name from symbol table");
 
     /* Search the open IDs and replace names for unlinked object */
-    name_r=H5RS_wrap(norm_name);
-    assert(name_r);
-    if (H5G_replace_name(statbuf.type, &obj_ent, name_r, NULL, NULL, NULL, OP_UNLINK )<0)
+    if (H5G_replace_name(statbuf.type, &obj_ent, NULL, NULL, NULL, NULL, OP_UNLINK )<0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to replace name");
-    H5RS_decr(name_r);
 
 done:
     /* Free the ID to name buffers */
@@ -3545,6 +3542,72 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function: H5G_build_fullpath
+ *
+ * Purpose: Build a full path from a prefix & base pair of reference counted
+ *              strings
+ *
+ * Return: Pointer to reference counted string on success, NULL on error
+ *
+ * Programmer: Quincey Koziol, koziol@ncsa.uiuc.edu
+ *
+ * Date: August 19, 2005
+ *
+ * Comments:
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5RS_str_t *
+H5G_build_fullpath(const H5RS_str_t *prefix_r, const H5RS_str_t *name_r)
+{
+    const char *prefix;         /* Pointer to raw string of prefix */
+    const char *name;           /* Pointer to raw string of name */
+    char *full_path;            /* Full user path built */
+    size_t path_len;            /* Length of the path */
+    unsigned need_sep;          /* Flag to indicate if separator is needed */
+    H5RS_str_t *ret_value;      /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5G_build_fullpath)
+
+    /* Get the pointer to the prefix */
+    prefix=H5RS_get_str(prefix_r);
+
+    /* Get the length of the prefix */
+    path_len=HDstrlen(prefix);
+
+    /* Determine if there is a trailing separator in the name */
+    if(prefix[path_len-1]=='/')
+        need_sep=0;
+    else
+        need_sep=1;
+
+    /* Get the pointer to the raw src user path */
+    name=H5RS_get_str(name_r);
+
+    /* Add in the length needed for the '/' separator and the relative path */
+    path_len+=HDstrlen(name)+need_sep;
+
+    /* Allocate space for the path */
+    if(NULL==(full_path = H5FL_BLK_MALLOC(str_buf,path_len+1)))
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    /* Build full path */
+    HDstrcpy(full_path,prefix);
+    if(need_sep)
+        HDstrcat(full_path,"/");
+    HDstrcat(full_path,name);
+
+    /* Create reference counted string for path */
+    ret_value=H5RS_own(full_path);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_build_fullpath() */
+
+
+/*-------------------------------------------------------------------------
  * Function: H5G_replace_ent
  *
  * Purpose: H5I_search callback function to replace group entry names
@@ -3675,7 +3738,8 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, void *key)
         */
         case OP_UNLINK:
             /* If the ID's entry is not in the file we operated on, skip it */
-            if(ent->file->shared == names->loc->file->shared && ent->user_path_r) {
+            if(ent->file->shared == names->loc->file->shared && 
+                    names->loc->canon_path_r && ent->canon_path_r && ent->user_path_r) {
                 /* Check if we are referring to the same object */
                 if(H5F_addr_eq(ent->header, names->loc->header)) {
                     /* Check if the object was opened with the same canonical path as the one being moved */
@@ -3716,83 +3780,19 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, void *key)
 
 		    /* Make certain that the source and destination names are full (not relative) paths */
 		    if(*(H5RS_get_str(names->src_name))!='/') {
-			const char *src_name;         /* Pointer to raw string of src_name */
-			char *src_path;         /* Full user path of source name */
-			const char *src_user_path;    /* Pointer to raw string of src path */
-			size_t src_path_len;    /* Length of the source path */
-			unsigned need_sep;      /* Flag to indicate if separator is needed */
-
-			/* Get the pointer to the raw src user path */
-			src_user_path=H5RS_get_str(names->src_loc->user_path_r);
-
-			/* Get the length of the name for the source group's user path */
-			src_path_len=HDstrlen(src_user_path);
-
-			/* Determine if there is a trailing separator in the name */
-			if(src_user_path[src_path_len-1]=='/')
-			    need_sep=0;
-			else
-			    need_sep=1;
-
-			/* Get the pointer to the raw src user path */
-			src_name=H5RS_get_str(names->src_name);
-
-			/* Add in the length needed for the '/' separator and the relative path */
-			src_path_len+=HDstrlen(src_name)+need_sep;
-
-			/* Allocate space for the path */
-			if(NULL==(src_path = H5FL_BLK_MALLOC(str_buf,src_path_len+1)))
-			    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-
-			HDstrcpy(src_path,src_user_path);
-			if(need_sep)
-			    HDstrcat(src_path,"/");
-			HDstrcat(src_path,src_name);
-
-			/* Create reference counted string for src path */
-			src_path_r=H5RS_own(src_path);
+			/* Create reference counted string for full src path */
+			if((src_path_r = H5G_build_fullpath(names->src_loc->user_path_r, names->src_name)) == NULL)
+			    HGOTO_ERROR (H5E_SYM, H5E_CWG, FAIL, "can't build source path name")
 		    } /* end if */
 		    else
-			    src_path_r=H5RS_dup(names->src_name);
+                        src_path_r=H5RS_dup(names->src_name);
 		    if(*(H5RS_get_str(names->dst_name))!='/') {
-			const char *dst_name;         /* Pointer to raw string of dst_name */
-			char *dst_path;         /* Full user path of destination name */
-			const char *dst_user_path;    /* Pointer to raw string of dst path */
-			size_t dst_path_len;    /* Length of the destination path */
-			unsigned need_sep;      /* Flag to indicate if separator is needed */
-
-			/* Get the pointer to the raw dst user path */
-			dst_user_path=H5RS_get_str(names->dst_loc->user_path_r);
-
-			/* Get the length of the name for the destination group's user path */
-			dst_path_len=HDstrlen(dst_user_path);
-
-			/* Determine if there is a trailing separator in the name */
-			if(dst_user_path[dst_path_len-1]=='/')
-			    need_sep=0;
-			else
-			    need_sep=1;
-
-			/* Get the pointer to the raw dst user path */
-			dst_name=H5RS_get_str(names->dst_name);
-
-			/* Add in the length needed for the '/' separator and the relative path */
-			dst_path_len+=HDstrlen(dst_name)+need_sep;
-
-			/* Allocate space for the path */
-			if(NULL==(dst_path = H5FL_BLK_MALLOC(str_buf,dst_path_len+1)))
-			    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-
-			HDstrcpy(dst_path,dst_user_path);
-			if(need_sep)
-			    HDstrcat(dst_path,"/");
-			HDstrcat(dst_path,dst_name);
-
-			/* Create reference counted string for dst path */
-			dst_path_r=H5RS_own(dst_path);
+			/* Create reference counted string for full dst path */
+			if((dst_path_r = H5G_build_fullpath(names->dst_loc->user_path_r, names->dst_name)) == NULL)
+			    HGOTO_ERROR (H5E_SYM, H5E_CWG, FAIL, "can't build destination path name")
 		    } /* end if */
 		    else
-			    dst_path_r=H5RS_dup(names->dst_name);
+                        dst_path_r=H5RS_dup(names->dst_name);
 
 		    /* Get the canonical parts of the source and destination names */
 
