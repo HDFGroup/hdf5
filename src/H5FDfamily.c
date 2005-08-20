@@ -578,7 +578,6 @@ done:
 static hsize_t
 H5FD_family_sb_size(H5FD_t UNUSED *_file)
 {
-    H5FD_family_t	*file = (H5FD_family_t*)_file;
     hsize_t		ret_value = 0; /*size of header*/
 
     FUNC_ENTER_NOAPI(H5FD_family_sb_size, UFAIL)
