@@ -60,7 +60,6 @@ static void *tts_error_thread(void *);
 
 /* Global variables */
 hid_t error_file;
-int ret;
 
 typedef struct err_num_struct {
     hid_t maj_num;
@@ -79,6 +78,7 @@ void tts_error(void)
     pthread_attr_t attribute;
     hid_t dataset;
     int value, i;
+    int ret;
 
     /* Must initialize these at runtime */
     expected[0].maj_num = H5E_DATASET;
@@ -107,15 +107,15 @@ void tts_error(void)
 
     /* set up mutex for global count of errors */
     ret=pthread_mutex_init(&error_mutex, NULL);
-	assert(ret==0);
+    assert(ret==0);
 
     /* make thread scheduling global */
     ret=pthread_attr_init(&attribute);
-	assert(ret==0);
+    assert(ret==0);
 
 #ifdef H5_HAVE_SYSTEM_SCOPE_THREADS
     ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
-	assert(ret==0);
+    assert(ret==0);
 #endif /* H5_HAVE_SYSTEM_SCOPE_THREADS */
 
     /*
@@ -123,17 +123,17 @@ void tts_error(void)
      * creation plist and default file access plist
      */
     error_file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-	assert(error_file>=0);
+    assert(error_file>=0);
 
     for (i = 0; i < NUM_THREAD; i++){
         ret=pthread_create(&threads[i], &attribute, tts_error_thread, NULL);
-		assert(ret==0);
-	}
+        assert(ret==0);
+    }
 
     for (i = 0; i < NUM_THREAD; i++){
         ret=pthread_join(threads[i],NULL);
-		assert(ret==0);
-	}
+        assert(ret==0);
+    }
 
     if (error_flag)
         TestErrPrintf("Threads reporting different error values!\n");
@@ -142,22 +142,22 @@ void tts_error(void)
         TestErrPrintf("Error: %d threads failed instead of %d\n", error_count, NUM_THREAD-1);
 
     dataset = H5Dopen(error_file, DATASETNAME);
-	assert(dataset>=0);
+    assert(dataset>=0);
 
     ret=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value);
-	assert(ret>=0);
+    assert(ret>=0);
 
     if (value != WRITE_NUMBER)
         TestErrPrintf("Error: Successful thread wrote value %d instead of %d\n", value, WRITE_NUMBER);
 
     ret=H5Dclose(dataset);
-	assert(ret>=0);
+    assert(ret>=0);
     ret=H5Fclose(error_file);
-	assert(ret>=0);
+    assert(ret>=0);
 
     /* Destroy the thread attribute */
     ret=pthread_attr_destroy(&attribute);
-	assert(ret==0);
+    assert(ret==0);
 }
 
 static
@@ -168,6 +168,7 @@ void *tts_error_thread(void UNUSED *arg)
     H5E_auto_stack_t old_error_cb;
     void *old_error_client_data;
     int value;
+    int ret;
 
     /* preserve previous error stack handler */
     H5Eget_auto_stack(H5E_DEFAULT, &old_error_cb, &old_error_client_data);
@@ -182,12 +183,11 @@ void *tts_error_thread(void UNUSED *arg)
 
     /* define datatype for the data using native little endian integers */
     datatype = H5Tcopy(H5T_NATIVE_INT);
-	assert(datatype>=0);
+    assert(datatype>=0);
     H5Tset_order(datatype, H5T_ORDER_LE);
 
     /* create a new dataset within the file */
     dataset = H5Dcreate(error_file, DATASETNAME, datatype, dataspace, H5P_DEFAULT);
-	
     if (dataset >= 0) {   /* not an error */
         value = WRITE_NUMBER;
         H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value);
@@ -195,9 +195,9 @@ void *tts_error_thread(void UNUSED *arg)
     }
 
     ret=H5Tclose(datatype);
-	assert(ret>=0);
+    assert(ret>=0);
     ret=H5Sclose(dataspace);
-	assert(ret>=0);
+    assert(ret>=0);
 
     /* turn our error stack handler off */
     H5Eset_auto_stack(H5E_DEFAULT, old_error_cb, old_error_client_data);
@@ -208,11 +208,13 @@ void *tts_error_thread(void UNUSED *arg)
 static
 herr_t error_callback(void *client_data)
 {
+    int ret;
+
     ret=pthread_mutex_lock(&error_mutex);
-	assert(ret==0);
+    assert(ret==0);
     error_count++;
     ret=pthread_mutex_unlock(&error_mutex);
-	assert(ret==0);
+    assert(ret==0);
     return H5Ewalk(H5E_WALK_DOWNWARD, walk_error_callback, client_data);
 }
 

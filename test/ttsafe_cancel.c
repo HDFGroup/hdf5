@@ -66,57 +66,56 @@ pthread_t childthread;
 pthread_mutex_t mutex;
 pthread_cond_t cond;
 
-//Global variables
-int ret;
-
 void tts_cancel(void)
 {
     pthread_attr_t attribute;
     hid_t dataset;
     int buffer;
+    int ret;
 
     /* make thread scheduling global */
     ret=pthread_attr_init(&attribute);
-	assert(ret==0);
+    assert(ret==0);
 #ifdef H5_HAVE_SYSTEM_SCOPE_THREADS
     ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
-	assert(ret==0);
+    assert(ret==0);
 #endif /* H5_HAVE_SYSTEM_SCOPE_THREADS */
 
 
-	ret=pthread_mutex_init(&mutex,NULL);
-	assert(ret==0);
-	ret=pthread_cond_init(&cond,NULL);
-	assert(ret==0);
+    /* Initialize mutex & condition variables */
+    ret=pthread_mutex_init(&mutex,NULL);
+    assert(ret==0);
+    ret=pthread_cond_init(&cond,NULL);
+    assert(ret==0);
 
     /*
      * Create a hdf5 file using H5F_ACC_TRUNC access, default file
      * creation plist and default file access plist
      */
     cancel_file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-	assert(cancel_file>=0);
+    assert(cancel_file>=0);
     ret=pthread_create(&childthread, &attribute, tts_cancel_thread, NULL);
-	assert(ret==0);
+    assert(ret==0);
     tts_cancel_barrier();
     ret=pthread_cancel(childthread);
-	assert(ret==0);
+    assert(ret==0);
 
     dataset = H5Dopen(cancel_file, DATASETNAME);
-	assert(dataset>=0);
+    assert(dataset>=0);
     ret=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &buffer);
-	assert(ret>=0);
+    assert(ret>=0);
 
     if (buffer != 11)
         TestErrPrintf("operation unsuccessful with value at %d instead of 11\n", buffer);
 
     ret=H5Dclose(dataset);
-	assert(ret>=0);
+    assert(ret>=0);
     ret=H5Fclose(cancel_file);
-	assert(ret>=0);
+    assert(ret>=0);
 
     /* Destroy the thread attribute */
     ret=pthread_attr_destroy(&attribute);
-	assert(ret==0);
+    assert(ret==0);
 }
 
 void *tts_cancel_thread(void UNUSED *arg)
@@ -126,17 +125,18 @@ void *tts_cancel_thread(void UNUSED *arg)
     hid_t dataspace, datatype, dataset;
     hsize_t dimsf[1];	/* dataset dimensions */
     cancel_cleanup_t *cleanup_structure;
+    int ret;
 
     /* define dataspace for dataset */
     dimsf[0] = 1;
     dataspace = H5Screate_simple(1,dimsf,NULL);
-	assert(dataspace>=0);
+    assert(dataspace>=0);
 
     /* define datatype for the data using native little endian integers */
     datatype = H5Tcopy(H5T_NATIVE_INT);
-	assert(datatype>=0);
+    assert(datatype>=0);
     ret=H5Tset_order(datatype, H5T_ORDER_LE);
-	assert(ret>=0);
+    assert(ret>=0);
 
     /* create a new dataset within the file */
     dataset = H5Dcreate(cancel_file, DATASETNAME, datatype, dataspace, H5P_DEFAULT);
@@ -156,7 +156,7 @@ void *tts_cancel_thread(void UNUSED *arg)
 
     buffer = malloc(sizeof(int));
     ret=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
-	assert(ret>=0);
+    assert(ret>=0);
     ret=H5Diterate(buffer, H5T_NATIVE_INT, dataspace, tts_cancel_callback, &dataset);
     assert(ret>=0);
 
@@ -164,13 +164,13 @@ void *tts_cancel_thread(void UNUSED *arg)
 
     datavalue = 100;
     ret=H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &datavalue);
-	assert(ret>=0);
+    assert(ret>=0);
     ret=H5Dclose(dataset);
-	assert(ret>=0);
+    assert(ret>=0);
     ret=H5Tclose(datatype);
-	assert(ret>=0);
+    assert(ret>=0);
     ret=H5Sclose(dataspace);
-	assert(ret>=0);
+    assert(ret>=0);
 
     /*
      * Required by pthreads. The argument 0 pops the stack but does not
@@ -186,6 +186,7 @@ herr_t tts_cancel_callback(void *elem, hid_t UNUSED type_id, unsigned UNUSED ndi
 {
     int value = *(int *)elem;
     hid_t dataset = *(hid_t *)operator_data;
+    int ret;
 
     tts_cancel_barrier();
     sleep(3);
@@ -197,7 +198,7 @@ herr_t tts_cancel_callback(void *elem, hid_t UNUSED type_id, unsigned UNUSED ndi
 
     value += 10;
     ret=H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value);
-	assert(ret>=0);
+    assert(ret>=0);
     return 0;
 }
 
@@ -208,12 +209,14 @@ herr_t tts_cancel_callback(void *elem, hid_t UNUSED type_id, unsigned UNUSED ndi
 void cancellation_cleanup(void *arg)
 {
     cancel_cleanup_t *cleanup_structure = (cancel_cleanup_t *)arg;
+    int ret;
+
     ret=H5Dclose(cleanup_structure->dataset);
-	assert(ret>=0);
+    assert(ret>=0);
     ret=H5Tclose(cleanup_structure->datatype);
-	assert(ret>=0);
+    assert(ret>=0);
     ret=H5Sclose(cleanup_structure->dataspace);
-	assert(ret>=0);
+    assert(ret>=0);
 
     /* retained for debugging */
     /*  print_func("cancellation noted, cleaning up ... \n"); */
@@ -226,26 +229,27 @@ void cancellation_cleanup(void *arg)
 void tts_cancel_barrier(void)
 {
     static int count = 2;
+    int ret;
 
     ret=pthread_mutex_lock(&mutex);
-	assert(ret==0);
+    assert(ret==0);
 
     if (count != 1) {
         count--;
         ret=pthread_cond_wait(&cond, &mutex);
-		assert(ret==0);
+        assert(ret==0);
     } else {
-        pthread_cond_signal(&cond);
-		assert(ret==0);
+        ret=pthread_cond_signal(&cond);
+        assert(ret==0);
     }
 
-    pthread_mutex_unlock(&mutex);
-	assert(ret==0);
+    ret=pthread_mutex_unlock(&mutex);
+    assert(ret==0);
 }
 
 void cleanup_cancel(void)
 {
-	HDunlink(FILENAME);
+    HDunlink(FILENAME);
 }
 
 #endif /*H5_HAVE_THREADSAFE*/
