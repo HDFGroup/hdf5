@@ -417,11 +417,44 @@ H5G_ent_copy(H5G_entry_t *dst, const H5G_entry_t *src, H5G_ent_copy_depth_t dept
         dst->canon_path_r=NULL;
     } else if(depth==H5G_COPY_SHALLOW) {
         /* Discarding 'const' qualifier OK - QAK */
-        HDmemset(src, 0, sizeof(H5G_entry_t));
+        H5G_ent_reset(src);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5G_ent_reset
+ *
+ * Purpose: Reset a symbol table entry to an empty state
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Quincey Koziol, koziol@ncsa.uiuc.edu
+ *
+ * Date: August 2005
+ *
+ * Comments:
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_ent_reset(H5G_entry_t *ent)
+{
+    FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_reset);
+
+    /* Check arguments */
+    HDassert(ent);
+
+    /* Clear the symbol table entry to an empty state */
+    HDmemset(ent, 0, sizeof(H5G_entry_t));
+    ent->header = HADDR_UNDEF;
+
+    FUNC_LEAVE_NOAPI(SUCCEED);
+} /* end H5G_ent_reset() */
 
 
 /*-------------------------------------------------------------------------

@@ -25,6 +25,23 @@
 /* module-scoped variables */
 const char  *progname = "h5dump";
 
+/* Macros for displaying objects */
+#define begin_obj(obj,name,begin)                               \
+    if (name)                                                   \
+        printf("%s \"%s\" %s\n", (obj), (name), (begin));       \
+    else                                                        \
+        printf("%s %s\n", (obj), (begin));
+
+#define end_obj(obj,end)                                        \
+    if(HDstrlen(end)) {                                         \
+        printf("%s", end);                                      \
+        if(HDstrlen(obj))                                       \
+            printf(" ");                                        \
+    }                                                           \
+    if(HDstrlen(obj))                                           \
+        printf("%s", obj);                                      \
+    printf("\n");
+
 /* 3 private values: can't be set, but can be read.
    Note: these are defined in H5Zprivate, they are
    duplicated here.
@@ -667,7 +684,7 @@ print_datatype(hid_t type,unsigned in_group)
 
         if (ret >= 0) {
             if (!type_table->objs[ret].recorded)
-                printf("\"/#%lu:%lu\"", type_table->objs[ret].objno[0],
+                HDfprintf(stdout,"\"/#%lu:%lu\"", type_table->objs[ret].objno[0],
                        type_table->objs[ret].objno[1]);
             else
                 printf("\"%s\"", type_table->objs[ret].objname);
@@ -1752,7 +1769,7 @@ dump_tables(void)
     printf("group_table: # of entries = %d\n", group_table->nobjs);
 
     for (i = 0; i < group_table->nobjs; i++)
-	printf("%lu %lu %s %d %d\n", group_table->objs[i].objno[0],
+	HDfprintf(stdout,"%lu %lu %s %d %d\n", group_table->objs[i].objno[0],
 	       group_table->objs[i].objno[1],
 	       group_table->objs[i].objname,
 	       group_table->objs[i].displayed, group_table->objs[i].recorded);
@@ -1760,7 +1777,7 @@ dump_tables(void)
     printf("\ndset_table: # of entries = %d\n", dset_table->nobjs);
 
     for (i = 0; i < dset_table->nobjs; i++)
-	printf("%lu %lu %s %d %d\n", dset_table->objs[i].objno[0],
+	HDfprintf(stdout,"%lu %lu %s %d %d\n", dset_table->objs[i].objno[0],
 	       dset_table->objs[i].objno[1],
 	       dset_table->objs[i].objname,
 	       dset_table->objs[i].displayed, dset_table->objs[i].recorded);
@@ -1768,7 +1785,7 @@ dump_tables(void)
     printf("\ntype_table: # of entries = %d\n", type_table->nobjs);
 
     for (i = 0; i < type_table->nobjs; i++)
-	printf("%lu %lu %s %d %d\n", type_table->objs[i].objno[0],
+	HDfprintf(stdout,"%lu %lu %s %d %d\n", type_table->objs[i].objno[0],
 	       type_table->objs[i].objno[1],
 	       type_table->objs[i].objname,
 	       type_table->objs[i].displayed, type_table->objs[i].recorded);
@@ -3537,7 +3554,7 @@ main(int argc, const char *argv[])
         goto done;
     }
 
-    /* start to dump */
+    /* start to dump - display file header information */
     if (!doxml) {
 	begin_obj(dump_header_format->filebegin, fname,
 		  dump_header_format->fileblockbegin);
@@ -3545,40 +3562,39 @@ main(int argc, const char *argv[])
 	printf("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 	/* alternative first element, depending on schema or DTD. */
         if (useschema) {
-		if (strcmp(xmlnsprefix,"") == 0) {
-		printf("<HDF5-File xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"%s\">\n",
-		       xml_dtd_uri);
-		} else {
+            if (strcmp(xmlnsprefix,"") == 0) {
+                printf("<HDF5-File xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"%s\">\n",
+                   xml_dtd_uri);
+            } else {
 /*  TO DO: make -url option work in this case (may need new option) */
-			char * ns;
-			char *indx;
-			ns = strdup(xmlnsprefix);
-			indx = strrchr(ns,(int)':');
-			if (indx) *indx = '\0';
+                char * ns;
+                char *indx;
 
-		printf("<%sHDF5-File xmlns:%s=\"http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File\" "
-		"xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
-		"xsi:schemaLocation=\"http://hdf.ncsa.uiuc.edu/DTDs/HDF5File "
-		"http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd\">\n",xmlnsprefix,ns);
-		}
+                ns = strdup(xmlnsprefix);
+                indx = strrchr(ns,(int)':');
+                if (indx) *indx = '\0';
+
+                printf("<%sHDF5-File xmlns:%s=\"http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File\" "
+                    "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+                    "xsi:schemaLocation=\"http://hdf.ncsa.uiuc.edu/DTDs/HDF5File "
+                    "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd\">\n",xmlnsprefix,ns);
+            }
 	} else {
-		printf("<!DOCTYPE HDF5-File PUBLIC \"HDF5-File.dtd\" \"%s\">\n",
-		       xml_dtd_uri);
-		printf("<HDF5-File>\n");
+            printf("<!DOCTYPE HDF5-File PUBLIC \"HDF5-File.dtd\" \"%s\">\n",
+                   xml_dtd_uri);
+            printf("<HDF5-File>\n");
 	}
     }
 
-    if (!doxml)
-    {
-     if (display_fi)
-     {
-      dump_fcontents(fid);
-      end_obj(dump_header_format->fileend,dump_header_format->fileblockend);
-      goto done;
-     }
+    if (!doxml) {
+        if (display_fi) {
+            dump_fcontents(fid);
+            end_obj(dump_header_format->fileend,dump_header_format->fileblockend);
+            goto done;
+        }
 
-     if (display_bb)
-      dump_fcpl(fid);
+        if (display_bb)
+            dump_fcpl(fid);
     }
 
 
@@ -3861,7 +3877,7 @@ xml_escape_the_name(const char *str)
 	return HDstrdup(str);
 
     cp = str;
-    rcp = ncp = calloc((size_t)(len + extra + 1), sizeof(char));
+    rcp = ncp = HDmalloc(len + extra + 1);
 
     if (!ncp)
         return NULL;    /* ?? */
@@ -4048,14 +4064,12 @@ xml_print_datatype(hid_t type, unsigned in_group)
                 /* 'anonymous' NDT.  Use it's object num.
                    as it's name.  */
                 printf("<%sNamedDataTypePtr OBJ-XID=\"/%s\"/>\n",
-                    xmlnsprefix,
-                    dtxid);
+                    xmlnsprefix, dtxid);
             } else {
                 /* point to the NDT by name */
                 char *t_objname = xml_escape_the_name(type_table->objs[ret].objname);
                 printf("<%sNamedDataTypePtr OBJ-XID=\"%s\" H5Path=\"%s\"/>\n",
-                    xmlnsprefix,
-                    dtxid,t_objname);
+                    xmlnsprefix, dtxid,t_objname);
                 free(t_objname);
             }
             free(dtxid);
@@ -4418,15 +4432,13 @@ xml_dump_datatype(hid_t type)
 		   use it's object ref as its name
 		 */
 		printf("<%sNamedDataTypePtr OBJ-XID=\"%s\"/>\n",
-			xmlnsprefix,
-			dtxid);
+			xmlnsprefix, dtxid);
 
 	    } else {
 		/* pointer to a named data type already in XML */
                 char *t_objname = xml_escape_the_name(type_table->objs[i].objname);
 		printf("<%sNamedDataTypePtr OBJ-XID=\"%s\" H5Path=\"%s\" />\n",
-			xmlnsprefix,
-			dtxid,t_objname);
+			xmlnsprefix, dtxid,t_objname);
 		free(t_objname);
 	    }
 	    free(dtxid);
@@ -5069,7 +5081,6 @@ xml_print_refs(hid_t did, int source)
     hid_t                   type, space;
     char                   *buf;
     hobj_ref_t             *refbuf;
-    char                   *path;
     hsize_t                 ssiz;
     hsize_t                 i;
 
@@ -5127,6 +5138,8 @@ xml_print_refs(hid_t did, int source)
     ssiz = H5Sget_simple_extent_npoints(space);
 
     for (i = 0; i < ssiz; i++) {
+        const char *path;
+
 	path = lookup_ref_path(*refbuf);
 	indentation(indent + COL);
 
@@ -5395,7 +5408,8 @@ check_filters(hid_t dcpl)
     }
 }
 
-static void xml_dump_fill_value(hid_t dcpl, hid_t type)
+static void
+xml_dump_fill_value(hid_t dcpl, hid_t type)
 {
 size_t sz;
 size_t i;
@@ -5509,11 +5523,11 @@ char * name;
 	    break;
 	}
 	}
-        free(buf);
-	indent -= COL;
-	indentation(indent);
-	printf("</%sData>\n",xmlnsprefix);
-	indent -= COL;
+    free(buf);
+    indent -= COL;
+    indentation(indent);
+    printf("</%sData>\n",xmlnsprefix);
+    indent -= COL;
 }
 /*-------------------------------------------------------------------------
  * Function:    xml_dump_group
