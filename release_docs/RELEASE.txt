@@ -345,7 +345,7 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
-        - Corrected errors when querying information about a group opened
+        - Corrected errors when performing various operations on a group opened
             by dereferencing an object reference.  QAK - 2005/07/30
         - Fixed a bug with named datatypes where a copy of a named datatype
             used to create a dataset would accidentally use the original

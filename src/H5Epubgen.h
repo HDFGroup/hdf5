@@ -178,15 +178,15 @@ H5_DLLVAR hid_t H5E_NOENCODER_g;     /* Filter present but encoding disabled */
 #define H5E_CANTOPENOBJ      (H5OPEN H5E_CANTOPENOBJ_g)
 #define H5E_CANTCLOSEOBJ     (H5OPEN H5E_CANTCLOSEOBJ_g)
 #define H5E_COMPLEN          (H5OPEN H5E_COMPLEN_g)
-#define H5E_CWG              (H5OPEN H5E_CWG_g)
 #define H5E_LINK             (H5OPEN H5E_LINK_g)
 #define H5E_SLINK            (H5OPEN H5E_SLINK_g)
+#define H5E_PATH             (H5OPEN H5E_PATH_g)
 H5_DLLVAR hid_t H5E_CANTOPENOBJ_g;   /* Can't open object */
 H5_DLLVAR hid_t H5E_CANTCLOSEOBJ_g;  /* Can't close object */
 H5_DLLVAR hid_t H5E_COMPLEN_g;       /* Name component is too long */
-H5_DLLVAR hid_t H5E_CWG_g;           /* Problem with current working group */
 H5_DLLVAR hid_t H5E_LINK_g;          /* Link count failure */
 H5_DLLVAR hid_t H5E_SLINK_g;         /* Symbolic link error */
+H5_DLLVAR hid_t H5E_PATH_g;          /* Problem with path to object */
 
 /* File accessability errors */
 #define H5E_FILEEXISTS       (H5OPEN H5E_FILEEXISTS_g)
