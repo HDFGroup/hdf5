@@ -846,7 +846,7 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
             gpfsFcntlHeader_t   hdr;
             gpfsFreeRange_t     fr;
         } hint;
-        memset(&hint, 0, sizeof hint);
+        HDmemset(&hint, 0, sizeof hint);
         hint.hdr.totalLength = sizeof hint;
         hint.hdr.fcntlVersion = GPFS_FCNTL_CURRENT_VERSION;
         hint.fr.structLen = sizeof hint.fr;
@@ -1392,7 +1392,7 @@ H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
                 gpfsFcntlHeader_t           hdr;
                 gpfsMultipleAccessRange_t   mar;
             } hint;
-            memset(&hint, 0, sizeof hint);
+            HDmemset(&hint, 0, sizeof hint);
             hint.hdr.totalLength = sizeof hint;
             hint.hdr.fcntlVersion = GPFS_FCNTL_CURRENT_VERSION;
             hint.mar.structLen = sizeof hint.mar;
