@@ -551,10 +551,10 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_mpio_space_span_ type
+ * Function:	H5S_mpio_space_span_type
  *
  * Purpose:	Translate an HDF5 dataspace selection into a general
-                MPI derivewd datatype built with span-tree.
+ *              MPI derived datatype built with span-tree.
  *
  *		Currently handle only hyperslab and "all" selections.
  *
@@ -803,7 +803,6 @@ static herr_t obtain_datatype(const hsize_t size[], H5S_hyper_span_t* span,MPI_D
     if(ret < 0) printf("type hindexed doesn't work\n");
     printf("after hindexed \n");
 
-
   }
   else {/* dimindex is the rank of the dimension */
 
@@ -872,12 +871,10 @@ static herr_t obtain_datatype(const hsize_t size[], H5S_hyper_span_t* span,MPI_D
     printf("after type struct \n");
   }
 
-
   if(inner_type != NULL){
     if(down != NULL) {
     for(i=0;i<outercount;i++)
              MPI_Type_free(&inner_type[i]);
-
     }
   }
 

@@ -627,7 +627,6 @@ H5D_mpio_spaces_span_read(H5D_io_info_t *io_info,
  * Programmer:	KY
  * Note:        Don't call this funtion until you don't see this line.
  *              KY,  11/11/04
-
  *
  * Modifications:
  *
