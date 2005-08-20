@@ -44,6 +44,44 @@
 #define H5_NO_FAC_FREE_LISTS
 #endif /* H5_NO_FREE_LISTS */
 
+/* Macro to track location where block was allocated from */
+/* Uncomment next line to turn on tracking, but don't leave it on after
+ * debugging is done because of the extra overhead it imposes.
+ */
+/* NOTE: This hasn't been extended to all the free-list allocation routines
+ * yet. -QAK
+ */
+/* #define H5FL_TRACK */
+#ifdef H5FL_TRACK
+/* Macro for inclusion in the free list allocation calls */
+#define H5FL_TRACK_INFO         ,__FILE__, FUNC, __LINE__
+
+/* Macro for inclusion in internal free list allocation calls */
+#define H5FL_TRACK_INFO_INT     ,call_file, call_func, call_line
+
+/* Macro for inclusion in the free list allocation parameters */
+#define H5FL_TRACK_PARAMS       ,const char *call_file, const char *call_func, int call_line
+
+/* Tracking information for each block */
+typedef struct H5FL_track_t {
+    H5FS_t *stack;      /* Function stack */
+    char *file;         /* Name of file containing calling function */
+    char *func;         /* Name of calling function */
+    int line;           /* Line # within calling function */
+    struct H5FL_track_t *next;  /* Pointer to next tracking block */
+    struct H5FL_track_t *prev;  /* Pointer to previous tracking block */
+} H5FL_track_t;
+
+/* Macro for size of tracking information */
+#define H5FL_TRACK_SIZE sizeof(H5FL_track_t)
+
+#else /* H5FL_TRACK */
+#define H5FL_TRACK_INFO
+#define H5FL_TRACK_INFO_INT
+#define H5FL_TRACK_PARAMS
+#define H5FL_TRACK_SIZE         0
+#endif /* H5FL_TRACK */
+
 /*
  * Private datatypes.
  */
@@ -55,9 +93,9 @@ typedef struct H5FL_reg_node_t {
 
 /* Data structure for free list of blocks */
 typedef struct H5FL_reg_head_t {
-    unsigned init;         /* Whether the free list has been initialized */
-    unsigned allocated;    /* Number of blocks allocated */
-    unsigned onlist;       /* Number of blocks on free list */
+    unsigned init;      /* Whether the free list has been initialized */
+    unsigned allocated; /* Number of blocks allocated */
+    unsigned onlist;    /* Number of blocks on free list */
     size_t list_mem;    /* Amount of memory on free list */
     const char *name;   /* Name of the type */
     size_t size;        /* Size of the blocks in the list */
@@ -82,10 +120,10 @@ typedef struct H5FL_reg_head_t {
 #define H5FL_DEFINE_STATIC(t)  static H5FL_DEFINE_COMMON(t)
 
 /* Allocate an object of type 't' */
-#define H5FL_MALLOC(t) H5FL_reg_malloc(&(H5FL_REG_NAME(t)))
+#define H5FL_MALLOC(t) H5FL_reg_malloc(&(H5FL_REG_NAME(t)) H5FL_TRACK_INFO)
 
 /* Allocate an object of type 't' and clear it to all zeros */
-#define H5FL_CALLOC(t) H5FL_reg_calloc(&(H5FL_REG_NAME(t)))
+#define H5FL_CALLOC(t) H5FL_reg_calloc(&(H5FL_REG_NAME(t)) H5FL_TRACK_INFO)
 
 /* Free an object of type 't' */
 #define H5FL_FREE(t,obj) H5FL_reg_free(&(H5FL_REG_NAME(t)),obj)
@@ -151,16 +189,16 @@ typedef struct H5FL_blk_head_t {
 #define H5FL_BLK_DEFINE_STATIC(t)  static H5FL_BLK_DEFINE_COMMON(t)
 
 /* Allocate an block of type 't' */
-#define H5FL_BLK_MALLOC(t,size) H5FL_blk_malloc(&(H5FL_BLK_NAME(t)),size)
+#define H5FL_BLK_MALLOC(t,size) H5FL_blk_malloc(&(H5FL_BLK_NAME(t)),size H5FL_TRACK_INFO)
 
 /* Allocate an block of type 't' and clear it to zeros */
-#define H5FL_BLK_CALLOC(t,size) H5FL_blk_calloc(&(H5FL_BLK_NAME(t)),size)
+#define H5FL_BLK_CALLOC(t,size) H5FL_blk_calloc(&(H5FL_BLK_NAME(t)),size H5FL_TRACK_INFO)
 
 /* Free a block of type 't' */
 #define H5FL_BLK_FREE(t,blk) H5FL_blk_free(&(H5FL_BLK_NAME(t)),blk)
 
 /* Re-allocate a block of type 't' */
-#define H5FL_BLK_REALLOC(t,blk,new_size) H5FL_blk_realloc(&(H5FL_BLK_NAME(t)),blk,new_size)
+#define H5FL_BLK_REALLOC(t,blk,new_size) H5FL_blk_realloc(&(H5FL_BLK_NAME(t)),blk,new_size H5FL_TRACK_INFO)
 
 /* Check if there is a free block available to re-use */
 #define H5FL_BLK_AVAIL(t,size)  H5FL_blk_free_block_avail(&(H5FL_BLK_NAME(t)),size)
@@ -283,16 +321,16 @@ typedef struct H5FL_seq_head_t {
 #define H5FL_SEQ_DEFINE_STATIC(t)  static H5FL_SEQ_DEFINE_COMMON(t)
 
 /* Allocate a sequence of type 't' */
-#define H5FL_SEQ_MALLOC(t,elem) H5FL_seq_malloc(&(H5FL_SEQ_NAME(t)),elem)
+#define H5FL_SEQ_MALLOC(t,elem) H5FL_seq_malloc(&(H5FL_SEQ_NAME(t)),elem H5FL_TRACK_INFO)
 
 /* Allocate a sequence of type 't' and clear it to all zeros */
-#define H5FL_SEQ_CALLOC(t,elem) H5FL_seq_calloc(&(H5FL_SEQ_NAME(t)),elem)
+#define H5FL_SEQ_CALLOC(t,elem) H5FL_seq_calloc(&(H5FL_SEQ_NAME(t)),elem H5FL_TRACK_INFO)
 
 /* Free a sequence of type 't' */
 #define H5FL_SEQ_FREE(t,obj) H5FL_seq_free(&(H5FL_SEQ_NAME(t)),obj)
 
 /* Re-allocate a sequence of type 't' */
-#define H5FL_SEQ_REALLOC(t,obj,new_elem) H5FL_seq_realloc(&(H5FL_SEQ_NAME(t)),obj,new_elem)
+#define H5FL_SEQ_REALLOC(t,obj,new_elem) H5FL_seq_realloc(&(H5FL_SEQ_NAME(t)),obj,new_elem H5FL_TRACK_INFO)
 
 #else /* H5_NO_SEQ_FREE_LISTS */
 /* Common macro for H5FL_BLK_DEFINE & H5FL_BLK_DEFINE_STATIC */
@@ -322,10 +360,10 @@ typedef struct H5FL_fac_head_t {
  */
 #ifndef H5_NO_FAC_FREE_LISTS
 /* Allocate a block from a factory */
-#define H5FL_FAC_MALLOC(t) H5FL_fac_malloc(t)
+#define H5FL_FAC_MALLOC(t) H5FL_fac_malloc(t H5FL_TRACK_INFO)
 
 /* Allocate a block from a factory and clear it to all zeros */
-#define H5FL_FAC_CALLOC(t) H5FL_fac_calloc(t)
+#define H5FL_FAC_CALLOC(t) H5FL_fac_calloc(t H5FL_TRACK_INFO)
 
 /* Return a block to a factory */
 #define H5FL_FAC_FREE(t,obj) H5FL_fac_free(t,obj)
@@ -339,25 +377,25 @@ typedef struct H5FL_fac_head_t {
 /*
  * Library prototypes.
  */
-H5_DLL void * H5FL_blk_malloc(H5FL_blk_head_t *head, size_t size);
-H5_DLL void * H5FL_blk_calloc(H5FL_blk_head_t *head, size_t size);
+H5_DLL void * H5FL_blk_malloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS);
+H5_DLL void * H5FL_blk_calloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS);
 H5_DLL void * H5FL_blk_free(H5FL_blk_head_t *head, void *block);
-H5_DLL void * H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size);
+H5_DLL void * H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size H5FL_TRACK_PARAMS);
 H5_DLL htri_t H5FL_blk_free_block_avail(H5FL_blk_head_t *head, size_t size);
-H5_DLL void * H5FL_reg_malloc(H5FL_reg_head_t *head);
-H5_DLL void * H5FL_reg_calloc(H5FL_reg_head_t *head);
+H5_DLL void * H5FL_reg_malloc(H5FL_reg_head_t *head H5FL_TRACK_PARAMS);
+H5_DLL void * H5FL_reg_calloc(H5FL_reg_head_t *head H5FL_TRACK_PARAMS);
 H5_DLL void * H5FL_reg_free(H5FL_reg_head_t *head, void *obj);
 H5_DLL void * H5FL_arr_malloc(H5FL_arr_head_t *head, size_t elem);
 H5_DLL void * H5FL_arr_calloc(H5FL_arr_head_t *head, size_t elem);
 H5_DLL void * H5FL_arr_free(H5FL_arr_head_t *head, void *obj);
 H5_DLL void * H5FL_arr_realloc(H5FL_arr_head_t *head, void *obj, size_t new_elem);
-H5_DLL void * H5FL_seq_malloc(H5FL_seq_head_t *head, size_t elem);
-H5_DLL void * H5FL_seq_calloc(H5FL_seq_head_t *head, size_t elem);
+H5_DLL void * H5FL_seq_malloc(H5FL_seq_head_t *head, size_t elem H5FL_TRACK_PARAMS);
+H5_DLL void * H5FL_seq_calloc(H5FL_seq_head_t *head, size_t elem H5FL_TRACK_PARAMS);
 H5_DLL void * H5FL_seq_free(H5FL_seq_head_t *head, void *obj);
-H5_DLL void * H5FL_seq_realloc(H5FL_seq_head_t *head, void *obj, size_t new_elem);
+H5_DLL void * H5FL_seq_realloc(H5FL_seq_head_t *head, void *obj, size_t new_elem H5FL_TRACK_PARAMS);
 H5_DLL H5FL_fac_head_t *H5FL_fac_init(size_t size);
-H5_DLL void * H5FL_fac_malloc(H5FL_fac_head_t *head);
-H5_DLL void * H5FL_fac_calloc(H5FL_fac_head_t *head);
+H5_DLL void * H5FL_fac_malloc(H5FL_fac_head_t *head H5FL_TRACK_PARAMS);
+H5_DLL void * H5FL_fac_calloc(H5FL_fac_head_t *head H5FL_TRACK_PARAMS);
 H5_DLL void * H5FL_fac_free(H5FL_fac_head_t *head, void *obj);
 H5_DLL herr_t H5FL_fac_term(H5FL_fac_head_t *head);
 H5_DLL herr_t H5FL_garbage_coll(void);

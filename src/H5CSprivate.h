@@ -29,12 +29,15 @@
 
 /* A function stack */
 typedef struct H5FS_t {
-    int	nused;			        /*num slots currently used in stack  */
+    unsigned	nused;			        /*num slots currently used in stack  */
     const char *slot[H5FS_NSLOTS];	/*array of function records	     */
 } H5FS_t;
 
 H5_DLL herr_t H5FS_push (const char *func_name);
 H5_DLL herr_t H5FS_pop (void);
 H5_DLL herr_t H5FS_print (FILE *stream);
+H5_DLL herr_t H5FS_print_stack (const H5FS_t *stack, FILE *stream);
+H5_DLL herr_t H5FS_copy_stack (H5FS_t *stack);
+H5_DLL herr_t H5FS_close_stack (H5FS_t *stack);
 
 #endif /* _H5FSprivate_H */

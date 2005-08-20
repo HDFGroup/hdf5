@@ -27,8 +27,9 @@
  */
 
 
-#include "H5private.h"		/* Generic Functions			  */
-#include "H5FSprivate.h"	/* Private function stack routines	  */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5FSprivate.h"	/* Function stack			*/
+#include "H5MMprivate.h"	/* Memory management			*/
 
 #ifdef H5_HAVE_FUNCSTACK
 
@@ -93,31 +94,30 @@ H5FS_get_stack(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_print
+ * Function:	H5FS_print_stack
  *
- * Purpose:	Prints the function stack in some default way.
+ * Purpose:	Prints a function stack.
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              THursday, February 6, 2003
+ *              Thursday, February 6, 2003
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FS_print(FILE *stream)
+H5FS_print_stack(const H5FS_t *fstack, FILE *stream)
 {
-    H5FS_t	*fstack = H5FS_get_my_stack (); /* Get the correct function stack */
     const int	indent = 2;             /* Indention level */
     int         i;                      /* Local index ariable */
 
     /* Don't push this function on the function stack... :-) */
-    FUNC_ENTER_NOAPI_NOFUNC_NOFS(H5FS_print);
+    FUNC_ENTER_NOAPI_NOFUNC_NOFS(H5FS_print_stack);
 
     /* Sanity check */
-    assert(fstack);
+    HDassert(fstack);
 
     /* Default to outputting information to stderr */
     if (!stream)
@@ -136,6 +136,37 @@ H5FS_print(FILE *stream)
 
     for (i=fstack->nused-1; i>=0; --i)
         HDfprintf(stream, "%*s#%03d: Routine: %s\n", indent, "", i, fstack->slot[i]);
+
+    FUNC_LEAVE_NOAPI_NOFS(SUCCEED);
+} /* end H5FS_print_stack() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FS_print
+ *
+ * Purpose:	Prints the default function stack in some default way.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, February 6, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FS_print(FILE *stream)
+{
+    H5FS_t	*fstack = H5FS_get_my_stack (); /* Get the correct function stack */
+    
+    /* Don't push this function on the function stack... :-) */
+    FUNC_ENTER_NOAPI_NOFUNC_NOFS(H5FS_print);
+    
+    /* Sanity check */
+    assert(fstack);
+
+    H5FS_print_stack(fstack, stream);
 
     FUNC_LEAVE_NOAPI_NOFS(SUCCEED);
 } /* end H5FS_print() */
@@ -210,5 +241,73 @@ H5FS_pop(void)
 
     FUNC_LEAVE_NOAPI_NOFS(SUCCEED);
 } /* end H5FS_pop() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FS_copy_stack
+ *
+ * Purpose:	Makes a copy of the current stack
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, August 9, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FS_copy_stack(H5FS_t *new_stack)
+{
+    H5FS_t	*old_stack = H5FS_get_my_stack ();
+    unsigned    u;                      /* Local index variable */
+    
+    /* Don't push this function on the function stack... :-) */
+    FUNC_ENTER_NOAPI_NOFUNC_NOFS(H5FS_copy_stack);
+
+    /* Sanity check */
+    HDassert (old_stack);
+
+    /* Copy old stack to new one, duplicating the strings */
+    for(u = 0; u < old_stack->nused; u++)
+        new_stack->slot[u] = H5MM_strdup(old_stack->slot[u]);
+    new_stack->nused = old_stack->nused;
+
+    FUNC_LEAVE_NOAPI_NOFS(SUCCEED);
+} /* end H5FS_copy_stack() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FS_close_stack
+ *
+ * Purpose:	Closes a copy of a stack
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, August 9, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FS_close_stack(H5FS_t *stack)
+{
+    unsigned    u;                      /* Local index variable */
+    
+    /* Don't push this function on the function stack... :-) */
+    FUNC_ENTER_NOAPI_NOFUNC_NOFS(H5FS_close_stack);
+
+    /* Sanity check */
+    HDassert (stack);
+
+    /* Free strings on stack */
+    for(u = 0; u < stack->nused; u++)
+        stack->slot[u] = H5MM_xfree(stack->slot[u]);
+
+    FUNC_LEAVE_NOAPI_NOFS(SUCCEED);
+} /* end H5FS_close_stack() */
 
 #endif /* H5_HAVE_FUNCSTACK */

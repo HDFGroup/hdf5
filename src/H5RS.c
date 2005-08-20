@@ -62,7 +62,7 @@ H5RS_xstrdup(const char *s)
 {
     char *ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5RS_xstrdup);
+    FUNC_ENTER_NOAPI_NOINIT(H5RS_xstrdup);
 
     if (s) {
         ret_value = H5FL_BLK_MALLOC(str_buf,HDstrlen(s) + 1);

@@ -2388,8 +2388,7 @@ static void *
 H5D_istore_chunk_alloc(size_t size, const H5O_pline_t *pline)
 {
     void *ret_value=NULL;		/* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_chunk_alloc)
+    FUNC_ENTER_NOAPI_NOINIT(H5D_istore_chunk_alloc)
 
     assert(size);
     assert(pline);
