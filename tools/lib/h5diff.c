@@ -28,10 +28,10 @@
 #define h5diffdebug5(x1, x2, x3, x4, x5)	fprintf(stderr, "h5diff debug: " x1, x2, x3, x4, x5)
 #else
 #define h5diffdebug(x)
-#define h5diffdebug2(x)
-#define h5diffdebug3(x)
-#define h5diffdebug4(x)
-#define h5diffdebug5(x)
+#define h5diffdebug2(x1, x2)
+#define h5diffdebug3(x1, x2, x3)
+#define h5diffdebug4(x1, x2, x3, x4)
+#define h5diffdebug5(x1, x2, x3, x4, x5)
 #endif
 
 
