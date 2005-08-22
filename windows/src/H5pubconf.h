@@ -56,10 +56,10 @@ in the file file_io.win32.c and including it on the projects
 #define H5_HAVE_LONGJMP 1
 #define H5_HAVE_SIGACTION 1
 #define H5_HAVE_SIGNAL 1
-#define H5_HAVE__SNPRINTF 1
+#define H5_HAVE_SNPRINTF 1
 #define H5_HAVE_STRDUP 1
 #define H5_HAVE_SYSTEM 1
-#define H5_HAVE__VSNPRINTF 1
+#define H5_HAVE_VSNPRINTF 1
 #define  H5_HAVE_IO_H 1
 #define H5_HAVE_SETJMP_H 1
 #define H5_HAVE_STDDEF_H 1
@@ -121,7 +121,8 @@ in the file file_io.win32.c and including it on the projects
 /*Users want to build and test hdf5 library with thread safe enabled,
   Make the following block active
 */
-/* 
+
+/* (Remove the comment signs to enable thread safe on windows) 
 #if defined _DLL
 #define H5_HAVE_THREADSAFE 1
 #define H5_HAVE_SYSTEM_SCOPE_THREADS 1
