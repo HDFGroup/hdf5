@@ -798,7 +798,11 @@ typedef off_t                   h5_stat_size_t;
 #define HDsinh(X)		sinh(X)
 #define HDsleep(N)		sleep(N)
 #ifdef H5_HAVE_SNPRINTF
+#ifdef WIN32
+#define HDsnprintf       _snprintf /*varargs*/
+#else
 #   define HDsnprintf		snprintf /*varargs*/
+#endif
 #endif
 /* sprintf() variable arguments */
 #define HDsqrt(X)		sqrt(X)
@@ -880,7 +884,11 @@ H5_DLL int64_t HDstrtoll (const char *s, const char **rest, int base);
 #define HDvprintf(FMT,A)	vprintf(FMT,A)
 #define HDvsprintf(S,FMT,A)	vsprintf(S,FMT,A)
 #ifdef H5_HAVE_VSNPRINTF
+#ifdef WIN32
+#   define HDvsnprintf(S,N,FMT,A) _vsnprintf(S,N,FMT,A)
+#else
 #   define HDvsnprintf(S,N,FMT,A) vsnprintf(S,N,FMT,A)
+#endif
 #endif
 #define HDwait(W)		wait(W)
 #define HDwaitpid(P,W,O)	waitpid(P,W,O)
@@ -914,20 +922,11 @@ extern char *strdup(const char *s);
 
 
 #ifndef H5_HAVE_SNPRINTF
-
 H5_DLL int HDsnprintf(char *buf, size_t size, const char *fmt, ...);
-#ifdef WIN32
-#define HDsnprintf	 _snprintf /*varargs*/
-#endif
-
 #endif
 
 #ifndef H5_HAVE_VSNPRINTF
 H5_DLL int HDvsnprintf(char *buf, size_t size, const char *fmt, va_list ap);
-#ifdef WIN32
-#define HDvsnprintf _vsnprintf /*varargs*/
-#endif
-
 #endif
 
 /*
