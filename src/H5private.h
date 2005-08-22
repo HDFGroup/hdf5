@@ -921,12 +921,15 @@ extern char *strdup(const char *s);
 #endif /* WIN32 */
 
 
+/* Define our own HDsnprintf only for TFLOPS. */
+#ifdef __PUMAGON__
 #ifndef H5_HAVE_SNPRINTF
 H5_DLL int HDsnprintf(char *buf, size_t size, const char *fmt, ...);
 #endif
 
 #ifndef H5_HAVE_VSNPRINTF
 H5_DLL int HDvsnprintf(char *buf, size_t size, const char *fmt, va_list ap);
+#endif
 #endif
 
 /*
