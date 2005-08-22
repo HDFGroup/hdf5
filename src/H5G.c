@@ -2633,7 +2633,7 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
      */
     if (statbuf) {
         /* Common code to retrieve the file's fileno */
-        if(H5F_get_fileno(obj_ent.file,&statbuf->fileno)<0)
+        if(H5F_get_fileno(obj_ent.file,statbuf->fileno)<0)
             HGOTO_ERROR (H5E_FILE, H5E_BADVALUE, FAIL, "unable to read fileno");
 
         /* Retrieve information specific to each type of entry */
