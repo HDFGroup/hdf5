@@ -22,7 +22,8 @@ Contents:
    Section VII   :  How to build HDF5 with INTEL Compiler
    Section VIII  :  How to build Multi-threaded version of HDF5 library
    Section IX    :  How to build and test HDF5 snapshot release
-   Section X     :  Misc.
+   Section X     :  How to build HDF5 with Thread-Safe Feature
+   Section XI    :  Misc.
 
 
 ========================================================================
@@ -2017,7 +2018,7 @@ by other compilers.
      build the project file.
 
  4) Invoke command prompt and go to c:\myHDFstuff\hdf5\fortran\src.                         
-     Type 
+    Type 
          H5fortran_detect_gen.exe > H5fortran_detect.f90
 
  5) Open and build fortrantypegen.dsw with Compaq Visual Fortran
@@ -2028,24 +2029,211 @@ by other compilers.
      build the project file.
     
  6) Invoke command prompt and go to c:\myHDFstuff\hdf5\fortran\src.
-     type 
+    Type 
     		
           H5fortran_detect.exe > H5fort_type_defines.h
     
  7) Open and build matchtypegen.dsw with Compaq Visual Fortran
-     Go to the following directory
-     c:\myHDFstuff\hdf5\windows\misc\matchtypegen 
-     Open matchtypegen.dsw and build the project file.
+    Go to the following directory
+    c:\myHDFstuff\hdf5\windows\misc\matchtypegen 
+    Open matchtypegen.dsw and build the project file.
     
  8) Invoke command prompt and go to c:\myHDFstuff\hdf5\fortran\src.
-     type 
+    Type 
           H5match_types.exe
    
-      This step will generate H5f90i_gen.h and H5fortran_types.f90 automatically.
+    This step will generate H5f90i_gen.h and H5fortran_types.f90 
+    automatically.
     
- 9) Go back to Section II, step 1(2) to build and test HDF5 Libraries and Tools
+ 9) Go back to Section II, step 1(2) to build and test HDF5 Libraries 
+    and Tools
 
 
+========================================================================
+    Section X: How To Build And Test HDF5 With Thread-Safe Feature
+========================================================================
+
+Extra Preconditions and Notes:
+
+   Notes: Extra means there are more preconditions for this section 
+          except those preconditions under section 
+          "Preconditions and Notes" the beginning of this document. 
+
+   Please read section "Preconditions and Notes" carefully before going
+   to the next part. 
+
+   p1. Pthread-Win32 Installed
+
+   Posix Threads for Windows is a open source free software. Users can 
+   download it from http://sources.redhat.com/pthreads-win32/.
+
+   HDF5 release 1.8.0 supports Pthread-Win32 2.7.0 (2005-06-04) or 
+   later. Since pthreadVC2.dll used by HDF5 1.8.0 is the release version
+   dll of pthread-win32, ONLY HDF5 1.8.0 release dll are supported and 
+   tested on Windows XP. 
+ 
+   p2. Set Path for Pthread-Win32 header and library
+   
+   Invoke Microsoft Visual C++ 6.0, go to Tools->Options->Directories. 
+
+   From the drop-down box under "Show directories for:",
+
+       Choose "Include files", add in the path to Pthread-Win32 header 
+       file(For example: C:\PTHREADS_WIN32\INCLUDE).
+       
+       Choose "Library files", add in the path to Pthread-Winew library
+       (For example: C:\PTHREADS_WIN32\LIB).
+
+   p3. Enable HDF5 Thread-safe Feature on Windows
+
+   Go to directory c:\MYHDFstuff\hdf5\windows\src, open H5pubconf.h and 
+   find the following messages and remove those comment signs according
+   to the instruction given below:
+
+   /*Users want to build and test hdf5 library with thread safe enabled,
+     Make the following block active
+   */
+
+   /*                                            <----|
+     #if defined _DLL                                 |
+     #define H5_HAVE_THREADSAFE 1                     |
+     #define H5_HAVE_SYSTEM_SCOPE_THREADS 1           |---Lines should
+     #if defined TTSAFE_H                             |   be removed
+     #define sleep Sleep                              |   (/* and */)
+     #endif                                           |
+     #endif                                           |
+   */                                            <----|
+
+   Save H5pubconf.h
+
+   p4. Define Environment Variable(HDF5_EXT_PTHREAD) for PthreadVC2.lib 
+      
+      To define this environment variable:
+      
+      Click "Start", click "Control Panel", and then double-click
+      "System".  On the "Advanced" tab, click "Environment Variables".
+      
+      If you are logged on as administrator to the local computer AND
+      want to let all other users use these two environment variables,
+      click "New" under "System Variables" box; otherwise, click "New"
+      under "User Variables" box.
+      
+      In the New Variable window, set "Variable name" as 
+      HDF5_EXT_PTHREAD and "Variable value" as pthreadVC2.lib, then 
+      click OK.
+  
+   p5. Copy pthreadVC2.dll to System Directory
+      
+      Copy pthreadVC2.dll should be copied into the location that 
+      applications can find. One suggestion is to use the 
+      c:\WINDOWS\system.
+      
+ 
+1. Build HDF5 Release DLL with Thread-safe Feature
+
+   1.1 Run batch file copy_hdf.bat.
+
+   Go to  c:\MyHDFstuff\hdf5\windows and run copy_hdf.bat. This
+   process will copy all the necessary batch files,windows specific 
+   source codes and text files saved under c:\MyHDFstuff\hdf5\windows 
+   directory to the corresponding directories under hdf5.
+
+
+   1.2 Invoke Microsoft Visual C++ compiler
+    
+   Invoke Microsoft Visual C++.  From the main menu, go to "File"
+   and select the "Open Workspace" option. Then open the
+   c:\MyHDFstuff\hdf5\windows\proj\all\all.dsw workspace. 
+
+   1.3 Add in Thread-safe Source Code for HDF5 Library
+
+   Expand project "hdf5dll", right click on "source" and choose
+   "Add Files to Folder...", browse to add in file "H5TS.c" under 
+   directory c:\MYHDFSTUFF\hdf5\src.
+
+   1.4 Using pthreadVC2.lib inside HDF5 Release DLL
+
+   Right click on project "hdf5dll", choose "Set as Active Project"
+   and set "hdf5dll" as the active project file.
+   
+   Go to Project->Setting
+
+      On the left pane, choose "Win32 Release" to the right of 
+      "Settings For:" 
+
+      On the right pane, choose "Link", choose "Input" from the 
+      drop-down box to the right of "Category:"
+   
+      Under "Object/library modules:", add in "$(HDF5_EXT_PTHREAD)"
+      (No quotation marks).
+
+   Click on "OK".
+
+   1.5 Set Project Active Configurations
+   
+   Go to Build->Set Active Configuration, choose "hdf5dll-Win32 Release"
+   under "Project configurations:", Click "OK".
+
+   1.6 Build HDF5 Release DLL with Thread-safe Feature
+   
+   Go to Build->Build hdf5dll.dll to build HDF5 Release DLL with 
+   thread-safe feature.
+
+   Warning messages can be ignored. But there should be no failures at 
+   all.
+
+2. Test Thread-safe Feature of HDF5 Release DLL
+   
+   2.1 Build Release Version of Project libtestD
+   
+   Go to Build->Set Active Configuration, choose 
+   "libtestD-Win32 Release" under "Project configurations:", Click "OK".
+
+   Go to Build->Build libtestD.dll to build release version of Project
+   libtestD.
+
+   2.2 Build Release Version of Project ttsafedll
+    
+   Go to Build->Set Active Configuration, choose 
+   "ttsafedll-Win32 Release" under "Project configurations:", Click "OK".
+
+   Go to Build->Build ttsafedll.exe to build release version of Project
+   ttsafedll.exe.
+
+   2.3 Install hdf5dll.dll 
+   
+   Invoke a comand prompt, change directory to c:\MYHDFSTUFF\hdf5, run 
+   batch file install_dll.bat to copy
+   c:\MYHDFSTUFF\hdf5\proj\hdf5dll\release\hdf5dll.dll into system 
+   directory.
+
+   2.4 Test Thread-safe Feature of HDF5 Release DLL
+   
+   Set project file ttsafedll.dsp as the active project file if it is 
+   not. Go to Build->Execute ttsafedll.exe, the following is the 
+   test messages users should get:
+
+       For help use: ttsafedll.exe -help
+       Linked with hdf5 version 1.7 release 51
+       Testing  -- multi-dataset creation (dcreate) 
+       Testing  -- per-thread error stacks (error) 
+       Testing  -- thread cancellation safety test (cancel) 
+       Testing  -- multi-attribute creation (acreate) 
+   
+
+       All tests were successful. 
+
+
+       Cleaning Up temp files...
+   
+   Users who got the same messages as above have successfully built the
+   release version of hdf5dll.dll.
+
+3. Build, Test and Install HDF5 Library and Tools
+ 
+   Go back to Section II, Step I(2) to Build, test and install HDF5 
+   libary and tools.
+   
 ========================================================================
                             Section X: Misc.
 ========================================================================
