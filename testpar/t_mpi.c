@@ -661,7 +661,7 @@ static int test_mpio_derived_dtype(char *filename) {
     MPI_Aint      offsets[1],adv_offsets[2];
     int           blocklens[1],adv_blocklens[2];
     int           count,outcount;
-    int           ret;
+    int           retcode;
 
     int mpi_rank,mpi_size;
 
@@ -669,7 +669,7 @@ static int test_mpio_derived_dtype(char *filename) {
 
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-    ret = 0;
+    retcode = 0;
     for(i=0;i<2;i++)
       buf[i] = i+1;
 
@@ -779,7 +779,7 @@ static int test_mpio_derived_dtype(char *filename) {
     }
 
     if(outbuf[1]==0) {
-       ret = 0;
+       retcode = 0;
     }
     if(outbuf[1]==2) {
 /*      if(mpi_rank == 0) {
@@ -788,7 +788,7 @@ static int test_mpio_derived_dtype(char *filename) {
        printf("configure-specific file and change ?????\n");
       }
 */
-       ret = -1;
+       retcode = -1;
    }
 
     if((mpi_err = MPI_File_close(&fh)) != MPI_SUCCESS){
@@ -799,7 +799,34 @@ static int test_mpio_derived_dtype(char *filename) {
 
 
     mpi_err = MPI_Barrier(MPI_COMM_WORLD);
-    return ret;
+#ifdef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
+    if(retcode == -1) {
+	if(mpi_rank == 0) {
+	    printf("Complicated derived datatype is NOT working at this platform\n");
+	    printf("Go back to hdf5/config and find the corresponding\n");
+	    printf("configure-specific file (for example, powerpc-ibm-aix5.x) and add\n");
+	    printf("hdf5_mpi_complex_derived_datatype_works=${hdf5_mpi_complex_derived_datatype-works='no'}\n");
+	    printf(" at the end of the file.\n");
+	    printf(" Please report to hdfhelp@ncsa.uiuc.edu about this problem.\n");
+	}
+	retcode = 1;
+    }
+#else
+    if(retcode == 0) {
+	if(mpi_rank == 0) {
+	    printf(" This is NOT an error, What it really says is\n");
+	    printf("Complicated derived datatype is WORKING at this platform\n");
+	    printf(" Go back to hdf5/config and find the corresponding \n");
+	    printf(" configure-specific file (for example, powerpc-ibm-aix5.x) and delete the line\n");
+	    printf("hdf5_mpi_complex_derived_datatype_works=${hdf5_mpi_complex_derived_datatype-works='no'}\n");
+	    printf(" at the end of the file.\n");
+	    printf("Please report to hdfhelp@ncsa.uiuc.edu about this problem.\n");
+	}
+	retcode = 1;
+    }
+    if(retcode == -1) retcode = 0;
+#endif
+    return retcode;
 }
 /*
  * parse the command line options
@@ -925,39 +952,11 @@ main(int argc, char **argv)
     }else{
 	MPI_BANNER("MPIO complicated derived datatype test...");
 	ret_code = test_mpio_derived_dtype(filenames[0]);
-#ifdef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
-	if(ret_code == -1) {
-	  if(mpi_rank == 0) {
-	    printf("Complicated derived datatype is NOT working at this platform\n");
-	    printf("Go back to hdf5/config and find the corresponding\n");
-	    printf("configure-specific file (for example, powerpc-ibm-aix5.x) and add\n");
-	    printf("hdf5_mpi_complex_derived_datatype_works=${hdf5_mpi_complex_derived_datatype-works='no'}\n");
-	    printf(" at the end of the file.\n");
-	    printf(" Please report to hdfhelp@ncsa.uiuc.edu about this problem.\n");
-	  }
-	    ret_code = 1;
-	}
-#else
-	if(ret_code == 0) {
-	  if(mpi_rank == 0) {
-	    printf(" This is NOT an error, What it really says is\n");
-	    printf("Complicated derived datatype is WORKING at this platform\n");
-	    printf(" Go back to hdf5/config and find the corresponding \n");
-	    printf(" configure-specific file (for example, powerpc-ibm-aix5.x) and delete the line\n");
-	    printf("hdf5_mpi_complex_derived_datatype_works=${hdf5_mpi_complex_derived_datatype-works='no'}\n");
-	    printf(" at the end of the file.\n");
-	    printf("Please report to hdfhelp@ncsa.uiuc.edu about this problem.\n");
-	  }
-	  ret_code = 1;
-	}
-	if(ret_code == -1) ret_code = 0;
-
 	ret_code = errors_sum(ret_code);
 	if (mpi_rank==0 && ret_code > 0){
 	    printf("***FAILED with %d total errors\n", ret_code);
 	    nerrors += ret_code;
 	}
-#endif
     }
 
     MPI_BANNER("MPIO 1 write Many read test...");
