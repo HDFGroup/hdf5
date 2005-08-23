@@ -36,6 +36,9 @@ New Features
 
     Configuration:
     --------------
+	- t_mpi will run the test_mpio_derived_dtype by default unless it is
+	  known not working (indicated by macro H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
+	  not defined.)  -AKC- 2005/8/23.
 	- Test execution has changed in a number of ways:
 	  When make is invoked in parallel (using -j), sequential tests
 	  are now executed as parallel make targets.  This should make them
