@@ -943,10 +943,19 @@ main(int argc, char **argv)
     fapl = H5Pcreate (H5P_FILE_ACCESS);
     H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
 
-    /* The derived datatype test hangs when it fails.  This blocks
-     * daily test or automatic build. Run it only when hi verbose mode
-     * is used.
+    /* test_mpio_derived_dtype often hangs when fails.
+     * Do not run it if it is known NOT working unless ask to
+     * run explicitly by high verbose mode.
      */
+#ifdef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
+    MPI_BANNER("MPIO complicated derived datatype test...");
+    ret_code = test_mpio_derived_dtype(filenames[0]);
+    ret_code = errors_sum(ret_code);
+    if (mpi_rank==0 && ret_code > 0){
+	printf("***FAILED with %d total errors\n", ret_code);
+	nerrors += ret_code;
+    }
+#else
     if (!VERBOSE_HI){
 	MPI_BANNER("MPIO complicated derived datatype test SKIPPED.");
     }else{
@@ -958,6 +967,7 @@ main(int argc, char **argv)
 	    nerrors += ret_code;
 	}
     }
+#endif
 
     MPI_BANNER("MPIO 1 write Many read test...");
     ret_code = test_mpio_1wMr(filenames[0], USENONE);
