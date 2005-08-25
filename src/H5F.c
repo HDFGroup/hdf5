@@ -2677,8 +2677,21 @@ H5F_try_close(H5F_t *f)
             hid_t objs[128];        /* Array of objects to close */
             unsigned u;             /* Local index variable */
 
-            /* Get the list of IDs of open dataset, group, named datatype & attribute objects */
-            while((obj_count = H5F_get_obj_ids(f, H5F_OBJ_LOCAL|H5F_OBJ_DATASET|H5F_OBJ_GROUP|H5F_OBJ_DATATYPE|H5F_OBJ_ATTR, (int)(sizeof(objs)/sizeof(objs[0])), objs)) != 0) {
+            /* Get the list of IDs of open dataset, group, & attribute objects */
+            while((obj_count = H5F_get_obj_ids(f, H5F_OBJ_LOCAL|H5F_OBJ_DATASET|H5F_OBJ_GROUP|H5F_OBJ_ATTR, (int)(sizeof(objs)/sizeof(objs[0])), objs)) != 0) {
+
+                /* Try to close all the open objects in this file */
+                for(u = 0; u < obj_count; u++)
+                    if(H5I_dec_ref(objs[u]) < 0)
+                        HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't close object")
+            } /* end while */
+
+            /* Get the list of IDs of open named datatype objects */
+            /* (Do this separately from the dataset & attribute IDs, because
+             * they could be using one of the named datatypes and then the
+             * open named datatype ID will get closed twice.
+             */
+            while((obj_count = H5F_get_obj_ids(f, H5F_OBJ_LOCAL|H5F_OBJ_DATATYPE, (int)(sizeof(objs)/sizeof(objs[0])), objs)) != 0) {
 
                 /* Try to close all the open objects in this file */
                 for(u = 0; u < obj_count; u++)
