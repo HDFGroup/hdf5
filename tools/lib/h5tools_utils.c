@@ -39,7 +39,13 @@ int         opt_ind = 1;    /*token pointer                          */
 const char *opt_arg;        /*flag argument (or value)               */
 
 /* local functions */
-static void add_obj(table_t *table, haddr_t objno, char *objname);
+static void init_table(table_t **tbl);
+#ifdef H5DUMP_DEBUG
+static void dump_table(char* tablename, table_t *table);
+#endif  /* H5DUMP_DEBUG */
+static void add_obj(table_t *table, haddr_t objno, char *objname, hbool_t recorded);
+static char * build_obj_path_name(const char *prefix, const char *name);
+static herr_t find_objs_cb(hid_t group, const char *name, void *op_data);
 
 
 /*-------------------------------------------------------------------------
@@ -309,44 +315,16 @@ print_version(const char *progname)
  *
  *-------------------------------------------------------------------------
  */
-void
+static void
 init_table(table_t **tbl)
 {
-    int i;
     table_t *table = HDmalloc(sizeof(table_t));
 
     table->size = 20;
     table->nobjs = 0;
     table->objs = HDmalloc(table->size * sizeof(obj_t));
 
-    for (i = 0; i < table->size; i++) {
-        table->objs[i].objno = 0;
-        table->objs[i].displayed = 0;
-        table->objs[i].recorded = 0;
-        table->objs[i].objflag = 0;
-        table->objs[i].objname = NULL;
-    }
-
     *tbl = table;
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:    init_prefix
- *
- * Purpose:     allocate and initialize prefix
- *
- * Return:      void
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void
-init_prefix(char **prefix, size_t prefix_len)
-{
-    assert(prefix_len > 0);
-    *prefix = HDcalloc(prefix_len, 1);
 }
 
 
@@ -365,10 +343,67 @@ init_prefix(char **prefix, size_t prefix_len)
  *-------------------------------------------------------------------------
  */
 void
-free_table(table_t **table)
+free_table(table_t *table)
 {
-    HDfree((*table)->objs);
+    unsigned u;         /* Local index value */
+
+    /* Free the names for the objects in the table */
+    for(u = 0; u < table->nobjs; u++)
+        if(table->objs[u].objname)
+            HDfree(table->objs[u].objname);
+
+    HDfree(table->objs);
 }
+
+#ifdef H5DUMP_DEBUG
+
+/*-------------------------------------------------------------------------
+ * Function:    dump_table
+ *
+ * Purpose:     display the contents of tables for debugging purposes
+ *
+ * Return:      void
+ *
+ * Programmer:  Ruey-Hsia Li
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+dump_table(char* tablename, table_t *table)
+{
+    unsigned u;
+
+    printf("%s: # of entries = %d\n", tablename,table->nobjs);
+    for (u = 0; u < table->nobjs; u++)
+	HDfprintf(stdout,"%a %s %d %d\n", table->objs[u].objno,
+	       table->objs[u].objname,
+	       table->objs[u].displayed, table->objs[u].recorded);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    dump_tables
+ *
+ * Purpose:     display the contents of tables for debugging purposes
+ *
+ * Return:      void
+ *
+ * Programmer:  Ruey-Hsia Li
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+dump_tables(find_objs_t *info)
+{
+    dump_table("group_table", info->group_table);
+    dump_table("dset_table", info->dset_table);
+    dump_table("type_table", info->type_table);
+}
+#endif  /* H5DUMP_DEBUG */
 
 
 /*-------------------------------------------------------------------------
@@ -386,23 +421,153 @@ free_table(table_t **table)
  *
  *-------------------------------------------------------------------------
  */
-int
+obj_t *
 search_obj(table_t *table, haddr_t objno)
 {
-    int i;
+    unsigned u;
 
-    for (i = 0; i < table->nobjs; i++)
-        if (table->objs[i].objno == objno)
-	    return i;
+    for (u = 0; u < table->nobjs; u++)
+        if (table->objs[u].objno == objno)
+	    return &(table->objs[u]);
 
-    return FAIL;
+    return NULL;
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:    find_objs
+ * Function:    build_obj_path_name
  *
- * Purpose:     Find objects, committed types and store them in tables
+ * Purpose:     Allocate space & build path name from prefix & name
+ *
+ * Return:      Success:    SUCCEED
+ *
+ *              Failure:    FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static char *
+build_obj_path_name(const char *prefix, const char *name)
+{
+    char *path;
+
+    path = HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
+    HDstrcpy(path, prefix);
+    HDstrcat(path,"/");
+    HDstrcat(path,name); /* absolute name of the data set */
+
+    return(path);
+} /* end build_obj_path_name() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    find_objs_cb
+ *
+ * Purpose:     Callback to find objects, committed types and store them in tables
+ *
+ * Return:      Success:    SUCCEED
+ *
+ *              Failure:    FAIL
+ *
+ * Programmer:  Ruey-Hsia Li
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+find_objs_cb(hid_t group, const char *name, void *op_data)
+{
+    H5G_stat_t statbuf;
+    find_objs_t *info = (find_objs_t*)op_data;
+    herr_t ret_value = 0;
+
+    H5Gget_objinfo(group, name, TRUE, &statbuf);
+
+    switch (statbuf.type) {
+        char *tmp;
+
+        case H5G_GROUP:
+            if (search_obj(info->group_table, statbuf.objno) == NULL) {
+                char *old_prefix;
+
+                tmp = build_obj_path_name(info->prefix, name);
+                add_obj(info->group_table, statbuf.objno, tmp, TRUE);
+
+                old_prefix = info->prefix;
+                info->prefix = tmp;
+
+                if(H5Giterate(group, name, NULL, find_objs_cb, (void *)info) < 0)
+                    ret_value = FAIL;
+
+                info->prefix = old_prefix;
+            } /* end if */
+            break;
+
+        case H5G_DATASET:
+            if (search_obj(info->dset_table, statbuf.objno) == NULL) {
+                hid_t dset;
+
+                tmp = build_obj_path_name(info->prefix, name);
+                add_obj(info->dset_table, statbuf.objno, tmp, TRUE);
+
+                if ((dset = H5Dopen (group, name)) >= 0) {
+                    hid_t type;
+
+                    type = H5Dget_type(dset);
+
+                    if (H5Tcommitted(type) > 0) {
+                        H5Gget_objinfo(type, ".", TRUE, &statbuf);
+
+                        if (search_obj(info->type_table, statbuf.objno) == NULL) {
+                            char *type_name = HDstrdup(tmp);
+
+                            add_obj(info->type_table, statbuf.objno, type_name, FALSE);
+                        } /* end if */
+                    }
+
+                    H5Tclose(type);
+                    H5Dclose(dset);
+                } else {
+                    ret_value = FAIL;
+                }
+            } /* end if */
+            break;
+
+        case H5G_TYPE:
+        {
+            obj_t *found_obj;
+
+            tmp = build_obj_path_name(info->prefix, name);
+            if ((found_obj = search_obj(info->type_table, statbuf.objno)) == NULL)
+                add_obj(info->type_table, statbuf.objno, tmp, TRUE);
+            else {
+                /* Use latest version of name */
+                HDfree(found_obj->objname);
+                found_obj->objname = HDstrdup(tmp);
+
+                /* Mark named datatype as having valid name */
+                found_obj->recorded = TRUE;
+            } /* end else */
+            break;
+        }
+
+        default:
+            /* Ignore links, etc. */
+            break;
+    }
+
+    return ret_value;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    init_objs
+ *
+ * Purpose:     Initialize tables for groups, datasets & named datatypes
  *
  * Return:      Success:    SUCCEED
  *
@@ -415,216 +580,22 @@ search_obj(table_t *table, haddr_t objno)
  *-------------------------------------------------------------------------
  */
 herr_t
-find_objs(hid_t group, const char *name, void *op_data)
+init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
+    table_t **dset_table, table_t **type_table)
 {
-    hid_t obj, type;
-    H5G_stat_t statbuf;
-    char *tmp;
-    find_objs_t *info = (find_objs_t*)op_data;
-    int i;
+    /* Initialize the tables */
+    init_table(group_table);
+    init_table(dset_table);
+    init_table(type_table);
 
-    if (info->threshold > 1)
-        /*will get an infinite loop if greater than 1*/
-        return FAIL;
+    /* Init the find_objs_t */
+    info->prefix = "";
+    info->group_table = *group_table;
+    info->type_table = *type_table;
+    info->dset_table = *dset_table;
 
-    H5Gget_objinfo(group, name, TRUE, &statbuf);
-
-    tmp = HDmalloc(HDstrlen(info->prefix) + HDstrlen(name) + 2);
-    HDstrcpy(tmp, info->prefix);
-
-    switch (statbuf.type) {
-        case H5G_GROUP:
-            if ((obj = H5Gopen(group, name)) >= 0) {
-                while (info->prefix_len < (HDstrlen(info->prefix) + HDstrlen(name) + 2)) {
-                    info->prefix_len *= 2;
-                    info->prefix = HDrealloc(info->prefix,
-                                           info->prefix_len * sizeof(char));
-                }
-
-                HDstrcat(HDstrcat(info->prefix,"/"), name);
-
-                if (statbuf.nlink > info->threshold) {
-                    if (search_obj(info->group_table, statbuf.objno) == FAIL) {
-                        add_obj(info->group_table, statbuf.objno, info->prefix);
-                        H5Giterate(obj, ".", NULL, find_objs, (void *)info);
-                    }
-                } else {
-                    H5Giterate (obj, ".", NULL, find_objs, (void *)info);
-                }
-
-                HDstrcpy(info->prefix, tmp);
-                H5Gclose (obj);
-            } else {
-                info->status = 1;
-            }
-
-            break;
-
-        case H5G_DATASET:
-            HDstrcat(tmp,"/");
-            HDstrcat(tmp,name); /* absolute name of the data set */
-
-            if (statbuf.nlink > info->threshold  &&
-                            search_obj(info->dset_table, statbuf.objno) == FAIL)
-                add_obj(info->dset_table, statbuf.objno, tmp);
-
-            if ((obj = H5Dopen (group, name)) >= 0) {
-                type = H5Dget_type(obj);
-
-                if (H5Tcommitted(type) > 0) {
-                    H5Gget_objinfo(type, ".", TRUE, &statbuf);
-
-                    if (search_obj(info->type_table, statbuf.objno) == FAIL) {
-                        add_obj(info->type_table, statbuf.objno, tmp);
-                        info->type_table->objs[info->type_table->nobjs - 1].objflag = 0;
-                    }
-                }
-
-                H5Tclose(type);
-                H5Dclose (obj);
-            } else {
-                info->status = 1;
-            }
-
-            break;
-
-        case H5G_TYPE:
-            HDstrcat(tmp,"/");
-            HDstrcat(tmp,name); /* absolute name of the type */
-            i = search_obj(info->type_table, statbuf.objno);
-
-            if (i == FAIL) {
-                add_obj(info->type_table, statbuf.objno, tmp) ;
-
-                /* named data type */
-                info->type_table->objs[info->type_table->nobjs-1].recorded = 1;
-
-                /* named data type */
-                info->type_table->objs[info->type_table->nobjs-1].objflag = 1;
-            } else {
-                free(info->type_table->objs[i].objname);
-                info->type_table->objs[i].objname = HDstrdup(tmp);
-                info->type_table->objs[i].recorded = 1;
-
-                /* named data type */
-                info->type_table->objs[info->type_table->nobjs-1].objflag = 1;
-            }
-
-            break;
-
-        default:
-            break;
-    }
-
-    HDfree(tmp);
-    return SUCCEED;
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:    dump_table
- *
- * Purpose:     display the contents of tables for debugging purposes
- *
- * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void
-dump_table(char* tablename, table_t *table)
-{
-    int i;
-
-    printf("%s: # of entries = %d\n", tablename,table->nobjs);
-
-    for (i = 0; i < table->nobjs; i++)
-        HDfprintf(stdout,"\t%a %s %d\n",
-               table->objs[i].objno,
-               table->objs[i].objname,
-               table->objs[i].objflag);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:    get_table_idx
- *
- * Purpose:     Determine if objects are in a link loop
- *
- * Return:      Success:    table index of object detected to be in loop
- *
- *              Failure:    FAIL
- *
- * Programmer:  Paul Harten
- *
- *-------------------------------------------------------------------------
- */
-int
-get_table_idx(table_t *table, haddr_t objno)
-{
-    return search_obj(table, objno);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:    get_tableflag
- *
- * Purpose:     Return the i'th element's flag setting
- *
- * Return:      Boolean setting of the i'th element of the object table flag
- *
- * Programmer:  Paul Harten
- *
- *-------------------------------------------------------------------------
- */
-int
-get_tableflag(table_t *table, int idx)
-{
-    return table->objs[idx].objflag;
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:    set_tableflag
- *
- * Purpose:     Set the i'th element of the object table's flag to TRUE
- *
- * Return:      Success:    SUCCEED
- *
- *              Failure:    N/A
- *
- * Programmer:  Paul Harten
- *
- *-------------------------------------------------------------------------
- */
-int
-set_tableflag(table_t *table, int idx)
-{
-    table->objs[idx].objflag = TRUE;
-    return SUCCEED;
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:    get_objectname
- *
- * Purpose:     Get name of i'th object in table
- *
- * Return:      Success:    strdup() of object name character string
- *
- *              Failure:    NULL and sets errno to ENOMEM
- *
- * Programmer:  Paul Harten
- *
- *-------------------------------------------------------------------------
- */
-char *
-get_objectname(table_t *table, int idx)
-{
-    return HDstrdup(table->objs[idx].objname);
+    /* Find all shared objects */
+    return(H5Giterate(fid, "/", NULL, find_objs_cb, (void *)info));
 }
 
 
@@ -643,27 +614,24 @@ get_objectname(table_t *table, int idx)
  *-------------------------------------------------------------------------
  */
 static void
-add_obj(table_t *table, haddr_t objno, char *objname)
+add_obj(table_t *table, haddr_t objno, char *objname, hbool_t record)
 {
-    int i;
+    unsigned u;
 
+    /* See if we need to make table larger */
     if (table->nobjs == table->size) {
         table->size *= 2;
         table->objs = HDrealloc(table->objs, table->size * sizeof(obj_t));
-
-        for (i = table->nobjs; i < table->size; i++) {
-            table->objs[i].objno = 0;
-            table->objs[i].displayed = 0;
-            table->objs[i].recorded = 0;
-            table->objs[i].objflag = 0;
-            table->objs[i].objname = NULL;
-        }
     }
 
-    i = table->nobjs++;
-    table->objs[i].objno = objno;
-    free(table->objs[i].objname);
-    table->objs[i].objname = HDstrdup(objname);
+    /* Increment number of objects in table */
+    u = table->nobjs++;
+
+    /* Set information about object */
+    table->objs[u].objno = objno;
+    table->objs[u].objname = objname;
+    table->objs[u].recorded = record;
+    table->objs[u].displayed = 0;
 }
 
 

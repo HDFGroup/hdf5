@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include "h5tools_ref.h"
 #include "H5private.h"
+#include "H5SLprivate.h"
 #include "h5tools.h"
 #include "h5tools_utils.h"
 
@@ -34,15 +35,107 @@
  *  method of selecting which one.
  */
 
+typedef struct {
+    haddr_t objno;      /* Object ID (i.e. address) */
+    const char *path;   /* Object path */
+} ref_path_node_t;
 
-extern hid_t thefile;
-size_t       prefix_len = 1024;
-char  *prefix;
+static H5SL_t *ref_path_table = NULL;   /* the "table" (implemented with a skip list) */
+static hid_t thefile;
+
 extern char  *progname;
 extern int   d_status;
 
+static int ref_path_table_put(const char *, haddr_t objno);
+static hbool_t ref_path_table_find(haddr_t objno);
 
-ref_path_table_entry_t *ref_path_table = NULL;	/* the table */
+/*-------------------------------------------------------------------------
+ * Function:    init_ref_path_table
+ *
+ * Purpose:     Enter the root group ("/") into the path table
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+init_ref_path_table(hid_t fid)
+{
+    H5G_stat_t              sb;
+    char *root_path;
+
+    /* Set file ID for later queries (XXX: this should be fixed) */
+    thefile = fid;
+
+    /* Create skip list to store reference path information */
+    if((ref_path_table = H5SL_create(H5SL_TYPE_HADDR, 0.5, (size_t)16))==NULL)
+	return (-1);
+
+    if((root_path = HDstrdup("/")) == NULL)
+	return (-1);
+
+    if(H5Gget_objinfo(fid, "/", TRUE, &sb)<0) {
+	/* fatal error? */
+	HDfree(root_path);
+	return (-1);
+    }
+
+    /* Insert into table (takes ownership of path) */
+    ref_path_table_put(root_path, sb.objno);
+
+    return(0);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    free_ref_path_info
+ *
+ * Purpose:     Free the key for a reference path table node
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+free_ref_path_info(void *item, void UNUSED *key, void UNUSED *operator_data/*in,out*/)
+{
+    ref_path_node_t *node = (ref_path_node_t *)item;
+
+    HDfree(node->path);
+    HDfree(node);
+
+    return(0);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    term_ref_path_table
+ *
+ * Purpose:     Terminate the reference path table
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+term_ref_path_table(void)
+{
+    /* Destroy reference path table, freeing all memory */
+    if(ref_path_table)
+        H5SL_destroy(ref_path_table, free_ref_path_info, NULL);
+
+    return(0);
+}
 
 /*-------------------------------------------------------------------------
  * Function:    ref_path_table_lookup
@@ -59,34 +152,60 @@ ref_path_table_entry_t *ref_path_table = NULL;	/* the table */
  *
  *-------------------------------------------------------------------------
  */
-ref_path_table_entry_t *
+haddr_t
 ref_path_table_lookup(const char *thepath)
 {
-    H5G_stat_t              sb;
-    ref_path_table_entry_t *pte = ref_path_table;
+    H5G_stat_t  sb;
+    haddr_t     ret_value;
 
+    /* Get object ID for object at path */
     if(H5Gget_objinfo(thefile, thepath, TRUE, &sb)<0)
 	/*  fatal error ? */
-	return NULL;
+	return HADDR_UNDEF;
 
-    while(pte!=NULL) {
-	if (sb.objno==pte->statbuf.objno)
-	    return pte;
-	pte = pte->next;
-    }
+    /* Return OID or HADDR_UNDEF */
+    ret_value = ref_path_table_find(sb.objno) ? sb.objno : HADDR_UNDEF;
 
-    return NULL;
+    return(ret_value);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    ref_path_table_find
+ *
+ * Purpose:     Looks up a table entry given a object number.
+ *              Used during construction of the table.
+ *
+ * Return:      TRUE/FALSE on success, can't fail
+ *
+ * Programmer:  Quincey Koziol
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static hbool_t
+ref_path_table_find(haddr_t objno)
+{
+    HDassert(ref_path_table);
+
+    if(H5SL_search(ref_path_table, &objno) == NULL)
+        return FALSE;
+    else
+        return TRUE;
 }
 
 /*-------------------------------------------------------------------------
  * Function:    ref_path_table_put
  *
- * Purpose:     Enter the 'obj' with 'path' in the table if
- *              not already there.
+ * Purpose:     Enter the 'obj' with 'path' in the table (assumes its not
+ *              already there)
+ *
  *              Create an object reference, pte, and store them
  *              in the table.
  *
- * Return:      The object reference for the object.
+ *              NOTE: Takes ownership of the path name string passed in!
+ *
+ * Return:      Non-negative on success, negative on failure
  *
  * Programmer:  REMcG
  *
@@ -94,37 +213,21 @@ ref_path_table_lookup(const char *thepath)
  *
  *-------------------------------------------------------------------------
  */
-ref_path_table_entry_t *
-ref_path_table_put(hid_t obj, const char *path)
+static int
+ref_path_table_put(const char *path, haddr_t objno)
 {
-    ref_path_table_entry_t *pte;
+    ref_path_node_t *new_node;
 
-    /* look up 'obj'.  If already in table, return */
-    pte = ref_path_table_lookup(path);
-    if (pte != NULL)
-	return pte;
+    HDassert(ref_path_table);
+    HDassert(path);
 
-    /* if not found, then make new entry */
+    if((new_node = HDmalloc(sizeof(ref_path_node_t))) == NULL)
+        return(-1);
 
-    pte = (ref_path_table_entry_t *) malloc(sizeof(ref_path_table_entry_t));
-    if (pte == NULL)
-	/* fatal error? */
-	return NULL;
+    new_node->objno = objno;
+    new_node->path = path;
 
-    pte->obj = obj;
-
-    pte->apath = HDstrdup(path);
-
-    if(H5Gget_objinfo(thefile, path, TRUE, &pte->statbuf)<0) {
-	/* fatal error? */
-	free(pte);
-	return NULL;
-    }
-
-    pte->next = ref_path_table;
-    ref_path_table = pte;
-
-    return pte;
+    return(H5SL_insert(ref_path_table, new_node, &(new_node->objno)));
 }
 
 /*
@@ -133,7 +236,7 @@ ref_path_table_put(hid_t obj, const char *path)
 int xid = 1;
 
 int get_next_xid() {
-	return xid++;
+    return xid++;
 }
 
 /*
@@ -145,42 +248,33 @@ int get_next_xid() {
 haddr_t fake_xid = HADDR_MAX;
 haddr_t
 get_fake_xid () {
-	return (fake_xid--);
+    return (fake_xid--);
 }
 
 /*
  * for an object that does not have an object id (e.g., soft link),
  * create a table entry with a fake object id as the key.
+ *
+ * Assumes 'path' is for an object that is not in the table.
+ *
  */
 
-ref_path_table_entry_t *
+haddr_t
 ref_path_table_gen_fake(const char *path)
 {
-    ref_path_table_entry_t *pte;
+    const char *dup_path;
+    haddr_t fake_objno;
 
-    /* look up 'obj'.  If already in table, return */
-    pte = ref_path_table_lookup(path);
-    if (pte != NULL)
-	return pte;
+    if((dup_path = HDstrdup(path)) == NULL)
+        return HADDR_UNDEF;
 
-    /* if not found, then make new entry */
+    /* Generate fake ID for string */
+    fake_objno = get_fake_xid();
 
-    pte = (ref_path_table_entry_t *) malloc(sizeof(ref_path_table_entry_t));
-    if (pte == NULL)
-	/* fatal error? */
-	return NULL;
+    /* Insert "fake" object into table (takes ownership of path) */
+    ref_path_table_put(dup_path, fake_objno);
 
-    pte->obj = (hid_t)-1;
-
-    memset(&pte->statbuf,0,sizeof(H5G_stat_t));
-    pte->statbuf.objno = get_fake_xid();
-
-    pte->apath = HDstrdup(path);
-
-    pte->next = ref_path_table;
-    ref_path_table = pte;
-
-    return pte;
+    return(fake_objno);
 }
 
 /*-------------------------------------------------------------------------
@@ -196,17 +290,18 @@ ref_path_table_gen_fake(const char *path)
  *
  *-------------------------------------------------------------------------
  */
-char *
-lookup_ref_path(hobj_ref_t ref)
+const char *
+lookup_ref_path(haddr_t ref)
 {
-    ref_path_table_entry_t *pte = ref_path_table;
+    ref_path_node_t *node;
 
-    while(pte!=NULL) {
-	if (ref==pte->statbuf.objno)
-	    return pte->apath;
-	pte = pte->next;
-    }
-    return NULL;
+    /* Be safer for h5ls */
+    if(!ref_path_table)
+        return(NULL);
+
+    node = H5SL_search(ref_path_table, &ref);
+
+    return(node ? node->path : NULL);
 }
 
 /*-------------------------------------------------------------------------
@@ -224,84 +319,44 @@ lookup_ref_path(hobj_ref_t ref)
  *-------------------------------------------------------------------------
  */
 herr_t
-fill_ref_path_table(hid_t group, const char *name, void UNUSED * op_data)
+fill_ref_path_table(hid_t group, const char *obj_name, void *op_data)
 {
-    hid_t                   obj;
-    char                   *tmp;
-    size_t                  tmp_len;
+    const char *obj_prefix = (const char *)op_data;
     H5G_stat_t              statbuf;
-    ref_path_table_entry_t *pte;
-    char                   *thepath;
 
-    H5Gget_objinfo(group, name, FALSE, &statbuf);
-    tmp_len = strlen(prefix) + strlen(name) + 2;
-    tmp = (char *) malloc(tmp_len);
+    H5Gget_objinfo(group, obj_name, FALSE, &statbuf);
 
-    if (tmp == NULL)
-	return FAIL;
+    /* Check if the object is in the path table */
+    if (!ref_path_table_find(statbuf.objno)) {
+        size_t                  tmp_len;
+        char                   *thepath;
 
-    thepath = (char *) malloc(tmp_len);
+        /* Compute length for this object's path */
+        tmp_len = HDstrlen(obj_prefix) + HDstrlen(obj_name) + 2;
 
-    if (thepath == NULL) {
-	free(tmp);
-	return FAIL;
-    }
+        /* Allocate room for the path for this object */
+        if ((thepath = (char *) HDmalloc(tmp_len)) == NULL)
+            return FAIL;
 
-    strcpy(tmp, prefix);
+        /* Build the name for this object */
+        HDstrcpy(thepath, obj_prefix);
+        HDstrcat(thepath, "/");
+        HDstrcat(thepath, obj_name);
 
-    strcpy(thepath, prefix);
-    strcat(thepath, "/");
-    strcat(thepath, name);
+        /* Insert the object into the path table */
+        ref_path_table_put(thepath, statbuf.objno);
 
-    switch (statbuf.type) {
-    case H5G_DATASET:
-	if ((obj = H5Dopen(group, name)) >= 0) {
-	    pte = ref_path_table_lookup(thepath);
-	    if (pte == NULL)
-		ref_path_table_put(obj, thepath);
-	    H5Dclose(obj);
-	} else {
-            error_msg(progname, "unable to get dataset \"%s\"\n", name);
-	    d_status = EXIT_FAILURE;
-	}
-	break;
-    case H5G_GROUP:
-	if ((obj = H5Gopen(group, name)) >= 0) {
-            if (prefix_len <= tmp_len) {
-                prefix_len = tmp_len + 1;
-                prefix = realloc(prefix, prefix_len);
+        if(statbuf.type == H5G_GROUP) {
+            /* Iterate over objects in this group, using this group's
+             * name as their prefix
+             */
+            if(H5Giterate(group, obj_name, NULL, fill_ref_path_table, thepath) < 0) {
+                error_msg(progname, "unable to dump group \"%s\"\n", obj_name);
+                d_status = EXIT_FAILURE;
             }
-
-	    strcat(strcat(prefix, "/"), name);
-	    pte = ref_path_table_lookup(thepath);
-	    if (pte == NULL) {
-		ref_path_table_put(obj, thepath);
-		H5Giterate(obj, ".", NULL, fill_ref_path_table, NULL);
-		strcpy(prefix, tmp);
-	    }
-	    H5Gclose(obj);
-	} else {
-            error_msg(progname, "unable to dump group \"%s\"\n", name);
-	    d_status = EXIT_FAILURE;
-	}
-	break;
-    case H5G_TYPE:
-	if ((obj = H5Topen(group, name)) >= 0) {
-	    pte = ref_path_table_lookup(thepath);
-	    if (pte == NULL)
-		ref_path_table_put(obj, thepath);
-	    H5Tclose(obj);
-	} else {
-            error_msg(progname, "unable to get dataset \"%s\"\n", name);
-	    d_status = EXIT_FAILURE;
-	}
-	break;
-    default:
-        break;
+        }
     }
 
-    free(tmp);
-    free(thepath);
     return 0;
 }
 

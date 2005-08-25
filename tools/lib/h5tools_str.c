@@ -25,8 +25,8 @@
 
 #include "H5private.h"
 #include "h5tools.h"            /*for h5dump_t structure    */
-#include "h5tools_str.h"        /*function prototypes       */
 #include "h5tools_ref.h"
+#include "h5tools_str.h"        /*function prototypes       */
 
 /*
  * If REPEAT_VERBOSE is defined then character strings will be printed so
@@ -855,7 +855,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
         if (h5tools_is_zero(vp, H5Tget_size(type))) {
             h5tools_str_append(str, "NULL");
         } else {
-            char *path=NULL;
+            const char *path;
             otype = H5Rget_obj_type(container, H5R_OBJECT, vp);
             obj = H5Rdereference(container, H5R_OBJECT, vp);
             H5Gget_objinfo(obj, ".", FALSE, &sb);
@@ -886,7 +886,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
                 h5tools_str_append(str, info->obj_format, sb.fileno,sb.objno);
 
              /* Print name */
-            path = lookup_ref_path(*(hobj_ref_t *)vp);
+            path = lookup_ref_path(*(haddr_t *)vp);
             if (path) {
              h5tools_str_append(str, " ");
              h5tools_str_append(str, path);

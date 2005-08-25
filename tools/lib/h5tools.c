@@ -24,9 +24,9 @@
 #include <stdlib.h>
 
 #include "h5tools.h"
+#include "h5tools_ref.h"
 #include "h5tools_str.h"
 #include "h5tools_utils.h"
-#include "hdf5.h"
 #include "H5private.h"
 
 /*
@@ -138,6 +138,9 @@ h5tools_close(void)
 	    else
 		rawdatastream = NULL;
 	}
+
+        /* Clean up the reference path table, if it's been used */
+        term_ref_path_table();
 
         /* Shut down the library */
         H5close();
