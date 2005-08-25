@@ -50,6 +50,7 @@
 #define H5G_NODE_MAGIC  "SNOD"          /*symbol table node magic number     */
 #define H5G_NODE_SIZEOF_MAGIC 4         /*sizeof symbol node magic number    */
 #define H5G_NO_CHANGE   (-1)            /*see H5G_ent_modified()             */
+#define H5G_NLINKS	16		/*max symlinks to follow per lookup  */
 
 /*
  * The disk size for a symbol table entry...

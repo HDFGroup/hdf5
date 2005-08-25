@@ -19,6 +19,7 @@
  * Purpose:	Tests hard and soft (symbolic) links.
  */
 #include "h5test.h"
+#include "H5Gprivate.h"		/* Groups				*/
 
 const char *FILENAME[] = {
     "links1",
@@ -520,6 +521,154 @@ long_links(hid_t fapl)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    toomany
+ *
+ * Purpose:     Build a file with too many symbolic links
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Tuesday, August 9, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+toomany(hid_t fapl)
+{
+    hid_t		fid = (-1);     /* File ID */
+    hid_t		gid = (-1);     /* Group ID */
+    hid_t		gid2 = (-1);    /* Datatype ID */
+    char                objname[NAME_BUF_SIZE];         /* Object name */
+    ssize_t             name_len;       /* Length of object name */
+    char		filename[NAME_BUF_SIZE]; 
+
+    TESTING("too many links");
+
+    /* Make certain test is valid */
+    /* XXX: should probably make a "generic" test that creates the proper
+     *          # of links based on this value - QAK
+     */
+    HDassert(H5G_NLINKS == 16);
+
+    /* Create files */
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
+    if((fid=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+
+    /* Create group with short name in file (used as target for hard links) */
+    if((gid=H5Gcreate (fid, "final", (size_t)0))<0) TEST_ERROR;
+
+    /* Create chain of hard links to existing object (no limit on #) */
+    if(H5Glink2(fid, "final", H5G_LINK_HARD, fid, "hard1") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "hard1", H5G_LINK_HARD, fid, "hard2") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "hard2", H5G_LINK_HARD, fid, "hard3") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "hard3", H5G_LINK_HARD, fid, "hard4") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "hard4", H5G_LINK_HARD, fid, "hard5") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "hard5", H5G_LINK_HARD, fid, "hard6") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "hard6", H5G_LINK_HARD, fid, "hard7") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "hard7", H5G_LINK_HARD, fid, "hard8") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "hard8", H5G_LINK_HARD, fid, "hard9") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "hard9", H5G_LINK_HARD, fid, "hard10") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "hard10", H5G_LINK_HARD, fid, "hard11") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "hard11", H5G_LINK_HARD, fid, "hard12") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "hard12", H5G_LINK_HARD, fid, "hard13") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "hard13", H5G_LINK_HARD, fid, "hard14") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "hard14", H5G_LINK_HARD, fid, "hard15") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "hard15", H5G_LINK_HARD, fid, "hard16") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "hard16", H5G_LINK_HARD, fid, "hard17") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "hard17", H5G_LINK_HARD, fid, "hard18") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "hard18", H5G_LINK_HARD, fid, "hard19") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "hard19", H5G_LINK_HARD, fid, "hard20") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "hard20", H5G_LINK_HARD, fid, "hard21") < 0) TEST_ERROR;
+
+    /* Create chain of soft links to existing object (limited) */
+    if(H5Glink2(fid, "final", H5G_LINK_SOFT, fid, "soft1") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "soft1", H5G_LINK_SOFT, fid, "soft2") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "soft2", H5G_LINK_SOFT, fid, "soft3") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "soft3", H5G_LINK_SOFT, fid, "soft4") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "soft4", H5G_LINK_SOFT, fid, "soft5") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "soft5", H5G_LINK_SOFT, fid, "soft6") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "soft6", H5G_LINK_SOFT, fid, "soft7") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "soft7", H5G_LINK_SOFT, fid, "soft8") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "soft8", H5G_LINK_SOFT, fid, "soft9") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "soft9", H5G_LINK_SOFT, fid, "soft10") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "soft10", H5G_LINK_SOFT, fid, "soft11") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "soft11", H5G_LINK_SOFT, fid, "soft12") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "soft12", H5G_LINK_SOFT, fid, "soft13") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "soft13", H5G_LINK_SOFT, fid, "soft14") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "soft14", H5G_LINK_SOFT, fid, "soft15") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "soft15", H5G_LINK_SOFT, fid, "soft16") < 0) TEST_ERROR;
+    if(H5Glink2(fid, "soft16", H5G_LINK_SOFT, fid, "soft17") < 0) TEST_ERROR;
+
+    /* Close objects */
+    if(H5Gclose(gid)<0) TEST_ERROR;
+    if(H5Fclose(fid)<0) TEST_ERROR;
+
+    /* Open file */
+    if((fid=H5Fopen(filename, H5F_ACC_RDWR, fapl))<0) TEST_ERROR;
+
+    /* Open object through last hard link */
+    if((gid = H5Gopen(fid, "hard21")) < 0) TEST_ERROR;
+
+    /* Check name */
+    if((name_len = H5Iget_name( gid, objname, (size_t)NAME_BUF_SIZE )) < 0) TEST_ERROR
+    if(HDstrcmp(objname, "/hard21")) TEST_ERROR
+
+    /* Create object in hard-linked group */
+    if((gid2 = H5Gcreate(gid, "new_hard", (size_t)0)) < 0) TEST_ERROR
+
+    /* Close group in hard-linked group */
+    if(H5Gclose(gid2) < 0) TEST_ERROR
+
+    /* Close hard-linked object */
+    if(H5Gclose(gid) < 0) TEST_ERROR;
+
+    /* Open object through too deep soft link */
+    H5E_BEGIN_TRY {
+        gid = H5Gopen(fid, "soft17");
+    } H5E_END_TRY;
+    if (gid >= 0) {
+	H5_FAILED();
+	puts("    Should have failed for sequence of too many nested links.");
+	goto error;
+    }
+
+    /* Open object through lesser soft link */
+    if((gid = H5Gopen(fid, "soft16")) < 0) TEST_ERROR;
+
+    /* Check name */
+    if((name_len = H5Iget_name( gid, objname, (size_t)NAME_BUF_SIZE )) < 0) TEST_ERROR
+    if(HDstrcmp(objname, "/soft16")) TEST_ERROR
+
+    /* Create object in external file */
+    if((gid2 = H5Gcreate(gid, "new_soft", (size_t)0)) < 0) TEST_ERROR
+
+    /* Close group in external file */
+    if(H5Gclose(gid2) < 0) TEST_ERROR
+
+    /* Close external object */
+    if(H5Gclose(gid) < 0) TEST_ERROR;
+
+    /* Close first file */
+    if(H5Fclose(fid)<0) TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+ error:
+    H5E_BEGIN_TRY {
+    	H5Gclose (gid2);
+    	H5Gclose (gid);
+    	H5Fclose (fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end toomany() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Test links
@@ -550,6 +699,7 @@ main(void)
     nerrors += new_links(fapl) < 0 ? 1 : 0;
     nerrors += ck_new_links(fapl) < 0 ? 1 : 0;
     nerrors += long_links(fapl) < 0 ? 1 : 0;
+    nerrors += toomany(fapl) < 0 ? 1 : 0;
 
     /* Results */
     if (nerrors) {
