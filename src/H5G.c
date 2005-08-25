@@ -109,7 +109,6 @@
 #define H5G_INIT_HEAP		8192
 #define H5G_RESERVED_ATOMS	0
 #define H5G_SIZE_HINT   256             /*default root grp size hint         */
-#define H5G_NLINKS	16		/*max symlinks to follow per lookup  */
 
 /*
  * During name lookups (see H5G_namei()) we sometimes want information about
@@ -1384,6 +1383,7 @@ H5G_namei(const H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/
     const char		   *s = NULL;
     unsigned null_obj;          /* Flag to indicate this function was called with obj_ent set to NULL */
     unsigned null_grp;          /* Flag to indicate this function was called with grp_ent set to NULL */
+    unsigned obj_copy = 0;      /* Flag to indicate that the object entry is copied */
     unsigned group_copy = 0;    /* Flag to indicate that the group entry is copied */
     unsigned last_comp = 0;     /* Flag to indicate that a component is the last component in the name */
     unsigned did_insert = 0;    /* Flag to indicate that H5G_stab_insert was called */
@@ -1433,6 +1433,7 @@ H5G_namei(const H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/
     /* Deep copy of the symbol table entry (duplicates strings) */
     if (H5G_ent_copy(obj_ent, loc_ent,H5G_COPY_DEEP)<0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to copy entry");
+    obj_copy = 1;
 
     H5G_ent_reset(grp_ent);
 
@@ -1551,7 +1552,7 @@ H5G_namei(const H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/
 
 done:
     /* If we started with a NULL obj_ent, free the entry information */
-    if(null_obj)
+    if(null_obj || (ret_value < 0 && obj_copy))
         H5G_free_ent_name(obj_ent);
     /* If we started with a NULL grp_ent and we copied something into it, free the entry information */
     if(null_grp && group_copy)
