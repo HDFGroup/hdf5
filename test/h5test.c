@@ -588,7 +588,12 @@ h5_show_hostname(void)
 	    printf("thread 0.");
     }
 #elif defined(H5_HAVE_THREADSAFE)
+#ifdef WIN32
+    printf("some thread: no way to know the thread number from pthread on windows.");
+#else
     printf("thread %d.", (int)pthread_self());
+#endif
+
 #else
     printf("thread 0.");
 #endif
