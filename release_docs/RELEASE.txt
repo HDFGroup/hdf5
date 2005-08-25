@@ -54,6 +54,8 @@ New Features
 
     Tools:
     ------
+        - Sped up h5dump on files with large numbers of objects.
+            QAK - 2005/08/25
 
     F90 API:
     --------

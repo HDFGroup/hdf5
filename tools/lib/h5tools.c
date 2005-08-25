@@ -24,9 +24,9 @@
 #include <stdlib.h>
 
 #include "h5tools.h"
+#include "h5tools_ref.h"
 #include "h5tools_str.h"
 #include "h5tools_utils.h"
-#include "hdf5.h"
 #include "H5private.h"
 
 /*
@@ -138,6 +138,9 @@ h5tools_close(void)
 	    else
 		rawdatastream = NULL;
 	}
+
+        /* Clean up the reference path table, if it's been used */
+        term_ref_path_table();
 
         /* Shut down the library */
         H5close();
@@ -445,7 +448,7 @@ h5tools_simple_prefix(FILE *stream, const h5dump_t *info,
 
     /* Calculate new prefix */
     h5tools_str_prefix(&prefix, info, elmtno, ctx->ndims, ctx->p_min_idx,
-                       ctx->p_max_idx,ctx);
+                       ctx->p_max_idx, ctx);
 
     /* Write new prefix to output */
     if (ctx->indent_level >= 0) {

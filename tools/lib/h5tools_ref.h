@@ -17,32 +17,22 @@
 
 #include "hdf5.h"
 
-typedef struct ref_path_table_entry_t {
-    hid_t                 obj;
-    hobj_ref_t            obj_ref;
-    char                   *apath;
-    H5G_stat_t  statbuf;
-    struct ref_path_table_entry_t *next;
-}ref_path_table_entry_t;
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-char*       lookup_ref_path(hobj_ref_t ref);
+int init_ref_path_table(hid_t fid);
+const char *lookup_ref_path(haddr_t ref);
 herr_t      fill_ref_path_table(hid_t, const char *, void *);
 int         get_next_xid(void);
 haddr_t     get_fake_xid (void);
-struct      ref_path_table_entry_t *ref_path_table_lookup(const char *);
-ref_path_table_entry_t *ref_path_table_put(hid_t obj, const char *path);
-struct      ref_path_table_entry_t *ref_path_table_gen_fake(const char *);
+haddr_t ref_path_table_lookup(const char *);
+haddr_t ref_path_table_gen_fake(const char *);
+int term_ref_path_table(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-
-
 #endif
-
 

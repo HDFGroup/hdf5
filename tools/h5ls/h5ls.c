@@ -78,7 +78,6 @@ static herr_t list (hid_t group, const char *name, void *cd);
 static void display_type(hid_t type, int ind);
 static char *fix_name(const char *path, const char *base);
 
-hid_t thefile;
 const char *progname="h5ls";
 int   d_status;
 
@@ -1813,10 +1812,11 @@ list (hid_t group, const char *name, void *_iter)
     /* Show detailed information about the object, beginning with information
      * which is common to all objects. */
     if (verbose_g>0 && H5G_LINK!=sb.type) {
- if (sb.type>=0) H5Aiterate(obj, NULL, list_attr, NULL);
+        if (sb.type>=0)
+            H5Aiterate(obj, NULL, list_attr, NULL);
  printf("    %-10s %lu:%lu:%lu:%lu\n", "Location:",
         sb.fileno[1], sb.fileno[0], sb.objno[1], sb.objno[0]);
- printf("    %-10s %u\n", "Links:", sb.nlink);
+        printf("    %-10s %u\n", "Links:", sb.nlink);
         if (sb.mtime>0) {
             if (simple_output_g) tm=gmtime(&(sb.mtime));
             else tm=localtime(&(sb.mtime));
