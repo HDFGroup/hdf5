@@ -75,8 +75,8 @@ build-check-s: $(LIB) $(PROGS) $(TESTS)
 
 TEST_PROG_CHKEXE=$(TEST_PROG:=.chkexe_)
 TEST_PROG_PARA_CHKEXE=$(TEST_PROG_PARA:=.chkexe_)
-TEST_SCRIPT_CHKSH=$(TEST_SCRIPT:=.chksh_)
-TEST_SCRIPT_PARA_CHKSH=$(TEST_SCRIPT_PARA:=.chksh_)
+TEST_SCRIPT_CHKSH=$(TEST_SCRIPT:=.chkexe_)
+TEST_SCRIPT_PARA_CHKSH=$(TEST_SCRIPT_PARA:=.chkexe_)
 
 _exec_check-s: $(TEST_PROG_CHKEXE) $(TEST_SCRIPT_CHKSH)
 
@@ -87,7 +87,7 @@ _exec_check-s: $(TEST_PROG_CHKEXE) $(TEST_SCRIPT_CHKSH)
 $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
 	@if test "X$@" != "X.chkexe_" && test "X$@" != "Xdummy.chkexe_"; then \
 	   tname=$(@:.chkexe_=)$(EXEEXT);\
-	   log=$(@:.chkexe_=.log); \
+	   log=$(@:.chkexe_=.chklog); \
 	   echo "============================"; \
 	   if $(top_srcdir)/bin/newer $(@:.chkexe_=.chkexe) $${tname}; then \
 	      echo "No need to test $${tname} again."; \
@@ -118,16 +118,16 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
 	   echo "============================"; \
 	fi
  
-# The dummy.chksh here prevents the target from being
+# The dummysh.chkexe here prevents the target from being
 # empty if there are no tests in the current directory.
 # $${log} is the log file.
 # $${tname} is the name of test.
-$(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) dummy.chksh_:
-	@if test "X$@" != "X.chksh_" && test "X$@" != "Xdummy.chksh_"; then \
-	   tname=`basename $(@:.chksh_=)`;\
-	   log=`basename $(@:.chksh_=.logsh)`; \
+$(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) dummysh.chkexe_:
+	@if test "X$@" != "X.chkexe_" && test "X$@" != "Xdummysh.chkexe_"; then \
+	   tname=`basename $(@:.chkexe_=)`;\
+	   log=`basename $(@:.chkexe_=.chklog)`; \
 	   echo "============================"; \
-	   if $(top_srcdir)/bin/newer `basename $(@:.chksh_=.chksh)` $(@:.chksh_=); then \
+	   if $(top_srcdir)/bin/newer `basename $(@:.chkexe_=.chkexe)` $(@:.chkexe_=); then \
 	      echo "No need to test $${tname} again."; \
 	   else \
 	      echo "============================" > $${log}; \
@@ -144,8 +144,8 @@ $(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) dummy.chksh_:
 	      echo "============================" >> $${log}; \
 	      RUNSERIAL="$(RUNSERIAL)" RUNPARALLEL="$(RUNPARALLEL)"           \
 	      srcdir="$(srcdir)" \
-	         $(SHELL) $(@:.chksh_=) $(TEST_FLAGS) >> $${log} 2>&1 \
-	         && touch `basename $(@:.chksh_=.chksh)` || \
+	         $(SHELL) $(@:.chkexe_=) $(TEST_FLAGS) >> $${log} 2>&1 \
+	         && touch `basename $(@:.chkexe_=.chkexe)` || \
 	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
 	         (cat $${log} && false) || exit 1; \
 	      echo "" >> $${log}; \
@@ -181,7 +181,7 @@ build-check-p: $(LIB) $(PROGS) $(TESTS)
 	test $$test = dummy || false
 	@for test in $(TEST_SCRIPT_PARA) dummy; do                           \
 	  if test $$test != dummy; then                                      \
-	    $(MAKE) $(AM_MAKEFLAGS) $$test.chksh_; \
+	    $(MAKE) $(AM_MAKEFLAGS) $$test.chkexe_; \
 	  fi;                                                                 \
 	done;                                                                 \
 	test $$test = dummy || false
