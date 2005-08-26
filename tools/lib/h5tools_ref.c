@@ -297,13 +297,40 @@ ref_path_table_gen_fake(const char *path)
 const char *
 lookup_ref_path(haddr_t ref)
 {
-    ref_path_node_t *node;
+    uint8_t                *p;          /* Pointer to reference to translate */
+    haddr_t                 addr;       /* Resulting address */
+    unsigned		    i;          /* Local index variable */
+    haddr_t		    tmp;        /* Temporary portion of address */
+    uint8_t		    c;          /* Byte from address */
+    hbool_t		    all_zero = TRUE;    /* If the address is all zeros, make into HADDR_UNDEF */
+    ref_path_node_t        *node;       /* Ref path node found for address */
 
     /* Be safer for h5ls */
     if(!ref_path_table)
         return(NULL);
 
-    node = H5SL_search(ref_path_table, &ref);
+    /* Compensate for endianness differences */
+    p = (uint8_t *)&ref;
+    addr = 0;
+
+    for (i=0; i<sizeof(haddr_t); i++) {
+	c = *p++;
+	if (c != 0xff)
+            all_zero = FALSE;
+
+	if (i<sizeof(haddr_t)) {
+	    tmp = c;
+	    tmp <<= (i * 8);	/*use tmp to get casting right */
+	    addr |= tmp;
+	} else if (!all_zero) {
+	    assert(0 == *p);	/*overflow */
+	}
+    }
+    if (all_zero)
+        addr = HADDR_UNDEF;
+
+    /* Check if address is in reference path table */
+    node = H5SL_search(ref_path_table, &addr);
 
     return(node ? node->path : NULL);
 }
