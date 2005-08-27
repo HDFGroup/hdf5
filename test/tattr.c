@@ -1433,7 +1433,7 @@ test_attr_dtype_shared(void)
     /* Check reference count on named datatype */
     ret=H5Gget_objinfo(file_id,TYPE1_NAME,0,&statbuf);
     CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(statbuf.nlink, 1, "H5Tcommit");
+    VERIFY(statbuf.u.obj.nlink, 1, "H5Tcommit");
 
     /* Create dataspace for dataset */
     space_id=H5Screate(H5S_SCALAR);
@@ -1446,7 +1446,7 @@ test_attr_dtype_shared(void)
     /* Check reference count on named datatype */
     ret=H5Gget_objinfo(file_id,TYPE1_NAME,0,&statbuf);
     CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(statbuf.nlink, 2, "H5Dcreate");
+    VERIFY(statbuf.u.obj.nlink, 2, "H5Dcreate");
 
     /* Create attribute on dataset */
     attr_id=H5Acreate(dset_id,ATTR1_NAME,type_id,space_id,H5P_DEFAULT);
@@ -1455,7 +1455,7 @@ test_attr_dtype_shared(void)
     /* Check reference count on named datatype */
     ret=H5Gget_objinfo(file_id,TYPE1_NAME,0,&statbuf);
     CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(statbuf.nlink, 3, "H5Acreate");
+    VERIFY(statbuf.u.obj.nlink, 3, "H5Acreate");
 
     /* Close attribute */
     ret=H5Aclose(attr_id);
@@ -1468,7 +1468,7 @@ test_attr_dtype_shared(void)
     /* Check reference count on named datatype */
     ret=H5Gget_objinfo(file_id,TYPE1_NAME,0,&statbuf);
     CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(statbuf.nlink, 2, "H5Adelete");
+    VERIFY(statbuf.u.obj.nlink, 2, "H5Adelete");
 
     /* Create attribute on dataset */
     attr_id=H5Acreate(dset_id,ATTR1_NAME,type_id,space_id,H5P_DEFAULT);
@@ -1477,7 +1477,7 @@ test_attr_dtype_shared(void)
     /* Check reference count on named datatype */
     ret=H5Gget_objinfo(file_id,TYPE1_NAME,0,&statbuf);
     CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(statbuf.nlink, 3, "H5Acreate");
+    VERIFY(statbuf.u.obj.nlink, 3, "H5Acreate");
 
     /* Write data into the attribute */
     ret=H5Awrite(attr_id,H5T_NATIVE_INT,&data);
@@ -1531,7 +1531,7 @@ test_attr_dtype_shared(void)
     /* Check reference count on named datatype */
     ret=H5Gget_objinfo(file_id,TYPE1_NAME,0,&statbuf);
     CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(statbuf.nlink, 3, "H5Aopen_name");
+    VERIFY(statbuf.u.obj.nlink, 3, "H5Aopen_name");
 
     /* Unlink the dataset */
     ret=H5Gunlink(file_id,DSET1_NAME);
@@ -1540,7 +1540,7 @@ test_attr_dtype_shared(void)
     /* Check reference count on named datatype */
     ret=H5Gget_objinfo(file_id,TYPE1_NAME,0,&statbuf);
     CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(statbuf.nlink, 1, "H5Gunlink");
+    VERIFY(statbuf.u.obj.nlink, 1, "H5Gunlink");
 
     /* Unlink the named datatype */
     ret=H5Gunlink(file_id,TYPE1_NAME);

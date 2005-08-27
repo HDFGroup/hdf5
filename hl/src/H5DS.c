@@ -148,7 +148,7 @@ herr_t H5DSattach_scale(hid_t did,
   return FAIL;
 
  /* same object, not valid */
- if (sb1.fileno==sb2.fileno && sb1.objno==sb2.objno)
+ if (sb1.fileno==sb2.fileno && sb1.u.obj.objno==sb2.u.obj.objno)
   return FAIL;
 
  /* get ID type */
@@ -325,7 +325,7 @@ herr_t H5DSattach_scale(hid_t did,
     goto out;
 
    /* same object, so this DS scale is already in this DIM IDX */
-   if (sb1.fileno==sb2.fileno && sb1.objno==sb2.objno)
+   if (sb1.fileno==sb2.fileno && sb1.u.obj.objno==sb2.u.obj.objno)
    {
     found_ds = 1;
    }
@@ -602,7 +602,7 @@ herr_t H5DSdetach_scale(hid_t did,
   return FAIL;
 
  /* same object, not valid */
- if (sb1.fileno==sb2.fileno && sb1.objno==sb2.objno)
+ if (sb1.fileno==sb2.fileno && sb1.u.obj.objno==sb2.u.obj.objno)
   return FAIL;
 
  /* get ID type */
@@ -696,7 +696,7 @@ herr_t H5DSdetach_scale(hid_t did,
     goto out;
 
    /* same object, reset */
-   if (sb1.fileno==sb2.fileno && sb1.objno==sb2.objno)
+   if (sb1.fileno==sb2.fileno && sb1.u.obj.objno==sb2.u.obj.objno)
    {
     for(jj=j; jj<buf[idx].len-1; jj++)
     {
@@ -781,7 +781,7 @@ herr_t H5DSdetach_scale(hid_t did,
    goto out;
 
   /* same object, reset. we want to detach only for this DIM */
-  if (sb3.fileno==sb4.fileno && sb3.objno==sb4.objno && (int)idx==dsbuf[i].dim_idx)
+  if (sb3.fileno==sb4.fileno && sb3.u.obj.objno==sb4.u.obj.objno && (int)idx==dsbuf[i].dim_idx)
   {
    for(jj=i; jj<nelmts-1; jj++)
    {
@@ -1787,7 +1787,7 @@ htri_t H5DSis_attached(hid_t did,
   return FAIL;
 
  /* same object, not valid */
- if (sb1.fileno==sb2.fileno && sb1.objno==sb2.objno)
+ if (sb1.fileno==sb2.fileno && sb1.u.obj.objno==sb2.u.obj.objno)
   return FAIL;
 
  /* get ID type */
@@ -1869,7 +1869,7 @@ htri_t H5DSis_attached(hid_t did,
     goto out;
 
    /* same object */
-   if (sb1.fileno==sb2.fileno && sb1.objno==sb2.objno)
+   if (sb1.fileno==sb2.fileno && sb1.u.obj.objno==sb2.u.obj.objno)
    {
     found_ds = 1;
    }
@@ -1957,7 +1957,7 @@ htri_t H5DSis_attached(hid_t did,
      goto out;
 
     /* same object */
-    if (sb3.fileno==sb4.fileno && sb3.objno==sb4.objno && (int)idx==dsbuf[i].dim_idx) {
+    if (sb3.fileno==sb4.fileno && sb3.u.obj.objno==sb4.u.obj.objno && (int)idx==dsbuf[i].dim_idx) {
      found_dset=1;
     } /* if */
 

@@ -839,9 +839,9 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
             H5Gget_objinfo(obj, ".", FALSE, &sb);
 
             if (info->dset_hidefileno)
-                h5tools_str_append(str, info->dset_format, sb.objno);
+                h5tools_str_append(str, info->dset_format, sb.u.obj.objno);
             else
-                h5tools_str_append(str, info->dset_format, sb.fileno, sb.objno);
+                h5tools_str_append(str, info->dset_format, sb.fileno, sb.u.obj.objno);
 
             h5tools_str_dump_region(str, region, info);
             H5Sclose(region);
@@ -881,9 +881,9 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
 
             /* Print OID */
             if (info->obj_hidefileno)
-                h5tools_str_append(str, info->obj_format, sb.objno);
+                h5tools_str_append(str, info->obj_format, sb.u.obj.objno);
             else
-                h5tools_str_append(str, info->obj_format, sb.fileno,sb.objno);
+                h5tools_str_append(str, info->obj_format, sb.fileno,sb.u.obj.objno);
 
              /* Print name */
             path = lookup_ref_path(*(haddr_t *)vp);

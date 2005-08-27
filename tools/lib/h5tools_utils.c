@@ -491,11 +491,11 @@ find_objs_cb(hid_t group, const char *name, void *op_data)
         char *tmp;
 
         case H5G_GROUP:
-            if (search_obj(info->group_table, statbuf.objno) == NULL) {
+            if (search_obj(info->group_table, statbuf.u.obj.objno) == NULL) {
                 char *old_prefix;
 
                 tmp = build_obj_path_name(info->prefix, name);
-                add_obj(info->group_table, statbuf.objno, tmp, TRUE);
+                add_obj(info->group_table, statbuf.u.obj.objno, tmp, TRUE);
 
                 old_prefix = info->prefix;
                 info->prefix = tmp;
@@ -508,11 +508,11 @@ find_objs_cb(hid_t group, const char *name, void *op_data)
             break;
 
         case H5G_DATASET:
-            if (search_obj(info->dset_table, statbuf.objno) == NULL) {
+            if (search_obj(info->dset_table, statbuf.u.obj.objno) == NULL) {
                 hid_t dset;
 
                 tmp = build_obj_path_name(info->prefix, name);
-                add_obj(info->dset_table, statbuf.objno, tmp, TRUE);
+                add_obj(info->dset_table, statbuf.u.obj.objno, tmp, TRUE);
 
                 if ((dset = H5Dopen (group, name)) >= 0) {
                     hid_t type;
@@ -522,10 +522,10 @@ find_objs_cb(hid_t group, const char *name, void *op_data)
                     if (H5Tcommitted(type) > 0) {
                         H5Gget_objinfo(type, ".", TRUE, &statbuf);
 
-                        if (search_obj(info->type_table, statbuf.objno) == NULL) {
+                        if (search_obj(info->type_table, statbuf.u.obj.objno) == NULL) {
                             char *type_name = HDstrdup(tmp);
 
-                            add_obj(info->type_table, statbuf.objno, type_name, FALSE);
+                            add_obj(info->type_table, statbuf.u.obj.objno, type_name, FALSE);
                         } /* end if */
                     }
 
@@ -542,8 +542,8 @@ find_objs_cb(hid_t group, const char *name, void *op_data)
             obj_t *found_obj;
 
             tmp = build_obj_path_name(info->prefix, name);
-            if ((found_obj = search_obj(info->type_table, statbuf.objno)) == NULL)
-                add_obj(info->type_table, statbuf.objno, tmp, TRUE);
+            if ((found_obj = search_obj(info->type_table, statbuf.u.obj.objno)) == NULL)
+                add_obj(info->type_table, statbuf.u.obj.objno, tmp, TRUE);
             else {
                 /* Use latest version of name */
                 HDfree(found_obj->objname);

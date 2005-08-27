@@ -2789,7 +2789,7 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 
             s = H5HL_offset_into(grp_ent.file, heap, obj_ent.cache.slink.lval_offset);
 
-	    statbuf->linklen = HDstrlen(s) + 1; /*count the null terminator*/
+	    statbuf->u.slink.linklen = HDstrlen(s) + 1; /*count the null terminator*/
 
             /* Release the local heap */
             if (H5HL_unprotect(grp_ent.file, dxpl_id, heap, stab_mesg.heap_addr, H5AC__NO_FLAGS_SET) < 0)
@@ -2799,13 +2799,13 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 	    statbuf->type = H5G_LINK;
 	} else {
 	    /* Some other type of object */
-	    statbuf->objno = obj_ent.header;
-	    statbuf->nlink = H5O_link (&obj_ent, 0, dxpl_id);
-	    if (NULL==H5O_read(&obj_ent, H5O_MTIME_ID, 0, &(statbuf->mtime), dxpl_id)) {
+	    statbuf->u.obj.objno = obj_ent.header;
+	    statbuf->u.obj.nlink = H5O_link (&obj_ent, 0, dxpl_id);
+	    if (NULL==H5O_read(&obj_ent, H5O_MTIME_ID, 0, &(statbuf->u.obj.mtime), dxpl_id)) {
                 H5E_clear_stack(NULL);
-                if (NULL==H5O_read(&obj_ent, H5O_MTIME_NEW_ID, 0, &(statbuf->mtime), dxpl_id)) {
+                if (NULL==H5O_read(&obj_ent, H5O_MTIME_NEW_ID, 0, &(statbuf->u.obj.mtime), dxpl_id)) {
                     H5E_clear_stack(NULL);
-                    statbuf->mtime = 0;
+                    statbuf->u.obj.mtime = 0;
                 }
 	    }
             /* Get object type */
@@ -2813,7 +2813,7 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 	    H5E_clear_stack(NULL); /*clear errors resulting from checking type*/
 
             /* Get object header information */
-            if(H5O_get_info(&obj_ent, &(statbuf->ohdr), dxpl_id)<0)
+            if(H5O_get_info(&obj_ent, &(statbuf->u.obj.ohdr), dxpl_id)<0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get object header information")
 	}
     } /* end if */

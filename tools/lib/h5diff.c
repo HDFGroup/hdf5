@@ -1048,12 +1048,12 @@ diff (hid_t file1_id,
      if (H5Gget_objinfo (file1_id, path1, FALSE, &sb2) < 0)
   goto out;
 
-     buf1 = malloc (sb1.linklen);
-     buf2 = malloc (sb2.linklen);
+     buf1 = malloc (sb1.u.slink.linklen);
+     buf2 = malloc (sb2.u.slink.linklen);
 
-     if (H5Gget_linkval (file1_id, path1, sb1.linklen, buf1) < 0)
+     if (H5Gget_linkval (file1_id, path1, sb1.u.slink.linklen, buf1) < 0)
   goto out;
-     if (H5Gget_linkval (file2_id, path2, sb1.linklen, buf2) < 0)
+     if (H5Gget_linkval (file2_id, path2, sb1.u.slink.linklen, buf2) < 0)
   goto out;
 
      ret = HDstrcmp (buf1, buf2);

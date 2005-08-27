@@ -71,14 +71,24 @@ typedef enum H5G_obj_t {
 #define H5G_USERTYPE(X)	(8+(X))		/* User defined types		*/
 
 /* Information about an object */
-typedef struct H5G_stat_t {
-    unsigned long 	fileno;		/*file number			*/
-    haddr_t 		objno;		/*object number			*/
-    unsigned 		nlink;		/*number of hard links to object*/
-    H5G_obj_t 		type;		/*basic object type		*/
-    time_t		mtime;		/*modification time		*/
-    size_t		linklen;	/*symbolic link value length	*/
+typedef struct H5G_obj_stat_t {
+    haddr_t 		objno;		/* Object number		*/
+    unsigned 		nlink;		/* Number of hard links to object*/
+    time_t		mtime;		/* Modification time		*/
     H5O_stat_t          ohdr;           /* Object header information    */
+} H5G_obj_stat_t;
+
+typedef struct H5G_slink_stat_t {
+    size_t		linklen;	/* Symbolic link value length	*/
+} H5G_slink_stat_t;
+
+typedef struct H5G_stat_t {
+    unsigned long 	fileno;		/* File number			*/
+    H5G_obj_t 		type;		/* Object type			*/
+    union {
+        H5G_obj_stat_t  obj;		/* Information about objects    */
+        H5G_slink_stat_t slink;		/* Information about symbolic links */
+    } u;
 } H5G_stat_t;
 
 #define H5G_SAME_LOC 0

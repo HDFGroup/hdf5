@@ -504,9 +504,9 @@ int do_copy_objects(hid_t fidin,
     if (H5Gget_objinfo(fidin,travt->objs[i].name,FALSE,&statbuf)<0)
      goto error;
 
-    targbuf = malloc(statbuf.linklen);
+    targbuf = malloc(statbuf.u.slink.linklen);
 
-    if (H5Gget_linkval(fidin,travt->objs[i].name,statbuf.linklen,targbuf)<0)
+    if (H5Gget_linkval(fidin,travt->objs[i].name,statbuf.u.slink.linklen,targbuf)<0)
      goto error;
 
     if (H5Glink(fidout,

@@ -153,7 +153,7 @@ H5R_create(void *_ref, H5G_entry_t *loc, const char *name, H5R_type_t ref_type, 
         {
             hobj_ref_t *ref=(hobj_ref_t *)_ref; /* Get pointer to correct type of reference struct */
 
-            *ref=sb.objno;
+            *ref=sb.u.obj.objno;
             break;
         }
 
@@ -200,7 +200,7 @@ H5R_create(void *_ref, H5G_entry_t *loc, const char *name, H5R_type_t ref_type, 
 
             /* Serialize information for dataset OID */
             p=(uint8_t *)buf;
-            H5F_addr_encode(loc->file,&p,sb.objno);
+            H5F_addr_encode(loc->file,&p,sb.u.obj.objno);
 
             /* Serialize the selection */
             if (H5S_SELECT_SERIALIZE(space,p) < 0)

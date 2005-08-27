@@ -149,7 +149,7 @@ sym_insert(H5G_stat_t *sb, const char *name)
 
     /* Don't add it if the link count is 1 because such an object can only
      * have one name. */
-    if (sb->nlink<2) return;
+    if (sb->u.obj.nlink<2) return;
 
     /* Extend the table */
     if (idtab_g.nobjs>=idtab_g.nalloc) {
@@ -160,7 +160,7 @@ sym_insert(H5G_stat_t *sb, const char *name)
 
     /* Insert the entry */
     n = idtab_g.nobjs++;
-    idtab_g.obj[n].id = sb->objno;
+    idtab_g.obj[n].id = sb->u.obj.objno;
     idtab_g.obj[n].name = HDstrdup(name);
 }
 
@@ -186,9 +186,9 @@ sym_lookup(H5G_stat_t *sb)
 {
     int  n;
 
-    if (sb->nlink<2) return NULL; /*only one name possible*/
+    if (sb->u.obj.nlink<2) return NULL; /*only one name possible*/
     for (n=0; n<idtab_g.nobjs; n++) {
-        if (idtab_g.obj[n].id==sb->objno)
+        if (idtab_g.obj[n].id==sb->u.obj.objno)
             return idtab_g.obj[n].name;
     }
     return NULL;
@@ -1176,7 +1176,7 @@ display_type(hid_t type, int ind)
     if (H5Tcommitted(type)) {
  if (H5Gget_objinfo(type, ".", FALSE, &sb)>=0) {
      printf("shared-%lu:"H5_PRINTF_HADDR_FMT" ",
-     sb.fileno, sb.objno);
+     sb.fileno, sb.u.obj.objno);
  } else {
      printf("shared ");
  }
@@ -1824,11 +1824,11 @@ list (hid_t group, const char *name, void *_iter)
     if (verbose_g>0 && H5G_LINK!=sb.type) {
         if (sb.type>=0)
             H5Aiterate(obj, NULL, list_attr, NULL);
-        printf("    %-10s %lu:"H5_PRINTF_HADDR_FMT"\n", "Location:", sb.fileno, sb.objno);
-        printf("    %-10s %u\n", "Links:", sb.nlink);
-        if (sb.mtime>0) {
-            if (simple_output_g) tm=gmtime(&(sb.mtime));
-            else tm=localtime(&(sb.mtime));
+        printf("    %-10s %lu:"H5_PRINTF_HADDR_FMT"\n", "Location:", sb.fileno, sb.u.obj.objno);
+        printf("    %-10s %u\n", "Links:", sb.u.obj.nlink);
+        if (sb.u.obj.mtime>0) {
+            if (simple_output_g) tm=gmtime(&(sb.u.obj.mtime));
+            else tm=localtime(&(sb.u.obj.mtime));
             if (tm) {
                 strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
                 printf("    %-10s %s\n", "Modified:", buf);
