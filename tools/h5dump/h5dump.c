@@ -690,7 +690,11 @@ print_datatype(hid_t type,unsigned in_group)
                 unsigned long 	objno[2];	/*object number			*/
 
                 objno[0] = (unsigned long)(obj->objno);
+#if H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG
                 objno[1] = (unsigned long)(obj->objno >> 8*sizeof(long));
+#else /* H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG */
+                objno[1] = 0;
+#endif /* H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG */
                 HDfprintf(stdout,"\"/#%lu:%lu\"", objno[0], objno[1]);
             }
             else
@@ -1652,7 +1656,11 @@ dump_group(hid_t gid, const char *name)
 		type = H5Dget_type(dset);
 
                 objno[0] = (unsigned long)(type_table->objs[u].objno);
+#if H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG
                 objno[1] = (unsigned long)(type_table->objs[u].objno >> 8*sizeof(long));
+#else /* H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG */
+                objno[1] = 0;
+#endif /* H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG */
 		sprintf(type_name, "#%lu:%lu", objno[0], objno[1]);
                 dump_function_table->dump_named_datatype_function(type, type_name);
 
@@ -2584,7 +2592,11 @@ static void dump_fcontents(hid_t fid)
                 unsigned long 	objno[2];	/*object number			*/
 
                 objno[0] = (unsigned long)(type_table->objs[u].objno);
+#if H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG
                 objno[1] = (unsigned long)(type_table->objs[u].objno >> 8*sizeof(long));
+#else /* H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG */
+                objno[1] = 0;
+#endif /* H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG */
                 printf(" %-10s /#%lu:%lu\n", "datatype", objno[0], objno[1]);
             }
         }
@@ -3017,7 +3029,11 @@ handle_datatypes(hid_t fid, char *type, void UNUSED * data)
 
                 /* unamed data type */
                 objno[0] = (unsigned long)(type_table->objs[idx].objno);
+#if H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG
                 objno[1] = (unsigned long)(type_table->objs[idx].objno >> 8*sizeof(long));
+#else /* H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG */
+                objno[1] = 0;
+#endif /* H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG */
                 sprintf(name, "/#%lu:%lu", objno[0], objno[1]);
 
                 if (!HDstrcmp(name, type))
@@ -3730,7 +3746,11 @@ xml_name_to_XID(const char *str , char *outstr, int outlen, int gen)
                 if (gen) {
                     objno = ref_path_table_gen_fake(str);
                     _objno[0] = (unsigned long)(objno);
+#if H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG
                     _objno[1] = (unsigned long)(objno >> 8*sizeof(long));
+#else /* H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG */
+                    _objno[1] = 0;
+#endif /* H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG */
 		    sprintf(outstr,"xid_%lu-%lu", _objno[0], _objno[1]);
                     return 0;
                 } else {
@@ -3741,7 +3761,11 @@ xml_name_to_XID(const char *str , char *outstr, int outlen, int gen)
             if (gen) {
                 objno = ref_path_table_gen_fake(str);
                 _objno[0] = (unsigned long)(objno);
+#if H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG
                 _objno[1] = (unsigned long)(objno >> 8*sizeof(long));
+#else /* H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG */
+                _objno[1] = 0;
+#endif /* H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG */
                 sprintf(outstr,"xid_%lu-%lu", _objno[0], _objno[1]);
                 return 0;
             } else {
@@ -3751,7 +3775,11 @@ xml_name_to_XID(const char *str , char *outstr, int outlen, int gen)
     }
 
     _objno[0] = (unsigned long)(objno);
+#if H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG
     _objno[1] = (unsigned long)(objno >> 8*sizeof(long));
+#else /* H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG */
+    _objno[1] = 0;
+#endif /* H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG */
     sprintf(outstr,"xid_%lu-%lu", _objno[0], _objno[1]);
 
     return(0);
@@ -4913,7 +4941,11 @@ xml_dump_group(hid_t gid, const char *name)
                             type = H5Dget_type(dset);
 
                             objno[0] = (unsigned long)(type_table->objs[u].objno);
+#if H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG
                             objno[1] = (unsigned long)(type_table->objs[u].objno >> 8*sizeof(long));
+#else /* H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG */
+                            objno[1] = 0;
+#endif /* H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG */
                             sprintf(type_name, "#%lu:%lu", objno[0], objno[1]);
                             dump_function_table->dump_named_datatype_function(type, type_name);
 
@@ -4978,7 +5010,11 @@ xml_dump_group(hid_t gid, const char *name)
 		    type = H5Dget_type(dset);
 
                     objno[0] = (unsigned long)(type_table->objs[u].objno);
+#if H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG
                     objno[1] = (unsigned long)(type_table->objs[u].objno >> 8*sizeof(long));
+#else /* H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG */
+                    objno[1] = 0;
+#endif /* H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG */
 		    sprintf(type_name, "#%lu:%lu", objno[0], objno[1]);
 		    dump_function_table->dump_named_datatype_function(type, type_name);
 
