@@ -4,10 +4,6 @@
    values. */
 #undef CONVERT_DENORMAL_FLOAT
 
-/* Define if your system can convert long double to unsigned int values
-   correctly. */
-#undef CV_LDOUBLE_TO_UINT_WORKS
-
 /* Define if `dev_t' is a scalar */
 #undef DEV_T_IS_SCALAR
 
@@ -29,9 +25,9 @@
    integer values. */
 #undef FP_TO_INTEGER_OVERFLOW_WORKS
 
-/* Define if your system roundup accurately convert floating-point to unsigned
-   long long values. */
-#undef FP_TO_ULLONG_BOTTOM_BIT_WORKS
+/* Define if your system roundup accurately converting floating-point to
+   unsigned long long values. */
+#undef FP_TO_ULLONG_ACCURATE
 
 /* Define if your system has right maximum convert floating-point to unsigned
    long long values. */
@@ -361,6 +357,20 @@
 /* Define if `__tm_gmtoff' is a member of `struct tm' */
 #undef HAVE___TM_GMTOFF
 
+/* Define if your system can accurately convert from integers to long double
+   values. */
+#undef INTEGER_TO_LDOUBLE_ACCURATE
+
+/* Define if your system can convert long double to integers accurately. */
+#undef LDOUBLE_TO_INTEGER_ACCURATE
+
+/* Define if your system can convert from long double to integer values. */
+#undef LDOUBLE_TO_INTEGER_WORKS
+
+/* Define if your system can convert long double to unsigned int values
+   correctly. */
+#undef LDOUBLE_TO_UINT_ACCURATE
+
 /* Define if your system can compile long long to floating-point casts. */
 #undef LLONG_TO_FP_CAST_WORKS
 
@@ -507,18 +517,6 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
-/* Define if your system can accurately convert from integers to long double
-   values. */
-#undef SW_INTEGER_TO_LDOUBLE_WORKS
-
-/* Define if your system can accurately convert from long double to integer
-   values. */
-#undef SW_LDOUBLE_TO_INTEGER_WORKS
-
-/* Define if your system can accurately convert unsigned (long) long values to
-   floating-point values. */
-#undef SW_ULONG_TO_FP_BOTTOM_BIT_WORKS
-
 /* Define if your system supports pthread_attr_setscope(&attribute,
    PTHREAD_SCOPE_SYSTEM) call. */
 #undef SYSTEM_SCOPE_THREADS
@@ -535,7 +533,11 @@
 
 /* Define if your system can convert unsigned long long to long double with
    correct precision. */
-#undef ULLONG_TO_LDOUBLE_PRECISION_WORKS
+#undef ULLONG_TO_LDOUBLE_PRECISION
+
+/* Define if your system can accurately convert unsigned (long) long values to
+   floating-point values. */
+#undef ULONG_TO_FP_BOTTOM_BIT_ACCURATE
 
 /* Version number of package */
 #undef VERSION
@@ -543,6 +545,12 @@
 /* Define if vsnprintf() returns the correct value for formatted strings that
    don't fit into size allowed */
 #undef VSNPRINTF_WORKS
+
+/* Data accuracy is prefered to speed during data conversions */
+#undef WANT_DATA_ACCURACY
+
+/* Check exception handling functions during data conversions */
+#undef WANT_DCONV_EXCEPTION
 
 /* Define if the HDF5 v1.6 compatibility functions are to be compiled in */
 #undef WANT_H5_V1_6_COMPAT

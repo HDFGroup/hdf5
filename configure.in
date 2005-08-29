@@ -2357,6 +2357,48 @@ if test 1 = 2; then
 fi
 
 dnl ----------------------------------------------------------------------
+dnl Decide whether the presence of user's exception handling functions is
+dnl checked and data conversion exceptions are returned.  This is mainly
+dnl for the speed optimization of hard conversions.  Soft conversions can
+dnl actually benefit little.  
+dnl
+AC_MSG_CHECKING([whether exception handling functions is checked during data conversions])
+AC_ARG_ENABLE([exception],
+              [AC_HELP_STRING([--enable-exception],
+                              [if exception handling functions is checked during 
+                              data conversions [default=yes]])],
+              [DCONV_EXCEPTION=$enableval], [DCONV_EXCEPTION=yes])
+
+if test "$DCONV_EXCEPTION" = "yes"; then
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([WANT_DCONV_EXCEPTION], [1],
+            [Check exception handling functions during data conversions])
+else
+  AC_MSG_RESULT([no])
+fi
+
+dnl ----------------------------------------------------------------------
+dnl Decide whether the data accuracy has higher priority during data
+dnl conversions.  If not, some hard conversions will still be prefered even
+dnl though the data may be wrong (for example, some compilers don't 
+dnl support denormalized floating values) to maximize speed.
+dnl 
+AC_MSG_CHECKING([whether data accuracy is guaranteed during data conversions])
+AC_ARG_ENABLE([accuracy],
+              [AC_HELP_STRING([--enable-accuracy],
+                              [if data accuracy is guaranteed during 
+                              data conversions [default=yes]])],
+              [DATA_ACCURACY=$enableval], [DATA_ACCURACY=yes])
+
+if test "$DATA_ACCURACY" = "yes"; then
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([WANT_DATA_ACCURACY], [1],
+            [Data accuracy is prefered to speed during data conversions])
+else
+  AC_MSG_RESULT([no])
+fi
+
+dnl ----------------------------------------------------------------------
 dnl Set the flag to indicate that the machine can handle converting
 dnl denormalized floating-point values.
 dnl (This flag should be set for all machines, except for the Crays, where
@@ -2375,47 +2417,69 @@ fi
 
 dnl -----------------------------------------------------------------------
 dnl Set flag to indicate that the machine can handle conversion from 
-dnl long double to integers.  This flag should be set "yes" for all 
-dnl machines except all SGIs and HP-UX 11.00.  For SGIs, some conversions are
+dnl long double to integers accurately.  This flag should be set "yes" for 
+dnl all machines except all SGIs.  For SGIs, some conversions are
 dnl incorrect and its cache value is set "no" in its config/irix6.x and 
-dnl irix5.x.  For HP-UX 11.00, the compiler has 'floating exception'
-dnl when converting 'long double' to all integers except 'unsigned long long'.
-dnl Other HP-UX systems are unknown yet. (1/8/05 - SLU)
+dnl irix5.x.
+dnl
+AC_MSG_CHECKING([if converting from long double to integers is accurate])
 
-AC_MSG_CHECKING([if accurately converting from long double to integers works])
-
-if test ${ac_cv_sizeof_long_double}=0; then
-   hdf5_cv_sw_ldouble_to_integer_works=${hdf5_cv_sw_ldouble_to_integer_works=no}
+if test ${ac_cv_sizeof_long_double} = 0; then
+   hdf5_ldouble_to_integer_accurate=${hdf5_ldouble_to_integer_accurate=no}
+else
+   AC_CACHE_VAL([hdf5_cv_ldouble_to_integer_accurate], [hdf5_cv_ldouble_to_integer_accurate=yes])
 fi
 
-AC_CACHE_VAL([hdf5_cv_sw_ldouble_to_integer_works],
-    [AC_TRY_RUN([
-    int main(void)
-    {
-        void *align;
-        long double ld= 9701917572145405952.00L;
-        unsigned char v1;
-        short v2;
-        unsigned int v3;
-        int  ret = 0;
+if test ${hdf5_cv_ldouble_to_integer_accurate} = "yes"; then
+  AC_DEFINE([LDOUBLE_TO_INTEGER_ACCURATE], [1],
+            [Define if your system can convert long double to integers accurately.])
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
 
-        align = (void*)malloc(sizeof(long double));
-        memcpy(align, &ld, sizeof(long double));
+dnl -----------------------------------------------------------------------
+dnl Set flag to indicate that the machine can do conversion from 
+dnl long double to integers regardless of accuracy.  This flag should be 
+dnl set "yes" for all machines except HP-UX 11.00.  For HP-UX 11.00, the
+dnl compiler has 'floating exception' when converting 'long double' to all 
+dnl integers except 'unsigned long long'.  Other HP-UX systems are unknown
+dnl yet. (1/8/05 - SLU)
 
-        /*For HU-UX11.00, there's floating exception(core dump) when doing some of casting
-         *from 'long double' to integers*/
-        v1=(unsigned char)(*((long double*)align));
-        v2=(short)(*((long double*)align));
-        v3=(unsigned int)(*((long double*)align));
+AC_MSG_CHECKING([if converting from long double to integers works])
 
-done:
-        exit(ret);
-    }
-    ], [hdf5_cv_sw_ldouble_to_integer_works=yes], [hdf5_cv_sw_ldouble_to_integer_works=no],)])
+if test ${ac_cv_sizeof_long_double} = 0; then
+   hdf5_ldouble_to_integer_works=${hdf5_ldouble_to_integer_works=no}
+else
+   AC_CACHE_VAL([hdf5_ldouble_to_integer_works],
+        [AC_TRY_RUN([
+        int main(void)
+        {
+            void *align;
+            long double ld= 9701917572145405952.00L;
+            unsigned char v1;
+            short v2;
+            unsigned int v3;
+            int  ret = 0;
 
-if test ${hdf5_cv_sw_ldouble_to_integer_works} = "yes"; then
-  AC_DEFINE([SW_LDOUBLE_TO_INTEGER_WORKS], [1],
-            [Define if your system can accurately convert from long double to integer values.])
+            align = (void*)malloc(sizeof(long double));
+            memcpy(align, &ld, sizeof(long double));
+
+            /*For HU-UX11.00, there's floating exception(core dump) when doing some of casting
+             *from 'long double' to integers*/
+            v1=(unsigned char)(*((long double*)align));
+            v2=(short)(*((long double*)align));
+            v3=(unsigned int)(*((long double*)align));
+
+    done:
+            exit(ret);
+        }
+        ], [hdf5_ldouble_to_integer_works=yes], [hdf5_ldouble_to_integer_works=no],)])
+fi
+
+if test ${hdf5_ldouble_to_integer_works} = "yes"; then
+  AC_DEFINE([LDOUBLE_TO_INTEGER_WORKS], [1],
+            [Define if your system can convert from long double to integer values.])
   AC_MSG_RESULT([yes])
 else
   AC_MSG_RESULT([no])
@@ -2428,17 +2492,16 @@ dnl machines except all SGIs, where some conversions are
 dnl incorrect and its cache value is set "no" in its config/irix6.x and 
 dnl irix5.x) 
 dnl
-AC_MSG_CHECKING([if accurately converting from integers to long double works])
+AC_MSG_CHECKING([if accurately converting from integers to long double])
 
-if test ${ac_cv_sizeof_long_double}=0; then
-   hdf5_cv_sw_integer_to_ldouble_works=${hdf5_cv_sw_integer_to_ldouble_works=no}
+if test ${ac_cv_sizeof_long_double} = 0; then
+   hdf5_cv_integer_to_ldouble_accurate=${hdf5_cv_integer_to_ldouble_accurate=no}
+else
+   AC_CACHE_VAL([hdf5_cv_integer_to_ldouble_accurate], [hdf5_cv_integer_to_ldouble_accurate=yes])
 fi
 
-
-AC_CACHE_VAL([hdf5_cv_sw_integer_to_ldouble_works], [hdf5_cv_sw_integer_to_ldouble_works=yes])
-
-if test ${hdf5_cv_sw_integer_to_ldouble_works} = "yes"; then
-  AC_DEFINE([SW_INTEGER_TO_LDOUBLE_WORKS], [1],
+if test ${hdf5_cv_integer_to_ldouble_accurate} = "yes"; then
+  AC_DEFINE([INTEGER_TO_LDOUBLE_ACCURATE], [1],
             [Define if your system can accurately convert from integers to long double values.])
   AC_MSG_RESULT([yes])
 else
@@ -2453,10 +2516,10 @@ dnl the cache value is set in the config/irix6.x config file) and Solaris
 dnl 64-bit machines, where the short program below tests if round-up is 
 dnl correctly handled.
 dnl
-AC_MSG_CHECKING([if accurately converting unsigned long long to floating-point values works])
+AC_MSG_CHECKING([if accurately converting unsigned long long to floating-point values])
 
 if test ${host_os_novers} = "solaris2.x"; then
-    AC_CACHE_VAL([hdf5_cv_sw_ulong_to_fp_bottom_bit_works],
+    AC_CACHE_VAL([hdf5_cv_ulong_to_fp_bottom_bit_accurate],
     [AC_TRY_RUN([
     int main(void)
     {
@@ -2516,13 +2579,13 @@ if test ${host_os_novers} = "solaris2.x"; then
 done:
         exit(ret);
     }
-    ], [hdf5_cv_sw_ulong_to_fp_bottom_bit_works=yes], [hdf5_cv_sw_ulong_to_fp_bottom_bit_works=no],)])
+    ], [hdf5_cv_ulong_to_fp_bottom_bit_accurate=yes], [hdf5_cv_ulong_to_fp_bottom_bit_accurate=no],)])
 else
-    AC_CACHE_VAL([hdf5_cv_sw_ulong_to_fp_bottom_bit_works], [hdf5_cv_sw_ulong_to_fp_bottom_bit_works=yes])
+    AC_CACHE_VAL([hdf5_cv_ulong_to_fp_bottom_bit_accurate], [hdf5_cv_ulong_to_fp_bottom_bit_accurate=yes])
 fi
 
-if test ${hdf5_cv_sw_ulong_to_fp_bottom_bit_works} = "yes"; then
-  AC_DEFINE([SW_ULONG_TO_FP_BOTTOM_BIT_WORKS], [1],
+if test ${hdf5_cv_ulong_to_fp_bottom_bit_accurate} = "yes"; then
+  AC_DEFINE([ULONG_TO_FP_BOTTOM_BIT_ACCURATE], [1],
             [Define if your system can accurately convert unsigned (long) long values to floating-point values.])
   AC_MSG_RESULT([yes])
 else
@@ -2538,7 +2601,7 @@ dnl than 0.5.
 dnl
 AC_MSG_CHECKING([if accurately roundup converting floating-point to unsigned long long values])
 
-AC_CACHE_VAL([hdf5_cv_fp_to_ullong_bottom_bit_works],
+AC_CACHE_VAL([hdf5_fp_to_ullong_accurate],
     [AC_TRY_RUN([
     int main(void)
     {
@@ -2556,11 +2619,11 @@ AC_CACHE_VAL([hdf5_cv_fp_to_ullong_bottom_bit_works],
 done:
         exit(ret);
     }
-    ], [hdf5_cv_fp_to_ullong_bottom_bit_works=yes], [hdf5_cv_fp_to_ullong_bottom_bit_works=no],)])
+    ], [hdf5_fp_to_ullong_accurate=yes], [hdf5_fp_to_ullong_accurate=no],)])
 
-if test ${hdf5_cv_fp_to_ullong_bottom_bit_works} = "yes"; then
-  AC_DEFINE([FP_TO_ULLONG_BOTTOM_BIT_WORKS], [1],
-            [Define if your system roundup accurately convert floating-point to unsigned long long values.])
+if test ${hdf5_fp_to_ullong_accurate} = "yes"; then
+  AC_DEFINE([FP_TO_ULLONG_ACCURATE], [1],
+            [Define if your system roundup accurately converting floating-point to unsigned long long values.])
   AC_MSG_RESULT([yes])
 else
   AC_MSG_RESULT([no])
@@ -2575,7 +2638,7 @@ dnl during conversion.
 dnl
 AC_MSG_CHECKING([if right maximum converting floating-point to unsigned long long values])
 
-AC_CACHE_VAL([hdf5_cv_fp_to_ullong_right_maximum],
+AC_CACHE_VAL([hdf5_fp_to_ullong_right_maximum],
     [AC_TRY_RUN([
     int main(void)
     {
@@ -2600,9 +2663,9 @@ AC_CACHE_VAL([hdf5_cv_fp_to_ullong_right_maximum],
 done:
         exit(ret);
     }
-    ], [hdf5_cv_fp_to_ullong_right_maximum=yes], [hdf5_cv_fp_to_ullong_right_maximum=no],)])
+    ], [hdf5_fp_to_ullong_right_maximum=yes], [hdf5_fp_to_ullong_right_maximum=no],)])
 
-if test ${hdf5_cv_fp_to_ullong_right_maximum} = "yes"; then
+if test ${hdf5_fp_to_ullong_right_maximum} = "yes"; then
   AC_DEFINE([FP_TO_ULLONG_RIGHT_MAXIMUM], [1],
             [Define if your system has right maximum convert floating-point to unsigned long long values.])
   AC_MSG_RESULT([yes])
@@ -2615,31 +2678,31 @@ dnl Set the flag to indicate that the machine can accurately convert
 dnl 'long double' to 'unsigned int' values.  (This flag should be set for 
 dnl all machines, except for some Intel compilers on some Linux.)
 dnl
-AC_MSG_CHECKING([if converting long double to unsigned int values works])
+AC_MSG_CHECKING([if correctly converting long double to unsigned int values])
 
-if test ${ac_cv_sizeof_long_double}=0; then
-   hdf5_cv_ldouble_to_uint_works=${hdf5_cv_ldouble_to_uint_works=no}
+if test ${ac_cv_sizeof_long_double} = 0; then
+   hdf5_ldouble_to_uint_accurate=${hdf5_ldouble_to_uint_accurate=no}
+else
+   AC_CACHE_VAL([hdf5_ldouble_to_uint_accurate],
+        [AC_TRY_RUN([
+        int main(void)
+        {
+            long double ld = 2733248032.9183987530L;
+            unsigned int i;
+            int           ret = 0;
+
+            i = (unsigned int)ld;
+            if(i!=2733248032 && i!=2733248031 && i!=2733248033)
+                ret = 1;
+
+    done:
+            exit(ret);
+        }
+        ], [hdf5_ldouble_to_uint_accurate=yes], [hdf5_ldouble_to_uint_accurate=no],)])
 fi
 
-AC_CACHE_VAL([hdf5_cv_ldouble_to_uint_works],
-    [AC_TRY_RUN([
-    int main(void)
-    {
-        long double ld = 2733248032.9183987530L;
-        unsigned int i;
-        int           ret = 0;
-
-        i = (unsigned int)ld;
-        if(i!=2733248032 && i!=2733248031 && i!=2733248033)
-            ret = 1;
-
-done:
-        exit(ret);
-    }
-    ], [hdf5_cv_ldouble_to_uint_works=yes], [hdf5_cv_ldouble_to_uint_works=no],)])
-
-if test ${hdf5_cv_ldouble_to_uint_works} = "yes"; then
-  AC_DEFINE([CV_LDOUBLE_TO_UINT_WORKS], [1],
+if test ${hdf5_ldouble_to_uint_accurate} = "yes"; then
+  AC_DEFINE([LDOUBLE_TO_UINT_ACCURATE], [1],
             [Define if your system can convert long double to unsigned int values correctly.])
   AC_MSG_RESULT([yes])
 else
@@ -2689,88 +2752,88 @@ dnl (This flag should be set for all machines, except for FreeBSD(sleipnir)
 dnl where the last 2 bytes of mantissa are lost when compiler tries to do 
 dnl the conversion, and Cygwin where compiler doesn't do rounding correctly.)
 dnl
-AC_MSG_CHECKING([if converting unsigned long long to long double with precision work])
+AC_MSG_CHECKING([if converting unsigned long long to long double with precision])
 
-if test ${ac_cv_sizeof_long_double}=0; then
-   hdf5_cv_ullong_to_ldouble_precision_works=${hdf5_cv_ullong_to_ldouble_precision_works=no}
+if test ${ac_cv_sizeof_long_double} = 0; then
+   hdf5_cv_ullong_to_ldouble_precision=${hdf5_cv_ullong_to_ldouble_precision=no}
+else
+   AC_CACHE_VAL([hdf5_cv_ullong_to_ldouble_precision],
+        [AC_TRY_RUN([
+        int main(void)
+        {
+            /* General variables */
+            int endian;
+            int tst_value = 1; 
+            int ret = 0;
+
+            /* For FreeBSD */
+            unsigned long long l = 0xa601e80bda85fcefULL;
+            long double ld;
+            unsigned char *c1, *c2;
+            size_t size;
+
+            /* For Cygwin */
+            unsigned long long l_cyg = 0xfffffffffffffff0ULL;
+            long double ld_cyg;
+            unsigned char *c2_cyg;
+            size_t size_cyg;
+            
+            
+            /* Determine this system's endianess */
+            c1 = (unsigned char*)calloc(1, sizeof(int));
+            memcpy((void*)c1, &tst_value, sizeof(int));
+            if(c1[0]==1)
+                endian = 0;  /* little endian */
+            else 
+                endian = 1;  /* big endian */
+            
+            /* For FreeBSD */     
+            size = sizeof(long double);
+            memset(&ld, 0, size); 
+            ld = (long double)l;
+
+            c2 = (unsigned char*)calloc(1, size);
+            memcpy((void*)c2, &ld, size);
+
+            /* Test if the last 2 bytes of mantissa are lost.  Mainly for FreeBSD on Intel
+             * architecture(sleipnir) where it happens. */        
+            /*if(endian==0 && c2[0]==0 && c2[1]==0)*/ /*little endian*/
+            if(endian==0 && c2[0]==0) { /*little endian*/
+                ret = 1;
+                goto done;
+            }
+
+            /* For Cygwin */
+            size_cyg = sizeof(long double);
+            memset(&ld_cyg, 0, size); 
+            ld_cyg = (long double)l_cyg;
+
+            c2_cyg = (unsigned char*)calloc(1, size_cyg);
+            memcpy((void*)c2_cyg, &ld_cyg, size_cyg);
+
+            /* Test if the last 4 bytes(roughly) of mantissa are rounded up.  Mainly for Cygwin
+             * where the values like 0xffffffffffffffff,  0xfffffffffffffffe, ..., 
+             * 0xfffffffffffff000 ... are rounded up as 0x0000403f8000000000000000 
+             * instead of 0x0000403effffffffffffffff, 0x0000403efffffffffffffffe, ..., 
+             * 0x0000403efffffffffffff000 ...
+             */    
+            if(endian==0 && c2_cyg[0]==0 && c2_cyg[1]==0 && c2_cyg[2]==0 && c2_cyg[3]==0)
+                ret = 1;
+
+    done:
+            if(c1)
+                free(c1);
+            if(c2)
+                free(c2);
+            if(c2_cyg)
+                free(c2_cyg);
+            exit(ret);
+        }
+        ], [hdf5_cv_ullong_to_ldouble_precision=yes], [hdf5_cv_ullong_to_ldouble_precision=no],)])
 fi
 
-AC_CACHE_VAL([hdf5_cv_ullong_to_ldouble_precision_works],
-    [AC_TRY_RUN([
-    int main(void)
-    {
-        /* General variables */
-        int endian;
-        int tst_value = 1; 
-        int ret = 0;
-
-        /* For FreeBSD */
-        unsigned long long l = 0xa601e80bda85fcefULL;
-        long double ld;
-        unsigned char *c1, *c2;
-        size_t size;
-
-        /* For Cygwin */
-        unsigned long long l_cyg = 0xfffffffffffffff0ULL;
-        long double ld_cyg;
-        unsigned char *c2_cyg;
-        size_t size_cyg;
-        
-        
-        /* Determine this system's endianess */
-        c1 = (unsigned char*)calloc(1, sizeof(int));
-        memcpy((void*)c1, &tst_value, sizeof(int));
-        if(c1[0]==1)
-            endian = 0;  /* little endian */
-        else 
-            endian = 1;  /* big endian */
-        
-        /* For FreeBSD */     
-        size = sizeof(long double);
-        memset(&ld, 0, size); 
-        ld = (long double)l;
-
-        c2 = (unsigned char*)calloc(1, size);
-        memcpy((void*)c2, &ld, size);
-
-        /* Test if the last 2 bytes of mantissa are lost.  Mainly for FreeBSD on Intel
-         * architecture(sleipnir) where it happens. */        
-        /*if(endian==0 && c2[0]==0 && c2[1]==0)*/ /*little endian*/
-        if(endian==0 && c2[0]==0) { /*little endian*/
-            ret = 1;
-            goto done;
-        }
-
-        /* For Cygwin */
-        size_cyg = sizeof(long double);
-        memset(&ld_cyg, 0, size); 
-        ld_cyg = (long double)l_cyg;
-
-        c2_cyg = (unsigned char*)calloc(1, size_cyg);
-        memcpy((void*)c2_cyg, &ld_cyg, size_cyg);
-
-        /* Test if the last 4 bytes(roughly) of mantissa are rounded up.  Mainly for Cygwin
-         * where the values like 0xffffffffffffffff,  0xfffffffffffffffe, ..., 
-         * 0xfffffffffffff000 ... are rounded up as 0x0000403f8000000000000000 
-         * instead of 0x0000403effffffffffffffff, 0x0000403efffffffffffffffe, ..., 
-         * 0x0000403efffffffffffff000 ...
-         */    
-        if(endian==0 && c2_cyg[0]==0 && c2_cyg[1]==0 && c2_cyg[2]==0 && c2_cyg[3]==0)
-            ret = 1;
-
-done:
-        if(c1)
-            free(c1);
-        if(c2)
-            free(c2);
-        if(c2_cyg)
-            free(c2_cyg);
-        exit(ret);
-    }
-    ], [hdf5_cv_ullong_to_ldouble_precision_works=yes], [hdf5_cv_ullong_to_ldouble_precision_works=no],)])
-
-if test ${hdf5_cv_ullong_to_ldouble_precision_works} = "yes"; then
-  AC_DEFINE([ULLONG_TO_LDOUBLE_PRECISION_WORKS], [1],
+if test ${hdf5_cv_ullong_to_ldouble_precision} = "yes"; then
+  AC_DEFINE([ULLONG_TO_LDOUBLE_PRECISION], [1],
             [Define if your system can convert unsigned long long to long double with correct precision.])
   AC_MSG_RESULT([yes])
 else

@@ -1082,6 +1082,10 @@ Optional Features:
   --enable-filters=all    Turn on all internal I/O filters. One may also
                           specify a comma-separated list of filters or the
                           word no. The default is all internal I/O filters.
+  --enable-exception      if exception handling functions is checked during
+                          data conversions [default=yes]
+  --enable-accuracy       if data accuracy is guaranteed during data
+                          conversions [default=yes]
   --enable-hl             Enable the high level library [default=yes]
 
 Optional Packages:
@@ -3512,7 +3516,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:3515:" \
+echo "$as_me:3519:" \
      "checking for Fortran compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -3807,7 +3811,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FCFLAGS
 FCFLAGS="$FCFLAGS $ac_verb"
-(eval echo $as_me:3810: \"$ac_link\") >&5
+(eval echo $as_me:3814: \"$ac_link\") >&5
 ac_fc_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_fc_v_output" >&5
 FCFLAGS=$ac_save_FFLAGS
@@ -3885,7 +3889,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FCFLAGS
 FCFLAGS="$FCFLAGS $ac_cv_prog_fc_v"
-(eval echo $as_me:3888: \"$ac_link\") >&5
+(eval echo $as_me:3892: \"$ac_link\") >&5
 ac_fc_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_fc_v_output" >&5
 FCFLAGS=$ac_save_FFLAGS
@@ -6369,7 +6373,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6372 "configure"' > conftest.$ac_ext
+  echo '#line 6376 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7499,7 +7503,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:7502:" \
+echo "$as_me:7506:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -8568,11 +8572,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8571: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8575: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8575: \$? = $ac_status" >&5
+   echo "$as_me:8579: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -8823,11 +8827,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8826: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8830: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8830: \$? = $ac_status" >&5
+   echo "$as_me:8834: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -8883,11 +8887,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8886: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8890: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8890: \$? = $ac_status" >&5
+   echo "$as_me:8894: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11155,7 +11159,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11158 "configure"
+#line 11162 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11253,7 +11257,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11256 "configure"
+#line 11260 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13489,11 +13493,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13492: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13496: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:13496: \$? = $ac_status" >&5
+   echo "$as_me:13500: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -13549,11 +13553,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13552: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13556: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:13556: \$? = $ac_status" >&5
+   echo "$as_me:13560: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14968,7 +14972,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 14971 "configure"
+#line 14975 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15066,7 +15070,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 15069 "configure"
+#line 15073 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15921,11 +15925,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15924: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15928: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:15928: \$? = $ac_status" >&5
+   echo "$as_me:15932: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -15981,11 +15985,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15984: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15988: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:15988: \$? = $ac_status" >&5
+   echo "$as_me:15992: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -18037,11 +18041,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18040: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18044: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18044: \$? = $ac_status" >&5
+   echo "$as_me:18048: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -18292,11 +18296,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18295: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18299: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18299: \$? = $ac_status" >&5
+   echo "$as_me:18303: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -18352,11 +18356,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18355: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18359: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:18359: \$? = $ac_status" >&5
+   echo "$as_me:18363: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -20624,7 +20628,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 20627 "configure"
+#line 20631 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -20722,7 +20726,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 20725 "configure"
+#line 20729 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -49997,6 +50001,52 @@ _ACEOF
 
 fi
 
+echo "$as_me:$LINENO: checking whether exception handling functions is checked during data conversions" >&5
+echo $ECHO_N "checking whether exception handling functions is checked during data conversions... $ECHO_C" >&6
+# Check whether --enable-exception or --disable-exception was given.
+if test "${enable_exception+set}" = set; then
+  enableval="$enable_exception"
+  DCONV_EXCEPTION=$enableval
+else
+  DCONV_EXCEPTION=yes
+fi;
+
+if test "$DCONV_EXCEPTION" = "yes"; then
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+
+cat >>confdefs.h <<\_ACEOF
+#define WANT_DCONV_EXCEPTION 1
+_ACEOF
+
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+echo "$as_me:$LINENO: checking whether data accuracy is guaranteed during data conversions" >&5
+echo $ECHO_N "checking whether data accuracy is guaranteed during data conversions... $ECHO_C" >&6
+# Check whether --enable-accuracy or --disable-accuracy was given.
+if test "${enable_accuracy+set}" = set; then
+  enableval="$enable_accuracy"
+  DATA_ACCURACY=$enableval
+else
+  DATA_ACCURACY=yes
+fi;
+
+if test "$DATA_ACCURACY" = "yes"; then
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+
+cat >>confdefs.h <<\_ACEOF
+#define WANT_DATA_ACCURACY 1
+_ACEOF
+
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
 echo "$as_me:$LINENO: checking if converting denormalized floating-point values is possible" >&5
 echo $ECHO_N "checking if converting denormalized floating-point values is possible... $ECHO_C" >&6
 if test "${hdf5_cv_convert_denormal_float+set}" = set; then
@@ -50019,15 +50069,41 @@ else
 echo "${ECHO_T}no" >&6
 fi
 
+echo "$as_me:$LINENO: checking if converting from long double to integers is accurate" >&5
+echo $ECHO_N "checking if converting from long double to integers is accurate... $ECHO_C" >&6
 
-echo "$as_me:$LINENO: checking if accurately converting from long double to integers works" >&5
-echo $ECHO_N "checking if accurately converting from long double to integers works... $ECHO_C" >&6
-
-if test ${ac_cv_sizeof_long_double}=0; then
-   hdf5_cv_sw_ldouble_to_integer_works=${hdf5_cv_sw_ldouble_to_integer_works=no}
+if test ${ac_cv_sizeof_long_double} = 0; then
+   hdf5_ldouble_to_integer_accurate=${hdf5_ldouble_to_integer_accurate=no}
+else
+   if test "${hdf5_cv_ldouble_to_integer_accurate+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  hdf5_cv_ldouble_to_integer_accurate=yes
 fi
 
-if test "${hdf5_cv_sw_ldouble_to_integer_works+set}" = set; then
+fi
+
+if test ${hdf5_cv_ldouble_to_integer_accurate} = "yes"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define LDOUBLE_TO_INTEGER_ACCURATE 1
+_ACEOF
+
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+
+echo "$as_me:$LINENO: checking if converting from long double to integers works" >&5
+echo $ECHO_N "checking if converting from long double to integers works... $ECHO_C" >&6
+
+if test ${ac_cv_sizeof_long_double} = 0; then
+   hdf5_ldouble_to_integer_works=${hdf5_ldouble_to_integer_works=no}
+else
+   if test "${hdf5_ldouble_to_integer_works+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   if test "$cross_compiling" = yes; then
@@ -50044,27 +50120,27 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
-    int main(void)
-    {
-        void *align;
-        long double ld= 9701917572145405952.00L;
-        unsigned char v1;
-        short v2;
-        unsigned int v3;
-        int  ret = 0;
+        int main(void)
+        {
+            void *align;
+            long double ld= 9701917572145405952.00L;
+            unsigned char v1;
+            short v2;
+            unsigned int v3;
+            int  ret = 0;
 
-        align = (void*)malloc(sizeof(long double));
-        memcpy(align, &ld, sizeof(long double));
+            align = (void*)malloc(sizeof(long double));
+            memcpy(align, &ld, sizeof(long double));
 
-        /*For HU-UX11.00, there's floating exception(core dump) when doing some of casting
-         *from 'long double' to integers*/
-        v1=(unsigned char)(*((long double*)align));
-        v2=(short)(*((long double*)align));
-        v3=(unsigned int)(*((long double*)align));
+            /*For HU-UX11.00, there's floating exception(core dump) when doing some of casting
+             *from 'long double' to integers*/
+            v1=(unsigned char)(*((long double*)align));
+            v2=(short)(*((long double*)align));
+            v3=(unsigned int)(*((long double*)align));
 
-done:
-        exit(ret);
-    }
+    done:
+            exit(ret);
+        }
 
 _ACEOF
 rm -f conftest$ac_exeext
@@ -50078,24 +50154,25 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  hdf5_cv_sw_ldouble_to_integer_works=yes
+  hdf5_ldouble_to_integer_works=yes
 else
   echo "$as_me: program exited with status $ac_status" >&5
 echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
 ( exit $ac_status )
-hdf5_cv_sw_ldouble_to_integer_works=no
+hdf5_ldouble_to_integer_works=no
 fi
 rm -f core *.core gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
 fi
 fi
 
+fi
 
-if test ${hdf5_cv_sw_ldouble_to_integer_works} = "yes"; then
+if test ${hdf5_ldouble_to_integer_works} = "yes"; then
 
 cat >>confdefs.h <<\_ACEOF
-#define SW_LDOUBLE_TO_INTEGER_WORKS 1
+#define LDOUBLE_TO_INTEGER_WORKS 1
 _ACEOF
 
   echo "$as_me:$LINENO: result: yes" >&5
@@ -50105,25 +50182,24 @@ else
 echo "${ECHO_T}no" >&6
 fi
 
-echo "$as_me:$LINENO: checking if accurately converting from integers to long double works" >&5
-echo $ECHO_N "checking if accurately converting from integers to long double works... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking if accurately converting from integers to long double" >&5
+echo $ECHO_N "checking if accurately converting from integers to long double... $ECHO_C" >&6
 
-if test ${ac_cv_sizeof_long_double}=0; then
-   hdf5_cv_sw_integer_to_ldouble_works=${hdf5_cv_sw_integer_to_ldouble_works=no}
-fi
-
-
-if test "${hdf5_cv_sw_integer_to_ldouble_works+set}" = set; then
+if test ${ac_cv_sizeof_long_double} = 0; then
+   hdf5_cv_integer_to_ldouble_accurate=${hdf5_cv_integer_to_ldouble_accurate=no}
+else
+   if test "${hdf5_cv_integer_to_ldouble_accurate+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  hdf5_cv_sw_integer_to_ldouble_works=yes
+  hdf5_cv_integer_to_ldouble_accurate=yes
 fi
 
+fi
 
-if test ${hdf5_cv_sw_integer_to_ldouble_works} = "yes"; then
+if test ${hdf5_cv_integer_to_ldouble_accurate} = "yes"; then
 
 cat >>confdefs.h <<\_ACEOF
-#define SW_INTEGER_TO_LDOUBLE_WORKS 1
+#define INTEGER_TO_LDOUBLE_ACCURATE 1
 _ACEOF
 
   echo "$as_me:$LINENO: result: yes" >&5
@@ -50133,11 +50209,11 @@ else
 echo "${ECHO_T}no" >&6
 fi
 
-echo "$as_me:$LINENO: checking if accurately converting unsigned long long to floating-point values works" >&5
-echo $ECHO_N "checking if accurately converting unsigned long long to floating-point values works... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking if accurately converting unsigned long long to floating-point values" >&5
+echo $ECHO_N "checking if accurately converting unsigned long long to floating-point values... $ECHO_C" >&6
 
 if test ${host_os_novers} = "solaris2.x"; then
-    if test "${hdf5_cv_sw_ulong_to_fp_bottom_bit_works+set}" = set; then
+    if test "${hdf5_cv_ulong_to_fp_bottom_bit_accurate+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   if test "$cross_compiling" = yes; then
@@ -50225,32 +50301,32 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  hdf5_cv_sw_ulong_to_fp_bottom_bit_works=yes
+  hdf5_cv_ulong_to_fp_bottom_bit_accurate=yes
 else
   echo "$as_me: program exited with status $ac_status" >&5
 echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
 ( exit $ac_status )
-hdf5_cv_sw_ulong_to_fp_bottom_bit_works=no
+hdf5_cv_ulong_to_fp_bottom_bit_accurate=no
 fi
 rm -f core *.core gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
 fi
 fi
 
 else
-    if test "${hdf5_cv_sw_ulong_to_fp_bottom_bit_works+set}" = set; then
+    if test "${hdf5_cv_ulong_to_fp_bottom_bit_accurate+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  hdf5_cv_sw_ulong_to_fp_bottom_bit_works=yes
+  hdf5_cv_ulong_to_fp_bottom_bit_accurate=yes
 fi
 
 fi
 
-if test ${hdf5_cv_sw_ulong_to_fp_bottom_bit_works} = "yes"; then
+if test ${hdf5_cv_ulong_to_fp_bottom_bit_accurate} = "yes"; then
 
 cat >>confdefs.h <<\_ACEOF
-#define SW_ULONG_TO_FP_BOTTOM_BIT_WORKS 1
+#define ULONG_TO_FP_BOTTOM_BIT_ACCURATE 1
 _ACEOF
 
   echo "$as_me:$LINENO: result: yes" >&5
@@ -50263,7 +50339,7 @@ fi
 echo "$as_me:$LINENO: checking if accurately roundup converting floating-point to unsigned long long values" >&5
 echo $ECHO_N "checking if accurately roundup converting floating-point to unsigned long long values... $ECHO_C" >&6
 
-if test "${hdf5_cv_fp_to_ullong_bottom_bit_works+set}" = set; then
+if test "${hdf5_fp_to_ullong_accurate+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   if test "$cross_compiling" = yes; then
@@ -50309,24 +50385,24 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  hdf5_cv_fp_to_ullong_bottom_bit_works=yes
+  hdf5_fp_to_ullong_accurate=yes
 else
   echo "$as_me: program exited with status $ac_status" >&5
 echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
 ( exit $ac_status )
-hdf5_cv_fp_to_ullong_bottom_bit_works=no
+hdf5_fp_to_ullong_accurate=no
 fi
 rm -f core *.core gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
 fi
 fi
 
 
-if test ${hdf5_cv_fp_to_ullong_bottom_bit_works} = "yes"; then
+if test ${hdf5_fp_to_ullong_accurate} = "yes"; then
 
 cat >>confdefs.h <<\_ACEOF
-#define FP_TO_ULLONG_BOTTOM_BIT_WORKS 1
+#define FP_TO_ULLONG_ACCURATE 1
 _ACEOF
 
   echo "$as_me:$LINENO: result: yes" >&5
@@ -50339,7 +50415,7 @@ fi
 echo "$as_me:$LINENO: checking if right maximum converting floating-point to unsigned long long values" >&5
 echo $ECHO_N "checking if right maximum converting floating-point to unsigned long long values... $ECHO_C" >&6
 
-if test "${hdf5_cv_fp_to_ullong_right_maximum+set}" = set; then
+if test "${hdf5_fp_to_ullong_right_maximum+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   if test "$cross_compiling" = yes; then
@@ -50392,21 +50468,21 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  hdf5_cv_fp_to_ullong_right_maximum=yes
+  hdf5_fp_to_ullong_right_maximum=yes
 else
   echo "$as_me: program exited with status $ac_status" >&5
 echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
 ( exit $ac_status )
-hdf5_cv_fp_to_ullong_right_maximum=no
+hdf5_fp_to_ullong_right_maximum=no
 fi
 rm -f core *.core gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
 fi
 fi
 
 
-if test ${hdf5_cv_fp_to_ullong_right_maximum} = "yes"; then
+if test ${hdf5_fp_to_ullong_right_maximum} = "yes"; then
 
 cat >>confdefs.h <<\_ACEOF
 #define FP_TO_ULLONG_RIGHT_MAXIMUM 1
@@ -50419,14 +50495,13 @@ else
 echo "${ECHO_T}no" >&6
 fi
 
-echo "$as_me:$LINENO: checking if converting long double to unsigned int values works" >&5
-echo $ECHO_N "checking if converting long double to unsigned int values works... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking if correctly converting long double to unsigned int values" >&5
+echo $ECHO_N "checking if correctly converting long double to unsigned int values... $ECHO_C" >&6
 
-if test ${ac_cv_sizeof_long_double}=0; then
-   hdf5_cv_ldouble_to_uint_works=${hdf5_cv_ldouble_to_uint_works=no}
-fi
-
-if test "${hdf5_cv_ldouble_to_uint_works+set}" = set; then
+if test ${ac_cv_sizeof_long_double} = 0; then
+   hdf5_ldouble_to_uint_accurate=${hdf5_ldouble_to_uint_accurate=no}
+else
+   if test "${hdf5_ldouble_to_uint_accurate+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   if test "$cross_compiling" = yes; then
@@ -50443,19 +50518,19 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
-    int main(void)
-    {
-        long double ld = 2733248032.9183987530L;
-        unsigned int i;
-        int           ret = 0;
+        int main(void)
+        {
+            long double ld = 2733248032.9183987530L;
+            unsigned int i;
+            int           ret = 0;
 
-        i = (unsigned int)ld;
-        if(i!=2733248032 && i!=2733248031 && i!=2733248033)
-            ret = 1;
+            i = (unsigned int)ld;
+            if(i!=2733248032 && i!=2733248031 && i!=2733248033)
+                ret = 1;
 
-done:
-        exit(ret);
-    }
+    done:
+            exit(ret);
+        }
 
 _ACEOF
 rm -f conftest$ac_exeext
@@ -50469,24 +50544,25 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  hdf5_cv_ldouble_to_uint_works=yes
+  hdf5_ldouble_to_uint_accurate=yes
 else
   echo "$as_me: program exited with status $ac_status" >&5
 echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
 ( exit $ac_status )
-hdf5_cv_ldouble_to_uint_works=no
+hdf5_ldouble_to_uint_accurate=no
 fi
 rm -f core *.core gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
 fi
 fi
 
+fi
 
-if test ${hdf5_cv_ldouble_to_uint_works} = "yes"; then
+if test ${hdf5_ldouble_to_uint_accurate} = "yes"; then
 
 cat >>confdefs.h <<\_ACEOF
-#define CV_LDOUBLE_TO_UINT_WORKS 1
+#define LDOUBLE_TO_UINT_ACCURATE 1
 _ACEOF
 
   echo "$as_me:$LINENO: result: yes" >&5
@@ -50540,14 +50616,13 @@ else
 echo "${ECHO_T}no" >&6
 fi
 
-echo "$as_me:$LINENO: checking if converting unsigned long long to long double with precision work" >&5
-echo $ECHO_N "checking if converting unsigned long long to long double with precision work... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking if converting unsigned long long to long double with precision" >&5
+echo $ECHO_N "checking if converting unsigned long long to long double with precision... $ECHO_C" >&6
 
-if test ${ac_cv_sizeof_long_double}=0; then
-   hdf5_cv_ullong_to_ldouble_precision_works=${hdf5_cv_ullong_to_ldouble_precision_works=no}
-fi
-
-if test "${hdf5_cv_ullong_to_ldouble_precision_works+set}" = set; then
+if test ${ac_cv_sizeof_long_double} = 0; then
+   hdf5_cv_ullong_to_ldouble_precision=${hdf5_cv_ullong_to_ldouble_precision=no}
+else
+   if test "${hdf5_cv_ullong_to_ldouble_precision+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   if test "$cross_compiling" = yes; then
@@ -50564,76 +50639,76 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
-    int main(void)
-    {
-        /* General variables */
-        int endian;
-        int tst_value = 1;
-        int ret = 0;
+        int main(void)
+        {
+            /* General variables */
+            int endian;
+            int tst_value = 1;
+            int ret = 0;
 
-        /* For FreeBSD */
-        unsigned long long l = 0xa601e80bda85fcefULL;
-        long double ld;
-        unsigned char *c1, *c2;
-        size_t size;
+            /* For FreeBSD */
+            unsigned long long l = 0xa601e80bda85fcefULL;
+            long double ld;
+            unsigned char *c1, *c2;
+            size_t size;
 
-        /* For Cygwin */
-        unsigned long long l_cyg = 0xfffffffffffffff0ULL;
-        long double ld_cyg;
-        unsigned char *c2_cyg;
-        size_t size_cyg;
+            /* For Cygwin */
+            unsigned long long l_cyg = 0xfffffffffffffff0ULL;
+            long double ld_cyg;
+            unsigned char *c2_cyg;
+            size_t size_cyg;
 
 
-        /* Determine this system's endianess */
-        c1 = (unsigned char*)calloc(1, sizeof(int));
-        memcpy((void*)c1, &tst_value, sizeof(int));
-        if(c1[0]==1)
-            endian = 0;  /* little endian */
-        else
-            endian = 1;  /* big endian */
+            /* Determine this system's endianess */
+            c1 = (unsigned char*)calloc(1, sizeof(int));
+            memcpy((void*)c1, &tst_value, sizeof(int));
+            if(c1[0]==1)
+                endian = 0;  /* little endian */
+            else
+                endian = 1;  /* big endian */
 
-        /* For FreeBSD */
-        size = sizeof(long double);
-        memset(&ld, 0, size);
-        ld = (long double)l;
+            /* For FreeBSD */
+            size = sizeof(long double);
+            memset(&ld, 0, size);
+            ld = (long double)l;
 
-        c2 = (unsigned char*)calloc(1, size);
-        memcpy((void*)c2, &ld, size);
+            c2 = (unsigned char*)calloc(1, size);
+            memcpy((void*)c2, &ld, size);
 
-        /* Test if the last 2 bytes of mantissa are lost.  Mainly for FreeBSD on Intel
-         * architecture(sleipnir) where it happens. */
-        /*if(endian==0 && c2[0]==0 && c2[1]==0)*/ /*little endian*/
-        if(endian==0 && c2[0]==0) { /*little endian*/
-            ret = 1;
-            goto done;
+            /* Test if the last 2 bytes of mantissa are lost.  Mainly for FreeBSD on Intel
+             * architecture(sleipnir) where it happens. */
+            /*if(endian==0 && c2[0]==0 && c2[1]==0)*/ /*little endian*/
+            if(endian==0 && c2[0]==0) { /*little endian*/
+                ret = 1;
+                goto done;
+            }
+
+            /* For Cygwin */
+            size_cyg = sizeof(long double);
+            memset(&ld_cyg, 0, size);
+            ld_cyg = (long double)l_cyg;
+
+            c2_cyg = (unsigned char*)calloc(1, size_cyg);
+            memcpy((void*)c2_cyg, &ld_cyg, size_cyg);
+
+            /* Test if the last 4 bytes(roughly) of mantissa are rounded up.  Mainly for Cygwin
+             * where the values like 0xffffffffffffffff,  0xfffffffffffffffe, ...,
+             * 0xfffffffffffff000 ... are rounded up as 0x0000403f8000000000000000
+             * instead of 0x0000403effffffffffffffff, 0x0000403efffffffffffffffe, ...,
+             * 0x0000403efffffffffffff000 ...
+             */
+            if(endian==0 && c2_cyg[0]==0 && c2_cyg[1]==0 && c2_cyg[2]==0 && c2_cyg[3]==0)
+                ret = 1;
+
+    done:
+            if(c1)
+                free(c1);
+            if(c2)
+                free(c2);
+            if(c2_cyg)
+                free(c2_cyg);
+            exit(ret);
         }
-
-        /* For Cygwin */
-        size_cyg = sizeof(long double);
-        memset(&ld_cyg, 0, size);
-        ld_cyg = (long double)l_cyg;
-
-        c2_cyg = (unsigned char*)calloc(1, size_cyg);
-        memcpy((void*)c2_cyg, &ld_cyg, size_cyg);
-
-        /* Test if the last 4 bytes(roughly) of mantissa are rounded up.  Mainly for Cygwin
-         * where the values like 0xffffffffffffffff,  0xfffffffffffffffe, ...,
-         * 0xfffffffffffff000 ... are rounded up as 0x0000403f8000000000000000
-         * instead of 0x0000403effffffffffffffff, 0x0000403efffffffffffffffe, ...,
-         * 0x0000403efffffffffffff000 ...
-         */
-        if(endian==0 && c2_cyg[0]==0 && c2_cyg[1]==0 && c2_cyg[2]==0 && c2_cyg[3]==0)
-            ret = 1;
-
-done:
-        if(c1)
-            free(c1);
-        if(c2)
-            free(c2);
-        if(c2_cyg)
-            free(c2_cyg);
-        exit(ret);
-    }
 
 _ACEOF
 rm -f conftest$ac_exeext
@@ -50647,24 +50722,25 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  hdf5_cv_ullong_to_ldouble_precision_works=yes
+  hdf5_cv_ullong_to_ldouble_precision=yes
 else
   echo "$as_me: program exited with status $ac_status" >&5
 echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
 ( exit $ac_status )
-hdf5_cv_ullong_to_ldouble_precision_works=no
+hdf5_cv_ullong_to_ldouble_precision=no
 fi
 rm -f core *.core gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
 fi
 fi
 
+fi
 
-if test ${hdf5_cv_ullong_to_ldouble_precision_works} = "yes"; then
+if test ${hdf5_cv_ullong_to_ldouble_precision} = "yes"; then
 
 cat >>confdefs.h <<\_ACEOF
-#define ULLONG_TO_LDOUBLE_PRECISION_WORKS 1
+#define ULLONG_TO_LDOUBLE_PRECISION 1
 _ACEOF
 
   echo "$as_me:$LINENO: result: yes" >&5

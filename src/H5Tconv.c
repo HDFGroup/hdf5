@@ -190,6 +190,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
  * equal. In this case, do not return exception but make sure the maximum is assigned
  * to the destination.   SLU - 2005/06/29
  */
+#ifdef H5_WANT_DCONV_EXCEPTION
 #define H5T_CONV_Xx_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
     if (*((ST*)S) > (DT)(D_MAX)) {                                            \
         if(cb_struct.func) {			                              \
@@ -226,7 +227,13 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     } else 								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
+#else
+#define H5T_CONV_Xx_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+#endif
 
+#ifdef H5_WANT_DCONV_EXCEPTION
 #define H5T_CONV_Ux_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
     if (*((ST*)S) > (DT)(D_MAX)) {                                            \
         if(cb_struct.func) {			                              \
@@ -246,12 +253,18 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
+#else
+#define H5T_CONV_Ux_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+#endif
 
 #define H5T_CONV_sS(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
     H5T_CONV(H5T_CONV_xX, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
+#ifdef H5_WANT_DCONV_EXCEPTION
 #define H5T_CONV_sU_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
     if (*((ST*)S) < 0) {                                                      \
         if(cb_struct.func) {			                              \
@@ -271,23 +284,29 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
+#else
+#define H5T_CONV_sU_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+#endif
 
 #define H5T_CONV_sU(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
     H5T_CONV(H5T_CONV_sU, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
+#ifdef H5_WANT_DCONV_EXCEPTION
 #define H5T_CONV_uS_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
     if (sizeof(ST)==sizeof(DT) && *((ST*)S) > (D_MAX)) {                      \
         if(cb_struct.func) {                                                  \
-            H5T_conv_ret_t      except_ret;     /*callback return*/               \
-                                                                                  \
-            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,               \
-                    src_id, dst_id, S, D, cb_struct.user_data);                   \
-            if(except_ret == H5T_CONV_UNHANDLED)                                  \
-                /* Let compiler convert if case is ignored by user handler*/      \
+            H5T_conv_ret_t      except_ret;     /*callback return*/           \
+                                                                              \
+            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,           \
+                    src_id, dst_id, S, D, cb_struct.user_data);               \
+            if(except_ret == H5T_CONV_UNHANDLED)                              \
+                /* Let compiler convert if case is ignored by user handler*/  \
                 *((DT*)D) = (D_MAX);					      \
-            else if(except_ret == H5T_CONV_ABORT)                                 \
+            else if(except_ret == H5T_CONV_ABORT)                             \
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
             /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
         }                                                                     \
@@ -296,6 +315,11 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
+#else
+#define H5T_CONV_uS_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+#endif
 
 #define H5T_CONV_uS(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
@@ -312,6 +336,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     H5T_CONV(H5T_CONV_Xx, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
+#ifdef H5_WANT_DCONV_EXCEPTION
 #define H5T_CONV_Su_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
     if (*((ST*)S) < 0) {                                                      \
         if(cb_struct.func) {			                              \
@@ -346,6 +371,11 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
+#else
+#define H5T_CONV_Su_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+#endif
 
 #define H5T_CONV_Su(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
@@ -362,6 +392,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     H5T_CONV(H5T_CONV_Ux, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
+#ifdef H5_WANT_DCONV_EXCEPTION
 #define H5T_CONV_su_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
     /* Assumes memory format of unsigned & signed integers is same */	      \
     if (*((ST*)S) < 0) {                                                      \
@@ -379,14 +410,21 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
         }                                                                     \
         else                                                                  \
             *((DT*)D) = 0;					              \
-    }									      \
+    } else								      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
 }
+#else
+#define H5T_CONV_su_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+#endif
 
 #define H5T_CONV_su(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)==sizeof(DT));					      \
     H5T_CONV(H5T_CONV_su, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
+#ifdef H5_WANT_DCONV_EXCEPTION
 #define H5T_CONV_us_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
     /* Assumes memory format of unsigned & signed integers is same */	      \
     if (*((ST*)S) > (DT)(D_MAX)) {                                            \
@@ -404,8 +442,14 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
         }								      \
         else                                                                  \
             *((DT*)D) = (D_MAX);					      \
-    }									      \
+    } else								      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
 }
+#else
+#define H5T_CONV_us_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+#endif
 
 #define H5T_CONV_us(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)==sizeof(DT));					      \
@@ -420,6 +464,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 /* Same as H5T_CONV_Xx_CORE, except that instead of using D_MAX and D_MIN
  * when an overflow occurs, use the 'float' infinity values.
  */
+#ifdef H5_WANT_DCONV_EXCEPTION
 #define H5T_CONV_Ff_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
     if (*((ST*)S) > (DT)(D_MAX)) {                                            \
         if(cb_struct.func) {			                              \
@@ -454,6 +499,11 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
+#else
+#define H5T_CONV_Ff_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+#endif
 
 #define H5T_CONV_Ff(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
@@ -7057,7 +7107,7 @@ done:
  *		destination values are packed.
  *-------------------------------------------------------------------------
  */
-#if H5_CONVERT_DENORMAL_FLOAT
+#if FP_FP
 herr_t
 H5T_conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -7073,7 +7123,7 @@ H5T_conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_CONVERT_DENORMAL_FLOAT */
+#endif /* FP_FP */
 
 
 /*-------------------------------------------------------------------------
@@ -7091,7 +7141,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_CONVERT_DENORMAL_FLOAT && H5_SIZEOF_LONG_DOUBLE !=0
+#if FP_LDOUBLE
 herr_t
 H5T_conv_float_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -7107,7 +7157,7 @@ H5T_conv_float_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_CONVERT_DENORMAL_FLOAT && H5_SIZEOF_LONG_DOUBLE !=0 */
+#endif /*FP_LDOUBLE*/
 
 
 /*-------------------------------------------------------------------------
@@ -7132,7 +7182,7 @@ done:
  *		destination values are packed.
  *-------------------------------------------------------------------------
  */
-#if H5_CONVERT_DENORMAL_FLOAT
+#if FP_FP
 herr_t
 H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -7148,7 +7198,7 @@ H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /*H5_CONVERT_DENORMAL_FLOAT*/
+#endif /*FP_FP*/
 
 
 /*-------------------------------------------------------------------------
@@ -7166,7 +7216,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_CONVERT_DENORMAL_FLOAT && H5_SIZEOF_LONG_DOUBLE !=0
+#if FP_LDOUBLE
 herr_t
 H5T_conv_double_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -7183,7 +7233,7 @@ H5T_conv_double_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_CONVERT_DENORMAL_FLOAT && H5_SIZEOF_LONG_DOUBLE !=0 */
+#endif /*FP_LDOUBLE*/
 
 
 /*-------------------------------------------------------------------------
@@ -7201,7 +7251,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_CONVERT_DENORMAL_FLOAT && H5_SIZEOF_LONG_DOUBLE !=0
+#if FP_LDOUBLE
 herr_t
 H5T_conv_ldouble_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -7217,7 +7267,7 @@ H5T_conv_ldouble_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_CONVERT_DENORMAL_FLOAT && H5_SIZEOF_LONG_DOUBLE !=0 */
+#endif /* FP_LDOUBLE */
 
 
 /*-------------------------------------------------------------------------
@@ -7235,7 +7285,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_CONVERT_DENORMAL_FLOAT && H5_SIZEOF_LONG_DOUBLE !=0
+#if FP_LDOUBLE
 herr_t
 H5T_conv_ldouble_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -7251,7 +7301,7 @@ H5T_conv_ldouble_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_CONVERT_DENORMAL_FLOAT && H5_SIZEOF_LONG_DOUBLE !=0 */
+#endif /*FP_LDOUBLE*/
 
 
 /*-------------------------------------------------------------------------
@@ -7333,7 +7383,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SW_INTEGER_TO_LDOUBLE_WORKS
+#if INTEGER_LDOUBLE
 herr_t
 H5T_conv_schar_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -7349,7 +7399,7 @@ H5T_conv_schar_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_SW_INTEGER_TO_LDOUBLE_WORKS */
+#endif /* INTEGER_LDOUBLE */
 
 
 /*-------------------------------------------------------------------------
@@ -7431,7 +7481,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SW_INTEGER_TO_LDOUBLE_WORKS
+#if INTEGER_LDOUBLE
 herr_t
 H5T_conv_uchar_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -7447,7 +7497,7 @@ H5T_conv_uchar_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_SW_INTEGER_TO_LDOUBLE_WORKS */
+#endif /* INTEGER_LDOUBLE */
 
 
 /*-------------------------------------------------------------------------
@@ -7529,7 +7579,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SW_INTEGER_TO_LDOUBLE_WORKS
+#if INTEGER_LDOUBLE
 herr_t
 H5T_conv_short_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -7545,7 +7595,7 @@ H5T_conv_short_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_SW_INTEGER_TO_LDOUBLE_WORKS */
+#endif /* INTEGER_LDOUBLE */
 
 
 /*-------------------------------------------------------------------------
@@ -7627,7 +7677,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SW_INTEGER_TO_LDOUBLE_WORKS
+#if INTEGER_LDOUBLE
 herr_t
 H5T_conv_ushort_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -7643,7 +7693,7 @@ H5T_conv_ushort_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_SW_INTEGER_TO_LDOUBLE_WORKS */
+#endif /* INTEGER_LDOUBLE */
 
 
 /*-------------------------------------------------------------------------
@@ -7725,7 +7775,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SW_INTEGER_TO_LDOUBLE_WORKS
+#if INTEGER_LDOUBLE
 herr_t
 H5T_conv_int_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -7741,7 +7791,7 @@ H5T_conv_int_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_SW_INTEGER_TO_LDOUBLE_WORKS */
+#endif /* INTEGER_LDOUBLE */
 
 
 /*-------------------------------------------------------------------------
@@ -7823,7 +7873,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SW_INTEGER_TO_LDOUBLE_WORKS
+#if INTEGER_LDOUBLE
 herr_t
 H5T_conv_uint_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -7839,7 +7889,7 @@ H5T_conv_uint_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_SW_INTEGER_TO_LDOUBLE_WORKS */
+#endif /* INTEGER_LDOUBLE */
 
 
 /*-------------------------------------------------------------------------
@@ -7921,7 +7971,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SW_INTEGER_TO_LDOUBLE_WORKS
+#if INTEGER_LDOUBLE
 herr_t
 H5T_conv_long_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -7937,7 +7987,7 @@ H5T_conv_long_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_SW_INTEGER_TO_LDOUBLE_WORKS */
+#endif /* INTEGER_LDOUBLE */
 
 
 /*-------------------------------------------------------------------------
@@ -7955,7 +8005,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SW_ULONG_TO_FP_BOTTOM_BIT_WORKS
+#if ULONG_FP
 herr_t
 H5T_conv_ulong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -7971,7 +8021,7 @@ H5T_conv_ulong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_SW_ULONG_TO_FP_BOTTOM_BIT_WORKS */
+#endif /* ULONG_FP */
 
 
 /*-------------------------------------------------------------------------
@@ -7989,7 +8039,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SW_ULONG_TO_FP_BOTTOM_BIT_WORKS
+#if ULONG_FP
 herr_t
 H5T_conv_ulong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8005,7 +8055,7 @@ H5T_conv_ulong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_SW_ULONG_TO_FP_BOTTOM_BIT_WORKS */
+#endif /* ULONG_FP */
 
 
 /*-------------------------------------------------------------------------
@@ -8023,7 +8073,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SW_ULONG_TO_FP_BOTTOM_BIT_WORKS && H5_SW_INTEGER_TO_LDOUBLE_WORKS
+#if ULONG_LDOUBLE
 herr_t
 H5T_conv_ulong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8039,7 +8089,7 @@ H5T_conv_ulong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_SW_ULONG_TO_FP_BOTTOM_BIT_WORKS && H5_SW_INTEGER_TO_LDOUBLE_WORKS */
+#endif /* ULONG_LDOUBLE */
 
 
 /*-------------------------------------------------------------------------
@@ -8121,7 +8171,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SW_INTEGER_TO_LDOUBLE_WORKS
+#if INTEGER_LDOUBLE
 herr_t
 H5T_conv_llong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8137,9 +8187,8 @@ H5T_conv_llong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_SW_INTEGER_TO_LDOUBLE_WORKS */
+#endif /* INTEGER_LDOUBLE */
 
-#if H5_ULLONG_TO_FP_CAST_WORKS && H5_SW_ULONG_TO_FP_BOTTOM_BIT_WORKS
 
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ullong_float
@@ -8156,6 +8205,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#if ULLONG_FP
 herr_t
 H5T_conv_ullong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8171,6 +8221,7 @@ H5T_conv_ullong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+#endif /*ULLONG_FP*/
 
 
 /*-------------------------------------------------------------------------
@@ -8188,6 +8239,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#if ULLONG_FP
 herr_t
 H5T_conv_ullong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8203,6 +8255,7 @@ H5T_conv_ullong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+#endif /*ULLONG_FP*/
 
 
 /*-------------------------------------------------------------------------
@@ -8220,7 +8273,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_ULLONG_TO_LDOUBLE_PRECISION_WORKS
+#if ULLONG_LDOUBLE
 herr_t
 H5T_conv_ullong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8236,8 +8289,7 @@ H5T_conv_ullong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_ULLONG_TO_LDOUBLE_PRECISION_WORKS */
-#endif /* H5_ULLONG_TO_FP_CAST_WORKS && H5_SW_ULONG_TO_FP_BOTTOM_BIT_WORKS */
+#endif /*ULLONG_LDOUBLE*/
 
 
 /*-------------------------------------------------------------------------
@@ -8383,7 +8435,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SW_LDOUBLE_TO_INTEGER_WORKS
+#if LDOUBLE_INTEGER
 herr_t
 H5T_conv_ldouble_schar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8399,7 +8451,7 @@ H5T_conv_ldouble_schar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_SW_LDOUBLE_TO_INTEGER_WORKS */
+#endif /* LDOUBLE_INTEGER */
 
 
 /*-------------------------------------------------------------------------
@@ -8417,7 +8469,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SW_LDOUBLE_TO_INTEGER_WORKS
+#if LDOUBLE_INTEGER
 herr_t
 H5T_conv_ldouble_uchar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8433,7 +8485,7 @@ H5T_conv_ldouble_uchar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_SW_LDOUBLE_TO_INTEGER_WORKS */
+#endif /* LDOUBLE_INTEGER */
 
 
 /*-------------------------------------------------------------------------
@@ -8579,7 +8631,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SW_LDOUBLE_TO_INTEGER_WORKS
+#if LDOUBLE_INTEGER
 herr_t
 H5T_conv_ldouble_short (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8595,7 +8647,7 @@ H5T_conv_ldouble_short (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_SW_LDOUBLE_TO_INTEGER_WORKS */
+#endif /* LDOUBLE_INTEGER */
 
 
 /*-------------------------------------------------------------------------
@@ -8613,7 +8665,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SW_LDOUBLE_TO_INTEGER_WORKS
+#if LDOUBLE_INTEGER
 herr_t
 H5T_conv_ldouble_ushort (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8629,7 +8681,7 @@ H5T_conv_ldouble_ushort (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_SW_LDOUBLE_TO_INTEGER_WORKS */
+#endif /* LDOUBLE_INTEGER */
 
 
 /*-------------------------------------------------------------------------
@@ -8775,7 +8827,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SW_LDOUBLE_TO_INTEGER_WORKS
+#if LDOUBLE_INTEGER
 herr_t
 H5T_conv_ldouble_int (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8791,7 +8843,7 @@ H5T_conv_ldouble_int (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_SW_LDOUBLE_TO_INTEGER_WORKS */
+#endif /* LDOUBLE_INTEGER */
 
 
 /*-------------------------------------------------------------------------
@@ -8809,7 +8861,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SW_LDOUBLE_TO_INTEGER_WORKS && H5_CV_LDOUBLE_TO_UINT_WORKS
+#if LDOUBLE_UINT
 herr_t
 H5T_conv_ldouble_uint (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8825,7 +8877,7 @@ H5T_conv_ldouble_uint (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_SW_LDOUBLE_TO_INTEGER_WORKS && H5_CV_LDOUBLE_TO_UINT_WORKS */
+#endif /* LDOUBLE_UINT */
 
 
 /*-------------------------------------------------------------------------
@@ -8971,7 +9023,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SW_LDOUBLE_TO_INTEGER_WORKS
+#if LDOUBLE_INTEGER
 herr_t
 H5T_conv_ldouble_long (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8987,7 +9039,7 @@ H5T_conv_ldouble_long (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /*H5_SW_LDOUBLE_TO_INTEGER_WORKS*/
+#endif /*LDOUBLE_INTEGER*/
 
 
 /*-------------------------------------------------------------------------
@@ -9005,7 +9057,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SW_LDOUBLE_TO_INTEGER_WORKS
+#if LDOUBLE_INTEGER
 herr_t
 H5T_conv_ldouble_ulong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -9021,7 +9073,7 @@ H5T_conv_ldouble_ulong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_SW_LDOUBLE_TO_INTEGER_WORKS */
+#endif /* LDOUBLE_INTEGER */
 
 
 /*-------------------------------------------------------------------------
@@ -9039,7 +9091,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#ifndef H5_HW_FP_TO_LLONG_NOT_WORKS
+#if FP_LLONG
 herr_t
 H5T_conv_float_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -9055,7 +9107,7 @@ H5T_conv_float_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* !H5_HW_FP_TO_LLONG_NOT_WORKS */
+#endif /* FP_LLONG */
 
 
 /*-------------------------------------------------------------------------
@@ -9073,7 +9125,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_FP_TO_ULLONG_BOTTOM_BIT_WORKS && H5_FP_TO_ULLONG_RIGHT_MAXIMUM
+#if FP_ULLONG
 herr_t
 H5T_conv_float_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -9089,7 +9141,7 @@ H5T_conv_float_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_FP_TO_ULLONG_BOTTOM_BIT_WORKS && H5_FP_TO_ULLONG_RIGHT_MAXIMUM */
+#endif /*FP_ULLONG*/
 
 
 /*-------------------------------------------------------------------------
@@ -9107,7 +9159,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#ifndef H5_HW_FP_TO_LLONG_NOT_WORKS
+#if FP_LLONG
 herr_t
 H5T_conv_double_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -9123,7 +9175,7 @@ H5T_conv_double_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* !H5_HW_FP_TO_LLONG_NOT_WORKS */
+#endif /*FP_LLONG*/
 
 
 /*-------------------------------------------------------------------------
@@ -9141,7 +9193,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_FP_TO_ULLONG_BOTTOM_BIT_WORKS && H5_FP_TO_ULLONG_RIGHT_MAXIMUM
+#if FP_ULLONG
 herr_t
 H5T_conv_double_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -9157,7 +9209,7 @@ H5T_conv_double_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_FP_TO_ULLONG_BOTTOM_BIT_WORKS && H5_FP_TO_ULLONG_RIGHT_MAXIMUM */
+#endif /*FP_ULLONG*/
 
 
 /*-------------------------------------------------------------------------
@@ -9175,7 +9227,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if !H5_HW_FP_TO_LLONG_NOT_WORKS && H5_SW_LDOUBLE_TO_INTEGER_WORKS
+#if LDOUBLE_LLONG
 herr_t
 H5T_conv_ldouble_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -9191,7 +9243,7 @@ H5T_conv_ldouble_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* !H5_HW_FP_TO_LLONG_NOT_WORKS && H5_SW_LDOUBLE_TO_INTEGER_WORKS */
+#endif /*LDOUBLE_LLONG*/ 
 
 
 /*-------------------------------------------------------------------------
@@ -9209,7 +9261,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5_FP_TO_ULLONG_BOTTOM_BIT_WORKS && H5_FP_TO_ULLONG_RIGHT_MAXIMUM && H5_SW_LDOUBLE_TO_INTEGER_WORKS
+#if LDOUBLE_ULLONG 
 herr_t
 H5T_conv_ldouble_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -9225,7 +9277,7 @@ H5T_conv_ldouble_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_FP_TO_ULLONG_BOTTOM_BIT_WORKS && H5_FP_TO_ULLONG_RIGHT_MAXIMUM && H5_SW_LDOUBLE_TO_INTEGER_WORKS */
+#endif /*LDOUBLE_ULLONG*/
 
 
 /*-------------------------------------------------------------------------

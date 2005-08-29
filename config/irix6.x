@@ -155,7 +155,7 @@ fi
 
 # Hard set flag to indicate that the 'unsigned long long' to floating-point
 # value conversion are broken by the compilers (as of 4/27/04 - QAK)
-hdf5_cv_sw_ulong_to_fp_bottom_bit_works=${hdf5_cv_sw_ulong_to_fp_bottom_bit_works='no'}
+hdf5_cv_ulong_to_fp_bottom_bit_accurate=${hdf5_cv_ulong_to_fp_bottom_bit_accurate='no'}
 
 # Set flags to avoid conversion between 'long double' and integers because of 
 # SGI's compiler problems.  For both IRIX64 6.5 and IRIX 6.5, the compilers
@@ -170,8 +170,8 @@ hdf5_cv_sw_ulong_to_fp_bottom_bit_works=${hdf5_cv_sw_ulong_to_fp_bottom_bit_work
 #       long or long long -> long double : correct value but incorrect bit pattern
 #       unsigned long or long long -> long double : correct value but incorrect bit pattern
 # (1/5/05 - SLU)
-hdf5_cv_sw_ldouble_to_integer_works=${hdf5_cv_sw_ldouble_to_integer_works='no'}
-hdf5_cv_sw_integer_to_ldouble_works=${hdf5_cv_sw_integer_to_ldouble_works='no'}
+hdf5_cv_ldouble_to_integer_accurate=${hdf5_cv_ldouble_to_integer_accurate='no'}
+hdf5_cv_integer_to_ldouble_accurate=${hdf5_cv_integer_to_ldouble_accurate='no'}
 
 # For IRIX 6.5, any version that is older than MIPSpro 7.3.1.3m, 
 # the MPI derived datatype is not working.
