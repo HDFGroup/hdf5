@@ -469,9 +469,9 @@ if [ -n "$cmdclean" ]; then
 	esac
 	TESTDIR=${BASEDIR}/TestDir/${SRCDIRNAME}
     fi
-    # Make sure current version exists and is clean
-    if [ -d ${TESTDIR} ]; then
-	(cd ${TESTDIR} && ${MAKE} $cmdclean )
+    # clean it
+    if (cd ${TESTDIR} && ${MAKE} $cmdclean ) then
+	:
     else
 	errcode=$?
         snapshot=no
