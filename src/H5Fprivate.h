@@ -52,13 +52,13 @@ typedef struct H5F_t H5F_t;
  */
 
 #  define INT16ENCODE(p, i) {						      \
-   *(p) = (uint8_t)( (unsigned)(i)	    & 0xff); (p)++;			      \
-   *(p) = (uint8_t)(((unsigned)(i) >> 8) & 0xff); (p)++;			      \
+   *(p) = (uint8_t)( (unsigned)(i)	 & 0xff); (p)++;		      \
+   *(p) = (uint8_t)(((unsigned)(i) >> 8) & 0xff); (p)++;		      \
 }
 
 #  define UINT16ENCODE(p, i) {						      \
-   *(p) = (uint8_t)(	    (i)	    & 0xff); (p)++;			      \
-   *(p) = (uint8_t)(((unsigned)(i) >> 8) & 0xff); (p)++;			      \
+   *(p) = (uint8_t)( (unsigned)(i)	 & 0xff); (p)++;		      \
+   *(p) = (uint8_t)(((unsigned)(i) >> 8) & 0xff); (p)++;		      \
 }
 
 #  define INT32ENCODE(p, i) {						      \
@@ -417,6 +417,8 @@ H5_DLL herr_t H5F_init(void);
 #ifdef NOT_YET
 H5_DLL herr_t H5F_flush_all(hbool_t invalidate);
 #endif /* NOT_YET */
+
+/* Functions than retrieve values from the file struct */
 H5_DLL hid_t H5F_get_driver_id(const H5F_t *f);
 H5_DLL unsigned H5F_get_intent(const H5F_t *f);
 H5_DLL herr_t H5F_get_fileno(const H5F_t *f, unsigned long *filenum);

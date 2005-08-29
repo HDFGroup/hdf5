@@ -983,14 +983,14 @@ H5G_node_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *_lt_key
     if (cmp)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "not found");
 
-    if (bt_udata->operation==H5G_OPER_FIND)
-        /*
-         * The caller is querying the symbol entry, copy it into the UDATA
-         * entry field. (Hmm... should this use H5G_ent_copy()? - QAK)
-         */
-        bt_udata->ent = sn->entry[idx];
-    else
-        HGOTO_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL, "internal erorr (unknown symbol find operation)");
+    /*
+     * The caller is querying the symbol entry, copy it into the UDATA
+     * entry field.
+     *
+     * (do a NULL copy, since the entry's name will be constructed later)
+     */
+    if (H5G_ent_copy(bt_udata->ent, &sn->entry[idx], H5G_COPY_NULL)<0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to copy entry");
 
 done:
     if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE) < 0)
@@ -1116,7 +1116,7 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
      */
     offset = H5HL_insert(f, dxpl_id, bt_udata->heap_addr, HDstrlen(bt_udata->name)+1,
 			bt_udata->name);
-    bt_udata->ent.name_off = offset;
+    bt_udata->ent->name_off = offset;
     if (0==offset || (size_t)(-1)==offset)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5B_INS_ERROR, "unable to insert symbol name into heap");
     if ((size_t)(sn->nsyms) >= 2*H5F_SYM_LEAF_K(f)) {
@@ -1173,12 +1173,19 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
 	}
     }
 
-    /* Move entries */
+    /* Move entries down to make room for new entry */
     HDmemmove(insert_into->entry + idx + 1,
 	      insert_into->entry + idx,
 	      (insert_into->nsyms - idx) * sizeof(H5G_entry_t));
-    H5G_ent_copy(&(insert_into->entry[idx]), &(bt_udata->ent),H5G_COPY_NULL);
+
+    /* Copy new entry into table */
+    /* (use H5G_COPY_NULL because we don't track the object names in the table) */
+    H5G_ent_copy(&(insert_into->entry[idx]), bt_udata->ent, H5G_COPY_NULL);
+
+    /* Flag entry as dirty */
     insert_into->entry[idx].dirty = TRUE;
+
+    /* Increment # of symbols in table */
     insert_into->nsyms += 1;
 
 done:

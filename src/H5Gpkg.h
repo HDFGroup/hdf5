@@ -65,30 +65,17 @@ struct H5G_t {
 };
 
 /*
- * These operations can be passed down from the H5G_stab layer to the
- * H5G_node layer through the B-tree layer.
- */
-typedef enum H5G_oper_t {
-    H5G_OPER_FIND       = 0,   	/*find a symbol                              */
-    H5G_OPER_INSERT     = 1,	/*insert a new symbol                        */
-    H5G_OPER_REMOVE	= 2	/*remove existing symbol		     */
-} H5G_oper_t;
-
-/*
  * Data exchange structure for symbol table nodes.  This structure is
  * passed through the B-link tree layer to the methods for the objects
  * to which the B-link tree points.
  */
 typedef struct H5G_bt_ud1_t {
-
     /* downward */
-    H5G_oper_t  operation;              /*what operation to perform          */
     const char  *name;                  /*points to temporary memory         */
     haddr_t     heap_addr;              /*symbol table heap address          */
 
     /* downward for INSERT, upward for FIND */
-    H5G_entry_t ent;                    /*entry to insert into table         */
-
+    H5G_entry_t *ent;                   /*entry to insert into table         */
 } H5G_bt_ud1_t;
 
 /*
@@ -105,7 +92,6 @@ typedef struct H5G_bt_ud2_t {
 
     /* upward */
     int		final_ent;	/*final entry looked at                      */
-
 } H5G_bt_ud2_t;
 
 /*
@@ -141,7 +127,7 @@ H5_DLL herr_t H5G_stab_create(H5F_t *f, hid_t dxpl_id, size_t size_hint,
 H5_DLL herr_t H5G_stab_find(H5G_entry_t *grp_ent, const char *name,
 			     H5G_entry_t *obj_ent/*out*/, hid_t dxpl_id);
 H5_DLL herr_t H5G_stab_insert(H5G_entry_t *grp_ent, const char *name,
-			       H5G_entry_t *obj_ent, hid_t dxpl_id);
+			       H5G_entry_t *obj_ent, hbool_t inc_link, hid_t dxpl_id);
 H5_DLL herr_t H5G_stab_delete(H5F_t *f, hid_t dxpl_id, haddr_t btree_addr, haddr_t heap_addr);
 H5_DLL herr_t H5G_stab_remove(H5G_entry_t *grp_ent, const char *name, hid_t dxpl_id);
 

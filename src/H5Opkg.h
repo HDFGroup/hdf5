@@ -104,96 +104,99 @@ typedef struct H5O_t {
 } H5O_t;
 
 /*
- * Null Message.
+ * Null Message. (0x0000)
  */
 H5_DLLVAR const H5O_class_t H5O_NULL[1];
 
 /*
- * Simple Data Space Message.
+ * Simple Dataspace Message. (0x0001)
  */
 H5_DLLVAR const H5O_class_t H5O_SDSPACE[1];
 
 /*
- * Data Type Message.
+ * Datatype Message. (0x0003)
  */
 H5_DLLVAR const H5O_class_t H5O_DTYPE[1];
 
 /*
- * Old Fill Value Message.
+ * Old Fill Value Message. (0x0004)
  */
 H5_DLLVAR const H5O_class_t H5O_FILL[1];
 
 /*
- * New Fill Value Message.  The new fill value message is fill value plus
+ * New Fill Value Message. (0x0005)
+ * 
+ * The new fill value message is fill value plus
  * space allocation time and fill value writing time and whether fill
  * value is defined.
  */
 H5_DLLVAR const H5O_class_t H5O_FILL_NEW[1];
 
 /*
- * External File List Message
+ * External File List Message. (0x0007)
  */
 H5_DLLVAR const H5O_class_t H5O_EFL[1];
 
 /*
- * Data Layout Message.
+ * Data Layout Message. (0x0008)
  */
 H5_DLLVAR const H5O_class_t H5O_LAYOUT[1];
 
 #ifdef H5O_ENABLE_BOGUS
 /*
- * "Bogus" Message.
+ * "Bogus" Message. (0x0009)
  */
 H5_DLLVAR const H5O_class_t H5O_BOGUS[1];
 #endif /* H5O_ENABLE_BOGUS */
 
 /*
- * Filter pipeline message.
+ * Filter pipeline message. (0x000b)
  */
 H5_DLLVAR const H5O_class_t H5O_PLINE[1];
 
 /*
- * Attribute Message.
+ * Attribute Message. (0x000c)
  */
 H5_DLLVAR const H5O_class_t H5O_ATTR[1];
 
 /*
- * Object name message.
+ * Object name message. (0x000d)
  */
 H5_DLLVAR const H5O_class_t H5O_NAME[1];
 
 /*
- * Modification time message.  The message is just a `time_t'.
+ * Modification Time Message. (0x000e)
+ *
+ * The message is just a `time_t'.
  * (See also the "new" modification time message)
  */
 H5_DLLVAR const H5O_class_t H5O_MTIME[1];
 
 /*
- * Shared object message.  This message ID never really appears in an object
+ * Shared Object Message. (0x000f)
+ * 
+ * This message ID never really appears in an object
  * header.  Instead, bit 2 of the `Flags' field will be set and the ID field
  * will be the ID of the pointed-to message.
  */
 H5_DLLVAR const H5O_class_t H5O_SHARED[1];
 
 /*
- * Object header continuation message.
+ * Object Header Continuation Message. (0x0010)
  */
 H5_DLLVAR const H5O_class_t H5O_CONT[1];
 
 /*
- * Symbol table message.
+ * Symbol Table Message. (0x0011)
  */
 H5_DLLVAR const H5O_class_t H5O_STAB[1];
 
 /*
- * New Modification time message.  The message is just a `time_t'.
+ * New Modification Time Message. (0x0012)
+ * 
+ * The message is just a `time_t'.
  */
 H5_DLLVAR const H5O_class_t H5O_MTIME_NEW[1];
-
-/*
- * Generic property list message.
- */
-H5_DLLVAR const H5O_class_t H5O_PLIST[1];
 
 /* Package-local function prototypes */
 H5_DLL void * H5O_read_real(const H5G_entry_t *ent, const H5O_class_t *type,

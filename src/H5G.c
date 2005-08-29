@@ -1509,7 +1509,7 @@ H5G_namei(const H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/
                 } /* end if */
                 else {
                     did_insert = 1;
-                    if (H5G_stab_insert(grp_ent, H5G_comp_g, ent, dxpl_id) < 0)
+                    if (H5G_stab_insert(grp_ent, H5G_comp_g, ent, TRUE, dxpl_id) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert name");
                     HGOTO_DONE(SUCCEED);
                 } /* end else */
@@ -2215,11 +2215,6 @@ H5G_insert(H5G_entry_t *loc, const char *name, H5G_entry_t *ent, hid_t dxpl_id)
     if (H5G_namei(loc, name, NULL, NULL, NULL, H5G_TARGET_NORMAL, NULL, H5G_NAMEI_INSERT, ent, dxpl_id)<0)
 	HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "already exists");
 
-    /*
-     * Insert the object into a symbol table.
-     */
-    if (H5O_link(ent, 1, dxpl_id) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_LINK, FAIL, "unable to increment hard link count");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -2511,8 +2506,10 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
              * exist and the file is writable (because the local heap is
              * writable).  But if it does, the only side effect is that the local
              * heap has some extra garbage in it.
+             *
+             * Note: We don't increment the link count of the destination object
              */
-            if (H5G_stab_insert (&grp_ent, rest, &cur_obj, dxpl_id)<0)
+            if (H5G_stab_insert (&grp_ent, rest, &cur_obj, FALSE, dxpl_id)<0)
                 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to create new name/link for object");
             break;
 

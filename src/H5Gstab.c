@@ -33,7 +33,7 @@
 H5FL_BLK_EXTERN(str_buf);
 
 /* Private prototypes */
-static herr_t H5G_insert_name(H5G_entry_t *loc, H5G_entry_t *obj,
+static herr_t H5G_stab_insert_name(H5G_entry_t *loc, H5G_entry_t *obj,
         const char *name);
 
 
@@ -155,31 +155,23 @@ H5G_stab_find(H5G_entry_t *grp_ent, const char *name,
     /* Check arguments */
     assert(grp_ent);
     assert(grp_ent->file);
+    assert(obj_ent);
     assert(name && *name);
 
     /* set up the udata */
     if (NULL == H5O_read(grp_ent, H5O_STAB_ID, 0, &stab, dxpl_id))
 	HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't read message");
-    udata.operation = H5G_OPER_FIND;
     udata.name = name;
     udata.heap_addr = stab.heap_addr;
+    udata.ent = obj_ent;
 
     /* search the B-tree */
-    if (H5B_find(grp_ent->file, dxpl_id, H5B_SNODE, stab.btree_addr, &udata) < 0) {
+    if (H5B_find(grp_ent->file, dxpl_id, H5B_SNODE, stab.btree_addr, &udata) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "not found");
-    } /* end if */
-    /* change OBJ_ENT only if found */
-    else {
-        if (obj_ent) {
-            /* do a NULL copy, since the obj_ent name will be constructed in H5G_insert_name() */
-            if (H5G_ent_copy(obj_ent, &(udata.ent),H5G_COPY_NULL)<0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to copy entry");
 
-            /* insert the name into the symbol entry OBJ_ENT */
-            if (H5G_insert_name( grp_ent, obj_ent, name ) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot insert name");
-        } /* end if */
-    } /* end else */
+    /* insert the name into the symbol entry OBJ_ENT */
+    if (H5G_stab_insert_name( grp_ent, obj_ent, name ) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot insert name");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -209,7 +201,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent, hid_t dxpl_id)
+H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent,
+    hbool_t inc_link, hid_t dxpl_id)
 {
     H5O_stab_t		stab;		/*symbol table message		*/
     H5G_bt_ud1_t	udata;		/*data to pass through B-tree	*/
@@ -225,24 +218,25 @@ H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent, hi
 	HGOTO_ERROR(H5E_SYM, H5E_LINK, FAIL, "interfile hard links are not allowed");
 
     /* insert the name into the symbol entry OBJ_ENT */
-    if(H5G_insert_name(grp_ent, obj_ent, name) < 0)
+    if(H5G_stab_insert_name(grp_ent, obj_ent, name) < 0)
        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot insert name");
 
     /* initialize data to pass through B-tree */
     if (NULL == H5O_read(grp_ent, H5O_STAB_ID, 0, &stab, dxpl_id))
 	HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table");
 
-    udata.operation = H5G_OPER_INSERT;
     udata.name = name;
     udata.heap_addr = stab.heap_addr;
-    H5G_ent_copy(&(udata.ent),obj_ent,H5G_COPY_NULL); /* NULL copy here, no copies happens in H5G_node_insert() callback() */
+    udata.ent = obj_ent;
 
     /* insert */
     if (H5B_insert(grp_ent->file, dxpl_id, H5B_SNODE, stab.btree_addr, &udata) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert entry");
 
-    /* update the name offset in the entry */
-    obj_ent->name_off = udata.ent.name_off;
+    /* Increment link count on object, if appropriate */
+    if(inc_link)
+        if (H5O_link(obj_ent, 1, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_LINK, FAIL, "unable to increment hard link count")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -278,10 +272,9 @@ H5G_stab_remove(H5G_entry_t *grp_ent, const char *name, hid_t dxpl_id)
     /* initialize data to pass through B-tree */
     if (NULL==H5O_read(grp_ent, H5O_STAB_ID, 0, &stab, dxpl_id))
 	HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table");
-    udata.operation = H5G_OPER_REMOVE;
     udata.name = name;
     udata.heap_addr = stab.heap_addr;
-    HDmemset(&(udata.ent), 0, sizeof(udata.ent));
+    udata.ent = NULL;
 
     /* remove */
     if (H5B_remove(grp_ent->file, dxpl_id, H5B_SNODE, stab.btree_addr, &udata)<0)
@@ -293,7 +286,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5G_insert_name
+ * Function: H5G_stab_insert_name
  *
  * Purpose: Insert a name into the symbol entry OBJ, located at LOC
  *
@@ -310,12 +303,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_insert_name(H5G_entry_t *loc, H5G_entry_t *obj, const char *name)
+H5G_stab_insert_name(H5G_entry_t *loc, H5G_entry_t *obj, const char *name)
 {
     size_t  name_len;           /* Length of name to append */
     herr_t  ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_insert_name);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_stab_insert_name);
 
     assert(loc);
     assert(obj);
@@ -441,10 +434,9 @@ H5G_stab_delete(H5F_t *f, hid_t dxpl_id, haddr_t btree_addr, haddr_t heap_addr)
     assert(H5F_addr_defined(heap_addr));
 
     /* Set up user data for B-tree deletion */
-    HDmemset(&udata, 0, sizeof udata);
-    udata.operation = H5G_OPER_REMOVE;
     udata.name = NULL;
     udata.heap_addr = heap_addr;
+    udata.ent = NULL;
 
     /* Delete entire B-tree */
     if(H5B_delete(f, dxpl_id, H5B_SNODE, btree_addr, &udata)<0)

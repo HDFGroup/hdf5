@@ -377,7 +377,8 @@ H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
  *                      previous value in the destination.
  *                  H5G_COPY_SHALLOW - Copy all the fields from the source
  *                      to the destination, including the user path and
- *                      canonical path.
+ *                      canonical path. (Destination "takes ownership" of
+ *                      user and canonical paths)
  *                  H5G_COPY_DEEP - Copy all the fields from the source to
  *                      the destination, deep copying the user and canonical
  *                      paths.
@@ -416,8 +417,10 @@ H5G_ent_copy(H5G_entry_t *dst, const H5G_entry_t *src, H5G_ent_copy_depth_t dept
         dst->user_path_r=NULL;
         dst->canon_path_r=NULL;
     } else if(depth==H5G_COPY_SHALLOW) {
+#ifndef NDEBUG
         /* Discarding 'const' qualifier OK - QAK */
-        H5G_ent_reset(src);
+        H5G_ent_reset((H5G_entry_t *)src);
+#endif /* NDEBUG */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED);
