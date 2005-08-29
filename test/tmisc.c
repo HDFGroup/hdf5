@@ -256,6 +256,7 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 
 /* Definitions for misc. test #23 */
 #define MISC23_FILE             "tmisc23.h5"
+#define MISC23_NAME_BUF_SIZE    40
 
 /****************************************************************
 **
@@ -3718,6 +3719,8 @@ test_misc23(void)
     hsize_t     dims[] = {10};
     hid_t       file_id=0, group_id=0, type_id=0, space_id=0,
                 tmp_id=0, create_id=H5P_DEFAULT, access_id=H5P_DEFAULT;
+    char        objname[MISC23_NAME_BUF_SIZE];  /* Name of object */
+    H5G_stat_t  sb;
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing intermediate group creation\n"));
@@ -3782,6 +3785,22 @@ test_misc23(void)
 
     tmp_id = H5Gcreate_expand(file_id, "/A/B01/grp", 0, create_id, access_id);
     CHECK(tmp_id, FAIL, "H5Gcreate_expand");
+
+    /* Query that the name of the new group is correct */
+    status = H5Iget_name( tmp_id, objname, (size_t)MISC23_NAME_BUF_SIZE );
+    CHECK(status, FAIL, "H5Iget_name");
+    VERIFY_STR(objname, "/A/B01/grp", "H5Iget_name");
+
+    status = H5Gclose(tmp_id);
+    CHECK(status, FAIL, "H5Gclose");
+
+    /* Check that intermediate group is set up correctly */
+    tmp_id = H5Gopen(file_id, "/A/B01");
+    CHECK(tmp_id, FAIL, "H5Gopen");
+
+    status = H5Gget_objinfo(tmp_id, ".", FALSE, &sb);
+    CHECK(status, FAIL, "H5Gget_objinfo");
+    VERIFY(sb.u.obj.nlink,1,"H5Gget_objinfo");
 
     status = H5Gclose(tmp_id);
     CHECK(status, FAIL, "H5Gclose");

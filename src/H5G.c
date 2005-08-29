@@ -1578,25 +1578,21 @@ H5G_namei(const H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/
                             /* Reset group entry */
                             H5G_ent_reset(&new_ent);
 
-                            /* Create the group entry */
+                            /* Create the intermediate group */
                             if (H5G_stab_create(grp_ent->file, dxpl_id, 0, &new_ent/*out*/) < 0)
                                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create grp");
 
                             /* Insert new group into current group's symbol table */
-                            if (H5G_stab_insert(grp_ent, H5G_comp_g, &new_ent, dxpl_id))
+                            if (H5G_stab_insert(grp_ent, H5G_comp_g, &new_ent, TRUE, dxpl_id))
                                 HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert intermediate group");
 
-                            /* Close new group entry */
-                            if (H5O_close(&new_ent) < 0)
-                                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close");
-
-                            /* Copy newly created group's entry, so we can traverse into it */
-                            if (H5G_ent_copy(obj_ent, &new_ent, H5G_COPY_NULL)<0)
+                            /* Keep newly created group's entry, so we can traverse into it */
+                            if (H5G_ent_copy(obj_ent, &new_ent, H5G_COPY_DEEP)<0)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to copy entry");
 
-                            /* Insert the name into the new symbol entry */
-                            if (H5G_stab_insert_name(grp_ent, obj_ent, H5G_comp_g ) < 0)
-                                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot insert name");
+                            /* Close new group */
+                            if (H5O_close(&new_ent) < 0)
+                                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close");
                         }
                         else
                             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found");
@@ -1604,7 +1600,7 @@ H5G_namei(const H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/
                 } /* end if */
                 else {
                     did_insert = 1;
-                    if (H5G_stab_insert(grp_ent, H5G_comp_g, ent, dxpl_id) < 0)
+                    if (H5G_stab_insert(grp_ent, H5G_comp_g, ent, TRUE, dxpl_id) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert name");
                     HGOTO_DONE(SUCCEED);
                 } /* end else */
@@ -2341,12 +2337,6 @@ H5G_insert(H5G_entry_t *loc, const char *name, H5G_entry_t *ent, hid_t dxpl_id, 
     if (H5G_namei(loc, name, NULL, NULL, NULL, target, NULL, H5G_NAMEI_INSERT, ent, dxpl_id)<0)
 	HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "already exists");
 
-    /*
-     * Insert the object into a symbol table.
-     */
-    if (H5O_link(ent, 1, dxpl_id) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_LINK, FAIL, "unable to increment hard link count");
-
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
@@ -2642,8 +2632,10 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
              * exist and the file is writable (because the local heap is
              * writable).  But if it does, the only side effect is that the local
              * heap has some extra garbage in it.
+             *
+             * Note: We don't increment the link count of the destination object
              */
-            if (H5G_stab_insert (&grp_ent, rest, &cur_obj, dxpl_id)<0)
+            if (H5G_stab_insert (&grp_ent, rest, &cur_obj, FALSE, dxpl_id)<0)
                 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to create new name/link for object");
             break;
 
@@ -2651,7 +2643,7 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
             if (H5G_namei(cur_loc, norm_cur_name, NULL, NULL, &cur_obj, namei_flags, NULL, H5G_NAMEI_TRAVERSE, NULL, dxpl_id)<0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "source object not found");
             cur_obj_init=1;     /* Indicate that the cur_obj struct is initialized */
-            if (H5G_insert (new_loc, norm_new_name, &cur_obj, dxpl_id, 0)<0)
+            if (H5G_insert (new_loc, norm_new_name, &cur_obj, dxpl_id, NULL)<0)
                 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to create new name/link for object");
             break;
 

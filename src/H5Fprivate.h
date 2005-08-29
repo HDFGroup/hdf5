@@ -52,13 +52,13 @@ typedef struct H5F_t H5F_t;
  */
 
 #  define INT16ENCODE(p, i) {						      \
-   *(p) = (uint8_t)( (unsigned)(i)	    & 0xff); (p)++;			      \
-   *(p) = (uint8_t)(((unsigned)(i) >> 8) & 0xff); (p)++;			      \
+   *(p) = (uint8_t)( (unsigned)(i)	 & 0xff); (p)++;		      \
+   *(p) = (uint8_t)(((unsigned)(i) >> 8) & 0xff); (p)++;		      \
 }
 
 #  define UINT16ENCODE(p, i) {						      \
-   *(p) = (uint8_t)(	    (i)	    & 0xff); (p)++;			      \
-   *(p) = (uint8_t)(((unsigned)(i) >> 8) & 0xff); (p)++;			      \
+   *(p) = (uint8_t)( (unsigned)(i)	 & 0xff); (p)++;		      \
+   *(p) = (uint8_t)(((unsigned)(i) >> 8) & 0xff); (p)++;		      \
 }
 
 #  define INT32ENCODE(p, i) {						      \
