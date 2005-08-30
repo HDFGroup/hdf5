@@ -78,7 +78,8 @@ t_mpi_LDADD = $(LDADD)
 t_mpi_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
 am_testphdf5_OBJECTS = testphdf5.$(OBJEXT) t_dset.$(OBJEXT) \
 	t_file.$(OBJEXT) t_mdset.$(OBJEXT) t_ph5basic.$(OBJEXT) \
-	t_coll_chunk.$(OBJEXT) t_span_tree.$(OBJEXT)
+	t_coll_chunk.$(OBJEXT) t_span_tree.$(OBJEXT) \
+	t_chunk_alloc.$(OBJEXT)
 testphdf5_OBJECTS = $(am_testphdf5_OBJECTS)
 testphdf5_LDADD = $(LDADD)
 testphdf5_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
@@ -321,7 +322,7 @@ TEST_PROG_PARA = t_mpi t_fphdf5 testphdf5
 TEST_SCRIPT_PARA = testph5.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 testphdf5_SOURCES = testphdf5.c t_dset.c t_file.c t_mdset.c t_ph5basic.c \
-        t_coll_chunk.c t_span_tree.c
+        t_coll_chunk.c t_span_tree.c t_chunk_alloc.c
 
 
 # The tests all depend on the hdf5 library and the test library
@@ -403,6 +404,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_chunk_alloc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_coll_chunk.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_dset.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_file.Po@am__quote@
