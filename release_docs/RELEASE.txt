@@ -256,6 +256,12 @@ New Features
 
     Parallel Library:
     -----------------
+	- A dataset created in serial mode with H5D_ALLOC_TIME_INCR allocation
+	  setting was not extendible, either explicitly by H5Dextend or
+	  implicitly by writing to unallocated chunks.	Library now allocates
+	  more space when needed or directed if the file is opened by parallel
+	  mode, independent of what the dataset allocation mode is.
+	  CC/AKC - 2005/08/29.
         - Allow compressed, chunked datasets to be read in parallel.
             QAK - 2004/10/04
         - Add options of using atomicity and file-sync to test_mpio_1wMr.
