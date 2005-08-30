@@ -621,8 +621,8 @@ static herr_t H5S_obtain_datatype(const hsize_t size[],
 #else
 
   blocklen     = (int *)HDcalloc((size_t)outercount,sizeof(int));
-  disp         = (MPI_Aint *)HDcalloc((size_t)outercount,sizeof(int));
-  inner_type   = (MPI_Datatype *)HDcalloc((size_t)outercount,sizeof(int));
+  disp         = (MPI_Aint *)HDcalloc((size_t)outercount,sizeof(MPI_Aint));
+  inner_type   = (MPI_Datatype *)HDcalloc((size_t)outercount,sizeof(MPI_Datatype));
 
 #endif
 
