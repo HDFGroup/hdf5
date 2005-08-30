@@ -2363,8 +2363,8 @@ dnl for the speed optimization of hard conversions.  Soft conversions can
 dnl actually benefit little.  
 dnl
 AC_MSG_CHECKING([whether exception handling functions is checked during data conversions])
-AC_ARG_ENABLE([exception],
-              [AC_HELP_STRING([--enable-exception],
+AC_ARG_ENABLE([dconv-exception],
+              [AC_HELP_STRING([--enable-dconv-exception],
                               [if exception handling functions is checked during 
                               data conversions [default=yes]])],
               [DCONV_EXCEPTION=$enableval], [DCONV_EXCEPTION=yes])
@@ -2384,8 +2384,8 @@ dnl though the data may be wrong (for example, some compilers don't
 dnl support denormalized floating values) to maximize speed.
 dnl 
 AC_MSG_CHECKING([whether data accuracy is guaranteed during data conversions])
-AC_ARG_ENABLE([accuracy],
-              [AC_HELP_STRING([--enable-accuracy],
+AC_ARG_ENABLE([dconv-accuracy],
+              [AC_HELP_STRING([--enable-dconv-accuracy],
                               [if data accuracy is guaranteed during 
                               data conversions [default=yes]])],
               [DATA_ACCURACY=$enableval], [DATA_ACCURACY=yes])
