@@ -68,33 +68,33 @@
 /* Define an interim macro for converting between floating number(float and double) and floating number.
  * All Cray compilers don't support denormalized floating values generating exception(?). */
 #if H5_CONVERT_DENORMAL_FLOAT
-#define FP_FP           1
+#define H5T_CONV_INTERIM_FP_FP           1
 #endif /*H5_CONVERT_DENORMAL_FLOAT*/
 
 /* Define an interim macro for converting between floating number(float and double) and long double.
  * All Cray compilers don't support denormalized floating values generating exception(?).  NEC doesn't
  * support long double. */
 #if H5_SIZEOF_LONG_DOUBLE && H5_CONVERT_DENORMAL_FLOAT
-#define FP_LDOUBLE      1
+#define H5T_CONV_INTERIM_FP_LDOUBLE      1
 #endif /*H5_SIZEOF_LONG_DOUBLE && H5_CONVERT_DENORMAL_FLOAT*/
 
 /* Define an interim macro for converting all integers to long double.  SGI compilers give some 
  * incorrect conversions. */
 #if (H5_WANT_DATA_ACCURACY && H5_INTEGER_TO_LDOUBLE_ACCURATE) || (!H5_WANT_DATA_ACCURACY)
-#define INTEGER_LDOUBLE         1
+#define H5T_CONV_INTERIM_INTEGER_LDOUBLE         1
 #endif
 
 /* Define an interim macro for converting unsigned (long) long to floating numbers.
  * 64-bit Solaris does different rounding. */ 
 #if (H5_WANT_DATA_ACCURACY && H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE) || (!H5_WANT_DATA_ACCURACY)
-#define ULONG_FP         1
+#define H5T_CONV_INTERIM_ULONG_FP         1
 #endif
 
 /* Define an interim macro for converting unsigned long to long double.  SGI compilers give some
  * incorrect conversions. 64-bit Solaris does different rounding. */
 #if (H5_WANT_DATA_ACCURACY && H5_INTEGER_TO_LDOUBLE_ACCURATE && H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE) || \
     (!H5_WANT_DATA_ACCURACY)
-#define ULONG_LDOUBLE       1
+#define H5T_CONV_INTERIM_ULONG_LDOUBLE       1
 #endif
 
 /* Define an interim macro for converting unsigned long long to floating numbers.  SGI compilers give 
@@ -102,7 +102,7 @@
  * not support unsigned long long. */
 #if (H5_WANT_DATA_ACCURACY && H5_ULLONG_TO_FP_CAST_WORKS && H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE) || \
     (!H5_WANT_DATA_ACCURACY && H5_ULLONG_TO_FP_CAST_WORKS)
-#define ULLONG_FP         1
+#define H5T_CONV_INTERIM_ULLONG_FP         1
 #endif
 
 /* Define an interim macro for converting unsigned long long to long double.  SGI compilers give 
@@ -111,14 +111,14 @@
  * compiler tries to do the conversion.  For Cygwin, compiler doesn't do rounding correctly. */
 #if (H5_WANT_DATA_ACCURACY && H5_ULLONG_TO_FP_CAST_WORKS && H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE && \
     H5_ULLONG_TO_LDOUBLE_PRECISION) || (!H5_WANT_DATA_ACCURACY && H5_ULLONG_TO_FP_CAST_WORKS)
-#define ULLONG_LDOUBLE         1
+#define H5T_CONV_INTERIM_ULLONG_LDOUBLE         1
 #endif
 
 /* Define an interim macro for converting long double to all integers.  SGI compilers give some incorrect
  * conversions.  HP-UX 11.00 compiler generates floating exception. */
 #if (H5_WANT_DATA_ACCURACY && H5_LDOUBLE_TO_INTEGER_ACCURATE && H5_LDOUBLE_TO_INTEGER_WORKS) || \
     (!H5_WANT_DATA_ACCURACY && H5_LDOUBLE_TO_INTEGER_WORKS)
-#define LDOUBLE_INTEGER         1
+#define H5T_CONV_INTERIM_LDOUBLE_INTEGER         1
 #endif
 
 /* Define an interim macro for converting long double to unsigned int.  SGI compilers give some incorrect
@@ -126,13 +126,13 @@
  * give incorrect values. */
 #if (H5_WANT_DATA_ACCURACY && H5_LDOUBLE_TO_INTEGER_ACCURATE && H5_LDOUBLE_TO_UINT_ACCURATE && \
     H5_LDOUBLE_TO_INTEGER_WORKS) || (!H5_WANT_DATA_ACCURACY && H5_LDOUBLE_TO_INTEGER_WORKS)
-#define LDOUBLE_UINT         1
+#define H5T_CONV_INTERIM_LDOUBLE_UINT         1
 #endif
 
 /* Define an interim macro for converting floating numbers to long long.  The hard conversion on Windows 
  * .NET 2003 has a bug and gives wrong exception value. */
 #if (H5_WANT_DATA_ACCURACY && !H5_HW_FP_TO_LLONG_NOT_WORKS) || (!H5_WANT_DATA_ACCURACY)
-#define FP_LLONG         1
+#define H5T_CONV_INTERIM_FP_LLONG         1
 #endif
 
 /* Define an interim macro for converting long double to long long.  SGI compilers give some incorrect
@@ -141,7 +141,7 @@
 #if (H5_WANT_DATA_ACCURACY && !H5_HW_FP_TO_LLONG_NOT_WORKS && H5_LDOUBLE_TO_INTEGER_ACCURATE && \
     H5_LDOUBLE_TO_INTEGER_WORKS) || \
     (!H5_WANT_DATA_ACCURACY && !H5_HW_FP_TO_LLONG_NOT_WORKS && H5_LDOUBLE_TO_INTEGER_WORKS)
-#define LDOUBLE_LLONG         1
+#define H5T_CONV_INTERIM_LDOUBLE_LLONG         1
 #endif
 
 /* Define an interim macro for converting floating numbers to unsigned long long.  PGI compiler does 
@@ -149,7 +149,7 @@
  * for unsigned long long as 0x7fffffffffffffff during conversion. */
 #if (H5_WANT_DATA_ACCURACY && H5_FP_TO_ULLONG_ACCURATE && H5_FP_TO_ULLONG_RIGHT_MAXIMUM) || \
     (!H5_WANT_DATA_ACCURACY)
-#define FP_ULLONG         1
+#define H5T_CONV_INTERIM_FP_ULLONG         1
 #endif
 
 /* Define an interim macro for converting long double to all integers.  SGI compilers give some incorrect
@@ -157,7 +157,7 @@
 #if (H5_WANT_DATA_ACCURACY && H5_LDOUBLE_TO_INTEGER_ACCURATE && H5_LDOUBLE_TO_INTEGER_WORKS && \
     H5_FP_TO_ULLONG_ACCURATE && H5_FP_TO_ULLONG_RIGHT_MAXIMUM) || \
     (!H5_WANT_DATA_ACCURACY && H5_LDOUBLE_TO_INTEGER_WORKS)
-#define LDOUBLE_ULLONG         1
+#define H5T_CONV_INTERIM_LDOUBLE_ULLONG         1
 #endif
 
 /* Statistics about a conversion function */
