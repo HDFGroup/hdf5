@@ -12,18 +12,33 @@
 ## http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
 ## access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
 ##
-# Compare the modification of two files.  If file1 is newer than file2,
-# return true (0).  Otherwise return false (1).  If file1 or file2 does
-# not exist or is not a file, return false (1).
+# Compare the modification time of file argument 1 against other file arguments.
+# Return true (0) if argument 1 is newer than all others, otherwise return
+# false (1).  If any of the argument is not a file, return false (1).
 #
 # Programmer: Albert Cheng
 # Created Date: 2005/07/06
+# Modification:
+#    Albert Cheng 2005/8/30
+#    Changed from two arguments to mulitple arguments.
 
-if test $# -eq 2; then
-    if test -f $1 -a -f $2; then
-	if test X != X`find $1 -newer $2 -print`; then
-	    exit 0
-	fi
-    fi
+if test $# -lt 2; then
+    exit 1
 fi
-exit 1
+if test ! -f $1; then
+    exit 1
+fi
+f1=$1
+shift
+
+for f in $*; do
+    if ! test -f $f; then
+	exit 1
+    fi
+    if test X = X`find $f1 -newer $f -print`; then
+	exit 1
+    fi
+done
+
+# passed all tests.  Must be a file newer than all others.
+exit 0

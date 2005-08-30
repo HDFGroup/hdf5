@@ -26,6 +26,7 @@ check_PROGRAMS=tellub h5jamgentest getub
 TEST_SCRIPT=testh5jam.sh
 
 check_SCRIPTS=$(TEST_SCRIPT)
+SCRIPT_DEPEND=h5jam$(EXEEXT) h5unjam$(EXEEXT)
 
 # Link against the main HDF5 library and tools library
 LDADD=$(LIBH5TOOLS) $(LIBHDF5)

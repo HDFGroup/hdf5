@@ -38,6 +38,7 @@ TEST_SCRIPT=$(srcdir)/testh5diff.sh
 
 check_PROGRAMS=$(TEST_PROG)
 check_SCRIPTS=$(TEST_SCRIPT) $(TEST_SCRIPT_PARA)
+SCRIPT_DEPEND=h5diff$(EXEEXT)
 
 # Source files for the program
 h5diff_SOURCES=h5diff_main.c h5diff_common.c

@@ -316,6 +316,7 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 TEST_PROG = h5importtest
 TEST_SCRIPT = $(srcdir)/h5importtestutil.sh
 check_SCRIPT = h5importtestutil.sh
+SCRIPT_DEPEND = h5import$(EXEEXT)
 
 # All programs depend on the main hdf5 library and the tools library
 LDADD = $(LIBHDF5) $(LIBH5TOOLS)
@@ -739,7 +740,7 @@ $(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) dummysh.chkexe_:
 	   tname=`basename $(@:.chkexe_=)`;\
 	   log=`basename $(@:.chkexe_=.chklog)`; \
 	   echo "============================"; \
-	   if $(top_srcdir)/bin/newer `basename $(@:.chkexe_=.chkexe)` $(@:.chkexe_=); then \
+	   if $(top_srcdir)/bin/newer `basename $(@:.chkexe_=.chkexe)` $(SCRIPT_DEPEND); then \
 	      echo "No need to test $${tname} again."; \
 	   else \
 	      echo "============================" > $${log}; \

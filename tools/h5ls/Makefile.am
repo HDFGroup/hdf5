@@ -25,6 +25,7 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 # Test programs and scripts
 TEST_SCRIPT=$(srcdir)/testh5ls.sh
 check_SCRIPTS=$(TEST_SCRIPT)
+SCRIPT_DEPEND=h5ls$(EXEEXT)
 
 # This is our main target, the h5ls tool
 bin_PROGRAMS=h5ls

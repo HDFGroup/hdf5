@@ -30,6 +30,8 @@ noinst_PROGRAMS=testh5repack_detect_szip
 check_SCRIPTS=$(TEST_SCRIPT)
 check_PROGRAMS=$(TEST_PROG)
 
+SCRIPT_DEPEND=h5repack$(EXEEXT)
+
 # Our main target, h5repack tool
 bin_PROGRAMS=h5repack
 

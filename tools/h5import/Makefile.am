@@ -28,6 +28,7 @@ TEST_SCRIPT=$(srcdir)/h5importtestutil.sh
 
 check_PROGRAMS=$(TEST_PROG)
 check_SCRIPT=h5importtestutil.sh
+SCRIPT_DEPEND=h5import$(EXEEXT)
 
 # Our main targets
 bin_PROGRAMS=h5import

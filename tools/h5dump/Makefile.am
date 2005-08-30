@@ -28,6 +28,7 @@ TEST_SCRIPT=testh5dump.sh $(srcdir)/testh5dumpxml.sh
 
 check_PROGRAMS=$(TEST_PROG)
 check_SCRIPTS=$(TEST_SCRIPT)
+SCRIPT_DEPEND=h5dump$(EXEEXT)
 
 # Our main target, the h5dump tool.
 bin_PROGRAMS=h5dump

@@ -33,13 +33,6 @@ lib_LTLIBRARIES=libhdf5.la
 # Add libtool numbers to the HDF5 library (from config/lt_vers.am)
 libhdf5_la_LDFLAGS= -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISION):$(LT_VERS_AGE)
 
-# Temporary files
-MOSTLYCLEANFILES=H5detect.o H5detect.lo H5detect H5Tinit.o H5Tinit.lo H5Tinit.c
-
-# libhdf5.settings is generated during configure. Remove it when distclean.
-DISTCLEAN=libhdf5.settings
-
-
 # library sources
 libhdf5_la_SOURCES= H5.c H5A.c H5AC.c H5B.c H5B2.c H5B2cache.c H5B2dbg.c      \
         H5B2test.c H5BP.c H5BPcache.c H5BPdbg.c H5BPtest.c \

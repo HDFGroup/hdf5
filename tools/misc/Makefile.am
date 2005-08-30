@@ -28,6 +28,7 @@ TEST_SCRIPT=testh5repart.sh
 
 check_PROGRAMS=$(TEST_PROG) repart_test
 check_SCRIPTS=$(TEST_SCRIPT)
+SCRIPT_DEPEND=h5repart$(EXEEXT)
 
 # Build pdb2hdf5 if LLNL's PDB is present (checked in configure)
 if BUILD_PDB2HDF_CONDITIONAL

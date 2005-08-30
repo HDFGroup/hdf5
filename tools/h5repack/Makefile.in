@@ -334,6 +334,7 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/tools/lib
 TEST_SCRIPT = h5repack.sh
 TEST_PROG = h5repacktst
 check_SCRIPTS = $(TEST_SCRIPT)
+SCRIPT_DEPEND = h5repack$(EXEEXT)
 
 # All programs depend on the hdf5 library and the tools library
 LDADD = $(LIBH5TOOLS) $(LIBHDF5)
@@ -796,7 +797,7 @@ $(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) dummysh.chkexe_:
 	   tname=`basename $(@:.chkexe_=)`;\
 	   log=`basename $(@:.chkexe_=.chklog)`; \
 	   echo "============================"; \
-	   if $(top_srcdir)/bin/newer `basename $(@:.chkexe_=.chkexe)` $(@:.chkexe_=); then \
+	   if $(top_srcdir)/bin/newer `basename $(@:.chkexe_=.chkexe)` $(SCRIPT_DEPEND); then \
 	      echo "No need to test $${tname} again."; \
 	   else \
 	      echo "============================" > $${log}; \

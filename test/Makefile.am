@@ -25,6 +25,7 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/src
 # Test script for error_test and err_compat
 TEST_SCRIPT = $(top_srcdir)/test/testerror.sh
 check_SCRIPTS = $(TEST_SCRIPT)
+SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT)
 
 
 # These are our main targets. They should be listed in the order to be
