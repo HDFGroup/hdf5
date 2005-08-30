@@ -50009,7 +50009,7 @@ if test "${enable_dconv_exception+set}" = set; then
   enableval="$enable_dconv_exception"
   DCONV_EXCEPTION=$enableval
 else
-  DCONV_EXCEPTION=yes
+  DCONV_EXCEPTION=no
 fi;
 
 if test "$DCONV_EXCEPTION" = "yes"; then
