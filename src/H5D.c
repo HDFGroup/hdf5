@@ -2989,14 +2989,17 @@ done:
  *
  * Modifications:
  *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to retrieve property for generic property
- *              list.
+ *              Raymond Lu, October 2, 2001
+ *              Changed the way to retrieve property for generic property list.
  *
- *              Nat Furrer and James Laird
- *              June 17, 2004
- *              Added check for filter encode capability
+ *              Nat Furrer/James Laird, June 17, 2004
+ *              Added check for filter encode capability.
+ *
+ *              Christian Chilan, June 27, 2005
+ *              In addition to the case where allocation property is
+ *              H5D_ALLOC_TIME_EARLY, storage will be allocated when the
+ *              dataset is open by parallel mode.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3062,7 +3065,7 @@ H5D_extend (H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update cached chunk indices")
 
 	/* Allocate space for the new parts of the dataset, if appropriate */
-        if(dataset->shared->alloc_time==H5D_ALLOC_TIME_EARLY)
+        if(dataset->shared->alloc_time==H5D_ALLOC_TIME_EARLY || IS_H5FD_MPI(dataset->ent.file))
             if (H5D_alloc_storage(dataset->ent.file, dxpl_id, dataset, H5D_ALLOC_EXTEND, TRUE, FALSE)<0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value")
     } /* end if */
@@ -3168,10 +3171,14 @@ H5D_get_file (const H5D_t *dset)
  *              Friday, January 16, 1998
  *
  * Modifications:
- *              Quincey Koziol
- *              Thursday, August 22, 2002
+ *              Quincey Koziol, August 22, 2002
  *              Moved here from H5F_arr_create and moved more logic into
  *              this function from places where it was being called.
+ *
+ *              Christian Chilan, June 27, 2005
+ *              In addition to the case where allocation property is
+ *              H5D_ALLOC_TIME_EARLY, storage will be allocated when the
+ *              dataset is open by parallel mode.
  *
  *-------------------------------------------------------------------------
  */
@@ -3226,13 +3233,17 @@ H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_allo
                     init_space=1;
                 } /* end if */
 
-                /* If space allocation is set to 'early' and we are extending
-                 *  the dataset, indicate that space should be allocated, so the
+                /* If (space allocation is set to 'early' or file is opened
+		 *  by parallel mode) and we are extending the dataset,
+		 *  indicate that space should be allocated, so the
                  *  B-tree gets expanded. -QAK
                  */
-                if(dset->shared->alloc_time==H5D_ALLOC_TIME_EARLY && time_alloc==H5D_ALLOC_EXTEND)
-                    init_space=1;
-
+		if((dset->shared->alloc_time==H5D_ALLOC_TIME_EARLY ||
+			IS_H5FD_MPI(dset->ent.file)) &&
+			time_alloc==H5D_ALLOC_EXTEND)
+		{
+		    init_space=1;
+		}
                 break;
 
             case H5D_COMPACT:
