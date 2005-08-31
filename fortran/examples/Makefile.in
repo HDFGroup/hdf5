@@ -274,7 +274,8 @@ H5FC_PP = $(bindir)/h5pfc
 
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
-CHECK_CLEANFILES = *.chkexe *.chklog
+# *.clog are from the MPE option.
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 
 # Compile parallel fortran examples only if parallel is enabled
 @BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_PROG_PARA = ph5example

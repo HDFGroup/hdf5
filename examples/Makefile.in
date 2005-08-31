@@ -274,7 +274,8 @@ H5FC_PP = $(bindir)/h5pfc
 
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
-CHECK_CLEANFILES = *.chkexe *.chklog *.h5
+# *.clog are from the MPE option.
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5
 @BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_PROG_PARA = ph5example
 
 # Example programs.
@@ -300,7 +301,7 @@ INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
 
 
 # We need to tell automake what to clean
-MOSTLYCLEANFILES = *.raw *.meta *.clog *.o
+MOSTLYCLEANFILES = *.raw *.meta *.o
 CLEANFILES = $(TEST_PROG) $(TEST_PROG_PARA)
 
 # How to install examples

@@ -45,7 +45,7 @@ INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
           h5_reference.c h5_drivers.c ph5example.c
 
 # We need to tell automake what to clean
-MOSTLYCLEANFILES=*.raw *.meta *.clog *.o
+MOSTLYCLEANFILES=*.raw *.meta *.o
 CHECK_CLEANFILES+=*.h5
 CLEANFILES=$(TEST_PROG) $(TEST_PROG_PARA)
 

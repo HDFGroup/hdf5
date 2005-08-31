@@ -39,9 +39,7 @@ LDADD = $(LIBHDF5) $(LIBH5TEST)
 # Temporary files
 # MPItest.h5 is from t_mpi
 # Para*.h5 are from testphdf
-# *.clog are from MPE option
 CHECK_CLEANFILES+=MPItest.h5 Para*.h5
-MOSTLYCLEANFILES=*.clog
 DISTCLEANFILES=go Makefile testph5.sh
 
 include $(top_srcdir)/config/conclude.am

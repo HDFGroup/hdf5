@@ -282,7 +282,8 @@ H5FC_PP = $(bindir)/h5pfc
 
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
-CHECK_CLEANFILES = *.chkexe *.chklog
+# *.clog are from the MPE option.
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 @BUILD_CXX_CONDITIONAL_TRUE@SUBDIRS = src test
 DIST_SUBDIRS = src test examples
 

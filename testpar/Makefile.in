@@ -308,12 +308,12 @@ H5FC_PP = $(bindir)/h5pfc
 
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
+# *.clog are from the MPE option.
 
 # Temporary files
 # MPItest.h5 is from t_mpi
 # Para*.h5 are from testphdf
-# *.clog are from MPE option
-CHECK_CLEANFILES = *.chkexe *.chklog MPItest.h5 Para*.h5
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog MPItest.h5 Para*.h5
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test
 
 # Test programs and scripts.  These are our main targets.
@@ -327,7 +327,6 @@ testphdf5_SOURCES = testphdf5.c t_dset.c t_file.c t_mdset.c t_ph5basic.c \
 
 # The tests all depend on the hdf5 library and the test library
 LDADD = $(LIBHDF5) $(LIBH5TEST)
-MOSTLYCLEANFILES = *.clog
 DISTCLEANFILES = go Makefile testph5.sh
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
@@ -543,7 +542,6 @@ install-strip:
 	  `test -z '$(STRIP)' || \
 	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
 mostlyclean-generic:
-	-test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
 
 clean-generic:
 

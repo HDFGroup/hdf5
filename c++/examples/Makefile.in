@@ -274,11 +274,12 @@ H5FC_PP = $(bindir)/h5pfc
 
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
+# *.clog are from the MPE option.
 
 # These are the files that 'make clean' (and derivatives) will remove from this
 # directory.  Since automake doesn't know about the examples, we need to
 # tell it to clean the example programs, too.
-CHECK_CLEANFILES = *.chkexe *.chklog *.h5
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5
 
 # Use h5c++ to build examples, instead of reguar C++ compiler
 H5CPP = $(bindir)/h5c++

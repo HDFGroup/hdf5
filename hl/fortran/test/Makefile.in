@@ -298,9 +298,11 @@ H5FC_PP = $(bindir)/h5pfc
 
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
+# *.clog are from the MPE option.
 
 # Temporary files.
-CHECK_CLEANFILES = *.chkexe *.chklog dsetf[1-4].h5 f1img.h5 f1tab.h5
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog dsetf[1-4].h5 f1img.h5 \
+	f1tab.h5
 AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_builddir)/src -I$(top_srcdir)/hl/src
 AM_FCFLAGS = -I$(top_builddir)/fortran/src -I$(top_builddir)/hl/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/hl/fortran/src
 
