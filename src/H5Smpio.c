@@ -496,11 +496,12 @@ H5S_mpio_span_hyper_type( const           H5S_t *space,
   H5S_hyper_span_info_t *odown;
   hsize_t               *size;
   int                   rank;
+  int                   mpi_code;
   herr_t                ret_value = SUCCEED;
   MPI_Aint              extent,lb;
 
 
-  FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_mpio_span_hyper_type);
+  FUNC_ENTER_NOAPI_NOINIT(H5S_mpio_span_hyper_type);
 
   /* Check args */
     assert (space);
@@ -525,8 +526,11 @@ H5S_mpio_span_hyper_type( const           H5S_t *space,
       goto empty;
 
     /* obtain derived data type */
-    H5S_obtain_datatype(space->extent.size,ospan,&span_type,elmt_size,rank);
-    MPI_Type_commit(&span_type);
+    if(FAIL == H5S_obtain_datatype(space->extent.size,ospan,&span_type,elmt_size,rank))
+      HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't obtain  MPI derived data type");
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&span_type)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code);
 
     *new_type = span_type;
     /* fill in the remaining return values */
@@ -549,7 +553,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	obtain datatype
+ * Function:	H5S_obtain datatype
  *
  * Purpose:	Obtain an MPI derived datatype based on span-tree
                 implementation
@@ -567,6 +571,7 @@ static herr_t H5S_obtain_datatype(const hsize_t size[],
 			      size_t elmt_size,
 			      int dimindex)
 {
+
   int                   innercount,outercount;
   MPI_Datatype          bas_type;
   MPI_Datatype          temp_type;
@@ -599,6 +604,7 @@ static herr_t H5S_obtain_datatype(const hsize_t size[],
 
   outercount = 0;
 
+/* obtain the number of span tree for this dimension */
   while(tspan) {
     tspan = tspan->next;
     outercount ++;
@@ -609,6 +615,7 @@ static herr_t H5S_obtain_datatype(const hsize_t size[],
     return 0;
   }
 
+/* MPI2 hasn't been widely acccepted, adding H5_HAVE_MPI2 for the future use */
 #ifdef H5_HAVE_MPI2
 
   MPI_Type_extent(MPI_Aint,&sizeaint);
@@ -630,6 +637,7 @@ static herr_t H5S_obtain_datatype(const hsize_t size[],
   tspan      = span;
   outercount = 0;
 
+  /* if this is the fastest changing dimension, it is the base case for derived datatype. */
   if(down == NULL){
 
     assert(dimindex <= 1);
@@ -692,7 +700,8 @@ static herr_t H5S_obtain_datatype(const hsize_t size[],
        if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&tempinner_type)))
           HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code);
 
-       MPI_Type_free(&temp_type);
+       if(MPI_SUCCESS != (mpi_code =MPI_Type_free(&temp_type)))
+          HMPI_GOTO_ERROR(FAIL, "MPI_Type_free failed",mpi_code);
        inner_type[outercount] = tempinner_type;
        outercount ++;
        tspan = tspan->next;
@@ -709,16 +718,17 @@ static herr_t H5S_obtain_datatype(const hsize_t size[],
   if(inner_type != NULL){
     if(down != NULL) {
         for(i=0;i<outercount;i++)
-             MPI_Type_free(&inner_type[i]);
+             if(MPI_SUCCESS != (mpi_code = MPI_Type_free(&inner_type[i])))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_free failed",mpi_code);
     }
   }
 
   if(inner_type != NULL)
     HDfree(inner_type);
   if(blocklen != NULL)
-  HDfree(blocklen);
+    HDfree(blocklen);
   if(disp != NULL)
-  HDfree(disp);
+    HDfree(disp);
 done:
   FUNC_LEAVE_NOAPI(ret_value);
 }
