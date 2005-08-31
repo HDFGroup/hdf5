@@ -24,15 +24,15 @@
 
 #ifdef H5_HAVE_FILTER_SCALEOFFSET
 
-/* Struct of parameters needed for compressing/decompressing one atomic datatype */
+/* Struct of parameters needed for compressing/decompressing one atomic datatype */ 
 typedef struct {
    size_t size;        /* datatype size */
    uint32_t minbits;   /* minimum bits to compress one value of such datatype */
    unsigned mem_order; /* current memory endianness order */
-} parms_atomic;
+} parms_atomic; 
 
 enum H5Z_scaleoffset_type {t_bad=0, t_uchar=1, t_ushort, t_uint, t_ulong, t_ulong_long,
-                           t_schar, t_short, t_int, t_long, t_long_long,
+                           t_schar, t_short, t_int, t_long, t_long_long, 
                            t_float, t_double};
 
 /* Local function prototypes */
@@ -40,7 +40,7 @@ static double H5Z_scaleoffset_rnd(double val);
 static herr_t H5Z_can_apply_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static enum H5Z_scaleoffset_type H5Z_scaleoffset_get_type(unsigned dtype_class,
     unsigned dtype_size, unsigned dtype_sign);
-static herr_t H5Z_scaleoffset_set_parms_fillval(hid_t dcpl_id, hid_t type_id,
+static herr_t H5Z_scaleoffset_set_parms_fillval(hid_t dcpl_id, hid_t type_id, 
     enum H5Z_scaleoffset_type type, unsigned cd_values[], int need_convert);
 static herr_t H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static size_t H5Z_filter_scaleoffset(unsigned flags, size_t cd_nelmts,
@@ -55,7 +55,7 @@ static void H5Z_scaleoffset_postdecompress_i(void *data, unsigned d_nelmts,
     uint32_t minbits, unsigned long_long minval);
 static herr_t H5Z_scaleoffset_precompress_fd(void *data, unsigned d_nelmts,
     enum H5Z_scaleoffset_type type, unsigned filavail, const void *filval_buf,
-    uint32_t *minbits, unsigned long_long *minval, double D_val);
+    uint32_t *minbits, unsigned long_long *minval, double D_val); 
 static herr_t H5Z_scaleoffset_postdecompress_fd(void *data, unsigned d_nelmts,
     enum H5Z_scaleoffset_type type, unsigned filavail, const void *filval_buf,
     uint32_t minbits, unsigned long_long minval, double D_val);
@@ -66,11 +66,11 @@ static void H5Z_scaleoffset_decompress_one_byte(unsigned char *data, size_t data
 static void H5Z_scaleoffset_compress_one_byte(unsigned char *data, size_t data_offset,
     int k, int begin_i, unsigned char *buffer, size_t *j, int *buf_len,
     parms_atomic p, int dtype_len);
-static void H5Z_scaleoffset_decompress_one_atomic(unsigned char *data, size_t data_offset,
+static void H5Z_scaleoffset_decompress_one_atomic(unsigned char *data, size_t data_offset, 
                       unsigned char *buffer, size_t *j, int *buf_len, parms_atomic p);
-static void H5Z_scaleoffset_compress_one_atomic(unsigned char *data, size_t data_offset,
+static void H5Z_scaleoffset_compress_one_atomic(unsigned char *data, size_t data_offset, 
                          unsigned char *buffer, size_t *j, int *buf_len, parms_atomic p);
-static void H5Z_scaleoffset_decompress(unsigned char *data, unsigned d_nelmts,
+static void H5Z_scaleoffset_decompress(unsigned char *data, unsigned d_nelmts, 
                                        unsigned char *buffer, parms_atomic p);
 static void H5Z_scaleoffset_compress(unsigned char *data, unsigned d_nelmts, unsigned char *buffer,
                                      size_t buffer_size, parms_atomic p);
@@ -90,8 +90,8 @@ H5Z_class_t H5Z_SCALEOFFSET[1] = {{
 /* Local macros */
 #define H5Z_SCALEOFFSET_USER_NPARMS      2    /* Number of parameters that users can set */
 #define H5Z_SCALEOFFSET_TOTAL_NPARMS     20   /* Total number of parameters for filter */
-#define H5Z_SCALEOFFSET_PARM_SCALEFACTOR 0    /* "User" parameter for scale factor */
-#define H5Z_SCALEOFFSET_PARM_SCALETYPE   1    /* "User" parameter for scale type */
+#define H5Z_SCALEOFFSET_PARM_SCALETYPE   0    /* "User" parameter for scale type */
+#define H5Z_SCALEOFFSET_PARM_SCALEFACTOR 1    /* "User" parameter for scale factor */
 #define H5Z_SCALEOFFSET_PARM_NELMTS      2    /* "Local" parameter for number of elements in the chunk */
 #define H5Z_SCALEOFFSET_PARM_CLASS       3    /* "Local" parameter for datatype class */
 #define H5Z_SCALEOFFSET_PARM_SIZE        4    /* "Local" parameter for datatype size */
@@ -316,7 +316,7 @@ H5Z_class_t H5Z_SCALEOFFSET[1] = {{
                                                                                        \
    if(filavail == H5Z_SCALEOFFSET_FILL_DEFINED) { /* fill value defined */             \
       H5Z_scaleoffset_get_filval_1(i, type, filval_buf, filval)                        \
-      if(*minbits == H5_SO_INT_MINIMUMBITS_DEFAULT ) { /* minbits not set yet, calculate max, min, and minbits */\
+      if(*minbits == H5_SO_INT_MINBITS_DEFAULT ) { /* minbits not set yet, calculate max, min, and minbits */\
          H5Z_scaleoffset_max_min_1(i, d_nelmts, buf, filval, max, min)                 \
          H5Z_scaleoffset_check_1(type, max, min, minbits)                              \
          span = max - min + 1;                                                         \
@@ -327,7 +327,7 @@ H5Z_class_t H5Z_SCALEOFFSET[1] = {{
          for(i = 0; i < d_nelmts; i++)                                                 \
             buf[i] = (buf[i] == filval)?(((type)1 << *minbits) - 1):(buf[i] - min);    \
    } else { /* fill value undefined */                                                 \
-      if(*minbits == H5_SO_INT_MINIMUMBITS_DEFAULT ) { /* minbits not set yet, calculate max, min, and minbits */\
+      if(*minbits == H5_SO_INT_MINBITS_DEFAULT ) { /* minbits not set yet, calculate max, min, and minbits */\
          H5Z_scaleoffset_max_min_2(i, d_nelmts, buf, max, min)                         \
          H5Z_scaleoffset_check_1(type, max, min, minbits)                              \
          span = max - min + 1;                                                         \
@@ -348,7 +348,7 @@ H5Z_class_t H5Z_SCALEOFFSET[1] = {{
                                                                                              \
    if(filavail == H5Z_SCALEOFFSET_FILL_DEFINED) { /* fill value defined */                   \
       H5Z_scaleoffset_get_filval_1(i, type, filval_buf, filval)                              \
-      if(*minbits == H5_SO_INT_MINIMUMBITS_DEFAULT ) { /* minbits not set yet, calculate max, min, and minbits */\
+      if(*minbits == H5_SO_INT_MINBITS_DEFAULT ) { /* minbits not set yet, calculate max, min, and minbits */\
          H5Z_scaleoffset_max_min_1(i, d_nelmts, buf, filval, max, min)                       \
          H5Z_scaleoffset_check_2(type, max, min, minbits)                                    \
          span = max - min + 1;                                                               \
@@ -359,7 +359,7 @@ H5Z_class_t H5Z_SCALEOFFSET[1] = {{
          for(i = 0; i < d_nelmts; i++)                                                       \
             buf[i] = (buf[i] == filval) ? (type)(((unsigned type)1 << *minbits) - 1) : (buf[i] - min); \
    } else { /* fill value undefined */                                                       \
-      if(*minbits == H5_SO_INT_MINIMUMBITS_DEFAULT ) { /* minbits not set yet, calculate max, min, and minbits */\
+      if(*minbits == H5_SO_INT_MINBITS_DEFAULT ) { /* minbits not set yet, calculate max, min, and minbits */\
          H5Z_scaleoffset_max_min_2(i, d_nelmts, buf, max, min)                               \
          H5Z_scaleoffset_check_2(type, max, min, minbits)                                    \
          span = max - min + 1;                                                               \
@@ -567,7 +567,7 @@ H5Z_class_t H5Z_SCALEOFFSET[1] = {{
 /*-------------------------------------------------------------------------
  * Function:	H5Z_can_apply_scaleoffset
  *
- * Purpose:	Check the parameters for scaleoffset compression for
+ * Purpose:	Check the parameters for scaleoffset compression for 
  *              validity and whether they fit a particular dataset.
  *
  * Return:	Success: Non-negative
@@ -576,7 +576,7 @@ H5Z_class_t H5Z_SCALEOFFSET[1] = {{
  * Programmer:  Xiaowen Wu
  *              Friday, February 4, 2005
  *
- * Modifications:
+ * Modifications: 
  *
  *-------------------------------------------------------------------------
  */
@@ -618,51 +618,51 @@ done:
  *
  * Purpose:	Get the specific integer type based on datatype size and sign
  *              or floating-point type based on size
- *
+ *              
  * Return:	Success: id number of integer type
- *		Failure: 0
+ *		Failure: 0	
  *
  * Programmer:	Xiaowen Wu
  *              Wednesday, April 13, 2005
  *
  * Modifications:
- *
+ *              
  *-------------------------------------------------------------------------
  */
-static enum H5Z_scaleoffset_type
+static enum H5Z_scaleoffset_type 
 H5Z_scaleoffset_get_type(unsigned dtype_class, unsigned dtype_size, unsigned dtype_sign)
 {
     enum H5Z_scaleoffset_type type; /* integer type */
     enum H5Z_scaleoffset_type ret_value;             /* return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5Z_scaleoffset_get_type)
-
+    
     if(dtype_class==H5Z_SCALEOFFSET_CLS_INTEGER) {
         if(dtype_sign==H5Z_SCALEOFFSET_SGN_NONE) { /* unsigned integer */
             if     (dtype_size == sizeof(unsigned char))      type = t_uchar;
-            else if(dtype_size == sizeof(unsigned short))     type = t_ushort;
-            else if(dtype_size == sizeof(unsigned int))       type = t_uint;
+            else if(dtype_size == sizeof(unsigned short))     type = t_ushort; 
+            else if(dtype_size == sizeof(unsigned int))       type = t_uint; 
             else if(dtype_size == sizeof(unsigned long))      type = t_ulong;
-            else if(dtype_size == sizeof(unsigned long_long)) type = t_ulong_long;
-            else
+            else if(dtype_size == sizeof(unsigned long_long)) type = t_ulong_long; 
+            else 
                 HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, t_bad, "cannot find matched memory dataype")
         }
 
         if(dtype_sign==H5Z_SCALEOFFSET_SGN_2) { /* signed integer */
             if     (dtype_size == sizeof(signed char)) type = t_schar;
-            else if(dtype_size == sizeof(short))       type = t_short;
-            else if(dtype_size == sizeof(int))         type = t_int;
+            else if(dtype_size == sizeof(short))       type = t_short; 
+            else if(dtype_size == sizeof(int))         type = t_int; 
             else if(dtype_size == sizeof(long))        type = t_long;
-            else if(dtype_size == sizeof(long_long))   type = t_long_long;
-            else
+            else if(dtype_size == sizeof(long_long))   type = t_long_long; 
+            else 
                 HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, t_bad, "cannot find matched memory dataype")
         }
     }
 
     if(dtype_class==H5Z_SCALEOFFSET_CLS_FLOAT) {
         if(dtype_size == sizeof(float))       type = t_float;
-        else if(dtype_size == sizeof(double)) type = t_double;
-        else
+        else if(dtype_size == sizeof(double)) type = t_double; 
+        else 
             HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, t_bad, "cannot find matched memory dataype")
     }
 
@@ -677,7 +677,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Z_scaleoffset_set_parms_fillval
  *
- * Purpose:	Get the fill value of the dataset and store in cd_values[]
+ * Purpose:	Get the fill value of the dataset and store in cd_values[] 
  *
  * Return:	Success: Non-negative
  *		Failure: Negative
@@ -685,11 +685,11 @@ done:
  * Programmer:  Xiaowen Wu
  *              Monday, March 7, 2005
  *
- * Modifications:
+ * Modifications: 
  *
  *-------------------------------------------------------------------------
  */
-static herr_t H5Z_scaleoffset_set_parms_fillval(hid_t dcpl_id, hid_t type_id,
+static herr_t H5Z_scaleoffset_set_parms_fillval(hid_t dcpl_id, hid_t type_id, 
       enum H5Z_scaleoffset_type type, unsigned cd_values[], int need_convert)
 {
     herr_t ret_value=SUCCEED;          /* Return value */
@@ -697,34 +697,34 @@ static herr_t H5Z_scaleoffset_set_parms_fillval(hid_t dcpl_id, hid_t type_id,
     FUNC_ENTER_NOAPI(H5Z_scaleoffset_set_parms_fillval, FAIL)
 
     if(type == t_uchar)
-        H5Z_scaleoffset_set_filval_3(unsigned char, dcpl_id, type_id,
+        H5Z_scaleoffset_set_filval_3(unsigned char, dcpl_id, type_id, 
                                      cd_values, need_convert)
-    else if(type == t_ushort)
-        H5Z_scaleoffset_set_filval_1(unsigned short, dcpl_id, type_id,
+    else if(type == t_ushort) 
+        H5Z_scaleoffset_set_filval_1(unsigned short, dcpl_id, type_id, 
                                      cd_values, need_convert)
-    else if(type == t_uint)
-        H5Z_scaleoffset_set_filval_1(unsigned int, dcpl_id, type_id,
+    else if(type == t_uint) 
+        H5Z_scaleoffset_set_filval_1(unsigned int, dcpl_id, type_id, 
                                      cd_values, need_convert)
-    else if(type == t_ulong)
-        H5Z_scaleoffset_set_filval_1(unsigned long, dcpl_id, type_id,
+    else if(type == t_ulong) 
+        H5Z_scaleoffset_set_filval_1(unsigned long, dcpl_id, type_id, 
                                      cd_values, need_convert)
-    else if(type == t_ulong_long)
-        H5Z_scaleoffset_set_filval_1(unsigned long_long, dcpl_id, type_id,
+    else if(type == t_ulong_long) 
+        H5Z_scaleoffset_set_filval_1(unsigned long_long, dcpl_id, type_id, 
                                      cd_values, need_convert)
-    else if(type == t_schar)
-        H5Z_scaleoffset_set_filval_3(signed char, dcpl_id, type_id,
+    else if(type == t_schar) 
+        H5Z_scaleoffset_set_filval_3(signed char, dcpl_id, type_id, 
                                      cd_values, need_convert)
     else if(type == t_short)
-        H5Z_scaleoffset_set_filval_2(short, dcpl_id, type_id,
+        H5Z_scaleoffset_set_filval_2(short, dcpl_id, type_id, 
                                      cd_values, need_convert)
-    else if(type == t_int)
-        H5Z_scaleoffset_set_filval_2(int, dcpl_id, type_id,
+    else if(type == t_int) 
+        H5Z_scaleoffset_set_filval_2(int, dcpl_id, type_id, 
                                      cd_values, need_convert)
-    else if(type == t_long)
-        H5Z_scaleoffset_set_filval_2(long, dcpl_id, type_id,
+    else if(type == t_long) 
+        H5Z_scaleoffset_set_filval_2(long, dcpl_id, type_id, 
                                      cd_values, need_convert)
-    else if(type == t_long_long)
-        H5Z_scaleoffset_set_filval_2(long_long, dcpl_id, type_id,
+    else if(type == t_long_long) 
+        H5Z_scaleoffset_set_filval_2(long_long, dcpl_id, type_id, 
                                      cd_values, need_convert)
     else if(type == t_float)
         H5Z_scaleoffset_set_filval_4(float, dcpl_id, type_id,
@@ -751,7 +751,7 @@ done:
  *              Friday, February 4, 2005
  *
  * Modifications:
- *
+ *                
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -826,7 +826,7 @@ H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
                 HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad integer sign")
         } /* end switch */
     }
-
+    
     /* Get datatype's endianness order */
     if((dtype_order=H5Tget_order(type_id))==H5T_ORDER_ERROR)
         HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype endianness order")
@@ -895,19 +895,19 @@ done:
  *
  * Purpose:	Implement an I/O filter for storing packed integer
  *              data using scale and offset method.
- *
+ *              
  * Return:	Success: Size of buffer filtered
- *		Failure: 0
+ *		Failure: 0	
  *
  * Programmer:	Xiaowen Wu
  *              Monday, February 7, 2005
  *
  * Modifications:
- *
+ *              
  *-------------------------------------------------------------------------
  */
 static size_t
-H5Z_filter_scaleoffset (unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
+H5Z_filter_scaleoffset (unsigned flags, size_t cd_nelmts, const unsigned cd_values[], 
                         size_t nbytes, size_t *buf_size, void **buf)
 {
     size_t ret_value = 0;           /* return value */
@@ -916,8 +916,8 @@ H5Z_filter_scaleoffset (unsigned flags, size_t cd_nelmts, const unsigned cd_valu
     unsigned dtype_class;           /* datatype class */
     unsigned dtype_sign;            /* integer datatype sign */
     unsigned filavail;              /* flag indicating if fill value is defined or not */
-    int scale_factor = 0;      /* scale factor */
-    unsigned scale_type = 0;        /* scale type */
+    H5_SO_scale_type scale_type = 0;/* scale type */
+    int scale_factor = 0;           /* scale factor */
     double D_val = 0.0;             /* decimal scale factor */
     uint32_t minbits = 0;           /* minimum number of bits to store values */
     unsigned long_long minval= 0;   /* minimum value of input buffer */
@@ -928,7 +928,7 @@ H5Z_filter_scaleoffset (unsigned flags, size_t cd_nelmts, const unsigned cd_valu
     unsigned buf_offset = 21;       /* buffer offset because of parameters stored in file */
     unsigned i;                     /* index */
     parms_atomic p;                 /* paramters needed for compress/decompress functions */
-
+ 	
     FUNC_ENTER_NOAPI(H5Z_filter_scaleoffset, 0)
 
     /* check arguments */
@@ -965,28 +965,33 @@ H5Z_filter_scaleoffset (unsigned flags, size_t cd_nelmts, const unsigned cd_valu
      * scale type can be H5_SO_FLOAT_DSCALE (0), H5_SO_FLOAT_ESCALE (1) or H5_SO_INT (other)
      * H5_SO_FLOAT_DSCALE : floating-point type, variable-minimum-bits method,
      *                      scale factor is decimal scale factor
-     * H5_SO_FLOAT_ESCALE : floating-point type, fixed-minimum-bits method,
+     * H5_SO_FLOAT_ESCALE : floating-point type,  fixed-minimum-bits method, 
      *                      scale factor is the fixed minimum number of bits
-     * H5_SO_INT          : integer type, scale_factor is minimum number of bits
+     * H5_SO_INT          : integer type, scale_factor is minimum number of bits 
      */
     if(dtype_class==H5Z_SCALEOFFSET_CLS_FLOAT) { /* floating-point type */
         if(scale_type!=H5_SO_FLOAT_DSCALE && scale_type!=H5_SO_FLOAT_ESCALE)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "scale type must be 0 or 1")
-    }
-    else if(dtype_class==H5Z_SCALEOFFSET_CLS_INTEGER) { /* integer type */
-        if(scale_type==H5_SO_FLOAT_DSCALE || scale_type==H5_SO_FLOAT_ESCALE) {
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "scale type cannot be 0 or 1")
-        /* check here when scale_factor is less than 0 for integer, library will reset it to 0
-           in this case, library will calculate the minimum-bits */
-	   if(scale_factor < 0) scale_factor = 0;
-        }
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid scale type")
+    } 
 
+    if(dtype_class==H5Z_SCALEOFFSET_CLS_INTEGER) { /* integer type */
+        if(scale_type!=H5_SO_INT) 
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid scale type")
+
+        /* if scale_factor is less than 0 for integer, library will reset it to 0 
+         * in this case, library will calculate the minimum-bits 
+         */
+	if(scale_factor < 0) scale_factor = 0;
     }
+
+    /* fixed-minimum-bits method is not implemented and is forbidden */
+    if(scale_type==H5_SO_FLOAT_ESCALE)
+         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "E-scaling method not supported")
 
     if(scale_type==H5_SO_FLOAT_DSCALE) { /* floating-point type, variable-minimum-bits */
         D_val = (double)scale_factor;
     } else { /* integer type, or floating-point type with fixed-minimum-bits method */
-        if(scale_factor>cd_values[H5Z_SCALEOFFSET_PARM_SIZE]*8)
+        if(scale_factor>cd_values[H5Z_SCALEOFFSET_PARM_SIZE]*8) 
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "minimum number of bits exceeds maximum")
 
         /* no need to process data */
@@ -1041,11 +1046,11 @@ H5Z_filter_scaleoffset (unsigned flags, size_t cd_nelmts, const unsigned cd_valu
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for scaleoffset decompression")
 
         /* special case: minbits equal to full precision */
-        if(minbits == p.size * 8) {
+        if(minbits == p.size * 8) { 
             HDmemcpy(outbuf, (unsigned char*)(*buf)+buf_offset, size_out);
 
             /* convert to dataset datatype endianness order if needed */
-            if(need_convert)
+            if(need_convert) 
                 H5Z_scaleoffset_convert(outbuf, d_nelmts, p.size);
 
             *buf = outbuf;
@@ -1055,11 +1060,11 @@ H5Z_filter_scaleoffset (unsigned flags, size_t cd_nelmts, const unsigned cd_valu
             goto done;
         }
 
-        /* decompress the buffer if minbits not equal to zero */
-        if(minbits != 0)
-            H5Z_scaleoffset_decompress(outbuf, d_nelmts, (unsigned char*)(*buf)+buf_offset, p);
-        else {
-            /* fill value is not defined and all data elements have the same value */
+        /* decompress the buffer if minbits not equal to zero */ 
+        if(minbits != 0) 
+            H5Z_scaleoffset_decompress(outbuf, d_nelmts, (unsigned char*)(*buf)+buf_offset, p);   
+        else { 
+            /* fill value is not defined and all data elements have the same value */  
             for(i = 0; i < size_out; i++) outbuf[i] = 0;
         }
 
@@ -1069,26 +1074,26 @@ H5Z_filter_scaleoffset (unsigned flags, size_t cd_nelmts, const unsigned cd_valu
 
         /* postprocess after decompression */
         if(dtype_class==H5Z_SCALEOFFSET_CLS_INTEGER)
-            H5Z_scaleoffset_postdecompress_i(outbuf, d_nelmts, type, filavail,
+            H5Z_scaleoffset_postdecompress_i(outbuf, d_nelmts, type, filavail, 
                                              &cd_values[H5Z_SCALEOFFSET_PARM_FILVAL], minbits, minval);
 
         if(dtype_class==H5Z_SCALEOFFSET_CLS_FLOAT)
-            if(scale_type==0) { /* variable-minimum-bits method */
-                if(H5Z_scaleoffset_postdecompress_fd(outbuf, d_nelmts, type, filavail,
+            if(scale_type==0) { /* variable-minimum-bits method */        
+                if(H5Z_scaleoffset_postdecompress_fd(outbuf, d_nelmts, type, filavail, 
                    &cd_values[H5Z_SCALEOFFSET_PARM_FILVAL], minbits, minval, D_val)==FAIL)
                     HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, 0, "post-decompression failed")
             }
 
         /* after postprocess, convert to dataset datatype endianness order if needed */
-        if(need_convert)
+        if(need_convert) 
             H5Z_scaleoffset_convert(outbuf, d_nelmts, p.size);
     }
     /* output; compress */
-    else {
+    else { 
         assert(nbytes == d_nelmts * p.size);
 
         /* before preprocess, convert to memory endianness order if needed */
-        if(need_convert)
+        if(need_convert) 
             H5Z_scaleoffset_convert(*buf, d_nelmts, p.size);
 
         /* before preprocess, get memory type */
@@ -1097,11 +1102,11 @@ H5Z_filter_scaleoffset (unsigned flags, size_t cd_nelmts, const unsigned cd_valu
 
         /* preprocess before compression */
         if(dtype_class==H5Z_SCALEOFFSET_CLS_INTEGER)
-            H5Z_scaleoffset_precompress_i(*buf, d_nelmts, type, filavail,
+            H5Z_scaleoffset_precompress_i(*buf, d_nelmts, type, filavail, 
                                           &cd_values[H5Z_SCALEOFFSET_PARM_FILVAL], &minbits, &minval);
-
+        
         if(dtype_class==H5Z_SCALEOFFSET_CLS_FLOAT)
-            if(scale_type==0) { /* variable-minimum-bits method */
+            if(scale_type==0) { /* variable-minimum-bits method */        
                 if(H5Z_scaleoffset_precompress_fd(*buf, d_nelmts, type, filavail,
                    &cd_values[H5Z_SCALEOFFSET_PARM_FILVAL], &minbits, &minval, D_val)==FAIL)
                     HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, 0, "pre-compression failed")
@@ -1142,10 +1147,10 @@ H5Z_filter_scaleoffset (unsigned flags, size_t cd_nelmts, const unsigned cd_valu
             goto done;
         }
 
-        /* compress the buffer if minbits not equal to zero
-         * minbits equal to zero only when fill value is not defined and
-         * all data elements have the same value
-         */
+        /* compress the buffer if minbits not equal to zero 
+         * minbits equal to zero only when fill value is not defined and 
+         * all data elements have the same value 
+         */  
         if(minbits != 0)
             H5Z_scaleoffset_compress(*buf, d_nelmts, outbuf+buf_offset, size_out-buf_offset, p);
     }
@@ -1169,13 +1174,13 @@ done:
  * assume one byte has 8 bit
  * assume padding bit is 0
  * assume size of unsigned char is one byte
- * assume one data item of certain datatype is stored continously in bytes
- * atomic datatype is treated on byte basis
+ * assume one data item of certain datatype is stored continously in bytes 
+ * atomic datatype is treated on byte basis 
  */
 
 
 /* change byte order of input buffer either from little-endian to big-endian
- * or from big-endian to little-endian  2/21/2005
+ * or from big-endian to little-endian  2/21/2005 
  */
 static void H5Z_scaleoffset_convert(void *buf, unsigned d_nelmts, unsigned dtype_size)
 {
@@ -1195,28 +1200,28 @@ static void H5Z_scaleoffset_convert(void *buf, unsigned d_nelmts, unsigned dtype
 }
 
 /* Round a floating-point value to the nearest integer value 4/19/05 */
-/* rounding to the bigger absolute value if val is in the middle,
+/* rounding to the bigger absolute value if val is in the middle, 
  0.5 -> 1, -0.5 ->-1
 5/9/05, KY */
-static double H5Z_scaleoffset_rnd(double val)
-{
-   double u_val, l_val;
-
-   u_val = HDceil(val);
+static double H5Z_scaleoffset_rnd(double val)                         
+{                                                              
+   double u_val, l_val;                                          
+                                                               
+   u_val = HDceil(val); 
    l_val = HDfloor(val);
 
    if(val > 0) {
-      if((u_val - val)<=(val - l_val)) return u_val;
-      else                            return l_val;
-   }
+      if((u_val - val)<=(val - l_val)) return u_val;      
+      else                            return l_val; 
+   }     
    else {
-      if((val - l_val)<=(u_val - val)) return l_val;
-      else                            return u_val;
-   }
-}
+      if((val - l_val)<=(u_val - val)) return l_val;      
+      else                            return u_val;      
+   } 
+}  
 
 /* return ceiling of floating-point log2 function
- * receive unsigned integer as argument 3/10/2005
+ * receive unsigned integer as argument 3/10/2005 
  */
 static unsigned H5Z_scaleoffset_log2(unsigned long_long num)
 {
@@ -1231,119 +1236,120 @@ static unsigned H5Z_scaleoffset_log2(unsigned long_long num)
 }
 
 /* precompress for integer type */
-static void
-H5Z_scaleoffset_precompress_i(void *data, unsigned d_nelmts, enum H5Z_scaleoffset_type type,
+static void 
+H5Z_scaleoffset_precompress_i(void *data, unsigned d_nelmts, enum H5Z_scaleoffset_type type, 
          unsigned filavail, const void *filval_buf, uint32_t *minbits, unsigned long_long *minval)
 {
    if(type ==  t_uchar)
-      H5Z_scaleoffset_precompress_1(unsigned char, data, d_nelmts,
+      H5Z_scaleoffset_precompress_1(unsigned char, data, d_nelmts, 
                                     filavail, filval_buf, minbits, minval)
-   else if(type == t_ushort)
-      H5Z_scaleoffset_precompress_1(unsigned short, data, d_nelmts,
+   else if(type == t_ushort) 
+      H5Z_scaleoffset_precompress_1(unsigned short, data, d_nelmts, 
                                     filavail, filval_buf, minbits, minval)
-   else if(type == t_uint)
-      H5Z_scaleoffset_precompress_1(unsigned int, data, d_nelmts,
+   else if(type == t_uint) 
+      H5Z_scaleoffset_precompress_1(unsigned int, data, d_nelmts, 
                                     filavail, filval_buf, minbits, minval)
    else if(type == t_ulong)
-      H5Z_scaleoffset_precompress_1(unsigned long, data, d_nelmts,
+      H5Z_scaleoffset_precompress_1(unsigned long, data, d_nelmts, 
                                     filavail, filval_buf, minbits, minval)
-   else if(type == t_ulong_long)
-      H5Z_scaleoffset_precompress_1(unsigned long_long, data, d_nelmts,
+   else if(type == t_ulong_long) 
+      H5Z_scaleoffset_precompress_1(unsigned long_long, data, d_nelmts, 
                                     filavail, filval_buf, minbits, minval)
    else if(type == t_schar) {
-      signed char *buf = data, min = 0, max = 0, filval = 0;
-      unsigned char span; unsigned i;
-
-      if(filavail == H5Z_SCALEOFFSET_FILL_DEFINED) { /* fill value defined */
-         H5Z_scaleoffset_get_filval_1(i, signed char, filval_buf, filval);
-         if(*minbits == H5_SO_INT_MINIMUMBITS_DEFAULT ) { /* minbits not set yet, calculate max, min, and minbits */
+      signed char *buf = data, min = 0, max = 0, filval = 0;                          
+      unsigned char span; unsigned i;                                                                    
+                                                                                             
+      if(filavail == H5Z_SCALEOFFSET_FILL_DEFINED) { /* fill value defined */                   
+         H5Z_scaleoffset_get_filval_1(i, signed char, filval_buf, filval);       
+         if(*minbits == H5_SO_INT_MINBITS_DEFAULT ) { /* minbits not set yet, 
+calculate max, min, and minbits */         
             H5Z_scaleoffset_max_min_1(i, d_nelmts, buf, filval, max, min)
-            if((unsigned char)(max - min) > (unsigned char)(~(unsigned char)0 - 2))
-            { *minbits = sizeof(signed char)*8; return; }
-            span = max - min + 1;
+            if((unsigned char)(max - min) > (unsigned char)(~(unsigned char)0 - 2)) 
+            { *minbits = sizeof(signed char)*8; return; }                        
+            span = max - min + 1;                                                               
             *minbits = H5Z_scaleoffset_log2((unsigned long_long)(span+1));
-         } else /* minbits already set, only calculate min */
-            H5Z_scaleoffset_min_1(i, d_nelmts, buf, filval, min)
-         if(*minbits != sizeof(signed char)*8) /* change values if minbits != full precision */
-            for(i = 0; i < d_nelmts; i++)
-               buf[i] = (buf[i] == filval)?(((unsigned char)1 << *minbits) - 1):(buf[i] - min);
-      } else { /* fill value undefined */
-         if(*minbits == H5_SO_INT_MINIMUMBITS_DEFAULT ) { /* minbits not set yet, calculate max, min, and minbits */
-            H5Z_scaleoffset_max_min_2(i, d_nelmts, buf, max, min)
+         } else /* minbits already set, only calculate min */                                   
+            H5Z_scaleoffset_min_1(i, d_nelmts, buf, filval, min)                                
+         if(*minbits != sizeof(signed char)*8) /* change values if minbits != full precision */        
+            for(i = 0; i < d_nelmts; i++)                                                       
+               buf[i] = (buf[i] == filval)?(((unsigned char)1 << *minbits) - 1):(buf[i] - min); 
+      } else { /* fill value undefined */                                                       
+         if(*minbits == H5_SO_INT_MINBITS_DEFAULT ) { /* minbits not set yet, calculate max, min, and minbits */         
+            H5Z_scaleoffset_max_min_2(i, d_nelmts, buf, max, min)                               
             if((unsigned char)(max - min) > (unsigned char)(~(unsigned char)0 - 2)) {
                *minbits = sizeof(signed char)*8;
                *minval = min; return;
-            }
-            span = max - min + 1;
+            }                            
+            span = max - min + 1;                                                               
             *minbits = H5Z_scaleoffset_log2((unsigned long_long)span);
-         } else /* minbits already set, only calculate min */
-            H5Z_scaleoffset_min_2(i, d_nelmts, buf, min)
-         if(*minbits != sizeof(signed char)*8) /* change values if minbits != full precision */
-            for(i = 0; i < d_nelmts; i++) buf[i] -= min;
-      }
-      *minval = min;
-   }
+         } else /* minbits already set, only calculate min */                                   
+            H5Z_scaleoffset_min_2(i, d_nelmts, buf, min)                                        
+         if(*minbits != sizeof(signed char)*8) /* change values if minbits != full precision */        
+            for(i = 0; i < d_nelmts; i++) buf[i] -= min;                                        
+      }                                                                                         
+      *minval = min;                                                                         
+   } 
    else if(type == t_short)
-      H5Z_scaleoffset_precompress_2(short, data, d_nelmts,
+      H5Z_scaleoffset_precompress_2(short, data, d_nelmts, 
                                     filavail, filval_buf, minbits, minval)
    else if(type == t_int)
-      H5Z_scaleoffset_precompress_2(int, data, d_nelmts,
+      H5Z_scaleoffset_precompress_2(int, data, d_nelmts, 
                                     filavail, filval_buf, minbits, minval)
-   else if(type == t_long)
-      H5Z_scaleoffset_precompress_2(long, data, d_nelmts,
+   else if(type == t_long) 
+      H5Z_scaleoffset_precompress_2(long, data, d_nelmts, 
                                     filavail, filval_buf, minbits, minval)
-   else if(type == t_long_long)
-      H5Z_scaleoffset_precompress_2(long_long, data, d_nelmts,
+   else if(type == t_long_long) 
+      H5Z_scaleoffset_precompress_2(long_long, data, d_nelmts, 
                                     filavail, filval_buf, minbits, minval)
 }
 
 /* postdecompress for integer type */
-static void
-H5Z_scaleoffset_postdecompress_i(void *data, unsigned d_nelmts, enum H5Z_scaleoffset_type type,
+static void 
+H5Z_scaleoffset_postdecompress_i(void *data, unsigned d_nelmts, enum H5Z_scaleoffset_type type, 
               unsigned filavail, const void *filval_buf, uint32_t minbits, unsigned long_long minval)
 {
    long_long sminval = *(long_long*)&minval; /* for signed integer types */
 
-   if(type == t_uchar)
-      H5Z_scaleoffset_postdecompress_1(unsigned char, data, d_nelmts, filavail,
+   if(type == t_uchar) 
+      H5Z_scaleoffset_postdecompress_1(unsigned char, data, d_nelmts, filavail, 
                                        filval_buf, minbits, minval)
-   else if(type == t_ushort)
-      H5Z_scaleoffset_postdecompress_1(unsigned short, data, d_nelmts, filavail,
+   else if(type == t_ushort) 
+      H5Z_scaleoffset_postdecompress_1(unsigned short, data, d_nelmts, filavail, 
                                        filval_buf, minbits, minval)
-   else if(type == t_uint)
-      H5Z_scaleoffset_postdecompress_1(unsigned int, data, d_nelmts, filavail,
+   else if(type == t_uint) 
+      H5Z_scaleoffset_postdecompress_1(unsigned int, data, d_nelmts, filavail, 
                                        filval_buf, minbits, minval)
-   else if(type == t_ulong)
-      H5Z_scaleoffset_postdecompress_1(unsigned long, data, d_nelmts, filavail,
+   else if(type == t_ulong) 
+      H5Z_scaleoffset_postdecompress_1(unsigned long, data, d_nelmts, filavail, 
                                        filval_buf, minbits, minval)
-   else if(type == t_ulong_long)
-      H5Z_scaleoffset_postdecompress_1(unsigned long_long, data, d_nelmts, filavail,
+   else if(type == t_ulong_long) 
+      H5Z_scaleoffset_postdecompress_1(unsigned long_long, data, d_nelmts, filavail, 
                                        filval_buf, minbits, minval)
    else if(type == t_schar) {
       signed char *buf = data, filval = 0; unsigned i;
 
       if(filavail == H5Z_SCALEOFFSET_FILL_DEFINED) { /* fill value defined */
          H5Z_scaleoffset_get_filval_1(i, signed char, filval_buf, filval)
-         for(i = 0; i < d_nelmts; i++)
+         for(i = 0; i < d_nelmts; i++) 
             buf[i] = (buf[i] == (((unsigned char)1 << minbits) - 1))?filval:(buf[i] + sminval);
       } else /* fill value undefined */
          for(i = 0; i < d_nelmts; i++) buf[i] += sminval;
-   }
-   else if(type == t_short)
-      H5Z_scaleoffset_postdecompress_2(short, data, d_nelmts, filavail,
+   } 
+   else if(type == t_short) 
+      H5Z_scaleoffset_postdecompress_2(short, data, d_nelmts, filavail, 
                                        filval_buf, minbits, sminval)
-   else if(type == t_int)
-      H5Z_scaleoffset_postdecompress_2(int, data, d_nelmts, filavail,
+   else if(type == t_int) 
+      H5Z_scaleoffset_postdecompress_2(int, data, d_nelmts, filavail, 
                                        filval_buf, minbits, sminval)
-   else if(type == t_long)
-      H5Z_scaleoffset_postdecompress_2(long, data, d_nelmts, filavail,
+   else if(type == t_long) 
+      H5Z_scaleoffset_postdecompress_2(long, data, d_nelmts, filavail, 
                                        filval_buf, minbits, sminval)
-   else if(type == t_long_long)
-      H5Z_scaleoffset_postdecompress_2(long_long, data, d_nelmts, filavail,
+   else if(type == t_long_long) 
+      H5Z_scaleoffset_postdecompress_2(long_long, data, d_nelmts, filavail, 
                                        filval_buf, minbits, sminval)
 }
 
-/* precompress for floating-point type, variable-minimum-bits method
+/* precompress for floating-point type, variable-minimum-bits method 
    success: non-negative, failure: negative 4/15/05 */
 static herr_t
 H5Z_scaleoffset_precompress_fd(void *data, unsigned d_nelmts, enum H5Z_scaleoffset_type type,
@@ -1353,18 +1359,18 @@ unsigned filavail, const void *filval_buf, uint32_t *minbits, unsigned long_long
 
    FUNC_ENTER_NOAPI(H5Z_scaleoffset_precompress_fd, FAIL)
 
-   if(type == t_float)
-      H5Z_scaleoffset_precompress_3(float, data, d_nelmts,
+   if(type == t_float) 
+      H5Z_scaleoffset_precompress_3(float, data, d_nelmts, 
                                     filavail, filval_buf, minbits, minval, D_val)
-   else if(type == t_double)
-      H5Z_scaleoffset_precompress_3(double, data, d_nelmts,
+   else if(type == t_double) 
+      H5Z_scaleoffset_precompress_3(double, data, d_nelmts, 
                                     filavail, filval_buf, minbits, minval, D_val)
 
 done:
    FUNC_LEAVE_NOAPI(ret_value)
 }
 
-/* postdecompress for floating-point type, variable-minimum-bits method
+/* postdecompress for floating-point type, variable-minimum-bits method 
    success: non-negative, failure: negative 4/15/05 */
 static herr_t
 H5Z_scaleoffset_postdecompress_fd(void *data, unsigned d_nelmts, enum H5Z_scaleoffset_type type,
@@ -1375,23 +1381,23 @@ unsigned filavail, const void *filval_buf, uint32_t minbits, unsigned long_long 
 
    FUNC_ENTER_NOAPI(H5Z_scaleoffset_postdecompress_fd, FAIL)
 
-   if(type == t_float)
-      H5Z_scaleoffset_postdecompress_3(float, data, d_nelmts, filavail,
+   if(type == t_float) 
+      H5Z_scaleoffset_postdecompress_3(float, data, d_nelmts, filavail, 
                                        filval_buf, minbits, sminval, D_val)
-   else if(type == t_double)
-      H5Z_scaleoffset_postdecompress_3(double, data, d_nelmts, filavail,
+   else if(type == t_double) 
+      H5Z_scaleoffset_postdecompress_3(double, data, d_nelmts, filavail, 
                                        filval_buf, minbits, sminval, D_val)
 
 done:
    FUNC_LEAVE_NOAPI(ret_value)
-}
+} 
 
 static void H5Z_scaleoffset_next_byte(size_t *j, int *buf_len)
 {
    ++(*j); *buf_len = 8 * sizeof(unsigned char);
 }
 
-static void H5Z_scaleoffset_decompress_one_byte(unsigned char *data, size_t data_offset, int k,
+static void H5Z_scaleoffset_decompress_one_byte(unsigned char *data, size_t data_offset, int k, 
 int begin_i, unsigned char *buffer, size_t *j, int *buf_len, parms_atomic p, int dtype_len)
 {
    int dat_len; /* dat_len is the number of bits to be copied in each data byte */
@@ -1399,12 +1405,12 @@ int begin_i, unsigned char *buffer, size_t *j, int *buf_len, parms_atomic p, int
 
    /* initialize value and bits of unsigned char to be copied */
    val = buffer[*j];
-   if(k == begin_i)
+   if(k == begin_i) 
       dat_len = 8 - (dtype_len - p.minbits) % 8;
-   else
+   else 
       dat_len = 8;
 
-   if(*buf_len > dat_len) {
+   if(*buf_len > dat_len) { 
       data[data_offset + k] =
       ((val >> (*buf_len - dat_len)) & ~(~0 << dat_len));
       *buf_len -= dat_len;
@@ -1418,12 +1424,12 @@ int begin_i, unsigned char *buffer, size_t *j, int *buf_len, parms_atomic p, int
       val = buffer[*j];
       data[data_offset + k] |=
       ((val >> (*buf_len - dat_len)) & ~(~0 << dat_len));
-      *buf_len -= dat_len;
+      *buf_len -= dat_len; 
    }
 }
 
-static void H5Z_scaleoffset_decompress_one_atomic(unsigned char *data, size_t data_offset,
-                           unsigned char *buffer, size_t *j, int *buf_len, parms_atomic p)
+static void H5Z_scaleoffset_decompress_one_atomic(unsigned char *data, size_t data_offset, 
+                           unsigned char *buffer, size_t *j, int *buf_len, parms_atomic p) 
 {
    /* begin_i: the index of byte having first significant bit */
    int k, begin_i, dtype_len;
@@ -1435,41 +1441,41 @@ static void H5Z_scaleoffset_decompress_one_atomic(unsigned char *data, size_t da
    if(p.mem_order == H5Z_SCALEOFFSET_ORDER_LE) { /* little endian */
       begin_i = p.size - 1 - (dtype_len - p.minbits) / 8;
 
-      for(k = begin_i; k >= 0; k--)
-         H5Z_scaleoffset_decompress_one_byte(data, data_offset, k, begin_i,
+      for(k = begin_i; k >= 0; k--) 
+         H5Z_scaleoffset_decompress_one_byte(data, data_offset, k, begin_i, 
                                              buffer, j, buf_len, p, dtype_len);
    }
 
    if(p.mem_order == H5Z_SCALEOFFSET_ORDER_BE) { /* big endian */
       begin_i = (dtype_len - p.minbits) / 8;
 
-      for(k = begin_i; k <= p.size - 1; k++)
-         H5Z_scaleoffset_decompress_one_byte(data, data_offset, k, begin_i,
+      for(k = begin_i; k <= p.size - 1; k++) 
+         H5Z_scaleoffset_decompress_one_byte(data, data_offset, k, begin_i,  
                                              buffer, j, buf_len, p, dtype_len);
-   }
+   } 
 }
 
-static void H5Z_scaleoffset_decompress(unsigned char *data, unsigned d_nelmts,
-                                       unsigned char *buffer, parms_atomic p)
+static void H5Z_scaleoffset_decompress(unsigned char *data, unsigned d_nelmts, 
+                                       unsigned char *buffer, parms_atomic p) 
 {
-   /* i: index of data, j: index of buffer,
+   /* i: index of data, j: index of buffer, 
       buf_len: number of bits to be filled in current byte */
    size_t i, j;
-   int buf_len;
+   int buf_len; 
 
-   /* must initialize to zeros */
-   for(i = 0; i < d_nelmts*p.size; i++) data[i] = 0;
-
-   /* initialization before the loop */
-   j = 0;
-   buf_len = sizeof(unsigned char) * 8;
+   /* must initialize to zeros */  
+   for(i = 0; i < d_nelmts*p.size; i++) data[i] = 0; 
+   
+   /* initialization before the loop */ 
+   j = 0; 
+   buf_len = sizeof(unsigned char) * 8; 
 
    /* decompress */
-   for(i = 0; i < d_nelmts; i++)
+   for(i = 0; i < d_nelmts; i++) 
       H5Z_scaleoffset_decompress_one_atomic(data, i*p.size, buffer, &j, &buf_len, p);
 }
 
-static void H5Z_scaleoffset_compress_one_byte(unsigned char *data, size_t data_offset, int k,
+static void H5Z_scaleoffset_compress_one_byte(unsigned char *data, size_t data_offset, int k, 
 int begin_i, unsigned char *buffer, size_t *j, int *buf_len, parms_atomic p, int dtype_len)
 {
    int dat_len; /* dat_len is the number of bits to be copied in each data byte */
@@ -1477,12 +1483,12 @@ int begin_i, unsigned char *buffer, size_t *j, int *buf_len, parms_atomic p, int
 
    /* initialize value and bits of unsigned char to be copied */
    val = data[data_offset + k];
-   if(k == begin_i)
+   if(k == begin_i) 
       dat_len = 8 - (dtype_len - p.minbits) % 8;
    else
       dat_len = 8;
 
-   if(*buf_len > dat_len) {
+   if(*buf_len > dat_len) { 
       buffer[*j] |= (val & ~(~0 << dat_len)) << (*buf_len - dat_len);
       *buf_len -= dat_len;
    } else {
@@ -1492,12 +1498,12 @@ int begin_i, unsigned char *buffer, size_t *j, int *buf_len, parms_atomic p, int
       if(dat_len == 0) return;
 
       buffer[*j] = (val & ~(~0 << dat_len)) << (*buf_len - dat_len);
-      *buf_len -= dat_len;
+      *buf_len -= dat_len; 
    }
 }
 
-static void H5Z_scaleoffset_compress_one_atomic(unsigned char *data, size_t data_offset,
-                         unsigned char *buffer, size_t *j, int *buf_len, parms_atomic p)
+static void H5Z_scaleoffset_compress_one_atomic(unsigned char *data, size_t data_offset, 
+                         unsigned char *buffer, size_t *j, int *buf_len, parms_atomic p) 
 {
    /* begin_i: the index of byte having first significant bit */
    int k, begin_i, dtype_len;
@@ -1509,38 +1515,38 @@ static void H5Z_scaleoffset_compress_one_atomic(unsigned char *data, size_t data
    if(p.mem_order == H5Z_SCALEOFFSET_ORDER_LE) { /* little endian */
       begin_i = p.size - 1 - (dtype_len - p.minbits) / 8;
 
-      for(k = begin_i; k >= 0; k--)
-         H5Z_scaleoffset_compress_one_byte(data, data_offset, k, begin_i,
+      for(k = begin_i; k >= 0; k--) 
+         H5Z_scaleoffset_compress_one_byte(data, data_offset, k, begin_i,  
                                            buffer, j, buf_len, p, dtype_len);
    }
 
    if(p.mem_order == H5Z_SCALEOFFSET_ORDER_BE) { /* big endian */
       begin_i = (dtype_len - p.minbits) / 8;
 
-      for(k = begin_i; k <= p.size - 1; k++)
-         H5Z_scaleoffset_compress_one_byte(data, data_offset, k, begin_i,
+      for(k = begin_i; k <= p.size - 1; k++) 
+         H5Z_scaleoffset_compress_one_byte(data, data_offset, k, begin_i,  
                                            buffer, j, buf_len, p, dtype_len);
-   }
+   }    
 }
 
-static void H5Z_scaleoffset_compress(unsigned char *data, unsigned d_nelmts, unsigned char *buffer,
-                                     size_t buffer_size, parms_atomic p)
+static void H5Z_scaleoffset_compress(unsigned char *data, unsigned d_nelmts, unsigned char *buffer, 
+                                     size_t buffer_size, parms_atomic p) 
 {
-   /* i: index of data, j: index of buffer,
+   /* i: index of data, j: index of buffer, 
       buf_len: number of bits to be filled in current byte */
    size_t i, j;
-   int buf_len;
+   int buf_len; 
 
    /* must initialize buffer to be zeros */
-   for(j = 0; j < buffer_size; j++)
+   for(j = 0; j < buffer_size; j++) 
       buffer[j] = 0;
 
-   /* initialization before the loop */
-   j = 0;
-   buf_len = sizeof(unsigned char) * 8;
+   /* initialization before the loop */ 
+   j = 0; 
+   buf_len = sizeof(unsigned char) * 8; 
 
    /* compress */
-   for(i = 0; i < d_nelmts; i++)
+   for(i = 0; i < d_nelmts; i++) 
        H5Z_scaleoffset_compress_one_atomic(data, i*p.size, buffer, &j, &buf_len, p);
 }
 #endif /* H5_HAVE_FILTER_SCALEOFFSET */

@@ -1293,7 +1293,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_scaleoffset(hid_t plist_id, int scale_factor, unsigned scale_type)
+H5Pset_scaleoffset(hid_t plist_id, H5_SO_scale_type scale_type, int scale_factor)
 {
     H5O_pline_t         pline;
     H5P_genplist_t *plist;      /* Property list pointer */
@@ -1307,6 +1307,9 @@ H5Pset_scaleoffset(hid_t plist_id, int scale_factor, unsigned scale_type)
     if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
         HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
 
+    if(scale_type!=0 && scale_type!=1 && scale_type!=2)
+       HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "invalid scale type");
+
     /* Get the plist structure */
     if(NULL == (plist = H5I_object(plist_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
@@ -1319,8 +1322,8 @@ H5Pset_scaleoffset(hid_t plist_id, int scale_factor, unsigned scale_type)
      * scale type = other: integer type, scale_factor is minimum number of bits
      *                     if scale_factor = 0, then filter calculates minimum number of bits
      */
-    cd_values[0] = scale_factor;
-    cd_values[1] = scale_type;
+    cd_values[0] = scale_type;
+    cd_values[1] = scale_factor;
 
     /* Add the scaleoffset filter */
     if(H5P_get(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
