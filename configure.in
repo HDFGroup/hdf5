@@ -2388,7 +2388,7 @@ AC_ARG_ENABLE([dconv-accuracy],
               [AC_HELP_STRING([--enable-dconv-accuracy],
                               [if data accuracy is guaranteed during 
                               data conversions [default=yes]])],
-              [DATA_ACCURACY=$enableval], [DATA_ACCURACY=yes])
+              [DATA_ACCURACY=$enableval], [DATA_ACCURACY=no])
 
 if test "$DATA_ACCURACY" = "yes"; then
   AC_MSG_RESULT([yes])
