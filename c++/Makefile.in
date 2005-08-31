@@ -553,7 +553,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-generic clean-libtool clean-local mostlyclean-am
+clean-am: clean-generic clean-libtool mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -f Makefile
@@ -603,7 +603,7 @@ uninstall-info: uninstall-info-recursive
 
 .PHONY: $(RECURSIVE_TARGETS) CTAGS GTAGS all all-am all-local check \
 	check-TESTS check-am clean clean-generic clean-libtool \
-	clean-local clean-recursive ctags ctags-recursive distclean \
+	clean-recursive ctags ctags-recursive distclean \
 	distclean-generic distclean-libtool distclean-recursive \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am install-exec \
@@ -621,16 +621,6 @@ uninstall-info: uninstall-info-recursive
 # normally go) because it should be included in the top-level Makefile.am
 # as well.
 check-install: installcheck
-
-# Clean and mostlyclean need to recurse into examples directory
-clean-local:
-	@if test -f examples/Makefile; then                                \
-	  (cd examples && $(MAKE) $(AM_MAKEFLAGS) clean) || exit 1;       \
-	fi;
-mostlyclean-local:
-	@if test -f examples/Makefile; then                                \
-	  (cd examples && $(MAKE) $(AM_MAKEFLAGS) mostlyclean) || exit 1; \
-	fi;
 
 # Install examples
 install-examples uninstall-examples:

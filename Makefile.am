@@ -104,23 +104,9 @@ install-exec-local:
 uninstall-local:
 	@cd perform && $(MAKE) $(AM_MAKEFLAGS) uninstall
 
-# Clean and mostlyclean need to recurse into examples and perform
-# directories unless they've already been distcleaned.
-clean-local:
-	@@SETX@; for d in examples perform; do                          \
-	  if test -f $$d/Makefile; then                                 \
-	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) clean) || exit 1;        \
-	  fi;                                                           \
-	done
-
 # Some C++ compilers/linkers will create a directory named ii_files in
 # the root directory, which should be cleaned.
 mostlyclean-local:
-	@@SETX@; for d in examples perform; do                          \
-	  if test -f $$d/Makefile; then                                 \
-	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) mostlyclean) || exit 1;  \
-	  fi;                                                           \
-	done;                                                           \
 	if test -d ii_files; then                                       \
           $(RM) -rf ii_files;                                           \
         fi

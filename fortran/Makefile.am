@@ -36,16 +36,6 @@ endif
 # All directories that have Makefiles
 DIST_SUBDIRS=src test testpar examples
 
-# Clean and mostlyclean need to recurse into examples directory     
-clean-local:     
-	@if test -f examples/Makefile; then                                \
-	  (cd examples && $(MAKE) $(AM_MAKEFLAGS) clean) || exit 1;       \
-	fi;
-mostlyclean-local:         
-	@if test -f examples/Makefile; then                                \
-	  (cd examples && $(MAKE) $(AM_MAKEFLAGS) mostlyclean) || exit 1; \
-	fi; 
-
 # Install examples
 install-examples uninstall-examples:
 	@(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;

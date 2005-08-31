@@ -61,6 +61,13 @@ install-data-local:
 uninstall-local:
 	@$(MAKE) uninstall-examples
 
+# Some C++ compilers/linkers will create a directory named ii_files,
+# which should be cleaned.
+mostlyclean-local:
+        if test -d ii_files; then                                       \
+          $(RM) -rf ii_files;                                           \
+        fi
+
 # Install source files, which are the examples with .cpp suffixes.  Do the same
 # for uninstall.
 install-examples: $(EXAMPLEDIR)
