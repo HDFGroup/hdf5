@@ -389,7 +389,10 @@ int apply_filters(const char* name,    /* object name from traverse list */
 				aggression=obj.filter[i].cd_values[0];
 				if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
 					return -1;
-				if (H5Pset_scaleoffset(dcpl_id,aggression,2)<0)
+                                /* The following line  needs to be changed in the future,
+                                   H5_SO_INT needs to be passed as a parameter, it can
+                                   be either H5_SO_FLOAT_DSCALE or H5_SO_INT. KY, 2005/8/31 */ 
+				if (H5Pset_scaleoffset(dcpl_id,H5_SO_INT,aggression)<0)
 					return -1;
 				break;
 			} /* switch */
