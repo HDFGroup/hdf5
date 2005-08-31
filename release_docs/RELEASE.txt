@@ -799,6 +799,11 @@ Linux 2.4 IA64 Intel  y       n       y    n    y        y           y
 
 Known Problems
 ==============
+* On IRIX6.5, when C compiler version >7.4, the complicate MPI derived data type
+  code will work. However, the user should be aware to enlarge MPI_TYPE_MAX environment 
+  variable to some certian value in order to use collective irregular selection code.
+  For example, the current parallel HDF5 test needs to enlarge MPI_TYPE_MAX to 
+  200,000 to make the test pass.
 * The dataset created or rewritten with the v1.6.3 library or after can't 
   be read with the v1.6.2 library or before when Fletcher32 EDC(filter) is 
   enabled.  There was a bug in the calculating code of the Fletcher32 
