@@ -1293,7 +1293,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_scaleoffset(hid_t plist_id, H5_SO_scale_type scale_type, int scale_factor)
+H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type, int scale_factor)
 {
     H5O_pline_t         pline;
     H5P_genplist_t *plist;      /* Property list pointer */
@@ -1307,7 +1307,7 @@ H5Pset_scaleoffset(hid_t plist_id, H5_SO_scale_type scale_type, int scale_factor
     if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
         HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
 
-    if(scale_type!=0 && scale_type!=1 && scale_type!=2)
+    if(scale_type!=H5Z_SO_FLOAT_DSCALE && scale_type!=H5Z_SO_FLOAT_ESCALE && scale_type!=H5Z_SO_INT)
        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "invalid scale type");
 
     /* Get the plist structure */

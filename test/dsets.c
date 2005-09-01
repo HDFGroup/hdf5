@@ -3800,7 +3800,7 @@ test_scaleoffset_int(hid_t file)
 
     /* Set up to use scaleoffset filter, let library calculate minbits */
     if (H5Pset_chunk(dc, 2, chunk_size)<0) goto error;
-    if (H5Pset_scaleoffset(dc, H5_SO_INT,H5_SO_INT_MINBITS_DEFAULT)<0) goto error;
+    if (H5Pset_scaleoffset(dc, H5Z_SO_INT,H5Z_SO_INT_MINBITS_DEFAULT)<0) goto error;
 
     /* Create the dataset */
     if ((dataset = H5Dcreate(file, DSET_SCALEOFFSET_INT_NAME, datatype,
@@ -3936,7 +3936,7 @@ test_scaleoffset_int_2(hid_t file)
 
     /* Set up to use scaleoffset filter, let library calculate minbits */
     if (H5Pset_chunk(dc, 2, chunk_size)<0) goto error;
-    if (H5Pset_scaleoffset(dc, H5_SO_INT,H5_SO_INT_MINBITS_DEFAULT)<0) goto error;
+    if (H5Pset_scaleoffset(dc, H5Z_SO_INT,H5Z_SO_INT_MINBITS_DEFAULT)<0) goto error;
 
     /* Create the dataset */
     if ((dataset = H5Dcreate(file, DSET_SCALEOFFSET_INT_NAME_2, datatype,
@@ -4079,7 +4079,7 @@ test_scaleoffset_float(hid_t file)
      * use variable-minimum-bits method
      */
     if (H5Pset_chunk(dc, 2, chunk_size)<0) goto error;
-    if (H5Pset_scaleoffset(dc, H5_SO_FLOAT_DSCALE,3)<0) goto error;
+    if (H5Pset_scaleoffset(dc, H5Z_SO_FLOAT_DSCALE,3)<0) goto error;
 
     /* Create the dataset */
     if ((dataset = H5Dcreate(file, DSET_SCALEOFFSET_FLOAT_NAME, datatype,
@@ -4217,7 +4217,7 @@ test_scaleoffset_float_2(hid_t file)
      * use variable-minimum-bits method
      */
     if (H5Pset_chunk(dc, 2, chunk_size)<0) goto error;
-    if (H5Pset_scaleoffset(dc, H5_SO_FLOAT_DSCALE,3)<0) goto error;
+    if (H5Pset_scaleoffset(dc, H5Z_SO_FLOAT_DSCALE,3)<0) goto error;
 
     /* Create the dataset */
     if ((dataset = H5Dcreate(file, DSET_SCALEOFFSET_FLOAT_NAME_2, datatype,
@@ -4359,7 +4359,7 @@ test_scaleoffset_double(hid_t file)
      * use variable-minimum-bits method
      */
     if (H5Pset_chunk(dc, 2, chunk_size)<0) goto error;
-    if (H5Pset_scaleoffset(dc, H5_SO_FLOAT_DSCALE,7)<0) goto error;
+    if (H5Pset_scaleoffset(dc, H5Z_SO_FLOAT_DSCALE,7)<0) goto error;
 
     /* Create the dataset */
     if ((dataset = H5Dcreate(file, DSET_SCALEOFFSET_DOUBLE_NAME, datatype,
@@ -4497,7 +4497,7 @@ test_scaleoffset_double_2(hid_t file)
      * use variable-minimum-bits method
      */
     if (H5Pset_chunk(dc, 2, chunk_size)<0) goto error;
-    if (H5Pset_scaleoffset(dc, H5_SO_FLOAT_DSCALE,7)<0) goto error;
+    if (H5Pset_scaleoffset(dc, H5Z_SO_FLOAT_DSCALE,7)<0) goto error;
 
     /* Create the dataset */
     if ((dataset = H5Dcreate(file, DSET_SCALEOFFSET_DOUBLE_NAME_2, datatype,

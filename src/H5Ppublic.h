@@ -268,7 +268,7 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned aggression);
 H5_DLL herr_t H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels_per_block);
 H5_DLL herr_t H5Pset_shuffle(hid_t plist_id);
 H5_DLL herr_t H5Pset_nbit(hid_t plist_id);
-H5_DLL herr_t H5Pset_scaleoffset(hid_t plist_id, H5_SO_scale_type scale_type, int scale_factor);
+H5_DLL herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type, int scale_factor);
 H5_DLL herr_t H5Pset_fletcher32(hid_t plist_id);
 H5_DLL herr_t H5Pset_edc_check(hid_t plist_id, H5Z_EDC_t check);
 H5_DLL H5Z_EDC_t H5Pget_edc_check(hid_t plist_id);
