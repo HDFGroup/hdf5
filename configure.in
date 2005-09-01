@@ -2039,12 +2039,12 @@ AC_ARG_ENABLE([parallel],
 
 dnl The --enable-parallel flag is not compatible with --enable-cxx.
 dnl If the user tried to specify both flags, throw an error.
-if test "X${HDF_CXX}" != "X" && test "X${enable-parallel}" != "X"; then
+if test "X${HDF_CXX}" != "X" && test "X$enable_parallel" != "X"; then
   AC_MSG_ERROR([--enable-cxx and --enable-parallel flags are incompatible])
 fi
 
 dnl --enable-parallel is also incompatible with --enable-threadsafe.
-if test "X${THREADSAFE}" != "X" && test "X${enable-parallel}" != "X"; then
+if test "X${THREADSAFE}" != "X" && test "X$enable_parallel" != "X"; then
   AC_MSG_ERROR([--enable-threadsafe and --enable-parallel flags are incompatible])
 fi
 

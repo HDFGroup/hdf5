@@ -48116,13 +48116,13 @@ if test "${enable_parallel+set}" = set; then
 
 fi;
 
-if test "X${HDF_CXX}" != "X" && test "X${enable-parallel}" != "X"; then
+if test "X${HDF_CXX}" != "X" && test "X$enable_parallel" != "X"; then
   { { echo "$as_me:$LINENO: error: --enable-cxx and --enable-parallel flags are incompatible" >&5
 echo "$as_me: error: --enable-cxx and --enable-parallel flags are incompatible" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
-if test "X${THREADSAFE}" != "X" && test "X${enable-parallel}" != "X"; then
+if test "X${THREADSAFE}" != "X" && test "X$enable_parallel" != "X"; then
   { { echo "$as_me:$LINENO: error: --enable-threadsafe and --enable-parallel flags are incompatible" >&5
 echo "$as_me: error: --enable-threadsafe and --enable-parallel flags are incompatible" >&2;}
    { (exit 1); exit 1; }; }
