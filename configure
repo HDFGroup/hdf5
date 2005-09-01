@@ -23213,7 +23213,8 @@ fi
 done
 
 
-if test "`uname -o`" = "Cygwin"; then
+case "`uname`" in
+  CYGWIN*)
 
 
 for ac_header in io.h sys/timeb.h
@@ -23365,7 +23366,8 @@ fi
 
 done
 
-else
+    ;;
+  *)
 
 
 
@@ -23518,7 +23520,9 @@ fi
 
 done
 
-fi
+    ;;
+esac
+
 case "$host" in
   alpha*-dec*-osf*)
 

@@ -761,11 +761,15 @@ AC_CHECK_HEADERS([stddef.h setjmp.h features.h])
 AC_CHECK_HEADERS([stdint.h], [C9x=yes])
 
 dnl Windows
-if test "`uname -o`" = "Cygwin"; then
-   AC_CHECK_HEADERS([io.h sys/timeb.h])
-else
-   AC_CHECK_HEADERS([io.h winsock.h sys/timeb.h])
-fi
+case "`uname`" in
+  CYGWIN*)
+    AC_CHECK_HEADERS([io.h sys/timeb.h])
+    ;;
+  *)
+    AC_CHECK_HEADERS([io.h winsock.h sys/timeb.h])
+    ;;
+esac
+
 case "$host" in
   alpha*-dec*-osf*)
     dnl The <sys/sysinfo.h> and <sys/proc.h> are needed on the DEC
