@@ -2367,7 +2367,7 @@ AC_ARG_ENABLE([dconv-exception],
               [AC_HELP_STRING([--enable-dconv-exception],
                               [if exception handling functions is checked during 
                               data conversions [default=yes]])],
-              [DCONV_EXCEPTION=$enableval], [DCONV_EXCEPTION=no])
+              [DCONV_EXCEPTION=$enableval], [DCONV_EXCEPTION=yes])
 
 if test "$DCONV_EXCEPTION" = "yes"; then
   AC_MSG_RESULT([yes])
@@ -2388,7 +2388,7 @@ AC_ARG_ENABLE([dconv-accuracy],
               [AC_HELP_STRING([--enable-dconv-accuracy],
                               [if data accuracy is guaranteed during 
                               data conversions [default=yes]])],
-              [DATA_ACCURACY=$enableval], [DATA_ACCURACY=no])
+              [DATA_ACCURACY=$enableval], [DATA_ACCURACY=yes])
 
 if test "$DATA_ACCURACY" = "yes"; then
   AC_MSG_RESULT([yes])

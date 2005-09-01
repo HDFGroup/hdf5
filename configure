@@ -50009,7 +50009,7 @@ if test "${enable_dconv_exception+set}" = set; then
   enableval="$enable_dconv_exception"
   DCONV_EXCEPTION=$enableval
 else
-  DCONV_EXCEPTION=no
+  DCONV_EXCEPTION=yes
 fi;
 
 if test "$DCONV_EXCEPTION" = "yes"; then
@@ -50032,7 +50032,7 @@ if test "${enable_dconv_accuracy+set}" = set; then
   enableval="$enable_dconv_accuracy"
   DATA_ACCURACY=$enableval
 else
-  DATA_ACCURACY=no
+  DATA_ACCURACY=yes
 fi;
 
 if test "$DATA_ACCURACY" = "yes"; then
