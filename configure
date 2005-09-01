@@ -44818,6 +44818,12 @@ if test "${enable_threadsafe+set}" = set; then
   THREADSAFE=$enableval
 fi;
 
+if test "X${HDF_CXX}" != "X" && test "X${THREADSAFE}" != "X"; then
+  { { echo "$as_me:$LINENO: error: --enable-cxx and --enable-threadsafe flags are incompatible" >&5
+echo "$as_me: error: --enable-cxx and --enable-threadsafe flags are incompatible" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
 case "X-$THREADSAFE" in
   X-|X-no)
     echo "$as_me:$LINENO: result: no" >&5
@@ -48106,6 +48112,18 @@ if test "${enable_parallel+set}" = set; then
 
 fi;
 
+if test "X${HDF_CXX}" != "X" && test "X${enable-parallel}" != "X"; then
+  { { echo "$as_me:$LINENO: error: --enable-cxx and --enable-parallel flags are incompatible" >&5
+echo "$as_me: error: --enable-cxx and --enable-parallel flags are incompatible" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+if test "X${THREADSAFE}" != "X" && test "X${enable-parallel}" != "X"; then
+  { { echo "$as_me:$LINENO: error: --enable-threadsafe and --enable-parallel flags are incompatible" >&5
+echo "$as_me: error: --enable-threadsafe and --enable-parallel flags are incompatible" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
 echo "$as_me:$LINENO: checking for parallel support files" >&5
 echo $ECHO_N "checking for parallel support files... $ECHO_C" >&6
 case "X-$enable_parallel" in
@@ -49867,7 +49885,15 @@ if test "${enable_fphdf5+set}" = set; then
 else
   FPHDF5="no"
 fi;
+
   if test "X$FPHDF5" = "Xyes"; then
+
+            if test "X$${FPHDF5}" != "X" && test "X${HDF_FORTRAN}" != "X"; then
+     { { echo "$as_me:$LINENO: error: --enable-fphdf5 and --enable-fortran flags are incompatible" >&5
+echo "$as_me: error: --enable-fphdf5 and --enable-fortran flags are incompatible" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_FPHDF5 1
