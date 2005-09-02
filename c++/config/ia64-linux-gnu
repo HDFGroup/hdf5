@@ -1,7 +1,7 @@
 
 if test -z "$CXX"; then
-    CXX=icc
-    CXX_BASENAME=icc
+    CXX=icpc
+    CXX_BASENAME=icpc
 fi
 
 
