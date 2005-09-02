@@ -21,9 +21,31 @@
  */
 
 #include "testphdf5.h"
+static int	mpi_size, mpi_rank;
 
 #define DATASETNAME "ExtendibleArray" 
-#define ELEMS		 20000000
+#define CHUNKSIZE	1000		/* #elements per chunk */
+#define DSETSIZE		20000*CHUNKSIZE
+
+static MPI_Offset
+get_filesize(const char *filename)
+{
+    int		mpierr;
+    MPI_File	fd;
+    MPI_Offset	filesize;
+
+    mpierr = MPI_File_open(MPI_COMM_SELF, (char*)filename, MPI_MODE_RDONLY,
+	MPI_INFO_NULL, &fd);
+    VRFY((mpierr == MPI_SUCCESS), "");
+
+    mpierr = MPI_File_get_size(fd, &filesize);
+    VRFY((mpierr == MPI_SUCCESS), "");
+
+    mpierr = MPI_File_close(&fd);
+    VRFY((mpierr == MPI_SUCCESS), "");
+
+    return(filesize);
+}
 
 /*
  * This creates a dataset serially with 20000 chunks, each of 1000
@@ -36,15 +58,14 @@ create_chunked_dataset(const char *filename)
     hid_t       file;                          /* handles */
     hid_t       dataspace, dataset;  
     hid_t       cparms;                     
-    int 	mpi_size, mpi_rank;
-    hsize_t      dims[1]  = {20*1000000};     /* dataset dimensions
+    hsize_t      dims[1]  = {DSETSIZE};     /* dataset dimensions
                                                  at creation time */
 
     hsize_t      maxdims[1] = {H5S_UNLIMITED};
     herr_t       hrc;                             
 
     /* Variables used in reading data back */
-    hsize_t      chunk_dims[1] ={1000};
+    hsize_t      chunk_dims[1] ={CHUNKSIZE};
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
@@ -87,57 +108,42 @@ void
 extend_chunked_dataset(const char *filename)
 {
     /* HDF5 gubbins */
-    hid_t    file_id, dataset;             /* HDF5 file identifier */
-    hid_t    access_plist;                 /* HDF5 ID for file access property list */
-    herr_t   hrc;                          /* HDF5 return code */
-
+    hid_t    file_id, dataset;     /* HDF5 file identifier */
+    hid_t    access_plist;         /* HDF5 ID for file access property list */
+    herr_t   hrc;                  /* HDF5 return code */
     hsize_t  size[1];
-    int mpi_size, mpi_rank;
-
-    long int lb;
 
     /* MPI Gubbins */
-    MPI_Comm     comm;
-    MPI_Info     info;
-    MPI_File	   thefile;
-    MPI_Offset   filesize;
+    MPI_Offset  filesize,	    /* actual file size */
+		est_filesize;	    /* estimated file size */
+    int         mpierr;
 
-    int          mpierr, ret;
-
-
-printf("extend_chunked_dataset: filename=%s\n", filename);
     /* Initialize MPI */
-    comm = MPI_COMM_WORLD;
-    info = MPI_INFO_NULL;
-
-    /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
-    /* Set up HDF5 file creation, access and independent data transfer property lists */
+    /* Set up MPIO file access property lists */
     access_plist  = H5Pcreate(H5P_FILE_ACCESS);
     VRFY((access_plist >= 0), "");
 
-    hrc = H5Pset_fapl_mpio(access_plist, comm, info);
+    hrc = H5Pset_fapl_mpio(access_plist, MPI_COMM_WORLD, MPI_INFO_NULL);
     VRFY((hrc >= 0), "");
 
     /* Open the file */
     file_id = H5Fopen(filename, H5F_ACC_RDWR, access_plist);
     VRFY((file_id >= 0), "");
 
-    /* Can close some plists */
-    hrc = H5Pclose(access_plist);
-    VRFY((hrc >= 0), "");
-
     /* Open dataset*/
     dataset   = H5Dopen(file_id, DATASETNAME);
     VRFY((dataset >= 0), "");
 
-    size[0] = ELEMS;
+#if 0
+    size[0] = DSETSIZE;
 
     /* Extend dataset*/
     hrc = H5Dextend(dataset, size);
     VRFY((hrc >= 0), "");
+#endif
 
     /* Close up */
     hrc = H5Dclose(dataset);
@@ -146,36 +152,14 @@ printf("extend_chunked_dataset: filename=%s\n", filename);
     hrc = H5Fclose(file_id);
     VRFY((hrc >= 0), "");
 
-    mpierr = MPI_File_open(comm, filename, MPI_MODE_RDONLY, info, &thefile);
-    VRFY((mpierr == MPI_SUCCESS), "");
+    /* verify file size has grown */
+    filesize = get_filesize(filename);
+    est_filesize = DSETSIZE*sizeof(H5T_NATIVE_INT);
+    VRFY((filesize>=est_filesize), "file size check");
 
-    mpierr = MPI_File_get_size(thefile, &filesize);
-    VRFY((mpierr == MPI_SUCCESS), "");
-
-
-    /* Definition of lower bound */
-    lb = ELEMS*sizeof(H5T_NATIVE_INT);
-
-    /* Print size of file. */
-    printf("File size: %ld\n", (long int)filesize);
-
-    if (filesize>=lb){
-	printf("Test passed\n");
-	ret = 0;
-    } else {
-	printf("Test failed\n");
-	ret = 1;
-    }
-
-    mpierr = MPI_File_close(&thefile);
-    VRFY((mpierr == MPI_SUCCESS), "");
-
-    hrc = H5close();
+    /* Can close some plists */
+    hrc = H5Pclose(access_plist);
     VRFY((hrc >= 0), "");
-
-    /* Finalize */
-    mpierr = MPI_Finalize();
-    VRFY((mpierr == MPI_SUCCESS), "");
 }
 
 void
@@ -190,5 +174,5 @@ test_chunk_alloc(void)
     /* create the datafile first */
     create_chunked_dataset(filename);
     /* reopen it in parallel and extend it. */
-    /*extend_chunked_dataset(filename); */
+    extend_chunked_dataset(filename);
 }
