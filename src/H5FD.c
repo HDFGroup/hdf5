@@ -2803,8 +2803,10 @@ H5FD_extend(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size, hsize_t e
                         /* Free the memory for the used block */
                         H5FL_FREE(H5FD_free_t, curr);
                     } /* end if */
-                    else
+                    else {
+                        curr->addr += extra_requested;
                         curr->size -= extra_requested;
+                    } /* end else */
 
                     /* Leave now */
                     break;
