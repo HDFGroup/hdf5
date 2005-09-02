@@ -127,6 +127,9 @@ Bug Fixes since HDF5-1.6.4 release
 
     Configuration
     -------------
+	- Changed default C++ compiler for the IA64 platform from icc to
+	    icpc which is the preferred compiler for Intel Compiler version
+	    8. AKC - 2005/09/02
 
     Performance
     -------------
