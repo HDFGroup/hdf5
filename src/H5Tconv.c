@@ -163,6 +163,11 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
  * is invoked inside the H5T_CONV "template" macro by "gluing" it together,
  * which allows the core conversion macro to be invoked as necessary.
  *
+ * "Core" macros come in two flavors: one which calls the exception handling
+ * routine and one which doesn't (the "_NOEX" variant).  The presence of the
+ * exception handling routine is detected before the loop over the values and
+ * the appropriate core routine loop is executed.
+ *
  * The generic "core" macros are: (others are specific to particular conversion)
  *
  * Suffix	Description
@@ -179,7 +184,10 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
  *		destination.
  *
  */
-#define H5T_CONV_xX_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+#define H5T_CONV_xX_CORE(S,D,ST,DT,D_MIN,D_MAX,D_PREC) {		      \
+    *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+#define H5T_CONV_xX_NOEX_CORE(S,D,ST,DT,D_MIN,D_MAX,D_PREC) {		      \
     *((DT*)D) = (DT)(*((ST*)S));					      \
 }
 
@@ -190,293 +198,335 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
  * equal. In this case, do not return exception but make sure the maximum is assigned
  * to the destination.   SLU - 2005/06/29
  */
-#define H5T_CONV_Xx_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+#define H5T_CONV_Xx_CORE(S,D,ST,DT,D_MIN,D_MAX,D_PREC) {		      \
     if (*((ST*)S) > (DT)(D_MAX)) {                                            \
-        if(cb_struct.func) {			                              \
-            H5T_conv_ret_t      except_ret;     /*callback return*/           \
-                                                                              \
-            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,           \
-                    src_id, dst_id, S, D, cb_struct.user_data);               \
-            if(except_ret == H5T_CONV_UNHANDLED)                              \
-                /* Let compiler convert if case is ignored by user handler*/  \
-                *((DT*)D) = (D_MAX);					      \
-            else if(except_ret == H5T_CONV_ABORT)                             \
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
-            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
-        }                                                                     \
-        else                                                                  \
+        H5T_conv_ret_t except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,               \
+                src_id, dst_id, S, D, cb_struct.user_data);                   \
+        if(except_ret == H5T_CONV_UNHANDLED)                                  \
+            /* Let compiler convert if case is ignored by user handler*/      \
             *((DT*)D) = (D_MAX);					      \
+        else if(except_ret == H5T_CONV_ABORT)                                 \
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+        /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
     } else if (*((ST*)S) < (DT)(D_MIN)) {                                     \
-        if(cb_struct.func) {			                              \
-            H5T_conv_ret_t      except_ret;     /*callback return*/           \
-                                                                              \
-            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW,          \
-                    src_id, dst_id, S, D, cb_struct.user_data);               \
-            if(except_ret == H5T_CONV_UNHANDLED)                              \
-                /* Let compiler convert if case is ignored by user handler*/  \
-                *((DT*)D) = (D_MIN);					      \
-            else if(except_ret == H5T_CONV_ABORT)                             \
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
-            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
-        }                                                                     \
-        else                                                                  \
+        H5T_conv_ret_t except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW,              \
+                src_id, dst_id, S, D, cb_struct.user_data);                   \
+        if(except_ret == H5T_CONV_UNHANDLED)                                  \
+            /* Let compiler convert if case is ignored by user handler*/      \
             *((DT*)D) = (D_MIN);					      \
+        else if(except_ret == H5T_CONV_ABORT)                                 \
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+        /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
+    } else 								      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+#define H5T_CONV_Xx_NOEX_CORE(S,D,ST,DT,D_MIN,D_MAX,D_PREC) {		      \
+    if (*((ST*)S) > (DT)(D_MAX)) {                                            \
+        *((DT*)D) = (D_MAX);						      \
+    } else if (*((ST*)S) < (DT)(D_MIN)) {                                     \
+        *((DT*)D) = (D_MIN);						      \
     } else 								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
 
-#define H5T_CONV_Ux_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+#define H5T_CONV_Ux_CORE(S,D,ST,DT,D_MIN,D_MAX,D_PREC) {		      \
     if (*((ST*)S) > (DT)(D_MAX)) {                                            \
-        if(cb_struct.func) {			                              \
-            H5T_conv_ret_t      except_ret;     /*callback return*/           \
-                                                                              \
-            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,           \
-                    src_id, dst_id, S, D, cb_struct.user_data);               \
-            if(except_ret == H5T_CONV_UNHANDLED)                              \
-                /* Let compiler convert if case is ignored by user handler*/  \
-                *((DT*)D) = (D_MAX);					      \
-            else if(except_ret == H5T_CONV_ABORT)                             \
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
-            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
-        }                                                                     \
-        else                                                                  \
+        H5T_conv_ret_t except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,               \
+                src_id, dst_id, S, D, cb_struct.user_data);                   \
+        if(except_ret == H5T_CONV_UNHANDLED)                                  \
+            /* Let compiler convert if case is ignored by user handler*/      \
             *((DT*)D) = (D_MAX);					      \
+        else if(except_ret == H5T_CONV_ABORT)                                 \
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+        /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
+    } else								      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+#define H5T_CONV_Ux_NOEX_CORE(S,D,ST,DT,D_MIN,D_MAX,D_PREC) {		      \
+    if (*((ST*)S) > (DT)(D_MAX)) {                                            \
+        *((DT*)D) = (D_MAX);						      \
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
 
-#define H5T_CONV_sS(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
+#define H5T_CONV_sS(STYPE,DTYPE,ST,DT,D_MIN,D_MAX,D_PREC) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_xX, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
+    H5T_CONV(H5T_CONV_xX, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, D_PREC)      \
 }
 
-#define H5T_CONV_sU_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+#define H5T_CONV_sU_CORE(S,D,ST,DT,D_MIN,D_MAX,D_PREC) {		      \
     if (*((ST*)S) < 0) {                                                      \
-        if(cb_struct.func) {			                              \
-            H5T_conv_ret_t      except_ret;     /*callback return*/           \
-                                                                              \
-            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW,          \
-                    src_id, dst_id, S, D, cb_struct.user_data);               \
-            if(except_ret == H5T_CONV_UNHANDLED)                              \
-                /* Let compiler convert if case is ignored by user handler*/  \
-                *((DT*)D) = 0;					              \
-            else if(except_ret == H5T_CONV_ABORT)                             \
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
-            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
-        }                                                                     \
-        else                                                                  \
+        H5T_conv_ret_t except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW,              \
+                src_id, dst_id, S, D, cb_struct.user_data);                   \
+        if(except_ret == H5T_CONV_UNHANDLED)                                  \
+            /* Let compiler convert if case is ignored by user handler*/      \
             *((DT*)D) = 0;					              \
+        else if(except_ret == H5T_CONV_ABORT)                                 \
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+        /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
+    } else								      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+#define H5T_CONV_sU_NOEX_CORE(S,D,ST,DT,D_MIN,D_MAX,D_PREC) {		      \
+    if (*((ST*)S) < 0) {                                                      \
+        *((DT*)D) = 0;						              \
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
 
-#define H5T_CONV_sU(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
+#define H5T_CONV_sU(STYPE,DTYPE,ST,DT,D_MIN,D_MAX,D_PREC) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_sU, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
+    H5T_CONV(H5T_CONV_sU, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, D_PREC)      \
 }
 
-#define H5T_CONV_uS_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+#define H5T_CONV_uS_CORE(S,D,ST,DT,D_MIN,D_MAX,D_PREC) {		      \
     if (sizeof(ST)==sizeof(DT) && *((ST*)S) > (D_MAX)) {                      \
-        if(cb_struct.func) {                                                  \
-            H5T_conv_ret_t      except_ret;     /*callback return*/           \
-                                                                              \
-            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,           \
-                    src_id, dst_id, S, D, cb_struct.user_data);               \
-            if(except_ret == H5T_CONV_UNHANDLED)                              \
-                /* Let compiler convert if case is ignored by user handler*/  \
-                *((DT*)D) = (D_MAX);					      \
-            else if(except_ret == H5T_CONV_ABORT)                             \
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
-            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
-        }                                                                     \
-        else                                                                  \
+        H5T_conv_ret_t except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,               \
+                src_id, dst_id, S, D, cb_struct.user_data);                   \
+        if(except_ret == H5T_CONV_UNHANDLED)                                  \
+            /* Let compiler convert if case is ignored by user handler*/      \
             *((DT*)D) = (D_MAX);					      \
+        else if(except_ret == H5T_CONV_ABORT)                                 \
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+        /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
+    } else								      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+#define H5T_CONV_uS_NOEX_CORE(S,D,ST,DT,D_MIN,D_MAX,D_PREC) {		      \
+    if (sizeof(ST)==sizeof(DT) && *((ST*)S) > (D_MAX)) {                      \
+        *((DT*)D) = (D_MAX);						      \
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
 
-#define H5T_CONV_uS(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
+#define H5T_CONV_uS(STYPE,DTYPE,ST,DT,D_MIN,D_MAX,D_PREC) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_uS, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
+    H5T_CONV(H5T_CONV_uS, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, D_PREC)      \
 }
 
-#define H5T_CONV_uU(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
+#define H5T_CONV_uU(STYPE,DTYPE,ST,DT,D_MIN,D_MAX,D_PREC) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_xX, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
+    H5T_CONV(H5T_CONV_xX, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, D_PREC)      \
 }
 
-#define H5T_CONV_Ss(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
+#define H5T_CONV_Ss(STYPE,DTYPE,ST,DT,D_MIN,D_MAX,D_PREC) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_Xx, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
+    H5T_CONV(H5T_CONV_Xx, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, D_PREC)      \
 }
 
-#define H5T_CONV_Su_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+#define H5T_CONV_Su_CORE(S,D,ST,DT,D_MIN,D_MAX,D_PREC) {		      \
     if (*((ST*)S) < 0) {                                                      \
-        if(cb_struct.func) {			                              \
-            H5T_conv_ret_t      except_ret;     /*callback return*/           \
-                                                                              \
-            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW,          \
-                    src_id, dst_id, S, D, cb_struct.user_data);               \
-            if(except_ret == H5T_CONV_UNHANDLED)                              \
-                /* Let compiler convert if case is ignored by user handler*/  \
-                *((DT*)D) = 0;					              \
-            else if(except_ret == H5T_CONV_ABORT)                             \
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
-            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
-        }                                                                     \
-        else                                                                  \
+        H5T_conv_ret_t except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW,              \
+                src_id, dst_id, S, D, cb_struct.user_data);                   \
+        if(except_ret == H5T_CONV_UNHANDLED)                                  \
+            /* Let compiler convert if case is ignored by user handler*/      \
             *((DT*)D) = 0;					              \
+        else if(except_ret == H5T_CONV_ABORT)                                 \
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+        /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
     } else if (sizeof(ST)>sizeof(DT) && *((ST*)S) > (DT)(D_MAX)) {            \
-        if(cb_struct.func) {                                                  \
-            H5T_conv_ret_t      except_ret;     /*callback return*/           \
-                                                                              \
-            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,           \
-                    src_id, dst_id, S, D, cb_struct.user_data);               \
-            if(except_ret == H5T_CONV_UNHANDLED)                              \
-                /* Let compiler convert if case is ignored by user handler*/  \
-                *((DT*)D) = (D_MAX);					      \
-            else if(except_ret == H5T_CONV_ABORT)                             \
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
-            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
-        }                                                                     \
-        else                                                                  \
+        H5T_conv_ret_t except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,               \
+                src_id, dst_id, S, D, cb_struct.user_data);                   \
+        if(except_ret == H5T_CONV_UNHANDLED)                                  \
+            /* Let compiler convert if case is ignored by user handler*/      \
             *((DT*)D) = (D_MAX);					      \
+        else if(except_ret == H5T_CONV_ABORT)                                 \
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+        /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
+    } else								      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+#define H5T_CONV_Su_NOEX_CORE(S,D,ST,DT,D_MIN,D_MAX,D_PREC) {		      \
+    if (*((ST*)S) < 0) {                                                      \
+        *((DT*)D) = 0;						              \
+    } else if (sizeof(ST)>sizeof(DT) && *((ST*)S) > (DT)(D_MAX)) {            \
+        *((DT*)D) = (D_MAX);						      \
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
 
-#define H5T_CONV_Su(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
+#define H5T_CONV_Su(STYPE,DTYPE,ST,DT,D_MIN,D_MAX,D_PREC) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_Su, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
+    H5T_CONV(H5T_CONV_Su, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, D_PREC)      \
 }
 
-#define H5T_CONV_Us(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
+#define H5T_CONV_Us(STYPE,DTYPE,ST,DT,D_MIN,D_MAX,D_PREC) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_Ux, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
+    H5T_CONV(H5T_CONV_Ux, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, D_PREC)      \
 }
 
-#define H5T_CONV_Uu(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
+#define H5T_CONV_Uu(STYPE,DTYPE,ST,DT,D_MIN,D_MAX,D_PREC) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_Ux, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
+    H5T_CONV(H5T_CONV_Ux, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, D_PREC)      \
 }
 
-#define H5T_CONV_su_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+#define H5T_CONV_su_CORE(S,D,ST,DT,D_MIN,D_MAX,D_PREC) {		      \
     /* Assumes memory format of unsigned & signed integers is same */	      \
     if (*((ST*)S) < 0) {                                                      \
-        if(cb_struct.func) {			                              \
-            H5T_conv_ret_t      except_ret;     /*callback return*/           \
-                                                                              \
-            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW,          \
-                    src_id, dst_id, S, D, cb_struct.user_data);               \
-            if(except_ret == H5T_CONV_UNHANDLED)                              \
-                /* Let compiler convert if case is ignored by user handler*/  \
-                *((DT*)D) = 0;					              \
-            else if(except_ret == H5T_CONV_ABORT)                             \
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
-            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
-        }                                                                     \
-        else                                                                  \
+        H5T_conv_ret_t except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW,              \
+                src_id, dst_id, S, D, cb_struct.user_data);                   \
+        if(except_ret == H5T_CONV_UNHANDLED)                                  \
+            /* Let compiler convert if case is ignored by user handler*/      \
             *((DT*)D) = 0;					              \
+        else if(except_ret == H5T_CONV_ABORT)                                 \
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+        /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
+    } else								      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+#define H5T_CONV_su_NOEX_CORE(S,D,ST,DT,D_MIN,D_MAX,D_PREC) {		      \
+    /* Assumes memory format of unsigned & signed integers is same */	      \
+    if (*((ST*)S) < 0) {                                                      \
+        *((DT*)D) = 0;						              \
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
 
-#define H5T_CONV_su(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
+#define H5T_CONV_su(STYPE,DTYPE,ST,DT,D_MIN,D_MAX,D_PREC) {			      \
     assert(sizeof(ST)==sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_su, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
+    H5T_CONV(H5T_CONV_su, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, D_PREC)      \
 }
 
-#define H5T_CONV_us_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+#define H5T_CONV_us_CORE(S,D,ST,DT,D_MIN,D_MAX,D_PREC) {		      \
     /* Assumes memory format of unsigned & signed integers is same */	      \
     if (*((ST*)S) > (DT)(D_MAX)) {                                            \
-        if(cb_struct.func) {                                                  \
-            H5T_conv_ret_t      except_ret;     /*callback return*/           \
-                                                                              \
-            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,           \
-                    src_id, dst_id, S, D, cb_struct.user_data);               \
-            if(except_ret == H5T_CONV_UNHANDLED)                              \
-                /* Let compiler convert if case is ignored by user handler*/  \
-                *((DT*)D) = (D_MAX);					      \
-            else if(except_ret == H5T_CONV_ABORT)                             \
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
-            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
-        }								      \
-        else                                                                  \
+        H5T_conv_ret_t except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,               \
+                src_id, dst_id, S, D, cb_struct.user_data);                   \
+        if(except_ret == H5T_CONV_UNHANDLED)                                  \
+            /* Let compiler convert if case is ignored by user handler*/      \
             *((DT*)D) = (D_MAX);					      \
+        else if(except_ret == H5T_CONV_ABORT)                                 \
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+        /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
+    } else								      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+#define H5T_CONV_us_NOEX_CORE(S,D,ST,DT,D_MIN,D_MAX,D_PREC) {		      \
+    /* Assumes memory format of unsigned & signed integers is same */	      \
+    if (*((ST*)S) > (DT)(D_MAX)) {                                            \
+        *((DT*)D) = (D_MAX);						      \
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
 
-#define H5T_CONV_us(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
+#define H5T_CONV_us(STYPE,DTYPE,ST,DT,D_MIN,D_MAX,D_PREC) {			      \
     assert(sizeof(ST)==sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_us, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
+    H5T_CONV(H5T_CONV_us, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, D_PREC)      \
 }
 
-#define H5T_CONV_fF(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
+#define H5T_CONV_fF(STYPE,DTYPE,ST,DT,D_MIN,D_MAX,D_PREC) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_xX, long double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)    \
+    H5T_CONV(H5T_CONV_xX, long double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, D_PREC)    \
 }
 
 /* Same as H5T_CONV_Xx_CORE, except that instead of using D_MAX and D_MIN
  * when an overflow occurs, use the 'float' infinity values.
  */
-#define H5T_CONV_Ff_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+#define H5T_CONV_Ff_CORE(S,D,ST,DT,D_MIN,D_MAX,D_PREC) {		      \
     if (*((ST*)S) > (DT)(D_MAX)) {                                            \
-        if(cb_struct.func) {			                              \
-            H5T_conv_ret_t      except_ret;     /*callback return*/           \
-                                                                              \
-            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,           \
-                    src_id, dst_id, S, D, cb_struct.user_data);               \
-            if(except_ret == H5T_CONV_UNHANDLED)                              \
-                /* Let compiler convert if case is ignored by user handler*/  \
-                *((DT*)D) = (H5T_NATIVE_FLOAT_POS_INF_g);		      \
-            else if(except_ret == H5T_CONV_ABORT)                             \
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
-            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
-        }                                                                     \
-        else                                                                  \
-            *((DT*)D) = (H5T_NATIVE_FLOAT_POS_INF_g);			      \
+        H5T_conv_ret_t except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,               \
+                src_id, dst_id, S, D, cb_struct.user_data);                   \
+        if(except_ret == H5T_CONV_UNHANDLED)                                  \
+            /* Let compiler convert if case is ignored by user handler*/      \
+            *((DT*)D) = (H5T_NATIVE_FLOAT_POS_INF_g);		              \
+        else if(except_ret == H5T_CONV_ABORT)                                 \
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+        /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
     } else if (*((ST*)S) < (DT)(D_MIN)) {                                     \
-        if(cb_struct.func) {			                              \
-            H5T_conv_ret_t      except_ret;     /*callback return*/           \
-                                                                              \
-            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW,          \
-                    src_id, dst_id, S, D, cb_struct.user_data);               \
-            if(except_ret == H5T_CONV_UNHANDLED)                              \
-                /* Let compiler convert if case is ignored by user handler*/  \
-                *((DT*)D) = (H5T_NATIVE_FLOAT_NEG_INF_g);		      \
-            else if(except_ret == H5T_CONV_ABORT)                             \
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
-            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
-        }                                                                     \
-        else                                                                  \
-            *((DT*)D) = (H5T_NATIVE_FLOAT_NEG_INF_g);			      \
+        H5T_conv_ret_t except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW,              \
+                src_id, dst_id, S, D, cb_struct.user_data);                   \
+        if(except_ret == H5T_CONV_UNHANDLED)                                  \
+            /* Let compiler convert if case is ignored by user handler*/      \
+            *((DT*)D) = (H5T_NATIVE_FLOAT_NEG_INF_g);		              \
+        else if(except_ret == H5T_CONV_ABORT)                                 \
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+        /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
+    } else								      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+#define H5T_CONV_Ff_NOEX_CORE(S,D,ST,DT,D_MIN,D_MAX,D_PREC) {		      \
+    if (*((ST*)S) > (DT)(D_MAX)) {                                            \
+        *((DT*)D) = (H5T_NATIVE_FLOAT_POS_INF_g);		              \
+    } else if (*((ST*)S) < (DT)(D_MIN)) {                                     \
+        *((DT*)D) = (H5T_NATIVE_FLOAT_NEG_INF_g);		              \
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
 
-#define H5T_CONV_Ff(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
+#define H5T_CONV_Ff(STYPE,DTYPE,ST,DT,D_MIN,D_MAX,D_PREC) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_Ff, long double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)    \
+    H5T_CONV(H5T_CONV_Ff, long double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, D_PREC)    \
 }
 
-/* Note: this is a relative fragile hack (to use the temporary variable of the
- * destination type) - it may get optimized out by the compiler. QAK - 2005/08/19
- *
- * A better solution would be to find the bit position of the highest 1 bit
- * in the source and the bit position of the lowest 1 bit in the source and
- * determine if the number of bits between them is greater than the mantissa
- * of the floating point number (including the leading "implied" 1 bit), then
- * issue a precision exception.  However, that's probably too slow, so we'll
- * try to use this solution for now.  QAK - 2005/19/08
- */
-#define H5T_CONV_xF_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    DT t_s = *((ST*)S);                                                       \
-    if (*((ST*)S) != (ST)t_s) {                                               \
-        if(cb_struct.func) {			                              \
-            H5T_conv_ret_t      except_ret;     /*callback return*/           \
+#define H5T_HI_LO_BIT_SET(TYP, V, LO, HI) {                                   \
+    unsigned count;                                                           \
+    unsigned char p;                                                          \
+    unsigned u;                                                               \
                                                                               \
-            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_PRECISION,          \
+    count = 0;                                                                \
+    for(u = 0; u < sizeof(TYP); u++) {                                        \
+        count = ((sizeof(TYP) - 1) - u) * 8;                                  \
+        p = ((V) >> count) & 0xff;                                            \
+        if(p > 0) {                                                           \
+            if(p & 0x80)                                                      \
+                count += 7;                                                   \
+            else if(p & 0x40)                                                 \
+                count += 6;                                                   \
+            else if(p & 0x20)                                                 \
+                count += 5;                                                   \
+            else if(p & 0x10)                                                 \
+                count += 4;                                                   \
+            else if(p & 0x08)                                                 \
+                count += 3;                                                   \
+            else if(p & 0x04)                                                 \
+                count += 2;                                                   \
+            else if(p & 0x02)                                                 \
+                count += 1;                                                   \
+            break;                                                            \
+        } /* end if */                                                        \
+    } /* end for */                                                           \
+                                                                              \
+    HI = count;                                                               \
+                                                                              \
+    count = 0;                                                                \
+    for(u = 0; u < sizeof(TYP); u++) {                                        \
+        p = ((V) >> (u * 8)) & 0xff;                                          \
+        if(p > 0) {                                                           \
+            count = u * 8;                                                    \
+                                                                              \
+            if(p & 0x01)                                                      \
+                ;                                                             \
+            else if(p & 0x02)                                                 \
+                count += 1;                                                   \
+            else if(p & 0x04)                                                 \
+                count += 2;                                                   \
+            else if(p & 0x08)                                                 \
+                count += 3;                                                   \
+            else if(p & 0x10)                                                 \
+                count += 4;                                                   \
+            else if(p & 0x20)                                                 \
+                count += 5;                                                   \
+            else if(p & 0x40)                                                 \
+                count += 6;                                                   \
+            else if(p & 0x80)                                                 \
+                count += 7;                                                   \
+            break;                                                            \
+        } /* end if */                                                        \
+    } /* end for */                                                           \
+                                                                              \
+    LO = count;                                                               \
+}
+
+#define H5T_CONV_xF_CORE(S,D,ST,DT,D_MIN,D_MAX,D_PREC) {		      \
+    if ((sizeof(ST) * 8) > D_PREC) {                                                \
+        unsigned low_bit_pos, high_bit_pos;                                   \
+                                                                              \
+        /* Detect high & low bits set in source */                            \
+        H5T_HI_LO_BIT_SET(ST, *((ST*)S), low_bit_pos, high_bit_pos)           \
+                                                                              \
+        /* Check for more bits of precision in src than available in dst */   \
+        if((high_bit_pos - low_bit_pos) >= D_PREC) {                          \
+            H5T_conv_ret_t except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_PRECISION,          \
                     src_id, dst_id, S, D, cb_struct.user_data);               \
             if(except_ret == H5T_CONV_UNHANDLED)                              \
                 /* Let compiler convert if case is ignored by user handler*/  \
@@ -484,16 +534,19 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
             else if(except_ret == H5T_CONV_ABORT)                             \
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
             /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
-        }                                                                     \
+        }        							      \
         else                                                                  \
             *((DT*)D) = (DT)(*((ST*)S));				      \
     }        								      \
     else                                                                      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
+#define H5T_CONV_xF_NOEX_CORE(S,D,ST,DT,D_MIN,D_MAX,D_PREC) {		      \
+    *((DT*)D) = (DT)(*((ST*)S));					      \
+}
 
-#define H5T_CONV_xF(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
-    H5T_CONV(H5T_CONV_xF, long double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)    \
+#define H5T_CONV_xF(STYPE,DTYPE,ST,DT,D_MIN,D_MAX,D_PREC) {			      \
+    H5T_CONV(H5T_CONV_xF, long double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, D_PREC)    \
 }
 
 /* Added a condition branch(else if (*((ST*)S) == (DT)(D_MAX))) which seems redundant.
@@ -506,71 +559,62 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
  * Modified Ray's change to just check for the source >= the DT_MAX, so that
  * the exception handling routine gets called.  QAK - 2005/08/08
  */
-#define H5T_CONV_Fx_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (*((ST*)S) >= (DT)(D_MAX)) {                                            \
-        if(cb_struct.func) {			                              \
-            H5T_conv_ret_t      except_ret;     /*callback return*/           \
-                                                                              \
-            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,           \
-                    src_id, dst_id, S, D, cb_struct.user_data);               \
-            if(except_ret == H5T_CONV_UNHANDLED)                              \
-                /* Let compiler convert if case is ignored by user handler*/  \
-                *((DT*)D) = (D_MAX);					      \
-            else if(except_ret == H5T_CONV_ABORT)                             \
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
-            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
-        }                                                                     \
-        else                                                                  \
+#define H5T_CONV_Fx_CORE(S,D,ST,DT,D_MIN,D_MAX,D_PREC) {		      \
+    if (*((ST*)S) >= (DT)(D_MAX)) {                                           \
+        H5T_conv_ret_t except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,               \
+                src_id, dst_id, S, D, cb_struct.user_data);                   \
+        if(except_ret == H5T_CONV_UNHANDLED)                                  \
+            /* Let compiler convert if case is ignored by user handler*/      \
             *((DT*)D) = (D_MAX);					      \
+        else if(except_ret == H5T_CONV_ABORT)                                 \
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+        /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
     } else if (*((ST*)S) < (DT)(D_MIN)) {                                     \
-        if(cb_struct.func) {			                              \
-            H5T_conv_ret_t      except_ret;     /*callback return*/           \
-                                                                              \
-            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW,          \
-                    src_id, dst_id, S, D, cb_struct.user_data);               \
-            if(except_ret == H5T_CONV_UNHANDLED)                              \
-                /* Let compiler convert if case is ignored by user handler*/  \
-                *((DT*)D) = (D_MIN);					      \
-            else if(except_ret == H5T_CONV_ABORT)                             \
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
-            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
-        }                                                                     \
-        else                                                                  \
+        H5T_conv_ret_t except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW,              \
+                src_id, dst_id, S, D, cb_struct.user_data);                   \
+        if(except_ret == H5T_CONV_UNHANDLED)                                  \
+            /* Let compiler convert if case is ignored by user handler*/      \
             *((DT*)D) = (D_MIN);					      \
+        else if(except_ret == H5T_CONV_ABORT)                                 \
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+        /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
     } else if (*((ST*)S) != (ST)((DT)(*((ST*)S)))) {                          \
-        if(cb_struct.func) {			                              \
-            H5T_conv_ret_t      except_ret;     /*callback return*/           \
-                                                                              \
-            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_TRUNCATE,           \
-                    src_id, dst_id, S, D, cb_struct.user_data);               \
-            if(except_ret == H5T_CONV_UNHANDLED)                              \
-                /* Let compiler convert if case is ignored by user handler*/  \
-                *((DT*)D) = (DT)(*((ST*)S));				      \
-            else if(except_ret == H5T_CONV_ABORT)                             \
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
-            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
-        }                                                                     \
-        else                                                                  \
+        H5T_conv_ret_t except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_TRUNCATE,               \
+                src_id, dst_id, S, D, cb_struct.user_data);                   \
+        if(except_ret == H5T_CONV_UNHANDLED)                                  \
+            /* Let compiler convert if case is ignored by user handler*/      \
             *((DT*)D) = (DT)(*((ST*)S));				      \
+        else if(except_ret == H5T_CONV_ABORT)                                 \
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+        /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
+    }        								      \
+    else                                                                      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+#define H5T_CONV_Fx_NOEX_CORE(S,D,ST,DT,D_MIN,D_MAX,D_PREC) {		      \
+    if (*((ST*)S) >= (DT)(D_MAX)) {                                           \
+        *((DT*)D) = (D_MAX);						      \
+    } else if (*((ST*)S) < (DT)(D_MIN)) {                                     \
+        *((DT*)D) = (D_MIN);						      \
     }        								      \
     else                                                                      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
 
-#define H5T_CONV_Fx(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
-    H5T_CONV(H5T_CONV_Fx, long double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)    \
+#define H5T_CONV_Fx(STYPE,DTYPE,ST,DT,D_MIN,D_MAX,D_PREC) {			      \
+    H5T_CONV(H5T_CONV_Fx, long double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, D_PREC)    \
 }
 
 /* Since all "no exception" cores do the same thing (assign the value in the
  * source location to the destination location, using casting), use one "core"
  * to do them all.
  */
-#define H5T_CONV_NO_EXCEPT_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {	      \
+#define H5T_CONV_NO_EXCEPT_CORE(S,D,ST,DT,D_MIN,D_MAX, D_PREC) {	      \
     *((DT*)D) = (DT)(*((ST*)S));					      \
 }
 
 /* The main part of every integer hardware conversion macro */
-#define H5T_CONV(GUTS,ATYPE,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+#define H5T_CONV(GUTS,ATYPE,STYPE,DTYPE,ST,DT,D_MIN,D_MAX,D_PREC) {		      \
     size_t	elmtno;			/*element number		*/    \
     uint8_t	*src, *s;		/*source buffer			*/    \
     uint8_t	*dst, *d;		/*destination buffer		*/    \
@@ -668,17 +712,17 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
             if (s_mv && d_mv) {						      \
                 /* Alignment is required for both source and dest */	      \
                 s = (uint8_t*)&aligned;					      \
-                H5T_CONV_LOOP(PRE_SALIGN,PRE_DALIGN,POST_SALIGN,POST_DALIGN,GUTS,s,d,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) \
+                H5T_CONV_LOOP_OUTER(PRE_SALIGN,PRE_DALIGN,POST_SALIGN,POST_DALIGN,GUTS,s,d,ST,DT,D_MIN,D_MAX,D_PREC) \
             } else if(s_mv) {						      \
                 /* Alignment is required only for source */		      \
                 s = (uint8_t*)&aligned;					      \
-                H5T_CONV_LOOP(PRE_SALIGN,PRE_DNOALIGN,POST_SALIGN,POST_DNOALIGN,GUTS,s,dst,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) \
+                H5T_CONV_LOOP_OUTER(PRE_SALIGN,PRE_DNOALIGN,POST_SALIGN,POST_DNOALIGN,GUTS,s,dst,ST,DT,D_MIN,D_MAX,D_PREC) \
             } else if(d_mv) {						      \
                 /* Alignment is required only for destination */	      \
-                H5T_CONV_LOOP(PRE_SNOALIGN,PRE_DALIGN,POST_SNOALIGN,POST_DALIGN,GUTS,src,d,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) \
+                H5T_CONV_LOOP_OUTER(PRE_SNOALIGN,PRE_DALIGN,POST_SNOALIGN,POST_DALIGN,GUTS,src,d,ST,DT,D_MIN,D_MAX,D_PREC) \
             } else {							      \
                 /* Alignment is not required for both source and destination */ \
-                H5T_CONV_LOOP(PRE_SNOALIGN,PRE_DNOALIGN,POST_SNOALIGN,POST_DNOALIGN,GUTS,src,dst,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) \
+                H5T_CONV_LOOP_OUTER(PRE_SNOALIGN,PRE_DNOALIGN,POST_SNOALIGN,POST_DNOALIGN,GUTS,src,dst,ST,DT,D_MIN,D_MAX,D_PREC) \
             }	 	 	 	 	 	 	 	      \
 									      \
             /* Decrement number of elements left to convert */		      \
@@ -727,24 +771,33 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 #define H5T_CONV_LOOP_POST_DNOALIGN(DT) {				      \
 }
 
+/* The outer wrapper for the type conversion loop, to check for an exception handling routine */
+#define H5T_CONV_LOOP_OUTER(PRE_SALIGN_GUTS,PRE_DALIGN_GUTS,POST_SALIGN_GUTS,POST_DALIGN_GUTS,GUTS,S,D,ST,DT,D_MIN,D_MAX,D_PREC) \
+    if(cb_struct.func) {			                              \
+        H5T_CONV_LOOP(PRE_SALIGN_GUTS,PRE_DALIGN_GUTS,POST_SALIGN_GUTS,POST_DALIGN_GUTS,GUTS,S,D,ST,DT,D_MIN,D_MAX,D_PREC) \
+    }                                                                         \
+    else {                                                                    \
+        H5T_CONV_LOOP(PRE_SALIGN_GUTS,PRE_DALIGN_GUTS,POST_SALIGN_GUTS,POST_DALIGN_GUTS,H5_GLUE(GUTS,_NOEX),S,D,ST,DT,D_MIN,D_MAX,D_PREC) \
+    }
+
 /* The inner loop of the type conversion macro, actually converting the elements */
-#define H5T_CONV_LOOP(PRE_SALIGN_GUTS,PRE_DALIGN_GUTS,POST_SALIGN_GUTS,POST_DALIGN_GUTS,GUTS,S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) \
+#define H5T_CONV_LOOP(PRE_SALIGN_GUTS,PRE_DALIGN_GUTS,POST_SALIGN_GUTS,POST_DALIGN_GUTS,GUTS,S,D,ST,DT,D_MIN,D_MAX,D_PREC) \
     for (elmtno=0; elmtno<safe; elmtno++) {				      \
         /* Handle source pre-alignment */				      \
         H5_GLUE(H5T_CONV_LOOP_,PRE_SALIGN_GUTS)(ST)			      \
-									      \
+                                                                              \
         /* Handle destination pre-alignment */				      \
         H5_GLUE(H5T_CONV_LOOP_,PRE_DALIGN_GUTS)(DT)			      \
-									      \
+                                                                              \
         /* ... user-defined stuff here -- the conversion ... */		      \
-        H5T_CONV_LOOP_GUTS(GUTS,S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX)	      \
-									      \
+        H5T_CONV_LOOP_GUTS(GUTS,S,D,ST,DT,D_MIN,D_MAX,D_PREC)	      \
+                                                                              \
         /* Handle source post-alignment */				      \
         H5_GLUE(H5T_CONV_LOOP_,POST_SALIGN_GUTS)(ST)			      \
-									      \
+                                                                              \
         /* Handle destination post-alignment */				      \
         H5_GLUE(H5T_CONV_LOOP_,POST_DALIGN_GUTS)(DT)			      \
-									      \
+                                                                              \
         /* Advance pointers */						      \
         src += s_stride;						      \
         dst += d_stride;						      \
@@ -752,12 +805,12 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 
 /* Macro to call the actual "guts" of the type conversion, or call the "no exception" guts */
 #ifdef H5_WANT_DCONV_EXCEPTION
-#define H5T_CONV_LOOP_GUTS(GUTS,S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX)            \
+#define H5T_CONV_LOOP_GUTS(GUTS,S,D,ST,DT,D_MIN,D_MAX,D_PREC)            \
         /* ... user-defined stuff here -- the conversion ... */		      \
-        H5_GLUE(GUTS,_CORE)(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX)
+        H5_GLUE(GUTS,_CORE)(S,D,ST,DT,D_MIN,D_MAX,D_PREC)
 #else /* H5_WANT_DCONV_EXCEPTION */
-#define H5T_CONV_LOOP_GUTS(GUTS,S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX)            \
-        H5_GLUE(H5T_CONV_NO_EXCEPT,_CORE)(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX)
+#define H5T_CONV_LOOP_GUTS(GUTS,S,D,ST,DT,D_MIN,D_MAX,D_PREC)            \
+        H5_GLUE(H5T_CONV_NO_EXCEPT,_CORE)(S,D,ST,DT,D_MIN,D_MAX,D_PREC)
 #endif /* H5_WANT_DCONV_EXCEPTION */
 
 
@@ -4235,7 +4288,7 @@ H5T_conv_schar_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_schar_uchar, FAIL);
 
-    H5T_CONV_su(SCHAR, UCHAR, signed char, unsigned char, -, -);
+    H5T_CONV_su(SCHAR, UCHAR, signed char, unsigned char, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4268,7 +4321,7 @@ H5T_conv_uchar_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uchar_schar, FAIL);
 
-    H5T_CONV_us(UCHAR, SCHAR, unsigned char, signed char, -, SCHAR_MAX);
+    H5T_CONV_us(UCHAR, SCHAR, unsigned char, signed char, -, SCHAR_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4301,7 +4354,7 @@ H5T_conv_schar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_schar_short, FAIL);
 
-    H5T_CONV_sS(SCHAR, SHORT, signed char, short, -, -);
+    H5T_CONV_sS(SCHAR, SHORT, signed char, short, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4334,7 +4387,7 @@ H5T_conv_schar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_schar_ushort, FAIL);
 
-    H5T_CONV_sU(SCHAR, USHORT, signed char, unsigned short, -, -);
+    H5T_CONV_sU(SCHAR, USHORT, signed char, unsigned short, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4367,7 +4420,7 @@ H5T_conv_uchar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uchar_short, FAIL);
 
-    H5T_CONV_uS(UCHAR, SHORT, unsigned char, short, -, SHRT_MAX);
+    H5T_CONV_uS(UCHAR, SHORT, unsigned char, short, -, SHRT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4400,7 +4453,7 @@ H5T_conv_uchar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uchar_ushort, FAIL);
 
-    H5T_CONV_uU(UCHAR, USHORT, unsigned char, unsigned short, -, -);
+    H5T_CONV_uU(UCHAR, USHORT, unsigned char, unsigned short, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4432,7 +4485,7 @@ H5T_conv_schar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_schar_int, FAIL);
 
-    H5T_CONV_sS(SCHAR, INT, signed char, int, -, -);
+    H5T_CONV_sS(SCHAR, INT, signed char, int, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4464,7 +4517,7 @@ H5T_conv_schar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_schar_uint, FAIL);
 
-    H5T_CONV_sU(SCHAR, UINT, signed char, unsigned, -, -);
+    H5T_CONV_sU(SCHAR, UINT, signed char, unsigned, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4496,7 +4549,7 @@ H5T_conv_uchar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uchar_int, FAIL);
 
-    H5T_CONV_uS(UCHAR, INT, unsigned char, int, -, INT_MAX);
+    H5T_CONV_uS(UCHAR, INT, unsigned char, int, -, INT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4528,7 +4581,7 @@ H5T_conv_uchar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uchar_uint, FAIL);
 
-    H5T_CONV_uU(UCHAR, UINT, unsigned char, unsigned, -, -);
+    H5T_CONV_uU(UCHAR, UINT, unsigned char, unsigned, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4560,7 +4613,7 @@ H5T_conv_schar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_schar_long, FAIL);
 
-    H5T_CONV_sS(SCHAR, LONG, signed char, long, -, -);
+    H5T_CONV_sS(SCHAR, LONG, signed char, long, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4593,7 +4646,7 @@ H5T_conv_schar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_schar_ulong, FAIL);
 
-    H5T_CONV_sU(SCHAR, ULONG, signed char, unsigned long, -, -);
+    H5T_CONV_sU(SCHAR, ULONG, signed char, unsigned long, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4625,7 +4678,7 @@ H5T_conv_uchar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uchar_long, FAIL);
 
-    H5T_CONV_uS(UCHAR, LONG, unsigned char, long, -, LONG_MAX);
+    H5T_CONV_uS(UCHAR, LONG, unsigned char, long, -, LONG_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4658,7 +4711,7 @@ H5T_conv_uchar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uchar_ulong, FAIL);
 
-    H5T_CONV_uU(UCHAR, ULONG, unsigned char, unsigned long, -, -);
+    H5T_CONV_uU(UCHAR, ULONG, unsigned char, unsigned long, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4691,7 +4744,7 @@ H5T_conv_schar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_schar_llong, FAIL);
 
-    H5T_CONV_sS(SCHAR, LLONG, signed char, long_long, -, -);
+    H5T_CONV_sS(SCHAR, LLONG, signed char, long_long, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4724,7 +4777,7 @@ H5T_conv_schar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_schar_ullong, FAIL);
 
-    H5T_CONV_sU(SCHAR, ULLONG, signed char, unsigned long_long, -, -);
+    H5T_CONV_sU(SCHAR, ULLONG, signed char, unsigned long_long, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4757,7 +4810,7 @@ H5T_conv_uchar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uchar_llong, FAIL);
 
-    H5T_CONV_uS(UCHAR, LLONG, unsigned char, long_long, -, LLONG_MAX);
+    H5T_CONV_uS(UCHAR, LLONG, unsigned char, long_long, -, LLONG_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4790,7 +4843,7 @@ H5T_conv_uchar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uchar_ullong, FAIL);
 
-    H5T_CONV_uU(UCHAR, ULLONG, unsigned char, unsigned long_long, -, -);
+    H5T_CONV_uU(UCHAR, ULLONG, unsigned char, unsigned long_long, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4823,7 +4876,7 @@ H5T_conv_short_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_short_schar, FAIL);
 
-    H5T_CONV_Ss(SHORT, SCHAR, short, signed char, SCHAR_MIN, SCHAR_MAX);
+    H5T_CONV_Ss(SHORT, SCHAR, short, signed char, SCHAR_MIN, SCHAR_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4856,7 +4909,7 @@ H5T_conv_short_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_short_uchar, FAIL);
 
-    H5T_CONV_Su(SHORT, UCHAR, short, unsigned char, -, UCHAR_MAX);
+    H5T_CONV_Su(SHORT, UCHAR, short, unsigned char, -, UCHAR_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4889,7 +4942,7 @@ H5T_conv_ushort_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ushort_schar, FAIL);
 
-    H5T_CONV_Us(USHORT, SCHAR, unsigned short, signed char, -, SCHAR_MAX);
+    H5T_CONV_Us(USHORT, SCHAR, unsigned short, signed char, -, SCHAR_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4922,7 +4975,7 @@ H5T_conv_ushort_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ushort_uchar, FAIL);
 
-    H5T_CONV_Uu(USHORT, UCHAR, unsigned short, unsigned char, -, UCHAR_MAX);
+    H5T_CONV_Uu(USHORT, UCHAR, unsigned short, unsigned char, -, UCHAR_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4955,7 +5008,7 @@ H5T_conv_short_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_short_ushort, FAIL);
 
-    H5T_CONV_su(SHORT, USHORT, short, unsigned short, -, -);
+    H5T_CONV_su(SHORT, USHORT, short, unsigned short, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4988,7 +5041,7 @@ H5T_conv_ushort_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ushort_short, FAIL);
 
-    H5T_CONV_us(USHORT, SHORT, unsigned short, short, -, SHRT_MAX);
+    H5T_CONV_us(USHORT, SHORT, unsigned short, short, -, SHRT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5021,7 +5074,7 @@ H5T_conv_short_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_short_int, FAIL);
 
-    H5T_CONV_sS(SHORT, INT, short, int, -, -);
+    H5T_CONV_sS(SHORT, INT, short, int, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5054,7 +5107,7 @@ H5T_conv_short_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_short_uint, FAIL);
 
-    H5T_CONV_sU(SHORT, UINT, short, unsigned, -, -);
+    H5T_CONV_sU(SHORT, UINT, short, unsigned, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5087,7 +5140,7 @@ H5T_conv_ushort_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ushort_int, FAIL);
 
-    H5T_CONV_uS(USHORT, INT, unsigned short, int, -, INT_MAX);
+    H5T_CONV_uS(USHORT, INT, unsigned short, int, -, INT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5120,7 +5173,7 @@ H5T_conv_ushort_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ushort_uint, FAIL);
 
-    H5T_CONV_uU(USHORT, UINT, unsigned short, unsigned, -, -);
+    H5T_CONV_uU(USHORT, UINT, unsigned short, unsigned, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5153,7 +5206,7 @@ H5T_conv_short_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_short_long, FAIL);
 
-    H5T_CONV_sS(SHORT, LONG, short, long, -, -);
+    H5T_CONV_sS(SHORT, LONG, short, long, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5186,7 +5239,7 @@ H5T_conv_short_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_short_ulong, FAIL);
 
-    H5T_CONV_sU(SHORT, ULONG, short, unsigned long, -, -);
+    H5T_CONV_sU(SHORT, ULONG, short, unsigned long, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5219,7 +5272,7 @@ H5T_conv_ushort_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ushort_long, FAIL);
 
-    H5T_CONV_uS(USHORT, LONG, unsigned short, long, -, LONG_MAX);
+    H5T_CONV_uS(USHORT, LONG, unsigned short, long, -, LONG_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5252,7 +5305,7 @@ H5T_conv_ushort_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ushort_ulong, FAIL);
 
-    H5T_CONV_uU(USHORT, ULONG, unsigned short, unsigned long, -, -);
+    H5T_CONV_uU(USHORT, ULONG, unsigned short, unsigned long, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5285,7 +5338,7 @@ H5T_conv_short_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_short_llong, FAIL);
 
-    H5T_CONV_sS(SHORT, LLONG, short, long_long, -, -);
+    H5T_CONV_sS(SHORT, LLONG, short, long_long, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5318,7 +5371,7 @@ H5T_conv_short_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_short_ullong, FAIL);
 
-    H5T_CONV_sU(SHORT, ULLONG, short, unsigned long_long, -, -);
+    H5T_CONV_sU(SHORT, ULLONG, short, unsigned long_long, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5351,7 +5404,7 @@ H5T_conv_ushort_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ushort_llong, FAIL);
 
-    H5T_CONV_uS(USHORT, LLONG, unsigned short, long_long, -, LLONG_MAX);
+    H5T_CONV_uS(USHORT, LLONG, unsigned short, long_long, -, LLONG_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5384,7 +5437,7 @@ H5T_conv_ushort_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ushort_ullong, FAIL);
 
-    H5T_CONV_uU(USHORT, ULLONG, unsigned short, unsigned long_long, -, -);
+    H5T_CONV_uU(USHORT, ULLONG, unsigned short, unsigned long_long, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5417,7 +5470,7 @@ H5T_conv_int_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_int_schar, FAIL);
 
-    H5T_CONV_Ss(INT, SCHAR, int, signed char, SCHAR_MIN, SCHAR_MAX);
+    H5T_CONV_Ss(INT, SCHAR, int, signed char, SCHAR_MIN, SCHAR_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5450,7 +5503,7 @@ H5T_conv_int_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_int_uchar, FAIL);
 
-    H5T_CONV_Su(INT, UCHAR, int, unsigned char, -, UCHAR_MAX);
+    H5T_CONV_Su(INT, UCHAR, int, unsigned char, -, UCHAR_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5483,7 +5536,7 @@ H5T_conv_uint_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uint_schar, FAIL);
 
-    H5T_CONV_Us(UINT, SCHAR, unsigned, signed char, -, SCHAR_MAX);
+    H5T_CONV_Us(UINT, SCHAR, unsigned, signed char, -, SCHAR_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5516,7 +5569,7 @@ H5T_conv_uint_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uint_uchar, FAIL);
 
-    H5T_CONV_Uu(UINT, UCHAR, unsigned, unsigned char, -, UCHAR_MAX);
+    H5T_CONV_Uu(UINT, UCHAR, unsigned, unsigned char, -, UCHAR_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5549,7 +5602,7 @@ H5T_conv_int_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_int_short, FAIL);
 
-    H5T_CONV_Ss(INT, SHORT, int, short, SHRT_MIN, SHRT_MAX);
+    H5T_CONV_Ss(INT, SHORT, int, short, SHRT_MIN, SHRT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5582,7 +5635,7 @@ H5T_conv_int_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_int_ushort, FAIL);
 
-    H5T_CONV_Su(INT, USHORT, int, unsigned short, -, USHRT_MAX);
+    H5T_CONV_Su(INT, USHORT, int, unsigned short, -, USHRT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5615,7 +5668,7 @@ H5T_conv_uint_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uint_short, FAIL);
 
-    H5T_CONV_Us(UINT, SHORT, unsigned, short, -, SHRT_MAX);
+    H5T_CONV_Us(UINT, SHORT, unsigned, short, -, SHRT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5648,7 +5701,7 @@ H5T_conv_uint_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uint_ushort, FAIL);
 
-    H5T_CONV_Uu(UINT, USHORT, unsigned, unsigned short, -, USHRT_MAX);
+    H5T_CONV_Uu(UINT, USHORT, unsigned, unsigned short, -, USHRT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5680,7 +5733,7 @@ H5T_conv_int_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_int_uint, FAIL);
 
-    H5T_CONV_su(INT, UINT, int, unsigned, -, -);
+    H5T_CONV_su(INT, UINT, int, unsigned, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5712,7 +5765,7 @@ H5T_conv_uint_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uint_int, FAIL);
 
-    H5T_CONV_us(UINT, INT, unsigned, int, -, INT_MAX);
+    H5T_CONV_us(UINT, INT, unsigned, int, -, INT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5744,7 +5797,7 @@ H5T_conv_int_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_int_long, FAIL);
 
-    H5T_CONV_sS(INT, LONG, int, long, -, -);
+    H5T_CONV_sS(INT, LONG, int, long, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5776,7 +5829,7 @@ H5T_conv_int_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_int_ulong, FAIL);
 
-    H5T_CONV_sU(INT, LONG, int, unsigned long, -, -);
+    H5T_CONV_sU(INT, LONG, int, unsigned long, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5808,7 +5861,7 @@ H5T_conv_uint_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uint_long, FAIL);
 
-    H5T_CONV_uS(UINT, LONG, unsigned, long, -, LONG_MAX);
+    H5T_CONV_uS(UINT, LONG, unsigned, long, -, LONG_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5840,7 +5893,7 @@ H5T_conv_uint_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uint_ulong, FAIL);
 
-    H5T_CONV_uU(UINT, ULONG, unsigned, unsigned long, -, -);
+    H5T_CONV_uU(UINT, ULONG, unsigned, unsigned long, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5872,7 +5925,7 @@ H5T_conv_int_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_int_llong, FAIL);
 
-    H5T_CONV_sS(INT, LLONG, int, long_long, -, -);
+    H5T_CONV_sS(INT, LLONG, int, long_long, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5904,7 +5957,7 @@ H5T_conv_int_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_int_ullong, FAIL);
 
-    H5T_CONV_sU(INT, ULLONG, int, unsigned long_long, -, -);
+    H5T_CONV_sU(INT, ULLONG, int, unsigned long_long, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5936,7 +5989,7 @@ H5T_conv_uint_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uint_llong, FAIL);
 
-    H5T_CONV_uS(UINT, LLONG, unsigned, long_long, -, LLONG_MAX);
+    H5T_CONV_uS(UINT, LLONG, unsigned, long_long, -, LLONG_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5969,7 +6022,7 @@ H5T_conv_uint_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uint_ullong, FAIL);
 
-    H5T_CONV_uU(UINT, ULLONG, unsigned, unsigned long_long, -, -);
+    H5T_CONV_uU(UINT, ULLONG, unsigned, unsigned long_long, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6001,7 +6054,7 @@ H5T_conv_long_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_long_schar, FAIL);
 
-    H5T_CONV_Ss(LONG, SCHAR, long, signed char, SCHAR_MIN, SCHAR_MAX);
+    H5T_CONV_Ss(LONG, SCHAR, long, signed char, SCHAR_MIN, SCHAR_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6033,7 +6086,7 @@ H5T_conv_long_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_long_uchar, FAIL);
 
-    H5T_CONV_Su(LONG, UCHAR, long, unsigned char, -, UCHAR_MAX);
+    H5T_CONV_Su(LONG, UCHAR, long, unsigned char, -, UCHAR_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6066,7 +6119,7 @@ H5T_conv_ulong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ulong_schar, FAIL);
 
-    H5T_CONV_Us(ULONG, SCHAR, unsigned long, signed char, -, SCHAR_MAX);
+    H5T_CONV_Us(ULONG, SCHAR, unsigned long, signed char, -, SCHAR_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6099,7 +6152,7 @@ H5T_conv_ulong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ulong_uchar, FAIL);
 
-    H5T_CONV_Uu(ULONG, UCHAR, unsigned long, unsigned char, -, UCHAR_MAX);
+    H5T_CONV_Uu(ULONG, UCHAR, unsigned long, unsigned char, -, UCHAR_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6131,7 +6184,7 @@ H5T_conv_long_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_long_short, FAIL);
 
-    H5T_CONV_Ss(LONG, SHORT, long, short, SHRT_MIN, SHRT_MAX);
+    H5T_CONV_Ss(LONG, SHORT, long, short, SHRT_MIN, SHRT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6164,7 +6217,7 @@ H5T_conv_long_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_long_ushort, FAIL);
 
-    H5T_CONV_Su(LONG, USHORT, long, unsigned short, -, USHRT_MAX);
+    H5T_CONV_Su(LONG, USHORT, long, unsigned short, -, USHRT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6196,7 +6249,7 @@ H5T_conv_ulong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ulong_short, FAIL);
 
-    H5T_CONV_Us(ULONG, SHORT, unsigned long, short, -, SHRT_MAX);
+    H5T_CONV_Us(ULONG, SHORT, unsigned long, short, -, SHRT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6229,7 +6282,7 @@ H5T_conv_ulong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ulong_ushort, FAIL);
 
-    H5T_CONV_Uu(ULONG, USHORT, unsigned long, unsigned short, -, USHRT_MAX);
+    H5T_CONV_Uu(ULONG, USHORT, unsigned long, unsigned short, -, USHRT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6261,7 +6314,7 @@ H5T_conv_long_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_long_int, FAIL);
 
-    H5T_CONV_Ss(LONG, INT, long, int, INT_MIN, INT_MAX);
+    H5T_CONV_Ss(LONG, INT, long, int, INT_MIN, INT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6293,7 +6346,7 @@ H5T_conv_long_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_long_uint, FAIL);
 
-    H5T_CONV_Su(LONG, UINT, long, unsigned, -, UINT_MAX);
+    H5T_CONV_Su(LONG, UINT, long, unsigned, -, UINT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6325,7 +6378,7 @@ H5T_conv_ulong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ulong_int, FAIL);
 
-    H5T_CONV_Us(ULONG, INT, unsigned long, int, -, INT_MAX);
+    H5T_CONV_Us(ULONG, INT, unsigned long, int, -, INT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6357,7 +6410,7 @@ H5T_conv_ulong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ulong_uint, FAIL);
 
-    H5T_CONV_Uu(ULONG, UINT, unsigned long, unsigned, -, UINT_MAX);
+    H5T_CONV_Uu(ULONG, UINT, unsigned long, unsigned, -, UINT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6389,7 +6442,7 @@ H5T_conv_long_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_long_ulong, FAIL);
 
-    H5T_CONV_su(LONG, ULONG, long, unsigned long, -, -);
+    H5T_CONV_su(LONG, ULONG, long, unsigned long, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6421,7 +6474,7 @@ H5T_conv_ulong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ulong_long, FAIL);
 
-    H5T_CONV_us(ULONG, LONG, unsigned long, long, -, LONG_MAX);
+    H5T_CONV_us(ULONG, LONG, unsigned long, long, -, LONG_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6453,7 +6506,7 @@ H5T_conv_long_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_long_llong, FAIL);
 
-    H5T_CONV_sS(LONG, LLONG, long, long_long, -, -);
+    H5T_CONV_sS(LONG, LLONG, long, long_long, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6486,7 +6539,7 @@ H5T_conv_long_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_long_ullong, FAIL);
 
-    H5T_CONV_sU(LONG, ULLONG, long, unsigned long_long, -, -);
+    H5T_CONV_sU(LONG, ULLONG, long, unsigned long_long, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6519,7 +6572,7 @@ H5T_conv_ulong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ulong_llong, FAIL);
 
-    H5T_CONV_uS(ULONG, LLONG, unsigned long, long_long, -, LLONG_MAX);
+    H5T_CONV_uS(ULONG, LLONG, unsigned long, long_long, -, LLONG_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6552,7 +6605,7 @@ H5T_conv_ulong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ulong_ullong, FAIL);
 
-    H5T_CONV_uU(ULONG, ULLONG, unsigned long, unsigned long_long, -, -);
+    H5T_CONV_uU(ULONG, ULLONG, unsigned long, unsigned long_long, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6585,7 +6638,7 @@ H5T_conv_llong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_schar, FAIL);
 
-    H5T_CONV_Ss(LLONG, SCHAR, long_long, signed char, SCHAR_MIN, SCHAR_MAX);
+    H5T_CONV_Ss(LLONG, SCHAR, long_long, signed char, SCHAR_MIN, SCHAR_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6618,7 +6671,7 @@ H5T_conv_llong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_uchar, FAIL);
 
-    H5T_CONV_Su(LLONG, UCHAR, long_long, unsigned char, -, UCHAR_MAX);
+    H5T_CONV_Su(LLONG, UCHAR, long_long, unsigned char, -, UCHAR_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6651,7 +6704,7 @@ H5T_conv_ullong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_schar, FAIL);
 
-    H5T_CONV_Us(ULLONG, SCHAR, unsigned long_long, signed char, -, SCHAR_MAX);
+    H5T_CONV_Us(ULLONG, SCHAR, unsigned long_long, signed char, -, SCHAR_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6684,7 +6737,7 @@ H5T_conv_ullong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_uchar, FAIL);
 
-    H5T_CONV_Uu(ULLONG, UCHAR, unsigned long_long, unsigned char, -, UCHAR_MAX);
+    H5T_CONV_Uu(ULLONG, UCHAR, unsigned long_long, unsigned char, -, UCHAR_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6717,7 +6770,7 @@ H5T_conv_llong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_short, FAIL);
 
-    H5T_CONV_Ss(LLONG, SHORT, long_long, short, SHRT_MIN, SHRT_MAX);
+    H5T_CONV_Ss(LLONG, SHORT, long_long, short, SHRT_MIN, SHRT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6750,7 +6803,7 @@ H5T_conv_llong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_ushort, FAIL);
 
-    H5T_CONV_Su(LLONG, USHORT, long_long, unsigned short, -, USHRT_MAX);
+    H5T_CONV_Su(LLONG, USHORT, long_long, unsigned short, -, USHRT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6783,7 +6836,7 @@ H5T_conv_ullong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_short, FAIL);
 
-    H5T_CONV_Us(ULLONG, SHORT, unsigned long_long, short, -, SHRT_MAX);
+    H5T_CONV_Us(ULLONG, SHORT, unsigned long_long, short, -, SHRT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6816,7 +6869,7 @@ H5T_conv_ullong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_ushort, FAIL);
 
-    H5T_CONV_Uu(ULLONG, USHORT, unsigned long_long, unsigned short, -, USHRT_MAX);
+    H5T_CONV_Uu(ULLONG, USHORT, unsigned long_long, unsigned short, -, USHRT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6848,7 +6901,7 @@ H5T_conv_llong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_int, FAIL);
 
-    H5T_CONV_Ss(LLONG, INT, long_long, int, INT_MIN, INT_MAX);
+    H5T_CONV_Ss(LLONG, INT, long_long, int, INT_MIN, INT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6880,7 +6933,7 @@ H5T_conv_llong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_uint, FAIL);
 
-    H5T_CONV_Su(LLONG, UINT, long_long, unsigned, -, UINT_MAX);
+    H5T_CONV_Su(LLONG, UINT, long_long, unsigned, -, UINT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6912,7 +6965,7 @@ H5T_conv_ullong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_int, FAIL);
 
-    H5T_CONV_Us(ULLONG, INT, unsigned long_long, int, -, INT_MAX);
+    H5T_CONV_Us(ULLONG, INT, unsigned long_long, int, -, INT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6945,7 +6998,7 @@ H5T_conv_ullong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_uint, FAIL);
 
-    H5T_CONV_Uu(ULLONG, UINT, unsigned long_long, unsigned, -, UINT_MAX);
+    H5T_CONV_Uu(ULLONG, UINT, unsigned long_long, unsigned, -, UINT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6977,7 +7030,7 @@ H5T_conv_llong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_long, FAIL);
 
-    H5T_CONV_Ss(LLONG, LONG, long_long, long, LONG_MIN, LONG_MAX);
+    H5T_CONV_Ss(LLONG, LONG, long_long, long, LONG_MIN, LONG_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7010,7 +7063,7 @@ H5T_conv_llong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_ulong, FAIL);
 
-    H5T_CONV_Su(LLONG, ULONG, long_long, unsigned long, -, ULONG_MAX);
+    H5T_CONV_Su(LLONG, ULONG, long_long, unsigned long, -, ULONG_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7043,7 +7096,7 @@ H5T_conv_ullong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_long, FAIL);
 
-    H5T_CONV_Us(ULLONG, LONG, unsigned long_long, long, -, LONG_MAX);
+    H5T_CONV_Us(ULLONG, LONG, unsigned long_long, long, -, LONG_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7076,7 +7129,7 @@ H5T_conv_ullong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_ulong, FAIL);
 
-    H5T_CONV_Uu(ULLONG, ULONG, unsigned long_long, unsigned long, -, ULONG_MAX);
+    H5T_CONV_Uu(ULLONG, ULONG, unsigned long_long, unsigned long, -, ULONG_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7109,7 +7162,7 @@ H5T_conv_llong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_ullong, FAIL);
 
-    H5T_CONV_su(LLONG, ULLONG, long_long, unsigned long_long, -, -);
+    H5T_CONV_su(LLONG, ULLONG, long_long, unsigned long_long, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7142,7 +7195,7 @@ H5T_conv_ullong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_llong, FAIL);
 
-    H5T_CONV_us(ULLONG, LLONG, unsigned long_long, long_long, -, LLONG_MAX);
+    H5T_CONV_us(ULLONG, LLONG, unsigned long_long, long_long, -, LLONG_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7179,7 +7232,7 @@ H5T_conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_float_double, FAIL);
 
-    H5T_CONV_fF(FLOAT, DOUBLE, float, double, -, -);
+    H5T_CONV_fF(FLOAT, DOUBLE, float, double, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7213,7 +7266,7 @@ H5T_conv_float_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_float_ldouble, FAIL);
 
-    H5T_CONV_fF(FLOAT, LDOUBLE, float, long double, -, -);
+    H5T_CONV_fF(FLOAT, LDOUBLE, float, long double, -, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7254,7 +7307,7 @@ H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_double_float, FAIL);
 
-    H5T_CONV_Ff(DOUBLE, FLOAT, double, float, -FLT_MAX, FLT_MAX);
+    H5T_CONV_Ff(DOUBLE, FLOAT, double, float, -FLT_MAX, FLT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7288,7 +7341,7 @@ H5T_conv_double_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_double_ldouble, FAIL);
 
-    H5T_CONV_fF(DOUBLE, LDOUBLE, double, long double, -, -);
+    H5T_CONV_fF(DOUBLE, LDOUBLE, double, long double, -, -, -);
 
 
 done:
@@ -7323,7 +7376,7 @@ H5T_conv_ldouble_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ldouble_float, FAIL);
 
-    H5T_CONV_Ff(LDOUBLE, FLOAT, long double, float, -FLT_MAX, FLT_MAX);
+    H5T_CONV_Ff(LDOUBLE, FLOAT, long double, float, -FLT_MAX, FLT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7357,7 +7410,7 @@ H5T_conv_ldouble_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ldouble_double, FAIL);
 
-    H5T_CONV_Ff(LDOUBLE, DOUBLE, long double, double, -DBL_MAX, DBL_MAX);
+    H5T_CONV_Ff(LDOUBLE, DOUBLE, long double, double, -DBL_MAX, DBL_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7390,7 +7443,7 @@ H5T_conv_schar_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_schar_float, FAIL);
 
-    H5T_CONV_xF(SCHAR, FLOAT, signed char, float, -, -);
+    H5T_CONV_xF(SCHAR, FLOAT, signed char, float, -, -, FLT_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7422,7 +7475,7 @@ H5T_conv_schar_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_schar_double, FAIL);
 
-    H5T_CONV_xF(SCHAR, DOUBLE, signed char, double, -, -);
+    H5T_CONV_xF(SCHAR, DOUBLE, signed char, double, -, -, DBL_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7455,7 +7508,7 @@ H5T_conv_schar_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_schar_ldouble, FAIL);
 
-    H5T_CONV_xF(SCHAR, LDOUBLE, signed char, long double, -, -);
+    H5T_CONV_xF(SCHAR, LDOUBLE, signed char, long double, -, -, DBL_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7488,7 +7541,7 @@ H5T_conv_uchar_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uchar_float, FAIL);
 
-    H5T_CONV_xF(UCHAR, FLOAT, unsigned char, float, -, -);
+    H5T_CONV_xF(UCHAR, FLOAT, unsigned char, float, -, -, FLT_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7520,7 +7573,7 @@ H5T_conv_uchar_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uchar_double, FAIL);
 
-    H5T_CONV_xF(UCHAR, DOUBLE, unsigned char, double, -, -);
+    H5T_CONV_xF(UCHAR, DOUBLE, unsigned char, double, -, -, DBL_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7553,7 +7606,7 @@ H5T_conv_uchar_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uchar_ldouble, FAIL);
 
-    H5T_CONV_xF(UCHAR, LDOUBLE, unsigned char, long double, -, -);
+    H5T_CONV_xF(UCHAR, LDOUBLE, unsigned char, long double, -, -, LDBL_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7586,7 +7639,7 @@ H5T_conv_short_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_short_float, FAIL);
 
-    H5T_CONV_xF(SHORT, FLOAT, short, float, -, -);
+    H5T_CONV_xF(SHORT, FLOAT, short, float, -, -, FLT_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7618,7 +7671,7 @@ H5T_conv_short_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_short_double, FAIL);
 
-    H5T_CONV_xF(SHORT, DOUBLE, short, double, -, -);
+    H5T_CONV_xF(SHORT, DOUBLE, short, double, -, -, DBL_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7651,7 +7704,7 @@ H5T_conv_short_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_short_ldouble, FAIL);
 
-    H5T_CONV_xF(SHORT, LDOUBLE, short, long double, -, -);
+    H5T_CONV_xF(SHORT, LDOUBLE, short, long double, -, -, LDBL_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7684,7 +7737,7 @@ H5T_conv_ushort_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ushort_float, FAIL);
 
-    H5T_CONV_xF(USHORT, FLOAT, unsigned short, float, -, -);
+    H5T_CONV_xF(USHORT, FLOAT, unsigned short, float, -, -, FLT_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7716,7 +7769,7 @@ H5T_conv_ushort_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ushort_double, FAIL);
 
-    H5T_CONV_xF(USHORT, DOUBLE, unsigned short, double, -, -);
+    H5T_CONV_xF(USHORT, DOUBLE, unsigned short, double, -, -, DBL_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7749,7 +7802,7 @@ H5T_conv_ushort_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ushort_ldouble, FAIL);
 
-    H5T_CONV_xF(USHORT, LDOUBLE, unsigned short, long double, -, -);
+    H5T_CONV_xF(USHORT, LDOUBLE, unsigned short, long double, -, -, LDBL_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7782,7 +7835,7 @@ H5T_conv_int_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_int_float, FAIL);
 
-    H5T_CONV_xF(INT, FLOAT, int, float, -, -);
+    H5T_CONV_xF(INT, FLOAT, int, float, -, -, FLT_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7814,7 +7867,7 @@ H5T_conv_int_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_int_double, FAIL);
 
-    H5T_CONV_xF(INT, DOUBLE, int, double, -, -);
+    H5T_CONV_xF(INT, DOUBLE, int, double, -, -, DBL_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7847,7 +7900,7 @@ H5T_conv_int_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_int_ldouble, FAIL);
 
-    H5T_CONV_xF(INT, LDOUBLE, int, long double, -, -);
+    H5T_CONV_xF(INT, LDOUBLE, int, long double, -, -, LDBL_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7880,7 +7933,7 @@ H5T_conv_uint_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uint_float, FAIL);
 
-    H5T_CONV_xF(UINT, FLOAT, unsigned int, float, -, -);
+    H5T_CONV_xF(UINT, FLOAT, unsigned int, float, -, -, FLT_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7912,7 +7965,7 @@ H5T_conv_uint_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uint_double, FAIL);
 
-    H5T_CONV_xF(UINT, DOUBLE, unsigned int, double, -, -);
+    H5T_CONV_xF(UINT, DOUBLE, unsigned int, double, -, -, DBL_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7945,7 +7998,7 @@ H5T_conv_uint_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uint_ldouble, FAIL);
 
-    H5T_CONV_xF(UINT, LDOUBLE, unsigned int, long double, -, -);
+    H5T_CONV_xF(UINT, LDOUBLE, unsigned int, long double, -, -, LDBL_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7978,7 +8031,7 @@ H5T_conv_long_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_long_float, FAIL);
 
-    H5T_CONV_xF(LONG, FLOAT, long, float, -, -);
+    H5T_CONV_xF(LONG, FLOAT, long, float, -, -, FLT_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8010,7 +8063,7 @@ H5T_conv_long_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_long_double, FAIL);
 
-    H5T_CONV_xF(LONG, DOUBLE, long, double, -, -);
+    H5T_CONV_xF(LONG, DOUBLE, long, double, -, -, DBL_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8043,7 +8096,7 @@ H5T_conv_long_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_long_ldouble, FAIL);
 
-    H5T_CONV_xF(LONG, LDOUBLE, long, long double, -, -);
+    H5T_CONV_xF(LONG, LDOUBLE, long, long double, -, -, LDBL_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8077,7 +8130,7 @@ H5T_conv_ulong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ulong_float, FAIL);
 
-    H5T_CONV_xF(ULONG, FLOAT, unsigned long, float, -, -);
+    H5T_CONV_xF(ULONG, FLOAT, unsigned long, float, -, -, FLT_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8111,7 +8164,7 @@ H5T_conv_ulong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ulong_double, FAIL);
 
-    H5T_CONV_xF(ULONG, DOUBLE, unsigned long, double, -, -);
+    H5T_CONV_xF(ULONG, DOUBLE, unsigned long, double, -, -, DBL_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8145,7 +8198,7 @@ H5T_conv_ulong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ulong_ldouble, FAIL);
 
-    H5T_CONV_xF(ULONG, LDOUBLE, unsigned long, long double, -, -);
+    H5T_CONV_xF(ULONG, LDOUBLE, unsigned long, long double, -, -, LDBL_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8178,7 +8231,7 @@ H5T_conv_llong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_float, FAIL);
 
-    H5T_CONV_xF(LLONG, FLOAT, long_long, float, -, -);
+    H5T_CONV_xF(LLONG, FLOAT, long_long, float, -, -, FLT_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8210,7 +8263,7 @@ H5T_conv_llong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_double, FAIL);
 
-    H5T_CONV_xF(LLONG, DOUBLE, long_long, double, -, -);
+    H5T_CONV_xF(LLONG, DOUBLE, long_long, double, -, -, DBL_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8243,7 +8296,7 @@ H5T_conv_llong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_ldouble, FAIL);
 
-    H5T_CONV_xF(LLONG, LDOUBLE, long_long, long double, -, -);
+    H5T_CONV_xF(LLONG, LDOUBLE, long_long, long double, -, -, LDBL_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8277,7 +8330,7 @@ H5T_conv_ullong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_float, FAIL);
 
-    H5T_CONV_xF(ULLONG, FLOAT, unsigned long_long, float, -, -);
+    H5T_CONV_xF(ULLONG, FLOAT, unsigned long_long, float, -, -, FLT_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8311,7 +8364,7 @@ H5T_conv_ullong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_double, FAIL);
 
-    H5T_CONV_xF(ULLONG, DOUBLE, unsigned long_long, double, -, -);
+    H5T_CONV_xF(ULLONG, DOUBLE, unsigned long_long, double, -, -, DBL_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8345,7 +8398,7 @@ H5T_conv_ullong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_ldouble, FAIL);
 
-    H5T_CONV_xF(ULLONG, LDOUBLE, unsigned long_long, long double, -, -);
+    H5T_CONV_xF(ULLONG, LDOUBLE, unsigned long_long, long double, -, -, LDBL_MANT_DIG);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8378,7 +8431,7 @@ H5T_conv_float_schar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_float_schar, FAIL);
 
-    H5T_CONV_Fx(FLOAT, SCHAR, float, signed char, SCHAR_MIN, SCHAR_MAX);
+    H5T_CONV_Fx(FLOAT, SCHAR, float, signed char, SCHAR_MIN, SCHAR_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8410,7 +8463,7 @@ H5T_conv_float_uchar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_float_uchar, FAIL);
 
-    H5T_CONV_Fx(FLOAT, UCHAR, float, unsigned char, 0, UCHAR_MAX);
+    H5T_CONV_Fx(FLOAT, UCHAR, float, unsigned char, 0, UCHAR_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8442,7 +8495,7 @@ H5T_conv_double_schar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_double_schar, FAIL);
 
-    H5T_CONV_Fx(DOUBLE, SCHAR, double, signed char, SCHAR_MIN, SCHAR_MAX);
+    H5T_CONV_Fx(DOUBLE, SCHAR, double, signed char, SCHAR_MIN, SCHAR_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8474,7 +8527,7 @@ H5T_conv_double_uchar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_double_uchar, FAIL);
 
-    H5T_CONV_Fx(DOUBLE, UCHAR, double, unsigned char, 0, UCHAR_MAX);
+    H5T_CONV_Fx(DOUBLE, UCHAR, double, unsigned char, 0, UCHAR_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8507,7 +8560,7 @@ H5T_conv_ldouble_schar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ldouble_schar, FAIL);
 
-    H5T_CONV_Fx(LDOUBLE, SCHAR, long double, signed char, SCHAR_MIN, SCHAR_MAX);
+    H5T_CONV_Fx(LDOUBLE, SCHAR, long double, signed char, SCHAR_MIN, SCHAR_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8541,7 +8594,7 @@ H5T_conv_ldouble_uchar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ldouble_uchar, FAIL);
 
-    H5T_CONV_Fx(LDOUBLE, UCHAR, long double, unsigned char, 0, UCHAR_MAX);
+    H5T_CONV_Fx(LDOUBLE, UCHAR, long double, unsigned char, 0, UCHAR_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8574,7 +8627,7 @@ H5T_conv_float_short (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_float_short, FAIL);
 
-    H5T_CONV_Fx(FLOAT, SHORT, float, short, SHRT_MIN, SHRT_MAX);
+    H5T_CONV_Fx(FLOAT, SHORT, float, short, SHRT_MIN, SHRT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8606,7 +8659,7 @@ H5T_conv_float_ushort (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_float_ushort, FAIL);
 
-    H5T_CONV_Fx(FLOAT, USHORT, float, unsigned short, 0, USHRT_MAX);
+    H5T_CONV_Fx(FLOAT, USHORT, float, unsigned short, 0, USHRT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8638,7 +8691,7 @@ H5T_conv_double_short (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_double_short, FAIL);
 
-    H5T_CONV_Fx(DOUBLE, SHORT, double, short, SHRT_MIN, SHRT_MAX);
+    H5T_CONV_Fx(DOUBLE, SHORT, double, short, SHRT_MIN, SHRT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8670,7 +8723,7 @@ H5T_conv_double_ushort (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_double_ushort, FAIL);
 
-    H5T_CONV_Fx(DOUBLE, USHORT, double, unsigned short, 0, USHRT_MAX);
+    H5T_CONV_Fx(DOUBLE, USHORT, double, unsigned short, 0, USHRT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8703,7 +8756,7 @@ H5T_conv_ldouble_short (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ldouble_short, FAIL);
 
-    H5T_CONV_Fx(LDOUBLE, SHORT, long double, short, SHRT_MIN, SHRT_MAX);
+    H5T_CONV_Fx(LDOUBLE, SHORT, long double, short, SHRT_MIN, SHRT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8737,7 +8790,7 @@ H5T_conv_ldouble_ushort (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ldouble_ushort, FAIL);
 
-    H5T_CONV_Fx(LDOUBLE, USHORT, long double, unsigned short, 0, USHRT_MAX);
+    H5T_CONV_Fx(LDOUBLE, USHORT, long double, unsigned short, 0, USHRT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8770,7 +8823,7 @@ H5T_conv_float_int (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_float_int, FAIL);
 
-    H5T_CONV_Fx(FLOAT, INT, float, int, INT_MIN, INT_MAX);
+    H5T_CONV_Fx(FLOAT, INT, float, int, INT_MIN, INT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8802,7 +8855,7 @@ H5T_conv_float_uint (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_float_uint, FAIL);
 
-    H5T_CONV_Fx(FLOAT, UINT, float, unsigned int, 0, UINT_MAX);
+    H5T_CONV_Fx(FLOAT, UINT, float, unsigned int, 0, UINT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8834,7 +8887,7 @@ H5T_conv_double_int (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_double_int, FAIL);
 
-    H5T_CONV_Fx(DOUBLE, INT, double, int, INT_MIN, INT_MAX);
+    H5T_CONV_Fx(DOUBLE, INT, double, int, INT_MIN, INT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8866,7 +8919,7 @@ H5T_conv_double_uint (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_double_uint, FAIL);
 
-    H5T_CONV_Fx(DOUBLE, UINT, double, unsigned int, 0, UINT_MAX);
+    H5T_CONV_Fx(DOUBLE, UINT, double, unsigned int, 0, UINT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8899,7 +8952,7 @@ H5T_conv_ldouble_int (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ldouble_int, FAIL);
 
-    H5T_CONV_Fx(LDOUBLE, INT, long double, int, INT_MIN, INT_MAX);
+    H5T_CONV_Fx(LDOUBLE, INT, long double, int, INT_MIN, INT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8933,7 +8986,7 @@ H5T_conv_ldouble_uint (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ldouble_uint, FAIL);
 
-    H5T_CONV_Fx(LDOUBLE, UINT, long double, unsigned int, 0, UINT_MAX);
+    H5T_CONV_Fx(LDOUBLE, UINT, long double, unsigned int, 0, UINT_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8966,7 +9019,7 @@ H5T_conv_float_long (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_float_long, FAIL);
 
-    H5T_CONV_Fx(FLOAT, LONG, float, long, LONG_MIN, LONG_MAX);
+    H5T_CONV_Fx(FLOAT, LONG, float, long, LONG_MIN, LONG_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8998,7 +9051,7 @@ H5T_conv_float_ulong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_float_ulong, FAIL);
 
-    H5T_CONV_Fx(FLOAT, ULONG, float, unsigned long, 0, ULONG_MAX);
+    H5T_CONV_Fx(FLOAT, ULONG, float, unsigned long, 0, ULONG_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -9030,7 +9083,7 @@ H5T_conv_double_long (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_double_long, FAIL);
 
-    H5T_CONV_Fx(DOUBLE, LONG, double, long, LONG_MIN, LONG_MAX);
+    H5T_CONV_Fx(DOUBLE, LONG, double, long, LONG_MIN, LONG_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -9062,7 +9115,7 @@ H5T_conv_double_ulong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_double_ulong, FAIL);
 
-    H5T_CONV_Fx(DOUBLE, ULONG, double, unsigned long, 0, ULONG_MAX);
+    H5T_CONV_Fx(DOUBLE, ULONG, double, unsigned long, 0, ULONG_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -9095,7 +9148,7 @@ H5T_conv_ldouble_long (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ldouble_long, FAIL);
 
-    H5T_CONV_Fx(LDOUBLE, LONG, long double, long, LONG_MIN, LONG_MAX);
+    H5T_CONV_Fx(LDOUBLE, LONG, long double, long, LONG_MIN, LONG_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -9129,7 +9182,7 @@ H5T_conv_ldouble_ulong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ldouble_ulong, FAIL);
 
-    H5T_CONV_Fx(LDOUBLE, ULONG, long double, unsigned long, 0, ULONG_MAX);
+    H5T_CONV_Fx(LDOUBLE, ULONG, long double, unsigned long, 0, ULONG_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -9163,7 +9216,7 @@ H5T_conv_float_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_float_llong, FAIL);
 
-    H5T_CONV_Fx(FLOAT, LLONG, float, long_long, LLONG_MIN, LLONG_MAX);
+    H5T_CONV_Fx(FLOAT, LLONG, float, long_long, LLONG_MIN, LLONG_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -9197,7 +9250,7 @@ H5T_conv_float_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_float_ullong, FAIL);
 
-    H5T_CONV_Fx(FLOAT, ULLONG, float, unsigned long_long, 0, ULLONG_MAX);
+    H5T_CONV_Fx(FLOAT, ULLONG, float, unsigned long_long, 0, ULLONG_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -9231,7 +9284,7 @@ H5T_conv_double_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_double_llong, FAIL);
 
-    H5T_CONV_Fx(DOUBLE, LLONG, double, long_long, LLONG_MIN, LLONG_MAX);
+    H5T_CONV_Fx(DOUBLE, LLONG, double, long_long, LLONG_MIN, LLONG_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -9265,7 +9318,7 @@ H5T_conv_double_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_double_ullong, FAIL);
 
-    H5T_CONV_Fx(DOUBLE, ULLONG, double, unsigned long_long, 0, ULLONG_MAX);
+    H5T_CONV_Fx(DOUBLE, ULLONG, double, unsigned long_long, 0, ULLONG_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -9299,7 +9352,7 @@ H5T_conv_ldouble_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ldouble_llong, FAIL);
 
-    H5T_CONV_Fx(LDOUBLE, LLONG, long double, long_long, LLONG_MIN, LLONG_MAX);
+    H5T_CONV_Fx(LDOUBLE, LLONG, long double, long_long, LLONG_MIN, LLONG_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -9333,7 +9386,7 @@ H5T_conv_ldouble_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ldouble_ullong, FAIL);
 
-    H5T_CONV_Fx(LDOUBLE, ULLONG, long double, unsigned long_long, 0, ULLONG_MAX);
+    H5T_CONV_Fx(LDOUBLE, ULLONG, long double, unsigned long_long, 0, ULLONG_MAX, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
