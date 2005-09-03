@@ -190,7 +190,6 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
  * equal. In this case, do not return exception but make sure the maximum is assigned
  * to the destination.   SLU - 2005/06/29
  */
-#ifdef H5_WANT_DCONV_EXCEPTION
 #define H5T_CONV_Xx_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
     if (*((ST*)S) > (DT)(D_MAX)) {                                            \
         if(cb_struct.func) {			                              \
@@ -207,8 +206,6 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
         }                                                                     \
         else                                                                  \
             *((DT*)D) = (D_MAX);					      \
-    } else if (*((ST*)S) == (DT)(D_MAX)) {                                    \
-        *((DT*)D) = (D_MAX);			                              \
     } else if (*((ST*)S) < (DT)(D_MIN)) {                                     \
         if(cb_struct.func) {			                              \
             H5T_conv_ret_t      except_ret;     /*callback return*/           \
@@ -227,13 +224,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     } else 								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
-#else
-#define H5T_CONV_Xx_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    *((DT*)D) = (DT)(*((ST*)S));					      \
-}
-#endif
 
-#ifdef H5_WANT_DCONV_EXCEPTION
 #define H5T_CONV_Ux_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
     if (*((ST*)S) > (DT)(D_MAX)) {                                            \
         if(cb_struct.func) {			                              \
@@ -253,18 +244,12 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
-#else
-#define H5T_CONV_Ux_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    *((DT*)D) = (DT)(*((ST*)S));					      \
-}
-#endif
 
 #define H5T_CONV_sS(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
     H5T_CONV(H5T_CONV_xX, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
-#ifdef H5_WANT_DCONV_EXCEPTION
 #define H5T_CONV_sU_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
     if (*((ST*)S) < 0) {                                                      \
         if(cb_struct.func) {			                              \
@@ -284,18 +269,12 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
-#else
-#define H5T_CONV_sU_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    *((DT*)D) = (DT)(*((ST*)S));					      \
-}
-#endif
 
 #define H5T_CONV_sU(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
     H5T_CONV(H5T_CONV_sU, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
-#ifdef H5_WANT_DCONV_EXCEPTION
 #define H5T_CONV_uS_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
     if (sizeof(ST)==sizeof(DT) && *((ST*)S) > (D_MAX)) {                      \
         if(cb_struct.func) {                                                  \
@@ -315,11 +294,6 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
-#else
-#define H5T_CONV_uS_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    *((DT*)D) = (DT)(*((ST*)S));					      \
-}
-#endif
 
 #define H5T_CONV_uS(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
@@ -336,7 +310,6 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     H5T_CONV(H5T_CONV_Xx, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
-#ifdef H5_WANT_DCONV_EXCEPTION
 #define H5T_CONV_Su_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
     if (*((ST*)S) < 0) {                                                      \
         if(cb_struct.func) {			                              \
@@ -371,11 +344,6 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
-#else
-#define H5T_CONV_Su_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    *((DT*)D) = (DT)(*((ST*)S));					      \
-}
-#endif
 
 #define H5T_CONV_Su(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
@@ -392,7 +360,6 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     H5T_CONV(H5T_CONV_Ux, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
-#ifdef H5_WANT_DCONV_EXCEPTION
 #define H5T_CONV_su_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
     /* Assumes memory format of unsigned & signed integers is same */	      \
     if (*((ST*)S) < 0) {                                                      \
@@ -413,18 +380,12 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
-#else
-#define H5T_CONV_su_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    *((DT*)D) = (DT)(*((ST*)S));					      \
-}
-#endif
 
 #define H5T_CONV_su(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)==sizeof(DT));					      \
     H5T_CONV(H5T_CONV_su, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
-#ifdef H5_WANT_DCONV_EXCEPTION
 #define H5T_CONV_us_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
     /* Assumes memory format of unsigned & signed integers is same */	      \
     if (*((ST*)S) > (DT)(D_MAX)) {                                            \
@@ -445,11 +406,6 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
-#else
-#define H5T_CONV_us_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    *((DT*)D) = (DT)(*((ST*)S));					      \
-}
-#endif
 
 #define H5T_CONV_us(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)==sizeof(DT));					      \
@@ -464,7 +420,6 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 /* Same as H5T_CONV_Xx_CORE, except that instead of using D_MAX and D_MIN
  * when an overflow occurs, use the 'float' infinity values.
  */
-#ifdef H5_WANT_DCONV_EXCEPTION
 #define H5T_CONV_Ff_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
     if (*((ST*)S) > (DT)(D_MAX)) {                                            \
         if(cb_struct.func) {			                              \
@@ -499,23 +454,119 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
-#else
-#define H5T_CONV_Ff_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    *((DT*)D) = (DT)(*((ST*)S));					      \
-}
-#endif
 
 #define H5T_CONV_Ff(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
     H5T_CONV(H5T_CONV_Ff, long double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)    \
 }
 
+/* Note: this is a relative fragile hack (to use the temporary variable of the
+ * destination type) - it may get optimized out by the compiler. QAK - 2005/08/19
+ *
+ * A better solution would be to find the bit position of the highest 1 bit
+ * in the source and the bit position of the lowest 1 bit in the source and
+ * determine if the number of bits between them is greater than the mantissa
+ * of the floating point number (including the leading "implied" 1 bit), then
+ * issue a precision exception.  However, that's probably too slow, so we'll
+ * try to use this solution for now.  QAK - 2005/19/08
+ */
+#define H5T_CONV_xF_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    DT t_s = *((ST*)S);                                                       \
+    if (*((ST*)S) != (ST)t_s) {                                               \
+        if(cb_struct.func) {			                              \
+            H5T_conv_ret_t      except_ret;     /*callback return*/           \
+                                                                              \
+            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_PRECISION,          \
+                    src_id, dst_id, S, D, cb_struct.user_data);               \
+            if(except_ret == H5T_CONV_UNHANDLED)                              \
+                /* Let compiler convert if case is ignored by user handler*/  \
+                *((DT*)D) = (DT)(*((ST*)S));				      \
+            else if(except_ret == H5T_CONV_ABORT)                             \
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
+        }                                                                     \
+        else                                                                  \
+            *((DT*)D) = (DT)(*((ST*)S));				      \
+    }        								      \
+    else                                                                      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+
 #define H5T_CONV_xF(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
-    H5T_CONV(H5T_CONV_xX, long double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)    \
+    H5T_CONV(H5T_CONV_xF, long double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)    \
+}
+
+/* Added a condition branch(else if (*((ST*)S) == (DT)(D_MAX))) which seems redundant.
+ * It handles a special situation when the source is "float" and assigned the value
+ * of "INT_MAX".  A compiler may do roundup making this value "INT_MAX+1".  However,
+ * when do comparison "if (*((ST*)S) > (DT)(D_MAX))", the compiler may consider them
+ * equal. In this case, do not return exception but make sure the maximum is assigned
+ * to the destination.   SLU - 2005/06/29
+ *
+ * Modified Ray's change to just check for the source >= the DT_MAX, so that
+ * the exception handling routine gets called.  QAK - 2005/08/08
+ */
+#define H5T_CONV_Fx_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    if (*((ST*)S) >= (DT)(D_MAX)) {                                            \
+        if(cb_struct.func) {			                              \
+            H5T_conv_ret_t      except_ret;     /*callback return*/           \
+                                                                              \
+            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,           \
+                    src_id, dst_id, S, D, cb_struct.user_data);               \
+            if(except_ret == H5T_CONV_UNHANDLED)                              \
+                /* Let compiler convert if case is ignored by user handler*/  \
+                *((DT*)D) = (D_MAX);					      \
+            else if(except_ret == H5T_CONV_ABORT)                             \
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
+        }                                                                     \
+        else                                                                  \
+            *((DT*)D) = (D_MAX);					      \
+    } else if (*((ST*)S) < (DT)(D_MIN)) {                                     \
+        if(cb_struct.func) {			                              \
+            H5T_conv_ret_t      except_ret;     /*callback return*/           \
+                                                                              \
+            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW,          \
+                    src_id, dst_id, S, D, cb_struct.user_data);               \
+            if(except_ret == H5T_CONV_UNHANDLED)                              \
+                /* Let compiler convert if case is ignored by user handler*/  \
+                *((DT*)D) = (D_MIN);					      \
+            else if(except_ret == H5T_CONV_ABORT)                             \
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
+        }                                                                     \
+        else                                                                  \
+            *((DT*)D) = (D_MIN);					      \
+    } else if (*((ST*)S) != (ST)((DT)(*((ST*)S)))) {                          \
+        if(cb_struct.func) {			                              \
+            H5T_conv_ret_t      except_ret;     /*callback return*/           \
+                                                                              \
+            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_TRUNCATE,           \
+                    src_id, dst_id, S, D, cb_struct.user_data);               \
+            if(except_ret == H5T_CONV_UNHANDLED)                              \
+                /* Let compiler convert if case is ignored by user handler*/  \
+                *((DT*)D) = (DT)(*((ST*)S));				      \
+            else if(except_ret == H5T_CONV_ABORT)                             \
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
+        }                                                                     \
+        else                                                                  \
+            *((DT*)D) = (DT)(*((ST*)S));				      \
+    }        								      \
+    else                                                                      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
 }
 
 #define H5T_CONV_Fx(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
-    H5T_CONV(H5T_CONV_Xx, long double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)    \
+    H5T_CONV(H5T_CONV_Fx, long double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)    \
+}
+
+/* Since all "no exception" cores do the same thing (assign the value in the
+ * source location to the destination location, using casting), use one "core"
+ * to do them all.
+ */
+#define H5T_CONV_NO_EXCEPT_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {	      \
+    *((DT*)D) = (DT)(*((ST*)S));					      \
 }
 
 /* The main part of every integer hardware conversion macro */
@@ -686,7 +737,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
         H5_GLUE(H5T_CONV_LOOP_,PRE_DALIGN_GUTS)(DT)			      \
 									      \
         /* ... user-defined stuff here -- the conversion ... */		      \
-        H5_GLUE(GUTS,_CORE)(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX)		      \
+        H5T_CONV_LOOP_GUTS(GUTS,S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX)	      \
 									      \
         /* Handle source post-alignment */				      \
         H5_GLUE(H5T_CONV_LOOP_,POST_SALIGN_GUTS)(ST)			      \
@@ -698,6 +749,16 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
         src += s_stride;						      \
         dst += d_stride;						      \
     }
+
+/* Macro to call the actual "guts" of the type conversion, or call the "no exception" guts */
+#ifdef H5_WANT_DCONV_EXCEPTION
+#define H5T_CONV_LOOP_GUTS(GUTS,S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX)            \
+        /* ... user-defined stuff here -- the conversion ... */		      \
+        H5_GLUE(GUTS,_CORE)(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX)
+#else /* H5_WANT_DCONV_EXCEPTION */
+#define H5T_CONV_LOOP_GUTS(GUTS,S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX)            \
+        H5_GLUE(H5T_CONV_NO_EXCEPT,_CORE)(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX)
+#endif /* H5_WANT_DCONV_EXCEPTION */
 
 
 #ifdef H5T_DEBUG

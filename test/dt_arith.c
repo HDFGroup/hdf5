@@ -4749,7 +4749,7 @@ run_fp_int_conv(const char *name)
  * Modifications:
  *              Raymond Lu
  *              Monday, April 4, 2005
- *              These tests were slitted from dtypes.c because dtypes.c
+ *              These tests were split from dtypes.c because dtypes.c
  *              has grown too big.
  *
  *-------------------------------------------------------------------------

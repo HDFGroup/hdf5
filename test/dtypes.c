@@ -86,6 +86,9 @@ typedef enum dtype_t {
     FLT_LDOUBLE, OTHER
 } dtype_t;
 
+/* Constant for size of conversion buffer for int <-> float exception test */
+#define CONVERT_SIZE    4
+
 /* Count opaque conversions */
 static int num_opaque_conversions_g = 0;
 
@@ -3832,6 +3835,177 @@ test_encode(void)
     return 1;
 }
 
+typedef struct {
+    unsigned num_range_hi;      /* Number of H5T_CONV_EXCEPT_RANGE_HI exceptions seen */
+    unsigned num_range_low;     /* Number of H5T_CONV_EXCEPT_RANGE_LOW exceptions seen */
+    unsigned num_precision;     /* Number of H5T_CONV_EXCEPT_PRECISION exceptions seen */
+    unsigned num_truncate;      /* Number of H5T_CONV_EXCEPT_TRUNCATE exceptions seen */
+    unsigned num_other;         /* Number of other exceptions seen */
+} except_info_t;
+
+static H5T_conv_ret_t
+conv_except(H5T_conv_except_t except_type, hid_t UNUSED src_id, hid_t UNUSED dst_id,
+    void UNUSED *src_buf, void UNUSED *dst_buf, void *_user_data)
+{
+    except_info_t *user_data = (except_info_t *)_user_data;
+
+    if(except_type == H5T_CONV_EXCEPT_RANGE_HI)
+        user_data->num_range_hi++;
+    else if(except_type == H5T_CONV_EXCEPT_RANGE_LOW)
+        user_data->num_range_low++;
+    else if(except_type == H5T_CONV_EXCEPT_PRECISION)
+        user_data->num_precision++;
+    else if(except_type == H5T_CONV_EXCEPT_TRUNCATE)
+        user_data->num_truncate++;
+    else 
+        user_data->num_other++;
+
+    return(H5T_CONV_UNHANDLED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_int_float_except
+ *
+ * Purpose:     Tests exception handling behavior of int <-> float
+ *              conversions.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        number of errors
+ *
+ * Programmer:  Quincey Koziol
+ *              August 18, 2005
+ *
+ * Notes: This routine is pretty specific to 4 byte integers and 4 byte
+ *              floats and I can't think of a particularly good way to
+ *              make it portable to other architectures, but further
+ *              input and changes are welcome.  -QAK
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_int_float_except(void)
+{
+#if H5_SIZEOF_INT==4 && H5_SIZEOF_FLOAT==4
+    float buf[CONVERT_SIZE] = {(float)INT_MIN - 172.0, (float)INT_MAX - 32.0,
+            (float)INT_MAX - 68.0, (float)4.5};
+    int buf_int[CONVERT_SIZE] = {INT_MIN, INT_MAX, INT_MAX-127, 4};
+    float buf_float[CONVERT_SIZE] = {INT_MIN, INT_MAX + 1.0, INT_MAX - 127.0, 4};
+    int *intp;          /* Pointer to buffer, as integers */
+    int buf2[CONVERT_SIZE] = {INT_MIN, INT_MAX, INT_MAX - 72, 0};
+    float buf2_float[CONVERT_SIZE] = {INT_MIN, INT_MAX, INT_MAX - 127.0, 0.0};
+    int buf2_int[CONVERT_SIZE] = {INT_MIN, INT_MAX, INT_MAX - 127, 0};
+    float *floatp;      /* Pointer to buffer #2, as floats */
+    hid_t dxpl;         /* Dataset transfer property list */
+    except_info_t e;    /* Exception information */
+    unsigned u;         /* Local index variables */
+#endif /* H5_SIZEOF_INT==4 && H5_SIZEOF_FLOAT==4 */
+
+    TESTING("exceptions for int <-> float conversions");
+
+#if H5_SIZEOF_INT==4 && H5_SIZEOF_FLOAT==4
+    /* Create dataset transfer property list */
+    if((dxpl = H5Pcreate(H5P_DATASET_XFER) ) < 0) TEST_ERROR
+
+    /* Set the conversion exception handler in the DXPL */
+    if(H5Pset_type_conv_cb(dxpl, conv_except, &e) < 0) TEST_ERROR
+
+    /* Convert buffer */
+    HDmemset(&e, 0, sizeof(except_info_t));
+    if(H5Tconvert(H5T_NATIVE_FLOAT, H5T_NATIVE_INT, (size_t)CONVERT_SIZE, buf, NULL, dxpl) < 0) TEST_ERROR
+
+    /* Check the buffer after conversion, as integers */
+    for(u = 0; u < CONVERT_SIZE; u++) {
+        intp = (int *)&buf[u];
+        if(*intp != buf_int[u]) TEST_ERROR
+    } /* end for */
+
+    /* Check for proper exceptions */
+    if(e.num_range_hi != 1) TEST_ERROR
+    if(e.num_range_low != 1) TEST_ERROR
+    if(e.num_precision != 0) TEST_ERROR
+    if(e.num_truncate != 1) TEST_ERROR
+    if(e.num_other != 0) TEST_ERROR
+
+    /* Convert buffer */
+    HDmemset(&e, 0, sizeof(except_info_t));
+    if(H5Tconvert(H5T_NATIVE_INT, H5T_NATIVE_FLOAT, (size_t)CONVERT_SIZE,
+            buf, NULL, dxpl) < 0) TEST_ERROR
+
+    /* Check the buffer after conversion, as floats */
+    for(u = 0; u < CONVERT_SIZE; u++) {
+        floatp = (float *)&buf[u];
+        if(*floatp != buf_float[u]) TEST_ERROR
+    } /* end for */
+
+    /* Check for proper exceptions */
+    if(e.num_range_hi != 0) TEST_ERROR
+    if(e.num_range_low != 0) TEST_ERROR
+    if(e.num_precision != 1) TEST_ERROR
+    if(e.num_truncate != 0) TEST_ERROR
+    if(e.num_other != 0) TEST_ERROR
+
+
+    /* Work on second buffer */
+
+    /* Convert second buffer */
+    HDmemset(&e, 0, sizeof(except_info_t));
+    if(H5Tconvert(H5T_NATIVE_INT, H5T_NATIVE_FLOAT, (size_t)CONVERT_SIZE,
+            buf2, NULL, dxpl) < 0) TEST_ERROR
+
+    /* Check the buffer after conversion, as floats */
+    for(u = 0; u < CONVERT_SIZE; u++) {
+        floatp = (float *)&buf2[u];
+        if(*floatp != buf2_float[u]) TEST_ERROR
+    } /* end for */
+
+    /* Check for proper exceptions */
+    if(e.num_range_hi != 0) TEST_ERROR
+    if(e.num_range_low != 0) TEST_ERROR
+    if(e.num_precision != 2) TEST_ERROR
+    if(e.num_truncate != 0) TEST_ERROR
+    if(e.num_other != 0) TEST_ERROR
+
+    /* Convert buffer */
+    HDmemset(&e, 0, sizeof(except_info_t));
+    if(H5Tconvert(H5T_NATIVE_FLOAT, H5T_NATIVE_INT, (size_t)CONVERT_SIZE,
+            buf2, NULL, dxpl) < 0) TEST_ERROR
+
+    /* Check the buffer after conversion, as integers */
+    for(u = 0; u < CONVERT_SIZE; u++) {
+        intp = (int *)&buf2[u];
+        if(*intp != buf2_int[u]) TEST_ERROR
+    } /* end for */
+
+    /* Check for proper exceptions */
+    if(e.num_range_hi != 1) TEST_ERROR
+    if(e.num_range_low != 0) TEST_ERROR
+    if(e.num_precision != 0) TEST_ERROR
+    if(e.num_truncate != 0) TEST_ERROR
+    if(e.num_other != 0) TEST_ERROR
+
+    /* Close DXPL */
+    if(H5Pclose(dxpl) < 0) TEST_ERROR
+
+    PASSED();
+#else /* H5_SIZEOF_INT==4 && H5_SIZEOF_FLOAT==4 */
+    SKIPPED();
+    HDputs("    Test skipped due to int or float not 4 bytes.");
+#endif /* H5_SIZEOF_INT==4 && H5_SIZEOF_FLOAT==4 */
+    return 0;
+
+#if H5_SIZEOF_INT==4 && H5_SIZEOF_FLOAT==4
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose (dxpl);
+    } H5E_END_TRY;
+    return 1;
+#endif /* H5_SIZEOF_INT==4 && H5_SIZEOF_FLOAT==4 */
+} /* end test_int_float_except() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -3873,6 +4047,7 @@ main(void)
     nerrors += test_transient (fapl);
     nerrors += test_named (fapl);
     nerrors += test_encode();
+    nerrors += test_int_float_except();
     h5_cleanup(FILENAME, fapl); /*must happen before first reset*/
     reset_hdf5();
 
