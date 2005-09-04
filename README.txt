@@ -1,4 +1,4 @@
-HDF5 version 1.6.4-post9 currently under development
+HDF5 version 1.6.4-post10 currently under development
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 

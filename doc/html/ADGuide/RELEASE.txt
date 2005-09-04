@@ -1,4 +1,4 @@
-HDF5 version 1.6.4-post8 released on Sun Aug 28 20:55:28 CDT 2005
+HDF5 version 1.6.4-post9 released on Sun Sep  4 17:28:54 CDT 2005
 ================================================================================
 
 INTRODUCTION
@@ -127,6 +127,9 @@ Bug Fixes since HDF5-1.6.4 release
 
     Configuration
     -------------
+	- Changed default C++ compiler for the IA64 platform from icc to
+	    icpc which is the preferred compiler for Intel Compiler version
+	    8. AKC - 2005/09/02
 
     Performance
     -------------
