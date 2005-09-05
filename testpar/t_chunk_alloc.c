@@ -71,31 +71,40 @@ create_chunked_dataset(const char *filename)
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
-    /* Create the data space with unlimited dimensions. */
-    dataspace = H5Screate_simple (1, dims, maxdims); 
-    VRFY((dataspace >= 0), "");
+    /* Only MAINPROCESS should create the file.  Others just wait. */
+    if (MAINPROCESS){
+	/* Create the data space with unlimited dimensions. */
+	dataspace = H5Screate_simple (1, dims, maxdims); 
+	VRFY((dataspace >= 0), "");
 
-    /* Create a new file. If file exists its contents will be overwritten. */
-    file = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    VRFY((file >= 0), "");
+	/* Create a new file. If file exists its contents will be overwritten. */
+	file = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+	VRFY((file >= 0), "");
 
-    /* Modify dataset creation properties, i.e. enable chunking  */
-    cparms = H5Pcreate (H5P_DATASET_CREATE);
-    VRFY((cparms >= 0), "");
+	/* Modify dataset creation properties, i.e. enable chunking  */
+	cparms = H5Pcreate (H5P_DATASET_CREATE);
+	VRFY((cparms >= 0), "");
 
-    hrc = H5Pset_chunk ( cparms, 1, chunk_dims);
-    VRFY((hrc >= 0), "");
+	hrc = H5Pset_chunk ( cparms, 1, chunk_dims);
+	VRFY((hrc >= 0), "");
 
-    /* Create a new dataset within the file using cparms creation properties. */
-    dataset = H5Dcreate (file, DATASETNAME, H5T_NATIVE_INT, dataspace, cparms);
-    VRFY((dataset >= 0), "");
+	/* Create a new dataset within the file using cparms creation properties. */
+	dataset = H5Dcreate (file, DATASETNAME, H5T_NATIVE_INT, dataspace, cparms);
+	VRFY((dataset >= 0), "");
 
-    /* Close resources */
-    hrc = H5Dclose (dataset);
-    VRFY((hrc >= 0), "");
+	/* Close resources */
+	hrc = H5Dclose (dataset);
+	VRFY((hrc >= 0), "");
 
-    hrc = H5Fclose (file);
-    VRFY((hrc >= 0), "");
+	hrc = H5Fclose (file);
+	VRFY((hrc >= 0), "");
+    }
+
+    /* Make sure all processes are done before exiting this routine.  Otherwise,
+     * other tests may start and change the test data file before some processes
+     * of this test are still accessing the file.
+     */
+    MPI_Barrier(MPI_COMM_WORLD);
 }     
 
 /*
@@ -160,6 +169,12 @@ extend_chunked_dataset(const char *filename)
     /* Can close some plists */
     hrc = H5Pclose(access_plist);
     VRFY((hrc >= 0), "");
+
+    /* Make sure all processes are done before exiting this routine.  Otherwise,
+     * other tests may start and change the test data file before some processes
+     * of this test are still accessing the file.
+     */
+    MPI_Barrier(MPI_COMM_WORLD);
 }
 
 void
