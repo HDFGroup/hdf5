@@ -54,7 +54,7 @@ if test "X-pgcc" = "X-$cc_vendor"; then
     #esac
 
     # General
-    CFLAGS="$CFLAGS $arch -Minform,warn"
+    CFLAGS="$CFLAGS $arch"
 
     # Production
     # Check for MPI wrapper being used and tweak down compiler options
