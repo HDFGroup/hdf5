@@ -2033,13 +2033,23 @@ AC_ARG_ENABLE([parallel],
 
 dnl The --enable-parallel flag is not compatible with --enable-cxx.
 dnl If the user tried to specify both flags, throw an error.
-if test "${enable_cxx}" = "yes" -a "$enable_parallel" = "yes"; then
+if test "X${HDF_CXX}" = "Xyes" -a "X${enable_parallel}" = "Xyes"; then
   AC_MSG_ERROR([--enable-cxx and --enable-parallel flags are incompatible])
 fi
 
 dnl --enable-parallel is also incompatible with --enable-threadsafe.
-if test "${enable_threadsafe}" = "yes" -a "$enable_parallel" = "yes"; then
+if test "X${THREADSAFE}" = "Xyes" -a "X${enable_parallel}" = "Xyes"; then
   AC_MSG_ERROR([--enable-threadsafe and --enable-parallel flags are incompatible])
+fi
+
+dnl It's possible to build in parallel by specifying a parallel compiler
+dnl without using the --enable-parallel flag.  This isn't allowed with
+dnl C++ or threadsafe, either.
+if test "X${PARALLEL}" != "X" -a "X${enable_cxx}" = "Xyes" ; then
+  AC_MSG_ERROR([An MPI compiler is being used; --enable-cxx is not allowed])
+fi
+if test "X${PARALLEL}" != "X" -a "X${THREADSAFE}" = "Xyes"; then
+  AC_MSG_ERROR([An MPI compiler is being used; --enable-threadsafe is not allowed])
 fi
 
 AC_MSG_CHECKING([for parallel support files])

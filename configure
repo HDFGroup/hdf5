@@ -48110,15 +48110,26 @@ if test "${enable_parallel+set}" = set; then
 
 fi;
 
-if test "${enable_cxx}" = "yes" -a "$enable_parallel" = "yes"; then
+if test "X${HDF_CXX}" = "Xyes" -a "X${enable_parallel}" = "Xyes"; then
   { { echo "$as_me:$LINENO: error: --enable-cxx and --enable-parallel flags are incompatible" >&5
 echo "$as_me: error: --enable-cxx and --enable-parallel flags are incompatible" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
-if test "${enable_threadsafe}" = "yes" -a "$enable_parallel" = "yes"; then
+if test "X${THREADSAFE}" = "Xyes" -a "X${enable_parallel}" = "Xyes"; then
   { { echo "$as_me:$LINENO: error: --enable-threadsafe and --enable-parallel flags are incompatible" >&5
 echo "$as_me: error: --enable-threadsafe and --enable-parallel flags are incompatible" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+if test "X${PARALLEL}" != "X" -a "X${enable_cxx}" = "Xyes" ; then
+  { { echo "$as_me:$LINENO: error: An MPI compiler is being used; --enable-cxx is not allowed" >&5
+echo "$as_me: error: An MPI compiler is being used; --enable-cxx is not allowed" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test "X${PARALLEL}" != "X" -a "X${THREADSAFE}" = "Xyes"; then
+  { { echo "$as_me:$LINENO: error: An MPI compiler is being used; --enable-threadsafe is not allowed" >&5
+echo "$as_me: error: An MPI compiler is being used; --enable-threadsafe is not allowed" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
