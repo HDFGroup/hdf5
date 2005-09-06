@@ -57,7 +57,7 @@ if test "X-pgf90" = "X-$f9x_vendor"; then
     F9X_BASENAME=pgf90
     F9XSUFFIXFLAG=""
     FSEARCH_DIRS=""
-    FFLAGS="$FFLAGS -Mdclchk -Mstandard -Minform,warn"
+    FFLAGS="$FFLAGS -Mdclchk -Mstandard"
 
     # Production
     # Check for MPI wrapper being used and tweak down compiler options
