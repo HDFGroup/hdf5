@@ -36,6 +36,9 @@ New Features
 
     Configuration:
     --------------
+        - A new API function, H5Tis_hard(), was added to the library.  It
+          checks if a conversion function is a compiler (hard) conversion.
+          SLU - 2005/9/6
 	- t_mpi will run the test_mpio_derived_dtype by default unless it is
 	  known not working (indicated by macro H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
 	  not defined.)  -AKC- 2005/8/23.
