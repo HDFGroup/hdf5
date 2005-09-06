@@ -30,18 +30,21 @@
 #       used within this file.
 
 if test "X-" =  "X-$CC"; then
-    CC="cc -Xa -size_t64 -xint"
-    CC_BASENAME=cc
+    CC="sxc++ -Xa -size_t64 -xint"
+    CC_BASENAME=sxc++
 fi
+# The default archiver is `sxar'
+AR=${AR:-sxar}
+RANLIB=${RANLIB:=" "}
 
 if test "X-" = "X-$CXX"; then
-    CXX="c++ -size_t64 -xint -Kexceptions"
-    CXX_BASENAME=c++
+    CXX="sxc++ -size_t64 -xint -Kexceptions"
+    CXX_BASENAME=sxc++
 fi
 
 if test "X-" = "X-$F9X"; then
-    FC="f90 -size_t64 -g -DDEBUG -UNDEBUG"
-    FC_BASENAME=f90
+    FC="sxf90 -size_t64 -g -DDEBUG -UNDEBUG"
+    FC_BASENAME=sxf90
 fi
 
 # C Compiler and Preprocessor Flags
@@ -142,5 +145,20 @@ esac
 # --------------------------
 #
 ac_cv_sizeof_long_double=${ac_cv_sizeof_long_double=0}
+hdf5_cv_gettimeofday_tz=no
+hdf5_cv_vsnprintf_works=no
+hdf5_cv_printf_ll=l
+hdf5_cv_system_scope_threads=no
+hdf5_cv_sw_ldouble_to_integer_works=no
+hdf5_cv_fp_to_ullong_right_maximum=no
+hdf5_cv_fp_to_ullong_bottom_bit_works=yes
+hdf5_cv_fp_to_ullong_right_maximum=no
+hdf5_cv_ldouble_to_uint_work=no
+hdf5_cv_ullong_to_fp_cast_works=yes
+hdf5_cv_ullong_to_ldouble_precision_works=no
+hdf5_cv_fp_to_integer_overflow_works=yes
+hdf5_fp_to_ullong_accurate=no
+hdf5_fp_to_ullong_right_maximum=no
 CONFIGURE_LIBS=/usr/lib/libi90sxe.a
+
 
