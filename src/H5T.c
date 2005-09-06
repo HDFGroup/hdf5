@@ -2660,6 +2660,46 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Tis_hard
+ *
+ * Purpose:	Finds out whether the library's conversion function from
+ *              type src_id to type dst_id is a hard conversion.  A hard
+ *              conversion uses compiler's casting; a soft conversion uses
+ *              the library's own conversion function.
+ *
+ * Return:	TRUE:           hard conversion.	
+ *		FALSE:          soft conversion.
+ *		FAIL:           failed.
+ *
+ * Programmer:	Raymond Lu
+ *		Friday, Sept 2, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5Tis_hard(hid_t src_id, hid_t dst_id)
+{
+    htri_t	ret_value;
+    H5T_t	*src = NULL, *dst = NULL;
+
+    FUNC_ENTER_API(H5Tis_hard, FAIL);
+
+    /* Check args */
+    if (NULL == (src = H5I_object_verify(src_id,H5I_DATATYPE)) ||
+            NULL == (dst = H5I_object_verify(dst_id,H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+
+    /* Find it */
+    if((ret_value=H5T_is_hard(src, dst))<0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL, "conversion function not found");
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+/*-------------------------------------------------------------------------
  * Function:	H5Tconvert
  *
  * Purpose:	Convert NELMTS elements from type SRC_ID to type DST_ID.  The
@@ -4562,6 +4602,43 @@ H5T_path_bkg(const H5T_path_t *p)
 
     FUNC_LEAVE_NOAPI(p->cdata.need_bkg);
 } /* end H5T_path_bkg() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_is_hard
+ *
+ * Purpose:	Private function for H5Tis_hard.  Finds out whether the 
+ *              library's conversion function from type SRC to type DST 
+ *              is a hard conversion.
+ *
+ * Return:	TRUE:           hard conversion.	
+ *		FALSE:          soft conversion.
+ *		FAIL:           function failed.
+ *
+ * Programmer:	Raymond Lu
+ *		Friday, Sept 2, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5T_is_hard(H5T_t *src, H5T_t *dst)
+{
+    htri_t	ret_value;
+    H5T_path_t	*path = NULL;
+
+    FUNC_ENTER_NOAPI(H5T_is_hard, FAIL);
+
+    /* Find it */
+    if (NULL==(path=H5T_path_find(src, dst, NULL, NULL, H5AC_ind_dxpl_id)))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL, "conversion function not found");
+
+    ret_value = (htri_t)path->is_hard;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
 
 
 /*-------------------------------------------------------------------------

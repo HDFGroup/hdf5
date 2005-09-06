@@ -75,6 +75,7 @@ H5_DLL H5T_class_t H5T_get_class(const H5T_t *dt, htri_t internal);
 H5_DLL htri_t H5T_detect_class (const H5T_t *dt, H5T_class_t cls);
 H5_DLL size_t H5T_get_size(const H5T_t *dt);
 H5_DLL int    H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset);
+H5_DLL htri_t H5T_is_hard(H5T_t *src, H5T_t *dst);
 H5_DLL herr_t H5T_debug(const H5T_t *dt, FILE * stream);
 H5_DLL H5G_entry_t *H5T_entof(H5T_t *dt);
 H5_DLL htri_t H5T_is_immutable(const H5T_t *dt);

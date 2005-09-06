@@ -579,6 +579,66 @@ generates_sigfpe(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_hard_query
+ *
+ * Purpose:     Tests H5Tis_hard() for querying whether a conversion is
+ *              a hard one.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        number of errors
+ *
+ * Programmer:  Raymond Lu
+ *              Friday, Sept 2, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_hard_query(void)
+{
+    htri_t      ret;
+
+    TESTING("query functions of hard conversion");
+
+    /* Verify the conversion from int to float is a hard conversion. */
+    if((ret = H5Tis_hard(H5T_NATIVE_INT, H5T_NATIVE_FLOAT))!=TRUE) {
+        H5_FAILED();
+        printf("Can't query conversion function\n");
+        goto error;
+    }
+
+    /* Unregister the hard conversion from int to float.  Verify the conversion
+     * is a soft conversion. */
+    H5Tunregister(H5T_PERS_HARD, NULL, H5T_NATIVE_INT, H5T_NATIVE_FLOAT, NULL);
+    if((ret = H5Tis_hard(H5T_NATIVE_INT, H5T_NATIVE_FLOAT))!=FALSE) {
+        H5_FAILED();
+        printf("Can't query conversion function\n");
+        goto error;
+    }
+    
+    /* Register the hard conversion from int to float.  Verify the conversion
+     * is a hard conversion. */
+    H5Tregister(H5T_PERS_HARD, "int_flt", H5T_NATIVE_INT, H5T_NATIVE_FLOAT, H5T_conv_int_float);
+    if((ret = H5Tis_hard(H5T_NATIVE_INT, H5T_NATIVE_FLOAT))!=TRUE) {
+        H5_FAILED();
+        printf("Can't query conversion function\n");
+        goto error;
+    }
+
+    PASSED();
+    reset_hdf5();
+
+    return 0;
+
+ error:
+    reset_hdf5();
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_derived_flt
  *
  * Purpose:     Tests user-define and query functions of floating-point types.
@@ -4768,6 +4828,9 @@ main(void)
 	printf("Testing non-aligned conversions (ALIGNMENT=%d)....\n", ALIGNMENT);
 
     /* Do the tests */
+
+    /* Test H5Tis_hard() for querying hard conversion. */
+    nerrors += test_hard_query();
 
     /* Test user-define, query functions and software conversion
      * for user-defined floating-point types */
