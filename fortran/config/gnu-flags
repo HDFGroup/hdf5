@@ -122,14 +122,14 @@ case "$cc_vendor-$cc_version" in
     esac
 
     # General
-    CFLAGS="$CFLAGS $arch -ansi -pedantic -Wall -W -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wsign-compare -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline"
+    CFLAGS="$CFLAGS $arch -ansi"
 
     # Production
     case "$cc_vendor-$cc_version" in
       gcc-2.95.[34])
         PROD_CFLAGS="-O3"
         ;;
-      gcc-3.[0-4]*|gcc-4.0*)
+      gcc-3.[0-4]*|gcc-4.[01]*)
         # The optimization level is reduced for gcc 3.* and 4.* due to problems
         # with code generation for src/H5Tconv.c with the -O2 & -O3 
         # optimization levels (which shows up as failures for various integer
@@ -150,7 +150,7 @@ case "$cc_vendor-$cc_version" in
     PROD_CPPFLAGS=
 
     # Debug
-    DEBUG_CFLAGS="-g -fverbose-asm"
+    DEBUG_CFLAGS="-g -fverbose-asm -pedantic -Wall -W -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wsign-compare -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline"
     DEBUG_CPPFLAGS=
 
     # Profile
@@ -167,7 +167,11 @@ esac
 # Please follow the pattern below by adding new versions at the top, copying
 # the information from the previous version and adding modifications to that.
 case "$cc_vendor-$cc_version" in
-  gcc-4.0*)
+
+# Closer to the gcc 4.1 release, we should check for additional flags to
+# include and break it out into it's own section, like the other versions
+# below. -QAK
+  gcc-4.[01]*)
     # Replace -ansi flag with -std=c99 flag
     CFLAGS="`echo $CFLAGS | sed -e 's/-ansi/-std=c99/g'`"
 
@@ -175,29 +179,29 @@ case "$cc_vendor-$cc_version" in
     CFLAGS="$CFLAGS -Wno-long-long"
 
     # Append warning flags from gcc-3* case
-    CFLAGS="$CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
+    DEBUG_CFLAGS="$DEBUG_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
 
     # Append warning flags from gcc-3.2* case
-    CFLAGS="$CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wmultichar"
+    DEBUG_CFLAGS="$DEBUG_CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wmultichar"
 
     # The "format=2" warning generates too many warnings about valid
     # usage in the library.
-    #CFLAGS="$CFLAGS -Wformat=2"
+    #DEBUG_CFLAGS="$DEBUG_CFLAGS -Wformat=2"
 
     # The "unreachable code" warning does not appear to be reliable yet...
-    #CFLAGS="$CFLAGS -Wunreachable-code"
+    #DEBUG_CFLAGS="$DEBUG_CFLAGS -Wunreachable-code"
 
     # Append warning flags from gcc-3.3* case
-    CFLAGS="$CFLAGS -Wendif-labels"
+    DEBUG_CFLAGS="$DEBUG_CFLAGS -Wendif-labels"
 
     # Append warning flags from gcc-3.4* case
-    CFLAGS="$CFLAGS -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch"
+    DEBUG_CFLAGS="$DEBUG_CFLAGS -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch"
 
     # Replace old -W flag with new -Wextra flag
-    CFLAGS="`echo $CFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
+    DEBUG_CFLAGS="`echo $DEBUG_CFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
 
     # Append more extra warning flags that only gcc4.0+ know about
-    CFLAGS="$CFLAGS -Wvariadic-macros"
+    DEBUG_CFLAGS="$DEBUG_CFLAGS -Wvariadic-macros"
     ;;
 
   gcc-3.4*)
@@ -208,26 +212,26 @@ case "$cc_vendor-$cc_version" in
     CFLAGS="$CFLAGS -Wno-long-long"
 
     # Append warning flags from gcc-3* case
-    CFLAGS="$CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
+    DEBUG_CFLAGS="$DEBUG_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
 
     # Append warning flags from gcc-3.2* case
-    CFLAGS="$CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wmultichar"
+    DEBUG_CFLAGS="$DEBUG_CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wmultichar"
 
     # The "format=2" warning generates too many warnings about valid
     # usage in the library.
-    #CFLAGS="$CFLAGS -Wformat=2"
+    #DEBUG_CFLAGS="$DEBUG_CFLAGS -Wformat=2"
 
     # The "unreachable code" warning does not appear to be reliable yet...
-    #CFLAGS="$CFLAGS -Wunreachable-code"
+    #DEBUG_CFLAGS="$DEBUG_CFLAGS -Wunreachable-code"
 
     # Append warning flags from gcc-3.3* case
-    CFLAGS="$CFLAGS -Wendif-labels"
+    DEBUG_CFLAGS="$DEBUG_CFLAGS -Wendif-labels"
 
     # Append more extra warning flags that only gcc3.4+ know about
-    CFLAGS="$CFLAGS -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch"
+    DEBUG_CFLAGS="$DEBUG_CFLAGS -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch"
 
     # Replace old -W flag with new -Wextra flag
-    CFLAGS="`echo $CFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
+    DEBUG_CFLAGS="`echo $DEBUG_CFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
     ;;
 
   gcc-3.3*)
@@ -238,20 +242,20 @@ case "$cc_vendor-$cc_version" in
     CFLAGS="$CFLAGS -Wno-long-long"
 
     # Append warning flags from gcc-3* case
-    CFLAGS="$CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
+    DEBUG_CFLAGS="$DEBUG_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
 
     # Append warning flags from gcc-3.2* case
-    CFLAGS="$CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wmultichar"
+    DEBUG_CFLAGS="$DEBUG_CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wmultichar"
 
     # The "format=2" warning generates too many warnings about valid
     # usage in the library.
-    #CFLAGS="$CFLAGS -Wformat=2"
+    #DEBUG_CFLAGS="$DEBUG_CFLAGS -Wformat=2"
 
     # The "unreachable code" warning does not appear to be reliable yet...
-    #CFLAGS="$CFLAGS -Wunreachable-code"
+    #DEBUG_CFLAGS="$DEBUG_CFLAGS -Wunreachable-code"
 
     # Append more extra warning flags that only gcc3.3+ know about
-    CFLAGS="$CFLAGS -Wendif-labels"
+    DEBUG_CFLAGS="$DEBUG_CFLAGS -Wendif-labels"
     ;;
 
   gcc-3.2*)
@@ -262,17 +266,17 @@ case "$cc_vendor-$cc_version" in
     CFLAGS="$CFLAGS -Wno-long-long"
 
     # Append warning flags from gcc-3* case
-    CFLAGS="$CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
+    DEBUG_CFLAGS="$DEBUG_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
 
     # Append more extra warning flags that only gcc3.2+ know about
-    CFLAGS="$CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wmultichar"
+    DEBUG_CFLAGS="$DEBUG_CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wmultichar"
 
     # The "format=2" warning generates too many warnings about valid
     # usage in the library.
-    #CFLAGS="$CFLAGS -Wformat=2"
+    #DEBUG_CFLAGS="$DEBUG_CFLAGS -Wformat=2"
 
     # The "unreachable code" warning does not appear to be reliable yet...
-    #CFLAGS="$CFLAGS -Wunreachable-code"
+    #DEBUG_CFLAGS="$DEBUG_CFLAGS -Wunreachable-code"
     ;;
 
   gcc-3*)
@@ -283,7 +287,7 @@ case "$cc_vendor-$cc_version" in
     CFLAGS="$CFLAGS -Wno-long-long"
 
     # Append some extra warning flags that only gcc3+ know about
-    CFLAGS="$CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
+    DEBUG_CFLAGS="$DEBUG_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
     ;;
 
   gcc-2.9[56]*)
