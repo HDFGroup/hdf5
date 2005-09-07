@@ -95,7 +95,7 @@ $(top_srcdir)/src/H5Edefin.h: $(top_srcdir)/src/H5err.txt
 # Things should have been all set during H5detect making.
 # Remove the generated .c file if errors occur unless HDF5_Make_Ignore
 # is set to ignore the error.
-H5Tinit.c: H5detect
+H5Tinit.c: H5detect$(EXEEXT)
 	LD_LIBRARY_PATH="$$LD_LIBRARY_PATH`echo $(LDFLAGS) |                  \
 		sed -e 's/-L/:/g' -e 's/ //g'`"                               \
 	$(RUNSERIAL) ./H5detect > H5Tinit.c  ||                               \
