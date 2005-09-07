@@ -243,7 +243,7 @@ int main()
       writeToFiles("HID_T", "hid_t_f", 2);
 #elif defined H5_FORTRAN_HAS_INTEGER_1 && H5_SIZEOF_HID_T >= 1
       writeToFiles("HID_T", "hid_t_f", 1);
-#if defined H5_FORTRAN_HAS_INTEGER_8 && H5_SIZEOF_HID_T >= 4
+#elif defined H5_FORTRAN_HAS_INTEGER_8 && H5_SIZEOF_HID_T >= 4
       writeToFiles("HID_T", "hid_t_f", 8);
 #else
     /* Error: couldn't find a size for hid_t */
