@@ -35,7 +35,7 @@ if test "X-" =  "X-$CC"; then
 fi
 # The default archiver is `sxar'
 AR=${AR:-sxar}
-RANLIB=${RANLIB:=" "}
+RANLIB=${RANLIB:=":"}
 
 if test "X-" = "X-$CXX"; then
     CXX="sxc++ -size_t64 -xint -Kexceptions"
