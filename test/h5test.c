@@ -915,7 +915,7 @@ char* getenv_all(MPI_Comm comm, int root, const char* name)
 		env = (char*) HDrealloc(env, len+1);
 
 	    MPI_Bcast(env, len, MPI_CHAR, root, comm);
-	    env[len+1] = '\0';
+	    env[len] = '\0';
 	}
 	else
 	{
