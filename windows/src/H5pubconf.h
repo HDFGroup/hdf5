@@ -1,5 +1,22 @@
 /* H5pubconf.h is adapted from UNIX platform and manually maintained on the windows platform. */
 
+#define H5_SIZEOF___INT64 8 
+#define H5_SIZEOF_CHAR 1
+#define H5_SIZEOF_DOUBLE 8
+#define H5_SIZEOF_FLOAT 4
+#define H5_SIZEOF_INT 4
+#define H5_SIZEOF_LONG 4
+#define H5_SIZEOF_LONG_DOUBLE 8
+#define H5_SIZEOF_OFF_T 4
+#define H5_SIZEOF_SHORT 2
+#define H5_SIZEOF_SIZE_T 4
+
+/*#if defined __INTEL_COMPILER
+#define H5_SIZEOF_LONG_DOUBLE 12
+#else*/
+
+/*#endif*/
+
 /*#define H5_HAVE_TM_ZONE 1 windows do not use this constant.*/  
 #define H5_MALLOC_WORKS 1
 
@@ -28,25 +45,8 @@ in the file file_io.win32.c and including it on the projects
 #else 
 #define H5_PRINTF_LL_WIDTH "I64" 
 #endif
+
 #define H5_HAVE___int64
-#define H5_SIZEOF___INT64 8 
-#define H5_SIZEOF_CHAR 1
-#define H5_SIZEOF_DOUBLE 8
-#define H5_SIZEOF_FLOAT 4
-#define H5_SIZEOF_INT 4
-
-
-#define H5_SIZEOF_LONG 4
-
-/*#if defined __INTEL_COMPILER
-#define H5_SIZEOF_LONG_DOUBLE 12
-#else*/
-
-#define H5_SIZEOF_LONG_DOUBLE 8
-/*#endif*/
-#define H5_SIZEOF_OFF_T 4
-#define H5_SIZEOF_SHORT 2
-#define H5_SIZEOF_SIZE_T 4
 
 
 #define H5_HAVE_DIFFTIME 1
@@ -131,3 +131,10 @@ in the file file_io.win32.c and including it on the projects
 #endif
 #endif
 */
+
+
+/* Data accuracy is prefered to speed during data conversions */
+#define H5_WANT_DATA_ACCURACY 1
+
+/* Check exception handling functions during data conversions */
+#define H5_WANT_DCONV_EXCEPTION 1
