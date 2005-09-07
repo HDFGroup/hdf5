@@ -9,26 +9,29 @@
 #          
 # The other command-line options are the names of the programs to use
 # for compressing the resulting tar archive (if none are given then
-# `tar' is assumed):
+# `tar md5' is assumed):
 #
 #   tar		-- use tar and don't do any compressing.
 #   compress	-- use compress and append `.Z' to the output name.
 #   gzip	-- use gzip with `-9' and append `.gz' to the output name.
 #   bzip2       -- use bzip2 with `-9' and append `.bz2' to the output name.
+#   md5         -- produce a md5 checksum in addition to the archive.
 #
 # Examples:
 #
 #   $ release
 #   releases/hdf5-1.0.38.tar
+#   releases/hdf5-1.0.38.tar.md5
 #
 #   $ release gzip
 #   releases/hdf5-1.0.38.tar.gz
 #
-#   $ release -d /tmp tar compress gzip bzip2
+#   $ release -d /tmp tar compress gzip bzip2 md5
 #   /tmp/hdf5-1.0.38.tar
 #   /tmp/hdf5-1.0.38.tar.Z
 #   /tmp/hdf5-1.0.38.tar.gz
 #   /tmp/hdf5-1.0.38.tar.bz2
+#   /tmp/hdf5-1.0.38.tar.md5
 #
 # Modifications
 #   Robb Matzke, 1999-07-16
@@ -55,26 +58,29 @@ Usage: $0 [--nocheck] [-d <dir>] [-h] <methods> ...
          
 The other command-line options are the names of the programs to use
 for compressing the resulting tar archive (if none are given then
-"tar" is assumed):
+"tar md5" is assumed):
 
     tar		-- use tar and don't do any compressing.
     compress	-- use compress and append ".Z" to the output name.
     gzip	-- use gzip with "-9" and append ".gz" to the output name.
     bzip2       -- use bzip2 with "-9" and append ".bz2" to the output name.
+    md5         -- produce a md5 checksum in addition to the archive.
 
 Examples:
 
     $ release
     releases/hdf5-1.0.38.tar
+    releases/hdf5-1.0.38.tar.md5
 
     $ release gzip
     releases/hdf5-1.0.38.tar.gz
 
-    $ release -d /tmp tar compress gzip bzip2
+    $ release -d /tmp tar compress gzip bzip2 md5
     /tmp/hdf5-1.0.38.tar
     /tmp/hdf5-1.0.38.tar.Z
     /tmp/hdf5-1.0.38.tar.gz
     /tmp/hdf5-1.0.38.tar.bz2
+    /tmp/hdf5-1.0.38.tar.md5
 
 EOF
 
@@ -131,9 +137,9 @@ while [ -n "$1" ]; do
     esac
 done
 
-# Default method is tar
+# Default methods are tar and md5
 if [ "X$methods" = "X" ]; then
-    methods=tar
+    methods="tar md5"
 fi
 
 # setup restoration in case of abort.
@@ -148,7 +154,10 @@ if [ X$pmode = Xyes ]; then
     bin/h5vers -s $VERS
 fi
 
-test "$verbose" && echo "Releasing hdf5-$VERS to $DEST" 1>&2
+# Store hdf5-$VERS ("hdf5-1.7.51", e.g.) to a variable to avoid typos
+HDF5_VERS=hdf5-$VERS
+
+test "$verbose" && echo "Releasing $HDF5_VERS to $DEST" 1>&2
 if [ ! -d $DEST ]; then
     echo "   Destination directory $DEST does not exist" 1>&2
     exit 1
@@ -170,8 +179,8 @@ MANIFEST=/tmp/H5_MANIFEST.$$
 grep '^\.' MANIFEST | grep -v _DO_NOT_DISTRIBUTE_ >$MANIFEST
 
 # Prepare the source tree for a release.
-test -h ../hdf5-$VERS && rm ../hdf5-$VERS
-ln -s `pwd` ../hdf5-$VERS || exit 1
+test -h ../$HDF5_VERS && rm ../$HDF5_VERS
+ln -s `pwd` ../$HDF5_VERS || exit 1
 mv Makefile ../Makefile.x 2>/dev/null #might fail
 cp -p Makefile.dist Makefile
 
@@ -191,7 +200,7 @@ cp release_docs/HISTORY.txt release_docs/RELEASE.txt doc/html/ADGuide/.
 test "$verbose" && echo "   Running tar..." 1>&2
 ( \
     cd ..; \
-    tar cf x.tar hdf5-$VERS/Makefile \
+    tar cf $HDF5_VERS.tar $HDF5_VERS/Makefile \
 	`sed 's/^\.\//hdf5-'$VERS'\//' $MANIFEST` || exit 1 \
 )
 
@@ -199,27 +208,32 @@ test "$verbose" && echo "   Running tar..." 1>&2
 for comp in $methods; do
     case $comp in
 	tar)
-	    cp -p ../x.tar $DEST/hdf5-$VERS.tar;;
+	    cp -p ../$HDF5_VERS.tar $DEST/$HDF5_VERS.tar;;
 	compress)
 	    test "$verbose" && echo "   Running compress..." 1>&2
-	    compress -c <../x.tar >$DEST/hdf5-$VERS.tar.Z;;
+	    compress -c <../$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.Z;;
 	gzip)
 	    test "$verbose" && echo "   Running gzip..." 1>&2
-	    gzip -9 <../x.tar >$DEST/hdf5-$VERS.tar.gz;;
+	    gzip -9 <../$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.gz;;
 	bzip2)
 	    test "$verbose" && echo "   Running bzip2..." 1>&2
-	    bzip2 -9 <../x.tar >$DEST/hdf5-$VERS.tar.bz2;;
+	    bzip2 -9 <../$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.bz2;;
+	md5)
+	    test "$verbose" && echo "   Creating checksum..." 1>&2
+	    (  cd .. && md5sum $HDF5_VERS.tar >$HDF5_VERS.tar.md5 )
+	    cp -p ../$HDF5_VERS.tar.md5 $DEST/$HDF5_VERS.tar.md5;;
     esac
 done
 
 # Copy the RELEASE.txt to the release area.
-cp release_docs/RELEASE.txt $DEST/hdf5-$VERS-RELEASE.txt
+cp release_docs/RELEASE.txt $DEST/$HDF5_VERS-RELEASE.txt
 
 # Remove temporary things
 test -f ../Makefile.x && mv ../Makefile.x Makefile
 rm -f $MANIFEST
-rm -f ../hdf5-$VERS
-rm -f ../x.tar
+rm -f ../$HDF5_VERS
+rm -f ../$HDF5_VERS.tar
+rm -f ../$HDF5_VERS.tar.md5
 
 # Restore OLD version information, then no need for trap.
 if [ X$pmode = Xyes ]; then

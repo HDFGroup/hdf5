@@ -37,7 +37,9 @@ New Features
 ============
     Source code distribution:
     -------------------------
-
+       - Added MD5 checksumming to snapshot releases.  Releases will now
+         produce a .md5 file as well as a .tar archive.  md5sum can be
+         used to verify the arvhice with the .md5 checksum.  -JL 2005/09/06
 
     Library:
     --------
