@@ -1,9 +1,11 @@
 ! H5test_kind.f90
 !
 ! This fortran program generates H5fortran_detect.f90
+! 
 !
          program test_kind
          integer :: i, j, ii, last, kind_numbers(10)
+         integer :: jr, jd
          last = -1
          ii = 0
          j = selected_int_kind(18)
@@ -25,6 +27,10 @@
           write(*,*) "write(*,*) "" /*generating header file*/ """
              j = 0
              write(*, "("" call i"", i2.2,""()"")") j
+             jr = 0
+             write(*, "("" call r"", i2.2,""()"")") jr
+             jd = 0
+             write(*, "("" call d"", i2.2,""()"")") jd
           do i = 1, ii
              j = kind_numbers(i)
              write(*, "("" call i"", i2.2,""()"")") j
@@ -50,6 +56,43 @@
              write(*,*)"   endif"
              write(*,*)"   if (a_size .eq. 128) then"
              write(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_NATIVE_16"" "
+             write(*,*)"   endif"
+             write(*,*)"   return"
+             write(*,*)"   end subroutine"    
+              jr = 0
+             write(*, "("" subroutine r"" i2.2,""()"")") j
+             write(*,*)"   implicit none"
+             write(*,*)"   real :: b"
+             write(*,*)"   integer :: a(8)"
+             write(*,*)"   integer :: a_size"
+             write(*,*)"   integer :: b_size"
+             write(*,*)"   a_size = bit_size(a(1))"
+             write(*,*)"   b_size = size(transfer(b,a))*a_size"
+             write(*,*)"   if (b_size .eq. 32) then"
+             write(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_REAL_NATIVE_4"" "
+             write(*,*)"   endif"
+             write(*,*)"   if (b_size .eq. 64) then"
+             write(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_REAL_NATIVE_8"" "
+             write(*,*)"   endif"
+             write(*,*)"   if (b_size .eq. 128) then"
+             write(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_REAL_NATIVE_16"" "
+             write(*,*)"   endif"
+             write(*,*)"   return"
+             write(*,*)"   end subroutine"    
+              jd = 0
+             write(*, "("" subroutine d"" i2.2,""()"")") jd
+             write(*,*)"   implicit none"
+             write(*,*)"   double precision :: b"
+             write(*,*)"   integer :: a(8)"
+             write(*,*)"   integer :: a_size"
+             write(*,*)"   integer :: b_size"
+             write(*,*)"   a_size = bit_size(a(1))"
+             write(*,*)"   b_size = size(transfer(b,a))*a_size"
+             write(*,*)"   if (b_size .eq. 64) then"
+             write(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_DOUBLE_NATIVE_8"" "
+             write(*,*)"   endif"
+             write(*,*)"   if (b_size .eq. 128) then"
+             write(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_DOUBLE_NATIVE_16"" "
              write(*,*)"   endif"
              write(*,*)"   return"
              write(*,*)"   end subroutine"    
