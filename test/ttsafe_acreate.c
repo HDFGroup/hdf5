@@ -144,10 +144,14 @@ void tts_acreate(void)
     }
 
     /* close remaining resources */
-    H5Sclose(dataspace);
-    H5Tclose(datatype);
-    H5Dclose(dataset);
-    H5Fclose(file);
+    ret=H5Sclose(dataspace);
+    assert(ret>=0);
+    ret=H5Tclose(datatype);
+    assert(ret>=0);
+    ret=H5Dclose(dataset);
+    assert(ret>=0);
+    ret=H5Fclose(file);
+    assert(ret>=0);
 }
 
 void *tts_acreate_thread(void *client_data)

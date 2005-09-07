@@ -140,7 +140,7 @@ void *tts_cancel_thread(void UNUSED *arg)
 
     /* create a new dataset within the file */
     dataset = H5Dcreate(cancel_file, DATASETNAME, datatype, dataspace, H5P_DEFAULT);
-	assert(dataset>=0);
+    assert(dataset>=0);
 
     /* If thread is cancelled, make cleanup call */
     cleanup_structure = (cancel_cleanup_t*)malloc(sizeof(cancel_cleanup_t));
@@ -152,7 +152,7 @@ void *tts_cancel_thread(void UNUSED *arg)
 
     datavalue = 1;
     ret=H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &datavalue);
-	assert(ret>=0);
+    assert(ret>=0);
 
     buffer = malloc(sizeof(int));
     ret=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
