@@ -479,7 +479,7 @@
          CALL check("h5dread_f", error, total_error)
          do i = 1, dimsize
             if (real_member_out(i) .ne. real_member(i)) then
-                write(*,*) " Wrong double precision data is read back "
+                write(*,*) " Wrong real precision data is read back "
                 total_error = total_error + 1
             endif
          enddo
