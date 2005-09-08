@@ -66,7 +66,7 @@ H5S_mpio_span_hyper_type( const H5S_t *space, size_t elmt_size,
 			  hsize_t *extra_offset,
 			  hbool_t *is_derived_type );
 
-static herr_t obtain_datatype(const hsize_t size[],
+static herr_t H5S_obtain_datatype(const hsize_t size[],
                               H5S_hyper_span_t* span,MPI_Datatype *span_type,
                               size_t elmt_size,int dimindex);
 
@@ -462,6 +462,278 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
+
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_mpio_span_hyper_type
+ *
+ * Purpose:	Translate an HDF5 irregular hyperslab selection into an
+                MPI type.
+ *
+ * Return:	non-negative on success, negative on failure.
+ *
+ * Outputs:	*new_type	  the MPI type corresponding to the selection
+ *		*count		  how many objects of the new_type in selection
+ *				  (useful if this is the buffer type for xfer)
+ *		*extra_offset     Number of bytes of offset within dataset
+ *		*is_derived_type  0 if MPI primitive type, 1 if derived
+ *
+ * Programmer:  kyang
+ *
+ */
+static herr_t
+H5S_mpio_span_hyper_type( const           H5S_t *space,
+			  size_t          elmt_size,
+			  MPI_Datatype    *new_type,/* out: */
+			  size_t          *count,
+			  hsize_t         *extra_offset,
+			  hbool_t         *is_derived_type ){
+
+  MPI_Datatype          span_type;
+  H5S_hyper_span_t      *ospan;
+  H5S_hyper_span_info_t *odown;
+  hsize_t               *size;
+  int                   rank;
+  int                   mpi_code;
+  herr_t                ret_value = SUCCEED;
+  MPI_Aint              extent,lb;
+
+
+  FUNC_ENTER_NOAPI_NOINIT(H5S_mpio_span_hyper_type);
+
+  /* Check args */
+    assert (space);
+
+ /* assert(sizeof(MPI_Aint) >= sizeof(elmt_size)); not sure the reason*/
+
+
+    rank = space->extent.rank;
+
+    /*    size = HDcalloc((size_t)rank,sizeof(hsize_t));  */
+    if (0==elmt_size)
+        goto empty;
+    size = space->extent.size;
+    if(size == 0)
+        goto empty;
+
+    odown = space->select.sel_info.hslab->span_lst;
+    if(odown == NULL)
+      goto empty;
+    ospan = odown->head;
+    if(ospan == NULL)
+      goto empty;
+
+    /* obtain derived data type */
+    if(FAIL == H5S_obtain_datatype(space->extent.size,ospan,&span_type,elmt_size,rank))
+      HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't obtain  MPI derived data type");
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&span_type)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code);
+
+    *new_type = span_type;
+    /* fill in the remaining return values */
+    *count = 1;
+    *extra_offset = 0;
+    *is_derived_type = 1;
+
+    HGOTO_DONE(SUCCEED);
+
+empty:
+    /* special case: empty hyperslab */
+    *new_type        = MPI_BYTE;
+    *count           = 0;
+    *extra_offset    = 0;
+    *is_derived_type = 0;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+  }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_obtain datatype
+ *
+ * Purpose:	Obtain an MPI derived datatype based on span-tree
+                implementation
+ *
+ * Return:	non-negative on success, negative on failure.
+ *
+ * Outputs:	*span_type	 the MPI type corresponding to the selection
+ *
+ * Programmer:  kyang
+ *
+ */
+static herr_t H5S_obtain_datatype(const hsize_t size[],
+			      H5S_hyper_span_t* span,
+			      MPI_Datatype *span_type,
+			      size_t elmt_size,
+			      int dimindex)
+{
+
+  int                   innercount,outercount;
+  MPI_Datatype          bas_type;
+  MPI_Datatype          temp_type;
+  MPI_Datatype          tempinner_type;
+  MPI_Datatype          *inner_type;
+  int                   *blocklen;
+  MPI_Aint              *disp;
+  MPI_Aint              stride;
+  MPI_Aint              extent,lb;
+  H5S_hyper_span_info_t *down;
+  H5S_hyper_span_t      *tspan;
+  int                   mpi_code;
+  herr_t                ret_value = SUCCEED;
+
+#ifdef H5_HAVE_MPI2
+  MPI_Aint              sizeaint,sizedtype;
+#endif /* H5_HAVE_MPI2 */
+  hsize_t               total_lowd,total_lowd1;
+  int                   i;
+  int                   ret;
+
+  FUNC_ENTER_NOAPI_NOINIT(H5S_obtain_datatype);
+  assert(span);
+
+  inner_type = NULL;
+  down       = NULL;
+  tspan      = NULL;
+  down       = span->down;
+  tspan      = span;
+
+  outercount = 0;
+
+/* obtain the number of span tree for this dimension */
+  while(tspan) {
+    tspan = tspan->next;
+    outercount ++;
+  }
+
+  if(outercount == 0) {
+    span_type = NULL;
+    return 0;
+  }
+
+/* MPI2 hasn't been widely acccepted, adding H5_HAVE_MPI2 for the future use */
+#ifdef H5_HAVE_MPI2
+
+  MPI_Type_extent(MPI_Aint,&sizeaint);
+  MPI_Type_extent(MPI_Datatype,&sizedtype);
+
+  blocklen  = (int *)HDcalloc((size_t)outercount,sizeof(int));
+  disp = (MPI_Aint *)HDcalloc((size_t)outercount,sizeaint);
+  inner_type   = (MPI_Datatype *)HDcalloc((size_t)outercount,sizedtype);
+
+#else
+
+  blocklen     = (int *)HDcalloc((size_t)outercount,sizeof(int));
+  disp         = (MPI_Aint *)HDcalloc((size_t)outercount,sizeof(MPI_Aint));
+  inner_type   = (MPI_Datatype *)HDcalloc((size_t)outercount,sizeof(MPI_Datatype));
+
+#endif
+
+
+  tspan      = span;
+  outercount = 0;
+
+  /* if this is the fastest changing dimension, it is the base case for derived datatype. */
+  if(down == NULL){
+
+    assert(dimindex <= 1);
+    if(MPI_SUCCESS != (mpi_code = MPI_Type_contiguous((int)elmt_size, MPI_BYTE,&bas_type)))
+          HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code);
+
+    if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&bas_type)))
+          HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code);
+
+    while(tspan){
+
+      disp[outercount]      = (MPI_Aint)elmt_size * tspan->low;
+      blocklen[outercount]  = tspan->nelem;
+      tspan                 = tspan->next;
+      outercount ++;
+    }
+
+    if(MPI_SUCCESS != (mpi_code = MPI_Type_hindexed(outercount,blocklen,
+						    disp,bas_type,span_type)))
+          HMPI_GOTO_ERROR(FAIL, "MPI_Type_hindexed failed", mpi_code);
+
+  }
+  else {/* dimindex is the rank of the dimension */
+
+    assert(dimindex >1);
+    /* Calculate the total bytes of the lower dimension */
+    total_lowd  = 1;  /* one dimension down */
+    total_lowd1 = 1; /* two dimensions down */
+
+    for ( i = dimindex-1; i > 0; i--)
+         total_lowd = total_lowd * size[i];
+
+    for ( i = dimindex-1; i > 1; i--)
+          total_lowd1 = total_lowd1 * size[i];
+
+     while(tspan){
+
+       /* Displacement should be in byte and should have dimension information */
+       /* First using MPI Type vector to build derived data type for this span only */
+       /* Need to calculate the disp in byte for this dimension. */
+       /* Calculate the total bytes of the lower dimension */
+
+       disp[outercount]      = tspan->low*total_lowd*elmt_size;
+       blocklen[outercount]  = 1;
+
+       /* generating inner derived datatype by using MPI_Type_hvector */
+       if(FAIL == H5S_obtain_datatype(size,tspan->down->head,&temp_type,elmt_size,dimindex-1))
+          HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't obtain  MPI derived data type");
+
+       if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&temp_type)))
+          HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code);
+
+       /* building the inner vector datatype */
+       stride     = total_lowd*elmt_size;
+       innercount = tspan->nelem;
+
+       if(MPI_SUCCESS != (mpi_code = MPI_Type_hvector(innercount,1,stride,temp_type,&tempinner_type)))
+          HMPI_GOTO_ERROR(FAIL, "MPI_Type_hvector failed", mpi_code);
+
+       if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&tempinner_type)))
+          HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code);
+
+       if(MPI_SUCCESS != (mpi_code =MPI_Type_free(&temp_type)))
+          HMPI_GOTO_ERROR(FAIL, "MPI_Type_free failed",mpi_code);
+       inner_type[outercount] = tempinner_type;
+       outercount ++;
+       tspan = tspan->next;
+
+     }
+
+    /* building the whole vector datatype */
+    if(MPI_SUCCESS != (mpi_code =
+		       MPI_Type_struct(outercount,blocklen,disp,inner_type,span_type)))
+          HMPI_GOTO_ERROR(FAIL, "MPI_Type_struct failed", mpi_code);
+
+  }
+
+  if(inner_type != NULL){
+    if(down != NULL) {
+        for(i=0;i<outercount;i++)
+             if(MPI_SUCCESS != (mpi_code = MPI_Type_free(&inner_type[i])))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_free failed",mpi_code);
+    }
+  }
+
+  if(inner_type != NULL)
+    HDfree(inner_type);
+  if(blocklen != NULL)
+    HDfree(blocklen);
+  if(disp != NULL)
+    HDfree(disp);
+done:
+  FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5S_mpio_space_type
@@ -524,9 +796,16 @@ H5S_mpio_space_type( const H5S_t *space, size_t elmt_size,
                     break;
 
                 case H5S_SEL_HYPERSLABS:
-                    if(H5S_mpio_hyper_type( space, elmt_size,
+		  if((H5S_SELECT_IS_REGULAR(space) == TRUE)) {
+		    if(H5S_mpio_hyper_type( space, elmt_size,
                             /* out: */ new_type, count, extra_offset, is_derived_type )<0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert \"all\" selection to MPI type");
+		    }
+		     else {
+		       if(H5S_mpio_span_hyper_type( space, elmt_size,
+                            /* out: */ new_type, count, extra_offset, is_derived_type )<0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert \"all\" selection to MPI type");
+		     }
                     break;
 
                 default:
@@ -546,346 +825,6 @@ H5S_mpio_space_type( const H5S_t *space, size_t elmt_size,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}
-
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5S_mpio_space_span_type
- *
- * Purpose:	Translate an HDF5 dataspace selection into a general
- *              MPI derived datatype built with span-tree.
- *
- *		Currently handle only hyperslab and "all" selections.
- *
- * Return:	non-negative on success, negative on failure.
- *
- * Outputs:	*new_type	  the MPI type corresponding to the selection
- *		*count		  how many objects of the new_type in selection
- *				  (useful if this is the buffer type for xfer)
- *		*extra_offset     Number of bytes of offset within dataset
- *		*is_derived_type  0 if MPI primitive type, 1 if derived
- *
- * Programmer:	KY
- *
- * Modifications:
- *
- *      Quincey Koziol, June 18, 2002
- *      Added 'extra_offset' parameter
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5S_mpio_space_span_type( const H5S_t *space, size_t elmt_size,
-		     /* out: */
-		     MPI_Datatype *new_type,
-		     size_t *count,
-		     hsize_t *extra_offset,
-		     hbool_t *is_derived_type )
-{
-    herr_t	ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT(H5S_mpio_space_span_type);
-
-    /* Check args */
-    assert (space);
-
-    /* Creat MPI type based on the kind of selection */
-    switch (H5S_GET_EXTENT_TYPE(space)) {
-        case H5S_SCALAR:
-        case H5S_SIMPLE:
-            switch(H5S_GET_SELECT_TYPE(space)) {
-                case H5S_SEL_NONE:
-                    if ( H5S_mpio_none_type( space, elmt_size,
-                        /* out: */ new_type, count, extra_offset, is_derived_type ) <0)
-                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert \"all\" selection to MPI type");
-                    break;
-
-                case H5S_SEL_ALL:
-                    if ( H5S_mpio_all_type( space, elmt_size,
-                        /* out: */ new_type, count, extra_offset, is_derived_type ) <0)
-                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert \"all\" selection to MPI type");
-                    break;
-
-                case H5S_SEL_POINTS:
-                    /* not yet implemented */
-                    ret_value = FAIL;
-                    break;
-
-                case H5S_SEL_HYPERSLABS:
-                    if(H5S_mpio_span_hyper_type( space, elmt_size,
-                            /* out: */ new_type, count, extra_offset, is_derived_type )<0)
-                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert \"all\" selection to MPI type");
-                    break;
-
-                default:
-                    assert("unknown selection type" && 0);
-                    break;
-            } /* end switch */
-            break;
-
-        case H5S_COMPLEX:
-            /* not yet implemented */
-            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "complex data spaces are not supported yet");
-
-        default:
-            assert("unknown data space type" && 0);
-            break;
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-
-
-/* The following codes have been used by Kent to test
-   general collective derived datatype functionality.
-   It should NOT be called by other routines except with
-   macro #ifdef KENT #endif
-   Nov. 11th, 2004 */
-
-
-static herr_t
-H5S_mpio_span_hyper_type( const H5S_t *space, size_t elmt_size,
-		     /* out: */
-		     MPI_Datatype *new_type,
-		     size_t *count,
-		     hsize_t *extra_offset,
-			  hbool_t *is_derived_type ){
-
-  MPI_Datatype          span_type;
-  H5S_hyper_span_t      *ospan;
-  H5S_hyper_span_info_t *odown;
-  hsize_t               *size;
-  int                   rank;
-  herr_t                ret_value = SUCCEED;
-
-   MPI_Aint              extent,lb;
-
-  FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_mpio_span_hyper_type);
-
-  printf("coming to hyper type \n");
-  /* Check args */
-    assert (space);
-    /* assert(sizeof(MPI_Aint) >= sizeof(elmt_size));?? */
-
-    /* Only for simple extent
-    rank = space->extent.u.simple.rank;
-    */
-    rank = space->extent.rank;
-
-    /*    size = HDcalloc((size_t)rank,sizeof(hsize_t));  */
-    if (0==elmt_size)
-        goto empty;
-    size = space->extent.size;
-
-
-    odown = space->select.sel_info.hslab->span_lst;
-    if(odown == NULL)
-      goto empty;
-    ospan = odown->head;
-    if(ospan == NULL)
-      goto empty;
-
-    obtain_datatype(space->extent.size,ospan,&span_type,elmt_size,rank);
-    MPI_Type_commit(&span_type);
-
-      MPI_Type_lb(span_type,&lb);
-      printf("lb %d\n",lb);
-      MPI_Type_extent(span_type,&extent);
-      printf("extent %d\n",extent);
-    *new_type = span_type;
-     /* fill in the remaining return values */
-    *count = 1;
-    *extra_offset = 0;
-    *is_derived_type = 1;
-    printf("before freeing size\n");
-    /*    HDfree(size);*/
-    printf("after freeing size\n");
-    HGOTO_DONE(SUCCEED);
-
-empty:
-    /* special case: empty hyperslab */
-    *new_type = MPI_BYTE;
-    *count = 0;
-    *extra_offset = 0;
-    *is_derived_type = 0;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-  }
-
-
-static herr_t obtain_datatype(const hsize_t size[], H5S_hyper_span_t* span,MPI_Datatype *span_type,
-			      size_t elmt_size,int dimindex) {
-
-  int                   innercount,outercount;
-  MPI_Datatype          bas_type;
-  MPI_Datatype          temp_type;
-  MPI_Datatype          tempinner_type;
-  MPI_Datatype          *inner_type;
-  int                   *blocklen;
-  MPI_Aint              *disp;
-  MPI_Aint              stride;
-  MPI_Aint              extent,lb;
-  H5S_hyper_span_info_t *down;
-  H5S_hyper_span_t      *tspan;
-#ifdef H5_HAVE_MPI2
-  MPI_Aint              sizeaint,sizedtype;
-#endif /* H5_HAVE_MPI2 */
-  hsize_t               total_lowd,total_lowd1;
-  int                   i;
-  int                   ret;
-
-  assert(span);
-
-  inner_type = NULL;
-  down = NULL;
-  tspan= NULL;
-  down  = span->down;
-  tspan = span;
-
-  outercount = 0;
-  while(tspan) {
-    if(tspan) {
-      HDfprintf(stdout, " span->low %Hd\n",tspan->low);
-      HDfprintf(stdout, " span->high %Hd\n",tspan->high);
-      HDfprintf(stdout, " span->nelm %Hu\n",tspan->nelem);
-    }
-    tspan = tspan->next;
-    outercount ++;
-  }
-
-  if(outercount == 0) {
-    span_type = NULL;
-    return 0;
-  }
-  printf("outercount %d\n",outercount);
-#ifdef H5_HAVE_MPI2
-  printf("coming into HAVE_MPI2\n");
-  fflush(stdout);
-
-  MPI_Type_extent(MPI_Aint,&sizeaint);
-  MPI_Type_extent(MPI_Datatype,&sizedtype);
-  printf("coming into HAVE_MPI2 type extent\n");
-  fflush(stdout);
-
-  blocklen  = (int *)HDcalloc((size_t)outercount,sizeof(int));
-  disp = (MPI_Aint *)HDcalloc((size_t)outercount,sizeaint);
-  inner_type   = (MPI_Datatype *)HDcalloc((size_t)outercount,sizedtype);
-#else
-  printf("coming to MPI2 else \n");
-  blocklen  = (int *)HDcalloc((size_t)outercount,sizeof(int));
-  disp = (MPI_Aint *)HDcalloc((size_t)outercount,sizeof(int));
-  inner_type   = (MPI_Datatype *)HDcalloc((size_t)outercount,sizeof(int));
-  printf("end of calloc \n");
-#endif
-
-
-  tspan = span;
-  outercount = 0;
-
-  if(down == NULL){
-    printf("coming to down = NULL \n");
-    if(dimindex > 1) printf("wrong area \n");
-    MPI_Type_contiguous((int)elmt_size,MPI_BYTE,&bas_type);
-    MPI_Type_commit(&bas_type);
-    printf("after type commit \n");
-    while(tspan){
-      disp[outercount]      = (MPI_Aint)elmt_size * tspan->low;
-      blocklen[outercount]  = tspan->nelem;
-      tspan                 = tspan->next;
-      outercount ++;
-    }
-    /*    printf("outercount %d\n",outercount);
-	  printf("after while loop \n");*/
-    ret = MPI_Type_hindexed(outercount,blocklen,disp,bas_type,span_type);
-    if(ret < 0) printf("type hindexed doesn't work\n");
-    printf("after hindexed \n");
-
-  }
-  else {/* dimindex is the rank of the dimension */
-
-    if(dimindex <2) printf("something is wrong \n");
-    /* Calculate the total bytes of the lower dimension */
-    total_lowd  = 1;  /* one dimension down */
-    total_lowd1 = 1; /* two dimensions down */
-
-    for ( i = dimindex-1; i > 0; i--)
-         total_lowd = total_lowd * size[i];
-
-    for ( i = dimindex-1; i > 1; i--)
-         total_lowd1 = total_lowd1 * size[i];
-
-     HDfprintf(stdout, " one dimension down size %Hu\n",total_lowd);
-     HDfprintf(stdout, " two dimension down size %Hu\n",total_lowd1);
-
-     while(tspan){
-/* Displacement should be in byte and should have dimension information */
-/* First using MPI Type vector to build derived data type for this span only */
-/* Need to calculate the disp in byte for this dimension. */
-      /* Calculate the total bytes of the lower dimension */
-
-      disp[outercount]      = tspan->low*total_lowd*elmt_size;
-      blocklen[outercount]  = 1;
-      printf("displacement the 0 rank %d\n",disp[0]);
-      /* generating inner derived datatype by using MPI_Type_hvector */
-      obtain_datatype(size,tspan->down->head,&temp_type,elmt_size,dimindex-1);
-      ret= MPI_Type_commit(&temp_type);
-      if(ret < 0) printf("cannot commit temp_type\n");
-/*      inner_type[count] = temp_type; */
-
-#ifdef H5_HAVE_MPI2
-      MPI_Type_get_extent(temp_type,&lb,&extent);
-#else
-      MPI_Type_lb(temp_type,&lb);
-      printf("lb %d\n",lb);
-      MPI_Type_extent(temp_type,&extent);
-      printf("extent %d\n",extent);
-#endif
-     /* building the inner vector datatype */
-      /* The following calculation of stride is wrong since stride is calculated
-         from the first element of the block to the first element of the next
-         block. */
-      /*stride = total_lowd1 * (size[dimindex-1]*elmt_size-extent-lb);*/
-       stride     = total_lowd*elmt_size;
-      innercount  = tspan->nelem;
-      printf("stride %d\n",stride);
-      printf("innercount %d\n",innercount);
-      fflush(stdout);
-	ret = MPI_Type_hvector(innercount,1,stride,temp_type,&tempinner_type);
-
-      /* MPI_Type_contiguous(2,temp_type,&tempinner_type);*/
-      if(ret < 0) printf("wrong vector \n");
-      MPI_Type_commit(&tempinner_type);
-      printf("after tempinner_type commit\n");
-      MPI_Type_free(&temp_type);
-      printf("after free \n");
-      inner_type[outercount] = tempinner_type;
-      outercount ++;
-      tspan = tspan->next;
-    }
-
-    /* building the whole vector datatype */
-    MPI_Type_struct(outercount,blocklen,disp,inner_type,span_type);
-    printf("after type struct \n");
-  }
-
-  if(inner_type != NULL){
-    if(down != NULL) {
-    for(i=0;i<outercount;i++)
-             MPI_Type_free(&inner_type[i]);
-    }
-  }
-
-  if(inner_type != NULL)
-    HDfree(inner_type);
-  if(blocklen != NULL)
-  HDfree(blocklen);
-  if(disp != NULL)
-  HDfree(disp);
-  printf("after obtaining type \n");
-  return 0;
 }
 
 #endif  /* H5_HAVE_PARALLEL */
