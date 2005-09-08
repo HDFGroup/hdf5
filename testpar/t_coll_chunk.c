@@ -86,6 +86,7 @@ coll_chunk3(void)
 
 }
 
+
 void
 coll_chunk4(void)
 {
@@ -104,6 +105,7 @@ coll_chunktest(const char* filename,int chunk_factor,int select_factor) {
 
   hid_t	   file,dataset, file_dataspace;
   hid_t    acc_plist,xfer_plist,crp_plist;
+  hbool_t  use_gpfs = FALSE;
   hsize_t  dims[RANK], chunk_dims[RANK];
   int*     data_array1  = NULL;
   int*     data_origin1 = NULL;
@@ -122,12 +124,8 @@ coll_chunktest(const char* filename,int chunk_factor,int select_factor) {
   MPI_Comm_rank(comm,&mpi_rank);
 
   /* Create the data space */
-  acc_plist = H5Pcreate(H5P_FILE_ACCESS);
+  acc_plist = create_faccess_plist(comm,info,facc_type,use_gpfs);
   VRFY((acc_plist >= 0),"");
-
-
-  status = H5Pset_fapl_mpio(acc_plist,comm,info);
-  VRFY((acc_plist >= 0),"MPIO creation property list succeeded");
 
   file = H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_plist);
   VRFY((file >= 0),"H5Fcreate succeeded");
@@ -166,7 +164,10 @@ coll_chunktest(const char* filename,int chunk_factor,int select_factor) {
 
     /* test1: chunk size is equal to dataset size */
     chunk_dims[0] = SPACE_DIM1/chunk_factor;
-    chunk_dims[1] = SPACE_DIM2/chunk_factor;
+
+    /* to decrease the testing time, maintain bigger chunk size */
+    if(chunk_factor >2) chunk_dims[1] = SPACE_DIM2/2;
+    else chunk_dims[1] = SPACE_DIM2/chunk_factor;
     status = H5Pset_chunk(crp_plist, 2, chunk_dims);
     VRFY((status >= 0),"chunk creation property list succeeded");
 
@@ -193,28 +194,12 @@ coll_chunktest(const char* filename,int chunk_factor,int select_factor) {
 
     status = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((status>= 0),"MPIO collective transfer property succeeded");
-#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-    prop_value = H5D_XFER_COLL_CHUNK_DEF;
-    status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
-                       NULL,NULL,NULL,NULL,NULL);
-    VRFY((status >= 0),"testing property list inserted succeeded");
-#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
     /* write data collectively */
     status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, file_dataspace,
 	    xfer_plist, data_array1);
     VRFY((status >= 0),"dataset write succeeded");
 
-#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-    status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_NAME,&prop_value);
-    VRFY((status >= 0),"testing property list get succeeded");
-    if(chunk_factor == mpi_size*2 && select_factor == BYROW_DISCONT) { /* suppose to use independent */
-        VRFY((prop_value == 0), "H5Dwrite shouldn't use MPI Collective IO call");
-    }
-    else {
-        VRFY((prop_value == 1), "H5Dwrite didn't use MPI Collective IO call");
-    }
-#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
     status = H5Dclose(dataset);
     VRFY((status >= 0),"");
 
@@ -242,11 +227,7 @@ coll_chunktest(const char* filename,int chunk_factor,int select_factor) {
     data_origin1 = (int *)malloc(SPACE_DIM1*SPACE_DIM2*sizeof(int));
     VRFY((data_origin1 != NULL), "data_origin1 malloc succeeded");
 
-    /* Create the data space */
-    acc_plist = H5Pcreate(H5P_FILE_ACCESS);
-    VRFY((acc_plist >= 0),"");
-
-    status = H5Pset_fapl_mpio(acc_plist,comm,info);
+    acc_plist = create_faccess_plist(comm, info, facc_type, use_gpfs);
     VRFY((acc_plist >= 0),"MPIO creation property list succeeded");
 
     file = H5Fopen(filename,H5F_ACC_RDONLY,acc_plist);
@@ -274,25 +255,9 @@ coll_chunktest(const char* filename,int chunk_factor,int select_factor) {
     VRFY((xfer_plist >= 0),"");
     status = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((status>= 0),"MPIO collective transfer property succeeded");
-#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-    prop_value = H5D_XFER_COLL_CHUNK_DEF;
-    status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
-                       NULL,NULL,NULL,NULL,NULL);
-    VRFY((status >= 0),"testing property list inserted succeeded");
-#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
     status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, file_dataspace,
                       xfer_plist, data_array1);
     VRFY((status >=0),"dataset read succeeded");
-#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-    status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_NAME,&prop_value);
-    VRFY((status >= 0),"testing property list get succeeded");
-    if(chunk_factor == mpi_size*2 && select_factor == BYROW_DISCONT) { /* suppose to use independent */
-        VRFY((prop_value == 0), "H5Dread shouldn't use MPI Collective IO call");
-    }
-    else {
-        VRFY((prop_value == 1), "H5Dread didn't use MPI Collective IO call");
-    }
-#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
     /* verify the read data with original expected data */
 
