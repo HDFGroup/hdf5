@@ -82,3 +82,5 @@ ac_cv_sizeof_uint_fast64_t=${ac_cv_sizeof_uint_fast64_t=8}
 # Don't cache size_t and off_t because they depend on if -D_LARGE_FILES is used
 #ac_cv_sizeof_size_t=${ac_cv_sizeof_size_t=4}
 #ac_cv_sizeof_off_t=${ac_cv_sizeof_off_t=8}
+
+hdf5_mpi_complex_derived_datatype_works=${hdf5_mpi_complex_derived_datatype_works='no'}
