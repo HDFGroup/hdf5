@@ -2080,6 +2080,23 @@ if test -n "$PARALLEL"; then
     AC_MSG_RESULT([no])
   fi
   
+
+dnl ----------------------------------------------------------------------
+dnl Check to see whether the complicate MPI derived datatype works. 
+dnl Up to now(Dec. 20th, 2004), we find that IBM's MPIO implemention doesn't
+dnl handle with the displacement of the complicate MPI type derived datatype 
+dnl correctly. So we add the check here.
+AC_MSG_CHECKING([if irregular hyperslab optimization code works inside MPI-IO])
+
+AC_CACHE_VAL([hdf5_mpi_complex_derived_datatype_works],[hdf5_mpi_complex_derived_datatype_works=yes])
+
+if test ${hdf5_mpi_complex_derived_datatype_works} = "yes"; then
+  AC_DEFINE([MPI_COMPLEX_DERIVED_DATATYPE_WORKS], [1],
+            [Define if your system can handle complicated MPI derived datatype correctly.])
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
 fi
 
 dnl ----------------------------------------------------------------------
