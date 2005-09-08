@@ -293,6 +293,11 @@ New Features
            for example, -i8 flag for PGI and Absoft Fortran compilers, 
            -qintsize=8 flag for IBM xlf compiler).
                                                  EIP 2005/06/20
+         - added support for "big" REAL and DOUBLE PRECISION types
+           (usually the size is specified by compilers flags like 
+            -r8, -r16, etc.)
+           Known problem: multi file test fails when REAL is 16 bytes.
+                                                EIP 2005/09/8
 
     C++ Library:
     ----------------
