@@ -18,11 +18,11 @@
 
 /*
  * Include generated header.  This header defines integer types,
- * so this file only needs to define _fcd and real_f.
+ * so this file only needs to define _fcd.
  */
 #include "H5f90i_gen.h"
 
-/* Define _fcd and real_f.  These are the same on every system
+/* Define _fcd.  These are the same on every system
  * but UNICOS.
  */
 #define _fcdtocp(desc) (desc)
@@ -32,12 +32,10 @@
 #include <fortran.h>
 
 /*typedef char*              _fcd;*/
-typedef double             real_f;
 
 #else
 
 typedef char              *_fcd;
-typedef float             real_f;
 
 #endif
 

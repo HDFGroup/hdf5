@@ -87,6 +87,18 @@ void writeTypedef(const char* c_type, unsigned int size)
   fprintf(c_header, "#define c_int_%d %s\n", size, c_type);
 }
 
+/* Define a c_float_x type in the C header */
+void writeFloatTypedef(const char* c_type, unsigned int size)
+{
+  fprintf(c_header, "#define c_float_%d %s\n", size, c_type);
+}
+
+/* Define a c_double_x type in the C header */
+void writeDoubleTypedef(const char* c_type, unsigned int size)
+{
+  fprintf(c_header, "#define c_double_%d %s\n", size, c_type);
+}
+
 /* Call this function if there is no matching C type for sizes > 1 */
 void writeTypedefDefault(unsigned int size)
 {
@@ -102,6 +114,23 @@ void writeToFiles(const char* fortran_type, const char* c_type, unsigned int siz
   fprintf(c_header, "typedef c_int_%d %s;\n", size, c_type);
 }
 
+/* Create matching Fortran and C floating types by writing to both files */
+void writeFloatToFiles(const char* fortran_type, const char* c_type, unsigned int size)
+{
+  fprintf(fort_header, "        INTEGER, PARAMETER :: %s = %d\n", fortran_type, size);
+
+  fprintf(c_header, "typedef c_float_%d %s;\n", size, c_type);
+}
+
+/* Create matching Fortran and C floating types by writing to both files */
+void writeDoubleToFiles(const char* fortran_type, const char* c_type, unsigned int size)
+{
+  fprintf(fort_header, "        INTEGER, PARAMETER :: %s = %d\n", fortran_type, size);
+
+  fprintf(c_header, "typedef c_double_%d %s;\n", size, c_type);
+}
+
+
 int main()
 {
   /* Open target files */
@@ -113,6 +142,8 @@ int main()
   initFfile();
 
   /* First, define c_int_x */
+
+#if defined H5_FORTRAN_HAS_INTEGER_1 
   if(sizeof(long_long) == 1)
     writeTypedef("long_long", 1);
   else if(sizeof(long) == 1)
@@ -126,7 +157,9 @@ int main()
   /* Actually, char is not necessarily one byte.
    * But if char isn't, then nothing is, so this
    * is as close as we can get. */
+#endif /*H5_FORTRAN_HAS_INTEGER_1 */
 
+#if defined H5_FORTRAN_HAS_INTEGER_2 
   if(sizeof(long_long) == 2)
     writeTypedef("long_long", 2);
   else if(sizeof(long) == 2)
@@ -137,7 +170,9 @@ int main()
     writeTypedef("short", 2);
   else
     writeTypedefDefault(2);
+#endif /*H5_FORTRAN_HAS_INTEGER_2 */
 
+#if defined H5_FORTRAN_HAS_INTEGER_4 
   if(sizeof(long_long) == 4)
     writeTypedef("long_long", 4);
   else if(sizeof(long) == 4)
@@ -148,7 +183,9 @@ int main()
     writeTypedef("short", 4);
   else
     writeTypedefDefault(4);
+#endif /*H5_FORTRAN_HAS_INTEGER_4 */
 
+#if defined H5_FORTRAN_HAS_INTEGER_8 
   if(sizeof(long_long) == 8)
     writeTypedef("long_long", 8);
   else if(sizeof(long) == 8)
@@ -159,10 +196,84 @@ int main()
     writeTypedef("short", 8);
   else
     writeTypedefDefault(8);
+#endif /*H5_FORTRAN_HAS_INTEGER_8 */
+
+  /* Define c_float_x */
+
+#if defined H5_FORTRAN_HAS_REAL_NATIVE_4
+  if(sizeof(long double) == 4)
+    writeFloatTypedef("long double", 4);
+  else if(sizeof(double) == 4)
+   writeFloatTypedef("double", 4);
+  else if(sizeof(float) == 4)
+   writeFloatTypedef("float", 4);
+  else
+   { printf("Fortran REAL is 4 bytes, no corresponding C floating type\n");
+     printf("Quitting....\n");
+     return -1;
+   }
+#endif /*H5_FORTRAN_HAS_REAL_NATIVE_4*/
+
+#if defined H5_FORTRAN_HAS_REAL_NATIVE_8
+  if(sizeof(long double) == 8)
+    writeFloatTypedef("long double", 8);
+  else if(sizeof(double) == 8)
+   writeFloatTypedef("double", 8);
+  else if(sizeof(float) == 8)
+   writeFloatTypedef("float", 8);
+  else
+   { printf("Fortran REAL is 16 bytes, no corresponding C floating type\n");
+     printf("Quitting....\n");
+     return -1;
+   }
+#endif /*H5_FORTRAN_HAS_REAL_NATIVE_8*/
+
+#if defined H5_FORTRAN_HAS_REAL_NATIVE_16
+  if(sizeof(long double) == 16)
+    writeFloatTypedef("long double", 16);
+  else if(sizeof(double) == 16)
+   writeFloatTypedef("double", 16);
+  else if(sizeof(float) == 16)
+   writeFloatTypedef("float", 16);
+  else
+   { printf("Fortran REAL is 16 bytes, no corresponding C floating type\n");
+     printf("Quitting....\n");
+     return -1;
+   }
+#endif /*H5_FORTRAN_HAS_REAL_NATIVE_16*/
+
+  /* Define c_double_x */
+
+#if defined H5_FORTRAN_HAS_DOUBLE_NATIVE_8
+  if(sizeof(long double) == 8)
+    writeDoubleTypedef("long double", 8);
+  else if(sizeof(double) == 8)
+   writeDoubleTypedef("double", 8);
+  else if(sizeof(float) == 8)
+   writeDoubleTypedef("float", 8);
+  else
+   { printf("Fortran DOUBLE is 16 bytes, no corresponding C floating type\n");
+     printf("Quitting....\n");
+     return -1;
+   }
+#endif /*H5_FORTRAN_HAS_DOUBLE_NATIVE_8*/
+
+#if defined H5_FORTRAN_HAS_DOUBLE_NATIVE_16
+  if(sizeof(long double) == 16)
+    writeDoubleTypedef("long double", 16);
+  else if(sizeof(double) == 16)
+   writeDoubleTypedef("double", 16);
+  else if(sizeof(float) == 16)
+   writeDoubleTypedef("float", 16);
+  else
+   { printf("Fortran DOUBLE is 16 bytes, no corresponding C floating type\n");
+     printf("Quitting....\n");
+     return -1;
+   }
+#endif /*H5_FORTRAN_HAS_DOUBLE_NATIVE_16*/
 
   /* Now begin defining fortran types. */
   fprintf(c_header, "\n");
-
   /* haddr_t */
 #if defined H5_FORTRAN_HAS_INTEGER_8 && H5_SIZEOF_HADDR_T >= 8
   writeToFiles("HADDR_T", "haddr_t_f", 8);
@@ -247,6 +358,28 @@ int main()
       writeToFiles("HID_T", "hid_t_f", 8);
 #else
     /* Error: couldn't find a size for hid_t */
+    return -1;
+#endif
+
+  /* real_f */
+#if defined H5_FORTRAN_HAS_REAL_NATIVE_16
+      writeFloatToFiles("Fortran_REAL", "real_f", 16);
+#elif defined H5_FORTRAN_HAS_REAL_NATIVE_8
+      writeFloatToFiles("Fortran_REAL", "real_f", 8);
+#elif defined H5_FORTRAN_HAS_REAL_NATIVE_4
+      writeFloatToFiles("Fortran_REAL", "real_f", 4);
+#else
+    /* Error: couldn't find a size for real_f */
+    return -1;
+#endif
+
+  /* double_f */
+#if defined H5_FORTRAN_HAS_DOUBLE_NATIVE_16
+      writeDoubleToFiles("Fortran_DOUBLE", "double_f", 16);
+#elif defined H5_FORTRAN_HAS_DOUBLE_NATIVE_8
+      writeDoubleToFiles("Fortran_DOUBLE", "double_f", 8);
+#else
+    /* Error: couldn't find a size for real_f */
     return -1;
 #endif
 
