@@ -355,6 +355,12 @@ Footnotes:  (1) Using mpich 1.2.6
 
 Known Problems
 ==============
+* Contiguous or chunked dataset created by a sequential version may
+  not be modified with a parallel version of the library. 
+  Use the H5Pset_alloc_time function with H5D_ALLOC_TIME_EARLY to set up the 
+  dataset creation property list to avoid the porblem.
+                                    EIP - 2005/09/09
+
 * The dataset created or rewritten with the v1.6.3 library or after can't 
   be read with the v1.6.2 library or before when Fletcher32 EDC(filter) is 
   enabled.  There was a bug in the calculating code of the Fletcher32 
@@ -364,6 +370,7 @@ Known Problems
   longer the same as before on little-endian system.  The library release 
   after 1.6.4 can still read the dataset created or rewritten with the library
   of v1.6.2 or before.  SLU - 2005/7/8
+
 * For the version 6(6.02 and 6.04) of Portland Group compiler on AMD Opteron
   processor, there's a bug in the compiler for optimization(-O2).  The library
   failed in several tests but all related to multi driver.  The problem has 
