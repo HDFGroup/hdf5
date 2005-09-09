@@ -46,7 +46,7 @@ main (void)
     int         chunk_out[2][5];   /* buffer for chunk to be read */
     int         column[10];        /* buffer for column to be read */
     int         rank, rank_chunk;
-    hsize_t	i, j;
+    int		i, j;
 
 
 
