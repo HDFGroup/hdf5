@@ -363,6 +363,10 @@
 /* Define if `__tm_gmtoff' is a member of `struct tm' */
 #undef HAVE___TM_GMTOFF
 
+/* Define if your system can handle complicated MPI derived datatype
+   correctly. */
+#undef MPI_COMPLEX_DERIVED_DATATYPE_WORKS
+
 /* Define if your system's `MPI_File_set_size' function works for files over
    2GB. */
 #undef MPI_FILE_SET_SIZE_BIG

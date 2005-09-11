@@ -1,4 +1,4 @@
-HDF5 version 1.6.5-snap0 currently under development
+HDF5 version 1.6.5-snap1 currently under development
 ================================================================================
 
 INTRODUCTION
