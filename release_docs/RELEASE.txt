@@ -53,7 +53,36 @@ New Features
 
     Parallel Library:
     -----------------
-
+ - HDF5 supports collective MPI-IO for irregular selection with HDF5
+         dataset. Irregular selection is when users use API H5Sselect_hyperslab
+         more than once for the same dataset.
+         Currently, not all MPI-IO packages support complicated MPI derived
+                     datatype used in the implementation of irregular
+                     selection INSIDE HDF5. 
+                     1) DEC 5.x is not supporting complicated derived datatype.
+                     2) For AIX 5.1,
+                     if your poe version number is 3.2.0.19 or lower,
+                     please edit powerpc-ibm-aix5.x under hdf5/config,
+                     Find the line with
+                            << hdf5_mpi_complex_derived_datatype_works>>
+                     and UNCOMMENT this line before the configure.
+                     check poe version with the following command:
+                     lpp -l all | grep ppe.poe
+                     3) For Linux cluster, 
+                        if mpich version is 1.2.5 or lower, collective irregular selection
+                        IO is not supported, internally independent IO is used.
+                     4) For IRIX 6.5,
+                        if C compiler version is 7.3 or lower, collective irregular selection
+                        IO is not supported, internally independent IO is used.
+                     5) For platforms which internally used mpich, if the
+                        mpich version is 1.2.5 or lower, please find the 
+                        corresponding config file and add
+                        hdf5_mpi_complex_derived_datatype_works='no' at the
+                        end of the configuration file. For example, at NCSA
+                        SGI Altix, the internal mpich library is 1.2.5. So 
+                        hdf5_mpi_complex_derived_datatype_works='no' should be
+                        added at the end of the config file ia64-linux-gnu.
+                     KY - 2005/09/12
     Tools:
     ------
         - Sped up h5dump on files with large numbers of objects.
