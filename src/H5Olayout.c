@@ -34,9 +34,9 @@ static void *H5O_layout_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_sh
 static herr_t H5O_layout_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_layout_copy(const void *_mesg, void *_dest, unsigned update_flags);
 static size_t H5O_layout_size(const H5F_t *f, const void *_mesg);
-static herr_t H5O_layout_reset (void *_mesg);
-static herr_t H5O_layout_free (void *_mesg);
-static herr_t H5O_layout_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg);
+static herr_t H5O_layout_reset(void *_mesg);
+static herr_t H5O_layout_free(void *_mesg);
+static herr_t H5O_layout_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
 static herr_t H5O_layout_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			       int indent, int fwidth);
 
@@ -560,7 +560,7 @@ H5O_layout_free (void *_mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_layout_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg)
+H5O_layout_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t UNUSED adj_link)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
     herr_t ret_value=SUCCEED;   /* Return value */

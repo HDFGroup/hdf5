@@ -134,17 +134,12 @@ H5T_enum_create(const H5T_t *parent)
     assert(parent);
 
     /* Build new type */
-    if (NULL==(ret_value = H5FL_CALLOC(H5T_t)))
+    if(NULL == (ret_value = H5T_alloc()))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    if (NULL==(ret_value->shared=H5FL_CALLOC(H5T_shared_t))) {
-        H5FL_FREE(H5T_t, ret_value);
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    }
     ret_value->shared->type = H5T_ENUM;
     ret_value->shared->parent = H5T_copy(parent, H5T_COPY_ALL);
     assert(ret_value->shared->parent);
     ret_value->shared->size = ret_value->shared->parent->shared->size;
-    ret_value->ent.header = HADDR_UNDEF;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

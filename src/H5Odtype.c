@@ -73,7 +73,7 @@ H5FL_EXTERN(H5T_shared_t);
 /*-------------------------------------------------------------------------
  * Function:	H5O_dtype_decode_helper
  *
- * Purpose:	Decodes a data type
+ * Purpose:	Decodes a datatype
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -82,7 +82,7 @@ H5FL_EXTERN(H5T_shared_t);
  *
  * Modifications:
  *		Robb Matzke, Thursday, May 20, 1999
- *		Added support for bitfields and opaque data types.
+ *		Added support for bitfields and opaque datatypes.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -103,7 +103,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
     UINT32DECODE(*pp, flags);
     version = (flags>>4) & 0x0f;
     if (version!=H5O_DTYPE_VERSION_COMPAT && version!=H5O_DTYPE_VERSION_UPDATED)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTLOAD, FAIL, "bad version number for data type message");
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTLOAD, FAIL, "bad version number for datatype message");
     dt->shared->type = (H5T_class_t)(flags & 0x0f);
     flags >>= 8;
     UINT32DECODE(*pp, dt->shared->size);
@@ -180,7 +180,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
 
         case H5T_COMPOUND:
             /*
-             * Compound data types...
+             * Compound datatypes...
              */
             dt->shared->u.compnd.nmembs = flags & 0xffff;
             assert(dt->shared->u.compnd.nmembs > 0);
@@ -227,13 +227,8 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
                 } /* end if */
 
                 /* Allocate space for the field's datatype */
-                if(NULL== (temp_type = H5FL_CALLOC (H5T_t)))
-                    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-                if(NULL== (temp_type->shared = H5FL_CALLOC (H5T_shared_t))) {
-                    H5FL_FREE(H5T_t, temp_type);
-                    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-                }
-                temp_type->ent.header = HADDR_UNDEF;
+                if(NULL == (temp_type = H5T_alloc()))
+                    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
                 /* Decode the field's datatype information */
                 if (H5O_dtype_decode_helper(f, pp, temp_type)<0) {
@@ -307,18 +302,13 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
 
         case H5T_ENUM:
             /*
-             * Enumeration data types...
+             * Enumeration datatypes...
              */
             dt->shared->u.enumer.nmembs = dt->shared->u.enumer.nalloc = flags & 0xffff;
-            if (NULL==(dt->shared->parent=H5FL_CALLOC(H5T_t)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            if(NULL== (dt->shared->parent->shared= H5FL_CALLOC (H5T_shared_t))) {
-                H5FL_FREE(H5T_t, dt->shared->parent);
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            }
-            dt->shared->parent->ent.header = HADDR_UNDEF;
+            if(NULL == (dt->shared->parent = H5T_alloc()))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
             if (H5O_dtype_decode_helper(f, pp, dt->shared->parent)<0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode parent data type");
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode parent datatype");
             if (NULL==(dt->shared->u.enumer.name=H5MM_calloc(dt->shared->u.enumer.nalloc * sizeof(char*))) ||
                     NULL==(dt->shared->u.enumer.value=H5MM_calloc(dt->shared->u.enumer.nalloc *
                     dt->shared->parent->shared->size)))
@@ -336,7 +326,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
             *pp += dt->shared->u.enumer.nmembs * dt->shared->parent->shared->size;
             break;
 
-        case H5T_REFERENCE: /* Reference data types...  */
+        case H5T_REFERENCE: /* Reference datatypes...  */
             dt->shared->u.atomic.order = H5T_ORDER_NONE;
             dt->shared->u.atomic.prec = 8 * dt->shared->size;
             dt->shared->u.atomic.offset = 0;
@@ -379,14 +369,8 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
             } /* end if */
 
             /* Decode base type of VL information */
-            if (NULL==(dt->shared->parent = H5FL_CALLOC(H5T_t)))
-                HGOTO_ERROR (H5E_DATATYPE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            if (NULL==(dt->shared->parent->shared = H5FL_CALLOC(H5T_shared_t)))
-            {
-                H5FL_FREE(H5T_t, dt->shared->parent);
-                HGOTO_ERROR (H5E_DATATYPE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            }
-            dt->shared->parent->ent.header = HADDR_UNDEF;
+            if(NULL == (dt->shared->parent = H5T_alloc()))
+                HGOTO_ERROR (H5E_DATATYPE, H5E_NOSPACE, FAIL, "memory allocation failed")
             if (H5O_dtype_decode_helper(f, pp, dt->shared->parent)<0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode VL parent type");
 
@@ -422,13 +406,8 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
                 UINT32DECODE(*pp, dt->shared->u.array.perm[j]);
 
             /* Decode base type of array */
-            if (NULL==(dt->shared->parent = H5FL_CALLOC(H5T_t)))
-                HGOTO_ERROR (H5E_DATATYPE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            if(NULL== (dt->shared->parent->shared = H5FL_CALLOC (H5T_shared_t))) {
-                H5FL_FREE(H5T_t, dt->shared->parent);
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            }
-            dt->shared->parent->ent.header = HADDR_UNDEF;
+            if(NULL == (dt->shared->parent = H5T_alloc()))
+                HGOTO_ERROR (H5E_DATATYPE, H5E_NOSPACE, FAIL, "memory allocation failed")
             if (H5O_dtype_decode_helper(f, pp, dt->shared->parent)<0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode VL parent type");
 
@@ -447,10 +426,11 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
 done:
     if(ret_value <0)
     {
-        if(dt->shared != NULL)
-            H5FL_FREE(H5T_shared_t, dt->shared);
-        if(dt != NULL)
+        if(dt != NULL) {
+            if(dt->shared != NULL)
+                H5FL_FREE(H5T_shared_t, dt->shared);
             H5FL_FREE(H5T_t, dt);
+        } /* end if */
     }
     FUNC_LEAVE_NOAPI(ret_value);
 }
@@ -459,7 +439,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5O_dtype_encode_helper
  *
- * Purpose:	Encodes a data type.
+ * Purpose:	Encodes a datatype.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -494,7 +474,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
     switch (dt->shared->type) {
         case H5T_INTEGER:
             /*
-             * Integer data types...
+             * Integer datatypes...
              */
             switch (dt->shared->u.atomic.order) {
                 case H5T_ORDER_LE:
@@ -542,7 +522,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
 
         case H5T_BITFIELD:
             /*
-             * Bitfield data types...
+             * Bitfield datatypes...
              */
             switch (dt->shared->u.atomic.order) {
                 case H5T_ORDER_LE:
@@ -580,7 +560,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
 
         case H5T_OPAQUE:
             /*
-             * Opaque data types...  The tag is stored in a field which is a
+             * Opaque datatypes...  The tag is stored in a field which is a
              * multiple of eight characters and null padded (not necessarily
              * null terminated).
              */
@@ -669,7 +649,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't detect array class");
 
             /*
-             * Compound data types...
+             * Compound datatypes...
              */
             flags = dt->shared->u.compnd.nmembs & 0xffff;
             for (i=0; i<dt->shared->u.compnd.nmembs; i++) {
@@ -716,13 +696,13 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
 
         case H5T_ENUM:
             /*
-             * Enumeration data types...
+             * Enumeration datatypes...
              */
             flags = dt->shared->u.enumer.nmembs & 0xffff;
 
             /* Parent type */
             if (H5O_dtype_encode_helper(pp, dt->shared->parent)<0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode parent data type");
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode parent datatype");
 
             /* Names, each a multiple of eight bytes */
             for (i=0; i<dt->shared->u.enumer.nmembs; i++) {
@@ -826,7 +806,7 @@ done:
  NAME
     H5O_dtype_decode
  PURPOSE
-    Decode a datatype message and return a pointer to a memory struct
+    Decode a message and return a pointer to a memory struct
 	with the decoded information
  USAGE
     void *H5O_dtype_decode(f, raw_size, p)
@@ -852,11 +832,8 @@ H5O_dtype_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p,
     /* check args */
     assert(p);
 
-    if (NULL==(dt = H5FL_CALLOC(H5T_t)))
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    if (NULL==(dt->shared=H5FL_CALLOC(H5T_shared_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    dt->ent.header = HADDR_UNDEF;
+    if(NULL == (dt = H5T_alloc()))
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     if (H5O_dtype_decode_helper(f, &p, dt) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode type");
@@ -866,10 +843,11 @@ H5O_dtype_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p,
 
 done:
     if(ret_value==NULL) {
-        if(dt->shared!=NULL)
-            H5FL_FREE(H5T_shared_t, dt->shared);
-        if(dt!=NULL)
-            H5FL_FREE(H5T_t,dt);
+        if(dt != NULL) {
+            if(dt->shared != NULL)
+                H5FL_FREE(H5T_shared_t, dt->shared);
+            H5FL_FREE(H5T_t, dt);
+        } /* end if */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1058,7 +1036,7 @@ H5O_dtype_size(const H5F_t *f, const void *mesg)
 /*-------------------------------------------------------------------------
  * Function:	H5O_dtype_reset
  *
- * Purpose:	Frees resources within a data type message, but doesn't free
+ * Purpose:	Frees resources within a message, but doesn't free
  *		the message itself.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -1146,7 +1124,7 @@ H5O_dtype_get_share(H5F_t UNUSED *f, const void *_mesg,
 	sh->in_gh = FALSE;
 	sh->u.ent = dt->ent;
     } else
-	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type is not sharable");
+	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype is not sharable");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1196,7 +1174,7 @@ H5O_dtype_set_share (H5F_t UNUSED *f, void *_mesg/*in,out*/,
  NAME
     H5O_dtype_debug
  PURPOSE
-    Prints debugging information for a data type message
+    Prints debugging information for a message
  USAGE
     void *H5O_dtype_debug(f, mesg, stream, indent, fwidth)
 	H5F_t *f;		IN: pointer to the HDF5 file struct

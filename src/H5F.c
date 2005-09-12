@@ -2412,6 +2412,25 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
     if (H5D_flush(f, dxpl_id, flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache")
 
+    /* flush (and invalidate) the entire meta data cache */
+    /*
+     * FIXME: This should be CLEAR_ONLY for non-captain processes.
+     * Need to fix the H5G_mkroot() call so that only the captain
+     * allocates object headers (calls the H5O_init function...via a
+     * lot of other functions first)....
+     */
+
+    H5AC_flags = 0;
+
+    if ( (flags & H5F_FLUSH_INVALIDATE) != 0 )
+        H5AC_flags |= H5AC__FLUSH_INVALIDATE_FLAG;
+
+    if ( (flags & H5F_FLUSH_CLEAR_ONLY) != 0 )
+        H5AC_flags |= H5AC__FLUSH_CLEAR_ONLY_FLAG;
+
+    if (H5AC_flush(f, dxpl_id, H5AC_flags) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush meta data cache")
+
     /*
      * If we are invalidating everything (which only happens just before
      * the file closes), release the unused portion of the metadata and
@@ -2466,25 +2485,6 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
         }
 #endif  /* H5_HAVE_FPHDF5 */
     } /* end if */
-
-    /* flush (and invalidate) the entire meta data cache */
-    /*
-     * FIXME: This should be CLEAR_ONLY for non-captain processes.
-     * Need to fix the H5G_mkroot() call so that only the captain
-     * allocates object headers (calls the H5O_init function...via a
-     * lot of other functions first)....
-     */
-
-    H5AC_flags = 0;
-
-    if ( (flags & H5F_FLUSH_INVALIDATE) != 0 )
-        H5AC_flags |= H5AC__FLUSH_INVALIDATE_FLAG;
-
-    if ( (flags & H5F_FLUSH_CLEAR_ONLY) != 0 )
-        H5AC_flags |= H5AC__FLUSH_CLEAR_ONLY_FLAG;
-
-    if (H5AC_flush(f, dxpl_id, H5AC_flags) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush meta data cache")
 
     /* Write the superblock to disk */
     if (H5F_write_superblock(f, dxpl_id, NULL) != SUCCEED)

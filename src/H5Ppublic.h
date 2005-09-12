@@ -81,6 +81,7 @@ typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data);
 #endif  /* _H5private_H */
 
 #define H5P_NO_CLASS		   	(H5OPEN H5P_CLS_NO_CLASS_g)
+#define H5P_OBJECT_CREATE 		(H5OPEN H5P_CLS_OBJECT_CREATE_g)
 #define H5P_FILE_CREATE 		(H5OPEN H5P_CLS_FILE_CREATE_g)
 #define H5P_FILE_ACCESS 		(H5OPEN H5P_CLS_FILE_ACCESS_g)
 #define H5P_DATASET_CREATE     		(H5OPEN H5P_CLS_DATASET_CREATE_g)
@@ -92,6 +93,7 @@ typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data);
 #define H5P_DATATYPE_CREATE 		(H5OPEN H5P_CLS_DATATYPE_CREATE_g)
 #define H5P_DATATYPE_ACCESS 		(H5OPEN H5P_CLS_DATATYPE_ACCESS_g)
 H5_DLLVAR hid_t H5P_CLS_NO_CLASS_g;
+H5_DLLVAR hid_t H5P_CLS_OBJECT_CREATE_g;
 H5_DLLVAR hid_t H5P_CLS_FILE_CREATE_g;
 H5_DLLVAR hid_t H5P_CLS_FILE_ACCESS_g;
 H5_DLLVAR hid_t H5P_CLS_DATASET_CREATE_g;

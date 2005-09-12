@@ -43,6 +43,7 @@
 #define H5O_MIN_SIZE	H5O_ALIGN(32)	/*min obj header data size	     */
 #define H5O_MAX_SIZE	65536	        /*max obj header data size	     */
 #define H5O_NEW_MESG	(-1)		/*new message			     */
+#define H5O_ALL		(-1)		/* Operate on all messages of type   */
 
 /* Flags which are part of a message */
 #define H5O_FLAG_CONSTANT	0x01u
@@ -224,6 +225,14 @@ typedef struct H5O_stab_t {
     haddr_t	heap_addr;		/*address of name heap		     */
 } H5O_stab_t;
 
+/* Define return values from operator callback function for H5O_iterate */
+/* (Actually, any postive value will cause the iterator to stop and pass back
+ *      that positive value to the function that called the iterator)
+ */
+#define H5O_ITER_ERROR  (-1)
+#define H5O_ITER_CONT   (0)
+#define H5O_ITER_STOP   (1)
+
 /* Typedef for iteration operations */
 typedef herr_t (*H5O_operator_t)(const void *mesg/*in*/, unsigned idx,
     void *operator_data/*in,out*/);
@@ -255,13 +264,16 @@ H5_DLL herr_t H5O_bogus_oh(H5F_t *f, struct H5O_t *oh,
                            unsigned * oh_flags_ptr);
 #endif /* H5O_ENABLE_BOGUS */
 H5_DLL herr_t H5O_remove(H5G_entry_t *ent, unsigned type_id, int sequence,
-    hid_t dxpl_id);
+    hbool_t adj_link, hid_t dxpl_id);
+H5_DLL herr_t H5O_remove_op(H5G_entry_t *ent, unsigned type_id,
+    H5O_operator_t op, void *op_data, hbool_t adj_link, hid_t dxpl_id);
 H5_DLL herr_t H5O_reset(unsigned type_id, void *native);
 H5_DLL void *H5O_free(unsigned type_id, void *mesg);
 H5_DLL herr_t H5O_encode(H5F_t *f, unsigned char *buf, void *obj, unsigned type_id);
 H5_DLL void* H5O_decode(H5F_t *f, const unsigned char *buf, unsigned type_id);
 H5_DLL void *H5O_copy(unsigned type_id, const void *mesg, void *dst);
 H5_DLL size_t H5O_raw_size(unsigned type_id, const H5F_t *f, const void *mesg);
+H5_DLL size_t H5O_mesg_size(unsigned type_id, const H5F_t *f, const void *mesg);
 H5_DLL herr_t H5O_get_share(unsigned type_id, H5F_t *f, const void *mesg, H5O_shared_t *share);
 H5_DLL herr_t H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 H5_DLL herr_t H5O_get_info(H5G_entry_t *ent, H5O_stat_t *ostat, hid_t dxpl_id);

@@ -231,6 +231,10 @@ H5T_commit(H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id,
     if (NULL == (tc_plist = H5I_object(tcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
+    /*
+     * Give the datatype a name.  That is, create and add a new object to the
+     * group this datatype is being initially created in.
+     */
     if (H5G_insert (loc, name, &(type->ent), dxpl_id, tc_plist)<0)
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to name datatype")
 

@@ -41,7 +41,7 @@ static herr_t H5O_stab_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_stab_copy(const void *_mesg, void *_dest, unsigned update_flags);
 static size_t H5O_stab_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_stab_free(void *_mesg);
-static herr_t H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg);
+static herr_t H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
 static herr_t H5O_stab_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			     FILE * stream, int indent, int fwidth);
 
@@ -317,12 +317,12 @@ H5O_stab_free (void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg)
+H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
 {
     const H5O_stab_t       *stab = (const H5O_stab_t *) _mesg;
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_stab_delete);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_stab_delete)
 
     /* check args */
     assert(f);
@@ -330,10 +330,10 @@ H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg)
 
     /* Free the file space for the symbol table */
     if (H5G_stab_delete(f, dxpl_id, stab->btree_addr, stab->heap_addr)<0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free symbol table");
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free symbol table")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_stab_delete() */
 
 

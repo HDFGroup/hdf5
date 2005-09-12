@@ -33,7 +33,6 @@
 /* Object header macros */
 #define H5O_NMESGS	32		/*initial number of messages	     */
 #define H5O_NCHUNKS	8		/*initial number of chunks	     */
-#define H5O_ALL		(-1)		/*delete all messages of type	     */
 
 /* Version of object header structure */
 #define H5O_VERSION		1
@@ -66,7 +65,7 @@ typedef struct H5O_class_t {
     size_t	(*raw_size)(const H5F_t*, const void*);/*sizeof raw val	     */
     herr_t	(*reset)(void *);		 /*free nested data structs  */
     herr_t	(*free)(void *);		 /*free main data struct  */
-    herr_t	(*del)(H5F_t *, hid_t, const void *); /* Delete space in file referenced by this message */
+    herr_t	(*del)(H5F_t *, hid_t, const void *, hbool_t); /* Delete space in file referenced by this message */
     herr_t	(*link)(H5F_t *, hid_t, const void *); /* Increment any links in file reference by this message */
     herr_t	(*get_share)(H5F_t*, const void*, struct H5O_shared_t*);    /* Get shared information */
     herr_t	(*set_share)(H5F_t*, void*, const struct H5O_shared_t*);    /* Set shared information */

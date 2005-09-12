@@ -41,13 +41,13 @@ herr_t
 H5Pset_create_intermediate_group(hid_t plist_id, unsigned crt_intmd_group)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(H5Pset_create_intermediate_group, FAIL);
 
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set value */
     crt_intmd_group = crt_intmd_group > 0 ? 1 : 0;
@@ -75,16 +75,16 @@ herr_t
 H5Pget_create_intermediate_group(hid_t plist_id, unsigned *crt_intmd_group /*out*/)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(H5Pget_create_intermediate_group, FAIL);
 
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get values */
-    if (crt_intmd_group)
+    if(crt_intmd_group)
         if(H5P_get(plist, H5G_CRT_INTERMEDIATE_GROUP_NAME, crt_intmd_group) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get intermediate group creation flag")
 

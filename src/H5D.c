@@ -2161,7 +2161,7 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
     if (NULL==(new_dset = H5FL_CALLOC(H5D_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    new_dset->ent.header=HADDR_UNDEF;
+    H5G_ent_reset(&(new_dset->ent));
 
     /* Initialize the shared dataset space */
     if(NULL == (new_dset->shared = H5D_new(dcpl_id,TRUE,has_vl_type)))
@@ -2390,9 +2390,8 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't fill DCPL cache")
 
     /*
-     * Give the dataset a name.  That is, create and add a new
-     * "H5G_entry_t" object to the group this dataset is being initially
-     * created in.
+     * Give the dataset a name.  That is, create and add a new object to the
+     * group this dataset is being initially created in.
      */
     if (H5G_insert(loc, name, &new_dset->ent, dxpl_id, dc_plist) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to name dataset")

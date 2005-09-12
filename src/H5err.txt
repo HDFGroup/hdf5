@@ -175,6 +175,7 @@ MINOR, OHDR, H5E_VERSION, Wrong version number
 MINOR, OHDR, H5E_ALIGNMENT, Alignment error
 MINOR, OHDR, H5E_BADMESG, Unrecognized message
 MINOR, OHDR, H5E_CANTDELETE, Can't delete message
+MINOR, OHDR, H5E_BADITER, Iteration failed
 
 # Group related errors
 MINOR, GROUP, H5E_CANTOPENOBJ, Can't open object

@@ -88,6 +88,7 @@ hid_t H5E_VERSION_g        = FAIL;      /* Wrong version number */
 hid_t H5E_ALIGNMENT_g      = FAIL;      /* Alignment error */
 hid_t H5E_BADMESG_g        = FAIL;      /* Unrecognized message */
 hid_t H5E_CANTDELETE_g     = FAIL;      /* Can't delete message */
+hid_t H5E_BADITER_g        = FAIL;      /* Iteration failed */
 
 /* FPHDF5 errors */
 hid_t H5E_CANTRECV_g       = FAIL;      /* Can't receive messages from processes */

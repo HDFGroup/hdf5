@@ -33,7 +33,7 @@ static void *H5O_attr_copy (const void *_mesg, void *_dest, unsigned update_flag
 static size_t H5O_attr_size (const H5F_t *f, const void *_mesg);
 static herr_t H5O_attr_reset (void *_mesg);
 static herr_t H5O_attr_free (void *mesg);
-static herr_t H5O_attr_delete (H5F_t *f, hid_t dxpl_id, const void *_mesg);
+static herr_t H5O_attr_delete (H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
 static herr_t H5O_attr_link(H5F_t *f, hid_t dxpl_id, const void *_mesg);
 static herr_t H5O_attr_debug (H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			      FILE * stream, int indent, int fwidth);
@@ -532,7 +532,7 @@ H5O_attr_free (void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_attr_delete(H5F_t UNUSED *f, hid_t dxpl_id, const void *_mesg)
+H5O_attr_delete(H5F_t UNUSED *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
 {
     const H5A_t            *attr = (const H5A_t *) _mesg;
     herr_t ret_value=SUCCEED;   /* Return value */
@@ -545,9 +545,10 @@ H5O_attr_delete(H5F_t UNUSED *f, hid_t dxpl_id, const void *_mesg)
 
     /* Check whether datatype is shared */
     if(H5T_committed(attr->dt)) {
-        /* Decrement the reference count on the shared datatype */
-        if(H5T_link(attr->dt,-1,dxpl_id)<0)
-            HGOTO_ERROR (H5E_OHDR, H5E_LINK, FAIL, "unable to adjust shared datatype link count");
+        /* Decrement the reference count on the shared datatype, if requested */
+        if(adj_link)
+            if(H5T_link(attr->dt, -1, dxpl_id)<0)
+                HGOTO_ERROR (H5E_OHDR, H5E_LINK, FAIL, "unable to adjust shared datatype link count")
     } /* end if */
 
 done:
