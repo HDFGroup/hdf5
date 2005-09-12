@@ -16,21 +16,25 @@
  * Programmer: Robb Matzke <matzke@llnl.gov>
  *             Friday, September 19, 1997
  */
-#define H5G_PACKAGE
+#define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 
+/* Packages needed by this file... */
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
+#include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5HLprivate.h"	/* Local Heaps				*/
-#include "H5MMprivate.h"	/* Memory management			*/
 
 /* Private prototypes */
 #ifdef NOT_YET
 static herr_t H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type);
 #endif /* NOT_YET */
+
+/* Declare extern the PQ free list for the wrapped strings */
+H5FL_BLK_EXTERN(str_buf);
 
 
 /*-------------------------------------------------------------------------
@@ -94,19 +98,17 @@ done:
 static herr_t
 H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
+    FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_modified)
 
-    FUNC_ENTER_NOAPI(H5G_ent_modified, FAIL);
+    HDassert(ent);
 
-    assert(ent);
-
-    if (H5G_NO_CHANGE != ent->type)
+    /* Update cache type, if requested */
+    if (H5G_NO_CHANGE != cache_type)
         ent->type = cache_type;
     ent->dirty = TRUE;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5G_ent_modified */
 #endif /* NOT_YET */
 
 
@@ -133,9 +135,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_decode_vec(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, int n)
+H5G_ent_decode_vec(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, unsigned n)
 {
-    int                    i;
+    unsigned    u;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_ent_decode_vec, FAIL);
@@ -144,13 +146,11 @@ H5G_ent_decode_vec(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, int n)
     assert(f);
     assert(pp);
     assert(ent);
-    assert(n >= 0);
 
     /* decode entries */
-    for (i = 0; i < n; i++) {
-        if (H5G_ent_decode(f, pp, ent + i) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode");
-    }
+    for (u = 0; u < n; u++)
+        if (H5G_ent_decode(f, pp, ent + u) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -249,9 +249,9 @@ H5G_ent_decode(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_encode_vec(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent, int n)
+H5G_ent_encode_vec(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent, unsigned n)
 {
-    int                    i;
+    unsigned    u;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_ent_encode_vec, FAIL);
@@ -260,13 +260,11 @@ H5G_ent_encode_vec(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent, int n)
     assert(f);
     assert(pp);
     assert(ent);
-    assert(n >= 0);
 
     /* encode entries */
-    for (i = 0; i < n; i++) {
-        if (H5G_ent_encode(f, pp, ent + i) < 0)
+    for (u = 0; u < n; u++)
+        if (H5G_ent_encode(f, pp, ent + u) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "can't encode");
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -458,6 +456,124 @@ H5G_ent_reset(H5G_entry_t *ent)
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5G_ent_reset() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5G_ent_set_name
+ *
+ * Purpose: Set the name of a symbol entry OBJ, located at LOC
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: August 22, 2002
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_ent_set_name(H5G_entry_t *loc, H5G_entry_t *obj, const char *name)
+{
+    size_t  name_len;           /* Length of name to append */
+    herr_t  ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5G_ent_set_name, FAIL)
+
+    assert(loc);
+    assert(obj);
+    assert(name);
+
+    /* Reset the object's previous names, if they exist */
+    if(obj->user_path_r) {
+        H5RS_decr(obj->user_path_r);
+        obj->user_path_r=NULL;
+    } /* end if */
+    if(obj->canon_path_r) {
+        H5RS_decr(obj->canon_path_r);
+        obj->canon_path_r=NULL;
+    } /* end if */
+    obj->user_path_hidden=0;
+
+    /* Get the length of the new name */
+    name_len = HDstrlen(name);
+
+    /* Modify the object's user path, if a user path exists in the location */
+    if(loc->user_path_r) {
+        const char *loc_user_path;      /* Pointer to raw string for user path */
+        size_t  user_path_len;      /* Length of location's user path name */
+        char *new_user_path;        /* Pointer to new user path */
+
+        /* Get the length of the strings involved */
+        user_path_len = H5RS_len(loc->user_path_r);
+
+        /* Modify the object's user path */
+
+        /* Get the raw string for the user path */
+        loc_user_path=H5RS_get_str(loc->user_path_r);
+        assert(loc_user_path);
+
+        /* The location's user path already ends in a '/' separator */
+        if ('/'==loc_user_path[user_path_len-1]) {
+            if (NULL==(new_user_path = H5FL_BLK_MALLOC(str_buf,user_path_len+name_len+1)))
+                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+            HDstrcpy(new_user_path, loc_user_path);
+        } /* end if */
+        /* The location's user path needs a separator */
+        else {
+            if (NULL==(new_user_path = H5FL_BLK_MALLOC(str_buf,user_path_len+1+name_len+1)))
+                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+            HDstrcpy(new_user_path, loc_user_path);
+            HDstrcat(new_user_path, "/");
+        } /* end else */
+
+        /* Append the component's name */
+        HDstrcat(new_user_path, name);
+
+        /* Give ownership of the user path to the entry */
+        obj->user_path_r=H5RS_own(new_user_path);
+        assert(obj->user_path_r);
+    } /* end if */
+
+    /* Modify the object's canonical path, if a canonical path exists in the location */
+    if(loc->canon_path_r) {
+        const char *loc_canon_path;     /* Pointer to raw string for canonical path */
+        size_t  canon_path_len;     /* Length of location's canonical path name */
+        char *new_canon_path;       /* Pointer to new canonical path */
+
+        /* Get the length of the strings involved */
+        canon_path_len = H5RS_len(loc->canon_path_r);
+
+        /* Modify the object's canonical path */
+
+        /* Get the raw string for the canonical path */
+        loc_canon_path=H5RS_get_str(loc->canon_path_r);
+        assert(loc_canon_path);
+
+        /* The location's canonical path already ends in a '/' separator */
+        if ('/'==loc_canon_path[canon_path_len-1]) {
+            if (NULL==(new_canon_path = H5FL_BLK_MALLOC(str_buf,canon_path_len+name_len+1)))
+                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+            HDstrcpy(new_canon_path, loc_canon_path);
+        } /* end if */
+        /* The location's canonical path needs a separator */
+        else {
+            if (NULL==(new_canon_path = H5FL_BLK_MALLOC(str_buf,canon_path_len+1+name_len+1)))
+                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+            HDstrcpy(new_canon_path, loc_canon_path);
+            HDstrcat(new_canon_path, "/");
+        } /* end else */
+
+        /* Append the component's name */
+        HDstrcat(new_canon_path, name);
+
+        /* Give ownership of the canonical path to the entry */
+        obj->canon_path_r=H5RS_own(new_canon_path);
+        assert(obj->canon_path_r);
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_ent_set_name() */
 
 
 /*-------------------------------------------------------------------------

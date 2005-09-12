@@ -43,7 +43,7 @@
 typedef struct H5G_node_t {
     H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
                             /* first field in structure */
-    int         nsyms;                  /*number of symbols                  */
+    unsigned nsyms;                     /*number of symbols                  */
     H5G_entry_t *entry;                 /*array of symbol table entries      */
 } H5G_node_t;
 
@@ -65,49 +65,106 @@ struct H5G_t {
 };
 
 /*
+ * Common data exchange structure for symbol table nodes.  This structure is
+ * passed through the B-link tree layer to the methods for the objects
+ * to which the B-link tree points.
+ */
+typedef struct H5G_bt_ud_common_t {
+    /* downward */
+    const char  *name;                  /*points to temporary memory         */
+    haddr_t     heap_addr;              /*symbol table heap address          */
+} H5G_bt_ud_common_t;
+
+/*
+ * Data exchange structure for symbol table nodes.  This structure is
+ * passed through the B-link tree layer to the methods for the objects
+ * to which the B-link tree points for operations which require no
+ * additional information.
+ *
+ * (Just an alias for the "common" info).
+ */
+typedef H5G_bt_ud_common_t H5G_bt_ud0_t;
+
+/*
  * Data exchange structure for symbol table nodes.  This structure is
  * passed through the B-link tree layer to the methods for the objects
  * to which the B-link tree points.
  */
 typedef struct H5G_bt_ud1_t {
     /* downward */
-    const char  *name;                  /*points to temporary memory         */
-    haddr_t     heap_addr;              /*symbol table heap address          */
+    H5G_bt_ud_common_t common;          /* Common info for B-tree user data (must be first) */
 
     /* downward for INSERT, upward for FIND */
     H5G_entry_t *ent;                   /*entry to insert into table         */
 } H5G_bt_ud1_t;
 
 /*
- * Data exchange structure to pass through the B-tree layer for the
- * H5B_iterate function.
+ * Data exchange structure for symbol table nodes.  This structure is
+ * passed through the B-link tree layer to the methods for the objects
+ * to which the B-link tree points.
  */
 typedef struct H5G_bt_ud2_t {
     /* downward */
-    hid_t	group_id;	/*group id to pass to iteration operator     */
-    H5O_stab_t  *stab;          /*the cached symbol table info to which group_id points */
-    H5G_iterate_t op;		/*iteration operator			     */
-    void	*op_data;	/*user-defined operator data		     */
-    int		skip;		/*initial entries to skip		     */
+    H5G_bt_ud_common_t common;          /* Common info for B-tree user data (must be first) */
+    hbool_t adj_link;                   /* Whether to adjust the link count on objects */
 
     /* upward */
-    int		final_ent;	/*final entry looked at                      */
 } H5G_bt_ud2_t;
 
 /*
  * Data exchange structure to pass through the B-tree layer for the
  * H5B_iterate function.
  */
-typedef struct H5G_bt_ud3_t {
+typedef struct H5G_bt_it_ud1_t {
     /* downward */
-    const H5O_stab_t *mesg;     /*the symbol table message of group being queried */
-    hsize_t      idx;           /*index of group member to be queried        */
-    hsize_t      num_objs;      /*the number of objects having been traversed*/
+    hid_t	group_id;	/*group id to pass to iteration operator     */
+    haddr_t     heap_addr;      /*symbol table heap address                  */
+    H5G_iterate_t op;		/*iteration operator			     */
+    void	*op_data;	/*user-defined operator data		     */
+    int		skip;		/*initial entries to skip		     */
+
+    /* upward */
+    int		final_ent;	/*final entry looked at                      */
+} H5G_bt_it_ud1_t;
+
+/*
+ * Data exchange structure to pass through the B-tree layer for the
+ * H5B_iterate function.
+ */
+typedef struct H5G_bt_it_ud2_t {
+    /* downward */
+    haddr_t     heap_addr;      /*symbol table heap address                  */
+    hsize_t     idx;            /*index of group member to be queried        */
+    hsize_t     num_objs;       /*the number of objects having been traversed*/
 
     /* upward */
     char         *name;         /*member name to be returned                 */
-    int          type;          /*member type to be returned                 */
-} H5G_bt_ud3_t;
+} H5G_bt_it_ud2_t;
+
+/*
+ * Data exchange structure to pass through the B-tree layer for the
+ * H5B_iterate function.
+ */
+typedef struct H5G_bt_it_ud3_t {
+    /* downward */
+    hsize_t     idx;            /*index of group member to be queried        */
+    hsize_t     num_objs;       /*the number of objects having been traversed*/
+
+    /* upward */
+    H5G_obj_t    type;          /*member type to be returned                 */
+} H5G_bt_it_ud3_t;
+
+/*
+ * Data exchange structure to pass through the B-tree layer for the
+ * H5B_iterate function.
+ */
+typedef struct H5G_bt_it_ud4_t {
+    /* downward */
+    haddr_t     heap_addr;      /*symbol table heap address                  */
+    H5G_entry_t *grp_ent;       /*entry of group                             */
+
+    /* upward */
+} H5G_bt_it_ud4_t;
 
 /*
  * This is the class identifier to give to the B-tree functions.
@@ -128,16 +185,17 @@ H5_DLL herr_t H5G_stab_find(H5G_entry_t *grp_ent, const char *name,
 			     H5G_entry_t *obj_ent/*out*/, hid_t dxpl_id);
 H5_DLL herr_t H5G_stab_insert(H5G_entry_t *grp_ent, const char *name,
 			       H5G_entry_t *obj_ent, hbool_t inc_link, hid_t dxpl_id);
-H5_DLL herr_t H5G_stab_delete(H5F_t *f, hid_t dxpl_id, haddr_t btree_addr, haddr_t heap_addr);
+H5_DLL herr_t H5G_stab_delete(H5F_t *f, hid_t dxpl_id, const H5O_stab_t *stab, hbool_t adj_link);
 H5_DLL herr_t H5G_stab_remove(H5G_entry_t *grp_ent, const char *name, hid_t dxpl_id);
 
 /*
  * Functions that understand symbol table entries.
  */
 H5_DLL herr_t H5G_ent_decode_vec(H5F_t *f, const uint8_t **pp,
-				  H5G_entry_t *ent, int n);
+				  H5G_entry_t *ent, unsigned n);
 H5_DLL herr_t H5G_ent_encode_vec(H5F_t *f, uint8_t **pp,
-				  const H5G_entry_t *ent, int n);
+				  const H5G_entry_t *ent, unsigned n);
+H5_DLL herr_t H5G_ent_set_name(H5G_entry_t *loc, H5G_entry_t *obj, const char *name);
 
 /* Functions that understand symbol table nodes */
 H5_DLL int H5G_node_iterate (H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,

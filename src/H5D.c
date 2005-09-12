@@ -1142,7 +1142,7 @@ H5Dopen(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Find the dataset object */
-    if (H5G_find(loc, name, NULL, &ent, dxpl_id) < 0)
+    if (H5G_find(loc, name, &ent, dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found")
     ent_found = TRUE;
 

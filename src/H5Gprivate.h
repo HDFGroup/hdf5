@@ -151,7 +151,7 @@ H5_DLL herr_t H5G_get_objinfo(H5G_entry_t *loc, const char *name,
 H5_DLL herr_t H5G_insert(H5G_entry_t *loc, const char *name,
 			  H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL herr_t H5G_find(H5G_entry_t *loc, const char *name,
-			H5G_entry_t *grp_ent/*out*/, H5G_entry_t *ent/*out*/, hid_t dxpl_id);
+                        H5G_entry_t *ent/*out*/, hid_t dxpl_id);
 H5_DLL H5F_t *H5G_insertion_file(H5G_entry_t *loc, const char *name, hid_t dxpl_id);
 H5_DLL  herr_t H5G_replace_name(int type, H5G_entry_t *loc,
         H5RS_str_t *src_name, H5G_entry_t *src_loc,

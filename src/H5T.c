@@ -1408,7 +1408,7 @@ H5Topen(hid_t loc_id, const char *name)
      * Find the named data type object header and read the data type message
      * from it.
      */
-    if (H5G_find (loc, name, NULL, &ent/*out*/, dxpl_id)<0)
+    if (H5G_find (loc, name, &ent/*out*/, dxpl_id)<0)
         HGOTO_ERROR (H5E_DATATYPE, H5E_NOTFOUND, FAIL, "not found");
     ent_found = TRUE;
 
