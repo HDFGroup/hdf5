@@ -139,7 +139,7 @@ New Features
                      datatype used in the implementation of irregular
                      selection INSIDE HDF5. 
                      1) DEC 5.x is not supporting complicated derived datatype.
-                     2) For AIX 5.1 32-bit,
+                     2) For AIX 5.1,
                      if your poe version number is 3.2.0.19 or lower,
                      please edit powerpc-ibm-aix5.x under hdf5/config,
                      Find the line with
@@ -147,11 +147,6 @@ New Features
                      and UNCOMMENT this line before the configure.
                      check poe version with the following command:
                      lpp -l all | grep ppe.poe
-                     For AIX 5.1 64-bit,
-                     regardless of poe version number, please UNCOMMENT
-                      << hdf5_mpi_complex_derived_datatype_works>> under hdf5/config.
-                      We suspect there are some problems  for MPI-IO implementation
-                      for 64-bit.
                      3) For Linux cluster, 
                         if mpich version is 1.2.5 or lower, collective irregular selection
                         IO is not supported, internally independent IO is used.
@@ -166,7 +161,7 @@ New Features
                         SGI Altix, the internal mpich library is 1.2.5. So 
                         hdf5_mpi_complex_derived_datatype_works='no' should be
                         added at the end of the config file ia64-linux-gnu.
-                     KY - 2005/08/19
+                     KY - 2005/09/12
         - HDF5 N-bit filter 
           HDF5 support N-bit filter from this version,  
           The N-Bit filter is used effectively for compressing data of N-Bit
