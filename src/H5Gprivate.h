@@ -63,12 +63,17 @@
     4 +				/*reserved				*/    \
     H5G_SIZEOF_SCRATCH)         /*scratch pad space                     */
 
-/* ========= group Creation properties ============ */
+/* ========= Group Creation properties ============ */
+
+/* Definitions for local heap size hint */
+#define H5G_CRT_GROUP_INFO_NAME                 "group info"
+#define H5G_CRT_GROUP_INFO_SIZE                 sizeof(H5O_ginfo_t)
+#define H5G_CRT_GROUP_INFO_DEF                  {0, 8, 6, 4, 8}
 
 /* Definitions for creating intermediate groups */
-#define H5G_CRT_INTERMEDIATE_GROUP_NAME      "intermediate_group"
-#define H5G_CRT_INTERMEDIATE_GROUP_SIZE      sizeof(unsigned)
-#define H5G_CRT_INTERMEDIATE_GROUP_DEF       0
+#define H5G_CRT_INTERMEDIATE_GROUP_NAME         "intermediate_group"
+#define H5G_CRT_INTERMEDIATE_GROUP_SIZE         sizeof(unsigned)
+#define H5G_CRT_INTERMEDIATE_GROUP_DEF          0
 
 /*
  * Various types of object header information can be cached in a symbol
@@ -161,7 +166,7 @@ H5_DLL herr_t H5G_get_objinfo(H5G_entry_t *loc, const char *name,
 H5_DLL herr_t H5G_insert(H5G_entry_t *loc, const char *name,
 			  H5G_entry_t *ent, hid_t dxpl_id, struct H5P_genplist_t *oc_plist);
 H5_DLL herr_t H5G_find(H5G_entry_t *loc, const char *name,
-			H5G_entry_t *grp_ent/*out*/, H5G_entry_t *ent/*out*/, hid_t dxpl_id);
+                        H5G_entry_t *ent/*out*/, hid_t dxpl_id);
 H5_DLL H5F_t *H5G_insertion_file(H5G_entry_t *loc, const char *name, hid_t dxpl_id);
 H5_DLL  herr_t H5G_replace_name(H5G_obj_t type, H5G_entry_t *loc,
         H5RS_str_t *src_name, H5G_entry_t *src_loc,

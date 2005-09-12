@@ -3783,7 +3783,7 @@ test_misc23(void)
     CHECK(status, FAIL, "H5Pset_create_intermediate_group");
 
 
-    tmp_id = H5Gcreate_expand(file_id, "/A/B01/grp", 0, create_id, access_id);
+    tmp_id = H5Gcreate_expand(file_id, "/A/B01/grp", create_id, access_id);
     CHECK(tmp_id, FAIL, "H5Gcreate_expand");
 
     /* Query that the name of the new group is correct */
@@ -3806,28 +3806,28 @@ test_misc23(void)
     CHECK(status, FAIL, "H5Gclose");
 
 
-    tmp_id = H5Gcreate_expand(file_id, "/A/B02/C02/grp", 0, create_id, access_id);
+    tmp_id = H5Gcreate_expand(file_id, "/A/B02/C02/grp", create_id, access_id);
     CHECK(tmp_id, FAIL, "H5Gcreate_expand");
 
     status = H5Gclose(tmp_id);
     CHECK(status, FAIL, "H5Gclose");
 
 
-    tmp_id = H5Gcreate_expand(group_id, "B03/grp/", 0, create_id, access_id);
+    tmp_id = H5Gcreate_expand(group_id, "B03/grp/", create_id, access_id);
     CHECK(tmp_id, FAIL, "H5Gcreate_expand");
 
     status = H5Gclose(tmp_id);
     CHECK(status, FAIL, "H5Gclose");
 
 
-    if ( (tmp_id = H5Gcreate_expand(group_id, "/A/B04/grp/", 0, create_id, access_id)) < 0)
+    if ( (tmp_id = H5Gcreate_expand(group_id, "/A/B04/grp/", create_id, access_id)) < 0)
     CHECK(tmp_id, FAIL, "H5Gcreate_expand");
 
     status = H5Gclose(tmp_id);
     CHECK(status, FAIL, "H5Gclose");
 
 
-    if ( (tmp_id = H5Gcreate_expand(file_id, "/A/B05/C05/A", 0, create_id, access_id)) < 0)
+    if ( (tmp_id = H5Gcreate_expand(file_id, "/A/B05/C05/A", create_id, access_id)) < 0)
     CHECK(tmp_id, FAIL, "H5Gcreate_expand");
 
     status = H5Gclose(tmp_id);

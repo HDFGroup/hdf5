@@ -55,7 +55,8 @@ libhdf5_la_SOURCES= H5.c H5A.c H5AC.c H5B.c H5B2.c H5B2cache.c H5B2dbg.c      \
         H5Oattr.c H5Obogus.c   \
         H5Ocont.c H5Odtype.c H5Oefl.c H5Ofill.c H5Olayout.c H5Omtime.c        \
         H5Oname.c H5Onull.c H5Opline.c H5Osdspace.c H5Oshared.c H5Ostab.c     \
-        H5P.c H5Pdcpl.c H5Pdxpl.c H5Pfapl.c H5Pfcpl.c H5Pocpl.c H5Ptest.c \
+        H5P.c H5Pdcpl.c H5Pdxpl.c H5Pfapl.c H5Pfcpl.c H5Pgcpl.c H5Pocpl.c \
+        H5Ptest.c \
         H5R.c H5RC.c  \
         H5RS.c H5S.c H5Sall.c H5Shyper.c H5Smpio.c H5Snone.c H5Spoint.c       \
         H5Sselect.c H5Stest.c H5SH.c H5SHcache.c H5SHdbg.c \

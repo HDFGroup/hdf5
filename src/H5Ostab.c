@@ -317,19 +317,18 @@ H5O_stab_free (void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
+H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *mesg, hbool_t adj_link)
 {
-    const H5O_stab_t       *stab = (const H5O_stab_t *) _mesg;
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_stab_delete)
 
     /* check args */
     assert(f);
-    assert(stab);
+    assert(mesg);
 
     /* Free the file space for the symbol table */
-    if (H5G_stab_delete(f, dxpl_id, stab->btree_addr, stab->heap_addr)<0)
+    if (H5G_stab_delete(f, dxpl_id, mesg, adj_link)<0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free symbol table")
 
 done:

@@ -528,6 +528,7 @@ a------------------------------------------------------------------------------
 ./src/H5Pdxpl.c
 ./src/H5Pfapl.c
 ./src/H5Pfcpl.c
+./src/H5Pgcpl.c
 ./src/H5Pocpl.c
 ./src/H5Ppkg.h
 ./src/H5Pprivate.h

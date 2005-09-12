@@ -171,6 +171,18 @@ typedef struct H5O_bogus_t {
 #endif /* H5O_ENABLE_BOGUS */
 
 /*
+ * Group info message.
+ * (Data structure in memory)
+ */
+typedef struct H5O_ginfo_t {
+    size_t      lheap_size_hint;        /* Local heap size hint              */
+    unsigned	max_compact;		/* Maximum # of compact links        */
+    unsigned	min_dense;		/* Minimum # of "dense" links        */
+    unsigned	est_num_entries;	/* Estimated # of entries in group   */
+    unsigned	est_name_len;		/* Estimated length of entry name    */
+} H5O_ginfo_t;
+
+/*
  * Filter pipeline message.
  * (Data structure in memory)
  */

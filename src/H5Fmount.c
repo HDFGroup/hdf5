@@ -147,7 +147,7 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
      */
     if (child->mtab.parent)
         HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "file is already mounted")
-    if (H5G_find(loc, name, NULL, &mp_open_ent/*out*/, H5AC_dxpl_id) < 0)
+    if (H5G_find(loc, name, &mp_open_ent/*out*/, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
     if (NULL==(mount_point=H5G_open(&mp_open_ent, dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point not found")
@@ -276,7 +276,7 @@ H5F_unmount(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
      * If we get the root group and the file has a parent in the mount tree,
      * then we must have found the mount point.
      */
-    if (H5G_find(loc, name, NULL, &mnt_open_ent/*out*/, H5AC_dxpl_id) < 0)
+    if (H5G_find(loc, name, &mnt_open_ent/*out*/, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
     if (NULL==(mounted=H5G_open(&mnt_open_ent, dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point not found")

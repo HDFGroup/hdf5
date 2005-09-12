@@ -85,8 +85,8 @@
  *-------------------------------------------------------------------------
  */
 
-#define H5G_PACKAGE     /*suppress error message about including H5Gpkg.h */
-#define H5F_PACKAGE     /*suppress error about including H5Fpkg	  */
+#define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5G_init_interface
@@ -95,7 +95,6 @@
 /* Packages needed by this file... */
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Aprivate.h"		/* Attributes				*/
-#include "H5Bprivate.h"		/* B-link trees				*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"		/* File access				*/
@@ -176,8 +175,8 @@ static herr_t H5G_namei(const H5G_entry_t *loc_ent, const char *name,
     H5G_entry_t *ent, hid_t dxpl_id);
 static herr_t H5G_traverse_slink(H5G_entry_t *grp_ent/*in,out*/,
     H5G_entry_t *obj_ent/*in,out*/, int *nlinks/*in,out*/, hid_t dxpl_id);
-static H5G_t *H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint,
-    hid_t dxpl_id, hid_t gcpl_id, hid_t gapl_id);
+static H5G_t *H5G_create(H5G_entry_t *loc, const char *name, hid_t dxpl_id,
+    hid_t gcpl_id, hid_t gapl_id);
 static htri_t H5G_isa(H5G_entry_t *ent, hid_t dxpl_id);
 static htri_t H5G_link_isa(H5G_entry_t *ent, hid_t dxpl_id);
 static H5G_t * H5G_open_oid(H5G_entry_t *ent, hid_t dxpl_id);
@@ -237,6 +236,7 @@ H5Gcreate(hid_t loc_id, const char *name, size_t size_hint)
 {
     H5G_entry_t		   *loc = NULL;
     H5G_t		   *grp = NULL;
+    hid_t                   tmp_gcpl = (-1);    /* Temporary group creation property list */
     hid_t		    ret_value;
 
     FUNC_ENTER_API(H5Gcreate, FAIL);
@@ -248,15 +248,47 @@ H5Gcreate(hid_t loc_id, const char *name, size_t size_hint)
     if (!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name given");
 
+    /* Check if we need to create a non-standard GCPL */
+    if(size_hint > 0) {
+        H5P_genplist_t  *gc_plist;  /* Property list created */
+        H5O_ginfo_t     ginfo;          /* Group info property */
+
+        /* Get the default property list */
+        if(NULL == (gc_plist = H5I_object(H5P_GROUP_CREATE_DEFAULT)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+        /* Make a copy of the default property list */
+        if((tmp_gcpl = H5P_copy_plist(gc_plist)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to copy the creation property list")
+
+        /* Get the copy of the property list */
+        if(NULL == (gc_plist = H5I_object(H5P_GROUP_CREATE_DEFAULT)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+        /* Get the group info property */
+        if(H5P_get(gc_plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info")
+
+        /* Set the non-default local heap size hint */
+        ginfo.lheap_size_hint = size_hint;
+        if(H5P_set(gc_plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set group info")
+    } /* end if */
+    else
+        tmp_gcpl = H5P_GROUP_CREATE_DEFAULT;
+
     /* Create the group */
-    if (NULL == (grp = H5G_create(loc, name, size_hint, H5AC_dxpl_id,
-            H5P_GROUP_CREATE_DEFAULT, H5P_DEFAULT)))
+    if (NULL == (grp = H5G_create(loc, name, H5AC_dxpl_id, tmp_gcpl, H5P_DEFAULT)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group");
     if ((ret_value = H5I_register(H5I_GROUP, grp)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group");
 
 done:
-    if(ret_value<0) {
+    if(tmp_gcpl > 0 && tmp_gcpl != H5P_GROUP_CREATE_DEFAULT)
+        if(H5I_dec_ref(tmp_gcpl) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release property list")
+
+    if(ret_value < 0) {
         if(grp!=NULL)
             H5G_close(grp);
     } /* end if */
@@ -295,7 +327,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Gcreate_expand(hid_t loc_id, const char *name, size_t size_hint, hid_t gcpl_id, hid_t gapl_id)
+H5Gcreate_expand(hid_t loc_id, const char *name, hid_t gcpl_id, hid_t gapl_id)
 {
     H5G_entry_t		   *loc = NULL;
     H5G_t		   *grp = NULL;
@@ -325,7 +357,7 @@ H5Gcreate_expand(hid_t loc_id, const char *name, size_t size_hint, hid_t gcpl_id
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
 #endif /* LATER */
 
-    if (NULL == (grp = H5G_create(loc, name, size_hint, H5AC_dxpl_id, gcpl_id, gapl_id)))
+    if (NULL == (grp = H5G_create(loc, name, H5AC_dxpl_id, gcpl_id, gapl_id)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
     if ((ret_value = H5I_register(H5I_GROUP, grp)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
@@ -377,7 +409,7 @@ H5Gopen(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
 
     /* Open the parent group, making sure it's a group */
-    if (H5G_find(loc, name, NULL, &ent/*out*/, H5AC_dxpl_id) < 0)
+    if (H5G_find(loc, name, &ent/*out*/, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found");
 
     /* Open the group */
@@ -468,9 +500,9 @@ herr_t
 H5Giterate(hid_t loc_id, const char *name, int *idx_p,
 	    H5G_iterate_t op, void *op_data)
 {
-    H5O_stab_t		stab_mesg;		/*info about B-tree	*/
+    H5O_stab_t		stab;		/*info about B-tree	*/
     int			idx;
-    H5G_bt_ud2_t	udata;
+    H5G_bt_it_ud1_t	udata;
     H5G_t		*grp = NULL;
     herr_t		ret_value;
 
@@ -500,12 +532,12 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p,
     }
 
     /* Get the B-tree info */
-    if (NULL==H5O_read (&(grp->ent), H5O_STAB_ID, 0, &stab_mesg, H5AC_dxpl_id))
+    if (NULL==H5O_read (&(grp->ent), H5O_STAB_ID, 0, &stab, H5AC_dxpl_id))
 	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address")
 
     /* Build udata to pass through H5B_iterate() to H5G_node_iterate() */
     udata.skip = idx;
-    udata.stab = &stab_mesg;
+    udata.heap_addr = stab.heap_addr;
     udata.op = op;
     udata.op_data = op_data;
 
@@ -514,15 +546,15 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p,
 
     /* Iterate over the group members */
     if ((ret_value = H5B_iterate (H5G_fileof(grp), H5AC_dxpl_id, H5B_SNODE,
-              H5G_node_iterate, stab_mesg.btree_addr, &udata))<0)
+              H5G_node_iterate, stab.btree_addr, &udata))<0)
         HERROR (H5E_SYM, H5E_CANTNEXT, "iteration operator failed");
 
     H5I_dec_ref (udata.group_id); /*also closes 'grp'*/
 
     /* Check for too high of a starting index (ex post facto :-) */
     /* (Skipping exactly as many entries as are in the group is currently an error) */
-    if (idx>0 && idx>=udata.final_ent)
-	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified");
+    if(idx>0 && idx>=udata.final_ent)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified");
 
     /* Set the index we stopped at */
     *idx_p=udata.final_ent;
@@ -1029,8 +1061,14 @@ done:
 static herr_t
 H5G_init_interface(void)
 {
-    herr_t          ret_value=SUCCEED;       /* Return value */
+    /* Group creation property class variables.  In sequence, they are,
+     * - Creation property list class to modify
+     * - Default value for "group info"
+     */
     H5P_genclass_t  *crt_pclass;
+    H5O_ginfo_t     ginfo                       = H5G_CRT_GROUP_INFO_DEF;
+    size_t          nprops;             /* Number of properties */
+    herr_t          ret_value=SUCCEED;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_init_interface);
 
@@ -1056,8 +1094,17 @@ H5G_init_interface(void)
     if(NULL == (crt_pclass = H5I_object(H5P_CLS_GROUP_CREATE_g)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
 
-    /* Put group creation property insertion code here when it's needed. */
-    /* (See example in H5D_init_interface() ) */
+    /* Get the number of properties in the class */
+    if(H5P_get_nprops_pclass(crt_pclass, &nprops, FALSE)<0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't query number of properties")
+
+    /* Assume that if there are properties in the class, they are the default ones */
+    if(nprops==0) {
+        /* Register group info */
+        if(H5P_register(crt_pclass,H5G_CRT_GROUP_INFO_NAME,H5G_CRT_GROUP_INFO_SIZE,
+                 &ginfo,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+    } /* end if */
 
     /* Only register the default property list if it hasn't been created yet */
     if(H5P_LST_GROUP_CREATE_g==(-1)) {
@@ -1781,8 +1828,7 @@ herr_t
 H5G_mkroot (H5F_t *f, hid_t dxpl_id, H5G_entry_t *ent)
 {
     H5G_entry_t	new_root;		/*new root object		*/
-    H5O_stab_t	stab;			/*symbol table message		*/
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_mkroot, FAIL);
 
@@ -1796,8 +1842,8 @@ H5G_mkroot (H5F_t *f, hid_t dxpl_id, H5G_entry_t *ent)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group node info")
 
     /*
-     * If there is no root object then create one. The root group always has
-     * a hard link count of one since it's pointed to by the boot block.
+     * If there is no root object then create one. The root group always starts
+     * with a hard link count of one since it's pointed to by the boot block.
      */
     if (!ent) {
 	ent = &new_root;
@@ -1812,11 +1858,6 @@ H5G_mkroot (H5F_t *f, hid_t dxpl_id, H5G_entry_t *ent)
 	 */
 	if (H5O_open (ent)<0)
 	    HGOTO_ERROR (H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open root group");
-	if (NULL==H5O_read (ent, H5O_STAB_ID, 0, &stab, dxpl_id)) {
-	    H5O_close(ent);
-	    HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "root object is not a group");
-	}
-	H5O_reset (H5O_STAB_ID, &stab);
     }
 
     /* Create the path names for the root group's entry */
@@ -1876,7 +1917,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5G_t *
-H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint,
+H5G_create(H5G_entry_t *loc, const char *name,
                   hid_t dxpl_id, hid_t gcpl_id, hid_t UNUSED gapl_id)
 {
     H5G_t	*grp = NULL;	/*new group			*/
@@ -1906,7 +1947,7 @@ H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint,
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to locate insertion point");
 
     /* Create the group entry */
-    if (H5G_stab_create(file, dxpl_id, size_hint, &(grp->ent)/*out*/) < 0)
+    if (H5G_stab_create(file, dxpl_id, (size_t)H5G_SIZE_HINT, &(grp->ent)/*out*/) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create grp");
     stab_init=1;    /* Indicate that the symbol table information is valid */
 
@@ -2123,7 +2164,7 @@ H5G_open_oid(H5G_entry_t *ent, hid_t dxpl_id)
 {
     H5G_t		*grp = NULL;
     H5G_t		*ret_value = NULL;
-    H5O_stab_t		mesg;
+    hbool_t             ent_opened = FALSE;
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_open_oid);
 
@@ -2141,21 +2182,26 @@ H5G_open_oid(H5G_entry_t *ent, hid_t dxpl_id)
 
     /* Grab the object header */
     if (H5O_open(&(grp->ent)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to open group");
-    if (NULL==H5O_read (&(grp->ent), H5O_STAB_ID, 0, &mesg, dxpl_id)) {
-        H5O_close(&(grp->ent));
-        HGOTO_ERROR (H5E_SYM, H5E_CANTOPENOBJ, NULL, "not a group");
-    }
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to open group")
+    ent_opened = TRUE;
+
+    /* Check if this object has the right message(s) to be treated as a group */
+    if(H5O_exists(&(grp->ent), H5O_STAB_ID, 0, dxpl_id) <= 0)
+        HGOTO_ERROR (H5E_SYM, H5E_CANTOPENOBJ, NULL, "not a group")
 
     /* Set return value */
     ret_value = grp;
 
 done:
-    if (!ret_value && grp) {
-        if(grp->shared)
-            H5FL_FREE(H5G_shared_t, grp->shared);
-        H5FL_FREE(H5G_t,grp);
-    }
+    if(!ret_value) {
+        if(grp) {
+            if(ent_opened)
+                H5O_close(&(grp->ent));
+            if(grp->shared)
+                H5FL_FREE(H5G_shared_t, grp->shared);
+            H5FL_FREE(H5G_t,grp);
+        } /* end if */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value);
 }
@@ -2369,12 +2415,15 @@ done:
  *		Aug 12 1997
  *
  * Modifications:
+ *              Removed the "H5G_entry_t *grp_ent" parameter, since it was unused
+ *              Quincey Koziol
+ *		Aug 29 2005
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5G_find(H5G_entry_t *loc, const char *name,
-	 H5G_entry_t *grp_ent/*out*/, H5G_entry_t *obj_ent/*out*/, hid_t dxpl_id)
+         H5G_entry_t *obj_ent/*out*/, hid_t dxpl_id)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -2384,7 +2433,7 @@ H5G_find(H5G_entry_t *loc, const char *name,
     assert (loc);
     assert (name && *name);
 
-    if (H5G_namei(loc, name, NULL, grp_ent, obj_ent, H5G_TARGET_NORMAL, NULL, H5G_NAMEI_TRAVERSE, NULL, dxpl_id)<0)
+    if (H5G_namei(loc, name, NULL, NULL, obj_ent, H5G_TARGET_NORMAL, NULL, H5G_NAMEI_TRAVERSE, NULL, dxpl_id)<0)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
 
 done:
@@ -2889,8 +2938,8 @@ done:
 static ssize_t
 H5G_get_objname_by_idx(H5G_entry_t *loc, hsize_t idx, char* name, size_t size, hid_t dxpl_id)
 {
-    H5O_stab_t		stab_mesg;	/*info about local heap	& B-tree */
-    H5G_bt_ud3_t	udata;          /* Iteration information */
+    H5O_stab_t		stab;		/*info about local heap	& B-tree */
+    H5G_bt_it_ud2_t	udata;          /* Iteration information */
     ssize_t		ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_get_objname_by_idx);
@@ -2899,18 +2948,18 @@ H5G_get_objname_by_idx(H5G_entry_t *loc, hsize_t idx, char* name, size_t size, h
     assert(loc);
 
     /* Get the B-tree & local heap info */
-    if (NULL==H5O_read (loc, H5O_STAB_ID, 0, &stab_mesg, dxpl_id))
+    if (NULL==H5O_read (loc, H5O_STAB_ID, 0, &stab, dxpl_id))
 	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address");
 
     /* Set iteration information */
     udata.idx = idx;
     udata.num_objs = 0;
-    udata.mesg = &stab_mesg;
+    udata.heap_addr = stab.heap_addr;
     udata.name = NULL;
 
     /* Iterate over the group members */
     if ((ret_value = H5B_iterate (loc->file, dxpl_id, H5B_SNODE,
-              H5G_node_name, stab_mesg.btree_addr, &udata))<0)
+              H5G_node_name, stab.btree_addr, &udata))<0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "iteration operator failed");
 
     /* If we don't know the name now, we almost certainly went out of bounds */
@@ -2956,7 +3005,7 @@ static H5G_obj_t
 H5G_get_objtype_by_idx(H5G_entry_t *loc, hsize_t idx, hid_t dxpl_id)
 {
     H5O_stab_t		stab_mesg;	/*info about local heap	& B-tree */
-    H5G_bt_ud3_t	udata;          /* User data for B-tree callback */
+    H5G_bt_it_ud3_t	udata;          /* User data for B-tree callback */
     H5G_obj_t		ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_get_objtype_by_idx);
@@ -2971,7 +3020,6 @@ H5G_get_objtype_by_idx(H5G_entry_t *loc, hsize_t idx, hid_t dxpl_id)
     /* Set iteration information */
     udata.idx = idx;
     udata.num_objs = 0;
-    udata.mesg = &stab_mesg;
     udata.type = H5G_UNKNOWN;
 
     /* Iterate over the group members */
@@ -3094,8 +3142,7 @@ H5G_set_comment(H5G_entry_t *loc, const char *name, const char *buf, hid_t dxpl_
     FUNC_ENTER_NOAPI_NOINIT(H5G_set_comment);
 
     /* Get the symbol table entry for the object */
-    if (H5G_namei(loc, name, NULL, NULL, &obj_ent/*out*/, H5G_TARGET_NORMAL,
-		  NULL, H5G_NAMEI_TRAVERSE, NULL, dxpl_id)<0)
+    if (H5G_find(loc, name, &obj_ent/*out*/, dxpl_id)<0)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
 
     /* Remove the previous comment message if any */
@@ -3149,8 +3196,7 @@ H5G_get_comment(H5G_entry_t *loc, const char *name, size_t bufsize, char *buf, h
     FUNC_ENTER_NOAPI_NOINIT(H5G_get_comment);
 
     /* Get the symbol table entry for the object */
-    if (H5G_namei(loc, name, NULL, NULL, &obj_ent/*out*/, H5G_TARGET_NORMAL,
-		  NULL, H5G_NAMEI_TRAVERSE, NULL, dxpl_id)<0)
+    if (H5G_find(loc, name, &obj_ent/*out*/, dxpl_id)<0)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
 
     /* Get the message */

@@ -20,17 +20,13 @@
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
 
 
-#include "H5private.h"
-#include "H5Eprivate.h"
-#include "H5Fpkg.h"         /*file access                             */
-#include "H5FLprivate.h"	/*Free Lists	  */
-#include "H5Gpkg.h"
-#include "H5HLprivate.h"
-#include "H5MMprivate.h"
-#include "H5Oprivate.h"
-
-/* Declare extern the PQ free list for the wrapped strings */
-H5FL_BLK_EXTERN(str_buf);
+/* Packages needed by this file... */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fpkg.h"		/* File access				*/
+#include "H5Gpkg.h"		/* Groups		  		*/
+#include "H5HLprivate.h"	/* Local Heaps				*/
+#include "H5MMprivate.h"	/* Memory management			*/
 
 /* Private prototypes */
 
@@ -66,21 +62,21 @@ H5G_stab_create(H5F_t *f, hid_t dxpl_id, size_t init, H5G_entry_t *self/*out*/)
     H5O_stab_t		    stab;	/*symbol table message	*/
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_stab_create, FAIL);
+    FUNC_ENTER_NOAPI(H5G_stab_create, FAIL)
 
     /*
      * Check arguments.
      */
-    assert(f);
-    assert(self);
+    HDassert(f);
+    HDassert(self);
     init = MAX(init, H5HL_SIZEOF_FREE(f) + 2);
 
     /* Create symbol table private heap */
     if (H5HL_create(f, dxpl_id, init, &(stab.heap_addr)/*out*/)<0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create heap");
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create heap")
     name = H5HL_insert(f, dxpl_id, stab.heap_addr, 1, "");
     if ((size_t)(-1)==name)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't initialize heap");
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't initialize heap")
 
     /*
      * B-tree's won't work if the first name isn't at the beginning
@@ -90,7 +86,7 @@ H5G_stab_create(H5F_t *f, hid_t dxpl_id, size_t init, H5G_entry_t *self/*out*/)
 
     /* Create the B-tree */
     if (H5B_create(f, dxpl_id, H5B_SNODE, NULL, &(stab.btree_addr)/*out*/) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create B-tree");
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create B-tree")
 
     /*
      * Create symbol table object header.  It has a zero link count
@@ -98,7 +94,7 @@ H5G_stab_create(H5F_t *f, hid_t dxpl_id, size_t init, H5G_entry_t *self/*out*/)
      * incremented if the object is added to the group directed graph.
      */
     if (H5O_create(f, dxpl_id, 4 + 2 * H5F_SIZEOF_ADDR(f), self/*out*/) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create header");
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create header")
 
     /*
      * Insert the symbol table message into the object header and the symbol
@@ -106,15 +102,15 @@ H5G_stab_create(H5F_t *f, hid_t dxpl_id, size_t init, H5G_entry_t *self/*out*/)
      */
     if (H5O_modify(self, H5O_STAB_ID, H5O_NEW_MESG, H5O_FLAG_CONSTANT, H5O_UPDATE_TIME, &stab, dxpl_id)<0) {
 	H5O_close(self);
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message");
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
     }
     self->cache.stab.btree_addr = stab.btree_addr;
     self->cache.stab.heap_addr = stab.heap_addr;
     self->type = H5G_CACHED_STAB;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_stab_create() */
 
 
 /*-------------------------------------------------------------------------
@@ -148,7 +144,7 @@ H5G_stab_find(H5G_entry_t *grp_ent, const char *name,
     H5O_stab_t		stab;		/*symbol table message		*/
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_stab_find, FAIL);
+    FUNC_ENTER_NOAPI(H5G_stab_find, FAIL)
 
     /* Check arguments */
     assert(grp_ent);
@@ -158,22 +154,22 @@ H5G_stab_find(H5G_entry_t *grp_ent, const char *name,
 
     /* set up the udata */
     if (NULL == H5O_read(grp_ent, H5O_STAB_ID, 0, &stab, dxpl_id))
-	HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't read message");
-    udata.name = name;
-    udata.heap_addr = stab.heap_addr;
+	HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't read message")
+    udata.common.name = name;
+    udata.common.heap_addr = stab.heap_addr;
     udata.ent = obj_ent;
 
     /* search the B-tree */
     if (H5B_find(grp_ent->file, dxpl_id, H5B_SNODE, stab.btree_addr, &udata) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "not found");
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "not found")
 
-    /* insert the name into the symbol entry OBJ_ENT */
-    if (H5G_stab_insert_name( grp_ent, obj_ent, name ) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot insert name");
+    /* Set the name for the symbol entry OBJ_ENT */
+    if (H5G_ent_set_name( grp_ent, obj_ent, name ) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot insert name")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_stab_find() */
 
 
 /*-------------------------------------------------------------------------
@@ -183,18 +179,11 @@ done:
  *		file F.	 The name of the new symbol is NAME and its symbol
  *		table entry is OBJ_ENT.
  *
- * Errors:
- *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
  *		Aug  1 1997
- *
- * Modifications:
- *
- *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
- *      Added `id to name' support.
  *
  *-------------------------------------------------------------------------
  */
@@ -206,30 +195,30 @@ H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent,
     H5G_bt_ud1_t	udata;		/*data to pass through B-tree	*/
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_stab_insert, FAIL);
+    FUNC_ENTER_NOAPI(H5G_stab_insert, FAIL)
 
     /* check arguments */
     assert(grp_ent && grp_ent->file);
     assert(name && *name);
     assert(obj_ent && obj_ent->file);
     if (grp_ent->file->shared != obj_ent->file->shared)
-	HGOTO_ERROR(H5E_SYM, H5E_LINK, FAIL, "interfile hard links are not allowed");
+	HGOTO_ERROR(H5E_SYM, H5E_LINK, FAIL, "interfile hard links are not allowed")
 
-    /* insert the name into the symbol entry OBJ_ENT */
-    if(H5G_stab_insert_name(grp_ent, obj_ent, name) < 0)
-       HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot insert name");
+    /* Set the name for the symbol entry OBJ_ENT */
+    if (H5G_ent_set_name( grp_ent, obj_ent, name ) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot insert name")
 
     /* initialize data to pass through B-tree */
     if (NULL == H5O_read(grp_ent, H5O_STAB_ID, 0, &stab, dxpl_id))
-	HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table");
+	HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table")
 
-    udata.name = name;
-    udata.heap_addr = stab.heap_addr;
+    udata.common.name = name;
+    udata.common.heap_addr = stab.heap_addr;
     udata.ent = obj_ent;
 
     /* insert */
     if (H5B_insert(grp_ent->file, dxpl_id, H5B_SNODE, stab.btree_addr, &udata) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert entry");
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert entry")
 
     /* Increment link count on object, if appropriate */
     if(inc_link)
@@ -259,149 +248,27 @@ herr_t
 H5G_stab_remove(H5G_entry_t *grp_ent, const char *name, hid_t dxpl_id)
 {
     H5O_stab_t		stab;		/*symbol table message		*/
-    H5G_bt_ud1_t	udata;		/*data to pass through B-tree	*/
+    H5G_bt_ud2_t	udata;		/*data to pass through B-tree	*/
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_stab_remove, FAIL);
+    FUNC_ENTER_NOAPI(H5G_stab_remove, FAIL)
 
     assert(grp_ent && grp_ent->file);
     assert(name && *name);
 
     /* initialize data to pass through B-tree */
     if (NULL==H5O_read(grp_ent, H5O_STAB_ID, 0, &stab, dxpl_id))
-	HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table");
-    udata.name = name;
-    udata.heap_addr = stab.heap_addr;
-    udata.ent = NULL;
+	HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table")
+    udata.common.name = name;
+    udata.common.heap_addr = stab.heap_addr;
+    udata.adj_link = TRUE;
 
     /* remove */
     if (H5B_remove(grp_ent->file, dxpl_id, H5B_SNODE, stab.btree_addr, &udata)<0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to remove entry");
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to remove entry")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function: H5G_stab_insert_name
- *
- * Purpose: Insert a name into the symbol entry OBJ, located at LOC
- *
- * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: August 22, 2002
- *
- * Comments: The allocated memory (H5MM_malloc) is freed in H5O_close
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5G_stab_insert_name(H5G_entry_t *loc, H5G_entry_t *obj, const char *name)
-{
-    size_t  name_len;           /* Length of name to append */
-    herr_t  ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT(H5G_stab_insert_name);
-
-    assert(loc);
-    assert(obj);
-    assert(name);
-
-    /* Reset the object's previous names, if they exist */
-    if(obj->user_path_r) {
-        H5RS_decr(obj->user_path_r);
-        obj->user_path_r=NULL;
-    } /* end if */
-    if(obj->canon_path_r) {
-        H5RS_decr(obj->canon_path_r);
-        obj->canon_path_r=NULL;
-    } /* end if */
-    obj->user_path_hidden=0;
-
-    /* Get the length of the new name */
-    name_len = HDstrlen(name);
-
-    /* Modify the object's user path, if a user path exists in the location */
-    if(loc->user_path_r) {
-        const char *loc_user_path;      /* Pointer to raw string for user path */
-        size_t  user_path_len;      /* Length of location's user path name */
-        char *new_user_path;        /* Pointer to new user path */
-
-        /* Get the length of the strings involved */
-        user_path_len = H5RS_len(loc->user_path_r);
-
-        /* Modify the object's user path */
-
-        /* Get the raw string for the user path */
-        loc_user_path=H5RS_get_str(loc->user_path_r);
-        assert(loc_user_path);
-
-        /* The location's user path already ends in a '/' separator */
-        if ('/'==loc_user_path[user_path_len-1]) {
-            if (NULL==(new_user_path = H5FL_BLK_MALLOC(str_buf,user_path_len+name_len+1)))
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            HDstrcpy(new_user_path, loc_user_path);
-        } /* end if */
-        /* The location's user path needs a separator */
-        else {
-            if (NULL==(new_user_path = H5FL_BLK_MALLOC(str_buf,user_path_len+1+name_len+1)))
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            HDstrcpy(new_user_path, loc_user_path);
-            HDstrcat(new_user_path, "/");
-        } /* end else */
-
-        /* Append the component's name */
-        HDstrcat(new_user_path, name);
-
-        /* Give ownership of the user path to the entry */
-        obj->user_path_r=H5RS_own(new_user_path);
-        assert(obj->user_path_r);
-    } /* end if */
-
-    /* Modify the object's canonical path, if a canonical path exists in the location */
-    if(loc->canon_path_r) {
-        const char *loc_canon_path;     /* Pointer to raw string for canonical path */
-        size_t  canon_path_len;     /* Length of location's canonical path name */
-        char *new_canon_path;       /* Pointer to new canonical path */
-
-        /* Get the length of the strings involved */
-        canon_path_len = H5RS_len(loc->canon_path_r);
-
-        /* Modify the object's canonical path */
-
-        /* Get the raw string for the canonical path */
-        loc_canon_path=H5RS_get_str(loc->canon_path_r);
-        assert(loc_canon_path);
-
-        /* The location's canonical path already ends in a '/' separator */
-        if ('/'==loc_canon_path[canon_path_len-1]) {
-            if (NULL==(new_canon_path = H5FL_BLK_MALLOC(str_buf,canon_path_len+name_len+1)))
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            HDstrcpy(new_canon_path, loc_canon_path);
-        } /* end if */
-        /* The location's canonical path needs a separator */
-        else {
-            if (NULL==(new_canon_path = H5FL_BLK_MALLOC(str_buf,canon_path_len+1+name_len+1)))
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            HDstrcpy(new_canon_path, loc_canon_path);
-            HDstrcat(new_canon_path, "/");
-        } /* end else */
-
-        /* Append the component's name */
-        HDstrcat(new_canon_path, name);
-
-        /* Give ownership of the canonical path to the entry */
-        obj->canon_path_r=H5RS_own(new_canon_path);
-        assert(obj->canon_path_r);
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -420,31 +287,31 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_stab_delete(H5F_t *f, hid_t dxpl_id, haddr_t btree_addr, haddr_t heap_addr)
+H5G_stab_delete(H5F_t *f, hid_t dxpl_id, const H5O_stab_t *stab, hbool_t adj_link)
 {
-    H5G_bt_ud1_t	udata;		/*data to pass through B-tree	*/
+    H5G_bt_ud2_t	udata;		/*data to pass through B-tree	*/
     herr_t  ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5G_stab_delete, FAIL);
 
     assert(f);
-    assert(H5F_addr_defined(btree_addr));
-    assert(H5F_addr_defined(heap_addr));
+    assert(stab);
+    assert(H5F_addr_defined(stab->btree_addr));
+    assert(H5F_addr_defined(stab->heap_addr));
 
     /* Set up user data for B-tree deletion */
-    udata.name = NULL;
-    udata.heap_addr = heap_addr;
-    udata.ent = NULL;
+    udata.common.name = NULL;
+    udata.common.heap_addr = stab->heap_addr;
+    udata.adj_link = adj_link;
 
     /* Delete entire B-tree */
-    if(H5B_delete(f, dxpl_id, H5B_SNODE, btree_addr, &udata)<0)
+    if(H5B_delete(f, dxpl_id, H5B_SNODE, stab->btree_addr, &udata)<0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete symbol table B-tree");
 
     /* Delete local heap for names */
-    if(H5HL_delete(f, dxpl_id, heap_addr)<0)
+    if(H5HL_delete(f, dxpl_id, stab->heap_addr)<0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete symbol table heap");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5G_stab_delete() */
-
