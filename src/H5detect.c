@@ -359,7 +359,7 @@ precision (detected_t *d)
     void		(*_handler)(int) = signal(SIGBUS, sigbus_handler);    \
     void		(*_handler2)(int) = signal(SIGSEGV, sigsegv_handler);	\
 									      \
-    _buf = malloc(sizeof(TYPE)+align_g[NELMTS(align_g)-1]);		      \
+    _buf = (char*)malloc(sizeof(TYPE)+align_g[NELMTS(align_g)-1]);		      \
     if (setjmp(jbuf_g)) _ano++;						      \
     if (_ano<NELMTS(align_g)) {						      \
 	*((TYPE*)(_buf+align_g[_ano])) = _val; /*possible SIGBUS or SEGSEGV*/	\
