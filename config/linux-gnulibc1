@@ -25,8 +25,9 @@ fi
 # supported, we need to set the macro to hdf5_mpi_complex_derived_datatype_works to no.                  
 # Notice that this fix will only work if the compiler name is mpicc and mpi package is                   
 # mpich 1.x.x.  
+echo "Debug: CC_BASENAME=" $CC_BASENAME
 
-if [ -z "$hdf5_mpi_complex_derived_datatype_works" -a $CC_BASENAME = mpicc ]; then
+if [ -z "$hdf5_mpi_complex_derived_datatype_works" -a \( $CC_BASENAME = mpicc -o $CC_BASENAME = mpiicc \) ]; then
    ccversion=`$CC -v 2>&1 | sed -e 's/.*for //p'`
    ccversion1=`echo $ccversion | cut -f1 -d.`
    ccversion2=`echo $ccversion | cut -f2 -d.`
