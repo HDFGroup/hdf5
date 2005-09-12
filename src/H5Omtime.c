@@ -114,9 +114,8 @@ static void *
 H5O_mtime_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
 		 H5O_shared_t UNUSED *sh)
 {
-    time_t	*mesg, the_time;
+    time_t	*mesg;
     uint32_t    tmp_time;       /* Temporary copy of the time */
-    int		version;        /* Version of mtime information */
     void        *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_mtime_new_decode);
@@ -127,8 +126,7 @@ H5O_mtime_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
     assert (!sh);
 
     /* decode */
-    version = *p++;
-    if(version!=H5O_MTIME_VERSION)
+    if(*p++ != H5O_MTIME_VERSION)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for mtime message");
 
     /* Skip reserved bytes */
@@ -136,12 +134,11 @@ H5O_mtime_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
 
     /* Get the time_t from the file */
     UINT32DECODE(p, tmp_time);
-    the_time=(time_t)tmp_time;
 
     /* The return value */
     if (NULL==(mesg = H5FL_MALLOC(time_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    *mesg = the_time;
+    *mesg = (time_t)tmp_time;
 
     /* Set return value */
     ret_value=mesg;

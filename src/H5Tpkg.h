@@ -325,6 +325,7 @@ H5_DLLVAR double H5T_NATIVE_DOUBLE_NEG_INF_g;
 
 /* Common functions */
 H5_DLL H5T_t *H5T_create(H5T_class_t type, size_t size);
+H5_DLL H5T_t *H5T_alloc(void);
 H5_DLL herr_t H5T_free(H5T_t *dt);
 H5_DLL H5T_sign_t H5T_get_sign(H5T_t const *dt);
 H5_DLL H5T_t *H5T_get_super(H5T_t *dt);

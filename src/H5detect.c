@@ -557,15 +557,9 @@ H5TN_init_interface(void)\n\
 
 	/* The part common to fixed and floating types */
 	printf("\
-    if (NULL==(dt = H5FL_CALLOC (H5T_t)))\n\
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,\"memory allocation failed\");\n\
-    if (NULL==(dt->shared = H5FL_CALLOC(H5T_shared_t)))\n\
-    { \
-        H5FL_FREE(H5T_t, dt);\
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, \"memory allocation failed\");\n\
-    } \
+    if(NULL == (dt = H5T_alloc()))\n\
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,\"memory allocation failed\")\n\
     dt->shared->state = H5T_STATE_IMMUTABLE;\n\
-    dt->ent.header = HADDR_UNDEF;\n\
     dt->shared->type = H5T_%s;\n\
     dt->shared->size = %d;\n\
     dt->shared->u.atomic.order = H5T_ORDER_%s;\n\
@@ -637,8 +631,11 @@ H5TN_init_interface(void)\n\
 \n\
 done:\n\
     if(ret_value<0) {\n\
-        if(dt!=NULL)\n\
-            H5FL_FREE(H5T_t,dt);\n\
+        if(dt != NULL) {\n\
+            if(dt->shared != NULL)\n\
+                H5FL_FREE(H5T_shared_t, dt->shared);\n\
+            H5FL_FREE(H5T_t, dt);\n\
+        } /* end if */\n\
     }\n\
 \n\
     FUNC_LEAVE_NOAPI(ret_value);\n}\n");
@@ -845,7 +842,7 @@ fix_order(int n, int first, int last, int *perm, const char **mesg)
 	    /*
 	     * Bi-endian machines like VAX.
 	     */
-	    assert(0 == n / 2);
+	    assert(0 == n % 2);
 	    if (mesg) *mesg = "VAX";
 	    for (i = 0; i < n; i += 2) {
 		perm[i] = (n - 2) - i;
@@ -1381,7 +1378,7 @@ detect_C99_floats(void)
      * anyway.
      */
     DETECT_F(double,		  LDOUBLE,      d_g[nd_g]); nd_g++;
-#else
+#elif H5_SIZEOF_LONG_DOUBLE !=0
     DETECT_F(long double,	  LDOUBLE,      d_g[nd_g]); nd_g++;
 #endif
 }

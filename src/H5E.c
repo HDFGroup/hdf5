@@ -159,14 +159,15 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
     {H5E_ALIGNMENT, 	"Alignment error"},
     {H5E_BADMESG, 	"Unrecognized message"},
     {H5E_CANTDELETE, 	"Can't delete message"},
+    {H5E_BADITER, 	"Iteration failed"},
 
     /* Group related errors */
     {H5E_CANTOPENOBJ, 	"Can't open object"},
     {H5E_CANTCLOSEOBJ, 	"Can't close object"},
     {H5E_COMPLEN, 	"Name component is too long"},
-    {H5E_CWG, 		"Problem with current working group"},
     {H5E_LINK, 		"Link count failure"},
     {H5E_SLINK,		"Symbolic link error"},
+    {H5E_PATH,		"Problem with path to object"},
 
     /* Datatype conversion errors */
     {H5E_CANTCONVERT,	"Can't convert datatypes"},

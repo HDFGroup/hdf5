@@ -47,10 +47,28 @@
 #include <sys/time.h>
 #endif /* H5_HAVE_GETTIMEOFDAY */
 
+/* Private typedefs */
+
+/* User data for iteration while removing a message */
+typedef struct {
+    H5F_t      *f;              /* Pointer to file for insertion */
+    hid_t dxpl_id;              /* DXPL during iteration */
+    int sequence;               /* Sequence # to search for */
+    unsigned nfailed;           /* # of failed message removals */
+    H5O_operator_t op;          /* Callback routine for removal operations */
+    void *op_data;              /* Callback data for removal operations */
+    hbool_t adj_link;           /* Whether to adjust links when removing messages */
+} H5O_iter_ud1_t;
+
+/* Typedef for "internal" iteration operations */
+typedef herr_t (*H5O_operator_int_t)(H5O_mesg_t *mesg/*in,out*/, unsigned idx,
+    unsigned * oh_flags_ptr, void *operator_data/*in,out*/);
+
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_init(H5F_t *f, hid_t dxpl_id, size_t size_hint,
                        H5G_entry_t *ent/*out*/, haddr_t header);
 static herr_t H5O_reset_real(const H5O_class_t *type, void *native);
+static herr_t H5O_free_mesg(H5O_mesg_t *mesg);
 static void * H5O_copy_real(const H5O_class_t *type, const void *mesg,
         void *dst);
 static int H5O_count_real (H5G_entry_t *ent, const H5O_class_t *type,
@@ -69,18 +87,21 @@ static int H5O_modify_real(H5G_entry_t *ent, const H5O_class_t *type,
 static int H5O_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     const H5O_class_t *type, unsigned flags, const void *mesg);
 static herr_t H5O_remove_real(H5G_entry_t *ent, const H5O_class_t *type,
-    int sequence, hid_t dxpl_id);
+    int sequence, H5O_operator_t op, void *op_data, hbool_t adj_link, hid_t dxpl_id);
 static unsigned H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type,
 		      size_t size);
 static unsigned H5O_alloc_extend_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno, size_t size);
 static unsigned H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size);
 static herr_t H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
-static herr_t H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg);
+static herr_t H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg,
+    hbool_t adj_link);
 static unsigned H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *flags,
     const H5O_class_t *orig_type, const void *orig_mesg, H5O_shared_t *sh_mesg,
     const H5O_class_t **new_type, const void **new_mesg, hid_t dxpl_id);
 static herr_t H5O_write_mesg(H5O_t *oh, unsigned idx, const H5O_class_t *type,
     const void *mesg, unsigned flags, unsigned update_flags);
+static herr_t H5O_iterate_real(const H5G_entry_t *ent, const H5O_class_t *type,
+    H5AC_protect_t prot, hbool_t internal, void *op, void *op_data, hid_t dxpl_id);
 
 /* Metadata cache callbacks */
 static H5O_t *H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata1,
@@ -839,10 +860,7 @@ H5O_dest(H5F_t UNUSED *f, H5O_t *oh)
         /* Verify that message is clean */
         assert (oh->mesg[i].dirty==0);
 
-        if (oh->mesg[i].flags & H5O_FLAG_SHARED)
-            H5O_free_real(H5O_SHARED, oh->mesg[i].native);
-        else
-            H5O_free_real(oh->mesg[i].type, oh->mesg[i].native);
+        H5O_free_mesg(&oh->mesg[i]);
     }
     if(oh->mesg)
         oh->mesg = H5FL_SEQ_FREE(H5O_mesg_t,oh->mesg);
@@ -1071,6 +1089,36 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5O_free_mesg
+ *
+ * Purpose:	Call H5O_free_real() on a message.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, Sep  6, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_free_mesg(H5O_mesg_t *mesg)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_free_mesg)
+
+    /* check args */
+    HDassert(mesg);
+
+    /* Free any native information */
+    if(mesg->flags & H5O_FLAG_SHARED)
+        mesg->native = H5O_free_real(H5O_SHARED, mesg->native);
+    else
+        mesg->native = H5O_free_real(mesg->type, mesg->native);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_free_mesg() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_free_real
  *
  * Purpose:	Similar to H5O_reset() except it also frees the message
@@ -1088,24 +1136,22 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5O_free_real(const H5O_class_t *type, void *mesg)
+H5O_free_real(const H5O_class_t *type, void *msg_native)
 {
-    void * ret_value=NULL;      /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_free_real);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_free_real)
 
     /* check args */
     assert(type);
 
-    if (mesg) {
-        H5O_reset_real(type, mesg);
+    if (msg_native) {
+        H5O_reset_real(type, msg_native);
         if (NULL!=(type->free))
-            (type->free)(mesg);
+            (type->free)(msg_native);
         else
-            H5MM_xfree (mesg);
+            H5MM_xfree (msg_native);
     }
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(NULL)
 } /* end H5O_free_real() */
 
 
@@ -1842,7 +1888,7 @@ H5O_modify_real(H5G_entry_t *ent, const H5O_class_t *type, int overwrite,
     H5O_shared_t	sh_mesg;
     int		        ret_value;
 
-    FUNC_ENTER_NOAPI(H5O_modify_real, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_modify_real)
 
     /* check args */
     assert(ent);
@@ -2469,28 +2515,151 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_remove(H5G_entry_t *ent, unsigned type_id, int sequence, hid_t dxpl_id)
+H5O_remove(H5G_entry_t *ent, unsigned type_id, int sequence, hbool_t adj_link, hid_t dxpl_id)
 {
     const H5O_class_t *type;            /* Actual H5O class type for the ID */
     herr_t      ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_remove, FAIL);
+    FUNC_ENTER_NOAPI(H5O_remove, FAIL)
 
     /* check args */
-    assert(ent);
-    assert(ent->file);
-    assert(H5F_addr_defined(ent->header));
-    assert(type_id<NELMTS(message_type_g));
-    type=message_type_g[type_id];    /* map the type ID to the actual type object */
-    assert(type);
+    HDassert(ent);
+    HDassert(ent->file);
+    HDassert(H5F_addr_defined(ent->header));
+    HDassert(type_id < NELMTS(message_type_g));
+    type = message_type_g[type_id];    /* map the type ID to the actual type object */
+    HDassert(type);
 
     /* Call the "real" remove routine */
-    if((ret_value=H5O_remove_real(ent, type, sequence, dxpl_id))<0)
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to remove object header message");
+    if((ret_value = H5O_remove_real(ent, type, sequence, NULL, NULL, adj_link, dxpl_id))<0)
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to remove object header message")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_remove() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_remove_op
+ *
+ * Purpose:	Removes messages from the object header that a callback
+ *              routine indicates should be removed.
+ *
+ *		No attempt is made to join adjacent free areas of the
+ *		object header into a single larger free area.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Sep  6 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_remove_op(H5G_entry_t *ent, unsigned type_id, 
+    H5O_operator_t op, void *op_data, hbool_t adj_link, hid_t dxpl_id)
+{
+    const H5O_class_t *type;            /* Actual H5O class type for the ID */
+    herr_t      ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_remove_op, FAIL)
+
+    /* check args */
+    HDassert(ent);
+    HDassert(ent->file);
+    HDassert(H5F_addr_defined(ent->header));
+    HDassert(type_id < NELMTS(message_type_g));
+    type = message_type_g[type_id];    /* map the type ID to the actual type object */
+    HDassert(type);
+
+    /* Call the "real" remove routine */
+    if((ret_value = H5O_remove_real(ent, type, H5O_ALL, op, op_data, adj_link, dxpl_id))<0)
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to remove object header message")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_remove_op() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_remove_cb
+ *
+ * Purpose:	Object header iterator callback routine to remove messages
+ *              of a particular type that match a particular sequence number,
+ *              or all messages if the sequence number is H5O_ALL (-1).
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Sep  6 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_remove_cb(H5O_mesg_t *mesg/*in,out*/, unsigned idx, unsigned * oh_flags_ptr,
+    void *_udata/*in,out*/)
+{
+    H5O_iter_ud1_t *udata = (H5O_iter_ud1_t *)_udata;   /* Operator user data */
+    htri_t try_remove = FALSE;         /* Whether to try removing a message */
+    herr_t ret_value = H5O_ITER_CONT;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_remove_cb)
+
+    /* check args */
+    HDassert(mesg);
+
+    /* Check for callback routine */
+    if(udata->op) {
+        /* Call the iterator callback */
+        if((try_remove = (udata->op)(mesg->native, idx, udata->op_data)) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5O_ITER_ERROR, "unable to delete file space for object header message")
+    } /* end if */
+    else {
+        /* If there's no callback routine, does the sequence # match? */
+        if ((int)idx == udata->sequence || H5O_ALL == udata->sequence)
+            try_remove = TRUE;
+    } /* end else */
+
+    /* Try removing the message, if indicated */
+    if(try_remove) {
+        /*
+         * Keep track of how many times we failed trying to remove constant
+         * messages.
+         */
+        if (mesg->flags & H5O_FLAG_CONSTANT) {
+            udata->nfailed++;
+        } /* end if */
+        else {
+            /* Free any space referred to in the file from this message */
+            if(H5O_delete_mesg(udata->f, udata->dxpl_id, mesg, udata->adj_link)<0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5O_ITER_ERROR, "unable to delete file space for object header message")
+
+            /* Free any native information */
+            H5O_free_mesg(mesg);
+
+            /* Change message type to nil and zero it */
+            mesg->type = H5O_NULL;
+            HDmemset(mesg->raw, 0, mesg->raw_size);
+
+            /* Indicate that the message was modified */
+            mesg->dirty = TRUE;
+
+            /* Indicate that the object header was modified */
+            *oh_flags_ptr = TRUE;
+        } /* end else */
+
+        /* Break out now, if we've found the correct message */
+        if(udata->sequence != H5O_ALL)
+            HGOTO_DONE(H5O_ITER_STOP)
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_remove_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -2519,69 +2688,41 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_remove_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, hid_t dxpl_id)
+H5O_remove_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence,
+    H5O_operator_t op, void *op_data, hbool_t adj_link, hid_t dxpl_id)
 {
-    H5O_t	*oh = NULL;
-    H5O_mesg_t *curr_msg;       /* Pointer to current message being operated on */
-    int		seq, nfailed = 0;
-    unsigned	u;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    H5O_iter_ud1_t udata;               /* User data for iterator */
+    herr_t ret_value=SUCCEED;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_remove_real);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_remove_real)
 
     /* check args */
-    assert(ent);
-    assert(ent->file);
-    assert(H5F_addr_defined(ent->header));
-    assert(type);
+    HDassert(ent);
+    HDassert(ent->file);
+    HDassert(type);
 
     if (0==(ent->file->intent & H5F_ACC_RDWR))
-	HGOTO_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file");
+	HGOTO_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file")
 
-    /* load the object header */
-    if (NULL == (oh = H5AC_protect(ent->file, dxpl_id, H5AC_OHDR, ent->header, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header");
+    /* Set up iterator operator data */
+    udata.f = ent->file;
+    udata.dxpl_id = dxpl_id;
+    udata.sequence = sequence;
+    udata.nfailed = 0;
+    udata.op = op;
+    udata.op_data = op_data;
+    udata.adj_link = adj_link;
 
-    for (u = seq = 0, curr_msg=&oh->mesg[0]; u < oh->nmesgs; u++,curr_msg++) {
-	if (type->id != curr_msg->type->id)
-            continue;
-	if (seq++ == sequence || H5O_ALL == sequence) {
-
-	    /*
-	     * Keep track of how many times we failed trying to remove constant
-	     * messages.
-	     */
-	    if (curr_msg->flags & H5O_FLAG_CONSTANT) {
-		nfailed++;
-		continue;
-	    } /* end if */
-
-            /* Free any space referred to in the file from this message */
-            if(H5O_delete_mesg(ent->file,dxpl_id,curr_msg)<0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete file space for object header message");
-
-	    /* change message type to nil and zero it */
-	    curr_msg->type = H5O_NULL;
-	    HDmemset(curr_msg->raw, 0, curr_msg->raw_size);
-            if(curr_msg->flags & H5O_FLAG_SHARED)
-                curr_msg->native = H5O_free_real(H5O_SHARED, curr_msg->native);
-            else
-                curr_msg->native = H5O_free_real(type, curr_msg->native);
-	    curr_msg->dirty = TRUE;
-	    oh->cache_info.is_dirty = TRUE;
-	    H5O_touch_oh(ent->file, oh, FALSE);
-	}
-    }
+    /* Iterate over the messages, deleting appropriate one(s) */
+    if(H5O_iterate_real(ent, type, H5AC_WRITE, TRUE, (void *)H5O_remove_cb, &udata, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over messages")
 
     /* Fail if we tried to remove any constant messages */
-    if (nfailed)
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to remove constant message(s)");
+    if (udata.nfailed)
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to remove constant message(s)")
 
 done:
-    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, FALSE) < 0)
-	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
-
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_remove_real() */
 
 
@@ -3133,23 +3274,68 @@ H5O_raw_size(unsigned type_id, const H5F_t *f, const void *mesg)
     const H5O_class_t *type;            /* Actual H5O class type for the ID */
     size_t      ret_value;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_raw_size,0);
+    FUNC_ENTER_NOAPI(H5O_raw_size,0)
 
     /* Check args */
-    assert(type_id<NELMTS(message_type_g));
+    HDassert(type_id<NELMTS(message_type_g));
     type=message_type_g[type_id];    /* map the type ID to the actual type object */
-    assert (type);
-    assert (type->raw_size);
-    assert (f);
-    assert (mesg);
+    HDassert(type);
+    HDassert(type->raw_size);
+    HDassert(f);
+    HDassert(mesg);
 
     /* Compute the raw data size for the mesg */
     if ((ret_value = (type->raw_size)(f, mesg))==0)
-        HGOTO_ERROR (H5E_OHDR, H5E_CANTCOUNT, 0, "unable to determine size of message");
+        HGOTO_ERROR (H5E_OHDR, H5E_CANTCOUNT, 0, "unable to determine size of message")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_raw_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_mesg_size
+ *
+ * Purpose:	Calculate the final size of an encoded message in an object
+ *              header.
+ *
+ * Return:	Size of message on success, 0 on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Sep  6 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+size_t
+H5O_mesg_size(unsigned type_id, const H5F_t *f, const void *mesg)
+{
+    const H5O_class_t *type;            /* Actual H5O class type for the ID */
+    size_t      ret_value;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_mesg_size,0)
+
+    /* Check args */
+    HDassert(type_id<NELMTS(message_type_g));
+    type=message_type_g[type_id];    /* map the type ID to the actual type object */
+    HDassert(type);
+    HDassert(type->raw_size);
+    HDassert(f);
+    HDassert(mesg);
+
+    /* Compute the raw data size for the mesg */
+    if((ret_value = (type->raw_size)(f, mesg)) == 0)
+        HGOTO_ERROR (H5E_OHDR, H5E_CANTCOUNT, 0, "unable to determine size of message")
+
+    /* Adjust size for alignment, if necessary */
+    ret_value = H5O_ALIGN(ret_value);
+
+    /* Add space for message header */
+    ret_value += H5O_SIZEOF_MSGHDR(f);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_mesg_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -3281,7 +3467,7 @@ H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
      */
     for (u = 0, curr_msg=&oh->mesg[0]; u < oh->nmesgs; u++,curr_msg++) {
         /* Free any space referred to in the file from this message */
-        if(H5O_delete_mesg(f,dxpl_id,curr_msg)<0)
+        if(H5O_delete_mesg(f, dxpl_id, curr_msg, TRUE)<0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete file space for object header message");
     } /* end for */
 
@@ -3327,7 +3513,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg)
+H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg, hbool_t adj_link)
 {
     const H5O_class_t	*type;  /* Type of object to free */
     herr_t ret_value=SUCCEED;   /* Return value */
@@ -3356,7 +3542,7 @@ H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode message");
         } /* end if */
 
-        if ((type->del)(f, dxpl_id, mesg->native)<0)
+        if ((type->del)(f, dxpl_id, mesg->native, adj_link)<0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete file space for object header message");
     } /* end if */
 
@@ -3463,29 +3649,87 @@ herr_t
 H5O_iterate(const H5G_entry_t *ent, unsigned type_id, H5O_operator_t op,
     void *op_data, hid_t dxpl_id)
 {
-    H5O_t		*oh=NULL;       /* Pointer to actual object header */
     const H5O_class_t *type;            /* Actual H5O class type for the ID */
+    herr_t              ret_value=0;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_iterate, FAIL)
+
+    /* check args */
+    HDassert(ent);
+    HDassert(ent->file);
+    HDassert(H5F_addr_defined(ent->header));
+    HDassert(type_id<NELMTS(message_type_g));
+    type=message_type_g[type_id];    /* map the type ID to the actual type object */
+    HDassert(type);
+
+    /* Call the "real" iterate routine */
+    if((ret_value=H5O_iterate_real(ent, type, H5AC_READ, FALSE, (void *)op, op_data, dxpl_id))<0)
+	HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "unable to iterate over object header messages")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_iterate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_iterate_real
+ *
+ * Purpose:	Iterate through object headers of a certain type.
+ *
+ * Return:	Returns a negative value if something is wrong, the return
+ *      value of the last operator if it was non-zero, or zero if all
+ *      object headers were processed.
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Sep  6 2005
+ *
+ * Description:
+ *      This function interates over the object headers of an object
+ *  specified with 'ent' of type 'type_id'.  For each object header of the
+ *  object, the 'op_data' and some additional information (specified below) are
+ *  passed to the 'op' function.
+ *      The operation receives a pointer to the object header message for the
+ *  object being iterated over ('mesg'), and the pointer to the operator data
+ *  passed in to H5O_iterate ('op_data').  The return values from an operator
+ *  are:
+ *      A. Zero causes the iterator to continue, returning zero when all
+ *          object headers of that type have been processed.
+ *      B. Positive causes the iterator to immediately return that positive
+ *          value, indicating short-circuit success.
+ *      C. Negative causes the iterator to immediately return that value,
+ *          indicating failure.
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_iterate_real(const H5G_entry_t *ent, const H5O_class_t *type, H5AC_protect_t prot,
+    hbool_t internal, void *op, void *op_data, hid_t dxpl_id)
+{
+    H5O_t		*oh=NULL;       /* Pointer to actual object header */
+    unsigned            oh_flags = FALSE;  /* Start iteration with no flags set on object header */
     unsigned		idx;            /* Absolute index of current message in all messages */
     unsigned		sequence;       /* Relative index of current message for messages of type */
     H5O_mesg_t         *idx_msg;        /* Pointer to current message */
     herr_t              ret_value=0;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_iterate, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_iterate_real)
 
     /* check args */
-    assert(ent);
-    assert(ent->file);
-    assert(H5F_addr_defined(ent->header));
-    assert(type_id<NELMTS(message_type_g));
-    type=message_type_g[type_id];    /* map the type ID to the actual type object */
-    assert(type);
+    HDassert(ent);
+    HDassert(ent->file);
+    HDassert(H5F_addr_defined(ent->header));
+    HDassert(type);
+    HDassert(op);
 
     /* Protect the object header to iterate over */
-    if (NULL == (oh = H5AC_protect(ent->file, dxpl_id, H5AC_OHDR, ent->header, NULL, NULL, H5AC_READ)))
+    if (NULL == (oh = H5AC_protect(ent->file, dxpl_id, H5AC_OHDR, ent->header, NULL, NULL, prot)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header");
 
     /* Iterate over messages */
-    for (sequence=0, idx = 0, idx_msg=&oh->mesg[0]; idx < oh->nmesgs; idx++, idx_msg++) {
+    for (sequence = 0, idx = 0, idx_msg = &oh->mesg[0]; idx < oh->nmesgs; idx++, idx_msg++) {
 	if (type->id == idx_msg->type->id) {
             /*
              * Decode the message if necessary.  If the message is shared then decode
@@ -3500,26 +3744,42 @@ H5O_iterate(const H5G_entry_t *ent, unsigned type_id, H5O_operator_t op,
                     decode_type = type;
 
                 /* Decode the message if necessary */
-                assert(decode_type->decode);
+                HDassert(decode_type->decode);
                 if (NULL == (idx_msg->native = (decode_type->decode) (ent->file, dxpl_id, idx_msg->raw, NULL)))
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode message");
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode message")
             } /* end if */
 
-            /* Call the iterator callback */
-	    if((ret_value=(op)(idx_msg->native,sequence,op_data))!=0)
-		break;
+            /* Check for making an "internal" (i.e. within the H5O package) callback */
+            if(internal) {
+                /* Call the "internal" iterator callback */
+                if((ret_value = ((H5O_operator_int_t)op)(idx_msg, sequence, &oh_flags, op_data)) != 0)
+                    break;
+            } /* end if */
+            else {
+                /* Call the iterator callback */
+                if((ret_value = ((H5O_operator_t)op)(idx_msg->native, sequence, op_data)) != 0)
+                    break;
+            } /* end else */
 
             /* Increment sequence value for message type */
             sequence++;
         } /* end if */
     } /* end for */
 
+    /* Check if object header was modified */
+    if(oh_flags) {
+        /* Shouldn't be able to modify object header if we don't have write access */
+        HDassert(prot == H5AC_WRITE);
+        oh->cache_info.is_dirty = TRUE;
+        H5O_touch_oh(ent->file, oh, FALSE);
+    } /* end if */
+
 done:
     if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, FALSE) < 0)
-	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
+	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
 
-    FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5O_iterate() */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_iterate_real() */
 
 
 /*-------------------------------------------------------------------------
@@ -3723,6 +3983,7 @@ H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
 	if (oh->mesg[i].flags & H5O_FLAG_SHARED) {
 	    H5O_shared_t *shared = (H5O_shared_t*)(oh->mesg[i].native);
 	    void *mesg = NULL;
+
 	    if (shared->in_gh) {
 		void *p = H5HG_read (f, dxpl_id, oh->mesg[i].native, NULL);
 		mesg = (oh->mesg[i].type->decode)(f, dxpl_id, p, oh->mesg[i].native);

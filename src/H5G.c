@@ -1741,7 +1741,10 @@ H5G_mkroot (H5F_t *f, hid_t dxpl_id, H5G_entry_t *ent)
         H5FL_FREE(H5G_t, f->shared->root_grp);
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     }
-    f->shared->root_grp->ent = *ent;
+    /* Shallow copy (take ownership) of the group entry object */
+    if(H5G_ent_copy(&(f->shared->root_grp->ent), ent, H5G_COPY_SHALLOW)<0)
+        HGOTO_ERROR (H5E_SYM, H5E_CANTCOPY, FAIL, "can't copy group entry")
+
     f->shared->root_grp->shared->fo_count = 1;
     assert (1==f->nopen_objs);
     f->nopen_objs = 0;
@@ -2970,7 +2973,7 @@ H5G_set_comment(H5G_entry_t *loc, const char *name, const char *buf, hid_t dxpl_
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
 
     /* Remove the previous comment message if any */
-    if (H5O_remove(&obj_ent, H5O_NAME_ID, 0, dxpl_id)<0)
+    if (H5O_remove(&obj_ent, H5O_NAME_ID, 0, TRUE, dxpl_id)<0)
         H5E_clear();
 
     /* Add the new message */
@@ -3779,14 +3782,14 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, void *key)
 		    if(*(H5RS_get_str(names->src_name))!='/') {
 			/* Create reference counted string for full src path */
 			if((src_path_r = H5G_build_fullpath(names->src_loc->user_path_r, names->src_name)) == NULL)
-			    HGOTO_ERROR (H5E_SYM, H5E_CWG, FAIL, "can't build source path name")
+			    HGOTO_ERROR (H5E_SYM, H5E_PATH, FAIL, "can't build source path name")
 		    } /* end if */
 		    else
                         src_path_r=H5RS_dup(names->src_name);
 		    if(*(H5RS_get_str(names->dst_name))!='/') {
 			/* Create reference counted string for full dst path */
 			if((dst_path_r = H5G_build_fullpath(names->dst_loc->user_path_r, names->dst_name)) == NULL)
-			    HGOTO_ERROR (H5E_SYM, H5E_CWG, FAIL, "can't build destination path name")
+			    HGOTO_ERROR (H5E_SYM, H5E_PATH, FAIL, "can't build destination path name")
 		    } /* end if */
 		    else
                         dst_path_r=H5RS_dup(names->dst_name);

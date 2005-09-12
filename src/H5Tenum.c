@@ -134,17 +134,12 @@ H5T_enum_create(const H5T_t *parent)
     assert(parent);
 
     /* Build new type */
-    if (NULL==(ret_value = H5FL_CALLOC(H5T_t)))
+    if(NULL == (ret_value = H5T_alloc()))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    if (NULL==(ret_value->shared=H5FL_CALLOC(H5T_shared_t))) {
-        H5FL_FREE(H5T_t, ret_value);
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    }
     ret_value->shared->type = H5T_ENUM;
     ret_value->shared->parent = H5T_copy(parent, H5T_COPY_ALL);
     assert(ret_value->shared->parent);
     ret_value->shared->size = ret_value->shared->parent->shared->size;
-    ret_value->ent.header = HADDR_UNDEF;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -424,9 +419,9 @@ static char *
 H5T_enum_nameof(const H5T_t *dt, const void *value, char *name/*out*/, size_t size)
 {
     unsigned	lt, md=0, rt;		/*indices for binary search	*/
-    int	        cmp=(-1);		/*comparison result		*/
+    int	cmp=(-1);		        /*comparison result		*/
     H5T_t       *copied_dt = NULL;      /*do sorting in copied datatype */
-    char        *ret_value;             /* Return value                 */
+    char *ret_value;                    /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_enum_nameof, NULL)
 
@@ -446,6 +441,7 @@ H5T_enum_nameof(const H5T_t *dt, const void *value, char *name/*out*/, size_t si
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy data type");
     if(H5T_sort_value(copied_dt, NULL)<0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOMPARE, NULL, "value sort failed")
+
     lt = 0;
     rt = copied_dt->shared->u.enumer.nmembs;
 
@@ -498,7 +494,10 @@ done:
  *              Monday, January  4, 1999
  *
  * Modifications:
- *
+ *              Raymond Lu
+ *              Wednesday, Febuary 9, 2005
+ *              Made a copy of original datatype and do sorting and search
+ *              on that copy, to protect the original order of members.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -554,7 +553,7 @@ static herr_t
 H5T_enum_valueof(const H5T_t *dt, const char *name, void *value/*out*/)
 {
     unsigned	lt, md=0, rt;		/*indices for binary search	*/
-    int	        cmp=(-1);		/*comparison result		*/
+    int	cmp=(-1);		        /*comparison result		*/
     H5T_t       *copied_dt = NULL;      /*do sorting in copied datatype */
     herr_t      ret_value=SUCCEED;      /* Return value */
 
@@ -575,6 +574,7 @@ H5T_enum_valueof(const H5T_t *dt, const char *name, void *value/*out*/)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy data type");
     if(H5T_sort_name(copied_dt, NULL)<0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOMPARE, FAIL, "value sort failed")
+
     lt = 0;
     rt = copied_dt->shared->u.enumer.nmembs;
 

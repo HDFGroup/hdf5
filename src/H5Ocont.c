@@ -40,7 +40,8 @@
 /* PRIVATE PROTOTYPES */
 static void *H5O_cont_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_cont_encode(H5F_t *f, uint8_t *p, const void *_mesg);
-static herr_t H5O_cont_free (void *mesg);
+static size_t H5O_cont_size(const H5F_t *f, const void *_mesg);
+static herr_t H5O_cont_free(void *mesg);
 static herr_t H5O_cont_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			     int indent, int fwidth);
 
@@ -52,7 +53,7 @@ const H5O_class_t H5O_CONT[1] = {{
     H5O_cont_decode,        	/*decode message                */
     H5O_cont_encode,        	/*encode message                */
     NULL,                   	/*no copy method                */
-    NULL,                   	/*no size method                */
+    H5O_cont_size,          	/*size of header continuation   */
     NULL,                   	/*reset method			*/
     H5O_cont_free,	        /* free method			*/
     NULL,		        /* file delete method		*/
@@ -144,6 +145,40 @@ H5O_cont_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_cont_size
+ *
+ * Purpose:     Returns the size of the raw message in bytes not counting
+ *              the message type or size fields, but only the data fields.
+ *              This function doesn't take into account alignment.
+ *
+ * Return:      Success:        Message data size in bytes without alignment.
+ *
+ *              Failure:        zero
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@ncsa.uiuc.edu
+ *              Sep  6 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static size_t
+H5O_cont_size(const H5F_t *f, const void UNUSED *_mesg)
+{
+    size_t ret_value;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_cont_size)
+
+    /* Set return value */
+    ret_value = H5F_SIZEOF_ADDR(f) +    /* Continuation header address */
+                H5F_SIZEOF_SIZE(f);     /* Continuation header length */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_cont_size() */
 
 
 /*-------------------------------------------------------------------------

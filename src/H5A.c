@@ -1455,7 +1455,7 @@ H5Adelete(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "attribute not found")
 
     /* Delete the attribute from the location */
-    if ((ret_value=H5O_remove(ent, H5O_ATTR_ID, found, H5AC_dxpl_id)) < 0)
+    if ((ret_value=H5O_remove(ent, H5O_ATTR_ID, found, TRUE, H5AC_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute header message")
 
 done:

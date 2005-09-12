@@ -427,13 +427,8 @@ static herr_t H5T_register(H5T_pers_t pers, const char *name, H5T_t *src,
 
 #define H5T_INIT_TYPE_ALLOC_CREATE(BASE) {				      \
     /* Allocate new datatype info */					      \
-    if (NULL==(dt = H5FL_CALLOC(H5T_t)))				      \
+    if (NULL==(dt = H5T_alloc()))				              \
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed") \
-    dt->ent.header = HADDR_UNDEF;					      \
-    if (NULL==(dt->shared = H5FL_CALLOC(H5T_shared_t)))  {		      \
-        H5FL_FREE(H5T_t, dt);						      \
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed") \
-    }									      \
 }
 
 
@@ -2629,10 +2624,7 @@ H5T_create(H5T_class_t type, size_t size)
 
         case H5T_OPAQUE:
         case H5T_COMPOUND:
-            if (NULL==(dt = H5FL_CALLOC(H5T_t)))
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-            dt->ent.header = HADDR_UNDEF;
-            if (NULL==(dt->shared = H5FL_CALLOC(H5T_shared_t)))
+            if(NULL == (dt = H5T_alloc()))
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
             dt->shared->type = type;
 
@@ -2658,11 +2650,8 @@ H5T_create(H5T_class_t type, size_t size)
             } else {
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "no applicable native integer type");
             }
-            if (NULL==(dt = H5FL_CALLOC(H5T_t)))
+            if(NULL == (dt = H5T_alloc()))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-            dt->ent.header = HADDR_UNDEF;
-            if (NULL==(dt->shared = H5FL_CALLOC(H5T_shared_t)))
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
             dt->shared->type = type;
             if (NULL==(dt->shared->parent=H5T_copy(H5I_object(subtype), H5T_COPY_ALL)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy base data type");
@@ -2678,7 +2667,6 @@ H5T_create(H5T_class_t type, size_t size)
             HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, NULL, "unknown data type class");
     }
 
-    dt->ent.header = HADDR_UNDEF;
     dt->shared->size = size;
 
     /* Set return value */
@@ -3153,6 +3141,51 @@ H5T_lock (H5T_t *dt, hbool_t immutable)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_alloc
+ *
+ * Purpose:	Allocates a new H5T_t structure, initializing it correctly.
+ *
+ * Return:	Pointer to new H5T_t on success/NULL on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Monday, August 29, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_t *
+H5T_alloc(void)
+{
+    H5T_t *dt;                  /* Pointer to datatype allocated */
+    H5T_t *ret_value;           /* Return value */
+
+    FUNC_ENTER_NOAPI(H5T_alloc, NULL)
+
+    /* Allocate & initialize new datatype info */
+    if(NULL == (dt = H5FL_CALLOC(H5T_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    H5G_ent_reset(&(dt->ent));
+    if(NULL == (dt->shared = H5FL_CALLOC(H5T_shared_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    /* Assign return value */
+    ret_value = dt;
+
+done:
+    if(ret_value == NULL) {
+        if(dt != NULL) {
+            if(dt->shared != NULL)
+                H5FL_FREE(H5T_shared_t, dt->shared);
+            H5FL_FREE(H5T_t, dt);
+        } /* end if */
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_alloc() */
 
 
 /*-------------------------------------------------------------------------

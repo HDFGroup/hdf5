@@ -90,7 +90,7 @@ H5Tcommit(hid_t loc_id, const char *name, hid_t type_id)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
     /* Commit the type */
-    if (H5T_commit (loc, name, type, H5AC_dxpl_id)<0)
+    if (H5T_commit(loc, name, type, H5AC_dxpl_id)<0)
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
 done:
@@ -117,7 +117,7 @@ static herr_t
 H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id)
 {
     H5F_t	*file = NULL;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5T_commit)
 
@@ -143,8 +143,9 @@ H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id)
     if(H5T_is_sensible(type)<=0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "datatype is not sensible")
 
-    /* Mark datatype as being on disk now */
-    if (H5T_vlen_mark(type, file, H5T_VLEN_DISK)<0)
+    /* Mark datatype as being on disk now.  This step changes the size of datatype as
+     * stored on disk. */
+    if(H5T_vlen_mark(type, file, H5T_VLEN_DISK)<0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location");
 
     /*
@@ -155,6 +156,11 @@ H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id)
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to create datatype object header")
     if (H5O_modify (&(type->ent), H5O_DTYPE_ID, 0, H5O_FLAG_CONSTANT, H5O_UPDATE_TIME, type, dxpl_id)<0)
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to update type header message")
+
+    /*
+     * Give the datatype a name.  That is, create and add a new object to the
+     * group this datatype is being initially created in.
+     */
     if (H5G_insert (loc, name, &(type->ent), dxpl_id)<0)
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to name datatype")
     type->shared->state = H5T_STATE_OPEN;
@@ -164,8 +170,8 @@ H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id)
     if(H5FO_insert(type->ent.file, type->ent.header, type->shared)<0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "can't insert datatype into list of open objects")
 
-    /* Mark datatype as being on memory now because this datatype may be still used in
-     * memory after committed to disk.  So we need to change its size back. */
+    /* Mark datatype as being on memory now.  Since this datatype may still be used in memory
+     * after committed to disk, change its size back as in memory. */
     if (H5T_vlen_mark(type, NULL, H5T_VLEN_MEMORY)<0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype in memory")
 

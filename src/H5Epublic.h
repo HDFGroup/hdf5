@@ -187,14 +187,15 @@ typedef enum H5E_minor_t {
     H5E_ALIGNMENT,              /*alignment error                            */
     H5E_BADMESG,                /*unrecognized message                       */
     H5E_CANTDELETE,             /* Can't delete message                      */
+    H5E_BADITER,                /* Iteration failed                          */
 
     /* Group related errors */
     H5E_CANTOPENOBJ,            /*Can't open object                          */
     H5E_CANTCLOSEOBJ,           /*Can't close object                         */
     H5E_COMPLEN,                /*name component is too long                 */
-    H5E_CWG,                    /*problem with current working group         */
     H5E_LINK,                   /*link count failure                         */
     H5E_SLINK,			/*symbolic link error			     */
+    H5E_PATH,			/*Problem with path to object		     */
 
     /* Datatype conversion errors */
     H5E_CANTCONVERT,            /*Can't convert datatypes                    */

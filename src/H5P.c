@@ -3176,10 +3176,10 @@ H5P_get_nprops_plist(H5P_genplist_t *plist, size_t *nprops)
         H5P_genclass_t *pclass;  IN: Property class to check
         size_t *nprops;         OUT: Number of properties in the property list
  RETURNS
-    Success: non-negative value
+    Success: non-negative value (can't fail)
     Failure: negative value
  DESCRIPTION
-        This routine retrieves the number of a properties in a property class.
+    This routine retrieves the number of a properties in a property class.
 
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -3189,18 +3189,18 @@ H5P_get_nprops_plist(H5P_genplist_t *plist, size_t *nprops)
 herr_t
 H5P_get_nprops_pclass(H5P_genclass_t *pclass, size_t *nprops)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5P_get_nprops_pclass, FAIL);
+    FUNC_ENTER_NOAPI(H5P_get_nprops_pclass, FAIL)
 
     assert(pclass);
     assert(nprops);
 
-    /* Get property size */
+    /* Get number of properties */
     *nprops=pclass->nprops;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5P_get_nprops_pclass() */
 
 

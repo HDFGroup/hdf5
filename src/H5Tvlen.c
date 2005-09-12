@@ -165,13 +165,8 @@ H5T_vlen_create(const H5T_t *base)
     assert(base);
 
     /* Build new type */
-    if (NULL==(dt = H5FL_CALLOC(H5T_t)))
+    if(NULL == (dt = H5T_alloc()))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    if (NULL==(dt->shared = H5FL_CALLOC(H5T_shared_t))) {
-        H5FL_FREE(H5T_t, dt);
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,"memory allocation failed")
-    }
-    dt->ent.header = HADDR_UNDEF;
     dt->shared->type = H5T_VLEN;
 
     /*

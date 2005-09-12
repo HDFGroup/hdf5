@@ -151,13 +151,8 @@ H5T_array_create(H5T_t *base, int ndims, const hsize_t dim[/* ndims */],
     assert(dim);
 
     /* Build new type */
-    if (NULL==(ret_value = H5FL_CALLOC(H5T_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    if (NULL==(ret_value->shared=H5FL_CALLOC(H5T_shared_t)))  {
-        H5FL_FREE(H5T_t, ret_value);
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    }
-    ret_value->ent.header = HADDR_UNDEF;
+    if(NULL == (ret_value = H5T_alloc()))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     ret_value->shared->type = H5T_ARRAY;
 
     /* Copy the base type of the array */
