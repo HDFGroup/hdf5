@@ -639,6 +639,229 @@ test_hard_query(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	expt_handle
+ *
+ * Purpose:	Gets called from test_particular_fp_integer() for data type 
+ *              conversion exceptions.
+ *
+ * Return:	H5T_CONV_HANDLED        1
+ *
+ * Programmer:	Raymond Lu
+ *              Sept 7, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5T_conv_ret_t
+expt_handle(H5T_conv_except_t except_type, hid_t UNUSED src_id, hid_t UNUSED dst_id, void UNUSED *src_buf,
+		 void *dst_buf, void *user_data)
+{
+    H5T_conv_ret_t      ret = H5T_CONV_HANDLED;
+    signed char         fill_value1 = 7;
+    int                 fill_value2 = 13;
+
+    if(except_type == H5T_CONV_EXCEPT_RANGE_HI || except_type == H5T_CONV_EXCEPT_RANGE_LOW || 
+        except_type == H5T_CONV_EXCEPT_TRUNCATE) {
+        if(*(hbool_t*)user_data)
+            *(signed char*)dst_buf = fill_value1;
+        else
+            *(int*)dst_buf = fill_value2;
+    }
+
+    return ret;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_particular_fp_integer
+ *
+ * Purpose:     Tests hard conversions from floating numbers to integers in
+ *              a special situation when the source is "float" and assigned
+ *              the value of "INT_MAX".  A compiler may do roundup making 
+ *              this value "INT_MAX+1".  When this float value is casted to
+ *              int, overflow happens.  This test makes sure the library 
+ *              returns exception in this situation.  
+ *
+ *              Also verifies the library handles conversion from double to
+ *              signed char correctly when the value of double is SCHAR_MAX.
+ *              The test makes sure the signed char doesn't overflow.
+ *
+ *              This test is mainly for netCDF's request.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        number of errors
+ *
+ * Programmer:  Raymond Lu
+ *              Sept 7, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int test_particular_fp_integer(void)
+{
+    hid_t       dxpl_id;
+    hbool_t     flag;
+    double      src_d = (double)SCHAR_MAX;
+    signed char dst_c;
+    unsigned char *buf1, *buf2;
+    unsigned char *saved_buf1, *saved_buf2;
+    unsigned int  src_size1, src_size2;
+    unsigned int  dst_size1, dst_size2;
+    float       src_f = (float)INT_MAX;
+    int         dst_i;
+    int         fill_value = 13;
+    int		endian;			/*endianess	        */
+    char	str[256];		/*message string	*/
+    unsigned int        fails_this_test = 0;
+    int         i, j;
+
+    TESTING("hard particular floating number -> integer conversions");
+    
+    if((dxpl_id = H5Pcreate(H5P_DATASET_XFER))<0) {
+        H5_FAILED();
+        printf("Can't create data transfer property list\n");
+        goto error;
+    }
+
+    /* Test conversion from double (the value is SCHAR_MAX) to signed char. */
+    endian = H5Tget_order(H5T_NATIVE_DOUBLE);
+    src_size1 = H5Tget_size(H5T_NATIVE_DOUBLE);
+    dst_size1 = H5Tget_size(H5T_NATIVE_SCHAR);
+    buf1 = (unsigned char*)calloc(1, MAX(src_size1, dst_size1));
+    saved_buf1 = (unsigned char*)calloc(1, MAX(src_size1, dst_size1));
+
+    memcpy(buf1, &src_d, src_size1);
+    memcpy(saved_buf1, &src_d, src_size1);
+
+    /* Register exception handling function and signal the destination is "signed char". */
+    flag = 1;
+    if(H5Pset_type_conv_cb(dxpl_id, expt_handle, &flag)<0) {
+        H5_FAILED();
+        printf("Can't register conversion callback\n");
+        goto error;
+    }
+
+    /* Do conversion */
+    if(H5Tconvert(H5T_NATIVE_DOUBLE, H5T_NATIVE_SCHAR, 1, buf1, NULL, dxpl_id)<0) {
+        H5_FAILED();
+        printf("Can't convert data\n");
+        goto error;
+    }
+
+    memcpy(&dst_c, buf1, dst_size1);
+
+    /* Print errors */
+    if(dst_c != SCHAR_MAX) {
+        double x;
+        signed char   y;
+
+        if(0 == fails_this_test++)
+            H5_FAILED();
+
+        printf("    test double to signed char:\n");
+        printf("        src = ");
+        for (j=0; j<src_size1; j++)
+            printf(" %02x", saved_buf1[ENDIAN(src_size1, j)]);
+        
+        HDmemcpy(&x, saved_buf1, src_size1);
+        printf(" %29.20e\n", x);
+
+        printf("        dst = ");
+        for (j=0; j<dst_size1; j++)
+            printf(" %02x", buf1[ENDIAN(dst_size1, j)]);
+
+        HDmemcpy(&y, buf1, dst_size1);
+        printf(" %29d\n", y);
+    }
+
+    /* Test conversion from float (the value is INT_MAX) to int. */
+    src_size2 = H5Tget_size(H5T_NATIVE_FLOAT);
+    dst_size2 = H5Tget_size(H5T_NATIVE_INT);
+    buf2 = (unsigned char*)calloc(1, MAX(src_size2, dst_size2));
+    saved_buf2 = (unsigned char*)calloc(1, MAX(src_size2, dst_size2));
+    memcpy(buf2, &src_f, src_size2);
+    memcpy(saved_buf2, &src_f, src_size2);
+
+    /* signal exception handling function that the destination is "int". */
+    flag = 0;
+
+    /* Do conversion */
+    if(H5Tconvert(H5T_NATIVE_FLOAT, H5T_NATIVE_INT, 1, buf2, NULL, dxpl_id)<0) {
+        H5_FAILED();
+        printf("Can't convert data\n");
+        goto error;
+    }
+
+    memcpy(&dst_i, buf2, dst_size2); 
+
+    /* Print errors */
+    if(dst_i != fill_value) {
+        float x;
+        int   y;
+
+        if(0 == fails_this_test++)
+            H5_FAILED();
+
+        printf("    test float to int:\n");
+        printf("        src = ");
+        for (j=0; j<src_size2; j++)
+            printf(" %02x", saved_buf2[ENDIAN(src_size2, j)]);
+        
+        HDmemcpy(&x, saved_buf2, src_size2);
+        printf(" %29.20e\n", x);
+
+        printf("        dst = ");
+        for (j=0; j<dst_size2; j++)
+            printf(" %02x", buf2[ENDIAN(dst_size2, j)]);
+
+        HDmemcpy(&y, buf2, dst_size2);
+        printf(" %29d\n", y);
+    }
+
+    if(fails_this_test)
+        goto error;
+
+    if(H5Pclose(dxpl_id)<0) {
+        H5_FAILED();
+        printf("Can't close property list\n");
+        goto error;
+    }
+
+    if(buf1)
+        free(buf1);
+    if(buf2)
+        free(buf2);
+    if(saved_buf1)
+        free(saved_buf1);
+    if(saved_buf2)
+        free(saved_buf2);
+   
+    PASSED();
+    return 0;
+
+error:
+    HDfflush(stdout);
+    H5E_BEGIN_TRY {
+        H5Pclose(dxpl_id);
+    } H5E_END_TRY;
+    if(buf1)
+        free(buf1);
+    if(buf2)
+        free(buf2);
+    if(saved_buf1)
+        free(saved_buf1);
+    if(saved_buf2)
+        free(saved_buf2);
+
+    reset_hdf5(); /*print statistics*/
+    return MAX((int)fails_this_test, 1);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_derived_flt
  *
  * Purpose:     Tests user-define and query functions of floating-point types.
@@ -4857,6 +5080,9 @@ main(void)
 
     /* Test hardware float-integer conversion functions */
     nerrors += run_fp_int_conv("hard");
+
+    /* Test a few special values for hardware float-integer conversions */
+    nerrors += test_particular_fp_integer();
 
     /*----------------------------------------------------------------------
      * Software tests
