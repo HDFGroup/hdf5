@@ -271,15 +271,15 @@ int         parse_number(char *str);
 #define FNAME9     "test_shuffle.h5"
 #define FNAME10    "test_fletcher32.h5"
 #define FNAME11    "test_all.h5"
-#define FNAME7OUT     "test_szip.out.h5"
-#define FNAME8OUT     "test_deflate.out.h5"
-#define FNAME9OUT     "test_shuffle.out.h5"
-#define FNAME10OUT    "test_fletcher32.out.h5"
-#define FNAME11OUT    "test_all.out.h5"
+#define FNAME7OUT  "test_szip.out.h5"
+#define FNAME8OUT  "test_deflate.out.h5"
+#define FNAME9OUT  "test_shuffle.out.h5"
+#define FNAME10OUT "test_fletcher32.out.h5"
+#define FNAME11OUT "test_all.out.h5"
 #define FNAME12    "test_nbit.h5"
-#define FNAME12OUT    "test_nbit.out.h5"
+#define FNAME12OUT "test_nbit.out.h5"
 #define FNAME13    "test_scaleoffset.h5"
-#define FNAME13OUT    "test_scaleoffset.out.h5"
+#define FNAME13OUT "test_scaleoffset.out.h5"
 
 int make_testfiles(void);
 

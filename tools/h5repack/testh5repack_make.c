@@ -167,6 +167,8 @@ int make_testfiles(void)
   return -1;
  if (make_nbit(loc_id)<0)
   goto out;
+	if(H5Fclose(loc_id)<0)
+  return -1;
 
 /*-------------------------------------------------------------------------
  * create a file with the scaleoffset filter
@@ -176,9 +178,11 @@ int make_testfiles(void)
   return -1;
  if (make_scaleoffset(loc_id)<0)
   goto out;
+	if(H5Fclose(loc_id)<0)
+  return -1;
 
 /*-------------------------------------------------------------------------
- * create a file with the all filters
+ * create a file with all the filters
  *-------------------------------------------------------------------------
  */
  if((loc_id = H5Fcreate(FNAME11,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
@@ -779,7 +783,7 @@ int make_scaleoffset(hid_t loc_id)
 
  dtid = H5Tcopy(H5T_NATIVE_INT);
 
-#if defined (H5_HAVE_FILTER_NBIT)
+#if defined (H5_HAVE_FILTER_SCALEOFFSET)
  /* remove the filters from the dcpl */
  if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0)
  {
