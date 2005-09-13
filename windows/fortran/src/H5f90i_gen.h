@@ -24,6 +24,8 @@
 #define c_int_2 short
 #define c_int_4 long
 #define c_int_8 long_long
+#define c_float_4 float
+#define c_double_8 long double
 
 typedef c_int_8 haddr_t_f;
 typedef c_int_8 hsize_t_f;
@@ -31,5 +33,7 @@ typedef c_int_8 hssize_t_f;
 typedef c_int_4 size_t_f;
 typedef c_int_4 int_f;
 typedef c_int_4 hid_t_f;
+typedef c_float_4 real_f;
+typedef c_double_8 double_f;
 
 #endif /* _H5f90i_gen_H */
