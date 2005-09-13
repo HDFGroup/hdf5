@@ -21,6 +21,98 @@ fi
 # Figure out Intel C compiler flags
 . $srcdir/config/intel-flags
 
+# The default Fortran 90 compiler
+if test "X-" = "X-$FC"; then
+    case $CC_BASENAME in
+        gcc*|pgcc*)
+            FC=pgf90
+            FC_BASENAME=pgf90
+            ;;
+        icc*)
+            FC=ifort
+            FC_BASENAME=ifort
+            ;;
+        mpicc*)
+            FC=mpif90
+            FC_BASENAME=mpif90
+            ;;
+    esac
+else
+    case $FC in
+        # The PGI and Intel compilers are automatically detected below
+        ifc*|ifort*|pgf90*)
+            ;;
+
+        *)
+            # Figure out which compiler we are using: pgf90 or Absoft f95
+            RM='rm -f'
+            tmpfile=/tmp/cmpver.$$
+            $FC -V >$tmpfile
+            if test -s "$tmpfile"; then 
+                if( grep -s 'Absoft' $tmpfile > /dev/null) then
+                    FC_BASENAME=f95
+                fi 
+                if( grep -s 'pgf90' $tmpfile > /dev/null) then
+                    FC_BASENAME=pgf90
+                fi 
+            fi
+            $RM $tmpfile
+            ;;
+    esac
+fi
+
+#
+# HDF5 integers
+#
+# 	R_LARGE is the number of digits for the bigest integer supported.
+#	R_INTEGER is the number of digits in INTEGER
+#
+# (for the Linux architechture)
+#
+R_LARGE=18
+R_INTEGER=9
+HADDR_T='SELECTED_INT_KIND(R_LARGE)'
+HSIZE_T='SELECTED_INT_KIND(R_LARGE)'
+HSSIZE_T='SELECTED_INT_KIND(R_LARGE)'
+HID_T='SELECTED_INT_KIND(R_INTEGER)'
+SIZE_T='SELECTED_INT_KIND(R_INTEGER)'
+OBJECT_NAMELEN_DEFAULT_F=-1
+
+# Figure out PGI F90 compiler flags
+. $srcdir/config/pgi-fflags
+
+# Figure out Intel F90 compiler flags
+. $srcdir/config/intel-fflags
+
+case $FC_BASENAME in
+    #
+    # Absoft compiler
+    #
+    f95)
+        # Set required flag for compiling C stubs
+        CFLAGS="$CFLAGS -DH5_ABSOFT" 
+
+        F9XSUFFIXFLAG=""
+# We force compiler to use upper case for external names 
+# (just in case since this should be a default EIP)
+        FCFLAGS="$FCFLAGS -YEXT_NAMES=UCS"
+        FSEARCH_DIRS=""
+        DEBUG_FCFLAGS="-g"
+        PROD_FCFLAGS="-O"
+        PROFILE_FCFLAGS="-g -pg"
+        f9x_flags_set=yes
+        ;;
+
+esac  
+
+# The default C++ compiler
+
+# The default compiler is `g++'.
+if test -z "$CXX"; then
+  CXX=g++
+  CXX_BASENAME=g++
+fi
+
 # We know that for mpich 1.2.5 and previous version, complicated derived datatype is
 # supported, we need to set the macro to hdf5_mpi_complex_derived_datatype_works to no.                  
 # Notice that this fix will only work if the compiler name is mpicc and mpi package is                   
