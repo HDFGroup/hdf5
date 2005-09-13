@@ -66,17 +66,21 @@ nh5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertype
     else if(sizeof(real_f)==sizeof(double)){
         if ((types[1] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
     } /* end if */
+#if H5_SIZEOF_LONG_DOUBLE!=0
     else if (sizeof(real_f) == sizeof(long double)) {
         if ((types[1] = (hid_t_f)H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0) return ret_value;
     } /* end else */
+#endif
 
-
+    /* Find appropriate size to store Fortran DOUBLE */
     if(sizeof(double_f)==sizeof(double)) {
        if ((types[2] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
     }/*end if */
+#if H5_SIZEOF_LONG_DOUBLE!=0
     else if(sizeof(double_f)==sizeof(long double)) {
        if ((types[2] = (hid_t_f)H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0) return ret_value;
     }/*end else */
+#endif
 
 /*
     if ((types[3] = H5Tcopy(H5T_NATIVE_UINT8)) < 0) return ret_value;
