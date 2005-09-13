@@ -83,23 +83,25 @@ am_h5perf_OBJECTS = pio_perf.$(OBJEXT) pio_engine.$(OBJEXT) \
 h5perf_OBJECTS = $(am_h5perf_OBJECTS)
 am__DEPENDENCIES_2 = $(top_builddir)/tools/lib/libh5tools.la
 am__DEPENDENCIES_3 = $(top_builddir)/test/libh5test.la
-h5perf_DEPENDENCIES = $(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3)
+h5perf_DEPENDENCIES = $(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
+	$(am__DEPENDENCIES_1)
 iopipe_SOURCES = iopipe.c
 iopipe_OBJECTS = iopipe.$(OBJEXT)
-iopipe_DEPENDENCIES = $(am__DEPENDENCIES_3)
+iopipe_DEPENDENCIES = $(am__DEPENDENCIES_3) $(am__DEPENDENCIES_1)
 overhead_SOURCES = overhead.c
 overhead_OBJECTS = overhead.$(OBJEXT)
 overhead_LDADD = $(LDADD)
 overhead_DEPENDENCIES = $(am__DEPENDENCIES_1)
 perf_SOURCES = perf.c
 perf_OBJECTS = perf.$(OBJEXT)
-perf_DEPENDENCIES = $(am__DEPENDENCIES_3)
+perf_DEPENDENCIES = $(am__DEPENDENCIES_3) $(am__DEPENDENCIES_1)
 perf_meta_SOURCES = perf_meta.c
 perf_meta_OBJECTS = perf_meta.$(OBJEXT)
-perf_meta_DEPENDENCIES = $(am__DEPENDENCIES_3)
+perf_meta_DEPENDENCIES = $(am__DEPENDENCIES_3) $(am__DEPENDENCIES_1)
 zip_perf_SOURCES = zip_perf.c
 zip_perf_OBJECTS = zip_perf.$(OBJEXT)
-zip_perf_DEPENDENCIES = $(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3)
+zip_perf_DEPENDENCIES = $(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
+	$(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
@@ -344,11 +346,11 @@ CLEANFILES = *.h5 *.raw *.dat x-gnuplot
 # All of the programs depend on the main hdf5 library, and some of them
 # depend on test or tools library.
 LDADD = $(LIBHDF5)
-h5perf_LDADD = $(LIBH5TOOLS) $(LIBH5TEST)
-perf_LDADD = $(LIBH5TEST)
-iopipe_LDADD = $(LIBH5TEST)
-zip_perf_LDADD = $(LIBH5TOOLS) $(LIBH5TEST)
-perf_meta_LDADD = $(LIBH5TEST)
+h5perf_LDADD = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
+perf_LDADD = $(LIBH5TEST) $(LIBHDF5)
+iopipe_LDADD = $(LIBH5TEST) $(LIBHDF5)
+zip_perf_LDADD = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
+perf_meta_LDADD = $(LIBH5TEST) $(LIBHDF5)
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,

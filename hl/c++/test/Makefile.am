@@ -22,9 +22,6 @@ include $(top_srcdir)/config/commence.am
 # Include directories
 INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/hl/src -I$(top_srcdir)/hl/c++/src -I$(top_srcdir)/test
 
-# C++ libraries and tests are built statically
-AM_LDFLAGS=-static
-
 # These are our main targets.  They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
 TEST_PROG=ptableTest

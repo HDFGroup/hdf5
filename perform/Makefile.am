@@ -44,10 +44,10 @@ CLEANFILES=*.h5 *.raw *.dat x-gnuplot
 # All of the programs depend on the main hdf5 library, and some of them
 # depend on test or tools library.
 LDADD=$(LIBHDF5)
-h5perf_LDADD=$(LIBH5TOOLS) $(LIBH5TEST)
-perf_LDADD=$(LIBH5TEST)
-iopipe_LDADD=$(LIBH5TEST)
-zip_perf_LDADD=$(LIBH5TOOLS) $(LIBH5TEST)
-perf_meta_LDADD=$(LIBH5TEST)
+h5perf_LDADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
+perf_LDADD=$(LIBH5TEST) $(LIBHDF5)
+iopipe_LDADD=$(LIBH5TEST) $(LIBHDF5)
+zip_perf_LDADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
+perf_meta_LDADD=$(LIBH5TEST) $(LIBHDF5)
 
 include $(top_srcdir)/config/conclude.am

@@ -26,9 +26,6 @@ AM_FCFLAGS=-I$(top_srcdir)/src -I$(top_srcdir)/src/fortran
 
 AM_FCLIBS=$(LIBHDF5)
 
-# Fortran libraries are linked statically to solve a build problem.
-AM_LDFLAGS=-static
-
 # This is our main target, the fortran library
 lib_LTLIBRARIES=libhdf5_fortran.la
 

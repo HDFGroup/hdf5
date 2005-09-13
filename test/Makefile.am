@@ -48,14 +48,8 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat testmeta
 
 
 # The libh5test library provides common support code for the tests.
-check_LTLIBRARIES=libh5test.la
+noinst_LTLIBRARIES=libh5test.la
 libh5test_la_SOURCES=h5test.c testframe.c
-libh5test_la_LIBADD=$(LIBHDF5)
-
-# Build the library statically because some compilers can only link
-# one dynamic library and the main hdf5 library is much larger than this
-# one.
-libh5test_la_LDFLAGS=-static
 
 # Use libhd5test.la to compile all of the tests
 LDADD=libh5test.la $(LIBHDF5)

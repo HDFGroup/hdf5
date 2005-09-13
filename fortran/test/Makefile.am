@@ -23,11 +23,8 @@ include $(top_srcdir)/config/commence.am
 AM_FCFLAGS=-I$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/src
 INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/fortran/src
 
-# Fortran libraries are linked statically to solve a build problem.
-AM_LDFLAGS=-static
-
 # The Fortran test library
-lib_LTLIBRARIES=libh5test_fortran.la
+noinst_LTLIBRARIES=libh5test_fortran.la
 
 # Our main targets, the tests themselves
 TEST_PROG=fortranlib_test fflush1 fflush2
@@ -49,9 +46,7 @@ fortranlib_test_SOURCES = fortranlib_test.f90 \
 fflush1_SOURCES=fflush1.f90
 fflush2_SOURCES=fflush2.f90
 
-# The fortran test library depends on the main fortran library.
 # The tests depend on both fortran libraries and both main libraries.
-LIBADD=$(LIBH5TEST) $(LIBHDF5) $(LIBH5F)
 LDADD=libh5test_fortran.la $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)
 
 # Temporary files

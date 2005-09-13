@@ -29,6 +29,7 @@
 #
 # HDF5 Library Test Makefile(.in)
 #
+
 SOURCES = $(libh5test_la_SOURCES) b+tree.c big.c bittests.c blocktrack.c btree2.c cache.c cmpd_dset.c dangle.c dsets.c dt_arith.c dtransform.c dtypes.c enum.c err_compat.c error_test.c extend.c external.c fillval.c flush1.c flush2.c getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c mtime.c ntypes.c ohdr.c pool.c reserved.c set_extent.c sheap.c stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
 
 srcdir = @srcdir@
@@ -66,8 +67,8 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES =
-am__DEPENDENCIES_1 = $(top_builddir)/src/libhdf5.la
-libh5test_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
+LTLIBRARIES = $(noinst_LTLIBRARIES)
+libh5test_la_LIBADD =
 am_libh5test_la_OBJECTS = h5test.lo testframe.lo
 libh5test_la_OBJECTS = $(am_libh5test_la_OBJECTS)
 am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
@@ -85,6 +86,7 @@ am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 b_tree_SOURCES = b+tree.c
 b_tree_OBJECTS = b+tree.$(OBJEXT)
 b_tree_LDADD = $(LDADD)
+am__DEPENDENCIES_1 = $(top_builddir)/src/libhdf5.la
 b_tree_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
 big_SOURCES = big.c
 big_OBJECTS = big.$(OBJEXT)
@@ -538,14 +540,8 @@ TEST_PROG = testhdf5 lheap ohdr stab gheap btree2 cache b+tree blocktrack sheap 
 
 
 # The libh5test library provides common support code for the tests.
-check_LTLIBRARIES = libh5test.la
+noinst_LTLIBRARIES = libh5test.la
 libh5test_la_SOURCES = h5test.c testframe.c
-libh5test_la_LIBADD = $(LIBHDF5)
-
-# Build the library statically because some compilers can only link
-# one dynamic library and the main hdf5 library is much larger than this
-# one.
-libh5test_la_LDFLAGS = -static
 
 # Use libhd5test.la to compile all of the tests
 LDADD = libh5test.la $(LIBHDF5)
@@ -611,9 +607,9 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 
-clean-checkLTLIBRARIES:
-	-test -z "$(check_LTLIBRARIES)" || rm -f $(check_LTLIBRARIES)
-	@list='$(check_LTLIBRARIES)'; for p in $$list; do \
+clean-noinstLTLIBRARIES:
+	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
+	@list='$(noinst_LTLIBRARIES)'; for p in $$list; do \
 	  dir="`echo $$p | sed -e 's|/[^/]*$$||'`"; \
 	  test "$$dir" != "$$p" || dir=.; \
 	  echo "rm -f \"$${dir}/so_locations\""; \
@@ -934,11 +930,10 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-	$(MAKE) $(AM_MAKEFLAGS) $(check_LTLIBRARIES) $(check_PROGRAMS) \
-	  $(check_SCRIPTS)
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_SCRIPTS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile all-local
+all-am: Makefile $(LTLIBRARIES) all-local
 installdirs:
 install: install-am
 install-exec: install-exec-am
@@ -966,8 +961,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-checkLTLIBRARIES clean-checkPROGRAMS clean-generic \
-	clean-libtool mostlyclean-am
+clean-am: clean-checkPROGRAMS clean-generic clean-libtool \
+	clean-noinstLTLIBRARIES mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -1016,8 +1011,8 @@ ps-am:
 uninstall-am: uninstall-info-am
 
 .PHONY: CTAGS GTAGS all all-am all-local check check-TESTS check-am \
-	clean clean-checkLTLIBRARIES clean-checkPROGRAMS clean-generic \
-	clean-libtool ctags distclean distclean-compile \
+	clean clean-checkPROGRAMS clean-generic clean-libtool \
+	clean-noinstLTLIBRARIES ctags distclean distclean-compile \
 	distclean-generic distclean-libtool distclean-tags distdir dvi \
 	dvi-am html html-am info info-am install install-am \
 	install-data install-data-am install-exec install-exec-am \

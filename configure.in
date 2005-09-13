@@ -498,6 +498,51 @@ export AR
 
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
+
+dnl ----------------------------------------------------------------------
+dnl As of Libtool 1.5.14, libtool officially doesn't know how to create
+dnl shared libraries with pgcc.  In fact, it is able to do so on some
+dnl platforms, but not all (e.g., pgcc 5.2-4 on mir).
+dnl Disable shared libraries when using pgcc.  -JL 09/2005
+if (${CC-cc} -V 2>&1 | grep '^pgcc') > /dev/null; then
+  echo '    warning: shared libraries are not supported for pgcc!'
+  echo '    disabling shared libraries'
+  enable_shared="no"
+fi
+
+dnl A similar problem seems to exist for pgf90 version 6.0-4.
+if test "X$HDF_FORTRAN" = "Xyes" && \
+         (${FC} -V 2>&1 | grep '^pgf90') > /dev/null; then
+  echo '    warning: shared libraries are not supported for pgf90!'
+  echo '    disabling shared libraries'
+  enable_shared="no"
+fi
+
+dnl ----------------------------------------------------------------------
+dnl pgcc version 6.0x have optimization (-O, -O2 or -O3) problem.  Detect
+dnl these versions and add option "-Mx,28,0x8" to the compiler to avoid
+dnl the problem if optimization is enabled.
+dnl
+if (${CC-cc} -V 2>&1 | grep '^pgcc 6.0') > /dev/null && test "X$enable_production" = "Xyes"; then
+    echo 'adding compiler flag to avoid optimization problem in pgcc'
+    CC="${CC-cc} -Mx,28,0x8"
+fi
+
+dnl ----------------------------------------------------------------------
+dnl Shared libraries are not currently supported under Cygwin.
+case "`uname`" in
+  CYGWIN*)
+    if test "X${enable_shared}" = "Xyes"; then
+      echo '    warning: shared libraries are not supported on Cygwin!'
+      echo '    disabling shared libraries'
+    fi
+    enable_shared="no"
+    ;;
+esac
+
+dnl ----------------------------------------------------------------------
+dnl Create libtool.  If shared/static libraries are going to be enabled
+dnl or disabled, it should happen before these macros.
 AC_LIBTOOL_DLOPEN
 AM_PROG_LIBTOOL
 
@@ -518,30 +563,6 @@ EOF
     fi
     ;;
 esac
-
-dnl As of Libtool 1.5.14, libtool officially doesn't know how to create
-dnl shared libraries with pgcc.  In fact, it is able to do so on a number
-dnl of platforms, but not all (e.g., pgcc 5.2-4 on mir).  There is discussion
-dnl online which will hopefully resolve this issue, but in the meantime
-dnl we disable support for shared libraries using pgcc because this issue
-dnl is difficult to detect.  -JL 03/2005
-if (${CC-cc} -V 2>&1 | grep '^pgcc') > /dev/null; then
-  echo 'disabling shared libraries for pgcc'
-ed - $ofile <<EOF 2> /dev/null
-/^build_libtool_libs=yes/s//build_libtool_libs=no/
-w
-q
-EOF
-fi
-
-dnl ----------------------------------------------------------------------
-dnl pgcc version 6.0x have optimization (-O, -O2 or -O3) problem.  Detect
-dnl these versions and add option "-Mx,28,0x8" to the compiler to avoid
-dnl the problem if optimization is enable.
-dnl
-if (${CC-cc} -V 2>&1 | grep '^pgcc 6.0') > /dev/null && test "X$enable_production" = "Xyes"; then
-    CC="${CC-cc} -Mx,28,0x8"
-fi
 
 dnl Fix up the INSTALL macro if it's a relative path. We want the
 dnl full-path to the binary instead.
@@ -2937,17 +2958,16 @@ dnl Are we compiling static libraries, shared libraries, or both?  This
 dnl is only used for the libhdf5.settings file. We can't just look at
 dnl $enable_static and $enable_shared because if they're yes the ltconfig
 dnl might have decided that one or the other is simply not possible.
-dnl Therefore we have to look in the generated `libtool' shell script for
-dnl lines that set the value of `build_libtool_libs' (shared) and
-dnl `build_old_libs' (static).
+dnl Therefore we have to ask the generated `libtool' shell script
+dnl which 'features' it has enabled.
 AC_SUBST([STATIC_SHARED])
-if (grep '^build_libtool_libs=yes' libtool >/dev/null); then
+if (./libtool --features | grep '^enable shared libraries' > /dev/null); then
   enable_shared=yes
 else
   enable_shared=no
 fi
 
-if (grep '^build_old_libs=yes' libtool >/dev/null); then
+if (./libtool --features | grep '^enable static libraries' > /dev/null); then
   enable_static=yes
 else
   enable_static=no

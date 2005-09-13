@@ -69,8 +69,8 @@ am__EXEEXT_1 = t_mpi$(EXEEXT) t_fphdf5$(EXEEXT) testphdf5$(EXEEXT)
 t_fphdf5_SOURCES = t_fphdf5.c
 t_fphdf5_OBJECTS = t_fphdf5.$(OBJEXT)
 t_fphdf5_LDADD = $(LDADD)
-am__DEPENDENCIES_1 = $(top_builddir)/src/libhdf5.la
-am__DEPENDENCIES_2 = $(top_builddir)/test/libh5test.la
+am__DEPENDENCIES_1 = $(top_builddir)/test/libh5test.la
+am__DEPENDENCIES_2 = $(top_builddir)/src/libhdf5.la
 t_fphdf5_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
 t_mpi_SOURCES = t_mpi.c
 t_mpi_OBJECTS = t_mpi.$(OBJEXT)
@@ -326,7 +326,7 @@ testphdf5_SOURCES = testphdf5.c t_dset.c t_file.c t_mdset.c t_ph5basic.c \
 
 
 # The tests all depend on the hdf5 library and the test library
-LDADD = $(LIBHDF5) $(LIBH5TEST)
+LDADD = $(LIBH5TEST) $(LIBHDF5)
 DISTCLEANFILES = go Makefile testph5.sh
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
