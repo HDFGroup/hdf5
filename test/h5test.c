@@ -619,7 +619,7 @@ h5_show_hostname(void)
    }
 
 #endif
-
+#ifdef H5_HAVE_GETHOSTNAME
     if (gethostname(hostname, 80) < 0){
 	printf(" gethostname failed\n");
     }
@@ -627,6 +627,7 @@ h5_show_hostname(void)
 	printf(" hostname=%s\n", hostname);
 #ifdef WIN32
     WSACleanup();
+#endif
 #endif
 }
 

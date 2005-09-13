@@ -3105,7 +3105,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                     continue;	/* all overflowed, no error */
                 check_mant[0] = HDfrexp(x, check_expo+0);
                 check_mant[1] = HDfrexp(hw_d, check_expo+1);
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+#if H5_SIZEOF_LONG_DOUBLE !=0 && (H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE)
             } else {
                 long double x;
                 HDmemcpy(&x, &buf[j*dst_size], sizeof(long double));
