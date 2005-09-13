@@ -305,7 +305,7 @@ H5FS_close_stack(H5FS_t *stack)
 
     /* Free strings on stack */
     for(u = 0; u < stack->nused; u++)
-        stack->slot[u] = H5MM_xfree(stack->slot[u]);
+        stack->slot[u] = H5MM_xfree((void *)stack->slot[u]);
 
     FUNC_LEAVE_NOAPI_NOFS(SUCCEED);
 } /* end H5FS_close_stack() */
