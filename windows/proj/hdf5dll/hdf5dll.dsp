@@ -1580,6 +1580,21 @@ SOURCE=..\..\..\src\H5Pfcpl.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\H5Pgcpl.c
+
+!IF  "$(CFG)" == "hdf5dll - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\H5Pocpl.c
 
 !IF  "$(CFG)" == "hdf5dll - Win32 Release"
