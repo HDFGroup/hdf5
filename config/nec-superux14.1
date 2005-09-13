@@ -30,7 +30,7 @@
 #       used within this file.
 
 if test "X-" =  "X-$CC"; then
-    CC="sxc++ -Xa -size_t64 -xint"
+    CC="sxc++ -Xa -size_t64 -xint -K c99"
     CC_BASENAME=sxc++
 fi
 # The default archiver is `sxar'
@@ -43,7 +43,7 @@ if test "X-" = "X-$CXX"; then
 fi
 
 if test "X-" = "X-$F9X"; then
-    FC="sxf90 -size_t64 -g -DDEBUG -UNDEBUG"
+    FC="sxf90 -size_t64 -ew "
     FC_BASENAME=sxf90
 fi
 
@@ -146,6 +146,9 @@ esac
 #
 ac_cv_sizeof_long_double=${ac_cv_sizeof_long_double=0}
 hdf5_cv_gettimeofday_tz=no
+# I have to add the follwoing two lines when -K c99 was used
+ac_cv_func_getrusage=no
+ac_cv_func_gethostname=no
 hdf5_cv_vsnprintf_works=no
 hdf5_cv_printf_ll=l
 hdf5_cv_system_scope_threads=no
