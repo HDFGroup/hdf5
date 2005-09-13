@@ -20,6 +20,7 @@
  *              for h5repart test.
  */
 #include "hdf5.h"
+#include "H5private.h"
 
 #define KB              1024
 #define FAMILY_NUMBER   4
