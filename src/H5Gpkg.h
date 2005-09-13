@@ -151,7 +151,11 @@ typedef struct H5G_bt_it_ud3_t {
     hsize_t     num_objs;       /*the number of objects having been traversed*/
 
     /* upward */
+#ifdef H5_WANT_H5_V1_4_COMPAT
+    int    type;                /*member type to be returned                 */
+#else /* H5_WANT_H5_V1_4_COMPAT */
     H5G_obj_t    type;          /*member type to be returned                 */
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 } H5G_bt_it_ud3_t;
 
 /*
