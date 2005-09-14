@@ -119,6 +119,10 @@ Bug Fixes since HDF5-1.6.4 release
 
     Library
     -------
+	- The ./dsets tests used to fail in the TFLOPS machine if the
+	  test program, dsets.c, was compiled with the -O option.
+	  The hdf5 library still worked correctly with the -O option. Only
+	  the ./dsets failed.  It is fixed. AKC - 2005/09/14
         - Corrected errors when performing various operations on a group opened
             by dereferencing an object reference.  QAK - 2005/07/30
         - Fixed a bug with named datatypes where a copy of a named datatype
@@ -458,12 +462,6 @@ Known Problems
 
 * The Stream VFD was not tested yet under Windows. It is not supported
   in the TFLOPS machine.
-
-* The ./dsets tests failed in the TFLOPS machine if the test program,
-  dsets.c, is compiled with the -O option.  The hdf5 library still works
-  correctly with the -O option.  The test program works fine if it is
-  compiled with -O1 or -O0.  Only -O (same as -O2) causes the test
-  program to fail.
 
 * Certain platforms give false negatives when testing h5ls:
     - Cray T90IEEE give errors during testing when displaying
