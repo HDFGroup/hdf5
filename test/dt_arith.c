@@ -581,7 +581,7 @@ generates_sigfpe(void)
 /*-------------------------------------------------------------------------
  * Function:    test_hard_query
  *
- * Purpose:     Tests H5Tis_hard() for querying whether a conversion is
+ * Purpose:     Tests H5Tcompiler_conv() for querying whether a conversion is
  *              a hard one.
  *
  * Return:      Success:        0
@@ -600,10 +600,10 @@ test_hard_query(void)
 {
     htri_t      ret;
 
-    TESTING("query functions of hard conversion");
+    TESTING("query functions of compiler conversion");
 
     /* Verify the conversion from int to float is a hard conversion. */
-    if((ret = H5Tis_hard(H5T_NATIVE_INT, H5T_NATIVE_FLOAT))!=TRUE) {
+    if((ret = H5Tcompiler_conv(H5T_NATIVE_INT, H5T_NATIVE_FLOAT))!=TRUE) {
         H5_FAILED();
         printf("Can't query conversion function\n");
         goto error;
@@ -612,7 +612,7 @@ test_hard_query(void)
     /* Unregister the hard conversion from int to float.  Verify the conversion
      * is a soft conversion. */
     H5Tunregister(H5T_PERS_HARD, NULL, H5T_NATIVE_INT, H5T_NATIVE_FLOAT, NULL);
-    if((ret = H5Tis_hard(H5T_NATIVE_INT, H5T_NATIVE_FLOAT))!=FALSE) {
+    if((ret = H5Tcompiler_conv(H5T_NATIVE_INT, H5T_NATIVE_FLOAT))!=FALSE) {
         H5_FAILED();
         printf("Can't query conversion function\n");
         goto error;
@@ -621,7 +621,7 @@ test_hard_query(void)
     /* Register the hard conversion from int to float.  Verify the conversion
      * is a hard conversion. */
     H5Tregister(H5T_PERS_HARD, "int_flt", H5T_NATIVE_INT, H5T_NATIVE_FLOAT, H5T_conv_int_float);
-    if((ret = H5Tis_hard(H5T_NATIVE_INT, H5T_NATIVE_FLOAT))!=TRUE) {
+    if((ret = H5Tcompiler_conv(H5T_NATIVE_INT, H5T_NATIVE_FLOAT))!=TRUE) {
         H5_FAILED();
         printf("Can't query conversion function\n");
         goto error;
@@ -5052,7 +5052,7 @@ main(void)
 
     /* Do the tests */
 
-    /* Test H5Tis_hard() for querying hard conversion. */
+    /* Test H5Tcompiler_conv() for querying hard conversion. */
     nerrors += test_hard_query();
 
     /* Test user-define, query functions and software conversion

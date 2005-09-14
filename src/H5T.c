@@ -2655,12 +2655,12 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Tis_hard
+ * Function:	H5Tcompiler_conv
  *
  * Purpose:	Finds out whether the library's conversion function from
- *              type src_id to type dst_id is a hard conversion.  A hard
- *              conversion uses compiler's casting; a soft conversion uses
- *              the library's own conversion function.
+ *              type src_id to type dst_id is a compiler (hard) conversion.  
+ *              A hard conversion uses compiler's casting; a soft conversion 
+ *              uses the library's own conversion function.
  *
  * Return:	TRUE:           hard conversion.	
  *		FALSE:          soft conversion.
@@ -2674,12 +2674,12 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5Tis_hard(hid_t src_id, hid_t dst_id)
+H5Tcompiler_conv(hid_t src_id, hid_t dst_id)
 {
     htri_t	ret_value;
     H5T_t	*src = NULL, *dst = NULL;
 
-    FUNC_ENTER_API(H5Tis_hard, FAIL);
+    FUNC_ENTER_API(H5Tcompiler_conv, FAIL);
 
     /* Check args */
     if (NULL == (src = H5I_object_verify(src_id,H5I_DATATYPE)) ||
@@ -2687,7 +2687,7 @@ H5Tis_hard(hid_t src_id, hid_t dst_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 
     /* Find it */
-    if((ret_value=H5T_is_hard(src, dst))<0)
+    if((ret_value=H5T_compiler_conv(src, dst))<0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL, "conversion function not found");
 
 done:
@@ -4638,9 +4638,9 @@ H5T_path_bkg(const H5T_path_t *p)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_is_hard
+ * Function:	H5T_compiler_conv
  *
- * Purpose:	Private function for H5Tis_hard.  Finds out whether the 
+ * Purpose:	Private function for H5Tcompiler_conv.  Finds out whether the 
  *              library's conversion function from type SRC to type DST 
  *              is a hard conversion.
  *
@@ -4656,12 +4656,12 @@ H5T_path_bkg(const H5T_path_t *p)
  *-------------------------------------------------------------------------
  */
 htri_t
-H5T_is_hard(H5T_t *src, H5T_t *dst)
+H5T_compiler_conv(H5T_t *src, H5T_t *dst)
 {
     htri_t	ret_value;
     H5T_path_t	*path = NULL;
 
-    FUNC_ENTER_NOAPI(H5T_is_hard, FAIL);
+    FUNC_ENTER_NOAPI(H5T_compiler_conv, FAIL);
 
     /* Find it */
     if (NULL==(path=H5T_path_find(src, dst, NULL, NULL, H5AC_ind_dxpl_id)))
