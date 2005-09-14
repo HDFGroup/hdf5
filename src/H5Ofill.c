@@ -836,7 +836,7 @@ H5O_fill_convert(void *_fill, H5T_t *dset_type, hid_t dxpl_id)
     /*
      * Can we convert between source and destination data types?
      */
-    if (NULL==(tpath=H5T_path_find(fill->type, dset_type, NULL, NULL, dxpl_id)))
+    if (NULL==(tpath=H5T_path_find(fill->type, dset_type, NULL, NULL, dxpl_id, FALSE)))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between src and dst datatypes")
 
     /* Don't bother doing anything if there will be no actual conversion */

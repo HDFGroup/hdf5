@@ -611,7 +611,7 @@ test_hard_query(void)
 
     /* Unregister the hard conversion from int to float.  Verify the conversion
      * is a soft conversion. */
-    H5Tunregister(H5T_PERS_HARD, NULL, H5T_NATIVE_INT, H5T_NATIVE_FLOAT, NULL);
+    H5Tunregister(H5T_PERS_HARD, NULL, H5T_NATIVE_INT, H5T_NATIVE_FLOAT, H5T_conv_int_float);
     if((ret = H5Tcompiler_conv(H5T_NATIVE_INT, H5T_NATIVE_FLOAT))!=FALSE) {
         H5_FAILED();
         printf("Can't query conversion function\n");

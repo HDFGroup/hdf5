@@ -1517,7 +1517,7 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
      /*
      * Can we convert between the source and destination data types?
      */
-    if(NULL==(tpath=H5T_path_find(fill.type, type, NULL, NULL, H5AC_dxpl_id)))
+    if(NULL==(tpath=H5T_path_find(fill.type, type, NULL, NULL, H5AC_dxpl_id, FALSE)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between src and dst data types");
     src_id = H5I_register(H5I_DATATYPE, H5T_copy (fill.type, H5T_COPY_TRANSIENT));
     if (src_id<0)
