@@ -195,6 +195,8 @@ FCFLAGS = @FCFLAGS@
 FCLIBS = @FCLIBS@
 FFLAGS = @FFLAGS@
 FILTERS = @FILTERS@
+FORTRAN_SHARED_CONDITIONAL_FALSE = @FORTRAN_SHARED_CONDITIONAL_FALSE@
+FORTRAN_SHARED_CONDITIONAL_TRUE = @FORTRAN_SHARED_CONDITIONAL_TRUE@
 FSEARCH_DIRS = @FSEARCH_DIRS@
 H5_VERSION = @H5_VERSION@
 HADDR_T = @HADDR_T@
@@ -352,6 +354,11 @@ AM_FCLIBS = $(LIBHDF5)
 
 # This is our main target, the fortran library
 lib_LTLIBRARIES = libhdf5_fortran.la
+
+# Some Fortran compilers can't build shared libraries, so sometimes we
+# want to build a shared C library and a static Fortran library.  If so,
+# pass the -static flag to the library linker.
+@FORTRAN_SHARED_CONDITIONAL_FALSE@AM_LDFLAGS = -static
 @BUILD_PARALLEL_CONDITIONAL_FALSE@PARALLEL_COND_SRC = HDF5.f90
 
 # Include HDF5.f90 if parallel is disabled, HDF5mpiof*  if parallel is enabled

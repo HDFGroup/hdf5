@@ -189,6 +189,8 @@ FCFLAGS = @FCFLAGS@
 FCLIBS = @FCLIBS@
 FFLAGS = @FFLAGS@
 FILTERS = @FILTERS@
+FORTRAN_SHARED_CONDITIONAL_FALSE = @FORTRAN_SHARED_CONDITIONAL_FALSE@
+FORTRAN_SHARED_CONDITIONAL_TRUE = @FORTRAN_SHARED_CONDITIONAL_TRUE@
 FSEARCH_DIRS = @FSEARCH_DIRS@
 H5_VERSION = @H5_VERSION@
 HADDR_T = @HADDR_T@
@@ -346,6 +348,11 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_builddir)/fortran/src
 
 # The Fortran test library
 noinst_LTLIBRARIES = libh5test_fortran.la
+
+# Some Fortran compilers can't build shared libraries, so sometimes we
+# want to build a shared C library and a static Fortran library.  If so,
+# pass the -static flag to the library linker.
+@FORTRAN_SHARED_CONDITIONAL_FALSE@AM_LDFLAGS = -static
 
 # Our main targets, the tests themselves
 TEST_PROG = fortranlib_test fflush1 fflush2

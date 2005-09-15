@@ -29,6 +29,14 @@ AM_FCLIBS=$(LIBHDF5)
 # This is our main target, the fortran library
 lib_LTLIBRARIES=libhdf5_fortran.la
 
+# Some Fortran compilers can't build shared libraries, so sometimes we
+# want to build a shared C library and a static Fortran library.  If so,
+# pass the -static flag to the library linker.
+if FORTRAN_SHARED_CONDITIONAL
+else
+   AM_LDFLAGS=-static
+endif
+
 # Include HDF5.f90 if parallel is disabled, HDF5mpiof*  if parallel is enabled
 if BUILD_PARALLEL_CONDITIONAL
    PARALLEL_COND_SRC = H5FDmpiof.c HDF5mpio.f90 H5FDmpioff.f90

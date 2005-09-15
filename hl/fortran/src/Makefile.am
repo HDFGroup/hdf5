@@ -18,6 +18,14 @@ AM_FCFLAGS=-I$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/sr
 # Our main target, the high-level fortran library
 lib_LTLIBRARIES=libhdf5hl_fortran.la
 
+# Some Fortran compilers can't build shared libraries, so sometimes we
+# want to build a shared C library and a static Fortran library.  If so,
+# pass the -static flag to the library linker.
+if FORTRAN_SHARED_CONDITIONAL
+else
+   AM_LDFLAGS=-static
+endif
+
 # Source files for the library
 #if BUILD_PARALLEL_CONDITIONAL
 #    PARALLEL_COND_SRC=HDFDmpiof.c HDF5mpio.f90

@@ -152,6 +152,8 @@ FCFLAGS = @FCFLAGS@
 FCLIBS = @FCLIBS@
 FFLAGS = @FFLAGS@
 FILTERS = @FILTERS@
+FORTRAN_SHARED_CONDITIONAL_FALSE = @FORTRAN_SHARED_CONDITIONAL_FALSE@
+FORTRAN_SHARED_CONDITIONAL_TRUE = @FORTRAN_SHARED_CONDITIONAL_TRUE@
 FSEARCH_DIRS = @FSEARCH_DIRS@
 H5_VERSION = @H5_VERSION@
 HADDR_T = @HADDR_T@
@@ -305,6 +307,11 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog dsetf[1-4].h5 f1img.h5 \
 	f1tab.h5
 AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_builddir)/src -I$(top_srcdir)/hl/src
 AM_FCFLAGS = -I$(top_builddir)/fortran/src -I$(top_builddir)/hl/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/hl/fortran/src
+
+# Some Fortran compilers can't build shared libraries, so sometimes we
+# need to make sure the Fortran programs link against the static version
+# of the HDF5 library.  We do this by passing the -static flag to the linker.
+@FORTRAN_SHARED_CONDITIONAL_FALSE@AM_LDFLAGS = -static
 
 # Our main target, the test programs
 TEST_PROG = tstlite tstimage tsttable

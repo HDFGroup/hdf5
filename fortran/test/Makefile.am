@@ -26,6 +26,14 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/fortran/src
 # The Fortran test library
 noinst_LTLIBRARIES=libh5test_fortran.la
 
+# Some Fortran compilers can't build shared libraries, so sometimes we
+# want to build a shared C library and a static Fortran library.  If so,
+# pass the -static flag to the library linker.
+if FORTRAN_SHARED_CONDITIONAL
+else
+   AM_LDFLAGS=-static
+endif
+
 # Our main targets, the tests themselves
 TEST_PROG=fortranlib_test fflush1 fflush2
 check_PROGRAMS=$(TEST_PROG)

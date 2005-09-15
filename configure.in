@@ -504,19 +504,55 @@ dnl As of Libtool 1.5.14, libtool officially doesn't know how to create
 dnl shared libraries with pgcc.  In fact, it is able to do so on some
 dnl platforms, but not all (e.g., pgcc 5.2-4 on mir).
 dnl Disable shared libraries when using pgcc.  -JL 09/2005
-if (${CC-cc} -V 2>&1 | grep '^pgcc') > /dev/null; then
+if test "X${enable_shared}" != "Xno" && \
+      (${CC-cc} -V 2>&1 | grep '^pgcc') > /dev/null; then
   echo '    warning: shared libraries are not supported for pgcc!'
   echo '    disabling shared libraries'
   enable_shared="no"
 fi
 
-dnl A similar problem seems to exist for pgf90 version 6.0-4.
-if test "X$HDF_FORTRAN" = "Xyes" && \
-         (${FC} -V 2>&1 | grep '^pgf90') > /dev/null; then
-  echo '    warning: shared libraries are not supported for pgf90!'
-  echo '    disabling shared libraries'
-  enable_shared="no"
+dnl ----------------------------------------------------------------------
+dnl Many Fortran compilers don't support shared libraries.  Some of these
+dnl compilers include:
+dnl pgf90 version 6.0-4
+dnl Absoft 32bit Fortran 95 9.0
+dnl HP F90 v2.4
+dnl Intel Fortran Compiler 8.1
+dnl If any of these compilers is being used, disable shared libraries for
+dnl Fortran.
+if test "X${HDF_FORTRAN}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
+  H5_FORTRAN_SHARED="yes"
+
+  if (${FC} -V 2>&1 | grep '^pgf90') > /dev/null; then
+    echo "    warning: shared libraries are not supported for pgf90!"
+    echo "    disabling shared Fortran libraries"
+    H5_FORTRAN_SHARED="no"
+  fi
+
+  if (${FC} -V 2>&1 | grep '^Intel(R) Fortran Compiler') > /dev/null; then
+    echo "    warning: shared libraries are not supported for ifort!"
+    echo "    disabling shared Fortran libraries"
+    H5_FORTRAN_SHARED="no"
+  fi
+
+  if (${FC} +version 2>&1 | grep '^HP F90') > /dev/null; then
+    echo "    warning: shared libraries are not supported for f90!"
+    echo "    disabling shared Fortran libraries"
+    H5_FORTRAN_SHARED="no"
+  fi
+
+  if (${FC} -V 2>&1 | grep '^Absoft') > /dev/null; then
+    echo "    warning: shared libraries are not supported for Absoft f95!"
+    echo "    disabling shared Fortran libraries"
+    H5_FORTRAN_SHARED="no"
+  fi
+
+  if test "X${enable_static}" = "Xno" && test "X${H5_FORTRAN_SHARED}" = "Xno"; then
+    AC_MSG_ERROR([both static and shared Fortran libraries are disabled])
+  fi
 fi
+
+AM_CONDITIONAL([FORTRAN_SHARED_CONDITIONAL], [test "X$H5_FORTRAN_SHARED" = "Xyes"])
 
 dnl ----------------------------------------------------------------------
 dnl pgcc version 6.0x have optimization (-O, -O2 or -O3) problem.  Detect
