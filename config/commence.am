@@ -42,6 +42,13 @@ H5CC_PP=$(bindir)/h5pcc
 H5FC=$(bindir)/h5fc
 H5FC_PP=$(bindir)/h5pfc
 
+# H5_CFLAGS holds flags that should be used as CFLAGS when building hdf5,
+# but which shouldn't be exported to h5cc for building other programs.
+CFLAGS=@CFLAGS@ @H5_CFLAGS@
+CPPFLAGS=@CPPFLAGS@ @H5_CPPFLAGS@
+FFLAGS=@FFLAGS@ @H5_FFLAGS@
+CXXFLAGS=@CXXFLAGS@ @H5_CXXFLAGS@
+
 # Make sure that these variables are exported to the Makefiles
 F9XMODEXT=@F9XMODEXT@
 F9XMODFLAG=@F9XMODFLAG@

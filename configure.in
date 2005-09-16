@@ -74,6 +74,13 @@ esac
 AC_CANONICAL_HOST
 AC_SUBST([CPPFLAGS])
 
+dnl H5_CFLAGS (and company) are for CFLAGS that should be used on HDF5, but
+dnl not exported to h5cc (or h5fc, etc.)
+AC_SUBST([H5_CFLAGS])
+AC_SUBST([H5_CPPFLAGS])
+AC_SUBST([H5_FFLAGS])
+AC_SUBST([H5_CXXFLAGS])
+
 dnl Different compilers may need default libraries. They are specified in
 dnl the config/* files, so we put this statement here so that it'll be
 dnl set by the code which follows...
