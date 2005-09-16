@@ -51,6 +51,12 @@ AC_SUBST(CPPFLAGS)
 AC_SUBST(FFLAGS)
 AC_SUBST(FSEARCH_DIRS)
 
+dnl These hold flags that we want to use while building HDF5, but which
+dnl the user might not want in h5fc. 
+AC_SUBST(H5_CPPFLAGS)
+AC_SUBST(H5_FFLAGS)
+AC_SUBST(H5_CFLAGS)
+
 dnl ----------------------------------------------------------------------
 dnl HDF5 integer variables for the H5fortran_types.f90 file.
 dnl

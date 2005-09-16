@@ -34,6 +34,12 @@ AC_CONFIG_AUX_DIR([../bin])
 AC_CANONICAL_HOST
 AC_SUBST(CPPFLAGS)
 
+dnl These hold flags which we want to use when compiling HDF5, but which
+dnl the user might not want in h5c++.
+AC_SUBST(H5_CPPFLAGS)
+AC_SUBST(H5_CFLAGS)
+AC_SUBST(H5_CXXFLAGS)
+
 dnl ----------------------------------------------------------------------
 dnl Dump all shell variables values.
 dnl

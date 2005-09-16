@@ -15,9 +15,12 @@
 ## Programs
 SHELL=/bin/sh
 CXX=@CXX@
-CXXFLAGS=@CXXFLAGS@
-CFLAGS=@CFLAGS@
-CPPFLAGS=@CPPFLAGS@
+## H5_CPPFLAGS, H5_CFLAGS, and H5_CXXFLAGS are used for extra flags
+## used to build HDF5 (flags that don't need to be included in h5cc,
+## for instance).
+CXXFLAGS=@CXXFLAGS@ @H5_CXXFLAGS@
+CFLAGS=@CFLAGS@ @H5_CFLAGS@
+CPPFLAGS=@CPPFLAGS@ @H5_CPPFLAGS@
 LDFLAGS=@LDFLAGS@
 ROOT=@ROOT@
 LIBS=@LIBS@
