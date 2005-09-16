@@ -467,7 +467,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT build build_cpu build_vendor build_os host host_cpu host_vendor host_os CPPFLAGS HSIZET CC CFLAGS LDFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE HDF5_INTERFACES R_LARGE R_INTEGER HADDR_T HSIZE_T HSSIZE_T HID_T SIZE_T OBJECT_NAMELEN_DEFAULT_F F9XSUFFIXFLAG FSEARCH_DIRS FC FCFLAGS ac_ct_FC F9XMODFLAG F9XMODEXT FCLIBS CXX CXXFLAGS ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE CXXCPP LT_STATIC_EXEC PERL AR FORTRAN_SHARED_CONDITIONAL_TRUE FORTRAN_SHARED_CONDITIONAL_FALSE EGREP LN_S ECHO ac_ct_AR RANLIB ac_ct_RANLIB CPP F77 FFLAGS ac_ct_F77 LIBTOOL AM_MAKEFLAGS USE_FILTER_DEFLATE USE_FILTER_SZIP BUILD_PDB2HDF BUILD_PDB2HDF_CONDITIONAL_TRUE BUILD_PDB2HDF_CONDITIONAL_FALSE PTHREAD DEBUG_PKG TRACE_API INSTRUMENT_LIBRARY PARALLEL RUNSERIAL RUNPARALLEL TESTPARALLEL ADD_PARALLEL_FILES MPE FILTERS USE_FILTER_SHUFFLE USE_FILTER_FLETCHER32 USE_FILTER_NBIT USE_FILTER_SCALEOFFSET H5_VERSION CONFIG_DATE CONFIG_USER CONFIG_MODE BYTESEX STATIC_SHARED CC_VERSION ROOT DYNAMIC_DIRS HL HL_FOR BUILD_CXX_CONDITIONAL_TRUE BUILD_CXX_CONDITIONAL_FALSE BUILD_PABLO_CONDITIONAL_TRUE BUILD_PABLO_CONDITIONAL_FALSE BUILD_PARALLEL_CONDITIONAL_TRUE BUILD_PARALLEL_CONDITIONAL_FALSE BUILD_FORTRAN_CONDITIONAL_TRUE BUILD_FORTRAN_CONDITIONAL_FALSE BUILD_HDF5_HL_CONDITIONAL_TRUE BUILD_HDF5_HL_CONDITIONAL_FALSE SEARCH SETX LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT build build_cpu build_vendor build_os host host_cpu host_vendor host_os CPPFLAGS HSIZET CC CFLAGS LDFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE HDF5_INTERFACES R_LARGE R_INTEGER HADDR_T HSIZE_T HSSIZE_T HID_T SIZE_T OBJECT_NAMELEN_DEFAULT_F F9XSUFFIXFLAG FSEARCH_DIRS FC FCFLAGS ac_ct_FC F9XMODFLAG F9XMODEXT FCLIBS CXX CXXFLAGS ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE CXXCPP LT_STATIC_EXEC PERL AR FORTRAN_SHARED_CONDITIONAL_TRUE FORTRAN_SHARED_CONDITIONAL_FALSE CXX_SHARED_CONDITIONAL_TRUE CXX_SHARED_CONDITIONAL_FALSE EGREP LN_S ECHO ac_ct_AR RANLIB ac_ct_RANLIB CPP F77 FFLAGS ac_ct_F77 LIBTOOL AM_MAKEFLAGS USE_FILTER_DEFLATE USE_FILTER_SZIP BUILD_PDB2HDF BUILD_PDB2HDF_CONDITIONAL_TRUE BUILD_PDB2HDF_CONDITIONAL_FALSE PTHREAD DEBUG_PKG TRACE_API INSTRUMENT_LIBRARY PARALLEL RUNSERIAL RUNPARALLEL TESTPARALLEL ADD_PARALLEL_FILES MPE FILTERS USE_FILTER_SHUFFLE USE_FILTER_FLETCHER32 USE_FILTER_NBIT USE_FILTER_SCALEOFFSET H5_VERSION CONFIG_DATE CONFIG_USER CONFIG_MODE BYTESEX STATIC_SHARED CC_VERSION ROOT DYNAMIC_DIRS HL HL_FOR BUILD_CXX_CONDITIONAL_TRUE BUILD_CXX_CONDITIONAL_FALSE BUILD_PABLO_CONDITIONAL_TRUE BUILD_PABLO_CONDITIONAL_FALSE BUILD_PARALLEL_CONDITIONAL_TRUE BUILD_PARALLEL_CONDITIONAL_FALSE BUILD_FORTRAN_CONDITIONAL_TRUE BUILD_FORTRAN_CONDITIONAL_FALSE BUILD_HDF5_HL_CONDITIONAL_TRUE BUILD_HDF5_HL_CONDITIONAL_FALSE SEARCH SETX LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -5874,6 +5874,33 @@ else
 fi
 
 
+if test "X${HDF_CXX}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
+  H5_CXX_SHARED="yes"
+
+  if (${CXX} -V 2>&1 | grep 'Sun WorkShop') > /dev/null; then
+    echo "    warning: shared libraries are not supported for Sun WorkShop C++!"
+    echo "    disabling shared Fortran libraries"
+    H5_CXX_SHARED="no"
+  fi
+
+  if test "X${enable_static}" = "Xno" && test "X${H5_CXX_SHARED}" = "Xno"; then
+    { { echo "$as_me:$LINENO: error: both static and shared C++ libraries are disabled" >&5
+echo "$as_me: error: both static and shared C++ libraries are disabled" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+fi
+
+
+
+if test "X$H5_CXX_SHARED" = "Xyes"; then
+  CXX_SHARED_CONDITIONAL_TRUE=
+  CXX_SHARED_CONDITIONAL_FALSE='#'
+else
+  CXX_SHARED_CONDITIONAL_TRUE='#'
+  CXX_SHARED_CONDITIONAL_FALSE=
+fi
+
+
 if (${CC-cc} -V 2>&1 | grep '^pgcc 6.0') > /dev/null && test "X$enable_production" = "Xyes"; then
     echo 'adding compiler flag to avoid optimization problem in pgcc'
     CC="${CC-cc} -Mx,28,0x8"
@@ -6442,7 +6469,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6445 "configure"' > conftest.$ac_ext
+  echo '#line 6472 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7572,7 +7599,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:7575:" \
+echo "$as_me:7602:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -8641,11 +8668,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8644: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8671: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8648: \$? = $ac_status" >&5
+   echo "$as_me:8675: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -8896,11 +8923,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8899: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8926: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8903: \$? = $ac_status" >&5
+   echo "$as_me:8930: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -8956,11 +8983,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8959: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8986: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8963: \$? = $ac_status" >&5
+   echo "$as_me:8990: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11228,7 +11255,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11231 "configure"
+#line 11258 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11326,7 +11353,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11329 "configure"
+#line 11356 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13562,11 +13589,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13565: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13592: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:13569: \$? = $ac_status" >&5
+   echo "$as_me:13596: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -13622,11 +13649,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13625: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13652: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:13629: \$? = $ac_status" >&5
+   echo "$as_me:13656: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -15041,7 +15068,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 15044 "configure"
+#line 15071 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15139,7 +15166,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 15142 "configure"
+#line 15169 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15994,11 +16021,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15997: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16024: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16001: \$? = $ac_status" >&5
+   echo "$as_me:16028: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -16054,11 +16081,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16057: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16084: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:16061: \$? = $ac_status" >&5
+   echo "$as_me:16088: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -18110,11 +18137,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18113: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18140: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18117: \$? = $ac_status" >&5
+   echo "$as_me:18144: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -18365,11 +18392,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18368: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18395: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18372: \$? = $ac_status" >&5
+   echo "$as_me:18399: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -18425,11 +18452,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18428: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18455: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:18432: \$? = $ac_status" >&5
+   echo "$as_me:18459: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -20697,7 +20724,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 20700 "configure"
+#line 20727 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -20795,7 +20822,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 20798 "configure"
+#line 20825 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -51252,6 +51279,13 @@ echo "$as_me: error: conditional \"FORTRAN_SHARED_CONDITIONAL\" was never define
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
+if test -z "${CXX_SHARED_CONDITIONAL_TRUE}" && test -z "${CXX_SHARED_CONDITIONAL_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"CXX_SHARED_CONDITIONAL\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"CXX_SHARED_CONDITIONAL\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 if test -z "${BUILD_PDB2HDF_CONDITIONAL_TRUE}" && test -z "${BUILD_PDB2HDF_CONDITIONAL_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"BUILD_PDB2HDF_CONDITIONAL\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
@@ -51950,6 +51984,8 @@ s,@PERL@,$PERL,;t t
 s,@AR@,$AR,;t t
 s,@FORTRAN_SHARED_CONDITIONAL_TRUE@,$FORTRAN_SHARED_CONDITIONAL_TRUE,;t t
 s,@FORTRAN_SHARED_CONDITIONAL_FALSE@,$FORTRAN_SHARED_CONDITIONAL_FALSE,;t t
+s,@CXX_SHARED_CONDITIONAL_TRUE@,$CXX_SHARED_CONDITIONAL_TRUE,;t t
+s,@CXX_SHARED_CONDITIONAL_FALSE@,$CXX_SHARED_CONDITIONAL_FALSE,;t t
 s,@EGREP@,$EGREP,;t t
 s,@LN_S@,$LN_S,;t t
 s,@ECHO@,$ECHO,;t t

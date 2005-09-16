@@ -130,6 +130,8 @@ CXX = @CXX@
 CXXCPP = @CXXCPP@
 CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
+CXX_SHARED_CONDITIONAL_FALSE = @CXX_SHARED_CONDITIONAL_FALSE@
+CXX_SHARED_CONDITIONAL_TRUE = @CXX_SHARED_CONDITIONAL_TRUE@
 CYGPATH_W = @CYGPATH_W@
 DEBUG_PKG = @DEBUG_PKG@
 DEFS = @DEFS@
@@ -307,6 +309,13 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog parf[12].h5
 
 # Include files
 AM_FCFLAGS = -I$(top_srcdir)/fortran/src -I$(top_srcdir)/fortran/test $(F9XMODFLAG)$(top_builddir)/fortran/src
+
+# Some Fortran compilers can't build shared libraries, so sometimes we
+# want to build a shared C library and a static Fortran library.  If so,
+# pass the -static flag to the library linker.
+# (Actually, we historically have bad luck combining shared libraries with
+# parallel code.  But you're welcome to try...)
+@FORTRAN_SHARED_CONDITIONAL_FALSE@AM_LDFLAGS = -static
 
 # These are our main targets
 TEST_PROG_PARA = parallel_test

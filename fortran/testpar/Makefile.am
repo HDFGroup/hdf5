@@ -22,6 +22,16 @@ include $(top_srcdir)/config/commence.am
 # Include files
 AM_FCFLAGS=-I$(top_srcdir)/fortran/src -I$(top_srcdir)/fortran/test $(F9XMODFLAG)$(top_builddir)/fortran/src
 
+# Some Fortran compilers can't build shared libraries, so sometimes we
+# want to build a shared C library and a static Fortran library.  If so,
+# pass the -static flag to the library linker.
+# (Actually, we historically have bad luck combining shared libraries with
+# parallel code.  But you're welcome to try...)
+if FORTRAN_SHARED_CONDITIONAL
+else
+   AM_LDFLAGS=-static
+endif
+
 # These are our main targets
 TEST_PROG_PARA=parallel_test
 check_PROGRAMS=$(TEST_PROG_PARA)

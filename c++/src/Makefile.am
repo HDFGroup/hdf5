@@ -25,23 +25,29 @@ INCLUDES=-I$(top_srcdir)/src
 # This is our main target
 lib_LTLIBRARIES=libhdf5_cpp.la
 
+# Shared C++ libraries aren't universally supported.
+if CXX_SHARED_CONDITIONAL
+else
+  AM_LDFLAGS=-static
+endif
+
 bin_SCRIPTS=h5c++
 
 # Source files for the library
-libhdf5_cpp_la_SOURCES=H5Exception.cpp H5IdComponent.cpp H5Library.cpp          \
-        H5Attribute.cpp H5Object.cpp H5PropList.cpp H5FaccProp.cpp              \
-        H5FcreatProp.cpp H5DcreatProp.cpp H5DxferProp.cpp H5DataType.cpp        \
-        H5DataSpace.cpp H5AbstractDs.cpp H5AtomType.cpp H5PredType.cpp          \
-        H5EnumType.cpp H5IntType.cpp H5FloatType.cpp H5StrType.cpp              \
-        H5ArrayType.cpp H5VarLenType.cpp H5CompType.cpp H5DataSet.cpp           \
+libhdf5_cpp_la_SOURCES=H5Exception.cpp H5IdComponent.cpp H5Library.cpp        \
+        H5Attribute.cpp H5Object.cpp H5PropList.cpp H5FaccProp.cpp            \
+        H5FcreatProp.cpp H5DcreatProp.cpp H5DxferProp.cpp H5DataType.cpp      \
+        H5DataSpace.cpp H5AbstractDs.cpp H5AtomType.cpp H5PredType.cpp        \
+        H5EnumType.cpp H5IntType.cpp H5FloatType.cpp H5StrType.cpp            \
+        H5ArrayType.cpp H5VarLenType.cpp H5CompType.cpp H5DataSet.cpp         \
         H5CommonFG.cpp H5Group.cpp H5File.cpp
 
 # Public headers
-include_HEADERS=H5Cpp.h H5AbstractDs.h H5AtomType.h H5Attribute.h H5Classes.h   \
-        H5CommonFG.h H5CompType.h H5DataSet.h H5DataSpace.h H5DataType.h        \
-        H5DcreatProp.h H5DxferProp.h H5EnumType.h H5Exception.h H5FaccProp.h    \
-        H5FcreatProp.h H5File.h H5FloatType.h H5Group.h H5IdComponent.h         \
-        H5Include.h H5IntType.h H5Library.h H5Object.h H5PredType.h             \
+include_HEADERS=H5Cpp.h H5AbstractDs.h H5AtomType.h H5Attribute.h H5Classes.h \
+        H5CommonFG.h H5CompType.h H5DataSet.h H5DataSpace.h H5DataType.h      \
+        H5DcreatProp.h H5DxferProp.h H5EnumType.h H5Exception.h H5FaccProp.h  \
+        H5FcreatProp.h H5File.h H5FloatType.h H5Group.h H5IdComponent.h       \
+        H5Include.h H5IntType.h H5Library.h H5Object.h H5PredType.h           \
         H5PropList.h H5StrType.h H5CppDoc.h H5ArrayType.h H5VarLenType.h
 
 # h5c++ and libhdf5.settings are generated during configure.  Remove only when
