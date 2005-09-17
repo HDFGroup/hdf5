@@ -36,7 +36,7 @@ if BUILD_PDB2HDF_CONDITIONAL
 endif
 
 # These are our main targets, the tools
-bin_PROGRAMS=h5debug h5repart $(PDB2HDF)
+bin_PROGRAMS=h5debug h5repart h5stat $(PDB2HDF)
 bin_SCRIPTS=h5redeploy
 
 # Tell automake to clean h5redeploy script

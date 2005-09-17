@@ -859,6 +859,7 @@ a------------------------------------------------------------------------------
 ./tools/misc/h5redeploy.in
 ./tools/misc/h5repart.c
 ./tools/misc/h5repart_gentest.c
+./tools/misc/h5stat.c
 ./tools/misc/pdb2hdf.c
 ./tools/misc/repart_test.c
 ./tools/misc/testh5repart.sh.in
