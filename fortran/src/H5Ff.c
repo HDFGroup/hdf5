@@ -396,7 +396,7 @@ nh5fclose_c ( hid_t_f *file_id )
   int ret_value = 0;
   hid_t c_file_id;
 
-  c_file_id = *file_id;
+  c_file_id = (hid_t)*file_id;
   if ( H5Fclose(c_file_id) < 0  ) ret_value = -1;
   return ret_value;
 }
@@ -445,12 +445,16 @@ nh5fget_obj_ids_c ( hid_t_f *file_id , int_f *obj_type, int_f *max_objs, hid_t_f
   int ret_value = 0;
   hid_t c_file_id;
   unsigned c_obj_type;
-  int c_max_objs;
+  int c_max_objs, i;
+  hid_t *c_obj_ids;
 
   c_file_id = (hid_t)*file_id;
   c_obj_type = (unsigned) *obj_type;
   c_max_objs = (int)*max_objs;
-  if ( H5Fget_obj_ids(c_file_id, c_obj_type, c_max_objs, (hid_t *)obj_ids) < 0  ) ret_value = -1;
+  c_obj_ids = (hid_t *)HDmalloc(sizeof(hid_t)*c_max_objs);
+  if ( H5Fget_obj_ids(c_file_id, c_obj_type, c_max_objs, c_obj_ids) < 0  ) ret_value = -1;
+  for (i=0; i< c_max_objs; i++) obj_ids[i] = (hid_t_f)c_obj_ids[i];
+  HDfree(c_obj_ids);
   return ret_value;
 }
 /*----------------------------------------------------------------------------
