@@ -628,7 +628,6 @@
                write(*,*) " File access lists should be equal, error "
                total_error=total_error + 1
           endif
-
           CALL h5fopen_f(fix_filename, H5F_ACC_RDWR_F, fid2, error, access_prp=fapl2)
                if( error .ne. -1) then
                    total_error = total_error + 1
@@ -653,7 +652,7 @@
                  write(*,*) "Wrong number of open objects reported, error"
                endif
           allocate(obj_ids(obj_countf), stat = error) 
-          CALL h5fget_obj_ids_f(fid, H5F_OBJ_FILE_F, -1, obj_ids, error)
+          CALL h5fget_obj_ids_f(fid, H5F_OBJ_FILE_F, obj_countf, obj_ids, error)
                CALL check("h5fget_obj_ids_f",error,total_error)
           if(error .eq. 0) then
              do i = 1, obj_countf
