@@ -2899,6 +2899,7 @@ nh5pset_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _f
   int c_lenmax;
   c_lenmax = (int)*lenmax;
   relax = (hbool_t)*flag;
+  long double  tmp_max_addr;
 /*
  * Check that we got correct values from Fortran for memb_addr array
  */
@@ -2925,7 +2926,7 @@ nh5pset_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _f
 /*
  * Take care of othe arguments
  */
-
+  tmp_max_addr =  (long double)(HADDR_MAX);
   c_prp_id = (hid_t)*prp_id;
   for (i=0; i < H5FD_MEM_NTYPES; i++) {
        c_memb_map[i] = (H5FD_mem_t)memb_map[i];
@@ -2933,7 +2934,8 @@ nh5pset_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _f
        c_memb_fapl[i] = (hid_t)memb_fapl[i];
        /*printf("fapl %d \n", c_memb_fapl[i]); */
        if(memb_addr[i] < 0) c_memb_addr[i] = HADDR_UNDEF;
-       else c_memb_addr[i] = (haddr_t)(((float)memb_addr[i])*(HADDR_MAX));
+      /* else c_memb_addr[i] = (haddr_t)(((float)memb_addr[i])*(HADDR_MAX));*/
+       else c_memb_addr[i] = (haddr_t)(((float)memb_addr[i])*(tmp_max_addr));
        /*printf("address %Ld \n", c_memb_addr[i]); */
   }
 /*
