@@ -263,6 +263,7 @@ static herr_t H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src,
                 H5T_t *dst, H5T_conv_t func, hid_t dxpl_id);
 static herr_t H5T_register(H5T_pers_t pers, const char *name, H5T_t *src,
         H5T_t *dst, H5T_conv_t func, hid_t dxpl_id, hbool_t api_call);
+static htri_t H5T_compiler_conv(H5T_t *src, H5T_t *dst);
 static herr_t H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc);
 static H5T_t *H5T_decode(const unsigned char *buf);
 
@@ -2679,20 +2680,21 @@ H5Tcompiler_conv(hid_t src_id, hid_t dst_id)
     htri_t	ret_value;
     H5T_t	*src = NULL, *dst = NULL;
 
-    FUNC_ENTER_API(H5Tcompiler_conv, FAIL);
+    FUNC_ENTER_API(H5Tcompiler_conv, FAIL)
 
     /* Check args */
     if (NULL == (src = H5I_object_verify(src_id,H5I_DATATYPE)) ||
             NULL == (dst = H5I_object_verify(dst_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
 
     /* Find it */
     if((ret_value=H5T_compiler_conv(src, dst))<0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL, "conversion function not found");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL, "conversion function not found")
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tconvert
@@ -4666,22 +4668,22 @@ H5T_path_bkg(const H5T_path_t *p)
  *
  *-------------------------------------------------------------------------
  */
-htri_t
+static htri_t
 H5T_compiler_conv(H5T_t *src, H5T_t *dst)
 {
+    H5T_path_t	*path;
     htri_t	ret_value;
-    H5T_path_t	*path = NULL;
 
-    FUNC_ENTER_NOAPI(H5T_compiler_conv, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5T_compiler_conv)
 
     /* Find it */
     if (NULL==(path=H5T_path_find(src, dst, NULL, NULL, H5AC_ind_dxpl_id, FALSE)))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL, "conversion function not found");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL, "conversion function not found")
 
     ret_value = (htri_t)path->is_hard;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
