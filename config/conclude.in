@@ -61,7 +61,7 @@ _check-s: tests
 	      echo "Testing $$test $(TEST_FLAGS)";			      \
 	      echo "============================";			      \
 	      srcdir="$(srcdir)"					      \
-		 $(RUNTEST) ./$$test $(TEST_FLAGS) ||			      \
+		 $(TIME) $(RUNTEST) ./$$test $(TEST_FLAGS) ||		      \
 		 (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||     \
 		 break;							      \
 	      echo "";							      \
@@ -75,7 +75,7 @@ _check-s: tests
 	      echo "============================";			      \
 	      RUNSERIAL="$(RUNSERIAL)" RUNPARALLEL="$(RUNPARALLEL)"           \
 	         srcdir="$(srcdir)"					      \
-		 /bin/sh $$test $(TEST_FLAGS) ||		              \
+		 $(TIME) /bin/sh $$test $(TEST_FLAGS) ||	              \
 		 (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||     \
 		 break;							      \
 	      echo "";							      \
@@ -101,7 +101,7 @@ _check-p: tests
 	      echo "Testing $$test $(TEST_FLAGS)";			      \
 	      echo "============================";			      \
 	      srcdir="$(srcdir)"					      \
-		 $(RUNPARALLEL) ./$$test $(TEST_FLAGS) ||		      \
+		 $(TIME) $(RUNPARALLEL) ./$$test $(TEST_FLAGS) ||	      \
 		 (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||     \
 		 break;							      \
 	      echo "";							      \
@@ -115,7 +115,7 @@ _check-p: tests
 	      echo "============================";			      \
 	      RUNSERIAL="$(RUNSERIAL)" RUNPARALLEL="$(RUNPARALLEL)"           \
 	         srcdir="$(srcdir)"					      \
-		 /bin/sh $$test $(TEST_FLAGS) ||		              \
+		 $(TIME) /bin/sh $$test $(TEST_FLAGS) ||	              \
 		 (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||     \
 		 break;							      \
 	      echo "";							      \

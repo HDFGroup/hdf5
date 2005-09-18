@@ -51,7 +51,7 @@ _check-s: tests
 	      echo "=====================================";		      \
 	      echo "";							      \
 	      srcdir="$(srcdir)"					      \
-		 ./$$test $(TEST_FLAGS) ||                                    \
+		 $(TIME) ./$$test $(TEST_FLAGS) ||                            \
 		 (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||     \
 		 break;							      \
 	   fi;								      \
@@ -65,7 +65,7 @@ _check-s: tests
 	      echo "=====================================";		      \
 	      echo "";							      \
 	      srcdir="$(srcdir)"					      \
-		 /bin/sh $$test $(TEST_FLAGS) ||		              \
+		 $(TIME) /bin/sh $$test $(TEST_FLAGS) ||	              \
 		 (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||     \
 		 break;							      \
 	   fi;								      \
