@@ -297,6 +297,7 @@ target_alias = @target_alias@
 # Shell commands used in Makefiles
 RM = rm -f
 CP = cp
+TIME = time
 
 # Some machines need a command to run executables; this is that command
 # so that our tests will run.
@@ -824,7 +825,7 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
 	      fi; \
 	      echo "============================" >> $${log}; \
 	      srcdir="$(srcdir)" \
-	         $(RUNTESTS) ./$${tname} $(TEST_FLAGS) >> $${log} 2>&1 \
+	         $(TIME) $(RUNTESTS) ./$${tname} $(TEST_FLAGS) >> $${log} 2>&1 \
 	         && touch $(@:.chkexe_=.chkexe) || \
 	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
 	         (cat $${log} && false) || exit 1; \
@@ -863,7 +864,7 @@ $(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) dummysh.chkexe_:
 	      echo "============================" >> $${log}; \
 	      RUNSERIAL="$(RUNSERIAL)" RUNPARALLEL="$(RUNPARALLEL)"           \
 	      srcdir="$(srcdir)" \
-	         $(SHELL) $(@:.chkexe_=) $(TEST_FLAGS) >> $${log} 2>&1 \
+	         $(TIME) $(SHELL) $(@:.chkexe_=) $(TEST_FLAGS) >> $${log} 2>&1 \
 	         && touch `basename $(@:.chkexe_=.chkexe)` || \
 	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
 	         (cat $${log} && false) || exit 1; \

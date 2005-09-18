@@ -293,6 +293,7 @@ target_alias = @target_alias@
 # Shell commands used in Makefiles
 RM = rm -f
 CP = cp
+TIME = time
 
 # Some machines need a command to run executables; this is that command
 # so that our tests will run.

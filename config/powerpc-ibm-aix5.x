@@ -18,7 +18,7 @@ fi
 
 # Define RUNPARALLEL if parallel mode is enabled or a parallel compiler used.
 if test "X-$enable_parallel" = "X-yes" -o X-$CC_BASENAME = X-mpcc_r; then
-  RUNPARALLEL=${RUNPARALLEL="MP_PROCS=\$\${NPROCS:=3} MP_TASKS_PER_NODE=\$\${NPROCS:=3} poe"}
+    RUNPARALLEL=${RUNPARALLEL="env MP_PROCS=\$\${NPROCS:=3} MP_TASKS_PER_NODE=\$\${NPROCS:=3} poe"}
 fi
 
 
