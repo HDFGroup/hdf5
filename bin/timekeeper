@@ -100,7 +100,7 @@ if [ -z "$debugflag" ]; then
 	if [ -f $x ]; then
 	    pid=`cat $x`
 	    # check if process is still around
-	    if ps $pid > /dev/null; then
+	    if test X$pid \!= X && ps -p $pid > /dev/null; then
 		echo "terminating process $x ($pid)"
 		kill -HUP $pid
 	    fi
