@@ -2897,9 +2897,9 @@ nh5pset_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _f
   char *tmp, *tmp_p, *tmp_pp;
   int i;
   int c_lenmax;
+  long double  tmp_max_addr;
   c_lenmax = (int)*lenmax;
   relax = (hbool_t)*flag;
-  long double  tmp_max_addr;
 /*
  * Check that we got correct values from Fortran for memb_addr array
  */
