@@ -1052,12 +1052,13 @@ if (szip_can_encode) {
  SKIPPED();
 #endif
 
+
   TESTING("    adding scaleoffset filter");
 
 #ifdef H5_HAVE_FILTER_SCALEOFFSET
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
- if (h5repack_addfilter("dset_none:S+O=31",&pack_options)<0)
+ if (h5repack_addfilter("dset_none:SOFF=31,IN",&pack_options)<0)
   TEST_ERROR;
  if (h5repack(FNAME13,FNAME13OUT,&pack_options)<0)
   TEST_ERROR;

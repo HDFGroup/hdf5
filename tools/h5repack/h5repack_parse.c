@@ -35,7 +35,7 @@
  *  SHUF, to apply the HDF5 shuffle filter
  *  FLET, to apply the HDF5 checksum filter
  *  NBIT, to apply the HDF5 NBIT filter (NBIT compression)
- *  S+O, to apply the HDF5 scale+offset filter (compression)
+ *  SOFF, to apply the HDF5 scale+offset filter (compression)
  *  NONE, to remove the filter
  *
  * Examples:
@@ -135,11 +135,13 @@ obj_list_t* parse_filter(const char *str,
    if ( c=='=') {      /*one more parameter */
     scomp[k]='\0';     /*cut space */
 
-     /*SZIP is a special case , it can be
-      SZIP=8,EC
-      SZIP=8,NN
-      */
-
+/*-------------------------------------------------------------------------
+ * H5Z_FILTER_SZIP
+	* szip has the format SZIP=<pixels per block,coding>
+ * pixels per block is a even number in 2-32 and coding method is 'EC' or 'NN'
+	* example SZIP=8,NN
+ *-------------------------------------------------------------------------
+ */
     if (strcmp(scomp,"SZIP")==0)
     {
      l=-1; /* mask index check */
@@ -169,9 +171,9 @@ obj_list_t* parse_filter(const char *str,
         i=len-1; /* end */
         (*n_objs)--; /* we counted an extra ',' */
         if (strcmp(smask,"NN")==0)
-         filt->szip_coding=0;
+									filt->cd_values[j++]=H5_SZIP_NN_OPTION_MASK;
         else if (strcmp(smask,"EC")==0)
-         filt->szip_coding=1;
+									filt->cd_values[j++]=H5_SZIP_EC_OPTION_MASK;
         else
         {
          printf("Input Error: szip mask must be 'NN' or 'EC' \n");
@@ -183,6 +185,71 @@ obj_list_t* parse_filter(const char *str,
 
      }  /* u */
     } /*if */
+
+/*-------------------------------------------------------------------------
+ * H5Z_FILTER_SCALEOFFSET
+	* scaleoffset has the format SOFF=<scale_factor,scale_type>
+	* scale_type can be 
+	*   integer datatype, H5Z_SO_INT (IN)
+	*   float datatype using D-scaling method, H5Z_SO_FLOAT_DSCALE  (DS)
+	*   float datatype using E-scaling method, H5Z_SO_FLOAT_ESCALE  (ES) , not yet implemented
+	* for integer datatypes, scale_factor denotes Minimum Bits
+	* for float datatypes, scale_factor denotes decimal scale factor 
+ *  examples
+	*  SOFF=31,IN
+	*  SOFF=3,DF
+ *-------------------------------------------------------------------------
+ */
+
+				else if (strcmp(scomp,"SOFF")==0)
+    {
+     l=-1; /* mask index check */
+     for ( m=0,u=i+1; u<len; u++,m++)
+     {
+      if (str[u]==',')
+      {
+       stype[m]='\0'; /* end digit */
+       l=0;  /* start 'IN' , 'DS', or 'ES' search */
+       u++;  /* skip ',' */
+      }
+      c = str[u];
+      if (!isdigit(c) && l==-1){
+       if (obj_list) free(obj_list);
+       printf("Input Error: Compression parameter not digit in <%s>\n",str);
+       exit(1);
+      }
+      if (l==-1)
+       stype[m]=c;
+      else
+      {
+       smask[l]=c;
+       l++;
+       if (l==2)
+       {
+        smask[l]='\0';
+        i=len-1; /* end */
+        (*n_objs)--; /* we counted an extra ',' */
+        if (strcmp(smask,"IN")==0)
+									filt->cd_values[j++]=H5Z_SO_INT;
+        else if (strcmp(smask,"DS")==H5Z_SO_FLOAT_DSCALE)
+									filt->cd_values[j++]=H5Z_SO_FLOAT_DSCALE;
+        else
+        {
+         printf("Input Error: scale type must be 'IN' or 'DS' \n");
+         exit(1);
+        }
+
+       }
+      }
+
+     }  /* u */
+    } /*if */
+
+
+/*-------------------------------------------------------------------------
+ * all other filters
+ *-------------------------------------------------------------------------
+ */
 
     else
     {
@@ -289,10 +356,10 @@ obj_list_t* parse_filter(const char *str,
  * H5Z_FILTER_SCALEOFFSET
  *-------------------------------------------------------------------------
  */
-   else if (strcmp(scomp,"S+O")==0)
+   else if (strcmp(scomp,"SOFF")==0)
    {
     filt->filtn=H5Z_FILTER_SCALEOFFSET;
-    if (no_param) { /*no more parameters, S+O must have parameter */
+    if (no_param) { /*no more parameters, SOFF must have parameter */
      if (obj_list) free(obj_list);
      printf("Input Error: Missing compression parameter in <%s>\n",str);
      exit(1);
@@ -379,7 +446,7 @@ const char* get_sfilter(H5Z_filter_t filtn)
  else if (filtn==H5Z_FILTER_NBIT)
   return "NBIT";
  else if (filtn==H5Z_FILTER_SCALEOFFSET)
-  return "S+O";
+  return "SOFF";
  else {
   printf("Input error in filter type\n");
   exit(1);

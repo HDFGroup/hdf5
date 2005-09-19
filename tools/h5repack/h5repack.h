@@ -30,7 +30,6 @@
 #define MAX_NC_NAME 256 /* max length of a name */
 #define MAX_VAR_DIMS 32 /* max per variable dimensions */
 
-
 /*-------------------------------------------------------------------------
  * data structures for command line options
  *-------------------------------------------------------------------------
@@ -44,11 +43,13 @@ typedef struct {
 /*
  the type of filter and additional parameter
  type can be one of the filters
- H5Z_FILTER_NONE       0,  uncompress if compressed
- H5Z_FILTER_DEFLATE	   1 , deflation like gzip
- H5Z_FILTER_SHUFFLE    2 , shuffle the data
- H5Z_FILTER_FLETCHER32 3 , letcher32 checksum of EDC
- H5Z_FILTER_SZIP       4 , szip compression
+ H5Z_FILTER_NONE        0,  uncompress if compressed
+ H5Z_FILTER_DEFLATE	    1 , deflation like gzip
+ H5Z_FILTER_SHUFFLE     2 , shuffle the data
+ H5Z_FILTER_FLETCHER32  3 , letcher32 checksum of EDC
+ H5Z_FILTER_SZIP        4 , szip compression
+	H5Z_FILTER_NBIT        5 , nbit compression              
+ H5Z_FILTER_SCALEOFFSET 6 , scaleoffset compression      
 */
 
 #define CDVALUES 2
@@ -56,11 +57,6 @@ typedef struct {
 typedef struct {
  H5Z_filter_t filtn;               /* filter identification number */
  int          cd_values[CDVALUES]; /* filter client data values */
- /* extra input for szip, selects the coding method
-    entropy coding method: EC=0
-    nearest neighbor coding method: NN=1
- */
- int          szip_coding;
 } filter_info_t;
 
 /* chunk lengths along each dimension and rank */
@@ -71,7 +67,7 @@ typedef struct {
 
 /* we currently define a maximum value for the filters array,
    that corresponds to the current library filters */
-#define H5_REPACK_MAX_NFILTERS 4
+#define H5_REPACK_MAX_NFILTERS 6
 
 /* information for one object, contains PATH, CHUNK info and FILTER info */
 typedef struct {

@@ -147,8 +147,6 @@ int aux_assign_obj(const char* name,            /* object name from traverse lis
 			tmp.nfilters=1;
 			tmp.filter[0]=options->filter_g;
 		}
-
-
 		if (options->all_layout)
 		{
 			/* assign the global layout info to the OBJ info */
@@ -163,10 +161,7 @@ int aux_assign_obj(const char* name,            /* object name from traverse lis
 			default:
 				break;
 			}/*switch*/
-
 		}
-
-
 	}
 
  *obj = tmp;
@@ -199,7 +194,6 @@ int apply_filters(const char* name,    /* object name from traverse list */
                   pack_opt_t *options) /* repack options */
 {
 	int          nfilters;       /* number of filters in DCPL */
- unsigned     aggression;     /* the deflate level */
  hsize_t      nelmts;         /* number of elements in dataset */
  size_t       size;           /* size of datatype in bytes */
  hsize_t      chsize[64];     /* chunk size in elements */
@@ -276,10 +270,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
   }
  }
 
-
-
-
-	/*-------------------------------------------------------------------------
+/*-------------------------------------------------------------------------
  * the type of filter and additional parameter
  * type can be one of the filters
  * H5Z_FILTER_NONE       0,  uncompress if compressed
@@ -318,12 +309,16 @@ int apply_filters(const char* name,    /* object name from traverse list */
 				*-------------------------------------------------------------------------
 				*/
 			case H5Z_FILTER_DEFLATE:
-				aggression=obj.filter[i].cd_values[0];
-				/* set up for deflated data */
-				if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
-					return -1;
-				if(H5Pset_deflate(dcpl_id,aggression)<0)
-					return -1;
+				{
+					unsigned     aggression;     /* the deflate level */
+					
+					aggression = obj.filter[i].cd_values[0];
+					/* set up for deflated data */
+					if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
+						return -1;
+					if(H5Pset_deflate(dcpl_id,aggression)<0)
+						return -1;
+				}
 				break;
 
 				/*-------------------------------------------------------------------------
@@ -335,12 +330,9 @@ int apply_filters(const char* name,    /* object name from traverse list */
 					unsigned  options_mask;
 					unsigned  pixels_per_block;
 
-					pixels_per_block=obj.filter[i].cd_values[0];
-					if (obj.filter[i].szip_coding==0)
-						options_mask=H5_SZIP_NN_OPTION_MASK;
-					else
-						options_mask=H5_SZIP_EC_OPTION_MASK;
-
+					options_mask     = obj.filter[i].cd_values[0]; 
+					pixels_per_block = obj.filter[i].cd_values[1];
+		
 					/* set up for szip data */
 					if(H5Pset_chunk(dcpl_id,obj.chunk.rank,obj.chunk.chunk_lengths)<0)
 						return -1;
@@ -385,15 +377,20 @@ int apply_filters(const char* name,    /* object name from traverse list */
 				* H5Z_FILTER_SCALEOFFSET , scale+offset compression
 				*-------------------------------------------------------------------------
 				*/
+
 			case H5Z_FILTER_SCALEOFFSET:
-				aggression=obj.filter[i].cd_values[0];
-				if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
-					return -1;
-                                /* The following line  needs to be changed in the future,
-                                   H5_SO_INT needs to be passed as a parameter, it can
-                                   be either H5_SO_FLOAT_DSCALE or H5_SO_INT. KY, 2005/8/31 */ 
-				if (H5Pset_scaleoffset(dcpl_id,H5Z_SO_INT,aggression)<0)
-					return -1;
+				{
+					H5Z_SO_scale_type_t scale_type; 
+     int                 scale_factor;      
+					
+					scale_type   = obj.filter[i].cd_values[0];
+					scale_factor = obj.filter[i].cd_values[1];
+					
+					if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
+						return -1;
+					if (H5Pset_scaleoffset(dcpl_id,scale_type,scale_factor)<0)
+						return -1;
+				}
 				break;
 			} /* switch */
 		}/*i*/

@@ -17,7 +17,6 @@
 #include "h5repack.h"
 
 
-
 /*-------------------------------------------------------------------------
  * Function: init_packobject
  *
@@ -36,7 +35,6 @@ void init_packobject(pack_info_t *obj)
  for ( j=0; j<H5_REPACK_MAX_NFILTERS; j++)
  {
   obj->filter[j].filtn        = -1;
-  obj->filter[j].szip_coding  = -1;
   for ( k=0; k<CDVALUES; k++)
    obj->filter[j].cd_values[k] = -1;
  }
