@@ -312,6 +312,8 @@ New Features
 
     Tools:
     ------
+	- Added build_h5perf_alone.sh that builds h5perf by standalone mode.
+	  AKC - 2005/09/18.
         - Sped up h5dump on files with large numbers of objects.
             QAK - 2005/08/25
         - Added a standalone mode for building h5perf.  AKC - 2005/08/12
