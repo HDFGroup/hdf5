@@ -595,7 +595,12 @@ h5_show_hostname(void)
 	    printf("thread 0.");
     }
 #elif defined(H5_HAVE_THREADSAFE)
+#ifdef WIN32
+    printf("some thread: no way to know the thread number from pthread on windows.");
+#else
     printf("thread %d.", (int)pthread_self());
+#endif
+
 #else
     printf("thread 0.");
 #endif
@@ -621,12 +626,15 @@ h5_show_hostname(void)
    }
 
 #endif
-
+#ifdef H5_HAVE_GETHOSTNAME
     if (gethostname(hostname, 80) < 0){
 	printf(" gethostname failed\n");
     }
     else
 	printf(" hostname=%s\n", hostname);
+#else
+    printf(" gethostname not supported\n");
+#endif
 #ifdef WIN32
     WSACleanup();
 #endif
@@ -917,7 +925,7 @@ char* getenv_all(MPI_Comm comm, int root, const char* name)
 		env = (char*) HDrealloc(env, len+1);
 
 	    MPI_Bcast(env, len, MPI_CHAR, root, comm);
-	    env[len+1] = '\0';
+	    env[len] = '\0';
 	}
 	else
 	{
