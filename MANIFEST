@@ -327,6 +327,7 @@ a------------------------------------------------------------------------------
 ./perform/Makefile.am
 ./perform/Makefile.in
 ./perform/benchpar.c
+./perform/build_h5perf_alone.sh
 ./perform/chunk.c
 ./perform/gen_report.pl
 ./perform/iopipe.c
