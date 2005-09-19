@@ -89,6 +89,8 @@ MPI_Info    h5_io_info_g=MPI_INFO_NULL;/* MPI INFO object for IO */
  */
 static const char *multi_letters = "msbrglo";
 
+static herr_t h5_errors(void *client_data);
+
 
 /*-------------------------------------------------------------------------
  * Function:	h5_errors
@@ -106,11 +108,11 @@ static const char *multi_letters = "msbrglo";
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 h5_errors(void UNUSED *client_data)
 {
     H5_FAILED();
-    H5Eprint (stdout);
+    H5Eprint(stdout);
     return 0;
 }
 
@@ -212,7 +214,7 @@ h5_reset(void)
     HDfflush(stdout);
     HDfflush(stderr);
     H5close();
-    H5Eset_auto (h5_errors, NULL);
+    H5Eset_auto(h5_errors, NULL);
 
     /*
      * Cause the library to emit some diagnostics early so they don't

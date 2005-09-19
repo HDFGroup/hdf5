@@ -133,7 +133,7 @@ void TestInit(const char *ProgName, void (*private_usage)(void), int (*private_p
      * half the functions this test calls are private, so automatic error
      * reporting wouldn't do much good since it's triggered at the API layer.
      */
-    H5Eset_auto (NULL, NULL);
+    H5Eset_auto(NULL, NULL);
 
     /*
      * Record the program name and private routines if provided.
@@ -298,7 +298,9 @@ void PerformTests(void)
             MESSAGE(5, ("===============================================\n"));
             Test[Loop].NumErrors = num_errs;
 	    Test_parameters = Test[Loop].Parameters;
+	    ALARM_ON;
             Test[Loop].Call();
+	    ALARM_OFF;
             Test[Loop].NumErrors = num_errs - Test[Loop].NumErrors;
             MESSAGE(5, ("===============================================\n"));
             MESSAGE(5, ("There were %d errors detected.\n\n", (int)Test[Loop].NumErrors));
@@ -417,7 +419,7 @@ int GetTestNumErrs(void)
 
 
 /*
- * Retrieve the number of testing errors for the testing framework
+ * Increment the number of testing errors
  */
 void IncTestNumErrs(void)
 {
