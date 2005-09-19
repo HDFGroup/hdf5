@@ -5882,9 +5882,9 @@ fi
 if test "X${HDF_CXX}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
   H5_CXX_SHARED="yes"
 
-  if (${CXX} -V 2>&1 | grep 'Sun WorkShop') > /dev/null; then
-    echo "    warning: shared libraries are not supported for Sun WorkShop C++!"
-    echo "    disabling shared Fortran libraries"
+  if (echo dummy ${CXX} ${CXXLD} ${CFLAGS} ${CXXFLAGS} ${LDFLAGS} | grep 'xarch') > /dev/null; then
+    echo "    warning: -xarch flag detected"
+    echo "    disabling shared C++ libraries"
     H5_CXX_SHARED="no"
   fi
 

@@ -562,18 +562,16 @@ fi
 AM_CONDITIONAL([FORTRAN_SHARED_CONDITIONAL], [test "X$H5_FORTRAN_SHARED" = "Xyes"])
 
 dnl ----------------------------------------------------------------------
-dnl Sun WorkShop C++ seems to have trouble with shared libraries in 64-bit
-dnl mode.  This may be related libtool's historical inability to handle the
-dnl -xarch=v9 flag, or the fact that our tests pass this flag as part of
-dnl the CXX variable rather than as a CXXFLAG.
-dnl Avoid the problem by turning off C++ shared libraries when this
-dnl compiler is involved.
+dnl Shared C++ libraries seem not to work on some platforms (modi4, shanti)
+dnl when the -xarch=v9 flag is used to enable 64-bit mode.
+dnl Try to detect the -xarch=v9 flag and disable C++ shared libraries if it's
+dnl being used.
 if test "X${HDF_CXX}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
   H5_CXX_SHARED="yes"
 
-  if (${CXX} -V 2>&1 | grep 'Sun WorkShop') > /dev/null; then
-    echo "    warning: shared libraries are not supported for Sun WorkShop C++!"
-    echo "    disabling shared Fortran libraries"
+  if (echo dummy ${CXX} ${CXXLD} ${CFLAGS} ${CXXFLAGS} ${LDFLAGS} | grep 'xarch') > /dev/null; then
+    echo "    warning: -xarch flag detected"
+    echo "    disabling shared C++ libraries"
     H5_CXX_SHARED="no"
   fi
 
