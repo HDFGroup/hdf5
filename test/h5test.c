@@ -89,7 +89,7 @@ MPI_Info    h5_io_info_g=MPI_INFO_NULL;/* MPI INFO object for IO */
  */
 static const char *multi_letters = "msbrglo";
 
-static herr_t h5_errors(hid_t err_stack, void *client_data);
+static herr_t h5_errors(void *client_data);
 
 
 /*-------------------------------------------------------------------------
@@ -109,11 +109,10 @@ static herr_t h5_errors(hid_t err_stack, void *client_data);
  *-------------------------------------------------------------------------
  */
 static herr_t
-h5_errors(hid_t err_stack, void UNUSED *client_data)
+h5_errors(void UNUSED *client_data)
 {
     H5_FAILED();
-    H5Eprint_stack(err_stack, stdout);
-
+    H5Eprint(stdout);
     return 0;
 }
 
@@ -215,8 +214,7 @@ h5_reset(void)
     HDfflush(stdout);
     HDfflush(stderr);
     H5close();
-
-    H5Eset_auto_stack(H5E_DEFAULT, h5_errors, NULL);
+    H5Eset_auto(h5_errors, NULL);
 
     /*
      * Cause the library to emit some diagnostics early so they don't
@@ -625,9 +623,11 @@ h5_show_hostname(void)
     }
     else
 	printf(" hostname=%s\n", hostname);
+#else
+    printf(" gethostname not supported\n");
+#endif
 #ifdef WIN32
     WSACleanup();
-#endif
 #endif
 }
 
