@@ -18,3 +18,4 @@ fi
 # Try native DEC compiler
 ARCH=${ARCH:='-arch host -tune host'}
 . $srcdir/config/dec-flags
+hdf5_mpi_complex_derived_datatype_works=${hdf5_mpi_complex_derived_datatype_works='no'}
