@@ -400,8 +400,8 @@
 
 	    $ ./configure --disable-shared
 
-	The C++ and Fortran libraries are currently only available in the
-	static format.
+	Shared C++ and Fortran libraries will be built if shared libraries
+	are enabled.
 
 	To build only statically linked executables on platforms which
 	support shared libraries, use the `--enable-static-exec' flag.

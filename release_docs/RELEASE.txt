@@ -277,6 +277,7 @@ New Features
 
     Fortran Library:
     ----------------
+         - added support for shared Fortran libraries.  -JML 2005/09/20
          - added missing h5tget_member_class_f function
                                                  EIP 2005/04/06         
          - added new functions h5fget_name_f and h5fget_filesize_f 
@@ -296,6 +297,7 @@ New Features
 
     C++ Library:
     ----------------
+         - added support for shared C++ libraries.  -JML 2005/09/20
         - Added missing member functions
                 H5::CompType::getMemberArrayType
                 H5::CompType::getMemberVarLenType
