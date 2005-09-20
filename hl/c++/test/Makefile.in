@@ -709,9 +709,10 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
 $(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) dummysh.chkexe_:
 	@if test "X$@" != "X.chkexe_" && test "X$@" != "Xdummysh.chkexe_"; then \
 	   tname=`basename $(@:.chkexe_=)`;\
+	   chkname=`basename $(@:.chkexe_=.chkexe)`;\
 	   log=`basename $(@:.chkexe_=.chklog)`; \
 	   echo "============================"; \
-	   if $(top_srcdir)/bin/newer `basename $(@:.chkexe_=.chkexe)` $(SCRIPT_DEPEND); then \
+	   if $(top_srcdir)/bin/newer ${chkname} $(SCRIPT_DEPEND); then \
 	      echo "No need to test $${tname} again."; \
 	   else \
 	      echo "============================" > $${log}; \
@@ -729,7 +730,7 @@ $(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) dummysh.chkexe_:
 	      RUNSERIAL="$(RUNSERIAL)" RUNPARALLEL="$(RUNPARALLEL)"           \
 	      srcdir="$(srcdir)" \
 	         $(TIME) $(SHELL) $(@:.chkexe_=) $(TEST_FLAGS) >> $${log} 2>&1 \
-	         && touch `basename $(@:.chkexe_=.chkexe)` || \
+	         && touch $${chkname} || \
 	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
 	         (cat $${log} && false) || exit 1; \
 	      echo "" >> $${log}; \

@@ -32,7 +32,7 @@ f1=$1
 shift
 
 for f in $*; do
-    if ! test -f $f; then
+    if test ! -f $f; then
 	exit 1
     fi
     if test X = X`find $f1 -newer $f -print`; then
