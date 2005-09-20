@@ -194,7 +194,9 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
 
   if (options->not_cmp==1)
   {
+			printf("--------------------------------\n");
    printf("Some objects are not comparable\n");
+			printf("--------------------------------\n");
    if (!options->m_verbose)
     printf("Use -v for a list of objects.\n");
   }
