@@ -155,6 +155,8 @@ ICProjConvert80  windows\tools\h5ls\h5ls.vcproj /IC	>>	convert_intel.log
 ICProjConvert80  windows\tools\h5lsdll\h5lsdll.vcproj /IC	>>	convert_intel.log
 ICProjConvert80  windows\tools\h5dump\h5dump.vcproj /IC	>>	convert_intel.log
 ICProjConvert80  windows\tools\h5repack\h5repack.vcproj /IC	>>	convert_intel.log
+ICProjConvert80  windows\tools\h5stat\h5stat.vcproj /IC	>>	convert_intel.log
+ICProjConvert80  windows\tools\h5statdll\h5statdll.vcproj /IC	>>	convert_intel.log
 ICProjConvert80  windows\tools\h5unjam\h5unjam.vcproj /IC	>>	convert_intel.log
 ICProjConvert80  windows\tools\h5repart\h5repart.vcproj /IC	>>	convert_intel.log
 ICProjConvert80  windows\tools\talign\talign.vcproj /IC	>>	convert_intel.log
