@@ -207,6 +207,8 @@ echo ************************************************************ >> convert.log
   convert.js %1\windows\tools\h5lsdll\h5lsdll.dsp %1\windows\tools\h5lsdll\h5lsdll.vcproj  >> convert.log
   convert.js %1\windows\tools\h5dump\h5dump.dsp %1\windows\tools\h5dump\h5dump.vcproj  >> convert.log
   convert.js %1\windows\tools\h5repack\h5repack.dsp %1\windows\tools\h5repack\h5repack.vcproj  >> convert.log
+  convert.js %1\windows\tools\h5stat\h5stat.dsp %1\windows\tools\h5stat\h5stat.vcproj  >> convert.log
+  convert.js %1\windows\tools\h5statdll\h5statdll.dsp %1\windows\tools\h5statdll\h5statdll.vcproj  >> convert.log
   convert.js %1\windows\tools\h5unjam\h5unjam.dsp %1\windows\tools\h5unjam\h5unjam.vcproj  >> convert.log
   convert.js %1\windows\tools\h5repart\h5repart.dsp %1\windows\tools\h5repart\h5repart.vcproj  >> convert.log
   convert.js %1\windows\tools\talign\talign.dsp %1\windows\tools\talign\talign.vcproj  >> convert.log
