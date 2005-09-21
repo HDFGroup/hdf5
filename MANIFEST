@@ -1552,6 +1552,8 @@ a------------------------------------------------------------------------------
 ./windows/tools/testfiles/h5reparttst/h5reparttst.dsp
 ./windows/tools/toolslib/toolslib.dsp
 ./windows/tools/toolslibD/toolslibD.dsp
+./windows/tools/h5stat/h5stat.dsp
+./windows/tools/h5statdll/h5statdll.dsp
 ./windows/tools/deleteline.bat
 ./windows/tools/difftest.BAT
 ./windows/tools/dumptest.bat
