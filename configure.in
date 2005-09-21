@@ -2548,7 +2548,7 @@ else
    AC_CACHE_VAL([hdf5_cv_ldouble_to_integer_accurate], [hdf5_cv_ldouble_to_integer_accurate=yes])
 fi
 
-if test ${hdf5_cv_ldouble_to_integer_accurate} = "yes"; then
+if test "${hdf5_cv_ldouble_to_integer_accurate}" = "yes"; then
   AC_DEFINE([LDOUBLE_TO_INTEGER_ACCURATE], [1],
             [Define if your system can convert long double to integers accurately.])
   AC_MSG_RESULT([yes])

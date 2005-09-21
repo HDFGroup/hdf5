@@ -50206,7 +50206,7 @@ fi
 
 fi
 
-if test ${hdf5_cv_ldouble_to_integer_accurate} = "yes"; then
+if test "${hdf5_cv_ldouble_to_integer_accurate}" = "yes"; then
 
 cat >>confdefs.h <<\_ACEOF
 #define LDOUBLE_TO_INTEGER_ACCURATE 1
