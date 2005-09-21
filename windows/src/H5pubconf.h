@@ -138,3 +138,6 @@ in the file file_io.win32.c and including it on the projects
 
 /* Check exception handling functions during data conversions */
 #define H5_WANT_DCONV_EXCEPTION 1
+
+/* uncomment the following line if we want parallel HDF5 support */
+/* #define H5_HAVE_PARALLEL  */

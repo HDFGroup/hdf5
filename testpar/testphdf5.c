@@ -410,8 +410,14 @@ int main(int argc, char **argv)
 	    "collective group and dataset write", &collngroups_params);
     AddTest("ingrpr", independent_group_read, NULL,
 	    "independent group and dataset read", &collngroups_params);
-    AddTest("bigdset", big_dataset, NULL,
-	    "big dataset test", PARATESTFILE);
+ /* By default, do not run big dataset on WIN32. */
+#ifdef WIN32
+    AddTest("-bigdset", big_dataset, NULL, 
+            "big dataset test", PARATESTFILE);
+#else
+				 AddTest("bigdset", big_dataset, NULL, 
+            "big dataset test", PARATESTFILE);
+#endif
     AddTest("fill", dataset_fillvalue, NULL,
 	    "dataset fill value", PARATESTFILE);
 

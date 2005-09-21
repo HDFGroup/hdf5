@@ -438,7 +438,7 @@ void big_dataset(void)
 
     /* Check that file of the correct size was created */
     file_size=h5_mpi_get_file_size(filename, MPI_COMM_WORLD, MPI_INFO_NULL);
-    VRFY((file_size == 2147485696ULL), "File is correct size");
+    VRFY((file_size == 2147485696 /*ULL*/), "File is correct size");
 
     /*
      * Create >4GB HDF5 file
@@ -467,7 +467,7 @@ void big_dataset(void)
 
     /* Check that file of the correct size was created */
     file_size=h5_mpi_get_file_size(filename, MPI_COMM_WORLD, MPI_INFO_NULL);
-    VRFY((file_size == 4294969344ULL), "File is correct size");
+    VRFY((file_size == 4294969344 /*ULL*/), "File is correct size");
 
     /*
      * Create >8GB HDF5 file
@@ -496,7 +496,7 @@ void big_dataset(void)
 
     /* Check that file of the correct size was created */
     file_size=h5_mpi_get_file_size(filename, MPI_COMM_WORLD, MPI_INFO_NULL);
-    VRFY((file_size == 8589936640ULL), "File is correct size");
+    VRFY((file_size == 8589936640 /*ULL*/), "File is correct size");
 
     /* Close fapl */
     ret=H5Pclose (fapl);

@@ -130,7 +130,6 @@ typedef struct H5FD_mpiposix_t {
  *			either lseek() or lseek64().
  */
 /* adding for windows NT file system support. */
-/* pvn: added __MWERKS__ support. */
 
 #ifdef H5_HAVE_LSEEK64
 #   define file_offset_t	off64_t
@@ -751,7 +750,12 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
     /* Set the general file information */
     file->fd = fd;
     file->eof = sb.st_size;
+
+				/* for WIN32 support. WIN32 'stat' does not have st_blksize and st_blksize
+				   is only used for the H5_HAVE_GPFS case */
+#ifdef H5_HAVE_GPFS
     file->blksize = sb.st_blksize;
+#endif
 
     /* Set this field in the H5FD_mpiposix_t struct for later use */
     file->use_gpfs = fa->use_gpfs;
@@ -1372,7 +1376,7 @@ H5FD_mpiposix_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing
         if(file->mpi_rank == H5_PAR_META_WRITE) {
 #ifdef WIN32
             /* Map the posix file handle to a Windows file handle */
-            filehandle = _get_osfhandle(fd);
+            filehandle = _get_osfhandle(file->fd); 
 
             /* Translate 64-bit integers into form Windows wants */
             /* [This algorithm is from the Windows documentation for SetFilePointer()] */
