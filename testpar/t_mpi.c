@@ -657,6 +657,7 @@ static int test_mpio_derived_dtype(char *filename) {
     MPI_Datatype  adv_filetype,bas_filetype[2];
     MPI_Datatype  etypenew, filetypenew;
     MPI_Offset    disp,dispnew;
+    MPI_Status    Status;
     MPI_Aint      adv_disp[2];
     MPI_Aint      offsets[1],adv_offsets[2];
     int           blocklens[1],adv_blocklens[2];
@@ -746,7 +747,7 @@ static int test_mpio_derived_dtype(char *filename) {
 	return 1;
     }
 
-    if((mpi_err = MPI_File_write(fh,buf,2,MPI_BYTE,MPI_STATUS_IGNORE))!= MPI_SUCCESS){
+    if((mpi_err = MPI_File_write(fh,buf,2,MPI_BYTE,&Status))!= MPI_SUCCESS){
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
 	printf("MPI_File_write failed (%s)\n", mpi_err_str);
 	return 1;
@@ -772,7 +773,7 @@ static int test_mpio_derived_dtype(char *filename) {
 	printf("MPI_File_set_view failed (%s)\n", mpi_err_str);
 	return 1;
     }
-    if((mpi_err = MPI_File_read(fh,outbuf,2,MPI_BYTE,MPI_STATUS_IGNORE))!=MPI_SUCCESS){
+    if((mpi_err = MPI_File_read(fh,outbuf,2,MPI_BYTE,&Status))!=MPI_SUCCESS){
       MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
       printf("MPI_File_read failed (%s)\n", mpi_err_str);
       return 1;
