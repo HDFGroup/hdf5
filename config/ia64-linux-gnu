@@ -37,18 +37,6 @@ esac
 
 # The default Fortran 90 compiler
 
-#
-# HDF5 integers
-#
-#       R_LARGE is the number of digits for the bigest integer supported.
-#       R_INTEGER is the number of digits in INTEGER
-#
-# (for the Linux architechture)
-#
-
-R_LARGE=18
-R_INTEGER=9
-
 # Use Intel Fortran compiler by default.
 if test "X-$FC" = "X-"; then
   FC="ifort"
@@ -60,22 +48,10 @@ case $FC in
     # -Vaxlib is for non-standard fortran calls like exit().
     MORE_FCFLAGS='-fpp -DDEC$=DEC_ -DMS$=MS_ -Vaxlib'
     FCFLAGS="$FCFLAGS $MORE_FCFLAGS"
-    HADDR_T='SELECTED_INT_KIND(R_LARGE)'
-    HSIZE_T='SELECTED_INT_KIND(R_LARGE)'
-    HSSIZE_T='SELECTED_INT_KIND(R_LARGE)'
-    HID_T='SELECTED_INT_KIND(R_INTEGER)'
-    SIZE_T='SELECTED_INT_KIND(R_LARGE)'
-    OBJECT_NAMELEN_DEFAULT_F=-1
     f9x_flags_set=yes
     ;;
 
   *)
-    HADDR_T='SELECTED_INT_KIND(R_LARGE)'
-    HSIZE_T='SELECTED_INT_KIND(R_LARGE)'
-    HSSIZE_T='SELECTED_INT_KIND(R_LARGE)'
-    HID_T='SELECTED_INT_KIND(R_INTEGER)'
-    SIZE_T='SELECTED_INT_KIND(R_LARGE)'
-    OBJECT_NAMELEN_DEFAULT_F=-1
     f9x_flags_set=yes
     ;;
 esac

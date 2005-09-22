@@ -12,23 +12,6 @@ hdf5_cv_printf_ll=${hdf5_cv_printf_ll='ll'}
 
 # The default Fortran 90 compiler
 
-#
-# HDF5 integers
-#
-# 	R_LARGE is the number of digits for the bigest integer supported.
-#	R_INTEGER is the number of digits in INTEGER
-#
-# (for the AIX architechture)
-#
-R_LARGE=18
-R_INTEGER=9
-HADDR_T='SELECTED_INT_KIND(R_LARGE)'
-HSIZE_T='SELECTED_INT_KIND(R_LARGE)'
-HSSIZE_T='SELECTED_INT_KIND(R_LARGE)'
-HID_T='SELECTED_INT_KIND(R_INTEGER)'
-SIZE_T='SELECTED_INT_KIND(R_INTEGER)'
-OBJECT_NAMELEN_DEFAULT_F=-1
-
 if test "X-" = "X-$FC"; then
   FC=xlf
 fi
