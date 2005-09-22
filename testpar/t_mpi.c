@@ -943,6 +943,12 @@ main(int argc, char **argv)
     fapl = H5Pcreate (H5P_FILE_ACCESS);
     H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
 
+    /* set alarm. */
+    ALARM_ON;
+
+    /*=======================================
+     * MPIO complicated derived datatype test
+     *=======================================*/
     /* test_mpio_derived_dtype often hangs when fails.
      * Do not run it if it is known NOT working unless ask to
      * run explicitly by high verbose mode.
@@ -950,25 +956,25 @@ main(int argc, char **argv)
 #ifdef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
     MPI_BANNER("MPIO complicated derived datatype test...");
     ret_code = test_mpio_derived_dtype(filenames[0]);
+#else
+    if (VERBOSE_HI){
+	MPI_BANNER("MPIO complicated derived datatype test...");
+	ret_code = test_mpio_derived_dtype(filenames[0]);
+    }else{
+	MPI_BANNER("MPIO complicated derived datatype test SKIPPED.");
+	ret_code = 0;	/* fake ret_code */
+    }
+#endif
     ret_code = errors_sum(ret_code);
     if (mpi_rank==0 && ret_code > 0){
 	printf("***FAILED with %d total errors\n", ret_code);
 	nerrors += ret_code;
     }
-#else
-    if (!VERBOSE_HI){
-	MPI_BANNER("MPIO complicated derived datatype test SKIPPED.");
-    }else{
-	MPI_BANNER("MPIO complicated derived datatype test...");
-	ret_code = test_mpio_derived_dtype(filenames[0]);
-	ret_code = errors_sum(ret_code);
-	if (mpi_rank==0 && ret_code > 0){
-	    printf("***FAILED with %d total errors\n", ret_code);
-	    nerrors += ret_code;
-	}
-    }
-#endif
 
+
+    /*=======================================
+     * MPIO 1 write Many read test
+     *=======================================*/
     MPI_BANNER("MPIO 1 write Many read test...");
     ret_code = test_mpio_1wMr(filenames[0], USENONE);
     ret_code = errors_sum(ret_code);
@@ -997,6 +1003,10 @@ main(int argc, char **argv)
 	}
     }
 
+
+    /*=======================================
+     * MPIO MPIO File size range test
+     *=======================================*/
     MPI_BANNER("MPIO File size range test...");
     ret_code = test_mpio_gb_file(filenames[0]);
     ret_code = errors_sum(ret_code);
@@ -1005,6 +1015,10 @@ main(int argc, char **argv)
 	nerrors += ret_code;
     }
 
+
+    /*=======================================
+     * MPIO independent overlapping writes
+     *=======================================*/
     MPI_BANNER("MPIO independent overlapping writes...");
     ret_code = test_mpio_overlap_writes(filenames[0]);
     ret_code = errors_sum(ret_code);
@@ -1028,6 +1042,9 @@ finish:
 	}
 	printf("===================================\n");
     }
+
+    /* turn off alarm */
+    ALARM_OFF;
 
     h5_cleanup(FILENAME, fapl);
     H5close();
