@@ -94,7 +94,9 @@ typedef struct H5FD_mpiposix_t {
     haddr_t	pos;		/* Current file I/O position	        */
     int		op;		/* Last file I/O operation		*/
     hsize_t	naccess;	/* Number of (write) accesses to file   */
+#ifdef H5_HAVE_GPFS
     size_t      blksize;        /* Block size of file system            */
+#endif
     hbool_t     use_gpfs;       /* Use GPFS to write things             */
 #ifndef WIN32
     /*
@@ -751,8 +753,8 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
     file->fd = fd;
     file->eof = sb.st_size;
 
-				/* for WIN32 support. WIN32 'stat' does not have st_blksize and st_blksize
-				   is only used for the H5_HAVE_GPFS case */
+    /* for WIN32 support. WIN32 'stat' does not have st_blksize and st_blksize
+       is only used for the H5_HAVE_GPFS case */
 #ifdef H5_HAVE_GPFS
     file->blksize = sb.st_blksize;
 #endif
