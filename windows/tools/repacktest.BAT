@@ -19,8 +19,13 @@ REM testfiles\h5repacktst\%1\h5repacktst
 
 mkdir temptest
 type nul > temptest\empty.txt
+
+REM For test1.h5 and test2.h5, the output will be "Some objects are not comparable
+REM but actually there is no difference between two compared file"
 type nul > temptest\notcomparable.txt
+echo -------------------------------->>temptest\notcomparable.txt
 echo Some objects are not comparable>> temptest\notcomparable.txt
+echo -------------------------------->>temptest\notcomparable.txt
 echo Use -v for a list of objects.>> temptest\notcomparable.txt
 
 type nul > repacktest%2_%1.txt
