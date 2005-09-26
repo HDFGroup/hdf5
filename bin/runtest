@@ -644,6 +644,7 @@ TIMEKEEPERLOG=${LOGDIR}/TIMEKEEPER_LOG_${TODAY}
 CVSLOG=${LOGDIR}/CVS_LOG_${TODAY}
 CVSLOG_LOCK=${LOGDIR}/CVS_LOG_LOCK_${TODAY}
 DIFFLOG=${LOGDIR}/DIFF_LOG_${TODAY}
+COPYRIGHT_ERR=${LOGDIR}/COPYRIGHT_ERR_${TODAY}
 # Snap Test hosts and Configuration files
 ALLHOSTSFILE=${SNAPYARD}/allhostfile
 SNAPTESTCFG=${SNAPYARD}/snaptest.cfg
@@ -701,8 +702,8 @@ PRINT STANDARD_OPT=$STANDARD_OPT
 PRINT TEST_TYPES=$TEST_TYPES
 PRINT_BLANK
 
-# Do a checkout if one has not been done today
-# Also check MANIFEST file
+# Do a checkout if one has not been done today.
+# Then check MANIFEST file and copyrights noitces.
 if [ -z "$NOCVS" ]; then
     PRINT "Running CVS checkout with output saved in"
     PRINT "   $CVSLOG"
@@ -717,6 +718,9 @@ if [ -z "$NOCVS" ]; then
 	REPORT_ERR "****FAILED ${HOSTNAME}: CVS checkout****"
 	exit $errcode
     fi
+    # ===================
+    # Check MANIFEST file
+    # ===================
     PRINT Checking MAINFEST file ...
     (cd $SNAPYARD/current; bin/chkmanifest) > $TMPFILE 2>&1
     errcode=$?
@@ -735,6 +739,33 @@ if [ -z "$NOCVS" ]; then
             echo =========================
 	    echo ""
 	) >> $FAILEDDETAIL
+    fi
+    rm $TMPFILE
+    PRINT_BLANK
+    # ======================
+    # Check Copyright notice
+    # ======================
+    PRINT Checking Copyrights notices ...
+    (cd $SNAPYARD/current; bin/chkcopyright) > $TMPFILE 2>&1
+    if [ ! -s $TMPFILE ]; then
+	# No output means all is well.
+	echo Passed.
+    else
+	# Save the output and report some of it.
+	# Do not report it as failed for runtest yet.
+	# Send a separate report mail via hardcoding.
+	# Need fixes/cleanup later.
+	echo "Failed. See detail in another report mail"
+	cp $TMPFILE $COPYRIGHT_ERR
+        (   
+	    nlines=300
+	    echo =========================
+	    echo "Copyright checking failed. Showing first $nlines lines of output."
+	    echo "Complete output is in file $COPYRIGHT_ERR"
+	    echo =========================
+	    head -$nlines $COPYRIGHT_ERR
+	    echo ...
+	)  | Mail -s "${H5VERSION} Copyrights check Failed" hdf5lib
     fi
     rm $TMPFILE
     PRINT_BLANK
