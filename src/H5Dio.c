@@ -1606,29 +1606,9 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
                 }
 #ifndef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
                 else {
-                    int is_regular;     /* If this chunk's selections are regular */
-                    int mpi_code;       /* MPI error code */
-                    int all_regular = 0;    /* If this chunk's selections are regular on all processes */
-
-                    /* Determine if this process has regular selections */
-                    if(H5S_SELECT_IS_REGULAR(chunk_info->fspace) == TRUE &&
-                            H5S_SELECT_IS_REGULAR(chunk_info->mspace) == TRUE)
-                        is_regular = 1;
-                    else
-                        is_regular = 0;
-
-                    /* Determine if all processes have regular selections */
-                    if (MPI_SUCCESS != (mpi_code = MPI_Allreduce(&is_regular, &all_regular, 1, MPI_INT, MPI_LAND, io_info->comm)))
-                        HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
-
-                    /* For regular selection,
-                        if MPI_COMPLEX_DERIVED_DATATYPE is not defined,
-                        unless spaces for all processors are regular, independent read operation should be performed.*/
-                    if(!all_regular) {
                         /* Switch to independent I/O (temporarily) */
                         make_ind = TRUE;
                         make_coll = TRUE;
-                    } /* end if */
                 } /* end else */
 #endif /* H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS */
             } /* end if */
@@ -1986,29 +1966,9 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
 	        }
 #ifndef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
 	        else {
-                    int is_regular;     /* If this chunk's selections are regular */
-                    int mpi_code;       /* MPI error code */
-                    int all_regular = 0;    /* If this chunk's selections are regular on all processes */
-
-                    /* Determine if this process has regular selections */
-                    if(H5S_SELECT_IS_REGULAR(chunk_info->fspace) == TRUE &&
-                            H5S_SELECT_IS_REGULAR(chunk_info->mspace) == TRUE)
-                        is_regular = 1;
-                    else
-                        is_regular = 0;
-
-                    /* Determine if all processes have regular selections */
-                    if (MPI_SUCCESS != (mpi_code = MPI_Allreduce(&is_regular, &all_regular, 1, MPI_INT, MPI_LAND, io_info->comm)))
-                        HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
-
-                    /* For regular selection,
-                        if MPI_COMPLEX_DERIVED_DATATYPE is not defined,
-                        unless spaces for all processors are regular, independent read operation should be performed.*/
-                    if(!all_regular) {
                         /* Switch to independent I/O (temporarily) */
                         make_ind = TRUE;
                         make_coll = TRUE;
-                    } /* end if */
                 } /* end else */
 #endif /* H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS */
             } /* end if */
