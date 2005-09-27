@@ -2328,7 +2328,7 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t si
                 H5_ASSIGN_OVERFLOW(overlap_size,(file->accum_loc+file->accum_size)-addr,haddr_t,size_t);
 
                 /* Block to free is in the middle of the accumulator */
-                if(H5F_addr_lt(addr,file->accum_loc+file->accum_size)) {
+                if(H5F_addr_lt((addr + size), file->accum_loc + file->accum_size)) {
                     haddr_t tail_addr;
                     size_t tail_size;
 

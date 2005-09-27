@@ -182,7 +182,7 @@ extern hid_t H5AC_ind_dxpl_id;
   /* int         version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,     \
   /* hbool_t     rpt_fcn_enabled        = */ FALSE,                           \
   /* hbool_t     set_initial_size       = */ TRUE,                            \
-  /* size_t      initial_size           = */ (1 * 1024 * 1024),               \
+  /* size_t      initial_size           = */ ( 1 * 1024 * 1024),              \
   /* double      min_clean_fraction     = */ 0.25,                            \
   /* size_t      max_size               = */ (16 * 1024 * 1024),              \
   /* size_t      min_size               = */ ( 1 * 1024 * 1024),              \
@@ -216,6 +216,7 @@ extern hid_t H5AC_ind_dxpl_id;
 #define H5AC__SET_FLUSH_MARKER_FLAG	H5C__SET_FLUSH_MARKER_FLAG
 #define H5AC__DELETED_FLAG		H5C__DELETED_FLAG
 #define H5AC__DIRTIED_FLAG		H5C__DIRTIED_FLAG
+#define H5AC__SIZE_CHANGED_FLAG		H5C__SIZE_CHANGED_FLAG
 #define H5AC__FLUSH_INVALIDATE_FLAG	H5C__FLUSH_INVALIDATE_FLAG
 #define H5AC__FLUSH_CLEAR_ONLY_FLAG	H5C__FLUSH_CLEAR_ONLY_FLAG
 #define H5AC__FLUSH_MARKED_ENTRIES_FLAG	H5C__FLUSH_MARKED_ENTRIES_FLAG
@@ -235,6 +236,7 @@ H5_DLL herr_t H5AC_unprotect(H5F_t *f, hid_t dxpl_id,
 H5_DLL herr_t H5AC_flush(H5F_t *f, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5AC_rename(H5F_t *f, const H5AC_class_t *type,
 			   haddr_t old_addr, haddr_t new_addr);
+
 H5_DLL herr_t H5AC_dest(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5AC_stats(const H5F_t *f);
 

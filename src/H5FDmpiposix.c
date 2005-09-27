@@ -910,6 +910,12 @@ done:
  *
  * Modifications:
  *
+ *              John Mainzer -- 9/21/05
+ *              Modified code to turn off the
+ *              H5FD_FEAT_ACCUMULATE_METADATA_WRITE flag.
+ *		With the movement of all cache writes to process 0, 
+ *		this flag has become problematic in PHDF5.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -923,15 +929,6 @@ H5FD_mpiposix_query(const H5FD_t UNUSED *_file, unsigned long *flags /* out */)
     if(flags) {
         *flags=0;
         *flags|=H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
-
-        /* Distinguish between updating the metadata accumulator on writes and
-         * reads.  This is particularly (perhaps only, even) important for MPI-I/O
-         * where we guarantee that writes are collective, but reads may not be.
-         * If we were to allow the metadata accumulator to be written during a
-         * read operation, the application would hang.
-         */
-        *flags|=H5FD_FEAT_ACCUMULATE_METADATA_WRITE; /* OK to accumulate metadata for faster writes */
-
         *flags|=H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
     } /* end if */
 
@@ -1235,6 +1232,14 @@ H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
     /* Metadata specific actions */
+    /* All metadata is now written from process 0 -- thus this function
+     * needs to be re-written to reflect this.  For now I have simply 
+     * commented out the code that attempts to synchronize metadata 
+     * writes between processes, but we should really just flag an error
+     * whenever any process other than process 0 attempts to write 
+     * metadata.
+     * 						-- JRM 9/1/05
+     */
     if(type!=H5FD_MEM_DRAW) {
         unsigned		block_before_meta_write=0;      /* Whether to block before a metadata write */
 
@@ -1252,9 +1257,11 @@ H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
             if(H5P_get(plist,H5AC_BLOCK_BEFORE_META_WRITE_NAME,&block_before_meta_write)<0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get H5AC property")
 
+#if 0 /* JRM */
         if(block_before_meta_write)
             if (MPI_SUCCESS!= (mpi_code=MPI_Barrier(file->comm)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
+#endif /* JRM */
 
         /* Only one process will do the actual write if all procs in comm write same metadata */
         if (file->mpi_rank != H5_PAR_META_WRITE)
@@ -1328,6 +1335,14 @@ done:
         file->pos = HADDR_UNDEF;
         file->op = OP_UNKNOWN;
     } /* end if */
+#if 0 /* JRM */
+        /* Since metadata writes are now done by process 0 only, this broadcast
+	 * is no longer needed.  I leave it in and commented out to remind us
+	 * that we need to re-work this function to reflect this reallity.
+	 *
+	 *                                          -- JRM 9/1/05
+	 */
+
     /* Guard against getting into metadata broadcast in failure cases */
     else {
         /* when only one process writes, need to broadcast the ret_value to other processes */
@@ -1336,6 +1351,7 @@ done:
                 HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
         } /* end if */
     } /* end else */
+#endif /* JRM */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_mpiposix_write() */

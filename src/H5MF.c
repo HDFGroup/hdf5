@@ -399,9 +399,9 @@ done:
  *
  * Purpose:	Extend a block in the file.
  *
- * Return:	Success:	TRUE(1)/FALSE(0)
+ * Return:	Success:	Non-negative
  *
- * 		Failure:	FAIL
+ * 		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
  *              Saturday, June 12, 2004
@@ -410,10 +410,10 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-htri_t
+herr_t
 H5MF_extend(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hsize_t extra_requested)
 {
-    htri_t	ret_value;      /* Return value */
+    herr_t	ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5MF_extend, FAIL);
 

@@ -439,7 +439,7 @@ void big_dataset(void)
     /* Check that file of the correct size was created */
     file_size=h5_mpi_get_file_size(filename, MPI_COMM_WORLD, MPI_INFO_NULL);
 #ifndef WIN32
-    VRFY((file_size == 2147485696ULL), "File is correct size");
+    VRFY((file_size == 2147485696ULL), "File is correct size (~2GB)");
 #endif
 
     /*
@@ -470,7 +470,7 @@ void big_dataset(void)
     /* Check that file of the correct size was created */
     file_size=h5_mpi_get_file_size(filename, MPI_COMM_WORLD, MPI_INFO_NULL);
 #ifndef WIN32
-    VRFY((file_size == 4294969344ULL), "File is correct size");
+    VRFY((file_size == 4294969344ULL), "File is correct size (~4GB)");
 #endif
 
     /*
@@ -501,7 +501,7 @@ void big_dataset(void)
     /* Check that file of the correct size was created */
     file_size=h5_mpi_get_file_size(filename, MPI_COMM_WORLD, MPI_INFO_NULL);
 #ifndef WIN32
-    VRFY((file_size == 8589936640ULL), "File is correct size");
+    VRFY((file_size == 8589936640ULL), "File is correct size (~8GB)");
 #endif
 
     /* Close fapl */

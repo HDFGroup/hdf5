@@ -67,7 +67,8 @@ static int H5F_flush_all_cb(void *f, hid_t fid, void *_invalidate);
 static unsigned H5F_get_objects(const H5F_t *f, unsigned types, int max_objs, hid_t *obj_id_list);
 static int H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void** file_handle);
-static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id);
+static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id,
+                      H5FD_t *lf);
 static herr_t H5F_dest(H5F_t *f, hid_t dxpl_id);
 static herr_t H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags);
 static herr_t H5F_close(H5F_t *f);
@@ -1426,10 +1427,16 @@ done:
  *		Updated for the new metadata cache, and associated
  *		property list changes.
  *
+ *		J Mainzer, Jun 30, 2005
+ *		Added lf parameter so the shared->lf field can be 
+ *		initialized prior to the call to H5AC_create() if a 
+ *		new instance of H5F_file_t is created.  lf should be
+ *		NULL if shared isn't, and vise versa.
+ *
  *-------------------------------------------------------------------------
  */
 static H5F_t *
-H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
+H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 {
     H5F_t	*f=NULL, *ret_value;
     H5P_genplist_t *plist;              /* Property list */
@@ -1441,14 +1448,17 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
     f->file_id = -1;
 
     if (shared) {
+        HDassert( lf == NULL );
 	f->shared = shared;
     } else {
+        HDassert( lf != NULL );
 	f->shared = H5FL_CALLOC(H5F_file_t);
 	f->shared->super_addr = HADDR_UNDEF;
 	f->shared->base_addr = HADDR_UNDEF;
 	f->shared->freespace_addr = HADDR_UNDEF;
 	f->shared->driver_addr = HADDR_UNDEF;
-
+        f->shared->lf = lf;
+    
 	/*
 	 * Copy the file creation and file access property lists into the
 	 * new file handle.  We do this early because some values might need
@@ -1803,10 +1813,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is already open for read-only")
 
         /* Allocate new "high-level" file struct */
-        if ((file = H5F_new(shared, fcpl_id, fapl_id)) == NULL)
+        if ((file = H5F_new(shared, fcpl_id, fapl_id, NULL)) == NULL)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create new file object")
 
-	lf = file->shared->lf;
+        lf = file->shared->lf;
     } else if (flags!=tent_flags) {
 	/*
 	 * This file is not yet open by the library and the flags we used to
@@ -1821,20 +1831,18 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
 	    file = NULL; /*to prevent destruction of wrong file*/
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
 	}
-	if (NULL==(file = H5F_new(NULL, fcpl_id, fapl_id)))
+	if (NULL==(file = H5F_new(NULL, fcpl_id, fapl_id, lf)))
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create new file object")
 	file->shared->flags = flags;
-	file->shared->lf = lf;
     } else {
 	/*
 	 * This file is not yet open by the library and our tentative opening
 	 * above is good enough.
 	 */
-	if (NULL==(file = H5F_new(NULL, fcpl_id, fapl_id)))
+	if (NULL==(file = H5F_new(NULL, fcpl_id, fapl_id, lf)))
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create new file object")
 
 	file->shared->flags = flags;
-	file->shared->lf = lf;
     }
 
     /* Short cuts */
@@ -2841,7 +2849,7 @@ H5Freopen(hid_t file_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
     /* Get a new "top level" file struct, sharing the same "low level" file struct */
-    if (NULL==(new_file=H5F_new(old_file->shared, H5P_FILE_CREATE_DEFAULT, H5P_FILE_ACCESS_DEFAULT)))
+    if (NULL==(new_file=H5F_new(old_file->shared, H5P_FILE_CREATE_DEFAULT, H5P_FILE_ACCESS_DEFAULT, NULL)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
 
     /* Keep old file's read/write intent in new file */
@@ -3389,6 +3397,40 @@ H5F_mpi_get_comm(const H5F_t *f)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_mpi_get_comm() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_mpi_get_size
+ *
+ * Purpose:     Retrieves the size of an MPI process.
+ *
+ * Return:      Success:        The size (positive)
+ *
+ *              Failure:        Negative
+ *
+ * Programmer:  John Mainzer
+ *              Friday, May 6, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5F_mpi_get_size(const H5F_t *f)
+{
+    int ret_value;
+
+    FUNC_ENTER_NOAPI(H5F_mpi_get_size, FAIL)
+
+    assert(f && f->shared);
+
+    /* Dispatch to driver */
+    if ((ret_value=H5FD_mpi_get_size(f->shared->lf))<0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_size request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_mpi_get_size() */
 #endif /* H5_HAVE_PARALLEL */
 
 

@@ -79,8 +79,17 @@
  *
  *						JRM - 7/19/04
  *
+ * The TBBT has since been replaced with a skip list.  This change 
+ * greatly predates this note.
+ *
+ *						JRM - 9/26/05
+ *
  * magic:	Unsigned 32 bit integer always set to H5C__H5C_T_MAGIC.  This
  *		field is used to validate pointers to instances of H5C_t.
+ *
+ * aux_ptr:	Pointer to void used to allow wrapper code to associate 
+ *		its data with an instance of H5C_t.  The H5C cache code
+ *		sets this field to NULL, and otherwise leaves it alone.
  *
  * max_type_id:	Integer field containing the maximum type id number assigned
  *		to a type of entry in the cache.  All type ids from 0 to
@@ -110,6 +119,10 @@
  *                 will attempt to reduce its size to the max_cache_size
  *                 limit on the next cache write.
  *
+ *		c) When an entry increases in size, the cache may exceed
+ *		   the max_cache_size limit until the next time the cache
+ *		   attempts to load or insert an entry.
+ *
  * min_clean_size: Nominal minimum number of clean bytes in the cache.
  *              The cache attempts to maintain this number of bytes of
  *              clean data so as to avoid case b) above.  Again, this is
@@ -126,7 +139,14 @@
  *		a write is permissible at any given point in time.
  *
  *		If no such function is specified (i.e. this field is NULL),
- *		the cache will presume that writes are always permissable.
+ *		the cache uses the following write_permitted field to
+ *		determine whether writes are permitted.
+ *
+ * write_permitted: If check_write_permitted is NULL, this boolean flag 
+ *		indicates whether writes are permitted.
+ *
+ * log_flush:	If provided, this function is called whenever a dirty 
+ *		entry is flushed to disk.
  *
  *
  * The cache requires an index to facilitate searching for entries.  The
@@ -483,6 +503,16 @@
  *		id equal to the array index has been renamed in the current
  *		epoch.
  *
+ * size_increases:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  
+ *		The cells are used to record the number of times an entry 
+ *		with type id equal to the array index has increased in
+ *		size in the current epoch.
+ *
+ * size_decreases:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  
+ *		The cells are used to record the number of times an entry 
+ *		with type id equal to the array index has decreased in
+ *		size in the current epoch.
+ *
  * total_ht_insertions: Number of times entries have been inserted into the
  *		hash table in the current epoch.
  *
@@ -580,6 +610,8 @@ struct H5C_t
 {
     uint32_t			magic;
 
+    void *			aux_ptr;
+
     int32_t			max_type_id;
     const char *                (* type_name_table_ptr);
 
@@ -587,6 +619,9 @@ struct H5C_t
     size_t                      min_clean_size;
 
     H5C_write_permitted_func_t	check_write_permitted;
+    hbool_t			write_permitted;
+
+    H5C_log_flush_func_t	log_flush;
 
     int32_t                     index_len;
     size_t                      index_size;
@@ -646,6 +681,8 @@ struct H5C_t
     int64_t                     flushes[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     evictions[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     renames[H5C__MAX_NUM_TYPE_IDS + 1];
+    int64_t                     size_increases[H5C__MAX_NUM_TYPE_IDS + 1];
+    int64_t                     size_decreases[H5C__MAX_NUM_TYPE_IDS + 1];
 
     int64_t			total_ht_insertions;
     int64_t			total_ht_deletions;

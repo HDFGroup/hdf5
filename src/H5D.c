@@ -2034,7 +2034,7 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
 #endif /* H5O_ENABLE_BOGUS */
 
     /* Add a modification time message. */
-    if (H5O_touch_oh(file, oh, TRUE, &oh_flags) < 0)
+    if (H5O_touch_oh(file, dxpl_id, oh, TRUE, &oh_flags) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update modification time message")
 
 done:

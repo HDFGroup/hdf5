@@ -1628,7 +1628,14 @@ H5FD_multi_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     if (HADDR_UNDEF==(addr=H5FDalloc(file->memb[mmt], type, dxpl_id, size)))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "member file can't alloc", HADDR_UNDEF)
     addr += file->fa.memb_addr[mmt];
-    if (addr+size>file->eoa) file->eoa = addr+size;
+    if ( addr + size > file->eoa ) {
+
+	if ( H5FD_multi_set_eoa(_file, addr + size) < 0 ) {
+        
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, \
+			"can't set eoa", HADDR_UNDEF)
+	}
+    }
     return addr;
 }
 

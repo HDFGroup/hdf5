@@ -188,11 +188,11 @@ main (void)
    /*
     * Attach to the string attribute using its index, then read and display the value.
     */
-   attr  = H5Aopen_idx(dataset, 2);
+   attr  = H5Aopen_idx(dataset, 1);
    atype = H5Tcopy(H5T_C_S1);
            H5Tset_size(atype, 5);
    ret   = H5Aread(attr, atype, string_out);
-   printf("The value of the attribute with index 2 is %s \n", string_out);
+   printf("The value of the attribute with index 1 is %s \n", string_out);
    ret   = H5Aclose(attr);
    ret   = H5Tclose(atype);
 

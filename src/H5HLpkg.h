@@ -67,7 +67,6 @@ struct H5HL_t {
     haddr_t		    addr;	/*address of data		*/
     size_t		    disk_alloc;	/*data bytes allocated on disk	*/
     size_t		    mem_alloc;	/*data bytes allocated in mem	*/
-    size_t		    disk_resrv; /*data bytes "reserved" on disk */
     uint8_t		   *chunk;	/*the chunk, including header	*/
     H5HL_free_t		   *freelist;	/*the free list			*/
 };

@@ -1767,7 +1767,10 @@ setup_cache(size_t max_cache_size,
                            min_clean_size,
                            (NUMBER_OF_ENTRY_TYPES - 1),
 			   (const char **)entry_type_names,
-                           check_write_permitted);
+                           check_write_permitted,
+                           TRUE,
+                           NULL,
+                           NULL);
 
     if ( cache_ptr == NULL ) {
 
@@ -2186,6 +2189,10 @@ protect_entry(H5C_t * cache_ptr,
  *		Modified function to use the new dirtied parameter of
  *		H5C_unprotect().
  *
+ *		JRM -- 9/8/05
+ *		Update for new entry size parameter in H5C_unprotect().
+ *		We don't use them here for now.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -2226,7 +2233,7 @@ unprotect_entry(H5C_t * cache_ptr,
 
         result = H5C_unprotect(NULL, -1, -1, cache_ptr, &(types[type]),
                                entry_ptr->addr, (void *)entry_ptr,
-                               flags);
+                               flags, 0);
 
         if ( ( result < 0 ) ||
              ( entry_ptr->header.is_protected ) ||
@@ -8530,6 +8537,10 @@ check_double_protect_err(void)
  *		Modified function to use the new dirtied parameter in
  *		H5C_unprotect().
  *
+ *		JRM -- 9/8/05
+ *		Updated function for the new size change parameter in 
+ *		H5C_unprotect().  We don't use them for now.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -8567,8 +8578,8 @@ check_double_unprotect_err(void)
     if ( pass ) {
 
         result = H5C_unprotect(NULL, -1, -1, cache_ptr, &(types[0]),
-                               entry_ptr->addr, (void *)entry_ptr,
-                               H5C__NO_FLAGS_SET);
+                               entry_ptr->addr, (void *)entry_ptr, 
+                               H5C__NO_FLAGS_SET, 0);
 
         if ( result > 0 ) {
 
