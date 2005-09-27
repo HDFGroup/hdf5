@@ -33834,7 +33834,8 @@ rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 
 
 
-for ac_func in fork frexpf frexpl gethostname getpwuid getrusage
+
+for ac_func in alarm fork frexpf frexpl gethostname getpwuid getrusage
 do
 as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
 echo "$as_me:$LINENO: checking for $ac_func" >&5

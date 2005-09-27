@@ -1521,7 +1521,7 @@ AC_MSG_RESULT([no]))
 dnl ----------------------------------------------------------------------
 dnl Check for functions.
 dnl
-AC_CHECK_FUNCS(fork frexpf frexpl gethostname getpwuid getrusage)
+AC_CHECK_FUNCS(alarm fork frexpf frexpl gethostname getpwuid getrusage)
 AC_CHECK_FUNCS(BSDgettimeofday longjmp setsysinfo sigaction)
 AC_CHECK_FUNCS(signal snprintf vsnprintf strdup system waitpid)
 
