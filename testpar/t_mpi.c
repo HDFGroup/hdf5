@@ -620,7 +620,7 @@ and this platform.
 3) Setting MPI file view with advtype
 4) Writing 2 bytes 1 to 2 using MPI_File_write to a file
 5) File content:
-Supposed the fill value of the file is 0(most machines indeed do so)
+Suppose the fill value of the file is 0(most machines indeed do so)
 and Fill value is embraced with "() in the following output:
 Expected output should be:
 1,0,2
@@ -666,12 +666,12 @@ static int test_mpio_derived_dtype(char *filename) {
 
     int mpi_rank,mpi_size;
 
-    char          buf[2],outbuf[2];
+    char          buf[3],outbuf[3] = {0};
 
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     retcode = 0;
-    for(i=0;i<2;i++)
+    for(i=0;i<3;i++)
       buf[i] = i+1;
 
 
@@ -747,7 +747,7 @@ static int test_mpio_derived_dtype(char *filename) {
 	return 1;
     }
 
-    if((mpi_err = MPI_File_write(fh,buf,2,MPI_BYTE,&Status))!= MPI_SUCCESS){
+    if((mpi_err = MPI_File_write(fh,buf,3,MPI_BYTE,&Status))!= MPI_SUCCESS){
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
 	printf("MPI_File_write failed (%s)\n", mpi_err_str);
 	return 1;
@@ -773,16 +773,16 @@ static int test_mpio_derived_dtype(char *filename) {
 	printf("MPI_File_set_view failed (%s)\n", mpi_err_str);
 	return 1;
     }
-    if((mpi_err = MPI_File_read(fh,outbuf,2,MPI_BYTE,&Status))!=MPI_SUCCESS){
+    if((mpi_err = MPI_File_read(fh,outbuf,3,MPI_BYTE,&Status))!=MPI_SUCCESS){
       MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
       printf("MPI_File_read failed (%s)\n", mpi_err_str);
       return 1;
     }
 
-    if(outbuf[1]==0) {
+    if(outbuf[2]==2) {
        retcode = 0;
     }
-    if(outbuf[1]==2) {
+    else {
 /*      if(mpi_rank == 0) {
        printf("complicated derived datatype is NOT working at this platform\n");
        printf("go back to hdf5/config and find the corresponding\n");
