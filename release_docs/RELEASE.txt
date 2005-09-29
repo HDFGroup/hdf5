@@ -162,6 +162,8 @@ Bug Fixes since HDF5-1.6.4 release
 
     Configuration
     -------------
+	- Configure can recognize -lmpich as a form of MPI library. -AKC-
+	  2005/9/28.
 	- Changed default C++ compiler for the IA64 platform from icc to
 	    icpc which is the preferred compiler for Intel Compiler version
 	    8. AKC - 2005/09/02

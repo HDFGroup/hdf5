@@ -1935,8 +1935,11 @@ case "X-$enable_parallel" in
     AC_MSG_RESULT([provided by compiler])
     PARALLEL=yes
 
-    dnl Try link a simple MPI program.  If fail, try again with -lmpi.
-    AC_TRY_LINK(, MPI_Init(),, AC_CHECK_LIB(mpi, MPI_Init,, PARALLEL=no))
+    dnl Try link a simple MPI program.  If fail, try again with -lmpi and
+    dnl -lmpich.
+    AC_TRY_LINK(, MPI_Init(),, \
+	AC_CHECK_LIB(mpi, MPI_Init,, \
+	    AC_CHECK_LIB(mpich, MPI_Init,, PARALLEL=no)))
 
     dnl Then try link a simple MPI-IO program. If fail, try again with
     dnl -lmpio.

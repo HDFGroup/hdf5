@@ -163,6 +163,9 @@
 /* Define to 1 if you have the `mpi' library (-lmpi). */
 #undef HAVE_LIBMPI
 
+/* Define to 1 if you have the `mpich' library (-lmpich). */
+#undef HAVE_LIBMPICH
+
 /* Define to 1 if you have the `mpio' library (-lmpio). */
 #undef HAVE_LIBMPIO
 
