@@ -848,11 +848,12 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
 # $${tname} is the name of test.
 $(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) dummysh.chkexe_:
 	@if test "X$@" != "X.chkexe_" && test "X$@" != "Xdummysh.chkexe_"; then \
-	   tname=`basename $(@:.chkexe_=)`;\
+	   cmd=$(@:.chkexe_=);\
+	   tname=`basename $$cmd`;\
 	   chkname=`basename $(@:.chkexe_=.chkexe)`;\
 	   log=`basename $(@:.chkexe_=.chklog)`; \
 	   echo "============================"; \
-	   if $(top_srcdir)/bin/newer ${chkname} $(SCRIPT_DEPEND); then \
+	   if $(top_srcdir)/bin/newer $${chkname} $$cmd $(SCRIPT_DEPEND); then \
 	      echo "No need to test $${tname} again."; \
 	   else \
 	      echo "============================" > $${log}; \
@@ -869,7 +870,7 @@ $(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) dummysh.chkexe_:
 	      echo "============================" >> $${log}; \
 	      RUNSERIAL="$(RUNSERIAL)" RUNPARALLEL="$(RUNPARALLEL)"           \
 	      srcdir="$(srcdir)" \
-	         $(TIME) $(SHELL) $(@:.chkexe_=) $(TEST_FLAGS) >> $${log} 2>&1 \
+	         $(TIME) $(SHELL) $$cmd $(TEST_FLAGS) >> $${log} 2>&1 \
 	         && touch $${chkname} || \
 	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
 	         (cat $${log} && false) || exit 1; \
@@ -902,14 +903,12 @@ build-check-p: $(LIB) $(PROGS) $(TESTS)
 	      $(MAKE) $(AM_MAKEFLAGS) $$test.chkexe_ \
 	      RUNTESTS="$(RUNPARALLEL)"; \
 	   fi;                                                                \
-	done;                                                                 \
-	test $$test = dummy || false
+	done
 	@for test in $(TEST_SCRIPT_PARA) dummy; do                           \
 	  if test $$test != dummy; then                                      \
-	    $(MAKE) $(AM_MAKEFLAGS) $$test.chkexe_; \
+	    $(MAKE) $(AM_MAKEFLAGS) $$test.chkexe_ || exit 1; \
 	  fi;                                                                 \
-	done;                                                                 \
-	test $$test = dummy || false
+	done
 	@if test -n "$(TEST_PROG_PARA)$(TEST_SCRIPT_PARA)"; then      \
 	    echo "===Parallel tests in `echo ${PWD} | sed -e s:.*/::` ended `date`===";\
 	fi
