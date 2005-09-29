@@ -620,7 +620,7 @@ and this platform.
 3) Setting MPI file view with advtype
 4) Writing 2 bytes 1 to 2 using MPI_File_write to a file
 5) File content:
-Supposed the file value of the file is 0(most machines indeed do so)
+Supposed the fill value of the file is 0(most machines indeed do so)
 and Fill value is embraced with "() in the following output:
 Expected output should be:
 1,0,2
