@@ -116,7 +116,7 @@
      CALL h5fclose_f(file_id, error)
      ! Attempt to remove the data file.  Remove the line if the compiler
      ! does not support it.
-     CALL unlink(filename)
+     !CALL unlink(filename)
 
      !
      ! Close FORTRAN interface
