@@ -801,6 +801,18 @@ HDvsnprintf(char *buf, size_t UNUSED size, const char *fmt, va_list ap)
 }
 #endif /* H5_HAVE_VSNPRINTF */
 
+#ifndef H5_HAVE_ALARM
+#ifdef WIN32
+unsigned int HDalarm(unsigned int N) {
+    return 0;
+}
+#endif
+#else
+unsigned int HDalarm(unsigned int N) {
+    return alarm(N);
+}
+#endif
+
 
 /*-------------------------------------------------------------------------
  * Function:	HDfprintf
