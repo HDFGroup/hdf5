@@ -49,9 +49,9 @@ typedef struct H5S_hyper_span_info_t H5S_hyper_span_info_t;
 /* Information about one dimension in a hyperslab selection */
 typedef struct H5S_hyper_dim_t {
     hsize_t start;
-    hsize_t  stride;
-    hsize_t  count;
-    hsize_t  block;
+    hsize_t stride;
+    hsize_t count;
+    hsize_t block;
 } H5S_hyper_dim_t;
 
 /* Point selection iteration container */

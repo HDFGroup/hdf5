@@ -71,9 +71,9 @@ static herr_t H5S_hyper_iter_next_block(H5S_sel_iter_t *sel_iter);
 static herr_t H5S_hyper_iter_release(H5S_sel_iter_t *sel_iter);
 
 /* Static function for optimizing hyperslab */
-static htri_t H5S_hyper_can_rebuild(H5S_t *space);
-static int H5S_hyper_check_opt(H5S_hyper_span_t *span, H5S_hyper_dim_t span_slab_info[], int rank);
-static int compare_regular_info( H5S_hyper_dim_t  span_slab_info_1, H5S_hyper_dim_t span_slab_info_2);
+static hbool_t H5S_hyper_rebuild_helper(const H5S_hyper_span_t *span,
+    H5S_hyper_dim_t span_slab_info[], unsigned rank);
+static htri_t H5S_hyper_rebuild(H5S_t *space);
 
 /* Selection properties for hyperslab selections */
 const H5S_select_class_t H5S_sel_hyper[1] = {{
@@ -5338,179 +5338,200 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_hyper_can_rebuild
+    H5S_hyper_rebuild_helper
  PURPOSE
-    Check if optimized hyperslab information can be recovered
-    If it can be recovered with regular selection, just recovered.
+    Helper routine to rebuild optimized hyperslab information if possible.
+    (It can be recovered with regular selection)
  USAGE
-    htri_t H5S_hyper_can_rebuild(space)
-        const H5S_t *space;     IN: Dataspace to check
+    herr_t H5S_hyper_rebuild_helper(space)
+        const H5S_hyper_span_t *span;   IN: Portion of span tree to check
+        H5S_hyper_dim_t span_slab[];    OUT: Rebuilt section of hyperslab description
+        unsigned rank;                  IN: Current dimension to work on
  RETURNS
-    TRUE/FALSE on success, <0 on failure
+    >=0 on success, <0 on failure
  DESCRIPTION
-    Examine the span tree for a hyperslab selection and determine if it
-    can be used to rebuild the start/stride/count/block information for
-    the selection.
+    Examine the span tree for a hyperslab selection and rebuild 
+    the start/stride/count/block information for the selection, if possible.
 
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
     To be able to recover the optimized information, the span tree must conform
     to span tree able to be generated from a single H5S_SELECT_SET operation.
 
+ EXAMPLES
+ REVISION LOG
+    KY, 2005/9/22
+--------------------------------------------------------------------------*/
+static hbool_t
+H5S_hyper_rebuild_helper(const H5S_hyper_span_t *span, H5S_hyper_dim_t span_slab_info[],
+    unsigned rank)
+{
+    hsize_t curr_stride, next_stride;
+    hsize_t curr_block, next_block;
+    hsize_t curr_start;
+    hsize_t curr_low;
+    int     outcount;
+    H5S_hyper_dim_t      canon_down_span_slab_info;
+    hbool_t ret_value = TRUE;
+   
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_hyper_rebuild_helper)
+
+    if(span) {
+        /* Initialization */
+        curr_stride     = 1;
+        curr_block      = 0;
+        outcount        = 0;
+        curr_low        = 0;
+
+        /* Get "canonical" down span information */
+        if(span->down) {
+            HDassert(span->down->head);
+
+            /* Go to the next down span and check whether the selection can be rebuilt.*/
+            if(!H5S_hyper_rebuild_helper(span->down->head, span_slab_info, rank - 1))
+                HGOTO_DONE(FALSE)
+
+            canon_down_span_slab_info = span_slab_info[rank - 2];
+        } /* end if */
+
+        /* Assign the initial starting point & block size */
+        curr_start = span->low;
+        curr_block = (span->high - span->low) + 1;
+
+        /* Loop the span */
+        while(span) {
+            if(outcount > 0) {
+                if(span->down) {
+                    H5S_hyper_dim_t      *curr_down_span_slab_info;
+
+                    HDassert(span->down->head);
+
+                    /* Go to the next down span and check whether the selection can be rebuilt.*/
+                    if(!H5S_hyper_rebuild_helper(span->down->head, span_slab_info, rank - 1))
+                        HGOTO_DONE(FALSE)
+
+                    /* Point to hyperslab span information set up by recursive call */
+                    curr_down_span_slab_info = &span_slab_info[rank - 2];
+
+                    /* Compare the slab information of the adjacent spans in the down span tree.*/
+                    if(curr_down_span_slab_info->count > 0 && canon_down_span_slab_info.count > 0) {
+                        if(curr_down_span_slab_info->start != canon_down_span_slab_info.start
+                            || curr_down_span_slab_info->stride != canon_down_span_slab_info.stride
+                            || curr_down_span_slab_info->block != canon_down_span_slab_info.block
+                            || curr_down_span_slab_info->count != canon_down_span_slab_info.count)
+                        HGOTO_DONE(FALSE)
+                    } /* end if */
+                    else if (!((curr_down_span_slab_info->count == 0) && (canon_down_span_slab_info.count == 0)))
+                        HGOTO_DONE(FALSE)
+                } /* end if */
+            } /* end if */
+
+            /* Obtain values for stride and block */
+            next_stride  = span->low  - curr_low; 
+            next_block   = (span->high - span->low) + 1;
+
+            /* Compare stride and block in this span, to compare stride,
+             * three spans are needed. Ignore the first two spans.
+             */
+            if(outcount  > 1  && curr_stride != next_stride)
+                HGOTO_DONE(FALSE)
+            if(outcount != 0  && next_block  != curr_block)
+                HGOTO_DONE(FALSE)
+
+            /* Keep the isolated stride to be 1 */
+            if(outcount != 0)
+                curr_stride = next_stride;
+
+            /* Keep current starting point */
+            curr_low    = span->low;
+
+            /* Advance to next span */
+            span = span->next;
+            outcount++;
+        } /* end while */
+
+        /* Save the span information. */
+        span_slab_info[rank - 1].start  = curr_start;
+        span_slab_info[rank - 1].count  = outcount;
+        span_slab_info[rank - 1].block  = curr_block;
+        span_slab_info[rank - 1].stride = curr_stride;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_hyper_rebuild_helper() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_hyper_rebuild
+ PURPOSE
+    Rebuild optimized hyperslab information if possible.
+    (It can be recovered with regular selection)
+ USAGE
+    herr_t H5S_hyper_rebuild(space)
+        const H5S_t *space;     IN: Dataspace to check
+ RETURNS
+    >=0 on success, <0 on failure
+ DESCRIPTION
+    Examine the span tree for a hyperslab selection and rebuild 
+    the start/stride/count/block information for the selection, if possible.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    To be able to recover the optimized information, the span tree must conform
+    to span tree able to be generated from a single H5S_SELECT_SET operation.
+
+ EXAMPLES
+ REVISION LOG
+
     This routine is the optimization of the old version. The previous version
     can only detect a singluar selection. This version is general enough to 
     detect any regular selection.
     KY, 2005/9/22
-
- EXAMPLES
- REVISION LOG
 --------------------------------------------------------------------------*/
 static htri_t
-H5S_hyper_can_rebuild (H5S_t *space)
+H5S_hyper_rebuild(H5S_t *space)
 {
-    H5S_hyper_dim_t *top_span_slab_info;
+    H5S_hyper_dim_t top_span_slab_info[H5O_LAYOUT_NDIMS];
     H5S_hyper_dim_t *diminfo;
     H5S_hyper_dim_t *app_diminfo;
-    int rank,curr_dim;
-    htri_t ret_value=TRUE;      /* Return value */
+    unsigned rank, curr_dim;
+    htri_t ret_value = TRUE;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_hyper_can_rebuild);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_hyper_rebuild)
 
     /* Check args */
-    assert (space);
-    assert (space->select.sel_info.hslab->span_lst);
+    HDassert(space);
+    HDassert(space->select.sel_info.hslab->span_lst);
 
     /* Check the rank of space */
     rank = space->extent.rank;
-    top_span_slab_info = calloc((unsigned)rank,sizeof(H5S_hyper_dim_t));
 
     /* Check whether the slab can be rebuilt. Only regular selection can be rebuilt. If yes, fill in correct values.*/
-    if(H5S_hyper_check_opt(space->select.sel_info.hslab->span_lst->head,top_span_slab_info,rank)== -1){
-       ret_value = FALSE;
-    }
+    if(!H5S_hyper_rebuild_helper(space->select.sel_info.hslab->span_lst->head, top_span_slab_info, rank)) {
+        HGOTO_DONE(FALSE)
+    } /* end if */
     else {
-            diminfo=space->select.sel_info.hslab->opt_diminfo;
-            app_diminfo=space->select.sel_info.hslab->app_diminfo;
+        diminfo=space->select.sel_info.hslab->opt_diminfo;
+        app_diminfo=space->select.sel_info.hslab->app_diminfo;
 
-            for(curr_dim = 0; curr_dim <rank; curr_dim++) { 
+        for(curr_dim = 0; curr_dim < rank; curr_dim++) { 
 
-               app_diminfo[rank-curr_dim-1].start  = diminfo[rank-curr_dim-1].start = top_span_slab_info[curr_dim].start;
-               app_diminfo[rank-curr_dim-1].stride = diminfo[rank-curr_dim-1].stride = top_span_slab_info[curr_dim].stride;
-               app_diminfo[rank-curr_dim-1].count  = diminfo[rank-curr_dim-1].count = top_span_slab_info[curr_dim].count;
-               app_diminfo[rank-curr_dim-1].block  = diminfo[rank-curr_dim-1].block = top_span_slab_info[curr_dim].block;
+            app_diminfo[(rank - curr_dim) - 1].start  = diminfo[(rank - curr_dim) - 1].start = top_span_slab_info[curr_dim].start;
+            app_diminfo[(rank - curr_dim) - 1].stride = diminfo[(rank - curr_dim) - 1].stride = top_span_slab_info[curr_dim].stride;
+            app_diminfo[(rank - curr_dim) - 1].count  = diminfo[(rank - curr_dim) - 1].count = top_span_slab_info[curr_dim].count;
+            app_diminfo[(rank - curr_dim) - 1].block  = diminfo[(rank - curr_dim) - 1].block = top_span_slab_info[curr_dim].block;
 
-            }
+        } /* end for */
 
-            space->select.sel_info.hslab->diminfo_valid=TRUE;
-    }
-    /* For each level of the span tree check that there is only one span at
-     * that level.
-     */
+        space->select.sel_info.hslab->diminfo_valid = TRUE;
+    } /* end else */
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}   /* H5S_hyper_can_rebuild() */
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5S_hyper_rebuild() */
 
-/* Check whether the selection in span-tree form can be rebuilt as a regular hyperslab selection. */
-
-static int H5S_hyper_check_opt(H5S_hyper_span_t *span, H5S_hyper_dim_t span_slab_info[], int rank) {
-
-    hsize_t curr_stride,next_stride;
-    hsize_t curr_block,next_block;
-    hsize_t curr_start;
-    hsize_t curr_low;
-    int     outcount;
-    int     ret_value;
-
-    H5S_hyper_dim_t      next_down_span_slab_info;
-    H5S_hyper_dim_t      curr_down_span_slab_info;
-    H5S_hyper_span_t     *orig_span;
-    H5S_hyper_span_t     *next_down_span;
-   
-    /* Initialization */
-    curr_stride     = 1;
-    curr_block      = 0;
-    outcount        = 0;
-    curr_low        = 0;
-
-    orig_span       = span;
-
-    /* Loop the span */
-
-    while(span) {
-        if(span->down) {
-          next_down_span = span->down->head;
-
-          /* Go to the next down span and check whether the selection can be rebuilt.*/
-          if(next_down_span) {
-            ret_value = H5S_hyper_check_opt(next_down_span,span_slab_info,rank-1);
-            if(ret_value == -1) return -1;
-            next_down_span_slab_info = span_slab_info[rank-2];
-          }
-          else
-            next_down_span_slab_info.count = 0;
-        }
-        else 
-            next_down_span_slab_info.count = 0;
-
-        /* Obtain values for stride and block  */
-        next_stride  = span->low  - curr_low; 
-        next_block   = span->high - span->low+1;
-
-        /* Compare stride and block in this span, to compare stride, three spans are needed. Ignore the first two spans.*/
-        if(outcount >1  && curr_stride != next_stride) return -1;
-        if(outcount!=0  && next_block  != curr_block)  return -1;
-            
-        /* Keep the isolated stride to be 1 */
-        if(outcount != 0) curr_stride = next_stride;
-        curr_block  = next_block;
-        curr_low    = span->low;
-
-        /* Assign the current starting point */
-        if(outcount == 0) curr_start = curr_low;
-
-        /* Compare the slab information of the adjacent spans in the down span tree.*/
-        if(outcount !=0 && !compare_regular_info(curr_down_span_slab_info,next_down_span_slab_info)) return -1;
-
-        curr_down_span_slab_info = next_down_span_slab_info;
-        span = span->next;
-        outcount ++;
-    }
- 
-    /* Save the span information. */
-    if(orig_span) {
-       span_slab_info[rank-1].start  = curr_start;
-       span_slab_info[rank-1].count  = outcount;
-       span_slab_info[rank-1].block  = curr_block;
-       span_slab_info[rank-1].stride = curr_stride;
-    }
-
-    return 0;
-
-  }
-
-  /*Compare the slab information of two adjacent down span trees, this function shouldn't
-    be used as a general approach to compare two regular slabs.   
-
-    non-zero(true) should be returned if the two slabs are equal or are both NULL.
-    zero           should be returned for other cases.
-  */
-
-  static int compare_regular_info( H5S_hyper_dim_t  span_slab_info_1, H5S_hyper_dim_t span_slab_info_2) {
-
-   /* Only when the first span of the current span tree has no "down span tree", 
-      and the second span of the current span tree has no "down span tree",  the selection is a regular selection.
-      Otherwise, the selection is irregular.*/
-
-   if((span_slab_info_1.count == 0) && (span_slab_info_2.count ==0 )) return 1;
-   if((span_slab_info_1.count) && (span_slab_info_2.count)) 
-       return((span_slab_info_1.start == span_slab_info_2.start) &&
-               (span_slab_info_1.stride == span_slab_info_2.stride) &&
-               (span_slab_info_1.block == span_slab_info_2.block) &&
-               (span_slab_info_1.count == span_slab_info_2.count));
-   else 
-      return 0;
-}
-     
 
 /*--------------------------------------------------------------------------
  NAME
@@ -5783,20 +5804,11 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
         else {
             /* Check if we updated the spans */
             if(updated_spans) {
-                htri_t      status;         /* Status from internal calls */
-
-                /* Check if the resulting hyperslab span tree can be used to re-build
-                 * "optimized" start/stride/count/block information.
+                /* Attempt to rebuild "optimized" start/stride/count/block information.
+                 * from resulting hyperslab span tree
                  */
-                status=H5S_hyper_can_rebuild(space);
-#if 0
-                if(status<0)
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't check for rebuilding hyperslab info");
-                printf("status = %d\n",status);
-                if(status>0)
-                    if(H5S_hyper_rebuild(space)<0)
-                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't rebuild hyperslab info");
-#endif
+                if(H5S_hyper_rebuild(space) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't rebuild hyperslab info")
             } /* end if */
         } /* end else */
     } /* end else */
@@ -6318,20 +6330,11 @@ H5S_operate_hyperslab (H5S_t *result, H5S_hyper_span_info_t *spans1, H5S_seloper
         else {
             /* Check if we updated the spans */
             if(updated_spans) {
-                htri_t      status;         /* Status from internal calls */
-
-                /* Check if the resulting hyperslab span tree can be used to re-build
-                 * "optimized" start/stride/count/block information.
+                /* Attempt to rebuild "optimized" start/stride/count/block information.
+                 * from resulting hyperslab span tree
                  */
-                status=H5S_hyper_can_rebuild(result);
- #if 0
-                if(status<0)
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't check for rebuilding hyperslab info");
-                printf("status = %d\n",status);
-                if(status>0)
-                    if(H5S_hyper_rebuild(result)<0)
-                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't rebuild hyperslab info");
- #endif
+                if(H5S_hyper_rebuild(result) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't rebuild hyperslab info")
             } /* end if */
         } /* end else */
     } /* end else */
