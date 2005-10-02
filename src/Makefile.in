@@ -360,7 +360,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 # Add libtool shared library version numbers to the HDF5 library
 # See libtool versioning documentation online.
 LT_VERS_INTERFACE = 3
-LT_VERS_REVISION = 0
+LT_VERS_REVISION = 1
 LT_VERS_AGE = 2
 H5detect_CFLAGS = -g
 
