@@ -372,6 +372,8 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fixed core dump when closing root groups opened through two different
+            file handles that operate on the same actual file.  QAK - 2005/10/02
         - Corrected errors when performing various operations on a group opened
             by dereferencing an object reference.  QAK - 2005/07/30
         - Fixed a bug with named datatypes where a copy of a named datatype

@@ -148,6 +148,7 @@ struct H5F_t {
     char		*name;		/* Name used to open file	*/
     H5F_file_t		*shared;	/* The shared file info		*/
     unsigned		nopen_objs;	/* Number of open object headers*/
+    H5FO_t              *obj_count;     /* # of time each object is opened through top file structure */
     hid_t               file_id;        /* ID of this file              */
     hbool_t             closing;        /* File is in the process of being closed */
     H5F_mtab_t		mtab;		/* File mount table		*/

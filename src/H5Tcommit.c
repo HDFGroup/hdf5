@@ -242,6 +242,8 @@ H5T_commit(H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id,
     type->shared->fo_count=1;
 
     /* Add datatype to the list of open objects in the file */
+    if(H5FO_top_incr(type->ent.file, type->ent.header)<0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINC, NULL, "can't incr object ref. count")
     if(H5FO_insert(type->ent.file, type->ent.header, type->shared)<0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "can't insert datatype into list of open objects")
 

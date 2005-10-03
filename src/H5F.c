@@ -1532,6 +1532,10 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 
     f->shared->nrefs++;
 
+    /* Create the file's "top open object" information */
+    if(H5FO_top_create(f)<0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create open object data structure")
+
     /* Set return value */
     ret_value = f;
 
@@ -1651,6 +1655,8 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
     f->name = H5MM_xfree(f->name);
     f->mtab.child = H5MM_xfree(f->mtab.child);
     f->mtab.nalloc = 0;
+    if(H5FO_top_dest(f) < 0)
+        HDONE_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "problems closing file")
     H5FL_FREE(H5F_t,f);
 
     FUNC_LEAVE_NOAPI(ret_value)

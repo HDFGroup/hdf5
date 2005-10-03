@@ -1960,6 +1960,8 @@ H5G_create(H5G_entry_t *loc, const char *name,
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, NULL, "can't insert group");
 
     /* Add group to list of open objects in file */
+    if(H5FO_top_incr(grp->ent.file, grp->ent.header)<0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINC, NULL, "can't incr object ref. count")
     if(H5FO_insert(grp->ent.file, grp->ent.header, grp->shared)<0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, NULL, "can't insert group into list of open objects")
 
@@ -2110,6 +2112,10 @@ H5G_open(H5G_entry_t *ent, hid_t dxpl_id)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, NULL, "can't insert group into list of open objects")
         }
 
+        /* Increment object count for the object in the top file */
+        if(H5FO_top_incr(grp->ent.file, grp->ent.header) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINC, NULL, "can't increment object count")
+
         /* Set open object count */
         grp->shared->fo_count = 1;
     }
@@ -2119,13 +2125,24 @@ H5G_open(H5G_entry_t *ent, hid_t dxpl_id)
 
         /* Shallow copy (take ownership) of the group entry object */
         if(H5G_ent_copy(&(grp->ent), ent, H5G_COPY_SHALLOW)<0)
-            HGOTO_ERROR (H5E_SYM, H5E_CANTCOPY, NULL, "can't copy group entry")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "can't copy group entry")
 
         /* Point to shared group info */
         grp->shared = shared_fo;
 
         /* Increment shared reference count */
         shared_fo->fo_count++;
+
+        /* Check if the object has been opened through the top file yet */
+        if(H5FO_top_count(grp->ent.file, grp->ent.header) == 0) {
+            /* Open the object through this top file */
+            if(H5O_open(&(grp->ent)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to open object header")
+        } /* end if */
+
+        /* Increment object count for the object in the top file */
+        if(H5FO_top_incr(grp->ent.file, grp->ent.header) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINC, NULL, "can't increment object count")
     }
 
     /* Set return value */
@@ -2237,13 +2254,24 @@ H5G_close(H5G_t *grp)
     if (0 == grp->shared->fo_count) {
         assert (grp!=H5G_rootof(H5G_fileof(grp)));
 
-        /* Remove the dataset from the list of opened objects in the file */
+        /* Remove the group from the list of opened objects in the file */
+        if(H5FO_top_decr(grp->ent.file, grp->ent.header) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
         if(H5FO_delete(grp->ent.file, H5AC_dxpl_id, grp->ent.header)<0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't remove group from list of open objects")
-        if (H5O_close(&(grp->ent)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close");
+        if(H5O_close(&(grp->ent)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close")
         H5FL_FREE (H5G_shared_t, grp->shared);
     } else {
+        /* Decrement the ref. count for this object in the top file */
+        if(H5FO_top_decr(grp->ent.file, grp->ent.header) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
+
+        /* Check reference count for this object in the top file */
+        if(H5FO_top_count(grp->ent.file, grp->ent.header) == 0)
+            if(H5O_close(&(grp->ent)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close")
+
         /* If this group is a mount point and the mount point is the last open
          * reference to the group, then attempt to close down the file hierarchy
          */

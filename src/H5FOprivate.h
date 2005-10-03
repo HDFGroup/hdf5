@@ -42,6 +42,11 @@ H5_DLL herr_t H5FO_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 H5_DLL herr_t H5FO_mark(const H5F_t *f, haddr_t addr, hbool_t deleted);
 H5_DLL htri_t H5FO_marked(const H5F_t *f, haddr_t addr);
 H5_DLL herr_t H5FO_dest(const H5F_t *f);
+H5_DLL herr_t H5FO_top_create(H5F_t *f);
+H5_DLL herr_t H5FO_top_incr(const H5F_t *f, haddr_t addr);
+H5_DLL herr_t H5FO_top_decr(const H5F_t *f, haddr_t addr);
+H5_DLL hsize_t H5FO_top_count(const H5F_t *f, haddr_t addr);
+H5_DLL herr_t H5FO_top_dest(H5F_t *f);
 
 #endif /* _H5FOprivate_H */
 

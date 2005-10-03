@@ -996,6 +996,13 @@ H5G_node_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *_lt_key
     if (H5G_ent_copy(udata->ent, &sn->entry[idx], H5G_COPY_NULL)<0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to copy entry");
 
+    /* Leave object in same file as lookup occurs in */
+    /* If a file is opened through different H5Fopen() calls, the symbol
+     * table entry from the B-tree lookup ("&sn->entry[idx]" above) will be
+     * in the "first" file, but the lookup might occur in the second file. - QAK
+     */
+    udata->ent->file = f;
+
 done:
     if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to release symbol table node");

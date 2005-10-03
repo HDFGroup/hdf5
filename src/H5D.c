@@ -2397,6 +2397,8 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to name dataset")
 
     /* Add the dataset to the list of opened objects in the file */
+    if(H5FO_top_incr(new_dset->ent.file, new_dset->ent.header)<0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINC, NULL, "can't incr object ref. count")
     if(H5FO_insert(new_dset->ent.file,new_dset->ent.header,new_dset->shared)<0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, NULL, "can't insert dataset into list of open objects")
 
@@ -2535,19 +2537,34 @@ H5D_open(const H5G_entry_t *ent, hid_t dxpl_id)
         if(H5FO_insert(dataset->ent.file,dataset->ent.header,dataset->shared)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, NULL, "can't insert dataset into list of open objects")
 
+        /* Increment object count for the object in the top file */
+        if(H5FO_top_incr(dataset->ent.file, dataset->ent.header) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINC, NULL, "can't increment object count")
+
         dataset->shared->fo_count = 1;
     } /* end if */
     else {
-        shared_fo->fo_count++;
-
         if(NULL == (dataset = H5FL_CALLOC(H5D_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate space for dataset")
-
-        dataset->shared=shared_fo;
 
         /* Shallow copy (take ownership) of the group entry object */
         if(H5G_ent_copy(&(dataset->ent),ent,H5G_COPY_SHALLOW)<0)
             HGOTO_ERROR (H5E_DATASET, H5E_CANTCOPY, NULL, "can't copy group entry")
+
+        dataset->shared=shared_fo;
+
+        shared_fo->fo_count++;
+
+        /* Check if the object has been opened through the top file yet */
+        if(H5FO_top_count(dataset->ent.file, dataset->ent.header) == 0) {
+            /* Open the object through this top file */
+            if(H5O_open(&(dataset->ent)) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, NULL, "unable to open object header")
+        } /* end if */
+
+        /* Increment object count for the object in the top file */
+        if(H5FO_top_incr(dataset->ent.file, dataset->ent.header) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINC, NULL, "can't increment object count")
     } /* end else */
 
     ret_value = dataset;
@@ -2942,6 +2959,8 @@ H5D_close(H5D_t *dataset)
                           H5I_dec_ref(dataset->shared->dcpl_id) < 0);
 
         /* Remove the dataset from the list of opened objects in the file */
+        if(H5FO_top_decr(dataset->ent.file, dataset->ent.header) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
         if(H5FO_delete(dataset->ent.file, H5AC_dxpl_id, dataset->ent.header)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't remove dataset from list of open objects")
 
@@ -2962,6 +2981,15 @@ H5D_close(H5D_t *dataset)
     } /* end if */
     else
     {
+        /* Decrement the ref. count for this object in the top file */
+        if(H5FO_top_decr(dataset->ent.file, dataset->ent.header) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
+
+        /* Check reference count for this object in the top file */
+        if(H5FO_top_count(dataset->ent.file, dataset->ent.header) == 0)
+            if(H5O_close(&(dataset->ent)) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to close")
+
        if(H5G_free_ent_name(&dataset->ent)<0)
            free_failed=TRUE;
     } /* end else */

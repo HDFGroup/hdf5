@@ -1635,6 +1635,173 @@ test_file_getname(void)
 
 /****************************************************************
 **
+**  test_file_double_root_open(): low-level file test routine.
+**      This test checks whether opening the root group from two
+**      different files works correctly.
+**
+*****************************************************************/
+static void
+test_file_double_root_open(void)
+{
+    hid_t file1_id, file2_id; 
+    hid_t grp1_id, grp2_id; 
+    herr_t ret;         /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing double root group open\n"));
+
+    file1_id = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file1_id, FAIL, "H5Fcreate");
+    file2_id = H5Fopen (FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(file2_id, FAIL, "H5Fopen");
+
+    grp1_id  = H5Gopen(file1_id, "/");
+    CHECK(grp1_id, FAIL, "H5Gopen");
+    grp2_id  = H5Gopen(file2_id, "/");
+    CHECK(grp2_id, FAIL, "H5Gopen");
+
+    /* Note "assymetric" close order */
+    ret = H5Gclose(grp1_id);
+    CHECK(ret, FAIL, "H5Gclose");
+    ret = H5Gclose(grp2_id);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret = H5Fclose(file1_id);
+    CHECK(ret, FAIL, "H5Fclose");
+    ret = H5Fclose(file2_id);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* end test_file_double_root_open() */
+
+/****************************************************************
+**
+**  test_file_double_group_open(): low-level file test routine.
+**      This test checks whether opening the same group from two
+**      different files works correctly.
+**
+*****************************************************************/
+static void
+test_file_double_group_open(void)
+{
+    hid_t file1_id, file2_id; 
+    hid_t grp1_id, grp2_id; 
+    herr_t ret;         /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing double non-root group open\n"));
+
+    file1_id = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file1_id, FAIL, "H5Fcreate");
+    file2_id = H5Fopen (FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(file2_id, FAIL, "H5Fopen");
+
+    grp1_id  = H5Gcreate(file1_id, GRP_NAME, (size_t)0);
+    CHECK(grp1_id, FAIL, "H5Gcreate");
+    grp2_id  = H5Gopen(file2_id, GRP_NAME);
+    CHECK(grp2_id, FAIL, "H5Gopen");
+
+    /* Note "assymetric" close order */
+    ret = H5Gclose(grp1_id);
+    CHECK(ret, FAIL, "H5Gclose");
+    ret = H5Gclose(grp2_id);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret = H5Fclose(file1_id);
+    CHECK(ret, FAIL, "H5Fclose");
+    ret = H5Fclose(file2_id);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* end test_file_double_group_open() */
+
+/****************************************************************
+**
+**  test_file_double_dataset_open(): low-level file test routine.
+**      This test checks whether opening the same dataset from two
+**      different files works correctly.
+**
+*****************************************************************/
+static void
+test_file_double_dataset_open(void)
+{
+    hid_t file1_id, file2_id; 
+    hid_t dset1_id, dset2_id; 
+    hid_t space_id; 
+    herr_t ret;         /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing double dataset open\n"));
+
+    file1_id = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file1_id, FAIL, "H5Fcreate");
+    file2_id = H5Fopen (FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(file2_id, FAIL, "H5Fopen");
+
+    /* Create dataspace for dataset */
+    space_id = H5Screate(H5S_SCALAR);
+    CHECK(space_id, FAIL, "H5Screate");
+
+    dset1_id  = H5Dcreate(file1_id, DSET_NAME, H5T_NATIVE_INT, space_id, H5P_DEFAULT);
+    CHECK(dset1_id, FAIL, "H5Dcreate");
+    dset2_id  = H5Dopen(file2_id, DSET_NAME);
+    CHECK(dset2_id, FAIL, "H5Dopen");
+
+    /* Close "supporting" dataspace */
+    ret = H5Sclose(space_id);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Note "assymetric" close order */
+    ret = H5Dclose(dset1_id);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Dclose(dset2_id);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    ret = H5Fclose(file1_id);
+    CHECK(ret, FAIL, "H5Fclose");
+    ret = H5Fclose(file2_id);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* end test_file_double_dataset_open() */
+
+/****************************************************************
+**
+**  test_file_double_datatype_open(): low-level file test routine.
+**      This test checks whether opening the same named datatype from two
+**      different files works correctly.
+**
+*****************************************************************/
+static void
+test_file_double_datatype_open(void)
+{
+    hid_t file1_id, file2_id; 
+    hid_t type1_id, type2_id; 
+    herr_t ret;         /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing double dataset open\n"));
+
+    file1_id = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file1_id, FAIL, "H5Fcreate");
+    file2_id = H5Fopen (FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(file2_id, FAIL, "H5Fopen");
+
+    type1_id  = H5Tcopy(H5T_NATIVE_INT);
+    CHECK(type1_id, FAIL, "H5Tcopy");
+    ret  = H5Tcommit(file1_id, TYPE_NAME, type1_id);
+    CHECK(ret, FAIL, "H5Tcommit");
+    type2_id  = H5Topen(file2_id, TYPE_NAME);
+    CHECK(type2_id, FAIL, "H5Topen");
+
+    /* Note "assymetric" close order */
+    ret = H5Tclose(type1_id);
+    CHECK(ret, FAIL, "H5Tclose");
+    ret = H5Tclose(type2_id);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    ret = H5Fclose(file1_id);
+    CHECK(ret, FAIL, "H5Fclose");
+    ret = H5Fclose(file2_id);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* end test_file_double_dataset_open() */
+
+/****************************************************************
+**
 **  test_file(): Main low-level file I/O test routine.
 **
 ****************************************************************/
@@ -1656,6 +1823,10 @@ test_file(void)
     test_file_open_dot();       /* Test opening objects with "." for a name */
     test_file_open_overlap();   /* Test opening files in an overlapping manner */
     test_file_getname();        /* Test basic H5Fget_name() functionality */
+    test_file_double_root_open();       /* Test opening root group from two files works properly */
+    test_file_double_group_open();      /* Test opening same group from two files works properly */
+    test_file_double_dataset_open();    /* Test opening same dataset from two files works properly */
+    test_file_double_datatype_open();   /* Test opening same named datatype from two files works properly */
 }				/* test_file() */
 
 
