@@ -2760,6 +2760,10 @@ H5T_open (H5G_entry_t *ent, hid_t dxpl_id)
         if(H5FO_insert(dt->ent.file, dt->ent.header, dt->shared)<0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, NULL, "can't insert datatype into list of open objects")
 
+        /* Increment object count for the object in the top file */
+        if(H5FO_top_incr(dt->ent.file, dt->ent.header) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINC, NULL, "can't increment object count")
+
         /* Mark any datatypes as being in memory now */
         if (H5T_vlen_mark(dt, NULL, H5T_VLEN_MEMORY)<0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
@@ -2768,16 +2772,27 @@ H5T_open (H5G_entry_t *ent, hid_t dxpl_id)
     }
     else
     {
-        shared_fo->fo_count++;
-
         if(NULL == (dt = H5FL_MALLOC(H5T_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate space for datatype")
-
-        dt->shared=shared_fo;
 
         /* Shallow copy (take ownership) of the group entry object */
         if(H5G_ent_copy(&(dt->ent),ent,H5G_COPY_SHALLOW)<0)
             HGOTO_ERROR (H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy group entry")
+
+        dt->shared=shared_fo;
+
+        shared_fo->fo_count++;
+
+        /* Check if the object has been opened through the top file yet */
+        if(H5FO_top_count(dt->ent.file, dt->ent.header) == 0) {
+            /* Open the object through this top file */
+            if(H5O_open(&(dt->ent)) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to open object header")
+        } /* end if */
+
+        /* Increment object count for the object in the top file */
+        if(H5FO_top_incr(dt->ent.file, dt->ent.header) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINC, NULL, "can't increment object count")
     }
 
     ret_value = dt;
@@ -2949,6 +2964,10 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
                     if(H5FO_insert(old_dt->ent.file, old_dt->ent.header, new_dt->shared)<0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, NULL, "can't insert datatype into list of open objects")
 
+                    /* Increment object count for the object in the top file */
+                    if(H5FO_top_incr(old_dt->ent.file, old_dt->ent.header) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINC, NULL, "can't increment object count")
+
                     new_dt->shared->fo_count=1;
                 } else {
                     /* The object is already open.  Free the H5T_shared_t struct
@@ -2956,7 +2975,19 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
                      * Not terribly efficient. */
                     H5FL_FREE(H5T_shared_t, new_dt->shared);
                     new_dt->shared = reopened_fo;
+
                     reopened_fo->fo_count++;
+
+                    /* Check if the object has been opened through the top file yet */
+                    if(H5FO_top_count(old_dt->ent.file, old_dt->ent.header) == 0) {
+                        /* Open the object through this top file */
+                        if(H5O_open(&(old_dt->ent)) < 0)
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to open object header")
+                    } /* end if */
+
+                    /* Increment object count for the object in the top file */
+                    if(H5FO_top_incr(old_dt->ent.file, old_dt->ent.header) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINC, NULL, "can't increment object count")
                 }
                 new_dt->shared->state = H5T_STATE_OPEN;
             } else if (H5T_STATE_IMMUTABLE==old_dt->shared->state) {
@@ -3221,10 +3252,12 @@ H5T_free(H5T_t *dt)
     if (H5T_STATE_OPEN==dt->shared->state) {
         assert (H5F_addr_defined(dt->ent.header));
         /* Remove the datatype from the list of opened objects in the file */
+        if(H5FO_top_decr(dt->ent.file, dt->ent.header) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
         if(H5FO_delete(dt->ent.file, H5AC_dxpl_id, dt->ent.header)<0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't remove datatype from list of open objects")
         if (H5O_close(&(dt->ent))<0)
-	        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to close data type object header");
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to close data type object header");
         dt->shared->state = H5T_STATE_NAMED;
     }
 
@@ -3306,14 +3339,29 @@ H5T_close(H5T_t *dt)
 
     assert(dt && dt->shared);
 
-    if(dt->shared->state != H5T_STATE_OPEN || dt->shared->fo_count == 1)
+    dt->shared->fo_count--;
+
+    if(dt->shared->state != H5T_STATE_OPEN || dt->shared->fo_count == 0)
     {
         if(H5T_free(dt)<0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free datatype");
 
         H5FL_FREE(H5T_shared_t, dt->shared);
     } else {
-        dt->shared->fo_count--;
+        /*
+         * If a named type is being closed then close the object header and
+         * remove from the list of open objects in the file.
+         */
+        if(H5T_STATE_OPEN==dt->shared->state) {
+            /* Decrement the ref. count for this object in the top file */
+            if(H5FO_top_decr(dt->ent.file, dt->ent.header) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
+
+            /* Check reference count for this object in the top file */
+            if(H5FO_top_count(dt->ent.file, dt->ent.header) == 0)
+                if(H5O_close(&(dt->ent)) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to close")
+        } /* end if */
 
         /* Free the ID to name info since we're not calling H5T_free*/
         H5G_free_ent_name(&(dt->ent));

@@ -119,6 +119,8 @@ Bug Fixes since HDF5-1.6.4 release
 
     Library
     -------
+        - Fixed core dump when closing root groups opened through two different
+            file handles that operate on the same actual file.  QAK - 2005/10/02
 	- The ./dsets tests used to fail in the TFLOPS machine if the
 	  test program, dsets.c, was compiled with the -O option.
 	  The hdf5 library still worked correctly with the -O option. Only
