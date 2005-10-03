@@ -4360,14 +4360,14 @@ END SUBROUTINE h5pget_meta_block_size_f
 <dl>
   <dt><strong>Name:</strong> <a name="Property-GetMultiType">H5Pget_multi_type</a>
   <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pset_multi_type</code> (
+    <dd><em>herr_t</em> <code>H5Pget_multi_type</code> (
                         <em>hid_t</em> <code>fapl_id</code>,
                         <em>H5FD_mem_t *</em><code>type</code>
     )
   <dt><strong>Purpose:</strong>
-    <dd>Retrieves data type property for <code>MULTI</code> driver.
+    <dd>Retrieves type of data property for <code>MULTI</code> driver.
   <dt><strong>Description:</strong>
-    <dd><code>H5Pget_multi_type</code> retrieves the data type setting from the
+    <dd><code>H5Pget_multi_type</code> retrieves the type of data setting from the
         file access or data transfer property list <code>fapl_id</code>.
 	This enables a user application to specify the type of data the
         application wishes to access so that the application 
@@ -9499,9 +9499,9 @@ END SUBROUTINE h5pset_meta_block_size_f
                         <em>H5FD_mem_t</em> <code>type</code>
     )
   <dt><strong>Purpose:</strong>
-    <dd>Sets data type property for <code>MULTI</code> driver.
+    <dd>Sets type of data property for <code>MULTI</code> driver.
   <dt><strong>Description:</strong>
-    <dd><code>H5Pset_multi_type</code> sets the data type property in the 
+    <dd><code>H5Pset_multi_type</code> sets the type of data property in the 
         file access or data transfer property list <code>fapl_id</code>.
 	This enables a user application to specify the type of data the
         application wishes to access so that the application 
@@ -9515,44 +9515,39 @@ END SUBROUTINE h5pset_meta_block_size_f
 	<p>
 	The type of data specified in <code>type</code> may be one of the following:
         <table border=0>
-        <tr valign=top align=left><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
-            <code>H5FD_MEM_DEFAULT</code>&nbsp;&nbsp;
-            </td><td>
-            Need description.... 
-        </td></tr>
         <tr valign=top align=left><td>&nbsp;</td><td>
             <code>H5FD_MEM_SUPER</code>
             </td><td>
-            Super block ... need description.... 
+            Super block data
         </td></tr>
-        <tr valign=top align=left><td>&nbsp;</td><td>
-            <code>H5FD_MEM_BTREE</code>
+        <tr valign=top align=left><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+            <code>H5FD_MEM_BTREE</code>&nbsp;&nbsp;&nbsp;&nbsp;
             </td><td>
-            Btree ... need description.... 
+            B-tree data
         </td></tr>
         <tr valign=top align=left><td>&nbsp;</td><td>
             <code>H5FD_MEM_DRAW</code>
             </td><td>
-            Need description.... 
+            Dataset raw data 
         </td></tr>
         <tr valign=top align=left><td>&nbsp;</td><td>
             <code>H5FD_MEM_GHEAP</code>
             </td><td>
-            Global heap ... need description.... 
+            Global heap data
         </td></tr>
         <tr valign=top align=left><td>&nbsp;</td><td>
             <code>H5FD_MEM_LHEAP</code>
             </td><td>
-            Local Heap ... need description.... 
+            Local heap data
         </td></tr>
         <tr valign=top align=left><td>&nbsp;</td><td>
             <code>H5FD_MEM_OHDR</code>
             </td><td>
-            Need description.... 
+            Object header data
         </td></tr>
 	</table>
 	<p>
-	Use of this function is only appropriate for an HDF5 file written 
+	Use of this function is appropriate only for an HDF5 file written 
 	as a set of files with the <code>MULTI</code> file driver.
   <dt><strong>Parameters:</strong>
     <ul><table>
@@ -10838,7 +10833,7 @@ Describes HDF5 Release 1.6.5, October 2005
 </address>
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 6 March 2005");
+document.writeln("Last modified: 3 October 2005");
 -->
 </SCRIPT>
  
