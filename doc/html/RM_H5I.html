@@ -360,6 +360,14 @@ END SUBROUTINE h5iget_file_id_f
 	for a second <code>H5Iget_name</code> call, 
 	which will retrieve the actual name.
 	<p>
+        If the object identified by <code>obj_id</code> is an attribute,
+        as determined via 
+        <a href="#Identify-GetType"><code>H5Iget_type</code></a>,
+        <code>H5Iget_name</code> retrieves the name of the object 
+        to which that attribute is attached. 
+        To retrieve the name of the attribute itself, use
+        <a href="RM_H5A.html#Annot-GetName"><code>H5Aget_name</code></a>.
+        <p>     
         If there is no name associated with the object identifier
 	or if the name is <code>NULL</code>, <code>H5Iget_name</code>
         returns <code>0</code> (zero).
@@ -704,7 +712,7 @@ Describes HDF5 Release 1.6.5, October 2005
 </address>
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 8 September 2004");
+document.writeln("Last modified: 4 October 2005");
 -->
 </SCRIPT>
 
