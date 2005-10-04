@@ -89,6 +89,8 @@ typedef long long         hssize_t_f;
 typedef int               size_t_f;
 #if defined H5_ABSOFT
 #define DF_CAPFNAMES
+#elif defined H5_G95
+#define FNAME_POST2_UNDERSCORE
 #else
 #define FNAME_POST_UNDERSCORE
 #endif /*H5_ABSOFT*/

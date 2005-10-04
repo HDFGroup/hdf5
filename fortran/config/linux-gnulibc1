@@ -43,7 +43,9 @@ else
         # The PGI and Intel compilers are automatically detected below
         ifc*|ifort*|pgf90*)
             ;;
-
+	g95)
+	    F9X_BASENAME=g95
+	    ;;
         *)
             # Figure out which compiler we are using: pgf90 or Absoft f95
             RM='rm -f'
@@ -103,5 +105,8 @@ case $F9X_BASENAME in
         PROFILE_FFLAGS="-g"
         f9x_flags_set=yes
         ;;
-
+    g95)
+        # Set required flag for compiling C stubs
+        CFLAGS="$CFLAGS -DH5_G95" 
+	;;
 esac  
