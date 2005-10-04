@@ -46,6 +46,27 @@ else
 	g95)
 	    F9X_BASENAME=g95
 	    ;;
+	*mpif90)
+            # Probably an MPICH compiler script.  Find out what fortran
+            # compiler it uses. version flags used by known complers,
+	    # G95: g95 -v
+	    # Absoft: f95 -v
+	    # Intel: ifort -V
+	    # PGI: pgf90 -V
+	    # Try both options.
+            tmpfile=/tmp/cmpver.$$
+            ( $F9X -v; $F9X -V) >$tmpfile 2>&1
+	    if grep '(g95!)' $tmpfile > /dev/null; then
+		F9X_BASENAME=g95
+	    elif grep 'Absoft' $tmpfile > /dev/null; then
+		F9X_BASENAME=f95
+	    elif grep 'Portland Group' $tmpfile > /dev/null; then
+		    F9X_BASENAME=pgf90
+	    elif grep 'Intel(R)' $tmpfile > /dev/null; then
+		F9X_BASENAME=ifort
+	    fi
+            rm -f $tmpfile
+            ;;
         *)
             # Figure out which compiler we are using: pgf90 or Absoft f95
             RM='rm -f'
