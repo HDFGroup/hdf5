@@ -1,0 +1,69 @@
+#							-*- shell-script -*-
+#
+# This file is part of the HDF5 build script.  It is processed shortly
+# after configure starts and defines, among other things, flags for
+# the various compile modes.
+#
+# See BlankForm in this directory for details.
+
+# Default compiler is `cc'
+if test "X-" =  "X-$CC"; then
+    CC=cc
+    CC_BASENAME=cc
+fi
+
+# Flags
+case "X-$CC" in
+    X-gcc)
+	CFLAGS="$CFLAGS -Wsign-compare" #Only works for some versions
+	DEBUG_CFLAGS="-g -fverbose-asm"
+	DEBUG_CPPFLAGS=
+	PROD_CFLAGS="-O3"
+	PROD_CPPFLAGS=
+	PROFILE_CFLAGS="-pg"
+	PROFILE_CPPFLAGS=
+	;;
+
+    *)
+	CFLAGS="$CFLAGS -Ae"
+	DEBUG_CFLAGS=-g
+	DEBUG_CPPFLAGS="-Ae"
+	PROD_CFLAGS=-O
+	PROD_CPPFLAGS="-Ae"
+	PROFILE_CFLAGS=
+	PROFILE_CPPFLAGS="-Ae"
+	;;
+esac
+
+# The default Fortran 90 compiler
+
+#
+# HDF5 integers
+#
+# 	R_LARGE is the number of digits for the bigest integer supported.
+#	R_INTEGER is the number of digits in INTEGER
+#
+# (for the HPUX architechture)
+#
+R_LARGE=18
+R_INTEGER=9
+HADDR_T='SELECTED_INT_KIND(R_LARGE)'
+HSIZE_T='SELECTED_INT_KIND(R_LARGE)'
+HSSIZE_T='SELECTED_INT_KIND(R_LARGE)'
+HID_T='SELECTED_INT_KIND(R_INTEGER)'
+SIZE_T='SELECTED_INT_KIND(R_INTEGER)'
+OBJECT_NAMELEN_DEFAULT_F=-1
+
+if test "X-" = "X-$F9X"; then
+    F9X=f90
+fi
+
+if test "X-" = "X-$f9x_flags_set"; then
+    F9XSUFFIXFLAG=""
+    FSEARCH_DIRS=""
+    FFLAGS="$FFLAGS -O"
+    DEBUG_FFLAGS="-O"
+    PROD_FFLAGS="-O"
+    PROFILE_FFLAGS="-O"
+    f9x_flags_set=yes
+fi
