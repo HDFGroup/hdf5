@@ -93,9 +93,14 @@ CLEANUP() {
 
 #  SETUP file tocopy
 #    Clone a standard input file in the test directory
+#  Modification:
+#    Was using "cp" command which means file $2 will inherit the permission
+#    setting of file $1.  If $1 is read-only, so will $2.  That will cause
+#    failure when the test attempts to write it later on.  Changed to use
+#    the "cat" command.
 #
 SETUP() {
-	cp $1 $2
+	cat < $1 > $2
 }
 
 #
