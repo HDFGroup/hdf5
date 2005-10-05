@@ -1,0 +1,35 @@
+#                                                       -*- shell-script -*-
+#
+# This file is part of the HDF5 build script.  It is processed shortly
+# after configure starts and defines, among other things, flags for
+# the various compile modes.
+#
+# See BlankForm in this directory for details.
+
+if test -z "$CXX"; then
+    CXX=aCC
+    CXX_BASENAME=aCC
+fi
+
+case "$CXX" in
+  aCC)
+    # +Z for PIC, +A for using archived libraries
+    # _INCLUDE_LONGLONG for using `long long' for hsize_t and hssize_t
+    CXXFLAGS="$CXXFLAGS  +A -D_INCLUDE_LONGLONG"
+    CFLAGS="$CFLAGS -g +O2"
+    DEBUG_CXXFLAGS=-g
+    DEBUG_CPPFLAGS=
+    PROD_CXXFLAGS="-O -s"
+    PROD_CPPFLAGS=
+    PROFILE_CPPFLAGS=
+    ;;
+  *)
+    CXXFLAGS="$CXXFLAGS -D_INCLUDE_LONGLONG"
+    CFLAGS="$CFLAGS"
+    DEBUG_CXXFLAGS=-g
+    DEBUG_CPPFLAGS=
+    PROD_CXXFLAGS=
+    PROD_CPPFLAGS=
+    PROFILE_CPPFLAGS=
+    ;;
+esac
