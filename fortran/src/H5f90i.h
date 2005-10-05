@@ -201,6 +201,9 @@ typedef int            hid_t_f;
 typedef float          real_f;
 #define _fcdtocp(desc) (desc)
 
+#if defined __ia64
+#define FNAME_POST_UNDERSCORE
+#endif
 #endif /* HP9000 */
 
 

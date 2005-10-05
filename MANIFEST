@@ -59,6 +59,7 @@
 ./config/gnu-flags
 ./config/hpux10.20
 ./config/hpux11.00
+./config/hpux11.23
 ./config/hpux9.03
 ./config/i386-pc-cygwin32
 ./config/i686-pc-cygwin
@@ -774,6 +775,7 @@
 ./fortran/config/gnu-flags
 ./fortran/config/hpux10.20
 ./fortran/config/hpux11.00
+./fortran/config/hpux11.23
 ./fortran/config/hpux9.03
 ./fortran/config/i386-pc-cygwin32
 ./fortran/config/ia64-linux-gnu
@@ -917,6 +919,7 @@
 ./c++/config/dependN.in
 ./c++/config/freebsd
 ./c++/config/hpux11.00
+./c++/config/hpux11.23
 ./c++/config/ia64-linux-gnu
 ./c++/config/irix6.x
 ./c++/config/linux-gnu

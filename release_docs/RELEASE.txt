@@ -112,6 +112,11 @@ New Features
 Support for new platforms, languages and compilers.
 =======================================
 
+    - Added support for HPUX 11.23 (IA64); only C and C++ are supported
+      with +DD64 flag 
+                                             EIP 2005/10/05
+ 
+
     Configuration
     -------------
 
