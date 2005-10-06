@@ -6634,6 +6634,11 @@ END SUBROUTINE h5pset_cache_f
         As a side-effect of this function, the layout of the dataset is 
         changed to <code>H5D_CHUNKED</code>, if it is not already so set.
         (See <a href="#Property-SetLayout"><code>H5Pset_layout</code></a>.)
+        <p>
+        <em>Note regarding fixed-size datasets:</em><br>
+        Chunk size cannot exceed the size of a fixed-size dataset.
+        For example, a dataset consisting of a 5x4 fixed-size array cannot be 
+        defined with 10x10 chunks.
   <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
@@ -10833,7 +10838,7 @@ Describes HDF5 Release 1.6.5, October 2005
 </address>
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 3 October 2005");
+document.writeln("Last modified: 5 October 2005");
 -->
 </SCRIPT>
  
