@@ -119,6 +119,7 @@ Support for new platforms, languages and compilers.
 
     Configuration
     -------------
+        - Added support for Cray X1.  JML 2005/10/03
 
 
 Bug Fixes since HDF5-1.6.4 release
@@ -239,6 +240,9 @@ Platforms Tested
                                   Cray Fortran Version 3.4.0.0
     Cray SV1 sn9617 10.0.1.2      Cray Standard C Version 6.6.0.3.6
                                   Cray Fortran Version 3.6.0.3.1
+    Cray X1 water 3.0.35          Cray Standard C Version 5.4.0.7.4
+                                  Cray Fortran 5.4.0.7.3
+                                  Cray C++ 5.4.0.7.4
     FreeBSD 4.9                   gcc 2.95.4
                                   g++ 2.95.4
                                   gcc 3.2.3, 3.3.6, 3.4.4, 4.0.0
@@ -325,6 +329,7 @@ HPUX11.00                            y(1)     y      y        y    y     y
 OSF1 v5.1                            y        y      y        y    y     y
 T90 IEEE                             n        y      n        n    y     n
 SV1                                  y(5)     y      y(5)     n    y     n
+X1                                   y        y      y        y    y     n
 TFLOPS                               y(1)     n      n        n    y     n
 AIX-5.1 & 5.2 32-bit                 y        y      y        y    y     y
 AIX-5.1 & 5.2 64-bit                 y        y      y        y    y     y
@@ -354,6 +359,7 @@ HPUX11.00                            y              x       n        y
 OSF1 v5.1                            y              y       n        y
 T90 IEEE                             n              y       n        y
 SV1                                  n              y       n        y
+X1                                   n              y       n        y
 TFLOPS                               n              y       n        n
 AIX-5.1 & 5.2 32-bit                 n              y       n        y
 AIX-5.1 & 5.2 64-bit                 n              y       n        y

@@ -310,8 +310,8 @@
 	Note: Fortran interface supports parallel HDF5 while the 
               C++ interface does not.
           
-        Note:  On Crays the following files should be modified before
-               building the Fortran Library:
+        Note:  On Cray T3E machines the following files need to be modified
+               before building the Fortran Library:
                  fortran/src/H5Dff.f90
                  fortran/src/H5Aff.f90
                  fortran/src/H5Pff.f90
