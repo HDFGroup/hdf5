@@ -351,6 +351,7 @@ New Features
 
 Support for new platforms, languages and compilers.
 =======================================
+        - Added support for Cray X1.  JML - 2005/10/03
         - PGI Fortran compiler is supported on Linux64 systems (x86_64)
                             EIP - 2004/08/19
         - Absoft compiler f95 v9.0 supported on Linux 2.4
