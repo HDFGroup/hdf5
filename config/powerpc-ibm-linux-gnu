@@ -1,0 +1,164 @@
+#							-*- shell-script -*-
+#
+# This file is part of the HDF5 build script.  It is processed shortly
+# after configure starts and defines, among other things, flags for
+# the various compile modes.
+
+# Use BGL supplied C compiler by default, xlc for serial, mpxlc for parallel.
+# Use -D_LARGE_FILES by default to support large file size.
+if test "X-" =  "X-$CC"; then
+  if test "X-$enable_parallel" = "X-yes"; then
+    CC=mpxlc
+    CC_BASENAME=mpxlc
+  else
+    CC=xlc
+    CC_BASENAME=xlc
+  fi
+fi
+
+# Define RUNPARALLEL if parallel mode is enabled or a parallel compiler used.
+if test "X-$enable_parallel" = "X-yes" -o X-$CC_BASENAME = X-mpxlc; then
+  RUNPARALLEL=${RUNPARALLEL="MP_PROCS=\$\${NPROCS:=3} MP_TASKS_PER_NODE=\$\${NPROCS:=3} poe"}
+fi
+
+
+#----------------------------------------------------------------------------
+# Compiler flags. The CPPFLAGS values should not include package debug
+# flags like `-DH5G_DEBUG' since these are added with the
+# `--enable-debug' switch of configure.
+
+case $CC_BASENAME in
+  xlc|mpxlc)
+    # Turn off shared lib option.  It causes some test suite to fail.
+    enable_shared="${enable_shared:-no}"
+    # Use -D_LARGE_FILES by default to support large file size.
+    CFLAGS="-qlanglvl=ansi -D_LARGE_FILES -DSTDC $CFLAGS"
+    DEBUG_CFLAGS="-g -qfullpath"
+    DEBUG_CPPFLAGS=
+    # -O causes test/dtypes to fail badly. Turn it off for now.
+    PROD_CFLAGS=""
+    PROD_CPPFLAGS=
+    PROFILE_CFLAGS="-g -qfullpath -pg"
+    PROFILE_CPPFLAGS=
+    ;;
+
+  gcc)
+    . $srcdir/config/gnu-flags
+    ;;
+
+  *)
+    CFLAGS="$CFLAGS -ansi"
+    DEBUG_CFLAGS="-g"
+    DEBUG_CPPFLAGS=
+    PROD_CFLAGS="-O"
+    PROD_CPPFLAGS=
+    PROFILE_CFLAGS="-pg"
+    PROFILE_CPPFLAGS=
+    ;;
+esac
+
+#----------------------------------------------------------------------------
+# Values for overriding configuration tests when cross compiling.
+# This includes compiling on some machines where the serial front end
+# compiles for a parallel back end.
+
+# Set this to `yes' or `no' depending on whether the target is big
+# endian or little endian.
+hdf5_cv_printf_ll=${hdf5_cv_printf_ll='ll'}
+ac_cv_c_bigendian=${ac_cv_c_bigendian='yes'}
+ac_cv_header_stdc=${ac_cv_header_stdc='yes'}
+ac_cv_header_sys_ioctl_h=${ac_cv_header_sys_ioctl_h=yes}
+
+# On bgl, because mpxlc is a cross-compiler, we need to cache ALL of the types
+# so that configure doesn't try to compile little programs to determine them
+# since these program will fail to execute.
+ac_cv_sizeof_char=${ac_cv_sizeof_char=1}
+ac_cv_sizeof_short=${ac_cv_sizeof_short=2}
+ac_cv_sizeof_int=${ac_cv_sizeof_int=4}
+ac_cv_sizeof_long=${ac_cv_sizeof_long=4}
+ac_cv_sizeof_long_long=${ac_cv_sizeof_long_long=8}
+ac_cv_sizeof___int64=${ac_cv_sizeof___int64=8}
+ac_cv_sizeof_float=${ac_cv_sizeof_float=4}
+ac_cv_sizeof_double=${ac_cv_sizeof_double=8}
+ac_cv_sizeof_long_double=${ac_cv_sizeof_long_double=8}
+ac_cv_sizeof_int8_t=${ac_cv_sizeof_int8_t=1}
+ac_cv_sizeof_uint8_t=${ac_cv_sizeof_uint8_t=1}
+ac_cv_sizeof_int_least8_t=${ac_cv_sizeof_int_least8_t=1}
+ac_cv_sizeof_uint_least8_t=${ac_cv_sizeof_uint_least8_t=1}
+ac_cv_sizeof_int_fast8_t=${ac_cv_sizeof_int_fast8_t=1}
+ac_cv_sizeof_uint_fast8_t=${ac_cv_sizeof_uint_fast8_t=1}
+ac_cv_sizeof_int16_t=${ac_cv_sizeof_int16_t=2}
+ac_cv_sizeof_uint16_t=${ac_cv_sizeof_uint16_t=2}
+ac_cv_sizeof_int_least16_t=${ac_cv_sizeof_int_least16_t=2}
+ac_cv_sizeof_uint_least16_t=${ac_cv_sizeof_uint_least16_t=2}
+ac_cv_sizeof_int_fast16_t=${ac_cv_sizeof_int_fast16_t=4}
+ac_cv_sizeof_uint_fast16_t=${ac_cv_sizeof_uint_fast16_t=4}
+ac_cv_sizeof_int32_t=${ac_cv_sizeof_int32_t=4}
+ac_cv_sizeof_uint32_t=${ac_cv_sizeof_uint32_t=4}
+ac_cv_sizeof_int_least32_t=${ac_cv_sizeof_int_least32_t=4}
+ac_cv_sizeof_uint_least32_t=${ac_cv_sizeof_uint_least32_t=4}
+ac_cv_sizeof_int_fast32_t=${ac_cv_sizeof_int_fast32_t=4}
+ac_cv_sizeof_uint_fast32_t=${ac_cv_sizeof_uint_fast32_t=4}
+ac_cv_sizeof_int64_t=${ac_cv_sizeof_int64_t=8}
+ac_cv_sizeof_uint64_t=${ac_cv_sizeof_uint64_t=8}
+ac_cv_sizeof_int_least64_t=${ac_cv_sizeof_int_least64_t=8}
+ac_cv_sizeof_uint_least64_t=${ac_cv_sizeof_uint_least64_t=8}
+ac_cv_sizeof_int_fast64_t=${ac_cv_sizeof_int_fast64_t=8}
+ac_cv_sizeof_uint_fast64_t=${ac_cv_sizeof_uint_fast64_t=8}
+
+ac_cv_sizeof_size_t=${ac_cv_sizeof_size_t=4}
+ac_cv_sizeof_ssize_t=${ac_cv_sizeof_ssize_t=4}
+ac_cv_sizeof_off_t=${ac_cv_sizeof_off_t=8}
+
+# The default Fortran 90 compiler
+
+#
+# HDF5 integers
+#
+# 	R_LARGE is the number of digits for the bigest integer supported.
+#	R_INTEGER is the number of digits in INTEGER
+#
+# (for the AIX architechture)
+#
+R_LARGE=18
+R_INTEGER=9
+HADDR_T='SELECTED_INT_KIND(R_LARGE)'
+HSIZE_T='SELECTED_INT_KIND(R_LARGE)'
+HSSIZE_T='SELECTED_INT_KIND(R_LARGE)'
+HID_T='SELECTED_INT_KIND(R_INTEGER)'
+SIZE_T='SELECTED_INT_KIND(R_INTEGER)'
+OBJECT_NAMELEN_DEFAULT_F=-1
+
+if test "X-" = "X-$FC"; then
+  if test "X-$enable_parallel" = "X-yes"; then
+    FC=mpxlf
+  else
+    FC=xlf
+  fi
+fi
+
+if test "X-" = "X-$f9x_flags_set"; then
+  F9XSUFFIXFLAG="-qsuffix=f=f90"
+  FCFLAGS="$FCFLAGS -static -O ${F9XSUFFIXFLAG} -qmoddir=./ -k"
+  FSEARCH_DIRS="-I./ -I../src"
+  DEBUG_FCFLAGS="-O"
+  PROD_FCFLAGS="-O"
+  PROFILE_FCFLAGS="-O"
+  f9x_flags_set=yes
+fi
+
+# With poe version 3.2.0.19 or lower(using lpp -l all | grep ppe.poe to check the version number, 
+# IBM MPI-IO implementation has a bug, 
+#it cannot generate correct MPI derived datatype. Please uncomment the following line:
+hdf5_mpi_complex_derived_datatype_works=${hdf5_mpi_complex_derived_datatype_works='no'}
+
+# The default C++ compiler
+
+# Use AIX supplied C++ compiler by default.
+CXX=${CXX=xlC}
+
+# Added -qweaksymbol to suppress linker messages warning of duplicate
+# symbols; these warnings are harmless. - BMR
+CXXFLAGS="$CXXFLAGS -qweaksymbol"
+
+
