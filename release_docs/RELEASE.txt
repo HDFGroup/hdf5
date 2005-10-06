@@ -399,10 +399,17 @@ Footnotes:  (1) Using mpich 1.2.6
 
 Known Problems
 ==============
+* When testing parallel HDF5 with the C compiler version MIPSpro 7.4.3 at IRIX
+  6.5, set enviroment variable MPI_TYPE_MAX to be a bigger number, for example 120000 
+  in order to pass the complicated collective IO tests inside parallel HDF5
+  library. This is not a problem inside parallel HDF5 library. You can always
+  set a bigger number in your system.
+                                  KY - 2005/10/6
+
 * Contiguous or chunked dataset created by a sequential version may
   not be modified with a parallel version of the library. 
   Use the H5Pset_alloc_time function with H5D_ALLOC_TIME_EARLY to set up the 
-  dataset creation property list to avoid the porblem.
+  dataset creation property list to avoid the problem.
                                     EIP - 2005/09/09
 
 * The dataset created or rewritten with the v1.6.3 library or after can't 
