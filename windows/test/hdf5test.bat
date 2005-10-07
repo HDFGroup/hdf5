@@ -277,5 +277,5 @@ echo ============================
 echo Testing talign 
 echo ============================
 
-REM talign%2\%1\talign%2
+..\tools\talign%2\%1\talign%2
 
