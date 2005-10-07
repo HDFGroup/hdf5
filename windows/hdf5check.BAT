@@ -284,8 +284,8 @@ echo ***************************************************************************
 echo                         HDF5 Hight Level Fortran Library Tests -- Debug DLL >> ..\..\check_results.txt
 echo ***************************************************************************** >> ..\..\check_results.txt
 cd ..\..\hl\fortran\test
-echo test_hdf5_hl_fortran release dll
-call test_hdf5_hl_fortran release dll >> ..\..\..\check_results.txt
+echo test_hdf5_hl_fortran debug dll
+call test_hdf5_hl_fortran debug dll >> ..\..\..\check_results.txt
 
 echo. >> ..\..\..\check_results.txt
 cd ..\..\..\
@@ -421,8 +421,8 @@ echo ***************************************************************************
 echo                         HDF5 High Level Fortran Library Tests -- Debug DLL >> ..\..\check_results.txt
 echo ***************************************************************************** >> ..\..\check_results.txt
 cd ..\..\hl\fortran\test
-echo test_hdf5_hl_fortran release dll
-call test_hdf5_hl_fortran release dll >> ..\..\..\check_results.txt
+echo test_hdf5_hl_fortran debug dll
+call test_hdf5_hl_fortran debug dll >> ..\..\..\check_results.txt
 
 echo. >> ..\..\..\check_results.txt
 cd ..\..\..\
