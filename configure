@@ -35429,6 +35429,12 @@ echo "$as_me: error: \'$enable_parallel\' is not a valid parallel search type" >
 esac
 
 if test -n "$PARALLEL"; then
+      if test "X$HDF_CXX" = "Xyes"; then
+    { { echo "$as_me:$LINENO: error: enable-cxx is incompatible with parallel library" >&5
+echo "$as_me: error: enable-cxx is incompatible with parallel library" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+
     TESTPARALLEL=testpar
 
 

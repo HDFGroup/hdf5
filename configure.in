@@ -1964,6 +1964,12 @@ dnl ----------------------------------------------------------------------
 dnl Print some other parallel information and do some sanity checks.
 dnl
 if test -n "$PARALLEL"; then
+  dnl Ensure that user isn't trying to build both C++ and parallel;
+  dnl this isn't supported.
+  if test "X$HDF_CXX" = "Xyes"; then
+    AC_MSG_ERROR([enable-cxx is incompatible with parallel library])
+  fi
+
   dnl The 'testpar' directory should participate in the build
   TESTPARALLEL=testpar
 
