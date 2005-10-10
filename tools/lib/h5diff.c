@@ -379,6 +379,7 @@ hsize_t diff_compare( hid_t file1_id,
   printf("Comparison not possible: <%s> is of type %s and <%s> is of type %s\n",
    obj1_name, get_type(info1[i].type),
    obj2_name, get_type(info2[j].type) );
+  options->not_cmp=1;
   return 0;
  }
 
@@ -580,6 +581,7 @@ hsize_t diff( hid_t      file1_id,
    printf("Comparison not supported: <%s> and <%s> are of type %s\n",
     path1, path2, get_type(type) );
   }
+		options->not_cmp=1;
   break;
  }
 

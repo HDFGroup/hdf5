@@ -62,6 +62,7 @@ typedef struct {
  hsize_t count;     /* count value */
  int    err_stat;  /* an error ocurred (1, error, 0, no error) */
  int    cmn_objs;  /* do we have comparable objects */
+	int    not_cmp;   /* are the objects comparable */
 
 } diff_opt_t;
 

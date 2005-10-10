@@ -680,3 +680,6 @@ position        vlen3D          vlen3D          difference
 [ 3 2 1 ]          59              0               59             
 Group:       </> and </>
 491 differences found
+--------------------------------
+Some objects are not comparable
+--------------------------------

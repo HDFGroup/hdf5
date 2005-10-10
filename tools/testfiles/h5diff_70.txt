@@ -1140,3 +1140,6 @@ position        float3D of </>  float3D of </>  difference
 [ 3 2 1 ]          24.000000       0.000000        24.000000      
 24 differences found
 0 differences found
+--------------------------------
+Some objects are not comparable
+--------------------------------

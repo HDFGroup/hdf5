@@ -10,3 +10,6 @@ Warning: Different storage datatype
 </dset7b> has file datatype H5T_STD_U8LE
 Comparison not supported: </dset7a> has sign H5T_SGN_2 and </dset7b> has sign H5T_SGN_NONE
 0 differences found
+--------------------------------
+Some objects are not comparable
+--------------------------------

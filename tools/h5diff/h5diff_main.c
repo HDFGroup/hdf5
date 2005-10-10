@@ -29,7 +29,7 @@ static int check_f_input( const char* );
  * Return: An  exit status of 0 means no differences were found, 1 means some
  *   differences were found.
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
  *
  * Date: May 9, 2003
  *
@@ -42,6 +42,10 @@ static int check_f_input( const char* );
  *   Verbose mode: print the above plus a list of objects and warnings
  *   Quiet mode: do not print output
  *
+	* Modifications: October 2005
+	*  Introduced a new field 'not_cmp' to 'diff_opt_t' that detects
+	*  if some objects are not comparable and prints the message
+	*  "Some objects are not comparable"
  *-------------------------------------------------------------------------
  */
 
@@ -216,6 +220,17 @@ int main(int argc, const char *argv[])
    if (!options.err_stat)
     print_found(nfound);
   }
+
+		if (options.not_cmp==1)
+  {
+			printf("--------------------------------\n");
+   printf("Some objects are not comparable\n");
+			printf("--------------------------------\n");
+   if (!options.m_verbose)
+    printf("Use -v for a list of objects.\n");
+  }
+
+
  }
 
 /*-------------------------------------------------------------------------

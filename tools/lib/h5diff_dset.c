@@ -208,6 +208,7 @@ hsize_t diff_datasetid( hid_t dset1_id,
   if (options->m_verbose && obj1_name && obj2_name)
    printf("<%s> and <%s> are empty datasets\n", obj1_name, obj2_name);
   cmp=0;
+		options->not_cmp=1;
  }
 
 
@@ -227,7 +228,11 @@ hsize_t diff_datasetid( hid_t dset1_id,
   obj1_name,
   obj2_name,
   options)!=1)
+	{
   cmp=0;
+  options->not_cmp=1;
+ }
+
 /*-------------------------------------------------------------------------
  * get number of elements
  *-------------------------------------------------------------------------
@@ -294,6 +299,7 @@ hsize_t diff_datasetid( hid_t dset1_id,
    printf("and <%s> has sign %s\n", obj2_name, get_sign(sign2));
   }
   cmp=0;
+		options->not_cmp=1;
  }
 
 /*-------------------------------------------------------------------------
