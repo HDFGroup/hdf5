@@ -518,10 +518,10 @@ bool DataSpace::selectValid () const
 // Function:	DataSpace::selectHyperslab
 ///\brief	Selects a hyperslab region to add to the current selected region.
 ///\param	op - IN: Operation to perform on current selection
-///\param	count - IN: Offset of the start of hyperslab
-///\param	start - IN: Number of blocks included in the hyperslab
-///\param	stride - IN: Hyperslab stride
-///\param	block - IN: Size of block in the hyperslab
+///\param	count - IN: Number of blocks included in the hyperslab
+///\param	start - IN: Offset of the start of hyperslab
+///\param	stride - IN: Hyperslab stride - default to \c NULL
+///\param	block - IN: Size of block in the hyperslab - default to \c NULL
 ///\exception	H5::DataSpaceIException
 ///\par Description
 ///		For more information, please refer to the C layer Reference
