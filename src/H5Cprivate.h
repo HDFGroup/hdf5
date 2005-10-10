@@ -149,8 +149,8 @@ typedef herr_t (*H5C_write_permitted_func_t)(const H5F_t *f,
  * them generally accessable.
  */
 
-#define H5C__DEFAULT_MAX_CACHE_SIZE     ((size_t)(4 * 1024 * 1024))
-#define H5C__DEFAULT_MIN_CLEAN_SIZE     ((size_t)(2 * 1024 * 1024))
+#define H5C__DEFAULT_MAX_CACHE_SIZE     ((size_t)(8 * 1024 * 1024))
+#define H5C__DEFAULT_MIN_CLEAN_SIZE     ((size_t)(4 * 1024 * 1024))
 
 
 /****************************************************************************
