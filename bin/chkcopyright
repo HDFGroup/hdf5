@@ -1,17 +1,17 @@
 #! /bin/sh
-##
-## Copyright by the Board of Trustees of the University of Illinois.
-## All rights reserved.
-##
-## This file is part of HDF5.  The full HDF5 copyright notice, including
-## terms governing use, modification, and redistribution, is contained in
-## the files COPYING and Copyright.html.  COPYING can be found at the root
-## of the source code distribution tree; Copyright.html can be found at the
-## root level of an installed copy of the electronic HDF5 document set and
-## is linked from the top-level documents page.  It can also be found at
-## http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
-## access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
-##
+#
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the files COPYING and Copyright.html.  COPYING can be found at the root
+# of the source code distribution tree; Copyright.html can be found at the
+# root level of an installed copy of the electronic HDF5 document set and
+# is linked from the top-level documents page.  It can also be found at
+# http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+#
 
 # Check Copyright notice.
 # Check that all the files have the proper copyright notice.
@@ -19,6 +19,8 @@
 #
 # Programmer: Albert Cheng
 # Created Data: 2003/07/22
+# Modification:
+#	Rewrote most of it. Albert Cheng, 2005/10/10.
 
 # Setup
 #
@@ -347,13 +349,16 @@ UNKNOWN_FILE()
     f=$1
     head -5 < $f > $tmpfile
     if head -1 < $tmpfile | grep '^#!' > /dev/null; then
-	# It is likely a shell script or similar type.
+	# First line is "#!".  It is likely a shell script or similar type.
+	SHELL_FILE $f
+    elif grep '^#' < $tmpfile > /dev/null; then
+	# Some lines start with a "#".  It may be a shell like type.
 	SHELL_FILE $f
     elif grep '\/\*' < $tmpfile > /dev/null; then
-	# It is C/C++ style file.
+	# Found some lines containing '/*'.  It may be a C/C++ style file.
 	C_SOURCE $f
     elif grep '^!' < $tmpfile > /dev/null; then
-	# It is a Fortran 9X style file.
+	# Some lines start with a "!".  It may be a Fortran 9X style file.
 	FORTRAN_SOURCE $f
     else
 	# Unknown type.
@@ -464,6 +469,9 @@ rm -f $EXCEPTIONS $EXTRACTEDFILE
 rm -f $PASSEDLOG $SKIPPEDLOG $FAILEDLOG
 
 # Report Results
+# Results are not total accurate--e.g., Passed are not counted, thus not
+# reported.
+# 
 echo "*******************"
 echo " REPORT"
 echo "*******************"
