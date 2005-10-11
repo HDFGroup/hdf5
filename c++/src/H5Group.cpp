@@ -86,7 +86,12 @@ Group::Group( const hid_t group_id ) : H5Object( group_id ) {}
 //--------------------------------------------------------------------------
 void* Group::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type) const
 {
-   return(p_reference(name, dataspace.getId(), ref_type));
+   try {
+      return(p_reference(name, dataspace.getId(), ref_type));
+   }
+   catch (IdComponentException E) {
+      throw GroupIException("Group::Reference", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -105,7 +110,25 @@ void* Group::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_ty
 //--------------------------------------------------------------------------
 void* Group::Reference(const char* name) const
 {
-   return(p_reference(name, -1, H5R_OBJECT));
+   try {
+      return(p_reference(name, -1, H5R_OBJECT));
+   }
+   catch (IdComponentException E) {
+      throw GroupIException("Group::Reference", E.getDetailMsg());
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:	Group::Reference
+///\brief	This is an overloaded function, provided for your convenience.
+///		It differs from the above function in that it takes an
+///		\c std::string for the object's name.
+///\param	name - IN: Name of the object to be referenced
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void* Group::Reference(const string& name) const
+{
+   return(Reference(name.c_str()));
 }
 
 //--------------------------------------------------------------------------

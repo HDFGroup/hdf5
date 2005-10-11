@@ -70,7 +70,7 @@ H5T_class_t AbstractDs::getTypeClass() const
       return( type_class );
    else
    {
-      throw DataTypeIException("AbstractDs::getTypeClass",
+      throw DataTypeIException(inMemFunc("getTypeClass"),
 		"H5Tget_class returns H5T_NO_CLASS");
    }
 }

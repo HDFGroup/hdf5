@@ -65,6 +65,9 @@ class H5_DLLCPP FileCreatPropList : public PropList {
 	// indexing chunked datasets.
 	void setIstorek( unsigned ik ) const;
 
+	// Returns this class name
+	virtual string fromClass () const { return("FileCreatPropList"); }
+
 	// Creates a file create property list.
 	FileCreatPropList();
 

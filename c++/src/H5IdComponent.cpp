@@ -53,7 +53,7 @@ void IdComponent::incRefCount(hid_t obj_id) const
 {
     if (p_valid_id(obj_id))
 	if (H5Iinc_ref(obj_id) < 0)
-            throw IdComponentException("IdComponent::incRefCount", "incrementing object ref count failed");
+            throw IdComponentException(inMemFunc("incRefCount"), "incrementing object ref count failed");
 }
 
 //--------------------------------------------------------------------------
@@ -79,10 +79,10 @@ void IdComponent::decRefCount(hid_t obj_id) const
     if (p_valid_id(obj_id))
         if (H5Idec_ref(obj_id) < 0)
 	    if (H5Iget_ref(obj_id) <= 0)
-		throw IdComponentException("IdComponent::decRefCount",
+		throw IdComponentException(inMemFunc("decRefCount"),
 					"object ref count is 0 or negative");
 	    else
-		throw IdComponentException("IdComponent::decRefCount",
+		throw IdComponentException(inMemFunc("decRefCount"),
 					"decrementing object ref count failed");
 }
 
@@ -109,7 +109,7 @@ int IdComponent::getCounter(hid_t obj_id) const
     {
 	counter = H5Iget_ref(obj_id);
 	if (counter < 0)
-            throw IdComponentException("IdComponent::incRefCount", "incrementing object ref count failed");
+            throw IdComponentException(inMemFunc("incRefCount"), "incrementing object ref count failed");
     }
     return (counter);
 }
@@ -218,7 +218,8 @@ IdComponent::~IdComponent() {
 }
 
 //
-// Implementation of protected functions for HDF5 Reference Interface.
+// Implementation of protected functions for HDF5 Reference Interface
+// and miscelaneous helpers.
 //
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -247,8 +248,7 @@ string IdComponent::p_get_file_name() const
    // If H5Aget_name returns a negative value, raise an exception,
    if( name_size < 0 )
    {
-      throw IdComponentException("IdComponent::p_get_file_name",
-				"H5Fget_name failed");
+      throw IdComponentException("", "H5Fget_name failed");
    }
 
    // Call H5Fget_name again to get the actual file name
@@ -258,8 +258,7 @@ string IdComponent::p_get_file_name() const
    // Check for failure again
    if( name_size < 0 )
    {
-      throw IdComponentException("IdComponent::p_get_file_name",
-				"H5Fget_name failed");
+      throw IdComponentException("", "H5Fget_name failed");
    }
 
    // Convert the C file name and return
@@ -285,8 +284,7 @@ void* IdComponent::p_reference(const char* name, hid_t space_id, H5R_type_t ref_
    herr_t ret_value = H5Rcreate(ref, id, name, ref_type, space_id);
    if (ret_value < 0)
    {
-      throw IdComponentException("IdComponent::p_reference",
-                "H5Rcreate failed");
+      throw IdComponentException("", "H5Rcreate failed");
    }
    return(ref);
 }
@@ -310,8 +308,7 @@ H5G_obj_t IdComponent::p_get_obj_type(void *ref, H5R_type_t ref_type) const
    H5G_obj_t obj_type = H5Rget_obj_type(id, ref_type, ref);
    if (obj_type == H5G_UNKNOWN)
    {
-      throw IdComponentException("IdComponent::p_get_obj_type",
-                "H5R_get_obj_type failed");
+      throw IdComponentException("", "H5R_get_obj_type failed");
    }
    return(obj_type);
 }
@@ -332,8 +329,7 @@ hid_t IdComponent::p_get_region(void *ref, H5R_type_t ref_type) const
    hid_t space_id = H5Rget_region(id, ref_type, ref);
    if (space_id < 0)
    {
-      throw IdComponentException("IdComponent::p_get_region",
-                "H5Rget_region failed");
+      throw IdComponentException("", "H5Rget_region failed");
    }
    return(space_id);
 }
@@ -356,6 +352,26 @@ bool IdComponent::p_valid_id(hid_t obj_id) const
 	return false;
     else
 	return true;
+}
+
+//--------------------------------------------------------------------------
+// Function:	IdComponent::inMemFunc
+///\brief	Makes and returns string "<class-name>::<func_name>"
+///\param	func_name - Name of the function where failure occurs
+// Description
+///		Concatenates the class name of this object with the
+///		passed-in function name to create a string that indicates
+///		where the failure occurs.  The class-name is provided by
+///		fromClass().  This string will be used by a base class when
+///		an exception is thrown.
+// Programmer	Binh-Minh Ribler - Oct 10, 2005
+//--------------------------------------------------------------------------
+string IdComponent::inMemFunc(const char* func_name) const
+{
+   string full_name = func_name;
+   full_name.insert(0, "::");
+   full_name.insert(0, fromClass());
+   return (full_name);
 }
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS

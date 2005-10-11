@@ -37,6 +37,10 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 
 	// Creates a reference to a named Hdf5 object in this object.
 	void* Reference(const char* name) const;
+	void* Reference(const string& name) const;
+
+	// Returns this class name
+	virtual string fromClass () const { return ("Group"); }
 
         // Throw group exception.
         virtual void throwException(const string func_name, const string msg) const;

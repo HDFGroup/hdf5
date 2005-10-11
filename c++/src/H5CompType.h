@@ -90,6 +90,9 @@ class H5_DLLCPP CompType : public DataType {
 	// Recursively removes padding from within this compound datatype.
 	void pack() const;
 
+	// Returns this class name
+	virtual string fromClass () const { return("CompType"); }
+
 	// Default constructor
 	CompType();
 

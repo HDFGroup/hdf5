@@ -52,6 +52,9 @@ class H5_DLLCPP FloatType : public AtomType {
 	// Sets the mantissa normalization of a floating-point datatype.
 	void setNorm( H5T_norm_t norm ) const;
 
+	// Returns this class name
+	virtual string fromClass () const { return ("FloatType"); }
+
 	// Default constructor
 	FloatType();
 

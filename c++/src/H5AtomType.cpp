@@ -66,7 +66,7 @@ void AtomType::setSize( size_t size ) const
    herr_t ret_value = H5Tset_size( id, size );
    if( ret_value < 0 )
    {
-      throw DataTypeIException("AtomType::setSize", "H5Tset_size failed");
+      throw DataTypeIException(inMemFunc("setSize"), "H5Tset_size failed");
    }
 }
 
@@ -88,7 +88,7 @@ H5T_order_t AtomType::getOrder() const
    // return a byte order constant if successful
    if( type_order == H5T_ORDER_ERROR )
    {
-      throw DataTypeIException("AtomType::getOrder",
+      throw DataTypeIException(inMemFunc("getOrder"),
                 "H5Tget_order returns H5T_ORDER_ERROR");
    }
    return( type_order );
@@ -142,7 +142,7 @@ void AtomType::setOrder( H5T_order_t order ) const
    herr_t ret_value = H5Tset_order( id, order );
    if( ret_value < 0 )
    {
-      throw DataTypeIException("AtomType::setOrder", "H5Tset_order failed");
+      throw DataTypeIException(inMemFunc("setOrder"), "H5Tset_order failed");
    }
 }
 
@@ -164,7 +164,7 @@ size_t AtomType::getPrecision() const
    // returns number of significant bits if successful
    if( num_signi_bits == 0 )
    {
-      throw DataTypeIException("AtomType::getPrecision",
+      throw DataTypeIException(inMemFunc("getPrecision"),
 		"H5Tget_precision returns invalid number of significant bits");
    }
    return( num_signi_bits );
@@ -186,7 +186,7 @@ void AtomType::setPrecision( size_t precision ) const
    herr_t ret_value = H5Tset_precision( id, precision );
    if( ret_value < 0 )
    {
-      throw DataTypeIException("AtomType::setPrecision", "H5Tset_precision failed");
+      throw DataTypeIException(inMemFunc("setPrecision"), "H5Tset_precision failed");
    }
 }
 
@@ -211,7 +211,7 @@ int AtomType::getOffset() const
    // returns a non-negative offset value if successful
    if( offset == -1 )
    {
-      throw DataTypeIException("AtomType::getOffset",
+      throw DataTypeIException(inMemFunc("getOffset"),
 		"H5Tget_offset returns a negative offset value");
    }
    return( offset );
@@ -233,7 +233,7 @@ void AtomType::setOffset( size_t offset ) const
    herr_t ret_value = H5Tset_offset( id, offset );
    if( ret_value < 0 )
    {
-      throw DataTypeIException("AtomType::setOffset", "H5Tset_offset failed");
+      throw DataTypeIException(inMemFunc("setOffset"), "H5Tset_offset failed");
    }
 }
 
@@ -257,7 +257,7 @@ void AtomType::getPad( H5T_pad_t& lsb, H5T_pad_t& msb ) const
    herr_t ret_value = H5Tget_pad( id, &lsb, &msb );
    if( ret_value < 0 )
    {
-      throw DataTypeIException("AtomType::getPad", "H5Tget_pad failed");
+      throw DataTypeIException(inMemFunc("getPad"), "H5Tget_pad failed");
    }
 }
 
@@ -280,7 +280,7 @@ void AtomType::setPad( H5T_pad_t lsb, H5T_pad_t msb ) const
    herr_t ret_value = H5Tset_pad( id, lsb, msb );
    if( ret_value < 0 )
    {
-      throw DataTypeIException("AtomType::setPad", "H5Tset_pad failed");
+      throw DataTypeIException(inMemFunc("setPad"), "H5Tset_pad failed");
    }
 }
 
