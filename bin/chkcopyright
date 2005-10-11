@@ -20,14 +20,30 @@
 # Programmer: Albert Cheng
 # Created Data: 2003/07/22
 
+# Setup
+#
 PROGNAME=$0
 DIFF="diff"
-COPYRIGHTFILE=/tmp/copy.$$
-EXTRACTEDFILE=/tmp/extracted.$$
+INITFILE=.h5chkright.ini
+EXCEPTIONS=/tmp/h5chkright.except.$$
+EXCEPTIONDIRS="-name CVS"	# at least skip CVS directories.
+EXTRACTEDFILE=/tmp/h5chkright.extracted.$$
 VERBOSE=		# default no
 DIRS=.			# default current directory
+NFAILEDFILES=0		# Number of failed files found.
+PASSEDLOG=/tmp/h5chkright_passed.$$
+SKIPPEDLOG=/tmp/h5chkright_skipped.$$
+FAILEDLOG=/tmp/h5chkright_failed.$$
+
+C_COPYRIGHT=/tmp/h5chkright_C.$$	# C style copyright
+FTN_COPYRIGHT=/tmp/h5chkright_FTN.$$	# Fortran style copyright
+HTM_COPYRIGHT=/tmp/h5chkright_HTM.$$	# HTML style copyright
+SH_COPYRIGHT=/tmp/h5chkright_SH.$$	# SHELL style copyright
+SH_COPYRIGHT2=/tmp/h5chkright_SH2.$$	# SHELL style copyright, 2nd style.
 
 
+# Help page
+#
 USAGE()
 {
     cat <<EOF
@@ -43,6 +59,146 @@ Usage: $PROGNAME [-h | -help] [-fname name-patter] [-v | -v9] [dir1 dir2 ...]
     -v9
 	highly verbose
 EOF
+}
+
+
+# Generate various styles of Copyright notices
+#
+BUILDCOPYRIGHT()
+{
+    # C and C++ source Copyright notice
+    cat > ${C_COPYRIGHT} << \EOF
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+EOF
+
+    # Fortran9X source Copyright notice
+    cat > ${FTN_COPYRIGHT} << \EOF
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+!   Copyright by the Board of Trustees of the University of Illinois.         *
+!   All rights reserved.                                                      *
+!                                                                             *
+!   This file is part of HDF5.  The full HDF5 copyright notice, including     *
+!   terms governing use, modification, and redistribution, is contained in    *
+!   the files COPYING and Copyright.html.  COPYING can be found at the root   *
+!   of the source code distribution tree; Copyright.html can be found at the  *
+!   root level of an installed copy of the electronic HDF5 document set and   *
+!   is linked from the top-level documents page.  It can also be found at     *
+!   http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+!   access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+EOF
+
+    # HTML file Copyright notice
+    cat > ${HTM_COPYRIGHT} << \EOF
+<!--
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  * Copyright by the Board of Trustees of the University of Illinois.         *
+  * All rights reserved.                                                      *
+  *                                                                           *
+  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+  * terms governing use, modification, and redistribution, is contained in    *
+  * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+  * of the source code distribution tree; Copyright.html can be found at the  *
+  * root level of an installed copy of the electronic HDF5 document set and   *
+  * is linked from the top-level documents page.  It can also be found at     *
+  * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ -->
+EOF
+
+    # Shell style Copyright notice
+    cat > ${SH_COPYRIGHT} << \EOF
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the files COPYING and Copyright.html.  COPYING can be found at the root
+# of the source code distribution tree; Copyright.html can be found at the
+# root level of an installed copy of the electronic HDF5 document set and
+# is linked from the top-level documents page.  It can also be found at
+# http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+EOF
+
+    # Shell style Copyright notice (2nd type)
+    cat > ${SH_COPYRIGHT2} << \EOF
+## Copyright by the Board of Trustees of the University of Illinois.
+## All rights reserved.
+##
+## This file is part of HDF5.  The full HDF5 copyright notice, including
+## terms governing use, modification, and redistribution, is contained in
+## the files COPYING and Copyright.html.  COPYING can be found at the root
+## of the source code distribution tree; Copyright.html can be found at the
+## root level of an installed copy of the electronic HDF5 document set and
+## is linked from the top-level documents page.  It can also be found at
+## http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
+## access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+EOF
+
+}
+
+# Initialization
+#
+# Initialize file format:
+# Each line is a keyword for action and the rest are values.
+# Keywords:
+# '#'           Comments
+# skip          Files to be skipped
+# prune         Directories to be skipped.  Notice this prunes all directories
+#               with the same name.  E.g.,
+#               "prune test" skips test, fortran/test, c++/test, ...
+INITIALIZATION()
+{
+    # clean up log files
+    rm -f $PASSEDLOG $SKIPPEDLOG $FAILEDLOG
+
+    # Generate various styles of copyright notice.
+    BUILDCOPYRIGHT
+
+    echo Initialization...
+    # setup exceptions.
+    cp /dev/null $EXCEPTIONS
+
+    # Process Initial setting file if exists
+    if [ -r $INITFILE ]; then
+	while read key value; do
+	    case "$key" in
+	    '#' | '')	# Comment or blank line, skip it
+		continue
+		;;
+	    skip)
+		echo $key $value
+		echo $value >> $EXCEPTIONS
+		;;
+	    prune)
+		echo $key $value
+		EXCEPTIONDIRS="$EXCEPTIONDIRS -o -name $value"
+		;;
+	    *)
+		echo unknown setting input in file $INITFILE
+		echo $key $value
+		;;
+	    esac
+	done < $INITFILE
+    fi
+    
+    # Change EXCEPTIONDIRS to be compatible with find command.
+    EXCEPTIONDIRS="( $EXCEPTIONDIRS ) -prune -o"
+    echo Initialization done
 }
 
 
@@ -86,27 +242,13 @@ PARSE_OPTION()
 C_SOURCE()
 {
     f=$1
-    cat > ${COPYRIGHTFILE} << \EOF
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright by the Board of Trustees of the University of Illinois.         *
- * All rights reserved.                                                      *
- *                                                                           *
- * This file is part of HDF5.  The full HDF5 copyright notice, including     *
- * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
- * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-EOF
+    COPYRIGHTFILE=$C_COPYRIGHT
     # Must use stdin for wc to prevent filename from popping up.
     nlines=`wc -l < ${COPYRIGHTFILE}| tr -d ' '`
     head -${nlines} $f | $DIFF - ${COPYRIGHTFILE} >/dev/null 2>&1
     if test $? -ne 0; then
 	# show the difference
-	echo ${f}:
+	FAILED $f
 	head -${nlines} $f | $DIFF - ${COPYRIGHTFILE}
     fi
 }
@@ -117,27 +259,13 @@ EOF
 FORTRAN_SOURCE()
 {
     f=$1
-    cat > ${COPYRIGHTFILE} << \EOF
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
-!   Copyright by the Board of Trustees of the University of Illinois.         *
-!   All rights reserved.                                                      *
-!                                                                             *
-!   This file is part of HDF5.  The full HDF5 copyright notice, including     *
-!   terms governing use, modification, and redistribution, is contained in    *
-!   the files COPYING and Copyright.html.  COPYING can be found at the root   *
-!   of the source code distribution tree; Copyright.html can be found at the  *
-!   root level of an installed copy of the electronic HDF5 document set and   *
-!   is linked from the top-level documents page.  It can also be found at     *
-!   http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
-!   access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
-EOF
+    COPYRIGHTFILE=$FTN_COPYRIGHT
     # Must use stdin for wc to prevent filename from popping up.
     nlines=`wc -l < ${COPYRIGHTFILE}| tr -d ' '`
     head -${nlines} $f | $DIFF - ${COPYRIGHTFILE} >/dev/null 2>&1
     if test $? -ne 0; then
 	# show the differences
-	echo ${f}:
+	FAILED $f
 	head -${nlines} $f | $DIFF - ${COPYRIGHTFILE}
     fi
 }
@@ -148,95 +276,95 @@ EOF
 HTML_FILE()
 {
     f=$1
-    cat > ${COPYRIGHTFILE} << \EOF
-<!--
-  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-  * Copyright by the Board of Trustees of the University of Illinois.         *
-  * All rights reserved.                                                      *
-  *                                                                           *
-  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
-  * terms governing use, modification, and redistribution, is contained in    *
-  * the files COPYING and Copyright.html.  COPYING can be found at the root   *
-  * of the source code distribution tree; Copyright.html can be found at the  *
-  * root level of an installed copy of the electronic HDF5 document set and   *
-  * is linked from the top-level documents page.  It can also be found at     *
-  * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
-  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
-  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- -->
-EOF
+    COPYRIGHTFILE=$HTM_COPYRIGHT
     # Must use stdin for wc to prevent filename from popping up.
     nlines=`wc -l < ${COPYRIGHTFILE}| tr -d ' '`
     sed -n -e '/^<!--$/,/^ -->$/p' < $f | head -${nlines} > ${EXTRACTEDFILE}
     $DIFF ${EXTRACTEDFILE} ${COPYRIGHTFILE} >/dev/null 2>&1
     if test $? -ne 0; then
 	# show the differences
-	echo ${f}:
+	FAILED $f
 	$DIFF ${EXTRACTEDFILE} ${COPYRIGHTFILE}
     fi
 }
 
 
-# Check Shell script files
+# Check Shell script files and other files (e.g., Makefile) that use
+# the style of copyright notice of leading #'s.
+# There is a preferred style (single leading #) vs the alternate style (double
+# leading #'s).  The double leading #'s style is used in Makefile.am, for
+# example.
 #
 SHELL_FILE()
 {
     f=$1
-    cat > ${COPYRIGHTFILE} << \EOF
-#! /bin/sh
-##
-## Copyright by the Board of Trustees of the University of Illinois.
-## All rights reserved.
-##
-## This file is part of HDF5.  The full HDF5 copyright notice, including
-## terms governing use, modification, and redistribution, is contained in
-## the files COPYING and Copyright.html.  COPYING can be found at the root
-## of the source code distribution tree; Copyright.html can be found at the
-## root level of an installed copy of the electronic HDF5 document set and
-## is linked from the top-level documents page.  It can also be found at
-## http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
-## access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
-##
-EOF
-    # Must use stdin for wc to prevent filename from popping up.
-    nlines=`wc -l < ${COPYRIGHTFILE}| tr -d ' '`
-    head -${nlines} $f | $DIFF - ${COPYRIGHTFILE} >/dev/null 2>&1
-    if test $? -ne 0; then
-	# show the differences
-	echo ${f}:
-	head -${nlines} $f | $DIFF - ${COPYRIGHTFILE}
-    fi
-}
-
-
-# Check Makefile 
-#
-MAKE_FILE()
-{
-    f=$1
-    cat > ${COPYRIGHTFILE} << \EOF
-# Copyright by the Board of Trustees of the University of Illinois.
-# All rights reserved.
-#
-# This file is part of HDF5.  The full HDF5 copyright notice, including
-# terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
-EOF
+    COPYRIGHTFILE=$SH_COPYRIGHT
     # Must use stdin for wc to prevent filename from popping up.
     nlines=`wc -l < ${COPYRIGHTFILE}| tr -d ' '`
     morelines=`expr $nlines - 1`
     sed -n -e "/^# Copyright by the Board of Trustees/,+${morelines}p" < $f > ${EXTRACTEDFILE}
     $DIFF ${EXTRACTEDFILE} ${COPYRIGHTFILE} >/dev/null 2>&1
-    if test $? -ne 0; then
-	# show the differences
-	echo ${f}:
-	$DIFF ${EXTRACTEDFILE} ${COPYRIGHTFILE}
+    if test $? -eq 0; then
+	return 0
     fi
+    #
+    # Try again with alternate style
+    COPYRIGHTFILE=$SH_COPYRIGHT2
+    # Must use stdin for wc to prevent filename from popping up.
+    nlines=`wc -l < ${COPYRIGHTFILE}| tr -d ' '`
+    morelines=`expr $nlines - 1`
+    sed -n -e "/^## Copyright by the Board of Trustees/,+${morelines}p" < $f > ${EXTRACTEDFILE}
+    $DIFF ${EXTRACTEDFILE} ${COPYRIGHTFILE} >/dev/null 2>&1
+    if test $? -eq 0; then
+	return 0
+    fi
+
+    # show the differences with the preferred style.
+    FAILED $f
+    $DIFF ${EXTRACTEDFILE} ${SH_COPYRIGHT}
+}
+
+
+# Passed checking.
+# $1 file that has passed.
+#
+PASS()
+{
+    if test X-$VERBOSE = X-yes; then
+	echo "    PASSED"
+    fi
+    echo $1 >> $PASSEDLOG
+}
+
+
+# Unknown file type. Considered a fail.
+# $1 file that is skipped.
+#
+UNKNOWN_TYPE()
+{
+    echo "UNKNOWN type: $1" | tee -a $FAILEDLOG
+}
+
+
+# Skip checking.
+# $1 file that is skipped.
+#
+SKIP()
+{
+    if test X-$VERBOSE = X-yes; then
+	echo "    SKIPPED"
+    fi
+    echo $1 >> $SKIPPEDLOG
+}
+
+
+# Failed checking.
+# $1 file that has failed.
+#
+FAILED()
+{
+    echo "FAILED:  $1"
+    echo $1 >> $FAILEDLOG
 }
 
 
@@ -244,45 +372,68 @@ EOF
 # Main body
 
 PARSE_OPTION "$@"
+INITIALIZATION
 
 # use find to list all those file names and process them
 # one by one.
-(
 if test -z "$FNAME" ; then
-    find $DIRS -type f -print
+    find $DIRS $EXCEPTIONDIRS -type f -print
 else
     find $DIRS -type f -name "${FNAME}" -print 
-fi
-) |
+fi |
 while read file; do
     if test X-$VERBOSE = X-yes; then
 	echo checking ${file}...
     fi
-    case ${file} in
-    *.c | *.h | *.cpp )
-	C_SOURCE ${file}
-	;;
-    *.f90 )
-	FORTRAN_SOURCE ${file}
-	;;
-    *.htm | *.html )
-        HTML_FILE ${file}
-	;;
-    *.sh | *.sh.in )
-	SHELL_FILE ${file}
-	;;
-    *Makefile | *Makefile.in | *Makefile.am )
-	MAKE_FILE ${file}
-	;;
-    *CVS/* )
-	# Ignore CVS control files.
-	continue
-	;;
-    *)
-	echo "Unknown file type (${file})"
-	;;
-    esac
+    if echo $file | egrep -f $EXCEPTIONS > /dev/null; then
+	SKIP ${file}
+    else
+	case ${file} in
+	*.c | *.h | *.cpp )
+	    C_SOURCE ${file}
+	    ;;
+	*.f90 )
+	    FORTRAN_SOURCE ${file}
+	    ;;
+	*.htm | *.html )
+	    HTML_FILE ${file}
+	    ;;
+	*.sh | *.sh.in | *Makefile | *Makefile.in | *Makefile.am )
+	    SHELL_FILE ${file}
+	    ;;
+	*.h5 )
+	    # Ignore HDF5 data files
+	    continue
+	    ;;
+	*CVS/* )
+	    # Ignore CVS control files.
+	    continue
+	    ;;
+	*)
+	    UNKNOWN_TYPE $file
+	    ;;
+	esac
+    fi
 done
 
+# check results
+if [ -f $FAILEDLOG ]; then
+    NFAILEDFILES=`wc -l < $FAILEDLOG`
+fi
+
 # Cleanup
-rm -f ${EXTRACTEDFILE} ${COPYRIGHTFILE}
+rm -f $C_COPYRIGHT $FTN_COPYRIGHT $HTM_COPYRIGHT $SH_COPYRIGHT $SH_COPYRIGHT2
+rm -f $EXCEPTIONS $EXTRACTEDFILE
+rm -f $PASSEDLOG $SKIPPEDLOG $FAILEDLOG
+
+# Report Results
+echo "*******************"
+echo " REPORT"
+echo "*******************"
+if [ $NFAILEDFILES -gt 0 ]; then
+    echo Number of failed files found = $NFAILEDFILES
+    exit 1
+else
+    echo No failed files found
+    exit 0
+fi
