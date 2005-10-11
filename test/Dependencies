@@ -1,3 +1,16 @@
+##
+## Copyright by the Board of Trustees of the University of Illinois.
+## All rights reserved.
+##
+## This file is part of HDF5.  The full HDF5 copyright notice, including
+## terms governing use, modification, and redistribution, is contained in
+## the files COPYING and Copyright.html.  COPYING can be found at the root
+## of the source code distribution tree; Copyright.html can be found at the
+## root level of an installed copy of the electronic HDF5 document set and
+## is linked from the top-level documents page.  It can also be found at
+## http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
+## access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+##
 ## This file is machine generated on GNU systems.
 ## Only temporary changes may be made here.
 
@@ -787,7 +800,15 @@ links.lo: \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h \
    $(top_srcdir)/src/H5private.h \
-   $(top_srcdir)/src/H5MPprivate.h
+   $(top_srcdir)/src/H5MPprivate.h \
+   $(top_srcdir)/src/H5Gprivate.h \
+   $(top_srcdir)/src/H5Bprivate.h \
+   $(top_srcdir)/src/H5ACprivate.h \
+   $(top_srcdir)/src/H5Fprivate.h \
+   $(top_srcdir)/src/H5Cprivate.h \
+   $(top_srcdir)/src/H5Cpublic.h \
+   $(top_srcdir)/src/H5RCprivate.h \
+   $(top_srcdir)/src/H5RSprivate.h
 mount.lo: \
    $(srcdir)/mount.c \
    $(srcdir)/h5test.h \
@@ -826,7 +847,9 @@ mount.lo: \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h \
    $(top_srcdir)/src/H5private.h \
-   $(top_srcdir)/src/H5MPprivate.h
+   $(top_srcdir)/src/H5MPprivate.h \
+   $(top_srcdir)/src/H5Fprivate.h \
+   $(top_srcdir)/src/H5Iprivate.h
 mtime.lo: \
    $(srcdir)/mtime.c \
    $(srcdir)/h5test.h \
@@ -968,7 +991,12 @@ stab.lo: \
    $(top_srcdir)/src/H5Cprivate.h \
    $(top_srcdir)/src/H5Cpublic.h \
    $(top_srcdir)/src/H5RCprivate.h \
-   $(top_srcdir)/src/H5RSprivate.h
+   $(top_srcdir)/src/H5RSprivate.h \
+   $(top_srcdir)/src/H5Oprivate.h \
+   $(top_srcdir)/src/H5HGprivate.h \
+   $(top_srcdir)/src/H5Tprivate.h \
+   $(top_srcdir)/src/H5Rprivate.h \
+   $(top_srcdir)/src/H5Zprivate.h
 tarray.lo: \
    $(srcdir)/tarray.c \
    $(srcdir)/testhdf5.h \
@@ -2628,47 +2656,6 @@ dangle.lo: \
    $(top_srcdir)/src/H5FDstream.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5MPprivate.h
-filename.lo: \
-   $(srcdir)/filename.c \
-   $(srcdir)/testhdf5.h \
-   $(top_srcdir)/src/H5private.h \
-   $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5pubconf.h \
-   $(top_srcdir)/src/H5api_adpt.h \
-   $(top_srcdir)/src/H5MPprivate.h \
-   $(top_srcdir)/src/H5Eprivate.h \
-   $(top_srcdir)/src/H5Epublic.h \
-   $(top_srcdir)/src/H5Ipublic.h \
-   $(srcdir)/h5test.h \
-   $(top_srcdir)/src/hdf5.h \
-   $(top_srcdir)/src/H5Apublic.h \
-   $(top_srcdir)/src/H5ACpublic.h \
-   $(top_srcdir)/src/H5Bpublic.h \
-   $(top_srcdir)/src/H5Dpublic.h \
-   $(top_srcdir)/src/H5Fpublic.h \
-   $(top_srcdir)/src/H5FDpublic.h \
-   $(top_srcdir)/src/H5Gpublic.h \
-   $(top_srcdir)/src/H5Opublic.h \
-   $(top_srcdir)/src/H5HGpublic.h \
-   $(top_srcdir)/src/H5HLpublic.h \
-   $(top_srcdir)/src/H5MMpublic.h \
-   $(top_srcdir)/src/H5Ppublic.h \
-   $(top_srcdir)/src/H5Zpublic.h \
-   $(top_srcdir)/src/H5Rpublic.h \
-   $(top_srcdir)/src/H5Spublic.h \
-   $(top_srcdir)/src/H5Tpublic.h \
-   $(top_srcdir)/src/H5FDcore.h \
-   $(top_srcdir)/src/H5FDfamily.h \
-   $(top_srcdir)/src/H5FDgass.h \
-   $(top_srcdir)/src/H5FDlog.h \
-   $(top_srcdir)/src/H5FDmpi.h \
-   $(top_srcdir)/src/H5FDmpio.h \
-   $(top_srcdir)/src/H5FDmpiposix.h \
-   $(top_srcdir)/src/H5FDmulti.h \
-   $(top_srcdir)/src/H5FDsec2.h \
-   $(top_srcdir)/src/H5FDsrb.h \
-   $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDstream.h
 reserved.lo: \
    $(srcdir)/reserved.c \
    $(srcdir)/h5test.h \

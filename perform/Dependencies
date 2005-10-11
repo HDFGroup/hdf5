@@ -1,3 +1,16 @@
+##
+## Copyright by the Board of Trustees of the University of Illinois.
+## All rights reserved.
+##
+## This file is part of HDF5.  The full HDF5 copyright notice, including
+## terms governing use, modification, and redistribution, is contained in
+## the files COPYING and Copyright.html.  COPYING can be found at the root
+## of the source code distribution tree; Copyright.html can be found at the
+## root level of an installed copy of the electronic HDF5 document set and
+## is linked from the top-level documents page.  It can also be found at
+## http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
+## access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+##
 ## This file is machine generated on GNU systems.
 ## Only temporary changes may be made here.
 
@@ -149,6 +162,8 @@ zip_perf.lo: \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h \
+   $(top_srcdir)/src/H5private.h \
+   $(top_srcdir)/src/H5MPprivate.h \
    $(top_srcdir)/tools/lib/h5tools_utils.h
 perf_meta.lo: \
    $(srcdir)/perf_meta.c \
@@ -224,13 +239,7 @@ pio_perf.lo: \
    $(top_srcdir)/src/H5FDsec2.h \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDstream.h \
-   $(top_srcdir)/tools/lib/h5tools_utils.h \
-   $(srcdir)/pio_perf.h \
-   $(srcdir)/pio_timer.h \
-   $(top_srcdir)/src/H5private.h \
-   $(top_srcdir)/src/H5MPprivate.h \
-   $(top_srcdir)/test/h5test.h
+   $(top_srcdir)/src/H5FDstream.h
 pio_engine.lo: \
    $(srcdir)/pio_engine.c \
    $(top_srcdir)/src/hdf5.h \
@@ -266,12 +275,7 @@ pio_engine.lo: \
    $(top_srcdir)/src/H5FDsec2.h \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDstream.h \
-   $(srcdir)/pio_perf.h \
-   $(srcdir)/pio_timer.h \
-   $(top_srcdir)/src/H5private.h \
-   $(top_srcdir)/src/H5MPprivate.h \
-   $(top_srcdir)/test/h5test.h
+   $(top_srcdir)/src/H5FDstream.h
 pio_timer.lo: \
    $(srcdir)/pio_timer.c \
    $(srcdir)/pio_timer.h \
@@ -308,8 +312,4 @@ pio_timer.lo: \
    $(top_srcdir)/src/H5FDsec2.h \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDstream.h \
-   $(srcdir)/pio_perf.h \
-   $(top_srcdir)/src/H5private.h \
-   $(top_srcdir)/src/H5MPprivate.h \
-   $(top_srcdir)/test/h5test.h
+   $(top_srcdir)/src/H5FDstream.h

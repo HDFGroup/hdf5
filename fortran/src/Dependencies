@@ -329,7 +329,8 @@ H5Af.lo: \
    $(srcdir)/H5f90i.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5MPprivate.h \
-   $(srcdir)/H5f90proto.h
+   $(srcdir)/H5f90proto.h \
+   $(top_srcdir)/src/H5Eprivate.h
 H5Tf.lo: \
    $(srcdir)/H5Tf.c \
    $(srcdir)/H5f90.h \
