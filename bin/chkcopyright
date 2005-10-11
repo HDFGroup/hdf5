@@ -31,6 +31,10 @@ EXTRACTEDFILE=/tmp/h5chkright.extracted.$$
 VERBOSE=		# default no
 DIRS=.			# default current directory
 NFAILEDFILES=0		# Number of failed files found.
+NUMBEGINLINES=60	# Copyright notice should be located within the
+			# this number of lines at the beginning of the file.
+COPYRIGHTSTR="Copyright by the Board of Trustees of the University of Illinois"
+
 PASSEDLOG=/tmp/h5chkright_passed.$$
 SKIPPEDLOG=/tmp/h5chkright_skipped.$$
 FAILEDLOG=/tmp/h5chkright_failed.$$
@@ -68,7 +72,6 @@ BUILDCOPYRIGHT()
 {
     # C and C++ source Copyright notice
     cat > ${C_COPYRIGHT} << \EOF
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
@@ -80,12 +83,10 @@ BUILDCOPYRIGHT()
  * is linked from the top-level documents page.  It can also be found at     *
  * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 EOF
 
     # Fortran9X source Copyright notice
     cat > ${FTN_COPYRIGHT} << \EOF
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
@@ -97,7 +98,6 @@ EOF
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
 !   access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 EOF
 
     # HTML file Copyright notice
@@ -237,20 +237,49 @@ PARSE_OPTION()
 }
 
 
+# Match Copyright notice.
+# $1 file which contains the expected copyright notice.
+# $2 file in which to look for the copyright notice.
+# Copyright notice must be found within the beginning $NUMBEGINLINES of lines.
+# Hunt for the particular string $COPYRIGHTSTR which signifies the beginning
+# of the copyright notice.
+#
+MATCH_COPYRIGHT()
+{
+    if [ $# -ne 2 ]; then
+	# expect two arguments
+	echo FAILED
+	return
+    fi
+    COPYRIGHTFILE=$1
+    f=$2
+    # Must use stdin for wc to prevent filename from popping up.
+    nlines=`wc -l < ${COPYRIGHTFILE}| tr -d ' '`
+    head -$NUMBEGINLINES < $f | sed -n -e "/${COPYRIGHTSTR}/"',$p' | \
+	head -${nlines} > ${EXTRACTEDFILE}
+    $DIFF ${EXTRACTEDFILE} ${COPYRIGHTFILE} >/dev/null 2>&1
+    if test $? -eq 0; then
+	echo PASSED
+    else
+	echo FAILED
+    fi
+}
+
 # Check C and C++ source files
 #
 C_SOURCE()
 {
     f=$1
-    COPYRIGHTFILE=$C_COPYRIGHT
-    # Must use stdin for wc to prevent filename from popping up.
-    nlines=`wc -l < ${COPYRIGHTFILE}| tr -d ' '`
-    head -${nlines} $f | $DIFF - ${COPYRIGHTFILE} >/dev/null 2>&1
-    if test $? -ne 0; then
+    case `MATCH_COPYRIGHT $C_COPYRIGHT $f` in
+    PASSED)
+	return
+	;;
+    FAILED)
 	# show the difference
 	FAILED $f
-	head -${nlines} $f | $DIFF - ${COPYRIGHTFILE}
-    fi
+	$DIFF ${EXTRACTEDFILE} ${C_COPYRIGHT}
+	;;
+    esac
 }
 
 
@@ -259,15 +288,16 @@ C_SOURCE()
 FORTRAN_SOURCE()
 {
     f=$1
-    COPYRIGHTFILE=$FTN_COPYRIGHT
-    # Must use stdin for wc to prevent filename from popping up.
-    nlines=`wc -l < ${COPYRIGHTFILE}| tr -d ' '`
-    head -${nlines} $f | $DIFF - ${COPYRIGHTFILE} >/dev/null 2>&1
-    if test $? -ne 0; then
-	# show the differences
+    case `MATCH_COPYRIGHT $FTN_COPYRIGHT $f` in
+    PASSED)
+	return
+	;;
+    FAILED)
+	# show the difference
 	FAILED $f
-	head -${nlines} $f | $DIFF - ${COPYRIGHTFILE}
-    fi
+	$DIFF ${EXTRACTEDFILE} ${FTN_COPYRIGHT}
+	;;
+    esac
 }
 
 
@@ -298,30 +328,12 @@ HTML_FILE()
 SHELL_FILE()
 {
     f=$1
-    COPYRIGHTFILE=$SH_COPYRIGHT
-    # Must use stdin for wc to prevent filename from popping up.
-    nlines=`wc -l < ${COPYRIGHTFILE}| tr -d ' '`
-    morelines=`expr $nlines - 1`
-    sed -n -e "/^# Copyright by the Board of Trustees/,+${morelines}p" < $f > ${EXTRACTEDFILE}
-    $DIFF ${EXTRACTEDFILE} ${COPYRIGHTFILE} >/dev/null 2>&1
-    if test $? -eq 0; then
-	return 0
+    if [ `MATCH_COPYRIGHT $SH_COPYRIGHT $f` = FAILED -a \
+	 `MATCH_COPYRIGHT $SH_COPYRIGHT2 $f` = FAILED ]; then
+	# show the differences with the preferred style.
+	FAILED $f
+	$DIFF ${EXTRACTEDFILE} ${SH_COPYRIGHT}
     fi
-    #
-    # Try again with alternate style
-    COPYRIGHTFILE=$SH_COPYRIGHT2
-    # Must use stdin for wc to prevent filename from popping up.
-    nlines=`wc -l < ${COPYRIGHTFILE}| tr -d ' '`
-    morelines=`expr $nlines - 1`
-    sed -n -e "/^## Copyright by the Board of Trustees/,+${morelines}p" < $f > ${EXTRACTEDFILE}
-    $DIFF ${EXTRACTEDFILE} ${COPYRIGHTFILE} >/dev/null 2>&1
-    if test $? -eq 0; then
-	return 0
-    fi
-
-    # show the differences with the preferred style.
-    FAILED $f
-    $DIFF ${EXTRACTEDFILE} ${SH_COPYRIGHT}
 }
 
 
