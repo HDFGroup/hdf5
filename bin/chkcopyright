@@ -26,6 +26,7 @@ PROGNAME=$0
 DIFF="diff"
 INITFILE=.h5chkright.ini
 EXCEPTIONS=/tmp/h5chkright.except.$$
+tmpfile=/tmp/h5chkright_tmp.$$
 EXCEPTIONDIRS="-name CVS"	# at least skip CVS directories.
 EXTRACTEDFILE=/tmp/h5chkright.extracted.$$
 VERBOSE=		# default no
@@ -337,6 +338,30 @@ SHELL_FILE()
 }
 
 
+# Check Unknown type file.
+# Inspect the first 5 lines and try to guess what type of file it is.
+# Then try verify Copyright notice according to guessed type.
+#
+UNKNOWN_FILE()
+{
+    f=$1
+    head -5 < $f > $tmpfile
+    if head -1 < $tmpfile | grep '^#!' > /dev/null; then
+	# It is likely a shell script or similar type.
+	SHELL_FILE $f
+    elif grep '\/\*' < $tmpfile > /dev/null; then
+	# It is C/C++ style file.
+	C_SOURCE $f
+    elif grep '^!' < $tmpfile > /dev/null; then
+	# It is a Fortran 9X style file.
+	FORTRAN_SOURCE $f
+    else
+	# Unknown type.
+	UNKNOWN_TYPE $f
+    fi
+}
+
+
 # Passed checking.
 # $1 file that has passed.
 #
@@ -422,7 +447,7 @@ while read file; do
 	    continue
 	    ;;
 	*)
-	    UNKNOWN_TYPE $file
+	    UNKNOWN_FILE $file
 	    ;;
 	esac
     fi
