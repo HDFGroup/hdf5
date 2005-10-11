@@ -6,7 +6,8 @@
 # in column one with a '#'.
 #------------------------------------------------------------------------------
 
-./.autom4te.cfg             _DO_NOT_DISTRIBUTE_
+./.autom4te.cfg             		_DO_NOT_DISTRIBUTE_
+./.h5chkright.ini			_DO_NOT_DISTRIBUTE_
 ./COPYING
 ./MANIFEST
 ./Makefile.dist
