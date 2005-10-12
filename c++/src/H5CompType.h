@@ -36,9 +36,6 @@ class H5_DLLCPP CompType : public DataType {
 	// to create another datatype of the same class
 	H5T_class_t getMemberClass( unsigned member_num ) const;
 
-	// Returns the dimensionality of the specified member.
-	int getMemberDims( unsigned member_num, size_t* dims, int* perm ) const;
-
 	// Returns the index of a member in this compound data type.
 	int getMemberIndex(const char* name) const;
 	int getMemberIndex(const string& name) const;

@@ -27,6 +27,9 @@ namespace H5 {
 
 class H5_DLLCPP PredType : public AtomType {
    public:
+	// Returns this class name
+	virtual string fromClass () const { return ("PredType"); }
+
 	// Makes a copy of the predefined type and stores the new
 	// id in the left hand side object.
 	PredType& operator=( const PredType& rhs );
@@ -179,9 +182,6 @@ class H5_DLLCPP PredType : public AtomType {
 	static const PredType NATIVE_UINT_FAST64;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-
-	// Returns this class name
-	virtual string fromClass () const { return ("PredType"); }
 
 	// These dummy functions do not inherit from DataType - they'll
 	// throw a DataTypeIException if invoked.

@@ -20,6 +20,9 @@
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
+#ifndef H5_NO_STD
+    using std::string;
+#endif  // H5_NO_STD
 #endif
 
 class H5_DLLCPP IdComponent {
@@ -61,18 +64,10 @@ class H5_DLLCPP IdComponent {
 
 	// Makes and returns the string "<class-name>::<func_name>";
 	// <class-name> is returned by fromClass().
-#ifdef H5_NO_STD
 	string inMemFunc(const char* func_name) const;
-#else
-	std::string inMemFunc(const char* func_name) const;
-#endif  // H5_NO_STD
 
 	// Returns this class name.
-#ifdef H5_NO_STD
         virtual string fromClass() const {return ("IdComponent");}
-#else
-        virtual std::string fromClass() const {return ("IdComponent");}
-#endif  // H5_NO_STD
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
@@ -87,11 +82,7 @@ class H5_DLLCPP IdComponent {
 	IdComponent();
 
 	// Gets the name of the file, in which an HDF5 object belongs.
-#ifdef H5_NO_STD
 	string p_get_file_name() const;
-#else
-	std::string p_get_file_name() const;
-#endif  // H5_NO_STD
 
         // Gets the id of the H5 file in which the given object is located.
         hid_t p_get_file_id();

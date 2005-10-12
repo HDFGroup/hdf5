@@ -606,7 +606,7 @@ bool PropList::operator==(const PropList& rhs) const
 PropList PropList::getClassParent() const
 {
    hid_t class_id = H5Pget_class_parent(id);
-   if (class_id <= 0)
+   if (class_id < 0)
    {
       throw PropListIException(inMemFunc("getClassParent"), "H5Pget_class_parent failed");
    }

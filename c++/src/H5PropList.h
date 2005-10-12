@@ -35,8 +35,8 @@ class H5_DLLCPP PropList : public IdComponent {
 	// Compares this property list or class against the given list or class.
 	bool operator==(const PropList& rhs) const;
 
-        // Close this property list.
-        virtual void close();
+	// Close this property list.
+	virtual void close();
 
 	// Close a property list class.
 	void closeClass() const;

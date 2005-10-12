@@ -570,7 +570,6 @@ void* DataType::Reference(const char* name) const
    catch (IdComponentException E) {
       throw DataTypeIException(inMemFunc("Reference"), E.getDetailMsg());
    }
-
 }
 
 //--------------------------------------------------------------------------

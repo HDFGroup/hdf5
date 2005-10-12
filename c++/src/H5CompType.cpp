@@ -175,14 +175,6 @@ size_t CompType::getMemberOffset( unsigned member_num ) const
    return( offset );
 }
 
-// Returns the dimensionality of the member.
-int CompType::getMemberDims( unsigned member_num, size_t* dims, int* perm ) const
-{
-   throw DataTypeIException( "Error: getMemberDims is no longer supported." );
-   return (-1); // unreachable statement; but without it, the compiler
-		// will complain
-}
-
 //--------------------------------------------------------------------------
 // Function:	CompType::getMemberClass
 ///\brief	Gets the type class of the specified member.
