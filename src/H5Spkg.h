@@ -223,6 +223,7 @@ H5_DLL herr_t H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src);
 /* Testing functions */
 #ifdef H5S_TESTING
 H5_DLL htri_t H5S_select_shape_same_test(hid_t sid1, hid_t sid2);
+H5_DLL htri_t H5S_inquiry_rebuild_status(hid_t space_id);
 #endif /* H5S_TESTING */
 
 #endif /*_H5Spkg_H*/

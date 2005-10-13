@@ -138,6 +138,30 @@
 #define SPACE12_DIM0            25
 #define SPACE12_CHUNK_DIM0      5
 
+/* Information for Space rebuild test */
+#define SPACERE1_RANK            1
+#define SPACERE1_DIM0            20
+#define SPACERE2_RANK            2
+#define SPACERE2_DIM0            8
+#define SPACERE2_DIM1            12
+#define SPACERE3_RANK            3
+#define SPACERE3_DIM0            8
+#define SPACERE3_DIM1            12
+#define SPACERE3_DIM2            8 
+#define SPACERE4_RANK            4
+#define SPACERE4_DIM0            8
+#define SPACERE4_DIM1            12
+#define SPACERE4_DIM2            8
+#define SPACERE4_DIM3            12
+#define SPACERE5_RANK            5
+#define SPACERE5_DIM0            8
+#define SPACERE5_DIM1            12
+#define SPACERE5_DIM2            8
+#define SPACERE5_DIM3            12
+#define SPACERE5_DIM4            8
+
+
+
 /* Location comparison function */
 int compare_size_t(const void *s1, const void *s2);
 
@@ -6529,6 +6553,669 @@ test_shape_same(void)
     CHECK(ret, FAIL, "H5Sclose");
 }   /* test_shape_same() */
 
+
+/****************************************************************
+**
+**  test_space_rebuild(): Tests selection rebuild routine,
+**  We will test whether selection in span-tree form can be rebuilt
+**  into a regular selection. 
+**      
+**
+****************************************************************/
+static void
+test_space_rebuild(void)
+{
+
+   /* regular space IDs in span-tree form */
+   hid_t sid_reg1,sid_reg2,sid_reg3,sid_reg4,sid_reg5; 
+     
+   /* Original regular Space IDs */         
+   hid_t sid_reg_ori1,sid_reg_ori2,sid_reg_ori3,sid_reg_ori4,sid_reg_ori5; 
+
+   /* Irregular space IDs */ 
+   hid_t sid_irreg1,sid_irreg2,sid_irreg3,sid_irreg4,sid_irreg5;
+
+   /* rebuild status state */
+   htri_t rebuild_stat,rebuild_check;
+   herr_t ret;
+
+   /* dimensions of rank 1 to rank 5 */
+   hsize_t dims1[] ={SPACERE1_DIM0};
+   hsize_t dims2[] ={SPACERE2_DIM0,SPACERE2_DIM1};
+   hsize_t dims3[] ={SPACERE3_DIM0,SPACERE3_DIM1,SPACERE3_DIM2};
+   hsize_t dims4[] ={SPACERE4_DIM0,SPACERE4_DIM1,SPACERE4_DIM2,SPACERE4_DIM3};
+   hsize_t dims5[] ={SPACERE5_DIM0,SPACERE5_DIM1,SPACERE5_DIM2,SPACERE5_DIM3,SPACERE5_DIM4};
+
+   /* The start of the hyperslab */
+   hsize_t start1[SPACERE1_RANK],start2[SPACERE2_RANK],
+           start3[SPACERE3_RANK],start4[SPACERE4_RANK],
+           start5[SPACERE5_RANK];      
+
+   /* The stride of the hyperslab */
+   hsize_t stride1[SPACERE1_RANK],stride2[SPACERE2_RANK],
+           stride3[SPACERE3_RANK],stride4[SPACERE4_RANK],
+           stride5[SPACERE5_RANK];    
+
+   /* The number of blocks for the hyperslab */
+   hsize_t count1[SPACERE1_RANK],count2[SPACERE2_RANK],
+           count3[SPACERE3_RANK],count4[SPACERE4_RANK],
+           count5[SPACERE5_RANK];    
+
+   /* The size of each block for the hyperslab */
+   hsize_t block1[SPACERE1_RANK],block2[SPACERE2_RANK],
+           block3[SPACERE3_RANK],block4[SPACERE4_RANK],
+           block5[SPACERE5_RANK];       
+
+  /* Declarations for special test of rebuild */
+   hid_t sid_spec;
+
+
+    /* Output message about test being performed */
+    MESSAGE(6, ("Testing functionality to rebuild regular hyperslab selection\n"));
+   
+
+    MESSAGE(7, ("Testing functionality to rebuild 1-D hyperslab selection\n"));
+
+    /* Create 1-D dataspace */
+    sid_reg1       = H5Screate_simple(SPACERE1_RANK,dims1,NULL);
+    sid_reg_ori1   = H5Screate_simple(SPACERE1_RANK,dims1,NULL);
+
+    /* Build up the original one dimensional regular selection */
+    start1[0]  = 1; 
+    count1[0]  = 3;
+    stride1[0] = 5;
+    block1[0]  = 4;
+    ret = H5Sselect_hyperslab(sid_reg_ori1,H5S_SELECT_SET,start1,stride1,count1,block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Build up one dimensional regular selection with H5_SELECT_OR,
+       inside HDF5, it will be treated as an irregular selection. */
+
+    start1[0]  = 1; 
+    count1[0]  = 2;
+    stride1[0] = 5;
+    block1[0]  = 4;
+    ret = H5Sselect_hyperslab(sid_reg1,H5S_SELECT_SET,start1,stride1,count1,block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");   
+
+    start1[0]  = 11; 
+    count1[0]  = 1;
+    stride1[0] = 5;
+    block1[0]  = 4;
+    ret = H5Sselect_hyperslab(sid_reg1,H5S_SELECT_OR,start1,stride1,count1,block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");   
+
+    rebuild_stat = FALSE;
+    rebuild_stat = H5S_inquiry_rebuild_status(sid_reg1);
+    assert(rebuild_stat!=FAIL);
+    /* In this case, rebuild_stat should be TRUE. */
+    if(!rebuild_stat){
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    }
+    else {
+       /* In this case, rebuild_check should be TRUE. */
+       rebuild_check = H5S_select_shape_same_test(sid_reg1,sid_reg_ori1);
+       CHECK(rebuild_check,FALSE,"H5S_hyper_rebuild");
+    }
+
+    /* For irregular hyperslab */
+    sid_irreg1     = H5Screate_simple(SPACERE1_RANK,dims1,NULL);
+    
+    /* Build up one dimensional irregular selection with H5_SELECT_OR */
+    start1[0]  = 1; 
+    count1[0]  = 2;
+    stride1[0] = 5;
+    block1[0]  = 4;
+    ret = H5Sselect_hyperslab(sid_irreg1,H5S_SELECT_SET,start1,stride1,count1,block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");   
+
+    start1[0]  = 12; /* Just one position switch */
+    count1[0]  = 1;
+    stride1[0] = 5;
+    block1[0]  = 4;
+    ret = H5Sselect_hyperslab(sid_irreg1,H5S_SELECT_OR,start1,stride1,count1,block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");   
+
+    rebuild_stat = TRUE;
+    rebuild_stat = H5S_inquiry_rebuild_status(sid_irreg1); 
+    assert(rebuild_stat!=FAIL);
+    /* In this case, rebuild_stat should be FALSE. */
+    if(rebuild_stat){
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    }/* No need to do shape comparision */
+
+    
+    MESSAGE(7, ("Testing functionality to rebuild 2-D hyperslab selection\n"));
+    /* Create 2-D dataspace */
+    sid_reg2       = H5Screate_simple(SPACERE2_RANK,dims2,NULL);
+    sid_reg_ori2   = H5Screate_simple(SPACERE2_RANK,dims2,NULL);
+
+    /* Build up the original two dimensional regular selection */
+    start2[0]  = 2; 
+    count2[0]  = 2;
+    stride2[0] = 7;
+    block2[0]  = 5;
+    start2[1]  = 1;
+    count2[1]  = 3;
+    stride2[1] = 3;
+    block2[1]  = 2;
+
+    ret = H5Sselect_hyperslab(sid_reg_ori2,H5S_SELECT_SET,start2,stride2,count2,block2);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Build up two dimensional regular selection with H5_SELECT_OR, inside HDF5,
+       it will be treated as an irregular selection. */
+
+    start2[1]  = 1;
+    count2[1]  = 2;
+    stride2[1] = 3;
+    block2[1]  = 2;
+
+    ret = H5Sselect_hyperslab(sid_reg2,H5S_SELECT_SET,start2,stride2,count2,block2);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");   
+
+    start2[1]  = 7; /* 7 = start(1) + count(2) * stride(3) */
+    count2[1]  = 1;
+    stride2[1] = 3;
+    block2[1]  = 2;
+
+    ret = H5Sselect_hyperslab(sid_reg2,H5S_SELECT_OR,start2,stride2,count2,block2);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");   
+
+    rebuild_stat = FALSE;
+    rebuild_stat = H5S_inquiry_rebuild_status(sid_reg2); 
+    assert(rebuild_stat!=FAIL);
+    /* In this case, rebuild_stat should be TRUE. */
+    if(!rebuild_stat){
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    }
+    else {
+       /* In this case, rebuild_check should be TRUE. */
+       rebuild_check = H5S_select_shape_same_test(sid_reg2,sid_reg_ori2);
+       CHECK(rebuild_check,FALSE,"H5S_hyper_rebuild");
+    }
+
+    /* 2-D irregular case */
+    sid_irreg2     = H5Screate_simple(SPACERE2_RANK,dims2,NULL);
+    /* Build up two dimensional irregular selection with H5_SELECT_OR */
+
+    start2[0]  = 2; 
+    count2[0]  = 2;
+    stride2[0] = 7;
+    block2[0]  = 5;
+    start2[1]  = 1;
+    count2[1]  = 1;
+    stride2[1] = 3;
+    block2[1]  = 2;
+    ret = H5Sselect_hyperslab(sid_irreg2,H5S_SELECT_SET,start2,stride2,count2,block2);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");   
+
+    start2[1]  = 4;
+    count2[1]  = 2; 
+    stride2[1] = 4;
+    block2[1]  = 3; /* Just add one element for the block */
+   
+    ret = H5Sselect_hyperslab(sid_irreg2,H5S_SELECT_OR,start2,stride2,count2,block2);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");   
+
+    rebuild_stat = TRUE;
+    rebuild_stat = H5S_inquiry_rebuild_status(sid_irreg2);
+    assert(rebuild_stat!=FAIL);
+    /* In this case, rebuild_stat should be FALSE. */
+    if(rebuild_stat){
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    }/* No need to do shape comparision */
+
+    MESSAGE(7, ("Testing functionality to rebuild 3-D hyperslab selection\n"));
+
+    /* Create 3-D dataspace */
+    sid_reg3       = H5Screate_simple(SPACERE3_RANK,dims3,NULL);
+    sid_reg_ori3   = H5Screate_simple(SPACERE3_RANK,dims3,NULL);
+
+    /* Build up the original three dimensional regular selection */
+    start3[0]  = 2; 
+    count3[0]  = 2;
+    stride3[0] = 3;
+    block3[0]  = 2;
+    start3[1]  = 1;
+    count3[1]  = 3;
+    stride3[1] = 3;
+    block3[1]  = 2;
+
+    start3[2]  = 1;
+    count3[2]  = 2;
+    stride3[2] = 4;
+    block3[2]  = 2;
+    
+
+    ret = H5Sselect_hyperslab(sid_reg_ori3,H5S_SELECT_SET,start3,stride3,count3,block3);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Build up three dimensional regular selection with H5_SELECT_OR, inside HDF5,
+       it will be treated as an irregular selection. */
+    start3[2]  = 1;
+    count3[2]  = 1;
+    stride3[2] = 4;
+    block3[2]  = 2;
+
+    ret = H5Sselect_hyperslab(sid_reg3,H5S_SELECT_SET,start3,stride3,count3,block3);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");   
+
+    start3[2]  = 5;
+    count3[2]  = 1;
+    stride3[2] = 4;
+    block3[2]  = 2;
+
+    ret = H5Sselect_hyperslab(sid_reg3,H5S_SELECT_OR,start3,stride3,count3,block3);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");   
+
+    rebuild_stat = FALSE;
+    rebuild_stat = H5S_inquiry_rebuild_status(sid_reg3);
+    assert(rebuild_stat!=FAIL);
+
+    /* In this case, rebuild_stat should be TRUE. */
+    if(!rebuild_stat){
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    }
+    else {
+       /* In this case, rebuild_check should be TRUE. */
+       rebuild_check = H5S_select_shape_same_test(sid_reg3,sid_reg_ori3);
+       CHECK(rebuild_check,FALSE,"H5S_hyper_rebuild");
+    }
+
+    sid_irreg3     = H5Screate_simple(SPACERE3_RANK,dims3,NULL);
+
+    /* Build up three dimensional irregular selection with H5_SELECT_OR */
+    start3[0]  = 2; 
+    count3[0]  = 2;
+    stride3[0] = 3;
+    block3[0]  = 2;
+    start3[1]  = 1;
+    count3[1]  = 3;
+    stride3[1] = 3;
+    block3[1]  = 2;
+
+    start3[2]  = 1;
+    count3[2]  = 2;
+    stride3[2] = 2;
+    block3[2]  = 1;
+
+    ret = H5Sselect_hyperslab(sid_irreg3,H5S_SELECT_SET,start3,stride3,count3,block3);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");   
+
+    start3[2]  = 3;
+    count3[2]  = 2; 
+    stride3[2] = 3; /* Just add one element for the stride */
+    block3[2]  = 1; 
+   
+    ret = H5Sselect_hyperslab(sid_irreg3,H5S_SELECT_OR,start3,stride3,count3,block3);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");   
+
+    rebuild_stat = TRUE;
+    rebuild_stat = H5S_inquiry_rebuild_status(sid_irreg3);
+    assert(rebuild_stat!=FAIL);
+    /* In this case, rebuild_stat should be FALSE. */
+    if(rebuild_stat){
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    }/* No need to do shape comparision */
+
+    MESSAGE(7, ("Testing functionality to rebuild 4-D hyperslab selection\n"));
+
+    /* Create 4-D dataspace */
+    sid_reg4       = H5Screate_simple(SPACERE4_RANK,dims4,NULL);
+    sid_reg_ori4   = H5Screate_simple(SPACERE4_RANK,dims4,NULL);
+
+    /* Build up the original four dimensional regular selection */
+    start4[0]  = 2; 
+    count4[0]  = 2;
+    stride4[0] = 3;
+    block4[0]  = 2;
+
+    start4[1]  = 1;
+    count4[1]  = 3;
+    stride4[1] = 3;
+    block4[1]  = 2;
+
+    start4[2]  = 1;
+    count4[2]  = 2;
+    stride4[2] = 4;
+    block4[2]  = 2;
+
+    start4[3]  = 1;
+    count4[3]  = 2;
+    stride4[3] = 4;
+    block4[3]  = 2;
+    
+
+    ret = H5Sselect_hyperslab(sid_reg_ori4,H5S_SELECT_SET,start4,stride4,count4,block4);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Build up four dimensional regular selection with H5_SELECT_OR, inside HDF5,
+       it will be treated as an irregular selection. */
+    start4[3]  = 1;
+    count4[3]  = 1;
+    stride4[3] = 4;
+    block4[3]  = 2;
+
+    ret = H5Sselect_hyperslab(sid_reg4,H5S_SELECT_SET,start4,stride4,count4,block4);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");   
+
+    start4[3]  = 5;
+    count4[3]  = 1;
+    stride4[3] = 4;
+    block4[3]  = 2;
+
+
+    ret = H5Sselect_hyperslab(sid_reg4,H5S_SELECT_OR,start4,stride4,count4,block4);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");   
+
+
+    rebuild_stat = FALSE;
+    rebuild_stat = H5S_inquiry_rebuild_status(sid_reg4);
+    assert(rebuild_stat!=FAIL);
+    /* In this case, rebuild_stat should be TRUE. */
+    if(!rebuild_stat){
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    }
+    else {
+       /* In this case, rebuild_check should be TRUE. */
+       rebuild_check = H5S_select_shape_same_test(sid_reg4,sid_reg_ori4);
+       CHECK(rebuild_check,FALSE,"H5S_hyper_rebuild");
+    }
+
+    /* Testing irregular selection */
+    sid_irreg4     = H5Screate_simple(SPACERE4_RANK,dims4,NULL);
+    
+    /* Build up four dimensional irregular selection with H5_SELECT_OR */
+    start4[0]  = 2; 
+    count4[0]  = 2;
+    stride4[0] = 3;
+    block4[0]  = 2;
+    start4[1]  = 1;
+    count4[1]  = 3;
+    stride4[1] = 3;
+    block4[1]  = 2;
+
+    start4[2]  = 1;
+    count4[2]  = 1;
+    stride4[2] = 4;
+    block4[2]  = 2;
+
+    start4[3]  = 1;
+    count4[3]  = 2;
+    stride4[3] = 4;
+    block4[3]  = 2; /* sub-block is one element difference */
+
+    ret = H5Sselect_hyperslab(sid_irreg4,H5S_SELECT_SET,start4,stride4,count4,block4);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");   
+
+    start4[2]  = 5;
+    count4[2]  = 1;
+    stride4[2] = 4;
+    block4[2]  = 2;
+
+    start4[3]  = 1;
+    count4[3]  = 2;
+    stride4[3] = 4;
+    block4[3]  = 3;  /* sub-block is one element difference */
+   
+    ret = H5Sselect_hyperslab(sid_irreg4,H5S_SELECT_OR,start4,stride4,count4,block4);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");   
+
+    rebuild_stat = TRUE;
+    rebuild_stat = H5S_inquiry_rebuild_status(sid_irreg4);
+    assert(rebuild_stat!=FAIL);
+    /* In this case, rebuild_stat should be FALSE. */
+    if(rebuild_stat){
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    }/* No need to do shape comparision */
+
+    MESSAGE(7, ("Testing functionality to rebuild 5-D hyperslab selection\n"));
+
+    /* Create 5-D dataspace */
+    sid_reg5       = H5Screate_simple(SPACERE5_RANK,dims5,NULL);
+    sid_reg_ori5   = H5Screate_simple(SPACERE5_RANK,dims5,NULL);
+
+    /* Build up the original five dimensional regular selection */
+    start5[0]  = 2; 
+    count5[0]  = 2;
+    stride5[0] = 3;
+    block5[0]  = 2;
+
+    start5[1]  = 1;
+    count5[1]  = 3;
+    stride5[1] = 3;
+    block5[1]  = 2;
+
+    start5[2]  = 1;
+    count5[2]  = 2;
+    stride5[2] = 4;
+    block5[2]  = 2;
+
+    start5[3]  = 1;
+    count5[3]  = 2;
+    stride5[3] = 4;
+    block5[3]  = 2;
+    
+    start5[4]  = 1;
+    count5[4]  = 2;
+    stride5[4] = 4;
+    block5[4]  = 2;
+
+    ret = H5Sselect_hyperslab(sid_reg_ori5,H5S_SELECT_SET,start5,stride5,count5,block5);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Build up four dimensional regular selection with H5_SELECT_OR, inside HDF5,
+       it will be treated as an irregular selection. */
+    start5[4]  = 1;
+    count5[4]  = 1;
+    stride5[4] = 4;
+    block5[4]  = 2;
+
+    ret = H5Sselect_hyperslab(sid_reg5,H5S_SELECT_SET,start5,stride5,count5,block5);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");   
+
+    start5[4]  = 5;
+    count5[4]  = 1;
+    stride5[4] = 4;
+    block5[4]  = 2;
+
+
+    ret = H5Sselect_hyperslab(sid_reg5,H5S_SELECT_OR,start5,stride5,count5,block5);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");   
+
+
+    rebuild_stat = FALSE;
+    rebuild_stat = H5S_inquiry_rebuild_status(sid_reg5);
+    assert(rebuild_stat!=FAIL);
+    /* In this case, rebuild_stat should be TRUE. */
+    if(!rebuild_stat){
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    }
+    else {
+       /* In this case, rebuild_check should be TRUE. */
+       rebuild_check = H5S_select_shape_same_test(sid_reg5,sid_reg_ori5);
+       CHECK(rebuild_check,FALSE,"H5S_hyper_rebuild");
+    }
+
+    sid_irreg5     = H5Screate_simple(SPACERE5_RANK,dims5,NULL);
+    
+    /* Build up five dimensional irregular selection with H5_SELECT_OR */
+    start5[0]  = 2; 
+    count5[0]  = 2;
+    stride5[0] = 3;
+    block5[0]  = 2;
+
+    start5[1]  = 1;
+    count5[1]  = 3;
+    stride5[1] = 3;
+    block5[1]  = 2;
+
+    start5[2]  = 1;
+    count5[2]  = 2;
+    stride5[2] = 4;
+    block5[2]  = 2;
+
+    start5[3]  = 1;
+    count5[3]  = 1;
+    stride5[3] = 4;
+    block5[3]  = 2; 
+
+    start5[4]  = 2; /* One element difference */
+    count5[4]  = 1;
+    stride5[4] = 4;
+    block5[4]  = 2; 
+
+    ret = H5Sselect_hyperslab(sid_irreg5,H5S_SELECT_SET,start5,stride5,count5,block5);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");   
+
+    start5[3]  = 5;
+    count5[3]  = 1;
+    stride5[3] = 4;
+    block5[3]  = 2;
+
+    start5[4]  = 1; /* One element difference */
+    count5[4]  = 2;
+    stride5[4] = 4;
+    block5[4]  = 2;  
+   
+    ret = H5Sselect_hyperslab(sid_irreg5,H5S_SELECT_OR,start5,stride5,count5,block5);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");   
+
+    rebuild_stat = TRUE;
+    rebuild_stat = H5S_inquiry_rebuild_status(sid_irreg5);
+    assert(rebuild_stat!=FAIL);
+    /* In this case, rebuild_stat should be FALSE. */
+    if(rebuild_stat){
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    }/* No need to do shape comparision */
+
+   /* We use 5-D to test a special case with 
+      rebuilding routine TRUE, FALSE and TRUE */
+    sid_spec   = H5Screate_simple(SPACERE5_RANK,dims5,NULL);
+
+    /* Build up the original five dimensional regular selection */
+    start5[0]  = 2; 
+    count5[0]  = 2;
+    stride5[0] = 3;
+    block5[0]  = 2;
+
+    start5[1]  = 1;
+    count5[1]  = 3;
+    stride5[1] = 3;
+    block5[1]  = 2;
+
+    start5[2]  = 1;
+    count5[2]  = 2;
+    stride5[2] = 4;
+    block5[2]  = 2;
+
+    start5[3]  = 1;
+    count5[3]  = 2;
+    stride5[3] = 4;
+    block5[3]  = 2;
+    
+    start5[4]  = 1;
+    count5[4]  = 1;
+    stride5[4] = 4;
+    block5[4]  = 2;
+
+    ret = H5Sselect_hyperslab(sid_spec,H5S_SELECT_SET,start5,stride5,count5,block5);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+    rebuild_stat = FALSE;
+    rebuild_stat = H5S_inquiry_rebuild_status(sid_spec); 
+    /* In this case, rebuild_stat should be TRUE. */
+    if(!rebuild_stat){
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    }/* No need to do shape comparision */
+
+    /* Adding some selections to make it real irregular */
+    start5[3]  = 1;
+    count5[3]  = 1;
+    stride5[3] = 4;
+    block5[3]  = 2;
+    
+    start5[4]  = 5;
+    count5[4]  = 1;
+    stride5[4] = 4;
+    block5[4]  = 2;
+
+    ret = H5Sselect_hyperslab(sid_spec,H5S_SELECT_OR,start5,stride5,count5,block5);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");   
+
+    rebuild_stat = TRUE;
+    rebuild_stat = H5S_inquiry_rebuild_status(sid_spec);
+    assert(rebuild_stat!=FAIL);
+    /* In this case, rebuild_stat should be FALSE. */
+    if(rebuild_stat){
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    }/* No need to do shape comparision */
+
+    start5[3]  = 5;
+    count5[3]  = 1;
+    stride5[3] = 4;
+    block5[3]  = 2;
+    
+    start5[4]  = 5;
+    count5[4]  = 1;
+    stride5[4] = 4;
+    block5[4]  = 2;
+
+    ret = H5Sselect_hyperslab(sid_spec,H5S_SELECT_OR,start5,stride5,count5,block5);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");   
+
+    rebuild_stat = FALSE;
+    rebuild_stat = H5S_inquiry_rebuild_status(sid_spec);
+    assert(rebuild_stat!=FAIL);
+    /* In this case, rebuild_stat should be FALSE. */
+    if(!rebuild_stat){
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    }/* No need to do shape comparision */
+
+    H5Sclose(sid_reg1);
+    CHECK(ret, FAIL, "H5Sclose");
+    H5Sclose(sid_irreg1);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    H5Sclose(sid_reg2);
+    CHECK(ret, FAIL, "H5Sclose");
+    H5Sclose(sid_irreg2);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    H5Sclose(sid_reg3);
+    CHECK(ret, FAIL, "H5Sclose");
+    H5Sclose(sid_irreg3);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    H5Sclose(sid_reg4);
+    CHECK(ret, FAIL, "H5Sclose");
+    H5Sclose(sid_irreg4);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    H5Sclose(sid_reg5);
+    CHECK(ret, FAIL, "H5Sclose");
+    H5Sclose(sid_irreg5);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    H5Sclose(sid_spec);
+    CHECK(ret, FAIL, "H5Sclose");
+
+}   
+   
+
 /****************************************************************
 **
 **  test_select_hyper_chunk_offset(): Tests selections on dataspace,
@@ -7181,6 +7868,10 @@ test_select(void)
 
     /* Test "same shape" routine */
     test_shape_same();
+ 
+    /* Test "re-build" routine */
+    test_space_rebuild();
+    
 
     /* Test point selections in chunked datasets */
     test_select_point_chunk();

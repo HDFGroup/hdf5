@@ -5371,7 +5371,8 @@ H5S_hyper_rebuild_helper(const H5S_hyper_span_t *span, H5S_hyper_dim_t span_slab
     hsize_t curr_start;
     hsize_t curr_low;
     int     outcount;
-    H5S_hyper_dim_t      canon_down_span_slab_info;
+    int     i;
+    H5S_hyper_dim_t      canon_down_span_slab_info[H5S_MAX_RANK];
     hbool_t ret_value = TRUE;
    
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_hyper_rebuild_helper)
@@ -5391,7 +5392,7 @@ H5S_hyper_rebuild_helper(const H5S_hyper_span_t *span, H5S_hyper_dim_t span_slab
             if(!H5S_hyper_rebuild_helper(span->down->head, span_slab_info, rank - 1))
                 HGOTO_DONE(FALSE)
 
-            canon_down_span_slab_info = span_slab_info[rank - 2];
+            HDmemcpy(canon_down_span_slab_info, span_slab_info, sizeof(H5S_hyper_dim_t) * rank);
         } /* end if */
 
         /* Assign the initial starting point & block size */
@@ -5410,19 +5411,22 @@ H5S_hyper_rebuild_helper(const H5S_hyper_span_t *span, H5S_hyper_dim_t span_slab
                     if(!H5S_hyper_rebuild_helper(span->down->head, span_slab_info, rank - 1))
                         HGOTO_DONE(FALSE)
 
-                    /* Point to hyperslab span information set up by recursive call */
-                    curr_down_span_slab_info = &span_slab_info[rank - 2];
+                    /* Compare the slab information of the adjacent spans in the down span tree.
+                       We have to compare all the sub-tree slab information with the canon_down_span_slab_info.*/
 
-                    /* Compare the slab information of the adjacent spans in the down span tree.*/
-                    if(curr_down_span_slab_info->count > 0 && canon_down_span_slab_info.count > 0) {
-                        if(curr_down_span_slab_info->start != canon_down_span_slab_info.start
-                            || curr_down_span_slab_info->stride != canon_down_span_slab_info.stride
-                            || curr_down_span_slab_info->block != canon_down_span_slab_info.block
-                            || curr_down_span_slab_info->count != canon_down_span_slab_info.count)
-                        HGOTO_DONE(FALSE)
-                    } /* end if */
-                    else if (!((curr_down_span_slab_info->count == 0) && (canon_down_span_slab_info.count == 0)))
-                        HGOTO_DONE(FALSE)
+                    for( i = 0; i < rank - 1; i++) {
+                       curr_down_span_slab_info = &span_slab_info[i];
+
+                       if(curr_down_span_slab_info->count > 0 && canon_down_span_slab_info[i].count > 0) {
+                          if(curr_down_span_slab_info->start != canon_down_span_slab_info[i].start
+                              || curr_down_span_slab_info->stride != canon_down_span_slab_info[i].stride
+                              || curr_down_span_slab_info->block != canon_down_span_slab_info[i].block
+                              || curr_down_span_slab_info->count != canon_down_span_slab_info[i].count)
+                          HGOTO_DONE(FALSE)
+                       } /* end if */
+                       else if (!((curr_down_span_slab_info->count == 0) && (canon_down_span_slab_info[i].count == 0)))
+                          HGOTO_DONE(FALSE)
+                    }
                 } /* end if */
             } /* end if */
 

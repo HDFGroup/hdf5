@@ -71,3 +71,38 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_shape_same_test() */
 
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_inquiry_rebuild_status
+ PURPOSE
+    Determine the status of rebuild
+ USAGE
+    htri_t H5S_inquiry_rebuild_status(hid_t space_id)
+        hid_t space_id;          IN:  dataspace id
+ RETURNS
+    Non-negative TRUE/FALSE on success, negative on failure
+ DESCRIPTION
+    Query the status of rebuilding the hyperslab
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    DO NOT USE THIS FUNCTION FOR ANYTHING EXCEPT TESTING H5P_get_class_path()
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t
+H5S_inquiry_rebuild_status(hid_t space_id)
+{
+    static htri_t ret_value = FAIL;        /* return value */
+
+    H5S_t	*space1 = NULL;      /* Pointer to 1st dataspace */
+
+    FUNC_ENTER_NOAPI(H5S_inquiry_rebuild_status, FAIL);
+     /* Get dataspace structures */                                                                         
+if (NULL == (space1=H5I_object_verify(space_id, H5I_DATASPACE)))                                               
+    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");    
+
+    ret_value= space1->select.sel_info.hslab->diminfo_valid;
+   
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}   /* H5S_inquiry_rebuild_status() */
