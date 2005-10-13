@@ -2858,8 +2858,6 @@ done:
  *
  * Programmer:  John Mainzer -- 8/16/05
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -2869,272 +2867,130 @@ H5O_alloc_extend_chunk(H5F_t *f,
                        size_t size, 
                        unsigned * msg_idx)
 {
-    unsigned    u;
-    unsigned    idx;
-    unsigned	i;
-    size_t      delta, old_size;
+    size_t      delta;          /* Change in chunk's size */
     size_t      aligned_size = H5O_ALIGN(size);
-    uint8_t     *old_addr;
-    herr_t	result;
-    htri_t      tri_result;
-    htri_t      ret_value; 	/* return value */
-    hbool_t	cont_updated;
+    uint8_t     *old_image;     /* Old address of chunk's image in memory */
+    size_t      old_size;       /* Old size of chunk */
+    htri_t      tri_result;     /* Result from checking if chunk can be extended */
+    int         extend_msg = -1;/* Index of null message to extend */
+    unsigned    u;              /* Local index variable */
+    htri_t      ret_value = TRUE; 	/* return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_alloc_extend_chunk);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_alloc_extend_chunk)
 
     /* check args */
-    HDassert( f != NULL );
-    HDassert( oh != NULL );
-    HDassert( chunkno < oh->nchunks );
-    HDassert( size > 0 );
-    HDassert( msg_idx != NULL );
+    HDassert(f != NULL);
+    HDassert(oh != NULL);
+    HDassert(chunkno < oh->nchunks);
+    HDassert(size > 0);
+    HDassert(msg_idx != NULL);
 
-    if ( !H5F_addr_defined(oh->chunk[chunkno].addr) ) {
+    if(!H5F_addr_defined(oh->chunk[chunkno].addr))
+        HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, FAIL, "chunk isn't on disk")
 
-        HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, FAIL, "chunk isn't on disk");
-    }
-
-    /* Test to see if the specified chunk ends with a null messages.  If
-     * it does, try to extend the chunk and (thereby) the null message.  
-     * If successful, return the index of the the null message in *msg_idx.
+    /* Test to see if the specified chunk ends with a null messages.
+     * If successful, set the index of the the null message in extend_msg.
      */
-    for ( idx = 0; idx < oh->nmesgs; idx++ ) 
-    {
-        if (oh->mesg[idx].chunkno==chunkno) {
+    for(u = 0; u < oh->nmesgs; u++) {
+        /* Check for null message at end of proper chunk */
+        if(oh->mesg[u].chunkno == chunkno && H5O_NULL_ID == oh->mesg[u].type->id &&
+                (oh->mesg[u].raw + oh->mesg[u].raw_size == oh->chunk[chunkno].image + oh->chunk[chunkno].size)) {
 
-            if (H5O_NULL_ID == oh->mesg[idx].type->id &&
-                    (oh->mesg[idx].raw + oh->mesg[idx].raw_size ==
-                     oh->chunk[chunkno].image + oh->chunk[chunkno].size)) {
-
-                delta = MAX(H5O_MIN_SIZE, 
-                            aligned_size - oh->mesg[idx].raw_size);
-
-                HDassert( delta == H5O_ALIGN(delta) );
-
-                /* determine whether the chunk can be extended */
-		tri_result = H5MF_can_extend(f, H5FD_MEM_OHDR,
-                                             oh->chunk[chunkno].addr, 
-                                             (hsize_t)(oh->chunk[chunkno].size),
-                                             (hsize_t)delta);
-
-                if ( tri_result == FALSE ) { /* can't extend -- we are done */
-
-		    HGOTO_DONE(FALSE);
-
-		} else if ( tri_result != TRUE ) { /* system error */
-
-                    HGOTO_ERROR (H5E_RESOURCE, H5E_SYSTEM, FAIL, \
-                                 "H5MF_can_extend() failed");
-		}
-
-		/* if we get this far, we should be able to extend the chunk */
-		result = H5MF_extend(f, H5FD_MEM_OHDR,
-                                     oh->chunk[chunkno].addr, 
-                                     (hsize_t)(oh->chunk[chunkno].size),
-                                     (hsize_t)delta);
-
-		if ( result < 0 ) { /* system error */
-
-                    HGOTO_ERROR (H5E_RESOURCE, H5E_SYSTEM, FAIL, \
-                                 "H5MF_extend() failed.");
-		}
-
-
-                /* chunk size has been increased -- tidy up */
-
-                oh->mesg[idx].dirty = TRUE;
-                oh->mesg[idx].raw_size += delta;
-
-                old_addr = oh->chunk[chunkno].image;
-
-                /* Be careful not to indroduce garbage */
-                oh->chunk[chunkno].image = 
-                    H5FL_BLK_REALLOC(chunk_image,old_addr,
-                                     (oh->chunk[chunkno].size + delta));
-
-                if ( NULL == oh->chunk[chunkno].image ) {
-
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, \
-                                "memory allocation failed");
-                }
-
-                HDmemset(oh->chunk[chunkno].image + oh->chunk[chunkno].size,
-                         0, delta);
-
-                oh->chunk[chunkno].size += delta;
-
-                /* adjust raw addresses for messages of this chunk */
-                if (old_addr != oh->chunk[chunkno].image) {
-                    for (u = 0; u < oh->nmesgs; u++) {
-                        if (oh->mesg[u].chunkno == chunkno)
-                            oh->mesg[u].raw = oh->chunk[chunkno].image +
-                                              (oh->mesg[u].raw - old_addr);
-                    }
-                }
-
-                /* adjust the continuation message pointing to this chunk 
-		 * for the increase in chunk size.
-                 *
-                 * As best I understand the code, it is not necessarily an 
-		 * error if there is no continuation message pointing to a 
-		 * chunk -- for example, chunk 0 seems to be pointed to by 
-		 * the object header.
-                 */
-		cont_updated = FALSE;
-                for ( i = 0; i < oh->nmesgs; i++ ) 
-                {
-                    if ( ( H5O_CONT_ID == oh->mesg[i].type->id ) &&
-                         ( ((H5O_cont_t *)(oh->mesg[i].native))->chunkno 
-			   == chunkno ) ) {
-
-                        HDassert( ((H5O_cont_t *)(oh->mesg[i].native))->size
-                                  == oh->chunk[chunkno].size - delta );
-
-	                ((H5O_cont_t *)(oh->mesg[i].native))->size = 
-				oh->chunk[chunkno].size;
-
-			cont_updated = TRUE;
-
-	                /* there should be at most one continuation message
-	                 * pointing to this chunk, so we can quit when we find
-	                 * and update it.
-	                 */
-	                break;
-                    }
-                }
-		HDassert( ( chunkno == 0 ) || ( cont_updated ) );
-
-                *msg_idx = idx;
-                HGOTO_DONE(TRUE);
-            }
+            extend_msg = u;
+            break;
         } /* end if */
     } /* end for */
 
-    /* if we get this far, the specified chunk does not end in a null message.
-     * Attempt to extend the chunk, and if successful, fill the new section
-     * of the chunk with a null messages.
-     */
-
-    /* compute space needed in the file */
-    delta = MAX(H5O_MIN_SIZE, aligned_size+H5O_SIZEOF_MSGHDR(f));
+    /* If we can extend an existing null message, adjust the delta appropriately */
+    if(extend_msg >= 0)
+        delta = MAX(H5O_MIN_SIZE, aligned_size - oh->mesg[extend_msg].raw_size);
+    else
+        delta = MAX(H5O_MIN_SIZE, aligned_size + H5O_SIZEOF_MSGHDR(f));
     delta = H5O_ALIGN(delta);
 
     /* determine whether the chunk can be extended */
-    tri_result = H5MF_can_extend(f, H5FD_MEM_OHDR,
-                                 oh->chunk[chunkno].addr, 
-                                 (hsize_t)(oh->chunk[chunkno].size),
-                                 (hsize_t)delta);
-
-    if ( tri_result == FALSE ) { /* can't extend -- we are done */
-
+    tri_result = H5MF_can_extend(f, H5FD_MEM_OHDR, oh->chunk[chunkno].addr, 
+                                 (hsize_t)(oh->chunk[chunkno].size), (hsize_t)delta);
+    if(tri_result == FALSE) { /* can't extend -- we are done */
         HGOTO_DONE(FALSE);
-
-    } else if ( tri_result != TRUE ) { /* system error */
-
-        HGOTO_ERROR(H5E_RESOURCE, H5E_SYSTEM, FAIL, "H5MF_can_extend() failed");
+    } else if(tri_result != TRUE) { /* system error */
+        HGOTO_ERROR(H5E_RESOURCE, H5E_SYSTEM, FAIL, "can't tell if we can extend chunk")
     }
 
-    /* if we get this far, we should be able to extend the chunk */
-    result = H5MF_extend(f, H5FD_MEM_OHDR,
-                         oh->chunk[chunkno].addr, 
-                         (hsize_t)(oh->chunk[chunkno].size),
-                         (hsize_t)delta);
+    /* If we get this far, we should be able to extend the chunk */
+    if(H5MF_extend(f, H5FD_MEM_OHDR, oh->chunk[chunkno].addr, (hsize_t)(oh->chunk[chunkno].size), (hsize_t)delta) < 0 )
+        HGOTO_ERROR(H5E_RESOURCE, H5E_SYSTEM, FAIL, "can't extend chunk")
 
-    if ( result < 0 ) { /* system error */
+    /* If we can extend an existing null message, take take of that */
+    if(extend_msg >= 0) {
+        /* Adjust message size of existing null message */
+        oh->mesg[extend_msg].dirty = TRUE;
+        oh->mesg[extend_msg].raw_size += delta;
+    } /* end if */
+    /* Create new null message for end of chunk */
+    else {
+        /* Create a new null message */
+        if(oh->nmesgs >= oh->alloc_nmesgs) {
+            unsigned na = oh->alloc_nmesgs + H5O_NMESGS;
+            H5O_mesg_t *x = H5FL_SEQ_REALLOC(H5O_mesg_t, oh->mesg, (size_t)na);
 
-        HGOTO_ERROR(H5E_RESOURCE, H5E_SYSTEM, FAIL, \
-                    "H5MF_extend() failed");
-    }
+            if(NULL == x)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+            oh->alloc_nmesgs = na;
+            oh->mesg = x;
+        } /* end if */
 
+        /* Set extension message */
+        extend_msg = oh->nmesgs++;
 
-    /* create a new null message */
-    if ( oh->nmesgs >= oh->alloc_nmesgs ) {
+        /* Initialize new null message */
+        oh->mesg[extend_msg].type = H5O_NULL;
+        oh->mesg[extend_msg].dirty = TRUE;
+        oh->mesg[extend_msg].native = NULL;
+        oh->mesg[extend_msg].raw = oh->chunk[chunkno].image +
+                            oh->chunk[chunkno].size + H5O_SIZEOF_MSGHDR(f);
+        oh->mesg[extend_msg].raw_size = delta - H5O_SIZEOF_MSGHDR(f);
+        oh->mesg[extend_msg].chunkno = chunkno;
+    } /* end else */
 
-        unsigned na = oh->alloc_nmesgs + H5O_NMESGS;
-
-        H5O_mesg_t *x = H5FL_SEQ_REALLOC (H5O_mesg_t, oh->mesg, (size_t)na);
-
-        if ( NULL == x ) {
-
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
-                        "memory allocation failed");
-        }
-        oh->alloc_nmesgs = na;
-        oh->mesg = x;
-    }
-
-    idx = oh->nmesgs++;
-
-    oh->mesg[idx].type = H5O_NULL;
-    oh->mesg[idx].dirty = TRUE;
-    oh->mesg[idx].native = NULL;
-    oh->mesg[idx].raw = oh->chunk[chunkno].image +
-                        oh->chunk[chunkno].size +
-                        H5O_SIZEOF_MSGHDR(f);
-    oh->mesg[idx].raw_size = delta - H5O_SIZEOF_MSGHDR(f);
-    oh->mesg[idx].chunkno = chunkno;
-
-    old_addr = oh->chunk[chunkno].image;
+    /* Allocate more memory space for chunk's image */
+    old_image = oh->chunk[chunkno].image;
     old_size = oh->chunk[chunkno].size;
     oh->chunk[chunkno].size += delta;
-    oh->chunk[chunkno].image = H5FL_BLK_REALLOC(chunk_image,old_addr,
-                                                oh->chunk[chunkno].size);
-    if (NULL==oh->chunk[chunkno].image) {
+    oh->chunk[chunkno].image = H5FL_BLK_REALLOC(chunk_image, old_image, oh->chunk[chunkno].size);
+    oh->chunk[chunkno].dirty = TRUE;
+    if(NULL == oh->chunk[chunkno].image)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
-                    "memory allocation failed");
-    }
+    /* Wipe new space for chunk */
+    HDmemset(oh->chunk[chunkno].image + old_size, 0, oh->chunk[chunkno].size - old_size);
 
-    HDmemset(oh->chunk[chunkno].image+old_size, 0,
-	     oh->chunk[chunkno].size - old_size);
+    /* Spin through existing messages, adjusting them */
+    for(u = 0; u < oh->nmesgs; u++) {
+        /* Adjust raw addresses for messages in this chunk to reflect to 'image' address */
+        if(oh->mesg[u].chunkno == chunkno)
+            oh->mesg[u].raw = oh->chunk[chunkno].image + (oh->mesg[u].raw - old_image);
 
-    /* adjust raw addresses for messages of this chunk */
-    if (old_addr != oh->chunk[chunkno].image) {
-        for (u = 0; u < oh->nmesgs; u++) {
-            if (oh->mesg[u].chunkno == chunkno)
-                oh->mesg[u].raw = oh->chunk[chunkno].image +
-                    (oh->mesg[u].raw - old_addr);
-        }
-    }
+        /* Find continuation message which points to this chunk and adjust chunk's size */
+        /* (Chunk 0 doesn't have a continuation message that points to it and
+         * it's size is directly encoded in the object header) */
+        if(chunkno > 0 && (H5O_CONT_ID == oh->mesg[u].type->id) &&
+                (((H5O_cont_t *)(oh->mesg[u].native))->chunkno == chunkno)) {
+            /* Adjust size of continuation message */
+            HDassert(((H5O_cont_t *)(oh->mesg[u].native))->size == old_size);
+            ((H5O_cont_t *)(oh->mesg[u].native))->size = oh->chunk[chunkno].size;
 
-    /* adjust the continuation message pointing to this chunk for the
-     * increase in chunk size.
-     *
-     * As best I understand the code, it is not necessarily an error
-     * if there is no continuation message pointing to a chunk -- for
-     * example, chunk 0 seems to be pointed to by the object header.
-     */
-    cont_updated = FALSE;
-    for ( i = 0; i < oh->nmesgs; i++ ) 
-    {
-        if ( ( H5O_CONT_ID == oh->mesg[i].type->id ) &&
-             ( ((H5O_cont_t *)(oh->mesg[i].native))->chunkno == chunkno ) ) {
-
-            HDassert( ((H5O_cont_t *)(oh->mesg[i].native))->size == 
-                       oh->chunk[chunkno].size - delta );
-
-	    ((H5O_cont_t *)(oh->mesg[i].native))->size = 
-		    oh->chunk[chunkno].size;
-
-	    cont_updated = TRUE;
-
-	    /* there should be at most one continuation message
-	     * pointing to this chunk, so we can quit when we find
-	     * and update it.
-	     */
-	    break;
-        }
-    }
-    HDassert( ( chunkno == 0 ) || ( cont_updated ) );
+            /* Flag continuation message & it's chunk as dirty */
+            oh->mesg[u].dirty = TRUE;
+            oh->chunk[oh->mesg[u].chunkno].dirty = TRUE;
+        } /* end if */
+    } /* end for */
 
     /* Set return value */
-    *msg_idx = idx;
-    ret_value = TRUE;
+    *msg_idx = extend_msg;
 
 done:
-
-    FUNC_LEAVE_NOAPI(ret_value);
-
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O_alloc_extend_chunk() */
 
 
