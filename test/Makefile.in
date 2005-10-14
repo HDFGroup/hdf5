@@ -30,7 +30,8 @@
 # HDF5 Library Test Makefile(.in)
 #
 
-SOURCES = $(libh5test_la_SOURCES) b+tree.c big.c bittests.c blocktrack.c btree2.c cache.c cmpd_dset.c dangle.c dsets.c dt_arith.c dtransform.c dtypes.c enum.c err_compat.c error_test.c extend.c external.c fillval.c flush1.c flush2.c getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c mtime.c ntypes.c ohdr.c pool.c reserved.c set_extent.c sheap.c stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
+
+SOURCES = $(libh5test_la_SOURCES) b+tree.c big.c bittests.c blocktrack.c btree2.c cache.c cmpd_dset.c dangle.c dsets.c dt_arith.c dtransform.c dtypes.c enum.c err_compat.c error_test.c extend.c external.c fillval.c flush1.c flush2.c gen_deflate.c gen_filters.c gen_new_array.c gen_new_fill.c gen_new_mtime.c gen_new_super.c gen_noencoder.c gen_nullspace.c gen_old_array.c gen_old_layout.c gen_old_mtime.c getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c mtime.c ntypes.c ohdr.c pool.c reserved.c set_extent.c sheap.c stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -59,6 +60,7 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/conclude.am
 check_PROGRAMS = $(am__EXEEXT_1) error_test$(EXEEXT) \
 	err_compat$(EXEEXT) testmeta$(EXEEXT)
+noinst_PROGRAMS = $(am__EXEEXT_2)
 subdir = test
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
@@ -83,6 +85,18 @@ am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	ttsafe$(EXEEXT) stream_test$(EXEEXT) getname$(EXEEXT) \
 	vfd$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
 	dtransform$(EXEEXT) reserved$(EXEEXT)
+@BUILD_ALL_CONDITIONAL_TRUE@am__EXEEXT_2 = gen_deflate$(EXEEXT) \
+@BUILD_ALL_CONDITIONAL_TRUE@	gen_filters$(EXEEXT) \
+@BUILD_ALL_CONDITIONAL_TRUE@	gen_new_array$(EXEEXT) \
+@BUILD_ALL_CONDITIONAL_TRUE@	gen_new_fill$(EXEEXT) \
+@BUILD_ALL_CONDITIONAL_TRUE@	gen_new_mtime$(EXEEXT) \
+@BUILD_ALL_CONDITIONAL_TRUE@	gen_new_super$(EXEEXT) \
+@BUILD_ALL_CONDITIONAL_TRUE@	gen_noencoder$(EXEEXT) \
+@BUILD_ALL_CONDITIONAL_TRUE@	gen_nullspace$(EXEEXT) \
+@BUILD_ALL_CONDITIONAL_TRUE@	gen_old_array$(EXEEXT) \
+@BUILD_ALL_CONDITIONAL_TRUE@	gen_old_layout$(EXEEXT) \
+@BUILD_ALL_CONDITIONAL_TRUE@	gen_old_mtime$(EXEEXT)
+PROGRAMS = $(noinst_PROGRAMS)
 b_tree_SOURCES = b+tree.c
 b_tree_OBJECTS = b+tree.$(OBJEXT)
 b_tree_LDADD = $(LDADD)
@@ -164,6 +178,50 @@ flush2_SOURCES = flush2.c
 flush2_OBJECTS = flush2.$(OBJEXT)
 flush2_LDADD = $(LDADD)
 flush2_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
+gen_deflate_SOURCES = gen_deflate.c
+gen_deflate_OBJECTS = gen_deflate.$(OBJEXT)
+gen_deflate_LDADD = $(LDADD)
+gen_deflate_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
+gen_filters_SOURCES = gen_filters.c
+gen_filters_OBJECTS = gen_filters.$(OBJEXT)
+gen_filters_LDADD = $(LDADD)
+gen_filters_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
+gen_new_array_SOURCES = gen_new_array.c
+gen_new_array_OBJECTS = gen_new_array.$(OBJEXT)
+gen_new_array_LDADD = $(LDADD)
+gen_new_array_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
+gen_new_fill_SOURCES = gen_new_fill.c
+gen_new_fill_OBJECTS = gen_new_fill.$(OBJEXT)
+gen_new_fill_LDADD = $(LDADD)
+gen_new_fill_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
+gen_new_mtime_SOURCES = gen_new_mtime.c
+gen_new_mtime_OBJECTS = gen_new_mtime.$(OBJEXT)
+gen_new_mtime_LDADD = $(LDADD)
+gen_new_mtime_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
+gen_new_super_SOURCES = gen_new_super.c
+gen_new_super_OBJECTS = gen_new_super.$(OBJEXT)
+gen_new_super_LDADD = $(LDADD)
+gen_new_super_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
+gen_noencoder_SOURCES = gen_noencoder.c
+gen_noencoder_OBJECTS = gen_noencoder.$(OBJEXT)
+gen_noencoder_LDADD = $(LDADD)
+gen_noencoder_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
+gen_nullspace_SOURCES = gen_nullspace.c
+gen_nullspace_OBJECTS = gen_nullspace.$(OBJEXT)
+gen_nullspace_LDADD = $(LDADD)
+gen_nullspace_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
+gen_old_array_SOURCES = gen_old_array.c
+gen_old_array_OBJECTS = gen_old_array.$(OBJEXT)
+gen_old_array_LDADD = $(LDADD)
+gen_old_array_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
+gen_old_layout_SOURCES = gen_old_layout.c
+gen_old_layout_OBJECTS = gen_old_layout.$(OBJEXT)
+gen_old_layout_LDADD = $(LDADD)
+gen_old_layout_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
+gen_old_mtime_SOURCES = gen_old_mtime.c
+gen_old_mtime_OBJECTS = gen_old_mtime.$(OBJEXT)
+gen_old_mtime_LDADD = $(LDADD)
+gen_old_mtime_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
 getname_SOURCES = getname.c
 getname_OBJECTS = getname.$(OBJEXT)
 getname_LDADD = $(LDADD)
@@ -272,18 +330,24 @@ SOURCES = $(libh5test_la_SOURCES) b+tree.c big.c bittests.c \
 	blocktrack.c btree2.c cache.c cmpd_dset.c dangle.c dsets.c \
 	dt_arith.c dtransform.c dtypes.c enum.c err_compat.c \
 	error_test.c extend.c external.c fillval.c flush1.c flush2.c \
-	getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c \
-	mtime.c ntypes.c ohdr.c pool.c reserved.c set_extent.c sheap.c \
-	stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c \
-	$(ttsafe_SOURCES) unlink.c vfd.c
+	gen_deflate.c gen_filters.c gen_new_array.c gen_new_fill.c \
+	gen_new_mtime.c gen_new_super.c gen_noencoder.c \
+	gen_nullspace.c gen_old_array.c gen_old_layout.c \
+	gen_old_mtime.c getname.c gheap.c hyperslab.c istore.c lheap.c \
+	links.c mount.c mtime.c ntypes.c ohdr.c pool.c reserved.c \
+	set_extent.c sheap.c stab.c stream_test.c $(testhdf5_SOURCES) \
+	testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
 DIST_SOURCES = $(libh5test_la_SOURCES) b+tree.c big.c bittests.c \
 	blocktrack.c btree2.c cache.c cmpd_dset.c dangle.c dsets.c \
 	dt_arith.c dtransform.c dtypes.c enum.c err_compat.c \
 	error_test.c extend.c external.c fillval.c flush1.c flush2.c \
-	getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c \
-	mtime.c ntypes.c ohdr.c pool.c reserved.c set_extent.c sheap.c \
-	stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c \
-	$(ttsafe_SOURCES) unlink.c vfd.c
+	gen_deflate.c gen_filters.c gen_new_array.c gen_new_fill.c \
+	gen_new_mtime.c gen_new_super.c gen_noencoder.c \
+	gen_nullspace.c gen_old_array.c gen_old_layout.c \
+	gen_old_mtime.c getname.c gheap.c hyperslab.c istore.c lheap.c \
+	links.c mount.c mtime.c ntypes.c ohdr.c pool.c reserved.c \
+	set_extent.c sheap.c stab.c stream_test.c $(testhdf5_SOURCES) \
+	testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -301,6 +365,8 @@ AUTOCONF = /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf
 AUTOHEADER = /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoheader
 AUTOMAKE = /afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/automake
 AWK = @AWK@
+BUILD_ALL_CONDITIONAL_FALSE = @BUILD_ALL_CONDITIONAL_FALSE@
+BUILD_ALL_CONDITIONAL_TRUE = @BUILD_ALL_CONDITIONAL_TRUE@
 BUILD_CXX_CONDITIONAL_FALSE = @BUILD_CXX_CONDITIONAL_FALSE@
 BUILD_CXX_CONDITIONAL_TRUE = @BUILD_CXX_CONDITIONAL_TRUE@
 BUILD_FORTRAN_CONDITIONAL_FALSE = @BUILD_FORTRAN_CONDITIONAL_FALSE@
@@ -550,6 +616,17 @@ TEST_PROG = testhdf5 lheap ohdr stab gheap btree2 cache b+tree blocktrack sheap 
            set_extent ttsafe stream_test \
            getname vfd ntypes dangle dtransform reserved 
 
+@BUILD_ALL_CONDITIONAL_FALSE@BUILD_ALL_PROGS = 
+
+# These programs generate test files for the tests.  They don't need to be
+# compiled every time we want to test the library.  However, putting
+# them in a conditional causes automake to generate rules so that they
+# can be built by hand.  They can also be built by specifying
+# --enable-build-all at configure time.
+@BUILD_ALL_CONDITIONAL_TRUE@BUILD_ALL_PROGS = gen_deflate gen_filters gen_new_array gen_new_fill   \
+@BUILD_ALL_CONDITIONAL_TRUE@                  gen_new_mtime gen_new_super gen_noencoder gen_nullspace  \
+@BUILD_ALL_CONDITIONAL_TRUE@                  gen_old_array gen_old_layout gen_old_mtime
+
 
 # The libh5test library provides common support code for the tests.
 noinst_LTLIBRARIES = libh5test.la
@@ -636,6 +713,13 @@ clean-checkPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
+
+clean-noinstPROGRAMS:
+	@list='$(noinst_PROGRAMS)'; for p in $$list; do \
+	  f=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
+	  echo " rm -f $$p $$f"; \
+	  rm -f $$p $$f ; \
+	done
 b+tree$(EXEEXT): $(b_tree_OBJECTS) $(b_tree_DEPENDENCIES) 
 	@rm -f b+tree$(EXEEXT)
 	$(LINK) $(b_tree_LDFLAGS) $(b_tree_OBJECTS) $(b_tree_LDADD) $(LIBS)
@@ -696,6 +780,39 @@ flush1$(EXEEXT): $(flush1_OBJECTS) $(flush1_DEPENDENCIES)
 flush2$(EXEEXT): $(flush2_OBJECTS) $(flush2_DEPENDENCIES) 
 	@rm -f flush2$(EXEEXT)
 	$(LINK) $(flush2_LDFLAGS) $(flush2_OBJECTS) $(flush2_LDADD) $(LIBS)
+gen_deflate$(EXEEXT): $(gen_deflate_OBJECTS) $(gen_deflate_DEPENDENCIES) 
+	@rm -f gen_deflate$(EXEEXT)
+	$(LINK) $(gen_deflate_LDFLAGS) $(gen_deflate_OBJECTS) $(gen_deflate_LDADD) $(LIBS)
+gen_filters$(EXEEXT): $(gen_filters_OBJECTS) $(gen_filters_DEPENDENCIES) 
+	@rm -f gen_filters$(EXEEXT)
+	$(LINK) $(gen_filters_LDFLAGS) $(gen_filters_OBJECTS) $(gen_filters_LDADD) $(LIBS)
+gen_new_array$(EXEEXT): $(gen_new_array_OBJECTS) $(gen_new_array_DEPENDENCIES) 
+	@rm -f gen_new_array$(EXEEXT)
+	$(LINK) $(gen_new_array_LDFLAGS) $(gen_new_array_OBJECTS) $(gen_new_array_LDADD) $(LIBS)
+gen_new_fill$(EXEEXT): $(gen_new_fill_OBJECTS) $(gen_new_fill_DEPENDENCIES) 
+	@rm -f gen_new_fill$(EXEEXT)
+	$(LINK) $(gen_new_fill_LDFLAGS) $(gen_new_fill_OBJECTS) $(gen_new_fill_LDADD) $(LIBS)
+gen_new_mtime$(EXEEXT): $(gen_new_mtime_OBJECTS) $(gen_new_mtime_DEPENDENCIES) 
+	@rm -f gen_new_mtime$(EXEEXT)
+	$(LINK) $(gen_new_mtime_LDFLAGS) $(gen_new_mtime_OBJECTS) $(gen_new_mtime_LDADD) $(LIBS)
+gen_new_super$(EXEEXT): $(gen_new_super_OBJECTS) $(gen_new_super_DEPENDENCIES) 
+	@rm -f gen_new_super$(EXEEXT)
+	$(LINK) $(gen_new_super_LDFLAGS) $(gen_new_super_OBJECTS) $(gen_new_super_LDADD) $(LIBS)
+gen_noencoder$(EXEEXT): $(gen_noencoder_OBJECTS) $(gen_noencoder_DEPENDENCIES) 
+	@rm -f gen_noencoder$(EXEEXT)
+	$(LINK) $(gen_noencoder_LDFLAGS) $(gen_noencoder_OBJECTS) $(gen_noencoder_LDADD) $(LIBS)
+gen_nullspace$(EXEEXT): $(gen_nullspace_OBJECTS) $(gen_nullspace_DEPENDENCIES) 
+	@rm -f gen_nullspace$(EXEEXT)
+	$(LINK) $(gen_nullspace_LDFLAGS) $(gen_nullspace_OBJECTS) $(gen_nullspace_LDADD) $(LIBS)
+gen_old_array$(EXEEXT): $(gen_old_array_OBJECTS) $(gen_old_array_DEPENDENCIES) 
+	@rm -f gen_old_array$(EXEEXT)
+	$(LINK) $(gen_old_array_LDFLAGS) $(gen_old_array_OBJECTS) $(gen_old_array_LDADD) $(LIBS)
+gen_old_layout$(EXEEXT): $(gen_old_layout_OBJECTS) $(gen_old_layout_DEPENDENCIES) 
+	@rm -f gen_old_layout$(EXEEXT)
+	$(LINK) $(gen_old_layout_LDFLAGS) $(gen_old_layout_OBJECTS) $(gen_old_layout_LDADD) $(LIBS)
+gen_old_mtime$(EXEEXT): $(gen_old_mtime_OBJECTS) $(gen_old_mtime_DEPENDENCIES) 
+	@rm -f gen_old_mtime$(EXEEXT)
+	$(LINK) $(gen_old_mtime_LDFLAGS) $(gen_old_mtime_OBJECTS) $(gen_old_mtime_LDADD) $(LIBS)
 getname$(EXEEXT): $(getname_OBJECTS) $(getname_DEPENDENCIES) 
 	@rm -f getname$(EXEEXT)
 	$(LINK) $(getname_LDFLAGS) $(getname_OBJECTS) $(getname_LDADD) $(LIBS)
@@ -786,6 +903,17 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fillval.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flush1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flush2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_deflate.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_filters.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_new_array.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_new_fill.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_new_mtime.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_new_super.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_noencoder.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_nullspace.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_old_array.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_old_layout.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_old_mtime.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getname.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gheap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5test.Plo@am__quote@
@@ -945,7 +1073,7 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_SCRIPTS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(LTLIBRARIES) all-local
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) all-local
 installdirs:
 install: install-am
 install-exec: install-exec-am
@@ -974,7 +1102,7 @@ maintainer-clean-generic:
 clean: clean-am
 
 clean-am: clean-checkPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES mostlyclean-am
+	clean-noinstLTLIBRARIES clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -1024,15 +1152,16 @@ uninstall-am: uninstall-info-am
 
 .PHONY: CTAGS GTAGS all all-am all-local check check-TESTS check-am \
 	clean clean-checkPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES ctags distclean distclean-compile \
-	distclean-generic distclean-libtool distclean-tags distdir dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-exec install-exec-am \
-	install-info install-info-am install-man install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool mostlyclean-local pdf \
-	pdf-am ps ps-am tags uninstall uninstall-am uninstall-info-am
+	clean-noinstLTLIBRARIES clean-noinstPROGRAMS ctags distclean \
+	distclean-compile distclean-generic distclean-libtool \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am install-exec \
+	install-exec-am install-info install-info-am install-man \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	mostlyclean-local pdf pdf-am ps ps-am tags uninstall \
+	uninstall-am uninstall-info-am
 
 
 # check-install is a synonym for installcheck.

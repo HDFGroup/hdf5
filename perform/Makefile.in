@@ -30,7 +30,7 @@
 # HDF5 Library Performance Makefile(.in)
 #
 
-SOURCES = chunk.c $(h5perf_SOURCES) iopipe.c overhead.c perf.c perf_meta.c zip_perf.c
+SOURCES = chunk.c $(h5perf_SOURCES) iopipe.c mpi-perf.c overhead.c perf.c perf_meta.c zip_perf.c
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -58,7 +58,7 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
 bin_PROGRAMS = h5perf$(EXEEXT)
-check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) perf$(EXEEXT)
+check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_3) perf$(EXEEXT)
 subdir = perform
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
@@ -70,8 +70,9 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 @BUILD_PARALLEL_CONDITIONAL_TRUE@am__EXEEXT_1 = h5perf$(EXEEXT)
-am__EXEEXT_2 = iopipe$(EXEEXT) chunk$(EXEEXT) overhead$(EXEEXT) \
-	zip_perf$(EXEEXT) perf_meta$(EXEEXT)
+@BUILD_ALL_CONDITIONAL_TRUE@am__EXEEXT_2 = mpi-perf$(EXEEXT)
+am__EXEEXT_3 = iopipe$(EXEEXT) chunk$(EXEEXT) overhead$(EXEEXT) \
+	zip_perf$(EXEEXT) perf_meta$(EXEEXT) $(am__EXEEXT_2)
 PROGRAMS = $(bin_PROGRAMS)
 chunk_SOURCES = chunk.c
 chunk_OBJECTS = chunk.$(OBJEXT)
@@ -88,6 +89,10 @@ h5perf_DEPENDENCIES = $(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
 iopipe_SOURCES = iopipe.c
 iopipe_OBJECTS = iopipe.$(OBJEXT)
 iopipe_DEPENDENCIES = $(am__DEPENDENCIES_3) $(am__DEPENDENCIES_1)
+mpi_perf_SOURCES = mpi-perf.c
+mpi_perf_OBJECTS = mpi-perf.$(OBJEXT)
+mpi_perf_LDADD = $(LDADD)
+mpi_perf_DEPENDENCIES = $(am__DEPENDENCIES_1)
 overhead_SOURCES = overhead.c
 overhead_OBJECTS = overhead.$(OBJEXT)
 overhead_LDADD = $(LDADD)
@@ -113,10 +118,10 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = chunk.c $(h5perf_SOURCES) iopipe.c overhead.c perf.c \
-	perf_meta.c zip_perf.c
-DIST_SOURCES = chunk.c $(h5perf_SOURCES) iopipe.c overhead.c perf.c \
-	perf_meta.c zip_perf.c
+SOURCES = chunk.c $(h5perf_SOURCES) iopipe.c mpi-perf.c overhead.c \
+	perf.c perf_meta.c zip_perf.c
+DIST_SOURCES = chunk.c $(h5perf_SOURCES) iopipe.c mpi-perf.c \
+	overhead.c perf.c perf_meta.c zip_perf.c
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -134,6 +139,8 @@ AUTOCONF = /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf
 AUTOHEADER = /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoheader
 AUTOMAKE = /afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/automake
 AWK = @AWK@
+BUILD_ALL_CONDITIONAL_FALSE = @BUILD_ALL_CONDITIONAL_FALSE@
+BUILD_ALL_CONDITIONAL_TRUE = @BUILD_ALL_CONDITIONAL_TRUE@
 BUILD_CXX_CONDITIONAL_FALSE = @BUILD_CXX_CONDITIONAL_FALSE@
 BUILD_CXX_CONDITIONAL_TRUE = @BUILD_CXX_CONDITIONAL_TRUE@
 BUILD_FORTRAN_CONDITIONAL_FALSE = @BUILD_FORTRAN_CONDITIONAL_FALSE@
@@ -345,10 +352,15 @@ H5FC_PP = $(bindir)/h5pfc
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/tools/lib
 @BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_PROG_PARA = h5perf
+@BUILD_ALL_CONDITIONAL_FALSE@MPI_PERF = 
+
+# mpi-perf is not built or run by default, but can be built by hand or by
+# specifying --enable-build-all at configure time.
+@BUILD_ALL_CONDITIONAL_TRUE@MPI_PERF = mpi-perf
 
 # These are the programs that `make all' or `make tests' will build and which
 # `make check' will run. List them in the order they should be run.
-TEST_PROG = iopipe chunk overhead zip_perf perf_meta
+TEST_PROG = iopipe chunk overhead zip_perf perf_meta $(MPI_PERF)
 h5perf_SOURCES = pio_perf.c pio_engine.c pio_timer.c
 
 # These are the files that `make clean' (and derivatives) will remove from
@@ -457,6 +469,9 @@ h5perf$(EXEEXT): $(h5perf_OBJECTS) $(h5perf_DEPENDENCIES)
 iopipe$(EXEEXT): $(iopipe_OBJECTS) $(iopipe_DEPENDENCIES) 
 	@rm -f iopipe$(EXEEXT)
 	$(LINK) $(iopipe_LDFLAGS) $(iopipe_OBJECTS) $(iopipe_LDADD) $(LIBS)
+mpi-perf$(EXEEXT): $(mpi_perf_OBJECTS) $(mpi_perf_DEPENDENCIES) 
+	@rm -f mpi-perf$(EXEEXT)
+	$(LINK) $(mpi_perf_LDFLAGS) $(mpi_perf_OBJECTS) $(mpi_perf_LDADD) $(LIBS)
 overhead$(EXEEXT): $(overhead_OBJECTS) $(overhead_DEPENDENCIES) 
 	@rm -f overhead$(EXEEXT)
 	$(LINK) $(overhead_LDFLAGS) $(overhead_OBJECTS) $(overhead_LDADD) $(LIBS)
@@ -478,6 +493,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chunk.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iopipe.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mpi-perf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/overhead.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/perf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/perf_meta.Po@am__quote@

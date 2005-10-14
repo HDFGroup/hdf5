@@ -47,6 +47,21 @@ TEST_PROG=testhdf5 lheap ohdr stab gheap btree2 cache b+tree blocktrack sheap \
 check_PROGRAMS=$(TEST_PROG) error_test err_compat testmeta
 
 
+# These programs generate test files for the tests.  They don't need to be
+# compiled every time we want to test the library.  However, putting
+# them in a conditional causes automake to generate rules so that they
+# can be built by hand.  They can also be built by specifying
+# --enable-build-all at configure time.
+if BUILD_ALL_CONDITIONAL
+  BUILD_ALL_PROGS=gen_deflate gen_filters gen_new_array gen_new_fill   \
+                  gen_new_mtime gen_new_super gen_noencoder gen_nullspace  \
+                  gen_old_array gen_old_layout gen_old_mtime
+else
+  BUILD_ALL_PROGS=
+endif
+
+noinst_PROGRAMS=$(BUILD_ALL_PROGS)
+
 # The libh5test library provides common support code for the tests.
 noinst_LTLIBRARIES=libh5test.la
 libh5test_la_SOURCES=h5test.c testframe.c

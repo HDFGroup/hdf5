@@ -3157,6 +3157,25 @@ else
 fi
 
 dnl ----------------------------------------------------------------------
+dnl Some programs shouldn't be built by default (e.g., programs to generate
+dnl data files used by tests, some optional tests).
+dnl Check if they want such programs built anyway.
+dnl
+AC_MSG_CHECKING([additional programs should be built])
+AC_ARG_ENABLE([build-all],
+     [AC_HELP_STRING([--enable-build-all],
+                     [Build helper programs that only developers should need [default=no]])],
+     [BUILD_ALL=$enableval],
+     [BUILD_ALL=no])
+
+if test "X$BUILD_ALL" = "Xyes"; then
+ echo "yes"
+else
+ echo "no"
+fi
+AM_CONDITIONAL([BUILD_ALL_CONDITIONAL], [test "X$BUILD_ALL" = "Xyes"])
+
+dnl ----------------------------------------------------------------------
 dnl Create automake conditionals to tell automake makefiles which directories
 dnl need to be compiled
 
