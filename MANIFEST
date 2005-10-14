@@ -628,7 +628,6 @@
 ./test/btree2.c
 ./test/cache.c
 ./test/cmpd_dset.c
-./test/createnoenc.c
 ./test/dangle.c
 ./test/deflate.h5
 ./test/dsets.c
@@ -672,6 +671,7 @@
 ./test/gen_old_mtime.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_mtime.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_super.c			_DO_NOT_DISTRIBUTE_
+./test/gen_noencoder.c			_DO_NOT_DISTRIBUTE_
 ./test/pool.c
 ./test/set_extent.c
 ./test/sheap.c
