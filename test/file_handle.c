@@ -374,6 +374,7 @@ test_family_compat(void)
         goto error;
 
     h5_fixname(COMPAT_BASENAME, fapl, filename, sizeof filename);
+    pathname[0] = '\0';
 
     /* Generate correct name for test file by prepending the source path */
     if(srcdir && ((strlen(srcdir) + strlen(filename) + 1) < sizeof(pathname))) {
