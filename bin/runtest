@@ -674,6 +674,12 @@ if test x-$CMD = x-setup; then
 fi
 
 #################################
+# Show some host status numbers
+#################################
+df
+uptime
+
+#################################
 # Setup test host(s)
 #################################
 if [ "$TESTHOST" = -all ]; then
