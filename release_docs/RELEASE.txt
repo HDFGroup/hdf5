@@ -243,7 +243,7 @@ Platforms Tested
     Cray X1 water 3.0.35          Cray Standard C Version 5.4.0.7.4
                                   Cray Fortran 5.4.0.7.3
                                   Cray C++ 5.4.0.7.4
-    FreeBSD 4.9                   gcc 2.95.4
+    FreeBSD 4.11                  gcc 2.95.4
                                   g++ 2.95.4
                                   gcc 3.2.3, 3.3.6, 3.4.4, 4.0.0
     HP-UX B.11.00                 HP C  HP92453-01 A.11.01.20 
@@ -336,7 +336,7 @@ AIX-5.1 & 5.2 64-bit                 y        y      y        y    y     y
 WinXP Visual Studio 6.0              n        y(9)   n        y    y     y
 WinXP .Net                           n        n      n        y(8) y     y
 Mac OS X 10.3                        n        y(10)  n        y    y     y
-FreeBSD 4.9                          y(1)     n      n        y    y     y
+FreeBSD 4.11                         n        n      n        y    y     y
 RedHat 7.3  W (3)                    y(1)     y(11)  n        y    y     y
 RedHat 7.3  W Intel (3)              n        y      n        y    y     y
 RedHat 7.3  W PGI (3)                n        y      n        y    y     y
@@ -366,7 +366,7 @@ AIX-5.1 & 5.2 64-bit                 n              y       n        y
 WinXP Visual Studio 6.0              y              y       n        n
 WinXP .Net                           y              y       n        n
 Mac OS X 10.3                        y              y       n        y
-FreeBSD 4.9                          y              y       y        y
+FreeBSD 4.11                         y              y       y        y
 RedHat 7.3   W (3)                   y              y       y        y
 RedHat 7.3  W  Intel (3)             n              y       n        y
 RedHat 7.3  W  PGI (3)               n              y       n        y
