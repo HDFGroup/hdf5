@@ -676,8 +676,11 @@ fi
 #################################
 # Show some host status numbers
 #################################
-df
+# df sometimes hangs due to file system problems.  Invoke it as background
+# process and give it 10 seconds to finish.  If it hangs, just continue.
 uptime
+df &
+sleep 10
 
 #################################
 # Setup test host(s)
