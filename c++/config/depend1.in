@@ -22,22 +22,24 @@
 ##
 $(srcdir)/Dependencies: .depend
 	@if test "$(srcdir)" != "."; then					\
-	  echo '##' >$@; \
-	  echo '## Copyright by the Board of Trustees of the University of Illinois.' >>$@; \
-	  echo '## All rights reserved.' >>$@; \
-	  echo '##' >>$@; \
-	  echo '## This file is part of HDF5.  The full HDF5 copyright notice, including' >>$@; \
-	  echo '## terms governing use, modification, and redistribution, is contained in' >>$@; \
-	  echo '## the files COPYING and Copyright.html.  COPYING can be found at the root' >>$@; \
-	  echo '## of the source code distribution tree; Copyright.html can be found at the' >>$@; \
-	  echo '## root level of an installed copy of the electronic HDF5 document set and' >>$@; \
-	  echo '## is linked from the top-level documents page.  It can also be found at' >>$@; \
-	  echo '## http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have' >>$@; \
-	  echo '## access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.' >>$@; \
-	  echo '##' >>$@; \
-	  echo '## This file is machine generated on GNU systems.' >>$@;		\
-	  echo '## Only temporary changes may be made here.' >>$@;		\
-	  echo >>$@;								\
+	  (									\
+	    echo '##'; 								\
+	    echo '## This file is machine generated on GNU systems.';		\
+	    echo '## Only temporary changes may be made here.';			\
+	    echo '##'; 								\
+	    echo '## Copyright by the Board of Trustees of the University of Illinois.'; \
+	    echo '## All rights reserved.'; 					\
+	    echo '##'; 								\
+	    echo '## This file is part of HDF5.  The full HDF5 copyright notice, including'; \
+	    echo '## terms governing use, modification, and redistribution, is contained in'; \
+	    echo '## the files COPYING and Copyright.html.  COPYING can be found at the root'; \
+	    echo '## of the source code distribution tree; Copyright.html can be found at the'; \
+	    echo '## root level of an installed copy of the electronic HDF5 document set and'; \
+	    echo '## is linked from the top-level documents page.  It can also be found at'; \
+	    echo '## http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have'; \
+	    echo '## access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.'; \
+	    echo;								\
+	  ) >$@;								\
 	  $(PERL) -p $(top_srcdir)/bin/distdep .depend >>$@;			\
 	else									\
 	  echo 'Dependencies cannot be built when $$srcdir == $$builddir';	\
