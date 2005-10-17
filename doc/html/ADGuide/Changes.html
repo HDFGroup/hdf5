@@ -25,8 +25,7 @@
   <body bgcolor="#FFFFFF">
   
   
-<!-- #BeginLibraryItem "/ed_libs/NavBar_ADevG.lbi" -->
-<hr>
+<!-- #BeginLibraryItem "/ed_libs/NavBar_ADevG.lbi" --><hr>
 <center>
 <table border=0 width=98%>
 <tr><td valign=top align=left>
@@ -54,7 +53,203 @@ This document is intended to assist application developers who must keep
 an application synchronized with the HDF5 library or related software.
 
 
-<h2>Release 1.6.4 (current release) versus Release 1.6.3</h2> 
+<h2>Release 1.6.5 (current release) versus Release 1.6.4</h2> 
+
+<dir>
+
+This section lists the API-level changes that have been made in the 
+transition from the HDF5 Release 1.6.4 to Release 1.6.5.
+
+
+    <h3>New Functions and Tools</h3>
+	<dl>
+
+	  <dt>C functions and
+	  <dt>Fortran subroutines:
+          <dd>HDF5 Release 1.6.5 is primarily a "Bugfix Release"; 
+              there are no public API changes in the HDF5 C library
+              or in the Fortran interfaces.
+<!--
+          <dd>The following C functions are new for Release 1.6.4 and 
+              are documented in the
+              <a href="../RM_H5Front.html"><cite>HDF5 Reference Manual</cite></a>.
+	
+              <table border="0">
+              <tr>
+                <td align="left" valign="top"><code>function</code>
+                    &nbsp;&nbsp;&nbsp;&nbsp;</td>
+                <td align="left" valign="top">syntax<br>
+                    See <a href="../RM_H5__.html#__">entry</a>.</td>
+              </tr>
+
+              </table>    
+-->
+	      
+          <dd>&nbsp;
+	  <dt>High Level C APIs:
+          <dd>The High Level C APIs (HL), including the HDF5 Image, 
+              HDF5 Table, and HDF5 Lite interfaces 
+              (H5IM, H5TB, and H5LT, respectively), 
+              have been distributed with the main HDF5 source code distribution
+              since Release 1.6.4.
+              A link to the HL documentation appears on the opening
+              page of the HDF5 document set or can be accessed directly at
+              <a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5hl.html">
+              <code>http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5hl.html</code></a>
+
+	  
+          <dd>&nbsp;
+	  <dt>Tools:
+          <dd>Any?
+
+
+        </dl>
+
+
+    <h3><!--Depricated and -->Deleted Functions</h3>
+
+	The following functions have been removed in this release.
+
+	<!--
+        None.
+	-->
+
+        <dl>
+        <dt><u>C functions:</u>
+        <dt><code>H5function_name?</code>
+
+
+        <p>
+        <dt><u>Fortran90 subroutines:</u>
+        <dt><code>h5subroutine_f?</code>
+
+
+        <p>
+        <dt><u>C++ wrappers:</u>
+        <dt><code>C++_wrapper_name</code>
+
+	  
+        </dl>
+
+
+<!--
+	The following functions are deprecated in this HDF5 release. 
+        A backward compatibility mode is provided 
+        enabling these functions and other Release 1.4.x compatibility
+        features, but is available only when the HDF5 library is 
+        configured with the flag <code>H5_WANT_H5_V1_4_COMPAT</code>.
+        The backward compatibility mode is not enabled in the 
+        binaries distributed by NCSA.
+
+        <dir>
+        <table border=0>
+        <tr valign="top" align="left"><td>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </td><td>
+<pre>
+<code>function</code>
+</pre>
+        </td><td>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </td><td>
+<pre>
+<code>function</code>
+</pre>
+        </td><td>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </td><td>
+<pre>&nbsp;
+
+</pre>
+        </td></tr>
+        </table>
+        </dir>
+        <p>
+	The above functions will eventually be removed from the HDF5 
+        distribution and from the <cite>HDF5 Reference Manual</cite>.
+-->
+
+
+
+    <h3>Functions with Changed Syntax</h3>
+
+        The following functions have changed as noted.
+        In general, one or more parameters or the return value has 
+        changed from a signed to an unsigned datatype.
+        Changed items are indicated in
+        <font color="red">red</font>. 
+        <p>
+
+        <dl>
+        <dt><u>C functions:</u>
+        <dt><code>H5function_name?</code>
+          <dd>Change...
+
+
+        <p>
+        <dt><u>Fortran90 subroutines:</u>
+        <dt><code>h5subroutine_f?</code>
+          <dd>Change...
+
+
+        <p>
+        <dt><u>C++ wrappers:</u>
+        <dt><code>C++_wrapper_name</code>
+          <dd>Change...
+
+	  
+        </dl>
+
+
+    <h3>Deleted Constants</h3>
+    
+        The following constants have been removed from the HDF5 Library:
+        <ul>
+        <li>Any?
+        <ul>
+          <li><code>Specifics?</code>
+        </ul>
+        </ul>
+        
+
+    <h3>Constants with Changed Values</h3>
+    
+        The following constants have been changed in this release:
+        <ul>
+        <li>Any?
+        <ul>
+          <li><code>Specifics?</code>
+        </ul>
+        </ul>
+        
+    
+    <h3>Changed Library Sturctures</h3>
+    
+        The following library structures have changed and are now 
+        defined as follows: 
+
+	<p>
+        <dl>
+        <dt>C API:
+        <dt><code>struct_name</code>
+	
+                <ul>
+                <li>new definition<br>
+                </ul>
+            <p>
+
+
+    <h3>Changed Library Configuration</h3>
+	<dl>
+	  <dt>Anything?  
+	</dl>
+
+
+    </dir>
+
+
+
+<h2>Release 1.6.4 versus Release 1.6.3</h2> 
 
 <dir>
 
@@ -596,8 +791,8 @@ transition from the HDF5 Release 1.6.2 to Release 1.6.3.
                     &nbsp;&nbsp;&nbsp;&nbsp;</td>
                 <td align="left" valign="top"><em>ssize_t</em> <code>H5Fget_name</code> 
                     (<em>hid_t</em> <code>obj_id</code>, 
-		     <em>char *</em><code>name</code>,
-		     <em>size_t</em> <code>size</code>)<br>
+                     <em>char *</em><code>name</code>,
+                     <em>size_t</em> <code>size</code>)<br>
                     See <a href="../RM_H5F.html#File-GetName">entry</a>.</td>
               </tr>
 
@@ -606,7 +801,7 @@ transition from the HDF5 Release 1.6.2 to Release 1.6.3.
                     &nbsp;&nbsp;&nbsp;&nbsp;</td>
                 <td align="left" valign="top"><em>herr_t</em> <code>H5Fget_filesize</code> 
                     (<em>hid_t</em> <code>file_id</code>, 
-		     <em>hsize_t *</em> <code>size</code>)<br>
+                     <em>hsize_t *</em> <code>size</code>)<br>
                     See <a href="../RM_H5F.html#File-GetFilesize">entry</a>.</td>
               </tr>
 
@@ -2182,10 +2377,7 @@ V1.4.0
 </dir>
 
 
-
-
-<!-- #BeginLibraryItem "/ed_libs/NavBar_ADevG.lbi" -->
-<hr>
+<!-- #BeginLibraryItem "/ed_libs/NavBar_ADevG.lbi" --><hr>
 <center>
 <table border=0 width=98%>
 <tr><td valign=top align=left>
@@ -2203,15 +2395,14 @@ V1.4.0
 </table>
 </center>
 <hr>
-<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" -->
-<address>
+<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
 Describes HDF5 Release 1.6.5, October 2005
 </address>
 <!-- #EndLibraryItem --><!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified: 5 August 2005 
+Last modified: 17 October 2005 
 <!-- hhmts end -->
 
 </body>
