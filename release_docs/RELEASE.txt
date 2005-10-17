@@ -36,6 +36,8 @@ New Features
 
     Configuration:
     --------------
+	- Configure uses the 'TR' variable to let the user override the path
+          to the 'tr' utility. -JML 2005/10/17
 	- Configure can recognize -lmpich as a form of MPI library. -AKC-
 	  2005/9/28.
         - MD5 checksumming has been added to snapshot releases.  Release
