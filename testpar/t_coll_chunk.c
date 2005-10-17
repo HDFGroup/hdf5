@@ -15,31 +15,28 @@
 #include "testphdf5.h"
 #include "H5Dprivate.h"
 
-/*#define SPACE_DIM1 256
-#define SPACE_DIM2 256
-#define BYROW_CONT 1
-#define BYROW_DISCONT 2
-#define DSET_COLLECTIVE_CHUNK_NAME "coll_chunk_name"
-*/
 
 /* some commonly used routines for collective chunk IO tests*/
+
 static void ccslab_set(int mpi_rank,int mpi_size,hsize_t start[],hsize_t count[],
-		hsize_t stride[],hsize_t block[],int mode);
+		       hsize_t stride[],hsize_t block[],int mode);
 
 static void ccdataset_fill(hsize_t start[],hsize_t count[],
-                 hsize_t stride[],hsize_t block[],DATATYPE*dataset);
+			   hsize_t stride[],hsize_t block[],DATATYPE*dataset);
 
 static void ccdataset_print(hsize_t start[],hsize_t block[],DATATYPE*dataset);
 
 static int ccdataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[],
-                 hsize_t block[], DATATYPE *dataset, DATATYPE *original);
+			  hsize_t block[], DATATYPE *dataset, DATATYPE *original);
 
 static void coll_chunktest(const char* filename,int chunk_factor,int select_factor);
+
 
 /*-------------------------------------------------------------------------
  * Function:	coll_chunk1
  *
- * Purpose:	Test the special case of the collective chunk io
+ * Purpose:	Wrapper to test the collective chunk IO for regular JOINT 
+                selection with a single chunk
  *
  * Return:	Success:	0
  *
@@ -52,26 +49,118 @@ static void coll_chunktest(const char* filename,int chunk_factor,int select_fact
  *
  *-------------------------------------------------------------------------
  */
+
+/* ------------------------------------------------------------------------
+ *  Descriptions for the selection: One big singluar selection inside one chunk
+ *  Two dimensions, 
+ *
+ *  dim1       = SPACE_DIM1(5760)
+ *  dim2       = SPACE_DIM2(3)
+ *  chunk_dim1 = dim1
+ *  chunk_dim2 = dim2
+ *  block      = 1 for all dimensions
+ *  stride     = 1 for all dimensions
+ *  count0     = SPACE_DIM1/mpi_size(5760/mpi_size)
+ *  count1     = SPACE_DIM2(3)
+ *  start0     = mpi_rank*SPACE_DIM1/mpi_size
+ *  start1     = 0
+ * ------------------------------------------------------------------------
+ */
+
 void
 coll_chunk1(void)
 {
 
   const char *filename;
+
   filename = GetTestParameters();
   coll_chunktest(filename,1,BYROW_CONT);
 
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	coll_chunk2
+ *
+ * Purpose:	Wrapper to test the collective chunk IO for regular DISJOINT 
+                selection with a single chunk
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Unknown
+ *		July 12th, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+ /* ------------------------------------------------------------------------
+ *  Descriptions for the selection: many disjoint selections inside one chunk
+ *  Two dimensions, 
+ *
+ *  dim1       = SPACE_DIM1(5760)
+ *  dim2       = SPACE_DIM2(3)
+ *  chunk_dim1 = dim1
+ *  chunk_dim2 = dim2
+ *  block      = 1 for all dimensions
+ *  stride     = 3 for all dimensions
+ *  count0     = SPACE_DIM1/mpi_size/stride0(5760/mpi_size/3)
+ *  count1     = SPACE_DIM2/stride(3/3 = 1)
+ *  start0     = mpi_rank*SPACE_DIM1/mpi_size
+ *  start1     = 0
+ *  
+ * ------------------------------------------------------------------------
+ */
 void
 coll_chunk2(void)
 {
 
   const char *filename;
+
   filename = GetTestParameters();
   coll_chunktest(filename,1,BYROW_DISCONT);
 
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	coll_chunk3
+ *
+ * Purpose:	Wrapper to test the collective chunk IO for regular JOINT 
+                selection with at least number of 2*mpi_size chunks
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Unknown
+ *		July 12th, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/* ------------------------------------------------------------------------
+ *  Descriptions for the selection: one singular selection accross many chunks
+ *  Two dimensions, Num of chunks = 2* mpi_size
+ *
+ *  dim1       = SPACE_DIM1(5760)
+ *  dim2       = SPACE_DIM2(3)
+ *  chunk_dim1 = dim1/mpi_size
+ *  chunk_dim2 = dim2/2
+ *  block      = 1 for all dimensions
+ *  stride     = 1 for all dimensions
+ *  count0     = SPACE_DIM1/mpi_size(5760/mpi_size)
+ *  count1     = SPACE_DIM2(3)
+ *  start0     = mpi_rank*SPACE_DIM1/mpi_size
+ *  start1     = 0
+ *  
+ * ------------------------------------------------------------------------
+ */
 
 void
 coll_chunk3(void)
@@ -79,51 +168,65 @@ coll_chunk3(void)
 
   const char *filename;
   int mpi_size;
+
   MPI_Comm comm = MPI_COMM_WORLD;
   MPI_Comm_size(comm,&mpi_size);
+
   filename = GetTestParameters();
   coll_chunktest(filename,mpi_size,BYROW_CONT);
 
 }
 
 
-void
-coll_chunk4(void)
-{
+/*-------------------------------------------------------------------------
+ * Function:	coll_chunktest
+ *
+ * Purpose:     The real testing routine for regular selection of collective
+                chunking storage
+                testing both write and read,
+		If anything fails, it may be read or write. There is no 
+		separation test between read and write.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Unknown
+ *		July 12th, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
 
-  const char *filename;
-  int mpi_size;
-  MPI_Comm comm = MPI_COMM_WORLD;
-  MPI_Comm_size(comm,&mpi_size);
-  filename = GetTestParameters();
-  coll_chunktest(filename,mpi_size*2,BYROW_DISCONT);
-
-}
 
 static void
-coll_chunktest(const char* filename,int chunk_factor,int select_factor) {
+coll_chunktest(const char* filename,
+	       int chunk_factor,
+	       int select_factor) {
 
   hid_t	   file,dataset, file_dataspace;
   hid_t    acc_plist,xfer_plist,crp_plist;
-  hbool_t  use_gpfs = FALSE;
+
   hsize_t  dims[RANK], chunk_dims[RANK];
   int*     data_array1  = NULL;
   int*     data_origin1 = NULL;
+
+  hsize_t  start[RANK],count[RANK],stride[RANK],block[RANK];
+
+  hbool_t  use_gpfs = FALSE;
+  int      mpi_size,mpi_rank;
+
   herr_t   status;
-  hsize_t start[RANK];
-  hsize_t  count[RANK],stride[RANK],block[RANK];
-#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-  unsigned prop_value;
-#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
-  int mpi_size,mpi_rank;
   MPI_Comm comm = MPI_COMM_WORLD;
   MPI_Info info = MPI_INFO_NULL;
 
-   /* set up MPI parameters */
+  /* set up MPI parameters */
   MPI_Comm_size(comm,&mpi_size);
   MPI_Comm_rank(comm,&mpi_rank);
 
   /* Create the data space */
+
   acc_plist = create_faccess_plist(comm,info,facc_type,use_gpfs);
   VRFY((acc_plist >= 0),"");
 
@@ -134,202 +237,199 @@ coll_chunktest(const char* filename,int chunk_factor,int select_factor) {
   VRFY((status >= 0),"");
 
   /* setup dimensionality object */
+  dims[0] = SPACE_DIM1;
+  dims[1] = SPACE_DIM2;
 
-    dims[0] = SPACE_DIM1;
-    dims[1] = SPACE_DIM2;
 
-  /* each process takes a slab of rows
-    stride[0] = 1;
-    stride[1] = 1;
-    count[0]  = SPACE_DIM1/mpi_size;
-    count[1]  = SPACE_DIM2;
-    start[0]  = mpi_rank*count[0];
-    start[1]  = 0;
-    block[0]  = 1;
-    block[1]  = 1;
-  */
+  /* allocate memory for data buffer */
+  data_array1 = (int *)malloc(SPACE_DIM1*SPACE_DIM2*sizeof(int));
+  VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
 
- /* allocate memory for data buffer */
-    data_array1 = (int *)malloc(SPACE_DIM1*SPACE_DIM2*sizeof(int));
-    VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
+  /* set up dimensions of the slab this process accesses */
+  ccslab_set(mpi_rank, mpi_size, start, count, stride, block, select_factor);
 
-     /* set up dimensions of the slab this process accesses */
-    ccslab_set(mpi_rank, mpi_size, start, count, stride, block, select_factor);
+  file_dataspace = H5Screate_simple(2, dims, NULL);
+  VRFY((file_dataspace >= 0),"file dataspace created succeeded");
 
-    file_dataspace = H5Screate_simple(2, dims, NULL);
-    VRFY((file_dataspace >= 0),"file dataspace created succeeded");
+  crp_plist = H5Pcreate(H5P_DATASET_CREATE);
+  VRFY((crp_plist >= 0),"");
 
-    crp_plist = H5Pcreate(H5P_DATASET_CREATE);
-    VRFY((crp_plist >= 0),"");
+  /* Set up chunk information.  */
+  chunk_dims[0] = SPACE_DIM1/chunk_factor;
 
-    /* test1: chunk size is equal to dataset size */
-    chunk_dims[0] = SPACE_DIM1/chunk_factor;
+  /* to decrease the testing time, maintain bigger chunk size */
+ 
+  (chunk_factor == 1) ? (chunk_dims[1] = SPACE_DIM2) : (chunk_dims[1] = SPACE_DIM2/2);
+  status = H5Pset_chunk(crp_plist, 2, chunk_dims);
+  VRFY((status >= 0),"chunk creation property list succeeded");
 
-    /* to decrease the testing time, maintain bigger chunk size */
-    if(chunk_factor >2) chunk_dims[1] = SPACE_DIM2/2;
-    else chunk_dims[1] = SPACE_DIM2/chunk_factor;
-    status = H5Pset_chunk(crp_plist, 2, chunk_dims);
-    VRFY((status >= 0),"chunk creation property list succeeded");
+  dataset = H5Dcreate(file,DSET_COLLECTIVE_CHUNK_NAME,H5T_NATIVE_INT,
+		      file_dataspace,crp_plist);
+  VRFY((dataset >= 0),"dataset created succeeded");
 
-    dataset = H5Dcreate(file,DSET_COLLECTIVE_CHUNK_NAME,H5T_NATIVE_INT,
-			file_dataspace,crp_plist);
-    VRFY((dataset >= 0),"dataset created succeeded");
-/*    H5Sclose(file_dataspace); */
+  status = H5Pclose(crp_plist);
+  VRFY((status >= 0),"");
 
-    status = H5Pclose(crp_plist);
-    VRFY((status >= 0),"");
+  /*put some trivial data in the data array */
+  ccdataset_fill(start, stride,count,block, data_array1);
+  MESG("data_array initialized");
 
-    /*put some trivial data in the data array */
-    ccdataset_fill(start, stride,count,block, data_array1);
-    MESG("data_array initialized");
+  status=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride,
+			     count, block);
+  VRFY((status >= 0),"hyperslab selection succeeded");
 
-/*    file_dataspace = H5Dget_space(dataset); */
-    status=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride,
-	    count, block);
-    VRFY((status >= 0),"hyperslab selection succeeded");
+  /* set up the collective transfer property list */
+  xfer_plist = H5Pcreate(H5P_DATASET_XFER);
+  VRFY((xfer_plist >= 0),"");
 
-    /* set up the collective transfer property list */
-    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
-    VRFY((xfer_plist >= 0),"");
+  status = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
+  VRFY((status>= 0),"MPIO collective transfer property succeeded");
 
-    status = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
-    VRFY((status>= 0),"MPIO collective transfer property succeeded");
+  /* write data collectively */
+  status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, file_dataspace,
+		    xfer_plist, data_array1);
+  VRFY((status >= 0),"dataset write succeeded");
 
-    /* write data collectively */
-    status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, file_dataspace,
-	    xfer_plist, data_array1);
-    VRFY((status >= 0),"dataset write succeeded");
+  status = H5Dclose(dataset);
+  VRFY((status >= 0),"");
 
-    status = H5Dclose(dataset);
-    VRFY((status >= 0),"");
+  status = H5Pclose(xfer_plist);
+  VRFY((status >= 0),"property list closed");
 
-    /* check whether using collective IO */
-    /* Should use H5Pget and H5Pinsert to handle this test. */
+  status = H5Sclose(file_dataspace);
+  VRFY((status >= 0),"");
 
-    status = H5Pclose(xfer_plist);
-    VRFY((status >= 0),"property list closed");
+  status = H5Fclose(file);
+  VRFY((status >= 0),"");
 
-    status = H5Sclose(file_dataspace);
-    VRFY((status >= 0),"");
+  if (data_array1) HDfree(data_array1);
 
-    status = H5Fclose(file);
-    VRFY((status >= 0),"");
+  
+  /* Use collective read to verify the correctness of collective write. */
 
-    if (data_array1) free(data_array1);
+  /* allocate memory for data buffer */
+  data_array1 = (int *)malloc(SPACE_DIM1*SPACE_DIM2*sizeof(int));
+  VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
 
-    /* Using read to verify the data inside the dataset is correct */
+  /* allocate memory for data buffer */
+  data_origin1 = (int *)malloc(SPACE_DIM1*SPACE_DIM2*sizeof(int));
+  VRFY((data_origin1 != NULL), "data_origin1 malloc succeeded");
 
-    /* allocate memory for data buffer */
-    data_array1 = (int *)malloc(SPACE_DIM1*SPACE_DIM2*sizeof(int));
-    VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
+  acc_plist = create_faccess_plist(comm, info, facc_type, use_gpfs);
+  VRFY((acc_plist >= 0),"MPIO creation property list succeeded");
 
-     /* allocate memory for data buffer */
-    data_origin1 = (int *)malloc(SPACE_DIM1*SPACE_DIM2*sizeof(int));
-    VRFY((data_origin1 != NULL), "data_origin1 malloc succeeded");
+  file = H5Fopen(filename,H5F_ACC_RDONLY,acc_plist);
+  VRFY((file >= 0),"H5Fcreate succeeded");
 
-    acc_plist = create_faccess_plist(comm, info, facc_type, use_gpfs);
-    VRFY((acc_plist >= 0),"MPIO creation property list succeeded");
+  status = H5Pclose(acc_plist);
+  VRFY((status >= 0),"");
 
-    file = H5Fopen(filename,H5F_ACC_RDONLY,acc_plist);
-    VRFY((file >= 0),"H5Fcreate succeeded");
+  /* open the collective dataset*/
+  dataset = H5Dopen(file, DSET_COLLECTIVE_CHUNK_NAME);
+  VRFY((dataset >= 0), "");
 
-    status = H5Pclose(acc_plist);
-    VRFY((status >= 0),"");
+  /* set up dimensions of the slab this process accesses */
+  ccslab_set(mpi_rank, mpi_size, start, count, stride, block, select_factor);
 
-    /* open the dataset collectively */
-    dataset = H5Dopen(file, DSET_COLLECTIVE_CHUNK_NAME);
-    VRFY((dataset >= 0), "");
+  /* obtain the file dataspace*/
+  file_dataspace = H5Dget_space (dataset);
+  VRFY((file_dataspace >= 0), "");
 
-    /* set up dimensions of the slab this process accesses */
-    ccslab_set(mpi_rank, mpi_size, start, count, stride, block, select_factor);
+  status=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
+  VRFY((status >= 0), "");
 
-    /* create a file dataspace independently */
-    file_dataspace = H5Dget_space (dataset);
-    VRFY((file_dataspace >= 0), "");
-    status=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
-    VRFY((status >= 0), "");
+  /* fill dataset with test data */
+  ccdataset_fill(start, stride,count,block, data_origin1);
+  xfer_plist = H5Pcreate (H5P_DATASET_XFER);
+  VRFY((xfer_plist >= 0),"");
 
-    /* fill dataset with test data */
-    ccdataset_fill(start, stride,count,block, data_origin1);
-    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
-    VRFY((xfer_plist >= 0),"");
-    status = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
-    VRFY((status>= 0),"MPIO collective transfer property succeeded");
-    status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, file_dataspace,
-                      xfer_plist, data_array1);
-    VRFY((status >=0),"dataset read succeeded");
+  status = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
+  VRFY((status>= 0),"MPIO collective transfer property succeeded");
 
-    /* verify the read data with original expected data */
+  status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, file_dataspace,
+                   xfer_plist, data_array1);
+  VRFY((status >=0),"dataset read succeeded");
 
-    status = ccdataset_vrfy(start, count, stride, block, data_array1, data_origin1);
-    if (status) nerrors++;
+  /* verify the read data with original expected data */
+  status = ccdataset_vrfy(start, count, stride, block, data_array1, data_origin1);
+  if (status) nerrors++;
 
-    status = H5Pclose(xfer_plist);
-    VRFY((status >= 0),"property list closed");
+  status = H5Pclose(xfer_plist);
+  VRFY((status >= 0),"property list closed");
 
-    /* close dataset collectively */
-    status=H5Dclose(dataset);
-    VRFY((status >= 0), "");
+  /* close dataset collectively */
+  status=H5Dclose(dataset);
+  VRFY((status >= 0), "");
 
-    /* release all IDs created */
-    H5Sclose(file_dataspace);
+  /* release all IDs created */
+  H5Sclose(file_dataspace);
 
-    /* close the file collectively */
-    H5Fclose(file);
+  /* close the file collectively */
+  H5Fclose(file);
 
-    /* release data buffers */
-    if (data_array1) free(data_array1);
-    if (data_origin1) free(data_origin1);
+  /* release data buffers */
+  if (data_array1) free(data_array1);
+  if (data_origin1) free(data_origin1);
 
 }
 
 
+/* Set up the selection */
 static void
-ccslab_set(int mpi_rank, int mpi_size, hsize_t start[], hsize_t count[],
-	 hsize_t stride[], hsize_t block[], int mode)
+ccslab_set(int mpi_rank, 
+	   int mpi_size, 
+	   hsize_t start[], 
+	   hsize_t count[],
+	   hsize_t stride[], 
+	   hsize_t block[], 
+	   int mode)
 {
     switch (mode){
+
     case BYROW_CONT:
 	/* Each process takes a slabs of rows. */
-	block[0] = 1;
-	block[1] = 1;
-	stride[0] = 1;
-	stride[1] = 1;
-	count[0] = SPACE_DIM1/mpi_size;
-	count[1] = SPACE_DIM2;
-	start[0] = mpi_rank*count[0];
-	start[1] = 0;
+	block[0]  =  1;
+	block[1]  =  1;
+	stride[0] =  1;
+	stride[1] =  1;
+	count[0]  =  SPACE_DIM1/mpi_size;
+	count[1]  =  SPACE_DIM2;
+	start[0]  =  mpi_rank*count[0];
+	start[1]  =  0;
 
 	if (VERBOSE_MED) printf("slab_set BYROW_CONT\n");
 	break;
+
     case BYROW_DISCONT:
 	/* Each process takes several disjoint blocks. */
-	block[0] = 1;
-	block[1] = 1;
-        stride[0] = 3;
-        stride[1] = 3;
-        count[0]  = (SPACE_DIM1/mpi_size)/(stride[0]*block[0]);
-        count[1]  = (SPACE_DIM2)/(stride[1]*block[1]);
-	start[0] = SPACE_DIM1/mpi_size*mpi_rank;
-	start[1] = 0;
-if (VERBOSE_MED) printf("slab_set BYROW_DISCONT\n");
+	block[0]  =  1;
+	block[1]  =  1;
+        stride[0] =  3;
+        stride[1] =  3;
+        count[0]  =  (SPACE_DIM1/mpi_size)/(stride[0]*block[0]);
+        count[1]  =  (SPACE_DIM2)/(stride[1]*block[1]);
+	start[0]  =  SPACE_DIM1/mpi_size*mpi_rank;
+	start[1]  =  0;
+
+	if (VERBOSE_MED) printf("slab_set BYROW_DISCONT\n");
 	break;
     default:
 	/* Unknown mode.  Set it to cover the whole dataset. */
 	printf("unknown slab_set mode (%d)\n", mode);
-	block[0] = SPACE_DIM1;
-	block[1] = SPACE_DIM2;
+	block[0]  = SPACE_DIM1;
+	block[1]  = SPACE_DIM2;
 	stride[0] = block[0];
 	stride[1] = block[1];
-	count[0] = 1;
-	count[1] = 1;
-	start[0] = 0;
-	start[1] = 0;
-if (VERBOSE_MED) printf("slab_set wholeset\n");
+	count[0]  = 1;
+	count[1]  = 1;
+	start[0]  = 0;
+	start[1]  = 0;
+
+	if (VERBOSE_MED) printf("slab_set wholeset\n");
 	break;
     }
-if (VERBOSE_MED){
-    printf("start[]=(%lu,%lu), count[]=(%lu,%lu), stride[]=(%lu,%lu), block[]=(%lu,%lu), total datapoints=%lu\n",
+    if (VERBOSE_MED){
+      printf("start[]=(%lu,%lu), count[]=(%lu,%lu), stride[]=(%lu,%lu), block[]=(%lu,%lu), total datapoints=%lu\n",
 	(unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0], (unsigned long)count[1],
 	(unsigned long)stride[0], (unsigned long)stride[1], (unsigned long)block[0], (unsigned long)block[1],
 	(unsigned long)(block[0]*block[1]*count[0]*count[1]));
@@ -339,41 +439,48 @@ if (VERBOSE_MED){
 
 /*
  * Fill the dataset with trivial data for testing.
- * Assume dimension rank is 2 and data is stored contiguous.
+ * Assume dimension rank is 2.
  */
 static void
-ccdataset_fill(hsize_t start[], hsize_t stride[], hsize_t count[], hsize_t block[], DATATYPE * dataset)
+ccdataset_fill(hsize_t start[], 
+	       hsize_t stride[],
+	       hsize_t count[], 
+	       hsize_t block[], 
+	       DATATYPE * dataset)
 {
     DATATYPE *dataptr = dataset;
     DATATYPE *tmptr;
-    hsize_t i, j,k1,k2;
+    hsize_t   i,j,k1,k2;
 
     /* put some trivial data in the data_array */
     tmptr = dataptr;
 
     /* assign the disjoint block (two-dimensional)data array value
        through the pointer */
-     for (k1 = 0; k1 < count[0]; k1++) {
-      for(i = 0;i < block[0]; i++) {
-        for(k2 = 0; k2<count[1]; k2++) {
-          for(j=0;j<block[1]; j++) {
 
-            dataptr = tmptr + ((start[0]+k1*stride[0]+i)*SPACE_DIM2+
-			       start[1]+k2*stride[1]+j);
+    for (k1 = 0; k1 < count[0]; k1++) {
+      for(i = 0;  i < block[0]; i++) {
+        for(k2 = 0; k2 < count[1]; k2++) {
+          for(j = 0;j < block[1]; j++) {
 
-	      *dataptr = (DATATYPE)(k1+k2+i+j);
+            dataptr  =  tmptr + ((start[0]+k1*stride[0]+i)*SPACE_DIM2+
+				  start[1]+k2*stride[1]+j);
+
+	    *dataptr = (DATATYPE)(k1+k2+i+j);
           }
-         }
+        }
       }
     }
-
 }
 
 /*
  * Print the first block of the content of the dataset.
  */
 static void
-ccdataset_print(hsize_t start[], hsize_t block[], DATATYPE * dataset)
+ccdataset_print(hsize_t start[], 
+		hsize_t block[], 
+		DATATYPE * dataset)
+
 {
     DATATYPE *dataptr = dataset;
     hsize_t i, j;
@@ -401,7 +508,12 @@ ccdataset_print(hsize_t start[], hsize_t block[], DATATYPE * dataset)
  * Print the content of the dataset.
  */
 static int
-ccdataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[], DATATYPE *dataset, DATATYPE *original)
+ccdataset_vrfy(hsize_t start[], 
+	       hsize_t count[], 
+	       hsize_t stride[], 
+	       hsize_t block[], 
+	       DATATYPE *dataset, 
+	       DATATYPE *original)
 {
     hsize_t i, j,k1,k2;
     int vrfyerrs;
@@ -427,9 +539,9 @@ ccdataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block
           for(j=0;j<block[1];j++) {
 
              dataptr = dataset + ((start[0]+k1*stride[0]+i)*SPACE_DIM2+
-			       start[1]+k2*stride[1]+j);
+			           start[1]+k2*stride[1]+j);
 	     oriptr =  original + ((start[0]+k1*stride[0]+i)*SPACE_DIM2+
-			       start[1]+k2*stride[1]+j);
+			            start[1]+k2*stride[1]+j);
 
 	    if (*dataptr != *oriptr){
 		if (vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED){
