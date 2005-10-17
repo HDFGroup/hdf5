@@ -480,6 +480,9 @@ Known Problems
   The --enable-static-exec configure flag also fails to correctly compile
   on IBM SP2 platform for the serial mode. The parallel mode works fine
   with this option.
+
+  The --enable-static-exec configure flag also fails to correctly compile
+  on the HPUX 11.00.
   
   It is suggested that you don't use this option on these platforms
   during configuration.
