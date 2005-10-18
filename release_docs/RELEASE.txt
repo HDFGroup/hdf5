@@ -113,7 +113,7 @@ Support for new platforms, languages and compilers.
 =======================================
 
     - Added support for HPUX 11.23 (IA64); only C and C++ are supported
-      with +DD64 flag 
+      with the +DD64 flag 
                                              EIP 2005/10/05
  
 
@@ -236,10 +236,9 @@ Platforms Tested
                                   xlf 8.1.1.7
                                   mpcc_r 6.0.0.8
                                   mpxlf_r 8.1.1.7
-    Cray T90 sn7001 10.0.0md      Cray Standard C Version 6.4.0.3
-                                  Cray Fortran Version 3.4.0.0
-    Cray SV1 sn9617 10.0.1.2      Cray Standard C Version 6.6.0.3.6
-                                  Cray Fortran Version 3.6.0.3.1
+    AIX 5.3 (32/64 bit)           xlc 7.0.0.0
+                                  xlC 7.0.
+                                  xlf 9.1.0.3
     Cray X1 water 3.0.35          Cray Standard C Version 5.4.0.7.4
                                   Cray Fortran 5.4.0.7.3
                                   Cray C++ 5.4.0.7.4
@@ -249,7 +248,9 @@ Platforms Tested
     HP-UX B.11.00                 HP C  HP92453-01 A.11.01.20 
                                   HP F90 v2.4
                                   HP ANSI C++ B3910B A.03.13
-                                  MPIch 1.2.4
+    HP-UX B.11.23                 HP aC++/ANSI C B3910B A.06.00
+                                  HP F90 v2.9
+                                  HP aC++/ANSI C B3910B A.06.00
     IRIX64 6.5 (tesla -64)        MIPSpro cc 7.4.2m
                                   F90 MIPSpro 7.4.2m
                                   C++ MIPSpro cc 7.4.2m
@@ -280,14 +281,16 @@ Platforms Tested
     OSF1 V5.1 (PSC)               Compaq C V6.5-303 
                                   HP Fortran V5.5A-3548
 				  Compaq C++ V6.5-040  
-				  MPIX200_64_r13.4
-                                  FORTRAN 90 2.0 Patch 107356-04 
     SunOS 5.8 32,46               Sun WorkShop 6 update 2 C 5.3
      (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 90
                                   Sun WorkShop 6 update 2 C++ 5.3
     SunOS 5.9 32,64               Sun C 5.6 2004/07/15
      (Solaris 2.9)                Sun Fortran 95 8.0 2004/07/15
                                   Sun C++ 5.6 2004/07/15
+    Solaris 5.10                  Sun WorkShop 6 update 2 C 5.3
+                                  Sun WorkShop 6 update 2 Fortran 95 6.2
+                                  Sun WorkShop 6 update 2 C++ 5.3
+                                  Patch 111685-13 
     TFLOPS r1.0.4 v4.5.2 i386     pgcc Rel 3.1-4i with mpich-1.2.4 with
                                           local modifications
     Xeon Linux 2.4.20-31.9smp_perfctr_lustre
@@ -323,16 +326,18 @@ Solaris2.8 64-bit                    y        y      y(1)     y    y     y
 Solaris2.8 32-bit                    y        y      y(1)     y    y     y
 Solaris2.9 64-bit                    y(1)     y      y(1)     y    y     y
 Solaris2.9 32-bit                    y(1)     y      y(1)     y    y     y
+Solaris2.10 64-bit                   y(1)     y      n        y    y     y
+Solaris2.10 32-bit                   y(1)     y      n        y    y     y
 IRIX64_6.5 64-bit                    y(2)     y      y        y    y     y
 IRIX64_6.5 32-bit                    y(2)     n      n        n    y     y
 HPUX11.00                            y(1)     y      y        y    y     y
+HPUX11.23-32bit                      n        y      n        y    y     y
+HPUX11.23-64bit                      n        n      n        y    y     y
 OSF1 v5.1                            y        y      y        y    y     y
-T90 IEEE                             n        y      n        n    y     n
-SV1                                  y(5)     y      y(5)     n    y     n
 X1                                   y        y      y        y    y     n
 TFLOPS                               y(1)     n      n        n    y     n
-AIX-5.1 & 5.2 32-bit                 y        y      y        y    y     y
-AIX-5.1 & 5.2 64-bit                 y        y      y        y    y     y
+AIX-5.1, 5.2 & 5.3 32-bit            y        y      y        y    y     y
+AIX-5.1, 5.2 & 5.3 64-bit            y        y      y        y    y     y
 WinXP Visual Studio 6.0              n        y(9)   n        y    y     y
 WinXP .Net                           n        n      n        y(8) y     y
 Mac OS X 10.3                        n        y(10)  n        y    y     y
@@ -353,16 +358,17 @@ Solaris2.8 64-bit                    y              x       y        y
 Solaris2.8 32-bit                    y              x       y        y
 Solaris2.9 64-bit                    y              x       y        y
 Solaris2.9 32-bit                    y              x       y        y
+Solaris2.10 64-bit                   y              x       y        y
+Solaris2.10 32-bit                   y              x       y        y
 IRIX64_6.5 64-bit                    y              y       y        y
 IRIX64_6.5 32-bit                    y              y       y        y
 HPUX11.00                            y              x       n        y
+HPUX11.23                            y              y       n        y
 OSF1 v5.1                            y              y       n        y
-T90 IEEE                             n              y       n        y
-SV1                                  n              y       n        y
 X1                                   n              y       n        y
 TFLOPS                               n              y       n        n
-AIX-5.1 & 5.2 32-bit                 n              y       n        y
-AIX-5.1 & 5.2 64-bit                 n              y       n        y
+AIX-5.1, 5.2 & 5.3 32-bit            n              y       n        y
+AIX-5.1, 5.2 & 5.3 64-bit            n              y       n        y
 WinXP Visual Studio 6.0              y              y       n        n
 WinXP .Net                           y              y       n        n
 Mac OS X 10.3                        y              y       n        y
