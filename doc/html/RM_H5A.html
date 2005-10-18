@@ -28,8 +28,7 @@ HDF5/H5A API Specification
 <!-- HEADER RIGHT " " -->
 
 
-<!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" -->
-<hr>
+<!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
 <center>
 <table border=0 width=98%>
 <tr><td valign=top align=left>
@@ -316,9 +315,8 @@ SUBROUTINE h5acreate_f(obj_id, name, type_id, space_id, attr_id, &amp;
   INTEGER(HID_T), INTENT(IN) :: space_id  ! Attribute dataspace identifier
   INTEGER(HID_T), INTENT(OUT) :: attr_id  ! Attribute identifier 
   INTEGER, INTENT(OUT) :: hdferr          ! Error code:
-                                          ! 0 on success and -1 on failure</pre>
-<!-- NEW PAGE -->
-<pre>
+                                          ! 0 on success and -1 on failure
+										  
   INTEGER(HID_T), OPTIONAL, INTENT(IN) :: creation_prp
                                           ! Attribute creation property 
                                           ! list identifier 
@@ -911,6 +909,7 @@ END SUBROUTINE h5awrite_f
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
+<dt><strong>History:</strong>
 	<ul><table width="90%">
         <tr>
           <td valign="top" align="left" width="10%">
@@ -924,8 +923,7 @@ END SUBROUTINE h5awrite_f
     </table></ul>
 </dl>
 
-<!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" -->
-<hr>
+<!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
 <center>
 <table border=0 width=98%>
 <tr><td valign=top align=left>
@@ -961,8 +959,7 @@ of complete manual formatted as print volume)&nbsp;&nbsp;&nbsp;</small></i>
 </table>
 </center>
 <hr>
-<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" -->
-<address>
+<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
 Describes HDF5 Release 1.6.5, October 2005

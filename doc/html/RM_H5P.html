@@ -28,8 +28,7 @@ HDF5/H5P API Specification
 <!-- HEADER RIGHT " " -->
 
 
-<!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" -->
-<hr>
+<!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
 <center>
 <table border=0 width=98%>
 <tr><td valign=top align=left>
@@ -481,6 +480,7 @@ backwards compatibility with HDF5 Releases 1.4.<i>x</i>.
 See further notes in the description of each function.
 <p>
 
+<!-- NEW PAGE -->
 <i>Alphabetical Listing</i>
 <table border="0">
   <tr>
@@ -1509,7 +1509,9 @@ SUBROUTINE h5premove_filter_f(prp_id, filter, hdferr)
                                        !     H5Z_FILTER_SHUFFLE_F
                                        !     H5Z_FILTER_FLETCHER32_F
                                        !     H5Z_FILTER_SZIP_F
-                                       !
+                                       !</pre>
+<!-- NEW PAGE -->
+<pre>
   INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                        ! 0 on success, -1 on failure
 END SUBROUTINE h5premove_filter_f
@@ -5339,7 +5341,6 @@ SUBROUTINE
     list objects; the initial value is assumed to have any necessary setup 
     already performed on it.
 
-<!-- NEW PAGE -->
   <dt><strong>Parameters:</strong>
     <ul><table>
     <tr>
@@ -5463,15 +5464,6 @@ END SUBROUTINE h5pisa_class_f
         <img src="Graphics/C++.gif">
         -->
 </dl>
-
-
-
-
-</body>
-</html>
-
-<html>
-<body>
 
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Piterate" -->
@@ -5798,9 +5790,7 @@ END SUBROUTINE h5pmodify_filter_f
     to range check the value being set for the property 
     or may perform some transformation or translation of the
     value set.  The <code>get</code> callback would then 
-    reverse the 
-    <!-- NEW PAGE --> 
-    transformation or translation.  
+    reverse the transformation or translation.  
     A single <code>get</code> or <code>set</code> callback 
     could handle multiple properties by 
     performing different actions based on the
@@ -6593,14 +6583,12 @@ END SUBROUTINE h5pset_cache_f
 		  <td valign="top">1.6.1</td>
 		  <td valign="top">&nbsp;</td>
 		  <td valign="top">&nbsp;</td>
-          <td valign="top">
-		    <code>rdcc_nbytes</code> parameter type 
-			changed to <code>INTEGER(SIZE_T)</code>.</td></tr>
+          <td valign="top"><code>rdcc_nbytes</code>&nbsp;parameter&nbsp;type&nbsp;changed&nbsp;
+		    to <code>INTEGER(SIZE_T)</code>.</td></tr>
         <tr>
 		  <td valign="top">1.6.0</td>
-		  <td valign="top">The <code>rdcc_nbytes</code> 
-		    parameter has changed from type <em>int</em> 
-			to <em>size_t</em>.</td>
+		  <td valign="top">The&nbsp;<code>rdcc_nbytes</code>&nbsp;parameter&nbsp;has&nbsp;changed 
+		    from type <em>int</em> to <em>size_t</em>.</td>
 		  <td valign="top">&nbsp;</td>
           <td valign="top">&nbsp;</td></tr>
     </table></ul>
@@ -8057,8 +8045,9 @@ SUBROUTINE h5pset_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name,
   CHARACTER(LEN=*),DIMENSION(0:H5FD_MEM_NTYPES_F-1),INTENT(IN) :: memb_name
   REAL, DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(IN)           :: memb_addr
               ! Numbers in the interval [0,1) (e.g. 0.0 0.1 0.5 0.2 0.3 0.4)
-              ! real address in the file will be calculated as X*HADDR_MAX 
-
+              ! real address in the file will be calculated as X*HADDR_MAX</pre>
+<!-- NEW PAGE -->
+<pre>
   LOGICAL, INTENT(IN)  :: relax
   INTEGER, INTENT(OUT) :: hdferr           ! Error code
                                            ! 0 on success and -1 on failure
@@ -8224,8 +8213,9 @@ END SUBROUTINE h5pset_fapl_sec2_f
 hid_t fapl, fid;
 fapl = H5Pcreate(H5P_FILE_ACCESS);
 H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT);
-fid=H5Fcreate("Station1",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
-
+fid=H5Fcreate("Station1",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);</pre>
+<!-- NEW PAGE -->
+<pre>
 /* Example 2: metadata and rawdata files are in different      */
 /*    directories.  Use PointA-m.h5 and /pfs/PointA-r.h5 as    */
 /*    the metadata and rawdata files.                          */
@@ -8586,6 +8576,7 @@ END SUBROUTINE h5pset_fclose_degree_f
     </table></ul>
 </dl>
 
+<!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Pset_fill_time" -->
 <hr>
 <dl>
@@ -10239,7 +10230,8 @@ END SUBROUTINE h5pset_sym_k_f
               the number elements in the chunk and 
               128 times <code>pixels_per_block</code>.
         </ul>
-	
+
+<!-- NEW PAGE -->	
 	<p>
 	The HDF5 datatype may have precision that is less than the 
 	full size of the data element, e.g., an 11-bit integer can be
@@ -10793,8 +10785,7 @@ END SUBROUTINE h5punregister_f
 -->
 
 
-<!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" -->
-<hr>
+<!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
 <center>
 <table border=0 width=98%>
 <tr><td valign=top align=left>
@@ -10830,8 +10821,7 @@ of complete manual formatted as print volume)&nbsp;&nbsp;&nbsp;</small></i>
 </table>
 </center>
 <hr>
-<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" -->
-<address>
+<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
 Describes HDF5 Release 1.6.5, October 2005

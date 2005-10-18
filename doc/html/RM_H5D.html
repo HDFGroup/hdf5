@@ -28,8 +28,7 @@ HDF5/H5D API Specification
 <!-- HEADER RIGHT " " -->
 
 
-<!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" -->
-<hr>
+<!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
 <center>
 <table border=0 width=98%>
 <tr><td valign=top align=left>
@@ -358,7 +357,6 @@ END SUBROUTINE h5dclose_f
 		    <td valign="top"><em>hid_t</em>&nbsp;<code>create_plist_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Identifier of the set creation property list.</td></tr>
     </table></ul>
-<!-- NEW PAGE -->
 <dt><strong>Returns:</strong>
     <dd>Returns a dataset identifier if successful;
         otherwise returns a negative value.
@@ -1587,9 +1585,8 @@ SUBROUTINE h5dwrite_f(dset_id, mem_type_id, buf, dims, hdferr, &amp;
   INTEGER(HID_T), INTENT(IN) :: dset_id      ! Dataset identifier
   INTEGER(HID_T), INTENT(IN) :: mem_type_id  ! Memory datatype identifier
   TYPE, INTENT(IN) :: buf                    ! Data buffer; may be a scalar 
-                                             ! or an array</pre>
-<!-- NEW PAGE -->
-<pre>
+                                             ! or an array
+
   DIMENSION(*), INTEGER(HSIZE_T), INTENT(IN)  :: dims 
                                              ! Array to hold corresponding 
                                              ! dimension sizes of data 
@@ -1633,8 +1630,7 @@ END SUBROUTINE h5dwrite_f
     </table></ul>
 </dl>
 
-<!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" -->
-<hr>
+<!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
 <center>
 <table border=0 width=98%>
 <tr><td valign=top align=left>
@@ -1670,8 +1666,7 @@ of complete manual formatted as print volume)&nbsp;&nbsp;&nbsp;</small></i>
 </table>
 </center>
 <hr>
-<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" -->
-<address>
+<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
 Describes HDF5 Release 1.6.5, October 2005
