@@ -127,6 +127,11 @@ Bug Fixes since HDF5-1.6.4 release
 
     Library
     -------
+        - Fixed collective IO in chunking-storage. The dataspace  for each
+          chunk is different with the dataspace for the whole file or buffer.
+          It may call the wrong routine when the shape of the dataspace in
+          file and in chunk is different. This bug was fixed to make sure
+          the correct routine is called. KY - 2005/10/19
         - Fixed core dump when closing root groups opened through two different
             file handles that operate on the same actual file.  QAK - 2005/10/02
 	- The ./dsets tests used to fail in the TFLOPS machine if the
@@ -302,7 +307,6 @@ Platforms Tested
 				  mpich-gm-1.2.5..intel
     Windows XP                    MSVC++.NET
                                   MSVC++ 6.0
-                                  Compaq Visual Fortran 6.6C
                                   Intel 8.1 C++
     MAC OS X                      Darwin 7.5
                                   gcc and g++ Apple Computer, Inc. GCC 
@@ -338,7 +342,7 @@ X1                                   y        y      y        y    y     n
 TFLOPS                               y(1)     n      n        n    y     n
 AIX-5.1, 5.2 & 5.3 32-bit            y        y      y        y    y     y
 AIX-5.1, 5.2 & 5.3 64-bit            y        y      y        y    y     y
-WinXP Visual Studio 6.0              n        y(9)   n        y    y     y
+WinXP Visual Studio 6.0              n        n(9)   n        y    y     y
 WinXP .Net                           n        n      n        y(8) y     y
 Mac OS X 10.3                        n        y(10)  n        y    y     y
 FreeBSD 4.11                         n        n      n        y    y     y
@@ -398,7 +402,12 @@ Footnotes:  (1) Using mpich 1.2.6
                 and Intel compilers
             (7) Linux 2.4.21, SuSE_128.befl.  Ia64 cluster with Intel compilers
             (8) Intel 8.1
-            (9) Compaq Visual Fortran 6.6C
+            (9) We found one test of this release failed with compaq visual
+                fortran 6.6c.
+                We won't provide binary fortran release. Users should build
+                the library by themselves and use with their own risks. We
+                recommend users to use HDF5 1.7 instead.
+                HDF5 1.7 or use compaq visual fortran 6.0.
            (10) IBM XLF and Absoft
            (11) PGI, Absoft.  No shared libraries with Absoft; 
                 use '--disable-shared'.
