@@ -275,7 +275,7 @@ Platforms Tested
     (mir)                         PGI 5.2-1 C and F90 (with k3-32) 
                          	  Intel(R) C++ 32-bit Version 8.1
     				  Intel(R) Fortran 32-bit Version 8.1
-    Linux 2.4.21-sgi303r2 Altix 
+    Linux 2.4.21-sgi306rp21 Altix 
           SMP ia64                Intel(R) C++ Version 8.1
     (cobalt)                      Intel(R) Fortran Itanium(R) Version 8.1
                                   SGI MPI
