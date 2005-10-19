@@ -256,8 +256,7 @@ h5diff (const char *fname1,
       goto out;
     }
 
-  assert (nobjects1 > 0);
-  assert (nobjects2 > 0);
+ 
 
 /*-------------------------------------------------------------------------
  * get the list of objects in the files

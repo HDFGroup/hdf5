@@ -529,6 +529,12 @@ h5tools_simple_prefix(FILE *stream, const h5dump_t *info,
  *      Do not dereference the memory for a variable-length string here.
  *      Deref in h5tools_str_sprint() instead so recursive types are
  *      handled correctly.
+	*
+	*      Pedro Vicente Nunes, THG, 2005-10-19
+ *        pass to the prefix in h5tools_simple_prefix the total position
+	*								instead of the current stripmine position i; this is necessary 
+	*								to print the array indices 
+	*        new field sm_pos in h5tools_context_t, the current stripmine element position 
  *-------------------------------------------------------------------------
  */
 void
@@ -663,9 +669,12 @@ h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
                 if (secnum)
                     multiline++;
 
-                  /* pass to the prefix the total position instead of the current
-                   stripmine position i; this is necessary to print the array
-                   indices */
+                  /* pass to the prefix in h5tools_simple_prefix the total position
+																		   instead of the current stripmine position i; this is necessary 
+																					to print the array indices */
+
+																 /* pass to the prefix in h5tools_simple_prefix the total position
+																		   this is necessary to print the array indices */
                 curr_pos = ctx->sm_pos + i;
 
                 h5tools_simple_prefix(stream, info, ctx, curr_pos, secnum);
@@ -1004,7 +1013,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
         flags = (elmtno == 0) ? START_OF_DATA : 0;
         flags |= ((elmtno + hs_nelmts) >= p_nelmts) ? END_OF_DATA : 0;
 
-        /* initialize the current stripmine position i; this is necessary to print the array
+        /* initialize the current stripmine position; this is necessary to print the array
            indices */
         ctx.sm_pos = elmtno;
 
