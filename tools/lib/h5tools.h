@@ -416,6 +416,7 @@ typedef struct h5tools_context_t {
     int		default_indent_level; /*this is used when the indent level gets changed */
     hsize_t acc[H5S_MAX_RANK];    /* accumulator position */
     hsize_t pos[H5S_MAX_RANK];    /* matrix position */
+				hsize_t sm_pos;               /* current stripmine element position */
 } h5tools_context_t;
 
 /* a structure to hold the subsetting particulars for a dataset */
