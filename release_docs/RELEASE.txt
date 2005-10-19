@@ -301,10 +301,10 @@ Platforms Tested
     Xeon Linux 2.4.20-31.9smp_perfctr_lustre
     (tungsten)	                  Intel(R) C++ Version 8.0
                                   Intel(R) Fortran Compiler Version 8.0
-    IA-64 Linux 2.4.21.SuSE_128.bef1 ia64
+    IA-64 Linux 2.4.21.SuSE_292.til1 ia64
     (NCSA tg-login)               Intel(R) C++ Version 8.0
                                   Intel(R) Fortran Compiler Version 8.0
-				  mpich-gm-1.2.5..intel
+				  mpich-gm-1.2.5..10-intel-r2
     Windows XP                    MSVC++.NET
                                   MSVC++ 6.0
                                   Intel 8.1 C++
@@ -400,7 +400,7 @@ Footnotes:  (1) Using mpich 1.2.6
             (5) Using mpt.
             (6) Linux 2.4.20-31.9.  Xeon cluster with smp_perfctr_lustre 
                 and Intel compilers
-            (7) Linux 2.4.21, SuSE_128.befl.  Ia64 cluster with Intel compilers
+            (7) Linux 2.4.21, SuSE_292.til1.  Ia64 cluster with Intel compilers
             (8) Intel 8.1
             (9) We found one test of this release failed with compaq visual
                 fortran 6.6c.
