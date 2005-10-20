@@ -31,7 +31,7 @@
 #
 
 
-SOURCES = $(libh5test_la_SOURCES) b+tree.c big.c bittests.c blocktrack.c btree2.c cache.c cmpd_dset.c dangle.c dsets.c dt_arith.c dtransform.c dtypes.c enum.c err_compat.c error_test.c extend.c external.c fillval.c flush1.c flush2.c gen_deflate.c gen_filters.c gen_new_array.c gen_new_fill.c gen_new_mtime.c gen_new_super.c gen_noencoder.c gen_nullspace.c gen_old_array.c gen_old_layout.c gen_old_mtime.c getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c mtime.c ntypes.c ohdr.c pool.c reserved.c set_extent.c sheap.c stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
+SOURCES = $(libh5test_la_SOURCES) b+tree.c big.c bittests.c blocktrack.c btree2.c cache.c cmpd_dset.c dangle.c dsets.c dt_arith.c dtransform.c dtypes.c enum.c err_compat.c error_test.c extend.c external.c fillval.c flush1.c flush2.c gen_deflate.c gen_filters.c gen_new_array.c gen_new_fill.c gen_new_mtime.c gen_new_super.c gen_noencoder.c gen_nullspace.c getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c mtime.c ntypes.c ohdr.c pool.c reserved.c set_extent.c sheap.c stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -92,10 +92,7 @@ am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 @BUILD_ALL_CONDITIONAL_TRUE@	gen_new_mtime$(EXEEXT) \
 @BUILD_ALL_CONDITIONAL_TRUE@	gen_new_super$(EXEEXT) \
 @BUILD_ALL_CONDITIONAL_TRUE@	gen_noencoder$(EXEEXT) \
-@BUILD_ALL_CONDITIONAL_TRUE@	gen_nullspace$(EXEEXT) \
-@BUILD_ALL_CONDITIONAL_TRUE@	gen_old_array$(EXEEXT) \
-@BUILD_ALL_CONDITIONAL_TRUE@	gen_old_layout$(EXEEXT) \
-@BUILD_ALL_CONDITIONAL_TRUE@	gen_old_mtime$(EXEEXT)
+@BUILD_ALL_CONDITIONAL_TRUE@	gen_nullspace$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 b_tree_SOURCES = b+tree.c
 b_tree_OBJECTS = b+tree.$(OBJEXT)
@@ -210,18 +207,6 @@ gen_nullspace_SOURCES = gen_nullspace.c
 gen_nullspace_OBJECTS = gen_nullspace.$(OBJEXT)
 gen_nullspace_LDADD = $(LDADD)
 gen_nullspace_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
-gen_old_array_SOURCES = gen_old_array.c
-gen_old_array_OBJECTS = gen_old_array.$(OBJEXT)
-gen_old_array_LDADD = $(LDADD)
-gen_old_array_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
-gen_old_layout_SOURCES = gen_old_layout.c
-gen_old_layout_OBJECTS = gen_old_layout.$(OBJEXT)
-gen_old_layout_LDADD = $(LDADD)
-gen_old_layout_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
-gen_old_mtime_SOURCES = gen_old_mtime.c
-gen_old_mtime_OBJECTS = gen_old_mtime.$(OBJEXT)
-gen_old_mtime_LDADD = $(LDADD)
-gen_old_mtime_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
 getname_SOURCES = getname.c
 getname_OBJECTS = getname.$(OBJEXT)
 getname_LDADD = $(LDADD)
@@ -332,8 +317,7 @@ SOURCES = $(libh5test_la_SOURCES) b+tree.c big.c bittests.c \
 	error_test.c extend.c external.c fillval.c flush1.c flush2.c \
 	gen_deflate.c gen_filters.c gen_new_array.c gen_new_fill.c \
 	gen_new_mtime.c gen_new_super.c gen_noencoder.c \
-	gen_nullspace.c gen_old_array.c gen_old_layout.c \
-	gen_old_mtime.c getname.c gheap.c hyperslab.c istore.c lheap.c \
+	gen_nullspace.c getname.c gheap.c hyperslab.c istore.c lheap.c \
 	links.c mount.c mtime.c ntypes.c ohdr.c pool.c reserved.c \
 	set_extent.c sheap.c stab.c stream_test.c $(testhdf5_SOURCES) \
 	testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
@@ -343,8 +327,7 @@ DIST_SOURCES = $(libh5test_la_SOURCES) b+tree.c big.c bittests.c \
 	error_test.c extend.c external.c fillval.c flush1.c flush2.c \
 	gen_deflate.c gen_filters.c gen_new_array.c gen_new_fill.c \
 	gen_new_mtime.c gen_new_super.c gen_noencoder.c \
-	gen_nullspace.c gen_old_array.c gen_old_layout.c \
-	gen_old_mtime.c getname.c gheap.c hyperslab.c istore.c lheap.c \
+	gen_nullspace.c getname.c gheap.c hyperslab.c istore.c lheap.c \
 	links.c mount.c mtime.c ntypes.c ohdr.c pool.c reserved.c \
 	set_extent.c sheap.c stab.c stream_test.c $(testhdf5_SOURCES) \
 	testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
@@ -624,9 +607,10 @@ TEST_PROG = testhdf5 lheap ohdr stab gheap btree2 cache b+tree blocktrack sheap 
 # them in a conditional causes automake to generate rules so that they
 # can be built by hand.  They can also be built by specifying
 # --enable-build-all at configure time.
+# The gen_old_* files can only be compiled with older versions of the library
+# so do not appear in this list.
 @BUILD_ALL_CONDITIONAL_TRUE@BUILD_ALL_PROGS = gen_deflate gen_filters gen_new_array gen_new_fill   \
-@BUILD_ALL_CONDITIONAL_TRUE@                  gen_new_mtime gen_new_super gen_noencoder gen_nullspace  \
-@BUILD_ALL_CONDITIONAL_TRUE@                  gen_old_array gen_old_layout gen_old_mtime
+@BUILD_ALL_CONDITIONAL_TRUE@                  gen_new_mtime gen_new_super gen_noencoder gen_nullspace
 
 
 # The libh5test library provides common support code for the tests.
@@ -805,15 +789,6 @@ gen_noencoder$(EXEEXT): $(gen_noencoder_OBJECTS) $(gen_noencoder_DEPENDENCIES)
 gen_nullspace$(EXEEXT): $(gen_nullspace_OBJECTS) $(gen_nullspace_DEPENDENCIES) 
 	@rm -f gen_nullspace$(EXEEXT)
 	$(LINK) $(gen_nullspace_LDFLAGS) $(gen_nullspace_OBJECTS) $(gen_nullspace_LDADD) $(LIBS)
-gen_old_array$(EXEEXT): $(gen_old_array_OBJECTS) $(gen_old_array_DEPENDENCIES) 
-	@rm -f gen_old_array$(EXEEXT)
-	$(LINK) $(gen_old_array_LDFLAGS) $(gen_old_array_OBJECTS) $(gen_old_array_LDADD) $(LIBS)
-gen_old_layout$(EXEEXT): $(gen_old_layout_OBJECTS) $(gen_old_layout_DEPENDENCIES) 
-	@rm -f gen_old_layout$(EXEEXT)
-	$(LINK) $(gen_old_layout_LDFLAGS) $(gen_old_layout_OBJECTS) $(gen_old_layout_LDADD) $(LIBS)
-gen_old_mtime$(EXEEXT): $(gen_old_mtime_OBJECTS) $(gen_old_mtime_DEPENDENCIES) 
-	@rm -f gen_old_mtime$(EXEEXT)
-	$(LINK) $(gen_old_mtime_LDFLAGS) $(gen_old_mtime_OBJECTS) $(gen_old_mtime_LDADD) $(LIBS)
 getname$(EXEEXT): $(getname_OBJECTS) $(getname_DEPENDENCIES) 
 	@rm -f getname$(EXEEXT)
 	$(LINK) $(getname_LDFLAGS) $(getname_OBJECTS) $(getname_LDADD) $(LIBS)
@@ -912,9 +887,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_new_super.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_noencoder.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_nullspace.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_old_array.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_old_layout.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_old_mtime.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getname.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gheap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5test.Plo@am__quote@

@@ -42,8 +42,8 @@ int main()
   if((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
 
   /* Create a dataset with space being allocated and fill value written */
-  if(H5Pset_space_time(dcpl, H5D_EARLY) < 0) goto error;
-  if(H5Pset_fill_time(dcpl, H5D_ALLOC) < 0) goto error;
+  if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0) goto error;
+  if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0) goto error;
   if(H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fill_val1)<0) goto error;
   if((dset1 = H5Dcreate(file, "dset1", H5T_NATIVE_INT, space, dcpl))<0)
         goto error;
@@ -56,8 +56,8 @@ int main()
   if(H5Dclose(dset1)<0) goto error;
 
   /* Create a dataset with space allocation being delayed */
-  if(H5Pset_space_time(dcpl, H5D_LATE) < 0) goto error;
-  if(H5Pset_fill_time(dcpl, H5D_ALLOC) < 0) goto error;
+  if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_LATE) < 0) goto error;
+  if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0) goto error;
   if(H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fill_val2)<0) goto error;
   if((dset2 = H5Dcreate(file, "dset2", H5T_NATIVE_INT, space, dcpl))<0)
         goto error;

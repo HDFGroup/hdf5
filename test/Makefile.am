@@ -52,10 +52,11 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat testmeta
 # them in a conditional causes automake to generate rules so that they
 # can be built by hand.  They can also be built by specifying
 # --enable-build-all at configure time.
+# The gen_old_* files can only be compiled with older versions of the library
+# so do not appear in this list.
 if BUILD_ALL_CONDITIONAL
   BUILD_ALL_PROGS=gen_deflate gen_filters gen_new_array gen_new_fill   \
-                  gen_new_mtime gen_new_super gen_noencoder gen_nullspace  \
-                  gen_old_array gen_old_layout gen_old_mtime
+                  gen_new_mtime gen_new_super gen_noencoder gen_nullspace
 else
   BUILD_ALL_PROGS=
 endif
