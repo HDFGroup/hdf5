@@ -298,9 +298,9 @@ Platforms Tested
                                   Patch 111685-13 
     TFLOPS r1.0.4 v4.5.2 i386     pgcc Rel 3.1-4i with mpich-1.2.4 with
                                           local modifications
-    Xeon Linux 2.4.20-31.9smp_perfctr_lustre
-    (tungsten)	                  Intel(R) C++ Version 8.0
-                                  Intel(R) Fortran Compiler Version 8.0
+    Xeon Linux 2.4.21-32.0.1.ELsmp-perfctr-lustre
+    (tungsten)	                  Intel(R) C++ Version 9.0
+                                  Intel(R) Fortran Compiler Version 9.0
     IA-64 Linux 2.4.21.SuSE_292.til1 ia64
     (NCSA tg-login)               Intel(R) C++ Version 8.0
                                   Intel(R) Fortran Compiler Version 8.0
@@ -398,7 +398,7 @@ Footnotes:  (1) Using mpich 1.2.6
             (4) Shared libraries are provided only for the C library, 
                 except on Windows where they are provided for C and C++.
             (5) Using mpt.
-            (6) Linux 2.4.20-31.9.  Xeon cluster with smp_perfctr_lustre 
+            (6) Linux 2.4.21-32.0.1.  Xeon cluster with ELsmp-perfctr-lustre 
                 and Intel compilers
             (7) Linux 2.4.21, SuSE_292.til1.  Ia64 cluster with Intel compilers
             (8) Intel 8.1
