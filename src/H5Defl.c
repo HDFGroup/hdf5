@@ -17,19 +17,44 @@
  *	       Thursday, September 30, 2004
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 
 
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* Files				*/
 
-/* PRIVATE PROTOTYPES */
+/****************/
+/* Local Macros */
+/****************/
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+/********************/
+/* Local Prototypes */
+/********************/
 static herr_t H5D_efl_read (const H5O_efl_t *efl, haddr_t addr, size_t size,
     uint8_t *buf);
 static herr_t H5D_efl_write(const H5O_efl_t *efl, haddr_t addr, size_t size,
     const uint8_t *buf);
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+/*******************/
+/* Local Variables */
+/*******************/
 
 
 /*-------------------------------------------------------------------------

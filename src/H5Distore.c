@@ -40,10 +40,17 @@
  *		entry which is added to the end of the list.
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5B_PACKAGE		/*suppress error about including H5Bpkg	  */
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 
 
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Bpkg.h"		/* B-link trees				*/
 #include "H5Dpkg.h"		/* Datasets				*/
@@ -58,6 +65,10 @@
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5Sprivate.h"         /* Dataspaces                           */
 #include "H5Vprivate.h"		/* Vector and array functions		*/
+
+/****************/
+/* Local Macros */
+/****************/
 
 /*
  * Feature: If this constant is defined then every cache preemption and load
@@ -90,6 +101,12 @@
  * that node.
  */
 #define H5D_ISTORE_NDIMS(X)	(((X)->sizeof_rkey-8)/8)
+
+#define H5D_HASH(D,ADDR) H5F_addr_hash(ADDR,(D)->cache.chunk.nslots)
+
+/******************/
+/* Local Typedefs */
+/******************/
 
 /* Raw data chunks are cached.  Each entry in the cache is: */
 typedef struct H5D_rdcc_ent_t {
@@ -136,9 +153,10 @@ typedef struct H5D_istore_ud1_t {
     hsize_t		*dims;		        /*dataset dimensions	*/
 } H5D_istore_ud1_t;
 
-#define H5D_HASH(D,ADDR) H5F_addr_hash(ADDR,(D)->cache.chunk.nslots)
+/********************/
+/* Local Prototypes */
+/********************/
 
-/* Private prototypes */
 static void *H5D_istore_chunk_alloc(size_t size, const H5O_pline_t *pline);
 static void *H5D_istore_chunk_xfree(void *chk, const H5O_pline_t *pline);
 static herr_t H5D_istore_shared_create (const H5F_t *f, H5O_layout_t *layout);
@@ -199,6 +217,14 @@ H5B_class_t H5B_ISTORE[1] = {{
     H5D_istore_debug_key,	/*debug			*/
 }};
 
+/*********************/
+/* Package Variables */
+/*********************/
+
+/*******************/
+/* Local Variables */
+/*******************/
+
 /* Declare a free list to manage the H5B_shared_t struct */
 H5FL_EXTERN(H5B_shared_t);
 
@@ -232,8 +258,6 @@ H5FL_BLK_DEFINE_STATIC(chunk_page);
  *
  * Programmer:	Robb Matzke
  *		Wednesday, October  8, 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -269,8 +293,6 @@ H5D_istore_sizeof_rkey(const H5F_t UNUSED *f, const void *_udata)
  * Programmer:	Quincey Koziol
  *		Monday, July  5, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
@@ -302,8 +324,6 @@ H5D_istore_get_shared(const H5F_t UNUSED *f, const void *_udata)
  *
  * Programmer:	Robb Matzke
  *		Friday, October 10, 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -347,8 +367,6 @@ H5D_istore_decode_key(const H5F_t UNUSED *f, const H5B_t *bt, const uint8_t *raw
  * Programmer:	Robb Matzke
  *		Friday, October 10, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -390,8 +408,6 @@ H5D_istore_encode_key(const H5F_t UNUSED *f, const H5B_t *bt, uint8_t *raw, void
  *
  * Programmer:	Robb Matzke
  *              Thursday, April 16, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -438,8 +454,6 @@ H5D_istore_debug_key (FILE *stream, H5F_t UNUSED *f, hid_t UNUSED dxpl_id, int i
  *
  * Programmer:	Robb Matzke
  *		Thursday, November  6, 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -491,8 +505,6 @@ H5D_istore_cmp2(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_uda
  *
  * Programmer:	Robb Matzke
  *		Wednesday, October  8, 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -556,8 +568,6 @@ H5D_istore_cmp3(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_uda
  *
  * Programmer:	Robb Matzke
  *		Tuesday, October 14, 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -639,9 +649,6 @@ done:
  * Programmer:	Robb Matzke
  *		Thursday, October  9, 1997
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
@@ -706,10 +713,6 @@ done:
  * Programmer:	Robb Matzke
  *		Thursday, October  9, 1997
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value. The NEW_NODE argument
- *		is renamed NEW_NODE_P.
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
@@ -833,12 +836,6 @@ done:
  * Programmer:	Robb Matzke
  *              Wednesday, April 21, 1999
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *
- *		Quincey Koziol, 2002-04-22
- *		Changed to callback from H5B_iterate
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
@@ -870,12 +867,6 @@ H5D_istore_iter_allocated (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_l
  * Programmer:	Robb Matzke
  *              Wednesday, April 21, 1999
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *
- *		Quincey Koziol, 2002-04-22
- *		Changed to callback from H5B_iterate
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
@@ -922,8 +913,6 @@ H5D_istore_iter_dump (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_lt_key
  * Programmer:	Robb Matzke
  *              Monday, May 18, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -962,8 +951,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1079,11 +1066,6 @@ done:
  * Programmer:  Robb Matzke
  *              Thursday, May 21, 1998
  *
- * Modifications:
- *      Pedro Vicente, March 28, 2002
- *      Added flush parameter that switches the call to H5F_istore_flush_entry
- *      The call with FALSE is used by the H5F_istore_prune_by_extent function
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1146,10 +1128,6 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
  *
- * Modifications:
- *      Pedro Vicente, March 28, 2002
- *      Added TRUE parameter to the call to H5F_istore_preempt
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1205,10 +1183,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
- *
- * Modifications:
- *      Pedro Vicente, March 28, 2002
- *      Added TRUE parameter to the call to H5F_istore_preempt
  *
  *-------------------------------------------------------------------------
  */
@@ -1272,8 +1246,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Monday, September 27, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1331,8 +1303,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Thursday, July  8, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1366,10 +1336,6 @@ H5D_istore_shared_free (void *_shared)
  *
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
- *
- * Modifications:
- *      Pedro Vicente, March 28, 2002
- *      TRUE parameter to the call to H5F_istore_preempt
  *
  *-------------------------------------------------------------------------
  */
@@ -1498,13 +1464,6 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
  *
- * Modifications:
- *		Robb Matzke, 1999-08-02
- *		The split ratios are passed in as part of the data transfer
- *		property list.
- *
- *              Pedro Vicente, March 28, 2002
- *              TRUE parameter to the call to H5F_istore_preempt
  *-------------------------------------------------------------------------
  */
 static void *
@@ -1778,10 +1737,6 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
  *
- * Modifications:
- *		Robb Matzke, 1999-08-02
- *		The split_ratios are passed as part of the data transfer
- *		property list.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1858,8 +1813,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *		Wednesday, May  7, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2052,8 +2005,6 @@ done:
  * Programmer:	Quincey Koziol
  *		Friday, May  2, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -2207,8 +2158,6 @@ done:
  * Programmer:	Robb Matzke
  *		Tuesday, October 21, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2256,9 +2205,6 @@ done:
  * Programmer:	Robb Matzke
  *              Wednesday, April 21, 1999
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 hsize_t
@@ -2314,10 +2260,6 @@ done:
  *
  * Programmer:	Albert Cheng
  *              June 27, 1998
- *
- * Modifications:
- *              Modified to return the address instead of returning it through
- *              a parameter - QAK, 1/30/02
  *
  *-------------------------------------------------------------------------
  */
@@ -2380,8 +2322,6 @@ done:
  * Programmer:	Quincey Koziol
  *              April 22, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -2413,8 +2353,6 @@ H5D_istore_chunk_alloc(size_t size, const H5O_pline_t *pline)
  *
  * Programmer:	Quincey Koziol
  *              April 22, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2457,26 +2395,6 @@ H5D_istore_chunk_xfree(void *chk, const H5O_pline_t *pline)
  * Programmer:	Albert Cheng
  *		June 26, 1998
  *
- * Modifications:
- *		rky, 1998-09-23
- *		Added barrier to preclude racing with data writes.
- *
- *		rky, 1998-12-07
- *		Added Wait-Signal wrapper around unlock-lock critical region
- *		to prevent race condition (unlock reads, lock writes the
- *		chunk).
- *
- * 		Robb Matzke, 1999-08-02
- *		The split_ratios are passed in as part of the data transfer
- *		property list.
- *
- * 		Quincey Koziol, 2002-05-16
- *		Rewrote algorithm to allocate & write blocks without using
- *              lock/unlock code.
- *
- * 		Quincey Koziol, 2002-05-17
- *		Added feature to avoid writing fill-values if user has indicated
- *              that they should never be written.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2901,8 +2819,6 @@ done:
  *
  * Comments: Called by H5D_prune_by_extent
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
@@ -2961,8 +2877,6 @@ done:
  *
  * Comments: Part of H5B_ISTORE
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
@@ -3010,8 +2924,6 @@ done:
  * within the chunk. We find those seven just like we did with the previous nine.
  * Fot the ones that are allocated we initialize the part that lies outside the boundary
  * with the fill value.
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3204,8 +3116,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Thursday, March 20, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3255,8 +3165,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Saturday, May 29, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3357,9 +3265,6 @@ done:
  * Programmer:	Robb Matzke
  *              Wednesday, April 28, 1999
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3397,8 +3302,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3461,9 +3364,6 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, April 16, 1998
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 herr_t

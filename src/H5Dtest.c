@@ -18,14 +18,41 @@
  * Purpose:	Dataset testing functions.
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 #define H5D_TESTING		/*suppress warning about H5D testing funcs*/
 
 
-#include "H5private.h"		/* Generic Functions			  */
+/***********/
+/* Headers */
+/***********/
+#include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Datasets 				*/
-#include "H5Eprivate.h"		/* Error handling		  */
-#include "H5Iprivate.h"		/* ID Functions		  */
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Iprivate.h"		/* IDs			  		*/
+
+/****************/
+/* Local Macros */
+/****************/
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+/*******************/
+/* Local Variables */
+/*******************/
 
 
 /*--------------------------------------------------------------------------

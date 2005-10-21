@@ -18,13 +18,40 @@
  * Purpose:	Dataspace I/O functions.
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 
 
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
+
+/****************/
+/* Local Macros */
+/****************/
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+/*******************/
+/* Local Variables */
+/*******************/
 
 /* Declare a free list to manage sequences of size_t */
 H5FL_SEQ_DEFINE_STATIC(size_t);
@@ -46,8 +73,6 @@ H5FL_SEQ_DEFINE_STATIC(hsize_t);
  *
  * Programmer:	Quincey Koziol
  *              Thursday, June 20, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -143,8 +168,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Monday, June 24, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 size_t
@@ -234,8 +257,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Monday, July 8, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -323,8 +344,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Monday, June 24, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 size_t
@@ -406,8 +425,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, July 23, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -551,8 +568,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, July 23, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

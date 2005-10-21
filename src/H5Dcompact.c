@@ -20,9 +20,16 @@
  *              H5D_contig_* and H5D_istore_*.
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5D_PACKAGE             /*suppress error about including H5Dpkg   */
 
 
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -31,6 +38,26 @@
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Vprivate.h"		/* Vector and array functions		*/
+
+/****************/
+/* Local Macros */
+/****************/
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+/*******************/
+/* Local Variables */
+/*******************/
 
 
 /*-------------------------------------------------------------------------
@@ -48,8 +75,6 @@
  *
  * Notes:
  *              Offsets in the sequences must be monotonically increasing
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -92,8 +117,6 @@ done:
  *
  * Notes:
  *              Offsets in the sequences must be monotonically increasing
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

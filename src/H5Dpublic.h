@@ -22,6 +22,14 @@
 #include "H5public.h"
 #include "H5Ipublic.h"
 
+/*****************/
+/* Public Macros */
+/*****************/
+
+/*******************/
+/* Public Typedefs */
+/*******************/
+
 /* Values for the H5D_LAYOUT property */
 typedef enum H5D_layout_t {
     H5D_LAYOUT_ERROR	= -1,
@@ -65,6 +73,13 @@ typedef enum H5D_fill_value_t {
     H5D_FILL_VALUE_USER_DEFINED =2
 } H5D_fill_value_t;
 
+/********************/
+/* Public Variables */
+/********************/
+
+/*********************/
+/* Public Prototypes */
+/*********************/
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -102,4 +117,5 @@ H5_DLL herr_t H5Ddebug(hid_t dset_id);
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif /* _H5Dpublic_H */
+

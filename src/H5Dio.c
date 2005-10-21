@@ -12,9 +12,16 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 
 
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -25,17 +32,20 @@
 #include "H5SLprivate.h"	/* Skip lists				*/
 #include "H5Vprivate.h"		/* Vector and array functions		*/
 
-/*#define H5D_DEBUG*/
-
 #ifdef H5_HAVE_PARALLEL
 /* Remove this if H5R_DATASET_REGION is no longer used in this file */
 #   include "H5Rpublic.h"
 #endif /*H5_HAVE_PARALLEL*/
 
-/* Local macros */
+/****************/
+/* Local Macros */
+/****************/
+
 #define H5D_DEFAULT_SKIPLIST_HEIGHT     8
 
-/* Local typedefs */
+/******************/
+/* Local Typedefs */
+/******************/
 
 /* Information for mapping between file space and memory space */
 
@@ -69,7 +79,10 @@ typedef struct fm_map {
     H5S_sel_type msel_type;     /* Selection type in memory */
 } fm_map;
 
-/* Local functions */
+/********************/
+/* Local Prototypes */
+/********************/
+
 static herr_t H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
     const H5T_t *buf_type, const H5S_t *space, hid_t dxpl_id);
 static herr_t H5D_read(H5D_t *dataset, hid_t mem_type_id,
@@ -78,23 +91,19 @@ static herr_t H5D_read(H5D_t *dataset, hid_t mem_type_id,
 static herr_t H5D_write(H5D_t *dataset, hid_t mem_type_id,
 			 const H5S_t *mem_space, const H5S_t *file_space,
 			 hid_t dset_xfer_plist, const void *buf);
-static herr_t
-H5D_contig_read(H5D_io_info_t *io_info, hsize_t nelmts,
+static herr_t H5D_contig_read(H5D_io_info_t *io_info, hsize_t nelmts,
             const H5T_t *mem_type, const H5S_t *mem_space,
             const H5S_t *file_space, H5T_path_t *tpath,
             hid_t src_id, hid_t dst_id, void *buf/*out*/);
-static herr_t
-H5D_contig_write(H5D_io_info_t *io_info, hsize_t nelmts,
+static herr_t H5D_contig_write(H5D_io_info_t *io_info, hsize_t nelmts,
             const H5T_t *mem_type, const H5S_t *mem_space,
 	    const H5S_t *file_space, H5T_path_t *tpath,
             hid_t src_id, hid_t dst_id, const void *buf);
-static herr_t
-H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
+static herr_t H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
             const H5T_t *mem_type, const H5S_t *mem_space,
             const H5S_t *file_space, H5T_path_t *tpath,
             hid_t src_id, hid_t dst_id, void *buf/*out*/);
-static herr_t
-H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
+static herr_t H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
             const H5T_t *mem_type, const H5S_t *mem_space,
 	    const H5S_t *file_space, H5T_path_t *tpath,
             hid_t src_id, hid_t dst_id, const void *buf);
@@ -122,6 +131,14 @@ static herr_t H5D_chunk_file_cb(void *elem, hid_t type_id, unsigned ndims,
     const hsize_t *coords, void *fm);
 static herr_t H5D_chunk_mem_cb(void *elem, hid_t type_id, unsigned ndims,
     const hsize_t *coords, void *fm);
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+/*******************/
+/* Local Variables */
+/*******************/
 
 /* Declare a free list to manage blocks of single datatype element data */
 H5FL_BLK_DEFINE(type_elem);
@@ -430,18 +447,8 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Errors:
- *		ARGS	  BADTYPE	Not a data space.
- *		ARGS	  BADTYPE	Not a data type.
- *		ARGS	  BADTYPE	Not a dataset.
- *		ARGS	  BADTYPE	Not xfer parms.
- *		ARGS	  BADVALUE	No output buffer.
- *		DATASET	  READERROR	Can't read data.
- *
  * Programmer:	Robb Matzke
  *		Thursday, December  4, 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -524,12 +531,8 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Errors:
- *
  * Programmer:	Robb Matzke
  *		Thursday, December  4, 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -596,40 +599,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Thursday, December  4, 1997
- *
- * Modifications:
- *	Robb Matzke, 1998-06-09
- *	The data space is no longer cached in the dataset struct.
- *
- * 	Robb Matzke, 1998-08-11
- *	Added timing calls around all the data space I/O functions.
- *
- * 	rky, 1998-09-18
- *	Added must_convert to do non-optimized read when necessary.
- *
- *  	Quincey Koziol, 1999-07-02
- *	Changed xfer_parms parameter to xfer plist parameter, so it
- *	could be passed to H5T_convert.
- *
- *	Albert Cheng, 2000-11-21
- *	Added the code that when it detects it is not safe to process a
- *	COLLECTIVE read request without hanging, it changes it to
- *	INDEPENDENT calls.
- *
- *	Albert Cheng, 2000-11-27
- *	Changed to use the optimized MPIO transfer for Collective calls only.
- *
- *      Raymond Lu, 2001-10-2
- *      Changed the way to retrieve property for generic property list.
- *
- *	Raymond Lu, 2002-2-26
- *	For the new fill value design, data space can either be allocated
- *	or not allocated at this stage.  Fill value or data from space is
- *	returned to outgoing buffer.
- *
- *      QAK - 2002/04/02
- *      Removed the must_convert parameter and move preconditions to
- *      H5S_<foo>_opt_possible() routine
  *
  *-------------------------------------------------------------------------
  */
@@ -769,39 +738,6 @@ done:
  * Programmer:	Robb Matzke
  *		Thursday, December  4, 1997
  *
- * Modifications:
- * 	Robb Matzke, 9 Jun 1998
- *	The data space is no longer cached in the dataset struct.
- *
- * 	rky 980918
- *	Added must_convert to do non-optimized read when necessary.
- *
- *      Quincey Koziol, 2 July 1999
- *      Changed xfer_parms parameter to xfer plist parameter, so it could
- *      be passed to H5T_convert
- *
- *	Albert Cheng, 2000-11-21
- *	Added the code that when it detects it is not safe to process a
- *	COLLECTIVE write request without hanging, it changes it to
- *	INDEPENDENT calls.
- *
- *	Albert Cheng, 2000-11-27
- *	Changed to use the optimized MPIO transfer for Collective calls only.
- *
- *      Raymond Lu, 2001-10-2
- *      Changed the way to retrieve property for generic property list.
- *
- *	Raymond Lu, 2002-2-26
- *	For the new fill value design, space may not be allocated until
- *	this function is called.  Allocate and initialize space if it
- *	hasn't been.
- *
- *      QAK - 2002/04/02
- *      Removed the must_convert parameter and move preconditions to
- *      H5S_<foo>_opt_possible() routine
- *
- *      Nat Furrer and James Laird, 2004/6/7
- *      Added check for filter encode capability
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -977,12 +913,6 @@ done:
  *
  * Programmer:	Raymond Lu
  *		Thursday, April 10, 2003
- *
- * Modifications:
- *      QAK - 2003/04/17
- *      Hacked on it a lot. :-)
- *      Leon Arber: 4/20/04
- *      Added support for data transforms.
  *
  *-------------------------------------------------------------------------
  */
@@ -1240,12 +1170,6 @@ done:
  * Programmer:	Raymond Lu
  *		Thursday, April 10, 2003
  *
- * Modifications:
- *      QAK - 2003/04/17
- *      Hacked on it a lot. :-)
- *      Leon Arber: 4/20/04
- *      Added support for data transforms.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1495,12 +1419,6 @@ done:
  *
  * Programmer:	Raymond Lu
  *		Thursday, April 10, 2003
- *
- * Modifications:
- *      QAK - 2003/04/17
- *      Hacked on it a lot. :-)
- *      Leon Arber: 4/20/04
- *      Added support for data transforms.
  *
  *-------------------------------------------------------------------------
  */
@@ -1885,14 +1803,6 @@ done:
  * Programmer:	Raymond Lu
  *		Thursday, April 10, 2003
  *
- * Modifications:
- *      QAK - 2003/04/17
- *      Hacked on it a lot. :-)
- *      Leon Arber: 4/20/04
- *      Added support for data transforms.
- *      Kent Yang: 8/10/04
- *      Added support for collective chunk IO.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2275,10 +2185,6 @@ done:
  * Programmer:	Raymond Lu
  *		Thursday, April 10, 2003
  *
- * Modifications:
- *      QAK - 2003/04/17
- *      Hacked on it a lot. :-)
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2565,8 +2471,6 @@ H5D_free_chunk_info(void *item, void UNUSED *key, void UNUSED *opdata)
  * Programmer:	Quincey Koziol
  *		Saturday, May 17, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2604,8 +2508,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *		Thursday, May 29, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2782,8 +2684,6 @@ done:
  *
  * Assumptions: That the file and memory selections are the same shape.
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2901,8 +2801,6 @@ done:
  * Programmer:	Quincey Koziol
  *		Wednesday, July 23, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3014,10 +2912,6 @@ done:
  * Programmer:	Raymond Lu
  *		Thursday, April 10, 2003
  *
- * Modifications:
- *      QAK - 2003/04/17
- *      Hacked on it a lot. :-)
- *
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
@@ -3096,8 +2990,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *		Thursday, September 30, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3250,8 +3142,6 @@ done:
  * Programmer:	Quincey Koziol
  *		Friday, August 12, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3296,8 +3186,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *		Friday, August 12, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3345,8 +3233,6 @@ done:
  * Programmer:	Quincey Koziol
  *		Friday, February  6, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3384,8 +3270,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

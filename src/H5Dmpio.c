@@ -21,9 +21,16 @@
  *		I didn't make them portable.
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 
 
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -35,12 +42,32 @@
 
 #ifdef H5_HAVE_PARALLEL
 
+/****************/
+/* Local Macros */
+/****************/
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+/********************/
+/* Local Prototypes */
+/********************/
+
 /* For regular hyperslab selection. */
 static herr_t
 H5D_mpio_spaces_xfer(H5D_io_info_t *io_info, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
                      void *buf/*out*/,
 		     hbool_t do_write);
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+/*******************/
+/* Local Variables */
+/*******************/
 
 
 /*-------------------------------------------------------------------------
@@ -54,8 +81,6 @@ H5D_mpio_spaces_xfer(H5D_io_info_t *io_info, size_t elmt_size,
  *
  * Programmer:	Quincey Koziol
  *              Wednesday, April 3, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -179,26 +204,6 @@ done:
  *      H5S_mpio_opt_possible() routine, which determines whether this routine
  *      can be called for a given dataset transfer.
  *
- * Modifications:
- *	rky 980918
- *	Added must_convert parameter to let caller know we can't optimize
- *	the xfer.
- *
- *	Albert Cheng, 001123
- *	Include the MPI_type freeing as part of cleanup code.
- *
- *      QAK - 2002/04/02
- *      Removed the must_convert parameter and move preconditions to
- *      H5S_mpio_opt_possible() routine
- *
- *      QAK - 2002/06/17
- *      Removed 'disp' parameter from H5FD_mpio_setup routine and use the
- *      address of the dataset in MPI_File_set_view() calls, as necessary.
- *
- *      QAK - 2002/06/18
- *      Removed 'dc_plist' parameter, since it was not used.  Also, switch to
- *      getting the 'extra_offset' setting for each selection.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -308,8 +313,6 @@ done:
  *
  * Programmer:
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -337,9 +340,6 @@ H5D_mpio_select_read(H5D_io_info_t *io_info,
  * Return:	non-negative on success, negative on failure.
  *
  * Programmer:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */

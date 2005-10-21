@@ -334,3 +334,4 @@ H5_DLL herr_t H5D_layout_contig_size_test(hid_t did, hsize_t *size);
 #endif /* H5D_TESTING */
 
 #endif /*_H5Dpkg_H*/
+
