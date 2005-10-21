@@ -473,7 +473,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os CPPFLAGS H5_CPPFLAGS H5_CFLAGS DEFAULT_LIBS HSIZET CC CFLAGS LDFLAGS ac_ct_CC EXEEXT OBJEXT config_dirs subdirs LT_STATIC_EXEC PERL AR SET_MAKE INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S ECHO RANLIB ac_ct_RANLIB STRIP ac_ct_STRIP CPP EGREP LIBTOOL USE_FILTER_DEFLATE USE_FILTER_SZIP SSL GASS TESTGASS SRB TESTSRB PDB2HDF PTHREAD DEBUG_PKG TRACE_API INSTRUMENT_LIBRARY PARALLEL RUNSERIAL RUNPARALLEL TESTPARALLEL MPE FILTERS USE_FILTER_SHUFFLE USE_FILTER_FLETCHER32 H5_VERSION CONFIG_DATE CONFIG_USER CONFIG_MODE BYTESEX STATIC_SHARED CC_VERSION ROOT DYNAMIC_DIRS HL SEARCH SETX LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os CPPFLAGS H5_CPPFLAGS H5_CFLAGS DEFAULT_LIBS TR HSIZET CC CFLAGS LDFLAGS ac_ct_CC EXEEXT OBJEXT config_dirs subdirs LT_STATIC_EXEC PERL AR SET_MAKE INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S ECHO RANLIB ac_ct_RANLIB STRIP ac_ct_STRIP CPP EGREP LIBTOOL USE_FILTER_DEFLATE USE_FILTER_SZIP SSL GASS TESTGASS SRB TESTSRB PDB2HDF PTHREAD DEBUG_PKG TRACE_API INSTRUMENT_LIBRARY PARALLEL RUNSERIAL RUNPARALLEL TESTPARALLEL MPE FILTERS USE_FILTER_SHUFFLE USE_FILTER_FLETCHER32 H5_VERSION CONFIG_DATE CONFIG_USER CONFIG_MODE BYTESEX STATIC_SHARED CC_VERSION ROOT DYNAMIC_DIRS HL SEARCH SETX LIBOBJS LTLIBOBJS'
 ac_subst_files='DEPEND COMMENCE CONCLUDE'
 
 # Initialize some variables set by options.
@@ -1640,8 +1640,12 @@ echo "${ECHO_T}done" >&6
 
 echo "$as_me:$LINENO: checking if tr works" >&5
 echo $ECHO_N "checking if tr works... $ECHO_C" >&6
-TR_TEST="`echo Test | tr 'a-z,' 'A-Z '`"
-if test $TR_TEST != "TEST"; then
+
+if test "X${TR}" = "X"; then
+  TR=tr
+fi
+TR_TEST="`echo Test | ${TR} 'a-z,' 'A-Z '`"
+if test "X${TR_TEST}" != "XTEST"; then
   { { echo "$as_me:$LINENO: error: tr program doesn't work" >&5
 echo "$as_me: error: tr program doesn't work" >&2;}
    { (exit 1); exit 1; }; }
@@ -4572,7 +4576,7 @@ test "x$enable_libtool_lock" != xno && enable_libtool_lock=yes
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 4575 "configure"' > conftest.$ac_ext
+  echo '#line 4579 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -5139,7 +5143,7 @@ chmod -w .
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -o out/conftest2.$ac_objext"
 compiler_c_o=no
-if { (eval echo configure:5142: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
+if { (eval echo configure:5146: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
   # The compiler can only warn and ignore the option if not recognized
   # So say no if there are warnings
   if test -s out/conftest.err; then
@@ -7050,7 +7054,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 7053 "configure"
+#line 7057 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -7148,7 +7152,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 7151 "configure"
+#line 7155 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -35045,7 +35049,7 @@ echo "${ECHO_T}$DEBUG_PKG" >&6
 esac
 
 if test -n "$DEBUG_PKG"; then
-  for pkg in `echo $DEBUG_PKG | tr 'a-z,' 'A-Z '`; do
+  for pkg in `echo $DEBUG_PKG | ${TR} 'a-z,' 'A-Z '`; do
     CPPFLAGS="$CPPFLAGS -DH5${pkg}_DEBUG"
   done
 fi
@@ -35219,7 +35223,7 @@ echo $ECHO_N "checking for mpirun... $ECHO_C" >&6
     if (echo $cmd | grep / >/dev/null); then
       path="`echo $cmd | sed 's/\(.*\)\/.*$/\1/'`"
     else
-      for path in `echo $PATH | tr : ' '`; do
+      for path in `echo $PATH | ${TR} : ' '`; do
         if test -x $path/$cmd; then
           break
         fi
@@ -35249,7 +35253,7 @@ echo $ECHO_N "checking for mpirun_lam or mpirun... $ECHO_C" >&6
     if (echo $cmd | grep / >/dev/null); then
       path="`echo $cmd | sed 's/\(.*\)\/.*$/\1/'`"
     else
-      for path in `echo $PATH | tr : ' '`; do
+      for path in `echo $PATH | ${TR} : ' '`; do
         if test -x $path/$cmd; then
           break
         fi
@@ -36781,7 +36785,7 @@ echo "${ECHO_T}$FILTERS" >&6
 esac
 
 if test -n "$FILTERS"; then
-  for filter in `echo $FILTERS | tr 'a-z,' 'A-Z '`; do
+  for filter in `echo $FILTERS | ${TR} 'a-z,' 'A-Z '`; do
                     if test $filter = "SHUFFLE"; then
 
 cat >>confdefs.h <<\_ACEOF
@@ -37676,6 +37680,7 @@ s,@CPPFLAGS@,$CPPFLAGS,;t t
 s,@H5_CPPFLAGS@,$H5_CPPFLAGS,;t t
 s,@H5_CFLAGS@,$H5_CFLAGS,;t t
 s,@DEFAULT_LIBS@,$DEFAULT_LIBS,;t t
+s,@TR@,$TR,;t t
 s,@HSIZET@,$HSIZET,;t t
 s,@CC@,$CC,;t t
 s,@CFLAGS@,$CFLAGS,;t t

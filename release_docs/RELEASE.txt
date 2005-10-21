@@ -35,6 +35,11 @@ CONTENTS
 
 New Features
 ============
+    Configuration:
+    -------------------------
+	- Configure now recognizes the TR variable as the location of the
+          tr utility.  JML 2005/10/20
+
     Source code distribution:
     -------------------------
 	- Added g95 as a testing "platform" informally. AKC - 2005/10/04.
