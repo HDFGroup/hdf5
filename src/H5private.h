@@ -545,6 +545,11 @@ H5_DLL void H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds);
 #define HDabs(X)		abs(X)
 #define HDaccess(F,M)		access(F, M)
 #define HDacos(X)		acos(X)
+#ifdef H5_HAVE_ALARM
+#define HDalarm(N)              alarm(N)
+#else /* H5_HAVE_ALARM */
+#define HDalarm(N)              (0)
+#endif /* H5_HAVE_ALARM */
 #define HDasctime(T)		asctime(T)
 #define HDasin(X)		asin(X)
 #define HDassert(X)		assert(X)
@@ -1392,8 +1397,5 @@ H5_DLL int H5R_term_interface(void);
 H5_DLL int H5S_term_interface(void);
 H5_DLL int H5T_term_interface(void);
 H5_DLL int H5Z_term_interface(void);
-
-/* Define alarm function since windows doesn't support alarm function*/
-H5_DLL unsigned int HDalarm(unsigned int N); 
 
 #endif
