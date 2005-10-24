@@ -31,7 +31,7 @@
 #
 
 
-SOURCES = h5debug.c h5repart.c h5repart_gentest.c h5stat.c pdb2hdf5.c repart_test.c
+SOURCES = h5debug.c h5repart.c h5repart_gentest.c h5stat.c repart_test.c
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -59,9 +59,8 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/h5cc.in $(srcdir)/testh5repart.sh.in \
 	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
-check_PROGRAMS = $(am__EXEEXT_2) repart_test$(EXEEXT)
-bin_PROGRAMS = h5debug$(EXEEXT) h5repart$(EXEEXT) h5stat$(EXEEXT) \
-	$(am__EXEEXT_1)
+check_PROGRAMS = $(am__EXEEXT_1) repart_test$(EXEEXT)
+bin_PROGRAMS = h5debug$(EXEEXT) h5repart$(EXEEXT) h5stat$(EXEEXT)
 subdir = tools/misc
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
@@ -70,10 +69,9 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES = h5cc testh5repart.sh
-@BUILD_PDB2HDF_CONDITIONAL_TRUE@am__EXEEXT_1 = pdb2hdf5$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
-am__EXEEXT_2 = h5repart_gentest$(EXEEXT)
+am__EXEEXT_1 = h5repart_gentest$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 h5debug_SOURCES = h5debug.c
 h5debug_OBJECTS = h5debug.$(OBJEXT)
@@ -94,10 +92,6 @@ h5stat_SOURCES = h5stat.c
 h5stat_OBJECTS = h5stat.$(OBJEXT)
 h5stat_LDADD = $(LDADD)
 h5stat_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
-pdb2hdf5_SOURCES = pdb2hdf5.c
-pdb2hdf5_OBJECTS = pdb2hdf5.$(OBJEXT)
-pdb2hdf5_LDADD = $(LDADD)
-pdb2hdf5_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
 repart_test_SOURCES = repart_test.c
 repart_test_OBJECTS = repart_test.$(OBJEXT)
 repart_test_LDADD = $(LDADD)
@@ -115,10 +109,10 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = h5debug.c h5repart.c h5repart_gentest.c h5stat.c pdb2hdf5.c \
+SOURCES = h5debug.c h5repart.c h5repart_gentest.c h5stat.c \
 	repart_test.c
 DIST_SOURCES = h5debug.c h5repart.c h5repart_gentest.c h5stat.c \
-	pdb2hdf5.c repart_test.c
+	repart_test.c
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -148,9 +142,6 @@ BUILD_PABLO_CONDITIONAL_FALSE = @BUILD_PABLO_CONDITIONAL_FALSE@
 BUILD_PABLO_CONDITIONAL_TRUE = @BUILD_PABLO_CONDITIONAL_TRUE@
 BUILD_PARALLEL_CONDITIONAL_FALSE = @BUILD_PARALLEL_CONDITIONAL_FALSE@
 BUILD_PARALLEL_CONDITIONAL_TRUE = @BUILD_PARALLEL_CONDITIONAL_TRUE@
-BUILD_PDB2HDF = @BUILD_PDB2HDF@
-BUILD_PDB2HDF_CONDITIONAL_FALSE = @BUILD_PDB2HDF_CONDITIONAL_FALSE@
-BUILD_PDB2HDF_CONDITIONAL_TRUE = @BUILD_PDB2HDF_CONDITIONAL_TRUE@
 BYTESEX = @BYTESEX@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
@@ -362,9 +353,6 @@ TEST_PROG = h5repart_gentest
 TEST_SCRIPT = testh5repart.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = h5repart$(EXEEXT)
-
-# Build pdb2hdf5 if LLNL's PDB is present (checked in configure)
-@BUILD_PDB2HDF_CONDITIONAL_TRUE@PDB2HDF = pdb2hdf5
 bin_SCRIPTS = h5redeploy
 
 # Tell automake to clean h5redeploy script
@@ -481,9 +469,6 @@ h5repart_gentest$(EXEEXT): $(h5repart_gentest_OBJECTS) $(h5repart_gentest_DEPEND
 h5stat$(EXEEXT): $(h5stat_OBJECTS) $(h5stat_DEPENDENCIES) 
 	@rm -f h5stat$(EXEEXT)
 	$(LINK) $(h5stat_LDFLAGS) $(h5stat_OBJECTS) $(h5stat_LDADD) $(LIBS)
-pdb2hdf5$(EXEEXT): $(pdb2hdf5_OBJECTS) $(pdb2hdf5_DEPENDENCIES) 
-	@rm -f pdb2hdf5$(EXEEXT)
-	$(LINK) $(pdb2hdf5_LDFLAGS) $(pdb2hdf5_OBJECTS) $(pdb2hdf5_LDADD) $(LIBS)
 repart_test$(EXEEXT): $(repart_test_OBJECTS) $(repart_test_DEPENDENCIES) 
 	@rm -f repart_test$(EXEEXT)
 	$(LINK) $(repart_test_LDFLAGS) $(repart_test_OBJECTS) $(repart_test_LDADD) $(LIBS)
@@ -517,7 +502,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repart.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repart_gentest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5stat.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pdb2hdf5.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/repart_test.Po@am__quote@
 
 .c.o:

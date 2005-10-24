@@ -1316,17 +1316,6 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
     fi
 fi
 
-
-dnl ----------------------------------------------------------------------
-dnl Is LLNL's PDB present? If so then we'll compile the PDB-to-HDF5
-dnl translator.
-dnl
-AC_SUBST([BUILD_PDB2HDF])
-AC_CHECK_LIB([pdb], [PD_open])
-AC_CHECK_LIB([silo], [lite_PD_open])
-AC_CHECK_HEADERS([pdb.h], [BUILD_PDB2HDF=yes])
-AM_CONDITIONAL([BUILD_PDB2HDF_CONDITIONAL], [test "X$BUILD_PDB2HDF" = "Xyes"])
-
 dnl Checkpoint the cache
 AC_CACHE_SAVE
 

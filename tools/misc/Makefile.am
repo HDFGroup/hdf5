@@ -30,13 +30,8 @@ check_PROGRAMS=$(TEST_PROG) repart_test
 check_SCRIPTS=$(TEST_SCRIPT)
 SCRIPT_DEPEND=h5repart$(EXEEXT)
 
-# Build pdb2hdf5 if LLNL's PDB is present (checked in configure)
-if BUILD_PDB2HDF_CONDITIONAL
-   PDB2HDF=pdb2hdf5
-endif
-
 # These are our main targets, the tools
-bin_PROGRAMS=h5debug h5repart h5stat $(PDB2HDF)
+bin_PROGRAMS=h5debug h5repart h5stat
 bin_SCRIPTS=h5redeploy
 
 # Tell automake to clean h5redeploy script
