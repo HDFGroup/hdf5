@@ -30,7 +30,7 @@
 # HDF5 Library Performance Makefile(.in)
 #
 
-SOURCES = chunk.c $(h5perf_SOURCES) iopipe.c mpi-perf.c overhead.c perf.c perf_meta.c zip_perf.c
+SOURCES = benchpar.c chunk.c $(h5perf_SOURCES) iopipe.c mpi-perf.c overhead.c perf.c perf_meta.c zip_perf.c
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -58,7 +58,7 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
 bin_PROGRAMS = h5perf$(EXEEXT)
-check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_3) perf$(EXEEXT)
+check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_4) perf$(EXEEXT)
 subdir = perform
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
@@ -70,14 +70,20 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 @BUILD_PARALLEL_CONDITIONAL_TRUE@am__EXEEXT_1 = h5perf$(EXEEXT)
-@BUILD_ALL_CONDITIONAL_TRUE@am__EXEEXT_2 = mpi-perf$(EXEEXT)
-am__EXEEXT_3 = iopipe$(EXEEXT) chunk$(EXEEXT) overhead$(EXEEXT) \
-	zip_perf$(EXEEXT) perf_meta$(EXEEXT) $(am__EXEEXT_2)
+@BUILD_PARALLEL_CONDITIONAL_TRUE@am__EXEEXT_2 = benchpar$(EXEEXT) \
+@BUILD_PARALLEL_CONDITIONAL_TRUE@	mpi-perf$(EXEEXT)
+@BUILD_ALL_CONDITIONAL_TRUE@am__EXEEXT_3 = $(am__EXEEXT_2)
+am__EXEEXT_4 = iopipe$(EXEEXT) chunk$(EXEEXT) overhead$(EXEEXT) \
+	zip_perf$(EXEEXT) perf_meta$(EXEEXT) $(am__EXEEXT_3)
 PROGRAMS = $(bin_PROGRAMS)
+benchpar_SOURCES = benchpar.c
+benchpar_OBJECTS = benchpar.$(OBJEXT)
+benchpar_LDADD = $(LDADD)
+am__DEPENDENCIES_1 = $(top_builddir)/src/libhdf5.la
+benchpar_DEPENDENCIES = $(am__DEPENDENCIES_1)
 chunk_SOURCES = chunk.c
 chunk_OBJECTS = chunk.$(OBJEXT)
 chunk_LDADD = $(LDADD)
-am__DEPENDENCIES_1 = $(top_builddir)/src/libhdf5.la
 chunk_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_h5perf_OBJECTS = pio_perf.$(OBJEXT) pio_engine.$(OBJEXT) \
 	pio_timer.$(OBJEXT)
@@ -118,10 +124,10 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = chunk.c $(h5perf_SOURCES) iopipe.c mpi-perf.c overhead.c \
-	perf.c perf_meta.c zip_perf.c
-DIST_SOURCES = chunk.c $(h5perf_SOURCES) iopipe.c mpi-perf.c \
+SOURCES = benchpar.c chunk.c $(h5perf_SOURCES) iopipe.c mpi-perf.c \
 	overhead.c perf.c perf_meta.c zip_perf.c
+DIST_SOURCES = benchpar.c chunk.c $(h5perf_SOURCES) iopipe.c \
+	mpi-perf.c overhead.c perf.c perf_meta.c zip_perf.c
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -353,15 +359,16 @@ H5FC_PP = $(bindir)/h5pfc
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/tools/lib
 @BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_PROG_PARA = h5perf
-@BUILD_ALL_CONDITIONAL_FALSE@MPI_PERF = 
 
-# mpi-perf is not built or run by default, but can be built by hand or by
+# Some programs are not built or run by default, but can be built by hand or by
 # specifying --enable-build-all at configure time.
-@BUILD_ALL_CONDITIONAL_TRUE@MPI_PERF = mpi-perf
+# Also, some of these programs should only be built in parallel.
+@BUILD_PARALLEL_CONDITIONAL_TRUE@PARA_BUILD_ALL = benchpar mpi-perf
+@BUILD_ALL_CONDITIONAL_TRUE@BUILD_ALL_PROGS = $(PARA_BUILD_ALL)
 
 # These are the programs that `make all' or `make tests' will build and which
 # `make check' will run. List them in the order they should be run.
-TEST_PROG = iopipe chunk overhead zip_perf perf_meta $(MPI_PERF)
+TEST_PROG = iopipe chunk overhead zip_perf perf_meta $(BUILD_ALL_PROGS)
 h5perf_SOURCES = pio_perf.c pio_engine.c pio_timer.c
 
 # These are the files that `make clean' (and derivatives) will remove from
@@ -461,6 +468,9 @@ clean-checkPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
+benchpar$(EXEEXT): $(benchpar_OBJECTS) $(benchpar_DEPENDENCIES) 
+	@rm -f benchpar$(EXEEXT)
+	$(LINK) $(benchpar_LDFLAGS) $(benchpar_OBJECTS) $(benchpar_LDADD) $(LIBS)
 chunk$(EXEEXT): $(chunk_OBJECTS) $(chunk_DEPENDENCIES) 
 	@rm -f chunk$(EXEEXT)
 	$(LINK) $(chunk_LDFLAGS) $(chunk_OBJECTS) $(chunk_LDADD) $(LIBS)
@@ -492,6 +502,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/benchpar.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chunk.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iopipe.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mpi-perf.Po@am__quote@

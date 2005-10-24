@@ -16,10 +16,22 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
+#include <float.h>
+#include <string.h>
 
 #include "hdf5.h"
 
 /* Local macros */
+
+/*      
+ * HDF Boolean type.
+ */
+#ifndef FALSE
+#   define FALSE 0
+#endif
+#ifndef TRUE
+#   define TRUE 1 
+#endif 
 
 /* defines for type of VFL driver to use */
 #define FACC_DEFAULT    0

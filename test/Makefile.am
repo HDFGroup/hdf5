@@ -56,7 +56,8 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat testmeta
 # so do not appear in this list.
 if BUILD_ALL_CONDITIONAL
   BUILD_ALL_PROGS=gen_deflate gen_filters gen_new_array gen_new_fill   \
-                  gen_new_mtime gen_new_super gen_noencoder gen_nullspace
+                  gen_new_mtime gen_new_super gen_noencoder gen_nullspace \
+                  space_overflow
 else
   BUILD_ALL_PROGS=
 endif

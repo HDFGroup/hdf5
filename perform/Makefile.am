@@ -30,17 +30,19 @@ endif
 # always installed with the tools during make install.
 bin_PROGRAMS=h5perf
 
-# mpi-perf is not built or run by default, but can be built by hand or by
+# Some programs are not built or run by default, but can be built by hand or by
 # specifying --enable-build-all at configure time.
+# Also, some of these programs should only be built in parallel.
+if BUILD_PARALLEL_CONDITIONAL
+  PARA_BUILD_ALL=benchpar mpi-perf
+endif
 if BUILD_ALL_CONDITIONAL
-  MPI_PERF=mpi-perf
-else
-  MPI_PERF=
+  BUILD_ALL_PROGS=$(PARA_BUILD_ALL)
 endif
 
 # These are the programs that `make all' or `make tests' will build and which
 # `make check' will run. List them in the order they should be run.
-TEST_PROG = iopipe chunk overhead zip_perf perf_meta $(MPI_PERF)
+TEST_PROG = iopipe chunk overhead zip_perf perf_meta $(BUILD_ALL_PROGS)
 check_PROGRAMS=$(TEST_PROG_PARA) $(TEST_PROG) perf
 
 h5perf_SOURCES=pio_perf.c pio_engine.c pio_timer.c
