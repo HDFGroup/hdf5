@@ -856,7 +856,7 @@ END SUBROUTINE h5fget_name_f
             </td><td valign=top>
             Named datatypes only
           </td></tr><tr><td valign=top>
-            <code>H5F_OBJ_ATTR&nbsp;&nbsp;</code>
+            <code>H5F_OBJ_ATTR</code>
             </td><td valign=top>
             Attributes only
           </td></tr><tr><td valign=top>
@@ -867,9 +867,14 @@ END SUBROUTINE h5fget_name_f
 	    (I.e., <code>H5F_OBJ_FILE</code> | <code>H5F_OBJ_DATASET</code> | 
 	    <code>H5F_OBJ_GROUP</code> | <code>H5F_OBJ_DATATYPE</code> 
 	    | <code>H5F_OBJ_ATTR</code> )
+          </td></tr><tr><td valign=top>
+            <code>H5F_OBJ_LOCAL</code>
+            </td><td valign=top>
+            Restrict search to objects opened through current file identifier.
           </td></tr>
         </table>
 	</center>
+        <p>
 	Multiple object types can be combined with the 
 	logical <code>OR</code> operator (<code>|</code>).
 	For example, the expression <code>(H5F_OBJ_DATASET|H5F_OBJ_GROUP)</code> would call for 
@@ -1477,7 +1482,7 @@ Describes HDF5 Release 1.6.5, October 2005
 </address>
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 24 August 2004");
+document.writeln("Last modified: 25 October 2005");
 -->
 </SCRIPT>
  

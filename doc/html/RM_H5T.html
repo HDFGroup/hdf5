@@ -1676,6 +1676,9 @@ END SUBROUTINE h5tget_inpad_f
     <dd>Given a compound datatype, <code>cdtype_id</code>, the function 
         <code>H5Tget_member_class</code> returns the datatype class of 
         the compound datatype member specified by <code>member_no</code>.
+        <p>
+        Valid class identifiers are as defined in 
+	<a href="#Datatype-GetClass"><code>H5Tget_class</code></a>.
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
@@ -4016,6 +4019,10 @@ END SUBROUTINE h5tset_strpad_f
 <dt><strong>Description:</strong>
     <dd><code>H5Tset_tag</code> tags an opaque datatype <code>type_id</code>
         with a descriptive ASCII identifier,<code> tag</code>.
+        <p>     
+        <code>tag</code> is intended to provide a concise description;
+        the maximum size is hard-coded in the HDF5 Library as 256 bytes 
+        (<code>H5T_OPAQUE_TAG_MAX</code>).
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
@@ -4217,7 +4224,7 @@ Describes HDF5 Release 1.6.5, October 2005
 </address>
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 27 April 2005");
+document.writeln("Last modified: 25 October 2005");
 -->
 </SCRIPT>
  
