@@ -2,7 +2,7 @@
   <head>
     <title>HDF5 Software Changes</title>
 
-</html><!-- #BeginLibraryItem "/ed_libs/styles_Gen.lbi" -->
+<!-- #BeginLibraryItem "/ed_libs/styles_Gen.lbi" -->
 <!--
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   * Copyright by the Board of Trustees of the University of Illinois.         *
@@ -20,7 +20,7 @@
  -->
 
 <link href="../ed_styles/GenElect.css" rel="stylesheet" type="text/css">
-<!-- #EndLibraryItem --><html></head>
+<!-- #EndLibraryItem --></head>
 
   <body bgcolor="#FFFFFF">
   
@@ -182,6 +182,19 @@ transition from the HDF5 Release 1.6.4 to Release 1.6.5.
 
         <dl>
         <dt><u>C functions:</u>
+        <dt><code>H5Fget_obj_count</code>
+          <dd><code><font color=red>H5F_OBJ_LOCAL</font></code> has been 
+            added as a qualifier on the types of objects to be counted. 
+            <code>H5F_OBJ_LOCAL</code> restricts the search 
+            to objects opened through current file identifier.
+
+        <dt><code>H5Tset_tag</code>
+          <dd>The <code><font color=red>H5T_OPAQUE_TAG_MAX</font></code> 
+            macro constant, 
+            specifying the maximum size of an opaque datatype tag, 
+            was added in <code>H5Tpublic.h</code>.
+
+
         <dt><code>H5function_name?</code>
           <dd>Change...
 
@@ -2402,7 +2415,7 @@ Describes HDF5 Release 1.6.5, October 2005
 </address>
 <!-- #EndLibraryItem --><!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified: 17 October 2005 
+Last modified: 25 October 2005 
 <!-- hhmts end -->
 
 </body>
