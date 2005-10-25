@@ -171,6 +171,46 @@ transition from the HDF5 Release 1.6.4 to Release 1.6.5.
 
 
 
+    <h3>Functions with New or Changed Symbols or Fixed Values</h3>
+
+        Symbols and fixed values in the following functions have changed 
+        as noted.
+        <p>
+
+        <dl>
+        <dt><u>C functions:</u>
+        <dt><code>H5Fget_obj_count</code>
+          <dd><code>H5F_OBJ_LOCAL</code> has been 
+            added as a qualifier on the types of objects to be counted. 
+            <code>H5F_OBJ_LOCAL</code> restricts the search 
+            to objects opened through current file identifier.
+
+        <dt><code>H5Tset_tag</code>
+          <dd>The <code>H5T_OPAQUE_TAG_MAX</code> 
+            macro constant, 
+            specifying the maximum size of an opaque datatype tag, 
+            was added in <code>H5Tpublic.h</code>.
+
+
+        <dt><code>H5function_name?</code>
+          <dd>Change...
+
+
+        <p>
+        <dt><u>Fortran90 subroutines:</u>
+        <dt><code>h5subroutine_f?</code>
+          <dd>Change...
+
+
+        <p>
+        <dt><u>C++ wrappers:</u>
+        <dt><code>C++_wrapper_name</code>
+          <dd>Change...
+
+
+        </dl>
+
+
     <h3>Functions with Changed Syntax</h3>
 
         The following functions have changed as noted.
@@ -182,19 +222,6 @@ transition from the HDF5 Release 1.6.4 to Release 1.6.5.
 
         <dl>
         <dt><u>C functions:</u>
-        <dt><code>H5Fget_obj_count</code>
-          <dd><code><font color=red>H5F_OBJ_LOCAL</font></code> has been 
-            added as a qualifier on the types of objects to be counted. 
-            <code>H5F_OBJ_LOCAL</code> restricts the search 
-            to objects opened through current file identifier.
-
-        <dt><code>H5Tset_tag</code>
-          <dd>The <code><font color=red>H5T_OPAQUE_TAG_MAX</font></code> 
-            macro constant, 
-            specifying the maximum size of an opaque datatype tag, 
-            was added in <code>H5Tpublic.h</code>.
-
-
         <dt><code>H5function_name?</code>
           <dd>Change...
 
