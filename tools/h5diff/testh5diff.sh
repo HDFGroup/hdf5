@@ -19,6 +19,8 @@
 #   Added the SKIP feature.
 #   Albert Cheng, 2005/2/3
 #   Added -p option for parallel h5diff tests.
+#   Pedro Vicente Nunes, 10/25/2005
+#   Added test #9
 
 H5DIFF=h5diff               # The tool name
 H5DIFF_BIN=`pwd`/$H5DIFF    # The path of the tool binary
@@ -408,24 +410,26 @@ TOOLTEST h5diff_627.txt file1.h5 file2.h5 -n 200 g1/dset3 g1/dset4
 TOOLTEST h5diff_628.txt file1.h5 file2.h5 -n 1 g1/dset3 g1/dset4
 
 # ##############################################################################
-# # non valid files
+# 6.29  non valid files
 # ##############################################################################
 
 TOOLTEST h5diff_629.txt file1.h6 file2.h6
 
 # ##############################################################################
-# # attributes
+# 7.  attributes
 # ##############################################################################
 
 TOOLTEST h5diff_70.txt file5.h5 file6.h5 -v
 
 # ##############################################################################
-# # all dataset datatypes
+# 8.  all dataset datatypes
 # ##############################################################################
 
 TOOLTEST h5diff_80.txt file7.h5 file8.h5 -v
 
+# 9. compare a file with itself
 
+TOOLTEST h5diff_90.txt file1.h5 file1.h5
 
 
 
