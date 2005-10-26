@@ -66,10 +66,13 @@ transition from the HDF5 Release 1.6.4 to Release 1.6.5.
 
 	  <dt>C functions and
 	  <dt>Fortran subroutines:
-          <dd>HDF5 Release 1.6.5 is primarily a "Bugfix Release"; 
-              there are no public API changes in the HDF5 C library
-              or in the Fortran interfaces.
+          <dd>HDF5 Release 1.6.5 is primarily a maintenance release, 
+              focusing on bugfixes, optimization and portability; 
+              there are no new C APIs or Fortran subroutines.
+
+
 <!--
+          <dd>&nbsp;
           <dd>The following C functions are new for Release 1.6.4 and 
               are documented in the
               <a href="../RM_H5Front.html"><cite>HDF5 Reference Manual</cite></a>.
@@ -96,6 +99,35 @@ transition from the HDF5 Release 1.6.4 to Release 1.6.5.
               page of the HDF5 document set or can be accessed directly at
               <a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5hl.html">
               <code>http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5hl.html</code></a>
+
+
+          <dd>&nbsp;
+	  <dt>C++ wrappers:
+          <dd><code>void PropList::copyProp(PropList& dest, const char* name) const</code>
+          <dd><code>void PropList::copyProp(PropList& dest, const string& name) const</code>
+          <dd><code>string CommonFG::getComment(const string& name) const</code>
+          <dd><code>void CommonFG::removeComment(const char* name) const</code>
+          <dd><code>void CommonFG::removeComment(const string& name) const</code>
+          <dd><code>hsize_t Attribute::getStorageSize() const</code>
+          <dd><code>void Attribute::close()</code>
+          <dd><code>void DataSet::close()</code>
+          <dd><code>void DataSpace::close()</code>
+          <dd><code>void DataType::close()</code>
+          <dd><code>void H5File::close()</code>
+          <dd><code>void Group::close()</code>
+          <dd><code>void PropList::close()</code>
+          <dd><code>H5T_order_t AtomType::getOrder() const</code>
+          <dd><code>void H5Object::renameAttr(const char* oldname, const char* newname) const</code>
+          <dd><code>void H5Object::renameAttr(const string& oldname, const string& newname) const</code>
+          <dd><code>string CommonFG::getObjnameByIdx(hsize_t idx) const</code>
+          <dd><code>ArrayType AbstractDs::getArrayType() const</code>
+          <dd><code>VarLenType AbstractDs::getVarLenType() const</code>
+          <dd><code>ArrayType CommonFG::openArrayType(const char* name) const</code>
+          <dd><code>ArrayType CommonFG::openArrayType(const string& name) const</code>
+          <dd><code>VarLenType CommonFG::openVarLenType(const char* name) const</code>
+          <dd><code>VarLenType CommonFG::openVarLenType(const string& name) const</code>
+          <dd><code>ArrayType CompType::getMemberArrayType(unsigned member_num) const</code>
+          <dd><code>VarLenType CompType::getMemberVarLenType(unsigned member_num) const</code>
 
 	  
           <dd>&nbsp;
@@ -126,7 +158,7 @@ transition from the HDF5 Release 1.6.4 to Release 1.6.5.
 
         <p>
         <dt><u>C++ wrappers:</u>
-        <dt><code>C++_wrapper_name</code>
+        <dt><code>C++_wrapper_name?</code>
 
 	  
         </dl>
@@ -173,8 +205,8 @@ transition from the HDF5 Release 1.6.4 to Release 1.6.5.
 
     <h3>Functions with New or Changed Symbols or Fixed Values</h3>
 
-        Symbols and fixed values in the following functions have changed 
-        as noted.
+        Symbols and preset values associated with  the following functions 
+        have changed as noted.
         <p>
 
         <dl>
@@ -204,7 +236,7 @@ transition from the HDF5 Release 1.6.4 to Release 1.6.5.
 
         <p>
         <dt><u>C++ wrappers:</u>
-        <dt><code>C++_wrapper_name</code>
+        <dt><code>C++_wrapper_name?</code>
           <dd>Change...
 
 
@@ -214,10 +246,7 @@ transition from the HDF5 Release 1.6.4 to Release 1.6.5.
     <h3>Functions with Changed Syntax</h3>
 
         The following functions have changed as noted.
-        In general, one or more parameters or the return value has 
-        changed from a signed to an unsigned datatype.
-        Changed items are indicated in
-        <font color="red">red</font>. 
+        Changed items are indicated in <font color="red">red</font>. 
         <p>
 
         <dl>
@@ -234,9 +263,40 @@ transition from the HDF5 Release 1.6.4 to Release 1.6.5.
 
         <p>
         <dt><u>C++ wrappers:</u>
-        <dt><code>C++_wrapper_name</code>
-          <dd>Change...
+        <!--
+        <dt><code>C++_wrapper_name?</code>
+          <dd>Change....
+        -->
+        <dt>In all cases below, a parameter datatype has changed from 
+            <code>int</code> to <code>unsigned</code>.
 
+          <dd><code>string CompType::getMemberName( 
+            <font color=red>unsigned</font> member_num ) const</code>
+          <dd><code>size_t CompType::getMemberOffset( 
+            <font color=red>unsigned</font> member_num ) const</code>
+          <dd><code>int CompType::getMemberDims( 
+            <font color=red>unsigned</font> member_num, size_t* dims, 
+            int* perm ) const</code>
+          <dd><code>H5T_class_t CompType::getMemberClass( 
+            <font color=red>unsigned</font> member_num ) const</code>
+          <dd><code>hid_t CompType::p_get_member_type(
+            <font color=red>unsigned</font> member_num) const</code>
+          <dd><code>DataType CompType::getMemberDataType( 
+            <font color=red>unsigned</font> member_num ) const</code>
+          <dd><code>ArrayType CompType::getMemberArrayType( 
+            <font color=red>unsigned</font> member_num ) const</code>
+          <dd><code>CompType CompType::getMemberCompType( 
+            <font color=red>unsigned</font> member_num ) const</code>
+          <dd><code>EnumType CompType::getMemberEnumType( 
+            <font color=red>unsigned</font> member_num ) const</code>
+          <dd><code>IntType CompType::getMemberIntType( 
+            <font color=red>unsigned</font> member_num ) const</code>
+          <dd><code>FloatType CompType::getMemberFloatType( 
+            <font color=red>unsigned</font> member_num ) const</code>
+          <dd><code>StrType CompType::getMemberStrType( 
+            <font color=red>unsigned</font> member_num ) const</code>
+          <dd><code>VarLenType CompType::getMemberVarLenType( 
+            <font color=red>unsigned</font> member_num ) const</code>
 	  
         </dl>
 
@@ -305,9 +365,8 @@ transition from the HDF5 Release 1.6.3 to Release 1.6.4.
 -->
 	  <dt>C functions and
 	  <dt>Fortran subroutines:
-          <dd>HDF5 Release 1.6.4 is primarily a "Bugfix Release"; 
-              there are no public API changes in the HDF5 C library
-              or in the Fortran interfaces.
+          <dd>HDF5 Release 1.6.4 "Bugfix Release";
+              there are no new C APIs or Fortran subroutines.
 <!--
           <dd>The following C functions are new for Release 1.6.4 and 
               are documented in the
@@ -2442,7 +2501,7 @@ Describes HDF5 Release 1.6.5, October 2005
 </address>
 <!-- #EndLibraryItem --><!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified: 25 October 2005 
+Last modified: 26 October 2005 
 <!-- hhmts end -->
 
 </body>
