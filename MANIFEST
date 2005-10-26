@@ -86,6 +86,7 @@
 ./config/linux-gnuaout
 ./config/linux-gnulibc1
 ./config/linux-gnulibc2
+./config/mpich
 ./config/nv1-cray
 ./config/pgi-flags
 ./config/powerpc-apple
