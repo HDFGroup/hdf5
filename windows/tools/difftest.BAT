@@ -231,6 +231,10 @@ h5diff%2 ..\..\testfiles\file7.h5 ..\..\testfiles\file8.h5 -v > ..\..\temptest\h
 more ..\..\temptest\h5diff_80_error.results >> ..\..\temptest\h5diff_80.results
 del ..\..\temptest\h5diff_80_error.results
 
+h5diff%2 ..\..\testfiles\file1.h5 ..\..\testfiles\file1.h5 > ..\..\temptest\h5diff_90.results 2>..\..\temptest\h5diff_90_error.results
+more ..\..\temptest\h5diff_90_error.results >> ..\..\temptest\h5diff_90.results
+del ..\..\temptest\h5diff_90_error.results
+
 cd ..\..\temptest
 mkdir fctemp
 
@@ -1120,6 +1124,24 @@ if %ERRORLEVEL%==0 (
    echo Testing h5diff file7.h5 file8.h5 -v                                    PASSED >> ..\..\difftest%2_%1.txt
 ) else (
    echo Testing h5diff file7.h5 file8.h5 -v                                    FAILED >> ..\..\difftest%2_%1.txt
+   more temp.txt >> ..\..\difftest%2_%1.txt
+)
+del temp.txt
+cd ..
+
+REM ##############################################################################
+REM ## Same File Comparison
+REM ##############################################################################
+
+call ..\deleteline h5diff_90.results 1 
+cd ..\testfiles
+call ..\deleteline h5diff_90.txt 4
+cd ..\temptest\fctemp
+fc h5diff_90.txt h5diff_90.results >temp.txt
+if %ERRORLEVEL%==0 (
+   echo Testing h5diff file1.h5 file1.h5                                       PASSED >> ..\..\difftest%2_%1.txt
+) else (
+   echo Testing h5diff file1.h5 file1.h5                                       FAILED >> ..\..\difftest%2_%1.txt
    more temp.txt >> ..\..\difftest%2_%1.txt
 )
 del temp.txt
