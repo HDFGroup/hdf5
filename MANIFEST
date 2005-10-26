@@ -91,6 +91,7 @@
 ./config/linux-gnulibc1
 ./config/linux-gnulibc2
 ./config/lt_vers.am
+./config/mpich
 ./config/nec-superux14.1
 ./config/nv1-cray
 ./config/Makefile.am.blank
