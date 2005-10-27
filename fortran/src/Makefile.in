@@ -1020,7 +1020,7 @@ build-check-p: $(LIB) $(PROGS) $(TESTS)
 	@for test in $(TEST_PROG_PARA) dummy; do                             \
 	   if test $$test != dummy; then                                      \
 	      $(MAKE) $(AM_MAKEFLAGS) $$test.chkexe_ \
-	      RUNTESTS="$(RUNPARALLEL)"; \
+	      RUNTESTS="$(RUNPARALLEL)" || exit 1; \
 	   fi;                                                                \
 	done
 	@for test in $(TEST_SCRIPT_PARA) dummy; do                           \
