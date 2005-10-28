@@ -172,14 +172,8 @@
 /* Define to 1 if you have the `nsl' library (-lnsl). */
 #undef HAVE_LIBNSL
 
-/* Define to 1 if you have the `pdb' library (-lpdb). */
-#undef HAVE_LIBPDB
-
 /* Define to 1 if you have the `pthread' library (-lpthread). */
 #undef HAVE_LIBPTHREAD
-
-/* Define to 1 if you have the `silo' library (-lsilo). */
-#undef HAVE_LIBSILO
 
 /* Define to 1 if you have the `socket' library (-lsocket). */
 #undef HAVE_LIBSOCKET
@@ -219,9 +213,6 @@
 
 /* Define if we have parallel support */
 #undef HAVE_PARALLEL
-
-/* Define to 1 if you have the <pdb.h> header file. */
-#undef HAVE_PDB_H
 
 /* Define to 1 if you have the <pthread.h> header file. */
 #undef HAVE_PTHREAD_H

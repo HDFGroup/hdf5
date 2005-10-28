@@ -92,6 +92,7 @@ New Features
 		 KY - 2005/09/12
     Tools:
     ------
+	- Removed obsolete pdb2hdf tool.  JML - 2005/10/28
         - Sped up h5dump on files with large numbers of objects.
             QAK - 2005/08/25
 

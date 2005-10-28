@@ -596,6 +596,15 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
 fi
 
 dnl ----------------------------------------------------------------------
+dnl Absoft compiler must be used with --disable-shared.
+dnl
+if test "X$F9X_BASENAME" = "Xf95"; then
+  if test "X$enable_shared" != "Xno"; then
+    AC_MSG_ERROR([must use --disable-shared when building with Absoft Fortran compiler])
+  fi
+fi
+
+dnl ----------------------------------------------------------------------
 dnl Should the Stream Virtual File Driver be compiled in ?
 dnl
 AC_MSG_CHECKING([for Stream Virtual File Driver support])

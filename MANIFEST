@@ -1502,10 +1502,8 @@
 ./tools/misc/Makefile.in
 ./tools/misc/h5cc.in
 ./tools/misc/h5debug.c
-./tools/misc/h5import.c
 ./tools/misc/h5redeploy.in
 ./tools/misc/h5repart.c
-./tools/misc/pdb2hdf.c
 
 ./tools/testfiles/tall-1.ddl
 ./tools/testfiles/tall-2.ddl

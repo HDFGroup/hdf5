@@ -9623,6 +9623,14 @@ _ACEOF
 
 fi
 
+if test "X$F9X_BASENAME" = "Xf95"; then
+  if test "X$enable_shared" != "Xno"; then
+    { { echo "$as_me:$LINENO: error: must use --disable-shared when building with Absoft Fortran compiler" >&5
+echo "$as_me: error: must use --disable-shared when building with Absoft Fortran compiler" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+fi
+
 echo "$as_me:$LINENO: checking for Stream Virtual File Driver support" >&5
 echo $ECHO_N "checking for Stream Virtual File Driver support... $ECHO_C" >&6
 # Check whether --enable-stream-vfd or --disable-stream-vfd was given.
