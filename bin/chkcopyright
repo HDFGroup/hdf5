@@ -446,8 +446,12 @@ while read file; do
 	*.sh | *.sh.in | *Makefile | *Makefile.in | *Makefile.am )
 	    SHELL_FILE ${file}
 	    ;;
-	*.h5 )
+	*.h5 | *.hdf5 )
 	    # Ignore HDF5 data files
+	    continue
+	    ;;
+	*.jpg )
+	    # Ignore binary data files
 	    continue
 	    ;;
 	*CVS/* )
