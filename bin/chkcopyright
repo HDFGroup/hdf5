@@ -360,6 +360,9 @@ UNKNOWN_FILE()
     elif grep '^!' < $tmpfile > /dev/null; then
 	# Some lines start with a "!".  It may be a Fortran 9X style file.
 	FORTRAN_SOURCE $f
+    elif grep -i '^<html>' < $tmpfile > /dev/null; then
+	# Some lines start with a "<html>".  It may be an HTML file.
+	HTML_FILE $f
     else
 	# Unknown type.
 	UNKNOWN_TYPE $f
