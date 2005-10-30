@@ -163,7 +163,7 @@ void PropList::copyProp( PropList& dest, const string& name ) const
 ///\param	dest - IN: Destination property list or class
 ///\param	src  - IN: Source property list or class
 ///\param	name - IN: Name of the property to copy - \c char pointer
-///\notes	This member function will be removed in the next release
+///\note	This member function will be removed in the next release
 ///\exception	H5::PropListIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------

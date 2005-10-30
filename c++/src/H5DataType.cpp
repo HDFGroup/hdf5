@@ -197,7 +197,8 @@ void DataType::commit(CommonFG& loc, const string& name) const
 // Function:	DataType::committed
 ///\brief	Determines whether a datatype is a named type or a
 ///		transient type.
-///\return	true if the datatype is a named type, and false, otherwise.
+///\return	\c true if the datatype is a named type, and \c false, 
+///		otherwise.
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -264,7 +265,24 @@ void DataType::convert( const DataType& dest, size_t nelmts, void *buf, void *ba
    }
 }
 
-// Sets the overflow handler to a specified function.
+/*
+These two functions may not work properly.  They will be re-evaluated 
+and tested throughly.  BMR - Oct 29, 2005
+*/
+
+//--------------------------------------------------------------------------
+// Function:	DataType::setOverflow
+///\brief	Sets the overflow handler to a specified function.
+///\param	func       - IN: Function to be called when overflow occurs
+///\return	Pointer to a suitable conversion function
+///\exception	H5::DataTypeIException
+///\par Description
+///		The function specified by \a func will be called for all 
+///		data type conversions that result in an overflow.
+///		For more information, please see:
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5T.html#Datatype-SetOverflow
+// Programmer	Binh-Minh Ribler - 2004
+//--------------------------------------------------------------------------
 void DataType::setOverflow( H5T_overflow_t func ) const
 {
    // Call C routine H5Tset_overflow to set the overflow handler
@@ -275,7 +293,15 @@ void DataType::setOverflow( H5T_overflow_t func ) const
    }
 }
 
-// Returns a pointer to the current global overflow function.
+//--------------------------------------------------------------------------
+// Function:	DataType::getOverflow
+///\brief	Returns a pointer to the current global overflow function.
+///\return	Pointer to an application-defined function if successful; 
+///		otherwise returns NULL; this can happen if no overflow 
+///		handling function is registered.
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2004
+//--------------------------------------------------------------------------
 H5T_overflow_t DataType::getOverflow(void) const
 {
    return( H5Tget_overflow());  // C routine
