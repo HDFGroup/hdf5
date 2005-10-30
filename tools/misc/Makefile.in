@@ -48,7 +48,7 @@ PUB_LIB=
 
 ## Source and object files for programs...
 ##
-PROG_SRC=h5debug.c h5repart.c pdb2hdf.c
+PROG_SRC=h5debug.c h5repart.c
 PROG_OBJ=$(PROG_SRC:.c=.lo)
 
 PRIVATE_HDR=
@@ -78,8 +78,5 @@ h5redeploy: h5redeploy.in
 
 h5repart: h5repart.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5repart.lo $(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
-
-pdb2hdf: pdb2hdf.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ pdb2hdf.lo $(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@
