@@ -70,7 +70,7 @@ if test "X-pgf90" = "X-$f9x_vendor"; then
     FC_BASENAME=pgf90
     F9XSUFFIXFLAG=""
     FSEARCH_DIRS=""
-    FCFLAGS="$FCFLAGS -Mdclchk -Mstandard -Minform,warn"
+    FCFLAGS="$FCFLAGS -Minform,warn"
 
     # Production
     # Check for MPI wrapper being used and tweak down compiler options
@@ -84,7 +84,7 @@ if test "X-pgf90" = "X-$f9x_vendor"; then
     PROD_FCFLAGS="-fast -s -Mnoframe"
 
     # Debug
-    DEBUG_FCFLAGS="-g -Mbounds -Mchkfpstk -Mchkptr"
+    DEBUG_FCFLAGS="-g -Mbounds -Mchkfpstk -Mchkptr -Mdclchk"
 
     # Profile
     PROFILE_FCFLAGS="-g -Mprof=func,line"
