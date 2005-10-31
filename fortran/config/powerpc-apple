@@ -34,7 +34,6 @@ if test "X-" = "X-$F9X"; then
     F9X_BASENAME=xlf
   else
     F9X_BASENAME=f95
-    
 fi
 
 #
@@ -83,3 +82,14 @@ case $F9X_BASENAME in
         ;;
 
 esac
+
+# ----------------------------------------------------------------------
+# Absoft compiler must be used with --disable-shared.
+# 
+if test "X$F9X_BASENAME" = "Xf95"; then
+  if test "X$enable_shared" != "Xno"; then
+    echo "error: --disable-shared must be used when building with Absoft Fortran compiler"
+    exit 1
+  fi
+fi
+    
