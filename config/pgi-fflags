@@ -70,7 +70,8 @@ if test "X-pgf90" = "X-$f9x_vendor"; then
     FC_BASENAME=pgf90
     F9XSUFFIXFLAG=""
     FSEARCH_DIRS=""
-    FCFLAGS="$FCFLAGS -Minform,warn"
+    # Uncomment the following to add something specific for FCFLAGS.
+    #FCFLAGS="$FCFLAGS"
 
     # Production
     # Check for MPI wrapper being used and tweak down compiler options
