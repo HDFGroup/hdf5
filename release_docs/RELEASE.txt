@@ -68,7 +68,7 @@ New Features
 	     selection INSIDE HDF5. 
 	     1) DEC 5.x is not supporting complicated derived datatype.
 	     2) For AIX 5.1,
-	     if your poe version number is 3.2.0.19 or lower,
+	     if your poe version number is 3.2.0.20 or lower,
 	     please edit powerpc-ibm-aix5.x under hdf5/config,
 	     Find the line with
 		    << hdf5_mpi_complex_derived_datatype_works>>
