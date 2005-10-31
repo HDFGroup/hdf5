@@ -426,7 +426,7 @@ void* DataSet::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_
 ///\brief	This is an overloaded function, provided for your convenience.
 ///		It differs from the above function in that it only creates
 ///		a reference to an HDF5 object, not to a dataset region.
-///\param	name - IN: Name of the object to be referenced
+///\param	name - IN: Name of the object to be referenced - \c char pointer
 ///\return	A reference
 ///\exception	H5::IdComponentException
 ///\par Description
@@ -438,6 +438,19 @@ void* DataSet::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_
 void* DataSet::Reference(const char* name) const
 {
    return(p_reference(name, -1, H5R_OBJECT));
+}
+
+//--------------------------------------------------------------------------
+// Function:    DataSet::Reference
+///\brief       This is an overloaded function, provided for your convenience.
+///             It differs from the above function in that it takes an
+///             \c std::string for the object's name.
+///\param       name - IN: Name of the object to be referenced - \c std::string
+// Programmer   Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void* DataSet::Reference(const string& name) const
+{
+   return(Reference(name.c_str()));
 }
 
 //--------------------------------------------------------------------------
