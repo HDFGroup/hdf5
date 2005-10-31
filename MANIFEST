@@ -65,6 +65,7 @@
 ./bin/snapshot_version			_DO_NOT_DISTRIBUTE_
 ./bin/timekeeper			_DO_NOT_DISTRIBUTE_
 ./bin/trace
+./bin/yodconfigure
 
 ./config/BlankForm
 ./config/commence.am
