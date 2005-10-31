@@ -755,9 +755,7 @@ if [ -z "$NOCVS" ]; then
     # Check Copyright notice
     # ======================
     PRINT Checking Copyrights notices ...
-    (cd $SNAPYARD/current; bin/chkcopyright) > $TMPFILE 2>&1
-    if [ ! -s $TMPFILE ]; then
-	# No output means all is well.
+    if (cd $SNAPYARD/current; bin/chkcopyright) > $TMPFILE 2>&1 ; then
 	echo Passed.
     else
 	# Save the output and report some of it.
@@ -766,14 +764,23 @@ if [ -z "$NOCVS" ]; then
 	# Need fixes/cleanup later.
 	echo "Failed. See detail in another report mail"
 	cp $TMPFILE $COPYRIGHT_ERR
-        (   
-	    nlines=300
+	nheadlines=300
+	ntaillines=5		# Number of lines in report summary.
+	(
 	    echo =========================
-	    echo "Copyright checking failed. Showing first $nlines lines of output."
+	    echo "Copyright checking failed. Showing first $nheadlines lines of output."
 	    echo "Complete output is in file $COPYRIGHT_ERR"
 	    echo =========================
-	    head -$nlines $COPYRIGHT_ERR
-	    echo ...
+	    nreportlines=`wc -l < $COPYRIGHT_ERR`
+	    if [ $nreportlines -le `expr $nheadlines + $ntaillines` ]; then
+		# Just print the whole file.
+		cat $COPYRIGHT_ERR
+	    else
+		# Show the first $nheadlines plus report summary
+		head -$nheadlines $COPYRIGHT_ERR
+		echo ...
+		tail -$ntaillines $COPYRIGHT_ERR
+	    fi 
 	)  | Mail -s "${H5VERSION} Copyrights check Failed" hdf5lib
     fi
     rm $TMPFILE
