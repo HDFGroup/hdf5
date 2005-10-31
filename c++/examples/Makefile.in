@@ -91,6 +91,8 @@ BUILD_PABLO_CONDITIONAL_FALSE = @BUILD_PABLO_CONDITIONAL_FALSE@
 BUILD_PABLO_CONDITIONAL_TRUE = @BUILD_PABLO_CONDITIONAL_TRUE@
 BUILD_PARALLEL_CONDITIONAL_FALSE = @BUILD_PARALLEL_CONDITIONAL_FALSE@
 BUILD_PARALLEL_CONDITIONAL_TRUE = @BUILD_PARALLEL_CONDITIONAL_TRUE@
+BUILD_SHARED_ONLY_CONDITIONAL_FALSE = @BUILD_SHARED_ONLY_CONDITIONAL_FALSE@
+BUILD_SHARED_ONLY_CONDITIONAL_TRUE = @BUILD_SHARED_ONLY_CONDITIONAL_TRUE@
 BYTESEX = @BYTESEX@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
@@ -277,12 +279,20 @@ LIBH5_HL = $(top_builddir)/hl/src/libhdf5_hl.la
 LIBH5F_HL = $(top_builddir)/hl/fortran/src/libhdf5hl_fortran.la
 LIBH5CPP_HL = $(top_builddir)/hl/c++/src/libhdf5_hl_cpp.la
 docdir = $(exec_prefix)/doc
+@BUILD_SHARED_ONLY_CONDITIONAL_FALSE@H5CC = $(bindir)/h5cc
 
 # Scripts used to build examples
-H5CC = $(bindir)/h5cc
-H5CC_PP = $(bindir)/h5pcc
-H5FC = $(bindir)/h5fc
-H5FC_PP = $(bindir)/h5pfc
+# If only shared libraries have been installed, have h5cc build examples with
+# shared libraries instead of static libraries
+@BUILD_SHARED_ONLY_CONDITIONAL_TRUE@H5CC = $(bindir)/h5cc -shlib
+@BUILD_SHARED_ONLY_CONDITIONAL_FALSE@H5CC_PP = $(bindir)/h5pcc
+@BUILD_SHARED_ONLY_CONDITIONAL_TRUE@H5CC_PP = $(bindir)/h5pcc -shlib
+@BUILD_SHARED_ONLY_CONDITIONAL_FALSE@H5FC = $(bindir)/h5fc
+@BUILD_SHARED_ONLY_CONDITIONAL_TRUE@H5FC = $(bindir)/h5fc -shlib
+@BUILD_SHARED_ONLY_CONDITIONAL_FALSE@H5FC_PP = $(bindir)/h5pfc
+@BUILD_SHARED_ONLY_CONDITIONAL_TRUE@H5FC_PP = $(bindir)/h5pfc -shlib
+@BUILD_SHARED_ONLY_CONDITIONAL_FALSE@H5CPP = $(bindir)/h5c++
+@BUILD_SHARED_ONLY_CONDITIONAL_TRUE@H5CPP = $(bindir)/h5c++ -shlib
 
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
@@ -292,9 +302,6 @@ H5FC_PP = $(bindir)/h5pfc
 # directory.  Since automake doesn't know about the examples, we need to
 # tell it to clean the example programs, too.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5
-
-# Use h5c++ to build examples, instead of reguar C++ compiler
-H5CPP = $(bindir)/h5c++
 
 # These are the programs that 'make all' or 'make prog' will build and
 # which 'make check' will run.  List them in the order they should be run.
@@ -546,7 +553,7 @@ installcheck-local:
 	@$(MAKE) $(AM_MAKEFLAGS) check
 
 # How to build programs using h5c++
-$(EXTRA_PROG): $(H5CPP) $(LIBHDF5) $(LIBH5CPP)
+$(EXTRA_PROG): $(LIBHDF5) $(LIBH5CPP)
 	$(H5CPP) $(CPPFLAGS) -o $@ $(srcdir)/$@.cpp
 
 # List dependencies for each program.  Normally, automake would take

@@ -20,9 +20,6 @@
 
 include $(top_srcdir)/config/commence.am
 
-# Use h5c++ to build examples, instead of reguar C++ compiler
-H5CPP=$(bindir)/h5c++
-
 # These are the programs that 'make all' or 'make prog' will build and
 # which 'make check' will run.  List them in the order they should be run.
 TEST_PROG=create readdata writedata compound extend_ds chunks h5group
@@ -88,7 +85,7 @@ installcheck-local:
 	@$(MAKE) $(AM_MAKEFLAGS) check
 
 # How to build programs using h5c++
-$(EXTRA_PROG): $(H5CPP) $(LIBHDF5) $(LIBH5CPP)
+$(EXTRA_PROG): $(LIBHDF5) $(LIBH5CPP)
 	$(H5CPP) $(CPPFLAGS) -o $@ $(srcdir)/$@.cpp
 
 # List dependencies for each program.  Normally, automake would take

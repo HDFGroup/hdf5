@@ -62,6 +62,8 @@ LIBS="@LIBS@"
 FC="${HDF5_FC:-$FCBASE}"
 FLINKER="${HDF5_FLINKER:-$FLINKERBASE}"
 
+USE_SHARED_LIB="${HDF5_USE_SHLIB:-no}"
+
 usage() {
   # A wonderfully informative "usage" message.
   echo "usage: $prog_name [OPTIONS] <compile line>"
@@ -72,6 +74,8 @@ usage() {
   echo "                   subdirectories [default: $prefix]"
   echo "    -show        Show the commands without executing them"
   echo "    -showconfig  Show the HDF5 library configuration summary"
+  echo "    -shlib       Compile with shared HDF5 libraries"
+  echo "    -noshlib     Compile with static HDF5 libraries [default]"
   echo " "
   echo "  <compile line>  - the normal compile line options for your compiler."
   echo "                    $prog_name uses the same compiler you used to compile"
@@ -158,6 +162,12 @@ for arg in $@ ; do
       showconfigure
       exit $status
       ;;
+    -shlib)
+      USE_SHARED_LIB="yes"
+      ;;
+    -noshlib)
+      USE_SHARED_LIB="no"
+      ;;
     -help)
       usage
       ;;
@@ -223,16 +233,62 @@ fi
 
 
 if test "x$do_link" = "xyes"; then
+  shared_link=""
+# conditionnaly link with the hl library
+  if test "X$HL" = "Xhl"; then
+   libraries=" $libraries -lhdf5_fortran -lhdf5_hl -lhdf5 "
+  else
+   libraries=" $libraries -lhdf5_fortran -lhdf5 "
+  fi
+  link_args="$link_args -L${libdir}"
 
-  # conditionnaly link with the hl library  
-    if test "X$HL" = "Xhl"; then
-      link_args="$link_args ${libdir}/libhdf5_fortran.a ${libdir}/libhdf5.a ${libdir}/libhdf5hl_fortran.a ${libdir}/libhdf5_hl.a"
-     else
-      link_args="$link_args ${libdir}/libhdf5_fortran.a ${libdir}/libhdf5.a"
-    fi      
+  case "$host_os" in
+    linux*)               flag="-Wl,-rpath -Wl," ;;
+    hpux*)                flag="-Wl,+b -Wl," ;;
+    freebsd*|solaris*)    flag="-R" ;;
+    rs6000*|aix*)         flag="-L" ;;
+    irix*|sgi)            flag="-rpath " ;;
+    *)                    flag="" ;;
+  esac
 
+  if test -n "$flag"; then
+    shared_link="${flag}${libdir}"
+  fi
+
+  if test "x$USE_SHARED_LIB" != "xyes"; then
+    # The "-lhdf5" & "-lhdf5_hl" flags are in here already...This is a static
+    # compile though, so change it to the static version (.a) of the library.
+    new_libraries=""
+    for lib in $libraries; do
+      case "$lib" in
+        -lhdf5)
+          new_libraries="$new_libraries ${libdir}/libhdf5.a"
+          ;;
+        -lhdf5_hl)
+          new_libraries="$new_libraries ${libdir}/libhdf5_hl.a"
+          ;;
+        *)
+          new_libraries="$new_libraries $lib"
+          ;;
+      esac
+    done
+    libraries="$new_libraries"
+  fi
+
+  for lib in $libraries; do
+    if echo $link_args | grep " $lib " > /dev/null ||
+       echo $link_args | grep " $lib$" > /dev/null; then
+      :
+    else
+      link_args="$link_args $lib "
+    fi
+  done
+
+  # The LIBS are just a bunch of -l* libraries necessary for the HDF5
+  # module. It's okay if they're included twice in the compile line.
   link_args="$link_args $LIBS"
-  $SHOW $FLINKER ${FFLAGS} ${F9XSUFFIXFLAG} ${fmodules} ${LDFLAGS} $link_objs $link_args
+
+  $SHOW $FLINKER $FFLAGS $F9XSUFFIXFLAG $fmodules $LDFLAGS $link_objs $link_args $shared_link
   status=$?
 fi
 
