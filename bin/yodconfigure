@@ -1,0 +1,46 @@
+#!/bin/sh
+# Fix configure file so that it can launch configure testing executable
+# via the proper launching command, e.g., yod.  (Thus the name yodconfigure
+# is used.)
+#
+# Author: Albert Cheng
+# Email acheng@hdfgroup.org if you have improvement, suggestios, questions, ...
+
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 <configure file>"
+    exit 1
+fi
+confile=$1
+
+if [ ! -w $confile ]; then
+    echo "$0: $confile is not writable"
+    exit 1
+fi
+
+# Insert the ACTRY function after the 1st line which is the #!/bin/sh.
+# Change all "eval $ac_try" commands to call ACTRY.
+#
+ed - $confile <<'EOF'
+1a
+# ===inserted by yodconfigure ====
+# ACTRY will figure out when it is approprirate to run the command by the
+# $RUNSERIAL launcher (e.g., yod -sz 1) and when to just run it as is.
+# So far, ./a.out and ./conftest are names of real executable that should
+# be run by $RUNSERIAL.
+#
+# (uncomment the echo line if you want to see what is going on.)
+ACTRY()
+{
+#echo ACTRY: args are: $* > /dev/tty
+if [ "$1" = ./a.out -o "$1" = ./conftest ]; then
+#    echo $RUNSERIAL $* > /dev/tty
+    $RUNSERIAL $*
+else
+    $*
+fi
+}
+.
+g/eval $ac_try/s/eval/eval ACTRY/p
+w
+q
+EOF
