@@ -48,6 +48,7 @@ FTN_COPYRIGHT=/tmp/h5chkright_FTN.$$	# Fortran style copyright
 HTM_COPYRIGHT=/tmp/h5chkright_HTM.$$	# HTML style copyright
 SH_COPYRIGHT=/tmp/h5chkright_SH.$$	# SHELL style copyright
 SH_COPYRIGHT2=/tmp/h5chkright_SH2.$$	# SHELL style copyright, 2nd style.
+WINBAT_COPYRIGHT=/tmp/h5chkright_WINBAT.$$	# Windows Batch file Copyright notice
 
 
 # Help page
@@ -151,6 +152,21 @@ EOF
 ## is linked from the top-level documents page.  It can also be found at
 ## http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
 ## access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+EOF
+
+    # Windows Batch file Copyright notice
+    cat > ${WINBAT_COPYRIGHT} << \EOF
+@REM Copyright by the Board of Trustees of the University of Illinois.
+@REM All rights reserved.
+@REM
+@REM This file is part of HDF5.  The full HDF5 copyright notice, including
+@REM terms governing use, modification, and redistribution, is contained in
+@REM the files COPYING and Copyright.html.  COPYING can be found at the root
+@REM of the source code distribution tree; Copyright.html can be found at the
+@REM root level of an installed copy of the electronic HDF5 document set and
+@REM is linked from the top-level documents page.  It can also be found at
+@REM http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
+@REM access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
 EOF
 
 }
@@ -347,6 +363,26 @@ SHELL_FILE()
 }
 
 
+# Check Windows Batch files
+#
+BATCH_FILE()
+{
+    f=$1
+    echo matching it as batch file
+    case `MATCH_COPYRIGHT $WINBAT_COPYRIGHT $f` in
+    PASSED)
+	PASSED $f
+	return
+	;;
+    FAILED)
+	# show the difference
+	FAILED $f
+	$DIFF ${EXTRACTEDFILE} ${WINBAT_COPYRIGHT}
+	;;
+    esac
+}
+
+
 # Check Unknown type file.
 # Inspect the first 5 lines and try to guess what type of file it is.
 # Then try verify Copyright notice according to guessed type.
@@ -453,12 +489,20 @@ while read file; do
 	*.sh | *.sh.in | *Makefile | *Makefile.in | *Makefile.am )
 	    SHELL_FILE ${file}
 	    ;;
+	*.bat | *.BAT )
+	    # Windows Batch files
+	    BATCH_FILE ${file}
+	    ;;
 	*.h5 | *.hdf5 )
 	    # Ignore HDF5 data files
 	    continue
 	    ;;
 	*.jpg )
 	    # Ignore binary data files
+	    continue
+	    ;;
+	*.zip | *.dsp | *.dsw)
+	    # Ignore Windows binary files
 	    continue
 	    ;;
 	*CVS/* )
