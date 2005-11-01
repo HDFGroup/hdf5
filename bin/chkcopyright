@@ -383,7 +383,6 @@ SHELL_FILE()
 BATCH_FILE()
 {
     f=$1
-    echo matching it as batch file
     case `MATCH_COPYRIGHT $WINBAT_COPYRIGHT $f` in
     PASSED)
 	PASSED $f
