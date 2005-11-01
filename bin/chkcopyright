@@ -257,6 +257,19 @@ PARSE_OPTION()
 }
 
 
+# Rinse the file by,
+#    removing all \r which is often present in Windows files;
+#    replace tabs with equivalent spaces;
+#    removing all trailing spaces.
+# $1 is the file to be rinsed.
+RINSE()
+{
+    rf=$1
+    cp $rf $tmpfile
+    dos2unix < $tmpfile | expand | sed -e 's/ *$//' > $rf
+}
+
+
 # Match Copyright notice.
 # $1 file which contains the expected copyright notice.
 # $2 file in which to look for the copyright notice.
@@ -277,6 +290,7 @@ MATCH_COPYRIGHT()
     nlines=`wc -l < ${COPYRIGHTFILE}| tr -d ' '`
     head -$NUMBEGINLINES < $f | sed -n -e "/${COPYRIGHTSTR}/"',$p' | \
 	head -${nlines} > ${EXTRACTEDFILE}
+    RINSE ${EXTRACTEDFILE}
     $DIFF ${EXTRACTEDFILE} ${COPYRIGHTFILE} >/dev/null 2>&1
     if test $? -eq 0; then
 	echo PASSED
@@ -331,7 +345,8 @@ HTML_FILE()
     COPYRIGHTFILE=$HTM_COPYRIGHT
     # Must use stdin for wc to prevent filename from popping up.
     nlines=`wc -l < ${COPYRIGHTFILE}| tr -d ' '`
-    sed -n -e '/^<!--$/,/^ -->$/p' < $f | head -${nlines} > ${EXTRACTEDFILE}
+    sed -n -e '/^<!--/,/^ -->/p' < $f | head -${nlines} > ${EXTRACTEDFILE}
+    RINSE ${EXTRACTEDFILE}
     $DIFF ${EXTRACTEDFILE} ${COPYRIGHTFILE} >/dev/null 2>&1
     if test $? -ne 0; then
 	# show the differences
@@ -501,8 +516,8 @@ while read file; do
 	    # Ignore binary data files
 	    continue
 	    ;;
-	*.zip | *.dsp | *.dsw)
-	    # Ignore Windows binary files
+	*.zip | *.dsp | *.dsw | *.js)
+	    # Ignore Windows binary or special files.
 	    continue
 	    ;;
 	*CVS/* )
