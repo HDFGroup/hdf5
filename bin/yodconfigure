@@ -52,7 +52,7 @@ else
 fi
 }
 .
-g/eval $ac_try/s/eval/eval ACTRY/p
+g/eval $ac_try/s/eval/eval ACTRY/
 w
 q
 EOF
