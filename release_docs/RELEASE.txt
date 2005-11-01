@@ -426,6 +426,15 @@ Footnotes:  (1) Using mpich 1.2.6
 
 Known Problems
 ==============
+* Fortran testing and compiling failures on windows XP 
+  1. Compaq visual fortran 6.6c with VS 6.0
+     The Fortran tests failed for both release, release dll, debug and debug
+     dll. The failure is a random one. We won't provide fortran libraries. The
+     same test passed with 1.7.51 snapshot. You may find the 1.7.51 snapshot
+     under ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/snapshots/
+  2. Intel fortran 8.1 under .Net environment
+     The fortran library cannot even be compiled. Some users have pointed this
+     to intel forum.
 * When testing parallel HDF5 with the C compiler version MIPSpro 7.4.3 at IRIX
   6.5, set enviroment variable MPI_TYPE_MAX to be a bigger number, for example 120000 
   in order to pass the complicated collective IO tests inside parallel HDF5
