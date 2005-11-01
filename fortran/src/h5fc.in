@@ -236,7 +236,7 @@ if test "x$do_link" = "xyes"; then
   shared_link=""
 # conditionnaly link with the hl library
   if test "X$HL" = "Xhl"; then
-   libraries=" $libraries -lhdf5_fortran -lhdf5_hl -lhdf5 "
+   libraries=" $libraries -lhdf5hl_fortran -lhdf5_hl -lhdf5_fortran -lhdf5 "
   else
    libraries=" $libraries -lhdf5_fortran -lhdf5 "
   fi
@@ -256,8 +256,8 @@ if test "x$do_link" = "xyes"; then
   fi
 
   if test "x$USE_SHARED_LIB" != "xyes"; then
-    # The "-lhdf5" & "-lhdf5_hl" flags are in here already...This is a static
-    # compile though, so change it to the static version (.a) of the library.
+    # The hdf5 library "-l" flags are in here already.  This is a static
+    # compile though, so change it to the static versions (.a) of the libraries.
     new_libraries=""
     for lib in $libraries; do
       case "$lib" in
@@ -266,6 +266,12 @@ if test "x$do_link" = "xyes"; then
           ;;
         -lhdf5_hl)
           new_libraries="$new_libraries ${libdir}/libhdf5_hl.a"
+          ;;
+        -lhdf5_fortran)
+          new_libraries="$new_libraries ${libdir}/libhdf5_fortran.a"
+          ;;
+        -lhdf5hl_fortran)
+          new_libraries="$new_libraries ${libdir}/libhdf5hl_fortran.a"
           ;;
         *)
           new_libraries="$new_libraries $lib"

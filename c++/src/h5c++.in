@@ -251,7 +251,7 @@ if test "x$do_link" = "xyes"; then
   shared_link=""
   # conditionnaly link with the hl library  
   if test "X$HL" = "Xhl"; then
-   libraries=" $libraries -lhdf5_cpp -lhdf5_hl -lhdf5 "
+   libraries=" $libraries -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5 "
   else
    libraries=" $libraries -lhdf5_cpp -lhdf5 "
   fi
@@ -288,6 +288,12 @@ if test "x$do_link" = "xyes"; then
           ;;
         -lhdf5_hl)
           new_libraries="$new_libraries ${libdir}/libhdf5_hl.a"
+          ;;
+        -lhdf5_cpp)
+          new_libraries="$new_libraries ${libdir}/libhdf5_cpp.a"
+          ;;
+        -lhdf5_hl_cpp)
+          new_libraries="$new_libraries ${libdir}/libhdf5_hl_cpp.a"
           ;;
         *)
           new_libraries="$new_libraries $lib"
