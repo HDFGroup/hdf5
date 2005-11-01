@@ -16,6 +16,7 @@
 #
 # HDF5 Library Makefile(.in)
 #
+
 include $(top_srcdir)/config/commence.am
 
 # Include src and tools/lib directories
