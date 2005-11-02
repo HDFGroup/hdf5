@@ -515,8 +515,11 @@ while read file; do
 	    # Ignore binary data files
 	    continue
 	    ;;
-	*.zip | *.dsp | *.dsw | *.js)
+	*.zip | *.dsp | *.dsw | *.js | *.sln )
 	    # Ignore Windows binary or special files.
+	    # .dsp & .dsw are Visual Studio project files.
+	    # .sln are .NET solution files.
+	    # .js are Microsoft Java Script files.
 	    continue
 	    ;;
 	*CVS/* )
