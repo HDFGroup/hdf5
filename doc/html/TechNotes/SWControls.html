@@ -9,6 +9,26 @@
 
 <BODY LINK="#0000ff" VLINK="#800080">
 
+<!-- #BeginLibraryItem "/ed_libs/copyright-html.lbi" -->
+<!-- separator -->
+<!--
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  * Copyright by the Board of Trustees of the University of Illinois.         *
+  * All rights reserved.                                                      *
+  *                                                                           *
+  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+  * terms governing use, modification, and redistribution, is contained in    *
+  * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+  * of the source code distribution tree; Copyright.html can be found at the  *
+  * root level of an installed copy of the electronic HDF5 document set and   *
+  * is linked from the top-level documents page.  It can also be found at     *
+  * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ -->
+<!-- separator -->
+<!-- #EndLibraryItem -->
+
 <H1>HDF5 Software Controls</H1>
 
 <P>
@@ -32,38 +52,38 @@ debugging HDF5 API calls</I></A>.
 </P>
 
 <DL>
-	<DT><B>CC</B></DT>
-		<DD><I>Used by configure.</I> Override the default C compiler.</DD>
-	<DT><B>LIBS</B></DT>
-		<DD><I>Used by configure.</I> Add more libraries to be used.</DD>
-	<DT><B>NP</B></DT>
-		<DD>Number of MPI-processes to invoke for testing. Default to 2.</DD>
-	<DT><B>HDF5_NOCLEANUP</B></DT>
-		<DD><I>Used by most test programs.</I> When set, temporary files
-				created during tests are NOT removed. Default is to remove them
-				by the end of each test. Note that the variable value does not
-				matter. E.g., the values of "yes", "no" and "" all have the same
-				effect, that is, NO cleanup.</DD>
-	<DT><B>H5FD_mpio_Debug</B></DT>
-		<DD><I>Used by the MPIO file driver for debugging.</I> Need to have
-				H5FDmpio_DEBUG macro defined during compiling. Should be set to a
-				string to turn on various tracing. Valid values (cases matter)
-				are:
-				<DL>
-					<DT>t</DT>
-						<DD>Trace all routine</DD>
-					<DT>r</DT>
-						<DD>Trace read routines</DD>
-					<DT>w</DT>
-						<DD>Trace write routines</DD>
-					<DT>c</DT>
-						<DD>Show result of MPI_Get_count</DD>
-				</DL>
-		</DD>
-	<DT><B>HDF5_MPI_OPT_TYPES</B></DT>
-		<DD><I>Used by the MPIO file driver to control the use of the optimized
-				mpi input/output routine.</I> 0 turns it off, 1 turns it on (uses
-				optimized code if it can).</DD>
+    <DT><B>CC</B></DT>
+        <DD><I>Used by configure.</I> Override the default C compiler.</DD>
+    <DT><B>LIBS</B></DT>
+        <DD><I>Used by configure.</I> Add more libraries to be used.</DD>
+    <DT><B>NP</B></DT>
+        <DD>Number of MPI-processes to invoke for testing. Default to 2.</DD>
+    <DT><B>HDF5_NOCLEANUP</B></DT>
+        <DD><I>Used by most test programs.</I> When set, temporary files
+                created during tests are NOT removed. Default is to remove them
+                by the end of each test. Note that the variable value does not
+                matter. E.g., the values of "yes", "no" and "" all have the 
+                same effect, that is, NO cleanup.</DD>
+    <DT><B>H5FD_mpio_Debug</B></DT>
+        <DD><I>Used by the MPIO file driver for debugging.</I> Need to have
+                H5FDmpio_DEBUG macro defined during compiling. Should be set to a
+                string to turn on various tracing. Valid values (cases matter)
+                are:
+                <DL>
+                    <DT>t</DT>
+                        <DD>Trace all routine</DD>
+                    <DT>r</DT>
+                        <DD>Trace read routines</DD>
+                    <DT>w</DT>
+                        <DD>Trace write routines</DD>
+                    <DT>c</DT>
+                        <DD>Show result of MPI_Get_count</DD>
+                </DL>
+        </DD>
+    <DT><B>HDF5_MPI_OPT_TYPES</B></DT>
+        <DD><I>Used by the MPIO file driver to control the use of the optimized
+                mpi input/output routine.</I> 0 turns it off, 1 turns it on 
+                (uses optimized code if it can).</DD>
 </DL>
 
 <P>
@@ -71,14 +91,15 @@ debugging HDF5 API calls</I></A>.
 </P>
 
 <DL>
-	<DT><B>H5FDmpio_DEBUG</B></DT>
-		<DD><I>Compile macro.</I> Compile in the MPIO file driver related debugging
-				statements. Defined if macro H5F_DEBUG is defined.</DD>
-	<DT><B>H5FD_mpio_Debug</B></DT>
-		<DD>Compile in debugging used by the MPIO file driver. Need to have
-				H5FDmpio_DEBUG macro defined during compiling. Should be set to a
-				string to turn on the tracing. See environment variable
-				H5FD_mpio_Debug for valid values.</DD>
+    <DT><B>H5FDmpio_DEBUG</B></DT>
+        <DD><I>Compile macro.</I> Compile in the MPIO file driver related 
+                debugging statements. Defined if macro H5F_DEBUG is 
+                defined.</DD>
+    <DT><B>H5FD_mpio_Debug</B></DT>
+        <DD>Compile in debugging used by the MPIO file driver. Need to have
+            FDmpio_DEBUG macro defined during compiling. Should be set to a
+            string to turn on the tracing. See environment variable
+            H5FD_mpio_Debug for valid values.</DD>
 </DL>
 
 <P>

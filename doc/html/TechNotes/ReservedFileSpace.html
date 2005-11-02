@@ -4,7 +4,28 @@
    </head>
 
    <body>
-      <hl>Reserved File Address Space</hl>
+
+<!-- #BeginLibraryItem "/ed_libs/copyright-html.lbi" -->
+<!-- separator -->
+<!--
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  * Copyright by the Board of Trustees of the University of Illinois.         *
+  * All rights reserved.                                                      *
+  *                                                                           *
+  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+  * terms governing use, modification, and redistribution, is contained in    *
+  * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+  * of the source code distribution tree; Copyright.html can be found at the  *
+  * root level of an installed copy of the electronic HDF5 document set and   *
+  * is linked from the top-level documents page.  It can also be found at     *
+  * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ -->
+<!-- separator -->
+<!-- #EndLibraryItem -->   
+
+<hl>Reserved File Address Space</hl>
 
       <p>HDF5 files use 8-byte addresses by default, but users can change this to 2, 4, or even 16 bytes.  This means that it is possible to have files that only address 64 KB of space, and thus that HDF must handle the case of files that have enough space on disk but not enough internal address space to be written.</p>
 

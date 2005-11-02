@@ -5,7 +5,28 @@
   </head>
 
   <body>
-    <h1>Description of the three basic performance tools</h1>
+
+<!-- #BeginLibraryItem "/ed_libs/copyright-html.lbi" -->
+  <!-- separator -->
+  <!--
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  * Copyright by the Board of Trustees of the University of Illinois.         *
+  * All rights reserved.                                                      *
+  *                                                                           *
+  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+  * terms governing use, modification, and redistribution, is contained in    *
+  * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+  * of the source code distribution tree; Copyright.html can be found at the  *
+  * root level of an installed copy of the electronic HDF5 document set and   *
+  * is linked from the top-level documents page.  It can also be found at     *
+  * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ -->
+  <!-- separator -->
+  <!-- #EndLibraryItem -->
+ 
+  <h1>Description of the three basic performance tools</h1>
 
     <h2>iopipe</h2>
   <p>Times reads and writes to an HDF5 2-d dataset and compares that with
@@ -31,7 +52,7 @@
   library itself.
 
 
-    <h2>chunk</h2>
+  <h2>chunk</h2>
   <p>Determines how efficient the raw data cache is for various access
   patterns of a chunked dataset, both reading and writing.  The access
   pattern is either (a) we access the entire dataset by moving a window
@@ -50,11 +71,11 @@
     layers.
 
 
-    <p>A gnuplot script and data files which can be displayed by running
+  <p>A gnuplot script and data files which can be displayed by running
     gnuplot and typing the command `load "x-gnuplot"'.
 
 
-    <h2>overhead</h2>
+  <h2>overhead</h2>
   <p>Measures the overhead used by the B-tree for indexing chunked
   datasets. As data is written to a chunked dataset the B-tree
   grows and its nodes get split.  When a node splits one of three
@@ -65,7 +86,7 @@
 
 
   <p>Invoke as `overhead usage' for more information.
-    <hr>
+  <hr>
     <address><a href="mailto:matzke@llnl.gov">Robb Matzke</a></address>
 <!-- Created: Tue Mar 17 11:13:35 EST 1998 -->
 <!-- hhmts start -->

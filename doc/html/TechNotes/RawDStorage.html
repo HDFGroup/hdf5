@@ -5,7 +5,28 @@
   </head>
 
   <body>
-    <h1>Raw Data Storage in HDF5</h1>
+
+<!-- #BeginLibraryItem "/ed_libs/copyright-html.lbi" -->
+  <!-- separator -->
+  <!--
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  * Copyright by the Board of Trustees of the University of Illinois.         *
+  * All rights reserved.                                                      *
+  *                                                                           *
+  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+  * terms governing use, modification, and redistribution, is contained in    *
+  * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+  * of the source code distribution tree; Copyright.html can be found at the  *
+  * root level of an installed copy of the electronic HDF5 document set and   *
+  * is linked from the top-level documents page.  It can also be found at     *
+  * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ -->
+  <!-- separator -->
+  <!-- #EndLibraryItem -->
+ 
+  <h1>Raw Data Storage in HDF5</h1>
 
     <p>This document describes the various ways that raw data is
       stored in an HDF5 file and the object header messages which
@@ -80,7 +101,7 @@
       Sparse Object (<code>0x000A</code>) Messages.
 
     <p>
-      <center>
+  <center>
 	<table border cellpadding=4 width="60%">
 	  <caption align=bottom>
 	    <b>The Format of the Indexed Storage Message</b>
@@ -117,7 +138,7 @@
 	    <td colspan=4>Alignment for Dimension N (4 bytes)</td>
 	  </tr>
 	</table>
-      </center>
+  </center>
 
     <p>The alignment fields indicate the alignment in logical space to
       use when allocating new storage areas on disk.  For instance,
@@ -137,7 +158,7 @@
       created.
 
     <p>
-      <center>
+  <center>
 	<table border cellpadding=4 width="60%">
 	  <caption align=bottom>
 	    <b>The Format of a B-Tree Key</b>
@@ -165,7 +186,7 @@
 	    <td colspan=4>Chunk Offset in Dimension N (4 bytes)</td>
 	  </tr>
 	</table>
-      </center>
+  </center>
 
     <p>The keys within a B-tree obey an ordering based on the chunk
       offsets.  If the offsets in dimension-0 are equal, then
@@ -183,7 +204,7 @@
       File List Message (0x0009) which takes the form:
 
     <p>
-      <center>
+  <center>
 	<table border cellpadding=4 width="60%">
 	  <caption align=bottom>
 	    <b>The Format of the External File List Message</b>
@@ -217,7 +238,7 @@
 	    <td colspan=4><br>Unused Slot(s)<br><br></td>
 	  </tr>
 	</table>
-      </center>
+  </center>
 
     <p>Each indexed storage array that has all or part of its data
       stored in external files will contain a single external file
