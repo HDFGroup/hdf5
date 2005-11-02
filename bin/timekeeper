@@ -103,6 +103,8 @@ if [ -z "$debugflag" ]; then
 	    if test X$pid \!= X && ps -p $pid > /dev/null; then
 		echo "terminating process $x ($pid)"
 		kill -HUP $pid
+		echo "Remote shell command ended.  But some processes might still be"
+		echo "running in the remote machine.  Login there to verify."
 	    fi
 	fi
     done
