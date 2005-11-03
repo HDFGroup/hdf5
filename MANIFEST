@@ -1260,6 +1260,11 @@
 ./hl/src/H5PT.h
 ./hl/src/H5HL_private.c
 ./hl/src/H5HL_private.h
+./hl/src/H5LTanalyze.l
+./hl/src/H5LTparse.y
+./hl/src/lex.yy.c
+./hl/src/y.tab.c
+./hl/src/y.tab.h
 ./hl/test/Makefile.am
 ./hl/test/Makefile.in
 ./hl/test/test_image.c
