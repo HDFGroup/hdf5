@@ -27,7 +27,8 @@
 #endif
 
 #define TESTING(WHAT)	{printf("%-70s", "Testing " WHAT); fflush(stdout);}
-#define TESTING2(WHAT) {printf("%-70s", "Testing     " WHAT); fflush(stdout);}
+#define TESTING2(WHAT)  {printf("%-70s", "Testing     " WHAT); fflush(stdout);}
+#define TESTING3(WHAT)  {printf("%-70s", "" WHAT); fflush(stdout);}
 #define PASSED()	{puts(" PASSED");fflush(stdout);}
 #define H5_FAILED()	{puts("*FAILED*");fflush(stdout);}
 #define SKIPPED()	{puts(" -SKIP-");fflush(stdout);}
@@ -38,7 +39,10 @@
 extern "C" {
 #endif
 
-
+/* For Lex and Yacc */
+int  input_len;
+char *myinput;
+    
 /*-------------------------------------------------------------------------
  *
  * Make dataset functions
@@ -344,6 +348,7 @@ H5_HLDLL herr_t  H5LTget_attribute_info( hid_t loc_id,
 H5_HLDLL hid_t H5LTcreate_compound_type( hsize_t nfields, size_t size, const char *field_names[],
                                 const size_t *field_offset, const hid_t *field_types );
 
+hid_t H5LTtext_to_dtype(const char *text);
 
 H5_HLDLL herr_t  H5LTrepack( hsize_t nfields,
                    hsize_t nrecords,

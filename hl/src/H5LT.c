@@ -1978,9 +1978,42 @@ out:
  return -1;
 }
 
+/*-------------------------------------------------------------------------
+ * Function: H5LTtext_to_dtype
+ *
+ * Purpose:  Convert DDL description to HDF5 data type.
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Raymond Lu, slu@ncsa.uiuc.edu
+ *
+ * Date: October 6, 2004
+ *
+ * Comments:
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t H5LTtext_to_dtype(const char *text)
+{
 
+ hid_t   type_id; 
+ hsize_t i;
+ 
+ input_len = strlen(text);
+ myinput = strdup(text);
 
+ type_id = yyparse();
 
+ free(myinput);
+ input_len = 0;
+
+ return type_id;
+
+out:
+ return -1;
+}
 
 /*-------------------------------------------------------------------------
  * Function: H5LTrepack

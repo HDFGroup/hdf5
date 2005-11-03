@@ -1044,6 +1044,409 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
 }
 
 /*-------------------------------------------------------------------------
+ * test H5LTtext_to_dtype function
+ *-------------------------------------------------------------------------
+ */
+static int test_text_dtype(void) 
+{
+    TESTING("H5LTtext_to_dtype");
+
+    if(test_integers()<0)
+        goto out;
+    
+    if(test_fps()<0)
+        goto out;
+    
+    if(test_strings()<0)
+        goto out;
+     
+    if(test_opaques()<0)
+        goto out;
+    
+    if(test_enums()<0)
+        goto out;
+    
+    if(test_variables()<0)
+        goto out;
+    
+    if(test_arrays()<0)
+        goto out;
+ 
+    if(test_compounds()<0)
+        goto out;
+
+    return 0;
+
+out:
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * subroutine for test_text_dtype(): test_integers().
+ *-------------------------------------------------------------------------
+ */
+static int test_integers(void)
+{
+    hid_t   dtype;
+
+    TESTING3("\n        text for integer types");
+    
+    if((dtype = H5LTtext_to_dtype("H5T_NATIVE_INT\n"))<0)
+        goto out;
+    if(!H5Tequal(dtype, H5T_NATIVE_INT))
+        goto out;
+    if(H5Tclose(dtype)<0)
+        goto out;
+    
+    if((dtype = H5LTtext_to_dtype("H5T_STD_I8BE\n"))<0)
+        goto out;
+    if(!H5Tequal(dtype, H5T_STD_I8BE))
+        goto out;
+    if(H5Tclose(dtype)<0)
+        goto out;
+    
+    if((dtype = H5LTtext_to_dtype("H5T_STD_U16LE\n"))<0)
+        goto out;
+    if(!H5Tequal(dtype, H5T_STD_U16LE))
+        goto out;
+    if(H5Tclose(dtype)<0)
+        goto out;
+
+    PASSED();
+    return 0;
+
+out:
+    H5_FAILED();
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * subroutine for test_text_dtype(): test_fps().
+ *-------------------------------------------------------------------------
+ */
+static int test_fps(void)
+{
+    hid_t   dtype;
+
+    TESTING3("        text for floating-point types");
+    
+    if((dtype = H5LTtext_to_dtype("H5T_NATIVE_LDOUBLE\n"))<0)
+        goto out;
+    if(!H5Tequal(dtype, H5T_NATIVE_LDOUBLE))
+        goto out;
+    if(H5Tclose(dtype)<0)
+        goto out;
+     
+    if((dtype = H5LTtext_to_dtype("H5T_IEEE_F32BE\n"))<0)
+        goto out;
+    if(!H5Tequal(dtype, H5T_IEEE_F32BE))
+        goto out;
+    if(H5Tclose(dtype)<0)
+        goto out;
+    
+    if((dtype = H5LTtext_to_dtype("H5T_IEEE_F64LE\n"))<0)
+        goto out;
+    if(!H5Tequal(dtype, H5T_IEEE_F64LE))
+        goto out;
+    if(H5Tclose(dtype)<0)
+        goto out;
+
+    PASSED();
+    return 0;
+
+out:
+    H5_FAILED();
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * subroutine for test_text_dtype(): test_strings().
+ *-------------------------------------------------------------------------
+ */
+static int test_strings(void)
+{
+    hid_t   dtype;
+    size_t  str_size;
+    H5T_str_t   str_pad;
+    H5T_cset_t  str_cset;
+    H5T_class_t type_class;
+    
+    TESTING3("        text for string types");
+    
+    if((dtype = H5LTtext_to_dtype("H5T_STRING { CTYPE H5T_C_S1; STRSIZE 13; STRPAD H5T_STR_NULLTERM; CSET H5T_CSET_ASCII; }"))<0)
+        goto out;
+      
+    if((type_class = H5Tget_class(dtype))<0)
+        goto out;
+    if(type_class != H5T_STRING)
+        goto out;
+
+    str_size = H5Tget_size(dtype);
+    if(str_size != 13)
+        goto out;
+    
+    str_pad = H5Tget_strpad(dtype);
+    if(str_pad != H5T_STR_NULLTERM)
+        goto out;
+    
+    str_cset = H5Tget_cset(dtype);
+    if(str_cset != H5T_CSET_ASCII)
+        goto out;
+    
+    if(H5Tclose(dtype)<0)
+        goto out;
+    
+    if((dtype = H5LTtext_to_dtype("H5T_STRING { CTYPE H5T_FORTRAN_S1; STRSIZE H5T_VARIABLE; STRPAD H5T_STR_NULLPAD; CSET H5T_CSET_ASCII; }"))<0)
+        goto out;
+    
+    if(!H5Tis_variable_str(dtype))
+        goto out;
+        
+    str_pad = H5Tget_strpad(dtype);
+    if(str_pad != H5T_STR_NULLPAD)
+        goto out;
+    
+    str_cset = H5Tget_cset(dtype);
+    if(str_cset != H5T_CSET_ASCII)
+        goto out;
+    
+    if(H5Tclose(dtype)<0)
+        goto out;
+ 
+    PASSED();
+    return 0;
+
+out:
+    H5_FAILED();
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * subroutine for test_text_dtype(): test_opaques().
+ *-------------------------------------------------------------------------
+ */
+static int test_opaques(void)
+{
+    hid_t   dtype;
+    size_t  opq_size;
+    char    *opq_tag = NULL;
+    H5T_class_t type_class;
+
+    TESTING3("        text for opaque types");
+    
+    if((dtype = H5LTtext_to_dtype("H5T_OPAQUE { OPQ_SIZE 19; OPQ_TAG \"This is a tag for opaque type\"; }\n"))<0)
+        goto out;
+      
+    if((type_class = H5Tget_class(dtype))<0)
+        goto out;
+    if(type_class != H5T_OPAQUE)
+        goto out;
+               
+    if((opq_size = H5Tget_size(dtype)) == 0)
+        goto out;
+    if(opq_size != 19)
+        goto out;
+ 
+    if((opq_tag = H5Tget_tag(dtype)) == NULL)
+        goto out;
+    if(strcmp(opq_tag, "This is a tag for opaque type"))
+       goto out;
+    free(opq_tag);
+
+    if(H5Tclose(dtype)<0)
+        goto out;
+    
+    PASSED();
+    return 0;
+
+out:
+    H5_FAILED();
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * subroutine for test_text_dtype(): test_enums().
+ *-------------------------------------------------------------------------
+ */
+static int test_enums(void)
+{
+    hid_t   dtype;
+    size_t  size = 16;
+    char    name1[16];
+    int     value1 = 7;
+    char    *name2 = "WHITE";
+    int     value2;
+    H5T_class_t type_class;
+    
+    TESTING3("        text for enum types");
+    
+    if((dtype = H5LTtext_to_dtype("H5T_ENUM { H5T_STD_I32LE; \"RED\" 5; \"GREEN\" 6; \"BLUE\" 7; \"WHITE\" 8; }"))<0)
+        goto out;
+     
+    if((type_class = H5Tget_class(dtype))<0)
+        goto out;
+    if(type_class != H5T_ENUM)
+        goto out;
+
+    if(H5Tenum_nameof(dtype, &value1, name1, size)<0)
+        goto out;
+    if(strcmp(name1, "BLUE"))
+        goto out; 
+   
+    if(H5Tenum_valueof(dtype, name2, &value2)<0)
+        goto out;
+    if(value2 != 8)
+        goto out;
+    
+    if(H5Tclose(dtype)<0)
+        goto out;
+    
+    PASSED();
+    return 0;
+
+out:
+    H5_FAILED();
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * subroutine for test_text_dtype(): test_variables().
+ *-------------------------------------------------------------------------
+ */
+static int test_variables(void)
+{
+    hid_t   dtype;
+    H5T_class_t type_class;
+    
+    TESTING3("        text for variable types");
+      
+    if((dtype = H5LTtext_to_dtype("H5T_VLEN { H5T_NATIVE_CHAR }\n"))<0)
+        goto out;
+     
+    if((type_class = H5Tget_class(dtype))<0)
+        goto out;
+    if(type_class != H5T_VLEN)
+        goto out;
+   
+    if(H5Tis_variable_str(dtype))
+        goto out;
+
+    if(H5Tclose(dtype)<0)
+        goto out;
+   
+    if((dtype = H5LTtext_to_dtype("H5T_VLEN { H5T_VLEN { H5T_STD_I32BE } }\n"))<0)
+        goto out;
+    
+    if(H5Tis_variable_str(dtype))
+        goto out;
+
+    if(H5Tclose(dtype)<0)
+        goto out;
+     
+    PASSED();
+    return 0;
+
+out:
+    H5_FAILED();
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * subroutine for test_text_dtype(): test_arrays().
+ *-------------------------------------------------------------------------
+ */
+static int test_arrays(void)
+{
+    hid_t   dtype;
+    int     ndims;
+    hsize_t dims[3];
+    H5T_class_t type_class;
+
+    TESTING3("        text for array types");
+      
+    if((dtype = H5LTtext_to_dtype("H5T_ARRAY { [5][7][13] H5T_ARRAY { [17][19] H5T_COMPOUND { H5T_STD_I8BE \"arr_compound_1\"; H5T_STD_I32BE \"arr_compound_2\"; } } }"))<0)
+        goto out;
+    
+    if((type_class = H5Tget_class(dtype))<0)
+        goto out;
+    if(type_class != H5T_ARRAY)
+        goto out;
+ 
+    if((ndims = H5Tget_array_ndims(dtype))<0)
+        goto out;
+    if(ndims != 3)
+        goto out; 
+
+    if(H5Tget_array_dims(dtype, dims, NULL)<0)
+        goto out;
+    if(dims[0] != 5 || dims[1] != 7 || dims[2] != 13)
+        goto out;
+
+    if(H5Tclose(dtype)<0)
+        goto out;
+   
+     
+    PASSED();
+    return 0;
+
+out:
+    H5_FAILED();
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * subroutine for test_text_dtype(): test_compounds().
+ *-------------------------------------------------------------------------
+ */
+static int test_compounds(void)
+{
+    hid_t   dtype;
+    int     nmembs;
+    char    *memb_name = NULL;
+    H5T_class_t memb_class;
+    H5T_class_t type_class;
+        
+    TESTING3("        text for compound types");
+    
+    if((dtype = H5LTtext_to_dtype("H5T_COMPOUND { H5T_STD_I16BE \"one_field\"; H5T_STD_U8LE \"two_field\"; }"))<0)
+        goto out;
+   
+    if((type_class = H5Tget_class(dtype))<0)
+        goto out;
+    if(type_class != H5T_COMPOUND)
+        goto out;
+
+    if((nmembs = H5Tget_nmembers(dtype))<0)
+        goto out;
+    if(nmembs != 2)
+        goto out;
+        
+    if(H5Tclose(dtype)<0)
+        goto out;
+    
+    if((dtype = H5LTtext_to_dtype("H5T_COMPOUND { H5T_STD_I32BE \"i32_field\"; H5T_STD_I16BE \"i16_field\"; H5T_COMPOUND  { H5T_STD_I16BE \"sec_field\"; H5T_COMPOUND { H5T_STD_I32BE \"thd_field\"; } \"grandchild\"; } \"child_compound\"; H5T_STD_I8BE  \"i8_field\"; }"))<0)
+        goto out;
+    
+    if((memb_name = H5Tget_member_name(dtype, 1)) == NULL)
+        goto out;    
+    if(strcmp(memb_name, "i16_field"))
+        goto out;    
+    free(memb_name);
+
+    if((memb_class = H5Tget_member_class(dtype, 2))<0)
+        goto out;
+    if(memb_class != H5T_COMPOUND)
+        goto out;
+
+    PASSED();
+    return 0;
+
+out:
+    H5_FAILED();
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
  * the main program
  *-------------------------------------------------------------------------
  */
@@ -1057,6 +1460,9 @@ int main( void )
 
  /* test attribute functions */
  nerrors += test_attr();
+ 
+ /* test text-dtype functions */
+ nerrors += test_text_dtype();
 
  /* check for errors */
  if (nerrors)
