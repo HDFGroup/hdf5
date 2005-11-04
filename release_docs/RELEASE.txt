@@ -36,8 +36,10 @@ New Features
 
     Configuration:
     --------------
-	- Added --enable-build-all option, which only developers should need
-	  to use.  -JML 2005/10/24
+	- Added -shlib option to link against installed shared libraries to
+	  h5c++ and h5fc.  -JML 2005/11/1
+	- Added --enable-build-all option to configure, which only developers
+	  should need to use.  -JML 2005/10/24
 	- Configure uses the 'TR' variable to let the user override the path
           to the 'tr' utility. -JML 2005/10/17
 	- Configure can recognize -lmpich as a form of MPI library. -AKC-
