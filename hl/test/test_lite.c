@@ -1044,44 +1044,6 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
 }
 
 /*-------------------------------------------------------------------------
- * test H5LTtext_to_dtype function
- *-------------------------------------------------------------------------
- */
-static int test_text_dtype(void) 
-{
-    TESTING("H5LTtext_to_dtype");
-
-    if(test_integers()<0)
-        goto out;
-    
-    if(test_fps()<0)
-        goto out;
-    
-    if(test_strings()<0)
-        goto out;
-     
-    if(test_opaques()<0)
-        goto out;
-    
-    if(test_enums()<0)
-        goto out;
-    
-    if(test_variables()<0)
-        goto out;
-    
-    if(test_arrays()<0)
-        goto out;
- 
-    if(test_compounds()<0)
-        goto out;
-
-    return 0;
-
-out:
-    return -1;
-}
-
-/*-------------------------------------------------------------------------
  * subroutine for test_text_dtype(): test_integers().
  *-------------------------------------------------------------------------
  */
@@ -1447,10 +1409,47 @@ out:
 }
 
 /*-------------------------------------------------------------------------
+ * test H5LTtext_to_dtype function
+ *-------------------------------------------------------------------------
+ */
+static int test_text_dtype(void) 
+{
+    TESTING("H5LTtext_to_dtype");
+
+    if(test_integers()<0)
+        goto out;
+  
+    if(test_fps()<0)
+        goto out;
+    
+    if(test_strings()<0)
+        goto out;
+     
+    if(test_opaques()<0)
+        goto out;
+    
+    if(test_enums()<0)
+        goto out;
+    
+    if(test_variables()<0)
+        goto out;
+    
+    if(test_arrays()<0)
+        goto out;
+ 
+    if(test_compounds()<0)
+        goto out;
+
+    return 0;
+
+out:
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
  * the main program
  *-------------------------------------------------------------------------
  */
-
 int main( void )
 {
  int  nerrors=0;
