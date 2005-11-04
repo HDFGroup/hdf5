@@ -1158,7 +1158,7 @@ hid_t
 H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	  hid_t dcpl_id)
 {
-    H5G_entry_t	   *loc = NULL;         /* Entry for group to insert dataset into */
+    H5G_entry_t	   *loc;                /* Entry for group to insert dataset into */
     H5D_t	   *new_dset = NULL;    /* New dataset's info */
     const H5S_t    *space;              /* Dataspace for dataset */
     hid_t	    ret_value;          /* Return value */
@@ -1167,13 +1167,13 @@ H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     H5TRACE5("i","isiii",loc_id,name,type_id,space_id,dcpl_id);
 
     /* Check arguments */
-    if (NULL == (loc = H5G_loc(loc_id)))
+    if(NULL == (loc = H5G_loc(loc_id)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location ID")
-    if (!name || !*name)
+    if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
-    if (H5I_DATATYPE != H5I_get_type(type_id))
+    if(H5I_DATATYPE != H5I_get_type(type_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype ID")
-    if (NULL == (space = H5I_object_verify(space_id,H5I_DATASPACE)))
+    if(NULL == (space = H5I_object_verify(space_id,H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace ID")
     if(H5P_DEFAULT == dcpl_id)
         dcpl_id = H5P_DATASET_CREATE_DEFAULT;
@@ -1190,15 +1190,15 @@ H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register dataset")
 
 done:
-    if(ret_value<0) {
-        if(new_dset!=NULL) {
-            if(H5D_close(new_dset)<0)
+    if(ret_value < 0) {
+        if(new_dset != NULL) {
+            if(H5D_close(new_dset) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
         } /* end if */
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Dcreate() */
 
 
 /*-------------------------------------------------------------------------
