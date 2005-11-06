@@ -1,4 +1,4 @@
-HDF5 version 1.6.5-pre1 released on Sun Oct 23 17:50:56 CDT 2005
+HDF5 version 1.6.5-pre3 released on Sun Nov  6 17:45:25 CST 2005
 ================================================================================
 
 INTRODUCTION
@@ -68,7 +68,7 @@ New Features
 	     selection INSIDE HDF5. 
 	     1) DEC 5.x is not supporting complicated derived datatype.
 	     2) For AIX 5.1,
-	     if your poe version number is 3.2.0.19 or lower,
+	     if your poe version number is 3.2.0.20 or lower,
 	     please edit powerpc-ibm-aix5.x under hdf5/config,
 	     Find the line with
 		    << hdf5_mpi_complex_derived_datatype_works>>
@@ -92,6 +92,7 @@ New Features
 		 KY - 2005/09/12
     Tools:
     ------
+	- Removed obsolete pdb2hdf tool.  JML - 2005/10/28
         - Sped up h5dump on files with large numbers of objects.
             QAK - 2005/08/25
 
@@ -425,6 +426,15 @@ Footnotes:  (1) Using mpich 1.2.6
 
 Known Problems
 ==============
+* Fortran testing and compiling failures on windows XP 
+  1. Compaq visual fortran 6.6c with VS 6.0
+     The Fortran tests failed for both release, release dll, debug and debug
+     dll. The failure is a random one. We won't provide fortran libraries. The
+     same test passed with 1.7.51 snapshot. You may find the 1.7.51 snapshot
+     under ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/snapshots/
+  2. Intel fortran 8.1 under .Net environment
+     The fortran library cannot even be compiled. Some users have pointed this
+     to intel forum.
 * When testing parallel HDF5 with the C compiler version MIPSpro 7.4.3 at IRIX
   6.5, set enviroment variable MPI_TYPE_MAX to be a bigger number, for example 120000 
   in order to pass the complicated collective IO tests inside parallel HDF5
