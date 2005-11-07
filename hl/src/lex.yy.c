@@ -736,6 +736,8 @@ char *yytext;
 #include <string.h>
 #include<hdf5.h>
 #include "y.tab.h"
+
+int my_yyinput(char *, int);
 #undef YY_INPUT
 #define YY_INPUT(b, r, ms) (r=my_yyinput(b, ms))
 #define token(x)        (int)x
@@ -745,7 +747,7 @@ extern int  input_len;
 #define STACK_SIZE      16
 
 /*variables for compound type*/
-extern struct cmpd_info {
+struct cmpd_info {
     hid_t       id;
     hbool_t         is_field;
     hbool_t         first_memb;
@@ -754,7 +756,7 @@ extern struct cmpd_info cmpd_stack[STACK_SIZE];
 extern int csindex;
 
 /*variables for array type*/
-extern struct arr_info {
+struct arr_info {
     hsize_t             dims[H5S_MAX_RANK];
     int                 ndim;
     hbool_t             is_dim;
@@ -778,7 +780,7 @@ hbool_t        first_quote = 1;
 
 #define TAG_STRING 1
 
-#line 782 "lex.yy.c"
+#line 784 "lex.yy.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -929,10 +931,10 @@ YY_DECL
 	register char *yy_cp = NULL, *yy_bp = NULL;
 	register int yy_act;
 
-#line 49 "H5LTanalyze.l"
+#line 51 "H5LTanalyze.l"
 
 
-#line 936 "lex.yy.c"
+#line 938 "lex.yy.c"
 
 	if ( yy_init )
 		{
@@ -1018,272 +1020,272 @@ do_action:	/* This label is used only to access EOF actions. */
 	{ /* beginning of action switch */
 case 1:
 YY_RULE_SETUP
-#line 51 "H5LTanalyze.l"
+#line 53 "H5LTanalyze.l"
 {return token(H5T_STD_I8BE_TOKEN);}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 52 "H5LTanalyze.l"
+#line 54 "H5LTanalyze.l"
 {return token(H5T_STD_I8LE_TOKEN);}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 53 "H5LTanalyze.l"
+#line 55 "H5LTanalyze.l"
 {return token(H5T_STD_I16BE_TOKEN);}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 54 "H5LTanalyze.l"
+#line 56 "H5LTanalyze.l"
 {return token(H5T_STD_I16LE_TOKEN);}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 55 "H5LTanalyze.l"
+#line 57 "H5LTanalyze.l"
 {return token(H5T_STD_I32BE_TOKEN);}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 56 "H5LTanalyze.l"
+#line 58 "H5LTanalyze.l"
 {return token(H5T_STD_I32LE_TOKEN);}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 57 "H5LTanalyze.l"
+#line 59 "H5LTanalyze.l"
 {return token(H5T_STD_I64BE_TOKEN);}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 58 "H5LTanalyze.l"
+#line 60 "H5LTanalyze.l"
 {return token(H5T_STD_I64LE_TOKEN);}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 60 "H5LTanalyze.l"
+#line 62 "H5LTanalyze.l"
 {return token(H5T_STD_U8BE_TOKEN);}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 61 "H5LTanalyze.l"
+#line 63 "H5LTanalyze.l"
 {return token(H5T_STD_U8LE_TOKEN);}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 62 "H5LTanalyze.l"
+#line 64 "H5LTanalyze.l"
 {return token(H5T_STD_U16BE_TOKEN);}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 63 "H5LTanalyze.l"
+#line 65 "H5LTanalyze.l"
 {return token(H5T_STD_U16LE_TOKEN);}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 64 "H5LTanalyze.l"
+#line 66 "H5LTanalyze.l"
 {return token(H5T_STD_U32BE_TOKEN);}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 65 "H5LTanalyze.l"
+#line 67 "H5LTanalyze.l"
 {return token(H5T_STD_U32LE_TOKEN);}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 66 "H5LTanalyze.l"
+#line 68 "H5LTanalyze.l"
 {return token(H5T_STD_U64BE_TOKEN);}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 67 "H5LTanalyze.l"
+#line 69 "H5LTanalyze.l"
 {return token(H5T_STD_U64LE_TOKEN);}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 69 "H5LTanalyze.l"
+#line 71 "H5LTanalyze.l"
 {return token(H5T_NATIVE_CHAR_TOKEN);}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 70 "H5LTanalyze.l"
+#line 72 "H5LTanalyze.l"
 {return token(H5T_NATIVE_SCHAR_TOKEN);}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 71 "H5LTanalyze.l"
+#line 73 "H5LTanalyze.l"
 {return token(H5T_NATIVE_UCHAR_TOKEN);}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 72 "H5LTanalyze.l"
+#line 74 "H5LTanalyze.l"
 {return token(H5T_NATIVE_SHORT_TOKEN);}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 73 "H5LTanalyze.l"
+#line 75 "H5LTanalyze.l"
 {return token(H5T_NATIVE_USHORT_TOKEN);}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 74 "H5LTanalyze.l"
+#line 76 "H5LTanalyze.l"
 {return token(H5T_NATIVE_INT_TOKEN);}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 75 "H5LTanalyze.l"
+#line 77 "H5LTanalyze.l"
 {return token(H5T_NATIVE_UINT_TOKEN);}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 76 "H5LTanalyze.l"
+#line 78 "H5LTanalyze.l"
 {return token(H5T_NATIVE_LONG_TOKEN);}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 77 "H5LTanalyze.l"
+#line 79 "H5LTanalyze.l"
 {return token(H5T_NATIVE_ULONG_TOKEN);}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 78 "H5LTanalyze.l"
+#line 80 "H5LTanalyze.l"
 {return token(H5T_NATIVE_LLONG_TOKEN);}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 79 "H5LTanalyze.l"
+#line 81 "H5LTanalyze.l"
 {return token(H5T_NATIVE_ULLONG_TOKEN);}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 81 "H5LTanalyze.l"
+#line 83 "H5LTanalyze.l"
 {return token(H5T_IEEE_F32BE_TOKEN);}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 82 "H5LTanalyze.l"
+#line 84 "H5LTanalyze.l"
 {return token(H5T_IEEE_F32LE_TOKEN);}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 83 "H5LTanalyze.l"
+#line 85 "H5LTanalyze.l"
 {return token(H5T_IEEE_F64BE_TOKEN);}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 84 "H5LTanalyze.l"
+#line 86 "H5LTanalyze.l"
 {return token(H5T_IEEE_F64LE_TOKEN);}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 85 "H5LTanalyze.l"
+#line 87 "H5LTanalyze.l"
 {return token(H5T_NATIVE_FLOAT_TOKEN);}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 86 "H5LTanalyze.l"
+#line 88 "H5LTanalyze.l"
 {return token(H5T_NATIVE_DOUBLE_TOKEN);}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 87 "H5LTanalyze.l"
+#line 89 "H5LTanalyze.l"
 {return token(H5T_NATIVE_LDOUBLE_TOKEN);}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 89 "H5LTanalyze.l"
+#line 91 "H5LTanalyze.l"
 {return token(H5T_STRING_TOKEN);}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 90 "H5LTanalyze.l"
+#line 92 "H5LTanalyze.l"
 {return token(STRSIZE_TOKEN);}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 91 "H5LTanalyze.l"
+#line 93 "H5LTanalyze.l"
 {return token(STRPAD_TOKEN);}
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 92 "H5LTanalyze.l"
+#line 94 "H5LTanalyze.l"
 {return token(CSET_TOKEN);}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 93 "H5LTanalyze.l"
+#line 95 "H5LTanalyze.l"
 {return token(CTYPE_TOKEN);}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 94 "H5LTanalyze.l"
+#line 96 "H5LTanalyze.l"
 {return token(H5T_STR_NULLTERM_TOKEN);} 
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 95 "H5LTanalyze.l"
+#line 97 "H5LTanalyze.l"
 {return token(H5T_STR_NULLPAD_TOKEN);} 
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 96 "H5LTanalyze.l"
+#line 98 "H5LTanalyze.l"
 {return token(H5T_STR_SPACEPAD_TOKEN);} 
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 97 "H5LTanalyze.l"
+#line 99 "H5LTanalyze.l"
 {return token(H5T_CSET_ASCII_TOKEN);}
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 98 "H5LTanalyze.l"
+#line 100 "H5LTanalyze.l"
 {return token(H5T_C_S1_TOKEN);}
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 99 "H5LTanalyze.l"
+#line 101 "H5LTanalyze.l"
 {return token(H5T_FORTRAN_S1_TOKEN);}
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 100 "H5LTanalyze.l"
+#line 102 "H5LTanalyze.l"
 {return token(H5T_VARIABLE_TOKEN);}
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 102 "H5LTanalyze.l"
+#line 104 "H5LTanalyze.l"
 {return token(H5T_COMPOUND_TOKEN);}
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 103 "H5LTanalyze.l"
+#line 105 "H5LTanalyze.l"
 {return token(H5T_ENUM_TOKEN);}
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 104 "H5LTanalyze.l"
+#line 106 "H5LTanalyze.l"
 {return token(H5T_ARRAY_TOKEN);}
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 105 "H5LTanalyze.l"
+#line 107 "H5LTanalyze.l"
 {return token(H5T_VLEN_TOKEN);}
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 107 "H5LTanalyze.l"
+#line 109 "H5LTanalyze.l"
 {return token(H5T_OPAQUE_TOKEN);}
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 108 "H5LTanalyze.l"
+#line 110 "H5LTanalyze.l"
 {return token(OPQ_SIZE_TOKEN);}
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 109 "H5LTanalyze.l"
+#line 111 "H5LTanalyze.l"
 {return token(OPQ_TAG_TOKEN);}
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 111 "H5LTanalyze.l"
+#line 113 "H5LTanalyze.l"
 {    
                         if(is_str_size || (is_enum && is_enum_memb) || 
                             is_opq_size || (asindex>-1 && arr_stack[asindex].is_dim)) {
@@ -1295,7 +1297,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 120 "H5LTanalyze.l"
+#line 122 "H5LTanalyze.l"
 {
                     /*if it's first quote, and is a opaque tag or an enum symbol*/
                     if((is_opq_tag || is_enum || (csindex>-1 && cmpd_stack[csindex].is_field)) && first_quote) {
@@ -1308,7 +1310,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 129 "H5LTanalyze.l"
+#line 131 "H5LTanalyze.l"
 {
                     yylval.sval = strdup(yytext);
                     BEGIN INITIAL;
@@ -1317,45 +1319,45 @@ YY_RULE_SETUP
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 135 "H5LTanalyze.l"
+#line 137 "H5LTanalyze.l"
 {return token('{');}
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 136 "H5LTanalyze.l"
+#line 138 "H5LTanalyze.l"
 {return token('}');}
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 137 "H5LTanalyze.l"
+#line 139 "H5LTanalyze.l"
 {return token('[');}
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 138 "H5LTanalyze.l"
+#line 140 "H5LTanalyze.l"
 {return token(']');}
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 139 "H5LTanalyze.l"
+#line 141 "H5LTanalyze.l"
 {return token(';');}
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 140 "H5LTanalyze.l"
+#line 142 "H5LTanalyze.l"
 ;
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 141 "H5LTanalyze.l"
+#line 143 "H5LTanalyze.l"
 { return 0; }
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 143 "H5LTanalyze.l"
+#line 145 "H5LTanalyze.l"
 ECHO;
 	YY_BREAK
-#line 1359 "lex.yy.c"
+#line 1361 "lex.yy.c"
 			case YY_STATE_EOF(INITIAL):
 			case YY_STATE_EOF(TAG_STRING):
 				yyterminate();
@@ -2231,7 +2233,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 143 "H5LTanalyze.l"
+#line 145 "H5LTanalyze.l"
 
 int my_yyinput(char *buf, int max_size)
 {
@@ -2242,12 +2244,12 @@ int my_yyinput(char *buf, int max_size)
    return ret;
 }
 
-yyerror(msg)
+int yyerror(char *msg)
 {
         printf("ERROR: %s before \"%s\".\n", msg, yytext);
 }
 
-yywrap()
+int yywrap()
 {
     return(1);
 }

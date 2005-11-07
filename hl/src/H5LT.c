@@ -16,6 +16,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+/* For Lex and Yacc */
+int  input_len;
+char *myinput;
+
 /*-------------------------------------------------------------------------
  *
  * internal functions
@@ -1997,14 +2001,15 @@ out:
  */
 hid_t H5LTtext_to_dtype(const char *text)
 {
-
+ extern int yyparse(void);
  hid_t   type_id; 
  hsize_t i;
  
  input_len = strlen(text);
  myinput = strdup(text);
 
- type_id = yyparse();
+ if((type_id = yyparse())<0)
+     goto out;
 
  free(myinput);
  input_len = 0;

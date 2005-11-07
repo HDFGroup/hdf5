@@ -3,6 +3,9 @@
 #include<string.h>
 #include<hdf5.h>
 
+extern int yylex();
+extern int yyerror(char *);
+
 #define STACK_SIZE      16
 
 /*structure for compound type information*/

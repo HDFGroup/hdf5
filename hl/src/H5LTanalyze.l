@@ -2,6 +2,8 @@
 #include <string.h>
 #include<hdf5.h>
 #include "y.tab.h"
+
+int my_yyinput(char *, int);
 #undef YY_INPUT
 #define YY_INPUT(b, r, ms) (r=my_yyinput(b, ms))
 #define token(x)        (int)x
@@ -11,7 +13,7 @@ extern int  input_len;
 #define STACK_SIZE      16
 
 /*variables for compound type*/
-extern struct cmpd_info {
+struct cmpd_info {
     hid_t       id;
     hbool_t         is_field;
     hbool_t         first_memb;
@@ -20,7 +22,7 @@ extern struct cmpd_info cmpd_stack[STACK_SIZE];
 extern int csindex;
 
 /*variables for array type*/
-extern struct arr_info {
+struct arr_info {
     hsize_t             dims[H5S_MAX_RANK];
     int                 ndim;
     hbool_t             is_dim;
@@ -150,12 +152,12 @@ int my_yyinput(char *buf, int max_size)
    return ret;
 }
 
-yyerror(msg)
+int yyerror(char *msg)
 {
         printf("ERROR: %s before \"%s\".\n", msg, yytext);
 }
 
-yywrap()
+int yywrap()
 {
     return(1);
 }

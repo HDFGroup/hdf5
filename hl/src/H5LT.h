@@ -39,10 +39,6 @@
 extern "C" {
 #endif
 
-/* For Lex and Yacc */
-int  input_len;
-char *myinput;
-    
 /*-------------------------------------------------------------------------
  *
  * Make dataset functions

@@ -18,6 +18,9 @@ static int yygrowstack();
 #include<string.h>
 #include<hdf5.h>
 
+extern int yylex();
+extern int yyerror(char *);
+
 #define STACK_SIZE      16
 
 /*structure for compound type information*/
@@ -54,12 +57,12 @@ char*   enum_memb_symbol;           /*enum member symbol string*/
 hbool_t is_opq_size = 0;               /*flag to lexer for opaque type size*/
 hbool_t is_opq_tag = 0;                /*flag to lexer for opaque type tag*/
 
-#line 43 "H5LTparse.y"
+#line 46 "H5LTparse.y"
 typedef union {
     int   ival;         /*for integer token*/
     char  *sval;        /*for compound member name*/
 } YYSTYPE;
-#line 63 "y.tab.c"
+#line 66 "y.tab.c"
 #define YYERRCODE 256
 #define H5T_STD_I8BE_TOKEN 257
 #define H5T_STD_I8LE_TOKEN 258
@@ -609,155 +612,155 @@ yyreduce:
     switch (yyn)
     {
 case 1:
-#line 75 "H5LTparse.y"
+#line 78 "H5LTparse.y"
 { memset(arr_stack, 0, STACK_SIZE*sizeof(struct arr_info)); /*initialize here?*/ }
 break;
 case 2:
-#line 76 "H5LTparse.y"
+#line 79 "H5LTparse.y"
 { return yyval.ival;}
 break;
 case 12:
-#line 90 "H5LTparse.y"
+#line 93 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_I8BE); }
 break;
 case 13:
-#line 91 "H5LTparse.y"
+#line 94 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_I8LE); }
 break;
 case 14:
-#line 92 "H5LTparse.y"
+#line 95 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_I16BE); }
 break;
 case 15:
-#line 93 "H5LTparse.y"
+#line 96 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_I16LE); }
 break;
 case 16:
-#line 94 "H5LTparse.y"
+#line 97 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_I32BE); }
 break;
 case 17:
-#line 95 "H5LTparse.y"
+#line 98 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_I32LE); }
 break;
 case 18:
-#line 96 "H5LTparse.y"
+#line 99 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_I64BE); }
 break;
 case 19:
-#line 97 "H5LTparse.y"
+#line 100 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_I64LE); }
 break;
 case 20:
-#line 98 "H5LTparse.y"
+#line 101 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_U8BE); }
 break;
 case 21:
-#line 99 "H5LTparse.y"
+#line 102 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_U8LE); }
 break;
 case 22:
-#line 100 "H5LTparse.y"
+#line 103 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_U16BE); }
 break;
 case 23:
-#line 101 "H5LTparse.y"
+#line 104 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_U16LE); }
 break;
 case 24:
-#line 102 "H5LTparse.y"
+#line 105 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_U32BE); }
 break;
 case 25:
-#line 103 "H5LTparse.y"
+#line 106 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_U32LE); }
 break;
 case 26:
-#line 104 "H5LTparse.y"
+#line 107 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_U64BE); }
 break;
 case 27:
-#line 105 "H5LTparse.y"
+#line 108 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_U64LE); }
 break;
 case 28:
-#line 106 "H5LTparse.y"
+#line 109 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_CHAR); }
 break;
 case 29:
-#line 107 "H5LTparse.y"
+#line 110 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_SCHAR); }
 break;
 case 30:
-#line 108 "H5LTparse.y"
+#line 111 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_UCHAR); }
 break;
 case 31:
-#line 109 "H5LTparse.y"
+#line 112 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_SHORT); }
 break;
 case 32:
-#line 110 "H5LTparse.y"
+#line 113 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_USHORT); }
 break;
 case 33:
-#line 111 "H5LTparse.y"
+#line 114 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_INT); }
 break;
 case 34:
-#line 112 "H5LTparse.y"
+#line 115 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_UINT); }
 break;
 case 35:
-#line 113 "H5LTparse.y"
+#line 116 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_LONG); }
 break;
 case 36:
-#line 114 "H5LTparse.y"
+#line 117 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_ULONG); }
 break;
 case 37:
-#line 115 "H5LTparse.y"
+#line 118 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_LLONG); }
 break;
 case 38:
-#line 116 "H5LTparse.y"
+#line 119 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_ULLONG); }
 break;
 case 39:
-#line 119 "H5LTparse.y"
+#line 122 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_IEEE_F32BE); }
 break;
 case 40:
-#line 120 "H5LTparse.y"
+#line 123 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_IEEE_F32LE); }
 break;
 case 41:
-#line 121 "H5LTparse.y"
+#line 124 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_IEEE_F64BE); }
 break;
 case 42:
-#line 122 "H5LTparse.y"
+#line 125 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_IEEE_F64LE); }
 break;
 case 43:
-#line 123 "H5LTparse.y"
+#line 126 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_FLOAT); }
 break;
 case 44:
-#line 124 "H5LTparse.y"
+#line 127 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_DOUBLE); }
 break;
 case 45:
-#line 125 "H5LTparse.y"
+#line 128 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_LDOUBLE); }
 break;
 case 46:
-#line 129 "H5LTparse.y"
+#line 132 "H5LTparse.y"
 { csindex++; cmpd_stack[csindex].id = H5Tcreate(H5T_COMPOUND, 1); /*temporarily set size to 1*/ }
 break;
 case 47:
-#line 131 "H5LTparse.y"
+#line 134 "H5LTparse.y"
 { yyval.ival = cmpd_stack[csindex].id; 
                               cmpd_stack[csindex].id = 0;
                               cmpd_stack[csindex].first_memb = 1; 
@@ -765,11 +768,11 @@ case 47:
                             }
 break;
 case 50:
-#line 140 "H5LTparse.y"
+#line 143 "H5LTparse.y"
 { cmpd_stack[csindex].is_field = 1; /*notify lexer a compound member is parsed*/ }
 break;
 case 51:
-#line 142 "H5LTparse.y"
+#line 145 "H5LTparse.y"
 {   int origin_size, new_size;
                             hid_t dtype_id = cmpd_stack[csindex].id;
 
@@ -795,11 +798,11 @@ case 51:
                         }
 break;
 case 53:
-#line 169 "H5LTparse.y"
+#line 172 "H5LTparse.y"
 { asindex++; /*pushd onto the stack*/ }
 break;
 case 54:
-#line 171 "H5LTparse.y"
+#line 174 "H5LTparse.y"
 { 
                           yyval.ival = H5Tarray_create(yyvsp[-1].ival, arr_stack[asindex].ndims, arr_stack[asindex].dims, NULL);
                           arr_stack[asindex].ndims = 0;
@@ -808,11 +811,11 @@ case 54:
                         }
 break;
 case 57:
-#line 181 "H5LTparse.y"
+#line 184 "H5LTparse.y"
 { arr_stack[asindex].is_dim = 1; /*notice lexer of dimension size*/ }
 break;
 case 58:
-#line 182 "H5LTparse.y"
+#line 185 "H5LTparse.y"
 { int ndims = arr_stack[asindex].ndims;
                                   arr_stack[asindex].dims[ndims] = (hsize_t)yylval.ival; 
                                   arr_stack[asindex].ndims++;
@@ -820,15 +823,15 @@ case 58:
                                 }
 break;
 case 61:
-#line 193 "H5LTparse.y"
+#line 196 "H5LTparse.y"
 { yyval.ival = H5Tvlen_create(yyvsp[-1].ival); H5Tclose(yyvsp[-1].ival); }
 break;
 case 62:
-#line 198 "H5LTparse.y"
+#line 201 "H5LTparse.y"
 { is_opq_size = 1; }
 break;
 case 63:
-#line 199 "H5LTparse.y"
+#line 202 "H5LTparse.y"
 {   
                                 size_t size = (size_t)yylval.ival;
                                 yyval.ival = H5Tcreate(H5T_OPAQUE, size);
@@ -836,22 +839,22 @@ case 63:
                             }
 break;
 case 64:
-#line 204 "H5LTparse.y"
+#line 207 "H5LTparse.y"
 { is_opq_tag = 1; }
 break;
 case 65:
-#line 205 "H5LTparse.y"
+#line 208 "H5LTparse.y"
 {  
                                 H5Tset_tag(yyvsp[-6].ival, yylval.sval);
                                 is_opq_tag = 0;
                             }
 break;
 case 66:
-#line 209 "H5LTparse.y"
+#line 212 "H5LTparse.y"
 { yyval.ival = yyvsp[-8].ival; }
 break;
 case 69:
-#line 219 "H5LTparse.y"
+#line 222 "H5LTparse.y"
 {
                                 if(yyvsp[-1].ival == H5T_C_S1_TOKEN)
                                     yyval.ival = H5Tcopy(H5T_C_S1);
@@ -860,11 +863,11 @@ case 69:
                             }
 break;
 case 70:
-#line 225 "H5LTparse.y"
+#line 228 "H5LTparse.y"
 { is_str_size = 1; }
 break;
 case 71:
-#line 226 "H5LTparse.y"
+#line 229 "H5LTparse.y"
 {  
                                 if(yyvsp[-1].ival == H5T_VARIABLE_TOKEN)
                                     H5Tset_size(yyvsp[-4].ival, H5T_VARIABLE);
@@ -874,7 +877,7 @@ case 71:
                             }
 break;
 case 72:
-#line 234 "H5LTparse.y"
+#line 237 "H5LTparse.y"
 {
                                 if(yyvsp[-1].ival == H5T_STR_NULLTERM_TOKEN)
                                     H5Tset_strpad(yyvsp[-8].ival, H5T_STR_NULLTERM);
@@ -885,61 +888,61 @@ case 72:
                             }
 break;
 case 73:
-#line 243 "H5LTparse.y"
+#line 246 "H5LTparse.y"
 {  
                                 if(yyvsp[-1].ival == H5T_CSET_ASCII_TOKEN)
                                     H5Tset_cset(yyvsp[-12].ival, H5T_CSET_ASCII);
                             }
 break;
 case 74:
-#line 247 "H5LTparse.y"
+#line 250 "H5LTparse.y"
 { yyval.ival = yyvsp[-14].ival; }
 break;
 case 75:
-#line 250 "H5LTparse.y"
+#line 253 "H5LTparse.y"
 {yyval.ival = H5T_VARIABLE_TOKEN;}
 break;
 case 77:
-#line 253 "H5LTparse.y"
+#line 256 "H5LTparse.y"
 {yyval.ival = H5T_STR_NULLTERM_TOKEN;}
 break;
 case 78:
-#line 254 "H5LTparse.y"
+#line 257 "H5LTparse.y"
 {yyval.ival = H5T_STR_NULLPAD_TOKEN;}
 break;
 case 79:
-#line 255 "H5LTparse.y"
+#line 258 "H5LTparse.y"
 {yyval.ival = H5T_STR_SPACEPAD_TOKEN;}
 break;
 case 80:
-#line 257 "H5LTparse.y"
+#line 260 "H5LTparse.y"
 {yyval.ival = H5T_CSET_ASCII_TOKEN;}
 break;
 case 81:
-#line 259 "H5LTparse.y"
+#line 262 "H5LTparse.y"
 {yyval.ival = H5T_C_S1_TOKEN;}
 break;
 case 82:
-#line 260 "H5LTparse.y"
+#line 263 "H5LTparse.y"
 {yyval.ival = H5T_FORTRAN_S1_TOKEN;}
 break;
 case 83:
-#line 264 "H5LTparse.y"
+#line 267 "H5LTparse.y"
 { is_enum = 1; enum_id = H5Tenum_create(yyvsp[-1].ival); H5Tclose(yyvsp[-1].ival); }
 break;
 case 84:
-#line 266 "H5LTparse.y"
+#line 269 "H5LTparse.y"
 { is_enum = 0; /*reset*/ yyval.ival = enum_id; }
 break;
 case 87:
-#line 271 "H5LTparse.y"
+#line 274 "H5LTparse.y"
 {
                                                 is_enum_memb = 1; /*indicate member of enum*/
                                                 enum_memb_symbol = strdup(yylval.sval); 
                                             }
 break;
 case 88:
-#line 276 "H5LTparse.y"
+#line 279 "H5LTparse.y"
 {
                                 int memb_val;
                                 if(is_enum && is_enum_memb) { /*if it's an enum member*/
@@ -949,7 +952,7 @@ case 88:
                                 }
                             }
 break;
-#line 953 "y.tab.c"
+#line 956 "y.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
