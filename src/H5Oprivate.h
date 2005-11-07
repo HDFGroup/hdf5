@@ -28,16 +28,17 @@
 #define _H5Oprivate_H
 
 /* Include the public header file for this API */
-#include "H5Opublic.h"          /* Object header functions                */
+#include "H5Opublic.h"          /* Object header functions              */
 
 /* Public headers needed by this file */
-#include "H5Dpublic.h"          /* Dataset functions                      */
-#include "H5Spublic.h"		/* Dataspace functions			  */
+#include "H5Dpublic.h"          /* Dataset functions                    */
+#include "H5Spublic.h"		/* Dataspace functions			*/
 
 /* Private headers needed by this file */
-#include "H5HGprivate.h"        /* Global heap functions                  */
-#include "H5Tprivate.h"		/* Datatype functions			  */
-#include "H5Zprivate.h"         /* I/O pipeline filters			  */
+#include "H5FLprivate.h"	/* Free Lists                           */
+#include "H5HGprivate.h"        /* Global heap functions                */
+#include "H5Tprivate.h"		/* Datatype functions			*/
+#include "H5Zprivate.h"         /* I/O pipeline filters			*/
 
 /* Object header macros */
 #define H5O_MIN_SIZE	H5O_ALIGN(32)	/*min obj header data size	     */
@@ -249,6 +250,9 @@ typedef struct H5O_stab_t {
 typedef herr_t (*H5O_operator_t)(const void *mesg/*in*/, unsigned idx,
     void *operator_data/*in,out*/);
 
+/* Forward declarations for prototype arguments */
+struct H5SL_t;
+
 /* General message operators */
 H5_DLL herr_t H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint,
 			  H5G_entry_t *ent/*out*/);
@@ -291,6 +295,10 @@ H5_DLL herr_t H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 H5_DLL herr_t H5O_get_info(H5G_entry_t *ent, H5O_stat_t *ostat, hid_t dxpl_id);
 H5_DLL herr_t H5O_iterate(const H5G_entry_t *ent, unsigned type_id, H5O_operator_t op,
     void *op_data, hid_t dxpl_id);
+H5_DLL herr_t H5O_copy_header(const H5G_entry_t *ent_src,
+    H5G_entry_t *ent_dst /*out */, hid_t dxpl_id);
+H5_DLL herr_t H5O_copy_header_map(const H5G_entry_t *ent_src,
+    H5G_entry_t *ent_dst /*out */, hid_t dxpl_id, struct H5SL_t *obj_list);
 H5_DLL herr_t H5O_debug_id(hid_t type_id, H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream, int indent, int fwidth);
 H5_DLL herr_t H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
 			 int fwidth);

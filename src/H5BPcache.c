@@ -551,7 +551,7 @@ H5BP_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5
 
                 /* Encode the record */
                 if((shared->type->encode)(f, leaf->rec_ptr[u], p, &rec_len) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, NULL, "can't encode B+ tree record")
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "can't encode B+ tree record")
                 assert(rec_len > 0);
                 p += rec_len;
 
@@ -561,7 +561,7 @@ H5BP_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5
         } /* end if */
         else {
 HDfprintf(stderr,"%s: attempting to decode fixed-size records from leaf node\n",FUNC);
-HGOTO_ERROR(H5E_BTREE, H5E_UNSUPPORTED, NULL, "Can't decode records yet!")
+HGOTO_ERROR(H5E_BTREE, H5E_UNSUPPORTED, FAIL, "Can't decode records yet!")
         } /* end else */
 
 #ifdef LATER

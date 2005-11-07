@@ -130,6 +130,9 @@ New Features
 
     Library:
     --------
+       - Added H5Gcopy() routine to copy objects between while keeping
+         data in compressed form.  QAK - 2005/11/06
+       - Added H5Sextent_equal() routine.  QAK - 2005/11/06
        - Added HSYS_ERROR which retrieves the system error message and pushes
          it to the error stack.  This gives more information of the failed
 	 system call. AKC - 2005/08/04

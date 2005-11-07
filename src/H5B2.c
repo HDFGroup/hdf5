@@ -28,15 +28,23 @@
  *-------------------------------------------------------------------------
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5B2_PACKAGE		/*suppress error about including H5B2pkg  */
 
-/* Private headers */
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5B2pkg.h"		/* v2 B-trees				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5MFprivate.h"	/* File memory management		*/
 
-/* Local macros */
+/****************/
+/* Local Macros */
+/****************/
 
 /* Format overhead for each node (on disk) */
 #define H5B2_OVERHEAD_SIZE              (H5B2_SIZEOF_MAGIC+1)   /* Signature + version # */
@@ -51,9 +59,13 @@
 /* #define H5B2_DEBUG */
 
 
-/* Local typedefs */
+/******************/
+/* Local Typedefs */
+/******************/
 
-/* Local prototypes */
+/********************/
+/* Local Prototypes */
+/********************/
 
 /* Helper functions */
 static herr_t H5B2_create_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
@@ -113,7 +125,9 @@ static herr_t H5B2_assert_internal2(hsize_t parent_all_nrec, H5B2_shared_t *shar
 #endif /* H5B2_DEBUG */
 
 
-/* Package variables */
+/*********************/
+/* Package Variables */
+/*********************/
 
 /* Declare a free list to manage the H5B2_t struct */
 H5FL_DEFINE(H5B2_t);
@@ -124,8 +138,13 @@ H5FL_DEFINE(H5B2_internal_t);
 /* Declare a free list to manage the H5B2_leaf_t struct */
 H5FL_DEFINE(H5B2_leaf_t);
 
+/*****************************/
+/* Library Private Variables */
+/*****************************/
 
-/* Static variables */
+/*******************/
+/* Local Variables */
+/*******************/
 
 /* Declare a free list to manage B-tree node pages to/from disk */
 H5FL_BLK_DEFINE_STATIC(node_page);

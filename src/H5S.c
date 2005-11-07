@@ -39,6 +39,7 @@ static herr_t H5S_set_extent_simple (H5S_t *space, unsigned rank,
 static htri_t H5S_is_simple(const H5S_t *sdim);
 static herr_t H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc);
 static H5S_t *H5S_decode(const unsigned char *buf);
+static htri_t H5S_extent_equal(const H5S_t *ds1, const H5S_t *ds2);
 
 #ifdef H5S_DEBUG
 /* Names of the selection names, for debugging */
@@ -2222,6 +2223,106 @@ H5S_set_extent_real( H5S_t *space, const hsize_t *size )
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_set_extent_real() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Sextent_equal
+ *
+ * Purpose:	Determines if two dataspace extents are equal.
+ *
+ * Return:	Success:	TRUE if equal, FALSE if unequal
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		Monday, October 24, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5Sextent_equal(hid_t space1_id, hid_t space2_id)
+{
+    const H5S_t	*ds1, *ds2;     /* Dataspaces to compare */
+    htri_t	ret_value;
+
+    FUNC_ENTER_API(H5Sextent_equal, FAIL)
+    H5TRACE2("t","ii",space1_id,space2_id);
+
+    /* check args */
+    if(NULL == (ds1 = H5I_object_verify(space1_id, H5I_DATASPACE)) ||
+            NULL == (ds2 = H5I_object_verify(space2_id, H5I_DATASPACE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+
+    /* Check dataspaces for extent's equality */
+    if((ret_value = H5S_extent_equal(ds1, ds2)) < 0)
+	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOMPARE, FAIL, "dataspace comparison failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Sextent_equal() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_extent_equal
+ PURPOSE
+    Check if two dataspaces have equal extents
+ USAGE
+    htri_t H5S_extent_equal(ds1, ds2)
+        H5S_t *ds1, *ds2;	        IN: Dataspace objects to compare
+ RETURNS
+     TRUE if equal, FALSE if unequal on succeess/Negative on failure
+ DESCRIPTION
+	Compare two dataspaces if their extents are identical.
+--------------------------------------------------------------------------*/
+static htri_t
+H5S_extent_equal(const H5S_t *ds1, const H5S_t *ds2)
+{
+    unsigned u;                 /* Local index variable */
+    htri_t ret_value = TRUE;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5S_extent_equal, FAIL)
+
+    /* Check args */
+    HDassert(ds1);
+    HDassert(ds2);
+
+    /* Make certain the dataspaces are the same type */
+    if(ds1->extent.type != ds2->extent.type)
+        HGOTO_DONE(FALSE)
+
+    /* Make certain the dataspaces are the same rank */
+    if(ds1->extent.rank != ds2->extent.rank)
+        HGOTO_DONE(FALSE)
+
+    /* Make certain the dataspaces' current dimensions are the same size */
+    if(ds1->extent.rank > 0) {
+        HDassert(ds1->extent.size);
+        HDassert(ds2->extent.size);
+        for(u = 0; u < ds1->extent.rank; u++) {
+            if(ds1->extent.size[u] != ds2->extent.size[u])
+                HGOTO_DONE(FALSE)
+        } /* end for */
+    } /* end if */
+
+    /* Make certain the dataspaces' maximum dimensions are the same size */
+    if(ds1->extent.rank > 0) {
+        /* Check for no maximum dimensions on dataspaces */
+        if(ds1->extent.max != NULL && ds2->extent.max != NULL) {
+            for(u = 0; u < ds1->extent.rank; u++) {
+                if(ds1->extent.max[u] != ds2->extent.max[u])
+                    HGOTO_DONE(FALSE)
+            } /* end for */
+        } /* end if */
+        else
+            if((ds1->extent.max == NULL && ds2->extent.max != NULL) ||
+                    (ds1->extent.max != NULL && ds2->extent.max == NULL))
+                HGOTO_DONE(FALSE)
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_extent_equal() */
 
 
 /*-------------------------------------------------------------------------

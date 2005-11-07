@@ -271,6 +271,8 @@ H5_DLL ssize_t H5D_istore_writevv(const H5D_io_info_t *io_info,
     const void *buf);
 H5_DLL haddr_t H5D_istore_get_addr(const H5D_io_info_t *io_info,
     struct H5D_istore_ud1_t *_udata);
+H5_DLL herr_t H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src,
+    H5F_t *f_dst, H5O_layout_t *layout_dst, hid_t dxpl_id);
 
 /* Functions that operate on external file list (efl) storage */
 H5_DLL ssize_t H5D_efl_readvv(const H5D_io_info_t *io_info,

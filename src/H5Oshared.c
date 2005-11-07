@@ -42,6 +42,8 @@ static void *H5O_shared_copy(const void *_mesg, void *_dest, unsigned update_fla
 static size_t H5O_shared_size (const H5F_t*, const void *_mesg);
 static herr_t H5O_shared_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
 static herr_t H5O_shared_link(H5F_t *f, hid_t dxpl_id, const void *_mesg);
+static void *H5O_shared_copy_file(H5F_t *file_src, void *native_src,
+    H5F_t *file_dst, hid_t dxpl_id, H5SL_t *map_list, void *udata);
 static herr_t H5O_shared_debug (H5F_t*, hid_t dxpl_id, const void*, FILE*, int, int);
 
 /* This message derives from H5O */
@@ -59,7 +61,9 @@ const H5O_class_t H5O_SHARED[1] = {{
     H5O_shared_link,		/*link method				*/
     NULL,			/*get share method			*/
     NULL, 			/*set share method			*/
-    H5O_shared_debug,	    	/*debug method				*/
+    H5O_shared_copy_file,	/* copy native value to file    */
+    NULL,			/* post copy native value to file    */
+    H5O_shared_debug	    	/*debug method				*/
 }};
 
 /* Old version, with full symbol table entry as link for object header sharing */
@@ -469,6 +473,63 @@ H5O_shared_link(H5F_t *f, hid_t dxpl_id, const void *_mesg)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5O_shared_link() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_shared_copy_file
+ *
+ * Purpose:     Copies a message from _MESG to _DEST in file
+ *
+ * Return:      Success:        Ptr to _DEST
+ *
+ *              Failure:        NULL
+ *
+ * Programmer:  Quincey Koziol
+ *              November 1, 2005 
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5O_shared_copy_file(H5F_t UNUSED *file_src, void *native_src,
+       H5F_t *file_dst, hid_t dxpl_id, H5SL_t *map_list, void UNUSED *udata)
+{
+    H5O_shared_t        *shared_src = (H5O_shared_t *)native_src;
+    H5O_shared_t        *shared_dst = NULL;
+    void                *ret_value;             /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_copy_file)
+
+    /* check args */
+    HDassert(shared_src);
+    HDassert(file_dst);
+    HDassert(map_list);
+
+    /* Allocate space for the destination message */
+    if(NULL == (shared_dst = H5MM_malloc(sizeof(H5O_shared_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    /* Can't handle copying message in global heap currently */
+    HDassert(!shared_src->in_gh);
+    shared_dst->in_gh = FALSE;
+
+    /* Reset group entry for new object */
+    H5G_ent_reset(&(shared_dst->u.ent));
+    shared_dst->u.ent.file = file_dst;
+
+    /* Copy the shared object from source to destination */
+    if(H5O_copy_header_map(&(shared_src->u.ent), &(shared_dst->u.ent), dxpl_id, map_list) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy object")
+
+    /* Set return value */
+    ret_value = shared_dst;
+
+done:
+    if(!ret_value)
+        if(shared_dst)
+            H5MM_xfree(shared_dst);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5O_shared_copy_file() */
 
 
 /*-------------------------------------------------------------------------

@@ -38,6 +38,7 @@
 #include "H5Aprivate.h"
 
 /* Other private headers needed by this file */
+#include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5Sprivate.h"		/* Dataspace				*/
 #include "H5Tprivate.h"		/* Datatype functions			*/
 
@@ -53,6 +54,12 @@ struct H5A_t {
     void        *data;      /* Attribute data (on a temporary basis) */
     size_t      data_size;  /* Size of data on disk */
 };
+
+/* Declare extern the free list for H5A_t's */
+H5FL_EXTERN(H5A_t);
+
+/* Declare extern a free list to manage blocks of type conversion data */
+H5FL_BLK_EXTERN(attr_buf);
 
 /* Function prototypes for H5A package scope */
 H5_DLL H5A_t       *H5A_copy(H5A_t *new_attr, const H5A_t *old_attr, unsigned update_flags);

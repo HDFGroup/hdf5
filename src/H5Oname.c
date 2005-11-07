@@ -57,7 +57,9 @@ const H5O_class_t H5O_NAME[1] = {{
     NULL,			/* link method			*/
     NULL,		    	/*get share method		*/
     NULL,			/*set share method		*/
-    H5O_name_debug,         	/*debug the message             */
+    NULL,			/* copy native value to file    */
+    NULL,			/* post copy native value to file    */
+    H5O_name_debug         	/*debug the message             */
 }};
 
 

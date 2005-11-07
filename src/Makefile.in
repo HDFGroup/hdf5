@@ -82,10 +82,10 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(settingsdir)" \
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libhdf5_la_LIBADD =
-am_libhdf5_la_OBJECTS = H5.lo H5A.lo H5AC.lo H5B.lo H5B2.lo \
-	H5B2cache.lo H5B2dbg.lo H5B2test.lo H5BP.lo H5BPcache.lo \
-	H5BPdbg.lo H5BPtest.lo H5BT.lo H5BTbtree2.lo H5BTcache.lo \
-	H5BTdbg.lo H5BTtest.lo H5C.lo H5D.lo H5Dcontig.lo \
+am_libhdf5_la_OBJECTS = H5.lo H5A.lo H5AC.lo H5B.lo H5Bcache.lo \
+	H5B2.lo H5B2cache.lo H5B2dbg.lo H5B2test.lo H5BP.lo \
+	H5BPcache.lo H5BPdbg.lo H5BPtest.lo H5BT.lo H5BTbtree2.lo \
+	H5BTcache.lo H5BTdbg.lo H5BTtest.lo H5C.lo H5D.lo H5Dcontig.lo \
 	H5Dcompact.lo H5Defl.lo H5Dio.lo H5Distore.lo H5Dmpio.lo \
 	H5Dselect.lo H5Dtest.lo H5E.lo H5F.lo H5Fdbg.lo H5Fmount.lo \
 	H5Fsfile.lo H5Fsuper.lo H5FD.lo H5FDcore.lo H5FDfamily.lo \
@@ -384,7 +384,8 @@ libhdf5_la_LDFLAGS = -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISION):$(LT
 MOSTLYCLEANFILES = H5Tinit.c
 
 # library sources
-libhdf5_la_SOURCES = H5.c H5A.c H5AC.c H5B.c H5B2.c H5B2cache.c H5B2dbg.c      \
+libhdf5_la_SOURCES = H5.c H5A.c H5AC.c H5B.c H5Bcache.c H5B2.c H5B2cache.c \
+        H5B2dbg.c \
         H5B2test.c H5BP.c H5BPcache.c H5BPdbg.c H5BPtest.c \
         H5BT.c H5BTbtree2.c H5BTcache.c H5BTdbg.c H5BTtest.c H5C.c \
         H5D.c \
@@ -563,6 +564,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5BTcache.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5BTdbg.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5BTtest.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Bcache.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5C.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5D.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Dcompact.Plo@am__quote@

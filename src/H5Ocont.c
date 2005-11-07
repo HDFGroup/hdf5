@@ -42,6 +42,8 @@ static void *H5O_cont_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shar
 static herr_t H5O_cont_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static size_t H5O_cont_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_cont_free(void *mesg);
+static void *H5O_cont_copy_file(H5F_t *file_src, void *mesg_src,
+    H5F_t *file_dst, hid_t dxpl_id, H5SL_t *map_list, void *udata);
 static herr_t H5O_cont_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			     int indent, int fwidth);
 
@@ -60,7 +62,9 @@ const H5O_class_t H5O_CONT[1] = {{
     NULL,			/* link method			*/
     NULL, 		    	/*get share method		*/
     NULL,		    	/*set share method		*/
-    H5O_cont_debug,         	/*debugging                     */
+    H5O_cont_copy_file,  	/* copy native value to file    */
+    NULL, 		 	/* post copy native value to file    */
+    H5O_cont_debug         	/*debugging                     */
 }};
 
 /* Declare the free list for H5O_cont_t's */
@@ -206,6 +210,54 @@ H5O_cont_free (void *mesg)
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5O_cont_free() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_cont_copy_file
+ *
+ * Purpose:     Copies a continuation block message from _MESG to _DEST in file
+ *
+ * Return:      Success:        Ptr to _DEST
+ *
+ *              Failure:        NULL
+ *
+ * Programmer:  Peter Cao 
+ *              September 22, 2005 
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5O_cont_copy_file(H5F_t UNUSED *file_src, void *mesg_src,
+        H5F_t *file_dst, hid_t UNUSED dxpl_id, H5SL_t UNUSED *map_list, void *udata)
+{
+    H5O_cont_t  *cont_src = (H5O_cont_t *) mesg_src;
+    H5O_chunk_t *chunk = (H5O_chunk_t *)udata;
+    H5O_cont_t  *cont_dst = NULL;
+    void        *ret_value;          /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_cont_copy_file)
+
+    /* check args */
+    HDassert(cont_src);
+    HDassert(file_dst);
+
+    /* Allocate space for the destination cont */
+    if(NULL == (cont_dst = H5FL_MALLOC(H5O_cont_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    HDmemcpy(cont_dst, cont_src, sizeof(H5O_cont_t));
+    cont_dst->addr = chunk[cont_src->chunkno].addr;
+
+    /* Set return value */
+    ret_value = cont_dst;
+
+done:
+    if(!ret_value)
+        if(cont_dst)
+            H5FL_FREE(H5O_cont_t, cont_dst);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_cont_copy_file() */
 
 
 /*-------------------------------------------------------------------------

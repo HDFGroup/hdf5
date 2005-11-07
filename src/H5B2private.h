@@ -96,6 +96,10 @@ typedef struct H5B2_class_t {
 
 } H5B2_class_t;
 
+/*****************************/
+/* Library-private Variables */
+/*****************************/
+ 
 /***************************************/
 /* Library-private Function Prototypes */
 /***************************************/

@@ -68,7 +68,6 @@ static herr_t H5G_node_clear(H5F_t *f, H5G_node_t *sym, hbool_t destroy);
 static herr_t H5G_compute_size(const H5F_t *f, const H5G_node_t *sym, size_t *size_ptr);
 
 /* B-tree callbacks */
-static size_t H5G_node_sizeof_rkey(const H5F_t *f, const void *_udata);
 static H5RC_t *H5G_node_get_shared(const H5F_t *f, const void *_udata);
 static herr_t H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t op, void *_lt_key,
 			      void *_udata, void *_rt_key,
@@ -109,7 +108,6 @@ const H5AC_class_t H5AC_SNODE[1] = {{
 H5B_class_t H5B_SNODE[1] = {{
     H5B_SNODE_ID,		/*id			*/
     sizeof(H5G_node_key_t), 	/*sizeof_nkey		*/
-    H5G_node_sizeof_rkey,	/*get_sizeof_rkey	*/
     H5G_node_get_shared,	/*get_shared		*/
     H5G_node_create,		/*new			*/
     H5G_node_cmp2,		/*cmp2			*/
@@ -123,9 +121,6 @@ H5B_class_t H5B_SNODE[1] = {{
     H5G_node_encode_key,	/*encode		*/
     H5G_node_debug_key,		/*debug			*/
 }};
-
-/* Declare a free list to manage the H5B_shared_t struct */
-H5FL_EXTERN(H5B_shared_t);
 
 /* Declare a free list to manage the H5G_node_t struct */
 H5FL_DEFINE_STATIC(H5G_node_t);
@@ -142,33 +137,8 @@ H5FL_SEQ_DEFINE_STATIC(size_t);
 /* Declare a free list to manage the raw page information */
 H5FL_BLK_DEFINE_STATIC(grp_page);
 
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_node_sizeof_rkey
- *
- * Purpose:	Returns the size of a raw B-link tree key for the specified
- *		file.
- *
- * Return:	Success:	Size of the key.
- *
- *		Failure:	never fails
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 14 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static size_t
-H5G_node_sizeof_rkey(const H5F_t *f, const void UNUSED * udata)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_sizeof_rkey);
-
-    FUNC_LEAVE_NOAPI(H5F_SIZEOF_SIZE(f));	/*the name offset */
-}
+/* Declare extern the free list to manage haddr_t's */
+H5FL_EXTERN(haddr_t);
 
 
 /*-------------------------------------------------------------------------
@@ -1803,7 +1773,7 @@ H5G_node_init(H5F_t *f)
     /* Set up the "global" information for this file's groups */
     shared->type= H5B_SNODE;
     shared->two_k=2*H5F_KVALUE(f,H5B_SNODE);
-    shared->sizeof_rkey = H5G_node_sizeof_rkey(f, NULL);
+    shared->sizeof_rkey = H5F_SIZEOF_SIZE(f);	/*the name offset */
     assert(shared->sizeof_rkey);
     shared->sizeof_rnode = H5B_nodesize(f, shared, &shared->sizeof_keys);
     assert(shared->sizeof_rnode);
@@ -1891,6 +1861,106 @@ H5G_node_shared_free (void *_shared)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G_node_shared_free() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_node_copy
+ *
+ * Purpose:	This function gets called during a group iterate operation
+ *              to copy objects of this node into a new location.
+ *
+ * Return:	0(zero) on success/Negative on failure
+ *
+ * Programmer:  Peter Cao 
+ *              Sept 10, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
+		  const void UNUSED *_rt_key, void *_udata)
+{
+    H5G_bt_it_ud5_t       *udata = (H5G_bt_it_ud5_t *)_udata;
+    const H5HL_t          *heap = NULL;
+    H5G_node_t	          *sn = NULL;
+    unsigned int           i;                   /* Local index variable */
+    int                    ret_value = H5B_ITER_CONT;
+
+    FUNC_ENTER_NOAPI(H5G_node_copy, H5B_ITER_ERROR)
+
+    /* Check arguments. */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(udata);
+
+    /* load the symbol table into memory from the source file */
+    if(NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_ITER_ERROR, "unable to load symbol table node")
+
+    /* get the base address of the heap */
+    if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr)))
+       HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_ITER_ERROR, "unable to protect symbol name")
+
+    /* copy object in this node one by one */
+    for(i = 0; i < sn->nsyms; i++) {
+        H5G_entry_t  ent_new;           /* New entry to insert into dest. group */
+        H5G_entry_t *ent_src = &(sn->entry[i]); /* Convenience variable to refer to current source group entry */
+        const char  *name;              /* Name of source object */
+
+        /* Set up symbol table entry for destination */
+        H5G_ent_reset(&ent_new);
+        ent_new.file = udata->loc_dst->file;
+
+        /* Determine name of source object */
+        name = H5HL_offset_into(f, heap, ent_src->name_off);
+	HDassert(name);
+
+        /* Check if object in source group is a hard link */
+        if(H5F_addr_defined(ent_src->header)) {
+            /* Copy the shared object from source to destination */
+            /* (Increments link count on destination) */
+            if(H5O_copy_header_map(ent_src, &ent_new, dxpl_id, udata->map_list) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, H5B_ITER_ERROR, "unable to copy object")
+        } /* ( H5F_addr_defined(ent_src->header)) */
+        else if(H5G_CACHED_SLINK == ent_src->type) {
+            /* it is a soft link */
+            H5O_stab_t stab_mesg;
+            size_t offset_link;
+            char *name_link = H5HL_offset_into(f, heap, ent_src->cache.slink.lval_offset);
+
+            /* read the symbol table where the soft link to be inserted */
+            if(NULL == H5O_read(udata->loc_dst, H5O_STAB_ID, 0, &stab_mesg, dxpl_id))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5B_ITER_ERROR, "unable to determine local heap address")
+            if((size_t)(-1) == (offset_link = H5HL_insert(udata->loc_dst->file, dxpl_id,
+                       stab_mesg.heap_addr, HDstrlen(name_link) + 1, name_link)))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5B_ITER_ERROR, "unable to write link value to local heap")
+            H5O_reset (H5O_STAB_ID, &stab_mesg);
+
+            /* Set up soft link to insert */
+            ent_new.type = H5G_CACHED_SLINK;
+            ent_new.cache.slink.lval_offset = offset_link;
+        } /* else if */
+        else 
+            HDassert(0 && "Unknown entry type");
+
+        /* Insert the new object in the destination file's group */
+        /* (Don't increment the link count - that's already done above for hard links) */
+        if(H5G_stab_insert(udata->loc_dst, name, &ent_new, FALSE, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5B_ITER_ERROR, "unable to insert the name")
+
+        /* Free the ID to name buffers */
+        H5G_free_ent_name(&ent_new);
+    } /* end of for (i=0; i<sn->nsyms; i++) */
+    
+done:
+    if (heap && H5HL_unprotect(f, dxpl_id, heap, udata->heap_addr, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to unprotect symbol name")
+
+    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) != SUCCEED)
+        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_node_copy() */
 
 
 /*-------------------------------------------------------------------------

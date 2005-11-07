@@ -87,6 +87,10 @@ static herr_t H5D_xfer_xform_close(const char* name, size_t size, void* value);
 /* Define a "default" dataset transfer property list cache structure to use for default DXPLs */
 H5D_dxpl_cache_t H5D_def_dxpl_cache;
 
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
 /*******************/
 /* Local Variables */
 /*******************/

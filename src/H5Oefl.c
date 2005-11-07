@@ -33,6 +33,8 @@ static herr_t H5O_efl_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_efl_copy(const void *_mesg, void *_dest, unsigned update_flags);
 static size_t H5O_efl_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_efl_reset(void *_mesg);
+static void *H5O_efl_copy_file(H5F_t *file_src, void *mesg_src,
+    H5F_t *file_dst, hid_t dxpl_id, H5SL_t *map_list, void *udata);
 static herr_t H5O_efl_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			    int indent, int fwidth);
 
@@ -51,7 +53,9 @@ const H5O_class_t H5O_EFL[1] = {{
     NULL,			/* link method			*/
     NULL,	  	    	/*get share method		*/
     NULL,			/*set share method		*/
-    H5O_efl_debug,	    	/*debug the message		*/
+    H5O_efl_copy_file,		/* copy native value to file    */
+    NULL,			/* post copy native value to file    */
+    H5O_efl_debug	    	/*debug the message		*/
 }};
 
 #define H5O_EFL_VERSION		1
@@ -415,6 +419,86 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5O_efl_copy_file
+ *
+ * Purpose:     Copies an efl message from _MESG to _DEST in file
+ *
+ * Return:      Success:        Ptr to _DEST
+ *
+ *              Failure:        NULL
+ *
+ * Programmer:  Peter Cao 
+ *              September 29, 2005 
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5O_efl_copy_file(H5F_t UNUSED *file_src, void *mesg_src,
+        H5F_t *file_dst, hid_t dxpl_id, H5SL_t UNUSED *map_list, void UNUSED *_udata)
+{
+    H5O_efl_t     *efl_src = (H5O_efl_t *) mesg_src;
+    H5O_efl_t     *efl_dst = NULL;
+    size_t        idx, size, name_offset, heap_size;
+    void          *ret_value;          /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_efl_copy_file)
+
+    /* check args */
+    HDassert(efl_src);
+    HDassert(file_dst);
+
+    /* Allocate space for the destination efl */
+    if(NULL == (efl_dst = H5MM_calloc(sizeof(H5O_efl_t))))
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    /* Copy the "top level" information */
+    HDmemcpy(efl_dst, efl_src, sizeof(H5O_efl_t));
+
+    /* create name heap */
+    heap_size = H5HL_ALIGN(1);
+    for(idx = 0; idx < efl_src->nused; idx++)
+        heap_size += H5HL_ALIGN(HDstrlen(efl_src->slot[idx].name) + 1);
+
+    if(H5HL_create(file_dst, dxpl_id, heap_size, &efl_dst->heap_addr/*out*/) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create heap")
+
+    name_offset = H5HL_insert(file_dst, dxpl_id, efl_dst->heap_addr, 1, "");
+    if((size_t)(-1) == name_offset)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't initialize heap")
+    HDassert(0 == name_offset);
+
+    /* allocate array of external file entries */
+    if(efl_src->nalloc > 0) {
+        size = efl_src->nalloc * sizeof(H5O_efl_entry_t);
+        if((efl_dst->slot = H5MM_calloc(size)) == NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+        /* copy content from the source. Need to update later */
+        HDmemcpy(efl_dst->slot, efl_src->slot, size);
+    }
+
+    /* copy the name from the source */
+    for(idx = 0; idx < efl_src->nused; idx++) {
+        efl_dst->slot[idx].name = H5MM_xstrdup(efl_src->slot[idx].name);
+        efl_dst->slot[idx].name_offset = H5HL_insert(file_dst, dxpl_id, efl_dst->heap_addr,
+            HDstrlen(efl_dst->slot[idx].name)+1, efl_dst->slot[idx].name);
+    }
+
+    /* Set return value */
+    ret_value = efl_dst;
+
+done:
+    if(!ret_value)
+        if(efl_dst)
+            H5MM_xfree(efl_dst);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_efl_debug
  *
  * Purpose:	Prints debugging info for a message.
@@ -475,3 +559,4 @@ H5O_efl_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * s
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
+

@@ -42,8 +42,12 @@ static void *H5O_stab_copy(const void *_mesg, void *_dest, unsigned update_flags
 static size_t H5O_stab_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_stab_free(void *_mesg);
 static herr_t H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
+static void *H5O_stab_copy_file(H5F_t *file_src, void *native_src,
+    H5F_t *file_dst, hid_t dxpl_id, H5SL_t *map_list, void *udata);
+static herr_t H5O_stab_post_copy_file(H5F_t *file_src, const void *mesg_src,
+    H5G_entry_t *loc_dst, hid_t dxpl_id, H5SL_t *map_list);
 static herr_t H5O_stab_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
-			     FILE * stream, int indent, int fwidth);
+    FILE * stream, int indent, int fwidth);
 
 /* This message derives from H5O */
 const H5O_class_t H5O_STAB[1] = {{
@@ -60,7 +64,9 @@ const H5O_class_t H5O_STAB[1] = {{
     NULL,			/* link method			*/
     NULL,		    	/*get share method		*/
     NULL, 			/*set share method		*/
-    H5O_stab_debug,         	/*debug the message             */
+    H5O_stab_copy_file,		/* copy native value to file    */
+    H5O_stab_post_copy_file,	/* post copy native value to file    */
+    H5O_stab_debug         	/*debug the message             */
 }};
 
 /* Declare a free list to manage the H5O_stab_t struct */
@@ -334,6 +340,95 @@ H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *mesg, hbool_t adj_link)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_stab_delete() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_stab_copy_file
+ *
+ * Purpose:     Copies a message from _MESG to _DEST in file
+ *
+ * Return:      Success:        Ptr to _DEST
+ *
+ *              Failure:        NULL
+ *
+ * Programmer:  Peter Cao 
+ *              September 10, 2005 
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5O_stab_copy_file(H5F_t UNUSED *file_src, void *native_src,
+       H5F_t *file_dst, hid_t dxpl_id, H5SL_t UNUSED *map_list, void UNUSED *udata)
+{
+    H5O_stab_t           *stab_src = (H5O_stab_t *) native_src;
+    H5O_stab_t           *stab_dst = NULL;
+    void                 *ret_value;          /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_stab_copy_file)
+
+    /* check args */
+    HDassert(stab_src);
+    HDassert(file_dst);
+
+    /* Allocate space for the destination stab */
+    if(NULL == (stab_dst = H5FL_MALLOC(H5O_stab_t)))
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    if(H5G_stab_copy_tmp(file_dst, stab_dst, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to copy group symbol table")
+
+    /* Set return value */
+    ret_value = stab_dst;
+
+done:
+    if(!ret_value)
+        if(stab_dst)
+            H5FL_FREE(H5O_stab_t, stab_dst);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5O_stab_copy_file() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_stab_post_copy_file
+ *
+ * Purpose:     Copies entries of a symbol table message from _MESG to _DEST in file
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Peter Cao 
+ *              September 28, 2005 
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5O_stab_post_copy_file(H5F_t *file_src, const void *mesg_src,
+    H5G_entry_t *loc_dst, hid_t dxpl_id, H5SL_t *map_list)
+{
+    H5G_bt_it_ud5_t      udata;      /* B-tree user data */
+    const H5O_stab_t     *stab_src = (const H5O_stab_t *) mesg_src;
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_stab_post_copy_file)
+
+    /* check args */
+    HDassert(file_src);
+    HDassert(stab_src);
+    HDassert(loc_dst->file);
+    HDassert(map_list);
+
+    /* Set up B-tree iteration user data */
+    udata.map_list = map_list;
+    udata.heap_addr = stab_src->heap_addr;
+    udata.loc_dst = loc_dst;
+
+    /* Iterate over objects in group, copying them */
+    if((H5B_iterate(file_src, dxpl_id, H5B_SNODE, H5G_node_copy, stab_src->btree_addr, &udata)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "iteration operator failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5O_stab_post_copy_file() */
 
 
 /*-------------------------------------------------------------------------

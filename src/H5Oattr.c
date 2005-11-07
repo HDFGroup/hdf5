@@ -35,6 +35,8 @@ static herr_t H5O_attr_reset (void *_mesg);
 static herr_t H5O_attr_free (void *mesg);
 static herr_t H5O_attr_delete (H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
 static herr_t H5O_attr_link(H5F_t *f, hid_t dxpl_id, const void *_mesg);
+static void *H5O_attr_copy_file(H5F_t *file_src, void *native_src,
+    H5F_t *file_dst, hid_t dxpl_id, H5SL_t *map_list, void *udata);
 static herr_t H5O_attr_debug (H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			      FILE * stream, int indent, int fwidth);
 
@@ -53,7 +55,9 @@ const H5O_class_t H5O_ATTR[1] = {{
     H5O_attr_link,		/* link method			*/
     NULL,			/* get share method		*/
     NULL,			/* set share method		*/
-    H5O_attr_debug,		/* debug the message            */
+    H5O_attr_copy_file,		/* copy native value to file    */
+    NULL,			/* post copy native value to file    */
+    H5O_attr_debug		/* debug the message            */
 }};
 
 /* This is the initial version, which does not have support for shared datatypes */
@@ -64,12 +68,6 @@ const H5O_class_t H5O_ATTR[1] = {{
 
 /* Flags for attribute flag encoding */
 #define H5O_ATTR_FLAG_TYPE_SHARED       0x01
-
-/* Declare extern the free list for H5A_t's */
-H5FL_EXTERN(H5A_t);
-
-/* Declare extern the free list for attribute data buffers */
-H5FL_BLK_EXTERN(attr_buf);
 
 /* Declare external the free list for H5S_t's */
 H5FL_EXTERN(H5S_t);
@@ -593,6 +591,95 @@ H5O_attr_link(H5F_t UNUSED *f, hid_t dxpl_id, const void *_mesg)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5O_attr_link() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_attr_copy_file
+ *
+ * Purpose:     Copies a message from _MESG to _DEST in file
+ *
+ * Return:      Success:        Ptr to _DEST
+ *
+ *              Failure:        NULL
+ *
+ * Programmer:  Quincey Koziol
+ *              November 1, 2005 
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5O_attr_copy_file(H5F_t UNUSED *file_src, void *native_src,
+       H5F_t *file_dst, hid_t dxpl_id, H5SL_t *map_list, void UNUSED *udata)
+{
+    H5A_t        *attr_src = (H5A_t *)native_src;
+    H5A_t        *attr_dst = NULL;
+    void         *ret_value;             /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_copy_file)
+
+    /* check args */
+    HDassert(attr_src);
+    HDassert(file_dst);
+    HDassert(map_list);
+
+    /* Allocate space for the destination message */
+    if(NULL == (attr_dst = H5FL_CALLOC(H5A_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    /* Copy the top level of the attribute */
+    *attr_dst = *attr_src;
+
+    /* Don't have an opened group entry for copy */
+    H5G_ent_reset(&(attr_dst->ent));
+    attr_dst->ent_opened = 0;
+
+    /* Copy attribute's name */
+    attr_dst->name = H5MM_strdup(attr_src->name);
+
+    /* Copy attribute's datatype */
+    /* (Start destination datatype as transient, even if source is named) */
+    attr_dst->dt = H5T_copy(attr_src->dt, H5T_COPY_ALL);
+
+    /* Check for named datatype being copied */
+    if(H5T_committed(attr_src->dt)) {
+        H5G_entry_t         *ent_src;           /* Pointer to source datatype's group entry */
+        H5G_entry_t         *ent_dst;           /* Pointer to dest. datatype's group entry */
+
+        /* Get group entries for source & destination */
+        ent_src = H5T_entof(attr_src->dt);
+        HDassert(ent_src);
+        ent_dst = H5T_entof(attr_dst->dt);
+        HDassert(ent_dst);
+
+        /* Reset group entry for new object */
+        H5G_ent_reset(ent_dst);
+        ent_dst->file = file_dst;
+
+        /* Copy the shared object from source to destination */
+        if(H5O_copy_header_map(ent_src, ent_dst, dxpl_id, map_list) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy object")
+    } /* end if */
+
+    /* Copy the guts of the attribute */
+    attr_dst->ds = H5S_copy(attr_src->ds, FALSE);
+
+    if(attr_src->data) {
+        if(NULL == (attr_dst->data = H5FL_BLK_MALLOC(attr_buf, attr_src->data_size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+        HDmemcpy(attr_dst->data, attr_src->data, attr_src->data_size);
+    } /* end if */
+
+    /* Set return value */
+    ret_value = attr_dst;
+
+done:
+    if(!ret_value)
+        if(attr_dst)
+            (void)H5A_free(attr_dst);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5O_attr_copy_file() */
 
 
 /*--------------------------------------------------------------------------

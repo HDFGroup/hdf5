@@ -14,14 +14,12 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:             H5Gproto.h
+ * Created:             H5Gpublic.h
  *                      Jul 11 1997
  *                      Robb Matzke <matzke@llnl.gov>
  *
  * Purpose:             Public declarations for the H5G package (symbol
  *                      tables).
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -123,6 +121,8 @@ H5_DLL int H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize,
 			   char *buf);
 H5_DLL hid_t H5Gcreate_expand(hid_t loc_id, const char *name, hid_t gcpl_id,
     hid_t gapl_id);
+H5_DLL herr_t H5Gcopy(hid_t id_src, hid_t loc_dst, const char *name_dst, 
+                              hid_t plist_id);
 
 #ifdef __cplusplus
 }

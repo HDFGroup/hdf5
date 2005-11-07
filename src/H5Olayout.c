@@ -18,16 +18,18 @@
  * Purpose:     Messages related to data layout.
  */
 
+#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 #define H5O_PACKAGE	/*suppress error about including H5Opkg	  */
 
 
-#include "H5private.h"
-#include "H5Dprivate.h"
-#include "H5Eprivate.h"
-#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Dpkg.h"		/* Dataset functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5MFprivate.h"	/* File space management		*/
-#include "H5MMprivate.h"
-#include "H5Opkg.h"             /* Object header functions                  */
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Opkg.h"             /* Object headers			*/
+#include "H5Pprivate.h"		/* Property lists			*/
 
 /* PRIVATE PROTOTYPES */
 static void *H5O_layout_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
@@ -37,6 +39,8 @@ static size_t H5O_layout_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_layout_reset(void *_mesg);
 static herr_t H5O_layout_free(void *_mesg);
 static herr_t H5O_layout_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
+static void *H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, 
+    H5F_t *file_dst, hid_t dxpl_id, H5SL_t *map_list, void *udata);
 static herr_t H5O_layout_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			       int indent, int fwidth);
 
@@ -55,7 +59,9 @@ const H5O_class_t H5O_LAYOUT[1] = {{
     NULL,			/* link method			*/
     NULL,		    	/*get share method		*/
     NULL,			/*set share method		*/
-    H5O_layout_debug,       	/*debug the message             */
+    H5O_layout_copy_file,       /* copy native value to file    */
+    NULL,		        /* post copy native value to file    */
+    H5O_layout_debug       	/*debug the message             */
 }};
 
 /* For forward and backward compatibility.  Version is 1 when space is
@@ -596,6 +602,113 @@ H5O_layout_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t UNUSED adj
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5O_layout_delete() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_layout_copy_file
+ *
+ * Purpose:     Copies a data layout message from _MESG to _DEST in file
+ *
+ * Return:      Success:        Ptr to _DEST
+ *
+ *              Failure:        NULL
+ *
+ * Programmer:  Peter Cao 
+ *              July 23, 2005 
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5O_layout_copy_file(H5F_t *file_src, void *mesg_src,
+         H5F_t *file_dst, hid_t dxpl_id, H5SL_t UNUSED *map_list, void UNUSED *_udata)
+{
+    H5O_layout_t     *layout_src = (H5O_layout_t *) mesg_src;
+    H5O_layout_t           *layout_dst = NULL;
+    void                   *ret_value;          /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_layout_copy_file)
+
+    /* check args */
+    HDassert(layout_src);
+    HDassert(file_dst);
+
+    /* Allocate space for the destination layout */
+    if(NULL == (layout_dst = H5FL_MALLOC(H5O_layout_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    /* Copy the "top level" information */
+    HDmemcpy(layout_dst, layout_src, sizeof(H5O_layout_t));
+
+    /* Copy the layout type specific information */
+    switch(layout_src->type) {
+        case H5D_COMPACT:
+	    if(layout_src->u.compact.buf) {
+            	if(NULL == (layout_dst->u.compact.buf = H5MM_malloc(layout_src->u.compact.size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset")
+            	HDmemcpy(layout_dst->u.compact.buf, layout_src->u.compact.buf, layout_src->u.compact.size);
+            	layout_dst->u.compact.dirty = TRUE;
+	    }
+            break;
+
+        case H5D_CONTIGUOUS:
+            if(H5F_addr_defined(layout_src->u.contig.addr)) {
+		haddr_t                 addr_src, addr_dst;
+		unsigned                DRAW_BUF_SIZE = 4096;
+		uint8_t                 buf[4096];
+		size_t		    nbytes=0, total_nbytes=0;
+
+                /* create layout */
+                if(H5D_contig_create (file_dst, dxpl_id, layout_dst)<0)
+                    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to initialize contiguous storage")
+
+                /* copy raw data*/
+                nbytes = total_nbytes = 0;
+                while(total_nbytes < layout_src->u.contig.size) {
+                    addr_src = layout_src->u.contig.addr + total_nbytes;
+                    addr_dst = layout_dst->u.contig.addr + total_nbytes;
+
+                    nbytes = layout_src->u.contig.size-total_nbytes;
+                    if(nbytes > DRAW_BUF_SIZE)
+			nbytes = DRAW_BUF_SIZE;
+                    total_nbytes += nbytes; 
+
+                    if(H5F_block_read(file_src, H5FD_MEM_DRAW, addr_src, nbytes, H5P_DATASET_XFER_DEFAULT, buf)<0)
+                        HGOTO_ERROR(H5E_SYM, H5E_READERROR, NULL, "unable to read raw data")
+
+                    if(H5F_block_write(file_dst, H5FD_MEM_DRAW, addr_dst, nbytes, H5P_DATASET_XFER_DEFAULT, buf)<0)
+                        HGOTO_ERROR(H5E_SYM, H5E_READERROR, NULL, "unable to write raw data")
+                }
+            } /*  if ( H5F_addr_defined(layout_src->u.contig.addr)) */
+            break;
+
+        case H5D_CHUNKED:
+            if(H5F_addr_defined(layout_src->u.chunk.addr)) {
+
+                /* layout is not created in the destination file, undef btree address */
+                layout_dst->u.chunk.addr = HADDR_UNDEF;
+
+                /* create chunked layout */
+                if(H5D_istore_copy(file_src, layout_src, file_dst, layout_dst, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to copy chunked storage")
+            } /* if ( H5F_addr_defined(layout_srct->u.chunk.addr)) */
+            break;
+
+        default:
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "Invalid layout class");
+    } /* end switch */
+
+    /* Set return value */
+    ret_value=layout_dst;
+
+done:
+    if(!ret_value)
+	if(layout_dst)
+	    H5FL_FREE(H5O_layout_t, layout_dst);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
 
 
 /*-------------------------------------------------------------------------

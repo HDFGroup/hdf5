@@ -398,6 +398,7 @@
 ./src/H5ACprivate.h
 ./src/H5ACpublic.h
 ./src/H5B.c
+./src/H5Bcache.c
 ./src/H5Bpkg.h
 ./src/H5Bprivate.h
 ./src/H5Bpublic.h
@@ -662,6 +663,7 @@
 ./test/noencoder.h5
 ./test/ntypes.c
 ./test/ohdr.c
+./test/objcopy.c
 ./test/reserved.c
 ./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_deflate.c			_DO_NOT_DISTRIBUTE_

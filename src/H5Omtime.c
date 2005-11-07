@@ -60,7 +60,9 @@ const H5O_class_t H5O_MTIME[1] = {{
     NULL,			/* link method			*/
     NULL,			/*get share method		*/
     NULL,			/*set share method		*/
-    H5O_mtime_debug,		/*debug the message		*/
+    NULL,			/* copy native value to file    */
+    NULL,			/* post copy native value to file    */
+    H5O_mtime_debug		/*debug the message		*/
 }};
 
 /* This message derives from H5O */
@@ -79,7 +81,9 @@ const H5O_class_t H5O_MTIME_NEW[1] = {{
     NULL,			/* link method			*/
     NULL,			/*get share method		*/
     NULL,			/*set share method		*/
-    H5O_mtime_debug,		/*debug the message		*/
+    NULL,			/* copy native value to file    */
+    NULL,			/* post copy native value to file    */
+    H5O_mtime_debug		/*debug the message		*/
 }};
 
 /* Current version of new mtime information */

@@ -132,6 +132,7 @@ H5_DLL herr_t H5Sselect_elements(hid_t space_id, H5S_seloper_t op,
 H5_DLL H5S_class_t H5Sget_simple_extent_type(hid_t space_id);
 H5_DLL herr_t H5Sset_extent_none(hid_t space_id);
 H5_DLL herr_t H5Sextent_copy(hid_t dst_id,hid_t src_id);
+H5_DLL herr_t H5Sextent_equal(hid_t sid1, hid_t sid2);
 H5_DLL herr_t H5Sselect_all(hid_t spaceid);
 H5_DLL herr_t H5Sselect_none(hid_t spaceid);
 H5_DLL herr_t H5Soffset_simple(hid_t space_id, const hssize_t *offset);

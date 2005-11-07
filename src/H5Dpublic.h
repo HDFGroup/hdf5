@@ -88,29 +88,28 @@ extern "C" {
 typedef herr_t (*H5D_operator_t)(void *elem, hid_t type_id, unsigned ndim,
 				 const hsize_t *point, void *operator_data);
 
-H5_DLL hid_t H5Dcreate (hid_t file_id, const char *name, hid_t type_id,
+H5_DLL hid_t H5Dcreate(hid_t file_id, const char *name, hid_t type_id,
 			 hid_t space_id, hid_t plist_id);
-H5_DLL hid_t H5Dopen (hid_t file_id, const char *name);
-H5_DLL herr_t H5Dclose (hid_t dset_id);
-H5_DLL hid_t H5Dget_space (hid_t dset_id);
-H5_DLL herr_t H5Dget_space_status(hid_t dset_id,
-				H5D_space_status_t *allocation);
-H5_DLL hid_t H5Dget_type (hid_t dset_id);
-H5_DLL hid_t H5Dget_create_plist (hid_t dset_id);
+H5_DLL hid_t H5Dopen(hid_t file_id, const char *name);
+H5_DLL herr_t H5Dclose(hid_t dset_id);
+H5_DLL hid_t H5Dget_space(hid_t dset_id);
+H5_DLL herr_t H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation);
+H5_DLL hid_t H5Dget_type(hid_t dset_id);
+H5_DLL hid_t H5Dget_create_plist(hid_t dset_id);
 H5_DLL hsize_t H5Dget_storage_size(hid_t dset_id);
 H5_DLL haddr_t H5Dget_offset(hid_t dset_id);
-H5_DLL herr_t H5Dread (hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
+H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 			hid_t file_space_id, hid_t plist_id, void *buf/*out*/);
-H5_DLL herr_t H5Dwrite (hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
+H5_DLL herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 			 hid_t file_space_id, hid_t plist_id, const void *buf);
-H5_DLL herr_t H5Dextend (hid_t dset_id, const hsize_t *size);
+H5_DLL herr_t H5Dextend(hid_t dset_id, const hsize_t *size);
 H5_DLL herr_t H5Diterate(void *buf, hid_t type_id, hid_t space_id,
             H5D_operator_t op, void *operator_data);
 H5_DLL herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf);
 H5_DLL herr_t H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id, hsize_t *size);
 H5_DLL herr_t H5Dfill(const void *fill, hid_t fill_type, void *buf,
         hid_t buf_type, hid_t space);
-H5_DLL herr_t H5Dset_extent (hid_t dset_id, const hsize_t *size);
+H5_DLL herr_t H5Dset_extent(hid_t dset_id, const hsize_t *size);
 H5_DLL herr_t H5Ddebug(hid_t dset_id);
 
 
@@ -118,4 +117,3 @@ H5_DLL herr_t H5Ddebug(hid_t dset_id);
 }
 #endif
 #endif /* _H5Dpublic_H */
-

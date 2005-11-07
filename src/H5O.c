@@ -64,6 +64,12 @@ typedef struct {
 typedef herr_t (*H5O_operator_int_t)(H5O_mesg_t *mesg/*in,out*/, unsigned idx,
     unsigned * oh_flags_ptr, void *operator_data/*in,out*/);
 
+/* Node in skip list to map addresses from one file to another during object header copy */
+typedef struct H5O_addr_map_t {
+    haddr_t     src_addr;               /* Address of object in source file */
+    haddr_t     dst_addr;               /* Address of object in destination file */
+} H5O_addr_map_t;
+
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_init(H5F_t *f, hid_t dxpl_id, size_t size_hint,
                        H5G_entry_t *ent/*out*/, haddr_t header);
@@ -107,6 +113,14 @@ static herr_t H5O_write_mesg(H5O_t *oh, unsigned idx, const H5O_class_t *type,
     unsigned * oh_flags_ptr);
 static herr_t H5O_iterate_real(const H5G_entry_t *ent, const H5O_class_t *type,
     H5AC_protect_t prot, hbool_t internal, void *op, void *op_data, hid_t dxpl_id);
+static void * H5O_copy_mesg_file(const H5O_class_t *type, H5F_t *file_src,
+        void *mesg_src, H5F_t *file_dst, hid_t dxpl_id, H5SL_t *map_list, void *udata);
+static herr_t H5O_post_copy_mesg_file(const H5O_class_t *type, H5F_t *file_src,
+        const void *mesg_src, H5G_entry_t *loc_dst, 
+        hid_t dxpl_id, H5SL_t *map_list);
+static herr_t H5O_copy_header_real(const H5G_entry_t *ent_src,
+    H5G_entry_t *ent_dst /*out */, hid_t dxpl_id, H5SL_t *map_list);
+static herr_t H5O_copy_free_addrmap_cb(void *item, void *key, void *op_data);
 
 /* Metadata cache callbacks */
 static H5O_t *H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata1,
@@ -153,6 +167,8 @@ static const H5O_class_t *const message_type_g[] = {
     H5O_MTIME_NEW,	/*0x0012 New Object modification date and time  */
 };
 
+/* Library private variables */
+
 /*
  * An array of functions indexed by symbol table entry cache type
  * (H5G_type_t) that are called to retrieve constant messages cached in the
@@ -179,6 +195,9 @@ H5FL_EXTERN(time_t);
 
 /* Declare extern the free list for H5O_cont_t's */
 H5FL_EXTERN(H5O_cont_t);
+
+/* Declare a free list to manage the H5O_addr_map_t struct */
+H5FL_DEFINE_STATIC(H5O_addr_map_t);
 
 
 /*-------------------------------------------------------------------------
@@ -584,12 +603,8 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 	    p += 3; /*reserved*/
 
             /* Try to detect invalidly formatted object header messages */
-	    if (p + mesg_size > oh->chunk[chunkno].image + chunk_size) {
-
-		HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, \
-		            "corrupt object header");
-            }
-
+	    if (p + mesg_size > oh->chunk[chunkno].image + chunk_size)
+		HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "corrupt object header");
 
             /* Skip header messages we don't know about */
             /* (Usually from future versions of the library */
@@ -680,7 +695,6 @@ H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh)
     int	id;
     unsigned	u;
     H5O_mesg_t *curr_msg;       /* Pointer to current message being operated on */
-    H5O_cont_t	*cont = NULL;
     herr_t	(*encode)(H5F_t*, uint8_t*, const void*) = NULL;
     unsigned combine=0;        /* Whether to combine the object header prefix & the first chunk */
     herr_t      ret_value=SUCCEED;       /* Return value */
@@ -2259,8 +2273,7 @@ H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *flags, const H5O_class_t *orig_type,
         HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, UFAIL, "object header message is too large (16k max)");
 
     /* Allocate space in the object headed for the message */
-    if ((ret_value = H5O_alloc(f, dxpl_id, oh, 
-                               orig_type, size, oh_flags_ptr)) == UFAIL)
+    if ((ret_value = H5O_alloc(f, dxpl_id, oh, orig_type, size, oh_flags_ptr)) == UFAIL)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, UFAIL, "unable to allocate space for message");
 
     /* Increment any links in message */
@@ -3045,8 +3058,8 @@ H5O_alloc_new_chunk(H5F_t *f,
     H5O_cont_t  *cont = NULL;           /*native continuation message   */
     int chunkno;
     unsigned    u;
-    unsigned    ret_value;              /*return value  */
     haddr_t	new_chunk_addr;
+    unsigned    ret_value;              /*return value  */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_alloc_new_chunk);
 
@@ -3088,10 +3101,8 @@ H5O_alloc_new_chunk(H5F_t *f,
      * message, then make sure the new chunk has enough room for that
      * other message.
      */
-    if ( found_null < 0 ) {
-
+    if (found_null < 0)
         size += H5O_SIZEOF_MSGHDR(f) + oh->mesg[found_other].raw_size;
-    }
 
     /*
      * The total chunk size must include the requested space plus enough
@@ -3103,11 +3114,8 @@ H5O_alloc_new_chunk(H5F_t *f,
 
     /* allocate space in file to hold the new chunk */
     new_chunk_addr = H5MF_alloc(f, H5FD_MEM_OHDR, dxpl_id, (hsize_t)size);
-    if ( HADDR_UNDEF == new_chunk_addr ) {
-
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, \
-                    "unable to allocate space for new chunk");
-    }
+    if(HADDR_UNDEF == new_chunk_addr)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, "unable to allocate space for new chunk")
 
     /*
      * Create the new chunk giving it a file address.
@@ -3117,11 +3125,8 @@ H5O_alloc_new_chunk(H5F_t *f,
         unsigned na = oh->alloc_nchunks + H5O_NCHUNKS;
         H5O_chunk_t *x = H5FL_SEQ_REALLOC (H5O_chunk_t, oh->chunk, (size_t)na);
 
-        if ( !x ) {
-
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, \
-                        "memory allocation failed");
-        }
+        if (!x)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, "memory allocation failed");
         oh->alloc_nchunks = na;
         oh->chunk = x;
     }
@@ -3142,11 +3147,8 @@ H5O_alloc_new_chunk(H5F_t *f,
         unsigned na = oh->alloc_nmesgs + MAX (H5O_NMESGS, 3);
         H5O_mesg_t *x = H5FL_SEQ_REALLOC (H5O_mesg_t, oh->mesg, (size_t)na);
 
-        if ( !x ) {
-
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, \
-                        "memory allocation failed");
-        }
+        if (!x)
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, UFAIL, "memory allocation failed");
         oh->alloc_nmesgs = na;
         oh->mesg = x;
 
@@ -3211,11 +3213,8 @@ H5O_alloc_new_chunk(H5F_t *f,
      */
     oh->mesg[found_null].type = H5O_CONT;
     oh->mesg[found_null].dirty = TRUE;
-    if (NULL==(cont = H5FL_MALLOC(H5O_cont_t))) {
-
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, \
-                    "memory allocation failed");
-    }
+    if (NULL==(cont = H5FL_MALLOC(H5O_cont_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, "memory allocation failed")
     cont->addr = oh->chunk[chunkno].addr;
     cont->size = oh->chunk[chunkno].size;
     cont->chunkno = chunkno;
@@ -3226,7 +3225,6 @@ H5O_alloc_new_chunk(H5F_t *f,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-
 } /* H5O_alloc_new_chunk() */
 
 
@@ -3270,7 +3268,7 @@ H5O_alloc(H5F_t *f,
           size_t size, 
           unsigned * oh_flags_ptr)
 {
-    unsigned    idx = UFAIL;
+    unsigned	idx;
     H5O_mesg_t *msg;            /* Pointer to newly allocated message */
     size_t      aligned_size = H5O_ALIGN(size);
     htri_t	tri_result;
@@ -3310,8 +3308,7 @@ H5O_alloc(H5F_t *f,
          * Note that in this new version of this function, all chunks 
          * must have file space allocated to them.
          */
-        for ( chunkno = 0; chunkno < oh->nchunks; chunkno++ ) 
-        {
+	for (chunkno = 0; chunkno < oh->nchunks; chunkno++) {
             HDassert( H5F_addr_defined(oh->chunk[chunkno].addr) );
 
             tri_result = H5O_alloc_extend_chunk(f, oh, chunkno, size, &idx);
@@ -3334,13 +3331,9 @@ H5O_alloc(H5F_t *f,
         /* if idx is still UFAIL, we were not able to extend a chunk.  
          * Create a new one.
          */
-        if (idx == UFAIL) {
-
-            if ( (idx = H5O_alloc_new_chunk(f, dxpl_id, oh, size)) == UFAIL ) {
-
-                HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, UFAIL, \
-                            "unable to create a new object header data chunk");
-            }
+        if(idx == UFAIL) {
+            if((idx = H5O_alloc_new_chunk(f, dxpl_id, oh, size)) == UFAIL)
+                HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, UFAIL, "unable to create a new object header data chunk")
         }
     }
 
@@ -3349,35 +3342,26 @@ H5O_alloc(H5F_t *f,
 
     /* do we need to split the null message? */
     if (msg->raw_size > aligned_size) {
-
         H5O_mesg_t *null_msg;       /* Pointer to null message */
+        size_t	mesg_size = aligned_size+ H5O_SIZEOF_MSGHDR(f); /* Total size of newly allocated message */
 
-        size_t  mesg_size = aligned_size + H5O_SIZEOF_MSGHDR(f); 
-                            /* Total size of newly allocated message */
-
-        HDassert( msg->raw_size - aligned_size >= H5O_SIZEOF_MSGHDR(f) );
+        HDassert(msg->raw_size - aligned_size >= H5O_SIZEOF_MSGHDR(f));
 
         if (oh->nmesgs >= oh->alloc_nmesgs) {
-
             int old_alloc=oh->alloc_nmesgs;
             unsigned na = oh->alloc_nmesgs + H5O_NMESGS;
             H5O_mesg_t *x = H5FL_SEQ_REALLOC(H5O_mesg_t, oh->mesg, (size_t)na);
 
-            if (!x) {
-
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, \
-                            "memory allocation failed");
-            }
-            oh->alloc_nmesgs = na;
-            oh->mesg = x;
+	    if (!x)
+                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, UFAIL, "memory allocation failed");
+	    oh->alloc_nmesgs = na;
+	    oh->mesg = x;
 
             /* Set new object header info to zeros */
             HDmemset(&oh->mesg[old_alloc],0,
                      (oh->alloc_nmesgs-old_alloc)*sizeof(H5O_mesg_t));
 
-            /* "Retarget" local 'msg' pointer into newly allocated array 
-             * of messages 
-             */
+            /* "Retarget" local 'msg' pointer into newly allocated array of messages */
             msg=&oh->mesg[idx];
         }
         null_msg = &(oh->mesg[oh->nmesgs++]);
@@ -3402,7 +3386,6 @@ H5O_alloc(H5F_t *f,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-
 } /* H5O_alloc() */
 
 #ifdef NOT_YET
@@ -4075,6 +4058,432 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_iterate_real() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_copy_mesg_file
+ *      
+ * Purpose:     Copies a message to file.  If MESG is is the null pointer then a null
+ *              pointer is returned with no error.
+ *
+ * Return:      Success:        Ptr to the new message
+ *
+ *              Failure:        NULL
+ *                       
+ * Programmer:  Peter Cao 
+ *              June 4, 2005 
+ *                               
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5O_copy_mesg_file(const H5O_class_t *type, H5F_t *file_src,
+    void *native_src, H5F_t *file_dst, hid_t dxpl_id, H5SL_t *map_list, void *udata)
+{
+    void        *ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_copy_mesg_file)
+
+    /* check args */
+    HDassert(type);
+    HDassert(type->copy_file);
+    HDassert(file_src);
+    HDassert(native_src);
+    HDassert(file_dst);
+    HDassert(map_list);
+
+    if(NULL == (ret_value = (type->copy_file)(file_src, native_src, file_dst, dxpl_id, map_list, udata)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to copy object header message to file")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_copy_mesg_file() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_post_copy_mesg_file
+ *      
+ * Purpose:     Copies what's left to file after the object a meesage is copied.
+ *              This function is need for situations like copying symbol tables.
+ *              Copying a member of symbol table requires the parent object header 
+ *              exists in file. For this case, the first round of the message will
+ *              create symbol table enttries but will not go deep copying member
+ *              objects in the symbol table. The post copy will do that.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *                       
+ * Programmer:  Peter Cao 
+ *              September 28, 2005 
+ *                               
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5O_post_copy_mesg_file (const H5O_class_t *type, H5F_t *file_src,
+        const void *mesg_src, H5G_entry_t *loc_dst, 
+        hid_t dxpl_id, H5SL_t *map_list)
+{
+    herr_t	ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_post_copy_mesg_file)
+
+    /* check args */
+    HDassert(type);
+    HDassert(file_src);
+    HDassert(mesg_src);
+    HDassert(loc_dst->file);
+    HDassert(map_list);
+
+    if(type->post_copy_file && (type->post_copy_file)(file_src, mesg_src, loc_dst, dxpl_id, map_list) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to copy object header message to file")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5O_post_copy_mesg_file */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_copy_header_real
+ *
+ * Purpose:     copy header object from one location to another.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Peter Cao
+ *              May 30, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_copy_header_real(const H5G_entry_t *ent_src,
+    H5G_entry_t *ent_dst /*out */, hid_t dxpl_id, H5SL_t *map_list)
+{
+    H5O_addr_map_t      *addr_map;              /* Address mapping of object copied */
+    uint8_t	       buf[16], *p;
+    H5O_t             *oh = NULL;
+    unsigned           chunkno = 0, mesgno = 0;
+    size_t             chunk_size, hdr_size;
+    haddr_t            addr_new;
+    H5O_mesg_t         *mesg_src;
+    H5O_chunk_t       *chunk;
+    herr_t             ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_copy_header_real)
+
+    HDassert(ent_src);
+    HDassert(ent_src->file);
+    HDassert(H5F_addr_defined(ent_src->header));
+    HDassert(ent_dst->file);
+    HDassert(map_list);
+
+    if(NULL == (oh = H5AC_protect(ent_src->file, dxpl_id, H5AC_OHDR, ent_src->header, NULL, NULL, H5AC_READ)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+
+    /* get the size of the file header of the destination file */
+    hdr_size = H5O_SIZEOF_HDR(ent_dst->file);
+
+    /* allocate memory space for the destitnation chunks */
+    if(NULL == (chunk = H5FL_SEQ_MALLOC(H5O_chunk_t, (size_t)oh->nchunks)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+    /* Allocate space for the first chunk */
+    if(HADDR_UNDEF == (addr_new = H5MF_alloc(ent_dst->file, H5FD_MEM_OHDR, dxpl_id, (hsize_t)hdr_size + oh->chunk[0].size))) 
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for object header")
+
+    /* Return the first chunk address */
+    ent_dst->header = addr_new;
+
+    /* Set chunk's address */
+    chunk[0].addr = addr_new + (hsize_t)hdr_size;
+
+    /* Encode header information */
+    p = buf;
+
+    /* encode version */
+    *p++ = H5O_VERSION;
+
+    /* reserved */
+    *p++ = 0;
+
+    /* encode number of messages */
+    UINT16ENCODE(p, oh->nmesgs);
+
+    /* encode link count (at zero initially) */
+    UINT32ENCODE(p, 0);
+
+    /* encode body size */
+    UINT32ENCODE(p, oh->chunk[0].size);
+
+    /* zero to alignment */
+    HDmemset(p, 0, (size_t)(hdr_size-12));
+
+    /* need to allocate all the chunks for the destination before copy the chunk message
+       because continuation chunk message will need to know the chunk address of address of 
+       continuation block. 
+     */
+    for(chunkno = 1; chunkno < oh->nchunks; chunkno++) {
+        if(HADDR_UNDEF == (chunk[chunkno].addr = H5MF_alloc(ent_dst->file, H5FD_MEM_OHDR, dxpl_id, (hsize_t)oh->chunk[chunkno].size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for object header")
+    } /* end for */
+
+    /* Loop through chunks to copy chunk information */
+    for(chunkno = 0; chunkno < oh->nchunks; chunkno++) {
+        chunk_size = oh->chunk[chunkno].size;
+
+        /* copy chunk information */
+        chunk[chunkno].dirty = oh->chunk[chunkno].dirty;
+        chunk[chunkno].size = chunk_size;
+
+        /* create memory image for the new chunk */
+        if(NULL == (chunk[chunkno].image = H5FL_BLK_MALLOC(chunk_image,chunk_size)))
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+        /* copy the chunk image from source to destination in memory */
+        /* (This copies over all the messages which don't require special
+         * callbacks to fix them up.)
+         */
+        HDmemcpy(chunk[chunkno].image, oh->chunk[chunkno].image, chunk_size);
+
+        /* Loop through messages, to fix up any which refer to addresses in the source file, etc. */
+        for(mesgno = 0; mesgno < oh->nmesgs; mesgno++) {
+            const H5O_class_t *copy_type;
+
+            mesg_src = &(oh->mesg[mesgno]);
+
+            /* check if the message belongs to this chunk */
+            if(mesg_src->chunkno != chunkno)
+                continue;
+
+            if (mesg_src->flags & H5O_FLAG_SHARED)
+                copy_type = H5O_SHARED;
+            else
+                copy_type = mesg_src->type;
+
+            /* copy this message into destination file */
+            HDassert(copy_type);
+            if(copy_type->copy_file) {
+		void    *dst_native;       /* Pointer to copy of native information for current message */
+ 
+                /*
+                 * Decode the message if necessary.  If the message is shared then d
+                 * a shared message, ignoring the message type.
+                 */
+                if(NULL == mesg_src->native) {
+                    /* Decode the message if necessary */
+                    HDassert(copy_type->decode);
+                    if(NULL == (mesg_src->native = (copy_type->decode)(ent_src->file, dxpl_id, mesg_src->raw, NULL)))
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode a message")
+                } /* end if (NULL == mesg_src->native) */
+
+		/* Copy the source message */
+                if(H5O_CONT_ID == copy_type->id) {
+                    if((dst_native = H5O_copy_mesg_file(copy_type, ent_src->file, mesg_src->native, 
+                            ent_dst->file, dxpl_id, map_list, chunk)) == NULL)
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object header message")
+                 } /* end if */
+                 else {
+                    if((dst_native = H5O_copy_mesg_file(copy_type, ent_src->file, mesg_src->native, 
+                            ent_dst->file, dxpl_id, map_list, NULL)) == NULL)
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object header message")
+                 } /* end else */
+
+		/* Calculate address in destination raw chunk */
+		p = chunk[chunkno].image + (mesg_src->raw - oh->chunk[chunkno].image);
+
+                /*
+                 * Encode the message.  If the message is shared then we
+                 * encode a Shared Object message instead of the object
+                 * which is being shared.
+                 */
+                if((copy_type->encode)(ent_dst->file, p, dst_native) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode object header message")
+
+		/* Release native destination info */
+                H5O_free_real(copy_type, dst_native);
+	    } /* end if (mesg_src->type && mesg_src->type->copy_file) */
+        } /* end of mesgno loop */
+
+        /* Write the object header to the file if this is the first chunk */
+        if(chunkno == 0)
+            if(H5F_block_write(ent_dst->file, H5FD_MEM_OHDR, addr_new, hdr_size, dxpl_id, buf) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to write object header hdr to disk")
+
+        /* Write this chunk into disk */
+        if(H5F_block_write(ent_dst->file, H5FD_MEM_OHDR, chunk[chunkno].addr, chunk[chunkno].size, dxpl_id, chunk[chunkno].image) < 0)
+           HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to write object header data to disk")
+    } /* end of chunkno loop */
+
+    /* Allocate space for the address mapping of the object copied */
+    if(NULL == (addr_map = H5FL_MALLOC(H5O_addr_map_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+    /* Insert the address mapping for the new object into the copied list */
+    /* (Do this here, because "post copy" possibly checks it) */
+    addr_map->src_addr = ent_src->header;
+    addr_map->dst_addr = ent_dst->header;
+    if(H5SL_insert(map_list, addr_map, &(addr_map->src_addr)) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object into skip list")
+
+    /* "post copy" loop over messages */
+    for(mesgno = 0; mesgno < oh->nmesgs; mesgno++) {
+        const H5O_class_t *copy_type;
+
+        mesg_src = &(oh->mesg[mesgno]);
+
+        if (mesg_src->flags & H5O_FLAG_SHARED)
+            copy_type = H5O_SHARED;
+        else
+            copy_type = mesg_src->type;
+
+        HDassert(copy_type);
+        if(mesg_src->native) {
+            if((H5O_post_copy_mesg_file(copy_type, ent_src->file, mesg_src->native,
+                    ent_dst, dxpl_id, map_list)) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object header message")
+        } /* end if */
+    } /* end for */
+
+done:
+    /* Release pointer to object header itself */
+    if(oh != NULL) {
+        for(chunkno = 0; chunkno < oh->nchunks; chunkno++)
+            H5FL_BLK_FREE(chunk_image, chunk[chunkno].image);
+        H5FL_SEQ_FREE(H5O_chunk_t, chunk);
+
+        if(H5AC_unprotect(ent_src->file, dxpl_id, H5AC_OHDR, ent_src->header, oh, H5AC__NO_FLAGS_SET) < 0)
+            HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_copy_header_real() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_copy_header_map
+ *
+ * Purpose:     Copy header object from one location to another, detecting
+ *              already mapped objects, etc.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              November 1, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_copy_header_map(const H5G_entry_t *ent_src,
+    H5G_entry_t *ent_dst /*out */, hid_t dxpl_id, H5SL_t *map_list)
+{
+    H5O_addr_map_t      *addr_map;              /* Address mapping of object copied */
+    herr_t             ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5O_copy_header_map, FAIL)
+
+    /* Sanity check */
+    HDassert(ent_src);
+    HDassert(ent_dst);
+    HDassert(ent_dst->file);
+    HDassert(map_list);
+
+    /* Look up the address of the object to copy in the skip list */
+    addr_map = (H5O_addr_map_t *)H5SL_search(map_list, &(ent_src->header));
+
+    /* Check if address is already in list of objects copied */
+    if(addr_map == NULL) {
+        /* Copy object for the first time */
+
+        /* Copy object referred to */
+        if(H5O_copy_header_real(ent_src, ent_dst, dxpl_id, map_list) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
+    } /* end if */
+    else {
+        /* Object has already been copied, set it's address in destination file */
+        ent_dst->header = addr_map->dst_addr;
+    } /* end else */
+
+    /* Increment destination object's link count */
+    if(H5O_link(ent_dst, 1, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to increment object link count")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_copy_header_map() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5O_copy_free_addrmap_cb
+ PURPOSE
+    Internal routine to free address maps from the skip list for copying objects
+ USAGE
+    herr_t H5O_copy_free_addrmap_cb(item, key, op_data)
+        void *item;             IN/OUT: Pointer to addr
+        void *key;              IN/OUT: (unused)
+        void *op_data;          IN: (unused)
+ RETURNS
+    Returns zero on success, negative on failure.
+ DESCRIPTION
+        Releases the memory for the address.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5O_copy_free_addrmap_cb(void *item, void UNUSED *key, void UNUSED *op_data)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_copy_free_addrmap_cb)
+
+    HDassert(item);
+
+    /* Release the item */
+    H5FL_FREE(H5O_addr_map_t, item);
+
+    FUNC_LEAVE_NOAPI(0)
+}   /* H5O_copy_free_addrmap_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_copy_header
+ *
+ * Purpose:     copy header object from one location to another.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Peter Cao
+ *              May 30, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_copy_header(const H5G_entry_t *ent_src,
+    H5G_entry_t *ent_dst /*out */, hid_t dxpl_id)
+{
+    H5SL_t          *map_list = NULL;           /* Skip list to hold address mappings */
+    herr_t             ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5O_copy_header, FAIL)
+
+    HDassert(ent_src);
+    HDassert(ent_src->file);
+    HDassert(H5F_addr_defined(ent_src->header));
+    HDassert(ent_dst->file);
+
+    /* Create a skip list to keep track of which objects are copied */
+    if((map_list = H5SL_create(H5SL_TYPE_HADDR, 0.5, 16)) == NULL)
+        HGOTO_ERROR(H5E_SLIST, H5E_CANTCREATE, FAIL, "cannot make skip list")
+
+    /* copy the object from the source file to the destination file */
+    if(H5O_copy_header_real(ent_src, ent_dst, dxpl_id, map_list) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
+
+done:
+    if(map_list)
+        H5SL_destroy(map_list, H5O_copy_free_addrmap_cb, NULL);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_copy_header() */
 
 
 /*-------------------------------------------------------------------------

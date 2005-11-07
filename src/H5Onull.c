@@ -46,5 +46,7 @@ const H5O_class_t H5O_NULL[1] = {{
     NULL,		    /*no link method		    */
     NULL,		    /*no get share method	    */
     NULL,	            /*no set share method	    */
-    NULL,                   /*no debug method               */
+    NULL,		    /*no copy native value to file    */
+    NULL,		    /*no post copy native value to file    */
+    NULL                    /*no debug method               */
 }};

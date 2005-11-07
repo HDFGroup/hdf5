@@ -315,3 +315,50 @@ H5G_stab_delete(H5F_t *f, hid_t dxpl_id, const H5O_stab_t *stab, hbool_t adj_lin
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5G_stab_delete() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5G_stab_copy_tmp
+ *
+ * Purpose:     copy a group symbol table and memeber objects from SRC file to DST file.
+ *
+ * Return:      Non-negative on success
+ *              Negative on failure.
+ *
+ * Programmer:  Peter Cao       
+ *              September 10, 2005 
+ *
+ * Note:        This routine should be replaced with proper call to "real"
+ *              stab creation routine after the "big group revision" checkin
+ *              occurs. -QAK
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_stab_copy_tmp(H5F_t *f_dst,  H5O_stab_t *stab_dst, hid_t dxpl_id)
+{
+    size_t      size_init, name_offset;
+    herr_t      ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_stab_copy_tmp, FAIL)
+
+    HDassert(f_dst);
+    HDassert(stab_dst);
+
+   /* create B-tree private heap */
+   size_init = MAX(H5G_SIZE_HINT, H5HL_SIZEOF_FREE(f_dst) + 2);
+   if (H5HL_create(f_dst, dxpl_id, size_init, &(stab_dst->heap_addr))<0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create heap")
+
+    name_offset = H5HL_insert(f_dst, dxpl_id, stab_dst->heap_addr, 1, "");
+    if ((size_t)(-1)==name_offset)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't initialize heap")
+    assert(0 == name_offset);
+  
+    /* create the B-tree */
+    if (H5B_create(f_dst, dxpl_id, H5B_SNODE, NULL, &(stab_dst->btree_addr)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create B-tree")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_stab_copy_tmp() */

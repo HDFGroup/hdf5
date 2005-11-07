@@ -91,7 +91,6 @@
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5G_init_interface
 
-
 /* Packages needed by this file... */
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Aprivate.h"		/* Attributes				*/
@@ -108,7 +107,6 @@
 /* Local macros */
 #define H5G_INIT_HEAP		8192
 #define H5G_RESERVED_ATOMS	0
-#define H5G_SIZE_HINT   256             /*default root grp size hint         */
 
 /*
  * During name lookups (see H5G_namei()) we sometimes want information about
@@ -149,6 +147,8 @@ typedef struct H5G_typeinfo_t {
     char	*desc;			        /*description of object type	     */
 } H5G_typeinfo_t;
 
+/* Package variables */
+
 /* Local variables */
 static H5G_typeinfo_t *H5G_type_g = NULL;	/*object typing info	*/
 static size_t H5G_ntypes_g = 0;			/*entries in type table	*/
@@ -162,6 +162,9 @@ H5FL_DEFINE(H5G_shared_t);
 
 /* Declare extern the PQ free list for the wrapped strings */
 H5FL_BLK_EXTERN(str_buf);
+
+/* Declare a free list to manage haddr_t's */
+H5FL_DEFINE(haddr_t);
 
 /* Private prototypes */
 static herr_t H5G_register_type(H5G_obj_t type, htri_t(*isa)(H5G_entry_t*, hid_t),
@@ -200,6 +203,8 @@ static htri_t H5G_common_path(const H5RS_str_t *fullpath_r,
     const H5RS_str_t *prefix_r);
 static H5RS_str_t *H5G_build_fullpath(const H5RS_str_t *prefix_r, const H5RS_str_t *name_r);
 static int H5G_replace_ent(void *obj_ptr, hid_t obj_id, void *key);
+static herr_t H5G_copy(H5G_entry_t *ent_src, H5G_entry_t *loc_dst,
+         const char *name_dst, hid_t plist_id);
 
 
 /*-------------------------------------------------------------------------
@@ -1035,6 +1040,50 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
 done:
     FUNC_LEAVE_API(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Gcopy
+ *
+ * Purpose:     Copy an object to destination location 
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Peter Cao 
+ *              June 4, 2005 
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Gcopy(hid_t id_src, hid_t loc_dst, const char *name_dst, hid_t plist_id)
+{
+    H5G_entry_t            *ent_src = NULL, *ent_dst=NULL;
+    herr_t                  ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_API(H5Gcopy, FAIL)
+
+    /* Check arguments */
+    if(NULL == (ent_src = H5G_loc(id_src)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(NULL == (ent_dst = H5G_loc(loc_dst)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!name_dst || !*name_dst)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+
+/* Get correct property list */
+/* XXX: This is a kludge, to use the datatype creation property list - QAK */
+if(H5P_DEFAULT == plist_id)
+    plist_id = H5P_DATATYPE_CREATE_DEFAULT;
+else
+    if(TRUE != H5P_isa_class(plist_id, H5P_DATATYPE_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not object create property list")
+
+    if(H5G_copy(ent_src, ent_dst, name_dst, plist_id) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Gcopy() */
 
 /*
  *-------------------------------------------------------------------------
@@ -4214,3 +4263,60 @@ H5G_unmount(H5G_t *grp)
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5G_unmount() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5G_copy
+ *
+ * Purpose:     Copy an object to destination location 
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Peter Cao 
+ *              June 4, 2005 
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G_copy(H5G_entry_t *ent_src, H5G_entry_t *loc_dst,
+         const char *name_dst, hid_t plist_id)
+{
+    H5P_genplist_t  *oc_plist;          /* Property list created */
+    hid_t           dxpl_id = H5AC_dxpl_id;
+    H5G_entry_t     ent_new;
+    hbool_t         entry_inserted = FALSE;     /* Flag to indicate that the new entry was inserted into a group */
+    herr_t          ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_copy, FAIL);
+
+    HDassert(ent_src);
+    HDassert(ent_src->file);
+    HDassert(loc_dst);
+    HDassert(loc_dst->file);
+    HDassert(name_dst);
+
+    /* Get the property list */
+    if(NULL == (oc_plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+    /* Reset group entry for new object */
+    H5G_ent_reset(&ent_new);
+    ent_new.file = loc_dst->file;
+
+    /* copy the object from the source file to the destination file */
+    if(H5O_copy_header(ent_src, &ent_new, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
+
+    /* Insert the new object in the destination file's group */
+    if(H5G_insert(loc_dst, name_dst, &ent_new, dxpl_id, oc_plist) < 0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to insert the name")
+    entry_inserted = TRUE;
+
+done:
+    /* Free the ID to name buffers */
+    if(entry_inserted)
+        H5G_free_ent_name(&ent_new);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_copy() */
