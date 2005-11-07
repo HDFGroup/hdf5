@@ -23,8 +23,6 @@ srcdir=@srcdir@
 CPPFLAGS=-I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src -I$(top_srcdir)/hl/src  @CPPFLAGS@
 ## These are our main targets. They should be listed in the order to be
 ## executed, generally most specific tests to least specific tests.
-RUNTEST=$(LT_RUN)
-
 TEST_PROGS=test_lite test_image test_table 
 
 ## The libh5test.a library provides common support code for the tests. We link
