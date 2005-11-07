@@ -4046,7 +4046,22 @@ SUBROUTINE h5tset_tag_f(type_id, tag, hdferr)
                                         ! opaque datatype is to be tagged 
   INTEGER, INTENT(OUT) :: hdferr        ! Error code
 END SUBROUTINE h5tset_tag_f
-	</pre>		
+	</pre>
+	
+<dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.5</td>
+          <td valign="top">
+		    The <code>H5T_OPAQUE_TAG_MAX</code> macro constant, 
+			specifying the maximum size of an opaque datatype tag, 
+			was added in <code>H5Tpublic.h</code>.</td></tr>
+    </table></ul>		
 		
 		<!--<dt><strong>Non-C API(s):</strong>
     	<dd>
@@ -4224,7 +4239,7 @@ Describes HDF5 Release 1.6.5, November 2005
 </address>
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 25 October 2005");
+document.writeln("Last modified: 7 November 2005");
 -->
 </SCRIPT>
  
