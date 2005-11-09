@@ -107,8 +107,6 @@ EOF
 
     # HTML file Copyright notice
     cat > ${HTM_COPYRIGHT} << \EOF
-<!--
-  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   * Copyright by the Board of Trustees of the University of Illinois.         *
   * All rights reserved.                                                      *
   *                                                                           *
@@ -120,8 +118,6 @@ EOF
   * is linked from the top-level documents page.  It can also be found at     *
   * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
   * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
-  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- -->
 EOF
 
     # Shell style Copyright notice
@@ -354,19 +350,17 @@ FORTRAN_SOURCE()
 HTML_FILE()
 {
     f=$1
-    COPYRIGHTFILE=$HTM_COPYRIGHT
-    # Must use stdin for wc to prevent filename from popping up.
-    nlines=`wc -l < ${COPYRIGHTFILE}| tr -d ' '`
-    sed -n -e '/^<!--/,/^ -->/p' < $f | head -${nlines} > ${EXTRACTEDFILE}
-    RINSE ${EXTRACTEDFILE}
-    $DIFF ${EXTRACTEDFILE} ${COPYRIGHTFILE} >/dev/null 2>&1
-    if test $? -ne 0; then
-	# show the differences
-	FAILED $f
-	$DIFF ${EXTRACTEDFILE} ${COPYRIGHTFILE}
-    else
+    case `MATCH_COPYRIGHT $HTM_COPYRIGHT $f` in
+    PASSED)
 	PASSED $f
-    fi
+	return
+	;;
+    FAILED)
+	# show the difference
+	FAILED $f
+	$DIFF ${EXTRACTEDFILE} ${HTM_COPYRIGHT}
+	;;
+    esac
 }
 
 
