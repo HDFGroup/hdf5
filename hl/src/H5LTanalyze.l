@@ -13,6 +13,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 %{
+#include <stdlib.h>
 #include <string.h>
 #include<hdf5.h>
 #include "y.tab.h"
