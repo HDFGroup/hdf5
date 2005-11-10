@@ -129,10 +129,29 @@ PUB_DOCS= H5AbstractDs_8cpp.html H5AbstractDs_8h-source.html                  \
           classH5_1_1StrType.html classH5_1_1StrType.png                      \
           classH5_1_1VarLenType.html classH5_1_1VarLenType-members.html       \
           classH5_1_1VarLenType.png                                           \
-          compound_8cpp-example.html create_8cpp-example.html doxygen.css     \
+          compound_8cpp-example.html create_8cpp-example.html                 \
+          doxygen.css RM_stylesheet.css                                       \
           doxygen.png extend__ds_8cpp-example.html                            \
-          examples.html files.html functions.html functions_func.html         \
-          functions_vars.html h5group_8cpp-example.html header.html           \
+          examples.html files.html                                            \
+          functions.html functions_func.html functions_vars.html              \
+          functions_0x63.html functions_0x64.html functions_0x65.html         \
+          functions_0x66.html functions_0x67.html functions_0x68.html         \
+          functions_0x69.html functions_0x6c.html functions_0x6d.html         \
+          functions_0x6e.html functions_0x6f.html functions_0x70.html         \
+          functions_0x72.html functions_0x73.html functions_0x74.html         \
+          functions_0x75.html functions_0x76.html functions_0x77.html         \
+          functions_0x7e.html                                                 \
+          functions_func_0x63.html functions_func_0x64.html                   \
+          functions_func_0x65.html functions_func_0x66.html                   \
+          functions_func_0x67.html functions_func_0x68.html                   \
+          functions_func_0x69.html functions_func_0x6c.html                   \
+          functions_func_0x6d.html functions_func_0x6e.html                   \
+          functions_func_0x6f.html functions_func_0x70.html                   \
+          functions_func_0x72.html functions_func_0x73.html                   \
+          functions_func_0x74.html functions_func_0x75.html                   \
+          functions_func_0x76.html functions_func_0x77.html                   \
+          functions_func_0x7e.html                                            \
+          h5group_8cpp-example.html header.html                               \
           hierarchy.html index.html namespaceH5.html namespaces.html          \
           namespacestd.html readdata_8cpp-example.html                        \
           writedata_8cpp-example.html
