@@ -1,10 +1,10 @@
-HDF5 version 1.6.5-pre4 currently under development
+HDF5 version 1.6.5 released on Thu Nov 10 18:17:53 CST 2005
 ================================================================================
 
 INTRODUCTION
 ============
 This document describes the differences between HDF5-1.6.4 and
-HDF5-1.6.4-post*.  It contains information on the platforms tested and
+HDF5-1.6.5.  It contains information on the platforms tested and
 known problems in HDF5-1.6.5. For more details, check the HISTORY.txt
 file in the HDF5 source.
 
@@ -225,9 +225,7 @@ Bug Fixes since HDF5-1.6.4 Release
 
 
 
-Documentation
-=============
-
+   
 
 Platforms Tested
 ================
@@ -303,7 +301,7 @@ Platforms Tested
     SunOS 5.9 32,64               Sun C 5.6 2004/07/15
      (Solaris 2.9)                Sun Fortran 95 8.0 2004/07/15
                                   Sun C++ 5.6 2004/07/15
-    Solaris 5.10                  Sun WorkShop 6 update 2 C 5.3
+    SunOS 5.10                    Sun WorkShop 6 update 2 C 5.3
                                   Sun WorkShop 6 update 2 Fortran 95 6.2
                                   Sun WorkShop 6 update 2 C++ 5.3
                                   Patch 111685-13 
@@ -480,9 +478,6 @@ Known Problems
   HDF5.  Since the error is triggered by a random situation, it will
   usually disappear if the test is re-run.
 
-* Cray SV1 fails to correctly convert between floating-point and "long double"
-  for software conversion.  Problem is being investigated. SLU - 2005/03/04
-
 * Newer SGI MIPSpro compilers (version 7.4.x) support C99 features but it
   has a "guard" statement in stdint.h that will #error and skip the rest
   of the header file if C99 option is not used explicitly.  Hardset
@@ -531,22 +526,12 @@ Known Problems
 
 * The Stream VFD was not tested yet under Windows.
 
-* Certain platforms give false negatives when testing h5ls:
-    - Cray T90IEEE give errors during testing when displaying
-      some floating-point values. These are benign differences due to
-      the different precision in the values displayed.
-      h5ls appears to be dumping floating-point numbers correctly.
 
 * Before building HDF5 F90 Library from source on Crays 
   replace H5Aff.f90, H5Dff.f90 and H5Pff.f90 files in the fortran/src
   subdirectory in the top level directory with the Cray-specific files
   from the site:
   ftp://ftp.ncsa.uiuc.edu/HDF/HDF5/current/src/patches/
-
-* On some platforms that use Intel and Absoft compilers to build the HDF5 
-  fortran library, compilation may fail for fortranlib_test.f90, fflush1.f90 
-  and fflush2.f90 complaining about exit subroutine. Comment out the line 
-  IF (total_error .ne. 0) CALL exit (total_error).
 
 * Use --disable-shared configure flag if building with Absoft Fortran
   compiler.
@@ -562,12 +547,6 @@ Known Problems
   If -ieee is not used, the converted double values are mostly 0.0 but
   occasionally as 1**-308.  This has been reported to the system staff.
   All other tests have passed.
-
-* The C++ library's tests fail when compiling with PGI C++ compiler.  The
-  workaround until the problem is correctly handled is to use the
-  flag "--instantiate=local" prior to the configure and build steps, as follows:
-        setenv CXX "pgCC --instantiate=local"  for pgCC 5.02 and higher
-        setenv CXX "pgCC -tlocal" for others
 
 * Fortran release DLL randomly failed with Compaq Visual Fortran 6.6c on
   Windows. 
