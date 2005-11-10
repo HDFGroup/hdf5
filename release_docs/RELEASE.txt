@@ -37,6 +37,9 @@ New Features
 ============
     Configuration:
     -------------------------
+	- Added yodconfigure, a configure tool, that patches up the configure
+	  file to allow configure to launch executable via the proper
+	  launching command like "yod -sz 1".  AKC - 2005/11/10
 	- Configure now recognizes the TR variable as the location of the
           tr utility.  JML 2005/10/20
 
@@ -117,7 +120,8 @@ New Features
 
 Support for new platforms, languages and compilers.
 =======================================
-
+    - Added support for RedStorm platform (serial only.)  AKC 2005/11/10
+    - Added support for BG/L platform (serial only.)  LA 2005/11/10
     - Added support for HPUX 11.23 (IA64); only C and C++ are supported
       with the +DD64 flag 
                                              EIP 2005/10/05
@@ -302,8 +306,6 @@ Platforms Tested
                                   Sun WorkShop 6 update 2 Fortran 95 6.2
                                   Sun WorkShop 6 update 2 C++ 5.3
                                   Patch 111685-13 
-    TFLOPS r1.0.4 v4.5.2 i386     pgcc Rel 3.1-4i with mpich-1.2.4 with
-                                          local modifications
     Xeon Linux 2.4.21-32.0.1.ELsmp-perfctr-lustre
     (tungsten)	                  Intel(R) C++ Version 9.0
                                   Intel(R) Fortran Compiler Version 9.0
@@ -332,6 +334,7 @@ Key:   y   = tested and supported
 
 Platform                             C        F90    F90      C++  zlib  SZIP
                                      parallel        parallel      
+IBM BG/L (16)			     n        n      n        n    y     y
 Solaris2.8 64-bit                    y        y      y(1)     y    y     y
 Solaris2.8 32-bit                    y        y      y(1)     y    y     y
 Solaris2.9 64-bit                    y(1)     y      y(1)     y    y     y
@@ -345,7 +348,6 @@ HPUX11.23-32bit                      n        y      n        y    y     y
 HPUX11.23-64bit                      n        n      n        y    y     y
 OSF1 v5.1                            y        y      y        y    y     y
 X1                                   y        y      y        y    y     n
-TFLOPS                               y(1)     n      n        n    y     n
 AIX-5.1, 5.2 & 5.3 32-bit            y        y      y        y    y     y
 AIX-5.1, 5.2 & 5.3 64-bit            y        y      y        y    y     y
 WinXP Visual Studio 6.0              n        n(9)   n        y    y     y
@@ -355,6 +357,7 @@ FreeBSD 4.11                         n        n      n        y    y     y
 RedHat 7.3  W (3)                    y(1)     y(11)  n        y    y     y
 RedHat 7.3  W Intel (3)              n        y      n        y    y     y
 RedHat 7.3  W PGI (3)                n        y      n        y    y     y
+RedStorm (16)			     n        y      n        y    y     n
 SuSe x86_64 gcc (3,13)               n        y(12)  n        y    y     y
 SuSe x86_64 icc (3,13)               n        y(14)  n        y    y     y
 Linux 2.4 Xeon C Lustre Intel (3,6)  n        y      n        y    y     y
@@ -364,6 +367,7 @@ Linux 2.4 SGI Altix ia64 Intel (3)   y        y      y        y    y     y
 
 Platform                             Shared        static-  Thread-  STREAM- 
                                      libraries(4)  exec     safe     VFD    
+IBM BG/L 			     n              y       n        n
 Solaris2.8 64-bit                    y              x       y        y
 Solaris2.8 32-bit                    y              x       y        y
 Solaris2.9 64-bit                    y              x       y        y
@@ -376,7 +380,6 @@ HPUX11.00                            y              x       n        y
 HPUX11.23                            y              y       n        y
 OSF1 v5.1                            y              y       n        y
 X1                                   n              y       n        y
-TFLOPS                               n              y       n        n
 AIX-5.1, 5.2 & 5.3 32-bit            n              y       n        y
 AIX-5.1, 5.2 & 5.3 64-bit            n              y       n        y
 WinXP Visual Studio 6.0              y              y       n        n
@@ -386,6 +389,7 @@ FreeBSD 4.11                         y              y       y        y
 RedHat 7.3   W (3)                   y              y       y        y
 RedHat 7.3  W  Intel (3)             n              y       n        y
 RedHat 7.3  W  PGI (3)               n              y       n        y
+RedStorm 			     n              y       n        y
 SuSe x86_64 gcc (3,13)               n              y       n        y
 SuSe x86_64 icc (3,13)               y              y(15)   n        y
 Linux 2.4 Xeon C Lustre Intel (3,6)  y              y       n        y
@@ -421,11 +425,17 @@ Footnotes:  (1) Using mpich 1.2.6
            (13) AMD Opteron x86_64
            (14) ifort
            (15) Yes with C and Fortran, but not with C++
-       FMB/EIP - 2005/03/15
+	   (16) Only serial is ported.  PFS does not work for PHDF5 yet.
+       FMB/EIP - 2005/11/10
 
 
 Known Problems
 ==============
+* Intel Compilers for Linux x86_86 platforms (EM64T-based, v8.1) has
+  optimization error in the data types conversion code.  Before running
+  configure, edit the file config/intel-flags by changing the setting of
+  PROD_CFLAGS from -O3 to -O0, then run configure.  AKC - 2005/11/10.
+
 * Fortran testing and compiling failures on windows XP 
   1. Compaq visual fortran 6.6c with VS 6.0
      The Fortran tests failed for both release, release dll, debug and debug
@@ -517,8 +527,7 @@ Known Problems
   It is suggested that you don't use this option on these platforms
   during configuration.
 
-* The Stream VFD was not tested yet under Windows. It is not supported
-  in the TFLOPS machine.
+* The Stream VFD was not tested yet under Windows.
 
 * Certain platforms give false negatives when testing h5ls:
     - Cray T90IEEE give errors during testing when displaying
