@@ -60,7 +60,7 @@ const H5O_class_t H5O_CONT[1] = {{
     NULL,			/* link method			*/
     NULL, 		    	/*get share method		*/
     NULL,		    	/*set share method		*/
-    H5O_cont_debug,         	/*debugging                     */
+    H5O_cont_debug         	/*debugging                     */
 }};
 
 /* Declare the free list for H5O_cont_t's */

@@ -59,7 +59,7 @@ const H5O_class_t H5O_SHARED[1] = {{
     H5O_shared_link,		/*link method				*/
     NULL,			/*get share method			*/
     NULL, 			/*set share method			*/
-    H5O_shared_debug,	    	/*debug method				*/
+    H5O_shared_debug	    	/*debug method				*/
 }};
 
 /* Old version, with full symbol table entry as link for object header sharing */

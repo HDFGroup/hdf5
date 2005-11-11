@@ -14,14 +14,12 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:             H5Gproto.h
+ * Created:             H5Gpublic.h
  *                      Jul 11 1997
  *                      Robb Matzke <matzke@llnl.gov>
  *
  * Purpose:             Public declarations for the H5G package (symbol
  *                      tables).
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

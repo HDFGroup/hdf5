@@ -31,8 +31,10 @@
 #include "H5Gprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5ACprivate.h"	/* Metadata cache			  */
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
+
+#define H5G_SIZE_HINT   256    /* default root grp size hint         */
 
 /*
  * A symbol table node is a collection of symbol table entries.  It can

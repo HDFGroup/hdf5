@@ -40,10 +40,17 @@
  *		entry which is added to the end of the list.
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5B_PACKAGE		/*suppress error about including H5Bpkg	  */
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 
 
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Bpkg.h"		/* B-link trees				*/
 #include "H5Dpkg.h"		/* Datasets				*/
@@ -58,6 +65,10 @@
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5Sprivate.h"         /* Dataspaces                           */
 #include "H5Vprivate.h"		/* Vector and array functions		*/
+
+/****************/
+/* Local Macros */
+/****************/
 
 /*
  * Feature: If this constant is defined then every cache preemption and load
@@ -90,6 +101,12 @@
  * that node.
  */
 #define H5D_ISTORE_NDIMS(X)	(((X)->sizeof_rkey-8)/8)
+
+#define H5D_HASH(D,ADDR) H5F_addr_hash(ADDR,(D)->cache.chunk.nslots)
+
+/******************/
+/* Local Typedefs */
+/******************/
 
 /* Raw data chunks are cached.  Each entry in the cache is: */
 typedef struct H5D_rdcc_ent_t {
@@ -127,18 +144,55 @@ typedef struct H5D_istore_key_t {
     unsigned	filter_mask;			/*excluded filters	*/
 } H5D_istore_key_t;
 
-typedef struct H5D_istore_ud1_t {
+/*
+ * Common data exchange structure for indexed storage nodes.  This structure is
+ * passed through the B-link tree layer to the methods for the objects
+ * to which the B-link tree points.
+ */
+typedef struct H5D_istore_bt_ud_common_t {
+    /* downward */
     H5D_istore_key_t	key;	                /*key values		*/
-    haddr_t		addr;			/*file address of chunk */
     const H5O_layout_t	*mesg;		        /*layout message	*/
-    hsize_t		total_storage;	        /*output from iterator	*/
-    FILE		*stream;		/*debug output stream	*/
-    hsize_t		*dims;		        /*dataset dimensions	*/
+} H5D_istore_bt_ud_common_t;
+
+/*
+ * Data exchange structure for indexed storage nodes.  This structure is
+ * passed through the B-link tree layer to the methods for the objects
+ * to which the B-link tree points for operations which require no
+ * additional information.
+ *
+ * (Just an alias for the "common" info).
+ */
+typedef H5D_istore_bt_ud_common_t H5D_istore_ud0_t;
+
+typedef struct H5D_istore_ud1_t {
+    H5D_istore_bt_ud_common_t common;           /* Common info for B-tree user data (must be first) */
+    haddr_t		addr;			/*file address of chunk */
 } H5D_istore_ud1_t;
 
-#define H5D_HASH(D,ADDR) H5F_addr_hash(ADDR,(D)->cache.chunk.nslots)
+/* B-tree callback info for iteration to total allocated space */
+typedef struct H5D_istore_it_ud1_t {
+    H5D_istore_bt_ud_common_t common;           /* Common info for B-tree user data (must be first) */
+    hsize_t		total_storage;	        /*output from iterator	*/
+} H5D_istore_it_ud1_t;
 
-/* Private prototypes */
+/* B-tree callback info for iteration to dump node's info */
+typedef struct H5D_istore_it_ud2_t {
+    H5D_istore_bt_ud_common_t common;           /* Common info for B-tree user data (must be first) */
+    FILE		*stream;		/*debug output stream	*/
+    hbool_t             header_displayed;       /* Node's header is displayed? */
+} H5D_istore_it_ud2_t;
+
+/* B-tree callback info for iteration to prune chunks */
+typedef struct H5D_istore_it_ud3_t {
+    H5D_istore_bt_ud_common_t common;           /* Common info for B-tree user data (must be first) */
+    hsize_t		*dims;		        /*dataset dimensions	*/
+} H5D_istore_it_ud3_t;
+
+/********************/
+/* Local Prototypes */
+/********************/
+
 static void *H5D_istore_chunk_alloc(size_t size, const H5O_pline_t *pline);
 static void *H5D_istore_chunk_xfree(void *chk, const H5O_pline_t *pline);
 static herr_t H5D_istore_shared_create (const H5F_t *f, H5O_layout_t *layout);
@@ -153,7 +207,6 @@ static int H5D_istore_prune_extent(H5F_t *f, hid_t dxpl_id, const void *_lt_key,
         const void *_rt_key, void *_udata);
 
 /* B-tree callbacks */
-static size_t H5D_istore_sizeof_rkey(const H5F_t *f, const void *_udata);
 static H5RC_t *H5D_istore_get_shared(const H5F_t *f, const void *_udata);
 static herr_t H5D_istore_new_node(H5F_t *f, hid_t dxpl_id, H5B_ins_t, void *_lt_key,
 				  void *_udata, void *_rt_key,
@@ -184,7 +237,6 @@ static herr_t H5D_istore_debug_key(FILE *stream, H5F_t *f, hid_t dxpl_id,
 H5B_class_t H5B_ISTORE[1] = {{
     H5B_ISTORE_ID,		/*id			*/
     sizeof(H5D_istore_key_t),	/*sizeof_nkey		*/
-    H5D_istore_sizeof_rkey, 	/*get_sizeof_rkey	*/
     H5D_istore_get_shared,	/*get_shared		*/
     H5D_istore_new_node,	/*new			*/
     H5D_istore_cmp2,		/*cmp2			*/
@@ -199,8 +251,17 @@ H5B_class_t H5B_ISTORE[1] = {{
     H5D_istore_debug_key,	/*debug			*/
 }};
 
-/* Declare a free list to manage the H5B_shared_t struct */
-H5FL_EXTERN(H5B_shared_t);
+/*********************/
+/* Package Variables */
+/*********************/
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+/*******************/
+/* Local Variables */
+/*******************/
 
 /* Declare a free list to manage H5F_rdcc_ent_t objects */
 H5FL_DEFINE_STATIC(H5D_rdcc_ent_t);
@@ -219,45 +280,6 @@ H5FL_BLK_DEFINE_STATIC(chunk_page);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_istore_sizeof_rkey
- *
- * Purpose:	Returns the size of a raw key for the specified UDATA.	The
- *		size of the key is dependent on the number of dimensions for
- *		the object to which this B-tree points.	 The dimensionality
- *		of the UDATA is the only portion that's referenced here.
- *
- * Return:	Success:	Size of raw key in bytes.
- *
- *		Failure:	abort()
- *
- * Programmer:	Robb Matzke
- *		Wednesday, October  8, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-/* ARGSUSED */
-static size_t
-H5D_istore_sizeof_rkey(const H5F_t UNUSED *f, const void *_udata)
-{
-    const H5D_istore_ud1_t *udata = (const H5D_istore_ud1_t *) _udata;
-    size_t		    nbytes;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_sizeof_rkey)
-
-    assert(udata);
-    assert(udata->mesg->u.chunk.ndims > 0 && udata->mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
-
-    nbytes = 4 +			/*storage size		*/
-	     4 +			/*filter mask		*/
-	     udata->mesg->u.chunk.ndims*8;	/*dimension indices	*/
-
-    FUNC_LEAVE_NOAPI(nbytes)
-} /* end H5D_istore_sizeof_rkey() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5D_istore_get_shared
  *
  * Purpose:	Returns the shared B-tree info for the specified UDATA.
@@ -269,21 +291,19 @@ H5D_istore_sizeof_rkey(const H5F_t UNUSED *f, const void *_udata)
  * Programmer:	Quincey Koziol
  *		Monday, July  5, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
 static H5RC_t *
 H5D_istore_get_shared(const H5F_t UNUSED *f, const void *_udata)
 {
-    const H5D_istore_ud1_t *udata = (const H5D_istore_ud1_t *) _udata;
+    const H5D_istore_ud0_t *udata = (const H5D_istore_ud0_t *) _udata;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_get_shared)
 
-    assert(udata);
-    assert(udata->mesg);
-    assert(udata->mesg->u.chunk.btree_shared);
+    HDassert(udata);
+    HDassert(udata->mesg);
+    HDassert(udata->mesg->u.chunk.btree_shared);
 
     /* Increment reference count on B-tree info */
     H5RC_INC(udata->mesg->u.chunk.btree_shared);
@@ -302,8 +322,6 @@ H5D_istore_get_shared(const H5F_t UNUSED *f, const void *_udata)
  *
  * Programmer:	Robb Matzke
  *		Friday, October 10, 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -347,8 +365,6 @@ H5D_istore_decode_key(const H5F_t UNUSED *f, const H5B_t *bt, const uint8_t *raw
  * Programmer:	Robb Matzke
  *		Friday, October 10, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -391,32 +407,27 @@ H5D_istore_encode_key(const H5F_t UNUSED *f, const H5B_t *bt, uint8_t *raw, void
  * Programmer:	Robb Matzke
  *              Thursday, April 16, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
 static herr_t
-H5D_istore_debug_key (FILE *stream, H5F_t UNUSED *f, hid_t UNUSED dxpl_id, int indent, int fwidth,
+H5D_istore_debug_key(FILE *stream, H5F_t UNUSED *f, hid_t UNUSED dxpl_id, int indent, int fwidth,
 		      const void *_key, const void *_udata)
 {
     const H5D_istore_key_t	*key = (const H5D_istore_key_t *)_key;
-    const H5D_istore_ud1_t	*udata = (const H5D_istore_ud1_t *)_udata;
+    const H5D_istore_ud0_t	*udata = (const H5D_istore_ud0_t *)_udata;
     unsigned		u;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_debug_key)
 
-    assert (key);
+    HDassert(key);
 
-    HDfprintf(stream, "%*s%-*s %Zd bytes\n", indent, "", fwidth,
-	      "Chunk size:", key->nbytes);
-    HDfprintf(stream, "%*s%-*s 0x%08x\n", indent, "", fwidth,
-	      "Filter mask:", key->filter_mask);
-    HDfprintf(stream, "%*s%-*s {", indent, "", fwidth,
-	      "Logical offset:");
-    for (u=0; u<udata->mesg->u.chunk.ndims; u++)
-        HDfprintf (stream, "%s%Hd", u?", ":"", key->offset[u]);
-    HDfputs ("}\n", stream);
+    HDfprintf(stream, "%*s%-*s %Zd bytes\n", indent, "", fwidth, "Chunk size:", key->nbytes);
+    HDfprintf(stream, "%*s%-*s 0x%08x\n", indent, "", fwidth, "Filter mask:", key->filter_mask);
+    HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Logical offset:");
+    for(u = 0; u < udata->mesg->u.chunk.ndims; u++)
+        HDfprintf(stream, "%s%Hd", u?", ":"", key->offset[u]);
+    HDfputs("}\n", stream);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D_istore_debug_key() */
@@ -439,8 +450,6 @@ H5D_istore_debug_key (FILE *stream, H5F_t UNUSED *f, hid_t UNUSED dxpl_id, int i
  * Programmer:	Robb Matzke
  *		Thursday, November  6, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
@@ -450,15 +459,15 @@ H5D_istore_cmp2(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_uda
 {
     H5D_istore_key_t	*lt_key = (H5D_istore_key_t *) _lt_key;
     H5D_istore_key_t	*rt_key = (H5D_istore_key_t *) _rt_key;
-    H5D_istore_ud1_t	*udata = (H5D_istore_ud1_t *) _udata;
+    H5D_istore_ud0_t	*udata = (H5D_istore_ud0_t *) _udata;
     int		ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_cmp2)
 
-    assert(lt_key);
-    assert(rt_key);
-    assert(udata);
-    assert(udata->mesg->u.chunk.ndims > 0 && udata->mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
+    HDassert(lt_key);
+    HDassert(rt_key);
+    HDassert(udata);
+    HDassert(udata->mesg->u.chunk.ndims > 0 && udata->mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
 
     /* Compare the offsets but ignore the other fields */
     ret_value = H5V_vector_cmp_u(udata->mesg->u.chunk.ndims, lt_key->offset, rt_key->offset);
@@ -492,8 +501,6 @@ H5D_istore_cmp2(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_uda
  * Programmer:	Robb Matzke
  *		Wednesday, October  8, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
@@ -503,15 +510,15 @@ H5D_istore_cmp3(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_uda
 {
     H5D_istore_key_t	*lt_key = (H5D_istore_key_t *) _lt_key;
     H5D_istore_key_t	*rt_key = (H5D_istore_key_t *) _rt_key;
-    H5D_istore_ud1_t	*udata = (H5D_istore_ud1_t *) _udata;
+    H5D_istore_ud0_t	*udata = (H5D_istore_ud0_t *) _udata;
     int		ret_value = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_cmp3)
 
-    assert(lt_key);
-    assert(rt_key);
-    assert(udata);
-    assert(udata->mesg->u.chunk.ndims > 0 && udata->mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
+    HDassert(lt_key);
+    HDassert(rt_key);
+    HDassert(udata);
+    HDassert(udata->mesg->u.chunk.ndims > 0 && udata->mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
 
     /* Special case for faster checks on 1-D chunks */
     /* (Checking for ndims==2 because last dimension is the datatype size) */
@@ -557,8 +564,6 @@ H5D_istore_cmp3(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_uda
  * Programmer:	Robb Matzke
  *		Tuesday, October 14, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -570,22 +575,22 @@ H5D_istore_new_node(H5F_t *f, hid_t dxpl_id, H5B_ins_t op,
     H5D_istore_key_t	*rt_key = (H5D_istore_key_t *) _rt_key;
     H5D_istore_ud1_t	*udata = (H5D_istore_ud1_t *) _udata;
     unsigned		u;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_istore_new_node)
 
     /* check args */
-    assert(f);
-    assert(lt_key);
-    assert(rt_key);
-    assert(udata);
-    assert(udata->mesg->u.chunk.ndims > 0 && udata->mesg->u.chunk.ndims < H5O_LAYOUT_NDIMS);
-    assert(addr_p);
+    HDassert(f);
+    HDassert(lt_key);
+    HDassert(rt_key);
+    HDassert(udata);
+    HDassert(udata->common.mesg->u.chunk.ndims > 0 && udata->common.mesg->u.chunk.ndims < H5O_LAYOUT_NDIMS);
+    HDassert(addr_p);
 
     /* Allocate new storage */
-    assert (udata->key.nbytes > 0);
-    H5_CHECK_OVERFLOW( udata->key.nbytes ,size_t, hsize_t);
-    if (HADDR_UNDEF==(*addr_p=H5MF_alloc(f, H5FD_MEM_DRAW, dxpl_id, (hsize_t)udata->key.nbytes)))
+    HDassert(udata->common.key.nbytes > 0);
+    H5_CHECK_OVERFLOW(udata->common.key.nbytes ,size_t, hsize_t);
+    if(HADDR_UNDEF == (*addr_p = H5MF_alloc(f, H5FD_MEM_DRAW, dxpl_id, (hsize_t)udata->common.key.nbytes)))
         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "couldn't allocate new file storage")
     udata->addr = *addr_p;
 
@@ -593,10 +598,10 @@ H5D_istore_new_node(H5F_t *f, hid_t dxpl_id, H5B_ins_t op,
      * The left key describes the storage of the UDATA chunk being
      * inserted into the tree.
      */
-    lt_key->nbytes = udata->key.nbytes;
-    lt_key->filter_mask = udata->key.filter_mask;
-    for (u=0; u<udata->mesg->u.chunk.ndims; u++)
-        lt_key->offset[u] = udata->key.offset[u];
+    lt_key->nbytes = udata->common.key.nbytes;
+    lt_key->filter_mask = udata->common.key.filter_mask;
+    for (u=0; u<udata->common.mesg->u.chunk.ndims; u++)
+        lt_key->offset[u] = udata->common.key.offset[u];
 
     /*
      * The right key might already be present.  If not, then add a zero-width
@@ -605,10 +610,10 @@ H5D_istore_new_node(H5F_t *f, hid_t dxpl_id, H5B_ins_t op,
     if (H5B_INS_LEFT != op) {
         rt_key->nbytes = 0;
         rt_key->filter_mask = 0;
-        for (u=0; u<udata->mesg->u.chunk.ndims; u++) {
-            assert (udata->key.offset[u]+udata->mesg->u.chunk.dim[u] >
-                udata->key.offset[u]);
-            rt_key->offset[u] = udata->key.offset[u] + udata->mesg->u.chunk.dim[u];
+        for (u=0; u<udata->common.mesg->u.chunk.ndims; u++) {
+            HDassert(udata->common.key.offset[u]+udata->common.mesg->u.chunk.dim[u] >
+                udata->common.key.offset[u]);
+            rt_key->offset[u] = udata->common.key.offset[u] + udata->common.mesg->u.chunk.dim[u];
         }
     }
 
@@ -639,9 +644,6 @@ done:
  * Programmer:	Robb Matzke
  *		Thursday, October  9, 1997
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
@@ -652,28 +654,28 @@ H5D_istore_found(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr, const void
     H5D_istore_ud1_t	   *udata = (H5D_istore_ud1_t *) _udata;
     const H5D_istore_key_t *lt_key = (const H5D_istore_key_t *) _lt_key;
     unsigned		u;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_found)
 
     /* Check arguments */
-    assert(f);
-    assert(H5F_addr_defined(addr));
-    assert(udata);
-    assert(lt_key);
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(udata);
+    HDassert(lt_key);
 
     /* Is this *really* the requested chunk? */
-    for (u=0; u<udata->mesg->u.chunk.ndims; u++)
-        if (udata->key.offset[u] >= lt_key->offset[u]+udata->mesg->u.chunk.dim[u])
+    for(u = 0; u < udata->common.mesg->u.chunk.ndims; u++)
+        if(udata->common.key.offset[u] >= lt_key->offset[u] + udata->common.mesg->u.chunk.dim[u])
             HGOTO_DONE(FAIL)
 
     /* Initialize return values */
     udata->addr = addr;
-    udata->key.nbytes = lt_key->nbytes;
-    udata->key.filter_mask = lt_key->filter_mask;
-    assert (lt_key->nbytes>0);
-    for (u = 0; u < udata->mesg->u.chunk.ndims; u++)
-        udata->key.offset[u] = lt_key->offset[u];
+    udata->common.key.nbytes = lt_key->nbytes;
+    udata->common.key.filter_mask = lt_key->filter_mask;
+    HDassert(lt_key->nbytes>0);
+    for(u = 0; u < udata->common.mesg->u.chunk.ndims; u++)
+        udata->common.key.offset[u] = lt_key->offset[u];
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -706,10 +708,6 @@ done:
  * Programmer:	Robb Matzke
  *		Thursday, October  9, 1997
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value. The NEW_NODE argument
- *		is renamed NEW_NODE_P.
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
@@ -731,30 +729,30 @@ H5D_istore_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
     FUNC_ENTER_NOAPI_NOINIT(H5D_istore_insert)
 
     /* check args */
-    assert(f);
-    assert(H5F_addr_defined(addr));
-    assert(lt_key);
-    assert(lt_key_changed);
-    assert(md_key);
-    assert(udata);
-    assert(rt_key);
-    assert(new_node_p);
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(lt_key);
+    HDassert(lt_key_changed);
+    HDassert(md_key);
+    HDassert(udata);
+    HDassert(rt_key);
+    HDassert(new_node_p);
 
     cmp = H5D_istore_cmp3(f, dxpl_id, lt_key, udata, rt_key);
-    assert(cmp <= 0);
+    HDassert(cmp <= 0);
 
     if (cmp < 0) {
         /* Negative indices not supported yet */
         HGOTO_ERROR(H5E_STORAGE, H5E_UNSUPPORTED, H5B_INS_ERROR, "internal error")
 
-    } else if (H5V_vector_eq_u (udata->mesg->u.chunk.ndims,
-				udata->key.offset, lt_key->offset) &&
+    } else if (H5V_vector_eq_u (udata->common.mesg->u.chunk.ndims,
+				udata->common.key.offset, lt_key->offset) &&
 	       lt_key->nbytes>0) {
         /*
          * Already exists.  If the new size is not the same as the old size
          * then we should reallocate storage.
          */
-        if (lt_key->nbytes != udata->key.nbytes) {
+        if (lt_key->nbytes != udata->common.key.nbytes) {
 /* Currently, the old chunk data is "thrown away" after the space is reallocated,
  * so avoid data copy in H5MF_realloc() call by just free'ing the space and
  * allocating new space.
@@ -765,19 +763,19 @@ H5D_istore_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
  * QAK - 11/19/2002
  */
 #ifdef OLD_WAY
-            if (HADDR_UNDEF==(*new_node_p=H5MF_realloc(f, H5FD_MEM_DRAW, addr,
-                      (hsize_t)lt_key->nbytes, (hsize_t)udata->key.nbytes)))
-                HGOTO_ERROR (H5E_STORAGE, H5E_NOSPACE, H5B_INS_ERROR, "unable to reallocate chunk storage")
+            if(HADDR_UNDEF == (*new_node_p = H5MF_realloc(f, H5FD_MEM_DRAW, addr,
+                      (hsize_t)lt_key->nbytes, (hsize_t)udata->common.key.nbytes)))
+                HGOTO_ERROR(H5E_STORAGE, H5E_NOSPACE, H5B_INS_ERROR, "unable to reallocate chunk storage")
 #else /* OLD_WAY */
             H5_CHECK_OVERFLOW( lt_key->nbytes ,size_t, hsize_t);
-            if (H5MF_xfree(f, H5FD_MEM_DRAW, dxpl_id, addr, (hsize_t)lt_key->nbytes)<0)
+            if(H5MF_xfree(f, H5FD_MEM_DRAW, dxpl_id, addr, (hsize_t)lt_key->nbytes)<0)
                 HGOTO_ERROR(H5E_STORAGE, H5E_CANTFREE, H5B_INS_ERROR, "unable to free chunk")
-            H5_CHECK_OVERFLOW( udata->key.nbytes ,size_t, hsize_t);
-            if (HADDR_UNDEF==(*new_node_p=H5MF_alloc(f, H5FD_MEM_DRAW, dxpl_id, (hsize_t)udata->key.nbytes)))
+            H5_CHECK_OVERFLOW(udata->common.key.nbytes ,size_t, hsize_t);
+            if(HADDR_UNDEF == (*new_node_p = H5MF_alloc(f, H5FD_MEM_DRAW, dxpl_id, (hsize_t)udata->common.key.nbytes)))
                 HGOTO_ERROR(H5E_STORAGE, H5E_NOSPACE, H5B_INS_ERROR, "unable to reallocate chunk")
 #endif /* OLD_WAY */
-            lt_key->nbytes = udata->key.nbytes;
-            lt_key->filter_mask = udata->key.filter_mask;
+            lt_key->nbytes = udata->common.key.nbytes;
+            lt_key->filter_mask = udata->common.key.filter_mask;
             *lt_key_changed = TRUE;
             udata->addr = *new_node_p;
             ret_value = H5B_INS_CHANGE;
@@ -786,28 +784,28 @@ H5D_istore_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
             ret_value = H5B_INS_NOOP;
         }
 
-    } else if (H5V_hyper_disjointp(udata->mesg->u.chunk.ndims,
-				   lt_key->offset, udata->mesg->u.chunk.dim,
-				   udata->key.offset, udata->mesg->u.chunk.dim)) {
-        assert(H5V_hyper_disjointp(udata->mesg->u.chunk.ndims,
-				   rt_key->offset, udata->mesg->u.chunk.dim,
-				   udata->key.offset, udata->mesg->u.chunk.dim));
+    } else if (H5V_hyper_disjointp(udata->common.mesg->u.chunk.ndims,
+				   lt_key->offset, udata->common.mesg->u.chunk.dim,
+				   udata->common.key.offset, udata->common.mesg->u.chunk.dim)) {
+        HDassert(H5V_hyper_disjointp(udata->common.mesg->u.chunk.ndims,
+				   rt_key->offset, udata->common.mesg->u.chunk.dim,
+				   udata->common.key.offset, udata->common.mesg->u.chunk.dim));
         /*
          * Split this node, inserting the new new node to the right of the
          * current node.  The MD_KEY is where the split occurs.
          */
-        md_key->nbytes = udata->key.nbytes;
-        md_key->filter_mask = udata->key.filter_mask;
-        for (u=0; u<udata->mesg->u.chunk.ndims; u++) {
-            assert(0 == udata->key.offset[u] % udata->mesg->u.chunk.dim[u]);
-            md_key->offset[u] = udata->key.offset[u];
+        md_key->nbytes = udata->common.key.nbytes;
+        md_key->filter_mask = udata->common.key.filter_mask;
+        for(u = 0; u < udata->common.mesg->u.chunk.ndims; u++) {
+            HDassert(0 == udata->common.key.offset[u] % udata->common.mesg->u.chunk.dim[u]);
+            md_key->offset[u] = udata->common.key.offset[u];
         }
 
         /*
          * Allocate storage for the new chunk
          */
-        H5_CHECK_OVERFLOW( udata->key.nbytes ,size_t, hsize_t);
-        if (HADDR_UNDEF==(*new_node_p=H5MF_alloc(f, H5FD_MEM_DRAW, dxpl_id, (hsize_t)udata->key.nbytes)))
+        H5_CHECK_OVERFLOW(udata->common.key.nbytes ,size_t, hsize_t);
+        if(HADDR_UNDEF == (*new_node_p = H5MF_alloc(f, H5FD_MEM_DRAW, dxpl_id, (hsize_t)udata->common.key.nbytes)))
             HGOTO_ERROR(H5E_STORAGE, H5E_NOSPACE, H5B_INS_ERROR, "file allocation failed")
         udata->addr = *new_node_p;
         ret_value = H5B_INS_RIGHT;
@@ -833,12 +831,6 @@ done:
  * Programmer:	Robb Matzke
  *              Wednesday, April 21, 1999
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *
- *		Quincey Koziol, 2002-04-22
- *		Changed to callback from H5B_iterate
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
@@ -846,12 +838,12 @@ static int
 H5D_istore_iter_allocated (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_lt_key, haddr_t UNUSED addr,
 		    const void UNUSED *_rt_key, void *_udata)
 {
-    H5D_istore_ud1_t	*bt_udata = (H5D_istore_ud1_t *)_udata;
+    H5D_istore_it_ud1_t	*udata = (H5D_istore_it_ud1_t *)_udata;
     const H5D_istore_key_t	*lt_key = (const H5D_istore_key_t *)_lt_key;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_iter_allocated)
 
-    bt_udata->total_storage += lt_key->nbytes;
+    udata->total_storage += lt_key->nbytes;
 
     FUNC_LEAVE_NOAPI(H5B_ITER_CONT)
 } /* H5D_istore_iter_allocated() */
@@ -870,12 +862,6 @@ H5D_istore_iter_allocated (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_l
  * Programmer:	Robb Matzke
  *              Wednesday, April 21, 1999
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *
- *		Quincey Koziol, 2002-04-22
- *		Changed to callback from H5B_iterate
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
@@ -883,29 +869,25 @@ static int
 H5D_istore_iter_dump (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_lt_key, haddr_t UNUSED addr,
 		    const void UNUSED *_rt_key, void *_udata)
 {
-    H5D_istore_ud1_t	*bt_udata = (H5D_istore_ud1_t *)_udata;
+    H5D_istore_it_ud2_t	*udata = (H5D_istore_it_ud2_t *)_udata;
     const H5D_istore_key_t	*lt_key = (const H5D_istore_key_t *)_lt_key;
     unsigned		u;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_iter_dump)
 
-    if (bt_udata->stream) {
-        if (0==bt_udata->total_storage) {
-            fprintf(bt_udata->stream,
-                "             Flags    Bytes    Address Logical Offset\n");
-            fprintf(bt_udata->stream,
-                "        ========== ======== ========== "
-                "==============================\n");
-        }
-        HDfprintf(bt_udata->stream, "        0x%08x %8Zu %10a [",
-              lt_key->filter_mask, lt_key->nbytes, addr);
-        for (u=0; u<bt_udata->mesg->u.chunk.ndims; u++)
-            HDfprintf(bt_udata->stream, "%s%Hd", u?", ":"", lt_key->offset[u]);
-        HDfputs("]\n", bt_udata->stream);
+    if(udata->stream) {
+        if(!udata->header_displayed) {
+            HDfprintf(udata->stream, "           Flags    Bytes     Address          Logical Offset\n");
+            HDfprintf(udata->stream, "        ========== ======== ========== ==============================\n");
 
-        /* Use "total storage" information as flag for printing headers */
-        bt_udata->total_storage++;
-    }
+            /* Set flag that the headers has been printed */
+            udata->header_displayed = TRUE;
+        } /* end if */
+        HDfprintf(udata->stream,     "        0x%08x %8Zu %10a [", lt_key->filter_mask, lt_key->nbytes, addr);
+        for(u = 0; u < udata->common.mesg->u.chunk.ndims; u++)
+            HDfprintf(udata->stream, "%s%Hd", (u ? ", " : ""), lt_key->offset[u]);
+        HDfputs("]\n", udata->stream);
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(H5B_ITER_CONT)
 } /* H5D_istore_iter_dump() */
@@ -921,8 +903,6 @@ H5D_istore_iter_dump (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_lt_key
  *
  * Programmer:	Robb Matzke
  *              Monday, May 18, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -963,8 +943,6 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -987,12 +965,12 @@ H5D_istore_flush_entry(const H5D_io_info_t *io_info, H5D_rdcc_ent_t *ent, hbool_
     if (ent->dirty) {
         H5D_istore_ud1_t 	udata;		/*pass through B-tree		*/
 
-        udata.mesg = &io_info->dset->shared->layout;
-        udata.key.filter_mask = 0;
+        udata.common.mesg = &io_info->dset->shared->layout;
+        udata.common.key.filter_mask = 0;
         udata.addr = HADDR_UNDEF;
-        udata.key.nbytes = ent->chunk_size;
+        udata.common.key.nbytes = ent->chunk_size;
         for (u=0; u<io_info->dset->shared->layout.u.chunk.ndims; u++)
-            udata.key.offset[u] = ent->offset[u];
+            udata.common.key.offset[u] = ent->offset[u];
         alloc = ent->alloc_size;
 
         /* Should the chunk be filtered before writing it to disk? */
@@ -1018,8 +996,8 @@ H5D_istore_flush_entry(const H5D_io_info_t *io_info, H5D_rdcc_ent_t *ent, hbool_
                 point_of_no_return = TRUE;
                 ent->chunk = NULL;
             }
-            if (H5Z_pipeline(&(io_info->dset->shared->dcpl_cache.pline), 0, &(udata.key.filter_mask), io_info->dxpl_cache->err_detect,
-                     io_info->dxpl_cache->filter_cb, &(udata.key.nbytes), &alloc, &buf)<0)
+            if (H5Z_pipeline(&(io_info->dset->shared->dcpl_cache.pline), 0, &(udata.common.key.filter_mask), io_info->dxpl_cache->err_detect,
+                     io_info->dxpl_cache->filter_cb, &(udata.common.key.nbytes), &alloc, &buf)<0)
                 HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "output pipeline failed")
         }
 
@@ -1029,7 +1007,7 @@ H5D_istore_flush_entry(const H5D_io_info_t *io_info, H5D_rdcc_ent_t *ent, hbool_
          */
         if (H5B_insert(io_info->dset->ent.file, io_info->dxpl_id, H5B_ISTORE, io_info->dset->shared->layout.u.chunk.addr, &udata)<0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to allocate chunk")
-        if (H5F_block_write(io_info->dset->ent.file, H5FD_MEM_DRAW, udata.addr, udata.key.nbytes, io_info->dxpl_id, buf)<0)
+        if (H5F_block_write(io_info->dset->ent.file, H5FD_MEM_DRAW, udata.addr, udata.common.key.nbytes, io_info->dxpl_id, buf)<0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
 
         /* Mark cache entry as clean */
@@ -1078,11 +1056,6 @@ done:
  *
  * Programmer:  Robb Matzke
  *              Thursday, May 21, 1998
- *
- * Modifications:
- *      Pedro Vicente, March 28, 2002
- *      Added flush parameter that switches the call to H5F_istore_flush_entry
- *      The call with FALSE is used by the H5F_istore_prune_by_extent function
  *
  *-------------------------------------------------------------------------
  */
@@ -1146,10 +1119,6 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
  *
- * Modifications:
- *      Pedro Vicente, March 28, 2002
- *      Added TRUE parameter to the call to H5F_istore_preempt
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1206,10 +1175,6 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
  *
- * Modifications:
- *      Pedro Vicente, March 28, 2002
- *      Added TRUE parameter to the call to H5F_istore_preempt
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1252,7 +1217,7 @@ H5D_istore_dest (H5D_t *dset, hid_t dxpl_id)
     HDmemset (rdcc, 0, sizeof(H5D_rdcc_t));
 
     /* Free the raw B-tree node buffer */
-   if(dset->shared->layout.u.chunk.btree_shared==NULL)
+    if(dset->shared->layout.u.chunk.btree_shared==NULL)
         HGOTO_ERROR (H5E_IO, H5E_CANTFREE, FAIL, "ref-counted page nil")
     if(H5RC_DEC(dset->shared->layout.u.chunk.btree_shared)<0)
 	HGOTO_ERROR (H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page")
@@ -1272,22 +1237,16 @@ done:
  * Programmer:	Quincey Koziol
  *              Monday, September 27, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5D_istore_shared_create (const H5F_t *f, H5O_layout_t *layout)
 {
-    H5D_istore_ud1_t	udata;
     H5B_shared_t *shared;               /* Shared B-tree node info */
     size_t	u;                      /* Local index variable */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_istore_shared_create)
-
-    /* Initialize "user" data for B-tree callbacks, etc. */
-    udata.mesg = layout;
 
     /* Allocate space for the shared structure */
     if(NULL==(shared=H5FL_MALLOC(H5B_shared_t)))
@@ -1296,7 +1255,9 @@ H5D_istore_shared_create (const H5F_t *f, H5O_layout_t *layout)
     /* Set up the "global" information for this file's groups */
     shared->type= H5B_ISTORE;
     shared->two_k=2*H5F_KVALUE(f,H5B_ISTORE);
-    shared->sizeof_rkey = H5D_istore_sizeof_rkey(f, &udata);
+    shared->sizeof_rkey = 4 +			/*storage size		*/
+                         4 +			/*filter mask		*/
+                         layout->u.chunk.ndims*8;	/*dimension indices	*/
     assert(shared->sizeof_rkey);
     shared->sizeof_rnode = H5B_nodesize(f, shared, &shared->sizeof_keys);
     assert(shared->sizeof_rnode);
@@ -1331,8 +1292,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Thursday, July  8, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1366,10 +1325,6 @@ H5D_istore_shared_free (void *_shared)
  *
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
- *
- * Modifications:
- *      Pedro Vicente, March 28, 2002
- *      TRUE parameter to the call to H5F_istore_preempt
  *
  *-------------------------------------------------------------------------
  */
@@ -1498,13 +1453,6 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
  *
- * Modifications:
- *		Robb Matzke, 1999-08-02
- *		The split ratios are passed in as part of the data transfer
- *		property list.
- *
- *              Pedro Vicente, March 28, 2002
- *              TRUE parameter to the call to H5F_istore_preempt
  *-------------------------------------------------------------------------
  */
 static void *
@@ -1580,10 +1528,10 @@ H5D_istore_lock(const H5D_io_info_t *io_info,
         haddr_t chunk_addr;             /* Address of chunk on disk */
 
         if(udata!=NULL)
-            chunk_addr=udata->addr;
+            chunk_addr = udata->addr;
         else {
             /* Point at temporary storage for B-tree pass through */
-            udata=&tmp_udata;
+            udata = &tmp_udata;
 
             /*
              * Not in the cache.  Read it from the file and count this as a miss
@@ -1593,22 +1541,22 @@ H5D_istore_lock(const H5D_io_info_t *io_info,
         } /* end else */
 
         if (H5F_addr_defined(chunk_addr)) {
-            size_t		chunk_alloc=0;		/*allocated chunk size	*/
+            size_t		chunk_alloc = 0;		/*allocated chunk size	*/
 
             /*
              * The chunk exists on disk.
              */
             /* Chunk size on disk isn't [likely] the same size as the final chunk
              * size in memory, so allocate memory big enough. */
-            chunk_alloc = udata->key.nbytes;
+            chunk_alloc = udata->common.key.nbytes;
             if (NULL==(chunk = H5D_istore_chunk_alloc (chunk_alloc,pline)))
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk")
-            if (H5F_block_read(dset->ent.file, H5FD_MEM_DRAW, chunk_addr, udata->key.nbytes, io_info->dxpl_id, chunk)<0)
+            if (H5F_block_read(dset->ent.file, H5FD_MEM_DRAW, chunk_addr, udata->common.key.nbytes, io_info->dxpl_id, chunk)<0)
                 HGOTO_ERROR (H5E_IO, H5E_READERROR, NULL, "unable to read raw data chunk")
 
             if (pline->nused)
-                if (H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &(udata->key.filter_mask), io_info->dxpl_cache->err_detect,
-                         io_info->dxpl_cache->filter_cb, &(udata->key.nbytes), &chunk_alloc, &chunk)<0) {
+                if (H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &(udata->common.key.filter_mask), io_info->dxpl_cache->err_detect,
+                         io_info->dxpl_cache->filter_cb, &(udata->common.key.nbytes), &chunk_alloc, &chunk)<0) {
                     HGOTO_ERROR(H5E_PLINE, H5E_READERROR, NULL, "data pipeline read failed")
                 }
 #ifdef H5D_ISTORE_DEBUG
@@ -1778,10 +1726,6 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
  *
- * Modifications:
- *		Robb Matzke, 1999-08-02
- *		The split_ratios are passed as part of the data transfer
- *		property list.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1859,8 +1803,6 @@ done:
  * Programmer:	Quincey Koziol
  *		Wednesday, May  7, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -1878,16 +1820,16 @@ H5D_istore_readvv(const H5D_io_info_t *io_info,
     FUNC_ENTER_NOAPI(H5D_istore_readvv, FAIL)
 
     /* Check args */
-    assert(io_info);
-    assert(dset && H5D_CHUNKED==dset->shared->layout.type);
-    assert(dset->shared->layout.u.chunk.ndims>0 && dset->shared->layout.u.chunk.ndims<=H5O_LAYOUT_NDIMS);
-    assert(io_info->dxpl_cache);
-    assert(io_info->store);
-    assert(chunk_len_arr);
-    assert(chunk_offset_arr);
-    assert(mem_len_arr);
-    assert(mem_offset_arr);
-    assert(buf);
+    HDassert(io_info);
+    HDassert(dset && H5D_CHUNKED==dset->shared->layout.type);
+    HDassert(dset->shared->layout.u.chunk.ndims>0 && dset->shared->layout.u.chunk.ndims<=H5O_LAYOUT_NDIMS);
+    HDassert(io_info->dxpl_cache);
+    HDassert(io_info->store);
+    HDassert(chunk_len_arr);
+    HDassert(chunk_offset_arr);
+    HDassert(mem_len_arr);
+    HDassert(mem_offset_arr);
+    HDassert(buf);
 
     /* Get the address of this chunk on disk */
 #ifdef QAK
@@ -1895,7 +1837,7 @@ HDfprintf(stderr,"%s: io_info->store->chunk.offset={",FUNC);
 for(u=0; u<dset->shared->layout.u.chunk.ndims; u++)
     HDfprintf(stderr,"%Hd%s",io_info->store->chunk.offset[u],(u<(dset->shared->layout.u.chunk.ndims-1) ? ", " : "}\n"));
 #endif /* QAK */
-    chunk_addr=H5D_istore_get_addr(io_info, &udata);
+    chunk_addr = H5D_istore_get_addr(io_info, &udata);
 #ifdef QAK
 HDfprintf(stderr,"%s: chunk_addr=%a, chunk_size=%Zu\n",FUNC,chunk_addr,dset->shared->layout.u.chunk.size);
 HDfprintf(stderr,"%s: chunk_len_arr[%Zu]=%Zu\n",FUNC,*chunk_curr_seq,chunk_len_arr[*chunk_curr_seq]);
@@ -2052,8 +1994,6 @@ done:
  * Programmer:	Quincey Koziol
  *		Friday, May  2, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -2062,7 +2002,7 @@ H5D_istore_writevv(const H5D_io_info_t *io_info,
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     const void *buf)
 {
-    H5D_t *dset=io_info->dset;          /* Local pointer to the dataset info */
+    H5D_t *dset = io_info->dset;          /* Local pointer to the dataset info */
     H5D_istore_ud1_t udata;		/*B-tree pass-through	*/
     haddr_t	        chunk_addr;     /* Chunk address on disk */
     size_t		u;              /* Local index variables */
@@ -2071,16 +2011,16 @@ H5D_istore_writevv(const H5D_io_info_t *io_info,
     FUNC_ENTER_NOAPI(H5D_istore_writevv, FAIL)
 
     /* Check args */
-    assert(io_info);
-    assert(dset && H5D_CHUNKED==dset->shared->layout.type);
-    assert(dset->shared->layout.u.chunk.ndims>0 && dset->shared->layout.u.chunk.ndims<=H5O_LAYOUT_NDIMS);
-    assert(io_info->dxpl_cache);
-    assert(io_info->store);
-    assert(chunk_len_arr);
-    assert(chunk_offset_arr);
-    assert(mem_len_arr);
-    assert(mem_offset_arr);
-    assert(buf);
+    HDassert(io_info);
+    HDassert(dset && H5D_CHUNKED==dset->shared->layout.type);
+    HDassert(dset->shared->layout.u.chunk.ndims>0 && dset->shared->layout.u.chunk.ndims<=H5O_LAYOUT_NDIMS);
+    HDassert(io_info->dxpl_cache);
+    HDassert(io_info->store);
+    HDassert(chunk_len_arr);
+    HDassert(chunk_offset_arr);
+    HDassert(mem_len_arr);
+    HDassert(mem_offset_arr);
+    HDassert(buf);
 
     /* Get the address of this chunk on disk */
 #ifdef QAK
@@ -2088,7 +2028,7 @@ HDfprintf(stderr,"%s: io_info->store->chunk.offset={",FUNC);
 for(u=0; u<dset->shared->layout.u.chunk.ndims; u++)
     HDfprintf(stderr,"%Hd%s",io_info->store->chunk.offset[u],(u<(dset->shared->layout.u.chunk.ndims-1) ? ", " : "}\n"));
 #endif /* QAK */
-    chunk_addr=H5D_istore_get_addr(io_info, &udata);
+    chunk_addr = H5D_istore_get_addr(io_info, &udata);
 #ifdef QAK
 HDfprintf(stderr,"%s: chunk_addr=%a, chunk_size=%Zu\n",FUNC,chunk_addr,dset->shared->layout.u.chunk.size);
 HDfprintf(stderr,"%s: chunk_len_arr[%Zu]=%Zu\n",FUNC,*chunk_curr_seq,chunk_len_arr[*chunk_curr_seq]);
@@ -2207,34 +2147,32 @@ done:
  * Programmer:	Robb Matzke
  *		Tuesday, October 21, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_istore_create(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout /*out */ )
+H5D_istore_create(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout /*out */)
 {
-    H5D_istore_ud1_t	udata;
+    H5D_istore_ud0_t	udata;
 #ifndef NDEBUG
     unsigned			u;
 #endif
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_istore_create, FAIL)
 
     /* Check args */
-    assert(f);
-    assert(layout && H5D_CHUNKED == layout->type);
-    assert(layout->u.chunk.ndims > 0 && layout->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
+    HDassert(f);
+    HDassert(layout && H5D_CHUNKED == layout->type);
+    HDassert(layout->u.chunk.ndims > 0 && layout->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
 #ifndef NDEBUG
-    for (u = 0; u < layout->u.chunk.ndims; u++)
-	assert(layout->u.chunk.dim[u] > 0);
+    for(u = 0; u < layout->u.chunk.ndims; u++)
+	HDassert(layout->u.chunk.dim[u] > 0);
 #endif
 
     /* Initialize "user" data for B-tree callbacks, etc. */
     udata.mesg = layout;
 
-    if (H5B_create(f, dxpl_id, H5B_ISTORE, &udata, &(layout->u.chunk.addr)/*out*/) < 0)
+    if(H5B_create(f, dxpl_id, H5B_ISTORE, &udata, &(layout->u.chunk.addr)/*out*/) < 0)
 	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "can't create B-tree")
 
 done:
@@ -2256,9 +2194,6 @@ done:
  * Programmer:	Robb Matzke
  *              Wednesday, April 21, 1999
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 hsize_t
@@ -2269,12 +2204,12 @@ H5D_istore_allocated(H5D_t *dset, hid_t dxpl_id)
     H5D_rdcc_ent_t     *ent;    /*cache entry  */
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache=&_dxpl_cache;   /* Data transfer property cache */
-    H5D_istore_ud1_t	udata;
+    H5D_istore_it_ud1_t	udata;
     hsize_t      ret_value;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_istore_allocated, 0)
 
-    assert(dset);
+    HDassert(dset);
 
     /* Fill the DXPL cache values for later use */
     if (H5D_get_dxpl_cache(dxpl_id,&dxpl_cache)<0)
@@ -2291,12 +2226,12 @@ H5D_istore_allocated(H5D_t *dset, hid_t dxpl_id)
     } /* end for */
 
     HDmemset(&udata, 0, sizeof udata);
-    udata.mesg = &dset->shared->layout;
+    udata.common.mesg = &dset->shared->layout;
     if (H5B_iterate(dset->ent.file, dxpl_id, H5B_ISTORE, H5D_istore_iter_allocated, dset->shared->layout.u.chunk.addr, &udata)<0)
         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, 0, "unable to iterate over chunk B-tree")
 
     /* Set return value */
-    ret_value=udata.total_storage;
+    ret_value = udata.total_storage;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2315,10 +2250,6 @@ done:
  * Programmer:	Albert Cheng
  *              June 27, 1998
  *
- * Modifications:
- *              Modified to return the address instead of returning it through
- *              a parameter - QAK, 1/30/02
- *
  *-------------------------------------------------------------------------
  */
 haddr_t
@@ -2331,18 +2262,18 @@ H5D_istore_get_addr(const H5D_io_info_t *io_info, H5D_istore_ud1_t *_udata)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_get_addr)
 
-    assert(io_info);
-    assert(io_info->dset);
-    assert(io_info->dset->shared->layout.u.chunk.ndims > 0);
-    assert(io_info->store->chunk.offset);
+    HDassert(io_info);
+    HDassert(io_info->dset);
+    HDassert(io_info->dset->shared->layout.u.chunk.ndims > 0);
+    HDassert(io_info->store->chunk.offset);
 
     /* Check for udata struct to return */
-    udata = (_udata!=NULL ? _udata : &tmp_udata);
+    udata = (_udata != NULL ? _udata : &tmp_udata);
 
     /* Initialize the information about the chunk we are looking for */
-    for (u=0; u<io_info->dset->shared->layout.u.chunk.ndims; u++)
-	udata->key.offset[u] = io_info->store->chunk.offset[u];
-    udata->mesg = &(io_info->dset->shared->layout);
+    for(u = 0; u < io_info->dset->shared->layout.u.chunk.ndims; u++)
+	udata->common.key.offset[u] = io_info->store->chunk.offset[u];
+    udata->common.mesg = &(io_info->dset->shared->layout);
     udata->addr = HADDR_UNDEF;
 
     /* Go get the chunk information */
@@ -2380,8 +2311,6 @@ done:
  * Programmer:	Quincey Koziol
  *              April 22, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -2389,7 +2318,7 @@ H5D_istore_chunk_alloc(size_t size, const H5O_pline_t *pline)
 {
     void *ret_value=NULL;		/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_chunk_alloc)
+    FUNC_ENTER_NOAPI_NOINIT(H5D_istore_chunk_alloc)
 
     assert(size);
     assert(pline);
@@ -2414,8 +2343,6 @@ H5D_istore_chunk_alloc(size_t size, const H5O_pline_t *pline)
  *
  * Programmer:	Quincey Koziol
  *              April 22, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2458,26 +2385,6 @@ H5D_istore_chunk_xfree(void *chk, const H5O_pline_t *pline)
  * Programmer:	Albert Cheng
  *		June 26, 1998
  *
- * Modifications:
- *		rky, 1998-09-23
- *		Added barrier to preclude racing with data writes.
- *
- *		rky, 1998-12-07
- *		Added Wait-Signal wrapper around unlock-lock critical region
- *		to prevent race condition (unlock reads, lock writes the
- *		chunk).
- *
- * 		Robb Matzke, 1999-08-02
- *		The split_ratios are passed in as part of the data transfer
- *		property list.
- *
- * 		Quincey Koziol, 2002-05-16
- *		Rewrote algorithm to allocate & write blocks without using
- *              lock/unlock code.
- *
- * 		Quincey Koziol, 2002-05-17
- *		Added feature to avoid writing fill-values if user has indicated
- *              that they should never be written.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2494,7 +2401,6 @@ H5D_istore_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
     H5D_fill_time_t fill_time;  /* When to write fill values */
     H5D_fill_value_t fill_status;    /* The fill value status */
     unsigned   should_fill=0;   /* Whether fill values should be written */
-    H5D_istore_ud1_t udata;	/* B-tree pass-through for creating chunk */
     void *chunk=NULL;           /* Chunk buffer for writing fill values */
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache=&_dxpl_cache;   /* Data transfer property cache */
@@ -2645,14 +2551,16 @@ H5D_istore_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
         } /* end if */
 
         if(!chunk_exists) {
+            H5D_istore_ud1_t udata;	/* B-tree pass-through for creating chunk */
+
             /* Initialize the chunk information */
-            udata.mesg = &dset->shared->layout;
-            udata.key.filter_mask = filter_mask;
+            udata.common.mesg = &dset->shared->layout;
+            udata.common.key.filter_mask = filter_mask;
             udata.addr = HADDR_UNDEF;
             H5_CHECK_OVERFLOW(chunk_size,hsize_t,size_t);
-            udata.key.nbytes = (size_t)chunk_size;
-            for (u=0; u<dset->shared->layout.u.chunk.ndims; u++)
-                udata.key.offset[u] = chunk_offset[u];
+            udata.common.key.nbytes = (size_t)chunk_size;
+            for(u = 0; u < dset->shared->layout.u.chunk.ndims; u++)
+                udata.common.key.offset[u] = chunk_offset[u];
 
             /* Allocate the chunk with all processes */
             if (H5B_insert(dset->ent.file, dxpl_id, H5B_ISTORE, dset->shared->layout.u.chunk.addr, &udata)<0)
@@ -2666,7 +2574,7 @@ H5D_istore_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
                     /* Write the chunks out from only one process */
                     /* !! Use the internal "independent" DXPL!! -QAK */
                     if(H5_PAR_META_WRITE==mpi_rank) {
-                        if (H5F_block_write(dset->ent.file, H5FD_MEM_DRAW, udata.addr, udata.key.nbytes, H5AC_ind_dxpl_id, chunk)<0)
+                        if (H5F_block_write(dset->ent.file, H5FD_MEM_DRAW, udata.addr, udata.common.key.nbytes, H5AC_ind_dxpl_id, chunk)<0)
                             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
                     } /* end if */
 
@@ -2675,7 +2583,7 @@ H5D_istore_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
                 } /* end if */
                 else {
 #endif /* H5_HAVE_PARALLEL */
-                    if (H5F_block_write(dset->ent.file, H5FD_MEM_DRAW, udata.addr, udata.key.nbytes, dxpl_id, chunk)<0)
+                    if (H5F_block_write(dset->ent.file, H5FD_MEM_DRAW, udata.addr, udata.common.key.nbytes, dxpl_id, chunk)<0)
                         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
 #ifdef H5_HAVE_PARALLEL
                 } /* end else */
@@ -2818,14 +2726,14 @@ done:
 herr_t
 H5D_istore_prune_by_extent(const H5D_io_info_t *io_info)
 {
-    H5D_t *dset=io_info->dset;          /* Local pointer to the dataset info */
+    H5D_t *dset = io_info->dset;          /* Local pointer to the dataset info */
     const H5D_rdcc_t       *rdcc = &(dset->shared->cache.chunk);	/*raw data chunk cache */
     H5D_rdcc_ent_t         *ent = NULL, *next = NULL;	/*cache entry  */
     unsigned                u;	/*counters  */
     int                     found;	/*remove this entry  */
-    H5D_istore_ud1_t        udata;	/*B-tree pass-through */
+    H5D_istore_it_ud3_t     udata;	/*B-tree pass-through */
     hsize_t                 curr_dims[H5O_LAYOUT_NDIMS];	/*current dataspace dimensions */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_istore_prune_by_extent, FAIL)
 
@@ -2877,8 +2785,7 @@ H5D_istore_prune_by_extent(const H5D_io_info_t *io_info)
  */
 
     HDmemset(&udata, 0, sizeof udata);
-    udata.stream = stdout;
-    udata.mesg = &dset->shared->layout;
+    udata.common.mesg = &dset->shared->layout;
     udata.dims = curr_dims;
 
     if(H5B_iterate(dset->ent.file, io_info->dxpl_id, H5B_ISTORE, H5D_istore_prune_extent, dset->shared->layout.u.chunk.addr, &udata) < 0)
@@ -2902,8 +2809,6 @@ done:
  *
  * Comments: Called by H5D_prune_by_extent
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
@@ -2911,11 +2816,10 @@ static int
 H5D_istore_prune_extent(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t UNUSED addr,
         const void UNUSED *_rt_key, void *_udata)
 {
-    H5D_istore_ud1_t       *bt_udata = (H5D_istore_ud1_t *)_udata;
+    H5D_istore_it_ud3_t       *udata = (H5D_istore_it_ud3_t *)_udata;
     const H5D_istore_key_t       *lt_key = (const H5D_istore_key_t *)_lt_key;
     unsigned                u;
-    H5D_istore_ud1_t        udata;
-    int                     ret_value=H5B_ITER_CONT;       /* Return value */
+    int                     ret_value = H5B_ITER_CONT;       /* Return value */
 
     /* The LT_KEY is the left key (the one that describes the chunk). It points to a chunk of
      * storage that contains the beginning of the logical address space represented by UDATA.
@@ -2924,21 +2828,16 @@ H5D_istore_prune_extent(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t UN
     FUNC_ENTER_NOAPI_NOINIT(H5D_istore_prune_extent)
 
     /* Figure out what chunks are no longer in use for the specified extent and release them */
-    for(u = 0; u < bt_udata->mesg->u.chunk.ndims - 1; u++)
-	if((hsize_t)lt_key->offset[u] > bt_udata->dims[u]) {
-#ifdef H5D_ISTORE_DEBUG
-            HDfputs("b-tree:remove:[", bt_udata->stream);
-            for(u = 0; u < bt_udata->mesg->u.chunk.ndims - 1; u++)
-                HDfprintf(bt_udata->stream, "%s%Hd", u ? ", " : "", lt_key->offset[u]);
-            HDfputs("]\n", bt_udata->stream);
-#endif
+    for(u = 0; u < udata->common.mesg->u.chunk.ndims - 1; u++)
+	if((hsize_t)lt_key->offset[u] > udata->dims[u]) {
+            H5D_istore_ud0_t        bt_udata;
 
-            HDmemset(&udata, 0, sizeof udata);
-            udata.key = *lt_key;
-            udata.mesg = bt_udata->mesg;
+            HDmemset(&bt_udata, 0, sizeof bt_udata);
+            bt_udata.key = *lt_key;
+            bt_udata.mesg = udata->common.mesg;
 
             /* Remove */
-            if(H5B_remove(f, dxpl_id, H5B_ISTORE, bt_udata->mesg->u.chunk.addr, &udata) < 0)
+            if(H5B_remove(f, dxpl_id, H5B_ISTORE, udata->common.mesg->u.chunk.addr, &bt_udata) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5B_ITER_ERROR, "unable to remove entry")
 	    break;
 	} /* end if */
@@ -2961,8 +2860,6 @@ done:
  * Date: March 28, 2002
  *
  * Comments: Part of H5B_ISTORE
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3011,8 +2908,6 @@ done:
  * within the chunk. We find those seven just like we did with the previous nine.
  * Fot the ones that are allocated we initialize the part that lies outside the boundary
  * with the fill value.
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3205,8 +3100,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Thursday, March 20, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3219,7 +3112,7 @@ H5D_istore_delete(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout)
     /* Check if the B-tree has been created in the file */
     if(H5F_addr_defined(layout->u.chunk.addr)) {
         H5O_layout_t tmp_layout=*layout;/* Local copy of layout info */
-        H5D_istore_ud1_t	udata;  /* User data for B-tree iterator call */
+        H5D_istore_ud0_t	udata;  /* User data for B-tree iterator call */
 
         /* Set up user data for B-tree deletion */
         HDmemset(&udata, 0, sizeof udata);
@@ -3256,8 +3149,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Saturday, May 29, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3358,26 +3249,23 @@ done:
  * Programmer:	Robb Matzke
  *              Wednesday, April 28, 1999
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 herr_t
 H5D_istore_dump_btree(H5F_t *f, hid_t dxpl_id, FILE *stream, unsigned ndims, haddr_t addr)
 {
     H5O_layout_t        layout;
-    H5D_istore_ud1_t	udata;
+    H5D_istore_it_ud2_t	udata;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_istore_dump_btree, FAIL)
 
     HDmemset(&udata, 0, sizeof udata);
     layout.u.chunk.ndims = ndims;
-    udata.mesg = &layout;
+    udata.common.mesg = &layout;
     udata.stream = stream;
     if(stream)
-        HDfprintf(stream, "    Address: %a\n",addr);
+        HDfprintf(stream, "    Address: %a\n", addr);
     if(H5B_iterate(f, dxpl_id, H5B_ISTORE, H5D_istore_iter_dump, addr, &udata)<0)
         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, 0, "unable to iterate over chunk B-tree")
 
@@ -3398,8 +3286,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3462,9 +3348,6 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, April 16, 1998
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3472,20 +3355,22 @@ H5D_istore_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int inden
 		 int fwidth, unsigned ndims)
 {
     H5O_layout_t        layout;
-    H5D_istore_ud1_t	udata;
-    herr_t      ret_value=SUCCEED;      /* Return value */
+    H5D_istore_ud0_t	udata;          /* B-tree user data */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_istore_debug,FAIL)
 
     layout.u.chunk.ndims = ndims;
-    HDmemset (&udata, 0, sizeof udata);
-    udata.mesg = &layout;
 
     /* Allocate the shared structure */
     if(H5D_istore_shared_create(f, &layout)<0)
 	HGOTO_ERROR (H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create wrapper for shared B-tree info")
 
-    (void)H5B_debug (f, dxpl_id, addr, stream, indent, fwidth, H5B_ISTORE, &udata);
+    /* Set up B-tree user data */
+    HDmemset(&udata, 0, sizeof udata);
+    udata.mesg = &layout;
+
+    (void)H5B_debug(f, dxpl_id, addr, stream, indent, fwidth, H5B_ISTORE, &udata);
 
     /* Free the raw B-tree node buffer */
     if(layout.u.chunk.btree_shared==NULL)

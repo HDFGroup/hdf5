@@ -28,16 +28,16 @@
 #define _H5Oprivate_H
 
 /* Include the public header file for this API */
-#include "H5Opublic.h"          /* Object header functions                */
+#include "H5Opublic.h"          /* Object header functions              */
 
 /* Public headers needed by this file */
-#include "H5Dpublic.h"          /* Dataset functions                      */
-#include "H5Spublic.h"		/* Dataspace functions			  */
+#include "H5Dpublic.h"          /* Dataset functions                    */
+#include "H5Spublic.h"		/* Dataspace functions			*/
 
 /* Private headers needed by this file */
-#include "H5HGprivate.h"        /* Global heap functions                  */
-#include "H5Tprivate.h"		/* Datatype functions			  */
-#include "H5Zprivate.h"         /* I/O pipeline filters			  */
+#include "H5HGprivate.h"        /* Global heap functions                */
+#include "H5Tprivate.h"		/* Datatype functions			*/
+#include "H5Zprivate.h"         /* I/O pipeline filters			*/
 
 /* Object header macros */
 #define H5O_MIN_SIZE	H5O_ALIGN(32)	/*min obj header data size	     */

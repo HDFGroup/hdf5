@@ -34,7 +34,12 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Fprivate.h"		/* File access				*/
+#include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5RCprivate.h"	/* Reference counted object functions	*/
+
+/**************************/
+/* Library Private Macros */
+/**************************/
 
 /*
  * Feature: Define this constant if you want to check B-tree consistency
@@ -48,6 +53,19 @@
 #define H5B_MAGIC	"TREE"		/*tree node magic number	     */
 #define H5B_SIZEOF_MAGIC 4		/*size of magic number		     */
 
+/* Define return values from operator callback function for H5B_iterate */
+/* (Actually, any postive value will cause the iterator to stop and pass back
+ *      that positive value to the function that called the iterator)
+ */
+#define H5B_ITER_ERROR  (-1)
+#define H5B_ITER_CONT   (0)
+#define H5B_ITER_STOP   (1)
+
+/****************************/
+/* Library Private Typedefs */
+/****************************/
+
+/* Define return values from B-tree insertion callbacks */
 typedef enum H5B_ins_t {
     H5B_INS_ERROR	 = -1,	/*error return value			     */
     H5B_INS_NOOP	 = 0,	/*insert made no changes		     */
@@ -57,14 +75,6 @@ typedef enum H5B_ins_t {
     H5B_INS_FIRST	 = 4,	/*insert first node in (sub)tree	     */
     H5B_INS_REMOVE	 = 5	/*remove current node			     */
 } H5B_ins_t;
-
-/* Define return values from operator callback function for H5B_iterate */
-/* (Actually, any postive value will cause the iterator to stop and pass back
- *      that positive value to the function that called the iterator)
- */
-#define H5B_ITER_ERROR  (-1)
-#define H5B_ITER_CONT   (0)
-#define H5B_ITER_STOP   (1)
 
 /* Define the operator callback function pointer for H5B_iterate() */
 typedef int (*H5B_operator_t)(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
@@ -97,7 +107,6 @@ typedef struct H5B_shared_t {
 typedef struct H5B_class_t {
     H5B_subid_t id;					/*id as found in file*/
     size_t	sizeof_nkey;			/*size of native (memory) key*/
-    size_t	(*get_sizeof_rkey)(const H5F_t*, const void*);    /*raw key size   */
     H5RC_t *    (*get_shared)(const H5F_t*, const void*);    /*shared info for node */
     herr_t	(*new_node)(H5F_t*, hid_t, H5B_ins_t, void*, void*, void*, haddr_t*);
     int         (*cmp2)(H5F_t*, hid_t, void*, void*, void*);	    /*compare 2 keys */
@@ -120,12 +129,19 @@ typedef struct H5B_class_t {
     herr_t	(*decode)(const H5F_t*, const struct H5B_t*, const uint8_t*, void*);
     herr_t	(*encode)(const H5F_t*, const struct H5B_t*, uint8_t*, void*);
     herr_t	(*debug_key)(FILE*, H5F_t*, hid_t, int, int, const void*, const void*);
-
 } H5B_class_t;
 
-/*
- * Library prototypes.
- */
+/*****************************/
+/* Library-private Variables */
+/*****************************/
+ 
+/* Declare a free list to manage the H5B_shared_t struct */
+H5FL_EXTERN(H5B_shared_t);
+
+
+/***************************************/
+/* Library-private Function Prototypes */
+/***************************************/
 H5_DLL size_t H5B_nodesize(const H5F_t *f, const H5B_shared_t *shared,
 			   size_t *total_nkey_size);
 H5_DLL herr_t H5B_create (H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, void *udata,

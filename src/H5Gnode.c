@@ -68,7 +68,6 @@ static herr_t H5G_node_clear(H5F_t *f, H5G_node_t *sym, hbool_t destroy);
 static herr_t H5G_compute_size(const H5F_t *f, const H5G_node_t *sym, size_t *size_ptr);
 
 /* B-tree callbacks */
-static size_t H5G_node_sizeof_rkey(const H5F_t *f, const void *_udata);
 static H5RC_t *H5G_node_get_shared(const H5F_t *f, const void *_udata);
 static herr_t H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t op, void *_lt_key,
 			      void *_udata, void *_rt_key,
@@ -109,7 +108,6 @@ const H5AC_class_t H5AC_SNODE[1] = {{
 H5B_class_t H5B_SNODE[1] = {{
     H5B_SNODE_ID,		/*id			*/
     sizeof(H5G_node_key_t), 	/*sizeof_nkey		*/
-    H5G_node_sizeof_rkey,	/*get_sizeof_rkey	*/
     H5G_node_get_shared,	/*get_shared		*/
     H5G_node_create,		/*new			*/
     H5G_node_cmp2,		/*cmp2			*/
@@ -123,9 +121,6 @@ H5B_class_t H5B_SNODE[1] = {{
     H5G_node_encode_key,	/*encode		*/
     H5G_node_debug_key,		/*debug			*/
 }};
-
-/* Declare a free list to manage the H5B_shared_t struct */
-H5FL_EXTERN(H5B_shared_t);
 
 /* Declare a free list to manage the H5G_node_t struct */
 H5FL_DEFINE_STATIC(H5G_node_t);
@@ -142,33 +137,8 @@ H5FL_SEQ_DEFINE_STATIC(size_t);
 /* Declare a free list to manage the raw page information */
 H5FL_BLK_DEFINE_STATIC(grp_page);
 
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_node_sizeof_rkey
- *
- * Purpose:	Returns the size of a raw B-link tree key for the specified
- *		file.
- *
- * Return:	Success:	Size of the key.
- *
- *		Failure:	never fails
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 14 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static size_t
-H5G_node_sizeof_rkey(const H5F_t *f, const void UNUSED * udata)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_sizeof_rkey);
-
-    FUNC_LEAVE_NOAPI(H5F_SIZEOF_SIZE(f));	/*the name offset */
-}
+/* Declare extern the free list to manage haddr_t's */
+H5FL_EXTERN(haddr_t);
 
 
 /*-------------------------------------------------------------------------
@@ -1757,7 +1727,7 @@ H5G_node_init(H5F_t *f)
     /* Set up the "global" information for this file's groups */
     shared->type= H5B_SNODE;
     shared->two_k=2*H5F_KVALUE(f,H5B_SNODE);
-    shared->sizeof_rkey = H5G_node_sizeof_rkey(f, NULL);
+    shared->sizeof_rkey = H5F_SIZEOF_SIZE(f);	/*the name offset */
     assert(shared->sizeof_rkey);
     shared->sizeof_rnode = H5B_nodesize(f, shared, &shared->sizeof_keys);
     assert(shared->sizeof_rnode);

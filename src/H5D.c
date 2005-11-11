@@ -12,11 +12,19 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5D_init_interface
 
+
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Datasets 				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -28,23 +36,13 @@
 #include "H5Sprivate.h"		/* Dataspaces 				*/
 #include "H5Vprivate.h"		/* Vectors and arrays 			*/
 
-/*#define H5D_DEBUG*/
+/****************/
+/* Local Macros */
+/****************/
 
-/* Local functions */
-static herr_t H5D_init_storage(H5D_t *dataset, hbool_t full_overwrite, hid_t dxpl_id);
-static H5D_shared_t * H5D_new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type);
-static H5D_t * H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id,
-           const H5S_t *space, hid_t dcpl_id, hid_t dxpl_id);
-static H5D_t * H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id);
-static herr_t H5D_get_space_status(H5D_t *dset, H5D_space_status_t *allocation, hid_t dxpl_id);
-static hsize_t H5D_get_storage_size(H5D_t *dset, hid_t dxpl_id);
-static haddr_t H5D_get_offset(const H5D_t *dset);
-static herr_t H5D_extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
-static herr_t H5D_set_extent(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
-static herr_t H5D_init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type);
-static int H5D_crt_fill_value_cmp(const void *value1, const void *value2, size_t size);
-static int H5D_crt_ext_file_list_cmp(const void *value1, const void *value2, size_t size);
-static int H5D_crt_data_pipeline_cmp(const void *value1, const void *value2, size_t size);
+/******************/
+/* Local Typedefs */
+/******************/
 
 /* Internal data structure for computing variable-length dataset's total size */
 typedef struct {
@@ -56,6 +54,43 @@ typedef struct {
     hid_t xfer_pid;     /* ID of the dataset xfer property list */
     hsize_t size;       /* Accumulated number of bytes for the selection */
 } H5D_vlen_bufsize_t;
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+/* General stuff */
+static herr_t H5D_init_storage(H5D_t *dataset, hbool_t full_overwrite, hid_t dxpl_id);
+static H5D_shared_t * H5D_new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type);
+static H5D_t * H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id,
+           const H5S_t *space, hid_t dcpl_id, hid_t dxpl_id);
+static H5D_t * H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id);
+static herr_t H5D_get_space_status(H5D_t *dset, H5D_space_status_t *allocation, hid_t dxpl_id);
+static hsize_t H5D_get_storage_size(H5D_t *dset, hid_t dxpl_id);
+static haddr_t H5D_get_offset(const H5D_t *dset);
+static herr_t H5D_extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
+static herr_t H5D_set_extent(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
+static herr_t H5D_init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type);
+
+/* Property list callbacks */
+static int H5D_crt_fill_value_cmp(const void *value1, const void *value2, size_t size);
+static int H5D_crt_ext_file_list_cmp(const void *value1, const void *value2, size_t size);
+static int H5D_crt_data_pipeline_cmp(const void *value1, const void *value2, size_t size);
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+/* Define a "default" dataset transfer property list cache structure to use for default DXPLs */
+H5D_dxpl_cache_t H5D_def_dxpl_cache;
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+/*******************/
+/* Local Variables */
+/*******************/
 
 /* Declare a free list to manage the H5D_t and H5D_shared_t structs */
 H5FL_DEFINE_STATIC(H5D_t);
@@ -73,9 +108,6 @@ H5FL_BLK_EXTERN(sieve_buf);
 /* Define a static "default" dataset structure to use to initialize new datasets */
 static H5D_shared_t H5D_def_dset;
 
-/* Define a "default" dataset transfer property list cache structure to use for default DXPLs */
-H5D_dxpl_cache_t H5D_def_dxpl_cache;
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5D_init
@@ -88,8 +120,6 @@ H5D_dxpl_cache_t H5D_def_dxpl_cache;
  *
  * Programmer:	Quincey Koziol
  *              Saturday, March 4, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -403,8 +433,6 @@ done:
  * Programmer:	Robb Matzke
  *              Friday, November 20, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -462,8 +490,6 @@ H5D_term_interface(void)
  *
  * Programmer:     Raymond Lu
  *                 Tuesday, October 2, 2001
- *
- * Modification:
  *
  *-------------------------------------------------------------------------
  */
@@ -538,8 +564,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Wednesday, July 11, 2001
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
@@ -594,8 +618,6 @@ done:
  * Programmer:     Quincey Koziol
  *                 Wednesday, January 7, 2004
  *
- * Modification:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -649,8 +671,6 @@ done:
  *
  * Programmer:     Quincey Koziol
  *                 Wednesday, January 7, 2004
- *
- * Modification:
  *
  *-------------------------------------------------------------------------
  */
@@ -731,8 +751,6 @@ done:
  *
  * Programmer:     Quincey Koziol
  *                 Wednesday, January 7, 2004
- *
- * Modification:
  *
  *-------------------------------------------------------------------------
  */
@@ -825,7 +843,6 @@ done:
  *              Thursday, August 2, 2001
  *
  * Notes:       This same routine is currently used for the 'copy' callback.
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -875,8 +892,6 @@ done:
  *
  * Programmer:     Raymond Lu
  *                 Tuesday, October 2, 2001
- *
- * Modification:
  *
  *-------------------------------------------------------------------------
  */
@@ -929,8 +944,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Wednesday, July 11, 2001
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1039,19 +1052,8 @@ done:
  *
  *		Failure:	FAIL
  *
- * Errors:
- *		ARGS	  BADTYPE	Not a data space.
- *		ARGS	  BADTYPE	Not a dataset creation plist.
- *		ARGS	  BADTYPE	Not a file.
- *		ARGS	  BADTYPE	Not a type.
- *		ARGS	  BADVALUE	No name.
- *		DATASET	  CANTINIT	Can't create dataset.
- *		DATASET	  CANTREGISTER	Can't register dataset.
- *
  * Programmer:	Robb Matzke
  *		Wednesday, December  3, 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1059,7 +1061,7 @@ hid_t
 H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	  hid_t dcpl_id)
 {
-    H5G_entry_t	   *loc = NULL;         /* Entry for group to insert dataset into */
+    H5G_entry_t	   *loc;                /* Entry for group to insert dataset into */
     H5D_t	   *new_dset = NULL;    /* New dataset's info */
     const H5S_t    *space;              /* Dataspace for dataset */
     hid_t	    ret_value;          /* Return value */
@@ -1068,13 +1070,13 @@ H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     H5TRACE5("i","isiii",loc_id,name,type_id,space_id,dcpl_id);
 
     /* Check arguments */
-    if (NULL == (loc = H5G_loc(loc_id)))
+    if(NULL == (loc = H5G_loc(loc_id)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location ID")
-    if (!name || !*name)
+    if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
-    if (H5I_DATATYPE != H5I_get_type(type_id))
+    if(H5I_DATATYPE != H5I_get_type(type_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype ID")
-    if (NULL == (space = H5I_object_verify(space_id,H5I_DATASPACE)))
+    if(NULL == (space = H5I_object_verify(space_id,H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace ID")
     if(H5P_DEFAULT == dcpl_id)
         dcpl_id = H5P_DATASET_CREATE_DEFAULT;
@@ -1091,15 +1093,15 @@ H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register dataset")
 
 done:
-    if(ret_value<0) {
-        if(new_dset!=NULL) {
-            if(H5D_close(new_dset)<0)
+    if(ret_value < 0) {
+        if(new_dset != NULL) {
+            if(H5D_close(new_dset) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
         } /* end if */
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Dcreate() */
 
 
 /*-------------------------------------------------------------------------
@@ -1113,12 +1115,8 @@ done:
  *
  *		Failure:	FAIL
  *
- * Errors:
- *
  * Programmer:	Robb Matzke
  *		Thursday, December  4, 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1182,14 +1180,8 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Errors:
- *		ARGS	  BADTYPE	Not a dataset.
- *		DATASET	  CANTINIT	Can't free.
- *
  * Programmer:	Robb Matzke
  *		Thursday, December  4, 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1234,10 +1226,6 @@ done:
  * Programmer:	Robb Matzke
  *		Wednesday, January 28, 1998
  *
- * Modifications:
- *	Robb Matzke, 9 Jun 1998
- *	The data space is not constant and is no longer cached by the dataset
- *	struct.
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -1286,8 +1274,6 @@ done:
  *
  * Programmer:	Raymond Lu
  *
- * Modification:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1323,8 +1309,6 @@ done:
  *              Failture:       Negative
  *
  * Programmer:  Raymond Lu
- *
- * Modification:
  *
  *-------------------------------------------------------------------------
  */
@@ -1392,13 +1376,6 @@ done:
  * Programmer:	Robb Matzke
  *		Tuesday, February  3, 1998
  *
- * Modifications:
- *
- * 	Robb Matzke, 1 Jun 1998
- *	If the dataset has a named data type then a handle to the opened data
- *	type is returned.  Otherwise the returned data type is read-only.  If
- *	atomization of the data type fails then the data type is closed.
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -1457,13 +1434,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Tuesday, February  3, 1998
- *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              The way to retrieve and set property is changed for the
- *              generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -1530,8 +1500,6 @@ done:
  * Programmer:	Robb Matzke
  *		Friday, January 30, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1567,17 +1535,8 @@ done:
  *
  *		Failure:	NULL
  *
- * Errors:
- *
  * Programmer:	Quincey Koziol
  *		Monday, October 12, 1998
- *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to query and inialization for generic
- *              property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -1640,12 +1599,8 @@ done:
  * Return:	Success:    SUCCEED
  *		Failure:    FAIL
  *
- * Errors:
- *
  * Programmer:	Quincey Koziol
  *		Thursday, June 24, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1712,12 +1667,8 @@ done:
  * Return:	Success:    SUCCEED
  *		Failure:    FAIL
  *
- * Errors:
- *
  * Programmer:	Bill Wendling
  *		Thursday, October 31, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1952,49 +1903,8 @@ done:
  *
  *		Failure:	NULL
  *
- * Errors:
- *		DATASET	  CANTINIT	Can't update dataset header.
- *		DATASET	  CANTINIT	Problem with the dataset name.
- *		DATASET	  CANTINIT	Fail in file space allocation for
- *					chunks
- *
  * Programmer:	Robb Matzke
  *		Thursday, December  4, 1997
- *
- * Modifications:
- *	Robb Matzke, 9 Jun 1998
- *	The data space message is no longer cached in the dataset struct.
- *
- * 	Robb Matzke, 27 Jul 1998
- *	Added the MTIME message to the dataset object header.
- *
- * 	Robb Matzke, 1999-10-14
- *	The names for the external file list are entered into the heap hear
- *	instead of when the efl message is encoded, preventing a possible
- *	infinite recursion situation.
- *
- *      Raymond Lu
- *      Tuesday, October 2, 2001
- *      Changed the way to retrieve and set property for generic property
- *      list.
- *
- *	Raymond Lu, 26 Feb 2002
- *	A new fill value message is added.  Two properties, space allocation
- *	time and fill value writing time, govern space allocation and fill
- *      value writing.
- *
- *      Bill Wendling, 1. November 2002
- *      Removed the cache updating mechanism. This was done so that it
- *      can be called separately from the H5D_create function. There were
- *      two of these mechanisms: one to create and insert into the parent
- *      group the H5G_entry_t object and the other to update based upon
- *      whether we're working with an external file or not. Between the
- *      two, there is a conditional call to allocate space which isn't
- *      part of updating the cache.
- *
- *      Nat Furrer and James Laird
- *      June 7, 2004
- *      Added checked_filters flag
  *
  *-------------------------------------------------------------------------
  */
@@ -2347,8 +2257,6 @@ done:
  * Programmer:	Robb Matzke
  *              Monday, November  2, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -2391,12 +2299,8 @@ done:
  * Return:	Success:	Dataset ID
  *		Failure:	FAIL
  *
- * Errors:
- *
  * Programmer:	Quincey Koziol
  *		Friday, December 20, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2479,23 +2383,8 @@ done:
  *
  * Return:	Dataset pointer on success, NULL on failure
  *
- * Errors:
- *
  * Programmer:	Quincey Koziol
  *		Monday, October 12, 1998
- *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to set property for generic property list.
- *
- *		Raymond Lu
- *		Feb 26, 2002
- *		A new fill value message and two new properties are added.
- *
- *              Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
- *              Added a deep copy of the symbol table entry
  *
  *-------------------------------------------------------------------------
  */
@@ -2758,16 +2647,8 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Errors:
- *		DATASET	  CANTINIT	Couldn't free the type or space,
- *					but the dataset was freed anyway.
- *
  * Programmer:	Robb Matzke
  *		Thursday, December  4, 1997
- *
- * Modifications:
- *	Robb Matzke, 9 Jun 1998
- *	The data space message is no longer cached in the dataset struct.
  *
  *-------------------------------------------------------------------------
  */
@@ -2902,16 +2783,6 @@ done:
  * Programmer:	Robb Matzke
  *		Friday, January 30, 1998
  *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to retrieve property for generic property
- *              list.
- *
- *              Nat Furrer and James Laird
- *              June 17, 2004
- *              Added check for filter encode capability
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2999,8 +2870,6 @@ done:
  * Programmer:	Robb Matzke
  *              Friday, April 24, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 H5G_entry_t *
@@ -3025,8 +2894,6 @@ H5D_entof (H5D_t *dataset)
  *
  * Programmer:	Robb Matzke
  *              Thursday, June  4, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3055,8 +2922,6 @@ H5D_typeof (const H5D_t *dset)
  * Programmer:        Quincey Koziol
  *              Thursday, October 22, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static H5F_t *
@@ -3081,12 +2946,6 @@ H5D_get_file (const H5D_t *dset)
  *
  * Programmer:	Robb Matzke
  *              Friday, January 16, 1998
- *
- * Modifications:
- *              Quincey Koziol
- *              Thursday, August 22, 2002
- *              Moved here from H5F_arr_create and moved more logic into
- *              this function from places where it was being called.
  *
  *-------------------------------------------------------------------------
  */
@@ -3233,13 +3092,6 @@ done:
  * Programmer:	Robb Matzke
  *              Monday, October  5, 1998
  *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to retrieve property for generic property
- *              list.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3320,8 +3172,6 @@ done:
  * Programmer:	Robb Matzke
  *              Wednesday, April 21, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 hsize_t
@@ -3357,8 +3207,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *              Wednesday, April 21, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3410,8 +3258,6 @@ done:
  * Programmer:  Raymond Lu
  *              November 6, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 haddr_t
@@ -3447,8 +3293,6 @@ done:
  *
  * Programmer:  Raymond Lu
  *              November 6, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3551,8 +3395,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Friday, June 11, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3596,8 +3438,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Thursday, June 10, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3648,8 +3488,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Tuesday, August 17, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -3694,8 +3532,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, August 17, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3754,8 +3590,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Wednesday, August 11, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3858,8 +3692,6 @@ done:
  *
  * Comments: Public function, calls private H5D_set_extent
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3900,8 +3732,6 @@ done:
  * Date: April 9, 2002
  *
  * Comments: Private function
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -4016,8 +3846,6 @@ done:
  *
  * Date:        August 14, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -4109,8 +3937,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *              Wednesday, April 28, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

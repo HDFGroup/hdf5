@@ -63,7 +63,7 @@ const H5O_class_t H5O_FILL[1] = {{
     NULL,			/* link method			*/
     NULL,                       /*get share method                      */
     NULL,                       /*set share method                      */
-    H5O_fill_debug,             /*debug the message                     */
+    H5O_fill_debug              /*debug the message                     */
 }};
 
 /* This message derives from H5O, for new fill value after version 1.4  */
@@ -81,7 +81,7 @@ const H5O_class_t H5O_FILL_NEW[1] = {{
     NULL,			/* link method			*/
     NULL,			/*get share method			*/
     NULL,			/*set share method			*/
-    H5O_fill_new_debug,		/*debug the message			*/
+    H5O_fill_new_debug		/*debug the message			*/
 }};
 
 /* Initial version of the "old" fill value information */

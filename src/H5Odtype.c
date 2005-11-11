@@ -53,7 +53,7 @@ const H5O_class_t H5O_DTYPE[1] = {{
     NULL,			/* link method			*/
     H5O_dtype_get_share,	/* get share method		*/
     H5O_dtype_set_share,	/* set share method		*/
-    H5O_dtype_debug,		/* debug the message		*/
+    H5O_dtype_debug		/* debug the message		*/
 }};
 
 /* This is the correct version to create all datatypes which don't contain

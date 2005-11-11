@@ -19,8 +19,8 @@
 #ifndef _H5Opkg_H
 #define _H5Opkg_H
 
-/* Include private header file */
-#include "H5Oprivate.h"          /* Object header functions                */
+/* Get package's private header */
+#include "H5Oprivate.h"		/* Object headers		  	*/
 
 /*
  * Align messages on 8-byte boundaries because we would like to copy the

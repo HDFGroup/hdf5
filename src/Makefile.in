@@ -30,7 +30,8 @@ LIB=libhdf5.la
 DISTCLEAN=libhdf5.settings
 
 ## Source and object files for the library (lexicographically)...
-LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5C.c H5D.c H5Dcontig.c H5Dcompact.c H5Defl.c \
+LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5Bcache.c H5C.c H5D.c H5Dcontig.c \
+        H5Dcompact.c H5Defl.c \
         H5Dio.c H5Distore.c H5Dmpio.c H5Dselect.c H5Dtest.c H5E.c H5F.c       \
         H5Fdbg.c H5Fmount.c H5Fsfile.c H5Fsuper.c H5FD.c \
         H5FDcore.c H5FDfamily.c H5FDgass.c H5FDlog.c H5FDmpi.c H5FDmpio.c     \
@@ -65,7 +66,8 @@ PUB_HDR=H5public.h H5Apublic.h H5ACpublic.h H5Bpublic.h H5Cpublic.h           \
         H5Tpublic.h H5Zpublic.h H5pubconf.h hdf5.h H5api_adpt.h
 
 ## Other header files (not to be installed)...
-PRIVATE_HDR=H5private.h H5Aprivate.h H5Apkg.h H5ACprivate.h H5Bprivate.h      \
+PRIVATE_HDR=H5private.h H5Aprivate.h H5Apkg.h H5ACprivate.h H5Bpkg.h \
+        H5Bprivate.h \
         H5Cprivate.h \
         H5Dprivate.h H5Eprivate.h H5Fprivate.h H5FDprivate.h H5FLprivate.h    \
         H5FOprivate.h H5FSprivate.h H5Gprivate.h H5Gpkg.h                     \

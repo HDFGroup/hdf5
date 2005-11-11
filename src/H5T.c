@@ -3109,8 +3109,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to copy entry");
     } /* end if */
     else {
-        HDmemset (&(new_dt->ent), 0, sizeof(new_dt->ent));
-        new_dt->ent.header = HADDR_UNDEF;
+        H5G_ent_reset(&(new_dt->ent));
     } /* end else */
 
     /* Set return value */

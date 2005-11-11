@@ -21,13 +21,13 @@
 #define H5O_PACKAGE	/*suppress error about including H5Opkg	  */
 
 
-#include "H5private.h"
-#include "H5Dprivate.h"
-#include "H5Eprivate.h"
-#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Dprivate.h"		/* Dataset functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5MFprivate.h"	/* File space management		*/
-#include "H5MMprivate.h"
-#include "H5Opkg.h"             /* Object header functions                  */
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Opkg.h"             /* Object headers			*/
 
 /* PRIVATE PROTOTYPES */
 static void *H5O_layout_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
@@ -55,7 +55,7 @@ const H5O_class_t H5O_LAYOUT[1] = {{
     NULL,			/* link method			*/
     NULL,		    	/*get share method		*/
     NULL,			/*set share method		*/
-    H5O_layout_debug,       	/*debug the message             */
+    H5O_layout_debug       	/*debug the message             */
 }};
 
 /* For forward and backward compatibility.  Version is 1 when space is
@@ -289,7 +289,7 @@ H5O_layout_encode(H5F_t *f, uint8_t *p, const void *_mesg)
         else if(mesg->type==H5D_CHUNKED)
             H5F_addr_encode(f, &p, mesg->u.chunk.addr);
 
-        /* dimension size */
+        /* Dimension sizes */
         if(mesg->type!=H5D_CHUNKED)
             for (u = 0; u < mesg->unused.ndims; u++)
                 UINT32ENCODE(p, mesg->unused.dim[u])

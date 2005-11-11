@@ -107,7 +107,6 @@
 /* Local macros */
 #define H5G_INIT_HEAP		8192
 #define H5G_RESERVED_ATOMS	0
-#define H5G_SIZE_HINT   256             /*default root grp size hint         */
 
 /*
  * During name lookups (see H5G_namei()) we sometimes want information about
@@ -147,6 +146,8 @@ typedef struct H5G_typeinfo_t {
     char	*desc;			        /*description of object type	     */
 } H5G_typeinfo_t;
 
+/* Package variables */
+
 /* Local variables */
 static H5G_typeinfo_t *H5G_type_g = NULL;	/*object typing info	*/
 static size_t H5G_ntypes_g = 0;			/*entries in type table	*/
@@ -160,6 +161,9 @@ H5FL_DEFINE(H5G_shared_t);
 
 /* Declare extern the PQ free list for the wrapped strings */
 H5FL_BLK_EXTERN(str_buf);
+
+/* Declare a free list to manage haddr_t's */
+H5FL_DEFINE(haddr_t);
 
 /* Private prototypes */
 static herr_t H5G_register_type(int type, htri_t(*isa)(H5G_entry_t*, hid_t),
@@ -4039,4 +4043,3 @@ H5G_unmount(H5G_t *grp)
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5G_unmount() */
-

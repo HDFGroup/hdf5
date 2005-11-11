@@ -51,7 +51,7 @@ const H5O_class_t H5O_EFL[1] = {{
     NULL,			/* link method			*/
     NULL,	  	    	/*get share method		*/
     NULL,			/*set share method		*/
-    H5O_efl_debug,	    	/*debug the message		*/
+    H5O_efl_debug	    	/*debug the message		*/
 }};
 
 #define H5O_EFL_VERSION		1

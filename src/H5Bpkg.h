@@ -31,7 +31,7 @@
 #include "H5Bprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5RCprivate.h"	/* Reference counted object functions	  */
+#include "H5RCprivate.h"	/* Reference counted objects            */
 
 /**************************/
 /* Package Private Macros */
@@ -41,9 +41,7 @@
 /* Package Private Typedefs */
 /****************************/
 
-/*
- * The B-tree node as stored in memory...
- */
+/* The B-tree node as stored in memory...  */
 struct H5B_t {
     H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
                             /* first field in structure */
@@ -56,8 +54,25 @@ struct H5B_t {
     haddr_t		*child;		/*2k child pointers		     */
 };
 
+/*****************************/
+/* Package Private Variables */
+/*****************************/
+
+/* H5B header inherits cache-like properties from H5AC */
+H5_DLLVAR const H5AC_class_t H5AC_BT[1];
+
+/* Declare a free list to manage the haddr_t sequence information */
+H5FL_SEQ_EXTERN(haddr_t);
+
+/* Declare a PQ free list to manage the native block information */
+H5FL_BLK_EXTERN(native_block);
+
+/* Declare a free list to manage the H5B_t struct */
+H5FL_EXTERN(H5B_t);
+
 /******************************/
 /* Package Private Prototypes */
 /******************************/
+herr_t H5B_dest(H5F_t *f, H5B_t *b);
 
 #endif /*_H5Bpkg_H*/

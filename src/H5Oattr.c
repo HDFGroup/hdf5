@@ -53,7 +53,7 @@ const H5O_class_t H5O_ATTR[1] = {{
     H5O_attr_link,		/* link method			*/
     NULL,			/* get share method		*/
     NULL,			/* set share method		*/
-    H5O_attr_debug,		/* debug the message            */
+    H5O_attr_debug		/* debug the message            */
 }};
 
 /* This is the initial version, which does not have support for shared datatypes */
@@ -64,12 +64,6 @@ const H5O_class_t H5O_ATTR[1] = {{
 
 /* Flags for attribute flag encoding */
 #define H5O_ATTR_FLAG_TYPE_SHARED       0x01
-
-/* Declare extern the free list for H5A_t's */
-H5FL_EXTERN(H5A_t);
-
-/* Declare extern the free list for attribute data buffers */
-H5FL_BLK_EXTERN(attr_buf);
 
 /* Declare external the free list for H5S_t's */
 H5FL_EXTERN(H5S_t);
