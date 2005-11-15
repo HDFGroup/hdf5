@@ -80,6 +80,8 @@ ICProjConvert80  windows\test\extend\extend.vcproj /IC  >> convert_intel.log
 ICProjConvert80  windows\test\extenddll\extenddll.vcproj /IC  >> convert_intel.log
 ICProjConvert80  windows\test\external\external.vcproj /IC  >> convert_intel.log
 ICProjConvert80  windows\test\externaldll\externaldll.vcproj /IC  >> convert_intel.log
+ICProjConvert80  windows\test\objcopy\objcopy.vcproj /IC  >> convert_intel.log
+ICProjConvert80  windows\test\objcopydll\objcopydll.vcproj /IC  >> convert_intel.log
 ICProjConvert80  windows\test\file_handle\file_handle.vcproj /IC  >> convert_intel.log
 ICProjConvert80  windows\test\file_handledll\file_handledll.vcproj /IC  >> convert_intel.log
 ICProjConvert80  windows\test\filename\filename.vcproj /IC  >> convert_intel.log
