@@ -86,6 +86,8 @@ echo ************************************************************ >> convert.log
   convert.js %1\windows\test\extenddll\extenddll.dsp  %1\windows\test\extenddll\extenddll.vcproj  >> convert.log
   convert.js %1\windows\test\external\external.dsp  %1\windows\test\external\external.vcproj  >> convert.log
   convert.js %1\windows\test\externaldll\externaldll.dsp  %1\windows\test\externaldll\externaldll.vcproj  >> convert.log
+  convert.js %1\windows\test\objcopy\objcopy.dsp  %1\windows\test\objcopy\objcopy.vcproj  >> convert.log
+  convert.js %1\windows\test\objcopydll\objcopydll.dsp  %1\windows\test\objcopydll\objcopydll.vcproj  >> convert.log
   convert.js %1\windows\test\file_handle\file_handle.dsp  %1\windows\test\file_handle\file_handle.vcproj  >> convert.log
   convert.js %1\windows\test\file_handledll\file_handledll.dsp  %1\windows\test\file_handledll\file_handledll.vcproj  >> convert.log
   convert.js %1\windows\test\fillval\fillval.dsp  %1\windows\test\fillval\fillval.vcproj  >> convert.log
