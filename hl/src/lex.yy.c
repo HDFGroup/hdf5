@@ -23,7 +23,7 @@
 #define YY_FLEX_MINOR_VERSION 5
 
 #include <stdio.h>
-#ifdef H5_HAVE_UNISTD_H
+#ifndef WIN32
 #include <unistd.h>
 #endif
 
