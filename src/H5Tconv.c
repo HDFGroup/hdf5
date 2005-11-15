@@ -22,6 +22,7 @@
 #include "H5private.h"		/*generic functions			  */
 #include "H5Eprivate.h"		/*error handling			  */
 #include "H5FLprivate.h"	/*Free Lists	                          */
+#include "H5HGprivate.h"	/* Global Heaps				*/
 #include "H5Iprivate.h"		/*ID functions		   		  */
 #include "H5MMprivate.h"	/*memory management			  */
 #include "H5Pprivate.h"		/* Property Lists			  */

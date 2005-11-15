@@ -26,7 +26,6 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dprivate.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5HGprivate.h"	/* Global Heaps				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -64,10 +63,6 @@ static H5T_vlen_alloc_info_t H5T_vlen_def_vl_alloc_info ={
     H5D_XFER_VLEN_FREE_DEF,
     H5D_XFER_VLEN_FREE_INFO_DEF
 };
-
-/* Declare extern the free lists for H5T_t's and H5T_shared_t's */
-H5FL_EXTERN(H5T_t);
-H5FL_EXTERN(H5T_shared_t);
 
 
 /*--------------------------------------------------------------------------

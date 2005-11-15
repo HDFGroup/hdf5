@@ -39,6 +39,7 @@
 
 /* Other private headers needed by this file */
 #include "H5Fprivate.h"		/* Files				*/
+#include "H5FLprivate.h"	/* Free Lists				*/
 
 /* Other public headers needed by this file */
 #include "H5Spublic.h"		/* Dataspace functions			*/
@@ -322,6 +323,10 @@ H5_DLLVAR float H5T_NATIVE_FLOAT_POS_INF_g;
 H5_DLLVAR float H5T_NATIVE_FLOAT_NEG_INF_g;
 H5_DLLVAR double H5T_NATIVE_DOUBLE_POS_INF_g;
 H5_DLLVAR double H5T_NATIVE_DOUBLE_NEG_INF_g;
+
+/* Declare extern the free list for H5T_t's and H5T_shared_t's */
+H5FL_EXTERN(H5T_t);
+H5FL_EXTERN(H5T_shared_t);
 
 /* Common functions */
 H5_DLL H5T_t *H5T_create(H5T_class_t type, size_t size);

@@ -1224,6 +1224,7 @@
 ./src/H5O.c
 ./src/H5Oattr.c
 ./src/H5Obogus.c
+./src/H5Ocache.c
 ./src/H5Ocont.c
 ./src/H5Odtype.c
 ./src/H5Oefl.c
@@ -1337,8 +1338,19 @@
 ./test/gass_append.c
 ./test/gass_read.c
 ./test/gass_write.c
+./test/gen_deflate.c			_DO_NOT_DISTRIBUTE_
+./test/gen_old_array.c			_DO_NOT_DISTRIBUTE_
+./test/gen_old_group.c			_DO_NOT_DISTRIBUTE_
+./test/gen_old_layout.c			_DO_NOT_DISTRIBUTE_
+./test/gen_old_mtime.c			_DO_NOT_DISTRIBUTE_
+./test/gen_new_array.c			_DO_NOT_DISTRIBUTE_
+./test/gen_new_fill.c			_DO_NOT_DISTRIBUTE_
+./test/gen_new_mtime.c			_DO_NOT_DISTRIBUTE_
+./test/gen_new_super.c			_DO_NOT_DISTRIBUTE_
+./test/gen_nullspace.c			_DO_NOT_DISTRIBUTE_
 ./test/getname.c
 ./test/gheap.c
+./test/group_new.h5
 ./test/h5test.c
 ./test/h5test.h
 ./test/hyperslab.c
@@ -1351,17 +1363,8 @@
 ./test/ntypes.c
 ./test/ohdr.c
 ./test/reserved.c
-./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
-./test/gen_deflate.c			_DO_NOT_DISTRIBUTE_
-./test/gen_old_array.c			_DO_NOT_DISTRIBUTE_
-./test/gen_new_array.c			_DO_NOT_DISTRIBUTE_
-./test/gen_new_fill.c			_DO_NOT_DISTRIBUTE_
-./test/gen_old_layout.c			_DO_NOT_DISTRIBUTE_
-./test/gen_old_mtime.c			_DO_NOT_DISTRIBUTE_
-./test/gen_new_mtime.c			_DO_NOT_DISTRIBUTE_
-./test/gen_new_super.c			_DO_NOT_DISTRIBUTE_
-./test/gen_nullspace.c			_DO_NOT_DISTRIBUTE_
 ./test/set_extent.c
+./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
 ./test/srb_append.c
 ./test/srb_read.c
 ./test/srb_write.c

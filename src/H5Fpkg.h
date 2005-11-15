@@ -58,7 +58,7 @@
 #endif
 
 /* Maximum size of super-block buffer */
-#define H5F_SUPERBLOCK_SIZE  256
+#define H5F_SUPERBLOCK_SIZE  128
 #define H5F_DRVINFOBLOCK_SIZE  1024
 
 /* Define the HDF5 file signature */

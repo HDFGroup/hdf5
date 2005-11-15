@@ -28,7 +28,7 @@
 #include "H5Opkg.h"             /* Object headers			*/
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_efl_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
+static void *H5O_efl_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
 static herr_t H5O_efl_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_efl_copy(const void *_mesg, void *_dest, unsigned update_flags);
 static size_t H5O_efl_size(const H5F_t *f, const void *_mesg);
@@ -77,7 +77,7 @@ const H5O_class_t H5O_EFL[1] = {{
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_efl_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *sh)
+H5O_efl_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
 {
     H5O_efl_t		*mesg = NULL;
     int			version;
@@ -91,7 +91,6 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *s
     /* Check args */
     assert(f);
     assert(p);
-    assert (!sh);
 
     if (NULL==(mesg = H5MM_calloc(sizeof(H5O_efl_t))))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");

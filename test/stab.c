@@ -30,6 +30,12 @@ const char *FILENAME[] = {
     NULL
 };
 
+/* The group_new.h5 is generated from gen_new_fill.c in HDF5 'test' directory
+ * for version 1.7 (after "compact group" checkin).  To get this data file,
+ * simply compile gen_new_group.c with HDF5 library (after compact group
+ * checkin) and run it. */
+#define FILE_NEW_GROUPS "group_new.h5"
+
 
 /*-------------------------------------------------------------------------
  * Function:	test_misc
@@ -214,6 +220,71 @@ test_large(hid_t file)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    read_new
+ *
+ * Purpose:     Test reading a file with "new style" (compact) groups
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, October 24, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+read_new(hid_t fapl)
+{
+    hid_t		fid = (-1);     /* File ID */
+    hid_t		gid = (-1);     /* Group ID */
+    char       *srcdir = HDgetenv("srcdir"); /*where the src code is located*/
+    char       filename[512]="";  /* test file name */
+
+    TESTING("reading new groups");
+
+    /* Generate correct name for test file by prepending the source path */
+    if(srcdir && ((HDstrlen(srcdir) + HDstrlen(FILE_NEW_GROUPS) + 1) < sizeof(filename))) {
+        HDstrcpy(filename, srcdir);
+        HDstrcat(filename, "/");
+    }
+    HDstrcat(filename, FILE_NEW_GROUPS);
+
+    /* Open file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR;
+
+    /* Attempt to open root group */
+    if((gid = H5Gopen(fid, "/")) < 0) TEST_ERROR;
+
+    /* Attempt to open new "empty" group (should fail) */
+    H5E_BEGIN_TRY {
+        if(H5Gopen(gid, "empty") >= 0) TEST_ERROR;
+    } H5E_END_TRY;
+
+    /* Attempt to open new group with link messages (should fail) */
+    H5E_BEGIN_TRY {
+        if(H5Gopen(gid, "links") >= 0) TEST_ERROR;
+    } H5E_END_TRY;
+
+    /* Close root group */
+    if(H5Gclose(gid) < 0) TEST_ERROR;
+
+    /* Close first file */
+    if(H5Fclose(fid)<0) TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+    	H5Gclose(gid);
+    	H5Fclose(fid);
+    } H5E_END_TRY;
+    return 1;
+} /* end read_new() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Test groups
@@ -258,6 +329,7 @@ main(void)
     nerrors += test_misc(file);
     nerrors += test_long(file);
     nerrors += test_large(file);
+    nerrors += read_new(fapl);
     if (nerrors) goto error;
 
     /* Cleanup */

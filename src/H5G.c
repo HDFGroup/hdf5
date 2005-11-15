@@ -180,7 +180,7 @@ static herr_t H5G_traverse_slink(H5G_entry_t *grp_ent/*in,out*/,
 static H5G_t *H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint, hid_t dxpl_id);
 static htri_t H5G_isa(H5G_entry_t *ent, hid_t dxpl_id);
 static htri_t H5G_link_isa(H5G_entry_t *ent, hid_t dxpl_id);
-static H5G_t * H5G_open_oid(H5G_entry_t *ent, hid_t dxpl_id);
+static herr_t H5G_open_oid(H5G_t *grp, hid_t dxpl_id);
 static H5G_t *H5G_rootof(H5F_t *f);
 static herr_t H5G_link(H5G_entry_t *cur_loc, const char *cur_name,
     H5G_entry_t *new_loc, const char *new_name, H5G_link_t type,
@@ -1945,6 +1945,14 @@ H5G_open(H5G_entry_t *ent, hid_t dxpl_id)
     /* Check args */
     assert(ent);
 
+    /* Allocate the group structure */
+    if(NULL == (grp = H5FL_CALLOC(H5G_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate space for group")
+
+    /* Shallow copy (take ownership) of the group entry object */
+    if(H5G_ent_copy(&(grp->ent), ent, H5G_COPY_SHALLOW)<0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "can't copy group entry")
+
     /* Check if group was already open */
     if((shared_fo=H5FO_opened(ent->file, ent->header))==NULL) {
 
@@ -1952,12 +1960,11 @@ H5G_open(H5G_entry_t *ent, hid_t dxpl_id)
         H5E_clear();
 
         /* Open the group object */
-        if ((grp=H5G_open_oid(ent, dxpl_id)) ==NULL)
+        if (H5G_open_oid(grp, dxpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "not found");
 
         /* Add group to list of open objects in file */
-        if(H5FO_insert(grp->ent.file, grp->ent.header, grp->shared)<0)
-        {
+        if(H5FO_insert(grp->ent.file, grp->ent.header, grp->shared)<0) {
             H5FL_FREE(H5G_shared_t, grp->shared);
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, NULL, "can't insert group into list of open objects")
         }
@@ -1970,13 +1977,6 @@ H5G_open(H5G_entry_t *ent, hid_t dxpl_id)
         grp->shared->fo_count = 1;
     }
     else {
-        if(NULL == (grp = H5FL_CALLOC(H5G_t)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate space for group")
-
-        /* Shallow copy (take ownership) of the group entry object */
-        if(H5G_ent_copy(&(grp->ent), ent, H5G_COPY_SHALLOW)<0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "can't copy group entry")
-
         /* Point to shared group info */
         grp->shared = shared_fo;
 
@@ -2026,47 +2026,37 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5G_t *
-H5G_open_oid(H5G_entry_t *ent, hid_t dxpl_id)
+static herr_t
+H5G_open_oid(H5G_t *grp, hid_t dxpl_id)
 {
-    H5G_t		*grp = NULL;
-    H5G_t		*ret_value = NULL;
     hbool_t             ent_opened = FALSE;
+    herr_t		ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_open_oid);
 
     /* Check args */
-    assert(ent);
+    assert(grp);
 
     /* Open the object, making sure it's a group */
-    if (NULL==(grp = H5FL_CALLOC(H5G_t)))
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     if (NULL==(grp->shared = H5FL_CALLOC(H5G_shared_t)))
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-
-    /* Copy over (take ownership) of the group entry object */
-    H5G_ent_copy(&(grp->ent),ent,H5G_COPY_SHALLOW);
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* Grab the object header */
     if (H5O_open(&(grp->ent)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to open group")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
     ent_opened = TRUE;
 
     /* Check if this object has the right message(s) to be treated as a group */
     if(H5O_exists(&(grp->ent), H5O_STAB_ID, 0, dxpl_id) <= 0)
-        HGOTO_ERROR (H5E_SYM, H5E_CANTOPENOBJ, NULL, "not a group")
-
-    /* Set return value */
-    ret_value = grp;
+        HGOTO_ERROR (H5E_SYM, H5E_CANTOPENOBJ, FAIL, "not a group")
 
 done:
-    if(!ret_value) {
+    if(ret_value < 0) {
         if(grp) {
             if(ent_opened)
                 H5O_close(&(grp->ent));
             if(grp->shared)
                 H5FL_FREE(H5G_shared_t, grp->shared);
-            H5FL_FREE(H5G_t,grp);
         } /* end if */
     } /* end if */
 

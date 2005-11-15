@@ -32,11 +32,11 @@
 #endif
 
 
-static void *H5O_mtime_new_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
+static void *H5O_mtime_new_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
 static herr_t H5O_mtime_new_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static size_t H5O_mtime_new_size(const H5F_t *f, const void *_mesg);
 
-static void *H5O_mtime_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
+static void *H5O_mtime_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
 static herr_t H5O_mtime_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_mtime_copy(const void *_mesg, void *_dest, unsigned update_flags);
 static size_t H5O_mtime_size(const H5F_t *f, const void *_mesg);
@@ -111,8 +111,7 @@ H5FL_DEFINE(time_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_mtime_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
-		 H5O_shared_t UNUSED *sh)
+H5O_mtime_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p)
 {
     time_t	*mesg;
     uint32_t    tmp_time;       /* Temporary copy of the time */
@@ -123,7 +122,6 @@ H5O_mtime_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
     /* check args */
     assert(f);
     assert(p);
-    assert (!sh);
 
     /* decode */
     if(*p++ != H5O_MTIME_VERSION)
@@ -167,8 +165,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_mtime_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
-		 H5O_shared_t UNUSED *sh)
+H5O_mtime_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p)
 {
     time_t	*mesg, the_time;
     int	i;
@@ -180,7 +177,6 @@ H5O_mtime_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
     /* check args */
     assert(f);
     assert(p);
-    assert (!sh);
 
     /* Initialize time zone information */
     if (!ntzset) {

@@ -252,7 +252,6 @@ H5FL_DEFINE(H5T_shared_t);
 H5FL_DEFINE(H5T_path_t);
 
 /* Static local functions */
-static H5T_t *H5T_open_oid(H5G_entry_t *ent, hid_t dxpl_id);
 static herr_t H5T_print_stats(H5T_path_t *path, int *nprint/*in,out*/);
 static herr_t H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src,
                 H5T_t *dst, H5T_conv_t func, hid_t dxpl_id);
@@ -1365,75 +1364,6 @@ H5Tcreate(H5T_class_t type, size_t size)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type atom");
 
 done:
-    FUNC_LEAVE_API(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Topen
- *
- * Purpose:	Opens a named data type.
- *
- * Return:	Success:	Object ID of the named data type.
- *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *              Monday, June  1, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-H5Topen(hid_t loc_id, const char *name)
-{
-    H5T_t       *type = NULL;
-    H5G_entry_t	*loc = NULL;
-    H5G_entry_t  ent;
-    hbool_t      ent_found = FALSE;     /* Entry at 'name' found */
-    hid_t        dxpl_id = H5AC_dxpl_id; /* dxpl to use to open datatype */
-    hid_t        ret_value =FAIL;
-
-    FUNC_ENTER_API(H5Topen, FAIL);
-    H5TRACE2("i","is",loc_id,name);
-
-    /* Check args */
-    if (NULL==(loc=H5G_loc (loc_id)))
-        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-    if (!name || !*name)
-        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
-
-    /*
-     * Find the named data type object header and read the data type message
-     * from it.
-     */
-    if (H5G_find (loc, name, &ent/*out*/, dxpl_id)<0)
-        HGOTO_ERROR (H5E_DATATYPE, H5E_NOTFOUND, FAIL, "not found");
-    ent_found = TRUE;
-
-    /* Check that the object found is the correct type */
-    if (H5G_get_type(&ent, dxpl_id) != H5G_TYPE)
-        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a named datatype")
-
-    /* Open it */
-    if ((type=H5T_open (&ent, dxpl_id)) ==NULL)
-        HGOTO_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to open named data type");
-
-    /* Register the type and return the ID */
-    if ((ret_value=H5I_register (H5I_DATATYPE, type))<0)
-        HGOTO_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register named data type");
-
-done:
-    if(ret_value<0) {
-        if(type!=NULL)
-            H5T_close(type);
-        else {
-            if(ent_found && ent.header)
-                H5G_free_ent_name(&ent);
-        } /* end else */
-    } /* end if */
-
     FUNC_LEAVE_API(ret_value);
 }
 
@@ -2715,148 +2645,6 @@ H5T_isa(H5G_entry_t *ent, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to read object header");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5T_open
- *
- * Purpose:	Open a named data type.
- *
- * Return:	Success:	Ptr to a new data type.
- *
- *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *              Monday, June  1, 1998
- *
- * Modifications:
- *      Changed to use H5T_open_oid - QAK - 3/17/99
- *
- *-------------------------------------------------------------------------
- */
-H5T_t*
-H5T_open (H5G_entry_t *ent, hid_t dxpl_id)
-{
-    H5T_shared_t   *shared_fo=NULL;
-    H5T_t          *dt=NULL;
-    H5T_t          *ret_value;
-
-    FUNC_ENTER_NOAPI(H5T_open, NULL);
-
-    assert (ent);
-
-    /* Check if datatype was already open */
-    if((shared_fo=H5FO_opened(ent->file,ent->header))==NULL) {
-        /* Clear any errors from H5FO_opened() */
-        H5E_clear();
-
-        /* Open the datatype object */
-        if ((dt=H5T_open_oid(ent, dxpl_id)) ==NULL)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL, "not found");
-
-        /* Add the datatype to the list of opened objects in the file */
-        if(H5FO_insert(dt->ent.file, dt->ent.header, dt->shared)<0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, NULL, "can't insert datatype into list of open objects")
-
-        /* Increment object count for the object in the top file */
-        if(H5FO_top_incr(dt->ent.file, dt->ent.header) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINC, NULL, "can't increment object count")
-
-        /* Mark any datatypes as being in memory now */
-        if (H5T_vlen_mark(dt, NULL, H5T_VLEN_MEMORY)<0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
-
-        dt->shared->fo_count=1;
-    }
-    else
-    {
-        if(NULL == (dt = H5FL_MALLOC(H5T_t)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate space for datatype")
-
-        /* Shallow copy (take ownership) of the group entry object */
-        if(H5G_ent_copy(&(dt->ent),ent,H5G_COPY_SHALLOW)<0)
-            HGOTO_ERROR (H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy group entry")
-
-        dt->shared=shared_fo;
-
-        shared_fo->fo_count++;
-
-        /* Check if the object has been opened through the top file yet */
-        if(H5FO_top_count(dt->ent.file, dt->ent.header) == 0) {
-            /* Open the object through this top file */
-            if(H5O_open(&(dt->ent)) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to open object header")
-        } /* end if */
-
-        /* Increment object count for the object in the top file */
-        if(H5FO_top_incr(dt->ent.file, dt->ent.header) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINC, NULL, "can't increment object count")
-    }
-
-    ret_value = dt;
-
-done:
-    if(ret_value==NULL) {
-        if(dt) {
-            if(shared_fo==NULL)   /* Need to free shared fo */
-                H5FL_FREE(H5T_shared_t, dt->shared);
-            H5FL_FREE(H5T_t, dt);
-        }
-        if(shared_fo)
-            shared_fo->fo_count--;
-    }
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5T_open_oid
- *
- * Purpose:	Open a named data type.
- *
- * Return:	Success:	Ptr to a new data type.
- *
- *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              Wednesday, March 17, 1999
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-H5T_t *
-H5T_open_oid (H5G_entry_t *ent, hid_t dxpl_id)
-{
-    H5T_t	*dt=NULL;
-    H5T_t	*ret_value;
-
-    FUNC_ENTER_NOAPI(H5T_open_oid, NULL);
-
-    assert (ent);
-
-    if (H5O_open (ent)<0)
-	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to open named data type");
-    if (NULL==(dt=H5O_read (ent, H5O_DTYPE_ID, 0, NULL, dxpl_id)))
-	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to load type message from object header");
-
-    /* Mark the type as named and open */
-    dt->shared->state = H5T_STATE_OPEN;
-
-    /* Shallow copy (take ownership) of the group entry object */
-    H5G_ent_copy(&(dt->ent),ent,H5G_COPY_SHALLOW);
-
-    /* Set return value */
-    ret_value=dt;
-
-done:
-    if(ret_value==NULL) {
-        if(dt==NULL)
-            H5O_close(ent);
-    } /* end if */
-
     FUNC_LEAVE_NOAPI(ret_value);
 }
 

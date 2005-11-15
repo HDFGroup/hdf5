@@ -32,6 +32,12 @@ const char *FILENAME[] = {
 #define NAME_BUF_SIZE   1024
 #define MAX_NAME_LEN    ((64*1024)+1024)
 
+/* The group_new.h5 is generated from gen_new_fill.c in HDF5 'test' directory
+ * for version 1.7 (after "compact group" checkin).  To get this data file,
+ * simply compile gen_new_group.c with HDF5 library (after compact group
+ * checkin) and run it. */
+#define FILE_NEW_GROUPS "group_new.h5"
+
 
 /*-------------------------------------------------------------------------
  * Function:	mklinks

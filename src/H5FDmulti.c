@@ -778,8 +778,8 @@ H5FD_multi_sb_encode(H5FD_t *_file, char *name/*out*/,
     assert(7==H5FD_MEM_NTYPES);
     for (m=H5FD_MEM_SUPER; m<H5FD_MEM_NTYPES; m=(H5FD_mem_t)(m+1))
         buf[m-1] = (unsigned char)file->fa.memb_map[m];
+    buf[6] = 0;
     buf[7] = 0;
-    buf[8] = 0;
 
     /*
      * Copy the starting addresses and EOA values into the buffer in order of

@@ -35,7 +35,6 @@
 #include "H5Spublic.h"		/* Dataspace functions			*/
 
 /* Private headers needed by this file */
-#include "H5HGprivate.h"        /* Global heap functions                */
 #include "H5Tprivate.h"		/* Datatype functions			*/
 #include "H5Zprivate.h"         /* I/O pipeline filters			*/
 
@@ -201,11 +200,7 @@ typedef struct H5O_name_t {
  */
 
 typedef struct H5O_shared_t {
-    hbool_t		in_gh;		/*shared by global heap?	     */
-    union {
-	H5HG_t		gh;		/*global heap info		     */
-	H5G_entry_t	ent;		/*symbol table entry info	     */
-    } u;
+    H5G_entry_t	ent;			/*symbol table entry info	     */
 } H5O_shared_t;
 
 /*

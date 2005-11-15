@@ -26,7 +26,7 @@
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_dtype_encode (H5F_t *f, uint8_t *p, const void *mesg);
-static void *H5O_dtype_decode (H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
+static void *H5O_dtype_decode (H5F_t *f, hid_t dxpl_id, const uint8_t *p);
 static void *H5O_dtype_copy (const void *_mesg, void *_dest, unsigned update_flags);
 static size_t H5O_dtype_size (const H5F_t *f, const void *_mesg);
 static herr_t H5O_dtype_reset (void *_mesg);
@@ -812,8 +812,7 @@ done:
     function using malloc() and is returned to the caller.
 --------------------------------------------------------------------------*/
 static void *
-H5O_dtype_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p,
-		 H5O_shared_t UNUSED *sh)
+H5O_dtype_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
 {
     H5T_t		   *dt = NULL;
     void                *ret_value;     /* Return value */
@@ -1112,8 +1111,7 @@ H5O_dtype_get_share(H5F_t UNUSED *f, const void *_mesg,
         /* If the address is defined, this had better be a named datatype */
 	HDassert (H5T_STATE_NAMED==dt->shared->state || H5T_STATE_OPEN==dt->shared->state);
 
-	sh->in_gh = FALSE;
-	sh->u.ent = dt->ent;
+        H5G_ent_copy(&(sh->ent), &(dt->ent), H5G_COPY_NULL);
     } else
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype is not sharable");
 
@@ -1149,10 +1147,9 @@ H5O_dtype_set_share (H5F_t UNUSED *f, void *_mesg/*in,out*/,
 
     assert (dt);
     assert (sh);
-    assert (!sh->in_gh);
 
     /* NULL copy here, names not appropriate */
-    H5G_ent_copy(&(dt->ent),&(sh->u.ent),H5G_COPY_NULL);
+    H5G_ent_copy(&(dt->ent), &(sh->ent), H5G_COPY_NULL);
 
     /* Note that the datatype is a named datatype */
     dt->shared->state = H5T_STATE_NAMED;
