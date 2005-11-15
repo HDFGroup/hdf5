@@ -423,9 +423,6 @@ libhdf5_hl.la: $(libhdf5_hl_la_OBJECTS) $(libhdf5_hl_la_DEPENDENCIES)
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
-distclean-compile:
-	-rm -f *.tab.c
-
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5DS.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5HL_private.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5IM.Plo@am__quote@
@@ -664,6 +661,10 @@ uninstall-am: uninstall-includeHEADERS uninstall-info-am \
 # normally go) because it should be included in the top-level Makefile.am
 # as well.
 check-install: installcheck
+
+# Automake naturally assumes that we want it to remove y.tab.c on distclean.
+# Convince it otherwise.
+distclean-compile:
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.

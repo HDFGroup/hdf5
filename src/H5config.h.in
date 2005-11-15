@@ -357,6 +357,10 @@
 /* Define if `__tm_gmtoff' is a member of `struct tm' */
 #undef HAVE___TM_GMTOFF
 
+/* Define if your system can't handle converting floating-point values to long
+   long. */
+#undef HW_FP_TO_LLONG_NOT_WORKS
+
 /* Define if your system can accurately convert from integers to long double
    values. */
 #undef INTEGER_TO_LDOUBLE_ACCURATE
