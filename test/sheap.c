@@ -153,7 +153,11 @@ test_allocate_simple(hid_t fapl)
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
-    if(obj_addr != 1178) TEST_ERROR;
+#ifdef H5_HAVE_LARGE_HSIZET
+    if(obj_addr != 530) TEST_ERROR;
+#else /* H5_HAVE_LARGE_HSIZET */
+    if(obj_addr != 478) TEST_ERROR;
+#endif /* H5_HAVE_LARGE_HSIZET */
 
     PASSED();
 
@@ -166,7 +170,11 @@ test_allocate_simple(hid_t fapl)
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
-    if(obj_addr != 1188) TEST_ERROR;
+#ifdef H5_HAVE_LARGE_HSIZET
+    if(obj_addr != 540) TEST_ERROR;
+#else /* H5_HAVE_LARGE_HSIZET */
+    if(obj_addr != 488) TEST_ERROR;
+#endif /* H5_HAVE_LARGE_HSIZET */
 
     PASSED();
 
@@ -179,7 +187,11 @@ test_allocate_simple(hid_t fapl)
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
-    if(obj_addr != 6298) TEST_ERROR;
+#ifdef H5_HAVE_LARGE_HSIZET
+    if(obj_addr != 5650) TEST_ERROR;
+#else /* H5_HAVE_LARGE_HSIZET */
+    if(obj_addr != 5598) TEST_ERROR;
+#endif /* H5_HAVE_LARGE_HSIZET */
 
     PASSED();
 
@@ -192,7 +204,11 @@ test_allocate_simple(hid_t fapl)
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
-    if(obj_addr != 6810) TEST_ERROR;
+#ifdef H5_HAVE_LARGE_HSIZET
+    if(obj_addr != 6162) TEST_ERROR;
+#else /* H5_HAVE_LARGE_HSIZET */
+    if(obj_addr != 6110) TEST_ERROR;
+#endif /* H5_HAVE_LARGE_HSIZET */
 
     PASSED();
 

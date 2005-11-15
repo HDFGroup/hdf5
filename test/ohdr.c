@@ -63,7 +63,7 @@ main(void)
     hid_t	dset=-1;
     H5F_t	*f=NULL;
     char	filename[1024];
-    H5G_entry_t	oh_ent;
+    H5O_loc_t	oh_loc;
     time_t	time_new, ro;
     int		i;
 
@@ -82,8 +82,8 @@ main(void)
      * Test object header creation
      */
     TESTING("object header creation");
-    HDmemset(&oh_ent,0,sizeof(H5G_entry_t));
-    if (H5O_create(f, H5P_DATASET_XFER_DEFAULT, 64, &oh_ent/*out*/)<0) {
+    HDmemset(&oh_loc, 0, sizeof(oh_loc));
+    if (H5O_create(f, H5P_DATASET_XFER_DEFAULT, 64, &oh_loc/*out*/)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -93,7 +93,7 @@ main(void)
     /* create a new message */
     TESTING("message creation");
     time_new = 11111111;
-    if (H5O_modify(&oh_ent, H5O_MTIME_NEW_ID, H5O_NEW_MESG, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
+    if (H5O_modify(&oh_loc, H5O_MTIME_NEW_ID, H5O_NEW_MESG, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -103,7 +103,7 @@ main(void)
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
-    if (NULL==H5O_read(&oh_ent, H5O_MTIME_NEW_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
+    if (NULL==H5O_read(&oh_loc, H5O_MTIME_NEW_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -121,7 +121,7 @@ main(void)
      */
     TESTING("message modification");
     time_new = 33333333;
-    if (H5O_modify(&oh_ent, H5O_MTIME_NEW_ID, 0, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
+    if (H5O_modify(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -131,7 +131,7 @@ main(void)
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
-    if (NULL==H5O_read(&oh_ent, H5O_MTIME_NEW_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
+    if (NULL==H5O_read(&oh_loc, H5O_MTIME_NEW_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -150,7 +150,7 @@ main(void)
      */
     TESTING("duplicate message creation");
     time_new = 55555555;
-    if (H5O_modify(&oh_ent, H5O_MTIME_NEW_ID, H5O_NEW_MESG, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
+    if (H5O_modify(&oh_loc, H5O_MTIME_NEW_ID, H5O_NEW_MESG, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -160,7 +160,7 @@ main(void)
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
-    if (NULL==H5O_read(&oh_ent, H5O_MTIME_NEW_ID, 1, &ro, H5P_DATASET_XFER_DEFAULT)) {
+    if (NULL==H5O_read(&oh_loc, H5O_MTIME_NEW_ID, 1, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -178,7 +178,7 @@ main(void)
      */
     TESTING("duplicate message modification");
     time_new = 77777777;
-    if (H5O_modify(&oh_ent, H5O_MTIME_NEW_ID, 1, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
+    if (H5O_modify(&oh_loc, H5O_MTIME_NEW_ID, 1, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -188,7 +188,7 @@ main(void)
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
-    if (NULL==H5O_read(&oh_ent, H5O_MTIME_NEW_ID, 1, &ro, H5P_DATASET_XFER_DEFAULT)) {
+    if (NULL==H5O_read(&oh_loc, H5O_MTIME_NEW_ID, 1, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -212,7 +212,7 @@ main(void)
     TESTING("object header overflow in memory");
     for (i=0; i<40; i++) {
         time_new = (i+1)*1000+1;
-        if (H5O_modify(&oh_ent, H5O_MTIME_ID, H5O_NEW_MESG, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
+        if (H5O_modify(&oh_loc, H5O_MTIME_ID, H5O_NEW_MESG, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
 	    H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
 	    goto error;
@@ -232,7 +232,7 @@ main(void)
     TESTING("object header overflow on disk");
     for (i=0; i<10; i++) {
         time_new = (i + 1) * 1000 + 10;
-        if (H5O_modify(&oh_ent, H5O_MTIME_NEW_ID, H5O_NEW_MESG, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
+        if (H5O_modify(&oh_loc, H5O_MTIME_NEW_ID, H5O_NEW_MESG, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
 	    H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
 	    goto error;
@@ -249,23 +249,23 @@ main(void)
      * Delete all time messages.
      */
     TESTING("message deletion");
-    if (H5O_remove(&oh_ent, H5O_MTIME_NEW_ID, H5O_ALL, TRUE, H5P_DATASET_XFER_DEFAULT)<0) {
+    if (H5O_remove(&oh_loc, H5O_MTIME_NEW_ID, H5O_ALL, TRUE, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
-    if (H5O_remove(&oh_ent, H5O_MTIME_ID, H5O_ALL, TRUE, H5P_DATASET_XFER_DEFAULT)<0) {
+    if (H5O_remove(&oh_loc, H5O_MTIME_ID, H5O_ALL, TRUE, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
-    if (H5O_read(&oh_ent, H5O_MTIME_NEW_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
+    if (H5O_read(&oh_loc, H5O_MTIME_NEW_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	puts("    H5O_read() should have failed but didn't");
 	H5Eclear_stack(H5E_DEFAULT);
 	goto error;
     }
-    if (H5O_read(&oh_ent, H5O_MTIME_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
+    if (H5O_read(&oh_loc, H5O_MTIME_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	puts("    H5O_read() should have failed but didn't");
 	H5Eclear_stack(H5E_DEFAULT);
@@ -276,7 +276,7 @@ main(void)
 
     /* release resources */
     TESTING("object header closing");
-    if (H5O_close(&oh_ent)<0) {
+    if (H5O_close(&oh_loc)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;

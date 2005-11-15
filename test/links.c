@@ -18,8 +18,14 @@
  *
  * Purpose:	Tests hard and soft (symbolic) links.
  */
+
+#define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
+
+/* Define this macro to indicate that the testing APIs should be available */
+#define H5G_TESTING
+
 #include "h5test.h"
-#include "H5Gprivate.h"		/* Groups				*/
+#include "H5Gpkg.h"		/* Groups				*/
 
 const char *FILENAME[] = {
     "links1",
@@ -60,39 +66,32 @@ mklinks(hid_t fapl)
 
     /* Create a file */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
-	goto error;
-    }
-    if ((scalar=H5Screate_simple (1, size, size))<0) goto error;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((scalar=H5Screate_simple (1, size, size))<0) TEST_ERROR;
 
     /* Create a group */
-    if ((grp=H5Gcreate (file, "grp1", (size_t)0))<0) goto error;
-    if (H5Gclose (grp)<0) goto error;
+    if ((grp=H5Gcreate (file, "grp1", (size_t)0))<0) TEST_ERROR;
+    if (H5Gclose (grp)<0) TEST_ERROR;
 
     /* Create a dataset */
-    if ((d1=H5Dcreate (file, "d1", H5T_NATIVE_INT, scalar, H5P_DEFAULT))<0) {
-	goto error;
-    }
-    if (H5Dclose (d1)<0) goto error;
+    if ((d1=H5Dcreate (file, "d1", H5T_NATIVE_INT, scalar, H5P_DEFAULT))<0) TEST_ERROR;
+    if (H5Dclose (d1)<0) TEST_ERROR;
 
     /* Create a hard link */
-    if (H5Glink (file, H5G_LINK_HARD, "d1", "grp1/hard")<0) goto error;
+    if (H5Glink (file, H5G_LINK_HARD, "d1", "grp1/hard")<0) TEST_ERROR;
 
     /* Create a symbolic link */
-    if (H5Glink (file, H5G_LINK_SOFT, "/d1", "grp1/soft")<0) goto error;
+    if (H5Glink (file, H5G_LINK_SOFT, "/d1", "grp1/soft")<0) TEST_ERROR;
 
     /* Create a symbolic link to something that doesn't exist */
-    if (H5Glink (file, H5G_LINK_SOFT, "foobar", "grp1/dangle")<0) goto error;
+    if (H5Glink (file, H5G_LINK_SOFT, "foobar", "grp1/dangle")<0) TEST_ERROR;
 
     /* Create a recursive symbolic link */
-    if (H5Glink (file, H5G_LINK_SOFT, "/grp1/recursive",
-		 "/grp1/recursive")<0) {
-	goto error;
-    }
+    if (H5Glink (file, H5G_LINK_SOFT, "/grp1/recursive", "/grp1/recursive")<0) TEST_ERROR;
 
     /* Close */
-    if (H5Sclose (scalar)<0) goto error;
-    if (H5Fclose (file)<0) goto error;
+    if (H5Sclose (scalar)<0) TEST_ERROR;
+    if (H5Fclose (file)<0) TEST_ERROR;
 
     PASSED();
     return 0;
@@ -132,81 +131,59 @@ new_links(hid_t fapl)
 
     /* Create two files */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
-    if ((file_a=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
-        goto error;
-    }
+    if ((file_a=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+
     h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
-    if ((file_b=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
-        goto error;
-    }
-    if ((scalar=H5Screate_simple (1, size, size))<0) goto error;
+    if ((file_b=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+
+    if ((scalar=H5Screate_simple (1, size, size))<0) TEST_ERROR;
 
     /* Create two groups in each file */
-    if ((grp1_a=H5Gcreate (file_a, "grp1", (size_t)0))<0) goto error;
-    if ((grp2_a=H5Gcreate (file_a, "grp2", (size_t)0))<0) goto error;
-    if ((grp1_b=H5Gcreate (file_b, "grp1", (size_t)0))<0) goto error;
-    if ((grp2_b=H5Gcreate (file_b, "grp2", (size_t)0))<0) goto error;
+    if ((grp1_a=H5Gcreate (file_a, "grp1", (size_t)0))<0) TEST_ERROR;
+    if ((grp2_a=H5Gcreate (file_a, "grp2", (size_t)0))<0) TEST_ERROR;
+    if ((grp1_b=H5Gcreate (file_b, "grp1", (size_t)0))<0) TEST_ERROR;
+    if ((grp2_b=H5Gcreate (file_b, "grp2", (size_t)0))<0) TEST_ERROR;
 
     /* Create datasets */
-    if((dset1=H5Dcreate(file_a, "dataset1", H5T_NATIVE_INT, scalar,
-	H5P_DEFAULT))<0) {
-	goto error;
-    }
-    if((dset2=H5Dcreate(grp1_a, "dataset2", H5T_NATIVE_INT, scalar,
-        H5P_DEFAULT))<0) {
-        goto error;
-    }
+    if((dset1=H5Dcreate(file_a, "dataset1", H5T_NATIVE_INT, scalar, H5P_DEFAULT))<0) TEST_ERROR;
+    if((dset2=H5Dcreate(grp1_a, "dataset2", H5T_NATIVE_INT, scalar, H5P_DEFAULT))<0) TEST_ERROR;
 
     /* Create links within a file.  Both of source and destination use
      * H5G_SAME_LOC.  Both hard and soft links should fail. */
     H5E_BEGIN_TRY {
-        if(H5Glink2(H5G_SAME_LOC, "dataset1", H5G_LINK_HARD , H5G_SAME_LOC,
-		"hard")!=FAIL) goto error;
+        if(H5Glink2(H5G_SAME_LOC, "dataset1", H5G_LINK_HARD , H5G_SAME_LOC, "hard")!=FAIL) TEST_ERROR;
     } H5E_END_TRY;
     H5E_BEGIN_TRY {
-        if(H5Glink2(H5G_SAME_LOC, "dataset1", H5G_LINK_SOFT , H5G_SAME_LOC,
-        	"soft")!=FAIL) goto error;
+        if(H5Glink2(H5G_SAME_LOC, "dataset1", H5G_LINK_SOFT , H5G_SAME_LOC, "soft")!=FAIL) TEST_ERROR;
     } H5E_END_TRY;
 
     /* Create links across files.  Both hard and soft links should fail. */
     H5E_BEGIN_TRY {
-        if(H5Glink2(file_a, "dataset1", H5G_LINK_HARD , file_b,
-        	"hard")!=FAIL) goto error;
+        if(H5Glink2(file_a, "dataset1", H5G_LINK_HARD , file_b, "hard")!=FAIL) TEST_ERROR;
     } H5E_END_TRY;
     H5E_BEGIN_TRY {
-        if(H5Glink2(file_a, "dataset1", H5G_LINK_SOFT, file_b, "soft")!=FAIL)
-            goto error;
+        if(H5Glink2(file_a, "dataset1", H5G_LINK_SOFT, file_b, "soft")!=FAIL) TEST_ERROR;
     } H5E_END_TRY;
 
     /* Create links to test H5G_SAME_LOC, H5G_LINK_HARD, H5G_LINK_SOFT. */
-    if(H5Glink2(grp1_a, "dataset2", H5G_LINK_HARD , H5G_SAME_LOC,
-        "hard1")<0) {
-        goto error;
-    }
-    if(H5Glink2(H5G_SAME_LOC, "dataset2", H5G_LINK_SOFT , grp1_a,
-	"soft1")<0) {
-        goto error;
-    }
+    if(H5Glink2(grp1_a, "dataset2", H5G_LINK_HARD , H5G_SAME_LOC, "hard1")<0) TEST_ERROR;
+    if(H5Glink2(H5G_SAME_LOC, "dataset2", H5G_LINK_SOFT , grp1_a, "soft1")<0) TEST_ERROR;
 
     /* Create links to test H5G_LINK_HARD, H5G_LINK_SOFT across different
      * locations. */
-    if(H5Glink2(grp1_a, "dataset2", H5G_LINK_HARD, grp2_a, "hard2")<0) {
-        goto error;
-    }
-    if(H5Glink2(grp1_a, "/grp1/dataset2", H5G_LINK_SOFT , grp2_a, "soft2")<0) {
-        goto error;
-    }
+    if(H5Glink2(grp1_a, "dataset2", H5G_LINK_HARD, grp2_a, "hard2")<0) TEST_ERROR;
+    if(H5Glink2(grp1_a, "/grp1/dataset2", H5G_LINK_SOFT , grp2_a, "soft2")<0) TEST_ERROR;
 
     /* Close dataspace and files */
-    if (H5Sclose (scalar)<0) goto error;
-    if (H5Dclose(dset1)<0) goto error;
-    if (H5Dclose(dset2)<0) goto error;
-    if (H5Gclose (grp1_a)<0) goto error;
-    if (H5Gclose (grp2_a)<0) goto error;
-    if (H5Gclose (grp1_b)<0) goto error;
-    if (H5Gclose (grp2_b)<0) goto error;
-    if (H5Fclose (file_a)<0) goto error;
-    if (H5Fclose (file_b)<0) goto error;
+    if (H5Sclose (scalar)<0) TEST_ERROR;
+    if (H5Dclose(dset1)<0) TEST_ERROR;
+    if (H5Dclose(dset2)<0) TEST_ERROR;
+    if (H5Gclose (grp1_a)<0) TEST_ERROR;
+    if (H5Gclose (grp2_a)<0) TEST_ERROR;
+    if (H5Gclose (grp1_b)<0) TEST_ERROR;
+    if (H5Gclose (grp2_b)<0) TEST_ERROR;
+    if (H5Fclose (file_a)<0) TEST_ERROR;
+    if (H5Fclose (file_b)<0) TEST_ERROR;
 
     PASSED();
     return 0;
@@ -257,16 +234,14 @@ cklinks(hid_t fapl)
 
     /* Open the file */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-    if ((file=H5Fopen(filename, H5F_ACC_RDONLY, fapl))<0) {
-	goto error;
-    }
+    if ((file=H5Fopen(filename, H5F_ACC_RDONLY, fapl))<0) TEST_ERROR;
 
     /* Hard link */
-    if (H5Gget_objinfo(file, "d1", TRUE, &sb1)<0) goto error;
-    if (H5Gget_objinfo(file, "grp1/hard", TRUE, &sb2)<0) goto error;
+    if (H5Gget_objinfo(file, "d1", TRUE, &sb1)<0) TEST_ERROR;
+    if (H5Gget_objinfo(file, "grp1/hard", TRUE, &sb2)<0) TEST_ERROR;
     if (H5G_DATASET!=sb2.type) {
 	H5_FAILED();
-	puts("    Unexpected object type should have been a dataset");
+	printf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
 	goto error;
     }
     if (sb1.u.obj.objno!=sb2.u.obj.objno) {
@@ -277,10 +252,10 @@ cklinks(hid_t fapl)
     }
 
     /* Symbolic link */
-    if (H5Gget_objinfo(file, "grp1/soft", TRUE, &sb2)<0) goto error;
+    if (H5Gget_objinfo(file, "grp1/soft", TRUE, &sb2)<0) TEST_ERROR;
     if (H5G_DATASET!=sb2.type) {
 	H5_FAILED();
-	puts("    Unexpected object type should have been a dataset");
+	printf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
 	goto error;
     }
     if (sb1.u.obj.objno!=sb2.u.obj.objno) {
@@ -289,9 +264,7 @@ cklinks(hid_t fapl)
 	puts("    expected file location.");
 	goto error;
     }
-    if (H5Gget_linkval(file, "grp1/soft", sizeof linkval, linkval)<0) {
-	goto error;
-    }
+    if (H5Gget_linkval(file, "grp1/soft", sizeof linkval, linkval)<0) TEST_ERROR;
     if (HDstrcmp(linkval, "/d1")) {
 	H5_FAILED();
 	puts("    Soft link test failed. Wrong link value");
@@ -307,13 +280,15 @@ cklinks(hid_t fapl)
 	puts("    H5Gget_objinfo() should have failed for a dangling link.");
 	goto error;
     }
-    if (H5Gget_objinfo(file, "grp1/dangle", FALSE, &sb2)<0) goto error;
+    if (H5Gget_objinfo(file, "grp1/dangle", FALSE, &sb2)<0) TEST_ERROR;
     if (H5G_LINK!=sb2.type) {
 	H5_FAILED();
-	puts("    Unexpected object type should have been a symbolic link");
+	printf("    %d: Unexpected object type should have been a symbolic link\n", __LINE__);
 	goto error;
     }
     if (H5Gget_linkval(file, "grp1/dangle", sizeof linkval, linkval)<0) {
+	H5_FAILED();
+	printf("    %d: Can't retrieve link value\n", __LINE__);
 	goto error;
     }
     if (HDstrcmp(linkval, "foobar")) {
@@ -331,13 +306,15 @@ cklinks(hid_t fapl)
 	puts("    H5Gget_objinfo() should have failed for a recursive link.");
 	goto error;
     }
-    if (H5Gget_objinfo(file, "grp1/recursive", FALSE, &sb2)<0) goto error;
+    if (H5Gget_objinfo(file, "grp1/recursive", FALSE, &sb2)<0) TEST_ERROR;
     if (H5G_LINK!=sb2.type) {
 	H5_FAILED();
-	puts("    Unexpected object type should have been a symbolic link");
+	printf("    %d: Unexpected object type should have been a symbolic link\n", __LINE__);
 	goto error;
     }
     if (H5Gget_linkval(file, "grp1/recursive", sizeof linkval, linkval)<0) {
+	H5_FAILED();
+	printf("    %d: Can't retrieve link value\n", __LINE__);
 	goto error;
     }
     if (HDstrcmp(linkval, "/grp1/recursive")) {
@@ -347,7 +324,7 @@ cklinks(hid_t fapl)
     }
 
     /* Cleanup */
-    if (H5Fclose(file)<0) goto error;
+    if (H5Fclose(file)<0) TEST_ERROR;
     PASSED();
     return 0;
 
@@ -369,8 +346,6 @@ cklinks(hid_t fapl)
  * Programmer:  Raymond Lu
  *              Thursday, April 25, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -385,22 +360,20 @@ ck_new_links(hid_t fapl)
 
     /* Open the file */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
-    if ((file=H5Fopen(filename, H5F_ACC_RDONLY, fapl))<0) {
-        goto error;
-    }
+    if ((file=H5Fopen(filename, H5F_ACC_RDONLY, fapl))<0) TEST_ERROR;
 
     /* Get hard link info */
     if(H5Gget_objinfo(file, "/grp1/dataset2", TRUE, &sb_dset)<0)
-	goto error;
+	TEST_ERROR;
     if(H5Gget_objinfo(file, "/grp1/hard1", TRUE, &sb_hard1)<0)
-	goto error;
+	TEST_ERROR;
     if(H5Gget_objinfo(file, "/grp2/hard2", TRUE, &sb_hard2)<0)
-	goto error;
+	TEST_ERROR;
 
     /* Check hard links */
     if(H5G_DATASET!=sb_hard1.type || H5G_DATASET!=sb_hard2.type) {
 	H5_FAILED();
-	puts("    Unexpected object type, should have been a dataset");
+	printf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
 	goto error;
     }
     if( sb_dset.u.obj.objno!=sb_hard1.u.obj.objno || sb_dset.u.obj.objno!=sb_hard2.u.obj.objno ) {
@@ -411,34 +384,33 @@ ck_new_links(hid_t fapl)
     }
 
     /* Get soft link info */
-    if(H5Gget_objinfo(file, "/grp1/soft1", TRUE, &sb_soft1)<0) goto error;
-    if(H5Gget_objinfo(file, "/grp2/soft2", TRUE, &sb_soft2)<0) goto error;
+    if(H5Gget_objinfo(file, "/grp1/soft1", TRUE, &sb_soft1)<0) TEST_ERROR;
+    if(H5Gget_objinfo(file, "/grp2/soft2", TRUE, &sb_soft2)<0) TEST_ERROR;
 
     /* Check soft links */
     if(H5G_DATASET!=sb_soft1.type || H5G_DATASET!=sb_soft2.type) {
         H5_FAILED();
-        puts("    Unexpected object type, should have been a dataset");
-        goto error;
+	printf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
+        TEST_ERROR;
     }
 
     if( sb_dset.u.obj.objno!=sb_soft1.u.obj.objno || sb_dset.u.obj.objno!=sb_soft2.u.obj.objno ) {
         H5_FAILED();
         puts("    Soft link test failed.  Link seems not to point to the ");
         puts("    expected file location.");
-        goto error;
+        TEST_ERROR;
     }
 
-    if (H5Gget_linkval(file, "grp2/soft2", sizeof linkval, linkval)<0) {
-        goto error;
-    }
+    if (H5Gget_linkval(file, "grp2/soft2", sizeof linkval, linkval)<0)
+        TEST_ERROR;
     if (HDstrcmp(linkval, "/grp1/dataset2")) {
         H5_FAILED();
         puts("    Soft link test failed. Wrong link value");
-        goto error;
+        TEST_ERROR;
     }
 
     /* Cleanup */
-    if(H5Fclose(file)<0) goto error;
+    if(H5Fclose(file)<0) TEST_ERROR;
     PASSED();
     return 0;
 
@@ -660,9 +632,9 @@ toomany(hid_t fapl)
 
  error:
     H5E_BEGIN_TRY {
-    	H5Gclose (gid2);
-    	H5Gclose (gid);
-    	H5Fclose (fid);
+    	H5Gclose(gid2);
+    	H5Gclose(gid);
+    	H5Fclose(fid);
     } H5E_END_TRY;
     return -1;
 } /* end toomany() */
@@ -711,3 +683,4 @@ main(void)
     h5_cleanup(FILENAME, fapl);
     return 0;
 }
+

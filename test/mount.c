@@ -336,7 +336,7 @@ test_hide(hid_t fapl)
 static int
 test_assoc(hid_t fapl)
 {
-    hid_t	file1=-1, file2=-1;
+    hid_t	file1 = -1, file2 = -1;
     H5G_stat_t	sb1, sb2;
     char	filename1[1024], filename2[1024];
 
@@ -345,35 +345,42 @@ test_assoc(hid_t fapl)
     h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
 
     /* Open the files */
-    if ((file1=H5Fopen(filename1, H5F_ACC_RDONLY, fapl))<0 ||
-	(file2=H5Fopen(filename2, H5F_ACC_RDONLY, fapl))<0)
-	goto error;
+    if((file1 = H5Fopen(filename1, H5F_ACC_RDONLY, fapl)) < 0 ||
+            (file2 = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR
 
     /* Get information about the root of file2 */
-    if (H5Gget_objinfo(file2, "/", TRUE, &sb1)<0) goto error;
+    if(H5Gget_objinfo(file2, "/", TRUE, &sb1) < 0)
+        TEST_ERROR
 
     /* Create the virtual file */
-    if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT)<0) goto error;
+    if(H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT) < 0)
+        TEST_ERROR
 
     /*
      * Get info about the mount point -- should be the same as the root group
      * of file2.
      */
-    if (H5Gget_objinfo(file1, "/mnt1", TRUE, &sb2)<0) goto error;
-    if (sb1.fileno!=sb2.fileno || sb1.u.obj.objno!=sb2.u.obj.objno) {
+    if(H5Gget_objinfo(file1, "/mnt1", TRUE, &sb2) < 0)
+        TEST_ERROR
+    if(sb1.fileno != sb2.fileno || sb1.u.obj.objno != sb2.u.obj.objno) {
 	H5_FAILED();
 	puts("    Association failed.");
-	goto error;
+        AT();
+        goto error;
     }
 
     /* Shut down */
-    if (H5Funmount(file1, "/mnt1_link")<0) goto error;
-    if (H5Fclose(file1)<0) goto error;
-    if (H5Fclose(file2)<0) goto error;
+    if(H5Funmount(file1, "/mnt1_link") < 0)
+        TEST_ERROR
+    if(H5Fclose(file1) < 0)
+        TEST_ERROR
+    if(H5Fclose(file2) < 0)
+        TEST_ERROR
     PASSED();
     return 0;
 
- error:
+error:
     H5E_BEGIN_TRY {
 	H5Fclose(file2);
 	H5Fclose(file1);

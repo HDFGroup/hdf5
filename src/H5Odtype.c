@@ -26,7 +26,7 @@
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_dtype_encode (H5F_t *f, uint8_t *p, const void *mesg);
-static void *H5O_dtype_decode (H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
+static void *H5O_dtype_decode (H5F_t *f, hid_t dxpl_id, const uint8_t *p);
 static void *H5O_dtype_copy (const void *_mesg, void *_dest, unsigned update_flags);
 static size_t H5O_dtype_size (const H5F_t *f, const void *_mesg);
 static herr_t H5O_dtype_reset (void *_mesg);
@@ -66,10 +66,6 @@ const H5O_class_t H5O_DTYPE[1] = {{
 /* This is the correct version to create all datatypes which contain H5T_ARRAY
  * class objects (array definitely, potentially compound & vlen sequences also) */
 #define H5O_DTYPE_VERSION_UPDATED	2
-
-/* Declare external the free list for H5T_t's */
-H5FL_EXTERN(H5T_t);
-H5FL_EXTERN(H5T_shared_t);
 
 
 /*-------------------------------------------------------------------------
@@ -823,8 +819,7 @@ done:
     function using malloc() and is returned to the caller.
 --------------------------------------------------------------------------*/
 static void *
-H5O_dtype_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p,
-		 H5O_shared_t UNUSED *sh)
+H5O_dtype_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
 {
     H5T_t		   *dt = NULL;
     void                *ret_value;     /* Return value */
@@ -1103,8 +1098,6 @@ H5O_dtype_free (void *mesg)
  * Programmer:	Robb Matzke
  *		Monday, June  1, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1112,25 +1105,26 @@ H5O_dtype_get_share(H5F_t UNUSED *f, const void *_mesg,
 		    H5O_shared_t *sh/*out*/)
 {
     const H5T_t	*dt = (const H5T_t *)_mesg;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_get_share);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_get_share)
 
-    assert (dt);
-    assert (sh);
+    HDassert(dt);
+    HDassert(sh);
 
-    if (H5F_addr_defined (dt->ent.header)) {
-        /* If the address is defined, this had better be a named datatype */
-	HDassert (H5T_STATE_NAMED==dt->shared->state || H5T_STATE_OPEN==dt->shared->state);
+    /* Check for object location address defined */
+    if(!H5F_addr_defined(dt->oloc.addr))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype is not sharable")
 
-	sh->in_gh = FALSE;
-	sh->u.ent = dt->ent;
-    } else
-	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype is not sharable");
+    /* If the address is defined, this had better be a named datatype */
+    HDassert(H5T_STATE_NAMED == dt->shared->state || H5T_STATE_OPEN == dt->shared->state);
+
+    /* Copy object location info */
+    H5O_loc_copy(&(sh->oloc), &(dt->oloc), H5O_COPY_DEEP);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_dtype_get_share() */
 
 
 /*-------------------------------------------------------------------------
@@ -1143,33 +1137,27 @@ done:
  * Programmer:	Robb Matzke
  *		Thursday, June	4, 1998
  *
- * Modifications:
- *
- *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
- *      Added `id to name' support.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_dtype_set_share (H5F_t UNUSED *f, void *_mesg/*in,out*/,
+H5O_dtype_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
 		     const H5O_shared_t *sh)
 {
     H5T_t	*dt = (H5T_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_set_share);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_set_share)
 
-    assert (dt);
-    assert (sh);
-    assert (!sh->in_gh);
+    HDassert(dt);
+    HDassert(sh);
 
-    /* NULL copy here, names not appropriate */
-    H5G_ent_copy(&(dt->ent),&(sh->u.ent),H5G_COPY_NULL);
+    /* Retrieve object location information */
+    H5O_loc_copy(&(dt->oloc), &(sh->oloc), H5O_COPY_DEEP);
 
     /* Note that the datatype is a named datatype */
     dt->shared->state = H5T_STATE_NAMED;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_dtype_set_share() */
 
 
 /*--------------------------------------------------------------------------

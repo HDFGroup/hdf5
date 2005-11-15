@@ -890,48 +890,39 @@ done:
  *		matzke@llnl.gov
  *		Jun 23 1997
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *
- *              John Mainzer, 6/17/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5G_node_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *_lt_key,
 	       void *_udata)
 {
-    H5G_bt_ud1_t	*udata = (H5G_bt_ud1_t *) _udata;
+    H5G_bt_ud3_t	*udata = (H5G_bt_ud3_t *) _udata;
     H5G_node_t		*sn = NULL;
     const H5HL_t        *heap = NULL;
     unsigned		lt = 0, idx = 0, rt;
     int		        cmp = 1;
     const char		*s;
     const char          *base;           /* Base of heap */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_node_found);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_found)
 
     /*
      * Check arguments.
      */
-    assert(f);
-    assert(H5F_addr_defined(addr));
-    assert(udata);
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(udata);
 
     /*
      * Load the symbol table node for exclusive access.
      */
-    if (NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "unable to protect symbol table node");
+    if(NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "unable to protect symbol table node")
 
     /* Get base address of heap */
-    if (NULL == (heap = H5HL_protect(f, dxpl_id, udata->common.heap_addr)))
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to protect symbol name");
+    if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->common.heap_addr)))
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to protect symbol name")
 
     base = H5HL_offset_into(f, heap, 0);
 
@@ -939,46 +930,34 @@ H5G_node_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *_lt_key
      * Binary search.
      */
     rt = sn->nsyms;
-    while (lt < rt && cmp) {
+    while(lt < rt && cmp) {
 	idx = (lt + rt) / 2;
-        s=base+sn->entry[idx].name_off;
+        s = base + sn->entry[idx].name_off;
 	cmp = HDstrcmp(udata->common.name, s);
 
 	if (cmp < 0)
 	    rt = idx;
 	else
 	    lt = idx + 1;
-    }
+    } /* end while */
 
-    if (H5HL_unprotect(f, dxpl_id, heap, udata->common.heap_addr, H5AC__NO_FLAGS_SET) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol name");
-    heap=NULL; base=NULL;
+    if(H5HL_unprotect(f, dxpl_id, heap, udata->common.heap_addr, H5AC__NO_FLAGS_SET) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol name")
+    heap = NULL; base = NULL;
 
-    if (cmp)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "not found");
+    if(cmp)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "not found")
 
-    /*
-     * The caller is querying the symbol entry, copy it into the UDATA
-     * entry field.
-     *
-     * (do a NULL copy, since the entry's name will be constructed later)
-     */
-    if (H5G_ent_copy(udata->ent, &sn->entry[idx], H5G_COPY_NULL)<0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to copy entry");
-
-    /* Leave object in same file as lookup occurs in */
-    /* If a file is opened through different H5Fopen() calls, the symbol
-     * table entry from the B-tree lookup ("&sn->entry[idx]" above) will be
-     * in the "first" file, but the lookup might occur in the second file. - QAK
-     */
-    udata->ent->file = f;
+    /* Call user's callback operator */
+    if((udata->op)(&sn->entry[idx], udata->op_data) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "iterator callback failed")
 
 done:
-    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) < 0)
-	HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to release symbol table node");
+    if(sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to release symbol table node")
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_node_found() */
 
 
 /*-------------------------------------------------------------------------
@@ -1013,59 +992,50 @@ done:
  *		matzke@llnl.gov
  *		Jun 24 1997
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *
- *              John Mainzer, 6/8/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
  *-------------------------------------------------------------------------
  */
 static H5B_ins_t
-H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
-		hbool_t UNUSED *lt_key_changed, void *_md_key,
-		void *_udata, void *_rt_key, hbool_t *rt_key_changed,
-		haddr_t *new_node_p)
+H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    void UNUSED *_lt_key, hbool_t UNUSED *lt_key_changed,
+    void *_md_key, void *_udata,
+    void *_rt_key, hbool_t *rt_key_changed,
+    haddr_t *new_node_p)
 {
     H5G_node_key_t	*md_key = (H5G_node_key_t *) _md_key;
     H5G_node_key_t	*rt_key = (H5G_node_key_t *) _rt_key;
     H5G_bt_ud1_t	*udata = (H5G_bt_ud1_t *) _udata;
-
     H5G_node_t		*sn = NULL, *snrt = NULL;
     unsigned		sn_flags = H5AC__NO_FLAGS_SET, snrt_flags = H5AC__NO_FLAGS_SET;
     const H5HL_t        *heap = NULL;
-    size_t		offset;			/*offset of name in heap */
     const char		*s;
     const char          *base;                  /* Base of heap */
     unsigned		lt = 0, rt;		/* Binary search cntrs	*/
     int		        cmp = 1, idx = -1;
     H5G_node_t		*insert_into = NULL;	/*node that gets new entry*/
+    H5G_entry_t         ent;                    /* Entry to insert in node */
     H5B_ins_t		ret_value = H5B_INS_ERROR;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_node_insert);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_insert)
 
     /*
      * Check arguments.
      */
-    assert(f);
-    assert(H5F_addr_defined(addr));
-    assert(md_key);
-    assert(rt_key);
-    assert(udata);
-    assert(new_node_p);
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(md_key);
+    HDassert(rt_key);
+    HDassert(udata);
+    HDassert(new_node_p);
 
     /*
      * Load the symbol node.
      */
-    if (NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR, "unable to protect symbol table node");
+    if(NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR, "unable to protect symbol table node")
 
     /* Get base address of heap */
-    if (NULL == (heap = H5HL_protect(f, dxpl_id, udata->common.heap_addr)))
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR, "unable to protect symbol name");
+    if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->common.heap_addr)))
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR, "unable to protect symbol name")
 
     base = H5HL_offset_into(f, heap, 0);
 
@@ -1073,40 +1043,37 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
      * Where does the new symbol get inserted?	We use a binary search.
      */
     rt = sn->nsyms;
-    while (lt < rt) {
+    while(lt < rt) {
 	idx = (lt + rt) / 2;
-        s=base+sn->entry[idx].name_off;
+        s = base + sn->entry[idx].name_off;
 
-	if (0 == (cmp = HDstrcmp(udata->common.name, s))) /*already present */ {
+	if(0 == (cmp = HDstrcmp(udata->common.name, s))) /*already present */ {
             HCOMMON_ERROR(H5E_SYM, H5E_CANTINSERT, "symbol is already present in symbol table");
 
-            if (H5HL_unprotect(f, dxpl_id, heap, udata->common.heap_addr, H5AC__NO_FLAGS_SET) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to unprotect symbol name");
-            heap=NULL; base=NULL;
+            if(H5HL_unprotect(f, dxpl_id, heap, udata->common.heap_addr, H5AC__NO_FLAGS_SET) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to unprotect symbol name")
+            heap = NULL; base = NULL;
 
-	    HGOTO_DONE(H5B_INS_ERROR);
-        }
+	    HGOTO_DONE(H5B_INS_ERROR)
+        } /* end if */
 
 	if (cmp < 0)
 	    rt = idx;
 	else
 	    lt = idx + 1;
-    }
+    } /* end while */
     idx += cmp > 0 ? 1 : 0;
 
-    if (H5HL_unprotect(f, dxpl_id, heap, udata->common.heap_addr, H5AC__NO_FLAGS_SET) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to unprotect symbol name");
-    heap=NULL; base=NULL;
+    if(H5HL_unprotect(f, dxpl_id, heap, udata->common.heap_addr, H5AC__NO_FLAGS_SET) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to unprotect symbol name")
+    heap = NULL; base = NULL;
 
-    /*
-     * Add the new name to the heap.
-     */
-    offset = H5HL_insert(f, dxpl_id, udata->common.heap_addr, HDstrlen(udata->common.name)+1,
-			udata->common.name);
-    udata->ent->name_off = offset;
-    if (0==offset || (size_t)(-1)==offset)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5B_INS_ERROR, "unable to insert symbol name into heap");
-    if (sn->nsyms >= 2*H5F_SYM_LEAF_K(f)) {
+    /* Convert link information & name to symbol table entry */
+    if(H5G_ent_convert(f, udata->common.heap_addr, udata->common.name, udata->lnk, &ent, dxpl_id) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTCONVERT, H5B_INS_ERROR, "unable to convert link")
+
+    /* Determine where to place entry in node */
+    if(sn->nsyms >= 2 * H5F_SYM_LEAF_K(f)) {
 	/*
 	 * The node is full.  Split it into a left and right
 	 * node and return the address of the new right node (the
@@ -1115,12 +1082,11 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
 	ret_value = H5B_INS_RIGHT;
 
 	/* The right node */
-	if (H5G_node_create(f, dxpl_id, H5B_INS_FIRST, NULL, NULL, NULL,
-			    new_node_p/*out*/)<0)
-	    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5B_INS_ERROR, "unable to split symbol table node");
+	if(H5G_node_create(f, dxpl_id, H5B_INS_FIRST, NULL, NULL, NULL, new_node_p/*out*/) < 0)
+	    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5B_INS_ERROR, "unable to split symbol table node")
 
-	if (NULL == (snrt = H5AC_protect(f, dxpl_id, H5AC_SNODE, *new_node_p, NULL, NULL, H5AC_WRITE)))
-	    HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR, "unable to split symbol table node");
+	if(NULL == (snrt = H5AC_protect(f, dxpl_id, H5AC_SNODE, *new_node_p, NULL, NULL, H5AC_WRITE)))
+	    HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR, "unable to split symbol table node")
 
 	HDmemcpy(snrt->entry, sn->entry + H5F_SYM_LEAF_K(f),
 		 H5F_SYM_LEAF_K(f) * sizeof(H5G_entry_t));
@@ -1137,37 +1103,35 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
 	md_key->offset = sn->entry[sn->nsyms - 1].name_off;
 
 	/* Where to insert the new entry? */
-	if (idx <= (int)H5F_SYM_LEAF_K(f)) {
+	if(idx <= (int)H5F_SYM_LEAF_K(f)) {
 	    insert_into = sn;
-	    if (idx == (int)H5F_SYM_LEAF_K(f))
-		md_key->offset = offset;
+	    if(idx == (int)H5F_SYM_LEAF_K(f))
+		md_key->offset = ent.name_off;
 	} else {
 	    idx -= H5F_SYM_LEAF_K(f);
 	    insert_into = snrt;
-	    if (idx == (int)H5F_SYM_LEAF_K (f)) {
-		rt_key->offset = offset;
+	    if(idx == (int)H5F_SYM_LEAF_K (f)) {
+		rt_key->offset = ent.name_off;
 		*rt_key_changed = TRUE;
-	    }
-	}
+	    } /* end if */
+	} /* end else */
     } else {
 	/* Where to insert the new entry? */
 	ret_value = H5B_INS_NOOP;
         sn_flags |= H5AC__DIRTIED_FLAG;
 	insert_into = sn;
-	if (idx == (int)sn->nsyms) {
-	    rt_key->offset = offset;
+	if(idx == (int)sn->nsyms) {
+	    rt_key->offset = ent.name_off;
 	    *rt_key_changed = TRUE;
-	}
-    }
+	} /* end if */
+    } /* end else */
 
     /* Move entries down to make room for new entry */
-    HDmemmove(insert_into->entry + idx + 1,
-	      insert_into->entry + idx,
+    HDmemmove(insert_into->entry + idx + 1, insert_into->entry + idx,
 	      (insert_into->nsyms - idx) * sizeof(H5G_entry_t));
 
     /* Copy new entry into table */
-    /* (use H5G_COPY_NULL because we don't track the object names in the table) */
-    H5G_ent_copy(&(insert_into->entry[idx]), udata->ent, H5G_COPY_NULL);
+    H5G_ent_copy(&(insert_into->entry[idx]), &ent, H5G_COPY_SHALLOW);
 
     /* Flag entry as dirty */
     insert_into->entry[idx].dirty = TRUE;
@@ -1176,13 +1140,13 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
     insert_into->nsyms += 1;
 
 done:
-    if (snrt && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, *new_node_p, snrt, snrt_flags) < 0)
-	HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node");
-    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, sn_flags) < 0)
-	HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node");
+    if(snrt && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, *new_node_p, snrt, snrt_flags) < 0)
+	HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node")
+    if(sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, sn_flags) < 0)
+	HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node")
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_node_insert() */
 
 
 /*-------------------------------------------------------------------------
@@ -1240,129 +1204,141 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
     H5G_node_t		*sn = NULL;
     unsigned		sn_flags = H5AC__NO_FLAGS_SET;
     const H5HL_t        *heap = NULL;
-    unsigned		lt=0, rt, idx=0;
-    int		        cmp=1;
+    unsigned		lt = 0, rt, idx = 0;
+    int		        cmp = 1;
     const char		*s = NULL;
     const char          *base;              /* Base of heap */
     H5B_ins_t		ret_value = H5B_INS_ERROR;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_node_remove);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_remove)
 
     /* Check arguments */
-    assert(f);
-    assert(H5F_addr_defined(addr));
-    assert(lt_key);
-    assert(rt_key);
-    assert(udata);
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(lt_key);
+    HDassert(rt_key);
+    HDassert(udata);
 
     /* Load the symbol table */
-    if (NULL==(sn=H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR, "unable to protect symbol table node");
+    if(NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR, "unable to protect symbol table node")
 
     /* "Normal" removal of a single entry from the symbol table node */
-    if(udata->common.name!=NULL) {
-        size_t len=0;
+    if(udata->common.name != NULL) {
+        size_t len = 0;
         hbool_t found;     /* Indicate that the string was found */
 
         /* Get base address of heap */
-        if (NULL == (heap = H5HL_protect(f, dxpl_id, udata->common.heap_addr)))
-            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR, "unable to protect symbol name");
+        if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->common.heap_addr)))
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR, "unable to protect symbol name")
 
         base = H5HL_offset_into(f, heap, 0);
 
         /* Find the name with a binary search */
         rt = sn->nsyms;
-        while (lt<rt && cmp) {
-            idx = (lt+rt)/2;
-            s=base+sn->entry[idx].name_off;
+        while(lt < rt && cmp) {
+            idx = (lt + rt) / 2;
+            s = base + sn->entry[idx].name_off;
             cmp = HDstrcmp(udata->common.name, s);
-            if (cmp<0) {
+            if(cmp < 0)
                 rt = idx;
-            } else {
-                lt = idx+1;
-            }
-        }
+            else
+                lt = idx + 1;
+        } /* end while */
 
-        if (H5HL_unprotect(f, dxpl_id, heap, udata->common.heap_addr, H5AC__NO_FLAGS_SET) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to unprotect symbol name");
-        heap=NULL; base=NULL;
+        if(H5HL_unprotect(f, dxpl_id, heap, udata->common.heap_addr, H5AC__NO_FLAGS_SET) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to unprotect symbol name")
+        heap = NULL; base = NULL;
 
-        if (cmp)
-            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR, "not found");
+        if(cmp)
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR, "not found")
 
-        if (H5G_CACHED_SLINK==sn->entry[idx].type) {
+        if(H5G_CACHED_SLINK == sn->entry[idx].type) {
+            /* Set the type of the link removed */
+            *(udata->obj_type) = H5G_LINK;
+
             /* Remove the symbolic link value */
-            if (NULL == (heap = H5HL_protect(f, dxpl_id, udata->common.heap_addr)))
-                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR, "unable to protect symbol name");
+            if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->common.heap_addr)))
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR, "unable to protect symbol name")
 
             s = H5HL_offset_into(f, heap, sn->entry[idx].cache.slink.lval_offset);
-            if (s) {
-                len=HDstrlen(s)+1;
-                found=1;
+            if(s) {
+                len = HDstrlen(s) + 1;
+                found = 1;
             } /* end if */
             else
-                found=0;
+                found = 0;
 
-            if (H5HL_unprotect(f, dxpl_id, heap, udata->common.heap_addr, H5AC__NO_FLAGS_SET) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to unprotect symbol name");
-            heap=NULL; s=NULL;
+            if(H5HL_unprotect(f, dxpl_id, heap, udata->common.heap_addr, H5AC__NO_FLAGS_SET) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to unprotect symbol name")
+            heap = NULL; s = NULL;
 
-            if (found)
+            if(found)
                 H5HL_remove(f, dxpl_id, udata->common.heap_addr, sn->entry[idx].cache.slink.lval_offset, len);
 
             H5E_clear_stack(NULL); /* no big deal */
         } else {
+            H5O_loc_t tmp_oloc;             /* Temporary object location */
+
+            /* Build temporary object location */
+            tmp_oloc.file = f;
+            HDassert(H5F_addr_defined(sn->entry[idx].header));
+            tmp_oloc.addr = sn->entry[idx].header;
+
+            /* Get the type of the object */
+            if((*(udata->obj_type) = H5O_obj_type(&tmp_oloc, dxpl_id)) == H5G_UNKNOWN)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5B_INS_ERROR, "unable to determine object type")
+
             /* Decrement the reference count, if requested */
             if(udata->adj_link) {
-                HDassert(H5F_addr_defined(sn->entry[idx].header));
-                if (H5O_link(sn->entry+idx, -1, dxpl_id)<0)
+                if(H5O_link(&tmp_oloc, -1, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5B_INS_ERROR, "unable to decrement object link count")
             } /* end if */
-        }
+        } /* end else */
 
         /* Remove the name from the local heap */
-        if (NULL == (heap = H5HL_protect(f, dxpl_id, udata->common.heap_addr)))
-            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR, "unable to protect symbol name");
+        if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->common.heap_addr)))
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR, "unable to protect symbol name")
 
         s = H5HL_offset_into(f, heap, sn->entry[idx].name_off);
 
-        if (s) {
-            len=HDstrlen(s)+1;
-            found=1;
+        if(s) {
+            len = HDstrlen(s) + 1;
+            found = 1;
         } /* end if */
         else
-            found=0;
+            found = 0;
 
-        if (H5HL_unprotect(f, dxpl_id, heap, udata->common.heap_addr, H5AC__NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to unprotect symbol name");
-        heap=NULL; s=NULL;
+        if(H5HL_unprotect(f, dxpl_id, heap, udata->common.heap_addr, H5AC__NO_FLAGS_SET) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to unprotect symbol name")
+        heap = NULL; s = NULL;
 
-        if (found)
+        if(found)
             H5HL_remove(f, dxpl_id, udata->common.heap_addr, sn->entry[idx].name_off, len);
 
         H5E_clear_stack(NULL); /* no big deal */
 
         /* Remove the entry from the symbol table node */
-        if(1==sn->nsyms) {
+        if(1 == sn->nsyms) {
             /*
              * We are about to remove the only symbol in this node. Copy the left
              * key to the right key and mark the right key as dirty.  Free this
              * node and indicate that the pointer to this node in the B-tree
              * should be removed also.
              */
-            assert(0==idx);
+            HDassert(0 == idx);
             *rt_key = *lt_key;
             *rt_key_changed = TRUE;
             sn->nsyms = 0;
-            if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)H5G_node_size(f))<0
-                    || H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__DIRTIED_FLAG | H5C__DELETED_FLAG)<0) {
+            if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)H5G_node_size(f)) < 0
+                    || H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__DIRTIED_FLAG | H5C__DELETED_FLAG) < 0) {
                 sn = NULL;
-                HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to free symbol table node");
-            }
+                HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to free symbol table node")
+            } /* end if */
             sn = NULL;
             ret_value = H5B_INS_REMOVE;
 
-        } else if (0==idx) {
+        } else if(0 == idx) {
             /*
              * We are about to remove the left-most entry from the symbol table
              * node but there are other entries to the right.  No key values
@@ -1370,11 +1346,11 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
              */
             sn->nsyms -= 1;
             sn_flags |= H5AC__DIRTIED_FLAG;
-            HDmemmove(sn->entry+idx, sn->entry+idx+1,
-                      (sn->nsyms-idx)*sizeof(H5G_entry_t));
+            HDmemmove(sn->entry + idx, sn->entry + idx + 1,
+                      (sn->nsyms-idx) * sizeof(H5G_entry_t));
             ret_value = H5B_INS_NOOP;
 
-        } else if (idx+1==sn->nsyms) {
+        } else if (idx + 1 == sn->nsyms) {
             /*
              * We are about to remove the right-most entry from the symbol table
              * node but there are other entries to the left.  The right key
@@ -1382,7 +1358,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
              */
             sn->nsyms -= 1;
             sn_flags |= H5AC__DIRTIED_FLAG;
-            rt_key->offset = sn->entry[sn->nsyms-1].name_off;
+            rt_key->offset = sn->entry[sn->nsyms - 1].name_off;
             *rt_key_changed = TRUE;
             ret_value = H5B_INS_NOOP;
 
@@ -1393,20 +1369,27 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
              */
             sn->nsyms -= 1;
             sn_flags |= H5AC__DIRTIED_FLAG;
-            HDmemmove(sn->entry+idx, sn->entry+idx+1,
-                      (sn->nsyms-idx)*sizeof(H5G_entry_t));
+            HDmemmove(sn->entry + idx, sn->entry + idx + 1,
+                      (sn->nsyms - idx) * sizeof(H5G_entry_t));
             ret_value = H5B_INS_NOOP;
-        }
+        } /* end else */
     } /* end if */
     /* Remove all entries from node, during B-tree deletion */
     else {
+        H5O_loc_t tmp_oloc;             /* Temporary object location */
+
+        /* Build temporary object location */
+        tmp_oloc.file = f;
+
         /* Reduce the link count for all entries in this node */
-        for(idx=0; idx<sn->nsyms; idx++) {
-            if (H5G_CACHED_SLINK!=sn->entry[idx].type) {
+        for(idx = 0; idx < sn->nsyms; idx++) {
+            if(H5G_CACHED_SLINK != sn->entry[idx].type) {
                 /* Decrement the reference count, if requested */
                 if(udata->adj_link) {
                     HDassert(H5F_addr_defined(sn->entry[idx].header));
-                    if (H5O_link(sn->entry+idx, -1, dxpl_id)<0)
+                    tmp_oloc.addr = sn->entry[idx].header;
+
+                    if(H5O_link(&tmp_oloc, -1, dxpl_id) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, H5B_INS_ERROR, "unable to decrement object link count")
                 } /* end if */
             } /* end if */
@@ -1421,21 +1404,21 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
         *rt_key = *lt_key;
         *rt_key_changed = TRUE;
         sn->nsyms = 0;
-        if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)H5G_node_size(f))<0
-                || H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__DIRTIED_FLAG | H5C__DELETED_FLAG)<0) {
+        if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)H5G_node_size(f)) < 0
+                || H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__DIRTIED_FLAG | H5C__DELETED_FLAG) < 0) {
             sn = NULL;
-            HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to free symbol table node");
-        }
+            HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to free symbol table node")
+        } /* end if */
         sn = NULL;
         ret_value = H5B_INS_REMOVE;
     } /* end else */
 
 done:
-    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, sn_flags)<0)
-	HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node");
+    if(sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, sn_flags) < 0)
+	HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node")
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_node_remove() */
 
 
 /*-------------------------------------------------------------------------
@@ -1538,7 +1521,7 @@ H5G_node_iterate (H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t a
 
         /* Increment the number of entries passed through */
         /* (whether we skipped them or not) */
-        udata->final_ent++;
+        (*udata->final_ent)++;
     }
     if (ret_value<0)
         HERROR (H5E_SYM, H5E_CANTNEXT, "iteration operator failed");
@@ -1695,13 +1678,6 @@ done:
  * Programmer:  Raymond Lu
  *              Nov 20, 2002
  *
- * Modifications:
- *
- *              John Mainzer, 6/17/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -1709,35 +1685,114 @@ H5G_node_type(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
 		  const void UNUSED *_rt_key, void *_udata)
 {
     H5G_bt_it_ud3_t	*udata = (H5G_bt_it_ud3_t*)_udata;
-    hsize_t             loc_idx;
     H5G_node_t		*sn = NULL;
     int                 ret_value = H5B_ITER_CONT;
 
-    FUNC_ENTER_NOAPI(H5G_node_type, H5B_ITER_ERROR);
+    FUNC_ENTER_NOAPI(H5G_node_type, H5B_ITER_ERROR)
 
     /* Check arguments. */
-    assert(f);
-    assert(H5F_addr_defined(addr));
-    assert(udata);
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(udata);
 
     /* Find the node, locate the object symbol table entry and retrieve the type */
-    if (NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_ITER_ERROR, "unable to load symbol table node");
 
     if(udata->idx >= udata->num_objs && udata->idx < (udata->num_objs + sn->nsyms)) {
+        H5O_loc_t tmp_oloc;             /* Temporary object location */
+        hsize_t loc_idx;
+
+        /* Compute index of entry */
         loc_idx = udata->idx - udata->num_objs;
-        udata->type = H5G_get_type(&(sn->entry[loc_idx]), dxpl_id);
+
+        /* Build temporary object location */
+        tmp_oloc.file = f;
+        HDassert(H5F_addr_defined(sn->entry[loc_idx].header));
+        tmp_oloc.addr = sn->entry[loc_idx].header;
+
+        udata->type = H5O_obj_type(&tmp_oloc, dxpl_id);
         ret_value = H5B_ITER_STOP;
     } else {
         udata->num_objs += sn->nsyms;
-    }
+    } /* end else */
 
 done:
-    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) != SUCCEED)
+    if(sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) != SUCCEED)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5G_node_type() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_node_stab_convert
+ *
+ * Purpose:	This function gets called when the entries in a group are
+ *              converted from a symbol table to link messages.
+ *
+ * Return:	0 if object isn't found in this node; 1 if found;
+ *              Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Sep  5, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5G_node_stab_convert(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
+		  const void UNUSED *_rt_key, void *_udata)
+{
+    H5G_bt_it_ud4_t	*udata = (H5G_bt_it_ud4_t*)_udata;
+    H5G_node_t		*sn = NULL;             /* Pointer to symbol table node to operate on */
+    const H5HL_t        *heap = NULL;           /* Pointer to local heap for group */
+    const char		*name;                  /* Pointer to name of link */
+    const H5G_entry_t   *ent;                   /* Pointer to current entry */
+    unsigned            u;                      /* Local index variable */
+    int                 ret_value = H5B_ITER_CONT;
+
+    FUNC_ENTER_NOAPI(H5G_node_stab_convert, H5B_ITER_ERROR)
+
+    /* Check arguments. */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(udata);
+
+    /* Lock the symbol table node */
+    if(NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_ITER_ERROR, "unable to load symbol table node")
+
+    /* Lock the local heap */
+    if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_ITER_ERROR, "unable to protect symbol name")
+
+    /* Convert all the entries from this node into link messages */
+    for(u = 0, ent = sn->entry; u < sn->nsyms; u++, ent++) {
+        /* Get a pointer to the link's name in the local heap */
+        name = H5HL_offset_into(f, heap, ent->name_off);
+        HDassert(name);
+
+        /* Check for too many links for link table */
+        if(udata->nlinks >= udata->max_links)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "too many links for table")
+
+        /* Convert entry into link message object */
+        if(H5G_link_convert(&(udata->lnk_table[udata->nlinks]), ent, heap, name) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTCONVERT, FAIL, "can't convert entry to link message")
+
+        /* Increment number of links stored */
+        udata->nlinks++;
+    } /* end for */
+
+done:
+    if(heap && H5HL_unprotect(f, dxpl_id, heap, udata->heap_addr, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to unprotect symbol name")
+
+    if(sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) != SUCCEED)
+        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_node_stab_convert() */
 
 
 /*-------------------------------------------------------------------------
@@ -1898,62 +1953,74 @@ H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_ITER_ERROR, "unable to load symbol table node")
 
     /* get the base address of the heap */
-    if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr)))
+    if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->src_heap_addr)))
        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_ITER_ERROR, "unable to protect symbol name")
 
     /* copy object in this node one by one */
     for(i = 0; i < sn->nsyms; i++) {
-        H5G_entry_t  ent_new;           /* New entry to insert into dest. group */
-        H5G_entry_t *ent_src = &(sn->entry[i]); /* Convenience variable to refer to current source group entry */
+        H5G_entry_t *src_ent = &(sn->entry[i]); /* Convenience variable to refer to current source group entry */
+        H5O_loc_t   new_oloc;           /* Copied object object location */
+        H5O_link_t  lnk;                /* Link to insert */
         const char  *name;              /* Name of source object */
 
-        /* Set up symbol table entry for destination */
-        H5G_ent_reset(&ent_new);
-        ent_new.file = udata->loc_dst->file;
-
-        /* Determine name of source object */
-        name = H5HL_offset_into(f, heap, ent_src->name_off);
-	HDassert(name);
+        /* Set up copied object location to fill in */
+        H5O_loc_reset(&new_oloc);
+        new_oloc.file = udata->dst_file;
 
         /* Check if object in source group is a hard link */
-        if(H5F_addr_defined(ent_src->header)) {
+        if(H5F_addr_defined(src_ent->header)) {
+            H5O_loc_t src_oloc;             /* Temporary object location for source object */
+
+            /* Build temporary object location for source */
+            src_oloc.file = f;
+            HDassert(H5F_addr_defined(src_ent->header));
+            src_oloc.addr = src_ent->header;
+
             /* Copy the shared object from source to destination */
             /* (Increments link count on destination) */
-            if(H5O_copy_header_map(ent_src, &ent_new, dxpl_id, udata->map_list) < 0)
+            if(H5O_copy_header_map(&src_oloc, &new_oloc, dxpl_id, udata->map_list) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, H5B_ITER_ERROR, "unable to copy object")
-        } /* ( H5F_addr_defined(ent_src->header)) */
-        else if(H5G_CACHED_SLINK == ent_src->type) {
+
+            /* Construct link information for eventual insertion */
+            lnk.type = H5G_LINK_HARD;
+            lnk.u.hard.addr = new_oloc.addr;
+        } /* ( H5F_addr_defined(src_ent->header)) */
+        else if(H5G_CACHED_SLINK == src_ent->type) {
             /* it is a soft link */
-            H5O_stab_t stab_mesg;
-            size_t offset_link;
-            char *name_link = H5HL_offset_into(f, heap, ent_src->cache.slink.lval_offset);
 
-            /* read the symbol table where the soft link to be inserted */
-            if(NULL == H5O_read(udata->loc_dst, H5O_STAB_ID, 0, &stab_mesg, dxpl_id))
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5B_ITER_ERROR, "unable to determine local heap address")
-            if((size_t)(-1) == (offset_link = H5HL_insert(udata->loc_dst->file, dxpl_id,
-                       stab_mesg.heap_addr, HDstrlen(name_link) + 1, name_link)))
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5B_ITER_ERROR, "unable to write link value to local heap")
-            H5O_reset (H5O_STAB_ID, &stab_mesg);
-
-            /* Set up soft link to insert */
-            ent_new.type = H5G_CACHED_SLINK;
-            ent_new.cache.slink.lval_offset = offset_link;
+            /* Construct link information for eventual insertion */
+            lnk.type = H5G_LINK_SOFT;
+            lnk.u.soft.name = H5HL_offset_into(f, heap, src_ent->cache.slink.lval_offset);
         } /* else if */
         else 
             HDassert(0 && "Unknown entry type");
 
+        /* Set up common link data */
+#ifdef H5_HAVE_GETTIMEOFDAY
+        {
+            struct timeval now_tv;
+
+            HDgettimeofday(&now_tv, NULL);
+            lnk.ctime = now_tv.tv_sec;
+        }
+#else /* H5_HAVE_GETTIMEOFDAY */
+        lnk.ctime = HDtime(NULL);
+#endif /* H5_HAVE_GETTIMEOFDAY */
+        lnk.cset = H5T_CSET_ASCII;          /* XXX: Allow user to set this */
+        /* lnk.name = name; */              /* This will be set in callback */
+
+        /* Determine name of source object */
+        name = H5HL_offset_into(f, heap, src_ent->name_off);
+	HDassert(name);
+
         /* Insert the new object in the destination file's group */
         /* (Don't increment the link count - that's already done above for hard links) */
-        if(H5G_stab_insert(udata->loc_dst, name, &ent_new, FALSE, dxpl_id) < 0)
+        if(H5G_stab_insert_real(udata->dst_file, udata->dst_stab, name, &lnk, dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5B_ITER_ERROR, "unable to insert the name")
-
-        /* Free the ID to name buffers */
-        H5G_free_ent_name(&ent_new);
     } /* end of for (i=0; i<sn->nsyms; i++) */
     
 done:
-    if (heap && H5HL_unprotect(f, dxpl_id, heap, udata->heap_addr, H5AC__NO_FLAGS_SET) < 0)
+    if (heap && H5HL_unprotect(f, dxpl_id, heap, udata->src_heap_addr, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to unprotect symbol name")
 
     if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) != SUCCEED)

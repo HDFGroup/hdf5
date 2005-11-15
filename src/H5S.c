@@ -30,6 +30,11 @@
 #include "H5Spkg.h"		/* Dataspaces 				*/
 
 /* Local macro definitions */
+
+/* Number of reserved IDs in ID group */
+#define H5S_RESERVED_ATOMS  2
+
+/* Version of datatype encoding */
 #define H5S_ENCODE_VERSION      0
 
 /* Local static function prototypes */
@@ -1042,39 +1047,37 @@ done:
  * Programmer:	Robb Matzke
  *		Tuesday, December  9, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_modify(H5G_entry_t *ent, const H5S_t *ds, hbool_t update_time, hid_t dxpl_id)
+H5S_modify(H5O_loc_t *loc, const H5S_t *ds, hbool_t update_time, hid_t dxpl_id)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_modify, FAIL);
+    FUNC_ENTER_NOAPI(H5S_modify, FAIL)
 
-    assert(ent);
-    assert(ds);
+    HDassert(loc);
+    HDassert(ds);
 
-    switch (H5S_GET_EXTENT_TYPE(ds)) {
+    switch(H5S_GET_EXTENT_TYPE(ds)) {
         case H5S_NULL:
         case H5S_SCALAR:
         case H5S_SIMPLE:
-            if (H5O_modify(ent, H5O_SDSPACE_ID, 0, 0, update_time, &(ds->extent), dxpl_id)<0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update simple data space message");
+            if(H5O_modify(loc, H5O_SDSPACE_ID, 0, 0, update_time, &(ds->extent), dxpl_id) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update simple dataspace message")
             break;
 
         case H5S_COMPLEX:
-            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "complex data spaces are not implemented yet");
+            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "complex dataspaces are not implemented yet")
 
         default:
-            assert("unknown data space class" && 0);
+            HDassert("unknown dataspace class" && 0);
             break;
-    }
+    } /* end switch */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_modify() */
 
 
 /*-------------------------------------------------------------------------
@@ -1143,44 +1146,40 @@ done:
  * Programmer:	Robb Matzke
  *		Tuesday, December  9, 1997
  *
- * Modifications:
- *	Robb Matzke, 9 Jun 1998
- *	Removed the unused file argument since the file is now part of the
- *	ENT argument.
  *-------------------------------------------------------------------------
  */
 H5S_t *
-H5S_read(const H5G_entry_t *ent, hid_t dxpl_id)
+H5S_read(const H5O_loc_t *loc, hid_t dxpl_id)
 {
-    H5S_t		   *ds = NULL;          /* Dataspace to return */
-    H5S_t		   *ret_value;   /* Return value */
+    H5S_t	   *ds = NULL;          /* Dataspace to return */
+    H5S_t	   *ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_read, NULL);
+    FUNC_ENTER_NOAPI(H5S_read, NULL)
 
     /* check args */
-    assert(ent);
+    HDassert(loc);
 
-    if (NULL==(ds = H5FL_CALLOC(H5S_t)))
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    if(NULL == (ds = H5FL_CALLOC(H5S_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    if (H5O_read(ent, H5O_SDSPACE_ID, 0, &(ds->extent), dxpl_id) == NULL)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, NULL, "unable to load dataspace info from dataset header");
+    if(H5O_read(loc, H5O_SDSPACE_ID, 0, &(ds->extent), dxpl_id) == NULL)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, NULL, "unable to load dataspace info from dataset header")
 
     /* Default to entire dataspace being selected */
-    if(H5S_select_all(ds,0)<0)
-        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
+    if(H5S_select_all(ds, 0) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection")
 
     /* Set the value for successful return */
-    ret_value=ds;
+    ret_value = ds;
 
 done:
-    if(ret_value==NULL) {
-        if(ds!=NULL)
-            H5FL_FREE(H5S_t,ds);
+    if(ret_value == NULL) {
+        if(ds != NULL)
+            H5FL_FREE(H5S_t, ds);
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_read() */
 
 
 /*--------------------------------------------------------------------------

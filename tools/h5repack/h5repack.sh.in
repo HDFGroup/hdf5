@@ -59,7 +59,7 @@ TESTING() {
 #
 VERIFY() {
  SPACES="                                                               "
- echo "Testing h5diff output $* $SPACES" | cut -c1-70 | tr -d '\012'
+ echo "Verifying h5diff output $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
 # Print a message that a test has been skipped (because a required filter

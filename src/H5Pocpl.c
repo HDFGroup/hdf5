@@ -31,6 +31,8 @@
  * Purpose:     set crt_intmd_group so that H5Gcreate(), H5Dcreate, etc.
  *              will create missing groups along the given path "name"
  *
+ * Note:        XXX: This property should really be an access property. -QAK
+ *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Peter Cao

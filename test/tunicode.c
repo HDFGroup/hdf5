@@ -468,6 +468,7 @@ void test_objnames(hid_t fid, const char* string)
   CHECK(ret, FAIL, "H5Dclose");
   ret = H5Sclose(space_id);
   CHECK(ret, FAIL, "H5Sclose");
+
   ret = H5Gclose(grp2_id);
   CHECK(ret, FAIL, "H5Gclose");
 
@@ -481,9 +482,9 @@ void test_objnames(hid_t fid, const char* string)
 
   ret = H5Glink2(fid, GROUP2_NAME, H5G_LINK_HARD, grp3_id, GROUP2_NAME);
   CHECK(ret, FAIL, "H5Glink2");
-  strcpy(path_buf, GROUP2_NAME);
-  strcat(path_buf, "/");
-  strcat(path_buf, string);
+  HDstrcpy(path_buf, GROUP2_NAME);
+  HDstrcat(path_buf, "/");
+  HDstrcat(path_buf, string);
   ret = H5Glink(grp3_id, H5G_LINK_SOFT, path_buf, string);
   CHECK(ret, FAIL, "H5Glink");
 
@@ -580,6 +581,7 @@ void test_compound(hid_t fid, const char * string)
   herr_t     ret;
 
   /* Initialize compound data */
+  HDmemset(&s1, 0, sizeof(s1_t));        /* To make purify happy */
   s1.a = COMP_INT_VAL;
   s1.c = COMP_DOUBLE_VAL;
   s1.b = COMP_FLOAT_VAL;
@@ -793,6 +795,7 @@ void test_unicode(void)
   unsigned int unicode_point;  /* Unicode code point for a single character */
   hid_t fid;                   /* ID of file */
   int x;                       /* Temporary variable */
+  herr_t ret;                  /* Generic return value */
 
   /* Output message about test being performed */
   MESSAGE(5, ("Testing UTF-8 Encoding\n"));
@@ -800,13 +803,14 @@ void test_unicode(void)
   /* Create a random string with length NUM_CHARS */
   HDsrandom((unsigned long)HDtime(NULL));
 
+  HDmemset(test_string, 0, sizeof(test_string));
   for(x=0; x<NUM_CHARS; x++)
   {
     /* We need to avoid unprintable characters (codes 0-31) and the
      * . and / characters, since they aren't allowed in path names.
      */
-    unicode_point = HDrandom() % (MAX_CODE_POINT-32) + 32;
-    if(unicode_point != 56 && unicode_point != 57)
+    unicode_point = (HDrandom() % (MAX_CODE_POINT-32)) + 32;
+    if(unicode_point != 46 && unicode_point != 47)
       cur_pos = write_char(unicode_point, test_string, cur_pos);
   }
 
@@ -831,6 +835,10 @@ void test_unicode(void)
   test_compound(fid, test_string);
   test_enum(fid, test_string);
   test_opaque(fid, test_string);
+
+  /* Close file */
+  ret = H5Fclose(fid);
+  CHECK(ret, FAIL, "H5Fclose");
 
   /* This function could be useful in debugging if certain strings
    * create errors.

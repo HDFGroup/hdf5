@@ -49,12 +49,18 @@ libhdf5_la_SOURCES= H5.c H5A.c H5AC.c H5B.c H5Bcache.c H5B2.c H5B2cache.c \
         H5FDfamily.c H5FDfphdf5.c H5FDlog.c H5FDmpi.c H5FDmpio.c   \
         H5FDmpiposix.c H5FDmulti.c H5FDsec2.c H5FDstdio.c           \
         H5FDstream.c H5FL.c H5FO.c H5FP.c H5FPclient.c H5FPserver.c H5FS.c    \
-        H5G.c H5Gent.c H5Gnode.c H5Gstab.c  \
+        H5G.c H5Gent.c H5Glink.c H5Gloc.c H5Gname.c H5Gnode.c H5Gobj.c \
+        H5Gstab.c  \
+        H5Gtest.c  \
+        H5Gtraverse.c  \
         H5HG.c H5HGdbg.c H5HL.c H5HLdbg.c H5HP.c H5I.c H5MF.c H5MM.c \
         H5MP.c H5MPtest.c \
         H5O.c \
-        H5Oattr.c H5Obogus.c   \
-        H5Ocont.c H5Odtype.c H5Oefl.c H5Ofill.c H5Olayout.c H5Omtime.c        \
+        H5Oattr.c H5Obogus.c H5Ocache.c \
+        H5Ocont.c H5Odtype.c H5Oefl.c H5Ofill.c H5Oginfo.c H5Olayout.c \
+        H5Olinfo.c \
+        H5Olink.c \
+        H5Omtime.c \
         H5Oname.c H5Onull.c H5Opline.c H5Osdspace.c H5Oshared.c H5Ostab.c     \
         H5P.c H5Pdcpl.c H5Pdxpl.c H5Pfapl.c H5Pfcpl.c H5Pgcpl.c H5Pocpl.c \
         H5Ptest.c \

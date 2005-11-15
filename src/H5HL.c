@@ -153,8 +153,7 @@ H5HL_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, haddr_t *addr_p/*out*/)
     if (NULL==(heap = H5FL_CALLOC(H5HL_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     heap->addr = *addr_p + (hsize_t)sizeof_hdr;
-    heap->disk_alloc = size_hint;
-    heap->mem_alloc = size_hint;
+    heap->heap_alloc = size_hint;
     if (NULL==(heap->chunk = H5FL_BLK_CALLOC(heap_chunk,(sizeof_hdr + size_hint))))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
@@ -254,25 +253,24 @@ H5HL_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* heap data size */
-    H5F_DECODE_LENGTH(f, p, heap->disk_alloc);
-    heap->mem_alloc = heap->disk_alloc;
+    H5F_DECODE_LENGTH(f, p, heap->heap_alloc);
 
     /* free list head */
     H5F_DECODE_LENGTH(f, p, free_block);
-    if (free_block != H5HL_FREE_NULL && free_block >= heap->disk_alloc)
+    if (free_block != H5HL_FREE_NULL && free_block >= heap->heap_alloc)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap free list");
 
     /* data */
     H5F_addr_decode(f, &p, &(heap->addr));
-    if (NULL==(heap->chunk = H5FL_BLK_CALLOC(heap_chunk,(sizeof_hdr + heap->mem_alloc))))
+    if (NULL==(heap->chunk = H5FL_BLK_CALLOC(heap_chunk,(sizeof_hdr + heap->heap_alloc))))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    if (heap->disk_alloc &&
-            H5F_block_read(f, H5FD_MEM_LHEAP, heap->addr, heap->disk_alloc, dxpl_id, heap->chunk + sizeof_hdr) < 0)
+    if (heap->heap_alloc &&
+            H5F_block_read(f, H5FD_MEM_LHEAP, heap->addr, heap->heap_alloc, dxpl_id, heap->chunk + sizeof_hdr) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unable to read heap data");
 
     /* Build free list */
     while (H5HL_FREE_NULL != free_block) {
-	if (free_block >= heap->disk_alloc)
+	if (free_block >= heap->heap_alloc)
 	    HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap free list");
 	if (NULL==(fl = H5FL_MALLOC(H5HL_free_t)))
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
@@ -287,7 +285,7 @@ H5HL_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
 	H5F_DECODE_LENGTH(f, p, free_block);
 	H5F_DECODE_LENGTH(f, p, fl->size);
 
-	if (fl->offset + fl->size > heap->disk_alloc)
+	if (fl->offset + fl->size > heap->heap_alloc)
 	    HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap free list");
     }
 
@@ -324,7 +322,7 @@ done:
  *		
  *		It used to be called during cache eviction, where it 
  *		attempted to size the disk space allocation for the 
- *		actuall size of the heap.  However, this causes problems
+ *		actual size of the heap.  However, this causes problems
  *		in the parallel case, as the reuslting disk allocations
  *		may not be synchronized.
  *
@@ -338,15 +336,15 @@ done:
 static herr_t
 H5HL_minimize_heap_space(H5F_t *f, hid_t dxpl_id, H5HL_t *heap)
 {
-    herr_t      ret_value = SUCCEED;
-    size_t      sizeof_hdr;
+    size_t new_heap_size = heap->heap_alloc; /* New size of heap */
+    size_t sizeof_hdr;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5HL_minimize_heap_space, FAIL)
 
     /* check args */
     HDassert( f );
     HDassert( heap );
-    HDassert( heap->disk_alloc == heap->mem_alloc );
 
     sizeof_hdr = H5HL_SIZEOF_HDR(f);    /* cache H5HL header size for file */
 
@@ -355,14 +353,14 @@ H5HL_minimize_heap_space(H5F_t *f, hid_t dxpl_id, H5HL_t *heap)
      * eliminating free blocks at the tail of the buffer before flushing the
      * buffer out.
      */
-    if (heap->freelist) {
+    if(heap->freelist) {
         H5HL_free_t    *tmp_fl;
         H5HL_free_t    *last_fl = NULL;
 
         /* Search for a free block at the end of the buffer */
         for (tmp_fl = heap->freelist; tmp_fl; tmp_fl = tmp_fl->next)
             /* Check if the end of this free block is at the end of the buffer */
-            if (tmp_fl->offset + tmp_fl->size == heap->mem_alloc) {
+            if (tmp_fl->offset + tmp_fl->size == heap->heap_alloc) {
                 last_fl = tmp_fl;
                 break;
             }
@@ -371,98 +369,90 @@ H5HL_minimize_heap_space(H5F_t *f, hid_t dxpl_id, H5HL_t *heap)
          * Found free block at the end of the buffer, decide what to do
          * about it
          */
-        if (last_fl) {
-            size_t  new_mem_size = heap->mem_alloc; /* New size of memory buffer */
-
+        if(last_fl) {
             /*
              * If the last free block's size is more than half the memory
              * buffer size (and the memory buffer is larger than the
              * minimum size), reduce or eliminate it.
              */
-            if (last_fl->size >= (heap->mem_alloc / 2) && heap->mem_alloc > H5HL_MIN_HEAP) {
+            if(last_fl->size >= (heap->heap_alloc / 2) && heap->heap_alloc > H5HL_MIN_HEAP) {
                 /*
                  * Reduce size of buffer until it's too small or would
                  * eliminate the free block
                  */
-                while (new_mem_size > H5HL_MIN_HEAP &&
-                        new_mem_size >= (last_fl->offset + H5HL_SIZEOF_FREE(f)))
-                    new_mem_size /= 2;
+                while(new_heap_size > H5HL_MIN_HEAP &&
+                        new_heap_size >= (last_fl->offset + H5HL_SIZEOF_FREE(f)))
+                    new_heap_size /= 2;
 
                 /*
                  * Check if reducing the memory buffer size would
-                 * eliminate the free list
+                 * eliminate the free block
                  */
-                if (new_mem_size < (last_fl->offset + H5HL_SIZEOF_FREE(f))) {
+                if(new_heap_size < (last_fl->offset + H5HL_SIZEOF_FREE(f))) {
                     /* Check if this is the only block on the free list */
-                    if (last_fl->prev == NULL && last_fl->next == NULL) {
+                    if(last_fl->prev == NULL && last_fl->next == NULL) {
                         /* Double the new memory size */
-                        new_mem_size *= 2;
+                        new_heap_size *= 2;
 
                         /* Truncate the free block */
-                        last_fl->size = H5HL_ALIGN(new_mem_size - last_fl->offset);
-                        new_mem_size = last_fl->offset + last_fl->size;
+                        last_fl->size = H5HL_ALIGN(new_heap_size - last_fl->offset);
+                        new_heap_size = last_fl->offset + last_fl->size;
                         assert(last_fl->size >= H5HL_SIZEOF_FREE(f));
                     } else {
                         /*
                          * Set the size of the memory buffer to the start
                          * of the free list
                          */
-                        new_mem_size = last_fl->offset;
+                        new_heap_size = last_fl->offset;
 
                         /* Eliminate the free block from the list */
                         last_fl = H5HL_remove_free(heap, last_fl);
-                    }
+                    } /* end else */
                 } else {
                     /* Truncate the free block */
-                    last_fl->size = H5HL_ALIGN(new_mem_size - last_fl->offset);
-                    new_mem_size = last_fl->offset + last_fl->size;
+                    last_fl->size = H5HL_ALIGN(new_heap_size - last_fl->offset);
+                    new_heap_size = last_fl->offset + last_fl->size;
                     assert(last_fl->size >= H5HL_SIZEOF_FREE(f));
                     assert(last_fl->size == H5HL_ALIGN(last_fl->size));
-                }
-
-                /* Resize the memory buffer and reserved space in file */
-                if (new_mem_size != heap->mem_alloc) {
-
-                    heap->mem_alloc = new_mem_size;
-                    heap->chunk = H5FL_BLK_REALLOC(heap_chunk, heap->chunk, (sizeof_hdr + new_mem_size));
-
-                    if (!heap->chunk)
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-                }
-            }
-        }
-    }
+                } /* end else */
+            } /* end if */
+        } /* end if */
+    } /* end if */
 
     /*
      * If the heap grew smaller than disk storage then move the
      * data segment of the heap to another contiguous block of disk
      * storage.
      */
-    if (heap->mem_alloc != heap->disk_alloc) {
-        haddr_t old_addr = heap->addr, new_addr;
+    if(new_heap_size != heap->heap_alloc) {
+        haddr_t old_addr = heap->addr,
+            new_addr;
 
-	HDassert( heap->mem_alloc < heap->disk_alloc );
+	HDassert(new_heap_size < heap->heap_alloc);
+
+        /* Resize the memory buffer */
+        heap->chunk = H5FL_BLK_REALLOC(heap_chunk, heap->chunk, (sizeof_hdr + new_heap_size));
+        if(!heap->chunk)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
         /* Release old space on disk */
-        H5_CHECK_OVERFLOW(heap->disk_alloc, size_t, hsize_t);
-        H5MF_xfree(f, H5FD_MEM_LHEAP, dxpl_id, old_addr, (hsize_t)heap->disk_alloc);
+        /* (Should be safe to free old heap space first, since it's shrinking -QAK) */
+        H5_CHECK_OVERFLOW(heap->heap_alloc, size_t, hsize_t);
+        H5MF_xfree(f, H5FD_MEM_LHEAP, dxpl_id, old_addr, (hsize_t)heap->heap_alloc);
         H5E_clear_stack(NULL);    /* don't really care if the free failed */
 
         /* Allocate new space on disk */
-        H5_CHECK_OVERFLOW(heap->mem_alloc, size_t, hsize_t);
-
-        if (HADDR_UNDEF == (new_addr = H5MF_alloc(f, H5FD_MEM_LHEAP, dxpl_id, (hsize_t)heap->mem_alloc)))
+        H5_CHECK_OVERFLOW(new_heap_size, size_t, hsize_t);
+        if(HADDR_UNDEF == (new_addr = H5MF_alloc(f, H5FD_MEM_LHEAP, dxpl_id, (hsize_t)new_heap_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate file space for heap")
 
+        /* Update heap info*/
         heap->addr = new_addr;
-
-        /* Set new size of block on disk */
-        heap->disk_alloc = heap->mem_alloc;
-    }
+        heap->heap_alloc = new_heap_size;
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5HL_minimize_heap_space() */
 
 
@@ -506,7 +496,7 @@ H5HL_serialize(H5F_t *f, H5HL_t *heap, uint8_t *buf)
     *p++ = 0;	/*reserved*/
     *p++ = 0;	/*reserved*/
     *p++ = 0;	/*reserved*/
-    H5F_ENCODE_LENGTH(f, p, heap->mem_alloc);
+    H5F_ENCODE_LENGTH(f, p, heap->heap_alloc);
     H5F_ENCODE_LENGTH(f, p, fl ? fl->offset : H5HL_FREE_NULL);
     H5F_addr_encode(f, &p, heap->addr);
 
@@ -573,7 +563,6 @@ H5HL_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HL_t *heap)
     HDassert( f );
     HDassert( H5F_addr_defined(addr) );
     HDassert( heap );
-    HDassert( heap->disk_alloc == heap->mem_alloc );
 
     if (heap->cache_info.is_dirty) {
         haddr_t hdr_end_addr;
@@ -588,14 +577,14 @@ H5HL_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HL_t *heap)
 
 	if (H5F_addr_eq(heap->addr, hdr_end_addr)) {
 	    /* The header and data are contiguous */
-	    if (H5F_block_write(f, H5FD_MEM_LHEAP, addr, (sizeof_hdr + heap->disk_alloc),
+	    if (H5F_block_write(f, H5FD_MEM_LHEAP, addr, (sizeof_hdr + heap->heap_alloc),
 				dxpl_id, heap->chunk) < 0)
 		HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "unable to write heap header and data to file")
 	} else {
 	    if (H5F_block_write(f, H5FD_MEM_LHEAP, addr, sizeof_hdr, dxpl_id, heap->chunk) < 0)
 		HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "unable to write heap header to file")
 
-	    if (H5F_block_write(f, H5FD_MEM_LHEAP, heap->addr, heap->disk_alloc,
+	    if (H5F_block_write(f, H5FD_MEM_LHEAP, heap->addr, heap->heap_alloc,
 				dxpl_id, heap->chunk + sizeof_hdr) < 0)
 		HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "unable to write heap data to file")
 	}
@@ -717,7 +706,7 @@ H5HL_compute_size(const H5F_t *f, const H5HL_t *heap, size_t *size_ptr)
     HDassert(heap);
     HDassert(size_ptr);
 
-    *size_ptr = H5HL_SIZEOF_HDR(f) + heap->disk_alloc;
+    *size_ptr = H5HL_SIZEOF_HDR(f) + heap->heap_alloc;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HL_compute_size() */
@@ -766,8 +755,8 @@ H5HL_read(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size, voi
     if (NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load heap");
 
-    assert(offset < heap->mem_alloc);
-    assert(offset + size <= heap->mem_alloc);
+    assert(offset < heap->heap_alloc);
+    assert(offset + size <= heap->heap_alloc);
 
     if (!buf && NULL==(buf = H5MM_malloc(size)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
@@ -864,7 +853,7 @@ H5HL_offset_into(H5F_t *f, const H5HL_t *heap, size_t offset)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_offset_into)
     assert(f);
     assert(heap);
-    assert(offset < heap->mem_alloc);
+    assert(offset < heap->heap_alloc);
     FUNC_LEAVE_NOAPI(heap->chunk + H5HL_SIZEOF_HDR(f) + offset)
 }
 
@@ -976,12 +965,9 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *
 {
     H5HL_t	*heap = NULL;
     unsigned	heap_flags = H5AC__NO_FLAGS_SET;
-    H5HL_free_t	*fl = NULL, *max_fl = NULL;
-    htri_t	tri_result;
-    herr_t      result;
+    H5HL_free_t	*fl = NULL, *last_fl = NULL;
     size_t	offset = 0;
-    size_t	need_size, old_size, need_more;
-    size_t	new_disk_alloc;
+    size_t	need_size;
     hbool_t	found;
     size_t      sizeof_hdr;     /* Cache H5HL header size for file */
     size_t	ret_value;      /* Return value */
@@ -989,10 +975,10 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *
     FUNC_ENTER_NOAPI(H5HL_insert, (size_t)(-1));
 
     /* check arguments */
-    assert(f);
-    assert(H5F_addr_defined(addr));
-    assert(buf_size > 0);
-    assert(buf);
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(buf_size > 0);
+    HDassert(buf);
 
     if (0==(f->intent & H5F_ACC_RDWR))
 	HGOTO_ERROR (H5E_HEAP, H5E_WRITEERROR, (size_t)(-1), "no write intent on file");
@@ -1016,28 +1002,28 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *
      * Look for a free slot large enough for this object and which would
      * leave zero or at least H5G_SIZEOF_FREE bytes left over.
      */
-    for (fl=heap->freelist, found=FALSE; fl; fl=fl->next) {
-	if (fl->size > need_size &&
-	    fl->size - need_size >= H5HL_SIZEOF_FREE(f)) {
-	    /* a bigger free block was found */
+    for(fl = heap->freelist, found = FALSE; fl; fl = fl->next) {
+	if(fl->size > need_size &&
+                fl->size - need_size >= H5HL_SIZEOF_FREE(f)) {
+	    /* a big enough free block was found */
 	    offset = fl->offset;
 	    fl->offset += need_size;
 	    fl->size -= need_size;
-	    assert (fl->offset==H5HL_ALIGN (fl->offset));
-	    assert (fl->size==H5HL_ALIGN (fl->size));
+	    HDassert(fl->offset == H5HL_ALIGN(fl->offset));
+	    HDassert(fl->size == H5HL_ALIGN(fl->size));
 	    found = TRUE;
 	    break;
-	} else if (fl->size == need_size) {
+	} else if(fl->size == need_size) {
 	    /* free block of exact size found */
 	    offset = fl->offset;
 	    fl = H5HL_remove_free(heap, fl);
 	    found = TRUE;
 	    break;
-	} else if (!max_fl || max_fl->offset < fl->offset) {
-	    /* use worst fit */
-	    max_fl = fl;
+	} else if(!last_fl || last_fl->offset < fl->offset) {
+	    /* track free space that's closest to end of heap */
+	    last_fl = fl;
 	}
-    }
+    } /* end for */
 
     /*
      * If no free chunk was large enough, then allocate more space and
@@ -1045,34 +1031,41 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *
      * can extend that free chunk.  Otherwise we'll have to make another
      * free chunk.  If the heap must expand, we double its size.
      */
-    if (found==FALSE) {
-	need_more = MAX3(need_size, heap->mem_alloc, H5HL_SIZEOF_FREE(f));
+    if(found == FALSE) {
+        size_t	need_more;              /* How much more space we need */
+        size_t	new_heap_alloc;         /* Final size of space allocated for heap */
+        htri_t	can_extend;             /* Whether the local heap's data segment on disk can be extended */
 
-	new_disk_alloc = heap->disk_alloc + need_more;
-	HDassert( heap->disk_alloc < new_disk_alloc );
-	H5_CHECK_OVERFLOW(heap->disk_alloc, size_t, hsize_t);
-	H5_CHECK_OVERFLOW(new_disk_alloc, size_t, hsize_t);
+        /* At least double the heap's size, making certain there's enough room
+         * for the new object */
+	need_more = MAX(need_size, heap->heap_alloc);
+
+        /* If there is no last free block or it's not at the end of the heap,
+         * and the amount of space to allocate is not big enough to include at
+         * least the new object and a free-list info, trim down the amount of
+         * space requested to just the amount of space needed.  (Generally
+         * speaking, this only occurs when the heap is small -QAK)
+         */
+	if(!(last_fl && last_fl->offset + last_fl->size == heap->heap_alloc)
+                && (need_more < (need_size + H5HL_SIZEOF_FREE(f))))
+            need_more = need_size;
+
+	new_heap_alloc = heap->heap_alloc + need_more;
+	HDassert(heap->heap_alloc < new_heap_alloc);
+	H5_CHECK_OVERFLOW(heap->heap_alloc, size_t, hsize_t);
+	H5_CHECK_OVERFLOW(new_heap_alloc, size_t, hsize_t);
+
+        /* Check if current heap is extendible */
+	can_extend = H5MF_can_extend(f, H5FD_MEM_LHEAP, heap->addr, (hsize_t)(heap->heap_alloc), (hsize_t)need_more);
+        if(can_extend < 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, (size_t)(-1), "unable to check whether heap can be extended")
 
 	/* extend the current heap if we can... */
-	tri_result = H5MF_can_extend(f, H5FD_MEM_LHEAP, heap->addr,
-                                     (hsize_t)(heap->disk_alloc),
-                                     (hsize_t)need_more);
-	if ( tri_result == TRUE ) {
-
-            result = H5MF_extend(f, H5FD_MEM_LHEAP, heap->addr,
-                                     (hsize_t)(heap->disk_alloc),
-                                     (hsize_t)need_more);
-            if ( result < 0 ) {
-
-		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, (size_t)(-1), \
-                            "can't extend heap on disk");
-	    }
-
-		heap->disk_alloc = new_disk_alloc;
-
-	} else { /* ...if we can't, allocate a new chunk & release the old */
-
-            haddr_t old_addr = heap->addr;
+	if(can_extend == TRUE) {
+            if(H5MF_extend(f, H5FD_MEM_LHEAP, heap->addr, (hsize_t)(heap->heap_alloc), (hsize_t)need_more) < 0)
+		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, (size_t)(-1), "can't extend heap on disk")
+	} /* end if */
+        else { /* ...if we can't, allocate a new chunk & release the old */
 	    haddr_t new_addr;
 
 	    /* The new allocation may fail -- to avoid the possiblity of 
@@ -1081,54 +1074,50 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *
 	     */
 
 	    /* allocate new disk space for the heap */
-	    if ( (new_addr = H5MF_alloc(f, H5FD_MEM_LHEAP, dxpl_id, 
-                                    (hsize_t)new_disk_alloc)) == HADDR_UNDEF ) {
-
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, (size_t)(-1), \
-                            "unable to allocate file space for heap")
-	    }
+	    if((new_addr = H5MF_alloc(f, H5FD_MEM_LHEAP, dxpl_id, (hsize_t)new_heap_alloc)) == HADDR_UNDEF)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, (size_t)(-1), "unable to allocate file space for heap")
 
             /* Release old space on disk */
-            H5MF_xfree(f, H5FD_MEM_LHEAP, dxpl_id, old_addr, 
-                       (hsize_t)heap->disk_alloc);
+            H5MF_xfree(f, H5FD_MEM_LHEAP, dxpl_id, heap->addr, (hsize_t)heap->heap_alloc);
             H5E_clear_stack(NULL);    /* don't really care if the free failed */
 
 	    heap->addr = new_addr;
-	    heap->disk_alloc = new_disk_alloc;
-	}
+	} /* end else */
 
-	if (max_fl && max_fl->offset + max_fl->size == heap->mem_alloc) {
+        /* If the last free list in the heap is at the end of the heap, extend it */
+	if(last_fl && last_fl->offset + last_fl->size == heap->heap_alloc) {
 	    /*
-	     * Increase the size of the maximum free block.
+	     * Increase the size of the last free block.
 	     */
-	    offset = max_fl->offset;
-	    max_fl->offset += need_size;
-	    max_fl->size += need_more - need_size;
-	    assert (max_fl->offset==H5HL_ALIGN (max_fl->offset));
-	    assert (max_fl->size==H5HL_ALIGN (max_fl->size));
+	    offset = last_fl->offset;
+	    last_fl->offset += need_size;
+	    last_fl->size += need_more - need_size;
+	    HDassert(last_fl->offset == H5HL_ALIGN(last_fl->offset));
+	    HDassert(last_fl->size == H5HL_ALIGN(last_fl->size));
 
-	    if (max_fl->size < H5HL_SIZEOF_FREE(f)) {
+	    if (last_fl->size < H5HL_SIZEOF_FREE(f)) {
 #ifdef H5HL_DEBUG
-		if (H5DEBUG(HL) && max_fl->size) {
+		if (H5DEBUG(HL) && last_fl->size) {
 		    fprintf(H5DEBUG(HL), "H5HL: lost %lu bytes at line %d\n",
-			    (unsigned long)(max_fl->size), __LINE__);
+			    (unsigned long)(last_fl->size), __LINE__);
 		}
 #endif
-		max_fl = H5HL_remove_free(heap, max_fl);
+		last_fl = H5HL_remove_free(heap, last_fl);
 	    }
-	} else {
+	} /* end if */
+        else {
 	    /*
 	     * Create a new free list element large enough that we can
 	     * take some space out of it right away.
 	     */
-	    offset = heap->mem_alloc;
-	    if (need_more - need_size >= H5HL_SIZEOF_FREE(f)) {
-		if (NULL==(fl = H5FL_MALLOC(H5HL_free_t)))
-		    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, (size_t)(-1), "memory allocation failed");
-		fl->offset = heap->mem_alloc + need_size;
+	    offset = heap->heap_alloc;
+	    if(need_more - need_size >= H5HL_SIZEOF_FREE(f)) {
+		if(NULL == (fl = H5FL_MALLOC(H5HL_free_t)))
+		    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, (size_t)(-1), "memory allocation failed")
+		fl->offset = heap->heap_alloc + need_size;
 		fl->size = need_more - need_size;
-		assert (fl->offset==H5HL_ALIGN (fl->offset));
-		assert (fl->size==H5HL_ALIGN (fl->size));
+		HDassert(fl->offset == H5HL_ALIGN(fl->offset));
+		HDassert(fl->size == H5HL_ALIGN(fl->size));
 		fl->prev = NULL;
 		fl->next = heap->freelist;
 		if (heap->freelist) heap->freelist->prev = fl;
@@ -1140,40 +1129,39 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *
 			(unsigned long)(need_more - need_size), __LINE__);
 #endif
 	    }
-	}
+	} /* end else */
 
 #ifdef H5HL_DEBUG
 	if (H5DEBUG(HL)) {
 	    fprintf(H5DEBUG(HL),
 		    "H5HL: resize mem buf from %lu to %lu bytes\n",
-		    (unsigned long)(heap->mem_alloc),
-		    (unsigned long)(heap->mem_alloc + need_more));
+		    (unsigned long)(heap->heap_alloc),
+		    (unsigned long)(heap->heap_alloc + need_more));
 	}
 #endif
-	old_size = heap->mem_alloc;
-	heap->mem_alloc += need_more;
-	heap->chunk = H5FL_BLK_REALLOC(heap_chunk,heap->chunk,
-				   (sizeof_hdr + heap->mem_alloc));
-	if (NULL==heap->chunk)
-	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, (size_t)(-1), "memory allocation failed");
+        heap->heap_alloc = new_heap_alloc;
+	heap->chunk = H5FL_BLK_REALLOC(heap_chunk, heap->chunk, (sizeof_hdr + heap->heap_alloc));
+	if(NULL == heap->chunk)
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, (size_t)(-1), "memory allocation failed")
 
-	/* clear new section so junk doesn't appear in the file */
-	HDmemset(heap->chunk + sizeof_hdr + old_size, 0, need_more);
-    }
+	/* Clear new section so junk doesn't appear in the file */
+        /* (Avoid clearing section which will be overwritten with newly inserted data) */
+	HDmemset(heap->chunk + sizeof_hdr + offset + buf_size, 0, (new_heap_alloc - (offset + buf_size)));
+    } /* end if */
+
     /*
      * Copy the data into the heap
      */
     HDmemcpy(heap->chunk + sizeof_hdr + offset, buf, buf_size);
 
     /* Set return value */
-    ret_value=offset;
+    ret_value = offset;
 
 done:
-    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, heap_flags) != SUCCEED)
-        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, (size_t)(-1), "unable to release object header");
+    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, heap_flags) != SUCCEED)
+        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, (size_t)(-1), "unable to release object header")
 
-    FUNC_LEAVE_NOAPI(ret_value);
-
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5HL_insert() */
 
 #ifdef NOT_YET
@@ -1227,8 +1215,8 @@ H5HL_write(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size, co
     if (NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to load heap");
 
-    assert(offset < heap->mem_alloc);
-    assert(offset + size <= heap->mem_alloc);
+    assert(offset < heap->heap_alloc);
+    assert(offset + size <= heap->heap_alloc);
 
     heap_flags |= H5AC__DIRTIED_FLAG;
     HDmemcpy(heap->chunk + H5HL_SIZEOF_HDR(f) + offset, buf, size);
@@ -1305,9 +1293,8 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size)
     if (NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to load heap");
 
-    HDassert( offset < heap->mem_alloc );
-    HDassert( offset + size <= heap->mem_alloc );
-    HDassert( heap->disk_alloc == heap->mem_alloc );
+    HDassert( offset < heap->heap_alloc );
+    HDassert( offset + size <= heap->heap_alloc );
 
     fl = heap->freelist;
     heap_flags |= H5AC__DIRTIED_FLAG;
@@ -1331,28 +1318,19 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size)
 		    assert (fl->offset==H5HL_ALIGN (fl->offset));
 		    assert (fl->size==H5HL_ALIGN (fl->size));
 		    fl2 = H5HL_remove_free(heap, fl2);
-	            if ( ( (fl->offset + fl->size) == heap->mem_alloc ) &&
-                         ( (2 * fl->size) > heap->mem_alloc ) ) {
-
-                        if ( H5HL_minimize_heap_space(f, dxpl_id, heap) != 
-                             SUCCEED ) {
-
-	                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
-                                        "heap size minimization failed");
-                        }
+	            if ( ( (fl->offset + fl->size) == heap->heap_alloc ) &&
+                             ( (2 * fl->size) > heap->heap_alloc ) ) {
+                        if ( H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
+	                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "heap size minimization failed")
                     }
 		    HGOTO_DONE(SUCCEED);
 		}
 		fl2 = fl2->next;
 	    }
-	    if ( ( (fl->offset + fl->size) == heap->mem_alloc ) &&
-                 ( (2 * fl->size) > heap->mem_alloc ) ) {
-
-                if ( H5HL_minimize_heap_space(f, dxpl_id, heap) != SUCCEED ) {
-
-	            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
-                                "heap size minimization failed");
-                }
+	    if ( ( (fl->offset + fl->size) == heap->heap_alloc ) &&
+                     ( (2 * fl->size) > heap->heap_alloc ) ) {
+                if ( H5HL_minimize_heap_space(f, dxpl_id, heap) < 0 )
+	            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "heap size minimization failed")
             }
 	    HGOTO_DONE(SUCCEED);
 
@@ -1365,28 +1343,19 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size)
 		    fl->size += fl2->size;
 		    assert (fl->size==H5HL_ALIGN (fl->size));
 		    fl2 = H5HL_remove_free(heap, fl2);
-	            if ( ( (fl->offset + fl->size) == heap->mem_alloc ) &&
-                         ( (2 * fl->size) > heap->mem_alloc ) ) {
-
-                        if ( H5HL_minimize_heap_space(f, dxpl_id, heap) != 
-                             SUCCEED ) {
-
-	                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
-                                        "heap size minimization failed");
-                        }
+	            if ( ( (fl->offset + fl->size) == heap->heap_alloc ) &&
+                            ( (2 * fl->size) > heap->heap_alloc ) ) {
+                        if ( H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
+	                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "heap size minimization failed")
                     }
 		    HGOTO_DONE(SUCCEED);
 		}
 		fl2 = fl2->next;
 	    }
-	    if ( ( (fl->offset + fl->size) == heap->mem_alloc ) &&
-                 ( (2 * fl->size) > heap->mem_alloc ) ) {
-
-                if ( H5HL_minimize_heap_space(f, dxpl_id, heap) != SUCCEED ) {
-
-	            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
-                                "heap size minimization failed");
-                }
+	    if ( ( (fl->offset + fl->size) == heap->heap_alloc ) &&
+                    ( (2 * fl->size) > heap->heap_alloc ) ) {
+                if ( H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
+	            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "heap size minimization failed")
             }
 	    HGOTO_DONE(SUCCEED);
 	}
@@ -1407,6 +1376,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size)
 #endif
 	HGOTO_DONE(SUCCEED);
     }
+
     /*
      * Add an entry to the free list.
      */
@@ -1422,14 +1392,10 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size)
         heap->freelist->prev = fl;
     heap->freelist = fl;
 
-    if ( ( (fl->offset + fl->size) == heap->mem_alloc ) &&
-         ( (2 * fl->size) > heap->mem_alloc ) ) {
-
-        if ( H5HL_minimize_heap_space(f, dxpl_id, heap) != SUCCEED ) {
-
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
-                        "heap size minimization failed");
-        }
+    if ( ( (fl->offset + fl->size) == heap->heap_alloc ) &&
+            ( (2 * fl->size) > heap->heap_alloc ) ) {
+        if ( H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "heap size minimization failed")
     }
 
 done:
@@ -1488,8 +1454,8 @@ H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
     assert(!H5F_addr_overflow(addr,sizeof_hdr));
     if(H5F_addr_eq(heap->addr,addr+sizeof_hdr)) {
         /* Free the contiguous local heap in one call */
-        H5_CHECK_OVERFLOW(sizeof_hdr+heap->disk_alloc,size_t,hsize_t);
-        if (H5MF_xfree(f, H5FD_MEM_LHEAP, dxpl_id, addr, (hsize_t)(sizeof_hdr+heap->disk_alloc))<0)
+        H5_CHECK_OVERFLOW(sizeof_hdr+heap->heap_alloc,size_t,hsize_t);
+        if (H5MF_xfree(f, H5FD_MEM_LHEAP, dxpl_id, addr, (hsize_t)(sizeof_hdr+heap->heap_alloc))<0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free contiguous local heap");
     } /* end if */
     else {
@@ -1499,8 +1465,8 @@ H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free local heap header");
 
         /* Free the local heap's data */
-        H5_CHECK_OVERFLOW(heap->disk_alloc,size_t,hsize_t);
-        if (H5MF_xfree(f, H5FD_MEM_LHEAP, dxpl_id, heap->addr, (hsize_t)heap->disk_alloc)<0)
+        H5_CHECK_OVERFLOW(heap->heap_alloc,size_t,hsize_t);
+        if (H5MF_xfree(f, H5FD_MEM_LHEAP, dxpl_id, heap->addr, (hsize_t)heap->heap_alloc)<0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free local heap data");
     } /* end else */
 
@@ -1517,4 +1483,45 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5HL_delete() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HL_get_size
+ *
+ * Purpose:	Retrieves the current size of a heap
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Nov  7 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HL_get_size(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t *size)
+{
+    H5HL_t	*heap = NULL;           /* Heap to query */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5HL_get_size, FAIL)
+
+    /* check arguments */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(size);
+
+    /* Get heap pointer */
+    if(NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap")
+
+    /* Set the size to return */
+    *size = heap->heap_alloc;
+
+done:
+    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release local heap")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HL_get_size() */
 

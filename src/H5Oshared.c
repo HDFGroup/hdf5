@@ -36,7 +36,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 
-static void *H5O_shared_decode (H5F_t*, hid_t dxpl_id, const uint8_t*, H5O_shared_t *sh);
+static void *H5O_shared_decode (H5F_t*, hid_t dxpl_id, const uint8_t*);
 static herr_t H5O_shared_encode (H5F_t*, uint8_t*, const void*);
 static void *H5O_shared_copy(const void *_mesg, void *_dest, unsigned update_flags);
 static size_t H5O_shared_size (const H5F_t*, const void *_mesg);
@@ -99,39 +99,19 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, H5O_shared_t *shared, const H5O_class_t
 {
     void *ret_value = NULL;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_read);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_read)
 
     /* check args */
-    assert(f);
-    assert(shared);
-    assert(type);
+    HDassert(f);
+    HDassert(shared);
+    HDassert(type);
 
-    /* Get the shared message */
-    if (shared->in_gh) {
-        void *tmp_buf, *tmp_mesg;
-
-        if (NULL==(tmp_buf = H5HG_read (f, dxpl_id, &(shared->u.gh), NULL)))
-            HGOTO_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL, "unable to read shared message from global heap");
-        tmp_mesg = (type->decode)(f, dxpl_id, tmp_buf, shared);
-        tmp_buf = H5MM_xfree (tmp_buf);
-        if (!tmp_mesg)
-            HGOTO_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL, "unable to decode object header shared message");
-        if (mesg) {
-            HDmemcpy (mesg, tmp_mesg, type->native_size);
-            H5MM_xfree (tmp_mesg);
-        } /* end if */
-        else
-            ret_value = tmp_mesg;
-    } /* end if */
-    else {
-        ret_value = H5O_read_real(&(shared->u.ent), type, 0, mesg, dxpl_id);
-        if (type->set_share &&
-                (type->set_share)(f, ret_value, shared)<0)
-            HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, NULL, "unable to set sharing information");
-    } /* end else */
+    ret_value = H5O_read_real(&(shared->oloc), type, 0, mesg, dxpl_id);
+    if(type->set_share && (type->set_share)(f, ret_value, shared) < 0)
+        HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, NULL, "unable to set sharing information")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_shared_read() */
 
 
@@ -158,35 +138,25 @@ H5O_shared_link_adj(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared, int adj
 {
     int ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_link_adj);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_link_adj)
 
     /* check args */
-    assert(f);
-    assert(shared);
+    HDassert(f);
+    HDassert(shared);
 
-    if (shared->in_gh) {
-        /*
-         * The shared message is stored in the global heap.
-         * Adjust the reference count on the global heap message.
-         */
-        if ((ret_value = H5HG_link (f, dxpl_id, &(shared->u.gh), adjust))<0)
-            HGOTO_ERROR (H5E_OHDR, H5E_LINK, FAIL, "unable to adjust shared object link count");
-    } /* end if */
-    else {
-        /*
-         * The shared message is stored in some other object header.
-         * The other object header must be in the same file as the
-         * new object header. Adjust the reference count on that
-         * object header.
-         */
-        if (shared->u.ent.file->shared != f->shared)
-            HGOTO_ERROR(H5E_OHDR, H5E_LINK, FAIL, "interfile hard links are not allowed");
-        if ((ret_value = H5O_link (&(shared->u.ent), adjust, dxpl_id))<0)
-            HGOTO_ERROR (H5E_OHDR, H5E_LINK, FAIL, "unable to adjust shared object link count");
-    } /* end else */
+    /*
+     * The shared message is stored in some other object header.
+     * The other object header must be in the same file as the
+     * new object header. Adjust the reference count on that
+     * object header.
+     */
+    if(shared->oloc.file->shared != f->shared)
+        HGOTO_ERROR(H5E_OHDR, H5E_LINK, FAIL, "interfile hard links are not allowed")
+    if((ret_value = H5O_link(&(shared->oloc), adjust, dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_LINK, FAIL, "unable to adjust shared object link count")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_shared_link_adj() */
 
 
@@ -208,53 +178,45 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_shared_decode (H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *buf, H5O_shared_t UNUSED *sh)
+H5O_shared_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *buf)
 {
-    H5O_shared_t	*mesg=NULL;
+    H5O_shared_t	*mesg = NULL;
     unsigned		flags, version;
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_decode);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_decode)
 
     /* Check args */
-    assert (f);
-    assert (buf);
-    assert (!sh);
+    HDassert(f);
+    HDassert(buf);
 
     /* Decode */
-    if (NULL==(mesg = H5MM_calloc (sizeof(H5O_shared_t))))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    if(NULL == (mesg = H5MM_calloc (sizeof(H5O_shared_t))))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Version */
     version = *buf++;
-    if (version!=H5O_SHARED_VERSION_1 && version!=H5O_SHARED_VERSION)
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for shared object message");
+    if(version != H5O_SHARED_VERSION_1 && version != H5O_SHARED_VERSION)
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for shared object message")
 
     /* Get the shared information flags */
-    flags = *buf++;
-    mesg->in_gh = (flags & 0x01);
+    flags = *buf++;             /* Unused currently */
 
     /* Skip reserved bytes (for version 1) */
-    if(version==H5O_SHARED_VERSION_1)
+    if(version == H5O_SHARED_VERSION_1)
         buf += 6;
 
     /* Body */
-    if (mesg->in_gh) {
-        H5F_addr_decode (f, &buf, &(mesg->u.gh.addr));
-        INT32DECODE (buf, mesg->u.gh.idx);
-    } /* end if */
+    if(version == H5O_SHARED_VERSION_1)
+        H5G_obj_ent_decode(f, &buf, &(mesg->oloc));
     else {
-        if(version==H5O_SHARED_VERSION_1)
-            H5G_ent_decode (f, &buf, &(mesg->u.ent));
-        else {
-            assert(version==H5O_SHARED_VERSION);
-            H5F_addr_decode (f, &buf, &(mesg->u.ent.header));
-            mesg->u.ent.file=f;
-        } /* end else */
+        HDassert(version == H5O_SHARED_VERSION);
+        H5F_addr_decode(f, &buf, &(mesg->oloc.addr));
+        mesg->oloc.file = f;
     } /* end else */
 
     /* Set return value */
-    ret_value=mesg;
+    ret_value = mesg;
 
 done:
     if(ret_value==NULL) {
@@ -262,8 +224,8 @@ done:
             H5MM_xfree(mesg);
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_shared_decode() */
 
 
 /*-------------------------------------------------------------------------
@@ -286,44 +248,21 @@ static herr_t
 H5O_shared_encode (H5F_t *f, uint8_t *buf/*out*/, const void *_mesg)
 {
     const H5O_shared_t	*mesg = (const H5O_shared_t *)_mesg;
-    unsigned		flags;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_shared_encode);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_shared_encode)
 
     /* Check args */
-    assert (f);
-    assert (buf);
-    assert (mesg);
+    HDassert(f);
+    HDassert(buf);
+    HDassert(mesg);
 
     /* Encode */
     *buf++ = H5O_SHARED_VERSION;
-    flags = mesg->in_gh ? 0x01 : 0x00;
-    *buf++ = flags;
-#ifdef OLD_WAY
-    *buf++ = 0; /*reserved 1*/
-    *buf++ = 0; /*reserved 2*/
-    *buf++ = 0; /*reserved 3*/
-    *buf++ = 0; /*reserved 4*/
-    *buf++ = 0; /*reserved 5*/
-    *buf++ = 0; /*reserved 6*/
+    *buf++ = 0; /* No flags currently */
+    H5F_addr_encode(f, &buf, mesg->oloc.addr);
 
-    if (mesg->in_gh) {
-	H5F_addr_encode (f, &buf, mesg->u.gh.addr);
-	INT32ENCODE (buf, mesg->u.gh.idx);
-    } /* end if */
-    else
-	H5G_ent_encode (f, &buf, &(mesg->u.ent));
-#else /* OLD_WAY */
-    if (mesg->in_gh) {
-	H5F_addr_encode (f, &buf, mesg->u.gh.addr);
-	INT32ENCODE (buf, mesg->u.gh.idx);
-    } /* end if */
-    else
-        H5F_addr_encode (f, &buf, mesg->u.ent.header);
-#endif /* OLD_WAY */
-
-    FUNC_LEAVE_NOAPI(SUCCEED);
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_shared_encode() */
 
 
 /*-------------------------------------------------------------------------
@@ -395,9 +334,7 @@ H5O_shared_size (const H5F_t *f, const void *_mesg)
 
     ret_value = 1 +			/*version			*/
             1 +				/*the flags field		*/
-            (shared->in_gh ?
-               (H5F_SIZEOF_ADDR(f)+4) :	/*sharing via global heap	*/
-		H5F_SIZEOF_ADDR(f));	/*sharing by another obj hdr	*/
+            H5F_SIZEOF_ADDR(f);		/*sharing by another obj hdr	*/
 
     FUNC_LEAVE_NOAPI(ret_value);
 }
@@ -508,16 +445,12 @@ H5O_shared_copy_file(H5F_t UNUSED *file_src, void *native_src,
     if(NULL == (shared_dst = H5MM_malloc(sizeof(H5O_shared_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    /* Can't handle copying message in global heap currently */
-    HDassert(!shared_src->in_gh);
-    shared_dst->in_gh = FALSE;
-
     /* Reset group entry for new object */
-    H5G_ent_reset(&(shared_dst->u.ent));
-    shared_dst->u.ent.file = file_dst;
+    H5O_loc_reset(&(shared_dst->oloc));
+    shared_dst->oloc.file = file_dst;
 
     /* Copy the shared object from source to destination */
-    if(H5O_copy_header_map(&(shared_src->u.ent), &(shared_dst->u.ent), dxpl_id, map_list) < 0)
+    if(H5O_copy_header_map(&(shared_src->oloc), &(shared_dst->oloc), dxpl_id, map_list) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy object")
 
     /* Set return value */
@@ -547,37 +480,27 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_shared_debug (H5F_t UNUSED *f, hid_t dxpl_id, const void *_mesg,
+H5O_shared_debug (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
 		  FILE *stream, int indent, int fwidth)
 {
     const H5O_shared_t	*mesg = (const H5O_shared_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_shared_debug);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_shared_debug)
 
     /* Check args */
-    assert (f);
-    assert (mesg);
-    assert (stream);
-    assert (indent>=0);
-    assert (fwidth>=0);
+    HDassert(f);
+    HDassert(mesg);
+    HDassert(stream);
+    HDassert(indent >= 0);
+    HDassert(fwidth >= 0);
 
-    if (mesg->in_gh) {
-	HDfprintf (stream, "%*s%-*s %s\n", indent, "", fwidth,
-		   "Sharing method",
-		   "Global heap");
-	HDfprintf (stream, "%*s%-*s %a\n", indent, "", fwidth,
-		   "Collection address:",
-		   mesg->u.gh.addr);
-	HDfprintf (stream, "%*s%-*s %d\n", indent, "", fwidth,
-		   "Object ID within collection:",
-		   mesg->u.gh.idx);
-    } else {
-	HDfprintf (stream, "%*s%-*s %s\n", indent, "", fwidth,
-		   "Sharing method",
-		   "Obj Hdr");
-	H5G_ent_debug (f, dxpl_id, &(mesg->u.ent), stream, indent, fwidth,
-		       HADDR_UNDEF);
-    }
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+               "Sharing method",
+               "Obj Hdr");
+    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+               "Object address:",
+               mesg->oloc.addr);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_shared_debug() */
+

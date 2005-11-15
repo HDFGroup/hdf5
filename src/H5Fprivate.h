@@ -218,6 +218,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_BASE_ADDR(F)        ((F)->shared->base_addr)
 /* Sieve buffer size for datasets */
 #define H5F_SIEVE_BUF_SIZE(F)   ((F)->shared->sieve_buf_size)
+#define H5F_GC_REF(F)           ((F)->shared->gc_ref)
 #else /* H5F_PACKAGE */
 #define H5F_FCPL(F)             (H5F_get_fcpl(F))
 #define H5F_SIZEOF_ADDR(F)      (H5F_sizeof_addr(F))
@@ -231,6 +232,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_GRP_BTREE_SHARED(F) (H5F_grp_btree_shared(F))
 #define H5F_BASE_ADDR(F)        (H5F_get_base_addr(F))
 #define H5F_SIEVE_BUF_SIZE(F)   (H5F_sieve_buf_size(F))
+#define H5F_GC_REF(F)           (H5F_gc_ref(F))
 #endif /* H5F_PACKAGE */
 
 
@@ -452,8 +454,8 @@ H5_DLL int H5F_mpi_get_size(const H5F_t *f);
 #endif /* H5_HAVE_PARALLEL */
 
 /* Functions than check file mounting information */
-H5_DLL htri_t H5F_is_mount(const H5F_t *file);
-H5_DLL htri_t H5F_has_mount(const H5F_t *file);
+H5_DLL hbool_t H5F_is_mount(const H5F_t *file);
+H5_DLL hbool_t H5F_has_mount(const H5F_t *file);
 
 /* Functions than retrieve values set from the FCPL */
 H5_DLL hid_t H5F_get_fcpl(const H5F_t *f);
@@ -467,6 +469,7 @@ H5_DLL size_t H5F_rdcc_nelmts(const H5F_t *f);
 H5_DLL double H5F_rdcc_w0(const H5F_t *f);
 H5_DLL struct H5RC_t *H5F_grp_btree_shared(const H5F_t *f);
 H5_DLL size_t H5F_sieve_buf_size(const H5F_t *f);
+H5_DLL unsigned H5F_gc_ref(const H5F_t *f);
 
 /* Functions that operate on blocks of bytes wrt super block */
 H5_DLL herr_t H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr,

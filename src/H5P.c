@@ -225,8 +225,18 @@ static herr_t
 H5P_init_interface(void)
 {
     H5P_genclass_t  *root_class;    /* Pointer to root property list class created */
-    H5P_genclass_t  *ocrt_class;    /* Pointer to object (dataset, group, or datatype) creation property list class created */
     H5P_genclass_t  *pclass;        /* Pointer to property list class to create */
+    /* Group creation property class variables.  In sequence, they are,
+     * - Creation property list class to modify
+     * - Default value for "group info"
+     */
+    H5P_genclass_t  *gcrt_class;    /* Pointer to group creation property list class created */
+    H5O_ginfo_t ginfo = H5G_CRT_GROUP_INFO_DEF;
+    /* Object creation property class variables.  In sequence, they are,
+     * - Creation property list class to modify
+     * - Default value for "intermediate group creation"
+     */
+    H5P_genclass_t  *ocrt_class;    /* Pointer to object (dataset, group, or datatype) creation property list class created */
     unsigned    intmd_group = H5G_CRT_INTERMEDIATE_GROUP_DEF;
     size_t      nprops;             /* Number of properties */
     herr_t      ret_value = SUCCEED;
@@ -276,11 +286,48 @@ H5P_init_interface(void)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
     } /* end if */
 
+    /* Register the group creation and group access property classes */
+    /* (Register the group property classes before file property classes, so
+     *  file creation property class can inherit from group creation property
+     *  class, which is used to allow application to control the group creation
+     *  properties of the root group of a file. -QAK)
+     */
+
+    /* Allocate the group creation class */
+    HDassert(H5P_CLS_GROUP_CREATE_g == (-1));
+    if(NULL == (gcrt_class = H5P_create_class(ocrt_class, "group create", 1, NULL, NULL, NULL, NULL, NULL, NULL)))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
+
+    /* Register the group creation class */
+    if((H5P_CLS_GROUP_CREATE_g = H5I_register(H5I_GENPROP_CLS, gcrt_class)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
+
+    /* Get the number of properties in the class */
+    if(H5P_get_nprops_pclass(gcrt_class, &nprops, FALSE) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't query number of properties")
+
+    /* Assume that if there are properties in the class, they are the default ones */
+    if(nprops == 0) {
+        /* Register group info */
+        if(H5P_register(gcrt_class, H5G_CRT_GROUP_INFO_NAME, H5G_CRT_GROUP_INFO_SIZE,
+                 &ginfo, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+    } /* end if */
+
+    /* Allocate the group access class */
+    HDassert(H5P_CLS_GROUP_ACCESS_g == (-1));
+    if(NULL == (pclass = H5P_create_class(root_class, "group access", 1, NULL, NULL, NULL, NULL, NULL, NULL)))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
+
+    /* Register the group access class */
+    if((H5P_CLS_GROUP_ACCESS_g = H5I_register(H5I_GENPROP_CLS, pclass)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
+
     /* Register the file creation and file access property classes */
 
     /* Allocate the file creation class */
     assert(H5P_CLS_FILE_CREATE_g==(-1));
-    if (NULL==(pclass = H5P_create_class (root_class,"file create",1,NULL,NULL,NULL,NULL,NULL,NULL)))
+    if (NULL==(pclass = H5P_create_class (gcrt_class,"file create",1,NULL,NULL,NULL,NULL,NULL,NULL)))
         HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
     /* Register the file creation class */
@@ -325,6 +372,8 @@ H5P_init_interface(void)
     if ((H5P_CLS_DATASET_XFER_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
+    /* Register the mount property classes */
+
     /* Allocate the mount class */
     assert(H5P_CLS_MOUNT_g==(-1));
     if (NULL==(pclass = H5P_create_class (root_class,"file mount",1,NULL,NULL,NULL,NULL,NULL,NULL)))
@@ -334,24 +383,7 @@ H5P_init_interface(void)
     if ((H5P_CLS_MOUNT_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
-
-    /* Allocate the group creation class */
-    assert(H5P_CLS_GROUP_CREATE_g==(-1));
-    if (NULL==(pclass = H5P_create_class (ocrt_class,"group create",1,NULL,NULL,NULL,NULL,NULL,NULL)))
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
-
-    /* Register the group creation class */
-    if ((H5P_CLS_GROUP_CREATE_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
-
-    /* Allocate the group access class */
-    assert(H5P_CLS_GROUP_ACCESS_g==(-1));
-    if (NULL==(pclass = H5P_create_class (root_class,"group access",1,NULL,NULL,NULL,NULL,NULL,NULL)))
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
-
-    /* Register the group access class */
-    if ((H5P_CLS_GROUP_ACCESS_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
+    /* Register the named datatype creation and named datatype access property classes */
 
     /* Allocate the datatype creation class */
     assert(H5P_CLS_DATATYPE_CREATE_g==(-1));

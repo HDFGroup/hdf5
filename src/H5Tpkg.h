@@ -39,6 +39,8 @@
 
 /* Other private headers needed by this file */
 #include "H5Fprivate.h"		/* Files				*/
+#include "H5FLprivate.h"	/* Free Lists				*/
+#include "H5Oprivate.h"		/* Object headers		  	*/
 
 /* Other public headers needed by this file */
 #include "H5Spublic.h"		/* Dataspace functions			*/
@@ -150,6 +152,8 @@
 #if (H5_WANT_DATA_ACCURACY && H5_FP_TO_ULLONG_ACCURATE && H5_FP_TO_ULLONG_RIGHT_MAXIMUM) || \
     (!H5_WANT_DATA_ACCURACY)
 #define H5T_CONV_INTERNAL_FP_ULLONG         1
+#else
+#define H5T_CONV_INTERNAL_FP_ULLONG         0
 #endif
 
 /* Define an internal macro for converting long double to all integers.  SGI compilers give some incorrect
@@ -158,6 +162,8 @@
     H5_FP_TO_ULLONG_ACCURATE && H5_FP_TO_ULLONG_RIGHT_MAXIMUM) || \
     (!H5_WANT_DATA_ACCURACY && H5_LDOUBLE_TO_INTEGER_WORKS)
 #define H5T_CONV_INTERNAL_LDOUBLE_ULLONG         1
+#else
+#define H5T_CONV_INTERNAL_LDOUBLE_ULLONG         0
 #endif
 
 /* Statistics about a conversion function */
@@ -311,8 +317,9 @@ typedef struct H5T_shared_t {
 } H5T_shared_t;
 
 struct H5T_t {
-    H5G_entry_t     ent;    /* entry information if the type is a named type */
     H5T_shared_t   *shared; /* all other information */
+    H5O_loc_t       oloc;   /* object location information if the type is a named type */
+    H5G_name_t      path;   /* group hier. path if the type is a named type */
 };
 
 /* A compound datatype member */
@@ -424,6 +431,10 @@ H5_DLLVAR double H5T_NATIVE_DOUBLE_NEG_INF_g;
 H5_DLLVAR double H5T_NATIVE_LDOUBLE_POS_INF_g;
 H5_DLLVAR double H5T_NATIVE_LDOUBLE_NEG_INF_g;
 #endif
+
+/* Declare extern the free lists for H5T_t's and H5T_shared_t's */
+H5FL_EXTERN(H5T_t);
+H5FL_EXTERN(H5T_shared_t);
 
 /* Common functions */
 H5_DLL H5T_t *H5T_create(H5T_class_t type, size_t size);
@@ -1288,9 +1299,9 @@ H5_DLL void H5T_bit_copy(uint8_t *dst, size_t dst_offset, const uint8_t *src,
 H5_DLL void H5T_bit_shift(uint8_t *buf, ssize_t shift_dist, size_t offset, size_t size);
 H5_DLL void H5T_bit_set(uint8_t *buf, size_t offset, size_t size,
 			 hbool_t value);
-H5_DLL hsize_t H5T_bit_get_d(uint8_t *buf, size_t offset, size_t size);
+H5_DLL uint64_t H5T_bit_get_d(uint8_t *buf, size_t offset, size_t size);
 H5_DLL void H5T_bit_set_d(uint8_t *buf, size_t offset, size_t size,
-			   hsize_t val);
+			   uint64_t val);
 H5_DLL ssize_t H5T_bit_find(uint8_t *buf, size_t offset, size_t size,
 			     H5T_sdir_t direction, hbool_t value);
 H5_DLL htri_t H5T_bit_inc(uint8_t *buf, size_t start, size_t size);

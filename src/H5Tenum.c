@@ -25,14 +25,9 @@
 
 #include "H5private.h"		/*generic functions			  */
 #include "H5Eprivate.h"		/*error handling			  */
-#include "H5FLprivate.h"	/*Free Lists				  */
 #include "H5Iprivate.h"		/*ID functions		   		  */
 #include "H5MMprivate.h"	/*memory management			  */
 #include "H5Tpkg.h"		/*data-type functions			  */
-
-/* Declare extern the free lists for H5T_t's and H5T_shared_t's */
-H5FL_EXTERN(H5T_t);
-H5FL_EXTERN(H5T_shared_t);
 
 /* Static local functions */
 static char *H5T_enum_nameof(const H5T_t *dt, const void *value, char *name/*out*/,

@@ -21,6 +21,7 @@
 #include "H5private.h"		/*generic functions			  */
 #include "H5Eprivate.h"		/*error handling			  */
 #include "H5FLprivate.h"	/*Free Lists	                          */
+#include "H5HGprivate.h"	/* Global Heaps				*/
 #include "H5Iprivate.h"		/*ID functions		   		  */
 #include "H5MMprivate.h"	/*memory management			  */
 #include "H5Pprivate.h"		/* Property Lists			  */
@@ -3555,7 +3556,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     size_t	elmtno;			/*element number		*/
     size_t	half_size;		/*half the type size		*/
     size_t	olap;			/*num overlapping elements	*/
-    ssize_t	bitno;			/*bit number			*/
+    ssize_t	bitno = 0;		/*bit number			*/
     uint8_t	*s, *sp, *d, *dp;	/*source and dest traversal ptrs*/
     uint8_t     *src_rev=NULL;          /*order-reversed source buffer  */
     uint8_t	dbuf[64];		/*temp destination buffer	*/
@@ -4200,7 +4201,8 @@ H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         while (nchars>0 && ' '==s[nchars-1])
                             --nchars;
                         nchars = MIN(dst->shared->size, nchars);
-                        HDmemcpy(d, s, nchars);
+                        if(d != s)
+                            HDmemcpy(d, s, nchars);
                         break;
 
                     case H5T_STR_RESERVED_3:

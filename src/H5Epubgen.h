@@ -143,12 +143,14 @@ H5_DLLVAR hid_t H5E_DUPCLASS_g;      /* Duplicate class name in parent class */
 #define H5E_BADMESG          (H5OPEN H5E_BADMESG_g)
 #define H5E_CANTDELETE       (H5OPEN H5E_CANTDELETE_g)
 #define H5E_BADITER          (H5OPEN H5E_BADITER_g)
+#define H5E_CANTPACK         (H5OPEN H5E_CANTPACK_g)
 H5_DLLVAR hid_t H5E_LINKCOUNT_g;     /* Bad object header link count */
 H5_DLLVAR hid_t H5E_VERSION_g;       /* Wrong version number */
 H5_DLLVAR hid_t H5E_ALIGNMENT_g;     /* Alignment error */
 H5_DLLVAR hid_t H5E_BADMESG_g;       /* Unrecognized message */
 H5_DLLVAR hid_t H5E_CANTDELETE_g;    /* Can't delete message */
 H5_DLLVAR hid_t H5E_BADITER_g;       /* Iteration failed */
+H5_DLLVAR hid_t H5E_CANTPACK_g;      /* Can't pack messages */
 
 /* FPHDF5 errors */
 #define H5E_CANTRECV         (H5OPEN H5E_CANTRECV_g)

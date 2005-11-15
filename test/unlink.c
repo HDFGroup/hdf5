@@ -248,8 +248,6 @@ test_many(hid_t file)
  * Programmer:	Robb Matzke
  *              Friday, September 25, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -260,12 +258,12 @@ test_symlink(hid_t file)
     TESTING("symlink removal");
 
     /* Create a test group and symlink */
-    if ((work=H5Gcreate(file, "/test_symlink", 0))<0) goto error;
-    if (H5Glink(work, H5G_LINK_SOFT, "link_value", "link")<0) goto error;
-    if (H5Gunlink(work, "link")<0) goto error;
+    if ((work=H5Gcreate(file, "/test_symlink", 0))<0) TEST_ERROR;
+    if (H5Glink(work, H5G_LINK_SOFT, "link_value", "link")<0) TEST_ERROR;
+    if (H5Gunlink(work, "link")<0) TEST_ERROR;
 
     /* Cleanup */
-    if (H5Gclose(work)<0) goto error;
+    if (H5Gclose(work)<0) TEST_ERROR;
     PASSED();
     return 0;
 
@@ -528,7 +526,7 @@ test_filespace(void)
     hsize_t     dims[FILESPACE_NDIMS]= {FILESPACE_DIM0, FILESPACE_DIM1, FILESPACE_DIM2};        /* Dataset dimensions */
     hsize_t     chunk_dims[FILESPACE_NDIMS]= {FILESPACE_CHUNK0, FILESPACE_CHUNK1, FILESPACE_CHUNK2};        /* Chunk dimensions */
     hsize_t     attr_dims[FILESPACE_ATTR_NDIMS]= {FILESPACE_ATTR_DIM0, FILESPACE_ATTR_DIM1};        /* Attribute dimensions */
-    int        *data;           /* Pointer to dataset buffer */
+    int        *data = NULL;    /* Pointer to dataset buffer */
     int        *tmp_data;       /* Temporary pointer to dataset buffer */
     off_t       empty_size;     /* Size of an empty file */
     off_t       file_size;      /* Size of each file created */
@@ -927,8 +925,9 @@ test_filespace(void)
     } /* end for */
 
     /* Remove the all the groups */
-    for(u=0; u<UNLINK_NGROUPS; u++) {
-        sprintf(objname,"%s %u",GROUPNAME,u);
+    /* (Remove them in reverse order just to make file size calculation easier -QAK) */
+    for(u=UNLINK_NGROUPS; u>0; u--) {
+        sprintf(objname,"%s %u",GROUPNAME,(u-1));
         if(H5Gunlink (file, objname)<0) TEST_ERROR;
     } /* end for */
 
@@ -1007,9 +1006,10 @@ test_filespace(void)
     } /* end for */
 
     /* Remove complex group hierarchy */
-    for(u=0; u<FILESPACE_TOP_GROUPS; u++) {
+    /* (Remove them in reverse order just to make file size calculation easier -QAK) */
+    for(u=FILESPACE_TOP_GROUPS; u>0; u--) {
         /* Open group */
-        sprintf(objname,"%s %u",GROUPNAME,u);
+        sprintf(objname,"%s %u",GROUPNAME,(u-1));
         if((group = H5Gopen (file, objname))<0) TEST_ERROR;
 
         /* Open nested groups inside top groups */
@@ -1037,7 +1037,7 @@ test_filespace(void)
         if(H5Gclose (group)<0) TEST_ERROR;
 
         /* Remove top group */
-        sprintf(objname,"%s %u",GROUPNAME,u);
+        sprintf(objname,"%s %u",GROUPNAME,(u-1));
         if(H5Gunlink (file, objname)<0) TEST_ERROR;
     } /* end for */
 
@@ -1226,6 +1226,10 @@ test_filespace(void)
     return 0;
 
 error:
+    /* Release dataset buffer */
+    if(data)
+        HDfree(data);
+
     return 1;
 } /* end test_filespace() */
 
@@ -1525,6 +1529,9 @@ test_unlink_rightleaf(hid_t fid)
     for (n = 0; n < ngroups; n++)
         if(H5Gclose(gids[n])<0) TEST_ERROR;
 
+    /* Close root group ID */
+    if(H5Gclose(rootid)<0) TEST_ERROR;
+
     /* Free memory */
     HDfree(gids);
 
@@ -1585,6 +1592,9 @@ test_unlink_rightnode(hid_t fid)
     if(H5Gunlink(fid,"/ZoneB79")<0) TEST_ERROR;
     if(H5Gunlink(fid,"/ZoneB8")<0) TEST_ERROR;
     if(H5Gunlink(fid,"/ZoneB80")<0) TEST_ERROR;
+
+    /* Close root group ID */
+    if(H5Gclose(rootid)<0) TEST_ERROR;
 
     /* Free memory */
     HDfree(gids);
@@ -1789,6 +1799,9 @@ test_unlink_middlenode(hid_t fid)
     if(H5Gunlink(fid,"/ZoneC79")<0) TEST_ERROR;
     if(H5Gunlink(fid,"/ZoneC8")<0) TEST_ERROR;
     if(H5Gunlink(fid,"/ZoneC80")<0) TEST_ERROR;
+
+    /* Close root group ID */
+    if(H5Gclose(rootid)<0) TEST_ERROR;
 
     /* Free memory */
     HDfree(gids);
@@ -2187,6 +2200,7 @@ main(void)
     nerrors += test_unlink_chunked_dataset();
 
     /* Close */
+    if (H5Pclose(fapl2)<0) TEST_ERROR;
     if (H5Fclose(file)<0) TEST_ERROR;
     if (nerrors) {
 	printf("***** %d FAILURE%s! *****\n", nerrors, 1==nerrors?"":"S");

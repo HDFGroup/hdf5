@@ -66,17 +66,10 @@ H5F_init_super_interface(void)
  *              wendling@ncsa.uiuc.edu
  *              Sept 12, 2003
  *
- * Modifications:
- *              Raymond Lu
- *              May 24, 2005
- *              Started to check if driver(only family and multi drivers)
- *              matches driver information saved in the superblock.  Wrong
- *              driver will result in a failure.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent, haddr_t addr, uint8_t *buf, size_t buf_size)
+H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc, haddr_t addr, uint8_t *buf, size_t buf_size)
 {
     haddr_t             stored_eoa;         /*relative end-of-addr in file  */
     haddr_t             eof;                /*end of file address           */
@@ -248,7 +241,7 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent, haddr_t addr
     H5F_addr_decode(f, (const uint8_t **)&p, &shared->freespace_addr/*out*/);
     H5F_addr_decode(f, (const uint8_t **)&p, &stored_eoa/*out*/);
     H5F_addr_decode(f, (const uint8_t **)&p, &shared->driver_addr/*out*/);
-    if (H5G_ent_decode(f, (const uint8_t **)&p, root_ent/*out*/) < 0)
+    if(H5G_obj_ent_decode(f, (const uint8_t **)&p, root_loc->oloc/*out*/) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to read root symbol entry")
 
     /*
@@ -490,8 +483,6 @@ done:
  *              wendling@ncsa.uiuc.edu
  *              Sept 12, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -561,7 +552,7 @@ H5F_write_superblock(H5F_t *f, hid_t dxpl_id, uint8_t *buf)
     H5F_addr_encode(f, &p, f->shared->freespace_addr);
     H5F_addr_encode(f, &p, H5FD_get_eoa(f->shared->lf));
     H5F_addr_encode(f, &p, f->shared->driver_addr);
-    if(H5G_ent_encode(f, &p, H5G_entof(f->shared->root_grp))<0)
+    if(H5G_obj_ent_encode(f, &p, H5G_oloc(f->shared->root_grp))<0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to encode root group information")
 
     H5_ASSIGN_OVERFLOW(superblock_size, p - sbuf, int, size_t);

@@ -19,11 +19,13 @@
  */
 
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
 
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		        */
 #include "H5Fpkg.h"             /* File access				*/
+#include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5Iprivate.h"		/* ID Functions		                */
 #include "H5Pprivate.h"		/* Property lists			*/
 
@@ -132,7 +134,20 @@ H5F_debug(H5F_t *f, hid_t dxpl_id, FILE * stream, int indent, int fwidth)
 	      "Root group symbol table entry:",
 	      f->shared->root_grp ? "" : "(none)");
     if (f->shared->root_grp) {
-	H5G_ent_debug(f, dxpl_id, H5G_entof(f->shared->root_grp), stream,
+        H5O_loc_t *root_oloc;   /* Root object location */
+        H5G_entry_t root_ent;   /* Constructed root symbol table entry */
+
+        /* Reset the root group entry */
+        H5G_ent_reset(&root_ent);
+
+        /* Build up a simulated root group symbol table entry */
+        root_oloc = H5G_oloc(f->shared->root_grp);
+        HDassert(root_oloc);
+        root_ent.type = H5G_NOTHING_CACHED;
+        root_ent.header = root_oloc->addr;
+        root_ent.file = f;
+
+	H5G_ent_debug(f, dxpl_id, &root_ent, stream,
 		      indent+3, MAX(0, fwidth-3), HADDR_UNDEF);
     }
 

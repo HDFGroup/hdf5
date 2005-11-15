@@ -155,13 +155,13 @@ H5D_contig_fill(H5D_t *dset, hid_t dxpl_id)
 
 #ifdef H5_HAVE_PARALLEL
     /* Retrieve MPI parameters */
-    if(IS_H5FD_MPI(dset->ent.file)) {
+    if(IS_H5FD_MPI(dset->oloc.file)) {
         /* Get the MPI communicator */
-        if (MPI_COMM_NULL == (mpi_comm=H5F_mpi_get_comm(dset->ent.file)))
+        if(MPI_COMM_NULL == (mpi_comm = H5F_mpi_get_comm(dset->oloc.file)))
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI communicator")
 
         /* Get the MPI rank */
-        if ((mpi_rank=H5F_mpi_get_rank(dset->ent.file))<0)
+        if((mpi_rank = H5F_mpi_get_rank(dset->oloc.file)) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank")
 
         /* Set the MPI-capable file driver flag */
@@ -421,7 +421,7 @@ H5D_contig_readvv(const H5D_io_info_t *io_info,
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     void *_buf)
 {
-    H5F_t *file=io_info->dset->ent.file;        /* File for dataset */
+    H5F_t *file = io_info->dset->oloc.file;        /* File for dataset */
     H5D_rdcdc_t *dset_contig=&(io_info->dset->shared->cache.contig); /* Cached information about contiguous data */
     const H5D_contig_storage_t *store_contig=&(io_info->store->contig);    /* Contiguous storage info for this I/O operation */
     unsigned char *buf=(unsigned char *)_buf;   /* Pointer to buffer to fill */
@@ -686,7 +686,7 @@ H5D_contig_writevv(const H5D_io_info_t *io_info,
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     const void *_buf)
 {
-    H5F_t *file=io_info->dset->ent.file;        /* File for dataset */
+    H5F_t *file = io_info->dset->oloc.file;        /* File for dataset */
     H5D_rdcdc_t *dset_contig=&(io_info->dset->shared->cache.contig); /* Cached information about contiguous data */
     const H5D_contig_storage_t *store_contig=&(io_info->store->contig);    /* Contiguous storage info for this I/O operation */
     const unsigned char *buf=_buf;      /* Pointer to buffer to fill */
@@ -750,6 +750,10 @@ H5D_contig_writevv(const H5D_io_info_t *io_info,
                     /* Allocate room for the data sieve buffer */
                     if (NULL==(dset_contig->sieve_buf=H5FL_BLK_MALLOC(sieve_buf,dset_contig->sieve_buf_size)))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+#ifdef H5_USING_PURIFY
+if(dset_contig->sieve_size > size)
+    HDmemset(dset_contig->sieve_buf + size, 0, (dset_contig->sieve_size - size));
+#endif /* H5_USING_PURIFY */
 
                     /* Determine the new sieve buffer size & location */
                     dset_contig->sieve_loc=addr;

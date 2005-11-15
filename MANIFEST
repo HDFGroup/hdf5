@@ -493,11 +493,17 @@
 ./src/H5FSprivate.h
 ./src/H5G.c
 ./src/H5Gent.c
+./src/H5Glink.c
+./src/H5Gloc.c
+./src/H5Gname.c
 ./src/H5Gnode.c
+./src/H5Gobj.c
 ./src/H5Gpkg.h
 ./src/H5Gprivate.h
 ./src/H5Gpublic.h
 ./src/H5Gstab.c
+./src/H5Gtest.c
+./src/H5Gtraverse.c
 ./src/H5HG.c
 ./src/H5HGdbg.c
 ./src/H5HGpkg.h
@@ -526,11 +532,15 @@
 ./src/H5O.c
 ./src/H5Oattr.c
 ./src/H5Obogus.c
+./src/H5Ocache.c
 ./src/H5Ocont.c
 ./src/H5Odtype.c
 ./src/H5Oefl.c
 ./src/H5Ofill.c
+./src/H5Oginfo.c
 ./src/H5Olayout.c
+./src/H5Olinfo.c
+./src/H5Olink.c
 ./src/H5Omtime.c
 ./src/H5Oname.c
 ./src/H5Onull.c
@@ -650,8 +660,21 @@
 ./test/fillval.c
 ./test/flush1.c
 ./test/flush2.c
+./test/gen_deflate.c			_DO_NOT_DISTRIBUTE_
+./test/gen_new_array.c			_DO_NOT_DISTRIBUTE_
+./test/gen_new_fill.c			_DO_NOT_DISTRIBUTE_
+./test/gen_new_group.c			_DO_NOT_DISTRIBUTE_
+./test/gen_new_mtime.c			_DO_NOT_DISTRIBUTE_
+./test/gen_new_super.c			_DO_NOT_DISTRIBUTE_
+./test/gen_noencoder.c			_DO_NOT_DISTRIBUTE_
+./test/gen_nullspace.c			_DO_NOT_DISTRIBUTE_
+./test/gen_old_array.c			_DO_NOT_DISTRIBUTE_
+./test/gen_old_group.c			_DO_NOT_DISTRIBUTE_
+./test/gen_old_layout.c			_DO_NOT_DISTRIBUTE_
+./test/gen_old_mtime.c			_DO_NOT_DISTRIBUTE_
 ./test/getname.c
 ./test/gheap.c
+./test/group_old.h5
 ./test/h5test.c
 ./test/h5test.h
 ./test/hyperslab.c
@@ -665,20 +688,10 @@
 ./test/ohdr.c
 ./test/objcopy.c
 ./test/reserved.c
-./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
-./test/gen_deflate.c			_DO_NOT_DISTRIBUTE_
-./test/gen_old_array.c			_DO_NOT_DISTRIBUTE_
-./test/gen_new_array.c			_DO_NOT_DISTRIBUTE_
-./test/gen_new_fill.c			_DO_NOT_DISTRIBUTE_
-./test/gen_nullspace.c			_DO_NOT_DISTRIBUTE_
-./test/gen_old_layout.c			_DO_NOT_DISTRIBUTE_
-./test/gen_old_mtime.c			_DO_NOT_DISTRIBUTE_
-./test/gen_new_mtime.c			_DO_NOT_DISTRIBUTE_
-./test/gen_new_super.c			_DO_NOT_DISTRIBUTE_
-./test/gen_noencoder.c			_DO_NOT_DISTRIBUTE_
 ./test/pool.c
 ./test/set_extent.c
 ./test/sheap.c
+./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
 ./test/stab.c
 ./test/stream_test.c
 ./test/tarray.c

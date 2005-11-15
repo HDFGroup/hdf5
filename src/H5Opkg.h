@@ -23,6 +23,7 @@
 #include "H5Oprivate.h"		/* Object headers		  	*/
 
 /* Other private headers needed by this file */
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5SLprivate.h"	/* Skip lists				*/
 
 /*
@@ -62,7 +63,7 @@ typedef struct H5O_class_t {
     int	id;				 /*message type ID on disk   */
     const char	*name;				 /*for debugging             */
     size_t	native_size;			 /*size of native message    */
-    void	*(*decode)(H5F_t*, hid_t, const uint8_t*, struct H5O_shared_t*);
+    void	*(*decode)(H5F_t*, hid_t, const uint8_t*);
     herr_t	(*encode)(H5F_t*, uint8_t*, const void*);
     void	*(*copy)(const void*, void*, unsigned);    /*copy native value         */
     size_t	(*raw_size)(const H5F_t*, const void*);/*sizeof raw val	     */
@@ -73,7 +74,7 @@ typedef struct H5O_class_t {
     herr_t	(*get_share)(H5F_t*, const void*, struct H5O_shared_t*);    /* Get shared information */
     herr_t	(*set_share)(H5F_t*, void*, const struct H5O_shared_t*);    /* Set shared information */
     void	*(*copy_file)(H5F_t *, void *, H5F_t *, hid_t, H5SL_t *, void *); /*copy native value to file */
-    herr_t	(*post_copy_file)(H5F_t *, const void *, H5G_entry_t *, hid_t, H5SL_t *); /*"post copy" action when copying native value to file */
+    herr_t	(*post_copy_file)(H5F_t *, const void *, H5O_loc_t *, void *, hbool_t *, hid_t, H5SL_t *); /*"post copy" action when copying native value to file */
     herr_t	(*debug)(H5F_t*, hid_t, const void*, FILE*, int, int);
 } H5O_class_t;
 
@@ -107,6 +108,24 @@ typedef struct H5O_t {
     H5O_chunk_t *chunk;			/*array of chunks		     */
 } H5O_t;
 
+/* H5O inherits cache-like properties from H5AC */
+H5_DLLVAR const H5AC_class_t H5AC_OHDR[1];
+
+/* ID to type mapping */
+H5_DLLVAR const H5O_class_t *const message_type_g[19];
+
+/* Declare external the free list for H5O_t's */
+H5FL_EXTERN(H5O_t);
+
+/* Declare external the free list for H5O_mesg_t sequences */
+H5FL_SEQ_EXTERN(H5O_mesg_t);
+
+/* Declare external the free list for H5O_chunk_t sequences */
+H5FL_SEQ_EXTERN(H5O_chunk_t);
+
+/* Declare external the free list for chunk_image blocks */
+H5FL_BLK_EXTERN(chunk_image);
+
 /*
  * Null Message. (0x0000)
  */
@@ -116,6 +135,11 @@ H5_DLLVAR const H5O_class_t H5O_NULL[1];
  * Simple Dataspace Message. (0x0001)
  */
 H5_DLLVAR const H5O_class_t H5O_SDSPACE[1];
+
+/*
+ * Link Information Message. (0x0002)
+ */
+H5_DLLVAR const H5O_class_t H5O_LINFO[1];
 
 /*
  * Datatype Message. (0x0003)
@@ -137,6 +161,12 @@ H5_DLLVAR const H5O_class_t H5O_FILL[1];
 H5_DLLVAR const H5O_class_t H5O_FILL_NEW[1];
 
 /*
+ * Link Message. (0x0006)
+ * 
+ */
+H5_DLLVAR const H5O_class_t H5O_LINK[1];
+
+/*
  * External File List Message. (0x0007)
  */
 H5_DLLVAR const H5O_class_t H5O_EFL[1];
@@ -152,6 +182,11 @@ H5_DLLVAR const H5O_class_t H5O_LAYOUT[1];
  */
 H5_DLLVAR const H5O_class_t H5O_BOGUS[1];
 #endif /* H5O_ENABLE_BOGUS */
+
+/*
+ * Group Information Message. (0x000a)
+ */
+H5_DLLVAR const H5O_class_t H5O_GINFO[1];
 
 /*
  * Filter pipeline message. (0x000b)
@@ -203,16 +238,18 @@ H5_DLLVAR const H5O_class_t H5O_STAB[1];
 H5_DLLVAR const H5O_class_t H5O_MTIME_NEW[1];
 
 /* Package-local function prototypes */
-H5_DLL void * H5O_read_real(const H5G_entry_t *ent, const H5O_class_t *type,
-        int sequence, void *mesg, hid_t dxpl_id);
+H5_DLL void * H5O_read_real(const H5O_loc_t *loc, const H5O_class_t *type,
+    int sequence, void *mesg, hid_t dxpl_id);
+H5_DLL herr_t H5O_free_mesg(H5O_mesg_t *mesg);
 H5_DLL void * H5O_free_real(const H5O_class_t *type, void *mesg);
+H5_DLL herr_t H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int fwidth);
 
 /* Shared object operators */
 H5_DLL void * H5O_shared_read(H5F_t *f, hid_t dxpl_id, H5O_shared_t *shared,
     const H5O_class_t *type, void *mesg);
 
-/* Symbol table operators */
-H5_DLL void *H5O_stab_fast(const H5G_cache_t *cache, const struct H5O_class_t *type,
-			    void *_mesg);
+/* Useful metadata cache callbacks */
+H5_DLL herr_t H5O_dest(H5F_t *f, H5O_t *oh);
 
 #endif /* _H5Opkg_H */
+

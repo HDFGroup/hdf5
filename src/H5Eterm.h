@@ -90,7 +90,8 @@ H5E_VERSION_g=
 H5E_ALIGNMENT_g=    
 H5E_BADMESG_g=    
 H5E_CANTDELETE_g=    
-H5E_BADITER_g=
+H5E_BADITER_g=    
+H5E_CANTPACK_g=
 
 /* FPHDF5 errors */    
 H5E_CANTRECV_g=    

@@ -32,6 +32,7 @@
 #include "H5public.h"
 #include "H5Ipublic.h"
 #include "H5Opublic.h"
+#include "H5Tpublic.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -82,6 +83,8 @@ typedef struct H5G_slink_stat_t {
 
 typedef struct H5G_stat_t {
     unsigned long 	fileno;		/* File number			*/
+    H5T_cset_t          cset;           /* Character set of link name	*/
+    time_t		ctime;		/* Creation time		*/
     H5G_obj_t 		type;		/* Object type			*/
     union {
         H5G_obj_stat_t  obj;		/* Information about objects    */
@@ -121,10 +124,12 @@ H5_DLL int H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize,
 			   char *buf);
 H5_DLL hid_t H5Gcreate_expand(hid_t loc_id, const char *name, hid_t gcpl_id,
     hid_t gapl_id);
-H5_DLL herr_t H5Gcopy(hid_t id_src, hid_t loc_dst, const char *name_dst, 
+H5_DLL hid_t H5Gget_create_plist(hid_t group_id);
+H5_DLL herr_t H5Gcopy(hid_t src_id, hid_t dst_loc_id, const char *name_dst, 
                               hid_t plist_id);
 
 #ifdef __cplusplus
 }
 #endif
 #endif
+

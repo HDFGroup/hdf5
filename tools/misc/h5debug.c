@@ -39,6 +39,7 @@
 #include "H5BPpkg.h"		/* B+ trees				*/
 #include "H5BTpkg.h"		/* Block tracker			*/
 #include "H5Dprivate.h"
+#include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"
 #include "H5Gprivate.h"
 #include "H5HGprivate.h"
@@ -311,7 +312,8 @@ main(int argc, char *argv[])
     }
 
     if (status < 0) {
-        fprintf(stderr, "An error occurred\n");
+        fprintf(stderr, "An error occurred!\n");
+        H5Eprint(stderr);
         HDexit(5);
     }
     H5Pclose(dxpl);

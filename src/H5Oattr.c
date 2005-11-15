@@ -28,7 +28,7 @@
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_attr_encode (H5F_t *f, uint8_t *p, const void *mesg);
-static void *H5O_attr_decode (H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
+static void *H5O_attr_decode (H5F_t *f, hid_t dxpl_id, const uint8_t *p);
 static void *H5O_attr_copy (const void *_mesg, void *_dest, unsigned update_flags);
 static size_t H5O_attr_size (const H5F_t *f, const void *_mesg);
 static herr_t H5O_attr_reset (void *_mesg);
@@ -105,7 +105,7 @@ H5FL_EXTERN(H5S_extent_t);
  *
 --------------------------------------------------------------------------*/
 static void *
-H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *sh)
+H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
 {
     H5A_t		*attr = NULL;
     H5S_extent_t	*extent;	/*extent dimensionality information  */
@@ -155,7 +155,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *
 	H5O_shared_t *shared;   /* Shared information */
 
         /* Get the shared information */
-	if (NULL == (shared = (H5O_SHARED->decode) (f, dxpl_id, p, NULL)))
+	if (NULL == (shared = (H5O_SHARED->decode) (f, dxpl_id, p)))
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode shared message");
 
         /* Get the actual datatype information */
@@ -166,7 +166,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *
         H5O_free_real(H5O_SHARED, shared);
     } /* end if */
     else {
-        if((attr->dt=(H5O_DTYPE->decode)(f,dxpl_id,p,NULL))==NULL)
+        if((attr->dt=(H5O_DTYPE->decode)(f,dxpl_id,p))==NULL)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute datatype");
     } /* end else */
     if(version < H5O_ATTR_VERSION_NEW)
@@ -178,7 +178,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *
     if (NULL==(attr->ds = H5FL_CALLOC(H5S_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-    if((extent=(H5O_SDSPACE->decode)(f,dxpl_id,p,NULL))==NULL)
+    if((extent=(H5O_SDSPACE->decode)(f,dxpl_id,p))==NULL)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute dataspace");
 
     /* Copy the extent information */
@@ -629,9 +629,10 @@ H5O_attr_copy_file(H5F_t UNUSED *file_src, void *native_src,
     /* Copy the top level of the attribute */
     *attr_dst = *attr_src;
 
-    /* Don't have an opened group entry for copy */
-    H5G_ent_reset(&(attr_dst->ent));
-    attr_dst->ent_opened = 0;
+    /* Don't have an opened group location for copy */
+    H5O_loc_reset(&(attr_dst->oloc));
+    H5G_name_reset(&(attr_dst->path));
+    attr_dst->obj_opened = 0;
 
     /* Copy attribute's name */
     attr_dst->name = H5MM_strdup(attr_src->name);
@@ -642,21 +643,21 @@ H5O_attr_copy_file(H5F_t UNUSED *file_src, void *native_src,
 
     /* Check for named datatype being copied */
     if(H5T_committed(attr_src->dt)) {
-        H5G_entry_t         *ent_src;           /* Pointer to source datatype's group entry */
-        H5G_entry_t         *ent_dst;           /* Pointer to dest. datatype's group entry */
+        H5O_loc_t         *src_oloc;           /* Pointer to source datatype's object location */
+        H5O_loc_t         *dst_oloc;           /* Pointer to dest. datatype's object location */
 
         /* Get group entries for source & destination */
-        ent_src = H5T_entof(attr_src->dt);
-        HDassert(ent_src);
-        ent_dst = H5T_entof(attr_dst->dt);
-        HDassert(ent_dst);
+        src_oloc = H5T_oloc(attr_src->dt);
+        HDassert(src_oloc);
+        dst_oloc = H5T_oloc(attr_dst->dt);
+        HDassert(dst_oloc);
 
-        /* Reset group entry for new object */
-        H5G_ent_reset(ent_dst);
-        ent_dst->file = file_dst;
+        /* Reset object location for new object */
+        H5O_loc_reset(dst_oloc);
+        dst_oloc->file = file_dst;
 
         /* Copy the shared object from source to destination */
-        if(H5O_copy_header_map(ent_src, ent_dst, dxpl_id, map_list) < 0)
+        if(H5O_copy_header_map(src_oloc, dst_oloc, dxpl_id, map_list) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy object")
     } /* end if */
 
@@ -725,11 +726,11 @@ H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream, int in
 	    "Initialized:",
 	    (unsigned int)mesg->initialized);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	    "Opened:",
-	    (unsigned int)mesg->ent_opened);
-    fprintf(stream, "%*sSymbol table entry...\n", indent, "");
-    H5G_ent_debug(f, dxpl_id, &(mesg->ent), stream, indent+3, MAX(0, fwidth-3),
-		  HADDR_UNDEF);
+	    "Object opened:",
+	    (unsigned int)mesg->obj_opened);
+    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+	    "Object:",
+	    mesg->oloc.addr);
 
     fprintf(stream, "%*sData type...\n", indent, "");
     fprintf(stream, "%*s%-*s %lu\n", indent+3, "", MAX(0,fwidth-3),

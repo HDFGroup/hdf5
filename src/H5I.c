@@ -45,6 +45,7 @@
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Ipkg.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Oprivate.h"		/* Object headers		  	*/
 
 /* Define this to compile in support for dumping ID information */
 /* #define H5I_DEBUG_OUTPUT */
@@ -2003,123 +2004,32 @@ H5I_find_id(hid_t id)
 ssize_t
 H5Iget_name(hid_t id, char *name/*out*/, size_t size)
 {
-    H5G_entry_t   *ent;       /*symbol table entry */
-    size_t        len=0;
+    H5G_loc_t     loc;          /* Object location */
+    size_t        len = 0;
     ssize_t       ret_value;
 
-    FUNC_ENTER_API (H5Iget_name, FAIL);
+    FUNC_ENTER_API(H5Iget_name, FAIL)
     H5TRACE3("Zs","ixz",id,name,size);
 
-    /* get symbol table entry */
-    if(NULL!=(ent = H5G_loc(id))) {
-        if (ent->user_path_r != NULL && ent->user_path_hidden==0) {
-            len = H5RS_len(ent->user_path_r);
+    /* get object location */
+    if(H5G_loc(id, &loc) >= 0) {
+        if(loc.path->user_path_r != NULL && loc.path->user_path_hidden == 0) {
+            len = H5RS_len(loc.path->user_path_r);
 
             if(name) {
-                HDstrncpy(name, H5RS_get_str(ent->user_path_r), MIN(len+1,size));
+                HDstrncpy(name, H5RS_get_str(loc.path->user_path_r), MIN(len + 1, size));
                 if(len >= size)
-                    name[size-1]='\0';
+                    name[size-1] = '\0';
             } /* end if */
         } /* end if */
     } /* end if */
 
     /* Set return value */
-    ret_value=(ssize_t)len;
+    ret_value = (ssize_t)len;
 
 done:
-    FUNC_LEAVE_API(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function: H5I_debug
- *
- * Purpose: Dump the contents of a type to stderr for debugging.
- *
- * Return: Success: Non-negative
- *
- *   Failure: Negative
- *
- * Programmer: Robb Matzke
- *  Friday, February 19, 1999
- *
- * Modifications:
- *
- *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
- *      Added `id to name' support.
- *
- *-------------------------------------------------------------------------
- */
-#ifdef H5I_DEBUG_OUTPUT
-static herr_t
-H5I_debug(H5I_type_t type)
-{
-    H5I_id_type_t *type_ptr;
-    H5I_id_info_t *cur;
-    H5G_entry_t *ent = NULL;
-    int   is, js;
-    unsigned int iu;
-    herr_t ret_value;  /* Return value */
-
-    FUNC_ENTER_NOAPI(H5I_debug, FAIL);
-
-    fprintf(stderr, "Dumping ID type %d\n", (int)type);
-    type_ptr = H5I_id_type_list_g[type];
-
-    /* Header */
-    fprintf(stderr, "	 count	   = %u\n", type_ptr->count);
-    fprintf(stderr, "	 reserved  = %u\n", type_ptr->reserved);
-    fprintf(stderr, "	 wrapped   = %u\n", type_ptr->wrapped);
-    fprintf(stderr, "	 hash_size = %lu\n", (unsigned long)type_ptr->hash_size);
-    fprintf(stderr, "	 ids	   = %u\n", type_ptr->ids);
-    fprintf(stderr, "	 nextid	   = %u\n", type_ptr->nextid);
-
-    /* Cache */
-    fprintf(stderr, "	 Cache:\n");
-    for (is=0; is<ID_CACHE_SIZE; is++) {
-        if (H5I_cache_g[is] && H5I_TYPE(H5I_cache_g[is]->id)==type) {
-            fprintf(stderr, "	     Entry-%d, ID=%lu\n",
-                    is, (unsigned long)(H5I_cache_g[is]->id));
-        }
-    }
-
-    /* List */
-    fprintf(stderr, "	 List:\n");
-    for (iu=0; iu<type_ptr->hash_size; iu++) {
-        for (js=0, cur=type_ptr->id_list[iu]; cur; cur=cur->next, js++) {
-            fprintf(stderr, "	     #%u.%d\n", iu, js);
-            fprintf(stderr, "		 id = %lu\n", (unsigned long)(cur->id));
-            fprintf(stderr, "		 count = %u\n", cur->count);
-            fprintf(stderr, "		 obj   = 0x%08lx\n", (unsigned long)(cur->obj_ptr));
-
-            /* Get the symbol table entry, so we get get the name */
-            switch(type) {
-                case H5I_GROUP:
-                    ent = H5G_entof((H5G_t*)cur->obj_ptr);
-                    break;
-                case H5I_DATASET:
-                    ent = H5D_entof((H5D_t*)cur->obj_ptr);
-                    break;
-                case H5I_DATATYPE:
-                    ent = H5T_entof((H5T_t*)cur->obj_ptr);
-                    break;
-                default:
-                    continue;   /* Other types of IDs are not stored in files */
-            } /* end switch*/
-
-            if(ent) {
-                if(ent->name)
-                    fprintf(stderr, "                name = %s\n",ent->name);
-                if(ent->old_name)
-                    fprintf(stderr, "                old_name = %s\n",ent->old_name);
-            } /* end if */
-        } /* end for */
-    } /* end for */
-
-done:
-    FUNC_LEAVE_NOAPI(SUCCEED);
-}
-#endif /* H5I_DEBUG_OUTPUT */
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Iget_name() */
 
 
 /*-------------------------------------------------------------------------
@@ -2168,18 +2078,16 @@ done:
  * Programmer:  Raymond Lu
  *              Oct 27, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static hid_t
 H5I_get_file_id(hid_t obj_id)
 {
-    H5G_entry_t         *ent;
-    H5I_type_t type;
-    hid_t		ret_value;
+    H5G_loc_t loc;              /* Location of object */
+    H5I_type_t type;            /* ID type */
+    hid_t ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5I_get_file_id);
+    FUNC_ENTER_NOAPI_NOINIT(H5I_get_file_id)
 
     /* Get object type */
     type = H5I_TYPE(obj_id);
@@ -2187,23 +2095,114 @@ H5I_get_file_id(hid_t obj_id)
         ret_value = obj_id;
 
         /* Increment reference count on atom. */
-        if (H5I_inc_ref(ret_value)<0)
-            HGOTO_ERROR (H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed");
+        if(H5I_inc_ref(ret_value) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
     }
     else if(type == H5I_DATATYPE) {
-        if((ent = H5G_loc(obj_id))==NULL)
-            HGOTO_ERROR (H5E_ATOM, H5E_CANTGET, FAIL, "not a named datatype");
-        ret_value = H5F_get_id(ent->file);
+        if(H5G_loc(obj_id, &loc) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "not a named datatype")
+        ret_value = H5F_get_id(loc.oloc->file);
     }
     else if(type == H5I_GROUP || type == H5I_DATASET || type == H5I_ATTR) {
-        if((ent = H5G_loc(obj_id))==NULL)
-            HGOTO_ERROR (H5E_ATOM, H5E_CANTGET, FAIL, "can't get symbol table info");
-        ret_value = H5F_get_id(ent->file);
+        if(H5G_loc(obj_id, &loc) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get symbol table info")
+        ret_value = H5F_get_id(loc.oloc->file);
     }
     else
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid object ID");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid object ID")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5I_get_file_id() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5I_debug
+ *
+ * Purpose: Dump the contents of a type to stderr for debugging.
+ *
+ * Return: Success: Non-negative
+ *
+ *   Failure: Negative
+ *
+ * Programmer: Robb Matzke
+ *  Friday, February 19, 1999
+ *
+ * Modifications:
+ *
+ *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
+ *      Added `id to name' support.
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifdef H5I_DEBUG_OUTPUT
+static herr_t
+H5I_debug(H5I_type_t type)
+{
+    H5I_id_type_t *type_ptr;
+    H5I_id_info_t *cur;
+    H5G_name_t *path;
+    int   is, js;
+    unsigned int iu;
+    herr_t ret_value;  /* Return value */
+
+    FUNC_ENTER_NOAPI(H5I_debug, FAIL);
+
+    fprintf(stderr, "Dumping ID type %d\n", (int)type);
+    type_ptr = H5I_id_type_list_g[type];
+
+    /* Header */
+    fprintf(stderr, "	 count	   = %u\n", type_ptr->count);
+    fprintf(stderr, "	 reserved  = %u\n", type_ptr->reserved);
+    fprintf(stderr, "	 wrapped   = %u\n", type_ptr->wrapped);
+    fprintf(stderr, "	 hash_size = %lu\n", (unsigned long)type_ptr->hash_size);
+    fprintf(stderr, "	 ids	   = %u\n", type_ptr->ids);
+    fprintf(stderr, "	 nextid	   = %u\n", type_ptr->nextid);
+
+    /* Cache */
+    fprintf(stderr, "	 Cache:\n");
+    for (is=0; is<ID_CACHE_SIZE; is++) {
+        if (H5I_cache_g[is] && H5I_TYPE(H5I_cache_g[is]->id)==type) {
+            fprintf(stderr, "	     Entry-%d, ID=%lu\n",
+                    is, (unsigned long)(H5I_cache_g[is]->id));
+        }
+    }
+
+    /* List */
+    fprintf(stderr, "	 List:\n");
+    for (iu=0; iu<type_ptr->hash_size; iu++) {
+        for (js=0, cur=type_ptr->id_list[iu]; cur; cur=cur->next, js++) {
+            fprintf(stderr, "	     #%u.%d\n", iu, js);
+            fprintf(stderr, "		 id = %lu\n", (unsigned long)(cur->id));
+            fprintf(stderr, "		 count = %u\n", cur->count);
+            fprintf(stderr, "		 obj   = 0x%08lx\n", (unsigned long)(cur->obj_ptr));
+
+            /* Get the group location, so we get get the name */
+            switch(type) {
+                case H5I_GROUP:
+                    path = H5G_nameof((H5G_t*)cur->obj_ptr);
+                    break;
+                case H5I_DATASET:
+                    path = H5D_nameof((H5D_t*)cur->obj_ptr);
+                    break;
+                case H5I_DATATYPE:
+                    path = H5T_nameof((H5T_t*)cur->obj_ptr);
+                    break;
+                default:
+                    continue;   /* Other types of IDs are not stored in files */
+            } /* end switch*/
+
+            if(path) {
+                if(path->user_path_r)
+                    fprintf(stderr, "                user_path = %s\n", H5RS_get_str(path->user_path_r));
+                if(ent->canon_path_r)
+                    fprintf(stderr, "                canon_path = %s\n", H5RS_get_str(path->canon_path_r));
+            } /* end if */
+        } /* end for */
+    } /* end for */
+
+done:
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
+#endif /* H5I_DEBUG_OUTPUT */
 

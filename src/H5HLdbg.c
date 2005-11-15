@@ -84,17 +84,14 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int
 	      "Address of heap data:",
 	      h->addr);
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
-	    "Data bytes allocated on disk:",
-            h->disk_alloc);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
-	    "Data bytes allocated in core:",
-            h->mem_alloc);
+	    "Data bytes allocated for heap:",
+            h->heap_alloc);
 
     /*
      * Traverse the free list and check that all free blocks fall within
      * the heap and that no two free blocks point to the same region of
      * the heap.  */
-    if (NULL==(marker = H5MM_calloc(h->mem_alloc)))
+    if (NULL==(marker = H5MM_calloc(h->heap_alloc)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     fprintf(stream, "%*sFree Blocks (offset, size):\n", indent, "");
@@ -106,7 +103,7 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int
 	HDfprintf(stream, "%*s%-*s %8Zu, %8Zu\n", indent+3, "", MAX(0,fwidth-9),
 		temp_str,
 		freelist->offset, freelist->size);
-	if (freelist->offset + freelist->size > h->mem_alloc) {
+	if (freelist->offset + freelist->size > h->heap_alloc) {
 	    fprintf(stream, "***THAT FREE BLOCK IS OUT OF BOUNDS!\n");
 	} else {
 	    for (i=overlap=0; i<(int)(freelist->size); i++) {
@@ -123,20 +120,20 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int
 	}
     }
 
-    if (h->mem_alloc) {
+    if (h->heap_alloc) {
 	fprintf(stream, "%*s%-*s %.2f%%\n", indent, "", fwidth,
 		"Percent of heap used:",
-		(100.0 * (double)(h->mem_alloc - amount_free) / (double)h->mem_alloc));
+		(100.0 * (double)(h->heap_alloc - amount_free) / (double)h->heap_alloc));
     }
     /*
      * Print the data in a VMS-style octal dump.
      */
     fprintf(stream, "%*sData follows (`__' indicates free region)...\n",
 	    indent, "");
-    for (i=0; i<(int)(h->disk_alloc); i+=16) {
+    for (i=0; i<(int)(h->heap_alloc); i+=16) {
 	fprintf(stream, "%*s %8d: ", indent, "", i);
 	for (j = 0; j < 16; j++) {
-	    if (i+j<(int)(h->disk_alloc)) {
+	    if (i+j<(int)(h->heap_alloc)) {
 		if (marker[i + j]) {
 		    fprintf(stream, "__ ");
 		} else {
@@ -151,7 +148,7 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int
 	}
 
 	for (j = 0; j < 16; j++) {
-	    if (i+j < (int)(h->disk_alloc)) {
+	    if (i+j < (int)(h->heap_alloc)) {
 		if (marker[i + j]) {
 		    HDfputc(' ', stream);
 		} else {

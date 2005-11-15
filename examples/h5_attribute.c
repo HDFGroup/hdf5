@@ -188,7 +188,7 @@ main (void)
    /*
     * Attach to the string attribute using its index, then read and display the value.
     */
-   attr  = H5Aopen_idx(dataset, 1);
+   attr  = H5Aopen_idx(dataset, 2);
    atype = H5Tcopy(H5T_C_S1);
            H5Tset_size(atype, 5);
    ret   = H5Aread(attr, atype, string_out);

@@ -72,38 +72,38 @@ test_sec2(void)
     /* Set property list and file name for SEC2 driver. */
     fapl = h5_fileaccess();
     if(H5Pset_fapl_sec2(fapl)<0)
-        goto error;
+        TEST_ERROR;
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
-        goto error;
+        TEST_ERROR;
 
     /* Retrieve the access property list... */
     if ((access_fapl = H5Fget_access_plist(file)) < 0)
-        goto error;
+        TEST_ERROR;
 
     /* ...and close the property list */
     if (H5Pclose(access_fapl) < 0)
-        goto error;
+        TEST_ERROR;
 
     /* Check file handle API */
     if(H5Fget_vfd_handle(file, H5P_DEFAULT, (void **)&fhandle)<0)
-        goto error;
+        TEST_ERROR;
     if(*fhandle<0)
-        goto error;
+        TEST_ERROR;
 
     /* Check file size API */
     if(H5Fget_filesize(file, &file_size) < 0)
-        goto error;
+        TEST_ERROR;
 
     /* There is no garantee the size of metadata in file is constant.
      * Just try to check if it's reasonable.  It's 2KB right now.
      */
     if(file_size<1*KB || file_size>4*KB)
-        goto error;
+        TEST_ERROR;
 
     if(H5Fclose(file)<0)
-        goto error;
+        TEST_ERROR;
     h5_cleanup(FILENAME, fapl);
     PASSED();
     return 0;
@@ -150,40 +150,40 @@ test_core(void)
     /* Set property list and file name for CORE driver */
     fapl = h5_fileaccess();
     if(H5Pset_fapl_core(fapl, CORE_INCREMENT, TRUE)<0)
-        goto error;
+        TEST_ERROR;
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
 
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
-        goto error;
+        TEST_ERROR;
 
     /* Retrieve the access property list... */
     if ((access_fapl = H5Fget_access_plist(file)) < 0)
-        goto error;
+        TEST_ERROR;
 
     /* ...and close the property list */
     if (H5Pclose(access_fapl) < 0)
-        goto error;
+        TEST_ERROR;
 
     if(H5Fget_vfd_handle(file, H5P_DEFAULT, &fhandle)<0)
-        goto error;
+        TEST_ERROR;
     if(fhandle==NULL)
     {
         printf("fhandle==NULL\n");
-               goto error;
+               TEST_ERROR;
     }
 
     /* Check file size API */
     if(H5Fget_filesize(file, &file_size) < 0)
-        goto error;
+        TEST_ERROR;
 
     /* There is no garantee the size of metadata in file is constant.
      * Just try to check if it's reasonable.  Why is this 4KB?
      */
     if(file_size<2*KB || file_size>6*KB)
-        goto error;
+        TEST_ERROR;
 
     if(H5Fclose(file)<0)
-        goto error;
+        TEST_ERROR;
     h5_cleanup(FILENAME, fapl);
     PASSED();
     return 0;
@@ -235,7 +235,7 @@ test_family_opens(char *fname, hid_t fa_pl)
 
     /* Case 3: reopen file with wrong member size */
     if(H5Pset_fapl_family(fa_pl, (hsize_t)128, H5P_DEFAULT)<0)
-        goto error;
+        TEST_ERROR;
 
     H5E_BEGIN_TRY {
         file=H5Fopen(fname, H5F_ACC_RDWR, fa_pl);
@@ -251,7 +251,7 @@ test_family_opens(char *fname, hid_t fa_pl)
     }
 
     if(H5Pset_fapl_family(fa_pl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT)<0)
-        goto error;
+        TEST_ERROR;
 
     H5E_BEGIN_TRY {
         file=H5Fopen(wrong_name, H5F_ACC_RDWR, fa_pl);
@@ -307,111 +307,111 @@ test_family(void)
     fapl = h5_fileaccess();
 
     if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT)<0)
-        goto error;
+        TEST_ERROR;
     h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
 
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
-        goto error;
+        TEST_ERROR;
 
     if(H5Fclose(file)<0)
-        goto error;
+        TEST_ERROR;
 
     /* Test different wrong ways to reopen family files where there's only
      * one member file existing. */
     if(test_family_opens(filename, fapl)<0)
-        goto error;
+        TEST_ERROR;
 
     /* Reopen the file with default member file size */
     if(H5Pset_fapl_family(fapl, (hsize_t)H5F_FAMILY_DEFAULT, H5P_DEFAULT)<0)
-        goto error;
+        TEST_ERROR;
 
     if((file=H5Fopen(filename, H5F_ACC_RDWR, fapl))<0)
-        goto error;
+        TEST_ERROR;
 
     /* Check file size API */
     if(H5Fget_filesize(file, &file_size) < 0)
-        goto error;
+        TEST_ERROR;
 
-    /* The file size is supposed to be about 1024 bytes right now. */
-    if(file_size<KB/2 || file_size>4*KB)
-        goto error;
+    /* The file size is supposed to be about 300 bytes right now. */
+    if(file_size<KB/4 || file_size>4*KB)
+        TEST_ERROR;
 
     /* Create and write dataset */
     if((space=H5Screate_simple(2, dims, NULL))<0)
-        goto error;
+        TEST_ERROR;
 
     /* Retrieve the access property list... */
     if ((access_fapl = H5Fget_access_plist(file)) < 0)
-        goto error;
+        TEST_ERROR;
 
     /* ...and close the property list */
     if (H5Pclose(access_fapl) < 0)
-        goto error;
+        TEST_ERROR;
 
     if((dset=H5Dcreate(file, dname, H5T_NATIVE_INT, space, H5P_DEFAULT))<0)
-        goto error;
+        TEST_ERROR;
 
     for(i=0; i<FAMILY_NUMBER; i++)
         for(j=0; j<FAMILY_SIZE; j++)
             buf[i][j] = i*10000+j;
     if(H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)<0)
-        goto error;
+        TEST_ERROR;
 
     /* check file handle API */
     if((fapl2=H5Pcreate(H5P_FILE_ACCESS))<0)
-        goto error;
+        TEST_ERROR;
     if(H5Pset_family_offset(fapl2, (hsize_t)0)<0)
-        goto error;
+        TEST_ERROR;
 
     if(H5Fget_vfd_handle(file, fapl2, (void **)&fhandle)<0)
-        goto error;
+        TEST_ERROR;
     if(*fhandle<0)
-        goto error;
+        TEST_ERROR;
 
     if(H5Pset_family_offset(fapl2, (hsize_t)(FAMILY_SIZE*2))<0)
-        goto error;
+        TEST_ERROR;
     if(H5Fget_vfd_handle(file, fapl2, (void **)&fhandle2)<0)
-        goto error;
+        TEST_ERROR;
     if(*fhandle2<0)
-        goto error;
+        TEST_ERROR;
 
     /* Check file size API */
     if(H5Fget_filesize(file, &file_size) < 0)
-        goto error;
+        TEST_ERROR;
 
     /* Some data has been written.  The file size should be bigger(18KB+976
      * bytes if int size is 4 bytes) now. */
     if(sizeof(int)<=4) {
         if(file_size<18*KB || file_size>20*KB)
-            goto error;
+            TEST_ERROR;
     } else if(sizeof(int)>=8) {
         if(file_size<32*KB || file_size>40*KB)
-            goto error;
+            TEST_ERROR;
     }
 
     if(H5Sclose(space)<0)
-        goto error;
+        TEST_ERROR;
     if(H5Dclose(dset)<0)
-        goto error;
+        TEST_ERROR;
     if(H5Pclose(fapl2)<0)
-        goto error;
+        TEST_ERROR;
     if(H5Fclose(file)<0)
-        goto error;
+        TEST_ERROR;
 
     /* Test different wrong ways to reopen family files when there're multiple
      * member files existing. */
     if(test_family_opens(filename, fapl)<0)
-        goto error;
+        TEST_ERROR;
 
     /* Reopen the file with correct member file size. */
     if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT)<0)
-        goto error;
+        TEST_ERROR;
 
     if((file=H5Fopen(filename, H5F_ACC_RDWR, fapl))<0)
-        goto error;
+        TEST_ERROR;
 
     if(H5Fclose(file)<0)
-        goto error;
+        TEST_ERROR;
 
     h5_cleanup(FILENAME, fapl);
     PASSED();
@@ -469,7 +469,7 @@ test_family_compat(void)
     fapl = h5_fileaccess();
 
     if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE2, H5P_DEFAULT)<0)
-        goto error;
+        TEST_ERROR;
 
     h5_fixname(COMPAT_BASENAME, fapl, filename, sizeof filename);
 
@@ -482,13 +482,13 @@ test_family_compat(void)
     strcat(pathname, filename);
 
     if((file=H5Fopen(pathname, H5F_ACC_RDONLY, fapl))<0)
-        goto error;
+        TEST_ERROR;
 
     if(H5Fclose(file)<0)
-        goto error;
+        TEST_ERROR;
 
     if(H5Pclose(fapl)<0)
-        goto error;
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -519,7 +519,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_multi_opens(char *fname, hid_t fa_pl)
+test_multi_opens(char *fname)
 {
     hid_t file;
     char  super_name[1024];     /*name string "%%s-s.h5"*/
@@ -600,90 +600,92 @@ test_multi(void)
     memb_addr[H5FD_MEM_DRAW] = HADDR_MAX/2;
 
     if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, TRUE)<0)
-        goto error;
+        TEST_ERROR;
     h5_fixname(FILENAME[3], fapl, filename, sizeof filename);
 
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
-        goto error;
+        TEST_ERROR;
 
     if(H5Fclose(file)<0)
-        goto error;
+        TEST_ERROR;
 
     /* Test wrong ways to reopen multi files */
-    if(test_multi_opens(filename, fapl)<0)
-        goto error;
+    if(test_multi_opens(filename)<0)
+        TEST_ERROR;
 
     /* Reopen the file */
     if((file=H5Fopen(filename, H5F_ACC_RDWR, fapl))<0)
-        goto error;
+        TEST_ERROR;
 
     /* Create and write data set */
     if((space=H5Screate_simple(2, dims, NULL))<0)
-        goto error;
+        TEST_ERROR;
 
     /* Retrieve the access property list... */
     if ((access_fapl = H5Fget_access_plist(file)) < 0)
-        goto error;
+        TEST_ERROR;
 
     /* ...and close the property list */
     if (H5Pclose(access_fapl) < 0)
-        goto error;
+        TEST_ERROR;
 
     /* Check file size API */
     if(H5Fget_filesize(file, &file_size) < 0)
-        goto error;
+        TEST_ERROR;
 
     /* Before any data is written, the raw data file is empty.  So
      * the file size is only the size of metadata file.  It's supposed
-     * to be 2KB.
+     * to be 400 bytes.
      */
-    if(file_size<1*KB || file_size>4*KB)
-        goto error;
+    if(file_size<(KB/4) || file_size>4*KB)
+        TEST_ERROR;
 
     if((dset=H5Dcreate(file, dname, H5T_NATIVE_INT, space, H5P_DEFAULT))<0)
-        goto error;
+        TEST_ERROR;
 
     for(i=0; i<MULTI_SIZE; i++)
         for(j=0; j<MULTI_SIZE; j++)
             buf[i][j] = i*10000+j;
     if(H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)<0)
-        goto error;
+        TEST_ERROR;
 
     if((fapl2=H5Pcreate(H5P_FILE_ACCESS))<0)
-        goto error;
+        TEST_ERROR;
     if(H5Pset_multi_type(fapl2, H5FD_MEM_SUPER)<0)
-        goto error;
+        TEST_ERROR;
     if(H5Fget_vfd_handle(file, fapl2, (void **)&fhandle)<0)
-        goto error;
+        TEST_ERROR;
     if(*fhandle<0)
-        goto error;
+        TEST_ERROR;
 
     if(H5Pset_multi_type(fapl2, H5FD_MEM_DRAW)<0)
-        goto error;
+        TEST_ERROR;
     if(H5Fget_vfd_handle(file, fapl2, (void **)&fhandle2)<0)
-        goto error;
+        TEST_ERROR;
     if(*fhandle2<0)
-        goto error;
+        TEST_ERROR;
 
     /* Check file size API */
     if(H5Fget_filesize(file, &file_size) < 0)
-        goto error;
+        TEST_ERROR;
 
     /* After the data is written, the file size is huge because the
      * beginning of raw data file is set at HADDR_MAX/2.  It's supposed
      * to be (HADDR_MAX/2 + 128*128*4)
      */
+#ifdef H5_HAVE_LARGE_HSIZET
     if(file_size < HADDR_MAX/2 || file_size > HADDR_MAX)
-        goto error;
+        TEST_ERROR;
+#endif /* H5_HAVE_LARGE_HSIZET */
 
     if(H5Sclose(space)<0)
-        goto error;
+        TEST_ERROR;
     if(H5Dclose(dset)<0)
-        goto error;
+        TEST_ERROR;
     if(H5Pclose(fapl2)<0)
-        goto error;
+        TEST_ERROR;
     if(H5Fclose(file)<0)
-        goto error;
+        TEST_ERROR;
 
     h5_cleanup(FILENAME, fapl);
     PASSED();

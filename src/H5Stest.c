@@ -22,10 +22,10 @@
 #define H5S_TESTING		/*suppress warning about H5S testing funcs*/
 
 
-#include "H5private.h"		/* Generic Functions			  */
-#include "H5Eprivate.h"		/* Error handling		  */
-#include "H5Iprivate.h"		/* ID Functions		  */
-#include "H5Spkg.h"		/* Dataspace functions			  */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5Spkg.h"		/* Dataspaces 				*/
 
 
 /*--------------------------------------------------------------------------
@@ -71,6 +71,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_shape_same_test() */
 
+
 /*--------------------------------------------------------------------------
  NAME
     H5S_inquiry_rebuild_status

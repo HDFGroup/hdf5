@@ -62,17 +62,17 @@ H5RS_xstrdup(const char *s)
 {
     char *ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5RS_xstrdup);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5RS_xstrdup)
 
-    if (s) {
-        ret_value = H5FL_BLK_MALLOC(str_buf,HDstrlen(s) + 1);
-        assert (ret_value);
+    if(s) {
+        ret_value = H5FL_BLK_MALLOC(str_buf, HDstrlen(s) + 1);
+        HDassert(ret_value);
         HDstrcpy(ret_value, s);
     } /* end if */
     else
-        ret_value=NULL;
+        ret_value = NULL;
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RS_xstrdup() */
 
 
@@ -160,7 +160,7 @@ done:
  NAME
     H5RS_own
  PURPOSE
-    Transfer ownership of a regular string to  a reference counted string
+    Transfer ownership of a regular string to a reference counted string
  USAGE
     H5RS_str_t *H5RS_own(s)
         const char *s;          IN: String to transfer ownership of
@@ -286,7 +286,7 @@ H5RS_incr(H5RS_str_t *rs)
  PURPOSE
     "Duplicate" a ref-counted string
  USAGE
-    H5RS_str_t H5RS_incr(rs)
+    H5RS_str_t H5RS_dup(rs)
         H5RS_str_t *rs;     IN/OUT: Ref-counted string to "duplicate"
 
  RETURNS
@@ -311,6 +311,54 @@ H5RS_dup(H5RS_str_t *ret_value)
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5RS_dup() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5RS_dup
+ PURPOSE
+    "Duplicate" a regular string into a ref-counted string
+ USAGE
+    H5RS_str_t H5RS_dup_str(s)
+        const char *s;     IN: Regular string to duplicate
+
+ RETURNS
+    Returns a pointer to ref-counted string on success, NULL on failure.
+ DESCRIPTION
+    Duplicate a regular string into a ref-counted string.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+H5RS_str_t *
+H5RS_dup_str(const char *s)
+{
+    char *new_str = NULL;       /* Duplicate of string */
+    size_t path_len;            /* Length of the path */
+    H5RS_str_t *ret_value;
+
+    FUNC_ENTER_NOAPI(H5RS_dup_str, FAIL)
+
+    /* Sanity check */
+    HDassert(s);
+
+    /* Get the length of the string */
+    path_len = HDstrlen(s);
+
+    /* Allocate space for the string */
+    if(NULL == (new_str = H5FL_BLK_MALLOC(str_buf, path_len + 1)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    /* Copy name for full path */
+    HDstrcpy(new_str, s);
+
+    /* Create reference counted string for path */
+    ret_value = H5RS_own(new_str);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5RS_dup_str() */
 
 
 /*--------------------------------------------------------------------------

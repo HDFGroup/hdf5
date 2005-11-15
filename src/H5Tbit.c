@@ -240,12 +240,12 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hsize_t
+uint64_t
 H5T_bit_get_d (uint8_t *buf, size_t offset, size_t size)
 {
-    hsize_t	val=0;
+    uint64_t	val=0;
     size_t	i, hs;
-    hsize_t	ret_value;      /* Return value */
+    uint64_t	ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOFUNC(H5T_bit_get_d);
 
@@ -290,7 +290,7 @@ H5T_bit_get_d (uint8_t *buf, size_t offset, size_t size)
  *-------------------------------------------------------------------------
  */
 void
-H5T_bit_set_d (uint8_t *buf, size_t offset, size_t size, hsize_t val)
+H5T_bit_set_d (uint8_t *buf, size_t offset, size_t size, uint64_t val)
 {
     size_t	i, hs;
 

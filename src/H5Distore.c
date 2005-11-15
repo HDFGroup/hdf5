@@ -1069,9 +1069,9 @@ H5D_istore_flush_entry(const H5D_io_info_t *io_info, H5D_rdcc_ent_t *ent, hbool_
          * Create the chunk it if it doesn't exist, or reallocate the chunk if
          * its size changed.  Then write the data into the file.
          */
-        if (H5B_insert(io_info->dset->ent.file, io_info->dxpl_id, H5B_ISTORE, io_info->dset->shared->layout.u.chunk.addr, &udata)<0)
+        if(H5B_insert(io_info->dset->oloc.file, io_info->dxpl_id, H5B_ISTORE, io_info->dset->shared->layout.u.chunk.addr, &udata)<0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to allocate chunk")
-        if (H5F_block_write(io_info->dset->ent.file, H5FD_MEM_DRAW, udata.addr, udata.common.key.nbytes, io_info->dxpl_id, buf)<0)
+        if(H5F_block_write(io_info->dset->oloc.file, H5FD_MEM_DRAW, udata.addr, udata.common.key.nbytes, io_info->dxpl_id, buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
 
         /* Mark cache entry as clean */
@@ -1416,7 +1416,7 @@ H5D_istore_prune (const H5D_io_info_t *io_info, size_t size)
      * begins.  The pointers participating in the list traversal are each
      * given a chance at preemption before any of the pointers are advanced.
      */
-    w[0] = (int)(rdcc->nused * H5F_RDCC_W0(io_info->dset->ent.file));
+    w[0] = (int)(rdcc->nused * H5F_RDCC_W0(io_info->dset->oloc.file));
     p[0] = rdcc->head;
     p[1] = NULL;
 
@@ -1613,16 +1613,16 @@ H5D_istore_lock(const H5D_io_info_t *io_info,
             /* Chunk size on disk isn't [likely] the same size as the final chunk
              * size in memory, so allocate memory big enough. */
             chunk_alloc = udata->common.key.nbytes;
-            if (NULL==(chunk = H5D_istore_chunk_alloc (chunk_alloc,pline)))
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk")
-            if (H5F_block_read(dset->ent.file, H5FD_MEM_DRAW, chunk_addr, udata->common.key.nbytes, io_info->dxpl_id, chunk)<0)
-                HGOTO_ERROR (H5E_IO, H5E_READERROR, NULL, "unable to read raw data chunk")
+            if(NULL == (chunk = H5D_istore_chunk_alloc (chunk_alloc, pline)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk")
+            if(H5F_block_read(dset->oloc.file, H5FD_MEM_DRAW, chunk_addr, udata->common.key.nbytes, io_info->dxpl_id, chunk) < 0)
+                HGOTO_ERROR(H5E_IO, H5E_READERROR, NULL, "unable to read raw data chunk")
 
-            if (pline->nused)
-                if (H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &(udata->common.key.filter_mask), io_info->dxpl_cache->err_detect,
-                         io_info->dxpl_cache->filter_cb, &(udata->common.key.nbytes), &chunk_alloc, &chunk)<0) {
+            if(pline->nused) {
+                if(H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &(udata->common.key.filter_mask), io_info->dxpl_cache->err_detect,
+                        io_info->dxpl_cache->filter_cb, &(udata->common.key.nbytes), &chunk_alloc, &chunk) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_READERROR, NULL, "data pipeline read failed")
-                }
+            } /* end if */
 #ifdef H5D_ISTORE_DEBUG
             rdcc->nmisses++;
 #endif /* H5D_ISTORE_DEBUG */
@@ -1923,7 +1923,7 @@ HDfprintf(stderr,"%s: buf=%p\n",FUNC,buf);
      * read-through of only the elements requested.
      */
     if (dset->shared->dcpl_cache.pline.nused==0 && ((dset->shared->layout.u.chunk.size>dset->shared->cache.chunk.nbytes && chunk_addr!=HADDR_UNDEF)
-            || (IS_H5FD_MPI(dset->ent.file) && (H5F_ACC_RDWR & H5F_get_intent(dset->ent.file))))) {
+            || (IS_H5FD_MPI(dset->oloc.file) && (H5F_ACC_RDWR & H5F_get_intent(dset->oloc.file))))) {
         H5D_io_info_t chk_io_info;      /* Temporary I/O info object */
         H5D_storage_t chk_store;        /* Chunk storage information */
 
@@ -1960,7 +1960,7 @@ HDfprintf(stderr,"%s: buf=%p\n",FUNC,buf);
 
             /* Check if the chunk is in the cache (but hasn't been written to disk yet) */
             if (rdcc->nslots>0) {
-                unsigned idx=H5D_HASH(dset->shared,io_info->store->chunk.index); /* Cache entry index */
+                unsigned idx=H5D_HASH(dset->shared, io_info->store->chunk.index); /* Cache entry index */
                 H5D_rdcc_ent_t	*ent = rdcc->slot[idx]; /* Cache entry */
 
                 /* Potential match... */
@@ -2114,7 +2114,7 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
      */
 #ifdef H5_HAVE_PARALLEL
     /* Additional sanity checks when operating in parallel */
-    if(IS_H5FD_MPI(dset->ent.file)) {
+    if(IS_H5FD_MPI(dset->oloc.file)) {
         if (chunk_addr==HADDR_UNDEF)
             HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "unable to locate raw data chunk")
         if (dset->shared->dcpl_cache.pline.nused>0)
@@ -2123,7 +2123,7 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
 #endif /* H5_HAVE_PARALLEL */
 
     if (dset->shared->dcpl_cache.pline.nused==0 && ((dset->shared->layout.u.chunk.size>dset->shared->cache.chunk.nbytes && chunk_addr!=HADDR_UNDEF)
-            || (IS_H5FD_MPI(dset->ent.file) && (H5F_ACC_RDWR & H5F_get_intent(dset->ent.file))))) {
+            || (IS_H5FD_MPI(dset->oloc.file) && (H5F_ACC_RDWR & H5F_get_intent(dset->oloc.file))))) {
         H5D_io_info_t chk_io_info;      /* Temporary I/O info object */
         H5D_storage_t chk_store;        /* Chunk storage information */
 
@@ -2291,7 +2291,7 @@ H5D_istore_allocated(H5D_t *dset, hid_t dxpl_id)
 
     HDmemset(&udata, 0, sizeof udata);
     udata.common.mesg = &dset->shared->layout;
-    if (H5B_iterate(dset->ent.file, dxpl_id, H5B_ISTORE, H5D_istore_iter_allocated, dset->shared->layout.u.chunk.addr, &udata)<0)
+    if(H5B_iterate(dset->oloc.file, dxpl_id, H5B_ISTORE, H5D_istore_iter_allocated, dset->shared->layout.u.chunk.addr, &udata) < 0)
         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, 0, "unable to iterate over chunk B-tree")
 
     /* Set return value */
@@ -2341,7 +2341,7 @@ H5D_istore_get_addr(const H5D_io_info_t *io_info, H5D_istore_ud1_t *_udata)
     udata->addr = HADDR_UNDEF;
 
     /* Go get the chunk information */
-    if (H5B_find (io_info->dset->ent.file, io_info->dxpl_id, H5B_ISTORE, io_info->dset->shared->layout.u.chunk.addr, udata)<0) {
+    if (H5B_find (io_info->dset->oloc.file, io_info->dxpl_id, H5B_ISTORE, io_info->dset->shared->layout.u.chunk.addr, udata)<0) {
         /* Note: don't push error on stack, leave that to next higher level,
          *      since many times the B-tree is searched in order to determine
          *      if a chunk exists in the B-tree or not. -QAK
@@ -2516,13 +2516,13 @@ H5D_istore_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
 
 #ifdef H5_HAVE_PARALLEL
     /* Retrieve MPI parameters */
-    if(IS_H5FD_MPI(dset->ent.file)) {
+    if(IS_H5FD_MPI(dset->oloc.file)) {
         /* Get the MPI communicator */
-        if (MPI_COMM_NULL == (mpi_comm=H5F_mpi_get_comm(dset->ent.file)))
+        if(MPI_COMM_NULL == (mpi_comm = H5F_mpi_get_comm(dset->oloc.file)))
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI communicator")
 
         /* Get the MPI rank */
-        if ((mpi_rank=H5F_mpi_get_rank(dset->ent.file))<0)
+        if((mpi_rank = H5F_mpi_get_rank(dset->oloc.file))<0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank")
 
         /* Set the MPI-capable file driver flag */
@@ -2627,7 +2627,7 @@ H5D_istore_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
                 udata.common.key.offset[u] = chunk_offset[u];
 
             /* Allocate the chunk with all processes */
-            if (H5B_insert(dset->ent.file, dxpl_id, H5B_ISTORE, dset->shared->layout.u.chunk.addr, &udata)<0)
+            if(H5B_insert(dset->oloc.file, dxpl_id, H5B_ISTORE, dset->shared->layout.u.chunk.addr, &udata)<0)
                 HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to allocate chunk")
 
             /* Check if fill values should be written to blocks */
@@ -2638,7 +2638,7 @@ H5D_istore_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
                     /* Write the chunks out from only one process */
                     /* !! Use the internal "independent" DXPL!! -QAK */
                     if(H5_PAR_META_WRITE==mpi_rank) {
-                        if (H5F_block_write(dset->ent.file, H5FD_MEM_DRAW, udata.addr, udata.common.key.nbytes, H5AC_ind_dxpl_id, chunk)<0)
+                        if(H5F_block_write(dset->oloc.file, H5FD_MEM_DRAW, udata.addr, udata.common.key.nbytes, H5AC_ind_dxpl_id, chunk) < 0)
                             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
                     } /* end if */
 
@@ -2647,7 +2647,7 @@ H5D_istore_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
                 } /* end if */
                 else {
 #endif /* H5_HAVE_PARALLEL */
-                    if (H5F_block_write(dset->ent.file, H5FD_MEM_DRAW, udata.addr, udata.common.key.nbytes, dxpl_id, chunk)<0)
+                    if(H5F_block_write(dset->oloc.file, H5FD_MEM_DRAW, udata.addr, udata.common.key.nbytes, dxpl_id, chunk) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
 #ifdef H5_HAVE_PARALLEL
                 } /* end else */
@@ -2852,7 +2852,7 @@ H5D_istore_prune_by_extent(const H5D_io_info_t *io_info)
     udata.common.mesg = &dset->shared->layout;
     udata.dims = curr_dims;
 
-    if(H5B_iterate(dset->ent.file, io_info->dxpl_id, H5B_ISTORE, H5D_istore_prune_extent, dset->shared->layout.u.chunk.addr, &udata) < 0)
+    if(H5B_iterate(dset->oloc.file, io_info->dxpl_id, H5B_ISTORE, H5D_istore_prune_extent, dset->shared->layout.u.chunk.addr, &udata) < 0)
 	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, 0, "unable to iterate over B-tree")
 
 done:

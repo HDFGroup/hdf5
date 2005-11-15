@@ -92,10 +92,12 @@ am_libhdf5_la_OBJECTS = H5.lo H5A.lo H5AC.lo H5B.lo H5Bcache.lo \
 	H5FDfphdf5.lo H5FDlog.lo H5FDmpi.lo H5FDmpio.lo \
 	H5FDmpiposix.lo H5FDmulti.lo H5FDsec2.lo H5FDstdio.lo \
 	H5FDstream.lo H5FL.lo H5FO.lo H5FP.lo H5FPclient.lo \
-	H5FPserver.lo H5FS.lo H5G.lo H5Gent.lo H5Gnode.lo H5Gstab.lo \
-	H5HG.lo H5HGdbg.lo H5HL.lo H5HLdbg.lo H5HP.lo H5I.lo H5MF.lo \
-	H5MM.lo H5MP.lo H5MPtest.lo H5O.lo H5Oattr.lo H5Obogus.lo \
-	H5Ocont.lo H5Odtype.lo H5Oefl.lo H5Ofill.lo H5Olayout.lo \
+	H5FPserver.lo H5FS.lo H5G.lo H5Gent.lo H5Glink.lo H5Gloc.lo \
+	H5Gname.lo H5Gnode.lo H5Gobj.lo H5Gstab.lo H5Gtest.lo \
+	H5Gtraverse.lo H5HG.lo H5HGdbg.lo H5HL.lo H5HLdbg.lo H5HP.lo \
+	H5I.lo H5MF.lo H5MM.lo H5MP.lo H5MPtest.lo H5O.lo H5Oattr.lo \
+	H5Obogus.lo H5Ocache.lo H5Ocont.lo H5Odtype.lo H5Oefl.lo \
+	H5Ofill.lo H5Oginfo.lo H5Olayout.lo H5Olinfo.lo H5Olink.lo \
 	H5Omtime.lo H5Oname.lo H5Onull.lo H5Opline.lo H5Osdspace.lo \
 	H5Oshared.lo H5Ostab.lo H5P.lo H5Pdcpl.lo H5Pdxpl.lo \
 	H5Pfapl.lo H5Pfcpl.lo H5Pgcpl.lo H5Pocpl.lo H5Ptest.lo H5R.lo \
@@ -396,12 +398,18 @@ libhdf5_la_SOURCES = H5.c H5A.c H5AC.c H5B.c H5Bcache.c H5B2.c H5B2cache.c \
         H5FDfamily.c H5FDfphdf5.c H5FDlog.c H5FDmpi.c H5FDmpio.c   \
         H5FDmpiposix.c H5FDmulti.c H5FDsec2.c H5FDstdio.c           \
         H5FDstream.c H5FL.c H5FO.c H5FP.c H5FPclient.c H5FPserver.c H5FS.c    \
-        H5G.c H5Gent.c H5Gnode.c H5Gstab.c  \
+        H5G.c H5Gent.c H5Glink.c H5Gloc.c H5Gname.c H5Gnode.c H5Gobj.c \
+        H5Gstab.c  \
+        H5Gtest.c  \
+        H5Gtraverse.c  \
         H5HG.c H5HGdbg.c H5HL.c H5HLdbg.c H5HP.c H5I.c H5MF.c H5MM.c \
         H5MP.c H5MPtest.c \
         H5O.c \
-        H5Oattr.c H5Obogus.c   \
-        H5Ocont.c H5Odtype.c H5Oefl.c H5Ofill.c H5Olayout.c H5Omtime.c        \
+        H5Oattr.c H5Obogus.c H5Ocache.c \
+        H5Ocont.c H5Odtype.c H5Oefl.c H5Ofill.c H5Oginfo.c H5Olayout.c \
+        H5Olinfo.c \
+        H5Olink.c \
+        H5Omtime.c \
         H5Oname.c H5Onull.c H5Opline.c H5Osdspace.c H5Oshared.c H5Ostab.c     \
         H5P.c H5Pdcpl.c H5Pdxpl.c H5Pfapl.c H5Pfcpl.c H5Pgcpl.c H5Pocpl.c \
         H5Ptest.c \
@@ -601,8 +609,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Fsuper.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5G.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Gent.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Glink.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Gloc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Gname.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Gnode.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Gobj.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Gstab.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Gtest.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Gtraverse.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5HG.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5HGdbg.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5HL.Plo@am__quote@
@@ -616,11 +630,15 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5O.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Oattr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Obogus.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Ocache.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Ocont.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Odtype.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Oefl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Ofill.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Oginfo.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Olayout.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Olinfo.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Olink.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Omtime.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Oname.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Onull.Plo@am__quote@

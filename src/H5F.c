@@ -28,8 +28,8 @@
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5FPprivate.h"        /* Flexible parallel			*/
-#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Gprivate.h"		/* Groups				*/
+#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5Tprivate.h"		/* Datatypes				*/
@@ -1157,23 +1157,23 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
                 HGOTO_DONE(TRUE)  /* Indicate that the iterator should stop */
 	}
     } else { /* either count opened object IDs or put the IDs on the list */
-        H5G_entry_t *ent;        /* Group entry info for object */
+        H5O_loc_t *oloc;        /* Group entry info for object */
 
     	switch(olist->obj_type) {
 	    case H5I_ATTR:
-	        ent = H5A_entof((H5A_t*)obj_ptr);
+	        oloc = H5A_oloc((H5A_t*)obj_ptr);
                 break;
 	    case H5I_GROUP:
-	        ent = H5G_entof((H5G_t*)obj_ptr);
+	        oloc = H5G_oloc((H5G_t*)obj_ptr);
                 break;
 	    case H5I_DATASET:
-	        ent = H5D_entof((H5D_t*)obj_ptr);
+	        oloc = H5D_oloc((H5D_t*)obj_ptr);
 		break;
 	    case H5I_DATATYPE:
                 if(H5T_is_named((H5T_t*)obj_ptr)==TRUE)
-                    ent = H5T_entof((H5T_t*)obj_ptr);
+                    oloc = H5T_oloc((H5T_t*)obj_ptr);
                 else
-                    ent = NULL;
+                    oloc = NULL;
 		break;
             default:
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unknown data object")
@@ -1182,11 +1182,11 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
         if((olist->file_info.local &&
                     ( (!olist->file_info.ptr.file && olist->obj_type==H5I_DATATYPE && H5T_is_immutable((H5T_t*)obj_ptr)==FALSE)
                             || (!olist->file_info.ptr.file && olist->obj_type!=H5I_DATATYPE)
-                            || (ent && ent->file == olist->file_info.ptr.file) ))
+                            || (oloc && oloc->file == olist->file_info.ptr.file) ))
                 || (!olist->file_info.local &&
                     ((!olist->file_info.ptr.shared && olist->obj_type==H5I_DATATYPE && H5T_is_immutable((H5T_t*)obj_ptr)==FALSE)
                             || (!olist->file_info.ptr.shared && olist->obj_type!=H5I_DATATYPE)
-                            || (ent && ent->file && ent->file->shared == olist->file_info.ptr.shared) ))) {
+                            || (oloc && oloc->file && oloc->file->shared == olist->file_info.ptr.shared) ))) {
             /* Add the object's ID to the ID list, if appropriate */
             if(olist->obj_id_list) {
             	olist->obj_id_list[olist->list_index] = obj_id;
@@ -1749,7 +1749,9 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
     H5F_t              *file = NULL;        /*the success return value      */
     H5F_file_t         *shared = NULL;      /*shared part of `file'         */
     H5FD_t             *lf = NULL;          /*file driver part of `shared'  */
-    H5G_entry_t         root_ent;           /*root symbol table entry       */
+    H5G_loc_t           root_loc;           /*root location                 */
+    H5O_loc_t           root_oloc;          /*root object location          */
+    H5G_name_t          root_path;          /*root group hier. path         */
     unsigned            tent_flags;         /*tentative flags               */
     H5FD_class_t       *drvr;               /*file driver class info        */
     hbool_t             driver_has_cmp;     /*`cmp' callback defined?       */
@@ -1759,6 +1761,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
     H5F_t              *ret_value;          /*actual return value           */
 
     FUNC_ENTER_NOAPI(H5F_open, NULL)
+
+    /* Set up root location to fill in */
+    root_loc.oloc = &root_oloc;
+    root_loc.path = &root_path;
 
     /*
      * If the driver has a `cmp' method then the driver is capable of
@@ -1951,7 +1957,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
             if (!H5FD_fphdf5_is_captain(lf)) {
                 /* Allocate room for the superblock buffer */
                 H5_CHECK_OVERFLOW(super_info.size, hsize_t, size_t);
-                if((buf=H5MM_malloc((size_t)super_info.size))==NULL)
+                if((buf = H5MM_malloc((size_t)super_info.size))==NULL)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for superblock buffer")
             } /* end if */
 
@@ -1962,7 +1968,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
                 HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mrc)
 
             if (!H5FD_fphdf5_is_captain(lf)) {
-                if (H5F_read_superblock(file, dxpl_id, &root_ent, super_info.addr,
+                if (H5F_read_superblock(file, dxpl_id, &root_loc, super_info.addr,
                                         buf, (size_t)super_info.size) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
 	    }
@@ -1973,12 +1979,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
              *                                    JRM - 4/13/04
              */
             if ( (mrc = MPI_Barrier(H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS )
-            {
                 HMPI_GOTO_ERROR(NULL, "MPI_Barrier failed", mrc)
-            }
 
             if (!H5FD_fphdf5_is_captain(lf)) {
-                if (H5G_mkroot(file, dxpl_id, &root_ent) < 0)
+                if (H5G_mkroot(file, dxpl_id, &root_loc) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group")
             }
 
@@ -1992,7 +1996,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
 #endif  /* H5_HAVE_FPHDF5 */
 
 	/* Read the superblock if it hasn't been read before. */
-        if (H5F_read_superblock(file, dxpl_id, &root_ent, HADDR_UNDEF, NULL, (size_t)0) < 0)
+        if(H5F_read_superblock(file, dxpl_id, &root_loc, HADDR_UNDEF, NULL, (size_t)0) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
 
 #ifdef H5_HAVE_FPHDF5
@@ -2001,14 +2005,13 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
              * race conditions with allocations, make sure that everyone is done
              * reading the superblock before we proceed.
              */
-            if ( (mrc = MPI_Barrier(H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS ) {
+            if ( (mrc = MPI_Barrier(H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS )
                 HMPI_GOTO_ERROR(NULL, "MPI_Barrier failed", mrc)
-            }
-        }
+        } /* end if */
 #endif  /* H5_HAVE_FPHDF5 */
 
 	/* Make sure we can open the root group */
-	if (H5G_mkroot(file, dxpl_id, &root_ent)<0)
+	if (H5G_mkroot(file, dxpl_id, &root_loc)<0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read root group")
     }
 
@@ -2270,61 +2273,61 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
     H5T_t	*type = NULL;
     H5D_t	*dset = NULL;
     H5A_t	*attr = NULL;
-    H5G_entry_t	*ent = NULL;
+    H5O_loc_t	*oloc = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Fflush, FAIL)
     H5TRACE2("e","iFs",object_id,scope);
 
-    switch (H5I_get_type(object_id)) {
+    switch(H5I_get_type(object_id)) {
         case H5I_FILE:
-            if (NULL==(f=H5I_object(object_id)))
+            if(NULL == (f = H5I_object(object_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
             break;
 
         case H5I_GROUP:
-            if (NULL==(grp=H5I_object(object_id)))
+            if(NULL == (grp = H5I_object(object_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid group identifier")
-            ent = H5G_entof(grp);
+            oloc = H5G_oloc(grp);
             break;
 
         case H5I_DATATYPE:
-            if (NULL==(type=H5I_object(object_id)))
+            if(NULL == (type = H5I_object(object_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid type identifier")
-            ent = H5T_entof(type);
+            oloc = H5T_oloc(type);
             break;
 
         case H5I_DATASET:
-            if (NULL==(dset=H5I_object(object_id)))
+            if(NULL == (dset = H5I_object(object_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
-            ent = H5D_entof(dset);
+            oloc = H5D_oloc(dset);
             break;
 
         case H5I_ATTR:
-            if (NULL==(attr=H5I_object(object_id)))
+            if(NULL == (attr = H5I_object(object_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid attribute identifier")
-            ent = H5A_entof(attr);
+            oloc = H5A_oloc(attr);
             break;
 
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-    }
+    } /* end switch */
 
-    if (!f) {
-	if (!ent)
+    if(!f) {
+	if(!oloc)
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "object is not assocated with a file")
-	f = ent->file;
-    }
-    if (!f)
+	f = oloc->file;
+    } /* end if */
+    if(!f)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "object is not associated with a file")
 
     /* Flush the file */
-    if (H5F_flush(f, H5AC_dxpl_id, scope, H5F_FLUSH_NONE) < 0)
+    if(H5F_flush(f, H5AC_dxpl_id, scope, H5F_FLUSH_NONE) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "flush failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Fflush() */
 
 
 /*-------------------------------------------------------------------------
@@ -3245,7 +3248,6 @@ done:
  * Programmer:	Raymond Lu
  *		Oct 29, 2003
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -3255,17 +3257,17 @@ H5F_get_id(H5F_t *file)
 
     FUNC_ENTER_NOAPI_NOINIT(H5F_get_id)
 
-    assert(file);
+    HDassert(file);
 
     if(file->file_id == -1) {
         /* Get an atom for the file */
-        if ((file->file_id = H5I_register(H5I_FILE, file))<0)
+        if((file->file_id = H5I_register(H5I_FILE, file)) < 0)
 	    HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
     } else {
         /* Increment reference count on atom. */
-        if (H5I_inc_ref(file->file_id)<0)
-            HGOTO_ERROR (H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
-    }
+        if(H5I_inc_ref(file->file_id)<0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
+    } /* end else */
 
     ret_value = file->file_id;
 
@@ -3504,6 +3506,37 @@ H5F_sieve_buf_size(const H5F_t *f)
 
     FUNC_LEAVE_NOAPI(f->shared->sieve_buf_size)
 } /* end H5F_sieve_buf_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_gc_ref
+ *
+ * Purpose:	Replaced a macro to retrieve the "garbage collect
+ *              references flag" now that the generic properties are being used
+ *              to store the values.
+ *
+ * Return:	Success:	The "garbage collect references flag"
+ *                              is returned.
+ *
+ * 		Failure:	(should not happen)
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Jul  8 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5F_gc_ref(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_gc_ref)
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->gc_ref)
+} /* end H5F_gc_ref() */
 
 
 /*-------------------------------------------------------------------------
@@ -4148,9 +4181,8 @@ done:
 ssize_t
 H5Fget_name(hid_t obj_id, char *name/*out*/, size_t size)
 {
-    H5G_entry_t   *ent;         /*symbol table entry */
-    H5F_t   *f;               /* Top file in mount hierarchy */
-    size_t        len=0;
+    H5F_t         *f;           /* Top file in mount hierarchy */
+    size_t        len;
     ssize_t       ret_value;
 
     FUNC_ENTER_API (H5Fget_name, FAIL)
@@ -4161,14 +4193,16 @@ H5Fget_name(hid_t obj_id, char *name/*out*/, size_t size)
      * the top file in a mount hierarchy)
      */
     if(H5I_get_type(obj_id) == H5I_FILE ) {
-        if (NULL==(f=H5I_object(obj_id)))
+        if(NULL == (f = H5I_object(obj_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
     } /* end if */
     else {
+        H5G_loc_t     loc;        /* Object location */
+
         /* Get symbol table entry */
-        if((ent = H5G_loc(obj_id))==NULL)
+        if(H5G_loc(obj_id, &loc) < 0)
              HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid object ID")
-        f = ent->file;
+        f = loc.oloc->file;
     } /* end else */
 
     len = HDstrlen(f->name);

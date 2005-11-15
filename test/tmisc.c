@@ -231,8 +231,13 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 #define MISC20_SPACE_RANK       2
 /* Make sure the product of the following 2 does not get too close to */
 /* 64 bits, risking an overflow. */
+#ifdef H5_HAVE_LARGE_HSIZET
 #define MISC20_SPACE_DIM0       (8*1024*1024*(uint64_t)1024)
 #define MISC20_SPACE_DIM1       ((256*1024*(uint64_t)1024)+1)
+#else /* H5_HAVE_LARGE_HSIZET */
+#define MISC20_SPACE_DIM0       (128*(uint64_t)1024)
+#define MISC20_SPACE_DIM1       ((4*(uint64_t)1024)+1)
+#endif /* H5_HAVE_LARGE_HSIZET */
 #define MISC20_SPACE2_DIM0      8
 #define MISC20_SPACE2_DIM1      4
 
@@ -257,6 +262,15 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 /* Definitions for misc. test #23 */
 #define MISC23_FILE             "tmisc23.h5"
 #define MISC23_NAME_BUF_SIZE    40
+
+/* Definitions for misc. test #24 */
+#define MISC24_FILE             "tmisc24.h5"
+#define MISC24_GROUP_NAME       "group"
+#define MISC24_GROUP_LINK       "group_link"
+#define MISC24_DATASET_NAME     "dataset"
+#define MISC24_DATASET_LINK     "dataset_link"
+#define MISC24_DATATYPE_NAME    "datatype"
+#define MISC24_DATATYPE_LINK    "datatype_link"
 
 /****************************************************************
 **
@@ -2816,7 +2830,11 @@ test_misc18(void)
     VERIFY(statbuf.u.obj.ohdr.nmesgs, 6, "H5Gget_objinfo");
     VERIFY(statbuf.u.obj.ohdr.nchunks, 1, "H5Gget_objinfo");
     VERIFY(statbuf.u.obj.ohdr.size, 272, "H5Gget_objinfo");
+#ifdef H5_HAVE_LARGE_HSIZET
     VERIFY(statbuf.u.obj.ohdr.free, 152, "H5Gget_objinfo");
+#else /* H5_HAVE_LARGE_HSIZET */
+    VERIFY(statbuf.u.obj.ohdr.free, 160, "H5Gget_objinfo");
+#endif /* H5_HAVE_LARGE_HSIZET */
 
     /* Create second dataset */
     did2 = H5Dcreate(fid, MISC18_DSET2_NAME, H5T_STD_U32LE, sid, H5P_DEFAULT);
@@ -2828,7 +2846,11 @@ test_misc18(void)
     VERIFY(statbuf.u.obj.ohdr.nmesgs, 6, "H5Gget_objinfo");
     VERIFY(statbuf.u.obj.ohdr.nchunks, 1, "H5Gget_objinfo");
     VERIFY(statbuf.u.obj.ohdr.size, 272, "H5Gget_objinfo");
+#ifdef H5_HAVE_LARGE_HSIZET
     VERIFY(statbuf.u.obj.ohdr.free, 152, "H5Gget_objinfo");
+#else /* H5_HAVE_LARGE_HSIZET */
+    VERIFY(statbuf.u.obj.ohdr.free, 160, "H5Gget_objinfo");
+#endif /* H5_HAVE_LARGE_HSIZET */
 
     /* Loop creating attributes on each dataset, flushing them to the file each time */
     for(u=0; u<10; u++) {
@@ -2857,18 +2879,32 @@ test_misc18(void)
     /* Get object information for dataset #1 now */
     ret = H5Gget_objinfo(fid,MISC18_DSET1_NAME,0,&statbuf);
     CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(statbuf.u.obj.ohdr.nmesgs, 24, "H5Gget_objinfo");
+#ifdef H5_HAVE_LARGE_HSIZET
+    VERIFY(statbuf.u.obj.ohdr.nmesgs, 28, "H5Gget_objinfo");
+    VERIFY(statbuf.u.obj.ohdr.nchunks, 9, "H5Gget_objinfo");
+    VERIFY(statbuf.u.obj.ohdr.size, 944, "H5Gget_objinfo");
+    VERIFY(statbuf.u.obj.ohdr.free, 72, "H5Gget_objinfo");
+#else /* H5_HAVE_LARGE_HSIZET */
+    VERIFY(statbuf.u.obj.ohdr.nmesgs, 26, "H5Gget_objinfo");
     VERIFY(statbuf.u.obj.ohdr.nchunks, 9, "H5Gget_objinfo");
     VERIFY(statbuf.u.obj.ohdr.size, 888, "H5Gget_objinfo");
-    VERIFY(statbuf.u.obj.ohdr.free, 16, "H5Gget_objinfo");
+    VERIFY(statbuf.u.obj.ohdr.free, 24, "H5Gget_objinfo");
+#endif /* H5_HAVE_LARGE_HSIZET */
 
     /* Get object information for dataset #2 now */
     ret = H5Gget_objinfo(fid,MISC18_DSET2_NAME,0,&statbuf);
     CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(statbuf.u.obj.ohdr.nmesgs, 24, "H5Gget_objinfo");
+#ifdef H5_HAVE_LARGE_HSIZET
+    VERIFY(statbuf.u.obj.ohdr.nmesgs, 28, "H5Gget_objinfo");
+    VERIFY(statbuf.u.obj.ohdr.nchunks, 9, "H5Gget_objinfo");
+    VERIFY(statbuf.u.obj.ohdr.size, 944, "H5Gget_objinfo");
+    VERIFY(statbuf.u.obj.ohdr.free, 72, "H5Gget_objinfo");
+#else /* H5_HAVE_LARGE_HSIZET */
+    VERIFY(statbuf.u.obj.ohdr.nmesgs, 26, "H5Gget_objinfo");
     VERIFY(statbuf.u.obj.ohdr.nchunks, 9, "H5Gget_objinfo");
     VERIFY(statbuf.u.obj.ohdr.size, 888, "H5Gget_objinfo");
-    VERIFY(statbuf.u.obj.ohdr.free, 16, "H5Gget_objinfo");
+    VERIFY(statbuf.u.obj.ohdr.free, 24, "H5Gget_objinfo");
+#endif /* H5_HAVE_LARGE_HSIZET */
 
     /* Close second dataset */
     ret = H5Dclose(did2);
@@ -3349,9 +3385,11 @@ test_misc20(void)
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
     CHECK(dcpl, FAIL, "H5Pcreate");
 
-    /* Use chunked storage for this dataset */
+    /* Try to use chunked storage for this dataset */
+#ifdef H5_HAVE_LARGE_HSIZET
     ret = H5Pset_chunk(dcpl,rank,big_dims);
     VERIFY(ret, FAIL, "H5Pset_chunk");
+#endif /* H5_HAVE_LARGE_HSIZET */
 
     /* Verify that the storage for the dataset is the correct size and hasn't
      * been truncated.
@@ -3466,6 +3504,7 @@ test_misc20(void)
 
     /* Open dataset with small dimensions */
     did = H5Dopen(fid, MISC20_DSET_NAME);
+#ifdef H5_HAVE_LARGE_HSIZET
     CHECK(did, FAIL, "H5Dopen");
 
     /* Get the layout version */
@@ -3481,6 +3520,9 @@ test_misc20(void)
     /* Close datasset */
     ret=H5Dclose(did);
     CHECK(ret, FAIL, "H5Dclose");
+#else /* H5_HAVE_LARGE_HSIZET */
+    VERIFY(did, FAIL, "H5Dopen");
+#endif /* H5_HAVE_LARGE_HSIZET */
 
     /* Close file */
     ret = H5Fclose(fid);
@@ -3886,6 +3928,13 @@ test_misc23(void)
     CHECK(status, FAIL, "H5Dclose");
 
 
+    status = H5Tclose(type_id);
+    CHECK(status, FAIL, "H5Tclose");
+
+    status = H5Sclose(space_id);
+    CHECK(status, FAIL, "H5Sclose");
+
+
     status = H5Pclose(create_id);
     CHECK(status, FAIL, "H5Pclose");
 
@@ -3956,7 +4005,138 @@ test_misc23(void)
     status = H5Pclose(create_id);
     CHECK(status, FAIL, "H5Pclose");
 
+    status = H5Gclose(group_id);
+    CHECK(status, FAIL, "H5Gclose");
+
+    status = H5Fclose(file_id);
+    CHECK(status, FAIL, "H5Fclose");
+
 } /* end test_misc23() */
+
+/****************************************************************
+**
+**  test_misc24(): Test opening objects with inappropriate APIs
+**
+****************************************************************/
+static void
+test_misc24(void)
+{
+    hid_t       file_id = 0, group_id = 0, type_id = 0, space_id = 0,
+                dset_id = 0, tmp_id = 0;
+    herr_t      ret;            /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing opening objects with inappropriate APIs\n"));
+
+    /* Create a new file using default properties. */
+    file_id = H5Fcreate(MISC24_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file_id, FAIL, "H5Fcreate");
+
+    /* Create dataspace for dataset */
+    space_id = H5Screate(H5S_SCALAR);
+    CHECK(space_id, FAIL, "H5Screate");
+
+    /* Create group, dataset & named datatype objects */
+    group_id = H5Gcreate(file_id, MISC24_GROUP_NAME, (size_t)0);
+    CHECK(group_id, FAIL, "H5Gcreate");
+
+    dset_id = H5Dcreate(file_id, MISC24_DATASET_NAME, H5T_NATIVE_INT, space_id, H5P_DEFAULT);
+    CHECK(dset_id, FAIL, "H5Dcreate");
+
+    type_id = H5Tcopy(H5T_NATIVE_INT);
+    CHECK(type_id, FAIL, "H5Tcopy");
+
+    ret = H5Tcommit(file_id, MISC24_DATATYPE_NAME, type_id);
+    CHECK(ret, FAIL, "H5Tcommit");
+
+    /* Create soft links to the objects created */
+    ret = H5Glink2(file_id, MISC24_GROUP_NAME, H5G_LINK_SOFT, file_id, MISC24_GROUP_LINK);
+    CHECK(ret, FAIL, "H5Glink2");
+
+    ret = H5Glink2(file_id, MISC24_DATASET_NAME, H5G_LINK_SOFT, file_id, MISC24_DATASET_LINK);
+    CHECK(ret, FAIL, "H5Glink2");
+
+    ret = H5Glink2(file_id, MISC24_DATATYPE_NAME, H5G_LINK_SOFT, file_id, MISC24_DATATYPE_LINK);
+    CHECK(ret, FAIL, "H5Glink2");
+
+    /* Close IDs for objects */
+    ret = H5Dclose(dset_id);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    ret = H5Sclose(space_id);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    ret = H5Gclose(group_id);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret = H5Tclose(type_id);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Attempt to open each kind of object with wrong API, including using soft links */
+    H5E_BEGIN_TRY {
+        tmp_id = H5Dopen(file_id, MISC24_GROUP_NAME);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Dopen");
+
+    H5E_BEGIN_TRY {
+        tmp_id = H5Dopen(file_id, MISC24_GROUP_LINK);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Dopen");
+
+    H5E_BEGIN_TRY {
+        tmp_id = H5Topen(file_id, MISC24_GROUP_NAME);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Topen");
+
+    H5E_BEGIN_TRY {
+        tmp_id = H5Topen(file_id, MISC24_GROUP_LINK);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Topen");
+
+    H5E_BEGIN_TRY {
+        tmp_id = H5Gopen(file_id, MISC24_DATASET_NAME);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Gopen");
+
+    H5E_BEGIN_TRY {
+        tmp_id = H5Gopen(file_id, MISC24_DATASET_LINK);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Gopen");
+
+    H5E_BEGIN_TRY {
+        tmp_id = H5Topen(file_id, MISC24_DATASET_NAME);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Topen");
+
+    H5E_BEGIN_TRY {
+        tmp_id = H5Topen(file_id, MISC24_DATASET_LINK);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Topen");
+
+    H5E_BEGIN_TRY {
+        tmp_id = H5Gopen(file_id, MISC24_DATATYPE_NAME);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Gopen");
+
+    H5E_BEGIN_TRY {
+        tmp_id = H5Gopen(file_id, MISC24_DATATYPE_LINK);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Gopen");
+
+    H5E_BEGIN_TRY {
+        tmp_id = H5Dopen(file_id, MISC24_DATATYPE_NAME);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Dopen");
+
+    H5E_BEGIN_TRY {
+        tmp_id = H5Dopen(file_id, MISC24_DATATYPE_LINK);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Dopen");
+
+    /* Close file */
+    ret = H5Fclose(file_id);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* end test_misc24() */
 
 /****************************************************************
 **
@@ -3991,9 +4171,10 @@ test_misc(void)
     test_misc20();      /* Test problems with truncated dimensions in version 2 of storage layout message */
 #if defined H5_HAVE_FILTER_SZIP
     test_misc21();      /* Test that "late" allocation time is treated the same as "incremental", for chunked datasets w/a filters */
-    test_misc22();     /* check szip bits per pixel */
+    test_misc22();      /* check szip bits per pixel */
 #endif /* H5_HAVE_FILTER_SZIP */
     test_misc23();      /* Test intermediate group creation */
+    test_misc24();      /* Test inappropriate API opens of objects */
 
 } /* test_misc() */
 
@@ -4043,5 +4224,6 @@ cleanup_misc(void)
     HDremove(MISC22_FILE);
 #endif /* H5_HAVE_FILTER_SZIP */
     HDremove(MISC23_FILE);
+    HDremove(MISC24_FILE);
 }
 

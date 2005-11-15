@@ -29,9 +29,6 @@
 
 #include "H5Sprivate.h"
 
-/* Number of reserved IDs in ID group */
-#define H5S_RESERVED_ATOMS  2
-
 /* Flags to indicate special dataspace features are active */
 #define H5S_VALID_MAX	0x01
 #define H5S_VALID_PERM	0x02

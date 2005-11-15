@@ -39,13 +39,15 @@
 
 /* Other private headers needed by this file */
 #include "H5FLprivate.h"	/* Free Lists				*/
+#include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Sprivate.h"		/* Dataspace				*/
 #include "H5Tprivate.h"		/* Datatype functions			*/
 
 struct H5A_t {
-    unsigned       initialized;/* Indicate whether the attribute has been modified */
-    unsigned       ent_opened; /* Object header entry opened? */
-    H5G_entry_t ent;        /* Object Header entry (for both datasets & groups) */
+    hbool_t    initialized;/* Indicate whether the attribute has been modified */
+    hbool_t     obj_opened; /* Object header entry opened? */
+    H5O_loc_t   oloc;       /* Object location for object attribute is on */
+    H5G_name_t  path;       /* Group hierarchy path */
     char        *name;      /* Attribute's name */
     H5T_t       *dt;        /* Attribute's datatype */
     size_t      dt_size;    /* Size of datatype on disk */

@@ -96,8 +96,7 @@ static herr_t H5B2_swap_leaf(H5F_t *f, hid_t dxpl_id, unsigned depth,
     H5B2_internal_t *internal, unsigned *internal_flags_ptr,
     unsigned idx, void *swap_loc);
 static herr_t H5B2_insert_internal(H5F_t *f, hid_t dxpl_id,
-    H5RC_t *bt2_shared, unsigned depth, H5AC_info_t *parent_cache_info,
-    unsigned *parent_cache_info_flags_ptr,
+    H5RC_t *bt2_shared, unsigned depth, unsigned *parent_cache_info_flags_ptr,
     H5B2_node_ptr_t *curr_node_ptr, void *udata);
 static herr_t H5B2_insert_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     H5B2_node_ptr_t *curr_node_ptr, void *udata);
@@ -2476,8 +2475,7 @@ done:
  */
 static herr_t
 H5B2_insert_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
-    unsigned depth, H5AC_info_t *parent_cache_info,
-    unsigned *parent_cache_info_flags_ptr,
+    unsigned depth, unsigned *parent_cache_info_flags_ptr,
     H5B2_node_ptr_t *curr_node_ptr, void *udata)
 {
     H5B2_internal_t *internal;          /* Pointer to internal node */
@@ -2492,7 +2490,6 @@ H5B2_insert_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     HDassert(f);
     HDassert(bt2_shared);
     HDassert(depth>0);
-    HDassert(parent_cache_info);
     HDassert(parent_cache_info_flags_ptr);
     HDassert(curr_node_ptr);
     HDassert(H5F_addr_defined(curr_node_ptr->addr));
@@ -2583,8 +2580,7 @@ H5B2_insert_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
     /* Attempt to insert node */
     if(depth>1) {
-        if(H5B2_insert_internal(f,dxpl_id,bt2_shared,depth-1,&internal->cache_info,&internal_flags,
-                                &internal->node_ptrs[idx],udata)<0)
+        if(H5B2_insert_internal(f, dxpl_id, bt2_shared, depth-1, &internal_flags, &internal->node_ptrs[idx], udata) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert record into B-tree internal node")
     } /* end if */
     else {
@@ -2670,7 +2666,7 @@ H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
 
     /* Attempt to insert record into B-tree */
     if(bt2->depth>0) {
-        if(H5B2_insert_internal(f,dxpl_id,bt2->shared,bt2->depth,&(bt2->cache_info),&bt2_flags,&bt2->root,udata)<0)
+        if(H5B2_insert_internal(f, dxpl_id, bt2->shared, bt2->depth, &bt2_flags, &bt2->root, udata) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert record into B-tree internal node")
     } /* end if */
     else {

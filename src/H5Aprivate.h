@@ -28,6 +28,7 @@
 typedef struct H5A_t H5A_t;
 
 /* Library private functions in package */
-H5_DLL H5G_entry_t *H5A_entof(H5A_t *attr);
+H5_DLL struct H5O_loc_t *H5A_oloc(H5A_t *attr);
+H5_DLL H5G_name_t *H5A_nameof(H5A_t *attr);
 
 #endif

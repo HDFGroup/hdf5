@@ -148,8 +148,8 @@ void print_pos( int        *ph,
  parallel_print("[ " );
  for ( i = 0; i < rank; i++)
  {
- /* HDfprintf(stdout,"%Hu ", pos[i]  ); */
-     parallel_print("%"H5_PRINTF_LL_WIDTH"u ", pos[i]);
+/* HDfprintf(stdout,"%Hu ", pos[i]  ); */
+     parallel_print("%"H5_PRINTF_LL_WIDTH"u ", (unsigned long_long)pos[i]);
  }
  parallel_print("]" );
 }
@@ -170,7 +170,7 @@ void print_dims( int r, hsize_t *d )
  int i;
  parallel_print("[ " );
  for ( i=0; i<r; i++ )
-  parallel_print("%d ",(int)d[i]  );
+  parallel_print("%"H5_PRINTF_LL_WIDTH"u ",(unsigned long_long)d[i]  );
  parallel_print("] " );
 }
 
@@ -421,7 +421,7 @@ get_class(H5T_class_t tclass)
 void print_found(hsize_t nfound)
 {
     if(g_Parallel)
-	parallel_print("%"H5_PRINTF_LL_WIDTH"u differences found\n", nfound);
+	parallel_print("%"H5_PRINTF_LL_WIDTH"u differences found\n", (unsigned long_long)nfound);
     else
 	HDfprintf(stdout,"%Hu differences found\n",nfound);
 }

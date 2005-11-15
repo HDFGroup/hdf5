@@ -2,6 +2,34 @@ HDF5 version 1.7.52 currently under development
 ================================================================================
 
 
+===========================================================================
+WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!
+
+                                   ______ 
+                                .-"      "-. 
+                               /            \ 
+                   _          |              |          _ 
+                  ( \         |,  .-.  .-.  ,|         / )
+                   > "=._     | )(__/  \__)( |     _.=" <
+                  (_/"=._"=._ |/     /\     \| _.="_.="\_)
+                         "=._ (_     ^^     _)"_.=" 
+                             "=\__|IIIIII|__/="
+                            _.="| \IIIIII/ |"=._
+                  _     _.="_.="\          /"=._"=._     _
+                 ( \_.="_.="     `--------`     "=._"=._/ )
+                  > _.="                            "=._ <
+                 (_/   jgs                              \_)
+
+    This code is currently using interim file format changes that will
+certainly change before the final 1.8.0 release.  Please feel free to test
+everything out (in fact, we'd welcome that!), but do _NOT_ keep any of the
+files produced as they will not be readable by later versions of the HDF5
+software. - QAK
+
+WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!
+===========================================================================
+
+
 INTRODUCTION
 
 This document describes the differences between HDF5-1.6.* and

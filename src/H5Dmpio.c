@@ -106,7 +106,7 @@ H5D_mpio_opt_possible( const H5D_io_info_t *io_info,
 
     /* Optimized MPI types flag must be set and it is must be collective IO */
     /* (Don't allow parallel I/O for the MPI-posix driver, since it doesn't do real collective I/O) */
-    if (!(H5S_mpi_opt_types_g && io_info->dxpl_cache->xfer_mode==H5FD_MPIO_COLLECTIVE && !IS_H5FD_MPIPOSIX(io_info->dset->ent.file))) {
+    if (!(H5S_mpi_opt_types_g && io_info->dxpl_cache->xfer_mode==H5FD_MPIO_COLLECTIVE && !IS_H5FD_MPIPOSIX(io_info->dset->oloc.file))) {
         local_opinion = FALSE;
         goto broadcast;
     } /* end if */
@@ -230,7 +230,7 @@ H5D_mpio_spaces_xfer(H5D_io_info_t *io_info, size_t elmt_size,
     assert (file_space);
     assert (mem_space);
     assert (buf);
-    assert (IS_H5FD_MPIO(io_info->dset->ent.file));
+    assert (IS_H5FD_MPIO(io_info->dset->oloc.file));
     /* Make certain we have the correct type of property list */
     assert(TRUE==H5P_isa_class(io_info->dxpl_id,H5P_DATASET_XFER));
 
@@ -260,7 +260,7 @@ H5D_mpio_spaces_xfer(H5D_io_info_t *io_info, size_t elmt_size,
 
         assert(io_info->dset->shared->layout.type == H5D_CHUNKED);
         chunk_addr=H5D_istore_get_addr(io_info,NULL);
-        addr = H5F_BASE_ADDR(io_info->dset->ent.file) + chunk_addr + mpi_file_offset;
+        addr = H5F_BASE_ADDR(io_info->dset->oloc.file) + chunk_addr + mpi_file_offset;
     }
 
     /*
@@ -276,10 +276,10 @@ H5D_mpio_spaces_xfer(H5D_io_info_t *io_info, size_t elmt_size,
 
     /* transfer the data */
     if (do_write) {
-    	if (H5F_block_write(io_info->dset->ent.file, H5FD_MEM_DRAW, addr, mpi_buf_count, io_info->dxpl_id, buf) <0)
+    	if (H5F_block_write(io_info->dset->oloc.file, H5FD_MEM_DRAW, addr, mpi_buf_count, io_info->dxpl_id, buf) <0)
 	    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,"MPI write failed");
     } else {
-    	if (H5F_block_read (io_info->dset->ent.file, H5FD_MEM_DRAW, addr, mpi_buf_count, io_info->dxpl_id, buf) <0)
+    	if (H5F_block_read (io_info->dset->oloc.file, H5FD_MEM_DRAW, addr, mpi_buf_count, io_info->dxpl_id, buf) <0)
 	    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL,"MPI read failed");
     }
 

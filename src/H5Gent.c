@@ -27,53 +27,21 @@
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5HLprivate.h"	/* Local Heaps				*/
+#include "H5Iprivate.h"		/* IDs			  		*/
+
+/* Private macros */
+#define H5G_NO_CHANGE   (-1)            /*see H5G_ent_modified()             */
 
 /* Private prototypes */
 #ifdef NOT_YET
 static herr_t H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type);
 #endif /* NOT_YET */
+static herr_t H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent);
+static herr_t H5G_ent_decode(H5F_t *f, const uint8_t **pp,
+			      H5G_entry_t *ent/*out*/);
 
 /* Declare extern the PQ free list for the wrapped strings */
 H5FL_BLK_EXTERN(str_buf);
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5G_ent_cache
- *
- * Purpose:     Returns a pointer to the cache associated with the symbol
- *              table entry.  You should modify the cache directly, then call
- *              H5G_ent_modified() with the new cache type (even if the type is
- *              still the same).
- *
- * Return:      Success:        Ptr to the cache in the symbol table entry.
- *
- *              Failure:        NULL
- *
- * Programmer:  Robb Matzke
- *              Friday, September 19, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-const H5G_cache_t *
-H5G_ent_cache(const H5G_entry_t *ent, H5G_type_t *cache_type)
-{
-    const H5G_cache_t *ret_value;     /* Return value */
-
-    FUNC_ENTER_NOAPI(H5G_ent_cache, NULL);
-
-    if (!ent)
-        HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, NULL, "no entry");
-    if (cache_type)
-        *cache_type = ent->type;
-
-    /* Set return value */
-    ret_value=(const H5G_cache_t *)&(ent->cache);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
 
 
 /*-------------------------------------------------------------------------
@@ -94,8 +62,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#ifdef NOT_YET
-static herr_t
+herr_t
 H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type)
 {
     FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_modified)
@@ -109,7 +76,6 @@ H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G_ent_modified */
-#endif /* NOT_YET */
 
 
 /*-------------------------------------------------------------------------
@@ -179,18 +145,18 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5G_ent_decode(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
 {
     const uint8_t	*p_ret = *pp;
     uint32_t		tmp;
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_decode);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_ent_decode)
 
     /* check arguments */
-    assert(f);
-    assert(pp);
-    assert(ent);
+    HDassert(f);
+    HDassert(pp);
+    HDassert(ent);
 
     ent->file = f;
 
@@ -222,8 +188,8 @@ H5G_ent_decode(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
 
     *pp = p_ret + H5G_SIZEOF_ENTRY(f);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5G_ent_decode() */
 
 
 /*-------------------------------------------------------------------------
@@ -296,12 +262,12 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
 {
     uint8_t		*p_ret = *pp + H5G_SIZEOF_ENTRY(f);
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_encode);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_ent_encode);
 
     /* check arguments */
     assert(f);
@@ -348,31 +314,19 @@ H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
 
 
 /*-------------------------------------------------------------------------
- * Function: H5G_ent_copy
+ * Function:    H5G_ent_copy
  *
- * Purpose: Do a deep copy of symbol table entries
+ * Purpose:     Do a deep copy of symbol table entries
  *
- * Return: Success: 0, Failure: -1
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer:	Pedro Vicente
+ *              pvn@ncsa.uiuc.edu
+ *              ???day, August ??, 2002
  *
- * Date: August 2002
- *
- * Comments:
- *
- * Modifications:
- *      Quincey Koziol, Sept. 25, 2002:
- *          - Changed source & destination parameters to match the rest
- *              of the functions in the library.
- *          - Added 'depth' parameter to determine how much of the group
- *              entry structure we want to copy.  The new depths are:
- *                  H5G_COPY_NULL - Copy all the fields from the
- *                      source to the destination, but set the destination's
- *                      user path and canonical path to NULL.
- *                  H5G_COPY_LIMITED - Copy all the fields from the
- *                      source to the destination, except for the user path
- *                      field, keeping it the same as its
- *                      previous value in the destination.
+ * Notes:       'depth' parameter determines how much of the group entry
+ *              structure we want to copy.  The values are:
  *                  H5G_COPY_SHALLOW - Copy all the fields from the source
  *                      to the destination, including the user path and
  *                      canonical path. (Destination "takes ownership" of
@@ -384,68 +338,48 @@ H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_copy(H5G_entry_t *dst, const H5G_entry_t *src, H5G_ent_copy_depth_t depth)
+H5G_ent_copy(H5G_entry_t *dst, const H5G_entry_t *src, H5G_copy_depth_t depth)
 {
-    H5RS_str_t *tmp_user_path_r=NULL;   /* Temporary string pointer for entry's user path */
-
-    FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_copy);
+    FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_copy)
 
     /* Check arguments */
-    assert(src);
-    assert(dst);
-
-    /* If the depth is "very shallow", keep the old entry's user path */
-    if(depth==H5G_COPY_LIMITED) {
-        tmp_user_path_r=dst->user_path_r;
-        if(dst->canon_path_r)
-            H5RS_decr(dst->canon_path_r);
-    } /* end if */
+    HDassert(src);
+    HDassert(dst);
+    HDassert(depth == H5G_COPY_SHALLOW || depth == H5G_COPY_DEEP);
 
     /* Copy the top level information */
-    HDmemcpy(dst,src,sizeof(H5G_entry_t));
+    HDmemcpy(dst, src, sizeof(H5G_entry_t));
 
     /* Deep copy the names */
-    if(depth==H5G_COPY_DEEP) {
-        dst->user_path_r=H5RS_dup(src->user_path_r);
-        dst->canon_path_r=H5RS_dup(src->canon_path_r);
-    } else if(depth==H5G_COPY_LIMITED) {
-        dst->user_path_r=tmp_user_path_r;
-        dst->canon_path_r=H5RS_dup(src->canon_path_r);
-    } else if(depth==H5G_COPY_NULL) {
-        dst->user_path_r=NULL;
-        dst->canon_path_r=NULL;
-    } else if(depth==H5G_COPY_SHALLOW) {
-#ifndef NDEBUG
+    if(depth == H5G_COPY_DEEP) {
+        /* Nothing currently */
+        ;
+    } else if(depth == H5G_COPY_SHALLOW) {
         /* Discarding 'const' qualifier OK - QAK */
         H5G_ent_reset((H5G_entry_t *)src);
-#endif /* NDEBUG */
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5G_ent_copy() */
 
 
 /*-------------------------------------------------------------------------
- * Function: H5G_ent_reset
+ * Function:	H5G_ent_reset
  *
- * Purpose: Reset a symbol table entry to an empty state
+ * Purpose:	Reset a symbol table entry to an empty state
  *
- * Return: Success: 0, Failure: -1
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
  *
- * Programmer: Quincey Koziol, koziol@ncsa.uiuc.edu
- *
- * Date: August 2005
- *
- * Comments:
- *
- * Modifications:
+ * Programmer:	Quincey Koziol
+ *              ?day, August ??, 2005
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5G_ent_reset(H5G_entry_t *ent)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_reset);
+    FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_reset)
 
     /* Check arguments */
     HDassert(ent);
@@ -454,126 +388,83 @@ H5G_ent_reset(H5G_entry_t *ent)
     HDmemset(ent, 0, sizeof(H5G_entry_t));
     ent->header = HADDR_UNDEF;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G_ent_reset() */
 
 
 /*-------------------------------------------------------------------------
- * Function: H5G_ent_set_name
+ * Function:    H5G_ent_convert
  *
- * Purpose: Set the name of a symbol entry OBJ, located at LOC
+ * Purpose:     Convert a link to a symbol table entry
  *
- * Return: Success: 0, Failure: -1
+ * Return:      Success:        Non-negative, with *pp pointing to the first byte
+ *                              after the last symbol.
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *              Failure:        Negative
  *
- * Date: August 22, 2002
+ * Programmer:  Quincey Koziol
+ *              koziol@ncsa.uiuc.edu
+ *              Sep 20 2005
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_set_name(H5G_entry_t *loc, H5G_entry_t *obj, const char *name)
+H5G_ent_convert(H5F_t *f, haddr_t heap_addr, const char *name, const H5O_link_t *lnk,
+    H5G_entry_t *ent, hid_t dxpl_id)
 {
-    size_t  name_len;           /* Length of name to append */
-    herr_t  ret_value = SUCCEED;
+    size_t	name_offset;            /* Offset of name in heap */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_ent_set_name, FAIL)
+    FUNC_ENTER_NOAPI(H5G_ent_convert, FAIL)
 
-    assert(loc);
-    assert(obj);
-    assert(name);
+    /* check arguments */
+    HDassert(f);
+    HDassert(H5F_addr_defined(heap_addr));
+    HDassert(name);
+    HDassert(lnk);
 
-    /* Reset the object's previous names, if they exist */
-    if(obj->user_path_r) {
-        H5RS_decr(obj->user_path_r);
-        obj->user_path_r=NULL;
-    } /* end if */
-    if(obj->canon_path_r) {
-        H5RS_decr(obj->canon_path_r);
-        obj->canon_path_r=NULL;
-    } /* end if */
-    obj->user_path_hidden=0;
+    /* Reset the new entry */
+    H5G_ent_reset(ent);
 
-    /* Get the length of the new name */
-    name_len = HDstrlen(name);
+    /*
+     * Add the new name to the heap.
+     */
+    name_offset = H5HL_insert(f, dxpl_id, heap_addr, HDstrlen(name) + 1, name);
+    if(0 == name_offset || (size_t)(-1) == name_offset)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5B_INS_ERROR, "unable to insert symbol name into heap")
+    ent->name_off = name_offset;
 
-    /* Modify the object's user path, if a user path exists in the location */
-    if(loc->user_path_r) {
-        const char *loc_user_path;      /* Pointer to raw string for user path */
-        size_t  user_path_len;      /* Length of location's user path name */
-        char *new_user_path;        /* Pointer to new user path */
+    /* Build correct information for symbol table entry based on link type */
+    switch(lnk->type) {
+        case H5G_LINK_HARD:
+            ent->type = H5G_NOTHING_CACHED;
+            ent->header = lnk->u.hard.addr;
+            break;
 
-        /* Get the length of the strings involved */
-        user_path_len = H5RS_len(loc->user_path_r);
+        case H5G_LINK_SOFT:
+            {
+                size_t	lnk_offset;		/* Offset to sym-link value	*/
 
-        /* Modify the object's user path */
+                /* Insert link value into local heap */
+                if((size_t)(-1) == (lnk_offset = H5HL_insert(f, dxpl_id, heap_addr,
+                        HDstrlen(lnk->u.soft.name) + 1, lnk->u.soft.name)))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write link value to local heap")
 
-        /* Get the raw string for the user path */
-        loc_user_path=H5RS_get_str(loc->user_path_r);
-        assert(loc_user_path);
+                ent->type = H5G_CACHED_SLINK;
+                ent->cache.slink.lval_offset = lnk_offset;
+            } /* end case */
+            break;
 
-        /* The location's user path already ends in a '/' separator */
-        if ('/'==loc_user_path[user_path_len-1]) {
-            if (NULL==(new_user_path = H5FL_BLK_MALLOC(str_buf,user_path_len+name_len+1)))
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-            HDstrcpy(new_user_path, loc_user_path);
-        } /* end if */
-        /* The location's user path needs a separator */
-        else {
-            if (NULL==(new_user_path = H5FL_BLK_MALLOC(str_buf,user_path_len+1+name_len+1)))
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-            HDstrcpy(new_user_path, loc_user_path);
-            HDstrcat(new_user_path, "/");
-        } /* end else */
+        default:
+            HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unrecognized link type")
+    } /* end switch */
 
-        /* Append the component's name */
-        HDstrcat(new_user_path, name);
-
-        /* Give ownership of the user path to the entry */
-        obj->user_path_r=H5RS_own(new_user_path);
-        assert(obj->user_path_r);
-    } /* end if */
-
-    /* Modify the object's canonical path, if a canonical path exists in the location */
-    if(loc->canon_path_r) {
-        const char *loc_canon_path;     /* Pointer to raw string for canonical path */
-        size_t  canon_path_len;     /* Length of location's canonical path name */
-        char *new_canon_path;       /* Pointer to new canonical path */
-
-        /* Get the length of the strings involved */
-        canon_path_len = H5RS_len(loc->canon_path_r);
-
-        /* Modify the object's canonical path */
-
-        /* Get the raw string for the canonical path */
-        loc_canon_path=H5RS_get_str(loc->canon_path_r);
-        assert(loc_canon_path);
-
-        /* The location's canonical path already ends in a '/' separator */
-        if ('/'==loc_canon_path[canon_path_len-1]) {
-            if (NULL==(new_canon_path = H5FL_BLK_MALLOC(str_buf,canon_path_len+name_len+1)))
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-            HDstrcpy(new_canon_path, loc_canon_path);
-        } /* end if */
-        /* The location's canonical path needs a separator */
-        else {
-            if (NULL==(new_canon_path = H5FL_BLK_MALLOC(str_buf,canon_path_len+1+name_len+1)))
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-            HDstrcpy(new_canon_path, loc_canon_path);
-            HDstrcat(new_canon_path, "/");
-        } /* end else */
-
-        /* Append the component's name */
-        HDstrcat(new_canon_path, name);
-
-        /* Give ownership of the canonical path to the entry */
-        obj->canon_path_r=H5RS_own(new_canon_path);
-        assert(obj->canon_path_r);
-    } /* end if */
+    /* Set the file for the entry */
+    ent->file = f;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_ent_set_name() */
+} /* end H5G_ent_convert() */
 
 
 /*-------------------------------------------------------------------------
@@ -581,17 +472,12 @@ done:
  *
  * Purpose:     Prints debugging information about a symbol table entry.
  *
- * Errors:
- *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov
  *              Aug 29 1997
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The HEAP argument is passed by value.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -664,3 +550,4 @@ H5G_ent_debug(H5F_t UNUSED *f, hid_t dxpl_id, const H5G_entry_t *ent, FILE * str
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
+

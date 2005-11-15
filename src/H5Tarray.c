@@ -25,13 +25,8 @@
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling			*/
-#include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5Iprivate.h"		/* IDs					*/
 #include "H5Tpkg.h"		/* Datatypes				*/
-
-/* Declare extern the free list for H5T_t's */
-H5FL_EXTERN(H5T_t);
-H5FL_EXTERN(H5T_shared_t);
 
 
 /*--------------------------------------------------------------------------

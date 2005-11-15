@@ -66,17 +66,17 @@ typedef struct H5T_conv_cb_t {
 /* Private functions */
 H5_DLL herr_t H5TN_init_interface(void);
 H5_DLL herr_t H5T_init(void);
-H5_DLL htri_t H5T_isa(H5G_entry_t *ent, hid_t dxpl_id);
-H5_DLL H5T_t *H5T_open(H5G_entry_t *ent, hid_t dxpl_id);
+H5_DLL htri_t H5T_isa(struct H5O_loc_t *loc, hid_t dxpl_id);
 H5_DLL H5T_t *H5T_copy(const H5T_t *old_dt, H5T_copy_t method);
 H5_DLL herr_t H5T_lock(H5T_t *dt, hbool_t immutable);
 H5_DLL herr_t H5T_close(H5T_t *dt);
 H5_DLL H5T_class_t H5T_get_class(const H5T_t *dt, htri_t internal);
-H5_DLL htri_t H5T_detect_class (const H5T_t *dt, H5T_class_t cls);
+H5_DLL htri_t H5T_detect_class(const H5T_t *dt, H5T_class_t cls);
 H5_DLL size_t H5T_get_size(const H5T_t *dt);
 H5_DLL int    H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset);
 H5_DLL herr_t H5T_debug(const H5T_t *dt, FILE * stream);
-H5_DLL H5G_entry_t *H5T_entof(H5T_t *dt);
+H5_DLL struct H5O_loc_t *H5T_oloc(H5T_t *dt);
+H5_DLL H5G_name_t *H5T_nameof(H5T_t *dt);
 H5_DLL htri_t H5T_is_immutable(const H5T_t *dt);
 H5_DLL htri_t H5T_is_named(const H5T_t *dt);
 H5_DLL htri_t H5T_is_relocatable(const H5T_t *dt);
@@ -91,10 +91,13 @@ H5_DLL herr_t H5T_vlen_reclaim(void *elem, hid_t type_id, unsigned ndim, const h
 H5_DLL herr_t H5T_vlen_get_alloc_info(hid_t dxpl_id, H5T_vlen_alloc_info_t **vl_alloc_info);
 H5_DLL htri_t H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc);
 H5_DLL htri_t H5T_is_sensible(const H5T_t *dt);
-H5_DLL htri_t H5T_committed(const H5T_t *type);
-H5_DLL int H5T_link(const H5T_t *type, int adjust, hid_t dxpl_id);
 
 /* Reference specific functions */
 H5_DLL H5R_type_t H5T_get_ref_type(const H5T_t *dt);
+
+/* Operations on named datatypes */
+H5_DLL H5T_t *H5T_open(H5G_loc_t *loc, hid_t dxpl_id);
+H5_DLL htri_t H5T_committed(const H5T_t *type);
+H5_DLL int H5T_link(const H5T_t *type, int adjust, hid_t dxpl_id);
 
 #endif

@@ -50,6 +50,7 @@ H5_DLL H5RS_str_t *H5RS_own(char *s);
 H5_DLL herr_t H5RS_decr(H5RS_str_t *rs);
 H5_DLL herr_t H5RS_incr(H5RS_str_t *rs);
 H5_DLL H5RS_str_t *H5RS_dup(H5RS_str_t *s);
+H5_DLL H5RS_str_t *H5RS_dup_str(const char *s);
 H5_DLL int H5RS_cmp(const H5RS_str_t *rs1, const H5RS_str_t *rs2);
 H5_DLL ssize_t H5RS_len(const H5RS_str_t *rs);
 H5_DLL char *H5RS_get_str(const H5RS_str_t *rs);

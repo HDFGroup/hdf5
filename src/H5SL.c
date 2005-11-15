@@ -466,6 +466,7 @@ H5SL_release_common(H5SL_t *slist, H5SL_operator_t op, void *op_data)
 
         /* Call callback, if one is given */
         if(op!=NULL)
+            /* Casting away const OK -QAK */
             (void)(op)(node->item,(void *)node->key,op_data);
 
         H5FL_ARR_FREE(H5SL_node_ptr_t,node);

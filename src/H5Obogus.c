@@ -39,7 +39,7 @@
 #ifdef H5O_ENABLE_BOGUS
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_bogus_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
+static void *H5O_bogus_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
 static herr_t H5O_bogus_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static size_t H5O_bogus_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_bogus_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
@@ -85,8 +85,7 @@ const H5O_class_t H5O_BOGUS[1] = {{
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_bogus_decode(H5F_t UNUSED *f, hid_t dxpl_id, const uint8_t *p,
-		H5O_shared_t UNUSED *sh)
+H5O_bogus_decode(H5F_t UNUSED *f, hid_t dxpl_id, const uint8_t *p)
 {
     H5O_bogus_t *mesg=NULL;
     void *ret_value;            /* Return value */
@@ -96,7 +95,6 @@ H5O_bogus_decode(H5F_t UNUSED *f, hid_t dxpl_id, const uint8_t *p,
     /* check args */
     assert(f);
     assert(p);
-    assert(!sh);
 
     /* Allocate the bogus message */
     if (NULL==(mesg = H5MM_calloc(sizeof(H5O_bogus_t))))

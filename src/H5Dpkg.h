@@ -174,7 +174,8 @@ typedef struct H5D_shared_t {
 } H5D_shared_t;
 
 struct H5D_t {
-    H5G_entry_t         ent;            /* cached object header stuff   */
+    H5O_loc_t           oloc;           /* Object header location       */
+    H5G_name_t          path;           /* Group hierarchy path         */
     H5D_shared_t        *shared;        /* cached information from file */
 };
 

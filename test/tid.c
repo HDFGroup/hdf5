@@ -26,7 +26,7 @@ static int basic_id_test(void)
 {
 	H5I_type_t myType = H5I_BADID;
 	hid_t arrayID = H5I_INVALID_HID;
-	void* testObj;
+	void* testObj = NULL;
 	void* testPtr = NULL;
 	char nameString[10];
 	hid_t testID;

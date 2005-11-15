@@ -385,7 +385,6 @@ static void test_iter_attr(void)
 {
     hid_t file;             /* File ID */
     hid_t dataset;          /* Common Dataset ID */
-    hid_t datatype;         /* Common datatype ID */
     hid_t filespace;        /* Common dataspace ID */
     hid_t attribute;        /* Attribute ID */
     int i;                  /* counting variable */
@@ -402,18 +401,15 @@ static void test_iter_attr(void)
     file = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fcreate");
 
-    datatype = H5Tcopy(H5T_NATIVE_INT);
-    CHECK(datatype, FAIL, "H5Tcopy");
-
     filespace=H5Screate(H5S_SCALAR);
     CHECK(filespace, FAIL, "H5Screate");
 
-    dataset = H5Dcreate(file, "Dataset", datatype, filespace, H5P_DEFAULT);
+    dataset = H5Dcreate(file, "Dataset", H5T_NATIVE_INT, filespace, H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate");
 
     for(i=0; i< NATTR; i++) {
         sprintf(name,"Attribute %d",i);
-        attribute = H5Acreate(dataset, name, datatype, filespace, H5P_DEFAULT);
+        attribute = H5Acreate(dataset, name, H5T_NATIVE_INT, filespace, H5P_DEFAULT);
         CHECK(attribute, FAIL, "H5Acreate");
 
         /* Keep a copy of the attribute names around for later */
@@ -428,14 +424,12 @@ static void test_iter_attr(void)
     ret=H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
 
-    ret=H5Tclose(datatype);
-    CHECK(ret, FAIL, "H5Tclose");
-
     ret=H5Sclose(filespace);
     CHECK(ret, FAIL, "H5Sclose");
 
     ret=H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
+
 
     /* Iterate through the attributes on the dataset in various ways */
     file=H5Fopen(DATAFILE, H5F_ACC_RDONLY, H5P_DEFAULT);

@@ -257,7 +257,6 @@ H5FL_DEFINE(H5T_shared_t);
 H5FL_DEFINE(H5T_path_t);
 
 /* Static local functions */
-static H5T_t *H5T_open_oid(H5G_entry_t *ent, hid_t dxpl_id);
 static herr_t H5T_print_stats(H5T_path_t *path, int *nprint/*in,out*/);
 static herr_t H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src,
                 H5T_t *dst, H5T_conv_t func, hid_t dxpl_id);
@@ -378,7 +377,7 @@ static H5T_t *H5T_decode(const unsigned char *buf);
 
 /* Define a macro for common code for all newly allocate datatypes */
 #define H5T_INIT_TYPE_ALLOC_COMMON(TYPE) {				      \
-    dt->ent.header = HADDR_UNDEF;					      \
+    dt->oloc.addr = HADDR_UNDEF;					      \
     dt->shared->type = TYPE;							      \
 }
 
@@ -1563,75 +1562,6 @@ H5Tcreate(H5T_class_t type, size_t size)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type atom");
 
 done:
-    FUNC_LEAVE_API(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Topen
- *
- * Purpose:	Opens a named data type.
- *
- * Return:	Success:	Object ID of the named data type.
- *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *              Monday, June  1, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-H5Topen(hid_t loc_id, const char *name)
-{
-    H5T_t       *type = NULL;
-    H5G_entry_t	*loc = NULL;
-    H5G_entry_t  ent;
-    hbool_t      ent_found = FALSE;     /* Entry at 'name' found */
-    hid_t        dxpl_id = H5AC_dxpl_id; /* dxpl to use to open datatype */
-    hid_t        ret_value =FAIL;
-
-    FUNC_ENTER_API(H5Topen, FAIL);
-    H5TRACE2("i","is",loc_id,name);
-
-    /* Check args */
-    if (NULL==(loc=H5G_loc (loc_id)))
-        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-    if (!name || !*name)
-        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
-
-    /*
-     * Find the named data type object header and read the data type message
-     * from it.
-     */
-    if (H5G_find (loc, name, &ent/*out*/, dxpl_id)<0)
-        HGOTO_ERROR (H5E_DATATYPE, H5E_NOTFOUND, FAIL, "not found");
-    ent_found = TRUE;
-
-    /* Check that the object found is the correct type */
-    if (H5G_get_type(&ent, dxpl_id) != H5G_TYPE)
-        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a named datatype")
-
-    /* Open it */
-    if ((type=H5T_open (&ent, dxpl_id)) ==NULL)
-        HGOTO_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to open named data type");
-
-    /* Register the type and return the ID */
-    if ((ret_value=H5I_register (H5I_DATATYPE, type))<0)
-        HGOTO_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register named data type");
-
-done:
-    if(ret_value<0) {
-        if(type!=NULL)
-            H5T_close(type);
-        else {
-            if(ent_found && ent.header)
-                H5G_free_ent_name(&ent);
-        } /* end else */
-    } /* end if */
-
     FUNC_LEAVE_API(ret_value);
 }
 
@@ -3037,7 +2967,7 @@ done:
  * Function:	H5T_isa
  *
  * Purpose:	Determines if an object has the requisite messages for being
- *		a data type.
+ *		a datatype.
  *
  * Return:	Success:	TRUE if the required data type messages are
  *				present; FALSE otherwise.
@@ -3048,166 +2978,23 @@ done:
  * Programmer:	Robb Matzke
  *              Monday, November  2, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 htri_t
-H5T_isa(H5G_entry_t *ent, hid_t dxpl_id)
+H5T_isa(H5O_loc_t *loc, hid_t dxpl_id)
 {
     htri_t	ret_value;
 
-    FUNC_ENTER_NOAPI(H5T_isa, FAIL);
-    assert(ent);
+    FUNC_ENTER_NOAPI(H5T_isa, FAIL)
 
-    if ((ret_value=H5O_exists(ent, H5O_DTYPE_ID, 0, dxpl_id))<0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to read object header");
+    HDassert(loc);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5T_open
- *
- * Purpose:	Open a named data type.
- *
- * Return:	Success:	Ptr to a new data type.
- *
- *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *              Monday, June  1, 1998
- *
- * Modifications:
- *      Changed to use H5T_open_oid - QAK - 3/17/99
- *
- *-------------------------------------------------------------------------
- */
-H5T_t*
-H5T_open (H5G_entry_t *ent, hid_t dxpl_id)
-{
-    H5T_shared_t   *shared_fo=NULL;
-    H5T_t          *dt=NULL;
-    H5T_t          *ret_value;
-
-    FUNC_ENTER_NOAPI(H5T_open, NULL);
-
-    assert (ent);
-
-    /* Check if datatype was already open */
-    if((shared_fo=H5FO_opened(ent->file,ent->header))==NULL) {
-        /* Clear any errors from H5FO_opened() */
-        H5E_clear_stack(NULL);
-
-        /* Open the datatype object */
-        if ((dt=H5T_open_oid(ent, dxpl_id)) ==NULL)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL, "not found");
-
-        /* Add the datatype to the list of opened objects in the file */
-        if(H5FO_insert(dt->ent.file, dt->ent.header, dt->shared)<0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, NULL, "can't insert datatype into list of open objects")
-
-        /* Increment object count for the object in the top file */
-        if(H5FO_top_incr(dt->ent.file, dt->ent.header) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINC, NULL, "can't increment object count")
-
-        /* Mark any datatypes as being in memory now */
-        if (H5T_set_loc(dt, NULL, H5T_LOC_MEMORY)<0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
-
-        dt->shared->fo_count=1;
-    }
-    else
-    {
-        if(NULL == (dt = H5FL_MALLOC(H5T_t)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate space for datatype")
-
-        /* Shallow copy (take ownership) of the group entry object */
-        if(H5G_ent_copy(&(dt->ent),ent,H5G_COPY_SHALLOW)<0)
-            HGOTO_ERROR (H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy group entry")
-
-        dt->shared=shared_fo;
-
-        shared_fo->fo_count++;
-
-        /* Check if the object has been opened through the top file yet */
-        if(H5FO_top_count(dt->ent.file, dt->ent.header) == 0) {
-            /* Open the object through this top file */
-            if(H5O_open(&(dt->ent)) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to open object header")
-        } /* end if */
-
-        /* Increment object count for the object in the top file */
-        if(H5FO_top_incr(dt->ent.file, dt->ent.header) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINC, NULL, "can't increment object count")
-    }
-
-    ret_value = dt;
+    if((ret_value = H5O_exists(loc, H5O_DTYPE_ID, 0, dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to read object header")
 
 done:
-    if(ret_value==NULL) {
-        if(dt) {
-            if(shared_fo==NULL)   /* Need to free shared fo */
-                H5FL_FREE(H5T_shared_t, dt->shared);
-            H5FL_FREE(H5T_t, dt);
-        }
-        if(shared_fo)
-            shared_fo->fo_count--;
-    }
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5T_open_oid
- *
- * Purpose:	Open a named data type.
- *
- * Return:	Success:	Ptr to a new data type.
- *
- *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              Wednesday, March 17, 1999
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-H5T_t *
-H5T_open_oid (H5G_entry_t *ent, hid_t dxpl_id)
-{
-    H5T_t	*dt=NULL;
-    H5T_t	*ret_value;
-
-    FUNC_ENTER_NOAPI(H5T_open_oid, NULL);
-
-    assert (ent);
-
-    if (H5O_open (ent)<0)
-	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to open named data type");
-    if (NULL==(dt=H5O_read (ent, H5O_DTYPE_ID, 0, NULL, dxpl_id)))
-	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to load type message from object header");
-
-    /* Mark the type as named and open */
-    dt->shared->state = H5T_STATE_OPEN;
-
-    /* Shallow copy (take ownership) of the group entry object */
-    H5G_ent_copy(&(dt->ent),ent,H5G_COPY_SHALLOW);
-
-    /* Set return value */
-    ret_value=dt;
-
-done:
-    if(ret_value==NULL) {
-        if(dt==NULL)
-            H5O_close(ent);
-    } /* end if */
-
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_isa() */
 
 
 /*-------------------------------------------------------------------------
@@ -3299,22 +3086,22 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
              * Return a transient type (locked or unlocked) or an opened named
              * type.  Immutable transient types are degraded to read-only.
              */
-            if (H5F_addr_defined(old_dt->ent.header)) {
+            if(H5F_addr_defined(old_dt->oloc.addr)) {
                 /* Check if the object is already open */
-                if((reopened_fo=H5FO_opened(old_dt->ent.file, old_dt->ent.header))==NULL) {
+                if((reopened_fo=H5FO_opened(old_dt->oloc.file, old_dt->oloc.addr))==NULL) {
                     /* Clear any errors from H5FO_opened() */
                     H5E_clear_stack(NULL);
 
                     /* Open named datatype again */
-                    if (H5O_open (&(old_dt->ent))<0)
+                    if(H5O_open(&(old_dt->oloc)) < 0)
                         HGOTO_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to reopen named data type");
 
                     /* Insert opened named datatype into opened object list for the file */
-                    if(H5FO_insert(old_dt->ent.file, old_dt->ent.header, new_dt->shared)<0)
+                    if(H5FO_insert(old_dt->oloc.file, old_dt->oloc.addr, new_dt->shared)<0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, NULL, "can't insert datatype into list of open objects")
 
                     /* Increment object count for the object in the top file */
-                    if(H5FO_top_incr(old_dt->ent.file, old_dt->ent.header) < 0)
+                    if(H5FO_top_incr(old_dt->oloc.file, old_dt->oloc.addr) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINC, NULL, "can't increment object count")
 
                     new_dt->shared->fo_count=1;
@@ -3328,14 +3115,14 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
                     reopened_fo->fo_count++;
 
                     /* Check if the object has been opened through the top file yet */
-                    if(H5FO_top_count(old_dt->ent.file, old_dt->ent.header) == 0) {
+                    if(H5FO_top_count(old_dt->oloc.file, old_dt->oloc.addr) == 0) {
                         /* Open the object through this top file */
-                        if(H5O_open(&(old_dt->ent)) < 0)
+                        if(H5O_open(&(old_dt->oloc)) < 0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to open object header")
                     } /* end if */
 
                     /* Increment object count for the object in the top file */
-                    if(H5FO_top_incr(old_dt->ent.file, old_dt->ent.header) < 0)
+                    if(H5FO_top_incr(old_dt->oloc.file, old_dt->oloc.addr) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINC, NULL, "can't increment object count")
                 }
                 new_dt->shared->state = H5T_STATE_OPEN;
@@ -3452,14 +3239,17 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     } /* end switch */
 
     /* Deep copy of the symbol table entry, if there was one */
-    if ( new_dt->shared->state == H5T_STATE_NAMED || new_dt->shared->state == H5T_STATE_OPEN) {
-        if (!H5F_addr_defined(old_dt->ent.header))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "named dataype with invalid address");
-        if (H5G_ent_copy(&(new_dt->ent), &(old_dt->ent),H5G_COPY_DEEP)<0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to copy entry");
+    if(new_dt->shared->state == H5T_STATE_NAMED || new_dt->shared->state == H5T_STATE_OPEN) {
+        if(!H5F_addr_defined(old_dt->oloc.addr))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "named dataype with invalid address")
+        if(H5O_loc_copy(&(new_dt->oloc), &(old_dt->oloc), H5O_COPY_DEEP) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to copy entry")
+        if(H5G_name_copy(&(new_dt->path), &(old_dt->path), H5G_COPY_DEEP) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to copy path")
     } /* end if */
     else {
-        H5G_ent_reset(&(new_dt->ent));
+        H5O_loc_reset(&(new_dt->oloc));
+        H5G_name_reset(&(new_dt->path));
     } /* end else */
 
     /* Set return value */
@@ -3540,7 +3330,7 @@ done:
 H5T_t *
 H5T_alloc(void)
 {
-    H5T_t *dt;                  /* Pointer to datatype allocated */
+    H5T_t *dt = NULL;           /* Pointer to datatype allocated */
     H5T_t *ret_value;           /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_alloc, NULL)
@@ -3548,7 +3338,8 @@ H5T_alloc(void)
     /* Allocate & initialize new datatype info */
     if(NULL == (dt = H5FL_CALLOC(H5T_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    H5G_ent_reset(&(dt->ent));
+    H5O_loc_reset(&(dt->oloc));
+    H5G_name_reset(&(dt->path));
     if(NULL == (dt->shared = H5FL_CALLOC(H5T_shared_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
@@ -3580,54 +3371,56 @@ done:
  * Programmer:	Quincey Koziol
  *		Monday, January  6, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5T_free(H5T_t *dt)
 {
     unsigned	i;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_free, FAIL);
+    FUNC_ENTER_NOAPI(H5T_free, FAIL)
 
-    assert(dt && dt->shared);
+    HDassert(dt && dt->shared);
 
     /*
      * If a named type is being closed then close the object header and
      * remove from the list of open objects in the file.
      */
-    if (H5T_STATE_OPEN==dt->shared->state) {
-        assert (H5F_addr_defined(dt->ent.header));
+    if(H5T_STATE_OPEN == dt->shared->state) {
+        HDassert(H5F_addr_defined(dt->oloc.addr));
+
         /* Remove the datatype from the list of opened objects in the file */
-        if(H5FO_top_decr(dt->ent.file, dt->ent.header) < 0)
+        if(H5FO_top_decr(dt->oloc.file, dt->oloc.addr) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
-        if(H5FO_delete(dt->ent.file, H5AC_dxpl_id, dt->ent.header)<0)
+        if(H5FO_delete(dt->oloc.file, H5AC_dxpl_id, dt->oloc.addr) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't remove datatype from list of open objects")
-        if (H5O_close(&(dt->ent))<0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to close data type object header");
+        if(H5O_close(&(dt->oloc)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to close data type object header")
         dt->shared->state = H5T_STATE_NAMED;
-    }
+    } /* end if */
+
+    /* Free the ID to name info */
+    H5G_name_free(&(dt->path));
 
     /*
      * Don't free locked datatypes.
      */
-    if (H5T_STATE_IMMUTABLE==dt->shared->state)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close immutable datatype");
+    if(H5T_STATE_IMMUTABLE==dt->shared->state)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close immutable datatype")
 
     /* Close the datatype */
-    switch (dt->shared->type) {
+    switch(dt->shared->type) {
         case H5T_COMPOUND:
-            for (i=0; i<dt->shared->u.compnd.nmembs; i++) {
+            for(i = 0; i < dt->shared->u.compnd.nmembs; i++) {
                 H5MM_xfree(dt->shared->u.compnd.memb[i].name);
                 H5T_close(dt->shared->u.compnd.memb[i].type);
-            }
+            } /* end for */
             H5MM_xfree(dt->shared->u.compnd.memb);
             break;
 
         case H5T_ENUM:
-            for (i=0; i<dt->shared->u.enumer.nmembs; i++)
+            for(i = 0; i < dt->shared->u.enumer.nmembs; i++)
                 H5MM_xfree(dt->shared->u.enumer.name[i]);
             H5MM_xfree(dt->shared->u.enumer.name);
             H5MM_xfree(dt->shared->u.enumer.value);
@@ -3639,17 +3432,14 @@ H5T_free(H5T_t *dt)
 
         default:
             break;
-    }
-
-    /* Free the ID to name info */
-    H5G_free_ent_name(&(dt->ent));
+    } /* end switch */
 
     /* Close the parent */
-    if (dt->shared->parent && H5T_close(dt->shared->parent)<0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close parent data type");
+    if(dt->shared->parent && H5T_close(dt->shared->parent) < 0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close parent data type")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_free() */
 
 
@@ -3682,17 +3472,16 @@ done:
 herr_t
 H5T_close(H5T_t *dt)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_close, FAIL);
+    FUNC_ENTER_NOAPI(H5T_close, FAIL)
 
-    assert(dt && dt->shared);
+    HDassert(dt && dt->shared);
 
     dt->shared->fo_count--;
 
-    if(dt->shared->state != H5T_STATE_OPEN || dt->shared->fo_count == 0)
-    {
-        if(H5T_free(dt)<0)
+    if(dt->shared->state != H5T_STATE_OPEN || dt->shared->fo_count == 0) {
+        if(H5T_free(dt) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free datatype");
 
         H5FL_FREE(H5T_shared_t, dt->shared);
@@ -3701,27 +3490,27 @@ H5T_close(H5T_t *dt)
          * If a named type is being closed then close the object header and
          * remove from the list of open objects in the file.
          */
-        if(H5T_STATE_OPEN==dt->shared->state) {
+        if(H5T_STATE_OPEN == dt->shared->state) {
             /* Decrement the ref. count for this object in the top file */
-            if(H5FO_top_decr(dt->ent.file, dt->ent.header) < 0)
+            if(H5FO_top_decr(dt->oloc.file, dt->oloc.addr) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
 
             /* Check reference count for this object in the top file */
-            if(H5FO_top_count(dt->ent.file, dt->ent.header) == 0)
-                if(H5O_close(&(dt->ent)) < 0)
+            if(H5FO_top_count(dt->oloc.file, dt->oloc.addr) == 0)
+                if(H5O_close(&(dt->oloc)) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to close")
         } /* end if */
 
-        /* Free the ID to name info since we're not calling H5T_free*/
-        H5G_free_ent_name(&(dt->ent));
-    }
+        /* Free the group hier. path since we're not calling H5T_free*/
+        H5G_name_free(&(dt->path));
+    } /* end else */
 
     /* Free the datatype struct */
     H5FL_FREE(H5T_t,dt);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -4807,44 +4596,79 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_entof
+ * Function:	H5T_oloc
  *
- * Purpose:	Returns a pointer to the entry for a named data type.
+ * Purpose:	Returns a pointer to the object location for a named datatype.
  *
- * Return:	Success:	Ptr directly into named data type
- *
+ * Return:	Success:	Ptr directly into named datatype
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
  *              Friday, June  5, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-H5G_entry_t *
-H5T_entof (H5T_t *dt)
+H5O_loc_t *
+H5T_oloc(H5T_t *dt)
 {
-    H5G_entry_t		*ret_value = NULL;
+    H5O_loc_t		*ret_value = NULL;
 
-    FUNC_ENTER_NOAPI(H5T_entof, NULL);
+    FUNC_ENTER_NOAPI(H5T_oloc, NULL)
 
-    assert (dt);
+    HDassert(dt);
 
-    switch (dt->shared->state) {
+    switch(dt->shared->state) {
         case H5T_STATE_TRANSIENT:
         case H5T_STATE_RDONLY:
         case H5T_STATE_IMMUTABLE:
-            HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL, "not a named data type");
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "not a named datatype")
         case H5T_STATE_NAMED:
         case H5T_STATE_OPEN:
-            ret_value = &(dt->ent);
+            ret_value = &(dt->oloc);
             break;
-    }
+    } /* end switch */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_oloc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_nameof
+ *
+ * Purpose:	Returns a pointer to the path for a named datatype.
+ *
+ * Return:	Success:	Ptr directly into named datatype
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, September 12, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+H5G_name_t *
+H5T_nameof(H5T_t *dt)
+{
+    H5G_name_t		*ret_value = NULL;
+
+    FUNC_ENTER_NOAPI(H5T_nameof, NULL)
+
+    HDassert(dt);
+
+    switch(dt->shared->state) {
+        case H5T_STATE_TRANSIENT:
+        case H5T_STATE_RDONLY:
+        case H5T_STATE_IMMUTABLE:
+            HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL, "not a named datatype")
+        case H5T_STATE_NAMED:
+        case H5T_STATE_OPEN:
+            ret_value = &(dt->path);
+            break;
+    } /* end switch */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_nameof() */
 
 
 /*-------------------------------------------------------------------------
@@ -5430,16 +5254,6 @@ H5T_debug(const H5T_t *dt, FILE *stream)
 	    fprintf(stream, "\n\"%s\" @%lu",
 		    dt->shared->u.compnd.memb[i].name,
 		    (unsigned long) (dt->shared->u.compnd.memb[i].offset));
-#ifdef OLD_WAY
-	    if (dt->shared->u.compnd.memb[i].ndims) {
-		fprintf(stream, "[");
-		for (j = 0; j < dt->shared->u.compnd.memb[i].ndims; j++) {
-		    fprintf(stream, "%s%lu", j ? ", " : "",
-			    (unsigned long)(dt->shared->u.compnd.memb[i].dim[j]));
-		}
-		fprintf(stream, "]");
-	    }
-#endif /* OLD_WAY */
 	    fprintf(stream, " ");
 	    H5T_debug(dt->shared->u.compnd.memb[i].type, stream);
 	}

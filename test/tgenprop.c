@@ -133,7 +133,7 @@ test_genprop_basic_class(void)
     CHECK_I(cid3, "H5Pget_class_parent");
 
     /* Verify class parent's parent correct */
-    ret = H5Pequal(cid3,H5P_NO_CLASS);
+    ret = H5Pequal(cid3,H5P_GROUP_CREATE);
     VERIFY(ret, 1, "H5Pequal");
 
     /* Close parent class's parent */

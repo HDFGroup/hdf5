@@ -1207,9 +1207,9 @@ test_file_freespace(void)
     free_space = H5Fget_freespace(file);
     CHECK(free_space, FAIL, "H5Fget_freespace");
 #ifdef H5_HAVE_LARGE_HSIZET
-    VERIFY(free_space, 168, "H5Fget_freespace");
+    VERIFY(free_space, 420, "H5Fget_freespace");
 #else /* H5_HAVE_LARGE_HSIZET */
-    VERIFY(free_space, 76, "H5Fget_freespace");
+    VERIFY(free_space, 588, "H5Fget_freespace");
 #endif /* H5_HAVE_LARGE_HSIZET */
 
     /* Delete datasets in file */
@@ -1223,9 +1223,9 @@ test_file_freespace(void)
     free_space = H5Fget_freespace(file);
     CHECK(free_space, FAIL, "H5Fget_freespace");
 #ifdef H5_HAVE_LARGE_HSIZET
-    VERIFY(free_space, 3584, "H5Fget_freespace");
+    VERIFY(free_space, 4628, "H5Fget_freespace");
 #else /* H5_HAVE_LARGE_HSIZET */
-    VERIFY(free_space, 3428, "H5Fget_freespace");
+    VERIFY(free_space, 4592, "H5Fget_freespace");
 #endif /* H5_HAVE_LARGE_HSIZET */
 
     /* Close file */

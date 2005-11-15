@@ -65,8 +65,7 @@ struct H5HL_t {
     H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
                             /* first field in structure */
     haddr_t		    addr;	/*address of data		*/
-    size_t		    disk_alloc;	/*data bytes allocated on disk	*/
-    size_t		    mem_alloc;	/*data bytes allocated in mem	*/
+    size_t		    heap_alloc;	/*size of heap on disk and in mem */
     uint8_t		   *chunk;	/*the chunk, including header	*/
     H5HL_free_t		   *freelist;	/*the free list			*/
 };

@@ -89,6 +89,7 @@ hid_t H5E_ALIGNMENT_g      = FAIL;      /* Alignment error */
 hid_t H5E_BADMESG_g        = FAIL;      /* Unrecognized message */
 hid_t H5E_CANTDELETE_g     = FAIL;      /* Can't delete message */
 hid_t H5E_BADITER_g        = FAIL;      /* Iteration failed */
+hid_t H5E_CANTPACK_g       = FAIL;      /* Can't pack messages */
 
 /* FPHDF5 errors */
 hid_t H5E_CANTRECV_g       = FAIL;      /* Can't receive messages from processes */
