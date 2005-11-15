@@ -407,6 +407,12 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name h5statdll
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name objcopy
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name objcopydll
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -2692,6 +2698,42 @@ Package=<4>
 ###############################################################################
 
 Project: "ntypesdll"=..\..\test\ntypesdll\ntypesdll.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtestD
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "objcopy"=..\..\TEST\objcopy\objcopy.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtest
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "objcopydll"=..\..\TEST\objcopydll\objcopydll.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
