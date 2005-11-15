@@ -1529,6 +1529,8 @@
 ./windows/test/mtimedll/mtimedll.dsp
 ./windows/test/ntypes/ntypes.dsp
 ./windows/test/ntypesdll/ntypesdll.dsp
+./windows/test/objcopy/objcopy.dsp
+./windows/test/objcopydll/objcopydll.dsp
 ./windows/test/ohdr/ohdr.dsp
 ./windows/test/ohdrdll/ohdrdll.dsp
 ./windows/test/overhead/overhead.dsp
