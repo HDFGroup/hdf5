@@ -51,7 +51,7 @@ in the file file_io.win32.c and including it on the projects
 
 
 #define H5_STDC_HEADERS 1
-#define H5_HAVE_ATTRIBUTE 1
+/* #define H5_HAVE_ATTRIBUTE 1 */
 #undef H5_HAVE_ATTRIBUTE
 #define H5_HAVE_LARGE_HSIZET 1 
 #ifdef __MWERKS__ 
