@@ -154,6 +154,13 @@ external%2\%1\external%2
 
 echo.
 echo ============================
+echo Testing objcopy 
+echo ============================
+
+objcopy%2\%1\objcopy%2
+
+echo.
+echo ============================
 echo Testing links  
 echo ============================
 
