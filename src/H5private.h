@@ -1238,7 +1238,7 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 /*
  * Use this macro for API functions that shouldn't perform _any_ initialization
  *      of the library or an interface, just perform tracing, etc.  Examples
- *      are: H5close, H5check_version, etc.
+ *      are: H5check_version, etc.
  *
  */
 #define FUNC_ENTER_API_NOINIT(func_name) {{                                   \
@@ -1246,6 +1246,20 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
     FUNC_ENTER_COMMON(func_name,H5_IS_API(#func_name));                       \
     FUNC_ENTER_API_THREADSAFE;                                                \
     H5_PUSH_FUNC(func_name);                                                  \
+    BEGIN_MPE_LOG(func_name);                                                 \
+    {
+
+/*
+ * Use this macro for API functions that shouldn't perform _any_ initialization
+ *      of the library or an interface or push themselves on the function
+ *      stack, just perform tracing, etc.  Examples
+ *      are: H5close, etc.
+ *
+ */
+#define FUNC_ENTER_API_NOINIT_NOFS(func_name) {{                              \
+    FUNC_ENTER_API_VARS(func_name)                                            \
+    FUNC_ENTER_COMMON(func_name,H5_IS_API(#func_name));                       \
+    FUNC_ENTER_API_THREADSAFE;                                                \
     BEGIN_MPE_LOG(func_name);                                                 \
     {
 
@@ -1348,6 +1362,14 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
         FINISH_MPE_LOG;                                                       \
         H5TRACE_RETURN(ret_value);					      \
         H5_POP_FUNC;                                                          \
+        FUNC_LEAVE_API_THREADSAFE                                             \
+        return (ret_value);						      \
+    } /*end scope from end of FUNC_ENTER*/                                    \
+}} /*end scope from beginning of FUNC_ENTER*/
+
+#define FUNC_LEAVE_API_NOFS(ret_value)                                        \
+        FINISH_MPE_LOG;                                                       \
+        H5TRACE_RETURN(ret_value);					      \
         FUNC_LEAVE_API_THREADSAFE                                             \
         return (ret_value);						      \
     } /*end scope from end of FUNC_ENTER*/                                    \

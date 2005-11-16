@@ -35,7 +35,8 @@
 /* Library level data structures */
 
 typedef struct H5TS_mutex_struct {
-    pthread_t *owner_thread;		/* current lock owner */
+    pthread_t owner_thread;		/* current lock owner */
+    unsigned owner_valid;		/* if current lock owner info is valid */
     pthread_mutex_t atomic_lock;	/* lock for atomicity of new mechanism */
     pthread_cond_t cond_var;		/* condition variable */
     unsigned int lock_count;

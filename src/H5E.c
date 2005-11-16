@@ -317,10 +317,18 @@ H5E_get_stack(void)
     if (!estack) {
         /* no associated value with current thread - create one */
         estack = (H5E_t *)H5FL_MALLOC(H5E_t);
+        HDassert(estack);
+
+        /* Set the thread-specific info */
         estack->nused = 0;
         estack->new_api = TRUE;
         estack->u.func_stack = (H5E_auto_stack_t)H5Eprint_stack;
         estack->auto_data = NULL;
+
+        /* (It's not necessary to release this in this API, it is
+         *      released by the "key destructor" set up in the H5TS
+         *      routines.  See calls to pthread_key_create() in H5TS.c -QAK)
+         */
         pthread_setspecific(H5TS_errstk_key_g, (void *)estack);
     }
 
