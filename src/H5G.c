@@ -1954,7 +1954,7 @@ H5G_open(H5G_entry_t *ent, hid_t dxpl_id)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "can't copy group entry")
 
     /* Check if group was already open */
-    if((shared_fo=H5FO_opened(ent->file, ent->header))==NULL) {
+    if((shared_fo=H5FO_opened(grp->ent.file, grp->ent.header))==NULL) {
 
         /* Clear any errors from H5FO_opened() */
         H5E_clear();

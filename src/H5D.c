@@ -2325,7 +2325,7 @@ H5D_open(const H5G_entry_t *ent, hid_t dxpl_id)
         HGOTO_ERROR (H5E_DATASET, H5E_CANTCOPY, NULL, "can't copy group entry")
 
     /* Check if dataset was already open */
-    if((shared_fo=H5FO_opened(ent->file,ent->header))==NULL) {
+    if((shared_fo=H5FO_opened(dataset->ent.file, dataset->ent.header))==NULL) {
         /* Clear any errors from H5FO_opened() */
         H5E_clear();
 
