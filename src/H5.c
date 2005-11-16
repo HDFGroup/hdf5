@@ -711,16 +711,16 @@ herr_t
 H5close(void)
 {
     /*
-     * Don't call FUNC_ENTER() since we don't want to initialize the whole
-     * thing just to release it all right away.  It is safe to call this
-     * function for an uninitialized library.
+     * Don't call normal FUNC_ENTER() since we don't want to initialize the
+     * whole library just to release it all right away.  It is safe to call
+     * this function for an uninitialized library.
      */
-    FUNC_ENTER_API_NOINIT(H5close)
+    FUNC_ENTER_API_NOINIT_NOFS(H5close)
     H5TRACE0("e","");
 
     H5_term_library();
 
-    FUNC_LEAVE_API(SUCCEED)
+    FUNC_LEAVE_API_NOFS(SUCCEED)
 }
 
 

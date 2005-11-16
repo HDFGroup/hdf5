@@ -95,8 +95,9 @@ H5TS_first_thread_init(void)
 {
     H5_g.H5_libinit_g = FALSE;
 
-    /* set the two pthread_t objects to ``null'' */
-    H5_g.init_lock.owner_thread = NULL;
+    /* set the owner objects to initial values */
+    H5_g.init_lock.owner_thread = pthread_self();
+    H5_g.init_lock.owner_valid = FALSE;
 
     /* initialize global API mutex lock */
     pthread_mutex_init(&H5_g.init_lock.atomic_lock, NULL);
@@ -148,36 +149,22 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
     if (ret_value)
         return ret_value;
 
-    if (mutex->owner_thread && pthread_equal(pthread_self(), *mutex->owner_thread)) {
+    if (mutex->owner_valid && pthread_equal(pthread_self(), mutex->owner_thread)) {
         /* already owned by self - increment count */
         mutex->lock_count++;
-    } else if (!mutex->owner_thread) {
+    } else if (!mutex->owner_valid) {
         /* no one else has locked it - set owner and grab lock */
-	mutex->owner_thread = H5MM_malloc(sizeof(pthread_t));
-
-	if (!mutex->owner_thread) {
-	    H5E_push(H5E_RESOURCE, H5E_NOSPACE, "H5TS_mutex_lock",
-		     __FILE__, __LINE__, "memory allocation failed");
-	    return FAIL;
-	}
-
-        *mutex->owner_thread = pthread_self();
+        mutex->owner_thread = pthread_self();
+        mutex->owner_valid = TRUE;
         mutex->lock_count = 1;
     } else {
         /* if already locked by someone else */
         for (;;) {
 	    pthread_cond_wait(&mutex->cond_var, &mutex->atomic_lock);
 
-	    if (!mutex->owner_thread) {
-		mutex->owner_thread = H5MM_malloc(sizeof(pthread_t));
-
-		if (!mutex->owner_thread) {
-		    H5E_push(H5E_RESOURCE, H5E_NOSPACE, "H5TS_mutex_lock",
-			     __FILE__, __LINE__, "memory allocation failed");
-		    return FAIL;
-		}
-
-	        *mutex->owner_thread = pthread_self();
+	    if (!mutex->owner_valid) {
+	        mutex->owner_thread = pthread_self();
+                mutex->owner_valid = TRUE;
 	        mutex->lock_count = 1;
 	        break;
 	    }
@@ -226,8 +213,7 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
     mutex->lock_count--;
 
     if (mutex->lock_count == 0) {
-	H5MM_xfree(mutex->owner_thread);
-	mutex->owner_thread = NULL;
+	mutex->owner_valid = FALSE;
         ret_value = pthread_cond_signal(&mutex->cond_var);
 
 	if (ret_value) {

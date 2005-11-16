@@ -315,6 +315,10 @@ H5E_get_stack(void)
         estack->auto_func = (H5E_auto_t)H5Eprint;
         estack->auto_data = stderr;
 
+        /* (It's not necessary to release this in this API, it is
+         *      released by the "key destructor" set up in the H5TS
+         *      routines.  See calls to pthread_key_create() in H5TS.c -QAK)
+         */
         pthread_setspecific(H5TS_errstk_key_g, (void *)estack);
     }
 
