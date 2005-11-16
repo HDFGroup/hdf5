@@ -24,6 +24,7 @@
 
 #include "h5test.h"
 #include "H5Gpkg.h"		/* Groups				*/
+#include "H5HLprivate.h"	/* Local Heaps				*/
 
 const char *FILENAME[] = {
     "stab1",
@@ -36,10 +37,11 @@ const char *FILENAME[] = {
 /* Definitions for 'lifecycle' test */
 #define LIFECYCLE_TOP_GROUP     "top"
 #define LIFECYCLE_BOTTOM_GROUP  "bottom %u"
+#define LIFECYCLE_LOCAL_HEAP_SIZE_HINT   256
 #define LIFECYCLE_MAX_COMPACT   4
 #define LIFECYCLE_MIN_DENSE     3
-#define LIFECYCLE_EST_NUM_ENTRIES       3
-#define LIFECYCLE_EST_NAME_LEN  10
+#define LIFECYCLE_EST_NUM_ENTRIES       4
+#define LIFECYCLE_EST_NAME_LEN  8
 
 /* Definitions for 'long_compact' test */
 #define LONG_COMPACT_LENGTH     ((64 * 1024) + 1024)
@@ -285,6 +287,7 @@ lifecycle(hid_t fapl)
     unsigned	est_num_entries;	/* Estimated # of entries in group */
     unsigned	est_name_len;		/* Estimated length of entry name */
     unsigned	nmsgs;		        /* Number of messages in group's header */
+    H5G_stat_t  obj_stat;               /* Object info */
     char        objname[NAME_BUF_SIZE];         /* Object name */
     char	filename[NAME_BUF_SIZE]; 
     off_t       empty_size;             /* Size of an empty file */
@@ -320,13 +323,16 @@ lifecycle(hid_t fapl)
     if(est_name_len != H5G_CRT_GINFO_EST_NAME_LEN) TEST_ERROR;
 
     /* Set GCPL parameters */
+    if(H5Pset_local_heap_size_hint(gcpl, LIFECYCLE_LOCAL_HEAP_SIZE_HINT) < 0) TEST_ERROR;
     if(H5Pset_link_phase_change(gcpl, LIFECYCLE_MAX_COMPACT, LIFECYCLE_MIN_DENSE) < 0) TEST_ERROR;
     if(H5Pset_est_link_info(gcpl, LIFECYCLE_EST_NUM_ENTRIES, LIFECYCLE_EST_NAME_LEN) < 0) TEST_ERROR;
 
     /* Create group for testing lifecycle */
     if((gid = H5Gcreate_expand(fid, LIFECYCLE_TOP_GROUP, gcpl, H5P_DEFAULT)) < 0) TEST_ERROR
 
-    /* Query default group creation property settings */
+    /* Query group creation property settings */
+    if(H5Pget_local_heap_size_hint(gcpl, &lheap_size_hint) < 0) TEST_ERROR;
+    if(lheap_size_hint != LIFECYCLE_LOCAL_HEAP_SIZE_HINT) TEST_ERROR;
     if(H5Pget_link_phase_change(gcpl, &max_compact, &min_dense) < 0) TEST_ERROR;
     if(max_compact != LIFECYCLE_MAX_COMPACT) TEST_ERROR;
     if(min_dense != LIFECYCLE_MIN_DENSE) TEST_ERROR;
@@ -370,6 +376,17 @@ lifecycle(hid_t fapl)
     if(H5G_has_links_test(gid, &nmsgs) != TRUE) TEST_ERROR;
     if(nmsgs != LIFECYCLE_MAX_COMPACT) TEST_ERROR;
 
+    /* Check that the object header is only one chunk and the space has been allocated correctly */
+    if(H5Gget_objinfo(gid, ".", FALSE, &obj_stat) < 0) TEST_ERROR;
+#ifdef H5_HAVE_LARGE_HSIZET
+    if(obj_stat.u.obj.ohdr.size != 232) TEST_ERROR;
+#else /* H5_HAVE_LARGE_HSIZET */
+    if(obj_stat.u.obj.ohdr.size != 224) TEST_ERROR;
+#endif /* H5_HAVE_LARGE_HSIZET */
+    if(obj_stat.u.obj.ohdr.free != 0) TEST_ERROR;
+    if(obj_stat.u.obj.ohdr.nmesgs != 6) TEST_ERROR;
+    if(obj_stat.u.obj.ohdr.nchunks != 1) TEST_ERROR;
+
     /* Create one more "bottom" group, which should push top group into using a symbol table */
     sprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
     if((gid2 = H5Gcreate(gid, objname, (size_t)0)) < 0) TEST_ERROR
@@ -384,6 +401,19 @@ lifecycle(hid_t fapl)
     if(H5G_is_empty_test(gid) == TRUE) TEST_ERROR;
     if(H5G_has_links_test(gid, NULL) == TRUE) TEST_ERROR;
     if(H5G_has_stab_test(gid) != TRUE) TEST_ERROR;
+    if(H5G_lheap_size_test(gid, &lheap_size_hint) < 0) TEST_ERROR;
+    if(lheap_size_hint != LIFECYCLE_LOCAL_HEAP_SIZE_HINT) TEST_ERROR;
+
+    /* Check that the object header is still one chunk and the space has been allocated correctly */
+    if(H5Gget_objinfo(gid, ".", FALSE, &obj_stat) < 0) TEST_ERROR;
+#ifdef H5_HAVE_LARGE_HSIZET
+    if(obj_stat.u.obj.ohdr.size != 232) TEST_ERROR;
+#else /* H5_HAVE_LARGE_HSIZET */
+    if(obj_stat.u.obj.ohdr.size != 224) TEST_ERROR;
+#endif /* H5_HAVE_LARGE_HSIZET */
+    if(obj_stat.u.obj.ohdr.free != 136) TEST_ERROR;
+    if(obj_stat.u.obj.ohdr.nmesgs != 4) TEST_ERROR;
+    if(obj_stat.u.obj.ohdr.nchunks != 1) TEST_ERROR;
 
     /* Unlink objects from top group */
     while(u >= LIFECYCLE_MIN_DENSE) {
@@ -722,6 +752,10 @@ no_compact(hid_t fapl)
     char	filename[NAME_BUF_SIZE]; 
     off_t       empty_size;             /* Size of an empty file */
     off_t       file_size;              /* Size of each file created */
+    size_t      lheap_size_hint;        /* Local heap size */
+    size_t      def_lheap_size;         /* Default local heap size */
+    unsigned	est_num_entries;	/* Estimated # of entries in group */
+    unsigned	est_name_len;		/* Estimated length of entry name */
 
     TESTING("group without compact form");
 
@@ -743,6 +777,13 @@ no_compact(hid_t fapl)
 
     /* Set GCPL parameters */
     if(H5Pset_link_phase_change(gcpl, NO_COMPACT_MAX_COMPACT, NO_COMPACT_MIN_DENSE) < 0) TEST_ERROR;
+
+    /* Check information for default local heap creation */
+    if(H5Pget_local_heap_size_hint(gcpl, &lheap_size_hint) < 0) TEST_ERROR;
+    if(lheap_size_hint != H5G_CRT_GINFO_LHEAP_SIZE_HINT) TEST_ERROR;
+    if(H5Pget_est_link_info(gcpl, &est_num_entries, &est_name_len) < 0) TEST_ERROR;
+    if(est_num_entries != H5G_CRT_GINFO_EST_NUM_ENTRIES) TEST_ERROR;
+    if(est_name_len != H5G_CRT_GINFO_EST_NAME_LEN) TEST_ERROR;
 
     /* Create group for testing lifecycle */
     if((gid = H5Gcreate_expand(fid, NO_COMPACT_TOP_GROUP, gcpl, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -767,6 +808,10 @@ no_compact(hid_t fapl)
     if(H5G_is_empty_test(gid) == TRUE) TEST_ERROR;
     if(H5G_has_links_test(gid, NULL) == TRUE) TEST_ERROR;
     if(H5G_has_stab_test(gid) != TRUE) TEST_ERROR;
+    if(H5G_lheap_size_test(gid, &lheap_size_hint) < 0) TEST_ERROR;
+    def_lheap_size = est_num_entries * (est_name_len + 1);
+    def_lheap_size = H5HL_ALIGN(def_lheap_size);
+    if(lheap_size_hint != def_lheap_size) TEST_ERROR;
 
     /* Unlink object from top group */
     sprintf(objname, NO_COMPACT_BOTTOM_GROUP, (unsigned)0);

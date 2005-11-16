@@ -404,6 +404,7 @@ H5_DLL herr_t H5G_loc_remove(H5G_loc_t *grp_loc, const char *name,
 H5_DLL htri_t H5G_is_empty_test(hid_t gid);
 H5_DLL htri_t H5G_has_links_test(hid_t gid, unsigned *nmsgs);
 H5_DLL htri_t H5G_has_stab_test(hid_t gid);
+H5_DLL herr_t H5G_lheap_size_test(hid_t gid, size_t *lheap_size);
 #endif /* H5G_TESTING */
 
 #endif

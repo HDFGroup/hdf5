@@ -25,6 +25,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Gpkg.h"		/* Groups		  		*/
+#include "H5HLprivate.h"	/* Local Heaps				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 
 
@@ -182,4 +183,49 @@ H5G_has_stab_test(hid_t gid)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5G_has_stab_test() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5G_lheap_size_test
+ PURPOSE
+    Determine the size of a local heap for a group
+ USAGE
+    herr_t H5G_lheap_size_test(gid, lheap_size)
+        hid_t gid;              IN: group to check
+        size_t *lheap_size;     OUT: Size of local heap
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Checks the size of the local heap for a group
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    DO NOT USE THIS FUNCTION FOR ANYTHING EXCEPT TESTING
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5G_lheap_size_test(hid_t gid, size_t *lheap_size)
+{
+    H5G_t *grp = NULL;          /* Pointer to group */
+    H5O_stab_t stab;		/* Symbol table message		*/
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_lheap_size_test, FAIL)
+
+    /* Get group structure */
+    if(NULL == (grp = H5I_object_verify(gid, H5I_GROUP)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
+
+    /* Make certain the group has a symbol table message */
+    if(NULL == H5O_read(&(grp->oloc), H5O_STAB_ID, 0, &stab, H5AC_dxpl_id))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read symbol table message")
+
+    /* Check the size of the local heap for the group */
+    if(H5HL_get_size(grp->oloc.file, H5AC_dxpl_id, stab.heap_addr, lheap_size) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGETSIZE, FAIL, "can't query local heap size")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5G_lheap_size_test() */
 

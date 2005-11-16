@@ -30,8 +30,6 @@
  *
  * Purpose:     Set the "size hint" for creating local heaps for a group.
  *
- * Note:        XXX: Add [meaningful] tests for this routine! -QAK
- *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
@@ -72,8 +70,6 @@ done:
  *
  * Purpose:     Returns the local heap size hint, which is used for creating
  *              groups
- *
- * Note:        XXX: Add [meaningful] tests for this routine! -QAK
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -118,8 +114,6 @@ done:
  *
  * Note:        Currently both of these must be updated at the same time.
  *
- * Note:        XXX: Add [meaningful] tests for this routine! -QAK
- *
  * Note:        Come up with better name & description! -QAK
  *
  * Return:      Non-negative on success/Negative on failure
@@ -163,8 +157,6 @@ done:
  *
  * Purpose:     Returns the max. # of compact links & the min. # of dense
  *              links, which are used for storing groups
- *
- * Note:        XXX: Add [meaningful] tests for this routine! -QAK
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -211,10 +203,8 @@ done:
  *
  * Note:        Currently both of these must be updated at the same time.
  *
- * Note:        EST_NUM_ENTRIES applies only when the number of entries than
- *              the MAX_COMPACT # of entries (from H5Pset_link_phase_change).
- *
- * Note:        XXX: Add [meaningful] tests for this routine! -QAK
+ * Note:        EST_NUM_ENTRIES applies only when the number of entries is less
+ *              than the MAX_COMPACT # of entries (from H5Pset_link_phase_change).
  *
  * Note:        Come up with better name & description? -QAK
  *
@@ -259,8 +249,6 @@ done:
  *
  * Purpose:     Returns the est. # of links in a group & the est. length of
  *              the name of each link.
- *
- * Note:        XXX: Add [meaningful] tests for this routine! -QAK
  *
  * Return:      Non-negative on success/Negative on failure
  *
