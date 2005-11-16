@@ -162,10 +162,6 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
             */
 	   size_t newsize = MAX(str->len+nchars+1, 2*str->nalloc);
 	   assert(newsize > str->nalloc); /*overflow*/
-#ifndef H5_HAVE_VSNPRINTF
-	   /* If we even made it this far... the HDvsnprintf() clobbered memory: SIGSEGV probable*/
-	   abort();
-#endif
 	   str->s = realloc(str->s, newsize);
 	   assert(str->s);
 	   str->nalloc = newsize;
