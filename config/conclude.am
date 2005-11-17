@@ -26,7 +26,6 @@ PROGS = $(bin_PROGRAMS) $(bin_SCRIPTS) $(noinst_PROGRAMS) $(noinst_SCRIPTS)   \
         $(EXTRA_PROG)
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS) $(EXTRA_TEST) 
 
-
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
 # BUILT_SOURCES contain targets that need to be built before anything else

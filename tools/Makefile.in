@@ -646,6 +646,14 @@ uninstall-info: uninstall-info-recursive
 # as well.
 check-install: installcheck
 
+# List all build rules defined by HDF5 Makefiles as "PHONY" targets here.
+# This tells the Makefiles that these targets are not files to be built but
+# commands that should be executed even if a file with the same name already
+# exists.
+.PHONY: build-check-clean build-check-p build-check-s build-lib build-progs \
+        build-tests check-clean check-install check-p check-s check-vfd \
+        install-doc lib progs tests uninstall-doc _exec_check-s _test
+
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
 # BUILT_SOURCES contain targets that need to be built before anything else
