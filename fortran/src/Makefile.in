@@ -373,7 +373,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 # Include src directory in both Fortran and C flags (C compiler is used
 # for linking).
 INCLUDES = -I$(top_srcdir)/src
-AM_FCFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/fortran
+AM_FCFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/fortran/src
 AM_FCLIBS = $(LIBHDF5)
 
 # This is our main target, the fortran library
@@ -429,7 +429,7 @@ H5fortran_detect_SOURCES = H5fortran_detect.f90
 
 # H5test_kind.f90 is included in the distribution, and Automake knows
 # how to compile a fortran program given its sources.
-H5test_kind_SOURCES = H5test_kind.f90
+H5test_kind_SOURCES = $(srcdir)/H5test_kind.f90
 
 # Mark this directory as part of the Fortran API
 HDF_FORTRAN = yes
@@ -585,6 +585,12 @@ distclean-compile:
 
 .f90.lo:
 	$(LTFCCOMPILE) -c -o $@ $<
+
+H5test_kind.o: $(srcdir)/H5test_kind.f90
+	$(FC) $(AM_FCFLAGS) $(FCFLAGS) -c -o H5test_kind.o `test -f '$(srcdir)/H5test_kind.f90' || echo '$(srcdir)/'`$(srcdir)/H5test_kind.f90
+
+H5test_kind.obj: $(srcdir)/H5test_kind.f90
+	$(FC) $(AM_FCFLAGS) $(FCFLAGS) -c -o H5test_kind.obj `if test -f '$(srcdir)/H5test_kind.f90'; then $(CYGPATH_W) '$(srcdir)/H5test_kind.f90'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/H5test_kind.f90'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -886,13 +892,14 @@ HDF5mpio.lo:         $(srcdir)/H5FDmpioff.f90 H5f90global.lo H5Aff.lo  \
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
-# BUILT_SOURCES contain targets that need to be built before anything else
-# in the directory (e.g., Fortran type detection)
-build-lib: $(BUILT_SOURCES) $(LIB)
-build-progs: $(BUILT_SOURCES) $(LIB) $(PROGS)
-build-tests: $(BUILT_SOURCES) $(LIB) $(PROGS) $(TESTS)
+build-lib: $(LIB)
+build-progs: $(LIB) $(PROGS)
+build-tests: $(LIB) $(PROGS) $(TESTS)
 
-lib progs tests check-s check-p check-clean ::
+# General rule for recursive building targets.
+# BUILT_SOURCES contain targets that need to be built before anything else
+# in the directory (e.g., for Fortran type detection)
+lib progs tests check-s check-p :: $(BUILT_SOURCES)
 	@$(MAKE) $(AM_MAKEFLAGS) build-$@ || exit 1;
 	@for d in X $(SUBDIRS); do                                             \
 	    if test $$d != X && test $$d != .; then                           \
@@ -900,6 +907,15 @@ lib progs tests check-s check-p check-clean ::
 	    fi;                                                               \
 	done
 
+# General rule for recursive cleaning targets.  Like the rule above,
+# but doesn't require building BUILT_SOURCES.
+check-clean ::
+	@$(MAKE) $(AM_MAKEFLAGS) build-$@ || exit 1;
+	@for d in X $(SUBDIRS); do                                             \
+	    if test $$d != X && test $$d != .; then                           \
+	        (set -x; cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;     \
+	    fi;                                                               \
+	done
 # Tell Automake to build tests when the user types `make all' (this is
 # not its default behavior).  Also build EXTRA_LIB and EXTRA_PROG since
 # Automake won't build them automatically, either.

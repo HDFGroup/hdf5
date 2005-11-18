@@ -22,7 +22,7 @@ include $(top_srcdir)/config/commence.am
 # Include src directory in both Fortran and C flags (C compiler is used
 # for linking).
 INCLUDES = -I$(top_srcdir)/src
-AM_FCFLAGS=-I$(top_srcdir)/src -I$(top_srcdir)/src/fortran
+AM_FCFLAGS=-I$(top_srcdir)/src -I$(top_srcdir)/fortran/src
 
 AM_FCLIBS=$(LIBHDF5)
 
@@ -144,7 +144,7 @@ H5fortran_detect.f90: H5test_kind$(EXEEXT)
 
 # H5test_kind.f90 is included in the distribution, and Automake knows
 # how to compile a fortran program given its sources.
-H5test_kind_SOURCES = H5test_kind.f90
+H5test_kind_SOURCES = $(srcdir)/H5test_kind.f90
 
 # Mark this directory as part of the Fortran API
 HDF_FORTRAN=yes
