@@ -76,6 +76,10 @@ CPPFLAGS=@CPPFLAGS@ @H5_CPPFLAGS@
 FFLAGS=@FFLAGS@ @H5_FFLAGS@
 CXXFLAGS=@CXXFLAGS@ @H5_CXXFLAGS@
 
+# The trace script; this is used on source files from the C library to
+# insert tracing macros.
+TRACE=perl $(top_srcdir)/bin/trace
+
 # Make sure that these variables are exported to the Makefiles
 F9XMODEXT=@F9XMODEXT@
 F9XMODFLAG=@F9XMODFLAG@

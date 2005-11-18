@@ -2611,6 +2611,7 @@ H5Tcompiler_conv(hid_t src_id, hid_t dst_id)
     H5T_t	*src = NULL, *dst = NULL;
 
     FUNC_ENTER_API(H5Tcompiler_conv, FAIL)
+    H5TRACE2("t","ii",src_id,dst_id);
 
     /* Check args */
     if (NULL == (src = H5I_object_verify(src_id,H5I_DATATYPE)) ||

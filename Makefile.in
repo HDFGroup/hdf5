@@ -332,6 +332,10 @@ docdir = $(exec_prefix)/doc
 @BUILD_SHARED_ONLY_CONDITIONAL_FALSE@H5CPP = $(bindir)/h5c++
 @BUILD_SHARED_ONLY_CONDITIONAL_TRUE@H5CPP = $(bindir)/h5c++ -shlib
 
+# The trace script; this is used on source files from the C library to
+# insert tracing macros.
+TRACE = perl $(top_srcdir)/bin/trace
+
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
 # *.clog are from the MPE option.
@@ -853,6 +857,11 @@ uninstall-doc:
 #  be successfully built
 installcheck-local:
 	@(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
+
+# Only source files in the src directory include tracing information,
+# so 'make trace' only needs to recurse into that directory.
+trace:
+	@(cd src && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
 
 # Automake wants to make config.status depend on configure.  This
 # makes sense, but config.status can't always be regenerated

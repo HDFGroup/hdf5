@@ -46,6 +46,7 @@ H5Pset_create_intermediate_group(hid_t plist_id, unsigned crt_intmd_group)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(H5Pset_create_intermediate_group, FAIL);
+    H5TRACE2("e","iIu",plist_id,crt_intmd_group);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
@@ -80,6 +81,7 @@ H5Pget_create_intermediate_group(hid_t plist_id, unsigned *crt_intmd_group /*out
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(H5Pget_create_intermediate_group, FAIL);
+    H5TRACE2("e","ix",plist_id,crt_intmd_group);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))

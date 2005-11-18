@@ -364,6 +364,10 @@ docdir = $(exec_prefix)/doc
 @BUILD_SHARED_ONLY_CONDITIONAL_FALSE@H5CPP = $(bindir)/h5c++
 @BUILD_SHARED_ONLY_CONDITIONAL_TRUE@H5CPP = $(bindir)/h5c++ -shlib
 
+# The trace script; this is used on source files from the C library to
+# insert tracing macros.
+TRACE = perl $(top_srcdir)/bin/trace
+
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
 # *.clog are from the MPE option.
@@ -993,6 +997,24 @@ H5Tinit.c: H5detect$(EXEEXT)
 	$(RUNSERIAL) ./H5detect > H5Tinit.c  ||                               \
 	    (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||          \
 	    ($(RM) $@ ; exit 1)
+
+# Add TRACE macros to library source files.  This is done via the trace script
+# in the hdf5/bin directory.  If the file contains HDF5 API macros, a "clean"
+# version of the source file is saved with a tilde (~) after its name and
+# tracing information is inserted.  trace should have no effect on files
+# without HDF5 macros.
+.PHONY: trace
+
+trace: $(libhdf5_la_SOURCES)
+	@for dep in $? dummy; do                                          \
+	 if test $$dep != "dummy" -a -n "$(PERL)"; then                      \
+	  case "$$dep" in                                                 \
+	   *.c)                                                           \
+	    $(TRACE) $$dep;                                               \
+	    ;;                                                            \
+	  esac;                                                           \
+	 fi;                                                              \
+	done
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.

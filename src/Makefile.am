@@ -110,4 +110,22 @@ H5Tinit.c: H5detect$(EXEEXT)
 	    (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||          \
 	    ($(RM) $@ ; exit 1)
 
+# Add TRACE macros to library source files.  This is done via the trace script
+# in the hdf5/bin directory.  If the file contains HDF5 API macros, a "clean"
+# version of the source file is saved with a tilde (~) after its name and
+# tracing information is inserted.  trace should have no effect on files
+# without HDF5 macros.
+.PHONY: trace
+
+trace: $(libhdf5_la_SOURCES)
+	@for dep in $? dummy; do                                          \
+	 if test $$dep != "dummy" -a -n "$(PERL)"; then                      \
+	  case "$$dep" in                                                 \
+	   *.c)                                                           \
+	    $(TRACE) $$dep;                                               \
+	    ;;                                                            \
+	  esac;                                                           \
+	 fi;                                                              \
+	done
+
 include $(top_srcdir)/config/conclude.am

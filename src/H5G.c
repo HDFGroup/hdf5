@@ -317,6 +317,7 @@ H5Gcreate_expand(hid_t loc_id, const char *name, hid_t gcpl_id, hid_t gapl_id)
     hid_t	    ret_value;
 
     FUNC_ENTER_API(H5Gcreate_expand, FAIL)
+    H5TRACE4("i","isii",loc_id,name,gcpl_id,gapl_id);
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -1032,7 +1033,7 @@ H5Gget_create_plist(hid_t group_id)
     hid_t		ret_value = FAIL;
 
     FUNC_ENTER_API(H5Gget_create_plist, FAIL)
-    H5TRACE1("i","i", group_id);
+    H5TRACE1("i","i",group_id);
 
     /* Check args */
     if(NULL == (grp = H5I_object_verify(group_id, H5I_GROUP)))
@@ -1094,6 +1095,7 @@ H5Gcopy(hid_t src_id, hid_t dst_id, const char *name_dst, hid_t plist_id)
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Gcopy, FAIL)
+    H5TRACE4("e","iisi",src_id,dst_id,name_dst,plist_id);
 
     /* Check arguments */
     if(H5G_loc(src_id, &src_loc) < 0)

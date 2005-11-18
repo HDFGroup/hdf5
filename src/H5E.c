@@ -1267,7 +1267,7 @@ H5Eget_num(hid_t error_stack_id)
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Eget_num, FAIL)
-    H5TRACE1("Is","i",error_stack_id);
+    H5TRACE1("Zs","i",error_stack_id);
 
     /* Need to check for errors */
     if(error_stack_id == H5E_DEFAULT) {

@@ -122,6 +122,7 @@ H5Tcommit_expand(hid_t loc_id, const char *name, hid_t type_id, hid_t tcpl_id, h
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tcommit_expand, FAIL)
+    H5TRACE5("e","isiii",loc_id,name,type_id,tcpl_id,tapl_id);
 
     /* Check arguments */
     if(H5G_loc (loc_id, &loc) < 0)

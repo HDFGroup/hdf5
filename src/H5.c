@@ -2984,6 +2984,31 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 
 	case 'Z':
 	    switch (type[1]) {
+                case 'a':
+                    if (ptr) {
+                        if (vp) {
+                            fprintf (out, "0x%lx", (unsigned long)vp);
+                        } else {
+                            fprintf(out, "NULL");
+                        }
+                    } else {
+                        H5Z_SO_scale_type_t scale_type = va_arg (ap, H5Z_SO_scale_type_t); /*lint !e64 Type mismatch not really occuring */
+                        switch(scale_type) {
+                          case H5Z_SO_FLOAT_DSCALE:
+                              fprintf(out, "H5Z_SO_FLOAT_DSCALE");
+                              break;
+                          case H5Z_SO_FLOAT_ESCALE:
+                              fprintf(out, "H5Z_SO_FLOAT_ESCALE");
+                              break;
+                          case H5Z_SO_INT:
+                              fprintf(out, "H5Z_SO_INT");
+                              break;
+                          default:
+                              fprintf(out, "%ld", (long)scale_type);
+                              break;
+                        }
+                    }
+                    break;
                 case 'c':
                     if (ptr) {
                         if (vp) {

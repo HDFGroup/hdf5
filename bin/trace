@@ -105,6 +105,7 @@ $Source = "";
                "H5Z_func_t"                 => "x",
                "H5Z_filter_func_t"          => "x",
                "size_t"                     => "z",
+               "H5Z_SO_scale_type_t"        => "Za",
                "H5Z_class_t*"               => "Zc",
                "H5Z_EDC_t"                  => "Ze",
                "H5Z_filter_t"               => "Zf",
@@ -272,7 +273,7 @@ for $file (@ARGV) {
   # Make modifications
   my $original = $Source;
   my $napi = $Source =~ s/\n([A-Za-z]\w*(\s+[a-z]\w*)*)\s*\n #type
-                            (H5[A-Z]{0,2}[^_A-Z]\w*)      #name
+                            (H5[A-Z]{0,2}[^_A-Z0-9]\w*)      #name
                             \s*\((.*?)\)\s*               #args
                             (\{.*?\n\}[^\n]*)             #body
                          /rewrite_func($file,$1,$3,$4,$5)/segx;

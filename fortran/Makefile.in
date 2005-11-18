@@ -306,6 +306,10 @@ docdir = $(exec_prefix)/doc
 @BUILD_SHARED_ONLY_CONDITIONAL_FALSE@H5CPP = $(bindir)/h5c++
 @BUILD_SHARED_ONLY_CONDITIONAL_TRUE@H5CPP = $(bindir)/h5c++ -shlib
 
+# The trace script; this is used on source files from the C library to
+# insert tracing macros.
+TRACE = perl $(top_srcdir)/bin/trace
+
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
 # *.clog are from the MPE option.

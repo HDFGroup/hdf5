@@ -917,8 +917,13 @@ H5Pget_filter_by_id(hid_t plist_id, H5Z_filter_t id, unsigned int *flags/*out*/,
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(H5Pget_filter_by_id, FAIL);
+#ifdef H5_WANT_H5_V1_6_COMPAT
     H5TRACE7("e","iZfx*zxzx",plist_id,id,flags,cd_nelmts,cd_values,namelen,
              name);
+#else
+    H5TRACE8("e","iZfx*zxzx*Iu",plist_id,id,flags,cd_nelmts,cd_values,namelen,
+             name,filter_config);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 
     /* Check args */
     if (cd_nelmts || cd_values)
@@ -1301,7 +1306,7 @@ H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type, int scale_fac
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_scaleoffset, FAIL);
-    H5TRACE3("e","iIIu",plist_id,scale_factor,scale_type);
+    H5TRACE3("e","iZaIs",plist_id,scale_type,scale_factor);
 
     /* Check arguments */
     if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))

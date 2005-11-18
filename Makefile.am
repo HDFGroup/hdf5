@@ -137,6 +137,11 @@ uninstall-doc:
 installcheck-local:
 	@(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
 
+# Only source files in the src directory include tracing information,
+# so 'make trace' only needs to recurse into that directory.
+trace:
+	@(cd src && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
+
 # Automake wants to make config.status depend on configure.  This
 # makes sense, but config.status can't always be regenerated
 # properly, which can cause builds to fail.
