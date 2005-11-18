@@ -589,6 +589,7 @@ herr_t H5DSdetach_scale(hid_t did,
  int        has_reflist;
  hssize_t   nelmts;
  hid_t      dsid_j;       /* DS dataset ID in DIMENSION_LIST */
+	hid_t      did_i;        /* dataset ID in REFERENCE_LIST */
  hid_t      sid;          /* space ID */
  hid_t      tid;          /* attribute type ID */
  hid_t      aid;          /* attribute ID */
@@ -783,19 +784,19 @@ herr_t H5DSdetach_scale(hid_t did,
 
  for(i=0; i<nelmts; i++)
  {
-  /* get the reference */
+  /* get the reference to the dataset */
   ref = dsbuf[i].ref;
 
-  /* get the DS id */
-  if ((dsid_j = H5Rdereference(did,H5R_OBJECT,&ref))<0)
+  /* get the dataset id */
+  if ((did_i = H5Rdereference(did,H5R_OBJECT,&ref))<0)
    goto out;
 
   /* get info for dataset in the parameter list */
   if (H5Gget_objinfo(did,".",TRUE,&sb3)<0)
    goto out;
 
-  /* get info for this DS */
-  if (H5Gget_objinfo(dsid_j,".",TRUE,&sb4)<0)
+  /* get info for this dataset */
+  if (H5Gget_objinfo(did_i,".",TRUE,&sb4)<0)
    goto out;
 
   /* same object, reset. we want to detach only for this DIM */
@@ -809,13 +810,13 @@ herr_t H5DSdetach_scale(hid_t did,
    found_dset=1;
 
    /* close the dereferenced dataset and break */
-   if (H5Dclose(dsid_j)<0)
+   if (H5Dclose(did_i)<0)
     goto out;
    break;
   } /* if */
 
   /* close the dereferenced dataset */
-  if (H5Dclose(dsid_j)<0)
+  if (H5Dclose(did_i)<0)
    goto out;
 
  } /* i */
@@ -961,6 +962,7 @@ htri_t H5DSis_attached(hid_t did,
  hobj_ref_t ref;          /* reference to the DS */
  hvl_t      *buf;         /* VL buffer to store in the attribute */
  hid_t      dsid_j;       /* DS dataset ID in DIMENSION_LIST */
+	hid_t      did_i;        /* dataset ID in REFERENCE_LIST */
  H5G_stat_t sb1, sb2, sb3, sb4;
  H5I_type_t it1, it2;
  int        i;
@@ -1140,16 +1142,16 @@ htri_t H5DSis_attached(hid_t did,
    /* the reference was not deleted  */
    if (ref)
    {
-    /* get the DS id */
-    if ((dsid_j = H5Rdereference(did,H5R_OBJECT,&ref))<0)
+    /* get the dataset id */
+    if ((did_i = H5Rdereference(did,H5R_OBJECT,&ref))<0)
      goto out;
 
     /* get info for dataset in the parameter list */
     if (H5Gget_objinfo(did,".",TRUE,&sb3)<0)
      goto out;
 
-    /* get info for this DS */
-    if (H5Gget_objinfo(dsid_j,".",TRUE,&sb4)<0)
+    /* get info for this dataset */
+    if (H5Gget_objinfo(did_i,".",TRUE,&sb4)<0)
      goto out;
 
     /* same object */
@@ -1158,7 +1160,7 @@ htri_t H5DSis_attached(hid_t did,
     } /* if */
 
     /* close the dereferenced dataset */
-    if (H5Dclose(dsid_j)<0)
+    if (H5Dclose(did_i)<0)
      goto out;
    } /* if */
   } /* i */
