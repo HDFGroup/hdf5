@@ -2419,7 +2419,8 @@ H5Eset_auto(H5E_auto_t func, void *client_data)
     H5E_t   *estack;            /* Error stack to operate on */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_API(H5Eset_auto, FAIL)
+    /* Don't clear the error stack! :-) */
+    FUNC_ENTER_API_NOCLEAR(H5Eset_auto, FAIL)
     H5TRACE2("e","xx",func,client_data);
 
     if((estack = H5E_get_my_stack())==NULL) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
@@ -2466,7 +2467,8 @@ H5Eset_auto_stack(hid_t estack_id, H5E_auto_stack_t func, void *client_data)
     H5E_t   *estack;            /* Error stack to operate on */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_API(H5Eset_auto_stack, FAIL)
+    /* Don't clear the error stack! :-) */
+    FUNC_ENTER_API_NOCLEAR(H5Eset_auto_stack, FAIL)
     H5TRACE3("e","ixx",estack_id,func,client_data);
 
     if(estack_id == H5E_DEFAULT) {
