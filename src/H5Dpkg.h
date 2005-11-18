@@ -259,7 +259,7 @@ H5_DLL herr_t H5D_istore_initialize_by_extent(H5D_io_info_t *io_info);
 H5_DLL herr_t H5D_istore_update_cache(H5D_t *dset, hid_t dxpl_id);
 H5_DLL herr_t H5D_istore_dump_btree(H5F_t *f, hid_t dxpl_id, FILE *stream, unsigned ndims,
         haddr_t addr);
-H5_DLL herr_t H5D_istore_chunkmap(const H5D_io_info_t *io_info, hsize_t total_chunk, haddr_t chunk_addr[] );
+H5_DLL herr_t H5D_istore_chunkmap(const H5D_io_info_t *io_info, hsize_t total_chunk, haddr_t chunk_addr[],hsize_t down_chunks[] );
 #ifdef H5D_ISTORE_DEBUG
 H5_DLL herr_t H5D_istore_stats (H5D_t *dset, hbool_t headers);
 #endif /* H5D_ISTORE_DEBUG */

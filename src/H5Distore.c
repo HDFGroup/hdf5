@@ -199,7 +199,7 @@ typedef struct H5D_istore_it_ud4_t {
 /* B-tree callback info for iteration to obtain chunk address and the index of the chunk for all chunks in the B-tree. */
 typedef struct H5D_istore_it_ud5_t {
     H5D_istore_bt_ud_common_t common;           /* Common info for B-tree user data (must be first) */
-    hsize_t              down_chunks[H5O_LAYOUT_NDIMS];
+    hsize_t*              down_chunks;
     haddr_t             *chunk_addr;
 } H5D_istore_it_ud5_t;
 
@@ -2374,7 +2374,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_istore_chunkmap(const H5D_io_info_t *io_info, hsize_t total_chunks,haddr_t chunk_addr[])
+H5D_istore_chunkmap(const H5D_io_info_t *io_info, hsize_t total_chunks,haddr_t chunk_addr[],hsize_t down_chunks[])
 {
  
     H5D_t *dset=io_info->dset;       /* Local pointer to dataset info */
@@ -2386,7 +2386,6 @@ H5D_istore_chunkmap(const H5D_io_info_t *io_info, hsize_t total_chunks,haddr_t c
 
     hsize_t                 curr_dims[H5O_LAYOUT_NDIMS];	/*current dataspace dimensions */
     hsize_t                 chunks[H5O_LAYOUT_NDIMS];	        /*current number of chunks in each dimension */
-    hsize_t                 down_chunks[H5O_LAYOUT_NDIMS];      /* "down" size of number of elements in each dimension */
 
     int                     srank;	                        /*current # of dimensions (signed) */
     unsigned                rank;	                        /*current # of dimensions */
@@ -2417,36 +2416,12 @@ H5D_istore_chunkmap(const H5D_io_info_t *io_info, hsize_t total_chunks,haddr_t c
 
     HDmemset(&udata, 0, sizeof udata);
     udata.common.mesg = &dset->shared->layout;
-
-    /* Go get the rank & dimensions */
-    if((srank = H5S_get_simple_extent_dims(dset->shared->space, curr_dims, NULL)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions");
-    H5_ASSIGN_OVERFLOW(rank,srank,int,unsigned);
-
-    /* Obtain number of chunks for each dimension*/
-    for(u = 0; u < rank; u++) {
-        /* Round up to the next integer # of chunks, to accomodate partial chunks */
-        chunks[u] = ((curr_dims[u]+dset->shared->layout.u.chunk.dim[u])-1) / dset->shared->layout.u.chunk.dim[u];
-    } /* end for */
-
-    /* Get the "down" sizes for each dimension */
-    if(H5V_array_down(rank,chunks,udata.down_chunks)<0)
-        HGOTO_ERROR (H5E_INTERNAL, H5E_BADVALUE, FAIL, "can't compute 'down' sizes")
-	  /* 
-    for(u = 0; u < rank; u++) 
-      udata.down_chunks[u] = down_chunks[u];
-	  */
-
-    assert(total_chunks!=0);
-    udata.chunk_addr=(haddr_t *)malloc(total_chunks*sizeof(haddr_t));
-    HDmemset(udata.chunk_addr,0,total_chunks*sizeof(haddr_t));
+    udata.down_chunks = down_chunks;
+    udata.chunk_addr  = chunk_addr;
     			 
     if (H5B_iterate(dset->oloc.file, dxpl_id, H5B_ISTORE, H5D_istore_iter_chunkmap, dset->shared->layout.u.chunk.addr, &udata)<0)
         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, 0, "unable to iterate over chunk B-tree")
 
-    for(u=0; u<total_chunks;u++)
-      chunk_addr[u] = udata.chunk_addr[u];
-    HDfree(udata.chunk_addr);
 	    
 done:
     FUNC_LEAVE_NOAPI(ret_value)
