@@ -114,17 +114,13 @@ class H5_DLLCPP DataType : public H5Object {
 	virtual string fromClass () const { return("DataType"); }
 
 	// Creates a copy of an existing DataType using its id
-	DataType( const hid_t type_id, bool predtype = false );
+	DataType( const hid_t type_id );
 
 	// Default constructor
 	DataType();
 
 	// Destructor: properly terminates access to this datatype.
 	virtual ~DataType();
-
-   protected:
-	bool is_predtype;	// indicates a type is predefined so
-				// H5Tclose will not be called for it
 };
 #ifndef H5_NO_NAMESPACE
 }

@@ -24,6 +24,7 @@
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #endif
+
 class H5_DLLCPP AtomType : public DataType {
    public:
 	// Returns the byte order of an atomic datatype.

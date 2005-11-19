@@ -19,6 +19,7 @@
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #endif
+
 class H5_DLLCPP IntType : public AtomType {
    public:
 	// Creates a integer type using a predefined type

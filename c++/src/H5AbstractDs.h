@@ -24,6 +24,7 @@
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #endif
+
 class ArrayType;
 class CompType;
 class EnumType;

@@ -21,9 +21,6 @@
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
-#ifndef H5_NO_STD
-    using std::string;
-#endif  // H5_NO_STD
 #endif
 
 class H5_DLLCPP IdComponent {

@@ -12,11 +12,17 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <string>
 #ifdef OLD_HEADER_FILENAME
 #include <iostream.h>
 #else
 #include <iostream>
+#endif
+#include <string>
+
+#ifndef H5_NO_NAMESPACE
+#ifndef H5_NO_STD
+    using std::string;
+#endif  // H5_NO_STD
 #endif
 
 #include "H5Include.h"
@@ -34,6 +40,10 @@
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
+#ifndef H5_NO_STD
+    using std::cerr;
+    using std::endl;
+#endif  // H5_NO_STD
 #endif
 
 //--------------------------------------------------------------------------
@@ -51,7 +61,7 @@ namespace H5 {
 //		- BMR 5/2004
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataType::DataType(const hid_t existing_id, bool predefined) : H5Object(existing_id), is_predtype(predefined) {}
+DataType::DataType(const hid_t existing_id) : H5Object(existing_id) {}
 
 //--------------------------------------------------------------------------
 // Function:	DataType overloaded constructor
@@ -61,7 +71,7 @@ DataType::DataType(const hid_t existing_id, bool predefined) : H5Object(existing
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataType::DataType( const H5T_class_t type_class, size_t size ) : H5Object(), is_predtype( false )
+DataType::DataType( const H5T_class_t type_class, size_t size ) : H5Object()
 {
    // Call C routine to create the new datatype
    id = H5Tcreate( type_class, size );
@@ -76,17 +86,14 @@ DataType::DataType( const H5T_class_t type_class, size_t size ) : H5Object(), is
 ///\brief	Default constructor: Creates a stub datatype
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataType::DataType() : H5Object(), is_predtype( false ) {}
+DataType::DataType() : H5Object() {}
 
 //--------------------------------------------------------------------------
 // Function:	DataType copy constructor
 ///\brief	Copy constructor: makes a copy of the original DataType object.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataType::DataType(const DataType& original) : H5Object(original)
-{
-   is_predtype = original.is_predtype; // copy data member from original
-}
+DataType::DataType(const DataType& original) : H5Object(original) {}
 
 //--------------------------------------------------------------------------
 // Function:	DataType::copy
@@ -100,22 +107,20 @@ DataType::DataType(const DataType& original) : H5Object(original)
 //--------------------------------------------------------------------------
 void DataType::copy( const DataType& like_type )
 {
-   // reset the identifier of this instance, H5Tclose will be called
-   // if needed
-   if( is_predtype == false ) {
-        try {
-            decRefCount();
-        }
-        catch (Exception close_error) {
-            throw DataTypeIException(inMemFunc("copy"), close_error.getDetailMsg());
-        }
+    // reset the identifier of this instance, H5Tclose will be called
+    // if needed
+    try {
+	decRefCount();
+    }
+    catch (Exception close_error) {
+	throw DataTypeIException(inMemFunc("copy"), close_error.getDetailMsg());
     }
 
-   // call C routine to copy the datatype
-   id = H5Tcopy( like_type.getId() );
+    // call C routine to copy the datatype
+    id = H5Tcopy( like_type.getId() );
 
-   if( id < 0 )
-      throw DataTypeIException(inMemFunc("copy"), "H5Tcopy failed");
+    if( id < 0 )
+	throw DataTypeIException(inMemFunc("copy"), "H5Tcopy failed");
 }
 
 //--------------------------------------------------------------------------
@@ -684,19 +689,13 @@ DataSpace DataType::getRegion(void *ref, H5R_type_t ref_type) const
 //--------------------------------------------------------------------------
 void DataType::close()
 {
-   // If this datatype is not a predefined type, call H5Tclose on it.
-   if( is_predtype == false )
-   {
-      herr_t ret_value = H5Tclose(id);
-      if( ret_value < 0 )
-      {
-         throw DataTypeIException(inMemFunc("close"), "H5Tclose failed");
-      }
-      // reset the id because the datatype that it represents is now closed
-      id = 0;
-   }
-   else // cannot close a predefined type
-      throw DataTypeIException(inMemFunc("close"), "Cannot close a predefined type");
+    herr_t ret_value = H5Tclose(id);
+    if( ret_value < 0 )
+    {
+	throw DataTypeIException(inMemFunc("close"), "H5Tclose failed");
+    }
+    // reset the id because the datatype that it represents is now closed
+    id = 0;
 }
 
 //--------------------------------------------------------------------------
@@ -709,14 +708,12 @@ void DataType::close()
 //--------------------------------------------------------------------------
 DataType::~DataType()
 {
-   // The datatype id will be closed properly
-   if( is_predtype == false ) {
-        try {
-            decRefCount();
-        }
-        catch (Exception close_error) {
-            cerr << inMemFunc("~DataType - ") << close_error.getDetailMsg() << endl;
-        }
+    // The datatype id will be closed properly
+    try {
+	decRefCount();
+    }
+    catch (Exception close_error) {
+	cerr << inMemFunc("~DataType - ") << close_error.getDetailMsg() << endl;
     }
 }
 
