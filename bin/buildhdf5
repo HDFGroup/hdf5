@@ -27,9 +27,9 @@ can continue from a previous build.
 
 Command Syntax
 ==============
-buildhdf5 [-config] [-gass] [-srcdir dir] config-arguments ...
+buildhdf5 [-config] [-srcdir dir] config-arguments ...
    -config:	run configure only. [default to do build too]
-   -gass:	configure for the GASS driver
+   -szlib:      configure in the szlib option
    -help:	show this help page
    -n:   	no execution, just show commands
    -srcdir:	use dir as the source directory
@@ -47,10 +47,10 @@ does the build in place.  If it finds ../hdf5/configure, it
 does the --srcdir (that is separated source) build.  Therefore,
 if you have the following structure setup, you can run multiple
 hosts building simultantously using a common source code.
-     hdf5_1.4/hdf5        # holds the source
-	  .../arabica     # for SunOS 2.7
-	  .../arabicapp   # for SunOS 2.7 parallel
-	  .../burrwhite   # for Linux 2.4
+     hdf5_v1.7/hdf5       # holds the source
+	  .../sunbox      # for SunOS
+	  .../linux       # for Linux
+	  .../linuxpp     # for Linux parallel
 EOF
 }
 
@@ -88,135 +88,57 @@ STEP()
 }
 
 
-# Try locate the HDF4 library
-# This is a hack because there is no consistent place to find
-# the valid HDF library.
-LOCATE_HDF4()
+# Try locate the SZLIB.
+# This is a hack because there is no consistent szlib pathname.
+LOCATE_SZLIB()
 {
     OS=`uname -s`
     echo OS=$OS
     case "$OS" in
 	HP-UX)
-	    h4paths="/afs/ncsa/packages/hdf/HPUX_10.20"
+	    szlibpaths="/afs/ncsa/projects/hdf/packages/szip_new/HPUX-11.00"
 	    ;;
 	IRIX)
-	    h4paths="/afs/ncsa/packages/hdf/4.1r3_irix"
+	    szlibpaths="/afs/ncsa/projects/hdf/packages/szip_new/IRIX64-6.5-32bit"
 	    ;;
 	IRIX64)
 	    case "$CC" in
 	    *-n32)
-		h4paths="/afs/ncsa/packages/hdf/IRIX64-n32_6.5"
+		szlibpaths="/afs/ncsa/projects/hdf/packages/szip_new/IRIX64-6.5-32bit"
 		;;
 	    *)
-		h4paths="/afs/ncsa/packages/hdf/IRIX64_6.5"
+		szlibpaths="/afs/ncsa/projects/hdf/packages/szip_new/IRIX64-6.5"
 		;;
 	    esac
 	    ;;
 	Linux)
-	    h4paths="/afs/ncsa/packages/hdf/linux"
-	    ;;
-	OSF1)
-	    h4paths="/afs/ncsa/packages/hdf/OSF1_V4.0"
-	    ;;
-	*)
-	    h4paths="/usr/ncsa /usr/sdt"
-	    ;;
-    esac
-    echo $h4paths
-    for h4 in $h4paths; do
-	if [ -f $h4/lib/libdf.a -a -f $h4/include/hdf.h ]; then
-	    WITH_H4="--with-hdf4=$h4/include,$h4/lib"
-	    break
-	fi
-    done
-    echo WITH_H4="$WITH_H4"
-}
-
-
-# Try locate the Fortran compiler
-# This is a hack because there is no consistent fortran compiler name
-LOCATE_FORTRAN()
-{
-    OS=`uname -s`
-    echo OS=$OS
-    case "$OS" in
-	IRIX64)
-	    case "$CC" in
-	    *-n32)
-		gasspaths=/usr/local/globus-install-1.1.1/development/mips-sgi-irix6.5-n32_nothreads_standard_debug
-		sslpaths=/usr/local/ssl-n32
+	    case `uname -m` in
+	    i686)
+		szlibpaths="/afs/ncsa/projects/hdf/packages/szip_new/Linux2.4"
 		;;
 	    *)
-		gasspaths=/usr/local/globus-install-1.1.1/development/mips-sgi-irix6.5-64_nothreads_standard_debug
-		sslpaths=/usr/local/ssl
+		# Don't know.  Give a shot at standard places.
+		szlibpaths="/usr/ncsa /usr/sdt"
 		;;
 	    esac
 	    ;;
-	*)
-	    ;;
-    esac
-    echo gasspaths=$gasspaths
-    echo $sslpaths=$sslpaths
-    for x in $gasspaths dummy; do
-	if [ $x != dummy -a -f $x/lib/libglobus_gass_cache.a ]; then
-	   WITH_GASS="--with-gass=$x/include,$x/lib"
-	   break
-	fi
-    done
-    for x in $sslpaths dummy; do
-	if [ $x != dummy -a -f $x/lib/libssl.a ]; then
-	   WITH_SSL="--with-ssl=$x/lib"
-	   break
-	fi
-    done
-
-    echo WITH_GASS="$WITH_GASS"
-    echo WITH_SSL="$WITH_SSL"
-
-}
-
-
-# Try locate the GASS software library
-# This is a hack because there is no consistent place to find
-# the valid HDF library.
-LOCATE_GASS()
-{
-    OS=`uname -s`
-    echo OS=$OS
-    case "$OS" in
-	IRIX64)
-	    case "$CC" in
-	    *-n32)
-		gasspaths=/usr/local/globus-install-1.1.1/development/mips-sgi-irix6.5-n32_nothreads_standard_debug
-		sslpaths=/usr/local/ssl-n32
-		;;
-	    *)
-		gasspaths=/usr/local/globus-install-1.1.1/development/mips-sgi-irix6.5-64_nothreads_standard_debug
-		sslpaths=/usr/local/ssl
-		;;
-	    esac
+	SunOS)
+	    szlibpaths="/afs/ncsa/projects/hdf/packages/szip_new/SunOS_5.8"
 	    ;;
 	*)
+	    # Don't know.  Give a shot at standard places.
+	    szlibpaths="/usr/ncsa /usr/sdt"
 	    ;;
     esac
-    echo gasspaths=$gasspaths
-    echo $sslpaths=$sslpaths
-    for x in $gasspaths dummy; do
-	if [ $x != dummy -a -f $x/lib/libglobus_gass_cache.a ]; then
-	   WITH_GASS="--with-gass=$x/include,$x/lib"
-	   break
-	fi
-    done
-    for x in $sslpaths dummy; do
-	if [ $x != dummy -a -f $x/lib/libssl.a ]; then
-	   WITH_SSL="--with-ssl=$x/lib"
+    echo szlibpaths=$szlibpaths
+    for x in $szlibpaths dummy; do
+	if [ $x != dummy -a -f $x/include/szlib.h -a -f $x/lib/libsz.a ]; then
+	   WITH_SZLIB="--with-szlib=$x"
 	   break
 	fi
     done
 
-    echo WITH_GASS="$WITH_GASS"
-    echo WITH_SSL="$WITH_SSL"
-
+    echo WITH_SZLIB="$WITH_SZLIB"
 }
 
 
@@ -242,6 +164,7 @@ trap QUIT 0
 MAKE=${MAKE:-'gmake'}
 export MAKE
 CONFIGURE="CONFIG"
+CONFIG_OP=		# configure options
 CONFIG_ONLY=no		# default is configure and build
 NOEXEC=			# default to execute commands
 SRCDIRLIST=". ../hdf5"  # places to look for configure
@@ -254,9 +177,6 @@ while [ $# -gt 0 ]; do
 	    # do configure only
 	    CONFIG_ONLY=yes
 	    ;;
-	-gass)
-	    LOCATE_GASS
-	    ;;
 	-help)
 	    USAGE
 	    exit 0
@@ -267,6 +187,9 @@ while [ $# -gt 0 ]; do
 	-srcdir)
 	    shift
 	    SRCDIRLIST="$1"
+	    ;;
+	-szlib)
+	    LOCATE_SZLIB
 	    ;;
 	*)	# Quit parsing
 	    break
@@ -293,11 +216,14 @@ if [ x-$SRCDIR = x-dummy ]; then
     exit 1
 fi
 
+# Setup Configure options
+CONFIG_OP="$WITH_SZLIB"
+
 # Configure
 # no configure if already done.
 if [ ! -f config.status ]; then
-    CONFIGURE="$CONFIGURE $WITH_SSL $WITH_GASS"
-    STEP "Configure HDF5..." "$CONFIGURE $*" "#config"
+    CONFIGURE="$CONFIGURE $CONFIG_OP $*"
+    STEP "Configure HDF5..." "$CONFIGURE" "#config"
 else
     STEP "Confiugre Skipped" "echo Confiugre Skipped" "#config"
 fi
