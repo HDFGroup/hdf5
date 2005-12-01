@@ -28,7 +28,7 @@
 
     /* "Open" Constructor
      * Opens an existing packet table, which can contain either fixed-length or
-     * variable-length records.
+     * variable-length packets.
      */
     PacketTable::PacketTable(hid_t fileID, char* name)
     {
@@ -67,7 +67,7 @@
     }
 
     /* ResetIndex
-     * Sets the "current record" to the first record in the packet table
+     * Sets the index to point to the first packet in the packet table
      */
     void PacketTable::ResetIndex()
     {
@@ -75,7 +75,7 @@
     }
 
     /* SetIndex
-     * Sets the current record to point to the record specified by index.
+     * Sets the index to point to the packet specified by index.
      * Returns 0 on success, negative on failure (if index is out of bounds)
      */
     int PacketTable::SetIndex(unsigned int index)
@@ -84,16 +84,16 @@
     }
 
     /* GetPacketCount
-     * Returns the number of records in the packet table.  Error
+     * Returns the number of packets in the packet table.  Error
      * is set to 0 on success.  On failure, returns 0 and
      * error is set to negative.
      */
     unsigned int PacketTable::GetPacketCount(int& error)
     {
-        hsize_t nrecords;
+        hsize_t npackets;
 
-        error = H5PTget_num_packets( table_id, (hsize_t *)&nrecords);
-        return nrecords;
+        error = H5PTget_num_packets( table_id, (hsize_t *)&npackets);
+        return npackets;
     }
 
     /********************************/
@@ -101,7 +101,7 @@
     /********************************/
 
     /* Constructor
-     * Creates a packet table in which to store fixed length records.
+     * Creates a packet table in which to store fixed length packets.
      * Takes the ID of the file the packet table will be created in, the name of
      * the packet table, the ID of the datatype of the set, and the size
      * of a memory chunk used in chunking.
@@ -135,18 +135,18 @@
     }
 
     /* AppendPackets (multiple packets)
-     * Adds multiple records to the packet table.  Takes the number of records to be
-     * added and a pointer to their location in memory.
+     * Adds multiple packets to the packet table.  Takes the number of packets
+     * to be added and a pointer to their location in memory.
      * Returns 0 on success, -1 on failure.
      */
-    int FL_PacketTable::AppendPackets(unsigned int numRecords, void * data)
+    int FL_PacketTable::AppendPackets(unsigned int numPackets, void * data)
     {
-        return H5PTappend(table_id, numRecords, data);
+        return H5PTappend(table_id, numPackets, data);
     }
 
     /* GetPacket (indexed)
      * Gets a single packet from the packet table.  Takes the index
-     * of the record (with 0 being the first record) and a pointer
+     * of the packet (with 0 being the first packet) and a pointer
      * to memory where the data should be stored.
      * Returns 0 on success, negative on failure
      */
@@ -156,9 +156,9 @@
     }
 
     /* GetPackets (multiple packets)
-     * Gets multiple packets at once, all records between
+     * Gets multiple packets at once, all packets between
      * startIndex and endIndex inclusive.  Also takes a pointer to
-     * the memory where these records should be stored.
+     * the memory where these packets should be stored.
      * Returns 0 on success, negative on failure.
      */
     int FL_PacketTable::GetPackets(unsigned int startIndex, unsigned int endIndex, void * data)
@@ -171,10 +171,10 @@
     }
 
     /* GetNextPacket (single packet)
-     * Gets the next record in the packet table.  Takes a pointer to
-     * memory where the record should be stored.
-     * Returns 0 on success, negative on failure.  Current record
-     * is not advanced to the next record on failure.
+     * Gets the next packet in the packet table.  Takes a pointer to
+     * memory where the packet should be stored.
+     * Returns 0 on success, negative on failure.  Index
+     * is not advanced to the next packet on failure.
      */
     int FL_PacketTable::GetNextPacket(void * data)
     {
@@ -182,14 +182,14 @@
     }
 
     /* GetNextPackets (multiple packets)
-     * Gets the next numRecords records in the packet table.  Takes a
-     * pointer to memory where these records should be stored.
-     * Returns 0 on success, negative on failure.  Current record
+     * Gets the next numPackets packets in the packet table.  Takes a
+     * pointer to memory where these packets should be stored.
+     * Returns 0 on success, negative on failure.  Index
      * is not advanced on failure.
      */
-    int FL_PacketTable::GetNextPackets(unsigned int numRecords, void * data)
+    int FL_PacketTable::GetNextPackets(unsigned int numPackets, void * data)
     {
-        return H5PTget_next(table_id, numRecords, data);
+        return H5PTget_next(table_id, numPackets, data);
     }
 
 
@@ -198,7 +198,7 @@
     /********************************/
 
     /* Constructor
-     * Creates a packet table in which to store variable length records.
+     * Creates a packet table in which to store variable length packets.
      * Takes the ID of the file the packet table will be created in, the name of
      * the packet table, and the size of a memory chunk used in chunking.
      */
@@ -237,19 +237,20 @@
     }
 
     /* AppendPackets (multiple packets)
-     * Adds multiple variable-length records to the packet table.  Takes the number of
-     * records to be added and a pointer to an array of hvl_t structs in memory.
+     * Adds multiple variable-length packets to the packet table.  Takes the
+     * number of
+     * packets to be added and a pointer to an array of hvl_t structs in memory.
      * Returns 0 on success, negative on failure.
      */
-    int VL_PacketTable::AppendPackets(unsigned int numRecords, hvl_t * data)
+    int VL_PacketTable::AppendPackets(unsigned int numPackets, hvl_t * data)
     {
-        return H5PTappend(table_id, numRecords, data);
+        return H5PTappend(table_id, numPackets, data);
     }
 
     /* GetPacket (indexed)
-     * Gets a single variable-length record from the packet table.  Takes the index
-     * of the record (with 0 being the first record) and a pointer
-     * to a hvl_t struct in which to store the record's size and location.
+     * Gets a single variable-length packet from the packet table.  Takes the
+     * index of the packet (with 0 being the first packet) and a pointer
+     * to a hvl_t struct in which to store the packet's size and location.
      * Returns 0 on success, negative on failure.
      */
     int VL_PacketTable::GetPacket(unsigned int index, hvl_t * data)
@@ -258,9 +259,9 @@
     }
 
     /* GetPackets (multiple packets)
-     * Gets multiple variable-length records at once, all records between
+     * Gets multiple variable-length packets at once, all packets between
      * startIndex and endIndex inclusive.  Takes a pointer to an array
-     * of hvl_t structs in memory in which to store pointers to the records.
+     * of hvl_t structs in memory in which to store pointers to the packets.
      * Returns 0 on success, negative on failure.
      */
     int VL_PacketTable::GetPackets(unsigned int startIndex, unsigned int endIndex, hvl_t * data)
@@ -273,10 +274,10 @@
     }
 
     /* GetNextPacket (single packet)
-     * Gets the next record in the packet table.  Takes a pointer to
-     * an hvl_t struct where the record should be stored.
-     * Returns 0 on success, negative on failure.  Current record
-     * is not advanced to the next record on failure.
+     * Gets the next packet in the packet table.  Takes a pointer to
+     * an hvl_t struct where the packet should be stored.
+     * Returns 0 on success, negative on failure.  Index
+     * is not advanced to the next packet on failure.
      */
     int VL_PacketTable::GetNextPacket(hvl_t * data)
     {
@@ -284,21 +285,21 @@
     }
 
     /* GetNextPackets (multiple packets)
-     * Gets the next numRecords records in the packet table.  Takes a
-     * pointer to an array of hvl_t structs where pointers to the records
+     * Gets the next numPackets packets in the packet table.  Takes a
+     * pointer to an array of hvl_t structs where pointers to the packets
      * should be stored.
-     * Returns 0 on success, negative on failure.  Current record
+     * Returns 0 on success, negative on failure.  Index
      * is not advanced on failure.
      */
-    int VL_PacketTable::GetNextPackets(unsigned int numRecords, hvl_t * data)
+    int VL_PacketTable::GetNextPackets(unsigned int numPackets, hvl_t * data)
     {
-        return H5PTget_next(table_id, numRecords, data);
+        return H5PTget_next(table_id, numPackets, data);
     }
 
     /* FreeReadbuff
-     * Frees the buffers created when variable-length records are read.
-     * Takes the number of hvl_t structs to be freed and a pointer to their location
-     * in memory.
+     * Frees the buffers created when variable-length packets are read.
+     * Takes the number of hvl_t structs to be freed and a pointer to their
+     * location in memory.
      * Returns 0 on success, negative on error.
      */
     int VL_PacketTable::FreeReadbuff(unsigned int numStructs, hvl_t * buffer)
