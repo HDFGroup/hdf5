@@ -13,44 +13,109 @@
 # access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
 #
 
-# A simple script to reconfigure autotools for HDF5.
-# The autotools include a reconfigure script, but this script
-# has the paths of autoconf and automake hardcoded to work on HDF
-# machines.  Thus is enforces that HDF5 always uses the
-# same versions of autotools.
-# Uses automake version 1.9.5
-# Uses autoconf version 2.59
-# Includes macros from libtool version 1.4.2
+# A script to reconfigure autotools for HDF5, and to recreate other
+# generated files specifc to HDF5.
+# If the paths of the autotools are not specified by the user, they
+# are hardcoded to point to their locations in AFS on HDF5 Linux machines.
+# Users can specify the locations of the autotools with the following
+# variables:
+# AUTOCONF, AUTOMAKE, ACLOCAL, AUTOHEADER should be the path to the
+# corresponding tools.
+# LIBTOOL_DIR should be the path to the base libtool directory;
+# $LIBTOOL_DIR/bin/libtool should invoke libtool, while
+# $LIBTOOL_DIR/share/aclocal needs to be included by aclocal.
+# Be very careful when specifying these tools manually!  There are a lot
+# of versions that can get confused (not even counting the m4 utility)!
+
+# HDF5 currently uses the following versions of the autotools:
+# Uses automake (and aclocal) version 1.9.5
+# Uses autoconf (and autoheader) version 2.59
+# Includes macros from libtool version 1.5.14
 #
 # When upgrading automake's version, don't forget to also update its
 # helper utilities, especially depcomp.
+AUTOCONF_VERSION="autoconf (GNU Autoconf) 2.59"
+AUTOMAKE_VERSION="automake (GNU automake) 1.9.5"
+AUTOHEADER_VERSION="autoheader (GNU Autoconf) 2.59"
+ACLOCAL_VERSION="aclocal (GNU automake) 1.9.5"
+LIBTOOL_VERSION="(GNU libtool) 1.5.14"
 
-# The autotools live in AFS, so as long as their paths don't change
-# and this machine has the right version of m4, this script should
-# be able to run the autotools.
+# If the user has defined environment variables pointing to the autotools,
+# use those (but check their versions first!).  Otherwise, assume that
+# we're running on a Linux box with access to the autotools in AFS.
+if test "X$AUTOCONF" = "X"; then
+  AUTOCONF=/afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf
+fi
+if test "X$AUTOMAKE" = "X"; then
+  AUTOMAKE=/afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/automake-1.9
+fi
+if test "X$AUTOHEADER" = "X"; then
+  AUTOHEADER=/afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoheader
+fi
+  # When using the default settings, add the correct version of autoconf
+  # binaries to path (otherwise aclocal may find an outdated version of
+  # autom4ate and complain about an
+  # "unknown language": Autoconf-without-aclocal-m4.
+if test "X$ACLOCAL" = "X"; then
+  ACLOCAL=/afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/aclocal-1.9
+  PATH=/afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin:$PATH
+fi
+  # Libtool is used to supply macros that aclocal uses
+if test "X$LIBTOOL_DIR" = "X"; then
+  LIBTOOL_DIR=/afs/ncsa/projects/hdf/packages/libtool_1.5.14/Linux_2.4
+fi
 
-# Add the correct version of autoconf binaries to path (otherwise aclocal
-# may find an outdated version of autom4ate and complain about an
-# "unknown language": Autoconf-without-aclocal-m4.
-PATH=/afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin:$PATH
 
-  # Run commands in order
-  echo /afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/aclocal-1.9 -I /afs/ncsa/projects/hdf/packages/libtool_1.5.14/Linux_2.4/share/aclocal
-  /afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/aclocal-1.9 -I /afs/ncsa/projects/hdf/packages/libtool_1.5.14/Linux_2.4/share/aclocal
+# Check version numbers of all autotools against the "correct" versions
+AC_VERS=`${AUTOCONF} --version 2>&1 | grep "^${AUTOCONF_VERSION}"`
+if test -z "${AC_VERS}"; then
+   echo "${AUTOCONF} version is not 2.59"
+   exit 1
+fi
+AM_VERS=`${AUTOMAKE} --version 2>&1 | grep "^${AUTOMAKE_VERSION}"`
+if test -z "${AM_VERS}"; then
+   echo "${AUTOMAKE} version is not 1.9.5"
+   exit 1
+fi
+AH_VERS=`${AUTOHEADER} --version 2>&1 | grep "^${AUTOHEADER_VERSION}"`
+if test -z "${AH_VERS}"; then
+   echo "${AUTOHEADER} version is not 2.59"
+   exit 1
+fi
+AL_VERS=`${ACLOCAL} --version 2>&1 | grep "^${ACLOCAL_VERSION}"`
+if test -z "${AL_VERS}"; then
+   echo "${ACLOCAL} version is not 1.9.5"
+   exit 1
+fi
+LT_VERS=`${LIBTOOL_DIR}/bin/libtool --version 2>&1 | grep "${LIBTOOL_VERSION}"`
+if test -z "${LT_VERS}"; then
+   echo "${LIBTOOL_DIR}/bin/libtool version is not 1.5.14"
+   exit 1
+fi
 
-  echo /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoheader
-  /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoheader
+# Run autoconf/automake commands in order
+  echo ${ACLOCAL} -I ${LIBTOOL_DIR}/share/aclocal
+  ${ACLOCAL} -I ${LIBTOOL_DIR}/share/aclocal || exit 1
 
-  echo /afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/automake-1.9 --add-missing
-  /afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/automake-1.9 --add-missing
+  echo ${AUTOHEADER}
+  ${AUTOHEADER} || exit 1
 
-  echo /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf
-  /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf
+  echo ${AUTOMAKE} --add-missing
+  ${AUTOMAKE} --add-missing || exit 1
 
-  # Clean up Makefiles.in
-  # Right now, only the root-level Makefile.in is edited to allow configure
-  # to pass arguments to the .MAKEFLAGS target to pacify pmake.
+  echo ${AUTOCONF}
+  ${AUTOCONF} || exit 1
+
+# Clean up top-level Makefile.in
+# pmake wants an argument to be the first non-comment line it encounters
+# in the Makefile.  Automake wants to reorganize the Makefile.
+# To work around this, we post-process the top-level Makefile.in.
   sed "s/^#xxx//" Makefile.in > Makefile.in.new
   mv Makefile.in.new Makefile.in
+
+# Run trace script
+# The trace script adds H5TRACE macros to library source files.  It should
+# have no effect on files that don't have HDF5 API macros in them.
+bin/trace src/H5*.c || exit 1
 
 exit 0

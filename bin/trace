@@ -265,27 +265,31 @@ sub rewrite_func ($$$$$) {
 #
 my $total_api = 0;
 for $file (@ARGV) {
-  # Snarf up the entire file
-  open SOURCE, $file or die "$file: $!\n";
-  $Source = join "", <SOURCE>;
-  close SOURCE;
-
-  # Make modifications
-  my $original = $Source;
-  my $napi = $Source =~ s/\n([A-Za-z]\w*(\s+[a-z]\w*)*)\s*\n #type
-                            (H5[A-Z]{0,2}[^_A-Z0-9]\w*)      #name
-                            \s*\((.*?)\)\s*               #args
-                            (\{.*?\n\}[^\n]*)             #body
-                         /rewrite_func($file,$1,$3,$4,$5)/segx;
-  $total_api += $napi;
+  # Ignore some files that do not need tracing macros
+  unless ($file eq "H5FDmulti.c" or $file eq "src/H5FDmulti.c" or $file eq "H5FDstdio.c" or $file eq "src/H5FDstdio.c") {
   
-  # If the source changed then print out the new version
-  if ($original ne $Source) {
-    printf "%s: instrumented %d API function%s\n", 
-           $file, $napi, 1==$napi?"":"s";
-    rename $file, "$file~" or die "unable to make backup";
-    open SOURCE, ">$file" or die "unable to modify source";
-    print SOURCE $Source;
+    # Snarf up the entire file
+    open SOURCE, $file or die "$file: $!\n";
+    $Source = join "", <SOURCE>;
     close SOURCE;
+
+    # Make modifications
+    my $original = $Source;
+    my $napi = $Source =~ s/\n([A-Za-z]\w*(\s+[a-z]\w*)*)\s*\n #type
+                              (H5[A-Z]{0,2}[^_A-Z0-9]\w*)      #name
+                              \s*\((.*?)\)\s*               #args
+                              (\{.*?\n\}[^\n]*)             #body
+                           /rewrite_func($file,$1,$3,$4,$5)/segx;
+    $total_api += $napi;
+
+    # If the source changed then print out the new version
+    if ($original ne $Source) {
+      printf "%s: instrumented %d API function%s\n", 
+             $file, $napi, 1==$napi?"":"s";
+      rename $file, "$file~" or die "unable to make backup";
+      open SOURCE, ">$file" or die "unable to modify source";
+      print SOURCE $Source;
+      close SOURCE;
+    }
   }
 }
