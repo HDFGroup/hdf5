@@ -16,13 +16,19 @@
  *  This example writes a dataset to a new HDF5 file.
  */
 
-#include <string>
-
 #ifdef OLD_HEADER_FILENAME
 #include <iostream.h>
 #else
 #include <iostream>
 #endif
+#include <string>
+
+#ifndef H5_NO_NAMESPACE
+#ifndef H5_NO_STD
+    using std::string;
+#endif  // H5_NO_STD
+#endif
+
 #include "H5Cpp.h"
 
 #ifndef H5_NO_NAMESPACE

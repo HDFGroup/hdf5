@@ -19,21 +19,25 @@
  *
  */
 
-#include <string>
-
 #ifdef OLD_HEADER_FILENAME
 #include <iostream.h>
 #else
 #include <iostream>
 #endif
+#include <string>
+
+#ifndef H5_NO_NAMESPACE
+#ifndef H5_NO_STD
+    using std::string;
+    using std::cout;
+    using std::endl;
+#endif  // H5_NO_STD
+#endif
+
 #include "H5Cpp.h"
 
 #ifndef H5_NO_NAMESPACE
 using namespace H5;
-#ifndef H5_NO_STD
-    using std::cout;
-    using std::endl;
-#endif  // H5_NO_STD
 #endif
 
 const string FILE_NAME( "SDSextendible.h5" );
