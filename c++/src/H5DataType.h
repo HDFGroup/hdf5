@@ -39,8 +39,8 @@ class H5_DLLCPP DataType : public H5Object {
 
 	// Commits a transient datatype to a file; this datatype becomes
 	// a named datatype which can be accessed from the location.
-	void commit( CommonFG& loc, const string& name ) const;
 	void commit( CommonFG& loc, const char* name ) const;
+	void commit( CommonFG& loc, const string& name ) const;
 
 	// Determines whether this datatype is a named datatype or
 	// a transient datatype.
@@ -70,16 +70,16 @@ class H5_DLLCPP DataType : public H5Object {
 	DataType getSuper() const;
 
 	// Registers a conversion function.
-	void registerFunc(H5T_pers_t pers, const string& name, const DataType& dest, H5T_conv_t func ) const;
 	void registerFunc(H5T_pers_t pers, const char* name, const DataType& dest, H5T_conv_t func ) const;
+	void registerFunc(H5T_pers_t pers, const string& name, const DataType& dest, H5T_conv_t func ) const;
 
 	// Removes a conversion function from all conversion paths.
-	void unregister( H5T_pers_t pers, const string& name, const DataType& dest, H5T_conv_t func ) const;
 	void unregister( H5T_pers_t pers, const char* name, const DataType& dest, H5T_conv_t func ) const;
+	void unregister( H5T_pers_t pers, const string& name, const DataType& dest, H5T_conv_t func ) const;
 
 	// Tags an opaque datatype.
-	void setTag( const string& tag ) const;
 	void setTag( const char* tag ) const;
+	void setTag( const string& tag ) const;
 
 	// Gets the tag associated with an opaque datatype.
 	string getTag() const;
@@ -104,10 +104,10 @@ class H5_DLLCPP DataType : public H5Object {
 	// Retrieves a dataspace with the region pointed to selected.
 	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
 
-	virtual string fromClass () const { return ("DataType"); }
+	virtual string fromClass () const { return("DataType"); }
 
 	// Creates a copy of an existing DataType using its id
-	DataType( const hid_t type_id, bool predtype = false );
+	DataType( const hid_t type_id );
 
 	// Default constructor
 	DataType();
@@ -115,9 +115,6 @@ class H5_DLLCPP DataType : public H5Object {
 	// Destructor: properly terminates access to this datatype.
 	virtual ~DataType();
 
-   protected:
-	bool is_predtype;	// indicates a type is predefined so
-				// H5Tclose will not be called for it
 };
 #ifndef H5_NO_NAMESPACE
 }

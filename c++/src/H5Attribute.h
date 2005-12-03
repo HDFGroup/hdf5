@@ -45,7 +45,7 @@ class H5_DLLCPP Attribute : public AbstractDs {
 	void write(const DataType& mem_type, const string& strg ) const;
 
 	// Returns this class name
-	virtual string fromClass () const { return ("Attribute"); }
+	virtual string fromClass () const { return("Attribute"); }
 
         // Creates a copy of an existing attribute using the attribute id
         Attribute( const hid_t attr_id );

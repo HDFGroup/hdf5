@@ -88,7 +88,7 @@ class H5_DLLCPP CompType : public DataType {
 	void pack() const;
 
 	// Returns this class name
-	virtual string fromClass () const { return ("CompType"); }
+	virtual string fromClass () const { return("CompType"); }
 
 	// Default constructor
 	CompType();

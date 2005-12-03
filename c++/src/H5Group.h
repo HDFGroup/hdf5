@@ -40,7 +40,7 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 	void* Reference(const string& name) const;
 
 	// Returns this class name
-	virtual string fromClass () const { return ("Group"); }
+	virtual string fromClass () const { return("Group"); }
 
         // Throw group exception.
         virtual void throwException(const string func_name, const string msg) const;

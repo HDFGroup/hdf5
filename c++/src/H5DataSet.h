@@ -84,7 +84,7 @@ class H5_DLLCPP DataSet : public AbstractDs {
 	void* Reference(const string& name) const;
 
 	// Returns this class name
-	virtual string fromClass () const { return ("DataSet"); }
+	virtual string fromClass () const { return("DataSet"); }
 
 	// Creates a copy of an existing DataSet using its id.
 	DataSet(const hid_t existing_id);

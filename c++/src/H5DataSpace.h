@@ -103,7 +103,7 @@ class H5_DLLCPP DataSpace : public IdComponent {
 	void setExtentSimple( int rank, const hsize_t *current_size, const hsize_t *maximum_size = NULL ) const;
 
 	// Returns this class name
-	virtual string fromClass () const { return ("DataSpace"); }
+	virtual string fromClass () const { return("DataSpace"); }
 
 	// Creates a DataSpace object using an existing dataspace id.
 	DataSpace(const hid_t space_id);

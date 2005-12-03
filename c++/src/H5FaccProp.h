@@ -120,7 +120,7 @@ class H5_DLLCPP FileAccPropList : public PropList {
 	unsigned getGcReferences() const;
 
 	// Returns this class name
-	virtual string fromClass () const { return ("FileAccPropList"); }
+	virtual string fromClass () const { return("FileAccPropList"); }
 
 	// Creates a file access property list.
 	FileAccPropList();

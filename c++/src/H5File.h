@@ -84,7 +84,7 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	void* Reference(const string& name) const;
 
 	// Returns this class name
-	virtual string fromClass () const { return ("H5File"); }
+	virtual string fromClass () const { return("H5File"); }
 
 	// Throw file exception.
 	virtual void throwException(const string func_name, const string msg) const;
