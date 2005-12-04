@@ -25,6 +25,10 @@
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 
+/**************************/
+/* Library Private Macros */
+/**************************/
+
 /*
  * Feature: Define H5D_DEBUG on the compiler command line if you want to
  *	    debug dataset I/O. NDEBUG must not be defined in order for this
@@ -210,7 +214,13 @@ typedef struct H5D_dcpl_cache_t {
     H5D_fill_time_t fill_time;  /* Fill time (H5D_CRT_FILL_TIME_NAME) */
 } H5D_dcpl_cache_t;
 
-/* Library-private functions defined in H5D package */
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+/******************************/
+/* Library Private Prototypes */
+/******************************/
 H5_DLL herr_t H5D_init(void);
 H5_DLL H5D_t *H5D_open(const H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL herr_t H5D_close(H5D_t *dataset);
@@ -238,4 +248,5 @@ H5_DLL herr_t H5D_istore_delete(H5F_t *f, hid_t dxpl_id,
 H5_DLL herr_t H5D_istore_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream,
 				int indent, int fwidth, unsigned ndims);
 
-#endif
+#endif /* _H5Dprivate_H */
+

@@ -40,8 +40,8 @@ static herr_t H5O_layout_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hboo
 static herr_t H5O_layout_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			       int indent, int fwidth);
 
-/* This message derives from H5O */
-const H5O_class_t H5O_LAYOUT[1] = {{
+/* This message derives from H5O message class */
+const H5O_msg_class_t H5O_MSG_LAYOUT[1] = {{
     H5O_LAYOUT_ID,          	/*message id number             */
     "layout",               	/*message name for debugging    */
     sizeof(H5O_layout_t),   	/*native message size           */
@@ -501,7 +501,7 @@ H5O_layout_meta_size(const H5F_t *f, const void *_mesg)
                 break;
 
             default:
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, 0, "Invalid layout class");
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, 0, "Invalid layout class")
         } /* end switch */
     } /* end else */
 
@@ -727,3 +727,4 @@ H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE 
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
+

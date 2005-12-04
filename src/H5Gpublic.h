@@ -134,3 +134,4 @@ H5_DLL int H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize,
 }
 #endif
 #endif
+

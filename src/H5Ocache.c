@@ -80,6 +80,97 @@ H5O_cache_init_interface(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5O_flush_msgs
+ *
+ * Purpose:	Flushes messages for object header.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Nov 21 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_flush_msgs(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
+{
+    uint8_t	*p;             /* Temporary pointer to encode with */
+    int	id;                     /* ID of message to encode */
+    H5O_mesg_t *curr_msg;       /* Pointer to current message being operated on */
+    herr_t	(*encode)(H5F_t*, uint8_t*, const void*) = NULL;
+    unsigned	u;              /* Local index variable */
+    herr_t      ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_flush_msgs)
+
+    /* check args */
+    HDassert(f);
+    HDassert(oh);
+
+    /* Encode any dirty messages */
+    for(u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++) {
+        if(curr_msg->dirty) {
+            p = curr_msg->raw - H5O_SIZEOF_MSGHDR(f);
+
+            id = curr_msg->type->id;
+            UINT16ENCODE(p, id);
+            HDassert(curr_msg->raw_size < H5O_MAX_SIZE);
+            UINT16ENCODE(p, curr_msg->raw_size);
+            *p++ = curr_msg->flags;
+            *p++ = 0; /*reserved*/
+            *p++ = 0; /*reserved*/
+            *p++ = 0; /*reserved*/
+
+            if(curr_msg->native) {
+                HDassert(curr_msg->type->encode);
+
+                /* allocate file space for chunks that have none yet */
+                if(H5O_CONT_ID == id && !H5F_addr_defined(((H5O_cont_t *)(curr_msg->native))->addr)) {
+                    H5O_cont_t *cont = (H5O_cont_t *) (curr_msg->native);
+                    assert(cont->chunkno < oh->nchunks);
+                    assert(!H5F_addr_defined(oh->chunk[cont->chunkno].addr));
+                    cont->size = oh->chunk[cont->chunkno].size;
+
+                    /* Free the space we'd reserved in the file to hold this chunk */
+                    H5MF_free_reserved(f, (hsize_t)cont->size);
+
+                    if (HADDR_UNDEF==(cont->addr=H5MF_alloc(f, H5FD_MEM_OHDR, dxpl_id, (hsize_t)cont->size)))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate space for object header data");
+                    oh->chunk[cont->chunkno].addr = cont->addr;
+                } /* end if */
+
+                /*
+                 * Encode the message.  If the message is shared then we
+                 * encode a Shared Object message instead of the object
+                 * which is being shared.
+                 */
+                HDassert(curr_msg->raw >= oh->chunk[curr_msg->chunkno].image);
+                HDassert(curr_msg->raw_size == H5O_ALIGN (curr_msg->raw_size));
+                HDassert(curr_msg->raw + curr_msg->raw_size <=
+                       oh->chunk[curr_msg->chunkno].image + oh->chunk[curr_msg->chunkno].size);
+                if(curr_msg->flags & H5O_FLAG_SHARED)
+                    encode = H5O_MSG_SHARED->encode;
+                else
+                    encode = curr_msg->type->encode;
+                if((encode)(f, curr_msg->raw, curr_msg->native) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode object header message")
+            } /* end if */
+            curr_msg->dirty = FALSE;
+            oh->chunk[curr_msg->chunkno].dirty = TRUE;
+        } /* end if */
+    } /* end for */
+
+    /* Sanity check for the correct # of messages in object header */
+    if(oh->nmesgs != u)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "corrupt object header - too few messages")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_flush_msgs() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_load
  *
  * Purpose:	Loads an object header from disk.
@@ -92,20 +183,6 @@ H5O_cache_init_interface(void)
  *		matzke@llnl.gov
  *		Aug  5 1997
  *
- * Modifications:
- *
- *	Robb Matzke, 1997-08-30
- *	Plugged memory leaks that occur during error handling.
- *
- *	Robb Matzke, 1998-01-07
- *	Able to distinguish between constant and variable messages.
- *
- * 	Robb Matzke, 1999-07-28
- *	The ADDR argument is passed by value.
- *
- *	Quincey Koziol, 2002-7-180
- *	Added dxpl parameter to allow more control over I/O from metadata
- *      cache.
  *-------------------------------------------------------------------------
  */
 static H5O_t *
@@ -127,13 +204,13 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
     size_t	chunk_size;
     uint8_t	flags;
 
-    FUNC_ENTER_NOAPI(H5O_load, NULL);
+    FUNC_ENTER_NOAPI(H5O_load, NULL)
 
     /* check args */
-    assert(f);
-    assert(H5F_addr_defined(addr));
-    assert(!_udata1);
-    assert(!_udata2);
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(!_udata1);
+    HDassert(!_udata2);
 
     /* allocate ohdr and init chunk list */
     if (NULL==(oh = H5FL_CALLOC(H5O_t)))
@@ -170,51 +247,50 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* read each chunk from disk */
-    while (H5F_addr_defined(chunk_addr)) {
+    while(H5F_addr_defined(chunk_addr)) {
 	/* increase chunk array size */
-	if (oh->nchunks >= oh->alloc_nchunks) {
+	if(oh->nchunks >= oh->alloc_nchunks) {
 	    unsigned na = oh->alloc_nchunks + H5O_NCHUNKS;
 	    H5O_chunk_t *x = H5FL_SEQ_REALLOC (H5O_chunk_t, oh->chunk, (size_t)na);
 
-	    if (!x)
+	    if(!x)
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 	    oh->alloc_nchunks = na;
 	    oh->chunk = x;
-	}
+	} /* end if */
 
 	/* read the chunk raw data */
 	chunkno = oh->nchunks++;
 	oh->chunk[chunkno].dirty = FALSE;
 	oh->chunk[chunkno].addr = chunk_addr;
 	oh->chunk[chunkno].size = chunk_size;
-	if (NULL==(oh->chunk[chunkno].image = H5FL_BLK_MALLOC(chunk_image,chunk_size)))
+	if(NULL==(oh->chunk[chunkno].image = H5FL_BLK_MALLOC(chunk_image, chunk_size)))
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-	if (H5F_block_read(f, H5FD_MEM_OHDR, chunk_addr, chunk_size, dxpl_id,
-			   oh->chunk[chunkno].image) < 0)
+	if(H5F_block_read(f, H5FD_MEM_OHDR, chunk_addr, chunk_size, dxpl_id, oh->chunk[chunkno].image) < 0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to read object header data");
 
 	/* load messages from this chunk */
-	for (p = oh->chunk[chunkno].image; p < oh->chunk[chunkno].image + chunk_size; p += mesg_size) {
+	for(p = oh->chunk[chunkno].image; p < oh->chunk[chunkno].image + chunk_size; p += mesg_size) {
 	    UINT16DECODE(p, id);
 	    UINT16DECODE(p, mesg_size);
-	    assert (mesg_size==H5O_ALIGN (mesg_size));
+	    HDassert(mesg_size==H5O_ALIGN (mesg_size));
 	    flags = *p++;
 	    p += 3; /*reserved*/
 
             /* Try to detect invalidly formatted object header messages */
-	    if (p + mesg_size > oh->chunk[chunkno].image + chunk_size)
-		HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "corrupt object header");
+	    if(p + mesg_size > oh->chunk[chunkno].image + chunk_size)
+		HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "corrupt object header")
 
             /* Skip header messages we don't know about */
             /* (Usually from future versions of the library */
-	    if(id >= NELMTS(message_type_g) || NULL == message_type_g[id]) {
+	    if(id >= NELMTS(H5O_msg_class_g) || NULL == H5O_msg_class_g[id]) {
                 skipped_msgs++;
                 continue;
             } /* end if */
 
-	    if (H5O_NULL_ID == id && oh->nmesgs > 0 &&
-		H5O_NULL_ID == oh->mesg[oh->nmesgs - 1].type->id &&
-		oh->mesg[oh->nmesgs - 1].chunkno == chunkno) {
+	    if(H5O_NULL_ID == id && oh->nmesgs > 0 &&
+                    H5O_NULL_ID == oh->mesg[oh->nmesgs - 1].type->id &&
+                    oh->mesg[oh->nmesgs - 1].chunkno == chunkno) {
 		/* combine adjacent null messages */
 		mesgno = oh->nmesgs - 1;
 		oh->mesg[mesgno].raw_size += H5O_SIZEOF_MSGHDR(f) + mesg_size;
@@ -224,31 +300,31 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 		if (oh->nmesgs >= nmesgs)
 		    HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "corrupt object header - too many messages");
 		mesgno = oh->nmesgs++;
-		oh->mesg[mesgno].type = message_type_g[id];
+		oh->mesg[mesgno].type = H5O_msg_class_g[id];
 		oh->mesg[mesgno].dirty = FALSE;
 		oh->mesg[mesgno].flags = flags;
 		oh->mesg[mesgno].native = NULL;
 		oh->mesg[mesgno].raw = p;
 		oh->mesg[mesgno].raw_size = mesg_size;
 		oh->mesg[mesgno].chunkno = chunkno;
-	    }
-	}
+	    } /* end else */
+	} /* end for */
 
-        assert(p == oh->chunk[chunkno].image + chunk_size);
+        HDassert(p == oh->chunk[chunkno].image + chunk_size);
 
         /* decode next object header continuation message */
-        for (chunk_addr = HADDR_UNDEF; !H5F_addr_defined(chunk_addr) && curmesg < oh->nmesgs; ++curmesg) {
-            if (H5O_CONT_ID == oh->mesg[curmesg].type->id) {
+        for(chunk_addr = HADDR_UNDEF; !H5F_addr_defined(chunk_addr) && curmesg < oh->nmesgs; ++curmesg) {
+            if(H5O_CONT_ID == oh->mesg[curmesg].type->id) {
                 H5O_cont_t *cont;
 
-                cont = (H5O_CONT->decode) (f, dxpl_id, oh->mesg[curmesg].raw);
+                cont = (H5O_MSG_CONT->decode) (f, dxpl_id, oh->mesg[curmesg].raw);
                 oh->mesg[curmesg].native = cont;
                 chunk_addr = cont->addr;
                 chunk_size = cont->size;
                 cont->chunkno = oh->nchunks;	/*the next chunk to allocate */
-            }
-        }
-    }
+            } /* end if */
+        } /* end for */
+    } /* end while */
 
     /* Sanity check for the correct # of messages in object header */
     if((oh->nmesgs + skipped_msgs + merged_null_msgs) != nmesgs)
@@ -258,13 +334,13 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
     ret_value = oh;
 
 done:
-    if (!ret_value && oh) {
-        if(H5O_dest(f,oh)<0)
-	    HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, NULL, "unable to destroy object header data");
-    }
+    if(!ret_value && oh) {
+        if(H5O_dest(f,oh) < 0)
+	    HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, NULL, "unable to destroy object header data")
+    } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_load() */
 
 
 /*-------------------------------------------------------------------------
@@ -278,104 +354,28 @@ done:
  *		matzke@llnl.gov
  *		Aug  5 1997
  *
- * Modifications:
- *
- *	Robb Matzke, 1998-01-07
- *	Handles constant vs non-constant messages.
- *
- *      rky, 1998-08-28
- *	Only p0 writes metadata to disk.
- *
- * 	Robb Matzke, 1999-07-28
- *	The ADDR argument is passed by value.
- *
- *	Quincey Koziol, 2002-7-180
- *	Added dxpl parameter to allow more control over I/O from metadata
- *      cache.
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh)
 {
     uint8_t	buf[16], *p;
-    int	id;
-    unsigned	u;
-    H5O_mesg_t *curr_msg;       /* Pointer to current message being operated on */
-    H5O_cont_t	*cont = NULL;
-    herr_t	(*encode)(H5F_t*, uint8_t*, const void*) = NULL;
-    unsigned combine=0;        /* Whether to combine the object header prefix & the first chunk */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    hbool_t combine = FALSE;    /* Whether to combine the object header prefix & the first chunk */
+    unsigned	u;              /* Local index variable */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_flush, FAIL);
+    FUNC_ENTER_NOAPI(H5O_flush, FAIL)
 
     /* check args */
-    assert(f);
-    assert(H5F_addr_defined(addr));
-    assert(oh);
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(oh);
 
     /* flush */
     if(oh->cache_info.is_dirty) {
 	/* Encode any dirty messages */
-	for(u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++) {
-	    if(curr_msg->dirty) {
-                p = curr_msg->raw - H5O_SIZEOF_MSGHDR(f);
-
-                id = curr_msg->type->id;
-                UINT16ENCODE(p, id);
-                assert (curr_msg->raw_size<H5O_MAX_SIZE);
-                UINT16ENCODE(p, curr_msg->raw_size);
-                *p++ = curr_msg->flags;
-                *p++ = 0; /*reserved*/
-                *p++ = 0; /*reserved*/
-                *p++ = 0; /*reserved*/
-
-                if (curr_msg->native) {
-                    assert(curr_msg->type->encode);
-
-                    /* allocate file space for chunks that have none yet */
-                    if (H5O_CONT_ID == curr_msg->type->id &&
-                            !H5F_addr_defined(((H5O_cont_t *)(curr_msg->native))->addr)) {
-                        cont = (H5O_cont_t *) (curr_msg->native);
-                        assert(cont->chunkno < oh->nchunks);
-                        assert(!H5F_addr_defined(oh->chunk[cont->chunkno].addr));
-                        cont->size = oh->chunk[cont->chunkno].size;
-
-                        /* Free the space we'd reserved in the file to hold this chunk */
-                        H5MF_free_reserved(f, (hsize_t)cont->size);
-
-                        if (HADDR_UNDEF==(cont->addr=H5MF_alloc(f, H5FD_MEM_OHDR, dxpl_id, (hsize_t)cont->size)))
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate space for object header data");
-                        oh->chunk[cont->chunkno].addr = cont->addr;
-                    }
-
-                    /*
-                     * Encode the message.  If the message is shared then we
-                     * encode a Shared Object message instead of the object
-                     * which is being shared.
-                     */
-                    assert(curr_msg->raw >=
-                       oh->chunk[curr_msg->chunkno].image);
-                    assert (curr_msg->raw_size ==
-                        H5O_ALIGN (curr_msg->raw_size));
-                    assert(curr_msg->raw + curr_msg->raw_size <=
-                       oh->chunk[curr_msg->chunkno].image +
-                       oh->chunk[curr_msg->chunkno].size);
-                    if (curr_msg->flags & H5O_FLAG_SHARED) {
-                        encode = H5O_SHARED->encode;
-                    } else {
-                        encode = curr_msg->type->encode;
-                    }
-                    if ((encode)(f, curr_msg->raw, curr_msg->native)<0)
-                        HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode object header message");
-                }
-                curr_msg->dirty = FALSE;
-                oh->chunk[curr_msg->chunkno].dirty = TRUE;
-	    }
-	}
-
-        /* Sanity check for the correct # of messages in object header */
-        if(oh->nmesgs != u)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "corrupt object header - too few messages")
+        if(H5O_flush_msgs(f, dxpl_id, oh) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object header messages")
 
         /* Encode header prefix */
 	p = buf;
@@ -402,58 +402,55 @@ H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh)
 
         /* Check if we can combine the object header prefix & the first chunk into one I/O operation */
         if(oh->chunk[0].dirty && (addr + H5O_SIZEOF_HDR(f)) == oh->chunk[0].addr) {
-            combine = 1;
+            combine = TRUE;
         } /* end if */
         else {
             if(H5F_block_write(f, H5FD_MEM_OHDR, addr, (size_t)H5O_SIZEOF_HDR(f), dxpl_id, buf) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to write object header hdr to disk")
         } /* end else */
 
-
 	/* write each chunk to disk */
-	for (u = 0; u < oh->nchunks; u++) {
-	    if (oh->chunk[u].dirty) {
-                assert(H5F_addr_defined(oh->chunk[u].addr));
-                if(u==0 && combine) {
+	for(u = 0; u < oh->nchunks; u++) {
+	    if(oh->chunk[u].dirty) {
+                HDassert(H5F_addr_defined(oh->chunk[u].addr));
+                if(u == 0 && combine) {
                     /* Allocate space for the combined prefix and first chunk */
-                    if((p=H5FL_BLK_MALLOC(chunk_image,(H5O_SIZEOF_HDR(f)+oh->chunk[u].size)))==NULL)
-                        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+                    if((p = H5FL_BLK_MALLOC(chunk_image,(H5O_SIZEOF_HDR(f)+oh->chunk[u].size))) == NULL)
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
                     /* Copy in the prefix */
-                    HDmemcpy(p,buf,(size_t)H5O_SIZEOF_HDR(f));
+                    HDmemcpy(p, buf, (size_t)H5O_SIZEOF_HDR(f));
 
                     /* Copy in the first chunk */
-                    HDmemcpy(p+H5O_SIZEOF_HDR(f),oh->chunk[u].image,oh->chunk[u].size);
+                    HDmemcpy(p + H5O_SIZEOF_HDR(f), oh->chunk[u].image, oh->chunk[u].size);
 
                     /* Write the combined prefix/chunk out */
-                    if (H5F_block_write(f, H5FD_MEM_OHDR, addr,
-                                (H5O_SIZEOF_HDR(f)+oh->chunk[u].size),
-                                dxpl_id, p) < 0)
-                        HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to write object header data to disk");
+                    if(H5F_block_write(f, H5FD_MEM_OHDR, addr,
+                                (H5O_SIZEOF_HDR(f) + oh->chunk[u].size), dxpl_id, p) < 0)
+                        HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to write object header data to disk")
 
                     /* Release the memory for the combined prefix/chunk */
                     p = H5FL_BLK_FREE(chunk_image,p);
                 } /* end if */
                 else {
-                    if (H5F_block_write(f, H5FD_MEM_OHDR, oh->chunk[u].addr,
-                                (oh->chunk[u].size),
-                                dxpl_id, oh->chunk[u].image) < 0)
-                        HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to write object header data to disk");
+                    if(H5F_block_write(f, H5FD_MEM_OHDR, oh->chunk[u].addr,
+                                (oh->chunk[u].size), dxpl_id, oh->chunk[u].image) < 0)
+                        HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to write object header data to disk")
                 } /* end else */
                 oh->chunk[u].dirty = FALSE;
 	    } /* end if */
 	} /* end for */
 	oh->cache_info.is_dirty = FALSE;
-    }
+    } /* end if */
 
     if (destroy) {
-        if(H5O_dest(f,oh)<0)
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data");
-    }
+        if(H5O_dest(f,oh) < 0)
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
+    } /* end if */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_flush() */
 
 
 /*-------------------------------------------------------------------------
@@ -466,8 +463,6 @@ done:
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Jan 15 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -522,8 +517,6 @@ H5O_dest(H5F_t UNUSED *f, H5O_t *oh)
  *		koziol@ncsa.uiuc.edu
  *		Mar 20 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -574,8 +567,6 @@ done:
  *
  * Programmer:	John Mainzer
  *		5/13/04
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

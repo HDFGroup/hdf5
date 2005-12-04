@@ -36,8 +36,8 @@ static herr_t H5O_efl_reset(void *_mesg);
 static herr_t H5O_efl_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			    int indent, int fwidth);
 
-/* This message derives from H5O */
-const H5O_class_t H5O_EFL[1] = {{
+/* This message derives from H5O message class */
+const H5O_msg_class_t H5O_MSG_EFL[1] = {{
     H5O_EFL_ID,		    	/*message id number		*/
     "external file list",   	/*message name for debugging    */
     sizeof(H5O_efl_t),	    	/*native message size	    	*/
@@ -474,3 +474,4 @@ H5O_efl_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * s
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
+

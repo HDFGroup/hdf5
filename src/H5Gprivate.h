@@ -20,11 +20,6 @@
  *
  * Purpose:             Library-visible declarations.
  *
- * Modifications:       Aug 22, 2002
- *                      Pedro Vicente <pvn@ncsa.uiuc.edu>
- *                      Added 'names' field to H5G_entry_t
- *                      Added H5G_replace_name
- *
  *-------------------------------------------------------------------------
  */
 

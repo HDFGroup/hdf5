@@ -48,8 +48,8 @@ static herr_t H5O_fill_free(void *_mesg);
 static herr_t H5O_fill_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
 			     int indent, int fwidth);
 
-/* This message derives from H5O, for old fill value before version 1.5 */
-const H5O_class_t H5O_FILL[1] = {{
+/* This message derives from H5O message class, for old fill value before version 1.5 */
+const H5O_msg_class_t H5O_MSG_FILL[1] = {{
     H5O_FILL_ID,                /*message id number                     */
     "fill",                     /*message name for debugging            */
     sizeof(H5O_fill_t),         /*native message size                   */
@@ -66,8 +66,8 @@ const H5O_class_t H5O_FILL[1] = {{
     H5O_fill_debug              /*debug the message                     */
 }};
 
-/* This message derives from H5O, for new fill value after version 1.4  */
-const H5O_class_t H5O_FILL_NEW[1] = {{
+/* This message derives from H5O message class, for new fill value after version 1.4  */
+const H5O_msg_class_t H5O_MSG_FILL_NEW[1] = {{
     H5O_FILL_NEW_ID,		/*message id number			*/
     "fill_new", 		/*message name for debugging		*/
     sizeof(H5O_fill_new_t),	/*native message size			*/

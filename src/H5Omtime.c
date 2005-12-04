@@ -45,8 +45,8 @@ static herr_t H5O_mtime_free(void *_mesg);
 static herr_t H5O_mtime_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
 			     int indent, int fwidth);
 
-/* This message derives from H5O */
-const H5O_class_t H5O_MTIME[1] = {{
+/* This message derives from H5O message class */
+const H5O_msg_class_t H5O_MSG_MTIME[1] = {{
     H5O_MTIME_ID,		/*message id number		*/
     "mtime",			/*message name for debugging	*/
     sizeof(time_t),		/*native message size		*/
@@ -63,9 +63,9 @@ const H5O_class_t H5O_MTIME[1] = {{
     H5O_mtime_debug		/*debug the message		*/
 }};
 
-/* This message derives from H5O */
+/* This message derives from H5O message class */
 /* (Only encode, decode & size routines are different from old mtime routines) */
-const H5O_class_t H5O_MTIME_NEW[1] = {{
+const H5O_msg_class_t H5O_MSG_MTIME_NEW[1] = {{
     H5O_MTIME_NEW_ID,		/*message id number		*/
     "mtime_new",		/*message name for debugging	*/
     sizeof(time_t),		/*native message size		*/

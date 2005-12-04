@@ -197,6 +197,8 @@ extern H5D_dxpl_cache_t H5D_def_dxpl_cache;
 
 H5_DLL herr_t H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset, H5D_time_alloc_t time_alloc,
                         hbool_t update_time, hbool_t full_overwrite);
+H5_DLL herr_t H5D_vlen_reclaim(hid_t type_id, H5S_t *space, hid_t plist_id,
+    void *buf);
 
 /* Functions that perform serial I/O operations */
 H5_DLL herr_t H5D_select_fscat (H5D_io_info_t *io_info,
@@ -283,7 +285,8 @@ H5_DLL ssize_t H5D_efl_writevv(const H5D_io_info_t *io_info,
     const void *buf);
 
 #ifdef H5_HAVE_PARALLEL
-/* MPI-IO function to read directly from app buffer to file rky980813 */
+
+/* MPI-IO function to read , it will select either regular or irregular read */
 H5_DLL herr_t H5D_mpio_select_read(H5D_io_info_t *io_info,
     size_t nelmts, size_t elmt_size,
     const struct H5S_t *file_space, const struct H5S_t *mem_space,
@@ -332,3 +335,4 @@ H5_DLL herr_t H5D_layout_contig_size_test(hid_t did, hsize_t *size);
 #endif /* H5D_TESTING */
 
 #endif /*_H5Dpkg_H*/
+

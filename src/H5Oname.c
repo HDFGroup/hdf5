@@ -42,8 +42,8 @@ static herr_t H5O_name_reset(void *_mesg);
 static herr_t H5O_name_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			     int indent, int fwidth);
 
-/* This message derives from H5O */
-const H5O_class_t H5O_NAME[1] = {{
+/* This message derives from H5O message class */
+const H5O_msg_class_t H5O_MSG_NAME[1] = {{
     H5O_NAME_ID,            	/*message id number             */
     "name",                 	/*message name for debugging    */
     sizeof(H5O_name_t),     	/*native message size           */

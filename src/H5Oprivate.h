@@ -38,6 +38,10 @@
 #include "H5Tprivate.h"		/* Datatype functions			*/
 #include "H5Zprivate.h"         /* I/O pipeline filters			*/
 
+/* Forward references of package typedefs */
+typedef struct H5O_msg_class_t H5O_msg_class_t;
+typedef struct H5O_t H5O_t;
+
 /* Object header macros */
 #define H5O_MIN_SIZE	H5O_ALIGN(32)	/*min obj header data size	     */
 #define H5O_MAX_SIZE	65536	        /*max obj header data size	     */
@@ -274,7 +278,7 @@ H5_DLL herr_t H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 H5_DLL herr_t H5O_get_info(H5G_entry_t *ent, H5O_stat_t *ostat, hid_t dxpl_id);
 H5_DLL herr_t H5O_iterate(const H5G_entry_t *ent, unsigned type_id, H5O_operator_t op,
     void *op_data, hid_t dxpl_id);
-H5_DLL herr_t H5O_debug_id(hid_t type_id, H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream, int indent, int fwidth);
+H5_DLL herr_t H5O_debug_id(unsigned type_id, H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream, int indent, int fwidth);
 H5_DLL herr_t H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
 			 int fwidth);
 

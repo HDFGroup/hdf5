@@ -39,8 +39,8 @@ static herr_t H5O_pline_free (void *_mesg);
 static herr_t H5O_pline_debug (H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			       FILE * stream, int indent, int fwidth);
 
-/* This message derives from H5O */
-const H5O_class_t H5O_PLINE[1] = {{
+/* This message derives from H5O message class */
+const H5O_msg_class_t H5O_MSG_PLINE[1] = {{
     H5O_PLINE_ID,		/* message id number		*/
     "filter pipeline",		/* message name for debugging	*/
     sizeof(H5O_pline_t),	/* native message size		*/

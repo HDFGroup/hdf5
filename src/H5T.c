@@ -659,8 +659,8 @@ H5T_init_interface(void)
     H5T_t       *native_uint=NULL;      /* Datatype structure for native unsigned int */
     H5T_t       *native_long=NULL;      /* Datatype structure for native long */
     H5T_t       *native_ulong=NULL;     /* Datatype structure for native unsigned long */
-    H5T_t       *native_llong=NULL;     /* Datatype structure for native llong */
-    H5T_t       *native_ullong=NULL;    /* Datatype structure for native unsigned llong */
+    H5T_t       *native_llong=NULL;     /* Datatype structure for native long long */
+    H5T_t       *native_ullong=NULL;    /* Datatype structure for native unsigned long long */
     H5T_t       *native_float=NULL;     /* Datatype structure for native float */
     H5T_t       *native_double=NULL;    /* Datatype structure for native double */
     H5T_t       *std_u8le=NULL;         /* Datatype structure for unsigned 8-bit little-endian integer */
@@ -2890,11 +2890,11 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     } /* end switch */
 
     /* Deep copy of the symbol table entry, if there was one */
-    if ( new_dt->shared->state == H5T_STATE_NAMED || new_dt->shared->state == H5T_STATE_OPEN) {
+    if(new_dt->shared->state == H5T_STATE_NAMED || new_dt->shared->state == H5T_STATE_OPEN) {
         if (!H5F_addr_defined(old_dt->ent.header))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "named dataype with invalid address");
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "named dataype with invalid address")
         if (H5G_ent_copy(&(new_dt->ent), &(old_dt->ent),H5G_COPY_DEEP)<0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to copy entry");
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to copy entry")
     } /* end if */
     else {
         H5G_ent_reset(&(new_dt->ent));
@@ -2978,7 +2978,7 @@ done:
 H5T_t *
 H5T_alloc(void)
 {
-    H5T_t *dt;                  /* Pointer to datatype allocated */
+    H5T_t *dt = NULL;           /* Pointer to datatype allocated */
     H5T_t *ret_value;           /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_alloc, NULL)
@@ -3018,54 +3018,52 @@ done:
  * Programmer:	Quincey Koziol
  *		Monday, January  6, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5T_free(H5T_t *dt)
 {
     unsigned	i;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_free, FAIL);
+    FUNC_ENTER_NOAPI(H5T_free, FAIL)
 
-    assert(dt && dt->shared);
+    HDassert(dt && dt->shared);
 
     /*
      * If a named type is being closed then close the object header and
      * remove from the list of open objects in the file.
      */
-    if (H5T_STATE_OPEN==dt->shared->state) {
-        assert (H5F_addr_defined(dt->ent.header));
+    if(H5T_STATE_OPEN == dt->shared->state) {
+        HDassert(H5F_addr_defined(dt->ent.header));
         /* Remove the datatype from the list of opened objects in the file */
         if(H5FO_top_decr(dt->ent.file, dt->ent.header) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
         if(H5FO_delete(dt->ent.file, H5AC_dxpl_id, dt->ent.header)<0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't remove datatype from list of open objects")
         if (H5O_close(&(dt->ent))<0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to close data type object header");
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to close data type object header")
         dt->shared->state = H5T_STATE_NAMED;
-    }
+    } /* end if */
 
     /*
      * Don't free locked datatypes.
      */
-    if (H5T_STATE_IMMUTABLE==dt->shared->state)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close immutable datatype");
+    if(H5T_STATE_IMMUTABLE==dt->shared->state)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close immutable datatype")
 
     /* Close the datatype */
-    switch (dt->shared->type) {
+    switch(dt->shared->type) {
         case H5T_COMPOUND:
-            for (i=0; i<dt->shared->u.compnd.nmembs; i++) {
+            for(i = 0; i < dt->shared->u.compnd.nmembs; i++) {
                 H5MM_xfree(dt->shared->u.compnd.memb[i].name);
                 H5T_close(dt->shared->u.compnd.memb[i].type);
-            }
+            } /* end for */
             H5MM_xfree(dt->shared->u.compnd.memb);
             break;
 
         case H5T_ENUM:
-            for (i=0; i<dt->shared->u.enumer.nmembs; i++)
+            for(i = 0; i < dt->shared->u.enumer.nmembs; i++)
                 H5MM_xfree(dt->shared->u.enumer.name[i]);
             H5MM_xfree(dt->shared->u.enumer.name);
             H5MM_xfree(dt->shared->u.enumer.value);
@@ -3077,17 +3075,17 @@ H5T_free(H5T_t *dt)
 
         default:
             break;
-    }
+    } /* end switch */
 
     /* Free the ID to name info */
     H5G_free_ent_name(&(dt->ent));
 
     /* Close the parent */
-    if (dt->shared->parent && H5T_close(dt->shared->parent)<0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close parent data type");
+    if(dt->shared->parent && H5T_close(dt->shared->parent) < 0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close parent data type")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_free() */
 
 
@@ -3120,17 +3118,16 @@ done:
 herr_t
 H5T_close(H5T_t *dt)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_close, FAIL);
+    FUNC_ENTER_NOAPI(H5T_close, FAIL)
 
-    assert(dt && dt->shared);
+    HDassert(dt && dt->shared);
 
     dt->shared->fo_count--;
 
-    if(dt->shared->state != H5T_STATE_OPEN || dt->shared->fo_count == 0)
-    {
-        if(H5T_free(dt)<0)
+    if(dt->shared->state != H5T_STATE_OPEN || dt->shared->fo_count == 0) {
+        if(H5T_free(dt) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free datatype");
 
         H5FL_FREE(H5T_shared_t, dt->shared);
@@ -3139,7 +3136,7 @@ H5T_close(H5T_t *dt)
          * If a named type is being closed then close the object header and
          * remove from the list of open objects in the file.
          */
-        if(H5T_STATE_OPEN==dt->shared->state) {
+        if(H5T_STATE_OPEN == dt->shared->state) {
             /* Decrement the ref. count for this object in the top file */
             if(H5FO_top_decr(dt->ent.file, dt->ent.header) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
@@ -3152,14 +3149,14 @@ H5T_close(H5T_t *dt)
 
         /* Free the ID to name info since we're not calling H5T_free*/
         H5G_free_ent_name(&(dt->ent));
-    }
+    } /* end else */
 
     /* Free the datatype struct */
     H5FL_FREE(H5T_t,dt);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -4668,16 +4665,6 @@ H5T_debug(const H5T_t *dt, FILE *stream)
 	    fprintf(stream, "\n\"%s\" @%lu",
 		    dt->shared->u.compnd.memb[i].name,
 		    (unsigned long) (dt->shared->u.compnd.memb[i].offset));
-#ifdef OLD_WAY
-	    if (dt->shared->u.compnd.memb[i].ndims) {
-		fprintf(stream, "[");
-		for (j = 0; j < dt->shared->u.compnd.memb[i].ndims; j++) {
-		    fprintf(stream, "%s%lu", j ? ", " : "",
-			    (unsigned long)(dt->shared->u.compnd.memb[i].dim[j]));
-		}
-		fprintf(stream, "]");
-	    }
-#endif /* OLD_WAY */
 	    fprintf(stream, " ");
 	    H5T_debug(dt->shared->u.compnd.memb[i].type, stream);
 	}

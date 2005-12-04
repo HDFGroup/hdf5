@@ -38,10 +38,10 @@ static herr_t H5O_dtype_set_share (H5F_t *f, void *_mesg,
 static herr_t H5O_dtype_debug (H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			       FILE * stream, int indent, int fwidth);
 
-/* This message derives from H5O */
-const H5O_class_t H5O_DTYPE[1] = {{
+/* This message derives from H5O message class */
+const H5O_msg_class_t H5O_MSG_DTYPE[1] = {{
     H5O_DTYPE_ID,		/* message id number		*/
-    "data_type",		/* message name for debugging	*/
+    "datatype",			/* message name for debugging	*/
     sizeof(H5T_t),		/* native message size		*/
     H5O_dtype_decode,		/* decode message		*/
     H5O_dtype_encode,		/* encode message		*/
@@ -64,10 +64,6 @@ const H5O_class_t H5O_DTYPE[1] = {{
 /* This is the correct version to create all datatypes which contain H5T_ARRAY
  * class objects (array definitely, potentially compound & vlen sequences also) */
 #define H5O_DTYPE_VERSION_UPDATED	2
-
-/* Declare external the free list for H5T_t's */
-H5FL_EXTERN(H5T_t);
-H5FL_EXTERN(H5T_shared_t);
 
 
 /*-------------------------------------------------------------------------
@@ -1091,8 +1087,6 @@ H5O_dtype_free (void *mesg)
  * Programmer:	Robb Matzke
  *		Monday, June  1, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1100,12 +1094,12 @@ H5O_dtype_get_share(H5F_t UNUSED *f, const void *_mesg,
 		    H5O_shared_t *sh/*out*/)
 {
     const H5T_t	*dt = (const H5T_t *)_mesg;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_get_share);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_get_share)
 
-    assert (dt);
-    assert (sh);
+    HDassert(dt);
+    HDassert(sh);
 
     if (H5F_addr_defined (dt->ent.header)) {
         /* If the address is defined, this had better be a named datatype */
@@ -1113,7 +1107,7 @@ H5O_dtype_get_share(H5F_t UNUSED *f, const void *_mesg,
 
         H5G_ent_copy(&(sh->ent), &(dt->ent), H5G_COPY_NULL);
     } else
-	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype is not sharable");
+	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype is not sharable")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1130,23 +1124,18 @@ done:
  * Programmer:	Robb Matzke
  *		Thursday, June	4, 1998
  *
- * Modifications:
- *
- *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
- *      Added `id to name' support.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_dtype_set_share (H5F_t UNUSED *f, void *_mesg/*in,out*/,
+H5O_dtype_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
 		     const H5O_shared_t *sh)
 {
     H5T_t	*dt = (H5T_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_set_share);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_set_share)
 
-    assert (dt);
-    assert (sh);
+    HDassert(dt);
+    HDassert(sh);
 
     /* NULL copy here, names not appropriate */
     H5G_ent_copy(&(dt->ent), &(sh->ent), H5G_COPY_NULL);
@@ -1154,8 +1143,8 @@ H5O_dtype_set_share (H5F_t UNUSED *f, void *_mesg/*in,out*/,
     /* Note that the datatype is a named datatype */
     dt->shared->state = H5T_STATE_NAMED;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_dtype_set_share() */
 
 
 /*--------------------------------------------------------------------------
@@ -1473,3 +1462,4 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
+

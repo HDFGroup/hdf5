@@ -34,10 +34,10 @@ static herr_t H5O_sdspace_free (void *_mesg);
 static herr_t H5O_sdspace_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 				FILE * stream, int indent, int fwidth);
 
-/* This message derives from H5O */
-const H5O_class_t H5O_SDSPACE[1] = {{
+/* This message derives from H5O message class */
+const H5O_msg_class_t H5O_MSG_SDSPACE[1] = {{
     H5O_SDSPACE_ID,	    	/* message id number		    	*/
-    "simple_dspace",	    	/* message name for debugging	   	*/
+    "dataspace",	    	/* message name for debugging	   	*/
     sizeof(H5S_extent_t),   	/* native message size		    	*/
     H5O_sdspace_decode,	    	/* decode message			*/
     H5O_sdspace_encode,	    	/* encode message			*/
@@ -127,8 +127,15 @@ H5O_sdspace_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
         if (sdim->rank > 0) {
             if (NULL==(sdim->size=H5FL_ARR_MALLOC(hsize_t,sdim->rank)))
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-            for (i = 0; i < sdim->rank; i++)
+            for (i = 0; i < sdim->rank; i++) {
                 H5F_DECODE_LENGTH (f, p, sdim->size[i]);
+#ifndef H5_HAVE_LARGE_HSIZET
+                /* Rudimentary check for overflow of the dimension size */
+                if(sdim->size[i] == 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_BADSIZE, NULL, "invalid size detected");
+#endif /* H5_HAVE_LARGE_HSIZET */
+            } /* end for */
+
             if (flags & H5S_VALID_MAX) {
                 if (NULL==(sdim->max=H5FL_ARR_MALLOC(hsize_t,sdim->rank)))
                     HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
@@ -427,3 +434,4 @@ H5O_sdspace_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *mesg,
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
+
