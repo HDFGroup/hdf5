@@ -68,6 +68,8 @@ static herr_t H5D_open_oid(H5D_t *dataset, hid_t dxpl_id);
 static herr_t H5D_get_space_status(H5D_t *dset, H5D_space_status_t *allocation, hid_t dxpl_id);
 static hsize_t H5D_get_storage_size(H5D_t *dset, hid_t dxpl_id);
 static haddr_t H5D_get_offset(const H5D_t *dset);
+static herr_t H5D_iterate(void *buf, hid_t type_id, H5S_t *space,
+    H5D_operator_t op, void *operator_data);
 static herr_t H5D_extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
 static herr_t H5D_set_extent(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
 static herr_t H5D_init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type);
@@ -2350,50 +2352,6 @@ done:
 } /* end H5D_create() */
 
 
-/*-------------------------------------------------------------------------
- * Function:	H5D_isa
- *
- * Purpose:	Determines if an object has the requisite messages for being
- *		a dataset.
- *
- * Return:	Success:	TRUE if the required dataset messages are
- *				present; FALSE otherwise.
- *
- *		Failure:	FAIL if the existence of certain messages
- *				cannot be determined.
- *
- * Programmer:	Robb Matzke
- *              Monday, November  2, 1998
- *
- *-------------------------------------------------------------------------
- */
-htri_t
-H5D_isa(H5O_loc_t *loc, hid_t dxpl_id)
-{
-    htri_t	exists;
-    htri_t	ret_value = TRUE;         /* Return value */
-
-    FUNC_ENTER_NOAPI(H5D_isa, FAIL)
-
-    HDassert(loc);
-
-    /* Datatype */
-    if((exists = H5O_exists(loc, H5O_DTYPE_ID, 0, dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header")
-    else if(!exists)
-	HGOTO_DONE(FALSE)
-
-    /* Layout */
-    if((exists = H5O_exists(loc, H5O_SDSPACE_ID, 0, dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header")
-    else if(!exists)
-	HGOTO_DONE(FALSE)
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_isa() */
-
-
 /*
  *-------------------------------------------------------------------------
  * Function:	H5D_open
@@ -3548,11 +3506,46 @@ H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op,
     if(!(H5S_has_extent(space)) )
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspace does not have extent set")
 
-    ret_value = H5S_select_iterate(buf,type_id,space,op,operator_data);
+    ret_value = H5D_iterate(buf, type_id, space, op, operator_data);
 
 done:
     FUNC_LEAVE_API(ret_value)
 }   /* end H5Diterate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_iterate
+ *
+ * Purpose:	Internal version of H5Diterate()
+ *
+ * Return:	Returns the return value of the last operator if it was non-zero,
+ *          or zero if all elements were processed. Otherwise returns a
+ *          negative value.
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November 22, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op,
+        void *operator_data)
+{
+    herr_t ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_iterate)
+
+    /* Check args */
+    HDassert(buf);
+    HDassert(H5I_DATATYPE == H5I_get_type(type_id));
+    HDassert(space);
+    HDassert(H5S_has_extent(space));
+    HDassert(op);
+
+    ret_value = H5S_select_iterate(buf, type_id, space, op, operator_data);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* end H5D_iterate() */
 
 
 /*-------------------------------------------------------------------------
@@ -3573,35 +3566,75 @@ done:
 herr_t
 H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
 {
-    H5T_vlen_alloc_info_t _vl_alloc_info;       /* VL allocation info buffer */
-    H5T_vlen_alloc_info_t *vl_alloc_info=&_vl_alloc_info;   /* VL allocation info */
+    H5S_t		   *space = NULL;
     herr_t ret_value;
 
     FUNC_ENTER_API(H5Dvlen_reclaim, FAIL)
     H5TRACE4("e","iiix",type_id,space_id,plist_id,buf);
 
     /* Check args */
-    if (H5I_DATATYPE!=H5I_get_type(type_id) || H5I_DATASPACE!=H5I_get_type(space_id) ||
-            buf==NULL)
+    if (H5I_DATATYPE != H5I_get_type(type_id) || buf == NULL)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
+    if(NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace")
+    if(!(H5S_has_extent(space)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspace does not have extent set")
 
     /* Get the default dataset transfer property list if the user didn't provide one */
-    if (H5P_DEFAULT == plist_id)
-        plist_id= H5P_DATASET_XFER_DEFAULT;
+    if(H5P_DEFAULT == plist_id)
+        plist_id = H5P_DATASET_XFER_DEFAULT;
     else
-        if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
+        if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
+
+    /* Call internal routine */
+    ret_value = H5D_vlen_reclaim(type_id, space, plist_id, buf);
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}   /* end H5Dvlen_reclaim() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_vlen_reclaim
+ *
+ * Purpose:	Frees the buffers allocated for storing variable-length data
+ *      in memory.  Only frees the VL data in the selection defined in the
+ *      dataspace.  The dataset transfer property list is required to find the
+ *      correct allocation/free methods for the VL data in the buffer.
+ *
+ * Return:	Non-negative on success, negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November 22, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_vlen_reclaim(hid_t type_id, H5S_t *space, hid_t plist_id, void *buf)
+{
+    H5T_vlen_alloc_info_t _vl_alloc_info;       /* VL allocation info buffer */
+    H5T_vlen_alloc_info_t *vl_alloc_info = &_vl_alloc_info;   /* VL allocation info */
+    herr_t ret_value;
+
+    FUNC_ENTER_NOAPI(H5D_vlen_reclaim, FAIL)
+
+    /* Check args */
+    HDassert(H5I_DATATYPE == H5I_get_type(type_id));
+    HDassert(space);
+    HDassert(H5P_isa_class(plist_id, H5P_DATASET_XFER));
+    HDassert(buf);
 
     /* Get the allocation info */
     if(H5T_vlen_get_alloc_info(plist_id,&vl_alloc_info)<0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to retrieve VL allocation info")
 
-    /* Call H5Diterate with args, etc. */
-    ret_value=H5Diterate(buf,type_id,space_id,H5T_vlen_reclaim,vl_alloc_info);
+    /* Call H5D_iterate with args, etc. */
+    ret_value = H5D_iterate(buf, type_id, space ,H5T_vlen_reclaim, vl_alloc_info);
 
 done:
-    FUNC_LEAVE_API(ret_value)
-}   /* end H5Dvlen_reclaim() */
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* end H5D_vlen_reclaim() */
 
 
 /*-------------------------------------------------------------------------
@@ -3728,6 +3761,7 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
 {
     H5D_vlen_bufsize_t vlen_bufsize = {0, 0, 0, 0, 0, 0, 0};
     char bogus;         /* bogus value to pass to H5Diterate() */
+    H5S_t		   *space = NULL;
     H5P_genclass_t  *pclass;    /* Property class */
     H5P_genplist_t  *plist;     /* Property list */
     herr_t ret_value=FAIL;
@@ -3736,10 +3770,13 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
     H5TRACE4("e","iii*h",dataset_id,type_id,space_id,size);
 
     /* Check args */
-    if (H5I_DATASET!=H5I_get_type(dataset_id) ||
-            H5I_DATATYPE!=H5I_get_type(type_id) ||
-            H5I_DATASPACE!=H5I_get_type(space_id) || size==NULL)
+    if(H5I_DATASET!=H5I_get_type(dataset_id) ||
+            H5I_DATATYPE!=H5I_get_type(type_id) || size==NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
+    if(NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace")
+    if(!(H5S_has_extent(space)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspace does not have extent set")
 
     /* Save the dataset ID */
     vlen_bufsize.dataset_id=dataset_id;
@@ -3777,8 +3814,8 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
     /* Set the initial number of bytes required */
     vlen_bufsize.size=0;
 
-    /* Call H5Diterate with args, etc. */
-    ret_value=H5Diterate(&bogus,type_id,space_id,H5D_vlen_get_buf_size,&vlen_bufsize);
+    /* Call H5D_iterate with args, etc. */
+    ret_value = H5D_iterate(&bogus, type_id, space, H5D_vlen_get_buf_size, &vlen_bufsize);
 
     /* Get the size if we succeeded */
     if(ret_value>=0)

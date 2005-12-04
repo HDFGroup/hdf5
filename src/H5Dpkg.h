@@ -198,6 +198,8 @@ extern H5D_dxpl_cache_t H5D_def_dxpl_cache;
 
 H5_DLL herr_t H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset, H5D_time_alloc_t time_alloc,
                         hbool_t update_time, hbool_t full_overwrite);
+H5_DLL herr_t H5D_vlen_reclaim(hid_t type_id, H5S_t *space, hid_t plist_id,
+    void *buf);
 
 /* Functions that perform serial I/O operations */
 H5_DLL herr_t H5D_select_fscat (H5D_io_info_t *io_info,
@@ -233,6 +235,8 @@ H5_DLL ssize_t H5D_contig_writevv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     const void *buf);
+H5_DLL herr_t H5D_contig_copy(H5F_t *f_src, H5O_layout_t *layout_src,
+    H5F_t *f_dst, H5O_layout_t *layout_dst, H5T_t *src_dtype, hid_t dxpl_id);
 
 /* Functions that operate on compact dataset storage */
 H5_DLL ssize_t H5D_compact_readvv(const H5D_io_info_t *io_info,
@@ -299,7 +303,6 @@ H5_DLL herr_t H5D_mpio_select_write(H5D_io_info_t *io_info,
     size_t nelmts, size_t elmt_size,
     const struct H5S_t *file_space, const struct H5S_t *mem_space,
     const void *buf);
-
 
 /* MPI-IO function to read directly from app buffer to file rky980813 */
 H5_DLL herr_t H5D_mpio_spaces_read(H5D_io_info_t *io_info,

@@ -50,8 +50,8 @@ static herr_t H5O_stab_post_copy_file(H5F_t *file_src, const void *mesg_src,
 static herr_t H5O_stab_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
     FILE * stream, int indent, int fwidth);
 
-/* This message derives from H5O */
-const H5O_class_t H5O_STAB[1] = {{
+/* This message derives from H5O message class */
+const H5O_msg_class_t H5O_MSG_STAB[1] = {{
     H5O_STAB_ID,            	/*message id number             */
     "stab",                 	/*message name for debugging    */
     sizeof(H5O_stab_t),     	/*native message size           */
@@ -65,6 +65,7 @@ const H5O_class_t H5O_STAB[1] = {{
     NULL,			/* link method			*/
     NULL,		    	/*get share method		*/
     NULL, 			/*set share method		*/
+    NULL,			/* pre copy native value to file */
     H5O_stab_copy_file,		/* copy native value to file    */
     H5O_stab_post_copy_file,	/* post copy native value to file    */
     H5O_stab_debug         	/*debug the message             */

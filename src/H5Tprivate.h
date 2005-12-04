@@ -63,10 +63,12 @@ typedef struct H5T_conv_cb_t {
     void*                       user_data;
 } H5T_conv_cb_t;
 
+/* Forward declarations for prototype arguments */
+struct H5O_t;
+
 /* Private functions */
 H5_DLL herr_t H5TN_init_interface(void);
 H5_DLL herr_t H5T_init(void);
-H5_DLL htri_t H5T_isa(struct H5O_loc_t *loc, hid_t dxpl_id);
 H5_DLL H5T_t *H5T_copy(const H5T_t *old_dt, H5T_copy_t method);
 H5_DLL herr_t H5T_lock(H5T_t *dt, hbool_t immutable);
 H5_DLL herr_t H5T_close(H5T_t *dt);

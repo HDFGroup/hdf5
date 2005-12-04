@@ -34,10 +34,10 @@ static herr_t H5O_sdspace_free (void *_mesg);
 static herr_t H5O_sdspace_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 				FILE * stream, int indent, int fwidth);
 
-/* This message derives from H5O */
-const H5O_class_t H5O_SDSPACE[1] = {{
+/* This message derives from H5O message class */
+const H5O_msg_class_t H5O_MSG_SDSPACE[1] = {{
     H5O_SDSPACE_ID,	    	/* message id number		    	*/
-    "simple_dspace",	    	/* message name for debugging	   	*/
+    "dataspace",	    	/* message name for debugging	   	*/
     sizeof(H5S_extent_t),   	/* native message size		    	*/
     H5O_sdspace_decode,	    	/* decode message			*/
     H5O_sdspace_encode,	    	/* encode message			*/
@@ -49,6 +49,7 @@ const H5O_class_t H5O_SDSPACE[1] = {{
     NULL,			/* link method			*/
     NULL,		    	/* get share method			*/
     NULL, 			/* set share method			*/
+    NULL,			/* pre copy native value to file */
     NULL,			/* copy native value to file    */
     NULL,			/* post copy native value to file    */
     H5O_sdspace_debug	        /* debug the message		    	*/

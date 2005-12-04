@@ -31,8 +31,8 @@
 #include "H5Opkg.h"             /* Object header functions                  */
 
 
-/* This message derives from H5O */
-const H5O_class_t H5O_NULL[1] = {{
+/* This message derives from H5O message class */
+const H5O_msg_class_t H5O_MSG_NULL[1] = {{
     H5O_NULL_ID,            /*message id number             */
     "null",                 /*message name for debugging    */
     0,                      /*native message size           */
@@ -46,6 +46,7 @@ const H5O_class_t H5O_NULL[1] = {{
     NULL,		    /*no link method		    */
     NULL,		    /*no get share method	    */
     NULL,	            /*no set share method	    */
+    NULL,		    /*no pre copy native value to file */
     NULL,		    /*no copy native value to file    */
     NULL,		    /*no post copy native value to file    */
     NULL                    /*no debug method               */

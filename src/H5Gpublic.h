@@ -54,10 +54,10 @@ typedef enum H5G_link_t {
  */
 typedef enum H5G_obj_t {
     H5G_UNKNOWN = -1,		/* Unknown object type		*/
-    H5G_LINK,		        /* Object is a symbolic link	*/
     H5G_GROUP,		        /* Object is a group		*/
     H5G_DATASET,		/* Object is a dataset		*/
     H5G_TYPE,			/* Object is a named data type	*/
+    H5G_LINK,		        /* Object is a symbolic link	*/
     H5G_RESERVED_4,		/* Reserved for future use	*/
     H5G_RESERVED_5,		/* Reserved for future use	*/
     H5G_RESERVED_6,		/* Reserved for future use	*/

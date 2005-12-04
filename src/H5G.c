@@ -1526,47 +1526,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_isa
- *
- * Purpose:	Determines if an object has the requisite messages for being
- *		a group.
- *
- * Return:	Success:	TRUE if the required group messages are
- *				present; FALSE otherwise.
- *
- *		Failure:	FAIL if the existence of certain messages
- *				cannot be determined.
- *
- * Programmer:	Robb Matzke
- *              Monday, November  2, 1998
- *
- *-------------------------------------------------------------------------
- */
-htri_t
-H5G_isa(H5O_loc_t *loc, hid_t dxpl_id)
-{
-    htri_t	stab_exists;
-    htri_t	linfo_exists;
-    htri_t	ret_value;
-
-    FUNC_ENTER_NOAPI_NOINIT(H5G_isa)
-
-    HDassert(loc);
-
-    /* Check for any of the messages that indicate a group */
-    if((stab_exists = H5O_exists(loc, H5O_STAB_ID, 0, dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
-    if((linfo_exists = H5O_exists(loc, H5O_LINFO_ID, 0, dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
-
-    ret_value = (stab_exists > 0 || linfo_exists > 0);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_isa() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5G_open
  *
  * Purpose:	Opens an existing group.  The group should eventually be

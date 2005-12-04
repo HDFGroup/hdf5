@@ -46,8 +46,8 @@ static void *H5O_cont_copy_file(H5F_t *file_src, void *mesg_src,
 static herr_t H5O_cont_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			     int indent, int fwidth);
 
-/* This message derives from H5O */
-const H5O_class_t H5O_CONT[1] = {{
+/* This message derives from H5O message class */
+const H5O_msg_class_t H5O_MSG_CONT[1] = {{
     H5O_CONT_ID,            	/*message id number             */
     "hdr continuation",     	/*message name for debugging    */
     sizeof(H5O_cont_t),     	/*native message size           */
@@ -61,6 +61,7 @@ const H5O_class_t H5O_CONT[1] = {{
     NULL,			/* link method			*/
     NULL, 		    	/*get share method		*/
     NULL,		    	/*set share method		*/
+    NULL,			/* pre copy native value to file */
     H5O_cont_copy_file,  	/* copy native value to file    */
     NULL, 		 	/* post copy native value to file    */
     H5O_cont_debug         	/*debugging                     */

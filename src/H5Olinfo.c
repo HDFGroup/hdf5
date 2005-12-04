@@ -42,8 +42,8 @@ static herr_t H5O_linfo_free(void *_mesg);
 static herr_t H5O_linfo_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			     FILE * stream, int indent, int fwidth);
 
-/* This message derives from H5O */
-const H5O_class_t H5O_LINFO[1] = {{
+/* This message derives from H5O message class */
+const H5O_msg_class_t H5O_MSG_LINFO[1] = {{
     H5O_LINFO_ID,            	/*message id number             */
     "linfo",                 	/*message name for debugging    */
     sizeof(H5O_linfo_t),     	/*native message size           */
@@ -57,6 +57,7 @@ const H5O_class_t H5O_LINFO[1] = {{
     NULL,			/* link method			*/
     NULL,		    	/*get share method		*/
     NULL, 			/*set share method		*/
+    NULL,			/* pre copy native value to file */
     NULL,			/* copy native value to file    */
     NULL,			/* post copy native value to file    */
     H5O_linfo_debug          	/*debug the message             */

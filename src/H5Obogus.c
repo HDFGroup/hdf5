@@ -45,8 +45,8 @@ static size_t H5O_bogus_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_bogus_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			     int indent, int fwidth);
 
-/* This message derives from H5O */
-const H5O_class_t H5O_BOGUS[1] = {{
+/* This message derives from H5O message class */
+const H5O_msg_class_t H5O_MSG_BOGUS[1] = {{
     H5O_BOGUS_ID,            	/*message id number             */
     "bogus",                 	/*message name for debugging    */
     0,     	                /*native message size           */
@@ -60,6 +60,7 @@ const H5O_class_t H5O_BOGUS[1] = {{
     NULL,			/* link method			*/
     NULL,		    	/*get share method		*/
     NULL,			/*set share method		*/
+    NULL,			/* pre copy native value to file */
     NULL,			/* copy native value to file    */
     NULL,			/* post copy native value to file    */
     H5O_bogus_debug         	/*debug the message             */

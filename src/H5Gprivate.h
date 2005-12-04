@@ -94,9 +94,10 @@ typedef struct {
     unsigned    user_path_hidden;       /* Whether the user's path is valid  */
 } H5G_name_t;
 
-/* Forward declarations */
+/* Forward declarations (for prototypes & struct definitions) */
 struct H5P_genplist_t;
 struct H5O_loc_t;
+struct H5O_t;
 
 /*
  * The "location" of an object in a group hierarchy.  This points to an object
@@ -122,7 +123,6 @@ typedef enum {
  * Library prototypes...  These are the ones that other packages routinely
  * call.
  */
-H5_DLL htri_t H5G_isa(struct H5O_loc_t *loc, hid_t dxpl_id);
 H5_DLL herr_t H5G_mkroot(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc);
 H5_DLL struct H5O_loc_t *H5G_oloc(H5G_t *grp);
 H5_DLL H5G_name_t * H5G_nameof(H5G_t *grp);

@@ -35,13 +35,15 @@ static herr_t H5O_dtype_get_share (H5F_t *f, const void *_mesg,
 				   H5O_shared_t *sh);
 static herr_t H5O_dtype_set_share (H5F_t *f, void *_mesg,
 				   const H5O_shared_t *sh);
+static herr_t H5O_dtype_pre_copy_file(H5F_t *file_src, void *mesg_src,
+    void *_udata);
 static herr_t H5O_dtype_debug (H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			       FILE * stream, int indent, int fwidth);
 
-/* This message derives from H5O */
-const H5O_class_t H5O_DTYPE[1] = {{
+/* This message derives from H5O message class */
+const H5O_msg_class_t H5O_MSG_DTYPE[1] = {{
     H5O_DTYPE_ID,		/* message id number		*/
-    "data_type",		/* message name for debugging	*/
+    "datatype",			/* message name for debugging	*/
     sizeof(H5T_t),		/* native message size		*/
     H5O_dtype_decode,		/* decode message		*/
     H5O_dtype_encode,		/* encode message		*/
@@ -53,8 +55,9 @@ const H5O_class_t H5O_DTYPE[1] = {{
     NULL,			/* link method			*/
     H5O_dtype_get_share,	/* get share method		*/
     H5O_dtype_set_share,	/* set share method		*/
+    H5O_dtype_pre_copy_file,	/* pre copy native value to file */
     NULL,			/* copy native value to file    */
-    NULL,			/* post copy native value to file    */
+    NULL,			/* post copy native value to file */
     H5O_dtype_debug		/* debug the message		*/
 }};
 
@@ -1160,6 +1163,56 @@ H5O_dtype_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
 } /* end H5O_dtype_set_share() */
 
 
+/*-------------------------------------------------------------------------
+ * Function:    H5O_dtype_pre_copy_file
+ *
+ * Purpose:     Perform any necessary actions before copying message between
+ *              files
+ *
+ * Return:      Success:        Non-negative
+ *
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              November 21, 2005 
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_dtype_pre_copy_file(H5F_t *file_src, void *mesg_src, void *_udata)
+{
+    H5T_t	   *dt_src = (H5T_t *)mesg_src;  /* Source datatype */
+    H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */
+    herr_t         ret_value = SUCCEED;          /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_pre_copy_file)
+
+    /* check args */
+    HDassert(file_src);
+    HDassert(dt_src);
+
+    /* If the user data is non-NULL, assume we are copying a dataset
+     * and check if we need to make a copy of the datatype for later in
+     * the object copying process.  (We currently only need to make a copy
+     * of the datatype if it's a vlen datatype)
+     */
+    if(udata) {
+        if(H5T_detect_class(dt_src, H5T_VLEN) > 0) {
+            /* Create a memory copy of the variable-length datatype */
+            if(NULL == (udata->src_dtype = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
+
+            /* Set the location of the source datatype */
+            if(H5T_set_loc(udata->src_dtype, file_src, H5T_LOC_DISK) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype on disk")
+        } /* end if */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_dtype_pre_copy_file() */
+
+
 /*--------------------------------------------------------------------------
  NAME
     H5O_dtype_debug
@@ -1475,3 +1528,4 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
+

@@ -221,9 +221,6 @@ H5_term_library(void)
 	pending += DOWN(A);
 	pending += DOWN(S);
 	pending += DOWN(T);
-        /* Don't shut down the object header code until objects are shut down */
-        if(pending==0)
-            pending += DOWN(O);
         /* Don't shut down the file code until objects in files are shut down */
         if(pending==0)
             pending += DOWN(F);

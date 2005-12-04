@@ -158,7 +158,7 @@
           !
           CALL h5rget_object_type_f(dsetr_id, ref(3), obj_type, error) 
               CALL check("h5rget_object_type_f",error,total_error)
-          if (obj_type == 2) then 
+          if (obj_type == H5G_DATASET_F) then 
               CALL h5rdereference_f(dsetr_id, ref(3), dset1_id, error)
                   CALL check("h5rdereference_f",error,total_error)
           
@@ -172,7 +172,7 @@
           !
           CALL h5rget_object_type_f(dsetr_id, ref(4), obj_type, error) 
               CALL check("h5rget_object_type_f",error,total_error)
-          if (obj_type == 3) then 
+          if (obj_type == H5G_TYPE_F) then 
               CALL h5rdereference_f(dsetr_id, ref(4), type_id, error)
                   CALL check("h5rdereference_f",error,total_error)
           end if

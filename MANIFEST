@@ -435,6 +435,7 @@
 ./src/H5Dio.c
 ./src/H5Distore.c
 ./src/H5Dmpio.c
+./src/H5Doh.c
 ./src/H5Dpkg.h
 ./src/H5Dprivate.h
 ./src/H5Dpublic.h
@@ -498,6 +499,7 @@
 ./src/H5Gname.c
 ./src/H5Gnode.c
 ./src/H5Gobj.c
+./src/H5Goh.c
 ./src/H5Gpkg.h
 ./src/H5Gprivate.h
 ./src/H5Gpublic.h
@@ -605,6 +607,7 @@
 ./src/H5Toffset.c
 ./src/H5Topaque.c
 ./src/H5Torder.c
+./src/H5Toh.c
 ./src/H5Tpad.c
 ./src/H5Tpkg.h
 ./src/H5Tprecis.c

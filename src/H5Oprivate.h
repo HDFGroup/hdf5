@@ -39,6 +39,10 @@
 #include "H5Tprivate.h"		/* Datatype functions			*/
 #include "H5Zprivate.h"         /* I/O pipeline filters			*/
 
+/* Forward references of package typedefs */
+typedef struct H5O_msg_class_t H5O_msg_class_t;
+typedef struct H5O_t H5O_t;
+
 /* Object header macros */
 #define H5O_MIN_SIZE	H5O_ALIGN(32)	/*min obj header data size	     */
 #define H5O_MAX_SIZE	65536	        /*max obj header data size	     */
@@ -291,6 +295,7 @@ typedef enum {
 
 /* Forward declarations for prototype arguments */
 struct H5SL_t;
+struct H5O_t;
 
 /* General message operators */
 H5_DLL herr_t H5O_init(void);
@@ -302,6 +307,7 @@ H5_DLL int H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id);
 H5_DLL int H5O_count(H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
 H5_DLL htri_t H5O_exists(H5O_loc_t *loc, unsigned type_id, int sequence,
     hid_t dxpl_id);
+H5_DLL htri_t H5O_exists_oh(struct H5O_t *oh, unsigned type_id, int sequence);
 H5_DLL void *H5O_read(const H5O_loc_t *loc, unsigned type_id, int sequence,
     void *mesg, hid_t dxpl_id);
 H5_DLL int H5O_modify(H5O_loc_t *loc, unsigned type_id,
@@ -340,7 +346,7 @@ H5_DLL herr_t H5O_copy_header(const H5O_loc_t *oloc_src,
     H5O_loc_t *oloc_dst /*out */, hid_t dxpl_id);
 H5_DLL herr_t H5O_copy_header_map(const H5O_loc_t *oloc_src,
     H5O_loc_t *oloc_dst /*out */, hid_t dxpl_id, struct H5SL_t *map_list);
-H5_DLL herr_t H5O_debug_id(hid_t type_id, H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream, int indent, int fwidth);
+H5_DLL herr_t H5O_debug_id(unsigned type_id, H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream, int indent, int fwidth);
 H5_DLL herr_t H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
 			 int fwidth);
 

@@ -223,7 +223,6 @@ typedef struct H5D_dcpl_cache_t {
 H5_DLL herr_t H5D_init(void);
 H5_DLL H5D_t *H5D_open(const H5G_loc_t *loc, hid_t dxpl_id);
 H5_DLL herr_t H5D_close(H5D_t *dataset);
-H5_DLL htri_t H5D_isa(H5O_loc_t *loc, hid_t dxpl_id);
 H5_DLL H5O_loc_t *H5D_oloc(H5D_t *dataset);
 H5_DLL H5G_name_t *H5D_nameof(H5D_t *dataset);
 H5_DLL H5T_t *H5D_typeof(const H5D_t *dset);

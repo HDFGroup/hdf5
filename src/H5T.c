@@ -2965,40 +2965,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_isa
- *
- * Purpose:	Determines if an object has the requisite messages for being
- *		a datatype.
- *
- * Return:	Success:	TRUE if the required data type messages are
- *				present; FALSE otherwise.
- *
- *		Failure:	FAIL if the existence of certain messages
- *				cannot be determined.
- *
- * Programmer:	Robb Matzke
- *              Monday, November  2, 1998
- *
- *-------------------------------------------------------------------------
- */
-htri_t
-H5T_isa(H5O_loc_t *loc, hid_t dxpl_id)
-{
-    htri_t	ret_value;
-
-    FUNC_ENTER_NOAPI(H5T_isa, FAIL)
-
-    HDassert(loc);
-
-    if((ret_value = H5O_exists(loc, H5O_DTYPE_ID, 0, dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to read object header")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_isa() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5T_copy
  *
  * Purpose:	Copies datatype OLD_DT.	 The resulting data type is not

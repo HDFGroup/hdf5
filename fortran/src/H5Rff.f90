@@ -410,10 +410,10 @@
 ! Outputs:  
 !		obj_type	- object_type, possible values:
 !					  H5G_UNKNOWN_F     (-1)
-!					  H5G_LINK_F         0
-!					  H5G_GROUP_F        1
-!					  H5G_DATASET_F      2
-! 					  H5G_TYPE_F         3
+!					  H5G_GROUP_F        0
+!					  H5G_DATASET_F      1
+! 					  H5G_TYPE_F         2
+!					  H5G_LINK_F         3
 !
 !		hdferr:		- error code		
 !				 	Success:  0
@@ -445,10 +445,10 @@
             TYPE(hobj_ref_t_f), INTENT(IN) :: ref   ! Object reference 
             INTEGER, INTENT(OUT) :: obj_type   ! Object type  
                                                !  H5G_UNKNOWN_F     (-1)
-                                               !  H5G_LINK_F         0
-                                               !  H5G_GROUP_F        1
-                                               !  H5G_DATASET_F      2
-                                               !  H5G_TYPE_F         3
+                                               !  H5G_GROUP_F        0
+                                               !  H5G_DATASET_F      1
+                                               !  H5G_TYPE_F         2
+                                               !  H5G_LINK_F         3
 
             INTEGER, INTENT(OUT) :: hdferr          ! Error code 
             INTEGER(HADDR_T) :: ref_f          ! Local buffer to pass reference

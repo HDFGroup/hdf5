@@ -59,8 +59,8 @@
 	       2 +	/*sizeof message data	*/			      \
 	       4)	/*reserved		*/
 
-typedef struct H5O_class_t {
-    int	id;				 /*message type ID on disk   */
+struct H5O_msg_class_t {
+    unsigned	id;				 /*message type ID on disk   */
     const char	*name;				 /*for debugging             */
     size_t	native_size;			 /*size of native message    */
     void	*(*decode)(H5F_t*, hid_t, const uint8_t*);
@@ -73,13 +73,14 @@ typedef struct H5O_class_t {
     herr_t	(*link)(H5F_t *, hid_t, const void *); /* Increment any links in file reference by this message */
     herr_t	(*get_share)(H5F_t*, const void*, struct H5O_shared_t*);    /* Get shared information */
     herr_t	(*set_share)(H5F_t*, void*, const struct H5O_shared_t*);    /* Set shared information */
+    herr_t	(*pre_copy_file)(H5F_t *, void *, void *);                  /*"pre copy" action when copying native value to file */
     void	*(*copy_file)(H5F_t *, void *, H5F_t *, hid_t, H5SL_t *, void *); /*copy native value to file */
     herr_t	(*post_copy_file)(H5F_t *, const void *, H5O_loc_t *, void *, hbool_t *, hid_t, H5SL_t *); /*"post copy" action when copying native value to file */
     herr_t	(*debug)(H5F_t*, hid_t, const void*, FILE*, int, int);
-} H5O_class_t;
+};
 
 typedef struct H5O_mesg_t {
-    const H5O_class_t	*type;		/*type of message		     */
+    const H5O_msg_class_t	*type;	/*type of message		     */
     hbool_t		dirty;		/*raw out of date wrt native	     */
     uint8_t		flags;		/*message flags			     */
     unsigned		chunkno;	/*chunk number for this mesg	     */
@@ -95,24 +96,41 @@ typedef struct H5O_chunk_t {
     uint8_t	*image;			/*image of file			     */
 } H5O_chunk_t;
 
-typedef struct H5O_t {
+struct H5O_t {
     H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
                             /* first field in structure */
-    int		version;		/*version number		     */
+    unsigned	version;		/*version number		     */
     int		nlink;			/*link count			     */
-    unsigned	nmesgs;			/*number of messages		     */
-    unsigned	alloc_nmesgs;		/*number of message slots	     */
+    size_t	nmesgs;			/*number of messages		     */
+    size_t	alloc_nmesgs;		/*number of message slots	     */
     H5O_mesg_t	*mesg;			/*array of messages		     */
-    unsigned	nchunks;		/*number of chunks		     */
-    unsigned	alloc_nchunks;		/*chunks allocated		     */
+    size_t	nchunks;		/*number of chunks		     */
+    size_t	alloc_nchunks;		/*chunks allocated		     */
     H5O_chunk_t *chunk;			/*array of chunks		     */
-} H5O_t;
+};
+
+/* Callback information for copying dataset */
+typedef struct {
+    H5T_t *src_dtype;                   /* Copy of datatype for dataset */
+} H5D_copy_file_ud_t;
+
+/* Class for types of objects in file */
+typedef struct H5O_obj_class_t {
+    H5G_obj_t	type;				/*object type on disk	     */
+    const char	*name;				/*for debugging		     */
+    void       *(*get_copy_file_udata)(void);	/*retrieve user data for 'copy file' operation */
+    void	(*free_copy_file_udata)(void *); /*free user data for 'copy file' operation */
+    htri_t	(*isa)(H5O_t *);		/*if a header matches an object class */
+} H5O_obj_class_t;
 
 /* H5O inherits cache-like properties from H5AC */
 H5_DLLVAR const H5AC_class_t H5AC_OHDR[1];
 
-/* ID to type mapping */
-H5_DLLVAR const H5O_class_t *const message_type_g[19];
+/* Header message ID to class mapping */
+H5_DLLVAR const H5O_msg_class_t *const H5O_msg_class_g[19];
+
+/* Header object ID to class mapping */
+H5_DLLVAR const H5O_obj_class_t *const H5O_obj_class_g[3];
 
 /* Declare external the free list for H5O_t's */
 H5FL_EXTERN(H5O_t);
@@ -127,126 +145,114 @@ H5FL_SEQ_EXTERN(H5O_chunk_t);
 H5FL_BLK_EXTERN(chunk_image);
 
 /*
- * Null Message. (0x0000)
+ * Object header messages
  */
-H5_DLLVAR const H5O_class_t H5O_NULL[1];
 
-/*
- * Simple Dataspace Message. (0x0001)
- */
-H5_DLLVAR const H5O_class_t H5O_SDSPACE[1];
+/* Null Message. (0x0000) */
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_NULL[1];
 
-/*
- * Link Information Message. (0x0002)
- */
-H5_DLLVAR const H5O_class_t H5O_LINFO[1];
+/* Simple Dataspace Message. (0x0001) */
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_SDSPACE[1];
 
-/*
- * Datatype Message. (0x0003)
- */
-H5_DLLVAR const H5O_class_t H5O_DTYPE[1];
+/* Link Information Message. (0x0002) */
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_LINFO[1];
 
-/*
- * Old Fill Value Message. (0x0004)
- */
-H5_DLLVAR const H5O_class_t H5O_FILL[1];
+/* Datatype Message. (0x0003) */
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_DTYPE[1];
 
-/*
- * New Fill Value Message. (0x0005)
- * 
+/* Old Fill Value Message. (0x0004) */
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_FILL[1];
+
+/* New Fill Value Message. (0x0005) */
+/* 
  * The new fill value message is fill value plus
  * space allocation time and fill value writing time and whether fill
  * value is defined.
  */
-H5_DLLVAR const H5O_class_t H5O_FILL_NEW[1];
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_FILL_NEW[1];
 
-/*
- * Link Message. (0x0006)
- * 
- */
-H5_DLLVAR const H5O_class_t H5O_LINK[1];
+/* Link Message. (0x0006) */
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_LINK[1];
 
-/*
- * External File List Message. (0x0007)
- */
-H5_DLLVAR const H5O_class_t H5O_EFL[1];
+/* External File List Message. (0x0007) */
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_EFL[1];
 
-/*
- * Data Layout Message. (0x0008)
- */
-H5_DLLVAR const H5O_class_t H5O_LAYOUT[1];
+/* Data Layout Message. (0x0008) */
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_LAYOUT[1];
 
 #ifdef H5O_ENABLE_BOGUS
+/* "Bogus" Message. (0x0009) */
 /*
- * "Bogus" Message. (0x0009)
+ * Used for debugging - should never be found in valid HDF5 file.
  */
-H5_DLLVAR const H5O_class_t H5O_BOGUS[1];
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_BOGUS[1];
 #endif /* H5O_ENABLE_BOGUS */
 
-/*
- * Group Information Message. (0x000a)
- */
-H5_DLLVAR const H5O_class_t H5O_GINFO[1];
+/* Group Information Message. (0x000a) */
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_GINFO[1];
 
-/*
- * Filter pipeline message. (0x000b)
- */
-H5_DLLVAR const H5O_class_t H5O_PLINE[1];
+/* Filter pipeline message. (0x000b) */
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_PLINE[1];
 
-/*
- * Attribute Message. (0x000c)
- */
-H5_DLLVAR const H5O_class_t H5O_ATTR[1];
+/* Attribute Message. (0x000c) */
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_ATTR[1];
 
-/*
- * Object name message. (0x000d)
- */
-H5_DLLVAR const H5O_class_t H5O_NAME[1];
+/* Object name message. (0x000d) */
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_NAME[1];
 
+/* Modification Time Message. (0x000e) */
 /*
- * Modification Time Message. (0x000e)
- *
  * The message is just a `time_t'.
  * (See also the "new" modification time message)
  */
-H5_DLLVAR const H5O_class_t H5O_MTIME[1];
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_MTIME[1];
 
-/*
- * Shared Object Message. (0x000f)
- * 
+/* Shared Object Message. (0x000f) */
+/* 
  * This message ID never really appears in an object
  * header.  Instead, bit 2 of the `Flags' field will be set and the ID field
  * will be the ID of the pointed-to message.
  */
-H5_DLLVAR const H5O_class_t H5O_SHARED[1];
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_SHARED[1];
 
-/*
- * Object Header Continuation Message. (0x0010)
- */
-H5_DLLVAR const H5O_class_t H5O_CONT[1];
+/* Object Header Continuation Message. (0x0010) */
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_CONT[1];
 
-/*
- * Symbol Table Message. (0x0011)
- */
-H5_DLLVAR const H5O_class_t H5O_STAB[1];
+/* Symbol Table Message. (0x0011) */
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_STAB[1];
 
-/*
- * New Modification Time Message. (0x0012)
- * 
+/* New Modification Time Message. (0x0012) */
+/* 
  * The message is just a `time_t'.
  */
-H5_DLLVAR const H5O_class_t H5O_MTIME_NEW[1];
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_MTIME_NEW[1];
+
+
+/*
+ * Object header "object" types
+ */
+
+/* Group Object. (H5G_GROUP - 0) */
+H5_DLLVAR const H5O_obj_class_t H5O_OBJ_GROUP[1];
+
+/* Dataset Object. (H5G_DATASET - 1) */
+H5_DLLVAR const H5O_obj_class_t H5O_OBJ_DATASET[1];
+
+/* Datatype Object. (H5G_TYPE - 2) */
+H5_DLLVAR const H5O_obj_class_t H5O_OBJ_DATATYPE[1];
+
 
 /* Package-local function prototypes */
-H5_DLL void * H5O_read_real(const H5O_loc_t *loc, const H5O_class_t *type,
+H5_DLL herr_t H5O_flush_msgs(H5F_t *f, H5O_t *oh);
+H5_DLL void * H5O_read_real(const H5O_loc_t *loc, const H5O_msg_class_t *type,
     int sequence, void *mesg, hid_t dxpl_id);
 H5_DLL herr_t H5O_free_mesg(H5O_mesg_t *mesg);
-H5_DLL void * H5O_free_real(const H5O_class_t *type, void *mesg);
+H5_DLL void * H5O_free_real(const H5O_msg_class_t *type, void *mesg);
 H5_DLL herr_t H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int fwidth);
 
 /* Shared object operators */
 H5_DLL void * H5O_shared_read(H5F_t *f, hid_t dxpl_id, H5O_shared_t *shared,
-    const H5O_class_t *type, void *mesg);
+    const H5O_msg_class_t *type, void *mesg);
 
 /* Useful metadata cache callbacks */
 H5_DLL herr_t H5O_dest(H5F_t *f, H5O_t *oh);

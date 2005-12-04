@@ -42,14 +42,16 @@ libhdf5_la_SOURCES= H5.c H5A.c H5AC.c H5B.c H5Bcache.c H5B2.c H5B2cache.c \
         H5B2test.c H5BP.c H5BPcache.c H5BPdbg.c H5BPtest.c \
         H5BT.c H5BTbtree2.c H5BTcache.c H5BTdbg.c H5BTtest.c H5C.c \
         H5D.c \
-        H5Dcontig.c \
         H5Dcompact.c \
-        H5Defl.c H5Dio.c H5Distore.c H5Dmpio.c H5Dselect.c H5Dtest.c H5E.c H5F.c \
+        H5Dcontig.c \
+        H5Defl.c H5Dio.c H5Distore.c H5Dmpio.c H5Doh.c H5Dselect.c H5Dtest.c \
+        H5E.c H5F.c \
         H5Fdbg.c H5Fmount.c H5Fsfile.c H5Fsuper.c H5FD.c H5FDcore.c  \
         H5FDfamily.c H5FDfphdf5.c H5FDlog.c H5FDmpi.c H5FDmpio.c   \
         H5FDmpiposix.c H5FDmulti.c H5FDsec2.c H5FDstdio.c           \
         H5FDstream.c H5FL.c H5FO.c H5FP.c H5FPclient.c H5FPserver.c H5FS.c    \
         H5G.c H5Gent.c H5Glink.c H5Gloc.c H5Gname.c H5Gnode.c H5Gobj.c \
+        H5Goh.c  \
         H5Gstab.c  \
         H5Gtest.c  \
         H5Gtraverse.c  \
@@ -69,7 +71,8 @@ libhdf5_la_SOURCES= H5.c H5A.c H5AC.c H5B.c H5Bcache.c H5B2.c H5B2cache.c \
         H5Sselect.c H5Stest.c H5SH.c H5SHcache.c H5SHdbg.c \
         H5SL.c H5ST.c H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c \
         H5Tcompound.c H5Tconv.c H5Tcset.c H5Tenum.c H5Tfields.c H5Tfixed.c    \
-        H5Tfloat.c H5Tinit.c H5Tnative.c H5Toffset.c H5Topaque.c H5Torder.c   \
+        H5Tfloat.c H5Tinit.c H5Tnative.c H5Toffset.c H5Toh.c H5Topaque.c \
+        H5Torder.c \
         H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvlen.c H5TS.c H5V.c H5Z.c  \
         H5Zdeflate.c H5Zfletcher32.c H5Znbit.c H5Zshuffle.c H5Zszip.c  \
         H5Zscaleoffset.c H5Ztrans.c

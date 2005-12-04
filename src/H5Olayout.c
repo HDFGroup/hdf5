@@ -44,8 +44,8 @@ static void *H5O_layout_copy_file(H5F_t *file_src, void *mesg_src,
 static herr_t H5O_layout_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			       int indent, int fwidth);
 
-/* This message derives from H5O */
-const H5O_class_t H5O_LAYOUT[1] = {{
+/* This message derives from H5O message class */
+const H5O_msg_class_t H5O_MSG_LAYOUT[1] = {{
     H5O_LAYOUT_ID,          	/*message id number             */
     "layout",               	/*message name for debugging    */
     sizeof(H5O_layout_t),   	/*native message size           */
@@ -59,6 +59,7 @@ const H5O_class_t H5O_LAYOUT[1] = {{
     NULL,			/* link method			*/
     NULL,		    	/*get share method		*/
     NULL,			/*set share method		*/
+    NULL,			/* pre copy native value to file */
     H5O_layout_copy_file,       /* copy native value to file    */
     NULL,		        /* post copy native value to file    */
     H5O_layout_debug       	/*debug the message             */
@@ -436,7 +437,7 @@ H5O_layout_meta_size(const H5F_t *f, const void *_mesg)
             break;
 
         default:
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, 0, "Invalid layout class");
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, 0, "Invalid layout class")
     } /* end switch */
 
 done:
@@ -606,7 +607,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5O_layout_copy_file
  *
- * Purpose:     Copies a data layout message from _MESG to _DEST in file
+ * Purpose:     Copies a message from _MESG to _DEST in file
  *
  * Return:      Success:        Ptr to _DEST
  *
@@ -621,8 +622,9 @@ done:
  */
 static void *
 H5O_layout_copy_file(H5F_t *file_src, void *mesg_src,
-         H5F_t *file_dst, hid_t dxpl_id, H5SL_t UNUSED *map_list, void UNUSED *_udata)
+         H5F_t *file_dst, hid_t dxpl_id, H5SL_t UNUSED *map_list, void *_udata)
 {
+    H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */
     H5O_layout_t     *layout_src = (H5O_layout_t *) mesg_src;
     H5O_layout_t           *layout_dst = NULL;
     void                   *ret_value;          /* Return value */
@@ -646,6 +648,7 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src,
 	    if(layout_src->u.compact.buf) {
             	if(NULL == (layout_dst->u.compact.buf = H5MM_malloc(layout_src->u.compact.size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset")
+HDassert(!udata->src_dtype);
             	HDmemcpy(layout_dst->u.compact.buf, layout_src->u.compact.buf, layout_src->u.compact.size);
             	layout_dst->u.compact.dirty = TRUE;
 	    }
@@ -653,38 +656,18 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src,
 
         case H5D_CONTIGUOUS:
             if(H5F_addr_defined(layout_src->u.contig.addr)) {
-		haddr_t                 addr_src, addr_dst;
-		unsigned                DRAW_BUF_SIZE = 4096;
-		uint8_t                 buf[4096];
-		size_t		    nbytes=0, total_nbytes=0;
+                /* create contig layout */
+                if(H5D_contig_copy(file_src, layout_src, file_dst, layout_dst, udata->src_dtype, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to copy contiguous storage")
 
-                /* create layout */
-                if(H5D_contig_create (file_dst, dxpl_id, layout_dst)<0)
-                    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to initialize contiguous storage")
-
-                /* copy raw data*/
-                nbytes = total_nbytes = 0;
-                while(total_nbytes < layout_src->u.contig.size) {
-                    addr_src = layout_src->u.contig.addr + total_nbytes;
-                    addr_dst = layout_dst->u.contig.addr + total_nbytes;
-
-                    nbytes = layout_src->u.contig.size-total_nbytes;
-                    if(nbytes > DRAW_BUF_SIZE)
-			nbytes = DRAW_BUF_SIZE;
-                    total_nbytes += nbytes; 
-
-                    if(H5F_block_read(file_src, H5FD_MEM_DRAW, addr_src, nbytes, H5P_DATASET_XFER_DEFAULT, buf)<0)
-                        HGOTO_ERROR(H5E_SYM, H5E_READERROR, NULL, "unable to read raw data")
-
-                    if(H5F_block_write(file_dst, H5FD_MEM_DRAW, addr_dst, nbytes, H5P_DATASET_XFER_DEFAULT, buf)<0)
-                        HGOTO_ERROR(H5E_SYM, H5E_READERROR, NULL, "unable to write raw data")
-                }
+                /* Freed by copy routine */
+                udata->src_dtype = NULL;
             } /*  if ( H5F_addr_defined(layout_src->u.contig.addr)) */
             break;
 
         case H5D_CHUNKED:
             if(H5F_addr_defined(layout_src->u.chunk.addr)) {
-
+HDassert(!udata->src_dtype);
                 /* layout is not created in the destination file, undef btree address */
                 layout_dst->u.chunk.addr = HADDR_UNDEF;
 
@@ -707,7 +690,7 @@ done:
 	    H5FL_FREE(H5O_layout_t, layout_dst);
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5O_layout_copy_file() */
 
 
 /*-------------------------------------------------------------------------

@@ -38,6 +38,7 @@
 #include "H5Fprivate.h"		/* Files				*/
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
+#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MFprivate.h"	/* File memory management		*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Pprivate.h"		/* Property lists			*/
@@ -74,6 +75,9 @@ H5FL_BLK_DEFINE_STATIC(non_zero_fill);
 
 /* Declare the free list to manage blocks of zero fill-value data */
 H5FL_BLK_DEFINE_STATIC(zero_fill);
+
+/* Declare extern the free list to manage blocks of type conversion data */
+H5FL_BLK_EXTERN(type_conv);
 
 
 /*-------------------------------------------------------------------------
@@ -130,7 +134,7 @@ H5D_contig_fill(H5D_t *dset, hid_t dxpl_id)
     size_t      npoints;        /* Number of points in space */
     size_t      ptsperbuf;      /* Maximum # of points which fit in the buffer */
     size_t      elmt_size;      /* Size of each element */
-    size_t	bufsize=64*1024; /* Size of buffer to write */
+    size_t	bufsize=H5D_XFER_MAX_TEMP_BUF_DEF; /* Size of buffer to write */
     size_t	size;           /* Current # of points to write */
     hsize_t	offset;         /* Offset of dataset */
     void       *buf = NULL;     /* Buffer for fill value writing */
@@ -975,4 +979,211 @@ if(dset_contig->sieve_size > size)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5D_contig_writevv() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_contig_copy
+ *
+ * Purpose:	Copy contiguous storage raw data from SRC file to DST file.
+ *
+ * Return:	Non-negative on success, negative on failure.
+ *
+ * Programmer:  Quincey Koziol
+ *	        Monday, November 21, 2005	
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_contig_copy(H5F_t *f_src, H5O_layout_t *layout_src, 
+    H5F_t *f_dst,  H5O_layout_t *layout_dst, H5T_t *dt_src, hid_t dxpl_id)
+{
+    haddr_t     addr_src;               /* File offset in source dataset */
+    haddr_t     addr_dst;               /* File offset in destination dataset */
+    H5T_path_t  *tpath_src_mem = NULL, *tpath_mem_dst = NULL;   /* Datatype conversion paths */
+    H5T_t       *dt_dst = NULL;         /* Destination datatype */
+    H5T_t       *dt_mem = NULL;         /* Memory datatype */
+    hid_t       tid_src = -1;           /* Datatype ID for source datatype */
+    hid_t       tid_dst = -1;           /* Datatype ID for destination datatype */
+    hid_t       tid_mem = -1;           /* Datatype ID for memory datatype */
+    size_t      max_dt_size;            /* Max. datatype size */
+    size_t      nelmts = 0;             /* Number of elements in buffer */
+    hsize_t     total_nbytes;           /* Total number of bytes to copy */
+    size_t      buf_size;               /* Size of copy buffer */
+    void       *buf = NULL;             /* Buffer for copying data */
+    void       *reclaim_buf = NULL;     /* Buffer for reclaiming data */
+    H5S_t      *buf_space = NULL;       /* Dataspace describing buffer */
+    hid_t       buf_sid = -1;           /* ID for buffer dataspace */
+    hsize_t     buf_dim;                /* Dimension for buffer */
+    hbool_t     do_conv;                /* Flag to indicate that type conversion should occur */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5D_contig_copy, FAIL)
+
+    /* Check args */
+    HDassert(f_src);
+    HDassert(f_dst);
+    HDassert(layout_src && H5D_CONTIGUOUS == layout_src->type);
+    HDassert(layout_dst && H5D_CONTIGUOUS == layout_dst->type);
+
+    /* Allocate space for destination raw data */
+    if(H5D_contig_create(f_dst, dxpl_id, layout_dst) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to allocate contiguous storage")
+
+    /* Set up number of bytes to copy, and initial buffer size */
+    total_nbytes = layout_src->u.contig.size;
+    buf_size = MIN(H5D_XFER_MAX_TEMP_BUF_DEF, total_nbytes);
+
+    /* If there's a source datatype, set up type conversion information */
+    if(dt_src) {
+        size_t tmp_dt_size;         /* Temp. atatype size */
+
+        /* Create datatype ID for src datatype */
+        if((tid_src = H5I_register(H5I_DATATYPE, dt_src)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")
+
+        /* create a memory copy of the variable-length datatype */
+        if(NULL == (dt_mem = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
+        if((tid_mem = H5I_register(H5I_DATATYPE, dt_mem)) < 0)
+            HGOTO_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register memory datatype")
+
+        /* create variable-length datatype at the destinaton file */
+        if(NULL == (dt_dst = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
+        if(H5T_set_loc(dt_dst, f_dst, H5T_LOC_DISK) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype on disk")
+        if((tid_dst = H5I_register(H5I_DATATYPE, dt_dst)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register destination file datatype")
+
+        /* Set up the conversion functions */
+        if(NULL == (tpath_src_mem = H5T_path_find(dt_src, dt_mem, NULL, NULL, dxpl_id, FALSE)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between src and mem datatypes")
+        if(NULL == (tpath_mem_dst = H5T_path_find(dt_mem, dt_dst, NULL, NULL, dxpl_id, FALSE)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between mem and dst datatypes")
+
+        /* Determine largest datatype size */
+        if(0 == (max_dt_size = H5T_get_size(dt_src)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
+        if(0 == (tmp_dt_size = H5T_get_size(dt_mem)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
+        max_dt_size = MAX(max_dt_size, tmp_dt_size);
+        if(0 == (tmp_dt_size = H5T_get_size(dt_dst)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
+        max_dt_size = MAX(max_dt_size, tmp_dt_size);
+
+        /* Set number of whole elements that fit in buffer */
+        if(0 == (nelmts = buf_size / max_dt_size))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "element size too large")
+
+        /* Adjust buffer size to be multiple of elements */
+        buf_size = nelmts * max_dt_size;
+
+        /* Create dataspace for number of elements in buffer */
+        buf_dim = nelmts;
+
+        /* Create the space and set the initial extent */
+        if(NULL == (buf_space = H5S_create_simple((unsigned)1, &buf_dim, NULL)))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
+
+        /* Atomize */
+        if((buf_sid = H5I_register(H5I_DATASPACE, buf_space)) < 0) {
+            H5S_close(buf_space);
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
+        } /* end if */
+
+        /* Set flag to do type conversion */
+        do_conv = TRUE;
+    } /* end if */
+    else
+        /* Type conversion not necessary */
+        do_conv = FALSE;
+
+    /* Allocate space for copy buffer */
+    HDassert(buf_size);
+    if(NULL == (buf = H5FL_BLK_MALLOC(type_conv, buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for copy buffer")
+
+    /* Need extra buffer for datatype conversions, to prevent stranding/leaking memory */
+    if(do_conv) {
+        if(NULL == (reclaim_buf = H5FL_BLK_MALLOC(type_conv, buf_size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for copy buffer")
+    } /* end if */
+
+    /* Loop over copying data */
+    addr_src = layout_src->u.contig.addr;
+    addr_dst = layout_dst->u.contig.addr;
+    while(total_nbytes > 0) {
+        size_t     nbytes;              /* Number of bytes to copy each time */
+
+        /* Compute number of bytes to copy for this pass */
+        if(total_nbytes >= buf_size)
+            nbytes = buf_size;
+        else {
+            nbytes = (size_t)total_nbytes;
+
+            /* Adjust dataspace describing buffer */
+            if(do_conv) {
+                /* Adjust size of buffer's dataspace dimension */
+                buf_dim = nelmts = nbytes / max_dt_size;
+
+                /* Adjust size of buffer's dataspace */
+                if(H5S_set_extent_real(buf_space, &buf_dim) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "unable to change buffer dataspace size")
+            } /* end if */
+        } /* end else */
+
+        /* Read raw data from source file */
+        if(H5F_block_read(f_src, H5FD_MEM_DRAW, addr_src, nbytes, H5P_DATASET_XFER_DEFAULT, buf) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read raw data")
+
+        /* Perform datatype conversion, if necessary */
+        if(do_conv) {
+            /* Convert from source file to memory */
+	    if(H5T_convert(tpath_src_mem, tid_src, tid_mem, nelmts, (size_t)0, (size_t)0, buf, NULL, dxpl_id) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed")
+
+            /* Copy into another buffer, to reclaim memory later */
+            HDmemcpy(reclaim_buf, buf, nbytes);
+
+            /* Convert from memory to destination file */
+	    if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, NULL, dxpl_id) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed")
+	} /* end if */
+
+        /* Write raw data to destination file */
+        if(H5F_block_write(f_dst, H5FD_MEM_DRAW, addr_dst, nbytes, H5P_DATASET_XFER_DEFAULT, buf) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write raw data")
+
+        /* Reclaim any space from variable length data */
+        if(do_conv) {
+            if(H5D_vlen_reclaim(tid_mem, buf_space, H5P_DATASET_XFER_DEFAULT, reclaim_buf) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to reclaim variable-length data")
+        } /* end if */
+
+        /* Adjust loop variables */
+        addr_src += nbytes;
+        addr_dst += nbytes;
+        total_nbytes -= nbytes;
+    } /* end while */
+
+done:
+    if(buf_sid > 0)
+        if(H5I_dec_ref(buf_sid) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary dataspace ID")
+    if(tid_src > 0)
+        if(H5I_dec_ref(tid_src) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
+    if(tid_dst > 0)
+        if(H5I_dec_ref(tid_dst) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
+    if(tid_mem > 0)
+        if(H5I_dec_ref(tid_mem) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
+    if(buf)
+        H5FL_BLK_FREE(type_conv, buf);
+    if(reclaim_buf)
+        H5FL_BLK_FREE(type_conv, reclaim_buf);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_contig_copy() */
 
