@@ -72,6 +72,8 @@ class H5_DLLCPP CommonFG {
 	// at this location.
 	void getObjinfo(const char* name, hbool_t follow_link, H5G_stat_t& statbuf) const;
 	void getObjinfo(const string& name, hbool_t follow_link, H5G_stat_t& statbuf) const;
+	void getObjinfo(const char* name, H5G_stat_t& statbuf) const;
+	void getObjinfo(const string& name, H5G_stat_t& statbuf) const;
 
 	// Retrieves the name of an object in this group, given the
 	// object's index.

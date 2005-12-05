@@ -267,7 +267,7 @@ void AtomType::getPad( H5T_pad_t& lsb, H5T_pad_t& msb ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	AtomType::getPad
+// Function:	AtomType::setPad
 ///\brief	Sets the least and most-significant bits padding types.
 ///\param	lsb - IN: Least-significant bit padding type
 ///\param	msb - IN: Most-significant bit padding type

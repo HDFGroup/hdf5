@@ -351,6 +351,34 @@ void CommonFG::getObjinfo( const string& name, hbool_t follow_link, H5G_stat_t& 
 }
 
 //--------------------------------------------------------------------------
+// Function:	CommonFG::getObjinfo
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above functions in that it doesn't have
+///		the paramemter \a follow_link.
+// Programmer	Binh-Minh Ribler - Nov, 2005
+//--------------------------------------------------------------------------
+void CommonFG::getObjinfo( const char* name, H5G_stat_t& statbuf ) const
+{
+   herr_t ret_value = H5Gget_objinfo( getLocId(), name, 0, &statbuf );
+   if( ret_value < 0 )
+   {
+      throwException("getObjinfo", "H5Gget_objinfo failed");
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:	CommonFG::getObjinfo
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above function in that it takes an
+///		\c std::string for \a name.
+// Programmer	Binh-Minh Ribler - Nov, 2005
+//--------------------------------------------------------------------------
+void CommonFG::getObjinfo( const string& name, H5G_stat_t& statbuf ) const
+{
+   getObjinfo( name.c_str(), statbuf );
+}
+
+//--------------------------------------------------------------------------
 // Function:	CommonFG::getLinkval
 ///\brief	Returns the name of the object that the symbolic link points to.
 ///\param	name  - IN: Symbolic link to the object

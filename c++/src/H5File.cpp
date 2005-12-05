@@ -116,7 +116,7 @@ void H5File::p_get_file(const char* name, unsigned int flags, const FileCreatPro
 {
     // These bits only set for creation, so if any of them are set,
     // create the file.
-    if( flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC|H5F_ACC_DEBUG ))
+    if( flags & (H5F_ACC_CREAT|H5F_ACC_EXCL|H5F_ACC_TRUNC|H5F_ACC_DEBUG))
     {
 	hid_t create_plist_id = create_plist.getId();
 	hid_t access_plist_id = access_plist.getId();
@@ -180,6 +180,49 @@ bool H5File::isHdf5(const char* name )
 bool H5File::isHdf5(const string& name )
 {
    return( isHdf5( name.c_str()) );
+}
+
+//--------------------------------------------------------------------------
+// Function:	openFile
+///\brief	Opens an HDF5 file
+///\param	name         - IN: Name of the file
+///\param	flags        - IN: File access flags
+///\param	access_plist - IN: File access property list.  Default to
+///		FileCreatPropList::DEFAULT
+///\par Description
+///		Valid values of \a flags include:
+///		H5F_ACC_RDWR:   Open with read/write access. If the file is
+///				currently open for read-only access then it
+///				will be reopened. Absence of this flag
+///				implies read-only access.
+///
+///		H5F_ACC_RDONLY: Open with read only access. - default
+///
+// Programmer	Binh-Minh Ribler - Oct, 2005
+//--------------------------------------------------------------------------
+void H5File::openFile(const char* name, unsigned int flags, const FileAccPropList& access_plist)
+{
+    hid_t access_plist_id = access_plist.getId();
+    id = H5Fopen (name, flags, access_plist_id);
+    if (id < 0)  // throw an exception when open fails
+    {
+	throw FileIException("H5File::openFile", "H5Fopen failed");
+    }
+}
+
+//--------------------------------------------------------------------------
+// Function:	H5File::openFile
+///\brief	This is an overloaded member function, provided for convenience.
+///		It takes an \c std::string for \a name.
+///\param	name         - IN: Name of the file - \c std::string
+///\param	flags        - IN: File access flags
+///\param	access_plist - IN: File access property list.  Default to
+///		FileAccPropList::DEFAULT
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void H5File::openFile(const string& name, unsigned int flags, const FileAccPropList& access_plist)
+{
+    openFile(name.c_str(), flags, access_plist);
 }
 
 //--------------------------------------------------------------------------

@@ -62,20 +62,21 @@ StrType::StrType( const PredType& pred_type ) : AtomType()
 //--------------------------------------------------------------------------
 // Function:	StrType overloaded constructor
 ///\brief	Creates a string datatype with a specified length
-///\param	existing_id - IN: Id of an existing datatype
+///\param	pred_type - IN: String predefined type to replicate.
+///\param	size	  - IN: Length of the new string type
 ///\exception	H5::DataTypeIException
 // Description
 // 		The 1st argument could have been skipped, but this
 // 		constructor will collide with the one that takes an
 // 		existing id.
 //
-// 		Update: by passing 'size' by reference will avoid the
-// 		clashing problem, so the 1st argument can actually be
-// 		omitted.  This constructor should be replaced by the
-// 		other after announcing. - May, 2004
+//		Update: replacing the 1st argument with a dummy 0 to
+//		avoid the clashing problem, that doesn't eliminate the
+//		the 1st argument but it's simpler for the user to type
+//		a '0' than PredType::C_S1.  - Dec 2, 2005
 ///\note
-///		This constructor will be obsolete in later releases,
-///		please use StrType( const size_t& size ) instead.
+///		The use of this constructor can be shortened by using
+///		its overloaded below as StrType(0, size).
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 StrType::StrType( const PredType& pred_type, const size_t size ) : AtomType()
@@ -85,7 +86,24 @@ StrType::StrType( const PredType& pred_type, const size_t size ) : AtomType()
    copy(pred_type);
    setSize(size);
 }
-StrType::StrType( const size_t& size ) : AtomType()
+
+//--------------------------------------------------------------------------
+// Function:	StrType overloaded constructor
+///\brief	Creates a string datatype with a specified length
+///\param	dummy - IN: To simplify calling the previous constructor
+//			and avoid prototype clash with another constructor
+///\param	size  - IN: Length of the new string type
+///\exception	H5::DataTypeIException
+///\par Description
+///		The 1st argument is just a dummy to simplify calling the
+///		previous constructor, such as:
+///		StrType atype(0, size) instead of
+///		StrType atype(PredType::C_S1, size)
+///\note
+///		This constructor may replace the previous one in the future.
+// Programmer	Binh-Minh Ribler - Nov 28, 2005
+//--------------------------------------------------------------------------
+StrType::StrType( const int dummy, const size_t& size ) : AtomType()
 {
    // use DataType::copy to make a copy of the string predefined type
    // then set its length
@@ -110,7 +128,7 @@ StrType::StrType( const hid_t existing_id ) : AtomType( existing_id ) {}
 StrType::StrType( const StrType& original ) : AtomType ( original ) {}
 
 //--------------------------------------------------------------------------
-// Function:	EnumType overloaded constructor
+// Function:	StrType overloaded constructor
 ///\brief	Gets the string datatype of the specified dataset
 ///\param	dataset - IN: Dataset that this string datatype associates with
 ///\exception	H5::DataTypeIException
