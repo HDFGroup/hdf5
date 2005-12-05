@@ -24,6 +24,7 @@
 #else
 #include <iostream>
 #endif
+
 #include <string>
 
 #ifndef H5_NO_NAMESPACE
@@ -42,7 +43,7 @@ using namespace H5;
 #include "h5cpputil.h"	// C++ utilility header file
 
 const string	FILENAME("tattr.h5");
-const size_t ATTR_MAX_DIMS = 7;
+const size_t	ATTR_MAX_DIMS = 7;
 const string	ATTR_TMP_NAME("temp_name");
 
 /* 3-D dataset with fixed dimensions */
@@ -58,6 +59,9 @@ const string DSET2_NAME("Dataset2");
 
 /* Group Information */
 const string GROUP1_NAME("/Group1");
+
+/* Named Datatype Information */
+const string TYPE1_NAME("/Type");
 
 /* Attribute Rank & Dimensions */
 const string ATTR1_NAME("Attr1");
@@ -101,7 +105,7 @@ const int ATTR5_RANK = 0;
 float attr_data5 = (float)-5.123;    	// Test data for 5th attribute
 
 /* Info for another attribute */
-#define ATTR1A_NAME  "Attr1_a"
+const string ATTR1A_NAME("Attr1_a");
 int attr_data1a[ATTR1_DIM1]={256,11945,-22107};
 
 /****************************************************************
@@ -286,8 +290,8 @@ test_attr_rename(void)
 
 	// Change first attribute back to the original name
 	dataset.renameAttr(ATTR_TMP_NAME, ATTR1_NAME);
-
     } // end try block
+
     catch (Exception E) {
 	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
@@ -355,6 +359,7 @@ test_attr_basic_read(void)
 		    TestErrPrintf("%d: attribute data different: attr_data2[%d][%d]=%d, read_data2[%d][%d]=%d\n",__LINE__, i,j,attr_data2[i][j],i,j,read_data1[i]);
 		}
     } // end try block
+
     catch (Exception E) {
 	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
@@ -413,6 +418,7 @@ test_attr_compound_write(void)
 	attr.write(comp_type, attr_data4);
 
     } // end try block
+
     catch (Exception E) {
 	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
@@ -547,6 +553,7 @@ test_attr_compound_read(void)
 	string attr_name = attr.getName();
 	verify_val(attr_name, ATTR4_NAME, "Attribute::getName", __LINE__, __FILE__);
     } // end try block
+
     catch (Exception E) {
 	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
@@ -568,7 +575,7 @@ test_attr_scalar_write(void)
 	H5File fid1(FILENAME, H5F_ACC_TRUNC);
 
 	// Create dataspace for dataset
-	hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+	hsize_t	dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
 	DataSpace sid1(SPACE1_RANK, dims1);
 
 	// Create a dataset
@@ -841,8 +848,8 @@ test_attr_mult_read(void)
 	//attr.read(i_type, read_data2);
 
 	// Verify values read in
-    for(i=0; i<ATTR2_DIM1; i++)
-        for(j=0; j<ATTR2_DIM2; j++)
+	for(i=0; i<ATTR2_DIM1; i++)
+	  for(j=0; j<ATTR2_DIM2; j++)
             if(attr_data2[i][j]!=read_data2[i][j])
                 TestErrPrintf("%d: attribute data different: attr_data2[%d][%d]=%d, read_data2[%d][%d]=%d\n",__LINE__,i,j,attr_data2[i][j],i,j,read_data2[i][j]);
 
@@ -1005,6 +1012,138 @@ test_attr_delete(void)
 
 /****************************************************************
 **
+**  test_attr_dtype_shared(): Test code for using shared datatypes 
+**				in attributes.
+**
+****************************************************************/
+static void
+test_attr_dtype_shared(void)
+{
+    int data=8;                 /* Data to write */
+    int rdata=0;                /* Read read in */
+    H5G_stat_t statbuf;         /* Object's information */
+    off_t empty_filesize;       /* Size of empty file */
+    off_t filesize;             /* Size of file after modifications */
+
+    // Output message about test being performed */
+    MESSAGE(5, ("Testing Shared Datatypes with Attributes\n"));
+
+    try {
+	// Create a file */
+	H5File fid1(FILENAME, H5F_ACC_TRUNC);
+
+	// Close file */
+	fid1.close();
+
+	// Get size of file */
+	off_t empty_filesize;       // Size of empty file */
+	empty_filesize = h5_get_file_size(FILENAME.c_str());
+	if (empty_filesize == 0)
+    	TestErrPrintf("Line %d: file size wrong!\n",__LINE__);
+
+	// Open the file again */
+	fid1.openFile(FILENAME, H5F_ACC_RDWR);
+
+	// Create a datatype to commit and use */
+	IntType dtype(PredType::NATIVE_INT);
+
+	// Commit datatype to file */
+	dtype.commit(fid1, TYPE1_NAME);
+
+	// Check reference count on named datatype */
+	fid1.getObjinfo(TYPE1_NAME, statbuf);
+	verify_val(statbuf.u.obj.nlink, 1, "DataType::getObjinfo", __LINE__, __FILE__);
+
+	// Create dataspace for dataset */
+	DataSpace dspace;
+
+	// Create dataset */
+	DataSet dset = fid1.createDataSet(DSET1_NAME, dtype, dspace);
+
+	// Check reference count on named datatype */
+	fid1.getObjinfo(TYPE1_NAME, statbuf);
+	verify_val(statbuf.u.obj.nlink, 2, "H5File::getObjinfo", __LINE__, __FILE__);
+
+	// Create attribute on dataset */
+	Attribute attr = dset.createAttribute(ATTR1_NAME,dtype,dspace);
+
+	// Check reference count on named datatype */
+	fid1.getObjinfo(TYPE1_NAME, statbuf);
+	verify_val(statbuf.u.obj.nlink, 3, "DataSet::getObjinfo", __LINE__, __FILE__);
+
+	// Close attribute */
+	attr.close();
+
+	// Delete attribute */
+	dset.removeAttr(ATTR1_NAME);
+
+	// Check reference count on named datatype */
+	fid1.getObjinfo(TYPE1_NAME, statbuf);
+	verify_val(statbuf.u.obj.nlink, 2, "DataSet::getObjinfo after DataSet::removeAttr", __LINE__, __FILE__);
+
+	// Create attribute on dataset */
+	attr = dset.createAttribute(ATTR1_NAME,dtype,dspace);
+
+	// Check reference count on named datatype */
+	fid1.getObjinfo(TYPE1_NAME, statbuf);
+	verify_val(statbuf.u.obj.nlink, 3, "DataSet::createAttribute", __LINE__, __FILE__);
+
+	// Write data into the attribute */
+	attr.write(PredType::NATIVE_INT,&data);
+
+	// Close attribute, dataset, dataspace, datatype, and file */
+	attr.close();
+	dset.close();
+	dspace.close();
+	dtype.close();
+	fid1.close();
+
+	// Open the file again */
+	fid1.openFile(FILENAME, H5F_ACC_RDWR);
+
+	// Open dataset */
+	dset = fid1.openDataSet(DSET1_NAME);
+
+	// Open attribute */
+	attr = dset.openAttribute(ATTR1_NAME);
+
+	// Read data from the attribute */
+	attr.read(PredType::NATIVE_INT, &rdata);
+	verify_val(data, rdata, "Attribute::read", __LINE__, __FILE__);
+
+	// Close attribute and dataset */
+	attr.close();
+	dset.close();
+
+	// Check reference count on named datatype */
+	fid1.getObjinfo(TYPE1_NAME, statbuf);
+	verify_val(statbuf.u.obj.nlink, 3, "DataSet::openAttribute", __LINE__, __FILE__);
+
+	// Unlink the dataset */
+	fid1.unlink(DSET1_NAME);
+
+	// Check reference count on named datatype */
+	fid1.getObjinfo(TYPE1_NAME, statbuf);
+	verify_val(statbuf.u.obj.nlink, 1, "H5File::unlink", __LINE__, __FILE__);
+
+	// Unlink the named datatype */
+	fid1.unlink(TYPE1_NAME);
+
+	// Close file
+	fid1.close();
+
+	// Check size of file */
+	filesize=h5_get_file_size(FILENAME.c_str());
+	verify_val(filesize, empty_filesize, "~H5File", __LINE__, __FILE__);
+    }   // end try block
+
+    catch (Exception E) {
+	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+    }
+}   /* test_attr_dtype_shared() */
+
+/****************************************************************
+**
 **  test_attr(): Main attribute testing routine.
 **
 ****************************************************************/
@@ -1014,23 +1153,21 @@ test_attr(void)
     // Output message about test being performed
     MESSAGE(5, ("Testing Attributes\n"));
 
-    // These next two tests use the same file information
     test_attr_basic_write();	// Test basic H5A writing code
     test_attr_rename();		// Test renaming attribute
     test_attr_basic_read(); 	// Test basic H5A reading code
 
-    // These next two tests use the same file information
-    test_attr_compound_write();  // Test complex datatype H5A writing code
-    test_attr_compound_read();   // Test complex datatype H5A reading code
+    test_attr_compound_write();	// Test complex datatype H5A writing code
+    test_attr_compound_read();	// Test complex datatype H5A reading code
 
-    // These next two tests use the same file information
-    test_attr_scalar_write();  // Test scalar dataspace H5A writing code
-    test_attr_scalar_read();   // Test scalar dataspace H5A reading code
+    test_attr_scalar_write();	// Test scalar dataspace H5A writing code
+    test_attr_scalar_read();	// Test scalar dataspace H5A reading code
 
-    // These next four tests use the same file information
-    test_attr_mult_write(); 	// Test H5A writing code for multiple attributes
-    test_attr_mult_read();  	// Test H5A reading code for multiple attributes
-    test_attr_delete();     	// Test H5A code for deleting attributes
+    test_attr_mult_write();	// Test writing multiple attributes
+    test_attr_mult_read();	// Test reading multiple attributes
+    test_attr_delete();		// Test deleting attributes
+
+    test_attr_dtype_shared();	// Test using shared datatypes in attributes
 
 }   /* test_attr() */
 
