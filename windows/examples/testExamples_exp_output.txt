@@ -2,7 +2,7 @@
 Expected output for HDF5 C examples tests
 #############################
 The value of the attribute "Integer attribute" is 1 
-The value of the attribute with index 2 is ABCD 
+The value of the attribute with index 1 is ABCD 
 
 Name : Float attribute
 Rank : 2 
