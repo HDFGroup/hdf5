@@ -2053,8 +2053,8 @@ fi
 
 
 case $host_alias in
-  tflops)
-    host_alias=i386-intel-osf1
+  redstorm)
+    host_alias=x86_64-redstorm-linux-gnu
     ;;
 esac
 
