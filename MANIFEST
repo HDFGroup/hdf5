@@ -110,7 +110,7 @@
 ./config/unicosmk2.0.X
 ./config/unicosmk2.0.5.X
 ./config/unicosmk2.0.6.X
-./config/x86_64-redstorm
+./config/x86_64-redstorm-linux-gnu
 
 ./config/site-specific/BlankForm
 
