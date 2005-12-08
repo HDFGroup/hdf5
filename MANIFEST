@@ -756,6 +756,7 @@
 ./testpar/t_chunk_alloc.c
 ./testpar/t_coll_chunk.c
 ./testpar/t_span_tree.c
+./testpar/t_posix_compliant.c
 ./testpar/testpar.h
 ./testpar/testphdf5.c
 ./testpar/testphdf5.h
