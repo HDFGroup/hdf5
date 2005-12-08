@@ -2572,8 +2572,8 @@ test_nbit_int(hid_t file)
     /* Initialize data, assuming size of long_long >= size of int */
     for (i= 0;i< size[0]; i++)
       for (j = 0; j < size[1]; j++) {
-        orig_data[i][j] = ((long_long)HDrandom() %
-                           (long_long)HDpow(2.0, precision - 1)) << offset;
+        orig_data[i][j] = (int)(((long_long)HDrandom() %
+                           (long_long)HDpow(2.0, precision - 1)) << offset);
 
         /* even-numbered values are negtive */
         if((i*size[1]+j+1)%2 == 0)
@@ -2677,8 +2677,8 @@ test_nbit_float(hid_t file)
     /* orig_data[] are initialized to be within the range that can be represented by
      * dataset datatype (no precision loss during datatype conversion)
      */
-    float               orig_data[2][5] = {{188384.00, 19.103516, -1.0831790e9, -84.242188,
-    5.2045898}, {-49140.000, 2350.2500, -3.2110596e-1, 6.4998865e-5, -0.0000000}};
+    float               orig_data[2][5] = {{(float)188384.00, (float)19.103516, (float)-1.0831790e9, (float)-84.242188,
+    (float)5.2045898}, {(float)-49140.000, (float)2350.2500, (float)-3.2110596e-1, (float)6.4998865e-5, (float)-0.0000000}};
     float               new_data[2][5];
     size_t              precision, offset;
     hsize_t             i, j;
@@ -2986,8 +2986,8 @@ test_nbit_array(hid_t file)
       for (j = 0; j < size[1]; j++)
         for (m = 0; m < adims[0]; m++)
           for (n = 0; n < adims[1]; n++)
-            orig_data[i][j][m][n] = ((long_long)HDrandom() %
-                                     (long_long)HDpow(2.0, precision)) << offset;
+            orig_data[i][j][m][n] = (unsigned int)(((long_long)HDrandom() %
+                                     (long_long)HDpow(2.0, precision)) << offset);
     PASSED();
 #else
     SKIPPED();
@@ -3097,8 +3097,8 @@ test_nbit_compound(hid_t file)
     hid_t               dataset, space, dc;
     const hsize_t       size[2] = {2, 5};
     const hsize_t       chunk_size[2] = {2, 5};
-    const float         float_val[2][5] = {{188384.00, 19.103516, -1.0831790e9, -84.242188,
-    5.2045898}, {-49140.000, 2350.2500, -3.2110596e-1, 6.4998865e-5, -0.0000000}};
+    const float         float_val[2][5] = {{(float)188384.00, (float)19.103516, (float)-1.0831790e9, (float)-84.242188,
+    (float)5.2045898}, {(float)-49140.000, (float)2350.2500, (float)-3.2110596e-1, (float)6.4998865e-5, (float)-0.0000000}};
     atomic              orig_data[2][5];
     atomic              new_data[2][5];
     unsigned int        i_mask, s_mask, c_mask;
@@ -3166,12 +3166,12 @@ test_nbit_compound(hid_t file)
     /* Initialize data, assuming size of long_long >= size of member datatypes */
     for (i= 0;i< size[0]; i++)
       for (j = 0; j < size[1]; j++) {
-        orig_data[i][j].i = ((long_long)HDrandom() %
-                             (long_long)HDpow(2.0, precision[0]-1)) << offset[0];
-        orig_data[i][j].c = ((long_long)HDrandom() %
-                             (long_long)HDpow(2.0, precision[1]-1)) << offset[1];
-        orig_data[i][j].s = ((long_long)HDrandom() %
-                             (long_long)HDpow(2.0, precision[2]-1)) << offset[2];
+        orig_data[i][j].i = (int)(((long_long)HDrandom() %
+                             (long_long)HDpow(2.0, precision[0]-1)) << offset[0]);
+        orig_data[i][j].c = (char)(((long_long)HDrandom() %
+                             (long_long)HDpow(2.0, precision[1]-1)) << offset[1]);
+        orig_data[i][j].s = (short)(((long_long)HDrandom() %
+                             (long_long)HDpow(2.0, precision[2]-1)) << offset[2]);
         orig_data[i][j].f = float_val[i][j];
 
         /* some even-numbered integer values are negtive */
@@ -3312,8 +3312,8 @@ test_nbit_compound_2(hid_t file)
     hid_t               dataset, space, dc;
     const hsize_t       size[2] = {2, 5};
     const hsize_t       chunk_size[2] = {2, 5};
-    const float         float_val[2][5] = {{188384.00, 19.103516, -1.0831790e9, -84.242188,
-    5.2045898}, {-49140.000, 2350.2500, -3.2110596e-1, 6.4998865e-5, -0.0000000}};
+    const float         float_val[2][5] = {{(float)188384.00, (float)19.103516, (float)-1.0831790e9, (float)-84.242188,
+    (float)5.2045898}, {(float)-49140.000, (float)2350.2500, (float)-3.2110596e-1, (float)6.4998865e-5, (float)-0.0000000}};
     complex             orig_data[2][5];
     complex             new_data[2][5];
     unsigned int        i_mask, s_mask, c_mask, b_mask;
@@ -3413,30 +3413,30 @@ test_nbit_compound_2(hid_t file)
     /* Initialize data, assuming size of long_long >= size of member datatypes */
     for (i= 0;i< size[0]; i++)
       for (j = 0; j < size[1]; j++) {
-        orig_data[i][j].a.i = ((long_long)HDrandom() %
-                               (long_long)HDpow(2.0, precision[0]-1)) << offset[0];
-        orig_data[i][j].a.c = ((long_long)HDrandom() %
-                               (long_long)HDpow(2.0, precision[1]-1)) << offset[1];
-        orig_data[i][j].a.s = -((long_long)HDrandom() %
-                               (long_long)HDpow(2.0, precision[2]-1)) << offset[2];
+        orig_data[i][j].a.i = (int)(((long_long)HDrandom() %
+                               (long_long)HDpow(2.0, precision[0]-1)) << offset[0]);
+        orig_data[i][j].a.c = (char)(((long_long)HDrandom() %
+                               (long_long)HDpow(2.0, precision[1]-1)) << offset[1]);
+        orig_data[i][j].a.s = (short)(-((long_long)HDrandom() %
+                               (long_long)HDpow(2.0, precision[2]-1)) << offset[2]);
         orig_data[i][j].a.f = float_val[i][j];
 
-        orig_data[i][j].v = ((long_long)HDrandom() %
-                             (long_long)HDpow(2.0, precision[3])) << offset[3];
+        orig_data[i][j].v = (unsigned int)(((long_long)HDrandom() %
+                             (long_long)HDpow(2.0, precision[3])) << offset[3]);
 
         for(m = 0; m < array_dims[0]; m++)
           for(n = 0; n < array_dims[1]; n++)
-            orig_data[i][j].b[m][n] = ((long_long)HDrandom() %
-                                       (long_long)HDpow(2.0, precision[4]-1)) << offset[4];
+            orig_data[i][j].b[m][n] = (char)(((long_long)HDrandom() %
+                                       (long_long)HDpow(2.0, precision[4]-1)) << offset[4]);
 
         for(m = 0; m < array_dims[0]; m++)
           for(n = 0; n < array_dims[1]; n++) {
-            orig_data[i][j].d[m][n].i = -((long_long)HDrandom() %
-                                         (long_long)HDpow(2.0, precision[0]-1)) << offset[0];
-            orig_data[i][j].d[m][n].c = ((long_long)HDrandom() %
-                                         (long_long)HDpow(2.0, precision[1]-1)) << offset[1];
-            orig_data[i][j].d[m][n].s = ((long_long)HDrandom() %
-                                         (long_long)HDpow(2.0, precision[2]-1)) << offset[2];
+            orig_data[i][j].d[m][n].i = (int)(-((long_long)HDrandom() %
+                                         (long_long)HDpow(2.0, precision[0]-1)) << offset[0]);
+            orig_data[i][j].d[m][n].c = (char)(((long_long)HDrandom() %
+                                         (long_long)HDpow(2.0, precision[1]-1)) << offset[1]);
+            orig_data[i][j].d[m][n].s = (short)(((long_long)HDrandom() %
+                                         (long_long)HDpow(2.0, precision[2]-1)) << offset[2]);
             orig_data[i][j].d[m][n].f = float_val[i][j];
           }
       }
@@ -3643,14 +3643,14 @@ test_nbit_compound_3(hid_t file)
         strcpy(orig_data[i].str, "fixed-length C string");
         orig_data[i].vl_str = strdup("variable-length C string");
 
-        orig_data[i].v.p = HDmalloc((i+1)*sizeof(unsigned int));
-        orig_data[i].v.len = i+1;
-        for(k = 0; k < (i+1); k++) ((unsigned int *)orig_data[i].v.p)[k] = i*100 + k;
+        orig_data[i].v.p = HDmalloc((size_t)(i+1)*sizeof(unsigned int));
+        orig_data[i].v.len = (size_t)i+1;
+        for(k = 0; k < (i+1); k++) ((unsigned int *)orig_data[i].v.p)[k] = (unsigned int)(i*100 + k);
 
         /* Create reference to the dataset "nbit_obj_ref" */
         if(H5Rcreate(&orig_data[i].r, file, "nbit_obj_ref", H5R_OBJECT, -1)<0) goto error;
 
-        for(j = 0; j < 5; j++) orig_data[i].o[j] = i + j;
+        for(j = 0; j < 5; j++) orig_data[i].o[j] = (unsigned char)(i + j);
     }
 
     PASSED();
@@ -3957,7 +3957,7 @@ test_scaleoffset_int_2(hid_t file)
 
     /* Initialize data of hyperslab */
     for (j = 0; j < size[1]; j++) {
-        orig_data[0][j] = (long_long)HDrandom() % 10000;
+        orig_data[0][j] = (int)HDrandom() % 10000;
 
         /* even-numbered values are negtive */
         if((j+1)%2 == 0)
@@ -4088,7 +4088,7 @@ test_scaleoffset_float(hid_t file)
     /* Initialize data */
     for (i= 0;i< size[0]; i++)
       for (j = 0; j < size[1]; j++) {
-        orig_data[i][j] = (HDrandom() % 100000) / 1000.0;
+        orig_data[i][j] = (float)((HDrandom() % 100000) / (float)1000.0);
 
         /* even-numbered values are negtive */
         if((i*size[1]+j+1)%2 == 0)
@@ -4238,7 +4238,7 @@ test_scaleoffset_float_2(hid_t file)
 
     /* Initialize data of hyperslab */
     for (j = 0; j < size[1]; j++) {
-        orig_data[0][j] = (HDrandom() % 100000) / 1000.0;
+        orig_data[0][j] = (float)((HDrandom() % 100000) / (float)1000.0);
 
         /* even-numbered values are negtive */
         if((j+1)%2 == 0)

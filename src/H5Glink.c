@@ -195,7 +195,8 @@ H5G_link_build_table(H5O_loc_t *oloc, hid_t dxpl_id, H5G_link_table_t *ltable)
         HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get link info")
 
     /* Set size of table */
-    ltable->nlinks = linfo.nlinks;
+    H5_CHECK_OVERFLOW(linfo.nlinks, hsize_t, size_t);
+    ltable->nlinks = (size_t)linfo.nlinks;
 
     /* Allocate space for the table entries */
     if(ltable->nlinks > 0) {

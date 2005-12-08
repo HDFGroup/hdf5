@@ -875,8 +875,8 @@ H5D_istore_iter_allocated (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_l
  *
  *		Failure:	Negative
  *
- * Programmer:	Robb Matzke
- *              Wednesday, April 21, 1999
+ * Programmer:	Kent Yang
+ *              Tuesday, November 15, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2356,27 +2356,25 @@ H5D_istore_allocated(H5D_t *dset, hid_t dxpl_id)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_istore_allocated() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5D_istore_chunkmap
  *
  * Purpose:     obtain the chunk address and corresponding chunk index	
  *	
- *		
- *
  * Return:	Success:	Non-negative on succeed.
  *
  *		Failure:	negative value
  *
- * Programmer:
- *              
+ * Programmer:  Kent Yang
+ *              November 15, 2005
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5D_istore_chunkmap(const H5D_io_info_t *io_info, hsize_t total_chunks,haddr_t chunk_addr[],hsize_t down_chunks[])
 {
- 
     H5D_t *dset=io_info->dset;       /* Local pointer to dataset info */
     const H5D_rdcc_t   *rdcc = &(dset->shared->cache.chunk);	/*raw data chunk cache */
     H5D_rdcc_ent_t     *ent;    /*cache entry  */
@@ -2425,8 +2423,7 @@ H5D_istore_chunkmap(const H5D_io_info_t *io_info, hsize_t total_chunks,haddr_t c
 	    
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_istore_allocated() */
-
+} /* end H5D_istore_chunkmap() */
 
 
 /*-------------------------------------------------------------------------

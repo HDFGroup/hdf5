@@ -472,9 +472,9 @@ H5Z_class_t H5Z_SCALEOFFSET[1] = {{
    if(filavail == H5Z_SCALEOFFSET_FILL_DEFINED) { /* fill value defined */        \
       H5Z_scaleoffset_get_filval_1(i, type, filval_buf, filval)                   \
       for(i = 0; i < d_nelmts; i++)                                               \
-         buf[i] = (buf[i] == (((type)1 << minbits) - 1))?filval:(buf[i] + minval);\
+         buf[i] = (type)((buf[i] == (((type)1 << minbits) - 1))?filval:(buf[i] + minval));\
    } else /* fill value undefined */                                              \
-      for(i = 0; i < d_nelmts; i++) buf[i] += minval;                             \
+      for(i = 0; i < d_nelmts; i++) buf[i] += (type)(minval);                     \
 }
 
 /* Postdecompress for signed integer type */
@@ -485,9 +485,9 @@ H5Z_class_t H5Z_SCALEOFFSET[1] = {{
    if(filavail == H5Z_SCALEOFFSET_FILL_DEFINED) { /* fill value defined */                 \
       H5Z_scaleoffset_get_filval_1(i, type, filval_buf, filval)                            \
       for(i = 0; i < d_nelmts; i++)                                                        \
-         buf[i] = ((unsigned type)buf[i] == (((unsigned type)1 << minbits) - 1)) ? filval : (buf[i] + minval);\
+         buf[i] = (type)(((unsigned type)buf[i] == (((unsigned type)1 << minbits) - 1)) ? filval : (buf[i] + minval));\
    } else /* fill value undefined */                                                       \
-      for(i = 0; i < d_nelmts; i++) buf[i] += minval;                                      \
+      for(i = 0; i < d_nelmts; i++) buf[i] += (type)(minval);                              \
 }
 
 /* Retrive minimum value of floating-point type */
@@ -1135,7 +1135,7 @@ H5Z_filter_scaleoffset (unsigned flags, size_t cd_nelmts, const unsigned cd_valu
         ((unsigned char *)outbuf)[4] = sizeof(unsigned long_long);
 
         for(i = 0; i < sizeof(unsigned long_long); i++)
-            ((unsigned char *)outbuf)[5+i] = (minval & ((unsigned long_long)0xff << i*8)) >> i*8;
+            ((unsigned char *)outbuf)[5+i] = (unsigned char)((minval & ((unsigned long_long)0xff << i*8)) >> i*8);
 
         /* special case: minbits equal to full precision */
         if(minbits == p.size * 8) {

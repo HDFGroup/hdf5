@@ -15,6 +15,7 @@
 /* This files contains C stubs for H5D Fortran APIs */
 
 #include "H5IM.h"
+#include "H5IMcc.h"
 #include "H5LTf90proto.h"
 #include "../../../fortran/src/H5f90i_gen.h"
 

@@ -398,8 +398,8 @@ int test_poly(const hid_t dxpl_id_polynomial)
     {
 	for(col = 0; col<COLS; col++)
 	{
-	    windchillC = (5/9.0)*(windchillFfloat[row][col] - 32);
-	    polyflres[row][col] = (2.0+windchillC)*((windchillC-8.0)/2.0);
+	    windchillC = (int)((5.0/9.0)*(windchillFfloat[row][col] - 32));
+	    polyflres[row][col] = (float)((2.0+windchillC)*((windchillC-8.0)/2.0));
 	}
     }
 
@@ -412,8 +412,8 @@ int test_poly(const hid_t dxpl_id_polynomial)
     {
 	for(col = 0; col<COLS; col++)
 	{
-	    windchillC = (5/9.0)*(windchillFfloat[row][col] - 32);
-	    polyflres[row][col] = (2+windchillC)*((windchillC-8)/2);
+	    windchillC = (int)((5.0/9.0)*(windchillFfloat[row][col] - 32));
+	    polyflres[row][col] = (float)((2+windchillC)*((windchillC-8)/2));
 	}
     }
 
@@ -439,8 +439,8 @@ int test_copy(const hid_t dxpl_id_c_to_f_copy, const hid_t dxpl_id_polynomial_co
     {
 	for(col = 0; col<COLS; col++)
 	{
-	    windchillC = (5/9.0)*(windchillFfloat[row][col] - 32);
-	    polyflres[row][col] = (2+windchillC)*((windchillC-8)/2);
+	    windchillC = (int)((5.0/9.0)*(windchillFfloat[row][col] - 32));
+	    polyflres[row][col] = (float)((2+windchillC)*((windchillC-8)/2));
 	}
     }
 

@@ -88,7 +88,7 @@
      * is set to 0 on success.  On failure, returns 0 and
      * error is set to negative.
      */
-    unsigned int PacketTable::GetPacketCount(int& error)
+    hsize_t PacketTable::GetPacketCount(int& error)
     {
         hsize_t npackets;
 

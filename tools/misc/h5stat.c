@@ -33,8 +33,8 @@ typedef struct dtype_info_t {
 } dtype_info_t;
 
 typedef struct ohdr_info_t {
-    unsigned long total_size;           /* Total size of object headers */
-    unsigned long free_size;            /* Total free space in object headers */
+    hsize_t total_size;                 /* Total size of object headers */
+    hsize_t free_size;                  /* Total free space in object headers */
 } ohdr_info_t;
 
 /* Info to pass to the iteration functions */
@@ -50,7 +50,7 @@ typedef struct iter_t {
 
     unsigned long max_depth;            /* Maximum depth of hierarchy */
     unsigned long max_links;            /* Maximum # of links to an object */
-    unsigned long max_fanout;           /* Maximum fanout from a group */
+    hsize_t max_fanout;                 /* Maximum fanout from a group */
     unsigned long num_small_groups[SIZE_SMALL_GROUPS];     /* Size of small groups tracked */
     unsigned group_nbins;               /* Number of bins for group counts */
     unsigned long *group_bins;          /* Pointer to array of bins for group counts */
@@ -58,7 +58,7 @@ typedef struct iter_t {
 
     unsigned long max_dset_rank;        /* Maximum rank of dataset */
     unsigned long dset_rank_count[H5S_MAX_RANK];     /* Number of datasets of each rank */
-    unsigned long max_dset_dims;        /* Maximum dimension size of dataset */
+    hsize_t max_dset_dims;              /* Maximum dimension size of dataset */
     unsigned long small_dset_dims[SIZE_SMALL_DSETS];    /* Size of dimensions of small datasets tracked */
     unsigned long dset_layouts[H5D_NLAYOUTS];           /* Type of storage for each dataset */
     unsigned long dset_ntypes;          /* Number of diff. dataset datatypes found */
@@ -66,7 +66,7 @@ typedef struct iter_t {
     unsigned dset_dim_nbins;            /* Number of bins for dataset dimensions */
     unsigned long *dset_dim_bins;       /* Pointer to array of bins for dataset dimensions */
     ohdr_info_t dset_ohdr_info;         /* Object header information for datasets */
-    unsigned long dset_storage_size;    /* Size of raw data for datasets */
+    hsize_t dset_storage_size;          /* Size of raw data for datasets */
 } iter_t;
 
 /* Table containing object id and object name */
@@ -553,11 +553,11 @@ main(int argc, char *argv[])
     printf("\t# of unique other: %lu\n", iter.uniq_others);
     printf("\tMax. # of links to object: %lu\n", iter.max_links);
     printf("\tMax. depth of hierarchy: %lu\n", iter.max_depth);
-    printf("\tMax. # of objects in group: %lu\n", iter.max_fanout);
+    HDfprintf(stdout, "\tMax. # of objects in group: %Hu\n", iter.max_fanout);
 
     printf("Object header size: (total/unused)\n");
-    printf("\tGroups: %lu/%lu\n", iter.group_ohdr_info.total_size,iter.group_ohdr_info.free_size);
-    printf("\tDatasets: %lu/%lu\n", iter.dset_ohdr_info.total_size,iter.dset_ohdr_info.free_size);
+    HDfprintf(stdout, "\tGroups: %Hu/%Hu\n", iter.group_ohdr_info.total_size, iter.group_ohdr_info.free_size);
+    HDfprintf(stdout, "\tDatasets: %Hu/%Hu\n", iter.dset_ohdr_info.total_size, iter.dset_ohdr_info.free_size);
 
     printf("Small groups:\n");
     total = 0;
@@ -595,7 +595,7 @@ main(int argc, char *argv[])
                 printf("\t\t# of dataset with rank %u: %lu\n", u, iter.dset_rank_count[u]);
 
         printf("1-D Dataset info:\n");
-        printf("\tMax. dimension size of 1-D datasets: %lu\n", iter.max_dset_dims);
+        HDfprintf(stdout, "\tMax. dimension size of 1-D datasets: %Hu\n", iter.max_dset_dims);
         printf("\tSmall 1-D datasets:\n");
         total = 0;
         for(u = 0; u < SIZE_SMALL_DSETS; u++) {
@@ -626,7 +626,7 @@ main(int argc, char *argv[])
         } /* end if */
 
         printf("Dataset storage info:\n");
-        printf("\tTotal raw data size: %lu\n", iter.dset_storage_size);
+        HDfprintf(stdout, "\tTotal raw data size: %Hu\n", iter.dset_storage_size);
 
         printf("Dataset layout info:\n");
         for(u = 0; u < H5D_NLAYOUTS; u++)

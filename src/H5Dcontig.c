@@ -1031,7 +1031,8 @@ H5D_contig_copy(H5F_t *f_src, H5O_layout_t *layout_src,
 
     /* Set up number of bytes to copy, and initial buffer size */
     total_nbytes = layout_src->u.contig.size;
-    buf_size = MIN(H5D_XFER_MAX_TEMP_BUF_DEF, total_nbytes);
+    H5_CHECK_OVERFLOW(total_nbytes,hsize_t,size_t);
+    buf_size = MIN(H5D_XFER_MAX_TEMP_BUF_DEF, (size_t)total_nbytes);
 
     /* If there's a source datatype, set up type conversion information */
     if(dt_src) {

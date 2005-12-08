@@ -2003,7 +2003,6 @@ hid_t H5LTtext_to_dtype(const char *text)
 {
  extern int yyparse(void);
  hid_t   type_id; 
- hsize_t i;
  
  input_len = strlen(text);
  myinput = strdup(text);

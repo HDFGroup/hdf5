@@ -91,9 +91,6 @@ nh5dopen_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *dset_id)
      int c_namelen;
      hid_t c_loc_id;
      hid_t c_dset_id;
-     hid_t plist;
-     off_t offset;
-     hsize_t size;
 
      /*
       * Convert FORTRAN name to C name

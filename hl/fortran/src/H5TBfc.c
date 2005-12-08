@@ -674,9 +674,9 @@ nh5tbget_field_info_c(hid_t_f *loc_id,
 	/* return values*/
 
 	/* names array */
-	tmp = (char *)malloc(c_lenmax* (hsize_t_f) c_nfields + 1);
+	tmp = (char *)malloc(c_lenmax* (size_t) c_nfields + 1);
 	tmp_p = tmp;
-	memset(tmp,' ', c_lenmax* (hsize_t_f) c_nfields);
+	memset(tmp,' ', c_lenmax* (size_t) c_nfields);
 	tmp[c_lenmax*c_nfields] = '\0';
 	for (i=0; i < c_nfields; i++) {
 		memcpy(tmp_p, c_field_names[i], strlen(c_field_names[i]));

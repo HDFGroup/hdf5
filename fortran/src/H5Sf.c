@@ -320,7 +320,8 @@ nh5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint,
   hid_t c_space_id;
   hsize_t c_num_points;
   hsize_t c_startpoint,* c_buf;
-  int i, rank;
+  int rank;
+  hsize_t i;
 
   c_space_id = *space_id;
   c_num_points = (hsize_t)* numpoints;

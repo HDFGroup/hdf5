@@ -3896,7 +3896,7 @@ test_int_float_except(void)
     float buf_float[CONVERT_SIZE] = {INT_MIN, INT_MAX + 1.0, INT_MAX - 127.0, 4};
     int *intp;          /* Pointer to buffer, as integers */
     int buf2[CONVERT_SIZE] = {INT_MIN, INT_MAX, INT_MAX - 72, 0};
-    float buf2_float[CONVERT_SIZE] = {INT_MIN, INT_MAX, INT_MAX - 127.0, 0.0};
+    float buf2_float[CONVERT_SIZE] = {INT_MIN, INT_MAX, INT_MAX - 127.0, (float)0.0};
     int buf2_int[CONVERT_SIZE] = {INT_MIN, INT_MAX, INT_MAX - 127, 0};
     float *floatp;      /* Pointer to buffer #2, as floats */
     hid_t dxpl;         /* Dataset transfer property list */

@@ -714,9 +714,8 @@ static int test_particular_fp_integer(void)
     int         dst_i;
     int         fill_value = 13;
     int		endian;			/*endianess	        */
-    char	str[256];		/*message string	*/
     unsigned int        fails_this_test = 0;
-    int         i, j;
+    int         j;
 
     TESTING("hard particular floating number -> integer conversions");
     

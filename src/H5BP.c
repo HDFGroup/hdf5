@@ -280,7 +280,7 @@ H5BP_create_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bpt_shared, H5BP_node_ptr_t *n
 
     /* Create record pool for leaf node */
     if((leaf->rec_pool = H5MP_create(H5BP_LEAF_POOL_PAGE, H5MP_FLG_DEFAULT)) == NULL)
-        HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, NULL, "can't allocate memory pool")
+        HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, FAIL, "can't allocate memory pool")
 
     /* Set number of records */
     leaf->nrec=0;
@@ -323,8 +323,10 @@ H5BP_insert_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bpt_shared,
 {
     H5BP_leaf_t *leaf;                  /* Pointer to leaf node */
     H5BP_shared_t *shared;              /* Pointer to B+ tree's shared information */
+#ifdef LATER
     int         cmp;                    /* Comparison value of records */
     unsigned    idx;                    /* Location of record which matches key */
+#endif /* LATER */
     herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT(H5BP_insert_leaf)

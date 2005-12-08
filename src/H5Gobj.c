@@ -675,7 +675,8 @@ H5G_obj_remove(H5O_loc_t *oloc, const char *name, H5G_obj_t *obj_type, hid_t dxp
                 udata.heap_addr = stab.heap_addr;
                 udata.lnk_table = lnk_table;
                 udata.nlinks = 0;
-                udata.max_links = linfo.nlinks;
+                H5_CHECK_OVERFLOW(linfo.nlinks, hsize_t, size_t);
+                udata.max_links = (size_t)linfo.nlinks;
 
                 /* Iterate over the group members, building a table of equivalent link messages */
                 if((ret_value = H5B_iterate(oloc->file, dxpl_id, H5B_SNODE,
