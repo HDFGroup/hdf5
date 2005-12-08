@@ -23,6 +23,11 @@
  * uses MPI I/O (MPI_File_read, MPI_File_write).  Each set has multiple sub-tests, which
  * test varying patters of writes and reads.  
  * 
+ *
+ * TODO:
+ * 	Add corresponding posix i/o tests for each MPI i/o test.  Currently, not all of the
+ * 	MPI IO tests are implemented using fwrite/fread.
+ * 
  * Leon Arber
  * larber@ncsa.uiuc.edu
 */
@@ -32,8 +37,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-
+#ifdef _POSIX_SOURCE
 #include <getopt.h>
+#endif
+#include "h5test.h"
 
 
 static char*		testfile = NULL;
@@ -662,12 +669,22 @@ int main(int argc, char* argv[])
     char    optstring[] = "h x m p: s: v:";
     
     err_flag = 0;
-    testfile = (char*) malloc(strlen("posix_test")+1);
-    memset(testfile, 0, strlen("posix_test")+1);
     
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    testfile = getenv_all(MPI_COMM_WORLD, 0, "HDF5_PARAPREFIX");
+    if(!testfile)
+    {
+	testfile = strdup("posix_test");
+    }
+    else
+    {
+	testfile = (char*) realloc(testfile, strlen(testfile) + 1 + strlen("posix_test"));
+	strcat(testfile, "/posix_test");
+    }
+    
 
     while((opt = getopt(argc, argv, optstring)) != -1)
     {
@@ -693,9 +710,11 @@ int main(int argc, char* argv[])
 		break;
 	    case 'p':
 		testfile = (char*) realloc(testfile, strlen(optarg) + 1 + strlen("posix_test"));	
+		memset(testfile, 0, strlen(optarg)+1+strlen("posix_test"));
 		strcpy(testfile, optarg);
 		/* Append a / just in case they didn't end their path with one */
-		strcat(testfile, "/");
+		strcat(testfile, "/posix_test");
+		fprintf(stderr, "Task %d setting testfile to: %s\n", rank, testfile);
 		break;
 	    case 's':
 		write_size = atoi(optarg);
@@ -706,8 +725,6 @@ int main(int argc, char* argv[])
 	}
     }
     
-    strcat(testfile, "posix_test");
-
     if( (optind < argc) && (rank == 0))
 	fprintf(stderr, "Unkown command-line argument passed.  Continuing anyway...\n");
 
