@@ -32,20 +32,22 @@
  * larber@ncsa.uiuc.edu
 */
 
-#include <mpi.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
+#include <stdio.h>
 #include <string.h>
-#ifdef _POSIX_SOURCE
-#include <getopt.h>
-#endif
+#include <stdlib.h>
+#include <mpi.h>
 #include "h5test.h"
-
 
 static char*		testfile = NULL;
 static int		err_flag = 0;
 static int		max_err_print = 5;
+
+/* globals needed for getopt
+ * Although they *should* be defined in unistd.h */
+extern char *optarg;
+extern int optind, opterr;
+
 
 #define CHECK_SUCCESS(res)	\
 {				\
