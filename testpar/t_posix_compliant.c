@@ -33,10 +33,12 @@
 #include <unistd.h>
 #include <string.h>
 
+#include <getopt.h>
 
-char*		testfile = NULL;
-int		err_flag = 0;
-int		max_err_print = 5;
+
+static char*		testfile = NULL;
+static int		err_flag = 0;
+static int		max_err_print = 5;
 
 #define CHECK_SUCCESS(res)	\
 {				\
@@ -61,20 +63,19 @@ int		max_err_print = 5;
     err_flag = 0;								\
 }
 
-void vrfy_elements(int* a, int* b, int size, int rank);
-int find_writesize(int rank, int numprocs, int write_size);
+static void vrfy_elements(int* a, int* b, int size, int rank);
+static int find_writesize(int rank, int numprocs, int write_size);
 
 
 /* All writes are to non-overlapping locations in the file 
  * Then, each task reads another tasks' data
  * */
 
-int allwrite_allread_blocks(int numprocs, int rank, int write_size)
+static int allwrite_allread_blocks(int numprocs, int rank, int write_size)
 {
     MPI_File	fh = MPI_FILE_NULL;
     int		mpio_result;
     int		amode, i;
-    MPI_Info hints_to_test = MPI_INFO_NULL;
     MPI_Offset	offset = rank*write_size*sizeof(int);
     MPI_Status	Status;
     int* writebuf = (int*)malloc(write_size*sizeof(int));
@@ -110,10 +111,10 @@ int allwrite_allread_blocks(int numprocs, int rank, int write_size)
 
 }
 
-int posix_allwrite_allread_blocks(int numprocs, int rank, int write_size)
+static int posix_allwrite_allread_blocks(int numprocs, int rank, int write_size)
 {
     int		ret;
-    int		amode, i;
+    int		i;
     int	offset = rank*write_size*sizeof(int);
     int* writebuf = (int*)malloc(write_size*sizeof(int));
     int* readbuf = (int*)malloc (write_size*sizeof(int));
@@ -183,10 +184,10 @@ int posix_allwrite_allread_blocks(int numprocs, int rank, int write_size)
 
 }
 
-int posix_onewrite_allread_blocks(int numprocs, int rank, int write_size)
+static int posix_onewrite_allread_blocks(int numprocs, int rank, int write_size)
 {
     int		ret;
-    int		amode, i;
+    int		i;
     int	offset = rank*write_size*sizeof(int);
     int* writebuf = (int*)malloc(write_size*sizeof(int));
     int* readbuf = (int*)malloc (write_size*sizeof(int));
@@ -262,10 +263,10 @@ int posix_onewrite_allread_blocks(int numprocs, int rank, int write_size)
 
 }
 
-int posix_onewrite_allread_interlaced(int numprocs, int rank, int write_size)
+static int posix_onewrite_allread_interlaced(int numprocs, int rank, int write_size)
 {
     int		ret;
-    int		amode, i, fill, index;
+    int		i, fill, index;
     int	offset = rank*write_size*sizeof(int);
     int* writebuf = (int*)malloc(write_size*sizeof(int));
     int* readbuf = (int*)malloc (write_size*sizeof(int));
@@ -354,13 +355,12 @@ int posix_onewrite_allread_interlaced(int numprocs, int rank, int write_size)
  *
  * Each proc then reads in the whole file and verifies that the data is what it is supposed to be*/
 
-int allwrite_allread_interlaced(int numprocs, int rank, int write_size)
+static int allwrite_allread_interlaced(int numprocs, int rank, int write_size)
 {
     MPI_File	fh = MPI_FILE_NULL;
     int		mpio_result;
     int		amode, i, counter = 0;
-    MPI_Info hints_to_test = MPI_INFO_NULL;
-    MPI_Datatype filetype, contig;
+    MPI_Datatype filetype;
     MPI_Status	Status;
     int* writebuf = (int*)malloc(write_size*sizeof(int));
     int*	readbuf = (int*) malloc(numprocs*sizeof(int));
@@ -452,14 +452,13 @@ int allwrite_allread_interlaced(int numprocs, int rank, int write_size)
  *  (1,2...((numprocs-1)*WRTE_SIZE).
  *  */
 
-int allwrite_allread_overlap(int numprocs, int rank, int write_size)
+static int allwrite_allread_overlap(int numprocs, int rank, int write_size)
 {
  
     MPI_File	fh = MPI_FILE_NULL;
     int		mpio_result;
     int		amode, i, counter = 0;
-    MPI_Info hints_to_test = MPI_INFO_NULL;
-    MPI_Datatype filetype, contig;
+    MPI_Datatype filetype;
     MPI_Status	Status;
     int*	writebuf = (int*) malloc(write_size*(numprocs-1)*sizeof(int)); /* An upper bound...not all the elements will be written */
     int*	readbuf = (int*) malloc(write_size*(numprocs-1)*sizeof(int));
@@ -547,13 +546,11 @@ int allwrite_allread_overlap(int numprocs, int rank, int write_size)
  *
  * Process i read's in write_size bytes at offset=i*write_size
  */
-int onewrite_allread_blocks(int numprocs, int rank, int write_size)
+static int onewrite_allread_blocks(int numprocs, int rank, int write_size)
 {
     MPI_File	fh = MPI_FILE_NULL;
     int		mpio_result;
     int		amode, i;
-    MPI_Info hints_to_test = MPI_INFO_NULL;
-    MPI_Offset	offset = rank*write_size*sizeof(int);
     MPI_Status	Status;
     int* writebuf = (int*)malloc(write_size*sizeof(int));
     int* readbuf = (int*)malloc (write_size*sizeof(int));
@@ -599,13 +596,12 @@ int onewrite_allread_blocks(int numprocs, int rank, int write_size)
  * 0000 1111 2222 3333 etc. (with 4 procs)
  *
  * Each proc reads out 0 1 2 3 starting at displacement i */
-int onewrite_allread_interlaced(int numprocs, int rank, int write_size)
+static int onewrite_allread_interlaced(int numprocs, int rank, int write_size)
 {
     MPI_File	fh = MPI_FILE_NULL;
     int		mpio_result;
     int		amode, i;
-    MPI_Info hints_to_test = MPI_INFO_NULL;
-    MPI_Datatype filetype, contig;
+    MPI_Datatype filetype;
     MPI_Status	Status;
     int*	writebuf = (int*) malloc(numprocs*write_size*sizeof(int)); /* Upper bound, not all used */
     int* readbuf = (int*)malloc (write_size*sizeof(int));
@@ -657,12 +653,11 @@ int onewrite_allread_interlaced(int numprocs, int rank, int write_size)
 
 }
 
-main(int argc, char* argv[])
+int main(int argc, char* argv[])
 {
 
     int numprocs, rank, opt, mpi_tests=1, posix_tests=1;
     int lb, ub, inc;
-    err_flag = 0;
     int	write_size = 0;
     char    optstring[] = "h x m p: s: v:";
     
@@ -804,7 +799,7 @@ done:
 
 
 
-int find_writesize(int rank, int numprocs, int size)
+static int find_writesize(int rank, int numprocs, int size)
 {
     /* Largest number in the file */
     int tmp = (size-1)*numprocs;
@@ -825,7 +820,7 @@ int find_writesize(int rank, int numprocs, int size)
     return write_size;
 }
 
-void vrfy_elements(int* a, int* b, int size, int rank)
+static void vrfy_elements(int* a, int* b, int size, int rank)
 {
     int i, counter = 0;
 
