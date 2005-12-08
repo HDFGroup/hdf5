@@ -105,12 +105,17 @@ test_file_create(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Low-Level File Creation I/O\n"));
 
+    /* First ensure the file does not exist */
+    remove(FILE1);
+
+    /* Try opening a non-existant file */
+    fid1 = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
+    VERIFY(fid1, FAIL, "H5Fopen");
+
     /* Test create with various sequences of H5F_ACC_EXCL and */
     /* H5F_ACC_TRUNC flags */
 
     /* Create with H5F_ACC_EXCL */
-    /* First ensure the file does not exist */
-    remove(FILE1);
     fid1 = H5Fcreate(FILE1, H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
