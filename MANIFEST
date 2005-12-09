@@ -1265,6 +1265,10 @@
 # high level libraries
 ./hl/Makefile.am
 ./hl/Makefile.in
+./hl/examples/Makefile.am
+./hl/examples/Makefile.in
+./hl/examples/ptExampleFL.c
+./hl/examples/ptExampleVL.c
 ./hl/src/Makefile.am
 ./hl/src/Makefile.in
 ./hl/src/H5IM.c
@@ -1306,6 +1310,10 @@
 ./hl/test/earth.pal
 
 # hl fortran
+./hl/fortran/Makefile.am
+./hl/fortran/Makefile.in
+./hl/fortran/examples/Makefile.am
+./hl/fortran/examples/Makefile.in
 ./hl/fortran/src/H5IMcc.c
 ./hl/fortran/src/H5IMcc.h
 ./hl/fortran/src/H5IMfc.c
@@ -1322,10 +1330,14 @@
 ./hl/fortran/test/tstimage.f90
 ./hl/fortran/test/tstlite.f90
 ./hl/fortran/test/tsttable.f90
-./hl/fortran/Makefile.am
-./hl/fortran/Makefile.in
 
 # hl c++
+./hl/c++/Makefile.am
+./hl/c++/Makefile.in
+./hl/c++/examples/Makefile.am
+./hl/c++/examples/Makefile.in
+./hl/c++/examples/ptExampleFL.cpp
+./hl/c++/examples/ptExampleVL.cpp
 ./hl/c++/src/H5PacketTable.h
 ./hl/c++/src/H5PacketTable.cpp
 ./hl/c++/src/Makefile.am
@@ -1334,8 +1346,6 @@
 ./hl/c++/test/ptableTest.cpp
 ./hl/c++/test/Makefile.am
 ./hl/c++/test/Makefile.in
-./hl/c++/Makefile.am
-./hl/c++/Makefile.in
 
 #windows projects
 

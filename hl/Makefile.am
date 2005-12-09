@@ -38,5 +38,17 @@ endif
 if BUILD_HDF5_HL_CONDITIONAL
    SUBDIRS=src test $(CXX_DIR) $(FORTRAN_DIR)
 endif
+DIST_SUBDIRS=src test c++ fortran examples
+
+# Install examples
+install-examples uninstall-examples:
+	@(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
+
+# Check that examples can be successfully built
+check-install:
+	@$(MAKE) $(AM_MAKEFLAGS) installcheck
+
+installcheck-local:
+	@(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
 
 include $(top_srcdir)/config/conclude.am

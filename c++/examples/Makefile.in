@@ -29,6 +29,10 @@
 #
 # HDF5 Library Examples Makefile(.in)
 #
+
+# We can't tell automake about example programs, because they need to be
+# built using h5cc (or h5fc, etc.) instead of the standard compilers.
+# This creates some extra work for us.
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
@@ -53,7 +57,8 @@ build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/commence.am \
-	$(top_srcdir)/config/conclude.am
+	$(top_srcdir)/config/conclude.am \
+	$(top_srcdir)/config/examples.am
 subdir = c++/examples
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
@@ -301,32 +306,31 @@ TRACE = perl $(top_srcdir)/bin/trace
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
 # *.clog are from the MPE option.
-
-# These are the files that 'make clean' (and derivatives) will remove from this
-# directory.  Since automake doesn't know about the examples, we need to
-# tell it to clean the example programs, too.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5
 
 # These are the programs that 'make all' or 'make prog' will build and
 # which 'make check' will run.  List them in the order they should be run.
 TEST_PROG = create readdata writedata compound extend_ds chunks h5group
-EXAMPLE_PROG = $(TEST_PROG)
-
-# Tell conclude.in when to build the examples
-EXTRA_PROG = $(TEST_PROG)
 
 # These are the example files to be installed
 INSTALL_FILES = create.cpp readdata.cpp writedata.cpp compound.cpp         \
               extend_ds.cpp chunks.cpp h5group.cpp
 
-MOSTLYCLEANFILES = $(EXTRA_PROG:=.o)
-CLEANFILES = $(EXTRA_PROG)
 
 # Tell conclude.am that these are C++ tests.
 HDF_CXX = yes
 
-# How to install examples
+# Where to install examples
 EXAMPLEDIR = $(docdir)/hdf5/examples/c++
+
+# Assume that all tests in this directory are examples, and tell
+# conclude.am when to build them.
+EXAMPLE_PROG = $(TEST_PROG_PARA) $(TEST_PROG)
+EXTRA_PROG = $(EXAMPLE_PROG)
+
+# We need to tell automake what to clean
+MOSTLYCLEANFILES = *.raw *.meta *.o
+CLEANFILES = $(TEST_PROG) $(TEST_PROG_PARA)
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -347,7 +351,7 @@ TEST_SCRIPT_PARA_CHKSH = $(TEST_SCRIPT_PARA:=.chkexe_)
 all: all-am
 
 .SUFFIXES:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/conclude.am $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/examples.am $(top_srcdir)/config/conclude.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -530,40 +534,6 @@ check-install: installcheck
 readdata.chkexe_: create.chkexe_
 chunks.chkexe_: extend_ds.chkexe_
 
-$(EXAMPLEDIR):
-	-$(top_srcdir)/bin/mkdirs $@
-
-install-data-local:
-	@$(MAKE) install-examples
-uninstall-local:
-	@$(MAKE) uninstall-examples
-
-# Some C++ compilers/linkers will create a directory named ii_files,
-# which should be cleaned.
-mostlyclean-local:
-	if test -d ii_files; then                                       \
-	  $(RM) -rf ii_files;                                           \
-	fi
-
-# Install source files, which are the examples with .cpp suffixes.  Do the same
-# for uninstall.
-install-examples: $(EXAMPLEDIR)
-	@for f in X $(INSTALL_FILES); do                                      \
-	  if test $$f != X; then                                              \
-	    (set -x; $(INSTALL_DATA) $(top_srcdir)/c++/examples/$$f $(EXAMPLEDIR)/. || exit 1);\
-	  fi;                                                                 \
-	done
-
-uninstall-examples:
-	@if test -n "$(INSTALL_FILES)" -a -d $(EXAMPLEDIR); then              \
-	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_FILES).cpp;             \
-	fi
-
-check-install:
-	@$(MAKE) $(AM_MAKEFLAGS) installcheck
-installcheck-local:
-	@$(MAKE) $(AM_MAKEFLAGS) check
-
 # How to build programs using h5c++
 $(EXTRA_PROG): $(LIBHDF5) $(LIBH5CPP)
 	$(H5CPP) $(CPPFLAGS) -o $@ $(srcdir)/$@.cpp
@@ -579,6 +549,32 @@ compound: $(srcdir)/compound.cpp
 extend_ds: $(srcdir)/extend_ds.cpp
 chunks: $(srcdir)/chunks.cpp
 h5group: $(srcdir)/h5group.cpp
+
+# How to create EXAMPLEDIR if it doesn't already exist
+$(EXAMPLEDIR):
+	-$(top_srcdir)/bin/mkdirs $@
+
+# Install and uninstall rules.  We install the source files, not the
+# example programs themselves.
+install-data-local:
+	@$(MAKE) $(AM_MAKEFLAGS) install-examples
+uninstall-local:
+	@$(MAKE) $(AM_MAKEFLAGS) uninstall-examples
+
+install-examples: $(EXAMPLEDIR) $(INSTALL_FILES)
+	@for f in X $(INSTALL_FILES); do                                     \
+	  if test $$f != X; then                                             \
+	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLEDIR)/. || exit 1);\
+	  fi;                                                                \
+	done
+
+uninstall-examples:
+	@if test -n "$(INSTALL_FILES)" -a -d $(EXAMPLEDIR); then                                 \
+	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_FILES);              \
+        fi
+
+installcheck-local:
+	@$(MAKE) $(AM_MAKEFLAGS) check
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.

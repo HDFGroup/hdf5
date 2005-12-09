@@ -29,6 +29,10 @@
 #
 # HDF5-Fortran Examples Makefile(.in)
 #
+
+# We can't tell automake about example programs, because they need to be
+# built using h5cc (or h5fc, etc.) instead of the standard compilers.
+# This creates some extra work for us.
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
@@ -53,7 +57,8 @@ build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/commence.am \
-	$(top_srcdir)/config/conclude.am
+	$(top_srcdir)/config/conclude.am \
+	$(top_srcdir)/config/examples.am
 subdir = fortran/examples
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
@@ -301,7 +306,7 @@ TRACE = perl $(top_srcdir)/bin/trace
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
 # *.clog are from the MPE option.
-CHECK_CLEANFILES = *.chkexe *.chklog *.clog
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5
 
 # Compile parallel fortran examples only if parallel is enabled
 @BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_PROG_PARA = ph5example
@@ -316,10 +321,6 @@ TEST_PROG = dsetexample fileexample rwdsetexample attrexample groupexample    \
        refregexample mountexample compound
 
 
-# Tell configure.in when to build examples
-EXTRA_PROG = $(TEST_PROG) $(TEST_PROG_PARA)
-EXAMPLE_PROG = $(EXTRA_PROG)
-
 # List files to be installed here
 INSTALL_FILES = dsetexample.f90 fileexample.f90 rwdsetexample.f90             \
        attrexample.f90 groupexample.f90 grpsexample.f90 grpdsetexample.f90  \
@@ -327,15 +328,20 @@ INSTALL_FILES = dsetexample.f90 fileexample.f90 rwdsetexample.f90             \
        refregexample.f90 mountexample.f90 compound.f90 ph5example.f90
 
 
-# Tell automake which files to clean
-MOSTLYCLEANFILES = $(EXTRA_PROG:=.o)
-CLEANFILES = *.h5 $(EXTRA_PROG)
-
 # Mark this directory as part of the Fortran API
 HDF_FORTRAN = yes
 
 # Tell automake how to install examples
 EXAMPLEDIR = $(docdir)/hdf5/examples/fortran
+
+# Assume that all tests in this directory are examples, and tell
+# conclude.am when to build them.
+EXAMPLE_PROG = $(TEST_PROG_PARA) $(TEST_PROG)
+EXTRA_PROG = $(EXAMPLE_PROG)
+
+# We need to tell automake what to clean
+MOSTLYCLEANFILES = *.raw *.meta *.o
+CLEANFILES = $(TEST_PROG) $(TEST_PROG_PARA)
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -356,7 +362,7 @@ TEST_SCRIPT_PARA_CHKSH = $(TEST_SCRIPT_PARA:=.chkexe_)
 all: all-am
 
 .SUFFIXES:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/conclude.am $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/examples.am $(top_srcdir)/config/conclude.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -549,33 +555,6 @@ $(EXTRA_PROG): $(LIBHDF5) $(LIBH5F)
 @BUILD_PARALLEL_CONDITIONAL_TRUE@	$(H5FC_PP) $(FCFLAGS) -o $@ $(srcdir)/$@.f90;
 @BUILD_PARALLEL_CONDITIONAL_FALSE@	$(H5FC) $(FCFLAGS) -o $@ $(srcdir)/$@.f90;
 
-$(EXAMPLEDIR):
-	-$(top_srcdir)/bin/mkdirs $@
-
-install-data-local:
-	@$(MAKE) install-examples
-uninstall-local:
-	@$(MAKE) uninstall-examples
-
-# We're installing source files, not the example programs.  Add .f90 to each
-# example program to get its source (and do the same when uninstalling).
-install-examples: $(EXAMPLEDIR)
-	@for f in X $(INSTALL_FILES); do                                   \
-	  if test $$f != X; then                                           \
-	    (set -x; $(INSTALL_DATA) $(top_srcdir)/fortran/examples/$$f $(EXAMPLEDIR)/. || exit 1);\
-	  fi;                                                              \
-	done
-
-uninstall-examples:
-	@if test -n "$(INSTALL_FILES)" -a -d $(EXAMPLEDIR); then                               \
-	  set -x; cd $(EXAMPLEDIR) && $(RM) $(EXAMPLE_PROG);               \
-	fi
-
-check-install:
-	@$(MAKE) installcheck
-installcheck-local:
-	@$(MAKE) check
-
 # List dependencies for each example.  Normally, automake would take
 # care of this for us, but if we tell automake about the programs it
 # will try to build them with the normal C compiler, not h5cc.  This is
@@ -597,6 +576,32 @@ refregexample: refregexample.f90
 mountexample: mountexample.f90
 compound: compound.f90
 ph5example: ph5example.f90
+
+# How to create EXAMPLEDIR if it doesn't already exist
+$(EXAMPLEDIR):
+	-$(top_srcdir)/bin/mkdirs $@
+
+# Install and uninstall rules.  We install the source files, not the
+# example programs themselves.
+install-data-local:
+	@$(MAKE) $(AM_MAKEFLAGS) install-examples
+uninstall-local:
+	@$(MAKE) $(AM_MAKEFLAGS) uninstall-examples
+
+install-examples: $(EXAMPLEDIR) $(INSTALL_FILES)
+	@for f in X $(INSTALL_FILES); do                                     \
+	  if test $$f != X; then                                             \
+	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLEDIR)/. || exit 1);\
+	  fi;                                                                \
+	done
+
+uninstall-examples:
+	@if test -n "$(INSTALL_FILES)" -a -d $(EXAMPLEDIR); then                                 \
+	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_FILES);              \
+        fi
+
+installcheck-local:
+	@$(MAKE) $(AM_MAKEFLAGS) check
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.

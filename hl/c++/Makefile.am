@@ -20,5 +20,17 @@
 include $(top_srcdir)/config/commence.am
 
 SUBDIRS=src test
+DIST_SUBDIRS=src test examples
+
+# Install examples
+install-examples uninstall-examples:
+	@(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
+
+# Check that examples can be successfully built
+check-install:
+	@$(MAKE) $(AM_MAKEFLAGS) installcheck
+
+installcheck-local:
+	@(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
 
 include $(top_srcdir)/config/conclude.am

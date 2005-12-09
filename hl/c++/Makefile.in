@@ -72,7 +72,6 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	uninstall-recursive
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = $(SUBDIRS)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 
 # Set the paths for AFS installs of autotools for Linux machines
@@ -312,6 +311,7 @@ TRACE = perl $(top_srcdir)/bin/trace
 # *.clog are from the MPE option.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 SUBDIRS = src test
+DIST_SUBDIRS = src test examples
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -604,7 +604,7 @@ install-info: install-info-recursive
 
 install-man:
 
-installcheck-am:
+installcheck-am: installcheck-local
 
 maintainer-clean: maintainer-clean-recursive
 	-rm -f Makefile
@@ -634,12 +634,12 @@ uninstall-info: uninstall-info-recursive
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am install-exec \
 	install-exec-am install-info install-info-am install-man \
-	install-strip installcheck installcheck-am installdirs \
-	installdirs-am maintainer-clean maintainer-clean-generic \
-	maintainer-clean-recursive mostlyclean mostlyclean-generic \
-	mostlyclean-libtool mostlyclean-local mostlyclean-recursive \
-	pdf pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
-	uninstall-info-am
+	install-strip installcheck installcheck-am installcheck-local \
+	installdirs installdirs-am maintainer-clean \
+	maintainer-clean-generic maintainer-clean-recursive \
+	mostlyclean mostlyclean-generic mostlyclean-libtool \
+	mostlyclean-local mostlyclean-recursive pdf pdf-am ps ps-am \
+	tags tags-recursive uninstall uninstall-am uninstall-info-am
 
 
 # check-install is a synonym for installcheck.
@@ -655,6 +655,17 @@ check-install: installcheck
 .PHONY: build-check-clean build-check-p build-check-s build-lib build-progs \
         build-tests check-clean check-install check-p check-s check-vfd \
         install-doc lib progs tests uninstall-doc _exec_check-s _test
+
+# Install examples
+install-examples uninstall-examples:
+	@(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
+
+# Check that examples can be successfully built
+check-install:
+	@$(MAKE) $(AM_MAKEFLAGS) installcheck
+
+installcheck-local:
+	@(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.

@@ -29,6 +29,10 @@
 #
 # HDF5 Library Examples Makefile(.in)
 #
+
+# We can't tell automake about example programs, because they need to be
+# built using h5cc (or h5fc, etc.) instead of the standard compilers.
+# This creates some extra work for us.
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
@@ -53,7 +57,8 @@ build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/commence.am \
-	$(top_srcdir)/config/conclude.am
+	$(top_srcdir)/config/conclude.am \
+	$(top_srcdir)/config/examples.am
 subdir = examples
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
@@ -307,17 +312,10 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5
 # Example programs.
 # Don't tell automake about them, because if it knew they were programs,
 # it would try to compile them instead of using the h5cc script.
-# This creates some extra work for us.
-#
-# It might be possible to use automake's COMPILE variable to have it
-# use h5cc properly (and h5fc and h5c++).
+# Use the boilerplate in config/examples.am instead.
 TEST_PROG = h5_write h5_read h5_extend_write h5_chunk_read h5_compound   \
            h5_group h5_select h5_attribute h5_mount h5_reference h5_drivers
 
-
-# Tell conclude.in boilerplate when to build the examples
-EXAMPLE_PROG = $(TEST_PROG_PARA) $(TEST_PROG)
-EXTRA_PROG = $(EXAMPLE_PROG)
 
 # Install files
 # List all file that should be installed in examples directory
@@ -326,15 +324,17 @@ INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
           h5_reference.c h5_drivers.c ph5example.c
 
 
+# Example directory
+EXAMPLEDIR = $(docdir)/hdf5/examples/c
+
+# Assume that all tests in this directory are examples, and tell
+# conclude.am when to build them.
+EXAMPLE_PROG = $(TEST_PROG_PARA) $(TEST_PROG)
+EXTRA_PROG = $(EXAMPLE_PROG)
+
 # We need to tell automake what to clean
 MOSTLYCLEANFILES = *.raw *.meta *.o
 CLEANFILES = $(TEST_PROG) $(TEST_PROG_PARA)
-
-# How to install examples
-# There are a lot of rules because automake does not know about
-# the examples programs, and does not recognize the install-examples
-# target.
-EXAMPLEDIR = $(docdir)/hdf5/examples/c
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -355,7 +355,7 @@ TEST_SCRIPT_PARA_CHKSH = $(TEST_SCRIPT_PARA:=.chkexe_)
 all: all-am
 
 .SUFFIXES:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/conclude.am $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/examples.am $(top_srcdir)/config/conclude.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -543,33 +543,6 @@ $(EXTRA_PROG): $(LIBHDF5)
 h5_read.chkexe_: h5_write.chkexe_
 h5_chunk_read.chkexe_: h5_extend_write.chkexe_
 
-$(EXAMPLEDIR):
-	-$(top_srcdir)/bin/mkdirs $@
-
-install-data-local:
-	@$(MAKE) $(AM_MAKEFLAGS) install-examples
-uninstall-local:
-	@$(MAKE) $(AM_MAKEFLAGS) uninstall-examples
-
-# We want to install the source files, not the examples themselves.  Add '.c' to
-# each example to get its source.  This is a bit kludgy.
-install-examples: $(EXAMPLEDIR) $(INSTALL_FILES)
-	@for f in X $(INSTALL_FILES); do                                     \
-	  if test $$f != X; then                                             \
-	    (set -x; $(INSTALL) $(top_srcdir)/examples/$$f $(EXAMPLEDIR)/. || exit 1);\
-	  fi;                                                                \
-	done
-
-uninstall-examples:
-	@if test -n "$(INSTALL_FILES)" -a -d $(EXAMPLEDIR); then                                 \
-	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_FILES);              \
-	fi
-
-check-install:
-	@$(MAKE) $(AM_MAKEFLAGS) installcheck
-installcheck-local:
-	@$(MAKE) $(AM_MAKEFLAGS) check
-
 # List dependencies for each program.  Normally, automake would take
 # care of this for us, but if we tell automake about the programs it
 # will try to build them with the normal C compiler, not h5cc.  This is
@@ -589,6 +562,32 @@ h5_reference: $(srcdir)/h5_reference.c
 h5_drivers: $(srcdir)/h5_drivers.c
 ph5example: $(srcdir)/ph5example.c
 h5_dtransform: $(srcdir)/h5_dtransform.c
+
+# How to create EXAMPLEDIR if it doesn't already exist
+$(EXAMPLEDIR):
+	-$(top_srcdir)/bin/mkdirs $@
+
+# Install and uninstall rules.  We install the source files, not the
+# example programs themselves.
+install-data-local:
+	@$(MAKE) $(AM_MAKEFLAGS) install-examples
+uninstall-local:
+	@$(MAKE) $(AM_MAKEFLAGS) uninstall-examples
+
+install-examples: $(EXAMPLEDIR) $(INSTALL_FILES)
+	@for f in X $(INSTALL_FILES); do                                     \
+	  if test $$f != X; then                                             \
+	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLEDIR)/. || exit 1);\
+	  fi;                                                                \
+	done
+
+uninstall-examples:
+	@if test -n "$(INSTALL_FILES)" -a -d $(EXAMPLEDIR); then                                 \
+	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_FILES);              \
+        fi
+
+installcheck-local:
+	@$(MAKE) $(AM_MAKEFLAGS) check
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.

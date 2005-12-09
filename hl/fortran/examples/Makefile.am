@@ -22,7 +22,7 @@ include $(top_srcdir)/config/commence.am
 
 # Compile parallel fortran examples only if parallel is enabled
 if BUILD_PARALLEL_CONDITIONAL
-   TEST_PROG_PARA=ph5example
+   TEST_PROG_PARA=
 endif
 
 # These are the programs that 'make all' or 'make tests' will build and
@@ -30,30 +30,17 @@ endif
 # be run.
 # We don't tell automake about these programs so that it doesn't try to
 # compile them with the regular fortran compiler.
-TEST_PROG=dsetexample fileexample rwdsetexample attrexample groupexample    \
-       grpsexample grpdsetexample hyperslab selectele grpit refobjexample   \
-       refregexample mountexample compound
+TEST_PROG=
 
 # List files to be installed here
-INSTALL_FILES=dsetexample.f90 fileexample.f90 rwdsetexample.f90             \
-       attrexample.f90 groupexample.f90 grpsexample.f90 grpdsetexample.f90  \
-       hyperslab.f90 selectele.f90 grpit.f90 refobjexample.f90              \
-       refregexample.f90 mountexample.f90 compound.f90 ph5example.f90
+INSTALL_FILES=
 
 # Mark this directory as part of the Fortran API
 HDF_FORTRAN=yes
 
-# Some examples depend on files created by other examples.
-grpdsetexample.chkexe_: grpsexample.chkexe_
-refregexample.chkexe_: refobjexample.chkexe_
-# rwdsetexample and attrexample both modify the same file created by
-# dsetexample. Serialize them.
-rwdsetexample.chkexe_: dsetexample.chkexe_
-attrexample.chkexe_: rwdsetexample.chkexe_
-
 # Tell automake how to build examples using h5fc
 # Additional dependencies for the examples are listed below
-$(EXTRA_PROG): $(LIBHDF5) $(LIBH5F)
+$(EXTRA_PROG): $(LIBHDF5) $(LIBH5F) $(LIBH5F_HL)
 if BUILD_PARALLEL_CONDITIONAL
 	$(H5FC_PP) $(FCFLAGS) -o $@ $(srcdir)/$@.f90;
 else
@@ -61,7 +48,7 @@ else
 endif
 
 # Tell automake how to install examples
-EXAMPLEDIR=$(docdir)/hdf5/examples/fortran
+EXAMPLEDIR=$(docdir)/hdf5/examples/hl/fortran
 
 # List dependencies for each example.  Normally, automake would take
 # care of this for us, but if we tell automake about the programs it
@@ -69,21 +56,6 @@ EXAMPLEDIR=$(docdir)/hdf5/examples/fortran
 # an inelegant way of solving the problem.
 # All programs share the same build rule and a dependency on the main hdf5
 # and fortran libraries above.
-dsetexample: dsetexample.f90
-fileexample: fileexample.f90
-rwdsetexample: rwdsetexample.f90
-attrexample: attrexample.f90
-groupexample: groupexample.f90
-grpsexample: grpsexample.f90
-grpdsetexample: grpdsetexample.f90
-hyperslab: hyperslab.f90
-selectele: selectele.f90
-grpit: grpit.f90
-refobjexample: refobjexample.f90
-refregexample: refregexample.f90
-mountexample: mountexample.f90
-compound: compound.f90
-ph5example: ph5example.f90
 
 include $(top_srcdir)/config/examples.am
 include $(top_srcdir)/config/conclude.am

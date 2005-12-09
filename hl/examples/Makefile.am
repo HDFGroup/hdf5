@@ -21,36 +21,29 @@
 include $(top_srcdir)/config/commence.am
 
 if BUILD_PARALLEL_CONDITIONAL
-  TEST_PROG_PARA = ph5example
+  TEST_PROG_PARA =
 endif
 
 # Example programs.
 # Don't tell automake about them, because if it knew they were programs,
 # it would try to compile them instead of using the h5cc script.
 # Use the boilerplate in config/examples.am instead.
-TEST_PROG = h5_write h5_read h5_extend_write h5_chunk_read h5_compound   \
-           h5_group h5_select h5_attribute h5_mount h5_reference h5_drivers
+TEST_PROG = ptExampleFL ptExampleVL
 
 # Install files
 # List all file that should be installed in examples directory
-INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
-          h5_compound.c h5_group.c h5_select.c h5_attribute.c h5_mount.c \
-          h5_reference.c h5_drivers.c ph5example.c
+INSTALL_FILES = ptExampleFL.c ptExampleVL.c
 
 # Additional dependencies for each program are listed below.
-$(EXTRA_PROG): $(LIBHDF5)
+$(EXTRA_PROG): $(LIBHDF5) $(LIBH5_HL)
 if BUILD_PARALLEL_CONDITIONAL
 	$(H5CC_PP) $(CFLAGS) -o $@ $(srcdir)/$@.c;
 else
 	$(H5CC) $(CFLAGS) -o $@ $(srcdir)/$@.c;
 endif
 
-# Two of the examples depend on files created by other examples.
-h5_read.chkexe_: h5_write.chkexe_
-h5_chunk_read.chkexe_: h5_extend_write.chkexe_
-
 # Example directory
-EXAMPLEDIR=$(docdir)/hdf5/examples/c
+EXAMPLEDIR=$(docdir)/hdf5/examples/hl/c
 
 # List dependencies for each program.  Normally, automake would take
 # care of this for us, but if we tell automake about the programs it
@@ -58,19 +51,8 @@ EXAMPLEDIR=$(docdir)/hdf5/examples/c
 # an inelegant way of solving the problem.
 # All programs share the same build rule and a dependency on the main hdf5
 # library above.
-h5_chunk_read: $(srcdir)/h5_chunk_read.c
-h5_compound: $(srcdir)/h5_compound.c
-h5_extend_write: $(srcdir)/h5_extend_write.c
-h5_group: $(srcdir)/h5_group.c
-h5_write: $(srcdir)/h5_write.c
-h5_read: $(srcdir)/h5_read.c
-h5_select: $(srcdir)/h5_select.c
-h5_attribute: $(srcdir)/h5_attribute.c
-h5_mount: $(srcdir)/h5_mount.c
-h5_reference: $(srcdir)/h5_reference.c
-h5_drivers: $(srcdir)/h5_drivers.c
-ph5example: $(srcdir)/ph5example.c
-h5_dtransform: $(srcdir)/h5_dtransform.c
+ptExampleFL: $(srcdir)/ptExampleFL.c
+ptExampleVL: $(srcdir)/ptExampleVL.c
 
 include $(top_srcdir)/config/examples.am
 include $(top_srcdir)/config/conclude.am

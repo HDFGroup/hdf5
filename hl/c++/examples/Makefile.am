@@ -22,37 +22,27 @@ include $(top_srcdir)/config/commence.am
 
 # These are the programs that 'make all' or 'make prog' will build and
 # which 'make check' will run.  List them in the order they should be run.
-TEST_PROG=create readdata writedata compound extend_ds chunks h5group
+TEST_PROG=ptExampleFL ptExampleVL
 
 # These are the example files to be installed
-INSTALL_FILES=create.cpp readdata.cpp writedata.cpp compound.cpp         \
-              extend_ds.cpp chunks.cpp h5group.cpp
-
-# Some of the examples depend on files created by running other examples
-readdata.chkexe_: create.chkexe_
-chunks.chkexe_: extend_ds.chkexe_
+INSTALL_FILES=ptExampleFL.cpp ptExampleVL.cpp
 
 # Tell conclude.am that these are C++ tests.
 HDF_CXX=yes
 
 # Where to install examples
-EXAMPLEDIR=$(docdir)/hdf5/examples/c++
+EXAMPLEDIR=$(docdir)/hdf5/examples/hl/c++
 
 # How to build programs using h5c++
-$(EXTRA_PROG): $(LIBHDF5) $(LIBH5CPP)
+$(EXTRA_PROG): $(LIBHDF5) $(LIBH5CPP) $(LIBH5CPP_HL)
 	$(H5CPP) $(CPPFLAGS) -o $@ $(srcdir)/$@.cpp
 
 # List dependencies for each program.  Normally, automake would take
 # care of this for us, but if we tell automake about the programs it
 # will try to build them with the normal C++ compiler, not h5c++.  This is
 # an inelegant way of solving the problem, unfortunately.
-create: $(srcdir)/create.cpp
-readdata: $(srcdir)/readdata.cpp
-writedata: $(srcdir)/writedata.cpp
-compound: $(srcdir)/compound.cpp
-extend_ds: $(srcdir)/extend_ds.cpp
-chunks: $(srcdir)/chunks.cpp
-h5group: $(srcdir)/h5group.cpp
+ptExampleFL: ptExampleFL.cpp
+ptExampleVL: ptExampleVL.cpp
 
 include $(top_srcdir)/config/examples.am
 include $(top_srcdir)/config/conclude.am
