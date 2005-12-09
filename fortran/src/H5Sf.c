@@ -321,7 +321,7 @@ nh5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint,
   hsize_t c_num_points;
   hsize_t c_startpoint,* c_buf;
   int rank;
-  hsize_t i;
+  hssize_t i;
 
   c_space_id = *space_id;
   c_num_points = (hsize_t)* numpoints;
@@ -334,7 +334,7 @@ nh5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint,
   if (!c_buf) return ret_value;
   ret_value = H5Sget_select_elem_pointlist(c_space_id, c_startpoint,
                                             c_num_points, c_buf);
-  for (i = c_num_points*rank-1; i >= 0; i--) {
+  for (i = (c_num_points*rank)-1; i >= 0; i--) {
       buf[i] = (hsize_t_f)(c_buf[i]+1);
   }
 
