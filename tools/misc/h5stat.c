@@ -15,6 +15,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include "H5private.h"		/* Generic Functions			*/
 #include "hdf5.h"
 
 #define TRUE 1
