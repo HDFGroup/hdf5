@@ -114,8 +114,8 @@ static int allwrite_allread_blocks(int numprocs, int rank, int write_size)
 
     mpio_result = MPI_File_close(&fh);
     CHECK_SUCCESS(mpio_result);
-    free(writebuf);
-    free(readbuf);
+    HDfree(writebuf);
+    HDfree(readbuf);
 
     return err_flag;
 
@@ -188,8 +188,8 @@ static int posix_allwrite_allread_blocks(int numprocs, int rank, int write_size)
     if(rank == 0)
 	unlink(testfile);
 
-    free(writebuf);
-    free(readbuf);
+    HDfree(writebuf);
+    HDfree(readbuf);
     return err_flag;
 
 }
@@ -267,8 +267,8 @@ static int posix_onewrite_allread_blocks(int numprocs, int rank, int write_size)
     if(rank == 0)
 	unlink(testfile);
 
-    free(writebuf);
-    free(readbuf);
+    HDfree(writebuf);
+    HDfree(readbuf);
     return err_flag;
 
 }
@@ -355,8 +355,8 @@ static int posix_onewrite_allread_interlaced(int numprocs, int rank, int write_s
     if(rank == 0)
 	unlink(testfile);
 
-    free(writebuf);
-    free(readbuf);
+    HDfree(writebuf);
+    HDfree(readbuf);
     return err_flag;
 
 }
@@ -424,8 +424,8 @@ static int allwrite_allread_interlaced(int numprocs, int rank, int write_size)
     mpio_result = MPI_File_close(&fh);
     CHECK_SUCCESS(mpio_result);
 
-    free(writebuf);
-    free(readbuf);
+    HDfree(writebuf);
+    HDfree(readbuf);
     return err_flag;
 
 
@@ -544,8 +544,8 @@ static int allwrite_allread_overlap(int numprocs, int rank, int write_size)
 
     mpio_result = MPI_File_close(&fh);
     CHECK_SUCCESS(mpio_result);
-    free(writebuf);
-    free(readbuf);
+    HDfree(writebuf);
+    HDfree(readbuf);
 
     return err_flag;
 
@@ -593,8 +593,8 @@ static int onewrite_allread_blocks(int numprocs, int rank, int write_size)
  
     mpio_result = MPI_File_close(&fh);
     CHECK_SUCCESS(mpio_result);
-    free(writebuf);
-    free(readbuf);
+    HDfree(writebuf);
+    HDfree(readbuf);
 
     return err_flag;
 
@@ -656,8 +656,8 @@ static int onewrite_allread_interlaced(int numprocs, int rank, int write_size)
 
     mpio_result = MPI_File_close(&fh);
     CHECK_SUCCESS(mpio_result);
-    free(writebuf);
-    free(readbuf);
+    HDfree(writebuf);
+    HDfree(readbuf);
 
     return err_flag;
 
@@ -698,7 +698,7 @@ int main(int argc, char* argv[])
 		break;
 	    case 'm':
 		mpi_tests = 1;
-		posix_tests = 1;
+		posix_tests = 0;
 		break;
 	    case 'p':
 		/* need 2 extra--1 for the / and 1 for the terminating NULL. */
@@ -829,7 +829,7 @@ done:
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Finalize();
 
-    return err_flag;
+    return 0;
 }
 
 
