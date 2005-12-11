@@ -21,27 +21,18 @@
 
 # This is for the ASCI RED STORM machine
 
-# The default compiler is `cc'
-if test "X-" = "X-$CC"; then
-    CC=cc
-    CC_BASENAME=cc
+# Define RUNPARALLEL and RUNSERIAL if parallel mode is enabled or a parallel
+# compiler is used.
+if test "X-$enable_parallel" = "X-yes" -o X-$CC_BASENAME = X-mpicc; then
+    RUNSERIAL=${RUNSERIAL:-"yod -sz 1"}
+    RUNPARALLEL=${RUNPARALLEL:-"yod -sz 3"}
+    # Disable stream-vfd option.  It does not work in parallel mode.
+    enable_stream_vfd="${enable_stream_vfd:-no}"
+    # Turn off shared lib option.  It does not work in parallel mode.
+    enable_shared="${enable_shared:-no}"
 fi
 
-# There is no ranlib
-RANLIB=:
-
-# Additional libraries
-LIBS="$LIBS"
-
-# How to run serial and parallel test programs
-RUNSERIAL=${RUNSERIAL:-"yod -sz 1"}
-RUNPARALLEL=${RUNPARALLEL:-"yod -sz 3"}
-
-# CFLAGS must be set else configure set it to -g
-CFLAGS="$CFLAGS"
-
-# What must *always* be present for things to compile correctly?
-#CPPFLAGS="$CPPFLAGS -I."
+CFLAGS="$CFLAGS -DRED_STORM"
 
 # What compiler flags should be used for code development?
 DEBUG_CFLAGS=-g
@@ -55,12 +46,6 @@ PROD_CPPFLAGS=
 # What compiler flags enable code profiling?
 PROFILE_CFLAGS=-pg
 PROFILE_CPPFLAGS=
-
-# Turn off shared lib option.  It does not work for Redstorm yet.
-enable_shared="${enable_shared:-no}"
-
-# Disable stream-vfd option.  It does not work for Redstorm.
-enable_stream_vfd="${enable_stream_vfd:-no}"
 
 # Set this to the width required by printf() to print type `long
 # long'.  For instance, if the format would be `%lld' then set it to
@@ -82,7 +67,9 @@ ac_cv_sizeof_float=${ac_cv_sizeof_float='4'}
 ac_cv_type_double=${ac_cv_type_double=yes}
 ac_cv_sizeof_double=${ac_cv_sizeof_double='8'}
 ac_cv_type_long_double=${ac_cv_type_long_double=yes}
-ac_cv_sizeof_long_double=${ac_cv_sizeof_long_double='8'}
+# no cache for long double which varies in size in different compilers.
+# gcc defines it as 12 bytes but pgcc defines it as 8 bytes.
+#ac_cv_sizeof_long_double=${ac_cv_sizeof_long_double='8'}
 ac_cv_type_long_long=${ac_cv_type_long_long=yes}
 ac_cv_sizeof_long_long=${ac_cv_sizeof_long_long='8'}
 ac_cv_type_size_t=${ac_cv_type_size_t=yes}
@@ -174,3 +161,5 @@ hdf5_cv_ullong_to_fp_cast_works=${hdf5_cv_ullong_to_fp_cast_works='yes'}
 hdf5_cv_ullong_to_ldouble_precision_works=${hdf5_cv_ullong_to_ldouble_precision_works='yes'}
 hdf5_cv_vsnprintf_works=${hdf5_cv_vsnprintf_works='yes'}
 hdf5_cv_fp_to_integer_overflow_works=${hdf5_cv_fp_to_integer_overflow_works='yes'}
+# mpich2 used has derived datatype errors.
+hdf5_mpi_complex_derived_datatype_works=${hdf5_mpi_complex_derived_datatype_works='no'}
