@@ -24,6 +24,9 @@
 # Notice that this code works only if the mpicc compiler shows its $MPIVERSION
 # properly.  It is confirmed mpicc does that as far back as v1.2.3.
 
+# mpich2 do not support it correctly.  But mpich2 reports small version number
+# indistiguishable from mpich.  Some mpich2 reports blank, some reports 1.0.2.
+
 if [ -z "$hdf5_mpi_complex_derived_datatype_works" ]; then
     ccversion=`$CC -v 2>/dev/null`
     # mpich compiler will give "mpicc for 1.2.x ..."
@@ -32,6 +35,15 @@ if [ -z "$hdf5_mpi_complex_derived_datatype_works" ]; then
         ccversion=`echo $ccversion | cut -f3 -d' '`
 	case "$ccversion" in
 	    1.2.[0-5]*)
+		hdf5_mpi_complex_derived_datatype_works='no'
+		;;
+	    1.0.2)
+		# mpich2 is recycling the version number, some report
+		# 1.0.2, some report blank.
+		hdf5_mpi_complex_derived_datatype_works='no'
+		;;
+	    "")
+		# got blank ccversion.  Assume it is bad a mpich2.
 		hdf5_mpi_complex_derived_datatype_works='no'
 		;;
 	    *)
