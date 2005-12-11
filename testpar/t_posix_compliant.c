@@ -38,6 +38,7 @@
 #include <stdlib.h>
 #include <mpi.h>
 #include "h5test.h"
+#define  TESTFNAME	"posix_test"	/* test file name */
 
 static char*		testfile = NULL;
 static int		err_flag = 0;
@@ -669,24 +670,13 @@ int main(int argc, char* argv[])
     int lb, ub, inc;
     int	write_size = 0;
     char    optstring[] = "h x m p: s: v:";
+    char *prefix;
     
     err_flag = 0;
     
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-    testfile = getenv_all(MPI_COMM_WORLD, 0, "HDF5_PARAPREFIX");
-    if(!testfile)
-    {
-	testfile = strdup("posix_test");
-    }
-    else
-    {
-	testfile = (char*) realloc(testfile, strlen(testfile) + 1 + strlen("posix_test"));
-	strcat(testfile, "/posix_test");
-    }
-    
 
     while((opt = getopt(argc, argv, optstring)) != -1)
     {
@@ -711,12 +701,11 @@ int main(int argc, char* argv[])
 		posix_tests = 1;
 		break;
 	    case 'p':
-		testfile = (char*) realloc(testfile, strlen(optarg) + 1 + strlen("posix_test"));	
-		memset(testfile, 0, strlen(optarg)+1+strlen("posix_test"));
+		/* need 2 extra--1 for the / and 1 for the terminating NULL. */
+		testfile = (char*) HDmalloc(strlen(optarg) + 2 + strlen(TESTFNAME));
 		strcpy(testfile, optarg);
 		/* Append a / just in case they didn't end their path with one */
-		strcat(testfile, "/posix_test");
-		fprintf(stderr, "Task %d setting testfile to: %s\n", rank, testfile);
+		strcat(testfile, "/" TESTFNAME);
 		break;
 	    case 's':
 		write_size = atoi(optarg);
@@ -730,6 +719,24 @@ int main(int argc, char* argv[])
     if( (optind < argc) && (rank == 0))
 	fprintf(stderr, "Unkown command-line argument passed.  Continuing anyway...\n");
 
+    if (!testfile){
+	/* Try environment variable if not given as option. */
+	prefix = getenv_all(MPI_COMM_WORLD, 0, "HDF5_PARAPREFIX");
+	if (prefix)
+	{
+	    /* need 2 extra--1 for the / and 1 for the terminating NULL. */
+	    testfile = (char*) HDmalloc(strlen(prefix) + 2 + strlen(TESTFNAME));
+	    strcpy(testfile, prefix);
+	    /* Append a / just in case they didn't end their path with one */
+	    strcat(testfile, "/" TESTFNAME);
+	}
+	else
+	{
+	    testfile = strdup(TESTFNAME);
+	}
+    }
+    printf("Proc %d: testfile=%s\n", rank, testfile);
+    
     if(write_size == 0)
     {
 	lb = 1024;
@@ -743,6 +750,9 @@ int main(int argc, char* argv[])
 	inc = 2;
     }
     
+    /* set alarm. */
+    ALARM_ON;
+
     for(write_size = lb; write_size <= ub; write_size*=inc)
     {
 	if(rank == 0)
@@ -809,7 +819,13 @@ int main(int argc, char* argv[])
 */
 	}
     }
+
+    /* turn off alarm */
+    ALARM_OFF;
+
 done:
+    if (testfile)
+	HDfree(testfile);
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Finalize();
 
