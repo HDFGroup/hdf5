@@ -76,6 +76,21 @@ H5_init_library(void)
     herr_t ret_value=SUCCEED;
 
     FUNC_ENTER_NOAPI(H5_init_library, FAIL)
+#if defined(H5_HAVE_PARALLEL) && defined(RED_STORM)
+/* A temporary patch for redstorm, must open a file in the same parallel
+ * data filesystem before H5_init_library.  Otherwise, it hangs with error:
+ * (client.c:568:ptlrpc_check_status()) @@@ type == PTL_RPC_MSG_ERR, err == -114 req@0x57a9660 x1/t0 o38->mds_l2@MDS_PEER_UUID:12 lens 240/272 ref 1 fl Rpc:R/100000/0 rc 0/-114
+ */
+#define H5_redstorm_patch(scr_dir) \
+{ \
+char *fname=scr_dir "/hdf5/junk"; \
+/* printf("redstorm parallel patch on %s\n", scr_dir); */ \
+fclose(fopen(fname, "w+")); remove(fname); \
+}
+
+H5_redstorm_patch("/scratch1");
+H5_redstorm_patch("/scratch2");
+#endif
     /*
      * Make sure the package information is updated.
      */
