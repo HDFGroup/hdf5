@@ -18,10 +18,6 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "hdf5.h"
 
-#define TRUE 1
-#define FALSE 0
-#define MAX(x,y)        ((x) < (y) ? (y) : (x))
-
 /* Parameters to control statistics gathered */
 #define SIZE_SMALL_GROUPS       10
 #define SIZE_SMALL_DSETS        10
