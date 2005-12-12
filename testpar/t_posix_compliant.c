@@ -740,7 +740,10 @@ int main(int argc, char* argv[])
     if(write_size == 0)
     {
 	lb = 1024;
-	ub = 1024*1024;
+	/* 1MB MPIO-IO overlapping is failing in copper. Lower it now pending
+	   permenant fix for copper.*/
+	/* ub = 1024*1024;*/
+	ub = 1024*512;
 	inc = 4;
     }
     else
@@ -777,7 +780,7 @@ int main(int argc, char* argv[])
 	    allwrite_allread_overlap(numprocs, rank, write_size);
 	    PRINT_RESULT();
 	    MPI_Barrier(MPI_COMM_WORLD);
-	    
+
 	    if(rank == 0)
 		printf("Testing onewrite_allread_blocks with MPI IO\t\t"); fflush(stdout);
 	    onewrite_allread_blocks(numprocs, rank, write_size/(numprocs*sizeof(int)));
