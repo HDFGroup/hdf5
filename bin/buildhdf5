@@ -236,8 +236,11 @@ fi
 # Compile
 STEP "Make HDF5..." "$MAKE" "#make"
 
-# Tests
-STEP "Testing HDF5..." "$MAKE check" "#test"
+# Serial tests 
+STEP "Testing HDF5 serial parts..." "$MAKE check-s" "#test-s"
+
+# Parallel tests
+STEP "Testing HDF5 parallel parts..." "$MAKE check-p" "#test-p"
 
 # all done
 echo "No Errors encountered"
