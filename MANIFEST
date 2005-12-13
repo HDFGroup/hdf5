@@ -73,6 +73,7 @@
 ./config/dec-flags
 ./config/dec-osf4.x
 ./config/dec-osf5.x
+./config/examples.am
 ./config/freebsd
 ./config/gnu-fflags
 ./config/gnu-flags
