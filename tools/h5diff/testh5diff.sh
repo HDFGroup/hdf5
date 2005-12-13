@@ -71,6 +71,32 @@ TESTING() {
    echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
+# Some systems will dump some messages to stdout for various reasons.
+# Remove them from the stdout result file.
+# $1 is the file name of the file to be filtered.
+# Cases of filter needed:
+# 1. Sandia Red-Storm
+#    yod always prints these two lines at the beginning.
+#    LibLustre: NAL NID: 0004a605 (5)
+#    Lustre: OBD class driver Build Version: 1, info@clusterfs.com
+# 2. LANL Lambda
+#    mpijob mirun -np always add an extra line at the end like:
+#    P4 procgroup file is /users/acheng/.lsbatch/host10524.l82
+STDOUT_FILTER() {
+    result_file=$1
+    tmp_file=/tmp/h5test_tmp_$$
+    # Filter Sandia Red-Storm yod messages.
+    cp $result_file $tmp_file
+    sed -e '/^LibLustre:/d' -e '/^Lustre:/d' \
+	< $tmp_file > $result_file
+    # Filter LANL Lambda mpirun message.
+    cp $result_file $tmp_file
+    sed -e '/^P4 procgroup file is/d' \
+	< $tmp_file > $result_file
+    # cleanup
+    rm -f $tmp_file
+}
+
 # Some systems will dump some messages to stderr for various reasons.
 # Remove them from the stderr result file.
 # $1 is the file name of the file to be filtered.
@@ -90,7 +116,7 @@ TESTING() {
 #    Debug output all have prefix "h5diff debug: ".
 STDERR_FILTER() {
     result_file=$1
-    tmp_file=/tmp/h5diff_tmp_$$
+    tmp_file=/tmp/h5test_tmp_$$
     # Filter MPE messages
     if test -n "$pmode"; then
 	cp $result_file $tmp_file
@@ -129,7 +155,8 @@ TOOLTEST() {
     expect="$srcdir/../testfiles/$1"
     actual="../testfiles/`basename $1 .txt`.out"
     actual_err="../testfiles/`basename $1 .txt`.err"
-    tmp_err=${actual_err}-tmp
+    actual_sav=${actual}-sav
+    actual_err_sav=${actual_err}-sav
     shift
     if test -n "$pmode"; then
 	RUNCMD=$RUNPARALLEL
@@ -152,10 +179,12 @@ TOOLTEST() {
 	    eval $RUNCMD $H5DIFF_BIN "$@"
 	fi
     ) >$actual 2>$actual_err
-    # save actual_err in case it is needed later.
-    cp $actual_err $tmp_err
-    STDERR_FILTER $tmp_err
-    cat $tmp_err >> $actual
+    # save actual and actual_err in case they are needed later.
+    cp $actual $actual_sav
+    STDOUT_FILTER $actual
+    cp $actual_err $actual_err_sav
+    STDERR_FILTER $actual_err
+    cat $actual_err >> $actual
 
     if [ ! -f $expect ]; then
     # Create the expect file if it doesn't yet exist.
@@ -184,11 +213,11 @@ TOOLTEST() {
 	    if test yes = "$verbose"; then
 		echo "====Expected result ($expect_sorted) differs from actual result ($actual_sorted)"
 		$DIFF $expect_sorted $actual_sorted |sed 's/^/    /'
-		echo "====The actual result ($actual)"
-		sed 's/^/    /' < $actual 
-		echo "====The part that is actual stderr ($actual_err)"
-		sed 's/^/    /' < $actual_err 
-		echo "====End of actual stderr ($actual_err)"
+		echo "====The actual output ($actual_sav)"
+		sed 's/^/    /' < $actual_sav 
+		echo "====The actual stderr ($actual_err_sav)"
+		sed 's/^/    /' < $actual_err_sav 
+		echo "====End of actual stderr ($actual_err_sav)"
 		echo ""
 	    fi
 	fi
@@ -196,7 +225,8 @@ TOOLTEST() {
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-	rm -f $actual $actual_err $actual_sorted $tmp_err $expect_sorted
+	rm -f $actual $actual_err $actual_sav $actual_err_sav
+	rm -f $actual_sorted $expect_sorted
     fi
 }
 
