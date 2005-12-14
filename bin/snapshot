@@ -436,8 +436,9 @@ if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
 	    # cvs commit if errors encounter here.
 	    set -e
 	    cd ${CURRENT}
-	    bin/release -d $ARCHIVES $METHODS
 	    RELEASE_VERSION="`perl bin/h5vers -v`"
+	    echo "Making snapshot release ($RELEASE_VERSION) to ${ARCHIVES}..."
+	    bin/release -d $ARCHIVES $METHODS
 	    perl bin/h5vers -i
 	    cvs -Q commit -m "Snapshot $RELEASE_VERSION"
 	)
