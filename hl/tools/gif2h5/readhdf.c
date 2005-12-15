@@ -12,6 +12,8 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #include "gif.h"
+#include "h5tools.h"
+
 
 /* just a small cleanup routine before we leave */
 void
@@ -38,19 +40,26 @@ cleanup(BYTE *ptr)
 ** specified, if the palette is missing, it makes a default greyscale
 ** palette and throws it in.
 **
+** Modifications: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+** Date: December 15, 2005
+** Changed the HDF5 read routines to use memory types and sizes,
+**  for both the image and pallete datasets
+**
 */
 int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
             CHAR *h5_file, CHAR *dset_name, CHAR *pal_name)
 {
-    hid_t fHfile;       /* H5 file to open                              */
-    hid_t dspace;       /* dataspace identifier for the the dataset     */
-    hid_t dtype;        /* datatype identifier for the the dataset     */
-    hid_t dset;	        /* dataset identifier                           */
-    hid_t pal_set;      /* dataset for palette                          */
-    hid_t pal_space;    /* dataspace for palette                        */
-    hid_t pal_dtype;     /* datatype for palette                        */
-    hsize_t datasize;	/* size of the image                            */
-    int pal_exist = 0;  /* do we have a palette?                        */
+    hid_t    fHfile;       /* H5 file to open                              */
+    hid_t    dspace;       /* dataspace identifier for the the dataset     */
+    hid_t    dtype;        /* datatype identifier for the the dataset      */
+				hid_t    mtype_id;     /* memory data type ID                          */
+				size_t   msize;        /* memory size of memory type                   */
+    hid_t    dset;	        /* dataset identifier                           */
+    hid_t    pal_set;      /* dataset for palette                          */
+    hid_t    pal_space;    /* dataspace for palette                        */
+    hid_t    pal_dtype;    /* datatype for palette                         */
+    hsize_t  datasize;	    /* size of the image                            */
+    int      pal_exist=0;  /* do we have a palette?                        */
 
     /* check stuff */
     if (!h5_file || !dset_name || !image_size) {
@@ -102,17 +111,29 @@ int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
         return -1;
     }
 
+				/* get memory type */						
+				if ((mtype_id=h5tools_get_native_type(dtype))<0){
+					fprintf(stderr , "Unable to get memory type\n");
+					return -1;
+				}
+				
+				/* get memory datatype size */	
+				if ((msize=H5Tget_size(mtype_id))==0){
+					fprintf(stderr , "Unable to get memory size\n");
+					return -1;
+				}
+
     /* size needed to store the image */
     datasize = image_size[0] * image_size[1];
 
     /* allocate memory to store the image */
-    if ((*data = (BYTE*) malloc((size_t)datasize)) == NULL) {
+    if ((*data = (BYTE*) malloc((size_t)datasize*msize)) == NULL) {
         fprintf(stderr , "Out of memory, exiting");
         return -1;
     }
 
     /* get the actual image */
-    if (H5Dread(dset , H5Tget_native_type(dtype, H5T_DIR_ASCEND) , H5S_ALL , H5S_ALL , H5P_DEFAULT , *data) < 0) {
+    if (H5Dread(dset , mtype_id, H5S_ALL , H5S_ALL , H5P_DEFAULT , *data) < 0) {
         fprintf(stderr , "Unable to read data \n");
         cleanup(*data);
         return -1;
@@ -121,8 +142,8 @@ int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
     if (pal_exist) {
         hsize_t loc_pal_size[2];
         hsize_t pal_datasize;
-        BYTE *temp_buf;
-        hsize_t temp_size;
+								hid_t   pal_mtype_id;    
+        void    *temp_buf;
 
         /* get the palette dataset */
         if ((pal_set = H5Dopen(fHfile , pal_name)) < 0) {
@@ -159,13 +180,27 @@ int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
             return -1;
         }
 
+								/* get memory type */						
+								if ((pal_mtype_id=h5tools_get_native_type(pal_dtype))<0){
+            fprintf(stderr , "Unable to get memory type\n");
+            return -1;
+        }
+								
+								/* get memory datatype size */	
+								if ((msize=H5Tget_size(pal_mtype_id))==0){
+            fprintf(stderr , "Unable to get memory size\n");
+            return -1;
+        }
+						
         /* size needed to store the image */
         pal_datasize = loc_pal_size[0] * loc_pal_size[1];
 
         /* copy stuff into a temp buffer and then copy 256*3 elements to palette */
-        temp_size = H5Dget_storage_size(pal_set);
-        temp_buf = (BYTE*) malloc ((size_t)temp_size * sizeof(BYTE));
-
+								temp_buf=(void *) malloc((unsigned)(pal_datasize*msize));
+											if ( temp_buf==NULL){
+												printf( "cannot read into memory\n" );
+												return -1;
+											}
         /*
          * make sure that the palette is actually 256 X 3 so that we don't
          * create overflows
@@ -177,7 +212,7 @@ int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
         }
 
         /* get the actual palette */
-        if (H5Dread(pal_set , H5Tget_native_type(pal_dtype, H5T_DIR_ASCEND) , H5S_ALL , H5S_ALL , H5P_DEFAULT , temp_buf) < 0) {
+        if (H5Dread(pal_set , pal_mtype_id, H5S_ALL , H5S_ALL , H5P_DEFAULT , temp_buf) < 0) {
             fprintf(stderr , "Unable to read data \n");
             cleanup(*data);
             cleanup(temp_buf);
@@ -189,6 +224,12 @@ int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
 
         /* get rid of the temp memory */
         cleanup(temp_buf);
+								
+								/* close pal ids */
+								H5Dclose(pal_set);
+								H5Sclose(pal_space);
+								H5Tclose(pal_dtype);
+								H5Tclose(pal_mtype_id);
         /* end of if (pal_exist) */
     } else {
         int i;
@@ -206,6 +247,8 @@ int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
     /* close everything */
     H5Dclose(dset);
     H5Sclose(dspace);
+				H5Tclose(dtype);
+				H5Tclose(mtype_id);
     H5Fclose(fHfile);
     return 0;
 }
