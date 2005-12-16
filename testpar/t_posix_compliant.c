@@ -32,12 +32,25 @@
  * larber@ncsa.uiuc.edu
 */
 
+/* To compile this outside of the HDF5 library, you can do so by defining the
+ * macro STANDALONE. E.g.,
+ *     mpicc -DSTANDALONE t_posix_compliant.c -o t_posix_compliant
+ * then run it as an MPI application.  E.g.,
+ *     mpirun -np 3 ./t_posix_compliant
+ */
+ 
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <mpi.h>
+#ifndef STANDALONE
 #include "h5test.h"
+#else
+#define HDmalloc(sz)	malloc(sz)
+#define HDfree(p)	free(p)
+#define getenv_all(comm, root, name)	getenv(name)
+#endif
 #define  TESTFNAME	"posix_test"	/* test file name */
 
 static char*		testfile = NULL;
@@ -753,8 +766,10 @@ int main(int argc, char* argv[])
 	inc = 2;
     }
     
+#ifndef STANDALONE
     /* set alarm. */
     ALARM_ON;
+#endif
 
     for(write_size = lb; write_size <= ub; write_size*=inc)
     {
@@ -823,8 +838,10 @@ int main(int argc, char* argv[])
 	}
     }
 
+#ifndef STANDALONE
     /* turn off alarm */
     ALARM_OFF;
+#endif
 
 done:
     if (testfile)
