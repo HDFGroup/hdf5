@@ -1678,6 +1678,7 @@
 ./windows/hl/examples/test_hl_cexamples.BAT
 ./windows/hl/examples/allhlcexamples/allhlcexamples.dsp
 ./windows/hl/examples/allhlcexamples/allhlcexamples.dsw
+./windows/hl/examples/ex_images/ex_images.dsp
 ./windows/hl/examples/ex_imagesdll/ex_imagesdll.dsp
 ./windows/hl/examples/ex_lite/ex_lite.dsp
 ./windows/hl/examples/ex_litedll/ex_litedll.dsp
