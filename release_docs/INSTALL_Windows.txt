@@ -227,7 +227,7 @@ Notes:
    3. Examples (Not included in the binary distribution)
 
       HDF5 examples:
-           simple HDF5 C/C++/Fortran and High level C examples
+           simple HDF5 C/C++/Fortran and High level C/Fortran examples
 
 ========================================================================
       Section II: How to build and test HDF5 libraries and tools 
@@ -893,10 +893,10 @@ The <release> layout of <hdf5lib> should be:
 You may also find the similar layout for the <debug>.
 
 
-STEP 4: Building HDF5 C/C++/Fortran and High Level C examples (Optional)
+STEP 4: Building HDF5 C/C++/Fortran & HL C/Fortran examples (Optional)
 
 Simple examples have been provided for users to test HDF5
-C/C++/Fortran and high level c library and tools.
+C/C++/Fortran and high level C/Fortran library and tools.
 
 Note: 
       1) To build HDF5 C++ examples, HDF5 C++ library must have been
@@ -916,7 +916,7 @@ Note:
          HDF5 C/C++/Fortran libraries and DLLs.
 
 To build and test HDF5 C examples:
-
+----------------------------------
    1. Invoke Microsoft Visual C++, go to "File" and select
       the "Open Workspace" option. 
       
@@ -985,6 +985,7 @@ To build and test HDF5 C examples:
       will be given.
 
 To build and test HDF5 C++ examples:
+------------------------------------
 
    1. Invoke Microsoft Visual C++ 6.0, choose "File" and select
       the "Open Workspace" option. 
@@ -1054,6 +1055,7 @@ To build and test HDF5 C++ examples:
       will be given.
 
 To build and test HDF5 Fortran example:
+---------------------------------------
 
    1. Invoke Compaq Visual Fortran or intel Fortran under Microsoft 
       Visual studio development environment, go to "File" and select
@@ -1117,30 +1119,33 @@ To build and test HDF5 Fortran example:
       versions of the examples should be built before this step is done.
       
 To build and test HDF5 High Level C examples:
+---------------------------------------------
 
    1. Invoke Microsoft Visual C++, go to "File" and select
       the "Open Workspace" option. 
       
-      Then open the workspace
-      c:\MyHDFstuff\hdf5\windows\hl\hl_c_examples\hl_c_examples.dsw.
+      Then open the workspace 
+
+c:\MyHDFstuff\hdf5\windows\hl\examples\allhlcexamples\allhlcexamples.dsw
 
    2. Select "Build", then Select "Set Active Configuration". 
 
        2.1 To build debug versions of High Level C examples.
    	   In "Project configurations", select 
-           "hl_c_examples -- Win32 Debug", select "ok". Select 
+           "allhlcexamples -- Win32 Debug", select "ok". Select 
            "Build" -> "Build" or "Rebuild All" to build debug version 
-           of project "hl_c_examples".
+           of project "allhlcexamples".
 
        2.2 To build release versions of C examples.
    	   In "Project configurations", select 
-           "hl_c_examples -- Win32 Release", select "ok". Select 
+           "allhlcexamples -- Win32 Release", select "ok". Select 
            "Build" -> "Build" or "Rebuild All" to build release version
-           of project "hl_c_examples".
+           of project "allhlcexamples".
 
       When the debug build or release build is done, there should be the 
-      following subdirectories in c:\MyHDFstuff\hdf5\hl\hl_c_examples
+      following subdirectories in c:\MyHDFstuff\hdf5\hl\examples
 
+          allhlcexamples
           ex_images
           ex_imagesdll
           ex_lite
@@ -1152,13 +1157,13 @@ To build and test HDF5 High Level C examples:
       Install_hlcexamples.bat which resides in the top level directory
       (c:\MyHDFstuff\hdf5).  This file creates 4 new directories, 
       HLCexamplesRELEASE, HLCexamplesRELEASEDLL, HLCexamplesDEBUG, and 
-      HLCexamplesDEBUGDLL, in the c:\MyHDFstuff\hdf5\hl\hl_c_examples 
+      HLCexamplesDEBUGDLL, in the c:\MyHDFstuff\hdf5\hl\examples 
       directory and places all the executables in it. Both the release 
       and debug versions of the examples should be built before this 
       step is done.
 
    4. We provide a batch file named test_hl_cexamples.bat in 
-      c:\MyHDFstuff\hdf5\hl\hl_c_examples directory for you to test 
+      c:\MyHDFstuff\hdf5\hl\examples directory for you to test 
       HDF5 high level C examples.
       
       test_hl_cexamples.bat batch file has 4 options:
@@ -1187,6 +1192,72 @@ To build and test HDF5 High Level C examples:
       
       Similar messages should be generated with another three options 
       If the high level C examples are built successfully.
+
+To build and test HDF5 High Level Fortran examples:
+---------------------------------------------------
+
+   1. Invoke Compaq Visual Fortran 6.6c, open the workspace
+
+    c:\MyHDFstuff\hdf5\windows\hl\fortran\examples\ (continue next line)
+      allhlf90examples\allhlf90examples.dsw
+
+   2. Select "Build", then Select "Set Active Configuration".
+
+       2.1 To build debug versions of High Level Fortran examples.
+           In "Project configurations", select
+           "allhlf90examples -- Win32 Debug", select "ok". Select
+           "Build" -> "Build" or "Rebuild All" to build debug version
+           of project "allhlf90examples".
+
+       2.2 To build release versions of Fortran examples.
+           In "Project configurations", select
+           "allhlf90examples -- Win32 Release", select "ok". Select
+           "Build" -> "Build" or "Rebuild All" to build release version
+           of project "allhlf90examples".
+
+      When the debug build or release build is done, there should be the
+      following subdirectories in c:\MyHDFstuff\hdf5\hl\fortran\examples
+
+          ex_lite
+          ex_litedll
+
+3. Invoke a command prompt window and run the batch file
+      Install_hlf90examples.bat which resides in the top level directory
+      (c:\MyHDFstuff\hdf5).  This file creates 4 new directories,
+      HLf90examplesRELEASE, HLf90examplesRELEASEDLL, HLf90examplesDEBUG, 
+      and HLf90examplesDEBUGDLL, in the 
+      c:\MyHDFstuff\hdf5\hl\fortran\examples directory and places all 
+      the executables in it. Both the release
+      and debug versions of the examples should be built before this
+      step is done.
+
+   4. We provide a batch file named test_hl_f90examples.bat in
+      c:\MyHDFstuff\hdf5\hl\fortran\examples directory for you to test
+      HDF5 high level fortran examples.
+
+      test_hl_f90examples.bat batch file has 4 options:
+
+         Options                          purpose
+
+         test_hl_f90examples release      -- for release version
+
+         test_hl_f90examples release dll  -- for release DLL version
+
+         test_hl_f90examples debug        -- for debug version
+
+         test_hl_f90examples debug dll    -- for debug DLL version
+
+      Invoke a command prompt window and run test_hl_f90examples with
+      appropriate options.
+
+      When you run "test_hl_f90examples release", the output will look
+      like:
+      
+          release  version of High Level Fortran examples     PASSED
+
+      Similar messages should be generated with another three options
+      If the high level Fortran examples are built successfully.
+
 
 ========================================================================
    Section III: Building an application using the HDF5 library or DLL
