@@ -345,6 +345,7 @@ H5_HLDLL hid_t H5LTcreate_compound_type( hsize_t nfields, size_t size, const cha
                                 const size_t *field_offset, const hid_t *field_types );
 
 H5_HLDLL hid_t H5LTtext_to_dtype(const char *text);
+H5_HLDLL herr_t H5LTdtype_to_text(hid_t dtype, char *str, size_t *len);
 
 H5_HLDLL herr_t  H5LTrepack( hsize_t nfields,
                    hsize_t nrecords,
@@ -365,8 +366,6 @@ H5_HLDLL herr_t  H5LTrepack( hsize_t nfields,
  *
  *-------------------------------------------------------------------------
  */
-
-
 H5_HLDLL herr_t  H5LT_get_attribute_mem( hid_t obj_id,
                            const char *attr_name,
                            hid_t mem_type_id,
@@ -377,7 +376,6 @@ H5_HLDLL herr_t  H5LT_get_attribute_disk( hid_t obj_id,
                            void *data );
 
 H5_HLDLL herr_t  H5LT_find_attribute( hid_t loc_id, const char *name );
-
 
 H5_HLDLL herr_t  H5LT_set_attribute_numerical( hid_t loc_id,
                                      const char *obj_name,
@@ -390,8 +388,7 @@ H5_HLDLL herr_t  H5LT_set_attribute_string( hid_t dset_id,
                                  char *name,
                                  char *buf );
 
-
-
+H5_HLDLL herr_t  H5LT_dtype_to_text(hid_t dtype, char **dt_str, size_t *slen, hbool_t no_user_buf);
 
 #ifdef __cplusplus
 }
