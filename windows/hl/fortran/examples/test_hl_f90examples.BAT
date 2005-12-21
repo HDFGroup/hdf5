@@ -29,11 +29,14 @@ if %2.==. GOTO TEST
 GOTO WRONG
 
 :TEST
-echo Testing %1 %2 version of High Level Fortran examples 
 echo.
-
 HLf90examples%1%2\ex_lite%2
-
+if ERRORLEVEL == 0 (
+echo. %1 %2 version of High Level Fortran examples     PASSED
+)else (
+echo. %1 %2 version of High Level Fortran examples     FAILED
+)
+echo.
 GOTO END
 
 :WRONG
