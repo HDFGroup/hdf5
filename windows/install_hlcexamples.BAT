@@ -18,7 +18,7 @@
 @:: Created on   : 07/25/2005
 @:: Last Modified: 
 
-cd hl/hl_c_examples
+cd hl/examples
 
 mkdir HLCexamplesRELEASE
 mkdir HLCexamplesRELEASEDLL
