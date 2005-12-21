@@ -1370,6 +1370,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name hdf5
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name toolslib
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -1384,6 +1387,9 @@ Package=<4>
 {{{
     Begin Project Dependency
     Project_Dep_Name hdf5dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name toolslibD
     End Project Dependency
 }}}
 
