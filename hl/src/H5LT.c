@@ -2067,7 +2067,7 @@ indentation(int x, char* str)
  *
  *-----------------------------------------------------------------------*/
 static herr_t
-print_enum(hid_t type, char* str, int indent)
+print_enum(hid_t type, char* str, int indt)
 {
     char           **name = NULL;   /*member names                   */
     unsigned char   *value = NULL;  /*value array                    */
@@ -2102,8 +2102,8 @@ print_enum(hid_t type, char* str, int indent)
     dst_size = H5Tget_size(native);
     
     /* Get the names and raw values of all members */
-    name = calloc(nmembs, sizeof(char *));
-    value = calloc(nmembs, MAX(dst_size, super_size));
+    name = (char**)calloc(nmembs, sizeof(char *));
+    value = (unsigned char*)calloc(nmembs, MAX(dst_size, super_size));
 
     for (i = 0; i < nmembs; i++) {
 	if((name[i] = H5Tget_member_name(type, i))==NULL)
@@ -2125,7 +2125,7 @@ print_enum(hid_t type, char* str, int indent)
 
     /* Print members */
     for (i = 0; i < nmembs; i++) {
-	indentation(indent + COL, str);
+	indentation(indt + COL, str);
 	nchars = sprintf(tmp_str, "\"%s\"", name[i]);
         strcat(str, tmp_str);
 	sprintf(tmp_str, "%*s   ", MAX(0, 16 - nchars), "");
@@ -2157,7 +2157,7 @@ print_enum(hid_t type, char* str, int indent)
     H5Tclose(super);
 
     if (0 == nmembs) {
-	sprintf(tmp_str, "\n%*s <empty>", indent + 4, "");
+	sprintf(tmp_str, "\n%*s <empty>", indt + 4, "");
         strcat(str, tmp_str);
     }
 
@@ -2227,25 +2227,25 @@ out:
  */
 herr_t H5LT_dtype_to_text(hid_t dtype, char **dt_str, size_t *slen, hbool_t no_user_buf)
 {
-    H5T_class_t class;
+    H5T_class_t tcls;
     char        tmp_str[256];
     char        *tmp;
-    unsigned    i;
+    int         i;
     herr_t      ret = SUCCEED;
 
     if(no_user_buf && ((*slen - strlen(*dt_str)) < LIMIT)) {
         *slen += INCREMENT;
-        tmp = realloc(*dt_str, *slen);
+        tmp = (char*)realloc(*dt_str, *slen);
         if(tmp != *dt_str) {
            free(*dt_str);
            *dt_str = tmp;
         }
     }
     
-    if((class = H5Tget_class(dtype))<0)
+    if((tcls = H5Tget_class(dtype))<0)
         goto out;
     
-    switch (class) {
+    switch (tcls) {
         case H5T_INTEGER:
             if (H5Tequal(dtype, H5T_STD_I8BE)) {
                 sprintf(*dt_str, "H5T_STD_I8BE");
@@ -2504,7 +2504,7 @@ next:
                 goto out;
             if(H5LTdtype_to_text(super, NULL, &super_len)<0)
                 goto out;
-            stmp = calloc(super_len, sizeof(char));
+            stmp = (char*)calloc(super_len, sizeof(char));
             if(H5LTdtype_to_text(super, stmp, &super_len)<0)
                 goto out;            
             strcat(*dt_str, stmp);
@@ -2537,7 +2537,7 @@ next:
                 goto out;
             if(H5LTdtype_to_text(super, NULL, &super_len)<0)
                 goto out;
-            stmp = calloc(super_len, sizeof(char));
+            stmp = (char*)calloc(super_len, sizeof(char));
             if(H5LTdtype_to_text(super, stmp, &super_len)<0)
                 goto out;            
             strcat(*dt_str, stmp);
@@ -2582,7 +2582,7 @@ next:
                 goto out;
             if(H5LTdtype_to_text(super, NULL, &super_len)<0)
                 goto out;
-            stmp = calloc(super_len, sizeof(char));
+            stmp = (char*)calloc(super_len, sizeof(char));
             if(H5LTdtype_to_text(super, stmp, &super_len)<0)
                 goto out;            
             strcat(*dt_str, stmp);
@@ -2604,7 +2604,10 @@ next:
             H5T_class_t mclass;
             size_t      mlen;
             char*       mtmp;
-            unsigned    nmembs = H5Tget_nmembers(dtype);
+            int         nmembs;
+           
+            if((nmembs = H5Tget_nmembers(dtype))<0)
+                goto out;
 
             sprintf(*dt_str, "H5T_COMPOUND {\n");
             indent += COL;
@@ -2623,7 +2626,7 @@ next:
 
                 if(H5LTdtype_to_text(mtype, NULL, &mlen)<0)
                     goto out;
-                mtmp = calloc(mlen, sizeof(char));
+                mtmp = (char*)calloc(mlen, sizeof(char));
                 if(H5LTdtype_to_text(mtype, mtmp, &mlen)<0)
                     goto out;            
                 strcat(*dt_str, mtmp);
