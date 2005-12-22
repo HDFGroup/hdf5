@@ -1,17 +1,3 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright by the Board of Trustees of the University of Illinois.         *
- * All rights reserved.                                                      *
- *                                                                           *
- * This file is part of HDF5.  The full HDF5 copyright notice, including     *
- * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
- * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 %{
 #include<stdio.h>
 #include<string.h>
@@ -54,12 +40,11 @@ hbool_t     is_enum_memb = 0;       /*flag to lexer for enum member*/
 char*   enum_memb_symbol;           /*enum member symbol string*/
 
 hbool_t is_opq_size = 0;               /*flag to lexer for opaque type size*/
-hbool_t is_opq_tag = 0;                /*flag to lexer for opaque type tag*/
 
 %}
 %union {
     int   ival;         /*for integer token*/
-    char  *sval;        /*for compound member name*/
+    char  *sval;        /*for name string*/
 }
 
 %token <ival> H5T_STD_I8BE_TOKEN H5T_STD_I8LE_TOKEN H5T_STD_I16BE_TOKEN  H5T_STD_I16LE_TOKEN
@@ -77,7 +62,7 @@ hbool_t is_opq_tag = 0;                /*flag to lexer for opaque type tag*/
 %token <ival> H5T_STR_NULLTERM_TOKEN H5T_STR_NULLPAD_TOKEN H5T_STR_SPACEPAD_TOKEN 
 %token <ival> H5T_CSET_ASCII_TOKEN H5T_C_S1_TOKEN H5T_FORTRAN_S1_TOKEN
 
-%token <ival> H5T_OPAQUE_TOKEN OPQ_SIZE_TOKEN OPQ_TAG_TOKEN
+%token <ival> H5T_OPAQUE_TOKEN OPQ_SIZE_TOKEN
 
 %token <ival> H5T_COMPOUND_TOKEN
 %token <ival> H5T_ENUM_TOKEN
@@ -218,16 +203,9 @@ opaque_type     :       H5T_OPAQUE_TOKEN
                                 $<ival>$ = H5Tcreate(H5T_OPAQUE, size);
                                 is_opq_size = 0;    
                             } 
-                            OPQ_TAG_TOKEN { is_opq_tag = 1; } '"' opaque_tag '"' ';'
-                            {  
-                                H5Tset_tag($<ival>7, yylval.sval);
-                                is_opq_tag = 0;
-                            } 
                         '}' { $<ival>$ = $<ival>7; }
                 ;
 opaque_size     :       NUMBER
-                ;
-opaque_tag      :       STRING
                 ;
 
 string_type     :       H5T_STRING_TOKEN 

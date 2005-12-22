@@ -77,7 +77,7 @@ libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libhdf5_hl_la_LIBADD =
 am_libhdf5_hl_la_OBJECTS = H5LT.lo H5TB.lo H5IM.lo H5DS.lo H5PT.lo \
-	H5HL_private.lo y.tab.lo lex.yy.lo
+	H5HL_private.lo H5LTparse.lo H5LTanalyze.lo
 libhdf5_hl_la_OBJECTS = $(am_libhdf5_hl_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
@@ -340,10 +340,10 @@ AM_CPPFLAGS = -I$(top_srcdir)/src
 
 # This library is our main target.
 lib_LTLIBRARIES = libhdf5_hl.la
-libhdf5_hl_la_SOURCES = H5LT.c H5TB.c H5IM.c H5DS.c H5PT.c H5HL_private.c y.tab.c lex.yy.c
+libhdf5_hl_la_SOURCES = H5LT.c H5TB.c H5IM.c H5DS.c H5PT.c H5HL_private.c H5LTparse.c H5LTanalyze.c
 
 # Public header files (to be installed)
-include_HEADERS = H5IM.h H5LT.h H5TB.h H5DS.h H5PT.h y.tab.h
+include_HEADERS = H5IM.h H5LT.h H5TB.h H5DS.h H5PT.h H5LTparse.h
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -431,10 +431,10 @@ mostlyclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5HL_private.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5IM.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5LT.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5LTanalyze.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5LTparse.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5PT.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5TB.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lex.yy.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/y.tab.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -674,7 +674,7 @@ check-install: installcheck
         build-tests check-clean check-install check-p check-s check-vfd \
         install-doc lib progs tests uninstall-doc _exec_check-s _test
 
-# Automake naturally assumes that we want it to remove y.tab.c on distclean.
+# Automake naturally assumes that we want it to remove H5LTparse.c on distclean.
 # Convince it otherwise.
 distclean-compile:
 

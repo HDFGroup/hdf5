@@ -25,12 +25,12 @@ AM_CPPFLAGS=-I$(top_srcdir)/src
 # This library is our main target.
 lib_LTLIBRARIES=libhdf5_hl.la
 
-libhdf5_hl_la_SOURCES=H5LT.c H5TB.c H5IM.c H5DS.c H5PT.c H5HL_private.c y.tab.c lex.yy.c
+libhdf5_hl_la_SOURCES=H5LT.c H5TB.c H5IM.c H5DS.c H5PT.c H5HL_private.c H5LTparse.c H5LTanalyze.c
 
 # Public header files (to be installed)
-include_HEADERS=H5IM.h H5LT.h H5TB.h H5DS.h H5PT.h y.tab.h
+include_HEADERS=H5IM.h H5LT.h H5TB.h H5DS.h H5PT.h H5LTparse.h
 
-# Automake naturally assumes that we want it to remove y.tab.c on distclean.
+# Automake naturally assumes that we want it to remove H5LTparse.c on distclean.
 # Convince it otherwise.
 distclean-compile:
 

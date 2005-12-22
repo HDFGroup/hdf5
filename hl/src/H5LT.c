@@ -2479,10 +2479,6 @@ next:
             sprintf(tmp_str, "OPQ_SIZE %d;\n", H5Tget_size(dtype));
             strcat(*dt_str, tmp_str);
              
-            indentation(indent + COL, *dt_str);
-            sprintf(tmp_str, "OPQ_TAG \"%s\";\n", H5Tget_tag(dtype));
-            strcat(*dt_str, tmp_str);
-
             /* Print closing */
             indent -= COL;
             indentation(indent + COL, *dt_str);

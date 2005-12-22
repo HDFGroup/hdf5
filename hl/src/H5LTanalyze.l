@@ -1,22 +1,8 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright by the Board of Trustees of the University of Illinois.         *
- * All rights reserved.                                                      *
- *                                                                           *
- * This file is part of HDF5.  The full HDF5 copyright notice, including     *
- * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
- * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 %{
 #include <stdlib.h>
 #include <string.h>
 #include<hdf5.h>
-#include "y.tab.h"
+#include "H5LTparse.h"
 
 int my_yyinput(char *, int);
 #undef YY_INPUT
@@ -55,7 +41,6 @@ extern hbool_t is_str_pad;
 
 /*variables for opaque type*/
 extern hbool_t is_opq_size;
-extern hbool_t is_opq_tag;
 
 hbool_t        first_quote = 1;
 
@@ -127,7 +112,6 @@ H5T_VLEN         {return token(H5T_VLEN_TOKEN);}
 
 H5T_OPAQUE       {return token(H5T_OPAQUE_TOKEN);}
 OPQ_SIZE         {return token(OPQ_SIZE_TOKEN);}
-OPQ_TAG          {return token(OPQ_TAG_TOKEN);}
 
 [0-9]+           {    
                         if(is_str_size || (is_enum && is_enum_memb) || 
@@ -139,8 +123,8 @@ OPQ_TAG          {return token(OPQ_TAG_TOKEN);}
                  }
 
 "\""             {
-                    /*if it's first quote, and is a opaque tag or an enum symbol*/
-                    if((is_opq_tag || is_enum || (csindex>-1 && cmpd_stack[csindex].is_field)) && first_quote) {
+                    /*if it's first quote, and is a compound field name or an enum symbol*/
+                    if((is_enum || (csindex>-1 && cmpd_stack[csindex].is_field)) && first_quote) {
                         first_quote = 0;
                         BEGIN TAG_STRING;
                     } else /*if it's second quote*/

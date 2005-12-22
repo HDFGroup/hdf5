@@ -1238,14 +1238,13 @@ static int test_opaques(void)
 {
     hid_t   dtype;
     size_t  opq_size;
-    char    *opq_tag = NULL;
     H5T_class_t type_class;
     char*   dt_str;
     size_t  str_len;
 
     TESTING3("        text for opaque types");
     
-    if((dtype = H5LTtext_to_dtype("H5T_OPAQUE { OPQ_SIZE 19; OPQ_TAG \"This is a tag for opaque type\"; }"))<0)
+    if((dtype = H5LTtext_to_dtype("H5T_OPAQUE { OPQ_SIZE 19; }"))<0)
         goto out;
       
     if((type_class = H5Tget_class(dtype))<0)
@@ -1258,18 +1257,12 @@ static int test_opaques(void)
     if(opq_size != 19)
         goto out;
  
-    if((opq_tag = H5Tget_tag(dtype)) == NULL)
-        goto out;
-    if(strcmp(opq_tag, "This is a tag for opaque type"))
-       goto out;
-    free(opq_tag);
-
     if(H5LTdtype_to_text(dtype, NULL, &str_len)<0)
         goto out; 
     dt_str = (char*)calloc(str_len, sizeof(char));
     if(H5LTdtype_to_text(dtype, dt_str, &str_len)<0)
         goto out; 
-    if(strcmp(dt_str, "H5T_OPAQUE {\n      OPQ_SIZE 19;\n      OPQ_TAG \"This is a tag for opaque type\";\n   }")) {
+    if(strcmp(dt_str, "H5T_OPAQUE {\n      OPQ_SIZE 19;\n   }")) {
         printf("dt=\n%s\n", dt_str);
         goto out;
     }
