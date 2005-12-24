@@ -17,8 +17,8 @@
 #else
 #include <iostream>
 #endif
-#include <string>
 
+#include <string>
 #ifndef H5_NO_NAMESPACE
 #ifndef H5_NO_STD
     using std::string;
@@ -116,7 +116,7 @@ void H5File::p_get_file(const char* name, unsigned int flags, const FileCreatPro
 {
     // These bits only set for creation, so if any of them are set,
     // create the file.
-    if( flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC|H5F_ACC_DEBUG ))
+    if( flags & (H5F_ACC_CREAT|H5F_ACC_EXCL|H5F_ACC_TRUNC|H5F_ACC_DEBUG))
     {
 	hid_t create_plist_id = create_plist.getId();
 	hid_t access_plist_id = access_plist.getId();
@@ -146,6 +146,25 @@ void H5File::p_get_file(const char* name, unsigned int flags, const FileCreatPro
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5File::H5File( const H5File& original ) : IdComponent( original ) {}
+
+//--------------------------------------------------------------------------
+// Function:	H5File::flush
+///\brief	Flushes all buffers associated with a file to disk.
+///\param	scope - IN: Specifies the scope of the flushing action,
+///		which can be either of these values:
+///		\li \c H5F_SCOPE_GLOBAL - Flushes the entire virtual file
+///		\li \c H5F_SCOPE_LOCAL - Flushes only the specified file
+///\exception	H5::FileIException
+// Programmer	Binh-Minh Ribler - Dec. 2005
+//--------------------------------------------------------------------------
+void H5File::flush(H5F_scope_t scope ) const
+{
+   herr_t ret_value = H5Fflush( id, scope );
+   if( ret_value < 0 )
+   {
+      throw FileIException("H5File::flush", "H5Fflush returned negative value");
+   }
+}
 
 //--------------------------------------------------------------------------
 // Function:	H5File::isHdf5

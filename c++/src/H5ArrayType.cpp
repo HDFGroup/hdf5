@@ -13,7 +13,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
-
 #ifndef H5_NO_NAMESPACE
 #ifndef H5_NO_STD
     using std::string;

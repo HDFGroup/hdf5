@@ -17,8 +17,8 @@
 #else
 #include <iostream>
 #endif
-#include <string>
 
+#include <string>
 #ifndef H5_NO_NAMESPACE
 #ifndef H5_NO_STD
     using std::string;
@@ -160,8 +160,7 @@ bool DataType::operator==(const DataType& compared_type ) const
       return false;
    else
    {
-      throw DataTypeIException(inMemFunc("operator=="),
-		"H5Tequal returns negative value");
+      throw DataTypeIException(inMemFunc("operator=="), "H5Tequal returns negative value");
    }
 }
 
@@ -530,8 +529,7 @@ string DataType::getTag() const
    }
    else
    {
-      throw DataTypeIException(inMemFunc("getTag"),
-		"H5Tget_tag returns NULL for tag");
+      throw DataTypeIException(inMemFunc("getTag"), "H5Tget_tag returns NULL for tag");
    }
 }
 
@@ -554,7 +552,7 @@ bool DataType::detectClass(H5T_class_t cls) const
    else
    {
       throw DataTypeIException(inMemFunc("detectClass"),
-		"H5Tdetect_class returns negative value");
+				"H5Tdetect_class returns negative value");
    }
 }
 
@@ -576,7 +574,7 @@ bool DataType::isVariableStr() const
    else
    {
       throw DataTypeIException(inMemFunc("isVariableStr"),
-                "H5Tis_variable_str returns negative value");
+                		"H5Tis_variable_str returns negative value");
    }
 }
 

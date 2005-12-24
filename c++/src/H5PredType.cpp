@@ -13,7 +13,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
-
 #ifndef H5_NO_NAMESPACE
 #ifndef H5_NO_STD
     using std::string;
@@ -43,13 +42,13 @@ namespace H5 {
 ///		predefined datatype.
 ///\param	predtype_id - IN: Id of a predefined datatype
 // Description
-// 		This constructor creates a predefined datatype, so it sets
-// 		DataType::is_predtype to true.
+// 		This constructor creates a PredType object by copying
+//		the provided HDF5 predefined datatype.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 PredType::PredType( const hid_t predtype_id ) : AtomType( predtype_id )
 {
-   id = H5Tcopy(predtype_id);
+    id = H5Tcopy(predtype_id);
 }
 
 //--------------------------------------------------------------------------
@@ -72,6 +71,7 @@ const PredType PredType::NotAtexit;	// only for atexit/global dest. problem
 // Definition of pre-defined types
 const PredType PredType::C_S1( H5T_C_S1 );
 const PredType PredType::FORTRAN_S1( H5T_FORTRAN_S1 );
+
 const PredType PredType::STD_I8BE( H5T_STD_I8BE );
 const PredType PredType::STD_I8LE( H5T_STD_I8LE );
 const PredType PredType::STD_I16BE( H5T_STD_I16BE );

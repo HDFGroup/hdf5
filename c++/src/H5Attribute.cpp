@@ -17,8 +17,8 @@
 #else
 #include <iostream>
 #endif
-#include <string>
 
+#include <string>
 #ifndef H5_NO_NAMESPACE
 #ifndef H5_NO_STD
     using std::string;
@@ -80,7 +80,8 @@ Attribute::Attribute(const hid_t existing_id) : AbstractDs(existing_id) {}
 //--------------------------------------------------------------------------
 void Attribute::write( const DataType& mem_type, const void *buf ) const
 {
-   herr_t ret_value = H5Awrite( id, mem_type.getId(), buf );
+cerr << "Attribute::write: mem_type.id = " << mem_type.getId() << endl;
+   herr_t ret_value = H5Awrite( id, mem_type.getId(), &buf );
    if( ret_value < 0 )
    {
       throw AttributeIException("Attribute::write", "H5Awrite failed");
@@ -102,7 +103,7 @@ void Attribute::write( const DataType& mem_type, const string& strg ) const
    const char* strg_C;
    strg_C = strg.c_str();  // strg_C refers to the contents of strg as a C-str
 
-   herr_t ret_value = H5Awrite( id, mem_type.getId(), strg_C );
+   herr_t ret_value = H5Awrite( id, mem_type.getId(), &strg_C );
    if( ret_value < 0 )
    {
       throw AttributeIException("Attribute::write", "H5Awrite failed");
