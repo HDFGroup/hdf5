@@ -80,8 +80,7 @@ Attribute::Attribute(const hid_t existing_id) : AbstractDs(existing_id) {}
 //--------------------------------------------------------------------------
 void Attribute::write( const DataType& mem_type, const void *buf ) const
 {
-cerr << "Attribute::write: mem_type.id = " << mem_type.getId() << endl;
-   herr_t ret_value = H5Awrite( id, mem_type.getId(), &buf );
+   herr_t ret_value = H5Awrite( id, mem_type.getId(), buf );
    if( ret_value < 0 )
    {
       throw AttributeIException("Attribute::write", "H5Awrite failed");
@@ -140,7 +139,7 @@ void Attribute::read( const DataType& mem_type, string& strg ) const
 {
    size_t size = mem_type.getSize();
    char* strg_C = new char[size+1];  // temporary C-string for C API
-   herr_t ret_value = H5Aread( id, mem_type.getId(), strg_C );
+   herr_t ret_value = H5Aread( id, mem_type.getId(), &strg_C );
    if( ret_value < 0 )
    {
       throw AttributeIException("Attribute::read", "H5Aread failed");
