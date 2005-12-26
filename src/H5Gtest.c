@@ -1,0 +1,318 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *              Monday, October 17, 2005
+ *
+ * Purpose:	Group testing functions.
+ */
+
+#define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
+#define H5G_TESTING		/*suppress warning about H5G testing funcs*/
+
+
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Dprivate.h"		/* Datasets				*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Gpkg.h"		/* Groups		  		*/
+#include "H5HLprivate.h"	/* Local Heaps				*/
+#include "H5Iprivate.h"		/* IDs			  		*/
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5G_is_empty_test
+ PURPOSE
+    Determine whether a group contains no objects
+ USAGE
+    htri_t H5G_is_empty_test(gid)
+        hid_t gid;              IN: group to check
+ RETURNS
+    Non-negative TRUE/FALSE on success, negative on failure
+ DESCRIPTION
+    Checks to see if the group has no link messages and no symbol table message
+    dimensionality and shape.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    DO NOT USE THIS FUNCTION FOR ANYTHING EXCEPT TESTING
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t
+H5G_is_empty_test(hid_t gid)
+{
+    H5G_t *grp = NULL;          /* Pointer to group */
+    htri_t msg_exists = 0;      /* Indicate that a header message is present */
+    htri_t ret_value = TRUE;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_is_empty_test, FAIL)
+
+    /* Get group structure */
+    if(NULL == (grp = H5I_object_verify(gid, H5I_GROUP)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
+
+    /* Check if the group has any link messages */
+    if((msg_exists = H5O_exists(&(grp->oloc), H5O_LINK_ID, 0, H5AC_dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+    if(msg_exists > 0)
+        HGOTO_DONE(FALSE)
+
+    /* Check if the group has a symbol table message */
+    if((msg_exists = H5O_exists(&(grp->oloc), H5O_STAB_ID, 0, H5AC_dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+    if(msg_exists > 0)
+        HGOTO_DONE(FALSE)
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5G_is_empty_test() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5G_has_links_test
+ PURPOSE
+    Determine whether a group contains link messages
+ USAGE
+    htri_t H5G_has_links_test(gid)
+        hid_t gid;              IN: group to check
+        unsigned *nmsgs;        OUT: # of link messages in header
+ RETURNS
+    Non-negative TRUE/FALSE on success, negative on failure
+ DESCRIPTION
+    Checks to see if the group has link messages and how many.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    DO NOT USE THIS FUNCTION FOR ANYTHING EXCEPT TESTING
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t
+H5G_has_links_test(hid_t gid, unsigned *nmsgs)
+{
+    H5G_t *grp = NULL;          /* Pointer to group */
+    htri_t msg_exists = 0;      /* Indicate that a header message is present */
+    htri_t ret_value = TRUE;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_has_links_test, FAIL)
+
+    /* Get group structure */
+    if(NULL == (grp = H5I_object_verify(gid, H5I_GROUP)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
+
+    /* Check if the group has any link messages */
+    if((msg_exists = H5O_exists(&(grp->oloc), H5O_LINK_ID, 0, H5AC_dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+    if(msg_exists == 0)
+        HGOTO_DONE(FALSE)
+
+    /* Check if the group has a symbol table message */
+    if((msg_exists = H5O_exists(&(grp->oloc), H5O_STAB_ID, 0, H5AC_dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+    if(msg_exists > 0)
+	HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "both symbol table and link messages found")
+
+    /* Check if we should retrieve the number of link messages */
+    if(nmsgs) {
+        int msg_count;     /* Number of messages of a type */
+
+        /* Check how many link messages there are */
+        if((msg_count = H5O_count(&(grp->oloc), H5O_LINK_ID, H5AC_dxpl_id)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "unable to count link messages")
+        *nmsgs = (unsigned)msg_count;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5G_has_links_test() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5G_has_stab_test
+ PURPOSE
+    Determine whether a group contains a symbol table message
+ USAGE
+    htri_t H5G_has_stab_test(gid)
+        hid_t gid;              IN: group to check
+ RETURNS
+    Non-negative TRUE/FALSE on success, negative on failure
+ DESCRIPTION
+    Checks to see if the group has a symbol table message.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    DO NOT USE THIS FUNCTION FOR ANYTHING EXCEPT TESTING
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t
+H5G_has_stab_test(hid_t gid)
+{
+    H5G_t *grp = NULL;          /* Pointer to group */
+    htri_t msg_exists = 0;      /* Indicate that a header message is present */
+    htri_t ret_value = TRUE;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_has_stab_test, FAIL)
+
+    /* Get group structure */
+    if(NULL == (grp = H5I_object_verify(gid, H5I_GROUP)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
+
+    /* Check if the group has a symbol table message */
+    if((msg_exists = H5O_exists(&(grp->oloc), H5O_STAB_ID, 0, H5AC_dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+    if(msg_exists == 0)
+        HGOTO_DONE(FALSE)
+
+    /* Check if the group has any link messages */
+    if((msg_exists = H5O_exists(&(grp->oloc), H5O_LINK_ID, 0, H5AC_dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+    if(msg_exists > 0)
+	HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "both symbol table and link messages found")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5G_has_stab_test() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5G_lheap_size_test
+ PURPOSE
+    Determine the size of a local heap for a group
+ USAGE
+    herr_t H5G_lheap_size_test(gid, lheap_size)
+        hid_t gid;              IN: group to check
+        size_t *lheap_size;     OUT: Size of local heap
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Checks the size of the local heap for a group
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    DO NOT USE THIS FUNCTION FOR ANYTHING EXCEPT TESTING
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5G_lheap_size_test(hid_t gid, size_t *lheap_size)
+{
+    H5G_t *grp = NULL;          /* Pointer to group */
+    H5O_stab_t stab;		/* Symbol table message		*/
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_lheap_size_test, FAIL)
+
+    /* Get group structure */
+    if(NULL == (grp = H5I_object_verify(gid, H5I_GROUP)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
+
+    /* Make certain the group has a symbol table message */
+    if(NULL == H5O_read(&(grp->oloc), H5O_STAB_ID, 0, &stab, H5AC_dxpl_id))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read symbol table message")
+
+    /* Check the size of the local heap for the group */
+    if(H5HL_get_size(grp->oloc.file, H5AC_dxpl_id, stab.heap_addr, lheap_size) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGETSIZE, FAIL, "can't query local heap size")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5G_lheap_size_test() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5G_user_path_test
+ PURPOSE
+    Retrieve the user path for an ID
+ USAGE
+    herr_t H5G_user_path_test(obj_id, user_path, user_path_len)
+        hid_t obj_id;           IN: ID to check
+        char *user_path;        OUT: Pointer to buffer for User path
+        size_t *user_path_len;  OUT: Size of user path
+        unsigned *obj_hidden;   OUT: Whether object is hidden
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Retrieves the user path for an ID.  A zero for the length is returned in
+    the case of no user path.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    DO NOT USE THIS FUNCTION FOR ANYTHING EXCEPT TESTING
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5G_user_path_test(hid_t obj_id, char *user_path, size_t *user_path_len, unsigned *obj_hidden)
+{
+    void *obj_ptr;              /* Pointer to object for ID */
+    H5G_name_t *obj_path;       /* Pointer to group hier. path for obj */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_user_path_test, FAIL)
+
+    /* Sanity check */
+    HDassert(user_path_len);
+    HDassert(obj_hidden);
+
+    /* Get pointer to object for ID */
+    if(NULL == (obj_ptr = H5I_object(obj_id)))
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get object for ID")
+
+    /* Get the symbol table entry */
+    switch(H5I_get_type(obj_id)) {
+        case H5I_GROUP:
+            obj_path = H5G_nameof((H5G_t *)obj_ptr);
+            break;
+
+        case H5I_DATASET:
+            obj_path = H5D_nameof((H5D_t *)obj_ptr);
+            break;
+
+        case H5I_DATATYPE:
+            /* Avoid non-named datatypes */
+            if(!H5T_is_named((H5T_t *)obj_ptr))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a named datatype")
+
+            obj_path = H5T_nameof((H5T_t *)obj_ptr);
+            break;
+
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unknown data object type")
+    } /* end switch */
+    HDassert(obj_path);
+
+    /* Retrieve a copy of the user path and put it into the buffer */
+    if(obj_path->user_path_r) {
+        size_t len = H5RS_len(obj_path->user_path_r);
+
+        /* Set the user path, if given */
+        if(user_path)
+            HDstrcpy(user_path, H5RS_get_str(obj_path->user_path_r));
+
+        /* Set the length of the path */
+        *user_path_len = len;
+
+        /* Set the user path hidden flag */
+        *obj_hidden = obj_path->obj_hidden;
+    } /* end if */
+    else {
+        *user_path_len = 0;
+        *obj_hidden = 0;
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5G_user_path_test() */
+
