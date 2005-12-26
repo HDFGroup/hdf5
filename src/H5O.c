@@ -3969,32 +3969,32 @@ H5O_loc_reset(H5O_loc_t *loc)
  *
  * Notes:       'depth' parameter determines how much of the group entry
  *              structure we want to copy.  The values are:
- *                  H5O_COPY_SHALLOW - Copy all the field values from the source
+ *                  H5_COPY_SHALLOW - Copy all the field values from the source
  *                      to the destination, but not copying objects pointed to.
  *                      (Destination "takes ownership" of objects pointed to)
- *                  H5O_COPY_DEEP - Copy all the fields from the source to
+ *                  H5_COPY_DEEP - Copy all the fields from the source to
  *                      the destination, deep copying objects pointed to.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_loc_copy(H5O_loc_t *dst, const H5O_loc_t *src, H5O_copy_depth_t depth)
+H5O_loc_copy(H5O_loc_t *dst, const H5O_loc_t *src, H5_copy_depth_t depth)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_loc_copy)
 
     /* Check arguments */
     HDassert(src);
     HDassert(dst);
-    HDassert(depth == H5O_COPY_SHALLOW || depth == H5O_COPY_DEEP);
+    HDassert(depth == H5_COPY_SHALLOW || depth == H5_COPY_DEEP);
 
     /* Copy the top level information */
     HDmemcpy(dst, src, sizeof(H5O_loc_t));
 
     /* Deep copy the names */
-    if(depth == H5G_COPY_DEEP) {
+    if(depth == H5_COPY_DEEP) {
         /* Nothing currently */
         ;
-    } else if(depth == H5G_COPY_SHALLOW) {
+    } else if(depth == H5_COPY_SHALLOW) {
         /* Discarding 'const' qualifier OK - QAK */
         H5O_loc_reset((H5O_loc_t *)src);
     } /* end if */

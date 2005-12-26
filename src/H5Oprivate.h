@@ -287,12 +287,6 @@ typedef struct H5O_stab_t {
 typedef herr_t (*H5O_operator_t)(const void *mesg/*in*/, unsigned idx,
     void *operator_data/*in,out*/);
 
-/* Depth of object location copy */
-typedef enum {
-    H5O_COPY_SHALLOW,   /* Copy from source to destination, just copy field pointers */
-    H5O_COPY_DEEP       /* Deep copy from source to destination, including duplicating fields pointed to */
-} H5O_copy_depth_t;
-
 /* Forward declarations for prototype arguments */
 struct H5SL_t;
 struct H5O_t;
@@ -354,7 +348,7 @@ H5_DLL herr_t H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, in
  * These functions operate on object locations
  */
 H5_DLL herr_t H5O_loc_reset(H5O_loc_t *loc);
-H5_DLL herr_t H5O_loc_copy(H5O_loc_t *dst, const H5O_loc_t *src, H5O_copy_depth_t depth);
+H5_DLL herr_t H5O_loc_copy(H5O_loc_t *dst, const H5O_loc_t *src, H5_copy_depth_t depth);
 
 /* Layout operators */
 H5_DLL size_t H5O_layout_meta_size(const H5F_t *f, const void *_mesg);

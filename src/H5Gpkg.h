@@ -87,19 +87,6 @@ typedef struct H5G_entry_t {
 } H5G_entry_t;
 
 /*
- * A symbol table node is a collection of symbol table entries.  It can
- * be thought of as the lowest level of the B-link tree that points to
- * a collection of symbol table entries that belong to a specific symbol
- * table or group.
- */
-typedef struct H5G_node_t {
-    H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
-                            /* first field in structure */
-    unsigned nsyms;                     /*number of symbols                  */
-    H5G_entry_t *entry;                 /*array of symbol table entries      */
-} H5G_node_t;
-
-/*
  * Shared information for all open group objects
  */
 struct H5G_shared_t {
@@ -319,7 +306,7 @@ H5_DLL herr_t H5G_stab_lookup(H5O_loc_t *grp_oloc, const char *name,
  * Functions that understand symbol table entries.
  */
 H5_DLL herr_t H5G_ent_copy(H5G_entry_t *dst, const H5G_entry_t *src,
-            H5G_copy_depth_t depth);
+            H5_copy_depth_t depth);
 H5_DLL herr_t H5G_ent_reset(H5G_entry_t *ent);
 H5_DLL herr_t H5G_ent_decode_vec(H5F_t *f, const uint8_t **pp,
 				  H5G_entry_t *ent, unsigned n);
@@ -381,7 +368,7 @@ H5_DLL H5G_obj_t H5G_obj_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx,
 H5_DLL herr_t H5G_obj_remove(H5O_loc_t *oloc, const char *name,
     H5G_obj_t *obj_type, hid_t dxpl_id);
 H5_DLL herr_t H5G_obj_find(H5G_loc_t *loc, const char *name,
-    unsigned traverse_flags, H5O_loc_t *obj_oloc, hid_t dxpl_id);
+    unsigned traverse_flags, H5O_link_t *lnk, H5O_loc_t *obj_oloc, hid_t dxpl_id);
 
 /*
  * These functions operate on group hierarchy names.
@@ -392,7 +379,7 @@ H5_DLL herr_t H5G_name_set(H5G_name_t *loc, H5G_name_t *obj, const char *name);
 /*
  * These functions operate on group "locations"
  */
-H5_DLL herr_t H5G_loc_copy(H5G_loc_t *dst, H5G_loc_t *src, H5G_copy_depth_t depth);
+H5_DLL herr_t H5G_loc_copy(H5G_loc_t *dst, H5G_loc_t *src, H5_copy_depth_t depth);
 H5_DLL herr_t H5G_loc_insert(H5G_loc_t *grp_loc, const char *name,
     H5G_loc_t *obj_loc, hbool_t inc_link, hid_t dxpl_id);
 H5_DLL herr_t H5G_loc_exists(const H5G_loc_t *loc, const char *name, hid_t dxpl_id);
@@ -405,6 +392,7 @@ H5_DLL htri_t H5G_is_empty_test(hid_t gid);
 H5_DLL htri_t H5G_has_links_test(hid_t gid, unsigned *nmsgs);
 H5_DLL htri_t H5G_has_stab_test(hid_t gid);
 H5_DLL herr_t H5G_lheap_size_test(hid_t gid, size_t *lheap_size);
+H5_DLL herr_t H5G_user_path_test(hid_t obj_id, char *user_path, size_t *user_path_len, unsigned *user_path_hidden);
 #endif /* H5G_TESTING */
 
 #endif

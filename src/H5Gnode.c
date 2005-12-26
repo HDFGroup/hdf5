@@ -49,6 +49,19 @@ typedef struct H5G_node_key_t {
     size_t      offset;                 /*offset into heap for name          */
 } H5G_node_key_t;
 
+/*
+ * A symbol table node is a collection of symbol table entries.  It can
+ * be thought of as the lowest level of the B-link tree that points to
+ * a collection of symbol table entries that belong to a specific symbol
+ * table or group.
+ */
+typedef struct H5G_node_t {
+    H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
+                            /* first field in structure */
+    unsigned nsyms;                     /*number of symbols                  */
+    H5G_entry_t *entry;                 /*array of symbol table entries      */
+} H5G_node_t;
+
 /* Private macros */
 #define H5G_NODE_VERS   1               /*symbol table node version number   */
 #define H5G_NODE_SIZEOF_HDR(F) (H5G_NODE_SIZEOF_MAGIC + 4)
@@ -677,15 +690,6 @@ H5G_compute_size(const H5F_t *f, const H5G_node_t UNUSED *sym, size_t *size_ptr)
  *		matzke@llnl.gov
  *		Jun 23 1997
  *
- * Modifications:
- *
- *              John Mainzer 6/8/05
- *              Removed code setting the is_dirty field of the cache info.
- *              This is no longer pemitted, as the cache code is now
- *              manageing this field.  Since this function uses a call to
- *              H5AC_set() (which marks the entry dirty automaticly), no
- *              other change is required.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1131,7 +1135,7 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr,
 	      (insert_into->nsyms - idx) * sizeof(H5G_entry_t));
 
     /* Copy new entry into table */
-    H5G_ent_copy(&(insert_into->entry[idx]), &ent, H5G_COPY_SHALLOW);
+    H5G_ent_copy(&(insert_into->entry[idx]), &ent, H5_COPY_SHALLOW);
 
     /* Flag entry as dirty */
     insert_into->entry[idx].dirty = TRUE;
@@ -1174,21 +1178,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *              Thursday, September 24, 1998
- *
- * Modifications:
- *	Robb Matzke, 1999-07-28
- *	The ADDR argument is passed by value.
- *
- *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
- *      Added `id to name' support.
- *
- *	Quincey Koziol, 2003-03-22
- *	Added support for deleting all the entries at once.
- *
- *      John Mainzer, 6/8/05
- *      Modified the function to use the new dirtied parameter of
- *      of H5AC_unprotect() instead of modifying the is_dirty
- *      field of the cache info.
  *
  *-------------------------------------------------------------------------
  */
@@ -1432,18 +1421,6 @@ done:
  *		matzke@llnl.gov
  *		Jun 24 1997
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *
- *		Quincey Koziol, 2002-04-22
- *		Changed to callback from H5B_iterate
- *
- *              John Mainzer, 6/8/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -1551,13 +1528,6 @@ done:
  * Programmer:  Raymond Lu
  *              Nov 20, 2002
  *
- * Modifications:
- *
- *              John Mainzer, 6/17/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -1602,13 +1572,6 @@ done:
  *
  * Programmer:  Raymond Lu
  *              Nov 20, 2002
- *
- * Modifications:
- *
- *              John Mainzer, 6/17/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
  *
  *-------------------------------------------------------------------------
  */
@@ -2041,15 +2004,6 @@ done:
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
  *		Aug  4 1997
- *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR and HEAP arguments are passed by value.
- *
- *              John Mainzer, 6/8/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
  *
  *-------------------------------------------------------------------------
  */

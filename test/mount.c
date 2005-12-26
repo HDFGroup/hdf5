@@ -792,19 +792,20 @@ test_mvmpt(hid_t fapl)
     /* Build the virtual file */
     if ((file1=H5Fopen(filename1, H5F_ACC_RDWR, fapl))<0 ||
 	(file2=H5Fopen(filename2, H5F_ACC_RDWR, fapl))<0)
-	goto error;
-    if (H5Fmount(file1, "/mnt_move_a", file2, H5P_DEFAULT)<0) goto error;
+	TEST_ERROR
+    if (H5Fmount(file1, "/mnt_move_a", file2, H5P_DEFAULT)<0) TEST_ERROR
 
     /* Rename the mount point */
-    if (H5Gmove(file1, "/mnt_move_a", "/mnt_move_b")<0) goto error;
+    if (H5Gmove(file1, "/mnt_move_a", "/mnt_move_b")<0) TEST_ERROR
 
     /* Access something under the new name */
-    if (H5Gget_objinfo(file1, "/mnt_move_b/file2", TRUE, NULL)<0) goto error;
+    if (H5Gget_objinfo(file1, "/mnt_move_b/file2", TRUE, NULL)<0) TEST_ERROR
 
     /* Shut down */
-    if (H5Funmount(file1, "/mnt_move_b")<0) goto error;
-    if (H5Fclose(file1)<0) goto error;
-    if (H5Fclose(file2)<0) goto error;
+    if (H5Funmount(file1, "/mnt_move_b")<0) TEST_ERROR
+    if (H5Fclose(file1)<0) TEST_ERROR
+    if (H5Fclose(file2)<0) TEST_ERROR
+
     PASSED();
     return 0;
 

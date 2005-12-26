@@ -537,6 +537,12 @@ H5_DLL void H5_timer_end (H5_timer_t *sum/*in,out*/,
 			   H5_timer_t *timer/*in,out*/);
 H5_DLL void H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds);
 
+/* Depth of object copy */
+typedef enum {
+    H5_COPY_SHALLOW,    /* Shallow copy from source to destination, just copy field pointers */
+    H5_COPY_DEEP        /* Deep copy from source to destination, including duplicating fields pointed to */
+} H5_copy_depth_t;
+
 /*
  * Redefine all the POSIX functions.  We should never see a POSIX
  * function (or any other non-HDF5 function) in the source!

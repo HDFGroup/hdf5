@@ -124,8 +124,7 @@ H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
     H5G_loc_t   mp_loc;                 /* entry of moint point to be opened */
     H5G_name_t  mp_path;            	/* Mount point group hier. path */
     H5O_loc_t   mp_oloc;            	/* Mount point object location */
-    H5O_loc_t   *mnt_oloc;            	/* Mount point object location */
-    H5RS_str_t  *name_r;                /* Ref-counted version of name */
+    H5G_loc_t   root_loc;               /* Group location of root of file to mount */
     herr_t	ret_value = SUCCEED;	/*return value			*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5F_mount)
@@ -152,13 +151,22 @@ H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
     if(NULL == (mount_point = H5G_open(&mp_loc, dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point not found")
 
+    /* Retrieve information from the mount point group */
+    /* (Some of which we had before but was reset in mp_loc when the group
+     *  "took over" the group location - QAK)
+     */
     parent = H5G_fileof(mount_point);
-    mnt_oloc = H5G_oloc(mount_point);
+    HDassert(parent);
+    mp_loc.oloc = H5G_oloc(mount_point);
+    HDassert(mp_loc.oloc);
+    mp_loc.path = H5G_nameof(mount_point);
+    HDassert(mp_loc.path);
     for(ancestor = parent; ancestor; ancestor = ancestor->mtab.parent) {
 	if(ancestor == child)
 	    HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount would introduce a cycle")
     } /* end for */
 
+    /* Make certain that the parent & child files have the same "file close degree" */
     if(parent->shared->fc_degree != child->shared->fc_degree)
         HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mounted file has different file close degree than parent")
 
@@ -175,7 +183,7 @@ H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
 
 	md = (lt + rt) / 2;
 	oloc = H5G_oloc(parent->mtab.child[md].group);
-	cmp = H5F_addr_cmp(mnt_oloc->addr, oloc->addr);
+	cmp = H5F_addr_cmp(mp_loc.oloc->addr, oloc->addr);
 	if(cmp < 0)
 	    rt = md;
 	else if(cmp > 0)
@@ -209,14 +217,16 @@ H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
     if(H5G_mount(parent->mtab.child[md].group) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to set group mounted flag")
 
+    /* Get the group location for the root group in the file to unmount */
+    if(NULL == (root_loc.oloc = H5G_oloc(child->shared->root_grp)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location for root group")
+    if(NULL == (root_loc.path = H5G_nameof(child->shared->root_grp)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path for root group")
+
     /* Search the open IDs and replace names for mount operation */
     /* We pass H5G_UNKNOWN as object type; search all IDs */
-    name_r = H5RS_wrap(name);
-    HDassert(name_r);
-    if(H5G_name_replace(H5G_UNKNOWN, loc, name_r, NULL, NULL, NULL, OP_MOUNT) < 0)
+    if(H5G_name_replace(H5G_UNKNOWN, &mp_loc, NULL, &root_loc, H5G_NAME_MOUNT) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to replace name")
-    if(H5RS_decr(name_r) < 0)
-	HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to decrement name string")
 
 done:
     if(ret_value < 0 && mount_point)
@@ -249,7 +259,6 @@ static herr_t
 H5F_unmount(H5G_loc_t *loc, const char *name, hid_t dxpl_id)
 {
     H5G_t	*child_group = NULL;	/* Child's group in parent mtab	*/
-    H5F_t	*child_file = NULL;	/* Child's file in parent mtab	*/
     H5F_t	*child = NULL;		/*mounted file			*/
     H5F_t	*parent = NULL;		/*file where mounted		*/
     H5O_loc_t   *mnt_oloc;            	/* symbol table entry for root of mounted file */
@@ -257,6 +266,7 @@ H5F_unmount(H5G_loc_t *loc, const char *name, hid_t dxpl_id)
     H5O_loc_t   mp_oloc;            	/* Mount point object location  */
     H5G_loc_t   mp_loc;                 /* entry used to open mount point*/
     hbool_t     mp_loc_setup = FALSE;   /* Whether mount point location is set up */
+    H5G_loc_t   root_loc;               /* Group location of root of file to unmount */
     int         child_idx;              /* Index of child in parent's mtab */
     herr_t	ret_value = SUCCEED;	/*return value			*/
 
@@ -327,16 +337,22 @@ H5F_unmount(H5G_loc_t *loc, const char *name, hid_t dxpl_id)
         mp_loc_setup = FALSE;
         mp_loc.oloc = mnt_oloc;
         mp_loc.path = H5G_nameof(parent->mtab.child[md].group);
+        child = parent->mtab.child[child_idx].file;
     } /* end else */
     HDassert(child_idx >= 0);
 
-    /* Search the open IDs replace names to reflect unmount operation */
-    if(H5G_name_replace(H5G_UNKNOWN, &mp_loc, mp_loc.path->user_path_r, NULL, NULL, NULL, OP_UNMOUNT) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to replace name")
-
     /* Save the information about the child from the mount table */
     child_group = parent->mtab.child[child_idx].group;
-    child_file = parent->mtab.child[child_idx].file;
+
+    /* Get the group location for the root group in the file to unmount */
+    if(NULL == (root_loc.oloc = H5G_oloc(child->shared->root_grp)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location for root group")
+    if(NULL == (root_loc.path = H5G_nameof(child->shared->root_grp)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path for root group")
+
+    /* Search the open IDs replace names to reflect unmount operation */
+    if(H5G_name_replace(H5G_UNKNOWN, &mp_loc, NULL, &root_loc, H5G_NAME_UNMOUNT) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to replace name")
 
     /* Eliminate the mount point from the table */
     HDmemmove(parent->mtab.child + child_idx, parent->mtab.child + child_idx + 1,
@@ -350,8 +366,8 @@ H5F_unmount(H5G_loc_t *loc, const char *name, hid_t dxpl_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close unmounted group")
 
     /* Detach child file from parent & see if it should close */
-    child_file->mtab.parent = NULL;
-    if(H5F_try_close(child_file) < 0)
+    child->mtab.parent = NULL;
+    if(H5F_try_close(child) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close unmounted file")
 
 done:

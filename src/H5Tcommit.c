@@ -485,12 +485,22 @@ H5T_open(H5G_loc_t *loc, hid_t dxpl_id)
         if(NULL == (dt = H5FL_MALLOC(H5T_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate space for datatype")
 
+#if defined(H5_USING_PURIFY) || !defined(NDEBUG)
+        /* Clear object location */
+        if(H5O_loc_reset(&(dt->oloc)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to reset location")
+
+        /* Clear path name */
+        if(H5G_name_reset(&(dt->path)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to reset path")
+#endif /* H5_USING_PURIFY */
+
         /* Shallow copy (take ownership) of the object location object */
-        if(H5O_loc_copy(&(dt->oloc), loc->oloc, H5O_COPY_SHALLOW) < 0)
+        if(H5O_loc_copy(&(dt->oloc), loc->oloc, H5_COPY_SHALLOW) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy object location")
 
         /* Shallow copy (take ownership) of the group hier. path */
-        if(H5G_name_copy(&(dt->path), loc->path, H5G_COPY_SHALLOW) < 0)
+        if(H5G_name_copy(&(dt->path), loc->path, H5_COPY_SHALLOW) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy path")
 
         dt->shared = shared_fo;
@@ -560,11 +570,11 @@ H5T_open_oid(H5G_loc_t *loc, hid_t dxpl_id)
     dt->shared->state = H5T_STATE_OPEN;
 
     /* Shallow copy (take ownership) of the object location object */
-    if(H5O_loc_copy(&(dt->oloc), loc->oloc, H5O_COPY_SHALLOW) < 0)
+    if(H5O_loc_copy(&(dt->oloc), loc->oloc, H5_COPY_SHALLOW) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy object location")
 
     /* Shallow copy (take ownership) of the group hier. path */
-    if(H5G_name_copy(&(dt->path), loc->path, H5G_COPY_SHALLOW) < 0)
+    if(H5G_name_copy(&(dt->path), loc->path, H5_COPY_SHALLOW) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy path")
 
     /* Set return value */

@@ -48,7 +48,7 @@ static char *H5G_comp_g = NULL;                 /*component buffer      */
 static size_t H5G_comp_alloc_g = 0;             /*sizeof component buffer */
 
 /* PRIVATE PROTOTYPES */
-static herr_t H5G_traverse_slink_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
+static herr_t H5G_traverse_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/);
 static herr_t H5G_traverse_slink(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
     H5G_loc_t *obj_loc/*in,out*/, int *nlinks/*in,out*/, hid_t dxpl_id);
@@ -87,9 +87,9 @@ H5G_traverse_term_interface(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_traverse_slink_cb
+ * Function:	H5G_traverse_link_cb
  *
- * Purpose:	Callback for symbolic link traversal.  This routine sets the
+ * Purpose:	Callback for link traversal.  This routine sets the
  *              correct information for the object location.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -100,20 +100,20 @@ H5G_traverse_term_interface(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_traverse_slink_cb(H5G_loc_t UNUSED *grp_loc, const char UNUSED *name, const H5O_link_t UNUSED *lnk,
+H5G_traverse_link_cb(H5G_loc_t UNUSED *grp_loc, const char UNUSED *name, const H5O_link_t UNUSED *lnk,
     H5G_loc_t *obj_loc, void *_udata/*in,out*/)
 {
     H5G_trav_ud1_t *udata = (H5G_trav_ud1_t *)_udata;   /* User data passed in */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_traverse_slink_cb)
+    FUNC_ENTER_NOAPI_NOINIT(H5G_traverse_link_cb)
 
     /* Check for dangling soft link */
     if(obj_loc == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found")
 
     /* Copy new location information for resolved object */
-    H5O_loc_copy(udata->obj_loc->oloc, obj_loc->oloc, H5O_COPY_DEEP);
+    H5O_loc_copy(udata->obj_loc->oloc, obj_loc->oloc, H5_COPY_DEEP);
 
 done:
     /* Release the group location for the object */
@@ -124,7 +124,7 @@ done:
         H5G_loc_free(obj_loc);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_traverse_slink_cb() */
+} /* end H5G_traverse_link_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -172,32 +172,32 @@ H5G_traverse_slink(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
 
     /* Portably initialize the temporary objects */
     H5G_loc_reset(&tmp_grp_loc);
+    H5G_name_reset(&tmp_obj_path);
 
     /* Clone the group location, so we can track the names properly */
     /* ("tracking the names properly" means to ignore the effects of the
-     *  soft link traversal on the object's & group's paths - QAK)
+     *  link traversal on the object's & group's paths - QAK)
      */
-    H5G_loc_copy(&tmp_grp_loc, grp_loc, H5G_COPY_DEEP);
+    H5G_loc_copy(&tmp_grp_loc, grp_loc, H5_COPY_DEEP);
     tmp_grp_path_set = TRUE;
 
     /* Hold the object's group hier. path to restore later */
     /* (Part of "tracking the names properly") */
-    H5G_name_reset(&tmp_obj_path);
-    H5G_name_copy(&tmp_obj_path, obj_loc->path, H5G_COPY_SHALLOW);
+    H5G_name_copy(&tmp_obj_path, obj_loc->path, H5_COPY_SHALLOW);
     tmp_obj_path_set = TRUE;
 
     /* Set up user data for traversal callback */
     udata.obj_loc = obj_loc;
 
-    /* Traverse to the link's last component */
-    if(H5G_traverse_real(&tmp_grp_loc, lnk->u.soft.name, H5G_TARGET_NORMAL, nlinks, H5G_traverse_slink_cb, &udata, dxpl_id) < 0)
+    /* Traverse the link */
+    if(H5G_traverse_real(&tmp_grp_loc, lnk->u.soft.name, H5G_TARGET_NORMAL, nlinks, H5G_traverse_link_cb, &udata, dxpl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to follow symbolic link")
 
 done:
     /* Restore object's group hier. path */
     if(tmp_obj_path_set) {
         H5G_name_free(obj_loc->path);
-        H5G_name_copy(obj_loc->path, &tmp_obj_path, H5G_COPY_SHALLOW);
+        H5G_name_copy(obj_loc->path, &tmp_obj_path, H5_COPY_SHALLOW);
     } /* end if */
 
     /* Release cloned copy of group path */
@@ -259,19 +259,12 @@ H5G_traverse_mount(H5G_loc_t *obj_loc/*in,out*/)
 
 	/* Copy root info over to ENT */
 	if(0 == cmp) {
-            H5G_name_t *root_path;      /* Path of root group */
-
             /* Get the location for the root group in the child's file */
 	    oloc = H5G_oloc(parent->mtab.child[md].file->shared->root_grp);
-	    root_path = H5G_nameof(parent->mtab.child[md].file->shared->root_grp);
 
             /* Copy the entry for the root group */
-            if(H5O_loc_copy(obj_loc->oloc, oloc, H5O_COPY_DEEP) < 0)
+            if(H5O_loc_copy(obj_loc->oloc, oloc, H5_COPY_DEEP) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "unable to copy object location")
-
-            /* Don't lose the user path of the group when we copy the root group's path */
-            if(H5G_name_copy(obj_loc->path, root_path, H5G_COPY_CANON) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "unable to copy object path")
 
             /* Switch to child's file */
 	    parent = oloc->file;
@@ -353,8 +346,14 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
     obj_loc.oloc = &obj_oloc;
     obj_loc.path = &obj_path;
 
+#if defined(H5_USING_PURIFY) || !defined(NDEBUG)
+    /* Clear group location */
+    if(H5G_loc_reset(&grp_loc) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to reset location")
+#endif /* H5_USING_PURIFY */
+
     /* Deep copy of the starting location to group location */
-    if(H5G_loc_copy(&grp_loc, &loc, H5G_COPY_DEEP) < 0)
+    if(H5G_loc_copy(&grp_loc, &loc, H5_COPY_DEEP) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to copy location")
     group_copy = TRUE;
 
@@ -403,7 +402,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
         } /* end if */
 
         /* Get information for object in current group */
-        /* (Defer issuing error for back lookup until later) */
+        /* (Defer issuing error for bad lookup until later) */
         lookup_status = H5G_obj_lookup(grp_loc.oloc, H5G_comp_g, &lnk/*out*/, dxpl_id);
 
         /* If the lookup was OK, try traversing soft links and mount points, if allowed */
@@ -430,9 +429,9 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
             if(H5G_LINK_SOFT == lnk.type &&
                     (0 == (target & H5G_TARGET_SLINK) || !last_comp)) {
                 if((*nlinks)-- <= 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_SLINK, FAIL, "too many links")
+                    HGOTO_ERROR(H5E_SYM, H5E_LINK, FAIL, "too many links")
                 if(H5G_traverse_slink(&grp_loc/*in,out*/, &lnk/*in*/, &obj_loc, nlinks, dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "symbolic link traversal failed")
+                    HGOTO_ERROR(H5E_SYM, H5E_SLINK, FAIL, "symbolic link traversal failed")
             } /* end if */
 
             /*
@@ -510,7 +509,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
 
         /* Transfer "ownership" of the object's information to the group object */
         H5G_loc_free(&grp_loc);
-        H5G_loc_copy(&grp_loc, &obj_loc, H5G_COPY_SHALLOW);
+        H5G_loc_copy(&grp_loc, &obj_loc, H5_COPY_SHALLOW);
         H5G_loc_reset(&obj_loc);
         obj_loc_valid = FALSE;
 

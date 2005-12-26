@@ -315,7 +315,7 @@ H5RS_dup(H5RS_str_t *ret_value)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5RS_dup
+    H5RS_dup_str
  PURPOSE
     "Duplicate" a regular string into a ref-counted string
  USAGE
@@ -338,7 +338,7 @@ H5RS_dup_str(const char *s)
     size_t path_len;            /* Length of the path */
     H5RS_str_t *ret_value;
 
-    FUNC_ENTER_NOAPI(H5RS_dup_str, FAIL)
+    FUNC_ENTER_NOAPI(H5RS_dup_str, NULL)
 
     /* Sanity check */
     HDassert(s);

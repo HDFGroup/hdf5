@@ -110,7 +110,7 @@ static int basic_id_test(void)
 		testSize = H5Iget_name(arrayID, nameString, 9);
 	H5E_END_TRY
 
-	VERIFY(testSize, 0, "H5Iget_name");
+	VERIFY(testSize, -1, "H5Iget_name");
 	if(testSize != 0)
 		goto out;
 

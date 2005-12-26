@@ -3209,9 +3209,18 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     if(new_dt->shared->state == H5T_STATE_NAMED || new_dt->shared->state == H5T_STATE_OPEN) {
         if(!H5F_addr_defined(old_dt->oloc.addr))
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "named dataype with invalid address")
-        if(H5O_loc_copy(&(new_dt->oloc), &(old_dt->oloc), H5O_COPY_DEEP) < 0)
+#if defined(H5_USING_PURIFY) || !defined(NDEBUG)
+        /* Clear object location */
+        if(H5O_loc_reset(&(new_dt->oloc)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to reset location")
+
+        /* Clear path name */
+        if(H5G_name_reset(&(new_dt->path)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to reset path")
+#endif /* H5_USING_PURIFY */
+        if(H5O_loc_copy(&(new_dt->oloc), &(old_dt->oloc), H5_COPY_DEEP) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to copy entry")
-        if(H5G_name_copy(&(new_dt->path), &(old_dt->path), H5G_COPY_DEEP) < 0)
+        if(H5G_name_copy(&(new_dt->path), &(old_dt->path), H5_COPY_DEEP) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to copy path")
     } /* end if */
     else {

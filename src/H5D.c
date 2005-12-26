@@ -2384,11 +2384,11 @@ H5D_open(const H5G_loc_t *loc, hid_t dxpl_id)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Shallow copy (take ownership) of the object location object */
-    if(H5O_loc_copy(&(dataset->oloc), loc->oloc, H5O_COPY_SHALLOW) < 0)
+    if(H5O_loc_copy(&(dataset->oloc), loc->oloc, H5_COPY_SHALLOW) < 0)
         HGOTO_ERROR (H5E_DATASET, H5E_CANTCOPY, NULL, "can't copy object location")
 
     /* Shallow copy (take ownership) of the group hier. path */
-    if(H5G_name_copy(&(dataset->path), loc->path, H5G_COPY_SHALLOW) < 0)
+    if(H5G_name_copy(&(dataset->path), loc->path, H5_COPY_SHALLOW) < 0)
         HGOTO_ERROR (H5E_DATASET, H5E_CANTCOPY, NULL, "can't copy path")
 
     /* Check if dataset was already open */
@@ -3103,6 +3103,8 @@ H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_allo
                     assert(layout->u.compact.size>0);
                     if (NULL==(layout->u.compact.buf=H5MM_malloc(layout->u.compact.size)))
                         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory for compact dataset")
+                    if(!full_overwrite)
+                        HDmemset(layout->u.compact.buf, 0, layout->u.compact.size);
                     layout->u.compact.dirty = TRUE;
 
                     /* Indicate that we set the storage addr */

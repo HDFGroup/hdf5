@@ -314,7 +314,7 @@ H5G_link_convert(H5O_link_t *lnk, const H5G_entry_t *ent, const H5HL_t *heap,
                 s = H5HL_offset_into(ent->file, heap, ent->cache.slink.lval_offset);
                 HDassert(s);
 
-                /* Copy to for link */
+                /* Copy to link */
                 lnk->u.soft.name = H5MM_xstrdup(s);
                 HDassert(lnk->u.soft.name);
             }

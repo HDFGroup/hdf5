@@ -47,6 +47,7 @@ typedef struct {
 
 /* User data for looking up an object in a group */
 typedef struct {
+    H5O_link_t *lnk;            /* Link information to set for object */
     H5O_loc_t  *oloc;           /* Object location to set */     
 } H5G_obj_ud2_t;
 
@@ -819,7 +820,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_obj_find_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t UNUSED *lnk,
+H5G_obj_find_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t *lnk,
     H5G_loc_t *obj_loc, void *_udata/*in,out*/)
 {
     H5G_obj_ud2_t *udata = (H5G_obj_ud2_t *)_udata;   /* User data passed in */
@@ -827,20 +828,34 @@ H5G_obj_find_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const 
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_obj_find_cb)
 
-    /* Check if the name in this group resolved to a valid link */
-    if(obj_loc == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
+    /* Copy link for object */
+    if(udata->lnk) {
+        /* Check if the name in this group resolved to a valid link */
+        if(lnk == NULL)
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
+
+        /* Copy link information */
+        if(H5O_copy(H5O_LINK_ID, lnk, udata->lnk) == NULL)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5O_ITER_ERROR, "can't copy link message")
+    } /* end if */
 
     /* Copy object location for object */
-    H5O_loc_copy(udata->oloc, obj_loc->oloc, H5O_COPY_DEEP);
+    if(udata->oloc) {
+        /* Check if the name in this group resolved to a valid object */
+        if(obj_loc == NULL)
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
 
+        H5O_loc_copy(udata->oloc, obj_loc->oloc, H5_COPY_DEEP);
+    } /* end if */
+
+done:
     /* Release the group location for the object */
     /* (Group traversal callbacks are responsible for either taking ownership
      *  of the group location for the object, or freeing it. - QAK)
      */
-    H5G_loc_free(obj_loc);
+    if(obj_loc)
+        H5G_loc_free(obj_loc);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_obj_find_cb() */
 
@@ -860,7 +875,7 @@ done:
  */
 herr_t
 H5G_obj_find(H5G_loc_t *loc, const char *name, unsigned traverse_flags,
-    H5O_loc_t *obj_oloc, hid_t dxpl_id)
+    H5O_link_t *lnk, H5O_loc_t *obj_oloc, hid_t dxpl_id)
 {
     H5G_obj_ud2_t udata;                /* User data for traversal callback */
     herr_t     ret_value = SUCCEED;     /* Return value */
@@ -873,6 +888,7 @@ H5G_obj_find(H5G_loc_t *loc, const char *name, unsigned traverse_flags,
     HDassert(obj_oloc);
 
     /* Set up user data for locating object */
+    udata.lnk = lnk;
     udata.oloc = obj_oloc;
 
     /* Traverse group hierarchy to locate object */

@@ -1123,7 +1123,7 @@ H5O_dtype_get_share(H5F_t UNUSED *f, const void *_mesg,
     HDassert(H5T_STATE_NAMED == dt->shared->state || H5T_STATE_OPEN == dt->shared->state);
 
     /* Copy object location info */
-    H5O_loc_copy(&(sh->oloc), &(dt->oloc), H5O_COPY_DEEP);
+    H5O_loc_copy(&(sh->oloc), &(dt->oloc), H5_COPY_DEEP);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1154,7 +1154,7 @@ H5O_dtype_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
     HDassert(sh);
 
     /* Retrieve object location information */
-    H5O_loc_copy(&(dt->oloc), &(sh->oloc), H5O_COPY_DEEP);
+    H5O_loc_copy(&(dt->oloc), &(sh->oloc), H5_COPY_DEEP);
 
     /* Note that the datatype is a named datatype */
     dt->shared->state = H5T_STATE_NAMED;

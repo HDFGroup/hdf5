@@ -77,11 +77,11 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
                 if(NULL == (f = H5I_object(loc_id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file ID")
                 if(NULL == (loc->oloc = H5G_oloc(H5G_rootof(f))))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get symbol table entry for root group")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location for root group")
                 if(NULL == (loc->path = H5G_nameof(H5G_rootof(f))))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path for root group")
 
-                /* Patch up root group's symbol table entry to reflect this file */
+                /* Patch up root group's object location to reflect this file */
                 /* (Since the root group info is only stored once for files which
                  *  share an underlying low-level file)
                  */
@@ -93,12 +93,12 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
 
         case H5I_GENPROP_CLS:
         case H5I_GENPROP_LST:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get symbol table entry of property list")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of property list")
 
         case H5I_ERROR_CLASS:
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get symbol table entry of error class, message or stack")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of error class, message or stack")
 
         case H5I_GROUP:
             {
@@ -107,7 +107,7 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
                 if(NULL == (group = H5I_object(loc_id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid group ID")
                 if(NULL == (loc->oloc = H5G_oloc(group)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get symbol table entry of group")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of group")
                 if(NULL == (loc->path = H5G_nameof(group)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of group")
             } /* end case */
@@ -120,14 +120,14 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
                 if(NULL == (dt = H5I_object(loc_id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid type ID")
                 if(NULL == (loc->oloc = H5T_oloc(dt)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get symbol table entry of datatype")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of datatype")
                 if(NULL == (loc->path = H5T_nameof(dt)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of datatype")
             } /* end case */
             break;
 
         case H5I_DATASPACE:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get symbol table entry of dataspace")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of dataspace")
 
         case H5I_DATASET:
             {
@@ -136,7 +136,7 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
                 if(NULL == (dset = H5I_object(loc_id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid data ID")
                 if(NULL == (loc->oloc = H5D_oloc(dset)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get symbol table entry of dataset")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of dataset")
                 if(NULL == (loc->path = H5D_nameof(dset)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of dataset")
             } /* end case */
@@ -149,14 +149,14 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
                 if(NULL == (attr = H5I_object(loc_id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid attribute ID")
                 if(NULL == (loc->oloc = H5A_oloc(attr)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get symbol table entry of attribute")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of attribute")
                 if(NULL == (loc->path = H5A_nameof(attr)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of attribute")
             } /* end case */
             break;
 
         case H5I_REFERENCE:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get symbol table entry of reference")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of reference")
 
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object ID")
@@ -180,7 +180,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_loc_copy(H5G_loc_t *dst, H5G_loc_t *src, H5G_copy_depth_t depth)
+H5G_loc_copy(H5G_loc_t *dst, H5G_loc_t *src, H5_copy_depth_t depth)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
@@ -191,7 +191,7 @@ H5G_loc_copy(H5G_loc_t *dst, H5G_loc_t *src, H5G_copy_depth_t depth)
     HDassert(src);
 
     /* Copy components of the location */
-    if(H5O_loc_copy(dst->oloc, src->oloc, (depth == H5G_COPY_SHALLOW ? H5O_COPY_SHALLOW : H5O_COPY_DEEP)) < 0)
+    if(H5O_loc_copy(dst->oloc, src->oloc, depth) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to copy entry")
     if(H5G_name_copy(dst->path, src->path, depth) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to copy path")
@@ -298,7 +298,7 @@ H5G_loc_find_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const 
     /* (Group traversal callbacks are responsible for either taking ownership
      *  of the group location for the object, or freeing it. - QAK)
      */
-    H5G_loc_copy(udata->loc, obj_loc, H5O_COPY_SHALLOW);
+    H5G_loc_copy(udata->loc, obj_loc, H5_COPY_SHALLOW);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -460,7 +460,7 @@ H5G_loc_remove(H5G_loc_t *grp_loc, const char *name, H5G_loc_t *obj_loc, hid_t d
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found")
 
     /* Search the open IDs and replace names for unlinked object */
-    if(H5G_name_replace(obj_type, obj_loc, NULL, NULL, NULL, NULL, OP_UNLINK) < 0)
+    if(H5G_name_replace(obj_type, obj_loc, NULL, NULL, H5G_NAME_UNLINK) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to replace name")
 
 done:

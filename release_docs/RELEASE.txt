@@ -412,6 +412,8 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fixed various problems with retrieving names of objects, especially
+            with mounted files.  QAK - 2005/12/25
         - Fixed core dump when closing root groups opened through two different
             file handles that operate on the same actual file.  QAK - 2005/10/02
         - Corrected errors when performing various operations on a group opened

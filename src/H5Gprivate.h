@@ -81,17 +81,17 @@
 
 /* Type of operation being performed for call to H5G_name_replace() */
 typedef enum {
-    OP_MOVE = 0,        /* H5*move call    */
-    OP_UNLINK,          /* H5Gunlink call  */
-    OP_MOUNT,           /* H5Fmount call   */
-    OP_UNMOUNT          /* H5Funmount call */
+    H5G_NAME_MOVE = 0,          /* H5*move call    */
+    H5G_NAME_UNLINK,            /* H5Gunlink call  */
+    H5G_NAME_MOUNT,             /* H5Fmount call   */
+    H5G_NAME_UNMOUNT            /* H5Funmount call */
 } H5G_names_op_t;
 
 /* Structure to store information about the name an object was opened with */
 typedef struct {
+    H5RS_str_t  *full_path_r;           /* Path to object, as seen from root of current file mounting hierarchy */
     H5RS_str_t  *user_path_r;           /* Path to object, as opened by user */
-    H5RS_str_t  *canon_path_r;          /* Path to object, as found in file  */
-    unsigned    user_path_hidden;       /* Whether the user's path is valid  */
+    unsigned    obj_hidden;             /* Whether the object is visible in group hier. */
 } H5G_name_t;
 
 /* Forward declarations (for prototypes & struct definitions) */
@@ -110,14 +110,6 @@ typedef struct {
 
 typedef struct H5G_t H5G_t;
 typedef struct H5G_shared_t H5G_shared_t;
-
-/* Depth of group entry copy */
-/* (Also used for group hier. name copies) */
-typedef enum {
-    H5G_COPY_SHALLOW,   /* Copy from source to destination, including name & old name fields */
-    H5G_COPY_CANON,     /* Keep user path the same, but deep copy canonical path */
-    H5G_COPY_DEEP       /* Deep copy from source to destination, including duplicating name & old name fields */
-} H5G_copy_depth_t;
 
 /*
  * Library prototypes...  These are the ones that other packages routinely
@@ -160,11 +152,11 @@ H5_DLL herr_t H5G_obj_ent_encode(H5F_t *f, uint8_t **pp,
  * These functions operate on group hierarchy names.
  */
 H5_DLL  herr_t H5G_name_replace(H5G_obj_t type, H5G_loc_t *loc,
-        H5RS_str_t *src_name, H5G_loc_t *src_loc,
         H5RS_str_t *dst_name, H5G_loc_t *dst_loc, H5G_names_op_t op);
 H5_DLL herr_t H5G_name_reset(H5G_name_t *name);
-H5_DLL herr_t H5G_name_copy(H5G_name_t *dst, const H5G_name_t *src, H5G_copy_depth_t depth);
+H5_DLL herr_t H5G_name_copy(H5G_name_t *dst, const H5G_name_t *src, H5_copy_depth_t depth);
 H5_DLL herr_t H5G_name_free(H5G_name_t *name);
+H5_DLL ssize_t H5G_get_name(hid_t id, char *name/*out*/, size_t size);
 
 /*
  * These functions operate on group "locations"
@@ -176,3 +168,4 @@ H5_DLL herr_t H5G_loc_reset(H5G_loc_t *loc);
 H5_DLL herr_t H5G_loc_free(H5G_loc_t *loc);
 
 #endif
+

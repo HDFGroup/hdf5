@@ -409,9 +409,7 @@ H5O_link_free(void *_mesg)
     HDassert(lnk);
 
     /* Free information for link */
-    if(lnk->type == H5G_LINK_SOFT)
-        lnk->u.soft.name = H5MM_xfree(lnk->u.soft.name);
-    lnk->name = H5MM_xfree(lnk->name);
+    H5O_link_reset(lnk);
     H5FL_FREE(H5O_link_t, lnk);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

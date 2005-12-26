@@ -327,34 +327,34 @@ H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
  *
  * Notes:       'depth' parameter determines how much of the group entry
  *              structure we want to copy.  The values are:
- *                  H5G_COPY_SHALLOW - Copy all the fields from the source
+ *                  H5_COPY_SHALLOW - Copy all the fields from the source
  *                      to the destination, including the user path and
  *                      canonical path. (Destination "takes ownership" of
  *                      user and canonical paths)
- *                  H5G_COPY_DEEP - Copy all the fields from the source to
+ *                  H5_COPY_DEEP - Copy all the fields from the source to
  *                      the destination, deep copying the user and canonical
  *                      paths.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_copy(H5G_entry_t *dst, const H5G_entry_t *src, H5G_copy_depth_t depth)
+H5G_ent_copy(H5G_entry_t *dst, const H5G_entry_t *src, H5_copy_depth_t depth)
 {
     FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_copy)
 
     /* Check arguments */
     HDassert(src);
     HDassert(dst);
-    HDassert(depth == H5G_COPY_SHALLOW || depth == H5G_COPY_DEEP);
+    HDassert(depth == H5_COPY_SHALLOW || depth == H5_COPY_DEEP);
 
     /* Copy the top level information */
     HDmemcpy(dst, src, sizeof(H5G_entry_t));
 
     /* Deep copy the names */
-    if(depth == H5G_COPY_DEEP) {
+    if(depth == H5_COPY_DEEP) {
         /* Nothing currently */
         ;
-    } else if(depth == H5G_COPY_SHALLOW) {
+    } else if(depth == H5_COPY_SHALLOW) {
         /* Discarding 'const' qualifier OK - QAK */
         H5G_ent_reset((H5G_entry_t *)src);
     } /* end if */

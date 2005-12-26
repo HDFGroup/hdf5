@@ -256,11 +256,11 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     attr->initialized = TRUE; /*for now, set to false later*/
 
     /* Copy the object header information */
-    if(H5O_loc_copy(&(attr->oloc), loc->oloc, H5O_COPY_DEEP) < 0)
+    if(H5O_loc_copy(&(attr->oloc), loc->oloc, H5_COPY_DEEP) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to copy entry")
 
     /* Deep copy of the group hierarchy path */
-    if(H5G_name_copy(&(attr->path), loc->path, H5G_COPY_DEEP) < 0)
+    if(H5G_name_copy(&(attr->path), loc->path, H5_COPY_DEEP) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to copy path")
 
     /* Compute the size of pieces on disk */
@@ -526,12 +526,22 @@ H5A_open(H5G_loc_t *loc, unsigned idx, hid_t dxpl_id)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to load attribute info from dataset header")
     attr->initialized = TRUE;
 
+#if defined(H5_USING_PURIFY) || !defined(NDEBUG)
+    /* Clear object location */
+    if(H5O_loc_reset(&(attr->oloc)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to reset location")
+
+    /* Clear path name */
+    if(H5G_name_reset(&(attr->path)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to reset path")
+#endif /* H5_USING_PURIFY */
+
     /* Deep copy of the symbol table entry */
-    if(H5O_loc_copy(&(attr->oloc), loc->oloc, H5O_COPY_DEEP) < 0)
+    if(H5O_loc_copy(&(attr->oloc), loc->oloc, H5_COPY_DEEP) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to copy entry")
 
     /* Deep copy of the group hier. path */
-    if(H5G_name_copy(&(attr->path), loc->path, H5G_COPY_DEEP) < 0)
+    if(H5G_name_copy(&(attr->path), loc->path, H5_COPY_DEEP) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to copy entry")
 
     /* Hold the symbol table entry (and file) open */
