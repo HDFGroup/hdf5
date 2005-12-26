@@ -1166,7 +1166,7 @@ done:
         } /* end if */
         else {
             if(ent_found && ent.header)
-                H5G_free_ent_name(&ent);
+                H5G_name_free(&ent);
         } /* end else */
     } /* end if */
     FUNC_LEAVE_API(ret_value)
@@ -1190,7 +1190,7 @@ done:
 herr_t
 H5Dclose(hid_t dset_id)
 {
-    H5D_t	*dset = NULL;	        /* Dataset object to release */
+    H5D_t	*dset;	                /* Dataset object to release */
     herr_t       ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(H5Dclose, FAIL)
@@ -1199,8 +1199,6 @@ H5Dclose(hid_t dset_id)
     /* Check args */
     if(NULL == (dset = H5I_object_verify(dset_id, H5I_DATASET)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-    if (NULL == dset->ent.file)
-	HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset")
 
     /*
      * Decrement the counter on the dataset.  It will be freed if the count
@@ -2320,14 +2318,14 @@ H5D_open(const H5G_entry_t *ent, hid_t dxpl_id)
 
     /* Allocate the dataset structure */
     if(NULL == (dataset = H5FL_CALLOC(H5D_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate space for dataset")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Shallow copy (take ownership) of the group entry object */
-    if(H5G_ent_copy(&(dataset->ent),ent,H5G_COPY_SHALLOW)<0)
+    if(H5G_ent_copy(&(dataset->ent), ent, H5_COPY_SHALLOW) < 0)
         HGOTO_ERROR (H5E_DATASET, H5E_CANTCOPY, NULL, "can't copy group entry")
 
     /* Check if dataset was already open */
-    if((shared_fo=H5FO_opened(dataset->ent.file, dataset->ent.header))==NULL) {
+    if((shared_fo = H5FO_opened(dataset->ent.file, dataset->ent.header))==NULL) {
         /* Clear any errors from H5FO_opened() */
         H5E_clear();
 
@@ -2625,7 +2623,6 @@ done:
             if(H5I_dec_ref(dataset->shared->type_id) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
         } /* end if */
-        dataset->ent.file = NULL;
     } /* end if */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_open_oid() */
@@ -2751,10 +2748,10 @@ H5D_close(H5D_t *dataset)
         if(H5FO_top_count(dataset->ent.file, dataset->ent.header) == 0)
             if(H5O_close(&(dataset->ent)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to close")
-
-       if(H5G_free_ent_name(&dataset->ent)<0)
-           free_failed=TRUE;
     } /* end else */
+
+   if(H5G_name_free(&dataset->ent)<0)
+       free_failed=TRUE;
 
     H5FL_FREE(H5D_t,dataset);
 
@@ -2841,7 +2838,7 @@ H5D_extend (H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update cached chunk indices")
 
 	/* Allocate space for the new parts of the dataset, if appropriate */
-        if(dataset->shared->alloc_time==H5D_ALLOC_TIME_EARLY)
+        if(dataset->shared->alloc_time == H5D_ALLOC_TIME_EARLY)
             if (H5D_alloc_storage(dataset->ent.file, dxpl_id, dataset, H5D_ALLOC_EXTEND, TRUE, FALSE)<0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value")
     } /* end if */
@@ -2857,7 +2854,6 @@ done:
  * Purpose:	Returns a pointer to the entry for a dataset.
  *
  * Return:	Success:	Ptr to entry
- *
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
@@ -3009,6 +3005,8 @@ H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_allo
                     assert(layout->u.compact.size>0);
                     if (NULL==(layout->u.compact.buf=H5MM_malloc(layout->u.compact.size)))
                         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory for compact dataset")
+                    if(!full_overwrite)
+                        HDmemset(layout->u.compact.buf, 0, layout->u.compact.size);
                     layout->u.compact.dirty = TRUE;
 
                     /* Indicate that we set the storage addr */

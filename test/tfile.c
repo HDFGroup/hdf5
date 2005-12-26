@@ -936,7 +936,7 @@ test_get_file_id(void)
      * this attribute.  And close it.
      */
     datatype_id=H5Tcopy(H5T_NATIVE_INT);
-    CHECK(ret, FAIL, "H5Acreate");
+    CHECK(ret, FAIL, "H5Tcopy");
 
     ret = H5Tcommit(fid, TYPE_NAME, datatype_id);
     CHECK(ret, FAIL, "H5Tcommit");

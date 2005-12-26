@@ -462,7 +462,7 @@ H5O_close(H5G_entry_t *obj_ent)
     } /* end if */
 
     /* Free the ID to name buffers */
-    H5G_free_ent_name(obj_ent);
+    H5G_name_free(obj_ent);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

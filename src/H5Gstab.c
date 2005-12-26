@@ -43,24 +43,20 @@
  *		item in the heap is the empty string, and must appear at
  *		heap offset zero.
  *
- * Errors:
- *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
  *		Aug  1 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5G_stab_create(H5F_t *f, hid_t dxpl_id, size_t init, H5G_entry_t *self/*out*/)
 {
-    size_t		    name;	/*offset of "" name	*/
+    size_t	name_offset;	        /* Offset of "" name	*/
     H5O_stab_t		    stab;	/*symbol table message	*/
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_stab_create, FAIL)
 
@@ -72,17 +68,17 @@ H5G_stab_create(H5F_t *f, hid_t dxpl_id, size_t init, H5G_entry_t *self/*out*/)
     init = MAX(init, H5HL_SIZEOF_FREE(f) + 2);
 
     /* Create symbol table private heap */
-    if (H5HL_create(f, dxpl_id, init, &(stab.heap_addr)/*out*/)<0)
+    if(H5HL_create(f, dxpl_id, init, &(stab.heap_addr)/*out*/)<0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create heap")
-    name = H5HL_insert(f, dxpl_id, stab.heap_addr, 1, "");
-    if ((size_t)(-1)==name)
+    name_offset = H5HL_insert(f, dxpl_id, stab.heap_addr, 1, "");
+    if((size_t)(-1) == name_offset)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't initialize heap")
 
     /*
      * B-tree's won't work if the first name isn't at the beginning
      * of the heap.
      */
-    assert(0 == name);
+    HDassert(0 == name_offset);
 
     /* Create the B-tree */
     if (H5B_create(f, dxpl_id, H5B_SNODE, NULL, &(stab.btree_addr)/*out*/) < 0)
@@ -164,7 +160,7 @@ H5G_stab_find(H5G_entry_t *grp_ent, const char *name,
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "not found")
 
     /* Set the name for the symbol entry OBJ_ENT */
-    if (H5G_ent_set_name( grp_ent, obj_ent, name ) < 0)
+    if (H5G_name_set( grp_ent, obj_ent, name ) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot insert name")
 
 done:
@@ -191,25 +187,21 @@ herr_t
 H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent,
     hbool_t inc_link, hid_t dxpl_id)
 {
-    H5O_stab_t		stab;		/*symbol table message		*/
+    H5O_stab_t		stab;		/* Symbol table message		*/
     H5G_bt_ud1_t	udata;		/*data to pass through B-tree	*/
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t              ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_stab_insert, FAIL)
 
     /* check arguments */
-    assert(grp_ent && grp_ent->file);
-    assert(name && *name);
-    assert(obj_ent && obj_ent->file);
-    if (grp_ent->file->shared != obj_ent->file->shared)
+    HDassert(grp_ent && grp_ent->file);
+    HDassert(name && *name);
+    HDassert(obj_ent && obj_ent->file);
+    if(grp_ent->file->shared != obj_ent->file->shared)
 	HGOTO_ERROR(H5E_SYM, H5E_LINK, FAIL, "interfile hard links are not allowed")
 
-    /* Set the name for the symbol entry OBJ_ENT */
-    if (H5G_ent_set_name( grp_ent, obj_ent, name ) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot insert name")
-
     /* initialize data to pass through B-tree */
-    if (NULL == H5O_read(grp_ent, H5O_STAB_ID, 0, &stab, dxpl_id))
+    if(NULL == H5O_read(grp_ent, H5O_STAB_ID, 0, &stab, dxpl_id))
 	HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table")
 
     udata.common.name = name;
@@ -217,8 +209,12 @@ H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent,
     udata.ent = obj_ent;
 
     /* insert */
-    if (H5B_insert(grp_ent->file, dxpl_id, H5B_SNODE, stab.btree_addr, &udata) < 0)
+    if(H5B_insert(grp_ent->file, dxpl_id, H5B_SNODE, stab.btree_addr, &udata) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert entry")
+
+    /* Set the name for the symbol entry OBJ_ENT */
+    if(H5G_name_set(grp_ent, obj_ent, name) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot insert name")
 
     /* Increment link count on object, if appropriate */
     if(inc_link)
@@ -226,8 +222,8 @@ H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent,
             HGOTO_ERROR(H5E_SYM, H5E_LINK, FAIL, "unable to increment hard link count")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_stab_insert() */
 
 
 /*-------------------------------------------------------------------------
@@ -240,8 +236,6 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, September 17, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -253,23 +247,25 @@ H5G_stab_remove(H5G_entry_t *grp_ent, const char *name, hid_t dxpl_id)
 
     FUNC_ENTER_NOAPI(H5G_stab_remove, FAIL)
 
-    assert(grp_ent && grp_ent->file);
-    assert(name && *name);
+    HDassert(grp_ent && grp_ent->file);
+    HDassert(name && *name);
 
     /* initialize data to pass through B-tree */
-    if (NULL==H5O_read(grp_ent, H5O_STAB_ID, 0, &stab, dxpl_id))
-	HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table")
+    if(NULL == H5O_read(grp_ent, H5O_STAB_ID, 0, &stab, dxpl_id))
+        HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table")
+
+    /* Initialize data to pass through B-tree */
     udata.common.name = name;
     udata.common.heap_addr = stab.heap_addr;
     udata.adj_link = TRUE;
 
-    /* remove */
-    if (H5B_remove(grp_ent->file, dxpl_id, H5B_SNODE, stab.btree_addr, &udata)<0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to remove entry")
+    /* Remove */
+    if(H5B_remove(grp_ent->file, dxpl_id, H5B_SNODE, stab.btree_addr, &udata)<0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to remove entry")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5G_stab_remove() */
 
 
 /*-------------------------------------------------------------------------

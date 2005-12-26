@@ -88,17 +88,6 @@ H5FL_EXTERN(H5S_extent_t);
         This function decodes the "raw" disk form of a attribute message
     into a struct in memory native format.  The struct is allocated within this
     function using malloc() and is returned to the caller.
- *
- * Modifications:
- * 	Robb Matzke, 17 Jul 1998
- *	Added padding for alignment.
- *
- * 	Robb Matzke, 20 Jul 1998
- *	Added a version number at the beginning.
- *
- *	Raymond Lu, 8 April 2004
- *	Changed Dataspace operation on H5S_simple_t to H5S_extent_t.
- *
 --------------------------------------------------------------------------*/
 static void *
 H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
@@ -107,16 +96,16 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
     H5S_extent_t	*extent;	/*extent dimensionality information  */
     size_t		name_len;   	/*attribute name length */
     int		        version;	/*message version number*/
-    unsigned            flags=0;        /* Attribute flags */
+    unsigned            flags = 0;        /* Attribute flags */
     H5A_t		*ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_decode);
 
     /* check args */
-    assert(f);
-    assert(p);
+    HDassert(f);
+    HDassert(p);
 
-    if (NULL==(attr = H5FL_CALLOC(H5A_t)))
+    if(NULL == (attr = H5FL_CALLOC(H5A_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Version number */
@@ -184,8 +173,8 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
     H5FL_FREE(H5S_extent_t,extent);
 
     /* Default to entire dataspace being selected */
-    if(H5S_select_all(attr->ds,0)<0)
-        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
+    if(H5S_select_all(attr->ds, 0) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection")
 
     if(version < H5O_ATTR_VERSION_NEW)
         p += H5O_ALIGN(attr->ds_size);
@@ -206,9 +195,18 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
     attr->initialized=1;
 
     /* Set return value */
-    ret_value=attr;
+    ret_value = attr;
 
 done:
+    if(!ret_value)
+        if(attr) {
+            /* Free dynamicly allocated items */
+            if(H5A_free(attr) < 0)
+                HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, NULL, "can't release attribute info")
+
+            H5FL_FREE(H5A_t, attr);
+        } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value);
 }
 

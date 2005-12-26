@@ -2891,9 +2891,9 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 
     /* Deep copy of the symbol table entry, if there was one */
     if(new_dt->shared->state == H5T_STATE_NAMED || new_dt->shared->state == H5T_STATE_OPEN) {
-        if (!H5F_addr_defined(old_dt->ent.header))
+        if(!H5F_addr_defined(old_dt->ent.header))
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "named dataype with invalid address")
-        if (H5G_ent_copy(&(new_dt->ent), &(old_dt->ent),H5G_COPY_DEEP)<0)
+        if (H5G_ent_copy(&(new_dt->ent), &(old_dt->ent),H5_COPY_DEEP)<0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to copy entry")
     } /* end if */
     else {
@@ -3078,7 +3078,7 @@ H5T_free(H5T_t *dt)
     } /* end switch */
 
     /* Free the ID to name info */
-    H5G_free_ent_name(&(dt->ent));
+    H5G_name_free(&(dt->ent));
 
     /* Close the parent */
     if(dt->shared->parent && H5T_close(dt->shared->parent) < 0)
@@ -3148,7 +3148,7 @@ H5T_close(H5T_t *dt)
         } /* end if */
 
         /* Free the ID to name info since we're not calling H5T_free*/
-        H5G_free_ent_name(&(dt->ent));
+        H5G_name_free(&(dt->ent));
     } /* end else */
 
     /* Free the datatype struct */

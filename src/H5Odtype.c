@@ -1105,7 +1105,7 @@ H5O_dtype_get_share(H5F_t UNUSED *f, const void *_mesg,
         /* If the address is defined, this had better be a named datatype */
 	HDassert (H5T_STATE_NAMED==dt->shared->state || H5T_STATE_OPEN==dt->shared->state);
 
-        H5G_ent_copy(&(sh->ent), &(dt->ent), H5G_COPY_NULL);
+        H5G_ent_copy(&(sh->ent), &(dt->ent), H5_COPY_NULL);
     } else
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype is not sharable")
 
@@ -1138,7 +1138,7 @@ H5O_dtype_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
     HDassert(sh);
 
     /* NULL copy here, names not appropriate */
-    H5G_ent_copy(&(dt->ent), &(sh->ent), H5G_COPY_NULL);
+    H5G_ent_copy(&(dt->ent), &(sh->ent), H5_COPY_NULL);
 
     /* Note that the datatype is a named datatype */
     dt->shared->state = H5T_STATE_NAMED;

@@ -143,7 +143,7 @@ typedef struct H5S_iostats_t {
 #define H5S_GET_SELECT_TYPE(S)          ((S)->select.type->type)
 #define H5S_SELECT_GET_SEQ_LIST(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN)             ((*(S)->select.type->get_seq_list)(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN))
 #define H5S_SELECT_VALID(S)             ((*(S)->select.type->is_valid)(S))
-#define H5S_SELECT_RELEASE(S)           ((*(S)->select.type->release)(S))
+#define H5S_SELECT_RELEASE(S)           ((S)->select.type ? (*(S)->select.type->release)(S) : SUCCEED)
 #define H5S_SELECT_SERIAL_SIZE(S)       ((*(S)->select.type->serial_size)(S))
 #define H5S_SELECT_SERIALIZE(S,BUF)     ((*(S)->select.type->serialize)(S,BUF))
 #define H5S_SELECT_BOUNDS(S,START,END)  ((*(S)->select.type->bounds)(S,START,END))

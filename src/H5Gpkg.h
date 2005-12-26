@@ -37,19 +37,6 @@
 #define H5G_SIZE_HINT   256    /* default root grp size hint         */
 
 /*
- * A symbol table node is a collection of symbol table entries.  It can
- * be thought of as the lowest level of the B-link tree that points to
- * a collection of symbol table entries that belong to a specific symbol
- * table or group.
- */
-typedef struct H5G_node_t {
-    H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
-                            /* first field in structure */
-    unsigned nsyms;                     /*number of symbols                  */
-    H5G_entry_t *entry;                 /*array of symbol table entries      */
-} H5G_node_t;
-
-/*
  * Shared information for all open group objects
  */
 struct H5G_shared_t {
@@ -172,6 +159,21 @@ typedef struct H5G_bt_it_ud4_t {
     /* upward */
 } H5G_bt_it_ud4_t;
 
+/* Enum for H5G_namei actions */
+typedef enum {
+    H5G_NAMEI_TRAVERSE,         /* Just traverse groups */
+    H5G_NAMEI_INSERT            /* Insert entry in group */
+} H5G_namei_act_t ;
+
+/*
+ * During name lookups (see H5G_namei()) we sometimes want information about
+ * a symbolic link or a mount point.  The normal operation is to follow the
+ * symbolic link or mount point and return information about its target.
+ */
+#define H5G_TARGET_NORMAL	0x0000
+#define H5G_TARGET_SLINK	0x0001
+#define H5G_TARGET_MOUNT	0x0002
+
 /*
  * This is the class identifier to give to the B-tree functions.
  */
@@ -179,6 +181,17 @@ H5_DLLVAR H5B_class_t H5B_SNODE[1];
 
 /* The cache subclass */
 H5_DLLVAR const H5AC_class_t H5AC_SNODE[1];
+
+/*
+ * Utility functions
+ */
+H5_DLL H5G_t *H5G_rootof(H5F_t *f);
+H5_DLL const char * H5G_component(const char *name, size_t *size_p);
+H5_DLL herr_t H5G_namei_term_interface(void);
+H5_DLL herr_t H5G_namei(const H5G_entry_t *loc_ent, const char *name,
+    const char **rest/*out*/, H5G_entry_t *grp_ent/*out*/, H5G_entry_t *obj_ent/*out*/,
+    unsigned target, int *nlinks/*out*/, H5G_namei_act_t action,
+    H5G_entry_t *ent, hid_t dxpl_id);
 
 /*
  * Functions that understand symbol tables but not names.  The
@@ -201,7 +214,6 @@ H5_DLL herr_t H5G_ent_decode_vec(H5F_t *f, const uint8_t **pp,
 				  H5G_entry_t *ent, unsigned n);
 H5_DLL herr_t H5G_ent_encode_vec(H5F_t *f, uint8_t **pp,
 				  const H5G_entry_t *ent, unsigned n);
-H5_DLL herr_t H5G_ent_set_name(H5G_entry_t *loc, H5G_entry_t *obj, const char *name);
 
 /* Functions that understand symbol table nodes */
 H5_DLL int H5G_node_iterate (H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
@@ -212,4 +224,11 @@ H5_DLL int H5G_node_name(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t a
 		     const void *_rt_key, void *_udata);
 H5_DLL int H5G_node_type(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
 		     const void *_rt_key, void *_udata);
+
+/*
+ * These functions operate on group hierarchy names.
+ */
+H5_DLL herr_t H5G_name_init(H5G_entry_t *name, const char *path);
+H5_DLL herr_t H5G_name_set(H5G_entry_t *loc, H5G_entry_t *obj, const char *name);
+
 #endif

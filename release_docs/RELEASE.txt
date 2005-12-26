@@ -44,6 +44,7 @@ New Features
 
     Source code distribution:
     -------------------------
+
     Library:
     --------
 
@@ -55,6 +56,7 @@ New Features
 
     F90 API:
     --------
+
     C++ API:
     --------
 
@@ -71,6 +73,8 @@ Bug Fixes since HDF5-1.6.5 Release
 
     Library
     -------
+        - Fixed various problems with retrieving names of objects, especially
+            with mounted files.  QAK - 2005/12/25
 
     Configuration
     -------------

@@ -1303,39 +1303,23 @@ done:
  *  If a zero is returned for the name's length, then there is no name
  *  associated with the ID.
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
 H5Iget_name(hid_t id, char *name/*out*/, size_t size)
 {
-    H5G_entry_t   *ent;       /*symbol table entry */
-    size_t        len=0;
     ssize_t       ret_value;
 
-    FUNC_ENTER_API (H5Iget_name, FAIL);
+    FUNC_ENTER_API(H5Iget_name, FAIL)
     H5TRACE3("Zs","ixz",id,name,size);
 
-    /* get symbol table entry */
-    if(NULL!=(ent = H5G_loc(id))) {
-        if (ent->user_path_r != NULL && ent->user_path_hidden==0) {
-            len = H5RS_len(ent->user_path_r);
-
-            if(name) {
-                HDstrncpy(name, H5RS_get_str(ent->user_path_r), MIN(len+1,size));
-                if(len >= size)
-                    name[size-1]='\0';
-            } /* end if */
-        } /* end if */
-    } /* end if */
-
-    /* Set return value */
-    ret_value=(ssize_t)len;
+    /* Call internal group routine to retrieve object's name */
+    if((ret_value = H5G_get_name(id, name, size)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object name")
 
 done:
-    FUNC_LEAVE_API(ret_value);
-}
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Iget_name() */
 
 
 /*-------------------------------------------------------------------------

@@ -433,8 +433,8 @@ H5_DLL MPI_Comm H5F_mpi_get_comm(const H5F_t *f);
 #endif /* H5_HAVE_PARALLEL */
 
 /* Functions than check file mounting information */
-H5_DLL htri_t H5F_is_mount(const H5F_t *file);
-H5_DLL htri_t H5F_has_mount(const H5F_t *file);
+H5_DLL hbool_t H5F_is_mount(const H5F_t *file);
+H5_DLL hbool_t H5F_has_mount(const H5F_t *file);
 
 /* Functions than retrieve values set from the FCPL */
 H5_DLL size_t H5F_sizeof_addr(const H5F_t *f);
