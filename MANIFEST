@@ -1194,11 +1194,14 @@
 ./src/H5FSprivate.h
 ./src/H5G.c
 ./src/H5Gent.c
+./src/H5Gname.c
 ./src/H5Gnode.c
 ./src/H5Gpkg.h
 ./src/H5Gprivate.h
 ./src/H5Gpublic.h
 ./src/H5Gstab.c
+./src/H5Gtest.c
+./src/H5Gtraverse.c
 ./src/H5HG.c
 ./src/H5HGdbg.c
 ./src/H5HGpkg.h
