@@ -106,19 +106,19 @@ SOURCE=..\..\..\hl\src\H5LT.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\hl\src\H5LTanalyze.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\hl\src\H5LTparse.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\hl\src\H5PT.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\hl\src\H5TB.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\hl\src\lex.yy.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\hl\src\y.tab.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
