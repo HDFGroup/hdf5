@@ -242,7 +242,11 @@ int UNUSED argc, const char UNUSED *argv[]
     } else if (!strcmp(driver, drivernames[MPIPOSIX_IDX])) {
         /* MPI-I/O Driver */
         if((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0) {
-            H5Pset_fapl_mpiposix(fapl, MPI_COMM_WORLD, TRUE);
+#ifdef H5_WANT_H5_V1_4_COMPAT
+            H5Pset_fapl_mpiposix(fapl, MPI_COMM_WORLD);
+#else
+	    H5Pset_fapl_mpiposix(fapl, MPI_COMM_WORLD, TRUE);
+#endif
 
             /* Initialize the MPI library, if it wasn't already */
             if(!h5tools_mpi_init_g) {
