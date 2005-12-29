@@ -102,7 +102,7 @@ void Attribute::write( const DataType& mem_type, const string& strg ) const
    const char* strg_C;
    strg_C = strg.c_str();  // strg_C refers to the contents of strg as a C-str
 
-   herr_t ret_value = H5Awrite( id, mem_type.getId(), strg_C );
+   herr_t ret_value = H5Awrite( id, mem_type.getId(), &strg_C );
    if( ret_value < 0 )
    {
       throw AttributeIException("Attribute::write", "H5Awrite failed");
@@ -139,7 +139,7 @@ void Attribute::read( const DataType& mem_type, string& strg ) const
 {
    size_t size = mem_type.getSize();
    char* strg_C = new char[size+1];  // temporary C-string for C API
-   herr_t ret_value = H5Aread( id, mem_type.getId(), strg_C );
+   herr_t ret_value = H5Aread( id, mem_type.getId(), &strg_C );
    if( ret_value < 0 )
    {
       throw AttributeIException("Attribute::read", "H5Aread failed");

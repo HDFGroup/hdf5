@@ -39,6 +39,9 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
         // Close this file.
         virtual void close();
 
+	// Flushes all buffers associated with this file to disk
+	void flush(H5F_scope_t scope) const;
+
 	// Gets the access property list of this file.
 	FileAccPropList getAccessPlist() const;
 

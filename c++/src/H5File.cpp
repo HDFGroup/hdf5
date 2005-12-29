@@ -148,6 +148,25 @@ void H5File::p_get_file(const char* name, unsigned int flags, const FileCreatPro
 H5File::H5File( const H5File& original ) : IdComponent( original ) {}
 
 //--------------------------------------------------------------------------
+// Function:	H5File::flush
+///\brief	Flushes all buffers associated with a file to disk.
+///\param	scope - IN: Specifies the scope of the flushing action,
+///		which can be either of these values:
+///		\li \c H5F_SCOPE_GLOBAL - Flushes the entire virtual file
+///		\li \c H5F_SCOPE_LOCAL - Flushes only the specified file
+///\exception	H5::FileIException
+// Programmer	Binh-Minh Ribler - Dec. 2005
+//--------------------------------------------------------------------------
+void H5File::flush(H5F_scope_t scope) const
+{
+   herr_t ret_value = H5Fflush( id, scope );
+   if( ret_value < 0 )
+   {
+      throw FileIException("H5File::flush", "H5Fflush failed");
+   }
+}
+
+//--------------------------------------------------------------------------
 // Function:	H5File::isHdf5
 ///\brief	Determines whether a file in HDF5 format.
 ///\param	name - IN: Name of the file
@@ -155,7 +174,7 @@ H5File::H5File( const H5File& original ) : IdComponent( original ) {}
 ///\exception	H5::FileIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-bool H5File::isHdf5(const char* name )
+bool H5File::isHdf5(const char* name)
 {
    // Calls C routine H5Fis_hdf5 to determine whether the file is in
    // HDF5 format.  It returns positive value, 0, or negative value
