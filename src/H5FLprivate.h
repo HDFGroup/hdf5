@@ -120,10 +120,10 @@ typedef struct H5FL_reg_head_t {
 #define H5FL_DEFINE_STATIC(t)  static H5FL_DEFINE_COMMON(t)
 
 /* Allocate an object of type 't' */
-#define H5FL_MALLOC(t) H5FL_reg_malloc(&(H5FL_REG_NAME(t)) H5FL_TRACK_INFO)
+#define H5FL_MALLOC(t) (t *)H5FL_reg_malloc(&(H5FL_REG_NAME(t)) H5FL_TRACK_INFO)
 
 /* Allocate an object of type 't' and clear it to all zeros */
-#define H5FL_CALLOC(t) H5FL_reg_calloc(&(H5FL_REG_NAME(t)) H5FL_TRACK_INFO)
+#define H5FL_CALLOC(t) (t *)H5FL_reg_calloc(&(H5FL_REG_NAME(t)) H5FL_TRACK_INFO)
 
 /* Free an object of type 't' */
 #define H5FL_FREE(t,obj) H5FL_reg_free(&(H5FL_REG_NAME(t)),obj)
@@ -140,8 +140,8 @@ typedef struct H5FL_reg_head_t {
 #define H5FL_DEFINE(t)  H5_DLL H5FL_DEFINE_COMMON(t)
 #define H5FL_EXTERN(t)  extern H5_DLL int H5FL_REG_NAME(t)
 #define H5FL_DEFINE_STATIC(t)  static H5FL_DEFINE_COMMON(t)
-#define H5FL_MALLOC(t) H5MM_malloc(sizeof(t))
-#define H5FL_CALLOC(t) H5MM_calloc(sizeof(t))
+#define H5FL_MALLOC(t) (t *)H5MM_malloc(sizeof(t))
+#define H5FL_CALLOC(t) (t *)H5MM_calloc(sizeof(t))
 #define H5FL_FREE(t,obj) H5MM_xfree(obj)
 #endif /* H5_NO_REG_FREE_LISTS */
 
@@ -189,16 +189,16 @@ typedef struct H5FL_blk_head_t {
 #define H5FL_BLK_DEFINE_STATIC(t)  static H5FL_BLK_DEFINE_COMMON(t)
 
 /* Allocate an block of type 't' */
-#define H5FL_BLK_MALLOC(t,size) H5FL_blk_malloc(&(H5FL_BLK_NAME(t)),size H5FL_TRACK_INFO)
+#define H5FL_BLK_MALLOC(t,size) (uint8_t *)H5FL_blk_malloc(&(H5FL_BLK_NAME(t)),size H5FL_TRACK_INFO)
 
 /* Allocate an block of type 't' and clear it to zeros */
-#define H5FL_BLK_CALLOC(t,size) H5FL_blk_calloc(&(H5FL_BLK_NAME(t)),size H5FL_TRACK_INFO)
+#define H5FL_BLK_CALLOC(t,size) (uint8_t *)H5FL_blk_calloc(&(H5FL_BLK_NAME(t)),size H5FL_TRACK_INFO)
 
 /* Free a block of type 't' */
-#define H5FL_BLK_FREE(t,blk) H5FL_blk_free(&(H5FL_BLK_NAME(t)),blk)
+#define H5FL_BLK_FREE(t,blk) (uint8_t *)H5FL_blk_free(&(H5FL_BLK_NAME(t)),blk)
 
 /* Re-allocate a block of type 't' */
-#define H5FL_BLK_REALLOC(t,blk,new_size) H5FL_blk_realloc(&(H5FL_BLK_NAME(t)),blk,new_size H5FL_TRACK_INFO)
+#define H5FL_BLK_REALLOC(t,blk,new_size) (uint8_t *)H5FL_blk_realloc(&(H5FL_BLK_NAME(t)),blk,new_size H5FL_TRACK_INFO)
 
 /* Check if there is a free block available to re-use */
 #define H5FL_BLK_AVAIL(t,size)  H5FL_blk_free_block_avail(&(H5FL_BLK_NAME(t)),size)
@@ -210,10 +210,10 @@ typedef struct H5FL_blk_head_t {
 #define H5FL_BLK_DEFINE(t)      H5_DLL H5FL_BLK_DEFINE_COMMON(t)
 #define H5FL_BLK_EXTERN(t)      extern H5_DLL int H5FL_BLK_NAME(t)
 #define H5FL_BLK_DEFINE_STATIC(t)  static H5FL_BLK_DEFINE_COMMON(t)
-#define H5FL_BLK_MALLOC(t,size) H5MM_malloc(size)
-#define H5FL_BLK_CALLOC(t,size) H5MM_calloc(size)
-#define H5FL_BLK_FREE(t,blk) H5MM_xfree(blk)
-#define H5FL_BLK_REALLOC(t,blk,new_size) H5MM_realloc(blk,new_size)
+#define H5FL_BLK_MALLOC(t,size) (uint8_t *)H5MM_malloc(size)
+#define H5FL_BLK_CALLOC(t,size) (uint8_t *)H5MM_calloc(size)
+#define H5FL_BLK_FREE(t,blk) (uint8_t *)H5MM_xfree(blk)
+#define H5FL_BLK_REALLOC(t,blk,new_size) (uint8_t *)H5MM_realloc(blk,new_size)
 #define H5FL_BLK_AVAIL(t,size)  (FALSE)
 #endif /* H5_NO_BLK_FREE_LISTS */
 
@@ -321,16 +321,16 @@ typedef struct H5FL_seq_head_t {
 #define H5FL_SEQ_DEFINE_STATIC(t)  static H5FL_SEQ_DEFINE_COMMON(t)
 
 /* Allocate a sequence of type 't' */
-#define H5FL_SEQ_MALLOC(t,elem) H5FL_seq_malloc(&(H5FL_SEQ_NAME(t)),elem H5FL_TRACK_INFO)
+#define H5FL_SEQ_MALLOC(t,elem) (t *)H5FL_seq_malloc(&(H5FL_SEQ_NAME(t)),elem H5FL_TRACK_INFO)
 
 /* Allocate a sequence of type 't' and clear it to all zeros */
-#define H5FL_SEQ_CALLOC(t,elem) H5FL_seq_calloc(&(H5FL_SEQ_NAME(t)),elem H5FL_TRACK_INFO)
+#define H5FL_SEQ_CALLOC(t,elem) (t *)H5FL_seq_calloc(&(H5FL_SEQ_NAME(t)),elem H5FL_TRACK_INFO)
 
 /* Free a sequence of type 't' */
 #define H5FL_SEQ_FREE(t,obj) H5FL_seq_free(&(H5FL_SEQ_NAME(t)),obj)
 
 /* Re-allocate a sequence of type 't' */
-#define H5FL_SEQ_REALLOC(t,obj,new_elem) H5FL_seq_realloc(&(H5FL_SEQ_NAME(t)),obj,new_elem H5FL_TRACK_INFO)
+#define H5FL_SEQ_REALLOC(t,obj,new_elem) (t *)H5FL_seq_realloc(&(H5FL_SEQ_NAME(t)),obj,new_elem H5FL_TRACK_INFO)
 
 #else /* H5_NO_SEQ_FREE_LISTS */
 /* Common macro for H5FL_BLK_DEFINE & H5FL_BLK_DEFINE_STATIC */
@@ -339,10 +339,10 @@ typedef struct H5FL_seq_head_t {
 #define H5FL_SEQ_DEFINE(t)      H5_DLL H5FL_SEQ_DEFINE_COMMON(t)
 #define H5FL_SEQ_EXTERN(t)      extern H5_DLL int H5FL_SEQ_NAME(t)
 #define H5FL_SEQ_DEFINE_STATIC(t)  static H5FL_SEQ_DEFINE_COMMON(t)
-#define H5FL_SEQ_MALLOC(t,elem) H5MM_malloc((elem)*sizeof(t))
-#define H5FL_SEQ_CALLOC(t,elem) H5MM_calloc((elem)*sizeof(t))
+#define H5FL_SEQ_MALLOC(t,elem) (t *)H5MM_malloc((elem)*sizeof(t))
+#define H5FL_SEQ_CALLOC(t,elem) (t *)H5MM_calloc((elem)*sizeof(t))
 #define H5FL_SEQ_FREE(t,obj) H5MM_xfree(obj)
-#define H5FL_SEQ_REALLOC(t,obj,new_elem) H5MM_realloc(obj,(new_elem)*sizeof(t))
+#define H5FL_SEQ_REALLOC(t,obj,new_elem) (t *)H5MM_realloc(obj,(new_elem)*sizeof(t))
 #endif /* H5_NO_SEQ_FREE_LISTS */
 
 /* Data structure for free list block factory */

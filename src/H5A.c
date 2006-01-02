@@ -203,9 +203,9 @@ H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
-    if(NULL == (type = H5I_object_verify(type_id, H5I_DATATYPE)))
+    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a type")
-    if(NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
+    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
     /* Go do the real work for attaching the attribute to the dataset */
@@ -576,7 +576,7 @@ H5A_open(H5G_loc_t *loc, unsigned idx, hid_t dxpl_id)
 
     /* Read in attribute with H5O_read() */
     H5_CHECK_OVERFLOW(idx,unsigned,int);
-    if(NULL == (attr = H5O_read(loc->oloc, H5O_ATTR_ID, (int)idx, NULL, dxpl_id)))
+    if(NULL == (attr = (H5A_t *)H5O_read(loc->oloc, H5O_ATTR_ID, (int)idx, NULL, dxpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to load attribute info from dataset header")
     attr->initialized = TRUE;
 
@@ -644,9 +644,9 @@ H5Awrite(hid_t attr_id, hid_t type_id, const void *buf)
     H5TRACE3("e","iix",attr_id,type_id,buf);
 
     /* check arguments */
-    if(NULL == (attr = H5I_object_verify(attr_id, H5I_ATTR)))
+    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
-    if(NULL == (mem_type = H5I_object_verify(type_id, H5I_DATATYPE)))
+    if(NULL == (mem_type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if(NULL == buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer")
@@ -732,7 +732,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
 
             /* Free the previous attribute data buffer, if there is one */
             if(attr->data)
-                H5FL_BLK_FREE(attr_buf, attr->data);
+                attr->data = H5FL_BLK_FREE(attr_buf, attr->data);
 
             /* Set the pointer to the attribute data to the converted information */
             attr->data = tconv_buf;
@@ -769,7 +769,7 @@ done:
     if(dst_id >= 0)
         (void)H5I_dec_ref(dst_id);
     if(bkg_buf)
-        H5FL_BLK_FREE(attr_buf, bkg_buf);
+        bkg_buf = H5FL_BLK_FREE(attr_buf, bkg_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A_write() */
@@ -802,9 +802,9 @@ H5Aread(hid_t attr_id, hid_t type_id, void *buf)
     H5TRACE3("e","iix",attr_id,type_id,buf);
 
     /* check arguments */
-    if(NULL == (attr = H5I_object_verify(attr_id, H5I_ATTR)))
+    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
-    if(NULL == (mem_type = H5I_object_verify(type_id, H5I_DATATYPE)))
+    if(NULL == (mem_type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if(NULL == buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer")
@@ -912,9 +912,9 @@ done:
     if(dst_id >= 0)
         (void)H5I_dec_ref(dst_id);
     if(tconv_buf)
-        H5FL_BLK_FREE(attr_buf, tconv_buf);
+        tconv_buf = H5FL_BLK_FREE(attr_buf, tconv_buf);
     if(bkg_buf)
-	H5FL_BLK_FREE(attr_buf, bkg_buf);
+	bkg_buf = H5FL_BLK_FREE(attr_buf, bkg_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A_read() */
@@ -947,7 +947,7 @@ H5Aget_space(hid_t attr_id)
     H5TRACE1("i","i",attr_id);
 
     /* check arguments */
-    if(NULL == (attr = H5I_object_verify(attr_id, H5I_ATTR)))
+    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
     /* Copy the attribute's dataspace */
@@ -990,7 +990,7 @@ H5Aget_type(hid_t attr_id)
     H5TRACE1("i","i",attr_id);
 
     /* check arguments */
-    if(NULL == (attr = H5I_object_verify(attr_id, H5I_ATTR)))
+    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
     /*
@@ -1108,7 +1108,7 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
     H5TRACE3("Zs","izs",attr_id,buf_size,buf);
 
     /* check arguments */
-    if(NULL == (attr = H5I_object_verify(attr_id, H5I_ATTR)))
+    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
     if(!buf && buf_size)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer")
@@ -1165,7 +1165,7 @@ H5Aget_storage_size(hid_t attr_id)
     H5TRACE1("h","i",attr_id);
 
     /* Check args */
-    if(NULL == (attr = H5I_object_verify(attr_id, H5I_ATTR)))
+    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not an attribute")
 
     /* Set return value */
@@ -1653,7 +1653,7 @@ H5A_free(H5A_t *attr)
         if(H5S_close(attr->ds) < 0)
 	    HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release dataspace info")
     if(attr->data)
-        H5FL_BLK_FREE(attr_buf, attr->data);
+        attr->data = H5FL_BLK_FREE(attr_buf, attr->data);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1694,7 +1694,7 @@ H5A_close(H5A_t *attr)
             HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "unable to write attribute")
 
         /* Free temporary buffer */
-        H5FL_BLK_FREE(attr_buf, tmp_buf);
+        tmp_buf = H5FL_BLK_FREE(attr_buf, tmp_buf);
     } /* end if */
     
     /* Free dynamicly allocated items */

@@ -181,10 +181,51 @@ esac
 # the information from the previous version and adding modifications to that.
 case "$cc_vendor-$cc_version" in
 
-# Closer to the gcc 4.1 release, we should check for additional flags to
+# Closer to the gcc 4.2 release, we should check for additional flags to
 # include and break it out into it's own section, like the other versions
 # below. -QAK
-  gcc-4.[01]*)
+  gcc-4.[12]*)
+    # Replace -ansi flag with -std=c99 flag
+    CFLAGS="`echo $CFLAGS | sed -e 's/-ansi/-std=c99/g'`"
+
+    # Disable warnings about using 'long long' type
+    CFLAGS="$CFLAGS -Wno-long-long"
+
+    # Append warning flags from gcc-3* case
+    CFLAGS="$CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
+
+    # Append warning flags from gcc-3.2* case
+    CFLAGS="$CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wmultichar"
+
+    # Enable mort format checking flags, beyond the basic -Wformat included
+    # in -Wall
+    CFLAGS="$CFLAGS -Wformat-nonliteral -Wformat-security -Wformat-y2k"
+
+    # The "unreachable code" warning does not appear to be reliable yet...
+    CFLAGS="$CFLAGS -Wunreachable-code"
+
+    # Append warning flags from gcc-3.3* case
+    CFLAGS="$CFLAGS -Wendif-labels"
+
+    # Append warning flags from gcc-3.4* case
+    CFLAGS="$CFLAGS -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch"
+
+    # Replace old -W flag with new -Wextra flag
+    CFLAGS="`echo $CFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
+
+    # Append more extra warning flags that only gcc4.0+ know about
+    CFLAGS="$CFLAGS -Wmissing-field-initializers -Wvariadic-macros"
+
+    # Append more extra warning flags that only gcc4.1+ know about
+    CFLAGS="$CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wvolatile-register-var"
+
+    # Try out the new "stack protector" feature in gcc 4.1
+    # (Strictly speaking this isn't really a "warning" flag, so it's added to
+    #   the debugging flags)
+    #DEBUG_CFLAGS="$DEBUG_CFLAGS -Wstack-protector -fstack-protector-all"
+    ;;
+
+  gcc-4.0*)
     # Replace -ansi flag with -std=c99 flag
     CFLAGS="`echo $CFLAGS | sed -e 's/-ansi/-std=c99/g'`"
 
@@ -214,7 +255,7 @@ case "$cc_vendor-$cc_version" in
     CFLAGS="`echo $CFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
 
     # Append more extra warning flags that only gcc4.0+ know about
-    CFLAGS="$CFLAGS -Wvariadic-macros"
+    CFLAGS="$CFLAGS -Wmissing-field-initializers -Wvariadic-macros"
     ;;
 
   gcc-3.4*)
