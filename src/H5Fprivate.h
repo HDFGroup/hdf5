@@ -323,6 +323,10 @@ typedef struct H5F_t H5F_t;
 #define H5F_CRT_SHARE_HEAD_VERS_SIZE  sizeof(unsigned)
 #define H5F_CRT_SHARE_HEAD_VERS_DEF   HDF5_SHAREDHEADER_VERSION
 
+/* File-wide default character encoding can not yet be set via the file
+ * creation property list and is always ASCII. */
+#define H5F_CRT_DEFAULT_CSET H5T_CSET_ASCII
+
 /* ========= File Access properties ============ */
 /* Definitions for the initial metadata cache resize configuration */
 #define H5F_ACS_META_CACHE_INIT_CONFIG_NAME	"mdc_initCacheCfg"

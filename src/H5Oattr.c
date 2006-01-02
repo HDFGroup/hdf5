@@ -62,10 +62,13 @@ const H5O_msg_class_t H5O_MSG_ATTR[1] = {{
 }};
 
 /* This is the initial version, which does not have support for shared datatypes */
-#define H5O_ATTR_VERSION	1
+#define H5O_ATTR_VERSION_1	1
 
 /* This version allows support for shared datatypes */
-#define H5O_ATTR_VERSION_NEW	2
+#define H5O_ATTR_VERSION_2	2
+
+/* Add support for different character encodings of attribute names */
+#define H5O_ATTR_VERSION_3      3
 
 /* Flags for attribute flag encoding */
 #define H5O_ATTR_FLAG_TYPE_SHARED       0x01
@@ -104,6 +107,9 @@ H5FL_EXTERN(H5S_extent_t);
  *	Raymond Lu, 8 April 2004
  *	Changed Dataspace operation on H5S_simple_t to H5S_extent_t.
  *
+ *      James Laird, 15 November 2005
+ *      Added character encoding (version 3)
+ *
 --------------------------------------------------------------------------*/
 static void *
 H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
@@ -126,11 +132,11 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
 
     /* Version number */
     version = *p++;
-    if (version!=H5O_ATTR_VERSION && version!=H5O_ATTR_VERSION_NEW)
+    if (version<H5O_ATTR_VERSION_1 || version>H5O_ATTR_VERSION_3)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for attribute message");
 
     /* Get the flags byte if we have a later version of the attribute */
-    if(version>H5O_ATTR_VERSION)
+    if(version>H5O_ATTR_VERSION_1)
         flags = *p++;
     else
         p++;    /* Byte is unused when version<2 */
@@ -143,10 +149,17 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
     UINT16DECODE(p, attr->dt_size);
     UINT16DECODE(p, attr->ds_size);
 
+    /*
+     * Decode the character encoding for the name for versions 3 or later,
+     * as well as some reserved bytes.
+     */
+    if(version >= H5O_ATTR_VERSION_3)
+      attr->encoding = *p++;
+
     /* Decode and store the name */
     if (NULL==(attr->name=H5MM_strdup((const char *)p)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    if(version < H5O_ATTR_VERSION_NEW)
+    if(version < H5O_ATTR_VERSION_2)
         p += H5O_ALIGN(name_len);    /* advance the memory pointer */
     else
         p += name_len;    /* advance the memory pointer */
@@ -170,7 +183,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
         if((attr->dt=(H5O_MSG_DTYPE->decode)(f,dxpl_id,p))==NULL)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute datatype");
     } /* end else */
-    if(version < H5O_ATTR_VERSION_NEW)
+    if(version < H5O_ATTR_VERSION_2)
         p += H5O_ALIGN(attr->dt_size);
     else
         p += attr->dt_size;
@@ -192,7 +205,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
     if(H5S_select_all(attr->ds,0)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
 
-    if(version < H5O_ATTR_VERSION_NEW)
+    if(version < H5O_ATTR_VERSION_2)
         p += H5O_ALIGN(attr->ds_size);
     else
         p += attr->ds_size;
@@ -245,6 +258,9 @@ done:
  *	For data space, changed the operation on H5S_simple_t to
  *	H5S_extent_t
  *
+ *      James Laird, 15 November 2005
+ *      Added character encoding (version 3)
+ *
 --------------------------------------------------------------------------*/
 static herr_t
 H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
@@ -269,16 +285,18 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
         type_shared = FALSE;
 
     /* Check which version to write out */
-    if(type_shared)
-        version = H5O_ATTR_VERSION_NEW;  /* Write out new version if shared datatype */
+    if(attr->encoding != H5T_CSET_ASCII)
+      version = H5O_ATTR_VERSION_3;   /* Write version which includes the character encoding */
+    else if(type_shared)
+      version = H5O_ATTR_VERSION_2;   /* Write out version with shared datatype */
     else
-        version = H5O_ATTR_VERSION;
+      version = H5O_ATTR_VERSION_1;   /* Write out basic version */
 
     /* Encode Version */
     *p++ = version;
 
     /* Set attribute flags if version >1 */
-    if(version>H5O_ATTR_VERSION)
+    if(version>H5O_ATTR_VERSION_1)
         *p++ = (type_shared ? H5O_ATTR_FLAG_TYPE_SHARED : 0 );    /* Set flags for attribute */
     else
         *p++ = 0; /* Reserved, for version <2 */
@@ -294,12 +312,19 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
     UINT16ENCODE(p, attr->ds_size);
 
     /*
+     * Encode the character encoding used for the attribute's name
+     * Also add several "reserved" fields to pad to 16 bytes.
+     */
+    if(version>=H5O_ATTR_VERSION_3)
+      *p++=attr->encoding;
+
+    /*
      * Write the name including null terminator padded to the correct number
      * of bytes.
      */
     HDmemcpy(p, attr->name, name_len);
     HDmemset(p+name_len, 0, H5O_ALIGN(name_len)-name_len);
-    if(version < H5O_ATTR_VERSION_NEW)
+    if(version < H5O_ATTR_VERSION_2)
         p += H5O_ALIGN(name_len);
     else
         p += name_len;
@@ -324,7 +349,7 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
         if((H5O_MSG_DTYPE->encode)(f,p,attr->dt)<0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute datatype");
     } /* end else */
-    if(version < H5O_ATTR_VERSION_NEW) {
+    if(version < H5O_ATTR_VERSION_2) {
         HDmemset(p+attr->dt_size, 0, H5O_ALIGN(attr->dt_size)-attr->dt_size);
         p += H5O_ALIGN(attr->dt_size);
     } /* end if */
@@ -334,7 +359,7 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
     /* encode the attribute dataspace */
     if((H5O_MSG_SDSPACE->encode)(f,p,&(attr->ds->extent))<0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute dataspace");
-    if(version < H5O_ATTR_VERSION_NEW) {
+    if(version < H5O_ATTR_VERSION_2) {
         HDmemset(p+attr->ds_size, 0, H5O_ALIGN(attr->ds_size)-attr->ds_size);
         p += H5O_ALIGN(attr->ds_size);
     } /* end if */
@@ -429,12 +454,14 @@ H5O_attr_size(const H5F_t UNUSED *f, const void *_mesg)
         type_shared = FALSE;
 
     /* Check which version to write out */
-    if(type_shared)
-        version = H5O_ATTR_VERSION_NEW;  /* Write out new version if shared datatype */
+    if(attr->encoding != H5T_CSET_ASCII)
+      version = H5O_ATTR_VERSION_3;   /* Write version which includes the character encoding */
+    else if(type_shared)
+      version = H5O_ATTR_VERSION_2;   /* Write out version with shared datatype */
     else
-        version = H5O_ATTR_VERSION;
+      version = H5O_ATTR_VERSION_1;   /* Write out basic version */
 
-    if(version < H5O_ATTR_VERSION_NEW)
+    if(version == H5O_ATTR_VERSION_1)
         ret_value = 1 +				/*version               */
                     1 +				/*reserved		*/
                     2 +				/*name size inc. null	*/
@@ -444,12 +471,23 @@ H5O_attr_size(const H5F_t UNUSED *f, const void *_mesg)
                     H5O_ALIGN(attr->dt_size) +	/*data type		*/
                     H5O_ALIGN(attr->ds_size) +	/*data space		*/
                     attr->data_size;		/*the data itself	*/
-    else
+    else if(version == H5O_ATTR_VERSION_2)
         ret_value = 1 +				/*version               */
                     1 +				/*flags			*/
                     2 +				/*name size inc. null	*/
                     2 +				/*type size		*/
                     2 +				/*space size		*/
+                    name_len	+		/*attribute name	*/
+                    attr->dt_size +		/*data type		*/
+                    attr->ds_size +		/*data space		*/
+                    attr->data_size;		/*the data itself	*/
+    else if(version == H5O_ATTR_VERSION_3)
+        ret_value = 1 +				/*version               */
+                    1 +				/*flags			*/
+                    2 +				/*name size inc. null	*/
+                    2 +				/*type size		*/
+                    2 +				/*space size		*/
+                    1 +                         /*character encoding    */
                     name_len	+		/*attribute name	*/
                     attr->dt_size +		/*data type		*/
                     attr->ds_size +		/*data space		*/

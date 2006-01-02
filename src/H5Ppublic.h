@@ -92,6 +92,7 @@ typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data);
 #define H5P_GROUP_ACCESS 		(H5OPEN H5P_CLS_GROUP_ACCESS_g)
 #define H5P_DATATYPE_CREATE 		(H5OPEN H5P_CLS_DATATYPE_CREATE_g)
 #define H5P_DATATYPE_ACCESS 		(H5OPEN H5P_CLS_DATATYPE_ACCESS_g)
+#define H5P_ATTRIBUTE_CREATE 		(H5OPEN H5P_CLS_ATTRIBUTE_CREATE_g)
 H5_DLLVAR hid_t H5P_CLS_NO_CLASS_g;
 H5_DLLVAR hid_t H5P_CLS_OBJECT_CREATE_g;
 H5_DLLVAR hid_t H5P_CLS_FILE_CREATE_g;
@@ -104,6 +105,7 @@ H5_DLLVAR hid_t H5P_CLS_GROUP_CREATE_g;
 H5_DLLVAR hid_t H5P_CLS_GROUP_ACCESS_g;
 H5_DLLVAR hid_t H5P_CLS_DATATYPE_CREATE_g;
 H5_DLLVAR hid_t H5P_CLS_DATATYPE_ACCESS_g;
+H5_DLLVAR hid_t H5P_CLS_ATTRIBUTE_CREATE_g;
 
 /*
  * The library created default property lists
@@ -123,6 +125,7 @@ H5_DLLVAR hid_t H5P_CLS_DATATYPE_ACCESS_g;
 #define H5P_GROUP_ACCESS_DEFAULT 	(H5OPEN H5P_LST_GROUP_ACCESS_g)
 #define H5P_DATATYPE_CREATE_DEFAULT	(H5OPEN H5P_LST_DATATYPE_CREATE_g)
 #define H5P_DATATYPE_ACCESS_DEFAULT 	(H5OPEN H5P_LST_DATATYPE_ACCESS_g)
+#define H5P_ATTRIBUTE_CREATE_DEFAULT	(H5OPEN H5P_LST_ATTRIBUTE_CREATE_g)
 H5_DLLVAR hid_t H5P_LST_NO_CLASS_g;
 H5_DLLVAR hid_t H5P_LST_FILE_CREATE_g;
 H5_DLLVAR hid_t H5P_LST_FILE_ACCESS_g;
@@ -134,6 +137,7 @@ H5_DLLVAR hid_t H5P_LST_GROUP_CREATE_g;
 H5_DLLVAR hid_t H5P_LST_GROUP_ACCESS_g;
 H5_DLLVAR hid_t H5P_LST_DATATYPE_CREATE_g;
 H5_DLLVAR hid_t H5P_LST_DATATYPE_ACCESS_g;
+H5_DLLVAR hid_t H5P_LST_ATTRIBUTE_CREATE_g;
 
 /* Public functions */
 H5_DLL hid_t H5Pcreate_class(hid_t parent, const char *name,
@@ -338,6 +342,9 @@ H5_DLL herr_t H5Pset_link_phase_change(hid_t plist_id, unsigned max_compact, uns
 H5_DLL herr_t H5Pget_link_phase_change(hid_t plist_id, unsigned *max_compact /*out*/, unsigned *min_dense /*out*/);
 H5_DLL herr_t H5Pset_est_link_info(hid_t plist_id, unsigned est_num_entries, unsigned est_name_len);
 H5_DLL herr_t H5Pget_est_link_info(hid_t plist_id, unsigned *est_num_entries /* out */, unsigned *est_name_len /* out */);
+
+H5_DLL herr_t H5Pset_char_encoding(hid_t plist_id, H5T_cset_t encoding);
+H5_DLL herr_t H5Pget_char_encoding(hid_t plist_id, H5T_cset_t *encoding /*out*/);
 
 #ifdef __cplusplus
 }

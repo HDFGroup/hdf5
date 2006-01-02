@@ -54,6 +54,7 @@ hid_t H5P_CLS_GROUP_CREATE_g        = FAIL;
 hid_t H5P_CLS_GROUP_ACCESS_g        = FAIL;
 hid_t H5P_CLS_DATATYPE_CREATE_g     = FAIL;
 hid_t H5P_CLS_DATATYPE_ACCESS_g     = FAIL;
+hid_t H5P_CLS_ATTRIBUTE_CREATE_g     = FAIL;
 
 /*
  * Predefined property lists for each predefined class. These are initialized
@@ -70,6 +71,7 @@ hid_t H5P_LST_GROUP_CREATE_g        = FAIL;
 hid_t H5P_LST_GROUP_ACCESS_g        = FAIL;
 hid_t H5P_LST_DATATYPE_CREATE_g       = FAIL;
 hid_t H5P_LST_DATATYPE_ACCESS_g       = FAIL;
+hid_t H5P_LST_ATTRIBUTE_CREATE_g       = FAIL;
 
 /* Track the revision count of a class, to make comparisons faster */
 static unsigned H5P_next_rev=0;
@@ -403,6 +405,15 @@ H5P_init_interface(void)
     if ((H5P_CLS_DATATYPE_ACCESS_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
+    /* Allocate the attribute creation class */
+    assert(H5P_CLS_ATTRIBUTE_CREATE_g==(-1));
+    if (NULL==(pclass = H5P_create_class (ocrt_class,"attribute create",1,NULL,NULL,NULL,NULL,NULL,NULL)))
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
+
+    /* Register the attribute creation class */
+    if ((H5P_CLS_ATTRIBUTE_CREATE_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
+
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
@@ -461,6 +472,7 @@ H5P_term_interface(void)
                         H5P_LST_GROUP_ACCESS_g =
                         H5P_LST_DATATYPE_CREATE_g =
                         H5P_LST_DATATYPE_ACCESS_g =
+                        H5P_LST_ATTRIBUTE_CREATE_g =
                         H5P_LST_MOUNT_g = (-1);
                 } /* end if */
             } /* end if */
@@ -482,6 +494,7 @@ H5P_term_interface(void)
                         H5P_CLS_GROUP_ACCESS_g =
                         H5P_CLS_DATATYPE_CREATE_g =
                         H5P_CLS_DATATYPE_ACCESS_g =
+                        H5P_CLS_ATTRIBUTE_CREATE_g =
                         H5P_CLS_MOUNT_g = (-1);
                 } /* end if */
             } /* end if */

@@ -29,7 +29,7 @@
 
 /* PRIVATE PROTOTYPES */
 static hid_t H5A_create(const H5G_loc_t *loc, const char *name,
-			const H5T_t *type, const H5S_t *space, hid_t dxpl_id);
+			const H5T_t *type, const H5S_t *space, hid_t acpl_id, hid_t dxpl_id);
 static hid_t H5A_open(H5G_loc_t *loc, unsigned idx, hid_t dxpl_id);
 static herr_t H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id);
 static herr_t H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id);
@@ -70,15 +70,44 @@ DESCRIPTION
 static herr_t
 H5A_init_interface(void)
 {
+    H5P_genclass_t  *crt_pclass;
+    size_t          nprops;                 /* Number of properties */
+    H5T_cset_t      default_cset = H5A_CHAR_ENCODING_DEF;
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5A_init_interface)
 
     /*
-     * Create attribute group.
+     * Create attribute ID type.
      */
     if(H5I_register_type(H5I_ATTR, (size_t)H5I_ATTRID_HASHSIZE, H5A_RESERVED_ATOMS, (H5I_free_t)H5A_close) < H5I_FILE)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to initialize interface")
+
+    /* =========Attribute Creation Property Class Initialization========= */
+    /* Register the default attribute creation properties */
+    assert(H5P_CLS_ATTRIBUTE_CREATE_g!=(-1));
+
+    /* Get the pointer to the attribute creation class */
+    if (NULL == (crt_pclass = H5I_object(H5P_CLS_ATTRIBUTE_CREATE_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
+
+    /* Get the number of properties in the class */
+    if(H5P_get_nprops_pclass(crt_pclass,&nprops,FALSE)<0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't query number of properties")
+
+    /* Assume that if there are properties in the class, they are the default ones */
+    if(nprops==0) {
+        /* Register the size of the character encoding field */
+        if(H5P_register(crt_pclass,H5A_CHAR_ENCODING_NAME,H5A_CHAR_ENCODING_SIZE,&default_cset,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+    }
+
+    /* Only register the default property list if it hasn't been created yet */
+    if(H5P_LST_ATTRIBUTE_CREATE_g==(-1)) {
+        /* Register the default attribute creation property list */
+        if ((H5P_LST_ATTRIBUTE_CREATE_g = H5P_create_id (crt_pclass))<0)
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register default property list")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -157,7 +186,7 @@ H5A_term_interface(void)
 /* ARGSUSED */
 hid_t
 H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
-	  hid_t UNUSED plist_id)
+	  hid_t plist_id)
 {
     H5G_loc_t           loc;                    /* Object location */
     H5T_t		*type = NULL;
@@ -180,8 +209,8 @@ H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
     /* Go do the real work for attaching the attribute to the dataset */
-    if((ret_value = H5A_create(&loc, name, type, space, H5AC_dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create attribute")
+    if ((ret_value=H5A_create(&loc, name, type, space, plist_id, H5AC_dxpl_id)) < 0)
+	HGOTO_ERROR (H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create attribute")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -199,21 +228,31 @@ done:
  *      const char *name;   IN: Name of attribute
  *      H5T_t *type;        IN: Datatype of attribute
  *      H5S_t *space;       IN: Dataspace of attribute
+ *      hid_t acpl_id       IN: Attribute creation property list
  *
  * Return: Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *		April 2, 1998
  *
+ * Modifications:
+ *
+ *	 Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
+ *	 Added a deep copy of the symbol table entry
+ *
+ *       James Laird, <jlaird@ncsa.uiuc.edu> 9 Nov 2005
+ *       Added Attribute Creation Property List
+ *
  *-------------------------------------------------------------------------
  */
 static hid_t
 H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
-    const H5S_t *space, hid_t dxpl_id)
+	   const H5S_t *space, hid_t acpl_id, hid_t dxpl_id)
 {
-    H5A_t	*attr = NULL;
-    H5A_iter_cb1 cb;                    /* Iterator callback */
-    hid_t	ret_value = FAIL;
+    H5A_t	    *attr = NULL;
+    H5A_iter_cb1     cb;                    /* Iterator callback */
+    H5P_genplist_t  *ac_plist=NULL;      /* New Property list */
+    hid_t	    ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT(H5A_create)
 
@@ -238,6 +277,21 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     /* Build the attribute information */
     if((attr = H5FL_CALLOC(H5A_t)) == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for attribute info")
+
+    /* If the creation property list is H5P_DEFAULT, use the default character encoding */
+    if(acpl_id == H5P_DEFAULT)
+    {
+      attr->encoding = H5A_CHAR_ENCODING_DEF;
+    }
+    else
+    {
+      /* Get a local copy of the attribute creation property list */
+      if (NULL == (ac_plist = H5I_object(acpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+      if(H5P_get(ac_plist, H5A_CHAR_ENCODING_NAME, &(attr->encoding)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get character encoding flag")
+    }
 
     /* Copy the attribute name */
     attr->name = HDstrdup(name);
@@ -513,7 +567,7 @@ static hid_t
 H5A_open(H5G_loc_t *loc, unsigned idx, hid_t dxpl_id)
 {
     H5A_t       *attr = NULL;
-    hid_t	    ret_value;
+    hid_t       ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT(H5A_open)
 
@@ -966,6 +1020,61 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aget_type() */
 
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Aget_create_plist
+ PURPOSE
+    Gets a copy of the creation property list for an attribute
+ USAGE
+    hssize_t H5Aget_create_plist (attr_id, buf_size, buf)
+        hid_t attr_id;      IN: Attribute to get name of
+ RETURNS
+    This function returns the ID of a copy of the attribute's creation
+    property list, or negative on failure.
+
+ ERRORS
+
+ DESCRIPTION
+        This function returns a copy of the creation property list for
+    an attribute.  The resulting ID must be closed with H5Pclose() or
+    resource leaks will occur.
+--------------------------------------------------------------------------*/
+hid_t
+H5Aget_create_plist(hid_t attr_id)
+{
+    H5A_t		*attr = NULL;
+    H5P_genplist_t      *plist;              /* Default property list */
+    hid_t               new_plist_id;        /* ID of ACPL to return */
+    H5P_genplist_t      *new_plist;          /* ACPL to return */
+    hid_t		ret_value;
+
+    FUNC_ENTER_API(H5Aget_create_plist, FAIL)
+    H5TRACE1("i","i",attr_id);
+
+    assert(H5P_LST_ATTRIBUTE_CREATE_g != -1);
+
+    /* Get attribute and default attribute creation property list*/
+    if (NULL==(attr=H5I_object_verify(attr_id, H5I_ATTR)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+    if (NULL==(plist=H5I_object(H5P_LST_ATTRIBUTE_CREATE_g)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "can't get default ACPL")
+
+    /* Create the property list object to return */
+    if((new_plist_id=H5P_copy_plist(plist)) < 0)
+	HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to copy attribute creation properties")
+    if (NULL == (new_plist = H5I_object(new_plist_id)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "can't get property list")
+
+    /* Set the character encoding on the new property list */
+    if(H5P_set(new_plist, H5A_CHAR_ENCODING_NAME, &(attr->encoding)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set character encoding")
+ 
+    ret_value = new_plist_id;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
 
 /*--------------------------------------------------------------------------
  NAME
@@ -1587,7 +1696,7 @@ H5A_close(H5A_t *attr)
         /* Free temporary buffer */
         H5FL_BLK_FREE(attr_buf, tmp_buf);
     } /* end if */
-
+    
     /* Free dynamicly allocated items */
     if(H5A_free(attr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release attribute info")

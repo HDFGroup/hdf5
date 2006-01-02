@@ -55,6 +55,7 @@ struct H5A_t {
     size_t      ds_size;    /* Size of dataspace on disk */
     void        *data;      /* Attribute data (on a temporary basis) */
     size_t      data_size;  /* Size of data on disk */
+    H5T_cset_t  encoding;   /* Character encoding of attribute */
 };
 
 /* Declare extern the free list for H5A_t's */
