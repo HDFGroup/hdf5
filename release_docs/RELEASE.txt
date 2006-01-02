@@ -158,6 +158,8 @@ New Features
 
     Library:
     --------
+       - Added character encoding to attribute creation property lists.
+            JML - 2006/01/02
        - Added H5Gcopy() routine to copy objects between while keeping
          data in compressed form.  QAK - 2005/11/06
        - Added H5Sextent_equal() routine.  QAK - 2005/11/06
