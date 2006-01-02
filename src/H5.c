@@ -2154,7 +2154,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                             /* Save the rank of simple data spaces for arrays */
                             /* This may generate recursive call to the library... -QAK */
                             {
-                                H5S_t *space = H5I_object(obj);
+                                H5S_t *space = (H5S_t *)H5I_object(obj);
                                 if (H5S_SIMPLE==H5S_GET_EXTENT_TYPE(space)) {
                                     asize[argno] = H5S_GET_EXTENT_NDIMS(space);
                                 }
@@ -2400,7 +2400,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 
                 /* Get the class name and print it */
                 /* This may generate recursive call to the library... -QAK */
-                if(NULL != (pclass = H5I_object(pclass_id)) &&
+                if(NULL != (pclass = (H5P_genclass_t *)H5I_object(pclass_id)) &&
                         (class_name=H5P_get_class_name(pclass))!=NULL) {
 		    fprintf (out, class_name);
                     H5MM_xfree(class_name);
