@@ -107,7 +107,7 @@ H5B_serialize(const H5F_t *f, const H5B_t *bt)
     HDassert(f);
     HDassert(bt);
     HDassert(bt->rc_shared);
-    shared=H5RC_GET_OBJ(bt->rc_shared);
+    shared=(H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
 
     p = shared->page;
@@ -190,7 +190,7 @@ H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata)
     HDmemset(&bt->cache_info,0,sizeof(H5AC_info_t));
     if((bt->rc_shared=(type->get_shared)(f, udata))==NULL)
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "can't retrieve B-tree node buffer")
-    shared=H5RC_GET_OBJ(bt->rc_shared);
+    shared=(H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
     if (NULL==(bt->native=H5FL_BLK_MALLOC(native_block,shared->sizeof_keys)) ||
             NULL==(bt->child=H5FL_SEQ_MALLOC(haddr_t,(size_t)shared->two_k)))
@@ -273,7 +273,7 @@ H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *bt)
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
     HDassert(bt);
-    shared=H5RC_GET_OBJ(bt->rc_shared);
+    shared=(H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
     HDassert(shared->type);
     HDassert(shared->type->encode);
@@ -400,7 +400,7 @@ H5B_compute_size(const H5F_t *f, const H5B_t *bt, size_t *size_ptr)
     HDassert(f);
     HDassert(bt);
     HDassert(bt->rc_shared);
-    shared=H5RC_GET_OBJ(bt->rc_shared);
+    shared=(H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
     HDassert(shared->type);
     HDassert(size_ptr);

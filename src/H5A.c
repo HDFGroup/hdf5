@@ -175,9 +175,9 @@ H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
-    if(NULL == (type = H5I_object_verify(type_id, H5I_DATATYPE)))
+    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a type")
-    if(NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
+    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
     /* Go do the real work for attaching the attribute to the dataset */
@@ -237,7 +237,7 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspace extent has not been set")
 
     /* Build the attribute information */
-    if((attr = H5FL_CALLOC(H5A_t)) == NULL)
+    if((attr = (H5A_t *)H5FL_CALLOC(H5A_t)) == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for attribute info")
 
     /* Copy the attribute name */
@@ -519,7 +519,7 @@ H5A_open(H5G_entry_t *ent, unsigned idx, hid_t dxpl_id)
 
     /* Read in attribute with H5O_read() */
     H5_CHECK_OVERFLOW(idx,unsigned,int);
-    if(NULL==(attr=H5O_read(ent, H5O_ATTR_ID, (int)idx, NULL, dxpl_id)))
+    if(NULL==(attr=(H5A_t *)H5O_read(ent, H5O_ATTR_ID, (int)idx, NULL, dxpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to load attribute info from dataset header")
     attr->initialized = TRUE;
 
@@ -579,9 +579,9 @@ H5Awrite(hid_t attr_id, hid_t type_id, const void *buf)
     H5TRACE3("e","iix",attr_id,type_id,buf);
 
     /* check arguments */
-    if(NULL == (attr = H5I_object_verify(attr_id, H5I_ATTR)))
+    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
-    if(NULL == (mem_type = H5I_object_verify(type_id, H5I_DATATYPE)))
+    if(NULL == (mem_type = (const H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if(NULL == buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer")
@@ -655,7 +655,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
 
             /* Get the maximum buffer size needed and allocate it */
             buf_size = nelmts * MAX(src_type_size, dst_type_size);
-            if(NULL == (tconv_buf = H5FL_BLK_MALLOC (attr_buf, buf_size)) || NULL == (bkg_buf = H5FL_BLK_CALLOC(attr_buf, buf_size)))
+            if(NULL == (tconv_buf = (uint8_t *)H5FL_BLK_MALLOC (attr_buf, buf_size)) || NULL == (bkg_buf = (uint8_t *)H5FL_BLK_CALLOC(attr_buf, buf_size)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
             /* Copy the user's data into the buffer for conversion */
@@ -737,9 +737,9 @@ H5Aread(hid_t attr_id, hid_t type_id, void *buf)
     H5TRACE3("e","iix",attr_id,type_id,buf);
 
     /* check arguments */
-    if(NULL == (attr = H5I_object_verify(attr_id, H5I_ATTR)))
+    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
-    if(NULL == (mem_type = H5I_object_verify(type_id, H5I_DATATYPE)))
+    if(NULL == (mem_type = (const H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if(NULL == buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer")
@@ -817,7 +817,7 @@ H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
 
                 /* Get the maximum buffer size needed and allocate it */
                 buf_size = nelmts*MAX(src_type_size,dst_type_size);
-                if(NULL == (tconv_buf = H5FL_BLK_MALLOC(attr_buf, buf_size)) || NULL == (bkg_buf = H5FL_BLK_CALLOC(attr_buf, buf_size)))
+                if(NULL == (tconv_buf = (uint8_t *)H5FL_BLK_MALLOC(attr_buf, buf_size)) || NULL == (bkg_buf = (uint8_t *)H5FL_BLK_CALLOC(attr_buf, buf_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
                 /* Copy the attribute data into the buffer for conversion */
@@ -882,7 +882,7 @@ H5Aget_space(hid_t attr_id)
     H5TRACE1("i","i",attr_id);
 
     /* check arguments */
-    if(NULL == (attr = H5I_object_verify(attr_id, H5I_ATTR)))
+    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
     /* Copy the attribute's dataspace */
@@ -925,7 +925,7 @@ H5Aget_type(hid_t attr_id)
     H5TRACE1("i","i",attr_id);
 
     /* check arguments */
-    if(NULL == (attr = H5I_object_verify(attr_id, H5I_ATTR)))
+    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
     /*
@@ -988,7 +988,7 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
     H5TRACE3("Zs","izs",attr_id,buf_size,buf);
 
     /* check arguments */
-    if(NULL == (attr = H5I_object_verify(attr_id, H5I_ATTR)))
+    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
     if(!buf && buf_size)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer")
@@ -1045,7 +1045,7 @@ H5Aget_storage_size(hid_t attr_id)
     H5TRACE1("h","i",attr_id);
 
     /* Check args */
-    if(NULL == (attr = H5I_object_verify(attr_id, H5I_ATTR)))
+    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not an attribute")
 
     /* Set return value */
@@ -1456,7 +1456,7 @@ H5A_copy(H5A_t *_new_attr, const H5A_t *old_attr, unsigned update_flags)
         /* Sanity check - We should not be only updating data if we don'y have anything */
         HDassert(!(update_flags&H5O_UPDATE_DATA_ONLY));
 
-        if(NULL == (new_attr = H5FL_MALLOC(H5A_t)))
+        if(NULL == (new_attr = (H5A_t *)H5FL_MALLOC(H5A_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
         allocated_attr = TRUE;
     } /* end if */
@@ -1562,7 +1562,7 @@ H5A_close(H5A_t *attr)
 
     /* Check if the attribute has any data yet, if not, fill with zeroes */
     if(attr->ent_opened && !attr->initialized) {
-        uint8_t *tmp_buf = H5FL_BLK_CALLOC(attr_buf, attr->data_size);
+        uint8_t *tmp_buf = (uint8_t *)H5FL_BLK_CALLOC(attr_buf, attr->data_size);
         if(NULL == tmp_buf)
             HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "memory allocation failed for attribute fill-value")
 

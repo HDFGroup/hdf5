@@ -689,7 +689,7 @@ H5D_contig_writevv(const H5D_io_info_t *io_info,
     H5F_t *file=io_info->dset->ent.file;        /* File for dataset */
     H5D_rdcdc_t *dset_contig=&(io_info->dset->shared->cache.contig); /* Cached information about contiguous data */
     const H5D_contig_storage_t *store_contig=&(io_info->store->contig);    /* Contiguous storage info for this I/O operation */
-    const unsigned char *buf=_buf;      /* Pointer to buffer to fill */
+    const unsigned char *buf=(const unsigned char *)_buf;      /* Pointer to buffer to fill */
     haddr_t addr;               /* Actual address to read */
     size_t total_size=0;        /* Size of sequence in bytes */
     size_t size;                /* Size of sequence in bytes */
