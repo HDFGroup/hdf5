@@ -231,4 +231,10 @@ H5_DLL int H5G_node_type(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t a
 H5_DLL herr_t H5G_name_init(H5G_entry_t *name, const char *path);
 H5_DLL herr_t H5G_name_set(H5G_entry_t *loc, H5G_entry_t *obj, const char *name);
 
+/* Testing functions */
+#ifdef H5G_TESTING
+H5_DLL herr_t H5G_user_path_test(hid_t obj_id, char *user_path, size_t *user_path_len, unsigned *user_path_hidden);
+#endif /* H5G_TESTING */
+
 #endif
+
