@@ -157,12 +157,12 @@ H5File::H5File( const H5File& original ) : IdComponent( original ) {}
 ///\exception	H5::FileIException
 // Programmer	Binh-Minh Ribler - Dec. 2005
 //--------------------------------------------------------------------------
-void H5File::flush(H5F_scope_t scope ) const
+void H5File::flush(H5F_scope_t scope) const
 {
    herr_t ret_value = H5Fflush( id, scope );
    if( ret_value < 0 )
    {
-      throw FileIException("H5File::flush", "H5Fflush returned negative value");
+      throw FileIException("H5File::flush", "H5Fflush failed");
    }
 }
 
@@ -174,7 +174,7 @@ void H5File::flush(H5F_scope_t scope ) const
 ///\exception	H5::FileIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-bool H5File::isHdf5(const char* name )
+bool H5File::isHdf5(const char* name)
 {
    // Calls C routine H5Fis_hdf5 to determine whether the file is in
    // HDF5 format.  It returns positive value, 0, or negative value
@@ -202,6 +202,48 @@ bool H5File::isHdf5(const string& name )
 }
 
 //--------------------------------------------------------------------------
+// Function:	openFile
+///\brief	Opens an HDF5 file
+///\param	name         - IN: Name of the file
+///\param	flags        - IN: File access flags
+///\param	access_plist - IN: File access property list.  Default to
+///		FileCreatPropList::DEFAULT
+///\par Description
+///		Valid values of \a flags include:
+///		H5F_ACC_RDWR:   Open with read/write access. If the file is
+///				currently open for read-only access then it
+///				will be reopened. Absence of this flag
+///				implies read-only access.
+///
+///		H5F_ACC_RDONLY: Open with read only access. - default
+///
+// Programmer	Binh-Minh Ribler - Oct, 2005
+//--------------------------------------------------------------------------
+void H5File::openFile(const char* name, unsigned int flags, const FileAccPropList& access_plist)
+{
+    hid_t access_plist_id = access_plist.getId();
+    id = H5Fopen (name, flags, access_plist_id);
+    if (id < 0)  // throw an exception when open fails
+    {
+	throw FileIException("H5File::openFile", "H5Fopen failed");
+    }
+}
+
+//--------------------------------------------------------------------------
+// Function:	H5File::openFile
+///\brief	This is an overloaded member function, provided for convenience.
+///		It takes an \c std::string for \a name.
+///\param	name         - IN: Name of the file - \c std::string
+///\param	flags        - IN: File access flags
+///\param	access_plist - IN: File access property list.  Default to
+///		FileAccPropList::DEFAULT
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void H5File::openFile(const string& name, unsigned int flags, const FileAccPropList& access_plist)
+{
+    openFile(name.c_str(), flags, access_plist);
+}
+//--------------------------------------------------------------------------
 // Function:	H5File::reOpen
 ///\brief	Reopens this file.
 ///
@@ -216,6 +258,7 @@ bool H5File::isHdf5(const string& name )
 //		Replaced resetIdComponent with decRefCount to use C library
 //		ID reference counting mechanism - BMR, Feb 20, 2005
 //--------------------------------------------------------------------------
+
 void H5File::reOpen()
 {
    // If this object has a valid id, appropriately decrement reference
@@ -541,7 +584,12 @@ void* H5File::Reference(const string& name) const
 //--------------------------------------------------------------------------
 H5G_obj_t H5File::getObjType(void *ref, H5R_type_t ref_type) const
 {
-   return(p_get_obj_type(ref, ref_type));
+   try {
+      return(p_get_obj_type(ref, ref_type));
+   }
+   catch (IdComponentException E) {
+      throw FileIException("H5File::getObjType", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -555,8 +603,13 @@ H5G_obj_t H5File::getObjType(void *ref, H5R_type_t ref_type) const
 //--------------------------------------------------------------------------
 DataSpace H5File::getRegion(void *ref, H5R_type_t ref_type) const
 {
-   DataSpace dataspace(p_get_region(ref, ref_type));
-   return(dataspace);
+   try {
+      DataSpace dataspace(p_get_region(ref, ref_type));
+      return(dataspace);
+   }
+   catch (IdComponentException E) {
+      throw FileIException("H5File::getRegion", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------

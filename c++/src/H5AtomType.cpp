@@ -76,14 +76,14 @@ void AtomType::setSize( size_t size ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:    AtomType::getOrder
-///\brief       Returns the byte order of an atomic datatype.
-///\return      Byte order, which can be:
-///             \li \c H5T_ORDER_LE
-///             \li \c H5T_ORDER_BE
-///             \li \c H5T_ORDER_VAX
-///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - Mar, 2005
+// Function:	AtomType::getOrder
+///\brief	Returns the byte order of an atomic datatype.
+///\return	Byte order, which can be:
+///		\li \c H5T_ORDER_LE
+///		\li \c H5T_ORDER_BE
+///		\li \c H5T_ORDER_VAX
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - Mar, 2005
 //--------------------------------------------------------------------------
 H5T_order_t AtomType::getOrder() const
 {
@@ -94,27 +94,27 @@ H5T_order_t AtomType::getOrder() const
    if( type_order == H5T_ORDER_ERROR )
    {
       throw DataTypeIException(inMemFunc("getOrder"),
-                "H5Tget_order returns H5T_ORDER_ERROR");
+		"H5Tget_order returns H5T_ORDER_ERROR");
    }
    return( type_order );
 }
 
 //--------------------------------------------------------------------------
-// Function:    AtomType::getOrder
-///\brief       This is an overloaded member function, provided for convenience.
-///             It takes a reference to a \c std::string for the buffer that
-///             provide the text description of the returned byte order.
-///             The text description can be either of the following:
-///             "Little endian byte ordering (0)";
-///             "Big endian byte ordering (1)";
-///             "VAX mixed byte ordering (2)";
-///\param       order_string - OUT: Text description of the returned byte order
-///\return      Byte order, which can be:
-///             \li \c H5T_ORDER_LE
-///             \li \c H5T_ORDER_BE
-///             \li \c H5T_ORDER_VAX
-///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - 2000
+// Function:	AtomType::getOrder
+///\brief	This is an overloaded member function, provided for convenience.
+///		It takes a reference to a \c std::string for the buffer that
+///		provide the text description of the returned byte order.
+///		The text description can be either of the following:
+///		"Little endian byte ordering (0)";
+///		"Big endian byte ordering (1)";
+///		"VAX mixed byte ordering (2)";
+///\param	order_string - OUT: Text description of the returned byte order
+///\return	Byte order, which can be:
+///		\li \c H5T_ORDER_LE
+///		\li \c H5T_ORDER_BE
+///		\li \c H5T_ORDER_VAX
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5T_order_t AtomType::getOrder( string& order_string ) const
 {
@@ -267,7 +267,7 @@ void AtomType::getPad( H5T_pad_t& lsb, H5T_pad_t& msb ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	AtomType::getPad
+// Function:	AtomType::setPad
 ///\brief	Sets the least and most-significant bits padding types.
 ///\param	lsb - IN: Least-significant bit padding type
 ///\param	msb - IN: Most-significant bit padding type
