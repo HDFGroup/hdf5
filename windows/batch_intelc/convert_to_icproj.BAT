@@ -193,12 +193,8 @@ ICProjConvert80  windows\tools\toolslib\toolslib.vcproj /IC	>>	convert_intel.log
 ICProjConvert80  windows\tools\toolslibD\toolslibD.vcproj /IC	>>	convert_intel.log
 
 echo End converting C project Files
-
-
 GOTO END
-
 :convertCPP
-
 echo **************************************************
 echo.
 echo Converting C++ project files in directory windows\proj
@@ -215,7 +211,6 @@ echo.
   ICProjConvert80 "windows\c++\test\testhdf5_cppdll\testhdf5_cppdll.vcproj" /IC  >> convert_intel.log
   ICProjConvert80 "windows\hl\c++\test\hl_test_table_cpp\hl_test_table_cpp.vcproj" /IC  >> convert_intel.log
   ICProjConvert80 "windows\hl\c++\test\hl_test_table_cppdll\hl_test_table_cppdll.vcproj" /IC  >> convert_intel.log
-      
 echo.
 echo End converting C++ project Files
 echo.
