@@ -145,7 +145,13 @@ h5_cleanup(const char *base_name[], hid_t fapl)
     int		retval=0;
     hid_t	driver;
 
-    if (!HDgetenv("HDF5_NOCLEANUP")) {
+    if (GetTestCleanup() && 
+#ifdef H5_HAVE_PARALLEL
+	!getenv_all(MPI_COMM_WORLD, 0, "HDF5_NOCLEANUP")
+#else
+	!HDgetenv("HDF5_NOCLEANUP")
+#endif
+	){
 	for (i = 0; base_name[i]; i++) {
 	    if (h5_fixname(base_name[i], fapl, filename, sizeof(filename)) == NULL)
 		continue;

@@ -507,12 +507,8 @@ int main(int argc, char **argv)
     if (MAINPROCESS && GetTestSummary())
         TestSummary();
 
-    /* Clean up test files, if allowed */
-    if (GetTestCleanup() && !getenv("HDF5_NOCLEANUP"))
-	h5_cleanup(FILENAME, fapl);
-    else
-	/* h5_cleanup would have closed fapl.  Now must do it explicitedly */
-	H5Pclose(fapl);
+    /* Clean up test files */
+    h5_cleanup(FILENAME, fapl);
 
     nerrors += GetTestNumErrs();
 
