@@ -23,12 +23,8 @@ include $(top_srcdir)/config/commence.am
 INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/tools/lib
 
 if BUILD_PARALLEL_CONDITIONAL
-  TEST_PROG_PARA=h5perf
+  TEST_PROG_PARA=h5perf perf
 endif
-
-# h5perf is run as a test in parallel when parallel is available, but it is
-# always installed with the tools during make install.
-bin_PROGRAMS=h5perf
 
 # Some programs are not built or run by default, but can be built by hand or by
 # specifying --enable-build-all at configure time.
@@ -43,7 +39,7 @@ endif
 # These are the programs that `make all' or `make tests' will build and which
 # `make check' will run. List them in the order they should be run.
 TEST_PROG = iopipe chunk overhead zip_perf perf_meta $(BUILD_ALL_PROGS)
-check_PROGRAMS=$(TEST_PROG_PARA) $(TEST_PROG) perf
+check_PROGRAMS=$(TEST_PROG_PARA) $(TEST_PROG)
 
 h5perf_SOURCES=pio_perf.c pio_engine.c pio_timer.c
 
