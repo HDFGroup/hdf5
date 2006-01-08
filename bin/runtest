@@ -113,12 +113,15 @@ REPORT_RESULT()
 {
     if [ $retcode -eq 0 ]; then
 	if [ $skiptest = yes ]; then
+	    n_skip=`expr $n_skip + 1`
 	    PRINT "SKIPPED ${HOSTNAME}: $TEST_TYPE" | tee -a $SKIPPEDLOG
 	else
+	    n_pass=`expr $n_pass + 1`
 	    PRINT "PASSED ${HOSTNAME}: $TEST_TYPE" | tee -a $PASSEDLOG
 	fi
     else
 	# test failed.
+	n_fail=`expr $n_fail + 1`
 	REPORT_ERR "****FAILED ${HOSTNAME}: $TEST_TYPE****"
     fi
 }
@@ -143,7 +146,7 @@ PRINT_TRAILER()
 {
     PRINT "*** finished tests in $HOSTNAME ***"
     date; TotalEndTime=`SecOfDay`
-    PRINT "${HOSTNAME}: Ran $n_test $runtest_type, Grand total test time = " \
+    PRINT "${HOSTNAME}: Ran $n_test($n_pass/$n_fail/$n_fail) $runtest_type, Grand total test time = " \
           "`ElapsedTime $TotalStartTime $TotalEndTime`" | tee -a $TIMELOG
     PRINT_BLANK
 }
@@ -836,6 +839,9 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
 	PRINT "    Fork off timekeeper $timelimit"
     fi
     n_test=0
+    n_pass=0
+    n_fail=0
+    n_skip=0
     runtest_type="hosts"
     for h in $TESTHOST; do
 	# Must do CONFIGNAME before $h got changed by the second cut.
