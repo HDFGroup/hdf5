@@ -145,13 +145,7 @@ h5_cleanup(const char *base_name[], hid_t fapl)
     int		retval=0;
     hid_t	driver;
 
-    if (GetTestCleanup() && 
-#ifdef H5_HAVE_PARALLEL
-	!getenv_all(MPI_COMM_WORLD, 0, "HDF5_NOCLEANUP")
-#else
-	!HDgetenv("HDF5_NOCLEANUP")
-#endif
-	){
+    if (GetTestCleanup()){
 	for (i = 0; base_name[i]; i++) {
 	    if (h5_fixname(base_name[i], fapl, filename, sizeof(filename)) == NULL)
 		continue;
@@ -327,6 +321,11 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
             prefix = HDF5_PARAPREFIX;
 #endif  /* HDF5_PARAPREFIX */
 	}
+	
+	/* check NOCLEANUP environment setting. */
+	if (getenv_all(MPI_COMM_WORLD, 0, "HDF5_NOCLEANUP")){
+	    SetTestNoCleanup();
+	}
 #endif  /* H5_HAVE_PARALLEL */
     } else {
 	/*
@@ -339,6 +338,11 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 	if (!prefix)
             prefix = HDF5_PREFIX;
 #endif  /* HDF5_PREFIX */
+
+	/* check NOCLEANUP environment setting. */
+	if (HDgetenv("HDF5_NOCLEANUP")){
+	    SetTestNoCleanup();
+	}
     }
 
     /* Prepend the prefix value to the base name */

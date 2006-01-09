@@ -266,7 +266,7 @@ void TestParseCmdLine(int argc, char *argv[])
             exit(0);
         }
 	else if ((HDstrcmp(*argv, "-cleanoff") == 0) || (HDstrcmp(*argv, "-c") == 0))
-            CleanUp = 0;
+	    SetTestNoCleanup();
 	else {
 	    /* non-standard option.  Break out. */
 	    break;
@@ -391,6 +391,19 @@ int GetTestSummary(void)
 int GetTestCleanup(void)
 {
     return(CleanUp);
+}
+
+/*
+ * Set cleanup to no.
+ * Return previous cleanup value.
+ */
+int SetTestNoCleanup(void)
+{
+    int oldval;
+
+    oldval = CleanUp;
+    CleanUp = 0;
+    return(oldval);
 }
 
 /*
