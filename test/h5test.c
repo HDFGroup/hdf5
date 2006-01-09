@@ -272,6 +272,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
     char           *ptr, last = '\0';
     size_t          i, j;
     hid_t           driver = -1;
+    int		    isppdriver = 0;	/* if the driver is MPI parallel */
 
     if (!base_name || !fullname || size < 1)
         return NULL;
@@ -289,8 +290,33 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 	    suffix = NULL;
     }
 
-    /* Use different ones depending on parallel or serial driver used. */
-    if (H5P_DEFAULT != fapl && (H5FD_MPIO == driver || H5FD_FPHDF5 == driver)) {
+    /* Must first check fapl is not H5P_DEFAULT (-1) because H5FD_XXX
+     * could be of value -1 if it is not defined.
+     */
+    isppdriver = H5P_DEFAULT != fapl && 
+	(H5FD_MPIO==driver || H5FD_MPIPOSIX==driver || H5FD_FPHDF5==driver);
+
+    /* Check HDF5_NOCLEANUP environment setting.
+     * (The #ifdef is needed to prevent compile failure in case MPI is not
+     * configured.)
+     */
+    if (isppdriver){
+#ifdef H5_HAVE_PARALLEL
+	if (getenv_all(MPI_COMM_WORLD, 0, "HDF5_NOCLEANUP"))
+	    SetTestNoCleanup();
+#endif  /* H5_HAVE_PARALLEL */
+    }else{
+	if (HDgetenv("HDF5_NOCLEANUP"))
+	    SetTestNoCleanup();
+    }
+
+    /* Check what prefix to use for test files. Process HDF5_PARAPREFIX and
+     * HDF5_PREFIX.
+     * Use different ones depending on parallel or serial driver used.
+     * (The #ifdef is needed to prevent compile failure in case MPI is not
+     * configured.)
+     */
+    if (isppdriver){
 #ifdef H5_HAVE_PARALLEL
 	/*
          * For parallel:
@@ -321,11 +347,6 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
             prefix = HDF5_PARAPREFIX;
 #endif  /* HDF5_PARAPREFIX */
 	}
-	
-	/* check NOCLEANUP environment setting. */
-	if (getenv_all(MPI_COMM_WORLD, 0, "HDF5_NOCLEANUP")){
-	    SetTestNoCleanup();
-	}
 #endif  /* H5_HAVE_PARALLEL */
     } else {
 	/*
@@ -338,16 +359,11 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 	if (!prefix)
             prefix = HDF5_PREFIX;
 #endif  /* HDF5_PREFIX */
-
-	/* check NOCLEANUP environment setting. */
-	if (HDgetenv("HDF5_NOCLEANUP")){
-	    SetTestNoCleanup();
-	}
     }
 
     /* Prepend the prefix value to the base name */
     if (prefix && *prefix) {
-        if (H5P_DEFAULT != fapl && (H5FD_MPIO == driver || H5FD_FPHDF5 == driver)) {
+	if (isppdriver){
             /* This is a parallel system */
             char *subdir;
 
