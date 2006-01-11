@@ -61,8 +61,10 @@ int diff_attr(hid_t      loc1_id,
  int        rank2;        /* rank of dataset */
  hsize_t    dims1[H5S_MAX_RANK];/* dimensions of dataset */
  hsize_t    dims2[H5S_MAX_RANK];/* dimensions of dataset */
- char       name1[255];
- char       name2[255];
+ char       name1[512];
+ char       name2[512];
+ char       np1[512];
+ char       np2[512];
  int        n1, n2, i, j;
  int        ret=0;
  hsize_t    nfound;
@@ -192,25 +194,27 @@ int diff_attr(hid_t      loc1_id,
   goto error;
 
 
+ /* format output string */
+ sprintf(np1,"%s of <%s>",name1,path1);
+ sprintf(np2,"%s of <%s>",name2,path2);
+ 
 /*-------------------------------------------------------------------------
  * array compare
  *-------------------------------------------------------------------------
  */
- sprintf(name1,"%s of <%s>",name1,path1);
- sprintf(name2,"%s of <%s>",name2,path2);
 
  /* always print name */
  if (options->m_verbose)
  {
-  printf( "Attribute:   <%s> and <%s>\n",name1,name2);
+  printf( "Attribute:   <%s> and <%s>\n",np1,np2);
   nfound = diff_array(buf1,
                      buf2,
                      nelmts1,
                      rank1,
                      dims1,
                      options,
-                     name1,
-                     name2,
+                     np1,
+                     np2,
                      mtype1_id,
                      attr1_id,
                      attr2_id);
@@ -230,8 +234,8 @@ int diff_attr(hid_t      loc1_id,
                      rank1,
                      dims1,
                      options,
-                     name1,
-                     name2,
+                     np1,
+                     np2,
                      mtype1_id,
                      attr1_id,
                      attr2_id);
@@ -239,15 +243,15 @@ int diff_attr(hid_t      loc1_id,
    options->m_quiet=0;
    if (nfound)
    {
-    printf( "Attribute:   <%s> and <%s>\n",name1,name2);
+    printf( "Attribute:   <%s> and <%s>\n",np1,np2);
     nfound = diff_array(buf1,
                      buf2,
                      nelmts1,
                      rank1,
                      dims1,
                      options,
-                     name1,
-                     name2,
+                     np1,
+                     np2,
                      mtype1_id,
                      attr1_id,
                      attr2_id);
@@ -263,8 +267,8 @@ int diff_attr(hid_t      loc1_id,
                      rank1,
                      dims1,
                      options,
-                     name1,
-                     name2,
+                     np1,
+                     np2,
                      mtype1_id,
                      attr1_id,
                      attr2_id);
