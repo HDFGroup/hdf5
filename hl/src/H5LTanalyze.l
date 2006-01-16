@@ -37,10 +37,10 @@ extern hbool_t     is_enum_memb;
 
 /*variables for string type*/
 extern hbool_t is_str_size;
-extern hbool_t is_str_pad;
 
 /*variables for opaque type*/
 extern hbool_t is_opq_size;
+extern hbool_t is_opq_tag;
 
 hbool_t        first_quote = 1;
 
@@ -101,6 +101,7 @@ H5T_STR_NULLTERM {return token(H5T_STR_NULLTERM_TOKEN);}
 H5T_STR_NULLPAD  {return token(H5T_STR_NULLPAD_TOKEN);} 
 H5T_STR_SPACEPAD {return token(H5T_STR_SPACEPAD_TOKEN);} 
 H5T_CSET_ASCII   {return token(H5T_CSET_ASCII_TOKEN);}
+H5T_CSET_UTF8    {return token(H5T_CSET_UTF8_TOKEN);}
 H5T_C_S1         {return token(H5T_C_S1_TOKEN);}
 H5T_FORTRAN_S1   {return token(H5T_FORTRAN_S1_TOKEN);}
 H5T_VARIABLE     {return token(H5T_VARIABLE_TOKEN);}
@@ -112,10 +113,12 @@ H5T_VLEN         {return token(H5T_VLEN_TOKEN);}
 
 H5T_OPAQUE       {return token(H5T_OPAQUE_TOKEN);}
 OPQ_SIZE         {return token(OPQ_SIZE_TOKEN);}
+OPQ_TAG          {return token(OPQ_TAG_TOKEN);}
 
 [0-9]+           {    
-                        if(is_str_size || (is_enum && is_enum_memb) || 
-                            is_opq_size || (asindex>-1 && arr_stack[asindex].is_dim)) {
+                        if( is_str_size || (is_enum && is_enum_memb) || 
+                            is_opq_size || (asindex>-1 && arr_stack[asindex].is_dim) ||
+                            (csindex>-1 && cmpd_stack[csindex].is_field) ) {
                             yylval.ival = atoi(yytext);
                             return NUMBER; 
                         } else
@@ -124,7 +127,8 @@ OPQ_SIZE         {return token(OPQ_SIZE_TOKEN);}
 
 "\""             {
                     /*if it's first quote, and is a compound field name or an enum symbol*/
-                    if((is_enum || (csindex>-1 && cmpd_stack[csindex].is_field)) && first_quote) {
+                    if((is_opq_tag || is_enum || (csindex>-1 && cmpd_stack[csindex].is_field)) 
+                        && first_quote) {
                         first_quote = 0;
                         BEGIN TAG_STRING;
                     } else /*if it's second quote*/
@@ -141,6 +145,7 @@ OPQ_SIZE         {return token(OPQ_SIZE_TOKEN);}
 "}"              {return token('}');}
 "["              {return token('[');}
 "]"              {return token(']');}
+":"              {return token(':');}
 ";"              {return token(';');}
 [ \t\n]*         ;
 "\n"             { return 0; }

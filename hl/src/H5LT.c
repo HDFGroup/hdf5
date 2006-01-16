@@ -2007,10 +2007,18 @@ out:
  *
  *-------------------------------------------------------------------------
  */
-hid_t H5LTtext_to_dtype(const char *text)
+hid_t H5LTtext_to_dtype(const char *text, H5LT_lang_t lang_type)
 {
  extern int yyparse(void);
  hid_t   type_id; 
+
+ if(lang_type <= H5LT_LANG_ERR || lang_type >= H5LT_NO_LANG)
+     goto out;
+
+ if(lang_type != H5LT_DDL) {
+     fprintf(stderr, "only DDL is supported for now.\n");
+     goto out;
+ }
  
  input_len = strlen(text);
  myinput = strdup(text);
@@ -2184,20 +2192,23 @@ out:
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5LTdtype_to_text(hid_t dtype, char *str, size_t *len)
+herr_t H5LTdtype_to_text(hid_t dtype, char *str, H5LT_lang_t lang_type, size_t *len)
 {
     size_t      str_len = INCREMENT;
     char        *text_str;
     herr_t      ret;
-    
+   
+    if(lang_type <= H5LT_LANG_ERR || lang_type >= H5LT_NO_LANG)
+        goto out;
+
     if(len && !str) {
         text_str = (char*)calloc(str_len, sizeof(char));
         text_str[0]='\0';
-        if((ret = H5LT_dtype_to_text(dtype, &text_str, &str_len, 1))<0)
+        if((ret = H5LT_dtype_to_text(dtype, &text_str, lang_type, &str_len, 1))<0)
             goto out;
         *len = strlen(text_str) + 1;
     } else if(len && str) {
-        if((ret = H5LT_dtype_to_text(dtype, &str, len, 0))<0)
+        if((ret = H5LT_dtype_to_text(dtype, &str, lang_type, len, 0))<0)
             goto out;
         str[*len-1] = '\0';
     }
@@ -2225,7 +2236,8 @@ out:
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5LT_dtype_to_text(hid_t dtype, char **dt_str, size_t *slen, hbool_t no_user_buf)
+herr_t H5LT_dtype_to_text(hid_t dtype, char **dt_str, H5LT_lang_t lang, size_t *slen, 
+                            hbool_t no_user_buf)
 {
     H5T_class_t tcls;
     char        tmp_str[256];
@@ -2240,6 +2252,11 @@ herr_t H5LT_dtype_to_text(hid_t dtype, char **dt_str, size_t *slen, hbool_t no_u
            free(*dt_str);
            *dt_str = tmp;
         }
+    }
+   
+    if(lang != H5LT_DDL) {
+        sprintf(*dt_str, "only DDL is supported for now");
+        goto out;
     }
     
     if((tcls = H5Tget_class(dtype))<0)
@@ -2354,6 +2371,36 @@ herr_t H5LT_dtype_to_text(hid_t dtype, char **dt_str, size_t *slen, hbool_t no_u
             sprintf(*dt_str, "H5T_STRING {\n");
             indent += COL;
 
+            indentation(indent + COL, *dt_str);
+
+            if(is_vlstr)
+                strcat(*dt_str, "STRSIZE H5T_VARIABLE;\n");
+            else {
+                sprintf(tmp_str, "STRSIZE %d;\n", (int)size);
+                strcat(*dt_str, tmp_str);
+            }
+
+            indentation(indent + COL, *dt_str);
+
+            if (str_pad == H5T_STR_NULLTERM)
+                strcat(*dt_str, "STRPAD H5T_STR_NULLTERM;\n");
+            else if (str_pad == H5T_STR_NULLPAD)
+                strcat(*dt_str, "STRPAD H5T_STR_NULLPAD;\n");
+            else if (str_pad == H5T_STR_SPACEPAD)
+                strcat(*dt_str, "STRPAD H5T_STR_SPACEPAD;\n");
+            else
+                strcat(*dt_str, "STRPAD H5T_STR_ERROR;\n");
+
+            indentation(indent + COL, *dt_str);
+
+            if (cset == H5T_CSET_ASCII)
+                strcat(*dt_str, "CSET H5T_CSET_ASCII;\n");
+            else if (cset == H5T_CSET_UTF8)
+                strcat(*dt_str, "CSET H5T_CSET_UTF8;\n");
+            else
+                strcat(*dt_str, "CSET unknown;\n");
+
+
             /* Reproduce a C type string */
             if((str_type = H5Tcopy(H5T_C_S1))<0)
                 goto out;
@@ -2433,33 +2480,6 @@ herr_t H5LT_dtype_to_text(hid_t dtype, char **dt_str, size_t *slen, hbool_t no_u
             strcat(*dt_str, "CTYPE unknown_one_character_type;\n ");
 
 next:
-            indentation(indent + COL, *dt_str);
-
-            if(is_vlstr)
-                strcat(*dt_str, "STRSIZE H5T_VARIABLE;\n");
-            else {
-                sprintf(tmp_str, "STRSIZE %d;\n", (int)size);
-                strcat(*dt_str, tmp_str);
-            }
-
-            indentation(indent + COL, *dt_str);
-
-            if (str_pad == H5T_STR_NULLTERM)
-                strcat(*dt_str, "STRPAD H5T_STR_NULLTERM;\n");
-            else if (str_pad == H5T_STR_NULLPAD)
-                strcat(*dt_str, "STRPAD H5T_STR_NULLPAD;\n");
-            else if (str_pad == H5T_STR_SPACEPAD)
-                strcat(*dt_str, "STRPAD H5T_STR_SPACEPAD;\n");
-            else
-                strcat(*dt_str, "STRPAD H5T_STR_ERROR;\n");
-
-            indentation(indent + COL, *dt_str);
-
-            if (cset == H5T_CSET_ASCII)
-                strcat(*dt_str, "CSET H5T_CSET_ASCII;\n");
-            else
-                strcat(*dt_str, "CSET unknown_cset;\n");
-
             H5Tclose(str_type);
             H5Tclose(tmp_type);
 
@@ -2478,7 +2498,11 @@ next:
             indentation(indent + COL, *dt_str);
             sprintf(tmp_str, "OPQ_SIZE %d;\n", H5Tget_size(dtype));
             strcat(*dt_str, tmp_str);
-             
+
+            indentation(indent + COL, *dt_str);
+            sprintf(tmp_str, "OPQ_TAG \"%s\";\n", H5Tget_tag(dtype));
+            strcat(*dt_str, tmp_str);
+            
             /* Print closing */
             indent -= COL;
             indentation(indent + COL, *dt_str);
@@ -2498,10 +2522,10 @@ next:
             
             if((super = H5Tget_super(dtype))<0)
                 goto out;
-            if(H5LTdtype_to_text(super, NULL, &super_len)<0)
+            if(H5LTdtype_to_text(super, NULL, lang, &super_len)<0)
                 goto out;
             stmp = (char*)calloc(super_len, sizeof(char));
-            if(H5LTdtype_to_text(super, stmp, &super_len)<0)
+            if(H5LTdtype_to_text(super, stmp, lang, &super_len)<0)
                 goto out;            
             strcat(*dt_str, stmp);
             free(stmp);
@@ -2531,10 +2555,10 @@ next:
 
             if((super = H5Tget_super(dtype))<0)
                 goto out;
-            if(H5LTdtype_to_text(super, NULL, &super_len)<0)
+            if(H5LTdtype_to_text(super, NULL, lang, &super_len)<0)
                 goto out;
             stmp = (char*)calloc(super_len, sizeof(char));
-            if(H5LTdtype_to_text(super, stmp, &super_len)<0)
+            if(H5LTdtype_to_text(super, stmp, lang, &super_len)<0)
                 goto out;            
             strcat(*dt_str, stmp);
             free(stmp);
@@ -2576,10 +2600,10 @@ next:
 
             if((super = H5Tget_super(dtype))<0)
                 goto out;
-            if(H5LTdtype_to_text(super, NULL, &super_len)<0)
+            if(H5LTdtype_to_text(super, NULL, lang, &super_len)<0)
                 goto out;
             stmp = (char*)calloc(super_len, sizeof(char));
-            if(H5LTdtype_to_text(super, stmp, &super_len)<0)
+            if(H5LTdtype_to_text(super, stmp, lang, &super_len)<0)
                 goto out;            
             strcat(*dt_str, stmp);
             free(stmp);
@@ -2597,6 +2621,7 @@ next:
             {
             char       *mname;
             hid_t       mtype;
+            size_t      moffset;
             H5T_class_t mclass;
             size_t      mlen;
             char*       mtmp;
@@ -2613,6 +2638,7 @@ next:
                     goto out;
                 if((mtype = H5Tget_member_type(dtype, i))<0)
                     goto out;
+                moffset = H5Tget_member_offset(dtype, i);
                 indentation(indent + COL, *dt_str);
 
                 if((mclass = H5Tget_class(mtype))<0)
@@ -2620,10 +2646,10 @@ next:
                 if (H5T_COMPOUND == mclass)
                     indent += COL;
 
-                if(H5LTdtype_to_text(mtype, NULL, &mlen)<0)
+                if(H5LTdtype_to_text(mtype, NULL, lang, &mlen)<0)
                     goto out;
                 mtmp = (char*)calloc(mlen, sizeof(char));
-                if(H5LTdtype_to_text(mtype, mtmp, &mlen)<0)
+                if(H5LTdtype_to_text(mtype, mtmp, lang, &mlen)<0)
                     goto out;            
                 strcat(*dt_str, mtmp);
                 free(mtmp);
@@ -2631,9 +2657,12 @@ next:
                 if (H5T_COMPOUND == mclass)
                     indent -= COL;
 
-                sprintf(tmp_str, " \"%s\";\n", mname);
+                sprintf(tmp_str, " \"%s\"", mname);
                 strcat(*dt_str, tmp_str);
                 free(mname);
+
+                sprintf(tmp_str, " : %d;\n", moffset);
+                strcat(*dt_str, tmp_str);
             }
 
             /* Print closing */

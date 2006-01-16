@@ -34,6 +34,13 @@
 #define SKIPPED()	{puts(" -SKIP-");fflush(stdout);}
 #define EXAMPLE(WHAT)	{printf("%-70s", "Example " WHAT); fflush(stdout);}
 
+typedef enum H5LT_lang_t {
+    H5LT_LANG_ERR = -1, /*this is the first*/
+    H5LT_DDL      = 0,  /*for DDL*/
+    H5LT_C        = 1,  /*for C*/
+    H5LT_FORTRAN  = 2,  /*for Fortran*/
+    H5LT_NO_LANG  = 3   /*this is the last*/
+} H5LT_lang_t;
 
 #ifdef __cplusplus
 extern "C" {
@@ -344,8 +351,8 @@ H5_HLDLL herr_t  H5LTget_attribute_info( hid_t loc_id,
 H5_HLDLL hid_t H5LTcreate_compound_type( hsize_t nfields, size_t size, const char *field_names[],
                                 const size_t *field_offset, const hid_t *field_types );
 
-H5_HLDLL hid_t H5LTtext_to_dtype(const char *text);
-H5_HLDLL herr_t H5LTdtype_to_text(hid_t dtype, char *str, size_t *len);
+H5_HLDLL hid_t H5LTtext_to_dtype(const char *text, H5LT_lang_t lang_type);
+H5_HLDLL herr_t H5LTdtype_to_text(hid_t dtype, char *str, H5LT_lang_t lang_type, size_t *len);
 
 H5_HLDLL herr_t  H5LTrepack( hsize_t nfields,
                    hsize_t nrecords,
@@ -388,7 +395,8 @@ H5_HLDLL herr_t  H5LT_set_attribute_string( hid_t dset_id,
                                  char *name,
                                  char *buf );
 
-H5_HLDLL herr_t  H5LT_dtype_to_text(hid_t dtype, char **dt_str, size_t *slen, hbool_t no_user_buf);
+H5_HLDLL herr_t  H5LT_dtype_to_text(hid_t dtype, char **dt_str, H5LT_lang_t lang, 
+                                    size_t *slen, hbool_t no_user_buf);
 
 #ifdef __cplusplus
 }

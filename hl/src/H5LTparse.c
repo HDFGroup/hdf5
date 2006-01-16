@@ -66,20 +66,25 @@ int asindex = -1;               /*pointer to the top of array stack*/
 
 hbool_t     is_str_size = 0;        /*flag to lexer for string size*/
 hbool_t     is_str_pad = 0;         /*flag to lexer for string padding*/
-
-hid_t   enum_id;                    /*type ID*/
+H5T_pad_t   str_pad;                /*variable for string padding*/
+H5T_cset_t  str_cset;               /*variable for string character set*/
+hbool_t     is_variable = 0;        /*variable for variable-length string*/
+size_t      str_size;               /*variable for string size*/
+   
+hid_t       enum_id;                /*type ID*/
 hbool_t     is_enum = 0;            /*flag to lexer for enum type*/
 hbool_t     is_enum_memb = 0;       /*flag to lexer for enum member*/
-char*   enum_memb_symbol;           /*enum member symbol string*/
+char*       enum_memb_symbol;       /*enum member symbol string*/
 
-hbool_t is_opq_size = 0;               /*flag to lexer for opaque type size*/
+hbool_t is_opq_size = 0;            /*flag to lexer for opaque type size*/
+hbool_t is_opq_tag = 0;             /*flag to lexer for opaque type tag*/
 
-#line 45 "H5LTparse.y"
+#line 50 "H5LTparse.y"
 typedef union {
     int   ival;         /*for integer token*/
     char  *sval;        /*for name string*/
 } YYSTYPE;
-#line 65 "H5LTparse.c"
+#line 70 "H5LTparse.c"
 #define YYERRCODE 256
 #define H5T_STD_I8BE_TOKEN 257
 #define H5T_STD_I8LE_TOKEN 258
@@ -125,26 +130,29 @@ typedef union {
 #define H5T_STR_NULLPAD_TOKEN 298
 #define H5T_STR_SPACEPAD_TOKEN 299
 #define H5T_CSET_ASCII_TOKEN 300
-#define H5T_C_S1_TOKEN 301
-#define H5T_FORTRAN_S1_TOKEN 302
-#define H5T_OPAQUE_TOKEN 303
-#define OPQ_SIZE_TOKEN 304
-#define H5T_COMPOUND_TOKEN 305
-#define H5T_ENUM_TOKEN 306
-#define H5T_ARRAY_TOKEN 307
-#define H5T_VLEN_TOKEN 308
-#define STRING 309
-#define NUMBER 310
+#define H5T_CSET_UTF8_TOKEN 301
+#define H5T_C_S1_TOKEN 302
+#define H5T_FORTRAN_S1_TOKEN 303
+#define H5T_OPAQUE_TOKEN 304
+#define OPQ_SIZE_TOKEN 305
+#define OPQ_TAG_TOKEN 306
+#define H5T_COMPOUND_TOKEN 307
+#define H5T_ENUM_TOKEN 308
+#define H5T_ARRAY_TOKEN 309
+#define H5T_VLEN_TOKEN 310
+#define STRING 311
+#define NUMBER 312
 const short yylhs[] = {                                        -1,
     0,    0,    1,    1,    1,    1,    2,    2,    2,    2,
     2,    6,    6,    6,    6,    6,    6,    6,    6,    6,
     6,    6,    6,    6,    6,    6,    6,    6,    6,    6,
     6,    6,    6,    6,    6,    6,    6,    6,    7,    7,
     7,    7,    7,    7,    7,   11,    3,   12,   12,   14,
-   13,   15,   16,    4,   17,   17,   20,   21,   18,   19,
-    5,   23,   24,   10,   22,   26,   28,   29,   31,   33,
-    8,   27,   27,   30,   30,   30,   32,   25,   25,   35,
-    9,   34,   34,   39,   36,   37,   38,
+   13,   15,   16,   16,   17,   18,    4,   19,   19,   22,
+   23,   20,   21,    5,   25,   26,   27,   29,   10,   24,
+   28,   31,   32,   34,   36,   38,    8,   30,   30,   33,
+   33,   33,   35,   35,   37,   37,   40,    9,   39,   39,
+   44,   41,   42,   43,
 };
 const short yylen[] = {                                         2,
     0,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -152,48 +160,54 @@ const short yylen[] = {                                         2,
     1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
     1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
     1,    1,    1,    1,    1,    0,    5,    0,    2,    0,
-    6,    1,    0,    6,    0,    2,    0,    0,    5,    1,
-    4,    0,    0,    8,    1,    0,    0,    0,    0,    0,
-   20,    1,    1,    1,    1,    1,    1,    1,    1,    0,
-    7,    0,    2,    0,    6,    1,    1,
+    7,    1,    0,    2,    1,    0,    6,    0,    2,    0,
+    0,    5,    1,    4,    0,    0,    0,    0,   15,    1,
+    1,    0,    0,    0,    0,    0,   20,    1,    1,    1,
+    1,    1,    1,    1,    1,    1,    0,    7,    0,    2,
+    0,    6,    1,    1,
 };
 const short yydefred[] = {                                      0,
    12,   13,   14,   15,   16,   17,   18,   19,   20,   21,
    22,   23,   24,   25,   26,   27,   28,   29,   30,   31,
    32,   33,   34,   35,   36,   37,   38,   39,   40,   41,
-   42,   43,   44,   45,    0,    0,   46,    0,   53,    0,
+   42,   43,   44,   45,    0,    0,   46,    0,   56,    0,
     0,    2,    3,    4,    5,    6,    7,    8,    9,   10,
-   11,    0,    0,    0,    0,    0,    0,    0,   62,   48,
-    0,   55,    0,   78,   79,    0,    0,    0,   80,    0,
-   61,   66,   65,    0,   47,   50,   49,   82,   57,    0,
-   56,    0,   63,    0,    0,    0,   54,   67,    0,    0,
-   81,    0,   83,   60,   58,    0,   64,   52,    0,   86,
-    0,    0,   72,   73,    0,    0,   84,   59,   68,   51,
-    0,    0,   87,    0,    0,   85,   74,   75,   76,    0,
-   69,    0,    0,   77,    0,   70,    0,   71,
+   11,    0,    0,    0,    0,    0,    0,   72,   65,   48,
+    0,   58,    0,    0,    0,    0,   87,    0,   64,   78,
+   79,    0,   70,    0,   47,   50,   49,   89,   60,    0,
+   59,   73,   66,    0,    0,    0,   57,    0,    0,    0,
+   88,    0,   90,   63,   61,    0,   67,   52,    0,   93,
+    0,    0,   80,   81,   82,    0,    0,    0,   91,   62,
+   74,    0,    0,    0,    0,    0,   71,    0,   55,   54,
+   51,   94,    0,    0,    0,   92,   83,   84,    0,   68,
+   75,    0,    0,   69,    0,   85,   86,    0,   76,    0,
+   77,
 };
 const short yydgoto[] = {                                      41,
    42,   43,   44,   45,   46,   47,   48,   49,   50,   51,
-   54,   68,   77,   84,   99,   56,   70,   81,   95,   86,
-  102,   74,   67,   89,   66,   82,  105,   96,  112,  120,
-  122,  125,  127,   85,   78,   93,  101,  114,  111,
+   54,   66,   77,   84,   99,  114,  120,   56,   68,   81,
+   95,   86,  102,   74,   65,   89,  107,  118,  132,   72,
+   64,   88,  106,  116,  129,  133,  138,  140,   85,   78,
+   93,  101,  123,  115,
 };
 const short yysindex[] = {                                   -255,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,  -81,  -80,    0,  -79,    0,  -78,
+    0,    0,    0,    0,  -82,  -79,    0,  -78,    0,  -76,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0, -249, -257,  -74, -203,  -41, -255, -261,    0,    0,
-   25,    0,  -40,    0,    0,   28, -222,  -39,    0,  -91,
-    0,    0,    0,   30,    0,    0,    0,    0,    0,  -35,
-    0, -201,    0,   59,  -33, -213,    0,    0,  -27, -210,
-    0, -209,    0,    0,    0, -215,    0,    0,   67,    0,
-   68,   10,    0,    0,   45,   46,    0,    0,    0,    0,
- -204, -186,    0,   49, -260,    0,    0,    0,    0,   50,
-    0, -184, -189,    0,   53,    0,  -12,    0,
+    0, -208, -220,  -36, -201,  -34, -255,    0,    0,    0,
+   27,    0,  -35, -213, -221,  -37,    0,  -91,    0,    0,
+    0,   34,    0,   35,    0,    0,    0,    0,    0,  -30,
+    0,    0,    0,   62,  -33, -215,    0, -195, -206, -210,
+    0, -209,    0,    0,    0, -259,    0,    0,   69,    0,
+   70,   12,    0,    0,    0,   47,   73,   50,    0,    0,
+    0, -202, -200,   51, -199, -183,    0,   80,    0,    0,
+    0,    0,   56, -258,   57,    0,    0,    0,   58,    0,
+    0,   -7, -176,    0, -252,    0,    0,   61,    0,   -4,
+    0,
 };
-const short yyrindex[] = {                                    114,
+const short yyrindex[] = {                                    122,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
@@ -204,31 +218,34 @@ const short yyrindex[] = {                                    114,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,   64,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,
 };
 const short yygindex[] = {                                      0,
-   26,    0,    0,    0,    0,   60,    0,    0,    0,    0,
+  -20,    0,    0,    0,    0,   71,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,
 };
-#define YYTABLESIZE 269
+#define YYTABLESIZE 273
 const short yytable[] = {                                      79,
    92,    1,    2,    3,    4,    5,    6,    7,    8,    9,
    10,   11,   12,   13,   14,   15,   16,   17,   18,   19,
    20,   21,   22,   23,   24,   25,   26,   27,   28,   29,
-   30,   31,   32,   33,   34,   35,  117,  118,  119,   64,
-   65,   52,   53,   55,   57,   58,   59,   36,   60,   37,
-   38,   39,   40,    1,    2,    3,    4,    5,    6,    7,
-    8,    9,   10,   11,   12,   13,   14,   15,   16,   17,
-   18,   19,   20,   21,   22,   23,   24,   25,   26,   27,
-  103,   62,   63,   69,   71,   75,   72,   73,   83,   87,
-   88,   91,   90,   76,  104,   80,   94,   97,   98,  100,
-  106,  107,  108,  109,  110,  113,  115,  116,  121,  123,
-  124,  126,  128,    1,   61,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+   30,   31,   32,   33,   34,   35,   63,  103,  104,  105,
+   52,  127,  128,   53,   55,   76,   57,   80,   36,  136,
+  137,   37,   38,   39,   40,    1,    2,    3,    4,    5,
+    6,    7,    8,    9,   10,   11,   12,   13,   14,   15,
+   16,   17,   18,   19,   20,   21,   22,   23,   24,   25,
+   26,   27,   70,   58,   59,   67,   60,   75,   62,   69,
+   73,   91,   82,   83,   87,   90,   94,   96,   71,   97,
+   98,  100,  108,  109,  110,  111,  112,  113,  117,  121,
+  124,  119,  122,  125,  126,  130,  131,  134,  135,  139,
+  141,    1,   53,    0,    0,   61,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
@@ -237,27 +254,28 @@ const short yytable[] = {                                      79,
    16,   17,   18,   19,   20,   21,   22,   23,   24,   25,
    26,   27,   28,   29,   30,   31,   32,   33,   34,   35,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,   36,    0,   37,   38,   39,   40,    1,    2,    3,
-    4,    5,    6,    7,    8,    9,   10,   11,   12,   13,
-   14,   15,   16,   17,   18,   19,   20,   21,   22,   23,
-   24,   25,   26,   27,   28,   29,   30,   31,   32,   33,
-   34,   35,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,   36,    0,   37,   38,   39,   40,
+    0,    0,   36,    0,    0,   37,   38,   39,   40,    1,
+    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,
+   12,   13,   14,   15,   16,   17,   18,   19,   20,   21,
+   22,   23,   24,   25,   26,   27,   28,   29,   30,   31,
+   32,   33,   34,   35,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,   36,    0,    0,   37,
+   38,   39,   40,
 };
 const short yycheck[] = {                                      91,
    34,  257,  258,  259,  260,  261,  262,  263,  264,  265,
   266,  267,  268,  269,  270,  271,  272,  273,  274,  275,
   276,  277,  278,  279,  280,  281,  282,  283,  284,  285,
-  286,  287,  288,  289,  290,  291,  297,  298,  299,  301,
-  302,  123,  123,  123,  123,  295,  304,  303,  123,  305,
-  306,  307,  308,  257,  258,  259,  260,  261,  262,  263,
-  264,  265,  266,  267,  268,  269,  270,  271,  272,  273,
-  274,  275,  276,  277,  278,  279,  280,  281,  282,  283,
-  296,  123,   57,   59,  125,  125,   59,  310,   59,  125,
-  292,  125,   34,   68,  310,   70,  310,  125,  309,  309,
-   34,   34,   93,   59,   59,  310,  293,   59,   59,  294,
-  300,   59,  125,    0,   55,   -1,   -1,   -1,   -1,   -1,
-   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
+  286,  287,  288,  289,  290,  291,   57,  297,  298,  299,
+  123,  300,  301,  123,  123,   66,  123,   68,  304,  302,
+  303,  307,  308,  309,  310,  257,  258,  259,  260,  261,
+  262,  263,  264,  265,  266,  267,  268,  269,  270,  271,
+  272,  273,  274,  275,  276,  277,  278,  279,  280,  281,
+  282,  283,  296,  292,  305,   59,  123,  125,  123,  125,
+  312,  125,   59,   59,  125,   34,  312,  293,  312,  306,
+  311,  311,   34,   34,   93,   59,   34,   58,  311,   59,
+  294,  312,  312,   34,   59,   59,   59,  125,  295,   59,
+  125,    0,   59,   -1,   -1,   55,   -1,   -1,   -1,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
@@ -266,27 +284,28 @@ const short yycheck[] = {                                      91,
   272,  273,  274,  275,  276,  277,  278,  279,  280,  281,
   282,  283,  284,  285,  286,  287,  288,  289,  290,  291,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
-   -1,  303,   -1,  305,  306,  307,  308,  257,  258,  259,
-  260,  261,  262,  263,  264,  265,  266,  267,  268,  269,
-  270,  271,  272,  273,  274,  275,  276,  277,  278,  279,
-  280,  281,  282,  283,  284,  285,  286,  287,  288,  289,
-  290,  291,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
-   -1,   -1,   -1,  303,   -1,  305,  306,  307,  308,
+   -1,   -1,  304,   -1,   -1,  307,  308,  309,  310,  257,
+  258,  259,  260,  261,  262,  263,  264,  265,  266,  267,
+  268,  269,  270,  271,  272,  273,  274,  275,  276,  277,
+  278,  279,  280,  281,  282,  283,  284,  285,  286,  287,
+  288,  289,  290,  291,   -1,   -1,   -1,   -1,   -1,   -1,
+   -1,   -1,   -1,   -1,   -1,   -1,  304,   -1,   -1,  307,
+  308,  309,  310,
 };
 #define YYFINAL 41
 #ifndef YYDEBUG
 #define YYDEBUG 0
 #endif
-#define YYMAXTOKEN 310
+#define YYMAXTOKEN 312
 #if YYDEBUG
 const char * const yyname[] = {
 "end-of-file",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-"'\"'",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"';'",0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"'['",0,"']'",0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"'{'",0,"'}'",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+"'\"'",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"':'","';'",0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"'['",0,"']'",0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"'{'",0,"'}'",0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 "H5T_STD_I8BE_TOKEN","H5T_STD_I8LE_TOKEN","H5T_STD_I16BE_TOKEN",
 "H5T_STD_I16LE_TOKEN","H5T_STD_I32BE_TOKEN","H5T_STD_I32LE_TOKEN",
 "H5T_STD_I64BE_TOKEN","H5T_STD_I64LE_TOKEN","H5T_STD_U8BE_TOKEN",
@@ -301,9 +320,9 @@ const char * const yyname[] = {
 "H5T_NATIVE_LDOUBLE_TOKEN","H5T_STRING_TOKEN","STRSIZE_TOKEN","STRPAD_TOKEN",
 "CSET_TOKEN","CTYPE_TOKEN","H5T_VARIABLE_TOKEN","H5T_STR_NULLTERM_TOKEN",
 "H5T_STR_NULLPAD_TOKEN","H5T_STR_SPACEPAD_TOKEN","H5T_CSET_ASCII_TOKEN",
-"H5T_C_S1_TOKEN","H5T_FORTRAN_S1_TOKEN","H5T_OPAQUE_TOKEN","OPQ_SIZE_TOKEN",
-"H5T_COMPOUND_TOKEN","H5T_ENUM_TOKEN","H5T_ARRAY_TOKEN","H5T_VLEN_TOKEN",
-"STRING","NUMBER",
+"H5T_CSET_UTF8_TOKEN","H5T_C_S1_TOKEN","H5T_FORTRAN_S1_TOKEN",
+"H5T_OPAQUE_TOKEN","OPQ_SIZE_TOKEN","OPQ_TAG_TOKEN","H5T_COMPOUND_TOKEN",
+"H5T_ENUM_TOKEN","H5T_ARRAY_TOKEN","H5T_VLEN_TOKEN","STRING","NUMBER",
 };
 const char * const yyrule[] = {
 "$accept : start",
@@ -357,8 +376,11 @@ const char * const yyrule[] = {
 "memb_list :",
 "memb_list : memb_list memb_def",
 "$$2 :",
-"memb_def : ddl_type $$2 '\"' field_name '\"' ';'",
+"memb_def : ddl_type $$2 '\"' field_name '\"' field_offset ';'",
 "field_name : STRING",
+"field_offset :",
+"field_offset : ':' offset",
+"offset : NUMBER",
 "$$3 :",
 "array_type : H5T_ARRAY_TOKEN $$3 '{' dim_list ddl_type '}'",
 "dim_list :",
@@ -370,28 +392,32 @@ const char * const yyrule[] = {
 "vlen_type : H5T_VLEN_TOKEN '{' ddl_type '}'",
 "$$6 :",
 "$$7 :",
-"opaque_type : H5T_OPAQUE_TOKEN '{' OPQ_SIZE_TOKEN $$6 opaque_size ';' $$7 '}'",
-"opaque_size : NUMBER",
 "$$8 :",
 "$$9 :",
+"opaque_type : H5T_OPAQUE_TOKEN '{' OPQ_SIZE_TOKEN $$6 opaque_size ';' $$7 OPQ_TAG_TOKEN $$8 '\"' opaque_tag '\"' ';' $$9 '}'",
+"opaque_size : NUMBER",
+"opaque_tag : STRING",
 "$$10 :",
 "$$11 :",
 "$$12 :",
-"string_type : H5T_STRING_TOKEN '{' CTYPE_TOKEN ctype ';' $$8 STRSIZE_TOKEN $$9 strsize ';' $$10 STRPAD_TOKEN strpad ';' $$11 CSET_TOKEN cset ';' $$12 '}'",
+"$$13 :",
+"$$14 :",
+"string_type : H5T_STRING_TOKEN '{' STRSIZE_TOKEN $$10 strsize ';' $$11 STRPAD_TOKEN strpad ';' $$12 CSET_TOKEN cset ';' $$13 CTYPE_TOKEN ctype ';' $$14 '}'",
 "strsize : H5T_VARIABLE_TOKEN",
 "strsize : NUMBER",
 "strpad : H5T_STR_NULLTERM_TOKEN",
 "strpad : H5T_STR_NULLPAD_TOKEN",
 "strpad : H5T_STR_SPACEPAD_TOKEN",
 "cset : H5T_CSET_ASCII_TOKEN",
+"cset : H5T_CSET_UTF8_TOKEN",
 "ctype : H5T_C_S1_TOKEN",
 "ctype : H5T_FORTRAN_S1_TOKEN",
-"$$13 :",
-"enum_type : H5T_ENUM_TOKEN '{' integer_type ';' $$13 enum_list '}'",
+"$$15 :",
+"enum_type : H5T_ENUM_TOKEN '{' integer_type ';' $$15 enum_list '}'",
 "enum_list :",
 "enum_list : enum_list enum_def",
-"$$14 :",
-"enum_def : '\"' enum_symbol '\"' $$14 enum_val ';'",
+"$$16 :",
+"enum_def : '\"' enum_symbol '\"' $$16 enum_val ';'",
 "enum_symbol : STRING",
 "enum_val : NUMBER",
 };
@@ -618,155 +644,155 @@ yyreduce:
     switch (yyn)
     {
 case 1:
-#line 77 "H5LTparse.y"
+#line 82 "H5LTparse.y"
 { memset(arr_stack, 0, STACK_SIZE*sizeof(struct arr_info)); /*initialize here?*/ }
 break;
 case 2:
-#line 78 "H5LTparse.y"
+#line 83 "H5LTparse.y"
 { return yyval.ival;}
 break;
 case 12:
-#line 92 "H5LTparse.y"
+#line 97 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_I8BE); }
 break;
 case 13:
-#line 93 "H5LTparse.y"
+#line 98 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_I8LE); }
 break;
 case 14:
-#line 94 "H5LTparse.y"
+#line 99 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_I16BE); }
 break;
 case 15:
-#line 95 "H5LTparse.y"
+#line 100 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_I16LE); }
 break;
 case 16:
-#line 96 "H5LTparse.y"
+#line 101 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_I32BE); }
 break;
 case 17:
-#line 97 "H5LTparse.y"
+#line 102 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_I32LE); }
 break;
 case 18:
-#line 98 "H5LTparse.y"
+#line 103 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_I64BE); }
 break;
 case 19:
-#line 99 "H5LTparse.y"
+#line 104 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_I64LE); }
 break;
 case 20:
-#line 100 "H5LTparse.y"
+#line 105 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_U8BE); }
 break;
 case 21:
-#line 101 "H5LTparse.y"
+#line 106 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_U8LE); }
 break;
 case 22:
-#line 102 "H5LTparse.y"
+#line 107 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_U16BE); }
 break;
 case 23:
-#line 103 "H5LTparse.y"
+#line 108 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_U16LE); }
 break;
 case 24:
-#line 104 "H5LTparse.y"
+#line 109 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_U32BE); }
 break;
 case 25:
-#line 105 "H5LTparse.y"
+#line 110 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_U32LE); }
 break;
 case 26:
-#line 106 "H5LTparse.y"
+#line 111 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_U64BE); }
 break;
 case 27:
-#line 107 "H5LTparse.y"
+#line 112 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_STD_U64LE); }
 break;
 case 28:
-#line 108 "H5LTparse.y"
+#line 113 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_CHAR); }
 break;
 case 29:
-#line 109 "H5LTparse.y"
+#line 114 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_SCHAR); }
 break;
 case 30:
-#line 110 "H5LTparse.y"
+#line 115 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_UCHAR); }
 break;
 case 31:
-#line 111 "H5LTparse.y"
+#line 116 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_SHORT); }
 break;
 case 32:
-#line 112 "H5LTparse.y"
+#line 117 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_USHORT); }
 break;
 case 33:
-#line 113 "H5LTparse.y"
+#line 118 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_INT); }
 break;
 case 34:
-#line 114 "H5LTparse.y"
+#line 119 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_UINT); }
 break;
 case 35:
-#line 115 "H5LTparse.y"
+#line 120 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_LONG); }
 break;
 case 36:
-#line 116 "H5LTparse.y"
+#line 121 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_ULONG); }
 break;
 case 37:
-#line 117 "H5LTparse.y"
+#line 122 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_LLONG); }
 break;
 case 38:
-#line 118 "H5LTparse.y"
+#line 123 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_ULLONG); }
 break;
 case 39:
-#line 121 "H5LTparse.y"
+#line 126 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_IEEE_F32BE); }
 break;
 case 40:
-#line 122 "H5LTparse.y"
+#line 127 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_IEEE_F32LE); }
 break;
 case 41:
-#line 123 "H5LTparse.y"
+#line 128 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_IEEE_F64BE); }
 break;
 case 42:
-#line 124 "H5LTparse.y"
+#line 129 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_IEEE_F64LE); }
 break;
 case 43:
-#line 125 "H5LTparse.y"
+#line 130 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_FLOAT); }
 break;
 case 44:
-#line 126 "H5LTparse.y"
+#line 131 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_DOUBLE); }
 break;
 case 45:
-#line 127 "H5LTparse.y"
+#line 132 "H5LTparse.y"
 { yyval.ival = H5Tcopy(H5T_NATIVE_LDOUBLE); }
 break;
 case 46:
-#line 131 "H5LTparse.y"
+#line 136 "H5LTparse.y"
 { csindex++; cmpd_stack[csindex].id = H5Tcreate(H5T_COMPOUND, 1); /*temporarily set size to 1*/ }
 break;
 case 47:
-#line 133 "H5LTparse.y"
+#line 138 "H5LTparse.y"
 { yyval.ival = cmpd_stack[csindex].id; 
                               cmpd_stack[csindex].id = 0;
                               cmpd_stack[csindex].first_memb = 1; 
@@ -774,41 +800,63 @@ case 47:
                             }
 break;
 case 50:
-#line 142 "H5LTparse.y"
+#line 147 "H5LTparse.y"
 { cmpd_stack[csindex].is_field = 1; /*notify lexer a compound member is parsed*/ }
 break;
 case 51:
-#line 144 "H5LTparse.y"
-{   int origin_size, new_size;
+#line 149 "H5LTparse.y"
+{   
+                            int origin_size, new_size;
                             hid_t dtype_id = cmpd_stack[csindex].id;
 
-                            /*Adjust size and insert member. Leave no space between.*/
+                            /*Adjust size and insert member, consider both member size and offset.*/
                             if(cmpd_stack[csindex].first_memb) { /*reclaim the size 1 temporarily set*/
-                                new_size = H5Tget_size(yyvsp[-5].ival);
+                                new_size = H5Tget_size(yyvsp[-6].ival) + yyvsp[-1].ival;
                                 H5Tset_size(dtype_id, new_size);
                                 /*member name is saved in yylval.sval by lexer*/
-                                H5Tinsert(dtype_id, yylval.sval, 0, yyvsp[-5].ival);
+                                H5Tinsert(dtype_id, yyvsp[-3].sval, yyvsp[-1].ival, yyvsp[-6].ival);
 
                                 cmpd_stack[csindex].first_memb = 0;
                             } else {
                                 origin_size = H5Tget_size(dtype_id);
-                                new_size = origin_size + H5Tget_size(yyvsp[-5].ival);
-                                H5Tset_size(dtype_id, new_size);
-                                H5Tinsert(dtype_id, yylval.sval, origin_size, yyvsp[-5].ival);
+                                
+                                if(yyvsp[-1].ival == 0) {
+                                    new_size = origin_size + H5Tget_size(yyvsp[-6].ival);
+                                    H5Tset_size(dtype_id, new_size);
+                                    H5Tinsert(dtype_id, yyvsp[-3].sval, origin_size, yyvsp[-6].ival);
+                                } else {
+                                    new_size = yyvsp[-1].ival + H5Tget_size(yyvsp[-6].ival);
+                                    H5Tset_size(dtype_id, new_size);
+                                    H5Tinsert(dtype_id, yyvsp[-3].sval, yyvsp[-1].ival, yyvsp[-6].ival);
+                                }
                             }
                           
                             cmpd_stack[csindex].is_field = 0;
-                            H5Tclose(yyvsp[-5].ival);
+                            H5Tclose(yyvsp[-6].ival);
                              
                             new_size = H5Tget_size(dtype_id);
                         }
 break;
+case 52:
+#line 182 "H5LTparse.y"
+{
+                            yyval.sval = yylval.sval;
+                        }
+break;
 case 53:
-#line 171 "H5LTparse.y"
-{ asindex++; /*pushd onto the stack*/ }
+#line 187 "H5LTparse.y"
+{ yyval.ival = 0; }
 break;
 case 54:
-#line 173 "H5LTparse.y"
+#line 189 "H5LTparse.y"
+{ yyval.ival = yylval.ival; }
+break;
+case 56:
+#line 193 "H5LTparse.y"
+{ asindex++; /*pushd onto the stack*/ }
+break;
+case 57:
+#line 195 "H5LTparse.y"
 { 
                           yyval.ival = H5Tarray_create(yyvsp[-1].ival, arr_stack[asindex].ndims, arr_stack[asindex].dims, NULL);
                           arr_stack[asindex].ndims = 0;
@@ -816,40 +864,85 @@ case 54:
                           H5Tclose(yyvsp[-1].ival);
                         }
 break;
-case 57:
-#line 183 "H5LTparse.y"
+case 60:
+#line 205 "H5LTparse.y"
 { arr_stack[asindex].is_dim = 1; /*notice lexer of dimension size*/ }
 break;
-case 58:
-#line 184 "H5LTparse.y"
+case 61:
+#line 206 "H5LTparse.y"
 { int ndims = arr_stack[asindex].ndims;
                                   arr_stack[asindex].dims[ndims] = (hsize_t)yylval.ival; 
                                   arr_stack[asindex].ndims++;
                                   arr_stack[asindex].is_dim = 0; 
                                 }
 break;
-case 61:
-#line 195 "H5LTparse.y"
+case 64:
+#line 217 "H5LTparse.y"
 { yyval.ival = H5Tvlen_create(yyvsp[-1].ival); H5Tclose(yyvsp[-1].ival); }
 break;
-case 62:
-#line 200 "H5LTparse.y"
+case 65:
+#line 222 "H5LTparse.y"
 { is_opq_size = 1; }
 break;
-case 63:
-#line 201 "H5LTparse.y"
+case 66:
+#line 223 "H5LTparse.y"
 {   
                                 size_t size = (size_t)yylval.ival;
                                 yyval.ival = H5Tcreate(H5T_OPAQUE, size);
                                 is_opq_size = 0;    
                             }
 break;
-case 64:
-#line 206 "H5LTparse.y"
-{ yyval.ival = yyvsp[-1].ival; }
+case 67:
+#line 228 "H5LTparse.y"
+{ is_opq_tag = 1; }
 break;
-case 66:
-#line 214 "H5LTparse.y"
+case 68:
+#line 229 "H5LTparse.y"
+{  
+                                H5Tset_tag(yyvsp[-6].ival, yylval.sval);
+                                is_opq_tag = 0;
+                            }
+break;
+case 69:
+#line 233 "H5LTparse.y"
+{ yyval.ival = yyvsp[-8].ival; }
+break;
+case 72:
+#line 241 "H5LTparse.y"
+{ is_str_size = 1; }
+break;
+case 73:
+#line 242 "H5LTparse.y"
+{  
+                                if(yyvsp[-1].ival == H5T_VARIABLE_TOKEN)
+                                    is_variable = 1;
+                                else 
+                                    str_size = yylval.ival;
+                                is_str_size = 0; 
+                            }
+break;
+case 74:
+#line 250 "H5LTparse.y"
+{
+                                if(yyvsp[-1].ival == H5T_STR_NULLTERM_TOKEN)
+                                    str_pad = H5T_STR_NULLTERM;
+                                else if(yyvsp[-1].ival == H5T_STR_NULLPAD_TOKEN)
+                                    str_pad = H5T_STR_NULLPAD;
+                                else if(yyvsp[-1].ival == H5T_STR_SPACEPAD_TOKEN)
+                                    str_pad = H5T_STR_SPACEPAD;
+                            }
+break;
+case 75:
+#line 259 "H5LTparse.y"
+{  
+                                if(yyvsp[-1].ival == H5T_CSET_ASCII_TOKEN)
+                                    str_cset = H5T_CSET_ASCII;
+                                else if(yyvsp[-1].ival == H5T_CSET_UTF8_TOKEN)
+                                    str_cset = H5T_CSET_UTF8;
+                            }
+break;
+case 76:
+#line 266 "H5LTparse.y"
 {
                                 if(yyvsp[-1].ival == H5T_C_S1_TOKEN)
                                     yyval.ival = H5Tcopy(H5T_C_S1);
@@ -857,87 +950,74 @@ case 66:
                                     yyval.ival = H5Tcopy(H5T_FORTRAN_S1);
                             }
 break;
-case 67:
-#line 220 "H5LTparse.y"
-{ is_str_size = 1; }
-break;
-case 68:
-#line 221 "H5LTparse.y"
-{  
-                                if(yyvsp[-1].ival == H5T_VARIABLE_TOKEN)
-                                    H5Tset_size(yyvsp[-4].ival, H5T_VARIABLE);
-                                else 
-                                    H5Tset_size(yyvsp[-4].ival, yylval.ival);
-                                is_str_size = 0; 
-                            }
-break;
-case 69:
-#line 229 "H5LTparse.y"
-{
-                                if(yyvsp[-1].ival == H5T_STR_NULLTERM_TOKEN)
-                                    H5Tset_strpad(yyvsp[-8].ival, H5T_STR_NULLTERM);
-                                else if(yyvsp[-1].ival == H5T_STR_NULLPAD_TOKEN)
-                                    H5Tset_strpad(yyvsp[-8].ival, H5T_STR_NULLPAD);
-                                else if(yyvsp[-1].ival == H5T_STR_SPACEPAD_TOKEN)
-                                    H5Tset_strpad(yyvsp[-8].ival, H5T_STR_SPACEPAD);
-                            }
-break;
-case 70:
-#line 238 "H5LTparse.y"
-{  
-                                if(yyvsp[-1].ival == H5T_CSET_ASCII_TOKEN)
-                                    H5Tset_cset(yyvsp[-12].ival, H5T_CSET_ASCII);
-                            }
-break;
-case 71:
-#line 242 "H5LTparse.y"
-{ yyval.ival = yyvsp[-14].ival; }
-break;
-case 72:
-#line 245 "H5LTparse.y"
-{yyval.ival = H5T_VARIABLE_TOKEN;}
-break;
-case 74:
-#line 248 "H5LTparse.y"
-{yyval.ival = H5T_STR_NULLTERM_TOKEN;}
-break;
-case 75:
-#line 249 "H5LTparse.y"
-{yyval.ival = H5T_STR_NULLPAD_TOKEN;}
-break;
-case 76:
-#line 250 "H5LTparse.y"
-{yyval.ival = H5T_STR_SPACEPAD_TOKEN;}
-break;
 case 77:
-#line 252 "H5LTparse.y"
-{yyval.ival = H5T_CSET_ASCII_TOKEN;}
+#line 273 "H5LTparse.y"
+{   
+                                hid_t str_id = yyvsp[-1].ival;
+
+                                /*set string size*/
+                                if(is_variable) {
+                                    H5Tset_size(str_id, H5T_VARIABLE);
+                                    is_variable = 0;
+                                } else
+                                    H5Tset_size(str_id, str_size);
+                                
+                                /*set string padding and character set*/
+                                H5Tset_strpad(str_id, str_pad);
+                                H5Tset_cset(str_id, str_cset);
+
+                                yyval.ival = str_id; 
+                            }
 break;
 case 78:
-#line 254 "H5LTparse.y"
-{yyval.ival = H5T_C_S1_TOKEN;}
-break;
-case 79:
-#line 255 "H5LTparse.y"
-{yyval.ival = H5T_FORTRAN_S1_TOKEN;}
+#line 290 "H5LTparse.y"
+{yyval.ival = H5T_VARIABLE_TOKEN;}
 break;
 case 80:
-#line 259 "H5LTparse.y"
-{ is_enum = 1; enum_id = H5Tenum_create(yyvsp[-1].ival); H5Tclose(yyvsp[-1].ival); }
+#line 293 "H5LTparse.y"
+{yyval.ival = H5T_STR_NULLTERM_TOKEN;}
 break;
 case 81:
-#line 261 "H5LTparse.y"
-{ is_enum = 0; /*reset*/ yyval.ival = enum_id; }
+#line 294 "H5LTparse.y"
+{yyval.ival = H5T_STR_NULLPAD_TOKEN;}
+break;
+case 82:
+#line 295 "H5LTparse.y"
+{yyval.ival = H5T_STR_SPACEPAD_TOKEN;}
+break;
+case 83:
+#line 297 "H5LTparse.y"
+{yyval.ival = H5T_CSET_ASCII_TOKEN;}
 break;
 case 84:
-#line 266 "H5LTparse.y"
+#line 298 "H5LTparse.y"
+{yyval.ival = H5T_CSET_UTF8_TOKEN;}
+break;
+case 85:
+#line 300 "H5LTparse.y"
+{yyval.ival = H5T_C_S1_TOKEN;}
+break;
+case 86:
+#line 301 "H5LTparse.y"
+{yyval.ival = H5T_FORTRAN_S1_TOKEN;}
+break;
+case 87:
+#line 305 "H5LTparse.y"
+{ is_enum = 1; enum_id = H5Tenum_create(yyvsp[-1].ival); H5Tclose(yyvsp[-1].ival); }
+break;
+case 88:
+#line 307 "H5LTparse.y"
+{ is_enum = 0; /*reset*/ yyval.ival = enum_id; }
+break;
+case 91:
+#line 312 "H5LTparse.y"
 {
                                                 is_enum_memb = 1; /*indicate member of enum*/
                                                 enum_memb_symbol = strdup(yylval.sval); 
                                             }
 break;
-case 85:
-#line 271 "H5LTparse.y"
+case 92:
+#line 317 "H5LTparse.y"
 {
                                 int memb_val;
                                 if(is_enum && is_enum_memb) { /*if it's an enum member*/
@@ -947,7 +1027,7 @@ case 85:
                                 }
                             }
 break;
-#line 933 "H5LTparse.c"
+#line 1013 "H5LTparse.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
