@@ -1009,8 +1009,6 @@ test_types(H5File& file)
 int
 main(void)
 {
-    h5_reset(); // in h5test.c, resets the library by closing it
-
     hid_t	fapl_id;
     fapl_id = h5_fileaccess(); // in h5test.c, returns a file access template
 
