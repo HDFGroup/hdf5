@@ -31,12 +31,12 @@ extern char    *h5tools_str_append(h5tools_str_t *str, const char *fmt, ...);
 extern char    *h5tools_str_reset(h5tools_str_t *str);
 extern char    *h5tools_str_trunc(h5tools_str_t *str, size_t size);
 extern char    *h5tools_str_fmt(h5tools_str_t *str, size_t start, const char *fmt);
-extern char    *h5tools_str_prefix(h5tools_str_t *str, const h5dump_t *info,
+extern char    *h5tools_str_prefix(h5tools_str_t *str, const h5tool_format_t *info,
                                    hsize_t elmtno, int ndims, hsize_t min_idx[],
-                                   hsize_t max_idx[],h5tools_context_t *ctx);
-extern int      h5tools_str_dump_region(h5tools_str_t *, hid_t, const h5dump_t *);
-extern void     h5tools_print_char(h5tools_str_t *str, const h5dump_t *info, unsigned char ch);
-extern char    *h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info,
+                                   hsize_t max_idx[], h5tools_context_t *ctx);
+extern int      h5tools_str_dump_region(h5tools_str_t *, hid_t, const h5tool_format_t *);
+extern void     h5tools_print_char(h5tools_str_t *str, const h5tool_format_t *info, unsigned char ch);
+extern char    *h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info,
                                    hid_t container, hid_t type, void *vp,
                                    h5tools_context_t *ctx);
 

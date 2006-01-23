@@ -507,7 +507,7 @@ int do_copy_objects(hid_t fidin,
   default:
    if (options->verbose)
     printf(" %-10s %s\n","User defined object",travt->objs[i].name);
-   break;
+   goto error;
   }
  }
 

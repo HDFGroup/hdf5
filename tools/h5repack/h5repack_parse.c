@@ -133,11 +133,13 @@ obj_list_t* parse_filter(const char *str,
    if ( c=='=') {      /*one more parameter */
     scomp[k]='\0';     /*cut space */
 
-     /*SZIP is a special case , it can be
-      SZIP=8,EC
-      SZIP=8,NN
-      */
-
+/*-------------------------------------------------------------------------
+ * H5Z_FILTER_SZIP
+ * szip has the format SZIP=<pixels per block,coding>
+ * pixels per block is a even number in 2-32 and coding method is 'EC' or 'NN'
+ * example SZIP=8,NN
+ *-------------------------------------------------------------------------
+ */
     if (strcmp(scomp,"SZIP")==0)
     {
      l=-1; /* mask index check */
@@ -181,6 +183,11 @@ obj_list_t* parse_filter(const char *str,
 
      }  /* u */
     } /*if */
+
+/*-------------------------------------------------------------------------
+ * all other filters
+ *-------------------------------------------------------------------------
+ */
 
     else
     {

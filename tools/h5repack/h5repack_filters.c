@@ -147,8 +147,6 @@ int aux_assign_obj(const char* name,            /* object name from traverse lis
 			tmp.nfilters=1;
 			tmp.filter[0]=options->filter_g;
 		}
-
-
 		if (options->all_layout)
 		{
 			/* assign the global layout info to the OBJ info */
@@ -163,10 +161,7 @@ int aux_assign_obj(const char* name,            /* object name from traverse lis
 			default:
 				break;
 			}/*switch*/
-
 		}
-
-
 	}
 
  *obj = tmp;
@@ -199,13 +194,13 @@ int apply_filters(const char* name,    /* object name from traverse list */
                   pack_opt_t *options) /* repack options */
 {
 	int          nfilters;       /* number of filters in DCPL */
- unsigned     aggression;     /* the deflate level */
  hsize_t      nelmts;         /* number of elements in dataset */
  size_t       size;           /* size of datatype in bytes */
  hsize_t      chsize[64];     /* chunk size in elements */
  H5D_layout_t layout;
  int          i;
 	pack_info_t  obj;
+
 
  if (rank==0)
   goto out;
@@ -275,8 +270,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
   }
  }
 
-
-	/*-------------------------------------------------------------------------
+/*-------------------------------------------------------------------------
  * the type of filter and additional parameter
  * type can be one of the filters
  * H5Z_FILTER_NONE       0,  uncompress if compressed
@@ -313,12 +307,16 @@ int apply_filters(const char* name,    /* object name from traverse list */
 				*-------------------------------------------------------------------------
 				*/
 			case H5Z_FILTER_DEFLATE:
-				aggression=obj.filter[i].cd_values[0];
-				/* set up for deflated data */
-				if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
-					return -1;
-				if(H5Pset_deflate(dcpl_id,aggression)<0)
-					return -1;
+				{
+					unsigned     aggression;     /* the deflate level */
+					
+					aggression = obj.filter[i].cd_values[0];
+					/* set up for deflated data */
+					if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
+						return -1;
+					if(H5Pset_deflate(dcpl_id,aggression)<0)
+						return -1;
+				}
 				break;
 
 				/*-------------------------------------------------------------------------

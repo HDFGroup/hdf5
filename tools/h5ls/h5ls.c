@@ -64,7 +64,7 @@ static struct dispatch_t {
     herr_t (*close)(hid_t obj);
     herr_t (*list1)(hid_t obj);
     herr_t (*list2)(hid_t obj, const char *name);
-} dispatch_g[H5G_NTYPES];
+} dispatch_g[H5G_NLIBTYPES];
 
 #define DISPATCH(TYPE,NAME,OPEN,CLOSE,LIST1,LIST2) {         \
     dispatch_g[TYPE].name = (NAME);           \
@@ -1226,7 +1226,7 @@ dump_dataset_values(hid_t dset)
 {
     hid_t  f_type = H5Dget_type(dset);
     size_t  size = H5Tget_size(f_type);
-    h5dump_t  info;
+    h5tool_format_t  info;
     char  string_prefix[64];
     static char         fmt_double[16], fmt_float[16];
 
@@ -1332,7 +1332,7 @@ list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
     size_t need;
     hsize_t     temp_need;
     void *buf;
-    h5dump_t info;
+    h5tool_format_t info;
     H5S_class_t space_type;
 
     printf("    Attribute: ");

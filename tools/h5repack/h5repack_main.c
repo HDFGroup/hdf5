@@ -136,9 +136,12 @@ void usage(void)
  printf("-i input          Input HDF5 File\n");
  printf("-o output         Output HDF5 File\n");
  printf("[-h]              Print usage message\n");
- printf("[-v]              Verbose mode. Print output (list of objects, filters, warnings)\n");
+ printf("[-v]              Verbose mode. Print more output (list of objects,\n");
+ printf("                   filters, warnings)\n");
  printf("[-f 'filter']     Filter type: 'filter' is a string with the format\n");
+ printf("\n");
  printf("     <list of objects> : <name of filter> = <filter parameters>\n");
+ printf("\n");
  printf("     <list of objects> is a comma separated list of object names\n");
  printf("       meaning apply compression only to those objects.\n");
  printf("       if no object names are specified, the filter is applied to all objects\n");
@@ -152,9 +155,13 @@ void usage(void)
  printf("       SHUF (no parameter)\n");
  printf("       FLET (no parameter)\n");
  printf("       GZIP=<deflation level> from 1-9\n");
- printf("       SZIP=<pixels per block,coding> (pixels per block is a even number in 2-32 and coding method is 'EC' or 'NN')\n");
+ printf("       SZIP=<pixels per block,coding>\n");
+ printf("            (pixels per block is a even number in 2-32 and coding method\n");
+ printf("            is 'EC' or 'NN')\n");
  printf("[-l 'layout']     Layout type. 'layout' is a string with the format\n");
+ printf("\n");
  printf("     <list of objects> : <layout type>\n");
+ printf("\n");
  printf("     <list of objects> is a comma separated list of object names,\n");
  printf("       meaning that layout information is supplied for those objects.\n");
  printf("       if no object names are specified, the layout is applied to all objects\n");
@@ -167,8 +174,9 @@ void usage(void)
  printf("       <dim_1 x dim_2 x ... dim_n>\n");
  printf("\n");
  printf("-e file           File with the -f and -l options (only filter and layout flags)\n");
- printf("-m number         Do not apply the filter to objects which size in bytes is smaller than number.\n");
- printf("                  If no size is specified a minimum of 1024 bytes is assumed.\n");
+ printf("-m size           Do not apply the filter to objects which size in bytes\n");
+ printf("                   is smaller than number. If no size is specified a minimum of\n");
+ printf("                   1024 bytes is assumed.\n");
  printf("\n");
  printf("Examples of use:\n");
  printf("\n");
@@ -185,5 +193,4 @@ void usage(void)
  printf("   Applies chunked layout to objects 'dset1' and 'dset2'\n");
  printf("\n");
 }
-
 

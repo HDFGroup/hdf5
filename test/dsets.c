@@ -1306,7 +1306,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     const hsize_t	hs_offset[2] = {FILTER_HS_OFFSET1, FILTER_HS_OFFSET2}; /* Hyperslab offset */
     const hsize_t	hs_size[2] = {FILTER_HS_SIZE1, FILTER_HS_SIZE2};   /* Hyperslab size */
     void		*tconv_buf = NULL;      /* Temporary conversion buffer */
-    int			i, j, n;        /* Local index variables */
+    hsize_t		i, j, n;        /* Local index variables */
     herr_t              status;         /* Error status */
 
     /* Create the data space */
@@ -2161,7 +2161,7 @@ test_missing_filter(hid_t file)
     const hsize_t dims[2] = {DSET_DIM1, DSET_DIM2};         /* Dataspace dimensions */
     const hsize_t chunk_dims[2] = {2, 25};      /* Chunk dimensions */
     hsize_t     dset_size;      /* Dataset size */
-    int	        i,j;            /* Local index variables */
+    hsize_t     i,j;            /* Local index variables */
     herr_t      ret;            /* Generic return value */
     char testfile[512]="";      /* Buffer to hold name of existing test file */
     char *srcdir = HDgetenv("srcdir");    /* The source directory, if we are using the --srcdir configure option */
@@ -2413,7 +2413,7 @@ test_onebyte_shuffle(hid_t file)
     const hsize_t       chunk_size[2] = {10, 20};
     unsigned char       orig_data[10][20];
     unsigned char       new_data[10][20];
-    int	   		i, j;
+    hsize_t		i, j;
 #else /* H5_HAVE_FILTER_SHUFFLE */
     const char		*not_supported= "    Data shuffling is not enabled.";
 #endif /* H5_HAVE_FILTER_SHUFFLE */
@@ -2675,7 +2675,7 @@ test_types(hid_t file)
 
 #ifndef H5_WANT_H5_V1_4_COMPAT
 /* This message derives from H5Z */
-const H5Z_class_t H5Z_CAN_APPLY[1] = {{
+const H5Z_class_t H5Z_CAN_APPLY_TEST[1] = {{
     H5Z_FILTER_BOGUS,		/* Filter id number		*/
     "bogus",			/* Filter name for debugging	*/
     can_apply_bogus,            /* The "can apply" callback     */
@@ -2707,7 +2707,7 @@ test_can_apply(hid_t file)
     const hsize_t dims[2] = {DSET_DIM1, DSET_DIM2};         /* Dataspace dimensions */
     const hsize_t chunk_dims[2] = {2, 25};      /* Chunk dimensions */
     hsize_t     dset_size;      /* Dataset size */
-    int	        i,j;            /* Local index variables */
+    hsize_t     i,j;            /* Local index variables */
 
     TESTING("dataset filter 'can apply' callback");
 
@@ -2722,7 +2722,7 @@ test_can_apply(hid_t file)
         printf("    Line %d: Can't set chunk sizes\n",__LINE__);
         goto error;
     } /* end if */
-    if(H5Zregister (H5Z_CAN_APPLY)<0) {
+    if(H5Zregister (H5Z_CAN_APPLY_TEST)<0) {
         H5_FAILED();
         printf("    Line %d: Can't register 'can apply' filter\n",__LINE__);
         goto error;
@@ -3034,7 +3034,7 @@ error:
 
 #ifndef H5_WANT_H5_V1_4_COMPAT
 /* This message derives from H5Z */
-const H5Z_class_t H5Z_SET_LOCAL[1] = {{
+const H5Z_class_t H5Z_SET_LOCAL_TEST[1] = {{
     H5Z_FILTER_BOGUS2,		/* Filter id number		*/
     "bogus2",			/* Filter name for debugging	*/
     NULL,                       /* The "can apply" callback     */
@@ -3068,7 +3068,7 @@ test_set_local(hid_t fapl)
     const hsize_t chunk_dims[2] = {2, 25};      /* Chunk dimensions */
     hsize_t     dset_size;      /* Dataset size */
     unsigned    cd_values[2]={BOGUS2_PARAM_1, BOGUS2_PARAM_2};   /* Parameters for Bogus2 filter */
-    int	        i,j;          /* Local index variables */
+    hsize_t     i,j;          /* Local index variables */
     double      n;          /* Local index variables */
 
     TESTING("dataset filter 'set local' callback");
@@ -3101,7 +3101,7 @@ test_set_local(hid_t fapl)
         printf("    Line %d: Can't set chunk sizes\n",__LINE__);
         goto error;
     } /* end if */
-    if(H5Zregister (H5Z_SET_LOCAL)<0) {
+    if(H5Zregister (H5Z_SET_LOCAL_TEST)<0) {
         H5_FAILED();
         printf("    Line %d: Can't register 'set local' filter\n",__LINE__);
         goto error;

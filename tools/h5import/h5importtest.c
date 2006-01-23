@@ -11,8 +11,10 @@
  * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include <stdio.h>
-#include <H5private.h>
+#include "H5private.h"
+
 /*
  * Name:
  *      h5importtest
@@ -285,5 +287,4 @@ main(void)
     (void) fclose(sp);
     return (0);
 }
-
 

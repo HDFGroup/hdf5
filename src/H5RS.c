@@ -62,17 +62,17 @@ H5RS_xstrdup(const char *s)
 {
     char *ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5RS_xstrdup);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5RS_xstrdup)
 
-    if (s) {
-        ret_value = H5FL_BLK_MALLOC(str_buf,HDstrlen(s) + 1);
-        assert (ret_value);
+    if(s) {
+        ret_value = (char *)H5FL_BLK_MALLOC(str_buf, HDstrlen(s) + 1);
+        HDassert(ret_value);
         HDstrcpy(ret_value, s);
     } /* end if */
     else
-        ret_value=NULL;
+        ret_value = NULL;
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RS_xstrdup() */
 
 
@@ -147,7 +147,7 @@ H5RS_wrap(const char *s)
         HGOTO_ERROR(H5E_RS,H5E_NOSPACE,NULL,"memory allocation failed");
 
     /* Set the internal fields */
-    ret_value->s=(char*)s;
+    ret_value->s=(char*)s;      /* (Cast away const OK - QAK) */
     ret_value->wrapped=1;
     ret_value->n=1;
 
@@ -160,7 +160,7 @@ done:
  NAME
     H5RS_own
  PURPOSE
-    Transfer ownership of a regular string to  a reference counted string
+    Transfer ownership of a regular string to a reference counted string
  USAGE
     H5RS_str_t *H5RS_own(s)
         const char *s;          IN: String to transfer ownership of
@@ -286,7 +286,7 @@ H5RS_incr(H5RS_str_t *rs)
  PURPOSE
     "Duplicate" a ref-counted string
  USAGE
-    H5RS_str_t H5RS_incr(rs)
+    H5RS_str_t H5RS_dup(rs)
         H5RS_str_t *rs;     IN/OUT: Ref-counted string to "duplicate"
 
  RETURNS

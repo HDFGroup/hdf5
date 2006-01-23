@@ -317,14 +317,11 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, April  2, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_shared_size (const H5F_t *f, const void *_mesg)
+H5O_shared_size (const H5F_t *f, const void UNUSED *_mesg)
 {
-    const H5O_shared_t  *shared = (const H5O_shared_t *) _mesg;
     size_t	ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_shared_size);

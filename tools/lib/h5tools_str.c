@@ -24,7 +24,7 @@
 #include <string.h>
 
 #include "H5private.h"
-#include "h5tools.h"            /*for h5dump_t structure    */
+#include "h5tools.h"            /*for h5tool_format_t structure    */
 #include "h5tools_ref.h"
 #include "h5tools_str.h"        /*function prototypes       */
 
@@ -308,7 +308,7 @@ h5tools_str_fmt(h5tools_str_t *str/*in,out*/, size_t start, const char *fmt)
  *-------------------------------------------------------------------------
  */
 char *
-h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5dump_t *info,
+h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
                    hsize_t elmtno, int ndims, hsize_t min_idx[],
                    hsize_t max_idx[], h5tools_context_t *ctx)
 {
@@ -368,7 +368,7 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5dump_t *info,
  *-------------------------------------------------------------------------
  */
 int
-h5tools_str_dump_region(h5tools_str_t *str, hid_t region, const h5dump_t *info)
+h5tools_str_dump_region(h5tools_str_t *str, hid_t region, const h5tool_format_t *info)
 {
     hssize_t	nblocks, npoints;
     hsize_t     alloc_size;
@@ -465,7 +465,7 @@ h5tools_str_dump_region(h5tools_str_t *str, hid_t region, const h5dump_t *info)
  *-------------------------------------------------------------------------
  */
 void
-h5tools_print_char(h5tools_str_t *str, const h5dump_t *info, unsigned char ch)
+h5tools_print_char(h5tools_str_t *str, const h5tool_format_t *info, unsigned char ch)
 {
     if (info->str_locale == ESCAPE_HTML) {
         if (ch <= ' ' || ch > '~')
@@ -568,7 +568,7 @@ h5tools_print_char(h5tools_str_t *str, const h5dump_t *info, unsigned char ch)
  *-------------------------------------------------------------------------
  */
 char *
-h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
+h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t container,
                    hid_t type, void *vp, h5tools_context_t *ctx)
 {
     size_t         n, offset, size=0, nelmts, start;
@@ -864,7 +864,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
             /* Print object type and close object */
             switch (otype) {
                 case H5G_GROUP:
-                    h5tools_str_append(str, GROUPNAME);
+                    h5tools_str_append(str, GROUP);
                     H5Gclose(obj);
                     break;
                 case H5G_DATASET:

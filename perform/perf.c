@@ -460,7 +460,7 @@ double Wtime()
 #else /* H5_HAVE_PARALLEL */
 /* dummy program since H5_HAVE_PARALLE is not configured in */
 int
-main()
+main(int UNUSED argc, char UNUSED **argv)
 {
 printf("No parallel performance because parallel is not configured in\n");
 return(0);

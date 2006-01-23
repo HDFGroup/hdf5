@@ -15,6 +15,7 @@
 #include "hdf5.h"
 #include "h5test.h"
 #include "h5repack.h"
+#include "testh5repack.h"
 
 #define DIM1  40
 #define DIM2  20
@@ -896,7 +897,7 @@ int make_layout(hid_t loc_id)
  hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
  int      buf[DIM1][DIM2];
  int      i, j, n;
- char     name[5];
+ char     name[6];
 
 
  for (i=n=0; i<DIM1; i++){

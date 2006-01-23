@@ -18,6 +18,9 @@
  *
  */
 
+#ifndef H5IMPORT_H__
+#define H5IMPORT_H__
+
 /*
  * state table tokens
  */
@@ -220,3 +223,6 @@ hid_t       createInputDataType(struct Input *in);
 static int  readUIntegerData(FILE **strm, struct Input *in);
 static int  allocateUIntegerStorage(struct Input *in);
 static int  validateConfigurationParameters(struct Input * in);
+
+#endif  /* H5IMPORT_H__ */
+

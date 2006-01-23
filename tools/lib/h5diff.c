@@ -391,10 +391,10 @@ hsize_t diff_compare( hid_t file1_id,
  *
  * Purpose: switch between types and choose the diff function
  * TYPE is either
- *  H5G_LINK     Object is a symbolic link
  *  H5G_GROUP		  Object is a group
  *  H5G_DATASET 	Object is a dataset
  *  H5G_TYPE     Object is a named data type
+ *  H5G_LINK     Object is a symbolic link
  *
  * Return: Number of differences found
  *
@@ -405,33 +405,32 @@ hsize_t diff_compare( hid_t file1_id,
  *-------------------------------------------------------------------------
  */
 
-hsize_t diff( hid_t      file1_id,
-              const char *path1,
-              hid_t      file2_id,
-              const char *path2,
-              diff_opt_t *options,
-              H5G_obj_t1  type )
+hsize_t
+diff (hid_t file1_id,
+      const char *path1,
+      hid_t file2_id, const char *path2, diff_opt_t * options, H5G_obj_t type)
 {
- hid_t       type1_id=(-1);
- hid_t       type2_id=(-1);
- hid_t       grp1_id=(-1);
- hid_t       grp2_id=(-1);
- int         ret;
- H5G_stat_t  sb1;
- H5G_stat_t  sb2;
- char        *buf1=NULL;
- char        *buf2=NULL;
- hsize_t     nfound=0;
+    hid_t       type1_id=(-1);
+    hid_t       type2_id=(-1);
+    hid_t       grp1_id=(-1);
+    hid_t       grp2_id=(-1);
+    int ret;
+    H5G_stat_t sb1;
+    H5G_stat_t sb2;
+    hsize_t nfound = 0;
 
- switch ( type )
- {
-/*-------------------------------------------------------------------------
- * H5G_DATASET
- *-------------------------------------------------------------------------
- */
- case H5G_DATASET:
+    switch (type)
+    {
+ /*-------------------------------------------------------------------------
+  * H5G_DATASET
+  *-------------------------------------------------------------------------
+  */
+    case H5G_DATASET:
 
-  /* always print name */
+ /*-------------------------------------------------------------------------
+  * verbose, always print name
+  *-------------------------------------------------------------------------
+  */
   if (options->m_verbose)
   {
    if (print_objname(options,(hsize_t)1))
@@ -538,42 +537,38 @@ hsize_t diff( hid_t      file1_id,
  *-------------------------------------------------------------------------
  */
  case H5G_LINK:
-  if (H5Gget_objinfo(file1_id,path1,FALSE,&sb1)<0)
-   goto out;
-  if (H5Gget_objinfo(file1_id,path1,FALSE,&sb2)<0)
-   goto out;
+ {
+    char *buf1 = NULL;
+    char *buf2 = NULL;
 
-  buf1 = malloc(sb1.linklen);
-  buf2 = malloc(sb2.linklen);
+    if (H5Gget_objinfo (file1_id, path1, FALSE, &sb1) < 0)
+        goto out;
+    if (H5Gget_objinfo (file1_id, path1, FALSE, &sb2) < 0)
+        goto out;
 
-  if (H5Gget_linkval(file1_id,path1,sb1.linklen,buf1)<0)
-   goto out;
-  if (H5Gget_linkval(file2_id,path2,sb1.linklen,buf2)<0)
-   goto out;
+     buf1 = HDmalloc (sb1.linklen);
+     buf2 = HDmalloc (sb2.linklen);
 
-  ret = HDstrcmp(buf1,buf2);
+     if (H5Gget_linkval (file1_id, path1, sb1.linklen, buf1) < 0)
+        goto out;
+     if (H5Gget_linkval (file2_id, path2, sb1.linklen, buf2) < 0)
+        goto out;
 
-  /* if "buf1" != "buf2" then the links are "different" */
-  nfound = (ret!=0) ? 1 : 0;
+     ret = HDstrcmp (buf1, buf2);
 
-  if (print_objname(options,nfound))
-   printf( "Link:        <%s> and <%s>\n",path1,path2);
+     /* if "buf1" != "buf2" then the links are "different" */
+     nfound = (ret != 0) ? 1 : 0;
 
-  if (buf1) {
-   free(buf1);
-   buf1=NULL;
-  }
+     if (print_objname (options, nfound))
+         printf( "Link:        <%s> and <%s>\n",path1,path2);
 
-  if (buf2) {
-   free(buf2);
-   buf2=NULL;
-  }
-
-  break;
-
+      HDfree (buf1);
+      HDfree (buf2);
+ }
+     break;
 
  default:
-  nfound=0;
+  nfound = 0;
   if (options->m_verbose) {
    printf("Comparison not supported: <%s> and <%s> are of type %s\n",
     path1, path2, get_type(type) );
@@ -583,27 +578,21 @@ hsize_t diff( hid_t      file1_id,
  }
 
 
- out:
+out:
 
- /* close */
- /* disable error reporting */
- H5E_BEGIN_TRY {
-  H5Tclose(type1_id);
-  H5Tclose(type2_id);
-  H5Gclose(grp1_id);
-  H5Tclose(grp2_id);
-   /* enable error reporting */
- } H5E_END_TRY;
+    /* close */
+    /* disable error reporting */
+    H5E_BEGIN_TRY
+    {
+ H5Tclose (type1_id);
+ H5Tclose (type2_id);
+ H5Gclose (grp1_id);
+ H5Tclose (grp2_id);
+ /* enable error reporting */
+    }
+    H5E_END_TRY;
 
- if (buf1)
-  free(buf1);
- if (buf2)
-  free(buf2);
-
- return nfound;
+    return nfound;
 }
-
-
-
 
 
