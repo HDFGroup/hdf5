@@ -137,9 +137,9 @@ obj_list_t* parse_filter(const char *str,
 
 /*-------------------------------------------------------------------------
  * H5Z_FILTER_SZIP
-	* szip has the format SZIP=<pixels per block,coding>
+ * szip has the format SZIP=<pixels per block,coding>
  * pixels per block is a even number in 2-32 and coding method is 'EC' or 'NN'
-	* example SZIP=8,NN
+ * example SZIP=8,NN
  *-------------------------------------------------------------------------
  */
     if (strcmp(scomp,"SZIP")==0)
@@ -171,9 +171,9 @@ obj_list_t* parse_filter(const char *str,
         i=len-1; /* end */
         (*n_objs)--; /* we counted an extra ',' */
         if (strcmp(smask,"NN")==0)
-									filt->cd_values[j++]=H5_SZIP_NN_OPTION_MASK;
+         filt->cd_values[j++]=H5_SZIP_NN_OPTION_MASK;
         else if (strcmp(smask,"EC")==0)
-									filt->cd_values[j++]=H5_SZIP_EC_OPTION_MASK;
+         filt->cd_values[j++]=H5_SZIP_EC_OPTION_MASK;
         else
         {
          printf("Input Error: szip mask must be 'NN' or 'EC' \n");

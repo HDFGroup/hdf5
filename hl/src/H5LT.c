@@ -2110,8 +2110,8 @@ print_enum(hid_t type, char* str, int indt)
     dst_size = H5Tget_size(native);
     
     /* Get the names and raw values of all members */
-    name = (char**)calloc(nmembs, sizeof(char *));
-    value = (unsigned char*)calloc(nmembs, MAX(dst_size, super_size));
+    name = (char**)calloc((size_t)nmembs, sizeof(char *));
+    value = (unsigned char*)calloc((size_t)nmembs, MAX(dst_size, super_size));
 
     for (i = 0; i < nmembs; i++) {
 	if((name[i] = H5Tget_member_name(type, i))==NULL)

@@ -472,7 +472,6 @@ test_attr_plist(void)
     hid_t		sid1,sid2;      /* Dataspace ID			*/
     hid_t		attr;	        /* Attribute ID		*/
     hid_t               plist;          /* Property list ID             */
-    char                *attr_name=NULL; /* name of attribute        */
     hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t		dims2[] = {ATTR1_DIM1};
     H5T_cset_t          cset;           /* Character set for attributes */

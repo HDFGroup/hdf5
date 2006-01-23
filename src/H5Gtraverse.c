@@ -416,9 +416,8 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
 
             /* Set the object location, if it's a hard link set the address also */
             obj_loc.oloc->file = grp_loc.oloc->file;
-            if(lnk.type == H5G_LINK_HARD) {
+            if(lnk.type == H5G_LINK_HARD)
                 obj_loc.oloc->addr = lnk.u.hard.addr;
-            } /* end if */
             obj_loc_valid = TRUE;
 
             /*

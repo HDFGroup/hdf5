@@ -1504,7 +1504,7 @@ test_unlink_rightleaf(hid_t fid)
         ngroups = 150;  /* Number of groups to create */
     char name[256];     /* Name of object to create */
 
-    TESTING("Deleting right-most child in non-leaf B-tree node");
+    TESTING("deleting right-most child in non-leaf B-tree node");
 
     /* Allocate space for the group IDs */
     gids = (hid_t *) HDmalloc (ngroups * sizeof(hid_t));
@@ -1568,7 +1568,7 @@ test_unlink_rightnode(hid_t fid)
         ngroups = 150;  /* Number of groups to create */
     char name[256];     /* Name of object to create */
 
-    TESTING("Deleting right-most child in non-leaf B-tree node");
+    TESTING("deleting right-most child in non-leaf B-tree node");
 
     /* Allocate space for the group IDs */
     gids = (hid_t *) HDmalloc (ngroups * sizeof(hid_t));
@@ -1632,7 +1632,7 @@ test_unlink_middlenode(hid_t fid)
         ngroups = 250;  /* Number of groups to create */
     char name[256];     /* Name of object to create */
 
-    TESTING("Deleting right-most child in non-leaf B-tree node");
+    TESTING("deleting right-most child in non-leaf B-tree node");
 
     /* Allocate space for the group IDs */
     gids = (hid_t *) HDmalloc (ngroups * sizeof(hid_t));
@@ -1836,7 +1836,7 @@ test_resurrect_dataset(void)
     hid_t       f=-1, s=-1, d=-1, fapl=-1;
     char	filename[1024];
 
-    TESTING("Resurrecting dataset after deletion");
+    TESTING("resurrecting dataset after deletion");
 
     /* Create file */
     fapl = h5_fileaccess();
@@ -1910,7 +1910,7 @@ test_resurrect_datatype(void)
     hid_t       file=-1, type=-1, fapl=-1;
     char        filename[1024];
 
-    TESTING("Resurrecting datatype after deletion");
+    TESTING("resurrecting datatype after deletion");
 
     /* Create file */
     fapl = h5_fileaccess();
@@ -1980,7 +1980,7 @@ test_resurrect_group(void)
     hid_t       file=-1, group=-1, fapl=-1;
     char        filename[1024];
 
-    TESTING("Resurrecting group after deletion");
+    TESTING("resurrecting group after deletion");
 
     /* Create file */
     fapl = h5_fileaccess();
@@ -2055,11 +2055,11 @@ test_unlink_chunked_dataset(void)
     hsize_t chunk_dims[FILESPACE_NDIMS]={FILESPACE_CHUNK0,FILESPACE_CHUNK1,FILESPACE_CHUNK2};
     char filename[1024];
 
-    TESTING("Unlinking chunked dataset");
+    TESTING("unlinking chunked dataset");
 
     /* Create file */
     fapl_id = h5_fileaccess();
-    h5_fixname(FILENAME[7], fapl_id, filename, sizeof filename);
+    h5_fixname(FILENAME[9], fapl_id, filename, sizeof filename);
 
     /* Create the file */
     if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id))<0) TEST_ERROR;
@@ -2092,7 +2092,7 @@ test_unlink_chunked_dataset(void)
     if(H5Fclose(file_id)<0) TEST_ERROR;
 
     /* Re-open the file */
-    if((file_id = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT))<0) TEST_ERROR;
+    if((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id))<0) TEST_ERROR;
 
     /* Delete the dataset */
     if(H5Gunlink(file_id, DATASETNAME)<0) TEST_ERROR;

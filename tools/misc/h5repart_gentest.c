@@ -29,7 +29,7 @@
 
 int main(void)
 {
-    hid_t       file=(-1), fapl, fapl2=(-1), space=(-1), dset=(-1);
+    hid_t       file=(-1), fapl, space=(-1), dset=(-1);
     char        dname[]="dataset";
     int         i, j;
     int         buf[FAMILY_NUMBER][FAMILY_SIZE];

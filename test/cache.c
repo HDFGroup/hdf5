@@ -1917,7 +1917,7 @@ static void
 insert_entry(H5C_t * cache_ptr,
              int32_t type,
              int32_t idx,
-             hbool_t dirty,
+             hbool_t UNUSED dirty,
              unsigned int flags)
 {
     herr_t result;

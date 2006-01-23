@@ -4664,7 +4664,7 @@ static void gent_filters(void)
  assert(ret>=0);
 
  /* set the scaleoffset filter */
- ret=H5Pset_scaleoffset(dcpl,H5Z_SO_INT,H5Tget_size(H5T_NATIVE_INT));
+ ret=H5Pset_scaleoffset(dcpl,H5Z_SO_INT,(int)H5Tget_size(H5T_NATIVE_INT));
  assert(ret>=0);
 
  ret=make_dset(fid,"scaleoffset",sid,H5T_NATIVE_INT,dcpl,buf1);

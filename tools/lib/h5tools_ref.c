@@ -156,17 +156,26 @@ haddr_t
 ref_path_table_lookup(const char *thepath)
 {
     H5G_stat_t  sb;
-    haddr_t     ret_value;
 
-    /* Get object ID for object at path */
-    if(H5Gget_objinfo(thefile, thepath, TRUE, &sb)<0)
-	/*  fatal error ? */
+    /* Check for external link first, so we don't return the OID of an object in another file */
+    if(H5Gget_objinfo(thefile, thepath, FALSE, &sb)<0)
 	return HADDR_UNDEF;
+    if(sb.type == H5G_LINK) {
+        /* Get object ID for object at path */
+        /* (If the object is not a soft link, we've already retrieved the
+         *      correct information and don't have to perform this call. -QAK
+         */
+        if(H5Gget_objinfo(thefile, thepath, TRUE, &sb)<0)
+            /*  fatal error ? */
+            return HADDR_UNDEF;
+    } /* end if */
 
-    /* Return OID or HADDR_UNDEF */
-    ret_value = ref_path_table_find(sb.u.obj.objno) ? sb.u.obj.objno : HADDR_UNDEF;
 
-    return(ret_value);
+    /* All existing objects in the file had better be in the table */
+    HDassert(ref_path_table_find(sb.u.obj.objno));
+
+    /* Return OID */
+    return(sb.u.obj.objno);
 }
 
 /*-------------------------------------------------------------------------

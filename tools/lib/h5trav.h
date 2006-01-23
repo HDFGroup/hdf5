@@ -17,19 +17,14 @@
 
 #include "hdf5.h"
 
-#if 0
-#define H5_TRAV_DEBUG
-#endif
-
-
 /*-------------------------------------------------------------------------
  * public struct to store name and type of an object
  * the TYPE can be:
  *    H5G_UNKNOWN = -1,
- *    H5G_LINK,		        Object is a symbolic link
  *    H5G_GROUP,		    Object is a group
  *    H5G_DATASET,		    Object is a dataset
  *    H5G_TYPE,			    Object is a named data type
+ *    H5G_LINK,		            Object is a symbolic link
  *-------------------------------------------------------------------------
  */
 

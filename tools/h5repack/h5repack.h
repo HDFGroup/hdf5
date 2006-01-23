@@ -16,7 +16,6 @@
 #ifndef H5REPACK_H__
 #define H5REPACK_H__
 
-#include <string.h>
 #include "hdf5.h"
 #include "h5trav.h"
 #include "h5diff.h"
@@ -44,11 +43,11 @@ typedef struct {
  the type of filter and additional parameter
  type can be one of the filters
  H5Z_FILTER_NONE        0,  uncompress if compressed
- H5Z_FILTER_DEFLATE	    1 , deflation like gzip
+ H5Z_FILTER_DEFLATE     1 , deflation like gzip
  H5Z_FILTER_SHUFFLE     2 , shuffle the data
  H5Z_FILTER_FLETCHER32  3 , letcher32 checksum of EDC
  H5Z_FILTER_SZIP        4 , szip compression
-	H5Z_FILTER_NBIT        5 , nbit compression              
+ H5Z_FILTER_NBIT        5 , nbit compression              
  H5Z_FILTER_SCALEOFFSET 6 , scaleoffset compression      
 */
 
@@ -244,82 +243,7 @@ obj_list_t* parse_layout(const char *str,
 const char* get_sfilter (H5Z_filter_t filtn);
 int         parse_number(char *str);
 
-/*-------------------------------------------------------------------------
- * tests
- *-------------------------------------------------------------------------
- */
-
-#define FNAME0     "test0.h5"
-#define FNAME0OUT  "test0out.h5"
-#define FNAME1     "test1.h5"
-#define FNAME1OUT  "test1out.h5"
-#define FNAME2     "test2.h5"
-#define FNAME2OUT  "test2out.h5"
-#define FNAME3     "test3.h5"
-#define FNAME3OUT  "test3out.h5"
-#define FNAME4     "test4.h5"
-#define FNAME4OUT  "test4out.h5"
-#define FNAME5     "test5.h5"
-#define FNAME5OUT  "test5out.h5"
-#define FNAME6     "test6.h5"
-#define FNAME7     "test_szip.h5"
-#define FNAME8     "test_deflate.h5"
-#define FNAME9     "test_shuffle.h5"
-#define FNAME10    "test_fletcher32.h5"
-#define FNAME11    "test_all.h5"
-#define FNAME7OUT  "test_szipout.h5"
-#define FNAME8OUT  "test_deflateout.h5"
-#define FNAME9OUT  "test_shuffleout.h5"
-#define FNAME10OUT "test_fletcher32out.h5"
-#define FNAME11OUT "test_allout.h5"
-#define FNAME12    "test_nbit.h5"
-#define FNAME12OUT "test_nbitout.h5"
-#define FNAME13    "test_scaleoffset.h5"
-#define FNAME13OUT "test_scaleoffsetout.h5"
-
-int make_testfiles(void);
-
-int write_dset( hid_t loc_id,
-                int rank,
-                hsize_t *dims,
-                const char *dset_name,
-                hid_t type_id,
-                void *buf );
-int write_attr(hid_t loc_id,
-               int rank,
-               hsize_t *dims,
-               const char *attr_name,
-               hid_t type_id,
-               void *buf);
-void write_attr_in(hid_t loc_id,
-                   const char* dset_name, /* for saving reference to dataset*/
-                   hid_t fid, /* for reference create */
-                   int make_diffs /* flag to modify data buffers */);
-void write_dset_in(hid_t loc_id,
-                   const char* dset_name, /* for saving reference to dataset*/
-                   hid_t file_id,
-                   int make_diffs /* flag to modify data buffers */);
-
-
-
-/*-------------------------------------------------------------------------
- * tests utils
- *-------------------------------------------------------------------------
- */
-int make_dset(hid_t loc_id,
-              const char *name,
-              hid_t sid,
-              hid_t dcpl,
-              void *buf);
-
-int make_attr(hid_t loc_id,
-               int rank,
-               hsize_t *dims,
-               const char *attr_name,
-               hid_t type_id,
-               void *buf);
-
-
 
 
 #endif  /* H5REPACK_H__ */
+

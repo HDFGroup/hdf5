@@ -520,10 +520,6 @@ print_results(int nd, detected_t *d, int na, malign_t *misc_align)
 #include \"H5FLprivate.h\"\n\
 #include \"H5Tpkg.h\"\n\
 \n\
-/* Declare external the free lists for H5T_t's and H5T_shared_t's */\n\
-H5FL_EXTERN(H5T_t);\n\
-H5FL_EXTERN(H5T_shared_t);\n\
-\n\
 \n");
 
     /* The interface initialization function */

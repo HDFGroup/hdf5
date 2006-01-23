@@ -161,35 +161,31 @@ static void print_incoming_data(void)
  *
  * Date: October 22, 2003
  *
- * Modifications: Jan 2005 Leon Arber, larber@uiuc.edu
- *    Added support for parallel diffing
- *
  *-------------------------------------------------------------------------
  */
 
-hsize_t
-h5diff (const char *fname1,
- const char *fname2,
- const char *objname1, const char *objname2, diff_opt_t * options)
+hsize_t h5diff(const char *fname1,
+               const char *fname2,
+               const char *objname1,
+               const char *objname2,
+               diff_opt_t *options)
 {
   int nobjects1, nobjects2;
   trav_info_t *info1 = NULL;
   trav_info_t *info2 = NULL;
   hid_t        file1_id=(-1), file2_id=(-1);
-  char filenames[2][1024];
-  hsize_t nfound = 0;
-  int not_cmp = 0;
+  char         filenames[2][1024];
+  hsize_t      nfound = 0;
 
   memset(filenames, 0, 1024*2);
 
-
-  if (options->m_quiet && (options->m_verbose || options->m_report))
-    {
-      printf
- ("Error: -q (quiet mode) cannot be added to verbose or report modes\n");
-      options->err_stat = 1;
-      return 0;
-    }
+ if (options->m_quiet &&
+     (options->m_verbose || options->m_report))
+ {
+  printf("Error: -q (quiet mode) cannot be added to verbose or report modes\n");
+  options->err_stat=1;
+  return 0;
+ }
 
 /*-------------------------------------------------------------------------
  * open the files first; if they are not valid, no point in continuing
@@ -256,8 +252,6 @@ h5diff (const char *fname1,
       goto out;
     }
 
- 
-
 /*-------------------------------------------------------------------------
  * get the list of objects in the files
  *-------------------------------------------------------------------------
@@ -269,10 +263,8 @@ h5diff (const char *fname1,
     {
       printf ("Error: Not enough memory for object list\n");
       options->err_stat = 1;
-      if (info1)
- h5trav_freeinfo (info1, nobjects1);
-      if (info2)
- h5trav_freeinfo (info2, nobjects1);
+      if (info1) h5trav_freeinfo (info1, nobjects1);
+      if (info2) h5trav_freeinfo (info2, nobjects1);
 #ifdef H5_HAVE_PARALLEL
  if(g_Parallel)
  {
@@ -875,10 +867,10 @@ diff_compare (hid_t file1_id,
  *
  * Purpose: switch between types and choose the diff function
  * TYPE is either
- *  H5G_LINK     Object is a symbolic link
  *  H5G_GROUP    Object is a group
  *  H5G_DATASET  Object is a dataset
  *  H5G_TYPE     Object is a named data type
+ *  H5G_LINK     Object is a symbolic link
  *
  * Return: Number of differences found
  *
@@ -901,8 +893,6 @@ diff (hid_t file1_id,
     int ret;
     H5G_stat_t sb1;
     H5G_stat_t sb2;
-    char *buf1 = NULL;
-    char *buf2 = NULL;
     hsize_t nfound = 0;
 
     switch (type)
@@ -1042,18 +1032,22 @@ diff (hid_t file1_id,
       *-------------------------------------------------------------------------
       */
  case H5G_LINK:
-     if (H5Gget_objinfo (file1_id, path1, FALSE, &sb1) < 0)
-  goto out;
-     if (H5Gget_objinfo (file1_id, path1, FALSE, &sb2) < 0)
-  goto out;
+ {
+    char *buf1 = NULL;
+    char *buf2 = NULL;
 
-     buf1 = malloc (sb1.u.slink.linklen);
-     buf2 = malloc (sb2.u.slink.linklen);
+    if (H5Gget_objinfo (file1_id, path1, FALSE, &sb1) < 0)
+        goto out;
+    if (H5Gget_objinfo (file1_id, path1, FALSE, &sb2) < 0)
+        goto out;
+
+     buf1 = HDmalloc (sb1.u.slink.linklen);
+     buf2 = HDmalloc (sb2.u.slink.linklen);
 
      if (H5Gget_linkval (file1_id, path1, sb1.u.slink.linklen, buf1) < 0)
-  goto out;
+        goto out;
      if (H5Gget_linkval (file2_id, path2, sb1.u.slink.linklen, buf2) < 0)
-  goto out;
+        goto out;
 
      ret = HDstrcmp (buf1, buf2);
 
@@ -1061,22 +1055,12 @@ diff (hid_t file1_id,
      nfound = (ret != 0) ? 1 : 0;
 
      if (print_objname (options, nfound))
-  parallel_print("Link:        <%s> and <%s>\n", path1, path2);
+          parallel_print("Soft Link:        <%s> and <%s>\n", path1, path2);
 
-     if (buf1)
-     {
-  free (buf1);
-  buf1 = NULL;
-     }
-
-     if (buf2)
-     {
-  free (buf2);
-  buf2 = NULL;
-     }
-
+      HDfree (buf1);
+      HDfree (buf2);
+ }
      break;
-
 
  default:
      nfound = 0;
@@ -1104,11 +1088,6 @@ out:
  /* enable error reporting */
     }
     H5E_END_TRY;
-
-    if (buf1)
- free (buf1);
-    if (buf2)
- free (buf2);
 
     return nfound;
 }

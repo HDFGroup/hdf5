@@ -26,13 +26,13 @@
 #define ESCAPE_HTML             1
 #define OPT(X,S)                ((X) ? (X) : (S))
 #define OPTIONAL_LINE_BREAK     "\001"  /* Special strings embedded in the output */
-#define START_OF_DATA  0x0001
-#define END_OF_DATA  0x0002
+#define START_OF_DATA		0x0001
+#define END_OF_DATA		0x0002
 
 /*
  * Information about how to format output.
  */
-typedef struct h5dump_t {
+typedef struct h5tool_format_t {
     /*
      * Fields associated with formatting numeric data.  If a datatype matches
      * multiple formats based on its size, then the first applicable format
@@ -321,82 +321,7 @@ typedef struct h5dump_t {
     /*escape non printable characters */
     int do_escape;
 
-} h5dump_t;
-
-typedef struct dump_header{
-    const char *name;
-    const char *filebegin;
-    const char *fileend;
-    const char *bootblockbegin;
-    const char *bootblockend;
-    const char *groupbegin;
-    const char *groupend;
-    const char *datasetbegin;
-    const char *datasetend;
-    const char *attributebegin;
-    const char *attributeend;
-    const char *datatypebegin;
-    const char *datatypeend;
-    const char *dataspacebegin;
-    const char *dataspaceend;
-    const char *databegin;
-    const char *dataend;
-    const char *softlinkbegin;
-    const char *softlinkend;
-    const char *subsettingbegin;
-    const char *subsettingend;
-    const char *startbegin;
-    const char *startend;
-    const char *stridebegin;
-    const char *strideend;
-    const char *countbegin;
-    const char *countend;
-    const char *blockbegin;
-    const char *blockend;
-
-    const char *fileblockbegin;
-    const char *fileblockend;
-    const char *bootblockblockbegin;
-    const char *bootblockblockend;
-    const char *groupblockbegin;
-    const char *groupblockend;
-    const char *datasetblockbegin;
-    const char *datasetblockend;
-    const char *attributeblockbegin;
-    const char *attributeblockend;
-    const char *datatypeblockbegin;
-    const char *datatypeblockend;
-    const char *dataspaceblockbegin;
-    const char *dataspaceblockend;
-    const char *datablockbegin;
-    const char *datablockend;
-    const char *softlinkblockbegin;
-    const char *softlinkblockend;
-    const char *strblockbegin;
-    const char *strblockend;
-    const char *enumblockbegin;
-    const char *enumblockend;
-    const char *structblockbegin;
-    const char *structblockend;
-    const char *vlenblockbegin;
-    const char *vlenblockend;
-    const char *subsettingblockbegin;
-    const char *subsettingblockend;
-    const char *startblockbegin;
-    const char *startblockend;
-    const char *strideblockbegin;
-    const char *strideblockend;
-    const char *countblockbegin;
-    const char *countblockend;
-    const char *blockblockbegin;
-    const char *blockblockend;
-
-    const char *dataspacedescriptionbegin;
-    const char *dataspacedescriptionend;
-    const char *dataspacedimbegin;
-    const char *dataspacedimend;
-
-} dump_header;
+} h5tool_format_t;
 
 typedef struct h5tools_context_t {
     size_t cur_column;                       /*current column for output */
@@ -419,8 +344,6 @@ typedef struct h5tools_context_t {
     hsize_t sm_pos;                   /* current stripmine element position */
 } h5tools_context_t;
 
-
-
 /* a structure to hold the subsetting particulars for a dataset */
 struct subset_t {
     hsize_t *start;
@@ -429,74 +352,12 @@ struct subset_t {
     hsize_t *block;
 };
 
-/*if we get a new program that needs to use the library add its name here*/
-typedef enum {
-    UNKNOWN = 0,
-    H5LS,
-    H5DUMP
-} ProgType;
-
-/* taken from h5dump.h */
-#define ATTRIBUTE_DATA  0
-#define DATASET_DATA    1
-#define ENUM_DATA       2
-
-#define COL             3
-
-extern int     indent;              /*how far in to indent the line         */
 extern FILE   *rawdatastream;       /*output stream for raw data            */
 
-/* taken from h5dump.h*/
-#define ATTRIBUTE       "ATTRIBUTE"
-#define BLOCK           "BLOCK"
-#define SUPER_BLOCK     "SUPER_BLOCK"
-#define COMPRESSION     "COMPRESSION"
-#define CONCATENATOR    "//"
-#define COMPLEX         "COMPLEX"
-#define COUNT           "COUNT"
-#define CSET            "CSET"
-#define CTYPE           "CTYPE"
-#define DATA            "DATA"
+/* Strings for output */
+#define GROUP           "GROUP"
 #define DATASET         "DATASET"
-#define DATASPACE       "DATASPACE"
 #define DATATYPE        "DATATYPE"
-#define EXTERNAL        "EXTERNAL"
-#define FILENO          "FILENO"
-#define GROUPNAME       "GROUP"
-#define HARDLINK        "HARDLINK"
-#define NLINK           "NLINK"
-#define OBJID           "OBJECTID"
-#define OBJNO           "OBJNO"
-#define S_SCALAR        "SCALAR"
-#define S_SIMPLE        "SIMPLE"
-#define S_NULL          "NULL"
-#define SOFTLINK        "SOFTLINK"
-#define STORAGELAYOUT   "STORAGELAYOUT"
-#define START           "START"
-#define STRIDE          "STRIDE"
-#define STRSIZE         "STRSIZE"
-#define STRPAD          "STRPAD"
-#define SUBSET          "SUBSET"
-#define FILTERS         "FILTERS"
-#define DEFLATE         "COMPRESSION DEFLATE"
-#define DEFLATE_LEVEL   "LEVEL"
-#define SHUFFLE         "PREPROCESSING SHUFFLE"
-#define FLETCHER32      "CHECKSUM FLETCHER32"
-#define SZIP            "COMPRESSION SZIP"
-#define NBIT            "COMPRESSION NBIT"
-#define SCALEOFFSET            "COMPRESSION SCALEOFFSET"
-#define SCALEOFFSET_MINBIT            "MIN BITS"
-#define STORAGE_LAYOUT  "STORAGE_LAYOUT"
-#define CONTIGUOUS      "CONTIGUOUS"
-#define COMPACT         "COMPACT"
-#define CHUNKED         "CHUNKED"
-#define EXTERNAL_FILE   "EXTERNAL_FILE"
-#define FILLVALUE       "FILLVALUE"
-#define FILE_CONTENTS   "FILE_CONTENTS"
-
-
-#define BEGIN           "{"
-#define END             "}"
 
 /* Definitions of useful routines */
 extern void     h5tools_init(void);
@@ -504,13 +365,13 @@ extern void     h5tools_close(void);
 extern hid_t    h5tools_fopen(const char *fname, const char *driver,
                               char *drivername, size_t drivername_len,
                               int argc, const char *argv[]);
-extern int      h5tools_dump_dset(FILE *stream, const h5dump_t *info, hid_t dset,
+extern int      h5tools_dump_dset(FILE *stream, const h5tool_format_t *info, hid_t dset,
                                   hid_t p_typ, struct subset_t *sset, int indentlevel);
-extern int      h5tools_dump_mem(FILE *stream, const h5dump_t *info, hid_t obj_id,
+extern int      h5tools_dump_mem(FILE *stream, const h5tool_format_t *info, hid_t obj_id,
                                  hid_t type, hid_t space, void *mem, int indentlevel);
 extern hid_t    h5tools_get_native_type(hid_t type);
 
-extern void     h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
+extern void     h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t container,
                          h5tools_context_t *ctx/*in,out*/, unsigned flags,
                          hsize_t nelmts, hid_t type, void *_mem);
 
@@ -520,5 +381,5 @@ extern int      h5tools_can_encode(H5Z_filter_t filtn);
 
 void            init_acc_pos(h5tools_context_t *ctx, hsize_t *dims);
 
-
 #endif /* H5TOOLS_H__ */
+

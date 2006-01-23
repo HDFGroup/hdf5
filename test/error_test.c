@@ -303,8 +303,8 @@ error_stack(void)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-long_desc_cb(unsigned n, const H5E_error_t *err_desc, void* client_data)
+static herr_t
+long_desc_cb(unsigned UNUSED n, const H5E_error_t *err_desc, void* client_data)
 {
     char		*real_desc  = (char *)client_data;
 
@@ -335,7 +335,7 @@ long_desc_cb(unsigned n, const H5E_error_t *err_desc, void* client_data)
 static herr_t
 test_long_desc(void)
 {
-    char                *format="Testing very long description string, %s";
+    const char          *format="Testing very long description string, %s";
     char                *long_desc;
     char                *full_desc;
     size_t              u;

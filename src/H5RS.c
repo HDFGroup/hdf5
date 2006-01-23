@@ -65,7 +65,7 @@ H5RS_xstrdup(const char *s)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5RS_xstrdup)
 
     if(s) {
-        ret_value = H5FL_BLK_MALLOC(str_buf, HDstrlen(s) + 1);
+        ret_value = (char *)H5FL_BLK_MALLOC(str_buf, HDstrlen(s) + 1);
         HDassert(ret_value);
         HDstrcpy(ret_value, s);
     } /* end if */
@@ -147,7 +147,7 @@ H5RS_wrap(const char *s)
         HGOTO_ERROR(H5E_RS,H5E_NOSPACE,NULL,"memory allocation failed");
 
     /* Set the internal fields */
-    ret_value->s=(char*)s;
+    ret_value->s=(char*)s;      /* (Cast away const OK - QAK) */
     ret_value->wrapped=1;
     ret_value->n=1;
 
@@ -347,7 +347,7 @@ H5RS_dup_str(const char *s)
     path_len = HDstrlen(s);
 
     /* Allocate space for the string */
-    if(NULL == (new_str = H5FL_BLK_MALLOC(str_buf, path_len + 1)))
+    if(NULL == (new_str = (char *)H5FL_BLK_MALLOC(str_buf, path_len + 1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy name for full path */

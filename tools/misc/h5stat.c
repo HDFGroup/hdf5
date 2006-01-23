@@ -94,11 +94,11 @@ static struct {
 static unsigned
 ceil_log10(unsigned long x)
 {
-    unsigned long pow = 1;
+    unsigned long pow10 = 1;
     unsigned ret = 0;
 
-    while(x >= pow) {
-        pow *= 10;
+    while(x >= pow10) {
+        pow10 *= 10;
         ret++;
     } /* end while */
     

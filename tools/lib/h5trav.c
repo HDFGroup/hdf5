@@ -17,14 +17,14 @@
 #include "H5private.h"
 
 /* functions for traversal */
-int traverse( hid_t loc_id,
+static int traverse( hid_t loc_id,
               const char *group_name,
               trav_table_t *table,
               trav_info_t *info,
               int *idx,
               int print);
 
-herr_t get_nnames( hid_t loc_id,
+static hssize_t get_nnames( hid_t loc_id,
                    const char *group_name );
 
 herr_t get_name_type( hid_t loc_id,
@@ -159,36 +159,6 @@ void h5trav_freeinfo( trav_info_t *info, int nobjs )
 
 
 /*-------------------------------------------------------------------------
- * Function: count_names
- *
- * Purpose: operator function
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: October 10, 2002
- *
- * Comments:
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-static herr_t count_names( hid_t loc_id, const char *name, void *op_data)
-{
-
- H5G_stat_t statbuf;
-
- if (H5Gget_objinfo( loc_id, name, 0, &statbuf) < 0 )
-  return 1;
-
- (*(int *)op_data)++;
-
- /* Define a default zero value for return. This will cause the iterator to continue */
- return 0;
-}
-
-/*-------------------------------------------------------------------------
  * Function: get_nnames
  *
  * Purpose:  Counts the number of names in the group GROUP_NAME
@@ -209,15 +179,24 @@ static herr_t count_names( hid_t loc_id, const char *name, void *op_data)
  *-------------------------------------------------------------------------
  */
 
-herr_t get_nnames( hid_t loc_id, const char *group_name )
+static hssize_t get_nnames( hid_t loc_id, const char *group_name )
 {
+    hid_t gid;
+    hsize_t nobjs = 0;
 
- int nobjs = 0;
+    /* Open the group */
+    if((gid = H5Gopen(loc_id, group_name)) < 0)
+        return(-1);
 
- if ( H5Giterate( loc_id, group_name, NULL, count_names, (void *)&nobjs ) < 0 )
-  return -1;
+    /* Retrieve the number of objects in it */
+    if(H5Gget_num_objs(gid, &nobjs) < 0)
+        return(-1);
 
- return nobjs;
+    /* Close the group */
+    if(H5Gclose(gid) < 0)
+        return(-1);
+
+    return((hssize_t)nobjs);
 }
 
 
@@ -242,7 +221,7 @@ static herr_t opget_info( hid_t loc_id, const char *name, void *op_data)
 
  H5G_stat_t statbuf;
 
- if (H5Gget_objinfo( loc_id, name, 0, &statbuf) < 0 )
+ if (H5Gget_objinfo( loc_id, name, FALSE, &statbuf) < 0 )
   return -1;
 
  ((trav_info_t *)op_data)->type = statbuf.type;
@@ -306,7 +285,7 @@ herr_t get_name_type( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-int traverse( hid_t loc_id,
+static int traverse( hid_t loc_id,
               const char *group_name,
               trav_table_t *table,
               trav_info_t *info,
@@ -323,7 +302,7 @@ int traverse( hid_t loc_id,
  int           i, j;
 
  /* get the number of names */
- if (( n_names = get_nnames( loc_id, group_name )) < 0 )
+ if (( n_names = (int)get_nnames( loc_id, group_name )) < 0 )
   return -1;
 
  for ( i = 0; i < n_names; i++)
@@ -332,13 +311,13 @@ int traverse( hid_t loc_id,
    return -1;
 
   /* allocate path buffer */
-  path = (char*) HDmalloc(strlen(group_name) + strlen(name) + 2);
+  path = (char*) HDmalloc(HDstrlen(group_name) + HDstrlen(name) + 2);
 
   /* initialize path */
-  strcpy( path, group_name );
-  if ( strcmp(group_name,"/")!=0 )
-   strcat( path, "/" );
-  strcat( path, name );
+  HDstrcpy( path, group_name );
+  if ( HDstrcmp(group_name, "/") != 0 )
+   HDstrcat( path, "/" );
+  HDstrcat( path, name );
 
   /* disable error reporting */
   H5E_BEGIN_TRY {
@@ -483,22 +462,22 @@ int traverse( hid_t loc_id,
 
   case H5G_LINK:
    {
-    char *targbuf=NULL;
-
     /* increment */
     inserted_objs++;
 
     /* add object to table */
-    trav_table_add(statbuf.u.obj.objno, path, H5G_LINK, table );
+    trav_table_add(HADDR_UNDEF, path, H5G_LINK, table );
 
     if (statbuf.u.slink.linklen>0)
     {
-     targbuf=malloc(statbuf.u.slink.linklen);
+     char *targbuf;
+
+     targbuf = HDmalloc(statbuf.u.slink.linklen);
+     assert(targbuf);
      H5Gget_linkval(loc_id,path,statbuf.u.slink.linklen,targbuf);
      if (print)
       printf(" %-10s %s -> %s\n", "link", path, targbuf);
-     if (targbuf)
-      free(targbuf);
+     free(targbuf);
     }
     else
     {
@@ -511,6 +490,8 @@ int traverse( hid_t loc_id,
 
 
   default:
+    HDfprintf(stderr, "traverse: Unknown object!\n");
+    return (-1);
    break;
 
   }

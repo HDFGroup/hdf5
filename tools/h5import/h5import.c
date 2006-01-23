@@ -11,15 +11,14 @@
  * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#include <hdf5.h>
-#include <H5private.h>
-#include  <stdio.h>
-#ifndef  MIPSEL
-#include  <math.h>
-#endif  /* MIPSEL */
-#include  <string.h>
-#include  <ctype.h>
-#include  "h5import.h"
+
+#include "hdf5.h"
+#include "H5private.h"
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
+#include <ctype.h>
+#include "h5import.h"
 
 int main(int argc, char *argv[])
 {
@@ -30,15 +29,15 @@ int main(int argc, char *argv[])
   int    state = 0;
   struct Input *in=NULL;
 
-  const char *err1 = "Invalid number of arguments:  %d.\n";
-  const char *err2 = "Error in state table.\n";
-  const char *err3 = "No output file given.\n";
-  const char *err4 = "Program aborted.\n";
-  const char *err5 = "Invalid path %s.\n";
-  const char *err6 = "Invalid dimensions - %s.\n";
-  const char *err7 = "Invalid type of data - %s.\n";
-  const char *err8 = "Invalid size of data - %s.\n";
-  const char *err9 = "Cannot specify more than 30 input files in one call to h5import.\n";
+    const char *err1 = "Invalid number of arguments:  %d.\n";
+    const char *err2 = "Error in state table.\n";
+    const char *err3 = "No output file given.\n";
+    const char *err4 = "Program aborted.\n";
+    const char *err5 = "Invalid path %s.\n";
+    const char *err6 = "Invalid dimensions - %s.\n";
+    const char *err7 = "Invalid type of data - %s.\n";
+    const char *err8 = "Invalid size of data - %s.\n";
+    const char *err9 = "Cannot specify more than 30 input files in one call to h5import.\n";
 
   (void) setvbuf(stderr, (char *) NULL, _IOLBF, 0);
   (void) setvbuf(stdout, (char *) NULL, _IOLBF, 0);

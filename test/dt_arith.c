@@ -372,7 +372,7 @@ static int without_hardware_g = 0;
 void some_dummy_func(float x);
 static hbool_t overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits);
 static int my_isnan(dtype_t type, void *val);
-static int my_isinf(dtype_t type, int endian, unsigned char *val, size_t size,
+static int my_isinf(int endian, unsigned char *val, size_t size,
         size_t mpos, size_t msize, size_t epos, size_t esize);
 
 /*-------------------------------------------------------------------------
@@ -708,14 +708,14 @@ static int test_particular_fp_integer(void)
     signed char dst_c;
     unsigned char *buf1, *buf2;
     unsigned char *saved_buf1, *saved_buf2;
-    unsigned int  src_size1, src_size2;
-    unsigned int  dst_size1, dst_size2;
+    size_t      src_size1, src_size2;
+    size_t      dst_size1, dst_size2;
     float       src_f = (float)INT_MAX;
     int         dst_i;
     int         fill_value = 13;
     int		endian;			/*endianess	        */
     unsigned int        fails_this_test = 0;
-    int         j;
+    size_t      j;
 
     TESTING("hard particular floating number -> integer conversions");
     
@@ -2681,12 +2681,12 @@ my_isnan(dtype_t type, void *val)
  *-------------------------------------------------------------------------
  */
 static int
-my_isinf(dtype_t type, int endian, unsigned char *val, size_t size,
+my_isinf(int endian, unsigned char *val, size_t size,
         size_t mpos, size_t msize, size_t epos, size_t esize)
 {
     unsigned char *bits;
     int retval = 0;
-    int i;
+    size_t i;
     ssize_t ret1=0, ret2=0;
 
     bits = (unsigned char*)calloc(1, size);
@@ -3088,7 +3088,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 if (underflow &&
                         HDfabsf(x) <= FLT_MIN && HDfabsf(hw_f) <= FLT_MIN)
                     continue;	/* all underflowed, no error */
-                if (overflow && my_isinf(dst_type, endian, buf+j*sizeof(float),
+                if (overflow && my_isinf(endian, buf+j*sizeof(float),
                         dst_size, dst_mpos, dst_msize, dst_epos, dst_esize))
                     continue;	/* all overflowed, no error */
                 check_mant[0] = HDfrexpf(x, check_expo+0);
@@ -3099,7 +3099,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 if (underflow &&
                         HDfabs(x) <= DBL_MIN && HDfabs(hw_d) <= DBL_MIN)
                     continue;	/* all underflowed, no error */
-                if (overflow && my_isinf(dst_type, endian, buf+j*sizeof(double),
+                if (overflow && my_isinf(endian, buf+j*sizeof(double),
                         dst_size, dst_mpos, dst_msize, dst_epos, dst_esize))
                     continue;	/* all overflowed, no error */
                 check_mant[0] = HDfrexp(x, check_expo+0);
@@ -4389,8 +4389,10 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
 
     if(run_test==TEST_NORMAL)
         return MAX((int)fails_all_tests, 1);
-    else if(run_test==TEST_DENORM || run_test==TEST_SPECIAL)
+    else {
+        HDassert(run_test==TEST_DENORM || run_test==TEST_SPECIAL);
         return 1;
+    }
 }
 
 

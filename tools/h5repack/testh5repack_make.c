@@ -15,6 +15,7 @@
 #include "hdf5.h"
 #include "h5test.h"
 #include "h5repack.h"
+#include "testh5repack.h"
 
 #define DIM1  40
 #define DIM2  20
@@ -851,8 +852,10 @@ int make_all(hid_t loc_id)
 {
  hid_t    dcpl; /* dataset creation property list */
  hid_t    sid;  /* dataspace ID */
+#if defined (H5_HAVE_FILTER_NBIT)
  hid_t    dtid;
  hid_t    dsid;
+#endif /* H5_HAVE_FILTER_NBIT */
 #if defined (H5_HAVE_FILTER_SZIP)
  unsigned szip_options_mask=H5_SZIP_ALLOW_K13_OPTION_MASK|H5_SZIP_NN_OPTION_MASK;
  unsigned szip_pixels_per_block=8;

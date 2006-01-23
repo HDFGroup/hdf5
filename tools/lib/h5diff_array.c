@@ -336,7 +336,7 @@ hsize_t diff_datum(void       *_mem1,
    }
    else
    {
-    s = mem1;
+    s = (char *)mem1;
     size = H5Tget_size(m_type);
    }
 
@@ -382,6 +382,7 @@ hsize_t diff_datum(void       *_mem1,
 
 	    }
 	    break;
+
 	    /*-------------------------------------------------------------------------
 	     * H5T_OPAQUE
 	     *-------------------------------------------------------------------------
@@ -831,7 +832,6 @@ hsize_t diff_datum(void       *_mem1,
 			    print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
 			    parallel_print(SPACES);
 			    parallel_print(IPFORMAT,temp1_short,temp2_short,abs(temp1_short-temp2_short),  abs(1-temp2_short/temp1_short));
-
 			}
 			nfound++;
 		    }
@@ -841,7 +841,6 @@ hsize_t diff_datum(void       *_mem1,
 		    if ( print_data(options) )
 		    {
 			print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-
 			parallel_print(SPACES);
 			parallel_print(IFORMAT,temp1_short,temp2_short,abs(temp1_short-temp2_short));
 		    }
@@ -1124,7 +1123,7 @@ hsize_t diff_datum(void       *_mem1,
 	   parallel_print(SPACES);
 	   parallel_print(LPIFORMAT,temp1_long,temp2_long,labs(temp1_long-temp2_long), labs(1-temp2_long/temp1_long));
       }
-	   nfound++;
+      nfound++;
      }
     }
     /* -d and -p */
@@ -1752,13 +1751,13 @@ void close_obj(H5G_obj_t obj_type, hid_t obj_id)
  */
 static int diff_region(hid_t region1_id, hid_t region2_id)
 {
- hssize_t 	nblocks1, npoints1;
- hssize_t 	nblocks2, npoints2;
+ hssize_t  nblocks1, npoints1;
+ hssize_t  nblocks2, npoints2;
  hsize_t   alloc_size;
  hsize_t   *ptdata1;
  hsize_t   *ptdata2;
- int		     ndims1 = H5Sget_simple_extent_ndims(region1_id);
- int		     ndims2 = H5Sget_simple_extent_ndims(region2_id);
+ int       ndims1 = H5Sget_simple_extent_ndims(region1_id);
+ int       ndims2 = H5Sget_simple_extent_ndims(region2_id);
  int       ret=0;
 
 #if defined (H5DIFF_DEBUG)
@@ -2190,7 +2189,7 @@ hsize_t diff_schar(unsigned char *mem1,
 				nfound++;
 			}
 		mem1+=sizeof(char);
-  mem2+=sizeof(char);
+		mem2+=sizeof(char);
 			if (options->n && nfound>=options->count)
 					return nfound;
 		}
@@ -2217,7 +2216,7 @@ hsize_t diff_schar(unsigned char *mem1,
 				nfound++;
 			}
 		mem1+=sizeof(char);
-  mem2+=sizeof(char);
+		mem2+=sizeof(char);
 			if (options->n && nfound>=options->count)
 					return nfound;
 		}
@@ -2245,7 +2244,7 @@ hsize_t diff_schar(unsigned char *mem1,
 				nfound++;
 			}
 		mem1+=sizeof(char);
-  mem2+=sizeof(char);
+		mem2+=sizeof(char);
 			if (options->n && nfound>=options->count)
 					return nfound;
 		}
@@ -2330,7 +2329,7 @@ hsize_t diff_uchar(unsigned char *mem1,
 				nfound++;
 			}
 		mem1+=sizeof(unsigned char);
-  mem2+=sizeof(unsigned char);
+		mem2+=sizeof(unsigned char);
 			if (options->n && nfound>=options->count)
 					return nfound;
 		}
@@ -2358,7 +2357,7 @@ hsize_t diff_uchar(unsigned char *mem1,
 				nfound++;
 			}
 		mem1+=sizeof(unsigned char);
-  mem2+=sizeof(unsigned char);
+		mem2+=sizeof(unsigned char);
 			if (options->n && nfound>=options->count)
 					return nfound;
 		}
@@ -2472,7 +2471,7 @@ hsize_t diff_short(unsigned char *mem1,
 				nfound++;
 			}
 			mem1+=sizeof(short);
-  mem2+=sizeof(short);
+			mem2+=sizeof(short);
 			if (options->n && nfound>=options->count)
 					return nfound;
 		}
@@ -2500,7 +2499,7 @@ hsize_t diff_short(unsigned char *mem1,
 				nfound++;
 			}
 			mem1+=sizeof(short);
-  mem2+=sizeof(short);
+			mem2+=sizeof(short);
 			if (options->n && nfound>=options->count)
 					return nfound;
 		}
@@ -2530,7 +2529,7 @@ hsize_t diff_short(unsigned char *mem1,
 				nfound++;
 			}
 			mem1+=sizeof(short);
-  mem2+=sizeof(short);
+			mem2+=sizeof(short);
 			if (options->n && nfound>=options->count)
 					return nfound;
 		}
@@ -2614,7 +2613,7 @@ hsize_t diff_ushort(unsigned char *mem1,
 				nfound++;
 			}
 				mem1+=sizeof(unsigned short);
-  mem2+=sizeof(unsigned short);
+				mem2+=sizeof(unsigned short);
 			if (options->n && nfound>=options->count)
 					return nfound;
 		}
@@ -2642,7 +2641,7 @@ hsize_t diff_ushort(unsigned char *mem1,
 				nfound++;
 			}
 				mem1+=sizeof(unsigned short);
-  mem2+=sizeof(unsigned short);
+				mem2+=sizeof(unsigned short);
 			if (options->n && nfound>=options->count)
 					return nfound;
 		}
@@ -2672,7 +2671,7 @@ hsize_t diff_ushort(unsigned char *mem1,
 				nfound++;
 			}
 				mem1+=sizeof(unsigned short);
-  mem2+=sizeof(unsigned short);
+				mem2+=sizeof(unsigned short);
 			if (options->n && nfound>=options->count)
 					return nfound;
 		}
@@ -2889,7 +2888,7 @@ hsize_t diff_uint(unsigned char *mem1,
 	    memcpy(&temp1_uint, mem1, sizeof(unsigned int));
 	    memcpy(&temp2_uint, mem2, sizeof(unsigned int));
 
-	    if (abs(temp1_uint-temp2_uint) > options->delta)
+	    if (abs((int)(temp1_uint-temp2_uint)) > options->delta)
 	    {
 		if ( print_data(options) )
 		{
@@ -3063,9 +3062,6 @@ hsize_t diff_long(unsigned char *mem1,
 	    {
 		if ( print_data(options) )
 		{
-			memcpy(&temp1_long, mem1, sizeof(long));
-			memcpy(&temp2_long, mem2, sizeof(long));
-
 			if (labs(temp1_long-temp2_long) > (long)options->delta)
 			{
 				if ( print_data(options) )
@@ -3218,7 +3214,7 @@ hsize_t diff_ulong(unsigned char *mem1,
 				nfound++;
 			}
 				mem1+=sizeof(unsigned long);
-  mem2+=sizeof(unsigned long);
+				mem2+=sizeof(unsigned long);
 			if (options->n && nfound>=options->count)
 					return nfound;
 		}

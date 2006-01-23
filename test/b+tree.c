@@ -108,6 +108,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
+#ifdef QAK
 static int
 test_insert_basic(hid_t fapl)
 {
@@ -116,7 +117,6 @@ test_insert_basic(hid_t fapl)
     H5F_t	*f=NULL;
     char        *record;                /* Record to insert into tree */
     haddr_t     bpt_addr;               /* Address of B+ tree created */
-    herr_t      ret;                    /* Generic error return value */
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
@@ -153,6 +153,7 @@ error:
     } H5E_END_TRY;
     return 1;
 } /* test_insert_basic() */
+#endif /* QAK */
 
 
 /*-------------------------------------------------------------------------

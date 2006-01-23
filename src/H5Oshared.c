@@ -107,6 +107,7 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, H5O_shared_t *shared, const H5O_msg_cla
     HDassert(shared);
     HDassert(type);
 
+    /* Get the shared message */
     ret_value = H5O_read_real(&(shared->oloc), type, 0, mesg, dxpl_id);
     if(type->set_share && (type->set_share)(f, ret_value, shared) < 0)
         HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, NULL, "unable to set sharing information")
@@ -321,14 +322,11 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, April  2, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_shared_size (const H5F_t *f, const void *_mesg)
+H5O_shared_size (const H5F_t *f, const void UNUSED *_mesg)
 {
-    const H5O_shared_t  *shared = (const H5O_shared_t *) _mesg;
     size_t	ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_shared_size);

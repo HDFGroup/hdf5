@@ -44,7 +44,6 @@
 #define ALIGN(A,Z)		((((A) + (Z) - 1) / (Z)) * (Z))
 
 /* global variables */
-int         indent;
 int         compound_data;
 FILE       *rawdatastream;	/* should initialize to stdout but gcc moans about it */
 
@@ -425,7 +424,7 @@ h5tools_ncols(const char *s)
  *-------------------------------------------------------------------------
  */
 static void
-h5tools_simple_prefix(FILE *stream, const h5dump_t *info,
+h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
                       h5tools_context_t *ctx, hsize_t elmtno, int secnum)
 {
     h5tools_str_t prefix;
@@ -538,7 +537,7 @@ h5tools_simple_prefix(FILE *stream, const h5dump_t *info,
  *-------------------------------------------------------------------------
  */
 void
-h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
+h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t container,
                          h5tools_context_t *ctx/*in,out*/, unsigned flags,
                          hsize_t nelmts, hid_t type, void *_mem)
 {
@@ -670,11 +669,8 @@ h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
                     multiline++;
 
                   /* pass to the prefix in h5tools_simple_prefix the total position
-																		   instead of the current stripmine position i; this is necessary 
-																					to print the array indices */
-
-																 /* pass to the prefix in h5tools_simple_prefix the total position
-																		   this is necessary to print the array indices */
+		     instead of the current stripmine position i; this is necessary 
+		     to print the array indices */
                 curr_pos = ctx->sm_pos + i;
 
                 h5tools_simple_prefix(stream, info, ctx, curr_pos, secnum);
@@ -709,7 +705,7 @@ h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
  *-------------------------------------------------------------------------
  */
 static herr_t
-h5tools_dump_simple_subset(FILE *stream, const h5dump_t *info, hid_t dset,
+h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset,
                            hid_t p_type, struct subset_t *sset,
                            int indentlevel)
 {
@@ -876,7 +872,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-h5tools_dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
+h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, hid_t dset,
                          hid_t p_type, int indentlevel)
 {
     hid_t		f_space;		/*file data space	*/
@@ -1071,7 +1067,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
  *-------------------------------------------------------------------------
  */
 static int
-h5tools_dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t obj_id,
+h5tools_dump_simple_mem(FILE *stream, const h5tool_format_t *info, hid_t obj_id,
                         hid_t type, hid_t space, void *mem, int indentlevel)
 {
     int			i;			/*counters		*/
@@ -1160,7 +1156,7 @@ h5tools_dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t obj_id,
  *-------------------------------------------------------------------------
  */
 int
-h5tools_dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type,
+h5tools_dump_dset(FILE *stream, const h5tool_format_t *info, hid_t dset, hid_t _p_type,
                   struct subset_t *sset, int indentlevel)
 {
     hid_t     f_space;
@@ -1168,7 +1164,7 @@ h5tools_dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type,
     hid_t     f_type;
     H5S_class_t space_type;
     int       status = FAIL;
-    h5dump_t  info_dflt;
+    h5tool_format_t  info_dflt;
 
     /* Use default values */
     if (!stream)
@@ -1238,10 +1234,10 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-h5tools_dump_mem(FILE *stream, const h5dump_t *info, hid_t obj_id, hid_t type,
+h5tools_dump_mem(FILE *stream, const h5tool_format_t *info, hid_t obj_id, hid_t type,
                  hid_t space, void *mem, int indentlevel)
 {
-    h5dump_t    info_dflt;
+    h5tool_format_t    info_dflt;
 
     /* Use default values */
     if (!stream)
@@ -1259,8 +1255,6 @@ h5tools_dump_mem(FILE *stream, const h5dump_t *info, hid_t obj_id, hid_t type,
     return h5tools_dump_simple_mem(stream, info, obj_id, type, space, mem,
                                    indentlevel);
 }
-
-
 
 /*-------------------------------------------------------------------------
  * Function:    init_acc_pos
@@ -1289,5 +1283,4 @@ void init_acc_pos(h5tools_context_t	*ctx, hsize_t *dims)
  for ( i = 0; i < ctx->ndims; i++)
   ctx->pos[i]=0;
 }
-
 

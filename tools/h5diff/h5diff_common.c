@@ -180,7 +180,7 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
  *-------------------------------------------------------------------------
  */
 
- void  print_results(hsize_t nfound, diff_opt_t* options)
+ void  print_results(diff_opt_t* options)
  {
   if (options->m_quiet || options->err_stat)
    return;
