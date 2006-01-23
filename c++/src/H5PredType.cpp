@@ -181,34 +181,65 @@ const PredType PredType::NATIVE_HBOOL( H5T_NATIVE_HBOOL );
 
 const PredType PredType::NATIVE_INT8( H5T_NATIVE_INT8 );
 const PredType PredType::NATIVE_UINT8( H5T_NATIVE_UINT8 );
-const PredType PredType::NATIVE_INT_LEAST8( H5T_NATIVE_INT_LEAST8 );
-const PredType PredType::NATIVE_UINT_LEAST8( H5T_NATIVE_UINT_LEAST8 );
-
 const PredType PredType::NATIVE_INT16( H5T_NATIVE_INT16 );
 const PredType PredType::NATIVE_UINT16( H5T_NATIVE_UINT16 );
-const PredType PredType::NATIVE_INT_LEAST16( H5T_NATIVE_INT_LEAST16 );
-const PredType PredType::NATIVE_UINT_LEAST16( H5T_NATIVE_UINT_LEAST16 );
-
 const PredType PredType::NATIVE_INT32( H5T_NATIVE_INT32 );
 const PredType PredType::NATIVE_UINT32( H5T_NATIVE_UINT32 );
-const PredType PredType::NATIVE_INT_LEAST32( H5T_NATIVE_INT_LEAST32 );
-const PredType PredType::NATIVE_UINT_LEAST32( H5T_NATIVE_UINT_LEAST32 );
-
 const PredType PredType::NATIVE_INT64( H5T_NATIVE_INT64 );
 const PredType PredType::NATIVE_UINT64( H5T_NATIVE_UINT64 );
-const PredType PredType::NATIVE_INT_LEAST64( H5T_NATIVE_INT_LEAST64 );
-const PredType PredType::NATIVE_UINT_LEAST64( H5T_NATIVE_UINT_LEAST64 );
 
-// These are new types and waiting for enabling with C99; currently,
-// the H5T_NATIVE_xxx_FASTn are -1 on sol.  11/14/05
-//const PredType PredType::NATIVE_INT_FAST8( H5T_NATIVE_INT_FAST8 );
-//const PredType PredType::NATIVE_UINT_FAST8( H5T_NATIVE_UINT_FAST8 );
-//const PredType PredType::NATIVE_INT_FAST16( H5T_NATIVE_INT_FAST16 );
-//const PredType PredType::NATIVE_UINT_FAST16( H5T_NATIVE_UINT_FAST16 );
-//const PredType PredType::NATIVE_INT_FAST32( H5T_NATIVE_INT_FAST32 );
-//const PredType PredType::NATIVE_UINT_FAST32( H5T_NATIVE_UINT_FAST32 );
-//const PredType PredType::NATIVE_INT_FAST64( H5T_NATIVE_INT_FAST64 );
-//const PredType PredType::NATIVE_UINT_FAST64( H5T_NATIVE_UINT_FAST64 );
+#ifdef SIZEOF_INT_LEAST8_T
+const PredType PredType::NATIVE_INT_LEAST8( H5T_NATIVE_INT_LEAST8 );
+#endif
+#ifdef SIZEOF_UINT_LEAST8_T
+const PredType PredType::NATIVE_UINT_LEAST8( H5T_NATIVE_UINT_LEAST8 );
+#endif
+
+#ifdef SIZEOF_INT_LEAST16_T
+const PredType PredType::NATIVE_INT_LEAST16( H5T_NATIVE_INT_LEAST16 );
+#endif
+#ifdef SIZEOF_UINT_LEAST16_T
+const PredType PredType::NATIVE_UINT_LEAST16( H5T_NATIVE_UINT_LEAST16 );
+#endif
+
+#ifdef SIZEOF_INT_LEAST32_T
+const PredType PredType::NATIVE_INT_LEAST32( H5T_NATIVE_INT_LEAST32 );
+#endif
+#ifdef SIZEOF_UINT_LEAST32_T
+const PredType PredType::NATIVE_UINT_LEAST32( H5T_NATIVE_UINT_LEAST32 );
+#endif
+
+#ifdef SIZEOF_INT_LEAST64_T
+const PredType PredType::NATIVE_INT_LEAST64( H5T_NATIVE_INT_LEAST64 );
+#endif
+#ifdef SIZEOF_UINT_LEAST64_T
+const PredType PredType::NATIVE_UINT_LEAST64( H5T_NATIVE_UINT_LEAST64 );
+#endif
+
+#ifdef SIZEOF_INT_FAST8_T
+const PredType PredType::NATIVE_INT_FAST8( H5T_NATIVE_INT_FAST8 );
+#endif
+#ifdef SIZEOF_UINT_FAST8_T
+const PredType PredType::NATIVE_UINT_FAST8( H5T_NATIVE_UINT_FAST8 );
+#endif
+#ifdef SIZEOF_INT_FAST16_T
+const PredType PredType::NATIVE_INT_FAST16( H5T_NATIVE_INT_FAST16 );
+#endif
+#ifdef SIZEOF_UINT_FAST16_T
+const PredType PredType::NATIVE_UINT_FAST16( H5T_NATIVE_UINT_FAST16 );
+#endif
+#ifdef SIZEOF_INT_FAST32_T
+const PredType PredType::NATIVE_INT_FAST32( H5T_NATIVE_INT_FAST32 );
+#endif
+#ifdef SIZEOF_UINT_FAST32_T
+const PredType PredType::NATIVE_UINT_FAST32( H5T_NATIVE_UINT_FAST32 );
+#endif
+#ifdef SIZEOF_INT_FAST64_T
+const PredType PredType::NATIVE_INT_FAST64( H5T_NATIVE_INT_FAST64 );
+#endif
+#ifdef SIZEOF_UINT_FAST64_T
+const PredType PredType::NATIVE_UINT_FAST64( H5T_NATIVE_UINT_FAST64 );
+#endif
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
