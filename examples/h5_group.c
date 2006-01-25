@@ -93,6 +93,7 @@ main(void)
     H5Sclose(dataspace);
     H5Dclose(dataset);
     H5Pclose(plist);
+    H5Gclose(grp);
     H5Fclose(file);
 
     /*
@@ -158,7 +159,8 @@ main(void)
      * Close the file.
      */
 
-    status = H5Fclose(file);
+    H5Gclose(grp);
+    H5Fclose(file);
 
     return 0;
 }
