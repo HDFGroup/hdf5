@@ -274,17 +274,22 @@ END SUBROUTINE h5rcreate_f
 <dl>
 <dt><strong>Name:</strong> <a name="Reference-Dereference">H5Rdereference</a>
 <dt><strong>Signature:</strong>
-    <dd><em>hid_t</em> <code>H5Rdereference</code>(<em>hid_t</em> <code>dataset</code>,
+    <dd><em>hid_t</em> <code>H5Rdereference</code>(<em>hid_t</em> <code>obj_id</code>,
         <em>H5R_type_t</em> <code>ref_type</code>,
         <em>void *</em><code>ref</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>Opens the HDF5 object referenced.
 <dt><strong>Description:</strong>
-    <dd>Given a reference to some object, <code>H5Rdereference</code>
-        opens that object and returns an identifier.
-        <p>
-        The parameter <code>ref_type</code> specifies the reference type
+    <dd>Given a reference, <code>ref</code>, to an object 
+      or a region in an object, <code>H5Rdereference</code>
+      opens that object and returns an identifier.
+      
+      <p>The parameter <code>obj_id</code> must be a valid identifier
+        for an object in the HDF5 file containing the referenced object,
+        including the file identifier.
+      
+      <p>The parameter <code>ref_type</code> specifies the reference type
         of <code>ref</code>. 
         <code>ref_type</code> may contain either of the following values:
         <ul>
@@ -294,49 +299,53 @@ END SUBROUTINE h5rcreate_f
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em> <code>dataset</code></td>
-            <td valign="top">IN: Dataset containing reference object.</td></tr>
+            <td valign="top"><em>hid_t</em> <code>obj_id</code></td>
+            <td valign="top">IN: Valid identifier for the file 
+              containing the referenced object or any object in that file.</td></tr>
         <tr>
-		    <td valign="top"><em>H5R_type_t</em>&nbsp;<code>ref_type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>H5R_type_t</em>&nbsp;<code>ref_type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: The reference type of <code>ref</code>.</td></tr>
         <tr>
-		    <td valign="top"><em>void *</em><code>ref</code></td>
+            <td valign="top"><em>void *</em><code>ref</code></td>
             <td valign="top">IN: Reference to open.</td></tr>
     </table></ul>
 <dt><strong>Returns:</strong>
-    <dd>Returns valid identifier if successful;
+    <dd>Returns identifier of referenced object if successful;
         otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5rdereference_f
 
     <p><strong>To dereference an object</strong> 
     <dd>
-	<pre>
-SUBROUTINE h5rdereference_f(dset_id, ref, obj_id, hdferr) 
+    <pre>
+SUBROUTINE h5rdereference_f(obj_id, ref, ref_obj_id, hdferr) 
   IMPLICIT NONE
-  INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier 
-  TYPE(hobj_ref_t_f), INTENT(IN) :: ref   ! Object reference 
-  INTEGER(HID_T), INTENT(OUT) :: obj_id   ! Object identifier 
-  INTEGER, INTENT(OUT) :: hdferr          ! Error code 
+  INTEGER(HID_T), INTENT(IN) :: obj_id        ! Valid identifier
+                                              ! in file 
+  TYPE(hobj_ref_t_f), INTENT(IN) :: ref       ! Object reference 
+  INTEGER(HID_T), INTENT(OUT) :: ref_obj_id   ! Identifier of
+                                              ! referenced object
+  INTEGER, INTENT(OUT) :: hdferr              ! Error code 
 
 END SUBROUTINE h5rdereference_f
-	</pre>
-</dt>
-	
+    </pre>
+
 <dt><strong>To dereference a region</strong>	
-	<dd>
-	<pre>
-SUBROUTINE h5rdereference_f(dset_id, ref, obj_id, hdferr) 
+    <dd>
+    <pre>
+SUBROUTINE h5rdereference_f(obj_id, ref, ref_obj_id, hdferr) 
   IMPLICIT NONE
-  INTEGER(HID_T), INTENT(IN) :: dset_id        ! Dataset identifier 
+  INTEGER(HID_T), INTENT(IN) :: obj_id         ! Valid identifier
+                                               ! in file 
   TYPE(hdset_reg_ref_t_f), INTENT(IN) :: ref   ! Object reference 
-  INTEGER(HID_T), INTENT(OUT) :: obj_id        ! Object identifier 
+  INTEGER(HID_T), INTENT(OUT) :: ref_obj_id    ! Identifier of
+                                               ! referenced object
   INTEGER, INTENT(OUT) :: hdferr               ! Error code 
           
 END SUBROUTINE h5rdereference_f
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
+    </pre>		
+
+        <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
         
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -600,7 +609,7 @@ Describes HDF5 Release 1.6.5, November 2005
 </address>
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 16 October 2003");
+document.writeln("Last modified: 25 January 2006");
 -->
 </SCRIPT> 
 
