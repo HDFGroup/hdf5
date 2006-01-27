@@ -645,6 +645,9 @@
 ./test/blocktrack.c
 ./test/btree2.c
 ./test/cache.c
+./test/cache_api.c
+./test/cache_common.c
+./test/cache_common.h
 ./test/cmpd_dset.c
 ./test/dangle.c
 ./test/deflate.h5
@@ -749,6 +752,7 @@
 
 ./testpar/Makefile.am
 ./testpar/Makefile.in
+./testpar/t_cache.c
 ./testpar/t_dset.c
 ./testpar/t_file.c
 ./testpar/t_fphdf5.c
