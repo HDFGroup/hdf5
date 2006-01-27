@@ -38,6 +38,22 @@
 /* global variables */
 pio_time   *timer_g;            /* timer: global for stub functions     */
 
+/* 
+ * Function:  sub_time
+ * Purpose:   Struct two time values, and return the difference, in microseconds
+ * 
+ * 	      Note that the function assumes that a > b 
+ * Programmer: Leon Arber, 1/27/06
+ */
+static double sub_time(struct timeval* a, struct timeval* b)
+{
+    return (((double)a->tv_sec +
+     ((double)a->tv_usec) / MICROSECOND) -
+	((double)b->tv_sec +
+	 ((double)b->tv_usec) / MICROSECOND));
+}
+
+
 /*
  * Function:    pio_time_new
  * Purpose:     Build us a brand, spankin', new performance time object.
@@ -233,15 +249,6 @@ double
 get_time(pio_time *pt, timer_type t)
 {
     return pt->total_time[t];
-}
-
-/* Assumes that a > b */
-static inline double sub_time(struct timeval* a, struct timeval* b)
-{
-    ((double)a->tv_sec +
-     ((double)a->tv_usec) / MICROSECOND) -
-	((double)b->tv_sec +
-	 ((double)b->tv_usec) / MICROSECOND);
 }
 
 #endif /* H5_HAVE_PARALLEL */
