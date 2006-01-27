@@ -51,7 +51,8 @@
 #define H5AC_SHEAP_ID	9	/*segmented heap			     */
 #define H5AC_BPT_HDR_ID	10	/*B+ tree header			     */
 #define H5AC_BPT_LEAF_ID 11	/*B+ tree leaf				     */
-#define H5AC_NTYPES	12
+#define H5AC_TEST_ID	12	/*test entry -- not used for actual files    */
+#define H5AC_NTYPES	13
 
 /* H5AC_DUMP_STATS_ON_CLOSE should always be FALSE when
  * H5C_COLLECT_CACHE_STATS is FALSE.
@@ -183,7 +184,7 @@ extern hid_t H5AC_ind_dxpl_id;
   /* hbool_t     rpt_fcn_enabled        = */ FALSE,                           \
   /* hbool_t     set_initial_size       = */ TRUE,                            \
   /* size_t      initial_size           = */ ( 1 * 1024 * 1024),              \
-  /* double      min_clean_fraction     = */ 0.25,                            \
+  /* double      min_clean_fraction     = */ 0.5,                             \
   /* size_t      max_size               = */ (16 * 1024 * 1024),              \
   /* size_t      min_size               = */ ( 1 * 1024 * 1024),              \
   /* long int    epoch_length           = */ 50000,                           \
@@ -199,7 +200,8 @@ extern hid_t H5AC_ind_dxpl_id;
   /* size_t      max_decrement          = */ (1 * 1024 * 1024),               \
   /* int         epochs_before_eviction = */ 3,                               \
   /* hbool_t     apply_empty_reserve    = */ TRUE,                            \
-  /* double      empty_reserve          = */ 0.1                              \
+  /* double      empty_reserve          = */ 0.1,                             \
+  /* int	 dirty_bytes_threshold  = */ (256 * 1024)                     \
 }
 
 

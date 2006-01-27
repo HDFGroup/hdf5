@@ -40,9 +40,18 @@ extern "C" {
  * structure H5AC_cache_config_t
  *
  * H5AC_cache_config_t is a public structure intended for use in public APIs.
- * At least in its initial incarnation, it is a essentially a copy of
- * struct H5C_auto_size_ctl_t, minus the report_fcn field.  This is omitted,
- * as including it would require us to make H5C_t structure public.
+ * At least in its initial incarnation, it is basicaly a copy of struct 
+ * H5C_auto_size_ctl_t, minus the report_fcn field, and plus the 
+ * dirty_bytes_threshold field.  
+ *
+ * The report_fcn field is omitted, as including it would require us to 
+ * make H5C_t structure public.
+ *
+ * The dirty_bytes_threshold field does not appear in H5C_auto_size_ctl_t,
+ * as synchronization between caches on different processes is handled at
+ * the H5AC level, not at the level of H5C.  Note however that there is 
+ * considerable interaction between this value and the other fields in this
+ * structure.
  *
  * The structure is in H5ACpublic.h as we may wish to allow different
  * configuration options for metadata and raw data caches.
@@ -226,6 +235,34 @@ extern "C" {
  *      The value of this field must be in the range [0.0, 1.0].  I would
  *      expect typical values to be in the range of 0.01 to 0.1.
  *
+ * 
+ * Parallel Configuration Fields:
+ *
+ * In PHDF5, all operations that modify metadata must be executed collectively.
+ * We used to think that this was enough to ensure consistency across the 
+ * metadata caches, but since we allow processes to read metadata individually,
+ * the order of dirty entries in the LRU list can vary across processes, 
+ * which can result in inconsistencies between the caches.
+ *
+ * To prevent this, only the metadata cache on process 0 is allowed to write 
+ * to file, and then only after synchronizing with the other caches.  After
+ * it writes entries to file, it sends the base addresses of the now clean
+ * entries to the other caches, so they can mark these entries clean as well.
+ *
+ * The different caches know when to synchronize caches by counting the 
+ * number of bytes of dirty metadata created by the collective operations
+ * modifying metadata.  Whenever this count exceeds a user specified 
+ * threshold (see below), process 0 flushes down to its minimum clean size, 
+ * and then sends the list of newly cleaned entries to the other caches.
+ *
+ * dirty_bytes_threshold:  Threshold of dirty byte creation used to 
+ * 	synchronize updates between caches. (See above for outline and 
+ *	motivation.)
+ *
+ *	This value MUST be consistant across all processes accessing the 
+ *	file.  This field is ignored unless HDF5 has been compiled for
+ *	parallel.
+ *
  ****************************************************************************/
 
 #define H5AC__CURR_CACHE_CONFIG_VERSION  1
@@ -273,6 +310,10 @@ typedef struct H5AC_cache_config_t
 
     hbool_t                     apply_empty_reserve;
     double                      empty_reserve;
+
+
+    /* parallel configuration fields: */
+    int				dirty_bytes_threshold;
 
 } H5AC_cache_config_t;
 

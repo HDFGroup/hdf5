@@ -32,7 +32,7 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT)
 # executed, generally most specific tests to least specific tests.
 # As an exception, long-running tests should occur earlier in the list.
 # This gives them more time to run when tests are executing in parallel.
-TEST_PROG=testhdf5 lheap ohdr stab gheap btree2 cache b+tree blocktrack sheap \
+TEST_PROG=testhdf5 lheap ohdr stab gheap btree2 cache cache_api b+tree blocktrack sheap \
            pool hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset extend external objcopy links unlink big mtime     \
            fillval mount flush1 flush2 enum \
@@ -66,7 +66,7 @@ noinst_PROGRAMS=$(BUILD_ALL_PROGS)
 
 # The libh5test library provides common support code for the tests.
 noinst_LTLIBRARIES=libh5test.la
-libh5test_la_SOURCES=h5test.c testframe.c
+libh5test_la_SOURCES=h5test.c testframe.c cache_common.c
 
 # Use libhd5test.la to compile all of the tests
 LDADD=libh5test.la $(LIBHDF5)

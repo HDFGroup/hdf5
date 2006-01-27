@@ -699,20 +699,25 @@ typedef struct H5C_auto_size_ctl_t
  */
 
 /* Generic "no flags set" value for all function calls */
-#define H5C__NO_FLAGS_SET		0x0000
+#define H5C__NO_FLAGS_SET			0x0000
 
 /* These flags apply to H5C_insert_entry() & H5C_unprotect() */
-#define H5C__SET_FLUSH_MARKER_FLAG	0x0001
-#define H5C__DELETED_FLAG		0x0002
+#define H5C__SET_FLUSH_MARKER_FLAG		0x0001
+#define H5C__DELETED_FLAG			0x0002
 
 /* These flags applies only to H5C_unprotect() */
-#define H5C__DIRTIED_FLAG		0x0004
-#define H5C__SIZE_CHANGED_FLAG		0x0008
+#define H5C__DIRTIED_FLAG			0x0004
+#define H5C__SIZE_CHANGED_FLAG			0x0008
 
-/* These flags apply to H5C_flush() & H5C_flush_single_entry() */
-#define H5C__FLUSH_INVALIDATE_FLAG	0x0010
-#define H5C__FLUSH_CLEAR_ONLY_FLAG	0x0020
-#define H5C__FLUSH_MARKED_ENTRIES_FLAG	0x0040
+/* These flags apply to H5C_flush_cache() & H5C_flush_single_entry() */
+#define H5C__FLUSH_INVALIDATE_FLAG		0x0010
+#define H5C__FLUSH_CLEAR_ONLY_FLAG		0x0020
+#define H5C__FLUSH_MARKED_ENTRIES_FLAG		0x0040
+
+/* This flag applies to H5C_flush_cache() only.  It is an error to use
+ * it in combination with the H5C__FLUSH_INVALIDATE_FLAG
+ */
+#define H5C__FLUSH_IGNORE_PROTECTED_FLAG	0x0080
 
 
 H5_DLL H5C_t * H5C_create(size_t                     max_cache_size,
@@ -804,6 +809,8 @@ H5_DLL herr_t H5C_reset_cache_hit_rate_stats(H5C_t * cache_ptr);
 
 H5_DLL herr_t H5C_set_cache_auto_resize_config(H5C_t * cache_ptr,
                                                H5C_auto_size_ctl_t *config_ptr);
+
+H5_DLL herr_t H5C_set_prefix(H5C_t * cache_ptr, char * prefix);
 
 H5_DLL herr_t H5C_set_skip_flags(H5C_t * cache_ptr,
                                  hbool_t skip_file_checks,

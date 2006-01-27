@@ -31,7 +31,7 @@
 #
 
 
-SOURCES = $(libh5test_la_SOURCES) b+tree.c big.c bittests.c blocktrack.c btree2.c cache.c cmpd_dset.c dangle.c dsets.c dt_arith.c dtransform.c dtypes.c enum.c err_compat.c error_test.c extend.c external.c fillval.c flush1.c flush2.c gen_deflate.c gen_filters.c gen_new_array.c gen_new_fill.c gen_new_group.c gen_new_mtime.c gen_new_super.c gen_noencoder.c gen_nullspace.c getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c mtime.c ntypes.c objcopy.c ohdr.c pool.c reserved.c set_extent.c sheap.c space_overflow.c stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
+SOURCES = $(libh5test_la_SOURCES) b+tree.c big.c bittests.c blocktrack.c btree2.c cache.c cache_api.c cmpd_dset.c dangle.c dsets.c dt_arith.c dtransform.c dtypes.c enum.c err_compat.c error_test.c extend.c external.c fillval.c flush1.c flush2.c gen_deflate.c gen_filters.c gen_new_array.c gen_new_fill.c gen_new_group.c gen_new_mtime.c gen_new_super.c gen_noencoder.c gen_nullspace.c getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c mtime.c ntypes.c objcopy.c ohdr.c pool.c reserved.c set_extent.c sheap.c space_overflow.c stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -71,19 +71,20 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libh5test_la_LIBADD =
-am_libh5test_la_OBJECTS = h5test.lo testframe.lo
+am_libh5test_la_OBJECTS = h5test.lo testframe.lo cache_common.lo
 libh5test_la_OBJECTS = $(am_libh5test_la_OBJECTS)
 am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	stab$(EXEEXT) gheap$(EXEEXT) btree2$(EXEEXT) cache$(EXEEXT) \
-	b+tree$(EXEEXT) blocktrack$(EXEEXT) sheap$(EXEEXT) \
-	pool$(EXEEXT) hyperslab$(EXEEXT) istore$(EXEEXT) \
-	bittests$(EXEEXT) dt_arith$(EXEEXT) dtypes$(EXEEXT) \
-	dsets$(EXEEXT) cmpd_dset$(EXEEXT) extend$(EXEEXT) \
-	external$(EXEEXT) objcopy$(EXEEXT) links$(EXEEXT) \
-	unlink$(EXEEXT) big$(EXEEXT) mtime$(EXEEXT) fillval$(EXEEXT) \
-	mount$(EXEEXT) flush1$(EXEEXT) flush2$(EXEEXT) enum$(EXEEXT) \
-	set_extent$(EXEEXT) ttsafe$(EXEEXT) stream_test$(EXEEXT) \
-	getname$(EXEEXT) vfd$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
+	cache_api$(EXEEXT) b+tree$(EXEEXT) blocktrack$(EXEEXT) \
+	sheap$(EXEEXT) pool$(EXEEXT) hyperslab$(EXEEXT) \
+	istore$(EXEEXT) bittests$(EXEEXT) dt_arith$(EXEEXT) \
+	dtypes$(EXEEXT) dsets$(EXEEXT) cmpd_dset$(EXEEXT) \
+	extend$(EXEEXT) external$(EXEEXT) objcopy$(EXEEXT) \
+	links$(EXEEXT) unlink$(EXEEXT) big$(EXEEXT) mtime$(EXEEXT) \
+	fillval$(EXEEXT) mount$(EXEEXT) flush1$(EXEEXT) \
+	flush2$(EXEEXT) enum$(EXEEXT) set_extent$(EXEEXT) \
+	ttsafe$(EXEEXT) stream_test$(EXEEXT) getname$(EXEEXT) \
+	vfd$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
 	dtransform$(EXEEXT) reserved$(EXEEXT)
 @BUILD_ALL_CONDITIONAL_TRUE@am__EXEEXT_2 = gen_deflate$(EXEEXT) \
 @BUILD_ALL_CONDITIONAL_TRUE@	gen_filters$(EXEEXT) \
@@ -121,6 +122,10 @@ cache_SOURCES = cache.c
 cache_OBJECTS = cache.$(OBJEXT)
 cache_LDADD = $(LDADD)
 cache_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
+cache_api_SOURCES = cache_api.c
+cache_api_OBJECTS = cache_api.$(OBJEXT)
+cache_api_LDADD = $(LDADD)
+cache_api_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
 cmpd_dset_SOURCES = cmpd_dset.c
 cmpd_dset_OBJECTS = cmpd_dset.$(OBJEXT)
 cmpd_dset_LDADD = $(LDADD)
@@ -326,8 +331,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(libh5test_la_SOURCES) b+tree.c big.c bittests.c \
-	blocktrack.c btree2.c cache.c cmpd_dset.c dangle.c dsets.c \
-	dt_arith.c dtransform.c dtypes.c enum.c err_compat.c \
+	blocktrack.c btree2.c cache.c cache_api.c cmpd_dset.c dangle.c \
+	dsets.c dt_arith.c dtransform.c dtypes.c enum.c err_compat.c \
 	error_test.c extend.c external.c fillval.c flush1.c flush2.c \
 	gen_deflate.c gen_filters.c gen_new_array.c gen_new_fill.c \
 	gen_new_group.c gen_new_mtime.c gen_new_super.c \
@@ -337,8 +342,8 @@ SOURCES = $(libh5test_la_SOURCES) b+tree.c big.c bittests.c \
 	stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c \
 	$(ttsafe_SOURCES) unlink.c vfd.c
 DIST_SOURCES = $(libh5test_la_SOURCES) b+tree.c big.c bittests.c \
-	blocktrack.c btree2.c cache.c cmpd_dset.c dangle.c dsets.c \
-	dt_arith.c dtransform.c dtypes.c enum.c err_compat.c \
+	blocktrack.c btree2.c cache.c cache_api.c cmpd_dset.c dangle.c \
+	dsets.c dt_arith.c dtransform.c dtypes.c enum.c err_compat.c \
 	error_test.c extend.c external.c fillval.c flush1.c flush2.c \
 	gen_deflate.c gen_filters.c gen_new_array.c gen_new_fill.c \
 	gen_new_group.c gen_new_mtime.c gen_new_super.c \
@@ -621,7 +626,7 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT)
 # executed, generally most specific tests to least specific tests.
 # As an exception, long-running tests should occur earlier in the list.
 # This gives them more time to run when tests are executing in parallel.
-TEST_PROG = testhdf5 lheap ohdr stab gheap btree2 cache b+tree blocktrack sheap \
+TEST_PROG = testhdf5 lheap ohdr stab gheap btree2 cache cache_api b+tree blocktrack sheap \
            pool hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset extend external objcopy links unlink big mtime     \
            fillval mount flush1 flush2 enum \
@@ -644,7 +649,7 @@ TEST_PROG = testhdf5 lheap ohdr stab gheap btree2 cache b+tree blocktrack sheap 
 
 # The libh5test library provides common support code for the tests.
 noinst_LTLIBRARIES = libh5test.la
-libh5test_la_SOURCES = h5test.c testframe.c
+libh5test_la_SOURCES = h5test.c testframe.c cache_common.c
 
 # Use libhd5test.la to compile all of the tests
 LDADD = libh5test.la $(LIBHDF5)
@@ -752,6 +757,9 @@ btree2$(EXEEXT): $(btree2_OBJECTS) $(btree2_DEPENDENCIES)
 cache$(EXEEXT): $(cache_OBJECTS) $(cache_DEPENDENCIES) 
 	@rm -f cache$(EXEEXT)
 	$(LINK) $(cache_LDFLAGS) $(cache_OBJECTS) $(cache_LDADD) $(LIBS)
+cache_api$(EXEEXT): $(cache_api_OBJECTS) $(cache_api_DEPENDENCIES) 
+	@rm -f cache_api$(EXEEXT)
+	$(LINK) $(cache_api_LDFLAGS) $(cache_api_OBJECTS) $(cache_api_LDADD) $(LIBS)
 cmpd_dset$(EXEEXT): $(cmpd_dset_OBJECTS) $(cmpd_dset_DEPENDENCIES) 
 	@rm -f cmpd_dset$(EXEEXT)
 	$(LINK) $(cmpd_dset_LDFLAGS) $(cmpd_dset_OBJECTS) $(cmpd_dset_LDADD) $(LIBS)
@@ -903,6 +911,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/blocktrack.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/btree2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cache.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cache_api.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cache_common.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cmpd_dset.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dangle.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsets.Po@am__quote@

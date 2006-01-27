@@ -187,7 +187,8 @@
  * on how frequently the cache is flushed.  We will see how it goes.
  *
  * For now at least, I will not remove dirty entries from the list as they
- * are flushed.
+ * are flushed. (this has been changed -- dirty entries are now removed from 
+ * the skip list as they are flushed.  JRM - 10/25/05)
  *
  * slist_len:   Number of entries currently in the skip list
  *              used to maintain a sorted list of dirty entries in the
@@ -601,10 +602,15 @@
  *		When this flag is set, all sanity checks on the dxpl_id
  *		parameters are skipped.  The field defaults to FALSE.
  *
+ * prefix	Array of char used to prefix debugging output.  The
+ *		field is intended to allow marking of output of with
+ *		the processes mpi rank.
+ *
  ****************************************************************************/
 
 #define H5C__H5C_T_MAGIC	0x005CAC0E
-#define H5C__MAX_NUM_TYPE_IDS	12
+#define H5C__MAX_NUM_TYPE_IDS	13
+#define H5C__PREFIX_LEN		32
 
 struct H5C_t
 {
@@ -715,7 +721,7 @@ struct H5C_t
 
     hbool_t			skip_file_checks;
     hbool_t			skip_dxpl_id_checks;
-
+    char			prefix[H5C__PREFIX_LEN];
 };
 
 #endif /* _H5Cpkg_H */

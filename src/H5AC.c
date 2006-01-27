@@ -71,6 +71,19 @@
 
 #define H5AC_DEBUG_DIRTY_BYTES_CREATION	0
 
+/*-------------------------------------------------------------------------
+ *  It is a bit difficult to set ranges of allowable values on the 
+ *  dirty_bytes_threshold field of H5AC_aux_t.  The following are 
+ *  probably broader than they should be.  
+ *-------------------------------------------------------------------------
+ */
+
+#define H5AC__MIN_DIRTY_BYTES_THRESHOLD		(int32_t) \
+						(H5C__MIN_MAX_CACHE_SIZE / 2)
+#define H5AC__DEFAULT_DIRTY_BYTES_THRESHOLD	(256 * 1024)
+#define H5AC__MAX_DIRTY_BYTES_THRESHOLD   	(int32_t) \
+						(H5C__MAX_MAX_CACHE_SIZE / 4)
+
 /****************************************************************************
  *
  * structure H5AC_aux_t
@@ -392,7 +405,12 @@ static herr_t H5AC_check_if_write_permitted(const H5F_t *f,
 
 #ifdef H5_HAVE_PARALLEL
 static herr_t H5AC_broadcast_clean_list(H5AC_t * cache_ptr);
+#endif /* JRM */
 
+static herr_t H5AC_ext_config_2_int_config(H5AC_cache_config_t * ext_conf_ptr,
+                                           H5C_auto_size_ctl_t * int_conf_ptr);
+
+#ifdef H5_HAVE_PARALLEL
 static herr_t H5AC_log_deleted_entry(H5AC_t * cache_ptr,
                                      H5AC_info_t * entry_ptr,
                                      haddr_t addr,
@@ -707,6 +725,10 @@ H5AC_term_interface(void)
  *
  *						JRM - 6/28/05
  *
+ *		Added code to set the prefix if required.
+ *
+ *						JRM - 1/20/06
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -723,7 +745,8 @@ static const char * H5AC_entry_type_names[H5AC_NTYPES] =
     "block tracker nodes",
     "segmented heaps",
     "B+ tree headers",
-    "B+ tree leaves"
+    "B+ tree leaves",
+    "test entry"	/* for testing only -- not used for actual files */
 };
 
 herr_t
@@ -733,6 +756,7 @@ H5AC_create(const H5F_t *f,
     herr_t ret_value = SUCCEED;      /* Return value */
     herr_t result;
 #ifdef H5_HAVE_PARALLEL
+    char 	 prefix[H5C__PREFIX_LEN] = "";
     MPI_Comm	 mpi_comm = MPI_COMM_NULL;
     int		 mpi_rank = -1;
     int	 	 mpi_size = -1;
@@ -789,7 +813,8 @@ H5AC_create(const H5F_t *f,
                 aux_ptr->mpi_rank = mpi_rank;
                 aux_ptr->mpi_size = mpi_size;
                 aux_ptr->write_permitted = FALSE;
-                aux_ptr->dirty_bytes_threshold = 256 * 1024;
+                aux_ptr->dirty_bytes_threshold = 
+			H5AC__DEFAULT_DIRTY_BYTES_THRESHOLD;
                 aux_ptr->dirty_bytes = 0;
 #if H5AC_DEBUG_DIRTY_BYTES_CREATION
                 aux_ptr->dirty_bytes_propagations = 0;
@@ -804,6 +829,8 @@ H5AC_create(const H5F_t *f,
                 aux_ptr->d_slist_len = 0;
                 aux_ptr->c_slist_ptr = NULL;
                 aux_ptr->c_slist_len = 0;
+
+		sprintf(prefix, "%d:", mpi_rank);
             }
 
             if ( mpi_rank == 0 ) {
@@ -856,6 +883,7 @@ H5AC_create(const H5F_t *f,
 #endif /* JRM */
                                            (void *)aux_ptr);
             }
+
         } else {
 
             f->shared->cache = H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE,
@@ -889,7 +917,19 @@ H5AC_create(const H5F_t *f,
 
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
+    } 
+#ifdef H5_HAVE_PARALLEL
+    else if ( aux_ptr != NULL ) {
+
+        result = H5C_set_prefix(f->shared->cache, prefix);
+
+        if ( result != SUCCEED ) {
+
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                        "H5C_set_prefix() failed")
+        }
     }
+#endif /* H5_HAVE_PARALLEL */
 
     result = H5AC_set_cache_auto_resize_config(f->shared->cache, config_ptr);
 
@@ -1133,7 +1173,7 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, unsigned flags)
          * flush first.
          */
         if ( ( aux_ptr->mpi_rank == 0 ) &&
-             ( (flags & H5AC__FLUSH_CLEAR_ONLY_FLAG) != 0 ) ) {
+             ( (flags & H5AC__FLUSH_CLEAR_ONLY_FLAG) == 0 ) ) {
 
             unsigned init_flush_flags = H5AC__NO_FLAGS_SET;
 
@@ -2058,7 +2098,8 @@ H5AC_stats(const H5F_t *f)
     HDassert(f);
     HDassert(f->shared->cache);
 
-    (void)H5C_stats(f->shared->cache, f->name, FALSE); /* at present, this can't fail */
+    /* at present, this can't fail */
+    (void)H5C_stats(f->shared->cache, f->name, FALSE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2081,6 +2122,10 @@ done:
  *		JRM - 4/6/05
  *              Reworked for the addition of struct H5AC_cache_config_t.
  *
+ *		JRM - 10/25/05
+ *		Added support for the new dirty_bytes_threshold field of 
+ *		both H5AC_cache_config_t and H5AC_aux_t.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -2094,9 +2139,22 @@ H5AC_get_cache_auto_resize_config(H5AC_t * cache_ptr,
 
     FUNC_ENTER_NOAPI(H5AC_get_cache_auto_resize_config, FAIL)
 
-    if ( ( cache_ptr == NULL ) ||
-         ( config_ptr == NULL ) ||
-         ( config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION ) )
+    if ( ( cache_ptr == NULL ) 
+         ||
+#ifdef H5_HAVE_PARALLEL
+         ( ( cache_ptr->aux_ptr != NULL ) 
+           && 
+           ( ((H5AC_aux_t *)(cache_ptr->aux_ptr))->magic 
+             != 
+             H5AC__H5AC_AUX_T_MAGIC 
+           )
+         ) 
+         ||
+#endif /* H5_HAVE_PARALLEL */
+         ( config_ptr == NULL ) 
+         ||
+         ( config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION ) 
+       )
     {
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                     "Bad cache_ptr or config_ptr on entry.")
@@ -2141,6 +2199,21 @@ H5AC_get_cache_auto_resize_config(H5AC_t * cache_ptr,
                                   (int)(internal_config.epochs_before_eviction);
     config_ptr->apply_empty_reserve    = internal_config.apply_empty_reserve;
     config_ptr->empty_reserve          = internal_config.empty_reserve;
+
+#ifdef H5_HAVE_PARALLEL
+    if ( cache_ptr->aux_ptr != NULL ) {
+
+        config_ptr->dirty_bytes_threshold = 
+	    ((H5AC_aux_t *)(cache_ptr->aux_ptr))->dirty_bytes_threshold;
+
+    } else {
+#endif /* H5_HAVE_PARALLEL */
+
+        config_ptr->dirty_bytes_threshold = H5AC__DEFAULT_DIRTY_BYTES_THRESHOLD;
+
+#ifdef H5_HAVE_PARALLEL
+    }
+#endif /* H5_HAVE_PARALLEL */
 
 done:
 
@@ -2294,6 +2367,10 @@ done:
  *              John Mainzer -- 4/6/05
  *              Updated for the addition of H5AC_cache_config_t.
  *
+ *		John Mainzer -- 1025/05
+ *		Added support for the new dirty_bytes_threshold field of 
+ *		both H5AC_cache_config_t and H5AC_aux_t.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -2307,9 +2384,21 @@ H5AC_set_cache_auto_resize_config(H5AC_t * cache_ptr,
 
     FUNC_ENTER_NOAPI(H5AC_set_cache_auto_resize_config, FAIL)
 
-    if ( cache_ptr == NULL ) {
+    if ( ( cache_ptr == NULL )
+#ifdef H5_HAVE_PARALLEL
+         ||
+         ( ( cache_ptr->aux_ptr != NULL ) 
+           && 
+           ( 
+             ((H5AC_aux_t *)(cache_ptr->aux_ptr))->magic 
+             != 
+             H5AC__H5AC_AUX_T_MAGIC 
+           )
+         ) 
+#endif /* H5_HAVE_PARALLEL */
+       ) {
 
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "NULL cache_ptr on entry.")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "bad cache_ptr on entry.")
     }
 
     if ( config_ptr == NULL ) {
@@ -2329,40 +2418,30 @@ H5AC_set_cache_auto_resize_config(H5AC_t * cache_ptr,
                     "config_ptr->rpt_fcn_enabled must be either TRUE or FALSE.")
     }
 
-    internal_config.version                = H5C__CURR_AUTO_SIZE_CTL_VER;
+    if ( 
+         ( 
+           config_ptr->dirty_bytes_threshold 
+           < 
+           H5AC__MIN_DIRTY_BYTES_THRESHOLD
+         )
+         ||
+         ( 
+           config_ptr->dirty_bytes_threshold 
+           > 
+           H5AC__MAX_DIRTY_BYTES_THRESHOLD
+         )
+       ) {
 
-    if ( config_ptr->rpt_fcn_enabled ) {
-
-        internal_config.rpt_fcn            = H5C_def_auto_resize_rpt_fcn;
-
-    } else {
-
-        internal_config.rpt_fcn            = NULL;
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "config_ptr->dirty_bytes_threshold out of range.")
     }
 
-    internal_config.set_initial_size       = config_ptr->set_initial_size;
-    internal_config.initial_size           = config_ptr->initial_size;
-    internal_config.min_clean_fraction     = config_ptr->min_clean_fraction;
-    internal_config.max_size               = config_ptr->max_size;
-    internal_config.min_size               = config_ptr->min_size;
-    internal_config.epoch_length           =
-                                            (int64_t)(config_ptr->epoch_length);
+    if ( H5AC_ext_config_2_int_config(config_ptr, &internal_config) !=
+         SUCCEED ) {
 
-    internal_config.incr_mode              = config_ptr->incr_mode;
-    internal_config.lower_hr_threshold     = config_ptr->lower_hr_threshold;
-    internal_config.increment              = config_ptr->increment;
-    internal_config.apply_max_increment    = config_ptr->apply_max_increment;
-    internal_config.max_increment          = config_ptr->max_increment;
-
-    internal_config.decr_mode              = config_ptr->decr_mode;
-    internal_config.upper_hr_threshold     = config_ptr->upper_hr_threshold;
-    internal_config.decrement              = config_ptr->decrement;
-    internal_config.apply_max_decrement    = config_ptr->apply_max_decrement;
-    internal_config.max_decrement          = config_ptr->max_decrement;
-    internal_config.epochs_before_eviction =
-                                  (int32_t)(config_ptr->epochs_before_eviction);
-    internal_config.apply_empty_reserve    = config_ptr->apply_empty_reserve;
-    internal_config.empty_reserve          = config_ptr->empty_reserve;
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "H5AC_ext_config_2_int_config() failed.")
+    }
 
     result = H5C_set_cache_auto_resize_config((H5C_t *)cache_ptr,
                                               &internal_config);
@@ -2371,6 +2450,14 @@ H5AC_set_cache_auto_resize_config(H5AC_t * cache_ptr,
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                     "H5C_set_cache_auto_resize_config() failed.")
     }
+
+#ifdef H5_HAVE_PARALLEL
+    if ( cache_ptr->aux_ptr != NULL ) {
+
+        ((H5AC_aux_t *)(cache_ptr->aux_ptr))->dirty_bytes_threshold = 
+            config_ptr->dirty_bytes_threshold;
+    }
+#endif /* H5_HAVE_PARALLEL */
 
 done:
 
@@ -2433,40 +2520,23 @@ H5AC_validate_config(H5AC_cache_config_t * config_ptr)
                     "config_ptr->rpt_fcn_enabled must be either TRUE or FALSE.")
     }
 
-    internal_config.version                = H5C__CURR_AUTO_SIZE_CTL_VER;
+    if ( config_ptr->dirty_bytes_threshold < H5AC__MIN_DIRTY_BYTES_THRESHOLD ) {
 
-    if ( config_ptr->rpt_fcn_enabled ) {
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "dirty_bytes_threshold too small.")
+    } else 
+    if ( config_ptr->dirty_bytes_threshold > H5AC__MAX_DIRTY_BYTES_THRESHOLD ) {
 
-        internal_config.rpt_fcn            = H5C_def_auto_resize_rpt_fcn;
-
-    } else {
-
-        internal_config.rpt_fcn            = NULL;
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "dirty_bytes_threshold too big.")
     }
 
-    internal_config.set_initial_size       = config_ptr->set_initial_size;
-    internal_config.initial_size           = config_ptr->initial_size;
-    internal_config.min_clean_fraction     = config_ptr->min_clean_fraction;
-    internal_config.max_size               = config_ptr->max_size;
-    internal_config.min_size               = config_ptr->min_size;
-    internal_config.epoch_length           =
-                                            (int64_t)(config_ptr->epoch_length);
+    if ( H5AC_ext_config_2_int_config(config_ptr, &internal_config) !=
+         SUCCEED ) {
 
-    internal_config.incr_mode              = config_ptr->incr_mode;
-    internal_config.lower_hr_threshold     = config_ptr->lower_hr_threshold;
-    internal_config.increment              = config_ptr->increment;
-    internal_config.apply_max_increment    = config_ptr->apply_max_increment;
-    internal_config.max_increment          = config_ptr->max_increment;
-
-    internal_config.decr_mode              = config_ptr->decr_mode;
-    internal_config.upper_hr_threshold     = config_ptr->upper_hr_threshold;
-    internal_config.decrement              = config_ptr->decrement;
-    internal_config.apply_max_decrement    = config_ptr->apply_max_decrement;
-    internal_config.max_decrement          = config_ptr->max_decrement;
-    internal_config.epochs_before_eviction =
-                                  (int32_t)(config_ptr->epochs_before_eviction);
-    internal_config.apply_empty_reserve    = config_ptr->apply_empty_reserve;
-    internal_config.empty_reserve          = config_ptr->empty_reserve;
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "H5AC_ext_config_2_int_config() failed.")
+    }
 
     result = H5C_validate_resize_config(&internal_config,
                                         H5C_RESIZE_CFG__VALIDATE_ALL);
@@ -2747,6 +2817,85 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5AC_check_if_write_permitted() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_ext_config_2_int_config()
+ *
+ * Purpose:     Utility function to translate an instance of 
+ *		H5AC_cache_config_t to an instance of H5C_auto_size_ctl_t.
+ *
+ *		Places translation in *int_conf_ptr and returns SUCCEED
+ *		if successful.  Returns FAIL on failure.
+ *
+ *		Does only minimal sanity checking.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              1/26/06
+ *
+ * Modifications:
+ *
+ *              None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5AC_ext_config_2_int_config(H5AC_cache_config_t * ext_conf_ptr,
+                             H5C_auto_size_ctl_t * int_conf_ptr)
+{
+    herr_t               ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5AC_ext_config_2_int_config, FAIL)
+
+    if ( ( ext_conf_ptr == NULL ) ||
+         ( ext_conf_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION ) ||
+         ( int_conf_ptr == NULL ) ) {
+
+    }
+
+    int_conf_ptr->version                = H5C__CURR_AUTO_SIZE_CTL_VER;
+
+    if ( ext_conf_ptr->rpt_fcn_enabled ) {
+
+        int_conf_ptr->rpt_fcn            = H5C_def_auto_resize_rpt_fcn;
+
+    } else {
+
+        int_conf_ptr->rpt_fcn            = NULL;
+    }
+
+    int_conf_ptr->set_initial_size       = ext_conf_ptr->set_initial_size;
+    int_conf_ptr->initial_size           = ext_conf_ptr->initial_size;
+    int_conf_ptr->min_clean_fraction     = ext_conf_ptr->min_clean_fraction;
+    int_conf_ptr->max_size               = ext_conf_ptr->max_size;
+    int_conf_ptr->min_size               = ext_conf_ptr->min_size;
+    int_conf_ptr->epoch_length           =
+                                         (int64_t)(ext_conf_ptr->epoch_length);
+
+    int_conf_ptr->incr_mode              = ext_conf_ptr->incr_mode;
+    int_conf_ptr->lower_hr_threshold     = ext_conf_ptr->lower_hr_threshold;
+    int_conf_ptr->increment              = ext_conf_ptr->increment;
+    int_conf_ptr->apply_max_increment    = ext_conf_ptr->apply_max_increment;
+    int_conf_ptr->max_increment          = ext_conf_ptr->max_increment;
+
+    int_conf_ptr->decr_mode              = ext_conf_ptr->decr_mode;
+    int_conf_ptr->upper_hr_threshold     = ext_conf_ptr->upper_hr_threshold;
+    int_conf_ptr->decrement              = ext_conf_ptr->decrement;
+    int_conf_ptr->apply_max_decrement    = ext_conf_ptr->apply_max_decrement;
+    int_conf_ptr->max_decrement          = ext_conf_ptr->max_decrement;
+    int_conf_ptr->epochs_before_eviction =
+                               (int32_t)(ext_conf_ptr->epochs_before_eviction);
+    int_conf_ptr->apply_empty_reserve    = ext_conf_ptr->apply_empty_reserve;
+    int_conf_ptr->empty_reserve          = ext_conf_ptr->empty_reserve;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_ext_config_2_int_config() */
 
 
 /*-------------------------------------------------------------------------
