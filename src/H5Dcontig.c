@@ -42,7 +42,6 @@
 #include "H5MFprivate.h"	/* File memory management		*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Pprivate.h"		/* Property lists			*/
-#include "H5Sprivate.h"		/* Dataspace functions			*/
 #include "H5Vprivate.h"		/* Vector and array functions		*/
 
 /****************/
@@ -1005,9 +1004,15 @@ H5D_contig_copy(H5F_t *f_src, H5O_layout_t *layout_src,
     hid_t       tid_src = -1;           /* Datatype ID for source datatype */
     hid_t       tid_dst = -1;           /* Datatype ID for destination datatype */
     hid_t       tid_mem = -1;           /* Datatype ID for memory datatype */
+    size_t      src_dt_size;            /* Source datatype size */
+    size_t      mem_dt_size;            /* Memory datatype size */
+    size_t      dst_dt_size;            /* Destination datatype size */
     size_t      max_dt_size;            /* Max. datatype size */
     size_t      nelmts = 0;             /* Number of elements in buffer */
-    hsize_t     total_nbytes;           /* Total number of bytes to copy */
+    size_t      src_nbytes;             /* Number of bytes to read from source */
+    size_t      mem_nbytes;             /* Number of bytes to convert in memory */
+    size_t      dst_nbytes;             /* Number of bytes to write to destination */
+    hsize_t     total_src_nbytes;       /* Total number of bytes to copy */
     size_t      buf_size;               /* Size of copy buffer */
     void       *buf = NULL;             /* Buffer for copying data */
     void       *reclaim_buf = NULL;     /* Buffer for reclaiming data */
@@ -1030,14 +1035,12 @@ H5D_contig_copy(H5F_t *f_src, H5O_layout_t *layout_src,
         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to allocate contiguous storage")
 
     /* Set up number of bytes to copy, and initial buffer size */
-    total_nbytes = layout_src->u.contig.size;
-    H5_CHECK_OVERFLOW(total_nbytes,hsize_t,size_t);
-    buf_size = MIN(H5D_XFER_MAX_TEMP_BUF_DEF, (size_t)total_nbytes);
+    total_src_nbytes = layout_src->u.contig.size;
+    H5_CHECK_OVERFLOW(total_src_nbytes,hsize_t,size_t);
+    buf_size = MIN(H5D_XFER_MAX_TEMP_BUF_DEF, (size_t)total_src_nbytes);
 
     /* If there's a source datatype, set up type conversion information */
     if(dt_src) {
-        size_t tmp_dt_size;         /* Temp. atatype size */
-
         /* Create datatype ID for src datatype */
         if((tid_src = H5I_register(H5I_DATATYPE, dt_src)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")
@@ -1063,18 +1066,23 @@ H5D_contig_copy(H5F_t *f_src, H5O_layout_t *layout_src,
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between mem and dst datatypes")
 
         /* Determine largest datatype size */
-        if(0 == (max_dt_size = H5T_get_size(dt_src)))
+        if(0 == (src_dt_size = H5T_get_size(dt_src)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
-        if(0 == (tmp_dt_size = H5T_get_size(dt_mem)))
+        if(0 == (mem_dt_size = H5T_get_size(dt_mem)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
-        max_dt_size = MAX(max_dt_size, tmp_dt_size);
-        if(0 == (tmp_dt_size = H5T_get_size(dt_dst)))
+        max_dt_size = MAX(src_dt_size, mem_dt_size);
+        if(0 == (dst_dt_size = H5T_get_size(dt_dst)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
-        max_dt_size = MAX(max_dt_size, tmp_dt_size);
+        max_dt_size = MAX(max_dt_size, dst_dt_size);
 
-        /* Set number of whole elements that fit in buffer */
+        /* Set maximum number of whole elements that fit in buffer */
         if(0 == (nelmts = buf_size / max_dt_size))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "element size too large")
+
+        /* Set the number of bytes to transfer */
+        src_nbytes = nelmts * src_dt_size;
+        dst_nbytes = nelmts * dst_dt_size;
+        mem_nbytes = nelmts * mem_dt_size;
 
         /* Adjust buffer size to be multiple of elements */
         buf_size = nelmts * max_dt_size;
@@ -1095,9 +1103,13 @@ H5D_contig_copy(H5F_t *f_src, H5O_layout_t *layout_src,
         /* Set flag to do type conversion */
         do_conv = TRUE;
     } /* end if */
-    else
+    else {
         /* Type conversion not necessary */
         do_conv = FALSE;
+
+        /* Set the number of bytes to read & write to the buffer size */
+        src_nbytes = dst_nbytes = mem_nbytes = buf_size;
+    } /* end else */
 
     /* Allocate space for copy buffer */
     HDassert(buf_size);
@@ -1113,28 +1125,34 @@ H5D_contig_copy(H5F_t *f_src, H5O_layout_t *layout_src,
     /* Loop over copying data */
     addr_src = layout_src->u.contig.addr;
     addr_dst = layout_dst->u.contig.addr;
-    while(total_nbytes > 0) {
-        size_t     nbytes;              /* Number of bytes to copy each time */
-
-        /* Compute number of bytes to copy for this pass */
-        if(total_nbytes >= buf_size)
-            nbytes = buf_size;
-        else {
-            nbytes = (size_t)total_nbytes;
+    while(total_src_nbytes > 0) {
+        /* Check if we should reduce the number of bytes to transfer */
+        if(total_src_nbytes < src_nbytes) {
+            /* Adjust bytes to transfer */
+            src_nbytes = (size_t)total_src_nbytes;
 
             /* Adjust dataspace describing buffer */
             if(do_conv) {
+                /* Adjust destination & memory bytes to transfer */
+                nelmts = src_nbytes / src_dt_size;
+                dst_nbytes = nelmts * dst_dt_size;
+                mem_nbytes = nelmts * mem_dt_size;
+
                 /* Adjust size of buffer's dataspace dimension */
-                buf_dim = nelmts = nbytes / max_dt_size;
+                buf_dim = nelmts;
 
                 /* Adjust size of buffer's dataspace */
                 if(H5S_set_extent_real(buf_space, &buf_dim) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "unable to change buffer dataspace size")
             } /* end if */
-        } /* end else */
+            else {
+                /* Adjust destination & memory bytes to transfer */
+                dst_nbytes = mem_nbytes = src_nbytes;
+            } /* end else */
+        } /* end if */
 
         /* Read raw data from source file */
-        if(H5F_block_read(f_src, H5FD_MEM_DRAW, addr_src, nbytes, H5P_DATASET_XFER_DEFAULT, buf) < 0)
+        if(H5F_block_read(f_src, H5FD_MEM_DRAW, addr_src, src_nbytes, H5P_DATASET_XFER_DEFAULT, buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read raw data")
 
         /* Perform datatype conversion, if necessary */
@@ -1144,27 +1162,25 @@ H5D_contig_copy(H5F_t *f_src, H5O_layout_t *layout_src,
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed")
 
             /* Copy into another buffer, to reclaim memory later */
-            HDmemcpy(reclaim_buf, buf, nbytes);
+            HDmemcpy(reclaim_buf, buf, mem_nbytes);
 
             /* Convert from memory to destination file */
 	    if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, NULL, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed")
+
+            /* Reclaim space from variable length data */
+            if(H5D_vlen_reclaim(tid_mem, buf_space, H5P_DATASET_XFER_DEFAULT, reclaim_buf) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to reclaim variable-length data")
 	} /* end if */
 
         /* Write raw data to destination file */
-        if(H5F_block_write(f_dst, H5FD_MEM_DRAW, addr_dst, nbytes, H5P_DATASET_XFER_DEFAULT, buf) < 0)
+        if(H5F_block_write(f_dst, H5FD_MEM_DRAW, addr_dst, dst_nbytes, H5P_DATASET_XFER_DEFAULT, buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write raw data")
 
-        /* Reclaim any space from variable length data */
-        if(do_conv) {
-            if(H5D_vlen_reclaim(tid_mem, buf_space, H5P_DATASET_XFER_DEFAULT, reclaim_buf) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to reclaim variable-length data")
-        } /* end if */
-
         /* Adjust loop variables */
-        addr_src += nbytes;
-        addr_dst += nbytes;
-        total_nbytes -= nbytes;
+        addr_src += src_nbytes;
+        addr_dst += dst_nbytes;
+        total_src_nbytes -= src_nbytes;
     } /* end while */
 
 done:

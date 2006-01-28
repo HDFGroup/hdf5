@@ -625,9 +625,9 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src,
          H5F_t *file_dst, hid_t dxpl_id, H5SL_t UNUSED *map_list, void *_udata)
 {
     H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */
-    H5O_layout_t     *layout_src = (H5O_layout_t *) mesg_src;
-    H5O_layout_t           *layout_dst = NULL;
-    void                   *ret_value;          /* Return value */
+    H5O_layout_t       *layout_src = (H5O_layout_t *) mesg_src;
+    H5O_layout_t       *layout_dst = NULL;
+    void               *ret_value;                              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_layout_copy_file)
 
@@ -648,9 +648,15 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src,
 	    if(layout_src->u.compact.buf) {
             	if(NULL == (layout_dst->u.compact.buf = H5MM_malloc(layout_src->u.compact.size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset")
-HDassert(!udata->src_dtype);
-            	HDmemcpy(layout_dst->u.compact.buf, layout_src->u.compact.buf, layout_src->u.compact.size);
+
+                /* copy compact raw data */
+                if(H5D_compact_copy(file_src, layout_src, file_dst, layout_dst, udata->src_dtype, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to copy chunked storage")
+
             	layout_dst->u.compact.dirty = TRUE;
+
+                /* Freed by copy routine */
+                udata->src_dtype = NULL;
 	    }
             break;
 
@@ -667,13 +673,16 @@ HDassert(!udata->src_dtype);
 
         case H5D_CHUNKED:
             if(H5F_addr_defined(layout_src->u.chunk.addr)) {
-HDassert(!udata->src_dtype);
                 /* layout is not created in the destination file, undef btree address */
                 layout_dst->u.chunk.addr = HADDR_UNDEF;
 
                 /* create chunked layout */
-                if(H5D_istore_copy(file_src, layout_src, file_dst, layout_dst, dxpl_id) < 0)
+                if(H5D_istore_copy(file_src, layout_src, file_dst, layout_dst, 
+                        udata->src_dtype, udata->src_pline, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to copy chunked storage")
+
+                /* Freed by copy routine */
+                udata->src_dtype = NULL;
             } /* if ( H5F_addr_defined(layout_srct->u.chunk.addr)) */
             break;
 

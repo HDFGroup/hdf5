@@ -18,11 +18,14 @@
 #ifndef _H5Sprivate_H
 #define _H5Sprivate_H
 
+/* Include package's public header */
 #include "H5Spublic.h"
+
+/* Public headers needed by this file */
+#include "H5Dpublic.h"		/* Datasets				*/
 
 /* Private headers needed by this file */
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5Dprivate.h"		/* Dataset functions			*/
 #include "H5Fprivate.h"		/* Files				*/
 #include "H5Gprivate.h"		/* Groups				*/
 #include "H5Oprivate.h"		/* Object headers		  	*/

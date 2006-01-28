@@ -4120,7 +4120,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src,
        continuation block. 
      */
     for(chunkno = 0; chunkno < oh_src->nchunks; chunkno++) {
-        size_t              chunk_size = oh_src->chunk[chunkno].size;
+        size_t chunk_size = oh_src->chunk[chunkno].size;
 
         /* '0th' chunk is preceded by object header prefix */
         if(0 == chunkno) {
@@ -4267,7 +4267,9 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src,
     if(H5SL_insert(map_list, addr_map, &(addr_map->src_addr)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object into skip list")
 
-    /* "post copy" loop over messages, to fix up any messages which require a complete object header for destination object */
+    /* "post copy" loop over messages, to fix up any messages which require a complete 
+     * object header for destination object 
+     */
     for(mesgno = 0; mesgno < oh_src->nmesgs; mesgno++) {
         /* Set up convenience variables */
         mesg_src = &(oh_src->mesg[mesgno]);

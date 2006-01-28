@@ -36,6 +36,8 @@ static void *H5O_pline_copy (const void *_mesg, void *_dest, unsigned update_fla
 static size_t H5O_pline_size (const H5F_t *f, const void *_mesg);
 static herr_t H5O_pline_reset (void *_mesg);
 static herr_t H5O_pline_free (void *_mesg);
+static herr_t H5O_pline_pre_copy_file(H5F_t *file_src, void *mesg_src,
+    void *_udata);
 static herr_t H5O_pline_debug (H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			       FILE * stream, int indent, int fwidth);
 
@@ -54,7 +56,7 @@ const H5O_msg_class_t H5O_MSG_PLINE[1] = {{
     NULL,			/* link method			*/
     NULL,			/* get share method		*/
     NULL, 			/* set share method		*/
-    NULL,			/* pre copy native value to file */
+    H5O_pline_pre_copy_file,	/* pre copy native value to file */
     NULL,			/* copy native value to file    */
     NULL,			/* post copy native value to file    */
     H5O_pline_debug		/* debug the message		*/
@@ -421,6 +423,49 @@ H5O_pline_free (void *mesg)
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_pline_pre_copy_file
+ *
+ * Purpose:     Perform any necessary actions before copying message between
+ *              files
+ *
+ * Return:      Success:        Non-negative
+ *
+ *              Failure:        Negative
+ *
+ * Programmer:  Peter Cao 
+ *              December 27, 2005 
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_pline_pre_copy_file(H5F_t *file_src, void *mesg_src, void *_udata)
+{
+    H5O_pline_t        *pline_src = (H5O_pline_t *)mesg_src;    /* Source datatype */
+    H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */
+    herr_t             ret_value = SUCCEED;                     /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_pline_pre_copy_file)
+
+    /* check args */
+    HDassert(file_src);
+    HDassert(pline_src);
+
+    /* If the user data is non-NULL, assume we are copying a dataset
+     * and make a copy of the filter pipeline for later in
+     * the object copying process.
+     */
+    if(udata) {
+        if(NULL == (udata->src_pline = H5O_copy(H5O_PLINE_ID, pline_src, udata->src_pline)))
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to copy")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_pline_pre_copy_file() */
+
 
 
 /*-------------------------------------------------------------------------

@@ -19,9 +19,11 @@
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Apkg.h"		/* Attributes				*/
+#include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5Gprivate.h"		/* Groups				*/
+#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5Spkg.h"		/* Dataspaces				*/
@@ -644,6 +646,10 @@ done:
  * Programmer:  Quincey Koziol
  *              November 1, 2005 
  *
+ * Modifications: Peter Cao 
+ *              December 17, 2005
+ *              Datatype conversion for variable length datatype
+ *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -652,7 +658,16 @@ H5O_attr_copy_file(H5F_t UNUSED *file_src, void *native_src,
 {
     H5A_t        *attr_src = (H5A_t *)native_src;
     H5A_t        *attr_dst = NULL;
-    void         *ret_value;             /* Return value */
+
+    /* for dataype conversion */
+    hid_t       tid_src = -1;           /* Datatype ID for source datatype */
+    hid_t       tid_dst = -1;           /* Datatype ID for destination datatype */
+    hid_t       tid_mem = -1;           /* Datatype ID for memory datatype */
+    void       *buf = NULL;             /* Buffer for copying data */
+    void       *reclaim_buf = NULL;     /* Buffer for reclaiming data */
+    hid_t       buf_sid = -1;           /* ID for buffer dataspace */
+
+    void        *ret_value;             /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_copy_file)
 
@@ -675,15 +690,22 @@ H5O_attr_copy_file(H5F_t UNUSED *file_src, void *native_src,
 
     /* Copy attribute's name */
     attr_dst->name = H5MM_strdup(attr_src->name);
+    HDassert(attr_dst->name);
 
     /* Copy attribute's datatype */
     /* (Start destination datatype as transient, even if source is named) */
     attr_dst->dt = H5T_copy(attr_src->dt, H5T_COPY_ALL);
+    HDassert(attr_dst->dt);
+
+    /* Set the location of the destination datatype */
+    if(H5T_set_loc(attr_dst->dt, file_dst, H5T_LOC_DISK) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "cannot mark datatype on disk")
 
     /* Check for named datatype being copied */
     if(H5T_committed(attr_src->dt)) {
         H5O_loc_t         *src_oloc;           /* Pointer to source datatype's object location */
         H5O_loc_t         *dst_oloc;           /* Pointer to dest. datatype's object location */
+        H5O_shared_t	  sh_mesg;
 
         /* Get group entries for source & destination */
         src_oloc = H5T_oloc(attr_src->dt);
@@ -698,22 +720,156 @@ H5O_attr_copy_file(H5F_t UNUSED *file_src, void *native_src,
         /* Copy the shared object from source to destination */
         if(H5O_copy_header_map(src_oloc, dst_oloc, dxpl_id, map_list) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy object")
+
+        /* Reset shared message information */
+        HDmemset(&sh_mesg, 0, sizeof(H5O_shared_t));
+
+        /* Get shared message information for datatype */
+        if(H5O_get_share(H5O_DTYPE_ID, file_dst, attr_src->dt, &sh_mesg/*out*/) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to get shared message")
+
+        /* Compute shared message size for datatype */
+        attr_dst->dt_size = H5O_raw_size(H5O_SHARED_ID, file_dst, &sh_mesg);
     } /* end if */
+    else
+        attr_dst->dt_size = H5O_raw_size(H5O_DTYPE_ID, file_dst, attr_src->dt);
+    HDassert(attr_dst->dt_size > 0);
+    attr_dst->ds_size = H5S_raw_size(file_dst, attr_src->ds);
+    HDassert(attr_dst->ds_size > 0);
 
-    /* Copy the guts of the attribute */
+    /* Copy the dataspace for the attribute */
     attr_dst->ds = H5S_copy(attr_src->ds, FALSE);
+    HDassert(attr_dst->ds);
 
+    /* Compute the size of the data */
+    H5_ASSIGN_OVERFLOW(attr_dst->data_size, H5S_GET_EXTENT_NPOINTS(attr_dst->ds) * H5T_get_size(attr_dst->dt), hsize_t, size_t);
+
+    /* Copy (& convert) the data, if necessary */
     if(attr_src->data) {
-        if(NULL == (attr_dst->data = H5FL_BLK_MALLOC(attr_buf, attr_src->data_size)))
+        if(NULL == (attr_dst->data = H5FL_BLK_MALLOC(attr_buf, attr_dst->data_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-        HDmemcpy(attr_dst->data, attr_src->data, attr_src->data_size);
+        /* Check if we need to convert data */
+        if(H5T_detect_class(attr_src->dt, H5T_VLEN) > 0) {
+            H5T_path_t  *tpath_src_mem, *tpath_mem_dst;   /* Datatype conversion paths */
+            H5T_t *dt_mem;              /* Memory datatype */
+            size_t src_dt_size;         /* Source datatype size */
+            size_t tmp_dt_size;         /* Temp. datatype size */
+            size_t max_dt_size;         /* Max atatype size */
+            H5S_t *buf_space;           /* Dataspace describing buffer */
+            hsize_t buf_dim;            /* Dimension for buffer */
+            size_t nelmts;              /* Number of elements in buffer */
+            size_t buf_size;            /* Size of copy buffer */
+
+            /* Create datatype ID for src datatype */
+            if((tid_src = H5I_register(H5I_DATATYPE, attr_src->dt)) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register source file datatype")
+
+            /* create a memory copy of the variable-length datatype */
+            if(NULL == (dt_mem = H5T_copy(attr_src->dt, H5T_COPY_TRANSIENT)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy")
+            if((tid_mem = H5I_register(H5I_DATATYPE, dt_mem)) < 0)
+                HGOTO_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register memory datatype")
+
+            /* create variable-length datatype at the destinaton file */
+            if((tid_dst = H5I_register(H5I_DATATYPE, attr_dst->dt)) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register destination file datatype")
+
+            /* Set up the conversion functions */
+            if(NULL == (tpath_src_mem = H5T_path_find(attr_src->dt, dt_mem, NULL, NULL, dxpl_id, FALSE)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to convert between src and mem datatypes")
+            if(NULL == (tpath_mem_dst = H5T_path_find(dt_mem, attr_dst->dt, NULL, NULL, dxpl_id, FALSE)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to convert between mem and dst datatypes")
+    
+            /* Determine largest datatype size */
+            if(0 == (src_dt_size = H5T_get_size(attr_src->dt)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to determine datatype size")
+            if(0 == (tmp_dt_size = H5T_get_size(dt_mem)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to determine datatype size")
+            max_dt_size = MAX(src_dt_size, tmp_dt_size);
+            if(0 == (tmp_dt_size = H5T_get_size(attr_dst->dt)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to determine datatype size")
+            max_dt_size = MAX(max_dt_size, tmp_dt_size);
+
+            /* Set number of whole elements that fit in buffer */
+            if(0 == (nelmts = attr_src->data_size / src_dt_size))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "element size too large")
+
+            /* Set up number of bytes to copy, and initial buffer size */
+            buf_size = nelmts * max_dt_size;
+
+            /* Create dataspace for number of elements in buffer */
+            buf_dim = nelmts;
+    
+            /* Create the space and set the initial extent */
+            if(NULL == (buf_space = H5S_create_simple((unsigned)1, &buf_dim, NULL)))
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, NULL, "can't create simple dataspace")
+    
+            /* Atomize */
+            if((buf_sid = H5I_register(H5I_DATASPACE, buf_space)) < 0) {
+                H5S_close(buf_space);
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, NULL, "unable to register dataspace ID")
+            } /* end if */
+    
+            /* Allocate memory for recclaim buf */
+            if(NULL == (reclaim_buf = H5FL_BLK_MALLOC(attr_buf, buf_size)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation NULLed for raw data chunk")
+    
+            /* Allocate memory for copying the chunk */
+            if(NULL == (buf = H5FL_BLK_MALLOC(attr_buf, buf_size)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation NULLed for raw data chunk")
+    
+            HDmemcpy(buf, attr_src->data, attr_src->data_size);
+    
+            /* Convert from source file to memory */
+            if(H5T_convert(tpath_src_mem, tid_src, tid_mem, nelmts, (size_t)0, (size_t)0, buf, NULL, dxpl_id) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "datatype conversion NULLed")
+    
+            HDmemcpy(reclaim_buf, buf, buf_size);
+    
+            /* Convert from memory to destination file */
+            if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, NULL, dxpl_id) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "datatype conversion NULLed")
+    
+            HDmemcpy(attr_dst->data, buf, attr_dst->data_size);
+    
+            if(H5D_vlen_reclaim(tid_mem, buf_space, H5P_DATASET_XFER_DEFAULT, reclaim_buf) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_BADITER, NULL, "unable to reclaim variable-length data")
+        }  /* type conversion */
+        else {
+            HDassert(attr_dst->data_size == attr_src->data_size);
+            HDmemcpy(attr_dst->data, attr_src->data, attr_src->data_size);
+        } /* end else */
     } /* end if */
+
+    /* Indicate that the fill values aren't to be written out */
+    attr_dst->initialized = TRUE;
 
     /* Set return value */
     ret_value = attr_dst;
 
 done:
+    if(buf_sid > 0)
+        if(H5I_dec_ref(buf_sid) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, NULL, "Can't decrement temporary dataspace ID")
+    if(tid_src > 0)
+        /* Don't decrement ID, we want to keep underlying datatype */
+        if(H5I_remove(tid_src) == NULL)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID")
+    if(tid_dst > 0)
+        /* Don't decrement ID, we want to keep underlying datatype */
+        if(H5I_remove(tid_dst) == NULL)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID")
+    if(tid_mem > 0)
+        /* Decrement the memory datatype ID, it's transient */
+        if(H5I_dec_ref(tid_mem) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID")
+    if(buf)
+        H5FL_BLK_FREE(attr_buf, buf);
+    if(reclaim_buf)
+        H5FL_BLK_FREE(attr_buf, reclaim_buf);
+
+    /* Release destination attribute information on failure */
     if(!ret_value)
         if(attr_dst)
             (void)H5A_free(attr_dst);

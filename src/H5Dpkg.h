@@ -34,7 +34,7 @@
 #include "H5Gprivate.h"		/* Groups 			  	*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Sprivate.h"		/* Dataspaces 				*/
-#include "H5Tprivate.h"		/* Datatype functions			*/
+#include "H5Tprivate.h"		/* Datatypes 				*/
 
 /**************************/
 /* Package Private Macros */
@@ -198,8 +198,6 @@ extern H5D_dxpl_cache_t H5D_def_dxpl_cache;
 
 H5_DLL herr_t H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset, H5D_time_alloc_t time_alloc,
                         hbool_t update_time, hbool_t full_overwrite);
-H5_DLL herr_t H5D_vlen_reclaim(hid_t type_id, H5S_t *space, hid_t plist_id,
-    void *buf);
 
 /* Functions that perform serial I/O operations */
 H5_DLL herr_t H5D_select_fscat (H5D_io_info_t *io_info,
@@ -247,6 +245,8 @@ H5_DLL ssize_t H5D_compact_writevv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[],
     const void *buf);
+H5_DLL herr_t H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src,
+    H5F_t *f_dst, H5O_layout_t *layout_dst, H5T_t *src_dtype, hid_t dxpl_id);
 
 /* Functions that operate on indexed storage */
 /* forward reference for collective-chunk IO use */
@@ -278,7 +278,7 @@ H5_DLL ssize_t H5D_istore_writevv(const H5D_io_info_t *io_info,
 H5_DLL haddr_t H5D_istore_get_addr(const H5D_io_info_t *io_info,
     struct H5D_istore_ud1_t *_udata);
 H5_DLL herr_t H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src,
-    H5F_t *f_dst, H5O_layout_t *layout_dst, hid_t dxpl_id);
+    H5F_t *f_dst, H5O_layout_t *layout_dst, H5T_t *src_dtype, H5O_pline_t *pline, hid_t dxpl_id);
 
 /* Functions that operate on external file list (efl) storage */
 H5_DLL ssize_t H5D_efl_readvv(const H5D_io_info_t *io_info,

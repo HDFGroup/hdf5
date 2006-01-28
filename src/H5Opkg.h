@@ -112,6 +112,7 @@ struct H5O_t {
 /* Callback information for copying dataset */
 typedef struct {
     H5T_t *src_dtype;                   /* Copy of datatype for dataset */
+    H5O_pline_t *src_pline;             /* Copy of filter pipeline for dataet */
 } H5D_copy_file_ud_t;
 
 /* Class for types of objects in file */
