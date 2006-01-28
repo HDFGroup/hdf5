@@ -216,7 +216,7 @@ H5T_vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
     assert(loc>H5T_VLEN_BADLOC && loc<H5T_VLEN_MAXLOC);
 
     /* Only change the location if it's different */
-    if(loc!=dt->shared->u.vlen.loc) {
+    if(loc != dt->shared->u.vlen.loc || f != dt->shared->u.vlen.f) {
         /* Indicate that the location changed */
         ret_value=TRUE;
 
