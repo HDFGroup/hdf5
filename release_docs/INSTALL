@@ -645,5 +645,22 @@
         scripts are installed under bin subdirectory when make install is run.
 
 
+6.1 Using the C++ API
+	To use the C++ API, one must include the header file H5Cpp.h
+	in the application.  Please refer to the examples in c++/examples
+	for sample code.
+
+	A doxygen-generated Reference Manual of the C++ API is provided 
+	in the doc/html/cpplus_RM directory.  It can be invoked from 
+	index.html.  If an updated version or a different format is 
+	desired, users can re-generate this document with Doxygen.
+
+	When running in c++/src, Doxygen will put the generated html 
+	files in doc/html/cpplus_RM.  Users may specify a different
+	location by editing the field OUTPUT_DIRECTORY in the configuration
+	file c++/src/cpp_doc_config.  The field HTML_STYLESHEET specifies
+	the stylesheet that can be used to change the document layout.
+
+
 7. Support
 	Support is described in the README file.
