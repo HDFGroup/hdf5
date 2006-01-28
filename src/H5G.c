@@ -232,10 +232,11 @@ done:
 hid_t
 H5Gopen(hid_t loc_id, const char *name)
 {
-    hid_t       ret_value = FAIL;
     H5G_t       *grp = NULL;
     H5G_entry_t	*loc = NULL;
     H5G_entry_t	 ent;
+    hbool_t      ent_found = FALSE;     /* Entry at 'name' found */
+    hid_t       ret_value = FAIL;
 
     FUNC_ENTER_API(H5Gopen, FAIL);
     H5TRACE2("i","is",loc_id,name);
@@ -249,6 +250,11 @@ H5Gopen(hid_t loc_id, const char *name)
     /* Open the parent group, making sure it's a group */
     if(H5G_find(loc, name, &ent/*out*/, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
+    ent_found = TRUE;
+
+    /* Check that the object found is the correct type */
+    if(H5G_get_type(&ent, H5AC_dxpl_id) != H5G_GROUP)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /* Open the group */
     if((grp = H5G_open(&ent, H5AC_dxpl_id)) == NULL)
@@ -260,8 +266,12 @@ H5Gopen(hid_t loc_id, const char *name)
 
 done:
     if(ret_value < 0) {
-        if(grp!=NULL)
+        if(grp != NULL)
             H5G_close(grp);
+        else {
+            if(ent_found && ent.header)
+                H5G_name_free(&ent);
+        } /* end else */
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
