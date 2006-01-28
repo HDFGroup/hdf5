@@ -4133,6 +4133,88 @@ test_misc24(void)
     } H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Dopen");
 
+    /* Try again, with the object already open through valid call */
+    /* Open group */
+    group_id = H5Gopen(file_id, MISC24_GROUP_NAME);
+    CHECK(group_id, FAIL, "H5Gopen");
+
+    H5E_BEGIN_TRY {
+        tmp_id = H5Dopen(file_id, MISC24_GROUP_NAME);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Dopen");
+
+    H5E_BEGIN_TRY {
+        tmp_id = H5Dopen(file_id, MISC24_GROUP_LINK);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Dopen");
+
+    H5E_BEGIN_TRY {
+        tmp_id = H5Topen(file_id, MISC24_GROUP_NAME);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Topen");
+
+    H5E_BEGIN_TRY {
+        tmp_id = H5Topen(file_id, MISC24_GROUP_LINK);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Topen");
+
+    ret = H5Gclose(group_id);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Open dataset */
+    dset_id = H5Dopen(file_id, MISC24_DATASET_NAME);
+    CHECK(dset_id, FAIL, "H5Dopen");
+
+    H5E_BEGIN_TRY {
+        tmp_id = H5Gopen(file_id, MISC24_DATASET_NAME);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Gopen");
+
+    H5E_BEGIN_TRY {
+        tmp_id = H5Gopen(file_id, MISC24_DATASET_LINK);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Gopen");
+
+    H5E_BEGIN_TRY {
+        tmp_id = H5Topen(file_id, MISC24_DATASET_NAME);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Topen");
+
+    H5E_BEGIN_TRY {
+        tmp_id = H5Topen(file_id, MISC24_DATASET_LINK);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Topen");
+
+    ret = H5Dclose(dset_id);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Open named datatype */
+    type_id = H5Topen(file_id, MISC24_DATATYPE_NAME);
+    CHECK(ret, FAIL, "H5Topen");
+
+    H5E_BEGIN_TRY {
+        tmp_id = H5Gopen(file_id, MISC24_DATATYPE_NAME);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Gopen");
+
+    H5E_BEGIN_TRY {
+        tmp_id = H5Gopen(file_id, MISC24_DATATYPE_LINK);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Gopen");
+
+    H5E_BEGIN_TRY {
+        tmp_id = H5Dopen(file_id, MISC24_DATATYPE_NAME);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Dopen");
+
+    H5E_BEGIN_TRY {
+        tmp_id = H5Dopen(file_id, MISC24_DATATYPE_LINK);
+    } H5E_END_TRY;
+    VERIFY(tmp_id, FAIL, "H5Dopen");
+
+    ret = H5Tclose(type_id);
+    CHECK(ret, FAIL, "H5Tclose");
+
     /* Close file */
     ret = H5Fclose(file_id);
     CHECK(ret, FAIL, "H5Fclose");
