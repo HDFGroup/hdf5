@@ -413,6 +413,12 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name objcopydll
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name cache_api
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name cache_apidll
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -604,6 +610,42 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libtest
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "cache_api"="..\..\TEST\cache_api\cache_api.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtest
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "cache_apidll"="..\..\TEST\cache_apidll\cache_apidll.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtestD
     End Project Dependency
 }}}
 
