@@ -2834,7 +2834,9 @@ smoke_check_2(void)
  *
  * Modifications:
  *
- *		None.
+ *		Added code intended to ensure correct operation with large
+ *		numbers of processors.
+ *							JRM - 1/31/06
  *	
  *****************************************************************************/
 
@@ -2921,6 +2923,10 @@ smoke_check_3(void)
         min_idx = 0;
         max_idx = ((NUM_DATA_ENTRIES / 10) / 
                    ((file_mpi_rank + 1) * (file_mpi_rank + 1))) - 1;
+        if ( max_idx <= min_idx ) {
+
+            max_idx = min_idx + 10;
+        }
 
         for ( i = (NUM_DATA_ENTRIES / 2) - 1; i >= 0; i-=2 )
         {
@@ -2933,6 +2939,10 @@ smoke_check_3(void)
         min_idx = 0;
         max_idx = ((NUM_DATA_ENTRIES / 10) / 
                    ((file_mpi_rank + 3) * (file_mpi_rank + 3))) - 1;
+        if ( max_idx <= min_idx ) {
+
+            max_idx = min_idx + 10;
+        }
 
         for ( i = 0; i < (NUM_DATA_ENTRIES / 2); i+=2 )
         {
@@ -2998,7 +3008,7 @@ smoke_check_3(void)
             }
         }
 
-        /* verify that all instance of datum are back where the started 
+        /* verify that all instances of datum are back where the started 
          * and are clean.
          */
 
@@ -3076,7 +3086,9 @@ smoke_check_3(void)
  *
  * Modifications:
  *
- *		None.
+ *		Added code intended to insure correct operation with large
+ *		numbers of processors.
+ *							JRM - 1/31/06
  *	
  *****************************************************************************/
 
@@ -3130,7 +3142,7 @@ smoke_check_4(void)
         }
 
         
-        min_count = 100 * file_mpi_rank;
+        min_count = 100 * (file_mpi_rank % 4);
         max_count = min_count + 50;
 
         for ( i = 0; i < (NUM_DATA_ENTRIES / 4); i++ )
@@ -3145,7 +3157,7 @@ smoke_check_4(void)
             }
         }
 
-        min_count = 10 * file_mpi_rank;
+        min_count = 10 * (file_mpi_rank % 4);
         max_count = min_count + 100;
 
         for ( i = (NUM_DATA_ENTRIES / 4); i < (NUM_DATA_ENTRIES / 2); i++ )
@@ -3184,7 +3196,7 @@ smoke_check_4(void)
                                            min_idx, max_idx, 0, 100);
         }
 
-        min_count = 10 * file_mpi_rank;
+        min_count = 10 * (file_mpi_rank % 4);
         max_count = min_count + 100;
 
         /* rename the first half of the entries... */
@@ -3212,7 +3224,7 @@ smoke_check_4(void)
         /* finally, do some dirty lock/unlocks while we give the cache
          * a chance t reduce its size.
          */
-        min_count = 100 * file_mpi_rank;
+        min_count = 100 * (file_mpi_rank % 4);
         max_count = min_count + 100;
 
         for ( i = 0; i < (NUM_DATA_ENTRIES / 2); i+=2 )
