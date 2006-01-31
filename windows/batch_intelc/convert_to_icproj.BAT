@@ -60,6 +60,8 @@ ICProjConvert80  windows\test\b_plus_tree\b_plus_tree.vcproj /IC  >> convert_int
 ICProjConvert80  windows\test\b_plus_treedll\b_plus_treedll.vcproj /IC  >> convert_intel.log
 ICProjConvert80  windows\test\cache\cache.vcproj /IC  >> convert_intel.log
 ICProjConvert80  windows\test\cachedll\cachedll.vcproj /IC  >> convert_intel.log
+ICProjConvert80  windows\test\cache_api\cache_api.vcproj /IC  >> convert_intel.log
+ICProjConvert80  windows\test\cache_apidll\cache_apidll.vcproj /IC  >> convert_intel.log
 ICProjConvert80  windows\test\chunk\chunk.vcproj /IC  >> convert_intel.log
 ICProjConvert80  windows\test\chunkdll\chunkdll.vcproj /IC  >> convert_intel.log
 ICProjConvert80  windows\test\cmpd_dset\cmpd_dset.vcproj /IC  >> convert_intel.log

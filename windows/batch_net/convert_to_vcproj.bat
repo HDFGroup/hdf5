@@ -66,6 +66,8 @@ echo ************************************************************ >> convert.log
   convert.js %1\windows\test\b_plus_treedll\b_plus_treedll.dsp  %1\windows\test\b_plus_treedll\b_plus_treedll.vcproj  >> convert.log
   convert.js %1\windows\test\cache\cache.dsp  %1\windows\test\cache\cache.vcproj  >> convert.log
   convert.js %1\windows\test\cachedll\cachedll.dsp  %1\windows\test\cachedll\cachedll.vcproj  >> convert.log
+  convert.js %1\windows\test\cache_api\cache_api.dsp  %1\windows\test\cache_api\cache_api.vcproj  >> convert.log
+  convert.js %1\windows\test\cache_apidll\cache_apidll.dsp  %1\windows\test\cache_apidll\cache_apidll.vcproj  >> convert.log
   convert.js %1\windows\test\chunk\chunk.dsp  %1\windows\test\chunk\chunk.vcproj  >> convert.log
   convert.js %1\windows\test\chunkdll\chunkdll.dsp  %1\windows\test\chunkdll\chunkdll.vcproj  >> convert.log
   convert.js %1\windows\test\cmpd_dset\cmpd_dset.dsp  %1\windows\test\cmpd_dset\cmpd_dset.vcproj  >> convert.log
