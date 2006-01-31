@@ -56,6 +56,13 @@ cache%2\%1\cache%2
 
 echo.
 echo ============================
+echo Testing cache_api
+echo ============================
+
+cache_api%2\%1\cache_api%2
+
+echo.
+echo ============================
 echo Testing b_plus_tree
 echo ============================
 
