@@ -91,5 +91,9 @@ LINK32=link.exe
 
 SOURCE=..\..\..\test\cache.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\..\test\cache_common.c
+# End Source File
 # End Target
 # End Project
