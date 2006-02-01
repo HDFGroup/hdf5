@@ -115,7 +115,9 @@ RESTORE_VERSION()
 {
     if [ X-${VERS_OLD} != X- ]; then
 	echo restoring version information back to $VERS_OLD
-	bin/h5vers -s $VERS_OLD
+	rm -f config/lt_vers.am
+	cp $tmpdir/lt_vers.am config/lt_vers.am
+	bin/h5vers -s $VERS_OLD > vers_out
 	VERS_OLD=
     fi
 }
@@ -170,6 +172,9 @@ trap RESTORE_VERSION 0
 
 if [ X$pmode = Xyes ]; then
     VERS_OLD=$VERS
+    # Copy old version of config/lt_vers.am, since it's hard to
+    # "undo" changes to it.
+    cp config/lt_vers.am $tmpdir
     # Set version information to m.n.r-of$today.
     # (h5vers does not correctly handle just m.n.r-$today.)
     VERS=`echo $VERS | sed -e s/-.*//`-of$today
@@ -253,13 +258,13 @@ cp release_docs/RELEASE.txt $DEST/$HDF5_VERS-RELEASE.txt
 # Restore previous Makefile if existed.
 test -f $tmpdir/Makefile.x && mv $tmpdir/Makefile.x Makefile
 
-# Remove temporary things
-rm -rf $tmpdir
-
 # Restore OLD version information, then no need for trap.
 if [ X$pmode = Xyes ]; then
     RESTORE_VERSION
     trap 0
 fi
+
+# Remove temporary things
+#rm -rf $tmpdir
 
 exit 0

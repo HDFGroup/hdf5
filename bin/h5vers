@@ -233,11 +233,17 @@ if ($set) {
   @newver = @curver;
 }
 
+# Note if the version increased or decreased
+my $version_increased="";
 # Print a warning if the version got smaller (don't check annot field)
 if ($newver[0]*1000000 + $newver[1]*1000 + $newver[2] <
     $curver[0]*1000000 + $curver[1]*1000 + $curver[2]) {
   printf STDERR "Warning: version decreased from %d.%d.%d to %d.%d.%d\n",
     @curver[0,1,2], @newver[0,1,2];
+}
+if ($newver[0]*1000000 + $newver[1]*1000 + $newver[2] >
+    $curver[0]*1000000 + $curver[1]*1000 + $curver[2]) {
+  $version_increased="true";
 }
 
 # Update the version number if it changed.
@@ -252,8 +258,9 @@ if ($newver[0]!=$curver[0] ||
   close FILE;
 }
 
-# Update the libtool shared library version in src/Makefile.am
-if ($LT_VERS) {
+# Update the libtool shared library version in src/Makefile.am if
+# the version number has increased.
+if ($LT_VERS && $version_increased) {
   open FILE, $LT_VERS or die "$LT_VERS: $!\n";
   my ($contentsy) = join "", <FILE>;
   close FILE;
