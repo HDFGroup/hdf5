@@ -159,6 +159,8 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-GetFaplGass">H5Pget_fapl_gass</a>
     <li><a href="#Property-SetFaplSrb">H5Pset_fapl_srb</a>
     <li><a href="#Property-GetFaplSrb">H5Pget_fapl_srb</a>
+    <li><a href="#Property-SetSmallData">H5Pset_small_data_block_size</a>
+    <li><a href="#Property-GetSmallData">H5Pget_small_data_block_size</a>
 <!-- FOR USE WITH PRINT VERSION ---------------------------------------->
     <!--
     <li><a href="#Property-xxx">xxx</a>
@@ -258,11 +260,6 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-GetDxplMpio">H5Pget_dxpl_mpio</a>&nbsp;&nbsp;&nbsp;||
     <li><a href="#Property-SetDxplMulti">H5Pset_dxpl_multi</a>
     <li><a href="#Property-GetDxplMulti">H5Pget_dxpl_multi</a>
-    <li><a href="#Property-SetMultiType">H5Pset_multi_type</a> 
-    <li><a href="#Property-GetMultiType">H5Pget_multi_type</a>
-        <br>&nbsp;
-    <li><a href="#Property-SetSmallData">H5Pset_small_data_block_size</a>
-    <li><a href="#Property-GetSmallData">H5Pget_small_data_block_size</a>
   </ul>
 </td>
 <td valign="top" width="3%">&nbsp;</td>
@@ -325,7 +322,7 @@ which require many different parameters to be easily manipulated.
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   available only in <br>
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  the parallel HDF5</i>
+  the parallel HDF5<br>
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   library.</i>
 
@@ -388,6 +385,8 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-GetFaplGass">H5Pget_fapl_gass</a>
     <li><a href="#Property-SetFaplSrb">H5Pset_fapl_srb</a>
     <li><a href="#Property-GetFaplSrb">H5Pget_fapl_srb</a>
+    <li><a href="#Property-SetSmallData">H5Pset_small_data_block_size</a>
+    <li><a href="#Property-GetSmallData">H5Pget_small_data_block_size</a>
     <!--
     <li><a href="#Property-xxx">xxx</a>
     <li><a href="#Property-xxx">xxx</a>&nbsp;&nbsp;&nbsp;||
@@ -454,11 +453,6 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-GetDxplMpio">H5Pget_dxpl_mpio</a>&nbsp;&nbsp;&nbsp;||
     <li><a href="#Property-SetDxplMulti">H5Pset_dxpl_multi</a>
     <li><a href="#Property-GetDxplMulti">H5Pget_dxpl_multi</a>
-    <li><a href="#Property-SetMultiType">H5Pset_multi_type</a> 
-    <li><a href="#Property-GetMultiType">H5Pget_multi_type</a>
-        <br>&nbsp;
-    <li><a href="#Property-SetSmallData">H5Pset_small_data_block_size</a>
-    <li><a href="#Property-GetSmallData">H5Pget_small_data_block_size</a>
     </ul>
 
 </td></tr>
@@ -9498,7 +9492,7 @@ END SUBROUTINE h5pset_meta_block_size_f
     <dd>Sets type of data property for <code>MULTI</code> driver.
   <dt><strong>Description:</strong>
     <dd><code>H5Pset_multi_type</code> sets the type of data property in the 
-        file access or data transfer property list <code>fapl_id</code>.
+        file access property list <code>fapl_id</code>.
 	This enables a user application to specify the type of data the
         application wishes to access so that the application 
 	can retrieve a file handle for low-level access to the particular member 
@@ -9548,10 +9542,10 @@ END SUBROUTINE h5pset_meta_block_size_f
   <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
-            <td valign="top">IN: File access property list or data transfer property list identifier.</td></tr>
+            <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
         <tr>
-		    <td valign="top"><em>H5FD_mem_t</em>&nbsp;<code>type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>H5FD_mem_t</em>&nbsp;<code>type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">OUT: Type of data.</td></tr>
     </table></ul>
   <dt><strong>Returns:</strong>
@@ -10828,7 +10822,7 @@ Describes HDF5 Release 1.6.5, November 2005
 </address>
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 5 October 2005");
+document.writeln("Last modified: 3 February 2006");
 -->
 </SCRIPT>
  
