@@ -20,7 +20,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include src and tools/lib directories
-INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
+INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib -I$(top_srcdir)/hl/src
 
 # These are our main targets, the tools
 bin_PROGRAMS=gif2h5 h52gif
@@ -29,6 +29,6 @@ gif2h5_SOURCES=gif2hdf.c gif2mem.c decompress.c gifread.c writehdf.c
 h52gif_SOURCES=hdf2gif.c hdfgifwr.c readhdf.c
 
 # Programs all depend on the hdf5 library and the tools library
-LDADD=$(LIBH5TOOLS) $(LIBHDF5)
+LDADD=$(LIBH5TOOLS) $(LIBHDF5) $(LIBH5_HL)
 
 include $(top_srcdir)/config/conclude.am
