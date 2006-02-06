@@ -18,7 +18,6 @@
 #include "gif.h"
 #include "H5IM.h"
 
-
 /*-------------------------------------------------------------------------
  * Function: WriteHDF
  *
@@ -77,8 +76,6 @@ WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName , char *GIFFileName)
     if (gifHead.PackedField & 0x80) { /* global palette exists */
         hsize_t dims[2];	/* specify the dimensions of the palette */
 
-        hsize_t dimsr[1] = {1};	/* needed to store reference */
-
         /* size of the palette is tablesize (rows) X 3 (columns) */
         dims[0] = gifHead.TableSize;
         dims[1] = 3;
@@ -97,7 +94,6 @@ WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName , char *GIFFileName)
         dims[0] = gifImageDesc->ImageHeight;
         dims[1] = gifImageDesc->ImageWidth;
 
-       
         /* create the image name */
         sprintf(ImageName , "Image%d" , i);
         
@@ -109,7 +105,6 @@ WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName , char *GIFFileName)
         if (H5IMlink_palette(file_id,ImageName,"Global Palette")<0)
          return -1;
     }
-
 
     /* close the H5 file */
     if (H5Fclose(file_id) < 0) {
