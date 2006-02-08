@@ -323,7 +323,11 @@ Atomic datatypes can also be system-specific, or <I><CODE>NATIVE</CODE></I>, and
 <li><em>Named</em> datatypes are either atomic or compound datatypes that have been specifically designated to be shared across datasets.
 </ul>
 <I><P>Atomic datatypes</I> include integers and floating-point numbers. Each atomic type belongs to a particular class and has several properties: size, order, precision, and offset. In this introduction, we consider only a few of these properties.
-<P>Atomic classes include integer, float, date and time, string, bit field, and opaque. <I>(Note: Only integer, float and string  classes are available in the current implementation.)
+<P>Atomic classes include integer, float, 
+<!-- date and time, 
+    (DISCUSSION OF TIME DATATYPE COMMENTED OUT 6 FEB 2006,
+     UNTIL IT IS PROPERLY SUPPORTED IN THE LIBRARY.) -->
+string, bit field, and opaque. <I>(Note: Only integer, float and string  classes are available in the current implementation.)
 </I><P>Properties of integer types include size, order (endian-ness), and signed-ness (signed/unsigned).
 <P>Properties of float types include the size and location of the exponent and mantissa, and the location of the sign bit.
 <P>The datatypes that are supported in the current implementation are: 
@@ -3154,7 +3158,7 @@ Describes HDF5 Release 1.6.5, November 2005
 </address>
 <!-- #EndLibraryItem -->
  
-Last modified: 26 March 2001 
+Last modified: 6 February 2006 
 
 </td><td align=right valign=top>
 <a href="Copyright.html">Copyright</a>&nbsp;&nbsp;
