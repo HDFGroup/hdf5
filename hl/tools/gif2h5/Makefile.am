@@ -29,6 +29,6 @@ gif2h5_SOURCES=gif2hdf.c gif2mem.c decompress.c gifread.c writehdf.c
 h52gif_SOURCES=hdf2gif.c hdfgifwr.c readhdf.c
 
 # Programs all depend on the hdf5 library and the tools library
-LDADD=$(LIBH5TOOLS) $(LIBHDF5) $(LIBH5_HL)
+LDADD=$(LIBH5TOOLS) $(LIBH5_HL) $(LIBHDF5)
 
 include $(top_srcdir)/config/conclude.am

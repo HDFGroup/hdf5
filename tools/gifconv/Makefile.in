@@ -74,8 +74,8 @@ am_gif2h5_OBJECTS = gif2hdf.$(OBJEXT) gif2mem.$(OBJEXT) \
 gif2h5_OBJECTS = $(am_gif2h5_OBJECTS)
 gif2h5_LDADD = $(LDADD)
 am__DEPENDENCIES_1 = $(top_builddir)/tools/lib/libh5tools.la
-am__DEPENDENCIES_2 = $(top_builddir)/src/libhdf5.la
-am__DEPENDENCIES_3 = $(top_builddir)/hl/src/libhdf5_hl.la
+am__DEPENDENCIES_2 = $(top_builddir)/hl/src/libhdf5_hl.la
+am__DEPENDENCIES_3 = $(top_builddir)/src/libhdf5.la
 gif2h5_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3)
 am_h52gif_OBJECTS = hdf2gif.$(OBJEXT) hdfgifwr.$(OBJEXT) \
@@ -344,7 +344,7 @@ gif2h5_SOURCES = gif2hdf.c gif2mem.c decompress.c gifread.c writehdf.c
 h52gif_SOURCES = hdf2gif.c hdfgifwr.c readhdf.c
 
 # Programs all depend on the hdf5 library and the tools library
-LDADD = $(LIBH5TOOLS) $(LIBHDF5) $(LIBH5_HL)
+LDADD = $(LIBH5TOOLS) $(LIBH5_HL) $(LIBHDF5)
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,

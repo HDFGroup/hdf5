@@ -71,8 +71,8 @@ else
    HDF5_HL_DIR=
 endif
 
-SUBDIRS = src test $(TESTPARALLEL_DIR)  $(CXX_DIR) \
-         $(FORTRAN_DIR) $(HDF5_HL_DIR) tools .
+SUBDIRS = src test $(TESTPARALLEL_DIR) $(CXX_DIR) $(FORTRAN_DIR) \
+          $(HDF5_HL_DIR) tools .
          
 DIST_SUBDIRS = src test testpar hl tools . c++ fortran perform examples
 
