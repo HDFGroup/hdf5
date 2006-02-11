@@ -262,25 +262,28 @@ END SUBROUTINE h5gclose_f
   <dt><strong>Signature:</strong>
     <dd><em>hid_t </em><code>H5Gcreate</code>(<em>hid_t</em> <code>loc_id</code>, 
         <em>const char *</em><code>name</code>,
-	  <em>size_t</em> <code>size_hint</code>
+        <em>size_t</em> <code>size_hint</code>
     )
   <dt><strong>Purpose:</strong>
     <dd>Creates a new empty group and gives it a name.
   <dt><strong>Description:</strong>
     <dd><code>H5Gcreate</code> creates a new group with the specified
-	  name at the specified location, <code>loc_id</code>.  
+        name at the specified location, <code>loc_id</code>.  
         The location is identified by a file or group identifier.  
-	  The name, <code>name</code>, must not already be taken by some 
-	  other object and all parent groups must already exist.  
+        The name, <code>name</code>, must not already be taken by some 
+        other object and all parent groups must already exist.  
         <p>
-	  <code>size_hint</code> is a hint for the number of bytes to
-	  reserve to store the names which will be eventually added to
-	  the new group.  Passing a value of zero for <code>size_hint</code>
-	  is usually adequate since the library is able to dynamically
-	  resize the name heap, but a correct hint may result in better
-	  performance.  
+        <code>size_hint</code> is a hint for the number of bytes to
+        reserve to store the names which will be eventually added to
+        the new group.  Passing a value of zero for <code>size_hint</code>
+        is usually adequate since the library is able to dynamically
+        resize the name heap, but a correct hint may result in better
+        performance.  
         If a non-positive value is supplied for <code>size_hint</code>, 
         then a default size is chosen.
+        <p>
+        The length of a group name, or of the name of any object within 
+        a group, is not limited.  
         <p>
         The return value is a group identifier for the open group.
 	This group identifier should be closed by calling 
@@ -288,15 +291,15 @@ END SUBROUTINE h5gclose_f
   <dt><strong>Parameters:</strong>
     <ul><table>
       <tr>
-	      <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+          <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
           <td valign="top">IN: File or group identifier.</td></tr>
       <tr>
-	      <td valign="top"><em>const char *</em><code>name</code></td>
+          <td valign="top"><em>const char *</em><code>name</code></td>
           <td valign="top">IN: Absolute or relative name of the new group.</td></tr>
       <tr>
-	      <td valign="top"><em>size_t</em>&nbsp;<code>size_hint&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
-          <td valign="top">IN: Optional parameter indicating the number of bytes 
-              to reserve for the names that will appear in the group. 
+          <td valign="top"><em>size_t</em>&nbsp;<code>size_hint&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: Optional parameter indicating the number of 
+              bytes to reserve for the names that will appear in the group. 
               A conservative estimate could result in multiple 
               system-level I/O requests to read the group name heap; 
               a liberal estimate could result in a single large 
@@ -1570,7 +1573,7 @@ Describes HDF5 Release 1.6.5, November 2005
 </address>
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 25 May 2004");
+document.writeln("Last modified: 11 February 2006");
 -->
 </SCRIPT>
  

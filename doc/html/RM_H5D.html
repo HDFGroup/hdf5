@@ -270,6 +270,9 @@ END SUBROUTINE h5dclose_f
         the name specified in <code>name</code> already exists at the
         location specified in <code>loc_id</code>.
         <p>
+        As is the case for any object in a group, 
+        the length of a dataset name is not limited.  
+        <p>
         <code>create_plist_id</code> is a <code>H5P_DATASET_CREATE</code>
         property list created with <code>H5Pcreate</code> and
         initialized with the various functions described above.
@@ -1675,7 +1678,7 @@ Describes HDF5 Release 1.6.5, November 2005
 </address>
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 8 September 2004");
+document.writeln("Last modified: 11 February 2006");
 -->
 </SCRIPT>
  
