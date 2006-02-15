@@ -263,13 +263,13 @@ cp release_docs/RELEASE.txt $DEST/$HDF5_VERS-RELEASE.txt
 # Restore previous Makefile if existed.
 test -f $tmpdir/Makefile.x && mv $tmpdir/Makefile.x Makefile
 
-# Remove temporary things
-rm -rf $tmpdir
-
 # Restore OLD version information, then no need for trap.
 if [ X$pmode = Xyes ]; then
     RESTORE_VERSION
     trap 0
 fi
+
+# Remove temporary things
+rm -rf $tmpdir
 
 exit 0
