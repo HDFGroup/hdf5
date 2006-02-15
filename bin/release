@@ -124,7 +124,7 @@ RESTORE_VERSION()
 	echo restoring version information back to $VERS_OLD
 	rm -f config/lt_vers.am
 	cp $tmpdir/lt_vers.am config/lt_vers.am
-	bin/h5vers -s $VERS_OLD > vers_out
+	bin/h5vers -s $VERS_OLD
 	VERS_OLD=
     fi
 }
@@ -272,6 +272,6 @@ if [ X$pmode = Xyes ]; then
 fi
 
 # Remove temporary things
-#rm -rf $tmpdir
+rm -rf $tmpdir
 
 exit 0
