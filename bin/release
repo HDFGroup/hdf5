@@ -29,6 +29,7 @@
 #   gzip	-- use gzip with `-9' and append `.gz' to the output name.
 #   bzip2       -- use bzip2 with `-9' and append `.bz2' to the output name.
 #   md5         -- produce a md5 checksum in addition to the archive.
+#   doc         -- produce the latest doc tree in addition to the archive.
 #
 # Examples:
 #
@@ -39,12 +40,13 @@
 #   $ release gzip
 #   releases/hdf5-1.0.38.tar.gz
 #
-#   $ release -d /tmp tar compress gzip bzip2 md5
+#   $ release -d /tmp tar compress gzip bzip2 md5 doc
 #   /tmp/hdf5-1.0.38.tar
 #   /tmp/hdf5-1.0.38.tar.Z
 #   /tmp/hdf5-1.0.38.tar.gz
 #   /tmp/hdf5-1.0.38.tar.bz2
 #   /tmp/hdf5-1.0.38.tar.md5
+#   /tmp/hdf5-1.0.38_doc.tar
 #
 # Modifications
 #   Robb Matzke, 1999-07-16
@@ -78,6 +80,7 @@ for compressing the resulting tar archive (if none are given then
     gzip	-- use gzip with "-9" and append ".gz" to the output name.
     bzip2       -- use bzip2 with "-9" and append ".bz2" to the output name.
     md5         -- produce a md5 checksum in addition to the archive.
+    doc         -- produce the latest doc tree in addition to the archive.
 
 Examples:
 
@@ -116,6 +119,8 @@ check=yes
 today=`date +%Y%m%d`
 pmode='no'
 tmpdir="../#release_tmp.$$"	# tmp work directory
+DOC_URL=http://sleipnir/svn/repos/hdf5doc/trunk
+CPPLUS_RM_NAME=cpplus_RM
 
 # Restore previous Version information
 RESTORE_VERSION()
@@ -255,6 +260,20 @@ for comp in $methods; do
 	md5)
 	    test "$verbose" && echo "   Creating checksum..." 1>&2
 	    (cd $tmpdir; md5sum $HDF5_VERS.tar ) > $DEST/$HDF5_VERS.tar.md5
+	    ;;
+	doc)
+	    test "$verbose" && echo "   Creating docs..." 1>&2
+	    # Check out docs from svn repo
+	    (cd $tmpdir; svn co $DOC_URL > /dev/null)
+	    # Create doxygen C++ RM
+	    (cd c++/src && doxygen cpp_doc_config > /dev/null 1>&2 )
+	    # Replace version of C++ RM with just-created version
+	    rm -rf $tmpdir/trunk/html/$CPPLUS_RM_NAME
+	    mv c++/src/$CPPLUS_RM_NAME $tmpdir/trunk/html/$CPPLUS_RM_NAME
+	    # Compress the docs and move them to the release area
+	    mv $tmpdir/trunk $tmpdir/${HDF5_VERS}_docs
+	    (cd $tmpdir && tar cf ${HDF5_VERS}_docs.tar ${HDF5_VERS}_docs)
+	    mv $tmpdir/${HDF5_VERS}_docs.tar $DEST
 	    ;;
     esac
 done
