@@ -1614,7 +1614,6 @@
 ./windows/tools/toolslibD/toolslibD.dsp
 ./windows/tools/h5stat/h5stat.dsp
 ./windows/tools/h5statdll/h5statdll.dsp
-./windows/tools/deleteline.bat
 ./windows/tools/difftest.BAT
 ./windows/tools/dumptest.bat
 ./windows/tools/importtest.BAT
@@ -1622,6 +1621,7 @@
 ./windows/tools/mask.BAT
 ./windows/tools/repacktest.BAT
 ./windows/tools/testhdf5tools.BAT
+./windows/tools/tooltest.bat
 
 #windows batchfile
 ./windows/hdf5bt.BAT
