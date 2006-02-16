@@ -1,250 +1,189 @@
-@REM Copyright by the Board of Trustees of the University of Illinois.
-@REM All rights reserved.
-@REM
-@REM This file is part of HDF5.  The full HDF5 copyright notice, including
-@REM terms governing use, modification, and redistribution, is contained in
-@REM the files COPYING and Copyright.html.  COPYING can be found at the root
-@REM of the source code distribution tree; Copyright.html can be found at the
-@REM root level of an installed copy of the electronic HDF5 document set and
-@REM is linked from the top-level documents page.  It can also be found at
-@REM http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
-@REM access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+@echo off
+:: Copyright by the Board of Trustees of the University of Illinois.
+:: All rights reserved.
+::
+:: This file is part of HDF5.  The full HDF5 copyright notice, including
+:: terms governing use, modification, and redistribution, is contained in
+:: the files COPYING and Copyright.html.  COPYING can be found at the root
+:: of the source code distribution tree; Copyright.html can be found at the
+:: root level of an installed copy of the electronic HDF5 document set and
+:: is linked from the top-level documents page.  It can also be found at
+:: http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
+:: access to either file, you may request a copy from hdfhelpncsa.uiuc.edu.
 
-@ ECHO OFF
+::This batch file is for h5import tests
+::Usage
+:: importtest release  -- release static version
+:: importtest debug  -- debug static version
+:: importtest release dll -- release dll version
+:: importtest debug dll -- debug dll version
+:: Written By: Fang GUO
+:: Date      : Jan. 27, 2006
 
-mkdir temptest
-cd temptest
-mkdir act_h5
-mkdir exp_h5
-mkdir fctemp
-cd ..
+:: Track total number of testing errors
+   set /A totalerr=0
+   set /A totalskip=0
 
-copy h5import\testfiles\*.h5 temptest\exp_h5\. >temp.txt
-del temp.txt
+::**********************************************
+:: Generate a new temp directory for test h5diff
+::**********************************************
 
+:: Make a tempory directory for difftest
+		mkdir temptest
+
+:: Run h5importtst
 cd testfiles\h5importtst\%1
-h5importtst
+h5importtst.exe
 
-cd ..\..\..\h5import%2\%1
+cd ..\..\..\
 
-REM TESTING "ASCII I32 rank 3 - Output BE " ;
-h5import%2 ..\..\testfiles\h5importtst\%1\txtin32 -c ..\..\h5import\testfiles\textin32 -o ..\..\temptest\act_h5\test1.h5
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\act_h5\test1.h5 >..\..\temptest\textin32_act.txt
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\exp_h5\test1.h5 >..\..\temptest\textin32_exp.txt
+::****************************************************
+:: Set the Environment Variables & Change Dir to .EXE
+::****************************************************
 
-REM TESTING "ASCII I16 rank 3 - Output LE - CHUNKED - extended" 
-h5import%2 ..\..\testfiles\h5importtst\%1\txtin16 -c ..\..\h5import\testfiles\textin16 -o ..\..\temptest\act_h5\test2.h5
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\act_h5\test2.h5 >..\..\temptest\textin16_act.txt
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\exp_h5\test2.h5 >..\..\temptest\textin16_exp.txt
+		:: The first incoming parameter should be configuration (debug or release)
+		   set p1=%1
+		:: The second parameter should be the types of library (dll or blank)
+		   set p2=%2
+			
+    :: Set up some variables for convenience
+       :: tempResults will contain the tests results temporarily
+       set tempResults=importtest%2_%1.txt
+       :: exefile will contain the file name of the executable file
+       set exefile=h5import%p2%
+       :: tooltest is the sub-batch file which will be called by tool test
+       set tooltest=..\..\tooltest
+       ::Handle the expected file and the actual output file
+       ::ln is the total line numbers to be deleted from the actual output
+       set ln=1
+       ::ln_exp is the total line numbers to be deleted from the expected output
+			 set ln_exp=4
 
-REM TESTING "ASCII I8 - rank 3 - Output I16 LE-Chunked+Extended+Compressed " 
-h5import%2 ..\..\testfiles\h5importtst\%1\txtin16 -c ..\..\h5import\testfiles\textin8 -o ..\..\temptest\act_h5\test3.h5
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\act_h5\test3.h5 >..\..\temptest\textin8_act.txt
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\exp_h5\test3.h5 >..\..\temptest\textin8_exp.txt
+       ::Set some variables to contain .h5 file and its path for convenience
+       ::Create the file to contain the tests output
+       type nul > %tempResults%
+       
+       :: Set up Variables
+       :: h5import%2 ..\..\testfiles\h5importtst\%1\txtin32 -c ..\..\h5import\testfiles\textin32 -o ..\..\temptest\act_h5\test1.h5
 
-REM TESTING "ASCII UI32 - rank 3 - Output BE" 
-h5import%2 ..\..\h5import\testfiles\in1 -c ..\..\h5import\testfiles\textuin32 -o ..\..\temptest\act_h5\test4.h5
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\act_h5\test4.h5 >..\..\temptest\textuin32_act.txt
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\exp_h5\test4.h5 >..\..\temptest\textuin32_exp.txt
+       ::Set up variables for h5import input files
+       for %%i in (testfiles\h5importtst\%1\t*) do set %%~ni=..\..\testfiles\h5importtst\%p1%\%%~ni
+       for %%i in (testfiles\h5importtst\%1\b*) do set %%~ni=..\..\testfiles\h5importtst\%p1%\%%~ni
 
-REM TESTING "ASCII UI16 - rank 2 - Output LE+Chunked+Compressed " 
-h5import%2 ..\..\h5import\testfiles\in1 -c ..\..\h5import\testfiles\textuin16 -o ..\..\temptest\act_h5\test5.h5
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\act_h5\test5.h5 >..\..\temptest\textuin16_act.txt
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\exp_h5\test5.h5 >..\..\temptest\textuin16_exp.txt
+       ::Set up variables for h5import configure files
+       for %%i in (h5import\testfiles\text*) do set %%~ni=..\..\h5import\testfiles\%%~ni
+       for %%i in (h5import\testfiles\con*) do set %%~ni=..\..\h5import\testfiles\%%~ni
+       for %%i in (in1 fp1 fp2) do ( set %%i=..\..\h5import\testfiles\%%i)
 
-REM TESTING "ASCII F32 - rank 3 - Output LE " 
-h5import%2 ..\..\h5import\testfiles\fp1 -c ..\..\h5import\testfiles\textfp32 -o ..\..\temptest\act_h5\test6.h5
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\act_h5\test6.h5 >..\..\temptest\textfp32_act.txt
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\exp_h5\test6.h5 >..\..\temptest\textfp32_exp.txt
+       ::Set up variables for h5import output files
+       for %%i in (h5import\testfiles\test*) do set out.%%~ni=..\..\temptest\out.%%~ni.h5
+       
+       ::Change directory to the directory where the .exe file is located
+       cd h5import%p2%\%p1%
 
-REM TESTING "ASCII F64 - rank 3 - Output BE + CHUNKED+Extended+Compressed " 
-h5import%2 ..\..\h5import\testfiles\fp2 -c ..\..\h5import\testfiles\textfp64 -o ..\..\temptest\act_h5\test7.h5
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\act_h5\test7.h5 >..\..\temptest\textfp64_act.txt
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\exp_h5\test7.h5 >..\..\temptest\textfp64_exp.txt
+::*********************************************
+:: Test each function by calling TOOLTEST.BAT
+::*********************************************
+::USAGE of importtest.bat
+::1. Set flag
+::2. Call batch file tooltest.bat followed with the expected file name
+::3. Example
 
-REM TESTING "BINARY F64 - rank 3 - Output LE+CHUNKED+Extended+Compressed " 
-h5import%2 ..\..\testfiles\h5importtst\%1\bfp64 -c ..\..\h5import\testfiles\conbfp64 -o ..\..\temptest\act_h5\test8.h5
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\act_h5\test8.h5 >..\..\temptest\conbfp64_act.txt
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\exp_h5\test8.h5 >..\..\temptest\conbfp64_exp.txt
 
-REM TESTING "BINARY I16 - rank 3 - Output order LE + CHUNKED + extended " 
-h5import%2 ..\..\testfiles\h5importtst\%1\bin16 -c ..\..\h5import\testfiles\conbin16 -o ..\..\temptest\act_h5\test9.h5
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\act_h5\test9.h5 >..\..\temptest\conbin16_act.txt
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\exp_h5\test9.h5 >..\..\temptest\conbin16_exp.txt
+echo. 
+echo.****************************************************
+echo.       h5import%2 %1   T E S T S            
+echo.****************************************************
 
-REM TESTING "BINARY I8 - rank 3 - Output I16LE + Chunked+Extended+Compressed " 
-h5import%2 ..\..\testfiles\h5importtst\%1\bin8 -c ..\..\h5import\testfiles\conbin8 -o ..\..\temptest\act_h5\test10.h5
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\act_h5\test10.h5 >..\..\temptest\conbin8_act.txt
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\exp_h5\test10.h5 >..\..\temptest\conbin8_exp.txt
+::TESTING "ASCII I32 rank 3 - Output BE
+set flag=%txtin32% -c %textin32% -o %out.test1%
+call %tooltest% textin32 test1.h5
 
-REM TESTING "BINARY I32 - rank 3 - Output BE + CHUNKED " 
-h5import%2 ..\..\testfiles\h5importtst\%1\bin32 -c ..\..\h5import\testfiles\conbin32 -o ..\..\temptest\act_h5\test11.h5
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\act_h5\test11.h5 >..\..\temptest\conbin32_act.txt
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\exp_h5\test11.h5 >..\..\temptest\conbin32_exp.txt
+::TESTING "ASCII I16 rank 3 - Output LE - CHUNKED - extended" 
+set flag=%txtin16% -c %textin16% -o %out.test2%
+call %tooltest% textin16.txt test2.h5
 
-REM TESTING "BINARY UI16 - rank 3 - Output byte BE + CHUNKED " 
-h5import%2 ..\..\testfiles\h5importtst\%1\buin16 -c ..\..\h5import\testfiles\conbuin16 -o ..\..\temptest\act_h5\test12.h5
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\act_h5\test12.h5 >..\..\temptest\conbuin16_act.txt
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\exp_h5\test12.h5 >..\..\temptest\conbuin16_exp.txt
+::TESTING "ASCII I8 - rank 3 - Output I16 LE-Chunked+Extended+Compressed " 
+set flag=%txtin16% -c %textin8% -o %out.test3%
+call %tooltest% textin8.txt test3.h5
 
-REM TESTING "BINARY UI32 - rank 3 - Output LE + CHUNKED " 
-h5import%2 ..\..\testfiles\h5importtst\%1\buin32 -c ..\..\h5import\testfiles\conbuin32 -o ..\..\temptest\act_h5\test13.h5
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\act_h5\test13.h5 >..\..\temptest\conbuin32_act.txt
-..\..\h5dump%2\%1\h5dump%2 ..\..\temptest\exp_h5\test13.h5 >..\..\temptest\conbuin32_exp.txt
+::TESTING "ASCII UI32 - rank 3 - Output BE" 
+set flag=%in1% -c %textuin32% -o %out.test4%
+call %tooltest% textuin32.txt test4.h5
 
-cd ..\..\temptest
+::TESTING "ASCII UI16 - rank 2 - Output LE+Chunked+Compressed " 
+set flag=%in1% -c %textuin16% -o %out.test5%
+call %tooltest% textuin16.txt test5.h5
 
-type nul > ..\importtest%2_%1.txt
-echo ========================================== >> ..\importtest%2_%1.txt
-echo Testing importtest.bat >> ..\importtest%2_%1.txt
-echo ========================================== >> ..\importtest%2_%1.txt
+::TESTING "ASCII F32 - rank 3 - Output LE " 
+set flag=%fp1% -c %textfp32% -o %out.test6%
+call %tooltest% textfp32.txt test6.h5
 
-call ..\deleteline textin32_act.txt  1
-call ..\deleteline textin32_exp.txt  1
-call ..\deleteline textin16_act.txt  1
-call ..\deleteline textin16_exp.txt  1
-call ..\deleteline textin8_act.txt   1
-call ..\deleteline textin8_exp.txt   1
-call ..\deleteline textuin32_act.txt 1
-call ..\deleteline textuin32_exp.txt 1
-call ..\deleteline textuin16_act.txt 1
-call ..\deleteline textuin16_exp.txt 1
-call ..\deleteline textfp32_act.txt  1
-call ..\deleteline textfp32_exp.txt  1
-call ..\deleteline textfp64_act.txt  1
-call ..\deleteline textfp64_exp.txt  1
-call ..\deleteline conbfp64_act.txt  1
-call ..\deleteline conbfp64_exp.txt  1
-call ..\deleteline conbin16_act.txt  1
-call ..\deleteline conbin16_exp.txt  1
-call ..\deleteline conbin8_act.txt   1
-call ..\deleteline conbin8_exp.txt   1
-call ..\deleteline conbin32_act.txt  1
-call ..\deleteline conbin32_exp.txt  1
-call ..\deleteline conbuin16_act.txt 1
-call ..\deleteline conbuin16_exp.txt 1
-call ..\deleteline conbuin32_act.txt 1
-call ..\deleteline conbuin32_exp.txt 1
+::TESTING "ASCII F64 - rank 3 - Output BE + CHUNKED+Extended+Compressed " 
+set flag=%fp2% -c %textfp64% -o %out.test7%
+call %tooltest% textfp64.txt test7.h5
 
-cd fctemp
-fc textin32_act.txt  textin32_exp.txt >temp.txt
-if %ERRORLEVEL%==0 (
-   echo Testing ASCII I32 rank 3 - Output BE                                   PASSED >> ..\..\importtest%2_%1.txt
+::TESTING "BINARY F64 - rank 3 - Output LE+CHUNKED+Extended+Compressed " 
+set flag=%bfp64% -c %conbfp64% -o %out.test8%
+call %tooltest% conbfp64.txt test8.h5
+
+::TESTING "BINARY I16 - rank 3 - Output order LE + CHUNKED + extended " 
+set flag=%bin16% -c %conbin16% -o %out.test9%
+call %tooltest% conbin16.txt test9.h5
+
+::TESTING "BINARY I8 - rank 3 - Output I16LE + Chunked+Extended+Compressed " 
+set flag=%bin8% -c %conbin8% -o %out.test10%
+call %tooltest% conbin8.txt test10.h5
+
+::TESTING "BINARY I32 - rank 3 - Output BE + CHUNKED " 
+set flag=%bin32% -c %conbin32% -o %out.test11%
+call %tooltest% conbin32.txt test11.h5
+
+::TESTING "BINARY UI16 - rank 3 - Output byte BE + CHUNKED " 
+set flag=%buin16% -c %conbuin16% -o %out.test12%
+call %tooltest% conbuin.txt test12.h5
+
+::TESTING "BINARY UI32 - rank 3 - Output LE + CHUNKED " 
+set flag=%buin32% -c %conbuin32% -o %out.test13%
+call %tooltest% conbuin32.txt test13.h5
+
+::Change directory to hdf5\tools
+cd ..\..
+
+::Check if any of tests failed or skiped for the time being
+echo.
+if "%totalerr%"=="0" (
+echo. All of the %exefile% %p1% Tests Passed!
+echo. All of the %exefile% %p1% Tests Passed! >> %tempResults%
 ) else (
-   echo Testing ASCII I32 rank 3 - Output BE                                   FAILED >> ..\..\importtest%2_%1.txt
-   more temp.txt >> ..\..\importtest%2_%1.txt
+echo. %exefile% %p1% Tests Finished with %totalerr% Errors!  
+echo. %exefile% %p1% Tests Finished with %totalerr% Errors!>> %tempResults%
 )
-del temp.txt
 
-fc textin16_act.txt  textin16_exp.txt >temp.txt
-if %ERRORLEVEL%==0 (
-   echo Testing ASCII I16 rank 3 - Output LE - CHUNKED - extended              PASSED >> ..\..\importtest%2_%1.txt
-) else (
-   echo Testing ASCII I16 rank 3 - Output LE - CHUNKED - extended              FAILED >> ..\..\importtest%2_%1.txt
-   more temp.txt >> ..\..\importtest%2_%1.txt
+if not "%totalskip%"=="0" (
+echo. %totalskip% Tests in total Skiped!  >> %tempResults%
+echo. %totalskip% Tests in total Skiped!
+find "SKIPED" %tempResults% | more +2
 )
-del temp.txt
 
-fc textin8_act.txt   textin8_exp.txt >temp.txt
-if %ERRORLEVEL%==0 (
-   echo Testing ASCII I8 - rank 3 - Output I16 LE-Chunked+Extended+Compressed  PASSED >> ..\..\importtest%2_%1.txt
-) else (
-   echo Testing ASCII I8 - rank 3 - Output I16 LE-Chunked+Extended+Compressed  FAILED >> ..\..\importtest%2_%1.txt
-   more temp.txt >> ..\..\importtest%2_%1.txt
+::Clean up Environment Variables
+for %%i in (p1 p2 tempResults exefile tooltest ln ln_exp totalskip totalerr) do set %%i=
+set flag=
+
+::Clean up the variables set for h5import input files
+for %%i in (testfiles\h5importtst\%1\t*) do set %%~ni=
+for %%i in (testfiles\h5importtst\%1\b*) do set %%~ni=
+
+::Clean up the variables set for h5import configure files
+for %%i in (h5import\testfiles\text*) do set %%~ni=
+for %%i in (h5import\testfiles\con*) do set %%~ni=
+for %%i in (in1 fp1 fp2) do ( set %%i=..\..\h5import\testfiles\%%i)
+
+::Clean up the variables set for h5import output files
+for %%i in (h5import\testfiles\test*) do (
+set out.%%~ni=
 )
-del temp.txt
-
-fc textuin32_act.txt textuin32_exp.txt >temp.txt
-if %ERRORLEVEL%==0 (
-   echo Testing ASCII UI32 - rank 3 - Output BE                                PASSED >> ..\..\importtest%2_%1.txt
-) else (
-   echo Testing ASCII UI32 - rank 3 - Output BE                                FAILED >> ..\..\importtest%2_%1.txt
-   more temp.txt >> ..\..\importtest%2_%1.txt
-)
-del temp.txt
-
-fc textuin16_act.txt textuin16_exp.txt >temp.txt
-if %ERRORLEVEL%==0 (
-   echo Testing ASCII UI16 - rank 2 - Output LE+Chunked+Compressed             PASSED >> ..\..\importtest%2_%1.txt
-) else (
-   echo Testing ASCII UI16 - rank 2 - Output LE+Chunked+Compressed             FAILED >> ..\..\importtest%2_%1.txt
-   more temp.txt >> ..\..\importtest%2_%1.txt
-)
-del temp.txt
-
-fc textfp32_act.txt  textfp32_exp.txt >temp.txt
-if %ERRORLEVEL%==0 (
-   echo Testing ASCII F32 - rank 3 - Output LE                                 PASSED >> ..\..\importtest%2_%1.txt
-) else (
-   echo Testing ASCII F32 - rank 3 - Output LE                                 FAILED >> ..\..\importtest%2_%1.txt
-   more temp.txt >> ..\..\importtest%2_%1.txt
-)
-del temp.txt
-
-fc textfp64_act.txt  textfp64_exp.txt >temp.txt
-if %ERRORLEVEL%==0 (
-   echo Testing ASCII F64 - rank 3 - Output BE + CHUNKED+Extended+Compressed   PASSED >> ..\..\importtest%2_%1.txt
-) else (
-   echo Testing ASCII F64 - rank 3 - Output BE + CHUNKED+Extended+Compressed   FAILED >> ..\..\importtest%2_%1.txt
-   more temp.txt >> ..\..\importtest%2_%1.txt
-)
-del temp.txt
-
-fc conbfp64_act.txt  conbfp64_exp.txt >temp.txt
-if %ERRORLEVEL%==0 (
-   echo Testing BINARY F64 - rank 3 - Output LE+CHUNKED+Extended+Compressed    PASSED >> ..\..\importtest%2_%1.txt
-) else (
-   echo Testing BINARY F64 - rank 3 - Output LE+CHUNKED+Extended+Compressed    FAILED >> ..\..\importtest%2_%1.txt
-   more temp.txt >> ..\..\importtest%2_%1.txt
-)
-del temp.txt
-
-fc conbin16_act.txt  conbin16_exp.txt >temp.txt
-if %ERRORLEVEL%==0 (
-   echo Testing BINARY I16 - rank 3 - Output order LE + CHUNKED + extended     PASSED >> ..\..\importtest%2_%1.txt
-) else (
-   echo Testing BINARY I16 - rank 3 - Output order LE + CHUNKED + extended     FAILED >> ..\..\importtest%2_%1.txt
-   more temp.txt >> ..\..\importtest%2_%1.txt
-)
-del temp.txt
-
-fc conbin8_act.txt   conbin8_exp.txt >temp.txt
-if %ERRORLEVEL%==0 (
-   echo Testing BINARY I8 - rank 3 - Output I16LE + Chunked+Extended+Compress  PASSED >> ..\..\importtest%2_%1.txt
-) else (
-   echo Testing BINARY I8 - rank 3 - Output I16LE + Chunked+Extended+Compress  FAILED >> ..\..\importtest%2_%1.txt
-   more temp.txt >> ..\..\importtest%2_%1.txt
-)
-del temp.txt
-
-fc conbin32_act.txt  conbin32_exp.txt >temp.txt
-if %ERRORLEVEL%==0 (
-   echo Testing BINARY I32 - rank 3 - Output BE + CHUNKED                      PASSED >> ..\..\importtest%2_%1.txt
-) else (
-   echo Testing BINARY I32 - rank 3 - Output BE + CHUNKED                      FAILED >> ..\..\importtest%2_%1.txt
-   more temp.txt >> ..\..\importtest%2_%1.txt
-)
-del temp.txt
-
-fc conbuin16_act.txt conbuin16_exp.txt >temp.txt
-if %ERRORLEVEL%==0 (
-   echo Testing BINARY UI16 - rank 3 - Output byte BE + CHUNKED                PASSED >> ..\..\importtest%2_%1.txt
-) else (
-   echo Testing BINARY UI16 - rank 3 - Output byte BE + CHUNKED                FAILED >> ..\..\importtest%2_%1.txt
-   more temp.txt >> ..\..\importtest%2_%1.txt
-)
-del temp.txt
-
-fc conbuin32_act.txt conbuin32_exp.txt >temp.txt
-if %ERRORLEVEL%==0 (
-   echo Testing BINARY UI32 - rank 3 - Output LE + CHUNKED                     PASSED >> ..\..\importtest%2_%1.txt
-) else (
-   echo Testing BINARY UI32 - rank 3 - Output LE + CHUNKED                     FAILED >> ..\..\importtest%2_%1.txt
-   more temp.txt >> ..\..\importtest%2_%1.txt
-)
-del temp.txt
-
-cd ..
-cd ..
-
+::Clean up Temporary Files
 rmdir /s/q temptest
+
+
