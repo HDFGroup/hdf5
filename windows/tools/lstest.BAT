@@ -11,7 +11,7 @@
 :: http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
 :: access to either file, you may request a copy from hdfhelpncsa.uiuc.edu.
 
-::This batch file is for h5dump general and xml tests.
+::This batch file is for h5ls tests
 ::Usage
 :: lstest release  -- release static version
 :: lstest debug  -- debug static version
