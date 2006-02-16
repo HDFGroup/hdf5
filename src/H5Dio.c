@@ -49,6 +49,7 @@
 
 /* Information for mapping between file space and memory space */
 
+#if 0
 /* Structure holding information about a chunk's selection for mapping */
 typedef struct H5D_chunk_info_t {
     hsize_t index;              /* "Index" of chunk in dataset */
@@ -77,8 +78,11 @@ typedef struct fm_map {
     hsize_t down_chunks[H5O_LAYOUT_NDIMS];   /* "down" size of number of chunks in each dimension */
     H5O_layout_t *layout;       /* Dataset layout information*/
     H5S_sel_type msel_type;     /* Selection type in memory */
+    hsize_t total_chunks;       /* Number of total chunks */
+    hbool_t *select_chunk;         /* store the information about whether this chunk is selected or not */
 } fm_map;
 
+#endif
 /********************/
 /* Local Prototypes */
 /********************/
@@ -107,12 +111,9 @@ static herr_t H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
             const H5T_t *mem_type, const H5S_t *mem_space,
 	    const H5S_t *file_space, H5T_path_t *tpath,
             hid_t src_id, hid_t dst_id, const void *buf);
+
 #ifdef H5_HAVE_PARALLEL
-static herr_t H5D_ioinfo_make_ind(H5D_io_info_t *io_info);
-static herr_t H5D_ioinfo_make_coll(H5D_io_info_t *io_info);
 static herr_t H5D_ioinfo_term(H5D_io_info_t *io_info);
-static herr_t H5D_mpio_get_min_chunk(const H5D_io_info_t *io_info,
-    const fm_map *fm, int *min_chunkf);
 #endif /* H5_HAVE_PARALLEL */
 
 /* I/O info operations */
@@ -125,7 +126,7 @@ static herr_t H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type,
         const H5S_t *file_space, const H5S_t *mem_space, fm_map *fm);
 static herr_t H5D_destroy_chunk_map(const fm_map *fm);
 static herr_t H5D_free_chunk_info(void *item, void *key, void *opdata);
-static herr_t H5D_create_chunk_file_map_hyper(const fm_map *fm);
+static herr_t H5D_create_chunk_file_map_hyper(fm_map *fm, const H5D_t *dset);
 static herr_t H5D_create_chunk_mem_map_hyper(const fm_map *fm);
 static herr_t H5D_chunk_file_cb(void *elem, hid_t type_id, unsigned ndims,
     const hsize_t *coords, void *fm);
@@ -952,6 +953,8 @@ H5D_contig_read(H5D_io_info_t *io_info, hsize_t nelmts,
     hsize_t	smine_start;		/*strip mine start loc	*/
     size_t	n, smine_nelmts;	/*elements per strip	*/
     H5D_storage_t store;                /*union of storage info for dataset */
+
+
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_contig_read)
@@ -981,10 +984,21 @@ H5D_contig_read(H5D_io_info_t *io_info, hsize_t nelmts,
                 || dataset->shared->efl.nused>0 || 0 == nelmts
                 || dataset->shared->layout.type==H5D_COMPACT);
         H5_CHECK_OVERFLOW(nelmts,hsize_t,size_t);
-        status = (io_info->ops.read)(io_info,
+
+#ifdef H5_HAVE_PARALLEL
+	if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE) {
+	  if(H5D_contig_collective_io(io_info,file_space,mem_space,buf,FALSE)<0)
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't manipulate collective I/O");
+	}
+	else
+#endif
+         {
+	  status = (io_info->ops.read)(io_info,
             (size_t)nelmts, H5T_get_size(dataset->shared->type),
-            file_space, mem_space,
+				       file_space, mem_space,0,
             buf/*out*/);
+	}
+
 #ifdef H5S_DEBUG
         H5_timer_end(&(io_info->stats->stats[1].read_timer), &timer);
         io_info->stats->stats[1].read_nbytes += nelmts * H5T_get_size(dataset->shared->type);
@@ -1208,6 +1222,7 @@ H5D_contig_write(H5D_io_info_t *io_info, hsize_t nelmts,
     hsize_t	smine_start;		/*strip mine start loc	*/
     size_t	n, smine_nelmts;	/*elements per strip	*/
     H5D_storage_t store;                /*union of storage info for dataset */
+
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_contig_write)
@@ -1232,10 +1247,20 @@ H5D_contig_write(H5D_io_info_t *io_info, hsize_t nelmts,
 	H5_timer_begin(&timer);
 #endif
         H5_CHECK_OVERFLOW(nelmts,hsize_t,size_t);
-        status = (io_info->ops.write)(io_info,
+#ifdef H5_HAVE_PARALLEL
+	if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE) {
+	  if(H5D_contig_collective_io(io_info,file_space,mem_space,buf,TRUE)<0)
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't manipulate collective I/O");
+	}
+	else 
+#endif
+        {
+	  status = (io_info->ops.write)(io_info,
             (size_t)nelmts, H5T_get_size(dataset->shared->type),
-            file_space, mem_space,
-            buf);
+				       file_space, mem_space,0,
+                                        buf/*out*/);
+	}
+
 #ifdef H5S_DEBUG
         H5_timer_end(&(io_info->stats->stats[0].write_timer), &timer);
         io_info->stats->stats[0].write_nbytes += nelmts * H5T_get_size(mem_type);
@@ -1460,10 +1485,6 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
     uint8_t	*tconv_buf = NULL;	/*data type conv buffer	*/
     uint8_t	*bkg_buf = NULL;	/*background buffer	*/
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
-#ifdef H5_HAVE_PARALLEL
-    int         count_chunk;            /* Number of chunks accessed */
-    int         min_num_chunk;          /* Number of chunks to access collectively */
-#endif
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_read)
@@ -1489,99 +1510,48 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
                 || dataset->shared->efl.nused>0 || 0 == nelmts
                 || dataset->shared->layout.type==H5D_COMPACT);
 
-        /* Get first node in chunk skip list */
-        chunk_node=H5SL_first(fm.fsel);
-
 #ifdef H5_HAVE_PARALLEL
         if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE) {
-       	    if(H5D_mpio_get_min_chunk(io_info, &fm, &min_num_chunk)<0)
-		HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get minimum number of chunk")
+          if(H5D_mpio_chunk_adjust_iomode(io_info,&fm))
+          HGOTO_ERROR(H5E_DATASET,H5E_CANTGET,FAIL,"can't adjust collective I/O")
+        }
+	/* Temporarily shut down collective IO for chunking */
+	if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE) {
+	  if(H5D_chunk_collective_io(io_info,&fm,buf,FALSE)<0)
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't manipulate collective I/O");
 	}
-        count_chunk = 0;
-#endif /* H5_HAVE_PARALLEL */
+	
+	else {/* sequential or independent read */
+#endif
+	/* Get first node in chunk skip list */
+	  chunk_node=H5SL_first(fm.fsel);
 
-        /* Iterate through chunks to be operated on */
-        while(chunk_node) {
+           while(chunk_node) {
             H5D_chunk_info_t *chunk_info;   /* chunk information */
+
+	     /* Get the actual chunk information from the skip list node */
+	     chunk_info=H5SL_item(chunk_node);
+
+	     /* Pass in chunk's coordinates in a union. */
+	     store.chunk.offset = chunk_info->coords;
+	     store.chunk.index = chunk_info->index;
+
+	     /* Perform the actual read operation */
+             status = (io_info->ops.read)(io_info,
+                       chunk_info->chunk_points, H5T_get_size(dataset->shared->type),
+                       chunk_info->fspace, chunk_info->mspace, 0,buf);
+
+	     /* Check return value from optimized read */
+             if (status<0)
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, " optimized read failed")
+
+             chunk_node = H5SL_next(chunk_node);
+
+	   }
 #ifdef H5_HAVE_PARALLEL
-            hbool_t make_ind, make_coll;        /* Flags to indicate that the MPI mode should change */
-#endif /* H5_HAVE_PARALLEL */
+	}
+#endif
 
-            /* Get the actual chunk information from the skip list node */
-            chunk_info=H5SL_item(chunk_node);
-
-            /* Pass in chunk's coordinates in a union. */
-            store.chunk.offset = chunk_info->coords;
-            store.chunk.index = chunk_info->index;
-
-#ifdef H5_HAVE_PARALLEL
-            /* Reset flags for changing parallel I/O mode */
-            make_ind = make_coll = FALSE;
-
-            if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE) {
-                /* Increment chunk we are operating on */
-                count_chunk++;
-
-	       /* If the number of chunk is greater than minimum number of chunk,
-		  Do independent read */
-                if(count_chunk > min_num_chunk) {
-                    /* Switch to independent I/O (permanently) */
-                    make_ind = TRUE;
-                }
-#ifndef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
-                else {
-                    int is_regular;     /* If this chunk's selections are regular */
-                    int mpi_code;       /* MPI error code */
-                    int all_regular = 0;    /* If this chunk's selections are regular on all processes */
-
-                    /* Determine if this process has regular selections */
-                    if(H5S_SELECT_IS_REGULAR(chunk_info->fspace) == TRUE &&
-                            H5S_SELECT_IS_REGULAR(chunk_info->mspace) == TRUE)
-                        is_regular = 1;
-                    else
-                        is_regular = 0;
-
-                    /* Determine if all processes have regular selections */
-                    if (MPI_SUCCESS != (mpi_code = MPI_Allreduce(&is_regular, &all_regular, 1, MPI_INT, MPI_LAND, io_info->comm)))
-                        HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
-
-                    /* For regular selection,
-                        if MPI_COMPLEX_DERIVED_DATATYPE is not defined,
-                        unless spaces for all processors are regular, independent read operation should be performed.*/
-                    if(!all_regular) {
-                        /* Switch to independent I/O (temporarily) */
-                        make_ind = TRUE;
-                        make_coll = TRUE;
-                    } /* end if */
-                } /* end else */
-#endif /* H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS */
-            } /* end if */
-
-            /* Switch to independent I/O */
-            if(make_ind)
-                if(H5D_ioinfo_make_ind(io_info) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't switch to independent I/O")
-#endif /* H5_HAVE_PARALLEL */
-
-            /* Perform the actual read operation */
-            status = (io_info->ops.read)(io_info,
-                chunk_info->chunk_points, H5T_get_size(dataset->shared->type),
-                chunk_info->fspace, chunk_info->mspace, buf);
-
-#ifdef H5_HAVE_PARALLEL
-            /* Switch back to collective I/O */
-            if(make_coll)
-                if(H5D_ioinfo_make_coll(io_info) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't switch to independent I/O")
-#endif /* H5_HAVE_PARALLEL */
-
-            /* Check return value from optimized read */
-            if (status<0)
-                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "optimized read failed")
-
-            /* Get the next chunk node in the skip list */
-            chunk_node=H5SL_next(chunk_node);
-        } /* end while */
 
 #ifdef H5S_DEBUG
         H5_timer_end(&(io_info->stats->stats[1].read_timer), &timer);
@@ -1843,10 +1813,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
     uint8_t	*tconv_buf = NULL;	/*data type conv buffer	*/
     uint8_t	*bkg_buf = NULL;	/*background buffer	*/
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
-#ifdef H5_HAVE_PARALLEL
-    int         count_chunk;            /* Number of chunks accessed */
-    int         min_num_chunk;          /* Number of chunks to access collectively */
-#endif
+
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_write)
@@ -1868,98 +1835,48 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
 #endif
 
 #ifdef H5_HAVE_PARALLEL
+        /* Check whether the collective mode can be turned off globally*/
+    
         if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE) {
-       	    if(H5D_mpio_get_min_chunk(io_info, &fm, &min_num_chunk)<0)
-		HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get minimum number of chunk")
+          if(H5D_mpio_chunk_adjust_iomode(io_info,&fm))
+          HGOTO_ERROR(H5E_DATASET,H5E_CANTGET,FAIL,"can't adjust collective I/O")
+        }
+        if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE) {
+	  if(H5D_chunk_collective_io(io_info,&fm,buf,TRUE)<0)
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't manipulate collective I/O");
 	}
-        count_chunk = 0;
-#endif /* H5_HAVE_PARALLEL */
+	else {/* sequential or independent write */
+	  
+ #endif /* H5_HAVE_PARALLEL */
+	/* Get first node in chunk skip list */
+	chunk_node=H5SL_first(fm.fsel);
 
-        /* Get first node in chunk skip list */
-        chunk_node=H5SL_first(fm.fsel);
-
-        /* Iterate through chunks to be operated on */
-        while(chunk_node) {
+         while(chunk_node) {
             H5D_chunk_info_t *chunk_info;       /* Chunk information */
+
+	  /* Get the actual chunk information from the skip list node */
+	  chunk_info=H5SL_item(chunk_node);
+
+	  /* Pass in chunk's coordinates in a union. */
+	  store.chunk.offset = chunk_info->coords;
+	  store.chunk.index = chunk_info->index;
+
+	  /* Perform the actual read operation */
+
+          status = (io_info->ops.write)(io_info,
+                    chunk_info->chunk_points, H5T_get_size(dataset->shared->type),
+                    chunk_info->fspace, chunk_info->mspace, 0,buf);
+
+	   /* Check return value from optimized read */
+          if (status<0)
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, " optimized read failed")
+
+            chunk_node = H5SL_next(chunk_node);
+
+	 }
 #ifdef H5_HAVE_PARALLEL
-            hbool_t make_ind, make_coll;        /* Flags to indicate that the MPI mode should change */
-#endif /* H5_HAVE_PARALLEL */
-
-            /* Get the actual chunk information from the skip list node */
-            chunk_info=H5SL_item(chunk_node);
-
-            /* Pass in chunk's coordinates in a union. */
-            store.chunk.offset = chunk_info->coords;
-            store.chunk.index = chunk_info->index;
-
-#ifdef H5_HAVE_PARALLEL
-            /* Reset flags for changing parallel I/O mode */
-            make_ind = make_coll = FALSE;
-
-            if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE) {
-                /* Increment chunk we are operating on */
-                count_chunk++;
-
-	       /* If the number of chunk is greater than minimum number of chunk,
-		  Do independent write */
-                if(count_chunk > min_num_chunk) {
-                    /* Switch to independent I/O (permanently) */
-                    make_ind = TRUE;
-	        }
-#ifndef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
-	        else {
-                    int is_regular;     /* If this chunk's selections are regular */
-                    int mpi_code;       /* MPI error code */
-                    int all_regular = 0;    /* If this chunk's selections are regular on all processes */
-
-                    /* Determine if this process has regular selections */
-                    if(H5S_SELECT_IS_REGULAR(chunk_info->fspace) == TRUE &&
-                            H5S_SELECT_IS_REGULAR(chunk_info->mspace) == TRUE)
-                        is_regular = 1;
-                    else
-                        is_regular = 0;
-
-                    /* Determine if all processes have regular selections */
-                    if (MPI_SUCCESS != (mpi_code = MPI_Allreduce(&is_regular, &all_regular, 1, MPI_INT, MPI_LAND, io_info->comm)))
-                        HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
-
-                    /* For regular selection,
-                        if MPI_COMPLEX_DERIVED_DATATYPE is not defined,
-                        unless spaces for all processors are regular, independent read operation should be performed.*/
-                    if(!all_regular) {
-                        /* Switch to independent I/O (temporarily) */
-                        make_ind = TRUE;
-                        make_coll = TRUE;
-                    } /* end if */
-                } /* end else */
-#endif /* H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS */
-            } /* end if */
-
-            /* Switch to independent I/O */
-            if(make_ind)
-                if(H5D_ioinfo_make_ind(io_info) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't switch to independent I/O")
-#endif	/* H5_HAVE_PARALLEL */
-
-            /* Perform the actual write operation */
-            status = (io_info->ops.write)(io_info,
-                chunk_info->chunk_points, H5T_get_size(dataset->shared->type),
-                chunk_info->fspace, chunk_info->mspace, buf);
-
-#ifdef H5_HAVE_PARALLEL
-            /* Switch back to collective I/O */
-            if(make_coll)
-                if(H5D_ioinfo_make_coll(io_info) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't switch to independent I/O")
-#endif	/* H5_HAVE_PARALLEL */
-
-            /* Check return value from optimized write */
-            if (status<0)
-                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "optimized write failed")
-
-            /* Get the next chunk node in the skip list */
-            chunk_node=H5SL_next(chunk_node);
-        } /* end while */
+	}
+#endif
 
 #ifdef H5S_DEBUG
 	H5_timer_end(&(io_info->stats->stats[0].write_timer), &timer);
@@ -2211,12 +2128,14 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
     H5S_sel_type fsel_type;     /* Selection type on disk */
     char bogus;                 /* "bogus" buffer to pass to selection iterator */
     unsigned u;                 /* Local index variable */
+    hbool_t sel_hyper_flag;
     herr_t ret_value = SUCCEED;	/* Return value		*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_create_chunk_map)
 
     /* Get layout for dataset */
     fm->layout = &(dataset->shared->layout);
+
 
     /* Check if the memory space is scalar & make equivalent memory space */
     if((sm_ndims = H5S_GET_EXTENT_NDIMS(mem_space))<0)
@@ -2272,6 +2191,14 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
     if(H5V_array_down(f_ndims,fm->chunks,fm->down_chunks)<0)
         HGOTO_ERROR (H5E_INTERNAL, H5E_BADVALUE, FAIL, "can't compute 'down' sizes")
 
+    /* calculate total chunk in file map*/
+    fm->select_chunk = NULL;
+    fm->total_chunks = 1;
+    for(u=0; u<fm->f_ndims; u++) 
+       fm->total_chunks= fm->total_chunks*fm->chunks[u];
+
+
+
     /* Initialize skip list for chunk selections */
     if((fm->fsel=H5SL_create(H5SL_TYPE_HSIZE,0.5,H5D_DEFAULT_SKIPLIST_HEIGHT))==NULL)
         HGOTO_ERROR(H5E_DATASET,H5E_CANTCREATE,FAIL,"can't create skip list for chunk selections")
@@ -2291,8 +2218,13 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
     if((fm->msel_type=H5S_GET_SELECT_TYPE(equiv_mspace))<H5S_SEL_NONE)
         HGOTO_ERROR (H5E_DATASET, H5E_BADSELECT, FAIL, "unable to convert from file to memory data space")
 
+    /* If the selection is NONE or POINTS, set the flag to FALSE */
+    if(fsel_type == H5S_SEL_POINTS || fsel_type == H5S_SEL_NONE) 
+      sel_hyper_flag = FALSE;
+    else 
+      sel_hyper_flag = TRUE;
     /* Check if file selection is a point selection */
-    if(fsel_type==H5S_SEL_POINTS) {
+    if(!sel_hyper_flag) {
         /* Create temporary datatypes for selection iteration */
         if((f_tid = H5I_register(H5I_DATATYPE, H5T_copy(dataset->shared->type, H5T_COPY_ALL)))<0)
             HGOTO_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register file datatype")
@@ -2307,7 +2239,7 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
     } /* end if */
     else {
         /* Build the file selection for each chunk */
-        if(H5D_create_chunk_file_map_hyper(fm)<0)
+        if(H5D_create_chunk_file_map_hyper(fm,dataset)<0)
             HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create file chunk selections")
 
         /* Clean file chunks' hyperslab span "scratch" information */
@@ -2329,7 +2261,7 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
     } /* end else */
 
     /* Build the memory selection for each chunk */
-    if(fsel_type!=H5S_SEL_POINTS && H5S_select_shape_same(file_space,equiv_mspace)==TRUE) {
+    if(sel_hyper_flag && H5S_select_shape_same(file_space,equiv_mspace)==TRUE) {
         /* Reset chunk template information */
         fm->mchunk_tmpl=NULL;
 
@@ -2500,7 +2432,7 @@ H5D_destroy_chunk_map(const fm_map *fm)
     if(fm->mchunk_tmpl)
         if(H5S_close(fm->mchunk_tmpl)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release memory chunk dataspace template")
-
+    if(fm->select_chunk) H5MM_xfree(fm->select_chunk);
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_destroy_chunk_map() */
@@ -2519,7 +2451,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_create_chunk_file_map_hyper(const fm_map *fm)
+H5D_create_chunk_file_map_hyper(fm_map *fm,const H5D_t *dset)
 {
     hssize_t    ssel_points;                /* Number of elements in file selection */
     hsize_t     sel_points;                 /* Number of elements in file selection */
@@ -2548,12 +2480,18 @@ H5D_create_chunk_file_map_hyper(const fm_map *fm)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection bound info")
 
     /* Set initial chunk location & hyperslab size */
+
     for(u=0; u<fm->f_ndims; u++) {
         start_coords[u]=(sel_start[u]/fm->layout->u.chunk.dim[u])*fm->layout->u.chunk.dim[u];
         coords[u]=start_coords[u];
         end[u]=(coords[u]+fm->chunk_dim[u])-1;
     } /* end for */
 
+    if(IS_H5FD_MPI(dset->oloc.file)) { 
+       if(NULL == (fm->select_chunk = (hbool_t *) H5MM_calloc(fm->total_chunks*sizeof(hbool_t))))
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate chunk info")
+    }
+    
     /* Calculate the index of this chunk */
     if(H5V_chunk_index(fm->f_ndims,coords,fm->layout->u.chunk.dim,fm->down_chunks,&chunk_index)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
@@ -2607,6 +2545,10 @@ H5D_create_chunk_file_map_hyper(const fm_map *fm)
 
             /* Set the chunk index */
             new_chunk_info->index=chunk_index;
+
+            /* store chunk selection information */
+	  if(IS_H5FD_MPI(dset->oloc.file))
+               fm->select_chunk[chunk_index] = TRUE;
 
             /* Set the file chunk dataspace */
             new_chunk_info->fspace=tmp_fchunk;
@@ -3140,96 +3082,6 @@ done:
 #ifdef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_ioinfo_make_ind
- *
- * Purpose:	Switch to MPI independent I/O
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Friday, August 12, 2005
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D_ioinfo_make_ind(H5D_io_info_t *io_info)
-{
-    H5P_genplist_t *dx_plist;           /* Data transer property list */
-    herr_t	ret_value = SUCCEED;	/*return value		*/
-
-    FUNC_ENTER_NOAPI_NOINIT(H5D_ioinfo_make_ind)
-
-    /* Get the dataset transfer property list */
-    if (NULL == (dx_plist = H5I_object(io_info->dxpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
-
-    /* Change the xfer_mode to independent, handle the request,
-     * then set xfer_mode before return.
-     */
-    io_info->dxpl_cache->xfer_mode = H5FD_MPIO_INDEPENDENT;
-    if(H5P_set (dx_plist, H5D_XFER_IO_XFER_MODE_NAME, &io_info->dxpl_cache->xfer_mode) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set transfer mode")
-
-    /* Set the pointers to the non-MPI-specific routines */
-    io_info->ops.read = H5D_select_read;
-    io_info->ops.write = H5D_select_write;
-
-    /* Indicate that the transfer mode should be restored before returning
-     * to user.
-     */
-    io_info->xfer_mode_changed=TRUE;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_ioinfo_make_ind() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5D_ioinfo_make_coll
- *
- * Purpose:	Switch to MPI collective I/O
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Friday, August 12, 2005
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D_ioinfo_make_coll(H5D_io_info_t *io_info)
-{
-    H5P_genplist_t *dx_plist;           /* Data transer property list */
-    herr_t	ret_value = SUCCEED;	/*return value		*/
-
-    FUNC_ENTER_NOAPI_NOINIT(H5D_ioinfo_make_coll)
-
-    /* Get the dataset transfer property list */
-    if (NULL == (dx_plist = H5I_object(io_info->dxpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
-
-    /* Change the xfer_mode to independent, handle the request,
-     * then set xfer_mode before return.
-     */
-    io_info->dxpl_cache->xfer_mode = H5FD_MPIO_COLLECTIVE;
-    if(H5P_set (dx_plist, H5D_XFER_IO_XFER_MODE_NAME, &io_info->dxpl_cache->xfer_mode) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set transfer mode")
-
-    /* Set the pointers to the MPI-specific routines */
-    io_info->ops.read = H5D_mpio_select_read;
-    io_info->ops.write = H5D_mpio_select_write;
-
-    /* Indicate that the transfer mode should _NOT_ be restored before returning
-     * to user.
-     */
-    io_info->xfer_mode_changed=FALSE;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_ioinfo_make_coll() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5D_ioinfo_term
  *
  * Purpose:	Common logic for terminating an I/O info object
@@ -3267,38 +3119,4 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_ioinfo_term() */
 
-
-/*-------------------------------------------------------------------------
- * Function:	H5D_mpio_get_min_chunk
- *
- * Purpose:	Routine for obtaining minimum number of chunks to cover
- *              hyperslab selection selected by all processors.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D_mpio_get_min_chunk(const H5D_io_info_t *io_info,
-    const fm_map *fm, int *min_chunkf)
-{
-    int num_chunkf;             /* Number of chunks to iterate over */
-    int mpi_code;               /* MPI return code */
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT(H5D_mpio_get_min_chunk);
-
-    /* Get the number of chunks to perform I/O on */
-    num_chunkf = H5SL_count(fm->fsel);
-
-    /* Determine the minimum # of chunks for all processes */
-    if (MPI_SUCCESS != (mpi_code = MPI_Allreduce(&num_chunkf, min_chunkf, 1, MPI_INT, MPI_MIN, io_info->comm)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5D_mpio_get_min_chunk() */
-#endif /*H5_HAVE_PARALLEL*/
-
+#endif

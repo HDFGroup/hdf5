@@ -34,7 +34,8 @@
 #include "H5Gprivate.h"		/* Groups 			  	*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Sprivate.h"		/* Dataspaces 				*/
-#include "H5Tprivate.h"		/* Datatypes 				*/
+#include "H5Tprivate.h"		/* Datatype functions			*/
+#include "H5SLprivate.h"	/* Skip lists				*/
 
 /**************************/
 /* Package Private Macros */
@@ -67,14 +68,14 @@
 struct H5D_io_info_t;
 typedef herr_t (*H5D_io_read_func_t)(struct H5D_io_info_t *io_info,
     size_t nelmts, size_t elmt_size,
-    const H5S_t *file_space, const H5S_t *mem_space,
+    const H5S_t *file_space, const H5S_t *mem_space,haddr_t addr,
     void *buf/*out*/);
 
 
 /* Write directly from app buffer to file */
 typedef herr_t (*H5D_io_write_func_t)(struct H5D_io_info_t *io_info,
     size_t nelmts, size_t elmt_size,
-    const H5S_t *file_space, const H5S_t *mem_space,
+    const H5S_t *file_space, const H5S_t *mem_space,haddr_t addr,
     const void *buf);
 
 /* Function pointers for I/O on particular types of dataset layouts */
@@ -187,6 +188,39 @@ typedef enum {
     H5D_ALLOC_WRITE             /* Dataset is being extended */
 } H5D_time_alloc_t;
 
+
+/* Structure holding information about a chunk's selection for mapping */
+typedef struct H5D_chunk_info_t {
+    hsize_t index;              /* "Index" of chunk in dataset */
+    size_t chunk_points;        /* Number of elements selected in chunk */
+    H5S_t *fspace;              /* Dataspace describing chunk & selection in it */
+    hsize_t coords[H5O_LAYOUT_NDIMS];   /* Coordinates of chunk in file dataset's dataspace */
+    H5S_t *mspace;              /* Dataspace describing selection in memory corresponding to this chunk */
+    unsigned mspace_shared;     /* Indicate that the memory space for a chunk is shared and shouldn't be freed */
+} H5D_chunk_info_t;
+
+/* Main structure holding the mapping between file chunks and memory */
+typedef struct fm_map {
+    H5SL_t *fsel;               /* Skip list containing file dataspaces for all chunks */
+    hsize_t last_index;         /* Index of last chunk operated on */
+    H5D_chunk_info_t *last_chunk_info;  /* Pointer to last chunk's info */
+    const H5S_t *file_space;    /* Pointer to the file dataspace */
+    const H5S_t *mem_space;     /* Pointer to the memory dataspace */
+    unsigned mem_space_copy;    /* Flag to indicate that the memory dataspace must be copied */
+    hsize_t f_dims[H5O_LAYOUT_NDIMS];   /* File dataspace dimensions */
+    H5S_t *mchunk_tmpl;         /* Dataspace template for new memory chunks */
+    unsigned f_ndims;           /* Number of dimensions for file dataspace */
+    H5S_sel_iter_t mem_iter;    /* Iterator for elements in memory selection */
+    unsigned m_ndims;           /* Number of dimensions for memory dataspace */
+    hsize_t chunks[H5O_LAYOUT_NDIMS];   /* Number of chunks in each dimension */
+    hsize_t chunk_dim[H5O_LAYOUT_NDIMS];    /* Size of chunk in each dimension */
+    hsize_t down_chunks[H5O_LAYOUT_NDIMS];   /* "down" size of number of chunks in each dimension */
+    H5O_layout_t *layout;       /* Dataset layout information*/
+    H5S_sel_type msel_type;     /* Selection type in memory */
+    hsize_t total_chunks;       /* Number of total chunks */
+    hbool_t *select_chunk;         /* store the information about whether this chunk is selected or not */
+} fm_map;
+
 /*****************************/
 /* Package Private Variables */
 /*****************************/
@@ -215,10 +249,12 @@ H5_DLL size_t H5D_select_mgath (const void *_buf,
 H5_DLL herr_t H5D_select_read(H5D_io_info_t *io_info,
     size_t nelmts, size_t elmt_size,
     const H5S_t *file_space, const H5S_t *mem_space,
+			      haddr_t addr,
     void *buf/*out*/);
 H5_DLL herr_t H5D_select_write(H5D_io_info_t *io_info,
     size_t nelmts, size_t elmt_size,
     const H5S_t *file_space, const H5S_t *mem_space,
+			       haddr_t addr,
     const void *buf/*out*/);
 
 /* Functions that operate on contiguous storage */
@@ -296,42 +332,31 @@ H5_DLL ssize_t H5D_efl_writevv(const H5D_io_info_t *io_info,
 H5_DLL herr_t H5D_mpio_select_read(H5D_io_info_t *io_info,
     size_t nelmts, size_t elmt_size,
     const struct H5S_t *file_space, const struct H5S_t *mem_space,
-    void *buf/*out*/);
+    haddr_t addr,void *buf/*out*/);
 
 /* MPI-IO function to read , it will select either regular or irregular read */
 H5_DLL herr_t H5D_mpio_select_write(H5D_io_info_t *io_info,
     size_t nelmts, size_t elmt_size,
     const struct H5S_t *file_space, const struct H5S_t *mem_space,
-    const void *buf);
+    haddr_t addr,const void *buf);
 
-/* MPI-IO function to read directly from app buffer to file rky980813 */
-H5_DLL herr_t H5D_mpio_spaces_read(H5D_io_info_t *io_info,
-    size_t nelmts, size_t elmt_size,
-    const struct H5S_t *file_space, const struct H5S_t *mem_space,
-    void *buf/*out*/);
+/* MPI-IO function to handle contiguous collective IO */
+H5_DLL herr_t
+H5D_contig_collective_io(H5D_io_info_t *io_info,
+			 const H5S_t *file_space,const H5S_t *mem_space,
+			 void *_buf,hbool_t do_write);
 
-/* MPI-IO function to write directly from app buffer to file rky980813 */
-H5_DLL herr_t H5D_mpio_spaces_write(H5D_io_info_t *io_info,
-    size_t nelmts, size_t elmt_size,
-    const struct H5S_t *file_space, const struct H5S_t *mem_space,
-    const void *buf);
-
-/* MPI-IO function to read directly from app buffer to file rky980813 */
-H5_DLL herr_t H5D_mpio_spaces_span_read(H5D_io_info_t *io_info,
-    size_t nelmts, size_t elmt_size,
-    const struct H5S_t *file_space, const struct H5S_t *mem_space,
-    void *buf/*out*/);
-
-/* MPI-IO function to write directly from app buffer to file rky980813 */
-H5_DLL herr_t H5D_mpio_spaces_span_write(H5D_io_info_t *io_info,
-    size_t nelmts, size_t elmt_size,
-    const struct H5S_t *file_space, const struct H5S_t *mem_space,
-    const void *buf);
-
+/* MPI-IO function to handle chunked collective IO */
+H5_DLL herr_t
+H5D_chunk_collective_io(H5D_io_info_t * io_info,fm_map *fm, void*buf,
+			hbool_t do_write);
 /* MPI-IO function to check if a direct I/O transfer is possible between
  * memory and the file */
 H5_DLL htri_t H5D_mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *mem_space,
     const H5S_t *file_space, const H5T_path_t *tpath);
+
+H5_DLL herr_t  H5D_mpio_chunk_adjust_iomode(H5D_io_info_t *io_info,const fm_map *fm);
+
 #endif /* H5_HAVE_PARALLEL */
 
 /* Testing functions */
