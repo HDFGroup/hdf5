@@ -55,6 +55,7 @@
 #define SPACE_DIM2 3
 #define BYROW_CONT 1
 #define BYROW_DISCONT 2
+#define BYROW_SELECTNONE 3
 #define DSET_COLLECTIVE_CHUNK_NAME "coll_chunk_name"
 
 

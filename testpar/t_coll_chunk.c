@@ -177,6 +177,57 @@ coll_chunk3(void)
 
 }
 
+/*-------------------------------------------------------------------------
+ * Function:	coll_chunk4
+ *
+ * Purpose:	Wrapper to test the collective chunk IO for regular JOINT 
+                selection with at least number of 2*mpi_size chunks
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Unknown
+ *		July 12th, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/* ------------------------------------------------------------------------
+ *  Descriptions for the selection: one singular selection accross many chunks
+ *  Two dimensions, Num of chunks = 2* mpi_size
+ *
+ *  dim1       = SPACE_DIM1(5760)
+ *  dim2       = SPACE_DIM2(3)
+ *  chunk_dim1 = dim1/mpi_size
+ *  chunk_dim2 = dim2/2
+ *  block      = 1 for all dimensions
+ *  stride     = 1 for all dimensions
+ *  count0     = SPACE_DIM1/mpi_size(5760/mpi_size)
+ *  count1     = SPACE_DIM2(3)
+ *  start0     = mpi_rank*SPACE_DIM1/mpi_size
+ *  start1     = 0
+ *  
+ * ------------------------------------------------------------------------
+ */
+
+void
+coll_chunk4(void)
+{
+
+  const char *filename;
+  int mpi_size;
+
+  MPI_Comm comm = MPI_COMM_WORLD;
+  MPI_Comm_size(comm,&mpi_size);
+
+  filename = GetTestParameters();
+  coll_chunktest(filename,1,BYROW_SELECTNONE);
+
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	coll_chunktest
@@ -397,7 +448,6 @@ ccslab_set(int mpi_rank,
 	start[0]  =  mpi_rank*count[0];
 	start[1]  =  0;
 
-	if (VERBOSE_MED) printf("slab_set BYROW_CONT\n");
 	break;
 
     case BYROW_DISCONT:
@@ -411,11 +461,24 @@ ccslab_set(int mpi_rank,
 	start[0]  =  SPACE_DIM1/mpi_size*mpi_rank;
 	start[1]  =  0;
 
-	if (VERBOSE_MED) printf("slab_set BYROW_DISCONT\n");
 	break;
+
+    case BYROW_SELECTNONE:
+	/* Each process takes a slabs of rows, there are
+           no selections for the last process. */
+	block[0]  =  1;
+	block[1]  =  1;
+	stride[0] =  1;
+	stride[1] =  1;
+	count[0]  =  ((mpi_rank == (mpi_size-1))?0:SPACE_DIM1/mpi_size);
+	count[1]  =  SPACE_DIM2;
+	start[0]  =  mpi_rank*count[0];
+	start[1]  =  0;
+
+	break;
+    
     default:
 	/* Unknown mode.  Set it to cover the whole dataset. */
-	printf("unknown slab_set mode (%d)\n", mode);
 	block[0]  = SPACE_DIM1;
 	block[1]  = SPACE_DIM2;
 	stride[0] = block[0];
@@ -425,7 +488,6 @@ ccslab_set(int mpi_rank,
 	start[0]  = 0;
 	start[1]  = 0;
 
-	if (VERBOSE_MED) printf("slab_set wholeset\n");
 	break;
     }
     if (VERBOSE_MED){

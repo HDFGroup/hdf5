@@ -323,6 +323,8 @@ h5_mpi_get_file_size(const char *filename, MPI_Comm comm, MPI_Info info)
         size=0;
 
 done:
+    printf("size in llu = %llu\n",size);
+    printf("size in lld = %lld\n",size);
     return(size);
 }
 
@@ -427,6 +429,8 @@ int main(int argc, char **argv)
 	coll_chunk2,NULL, "noncontiguous collective chunk io",PARATESTFILE);
     AddTest("cchunk3",
 	coll_chunk3,NULL, "multi-chunk collective chunk io",PARATESTFILE);
+  AddTest("cchunk4",
+        coll_chunk4,NULL, "collective chunk io with partial non-selection ",PARATESTFILE);
 
 /* irregular collective IO tests*/
     AddTest("ccontw",
