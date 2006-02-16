@@ -386,6 +386,9 @@
    2GB. */
 #undef MPI_FILE_SET_SIZE_BIG
 
+/* Define if your system can handle special collective IO properly. */
+#undef MPI_SPECIAL_COLLECTIVE_IO_WORKS
+
 /* Define if shared writing must be disabled (CodeWarrior only) */
 #undef NO_SHARED_WRITING
 
