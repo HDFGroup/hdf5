@@ -64,6 +64,9 @@ New Features
 
     Configuration:
     --------------
+        - Added a macro hdf5_mpi_special_collective_io_works to filter out
+          some mpi-io packages that don't support collective IO for no IO
+          contributions in some processes. -KY 2006/2/16
 	- Added -shlib option to link against installed shared libraries to
 	  h5c++ and h5fc.  -JML 2005/11/1
 	- Added --enable-build-all option to configure, which only developers
@@ -158,6 +161,35 @@ New Features
 
     Library:
     --------
+       - Added managements of collective IO supports for chunking storage
+         inside parallel HDF5
+         1) Implemented One IO with collective mode for all chunks in the
+            application by building one MPI derived datatype accross all
+            chunks.
+         2) Implemented the decision-making support to do collective IO inside
+            MPI-IO per chunk. 
+         3) Added the decision-making support to do one IO accross all chunks
+            or to do multiple IOs with each IO per chunk.
+         4) Added the support to handle the case some processes won't do any IOs in 
+            collectively.
+         5) Some MPI-IO package(mpich 1.2.6 or lower, e.g.) cannot handle
+            collective IO correctly for the case when some processes have no
+            contributions to IOs, a special macro is added to change
+            collective IO mode to independent IO mode inside HDF5 library.
+
+            Currently we find that MPICH at Linux and vender MPI-IO package at NCSA
+            Altix cannot handle this case. 
+            
+             "hdf5_mpi_special_collective_io_works=${hdf5_mpi_special_collective_io_works='no'}"
+              has been added at the end of file <ia64-linux-gnui> and
+                                                 <linux-gnulibc1>.
+
+             If MPI-IO packages at your Linux and Altix support this case,
+             please comment out the last line and report to us at
+             hdfhelp@ncsa.uiuc.edu. We can tune in our configuration to
+             support this.                                                     
+ 
+             KY - 2006/02/16
        - Added character encoding to attribute creation property lists.
             JML - 2006/01/02
        - Added H5Gcopy() routine to copy objects between while keeping
