@@ -323,8 +323,6 @@ h5_mpi_get_file_size(const char *filename, MPI_Comm comm, MPI_Info info)
         size=0;
 
 done:
-    printf("size in llu = %llu\n",size);
-    printf("size in lld = %lld\n",size);
     return(size);
 }
 
