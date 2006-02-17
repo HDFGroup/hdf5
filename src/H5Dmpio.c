@@ -672,7 +672,7 @@ H5D_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,void *buf, hbool_t do_
 	HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL,"couldn't finish linked chunk MPI-IO");
     }
     else {/* multiple chunk IOs */
-      printf("coming into multiple chunk \n");
+/*      printf("coming into multiple chunk \n");*/
       if(H5D_multi_chunk_collective_io(io_info,fm,buf,do_write)<0)
 	HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL,"couldn't finish multiple chunk MPI-IO");
     }
