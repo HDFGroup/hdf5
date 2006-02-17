@@ -182,5 +182,6 @@ if [ -z "$hdf5_mpi_complex_derived_datatype_works" -a $CC_BASENAME = cc ]; then
     ccversionval=`expr $ccversion1 \* 100 + $ccversion2`
     if [ $ccversionval -lt 704 ]; then
         hdf5_mpi_complex_derived_datatype_works='no'
+        hdf5_mpi_special_collective_io_works='no'
     fi
 fi
