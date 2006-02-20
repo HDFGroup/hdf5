@@ -173,7 +173,7 @@ fi
 # Create the temporay work directory.
 if mkdir $tmpdir; then
     echo "temporary work directory for release.  "\
-         "Can be deleted after release completes." > $tmpdir/READEME
+         "Can be deleted after release completes." > $tmpdir/README
 else
     echo "Failed to mkdir tmpdir($tmpdir)"
     exit 1
@@ -266,7 +266,7 @@ for comp in $methods; do
 	    # Check out docs from svn repo
 	    (cd $tmpdir; svn co $DOC_URL > /dev/null)
 	    # Create doxygen C++ RM
-	    (cd c++/src && doxygen cpp_doc_config > /dev/null 1>&2 )
+	    (cd c++/src && doxygen cpp_doc_config >& /dev/null ) || exit 1
 	    # Replace version of C++ RM with just-created version
 	    rm -rf $tmpdir/trunk/html/$CPPLUS_RM_NAME
 	    mv c++/src/$CPPLUS_RM_NAME $tmpdir/trunk/html/$CPPLUS_RM_NAME
