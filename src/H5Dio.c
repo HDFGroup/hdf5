@@ -988,15 +988,16 @@ H5D_contig_read(H5D_io_info_t *io_info, hsize_t nelmts,
 #ifdef H5_HAVE_PARALLEL
 	if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE) {
 	  if(H5D_contig_collective_io(io_info,file_space,mem_space,buf,FALSE)<0)
-	    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't manipulate collective I/O");
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "contiguous read failed in collective mode");
 	}
 	else
 #endif
          {
-	  status = (io_info->ops.read)(io_info,
+	  if((io_info->ops.read)(io_info,
             (size_t)nelmts, H5T_get_size(dataset->shared->type),
 				       file_space, mem_space,0,
-            buf/*out*/);
+            buf/*out*/)<0)
+             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "contiguous read failed ");
 	}
 
 #ifdef H5S_DEBUG
@@ -1005,10 +1006,6 @@ H5D_contig_read(H5D_io_info_t *io_info, hsize_t nelmts,
         io_info->stats->stats[1].read_ncalls++;
 #endif
 
-        /* Check return value from optimized read */
-        if (status<0) {
-            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "optimized read failed")
-        } else
             /* direct xfer accomplished successfully */
             HGOTO_DONE(SUCCEED)
     } /* end if */
@@ -1250,15 +1247,16 @@ H5D_contig_write(H5D_io_info_t *io_info, hsize_t nelmts,
 #ifdef H5_HAVE_PARALLEL
 	if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE) {
 	  if(H5D_contig_collective_io(io_info,file_space,mem_space,buf,TRUE)<0)
-	    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't manipulate collective I/O");
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "contiguous write failed in collective mode");
 	}
 	else 
 #endif
         {
-	  status = (io_info->ops.write)(io_info,
+	  if((io_info->ops.write)(io_info,
             (size_t)nelmts, H5T_get_size(dataset->shared->type),
 				       file_space, mem_space,0,
-                                        buf/*out*/);
+                                        buf/*out*/)<0)
+             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "contiguous write failed ");
 	}
 
 #ifdef H5S_DEBUG
@@ -1267,10 +1265,6 @@ H5D_contig_write(H5D_io_info_t *io_info, hsize_t nelmts,
         io_info->stats->stats[0].write_ncalls++;
 #endif
 
-        /* Check return value from optimized write */
-        if (status<0) {
-	    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "optimized write failed")
-	} else
 	    /* direct xfer accomplished successfully */
 	    HGOTO_DONE(SUCCEED)
     } /* end if */
@@ -1518,7 +1512,7 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
 	/* Temporarily shut down collective IO for chunking */
 	if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE) {
 	  if(H5D_chunk_collective_io(io_info,&fm,buf,FALSE)<0)
-	    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't manipulate collective I/O");
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "chunked read failed in collective mode");
 	}
 	
 	else {/* sequential or independent read */
@@ -1543,7 +1537,7 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
 
 	     /* Check return value from optimized read */
              if (status<0)
-                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, " optimized read failed")
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, " chunked read failed")
 
              chunk_node = H5SL_next(chunk_node);
 
@@ -1843,7 +1837,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
         }
         if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE) {
 	  if(H5D_chunk_collective_io(io_info,&fm,buf,TRUE)<0)
-	    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't manipulate collective I/O");
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "chunked write failed in collective mode");
 	}
 	else {/* sequential or independent write */
 	  
@@ -1869,7 +1863,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
 
 	   /* Check return value from optimized read */
           if (status<0)
-                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, " optimized read failed")
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, " chunked write failed")
 
             chunk_node = H5SL_next(chunk_node);
 
