@@ -361,8 +361,6 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/tools/lib -I$(top_srcdir)/hl/src
 h52gif_SOURCES = hdf2gif.c hdfgifwr.c readhdf.c
 @BUILD_HDF5_HL_CONDITIONAL_FALSE@LDADD = $(LIBH5TOOLS) $(LIBHDF5)
 
-#h52gif_DEPENDENCIES=$(LIBH5_HL)
-
 # Programs all depend on the hdf5 library and the tools library
 @BUILD_HDF5_HL_CONDITIONAL_TRUE@LDADD = $(LIBH5TOOLS) $(LIBH5_HL) $(LIBHDF5)
 
