@@ -2186,10 +2186,15 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
         HGOTO_ERROR (H5E_INTERNAL, H5E_BADVALUE, FAIL, "can't compute 'down' sizes")
 
     /* calculate total chunk in file map*/
-    fm->select_chunk = NULL;
     fm->total_chunks = 1;
     for(u=0; u<fm->f_ndims; u++) 
        fm->total_chunks= fm->total_chunks*fm->chunks[u];
+    if(IS_H5FD_MPI(dataset->oloc.file)) { 
+
+       if(NULL == (fm->select_chunk = (hbool_t *) H5MM_calloc(fm->total_chunks*sizeof(hbool_t))))
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate chunk info")
+    }
+ 
 
 
 
@@ -2481,10 +2486,6 @@ H5D_create_chunk_file_map_hyper(fm_map *fm,const H5D_t *dset)
         end[u]=(coords[u]+fm->chunk_dim[u])-1;
     } /* end for */
 
-    if(IS_H5FD_MPI(dset->oloc.file)) { 
-       if(NULL == (fm->select_chunk = (hbool_t *) H5MM_calloc(fm->total_chunks*sizeof(hbool_t))))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate chunk info")
-    }
     
     /* Calculate the index of this chunk */
     if(H5V_chunk_index(fm->f_ndims,coords,fm->layout->u.chunk.dim,fm->down_chunks,&chunk_index)<0)
