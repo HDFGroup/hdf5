@@ -109,23 +109,23 @@ typedef struct H5D_common_coll_info_t {
 /********************/
 
 static herr_t 
-H5D_multi_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,void *buf, 
+H5D_multi_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf, 
 			      hbool_t do_write);
 
 static herr_t
-H5D_link_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,void *buf, 
+H5D_link_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf, 
 			     hbool_t do_write,int sum_chunk);
 
 static herr_t 
 H5D_inter_collective_io(H5D_io_info_t *io_info,const H5S_t *file_space,
 			const H5S_t *mem_space,haddr_t addr, 
-		        void *buf, hbool_t do_write );
+		        const void *buf, hbool_t do_write );
 
 static herr_t 
 H5D_final_collective_io(H5D_io_info_t *io_info,MPI_Datatype*mpi_file_type,
 			 MPI_Datatype *mpi_buf_type,
 			 H5D_common_coll_info_t* coll_info, 
-			 void *buf, hbool_t do_write);
+			 const void *buf, hbool_t do_write);
 #ifdef OLD_WAY
 static herr_t
 H5D_pre_sort_chunk(H5D_io_info_t *io_info,int total_chunks,
@@ -340,7 +340,7 @@ done:
 herr_t
 H5D_mpio_select_read(H5D_io_info_t *io_info,
                      size_t mpi_buf_count, 
-		     size_t elmt_size,
+                     const size_t UNUSED elmt_size,
 		     const H5S_t UNUSED *file_space, 
 		     const H5S_t UNUSED *mem_space,
 		     haddr_t addr,		     
@@ -371,7 +371,7 @@ done:
 herr_t
 H5D_mpio_select_write(H5D_io_info_t *io_info,
 		      size_t mpi_buf_count, 
-		      size_t elmt_size,
+		      const size_t UNUSED elmt_size,
 		      const H5S_t UNUSED *file_space, 
 		      const H5S_t UNUSED *mem_space,
 		      haddr_t addr,
@@ -571,13 +571,12 @@ herr_t
 H5D_contig_collective_io(H5D_io_info_t *io_info, 
 			 const H5S_t *file_space,
 			 const H5S_t *mem_space,
-			 void *buf,
+			 const void *buf,
 			 hbool_t do_write) 
 {
 
 
     haddr_t	 addr = HADDR_UNDEF;                  /* Address of dataset (or selection) within file */
-    hbool_t      select_valid;
     herr_t       ret_value = SUCCEED;  /* return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_contig_collective_io)
@@ -629,11 +628,11 @@ H5D_contig_collective_io(H5D_io_info_t *io_info,
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5D_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,void *buf, hbool_t do_write) 
+H5D_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf, hbool_t do_write) 
 {
 
     int               io_option = H5D_MULTI_CHUNK_IO;
-    int               min_chunk,sum_chunk,mpi_size;
+    int               sum_chunk,mpi_size;
     int               one_link_chunk_io_threshold;
     herr_t            ret_value = SUCCEED;    
 
@@ -702,7 +701,7 @@ done:
  */
 
 static herr_t
-H5D_link_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,void *buf, hbool_t do_write,int sum_chunk)
+H5D_link_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf, hbool_t do_write,int sum_chunk)
 {
 
 
@@ -980,11 +979,10 @@ printf("before inter_collective_io for total chunk = 1 \n");
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5D_multi_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,void *buf, hbool_t do_write) 
+H5D_multi_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf, hbool_t do_write) 
 {
 
       int               i,total_chunk;
-      int               mpi_rank;
       hsize_t           ori_total_chunk;
       uint8_t          *chunk_io_option;
 
@@ -1149,7 +1147,7 @@ printf("inside independent IO mpi_rank = %d, chunk index = %d\n",mpi_rank,i);
  */
 static herr_t 
 H5D_inter_collective_io(H5D_io_info_t *io_info,const H5S_t *file_space,const H5S_t *mem_space,
-			 haddr_t addr, void *buf, hbool_t do_write ) 
+			 haddr_t addr, const void *buf, hbool_t do_write ) 
 {
 
       size_t	        mpi_buf_count, mpi_file_count;     /* Number of "objects" to transfer */
@@ -1210,7 +1208,7 @@ printf("before final collective IO\n");
  */
 static herr_t 
 H5D_final_collective_io(H5D_io_info_t *io_info,MPI_Datatype*mpi_file_type,MPI_Datatype *mpi_buf_type,
-			 H5D_common_coll_info_t* coll_info, void *buf, hbool_t do_write) 
+			 H5D_common_coll_info_t* coll_info, const void *buf, hbool_t do_write) 
 {
 
 
@@ -1376,7 +1374,7 @@ H5D_sort_chunk(H5D_io_info_t * io_info,
     H5D_chunk_info_t *chunk_info;         /* Current chunking info. of this node. */
     haddr_t           chunk_addr;         /* Current chunking address of this node */
     haddr_t          *total_chunk_addr_array; /* The array of chunk address for the total number of chunk */
-    int               i,j,k,mpi_code;
+    int               i,mpi_code;
     int               total_chunks;
     size_t            num_chunks;
     int               mpi_type_cleanup    = 0;
@@ -1398,7 +1396,7 @@ H5D_sort_chunk(H5D_io_info_t * io_info,
 
       if(many_chunk_opt == H5D_OBTAIN_ALL_CHUNK_ADDR_COL) {/* We will broadcast the array from the root process */
 
-	int mpi_rank, root,mpi_code;
+	int mpi_rank, root;
 	root = 0;
 	if((mpi_rank = H5F_mpi_get_rank(io_info->dset->oloc.file))<0)
 	 HGOTO_ERROR (H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi rank");

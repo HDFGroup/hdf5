@@ -344,11 +344,11 @@ H5_DLL herr_t H5D_mpio_select_write(H5D_io_info_t *io_info,
 H5_DLL herr_t
 H5D_contig_collective_io(H5D_io_info_t *io_info,
 			 const H5S_t *file_space,const H5S_t *mem_space,
-			 void *_buf,hbool_t do_write);
+			 const void *_buf,hbool_t do_write);
 
 /* MPI-IO function to handle chunked collective IO */
 H5_DLL herr_t
-H5D_chunk_collective_io(H5D_io_info_t * io_info,fm_map *fm, void*buf,
+H5D_chunk_collective_io(H5D_io_info_t * io_info,fm_map *fm, const void*buf,
 			hbool_t do_write);
 /* MPI-IO function to check if a direct I/O transfer is possible between
  * memory and the file */

@@ -98,7 +98,7 @@ static herr_t H5D_write(H5D_t *dataset, hid_t mem_type_id,
 static herr_t H5D_contig_read(H5D_io_info_t *io_info, hsize_t nelmts,
             const H5T_t *mem_type, const H5S_t *mem_space,
             const H5S_t *file_space, H5T_path_t *tpath,
-            hid_t src_id, hid_t dst_id, void *buf/*out*/);
+            hid_t src_id, hid_t dst_id,  void *buf/*out*/);
 static herr_t H5D_contig_write(H5D_io_info_t *io_info, hsize_t nelmts,
             const H5T_t *mem_type, const H5S_t *mem_space,
 	    const H5S_t *file_space, H5T_path_t *tpath,
