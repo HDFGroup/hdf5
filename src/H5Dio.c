@@ -2186,6 +2186,7 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
         HGOTO_ERROR (H5E_INTERNAL, H5E_BADVALUE, FAIL, "can't compute 'down' sizes")
 
     /* calculate total chunk in file map*/
+    fm->select_chunk = NULL;
     fm->total_chunks = 1;
     for(u=0; u<fm->f_ndims; u++) 
        fm->total_chunks= fm->total_chunks*fm->chunks[u];
