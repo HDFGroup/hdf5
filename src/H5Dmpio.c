@@ -377,13 +377,17 @@ H5D_mpio_select_write(H5D_io_info_t *io_info,
 		      haddr_t addr,
 		      const void *buf)
 {
-    herr_t ret_value;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5D_mpio_select_write,FAIL);
 
+#ifdef KENT
+    printf("coming into mpio_select_write\n");
+#endif
     /*OKAY: CAST DISCARDS CONST QUALIFIER*/
     if(H5F_block_write (io_info->dset->oloc.file, H5FD_MEM_DRAW, addr, mpi_buf_count, io_info->dxpl_id, buf)<0)
        HGOTO_ERROR(H5E_IO,H5E_WRITEERROR,FAIL,"can't finish collective parallel write");
+
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D_mpio_select_write() */
@@ -589,6 +593,9 @@ H5D_contig_collective_io(H5D_io_info_t *io_info,
     if(io_info->dset->shared->layout.type == H5D_CONTIGUOUS)
        addr = H5D_contig_get_addr(io_info->dset);
 
+#ifdef KENT
+    printf("before inter_collective_io\n");
+#endif
     if(H5D_inter_collective_io(io_info,file_space,mem_space,addr,buf,do_write)<0)
 	HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL,"couldn't finish shared collective MPI-IO");
       
@@ -943,9 +950,15 @@ printf("before inter_collective_io for total chunk = 1 \n");
 	HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL,"couldn't finish MPI-IO");
 
  done:
-      if(num_chunk == 0) HDfree(total_chunk_addr_array);
-      else {
-        if (fm->total_chunks != 1) {
+#ifdef KENT
+printf("before freeing memory inside  H5D_link_collective_io ret_value = %d\n",ret_value);
+#endif
+
+
+      
+     if (fm->total_chunks != 1) {
+       if(num_chunk == 0) HDfree(total_chunk_addr_array);
+       else {
           HDfree(chunk_addr_info_array);
 	  HDfree(chunk_mtype);
 	  HDfree(chunk_ftype);
@@ -954,6 +967,10 @@ printf("before inter_collective_io for total chunk = 1 \n");
 	  HDfree(blocklen);
         }
       }
+
+#ifdef KENT
+printf("before leaving H5D_link_collective_io ret_value = %d\n",ret_value);
+#endif
 
       FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -993,6 +1010,9 @@ H5D_multi_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf,
       hbool_t           select_chunk;
       hbool_t 	        last_io_mode_coll = TRUE;
       herr_t            ret_value = SUCCEED;    
+#ifdef KENT
+      int mpi_rank;
+#endif
 
 
       FUNC_ENTER_NOAPI_NOINIT(H5D_multi_chunk_collective_io)
@@ -1189,6 +1209,9 @@ printf("before final collective IO\n");
       if(H5D_final_collective_io(io_info,&mpi_file_type,&mpi_buf_type,&coll_info,buf,do_write)<0)
 	    HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL,"couldn't finish collective MPI-IO");
  done:
+#ifdef KENT
+printf("before leaving inter_collective_io ret_value = %d\n",ret_value);
+#endif
 
       FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_inter_collective_io */
@@ -1227,13 +1250,18 @@ H5D_final_collective_io(H5D_io_info_t *io_info,MPI_Datatype*mpi_file_type,MPI_Da
 	HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI-I/O properties");
 
      plist_is_setup=1;
-     /*HDfprintf(stdout,"chunk addr %Hu\n",coll_info->chunk_addr);
-     printf("mpi_buf_count %d\n",coll_info->mpi_buf_count);	*/ 
+#ifdef KENT
+     HDfprintf(stdout,"chunk addr %Hu\n",coll_info->chunk_addr);
+     printf("mpi_buf_count %d\n",coll_info->mpi_buf_count);	
+#endif
      if(do_write) {
 	ret_value = (io_info->ops.write)(io_info,
 		coll_info->mpi_buf_count,0,NULL,NULL,coll_info->chunk_addr,
                 buf);
 	/* Check return value from optimized write */
+#ifdef KENT
+        printf("ret_value after final collective IO= %d\n",ret_value);
+#endif
 	if (ret_value<0) 
 	    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "optimized write failed")
 	      }
@@ -1263,6 +1291,9 @@ H5D_final_collective_io(H5D_io_info_t *io_info,MPI_Datatype*mpi_file_type,MPI_Da
 	if (MPI_SUCCESS != (mpi_code= MPI_Type_free( mpi_file_type )))
             HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
       }
+#ifdef KENT
+      printf("ret_value before leaving final_collective_io=%d\n",ret_value);
+#endif
 
       FUNC_LEAVE_NOAPI(ret_value)
 }/* end H5D_final_collective_io */
