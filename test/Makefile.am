@@ -32,7 +32,7 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT)
 # executed, generally most specific tests to least specific tests.
 # As an exception, long-running tests should occur earlier in the list.
 # This gives them more time to run when tests are executing in parallel.
-TEST_PROG=testhdf5 lheap ohdr stab gheap btree2 cache cache_api b+tree blocktrack sheap \
+TEST_PROG=testhdf5 lheap ohdr stab gheap btree2 cache cache_api \
            pool hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset extend external objcopy links unlink big mtime     \
            fillval mount flush1 flush2 enum \
@@ -107,7 +107,7 @@ CHECK_CLEANFILES+=cmpd_dset.h5 compact_dataset.h5 dataset.h5 extend.h5 istore.h5
             family_file000[0-3][0-9].h5 multi_file-[rs].h5 core_file         \
             new_move_[ab].h5 ntypes.h5 dangle.h5 error_test.h5 err_compat.h5 \
             dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
-            unlink_chunked.h5 btree2.h5 blocktrack.h5 sheap.h5 b+tree.h5     \
+            unlink_chunked.h5 btree2.h5 \
             objcopy_src.h5 objcopy_dst.h5 objcopy_ext.dat
 
 # Sources for testhdf5 executable

@@ -39,20 +39,19 @@
 #include "H5Cprivate.h"		/* cache				*/
 
 
-#define H5AC_BT_ID	0	/*B-tree nodes				     */
-#define H5AC_SNODE_ID	1	/*symbol table nodes			     */
-#define H5AC_LHEAP_ID	2	/*local heap				     */
-#define H5AC_GHEAP_ID	3	/*global heap				     */
-#define H5AC_OHDR_ID	4	/*object header				     */
-#define H5AC_BT2_HDR_ID	5	/*v2 B-tree header			     */
-#define H5AC_BT2_INT_ID 6	/*v2 B-tree internal node		     */
-#define H5AC_BT2_LEAF_ID 7	/*v2 B-tree leaf node			     */
-#define H5AC_BLTR_ID	8	/*block tracker				     */
-#define H5AC_SHEAP_ID	9	/*segmented heap			     */
-#define H5AC_BPT_HDR_ID	10	/*B+ tree header			     */
-#define H5AC_BPT_LEAF_ID 11	/*B+ tree leaf				     */
-#define H5AC_TEST_ID	12	/*test entry -- not used for actual files    */
-#define H5AC_NTYPES	13
+/* Types of metadata objects cached */
+typedef enum {
+    H5AC_BT_ID = 0, 	/*B-tree nodes				     */
+    H5AC_SNODE_ID,	/*symbol table nodes			     */
+    H5AC_LHEAP_ID,	/*local heap				     */
+    H5AC_GHEAP_ID,	/*global heap				     */
+    H5AC_OHDR_ID,	/*object header				     */
+    H5AC_BT2_HDR_ID,	/*v2 B-tree header			     */
+    H5AC_BT2_INT_ID,	/*v2 B-tree internal node		     */
+    H5AC_BT2_LEAF_ID,	/*v2 B-tree leaf node			     */
+    H5AC_TEST_ID,	/*test entry -- not used for actual files    */
+    H5AC_NTYPES		/* Number of types, must be last             */
+} H5AC_type_t;
 
 /* H5AC_DUMP_STATS_ON_CLOSE should always be FALSE when
  * H5C_COLLECT_CACHE_STATS is FALSE.

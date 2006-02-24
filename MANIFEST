@@ -410,21 +410,6 @@
 ./src/H5B2private.h
 ./src/H5B2public.h
 ./src/H5B2test.c
-./src/H5BP.c
-./src/H5BPcache.c
-./src/H5BPdbg.c
-./src/H5BPpkg.h
-./src/H5BPprivate.h
-./src/H5BPpublic.h
-./src/H5BPtest.c
-./src/H5BT.c
-./src/H5BTbtree2.c
-./src/H5BTcache.c
-./src/H5BTdbg.c
-./src/H5BTpkg.h
-./src/H5BTprivate.h
-./src/H5BTpublic.h
-./src/H5BTtest.c
 ./src/H5C.c
 ./src/H5Cpkg.h
 ./src/H5Cprivate.h
@@ -584,12 +569,6 @@
 ./src/H5Spublic.h
 ./src/H5Sselect.c
 ./src/H5Stest.c
-./src/H5SH.c
-./src/H5SHcache.c
-./src/H5SHdbg.c
-./src/H5SHpkg.h
-./src/H5SHpublic.h
-./src/H5SHprivate.h
 ./src/H5SL.c
 ./src/H5SLprivate.h
 ./src/H5ST.c
@@ -639,10 +618,8 @@
 
 ./test/Makefile.am
 ./test/Makefile.in
-./test/b+tree.c
 ./test/big.c
 ./test/bittests.c
-./test/blocktrack.c
 ./test/btree2.c
 ./test/cache.c
 ./test/cache_api.c
@@ -698,7 +675,6 @@
 ./test/reserved.c
 ./test/pool.c
 ./test/set_extent.c
-./test/sheap.c
 ./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
 ./test/stab.c
 ./test/stream_test.c

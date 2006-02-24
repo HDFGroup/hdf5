@@ -742,10 +742,6 @@ static const char * H5AC_entry_type_names[H5AC_NTYPES] =
     "v2 B-tree headers",
     "v2 B-tree internal nodes",
     "v2 B-tree leaf nodes",
-    "block tracker nodes",
-    "segmented heaps",
-    "B+ tree headers",
-    "B+ tree leaves",
     "test entry"	/* for testing only -- not used for actual files */
 };
 
@@ -768,6 +764,8 @@ H5AC_create(const H5F_t *f,
     HDassert ( f );
     HDassert ( NULL == f->shared->cache );
     HDassert ( config_ptr != NULL ) ;
+    HDassert ( NELMTS(H5AC_entry_type_names) == H5AC_NTYPES);
+    HDassert ( H5C__MAX_NUM_TYPE_IDS == H5AC_NTYPES);
 
     result = H5AC_validate_config(config_ptr);
 
