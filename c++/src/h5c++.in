@@ -241,7 +241,7 @@ fi
 if test "x$do_link" = "xyes"; then
   # conditionnaly link with the hl library  
     if test "X$HL" = "Xhl"; then
-     link_args="$link_args ${libdir}/libhdf5_cpp.a ${libdir}/libhdf5.a ${libdir}/libhdf5_hl.a $LIBS"
+     link_args="$link_args ${libdir}/libhdf5_hl.a ${libdir}/libhdf5_cpp.a ${libdir}/libhdf5.a $LIBS"
     else
      link_args="$link_args ${libdir}/libhdf5_cpp.a ${libdir}/libhdf5.a $LIBS"
     fi

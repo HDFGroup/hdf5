@@ -764,6 +764,24 @@ fi
 AC_SUBST(DYNAMIC_DIRS)
 
 dnl ----------------------------------------------------------------------
+dnl Check if they would like the High Level library  compiled
+dnl
+AC_SUBST(HL) HL=""
+AC_MSG_CHECKING([if high level library is enabled])
+AC_ARG_ENABLE([hl],
+     [AC_HELP_STRING([--enable-hl],
+                     [Enable the high level library [default=yes]])],
+     [HDF5_HL=$enableval],
+     [HDF5_HL=yes])
+
+if test "X$HDF5_HL" = "Xyes"; then
+ echo "yes"
+ HL="hl"
+else
+ echo "no"
+fi
+
+dnl ----------------------------------------------------------------------
 dnl Build the Makefiles.  Almost every Makefile.in will begin with the line
 dnl `@COMMENCE@' and end with the line `@CONCLUDE@'.  These lines insert
 dnl various files from the config directory into the Makefile.
