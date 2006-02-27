@@ -6646,7 +6646,7 @@ test_space_rebuild(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");   
 
     rebuild_stat = FALSE;
-    rebuild_stat = H5S_inquiry_rebuild_status(sid_reg1);
+    rebuild_stat = H5S_get_rebuild_status_test(sid_reg1);
     assert(rebuild_stat!=FAIL);
     /* In this case, rebuild_stat should be TRUE. */
     if(!rebuild_stat){
@@ -6678,7 +6678,7 @@ test_space_rebuild(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");   
 
     rebuild_stat = TRUE;
-    rebuild_stat = H5S_inquiry_rebuild_status(sid_irreg1); 
+    rebuild_stat = H5S_get_rebuild_status_test(sid_irreg1); 
     assert(rebuild_stat!=FAIL);
     /* In this case, rebuild_stat should be FALSE. */
     if(rebuild_stat){
@@ -6725,7 +6725,7 @@ test_space_rebuild(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");   
 
     rebuild_stat = FALSE;
-    rebuild_stat = H5S_inquiry_rebuild_status(sid_reg2); 
+    rebuild_stat = H5S_get_rebuild_status_test(sid_reg2); 
     assert(rebuild_stat!=FAIL);
     /* In this case, rebuild_stat should be TRUE. */
     if(!rebuild_stat){
@@ -6762,7 +6762,7 @@ test_space_rebuild(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");   
 
     rebuild_stat = TRUE;
-    rebuild_stat = H5S_inquiry_rebuild_status(sid_irreg2);
+    rebuild_stat = H5S_get_rebuild_status_test(sid_irreg2);
     assert(rebuild_stat!=FAIL);
     /* In this case, rebuild_stat should be FALSE. */
     if(rebuild_stat){
@@ -6814,7 +6814,7 @@ test_space_rebuild(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");   
 
     rebuild_stat = FALSE;
-    rebuild_stat = H5S_inquiry_rebuild_status(sid_reg3);
+    rebuild_stat = H5S_get_rebuild_status_test(sid_reg3);
     assert(rebuild_stat!=FAIL);
 
     /* In this case, rebuild_stat should be TRUE. */
@@ -6857,7 +6857,7 @@ test_space_rebuild(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");   
 
     rebuild_stat = TRUE;
-    rebuild_stat = H5S_inquiry_rebuild_status(sid_irreg3);
+    rebuild_stat = H5S_get_rebuild_status_test(sid_irreg3);
     assert(rebuild_stat!=FAIL);
     /* In this case, rebuild_stat should be FALSE. */
     if(rebuild_stat){
@@ -6917,7 +6917,7 @@ test_space_rebuild(void)
 
 
     rebuild_stat = FALSE;
-    rebuild_stat = H5S_inquiry_rebuild_status(sid_reg4);
+    rebuild_stat = H5S_get_rebuild_status_test(sid_reg4);
     assert(rebuild_stat!=FAIL);
     /* In this case, rebuild_stat should be TRUE. */
     if(!rebuild_stat){
@@ -6970,7 +6970,7 @@ test_space_rebuild(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");   
 
     rebuild_stat = TRUE;
-    rebuild_stat = H5S_inquiry_rebuild_status(sid_irreg4);
+    rebuild_stat = H5S_get_rebuild_status_test(sid_irreg4);
     assert(rebuild_stat!=FAIL);
     /* In this case, rebuild_stat should be FALSE. */
     if(rebuild_stat){
@@ -7034,7 +7034,7 @@ test_space_rebuild(void)
 
 
     rebuild_stat = FALSE;
-    rebuild_stat = H5S_inquiry_rebuild_status(sid_reg5);
+    rebuild_stat = H5S_get_rebuild_status_test(sid_reg5);
     assert(rebuild_stat!=FAIL);
     /* In this case, rebuild_stat should be TRUE. */
     if(!rebuild_stat){
@@ -7092,7 +7092,7 @@ test_space_rebuild(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");   
 
     rebuild_stat = TRUE;
-    rebuild_stat = H5S_inquiry_rebuild_status(sid_irreg5);
+    rebuild_stat = H5S_get_rebuild_status_test(sid_irreg5);
     assert(rebuild_stat!=FAIL);
     /* In this case, rebuild_stat should be FALSE. */
     if(rebuild_stat){
@@ -7133,7 +7133,7 @@ test_space_rebuild(void)
     ret = H5Sselect_hyperslab(sid_spec,H5S_SELECT_SET,start5,stride5,count5,block5);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
     rebuild_stat = FALSE;
-    rebuild_stat = H5S_inquiry_rebuild_status(sid_spec); 
+    rebuild_stat = H5S_get_rebuild_status_test(sid_spec); 
     /* In this case, rebuild_stat should be TRUE. */
     if(!rebuild_stat){
        ret = FAIL;
@@ -7155,7 +7155,7 @@ test_space_rebuild(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");   
 
     rebuild_stat = TRUE;
-    rebuild_stat = H5S_inquiry_rebuild_status(sid_spec);
+    rebuild_stat = H5S_get_rebuild_status_test(sid_spec);
     assert(rebuild_stat!=FAIL);
     /* In this case, rebuild_stat should be FALSE. */
     if(rebuild_stat){
@@ -7177,7 +7177,7 @@ test_space_rebuild(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");   
 
     rebuild_stat = FALSE;
-    rebuild_stat = H5S_inquiry_rebuild_status(sid_spec);
+    rebuild_stat = H5S_get_rebuild_status_test(sid_spec);
     assert(rebuild_stat!=FAIL);
     /* In this case, rebuild_stat should be FALSE. */
     if(!rebuild_stat){

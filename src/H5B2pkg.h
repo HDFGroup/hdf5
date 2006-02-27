@@ -55,15 +55,15 @@
 
 /* Size of the B-tree header on disk */
 #define H5B2_HEADER_SIZE(f)     (                                             \
-    4 + /* Signature */                                                       \
-    1 + /* Version */                                                         \
-    1 + /* Tree type */                                                       \
-    4 + /* Node size, in bytes */                                             \
-    2 + /* Key size, in bytes */                                              \
-    2 + /* Depth of tree */                                                   \
-    2 + /* Split % of full (as integer, ie. "98" means 98%) */                \
-    2 + /* Merge % of full (as integer, ie. "98" means 98%) */                \
-    H5B2_NODE_POINTER_SIZE(f))  /* Node pointer to root node in tree */
+    4   /* Signature */                                                       \
+    + 1 /* Version */                                                         \
+    + 1 /* Tree type */                                                       \
+    + 4 /* Node size, in bytes */                                             \
+    + 2 /* Key size, in bytes */                                              \
+    + 2 /* Depth of tree */                                                   \
+    + 2 /* Split % of full (as integer, ie. "98" means 98%) */                \
+    + 2 /* Merge % of full (as integer, ie. "98" means 98%) */                \
+    + H5B2_NODE_POINTER_SIZE(f))  /* Node pointer to root node in tree */
 
 /* Macro to retrieve pointer to i'th native record for native record buffer */
 #define H5B2_NAT_NREC(b,shared,idx)  (b+(shared)->nat_off[(idx)])
@@ -179,12 +179,17 @@ H5_DLLVAR const H5B2_class_t H5B2_TEST[1];
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-H5_DLL herr_t H5B2_shared_free (void *_shared);
-H5_DLL herr_t H5B2_shared_init (H5F_t *f, H5B2_t *bt2, const H5B2_class_t *type,
+
+/* Routines for managing shared B-tree info */
+H5_DLL herr_t H5B2_shared_init(H5F_t *f, H5B2_t *bt2, const H5B2_class_t *type,
     size_t node_size, size_t rrec_size, unsigned split_percent, unsigned merge_percent);
+
+/* Metadata cache callbacks */
 H5_DLL herr_t H5B2_cache_hdr_dest(H5F_t *f, H5B2_t *b);
 H5_DLL herr_t H5B2_cache_leaf_dest(H5F_t *f, H5B2_leaf_t *l);
 H5_DLL herr_t H5B2_cache_internal_dest(H5F_t *f, H5B2_internal_t *i);
+
+/* Debugging routines for dumping file structures */
 H5_DLL herr_t H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     FILE *stream, int indent, int fwidth, const H5B2_class_t *type);
 H5_DLL herr_t H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
@@ -193,8 +198,10 @@ H5_DLL herr_t H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
 H5_DLL herr_t H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     FILE *stream, int indent, int fwidth, const H5B2_class_t *type,
     haddr_t hdr_addr, unsigned nrec);
+
+/* Testing routines */
 #ifdef H5B2_TESTING
-H5_DLL herr_t H5B2_get_root_addr(H5F_t *f, hid_t dxpl_id,
+H5_DLL herr_t H5B2_get_root_addr_test(H5F_t *f, hid_t dxpl_id,
     const H5B2_class_t *type, haddr_t addr, haddr_t *root_addr);
 #endif /* H5B2_TESTING */
 

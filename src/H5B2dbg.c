@@ -23,13 +23,48 @@
  *-------------------------------------------------------------------------
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5B2_PACKAGE		/*suppress error about including H5B2pkg  */
 
-/* Private headers */
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5B2pkg.h"		/* B-trees				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
+
+/****************/
+/* Local Macros */
+/****************/
+
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
 
 
 /*-------------------------------------------------------------------------
@@ -43,50 +78,46 @@
  *		koziol@ncsa.uiuc.edu
  *		Feb  2 2005
  *
- * Modifications:
- *
- *              John Mainzer, 6/16/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth,
     const H5B2_class_t *type)
 {
-    H5B2_t	*bt2 = NULL;
-    H5B2_shared_t 	*shared;      /* Shared B-tree information */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    H5B2_t	*bt2 = NULL;            /* B-tree header info */
+    H5B2_shared_t *shared;              /* Shared B-tree information */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5B2_hdr_debug, FAIL)
 
     /*
      * Check arguments.
      */
-    assert(f);
-    assert(H5F_addr_defined(addr));
-    assert(stream);
-    assert(indent >= 0);
-    assert(fwidth >= 0);
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(stream);
+    HDassert(indent >= 0);
+    HDassert(fwidth >= 0);
 
     /*
-     * Load the b-tree header.
+     * Load the B-tree header.
      */
-    if (NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
+    if(NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header")
 
     /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(bt2->shared);
-    assert(shared);
+    shared = H5RC_GET_OBJ(bt2->shared);
+    HDassert(shared);
+
+    /* Print opening message */
+    HDfprintf(stream, "%*sv2 B-tree Header...\n", indent, "");
 
     /*
      * Print the values.
      */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Tree type ID:",
-	      ((shared->type->id)==H5B2_TEST_ID ? "H5B2_TEST_ID" :
+	      ((shared->type->id) == H5B2_TEST_ID ? "H5B2_TEST_ID" :
               "Unknown!"));
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of node:",
@@ -135,7 +166,7 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
 	      shared->merge_leaf_nrec);
 
 done:
-    if (bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
+    if(bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -152,13 +183,6 @@ done:
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Feb  4 2005
- *
- * Modifications:
- *
- *              John Mainzer, 6/16/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
  *
  *-------------------------------------------------------------------------
  */
@@ -204,6 +228,9 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, bt2, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree header")
     bt2 = NULL;
+
+    /* Print opening message */
+    HDfprintf(stream, "%*sv2 B-tree Internal Node...\n", indent, "");
 
     /*
      * Print the values.
@@ -271,13 +298,6 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Feb  7 2005
  *
- * Modifications:
- *
- *              John Mainzer, 6/16/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -322,6 +342,9 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, bt2, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree header")
     bt2 = NULL;
+
+    /* Print opening message */
+    HDfprintf(stream, "%*sv2 B-tree Leaf Node...\n", indent, "");
 
     /*
      * Print the values.

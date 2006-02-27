@@ -18,15 +18,15 @@
 
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	     */
 
-#include "H5private.h"		/*generic functions			  */
-#include "H5Eprivate.h"		/*error handling			  */
-#include "H5FLprivate.h"	/*Free Lists	                          */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Dprivate.h"		/* Datasets				*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5HGprivate.h"	/* Global Heaps				*/
-#include "H5Iprivate.h"		/*ID functions		   		  */
-#include "H5MMprivate.h"	/*memory management			  */
-#include "H5Pprivate.h"		/* Property Lists			  */
-#include "H5Dprivate.h"		/* Dataset 		                  */
-#include "H5Tpkg.h"		/*data-type functions			  */
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Pprivate.h"		/* Property lists			*/
+#include "H5Tpkg.h"		/* Datatypes				*/
 
 /* Conversion data for H5T_conv_struct() */
 typedef struct H5T_conv_struct_t {

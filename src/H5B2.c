@@ -68,6 +68,7 @@
 /********************/
 
 /* Helper functions */
+static herr_t H5B2_shared_free(void *_shared);
 static herr_t H5B2_create_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     H5B2_node_ptr_t *node_ptr);
 static herr_t H5B2_create_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
@@ -176,13 +177,13 @@ H5B2_shared_init (H5F_t *f, H5B2_t *bt2, const H5B2_class_t *type,
 {
     H5B2_shared_t *shared = NULL;       /* Shared B-tree information */
     unsigned u;                         /* Local index variable */
-    herr_t ret_value=SUCCEED;           /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_shared_init)
 
     /* Allocate space for the shared information */
-    if(NULL==(shared = H5FL_CALLOC(H5B2_shared_t)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree shared information")
+    if(NULL == (shared = H5FL_CALLOC(H5B2_shared_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree shared information")
 
     /* Assign user's information */
     shared->split_percent = split_percent;
@@ -191,50 +192,50 @@ H5B2_shared_init (H5F_t *f, H5B2_t *bt2, const H5B2_class_t *type,
     shared->rrec_size = rrec_size;
 
     /* Compute derived information */
-    shared->internal_nrec = H5B2_NUM_INT_REC(f,shared->node_size,shared->rrec_size);
-    shared->split_int_nrec = (shared->internal_nrec * shared->split_percent)/100;
-    shared->merge_int_nrec = (shared->internal_nrec * shared->merge_percent)/100;
+    shared->internal_nrec = H5B2_NUM_INT_REC(f, shared->node_size, shared->rrec_size);
+    shared->split_int_nrec = (shared->internal_nrec * shared->split_percent) / 100;
+    shared->merge_int_nrec = (shared->internal_nrec * shared->merge_percent) / 100;
 
-    shared->leaf_nrec = H5B2_NUM_LEAF_REC(shared->node_size,shared->rrec_size);
-    shared->split_leaf_nrec = (shared->leaf_nrec * shared->split_percent)/100;
-    shared->merge_leaf_nrec = (shared->leaf_nrec * shared->merge_percent)/100;
+    shared->leaf_nrec = H5B2_NUM_LEAF_REC(shared->node_size, shared->rrec_size);
+    shared->split_leaf_nrec = (shared->leaf_nrec * shared->split_percent) / 100;
+    shared->merge_leaf_nrec = (shared->leaf_nrec * shared->merge_percent) / 100;
 
     /* Assign common type information */
     shared->type = type;
 
     /* Allocate "page" for node I/O */
-    if((shared->page=H5FL_BLK_MALLOC(node_page,shared->node_size))==NULL)
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+    if((shared->page = H5FL_BLK_MALLOC(node_page, shared->node_size)) == NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 #ifdef H5_USING_PURIFY
 HDmemset(shared->page,0,shared->node_size);
 #endif /* H5_USING_PURIFY */
 
     /* Create factory for internal node native record storage */
-    if((shared->int_fac=H5FL_fac_init(type->nrec_size*shared->internal_nrec))==NULL)
-	HGOTO_ERROR (H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create internal node native key block factory")
+    if((shared->int_fac = H5FL_fac_init(type->nrec_size * shared->internal_nrec)) == NULL)
+	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create internal node native key block factory")
 
     /* Create factory for leaf node native record storage */
-    if((shared->leaf_fac=H5FL_fac_init(type->nrec_size*shared->leaf_nrec))==NULL)
-	HGOTO_ERROR (H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create leaf node native key block factory")
+    if((shared->leaf_fac = H5FL_fac_init(type->nrec_size * shared->leaf_nrec)) == NULL)
+	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create leaf node native key block factory")
 
     /* Create factory for internal node node pointer storage */
-    if((shared->node_ptr_fac=H5FL_fac_init(sizeof(H5B2_node_ptr_t)*(shared->internal_nrec+1)))==NULL)
-	HGOTO_ERROR (H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create internal node node pointer block factory")
+    if((shared->node_ptr_fac = H5FL_fac_init(sizeof(H5B2_node_ptr_t) * (shared->internal_nrec + 1))) == NULL)
+	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create internal node node pointer block factory")
 
     /* Allocate array of pointers to internal node native keys */
-    if((shared->nat_off=H5FL_SEQ_MALLOC(size_t,MAX(shared->internal_nrec,shared->leaf_nrec)))==NULL)
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+    if((shared->nat_off = H5FL_SEQ_MALLOC(size_t, MAX(shared->internal_nrec, shared->leaf_nrec))) == NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Initialize offsets in native key block */
-    for(u=0; u<MAX(shared->internal_nrec,shared->leaf_nrec); u++)
+    for(u = 0; u < MAX(shared->internal_nrec, shared->leaf_nrec); u++)
         shared->nat_off[u]=type->nrec_size*u;
 
     /* Make shared B-tree info reference counted */
-    if(NULL==(bt2->shared=H5RC_create(shared,H5B2_shared_free)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for shared B-tree info")
+    if(NULL == (bt2->shared = H5RC_create(shared, H5B2_shared_free)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for shared B-tree info")
 
 done:
-    if(ret_value<0)
+    if(ret_value < 0)
         if(shared)
             H5B2_shared_free(shared);
 
@@ -255,11 +256,11 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5B2_shared_free (void *_shared)
+static herr_t
+H5B2_shared_free(void *_shared)
 {
     H5B2_shared_t *shared = (H5B2_shared_t *)_shared;
-    herr_t ret_value=SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_shared_free)
 
@@ -268,29 +269,29 @@ H5B2_shared_free (void *_shared)
 
     /* Free the B-tree node buffer */
     if(shared->page)
-        H5FL_BLK_FREE(node_page,shared->page);
+        H5FL_BLK_FREE(node_page, shared->page);
 
     /* Destroy factory for internal node native record storage */
     if(shared->int_fac)
-        if(H5FL_fac_term(shared->int_fac)<0)
-            HGOTO_ERROR (H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't destroy internal node native key block factory")
+        if(H5FL_fac_term(shared->int_fac) < 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't destroy internal node native key block factory")
 
     /* Destroy factory for leaf node native record storage */
     if(shared->leaf_fac)
-        if(H5FL_fac_term(shared->leaf_fac)<0)
-            HGOTO_ERROR (H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't destroy leaf node native key block factory")
+        if(H5FL_fac_term(shared->leaf_fac) < 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't destroy leaf node native key block factory")
 
     /* Destroy factory for internal node node pointer storage */
     if(shared->node_ptr_fac)
-        if(H5FL_fac_term(shared->node_ptr_fac)<0)
-            HGOTO_ERROR (H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't destroy internal node node pointer block factory")
+        if(H5FL_fac_term(shared->node_ptr_fac) < 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't destroy internal node node pointer block factory")
 
     /* Free the array of offsets into the native key block */
     if(shared->nat_off)
         H5FL_SEQ_FREE(size_t,shared->nat_off);
 
     /* Free the shared B-tree info itself */
-    H5FL_FREE(H5B2_shared_t,shared);
+    H5FL_FREE(H5B2_shared_t, shared);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -309,16 +310,6 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Jan 31 2005
  *
- *
- * Modifications:
- *
- *              John Mainzer 6/10/05
- *              Removed code setting the is_dirty field of the cache info.
- *              This is no longer pemitted, as the cache code is now
- *              manageing this field.  Since this function uses a call to
- *              H5AC_set() (which marks the entry dirty automaticly), no
- *              other change is required.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -327,7 +318,7 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     unsigned split_percent, unsigned merge_percent, haddr_t *addr_p)
 {
     H5B2_t *bt2 = NULL;                 /* The new B-tree header information */
-    herr_t ret_value=SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5B2_create, FAIL)
 
@@ -336,41 +327,42 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
      */
     HDassert(f);
     HDassert(type);
-    HDassert(node_size>0);
-    HDassert(rrec_size>0);
-    HDassert(merge_percent>0 && merge_percent<=100);
-    HDassert(split_percent>0 && split_percent<=100);
-    HDassert(merge_percent<(split_percent/2));
+    HDassert(node_size > 0);
+    HDassert(rrec_size > 0);
+    HDassert(merge_percent > 0 && merge_percent <= 100);
+    HDassert(split_percent > 0 && split_percent <= 100);
+    HDassert(merge_percent < (split_percent / 2));
+    HDassert(addr_p);
 
     /*
      * Allocate file and memory data structures.
      */
-    if (NULL==(bt2 = H5FL_MALLOC(H5B2_t)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree header")
+    if(NULL == (bt2 = H5FL_MALLOC(H5B2_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree header")
 
     /* Assign internal information */
-    HDmemset(&bt2->cache_info,0,sizeof(H5AC_info_t));
+    HDmemset(&bt2->cache_info, 0, sizeof(H5AC_info_t));
     bt2->depth = 0;
     bt2->root.addr = HADDR_UNDEF;
     bt2->root.node_nrec = 0;
     bt2->root.all_nrec = 0;
 
     /* Initialize shared B-tree info */
-    if(H5B2_shared_init(f, bt2, type, node_size, rrec_size, split_percent, merge_percent)<0)
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create shared B-tree info")
+    if(H5B2_shared_init(f, bt2, type, node_size, rrec_size, split_percent, merge_percent) < 0)
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create shared B-tree info")
 
     /* Allocate space for the header on disk */
-    if (HADDR_UNDEF==(*addr_p=H5MF_alloc(f, H5FD_MEM_BTREE, dxpl_id, (hsize_t)H5B2_HEADER_SIZE(f))))
+    if(HADDR_UNDEF == (*addr_p = H5MF_alloc(f, H5FD_MEM_BTREE, dxpl_id, (hsize_t)H5B2_HEADER_SIZE(f))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for B-tree header")
 
     /* Cache the new B-tree node */
-    if (H5AC_set(f, dxpl_id, H5AC_BT2_HDR, *addr_p, bt2, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_set(f, dxpl_id, H5AC_BT2_HDR, *addr_p, bt2, H5AC__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't add B-tree header to cache")
 
 done:
-    if (ret_value<0) {
-	if (bt2)
-            (void)H5B2_cache_hdr_dest(f,bt2);
+    if(ret_value < 0) {
+	if(bt2)
+            (void)H5B2_cache_hdr_dest(f, bt2);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -435,16 +427,6 @@ H5B2_locate_record(const H5B2_class_t *type, unsigned nrec, size_t *rec_off,
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Feb  3 2005
- *
- * Modifications:
- *
- *              John Mainzer, 6/10/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
- *              In this case, that required adding the new bt2_dirtied_ptr
- *              parameter to the function's argument list.
  *
  *-------------------------------------------------------------------------
  */
@@ -639,11 +621,6 @@ done:
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Feb  9 2005
- *
- *              John Mainzer, 6/14/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
  *
  *-------------------------------------------------------------------------
  */
@@ -866,15 +843,6 @@ done:
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Feb  9 2005
- *
- *              John Mainzer, 6/14/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
- *              In this case, that required adding the new
- *		parent_cache_info_dirtied_ptr and internal_dirtied_ptr
- *              parameters to the function's argument list.
  *
  *-------------------------------------------------------------------------
  */
@@ -1145,17 +1113,6 @@ done:
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Feb  9 2005
- *
- * Modifications:
- *
- *              John Mainzer, 6/14/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
- *              In this case, that required adding the new
- *		internal_dirtied_ptr parameter to the function's
- *		argument list.
  *
  *-------------------------------------------------------------------------
  */
@@ -1527,17 +1484,6 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Feb 10 2005
  *
- * Modifications:
- *
- *              John Mainzer, 6/15/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
- *              In this case, that required adding the new
- *		parent_cache_info_dirtied_ptr and internal_dirtied_ptr
- *              parameters to the function's argument list.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1869,15 +1815,6 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Mar  4 2005
  *
- *              John Mainzer, 6/15/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
- *              In this case, that required adding the new
- *		parent_cache_info_dirtied_ptr and internal_dirtied_ptr
- *              parameters to the function's argument list.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2033,17 +1970,6 @@ done:
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Mar  4 2005
- *
- * Modifications:
- *
- *              John Mainzer, 6/15/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
- *              In this case, that required adding the new
- *		parent_cache_info_dirtied_ptr and internal_dirtied_ptr
- *              parameters to the function's argument list.
  *
  *-------------------------------------------------------------------------
  */
@@ -2269,17 +2195,6 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Mar  4 2005
  *
- * Modifications:
- *
- *              John Mainzer, 6/15/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
- *              In this case, that required adding the new
- *		internal_dirtied_ptr parameter to the function's
- *		argument list.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2373,13 +2288,6 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Mar  3 2005
  *
- * Modifications:
- *
- *              John Mainzer, 6/15/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2460,16 +2368,6 @@ done:
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Mar  2 2005
- *
- * Modifications:
- *
- *              John Mainzer, 6/14/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
- *              In this case, that required adding the new dirtied_ptr
- *              parameter to the function's argument list.
  *
  *-------------------------------------------------------------------------
  */
@@ -2614,13 +2512,6 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Feb  2 2005
  *
- * Modifications:
- *
- *              John Mainzer, 6/10/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2698,16 +2589,6 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Feb  2 2005
  *
- * Modifications:
- *
- *              John Mainzer, 6/15/05
- *              Modified the function to avoid modifying the is_dirty
- *		field of the cache info, as that field is now maintained
- *		by the cache code.  Since this function uses a call to
- *		H5AC_set(), and that function presumes that the newly
- *		inserted entry is dirty, we need only remove the reference
- *		to the is_dirty field.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2778,16 +2659,6 @@ done:
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Feb  3 2005
- *
- * Modifications:
- *
- *              John Mainzer, 6/15/05
- *              Modified the function to avoid modifying the is_dirty
- *		field of the cache info, as that field is now maintained
- *		by the cache code.  Since this function uses a call to
- *		H5AC_set(), and that function presumes that the newly
- *		inserted entry is dirty, we need only remove the reference
- *		to the is_dirty field.
  *
  *-------------------------------------------------------------------------
  */
@@ -2869,13 +2740,6 @@ done:
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Feb 11 2005
- *
- * Modifications:
- *
- *              John Mainzer, 6/16/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
  *
  *-------------------------------------------------------------------------
  */
@@ -2973,13 +2837,6 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Feb 11 2005
  *
- * Modifications:
- *
- *              John Mainzer, 6/16/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3058,13 +2915,6 @@ done:
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Feb 23 2005
- *
- * Modifications:
- *
- *              John Mainzer, 6/16/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
  *
  *-------------------------------------------------------------------------
  */
@@ -3229,13 +3079,6 @@ done:
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Feb 23 2005
- *
- * Modifications:
- *
- *              John Mainzer, 6/16/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
  *
  *-------------------------------------------------------------------------
  */
@@ -3409,13 +3252,6 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Mar  3 2005
  *
- * Modifications:
- *
- *              John Mainzer, 6/15/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3503,17 +3339,6 @@ done:
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Mar  3 2005
- *
- * Modifications:
- *
- *              John Mainzer, 6/14/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
- *              In this case, that required adding the new
- *		parent_cache_info_dirtied_ptr parameter to the
- *		function's argument list.
  *
  *-------------------------------------------------------------------------
  */
@@ -3724,13 +3549,6 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Feb 25 2005
  *
- * Modifications:
- *
- *              John Mainzer, 6/15/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3802,13 +3620,6 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Feb 25 2005
  *
- * Modifications:
- *
- *              John Mainzer, 6/16/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3865,13 +3676,6 @@ done:
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Mar  9 2005
- *
- * Modifications:
- *
- *              John Mainzer, 6/16/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
  *
  *-------------------------------------------------------------------------
  */
@@ -3966,13 +3770,6 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Mar  9 2005
  *
- * Modifications:
- *
- *              John Mainzer, 6/16/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -4063,13 +3860,6 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Mar  8 2005
  *
- * Modifications:
- *
- *              John Mainzer, 6/16/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -4125,13 +3915,6 @@ done:
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Mar  9 2005
- *
- * Modifications:
- *
- *              John Mainzer, 6/16/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
  *
  *-------------------------------------------------------------------------
  */
@@ -4209,13 +3992,6 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Mar  9 2005
  *
- * Modifications:
- *
- *              John Mainzer, 6/16/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -4269,13 +4045,6 @@ done:
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Mar 10 2005
- *
- * Modifications:
- *
- *              John Mainzer, 6/16/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
  *
  *-------------------------------------------------------------------------
  */

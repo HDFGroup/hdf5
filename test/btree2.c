@@ -54,8 +54,6 @@ const char *FILENAME[] = {
  * Programmer:	Quincey Koziol
  *              Wednesday, February 16, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -84,8 +82,6 @@ iter_cb(const void *_record, void *_op_data)
  * Programmer:	Quincey Koziol
  *              Thursday, February 24, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -113,8 +109,6 @@ find_cb(const void *_record, void *_op_data)
  * Programmer:	Quincey Koziol
  *              Tuesday, March  8, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -140,8 +134,6 @@ neighbor_cb(const void *_record, void *_op_data)
  *
  * Programmer:	Quincey Koziol
  *              Friday, March 10, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -170,52 +162,47 @@ modify_cb(void *_record, void *_op_data, hbool_t *changed)
  * Programmer:	Quincey Koziol
  *              Thursday, February  3, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_insert_basic(hid_t fapl)
 {
-    hid_t	file=-1;
-    char	filename[1024];
-    H5F_t	*f=NULL;
+    hid_t	file = -1;              /* File ID */
+    char	filename[1024];         /* Filename to use */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
     hsize_t     record;                 /* Record to insert into tree */
     hsize_t     idx;                    /* Index within B-tree, for iterator */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     herr_t      ret;                    /* Generic error return value */
 
-    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if (NULL==(f=H5I_object(file))) {
-	H5Eprint_stack(H5E_DEFAULT, stdout);
-	TEST_ERROR;
-    }
+    if(NULL == (f = H5I_object(file)))
+        STACK_ERROR
 
     /*
      * Test v2 B-tree creation
      */
     TESTING("B-tree creation");
-    if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
-	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
-	goto error;
-    }
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/) < 0)
+        FAIL_STACK_ERROR
+    if(!H5F_addr_defined(bt2_addr))
+        FAIL_STACK_ERROR
     PASSED();
 
     /* Attempt to iterate over a B-tree with no records */
     idx = 0;
-    if(H5B2_iterate(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, iter_cb, &idx)<0) {
-	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
-	goto error;
-    }
+    if(H5B2_iterate(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, iter_cb, &idx) < 0)
+        FAIL_STACK_ERROR
     /* Make certain that the index hasn't changed */
-    if(idx != 0) TEST_ERROR;
+    if(idx != 0)
+        TEST_ERROR
 
     /* Attempt to find record in B-tree with no records */
     idx = 0;
@@ -223,7 +210,8 @@ test_insert_basic(hid_t fapl)
 	ret = H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR;
+    if(ret != FAIL)
+        TEST_ERROR
 
     /* Attempt to index record in B-tree with no records */
     idx = 0;
@@ -231,18 +219,16 @@ test_insert_basic(hid_t fapl)
 	ret = H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)0, find_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR;
+    if(ret != FAIL)
+        TEST_ERROR
 
     /*
      * Test inserting record into v2 B-tree
      */
     TESTING("B-tree insert: several records");
-    record=42;
-    if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
-	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
-	goto error;
-    }
+    record = 42;
+    if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
+        FAIL_STACK_ERROR
 
     /* Attempt to find non-existant record in B-tree with 1 record */
     idx = 41;
@@ -250,21 +236,25 @@ test_insert_basic(hid_t fapl)
 	ret = H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR;
+    if(ret != FAIL)
+        TEST_ERROR
 
     /* Try again with NULL 'op' */
     H5E_BEGIN_TRY {
 	ret = H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, NULL, NULL);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR;
+    if(ret != FAIL)
+        TEST_ERROR
 
     /* Attempt to find existant record in B-tree with 1 record */
     idx = 42;
-    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx)<0) TEST_ERROR;
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx)<0)
+        TEST_ERROR
 
     /* Try again with NULL 'op' */
-    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, NULL, NULL)<0) TEST_ERROR;
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, NULL, NULL)<0)
+        TEST_ERROR
 
     /* Attempt to index non-existant record in B-tree with 1 record */
     idx = 0;
@@ -272,41 +262,34 @@ test_insert_basic(hid_t fapl)
 	ret = H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)1, find_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR;
+    if(ret != FAIL)
+        TEST_ERROR
 
     /* Attempt to index existing record in B-tree with 1 record */
     idx = 42;
-    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)0, find_cb, &idx)<0) TEST_ERROR;
+    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)0, find_cb, &idx)<0)
+        TEST_ERROR
 
     /*
      * Test inserting second record into v2 B-tree, before all other records
      */
-    record=34;
-    if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
-	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
-	goto error;
-    }
+    record = 34;
+    if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
+        FAIL_STACK_ERROR
 
     /*
      * Test inserting third record into v2 B-tree, after all other records
      */
-    record=56;
-    if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
-	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
-	goto error;
-    }
+    record = 56;
+    if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
+        FAIL_STACK_ERROR
 
     /*
      * Test inserting fourth record into v2 B-tree, in the middle of other records
      */
-    record=38;
-    if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
-	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
-	goto error;
-    }
+    record = 38;
+    if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
+        FAIL_STACK_ERROR
 
     /* Attempt to find non-existant record in level-0 B-tree with several records */
     idx = 41;
@@ -314,11 +297,13 @@ test_insert_basic(hid_t fapl)
 	ret = H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR;
+    if(ret != FAIL)
+        TEST_ERROR
 
     /* Attempt to find existant record in level-0 B-tree with several record */
     idx = 56;
-    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx)<0) TEST_ERROR;
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx)<0)
+        TEST_ERROR
 
     /* Attempt to index non-existant record in B-tree with several records */
     idx = 0;
@@ -326,29 +311,37 @@ test_insert_basic(hid_t fapl)
 	ret = H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)4, find_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR;
+    if(ret != FAIL)
+        TEST_ERROR
 
     /* Attempt to index existing record in B-tree with several records */
     idx = 34;
-    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)0, find_cb, &idx)<0) TEST_ERROR;
+    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)0, find_cb, &idx)<0)
+        TEST_ERROR
     idx = 38;
-    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)1, find_cb, &idx)<0) TEST_ERROR;
+    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)1, find_cb, &idx)<0)
+        TEST_ERROR
     idx = 42;
-    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)2, find_cb, &idx)<0) TEST_ERROR;
+    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)2, find_cb, &idx)<0)
+        TEST_ERROR
     idx = 56;
-    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)3, find_cb, &idx)<0) TEST_ERROR;
+    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)3, find_cb, &idx)<0)
+        TEST_ERROR
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    /* Close the file */
+    if(H5Fclose(file)<0)
+        TEST_ERROR
 
-    return 0;
+    /* All tests passed */
+    return(0);
 
 error:
     H5E_BEGIN_TRY {
 	H5Fclose(file);
     } H5E_END_TRY;
-    return 1;
+    return(1);
 } /* test_insert_basic() */
 
 
@@ -367,8 +360,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Thursday, February  3, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -386,7 +377,7 @@ test_insert_split_root(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
@@ -438,7 +429,7 @@ test_insert_split_root(hid_t fapl)
     }
 
     /* Make certain that the index is correct */
-    if(idx != (INSERT_SPLIT_ROOT_NREC+2)) TEST_ERROR;
+    if(idx != (INSERT_SPLIT_ROOT_NREC+2)) TEST_ERROR
 
     /* Attempt to find non-existant record in level-1 B-tree */
     idx = INSERT_SPLIT_ROOT_NREC + 10;
@@ -446,15 +437,15 @@ test_insert_split_root(hid_t fapl)
 	ret = H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR;
+    if(ret != FAIL) TEST_ERROR
 
     /* Attempt to find existant record in root of level-1 B-tree */
     idx = 33;
-    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx)<0) TEST_ERROR;
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx)<0) TEST_ERROR
 
     /* Attempt to find existant record in leaf of level-1 B-tree */
     idx = 56;
-    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx)<0) TEST_ERROR;
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx)<0) TEST_ERROR
 
     /* Attempt to index non-existant record in level-1 B-tree */
     idx = 0;
@@ -462,23 +453,23 @@ test_insert_split_root(hid_t fapl)
 	ret = H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)(INSERT_SPLIT_ROOT_NREC+2), find_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR;
+    if(ret != FAIL) TEST_ERROR
 
     /* Attempt to index existing record in root of level-1 B-tree */
     idx = 33;
-    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)33, find_cb, &idx)<0) TEST_ERROR;
+    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)33, find_cb, &idx)<0) TEST_ERROR
 
     /* Attempt to index existing record in left leaf of level-1 B-tree */
     idx = 0;
-    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)0, find_cb, &idx)<0) TEST_ERROR;
+    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)0, find_cb, &idx)<0) TEST_ERROR
 
     /* Attempt to index existing record in right leaf of level-1 B-tree */
     idx = 50;
-    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)50, find_cb, &idx)<0) TEST_ERROR;
+    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)50, find_cb, &idx)<0) TEST_ERROR
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -506,8 +497,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Tuesday, February  8, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -523,7 +512,7 @@ test_insert_level1_2leaf_redistrib(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
@@ -601,7 +590,7 @@ test_insert_level1_2leaf_redistrib(hid_t fapl)
     }
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -629,8 +618,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Tuesday, February  9, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -646,7 +633,7 @@ test_insert_level1_2leaf_split(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
@@ -724,7 +711,7 @@ test_insert_level1_2leaf_split(hid_t fapl)
     }
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -753,8 +740,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Thursday, February 10, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -771,7 +756,7 @@ test_insert_level1_3leaf_redistrib(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
@@ -822,11 +807,11 @@ test_insert_level1_3leaf_redistrib(hid_t fapl)
     }
 
     /* Make certain that the index is correct */
-    if(idx != (INSERT_SPLIT_ROOT_NREC*2)) TEST_ERROR;
+    if(idx != (INSERT_SPLIT_ROOT_NREC*2)) TEST_ERROR
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -855,8 +840,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Thursday, February 10, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -872,7 +855,7 @@ test_insert_level1_3leaf_split(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
@@ -915,7 +898,7 @@ test_insert_level1_3leaf_split(hid_t fapl)
     }
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -940,8 +923,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Friday, February 11, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -959,7 +940,7 @@ test_insert_make_level2(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
@@ -1037,7 +1018,7 @@ test_insert_make_level2(hid_t fapl)
     }
 
     /* Make certain that the index is correct */
-    if(idx != (INSERT_SPLIT_ROOT_NREC*11)+4) TEST_ERROR;
+    if(idx != (INSERT_SPLIT_ROOT_NREC*11)+4) TEST_ERROR
 
     /* Attempt to find non-existant record in level-1 B-tree */
     idx = INSERT_SPLIT_ROOT_NREC*12;
@@ -1045,19 +1026,19 @@ test_insert_make_level2(hid_t fapl)
 	ret = H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR;
+    if(ret != FAIL) TEST_ERROR
 
     /* Attempt to find existant record in root of level-2 B-tree */
     idx = 433;
-    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx)<0) TEST_ERROR;
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx)<0) TEST_ERROR
 
     /* Attempt to find existant record in internal node of level-2 B-tree */
     idx = 259;
-    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx)<0) TEST_ERROR;
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx)<0) TEST_ERROR
 
     /* Attempt to find existant record in leaf of level-2 B-tree */
     idx = 346;
-    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx)<0) TEST_ERROR;
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx)<0) TEST_ERROR
 
     /* Attempt to index non-existant record in level-1 B-tree */
     idx = 0;
@@ -1065,23 +1046,23 @@ test_insert_make_level2(hid_t fapl)
 	ret = H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)(INSERT_SPLIT_ROOT_NREC*12), find_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR;
+    if(ret != FAIL) TEST_ERROR
 
     /* Attempt to index existing record in root of level-2 B-tree */
     idx = 433;
-    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)433, find_cb, &idx)<0) TEST_ERROR;
+    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)433, find_cb, &idx)<0) TEST_ERROR
 
     /* Attempt to index existing record in internal node of level-2 B-tree */
     idx = 734;
-    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)734, find_cb, &idx)<0) TEST_ERROR;
+    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)734, find_cb, &idx)<0) TEST_ERROR
 
     /* Attempt to index existing record in leaf of level-2 B-tree */
     idx = 883;
-    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)883, find_cb, &idx)<0) TEST_ERROR;
+    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)883, find_cb, &idx)<0) TEST_ERROR
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -1107,8 +1088,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Thursday, February 17, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1125,7 +1104,7 @@ test_insert_level2_leaf_redistrib(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
@@ -1203,11 +1182,11 @@ test_insert_level2_leaf_redistrib(hid_t fapl)
     }
 
     /* Make certain that the index is correct */
-    if(idx != (INSERT_SPLIT_ROOT_NREC*12)) TEST_ERROR;
+    if(idx != (INSERT_SPLIT_ROOT_NREC*12)) TEST_ERROR
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -1233,8 +1212,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Thursday, February 17, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1251,7 +1228,7 @@ test_insert_level2_leaf_split(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
@@ -1329,11 +1306,11 @@ test_insert_level2_leaf_split(hid_t fapl)
     }
 
     /* Make certain that the index is correct */
-    if(idx != (INSERT_SPLIT_ROOT_NREC*14)) TEST_ERROR;
+    if(idx != (INSERT_SPLIT_ROOT_NREC*14)) TEST_ERROR
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -1360,8 +1337,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Friday, February 18, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1378,7 +1353,7 @@ test_insert_level2_2internal_redistrib(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
@@ -1434,11 +1409,11 @@ test_insert_level2_2internal_redistrib(hid_t fapl)
     }
 
     /* Make certain that the index is correct */
-    if(idx != (INSERT_SPLIT_ROOT_NREC*19)) TEST_ERROR;
+    if(idx != (INSERT_SPLIT_ROOT_NREC*19)) TEST_ERROR
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -1465,8 +1440,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Friday, February 18, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1483,7 +1456,7 @@ test_insert_level2_2internal_split(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
@@ -1539,11 +1512,11 @@ test_insert_level2_2internal_split(hid_t fapl)
     }
 
     /* Make certain that the index is correct */
-    if(idx != (INSERT_SPLIT_ROOT_NREC*29)) TEST_ERROR;
+    if(idx != (INSERT_SPLIT_ROOT_NREC*29)) TEST_ERROR
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -1571,8 +1544,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Saturday, February 19, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1589,7 +1560,7 @@ test_insert_level2_3internal_redistrib(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
@@ -1642,11 +1613,11 @@ test_insert_level2_3internal_redistrib(hid_t fapl)
     }
 
     /* Make certain that the index is correct */
-    if(idx != (INSERT_SPLIT_ROOT_NREC*34)) TEST_ERROR;
+    if(idx != (INSERT_SPLIT_ROOT_NREC*34)) TEST_ERROR
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -1674,8 +1645,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Saturday, February 19, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1692,7 +1661,7 @@ test_insert_level2_3internal_split(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
@@ -1745,11 +1714,11 @@ test_insert_level2_3internal_split(hid_t fapl)
     }
 
     /* Make certain that the index is correct */
-    if(idx != (INSERT_SPLIT_ROOT_NREC*41)) TEST_ERROR;
+    if(idx != (INSERT_SPLIT_ROOT_NREC*41)) TEST_ERROR
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -1773,8 +1742,6 @@ error:
  *
  * Programmer:	Quincey Koziol
  *              Saturday, February 19, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1804,7 +1771,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     HDsrandom((unsigned long)curr_time);
 
     /* Allocate space for the records */
-    if((records = HDmalloc(sizeof(hsize_t)*INSERT_MANY))==NULL) TEST_ERROR;
+    if((records = HDmalloc(sizeof(hsize_t)*INSERT_MANY))==NULL) TEST_ERROR
 
     /* Initialize record #'s */
     for(u=0; u<INSERT_MANY; u++)
@@ -1821,7 +1788,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
@@ -1868,7 +1835,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     }
 
     /* Make certain that the index is correct */
-    if(idx != INSERT_MANY) TEST_ERROR;
+    if(idx != INSERT_MANY) TEST_ERROR
 
     /* Attempt to find non-existant record in level-4 B-tree */
     idx = INSERT_MANY*2;
@@ -1876,7 +1843,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 	ret = H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR;
+    if(ret != FAIL) TEST_ERROR
 
     /* Find random records */
     for(u=0; u<FIND_MANY; u++) {
@@ -1884,7 +1851,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
         idx = (hsize_t)(HDrandom()%INSERT_MANY);
 
         /* Attempt to find existant record in root of level-4 B-tree */
-        if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx)<0) TEST_ERROR;
+        if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx)<0) TEST_ERROR
     } /* end for */
 
     /* Attempt to index non-existant record in level-4 B-tree */
@@ -1893,7 +1860,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 	ret = H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)(INSERT_MANY*3), find_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR;
+    if(ret != FAIL) TEST_ERROR
 
     /* Find random records */
     for(u=0; u<FIND_MANY; u++) {
@@ -1901,7 +1868,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
         idx = (hsize_t)(HDrandom()%INSERT_MANY);
 
         /* Attempt to find existant record in root of level-4 B-tree */
-        if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, idx, find_cb, &idx)<0) TEST_ERROR;
+        if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, idx, find_cb, &idx)<0) TEST_ERROR
     } /* end for */
 
     PASSED();
@@ -1913,7 +1880,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
         ret = H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR;
+    if(ret != FAIL) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -1923,11 +1890,11 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != INSERT_MANY) TEST_ERROR;
+    if(nrec != INSERT_MANY) TEST_ERROR
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     HDfree(records);
 
@@ -1954,8 +1921,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Friday, February 25, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1973,12 +1938,12 @@ test_remove_basic(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
-	TEST_ERROR;
+	TEST_ERROR
     }
 
     /*
@@ -1998,7 +1963,7 @@ test_remove_basic(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != 0) TEST_ERROR;
+    if(nrec != 0) TEST_ERROR
 
     /* Attempt to remove a record from a B-tree with no records */
     TESTING("B-tree remove: record from empty B-tree");
@@ -2007,7 +1972,7 @@ test_remove_basic(hid_t fapl)
 	ret = H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR;
+    if(ret != FAIL) TEST_ERROR
 
     PASSED();
 
@@ -2027,17 +1992,17 @@ test_remove_basic(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != 1) TEST_ERROR;
+    if(nrec != 1) TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    if (H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the address of the root node is defined */
-    if(!H5F_addr_defined(root_addr)) TEST_ERROR;
+    if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     /* Attempt to remove a non-existant record from a B-tree with 1 record */
     TESTING("B-tree remove: non-existant record from 1 record B-tree");
@@ -2046,7 +2011,7 @@ test_remove_basic(hid_t fapl)
 	ret = H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR;
+    if(ret != FAIL) TEST_ERROR
 
     PASSED();
 
@@ -2060,7 +2025,7 @@ test_remove_basic(hid_t fapl)
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 42) TEST_ERROR;
+    if(record != 42) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2070,17 +2035,17 @@ test_remove_basic(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != 0) TEST_ERROR;
+    if(nrec != 0) TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    if (H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the root node has been freed */
-    if(H5F_addr_defined(root_addr)) TEST_ERROR;
+    if(H5F_addr_defined(root_addr)) TEST_ERROR
 
     PASSED();
 
@@ -2120,7 +2085,7 @@ test_remove_basic(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != 4) TEST_ERROR;
+    if(nrec != 4) TEST_ERROR
 
     PASSED();
 
@@ -2131,7 +2096,7 @@ test_remove_basic(hid_t fapl)
 	ret = H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR;
+    if(ret != FAIL) TEST_ERROR
 
     PASSED();
 
@@ -2145,7 +2110,7 @@ test_remove_basic(hid_t fapl)
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 42) TEST_ERROR;
+    if(record != 42) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2155,17 +2120,17 @@ test_remove_basic(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != 3) TEST_ERROR;
+    if(nrec != 3) TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    if (H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the root node has not been freed */
-    if(!H5F_addr_defined(root_addr)) TEST_ERROR;
+    if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     record = 34;
     if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
@@ -2175,7 +2140,7 @@ test_remove_basic(hid_t fapl)
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 34) TEST_ERROR;
+    if(record != 34) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2185,17 +2150,17 @@ test_remove_basic(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != 2) TEST_ERROR;
+    if(nrec != 2) TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    if (H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the root node has not been freed */
-    if(!H5F_addr_defined(root_addr)) TEST_ERROR;
+    if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     record = 56;
     if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
@@ -2205,7 +2170,7 @@ test_remove_basic(hid_t fapl)
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 56) TEST_ERROR;
+    if(record != 56) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2215,17 +2180,17 @@ test_remove_basic(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != 1) TEST_ERROR;
+    if(nrec != 1) TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    if (H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the root node has not been freed */
-    if(!H5F_addr_defined(root_addr)) TEST_ERROR;
+    if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     record = 38;
     if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
@@ -2235,7 +2200,7 @@ test_remove_basic(hid_t fapl)
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 38) TEST_ERROR;
+    if(record != 38) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2245,21 +2210,21 @@ test_remove_basic(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != 0) TEST_ERROR;
+    if(nrec != 0) TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    if (H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the root node has been freed */
-    if(H5F_addr_defined(root_addr)) TEST_ERROR;
+    if(H5F_addr_defined(root_addr)) TEST_ERROR
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -2283,8 +2248,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Friday, February 25, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2303,12 +2266,12 @@ test_remove_level1_noredistrib(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
-	TEST_ERROR;
+	TEST_ERROR
     }
 
     /*
@@ -2338,17 +2301,17 @@ test_remove_level1_noredistrib(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)) TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    if (H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the address of the root node is defined */
-    if(!H5F_addr_defined(root_addr)) TEST_ERROR;
+    if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     /* Attempt to remove a non-existant record from a B-tree with 1 record */
     TESTING("B-tree remove: non-existant record from level-1 B-tree");
@@ -2357,7 +2320,7 @@ test_remove_level1_noredistrib(hid_t fapl)
 	ret = H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR;
+    if(ret != FAIL) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2367,7 +2330,7 @@ test_remove_level1_noredistrib(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)) TEST_ERROR
 
     PASSED();
 
@@ -2381,7 +2344,7 @@ test_remove_level1_noredistrib(hid_t fapl)
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != ((INSERT_SPLIT_ROOT_NREC*2)-2)) TEST_ERROR;
+    if(record != ((INSERT_SPLIT_ROOT_NREC*2)-2)) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2391,7 +2354,7 @@ test_remove_level1_noredistrib(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != ((INSERT_SPLIT_ROOT_NREC*2)-1)) TEST_ERROR;
+    if(nrec != ((INSERT_SPLIT_ROOT_NREC*2)-1)) TEST_ERROR
 
     PASSED();
 
@@ -2405,7 +2368,7 @@ test_remove_level1_noredistrib(hid_t fapl)
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 0) TEST_ERROR;
+    if(record != 0) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2415,7 +2378,7 @@ test_remove_level1_noredistrib(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != ((INSERT_SPLIT_ROOT_NREC*2)-2)) TEST_ERROR;
+    if(nrec != ((INSERT_SPLIT_ROOT_NREC*2)-2)) TEST_ERROR
 
     PASSED();
 
@@ -2429,7 +2392,7 @@ test_remove_level1_noredistrib(hid_t fapl)
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != INSERT_SPLIT_ROOT_NREC) TEST_ERROR;
+    if(record != INSERT_SPLIT_ROOT_NREC) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2439,11 +2402,11 @@ test_remove_level1_noredistrib(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != ((INSERT_SPLIT_ROOT_NREC*2)-3)) TEST_ERROR;
+    if(nrec != ((INSERT_SPLIT_ROOT_NREC*2)-3)) TEST_ERROR
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -2467,8 +2430,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Friday, March  4, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2486,12 +2447,12 @@ test_remove_level1_redistrib(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
-	TEST_ERROR;
+	TEST_ERROR
     }
 
     /*
@@ -2521,17 +2482,17 @@ test_remove_level1_redistrib(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)) TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    if (H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the address of the root node is defined */
-    if(!H5F_addr_defined(root_addr)) TEST_ERROR;
+    if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     /* Attempt to remove enough records from right leaf of a level-1 B-tree to force redistribution */
     TESTING("B-tree remove: redistribute 2 leaves in level-1 B-tree (r->l)");
@@ -2544,7 +2505,7 @@ test_remove_level1_redistrib(hid_t fapl)
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR;
+        if(record != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2554,7 +2515,7 @@ test_remove_level1_redistrib(hid_t fapl)
         } /* end if */
 
         /* Make certain that the # of records is correct */
-        if(nrec != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR;
+        if(nrec != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR
     } /* end for */
 
     PASSED();
@@ -2570,7 +2531,7 @@ test_remove_level1_redistrib(hid_t fapl)
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != u) TEST_ERROR;
+        if(record != u) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2580,7 +2541,7 @@ test_remove_level1_redistrib(hid_t fapl)
         } /* end if */
 
         /* Make certain that the # of records is correct */
-        if(nrec != (((INSERT_SPLIT_ROOT_NREC*2)-(INSERT_SPLIT_ROOT_NREC/2))-(u+1))) TEST_ERROR;
+        if(nrec != (((INSERT_SPLIT_ROOT_NREC*2)-(INSERT_SPLIT_ROOT_NREC/2))-(u+1))) TEST_ERROR
     } /* end for */
 
     PASSED();
@@ -2596,7 +2557,7 @@ test_remove_level1_redistrib(hid_t fapl)
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != (((INSERT_SPLIT_ROOT_NREC/4)*3) + u)) TEST_ERROR;
+        if(record != (((INSERT_SPLIT_ROOT_NREC/4)*3) + u)) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2606,12 +2567,12 @@ test_remove_level1_redistrib(hid_t fapl)
         } /* end if */
 
         /* Make certain that the # of records is correct */
-        if(nrec != (((INSERT_SPLIT_ROOT_NREC*2)-(3*(INSERT_SPLIT_ROOT_NREC/4)))-(u+1))) TEST_ERROR;
+        if(nrec != (((INSERT_SPLIT_ROOT_NREC*2)-(3*(INSERT_SPLIT_ROOT_NREC/4)))-(u+1))) TEST_ERROR
     } /* end for */
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -2635,8 +2596,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Friday, March  4, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2654,12 +2613,12 @@ test_remove_level1_2leaf_merge(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
-	TEST_ERROR;
+	TEST_ERROR
     }
 
     /*
@@ -2689,17 +2648,17 @@ test_remove_level1_2leaf_merge(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)) TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    if (H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the address of the root node is defined */
-    if(!H5F_addr_defined(root_addr)) TEST_ERROR;
+    if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     /* Attempt to remove enough records from right leaf of a level-1 B-tree to force redistribution */
     TESTING("B-tree remove: merge 2 leaves to 1 in level-1 B-tree (r->l)");
@@ -2712,7 +2671,7 @@ test_remove_level1_2leaf_merge(hid_t fapl)
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR;
+        if(record != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2722,7 +2681,7 @@ test_remove_level1_2leaf_merge(hid_t fapl)
         } /* end if */
 
         /* Make certain that the # of records is correct */
-        if(nrec != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR;
+        if(nrec != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR
     } /* end for */
 
     PASSED();
@@ -2750,7 +2709,7 @@ test_remove_level1_2leaf_merge(hid_t fapl)
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != u) TEST_ERROR;
+        if(record != u) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2760,12 +2719,12 @@ test_remove_level1_2leaf_merge(hid_t fapl)
         } /* end if */
 
         /* Make certain that the # of records is correct */
-        if(nrec != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR;
+        if(nrec != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR
     } /* end for */
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -2789,8 +2748,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Friday, March  4, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2808,12 +2765,12 @@ test_remove_level1_3leaf_merge(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
-	TEST_ERROR;
+	TEST_ERROR
     }
 
     /*
@@ -2843,17 +2800,17 @@ test_remove_level1_3leaf_merge(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)) TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    if (H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the address of the root node is defined */
-    if(!H5F_addr_defined(root_addr)) TEST_ERROR;
+    if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     /* Attempt to remove enough records from middle leaf of a level-1 B-tree to force merge */
     TESTING("B-tree remove: merge 3 leaves to 2 in level-1 B-tree");
@@ -2866,7 +2823,7 @@ test_remove_level1_3leaf_merge(hid_t fapl)
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != ((INSERT_SPLIT_ROOT_NREC/2)+3+u)) TEST_ERROR;
+        if(record != ((INSERT_SPLIT_ROOT_NREC/2)+3+u)) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2876,12 +2833,12 @@ test_remove_level1_3leaf_merge(hid_t fapl)
         } /* end if */
 
         /* Make certain that the # of records is correct */
-        if(nrec != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR;
+        if(nrec != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR
     } /* end for */
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -2905,8 +2862,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Friday, March  4, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2924,12 +2879,12 @@ test_remove_level1_promote(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
-	TEST_ERROR;
+	TEST_ERROR
     }
 
     /*
@@ -2959,17 +2914,17 @@ test_remove_level1_promote(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*3)) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*3)) TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    if (H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the address of the root node is defined */
-    if(!H5F_addr_defined(root_addr)) TEST_ERROR;
+    if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     /* Attempt to remove record from root node of a level-1 B-tree to force promotion from right leaf */
     TESTING("B-tree remove: promote from right leaf of level-1 B-tree");
@@ -2981,7 +2936,7 @@ test_remove_level1_promote(hid_t fapl)
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 181) TEST_ERROR;
+    if(record != 181) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2991,7 +2946,7 @@ test_remove_level1_promote(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*3)-1) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*3)-1) TEST_ERROR
 
     PASSED();
 
@@ -3005,7 +2960,7 @@ test_remove_level1_promote(hid_t fapl)
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 42) TEST_ERROR;
+    if(record != 42) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3015,7 +2970,7 @@ test_remove_level1_promote(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*3)-2) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*3)-2) TEST_ERROR
 
     PASSED();
 
@@ -3029,7 +2984,7 @@ test_remove_level1_promote(hid_t fapl)
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 85) TEST_ERROR;
+    if(record != 85) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3039,11 +2994,11 @@ test_remove_level1_promote(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*3)-3) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*3)-3) TEST_ERROR
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -3067,8 +3022,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Friday, March  4, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3086,12 +3039,12 @@ test_remove_level1_promote_2leaf_redistrib(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
-	TEST_ERROR;
+	TEST_ERROR
     }
 
     /*
@@ -3121,17 +3074,17 @@ test_remove_level1_promote_2leaf_redistrib(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)) TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    if (H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the address of the root node is defined */
-    if(!H5F_addr_defined(root_addr)) TEST_ERROR;
+    if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     /* Attempt to remove record from root node of a level-1 B-tree to force promotion from right leaf */
     TESTING("B-tree remove: promote from leaf of level-1 B-tree w/2 node redistrib");
@@ -3146,7 +3099,7 @@ test_remove_level1_promote_2leaf_redistrib(hid_t fapl)
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR;
+        if(record != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3156,7 +3109,7 @@ test_remove_level1_promote_2leaf_redistrib(hid_t fapl)
         } /* end if */
 
         /* Make certain that the # of records is correct */
-        if(nrec != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR;
+        if(nrec != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR
     } /* end for */
 
     record = 101;
@@ -3167,7 +3120,7 @@ test_remove_level1_promote_2leaf_redistrib(hid_t fapl)
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 101) TEST_ERROR;
+    if(record != 101) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3177,11 +3130,11 @@ test_remove_level1_promote_2leaf_redistrib(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)-34) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)-34) TEST_ERROR
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -3205,8 +3158,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Friday, March  4, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3224,12 +3175,12 @@ test_remove_level1_promote_3leaf_redistrib(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
-	TEST_ERROR;
+	TEST_ERROR
     }
 
     /*
@@ -3259,17 +3210,17 @@ test_remove_level1_promote_3leaf_redistrib(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)) TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    if (H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the address of the root node is defined */
-    if(!H5F_addr_defined(root_addr)) TEST_ERROR;
+    if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     /* Attempt to remove record from root node of a level-1 B-tree to force promotion from middle leaf */
     TESTING("B-tree remove: promote from leaf of level-1 B-tree w/3 node redistrib");
@@ -3284,7 +3235,7 @@ test_remove_level1_promote_3leaf_redistrib(hid_t fapl)
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != (43 + u)) TEST_ERROR;
+        if(record != (43 + u)) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3294,7 +3245,7 @@ test_remove_level1_promote_3leaf_redistrib(hid_t fapl)
         } /* end if */
 
         /* Make certain that the # of records is correct */
-        if(nrec != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR;
+        if(nrec != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR
     } /* end for */
 
     record = 42;
@@ -3305,7 +3256,7 @@ test_remove_level1_promote_3leaf_redistrib(hid_t fapl)
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 42) TEST_ERROR;
+    if(record != 42) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3315,11 +3266,11 @@ test_remove_level1_promote_3leaf_redistrib(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)-34) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)-34) TEST_ERROR
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -3343,8 +3294,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Friday, March  4, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3362,12 +3311,12 @@ test_remove_level1_promote_2leaf_merge(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
-	TEST_ERROR;
+	TEST_ERROR
     }
 
     /*
@@ -3397,17 +3346,17 @@ test_remove_level1_promote_2leaf_merge(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)) TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    if (H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the address of the root node is defined */
-    if(!H5F_addr_defined(root_addr)) TEST_ERROR;
+    if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     /* Attempt to remove record from root node of a level-1 B-tree to force promotion from right leaf */
     TESTING("B-tree remove: promote from leaf of level-1 B-tree w/2->1 merge");
@@ -3422,7 +3371,7 @@ test_remove_level1_promote_2leaf_merge(hid_t fapl)
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR;
+        if(record != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3432,7 +3381,7 @@ test_remove_level1_promote_2leaf_merge(hid_t fapl)
         } /* end if */
 
         /* Make certain that the # of records is correct */
-        if(nrec != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR;
+        if(nrec != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR
     } /* end for */
 
     record = 68;
@@ -3443,7 +3392,7 @@ test_remove_level1_promote_2leaf_merge(hid_t fapl)
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 68) TEST_ERROR;
+    if(record != 68) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3453,11 +3402,11 @@ test_remove_level1_promote_2leaf_merge(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)-67) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)-67) TEST_ERROR
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -3481,8 +3430,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Friday, March  4, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3500,12 +3447,12 @@ test_remove_level1_promote_3leaf_merge(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
-	TEST_ERROR;
+	TEST_ERROR
     }
 
     /*
@@ -3535,17 +3482,17 @@ test_remove_level1_promote_3leaf_merge(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)) TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    if (H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the address of the root node is defined */
-    if(!H5F_addr_defined(root_addr)) TEST_ERROR;
+    if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     /* Attempt to remove record from root node of a level-1 B-tree to force promotion from middle leaf */
     TESTING("B-tree remove: promote from leaf of level-1 B-tree w/3->2 merge");
@@ -3560,7 +3507,7 @@ test_remove_level1_promote_3leaf_merge(hid_t fapl)
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != (43 + u)) TEST_ERROR;
+        if(record != (43 + u)) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3570,7 +3517,7 @@ test_remove_level1_promote_3leaf_merge(hid_t fapl)
         } /* end if */
 
         /* Make certain that the # of records is correct */
-        if(nrec != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR;
+        if(nrec != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR
     } /* end for */
 
     record = 26;
@@ -3581,7 +3528,7 @@ test_remove_level1_promote_3leaf_merge(hid_t fapl)
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 26) TEST_ERROR;
+    if(record != 26) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3591,11 +3538,11 @@ test_remove_level1_promote_3leaf_merge(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)-82) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*2)-82) TEST_ERROR
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -3619,8 +3566,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Friday, March  4, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3638,12 +3583,12 @@ test_remove_level1_collapse(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
-	TEST_ERROR;
+	TEST_ERROR
     }
 
     /*
@@ -3673,17 +3618,17 @@ test_remove_level1_collapse(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC)) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC)) TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    if (H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the address of the root node is defined */
-    if(!H5F_addr_defined(root_addr)) TEST_ERROR;
+    if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     /* Attempt to remove records from B-tree to force a single leaf for the B-tree */
     TESTING("B-tree remove: collapse level-1 B-tree back to level-0");
@@ -3696,7 +3641,7 @@ test_remove_level1_collapse(hid_t fapl)
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != (INSERT_SPLIT_ROOT_NREC - (u+1))) TEST_ERROR;
+        if(record != (INSERT_SPLIT_ROOT_NREC - (u+1))) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3706,12 +3651,12 @@ test_remove_level1_collapse(hid_t fapl)
         } /* end if */
 
         /* Make certain that the # of records is correct */
-        if(nrec != (INSERT_SPLIT_ROOT_NREC-(u+1))) TEST_ERROR;
+        if(nrec != (INSERT_SPLIT_ROOT_NREC-(u+1))) TEST_ERROR
     } /* end for */
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -3735,8 +3680,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Friday, March  4, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3754,12 +3697,12 @@ test_remove_level2_promote(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
-	TEST_ERROR;
+	TEST_ERROR
     }
 
     /*
@@ -3789,17 +3732,17 @@ test_remove_level2_promote(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)) TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    if (H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the address of the root node is defined */
-    if(!H5F_addr_defined(root_addr)) TEST_ERROR;
+    if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     /* Attempt to remove record from right internal node of a level-2 B-tree to force promotion */
     TESTING("B-tree remove: promote from right internal of level-2 B-tree");
@@ -3811,7 +3754,7 @@ test_remove_level2_promote(hid_t fapl)
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 1632) TEST_ERROR;
+    if(record != 1632) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3821,7 +3764,7 @@ test_remove_level2_promote(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)-1) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)-1) TEST_ERROR
 
     PASSED();
 
@@ -3835,7 +3778,7 @@ test_remove_level2_promote(hid_t fapl)
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 1117) TEST_ERROR;
+    if(record != 1117) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3845,7 +3788,7 @@ test_remove_level2_promote(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)-2) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)-2) TEST_ERROR
 
     PASSED();
 
@@ -3859,7 +3802,7 @@ test_remove_level2_promote(hid_t fapl)
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 1246) TEST_ERROR;
+    if(record != 1246) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3869,7 +3812,7 @@ test_remove_level2_promote(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)-3) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)-3) TEST_ERROR
 
     PASSED();
 
@@ -3883,7 +3826,7 @@ test_remove_level2_promote(hid_t fapl)
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 1074) TEST_ERROR;
+    if(record != 1074) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3893,7 +3836,7 @@ test_remove_level2_promote(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)-4) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)-4) TEST_ERROR
 
     record = 558;
     if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
@@ -3903,7 +3846,7 @@ test_remove_level2_promote(hid_t fapl)
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 558) TEST_ERROR;
+    if(record != 558) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3913,11 +3856,11 @@ test_remove_level2_promote(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)-5) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)-5) TEST_ERROR
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -3941,8 +3884,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Monday, March  7, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3960,12 +3901,12 @@ test_remove_level2_promote_2internal_redistrib(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
-	TEST_ERROR;
+	TEST_ERROR
     }
 
     /*
@@ -3995,17 +3936,17 @@ test_remove_level2_promote_2internal_redistrib(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)) TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    if (H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the address of the root node is defined */
-    if(!H5F_addr_defined(root_addr)) TEST_ERROR;
+    if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     /* Attempt to remove record from right internal node of a level-2 B-tree to force promotion w/redistribution */
     TESTING("B-tree remove: promote from right internal of level-2 B-tree w/redistrib");
@@ -4018,7 +3959,7 @@ test_remove_level2_promote_2internal_redistrib(hid_t fapl)
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != ((INSERT_SPLIT_ROOT_NREC*21) - (u+1))) TEST_ERROR;
+        if(record != ((INSERT_SPLIT_ROOT_NREC*21) - (u+1))) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -4028,7 +3969,7 @@ test_remove_level2_promote_2internal_redistrib(hid_t fapl)
         } /* end if */
 
         /* Make certain that the # of records is correct */
-        if(nrec != ((INSERT_SPLIT_ROOT_NREC*21)-(u+1))) TEST_ERROR;
+        if(nrec != ((INSERT_SPLIT_ROOT_NREC*21)-(u+1))) TEST_ERROR
     } /* end for */
 
     record = 1632;
@@ -4039,7 +3980,7 @@ test_remove_level2_promote_2internal_redistrib(hid_t fapl)
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 1632) TEST_ERROR;
+    if(record != 1632) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -4049,11 +3990,11 @@ test_remove_level2_promote_2internal_redistrib(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)-23) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)-23) TEST_ERROR
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -4077,8 +4018,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Monday, March  7, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4096,12 +4035,12 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
-	TEST_ERROR;
+	TEST_ERROR
     }
 
     /*
@@ -4131,17 +4070,17 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)) TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    if (H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the address of the root node is defined */
-    if(!H5F_addr_defined(root_addr)) TEST_ERROR;
+    if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     /* Attempt to remove record from right internal node of a level-2 B-tree to force promotion w/redistribution */
     TESTING("B-tree remove: promote from right internal of level-2 B-tree w/redistrib");
@@ -4154,7 +4093,7 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl)
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != (43 + u)) TEST_ERROR;
+        if(record != (43 + u)) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -4164,7 +4103,7 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl)
         } /* end if */
 
         /* Make certain that the # of records is correct */
-        if(nrec != ((INSERT_SPLIT_ROOT_NREC*21)-(u+1))) TEST_ERROR;
+        if(nrec != ((INSERT_SPLIT_ROOT_NREC*21)-(u+1))) TEST_ERROR
     } /* end for */
 
     record = 42;
@@ -4175,7 +4114,7 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl)
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 42) TEST_ERROR;
+    if(record != 42) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -4185,11 +4124,11 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)-18) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)-18) TEST_ERROR
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -4213,8 +4152,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Monday, March  7, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4232,12 +4169,12 @@ test_remove_level2_promote_2internal_merge(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
-	TEST_ERROR;
+	TEST_ERROR
     }
 
     /*
@@ -4267,17 +4204,17 @@ test_remove_level2_promote_2internal_merge(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)) TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    if (H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the address of the root node is defined */
-    if(!H5F_addr_defined(root_addr)) TEST_ERROR;
+    if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     /* Attempt to remove record from right internal node of a level-2 B-tree to force promotion w/redistribution */
     TESTING("B-tree remove: promote from right internal of level-2 B-tree w/redistrib");
@@ -4290,7 +4227,7 @@ test_remove_level2_promote_2internal_merge(hid_t fapl)
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != ((INSERT_SPLIT_ROOT_NREC*21) - (u+1))) TEST_ERROR;
+        if(record != ((INSERT_SPLIT_ROOT_NREC*21) - (u+1))) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -4300,7 +4237,7 @@ test_remove_level2_promote_2internal_merge(hid_t fapl)
         } /* end if */
 
         /* Make certain that the # of records is correct */
-        if(nrec != ((INSERT_SPLIT_ROOT_NREC*21)-(u+1))) TEST_ERROR;
+        if(nrec != ((INSERT_SPLIT_ROOT_NREC*21)-(u+1))) TEST_ERROR
     } /* end for */
 
     record = 1616;
@@ -4311,7 +4248,7 @@ test_remove_level2_promote_2internal_merge(hid_t fapl)
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 1616) TEST_ERROR;
+    if(record != 1616) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -4321,11 +4258,11 @@ test_remove_level2_promote_2internal_merge(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)-39) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)-39) TEST_ERROR
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -4349,8 +4286,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Monday, March  7, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4368,12 +4303,12 @@ test_remove_level2_promote_3internal_merge(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
-	TEST_ERROR;
+	TEST_ERROR
     }
 
     /*
@@ -4403,17 +4338,17 @@ test_remove_level2_promote_3internal_merge(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)) TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    if (H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the address of the root node is defined */
-    if(!H5F_addr_defined(root_addr)) TEST_ERROR;
+    if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     /* Attempt to remove record from right internal node of a level-2 B-tree to force promotion w/redistribution */
     TESTING("B-tree remove: promote from right internal of level-2 B-tree w/redistrib");
@@ -4426,7 +4361,7 @@ test_remove_level2_promote_3internal_merge(hid_t fapl)
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != (43 + u)) TEST_ERROR;
+        if(record != (43 + u)) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -4436,7 +4371,7 @@ test_remove_level2_promote_3internal_merge(hid_t fapl)
         } /* end if */
 
         /* Make certain that the # of records is correct */
-        if(nrec != ((INSERT_SPLIT_ROOT_NREC*21)-(u+1))) TEST_ERROR;
+        if(nrec != ((INSERT_SPLIT_ROOT_NREC*21)-(u+1))) TEST_ERROR
     } /* end for */
 
     record = 26;
@@ -4447,7 +4382,7 @@ test_remove_level2_promote_3internal_merge(hid_t fapl)
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 26) TEST_ERROR;
+    if(record != 26) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -4457,11 +4392,11 @@ test_remove_level2_promote_3internal_merge(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)-50) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)-50) TEST_ERROR
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -4485,8 +4420,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Tuesday, March  8, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4504,12 +4437,12 @@ test_remove_level2_2internal_merge_left(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
-	TEST_ERROR;
+	TEST_ERROR
     }
 
     /*
@@ -4539,17 +4472,17 @@ test_remove_level2_2internal_merge_left(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)) TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    if (H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the address of the root node is defined */
-    if(!H5F_addr_defined(root_addr)) TEST_ERROR;
+    if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     /* Attempt to remove records from a level-2 B-tree to force 2 internal nodes to merge */
     TESTING("B-tree remove: merge 2 internal nodes to 1 in level-2 B-tree (l->r)");
@@ -4562,7 +4495,7 @@ test_remove_level2_2internal_merge_left(hid_t fapl)
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != u) TEST_ERROR;
+        if(record != u) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -4572,12 +4505,12 @@ test_remove_level2_2internal_merge_left(hid_t fapl)
         } /* end if */
 
         /* Make certain that the # of records is correct */
-        if(nrec != ((INSERT_SPLIT_ROOT_NREC*21)-(u+1))) TEST_ERROR;
+        if(nrec != ((INSERT_SPLIT_ROOT_NREC*21)-(u+1))) TEST_ERROR
     } /* end for */
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -4601,8 +4534,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Tuesday, March  8, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4620,12 +4551,12 @@ test_remove_level2_2internal_merge_right(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
-	TEST_ERROR;
+	TEST_ERROR
     }
 
     /*
@@ -4655,17 +4586,17 @@ test_remove_level2_2internal_merge_right(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)) TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    if (H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the address of the root node is defined */
-    if(!H5F_addr_defined(root_addr)) TEST_ERROR;
+    if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     /* Attempt to remove records from a level-2 B-tree to force 2 internal nodes to merge */
     TESTING("B-tree remove: merge 2 internal nodes to 1 in level-2 B-tree (r->l)");
@@ -4678,7 +4609,7 @@ test_remove_level2_2internal_merge_right(hid_t fapl)
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != ((INSERT_SPLIT_ROOT_NREC*21) - (u + 1))) TEST_ERROR;
+        if(record != ((INSERT_SPLIT_ROOT_NREC*21) - (u + 1))) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -4688,12 +4619,12 @@ test_remove_level2_2internal_merge_right(hid_t fapl)
         } /* end if */
 
         /* Make certain that the # of records is correct */
-        if(nrec != ((INSERT_SPLIT_ROOT_NREC*21)-(u+1))) TEST_ERROR;
+        if(nrec != ((INSERT_SPLIT_ROOT_NREC*21)-(u+1))) TEST_ERROR
     } /* end for */
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -4717,8 +4648,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Tuesday, March  8, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4736,12 +4665,12 @@ test_remove_level2_3internal_merge(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
-	TEST_ERROR;
+	TEST_ERROR
     }
 
     /*
@@ -4771,17 +4700,17 @@ test_remove_level2_3internal_merge(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)) TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    if (H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the address of the root node is defined */
-    if(!H5F_addr_defined(root_addr)) TEST_ERROR;
+    if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     /* Attempt to remove record from right internal node of a level-2 B-tree to force promotion w/redistribution */
     TESTING("B-tree remove: merge 3 internal nodes to 2 in level-2 B-tree");
@@ -4794,7 +4723,7 @@ test_remove_level2_3internal_merge(hid_t fapl)
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != (559 + u)) TEST_ERROR;
+        if(record != (559 + u)) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -4804,12 +4733,12 @@ test_remove_level2_3internal_merge(hid_t fapl)
         } /* end if */
 
         /* Make certain that the # of records is correct */
-        if(nrec != ((INSERT_SPLIT_ROOT_NREC*21)-(u+1))) TEST_ERROR;
+        if(nrec != ((INSERT_SPLIT_ROOT_NREC*21)-(u+1))) TEST_ERROR
     } /* end for */
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -4833,8 +4762,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Tuesday, March  8, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4852,12 +4779,12 @@ test_remove_level2_collapse_right(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
 	H5Eprint_stack(H5E_DEFAULT, stdout);
-	TEST_ERROR;
+	TEST_ERROR
     }
 
     /*
@@ -4887,17 +4814,17 @@ test_remove_level2_collapse_right(hid_t fapl)
     } /* end if */
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)) TEST_ERROR;
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)) TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    if (H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the address of the root node is defined */
-    if(!H5F_addr_defined(root_addr)) TEST_ERROR;
+    if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     /* Attempt to remove records from a level-2 B-tree to force back to level-1 */
     TESTING("B-tree remove: collapse level-1 B-tree back to level-0 (r->l)");
@@ -4910,7 +4837,7 @@ test_remove_level2_collapse_right(hid_t fapl)
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != ((INSERT_SPLIT_ROOT_NREC*21)-(u+1))) TEST_ERROR;
+        if(record != ((INSERT_SPLIT_ROOT_NREC*21)-(u+1))) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -4920,12 +4847,12 @@ test_remove_level2_collapse_right(hid_t fapl)
         } /* end if */
 
         /* Make certain that the # of records is correct */
-        if(nrec != ((INSERT_SPLIT_ROOT_NREC*21)-(u+1))) TEST_ERROR;
+        if(nrec != ((INSERT_SPLIT_ROOT_NREC*21)-(u+1))) TEST_ERROR
     } /* end for */
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -4950,8 +4877,6 @@ error:
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, March  8, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -4979,7 +4904,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     HDsrandom((unsigned long)curr_time);
 
     /* Allocate space for the records */
-    if((records = HDmalloc(sizeof(hsize_t)*INSERT_MANY))==NULL) TEST_ERROR;
+    if((records = HDmalloc(sizeof(hsize_t)*INSERT_MANY))==NULL) TEST_ERROR
 
     /* Initialize record #'s */
     for(u=0; u<INSERT_MANY; u++)
@@ -4996,7 +4921,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
@@ -5049,7 +4974,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != records[u]) TEST_ERROR;
+        if(record != records[u]) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -5059,12 +4984,12 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
         } /* end if */
 
         /* Make certain that the # of records is correct */
-        if(nrec != (INSERT_MANY-(u+1))) TEST_ERROR;
+        if(nrec != (INSERT_MANY-(u+1))) TEST_ERROR
     } /* end for */
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     HDfree(records);
 
@@ -5092,8 +5017,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Tuesday, March  8, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -5110,7 +5033,7 @@ test_find_neighbor(hid_t fapl)
     herr_t      ret;                    /* Generic error return value */
 
     /* Allocate space for the records */
-    if((records = HDmalloc(sizeof(hsize_t)*FIND_NEIGHBOR))==NULL) TEST_ERROR;
+    if((records = HDmalloc(sizeof(hsize_t)*FIND_NEIGHBOR))==NULL) TEST_ERROR
 
     /* Initialize record #'s */
     for(u=0; u<FIND_NEIGHBOR; u++)
@@ -5119,7 +5042,7 @@ test_find_neighbor(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
@@ -5157,37 +5080,37 @@ test_find_neighbor(hid_t fapl)
 	ret = H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_LESS, &search, neighbor_cb, &record);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR;
+    if(ret != FAIL) TEST_ERROR
 
     search = 1;
-    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_LESS, &search, neighbor_cb, &record)<0) TEST_ERROR;
-    if(record != 0) TEST_ERROR;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_LESS, &search, neighbor_cb, &record)<0) TEST_ERROR
+    if(record != 0) TEST_ERROR
 
     search = 2;
-    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_LESS, &search, neighbor_cb, &record)<0) TEST_ERROR;
-    if(record != 0) TEST_ERROR;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_LESS, &search, neighbor_cb, &record)<0) TEST_ERROR
+    if(record != 0) TEST_ERROR
 
     search = 3;
-    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_LESS, &search, neighbor_cb, &record)<0) TEST_ERROR;
-    if(record != 2) TEST_ERROR;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_LESS, &search, neighbor_cb, &record)<0) TEST_ERROR
+    if(record != 2) TEST_ERROR
 
     search = 4;
-    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_LESS, &search, neighbor_cb, &record)<0) TEST_ERROR;
-    if(record != 2) TEST_ERROR;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_LESS, &search, neighbor_cb, &record)<0) TEST_ERROR
+    if(record != 2) TEST_ERROR
 
     /* Neighbor is in internal node */
     search = 85;
-    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_LESS, &search, neighbor_cb, &record)<0) TEST_ERROR;
-    if(record != 84) TEST_ERROR;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_LESS, &search, neighbor_cb, &record)<0) TEST_ERROR
+    if(record != 84) TEST_ERROR
 
     /* Neighbor is in root node */
     search = 859;
-    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_LESS, &search, neighbor_cb, &record)<0) TEST_ERROR;
-    if(record != 858) TEST_ERROR;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_LESS, &search, neighbor_cb, &record)<0) TEST_ERROR
+    if(record != 858) TEST_ERROR
 
     search = (FIND_NEIGHBOR * 2) + 1;
-    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_LESS, &search, neighbor_cb, &record)<0) TEST_ERROR;
-    if(record != ((FIND_NEIGHBOR-1)*2)) TEST_ERROR;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_LESS, &search, neighbor_cb, &record)<0) TEST_ERROR
+    if(record != ((FIND_NEIGHBOR-1)*2)) TEST_ERROR
 
     PASSED();
 
@@ -5202,41 +5125,41 @@ test_find_neighbor(hid_t fapl)
 	ret = H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR;
+    if(ret != FAIL) TEST_ERROR
 
     search = 0;
-    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record)<0) TEST_ERROR;
-    if(record != 2) TEST_ERROR;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record)<0) TEST_ERROR
+    if(record != 2) TEST_ERROR
 
     search = 1;
-    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record)<0) TEST_ERROR;
-    if(record != 2) TEST_ERROR;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record)<0) TEST_ERROR
+    if(record != 2) TEST_ERROR
 
     search = 2;
-    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record)<0) TEST_ERROR;
-    if(record != 4) TEST_ERROR;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record)<0) TEST_ERROR
+    if(record != 4) TEST_ERROR
 
     search = 3;
-    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record)<0) TEST_ERROR;
-    if(record != 4) TEST_ERROR;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record)<0) TEST_ERROR
+    if(record != 4) TEST_ERROR
 
     /* Neighbor is in internal node */
     search = 599;
-    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record)<0) TEST_ERROR;
-    if(record != 600) TEST_ERROR;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record)<0) TEST_ERROR
+    if(record != 600) TEST_ERROR
 
     /* Neighbor is in root node */
     search = 857;
-    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record)<0) TEST_ERROR;
-    if(record != 858) TEST_ERROR;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record)<0) TEST_ERROR
+    if(record != 858) TEST_ERROR
 
     search = ((FIND_NEIGHBOR-1) * 2) - 1;
-    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record)<0) TEST_ERROR;
-    if(record != ((FIND_NEIGHBOR-1)*2)) TEST_ERROR;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record)<0) TEST_ERROR
+    if(record != ((FIND_NEIGHBOR-1)*2)) TEST_ERROR
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     HDfree(records);
 
@@ -5264,8 +5187,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Wednesday, March  9, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -5285,19 +5206,19 @@ test_delete(hid_t fapl)
 /* Create empty file for size comparisons later */
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Close file */
-    if(H5Fclose(file)<0) TEST_ERROR;
+    if(H5Fclose(file)<0) TEST_ERROR
 
     /* Get the size of an empty file */
-    if((empty_size=h5_get_file_size(filename))==0) TEST_ERROR;
+    if((empty_size=h5_get_file_size(filename))==0) TEST_ERROR
 
     /* Attempt to delete empty B-tree */
     TESTING("B-tree delete: delete empty B-tree");
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
@@ -5323,13 +5244,13 @@ test_delete(hid_t fapl)
 	goto error;
     } /* end if */
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR
 
     /* Verify the file is correct size */
-    if(file_size!=empty_size) TEST_ERROR;
+    if(file_size!=empty_size) TEST_ERROR
 
     PASSED();
 
@@ -5337,7 +5258,7 @@ test_delete(hid_t fapl)
     TESTING("B-tree delete: delete level-0 B-tree");
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
@@ -5373,13 +5294,13 @@ test_delete(hid_t fapl)
 	goto error;
     } /* end if */
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR
 
     /* Verify the file is correct size */
-    if(file_size!=empty_size) TEST_ERROR;
+    if(file_size!=empty_size) TEST_ERROR
 
     PASSED();
 
@@ -5387,7 +5308,7 @@ test_delete(hid_t fapl)
     TESTING("B-tree delete: delete level-1 B-tree");
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
@@ -5423,13 +5344,13 @@ test_delete(hid_t fapl)
 	goto error;
     } /* end if */
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR
 
     /* Verify the file is correct size */
-    if(file_size!=empty_size) TEST_ERROR;
+    if(file_size!=empty_size) TEST_ERROR
 
     PASSED();
 
@@ -5437,7 +5358,7 @@ test_delete(hid_t fapl)
     TESTING("B-tree delete: delete level-2 B-tree");
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
@@ -5473,13 +5394,13 @@ test_delete(hid_t fapl)
 	goto error;
     } /* end if */
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR
 
     /* Verify the file is correct size */
-    if(file_size!=empty_size) TEST_ERROR;
+    if(file_size!=empty_size) TEST_ERROR
 
     PASSED();
 
@@ -5506,8 +5427,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Friday, March 10, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -5526,7 +5445,7 @@ test_modify(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if (NULL==(f=H5I_object(file))) {
@@ -5565,7 +5484,7 @@ test_modify(hid_t fapl)
 	ret = H5B2_modify(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, modify_cb, &modify);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR;
+    if(ret != FAIL) TEST_ERROR
 
     PASSED();
 
@@ -5583,8 +5502,8 @@ test_modify(hid_t fapl)
     /* Attempt to find modified record */
     record = 131;
     found = 131;
-    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, find_cb, &found)<0) TEST_ERROR;
-    if(found != 131) TEST_ERROR;
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, find_cb, &found)<0) TEST_ERROR
+    if(found != 131) TEST_ERROR
 
     /* Attempt to find original record */
     record = 130;
@@ -5593,7 +5512,7 @@ test_modify(hid_t fapl)
 	ret = H5B2_modify(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, modify_cb, &modify);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR;
+    if(ret != FAIL) TEST_ERROR
 
     PASSED();
 
@@ -5611,8 +5530,8 @@ test_modify(hid_t fapl)
     /* Attempt to find modified record */
     record = 237;
     found = 237;
-    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, find_cb, &found)<0) TEST_ERROR;
-    if(found != 237) TEST_ERROR;
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, find_cb, &found)<0) TEST_ERROR
+    if(found != 237) TEST_ERROR
 
     /* Attempt to find original record */
     record = 235;
@@ -5621,11 +5540,11 @@ test_modify(hid_t fapl)
 	ret = H5B2_modify(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, modify_cb, &modify);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR;
+    if(ret != FAIL) TEST_ERROR
 
     PASSED();
 
-    if (H5Fclose(file)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR
 
     return 0;
 
@@ -5649,15 +5568,13 @@ error:
  * Programmer:	Quincey Koziol
  *              Tuesday, February  1, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
 main(void)
 {
-    hid_t	fapl=-1;
-    int		nerrors=0;
+    hid_t	fapl = -1;              /* File access property list for data files */
+    unsigned	nerrors = 0;            /* Cumulative error count */
 
     /* Reset library */
     h5_reset();
@@ -5713,7 +5630,8 @@ main(void)
     /* Test modifying B-tree records */
     nerrors += test_modify(fapl);
 
-    if (nerrors) goto error;
+    if(nerrors)
+        goto error;
     puts("All v2 B-tree tests passed.");
     h5_cleanup(FILENAME, fapl);
     return 0;
@@ -5724,5 +5642,5 @@ error:
 	H5Pclose(fapl);
     } H5E_END_TRY;
     return 1;
-}
+} /* end main() */
 

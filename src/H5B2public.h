@@ -18,10 +18,11 @@
  *                      Jan 31 2005
  *                      Quincey Koziol <koziol@ncsa.uiuc.edu>
  *
- * Purpose:             Public declarations for the H5B2 package.
+ * Purpose:             Public declarations for the v2 B-tree package.
  *
  *-------------------------------------------------------------------------
  */
+
 #ifndef _H5B2public_H
 #define _H5B2public_H
 
