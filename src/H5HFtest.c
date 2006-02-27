@@ -64,9 +64,9 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_get_addrmap_test
+ * Function:	H5HF_get_cparam_test
  *
- * Purpose:	Retrieve the address mapping type
+ * Purpose:	Retrieve the parameters used to create the fractal heap
  *
  * Return:	Success:	non-negative
  *
@@ -78,18 +78,18 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_get_addrmap_test(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr, H5HF_type_t *heap_type)
+H5HF_get_cparam_test(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr, H5HF_create_t *cparam)
 {
     H5HF_t	*fh = NULL;             /* Pointer to the B-tree header */
     H5HF_shared_t *shared;              /* Shared fractal heap information */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_get_addrmap_test)
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_get_cparam_test)
 
     /* Check arguments. */
     HDassert(f);
     HDassert(H5F_addr_defined(fh_addr));
-    HDassert(heap_type);
+    HDassert(cparam);
 
     /* Look up the fractal heap header */
     if(NULL == (fh = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, NULL, NULL, H5AC_READ)))
@@ -99,8 +99,10 @@ H5HF_get_addrmap_test(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr, H5HF_type_t *hea
     shared = H5RC_GET_OBJ(fh->shared);
     HDassert(shared);
 
-    /* Get fractal heap address mapping */
-    *heap_type = shared->type;
+    /* Get fractal heap creation parameters */
+    cparam->addrmap = shared->addrmap;
+    cparam->standalone_size = shared->standalone_size;
+    cparam->fixed_len_size = shared->fixed_len_size;
 
 done:
     /* Release fractal heap header node */
@@ -108,5 +110,5 @@ done:
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap header info")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5HF_get_addrmap_test() */
+} /* H5HF_get_cparam_test() */
 

@@ -54,7 +54,9 @@
     + 4 /* Metadata checksum */                                               \
                                                                               \
     /* Fractal heap header specific fields */                                 \
-    + 1 /* Heap type */                                                       \
+    + 1 /* Address mapping */                                                 \
+    + 4 /* Min. size of standalone object */                                  \
+    + 4 /* Length of fixed-size objects */                                    \
     )
 
 /****************************/
@@ -99,9 +101,9 @@ typedef struct H5HF_shared_t {
     H5HF_dtable_param_t std_dtable_info;        /* Doubling-table info for standalone objects */
 
     /* Information set by user */
-    H5HF_type_t type;           /* Type of address mapping */
-    size_t standalone_size;     /* Size of object to store standalone */
-    size_t fixed_len_size;      /* Size of objects (only for heaps w/fixed-length objects) */
+    H5HF_addrmap_t addrmap;     /* Type of address mapping */
+    uint32_t standalone_size;   /* Size of object to store standalone */
+    uint32_t fixed_len_size;    /* Size of objects (only for heaps w/fixed-length objects) */
 
     /* Information derived from user parameters */
     hbool_t     fixed_len_obj;  /* Are objects in the heap fixed length? */
@@ -136,7 +138,11 @@ H5FL_EXTERN(H5HF_t);
 /******************************/
 
 /* Routines for managing shared fractal heap info */
-H5_DLL herr_t H5HF_shared_init(H5F_t *f, H5HF_t *fh, H5HF_type_t type);
+H5_DLL herr_t H5HF_shared_init(H5HF_t *fh, H5HF_create_t *cparam);
+
+/* Routines for allocating space */
+herr_t H5HF_man_alloc_end(H5HF_shared_t *shared, size_t size, const void *obj,
+    void *id/*out*/);
 
 /* Metadata cache callbacks */
 H5_DLL herr_t H5HF_cache_hdr_dest(H5F_t *f, H5HF_t *b);
@@ -147,8 +153,8 @@ H5_DLL herr_t H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
 
 /* Testing routines */
 #ifdef H5HF_TESTING
-H5_DLL herr_t H5HF_get_addrmap_test(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr,
-    H5HF_type_t *heap_type);
+H5_DLL herr_t H5HF_get_cparam_test(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr,
+    H5HF_create_t *cparam);
 #endif /* H5HF_TESTING */
 
 #endif /* _H5HFpkg_H */

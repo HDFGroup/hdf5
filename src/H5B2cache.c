@@ -202,6 +202,7 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, vo
     H5F_DECODE_LENGTH(f, p, bt2->root.all_nrec);
 
     /* Initialize shared B-tree info */
+    HDassert((size_t)(p - buf) == size);
     if(H5B2_shared_init(f, bt2, type, node_size, rrec_size, split_percent, merge_percent) < 0)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't create shared B-tree info")
 
@@ -291,7 +292,7 @@ H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B
         H5F_ENCODE_LENGTH(f, p, bt2->root.all_nrec);
 
 	/* Write the B-tree header. */
-        HDassert((p - buf) == size);
+        HDassert((size_t)(p - buf) == size);
 	if(H5F_block_write(f, H5FD_MEM_BTREE, addr, size, dxpl_id, buf) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL, "unable to save B-tree header to disk")
 
@@ -431,13 +432,13 @@ static H5B2_leaf_t *
 H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, void *_bt2_shared)
 {
     const unsigned      *nrec = (const unsigned *)_nrec;
-    H5RC_t 		*bt2_shared=(H5RC_t *)_bt2_shared;        /* Shared B-tree information */
+    H5RC_t 		*bt2_shared = (H5RC_t *)_bt2_shared;        /* Shared B-tree information */
     H5B2_shared_t 	*shared;        /* Shared B-tree information */
-    H5B2_leaf_t		*leaf = NULL;
+    H5B2_leaf_t		*leaf = NULL;   /* Pointer to lead node loaded */
     uint8_t		*p;             /* Pointer into raw data buffer */
     uint8_t		*native;        /* Pointer to native keys */
     unsigned		u;              /* Local index variable */
-    H5B2_leaf_t		*ret_value;
+    H5B2_leaf_t		*ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5B2_cache_leaf_load, NULL)
 
@@ -446,49 +447,51 @@ H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, v
     HDassert(H5F_addr_defined(addr));
     HDassert(bt2_shared);
 
-    if (NULL==(leaf = H5FL_MALLOC(H5B2_leaf_t)))
+    if(NULL == (leaf = H5FL_MALLOC(H5B2_leaf_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    HDmemset(&leaf->cache_info,0,sizeof(H5AC_info_t));
+    HDmemset(&leaf->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Share common B-tree information */
     leaf->shared = bt2_shared;
     H5RC_INC(leaf->shared);
 
     /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(leaf->shared);
+    shared = H5RC_GET_OBJ(leaf->shared);
     HDassert(shared);
 
     /* Read header from disk */
-    if (H5F_block_read(f, H5FD_MEM_BTREE, addr, shared->node_size, dxpl_id, shared->page)<0)
+    if(H5F_block_read(f, H5FD_MEM_BTREE, addr, shared->node_size, dxpl_id, shared->page) < 0)
 	HGOTO_ERROR(H5E_BTREE, H5E_READERROR, NULL, "can't read B-tree leaf node")
 
     p = shared->page;
 
-    /* magic number */
-    if (HDmemcmp(p, H5B2_LEAF_MAGIC, H5B2_SIZEOF_MAGIC))
+    /* Magic number */
+    if(HDmemcmp(p, H5B2_LEAF_MAGIC, H5B2_SIZEOF_MAGIC))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree leaf node signature")
     p += H5B2_SIZEOF_MAGIC;
 
-    /* version */
-    if (*p++ != H5B2_LEAF_VERSION)
+    /* Version */
+    if(*p++ != H5B2_LEAF_VERSION)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree leaf node version")
 
+/* XXX: Add metadata flags & checksum to v2 B-tree metadata (like fractal heap) */
+
     /* B-tree type */
-    if (*p++ != (uint8_t)shared->type->id)
+    if(*p++ != (uint8_t)shared->type->id)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "incorrect B-tree type")
 
     /* Allocate space for the native keys in memory */
-    if((leaf->leaf_native=H5FL_FAC_MALLOC(shared->leaf_fac))==NULL)
+    if((leaf->leaf_native = H5FL_FAC_MALLOC(shared->leaf_fac)) == NULL)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree leaf native keys")
 
     /* Set the number of records in the leaf */
     leaf->nrec = *nrec;
 
     /* Deserialize records for leaf node */
-    native=leaf->leaf_native;
-    for(u=0; u<leaf->nrec; u++) {
+    native = leaf->leaf_native;
+    for(u = 0; u < leaf->nrec; u++) {
         /* Decode record */
-        if((shared->type->decode)(f,p,native)<0)
+        if((shared->type->decode)(f, p, native) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, NULL, "unable to decode B-tree record")
 
         /* Move to next record */
@@ -496,11 +499,14 @@ H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, v
         native += shared->type->nrec_size;
     } /* end for */
 
+    /* Sanity check parsing */
+    HDassert((size_t)(p - shared->page) <= shared->node_size);
+
     /* Set return value */
     ret_value = leaf;
 
 done:
-    if (!ret_value && leaf)
+    if(!ret_value && leaf)
         (void)H5B2_cache_leaf_dest(f,leaf);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_cache_leaf_load() */ /*lint !e818 Can't make udata a pointer to const */
@@ -531,14 +537,14 @@ H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5
     HDassert(H5F_addr_defined(addr));
     HDassert(leaf);
 
-    if (leaf->cache_info.is_dirty) {
+    if(leaf->cache_info.is_dirty) {
         H5B2_shared_t *shared;  /* Shared B-tree information */
         uint8_t *p;             /* Pointer into raw data buffer */
         uint8_t *native;        /* Pointer to native keys */
         unsigned u;             /* Local index variable */
 
         /* Get the pointer to the shared B-tree info */
-        shared=H5RC_GET_OBJ(leaf->shared);
+        shared = H5RC_GET_OBJ(leaf->shared);
         HDassert(shared);
 
         p = shared->page;
@@ -554,10 +560,10 @@ H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5
         *p++ = shared->type->id;
 
         /* Serialize records for leaf node */
-        native=leaf->leaf_native;
-        for(u=0; u<leaf->nrec; u++) {
+        native = leaf->leaf_native;
+        for(u = 0; u < leaf->nrec; u++) {
             /* Encode record */
-            if((shared->type->encode)(f,p,native)<0)
+            if((shared->type->encode)(f, p, native) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree record")
 
             /* Move to next record */
@@ -566,14 +572,15 @@ H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5
         } /* end for */
 
 	/* Write the B-tree leaf node */
-	if (H5F_block_write(f, H5FD_MEM_BTREE, addr, shared->node_size, dxpl_id, shared->page) < 0)
+        HDassert((size_t)(p - shared->page) <= shared->node_size);
+	if(H5F_block_write(f, H5FD_MEM_BTREE, addr, shared->node_size, dxpl_id, shared->page) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL, "unable to save B-tree leaf node to disk")
 
 	leaf->cache_info.is_dirty = FALSE;
     } /* end if */
 
-    if (destroy)
-        if (H5B2_cache_leaf_dest(f,leaf) < 0)
+    if(destroy)
+        if(H5B2_cache_leaf_dest(f, leaf) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree leaf node")
 
 done:
@@ -608,7 +615,7 @@ H5B2_cache_leaf_dest(H5F_t UNUSED *f, H5B2_leaf_t *leaf)
     HDassert(leaf);
 
     /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(leaf->shared);
+    shared = H5RC_GET_OBJ(leaf->shared);
     HDassert(shared);
 
     /* Release leaf's native key buffer */
@@ -654,8 +661,8 @@ H5B2_cache_leaf_clear(H5F_t *f, H5B2_leaf_t *leaf, hbool_t destroy)
     /* Reset the dirty flag.  */
     leaf->cache_info.is_dirty = FALSE;
 
-    if (destroy)
-        if (H5B2_cache_leaf_dest(f, leaf) < 0)
+    if(destroy)
+        if(H5B2_cache_leaf_dest(f, leaf) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree leaf node")
 
 done:
@@ -690,7 +697,7 @@ H5B2_cache_leaf_size(const H5F_t UNUSED *f, const H5B2_leaf_t *leaf, size_t *siz
     HDassert(size_ptr);
 
     /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(leaf->shared);
+    shared = H5RC_GET_OBJ(leaf->shared);
     HDassert(shared);
 
     /* Set size value */
@@ -721,12 +728,12 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nre
     const unsigned      *nrec = (const unsigned *)_nrec;
     H5RC_t 		*bt2_shared = (H5RC_t *)_bt2_shared;       /* Ref counter for shared B-tree info */
     H5B2_shared_t 	*shared;        /* Shared B-tree information */
-    H5B2_internal_t	*internal = NULL;
+    H5B2_internal_t	*internal = NULL;       /* Internal node read */
     uint8_t		*p;             /* Pointer into raw data buffer */
     uint8_t		*native;        /* Pointer to native record info */
     H5B2_node_ptr_t	*int_node_ptr;  /* Pointer to node pointer info */
     unsigned		u;              /* Local index variable */
-    H5B2_internal_t	*ret_value;
+    H5B2_internal_t	*ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5B2_cache_internal_load, NULL)
 
@@ -735,9 +742,9 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nre
     HDassert(H5F_addr_defined(addr));
     HDassert(bt2_shared);
 
-    if (NULL==(internal = H5FL_MALLOC(H5B2_internal_t)))
+    if(NULL == (internal = H5FL_MALLOC(H5B2_internal_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    HDmemset(&internal->cache_info,0,sizeof(H5AC_info_t));
+    HDmemset(&internal->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Share common B-tree information */
     internal->shared = bt2_shared;
@@ -748,40 +755,42 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nre
     HDassert(shared);
 
     /* Read header from disk */
-    if (H5F_block_read(f, H5FD_MEM_BTREE, addr, shared->node_size, dxpl_id, shared->page)<0)
+    if(H5F_block_read(f, H5FD_MEM_BTREE, addr, shared->node_size, dxpl_id, shared->page)<0)
 	HGOTO_ERROR(H5E_BTREE, H5E_READERROR, NULL, "can't read B-tree internal node")
 
     p = shared->page;
 
-    /* magic number */
-    if (HDmemcmp(p, H5B2_INT_MAGIC, H5B2_SIZEOF_MAGIC))
+    /* Magic number */
+    if(HDmemcmp(p, H5B2_INT_MAGIC, H5B2_SIZEOF_MAGIC))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree internal node signature")
     p += H5B2_SIZEOF_MAGIC;
 
-    /* version */
-    if (*p++ != H5B2_INT_VERSION)
+    /* Version */
+    if(*p++ != H5B2_INT_VERSION)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree internal node version")
+
+/* XXX: Add metadata flags & checksum to v2 B-tree metadata (like fractal heap) */
 
     /* B-tree type */
     if (*p++ != (uint8_t)shared->type->id)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "incorrect B-tree type")
 
     /* Allocate space for the native keys in memory */
-    if((internal->int_native=H5FL_FAC_MALLOC(shared->int_fac))==NULL)
+    if((internal->int_native = H5FL_FAC_MALLOC(shared->int_fac)) == NULL)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree internal native keys")
 
     /* Allocate space for the node pointers in memory */
-    if((internal->node_ptrs=H5FL_FAC_MALLOC(shared->node_ptr_fac))==NULL)
+    if((internal->node_ptrs = H5FL_FAC_MALLOC(shared->node_ptr_fac)) == NULL)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree internal node pointers")
 
     /* Set the number of records in the leaf */
     internal->nrec = *nrec;
 
     /* Deserialize records for internal node */
-    native=internal->int_native;
-    for(u=0; u<internal->nrec; u++) {
+    native = internal->int_native;
+    for(u = 0; u < internal->nrec; u++) {
         /* Decode record */
-        if((shared->type->decode)(f,p,native)<0)
+        if((shared->type->decode)(f, p, native) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, NULL, "unable to decode B-tree record")
 
         /* Move to next record */
@@ -790,8 +799,8 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nre
     } /* end for */
 
     /* Deserialize node pointers for internal node */
-    int_node_ptr=internal->node_ptrs;
-    for(u=0; u<internal->nrec+1; u++) {
+    int_node_ptr = internal->node_ptrs;
+    for(u = 0; u < internal->nrec + 1; u++) {
         /* Decode node pointer */
         H5F_addr_decode(f, (const uint8_t **)&p, &(int_node_ptr->addr));
         UINT16DECODE(p, int_node_ptr->node_nrec);
@@ -801,12 +810,15 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nre
         int_node_ptr++;
     } /* end for */
 
+    /* Sanity check parsing */
+    HDassert((size_t)(p - shared->page) <= shared->node_size);
+
     /* Set return value */
     ret_value = internal;
 
 done:
-    if (!ret_value && internal)
-        (void)H5B2_cache_internal_dest(f,internal);
+    if(!ret_value && internal)
+        (void)H5B2_cache_internal_dest(f, internal);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_cache_internal_load() */ /*lint !e818 Can't make udata a pointer to const */
 
@@ -836,7 +848,7 @@ H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr
     HDassert(H5F_addr_defined(addr));
     HDassert(internal);
 
-    if (internal->cache_info.is_dirty) {
+    if(internal->cache_info.is_dirty) {
         H5B2_shared_t *shared;  /* Shared B-tree information */
         uint8_t *p;             /* Pointer into raw data buffer */
         uint8_t *native;        /* Pointer to native record info */
@@ -844,26 +856,26 @@ H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr
         unsigned u;             /* Local index variable */
 
         /* Get the pointer to the shared B-tree info */
-        shared=H5RC_GET_OBJ(internal->shared);
+        shared = H5RC_GET_OBJ(internal->shared);
         HDassert(shared);
 
         p = shared->page;
 
-        /* magic number */
+        /* Magic number */
         HDmemcpy(p, H5B2_INT_MAGIC, H5B2_SIZEOF_MAGIC);
         p += H5B2_SIZEOF_MAGIC;
 
-        /* version # */
+        /* Version # */
         *p++ = H5B2_INT_VERSION;
 
-        /* b-tree type */
+        /* B-tree type */
         *p++ = shared->type->id;
 
         /* Serialize records for internal node */
-        native=internal->int_native;
-        for(u=0; u<internal->nrec; u++) {
+        native = internal->int_native;
+        for(u = 0; u < internal->nrec; u++) {
             /* Encode record */
-            if((shared->type->encode)(f,p,native)<0)
+            if((shared->type->encode)(f, p, native) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree record")
 
             /* Move to next record */
@@ -872,8 +884,8 @@ H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr
         } /* end for */
 
         /* Serialize node pointers for internal node */
-        int_node_ptr=internal->node_ptrs;
-        for(u=0; u<internal->nrec+1; u++) {
+        int_node_ptr = internal->node_ptrs;
+        for(u = 0; u < internal->nrec + 1; u++) {
             /* Encode node pointer */
             H5F_addr_encode(f, &p, int_node_ptr->addr);
             UINT16ENCODE(p, int_node_ptr->node_nrec);
@@ -884,14 +896,15 @@ H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr
         } /* end for */
 
 	/* Write the B-tree internal node */
-	if (H5F_block_write(f, H5FD_MEM_BTREE, addr, shared->node_size, dxpl_id, shared->page) < 0)
+        HDassert((size_t)(p - shared->page) <= shared->node_size);
+	if(H5F_block_write(f, H5FD_MEM_BTREE, addr, shared->node_size, dxpl_id, shared->page) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL, "unable to save B-tree internal node to disk")
 
 	internal->cache_info.is_dirty = FALSE;
     } /* end if */
 
-    if (destroy)
-        if (H5B2_cache_internal_dest(f,internal) < 0)
+    if(destroy)
+        if(H5B2_cache_internal_dest(f, internal) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree internal node")
 
 done:
@@ -926,23 +939,23 @@ H5B2_cache_internal_dest(H5F_t UNUSED *f, H5B2_internal_t *internal)
     HDassert(internal);
 
     /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(internal->shared);
+    shared = H5RC_GET_OBJ(internal->shared);
     HDassert(shared);
 
     /* Release internal node's native key buffer */
     if(internal->int_native)
-        H5FL_FAC_FREE(shared->int_fac,internal->int_native);
+        H5FL_FAC_FREE(shared->int_fac, internal->int_native);
 
     /* Release internal node's node pointer buffer */
     if(internal->node_ptrs)
-        H5FL_FAC_FREE(shared->node_ptr_fac,internal->node_ptrs);
+        H5FL_FAC_FREE(shared->node_ptr_fac, internal->node_ptrs);
 
     /* Decrement reference count on shared B-tree info */
     if(internal->shared)
         H5RC_DEC(internal->shared);
 
     /* Free B-tree internal node info */
-    H5FL_FREE(H5B2_internal_t,internal);
+    H5FL_FREE(H5B2_internal_t, internal);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5B2_cache_internal_dest() */
@@ -976,8 +989,8 @@ H5B2_cache_internal_clear(H5F_t *f, H5B2_internal_t *internal, hbool_t destroy)
     /* Reset the dirty flag.  */
     internal->cache_info.is_dirty = FALSE;
 
-    if (destroy)
-        if (H5B2_cache_internal_dest(f, internal) < 0)
+    if(destroy)
+        if(H5B2_cache_internal_dest(f, internal) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree internal node")
 
 done:
@@ -1012,7 +1025,7 @@ H5B2_cache_internal_size(const H5F_t UNUSED *f, const H5B2_internal_t *internal,
     HDassert(size_ptr);
 
     /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(internal->shared);
+    shared = H5RC_GET_OBJ(internal->shared);
     HDassert(shared);
 
     /* Set size value */
@@ -1020,5 +1033,4 @@ H5B2_cache_internal_size(const H5F_t UNUSED *f, const H5B2_internal_t *internal,
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2_cache_internal_size() */
-
 

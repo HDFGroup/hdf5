@@ -54,7 +54,7 @@ test_create(hid_t fapl)
     hid_t	file = -1;              /* File ID */
     char	filename[1024];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    H5HF_type_t heap_type, test_heap_type; /* Type of address mapping for fractal heap */
+    H5HF_create_t cparam, test_cparam;  /* Creation parameters for heap */
     haddr_t     fh_addr;                /* Address of fractal heap created */
 
     /* Set the filename to use for this test (dependent on fapl) */
@@ -72,8 +72,10 @@ test_create(hid_t fapl)
      * Test fractal heap creation (w/absolute address mapping)
      */
     TESTING("Fractal heap creation (w/absolute address mapping)");
-    heap_type = H5HF_ABSOLUTE;
-    if(H5HF_create(f, H5P_DATASET_XFER_DEFAULT, heap_type, &fh_addr/*out*/) < 0)
+    cparam.addrmap = H5HF_ABSOLUTE;
+    cparam.standalone_size = 64 * 1024;
+    cparam.fixed_len_size = 0;
+    if(H5HF_create(f, H5P_DATASET_XFER_DEFAULT, &cparam, &fh_addr/*out*/) < 0)
         FAIL_STACK_ERROR
     if(!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
@@ -81,10 +83,10 @@ test_create(hid_t fapl)
 
     /* Query the type of address mapping */
     TESTING("Query absolute address mapping setting");
-    test_heap_type = H5HF_MAPPED;
-    if(H5HF_get_addrmap_test(f, H5P_DATASET_XFER_DEFAULT, fh_addr, &test_heap_type) < 0)
+    HDmemset(&test_cparam, 0, sizeof(H5HF_create_t));
+    if(H5HF_get_cparam_test(f, H5P_DATASET_XFER_DEFAULT, fh_addr, &test_cparam) < 0)
         FAIL_STACK_ERROR
-    if(test_heap_type != heap_type)
+    if(HDmemcmp(&cparam, &test_cparam, sizeof(H5HF_create_t)))
         FAIL_STACK_ERROR
     PASSED()
 
@@ -92,8 +94,10 @@ test_create(hid_t fapl)
      * Test fractal heap creation (w/mapped address mapping)
      */
     TESTING("Fractal heap creation (w/mapped address mapping)");
-    heap_type = H5HF_MAPPED;
-    if(H5HF_create(f, H5P_DATASET_XFER_DEFAULT, heap_type, &fh_addr/*out*/) < 0)
+    cparam.addrmap = H5HF_MAPPED;
+    cparam.standalone_size = 64 * 1024;
+    cparam.fixed_len_size = 0;
+    if(H5HF_create(f, H5P_DATASET_XFER_DEFAULT, &cparam, &fh_addr/*out*/) < 0)
         FAIL_STACK_ERROR
     if(!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
@@ -101,10 +105,10 @@ test_create(hid_t fapl)
 
     /* Query the type of address mapping */
     TESTING("Query mapped address mapping setting");
-    test_heap_type = H5HF_ABSOLUTE;
-    if(H5HF_get_addrmap_test(f, H5P_DATASET_XFER_DEFAULT, fh_addr, &test_heap_type) < 0)
+    HDmemset(&test_cparam, 0, sizeof(H5HF_create_t));
+    if(H5HF_get_cparam_test(f, H5P_DATASET_XFER_DEFAULT, fh_addr, &test_cparam) < 0)
         FAIL_STACK_ERROR
-    if(test_heap_type != heap_type)
+    if(HDmemcmp(&cparam, &test_cparam, sizeof(H5HF_create_t)))
         FAIL_STACK_ERROR
     PASSED()
 
@@ -144,6 +148,7 @@ test_abs_insert_first(hid_t fapl)
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
     char	filename[1024];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
+    H5HF_create_t cparam;               /* Creation parameters for heap */
     haddr_t     fh_addr;                /* Address of fractal heap created */
     unsigned char obj[10];              /* Buffer for object to insert */
     haddr_t     heap_id;                /* Heap ID for object inserted */
@@ -162,7 +167,10 @@ test_abs_insert_first(hid_t fapl)
         STACK_ERROR
 
     /* Create absolute heap */
-    if(H5HF_create(f, dxpl, H5HF_ABSOLUTE, &fh_addr/*out*/) < 0)
+    cparam.addrmap = H5HF_ABSOLUTE;
+    cparam.standalone_size = 64 * 1024;
+    cparam.fixed_len_size = 0;
+    if(H5HF_create(f, dxpl, &cparam, &fh_addr/*out*/) < 0)
         FAIL_STACK_ERROR
     if(!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR

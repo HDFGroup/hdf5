@@ -115,10 +115,16 @@ H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
      * Print the values.
      */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-	      "Heap addressing method:",
-	      ((shared->type) == H5HF_ABSOLUTE ? "Absolute" :
-	      ((shared->type) == H5HF_MAPPED ? "Mapped" :
+	      "Heap address mapping method:",
+	      ((shared->addrmap) == H5HF_ABSOLUTE ? "Absolute" :
+	      ((shared->addrmap) == H5HF_MAPPED ? "Mapped" :
               "Unknown!")));
+    HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	      "Min. size of standalone object:",
+	      (unsigned long)shared->standalone_size);
+    HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	      "Fixed length object size:",
+	      (unsigned long)shared->fixed_len_size);
 
 done:
     if(fh && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, addr, fh, H5AC__NO_FLAGS_SET) < 0)

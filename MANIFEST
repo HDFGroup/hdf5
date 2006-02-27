@@ -406,6 +406,7 @@
 ./src/H5B2.c
 ./src/H5B2cache.c
 ./src/H5B2dbg.c
+./src/H5B2int.c
 ./src/H5B2pkg.h
 ./src/H5B2private.h
 ./src/H5B2public.h
@@ -495,6 +496,7 @@
 ./src/H5HF.c
 ./src/H5HFcache.c
 ./src/H5HFdbg.c
+./src/H5HFint.c
 ./src/H5HFpkg.h
 ./src/H5HFprivate.h
 ./src/H5HFpublic.h

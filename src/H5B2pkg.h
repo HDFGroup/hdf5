@@ -184,6 +184,45 @@ H5_DLLVAR const H5B2_class_t H5B2_TEST[1];
 H5_DLL herr_t H5B2_shared_init(H5F_t *f, H5B2_t *bt2, const H5B2_class_t *type,
     size_t node_size, size_t rrec_size, unsigned split_percent, unsigned merge_percent);
 
+/* Routines for allocating nodes */
+H5_DLL herr_t H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2,
+    unsigned *bt2_flags_ptr, H5RC_t *bt2_shared);
+H5_DLL herr_t H5B2_create_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
+    H5B2_node_ptr_t *node_ptr);
+
+/* Routines for inserting records */
+H5_DLL herr_t H5B2_insert_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
+    unsigned depth, unsigned *parent_cache_info_flags_ptr,
+    H5B2_node_ptr_t *curr_node_ptr, void *udata);
+H5_DLL herr_t H5B2_insert_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
+    H5B2_node_ptr_t *curr_node_ptr, void *udata);
+
+/* Routines for iterating over nodes/records */
+H5_DLL herr_t H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
+    unsigned depth, const H5B2_node_ptr_t *curr_node, H5B2_operator_t op,
+    void *op_data);
+
+/* Routines for locating records */
+H5_DLL int H5B2_locate_record(const H5B2_class_t *type, unsigned nrec,
+    size_t *rec_off, const uint8_t *native, const void *udata, unsigned *idx);
+H5_DLL herr_t H5B2_neighbor_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
+    unsigned depth, H5B2_node_ptr_t *curr_node_ptr, void *neighbor_loc,
+    H5B2_compare_t comp, void *udata, H5B2_found_t op, void *op_data);
+H5_DLL herr_t H5B2_neighbor_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
+    H5B2_node_ptr_t *curr_node_ptr, void *neighbor_loc,
+    H5B2_compare_t comp, void *udata, H5B2_found_t op, void *op_data);
+
+/* Routines for removing records */
+H5_DLL herr_t H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
+    hbool_t *depth_decreased, void *swap_loc, unsigned depth, H5AC_info_t *parent_cache_info,
+    hbool_t * parent_cache_info_dirtied_ptr, H5B2_node_ptr_t *curr_node_ptr, void *udata);
+H5_DLL herr_t H5B2_remove_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
+    H5B2_node_ptr_t *curr_node_ptr, void *udata);
+
+/* Routines for deleting nodes */
+H5_DLL herr_t H5B2_delete_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
+    unsigned depth, const H5B2_node_ptr_t *curr_node);
+
 /* Metadata cache callbacks */
 H5_DLL herr_t H5B2_cache_hdr_dest(H5F_t *f, H5B2_t *b);
 H5_DLL herr_t H5B2_cache_leaf_dest(H5F_t *f, H5B2_leaf_t *l);

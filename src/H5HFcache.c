@@ -107,7 +107,7 @@ H5HF_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *ud
     size_t		size;           /* Header size */
     uint8_t		*buf = NULL;    /* Temporary buffer */
     uint8_t		*p;             /* Pointer into raw data buffer */
-    H5HF_type_t         heap_type;      /* Type of heap */
+    H5HF_create_t       cparam;         /* Creation parameters for heap */
     uint32_t            metadata_chksum;        /* Metadata checksum value */
     H5HF_t		*ret_value;     /* Return value */
 
@@ -155,14 +155,21 @@ H5HF_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *ud
     if(metadata_chksum != 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "incorrect metadata checksum for fractal heap header")
 
-    /* Fractal heap type */
-    heap_type = *p++;
+    /* Heap address mapping */
+    cparam.addrmap = *p++;
     HDassert(H5HF_ABSOLUTE == 0);
-    if(heap_type > H5HF_MAPPED)
+    if(cparam.addrmap > H5HF_MAPPED)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "incorrect fractal heap type")
 
+    /* Min. size of standalone objects */
+    UINT32DECODE(p, cparam.standalone_size);
+
+    /* Size of fixed-length objects in heap */
+    UINT32DECODE(p, cparam.fixed_len_size);
+
     /* Initialize shared fractal heap info */
-    if(H5HF_shared_init(f, fh, heap_type) < 0)
+    HDassert((size_t)(p - buf) == size);
+    if(H5HF_shared_init(fh, &cparam) < 0)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't create shared fractal heap info")
 
     /* Set return value */
@@ -238,8 +245,14 @@ H5HF_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5H
         HDmemset(p, 0, 4);
         p += 4;
 
-        /* Fractal heap type */
-        *p++ = shared->type;
+        /* Heap address mapping */
+        *p++ = shared->addrmap;
+
+        /* Min. size of standalone objects */
+        UINT32ENCODE(p, shared->standalone_size);
+
+        /* Size of fixed-length objects in heap */
+        UINT32ENCODE(p, shared->fixed_len_size);
 
 	/* Write the B-tree header. */
         HDassert((size_t)(p - buf) == size);

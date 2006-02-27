@@ -45,7 +45,16 @@
 typedef enum {
     H5HF_ABSOLUTE,      /* The heap uses absolute internal addressing */
     H5HF_MAPPED         /* The heap maps internal addresses to allow compaction */
-} H5HF_type_t;
+} H5HF_addrmap_t;
+
+/* Fractal heap creation parameters */
+typedef struct H5HF_create_t {
+    H5HF_addrmap_t addrmap;     /* Type of address mapping for objects in heap */
+    uint32_t standalone_size;   /* Size of object to store standalone */
+                                /* (i.e. max. size of object to manage) */
+    uint32_t fixed_len_size;    /* Size of objects (0 means variable-sized objects) */
+                                /* (only for heaps w/fixed-length objects) */
+} H5HF_create_t;
 
 
 /*****************************/
@@ -55,7 +64,7 @@ typedef enum {
 /***************************************/
 /* Library-private Function Prototypes */
 /***************************************/
-H5_DLL herr_t H5HF_create(H5F_t *f, hid_t dxpl_id, H5HF_type_t type,
+H5_DLL herr_t H5HF_create(H5F_t *f, hid_t dxpl_id, H5HF_create_t *cparam,
     haddr_t *addr_p);
 H5_DLL herr_t H5HF_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t size,
     const void *obj, void *id/*out*/);
