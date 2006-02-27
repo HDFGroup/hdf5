@@ -123,11 +123,6 @@ if((msg = H5E_create_msg(cls, H5E_MAJOR, "Low-level I/O"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_IO_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
-assert(H5E_BLKTRK_g==(-1));
-if((msg = H5E_create_msg(cls, H5E_MAJOR, "Block tracker"))==NULL)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
-if((H5E_BLKTRK_g = H5I_register(H5I_ERROR_MSG, msg))<0)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 assert(H5E_SLIST_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MAJOR, "Skip Lists"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
@@ -550,13 +545,6 @@ assert(H5E_MPIERRSTR_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MINOR, "MPI Error String"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_MPIERRSTR_g = H5I_register(H5I_ERROR_MSG, msg))<0)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
-
-/* Block tracker errors */
-assert(H5E_OVERLAPS_g==(-1));
-if((msg = H5E_create_msg(cls, H5E_MINOR, "Blocks overlap"))==NULL)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
-if((H5E_OVERLAPS_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
 /* Dataspace errors */

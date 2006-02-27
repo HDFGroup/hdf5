@@ -31,7 +31,7 @@
 #
 
 
-SOURCES = $(libh5test_la_SOURCES) big.c bittests.c btree2.c cache.c cache_api.c cmpd_dset.c dangle.c dsets.c dt_arith.c dtransform.c dtypes.c enum.c err_compat.c error_test.c extend.c external.c fillval.c flush1.c flush2.c gen_deflate.c gen_filters.c gen_new_array.c gen_new_fill.c gen_new_group.c gen_new_mtime.c gen_new_super.c gen_noencoder.c gen_nullspace.c getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c mtime.c ntypes.c objcopy.c ohdr.c pool.c reserved.c set_extent.c space_overflow.c stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
+SOURCES = $(libh5test_la_SOURCES) big.c bittests.c btree2.c cache.c cache_api.c cmpd_dset.c dangle.c dsets.c dt_arith.c dtransform.c dtypes.c enum.c err_compat.c error_test.c extend.c external.c fheap.c fillval.c flush1.c flush2.c gen_deflate.c gen_filters.c gen_new_array.c gen_new_fill.c gen_new_group.c gen_new_mtime.c gen_new_super.c gen_noencoder.c gen_nullspace.c getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c mtime.c ntypes.c objcopy.c ohdr.c pool.c reserved.c set_extent.c space_overflow.c stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -73,14 +73,14 @@ LTLIBRARIES = $(noinst_LTLIBRARIES)
 libh5test_la_LIBADD =
 am_libh5test_la_OBJECTS = h5test.lo testframe.lo cache_common.lo
 libh5test_la_OBJECTS = $(am_libh5test_la_OBJECTS)
-am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
-	stab$(EXEEXT) gheap$(EXEEXT) btree2$(EXEEXT) cache$(EXEEXT) \
-	cache_api$(EXEEXT) pool$(EXEEXT) hyperslab$(EXEEXT) \
-	istore$(EXEEXT) bittests$(EXEEXT) dt_arith$(EXEEXT) \
-	dtypes$(EXEEXT) dsets$(EXEEXT) cmpd_dset$(EXEEXT) \
-	extend$(EXEEXT) external$(EXEEXT) objcopy$(EXEEXT) \
-	links$(EXEEXT) unlink$(EXEEXT) big$(EXEEXT) mtime$(EXEEXT) \
-	fillval$(EXEEXT) mount$(EXEEXT) flush1$(EXEEXT) \
+am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) fheap$(EXEEXT) \
+	ohdr$(EXEEXT) stab$(EXEEXT) gheap$(EXEEXT) btree2$(EXEEXT) \
+	cache$(EXEEXT) cache_api$(EXEEXT) pool$(EXEEXT) \
+	hyperslab$(EXEEXT) istore$(EXEEXT) bittests$(EXEEXT) \
+	dt_arith$(EXEEXT) dtypes$(EXEEXT) dsets$(EXEEXT) \
+	cmpd_dset$(EXEEXT) extend$(EXEEXT) external$(EXEEXT) \
+	objcopy$(EXEEXT) links$(EXEEXT) unlink$(EXEEXT) big$(EXEEXT) \
+	mtime$(EXEEXT) fillval$(EXEEXT) mount$(EXEEXT) flush1$(EXEEXT) \
 	flush2$(EXEEXT) enum$(EXEEXT) set_extent$(EXEEXT) \
 	ttsafe$(EXEEXT) stream_test$(EXEEXT) getname$(EXEEXT) \
 	vfd$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
@@ -161,6 +161,10 @@ external_SOURCES = external.c
 external_OBJECTS = external.$(OBJEXT)
 external_LDADD = $(LDADD)
 external_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
+fheap_SOURCES = fheap.c
+fheap_OBJECTS = fheap.$(OBJEXT)
+fheap_LDADD = $(LDADD)
+fheap_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
 fillval_SOURCES = fillval.c
 fillval_OBJECTS = fillval.$(OBJEXT)
 fillval_LDADD = $(LDADD)
@@ -320,25 +324,25 @@ LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 SOURCES = $(libh5test_la_SOURCES) big.c bittests.c btree2.c cache.c \
 	cache_api.c cmpd_dset.c dangle.c dsets.c dt_arith.c \
 	dtransform.c dtypes.c enum.c err_compat.c error_test.c \
-	extend.c external.c fillval.c flush1.c flush2.c gen_deflate.c \
-	gen_filters.c gen_new_array.c gen_new_fill.c gen_new_group.c \
-	gen_new_mtime.c gen_new_super.c gen_noencoder.c \
-	gen_nullspace.c getname.c gheap.c hyperslab.c istore.c lheap.c \
-	links.c mount.c mtime.c ntypes.c objcopy.c ohdr.c pool.c \
-	reserved.c set_extent.c space_overflow.c stab.c stream_test.c \
-	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c \
-	vfd.c
+	extend.c external.c fheap.c fillval.c flush1.c flush2.c \
+	gen_deflate.c gen_filters.c gen_new_array.c gen_new_fill.c \
+	gen_new_group.c gen_new_mtime.c gen_new_super.c \
+	gen_noencoder.c gen_nullspace.c getname.c gheap.c hyperslab.c \
+	istore.c lheap.c links.c mount.c mtime.c ntypes.c objcopy.c \
+	ohdr.c pool.c reserved.c set_extent.c space_overflow.c stab.c \
+	stream_test.c $(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) \
+	unlink.c vfd.c
 DIST_SOURCES = $(libh5test_la_SOURCES) big.c bittests.c btree2.c \
 	cache.c cache_api.c cmpd_dset.c dangle.c dsets.c dt_arith.c \
 	dtransform.c dtypes.c enum.c err_compat.c error_test.c \
-	extend.c external.c fillval.c flush1.c flush2.c gen_deflate.c \
-	gen_filters.c gen_new_array.c gen_new_fill.c gen_new_group.c \
-	gen_new_mtime.c gen_new_super.c gen_noencoder.c \
-	gen_nullspace.c getname.c gheap.c hyperslab.c istore.c lheap.c \
-	links.c mount.c mtime.c ntypes.c objcopy.c ohdr.c pool.c \
-	reserved.c set_extent.c space_overflow.c stab.c stream_test.c \
-	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c \
-	vfd.c
+	extend.c external.c fheap.c fillval.c flush1.c flush2.c \
+	gen_deflate.c gen_filters.c gen_new_array.c gen_new_fill.c \
+	gen_new_group.c gen_new_mtime.c gen_new_super.c \
+	gen_noencoder.c gen_nullspace.c getname.c gheap.c hyperslab.c \
+	istore.c lheap.c links.c mount.c mtime.c ntypes.c objcopy.c \
+	ohdr.c pool.c reserved.c set_extent.c space_overflow.c stab.c \
+	stream_test.c $(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) \
+	unlink.c vfd.c
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -586,9 +590,9 @@ TRACE = perl $(top_srcdir)/bin/trace
 # the temporary file name in ways that the makefile is not aware of.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog cmpd_dset.h5 \
 	compact_dataset.h5 dataset.h5 extend.h5 istore.h5 \
-	tfile[1-4].h5 th5s[1-3].h5 lheap.h5 ohdr.h5 stab[1-2].h5 \
-	extern_[1-3].h5 extern_[1-4][ab].raw gheap[0-4].h5 \
-	dt_arith[1-2] links.h5 links[1-3].h5 big.data \
+	tfile[1-4].h5 th5s[1-3].h5 lheap.h5 fheap.h5 ohdr.h5 \
+	stab[1-2].h5 extern_[1-3].h5 extern_[1-4][ab].raw \
+	gheap[0-4].h5 dt_arith[1-2] links.h5 links[1-3].h5 big.data \
 	big[0-9][0-9][0-9][0-9][0-9].h5 dtypes[1-8].h5 \
 	dt_arith[1-2].h5 tattr.h5 tselect.h5 mtime.h5 unlink.h5 \
 	unicode.h5 fillval_[0-9].h5 fillval.raw mount_[0-9].h5 \
@@ -612,7 +616,7 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT)
 # executed, generally most specific tests to least specific tests.
 # As an exception, long-running tests should occur earlier in the list.
 # This gives them more time to run when tests are executing in parallel.
-TEST_PROG = testhdf5 lheap ohdr stab gheap btree2 cache cache_api \
+TEST_PROG = testhdf5 lheap fheap ohdr stab gheap btree2 cache cache_api \
            pool hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset extend external objcopy links unlink big mtime     \
            fillval mount flush1 flush2 enum \
@@ -773,6 +777,9 @@ extend$(EXEEXT): $(extend_OBJECTS) $(extend_DEPENDENCIES)
 external$(EXEEXT): $(external_OBJECTS) $(external_DEPENDENCIES) 
 	@rm -f external$(EXEEXT)
 	$(LINK) $(external_LDFLAGS) $(external_OBJECTS) $(external_LDADD) $(LIBS)
+fheap$(EXEEXT): $(fheap_OBJECTS) $(fheap_DEPENDENCIES) 
+	@rm -f fheap$(EXEEXT)
+	$(LINK) $(fheap_LDFLAGS) $(fheap_OBJECTS) $(fheap_LDADD) $(LIBS)
 fillval$(EXEEXT): $(fillval_OBJECTS) $(fillval_DEPENDENCIES) 
 	@rm -f fillval$(EXEEXT)
 	$(LINK) $(fillval_LDFLAGS) $(fillval_OBJECTS) $(fillval_LDADD) $(LIBS)
@@ -899,6 +906,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extend.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/external.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fheap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fillval.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flush1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flush2.Po@am__quote@

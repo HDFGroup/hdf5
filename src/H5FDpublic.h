@@ -43,18 +43,21 @@ typedef enum H5FD_mem_t {
     H5FD_MEM_NTYPES				/*must be last*/
 } H5FD_mem_t;
 
-/* Map "block tracker" header blocks to 'ohdr' type file memory, since its
- * a fair amount of work to add a new kind of file memory, they are similar
- * enough to object headers and probably too minor to deserve their own type. -QAK */
-#define H5FD_MEM_BLKTRK H5FD_MEM_OHDR
-
-/* Map "segmented heap" header blocks to 'ohdr' type file memory, since its
- * a fair amount of work to add a new kind of file memory, they are similar
+/* Map "fractal heap" header blocks to 'ohdr' type file memory, since its
+ * a fair amount of work to add a new kind of file memory and they are similar
  * enough to object headers and probably too minor to deserve their own type.
- * Map "segmented heap" blocks to 'lheap' type file memory, since they will be
- * replacing local heaps. -QAK */
-#define H5FD_MEM_SHEAP_HDR      H5FD_MEM_OHDR
-#define H5FD_MEM_SHEAP_BLOCK    H5FD_MEM_LHEAP
+ *
+ * Map "fractal heap" indirect blocks to 'ohdr' type file memory, since they
+ * are similar to fractal heap header blocks.
+ *
+ * Map "fractal heap" direct blocks to 'lheap' type file memory, since they
+ * will be replacing local heaps.
+ *
+ *      -QAK
+ */
+#define H5FD_MEM_FHEAP_HDR      H5FD_MEM_OHDR
+#define H5FD_MEM_FHEAP_INDIRECT H5FD_MEM_OHDR
+#define H5FD_MEM_FHEAP_DIRECT   H5FD_MEM_LHEAP
 
 /*
  * A free-list map which maps all types of allocation requests to a single

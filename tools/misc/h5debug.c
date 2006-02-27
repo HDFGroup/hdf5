@@ -28,25 +28,28 @@
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 #define H5B2_PACKAGE		/*suppress error about including H5B2pkg  */
 #define H5B2_TESTING		/*suppress warning about H5B2 testing funcs*/
+#define H5HF_PACKAGE		/*suppress error about including H5HFpkg  */
 
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5Bprivate.h"
-#include "H5B2pkg.h"		/* B-trees				*/
-#include "H5Dprivate.h"
+#include "H5Bprivate.h"		/* B-trees				*/
+#include "H5B2pkg.h"		/* v2 B-trees				*/
+#include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"
-#include "H5Gprivate.h"
-#include "H5HGprivate.h"
-#include "H5HLprivate.h"
-#include "H5Iprivate.h"
-#include "H5Opkg.h"
-#include "H5Pprivate.h"
+#include "H5Fpkg.h"             /* File access				*/
+#include "H5Gprivate.h"		/* Groups				*/
+#include "H5HFpkg.h"		/* Fractal heaps			*/
+#include "H5HGprivate.h"	/* Global Heaps				*/
+#include "H5HLprivate.h"	/* Local Heaps				*/
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5Opkg.h"             /* Object headers			*/
+#include "H5Pprivate.h"		/* Property lists			*/
 
 /* File drivers */
 #include "H5FDfamily.h"
 
 #define INDENT  3
 #define VCOL    50
+#define SIGLEN  H5F_SIGNATURE_LEN       /* Size of signature buffer */
 
 
 /*-------------------------------------------------------------------------
@@ -72,7 +75,7 @@ main(int argc, char *argv[])
     hid_t	fid, fapl, dxpl;
     H5F_t       *f;
     haddr_t     addr=0, extra=0, extra2=0;
-    uint8_t     sig[16];
+    uint8_t     sig[SIGLEN];
     int         i;
     herr_t      status = SUCCEED;
 
@@ -114,16 +117,13 @@ main(int argc, char *argv[])
     /*
      * Parse command arguments.
      */
-    if (argc > 2) {
-/*        printf("New address: %s\n", argv[2]); */
+    if (argc > 2)
         addr = HDstrtoll(argv[2], NULL, 0);
-    }
-    if (argc > 3) {
+    if (argc > 3)
         extra = HDstrtoll(argv[3], NULL, 0);
-    }
-    if (argc > 4) {
+    if (argc > 4)
         extra2 = HDstrtoll(argv[4], NULL, 0);
-    }
+
     /*
      * Read the signature at the specified file position.
      */
@@ -134,7 +134,7 @@ main(int argc, char *argv[])
     }
     if (!HDmemcmp(sig, H5F_SIGNATURE, H5F_SIGNATURE_LEN)) {
         /*
-         * Debug the boot block.
+         * Debug the file's super block.
          */
         status = H5F_debug(f, H5P_DATASET_XFER_DEFAULT, stdout, 0, VCOL);
 
@@ -166,18 +166,18 @@ main(int argc, char *argv[])
         unsigned    ndims;
 
         switch (subtype) {
-        case H5B_SNODE_ID:
-            status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
-            break;
+            case H5B_SNODE_ID:
+                status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
+                break;
 
-	case H5B_ISTORE_ID:
-	    ndims = (unsigned)extra;
-	    status = H5D_istore_debug (f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, ndims);
-	    break;
+            case H5B_ISTORE_ID:
+                ndims = (unsigned)extra;
+                status = H5D_istore_debug (f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, ndims);
+                break;
 
-        default:
-            fprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
-            HDexit(4);
+            default:
+                fprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
+                HDexit(4);
         }
 
     } else if (!HDmemcmp(sig, H5B2_HDR_MAGIC, H5B2_SIZEOF_MAGIC)) {
@@ -234,6 +234,12 @@ main(int argc, char *argv[])
                 HDexit(4);
         } /* end switch */
 
+    } else if (!HDmemcmp(sig, H5HF_HDR_MAGIC, H5HF_SIZEOF_MAGIC)) {
+        /*
+         * Debug a fractal heap header.
+         */
+        status = H5HF_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
+
     } else if (sig[0] == H5O_VERSION) {
         /*
          * This could be an object header.  Since they don't have a signature
@@ -246,7 +252,7 @@ main(int argc, char *argv[])
          * Got some other unrecognized signature.
          */
         printf("%-*s ", VCOL, "Signature:");
-        for (i = 0; i < 8; i++) {
+        for (i = 0; i < sizeof(sig); i++) {
             if (sig[i] > ' ' && sig[i] <= '~' && '\\' != sig[i]) {
                 HDputchar(sig[i]);
             } else if ('\\' == sig[i]) {
@@ -270,5 +276,7 @@ main(int argc, char *argv[])
     H5Pclose(dxpl);
     H5Pclose(fapl);
     H5Fclose(fid);
+
     return 0;
 }
+

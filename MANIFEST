@@ -492,6 +492,13 @@
 ./src/H5Gstab.c
 ./src/H5Gtest.c
 ./src/H5Gtraverse.c
+./src/H5HF.c
+./src/H5HFcache.c
+./src/H5HFdbg.c
+./src/H5HFpkg.h
+./src/H5HFprivate.h
+./src/H5HFpublic.h
+./src/H5HFtest.c
 ./src/H5HG.c
 ./src/H5HGdbg.c
 ./src/H5HGpkg.h
@@ -641,6 +648,7 @@
 ./test/family_v1.6_00001.h5
 ./test/family_v1.6_00002.h5
 ./test/family_v1.6_00003.h5
+./test/fheap.c
 ./test/fill_old.h5
 ./test/fillval.c
 ./test/flush1.c

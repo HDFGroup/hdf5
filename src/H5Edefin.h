@@ -40,7 +40,6 @@ hid_t H5E_OHDR_g           = FAIL;      /* Object header */
 hid_t H5E_ATOM_g           = FAIL;      /* Object atom */
 hid_t H5E_ATTR_g           = FAIL;      /* Attribute */
 hid_t H5E_IO_g             = FAIL;      /* Low-level I/O */
-hid_t H5E_BLKTRK_g         = FAIL;      /* Block tracker */
 hid_t H5E_SLIST_g          = FAIL;      /* Skip Lists */
 hid_t H5E_EFL_g            = FAIL;      /* External file list */
 hid_t H5E_TST_g            = FAIL;      /* Ternary Search Trees */
@@ -149,9 +148,6 @@ hid_t H5E_CANTUNPROTECT_g  = FAIL;      /* Unable to unprotect metadata */
 /* Parallel MPI errors */
 hid_t H5E_MPI_g            = FAIL;      /* Some MPI function failed */
 hid_t H5E_MPIERRSTR_g      = FAIL;      /* MPI Error String */
-
-/* Block tracker errors */
-hid_t H5E_OVERLAPS_g       = FAIL;      /* Blocks overlap */
 
 /* Dataspace errors */
 hid_t H5E_CANTCLIP_g       = FAIL;      /* Can't clip hyperslab region */

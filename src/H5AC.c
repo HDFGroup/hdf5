@@ -742,6 +742,7 @@ static const char * H5AC_entry_type_names[H5AC_NTYPES] =
     "v2 B-tree headers",
     "v2 B-tree internal nodes",
     "v2 B-tree leaf nodes",
+    "fractal heap headers",
     "test entry"	/* for testing only -- not used for actual files */
 };
 

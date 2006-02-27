@@ -71,7 +71,6 @@ MAJOR, H5E_TST, Ternary Search Trees
 MAJOR, H5E_RS, Reference Counted Strings
 MAJOR, H5E_ERROR, Error API
 MAJOR, H5E_SLIST, Skip Lists
-MAJOR, H5E_BLKTRK, Block tracker
 
 # Sections (for grouping minor errors)
 SECTION, ARGS, Argument errors
@@ -91,7 +90,6 @@ SECTION, MPI, Parallel MPI errors
 SECTION, HEAP, Heap errors
 SECTION, FPH5, FPHDF5 errors
 SECTION, PIPELINE, I/O pipeline errors
-SECTION, BLKTRK, Block tracker errors
 SECTION, SYSTEM, System level errors
 
 # Minor errors
@@ -222,9 +220,6 @@ MINOR, PIPELINE, H5E_CALLBACK, Callback failed
 MINOR, PIPELINE, H5E_CANAPPLY, Error from filter 'can apply' callback
 MINOR, PIPELINE, H5E_SETLOCAL, Error from filter 'set local' callback
 MINOR, PIPELINE, H5E_NOENCODER, Filter present but encoding disabled
-
-# Block tracker errors
-MINOR, BLKTRK, H5E_OVERLAPS, Blocks overlap
 
 # System level errors
 MINOR, SYSTEM, H5E_SYSERRSTR, System error message

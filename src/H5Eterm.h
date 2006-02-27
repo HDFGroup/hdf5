@@ -41,7 +41,6 @@ H5E_OHDR_g=
 H5E_ATOM_g=    
 H5E_ATTR_g=    
 H5E_IO_g=    
-H5E_BLKTRK_g=    
 H5E_SLIST_g=    
 H5E_EFL_g=    
 H5E_TST_g=    
@@ -151,9 +150,6 @@ H5E_CANTUNPROTECT_g=
 /* Parallel MPI errors */    
 H5E_MPI_g=    
 H5E_MPIERRSTR_g=
-
-/* Block tracker errors */    
-H5E_OVERLAPS_g=
 
 /* Dataspace errors */    
 H5E_CANTCLIP_g=    
