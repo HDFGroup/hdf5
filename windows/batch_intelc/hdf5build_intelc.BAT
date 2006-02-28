@@ -69,10 +69,13 @@ more all_debug.log >> build_results_intelc.txt
 more all_release.log >> build_results_intelc.txt
 del all_debug.log
 del all_release.log
+echo. 
+echo. End Building HDF5 C Libraries!
 GOTO END
 
 :BUILDCPP
-
+echo.
+echo. Start Building HDF5 C++ libraries ...
 echo ***************************************************************************** >> build_results_intelc.txt
 echo                         Build HDF5 C/C++ Libraries and Tools >> build_results_intelc.txt
 echo ***************************************************************************** >> build_results_intelc.txt
@@ -97,6 +100,8 @@ more all_debug.log >> build_results_intelc.txt
 more all_release.log >> build_results_intelc.txt
 del all_debug.log
 del all_release.log
+echo.
+echo. End Building C++ Libraries
 GOTO END
 
 :WRONG
