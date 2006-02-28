@@ -28,7 +28,7 @@ if not %1.==. (
 	)
 )
    
-
+call convert_to_vcproj
 type nul > build_results_net.txt
 type nul > all_debug.log
 type nul >all_release.log
