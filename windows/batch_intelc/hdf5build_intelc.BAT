@@ -22,41 +22,46 @@
 @REM   2. hdf5build_intelc enablecpp      -- Build HDF5 tools and c/c++ library
 @echo off
 
-if %1.==. GOTO BUILDC
 if "%1"=="/?" GOTO HELP
-if %1==enablecpp GOTO BUILDCPP
-GOTO WRONG
-
-:BUILDC
-
-call convert_to_icproj %1
+if not %1.==. (
+	if not "%1"=="/?" (
+				if not "%1"=="enablecpp" goto WRONG
+	)
+)
 
 type nul > build_results_intelc.txt
 type nul > all_debug.log
 type nul > all_release.log
 type nul > h5tinit.log
 
-echo Start Building HDF5 C libraries ...
+call convert_to_vcproj
+call convert_to_icproj
 
 echo ***************************************************************************** >> build_results_intelc.txt
 echo                         Build H5Tinit.exe >> build_results_intelc.txt
 echo ***************************************************************************** >> build_results_intelc.txt
 
 cd windows\misc\typegen
-ICProjConvert80 typegen.sln /IC >> ..\..\..\h5tinit.log
 devenv typegen.sln /rebuild Debug /IntelSpecific Intel >> ..\..\..\h5tinit.log
 cd ..\..\..\
 more h5tinit.log >> build_results_intelc.txt
 del h5tinit.log
+cd src
+h5tinit.exe > h5tinit.c
+cd ..\
+
+if %1.==. GOTO BUILDC
+if "%1"=="enablecpp" GOTO BUILDCPP
+
+:BUILDC
+
+echo Start Building HDF5 C libraries ...
 
 echo ***************************************************************************** >> build_results_intelc.txt
 echo                         Build HDF5 C Library and Tools >> build_results_intelc.txt
 echo ***************************************************************************** >> build_results_intelc.txt
 
-cd src
-h5tinit.exe > h5tinit.c
-
-cd ..\windows\proj\all
+cd windows\proj\all
 devenv all.sln /rebuild debug /IntelSpecific Intel >> ..\..\..\all_debug.log
 devenv all.sln /rebuild release /IntelSpecific Intel >> ..\..\..\all_release.log 
 cd ..\..\..\
@@ -67,56 +72,24 @@ del all_release.log
 GOTO END
 
 :BUILDCPP
-call convert_to_icproj
-call convert_to_icproj %1
-
-type nul > build_results_intelc.txt
-type nul > all_debug.log
-type nul > all_release.log
-type nul > h5tinit.log
-
-echo ***************************************************************************** >> build_results_intelc.txt
-echo                         Build H5Tinit.exe >> build_results_intelc.txt
-echo ***************************************************************************** >> build_results_intelc.txt
-
-cd windows\misc\typegen
-ICProjConvert80 typegen.sln /IC >> ..\..\..\h5tinit.log
-devenv typegen.sln /rebuild Debug /IntelSpecific Intel >> ..\..\..\h5tinit.log
-cd ..\..\..\
-more h5tinit.log >> build_results_intelc.txt
-del h5tinit.log
 
 echo ***************************************************************************** >> build_results_intelc.txt
 echo                         Build HDF5 C/C++ Libraries and Tools >> build_results_intelc.txt
 echo ***************************************************************************** >> build_results_intelc.txt
 
-cd src
-h5tinit.exe > h5tinit.c
-
-cd ..\windows\proj\all
+cd windows\proj\all
 devenv all.sln /rebuild debug /IntelSpecific Intel >> ..\..\..\all_debug.log
-devenv all.sln /build debug /project hdf5_cppdll /IntelSpecific Intel >> ..\..\..\all_debug.log
-devenv all.sln /build debug /project hdf5_cpp /IntelSpecific Intel >> ..\..\..\all_debug.log
-devenv all.sln /build debug /project hdf5_hl_cpp /IntelSpecific Intel >> ..\..\..\all_debug.log
-devenv all.sln /build debug /project hdf5_hl_cppdll /IntelSpecific Intel >> ..\..\..\all_debug.log
-devenv all.sln /build debug /project testhdf5_cpp  /IntelSpecific Intel >> ..\..\..\all_debug.log
-devenv all.sln /build debug /project testhdf5_cppdll  /IntelSpecific Intel >> ..\..\..\all_debug.log
-devenv all.sln /build debug /project dsets_cpp  /IntelSpecific Intel >> ..\..\..\all_debug.log
-devenv all.sln /build debug /project dsets_cppdll  /IntelSpecific Intel >> ..\..\..\all_debug.log
-devenv all.sln /build debug /project hl_test_table_cpp  /IntelSpecific Intel >> ..\..\..\all_debug.log
-devenv all.sln /build debug /project hl_test_table_cppdll  /IntelSpecific Intel >> ..\..\..\all_debug.log
+
+for %%i in (hdf5_cpp hdf5_hl_cpp testhdf5_cpp dsets_cpp hl_test_table_cpp) do (
+devenv all.sln /build debug /project %%i /IntelSpecific Intel>>..\..\..\all_debug.log
+devenv all.sln /build debug /project %%idll /IntelSpecific Intel>>..\..\..\all_debug.log
+)
 
 devenv all.sln /rebuild release /IntelSpecific Intel >> ..\..\..\all_release.log
-devenv all.sln /build release /project hdf5_cppdll /IntelSpecific Intel >>..\..\..\all_release.log
-devenv all.sln /build release /project hdf5_cpp /IntelSpecific Intel >>..\..\..\all_release.log
-devenv all.sln /build release /project hdf5_hl_cpp /IntelSpecific Intel >>..\..\..\all_release.log
-devenv all.sln /build release /project hdf5_hl_cppdll /IntelSpecific Intel >>..\..\..\all_release.log
-devenv all.sln /build release /project testhdf5_cpp  /IntelSpecific Intel >>..\..\..\all_release.log
-devenv all.sln /build release /project testhdf5_cppdll  /IntelSpecific Intel >>..\..\..\all_release.log
-devenv all.sln /build release /project dsets_cpp  /IntelSpecific Intel >>..\..\..\all_release.log
-devenv all.sln /build release /project dsets_cppdll  /IntelSpecific Intel >>..\..\..\all_release.log
-devenv all.sln /build release /project hl_test_table_cpp  /IntelSpecific Intel >>..\..\..\all_release.log
-devenv all.sln /build release /project hl_test_table_cppdll  /IntelSpecific Intel >>..\..\..\all_release.log
+for %%i in (hdf5_cpp hdf5_hl_cpp testhdf5_cpp dsets_cpp hl_test_table_cpp) do (
+devenv all.sln /build release /project %%i /IntelSpecific Intel>>..\..\..\all_release.log
+devenv all.sln /build release /project %%idll /IntelSpecific Intel>>..\..\..\all_release.log
+)
 
 cd ..\..\..\
 
@@ -127,18 +100,16 @@ del all_release.log
 GOTO END
 
 :WRONG
-echo The syntax of the command is incorrect.
 echo.
+echo. The syntax of the command is incorrect.
 
 :HELP
-echo Builds HDF5 Libraries and Tools.
 echo.
-echo hdf5build [OPTION]
+echo. Please use one of the following options!
 echo.
-echo Please use one of the following options!
+echo.    hdf5build_intelc                   Build HDF5 C Library and Tools
+echo.    hdf5build_intelc enablecpp         Build HDF5 C/C++ Libraries and Tools
+echo.    hdf5build_intelc /?                Help information
 echo.
-echo    hdf5build_intelc                   Build HDF5 C Library and Tools
-echo    hdf5build_intelc enablecpp         Build HDF5 C/C++ Libraries and Tools
-echo    hdf5build_intelc /?                Help information
 
 :END
