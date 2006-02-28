@@ -1477,10 +1477,6 @@
 ./windows/test/bigdll/bigdll.dsp
 ./windows/test/bittests/bittests.dsp
 ./windows/test/bittestsdll/bittestsdll.dsp
-./windows/test/blocktrack/blocktrack.dsp
-./windows/test/blocktrackdll/blocktrackdll.dsp
-./windows/test/b_plus_treedll/b_plus_treedll.dsp
-./windows/test/b_plus_tree/b_plus_tree.dsp
 ./windows/test/btree2/btree2.dsp
 ./windows/test/btree2dll/btree2dll.dsp
 ./windows/test/cache/cache.dsp
@@ -1507,6 +1503,8 @@
 ./windows/test/extenddll/extenddll.dsp
 ./windows/test/external/external.dsp
 ./windows/test/externaldll/externaldll.dsp
+./windows/test/fheap/fheap.dsp
+./windows/test/fheapdll/fheapdll.dsp
 ./windows/test/file_handle/file_handle.dsp
 ./windows/test/file_handledll/file_handledll.dsp
 ./windows/test/fillval/fillval.dsp
@@ -1550,8 +1548,6 @@
 ./windows/test/reserveddll/reserveddll.dsp
 ./windows/test/set_extent/set_extent.dsp
 ./windows/test/set_extentdll/set_extentdll.dsp
-./windows/test/sheap/sheap.dsp
-./windows/test/sheapdll/sheapdll.dsp
 ./windows/test/stab/stab.dsp
 ./windows/test/stabdll/stabdll.dsp
 ./windows/test/tellub/tellub.dsp
