@@ -63,7 +63,7 @@ ZLIB_default=
 ZLIB=$ZLIB_default
 
 # What compression methods to use? (md5 does checksum).
-METHODS="gzip bzip2 md5"
+METHODS="gzip bzip2 md5 doc"
 
 # Use User's MAKE if set.  Else use generic make.
 MAKE=${MAKE:-make}
