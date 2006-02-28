@@ -26,6 +26,12 @@ echo ============================
 
 lheap%2\%1\lheap%2
 
+echo ============================
+echo Testing fheap 
+echo ============================
+
+fheap%2\%1\fheap%2
+
 echo.
 echo ============================
 echo Testing ohdr 
@@ -63,31 +69,10 @@ cache_api%2\%1\cache_api%2
 
 echo.
 echo ============================
-echo Testing b_plus_tree
-echo ============================
-
-b_plus_tree%2\%1\b_plus_tree%2
-
-echo.
-echo ============================
 echo Testing btree2 
 echo ============================
 
 btree2%2\%1\btree2%2
-
-echo.
-echo ============================
-echo Testing blocktrack 
-echo ============================
-
-blocktrack%2\%1\blocktrack%2
-
-echo.
-echo ============================
-echo Testing sheap 
-echo ============================
-
-sheap%2\%1\sheap%2
 
 echo.
 echo ============================
