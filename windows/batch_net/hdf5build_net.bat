@@ -85,8 +85,8 @@ devenv all.sln /build debug /project %%idll >>..\..\..\all_debug.log
 
 devenv all.sln /rebuild release >>  ..\..\..\all_release.log
 for %%i in (hdf5_cpp hdf5_hl_cpp testhdf5_cpp dsets_cpp hl_test_table_cpp) do (
-devenv all.sln /build debug /project %%i >>..\..\..\all_release.log
-devenv all.sln /build debug /project %%idll >>..\..\..\all_release.log
+devenv all.sln /build release /project %%i >>..\..\..\all_release.log
+devenv all.sln /build release /project %%idll >>..\..\..\all_release.log
 
 )
 
