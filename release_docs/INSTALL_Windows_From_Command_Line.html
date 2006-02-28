@@ -429,30 +429,6 @@ list-style-type:none;
 							   	will copy all the necessary batch files and text files saved under 
 							   	<span class="filename">c:\MyHDFstuff\hdf5\windows</span> directory to the directories where they 
 							   	will be used.</p></li>
-					<li><h4>1.5 Convert project files format from MSVS 6.0 to MSVS .Net</h4>
-							<p>Go to directory  <span class="filename">c:\MyHDFstuff\hdf5</span> and run
-                            <span class="filename">convert_to_vcproj.bat</span> in the following format:</p>
-							<ul class="normal">
-									<li>convert_to_vcproj "Absolute path of directory hdf5" </li>
-							</ul>
-							<p>For example:</p>
-							<ul class="normal">
-									<li>convert_to_vcproj c:\MyHDFstuff\hdf5</li>
-							</ul>
-							<p>The converting results will be saved into file 
-                            <span class="filename">convert.log</span> under the directory 
-                            <span class="filename">c:\MyHDFstuff\hdf5</span>. 
-									The messages should look like</p>
-							<ul class="normal">
-									<li>Converting: c:\MyHDFstuff\hdf5\windows\proj\all\all.dsp </li>
-        
-									<li>New Project Name: c:\MyHDFstuff\\hdf5\windows\proj\all\all.vcproj</li>
-							</ul>
-							<p class="note">Notes:</p>
-							<p><span class="filename">all.sln</span> was provided with HDF5-1.8.0 Release. Users don't need 
-					       to convert the workspace from MSVS 6.0 format to MSVS .Net
-					       Format
-					    </p></li>
 					 </ul>
 					 
 		<h3>2. Building HDF5 C and C++ Libraries :</h3>
@@ -595,26 +571,6 @@ list-style-type:none;
 						   	<span class="filename">c:\MyHDFstuff\hdf5\windows</span> directory to the directories where they 
 						   	will be used.
 						  </p></li>
-					<li><h4>1.3 Convert project files format from MSVS 6.0 to MSVS .Net Format</h4>
-							<p>Go to directory  <span class="filename">c:\MyHDFstuff\hdf5</span> and run
-                            <span class="filename">convert_to_vcproj.bat</span>
-       					in the following format:</p>
-       				<ul class="normal">
-       						<li>convert_to_vcproj "Absolute path of directory hdf5" </li>
-       				</ul>
-       				<p>For example:</p>
-       				<ul class="normal">
-       						<li>convert_to_vcproj c:\MyHDFstuff\hdf5</li>
-       				</ul>
-       				<p>The converting results will be saved into file 
-                    <span class="filename">convert.log </span>under 
-       						the directory<span class="filename"> c:\MyHDFstuff\hdf5</span>. The messages should look like</p>
-       				<ul class="normal">
-       						<li>Converting: c:\MyHDFstuff\hdf5\windows\proj\all\all.dsp </li>
- 
-       						<li>New Project Name: c:\MyHDFstuff\\hdf5\windows\proj\all\all.vcproj</li>
-       				</ul>
-      		</li>
       </ul>
   <h3>2. Building HDF5 C and C++ Libraries :</h3>
       		<p>We provide 2 options for users to build HDF5 libraries and tools.</p>

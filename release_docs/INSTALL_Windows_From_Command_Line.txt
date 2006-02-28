@@ -237,27 +237,6 @@ SECTION II: Building and testing HDF5 C and C++ Library on command line
    	c:\MyHDFstuff\hdf5\windows directory to the directories where they 
    	will be used.
    
-   1.5 Convert project files format from MSVS 6.0 to MSVS .Net
-    
-       Go to directory  c:\MyHDFstuff\hdf5 and run convert_to_vcproj.bat
-       in the following format 
-      
-       convert_to_vcproj "Absolute path of directory hdf5" 
-       
-       For example:
-       
-       convert_to_vcproj c:\MyHDFstuff\hdf5
-       
-       The converting results will be saved into file convert.log under 
-       the directory c:\MyHDFstuff\hdf5. The messages should look like
-       
-       Converting: c:\MyHDFstuff\hdf5\windows\proj\all\all.dsp
-       New Project Name: c:\MyHDFstuff\hdf5\windows\proj\all\all.vcproj
-       
-       Note: all.sln was provided with HDF5-1.8.0 Release. Users don't need 
-       to convert the workspace from MSVS 6.0 format to MSVS .Net
-       Format
-      
 2. Building HDF5 C and C++ Libraries :
 
   We provide 2 options for users to build and test HDF5 libraries and tools.
@@ -376,23 +355,6 @@ SECTION II: Building and testing HDF5 C and C++ Library on command line
         saved under c:\MyHDFstuff\hdf5\windows directory to the 
         directories where they will be used.
    	
-   1.4 Convert project files format from MSVS 6.0 to MSVS .Net Format
-
-       Go to directory  c:\MyHDFstuff\hdf5 and run convert_to_vcproj.bat
-       in the following format:
-      
-       convert_to_vcproj "Absolute path of directory hdf5" 
-       
-       For example:
-       
-       convert_to_vcproj c:\MyHDFstuff\hdf5
-       
-       The converting results will be saved into file convert.log under 
-       the directory c:\MyHDFstuff\hdf5. The messages should look like
-       
-       Converting: c:\MyHDFstuff\hdf5\windows\proj\all\all.dsp
-       New Project Name: c:\MyHDFstuff\\hdf5\windows\proj\all\all.vcproj
-
 2. Building HDF5 C and C++ Libraries :
 
    We provide 2 options for users to build HDF5 libraries and tools.
