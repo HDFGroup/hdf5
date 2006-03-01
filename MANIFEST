@@ -1258,6 +1258,9 @@
 # high level libraries
 ./hl/Makefile.am
 ./hl/Makefile.in
+./hl/examples/ex_lite1.c
+./hl/examples/ex_lite2.c
+./hl/examples/ex_lite3.c
 ./hl/examples/Makefile.am
 ./hl/examples/Makefile.in
 ./hl/examples/ptExampleFL.c

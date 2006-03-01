@@ -24,11 +24,14 @@ if BUILD_PARALLEL_CONDITIONAL
   TEST_PROG_PARA =
 endif
 
+# Example directory
+EXAMPLEDIR=$(docdir)/hdf5/examples/hl/c
+
 # Example programs.
 # Don't tell automake about them, because if it knew they were programs,
 # it would try to compile them instead of using the h5cc script.
 # Use the boilerplate in config/examples.am instead.
-TEST_PROG = ptExampleFL ptExampleVL
+TEST_PROG = ex_lite1 ex_lite2 ex_lite3 ptExampleFL ptExampleVL
 
 # Install files
 # List all file that should be installed in examples directory
@@ -42,8 +45,8 @@ else
 	$(H5CC) $(CFLAGS) -o $@ $(srcdir)/$@.c;
 endif
 
-# Example directory
-EXAMPLEDIR=$(docdir)/hdf5/examples/hl/c
+# ex_lite2 uses a file created by ex_lite1
+ex_lite2.chkexe_: ex_lite1.chkexe_
 
 # List dependencies for each program.  Normally, automake would take
 # care of this for us, but if we tell automake about the programs it
@@ -51,6 +54,9 @@ EXAMPLEDIR=$(docdir)/hdf5/examples/hl/c
 # an inelegant way of solving the problem.
 # All programs share the same build rule and a dependency on the main hdf5
 # library above.
+ex_lite1: $(srcdir)/ex_lite1.c
+ex_lite2: $(srcdir)/ex_lite2.c
+ex_lite3: $(srcdir)/ex_lite3.c
 ptExampleFL: $(srcdir)/ptExampleFL.c
 ptExampleVL: $(srcdir)/ptExampleVL.c
 
