@@ -1895,6 +1895,10 @@
 
 # high level libraries
 ./hl/Makefile.in
+./hl/examples/ex_lite1.c
+./hl/examples/ex_lite2.c
+./hl/examples/ex_lite3.c
+./hl/examples/Makefile.in
 ./hl/src/Dependencies
 ./hl/src/Makefile.in
 ./hl/src/H5IM.c

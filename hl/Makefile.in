@@ -22,7 +22,7 @@ srcdir=@srcdir@
 
 @COMMENCE@
 
-# Subdirectories in build-order
+# Subdirectories in build-order (not including 'examples')
 SUBDIRS=src test 
 
 ##############################################################################
@@ -74,16 +74,22 @@ tests TAGS dep depend:
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
 
+install-all:
+	@$(MAKE) install
 install:
 	@@SETX@; for d in $(SUBDIRS); do				      \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
+	@$(MAKE) install-examples
 
-install-doc:
-	(cd doc && $(MAKE) $@) || exit 1;
+install-examples:
+	(cd examples && $(MAKE) $@) || exit 1;
 
-uninstall-doc:
-	(cd doc && $(MAKE) $@) || exit 1;
+uninstall-examples:
+	(cd examples && $(MAKE) $@) || exit 1;
+
+check-install:
+	(cd examples && $(MAKE) check) || exit 1
 
 .PHONY: all lib progs test _test install uninstall dep depend clean           \
 	mostlyclean distclean maintainer-clean

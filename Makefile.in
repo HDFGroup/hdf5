@@ -25,7 +25,7 @@ srcdir=@srcdir@
 # Subdirectories in build-order (not including `examples')
 # TESTPARALLEL must be after test since it uses libtest.a.  Putting it
 # before tools allows parallel tests to run sooner.
-SUBDIRS=src test @TESTPARALLEL@ tools @HL@  @subdirs@
+SUBDIRS=src test @TESTPARALLEL@ tools @HL@ @subdirs@
 
 ##############################################################################
 ##		    T A R G E T S
@@ -77,7 +77,7 @@ tests TAGS dep depend uninstall:
 	done
 
 install-all:
-	@@SETX@; for d in dummy @subdirs@; do				      \
+	@@SETX@; for d in dummy @HL@ @subdirs@; do			      \
 	  if test $$d != "dummy"; then					      \
 	    (cd $$d && $(MAKE) $@) || exit 1;				      \
 	  fi;								      \
@@ -98,7 +98,7 @@ install:
 	@$(LT) --mode=finish $(libdir)
 
 install-examples:
-	@@SETX@; for d in dummy @subdirs@; do				      \
+	@@SETX@; for d in dummy @HL@ @subdirs@; do			      \
 	  if test $$d != "dummy"; then					      \
 	    (cd $$d && $(MAKE) $@) || exit 1;				      \
 	  fi;								      \
@@ -106,7 +106,7 @@ install-examples:
 	(cd examples && $(MAKE) $@) || exit 1;
 
 uninstall-examples:
-	@@SETX@; for d in dummy @subdirs@; do				      \
+	@@SETX@; for d in dummy @HL@ @subdirs@; do			      \
 	  if test $$d != "dummy"; then					      \
 	    (cd $$d && $(MAKE) $@) || exit 1;				      \
 	  fi;								      \
@@ -125,7 +125,7 @@ uninstall-doc:
 ## This requires a proper "make install" has been done.
 check-install:
 	(cd examples && $(MAKE) check) || exit 1
-	@@SETX@; for d in dummy @subdirs@; do				      \
+	@@SETX@; for d in dummy @HL@ @subdirs@; do			      \
 	  if test $$d != "dummy"; then					      \
 	    (cd $$d && $(MAKE) $@) || exit 1;				      \
 	  fi;								      \

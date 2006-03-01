@@ -36694,6 +36694,7 @@ fi
 # to do : fortran with hl
 if test "X$HDF5_HL" = "Xyes"; then
  HL_FILES="hl/Makefile
+	   hl/examples/Makefile
 	   hl/src/Makefile
            hl/test/Makefile"
 fi
