@@ -495,9 +495,9 @@ herr_t H5LTmake_dataset_string(hid_t loc_id,
 {
 
  hid_t   did=-1;
-	hid_t   sid=-1;
-	hid_t   tid;
-	size_t  size;
+ hid_t   sid=-1;
+ hid_t   tid;
+ size_t  size;
 
  /* create a string data type */
  if ( (tid = H5Tcopy( H5T_C_S1 )) < 0 )
@@ -532,7 +532,7 @@ herr_t H5LTmake_dataset_string(hid_t loc_id,
   return -1;
  if ( H5Sclose(sid) < 0 )
   return -1;
-	if ( H5Tclose(tid) < 0 )
+ if ( H5Tclose(tid) < 0 )
   goto out;
 
  return 0;
@@ -848,13 +848,13 @@ herr_t H5LTread_dataset_string( hid_t loc_id,
                                 char *buf )
 {
  hid_t   did;
-	hid_t   tid;
+ hid_t   tid;
 
  /* Open the dataset. */
  if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
   return -1;
 
-	if ( (tid = H5Dget_type(did)) < 0 )
+ if ( (tid = H5Dget_type(did)) < 0 )
   goto out;
 
  /* Read */
@@ -864,14 +864,14 @@ herr_t H5LTread_dataset_string( hid_t loc_id,
  /* close */
  if ( H5Dclose(did) )
   goto out;
-	if ( H5Tclose(tid) )
+ if ( H5Tclose(tid) )
   return -1;
 
  return 0;
 
 out:
  H5Dclose( did );
-	H5Tclose( tid );
+ H5Tclose( tid );
  return -1;
 
 }
@@ -938,6 +938,7 @@ out:
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
  * Date: September 4, 2001
+ *  Modified: February 28, 2006: checked for NULL parameters
  *
  *-------------------------------------------------------------------------
  */
@@ -952,36 +953,41 @@ herr_t H5LTget_dataset_info( hid_t loc_id,
  hid_t       tid;
  hid_t       sid;
 
- /* Open the dataset. */
+ /* open the dataset. */
  if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
   return -1;
 
- /* Get an identifier for the datatype. */
+ /* get an identifier for the datatype. */
  tid = H5Dget_type( did );
 
- /* Get the class. */
- *type_class = H5Tget_class( tid );
+ /* get the class. */
+ if (type_class!=NULL)
+  *type_class = H5Tget_class( tid );
 
- /* Get the size. */
- *type_size = H5Tget_size( tid );
+ /* get the size. */
+ if (type_size!=NULL)
+  *type_size = H5Tget_size( tid );
 
-  /* Get the dataspace handle */
- if ( (sid = H5Dget_space( did )) < 0 )
-  goto out;
+ if (dims!=NULL)
+ {
+  /* get the dataspace handle */
+  if ( (sid = H5Dget_space( did )) < 0 )
+   goto out;
+  
+  /* get dimensions */
+  if ( H5Sget_simple_extent_dims( sid, dims, NULL) < 0 )
+   goto out;
+  
+  /* terminate access to the dataspace */
+  if ( H5Sclose( sid ) < 0 )
+   goto out;
+ }
 
- /* Get dimensions */
- if ( H5Sget_simple_extent_dims( sid, dims, NULL) < 0 )
-  goto out;
-
- /* Terminate access to the dataspace */
- if ( H5Sclose( sid ) < 0 )
-  goto out;
-
-  /* Release the datatype. */
+ /* release the datatype. */
  if ( H5Tclose( tid ) )
   return -1;
 
- /* End access to the dataset */
+ /* end access to the dataset */
  if ( H5Dclose( did ) )
   return -1;
 
@@ -1109,7 +1115,7 @@ herr_t H5LTset_attribute_string( hid_t loc_id,
  hid_t      obj_id;
  int        has_attr;
  H5G_stat_t statbuf;
-	size_t     attr_size;
+ size_t     attr_size;
 
 
  /* Get the type of object */
