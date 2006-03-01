@@ -210,9 +210,16 @@ H5SL_init_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SL_init_interface)
 
+/* A temporary patch for redstorm because Lustre there also uses srand.
+ * This causes Lustre on Redstorm to hang with following errors. (Lustre
+ * has fix it, but not deployed at RedStorm yet. 
+ * (client.c:568:ptlrpc_check_status()) @@@ type == PTL_RPC_MSG_ERR, err == -114 req@0x57a9660 x1/t0 o38->mds_l2@MDS_PEER_UUID:12 lens 240/272 ref 1 fl Rpc:R/100000/0 rc 0/-114
+ */
+#ifndef RED_STORM 
     /* Create randomized set of numbers */
     curr_time=HDtime(NULL);
     HDsrand((unsigned)curr_time);
+#endif
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SL_init_interface() */
