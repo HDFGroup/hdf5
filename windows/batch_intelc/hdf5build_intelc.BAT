@@ -75,7 +75,7 @@ GOTO END
 
 :BUILDCPP
 echo.
-echo. Start Building HDF5 C++ libraries ...
+echo. Start Building HDF5 C/C++ libraries Using Intel ...
 echo ***************************************************************************** >> build_results_intelc.txt
 echo                         Build HDF5 C/C++ Libraries and Tools >> build_results_intelc.txt
 echo ***************************************************************************** >> build_results_intelc.txt
