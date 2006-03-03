@@ -26,6 +26,8 @@ H5CC=$(bindir)/h5cc
 H5PCC=$(bindir)/h5pcc
 CPPFLAGS=-I. -I$(srcdir)
 CFLAGS=
+LIBHDF5=../../src/libhdf5.la
+LIBHDF5_HL=../src/libhdf5_hl.la
 
 hdf5_srcdir=$(top_srcdir)/src
 hdf5_builddir=$(top_builddir)/src
@@ -55,7 +57,7 @@ ex_lite1: $(srcdir)/ex_lite1.c
 	  $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                     \
 	else                                                            \
 	  echo $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;               \
-	  $(H5CC_PP) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                  \
+	  $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                  \
 	fi
 
 ex_lite2: $(srcdir)/ex_lite2.c
@@ -64,7 +66,7 @@ ex_lite2: $(srcdir)/ex_lite2.c
 	  $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                     \
 	else                                                            \
 	  echo $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;               \
-	  $(H5CC_PP) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                  \
+	  $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                  \
 	fi
 
 ex_lite3: $(srcdir)/ex_lite3.c
@@ -73,7 +75,7 @@ ex_lite3: $(srcdir)/ex_lite3.c
 	  $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                     \
 	else                                                            \
 	  echo $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;               \
-	  $(H5CC_PP) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                  \
+	  $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                  \
 	fi
 
 @CONCLUDE@
