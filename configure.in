@@ -3287,7 +3287,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/misc/Makefile
                  tools/misc/h5cc
                  tools/misc/testh5repart.sh
-                 tools/gifconv/Makefile
                  examples/Makefile
                  c++/Makefile
                  c++/src/Makefile
@@ -3304,6 +3303,8 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  hl/Makefile
                  hl/src/Makefile
                  hl/test/Makefile
+                 hl/tools/Makefile
+                 hl/tools/gif2h5/Makefile
                  hl/examples/Makefile
                  hl/c++/Makefile
                  hl/c++/src/Makefile

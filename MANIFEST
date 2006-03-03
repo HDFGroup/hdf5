@@ -757,18 +757,6 @@
 ./tools/Makefile.am
 ./tools/Makefile.in
 
-./tools/gifconv/Makefile.am
-./tools/gifconv/Makefile.in
-./tools/gifconv/decompress.c
-./tools/gifconv/gif.h
-./tools/gifconv/gif2hdf.c
-./tools/gifconv/gif2mem.c
-./tools/gifconv/gifread.c
-./tools/gifconv/hdf2gif.c
-./tools/gifconv/hdfgifwr.c
-./tools/gifconv/readhdf.c
-./tools/gifconv/writehdf.c
-
 ./tools/h5dump/Makefile.am
 ./tools/h5dump/Makefile.in
 ./tools/h5dump/h5dump.c
@@ -1304,6 +1292,19 @@
 ./hl/test/dslon.txt
 ./hl/test/sepia.pal
 ./hl/test/earth.pal
+./hl/tools/Makefile.am
+./hl/tools/Makefile.in
+./hl/tools/gif2h5/Makefile.am
+./hl/tools/gif2h5/Makefile.in
+./hl/tools/gif2h5/decompress.c
+./hl/tools/gif2h5/gif.h
+./hl/tools/gif2h5/gif2hdf.c
+./hl/tools/gif2h5/gif2mem.c
+./hl/tools/gif2h5/gifread.c
+./hl/tools/gif2h5/hdf2gif.c
+./hl/tools/gif2h5/hdfgifwr.c
+./hl/tools/gif2h5/readhdf.c
+./hl/tools/gif2h5/writehdf.c
 
 # hl fortran
 ./hl/fortran/Makefile.am

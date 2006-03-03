@@ -24,27 +24,14 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib -I$(top_srcdir)/hl/src
 
 # These are our main targets, the tools
 
-if BUILD_HDF5_HL_CONDITIONAL
 bin_PROGRAMS=gif2h5 h52gif
-else
-bin_PROGRAMS=h52gif
-endif
 
-if BUILD_HDF5_HL_CONDITIONAL
 gif2h5_SOURCES=gif2hdf.c gif2mem.c decompress.c gifread.c writehdf.c
-endif
 
 h52gif_SOURCES=hdf2gif.c hdfgifwr.c readhdf.c
 
-
-
-# Programs all depend on the hdf5 library and the tools library
-if BUILD_HDF5_HL_CONDITIONAL
-LDADD=$(LIBH5TOOLS) $(LIBH5_HL) $(LIBHDF5)
-else
-LDADD=$(LIBH5TOOLS) $(LIBHDF5)
-endif
-
-
+# Programs all depend on the hdf5 library, the tools library, and the HL
+# library.
+LDADD=$(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
 
 include $(top_srcdir)/config/conclude.am

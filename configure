@@ -51212,7 +51212,7 @@ if test -n "$TESTPARALLEL"; then
   fi
 fi
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile testpar/Makefile testpar/testph5.sh perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5import/Makefile tools/h5diff/Makefile tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5ls/Makefile tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/misc/testh5repart.sh tools/gifconv/Makefile examples/Makefile c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/examples/Makefile fortran/Makefile fortran/src/h5fc fortran/src/libhdf5_fortran.settings fortran/src/Makefile fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile hl/Makefile hl/src/Makefile hl/test/Makefile hl/examples/Makefile hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/c++/examples/Makefile hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile hl/fortran/examples/Makefile"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile testpar/Makefile testpar/testph5.sh perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5import/Makefile tools/h5diff/Makefile tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5ls/Makefile tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/misc/testh5repart.sh examples/Makefile c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/examples/Makefile fortran/Makefile fortran/src/h5fc fortran/src/libhdf5_fortran.settings fortran/src/Makefile fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile hl/Makefile hl/src/Makefile hl/test/Makefile hl/tools/Makefile hl/tools/gif2h5/Makefile hl/examples/Makefile hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/c++/examples/Makefile hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile hl/fortran/examples/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -51863,7 +51863,6 @@ do
   "tools/misc/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/misc/Makefile" ;;
   "tools/misc/h5cc" ) CONFIG_FILES="$CONFIG_FILES tools/misc/h5cc" ;;
   "tools/misc/testh5repart.sh" ) CONFIG_FILES="$CONFIG_FILES tools/misc/testh5repart.sh" ;;
-  "tools/gifconv/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/gifconv/Makefile" ;;
   "examples/Makefile" ) CONFIG_FILES="$CONFIG_FILES examples/Makefile" ;;
   "c++/Makefile" ) CONFIG_FILES="$CONFIG_FILES c++/Makefile" ;;
   "c++/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES c++/src/Makefile" ;;
@@ -51880,6 +51879,8 @@ do
   "hl/Makefile" ) CONFIG_FILES="$CONFIG_FILES hl/Makefile" ;;
   "hl/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES hl/src/Makefile" ;;
   "hl/test/Makefile" ) CONFIG_FILES="$CONFIG_FILES hl/test/Makefile" ;;
+  "hl/tools/Makefile" ) CONFIG_FILES="$CONFIG_FILES hl/tools/Makefile" ;;
+  "hl/tools/gif2h5/Makefile" ) CONFIG_FILES="$CONFIG_FILES hl/tools/gif2h5/Makefile" ;;
   "hl/examples/Makefile" ) CONFIG_FILES="$CONFIG_FILES hl/examples/Makefile" ;;
   "hl/c++/Makefile" ) CONFIG_FILES="$CONFIG_FILES hl/c++/Makefile" ;;
   "hl/c++/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES hl/c++/src/Makefile" ;;

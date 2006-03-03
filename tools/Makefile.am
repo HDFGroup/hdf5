@@ -21,6 +21,6 @@
 include $(top_srcdir)/config/commence.am
 
 # All subdirectories
-SUBDIRS=lib h5dump h5diff h5ls misc gifconv h5import h5repack h5jam
+SUBDIRS=lib h5dump h5diff h5ls misc h5import h5repack h5jam
 
 include $(top_srcdir)/config/conclude.am

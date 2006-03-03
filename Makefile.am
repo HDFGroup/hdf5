@@ -71,10 +71,9 @@ else
    HDF5_HL_DIR=
 endif
 
-SUBDIRS = src test $(TESTPARALLEL_DIR) $(CXX_DIR) $(FORTRAN_DIR) \
-          $(HDF5_HL_DIR) tools .
-         
-DIST_SUBDIRS = src test testpar hl tools . c++ fortran perform examples
+SUBDIRS = src test $(TESTPARALLEL_DIR) tools . $(CXX_DIR) $(FORTRAN_DIR) \
+          $(HDF5_HL_DIR)
+DIST_SUBDIRS = src test testpar tools . c++ fortran hl perform examples
 
 # Some files generated during configure that should be cleaned
 DISTCLEANFILES=src/H5config.h src/H5pubconf.h config/stamp1 config/stamp2
