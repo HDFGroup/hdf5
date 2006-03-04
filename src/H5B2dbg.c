@@ -98,6 +98,7 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     HDassert(stream);
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
+    HDassert(type);
 
     /*
      * Load the B-tree header.
@@ -202,30 +203,33 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     /*
      * Check arguments.
      */
-    assert(f);
-    assert(H5F_addr_defined(addr));
-    assert(stream);
-    assert(indent >= 0);
-    assert(fwidth >= 0);
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(stream);
+    HDassert(indent >= 0);
+    HDassert(fwidth >= 0);
+    HDassert(type);
+    HDassert(H5F_addr_defined(hdr_addr));
+    HDassert(nrec > 0);
 
     /*
      * Load the B-tree header.
      */
-    if (NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, type, NULL, H5AC_READ)))
+    if(NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, type, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header")
 
     /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(bt2->shared);
-    assert(shared);
+    shared = H5RC_GET_OBJ(bt2->shared);
+    HDassert(shared);
 
     /*
      * Load the B-tree internal node
      */
-    if (NULL == (internal = H5AC_protect(f, dxpl_id, H5AC_BT2_INT, addr, &nrec, bt2->shared, H5AC_READ)))
+    if(NULL == (internal = H5AC_protect(f, dxpl_id, H5AC_BT2_INT, addr, &nrec, bt2->shared, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree internal node")
 
     /* Release the B-tree header */
-    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, bt2, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, bt2, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree header")
     bt2 = NULL;
 
@@ -253,9 +257,9 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
 	      internal->nrec);
 
     /* Print all node pointers and records */
-    for(u=0; u<internal->nrec; u++) {
+    for(u = 0; u < internal->nrec; u++) {
         /* Print node pointer */
-        sprintf(temp_str,"Node pointer #%u: (all/node/addr)",u);
+        sprintf(temp_str, "Node pointer #%u: (all/node/addr)", u);
         HDfprintf(stream, "%*s%-*s (%Hu/%u/%a)\n", indent + 3, "", MAX(0, fwidth - 3),
                   temp_str,
                   internal->node_ptrs[u].all_nrec,
@@ -263,16 +267,16 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
                   internal->node_ptrs[u].addr);
 
         /* Print record */
-        sprintf(temp_str,"Record #%u:",u);
+        sprintf(temp_str, "Record #%u:", u);
         HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
                   temp_str);
-        assert(H5B2_INT_NREC(internal,shared,u));
-        (void)(type->debug)(stream, f, dxpl_id, indent+6, MAX (0, fwidth-6),
+        HDassert(H5B2_INT_NREC(internal, shared, u));
+        (void)(type->debug)(stream, f, dxpl_id, indent + 6, MAX (0, fwidth-6),
             H5B2_INT_NREC(internal,shared,u), NULL);
     } /* end for */
 
     /* Print final node pointer */
-    sprintf(temp_str,"Node pointer #%u: (all/node/addr)",u);
+    sprintf(temp_str, "Node pointer #%u: (all/node/addr)", u);
     HDfprintf(stream, "%*s%-*s (%Hu/%u/%a)\n", indent + 3, "", MAX(0, fwidth - 3),
               temp_str,
               internal->node_ptrs[u].all_nrec,
@@ -280,7 +284,7 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
               internal->node_ptrs[u].addr);
 
 done:
-    if (internal && H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, addr, internal, H5AC__NO_FLAGS_SET) < 0)
+    if(internal && H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, addr, internal, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree internal node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -316,30 +320,33 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     /*
      * Check arguments.
      */
-    assert(f);
-    assert(H5F_addr_defined(addr));
-    assert(stream);
-    assert(indent >= 0);
-    assert(fwidth >= 0);
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(stream);
+    HDassert(indent >= 0);
+    HDassert(fwidth >= 0);
+    HDassert(type);
+    HDassert(H5F_addr_defined(hdr_addr));
+    HDassert(nrec > 0);
 
     /*
      * Load the B-tree header.
      */
-    if (NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, type, NULL, H5AC_READ)))
+    if(NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, type, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header")
 
     /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(bt2->shared);
-    assert(shared);
+    shared = H5RC_GET_OBJ(bt2->shared);
+    HDassert(shared);
 
     /*
      * Load the B-tree leaf node
      */
-    if (NULL == (leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, addr, &nrec, bt2->shared, H5AC_READ)))
+    if(NULL == (leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, addr, &nrec, bt2->shared, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree leaf node")
 
     /* Release the B-tree header */
-    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, bt2, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, bt2, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree header")
     bt2 = NULL;
 
@@ -367,18 +374,18 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
 	      leaf->nrec);
 
     /* Print all node pointers and records */
-    for(u=0; u<leaf->nrec; u++) {
+    for(u = 0; u < leaf->nrec; u++) {
         /* Print record */
-        sprintf(temp_str,"Record #%u:",u);
+        sprintf(temp_str, "Record #%u:", u);
         HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
                   temp_str);
-        assert(H5B2_LEAF_NREC(leaf,shared,u));
+        HDassert(H5B2_LEAF_NREC(leaf, shared, u));
         (void)(type->debug)(stream, f, dxpl_id, indent+6, MAX (0, fwidth-6),
             H5B2_LEAF_NREC(leaf,shared,u), NULL);
     } /* end for */
 
 done:
-    if (leaf && H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, addr, leaf, H5AC__NO_FLAGS_SET) < 0)
+    if(leaf && H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, addr, leaf, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree leaf node")
 
     FUNC_LEAVE_NOAPI(ret_value)
