@@ -103,6 +103,8 @@ H5HF_get_cparam_test(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr, H5HF_create_t *cp
     cparam->addrmap = shared->addrmap;
     cparam->standalone_size = shared->standalone_size;
     cparam->fixed_len_size = shared->fixed_len_size;
+    cparam->ref_count_size = shared->ref_count_size;
+    HDmemcpy(&(cparam->managed), &(shared->man_dtable_info.cparam), sizeof(H5HF_dtable_cparam_t));
 
 done:
     /* Release fractal heap header node */

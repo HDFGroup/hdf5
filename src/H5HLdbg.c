@@ -125,44 +125,11 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int
 		"Percent of heap used:",
 		(100.0 * (double)(h->heap_alloc - amount_free) / (double)h->heap_alloc));
     }
+
     /*
      * Print the data in a VMS-style octal dump.
      */
-    fprintf(stream, "%*sData follows (`__' indicates free region)...\n",
-	    indent, "");
-    for (i=0; i<(int)(h->heap_alloc); i+=16) {
-	fprintf(stream, "%*s %8d: ", indent, "", i);
-	for (j = 0; j < 16; j++) {
-	    if (i+j<(int)(h->heap_alloc)) {
-		if (marker[i + j]) {
-		    fprintf(stream, "__ ");
-		} else {
-		    c = h->chunk[H5HL_SIZEOF_HDR(f) + i + j];
-		    fprintf(stream, "%02x ", c);
-		}
-	    } else {
-		fprintf(stream, "   ");
-	    }
-	    if (7 == j)
-		HDfputc(' ', stream);
-	}
-
-	for (j = 0; j < 16; j++) {
-	    if (i+j < (int)(h->heap_alloc)) {
-		if (marker[i + j]) {
-		    HDfputc(' ', stream);
-		} else {
-		    c = h->chunk[H5HL_SIZEOF_HDR(f) + i + j];
-		    if (c > ' ' && c < '~')
-			HDfputc(c, stream);
-		    else
-			HDfputc('.', stream);
-		}
-	    }
-	}
-
-	HDfputc('\n', stream);
-    }
+    H5_buffer_dump(stream, indent, h->chunk, marker, H5HL_SIZEOF_HDR(f), h->heap_alloc);
 
 done:
     if (h && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, h, FALSE) != SUCCEED)

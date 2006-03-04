@@ -72,7 +72,6 @@
  * than the ID_MASK constant).
  */
 #  define H5I_LOC(a,s)		((hid_t)((size_t)(a)&((s)-1)))
-#  define POWER_OF_TWO(n)	((((n) - 1) & (n)) == 0 && (n) > 0)
 #else
 /*
  * Map an ID to a hash location.

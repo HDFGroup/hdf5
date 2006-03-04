@@ -325,6 +325,9 @@
 #   define SIGN(a)		((a)>0 ? 1 : (a)<0 ? -1 : 0)
 #endif
 
+/* test for number that is a power of 2 */
+#  define POWER_OF_TWO(n)	((((n) - 1) & (n)) == 0 && (n) > 0)
+
 /*
  * HDF Boolean type.
  */
@@ -1410,6 +1413,10 @@ H5_DLL int H5R_term_interface(void);
 H5_DLL int H5S_term_interface(void);
 H5_DLL int H5T_term_interface(void);
 H5_DLL int H5Z_term_interface(void);
+
+/* Functions for debugging */
+H5_DLL herr_t H5_buffer_dump(FILE *stream, int indent, uint8_t *buf,
+    uint8_t *marker, size_t buf_offset, size_t buf_size);
 
 #endif
 

@@ -385,6 +385,7 @@
 ./src/hdf5-win.lnt			_DO_NOT_DISTRIBUTE_
 ./src/hdf5-lin.lnt			_DO_NOT_DISTRIBUTE_
 ./src/H5.c
+./src/H5dbg.c
 ./src/H5api_adpt.h
 ./src/H5err.txt
 ./src/H5config.h.in

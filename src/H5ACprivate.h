@@ -51,6 +51,7 @@ typedef enum {
     H5AC_BT2_LEAF_ID,	/*v2 B-tree leaf node			     */
     H5AC_TEST_ID,	/*test entry -- not used for actual files    */
     H5AC_FHEAP_HDR_ID,	/*fractal heap header			     */
+    H5AC_FHEAP_DBLOCK_ID, /*fractal heap direct block		     */
     H5AC_NTYPES		/* Number of types, must be last             */
 } H5AC_type_t;
 

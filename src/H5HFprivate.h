@@ -47,13 +47,28 @@ typedef enum {
     H5HF_MAPPED         /* The heap maps internal addresses to allow compaction */
 } H5HF_addrmap_t;
 
+/* Creation parameters for doubling-tables */
+typedef struct H5HF_dtable_cparam_t {
+    unsigned    width;          /* Number of columns in the table (must be power of 2) */
+    size_t      start_block_size; /* Starting block size for table (must be power of 2) */
+    size_t      max_direct_size; /* Maximum size of a direct block (must be power of 2) */
+    unsigned    max_index;      /* Maximum ID/offset for table (integer log2 of actual value, ie. the # of bits required) */
+    unsigned    start_root_rows;        /* Starting number of rows for root indirect block */
+                                /* 0 indicates to create the full indirect block for the root,
+                                 * right from the start.  Doesn't have to be power of 2
+                                 */
+} H5HF_dtable_cparam_t;
+
 /* Fractal heap creation parameters */
 typedef struct H5HF_create_t {
+    H5HF_dtable_cparam_t managed;/* Mapped object doubling-table creation parameters */
     H5HF_addrmap_t addrmap;     /* Type of address mapping for objects in heap */
     uint32_t standalone_size;   /* Size of object to store standalone */
                                 /* (i.e. max. size of object to manage) */
-    uint32_t fixed_len_size;    /* Size of objects (0 means variable-sized objects) */
+    uint32_t fixed_len_size;    /* Size of objects, in bytes (0 means variable-sized objects) */
                                 /* (only for heaps w/fixed-length objects) */
+    unsigned char ref_count_size; /* Size of ref. count field for objects, in bytes (0 means no ref. counts for objects) */
+                                /* (only for heaps w/ref. counted objects) */
 } H5HF_create_t;
 
 

@@ -94,7 +94,7 @@ herr_t
 H5HF_create(H5F_t *f, hid_t dxpl_id, H5HF_create_t *cparam, haddr_t *addr_p)
 {
     H5HF_t *fh = NULL;                  /* The new fractal heap header information */
-    herr_t ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5HF_create, FAIL)
 
@@ -102,6 +102,7 @@ H5HF_create(H5F_t *f, hid_t dxpl_id, H5HF_create_t *cparam, haddr_t *addr_p)
      * Check arguments.
      */
     HDassert(f);
+    HDassert(cparam);
     HDassert(addr_p);
 
     /*
@@ -110,18 +111,18 @@ H5HF_create(H5F_t *f, hid_t dxpl_id, H5HF_create_t *cparam, haddr_t *addr_p)
     if(NULL == (fh = H5FL_MALLOC(H5HF_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for fractal heap header")
 
-    /* Assign internal information */
+    /* Reset the metadata cache info for the heap header */
     HDmemset(&fh->cache_info, 0, sizeof(H5AC_info_t));
-
-    /* Initialize shared fractal heap info */
-    if(H5HF_shared_init(fh, cparam) < 0)
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create shared fractal heap info")
 
     /* Allocate space for the header on disk */
     if(HADDR_UNDEF == (*addr_p = H5MF_alloc(f, H5FD_MEM_FHEAP_HDR, dxpl_id, (hsize_t)H5HF_HEADER_SIZE(f))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap header")
 
-    /* Cache the new fractal heap node */
+    /* Initialize shared fractal heap info */
+    if(H5HF_shared_create(f, fh, *addr_p, cparam) < 0)
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create shared fractal heap info")
+
+    /* Cache the new fractal heap header */
     if(H5AC_set(f, dxpl_id, H5AC_FHEAP_HDR, *addr_p, fh, H5AC__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add fractal heap header to cache")
 
@@ -159,6 +160,7 @@ H5HF_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t size,
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5HF_insert, FAIL)
+HDfprintf(stderr, "%s: size = %Zu\n", FUNC, size);
 
     /*
      * Check arguments.
@@ -181,22 +183,19 @@ H5HF_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t size,
 
     /* Check if object is large enough to be standalone */
     if(size >= shared->standalone_size) {
-HDfprintf(stderr, "%s: size = %Zu\n", FUNC, size);
 HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "standalone blocks not supported yet")
     } /* end if */
     else {
         /* Check if we are in "append only" mode, or if there's enough room for the object */
         if(shared->write_once) {
-HDfprintf(stderr, "%s: size = %Zu\n", FUNC, size);
 HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "'write once' managed blocks not supported yet")
         } /* end if */
         else if(size <= shared->total_man_free) {
-HDfprintf(stderr, "%s: size = %Zu\n", FUNC, size);
 HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "allocating internal managed blocks not supported yet")
         } /* end if */
         else {
             /* Allocate space at end of heap */
-            if(H5HF_man_alloc_end(shared, size, obj, id) < 0)
+            if(H5HF_man_alloc_end(fh->shared, dxpl_id, &hdr_flags, size, obj, id) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate space at end of managed blocks")
         } /* end else */
     } /* end else */

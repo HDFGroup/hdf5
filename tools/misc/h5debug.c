@@ -74,19 +74,18 @@ main(int argc, char *argv[])
 {
     hid_t	fid, fapl, dxpl;
     H5F_t       *f;
-    haddr_t     addr=0, extra=0, extra2=0;
+    haddr_t     addr = 0, extra = 0, extra2 = 0;
     uint8_t     sig[SIGLEN];
-    int         i;
+    size_t      u;
     herr_t      status = SUCCEED;
 
-    if (argc == 1) {
-	fprintf(stderr,
-		"Usage: %s filename [signature-addr [extra]]\n", argv[0]);
+    if(argc == 1) {
+	fprintf(stderr, "Usage: %s filename [signature-addr [extra]]\n", argv[0]);
 	HDexit(1);
     }
 
     /* Initialize the library */
-    if(H5open ()<0) {
+    if(H5open() < 0) {
         fprintf(stderr, "cannot initialize the library\n");
         HDexit(1);
     }
@@ -102,14 +101,13 @@ main(int argc, char *argv[])
         fprintf(stderr, "cannot create file access property list\n");
         HDexit(1);
     }
-    if (strchr (argv[1], '%')) {
+    if(strchr (argv[1], '%'))
 	H5Pset_fapl_family (fapl, (hsize_t)0, H5P_DEFAULT);
-    }
-    if ((fid = H5Fopen(argv[1], H5F_ACC_RDONLY, fapl)) < 0) {
+    if((fid = H5Fopen(argv[1], H5F_ACC_RDONLY, fapl)) < 0) {
         fprintf(stderr, "cannot open file\n");
         HDexit(1);
     }
-    if (NULL == (f = H5I_object(fid))) {
+    if(NULL == (f = H5I_object(fid))) {
         fprintf(stderr, "cannot obtain H5F_t pointer\n");
         HDexit(2);
     }
@@ -117,46 +115,46 @@ main(int argc, char *argv[])
     /*
      * Parse command arguments.
      */
-    if (argc > 2)
+    if(argc > 2)
         addr = HDstrtoll(argv[2], NULL, 0);
-    if (argc > 3)
+    if(argc > 3)
         extra = HDstrtoll(argv[3], NULL, 0);
-    if (argc > 4)
+    if(argc > 4)
         extra2 = HDstrtoll(argv[4], NULL, 0);
 
     /*
      * Read the signature at the specified file position.
      */
     HDfprintf(stdout, "Reading signature at address %a (rel)\n", addr);
-    if (H5F_block_read(f, H5FD_MEM_SUPER, addr, sizeof(sig), dxpl, sig)<0) {
+    if(H5F_block_read(f, H5FD_MEM_SUPER, addr, sizeof(sig), dxpl, sig) < 0) {
         fprintf(stderr, "cannot read signature\n");
         HDexit(3);
     }
-    if (!HDmemcmp(sig, H5F_SIGNATURE, H5F_SIGNATURE_LEN)) {
+    if(!HDmemcmp(sig, H5F_SIGNATURE, H5F_SIGNATURE_LEN)) {
         /*
          * Debug the file's super block.
          */
         status = H5F_debug(f, H5P_DATASET_XFER_DEFAULT, stdout, 0, VCOL);
 
-    } else if (!HDmemcmp(sig, H5HL_MAGIC, H5HL_SIZEOF_MAGIC)) {
+    } else if(!HDmemcmp(sig, H5HL_MAGIC, H5HL_SIZEOF_MAGIC)) {
         /*
          * Debug a local heap.
          */
         status = H5HL_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
 
-    } else if (!HDmemcmp (sig, H5HG_MAGIC, H5HG_SIZEOF_MAGIC)) {
+    } else if(!HDmemcmp (sig, H5HG_MAGIC, H5HG_SIZEOF_MAGIC)) {
 	/*
 	 * Debug a global heap collection.
 	 */
 	status = H5HG_debug (f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
 
-    } else if (!HDmemcmp(sig, H5G_NODE_MAGIC, H5G_NODE_SIZEOF_MAGIC)) {
+    } else if(!HDmemcmp(sig, H5G_NODE_MAGIC, H5G_NODE_SIZEOF_MAGIC)) {
         /*
          * Debug a symbol table node.
          */
         status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
 
-    } else if (!HDmemcmp(sig, H5B_MAGIC, H5B_SIZEOF_MAGIC)) {
+    } else if(!HDmemcmp(sig, H5B_MAGIC, H5B_SIZEOF_MAGIC)) {
         /*
          * Debug a B-tree.  B-trees are debugged through the B-tree
          * subclass.  The subclass identifier is the byte immediately
@@ -165,7 +163,7 @@ main(int argc, char *argv[])
         H5B_subid_t subtype = (H5B_subid_t)sig[H5B_SIZEOF_MAGIC];
         unsigned    ndims;
 
-        switch (subtype) {
+        switch(subtype) {
             case H5B_SNODE_ID:
                 status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
                 break;
@@ -180,7 +178,7 @@ main(int argc, char *argv[])
                 HDexit(4);
         }
 
-    } else if (!HDmemcmp(sig, H5B2_HDR_MAGIC, H5B2_SIZEOF_MAGIC)) {
+    } else if(!HDmemcmp(sig, H5B2_HDR_MAGIC, H5B2_SIZEOF_MAGIC)) {
         /*
          * Debug a v2 B-tree.  B-trees are debugged through the B-tree
          * subclass.  The subclass identifier is two bytes after the
@@ -188,7 +186,7 @@ main(int argc, char *argv[])
          */
         H5B2_subid_t subtype = (H5B2_subid_t)sig[H5B2_SIZEOF_MAGIC+1];
 
-        switch (subtype) {
+        switch(subtype) {
             case H5B2_TEST_ID:
                 status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5B2_TEST);
                 break;
@@ -198,7 +196,7 @@ main(int argc, char *argv[])
                 HDexit(4);
         } /* end switch */
 
-    } else if (!HDmemcmp(sig, H5B2_INT_MAGIC, H5B2_SIZEOF_MAGIC)) {
+    } else if(!HDmemcmp(sig, H5B2_INT_MAGIC, H5B2_SIZEOF_MAGIC)) {
         /*
          * Debug a v2 B-tree.  B-trees are debugged through the B-tree
          * subclass.  The subclass identifier is two bytes after the
@@ -206,7 +204,7 @@ main(int argc, char *argv[])
          */
         H5B2_subid_t subtype = (H5B2_subid_t)sig[H5B2_SIZEOF_MAGIC+1];
 
-        switch (subtype) {
+        switch(subtype) {
             case H5B2_TEST_ID:
                 status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5B2_TEST, extra, (unsigned)extra2);
                 break;
@@ -216,7 +214,7 @@ main(int argc, char *argv[])
                 HDexit(4);
         } /* end switch */
 
-    } else if (!HDmemcmp(sig, H5B2_LEAF_MAGIC, H5B2_SIZEOF_MAGIC)) {
+    } else if(!HDmemcmp(sig, H5B2_LEAF_MAGIC, H5B2_SIZEOF_MAGIC)) {
         /*
          * Debug a v2 B-tree.  B-trees are debugged through the B-tree
          * subclass.  The subclass identifier is two bytes after the
@@ -224,7 +222,7 @@ main(int argc, char *argv[])
          */
         H5B2_subid_t subtype = (H5B2_subid_t)sig[H5B2_SIZEOF_MAGIC+1];
 
-        switch (subtype) {
+        switch(subtype) {
             case H5B2_TEST_ID:
                 status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5B2_TEST, extra, (unsigned)extra2);
                 break;
@@ -234,13 +232,19 @@ main(int argc, char *argv[])
                 HDexit(4);
         } /* end switch */
 
-    } else if (!HDmemcmp(sig, H5HF_HDR_MAGIC, H5HF_SIZEOF_MAGIC)) {
+    } else if(!HDmemcmp(sig, H5HF_HDR_MAGIC, H5HF_SIZEOF_MAGIC)) {
         /*
          * Debug a fractal heap header.
          */
         status = H5HF_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
 
-    } else if (sig[0] == H5O_VERSION) {
+    } else if(!HDmemcmp(sig, H5HF_DBLOCK_MAGIC, H5HF_SIZEOF_MAGIC)) {
+        /*
+         * Debug a fractal heap direct block.
+         */
+        status = H5HF_dblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra, (size_t)extra2);
+
+    } else if(sig[0] == H5O_VERSION) {
         /*
          * This could be an object header.  Since they don't have a signature
          * it's a somewhat "ify" detection.
@@ -252,15 +256,14 @@ main(int argc, char *argv[])
          * Got some other unrecognized signature.
          */
         printf("%-*s ", VCOL, "Signature:");
-        for (i = 0; i < sizeof(sig); i++) {
-            if (sig[i] > ' ' && sig[i] <= '~' && '\\' != sig[i]) {
-                HDputchar(sig[i]);
-            } else if ('\\' == sig[i]) {
+        for (u = 0; u < sizeof(sig); u++) {
+            if (sig[u] > ' ' && sig[u] <= '~' && '\\' != sig[u])
+                HDputchar(sig[u]);
+            else if ('\\' == sig[u]) {
                 HDputchar('\\');
                 HDputchar('\\');
-            } else {
-                printf("\\%03o", sig[i]);
-            }
+            } else
+                printf("\\%03o", sig[u]);
         }
         HDputchar('\n');
 
@@ -268,11 +271,12 @@ main(int argc, char *argv[])
         HDexit(4);
     }
 
-    if (status < 0) {
+    if(status < 0) {
         fprintf(stderr, "An error occurred!\n");
         H5Eprint(stderr);
         HDexit(5);
     }
+
     H5Pclose(dxpl);
     H5Pclose(fapl);
     H5Fclose(fid);

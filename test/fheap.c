@@ -28,10 +28,59 @@
 /* Other private headers that this test requires */
 #include "H5Iprivate.h"
 
+/* "Standard" creation table parameters */
+#define STD_ADDRMAP     H5HF_ABSOLUTE           /* Heap address mapping */
+#define STD_STAND_SIZE  (64 * 1024)             /* Standalone obj. min. size */
+#define STD_FIXED_LEN_SIZE 0                    /* Fixed length obj. size */
+#define STD_REF_COUNT_SIZE 0                    /* Size of ref. count for obj. */
+#define STD_MAN_WIDTH   32                      /* Managed obj. table width */
+#define STD_MAN_START_BLOCK_SIZE 1024           /* Managed obj. starting block size */
+#define STD_MAN_MAX_DIRECT_SIZE (1024 * 1024)   /* Managed obj. max. direct block size */
+#define STD_MAN_MAX_INDEX 64                    /* Managed obj. # of bits for total heap size */
+#define STD_MAN_START_ROOT_ROWS 1               /* Managed obj. starting # of root indirect block rows */
+
 const char *FILENAME[] = {
     "fheap",
     NULL
 };
+
+
+/*-------------------------------------------------------------------------
+ * Function:	init_std_cparam
+ *
+ * Purpose:	Initialize heap creation parameter structure with standard
+ *              settings
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, February 27, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+init_std_cparam(H5HF_create_t *cparam)
+{
+    /* Wipe out background */
+    HDmemset(cparam, 0, sizeof(H5HF_create_t));
+
+    /* General parameters */
+    cparam->addrmap = STD_ADDRMAP;
+    cparam->standalone_size = STD_STAND_SIZE;
+    cparam->fixed_len_size = STD_FIXED_LEN_SIZE;
+    cparam->ref_count_size = STD_REF_COUNT_SIZE;
+
+    /* Managed object doubling-table parameters */
+    cparam->managed.width = STD_MAN_WIDTH;
+    cparam->managed.start_block_size = STD_MAN_START_BLOCK_SIZE;
+    cparam->managed.max_direct_size = STD_MAN_MAX_DIRECT_SIZE;
+    cparam->managed.max_index = STD_MAN_MAX_INDEX;
+    cparam->managed.start_root_rows = STD_MAN_START_ROOT_ROWS;
+
+    return(0);
+} /* init_std_cparam() */
 
 
 /*-------------------------------------------------------------------------
@@ -72,9 +121,7 @@ test_create(hid_t fapl)
      * Test fractal heap creation (w/absolute address mapping)
      */
     TESTING("Fractal heap creation (w/absolute address mapping)");
-    cparam.addrmap = H5HF_ABSOLUTE;
-    cparam.standalone_size = 64 * 1024;
-    cparam.fixed_len_size = 0;
+    init_std_cparam(&cparam);
     if(H5HF_create(f, H5P_DATASET_XFER_DEFAULT, &cparam, &fh_addr/*out*/) < 0)
         FAIL_STACK_ERROR
     if(!H5F_addr_defined(fh_addr))
@@ -94,9 +141,8 @@ test_create(hid_t fapl)
      * Test fractal heap creation (w/mapped address mapping)
      */
     TESTING("Fractal heap creation (w/mapped address mapping)");
+    init_std_cparam(&cparam);
     cparam.addrmap = H5HF_MAPPED;
-    cparam.standalone_size = 64 * 1024;
-    cparam.fixed_len_size = 0;
     if(H5HF_create(f, H5P_DATASET_XFER_DEFAULT, &cparam, &fh_addr/*out*/) < 0)
         FAIL_STACK_ERROR
     if(!H5F_addr_defined(fh_addr))
@@ -151,7 +197,7 @@ test_abs_insert_first(hid_t fapl)
     H5HF_create_t cparam;               /* Creation parameters for heap */
     haddr_t     fh_addr;                /* Address of fractal heap created */
     unsigned char obj[10];              /* Buffer for object to insert */
-    haddr_t     heap_id;                /* Heap ID for object inserted */
+    hsize_t     heap_id;                /* Heap ID for object inserted */
     unsigned    u;                      /* Local index variable */
     herr_t      ret;                    /* Generic error return value */
 
@@ -167,14 +213,12 @@ test_abs_insert_first(hid_t fapl)
         STACK_ERROR
 
     /* Create absolute heap */
-    cparam.addrmap = H5HF_ABSOLUTE;
-    cparam.standalone_size = 64 * 1024;
-    cparam.fixed_len_size = 0;
+    init_std_cparam(&cparam);
     if(H5HF_create(f, dxpl, &cparam, &fh_addr/*out*/) < 0)
         FAIL_STACK_ERROR
     if(!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-#ifdef QAK
+#ifndef QAK
 HDfprintf(stdout, "Fractal heap header address = %a\n", fh_addr);
 #endif /* QAK */
 
@@ -186,11 +230,11 @@ HDfprintf(stdout, "Fractal heap header address = %a\n", fh_addr);
      * Test inserting first (small) object into absolute heap
      */
     TESTING("Inserting first (small) object into absolute heap");
-    heap_id = HADDR_UNDEF;
+    heap_id = 0;
     if(H5HF_insert(f, dxpl, fh_addr, sizeof(obj), obj, &heap_id) < 0)
         FAIL_STACK_ERROR
-#ifdef QAK
-HDfprintf(stdout, "heap_id = %a\n", heap_id);
+#ifndef QAK
+HDfprintf(stdout, "heap_id = %Hu\n", heap_id);
 #endif /* QAK */
     PASSED()
 
@@ -242,7 +286,7 @@ main(void)
     if(nerrors)
         goto error;
     puts("All fractal heap tests passed.");
-#ifndef QAK
+#ifdef QAK
     h5_cleanup(FILENAME, fapl);
 #else /* QAK */
 HDfprintf(stderr, "Uncomment cleanup!\n");

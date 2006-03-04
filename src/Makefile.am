@@ -37,7 +37,7 @@ libhdf5_la_LDFLAGS= -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISION):$(LT_
 MOSTLYCLEANFILES=H5Tinit.c
 
 # library sources
-libhdf5_la_SOURCES= H5.c H5A.c H5AC.c H5B.c H5Bcache.c \
+libhdf5_la_SOURCES= H5.c H5dbg.c H5A.c H5AC.c H5B.c H5Bcache.c \
         H5B2.c H5B2cache.c H5B2dbg.c H5B2int.c H5B2test.c \
         H5C.c \
         H5D.c \

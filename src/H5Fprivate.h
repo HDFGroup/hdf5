@@ -79,12 +79,10 @@ typedef struct H5F_t H5F_t;
    int64_t _n = (n);							      \
    size_t _i;								      \
    uint8_t *_p = (uint8_t*)(p);						      \
-   for (_i=0; _i<sizeof(int64_t); _i++, _n>>=8) {			      \
+   for (_i = 0; _i < sizeof(int64_t); _i++, _n >>= 8)			      \
       *_p++ = (uint8_t)(_n & 0xff);					      \
-   }									      \
-   for (/*void*/; _i<8; _i++) {						      \
-      *_p++ = (n)<0 ? 0xff : 0;						      \
-   }									      \
+   for (/*void*/; _i < 8; _i++)						      \
+      *_p++ = (n) < 0 ? 0xff : 0;					      \
    (p) = (uint8_t*)(p)+8;						      \
 }
 
@@ -92,13 +90,23 @@ typedef struct H5F_t H5F_t;
    uint64_t _n = (n);							      \
    size_t _i;								      \
    uint8_t *_p = (uint8_t*)(p);						      \
-   for (_i=0; _i<sizeof(uint64_t); _i++, _n>>=8) {			      \
+   for (_i = 0; _i < sizeof(uint64_t); _i++, _n >>= 8)			      \
       *_p++ = (uint8_t)(_n & 0xff);					      \
-   }									      \
-   for (/*void*/; _i<8; _i++) {						      \
+   for (/*void*/; _i < 8; _i++)						      \
       *_p++ = 0;							      \
-   }									      \
-   (p) = (uint8_t*)(p)+8;						      \
+   (p) = (uint8_t*)(p) + 8;						      \
+}
+
+/* Encode a 64-bit unsigned integer into a variable-sized buffer */
+/* (Assumes that the high bits of the integer are zero) */
+#  define UINT64ENCODE_VAR(p, n, l) {					      \
+   uint64_t _n = (n);							      \
+   size_t _i;								      \
+   uint8_t *_p = (uint8_t*)(p);						      \
+									      \
+   for(_i = 0; _i < l; _i++, _n >>= 8)					      \
+      *_p++ = (uint8_t)(_n & 0xff);					      \
+   (p) = (uint8_t*)(p) + l;						      \
 }
 
 /* DECODE converts little endian bytes pointed by p to integer values and store
@@ -140,9 +148,8 @@ typedef struct H5F_t H5F_t;
    size_t _i;								      \
    n = 0;								      \
    (p) += 8;								      \
-   for (_i=0; _i<sizeof(int64_t); _i++) {				      \
-      n = (n<<8) | *(--p);						      \
-   }									      \
+   for (_i = 0; _i < sizeof(int64_t); _i++)					      \
+      n = (n << 8) | *(--p);						      \
    (p) += 8;								      \
 }
 
@@ -151,19 +158,22 @@ typedef struct H5F_t H5F_t;
    size_t _i;								      \
    n = 0;								      \
    (p) += 8;								      \
-   for (_i=0; _i<sizeof(uint64_t); _i++) {				      \
-      n = (n<<8) | *(--p);						      \
-   }									      \
+   for (_i = 0; _i < sizeof(uint64_t); _i++)				      \
+      n = (n << 8) | *(--p);						      \
    (p) += 8;								      \
 }
 
-#define NBYTEENCODE(d, s, n)    do { HDmemcpy(d,s,n); d += n; } while (0)
-
-/*
- * Note:  the NBYTEDECODE macro is backwards from the memcpy() routine, in
- *	  the spirit of the other DECODE macros.
- */
-#define NBYTEDECODE(s, d, n)    do { HDmemcpy(d,s,n); s += n; } while (0)
+/* Decode a variable-sized buffer into a 64-bit unsigned integer */
+/* (Assumes that the high bits of the integer will be zero) */
+#  define UINT64DECODE_VAR(p, n, l) {					      \
+   size_t _i;								      \
+									      \
+   n = 0;								      \
+   (p) += l;								      \
+   for (_i = 0; _i < l; _i++)						      \
+      n = (n << 8) | *(--p);						      \
+   (p) += l;								      \
+}
 
 /* Address-related macros */
 #define H5F_addr_overflow(X,Z)	(HADDR_UNDEF==(X) ||			      \
@@ -237,35 +247,28 @@ typedef struct H5F_t H5F_t;
 
 
 /* Macros to encode/decode offset/length's for storing in the file */
-#ifdef NOT_YET
-#define H5F_ENCODE_OFFSET(f,p,o) (H5F_SIZEOF_ADDR(f)==4 ? UINT32ENCODE(p,o) \
-    : H5F_SIZEOF_ADDR(f)==8 ? UINT64ENCODE(p,o) \
-    : H5F_SIZEOF_ADDR(f)==2 ? UINT16ENCODE(p,o) \
-    : H5FPencode_unusual_offset(f,&(p),(uint8_t*)&(o)))
-#else /* NOT_YET */
 #define H5F_ENCODE_OFFSET(f,p,o) switch(H5F_SIZEOF_ADDR(f)) {		      \
     case 4: UINT32ENCODE(p,o); break;					      \
     case 8: UINT64ENCODE(p,o); break;					      \
     case 2: UINT16ENCODE(p,o); break;					      \
 }
-#endif /* NOT_YET */
 
-#define H5F_DECODE_OFFSET(f,p,o) switch (H5F_SIZEOF_ADDR (f)) {	\
-   case 4: UINT32DECODE (p, o);	break;							\
-   case 8: UINT64DECODE (p, o);	break;							\
-   case 2: UINT16DECODE (p, o);	break;							\
+#define H5F_DECODE_OFFSET(f,p,o) switch (H5F_SIZEOF_ADDR (f)) {		      \
+    case 4: UINT32DECODE(p, o); break;					      \
+    case 8: UINT64DECODE(p, o); break;					      \
+    case 2: UINT16DECODE(p, o); break;					      \
 }
 
-#define H5F_ENCODE_LENGTH(f,p,l) switch(H5F_SIZEOF_SIZE(f)) {   \
-   case 4: UINT32ENCODE(p,l); break;					      \
-   case 8: UINT64ENCODE(p,l); break;					      \
-   case 2: UINT16ENCODE(p,l); break;					      \
+#define H5F_ENCODE_LENGTH(f,p,l) switch(H5F_SIZEOF_SIZE(f)) {		      \
+    case 4: UINT32ENCODE(p,l); break;					      \
+    case 8: UINT64ENCODE(p,l); break;					      \
+    case 2: UINT16ENCODE(p,l); break;					      \
 }
 
-#define H5F_DECODE_LENGTH(f,p,l) switch(H5F_SIZEOF_SIZE(f)) {   \
-   case 4: UINT32DECODE(p,l); break;					      \
-   case 8: UINT64DECODE(p,l); break;					      \
-   case 2: UINT16DECODE(p,l); break;					      \
+#define H5F_DECODE_LENGTH(f,p,l) switch(H5F_SIZEOF_SIZE(f)) {		      \
+    case 4: UINT32DECODE(p,l); break;					      \
+    case 8: UINT64DECODE(p,l); break;					      \
+    case 2: UINT16DECODE(p,l); break;					      \
 }
 
 /*
