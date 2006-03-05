@@ -1915,6 +1915,16 @@
 ./hl/test/test_table_le.hdf5
 ./hl/test/test_table_be.hdf5
 ./hl/test/test_table_cray.hdf5
+./hl/tools/gif2h5/Makefile.in
+./hl/tools/gif2h5/decompress.c
+./hl/tools/gif2h5/gif.h
+./hl/tools/gif2h5/gif2hdf.c
+./hl/tools/gif2h5/gif2mem.c
+./hl/tools/gif2h5/gifread.c
+./hl/tools/gif2h5/hdf2gif.c
+./hl/tools/gif2h5/hdfgifwr.c
+./hl/tools/gif2h5/readhdf.c
+./hl/tools/gif2h5/writehdf.c
 
 
 
