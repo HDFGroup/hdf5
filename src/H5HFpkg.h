@@ -258,7 +258,7 @@ H5_DLL herr_t H5HF_cache_dblock_dest(H5F_t *f, H5HF_direct_t *dblock);
 H5_DLL herr_t H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     FILE *stream, int indent, int fwidth);
 H5_DLL herr_t H5HF_dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-    FILE *stream, int indent, int fwidth, haddr_t hdr_addr, unsigned nrec);
+    FILE *stream, int indent, int fwidth, haddr_t hdr_addr, size_t nrec);
 
 /* Testing routines */
 #ifdef H5HF_TESTING
