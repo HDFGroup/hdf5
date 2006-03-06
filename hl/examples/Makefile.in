@@ -35,7 +35,11 @@ hdf5_builddir=$(top_builddir)/src
 ## List all source files here. The list of object files will be
 ## created by replacing the `.cpp' with a `.lo'. This list is necessary
 ## for building automatic dependencies.
-TEST_SRC=ex_lite1.c ex_lite2.c ex_lite3.c
+TEST_SRC=ex_lite1.c ex_lite2.c ex_lite3.c ex_image1.c ex_image2.c \
+         ex_table_01.c ex_table_02.c ex_table_03.c ex_table_04.c \
+         ex_table_05.c ex_table_06.c ex_table_07.c ex_table_08.c \
+         ex_table_09.c ex_table_10.c ex_table_11.c ex_table_12.c
+
 TEST_OBJ=$(TEST_SRC:.c=.lo)
 
 EXAMPLE_PROGS=$(TEST_SRC)
@@ -77,5 +81,134 @@ ex_lite3: $(srcdir)/ex_lite3.c
 	  echo $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;               \
 	  $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                  \
 	fi
+
+ex_image1: $(srcdir)/ex_image1.c
+	@if test "X$(PARALLEL)" = "Xno"; then                           \
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                \
+	  $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                     \
+	else                                                            \
+	  echo $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;               \
+	  $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                  \
+	fi
+
+ex_image2: $(srcdir)/ex_image2.c
+	@if test "X$(PARALLEL)" = "Xno"; then                           \
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                \
+	  $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                     \
+	else                                                            \
+	  echo $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;               \
+	  $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                  \
+	fi
+
+ex_table_01: $(srcdir)/ex_table_01.c
+	@if test "X$(PARALLEL)" = "Xno"; then                           \
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                \
+	  $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                     \
+	else                                                            \
+	  echo $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;               \
+	  $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                  \
+	fi
+
+ex_table_02: $(srcdir)/ex_table_02.c
+	@if test "X$(PARALLEL)" = "Xno"; then                           \
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                \
+	  $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                     \
+	else                                                            \
+	  echo $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;               \
+	  $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                  \
+	fi
+
+ex_table_03: $(srcdir)/ex_table_03.c
+	@if test "X$(PARALLEL)" = "Xno"; then                           \
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                \
+	  $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                     \
+	else                                                            \
+	  echo $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;               \
+	  $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                  \
+	fi
+
+ex_table_04: $(srcdir)/ex_table_04.c
+	@if test "X$(PARALLEL)" = "Xno"; then                           \
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                \
+	  $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                     \
+	else                                                            \
+	  echo $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;               \
+	  $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                  \
+	fi
+
+ex_table_05: $(srcdir)/ex_table_05.c
+	@if test "X$(PARALLEL)" = "Xno"; then                           \
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                \
+	  $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                     \
+	else                                                            \
+	  echo $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;               \
+	  $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                  \
+	fi
+
+ex_table_06: $(srcdir)/ex_table_06.c
+	@if test "X$(PARALLEL)" = "Xno"; then                           \
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                \
+	  $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                     \
+	else                                                            \
+	  echo $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;               \
+	  $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                  \
+	fi
+
+ex_table_07: $(srcdir)/ex_table_07.c
+	@if test "X$(PARALLEL)" = "Xno"; then                           \
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                \
+	  $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                     \
+	else                                                            \
+	  echo $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;               \
+	  $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                  \
+	fi
+
+ex_table_08: $(srcdir)/ex_table_08.c
+	@if test "X$(PARALLEL)" = "Xno"; then                           \
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                \
+	  $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                     \
+	else                                                            \
+	  echo $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;               \
+	  $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                  \
+	fi
+
+ex_table_09: $(srcdir)/ex_table_09.c
+	@if test "X$(PARALLEL)" = "Xno"; then                           \
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                \
+	  $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                     \
+	else                                                            \
+	  echo $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;               \
+	  $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                  \
+	fi
+
+ex_table_10: $(srcdir)/ex_table_10.c
+	@if test "X$(PARALLEL)" = "Xno"; then                           \
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                \
+	  $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                     \
+	else                                                            \
+	  echo $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;               \
+	  $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                  \
+	fi
+
+ex_table_11: $(srcdir)/ex_table_11.c
+	@if test "X$(PARALLEL)" = "Xno"; then                           \
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                \
+	  $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                     \
+	else                                                            \
+	  echo $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;               \
+	  $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                  \
+	fi
+
+ex_table_12: $(srcdir)/ex_table_12.c
+	@if test "X$(PARALLEL)" = "Xno"; then                           \
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                \
+	  $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                     \
+	else                                                            \
+	  echo $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;               \
+	  $(H5PCC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;                  \
+	fi
+
+
+
 
 @CONCLUDE@
