@@ -31,6 +31,7 @@ h5debug.lo: \
    $(top_srcdir)/src/H5FDpublic.h \
    $(top_srcdir)/src/H5Cprivate.h \
    $(top_srcdir)/src/H5Cpublic.h \
+   $(top_srcdir)/src/H5FLprivate.h \
    $(top_srcdir)/src/H5RCprivate.h \
    $(top_srcdir)/src/H5Dprivate.h \
    $(top_srcdir)/src/H5Dpublic.h \
@@ -41,8 +42,6 @@ h5debug.lo: \
    $(top_srcdir)/src/H5Oprivate.h \
    $(top_srcdir)/src/H5Opublic.h \
    $(top_srcdir)/src/H5Spublic.h \
-   $(top_srcdir)/src/H5HGprivate.h \
-   $(top_srcdir)/src/H5HGpublic.h \
    $(top_srcdir)/src/H5Tprivate.h \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5MMpublic.h \
@@ -56,6 +55,8 @@ h5debug.lo: \
    $(top_srcdir)/src/H5Fpkg.h \
    $(top_srcdir)/src/H5FOprivate.h \
    $(top_srcdir)/src/H5SLprivate.h \
+   $(top_srcdir)/src/H5HGprivate.h \
+   $(top_srcdir)/src/H5HGpublic.h \
    $(top_srcdir)/src/H5HLprivate.h \
    $(top_srcdir)/src/H5HLpublic.h \
    $(top_srcdir)/src/H5Iprivate.h \

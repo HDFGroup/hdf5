@@ -1429,18 +1429,6 @@
 ./tools/Dependencies
 ./tools/Makefile.in
 
-./tools/gifconv/Dependencies
-./tools/gifconv/Makefile.in
-./tools/gifconv/decompress.c
-./tools/gifconv/gif.h
-./tools/gifconv/gif2hdf.c
-./tools/gifconv/gif2mem.c
-./tools/gifconv/gifread.c
-./tools/gifconv/hdf2gif.c
-./tools/gifconv/hdfgifwr.c
-./tools/gifconv/readhdf.c
-./tools/gifconv/writehdf.c
-
 ./tools/h5dump/Dependencies
 ./tools/h5dump/Makefile.in
 ./tools/h5dump/h5dump.c
@@ -1916,6 +1904,7 @@
 ./hl/test/test_table_le.hdf5
 ./hl/test/test_table_be.hdf5
 ./hl/test/test_table_cray.hdf5
+./hl/tools/gif2h5/Dependencies
 ./hl/tools/gif2h5/Makefile.in
 ./hl/tools/gif2h5/decompress.c
 ./hl/tools/gif2h5/gif.h

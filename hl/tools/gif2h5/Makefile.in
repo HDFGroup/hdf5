@@ -14,7 +14,7 @@
 ## HDF5 Library Makefile(.in)
 ##
 top_srcdir=@top_srcdir@
-top_builddir=../..
+top_builddir=../../..
 srcdir=@srcdir@
 @COMMENCE@
 
@@ -31,8 +31,9 @@ TEST_SCRIPTS=
 
 ## These are our main targets: library and tools.
 ##
-LIBTOOLS=../lib/libh5tools.la
+LIBTOOLS=$(top_builddir)/tools/lib/libh5tools.la
 LIBHDF5=$(top_builddir)/src/libhdf5.la
+LIBHDF5_HL=$(top_builddir)/hl/src/libhdf5_hl.la
 
 PUB_PROGS= gif2h5 h52gif
 PROGS=$(PUB_PROGS) $(TEST_PROGS)
@@ -62,12 +63,12 @@ check test _test: $(PROGS)
 ## How to build the programs...They all depend on the hdf5 library and
 ## the tools library compiled in this directory.
 ##
-$(PROGS): $(LIBTOOLS) $(LIBHDF5)
+$(PROGS): $(LIBHDF5_HL) $(LIBTOOLS) $(LIBHDF5)
 
 gif2h5: gif2hdf.lo gif2mem.lo decompress.lo gifread.lo writehdf.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ gif2hdf.lo gif2mem.lo decompress.lo gifread.lo writehdf.lo  $(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ gif2hdf.lo gif2mem.lo decompress.lo gifread.lo writehdf.lo  $(LIBHDF5_HL) $(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 h52gif: hdf2gif.lo hdfgifwr.lo readhdf.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ hdf2gif.lo hdfgifwr.lo readhdf.lo $(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ hdf2gif.lo hdfgifwr.lo readhdf.lo $(LIBHDF5_HL) $(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@

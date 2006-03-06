@@ -428,7 +428,8 @@ testh5repack_attr.lo: \
    $(srcdir)/h5repack.h \
    $(top_srcdir)/tools/lib/h5trav.h \
    $(top_srcdir)/tools/lib/h5diff.h \
-   $(top_srcdir)/tools/lib/h5tools.h
+   $(top_srcdir)/tools/lib/h5tools.h \
+   $(srcdir)/testh5repack.h
 testh5repack_dset.lo: \
    $(srcdir)/testh5repack_dset.c \
    $(top_srcdir)/src/hdf5.h \
@@ -471,7 +472,8 @@ testh5repack_dset.lo: \
    $(srcdir)/h5repack.h \
    $(top_srcdir)/tools/lib/h5trav.h \
    $(top_srcdir)/tools/lib/h5diff.h \
-   $(top_srcdir)/tools/lib/h5tools.h
+   $(top_srcdir)/tools/lib/h5tools.h \
+   $(srcdir)/testh5repack.h
 testh5repack_main.lo: \
    $(srcdir)/testh5repack_main.c \
    $(top_srcdir)/src/hdf5.h \
@@ -514,7 +516,8 @@ testh5repack_main.lo: \
    $(srcdir)/h5repack.h \
    $(top_srcdir)/tools/lib/h5trav.h \
    $(top_srcdir)/tools/lib/h5diff.h \
-   $(top_srcdir)/tools/lib/h5tools.h
+   $(top_srcdir)/tools/lib/h5tools.h \
+   $(srcdir)/testh5repack.h
 testh5repack_make.lo: \
    $(srcdir)/testh5repack_make.c \
    $(top_srcdir)/src/hdf5.h \
@@ -557,7 +560,8 @@ testh5repack_make.lo: \
    $(srcdir)/h5repack.h \
    $(top_srcdir)/tools/lib/h5trav.h \
    $(top_srcdir)/tools/lib/h5diff.h \
-   $(top_srcdir)/tools/lib/h5tools.h
+   $(top_srcdir)/tools/lib/h5tools.h \
+   $(srcdir)/testh5repack.h
 testh5repack_util.lo: \
    $(srcdir)/testh5repack_util.c \
    $(top_srcdir)/src/hdf5.h \
@@ -597,4 +601,5 @@ testh5repack_util.lo: \
    $(srcdir)/h5repack.h \
    $(top_srcdir)/tools/lib/h5trav.h \
    $(top_srcdir)/tools/lib/h5diff.h \
-   $(top_srcdir)/tools/lib/h5tools.h
+   $(top_srcdir)/tools/lib/h5tools.h \
+   $(srcdir)/testh5repack.h

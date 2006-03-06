@@ -2403,7 +2403,9 @@ if test "X$HDF5_HL" = "Xyes"; then
  HL_FILES="hl/Makefile
 	   hl/examples/Makefile
 	   hl/src/Makefile
-           hl/test/Makefile"
+           hl/test/Makefile
+           hl/tools/Makefile
+           hl/tools/gif2h5/Makefile"
 fi
 
 AC_CONFIG_FILES([src/libhdf5.settings
@@ -2432,7 +2434,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/lib/Makefile
                  tools/misc/Makefile
                  tools/misc/h5cc
-                 tools/gifconv/Makefile
                  examples/Makefile
                  doc/Makefile
                  doc/html/Makefile

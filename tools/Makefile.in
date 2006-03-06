@@ -19,7 +19,7 @@ srcdir=@srcdir@
 
 ## All subdirectories except for the ``lib'' subdirectory.
 ##
-SUBDIRS=h5dump h5diff h5ls misc gifconv h5import h5repack h5jam
+SUBDIRS=h5dump h5diff h5ls misc h5import h5repack h5jam
 
 ## Add include directory to the C preprocessor flags, add -lh5tools and
 ## -lhdf5 to the list of libraries.

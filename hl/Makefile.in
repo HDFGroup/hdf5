@@ -23,7 +23,7 @@ srcdir=@srcdir@
 @COMMENCE@
 
 # Subdirectories in build-order (not including 'examples')
-SUBDIRS=src test 
+SUBDIRS=src test tools
 
 ##############################################################################
 ##		    T A R G E T S
