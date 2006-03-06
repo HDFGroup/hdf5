@@ -31,30 +31,23 @@ EXAMPLEDIR=$(docdir)/hdf5/examples/hl/c
 # Don't tell automake about them, because if it knew they were programs,
 # it would try to compile them instead of using the h5cc script.
 # Use the boilerplate in config/examples.am instead.
-TEST_PROG = ex_lite1 ex_lite2 ex_lite3 \
+TEST_PROG = ex_lite1 ex_lite2 ex_lite3 ptExampleFL ptExampleVL \
             ex_image1 ex_image2 \
             ex_table_01 ex_table_02 ex_table_03 ex_table_04 \
             ex_table_05 ex_table_06 ex_table_07 ex_table_08 \
             ex_table_09 ex_table_10 ex_table_11 ex_table_12 \
-            ex_ds1 \
-            ptExampleFL ptExampleVL
+            ex_ds1
 
 # Install files
 # List all file that should be installed in examples directory
-INSTALL_FILES = ex_lite1.c ex_lite2.c ex_lite3.c \
-                ex_image1.c ex_image2.c \
-                ex_table_01.c ex_table_02.c ex_table_03.c ex_table_04.c \
-                ex_table_05.c ex_table_06.c ex_table_07.c ex_table_08.c \
-                ex_table_09.c ex_table_10.c ex_table_11.c ex_table_12.c \
-                ex_ds1.c \
-                ptExampleFL.c ptExampleVL.c
+INSTALL_FILES = ptExampleFL.c ptExampleVL.c
 
 # Additional dependencies for each program are listed below.
 $(EXTRA_PROG): $(LIBHDF5) $(LIBH5_HL)
 if BUILD_PARALLEL_CONDITIONAL
-    $(H5CC_PP) $(CFLAGS) -o $@ $(srcdir)/$@.c;
+	$(H5CC_PP) $(CFLAGS) -o $@ $(srcdir)/$@.c;
 else
-    $(H5CC) $(CFLAGS) -o $@ $(srcdir)/$@.c;
+	$(H5CC) $(CFLAGS) -o $@ $(srcdir)/$@.c;
 endif
 
 # ex_lite2 uses a file created by ex_lite1
@@ -69,21 +62,22 @@ ex_lite2.chkexe_: ex_lite1.chkexe_
 ex_lite1: $(srcdir)/ex_lite1.c
 ex_lite2: $(srcdir)/ex_lite2.c
 ex_lite3: $(srcdir)/ex_lite3.c
-ex_image1: $(srcdir)/ex_image1.c
-ex_image2: $(srcdir)/ex_image2.c
-ex_table_01: $(srcdir)/ex_table_01.c
-ex_table_02: $(srcdir)/ex_table_02.c
-ex_table_03: $(srcdir)/ex_table_03.c
-ex_table_04: $(srcdir)/ex_table_04.c
-ex_table_05: $(srcdir)/ex_table_05.c
-ex_table_06: $(srcdir)/ex_table_06.c
-ex_table_07: $(srcdir)/ex_table_07.c
-ex_table_08: $(srcdir)/ex_table_08.c
-ex_table_09: $(srcdir)/ex_table_09.c
-ex_table_10: $(srcdir)/ex_table_10.c
-ex_table_11: $(srcdir)/ex_table_11.c
-ex_table_12: $(srcdir)/ex_table_12.c
 ptExampleFL: $(srcdir)/ptExampleFL.c
 ptExampleVL: $(srcdir)/ptExampleVL.c
+ex_image1: $(srcdir)/ex_image1.c
+ex_image2: $(srcdir)/ex_image2.c
+ex_table01: $(srcdir)/ex_table01.c
+ex_table02: $(srcdir)/ex_table02.c
+ex_table03: $(srcdir)/ex_table03.c
+ex_table04: $(srcdir)/ex_table04.c
+ex_table05: $(srcdir)/ex_table05.c
+ex_table06: $(srcdir)/ex_table06.c
+ex_table07: $(srcdir)/ex_table07.c
+ex_table08: $(srcdir)/ex_table08.c
+ex_table09: $(srcdir)/ex_table09.c
+ex_table10: $(srcdir)/ex_table10.c
+ex_table11: $(srcdir)/ex_table11.c
+ex_table12: $(srcdir)/ex_table12.c
+
 include $(top_srcdir)/config/examples.am
 include $(top_srcdir)/config/conclude.am
