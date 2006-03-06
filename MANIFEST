@@ -1904,6 +1904,7 @@
 ./hl/test/test_table_le.hdf5
 ./hl/test/test_table_be.hdf5
 ./hl/test/test_table_cray.hdf5
+./hl/tools/Makefile.in
 ./hl/tools/gif2h5/Dependencies
 ./hl/tools/gif2h5/Makefile.in
 ./hl/tools/gif2h5/decompress.c
