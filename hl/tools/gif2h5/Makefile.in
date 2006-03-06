@@ -22,7 +22,8 @@ srcdir=@srcdir@
 ## -lhdf5 to the list of libraries.
 ##
 CPPFLAGS=-I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src  \
-         -I$(top_srcdir)/tools/lib @CPPFLAGS@
+         -I$(top_srcdir)/tools/lib -I$(top_srcdir)/hl/src           \
+         -I$(top_builddir)/hl/src @CPPFLAGS@
 
 ## Test programs and scripts.
 ##
