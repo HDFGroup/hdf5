@@ -3154,8 +3154,8 @@ void HDsrand(unsigned int seed)
 #ifdef H5_HAVE_RAND_R
     g_seed = seed; 
 #elif H5_HAVE_RANDOM
-    return srandom(seed);
+    srandom(seed);
 #else
-    return srand(seed);
+    srand(seed);
 #endif
 }
