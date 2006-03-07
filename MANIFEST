@@ -1589,10 +1589,8 @@
 ./windows/tools/h5debug/h5debug.dsp
 ./windows/tools/h5debugdll/h5debugdll.dsp
 ./windows/tools/h5dumpdll/h5dumpdll.dsp
-./windows/tools/gifconv/gif2h5.dsp
 ./windows/tools/h5diffdll/h5diffdll.dsp
 ./windows/tools/h5repackdll/h5repackdll.dsp
-./windows/tools/gifconv/h52gif.dsp
 ./windows/tools/h5diff/h5diff.dsp
 ./windows/tools/h5ls/h5ls.dsp
 ./windows/tools/h5lsdll/h5lsdll.dsp
@@ -1685,9 +1683,6 @@
 ./windows/fortran/examples/selecteletestdll/selecteletestdll.dsp
 
 #Windows High Level C Examples
-./windows/hl/examples/ex_images.c
-./windows/hl/examples/ex_lite.c
-./windows/hl/examples/ex_table.c
 ./windows/hl/examples/test_hl_cexamples.BAT
 ./windows/hl/examples/allhlcexamples/allhlcexamples.dsp
 ./windows/hl/examples/allhlcexamples/allhlcexamples.dsw
@@ -1697,6 +1692,10 @@
 ./windows/hl/examples/ex_litedll/ex_litedll.dsp
 ./windows/hl/examples/ex_table/ex_table.dsp
 ./windows/hl/examples/ex_tabledll/ex_tabledll.dsp
+./windows/hl/examples/ex_ds/ex_ds.dsp
+./windows/hl/examples/ex_dsdll/ex_dsdll.dsp
+./windows/hl/examples/ex_packet/ex_packet.dsp
+./windows/hl/examples/ex_packetdll/ex_packetdll.dsp
 
 #Windows High Level Fortran Examples
 ./windows/hl/fortran/examples/exlite.f90
@@ -1706,4 +1705,7 @@
 ./windows/hl/fortran/examples/ex_lite/ex_lite.dsp
 ./windows/hl/fortran/examples/ex_litedll/ex_litedll.dsp
 
+#Window High Level Tools
+./windows/hl/tools/gifconv/gif2h5.dsp
+./windows/hl/tools/gifconv/h52gif.dsp
 
