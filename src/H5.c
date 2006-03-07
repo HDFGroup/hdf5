@@ -3114,3 +3114,48 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
     HDfflush (out);
     return event_time.etime;
 }
+
+/*-------------------------------------------------------------------------
+ * Function:	HDrand/HDsrand
+ *
+ * Purpose:	Wrapper function for rand.  If rand_r exists on this system,
+ * 		use it.  Otherwise, just call random() or rand().
+ *
+ * 		Wrapper function for srand.  If rand_r is available, it will keep
+ * 		track of the seed locally instead of using srand() which modifies
+ * 		global state and can break other programs.  Otherwise, just call
+ * 		srandom() or srand().
+ *
+ * Return:	Success:	Random number from 0 to RAND_MAX
+ *
+ *		Failure:	Cannot fail.
+ *
+ * Programmer:	Leon Arber
+ *              March 6, 2006.
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static unsigned int g_seed = 42;
+
+int HDrand(void)
+{
+#ifdef H5_HAVE_RAND_R
+    return rand_r(&g_seed);
+#elif H5_HAVE_RANDOM
+    return random();
+#else
+    return rand();
+#endif
+}
+
+void HDsrand(unsigned int seed)
+{
+#ifdef H5_HAVE_RAND_R
+    g_seed = seed; 
+#elif H5_HAVE_RANDOM
+    return srandom(seed);
+#else
+    return srand(seed);
+#endif
+}

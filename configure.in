@@ -1606,7 +1606,7 @@ dnl
 AC_CHECK_FUNCS(alarm fork frexpf frexpl gethostname getpwuid getrusage)
 AC_CHECK_FUNCS(BSDgettimeofday longjmp setsysinfo sigaction)
 AC_CHECK_FUNCS(signal snprintf vasprintf strdup system waitpid)
-AC_CHECK_FUNCS(random srandom)
+AC_CHECK_FUNCS(rand_r random srandom)
 AC_CHECK_FUNCS(tmpfile)
 
 dnl Check for vsnprintf() separately, so we can detect situations where it

@@ -3811,7 +3811,7 @@ test_select_hyper_union_random_5d(hid_t read_plist)
 #else /* QAK */
         seed=987909620;
 #endif /* QAK */
-        srand(seed);
+        HDsrand(seed);
 
 #ifdef QAK
 printf("test_num=%d, seed=%u\n",test_num,seed);
