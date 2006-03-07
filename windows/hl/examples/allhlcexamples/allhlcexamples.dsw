@@ -3,7 +3,7 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "allhlcexamples"=".\allhlcexamples.dsp" - Package Owner=<4>
+Project: "allhlcexamples"=.\allhlcexamples.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -29,11 +29,23 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name ex_tabledll
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ex_ds
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ex_dsdll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ex_packet
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ex_packetdll
+    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "ex_images"="..\ex_images\ex_images.dsp" - Package Owner=<4>
+Project: "ex_ds"=..\ex_ds\ex_ds.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -45,7 +57,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "ex_imagesdll"="..\ex_imagesdll\ex_imagesdll.dsp" - Package Owner=<4>
+Project: "ex_dsdll"=..\ex_dsdll\ex_dsdll.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -57,7 +69,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "ex_lite"="..\ex_lite\ex_lite.dsp" - Package Owner=<4>
+Project: "ex_images"=..\ex_images\ex_images.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -69,7 +81,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "ex_litedll"="..\ex_litedll\ex_litedll.dsp" - Package Owner=<4>
+Project: "ex_imagesdll"=..\ex_imagesdll\ex_imagesdll.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -81,7 +93,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "ex_table"="..\ex_table\ex_table.dsp" - Package Owner=<4>
+Project: "ex_lite"=..\ex_lite\ex_lite.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -93,7 +105,55 @@ Package=<4>
 
 ###############################################################################
 
-Project: "ex_tabledll"="..\ex_tabledll\ex_tabledll.dsp" - Package Owner=<4>
+Project: "ex_litedll"=..\ex_litedll\ex_litedll.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "ex_packet"=..\ex_packet\ex_packet.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "ex_packetdll"=..\ex_packetdll\ex_packetdll.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "ex_table"=..\ex_table\ex_table.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "ex_tabledll"=..\ex_tabledll\ex_tabledll.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
