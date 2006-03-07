@@ -51,12 +51,14 @@ if test "X-" = "X-$F9X"; then
             F9X_BASENAME=mpif90
             ;;
     esac
-else
+fi
+
+# Figure out the F9X_BASENAME
     case $F9X in
         # The PGI and Intel compilers are automatically detected below
         ifc*|ifort*|pgf90*)
             ;;
-	g95)
+	g95|*/g95)
 	    F9X_BASENAME=g95
 	    ;;
 	*mpif90)
@@ -96,7 +98,6 @@ else
             $RM $tmpfile
             ;;
     esac
-fi
 
 #
 # HDF5 integers
