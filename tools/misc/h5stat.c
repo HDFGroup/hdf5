@@ -447,7 +447,7 @@ printf("walk: fullname = %s\n", fullname);
                 assert(dcpl > 0);
 
                 lout = H5Pget_layout(dcpl);
-                assert(lout > 0);
+                assert(lout >= 0);
 
                 /* Track the layout type for dataset */
                 (iter->dset_layouts[lout])++;
