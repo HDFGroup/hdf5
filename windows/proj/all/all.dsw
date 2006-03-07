@@ -51,12 +51,6 @@ Package=<4>
     Project_Dep_Name gheap
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name gif2h5
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name h52gif
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name h5debug
     End Project Dependency
     Begin Project Dependency
@@ -312,12 +306,6 @@ Package=<4>
     Project_Dep_Name taligndll
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name gif2h5dll
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name h52gifdll
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name testh5repack_detect_szipdll
     End Project Dependency
     Begin Project Dependency
@@ -406,6 +394,18 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name fheapdll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name gif2h5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name gif2h5dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name h52gif
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name h52gifdll
     End Project Dependency
 }}}
 
@@ -1323,43 +1323,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "gif2h5"=..\..\tools\gifconv\gif2h5.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name hdf5
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name hdf5_hl
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "gif2h5dll"=..\..\tools\gifconvdll\gif2h5dll.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name hdf5dll
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name hdf5_hldll
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "h52gif"=..\..\tools\gifconv\h52gif.dsp - Package Owner=<4>
+Project: "gif2h5"=..\..\hl\tools\gifconv\gif2h5.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1373,11 +1337,14 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name toolslib
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hl
+    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "h52gifdll"=..\..\tools\gifconvdll\h52gifdll.dsp - Package Owner=<4>
+Project: "gif2h5dll"=..\..\hl\tools\gifconvdll\gif2h5dll.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1385,6 +1352,51 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hldll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name toolslibD
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "h52gif"=..\..\hl\tools\gifconv\h52gif.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hl
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name toolslib
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "h52gifdll"=..\..\hl\tools\gifconvdll\h52gifdll.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hldll
+    End Project Dependency
     Begin Project Dependency
     Project_Dep_Name hdf5dll
     End Project Dependency
