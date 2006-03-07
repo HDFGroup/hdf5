@@ -313,7 +313,7 @@ HDfprintf(stderr, "%s: size = %Zu\n", FUNC, size);
     /* Check if this is the first object in the heap */
     if(shared->next_man_block == 0) {
         /* Check if the object can fit in a direct block of the starting block size */
-#ifdef QAK
+#ifndef QAK
 HDfprintf(stderr, "%s: H5HF_MAN_ABS_DIRECT_OVERHEAD_SIZE = %u\n", FUNC, H5HF_MAN_ABS_DIRECT_OVERHEAD_SIZE(shared, shared->man_dtable_info.cparam.start_block_size));
 HDfprintf(stderr, "%s: H5HF_MAN_ABS_DIRECT_OBJ_PREFIX_LEN_SIZE = %u\n", FUNC, H5HF_MAN_ABS_DIRECT_OBJ_PREFIX_LEN_SIZE(shared, shared->man_dtable_info.cparam.start_block_size));
 #endif /* QAK */

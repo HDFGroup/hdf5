@@ -319,7 +319,7 @@ H5V_vector_inc(int n, hsize_t *v1, const hsize_t *v2)
  *-------------------------------------------------------------------------
  */
 static H5_inline unsigned 
-H5V_log2(unsigned n)
+H5V_log2(uint32_t n)
 {
     static const unsigned MultiplyDeBruijnBitPosition[32] = 
     {
@@ -327,7 +327,7 @@ H5V_log2(unsigned n)
             31, 27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9
     };
 
-    return(MultiplyDeBruijnBitPosition[(n * 0x077CB531UL) >> 27]);
+    return(MultiplyDeBruijnBitPosition[(n * (uint32_t)0x077CB531UL) >> 27]);
 } /* H5V_log2() */
 
 #endif /* H5Vprivate_H */
