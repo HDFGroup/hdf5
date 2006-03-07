@@ -278,12 +278,10 @@ main(void)
     fapl = h5_fileaccess();
 
     /* Test fractal heap creation */
-#ifdef QAK
     nerrors += test_create(fapl);
 
     /* Test fractal heap object insertion */
     nerrors += test_abs_insert_first(fapl);
-#endif /* QAK */
 
     if(nerrors)
         goto error;
