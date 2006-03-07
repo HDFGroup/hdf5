@@ -772,6 +772,8 @@ typedef off_t                   h5_stat_size_t;
 #define HDputs(S)		puts(S)
 #define HDqsort(M,N,Z,F)	qsort(M,N,Z,F)
 #define HDraise(N)		raise(N)
+H5_DLL int HDrand();
+H5_DLL void HDsrand(unsigned int seed);
 #define HDrandom()		HDrand()
 #define HDsrandom(S)		HDsrand(S)
 #define HDread(F,M,Z)		read(F,M,Z)
@@ -1407,6 +1409,4 @@ H5_DLL int H5Z_term_interface(void);
 /* Functions for debugging */
 H5_DLL herr_t H5_buffer_dump(FILE *stream, int indent, uint8_t *buf,
     uint8_t *marker, size_t buf_offset, size_t buf_size);
-
 #endif
-
