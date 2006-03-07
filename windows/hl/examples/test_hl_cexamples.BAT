@@ -16,6 +16,9 @@
 @:: Created      : 07/26/2005
 @:: Last Modified: 
 
+:: Track errors
+set total_error=0
+
 if %1.==. GOTO WRONG
 if "%1"=="/?" GOTO HELP
 if "%1"=="release" GOTO CONFIG
@@ -31,9 +34,20 @@ GOTO WRONG
 :TEST
 echo Testing %1 %2 version of High Level examples 
 echo.
-HLCexamples%1%2\ex_lite%2 
-HLCexamples%1%2\ex_images%2 
-HLCexamples%1%2\ex_table%2
+
+for %%i in (ds lite table images packet) do (
+HLCexamples%1%2\ex_%%i%2
+if not %errorlevel%==0 set /A totalerror=totalerror+1
+)
+
+
+if %total_error%==0 (
+echo.
+echo. All of the HL C Examples Passed!
+) else (
+echo.
+echo. %total_error% HL C Examples Failed!
+)
 
 GOTO END
 
