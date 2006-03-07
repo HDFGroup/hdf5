@@ -1583,8 +1583,6 @@
 ./windows/test/hdf5timingtest.bat
 
 #windows tools
-./windows/tools/gifconvdll/gif2h5dll.dsp
-./windows/tools/gifconvdll/h52gifdll.dsp
 ./windows/tools/h5diffdll/h5diffdll.dsp
 ./windows/tools/h5debug/h5debug.dsp
 ./windows/tools/h5debugdll/h5debugdll.dsp
@@ -1708,4 +1706,6 @@
 #Window High Level Tools
 ./windows/hl/tools/gifconv/gif2h5.dsp
 ./windows/hl/tools/gifconv/h52gif.dsp
+./windows/hl/tools/gifconvdll/gif2h5dll.dsp
+./windows/hl/tools/gifconvdll/h52gifdll.dsp
 
