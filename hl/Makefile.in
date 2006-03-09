@@ -95,12 +95,12 @@ check-install:
 	mostlyclean distclean maintainer-clean
 
 clean mostlyclean:
-	@@SETX@; for d in $(SUBDIRS); do		                      \
+	@@SETX@; for d in $(SUBDIRS) examples; do	                      \
 	   (cd $$d && $(MAKE) $@);					      \
 	done
 
 distclean:
-	@@SETX@; for d in $(SUBDIRS); do		                      \
+	@@SETX@; for d in $(SUBDIRS) examples; do	                      \
 	   (cd $$d && $(MAKE) $@);					      \
 	done
 	-$(RM)  Makefile
