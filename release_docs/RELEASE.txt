@@ -893,6 +893,10 @@ Linux 2.4 IA64 Intel  y       n       y    n    y        y           y
 
 Known Problems
 ==============
+* On mpich 1.2.5 and 1.2.6, we found that if more than two processes
+  contribute no IO and the application asks to do IO with collective, we found
+  that when using 4 processors, a simple collective write will be hung
+  sometimes. This can be verified with t_mpi test under testpar.
 * On IRIX6.5, when C compiler version >7.4, the complicate MPI derived data type
   code will work. However, the user should be aware to enlarge MPI_TYPE_MAX environment 
   variable to some certian value in order to use collective irregular selection code.
