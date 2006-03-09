@@ -52,3 +52,31 @@ if [ -z "$hdf5_mpi_complex_derived_datatype_works" ]; then
 	esac
     fi
 fi
+
+if [ -z "$hdf5_mpi_special_collective_io_works" ]; then
+    ccversion=`$CC -v 2>/dev/null`
+    # mpich compiler will give "mpicc for 1.2.x ..."
+    if echo "$ccversion" | grep '^mpicc for' > /dev/null ; then
+	# $CC is an MPICH compiler. Grab the version numbers.
+        ccversion=`echo $ccversion | cut -f3 -d' '`
+	case "$ccversion" in
+	    1.2.[0-6]*)
+		hdf5_mpi_special_collective_io_works='no'
+		;;
+	    1.0.2)
+		# mpich2 is recycling the version number, some report
+		# 1.0.2, some report blank.
+		hdf5_mpi_special_collective_io_works='no'
+		;;
+	    "")
+		# got blank ccversion.  Assume it is bad a mpich2.
+		hdf5_mpi_special_collective_io_works='no'
+		;;
+	    *)
+		# assume okay
+		;;
+	esac
+    fi
+fi
+
+
