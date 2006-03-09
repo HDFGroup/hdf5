@@ -1363,6 +1363,29 @@
 ./hl/c++/test/Makefile.am
 ./hl/c++/test/Makefile.in
 
+#vms files
+./vms/c++/examples/make.com
+./vms/c++/src/make.com
+./vms/c++/test/make.com
+
+./vms/fortran/examples/make.com
+./vms/fortran/src/make.com
+./vms/fortran/test/make.com
+
+./vms/examples/make.com
+./vms/src/make.com
+./vms/src/h5pubconf.h
+./vms/test/make.com
+
+./vms/tools/h5dump/make.com
+./vms/tools/h5ls/check.com
+./vms/tools/h5ls/make.com
+./vms/tools/h5diff/check.com
+./vms/tools/h5diff/make.com
+./vms/tools/h5import/make.com
+./vms/tools/h5jam/make.com
+./vms/tools/lib/make.com
+
 #windows projects
 
 #windows c++ examples
