@@ -21,6 +21,10 @@
 H5_FCDLL char * HD5f2cstring (_fcd fdesc, size_t len);
 H5_FCDLL void HD5packFstring(char *src, char *dest, size_t len);
 
+#ifdef H5_VMS
+#define H5_FC_FUNC_(name, NAME) NAME
+#endif /*H5_VMS*/
+
 /*
  *  Functions from H5Ff.c
  */
