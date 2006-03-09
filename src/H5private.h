@@ -779,7 +779,11 @@ H5_DLL void HDsrand(unsigned int seed);
 #define HDread(F,M,Z)		read(F,M,Z)
 #define HDreaddir(D)		readdir(D)
 #define HDrealloc(M,Z)		realloc(M,Z)
+#ifdef H5_VMS
+#define HDremove(Y)  remove(Y";*")
+#else           
 #define HDremove(S)		remove(S)
+#endif /*H5_VMS*/
 #define HDrename(OLD,NEW)	rename(OLD,NEW)
 #define HDrewind(F)		rewind(F)
 #define HDrewinddir(D)		rewinddir(D)
