@@ -11,11 +11,16 @@
  * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+#ifdef H5_VMS
+#include <iostream>
+#endif /*H5_VMS*/
 #include <string>
 #ifndef H5_NO_NAMESPACE
 #ifndef H5_NO_STD
     using std::string;
+#ifdef /*H5_VMS*/
+    using std::count;
+#endif /*H5_VMS*/
 #endif  // H5_NO_STD
 #endif
 
@@ -248,7 +253,6 @@ IdComponent::~IdComponent() {
 //
 // Implementation of protected functions for HDF5 Reference Interface.
 //
-
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:	IdComponent::inMemFunc
@@ -264,9 +268,15 @@ IdComponent::~IdComponent() {
 //--------------------------------------------------------------------------
 string IdComponent::inMemFunc(const char* func_name) const
 {
+#ifdef H5_VMS
+   string full_name = fromClass();
+   full_name.append("::"); 
+   full_name.append(func_name);
+#else
    string full_name = func_name;
    full_name.insert(0, "::");
    full_name.insert(0, fromClass());
+#endif /*H5_VMS*/
    return (full_name);
 }
 
@@ -400,7 +410,6 @@ bool IdComponent::p_valid_id(const hid_t obj_id) const
     else
 	return true;
 }
-
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 #ifndef H5_NO_NAMESPACE
