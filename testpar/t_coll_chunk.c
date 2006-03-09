@@ -470,7 +470,7 @@ ccslab_set(int mpi_rank,
 	block[1]  =  1;
 	stride[0] =  1;
 	stride[1] =  1;
-	count[0]  =  ((mpi_rank == (mpi_size-1))?0:SPACE_DIM1/mpi_size);
+	count[0]  =  ((mpi_rank >= MAX(1,(mpi_size-2)))?0:SPACE_DIM1/mpi_size);
 	count[1]  =  SPACE_DIM2;
 	start[0]  =  mpi_rank*count[0];
 	start[1]  =  0;

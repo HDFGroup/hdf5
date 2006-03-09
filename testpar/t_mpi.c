@@ -830,6 +830,177 @@ static int test_mpio_derived_dtype(char *filename) {
     return retcode;
 }
 /*
+
+Function: test_mpio_special_collective
+
+Test Whether collective IO is still working when more than one process 
+has no contribution to IO. To properly test this case, at least FOUR
+processes are needed.
+
+1. Details for the test:
+1) Create one derived datatype with MPI_Type_hindexed:
+
+2) Choosing at least two processes to contribute none for IO with
+   the buf size inside MPI_Write_at_all to 0.
+3) Choosing at least two processes to have real contributions for IO.
+4) Do collective IO.
+
+2. This test will fail with the MPI-IO package that doesn't support this. For example,
+mpich 1.2.6.
+
+If this bug has been fixed in the previous not-working package, this test will issue a printf message to tell the developer to change
+the configuration specific file of HDF5 so that we can change our configurationsetting to support special collective IO; currently only special collective IO.
+
+If it turns out that the previous working MPI-IO package no longer works, this test will also issue a message to inform the corresponding failure so that
+we can turn off the support for special collective IO; currently only special collective IO.
+*/
+
+static int test_mpio_special_collective(char *filename) {
+
+    char hostname[128];
+    int  mpi_size, mpi_rank;
+    MPI_File fh;
+    MPI_Datatype etype,buftype,filetype;
+    char mpi_err_str[MPI_MAX_ERROR_STRING];
+    int  mpi_err_strlen;
+    int  mpi_err;
+    char writedata[2];
+    char *buf;
+    char expect_val;
+    int  i, irank; 
+    int  count,bufcount;
+    int blocklens[2];
+    MPI_Aint offsets[2];
+    int  nerrors = 0;		/* number of errors */
+    MPI_Offset  mpi_off;
+    MPI_Status  mpi_stat;
+    int  retcode;
+
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    retcode = 0;
+
+    /* create MPI data type */
+    etype = MPI_BYTE;
+    if(mpi_rank == 0 || mpi_rank == 1) {
+        count = DIMSIZE;    
+        bufcount = 1;
+    }
+    else {
+        count = 0;
+        bufcount = 0;
+    }
+
+    blocklens[0] = count;
+    offsets[0] = mpi_rank*count;
+    blocklens[1] = count;
+    offsets[1] = (mpi_size+mpi_rank)*count;
+    
+    if(count !=0) { 
+      if((mpi_err= MPI_Type_hindexed(2,blocklens,offsets,etype,&filetype))
+       != MPI_SUCCESS){
+      	MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	printf("MPI_Type_contiguous failed (%s)\n", mpi_err_str);
+	return 1;
+      }
+
+      if((mpi_err=MPI_Type_commit(&filetype))!=MPI_SUCCESS){
+        MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	printf("MPI_Type_commit failed (%s)\n", mpi_err_str);
+	return 1;
+      }
+
+
+      if((mpi_err= MPI_Type_hindexed(2,blocklens,offsets,etype,&buftype))
+       != MPI_SUCCESS){
+      	MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	printf("MPI_Type_contiguous failed (%s)\n", mpi_err_str);
+	return 1;
+      }
+
+      if((mpi_err=MPI_Type_commit(&buftype))!=MPI_SUCCESS){
+        MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	printf("MPI_Type_commit failed (%s)\n", mpi_err_str);
+	return 1;
+      }
+     }
+     else {
+
+       filetype = MPI_BYTE;
+       buftype  = MPI_BYTE;
+     }
+
+   /* Open a file */
+    if ((mpi_err = MPI_File_open(MPI_COMM_WORLD, filename,
+	    MPI_MODE_RDWR | MPI_MODE_CREATE ,
+	    MPI_INFO_NULL, &fh))
+	    != MPI_SUCCESS){
+	MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	printf("MPI_File_open failed (%s)\n", mpi_err_str);
+	return 1;
+    }
+
+    /* each process writes some data */
+    for (i=0; i < 2*DIMSIZE; i++)
+	writedata[i] = mpi_rank*DIMSIZE + i;
+
+
+     mpi_off = 0;
+    if((mpi_err = MPI_File_set_view(fh, mpi_off, MPI_BYTE, filetype, "native", MPI_INFO_NULL))
+        != MPI_SUCCESS) {
+	MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	printf("MPI_File_set_view failed (%s)\n", mpi_err_str);
+	return 1;
+    }
+
+    buf   = writedata;
+    if ((mpi_err = MPI_File_write_at_all(fh, mpi_off, buf, bufcount, buftype,
+	    &mpi_stat))
+	    != MPI_SUCCESS){
+	MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	printf("MPI_File_write_at offset(%ld), bytes (%d), failed (%s)\n",
+		(long) mpi_off, bufcount, mpi_err_str);
+	return 1;
+    };
+
+     if ((mpi_err = MPI_File_close(&fh))
+	    != MPI_SUCCESS){
+	MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	printf("MPI_File_close failed. \n");
+	return 1;
+    };
+    
+    mpi_err = MPI_Barrier(MPI_COMM_WORLD);
+#ifdef H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS
+    if(retcode != 0) {
+	if(mpi_rank == 0) {
+	    printf("special collective IO is NOT working at this platform\n");
+	    printf("Go back to hdf5/config and find the corresponding\n");
+	    printf("configure-specific file (for example, powerpc-ibm-aix5.x) and add\n");
+	    printf("hdf5_mpi_special_collective_io_works=${hdf5_mpi_special_collective_io_works='no'}\n");
+	    printf(" at the end of the file.\n");
+	    printf(" Please report to hdfhelp@ncsa.uiuc.edu about this problem.\n");
+	}
+	retcode = 1;
+    }
+#else
+    if(retcode == 0) {
+	if(mpi_rank == 0) {
+	    printf(" This is NOT an error, What it really says is\n");
+	    printf("special collective IO is WORKING at this platform\n");
+	    printf(" Go back to hdf5/config and find the corresponding \n");
+	    printf(" configure-specific file (for example, powerpc-ibm-aix5.x) and delete the line\n");
+	    printf("hdf5_mpi_special_collective_io_works=${hdf5_mpi_special_collective_io_works='no'}\n");
+	    printf(" at the end of the file.\n");
+	    printf("Please report to hdfhelp@ncsa.uiuc.edu about this problem.\n");
+	}
+	retcode = 1;
+    }
+#endif
+    return retcode;
+}
+
+/*
  * parse the command line options
  */
 static int
@@ -947,31 +1118,6 @@ main(int argc, char **argv)
     /* set alarm. */
     ALARM_ON;
 
-    /*=======================================
-     * MPIO complicated derived datatype test
-     *=======================================*/
-    /* test_mpio_derived_dtype often hangs when fails.
-     * Do not run it if it is known NOT working unless ask to
-     * run explicitly by high verbose mode.
-     */
-#ifdef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
-    MPI_BANNER("MPIO complicated derived datatype test...");
-    ret_code = test_mpio_derived_dtype(filenames[0]);
-#else
-    if (VERBOSE_HI){
-	MPI_BANNER("MPIO complicated derived datatype test...");
-	ret_code = test_mpio_derived_dtype(filenames[0]);
-    }else{
-	MPI_BANNER("MPIO complicated derived datatype test SKIPPED.");
-	ret_code = 0;	/* fake ret_code */
-    }
-#endif
-    ret_code = errors_sum(ret_code);
-    if (mpi_rank==0 && ret_code > 0){
-	printf("***FAILED with %d total errors\n", ret_code);
-	nerrors += ret_code;
-    }
-
 
     /*=======================================
      * MPIO 1 write Many read test
@@ -1027,6 +1173,70 @@ main(int argc, char **argv)
 	printf("***FAILED with %d total errors\n", ret_code);
 	nerrors += ret_code;
     }
+
+    /*=======================================
+     * MPIO complicated derived datatype test
+     *=======================================*/
+    /* test_mpio_derived_dtype often hangs when fails.
+     * Do not run it if it is known NOT working unless ask to
+     * run explicitly by high verbose mode.
+     */
+#ifdef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
+    MPI_BANNER("MPIO complicated derived datatype test...");
+    ret_code = test_mpio_derived_dtype(filenames[0]);
+#else
+    if (VERBOSE_HI){
+	MPI_BANNER("MPIO complicated derived datatype test...");
+	ret_code = test_mpio_derived_dtype(filenames[0]);
+    }else{
+	MPI_BANNER("MPIO complicated derived datatype test SKIPPED.");
+	ret_code = 0;	/* fake ret_code */
+    }
+#endif
+    ret_code = errors_sum(ret_code);
+    if (mpi_rank==0 && ret_code > 0){
+	printf("***FAILED with %d total errors\n", ret_code);
+	nerrors += ret_code;
+    }
+
+    /*=======================================
+     * MPIO special collective IO  test
+     *=======================================*/
+    /* test_special_collective_io  often hangs when fails.
+     * Do not run it if it is known NOT working unless ask to
+     * run explicitly by high verbose mode.
+     */
+    if(mpi_size !=4){
+      MPI_BANNER("MPIO special collective io test SKIPPED.");
+      if(mpi_rank == 0){ 
+        printf("Use FOUR processes to run this test\n");
+        printf("If you still see the <test SKIPPED>, use <-vh> option to verify the test\n");
+  }
+      ret_code = 0;
+      goto sc_finish;
+    }
+    
+#ifdef H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS
+    MPI_BANNER("MPIO special collective io test...");
+    ret_code = test_mpio_special_collective(filenames[0]);
+
+#else
+    if (VERBOSE_HI){
+	MPI_BANNER("MPIO special collective io test...");
+	ret_code = test_mpio_special_collective(filenames[0]);
+    }else{
+	MPI_BANNER("MPIO special collective io test SKIPPED.");
+	ret_code = 0;	/* fake ret_code */
+    }
+#endif
+
+sc_finish: 
+    ret_code = errors_sum(ret_code);
+    if (mpi_rank==0 && ret_code > 0){
+	printf("***FAILED with %d total errors\n", ret_code);
+	nerrors += ret_code;
+    }
+
 
 finish:
     /* make sure all processes are finished before final report, cleanup
