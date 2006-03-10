@@ -18,7 +18,7 @@
 #ifndef H5_NO_NAMESPACE
 #ifndef H5_NO_STD
     using std::string;
-#ifdef /*H5_VMS*/
+#ifdef H5_VMS
     using std::count;
 #endif /*H5_VMS*/
 #endif  // H5_NO_STD
