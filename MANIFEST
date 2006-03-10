@@ -1377,13 +1377,16 @@
 ./vms/src/h5pubconf.h
 ./vms/test/make.com
 
+./vms/make.com
 ./vms/tools/h5dump/make.com
+./vms/tools/h5dump/check.com
 ./vms/tools/h5ls/check.com
 ./vms/tools/h5ls/make.com
 ./vms/tools/h5diff/check.com
 ./vms/tools/h5diff/make.com
 ./vms/tools/h5import/make.com
 ./vms/tools/h5jam/make.com
+./vms/tools/h5repack/make.com
 ./vms/tools/lib/make.com
 
 #windows projects
