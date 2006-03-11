@@ -326,7 +326,8 @@
 #endif
 
 /* test for number that is a power of 2 */
-#  define POWER_OF_TWO(n)	((((n) - 1) & (n)) == 0 && (n) > 0)
+/* (from: http://graphics.stanford.edu/~seander/bithacks.html#DetermineIfPowerOf2) */
+#  define POWER_OF_TWO(n)	(!(n & (n - 1)) && n)
 
 /*
  * HDF Boolean type.

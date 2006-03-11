@@ -300,14 +300,84 @@ H5V_vector_inc(int n, hsize_t *v1, const hsize_t *v2)
     while (n--) *v1++ += *v2++;
 }
 
+/* Lookup table for general log2(n) routine */
+static const char LogTable256[] = 
+{
+    0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3,
+    4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+    5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+    5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+    6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+    6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+    6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+    6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7
+};
+
 
 /*-------------------------------------------------------------------------
- * Function:    H5V_power_of_two
+ * Function:    H5V_log2_gen
  *
  * Purpose:     Determines the log base two of a number (i.e. log2(n)).
+ *              (i.e. the highest bit set in a number)
  *
- * Note:        N must be a power of two and is limited to 32-bit quantities.
+ * Note:        This is from the "Bit Twiddling Hacks" at:
+ *                  http://graphics.stanford.edu/~seander/bithacks.html#IntegerLogLookup
+ *
+ *              The version on the web-site is for 32-bit quantities and this
+ *              version has been extended for 64-bit quantities.
+ *
+ * Return:      log2(n) (always - no failure condition)
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, March  6, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5_inline unsigned UNUSED
+H5V_log2_gen(hsize_t n)
+{
+    unsigned r = 0;                     /* r will be log2(n) */
+    register unsigned int t, tt, ttt;   /* temporaries */
 
+    if((ttt = n >> 32))
+        if((tt = n >> 48))
+            r = (t = n >> 56) ? 56 + LogTable256[t] : 48 + LogTable256[tt & 0xFF];
+        else 
+            r = (t = n >> 40) ? 40 + LogTable256[t] : 32 + LogTable256[ttt & 0xFF];
+    else
+        if((tt = n >> 16))
+            r = (t = n >> 24) ? 24 + LogTable256[t] : 16 + LogTable256[tt & 0xFF];
+        else 
+            r = (t = n >> 8) ? 8 + LogTable256[t] : LogTable256[n];
+
+    return(r);
+} /* H5V_log2_gen() */
+
+
+/* Lookup table for specialized log2(n) of power of two routine */
+static const unsigned MultiplyDeBruijnBitPosition[32] = 
+{
+      0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8, 
+        31, 27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9
+};
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5V_log2_of2
+ *
+ * Purpose:     Determines the log base two of a number (i.e. log2(n)).
+ *              (i.e. the highest bit set in a number)
+ *
+ * Note:        **N must be a power of two** and is limited to 32-bit quantities.
+ *
  *              This is from the "Bit Twiddling Hacks" at:
  *                  http://graphics.stanford.edu/~seander/bithacks.html#IntegerLogDeBruijn
  *
@@ -318,17 +388,14 @@ H5V_vector_inc(int n, hsize_t *v1, const hsize_t *v2)
  *
  *-------------------------------------------------------------------------
  */
-static H5_inline unsigned 
-H5V_log2(uint32_t n)
+static H5_inline unsigned UNUSED
+H5V_log2_of2(uint32_t n)
 {
-    static const unsigned MultiplyDeBruijnBitPosition[32] = 
-    {
-          0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8, 
-            31, 27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9
-    };
-
+#ifndef NDEBUG
+    HDassert(POWER_OF_TWO(n));
+#endif /* NDEBUG */
     return(MultiplyDeBruijnBitPosition[(n * (uint32_t)0x077CB531UL) >> 27]);
-} /* H5V_log2() */
+} /* H5V_log2_of2() */
 
 #endif /* H5Vprivate_H */
 
