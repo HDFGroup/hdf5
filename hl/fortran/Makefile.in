@@ -315,7 +315,7 @@ TRACE = perl $(top_srcdir)/bin/trace
 # *.clog are from the MPE option.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 SUBDIRS = src test
-DIST_SUBDIRS = src test
+DIST_SUBDIRS = src test examples
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,

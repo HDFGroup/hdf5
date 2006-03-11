@@ -25,7 +25,7 @@
 include $(top_srcdir)/config/commence.am
 
 SUBDIRS=src test
-DIST_SUBDIRS=src test
+DIST_SUBDIRS=src test examples
 
 # Install examples
 install-examples uninstall-examples:

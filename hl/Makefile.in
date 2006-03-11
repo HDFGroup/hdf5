@@ -317,7 +317,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 @BUILD_FORTRAN_CONDITIONAL_TRUE@FORTRAN_DIR = fortran
 @BUILD_CXX_CONDITIONAL_TRUE@CXX_DIR = c++
 @BUILD_HDF5_HL_CONDITIONAL_TRUE@SUBDIRS = src test tools $(CXX_DIR) $(FORTRAN_DIR)
-DIST_SUBDIRS = src test c++ fortran examples
+DIST_SUBDIRS = src test tools c++ fortran examples
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,

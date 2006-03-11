@@ -38,7 +38,7 @@ endif
 if BUILD_HDF5_HL_CONDITIONAL
    SUBDIRS=src test tools $(CXX_DIR) $(FORTRAN_DIR)
 endif
-DIST_SUBDIRS=src test c++ fortran examples
+DIST_SUBDIRS=src test tools c++ fortran examples
 
 # Install examples
 install-examples uninstall-examples:
