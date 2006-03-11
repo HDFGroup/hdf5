@@ -75,6 +75,18 @@ typedef struct H5F_t H5F_t;
    *(p) = (uint8_t)(((i) >> 24) & 0xff); (p)++;				      \
 }
 
+/* Encode a 32-bit unsigned integer into a variable-sized buffer */
+/* (Assumes that the high bits of the integer are zero) */
+#  define UINT32ENCODE_VAR(p, n, l) {					      \
+   uint32_t _n = (n);							      \
+   size_t _i;								      \
+   uint8_t *_p = (uint8_t*)(p);						      \
+									      \
+   for(_i = 0; _i < l; _i++, _n >>= 8)					      \
+      *_p++ = (uint8_t)(_n & 0xff);					      \
+   (p) = (uint8_t*)(p) + l;						      \
+}
+
 #  define INT64ENCODE(p, n) {						      \
    int64_t _n = (n);							      \
    size_t _i;								      \
@@ -143,6 +155,21 @@ typedef struct H5F_t H5F_t;
    (i) |= ((uint32_t)(*(p) & 0xff) << 24); (p)++;			      \
 }
 
+/* Decode a variable-sized buffer into a 32-bit unsigned integer */
+/* (Assumes that the high bits of the integer will be zero) */
+/* (Note: this is exactly the same code as the 64-bit variable-length decoder
+ *      and bugs/improvements should be make in both places - QAK)
+ */
+#  define UINT32DECODE_VAR(p, n, l) {					      \
+   size_t _i;								      \
+									      \
+   n = 0;								      \
+   (p) += l;								      \
+   for (_i = 0; _i < l; _i++)						      \
+      n = (n << 8) | *(--p);						      \
+   (p) += l;								      \
+}
+
 #  define INT64DECODE(p, n) {						      \
    /* WE DON'T CHECK FOR OVERFLOW! */					      \
    size_t _i;								      \
@@ -165,6 +192,9 @@ typedef struct H5F_t H5F_t;
 
 /* Decode a variable-sized buffer into a 64-bit unsigned integer */
 /* (Assumes that the high bits of the integer will be zero) */
+/* (Note: this is exactly the same code as the 32-bit variable-length decoder
+ *      and bugs/improvements should be make in both places - QAK)
+ */
 #  define UINT64DECODE_VAR(p, n, l) {					      \
    size_t _i;								      \
 									      \
