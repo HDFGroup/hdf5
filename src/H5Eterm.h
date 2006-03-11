@@ -71,7 +71,8 @@ H5E_CANTGC_g=
 H5E_CANTGETSIZE_g=
 
 /* Heap errors */    
-H5E_CANTRESTORE_g=
+H5E_CANTRESTORE_g=    
+H5E_CANTCOMPUTE_g=
 
 /* Function entry/exit interface errors */    
 H5E_CANTINIT_g=    
