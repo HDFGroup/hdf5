@@ -16,6 +16,7 @@
  *              Thursday, February  3, 2005
  *
  * Purpose:	v2 B-tree testing functions.
+ *
  */
 
 /****************/
@@ -29,7 +30,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5B2pkg.h"		/* B-trees				*/
+#include "H5B2pkg.h"		/* v2 B-trees				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 
 /****************/
@@ -98,9 +99,9 @@ H5B2_test_store(void *nrecord, const void *udata)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_test_store)
 
-    *(hsize_t *)nrecord=*(const hsize_t *)udata;
+    *(hsize_t *)nrecord = *(const hsize_t *)udata;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2_test_store() */
 
 
@@ -123,9 +124,9 @@ H5B2_test_retrieve(void *udata, const void *nrecord)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_test_retrieve)
 
-    *(hsize_t *)udata=*(const hsize_t *)nrecord;
+    *(hsize_t *)udata = *(const hsize_t *)nrecord;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2_test_retrieve() */
 
 
@@ -148,7 +149,7 @@ H5B2_test_compare(const void *rec1, const void *rec2)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_test_compare)
 
-    FUNC_LEAVE_NOAPI((herr_t)(*(const hssize_t *)rec1-*(const hssize_t *)rec2));
+    FUNC_LEAVE_NOAPI((herr_t)(*(const hssize_t *)rec1-*(const hssize_t *)rec2))
 } /* H5B2_test_compare() */
 
 
@@ -173,7 +174,7 @@ H5B2_test_encode(const H5F_t *f, uint8_t *raw, const void *nrecord)
 
     H5F_ENCODE_LENGTH(f, raw, *(const hsize_t *)nrecord);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2_test_encode() */
 
 
@@ -198,7 +199,7 @@ H5B2_test_decode(const H5F_t *f, const uint8_t *raw, void *nrecord)
 
     H5F_DECODE_LENGTH(f, raw, *(hsize_t *)nrecord);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2_test_decode() */
 
 
@@ -227,7 +228,7 @@ H5B2_test_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, int i
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth, "Record:",
         *(const hsize_t *)record);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2_test_debug() */
 
 
