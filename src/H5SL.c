@@ -57,11 +57,12 @@
 /* Local Macros */
 
 /* Define the code template for insertions for the "OP" in the H5SL_LOCATE macro */
-#define H5SL_LOCATE_INSERT_FOUND(SLIST,X,UPDATE,I,ITEM)                   \
+#define H5SL_LOCATE_INSERT_FOUND(SLIST,X,UPDATE,I)                      \
         HGOTO_ERROR(H5E_SLIST,H5E_CANTINSERT,NULL,"can't insert duplicate key");
 
 /* Define the code template for removals for the "OP" in the H5SL_LOCATE macro */
-#define H5SL_LOCATE_REMOVE_FOUND(SLIST,X,UPDATE,I,ITEM)                   \
+/* (NOTE: the code in H5SL_remove_first() is largely the same, fix bugs in both places) */
+#define H5SL_LOCATE_REMOVE_FOUND(SLIST,X,UPDATE,I)                      \
         void *tmp;                                                      \
                                                                         \
         for(I=0; I<=(int)SLIST->curr_level; I++) {                      \
@@ -81,11 +82,11 @@
         HGOTO_DONE(tmp);
 
 /* Define the code template for searches for the "OP" in the H5SL_LOCATE macro */
-#define H5SL_LOCATE_SEARCH_FOUND(SLIST,X,UPDATE,I,ITEM)                 \
+#define H5SL_LOCATE_SEARCH_FOUND(SLIST,X,UPDATE,I)                      \
         HGOTO_DONE(X->item);
 
 /* Define the code template for finds for the "OP" in the H5SL_LOCATE macro */
-#define H5SL_LOCATE_FIND_FOUND(SLIST,X,UPDATE,I,ITEM)                   \
+#define H5SL_LOCATE_FIND_FOUND(SLIST,X,UPDATE,I)                        \
         HGOTO_DONE(X);
 
 /* Define a code template for updating the "update" vector for the "DOUPDATE" in the H5SL_LOCATE macro */
@@ -112,7 +113,7 @@
         (HDstrcmp(PKEY1,PKEY2)==0)
 
 /* Macro used to find node for operation */
-#define H5SL_LOCATE(OP,DOUPDATE,CMP,SLIST,X,UPDATE,I,TYPE,ITEM,KEY,CHECKED) \
+#define H5SL_LOCATE(OP,DOUPDATE,CMP,SLIST,X,UPDATE,I,TYPE,KEY,CHECKED)  \
     CHECKED=NULL;                                                       \
     for(I=(int)SLIST->curr_level; I>=0; I--) {                          \
         if(X->forward[I]!=CHECKED) {                                    \
@@ -125,24 +126,24 @@
     X=X->forward[0];                                                    \
     if(X!=NULL && H5_GLUE3(H5SL_LOCATE_,CMP,_EQ)(TYPE,X->key,KEY) ) {   \
         /* What to do when a node is found */				\
-        H5_GLUE3(H5SL_LOCATE_,OP,_FOUND)(SLIST,X,UPDATE,I,ITEM)         \
+        H5_GLUE3(H5SL_LOCATE_,OP,_FOUND)(SLIST,X,UPDATE,I)              \
     } /* end if */
 
 /* Macro used to insert node */
-#define H5SL_INSERT(CMP,SLIST,X,UPDATE,I,TYPE,ITEM,KEY,CHECKED)         \
-    H5SL_LOCATE(INSERT,YES,CMP,SLIST,X,UPDATE,I,TYPE,ITEM,KEY,CHECKED)
+#define H5SL_INSERT(CMP, SLIST, X, UPDATE, I, TYPE, KEY, CHECKED)       \
+    H5SL_LOCATE(INSERT, YES, CMP, SLIST, X, UPDATE, I, TYPE, KEY, CHECKED)
 
 /* Macro used to remove node */
-#define H5SL_REMOVE(CMP,SLIST,X,UPDATE,I,TYPE,ITEM,KEY,CHECKED)         \
-    H5SL_LOCATE(REMOVE,YES,CMP,SLIST,X,UPDATE,I,TYPE,ITEM,KEY,CHECKED)
+#define H5SL_REMOVE(CMP, SLIST, X, UPDATE, I, TYPE, KEY, CHECKED)       \
+    H5SL_LOCATE(REMOVE, YES, CMP, SLIST, X, UPDATE, I, TYPE, KEY, CHECKED)
 
 /* Macro used to search for node */
-#define H5SL_SEARCH(CMP,SLIST,X,UPDATE,I,TYPE,ITEM,KEY,CHECKED)         \
-    H5SL_LOCATE(SEARCH,NO,CMP,SLIST,X,UPDATE,I,TYPE,ITEM,KEY,CHECKED)
+#define H5SL_SEARCH(CMP, SLIST, X, UPDATE, I, TYPE, KEY, CHECKED)       \
+    H5SL_LOCATE(SEARCH, NO, CMP, SLIST, X, UPDATE, I, TYPE, KEY, CHECKED)
 
 /* Macro used to find a node */
-#define H5SL_FIND(CMP,SLIST,X,UPDATE,I,TYPE,ITEM,KEY,CHECKED)           \
-    H5SL_LOCATE(FIND,NO,CMP,SLIST,X,UPDATE,I,TYPE,ITEM,KEY,CHECKED)
+#define H5SL_FIND(CMP, SLIST, X, UPDATE, I, TYPE, KEY, CHECKED)         \
+    H5SL_LOCATE(FIND, NO, CMP, SLIST, X, UPDATE, I, TYPE, KEY, CHECKED)
 
 
 /* Private typedefs & structs */
@@ -363,23 +364,27 @@ H5SL_insert_common(H5SL_t *slist, void *item, const void *key)
     x=slist->header;
     switch(slist->type) {
         case H5SL_TYPE_INT:
-            H5SL_INSERT(SCALAR,slist,x,update,i,const int,item,key,checked)
+            H5SL_INSERT(SCALAR, slist, x, update, i, const int, key, checked)
             break;
 
         case H5SL_TYPE_HADDR:
-            H5SL_INSERT(SCALAR,slist,x,update,i,const haddr_t,item,key,checked)
+            H5SL_INSERT(SCALAR, slist, x, update, i, const haddr_t, key, checked)
             break;
 
         case H5SL_TYPE_STR:
-            H5SL_INSERT(STRING,slist,x,update,i,char *,item,key,checked)
+            H5SL_INSERT(STRING, slist, x, update, i, char *, key, checked)
             break;
 
         case H5SL_TYPE_HSIZE:
-            H5SL_INSERT(SCALAR,slist,x,update,i,const hsize_t,item,key,checked)
+            H5SL_INSERT(SCALAR, slist, x, update, i, const hsize_t, key, checked)
             break;
 
         case H5SL_TYPE_UNSIGNED:
-            H5SL_INSERT(SCALAR,slist,x,update,i,const unsigned,item,key,checked)
+            H5SL_INSERT(SCALAR, slist, x, update, i, const unsigned, key, checked)
+            break;
+
+        case H5SL_TYPE_SIZE:
+            H5SL_INSERT(SCALAR, slist, x, update, i, const size_t, key, checked)
             break;
     } /* end switch */
 
@@ -574,7 +579,7 @@ H5SL_create(H5SL_type_t type, double p, size_t max_level)
     /* Check args */
     HDassert(p>0.0 && p<1.0);
     HDassert(max_level>0 && max_level<=H5SL_LEVEL_MAX);
-    HDassert(type>=H5SL_TYPE_INT && type<=H5SL_TYPE_UNSIGNED);
+    HDassert(type>=H5SL_TYPE_INT && type<=H5SL_TYPE_SIZE);
 
     /* Allocate skip list structure */
     if((new_slist=H5FL_MALLOC(H5SL_t))==NULL)
@@ -789,29 +794,107 @@ H5SL_remove(H5SL_t *slist, const void *key)
     x=slist->header;
     switch(slist->type) {
         case H5SL_TYPE_INT:
-            H5SL_REMOVE(SCALAR,slist,x,update,i,const int,-,key,checked)
+            H5SL_REMOVE(SCALAR, slist, x, update, i, const int, key, checked)
             break;
 
         case H5SL_TYPE_HADDR:
-            H5SL_REMOVE(SCALAR,slist,x,update,i,const haddr_t,-,key,checked)
+            H5SL_REMOVE(SCALAR, slist, x, update, i, const haddr_t, key, checked)
             break;
 
         case H5SL_TYPE_STR:
-            H5SL_REMOVE(STRING,slist,x,update,i,char *,-,key,checked)
+            H5SL_REMOVE(STRING, slist, x, update, i, char *, key, checked)
             break;
 
         case H5SL_TYPE_HSIZE:
-            H5SL_REMOVE(SCALAR,slist,x,update,i,const hsize_t,-,key,checked)
+            H5SL_REMOVE(SCALAR, slist, x, update, i, const hsize_t, key, checked)
             break;
 
         case H5SL_TYPE_UNSIGNED:
-            H5SL_REMOVE(SCALAR,slist,x,update,i,const unsigned,-,key,checked)
+            H5SL_REMOVE(SCALAR, slist, x, update, i, const unsigned, key, checked)
+            break;
+
+        case H5SL_TYPE_SIZE:
+            H5SL_REMOVE(SCALAR, slist, x, update, i, const size_t, key, checked)
             break;
     } /* end switch */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5SL_remove() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5SL_remove_first
+ PURPOSE
+    Removes the first object from a skip list
+ USAGE
+    void *H5SL_remove_first(slist)
+        H5SL_t *slist;          IN/OUT: Pointer to skip list
+
+ RETURNS
+    Returns pointer to item removed on success, NULL on failure.
+ DESCRIPTION
+    Remove first element from a skip list.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    This algorithm is basically the same as the one in the
+        H5SL_LOCATE_REMOVE_FOUND macro, fix bugs in both places
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+void *
+H5SL_remove_first(H5SL_t *slist)
+{
+    void *ret_value = NULL;                     /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SL_remove_first)
+
+    /* Check args */
+    HDassert(slist);
+
+    /* Check internal consistency */
+    /* (Pre-condition) */
+
+    /* Remove item from skip list */
+
+    /* Check for empty list */
+    if(slist->last != slist->header) {
+        H5SL_node_t *x;                             /* Current node to examine */
+        int i;                                      /* Local index value */
+
+        /* Get pointer to first node on the list */
+        x = slist->header->forward[0];
+
+        /* Patch forward pointers in list header around node to remove */
+        for(i = 0; i <= (int)slist->curr_level; i++) {
+            if(slist->header->forward[i] != x)
+                break;
+            slist->header->forward[i] = x->forward[i];
+        } /* end for */
+
+        /* Update tail/backward pointer */
+        if(slist->last == x)
+            slist->last = x->backward;
+        else
+            x->forward[0]->backward = x->backward;
+
+        /* Get the item to return */
+        ret_value = x->item;
+
+        /* Free the skip list node */
+        H5FL_ARR_FREE(H5SL_node_ptr_t, x);
+
+        /* Lower the level of the list, if we removed the tallest node */
+        while(slist->curr_level > 0 && slist->header->forward[slist->curr_level] == NULL)
+            slist->curr_level--;
+
+        /* Decrement the # of objects in the list */
+        slist->nobjs--;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5SL_remove_first() */
 
 
 /*--------------------------------------------------------------------------
@@ -858,23 +941,27 @@ H5SL_search(H5SL_t *slist, const void *key)
     x=slist->header;
     switch(slist->type) {
         case H5SL_TYPE_INT:
-            H5SL_SEARCH(SCALAR,slist,x,-,i,const int,-,key,checked)
+            H5SL_SEARCH(SCALAR, slist, x, -, i, const int, key, checked)
             break;
 
         case H5SL_TYPE_HADDR:
-            H5SL_SEARCH(SCALAR,slist,x,-,i,const haddr_t,-,key,checked)
+            H5SL_SEARCH(SCALAR, slist, x, -, i, const haddr_t, key, checked)
             break;
 
         case H5SL_TYPE_STR:
-            H5SL_SEARCH(STRING,slist,x,-,i,char *,-,key,checked)
+            H5SL_SEARCH(STRING, slist, x, -, i, char *, key, checked)
             break;
 
         case H5SL_TYPE_HSIZE:
-            H5SL_SEARCH(SCALAR,slist,x,-,i,const hsize_t,-,key,checked)
+            H5SL_SEARCH(SCALAR, slist, x, -, i, const hsize_t, key, checked)
             break;
 
         case H5SL_TYPE_UNSIGNED:
-            H5SL_SEARCH(SCALAR,slist,x,-,i,const unsigned,-,key,checked)
+            H5SL_SEARCH(SCALAR, slist, x, -, i, const unsigned, key, checked)
+            break;
+
+        case H5SL_TYPE_SIZE:
+            H5SL_SEARCH(SCALAR, slist, x, -, i, const size_t, key, checked)
             break;
     } /* end switch */
 
@@ -933,23 +1020,27 @@ H5SL_less(H5SL_t *slist, const void *key)
     x=slist->header;
     switch(slist->type) {
         case H5SL_TYPE_INT:
-            H5SL_SEARCH(SCALAR,slist,x,-,i,const int,-,key,checked)
+            H5SL_SEARCH(SCALAR, slist, x, -, i, const int, key, checked)
             break;
 
         case H5SL_TYPE_HADDR:
-            H5SL_SEARCH(SCALAR,slist,x,-,i,const haddr_t,-,key,checked)
+            H5SL_SEARCH(SCALAR, slist, x, -, i, const haddr_t, key, checked)
             break;
 
         case H5SL_TYPE_STR:
-            H5SL_SEARCH(STRING,slist,x,-,i,char *,-,key,checked)
+            H5SL_SEARCH(STRING, slist, x, -, i, char *, key, checked)
             break;
 
         case H5SL_TYPE_HSIZE:
-            H5SL_SEARCH(SCALAR,slist,x,-,i,const hsize_t,-,key,checked)
+            H5SL_SEARCH(SCALAR, slist, x, -, i, const hsize_t, key, checked)
             break;
 
         case H5SL_TYPE_UNSIGNED:
-            H5SL_SEARCH(SCALAR,slist,x,-,i,const unsigned,-,key,checked)
+            H5SL_SEARCH(SCALAR, slist, x, -, i, const unsigned, key, checked)
+            break;
+
+        case H5SL_TYPE_SIZE:
+            H5SL_SEARCH(SCALAR, slist, x, -, i, const size_t, key, checked)
             break;
     } /* end switch */
 
@@ -972,6 +1063,89 @@ H5SL_less(H5SL_t *slist, const void *key)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5SL_less() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5SL_greater
+ PURPOSE
+    Search for object in a skip list that is greater than or equal to 'key'
+ USAGE
+    void *H5SL_greater(slist, key)
+        H5SL_t *slist;          IN/OUT: Pointer to skip list
+        void *key;              IN: Key for item to search for
+
+ RETURNS
+    Returns pointer to item who key is greater than or equal to 'key' on success,
+        NULL on failure
+ DESCRIPTION
+    Search for an object in a skip list, according to it's key, returning the
+    object itself (for an exact match), or the object with the next lowest
+    key that is greater than 'key'
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+void *
+H5SL_greater(H5SL_t *slist, const void *key)
+{
+    H5SL_node_t *checked;                       /* Pointer to last node checked */
+    H5SL_node_t *x;                             /* Current node to examine */
+    int i;                                      /* Local index value */
+    void *ret_value;                            /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SL_greater);
+
+    /* Check args */
+    HDassert(slist);
+    HDassert(key);
+
+    /* Check internal consistency */
+    /* (Pre-condition) */
+
+    /* Insert item into skip list */
+
+    /* Work through the forward pointers for a node, finding the node at each
+     * level that is before the location to insert
+     */
+    x = slist->header;
+    switch(slist->type) {
+        case H5SL_TYPE_INT:
+            H5SL_SEARCH(SCALAR, slist, x, -, i, const int, key, checked)
+            break;
+
+        case H5SL_TYPE_HADDR:
+            H5SL_SEARCH(SCALAR, slist, x, -, i, const haddr_t, key, checked)
+            break;
+
+        case H5SL_TYPE_STR:
+            H5SL_SEARCH(STRING, slist, x, -, i, char *, key, checked)
+            break;
+
+        case H5SL_TYPE_HSIZE:
+            H5SL_SEARCH(SCALAR, slist, x, -, i, const hsize_t, key, checked)
+            break;
+
+        case H5SL_TYPE_UNSIGNED:
+            H5SL_SEARCH(SCALAR, slist, x, -, i, const unsigned, key, checked)
+            break;
+
+        case H5SL_TYPE_SIZE:
+            H5SL_SEARCH(SCALAR, slist, x, -, i, const size_t, key, checked)
+            break;
+    } /* end switch */
+
+    /* An exact match for 'key' must not have been found in list, if we get here */
+    /* ('x' must be the next node with a key greater than the 'key', or NULL) */
+    if(x)
+        ret_value = x->item;
+    else
+        ret_value = NULL;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5SL_greater() */
 
 
 /*--------------------------------------------------------------------------
@@ -1020,23 +1194,27 @@ H5SL_find(H5SL_t *slist, const void *key)
     x=slist->header;
     switch(slist->type) {
         case H5SL_TYPE_INT:
-            H5SL_FIND(SCALAR,slist,x,-,i,const int,-,key,checked)
+            H5SL_FIND(SCALAR, slist, x, -, i, const int, key, checked)
             break;
 
         case H5SL_TYPE_HADDR:
-            H5SL_FIND(SCALAR,slist,x,-,i,const haddr_t,-,key,checked)
+            H5SL_FIND(SCALAR, slist, x, -, i, const haddr_t, key, checked)
             break;
 
         case H5SL_TYPE_STR:
-            H5SL_FIND(STRING,slist,x,-,i,char *,-,key,checked)
+            H5SL_FIND(STRING, slist, x, -, i, char *, key, checked)
             break;
 
         case H5SL_TYPE_HSIZE:
-            H5SL_FIND(SCALAR,slist,x,-,i,const hsize_t,-,key,checked)
+            H5SL_FIND(SCALAR, slist, x, -, i, const hsize_t, key, checked)
             break;
 
         case H5SL_TYPE_UNSIGNED:
-            H5SL_FIND(SCALAR,slist,x,-,i,const unsigned,-,key,checked)
+            H5SL_FIND(SCALAR, slist, x, -, i, const unsigned, key, checked)
+            break;
+
+        case H5SL_TYPE_SIZE:
+            H5SL_FIND(SCALAR, slist, x, -, i, const size_t, key, checked)
             break;
     } /* end switch */
 

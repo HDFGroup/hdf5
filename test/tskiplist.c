@@ -1099,6 +1099,116 @@ test_skiplist_less(void)
 
 /****************************************************************
 **
+**  test_skiplist_greater(): Test H5SL (skip list) code.
+**      Tests 'greater' operation in skip lists.
+**
+****************************************************************/
+static void
+test_skiplist_greater(void)
+{
+    H5SL_t *slist;      /* Skip list created */
+    size_t u;           /* Local index variable */
+    unsigned data[10]={ 10, 20, 15, 5, 50, 30, 31, 32, 80, 90};
+    /* unsigned sorted_data[10]={ 5, 10, 15, 20, 30, 31, 32, 50, 80, 90}; */
+    unsigned *found_item;    /* Item found in skip list */
+    unsigned find_item;  /* Item to add to skip list */
+    herr_t ret;         /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(7, ("Testing Skip List 'Greater' Operation\n"));
+
+    /* Create a skip list */
+    slist = H5SL_create(H5SL_TYPE_UNSIGNED, 0.5, 16);
+    CHECK(slist, NULL, "H5SL_create");
+
+    /* Insert objects into the skip list */
+    for(u = 0; u < 10; u++) {
+        ret = H5SL_insert(slist, &data[u], &data[u]);
+        CHECK(ret, FAIL, "H5SL_insert");
+    } /* end for */
+
+    /* Check for exact match of items in various positions */
+    find_item = 20;
+    found_item = H5SL_greater(slist, &find_item);
+    VERIFY(*found_item, find_item, "H5SL_greater");
+    find_item = 90;
+    found_item = H5SL_greater(slist, &find_item);
+    VERIFY(*found_item, find_item, "H5SL_greater");
+    find_item = 5;
+    found_item = H5SL_greater(slist, &find_item);
+    VERIFY(*found_item, find_item, "H5SL_greater");
+
+    /* Find item greater than a missing key, in various positions */
+    find_item = 19;
+    found_item = H5SL_greater(slist,&find_item);
+    VERIFY(*found_item, 20, "H5SL_greater");
+    find_item = 89;
+    found_item = H5SL_greater(slist, &find_item);
+    VERIFY(*found_item, 90, "H5SL_greater");
+    find_item = 100;
+    found_item = H5SL_greater(slist, &find_item);
+    VERIFY(found_item, NULL, "H5SL_greater");
+    find_item = 6;
+    found_item = H5SL_greater(slist, &find_item);
+    VERIFY(*found_item, 10, "H5SL_greater");
+    find_item = 4;
+    found_item = H5SL_greater(slist, &find_item);
+    VERIFY(*found_item, 5, "H5SL_greater");
+
+    /* Close the skip list */
+    ret = H5SL_close(slist);
+    CHECK(ret, FAIL, "H5SL_close");
+
+} /* end test_skiplist_greater() */
+
+/****************************************************************
+**
+**  test_skiplist_remote_first(): Test H5SL (skip list) code.
+**      Tests 'remove first' operation in skip lists.
+**
+****************************************************************/
+static void
+test_skiplist_remove_first(void)
+{
+    H5SL_t *slist;      /* Skip list created */
+    size_t u;           /* Local index variable */
+    unsigned data[10]={ 10, 20, 15, 5, 50, 30, 31, 32, 80, 90};
+    unsigned sorted_data[10]={ 5, 10, 15, 20, 30, 31, 32, 50, 80, 90};
+    unsigned *found_item;    /* Item found in skip list */
+    unsigned find_item;  /* Item to add to skip list */
+    herr_t ret;         /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(7, ("Testing Skip List 'Greater' Operation\n"));
+
+    /* Create a skip list */
+    slist = H5SL_create(H5SL_TYPE_UNSIGNED, 0.5, 16);
+    CHECK(slist, NULL, "H5SL_create");
+
+    /* Insert objects into the skip list */
+    for(u = 0; u < 10; u++) {
+        ret = H5SL_insert(slist, &data[u], &data[u]);
+        CHECK(ret, FAIL, "H5SL_insert");
+    } /* end for */
+
+    /* Remove objects from the skip list */
+    for(u = 0; u < 10; u++) {
+        found_item = H5SL_remove_first(slist);
+        VERIFY(*found_item, sorted_data[u], "H5SL_remove_first");
+    } /* end for */
+
+    /* Check for removing object from empty list */
+    found_item = H5SL_remove_first(slist);
+    VERIFY(found_item, NULL, "H5SL_remove_first");
+
+    /* Close the skip list */
+    ret = H5SL_close(slist);
+    CHECK(ret, FAIL, "H5SL_close");
+
+} /* end test_skiplist_remove_first() */
+
+/****************************************************************
+**
 **  test_skiplist(): Main H5SL testing routine.
 **
 ****************************************************************/
@@ -1128,6 +1238,8 @@ test_skiplist(void)
     test_skiplist_destroy();    /* Test 'destroy' operation */
     test_skiplist_free();       /* Test 'free' operation */
     test_skiplist_less();       /* Test 'less' operation */
+    test_skiplist_greater();    /* Test 'greater' operation */
+    test_skiplist_remove_first();       /* Test 'remove first' operation */
 
 }   /* end test_skiplist() */
 
