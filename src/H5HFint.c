@@ -44,7 +44,7 @@
 
 /* Limit on the size of the max. direct block size */
 /* (This is limited to 32-bits currently, because I think it's unlikely to
- *      need to be larger, and the 32-bit limit for H5V_log2(n)  - QAK)
+ *      need to be larger, and the 32-bit limit for H5V_log2_of2(n)  - QAK)
  */
 #define H5HL_MAX_DIRECT_SIZE_LIMIT ((hsize_t)2 * 1024 * 1024 * 1024)
 
