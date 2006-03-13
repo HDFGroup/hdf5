@@ -31,7 +31,6 @@
 /* "Standard" creation table parameters */
 #define STD_ADDRMAP     H5HF_ABSOLUTE           /* Heap address mapping */
 #define STD_STAND_SIZE  (64 * 1024)             /* Standalone obj. min. size */
-#define STD_FIXED_LEN_SIZE 0                    /* Fixed length obj. size */
 #define STD_REF_COUNT_SIZE 0                    /* Size of ref. count for obj. */
 #define STD_MAN_WIDTH   32                      /* Managed obj. table width */
 #define STD_MAN_START_BLOCK_SIZE 1024           /* Managed obj. starting block size */
@@ -43,6 +42,10 @@ const char *FILENAME[] = {
     "fheap",
     NULL
 };
+
+static int init_std_cparam(H5HF_create_t *cparam);
+static int check_stats(H5F_t *f, hid_t dxpl, haddr_t fh_addr, hsize_t total_size,
+    hsize_t man_size, hsize_t std_size, hsize_t man_free_space, hsize_t nobjs);
 
 
 /*-------------------------------------------------------------------------
@@ -69,7 +72,6 @@ init_std_cparam(H5HF_create_t *cparam)
     /* General parameters */
     cparam->addrmap = STD_ADDRMAP;
     cparam->standalone_size = STD_STAND_SIZE;
-    cparam->fixed_len_size = STD_FIXED_LEN_SIZE;
     cparam->ref_count_size = STD_REF_COUNT_SIZE;
 
     /* Managed object doubling-table parameters */
@@ -81,6 +83,155 @@ init_std_cparam(H5HF_create_t *cparam)
 
     return(0);
 } /* init_std_cparam() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	check_stats
+ *
+ * Purpose:	Verify stats for a heap
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, March  6, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+check_stats(H5F_t *f, hid_t dxpl, haddr_t fh_addr, hsize_t total_size,
+    hsize_t man_size, hsize_t std_size, hsize_t man_free_space, hsize_t nobjs)
+{
+    H5HF_stat_t heap_stats;             /* Statistics about the heap */
+
+    /* Get statistics for heap and verify they are correct */
+    HDmemset(&heap_stats, 0, sizeof(H5HF_stat_t));
+    if(H5HF_stat_info(f, dxpl, fh_addr, &heap_stats) < 0)
+        FAIL_STACK_ERROR
+    if(heap_stats.total_size != total_size) {
+        HDfprintf(stdout, "heap_stats.total_size = %Hu, total_size = %Hu\n", heap_stats.total_size, total_size);
+        FAIL_STACK_ERROR
+    } /* end if */
+    if(heap_stats.man_size != man_size) {
+        HDfprintf(stdout, "heap_stats.man_size = %Hu, man_size = %Hu\n", heap_stats.man_size, man_size);
+        FAIL_STACK_ERROR
+    } /* end if */
+    if(heap_stats.std_size != std_size) {
+        HDfprintf(stdout, "heap_stats.std_size = %Hu, std_size = %Hu\n", heap_stats.std_size, std_size);
+        FAIL_STACK_ERROR
+    } /* end if */
+    if(heap_stats.man_free_space != man_free_space) {
+        HDfprintf(stdout, "heap_stats.man_free_space = %Hu, man_free_space = %Hu\n", heap_stats.man_free_space, man_free_space);
+        FAIL_STACK_ERROR
+    } /* end if */
+    if(heap_stats.nobjs != nobjs) {
+        HDfprintf(stdout, "heap_stats.nobjs = %Hu, nobjs = %Hu\n", heap_stats.nobjs, nobjs);
+        FAIL_STACK_ERROR
+    } /* end if */
+
+    /* All tests passed */
+    return(0);
+
+error:
+    return(1);
+} /* check_stats() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	fill_heap
+ *
+ * Purpose:	Insert (small) objects to fill up the free space in a heap
+ *              (Generally used to create & fill up a new direct block)
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, March  7, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+fill_heap(H5F_t *f, hid_t dxpl, haddr_t fh_addr, hsize_t heap_size,
+    unsigned start_nobjs, unsigned *nobjs_ptr)
+{
+    H5HF_stat_t heap_stats;             /* Statistics about the heap */
+    hsize_t     heap_id;                /* Heap ID for object inserted */
+    unsigned char obj[10];              /* Buffer for first object to insert */
+    unsigned    nobjs = 0;              /* Number of objects inserted */
+    unsigned    u;                      /* Local index variable */
+
+    /* Initialize object buffer */
+    for(u = 0; u < sizeof(obj); u++)
+        obj[u] = u;
+
+    /* Insert first object */
+    heap_id = 0;
+    if(H5HF_insert(f, dxpl, fh_addr, sizeof(obj), obj, &heap_id) < 0)
+        FAIL_STACK_ERROR
+
+    /* Increment object count */
+    nobjs++;
+
+    if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, heap_size, heap_size, (hsize_t)0, (hsize_t)(994 - (nobjs * (sizeof(obj) + 3))), (hsize_t)(start_nobjs + nobjs)))
+        FAIL_STACK_ERROR
+
+    /* Get statistics for heap */
+    HDmemset(&heap_stats, 0, sizeof(H5HF_stat_t));
+    if(H5HF_stat_info(f, dxpl, fh_addr, &heap_stats) < 0)
+        FAIL_STACK_ERROR
+
+    /* Loop over inserting objects into the root direct block, until there's no more space */
+    /* (The "+ 2" in the equation below allows for the length of the object) */
+    while(heap_stats.man_free_space > (sizeof(obj) + 2)) {
+        /* Initialize object buffer */
+        for(u = 0; u < sizeof(obj); u++)
+            obj[u] = u + nobjs;
+
+        heap_id = 0;
+        if(H5HF_insert(f, dxpl, fh_addr, sizeof(obj), obj, &heap_id) < 0)
+            FAIL_STACK_ERROR
+
+        /* Increment object count */
+        nobjs++;
+
+        if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, heap_size, heap_size, (hsize_t)0, (hsize_t)(994 - (nobjs * (sizeof(obj) + 3))), (hsize_t)(start_nobjs + nobjs)))
+            FAIL_STACK_ERROR
+
+        /* Get statistics for heap */
+        HDmemset(&heap_stats, 0, sizeof(H5HF_stat_t));
+        if(H5HF_stat_info(f, dxpl, fh_addr, &heap_stats) < 0)
+            FAIL_STACK_ERROR
+    } /* end while */
+
+    /* Initialize object buffer */
+    for(u = 0; u < sizeof(obj); u++)
+        obj[u] = u + nobjs;
+
+    /* Insert last object into the heap, using the remaining free space */
+    heap_id = 0;
+    if(H5HF_insert(f, dxpl, fh_addr, (size_t)(heap_stats.man_free_space - 3), obj, &heap_id) < 0)
+        FAIL_STACK_ERROR
+
+    /* Increment object count */
+    nobjs++;
+
+    /* Verify that the heap is full */
+    if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, heap_size, heap_size, (hsize_t)0, (hsize_t)0, (hsize_t)(start_nobjs + nobjs)))
+        FAIL_STACK_ERROR
+
+    /* Set the number of objects, if requested */
+    if(nobjs_ptr)
+        *nobjs_ptr = nobjs;
+
+    /* Operations succeeded */
+    return(0);
+
+error:
+    return(1);
+} /* fill_heap() */
 
 
 /*-------------------------------------------------------------------------
@@ -126,6 +277,8 @@ test_create(hid_t fapl)
         FAIL_STACK_ERROR
     if(!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
+    if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, (hsize_t)0, (hsize_t)0, (hsize_t)0, (hsize_t)0, (hsize_t)0))
+        FAIL_STACK_ERROR
     PASSED()
 
     /* Query the type of address mapping */
@@ -146,6 +299,8 @@ test_create(hid_t fapl)
     if(H5HF_create(f, H5P_DATASET_XFER_DEFAULT, &cparam, &fh_addr/*out*/) < 0)
         FAIL_STACK_ERROR
     if(!H5F_addr_defined(fh_addr))
+        FAIL_STACK_ERROR
+    if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, (hsize_t)0, (hsize_t)0, (hsize_t)0, (hsize_t)0, (hsize_t)0))
         FAIL_STACK_ERROR
     PASSED()
 
@@ -199,7 +354,409 @@ test_abs_insert_first(hid_t fapl)
     unsigned char obj[10];              /* Buffer for object to insert */
     hsize_t     heap_id;                /* Heap ID for object inserted */
     unsigned    u;                      /* Local index variable */
-    herr_t      ret;                    /* Generic error return value */
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+    /* Create the file to work on */
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f = H5I_object(file)))
+        STACK_ERROR
+
+    /* Create absolute heap */
+    init_std_cparam(&cparam);
+    if(H5HF_create(f, dxpl, &cparam, &fh_addr/*out*/) < 0)
+        FAIL_STACK_ERROR
+    if(!H5F_addr_defined(fh_addr))
+        FAIL_STACK_ERROR
+    if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, (hsize_t)0, (hsize_t)0, (hsize_t)0, (hsize_t)0, (hsize_t)0))
+        FAIL_STACK_ERROR
+
+    /* Initialize object buffer */
+    for(u = 0; u < sizeof(obj); u++)
+        obj[u] = u;
+
+    /*
+     * Test inserting first (small) object into absolute heap
+     */
+    TESTING("Inserting first (small) object into absolute heap");
+    heap_id = 0;
+    if(H5HF_insert(f, dxpl, fh_addr, sizeof(obj), obj, &heap_id) < 0)
+        FAIL_STACK_ERROR
+    if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, (hsize_t)1024, (hsize_t)1024, (hsize_t)0, (hsize_t)981, (hsize_t)1))
+        FAIL_STACK_ERROR
+    PASSED()
+
+    /* Close the file */
+    if(H5Fclose(file) < 0)
+        TEST_ERROR
+
+    /* All tests passed */
+    return(0);
+
+error:
+    H5E_BEGIN_TRY {
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return(1);
+} /* test_abs_insert_first() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_abs_insert_second
+ *
+ * Purpose:	Test inserting two objects into absolute heap
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, March  6, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_abs_insert_second(hid_t fapl)
+{
+    hid_t	file = -1;              /* File ID */
+    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    char	filename[1024];         /* Filename to use */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    H5HF_create_t cparam;               /* Creation parameters for heap */
+    haddr_t     fh_addr;                /* Address of fractal heap created */
+    unsigned char obj[10];              /* Buffer for first object to insert */
+    unsigned char obj2[20];             /* Buffer for second object to insert */
+    hsize_t     heap_id;                /* Heap ID for object inserted */
+    unsigned    u;                      /* Local index variable */
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+    /* Create the file to work on */
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f = H5I_object(file)))
+        STACK_ERROR
+
+    /* Create absolute heap */
+    init_std_cparam(&cparam);
+    if(H5HF_create(f, dxpl, &cparam, &fh_addr/*out*/) < 0)
+        FAIL_STACK_ERROR
+    if(!H5F_addr_defined(fh_addr))
+        FAIL_STACK_ERROR
+
+    /* Initialize object buffers */
+    for(u = 0; u < sizeof(obj); u++)
+        obj[u] = u;
+    for(u = 0; u < sizeof(obj2); u++)
+        obj2[u] = u + 10;
+
+    /*
+     * Test inserting first (small) object into absolute heap
+     */
+    TESTING("Inserting two (small) objects into absolute heap");
+    heap_id = 0;
+    if(H5HF_insert(f, dxpl, fh_addr, sizeof(obj), obj, &heap_id) < 0)
+        FAIL_STACK_ERROR
+    if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, (hsize_t)1024, (hsize_t)1024, (hsize_t)0, (hsize_t)981, (hsize_t)1))
+        FAIL_STACK_ERROR
+
+    heap_id = 0;
+    if(H5HF_insert(f, dxpl, fh_addr, sizeof(obj2), obj2, &heap_id) < 0)
+        FAIL_STACK_ERROR
+    if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, (hsize_t)1024, (hsize_t)1024, (hsize_t)0, (hsize_t)958, (hsize_t)2))
+        FAIL_STACK_ERROR
+    PASSED()
+
+    /* Close the file */
+    if(H5Fclose(file) < 0)
+        TEST_ERROR
+
+    /* All tests passed */
+    return(0);
+
+error:
+    H5E_BEGIN_TRY {
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return(1);
+} /* test_abs_insert_second() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_abs_insert_root_mult
+ *
+ * Purpose:	Test inserting mult. objects into absolute heap, up to the
+ *              limit of a root direct block
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, March  6, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_abs_insert_root_mult(hid_t fapl)
+{
+    hid_t	file = -1;              /* File ID */
+    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    char	filename[1024];         /* Filename to use */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    H5HF_create_t cparam;               /* Creation parameters for heap */
+    haddr_t     fh_addr;                /* Address of fractal heap created */
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+    /* Create the file to work on */
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f = H5I_object(file)))
+        STACK_ERROR
+
+    /* Create absolute heap */
+    init_std_cparam(&cparam);
+    if(H5HF_create(f, dxpl, &cparam, &fh_addr/*out*/) < 0)
+        FAIL_STACK_ERROR
+    if(!H5F_addr_defined(fh_addr))
+        FAIL_STACK_ERROR
+
+    /*
+     * Test inserting mult. (small) object into absolute heap
+     */
+    TESTING("inserting objects to fill absolute heap's root direct block");
+
+    /* Fill the heap up */
+    if(fill_heap(f, dxpl, fh_addr, (hsize_t)1024, 0, NULL))
+        FAIL_STACK_ERROR
+
+    PASSED()
+
+    /* Close the file */
+    if(H5Fclose(file) < 0)
+        TEST_ERROR
+
+    /* All tests passed */
+    return(0);
+
+error:
+    H5E_BEGIN_TRY {
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return(1);
+} /* test_abs_insert_root_mult() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_abs_insert_force_indirect
+ *
+ * Purpose:	Test inserting mult. objects into absolute heap, filling the
+ *              root direct block and forcing the root block to be converted
+ *              into an indirect block
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, March  6, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_abs_insert_force_indirect(hid_t fapl)
+{
+    hid_t	file = -1;              /* File ID */
+    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    char	filename[1024];         /* Filename to use */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    H5HF_create_t cparam;               /* Creation parameters for heap */
+    haddr_t     fh_addr;                /* Address of fractal heap created */
+    unsigned char obj[10];              /* Buffer for first object to insert */
+    hsize_t     heap_id;                /* Heap ID for object inserted */
+    unsigned    nobjs = 0;              /* Number of objects inserted */
+    unsigned    u;                      /* Local index variable */
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+    /* Create the file to work on */
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f = H5I_object(file)))
+        STACK_ERROR
+
+    /* Create absolute heap */
+    init_std_cparam(&cparam);
+    if(H5HF_create(f, dxpl, &cparam, &fh_addr/*out*/) < 0)
+        FAIL_STACK_ERROR
+    if(!H5F_addr_defined(fh_addr))
+        FAIL_STACK_ERROR
+
+    /*
+     * Test forcing creation of indirect root block & second direct block
+     */
+    TESTING("inserting enough objects to create root indirect block");
+
+    /* Fill the heap up */
+    if(fill_heap(f, dxpl, fh_addr, (hsize_t)1024, 0, &nobjs))
+        FAIL_STACK_ERROR
+
+    /* Insert one more object, to force root indirect block creation */
+
+    /* Initialize object buffer */
+    for(u = 0; u < sizeof(obj); u++)
+        obj[u] = u + nobjs;
+
+    /* Insert another object, forcing the creation of an indirect block for the root block */
+    heap_id = 0;
+    if(H5HF_insert(f, dxpl, fh_addr, sizeof(obj), obj, &heap_id) < 0)
+        FAIL_STACK_ERROR
+
+    /* Increment object count */
+    nobjs++;
+
+    if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, (hsize_t)2048, (hsize_t)2048, (hsize_t)0, (hsize_t)981, (hsize_t)nobjs))
+        FAIL_STACK_ERROR
+
+    PASSED()
+
+    /* Close the file */
+    if(H5Fclose(file) < 0)
+        TEST_ERROR
+
+    /* All tests passed */
+    return(0);
+
+error:
+    H5E_BEGIN_TRY {
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return(1);
+} /* test_abs_insert_force_indirect() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_abs_insert_fill_second
+ *
+ * Purpose:	Test inserting mult. objects into absolute heap, filling the
+ *              root direct block, forcing the root block to be converted
+ *              into an indirect block and filling the secnod indirect block
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, March  7, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_abs_insert_fill_second(hid_t fapl)
+{
+    hid_t	file = -1;              /* File ID */
+    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    char	filename[1024];         /* Filename to use */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    H5HF_create_t cparam;               /* Creation parameters for heap */
+    haddr_t     fh_addr;                /* Address of fractal heap created */
+    unsigned    nobjs = 0;              /* Number of objects inserted */
+    unsigned    tot_nobjs = 0;          /* Total number of objects inserted */
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+    /* Create the file to work on */
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f = H5I_object(file)))
+        STACK_ERROR
+
+    /* Create absolute heap */
+    init_std_cparam(&cparam);
+    if(H5HF_create(f, dxpl, &cparam, &fh_addr/*out*/) < 0)
+        FAIL_STACK_ERROR
+    if(!H5F_addr_defined(fh_addr))
+        FAIL_STACK_ERROR
+
+    /*
+     * Test inserting mult. (small) objects to fill second direct block
+     */
+    TESTING("inserting enough objects to fill second direct block");
+
+    /* Fill the first direct block heap up */
+    if(fill_heap(f, dxpl, fh_addr, (hsize_t)1024, tot_nobjs, &nobjs))
+        FAIL_STACK_ERROR
+    tot_nobjs += nobjs;
+
+    /* Fill the second direct block heap up (also creates initial root indirect block) */
+    if(fill_heap(f, dxpl, fh_addr, (hsize_t)2048, tot_nobjs, &nobjs))
+        FAIL_STACK_ERROR
+
+    PASSED()
+
+    /* Close the file */
+    if(H5Fclose(file) < 0)
+        TEST_ERROR
+
+    /* All tests passed */
+    return(0);
+
+error:
+    H5E_BEGIN_TRY {
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return(1);
+} /* test_abs_insert_fill_second() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_abs_insert_third_direct
+ *
+ * Purpose:	Test inserting mult. objects into absolute heap, filling the
+ *              root direct block, forcing the root block to be converted
+ *              into an indirect block, filling the secnod indirect block and
+ *              creating a third direct block
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, March  7, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_abs_insert_third_direct(hid_t fapl)
+{
+    hid_t	file = -1;              /* File ID */
+    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    char	filename[1024];         /* Filename to use */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    H5HF_create_t cparam;               /* Creation parameters for heap */
+    haddr_t     fh_addr;                /* Address of fractal heap created */
+    unsigned char obj[10];              /* Buffer for first object to insert */
+    hsize_t     heap_id;                /* Heap ID for object inserted */
+    unsigned    nobjs = 0;              /* Number of objects inserted */
+    unsigned    tot_nobjs = 0;          /* Total number of objects inserted */
+    unsigned    u;                      /* Local index variable */
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -222,20 +779,41 @@ test_abs_insert_first(hid_t fapl)
 HDfprintf(stdout, "Fractal heap header address = %a\n", fh_addr);
 #endif /* QAK */
 
+    /*
+     * Test inserting mult. (small) objects to create third direct block
+     */
+    TESTING("inserting enough objects to create third direct block");
+
+    /* Fill the first direct block heap up */
+    if(fill_heap(f, dxpl, fh_addr, (hsize_t)1024, tot_nobjs, &nobjs))
+        FAIL_STACK_ERROR
+    tot_nobjs += nobjs;
+
+    /* Fill the second direct block heap up (also creates initial root indirect block) */
+    if(fill_heap(f, dxpl, fh_addr, (hsize_t)2048, tot_nobjs, &nobjs))
+        FAIL_STACK_ERROR
+    tot_nobjs += nobjs;
+
+    /* Insert one more object, to force creation of third direct block */
+
     /* Initialize object buffer */
     for(u = 0; u < sizeof(obj); u++)
-        obj[u] = u;
+        obj[u] = u + nobjs;
 
-    /*
-     * Test inserting first (small) object into absolute heap
-     */
-    TESTING("Inserting first (small) object into absolute heap");
+    /* Insert another object, forcing the creation of an indirect block for the root block */
     heap_id = 0;
     if(H5HF_insert(f, dxpl, fh_addr, sizeof(obj), obj, &heap_id) < 0)
         FAIL_STACK_ERROR
 #ifndef QAK
 HDfprintf(stdout, "heap_id = %Hu\n", heap_id);
 #endif /* QAK */
+
+    /* Increment object count */
+    nobjs++;
+
+    if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, (hsize_t)3072, (hsize_t)3072, (hsize_t)0, (hsize_t)982, (hsize_t)nobjs))
+        FAIL_STACK_ERROR
+
     PASSED()
 
     /* Close the file */
@@ -250,7 +828,7 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_insert_first() */
+} /* test_abs_insert_third_direct() */
 
 
 /*-------------------------------------------------------------------------
@@ -278,10 +856,21 @@ main(void)
     fapl = h5_fileaccess();
 
     /* Test fractal heap creation */
+#ifndef QAK
     nerrors += test_create(fapl);
 
     /* Test fractal heap object insertion */
     nerrors += test_abs_insert_first(fapl);
+    nerrors += test_abs_insert_second(fapl);
+    nerrors += test_abs_insert_root_mult(fapl);
+    nerrors += test_abs_insert_force_indirect(fapl);
+    nerrors += test_abs_insert_fill_second(fapl);
+#else /* QAK */
+HDfprintf(stderr, "Uncomment tests!\n");
+#endif /* QAK */
+#ifdef QAK
+    nerrors += test_abs_insert_third_direct(fapl);
+#endif /* QAK */
 
     if(nerrors)
         goto error;

@@ -38,7 +38,7 @@ MOSTLYCLEANFILES=H5Tinit.c
 
 # library sources
 libhdf5_la_SOURCES= H5.c H5dbg.c H5A.c H5AC.c H5B.c H5Bcache.c \
-        H5B2.c H5B2cache.c H5B2dbg.c H5B2int.c H5B2test.c \
+        H5B2.c H5B2cache.c H5B2dbg.c H5B2int.c H5B2stat.c H5B2test.c \
         H5C.c \
         H5D.c \
         H5Dcompact.c \
@@ -54,7 +54,7 @@ libhdf5_la_SOURCES= H5.c H5dbg.c H5A.c H5AC.c H5B.c H5Bcache.c \
         H5Gstab.c  \
         H5Gtest.c  \
         H5Gtraverse.c  \
-        H5HF.c H5HFcache.c H5HFdbg.c H5HFint.c H5HFtest.c \
+        H5HF.c H5HFcache.c H5HFdbg.c H5HFflist.c H5HFint.c H5HFstat.c H5HFtest.c \
         H5HG.c H5HGdbg.c H5HL.c H5HLdbg.c H5HP.c H5I.c H5MF.c H5MM.c \
         H5MP.c H5MPtest.c \
         H5O.c \

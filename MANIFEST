@@ -411,6 +411,7 @@
 ./src/H5B2pkg.h
 ./src/H5B2private.h
 ./src/H5B2public.h
+./src/H5B2stat.c
 ./src/H5B2test.c
 ./src/H5C.c
 ./src/H5Cpkg.h
@@ -497,10 +498,12 @@
 ./src/H5HF.c
 ./src/H5HFcache.c
 ./src/H5HFdbg.c
+./src/H5HFflist.c
 ./src/H5HFint.c
 ./src/H5HFpkg.h
 ./src/H5HFprivate.h
 ./src/H5HFpublic.h
+./src/H5HFstat.c
 ./src/H5HFtest.c
 ./src/H5HG.c
 ./src/H5HGdbg.c

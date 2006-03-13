@@ -33,8 +33,8 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5HFpkg.h"		/* Fractal heaps			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5HFpkg.h"		/* Fractal heaps			*/
 #include "H5Vprivate.h"		/* Vectors and arrays 			*/
 
 /****************/
@@ -44,9 +44,7 @@
 /* Fractal heap format version #'s */
 #define H5HF_HDR_VERSION        0               /* Header */
 #define H5HF_DBLOCK_VERSION     0               /* Direct block */
-
-/* Size of free space description in an absolute managed direct block */
-#define H5HF_MAN_ABS_FREE_NODE_SIZE(d) (2 * (d)->blk_off_size)
+#define H5HF_IBLOCK_VERSION     0               /* Indirect block */
 
 
 /******************/
@@ -58,18 +56,22 @@
 /********************/
 
 /* Metadata cache callbacks */
-static H5HF_t *H5HF_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata);
+static H5HF_t *H5HF_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
 static herr_t H5HF_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HF_t *fh);
 static herr_t H5HF_cache_hdr_clear(H5F_t *f, H5HF_t *fh, hbool_t destroy);
 static herr_t H5HF_cache_hdr_size(const H5F_t *f, const H5HF_t *fh, size_t *size_ptr);
-static H5HF_direct_t *H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata);
+static H5HF_direct_t *H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
 static herr_t H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HF_direct_t *dblock);
 static herr_t H5HF_cache_dblock_clear(H5F_t *f, H5HF_direct_t *dblock, hbool_t destroy);
 static herr_t H5HF_cache_dblock_size(const H5F_t *f, const H5HF_direct_t *dblock, size_t *size_ptr);
+static H5HF_indirect_t *H5HF_cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
+static herr_t H5HF_cache_iblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HF_indirect_t *iblock);
+static herr_t H5HF_cache_iblock_clear(H5F_t *f, H5HF_indirect_t *iblock, hbool_t destroy);
+static herr_t H5HF_cache_iblock_size(const H5F_t *f, const H5HF_indirect_t *iblock, size_t *size_ptr);
 
 /* Local encode/decode routines */
-static herr_t H5HF_dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_param_t *dt_param);
-static herr_t H5HF_dtable_decode(H5F_t *f, const uint8_t **pp, H5HF_dtable_param_t *dt_param);
+static herr_t H5HF_dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_t *dtable);
+static herr_t H5HF_dtable_decode(H5F_t *f, const uint8_t **pp, H5HF_dtable_t *dtable);
 
 /*********************/
 /* Package Variables */
@@ -95,6 +97,17 @@ const H5AC_class_t H5AC_FHEAP_DBLOCK[1] = {{
     (H5AC_size_func_t)H5HF_cache_dblock_size,
 }};
 
+/* H5HF indirect block inherits cache-like properties from H5AC */
+const H5AC_class_t H5AC_FHEAP_IBLOCK[1] = {{
+    H5AC_FHEAP_IBLOCK_ID,
+    (H5AC_load_func_t)H5HF_cache_iblock_load,
+    (H5AC_flush_func_t)H5HF_cache_iblock_flush,
+    (H5AC_dest_func_t)H5HF_cache_iblock_dest,
+    (H5AC_clear_func_t)H5HF_cache_iblock_clear,
+    (H5AC_size_func_t)H5HF_cache_iblock_size,
+}};
+
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -109,6 +122,9 @@ H5FL_BLK_DEFINE_STATIC(header_block);
 
 /* Declare a free list to manage heap direct block data to/from disk */
 H5FL_BLK_DEFINE(direct_block);
+
+/* Declare a free list to manage heap indirect block data to/from disk */
+H5FL_BLK_DEFINE_STATIC(indirect_block);
 
 
 
@@ -128,35 +144,44 @@ H5FL_BLK_DEFINE(direct_block);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_dtable_decode(H5F_t *f, const uint8_t **pp, H5HF_dtable_param_t *dt_param)
+H5HF_dtable_decode(H5F_t *f, const uint8_t **pp, H5HF_dtable_t *dtable)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_dtable_decode)
 
     /* Check arguments */
     HDassert(f);
     HDassert(pp && *pp);
-    HDassert(dt_param);
+    HDassert(dtable);
 
     /* Table width */
-    UINT16DECODE(*pp, dt_param->cparam.width);
+    UINT16DECODE(*pp, dtable->cparam.width);
 
     /* Starting block size */
-    H5F_DECODE_LENGTH(f, *pp, dt_param->cparam.start_block_size);
+    H5F_DECODE_LENGTH(f, *pp, dtable->cparam.start_block_size);
 
     /* Maximum direct block size */
-    H5F_DECODE_LENGTH(f, *pp, dt_param->cparam.max_direct_size);
+    H5F_DECODE_LENGTH(f, *pp, dtable->cparam.max_direct_size);
 
     /* Maximum heap size (as # of bits) */
-    UINT16DECODE(*pp, dt_param->cparam.max_index);
+    UINT16DECODE(*pp, dtable->cparam.max_index);
 
     /* Starting # of rows in root indirect block */
-    UINT16DECODE(*pp, dt_param->cparam.start_root_rows);
+    UINT16DECODE(*pp, dtable->cparam.start_root_rows);
 
     /* Address of table */
-    H5F_addr_decode(f, pp, &(dt_param->table_addr));
+    H5F_addr_decode(f, pp, &(dtable->table_addr));
 
     /* Current # of rows in root indirect block */
-    UINT16DECODE(*pp, dt_param->curr_root_rows);
+    UINT16DECODE(*pp, dtable->curr_root_rows);
+
+    /* Next direct block's heap offset */
+    H5F_DECODE_LENGTH(f, *pp, dtable->next_dir_block);
+
+    /* Next direct block size */
+    H5F_DECODE_LENGTH(f, *pp, dtable->next_dir_size);
+
+    /* Next direct block column */
+    UINT16DECODE(*pp, dtable->next_dir_col);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF_dtable_decode() */
@@ -178,35 +203,44 @@ H5HF_dtable_decode(H5F_t *f, const uint8_t **pp, H5HF_dtable_param_t *dt_param)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_param_t *dt_param)
+H5HF_dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_t *dtable)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_dtable_encode)
 
     /* Check arguments */
     HDassert(f);
     HDassert(pp && *pp);
-    HDassert(dt_param);
+    HDassert(dtable);
 
     /* Table width */
-    UINT16ENCODE(*pp, dt_param->cparam.width);
+    UINT16ENCODE(*pp, dtable->cparam.width);
 
     /* Starting block size */
-    H5F_ENCODE_LENGTH(f, *pp, dt_param->cparam.start_block_size);
+    H5F_ENCODE_LENGTH(f, *pp, dtable->cparam.start_block_size);
 
     /* Maximum direct block size */
-    H5F_ENCODE_LENGTH(f, *pp, dt_param->cparam.max_direct_size);
+    H5F_ENCODE_LENGTH(f, *pp, dtable->cparam.max_direct_size);
 
     /* Maximum heap size (as # of bits) */
-    UINT16ENCODE(*pp, dt_param->cparam.max_index);
+    UINT16ENCODE(*pp, dtable->cparam.max_index);
 
     /* Starting # of rows in root indirect block */
-    UINT16ENCODE(*pp, dt_param->cparam.start_root_rows);
+    UINT16ENCODE(*pp, dtable->cparam.start_root_rows);
 
     /* Address of table */
-    H5F_addr_encode(f, pp, dt_param->table_addr);
+    H5F_addr_encode(f, pp, dtable->table_addr);
 
     /* Current # of rows in root indirect block */
-    UINT16ENCODE(*pp, dt_param->curr_root_rows);
+    UINT16ENCODE(*pp, dtable->curr_root_rows);
+
+    /* Next direct block's heap offset */
+    H5F_ENCODE_LENGTH(f, *pp, dtable->next_dir_block);
+
+    /* Next direct block size */
+    H5F_ENCODE_LENGTH(f, *pp, dtable->next_dir_size);
+
+    /* Next direct block column */
+    UINT16ENCODE(*pp, dtable->next_dir_col);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF_dtable_encode() */
@@ -296,14 +330,21 @@ H5HF_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *ud
     /* Min. size of standalone objects */
     UINT32DECODE(p, shared->standalone_size);
 
-    /* Length of fixed-length objects in heap */
-    UINT32DECODE(p, shared->fixed_len_size);
-
     /* Size of ref. count for objects in heap */
     shared->ref_count_size = *p++;
 
+    /* Internal management information */
+    H5F_DECODE_LENGTH(f, p, shared->total_man_free);
+    H5F_DECODE_LENGTH(f, p, shared->total_std_free);
+
+    /* Statistics information */
+    H5F_DECODE_LENGTH(f, p, shared->total_size);
+    H5F_DECODE_LENGTH(f, p, shared->man_size);
+    H5F_DECODE_LENGTH(f, p, shared->std_size);
+    H5F_DECODE_LENGTH(f, p, shared->nobjs);
+
     /* Managed objects' doubling-table info */
-    if(H5HF_dtable_decode(shared->f, &p, &(shared->man_dtable_info)) < 0)
+    if(H5HF_dtable_decode(shared->f, &p, &(shared->man_dtable)) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTENCODE, NULL, "unable to encode managed obj. doubling table info")
 
     HDassert((size_t)(p - buf) == size);
@@ -360,6 +401,9 @@ H5HF_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5H
         uint8_t *p;                 /* Pointer into raw data buffer */
         size_t	size;               /* Header size on disk */
 
+        /* Sanity check */
+        HDassert(shared->dirty);
+
         /* Compute the size of the heap header on disk */
         size = H5HF_HEADER_SIZE(f);
 
@@ -391,14 +435,21 @@ H5HF_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5H
         /* Min. size of standalone objects */
         UINT32ENCODE(p, shared->standalone_size);
 
-        /* Size of fixed-length objects in heap */
-        UINT32ENCODE(p, shared->fixed_len_size);
-
         /* Size of ref. count for objects in heap */
         *p++ = shared->ref_count_size;
 
+        /* Internal management information */
+        H5F_ENCODE_LENGTH(f, p, shared->total_man_free);
+        H5F_ENCODE_LENGTH(f, p, shared->total_std_free);
+
+        /* Statistics information */
+        H5F_ENCODE_LENGTH(f, p, shared->total_size);
+        H5F_ENCODE_LENGTH(f, p, shared->man_size);
+        H5F_ENCODE_LENGTH(f, p, shared->std_size);
+        H5F_ENCODE_LENGTH(f, p, shared->nobjs);
+
         /* Managed objects' doubling-table info */
-        if(H5HF_dtable_encode(shared->f, &p, &(shared->man_dtable_info)) < 0)
+        if(H5HF_dtable_encode(shared->f, &p, &(shared->man_dtable)) < 0)
 	    HGOTO_ERROR(H5E_HEAP, H5E_CANTENCODE, FAIL, "unable to encode managed obj. doubling table info")
 
 	/* Write the heap header. */
@@ -408,6 +459,7 @@ H5HF_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5H
 
         H5FL_BLK_FREE(header_block, buf);
 
+	shared->dirty = FALSE;
 	fh->cache_info.is_dirty = FALSE;
     } /* end if */
 
@@ -545,7 +597,6 @@ H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_size,
     H5RC_t 		*fh_shared = (H5RC_t *)_fh_shared;     /* Shared heap information */
     H5HF_shared_t       *shared = NULL; /* Shared fractal heap information */
     H5HF_direct_t	*dblock = NULL; /* Direct block info */
-    uint8_t		*buf = NULL;    /* Temporary buffer */
     const uint8_t	*p;             /* Pointer into raw data buffer */
     haddr_t             heap_addr;      /* Address of heap header in the file */
     uint32_t            metadata_chksum;        /* Metadata checksum value */
@@ -578,14 +629,14 @@ H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_size,
 
     /* Allocate block buffer */
 /* XXX: Change to using free-list factories */
-    if((buf = H5FL_BLK_MALLOC(direct_block, (size_t)dblock->size)) == NULL)
+    if((dblock->blk = H5FL_BLK_MALLOC(direct_block, (size_t)dblock->size)) == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    /* Read header from disk */
-    if(H5F_block_read(f, H5FD_MEM_FHEAP_HDR, addr, (size_t)dblock->size, dxpl_id, buf) < 0)
+    /* Read direct block from disk */
+    if(H5F_block_read(f, H5FD_MEM_FHEAP_DBLOCK, addr, (size_t)dblock->size, dxpl_id, dblock->blk) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_READERROR, NULL, "can't read fractal heap direct block")
 
-    p = buf;
+    p = dblock->blk;
 
     /* Magic number */
     if(HDmemcmp(p, H5HF_DBLOCK_MAGIC, H5HF_SIZEOF_MAGIC))
@@ -621,9 +672,6 @@ H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_size,
     /* Offset of free list head */
     /* (Defer deserializing the whole free list until we actually need to modify it) */
     UINT64DECODE_VAR(p, dblock->free_list_head, dblock->blk_off_size);
-
-    /* Keep pointer to block buffer */
-    dblock->blk = buf;
 
     /* Set return value */
     ret_value = dblock;
@@ -714,7 +762,7 @@ H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
             node = dblock->free_list->first;
             while(node) {
                 /* Find first node which has enough room to describe free space */
-                while(node && node->size < H5HF_MAN_ABS_FREE_NODE_SIZE(dblock))
+                while(node && node->size < H5HF_MAN_ABS_DIRECT_FREE_NODE_SIZE(dblock))
                     node = node->next;
 
                 /* Check for free space node to encode */
@@ -723,7 +771,7 @@ H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
 
                     /* Probe ahead for next node that is large enough to encode free space description */
                     next_node = node->next;
-                    while(next_node && next_node->size < H5HF_MAN_ABS_FREE_NODE_SIZE(dblock))
+                    while(next_node && next_node->size < H5HF_MAN_ABS_DIRECT_FREE_NODE_SIZE(dblock))
                         next_node = next_node->next;
 
                     /* Encode information for this node on free list */
@@ -741,8 +789,8 @@ H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
             dblock->free_list->dirty = FALSE;
         } /* end if */
 
-	/* Write the heap header. */
-	if(H5F_block_write(f, H5FD_MEM_FHEAP_HDR, addr, (size_t)dblock->size, dxpl_id, dblock->blk) < 0)
+	/* Write the direct block */
+	if(H5F_block_write(f, H5FD_MEM_FHEAP_DBLOCK, addr, (size_t)dblock->size, dxpl_id, dblock->blk) < 0)
 	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFLUSH, FAIL, "unable to save fractal heap direct block to disk")
 
 	dblock->cache_info.is_dirty = FALSE;
@@ -857,7 +905,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_cache_block_size
+ * Function:	H5HF_cache_dblock_size
  *
  * Purpose:	Compute the size in bytes of a fractal heap direct block
  *		on disk, and return it in *size_ptr.  On failure,
@@ -885,4 +933,362 @@ H5HF_cache_dblock_size(const H5F_t UNUSED *f, const H5HF_direct_t *dblock, size_
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF_cache_dblock_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_cache_iblock_load
+ *
+ * Purpose:	Loads a fractal heap indirect block from the disk.
+ *
+ * Return:	Success:	Pointer to a new fractal heap indirect block
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Feb 27 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5HF_indirect_t *
+H5HF_cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrows, void *_fh_shared)
+{
+    const unsigned      *nrows = (const unsigned *)_nrows;     /* # of rows in indirect block */
+    H5RC_t 		*fh_shared = (H5RC_t *)_fh_shared;     /* Shared heap information */
+    H5HF_shared_t       *shared = NULL; /* Shared fractal heap information */
+    H5HF_indirect_t	*iblock = NULL; /* Indirect block info */
+    uint8_t		*buf = NULL;    /* Temporary buffer */
+    const uint8_t	*p;             /* Pointer into raw data buffer */
+    haddr_t             heap_addr;      /* Address of heap header in the file */
+    uint32_t            metadata_chksum;        /* Metadata checksum value */
+    size_t              u;              /* Local index variable */
+    H5HF_indirect_t	*ret_value;     /* Return value */
+
+    FUNC_ENTER_NOAPI(H5HF_cache_iblock_load, NULL)
+
+    /* Check arguments */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(fh_shared);
+
+    /* Allocate space for the fractal heap indirect block */
+    if(NULL == (iblock = H5FL_MALLOC(H5HF_indirect_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    HDmemset(&iblock->cache_info, 0, sizeof(H5AC_info_t));
+
+    /* Share common heap information */
+    iblock->shared = fh_shared;
+    H5RC_INC(iblock->shared);
+
+    /* Get the pointer to the shared heap info */
+    shared = H5RC_GET_OBJ(iblock->shared);
+    HDassert(shared);
+
+    /* Set block's internal information */
+    iblock->nrows = *nrows;
+    if(iblock->nrows > shared->man_dtable.max_direct_rows) {
+        iblock->ndir_rows = shared->man_dtable.max_direct_rows;
+        iblock->nindir_rows = iblock->nrows - iblock->ndir_rows;
+    } /* end if */
+    else {
+        iblock->ndir_rows = iblock->nrows;
+        iblock->nindir_rows = 0;
+    } /* end else */
+
+    /* Compute size of indirect block */
+    iblock->size = H5HF_MAN_INDIRECT_SIZE(shared, iblock);
+
+    /* Allocate buffer to decode block */
+/* XXX: Use free list factories? */
+    if((buf = H5FL_BLK_MALLOC(indirect_block, iblock->size)) == NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    /* Read indirect block from disk */
+    if(H5F_block_read(f, H5FD_MEM_FHEAP_IBLOCK, addr, iblock->size, dxpl_id, buf) < 0)
+	HGOTO_ERROR(H5E_HEAP, H5E_READERROR, NULL, "can't read fractal heap indirect block")
+
+    p = buf;
+
+    /* Magic number */
+    if(HDmemcmp(p, H5HF_IBLOCK_MAGIC, H5HF_SIZEOF_MAGIC))
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "wrong fractal heap indirect block signature")
+    p += H5HF_SIZEOF_MAGIC;
+
+    /* Version */
+    if(*p++ != H5HF_IBLOCK_VERSION)
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "wrong fractal heap direct block version")
+
+    /* Metadata flags (unused, currently) */
+/* XXX: Plan out metadata flags (including "read-only duplicate" feature) */
+    if(*p++ != 0)
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unknown metadata flag in fractal heap direct block")
+
+    /* Metadata checksum (unused, currently) */
+    UINT32DECODE(p, metadata_chksum);
+/* XXX: Verify checksum */
+    if(metadata_chksum != 0)
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "incorrect metadata checksum for fractal heap direct block")
+
+    /* Address of heap that owns this block (skip) */
+    H5F_addr_decode(f, &p, &heap_addr);
+    if(H5F_addr_ne(heap_addr, shared->heap_addr))
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "incorrect heap header address for direct block")
+    
+    /* Offset of heap within the heap's address space */
+    UINT64DECODE_VAR(p, iblock->block_off, shared->heap_off_size);
+
+    /* Allocate & decode indirect block entry tables */
+    HDassert(iblock->ndir_rows > 0);
+    if(NULL == (iblock->dblock_ents = H5FL_SEQ_MALLOC(H5HF_indirect_dblock_ent_t, (iblock->ndir_rows * shared->man_dtable.cparam.width))))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for direct entries")
+    for(u = 0; u < (iblock->ndir_rows * shared->man_dtable.cparam.width); u++) {
+        H5F_addr_decode(f, &p, &(iblock->dblock_ents[u].addr));
+        UINT32DECODE_VAR(p, iblock->dblock_ents[u].free_space, shared->man_dtable.max_dir_blk_off_size);
+    } /* end for */
+    if(iblock->nindir_rows > 0) {
+        if(NULL == (iblock->iblock_ents = H5FL_SEQ_MALLOC(H5HF_indirect_iblock_ent_t, (iblock->nindir_rows * shared->man_dtable.cparam.width))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for indirect entries")
+
+        /* Decode indirect block-specific fields */
+        for(u = 0; u < (iblock->nindir_rows * shared->man_dtable.cparam.width); u++)
+            H5F_addr_decode(f, &p, &(iblock->iblock_ents[u].addr));
+    } /* end if */
+    else
+        iblock->iblock_ents = NULL;
+
+    /* Sanity check */
+    HDassert((size_t)(p - buf) == iblock->size);
+
+    /* Set return value */
+    ret_value = iblock;
+
+done:
+    /* Free buffer */
+/* XXX: Keep buffer around? */
+    H5FL_BLK_FREE(indirect_block, buf);
+
+    if(!ret_value && iblock)
+        (void)H5HF_cache_iblock_dest(f, iblock);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_cache_iblock_load() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_cache_iblock_flush
+ *
+ * Purpose:	Flushes a dirty fractal heap indirect block to disk.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Mar  6 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HF_cache_iblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HF_indirect_t *iblock)
+{
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5HF_cache_iblock_flush, FAIL)
+
+    /* check arguments */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(iblock);
+
+    if(iblock->cache_info.is_dirty) {
+        H5HF_shared_t *shared;      /* Shared fractal heap information */
+        uint8_t	*buf = NULL;        /* Temporary buffer */
+        uint8_t *p;                 /* Pointer into raw data buffer */
+        size_t u;                   /* Local index variable */
+
+        /* Get the pointer to the shared heap info */
+        shared = H5RC_GET_OBJ(iblock->shared);
+        HDassert(shared);
+
+        /* Allocate buffer to encode block */
+/* XXX: Use free list factories? */
+#ifdef QAK
+HDfprintf(stderr, "%s: iblock->nrows = %u\n", FUNC, iblock->nrows);
+HDfprintf(stderr, "%s: iblock->ndir_rows = %u\n", FUNC, iblock->ndir_rows);
+HDfprintf(stderr, "%s: iblock->nindir_rows = %u\n", FUNC, iblock->nindir_rows);
+HDfprintf(stderr, "%s: iblock->size = %Zu\n", FUNC, iblock->size);
+HDfprintf(stderr, "%s: iblock->block_off = %Hu\n", FUNC, iblock->block_off);
+HDfprintf(stderr, "%s: shared->man_dtable.cparam.width = %u\n", FUNC, shared->man_dtable.cparam.width);
+#endif /* QAK */
+        if((buf = H5FL_BLK_MALLOC(indirect_block, iblock->size)) == NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+        p = buf;
+
+        /* Magic number */
+        HDmemcpy(p, H5HF_IBLOCK_MAGIC, H5HF_SIZEOF_MAGIC);
+        p += H5HF_SIZEOF_MAGIC;
+
+        /* Version # */
+        *p++ = H5HF_IBLOCK_VERSION;
+
+        /* Metadata status flags */
+/* XXX: Set this? */
+        *p++ = 0;
+
+        /* Metadata checksum */
+/* XXX: Set this!  (After all the metadata is in the buffer) */
+        HDmemset(p, 0, 4);
+        p += 4;
+
+        /* Address of heap header for heap which owns this block */
+        H5F_addr_encode(f, &p, shared->heap_addr);
+
+        /* Offset of block in heap */
+        UINT64ENCODE_VAR(p, iblock->block_off, shared->heap_off_size);
+
+        /* Encode indirect block-specific fields */
+        HDassert(iblock->ndir_rows > 0);
+        for(u = 0; u < (iblock->ndir_rows * shared->man_dtable.cparam.width); u++) {
+            H5F_addr_encode(f, &p, iblock->dblock_ents[u].addr);
+            UINT32ENCODE_VAR(p, iblock->dblock_ents[u].free_space, shared->man_dtable.max_dir_blk_off_size);
+        } /* end for */
+        if(iblock->nindir_rows > 0)
+            for(u = 0; u < (iblock->nindir_rows * shared->man_dtable.cparam.width); u++)
+                H5F_addr_encode(f, &p, iblock->iblock_ents[u].addr);
+
+        /* Sanity check */
+        HDassert((size_t)(p - buf) == iblock->size);
+
+	/* Write the indirect block */
+	if(H5F_block_write(f, H5FD_MEM_FHEAP_IBLOCK, addr, iblock->size, dxpl_id, buf) < 0)
+	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFLUSH, FAIL, "unable to save fractal heap indirect block to disk")
+
+        /* Free buffer */
+        H5FL_BLK_FREE(indirect_block, buf);
+
+	iblock->cache_info.is_dirty = FALSE;
+    } /* end if */
+
+    if(destroy)
+        if(H5HF_cache_iblock_dest(f, iblock) < 0)
+	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap indirect block")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5HF_cache_iblock_flush() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_cache_iblock_dest
+ *
+ * Purpose:	Destroys a fractal heap indirect block in memory.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Mar  6 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+herr_t
+H5HF_cache_iblock_dest(H5F_t UNUSED *f, H5HF_indirect_t *iblock)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_cache_iblock_dest)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(iblock);
+
+    /* Decrement reference count on shared fractal heap info */
+    if(iblock->shared)
+        H5RC_DEC(iblock->shared);
+
+    /* Release entry tables */
+    if(iblock->dblock_ents)
+        H5FL_SEQ_FREE(H5HF_indirect_dblock_ent_t, iblock->dblock_ents);
+    if(iblock->iblock_ents)
+        H5FL_SEQ_FREE(H5HF_indirect_iblock_ent_t, iblock->iblock_ents);
+
+    /* Free fractal heap indirect block info */
+    H5FL_FREE(H5HF_indirect_t, iblock);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HF_cache_iblock_dest() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_cache_iblock_clear
+ *
+ * Purpose:	Mark a fractal heap indirect block in memory as non-dirty.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Mar  6 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HF_cache_iblock_clear(H5F_t *f, H5HF_indirect_t *iblock, hbool_t destroy)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_cache_iblock_clear)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(iblock);
+
+    /* Reset the dirty flag.  */
+    iblock->cache_info.is_dirty = FALSE;
+
+    if(destroy)
+        if(H5HF_cache_iblock_dest(f, iblock) < 0)
+	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap indirect block")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_cache_iblock_clear() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_cache_iblock_size
+ *
+ * Purpose:	Compute the size in bytes of a fractal heap indirect block
+ *		on disk, and return it in *size_ptr.  On failure,
+ *		the value of *size_ptr is undefined.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Mar  6 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HF_cache_iblock_size(const H5F_t UNUSED *f, const H5HF_indirect_t *iblock, size_t *size_ptr)
+{
+    H5HF_shared_t *shared;      /* Shared fractal heap information */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_cache_iblock_size)
+
+    /* check arguments */
+    HDassert(iblock);
+    HDassert(size_ptr);
+
+    /* Get the pointer to the shared heap info */
+    shared = H5RC_GET_OBJ(iblock->shared);
+    HDassert(shared);
+
+    /* Set size value */
+    *size_ptr = iblock->size;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5HF_cache_iblock_size() */
 

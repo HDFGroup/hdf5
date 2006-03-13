@@ -38,8 +38,8 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5HFpkg.h"		/* Fractal heaps			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5HFpkg.h"		/* Fractal heaps			*/
 #include "H5MFprivate.h"	/* File memory management		*/
 
 /****************/
@@ -160,7 +160,9 @@ H5HF_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t size,
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5HF_insert, FAIL)
+#ifdef QAK
 HDfprintf(stderr, "%s: size = %Zu\n", FUNC, size);
+#endif /* QAK */
 
     /*
      * Check arguments.
@@ -190,15 +192,22 @@ HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "standalone blocks not supported ye
         if(shared->write_once) {
 HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "'write once' managed blocks not supported yet")
         } /* end if */
-        else if(size <= shared->total_man_free) {
-HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "allocating internal managed blocks not supported yet")
-        } /* end if */
         else {
-            /* Allocate space at end of heap */
-            if(H5HF_man_alloc_end(fh->shared, dxpl_id, &hdr_flags, size, obj, id) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate space at end of managed blocks")
+            H5HF_section_free_node_t *sec_node;
+
+            /* Find free space in heap */
+            if(H5HF_man_find(fh->shared, dxpl_id, size, &sec_node) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate space in fractal heap")
+
+            /* Use free space for allocating object */
+            if(H5HF_man_insert(fh->shared, dxpl_id, sec_node, size, obj, id) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate space for object in fractal heap")
         } /* end else */
     } /* end else */
+
+    /* Check for making header dirty */
+    if(shared->dirty)
+        hdr_flags |= H5AC__DIRTIED_FLAG;
 
 done:
     if(fh && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, addr, fh, hdr_flags) < 0)

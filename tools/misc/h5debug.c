@@ -152,6 +152,14 @@ main(int argc, char *argv[])
         /*
          * Debug a symbol table node.
          */
+
+        /* Check for extra parameters */
+        if(extra == 0) {
+            fprintf(stderr, "\nWarning: Providing the group's local heap address will give more information\n");
+            fprintf(stderr, "Symbol table node usage:\n");
+            fprintf(stderr, "\th5debug <filename> <Symbol table node address> <address of local heap>\n\n");
+        } /* end if */
+
         status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
 
     } else if(!HDmemcmp(sig, H5B_MAGIC, H5B_SIZEOF_MAGIC)) {
@@ -165,10 +173,25 @@ main(int argc, char *argv[])
 
         switch(subtype) {
             case H5B_SNODE_ID:
+                /* Check for extra parameters */
+                if(extra == 0) {
+                    fprintf(stderr, "\nWarning: Providing the group's local heap address will give more information\n");
+                    fprintf(stderr, "B-tree symbol table node usage:\n");
+                    fprintf(stderr, "\th5debug <filename> <B-tree node address> <address of local heap>\n\n");
+                } /* end if */
+
                 status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
                 break;
 
             case H5B_ISTORE_ID:
+                /* Check for extra parameters */
+                if(extra == 0) {
+                    fprintf(stderr, "ERROR: Need number of dimensions of chunk in order to dump chunk B-tree node\n");
+                    fprintf(stderr, "B-tree chunked storage node usage:\n");
+                    fprintf(stderr, "\th5debug <filename> <B-tree node address> <# of dimensions>\n");
+                    HDexit(4);
+                } /* end if */
+
                 ndims = (unsigned)extra;
                 status = H5D_istore_debug (f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, ndims);
                 break;
@@ -204,6 +227,14 @@ main(int argc, char *argv[])
          */
         H5B2_subid_t subtype = (H5B2_subid_t)sig[H5B2_SIZEOF_MAGIC+1];
 
+        /* Check for enough valid parameters */
+        if(extra == 0 || extra2 == 0) {
+            fprintf(stderr, "ERROR: Need v2 B-tree header address and number of records in order to dump internal node\n");
+            fprintf(stderr, "v2 B-tree internal node usage:\n");
+            fprintf(stderr, "\th5debug <filename> <internal node address> <v2 B-tree header address> <number of records>\n");
+            HDexit(4);
+        } /* end if */
+
         switch(subtype) {
             case H5B2_TEST_ID:
                 status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5B2_TEST, extra, (unsigned)extra2);
@@ -221,6 +252,14 @@ main(int argc, char *argv[])
          * B-tree signature.
          */
         H5B2_subid_t subtype = (H5B2_subid_t)sig[H5B2_SIZEOF_MAGIC+1];
+
+        /* Check for enough valid parameters */
+        if(extra == 0 || extra2 == 0) {
+            fprintf(stderr, "ERROR: Need v2 B-tree header address and number of records in order to dump leaf node\n");
+            fprintf(stderr, "v2 B-tree leaf node usage:\n");
+            fprintf(stderr, "\th5debug <filename> <leaf node address> <v2 B-tree header address> <number of records>\n");
+            HDexit(4);
+        } /* end if */
 
         switch(subtype) {
             case H5B2_TEST_ID:
@@ -242,7 +281,31 @@ main(int argc, char *argv[])
         /*
          * Debug a fractal heap direct block.
          */
+
+        /* Check for enough valid parameters */
+        if(extra == 0 || extra2 == 0) {
+            fprintf(stderr, "ERROR: Need fractal heap header address and size of direct block in order to dump direct block\n");
+            fprintf(stderr, "Fractal heap direct block usage:\n");
+            fprintf(stderr, "\th5debug <filename> <direct block address> <heap header address> <size of direct block>\n");
+            HDexit(4);
+        } /* end if */
+
         status = H5HF_dblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra, (size_t)extra2);
+
+    } else if(!HDmemcmp(sig, H5HF_IBLOCK_MAGIC, H5HF_SIZEOF_MAGIC)) {
+        /*
+         * Debug a fractal heap indirect block.
+         */
+
+        /* Check for enough valid parameters */
+        if(extra == 0 || extra2 == 0) {
+            fprintf(stderr, "ERROR: Need fractal heap header address and number of rows in order to dump indirect block\n");
+            fprintf(stderr, "Fractal heap indirect block usage:\n");
+            fprintf(stderr, "\th5debug <filename> <direct block address> <heap header address> <number of rows>\n");
+            HDexit(4);
+        } /* end if */
+
+        status = H5HF_iblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra, (unsigned)extra2);
 
     } else if(sig[0] == H5O_VERSION) {
         /*
