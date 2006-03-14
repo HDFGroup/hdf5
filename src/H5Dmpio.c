@@ -59,7 +59,6 @@
    If the average number of chunks per process is greater than this value,
       the library will create an MPI derived datatype to link all chunks to do collective IO.
       The user can set this value through an API. */
-#define H5D_ONE_LINK_CHUNK_IO_THRESHOLD 0 /* always set this option with value 0*/
 
 /* Macros to represent options on how to obtain chunk address for one linked-chunk IO case */
 #define H5D_OBTAIN_ONE_CHUNK_ADDR_IND 0
@@ -75,7 +74,6 @@
    If the average number of processes per chunk is greater than the default value,
    collective IO is done for this chunk.
 */
-#define H5D_MULTI_CHUNK_IO_COL_THRESHOLD 50
 
 /* Macros to represent different IO modes(NONE, Independent or collective)for multiple chunk IO case */
 #define H5D_CHUNK_IO_MODE_IND         0
@@ -640,34 +638,39 @@ H5D_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf, hbool
 
     int               io_option = H5D_MULTI_CHUNK_IO;
     int               sum_chunk,mpi_size;
-    int               one_link_chunk_io_threshold;
+    unsigned          one_link_chunk_io_threshold;
+    H5P_genplist_t    *plist; 
+    H5FD_mpio_chunk_opt_t chunk_opt_mode;
     herr_t            ret_value = SUCCEED;    
 
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_collective_io)
 
     assert (IS_H5FD_MPIO(io_info->dset->oloc.file));
+    
+    /* Obtain the data transfer properties */
+    if(NULL == (plist = H5I_object(io_info->dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+    chunk_opt_mode=(H5FD_mpio_chunk_opt_t)H5P_peek_unsigned(plist,H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME);
+    if(chunk_opt_mode != H5FD_MPIO_OPT_ONE_IO) {
 
-    if(H5D_mpio_get_sum_chunk(io_info,fm,&sum_chunk)<0)   
-         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSWAP, FAIL, "unable to obtain the total chunk number of all processes"); 
-    if((mpi_size = H5F_mpi_get_size(io_info->dset->oloc.file))<0)
+       if(H5D_mpio_get_sum_chunk(io_info,fm,&sum_chunk)<0)   
+  	       HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSWAP, FAIL, "unable to obtain the total chunk number of all processes"); 
+       if((mpi_size = H5F_mpi_get_size(io_info->dset->oloc.file))<0)
 	 HGOTO_ERROR (H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi size");
-    one_link_chunk_io_threshold = H5D_ONE_LINK_CHUNK_IO_THRESHOLD;/*This should be replaced by the user inputting value from API. */
+    
+       if(NULL == (plist = H5I_object(io_info->dxpl_id)))
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
-    /* step 1: choose an IO option */
-    /* If the average number of chunk per process is greater than a threshold, we will do one link chunked IO. */
-    if(sum_chunk/mpi_size >= one_link_chunk_io_threshold) io_option = H5D_ONE_LINK_CHUNK_IO;
+       one_link_chunk_io_threshold =H5P_peek_unsigned(plist,H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME);
 
-/* If this MPI-IO package doesn't support collective IO when no IO is done for one or more processes,
-   use MULTIPLE CHUNK IO */
-/*
-#ifndef H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS
-    if(H5D_mpio_get_min_chunk(io_info,fm,&min_chunk)<0)
-         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSWAP, FAIL, "unable to obtain the min chunk number of all processes"); 
-    if(min_chunk == 0) io_option = H5D_MULTI_CHUNK_IO;
-#endif
-*/
+      /* step 1: choose an IO option */
+      /* If the average number of chunk per process is greater than a threshold, we will do one link chunked IO. */
+       if(sum_chunk/mpi_size >= one_link_chunk_io_threshold) io_option = H5D_ONE_LINK_CHUNK_IO;
 
+    }
+    else 
+      io_option = H5D_ONE_LINK_CHUNK_IO;
 #ifndef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
     if(io_option == H5D_ONE_LINK_CHUNK_IO ) io_option = H5D_MULTI_CHUNK_IO ;/* We can not do this with one chunk IO. */
 #endif
@@ -1557,7 +1560,7 @@ H5D_obtain_mpio_mode(H5D_io_info_t* io_info,
 
   int               total_chunks;
   hsize_t           ori_total_chunks;
-  int               percent_nproc_per_chunk,threshold_nproc_per_chunk;
+  unsigned          percent_nproc_per_chunk,threshold_nproc_per_chunk;
   uint8_t*          io_mode_info;
   uint8_t*          recv_io_mode_info;
   uint8_t*          mergebuf;
@@ -1577,7 +1580,7 @@ H5D_obtain_mpio_mode(H5D_io_info_t* io_info,
   MPI_Comm          comm;
   int               root;
   int               mpi_code;
-  int               multi_chunk_io_col_threshold;
+  H5P_genplist_t    *plist;
   int               mem_cleanup      = 0,
                     mpi_type_cleanup = 0;
 
@@ -1594,8 +1597,11 @@ H5D_obtain_mpio_mode(H5D_io_info_t* io_info,
 	 HGOTO_ERROR (H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi rank");
   if((mpi_size = H5F_mpi_get_size(io_info->dset->oloc.file))<0)
 	 HGOTO_ERROR (H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi size");
-  multi_chunk_io_col_threshold = H5D_MULTI_CHUNK_IO_COL_THRESHOLD; /* May replace by user-input */
-  percent_nproc_per_chunk = multi_chunk_io_col_threshold;/* For example, above 50%, do collective IO */
+  /* Obtain the data transfer properties */
+  if(NULL == (plist = H5I_object(io_info->dxpl_id)))
+       HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+  percent_nproc_per_chunk=H5P_peek_unsigned(plist,H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME);
+ 
   threshold_nproc_per_chunk = mpi_size * percent_nproc_per_chunk/100;
 
   /* Allocate memory */

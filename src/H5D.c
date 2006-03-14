@@ -195,7 +195,10 @@ H5D_init_interface(void)
     void            *def_vfl_info            = H5D_XFER_VFL_INFO_DEF;
     size_t          def_hyp_vec_size         = H5D_XFER_HYPER_VECTOR_SIZE_DEF;
 #ifdef H5_HAVE_PARALLEL
-    H5FD_mpio_xfer_t def_io_xfer_mode        = H5D_XFER_IO_XFER_MODE_DEF;
+    H5FD_mpio_xfer_t def_io_xfer_mode             = H5D_XFER_IO_XFER_MODE_DEF;
+    H5FD_mpio_chunk_opt_t def_mpio_chunk_opt_mode = H5D_XFER_MPIO_CHUNK_OPT_HARD_DEF; 
+    unsigned def_mpio_chunk_opt_num               = H5D_XFER_MPIO_CHUNK_OPT_NUM_DEF;
+    unsigned def_mpio_chunk_opt_ratio             = H5D_XFER_MPIO_CHUNK_OPT_RATIO_DEF;
 #endif /* H5_HAVE_PARALLEL */
     H5Z_EDC_t       enable_edc               = H5D_XFER_EDC_DEF;
     H5Z_cb_t        filter_cb                = H5D_XFER_FILTER_CB_DEF;
@@ -297,6 +300,12 @@ H5D_init_interface(void)
 #ifdef H5_HAVE_PARALLEL
         /* Register the I/O transfer mode property */
         if(H5P_register(xfer_pclass,H5D_XFER_IO_XFER_MODE_NAME,H5D_XFER_IO_XFER_MODE_SIZE,&def_io_xfer_mode,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+	if(H5P_register(xfer_pclass,H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME,H5D_XFER_MPIO_CHUNK_OPT_HARD_SIZE,&def_mpio_chunk_opt_mode,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        if(H5P_register(xfer_pclass,H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME,H5D_XFER_MPIO_CHUNK_OPT_NUM_SIZE,&def_mpio_chunk_opt_num,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+	if(H5P_register(xfer_pclass,H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME,H5D_XFER_MPIO_CHUNK_OPT_RATIO_SIZE,&def_mpio_chunk_opt_ratio,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 #endif /* H5_HAVE_PARALLEL */
 

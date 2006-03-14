@@ -141,6 +141,18 @@
 #define H5D_XFER_IO_XFER_MODE_NAME       "io_xfer_mode"
 #define H5D_XFER_IO_XFER_MODE_SIZE       sizeof(H5FD_mpio_xfer_t)
 #define H5D_XFER_IO_XFER_MODE_DEF        H5FD_MPIO_INDEPENDENT
+/* Definitions for optimization of MPI-IO transfer mode property */
+#define H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME      "mpio_chunk_opt_hard"
+#define H5D_XFER_MPIO_CHUNK_OPT_HARD_SIZE       sizeof(H5FD_mpio_chunk_opt_t)
+#define H5D_XFER_MPIO_CHUNK_OPT_HARD_DEF        H5FD_MPIO_OPT_IGNORE
+
+#define H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME       "mpio_chunk_opt_num"
+#define H5D_XFER_MPIO_CHUNK_OPT_NUM_SIZE        sizeof(unsigned)
+#define H5D_XFER_MPIO_CHUNK_OPT_NUM_DEF         H5D_ONE_LINK_CHUNK_IO_THRESHOLD
+
+#define H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME     "mpio_chunk_opt_ratio"
+#define H5D_XFER_MPIO_CHUNK_OPT_RATIO_SIZE       sizeof(unsigned)
+#define H5D_XFER_MPIO_CHUNK_OPT_RATIO_DEF       H5D_MULTI_CHUNK_IO_COL_THRESHOLD
 /* Definitions for EDC property */
 #define H5D_XFER_EDC_NAME       "err_detect"
 #define H5D_XFER_EDC_SIZE       sizeof(H5Z_EDC_t)
