@@ -83,7 +83,7 @@ H5B2_stat_info(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree header */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B2_get_root_addr_test)
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_stat_info)
 
     /* Check arguments. */
     HDassert(f);
