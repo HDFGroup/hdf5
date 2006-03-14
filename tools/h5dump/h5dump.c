@@ -763,6 +763,10 @@ print_datatype(hid_t type,unsigned in_group)
                 printf("H5T_IEEE_F64BE");
             } else if (H5Tequal(type, H5T_IEEE_F64LE)) {
                 printf("H5T_IEEE_F64LE");
+            } else if (H5Tequal(type, H5T_VAX_F32)) {
+                printf("H5T_VAX_F32");
+            } else if (H5Tequal(type, H5T_VAX_F64)) {
+                printf("H5T_VAX_F64");
             } else if (H5Tequal(type, H5T_NATIVE_FLOAT)) {
                 printf("H5T_NATIVE_FLOAT");
             } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
@@ -4042,6 +4046,8 @@ xml_print_datatype(hid_t type, unsigned in_group)
                 printf("BE");
                 break;
             case H5T_ORDER_VAX:
+		printf("VAX");
+		break;
             default:
                 printf("ERROR_UNKNOWN");
             }

@@ -3540,6 +3540,9 @@ done:
  *              Oops, forgot to increment the exponent when rounding the
  *              significand resulted in a carry. Thanks to Guillaume Colin
  *              de Verdiere for finding this one!
+ *
+ *              Raymond Lu, 2006-03-13
+ *              Added support for VAX floating-point types.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3555,11 +3558,13 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     int	direction;		        /*forward or backward traversal	*/
     size_t	elmtno;			/*element number		*/
     size_t	half_size;		/*half the type size		*/
+    size_t      tsize;                  /*type size for swapping bytes  */
     size_t	olap;			/*num overlapping elements	*/
     ssize_t	bitno = 0;		/*bit number			*/
     uint8_t	*s, *sp, *d, *dp;	/*source and dest traversal ptrs*/
     uint8_t     *src_rev=NULL;          /*order-reversed source buffer  */
     uint8_t	dbuf[64];		/*temp destination buffer	*/
+    uint8_t     tmp1, tmp2;             /*temp variables for swapping bytes*/
 
     /* Conversion-related variables */
     hssize_t	expo;			/*exponent			*/
@@ -3587,9 +3592,9 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
             src = src_p->shared->u.atomic;
             dst = dst_p->shared->u.atomic;
-            if (H5T_ORDER_LE!=src.order && H5T_ORDER_BE!=src.order)
+            if (H5T_ORDER_LE!=src.order && H5T_ORDER_BE!=src.order && H5T_ORDER_VAX!=src.order)
                 HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported byte order");
-            if (H5T_ORDER_LE!=dst.order && H5T_ORDER_BE!=dst.order)
+            if (H5T_ORDER_LE!=dst.order && H5T_ORDER_BE!=dst.order && H5T_ORDER_VAX!=dst.order)
                 HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported byte order");
             if (dst_p->shared->size>sizeof(dbuf))
                 HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "destination size is too large");
@@ -3681,9 +3686,23 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 if (H5T_ORDER_BE==src.order) {
                     half_size = src_p->shared->size/2;
                     for (i=0; i<half_size; i++) {
-                        uint8_t tmp = s[src_p->shared->size-(i+1)];
+                        tmp1 = s[src_p->shared->size-(i+1)];
                         s[src_p->shared->size-(i+1)] = s[i];
-                        s[i] = tmp;
+                        s[i] = tmp1;
+                    }
+                } else if (H5T_ORDER_VAX==src.order) {
+                    tsize = src_p->shared->size;
+                    assert(0 == tsize % 2);
+
+                    for (i = 0; i < tsize; i += 4) {
+                        tmp1 = s[i];
+                        tmp2 = s[i+1];
+                        
+                        s[i] = s[(tsize-2)-i];
+                        s[i+1] = s[(tsize-1)-i];
+                       
+                        s[(tsize-2)-i] = tmp1;
+                        s[(tsize-1)-i] = tmp2; 
                     }
                 }
 
@@ -3771,6 +3790,9 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
 
                     goto padding;
+#ifdef VMS      
+                } /*Temporary solution to handle VAX special values*/
+#else /*VMS*/
                 } else if (H5T_bit_find (s, src.u.f.epos, src.u.f.esize,
                                          H5T_BIT_LSB, FALSE)<0) {
                     /* NaN */
@@ -3796,6 +3818,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                     goto padding;
                 }
+#endif /*VMS*/
 
                 /*
                  * Get the exponent as an unsigned quantity from the section of
@@ -4023,6 +4046,20 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         uint8_t tmp = d[dst_p->shared->size-(i+1)];
                         d[dst_p->shared->size-(i+1)] = d[i];
                         d[i] = tmp;
+                    }
+                } else if (H5T_ORDER_VAX==dst.order && reverse) {
+                    tsize = dst_p->shared->size;
+                    assert(0 == tsize % 2);
+
+                    for (i = 0; i < tsize; i += 4) {
+                        tmp1 = d[i];
+                        tmp2 = d[i+1];
+                        
+                        d[i] = d[(tsize-2)-i];
+                        d[i+1] = d[(tsize-1)-i];
+                       
+                        d[(tsize-2)-i] = tmp1;
+                        d[(tsize-1)-i] = tmp2; 
                     }
                 }
 
@@ -9434,6 +9471,9 @@ done:
  *              There is a new design for exception handling like overflow,
  *              which is passed in as a transfer property.
  *
+ *              Raymond Lu
+ *              Monday, March 13, 2006
+ *              Added support for VAX floating-point types.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -9449,10 +9489,12 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     int	direction;		        /*forward or backward traversal	*/
     size_t	elmtno;			/*element number		*/
     size_t	half_size;		/*half the type size		*/
+    size_t      tsize;                  /*type size for swapping bytes  */
     size_t	olap;			/*num overlapping elements	*/
     uint8_t	*s, *sp, *d, *dp;	/*source and dest traversal ptrs*/
     uint8_t     *src_rev=NULL;          /*order-reversed source buffer  */
     uint8_t	dbuf[64];		/*temp destination buffer	*/
+    uint8_t     tmp1, tmp2;             /*temp variables for swapping bytes*/
 
     /* Conversion-related variables */
     hssize_t	expo;			/*source exponent		*/
@@ -9478,7 +9520,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
             src = src_p->shared->u.atomic;
             dst = dst_p->shared->u.atomic;
-            if (H5T_ORDER_LE!=src.order && H5T_ORDER_BE!=src.order)
+            if (H5T_ORDER_LE!=src.order && H5T_ORDER_BE!=src.order && H5T_ORDER_VAX!=src.order)
                 HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported byte order");
             if (dst_p->shared->size>sizeof(dbuf))
                 HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "destination size is too large");
@@ -9575,9 +9617,23 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 if (H5T_ORDER_BE==src.order) {
                     half_size = src_p->shared->size/2;
                     for (i=0; i<half_size; i++) {
-                        uint8_t tmp = s[src_p->shared->size-(i+1)];
+                        tmp1 = s[src_p->shared->size-(i+1)];
                         s[src_p->shared->size-(i+1)] = s[i];
-                        s[i] = tmp;
+                        s[i] = tmp1;
+                    }
+                } else if (H5T_ORDER_VAX==src.order) {
+                    tsize = src_p->shared->size;
+                    assert(0 == tsize % 2);
+
+                    for (i = 0; i < tsize; i += 4) {
+                        tmp1 = s[i];
+                        tmp2 = s[i+1];
+                        
+                        s[i] = s[(tsize-2)-i];
+                        s[i+1] = s[(tsize-1)-i];
+                       
+                        s[(tsize-2)-i] = tmp1;
+                        s[(tsize-1)-i] = tmp2; 
                     }
                 }
 
@@ -9945,9 +10001,9 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 if (H5T_ORDER_BE==dst.order && reverse) {
                     half_size = dst_p->shared->size/2;
                     for (i=0; i<half_size; i++) {
-                        uint8_t tmp = d[dst_p->shared->size-(i+1)];
+                        tmp1 = d[dst_p->shared->size-(i+1)];
                         d[dst_p->shared->size-(i+1)] = d[i];
-                        d[i] = tmp;
+                        d[i] = tmp1;
                     }
                 }
 
@@ -10002,7 +10058,10 @@ done:
  *              Wednesday, April 21, 2004
  *              There is a new design for exception handling like overflow,
  *              which is passed in as a transfer property.
- *
+ *              
+ *              Raymond Lu
+ *              Monday, March 13, 2006
+ *              Added support for VAX floating-point types.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -10018,11 +10077,13 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     int	direction;		/*forward or backward traversal	*/
     size_t	elmtno;			/*element number		*/
     size_t	half_size;		/*half the type size		*/
+    size_t      tsize;                  /*type size for swapping bytes  */
     size_t	olap;			/*num overlapping elements	*/
     uint8_t	*s, *sp, *d, *dp;	/*source and dest traversal ptrs*/
     uint8_t     *src_rev=NULL;          /*order-reversed source buffer  */
     uint8_t	dbuf[64];		/*temp destination buffer	*/
-
+    uint8_t     tmp1, tmp2;             /*temp variables for swapping bytes*/
+    
     /* Conversion-related variables */
     hsize_t	expo;			/*destination exponent		*/
     hsize_t	expo_max;		/*maximal possible exponent value       */
@@ -10049,7 +10110,7 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
             src = src_p->shared->u.atomic;
             dst = dst_p->shared->u.atomic;
-            if (H5T_ORDER_LE!=dst.order && H5T_ORDER_BE!=dst.order)
+            if (H5T_ORDER_LE!=dst.order && H5T_ORDER_BE!=dst.order && H5T_ORDER_VAX!=dst.order)
                 HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported byte order");
             if (dst_p->shared->size>sizeof(dbuf))
                 HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "destination size is too large");
@@ -10152,9 +10213,9 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 if (H5T_ORDER_BE==src.order) {
                     half_size = src_p->shared->size/2;
                     for (i=0; i<half_size; i++) {
-                        uint8_t tmp = s[src_p->shared->size-(i+1)];
+                        tmp1 = s[src_p->shared->size-(i+1)];
                         s[src_p->shared->size-(i+1)] = s[i];
-                        s[i] = tmp;
+                        s[i] = tmp1;
                     }
                 }
 
@@ -10360,6 +10421,20 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         d[dst_p->shared->size-(i+1)] = d[i];
                         d[i] = tmp;
                     }
+                } else if (H5T_ORDER_VAX==dst.order && reverse) {
+                    tsize = dst_p->shared->size;
+                    assert(0 == tsize % 2);
+
+                    for (i = 0; i < tsize; i += 4) {
+                        tmp1 = d[i];
+                        tmp2 = d[i+1];
+                        
+                        d[i] = d[(tsize-2)-i];
+                        d[i+1] = d[(tsize-1)-i];
+                       
+                        d[(tsize-2)-i] = tmp1;
+                        d[(tsize-1)-i] = tmp2; 
+                    }
                 }
 
                 /*
@@ -10398,8 +10473,8 @@ done:
  * Function:	H5T_reverse_order
  *
  * Purpose:	Internal assisting function to reverse the order of
- *              a sequence of byte when it's big endian.  The byte sequence
- *              simulates the endian order.
+ *              a sequence of byte when it's big endian or VAX order.  
+ *              The byte sequence simulates the endian order.
  *
  * Return:      Success:        A pointer to the reversed byte sequence
  *
@@ -10410,6 +10485,9 @@ done:
  *
  * Modifications:
  *
+ *              Raymond Lu
+ *              March 13, 2006
+ *              Add support for VAX floating-point types.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -10422,12 +10500,18 @@ H5T_reverse_order(uint8_t *rev, uint8_t *s, size_t size, H5T_order_t order)
     assert(s);
     assert(size);
 
-    if (H5T_ORDER_BE == order)
+    if (H5T_ORDER_VAX == order) {
+        for (i = 0; i < size; i += 2) {
+            rev[i] = s[(size - 2) - i];
+            rev[i + 1] = s[(size - 1) - i];
+        }
+    } else if (H5T_ORDER_BE == order) {
         for (i=0; i<size; i++)
             rev[size-(i+1)] = s[i];
-    else
+    } else {
         for (i=0; i<size; i++)
             rev[i] = s[i];
-
+    }
+    
     FUNC_LEAVE_NOAPI(SUCCEED);
 }

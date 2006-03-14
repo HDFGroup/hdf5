@@ -61,7 +61,7 @@ const char *FILENAME[] = {
  * endian.  If local variable `endian' is H5T_ORDER_BE then the result will
  * be I, otherwise the result will be Z-(I+1).
  */
-#define ENDIAN(Z,I)	(H5T_ORDER_BE==endian?(I):(Z)-((I)+1))
+#define ENDIAN(Z,I,E)	(H5T_ORDER_BE==E?(I):(Z)-((I)+1))
 
 typedef enum dtype_t {
     INT_SCHAR, INT_UCHAR, INT_SHORT, INT_USHORT, INT_INT, INT_UINT,
@@ -85,6 +85,11 @@ static int skip_overflow_tests_g = 0;
 #if defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)
 #define HANDLE_SIGFPE
 #endif
+
+/* OpenVMS doesn't have this feature.  Make sure to disable it*/
+#ifdef VMS
+#undef HANDLE_SIGFPE
+#endif 
 
 /*
  * Decide what values of floating-point number we want to test.  They are
@@ -161,14 +166,26 @@ static int without_hardware_g = 0;
  */
 #define CHANGE_ORDER(EBUF, EORDER, ESIZE)                                                       \
 {                                                                                               \
+    unsigned int m;                                                                             \
     if (H5T_ORDER_BE==EORDER) {                                                                 \
-        unsigned int m;                                                                         \
         unsigned char mediator;                                                                 \
         size_t half_size = ESIZE/2;                                                             \
         for (m=0; m<half_size; m++) {                                                           \
             mediator = EBUF[ESIZE-(m+1)];                                                       \
             EBUF[ESIZE-(m+1)] = EBUF[m];                                                        \
             EBUF[m] = mediator;                                                                 \
+        }                                                                                       \
+    } else if (H5T_ORDER_VAX==EORDER) {                                                         \
+        unsigned char mediator1, mediator2;                                                     \
+        for (m = 0; m < ESIZE; m += 4) {                                                        \
+            mediator1 = EBUF[m];                                                                \
+            mediator2 = EBUF[m+1];                                                              \
+                                                                                                \
+            EBUF[m] = EBUF[(ESIZE-2)-m];                                                        \
+            EBUF[m+1] = EBUF[(ESIZE-1)-m];                                                      \
+                                                                                                \
+            EBUF[(ESIZE-2)-m] = mediator1;                                                      \
+            EBUF[(ESIZE-1)-m] = mediator2;                                                      \
         }                                                                                       \
     }                                                                                           \
 }
@@ -372,7 +389,7 @@ static int without_hardware_g = 0;
 void some_dummy_func(float x);
 static hbool_t overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits);
 static int my_isnan(dtype_t type, void *val);
-static int my_isinf(int endian, unsigned char *val, size_t size,
+static int my_isinf(dtype_t type, int endian, unsigned char *val, size_t size,
         size_t mpos, size_t msize, size_t epos, size_t esize);
 
 /*-------------------------------------------------------------------------
@@ -763,14 +780,14 @@ static int test_particular_fp_integer(void)
         printf("    test double to signed char:\n");
         printf("        src = ");
         for (j=0; j<src_size1; j++)
-            printf(" %02x", saved_buf1[ENDIAN(src_size1, j)]);
+            printf(" %02x", saved_buf1[ENDIAN(src_size1, j, endian)]);
         
         HDmemcpy(&x, saved_buf1, src_size1);
         printf(" %29.20e\n", x);
 
         printf("        dst = ");
         for (j=0; j<dst_size1; j++)
-            printf(" %02x", buf1[ENDIAN(dst_size1, j)]);
+            printf(" %02x", buf1[ENDIAN(dst_size1, j, endian)]);
 
         HDmemcpy(&y, buf1, dst_size1);
         printf(" %29d\n", y);
@@ -807,14 +824,14 @@ static int test_particular_fp_integer(void)
         printf("    test float to int:\n");
         printf("        src = ");
         for (j=0; j<src_size2; j++)
-            printf(" %02x", saved_buf2[ENDIAN(src_size2, j)]);
+            printf(" %02x", saved_buf2[ENDIAN(src_size2, j, endian)]);
         
         HDmemcpy(&x, saved_buf2, src_size2);
         printf(" %29.20e\n", x);
 
         printf("        dst = ");
         for (j=0; j<dst_size2; j++)
-            printf(" %02x", buf2[ENDIAN(dst_size2, j)]);
+            printf(" %02x", buf2[ENDIAN(dst_size2, j, endian)]);
 
         HDmemcpy(&y, buf2, dst_size2);
         printf(" %29d\n", y);
@@ -1067,14 +1084,14 @@ test_derived_flt(void)
 
         printf("        src = ");
         for (j=0; j<src_size; j++)
-            printf(" %02x", saved_buf[i*src_size+ENDIAN(src_size, j)]);
+            printf(" %02x", saved_buf[i*src_size+ENDIAN(src_size, j, endian)]);
 
         HDmemcpy(aligned, saved_buf+i*sizeof(int), sizeof(int));
         printf(" %29d\n", *aligned);
 
         printf("        dst = ");
         for (j=0; j<src_size; j++)
-            printf(" %02x", buf[i*src_size+ENDIAN(src_size, j)]);
+            printf(" %02x", buf[i*src_size+ENDIAN(src_size, j, endian)]);
 
         HDmemcpy(aligned, buf+i*sizeof(int), sizeof(int));
         printf(" %29d\n", *aligned);
@@ -1238,12 +1255,12 @@ test_derived_flt(void)
 
         printf("        src = ");
         for (j=0; j<src_size; j++)
-            printf(" %02x", saved_buf[i*src_size+ENDIAN(src_size, j)]);
+            printf(" %02x", saved_buf[i*src_size+ENDIAN(src_size, j, endian)]);
         printf("\n");
 
         printf("        dst = ");
         for (j=0; j<src_size; j++)
-            printf(" %02x", buf[i*src_size+ENDIAN(src_size, j)]);
+            printf(" %02x", buf[i*src_size+ENDIAN(src_size, j, endian)]);
         printf("\n");
 
         if (fails_this_test>=max_fails) {
@@ -1549,12 +1566,12 @@ test_derived_integer(void)
 
         printf("        src = ");
         for (j=0; j<src_size; j++)
-            printf(" %02x", saved_buf[i*src_size+ENDIAN(src_size, j)]);
+            printf(" %02x", saved_buf[i*src_size+ENDIAN(src_size, j, endian)]);
         printf("\n");
 
         printf("        dst = ");
         for (j=0; j<src_size; j++)
-            printf(" %02x", buf[i*src_size+ENDIAN(src_size, j)]);
+            printf(" %02x", buf[i*src_size+ENDIAN(src_size, j, endian)]);
         printf("\n");
 
         if (fails_this_test>=max_fails) {
@@ -2276,10 +2293,10 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
          * the `bittests' program.
          */
         for (k=0; k<src_size; k++)
-            src_bits[src_size-(k+1)] = saved[j*src_size+ENDIAN(src_size, k)];
+            src_bits[src_size-(k+1)] = saved[j*src_size+ENDIAN(src_size, k, endian)];
 
         for (k=0; k<dst_size; k++)
-            dst_bits[dst_size-(k+1)] = buf[j*dst_size+ENDIAN(dst_size, k)];
+            dst_bits[dst_size-(k+1)] = buf[j*dst_size+ENDIAN(dst_size, k, endian)];
 
         /*
          * Hardware usually doesn't handle overflows too gracefully. The
@@ -2385,7 +2402,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 
         printf("        src = ");
         for (k=0; k<src_size; k++)
-            printf(" %02x", saved[j*src_size+ENDIAN(src_size, k)]);
+            printf(" %02x", saved[j*src_size+ENDIAN(src_size, k, endian)]);
         printf("%*s", (int)(3*MAX(0, (ssize_t)dst_size-(ssize_t)src_size)), "");
         switch (src_type) {
             case INT_SCHAR:
@@ -2434,7 +2451,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 
         printf("        dst = ");
         for (k=0; k<dst_size; k++)
-            printf(" %02x", buf[j*dst_size+ENDIAN(dst_size, k)]);
+            printf(" %02x", buf[j*dst_size+ENDIAN(dst_size, k, endian)]);
         printf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)), "");
         switch (dst_type) {
             case INT_SCHAR:
@@ -2483,7 +2500,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 
         printf("        ans = ");
         for (k=0; k<dst_size; k++)
-            printf(" %02x", hw[ENDIAN(dst_size, k)]);
+            printf(" %02x", hw[ENDIAN(dst_size, k, endian)]);
         printf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)), "");
         switch (dst_type) {
             case INT_SCHAR:
@@ -2615,7 +2632,7 @@ test_conv_int_2(void)
 static int
 my_isnan(dtype_t type, void *val)
 {
-    int retval;
+    int retval = 0;
     char s[256];
 
     if (FLT_FLOAT==type) {
@@ -2662,6 +2679,24 @@ my_isnan(dtype_t type, void *val)
 	    retval = 1;
     }
 
+#ifdef VMS
+    /* For "float" and "double" on OpenVMS/Alpha, NaN is 
+     * actually a valid value of maximal value.*/
+    if(!retval) {
+	if (FLT_FLOAT==type) {
+	    float x;
+	    HDmemcpy(&x, val, sizeof(float));
+            retval = (x==FLT_MAX || x==-FLT_MAX);
+	} else if (FLT_DOUBLE==type) {
+ 	    double x;
+	    HDmemcpy(&x, val, sizeof(double));
+            retval = (x==DBL_MAX || x==-DBL_MAX);
+	} else {
+	    return 0;
+	}
+    }
+#endif /*VMS*/
+
     return retval;
 }
 
@@ -2681,7 +2716,7 @@ my_isnan(dtype_t type, void *val)
  *-------------------------------------------------------------------------
  */
 static int
-my_isinf(int endian, unsigned char *val, size_t size,
+my_isinf(dtype_t type, int endian, unsigned char *val, size_t size,
         size_t mpos, size_t msize, size_t epos, size_t esize)
 {
     unsigned char *bits;
@@ -2690,8 +2725,24 @@ my_isinf(int endian, unsigned char *val, size_t size,
     ssize_t ret1=0, ret2=0;
 
     bits = (unsigned char*)calloc(1, size);
+    
+#ifdef VMS
+    if(H5T_ORDER_VAX==endian) {
+        for (i = 0; i < size; i += 4) {
+            bits[i] = val[(size-2)-i];
+            bits[i+1] = val[(size-1)-i];
+           
+            bits[(size-2)-i] = val[i];
+            bits[(size-1)-i] = val[i+1]; 
+        }
+    } else {
+        for (i=0; i<size; i++)
+            bits[size-(i+1)] = *(val + ENDIAN(size,i,endian));
+    }
+#else /*VMS*/
     for (i=0; i<size; i++)
-        bits[size-(i+1)] = *(val + ENDIAN(size, i));
+        bits[size-(i+1)] = *(val + ENDIAN(size, i, endian));
+#endif /*VMS*/
 
     if((ret1=H5T_bit_find(bits, mpos, msize, H5T_BIT_LSB, 1))<0 &&
        (ret2=H5T_bit_find(bits, epos, esize, H5T_BIT_LSB, 0))<0)
@@ -2749,9 +2800,11 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
     unsigned char	*hw=NULL;		/*ptr to hardware-conv'd*/
     int			underflow;		/*underflow occurred	*/
     int			overflow;		/*overflow occurred	*/
+    int			maximal;		/*maximal value occurred, for VMS only.	*/
     int 		uflow=0;		/*underflow debug counters*/
     size_t		j, k;			/*counters		*/
-    int			endian;			/*machine endianess	*/
+    int			sendian;		/* source type endianess */
+    int			dendian;		/* Destination type endianess */
     size_t		dst_ebias;		/* Destination type's exponent bias */
     size_t		src_epos;		/* Source type's exponent position */
     size_t		src_esize;		/* Source type's exponent size */
@@ -2794,7 +2847,9 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
      * The remainder of this function is executed only by the child if
      * HANDLE_SIGFPE is defined.
      */
+#ifndef VMS
     HDsignal(SIGFPE,fpe_handler);
+#endif
 
     /* What are the names of the source and destination types */
     if (H5Tequal(src, H5T_NATIVE_FLOAT)) {
@@ -2877,7 +2932,8 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
     dst_ebias=H5Tget_ebias(dst);
     H5Tget_fields(src,NULL,&src_epos,&src_esize,NULL,NULL);
     H5Tget_fields(dst,NULL,&dst_epos,&dst_esize,&dst_mpos,&dst_msize);
-    endian = H5Tget_order(H5T_NATIVE_FLOAT);
+    sendian = H5Tget_order(src);
+    dendian = H5Tget_order(dst);
 
     /* Allocate buffers */
     aligned = HDcalloc(1, MAX(sizeof(long double), sizeof(double)));
@@ -2891,10 +2947,36 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
     switch (run_test) {
         case TEST_NOOP:
         case TEST_NORMAL:
+#ifdef VMS
             if(src_type == FLT_FLOAT) {
                 INIT_FP_NORM(float, FLT_MAX, FLT_MIN, FLT_MAX_10_EXP, FLT_MIN_10_EXP,
                         src_size, dst_size, buf, saved, nelmts);
-
+            } else if(src_type == FLT_DOUBLE && dst_type == FLT_FLOAT) {
+                /*Temporary solution for VMS.  Cap double values between maximal and minimal 
+                 *destination values because VMS return exception when overflows or underflows.
+                 *Same below.*/ 
+                INIT_FP_NORM(double, FLT_MAX, FLT_MIN, FLT_MAX_10_EXP, FLT_MIN_10_EXP,
+                        src_size, dst_size, buf, saved, nelmts);
+            } else if(src_type == FLT_DOUBLE) {
+                INIT_FP_NORM(double, DBL_MAX, DBL_MIN, DBL_MAX_10_EXP, DBL_MIN_10_EXP,
+                        src_size, dst_size, buf, saved, nelmts);
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
+            } else if(src_type == FLT_LDOUBLE && dst_type == FLT_FLOAT) {
+                INIT_FP_NORM(long double, FLT_MAX, FLT_MIN, FLT_MAX_10_EXP, FLT_MIN_10_EXP,
+                        src_size, dst_size, buf, saved, nelmts);
+            } else if(src_type == FLT_LDOUBLE && dst_type == FLT_DOUBLE) {
+                INIT_FP_NORM(long double, DBL_MAX, DBL_MIN, DBL_MAX_10_EXP, DBL_MIN_10_EXP,
+                        src_size, dst_size, buf, saved, nelmts);
+            } else if(src_type == FLT_LDOUBLE) {
+                INIT_FP_NORM(long double, LDBL_MAX, LDBL_MIN, LDBL_MAX_10_EXP, LDBL_MIN_10_EXP,
+                        src_size, dst_size, buf, saved, nelmts);
+#endif
+            } else
+                goto error;
+#else /*VMS*/
+            if(src_type == FLT_FLOAT) {
+                INIT_FP_NORM(float, FLT_MAX, FLT_MIN, FLT_MAX_10_EXP, FLT_MIN_10_EXP,
+                        src_size, dst_size, buf, saved, nelmts);
             } else if(src_type == FLT_DOUBLE) {
                 INIT_FP_NORM(double, DBL_MAX, DBL_MIN, DBL_MAX_10_EXP, DBL_MIN_10_EXP,
                         src_size, dst_size, buf, saved, nelmts);
@@ -2905,18 +2987,19 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
 #endif
             } else
                 goto error;
-
+#endif /*VMS*/
+            
             break;
         case TEST_DENORM:
             if(src_type == FLT_FLOAT) {
-                INIT_FP_DENORM(float, FLT_MANT_DIG, src_size, src_nbits, endian, dst_size,
+                INIT_FP_DENORM(float, FLT_MANT_DIG, src_size, src_nbits, sendian, dst_size,
                         buf, saved, nelmts);
             } else if(src_type == FLT_DOUBLE) {
-                INIT_FP_DENORM(double, DBL_MANT_DIG, src_size, src_nbits, endian, dst_size,
+                INIT_FP_DENORM(double, DBL_MANT_DIG, src_size, src_nbits, sendian, dst_size,
                         buf, saved, nelmts);
 #if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
             } else if(src_type == FLT_LDOUBLE) {
-                INIT_FP_DENORM(long double, LDBL_MANT_DIG, src_size, src_nbits, endian, dst_size,
+                INIT_FP_DENORM(long double, LDBL_MANT_DIG, src_size, src_nbits, sendian, dst_size,
                         buf, saved, nelmts);
 #endif
             } else
@@ -2926,14 +3009,14 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
 
         case TEST_SPECIAL:
             if(src_type == FLT_FLOAT) {
-                INIT_FP_SPECIAL(src_size, src_nbits, endian, FLT_MANT_DIG, dst_size,
+                INIT_FP_SPECIAL(src_size, src_nbits, sendian, FLT_MANT_DIG, dst_size,
                         buf, saved, nelmts);
             } else if(src_type == FLT_DOUBLE) {
-                 INIT_FP_SPECIAL(src_size, src_nbits, endian, DBL_MANT_DIG, dst_size,
+                 INIT_FP_SPECIAL(src_size, src_nbits, sendian, DBL_MANT_DIG, dst_size,
                         buf, saved, nelmts);
 #if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
             } else if(src_type == FLT_LDOUBLE) {
-                 INIT_FP_SPECIAL(src_size, src_nbits, endian, LDBL_MANT_DIG, dst_size,
+                 INIT_FP_SPECIAL(src_size, src_nbits, sendian, LDBL_MANT_DIG, dst_size,
                         buf, saved, nelmts);
 #endif
             } else
@@ -2980,6 +3063,9 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 hw = (unsigned char*)&hw_f;
                 underflow = HDfabs(*((double*)aligned)) < FLT_MIN;
                 overflow = HDfabs(*((double*)aligned)) > FLT_MAX;
+#ifdef VMS
+                maximal = HDfabs(*((double*)aligned)) == FLT_MAX;
+#endif
             } else if (FLT_DOUBLE==dst_type) {
                 hw_d = *((double*)aligned);
                 hw = (unsigned char*)&hw_d;
@@ -2997,11 +3083,17 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 hw = (unsigned char*)&hw_f;
                 underflow = HDfabsl(*((long double*)aligned)) < FLT_MIN;
                 overflow = HDfabsl(*((long double*)aligned)) > FLT_MAX;
+#ifdef VMS
+                maximal = HDfabs(*((long double*)aligned)) == FLT_MAX;
+#endif
             } else if (FLT_DOUBLE==dst_type) {
                 hw_d = *((long double*)aligned);
                 hw = (unsigned char*)&hw_d;
                 underflow = HDfabsl(*((long double*)aligned)) < DBL_MIN;
                 overflow = HDfabsl(*((long double*)aligned)) > DBL_MAX;
+#ifdef VMS
+                maximal = HDfabs(*((long double*)aligned)) == DBL_MAX;
+#endif
             } else {
                 hw_ld = *((long double*)aligned);
                 hw = (unsigned char*)&hw_ld;
@@ -3019,7 +3111,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
          * 0s before compare the values.
          */
 #if H5_SIZEOF_LONG_DOUBLE !=0
-        if(endian==H5T_ORDER_LE && dst_type==FLT_LDOUBLE) {
+        if(sendian==H5T_ORDER_LE && dst_type==FLT_LDOUBLE) {
             unsigned int q;
             for(q=dst_nbits/8; q<dst_size; q++) {
                 buf[j*dst_size+q] = 0x00;
@@ -3034,6 +3126,18 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 break;
         if (k==dst_size)
             continue; /*no error*/
+
+#ifdef VMS
+        /* For "float" and "double" on OpenVMS/Alpha, NaN is 
+         * a valid value of maximal value.*/
+        if (FLT_FLOAT==src_type &&
+                my_isnan(src_type, saved+j*sizeof(float))) {
+            continue;
+        } else if (FLT_DOUBLE==src_type &&
+                my_isnan(src_type, saved+j*sizeof(double))) {
+            continue;
+        }
+#endif /*VMS*/
 
         /*
          * Assume same if both results are NaN.  There are many NaN bit
@@ -3088,9 +3192,14 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 if (underflow &&
                         HDfabsf(x) <= FLT_MIN && HDfabsf(hw_f) <= FLT_MIN)
                     continue;	/* all underflowed, no error */
-                if (overflow && my_isinf(endian, buf+j*sizeof(float),
+                if (overflow && my_isinf(dst_type, dendian, buf+j*sizeof(float),
                         dst_size, dst_mpos, dst_msize, dst_epos, dst_esize))
                     continue;	/* all overflowed, no error */
+#ifdef VMS
+                if (maximal && my_isinf(dst_type, dendian, buf+j*sizeof(float),
+                        dst_size, dst_mpos, dst_msize, dst_epos, dst_esize))
+                    continue;	/* maximal value, no error */
+#endif /*VMS*/
                 check_mant[0] = HDfrexpf(x, check_expo+0);
                 check_mant[1] = HDfrexpf(hw_f, check_expo+1);
             } else if (FLT_DOUBLE==dst_type) {
@@ -3099,9 +3208,14 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 if (underflow &&
                         HDfabs(x) <= DBL_MIN && HDfabs(hw_d) <= DBL_MIN)
                     continue;	/* all underflowed, no error */
-                if (overflow && my_isinf(endian, buf+j*sizeof(double),
+                if (overflow && my_isinf(dst_type, dendian, buf+j*sizeof(double),
                         dst_size, dst_mpos, dst_msize, dst_epos, dst_esize))
                     continue;	/* all overflowed, no error */
+#ifdef VMS
+                if (maximal && my_isinf(dst_type, dendian, buf+j*sizeof(double),
+                        dst_size, dst_mpos, dst_msize, dst_epos, dst_esize))
+                    continue;	/* maximal value, no error */
+#endif /*VMS*/
                 check_mant[0] = HDfrexp(x, check_expo+0);
                 check_mant[1] = HDfrexp(hw_d, check_expo+1);
 #if H5_SIZEOF_LONG_DOUBLE !=0 && (H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE)
@@ -3142,21 +3256,41 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
             uint8_t tmp[32];
 
             assert(src_size<=sizeof(tmp));
-            if(endian==H5T_ORDER_LE)
+            if(sendian==H5T_ORDER_LE)
                 HDmemcpy(tmp,&saved[j*src_size],src_size);
-            else
+            else if(sendian==H5T_ORDER_BE)
                 for (k=0; k<src_size; k++)
                     tmp[k]=saved[j*src_size+(src_size-(k+1))];
+            else {
+                for (k = 0; k < src_size; k += 4) {
+                    tmp[k] = saved[j*src_size+(src_size-2)-k];
+                    tmp[k+1] = saved[j*src_size+(src_size-1)-k];
+                                      
+                    tmp[(src_size-2)-k] = saved[j*src_size+k]
+                    tmp[(src_size-1)-k] = saved[j*src_size+k+1];
+                }
+            }
+
             expo = H5T_bit_get_d(tmp, src_epos, src_esize);
             if(expo==0)
                 continue;   /* Denormalized floating-point value detected */
             else {
                 assert(dst_size<=sizeof(tmp));
-                if(endian==H5T_ORDER_LE)
+                if(sendian==H5T_ORDER_LE)
                     HDmemcpy(tmp,&buf[j*dst_size],dst_size);
-                else
+                else if(sendian==H5T_ORDER_BE)
                     for (k=0; k<dst_size; k++)
                         tmp[k]=buf[j*dst_size+(dst_size-(k+1))];
+                else {
+                    for (k = 0; k < src_size; k += 4) {
+                        tmp[k] = buf[j*dst_size+(dst_size-2)-k];
+                        tmp[k+1] = buf[j*dst_size+(dst_size-1)-k];
+                                          
+                        tmp[(dst_size-2)-k] = buf[j*dst_size+k]
+                        tmp[(dst_size-1)-k] = buf[j*dst_size+k+1];
+                    }
+                }
+
                 expo = H5T_bit_get_d(tmp, dst_epos, dst_esize);
                 if(expo==0)
                     continue;   /* Denormalized floating-point value detected */
@@ -3181,7 +3315,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
 
         printf("        src =");
         for (k=0; k<src_size; k++)
-            printf(" %02x", saved[j*src_size+ENDIAN(src_size,k)]);
+            printf(" %02x", saved[j*src_size+ENDIAN(src_size,k,sendian)]);
         printf("%*s", (int)(3*MAX(0, (ssize_t)dst_size-(ssize_t)src_size)), "");
         if (FLT_FLOAT==src_type) {
             float x;
@@ -3201,7 +3335,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
 
         printf("        dst =");
         for (k=0; k<dst_size; k++)
-            printf(" %02x", buf[j*dst_size+ENDIAN(dst_size,k)]);
+            printf(" %02x", buf[j*dst_size+ENDIAN(dst_size,k,dendian)]);
         printf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)), "");
         if (FLT_FLOAT==dst_type) {
             float x;
@@ -3221,7 +3355,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
 
         printf("        ans =");
         for (k=0; k<dst_size; k++)
-            printf(" %02x", hw[ENDIAN(dst_size,k)]);
+            printf(" %02x", hw[ENDIAN(dst_size,k,dendian)]);
         printf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)), "");
         if (FLT_FLOAT==dst_type)
             printf(" %29.20e\n", hw_f);
@@ -3331,7 +3465,8 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
     dtype_t		dst_type;	        /*data types		*/
     const char		*src_type_name=NULL;	/*source type name	*/
     const char		*dst_type_name=NULL;	/*destination type name	*/
-    int			endian;			/*machine endianess	*/
+    int			sendian;		/*source endianess	*/
+    int			dendian;		/*destination endianess	*/
     size_t		src_size, dst_size;	/*type sizes		*/
     unsigned char	*buf=NULL;		/*buffer for conversion	*/
     unsigned char	*saved=NULL;		/*original values	*/
@@ -3519,7 +3654,8 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
     }
 
     /* Some information about datatypes */
-    endian = H5Tget_order(H5T_NATIVE_INT);
+    sendian = H5Tget_order(src);
+    dendian = H5Tget_order(dst);
     src_size = H5Tget_size(src);
     dst_size = H5Tget_size(dst);
     src_nbits = H5Tget_precision(src); /* not 8*src_size, esp on J90 - QAK */
@@ -3589,20 +3725,20 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             INIT_FP_NORM(float, FLT_MAX, FLT_MIN, FLT_MAX_10_EXP, FLT_MIN_10_EXP,
                     src_size, dst_size, buf, saved, nelmts);
         } else if(run_test==TEST_DENORM) {
-            INIT_FP_DENORM(float, FLT_MANT_DIG, src_size, src_nbits, endian, dst_size,
+            INIT_FP_DENORM(float, FLT_MANT_DIG, src_size, src_nbits, sendian, dst_size,
                     buf, saved, nelmts);
         } else {
-            INIT_FP_SPECIAL(src_size, src_nbits, endian, FLT_MANT_DIG, dst_size, buf, saved, nelmts);
+            INIT_FP_SPECIAL(src_size, src_nbits, sendian, FLT_MANT_DIG, dst_size, buf, saved, nelmts);
         }
     } else if(src_type == FLT_DOUBLE) {
         if(run_test==TEST_NORMAL) {
             INIT_FP_NORM(double, DBL_MAX, DBL_MIN, DBL_MAX_10_EXP, DBL_MIN_10_EXP,
                     src_size, dst_size, buf, saved, nelmts);
         } else if(run_test==TEST_DENORM) {
-            INIT_FP_DENORM(double, DBL_MANT_DIG, src_size, src_nbits, endian, dst_size,
+            INIT_FP_DENORM(double, DBL_MANT_DIG, src_size, src_nbits, sendian, dst_size,
                     buf, saved, nelmts);
         } else {
-            INIT_FP_SPECIAL(src_size, src_nbits, endian, DBL_MANT_DIG, dst_size, buf, saved, nelmts);
+            INIT_FP_SPECIAL(src_size, src_nbits, sendian, DBL_MANT_DIG, dst_size, buf, saved, nelmts);
         }
 #if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
     } else if(src_type == FLT_LDOUBLE) {
@@ -3610,10 +3746,10 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             INIT_FP_NORM(long double, LDBL_MAX, LDBL_MIN, LDBL_MAX_10_EXP, LDBL_MIN_10_EXP,
                     src_size, dst_size, buf, saved, nelmts);
         } else if(run_test==TEST_DENORM) {
-            INIT_FP_DENORM(long double, LDBL_MANT_DIG, src_size, src_nbits, endian, dst_size,
+            INIT_FP_DENORM(long double, LDBL_MANT_DIG, src_size, src_nbits, sendian, dst_size,
                     buf, saved, nelmts);
         } else {
-            INIT_FP_SPECIAL(src_size, src_nbits, endian, LDBL_MANT_DIG, dst_size, buf, saved, nelmts);
+            INIT_FP_SPECIAL(src_size, src_nbits, sendian, LDBL_MANT_DIG, dst_size, buf, saved, nelmts);
         }
 #endif
     } else
@@ -3991,7 +4127,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
          * the values.
          */
 #if H5_SIZEOF_LONG_DOUBLE !=0
-        if(endian==H5T_ORDER_LE && dst_type==FLT_LDOUBLE) {
+        if(dendian==H5T_ORDER_LE && dst_type==FLT_LDOUBLE) {
             unsigned int q;
             for(q=dst_nbits/8; q<dst_size; q++) {
                 buf[j*dst_size+q] = 0x00;
@@ -4012,11 +4148,19 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
          * certain things.  These routines have already been tested by
          * the `bittests' program.
          */
-        for (k=0; k<src_size; k++)
-            src_bits[src_size-(k+1)] = saved[j*src_size+ENDIAN(src_size, k)];
+
+        if ((FLT_FLOAT==src_type || FLT_DOUBLE==src_type) && sendian==H5T_ORDER_VAX) {
+            for (k = 0; k < src_size; k += 2) {
+                src_bits[k] = saved[j*src_size + (src_size - 2) - k];
+                src_bits[k + 1] = saved[j*src_size + (src_size - 1) - k];
+            }
+        } else {
+            for (k=0; k<src_size; k++)
+                src_bits[src_size-(k+1)] = saved[j*src_size+ENDIAN(src_size, k, sendian)];
+        }
 
         for (k=0; k<dst_size; k++)
-            dst_bits[dst_size-(k+1)] = buf[j*dst_size+ENDIAN(dst_size, k)];
+            dst_bits[dst_size-(k+1)] = buf[j*dst_size+ENDIAN(dst_size, k, dendian)];
 
         /*          Test library's default overflow handling:
          * Hardware usually doesn't handle overflows too gracefully. The
@@ -4177,7 +4321,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
 
         printf("        src = ");
         for (k=0; k<src_size; k++)
-            printf(" %02x", saved[j*src_size+ENDIAN(src_size, k)]);
+            printf(" %02x", saved[j*src_size+ENDIAN(src_size, k, sendian)]);
         printf("%*s", (int)(3*MAX(0, (ssize_t)dst_size-(ssize_t)src_size)), "");
         switch (src_type) {
             case INT_SCHAR:
@@ -4240,7 +4384,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
 
         printf("        dst = ");
         for (k=0; k<dst_size; k++)
-            printf(" %02x", buf[j*dst_size+ENDIAN(dst_size, k)]);
+            printf(" %02x", buf[j*dst_size+ENDIAN(dst_size, k, dendian)]);
         printf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)), "");
         switch (dst_type) {
             case INT_SCHAR:
@@ -4303,7 +4447,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
 
         printf("        ans = ");
         for (k=0; k<dst_size; k++)
-            printf(" %02x", hw[ENDIAN(dst_size, k)]);
+            printf(" %02x", hw[ENDIAN(dst_size, k, dendian)]);
         printf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)), "");
         switch (dst_type) {
             case INT_SCHAR:
@@ -4865,7 +5009,15 @@ run_fp_int_conv(const char *name)
     run_test = FALSE;
 #endif
 
+#ifdef VMS
+    run_test = TRUE;
+#endif
+
     if(run_test) {
+#ifdef VMS
+	test_values = TEST_NORMAL;
+ 	{
+#else
         for(i=0; i<3; i++) {
             if(i==0)
                 test_values = TEST_NORMAL;
@@ -4873,6 +5025,7 @@ run_fp_int_conv(const char *name)
                 test_values = TEST_DENORM;
             else
                 test_values = TEST_SPECIAL;
+#endif /*VMS*/
 
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT, H5T_NATIVE_SCHAR);
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_DOUBLE, H5T_NATIVE_SCHAR);
@@ -5064,8 +5217,10 @@ main(void)
      * for user-defined integer types */
     nerrors += test_derived_integer();
 
+#ifndef VMS
     /* Does floating point overflow generate a SIGFPE? */
     generates_sigfpe();
+#endif
 
     /* Test degenerate cases */
     nerrors += run_fp_tests("noop");

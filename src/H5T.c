@@ -55,6 +55,9 @@ hid_t H5T_IEEE_F32LE_g			= FAIL;
 hid_t H5T_IEEE_F64BE_g			= FAIL;
 hid_t H5T_IEEE_F64LE_g			= FAIL;
 
+hid_t H5T_VAX_F32_g			= FAIL;
+hid_t H5T_VAX_F64_g			= FAIL;
+
 hid_t H5T_STD_I8BE_g			= FAIL;
 hid_t H5T_STD_I8LE_g			= FAIL;
 hid_t H5T_STD_I16BE_g			= FAIL;
@@ -345,6 +348,32 @@ static H5T_t *H5T_decode(const unsigned char *buf);
 
 #define H5T_INIT_TYPE_DOUBLEBE_CORE {					      \
     H5T_INIT_TYPE_DOUBLE_COMMON(H5T_ORDER_BE)				      \
+}
+
+/* Define the code templates for VAX float for the "GUTS" in the H5T_INIT_TYPE macro */
+#define H5T_INIT_TYPE_FLOATVAX_CORE {			                      \
+    H5T_INIT_TYPE_NUM_COMMON(H5T_ORDER_VAX)				      \
+    dt->shared->u.atomic.u.f.sign = 31;						      \
+    dt->shared->u.atomic.u.f.epos = 23;						      \
+    dt->shared->u.atomic.u.f.esize = 8;						      \
+    dt->shared->u.atomic.u.f.ebias = 0x81;					      \
+    dt->shared->u.atomic.u.f.mpos = 0;						      \
+    dt->shared->u.atomic.u.f.msize = 23;					      \
+    dt->shared->u.atomic.u.f.norm = H5T_NORM_IMPLIED;				      \
+    dt->shared->u.atomic.u.f.pad = H5T_PAD_ZERO;				      \
+}
+
+/* Define the code templates for VAX double for the "GUTS" in the H5T_INIT_TYPE macro */
+#define H5T_INIT_TYPE_DOUBLEVAX_CORE {                                        \
+    H5T_INIT_TYPE_NUM_COMMON(H5T_ORDER_VAX)				      \
+    dt->shared->u.atomic.u.f.sign = 63;						      \
+    dt->shared->u.atomic.u.f.epos = 52;						      \
+    dt->shared->u.atomic.u.f.esize = 11;					      \
+    dt->shared->u.atomic.u.f.ebias = 0x0401;					      \
+    dt->shared->u.atomic.u.f.mpos = 0;						      \
+    dt->shared->u.atomic.u.f.msize = 52;					      \
+    dt->shared->u.atomic.u.f.norm = H5T_NORM_IMPLIED;				      \
+    dt->shared->u.atomic.u.f.pad = H5T_PAD_ZERO;				      \
 }
 
 /* Define the code templates for standard signed integers for the "GUTS" in the H5T_INIT_TYPE macro */
@@ -806,6 +835,17 @@ H5T_init_interface(void)
 
     /* IEEE 8-byte big-endian float */
     H5T_INIT_TYPE(DOUBLEBE,H5T_IEEE_F64BE_g,COPY,native_double,SET,8)
+
+    /*------------------------------------------------------------
+     * VAX Types
+     *------------------------------------------------------------
+     */
+
+    /* VAX 4-byte float */
+    H5T_INIT_TYPE(FLOATVAX,H5T_VAX_F32_g,COPY,native_double,SET,4)
+
+    /* VAX 8-byte double */
+    H5T_INIT_TYPE(DOUBLEVAX,H5T_VAX_F64_g,COPY,native_double,SET,8)
 
     /*------------------------------------------------------------
      * Other "standard" types

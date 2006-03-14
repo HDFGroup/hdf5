@@ -235,6 +235,14 @@ H5_DLLVAR hid_t H5T_IEEE_F64BE_g;
 H5_DLLVAR hid_t H5T_IEEE_F64LE_g;
 
 /*
+ * The VAX floating point types
+ */
+#define H5T_VAX_F32		(H5OPEN H5T_VAX_F32_g)
+#define H5T_VAX_F64		(H5OPEN H5T_VAX_F64_g)
+H5_DLLVAR hid_t H5T_VAX_F32_g;
+H5_DLLVAR hid_t H5T_VAX_F64_g;
+
+/*
  * These are "standard" types.  For instance, signed (2's complement) and
  * unsigned integers of various sizes and byte orders.
  */
