@@ -8,9 +8,10 @@ Warning: Different storage datatype
 Warning: Different storage datatype
 </dset3a> has file datatype H5T_STD_I32LE
 </dset4b> has file datatype H5T_STD_I64LE
-position        dset3a          dset4b          difference      relative       
-------------------------------------------------------------------------
-[ 1 0 ]          1               3               2               2             
-[ 1 1 ]          1               5               4               4             
-[ 2 1 ]          65              417             352             5             
-6 differences found
+position        dset3a          dset4b          difference          
+------------------------------------------------------------
+[ 1 0 ]          1              3               2
+[ 1 1 ]          1              4               3
+[ 2 0 ]          1              5               4
+[ 2 1 ]          1              6               5
+4 differences found
