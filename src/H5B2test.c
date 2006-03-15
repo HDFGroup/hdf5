@@ -44,6 +44,11 @@
 
 
 /********************/
+/* Package Typedefs */
+/********************/
+
+
+/********************/
 /* Local Prototypes */
 /********************/
 static herr_t H5B2_test_store(void *nrecord, const void *udata);

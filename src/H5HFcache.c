@@ -51,6 +51,12 @@
 /* Local Typedefs */
 /******************/
 
+
+/********************/
+/* Package Typedefs */
+/********************/
+
+
 /********************/
 /* Local Prototypes */
 /********************/
@@ -177,12 +183,6 @@ H5HF_dtable_decode(H5F_t *f, const uint8_t **pp, H5HF_dtable_t *dtable)
     /* Next direct block's heap offset */
     H5F_DECODE_LENGTH(f, *pp, dtable->next_dir_block);
 
-    /* Next direct block size */
-    H5F_DECODE_LENGTH(f, *pp, dtable->next_dir_size);
-
-    /* Next direct block column */
-    UINT16DECODE(*pp, dtable->next_dir_col);
-
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF_dtable_decode() */
 
@@ -235,12 +235,6 @@ H5HF_dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_t *dtable)
 
     /* Next direct block's heap offset */
     H5F_ENCODE_LENGTH(f, *pp, dtable->next_dir_block);
-
-    /* Next direct block size */
-    H5F_ENCODE_LENGTH(f, *pp, dtable->next_dir_size);
-
-    /* Next direct block column */
-    UINT16ENCODE(*pp, dtable->next_dir_col);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF_dtable_encode() */
@@ -591,10 +585,10 @@ H5HF_cache_hdr_size(const H5F_t *f, const H5HF_t UNUSED *fh, size_t *size_ptr)
  *-------------------------------------------------------------------------
  */
 static H5HF_direct_t *
-H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_size, void *_fh_shared)
+H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_size, void *_par_shared)
 {
     const size_t        *size = (const size_t *)_size;         /* Size of block */
-    H5RC_t 		*fh_shared = (H5RC_t *)_fh_shared;     /* Shared heap information */
+    H5HF_parent_shared_t *par_shared = (H5HF_parent_shared_t *)_par_shared;     /* Shared direct block information */
     H5HF_shared_t       *shared = NULL; /* Shared fractal heap information */
     H5HF_direct_t	*dblock = NULL; /* Direct block info */
     const uint8_t	*p;             /* Pointer into raw data buffer */
@@ -607,7 +601,7 @@ H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_size,
     /* Check arguments */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
-    HDassert(fh_shared);
+    HDassert(par_shared);
 
     /* Allocate space for the fractal heap direct block */
     if(NULL == (dblock = H5FL_MALLOC(H5HF_direct_t)))
@@ -615,12 +609,19 @@ H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_size,
     HDmemset(&dblock->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Share common heap information */
-    dblock->shared = fh_shared;
+    dblock->shared = par_shared->shared;
     H5RC_INC(dblock->shared);
 
     /* Get the pointer to the shared heap info */
     shared = H5RC_GET_OBJ(dblock->shared);
     HDassert(shared);
+
+    /* Share common parent [indirect] block information */
+    dblock->parent = par_shared->parent;
+    if(dblock->parent)
+        H5RC_INC(dblock->parent);
+    dblock->parent_entry = par_shared->parent_entry;
+    dblock->blk_free_space = (size_t)par_shared->parent_free_space;
 
     /* Set block's internal information */
     dblock->size = *size;
@@ -665,9 +666,6 @@ H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_size,
     
     /* Offset of heap within the heap's address space */
     UINT64DECODE_VAR(p, dblock->block_off, shared->heap_off_size);
-
-    /* Total free space in block */
-    UINT64DECODE_VAR(p, dblock->blk_free_space, dblock->blk_off_size);
 
     /* Offset of free list head */
     /* (Defer deserializing the whole free list until we actually need to modify it) */
@@ -744,9 +742,6 @@ H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
         /* Check for (currently) unsupported address mapping */
         if(shared->addrmap != H5HF_ABSOLUTE)
             HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "encoding mapped direct blocks not supported currently")
-
-        /* Total free space in block */
-        UINT64ENCODE_VAR(p, dblock->blk_free_space, dblock->blk_off_size);
 
         /* Offset of free list head */
         UINT64ENCODE_VAR(p, dblock->free_list_head, dblock->blk_off_size);
@@ -832,6 +827,8 @@ H5HF_cache_dblock_dest(H5F_t UNUSED *f, H5HF_direct_t *dblock)
     /* Decrement reference count on shared fractal heap info */
     if(dblock->shared)
         H5RC_DEC(dblock->shared);
+    if(dblock->parent)
+        H5RC_DEC(dblock->parent);
 
     /* Check for free list & free it, if necessary */
     if(dblock->free_list) {
@@ -951,10 +948,10 @@ H5HF_cache_dblock_size(const H5F_t UNUSED *f, const H5HF_direct_t *dblock, size_
  *-------------------------------------------------------------------------
  */
 static H5HF_indirect_t *
-H5HF_cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrows, void *_fh_shared)
+H5HF_cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrows, void *_par_shared)
 {
     const unsigned      *nrows = (const unsigned *)_nrows;     /* # of rows in indirect block */
-    H5RC_t 		*fh_shared = (H5RC_t *)_fh_shared;     /* Shared heap information */
+    H5HF_parent_shared_t *par_shared = (H5HF_parent_shared_t *)_par_shared;     /* Shared direct block information */
     H5HF_shared_t       *shared = NULL; /* Shared fractal heap information */
     H5HF_indirect_t	*iblock = NULL; /* Indirect block info */
     uint8_t		*buf = NULL;    /* Temporary buffer */
@@ -969,7 +966,7 @@ H5HF_cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrows
     /* Check arguments */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
-    HDassert(fh_shared);
+    HDassert(par_shared);
 
     /* Allocate space for the fractal heap indirect block */
     if(NULL == (iblock = H5FL_MALLOC(H5HF_indirect_t)))
@@ -977,12 +974,23 @@ H5HF_cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrows
     HDmemset(&iblock->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Share common heap information */
-    iblock->shared = fh_shared;
+    iblock->shared = par_shared->shared;
     H5RC_INC(iblock->shared);
 
     /* Get the pointer to the shared heap info */
     shared = H5RC_GET_OBJ(iblock->shared);
     HDassert(shared);
+
+    /* Share common parent [indirect] block information */
+    iblock->parent = par_shared->parent;
+    if(iblock->parent)
+        H5RC_INC(iblock->parent);
+    iblock->parent_entry = par_shared->parent_entry;
+    iblock->child_free_space = par_shared->parent_free_space;
+
+    /* Make a reference to this block */
+    if(NULL == (iblock->self = H5RC_create(iblock, H5HF_iblock_free)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't create ref-count wrapper for indirect fractal heap block")
 
     /* Set block's internal information */
     iblock->nrows = *nrows;
@@ -1041,17 +1049,40 @@ H5HF_cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrows
     HDassert(iblock->ndir_rows > 0);
     if(NULL == (iblock->dblock_ents = H5FL_SEQ_MALLOC(H5HF_indirect_dblock_ent_t, (iblock->ndir_rows * shared->man_dtable.cparam.width))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for direct entries")
+    iblock->dir_full = TRUE;
     for(u = 0; u < (iblock->ndir_rows * shared->man_dtable.cparam.width); u++) {
         H5F_addr_decode(f, &p, &(iblock->dblock_ents[u].addr));
         UINT32DECODE_VAR(p, iblock->dblock_ents[u].free_space, shared->man_dtable.max_dir_blk_off_size);
+
+        /* Check for direct block being undefined and use that for the next one to allocate from this indirect block */
+        if(iblock->dir_full) {
+            if(!H5F_addr_defined(iblock->dblock_ents[u].addr)) {
+                iblock->next_dir_col = u % shared->man_dtable.cparam.width;
+                iblock->next_dir_row = u / shared->man_dtable.cparam.width;
+                iblock->next_dir_entry = u;
+                if(iblock->next_dir_row == 0)
+                    iblock->next_dir_size = shared->man_dtable.cparam.start_block_size;
+                else
+                    iblock->next_dir_size = shared->man_dtable.cparam.start_block_size * (1 << (iblock->next_dir_row - 1));
+                if(heap_addr == 0)
+                    iblock->max_direct_rows = shared->man_dtable.max_direct_rows;
+                else
+                    HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, NULL, "computing max direct rows for non-root indirect block not supported yet")
+
+                /* Set the flag to indicate the direct blocks aren't full */
+                iblock->dir_full = FALSE;
+            } /* end if */
+        } /* end if */
     } /* end for */
     if(iblock->nindir_rows > 0) {
         if(NULL == (iblock->iblock_ents = H5FL_SEQ_MALLOC(H5HF_indirect_iblock_ent_t, (iblock->nindir_rows * shared->man_dtable.cparam.width))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for indirect entries")
 
         /* Decode indirect block-specific fields */
-        for(u = 0; u < (iblock->nindir_rows * shared->man_dtable.cparam.width); u++)
+        for(u = 0; u < (iblock->nindir_rows * shared->man_dtable.cparam.width); u++) {
             H5F_addr_decode(f, &p, &(iblock->iblock_ents[u].addr));
+            UINT64DECODE_VAR(p, iblock->iblock_ents[u].free_space, shared->heap_off_size);
+        } /* end for */
     } /* end if */
     else
         iblock->iblock_ents = NULL;
@@ -1105,6 +1136,12 @@ H5HF_cache_iblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
         uint8_t *p;                 /* Pointer into raw data buffer */
         size_t u;                   /* Local index variable */
 
+        /* Sanity check */
+        HDassert(iblock->dirty);
+#ifdef QAK
+HDfprintf(stderr, "%s: Flushing indirect block\n", FUNC);
+#endif /* QAK */
+
         /* Get the pointer to the shared heap info */
         shared = H5RC_GET_OBJ(iblock->shared);
         HDassert(shared);
@@ -1145,6 +1182,9 @@ HDfprintf(stderr, "%s: shared->man_dtable.cparam.width = %u\n", FUNC, shared->ma
 
         /* Offset of block in heap */
         UINT64ENCODE_VAR(p, iblock->block_off, shared->heap_off_size);
+/* XXX: Fix this when we start writing recursive indirect blocks */
+if(iblock->block_off != 0)
+    HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "fix computing max direct rows for non-root indirect block for loading")
 
         /* Encode indirect block-specific fields */
         HDassert(iblock->ndir_rows > 0);
@@ -1153,8 +1193,10 @@ HDfprintf(stderr, "%s: shared->man_dtable.cparam.width = %u\n", FUNC, shared->ma
             UINT32ENCODE_VAR(p, iblock->dblock_ents[u].free_space, shared->man_dtable.max_dir_blk_off_size);
         } /* end for */
         if(iblock->nindir_rows > 0)
-            for(u = 0; u < (iblock->nindir_rows * shared->man_dtable.cparam.width); u++)
+            for(u = 0; u < (iblock->nindir_rows * shared->man_dtable.cparam.width); u++) {
                 H5F_addr_encode(f, &p, iblock->iblock_ents[u].addr);
+                UINT64ENCODE_VAR(p, iblock->iblock_ents[u].free_space, shared->heap_off_size);
+            } /* end for */
 
         /* Sanity check */
         HDassert((size_t)(p - buf) == iblock->size);
@@ -1201,19 +1243,26 @@ H5HF_cache_iblock_dest(H5F_t UNUSED *f, H5HF_indirect_t *iblock)
      * Check arguments.
      */
     HDassert(iblock);
+#ifdef QAK
+HDfprintf(stderr, "%s: Destroying indirect block\n", "H5HF_cache_iblock_dest");
+#endif /* QAK */
 
-    /* Decrement reference count on shared fractal heap info */
-    if(iblock->shared)
-        H5RC_DEC(iblock->shared);
-
-    /* Release entry tables */
-    if(iblock->dblock_ents)
-        H5FL_SEQ_FREE(H5HF_indirect_dblock_ent_t, iblock->dblock_ents);
-    if(iblock->iblock_ents)
-        H5FL_SEQ_FREE(H5HF_indirect_iblock_ent_t, iblock->iblock_ents);
-
-    /* Free fractal heap indirect block info */
-    H5FL_FREE(H5HF_indirect_t, iblock);
+    /* Decrement reference count on self */
+    /* (let ref-counting API's callback for the block perform all cleanup) */
+/* XXX: This should actually free all the indirect block info, since this
+ *      routine should not get called until the block has no dependents (once
+ *      the "un-evictable" flag is in the metadata cache)
+ */
+/* XXX: Once the "un-evictable" flag is working in the metadata cache, can
+ *      get rid of the "self" field and make a wrapper when creating the parent
+ *      info for each "child" block, which will make the indirect block 
+ *      un-evictable as well as create the initial ref-counted object.
+ */
+/* XXX: Once the "un-evictable" flag is working in the metadata cache, the
+ *      ref-counted 'free' callback should just make the indirect block
+ *      evictable again.
+ */
+    H5RC_DEC(iblock->self);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF_cache_iblock_dest() */
