@@ -281,22 +281,36 @@ TOOLTEST h5diff_18.txt file1.h5 file2.h5 -q
 # ##############################################################################
 
 # 2.0
-TOOLTEST h5diff_20.txt file3.h5 file3.h5 -v dset group
+TOOLTEST h5diff_20.txt file3.h5 file3.h5 -v dset g1
 
 # 2.1
-TOOLTEST h5diff_21.txt file3.h5 file3.h5 -v dset link
+TOOLTEST h5diff_21.txt file3.h5 file3.h5 -v dset l1
 
 # 2.2
-TOOLTEST h5diff_22.txt file3.h5 file3.h5 -v dset type
+TOOLTEST h5diff_22.txt file3.h5 file3.h5 -v dset t1
+
+# ##############################################################################
+# # compare groups, types, links (no differences and differences)
+# ##############################################################################
 
 # 2.3
-TOOLTEST h5diff_23.txt file3.h5 file3.h5 -v group group
+TOOLTEST h5diff_23.txt file3.h5 file3.h5 -v g1 g1
 
 # 2.4
-TOOLTEST h5diff_24.txt file3.h5 file3.h5 -v type type
+TOOLTEST h5diff_24.txt file3.h5 file3.h5 -v t1 t1
 
 # 2.5
-TOOLTEST h5diff_25.txt file3.h5 file3.h5 -v link link
+TOOLTEST h5diff_25.txt file3.h5 file3.h5 -v l1 l1 
+
+# 2.6
+TOOLTEST h5diff_26.txt file3.h5 file3.h5 -v g1 g2
+
+# 2.7
+TOOLTEST h5diff_27.txt file3.h5 file3.h5 -v t1 t2
+
+# 2.8
+TOOLTEST h5diff_28.txt file3.h5 file3.h5 -v l1 l2
+
 
 
 # ##############################################################################

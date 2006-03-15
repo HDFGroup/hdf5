@@ -1,7 +1,7 @@
 #############################
-Expected output for 'h5diff file3.h5 file3.h5 -v dset type'
+Expected output for 'h5diff file3.h5 file3.h5 -v dset t1'
 #############################
-Comparison not possible: </dset> is of type H5G_DATASET and </type> is of type H5G_TYPE
+Comparison not possible: </dset> is of type H5G_DATASET and </t1> is of type H5G_TYPE
 --------------------------------
 Some objects are not comparable
 --------------------------------

@@ -14,11 +14,8 @@
 
 #include "testh5diff.h"
 
-
 /*UINT_MAX Maximum value for a variable of type unsigned int. 4294967295 */
 #define UIMAX 4294967295u
-
-
 
 /*
 
@@ -252,6 +249,8 @@ int test_basic(const char *file1, const char *file2)
  double  data2[3][2] = {{1,1.1},{1.01,1.001},{1.0001,1}};
  double  data3[3][2] = {{100,110},{100,100},{100,100}};
  double  data4[3][2] = {{110,100},{90,80},{140,200}};
+ int     data5[3][2] = {{100,100},{100,100},{100,100}};
+ int     data6[3][2] = {{101,102},{103,104},{150,200}};
 
 /*-------------------------------------------------------------------------
  * Create two files
@@ -272,6 +271,10 @@ int test_basic(const char *file1, const char *file2)
  write_dset(group2_id,2,dims,"dset4",H5T_NATIVE_DOUBLE,data4);
  write_dset(group2_id,2,dims,"dset1",H5T_NATIVE_DOUBLE,data2);
 
+ /* integer relative */
+ write_dset(group1_id,2,dims,"dset2",H5T_NATIVE_INT,data5);
+ write_dset(group1_id,2,dims,"dset4",H5T_NATIVE_INT,data6);
+
 /*-------------------------------------------------------------------------
  * Close
  *-------------------------------------------------------------------------
@@ -285,7 +288,8 @@ int test_basic(const char *file1, const char *file2)
 }
 
 /*-------------------------------------------------------------------------
- * Compare different types: H5G_DATASET, H5G_TYPE, H5G_GROUP, H5G_LINK
+ * Compare different HDF5 types (H5G_obj_t): 
+ * H5G_DATASET, H5G_TYPE, H5G_GROUP, H5G_LINK
  *-------------------------------------------------------------------------
  */
 
@@ -293,17 +297,21 @@ int test_types(const char *file1, const char UNUSED *file2)
 {
 
  hid_t   file1_id;
- hid_t   group_id;
- hid_t   type_id;
+ hid_t   g1_id;
+ hid_t   g2_id;
+ hid_t   t1_id;
+ hid_t   t2_id;
  herr_t  status;
  hsize_t dims[1]={1};
- /* Compound datatype */
- typedef struct s_t
+ typedef struct s1_t
  {
   int    a;
   float  b;
- } s_t;
-
+ } s1_t;
+ typedef struct s2_t
+ {
+  int    a;
+ } s2_t;
 
 /*-------------------------------------------------------------------------
  * Create one file
@@ -321,28 +329,35 @@ int test_types(const char *file1, const char UNUSED *file2)
  * H5G_GROUP
  *-------------------------------------------------------------------------
  */
- group_id = H5Gcreate(file1_id, "group", 0);
- status = H5Gclose(group_id);
+ g1_id = H5Gcreate(file1_id, "g1", 0);
+ status = H5Gclose(g1_id);
+ g2_id = H5Gcreate(file1_id, "g2", 0);
+ status = H5Gclose(g2_id);
 
 /*-------------------------------------------------------------------------
  * H5G_TYPE
  *-------------------------------------------------------------------------
  */
 
- /* Create a memory compound datatype */
- type_id = H5Tcreate (H5T_COMPOUND, sizeof(s_t));
- H5Tinsert(type_id, "a", HOFFSET(s_t, a), H5T_NATIVE_INT);
- H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_FLOAT);
- /* Commit compound datatype and close it */
- H5Tcommit(file1_id, "type", type_id);
- H5Tclose(type_id);
+ /* create and commit datatype 1 */
+ t1_id = H5Tcreate (H5T_COMPOUND, sizeof(s1_t));
+ H5Tinsert(t1_id, "a", HOFFSET(s1_t, a), H5T_NATIVE_INT);
+ H5Tinsert(t1_id, "b", HOFFSET(s1_t, b), H5T_NATIVE_FLOAT);
+ H5Tcommit(file1_id, "t1", t1_id);
+ H5Tclose(t1_id);
+ /* create and commit datatype 2 */
+ t2_id = H5Tcreate (H5T_COMPOUND, sizeof(s2_t));
+ H5Tinsert(t2_id, "a", HOFFSET(s2_t, a), H5T_NATIVE_INT);
+ H5Tcommit(file1_id, "t2", t2_id);
+ H5Tclose(t2_id);
 
 /*-------------------------------------------------------------------------
  * H5G_LINK
  *-------------------------------------------------------------------------
  */
 
- status = H5Glink(file1_id, H5G_LINK_SOFT, "dset", "link");
+ status = H5Glink(file1_id, H5G_LINK_SOFT, "g1", "l1");
+ status = H5Glink(file1_id, H5G_LINK_SOFT, "g2", "l2");
 
 /*-------------------------------------------------------------------------
  * Close
@@ -351,9 +366,6 @@ int test_types(const char *file1, const char UNUSED *file2)
  status = H5Fclose(file1_id);
  return status;
 }
-
-
-
 
 
 /*-------------------------------------------------------------------------

@@ -1055,7 +1055,11 @@ diff (hid_t file1_id,
      nfound = (ret != 0) ? 1 : 0;
 
      if (print_objname (options, nfound))
-          parallel_print("Soft Link:        <%s> and <%s>\n", path1, path2);
+      parallel_print("Soft Link:        <%s> and <%s>\n", path1, path2);
+
+     /* always print the number of differences found in verbose mode */
+     if (options->m_verbose)
+      print_found(nfound);
 
       HDfree (buf1);
       HDfree (buf2);

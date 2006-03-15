@@ -1,4 +1,5 @@
 #############################
-Expected output for 'h5diff file3.h5 file3.h5 -v link link'
+Expected output for 'h5diff file3.h5 file3.h5 -v l1 l1'
 #############################
-Soft Link:        </link> and </link>
+Soft Link:        </l1> and </l1>
+0 differences found

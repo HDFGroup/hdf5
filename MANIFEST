@@ -1171,6 +1171,9 @@
 ./tools/testfiles/h5diff_23.txt
 ./tools/testfiles/h5diff_24.txt
 ./tools/testfiles/h5diff_25.txt
+./tools/testfiles/h5diff_26.txt
+./tools/testfiles/h5diff_27.txt
+./tools/testfiles/h5diff_28.txt
 ./tools/testfiles/h5diff_50.txt
 ./tools/testfiles/h5diff_51.txt
 ./tools/testfiles/h5diff_52.txt
