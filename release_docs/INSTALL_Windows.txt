@@ -1150,6 +1150,10 @@ c:\MyHDFstuff\hdf5\windows\hl\examples\allhlcexamples\allhlcexamples.dsw
           ex_litedll
           ex_table
           ex_tabledll
+          ex_ds
+          ex_dsdll
+          ex_packet
+          ex_packetdll
 
    3. Invoke a command prompt window and run the batch file 
       Install_hlcexamples.bat which resides in the top level directory
@@ -1179,17 +1183,14 @@ c:\MyHDFstuff\hdf5\windows\hl\examples\allhlcexamples\allhlcexamples.dsw
       Invoke a command prompt window and run test_hl_cexamples with
       appropriate options.
 
-      When you run "test_hl_cexamples release", the output will look 
-      like:
+     When you run "test_hl_cexamples.bat" with each option,  if you see the 
+     following messages at the end:
       
-      Testing release  version of High Level examples
+          All of the HL C Examples Passed!
 
-      Example make an attribute                              PASSED
-      Example make indexed image                             PASSED
-      Example make a table                                   PASSED
-      
-      Similar messages should be generated with another three options 
-      If the high level C examples are built successfully.
+      You have built HL C examples successfully. Otherwise, HL C examples
+      Failed to build.
+
 
 To build and test HDF5 High Level Fortran examples:
 ---------------------------------------------------

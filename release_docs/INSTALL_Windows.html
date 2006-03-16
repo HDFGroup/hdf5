@@ -1690,6 +1690,11 @@ file, you may see a folder called hdf5lib under <span class="filename">c:\MyHDFs
       <li>ex_litedll </li>
       <li>ex_table </li>
       <li>ex_tabledll</li>
+      <li>ex_ds</li>
+      <li>ex_dsdll</li>
+      <li>ex_packet</li>
+      <li>ex_packetdll</li>
+
     </ul>
     </li>
     <li>
@@ -1717,20 +1722,17 @@ file, you may see a folder called hdf5lib under <span class="filename">c:\MyHDFs
       <li>test_hl_cexamples debug -- for debug version </li>
       <li>test_hl_cexamples debug dll -- for debug DLL version</li>
     </ul>
+    
     <p>Invoke a command prompt window and run <span class="filename">test_hl_cexamples.bat</span> 
     with appropriate options. When you run <span class="filename">&quot;test_hl_cexamples 
-    release&quot;</span>, the output will look like: </p>
-    <ul class="normal">
-      <li>Testing release version of High Level examples</li>
-      <li>Example make an attribute&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-      PASSED</li>
-      <li>Example make indexted image&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-      PASSED</li>
-      <li>Example make a table&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-      PASSED</li>
-    </ul>
-    <p>Similar messages should be generated with the other three options if the 
-    high level C examples are built successfully.</p>
+    release&quot;</span>, When you run "test_hl_cexamples.bat" with each option,  if you see the 
+   following messages at the end: </p>
+      
+    <p class="insmes"> All of the HL C Examples Passed!</p>
+        
+    <p>You have built HL C examples successfully. Otherwise, HL C examples Failed to build.</p>
+    
+    
     <h3><a name="hlf90examples"><u>How to&nbsp; build and test HDF5 High Level Fortran examples:</u></a></h3>
     <ul class="intable">
     <li>
