@@ -28,7 +28,7 @@ $ type sys$input
 	Creating  HDF5 library
 $!
 $ cobj= "H5, H5A, H5AC, H5B, H5B2, H5B2cache,"+-
-        "H5Bcache, H5B2dbg, H5B2test, H5B2int.c, H5C,"+-  
+        "H5Bcache, H5B2dbg, H5B2test, H5B2int.c, H5B2stat.c, H5C,"+-  
         "H5D, H5Dcontig, H5Dcompact,"+-
         "H5Defl, H5Dio, H5Distore, H5Doh, H5Dmpio, H5Dselect, H5Dtest ,"+-
         "H5E, H5F, H5Fdbg, H5Fmount, H5Fsfile, H5Fsuper, H5FD, H5FDcore,"+-
@@ -37,7 +37,7 @@ $ cobj= "H5, H5A, H5AC, H5B, H5B2, H5B2cache,"+-
         "H5FDstream, H5FL, H5FO, H5FP, H5FPclient, H5FPserver, H5FS,"+-
         "H5G, H5Gent, H5Glink, H5Gloc, H5Gname, H5Gnode, H5Gstab,"+-
         "H5Gobj, H5Goh, H5Gtest, H5Gtraverse,"+-
-        "H5HF, H5HFcache, H5HFdbg, H5HFint, H5HFtest,"+-
+        "H5HF, H5HFcache, H5HFdbg, H5HFint, H5HFtest, H5HFflist.c, H5HFstat.c,"+-
         "H5HG, H5HGdbg, H5HL, H5HLdbg, H5HP, H5I, H5MF, H5MM,"+-
         "H5MP, H5MPtest, H5O, H5Oattr, H5Obogus, H5Ocache,"+-
         "H5Ocont, H5Odtype, H5Oefl, H5Ofill, H5Oginfo, H5Olayout,"+-
