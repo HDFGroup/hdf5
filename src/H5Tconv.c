@@ -3790,9 +3790,9 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
 
                     goto padding;
-#ifdef VMS      
+#ifdef H5_VMS      
                 } /*Temporary solution to handle VAX special values*/
-#else /*VMS*/
+#else /*H5_VMS*/
                 } else if (H5T_bit_find (s, src.u.f.epos, src.u.f.esize,
                                          H5T_BIT_LSB, FALSE)<0) {
                     /* NaN */
@@ -3818,7 +3818,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                     goto padding;
                 }
-#endif /*VMS*/
+#endif /*H5_VMS*/
 
                 /*
                  * Get the exponent as an unsigned quantity from the section of
