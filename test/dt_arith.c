@@ -87,7 +87,7 @@ static int skip_overflow_tests_g = 0;
 #endif
 
 /* OpenVMS doesn't have this feature.  Make sure to disable it*/
-#ifdef VMS
+#ifdef H5_VMS
 #undef HANDLE_SIGFPE
 #endif 
 
@@ -2679,7 +2679,7 @@ my_isnan(dtype_t type, void *val)
 	    retval = 1;
     }
 
-#ifdef VMS
+#ifdef H5_VMS
     /* For "float" and "double" on OpenVMS/Alpha, NaN is 
      * actually a valid value of maximal value.*/
     if(!retval) {
@@ -2695,7 +2695,7 @@ my_isnan(dtype_t type, void *val)
 	    return 0;
 	}
     }
-#endif /*VMS*/
+#endif /*H5_VMS*/
 
     return retval;
 }
@@ -2726,7 +2726,7 @@ my_isinf(dtype_t type, int endian, unsigned char *val, size_t size,
 
     bits = (unsigned char*)calloc(1, size);
     
-#ifdef VMS
+#ifdef H5_VMS
     if(H5T_ORDER_VAX==endian) {
         for (i = 0; i < size; i += 4) {
             bits[i] = val[(size-2)-i];
@@ -2739,10 +2739,10 @@ my_isinf(dtype_t type, int endian, unsigned char *val, size_t size,
         for (i=0; i<size; i++)
             bits[size-(i+1)] = *(val + ENDIAN(size,i,endian));
     }
-#else /*VMS*/
+#else /*H5_VMS*/
     for (i=0; i<size; i++)
         bits[size-(i+1)] = *(val + ENDIAN(size, i, endian));
-#endif /*VMS*/
+#endif /*H5_VMS*/
 
     if((ret1=H5T_bit_find(bits, mpos, msize, H5T_BIT_LSB, 1))<0 &&
        (ret2=H5T_bit_find(bits, epos, esize, H5T_BIT_LSB, 0))<0)
@@ -2847,7 +2847,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
      * The remainder of this function is executed only by the child if
      * HANDLE_SIGFPE is defined.
      */
-#ifndef VMS
+#ifndef H5_VMS
     HDsignal(SIGFPE,fpe_handler);
 #endif
 
@@ -2947,7 +2947,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
     switch (run_test) {
         case TEST_NOOP:
         case TEST_NORMAL:
-#ifdef VMS
+#ifdef H5_VMS
             if(src_type == FLT_FLOAT) {
                 INIT_FP_NORM(float, FLT_MAX, FLT_MIN, FLT_MAX_10_EXP, FLT_MIN_10_EXP,
                         src_size, dst_size, buf, saved, nelmts);
@@ -2973,7 +2973,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
 #endif
             } else
                 goto error;
-#else /*VMS*/
+#else /*H5_VMS*/
             if(src_type == FLT_FLOAT) {
                 INIT_FP_NORM(float, FLT_MAX, FLT_MIN, FLT_MAX_10_EXP, FLT_MIN_10_EXP,
                         src_size, dst_size, buf, saved, nelmts);
@@ -2987,7 +2987,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
 #endif
             } else
                 goto error;
-#endif /*VMS*/
+#endif /*H5_VMS*/
             
             break;
         case TEST_DENORM:
@@ -3063,7 +3063,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 hw = (unsigned char*)&hw_f;
                 underflow = HDfabs(*((double*)aligned)) < FLT_MIN;
                 overflow = HDfabs(*((double*)aligned)) > FLT_MAX;
-#ifdef VMS
+#ifdef H5_VMS
                 maximal = HDfabs(*((double*)aligned)) == FLT_MAX;
 #endif
             } else if (FLT_DOUBLE==dst_type) {
@@ -3083,7 +3083,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 hw = (unsigned char*)&hw_f;
                 underflow = HDfabsl(*((long double*)aligned)) < FLT_MIN;
                 overflow = HDfabsl(*((long double*)aligned)) > FLT_MAX;
-#ifdef VMS
+#ifdef H5_VMS
                 maximal = HDfabs(*((long double*)aligned)) == FLT_MAX;
 #endif
             } else if (FLT_DOUBLE==dst_type) {
@@ -3091,7 +3091,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 hw = (unsigned char*)&hw_d;
                 underflow = HDfabsl(*((long double*)aligned)) < DBL_MIN;
                 overflow = HDfabsl(*((long double*)aligned)) > DBL_MAX;
-#ifdef VMS
+#ifdef H5_VMS
                 maximal = HDfabs(*((long double*)aligned)) == DBL_MAX;
 #endif
             } else {
@@ -3127,7 +3127,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
         if (k==dst_size)
             continue; /*no error*/
 
-#ifdef VMS
+#ifdef H5_VMS
         /* For "float" and "double" on OpenVMS/Alpha, NaN is 
          * a valid value of maximal value.*/
         if (FLT_FLOAT==src_type &&
@@ -3137,7 +3137,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 my_isnan(src_type, saved+j*sizeof(double))) {
             continue;
         }
-#endif /*VMS*/
+#endif /*H5_VMS*/
 
         /*
          * Assume same if both results are NaN.  There are many NaN bit
@@ -3195,11 +3195,11 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 if (overflow && my_isinf(dst_type, dendian, buf+j*sizeof(float),
                         dst_size, dst_mpos, dst_msize, dst_epos, dst_esize))
                     continue;	/* all overflowed, no error */
-#ifdef VMS
+#ifdef H5_VMS
                 if (maximal && my_isinf(dst_type, dendian, buf+j*sizeof(float),
                         dst_size, dst_mpos, dst_msize, dst_epos, dst_esize))
                     continue;	/* maximal value, no error */
-#endif /*VMS*/
+#endif /*H5_VMS*/
                 check_mant[0] = HDfrexpf(x, check_expo+0);
                 check_mant[1] = HDfrexpf(hw_f, check_expo+1);
             } else if (FLT_DOUBLE==dst_type) {
@@ -3211,11 +3211,11 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 if (overflow && my_isinf(dst_type, dendian, buf+j*sizeof(double),
                         dst_size, dst_mpos, dst_msize, dst_epos, dst_esize))
                     continue;	/* all overflowed, no error */
-#ifdef VMS
+#ifdef H5_VMS
                 if (maximal && my_isinf(dst_type, dendian, buf+j*sizeof(double),
                         dst_size, dst_mpos, dst_msize, dst_epos, dst_esize))
                     continue;	/* maximal value, no error */
-#endif /*VMS*/
+#endif /*H5_VMS*/
                 check_mant[0] = HDfrexp(x, check_expo+0);
                 check_mant[1] = HDfrexp(hw_d, check_expo+1);
 #if H5_SIZEOF_LONG_DOUBLE !=0 && (H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE)
@@ -5009,12 +5009,12 @@ run_fp_int_conv(const char *name)
     run_test = FALSE;
 #endif
 
-#ifdef VMS
+#ifdef H5_VMS
     run_test = TRUE;
 #endif
 
     if(run_test) {
-#ifdef VMS
+#ifdef H5_VMS
 	test_values = TEST_NORMAL;
  	{
 #else
@@ -5025,7 +5025,7 @@ run_fp_int_conv(const char *name)
                 test_values = TEST_DENORM;
             else
                 test_values = TEST_SPECIAL;
-#endif /*VMS*/
+#endif /*H5_VMS*/
 
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT, H5T_NATIVE_SCHAR);
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_DOUBLE, H5T_NATIVE_SCHAR);
@@ -5217,7 +5217,7 @@ main(void)
      * for user-defined integer types */
     nerrors += test_derived_integer();
 
-#ifndef VMS
+#ifndef H5_VMS
     /* Does floating point overflow generate a SIGFPE? */
     generates_sigfpe();
 #endif
