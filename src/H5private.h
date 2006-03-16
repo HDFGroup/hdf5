@@ -773,8 +773,24 @@ typedef off_t                   h5_stat_size_t;
 #define HDputs(S)		puts(S)
 #define HDqsort(M,N,Z,F)	qsort(M,N,Z,F)
 #define HDraise(N)		raise(N)
-H5_DLL int HDrand(void);
+
+#ifdef H5_HAVE_RAND_R
 #define HDrandom()		HDrand()
+#define HDsrandom(S)		HDsrand(S)
+H5_DLL int HDrand();
+H5_DLL void HDsrand(unsigned int seed);
+#elif H5_HAVE_RANDOM
+#define HDrand()		random()
+#define HDrandom()		random()
+#define HDsrandom(S)		srandom(S)
+#define HDsrand(S)		srandom(S)
+#else
+#define HDrand()		rand()
+#define HDrandom()		rand()
+#define HDsrandom(S)		srand(S)
+#define HDsrand(S)		srand(S)
+#endif
+
 #define HDread(F,M,Z)		read(F,M,Z)
 #define HDreaddir(D)		readdir(D)
 #define HDrealloc(M,Z)		realloc(M,Z)
