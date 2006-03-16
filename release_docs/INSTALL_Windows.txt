@@ -14,9 +14,8 @@ Contents:
    Section       :  Preconditions and Notes
    Section I     :  What do we build and install
    Section II    :  How to build and test HDF5 libraries and tools
-   Section III   :  How to build an application using the HDF5 library
-                    or DLL
-   Section IV    :  Helpful pointers
+   Section III   :  How to build an application using the HDF5 library  or DLL
+   Section IV    :  How to build examples (optional)
    Section V     :  How to disable Gzip(Zlib)/Szip compression
    Section VI    :  How to build HDF5 in VS 7.0(.NET)
    Section VII   :  How to build HDF5 with INTEL Compiler
@@ -27,7 +26,7 @@ Contents:
 
 
 ========================================================================
-                       Preconditions and Notes
+                          Preconditions and Notes
 ========================================================================
 
 Preconditions:
@@ -192,7 +191,7 @@ Notes:
 
 
 ========================================================================
-              Section I: What do we build and install? 
+                 Section I: What do we build and install? 
 ========================================================================
 
    1. Build and Install
@@ -892,8 +891,7 @@ The <release> layout of <hdf5lib> should be:
        
 You may also find the similar layout for the <debug>.
 
-
-STEP 4: Building HDF5 C/C++/Fortran & HL C/Fortran examples (Optional)
+Section III: How to build examples (optional)
 
 Simple examples have been provided for users to test HDF5
 C/C++/Fortran and high level C/Fortran library and tools.
@@ -1260,7 +1258,7 @@ To build and test HDF5 High Level Fortran examples:
 
 
 ========================================================================
-   Section III: Building an application using the HDF5 library or DLL
+   Section IV: Building an application using the HDF5 library or DLL
 ========================================================================
 
 Waring: The instructions below will only describe how to build an
@@ -1405,78 +1403,6 @@ To use the DLL:
        "DLL Hints" at Section IV "HELPFUL POINTERS".
 
 ========================================================================
-                    Section IV: HELPFUL POINTERS
-========================================================================
-
-Here are some helpful notes if you are not familiar with
-using the Visual C++ Development Environment.
-
-Project name and location issues: 
-       
-    If you must install all.dsw and all.dsp in another directory,
-    relative to hdf5 directory, you will be asked to locate the 
-    sub-project files, when you open the project all.dsw.
-
-    If you want to rename all (the entire project), you will need to
-    modify two files all.dsw and all.dsp as text (contrary to the
-    explicit warnings in the files).
-
-    You can also modify all.dsw and all.dsp as text, to allow these 2
-    files to be installed in another directory.
-
-  
-Settings... details:
-
-    If you create your own project, the necessary settings can be read
-    from the all.dsp file(as text), or from the Project Settings in the
-    Developer Studio project settings dialog.
-
-    Project
-       Settings
-          C/C++
-             Category
-                Code Generation
-                   Use run-time Library
-                      These are all set to use Single-Threaded
-
-DLL... hints:
-  
-   If you want to use DLL versions of HDF5 library in your application, 
-   you should  
-      1) put HDF5 DLL into windows system directory
-      
-      2) add HDF5 DLL export library into your project
-      
-      3) Follow "Settings... details" into the last line:
-         change Single-Threaded into Multithreaded DLL or 
-         Debug Multithreaded DLL
-         
-      4) Follow "Settings.. details" into PreProcessor:
-         Project
-            Settings
-               C/C++
-                  Category
-                     PreProcessor
-
-         Find PreProcessor definations and Add _HDF5USEDLL_ at the
-         end of the PreProcessor definitions to use HDF5 C DLL.
-      
-      5) (optional) repeat 4), add HDF5CPP_USEDLL at the
-         end of the PreProcessor definitions to use HDF5 C++ DLL.
-      
-      6) (optional) repeat 4), add _HDF5USEHLDLL_ at the
-         end of the PreProcessor definitions to use HDF5 high level 
-         DLL.
-            
-      7) (optional) repeat 4), add HDF5USE_HLCPPDLL at the
-         end of the PreProcessor definitions to use HDF5 high level C++
-         DLL.
-         
-      8) (optional) Follow Project->Settings->Fortran->Category->
-         General->Predefined Preprocess or Symbols, and add 
-         "HDF5F90_WINDOWS" to use HDF5 Fortran DLL.
-
-========================================================================
          Section V: How to disable Gzip(Zlib)/Szip compression
 ========================================================================
 
@@ -1606,13 +1532,13 @@ Preconditions:
    the "Open Solution" window, Change "Files of type" to        
    "All Project Files". Choose "all.dsw" under the directory    
    c:\MyHDFstuff\hdf5\windows\proj\all. In the pop up window,   
-   chooise "Yes To All" to convert all project files to Visual  
+   choose "Yes To All" to convert all project files to Visual  
    C++ .Net project format.                                     
    
 2. Building HDF5 C and C++ Libraries 
 
    Users can choose the desirable libraries to be built according
-   to the following describtion.
+   to the following description.
    
    2.1 If you don't want to build HDF5 C++ Libraries,                          
    Go to "Build" and select "Configuration Manager". Choose "Release"      
@@ -1871,26 +1797,28 @@ Notes:  1. For Intel Compiler users, Intel 7.x works with MSVS 6.0 and
        
   2.2 Intel Fortran Compiler 8.1 under MSVS C++ .Net 2003 Environment
        
-      Note: This step will build HDF5 Static and DLL C and C++ Library 
-            using Intel C++ 8.1 Compiler as well as HDF5 Static and 
-            High Level Fortran Library using Intel Fortran 8.1 Compiler. 
+      Note: This step will build HDF5 Static and DLL C and C++ 
+            Library using Intel C++ 8.1 Compiler as well as HDF5 
+            Static and High Level Fortran Library using Intel 
+            Fortran 8.1 Compiler. 
              
             Users who want to build ONLY HDF5 Static and DLL C and C++ 
             LibraryPlease go to 2.1.
           
-      2.2.1  Open all.dsw and Convert Project Files to Visual  C++ .Net Format 
+      2.2.1 Open all.dsw and Convert Project Files (.dsp) to Visual 
+            C++ .Net Format (.vcproj) 
  
       Invoke Microsoft Visual C++ .Net 2003.  From the main menu, go to
       "File" and select "Open Solution". In the "Open Solution" window,
       Change "Files of type" to "All Project Files". Choose "all.dsw" 
       under the directory c:\MyHDFstuff\hdf5\windows\proj\all. In the 
-      pop up window, choose "Yes To All" to convert all project files to
-      Visual C++ .Net project format.
+      pop up window, choose "Yes To All" to convert all project files 
+      to Visual C++ .Net project format.
          
       2.2.2 Extract Compaq Fortran Project Files
       
-       a. Select project "flush1_fortran" in the Solution 
-       Explorer window. In the Project menu, select 
+       a. Select project "flush1_fortran" in the Solution Explorer 
+       window. In the Project menu, select 
        "Extract Compaq Visual Fortran Project". 
          		
        Do the same thing for the following project files:
@@ -1925,7 +1853,7 @@ Notes:  1. For Intel Compiler users, Intel 7.x works with MSVS 6.0 and
       "Convert to use Intel C++ Project System" to convert 
       all .Net C++ project files to Intel C++ project formats. 
 	      
-      2.2.5 Building HDF5 C, C++ and Static Fortran Libraries and Tools
+      2.2.5 Building HDF5 C/C++/Static Fortran Libraries and Tools
 
       Select "Build", then Select "Set Active Configuration".
 	             
@@ -2124,16 +2052,11 @@ by other compilers.
     Section X: How To Build And Test HDF5 With Thread-Safe Feature
 ========================================================================
 
-Extra Preconditions and Notes:
+   All of the preconditions in "Preconditions" Section at the 
+   beginning of this document also apply to this section. There
+   are some extra preconditions for this section only as following.
 
-   Notes: Extra means there are more preconditions for this section 
-          except those preconditions under section 
-          "Preconditions and Notes" the beginning of this document. 
-
-   Please read section "Preconditions and Notes" carefully before going
-   to the next part. 
-
-   p1. Pthread-Win32 Installed
+   pre1. Pthread-Win32 Installed
 
    Posix Threads for Windows is a open source free software. Users can 
    download it from http://sources.redhat.com/pthreads-win32/.
@@ -2143,7 +2066,7 @@ Extra Preconditions and Notes:
    dll of pthread-win32, ONLY HDF5 1.8.0 release dll are supported and 
    tested on Windows XP. 
  
-   p2. Set Path for Pthread-Win32 header and library
+   pre2. Set Path for Pthread-Win32 header and library
    
    Invoke Microsoft Visual C++ 6.0, go to Tools->Options->Directories. 
 
@@ -2155,49 +2078,49 @@ Extra Preconditions and Notes:
        Choose "Library files", add in the path to Pthread-Winew library
        (For example: C:\PTHREADS_WIN32\LIB).
 
-   p3. Enable HDF5 Thread-safe Feature on Windows
+   pre3. Enable HDF5 Thread-safe Feature on Windows
 
    Go to directory c:\MYHDFstuff\hdf5\windows\src, open H5pubconf.h and 
-   find the following messages and remove those comment signs according
-   to the instruction given below:
+   find the following messages and remove those comment signs referred to by those
+   two arrows and save H5pubconf.h
+   
 
    /*Users want to build and test hdf5 library with thread safe enabled,
      Make the following block active
    */
 
-   /*                                            <----|
-     #if defined _DLL                                 |
-     #define H5_HAVE_THREADSAFE 1                     |
-     #define H5_HAVE_SYSTEM_SCOPE_THREADS 1           |---Lines should
-     #if defined TTSAFE_H                             |   be removed
-     #define sleep Sleep                              |   (/* and */)
-     #endif                                           |
-     #endif                                           |
-   */                                            <----|
+   /*                                            <----
+     #if defined _DLL                                
+     #define H5_HAVE_THREADSAFE
+     #define H5_HAVE_SYSTEM_SCOPE_THREADS 1          
+     #if defined TTSAFE_H                             
+     #define sleep Sleep                              
+     #endif                                           
+     #endif                                           
+   */                                            <----
 
-   Save H5pubconf.h
 
-   p4. Define Environment Variable(HDF5_EXT_PTHREAD) for PthreadVC2.lib 
+   pre4. Define Environment Variable(HDF5_EXT_PTHREAD) for PthreadVC2.lib 
       
       To define this environment variable:
       
-      Click "Start", click "Control Panel", and then double-click
-      "System".  On the "Advanced" tab, click "Environment Variables".
+      Click "Start" -> "Control Panel" ->  "System" -> "Advanced" -> "Environment Variables".
       
       If you are logged on as administrator to the local computer AND
       want to let all other users use these two environment variables,
       click "New" under "System Variables" box; otherwise, click "New"
       under "User Variables" box.
       
-      In the New Variable window, set "Variable name" as 
-      HDF5_EXT_PTHREAD and "Variable value" as pthreadVC2.lib, then 
+      In the New Variable window, set 
+      "Variable name" as HDF5_EXT_PTHREAD 
+      "Variable value" as pthreadVC2.lib
+
       click OK.
   
-   p5. Copy pthreadVC2.dll to System Directory
+   pre5. Copy pthreadVC2.dll to System Directory
       
-      Copy pthreadVC2.dll should be copied into the location that 
-      applications can find. One suggestion is to use the 
-      c:\WINDOWS\system.
+      pthreadVC2.dll should be copied into the location that applications can find. 
+     One suggestion is to use the c:\WINDOWS\system.
       
  
 1. Build HDF5 Release DLL with Thread-safe Feature
@@ -2222,10 +2145,9 @@ Extra Preconditions and Notes:
    "Add Files to Folder...", browse to add in file "H5TS.c" under 
    directory c:\MYHDFSTUFF\hdf5\src.
 
-   1.4 Using pthreadVC2.lib inside HDF5 Release DLL
+   1.4 Link to  pthreadVC2.lib
 
-   Right click on project "hdf5dll", choose "Set as Active Project"
-   and set "hdf5dll" as the active project file.
+   Right click on project "hdf5dll", choose "Set as Active Project".
    
    Go to Project->Setting
 
@@ -2306,10 +2228,10 @@ Extra Preconditions and Notes:
    libary and tools.
    
 ========================================================================
-                            Section X: Misc.
+                            Section XI: Misc.
 ========================================================================
 
- 1) drivers we support
+1. drivers we support
  
  The default driver on windows we support is sec2 driver. However, stdio
  driver is also supported. If you want to use stdio driver in your 
@@ -2328,7 +2250,89 @@ Extra Preconditions and Notes:
  delete the environment variable "HDF5_DRIVER" or change the variable 
  value to "sec2".
 
+2. Helpful Pointers
 
+Here are some helpful notes if you are not familiar with
+using the Visual C++ Development Environment.
+
+    2.1 Project name and location issues: 
+       
+    If you must install all.dsw and all.dsp in another directory,
+    relative to hdf5 directory, you will be asked to locate the 
+    sub-project files, when you open the project all.dsw.
+
+    If you want to rename all (the entire project), you will need to
+    modify two files all.dsw and all.dsp as text (contrary to the
+    explicit warnings in the files).
+
+    You can also modify all.dsw and all.dsp as text, to allow these 2
+    files to be installed in another directory.
+
+  
+    2.2 Settings... details:
+
+    If you create your own project, the necessary settings can be read
+    from the all.dsp file(as text), or from the Project Settings in the
+    Developer Studio project settings dialog.
+
+    Project
+       Settings
+          C/C++
+             Category
+                Code Generation
+                   Use run-time Library
+                      These are all set to use Single-Threaded
+
+    2.3 DLL... hints:
+  
+    If you want to use DLL versions of HDF5 library in your application, 
+    you should  
+      1) put HDF5 DLL into windows system directory
+      
+      2) add HDF5 DLL export library into your project
+      
+      3) Follow "Settings... details" into the last line:
+         change Single-Threaded into Multithreaded DLL or 
+         Debug Multithreaded DLL
+         
+      4) Follow "Settings.. details" into PreProcessor:
+         Project
+            Settings
+               C/C++
+                  Category
+                     PreProcessor
+
+        Find PreProcessor definations and Add _HDF5USEDLL_ at the
+        end of the PreProcessor definitions to use HDF5 C DLL.
+      
+      5)(optional) repeat 4), add HDF5CPP_USEDLL at the
+        end of the PreProcessor definitions to use HDF5 C++ DLL.
+      
+      6) (optional) repeat 4), add _HDF5USEHLDLL_ at the
+         end of the PreProcessor definitions to use HDF5 high level 
+         DLL.
+            
+      7) (optional) repeat 4), add HDF5USE_HLCPPDLL at the
+         end of the PreProcessor definitions to use HDF5 high level C++
+         DLL.
+         
+      8) (optional) Follow Project->Settings->Fortran->Category->
+         General->Predefined Preprocess or Symbols, and add 
+         "HDF5F90_WINDOWS" to use HDF5 Fortran DLL.
+
+
+3. Use HDF5 to obtain debug information from library
+    
+    3.1 Define Debug Macro
+
+    Go to directory c:\MYHDFstuff\hdf5\windows\src, open H5pubconf.h 
+    and define the following debug macro:
+
+		#define H5S_DEBUG 1
+
+    Save H5pubconf.h.
+
+    3.2 Go back to Section II, continue building and testing HDF5 
 
 ************************************************************************
  Please send email to hdfhelp@ncsa.uiuc.edu for further assistance.
