@@ -327,10 +327,10 @@ TOOLTEST h5diff_51.txt file4.h5 file4.h5 -v dset1a dset1b
 TOOLTEST h5diff_52.txt file4.h5 file4.h5 -v dset2a dset2b
 
 # 5.3
-TOOLTEST h5diff_53.txt file4.h5 file4.h5 -v dset3a dset4b
+#TOOLTEST h5diff_53.txt file4.h5 file4.h5 -v dset3a dset4b
 
 # 5.4
-TOOLTEST h5diff_54.txt file4.h5 file4.h5 -v dset4a dset4b
+#TOOLTEST h5diff_54.txt file4.h5 file4.h5 -v dset4a dset4b
 
 # 5.5
 TOOLTEST h5diff_55.txt file4.h5 file4.h5 -v dset5a dset5b
