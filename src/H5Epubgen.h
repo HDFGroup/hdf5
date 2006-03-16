@@ -50,6 +50,7 @@
 #define H5E_ERROR            (H5OPEN H5E_ERROR_g)
 #define H5E_PLINE            (H5OPEN H5E_PLINE_g)
 #define H5E_CACHE            (H5OPEN H5E_CACHE_g)
+#define H5E_NONE_MAJOR       (H5OPEN H5E_NONE_MAJOR_g)
 H5_DLLVAR hid_t H5E_DATASET_g;       /* Dataset */
 H5_DLLVAR hid_t H5E_FUNC_g;          /* Function entry/exit */
 H5_DLLVAR hid_t H5E_STORAGE_g;       /* Data storage */
@@ -77,6 +78,7 @@ H5_DLLVAR hid_t H5E_ARGS_g;          /* Invalid arguments to routine */
 H5_DLLVAR hid_t H5E_ERROR_g;         /* Error API */
 H5_DLLVAR hid_t H5E_PLINE_g;         /* Data filters */
 H5_DLLVAR hid_t H5E_CACHE_g;         /* Object cache */
+H5_DLLVAR hid_t H5E_NONE_MAJOR_g;    /* No error */
 
 /*********************/
 /* Minor error codes */
@@ -307,5 +309,9 @@ H5_DLLVAR hid_t H5E_BADVALUE_g;      /* Bad value */
 #define H5E_BADSIZE          (H5OPEN H5E_BADSIZE_g)
 H5_DLLVAR hid_t H5E_CANTCONVERT_g;   /* Can't convert datatypes */
 H5_DLLVAR hid_t H5E_BADSIZE_g;       /* Bad size for object */
+
+/* No error, only for backward compatibility */
+#define H5E_NONE_MINOR        (H5OPEN H5E_NONE_MINOR_g)
+H5_DLLVAR hid_t H5E_NONE_MINOR_g;    /* No error, only for backward compatibility */
 
 #endif /* H5Epubgen_H */

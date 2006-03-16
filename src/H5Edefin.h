@@ -47,6 +47,7 @@ hid_t H5E_ARGS_g           = FAIL;      /* Invalid arguments to routine */
 hid_t H5E_ERROR_g          = FAIL;      /* Error API */
 hid_t H5E_PLINE_g          = FAIL;      /* Data filters */
 hid_t H5E_CACHE_g          = FAIL;      /* Object cache */
+hid_t H5E_NONE_MAJOR_g     = FAIL;      /* No error, only for backward compatibility */
 
 /* Minor error IDs */
 
@@ -180,5 +181,8 @@ hid_t H5E_BADVALUE_g       = FAIL;      /* Bad value */
 /* Datatype conversion errors */
 hid_t H5E_CANTCONVERT_g    = FAIL;      /* Can't convert datatypes */
 hid_t H5E_BADSIZE_g        = FAIL;      /* Bad size for object */
+
+/* No error, for backward compatibility */
+hid_t H5E_NONE_MINOR_g     = FAIL;
 
 #endif /* H5Edefin_H */
