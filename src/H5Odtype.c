@@ -61,18 +61,24 @@ const H5O_msg_class_t H5O_MSG_DTYPE[1] = {{
     H5O_dtype_debug		/* debug the message		*/
 }};
 
-/* This is the version bit to create all datatypes which don't contain
+/* This is the version to create all datatypes which don't contain
  * array datatypes (atomic types, compound datatypes without array fields,
- * vlen sequences of objects which aren't arrays, etc. 0x01) */
-#define H5O_DTYPE_VERSION_COMPAT	1
+ * vlen sequences of objects which aren't arrays, etc.) or VAX byte-ordered
+ * objects.
+ */
+#define H5O_DTYPE_VERSION_1	1
 
-/* This is the version bit to create all datatypes which contain H5T_ARRAY
- * class objects (array definitely, potentially compound & vlen sequences also.
- * 0x02) */
-#define H5O_DTYPE_VERSION_UPDATED	2
+/* This is the version to create all datatypes which contain H5T_ARRAY
+ * class objects (array definitely, potentially compound & vlen sequences also),
+ * but not VAX byte-ordered objects.
+ */
+#define H5O_DTYPE_VERSION_2	2
 
-/* This version bit represents H5T_ORDER_VAX (0x04) */
-#define H5O_DTYPE_VERSION_VAX           4
+/* This is the version to create all datatypes which contain VAX byte-ordered
+ * objects (floating-point types, currently) (can also also H5T_ARRAY types
+ * also).
+ */
+#define H5O_DTYPE_VERSION_3	3
 
 
 /*-------------------------------------------------------------------------
@@ -96,8 +102,7 @@ const H5O_msg_class_t H5O_MSG_DTYPE[1] = {{
 static herr_t
 H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
 {
-    unsigned		flags;
-    unsigned            version = 0;
+    unsigned		flags, version;
     unsigned		i, j;
     size_t		z;
     herr_t      ret_value=SUCCEED;       /* Return value */
@@ -111,9 +116,8 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
     /* decode */
     UINT32DECODE(*pp, flags);
     version = (flags>>4) & 0x0f;
-    if (!(version & H5O_DTYPE_VERSION_COMPAT) && !(version & H5O_DTYPE_VERSION_UPDATED) &&
-            !(version & H5O_DTYPE_VERSION_VAX))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTLOAD, FAIL, "bad version number for datatype message");
+    if(version < H5O_DTYPE_VERSION_1 || version > H5O_DTYPE_VERSION_3)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTLOAD, FAIL, "bad version number for datatype message")
     dt->shared->type = (H5T_class_t)(flags & 0x0f);
     flags >>= 8;
     UINT32DECODE(*pp, dt->shared->size);
@@ -160,7 +164,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
              * Floating-point types...
              */
             dt->shared->u.atomic.order = (flags & 0x1) ? H5T_ORDER_BE : H5T_ORDER_LE;
-            if(version & H5O_DTYPE_VERSION_VAX) {
+            if(version == H5O_DTYPE_VERSION_3) {
                 /*Unsupported byte order*/
                 if((flags & 0x40) && !(flags & 0x1))
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "bad byte order for datatype message");
@@ -228,7 +232,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
                 /* Older versions of the library allowed a field to have
                  * intrinsic 'arrayness'.  Newer versions of the library
                  * use the separate array datatypes. */
-                if(version & H5O_DTYPE_VERSION_COMPAT) {
+                if(version == H5O_DTYPE_VERSION_1) {
                     /* Decode the number of dimensions */
                     ndims = *(*pp)++;
                     assert(ndims <= 4);
@@ -258,7 +262,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
                 }
 
                 /* Go create the array datatype now, for older versions of the datatype message */
-                if(version & H5O_DTYPE_VERSION_COMPAT) {
+                if(version == H5O_DTYPE_VERSION_1) {
                     /* Check if this member is an array field */
                     if(ndims>0) {
                         /* Set up the permutation vector for the array create */
@@ -476,8 +480,8 @@ done:
 static herr_t
 H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
 {
-    htri_t              has_array=FALSE; /* Whether a compound datatype has an array inside it */
-    htri_t              has_vax=FALSE;   /* Whether VAX floating number exists */
+    htri_t              has_array = FALSE; /* Whether a compound datatype has an array inside it */
+    hbool_t             has_vax = FALSE;   /* Whether VAX floating number exists */
     unsigned		flags = 0;
     char		*hdr = (char *)*pp;
     unsigned		i, j;
@@ -819,14 +823,14 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
             break;
     }
 
-    /* Encode the type's class, version and bit field */
-    version &= 0x00; 
-    /* Four combination exist for version number, compact, compact+vax, updated, and updated+vax. */
-    version = (dt->shared->type==H5T_COMPOUND && has_array) ? H5O_DTYPE_VERSION_UPDATED : H5O_DTYPE_VERSION_COMPAT;
+    /* Set version #, based on actual features used for datatype */
     if(has_vax)
-        version |= H5O_DTYPE_VERSION_VAX;
+        version = H5O_DTYPE_VERSION_3;
+    else
+        version = (dt->shared->type == H5T_COMPOUND && has_array) ? H5O_DTYPE_VERSION_2 : H5O_DTYPE_VERSION_1;
 
-    *hdr++ = ((unsigned)(dt->shared->type) & 0x0f) | (version<<4);
+    /* Encode the type's class, version and bit field */
+    *hdr++ = ((unsigned)(dt->shared->type) & 0x0f) | (version << 4);
     *hdr++ = (flags >> 0) & 0xff;
     *hdr++ = (flags >> 8) & 0xff;
     *hdr++ = (flags >> 16) & 0xff;
