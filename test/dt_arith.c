@@ -3266,7 +3266,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                     tmp[k] = saved[j*src_size+(src_size-2)-k];
                     tmp[k+1] = saved[j*src_size+(src_size-1)-k];
                                       
-                    tmp[(src_size-2)-k] = saved[j*src_size+k]
+                    tmp[(src_size-2)-k] = saved[j*src_size+k];
                     tmp[(src_size-1)-k] = saved[j*src_size+k+1];
                 }
             }
@@ -3286,7 +3286,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                         tmp[k] = buf[j*dst_size+(dst_size-2)-k];
                         tmp[k+1] = buf[j*dst_size+(dst_size-1)-k];
                                           
-                        tmp[(dst_size-2)-k] = buf[j*dst_size+k]
+                        tmp[(dst_size-2)-k] = buf[j*dst_size+k];
                         tmp[(dst_size-1)-k] = buf[j*dst_size+k+1];
                     }
                 }
