@@ -834,10 +834,7 @@ H5_DLL void HDsrand(unsigned int seed);
 #endif
 /* sprintf() variable arguments */
 #define HDsqrt(X)		sqrt(X)
-H5_DLL void HDsrand(unsigned int seed);
-#define HDsrandom(S)		HDsrand(S)
 /* sscanf() variable arguments */
-
 
 #ifdef WIN32
      #ifdef __MWERKS__
