@@ -71,6 +71,7 @@ MAJOR, H5E_TST, Ternary Search Trees
 MAJOR, H5E_RS, Reference Counted Strings
 MAJOR, H5E_ERROR, Error API
 MAJOR, H5E_SLIST, Skip Lists
+MAJOR, H5E_NONE_MAJOR, No error
 
 # Sections (for grouping minor errors)
 SECTION, ARGS, Argument errors
@@ -91,6 +92,7 @@ SECTION, HEAP, Heap errors
 SECTION, FPH5, FPHDF5 errors
 SECTION, PIPELINE, I/O pipeline errors
 SECTION, SYSTEM, System level errors
+SECTION, NONE, No error
 
 # Minor errors
 
@@ -224,3 +226,6 @@ MINOR, PIPELINE, H5E_NOENCODER, Filter present but encoding disabled
 
 # System level errors
 MINOR, SYSTEM, H5E_SYSERRSTR, System error message
+
+# No error, for backward compatibility */
+MINOR, NONE, H5E_NONE_MINOR, No error

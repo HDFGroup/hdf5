@@ -39,6 +39,7 @@ hid_t H5E_HEAP_g           = FAIL;      /* Heap */
 hid_t H5E_OHDR_g           = FAIL;      /* Object header */
 hid_t H5E_ATOM_g           = FAIL;      /* Object atom */
 hid_t H5E_ATTR_g           = FAIL;      /* Attribute */
+hid_t H5E_NONE_MAJOR_g     = FAIL;      /* No error */
 hid_t H5E_IO_g             = FAIL;      /* Low-level I/O */
 hid_t H5E_SLIST_g          = FAIL;      /* Skip Lists */
 hid_t H5E_EFL_g            = FAIL;      /* External file list */
@@ -47,7 +48,6 @@ hid_t H5E_ARGS_g           = FAIL;      /* Invalid arguments to routine */
 hid_t H5E_ERROR_g          = FAIL;      /* Error API */
 hid_t H5E_PLINE_g          = FAIL;      /* Data filters */
 hid_t H5E_CACHE_g          = FAIL;      /* Object cache */
-hid_t H5E_NONE_MAJOR_g     = FAIL;      /* No error, only for backward compatibility */
 
 /* Minor error IDs */
 
@@ -116,6 +116,9 @@ hid_t H5E_LINK_g           = FAIL;      /* Link count failure */
 hid_t H5E_SLINK_g          = FAIL;      /* Symbolic link error */
 hid_t H5E_PATH_g           = FAIL;      /* Problem with path to object */
 
+/* No error */
+hid_t H5E_NONE_MINOR_g     = FAIL;      /* No error */
+
 /* File accessability errors */
 hid_t H5E_FILEEXISTS_g     = FAIL;      /* File already exists */
 hid_t H5E_FILEOPEN_g       = FAIL;      /* File already open */
@@ -181,8 +184,5 @@ hid_t H5E_BADVALUE_g       = FAIL;      /* Bad value */
 /* Datatype conversion errors */
 hid_t H5E_CANTCONVERT_g    = FAIL;      /* Can't convert datatypes */
 hid_t H5E_BADSIZE_g        = FAIL;      /* Bad size for object */
-
-/* No error, for backward compatibility */
-hid_t H5E_NONE_MINOR_g     = FAIL;
 
 #endif /* H5Edefin_H */

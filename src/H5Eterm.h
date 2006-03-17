@@ -40,6 +40,7 @@ H5E_HEAP_g=
 H5E_OHDR_g=    
 H5E_ATOM_g=    
 H5E_ATTR_g=    
+H5E_NONE_MAJOR_g=    
 H5E_IO_g=    
 H5E_SLIST_g=    
 H5E_EFL_g=    
@@ -47,8 +48,7 @@ H5E_TST_g=
 H5E_ARGS_g=    
 H5E_ERROR_g=    
 H5E_PLINE_g=    
-H5E_CACHE_g=
-H5E_NONE_MAJOR_g=(-1);
+H5E_CACHE_g= (-1);
 
 /* Reset minor error IDs */
 
@@ -118,6 +118,9 @@ H5E_LINK_g=
 H5E_SLINK_g=    
 H5E_PATH_g=
 
+/* No error */    
+H5E_NONE_MINOR_g=
+
 /* File accessability errors */    
 H5E_FILEEXISTS_g=    
 H5E_FILEOPEN_g=    
@@ -182,9 +185,6 @@ H5E_BADVALUE_g=
 
 /* Datatype conversion errors */    
 H5E_CANTCONVERT_g=    
-H5E_BADSIZE_g=
-
-/* No error, only for backward compatibility */
-H5E_NONE_MINOR_g= (-1);
+H5E_BADSIZE_g= (-1);
 
 #endif /* H5Eterm_H */

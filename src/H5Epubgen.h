@@ -42,6 +42,7 @@
 #define H5E_OHDR             (H5OPEN H5E_OHDR_g)
 #define H5E_ATOM             (H5OPEN H5E_ATOM_g)
 #define H5E_ATTR             (H5OPEN H5E_ATTR_g)
+#define H5E_NONE_MAJOR       (H5OPEN H5E_NONE_MAJOR_g)
 #define H5E_IO               (H5OPEN H5E_IO_g)
 #define H5E_SLIST            (H5OPEN H5E_SLIST_g)
 #define H5E_EFL              (H5OPEN H5E_EFL_g)
@@ -50,7 +51,6 @@
 #define H5E_ERROR            (H5OPEN H5E_ERROR_g)
 #define H5E_PLINE            (H5OPEN H5E_PLINE_g)
 #define H5E_CACHE            (H5OPEN H5E_CACHE_g)
-#define H5E_NONE_MAJOR       (H5OPEN H5E_NONE_MAJOR_g)
 H5_DLLVAR hid_t H5E_DATASET_g;       /* Dataset */
 H5_DLLVAR hid_t H5E_FUNC_g;          /* Function entry/exit */
 H5_DLLVAR hid_t H5E_STORAGE_g;       /* Data storage */
@@ -70,6 +70,7 @@ H5_DLLVAR hid_t H5E_HEAP_g;          /* Heap */
 H5_DLLVAR hid_t H5E_OHDR_g;          /* Object header */
 H5_DLLVAR hid_t H5E_ATOM_g;          /* Object atom */
 H5_DLLVAR hid_t H5E_ATTR_g;          /* Attribute */
+H5_DLLVAR hid_t H5E_NONE_MAJOR_g;    /* No error */
 H5_DLLVAR hid_t H5E_IO_g;            /* Low-level I/O */
 H5_DLLVAR hid_t H5E_SLIST_g;         /* Skip Lists */
 H5_DLLVAR hid_t H5E_EFL_g;           /* External file list */
@@ -78,7 +79,6 @@ H5_DLLVAR hid_t H5E_ARGS_g;          /* Invalid arguments to routine */
 H5_DLLVAR hid_t H5E_ERROR_g;         /* Error API */
 H5_DLLVAR hid_t H5E_PLINE_g;         /* Data filters */
 H5_DLLVAR hid_t H5E_CACHE_g;         /* Object cache */
-H5_DLLVAR hid_t H5E_NONE_MAJOR_g;    /* No error */
 
 /*********************/
 /* Minor error codes */
@@ -193,6 +193,10 @@ H5_DLLVAR hid_t H5E_COMPLEN_g;       /* Name component is too long */
 H5_DLLVAR hid_t H5E_LINK_g;          /* Link count failure */
 H5_DLLVAR hid_t H5E_SLINK_g;         /* Symbolic link error */
 H5_DLLVAR hid_t H5E_PATH_g;          /* Problem with path to object */
+
+/* No error */
+#define H5E_NONE_MINOR       (H5OPEN H5E_NONE_MINOR_g)
+H5_DLLVAR hid_t H5E_NONE_MINOR_g;    /* No error */
 
 /* File accessability errors */
 #define H5E_FILEEXISTS       (H5OPEN H5E_FILEEXISTS_g)
@@ -309,9 +313,5 @@ H5_DLLVAR hid_t H5E_BADVALUE_g;      /* Bad value */
 #define H5E_BADSIZE          (H5OPEN H5E_BADSIZE_g)
 H5_DLLVAR hid_t H5E_CANTCONVERT_g;   /* Can't convert datatypes */
 H5_DLLVAR hid_t H5E_BADSIZE_g;       /* Bad size for object */
-
-/* No error, only for backward compatibility */
-#define H5E_NONE_MINOR        (H5OPEN H5E_NONE_MINOR_g)
-H5_DLLVAR hid_t H5E_NONE_MINOR_g;    /* No error, only for backward compatibility */
 
 #endif /* H5Epubgen_H */
