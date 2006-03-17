@@ -776,19 +776,13 @@ typedef off_t                   h5_stat_size_t;
 
 #ifdef H5_HAVE_RAND_R
 #define HDrandom()		HDrand()
-#define HDsrandom(S)		HDsrand(S)
-H5_DLL int HDrand();
-H5_DLL void HDsrand(unsigned int seed);
+H5_DLL int HDrand(void);
 #elif H5_HAVE_RANDOM
 #define HDrand()		random()
 #define HDrandom()		random()
-#define HDsrandom(S)		srandom(S)
-#define HDsrand(S)		srandom(S)
 #else
 #define HDrand()		rand()
 #define HDrandom()		rand()
-#define HDsrandom(S)		srand(S)
-#define HDsrand(S)		srand(S)
 #endif
 
 #define HDread(F,M,Z)		read(F,M,Z)
@@ -834,6 +828,16 @@ H5_DLL void HDsrand(unsigned int seed);
 #endif
 /* sprintf() variable arguments */
 #define HDsqrt(X)		sqrt(X)
+#ifdef H5_HAVE_RAND_R
+H5_DLL void HDsrand(unsigned int seed);
+#define HDsrandom(S)		HDsrand(S)
+#elif H5_HAVE_RANDOM
+#define HDsrand(S)		srandom(S)
+#define HDsrandom(S)		srandom(S)
+#else
+#define HDsrand(S)		srand(S)
+#define HDsrandom(S)		srand(S)
+#endif
 /* sscanf() variable arguments */
 
 #ifdef WIN32
