@@ -271,7 +271,7 @@ TOOLTEST h5diff_15.txt file1.h5 file2.h5 -r -d 5 g1/dset3 g1/dset4
 TOOLTEST h5diff_16.txt file1.h5 file2.h5 -r -p 0.05 g1/dset3 g1/dset4
 
 # 1.7 verbose mode
-#TOOLTEST h5diff_17.txt file1.h5 file2.h5 -v  
+TOOLTEST h5diff_17.txt file1.h5 file2.h5 -v  
 
 # 1.8 quiet mode 
 TOOLTEST h5diff_18.txt file1.h5 file2.h5 -q

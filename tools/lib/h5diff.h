@@ -25,27 +25,6 @@
 
 
 /*-------------------------------------------------------------------------
- * printf formatting
- *-------------------------------------------------------------------------
- */
-
-#define FFORMAT "%-15f %-15f %-15f\n"
-#define IFORMAT "%-15d %-15d %-15d\n"
-#define CFORMAT "%-16c %-17c\n"
-#define SFORMAT "%-16s %-17s\n"
-#define UIFORMAT "%-15u %-15u %-15u\n"
-#define LIFORMAT "%-15ld %-15ld %-15ld\n"
-#define ULIFORMAT "%-15lu %-15lu %-15lu\n"
-/* with -p option */
-#define FPFORMAT "%-15.10g %-15.10g %-15.10g %-14.10g\n"
-#define IPFORMAT "%-15d %-15d %-15d %-14d\n"
-#define UIPFORMAT "%-15u %-15u %-15u %-14u\n"
-#define LPIFORMAT "%-15ld %-15ld %-15ld %-14ld\n"
-#define ULPIFORMAT "%-15lu %-15lu %-15lu %-14lu\n"
-#define SPACES  "          "
-
-
-/*-------------------------------------------------------------------------
  * command line options
  *-------------------------------------------------------------------------
  */
