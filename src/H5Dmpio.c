@@ -53,6 +53,8 @@
 /* Macros to represent different IO options */
 #define H5D_ONE_LINK_CHUNK_IO 0
 #define H5D_MULTI_CHUNK_IO 1
+#define H5D_ONE_LINK_CHUNK_IO_MORE_OPT 2
+#define H5D_MULTI_CHUNK_IO_MORE_OPT 3
 
 /***** Macros for One linked collective IO case. *****/
 /* The default value to do one linked collective IO for all chunks.
@@ -108,6 +110,9 @@ typedef struct H5D_common_coll_info_t {
 
 static herr_t 
 H5D_multi_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf, 
+			      hbool_t do_write);
+static herr_t 
+H5D_multi_chunk_collective_io_no_opt(H5D_io_info_t *io_info,fm_map *fm,const void *buf, 
 			      hbool_t do_write);
 
 static herr_t
@@ -636,7 +641,7 @@ herr_t
 H5D_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf, hbool_t do_write) 
 {
 
-    int               io_option = H5D_MULTI_CHUNK_IO;
+    int               io_option = H5D_MULTI_CHUNK_IO_MORE_OPT;
     int               sum_chunk,mpi_size;
     unsigned          one_link_chunk_io_threshold;
     H5P_genplist_t    *plist; 
@@ -652,8 +657,9 @@ H5D_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf, hbool
     if(NULL == (plist = H5I_object(io_info->dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
     chunk_opt_mode=(H5FD_mpio_chunk_opt_t)H5P_peek_unsigned(plist,H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME);
-    if(chunk_opt_mode != H5FD_MPIO_OPT_ONE_IO) {
-
+    if(chunk_opt_mode == H5FD_MPIO_OPT_ONE_IO) io_option = H5D_ONE_LINK_CHUNK_IO;
+    else if(chunk_opt_mode == H5FD_MPIO_OPT_MULTI_IO) io_option = H5D_MULTI_CHUNK_IO;
+    else {
        if(H5D_mpio_get_sum_chunk(io_info,fm,&sum_chunk)<0)   
   	       HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSWAP, FAIL, "unable to obtain the total chunk number of all processes"); 
        if((mpi_size = H5F_mpi_get_size(io_info->dset->oloc.file))<0)
@@ -666,26 +672,29 @@ H5D_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf, hbool
 
       /* step 1: choose an IO option */
       /* If the average number of chunk per process is greater than a threshold, we will do one link chunked IO. */
-       if(sum_chunk/mpi_size >= one_link_chunk_io_threshold) io_option = H5D_ONE_LINK_CHUNK_IO;
-
-    }
-    else 
-      io_option = H5D_ONE_LINK_CHUNK_IO;
+       if(sum_chunk/mpi_size >= one_link_chunk_io_threshold) io_option = H5D_ONE_LINK_CHUNK_IO_MORE_OPT;
+   }
 #ifndef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
     if(io_option == H5D_ONE_LINK_CHUNK_IO ) io_option = H5D_MULTI_CHUNK_IO ;/* We can not do this with one chunk IO. */
+    if(io_option == H5D_ONE_LINK_CHUNK_IO_MORE_OPT) io_option = H5D_MULTI_CHUNK_IO_MORE_OPT;
 #endif
 
     /* step 2:  Go ahead to do IO.*/
-    if(io_option == H5D_ONE_LINK_CHUNK_IO) {
+    if(io_option == H5D_ONE_LINK_CHUNK_IO || io_option == H5D_ONE_LINK_CHUNK_IO_MORE_OPT) {
       if(H5D_link_chunk_collective_io(io_info,fm,buf,do_write,sum_chunk)<0)
 	HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL,"couldn't finish linked chunk MPI-IO");
     }
-    else {/* multiple chunk IOs */
-/*      printf("coming into multiple chunk \n");*/
+      
+    else if(io_option == H5D_MULTI_CHUNK_IO_MORE_OPT) { /* multiple chunk IOs with opt. */
       if(H5D_multi_chunk_collective_io(io_info,fm,buf,do_write)<0)
 	HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL,"couldn't finish multiple chunk MPI-IO");
     }
+    else { /*multiple chunk IOs without opt */
+    
+      if(H5D_multi_chunk_collective_io_no_opt(io_info,fm,buf,do_write)<0)
+        HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL,"couldn't finish multiple chunk MPI-IO");
 
+    }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_chunk_collective_io */
@@ -1152,6 +1161,30 @@ printf("inside independent IO mpi_rank = %d, chunk index = %d\n",mpi_rank,i);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_multi_chunk_collective_io */
+/*-------------------------------------------------------------------------
+ * Function:	H5D_multi_chunk_collective_io_no_opt
+ *
+ * Purpose:	To do IO per chunk according to IO mode(collective/independent/none)
+
+                1. Use MPI_gather and MPI_Bcast to obtain IO mode in each chunk(collective/independent/none)
+                2. Depending on whether the IO mode is collective or independent or none,
+                   Create either MPI derived datatype for each chunk or just do independent IO
+                3. Use common collective IO routine to do MPI-IO               
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5D_multi_chunk_collective_io_no_opt(H5D_io_info_t *io_info,fm_map *fm,const void *buf, hbool_t do_write) 
+{
+return SUCCEED;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5D_inter_collective_io
