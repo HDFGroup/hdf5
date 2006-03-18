@@ -950,7 +950,7 @@ test_abs_start_second_row(hid_t fapl)
         FAIL_STACK_ERROR
     if(!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-#ifndef QAK
+#ifdef QAK
 HDfprintf(stderr, "Fractal heap header address = %a\n", fh_addr);
 #endif /* QAK */
 
@@ -979,9 +979,9 @@ HDfprintf(stderr, "Fractal heap header address = %a\n", fh_addr);
         FAIL_STACK_ERROR
 
     /* Increment object count */
-    nobjs++;
+    tot_nobjs++;
 
-    if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, (hsize_t)((STD_MAN_WIDTH + 1) * STD_MAN_START_BLOCK_SIZE), (hsize_t)((STD_MAN_WIDTH + 1) * STD_MAN_START_BLOCK_SIZE), (hsize_t)0, (hsize_t)983, (hsize_t)nobjs))
+    if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, (hsize_t)((STD_MAN_WIDTH + 1) * STD_MAN_START_BLOCK_SIZE), (hsize_t)((STD_MAN_WIDTH + 1) * STD_MAN_START_BLOCK_SIZE), (hsize_t)0, (hsize_t)983, (hsize_t)tot_nobjs))
         FAIL_STACK_ERROR
 
     PASSED()
@@ -1040,7 +1040,7 @@ main(void)
 #else /* QAK */
 HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK */
-#ifdef QAK
+#ifndef QAK
     nerrors += test_abs_start_second_row(fapl);
 #else /* QAK */
 HDfprintf(stderr, "Uncomment tests!\n");

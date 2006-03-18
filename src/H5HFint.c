@@ -975,6 +975,7 @@ HDfprintf(stderr, "%s: shared->man_dtable.next_dir_block = %Hu\n", FUNC, shared-
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to locate indirect block with space for direct block")
 #ifdef QAK
 HDfprintf(stderr, "%s: dblock_entry = %Zu\n", FUNC, dblock_entry);
+HDfprintf(stderr, "%s: dblock_size = %Zu\n", FUNC, dblock_size);
 #endif /* QAK */
 
         /* Create new direct block at corrent location*/
@@ -1469,13 +1470,15 @@ HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, NULL, "skipping direct block sizes not su
 
             /* Check for special case of second row, which has blocks the same size as first row */
             if(iblock->next_dir_row == 1)
-                iblock->next_dir_size = shared->man_dtable.table_addr;
+                iblock->next_dir_size = shared->man_dtable.cparam.start_block_size;
 
             /* Compute new # of rows in indirect block */
             new_nrows = 2 * iblock->ndir_rows;
             if(new_nrows > iblock->max_direct_rows)
                 new_nrows = iblock->max_direct_rows;
+#ifdef QAK
 HDfprintf(stderr, "%s: new_nrows = %u\n", FUNC, new_nrows);
+#endif /* QAK */
 
 /* Currently, the old chunk data is "thrown away" after the space is reallocated,
  * so avoid data copy in H5MF_realloc() call by just free'ing the space and
@@ -1495,16 +1498,9 @@ HDfprintf(stderr, "%s: new_nrows = %u\n", FUNC, new_nrows);
             iblock->ndir_rows = new_nrows;
             iblock->size = H5HF_MAN_INDIRECT_SIZE(shared, iblock);
 
-            /* Mark indirect block as dirty */
-            iblock->dirty = TRUE;
-
             /* Allocate space for the new indirect block on disk */
             if(HADDR_UNDEF == (shared->man_dtable.table_addr = H5MF_alloc(shared->f, H5FD_MEM_FHEAP_IBLOCK, dxpl_id, (hsize_t)iblock->size)))
                 HGOTO_ERROR(H5E_STORAGE, H5E_NOSPACE, NULL, "file allocation failed for fractal heap indirect block")
-
-            /* Move object in cache */
-            if(H5AC_rename(shared->f, H5AC_FHEAP_IBLOCK, shared->man_dtable.table_addr, old_addr) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTSPLIT, NULL, "unable to move fractal heap root indirect block")
 
             /* Re-allocate direct block entry table */
             if(NULL == (iblock->dblock_ents = H5FL_SEQ_REALLOC(H5HF_indirect_dblock_ent_t, iblock->dblock_ents, (iblock->ndir_rows * shared->man_dtable.cparam.width))))
@@ -1518,11 +1514,30 @@ HDfprintf(stderr, "%s: new_nrows = %u\n", FUNC, new_nrows);
                 iblock->dblock_ents[u].free_space = 0;
             } /* end for */
 
+            /* Mark indirect block as dirty */
+            iblock->dirty = TRUE;
+
+            /* Release the indirect block (marked as dirty) */
+            if(H5AC_unprotect(shared->f, dxpl_id, H5AC_FHEAP_IBLOCK, old_addr, iblock, H5AC__DIRTIED_FLAG) < 0)
+                HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release fractal heap indirect block")
+
+            /* Move object in cache */
+            if(H5AC_rename(shared->f, H5AC_FHEAP_IBLOCK, old_addr, shared->man_dtable.table_addr) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTSPLIT, NULL, "unable to move fractal heap root indirect block")
+
+            /* Update other shared header info */
+            shared->man_dtable.curr_root_rows = new_nrows;
+
             /* Mark heap header as modified */
             shared->dirty = TRUE;
 
-HDfprintf(stderr, "%s: Adding direct block of different size to heap not supported\n", FUNC);
-HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, NULL, "allocating objects from non root block not supported yet")
+            /* Lock root indirect block (again) */
+            par_shared.shared = fh_shared;
+            par_shared.parent = NULL;
+            par_shared.parent_entry = 0;
+            par_shared.parent_free_space = shared->total_man_free;
+            if(NULL == (iblock = H5AC_protect(shared->f, dxpl_id, H5AC_FHEAP_IBLOCK, shared->man_dtable.table_addr, &shared->man_dtable.curr_root_rows, &par_shared, H5AC_WRITE)))
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap indirect block")
         } /* end if */
 
         /* Set address of indirect block */
