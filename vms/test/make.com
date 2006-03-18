@@ -24,11 +24,12 @@ $
 $ cobj= "h5test.c, testframe.c, testhdf5.c, tarray.c, tattr.c, tconfig.c, "+-
         "tfile.c, tgenprop.c,th5s.c, theap.c, tid.c, titerate.c,"+- 
         "tmeta.c, tmisc.c, ttime.c, trefer.c, trefstr.c,"+-
-        "tselect.c, tskiplist.c, ttst.c, tunicode.c, tvltypes.c, tvlstr.c"
+        "tselect.c, tskiplist.c, ttst.c, tunicode.c, tvltypes.c,"+-
+        "tvlstr.c, cache_common.c"
 
 $                               
 $ ccc 'cobj 
-$ library/create/replace []libh5test h5test, testframe
+$ library/create/replace []libh5test h5test, testframe, cache_common
 $ type sys$input
        Creating libh5test
 $ link     testhdf5,tarray,tattr,tconfig, -
@@ -75,13 +76,6 @@ $ type sys$input
        Creating cache test
 $ ccc  cache
 $ link cache, -
-       libh5test.olb/lib,[-.src]hdf5.olb/lib
- 
- 
-$ type sys$input
-       Creating sheap test
-$ ccc  sheap
-$ link sheap, -
        libh5test.olb/lib,[-.src]hdf5.olb/lib
  
 $ type sys$input
