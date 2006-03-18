@@ -231,7 +231,7 @@
 #define H5_HAVE_SRANDOM 1
 
 /* Define if `struct stat' has the `st_blocks' field */
-#define H5_HAVE_STAT_ST_BLOCKS 1
+/* #undef H5_HAVE_STAT_ST_BLOCKS */
 
 /* Define to 1 if you have the <stddef.h> header file. */
 #define H5_HAVE_STDDEF_H 1
