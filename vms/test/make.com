@@ -79,6 +79,12 @@ $ link cache, -
        libh5test.olb/lib,[-.src]hdf5.olb/lib
  
 $ type sys$input
+       Creating cache_api test
+$ ccc  cache_api
+$ link cache_api, -
+       libh5test.olb/lib,[-.src]hdf5.olb/lib
+ 
+$ type sys$input
        Creating pool test
 $ ccc  pool 
 $ link pool, -
