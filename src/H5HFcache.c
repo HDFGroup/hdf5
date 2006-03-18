@@ -1064,7 +1064,7 @@ H5HF_cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrows
                     iblock->next_dir_size = shared->man_dtable.cparam.start_block_size;
                 else
                     iblock->next_dir_size = shared->man_dtable.cparam.start_block_size * (1 << (iblock->next_dir_row - 1));
-                if(heap_addr == 0)
+                if(iblock->block_off == 0)
                     iblock->max_direct_rows = shared->man_dtable.max_direct_rows;
                 else
                     HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, NULL, "computing max direct rows for non-root indirect block not supported yet")

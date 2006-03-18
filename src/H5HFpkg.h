@@ -373,6 +373,8 @@ H5_DLL herr_t H5HF_man_find(H5RC_t *fh_shared, hid_t dxpl_id, size_t request,
 H5_DLL herr_t H5HF_man_insert(H5RC_t *fh_shared, hid_t dxpl_id,
     H5HF_section_free_node_t *sec_node, size_t obj_size, const void *obj,
     void *id);
+H5_DLL herr_t H5HF_man_read(H5RC_t *fh_shared, hid_t dxpl_id, hsize_t obj_off,
+    void *obj);
 
 /* Metadata cache callbacks */
 H5_DLL herr_t H5HF_cache_hdr_dest(H5F_t *f, H5HF_t *fh);

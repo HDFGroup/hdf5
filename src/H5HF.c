@@ -159,7 +159,7 @@ herr_t
 H5HF_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t size,
     const void *obj, void *id/*out*/)
 {
-    H5HF_t *fh = NULL;                  /* The new fractal heap header information */
+    H5HF_t *fh = NULL;                  /* The fractal heap header information */
     H5HF_shared_t *shared;              /* Shared fractal heap information */
     unsigned hdr_flags = H5AC__NO_FLAGS_SET;    /* Metadata cache flags for header */
     herr_t ret_value = SUCCEED;
@@ -198,7 +198,7 @@ HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "standalone blocks not supported ye
 HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "'write once' managed blocks not supported yet")
         } /* end if */
         else {
-            H5HF_section_free_node_t *sec_node;
+            H5HF_section_free_node_t *sec_node;         /* Pointer to free space section */
 
             /* Find free space in heap */
             if(H5HF_man_find(fh->shared, dxpl_id, size, &sec_node) < 0)
@@ -220,4 +220,71 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_insert() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_read
+ *
+ * Purpose:	Read an object from a fractal heap into a buffer
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Mar 18 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_read(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_id,
+    void *obj/*out*/)
+{
+    H5HF_t *fh = NULL;                  /* The fractal heap header information */
+    H5HF_shared_t *shared;              /* Shared fractal heap information */
+    const uint8_t *id = (const uint8_t *)_id;   /* Object ID */
+    hsize_t obj_off;                    /* Object's offset in heap */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5HF_read, FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(id);
+    HDassert(obj);
+
+    /*
+     * Load the fractal heap header.
+     */
+    if(NULL == (fh = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap header")
+
+    /* Get the pointer to the shared fractal heap info */
+    shared = H5RC_GET_OBJ(fh->shared);
+    HDassert(shared);
+
+    /* Decode the offset within the heap */
+    UINT64DECODE_VAR(id, obj_off, shared->heap_off_size);
+#ifdef QAK
+HDfprintf(stderr, "%s: obj_off = %Hu\n", FUNC, obj_off);
+#endif /* QAK */
+
+    /* Check for standalone object */
+    if(obj_off & 0) {
+HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "standalone blocks not supported yet")
+    } /* end if */
+    else {
+        /* Read object from managed heap blocks */
+        if(H5HF_man_read(fh->shared, dxpl_id, obj_off, obj) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't read object from fractal heap")
+    } /* end else */
+
+done:
+    if(fh && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, addr, fh, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_read() */
 

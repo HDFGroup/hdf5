@@ -81,6 +81,8 @@ H5_DLL herr_t H5HF_create(H5F_t *f, hid_t dxpl_id, H5HF_create_t *cparam,
     haddr_t *addr_p);
 H5_DLL herr_t H5HF_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t size,
     const void *obj, void *id/*out*/);
+H5_DLL herr_t H5HF_read(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *id,
+    void *obj/*out*/);
 
 #endif /* _H5HFprivate_H */
 
