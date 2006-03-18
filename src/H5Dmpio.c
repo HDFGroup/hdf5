@@ -111,9 +111,6 @@ typedef struct H5D_common_coll_info_t {
 static herr_t 
 H5D_multi_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf, 
 			      hbool_t do_write);
-static herr_t 
-H5D_multi_chunk_collective_io_no_opt(H5D_io_info_t *io_info,fm_map *fm,const void *buf, 
-			      hbool_t do_write);
 
 static herr_t
 H5D_link_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf, 
@@ -685,13 +682,9 @@ H5D_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf, hbool
 	HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL,"couldn't finish linked chunk MPI-IO");
     }
       
-    else if(io_option == H5D_MULTI_CHUNK_IO_MORE_OPT) { /* multiple chunk IOs with opt. */
-      if(H5D_multi_chunk_collective_io(io_info,fm,buf,do_write)<0)
-	HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL,"couldn't finish multiple chunk MPI-IO");
-    }
     else { /*multiple chunk IOs without opt */
     
-      if(H5D_multi_chunk_collective_io_no_opt(io_info,fm,buf,do_write)<0)
+      if(H5D_multi_chunk_collective_io(io_info,fm,buf,do_write)<0)
         HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL,"couldn't finish multiple chunk MPI-IO");
 
     }
@@ -1041,6 +1034,8 @@ H5D_multi_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf,
    printf("total_chunk %d\n",total_chunk);
 #endif
 
+
+
       /* obtain IO option for each chunk */
       if(H5D_obtain_mpio_mode(io_info,fm,chunk_io_option,chunk_addr)<0) 
 	HGOTO_ERROR (H5E_DATASET, H5E_CANTRECV, FAIL, "unable to obtain MPIO mode");
@@ -1161,29 +1156,6 @@ printf("inside independent IO mpi_rank = %d, chunk index = %d\n",mpi_rank,i);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_multi_chunk_collective_io */
-/*-------------------------------------------------------------------------
- * Function:	H5D_multi_chunk_collective_io_no_opt
- *
- * Purpose:	To do IO per chunk according to IO mode(collective/independent/none)
-
-                1. Use MPI_gather and MPI_Bcast to obtain IO mode in each chunk(collective/independent/none)
-                2. Depending on whether the IO mode is collective or independent or none,
-                   Create either MPI derived datatype for each chunk or just do independent IO
-                3. Use common collective IO routine to do MPI-IO               
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t 
-H5D_multi_chunk_collective_io_no_opt(H5D_io_info_t *io_info,fm_map *fm,const void *buf, hbool_t do_write) 
-{
-return SUCCEED;
-}
 
 
 /*-------------------------------------------------------------------------
@@ -1594,6 +1566,7 @@ H5D_obtain_mpio_mode(H5D_io_info_t* io_info,
   int               total_chunks;
   hsize_t           ori_total_chunks;
   unsigned          percent_nproc_per_chunk,threshold_nproc_per_chunk;
+  H5FD_mpio_chunk_opt_t chunk_opt_mode;
   uint8_t*          io_mode_info;
   uint8_t*          recv_io_mode_info;
   uint8_t*          mergebuf;
@@ -1611,7 +1584,7 @@ H5D_obtain_mpio_mode(H5D_io_info_t* io_info,
   MPI_Datatype      stype;
   int               mpi_size,mpi_rank;
   MPI_Comm          comm;
-  int               root;
+  int               ic,root;
   int               mpi_code;
   H5P_genplist_t    *plist;
   int               mem_cleanup      = 0,
@@ -1630,16 +1603,30 @@ H5D_obtain_mpio_mode(H5D_io_info_t* io_info,
 	 HGOTO_ERROR (H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi rank");
   if((mpi_size = H5F_mpi_get_size(io_info->dset->oloc.file))<0)
 	 HGOTO_ERROR (H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi size");
-  /* Obtain the data transfer properties */
-  if(NULL == (plist = H5I_object(io_info->dxpl_id)))
-       HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-  percent_nproc_per_chunk=H5P_peek_unsigned(plist,H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME);
- 
-  threshold_nproc_per_chunk = mpi_size * percent_nproc_per_chunk/100;
-
-  /* Allocate memory */
+  
+   /* Allocate memory */
   ori_total_chunks      = fm->total_chunks;
   H5_ASSIGN_OVERFLOW(total_chunks,ori_total_chunks,hsize_t,int);
+
+ /* Obtain the data transfer properties */
+  if(NULL == (plist = H5I_object(io_info->dxpl_id)))
+       HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+  
+  percent_nproc_per_chunk=H5P_peek_unsigned(plist,H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME);
+#if defined(H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS) && defined(H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS)
+   
+  chunk_opt_mode=(H5FD_mpio_chunk_opt_t)H5P_peek_unsigned(plist,H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME);
+
+  if((chunk_opt_mode == H5FD_MPIO_OPT_MULTI_IO) || (percent_nproc_per_chunk == 0)){
+    if(H5D_istore_chunkmap(io_info,total_chunks,chunk_addr,fm->down_chunks)<0)
+       HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address");    
+    for(ic = 0; ic<total_chunks;ic++)
+       assign_io_mode[ic] = H5D_CHUNK_IO_MODE_COL;
+       goto done;
+  }
+#endif    
+  threshold_nproc_per_chunk = mpi_size * percent_nproc_per_chunk/100;
+
 
   io_mode_info      = (uint8_t *)H5MM_calloc(total_chunks*sizeof(MPI_BYTE));
   mergebuf          = H5MM_malloc((sizeof(haddr_t)+sizeof(MPI_BYTE))*total_chunks);
@@ -1706,7 +1693,7 @@ H5D_obtain_mpio_mode(H5D_io_info_t* io_info,
   /* Calculate the mode for IO(collective, independent or none) at root process */
   if(mpi_rank == root) {
 
-    int               ic,nproc;
+    int               nproc;
     int*              nproc_per_chunk;
 #if !defined(H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS) || !defined(H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS)
     int*              ind_this_chunk;
