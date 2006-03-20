@@ -272,8 +272,8 @@ int test_basic(const char *file1, const char *file2)
  write_dset(group2_id,2,dims,"dset1",H5T_NATIVE_DOUBLE,data2);
 
  /* integer relative */
- write_dset(group1_id,2,dims,"dset2",H5T_NATIVE_INT,data5);
- write_dset(group1_id,2,dims,"dset4",H5T_NATIVE_INT,data6);
+ write_dset(group1_id,2,dims,"dset5",H5T_NATIVE_INT,data5);
+ write_dset(group1_id,2,dims,"dset6",H5T_NATIVE_INT,data6);
 
 /*-------------------------------------------------------------------------
  * Close

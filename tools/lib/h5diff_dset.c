@@ -233,6 +233,14 @@ hsize_t diff_datasetid( hid_t dset1_id,
   cmp=0;
   options->not_cmp=1;
  }
+
+/*-------------------------------------------------------------------------
+ * only attempt to compare if possible
+ *-------------------------------------------------------------------------
+ */
+ if (cmp)
+ {
+
 /*-------------------------------------------------------------------------
  * get number of elements
  *-------------------------------------------------------------------------
@@ -249,25 +257,8 @@ hsize_t diff_datasetid( hid_t dset1_id,
   nelmts2 *= dims2[i];
  }
 
- if (cmp)
-  /* onnly assert if the space is the same */
-  assert(nelmts1==nelmts2);
-
-/*-------------------------------------------------------------------------
- * check for equal file datatype; warning only
- *-------------------------------------------------------------------------
- */
-
- if ( (H5Tequal(f_type1, f_type2)==0) && options->m_verbose && obj1_name)
- {
-  printf("Warning: Different storage datatype\n");
-  printf("<%s> has file datatype ", obj1_name);
-  print_type(f_type1);
-  printf("\n");
-  printf("<%s> has file datatype ", obj2_name);
-  print_type(f_type2);
-  printf("\n");
- }
+ /* only assert if the space is the same */
+ assert(nelmts1==nelmts2);
 
 /*-------------------------------------------------------------------------
  * memory type and sizes
@@ -296,13 +287,13 @@ hsize_t diff_datasetid( hid_t dset1_id,
  sign2=H5Tget_sign(m_type2);
  if ( sign1 != sign2 )
  {
-     if (options->m_verbose && obj1_name) {
-	 parallel_print("Comparison not supported: <%s> has sign %s ", obj1_name, get_sign(sign1));
-	 parallel_print("and <%s> has sign %s\n", obj2_name, get_sign(sign2));
-     }
-
-     cmp=0;
-     options->not_cmp=1;
+  if (options->m_verbose && obj1_name) {
+   parallel_print("Comparison not supported: <%s> has sign %s ", obj1_name, get_sign(sign1));
+   parallel_print("and <%s> has sign %s\n", obj2_name, get_sign(sign2));
+  }
+  
+  cmp=0;
+  options->not_cmp=1;
  }
 
 /*-------------------------------------------------------------------------
@@ -315,35 +306,29 @@ hsize_t diff_datasetid( hid_t dset1_id,
   if ( m_size1 < m_size2 )
   {
    H5Tclose(m_type1);
-
+   
    if ((m_type1=h5tools_get_native_type(f_type2))<0)
-        goto error;
-
+    goto error;
+   
    m_size1 = H5Tget_size( m_type1 );
   }
   else
   {
    H5Tclose(m_type2);
-
+   
    if ((m_type2=h5tools_get_native_type(f_type1))<0)
-        goto error;
-
+    goto error;
+   
    m_size2 = H5Tget_size( m_type2 );
   }
 #if defined (H5DIFF_DEBUG)
   printf("WARNING: Size was upgraded\n");
   if (obj1_name)
-  print_sizes(obj1_name,obj2_name,f_type1,f_type2,m_type1,m_type2);
+   print_sizes(obj1_name,obj2_name,f_type1,f_type2,m_type1,m_type2);
 #endif
  }
  assert(m_size1==m_size2);
 
-/*-------------------------------------------------------------------------
- * only attempt to compare if possible
- *-------------------------------------------------------------------------
- */
- if (cmp)
- {
 
  buf1 = (void *) HDmalloc((unsigned) (nelmts1*m_size1));
  buf2 = (void *) HDmalloc((unsigned) (nelmts2*m_size2));

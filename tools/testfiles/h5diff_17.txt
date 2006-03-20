@@ -6,9 +6,11 @@ file1     file2
 ---------------------------------------
     x      x    /g1            
     x      x    /g1/dset1      
-    x      x    /g1/dset2      
+           x    /g1/dset2      
     x           /g1/dset3      
-    x      x    /g1/dset4      
+           x    /g1/dset4      
+    x           /g1/dset5      
+    x           /g1/dset6      
            x    /g2            
 
 Group:       </g1> and </g1>
@@ -21,22 +23,5 @@ position        dset1           dset1           difference
 [ 1 1 ]          1.000000        1.001000        0.001000       
 [ 2 0 ]          1.000000        1.000100        0.000100       
 4 differences found
-Dataset:     </g1/dset2> and </g1/dset2>
-Comparison not possible: </g1/dset2> is of class H5T_INTEGER and </g1/dset2> is of class H5T_FLOAT
-Warning: Different storage datatype
-</g1/dset2> has file datatype H5T_STD_I32LE
-</g1/dset2> has file datatype H5T_IEEE_F64LE
-Comparison not supported: </g1/dset2> has sign H5T_SGN_2 and </g1/dset2> has sign H5T_SGN_ERROR
-0 differences found
-Dataset:     </g1/dset4> and </g1/dset4>
-Comparison not possible: </g1/dset4> is of class H5T_INTEGER and </g1/dset4> is of class H5T_FLOAT
-Warning: Different storage datatype
-</g1/dset4> has file datatype H5T_STD_I32LE
-</g1/dset4> has file datatype H5T_IEEE_F64LE
-Comparison not supported: </g1/dset4> has sign H5T_SGN_2 and </g1/dset4> has sign H5T_SGN_ERROR
-0 differences found
 Group:       </> and </>
 0 differences found
---------------------------------
-Some objects are not comparable
---------------------------------

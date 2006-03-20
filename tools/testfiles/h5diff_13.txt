@@ -9,7 +9,3 @@ position        dset1           dset1           difference
 [ 1 1 ]          1.000000        1.001000        0.001000       
 [ 2 0 ]          1.000000        1.000100        0.000100       
 4 differences found
---------------------------------
-Some objects are not comparable
---------------------------------
-Use -v for a list of objects.

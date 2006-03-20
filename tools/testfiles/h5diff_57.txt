@@ -5,11 +5,15 @@ Dataset:     </dset7a> and </dset7b>
 Warning: Different storage datatype
 </dset7a> has file datatype H5T_STD_I8LE
 </dset7b> has file datatype H5T_STD_U8LE
-Warning: Different storage datatype
-</dset7a> has file datatype H5T_STD_I8LE
-</dset7b> has file datatype H5T_STD_U8LE
 Comparison not supported: </dset7a> has sign H5T_SGN_2 and </dset7b> has sign H5T_SGN_NONE
-0 differences found
+position        dset7a          dset7b          difference          
+------------------------------------------------------------
+[ 0 0 ]          -1              1               2              
+[ 1 0 ]          -1              1               2              
+[ 1 1 ]          -1              1               2              
+[ 2 0 ]          -1              1               2              
+[ 2 1 ]          -1              1               2              
+5 differences found
 --------------------------------
 Some objects are not comparable
 --------------------------------
