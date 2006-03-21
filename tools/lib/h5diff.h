@@ -165,16 +165,7 @@ const char* get_type(int type);
 const char* get_class(H5T_class_t tclass);
 const char* get_sign(H5T_sign_t sign);
 void        print_dims( int r, hsize_t *d );
-void        print_pos( int        *ph,
-                       int        per,
-                       hsize_t    curr_pos,
-                       hsize_t    *acc,
-                       hsize_t    *pos,
-                       int        rank,
-                       const char *obj1,
-                       const char *obj2 );
-
-int print_objname(diff_opt_t *options, hsize_t nfound);
+int         print_objname(diff_opt_t *options, hsize_t nfound);
 
 
 #if defined (H5DIFF_DEBUG)
