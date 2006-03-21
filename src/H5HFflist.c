@@ -44,6 +44,13 @@
 /* Local Typedefs */
 /******************/
 
+/* Structure for storing single free list section */
+typedef struct H5HF_flist_single_t {
+    void *node;                 /* Pointer to section's node */
+    size_t *size_key;           /* Pointer to size key for section */
+    haddr_t *addr_key;          /* Pointer to address key for section */
+} H5HF_flist_single_t;
+
 /* Free list node for free list sections of the same size */
 typedef struct H5HF_flist_node_t {
     size_t sec_size;            /* Size of all sections on list */
@@ -58,6 +65,8 @@ typedef struct H5HF_flist_node_t {
 /* Main free list info */
 struct H5HF_freelist_t {
     hsize_t tot_space;          /* Total amount of space in free list         */
+    size_t sec_count;           /* # of sections on free list                 */
+    H5HF_flist_single_t single; /* Section information when free list has only one free section */
     unsigned nbins;             /* Number of bins                             */
     H5SL_operator_t node_free_op;       /* Callback for freeing nodes when free list is destroyed */
     H5SL_t **bins;              /* Pointer to array of lists of free nodes    */
@@ -128,12 +137,13 @@ H5HF_flist_create(size_t max_block_size, H5SL_operator_t node_free_op)
 
     /* Set free list parameters */
     flist->tot_space = 0;
+    flist->sec_count = 0;
+    flist->single.node = NULL;
+    flist->single.size_key = NULL;
+    flist->single.addr_key = NULL;
     flist->nbins = H5V_log2_of2(max_block_size);
     flist->node_free_op = node_free_op;
-
-    /* Allocate the bins for free space sizes */
-    if(NULL == (flist->bins = H5FL_SEQ_CALLOC(H5SL_ptr_t, flist->nbins)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for free list bins")
+    flist->bins = NULL;
 
     /* Set return value */
     ret_value = flist;
@@ -144,27 +154,28 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_flist_add
+ * Function:	H5HF_flist_add_bin_node
  *
  * Purpose:	Add a section of free space in a direct block to the free list
+ *              bins
  *
  * Return:	Success:	non-negative
  *
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *              Tuesday, March  7, 2006
+ *              Monday, March 20, 2006
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5HF_flist_add(H5HF_freelist_t *flist, void *node, size_t *size_key, haddr_t *addr_key)
+static herr_t
+H5HF_flist_add_bin_node(H5HF_freelist_t *flist, void *node, size_t *size_key, haddr_t *addr_key)
 {
     H5HF_flist_node_t *flist_node = NULL;   /* Pointer to free list node of the correct size */
     unsigned bin;                       /* Bin to put the free space section in */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_flist_add)
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_flist_add_bin_node)
 #ifdef QAK
 HDfprintf(stderr, "%s: *size_key = %Zu, *addr_key = %a\n", FUNC, *size_key, *addr_key);
 #endif /* QAK */
@@ -208,14 +219,13 @@ HDfprintf(stderr, "%s: *size_key = %Zu, *addr_key = %a\n", FUNC, *size_key, *add
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5HF_flist_add() */
+} /* H5HF_flist_add_bin_node() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_flist_find
+ * Function:	H5HF_flist_add
  *
- * Purpose:	Locate a section of free space (in existing free list) that
- *              is large enough to fulfill request.
+ * Purpose:	Add a section of free space in a direct block to the free list
  *
  * Return:	Success:	non-negative
  *
@@ -226,14 +236,85 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-htri_t
-H5HF_flist_find(H5HF_freelist_t *flist, size_t request, void **node)
+herr_t
+H5HF_flist_add(H5HF_freelist_t *flist, void *node, size_t *size_key, haddr_t *addr_key)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_flist_add)
+#ifdef QAK
+HDfprintf(stderr, "%s: *size_key = %Zu, *addr_key = %a\n", FUNC, *size_key, *addr_key);
+#endif /* QAK */
+
+    /* Check arguments. */
+    HDassert(flist);
+    HDassert(node);
+    HDassert(size_key);
+    HDassert(addr_key);
+
+    /* Check for special cases of # of sections on free list */
+    if(flist->sec_count == 0) {
+        HDassert(flist->single.node == NULL);
+
+        /* Capture single section's information */
+        flist->single.node = node;
+        flist->single.size_key = size_key;
+        flist->single.addr_key = addr_key;
+    } /* end if */
+    else {
+        /* Have a single section, put it into the bins */
+         if(flist->sec_count == 1) {
+            HDassert(flist->single.node);
+
+            /* Check if we should allocate the bins */
+            if(flist->bins == NULL)
+                /* Allocate the bins for free space sizes */
+                if(NULL == (flist->bins = H5FL_SEQ_CALLOC(H5SL_ptr_t, flist->nbins)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for free list bins")
+
+            /* Insert the current single section into the bins */
+            if(H5HF_flist_add_bin_node(flist, flist->single.node, flist->single.size_key, flist->single.addr_key) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "can't insert free list node into skip list")
+            flist->single.node = NULL;
+        } /* end if */
+        HDassert(flist->single.node == NULL);
+
+        /* Put new section into bins */
+        if(H5HF_flist_add_bin_node(flist, node, size_key, addr_key) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "can't insert free list node into skip list")
+    } /* end else */
+
+    /* Increment # of sections on free list */
+    flist->sec_count++;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5HF_flist_add() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_flist_find_bin_node
+ *
+ * Purpose:	Locate a section of free space (in existing free list bins) that
+ *              is large enough to fulfill request.
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, March 20, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5HF_flist_find_bin_node(H5HF_freelist_t *flist, size_t request, void **node)
 {
     H5HF_flist_node_t *flist_node;      /* Free list size node */
     unsigned bin;                       /* Bin to put the free space section in */
-    herr_t ret_value = FALSE;           /* Return value */
+    htri_t ret_value = FALSE;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_flist_find)
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_flist_find_bin_node)
 
     /* Check arguments. */
     HDassert(flist);
@@ -286,6 +367,64 @@ HDfprintf(stderr, "%s: bin = %u\n", FUNC, bin);
             /* Advance to next larger bin */
             bin++;
         } while(bin < flist->nbins);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5HF_flist_find_bin_node() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_flist_find
+ *
+ * Purpose:	Locate a section of free space (in existing free list) that
+ *              is large enough to fulfill request.
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, March  7, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5HF_flist_find(H5HF_freelist_t *flist, size_t request, void **node)
+{
+    htri_t ret_value = FALSE;           /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_flist_find)
+
+    /* Check arguments. */
+    HDassert(flist);
+    HDassert(request > 0);
+    HDassert(node);
+
+    /* Check for any sections on free list */
+    if(flist->sec_count > 0) {
+        /* Check for single section */
+        if(flist->sec_count == 1) {
+            HDassert(flist->single.node);
+
+            /* See if single section is large enough */
+            if(*(flist->single.size_key) >= request) {
+                *node = flist->single.node;
+                flist->single.node = NULL;
+                ret_value = TRUE;
+            } /* end if */
+        } /* end if */
+        else {
+            HDassert(flist->single.node == NULL);
+
+            /* Look for node in bins */
+            if((ret_value = H5HF_flist_find_bin_node(flist, request, node)) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "can't remove section from bins")
+        } /* end else */
+
+        /* Decrement # of sections on free list */
+        flist->sec_count--;
+/* XXX: Should check for only one section in bins & convert to single section */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -349,15 +488,25 @@ H5HF_flist_free(H5HF_freelist_t *flist)
     /* Check arguments. */
     HDassert(flist);
 
-    /* Clear out lists of nodes */
-    for(u = 0; u < flist->nbins; u++)
-        if(flist->bins[u]) {
-            H5SL_destroy(flist->bins[u], H5HF_flist_node_free_cb, (void *)flist->node_free_op);
-            flist->bins[u] = NULL;
-        } /* end if */
+    /* Check for single section to free */
+    if(flist->sec_count == 1) {
+        HDassert(flist->single.node != NULL);
+        flist->node_free_op(flist->single.node, flist->single.addr_key, NULL);
+        flist->single.node = NULL;
+    } /* end if */
+    HDassert(flist->single.node == NULL);
 
     /* Release bins for skip lists */
-    H5FL_SEQ_FREE(H5SL_ptr_t, flist->bins);
+    if(flist->bins) {
+        /* Clear out lists of nodes */
+        for(u = 0; u < flist->nbins; u++)
+            if(flist->bins[u]) {
+                H5SL_destroy(flist->bins[u], H5HF_flist_node_free_cb, (void *)flist->node_free_op);
+                flist->bins[u] = NULL;
+            } /* end if */
+
+        H5FL_SEQ_FREE(H5SL_ptr_t, flist->bins);
+    } /* end if */
 
     /* Free fractal heap free list info */
     H5FL_FREE(H5HF_freelist_t, flist);

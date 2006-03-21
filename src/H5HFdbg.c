@@ -133,7 +133,7 @@ H5HF_dtable_debug(H5HF_dtable_t *dtable, FILE *stream, int indent, int fwidth)
     /* Computed values */
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Max. # of rows in root indirect block:",
-	      dtable->max_root_indirect_rows);
+	      dtable->max_root_rows);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Max. # of direct rows in any indirect block:",
 	      dtable->max_direct_rows);
@@ -476,35 +476,28 @@ H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
 	      "Size of indirect block:",
 	      iblock->size);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Total # of rows:",
+	      "Current # of rows:",
 	      iblock->nrows);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "# of direct rows:",
-	      iblock->ndir_rows);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "# of indirect rows:",
-	      iblock->nindir_rows);
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-	      "Direct blocks full:",
-	      (iblock->dir_full ? "TRUE" : "FALSE"));
+	      "Max. # of rows:",
+	      iblock->max_rows);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Max direct block rows:",
-	      iblock->max_direct_rows);
+	      shared->man_dtable.max_direct_rows);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Next direct block column:",
-	      iblock->next_dir_col);
+	      "Next block column:",
+	      iblock->next_col);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Next direct block row:",
-	      iblock->next_dir_row);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Next direct block size:",
-	      iblock->next_dir_size);
+	      "Next block row:",
+	      iblock->next_row);
+    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+	      "Next block size:",
+	      iblock->next_size);
 
     /* Print the entry tables */
-    dblock_size = shared->man_dtable.cparam.start_block_size;
     HDfprintf(stream, "%*sDirect Block Entries (address, free space):\n", indent, "");
-    for(u = 0; u < iblock->ndir_rows; u++) {
-        sprintf(temp_str, "Row #%u: (block size: %lu)", (unsigned)u, (unsigned long)dblock_size);
+    for(u = 0; u < shared->man_dtable.max_direct_rows && u < iblock->nrows; u++) {
+        sprintf(temp_str, "Row #%u: (block size: %lu)", (unsigned)u, (unsigned long)shared->man_dtable.row_block_size[u]);
         HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
                 temp_str);
         for(v = 0; v < shared->man_dtable.cparam.width; v++) {
@@ -513,14 +506,14 @@ H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
             sprintf(temp_str, "Col #%u:", (unsigned)v);
             HDfprintf(stream, "%*s%-*s %8a, %8Zu\n", indent + 6, "", MAX(0, fwidth - 6),
                     temp_str,
-                    iblock->dblock_ents[off].addr,
-                    iblock->dblock_ents[off].free_space);
+                    iblock->ents[off].addr,
+                    iblock->ents[off].free_space);
         } /* end for */
         dblock_size *= 2;
     } /* end for */
     HDfprintf(stream, "%*sIndirect Block Entries:\n", indent, "");
-    if(iblock->nindir_rows > 0) {
-        for(u = 0; u < iblock->nindir_rows; u++) {
+    if(iblock->nrows > shared->man_dtable.max_direct_rows) {
+        for(u = shared->man_dtable.max_direct_rows; u < iblock->nrows; u++) {
             sprintf(temp_str, "Row #%u:", (unsigned)u);
             HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
                     temp_str);
@@ -528,9 +521,10 @@ H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
                 size_t off = (u * shared->man_dtable.cparam.width) + v;
 
                 sprintf(temp_str, "Col #%u:", (unsigned)v);
-                HDfprintf(stream, "%*s%-*s %8a\n", indent + 6, "", MAX(0, fwidth - 6),
+                HDfprintf(stream, "%*s%-*s %8a, %8Zu\n", indent + 6, "", MAX(0, fwidth - 6),
                         temp_str,
-                        iblock->iblock_ents[off].addr);
+                        iblock->ents[off].addr,
+                        iblock->ents[off].free_space);
             } /* end for */
         } /* end for */
     } /* end if */

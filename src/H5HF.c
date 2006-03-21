@@ -99,6 +99,7 @@ herr_t
 H5HF_create(H5F_t *f, hid_t dxpl_id, H5HF_create_t *cparam, haddr_t *addr_p)
 {
     H5HF_t *fh = NULL;                  /* The new fractal heap header information */
+    H5HF_shared_t *shared = NULL;       /* Shared fractal heap information */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5HF_create, FAIL)
@@ -119,12 +120,16 @@ H5HF_create(H5F_t *f, hid_t dxpl_id, H5HF_create_t *cparam, haddr_t *addr_p)
     /* Reset the metadata cache info for the heap header */
     HDmemset(&fh->cache_info, 0, sizeof(H5AC_info_t));
 
+    /* Allocate & basic initialization for the shared info struct */
+    if(NULL == (shared = H5HF_shared_alloc(f)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate space for shared heap info")
+
     /* Allocate space for the header on disk */
-    if(HADDR_UNDEF == (*addr_p = H5MF_alloc(f, H5FD_MEM_FHEAP_HDR, dxpl_id, (hsize_t)H5HF_HEADER_SIZE(f))))
+    if(HADDR_UNDEF == (*addr_p = H5MF_alloc(f, H5FD_MEM_FHEAP_HDR, dxpl_id, (hsize_t)H5HF_HEADER_SIZE(shared))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap header")
 
     /* Initialize shared fractal heap info */
-    if(H5HF_shared_create(f, fh, *addr_p, cparam) < 0)
+    if(H5HF_shared_init(shared, fh, *addr_p, cparam) < 0)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create shared fractal heap info")
 
     /* Cache the new fractal heap header */

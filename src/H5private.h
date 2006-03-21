@@ -1192,12 +1192,23 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 #endif /* H5_INTERFACE_INIT_FUNC */
 
 
+#ifndef NDEBUG
 #define FUNC_ENTER_COMMON_NOFUNC(func_name,asrt)                              \
-   /* Check API status */               				      \
-   assert(asrt);				                              \
+    static hbool_t func_check = FALSE;          			      \
 									      \
-   /* Check function name */               				      \
-   H5_CHECK_FUNCNAME(func_name);
+    if(!func_check) {			   				      \
+        /* Check API status */               				      \
+        HDassert(asrt);				                              \
+									      \
+        /* Check function name */               			      \
+        H5_CHECK_FUNCNAME(func_name);					      \
+									      \
+        /* Don't check again */                 			      \
+        func_check = TRUE;						      \
+    } /* end if */
+#else /* NDEBUG */
+#define FUNC_ENTER_COMMON_NOFUNC(func_name,asrt)
+#endif /* NDEBUG */
 
 #define FUNC_ENTER_COMMON(func_name,asrt)                                     \
     static const char FUNC[]=#func_name;                                      \

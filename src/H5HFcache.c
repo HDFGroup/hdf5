@@ -283,7 +283,7 @@ H5HF_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *ud
     shared->heap_addr = addr;
 
     /* Compute the size of the fractal heap header on disk */
-    size = H5HF_HEADER_SIZE(f);
+    size = H5HF_HEADER_SIZE(shared);
 
     /* Allocate temporary buffer */
     if((buf = H5FL_BLK_MALLOC(header_block, size)) == NULL)
@@ -399,7 +399,7 @@ H5HF_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5H
         HDassert(shared->dirty);
 
         /* Compute the size of the heap header on disk */
-        size = H5HF_HEADER_SIZE(f);
+        size = H5HF_HEADER_SIZE(shared);
 
         /* Allocate temporary buffer */
         if((buf = H5FL_BLK_MALLOC(header_block, size)) == NULL)
@@ -554,16 +554,23 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_cache_hdr_size(const H5F_t *f, const H5HF_t UNUSED *fh, size_t *size_ptr)
+H5HF_cache_hdr_size(const H5F_t *f, const H5HF_t *fh, size_t *size_ptr)
 {
+    H5HF_shared_t *shared;              /* Shared fractal heap information */
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_cache_hdr_size)
 
     /* check arguments */
     HDassert(f);
+    HDassert(fh);
     HDassert(size_ptr);
 
+    /* Get the pointer to the shared heap info */
+    shared = H5RC_GET_OBJ(fh->shared);
+    HDassert(shared);
+
     /* Set size value */
-    *size_ptr = H5HF_HEADER_SIZE(f);
+    *size_ptr = H5HF_HEADER_SIZE(shared);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF_cache_hdr_size() */
@@ -994,14 +1001,10 @@ H5HF_cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrows
 
     /* Set block's internal information */
     iblock->nrows = *nrows;
-    if(iblock->nrows > shared->man_dtable.max_direct_rows) {
-        iblock->ndir_rows = shared->man_dtable.max_direct_rows;
-        iblock->nindir_rows = iblock->nrows - iblock->ndir_rows;
-    } /* end if */
-    else {
-        iblock->ndir_rows = iblock->nrows;
-        iblock->nindir_rows = 0;
-    } /* end else */
+    if(!iblock->parent)
+        iblock->max_rows = shared->man_dtable.max_root_rows;
+    else
+        iblock->max_rows = *nrows;
 
     /* Compute size of indirect block */
     iblock->size = H5HF_MAN_INDIRECT_SIZE(shared, iblock);
@@ -1037,7 +1040,7 @@ H5HF_cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrows
     if(metadata_chksum != 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "incorrect metadata checksum for fractal heap direct block")
 
-    /* Address of heap that owns this block (skip) */
+    /* Address of heap that owns this block */
     H5F_addr_decode(f, &p, &heap_addr);
     if(H5F_addr_ne(heap_addr, shared->heap_addr))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "incorrect heap header address for direct block")
@@ -1045,47 +1048,28 @@ H5HF_cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrows
     /* Offset of heap within the heap's address space */
     UINT64DECODE_VAR(p, iblock->block_off, shared->heap_off_size);
 
+    /* Offset of next entry to allocate within this block */
+    UINT32DECODE(p, iblock->next_entry);
+
+    /* Compute next block column, row & size */
+    iblock->next_col = iblock->next_entry % shared->man_dtable.cparam.width;
+    iblock->next_row = iblock->next_entry / shared->man_dtable.cparam.width;
+    iblock->next_size = shared->man_dtable.row_block_size[iblock->next_row];
+
     /* Allocate & decode indirect block entry tables */
-    HDassert(iblock->ndir_rows > 0);
-    if(NULL == (iblock->dblock_ents = H5FL_SEQ_MALLOC(H5HF_indirect_dblock_ent_t, (iblock->ndir_rows * shared->man_dtable.cparam.width))))
+    HDassert(iblock->nrows > 0);
+    if(NULL == (iblock->ents = H5FL_SEQ_MALLOC(H5HF_indirect_ent_t, (iblock->nrows * shared->man_dtable.cparam.width))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for direct entries")
-    iblock->dir_full = TRUE;
-    for(u = 0; u < (iblock->ndir_rows * shared->man_dtable.cparam.width); u++) {
-        H5F_addr_decode(f, &p, &(iblock->dblock_ents[u].addr));
-        UINT32DECODE_VAR(p, iblock->dblock_ents[u].free_space, shared->man_dtable.max_dir_blk_off_size);
+    for(u = 0; u < (iblock->nrows * shared->man_dtable.cparam.width); u++) {
+        /* Decode block address */
+        H5F_addr_decode(f, &p, &(iblock->ents[u].addr));
 
-        /* Check for direct block being undefined and use that for the next one to allocate from this indirect block */
-        if(iblock->dir_full) {
-            if(!H5F_addr_defined(iblock->dblock_ents[u].addr)) {
-                iblock->next_dir_col = u % shared->man_dtable.cparam.width;
-                iblock->next_dir_row = u / shared->man_dtable.cparam.width;
-                iblock->next_dir_entry = u;
-                if(iblock->next_dir_row == 0)
-                    iblock->next_dir_size = shared->man_dtable.cparam.start_block_size;
-                else
-                    iblock->next_dir_size = shared->man_dtable.cparam.start_block_size * (1 << (iblock->next_dir_row - 1));
-                if(iblock->block_off == 0)
-                    iblock->max_direct_rows = shared->man_dtable.max_direct_rows;
-                else
-                    HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, NULL, "computing max direct rows for non-root indirect block not supported yet")
-
-                /* Set the flag to indicate the direct blocks aren't full */
-                iblock->dir_full = FALSE;
-            } /* end if */
-        } /* end if */
+        /* Decode direct & indirect blocks differently */
+        if(u < (shared->man_dtable.max_direct_rows * shared->man_dtable.cparam.width))
+            UINT32DECODE_VAR(p, iblock->ents[u].free_space, shared->man_dtable.max_dir_blk_off_size)
+        else
+            UINT64DECODE_VAR(p, iblock->ents[u].free_space, shared->heap_off_size)
     } /* end for */
-    if(iblock->nindir_rows > 0) {
-        if(NULL == (iblock->iblock_ents = H5FL_SEQ_MALLOC(H5HF_indirect_iblock_ent_t, (iblock->nindir_rows * shared->man_dtable.cparam.width))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for indirect entries")
-
-        /* Decode indirect block-specific fields */
-        for(u = 0; u < (iblock->nindir_rows * shared->man_dtable.cparam.width); u++) {
-            H5F_addr_decode(f, &p, &(iblock->iblock_ents[u].addr));
-            UINT64DECODE_VAR(p, iblock->iblock_ents[u].free_space, shared->heap_off_size);
-        } /* end for */
-    } /* end if */
-    else
-        iblock->iblock_ents = NULL;
 
     /* Sanity check */
     HDassert((size_t)(p - buf) == iblock->size);
@@ -1150,8 +1134,6 @@ HDfprintf(stderr, "%s: Flushing indirect block\n", FUNC);
 /* XXX: Use free list factories? */
 #ifdef QAK
 HDfprintf(stderr, "%s: iblock->nrows = %u\n", FUNC, iblock->nrows);
-HDfprintf(stderr, "%s: iblock->ndir_rows = %u\n", FUNC, iblock->ndir_rows);
-HDfprintf(stderr, "%s: iblock->nindir_rows = %u\n", FUNC, iblock->nindir_rows);
 HDfprintf(stderr, "%s: iblock->size = %Zu\n", FUNC, iblock->size);
 HDfprintf(stderr, "%s: iblock->block_off = %Hu\n", FUNC, iblock->block_off);
 HDfprintf(stderr, "%s: shared->man_dtable.cparam.width = %u\n", FUNC, shared->man_dtable.cparam.width);
@@ -1182,21 +1164,21 @@ HDfprintf(stderr, "%s: shared->man_dtable.cparam.width = %u\n", FUNC, shared->ma
 
         /* Offset of block in heap */
         UINT64ENCODE_VAR(p, iblock->block_off, shared->heap_off_size);
-/* XXX: Fix this when we start writing recursive indirect blocks */
-if(iblock->block_off != 0)
-    HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "fix computing max direct rows for non-root indirect block for loading")
+
+        /* Next block entry to allocate from */
+        UINT32ENCODE(p, iblock->next_entry);
 
         /* Encode indirect block-specific fields */
-        HDassert(iblock->ndir_rows > 0);
-        for(u = 0; u < (iblock->ndir_rows * shared->man_dtable.cparam.width); u++) {
-            H5F_addr_encode(f, &p, iblock->dblock_ents[u].addr);
-            UINT32ENCODE_VAR(p, iblock->dblock_ents[u].free_space, shared->man_dtable.max_dir_blk_off_size);
+        for(u = 0; u < (iblock->nrows * shared->man_dtable.cparam.width); u++) {
+            /* Encode block address */
+            H5F_addr_encode(f, &p, iblock->ents[u].addr);
+
+            /* Encode direct & indirect blocks differently */
+            if(u < (shared->man_dtable.max_direct_rows * shared->man_dtable.cparam.width))
+                UINT32ENCODE_VAR(p, iblock->ents[u].free_space, shared->man_dtable.max_dir_blk_off_size)
+            else
+                UINT64ENCODE_VAR(p, iblock->ents[u].free_space, shared->heap_off_size)
         } /* end for */
-        if(iblock->nindir_rows > 0)
-            for(u = 0; u < (iblock->nindir_rows * shared->man_dtable.cparam.width); u++) {
-                H5F_addr_encode(f, &p, iblock->iblock_ents[u].addr);
-                UINT64ENCODE_VAR(p, iblock->iblock_ents[u].free_space, shared->heap_off_size);
-            } /* end for */
 
         /* Sanity check */
         HDassert((size_t)(p - buf) == iblock->size);
