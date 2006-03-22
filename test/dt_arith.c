@@ -4833,6 +4833,7 @@ run_fp_tests(const char *name)
     nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_DOUBLE);
 #endif
 
+#ifndef H5_VMS
     /*Test denormalized values.  TEST_DENORM indicates denormalized values.*/
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE);
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_DOUBLE, H5T_NATIVE_FLOAT);
@@ -4852,6 +4853,7 @@ run_fp_tests(const char *name)
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT);
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_DOUBLE);
 #endif
+#endif /*H5_VMS*/
 
 done:
     return nerrors;
