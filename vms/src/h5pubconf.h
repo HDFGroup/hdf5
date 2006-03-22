@@ -503,15 +503,22 @@
 
 /* Define if your system can accurately convert from integers to long double
    values. */
-#define H5_SW_INTEGER_TO_LDOUBLE_WORKS 1
+#define H5_INTEGER_TO_LDOUBLE_ACCURATE 1
+
+/* Define if your system can convert long double to integers accurately. */
+#define H5_LDOUBLE_TO_INTEGER_ACCURATE 1
 
 /* Define if your system can accurately convert from long double to integer
    values. */
-#define H5_SW_LDOUBLE_TO_INTEGER_WORKS 1
+#define H5_LDOUBLE_TO_INTEGER_WORKS 1
+
+/* Define if your system can convert long double to unsigned int values
+   correctly. */
+#define H5_LDOUBLE_TO_UINT_ACCURATE 1
 
 /* Define if your system can accurately convert unsigned (long) long values to
    floating-point values. */
-#define H5_SW_ULONG_TO_FP_BOTTOM_BIT_WORKS 1
+#define H5_ULONG_TO_FP_BOTTOM_BIT_WORKS 1
 
 /* Define if your system supports pthread_attr_setscope(&attribute,
    PTHREAD_SCOPE_SYSTEM) call. */
@@ -529,7 +536,7 @@
 
 /* Define if your system can convert unsigned long long to long double with
    correct precision. */
-#define H5_ULLONG_TO_LDOUBLE_PRECISION_WORKS 1
+#define H5_ULLONG_TO_LDOUBLE_PRECISION 1
 
 /* Version number of package */
 #define H5_VERSION "1.7.51"
@@ -562,5 +569,7 @@
 
 /* Define to `long' if <sys/types.h> does not define. */
 /* #undef H5_ssize_t */
-# define H5_HAVE_FILE_VERSIONS 1
-# define H5_CANNOT_OPEN_TWICE  1
+#define H5_HAVE_FILE_VERSIONS 1
+#define H5_CANNOT_OPEN_TWICE  1
+#define H5_WANT_DATA_ACCURACY 1
+#define H5_WANT_DCONV_EXCEPTION 1
