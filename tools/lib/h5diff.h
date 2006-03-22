@@ -18,12 +18,6 @@
 #include "hdf5.h"
 #include "h5trav.h"
 
-
-#if 0
-#define H5DIFF_DEBUG
-#endif
-
-
 /*-------------------------------------------------------------------------
  * command line options
  *-------------------------------------------------------------------------
@@ -166,14 +160,6 @@ const char* get_class(H5T_class_t tclass);
 const char* get_sign(H5T_sign_t sign);
 void        print_dims( int r, hsize_t *d );
 int         print_objname(diff_opt_t *options, hsize_t nfound);
-
-
-#if defined (H5DIFF_DEBUG)
-void print_sizes( const char *obj1, const char *obj2,
- hid_t f_type1, hid_t f_type2,
- hid_t m_type1, hid_t m_type2 );
-#endif
-
 
 hsize_t diff_native_uchar(unsigned char *mem1,
                           unsigned char *mem2,

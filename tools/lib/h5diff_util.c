@@ -18,10 +18,10 @@
 
 /* global variables */
 int      g_nTasks = 1;
-unsigned char	 g_Parallel = 0;  /*0 for serial, 1 for parallel */
-char    outBuff[OUTBUFF_SIZE];
-int     outBuffOffset;
-FILE*	overflow_file	      = NULL;
+unsigned char  g_Parallel = 0;  /*0 for serial, 1 for parallel */
+char     outBuff[OUTBUFF_SIZE];
+int      outBuffOffset;
+FILE*    overflow_file = NULL;
 
 /*-------------------------------------------------------------------------
  * Function: parallel_print
@@ -36,57 +36,57 @@ FILE*	overflow_file	      = NULL;
  */
 void parallel_print(const char* format, ...)
 {
-    int 	bytes_written;
-    va_list	ap;
-
-    va_start(ap, format);
-
-    if(!g_Parallel)
-	vprintf(format, ap);
-    else
-    {
-
-	if(overflow_file == NULL) /*no overflow has occurred yet */
-	{
+ int  bytes_written;
+ va_list ap;
+ 
+ va_start(ap, format);
+ 
+ if(!g_Parallel)
+  vprintf(format, ap);
+ else
+ {
+  
+  if(overflow_file == NULL) /*no overflow has occurred yet */
+  {
 #if 0
-printf("calling HDvsnprintf: OUTBUFF_SIZE=%ld, outBuffOffset=%ld, ", (long)OUTBUFF_SIZE, (long)outBuffOffset);
+   printf("calling HDvsnprintf: OUTBUFF_SIZE=%ld, outBuffOffset=%ld, ", (long)OUTBUFF_SIZE, (long)outBuffOffset);
 #endif
-	    bytes_written = HDvsnprintf(outBuff+outBuffOffset, OUTBUFF_SIZE-outBuffOffset, format, ap);
+   bytes_written = HDvsnprintf(outBuff+outBuffOffset, OUTBUFF_SIZE-outBuffOffset, format, ap);
 #if 0
-printf("bytes_written=%ld\n", (long)bytes_written);
+   printf("bytes_written=%ld\n", (long)bytes_written);
 #endif
-            va_end(ap);
-	    va_start(ap, format);
-
+   va_end(ap);
+   va_start(ap, format);
+   
 #if 0
-printf("Result: bytes_written=%ld, OUTBUFF_SIZE-outBuffOffset=%ld\n", (long)bytes_written, (long)OUTBUFF_SIZE-outBuffOffset);
+   printf("Result: bytes_written=%ld, OUTBUFF_SIZE-outBuffOffset=%ld\n", (long)bytes_written, (long)OUTBUFF_SIZE-outBuffOffset);
 #endif
-
-	    if ((bytes_written < 0) ||
+   
+   if ((bytes_written < 0) ||
 #ifdef H5_VSNPRINTF_WORKS
-		(bytes_written >= (OUTBUFF_SIZE-outBuffOffset))
+    (bytes_written >= (OUTBUFF_SIZE-outBuffOffset))
 #else
-		((bytes_written+1) == (OUTBUFF_SIZE-outBuffOffset))
+    ((bytes_written+1) == (OUTBUFF_SIZE-outBuffOffset))
 #endif
-		)
-	    {
-		/* Terminate the outbuff at the end of the previous output */
-		outBuff[outBuffOffset] = '\0';
-
-		overflow_file = HDtmpfile();
-		if(overflow_file == NULL)
-		    fprintf(stderr, "Warning: Could not create overflow file.  Output may be truncated.\n");
-		else
-		    bytes_written = HDvfprintf(overflow_file, format, ap);
-	    }
-	    else
-		outBuffOffset += bytes_written;
-	}
-	else
-	    bytes_written = HDvfprintf(overflow_file, format, ap);
-
-    }
-    va_end(ap);
+    )
+   {
+    /* Terminate the outbuff at the end of the previous output */
+    outBuff[outBuffOffset] = '\0';
+    
+    overflow_file = HDtmpfile();
+    if(overflow_file == NULL)
+     fprintf(stderr, "Warning: Could not create overflow file.  Output may be truncated.\n");
+    else
+     bytes_written = HDvfprintf(overflow_file, format, ap);
+   }
+   else
+    outBuffOffset += bytes_written;
+  }
+  else
+   bytes_written = HDvfprintf(overflow_file, format, ap);
+  
+ }
+ va_end(ap);
 }
 
 
@@ -213,8 +213,6 @@ void print_type(hid_t type)
 
  }/*switch*/
 }
-
-
 
 /*-------------------------------------------------------------------------
  * Function: diff_basename
@@ -356,62 +354,11 @@ get_class(H5T_class_t tclass)
  */
 void print_found(hsize_t nfound)
 {
-    if(g_Parallel)
-	parallel_print("%"H5_PRINTF_LL_WIDTH"u differences found\n", (unsigned long_long)nfound);
-    else
-	HDfprintf(stdout,"%Hu differences found\n",nfound);
+ if(g_Parallel)
+  parallel_print("%"H5_PRINTF_LL_WIDTH"u differences found\n", (unsigned long_long)nfound);
+ else
+  HDfprintf(stdout,"%Hu differences found\n",nfound);
 }
 
-
-/*-------------------------------------------------------------------------
- * Function: print_sizes
- *
- * Purpose: Print datatype sizes
- *
- *-------------------------------------------------------------------------
- */
-#if defined (H5DIFF_DEBUG)
-void print_sizes( const char *obj1, const char *obj2,
-                  hid_t f_type1, hid_t f_type2,
-                  hid_t m_type1, hid_t m_type2 )
-{
- size_t  f_size1, f_size2;       /* size of type in file */
- size_t  m_size1, m_size2;       /* size of type in memory */
-
- f_size1 = H5Tget_size( f_type1 );
- f_size2 = H5Tget_size( f_type2 );
- m_size1 = H5Tget_size( m_type1 );
- m_size2 = H5Tget_size( m_type2 );
-
- printf("\n");
- printf("------------------\n");
- printf("sizeof(char)   %u\n", sizeof(char) );
- printf("sizeof(short)  %u\n", sizeof(short) );
- printf("sizeof(int)    %u\n", sizeof(int) );
- printf("sizeof(long)   %u\n", sizeof(long) );
- printf("<%s> ------------------\n", obj1);
- printf("type on file   ");
- print_type(f_type1);
- printf("\n");
- printf("size on file   %u\n", f_size1 );
-
- printf("type on memory ");
- print_type(m_type1);
- printf("\n");
- printf("size on memory %u\n", m_size1 );
-
- printf("<%s> ------------------\n", obj2);
- printf("type on file   ");
- print_type(f_type2);
- printf("\n");
- printf("size on file   %u\n", f_size2 );
-
- printf("type on memory ");
- print_type(m_type2);
- printf("\n");
- printf("size on memory %u\n", m_size2 );
- printf("\n");
-}
-#endif /* H5DIFF_DEBUG */
 
 

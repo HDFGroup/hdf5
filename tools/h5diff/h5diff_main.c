@@ -39,41 +39,41 @@
  *   Quiet mode: do not print output
  *
  * November 2004: Leon Arber (larber@uiuc.edu)
- * 		  Additions that allow h5diff to be run in parallel
+ *     Additions that allow h5diff to be run in parallel
  *
  * February 2005: Leon Arber (larber@uiuc.edu)
- * 		h5diff and ph5diff split into two files, one that is used
- * 		to build a serial h5diff and one used to build a parallel h5diff
- * 		Common functions have been moved to h5diff_common.c
+ *   h5diff and ph5diff split into two files, one that is used
+ *   to build a serial h5diff and one used to build a parallel h5diff
+ *   Common functions have been moved to h5diff_common.c
  *-------------------------------------------------------------------------
  */
 
 
 int main(int argc, const char *argv[])
 {
-    int        ret;
-    const char *fname1 = NULL;
-    const char *fname2 = NULL;
-    const char *objname1  = NULL;
-    const char *objname2  = NULL;
-    hsize_t    nfound=0;
-    diff_opt_t options;
-
-    parse_input(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
-
-    nfound = h5diff(fname1,fname2,objname1,objname2,&options);
-
-    print_results(&options);
-
-    /*-------------------------------------------------------------------------
-     * exit code
-     *   >0 if differences, 0 if no differences, <0 if error
-     *-------------------------------------------------------------------------
-     */
-
-    ret= (nfound==0 ? 0 : 1 );
-    if (options.err_stat)
-	ret=-1;
-    return ret;
+ int        ret;
+ const char *fname1 = NULL;
+ const char *fname2 = NULL;
+ const char *objname1  = NULL;
+ const char *objname2  = NULL;
+ hsize_t    nfound=0;
+ diff_opt_t options;
+ 
+ parse_input(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
+ 
+ nfound = h5diff(fname1,fname2,objname1,objname2,&options);
+ 
+ print_results(&options);
+ 
+/*-------------------------------------------------------------------------
+ * exit code
+ *   >0 if differences, 0 if no differences, <0 if error
+ *-------------------------------------------------------------------------
+ */
+ 
+ ret= (nfound==0 ? 0 : 1 );
+ if (options.err_stat)
+  ret=-1;
+ return ret;
 }
 

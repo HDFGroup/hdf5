@@ -276,6 +276,10 @@ TOOLTEST h5diff_17.txt file1.h5 file2.h5 -v
 # 1.8 quiet mode 
 TOOLTEST h5diff_18.txt file1.h5 file2.h5 -q
 
+# 1.9 with -p (int)
+TOOLTEST h5diff_191.txt file1.h5 file1.h5 -v -p 0.02 g1/dset5 g1/dset6
+
+
 # ##############################################################################
 # # not comparable types
 # ##############################################################################

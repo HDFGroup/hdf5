@@ -17,6 +17,60 @@
 #include "H5private.h"
 #include "h5tools.h"
 
+
+/*-------------------------------------------------------------------------
+ * Function: print_sizes
+ *
+ * Purpose: Print datatype sizes
+ *
+ *-------------------------------------------------------------------------
+ */
+#if defined (H5DIFF_DEBUG)
+void print_sizes( const char *obj1, const char *obj2,
+                  hid_t f_type1, hid_t f_type2,
+                  hid_t m_type1, hid_t m_type2 )
+{
+ size_t  f_size1, f_size2;       /* size of type in file */
+ size_t  m_size1, m_size2;       /* size of type in memory */
+
+ f_size1 = H5Tget_size( f_type1 );
+ f_size2 = H5Tget_size( f_type2 );
+ m_size1 = H5Tget_size( m_type1 );
+ m_size2 = H5Tget_size( m_type2 );
+
+ printf("\n");
+ printf("------------------\n");
+ printf("sizeof(char)   %u\n", sizeof(char) );
+ printf("sizeof(short)  %u\n", sizeof(short) );
+ printf("sizeof(int)    %u\n", sizeof(int) );
+ printf("sizeof(long)   %u\n", sizeof(long) );
+ printf("<%s> ------------------\n", obj1);
+ printf("type on file   ");
+ print_type(f_type1);
+ printf("\n");
+ printf("size on file   %u\n", f_size1 );
+
+ printf("type on memory ");
+ print_type(m_type1);
+ printf("\n");
+ printf("size on memory %u\n", m_size1 );
+
+ printf("<%s> ------------------\n", obj2);
+ printf("type on file   ");
+ print_type(f_type2);
+ printf("\n");
+ printf("size on file   %u\n", f_size2 );
+
+ printf("type on memory ");
+ print_type(m_type2);
+ printf("\n");
+ printf("size on memory %u\n", m_size2 );
+ printf("\n");
+}
+#endif /* H5DIFF_DEBUG */
+
+
+
 /*-------------------------------------------------------------------------
  * Function: diff_dataset
  *
@@ -112,11 +166,7 @@ error:
  } H5E_END_TRY;
 
  return nfound;
-
 }
-
-
-
 
 /*-------------------------------------------------------------------------
  * Function: diff_datasetid
