@@ -1070,8 +1070,8 @@ Optional Features:
                           specify a comma-separated list of package names
                           without the leading H5 or the word no. The default
                           is most packages.
-  --enable-funcstack      Enable the function stack tracing. Default=no if
-                          debug is disabled.
+  --enable-funcstack      Enable the function stack tracing (for developer
+                          debugging).
   --enable-trace          Enable API tracing capability. Default=no if debug
                           is disabled.
   --enable-instrument     Enable library instrumentation of optimization
@@ -47806,16 +47806,9 @@ if test "${enable_funcstack+set}" = set; then
   FUNCSTACK=$enableval
 fi;
 
-if test "X-$FUNCSTACK" = X- ; then
-  if test -z "$DEBUG_PKG" ; then
-    FUNCSTACK=no
-  else
-    FUNCSTACK=yes
-  fi
-fi
 case "X-$FUNCSTACK" in
-  X-|X-yes)
-      FUNCSTACK="yes"
+  X-yes)
+      FUNCSTACK=yes
       echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
 
@@ -47825,6 +47818,7 @@ _ACEOF
 
     ;;
   *)
+      FUNCSTACK=no
       echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
     ;;

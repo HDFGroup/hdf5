@@ -1822,26 +1822,18 @@ dnl
 AC_MSG_CHECKING([whether function stack tracking is enabled])
 AC_ARG_ENABLE([funcstack],
               [AC_HELP_STRING([--enable-funcstack],
-                              [Enable the function stack tracing.
-                               Default=no if debug is disabled.])],
+                              [Enable the function stack tracing (for developer debugging).])],
               [FUNCSTACK=$enableval])
 
-dnl Default to no if debug is disabled
-if test "X-$FUNCSTACK" = X- ; then
-  if test -z "$DEBUG_PKG" ; then
-    FUNCSTACK=no
-  else
-    FUNCSTACK=yes
-  fi
-fi
 case "X-$FUNCSTACK" in
-  X-|X-yes)
-      FUNCSTACK="yes"
+  X-yes)
+      FUNCSTACK=yes
       AC_MSG_RESULT([yes])
       AC_DEFINE([HAVE_FUNCSTACK], [1],
                 [Define if the function stack tracing code is to be compiled in])
     ;;
   *)
+      FUNCSTACK=no
       AC_MSG_RESULT([no])
     ;;
 esac
