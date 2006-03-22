@@ -3625,13 +3625,13 @@ test_misc22(void)
     hid_t fdts[2]={H5T_NATIVE_FLOAT32,
               H5T_NATIVE_FLOAT64}
 */
-    int prec[4] = {3,11,19,27};
+    size_t prec[4] = {3,11,19,27};
     int offsets[5] = {0,3,11,19,27};
     int i,j,k;
     unsigned int flags;
     size_t cd_nelmts=32;
     unsigned int cd_values[32];
-    int correct;
+    unsigned correct;
 
     if (h5_szip_can_encode() != 1) return;
     idts[0]=H5Tcopy(H5T_NATIVE_UINT8);
@@ -3661,7 +3661,7 @@ test_misc22(void)
                 if (offsets[k] > (H5Tget_size(idts[i])*8)) continue; /* skip irrelevant combinations */
                 if ((prec[j]+offsets[k]) > (H5Tget_size(idts[i])*8)) continue;
 
-                MESSAGE(5, ("  Testing datatypes size=%d precision=%d offset=%d\n",H5Tget_size(idts[i]),prec[j],offsets[k]));
+                MESSAGE(5, ("  Testing datatypes size=%d precision=%u offset=%d\n",H5Tget_size(idts[i]),(unsigned)prec[j],offsets[k]));
 
                 /* Create the DCPL */
                 dcpl = H5Pcreate (H5P_DATASET_CREATE);

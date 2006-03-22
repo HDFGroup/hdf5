@@ -13,6 +13,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdlib.h>
+#include <string.h>
 #include "h5repack.h"
 
 static void usage(void);

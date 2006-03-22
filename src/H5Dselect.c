@@ -432,7 +432,7 @@ herr_t
 H5D_select_read(H5D_io_info_t *io_info,
     size_t nelmts, size_t elmt_size,
     const H5S_t *file_space, const H5S_t *mem_space,
-		const haddr_t UNUSED addr,
+    haddr_t UNUSED addr,
     void *buf/*out*/)
 {
     H5S_sel_iter_t mem_iter;    /* Memory selection iteration info */
@@ -576,7 +576,7 @@ herr_t
 H5D_select_write(H5D_io_info_t *io_info,
     size_t nelmts, size_t elmt_size,
     const H5S_t *file_space, const H5S_t *mem_space,
-		 const haddr_t UNUSED addr,
+    haddr_t UNUSED addr,
     const void *buf/*out*/)
 {
     H5S_sel_iter_t mem_iter;    /* Memory selection iteration info */

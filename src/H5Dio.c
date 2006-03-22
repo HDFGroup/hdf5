@@ -2191,8 +2191,8 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
     for(u=0; u<fm->f_ndims; u++) 
        fm->total_chunks= fm->total_chunks*fm->chunks[u];
     if(IS_H5FD_MPI(dataset->oloc.file)) { 
-
-       if(NULL == (fm->select_chunk = (hbool_t *) H5MM_calloc(fm->total_chunks*sizeof(hbool_t))))
+        H5_CHECK_OVERFLOW(fm->total_chunks, hsize_t, size_t);
+        if(NULL == (fm->select_chunk = (hbool_t *) H5MM_calloc((size_t)fm->total_chunks * sizeof(hbool_t))))
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate chunk info")
     }
  

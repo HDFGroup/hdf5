@@ -904,9 +904,8 @@ H5D_istore_iter_chunkmap (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_lt
     H5D_istore_it_ud5_t	*udata = (H5D_istore_it_ud5_t *)_udata;
     const H5D_istore_key_t	*lt_key = (const H5D_istore_key_t *)_lt_key;
     unsigned       rank;
-    hsize_t        chunk_offset[H5O_LAYOUT_NDIMS];     /*logical location of the chunks */
     hsize_t        chunk_index;
-    int                           ret_value = H5B_ITER_CONT;     /* Return value */
+    int            ret_value = H5B_ITER_CONT;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_istore_iter_chunkmap);
     
@@ -915,19 +914,11 @@ H5D_istore_iter_chunkmap (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_lt
     if(H5V_chunk_index(rank,lt_key->offset,udata->common.mesg->u.chunk.dim,udata->down_chunks,&chunk_index)<0)
        HGOTO_ERROR (H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
     
-#if 0
-	 HDfprintf(stdout,"chunk index is %Hu\n",chunk_index);
-#endif
     udata->chunk_addr[chunk_index] = addr;
-#if 0
-    HDfprintf(stdout,"chunk address is %Hu\n",addr);
-#endif
- done:
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_istore_iter_allocated() */
-
-
 
 
 /*-------------------------------------------------------------------------
@@ -2463,30 +2454,24 @@ herr_t
 H5D_istore_chunkmap(const H5D_io_info_t *io_info, hsize_t total_chunks,haddr_t chunk_addr[],hsize_t down_chunks[])
 {
     H5D_t *dset=io_info->dset;       /* Local pointer to dataset info */
+#if 0
     const H5D_rdcc_t   *rdcc = &(dset->shared->cache.chunk);	/*raw data chunk cache */
     H5D_rdcc_ent_t     *ent;    /*cache entry  */
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache=&_dxpl_cache;   /* Data transfer property cache */
+#endif
     H5D_istore_it_ud5_t	udata;
-
-    hsize_t                 curr_dims[H5O_LAYOUT_NDIMS];	/*current dataspace dimensions */
-    hsize_t                 chunks[H5O_LAYOUT_NDIMS];	        /*current number of chunks in each dimension */
-
-    int                     srank;	                        /*current # of dimensions (signed) */
-    unsigned                rank;	                        /*current # of dimensions */
-    unsigned                u;
-
     hid_t  dxpl_id = io_info->dxpl_id;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_istore_chunkmap, 0)
+    FUNC_ENTER_NOAPI(H5D_istore_chunkmap, FAIL)
 
     HDassert(dset);
 
 #if 0
     /* Fill the DXPL cache values for later use */
     if (H5D_get_dxpl_cache(dxpl_id,&dxpl_cache)<0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't fill dxpl cache")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
     /* Construct dataset I/O info */
     H5D_BUILD_IO_INFO(&io_info,dset,dxpl_cache,dxpl_id,NULL);
@@ -2495,7 +2480,7 @@ H5D_istore_chunkmap(const H5D_io_info_t *io_info, hsize_t total_chunks,haddr_t c
     for(ent = rdcc->head; ent; ent = ent->next) {
         /* Flush the chunk out to disk, to make certain the size is correct later */
         if (H5D_istore_flush_entry(&io_info, ent, FALSE)<0)
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, 0, "cannot flush indexed storage buffer")
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot flush indexed storage buffer")
     } /* end for */
 #endif
 
@@ -2503,11 +2488,10 @@ H5D_istore_chunkmap(const H5D_io_info_t *io_info, hsize_t total_chunks,haddr_t c
     udata.common.mesg = &dset->shared->layout;
     udata.down_chunks = down_chunks;
     udata.chunk_addr  = chunk_addr;
-    			 
-    if (H5B_iterate(dset->oloc.file, dxpl_id, H5B_ISTORE, H5D_istore_iter_chunkmap, dset->shared->layout.u.chunk.addr, &udata)<0)
-        HGOTO_ERROR(H5E_IO, H5E_CANTINIT, 0, "unable to iterate over chunk B-tree")
 
-	    
+    if (H5B_iterate(dset->oloc.file, dxpl_id, H5B_ISTORE, H5D_istore_iter_chunkmap, dset->shared->layout.u.chunk.addr, &udata)<0)
+        HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to iterate over chunk B-tree")
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_istore_chunkmap() */

@@ -14,6 +14,7 @@
 
 
 #include <stdlib.h>
+#include <string.h>
 #include "h5repack.h"
 
 

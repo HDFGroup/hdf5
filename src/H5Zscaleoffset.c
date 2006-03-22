@@ -991,11 +991,11 @@ H5Z_filter_scaleoffset (unsigned flags, size_t cd_nelmts, const unsigned cd_valu
     if(scale_type==H5Z_SO_FLOAT_DSCALE) { /* floating-point type, variable-minimum-bits */
         D_val = (double)scale_factor;
     } else { /* integer type, or floating-point type with fixed-minimum-bits method */
-        if(scale_factor>cd_values[H5Z_SCALEOFFSET_PARM_SIZE]*8)
+        if(scale_factor > (int)(cd_values[H5Z_SCALEOFFSET_PARM_SIZE] * 8))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "minimum number of bits exceeds maximum")
 
         /* no need to process data */
-        if(scale_factor==cd_values[H5Z_SCALEOFFSET_PARM_SIZE]*8) {
+        if(scale_factor == (int)(cd_values[H5Z_SCALEOFFSET_PARM_SIZE] * 8)) {
             ret_value = *buf_size;
             goto done;
         }

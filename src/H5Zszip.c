@@ -141,7 +141,7 @@ H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     hsize_t dims[H5O_LAYOUT_NDIMS];             /* Dataspace (i.e. chunk) dimensions */
     int ndims;                  /* Number of (chunk) dimensions */
     H5T_order_t dtype_order;    /* Datatype's endianness order */
-    int dtype_size;             /* Datatype's size (in bits) */
+    size_t dtype_size;          /* Datatype's size (in bits) */
     size_t dtype_precision;     /* Datatype's precision (in bits) */
     size_t dtype_offset;        /* Datatype's offset (in bits) */
     hsize_t scanline;           /* Size of dataspace's fastest changing dimension */

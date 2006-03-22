@@ -347,16 +347,16 @@ H5V_log2_gen(hsize_t n)
     unsigned r = 0;                     /* r will be log2(n) */
     register unsigned int t, tt, ttt;   /* temporaries */
 
-    if((ttt = n >> 32))
-        if((tt = n >> 48))
-            r = (t = n >> 56) ? 56 + LogTable256[t] : 48 + LogTable256[tt & 0xFF];
+    if((ttt = (unsigned)(n >> 32)))
+        if((tt = (unsigned)(n >> 48)))
+            r = (t = (unsigned)(n >> 56)) ? 56 + LogTable256[t] : 48 + LogTable256[tt & 0xFF];
         else 
-            r = (t = n >> 40) ? 40 + LogTable256[t] : 32 + LogTable256[ttt & 0xFF];
+            r = (t = (unsigned)(n >> 40)) ? 40 + LogTable256[t] : 32 + LogTable256[ttt & 0xFF];
     else
-        if((tt = n >> 16))
-            r = (t = n >> 24) ? 24 + LogTable256[t] : 16 + LogTable256[tt & 0xFF];
+        if((tt = (unsigned)(n >> 16)))
+            r = (t = (unsigned)(n >> 24)) ? 24 + LogTable256[t] : 16 + LogTable256[tt & 0xFF];
         else 
-            r = (t = n >> 8) ? 8 + LogTable256[t] : LogTable256[n];
+            r = (t = (unsigned)(n >> 8)) ? 8 + LogTable256[t] : LogTable256[n];
 
     return(r);
 } /* H5V_log2_gen() */

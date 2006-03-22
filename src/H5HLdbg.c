@@ -54,8 +54,7 @@ herr_t
 H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int fwidth)
 {
     H5HL_t		*h = NULL;
-    int			i, j, overlap, free_block;
-    uint8_t		c;
+    int			i, overlap, free_block;
     H5HL_free_t		*freelist = NULL;
     uint8_t		*marker = NULL;
     size_t		amount_free = 0;

@@ -249,13 +249,11 @@ H5_DLL size_t H5D_select_mgath (const void *_buf,
 H5_DLL herr_t H5D_select_read(H5D_io_info_t *io_info,
     size_t nelmts, size_t elmt_size,
     const H5S_t *file_space, const H5S_t *mem_space,
-			      haddr_t addr,
-    void *buf/*out*/);
+    haddr_t addr, void *buf/*out*/);
 H5_DLL herr_t H5D_select_write(H5D_io_info_t *io_info,
     size_t nelmts, size_t elmt_size,
     const H5S_t *file_space, const H5S_t *mem_space,
-			       haddr_t addr,
-    const void *buf/*out*/);
+    haddr_t addr, const void *buf/*out*/);
 
 /* Functions that operate on contiguous storage */
 H5_DLL herr_t H5D_contig_create(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout);
