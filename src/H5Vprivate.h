@@ -19,7 +19,9 @@
 #ifndef H5Vprivate_H
 #define H5Vprivate_H
 
-#include "H5private.h"
+/* Private headers needed by this file */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
 
 /* Vector comparison functions like Fortran66 comparison operators */
 #define H5V_vector_eq_s(N,V1,V2) (H5V_vector_cmp_s (N, V1, V2)==0)
