@@ -3150,3 +3150,39 @@ void HDsrand(unsigned int seed)
 }
 
 #endif
+/*-------------------------------------------------------------------------
+ * Function:	HDremove_all
+ *
+ * Purpose:	Wrapper function for remove on VMS systems
+ *
+ * 		This function deletes all versions of a file
+ *
+ * Return:	Success:        0;
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Elena Pourmal
+ *              March 22, 2006
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+#ifdef H5_VMS
+
+
+int HDremove_all(char *fname)
+{
+   int ret_value = -1;
+   char *_fname;
+   _fname = malloc(strlen(fname)+3); /* to accomodate ;* and null */
+   if(_fname) {
+      strcpy(_fname, fname);
+      strcat(_fname,";*");
+      remove(_fname);
+      free(_fname);
+      ret_value = 0;
+   }
+   return ret_value;
+}
+#endif
+
