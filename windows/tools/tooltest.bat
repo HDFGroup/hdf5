@@ -26,42 +26,99 @@
      set flagmax=65     
 
 :: Decide which tool will be test
+:: Define an environment variable to decide which test should run
+
+:: Find string "dll" inside %exefile% and remove it
      set test_exefile=%exefile:dll=%
+
      if %test_exefile%==h5repack goto REPACK
      if %test_exefile%==h5diff goto COMMON
      if %test_exefile%==h5dump goto DUMP
      if %test_exefile%==h5ls goto COMMON
      if %test_exefile%==h5import goto IMPORT
 
+:: This block is for Repack test 
 :REPACK
      ::---------------------------------- 
      ::Test for h5repack or h5repackdll
      ::----------------------------------
+
+     :: Get the input parameters 
+		 :: Example case for h5repack
+		 :: if %1 is ..\..\testfiles\test1.h5
+     :: This line will set variable %testinput% equal to ..\..\testfiles\test1.h5
+
      set testinput=%1
-     set testoutput=..\..\temptest\out.%testinput:~16%
+      
+     :: %testinput:~16% will get all of the chars of %testinput% except the first 16 chars
+     :: Example case: %testinput:~16% will give you test1.h5
+     :: The whole line will set varialbe %testoutput% equal to ..\..\temptest\out.test1.h5
+
+		 set testoutput=..\..\temptest\out.%testinput:~16%
+
+ 		 ::Set exp_file equal to the second parameter
+		 :: Example case: %exp_file% will be equal to %nodiff%
      set exp_file=%2
+
+		 :: Set a variable to be the path to the real output 
      set actual_output=..\..\temptest\temp.txt
 
      :: Extract the string for printing results
-     :: Handle flags with .txt inside
+     :: Variable flagout is for printing purpose only
+     :: These lines will get rid of the paths inside %flag% and set it to %flagout%
+     :: Example case:
+     :: %flag% was set inside repacktest.bat to 
+     :: "-i ..\..\testfiles\test1.h5  -o ..\..\temptest\out.test1.h5"
+     :: The following two lines will set %flagout% equal to
+     :: "-i test1.h5  -o ..\..\temptest\out.test1.h5"
+
      set flagout=%flag:..\..\testfiles\t=t%
      set flagout=%flagout:..\..\temptest\t=t%
+
+     :: "." will be used as a delimiter in the for loop for printing output
+     :: But "." inside ".txt" and".." will not be treated as a delimiter. So replace it
+     :: with a "#" and recover it before printing results.
+
      set flagout=%flagout:.txt=#txt%
      set flagout=%flagout:..=##%
  
+     :: This for loop uses "." as a delimiter and gets the first and the fourth tokens 
+     :: and assign it to var1 and var4 
+		 ::Example case: 
+     :: %flagout% now is "-i test1.h5  -o ##\##\temptest\out.test1.h5"
+     :: This for loop will set %var1% as "-i test1" and %var4% as "h5"
+     
      for /f "tokens=1,4 delims=." %%a in ("%flagout%") do (
   	 set var1=%%a
      set var4=%%b
      )
+
+     ::Add in extension for input file 
+     ::Example case: %var1% is "-i test1" in previous step
+     :: This step will set %var1% as %var1% as "-i test1.h5"
      set var1=%var1%.h5
+
+     ::Check for output file name
+     ::Example case: %var4% is ".h5" in previous step
+     ::This step will set it to nothing
      set var4=%var4:~2%
+
+     ::Check if %var4% is blank, we will print the "flagout" with the "var1" only
      if "%var4%"=="" (
      set flagout=%var1%
      goto CHOICE
      )
+
+     ::If %var4% is not blank, for example in the "file test" we have flags like
+     ::set flag=-i %test4% -o %output4% -e ..\..\testfiles\h5repack_info.txt
+     ::In this case, we want to print the %var4% out 
+     ::Recover "." 
      set var4=%var4:#=.%
      set flagout=%var1% %var4%
           
+     ::Based on the third parameter, we will go to different part.
+     :: GTEST means general test, no need to check zlib and szlib
+     
      :CHOICE
      if "%3"=="" goto GTEST
      if "%3"=="SKIP" goto SKIP
@@ -94,12 +151,23 @@
      )
      goto SKIP 
 
+     ::Run the .exe file with the specified flag and generate %testoutput%
+     ::Compare the expected and the actual output and save the comparison
+     ::results into .\..\temptest\temp.txt(%actual_output%)
+     ::Example case: 
+     ::Expected output(%testinput%) is "..\..\testfiles\test1.h5"
+     ::Actual output(%testoutput%) is "..\..\temptest\out.test1.h5"
+     ::Save the comparion results into .\..\temptest\temp.txt
+			
      :GTEST
      %exefile% %flag%
      ..\..\h5diff%p2%\%p1%\h5diff%p2% %testinput% %testoutput% > %actual_output% 2>&1
      goto RESULTS
      
- 
+:: End of Repack tests
+
+
+::H5diff and H5ls Tests 
 :COMMON
     :: ------------------------------------------------------
     :: Test for Tools which only need to run .exe and compare

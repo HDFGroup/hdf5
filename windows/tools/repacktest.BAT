@@ -21,6 +21,19 @@
 :: Written By: Fang GUO
 :: Date      : Jan. 12, 2006
 
+::What is actually doing?
+::Example case
+::h5repack -i ..\..\testfiles\test1.h5  -o ..\..\temptest\out.test1.h5
+::h5diff ..\..\testfiles\test1.h5 ..\..\temptest\out.test1.h5 > ..\..\temptest\temp.txt 2>&1
+::fc ..\..\temptest\temp.txt temptest\notcomp.txt 
+::if %ERRORLEVEL%==0 (
+::   echo Testing h5repack test1.h5                                              PASSED >> ..\..\repacktest%2_%1.txt
+::) else (
+::   echo Testing h5repack test1.h5                                              FAILED >> ..\..\repacktest%2_%1.txt
+::   more temp.txt >> ..\..\repacktest%2_%1.txt
+::)
+
+
 
     :: We will check whether the SZIP library available includes encoder or not by 
 		:: calling the szip encoder detecting executable file testh5repack_detect_szip(dll).exe
@@ -103,6 +116,7 @@ echo.
 echo.****************************************************
 echo.       h5repack%2 %1   T E S T S            
 echo.****************************************************
+
 ::Basic Usage:
 ::1. Set flag
 ::2. Call batch file tooltest.bat followed with the expected file name
@@ -110,9 +124,9 @@ echo.****************************************************
 ::If we want to test 
 ::h5repack -i ..\..\testfiles\test1.h5  -o ..\..\temptest\out.test1.h5
 ::At first, we need to set the flag like
-::set flag=-i %test0% -o %output1%
+::set flag=-i %test1% -o %output1%
 ::Secondly, we call batch file tooltest.bat followed by one of reference files
-::call %tooltest% %test0% %nodiff%
+::call %tooltest% %test1% %notcomp%
 
 :: Using Filters (Zlib, SZIP)
 ::1. Set flag
@@ -120,10 +134,13 @@ echo.****************************************************
 ::3. Example
 ::If we want to test 
 ::h5repack -i ..\..\testfiles\test4.h5  -o ..\..\temptest\out.test4.h5 f dset2:SZIP=8,EC  -l dset2:CHUNK=20x10
+
 ::At first, we need to set the flag like
 ::set flag=-i %test4% -o %output4% f dset2:SZIP=8,EC  -l dset2:CHUNK=20x10
+
 ::Secondly, we call batch file tooltest.bat followed by one of reference files and szip
 ::call %tooltest% %test4% %nodiff% szip
+
 ::Similarly, if you are using zlib, replace "szip" with "zlib" when calling %tooltest%
 ::If you are using both zlib and szip, replace "szip" with "zlib szip" when calling %tooltest%
 ::The order of "zlib szip" does matter.
@@ -139,11 +156,20 @@ echo.****************************************************
 set flag=-i %test0% -o %output0%
 call %tooltest% %test0% %nodiff% 
 
+
+::This case will be used as an example case for 
+::illustration purpose inside tooltest.bat for repacktest
 ::--------------
 :: test1.h5
 ::--------------
+
+:: Actually we are doing:
+:: set flag=-i ..\..\testfiles\test1.h5  -o ..\..\temptest\out.test1.h5
+:: call ..\..\tooltest ..\..\testfiles\test1.h5 ..\..\temptest\notcomp.txt
+
 set flag=-i %test1% -o %output1%
 call %tooltest% %test1% %notcomp% 
+
 
 ::--------------
 :: test2.h5
