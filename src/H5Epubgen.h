@@ -243,6 +243,7 @@ H5_DLLVAR hid_t H5E_NOIDS_g;         /* Out of IDs for group */
 #define H5E_CANTRENAME       (H5OPEN H5E_CANTRENAME_g)
 #define H5E_CANTPROTECT      (H5OPEN H5E_CANTPROTECT_g)
 #define H5E_CANTUNPROTECT    (H5OPEN H5E_CANTUNPROTECT_g)
+#define H5E_CANTDIRTY        (H5OPEN H5E_CANTDIRTY_g)
 H5_DLLVAR hid_t H5E_CANTFLUSH_g;     /* Unable to flush data from cache */
 H5_DLLVAR hid_t H5E_CANTSERIALIZE_g; /* Unable to serialize data from cache */
 H5_DLLVAR hid_t H5E_CANTLOAD_g;      /* Unable to load metadata into cache */
@@ -253,6 +254,7 @@ H5_DLLVAR hid_t H5E_CANTINS_g;       /* Unable to insert metadata into cache */
 H5_DLLVAR hid_t H5E_CANTRENAME_g;    /* Unable to rename metadata */
 H5_DLLVAR hid_t H5E_CANTPROTECT_g;   /* Unable to protect metadata */
 H5_DLLVAR hid_t H5E_CANTUNPROTECT_g; /* Unable to unprotect metadata */
+H5_DLLVAR hid_t H5E_CANTDIRTY_g;     /* Unable to mark metadata as dirty */
 
 /* Parallel MPI errors */
 #define H5E_MPI              (H5OPEN H5E_MPI_g)

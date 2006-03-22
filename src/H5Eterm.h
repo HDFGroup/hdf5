@@ -150,7 +150,8 @@ H5E_SYSTEM_g=
 H5E_CANTINS_g=    
 H5E_CANTRENAME_g=    
 H5E_CANTPROTECT_g=    
-H5E_CANTUNPROTECT_g=
+H5E_CANTUNPROTECT_g=    
+H5E_CANTDIRTY_g=
 
 /* Parallel MPI errors */    
 H5E_MPI_g=    

@@ -551,6 +551,11 @@ if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to unprotect metadata"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_CANTUNPROTECT_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_CANTDIRTY_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to mark metadata as dirty"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_CANTDIRTY_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
 /* Parallel MPI errors */
 assert(H5E_MPI_g==(-1));
