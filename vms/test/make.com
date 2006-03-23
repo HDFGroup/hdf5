@@ -39,7 +39,7 @@ $ link     testhdf5,tarray,tattr,tconfig, -
            tvlstr, -
            libh5test.olb/lib,[-.src]hdf5.olb/lib
 
-$!goto ENDTEST
+$
 $
 $ type sys$input
        Creating lheap test
@@ -290,13 +290,8 @@ $ run  cache
 $ type sys$input
  
 $ type sys$input
--------			Running blocktrack    	-------
-$ run  blocktrack
-$ type sys$input
- 
-$ type sys$input
--------			Running sheap    	-------
-$ run  sheap
+-------			Running cache_api   	-------
+$ run  cache_api
 $ type sys$input
  
 $ type sys$input
@@ -316,7 +311,7 @@ $ type sys$input
  
 $ type sys$input
 -------			Running bittest    	-------
-$ run  bittest
+$ run  bittests
 $ type sys$input
  
 $ type sys$input
@@ -433,7 +428,6 @@ $ type sys$input
 -------			Running reserved     	-------
 $ run  reserved
 $ type sys$input
-$!ENDTEST:
 $EXIT 
 
 
