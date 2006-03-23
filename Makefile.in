@@ -785,12 +785,6 @@ uninstall-info: uninstall-info-recursive
 	uninstall-local
 
 
-# check-install is a synonym for installcheck.
-# Add this build rule here (rather than in conclude.am, where build rules
-# normally go) because it should be included in the top-level Makefile.am
-# as well.
-check-install: installcheck
-
 # List all build rules defined by HDF5 Makefiles as "PHONY" targets here.
 # This tells the Makefiles that these targets are not files to be built but
 # commands that should be executed even if a file with the same name already
@@ -866,6 +860,9 @@ uninstall-doc:
 #  be successfully built
 installcheck-local:
 	@(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
+
+# check-install is just a synonym for installcheck
+check-install: installcheck
 
 # Only source files in the src directory include tracing information,
 # so 'make trace' only needs to recurse into that directory.

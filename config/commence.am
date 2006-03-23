@@ -96,12 +96,6 @@ AUTOCONF=/afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf
 # *.clog are from the MPE option.
 CHECK_CLEANFILES=*.chkexe *.chklog *.clog
 
-# check-install is a synonym for installcheck.
-# Add this build rule here (rather than in conclude.am, where build rules
-# normally go) because it should be included in the top-level Makefile.am
-# as well.
-check-install: installcheck
-
 # List all build rules defined by HDF5 Makefiles as "PHONY" targets here.
 # This tells the Makefiles that these targets are not files to be built but
 # commands that should be executed even if a file with the same name already

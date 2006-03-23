@@ -662,12 +662,6 @@ uninstall-am: uninstall-info-am
 	pdf-am ps ps-am tags uninstall uninstall-am uninstall-info-am
 
 
-# check-install is a synonym for installcheck.
-# Add this build rule here (rather than in conclude.am, where build rules
-# normally go) because it should be included in the top-level Makefile.am
-# as well.
-check-install: installcheck
-
 # List all build rules defined by HDF5 Makefiles as "PHONY" targets here.
 # This tells the Makefiles that these targets are not files to be built but
 # commands that should be executed even if a file with the same name already
@@ -723,7 +717,7 @@ build-check-clean:
 mostlyclean-local: build-check-clean
 
 # check-install is just a synonym for installcheck
-	@$(MAKE) $(AM_MAKEFLAGS) installcheck
+check-install: installcheck
 
 # Run each test in order, passing $(TEST_FLAGS) to the program.
 # Since tests are done in a shell loop, "make -i" does apply inside it.

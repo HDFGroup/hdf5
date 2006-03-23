@@ -146,6 +146,9 @@ uninstall-doc:
 installcheck-local:
 	@(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
 
+# check-install is just a synonym for installcheck
+check-install: installcheck
+
 # Only source files in the src directory include tracing information,
 # so 'make trace' only needs to recurse into that directory.
 trace:

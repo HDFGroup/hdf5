@@ -73,7 +73,7 @@ build-check-clean:
 mostlyclean-local: build-check-clean
 
 # check-install is just a synonym for installcheck
-	@$(MAKE) $(AM_MAKEFLAGS) installcheck
+check-install: installcheck
 
 # Run each test in order, passing $(TEST_FLAGS) to the program.
 # Since tests are done in a shell loop, "make -i" does apply inside it.
