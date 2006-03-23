@@ -434,6 +434,7 @@ ccslab_set(int mpi_rank,
 	   hsize_t block[], 
 	   int mode)
 {
+
     switch (mode){
 
     case BYROW_CONT:
@@ -475,7 +476,36 @@ ccslab_set(int mpi_rank,
 	start[1]  =  0;
 
 	break;
-    
+
+    case BYROW_SELECTUNBALANCE:
+      /* The first one-third of the number of processes only
+         select top half of the domain, The rest will select the bottom
+         half of the domain. */   
+
+        block[0]  = 1;
+	count[0]  = 2;
+        stride[0] = SPACE_DIM1*mpi_size/4+1;
+        block[1]  = SPACE_DIM2;
+        count[1]  = 1;
+        start[1]  = 0;
+        stride[1] = 1;
+	if((mpi_rank *3)<(mpi_size*2)) start[0]  = mpi_rank;
+	else start[0] = 1 + SPACE_DIM1*mpi_size/2 + (mpi_rank-2*mpi_size/3);            break;
+         
+    case BYROW_SELECTINCHUNK:
+      /* Each process will only select one chunk */
+
+        block[0] = 1;
+        count[0] = 1;
+	start[0] = mpi_rank*SPACE_DIM1;
+        stride[0]= 1;
+	block[1] = SPACE_DIM2;
+	count[1] = 1;
+	stride[1]= 1;
+	start[1] = 0;
+
+        break;
+
     default:
 	/* Unknown mode.  Set it to cover the whole dataset. */
 	block[0]  = SPACE_DIM1*mpi_size;
