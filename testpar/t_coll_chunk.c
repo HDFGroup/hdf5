@@ -54,15 +54,15 @@ static void coll_chunktest(const char* filename,int chunk_factor,int select_fact
  *  Descriptions for the selection: One big singluar selection inside one chunk
  *  Two dimensions, 
  *
- *  dim1       = SPACE_DIM1(5760)
+ *  dim1       = SPACE_DIM1(5760)*mpi_size
  *  dim2       = SPACE_DIM2(3)
  *  chunk_dim1 = dim1
  *  chunk_dim2 = dim2
  *  block      = 1 for all dimensions
  *  stride     = 1 for all dimensions
- *  count0     = SPACE_DIM1/mpi_size(5760/mpi_size)
+ *  count0     = SPACE_DIM1(5760)
  *  count1     = SPACE_DIM2(3)
- *  start0     = mpi_rank*SPACE_DIM1/mpi_size
+ *  start0     = mpi_rank*SPACE_DIM1
  *  start1     = 0
  * ------------------------------------------------------------------------
  */
@@ -101,15 +101,15 @@ coll_chunk1(void)
  *  Descriptions for the selection: many disjoint selections inside one chunk
  *  Two dimensions, 
  *
- *  dim1       = SPACE_DIM1(5760)
+ *  dim1       = SPACE_DIM1*mpi_size(5760)
  *  dim2       = SPACE_DIM2(3)
  *  chunk_dim1 = dim1
  *  chunk_dim2 = dim2
  *  block      = 1 for all dimensions
  *  stride     = 3 for all dimensions
- *  count0     = SPACE_DIM1/mpi_size/stride0(5760/mpi_size/3)
+ *  count0     = SPACE_DIM1/stride0(5760/3)
  *  count1     = SPACE_DIM2/stride(3/3 = 1)
- *  start0     = mpi_rank*SPACE_DIM1/mpi_size
+ *  start0     = mpi_rank*SPACE_DIM1
  *  start1     = 0
  *  
  * ------------------------------------------------------------------------
@@ -148,15 +148,15 @@ coll_chunk2(void)
  *  Descriptions for the selection: one singular selection accross many chunks
  *  Two dimensions, Num of chunks = 2* mpi_size
  *
- *  dim1       = SPACE_DIM1(5760)
+ *  dim1       = SPACE_DIM1*mpi_size
  *  dim2       = SPACE_DIM2(3)
- *  chunk_dim1 = dim1/mpi_size
+ *  chunk_dim1 = SPACE_DIM1
  *  chunk_dim2 = dim2/2
  *  block      = 1 for all dimensions
  *  stride     = 1 for all dimensions
- *  count0     = SPACE_DIM1/mpi_size(5760/mpi_size)
+ *  count0     = SPACE_DIM1
  *  count1     = SPACE_DIM2(3)
- *  start0     = mpi_rank*SPACE_DIM1/mpi_size
+ *  start0     = mpi_rank*SPACE_DIM1
  *  start1     = 0
  *  
  * ------------------------------------------------------------------------
@@ -199,15 +199,15 @@ coll_chunk3(void)
  *  Descriptions for the selection: one singular selection accross many chunks
  *  Two dimensions, Num of chunks = 2* mpi_size
  *
- *  dim1       = SPACE_DIM1(5760)
- *  dim2       = SPACE_DIM2(3)
- *  chunk_dim1 = dim1/mpi_size
- *  chunk_dim2 = dim2/2
+ *  dim1       = SPACE_DIM1*mpi_size
+ *  dim2       = SPACE_DIM2
+ *  chunk_dim1 = dim1
+ *  chunk_dim2 = dim2
  *  block      = 1 for all dimensions
  *  stride     = 1 for all dimensions
- *  count0     = SPACE_DIM1/mpi_size(5760/mpi_size)
+ *  count0     = SPACE_DIM1
  *  count1     = SPACE_DIM2(3)
- *  start0     = mpi_rank*SPACE_DIM1/mpi_size
+ *  start0     = mpi_rank*SPACE_DIM1
  *  start1     = 0
  *  
  * ------------------------------------------------------------------------
@@ -221,7 +221,6 @@ coll_chunk4(void)
   int mpi_size;
 
   MPI_Comm comm = MPI_COMM_WORLD;
-  MPI_Comm_size(comm,&mpi_size);
 
   filename = GetTestParameters();
   coll_chunktest(filename,1,BYROW_SELECTNONE);
@@ -288,12 +287,12 @@ coll_chunktest(const char* filename,
   VRFY((status >= 0),"");
 
   /* setup dimensionality object */
-  dims[0] = SPACE_DIM1;
+  dims[0] = SPACE_DIM1*mpi_size;
   dims[1] = SPACE_DIM2;
 
 
   /* allocate memory for data buffer */
-  data_array1 = (int *)malloc(SPACE_DIM1*SPACE_DIM2*sizeof(int));
+  data_array1 = (int *)malloc(dims[0]*dims[1]*sizeof(int));
   VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
 
   /* set up dimensions of the slab this process accesses */
@@ -306,7 +305,7 @@ coll_chunktest(const char* filename,
   VRFY((crp_plist >= 0),"");
 
   /* Set up chunk information.  */
-  chunk_dims[0] = SPACE_DIM1/chunk_factor;
+  chunk_dims[0] = dims[0]/chunk_factor;
 
   /* to decrease the testing time, maintain bigger chunk size */
  
@@ -359,11 +358,11 @@ coll_chunktest(const char* filename,
   /* Use collective read to verify the correctness of collective write. */
 
   /* allocate memory for data buffer */
-  data_array1 = (int *)malloc(SPACE_DIM1*SPACE_DIM2*sizeof(int));
+  data_array1 = (int *)malloc(dims[0]*dims[1]*sizeof(int));
   VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
 
   /* allocate memory for data buffer */
-  data_origin1 = (int *)malloc(SPACE_DIM1*SPACE_DIM2*sizeof(int));
+  data_origin1 = (int *)malloc(dims[0]*dims[1]*sizeof(int));
   VRFY((data_origin1 != NULL), "data_origin1 malloc succeeded");
 
   acc_plist = create_faccess_plist(comm, info, facc_type, use_gpfs);
@@ -443,7 +442,7 @@ ccslab_set(int mpi_rank,
 	block[1]  =  1;
 	stride[0] =  1;
 	stride[1] =  1;
-	count[0]  =  SPACE_DIM1/mpi_size;
+	count[0]  =  SPACE_DIM1;
 	count[1]  =  SPACE_DIM2;
 	start[0]  =  mpi_rank*count[0];
 	start[1]  =  0;
@@ -456,9 +455,9 @@ ccslab_set(int mpi_rank,
 	block[1]  =  1;
         stride[0] =  3;
         stride[1] =  3;
-        count[0]  =  (SPACE_DIM1/mpi_size)/(stride[0]*block[0]);
+        count[0]  =  SPACE_DIM1/(stride[0]*block[0]);
         count[1]  =  (SPACE_DIM2)/(stride[1]*block[1]);
-	start[0]  =  SPACE_DIM1/mpi_size*mpi_rank;
+	start[0]  =  SPACE_DIM1*mpi_rank;
 	start[1]  =  0;
 
 	break;
@@ -470,7 +469,7 @@ ccslab_set(int mpi_rank,
 	block[1]  =  1;
 	stride[0] =  1;
 	stride[1] =  1;
-	count[0]  =  ((mpi_rank >= MAX(1,(mpi_size-2)))?0:SPACE_DIM1/mpi_size);
+	count[0]  =  ((mpi_rank >= MAX(1,(mpi_size-2)))?0:SPACE_DIM1);
 	count[1]  =  SPACE_DIM2;
 	start[0]  =  mpi_rank*count[0];
 	start[1]  =  0;
@@ -479,7 +478,7 @@ ccslab_set(int mpi_rank,
     
     default:
 	/* Unknown mode.  Set it to cover the whole dataset. */
-	block[0]  = SPACE_DIM1;
+	block[0]  = SPACE_DIM1*mpi_size;
 	block[1]  = SPACE_DIM2;
 	stride[0] = block[0];
 	stride[1] = block[1];

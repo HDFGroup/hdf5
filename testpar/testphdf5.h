@@ -51,7 +51,7 @@
 #define FACC_MPIPOSIX   0x8     /* MPIPOSIX */
 
 /*Constants for collective chunk definitions */
-#define SPACE_DIM1 5760
+#define SPACE_DIM1 24
 #define SPACE_DIM2 3
 #define BYROW_CONT 1
 #define BYROW_DISCONT 2
