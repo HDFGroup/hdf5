@@ -236,6 +236,10 @@
 	home of the shared library must be specified with this switch
 	before the library and executables are built.
 
+	HDF5 can be installed into a different location than the prefix
+	specified at configure time; see the section on Installing HDF5
+	for more details.
+
 5.3.2. Using an alternate C compiler
 	By default, configure will look for the C compiler by trying
 	`gcc' and `cc'. However, if the environment variable "CC" is set
@@ -255,8 +259,8 @@
 	    $ CC=/usr/local/mpi/bin/mpicc ./configure
 
 5.3.3. Configuring for 64-bit support
-        Several machine architectures support 32-bit or 64-bit binaries.
-        The options below describe how to enable support for different options.
+	Several machine architectures support 32-bit or 64-bit binaries.
+	The options below describe how to enable support for different options.
 
 	On Irix64 the default compiler is `cc'. To use an alternate
 	compiler specify it with the CC variable:
@@ -305,7 +309,7 @@
 	platforms the main HDF5 library supports. Also, the Fortran
 	interface supports parallel HDF5 while the C++ interface does
 	not.
-          
+
         Note:  On Cray T3Es the following files should be modified before
                building the Fortran Library:
                  fortran/src/H5Dff.f90
@@ -385,7 +389,7 @@
 	with some versions of HDF4. Also, unless you have the "correct"
 	version of hdf4 the confidence testing will fail in the tools
 	directory.
-        
+
 	HDF5 has Szip predefined compression method (see 4.2).  To enable
 	Szip compression, HDF5 library has to be configured and build using 
 	Szip Library
@@ -463,10 +467,10 @@
 5.3.12. Threadsafe capability
 	The HDF5 library can be configured to be thread-safe (on a very
 	large scale) with the with the `--enable-threadsafe' flag to
-        the configure script.  Some platforms may also require the 
-        '-with-pthread=INC,LIB' (or '--with-pthread=DIR') flag to the configure
-        script as well.  Read the file doc/TechNotes/ThreadSafeLibrary.html
-        for further details.
+	the configure script.  Some platforms may also require the 
+	'-with-pthread=INC,LIB' (or '--with-pthread=DIR') flag to the configure
+	script as well.  Read the file doc/TechNotes/ThreadSafeLibrary.html
+	for further details.
 
 5.3.13. Backward compatibility
 	The 1.8 version of the HDF5 library can be configured to operate
@@ -482,7 +486,7 @@
 	compiles the "stream" Virtual File Driver into the main library.
 	See the documentation on the Virtual File Layer for more details
 	about the use of this driver.  The network stream capability is
-        enabled by default.
+	enabled by default.
 
 5.4. Building
 	The library, confidence tests, and programs can be build by
@@ -535,14 +539,19 @@
 	If you want to install HDF5 in a location other than the location
 	specified by the `--prefix=DIR' flag during configuration (or
 	instead of the default location, `/usr/local'), you can do that
-	by issuing the command:
+	by running the deploy script:
+
+            $ bin/deploy NEW_DIR
+
+	This will install hdf5 in NEW_DIR.  Alternately, you can do this
+	manually by issuing the command:
 
 	    $ make install prefix=NEW_DIR
 
 	where NEW_DIR is the new directory you wish to install HDF5. If
-	you do this, you should run h5redeploy in NEW_DIR/bin directory.
-        This utility will fix h5cc, h5fc and h5c++ scripts to reflect new
-        NEW_DIR location.
+	you do not use the deploy script, you should run h5redeploy in
+	NEW_DIR/bin directory.  This utility will fix h5cc, h5fc and
+	h5c++ scripts to reflect the new NEW_DIR location.
 
 	The library can be used without installing it by pointing the
 	compiler at the `src' and 'src/.libs' directory for include files and
