@@ -26,11 +26,16 @@ DIST_SUBDIRS=src test examples
 install-examples uninstall-examples:
 	@(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
 
-# Check that examples can be successfully built
-check-install:
-	@$(MAKE) $(AM_MAKEFLAGS) installcheck
-
 installcheck-local:
 	@(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
+
+# Clean examples when check-clean is invoked
+check-clean ::
+	@$(MAKE) $(AM_MAKEFLAGS) build-$@ || exit 1;
+	@for d in X $(SUBDIRS) examples; do                                   \
+	    if test $$d != X && test $$d != .; then                           \
+	        (set -x; cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;     \
+	    fi;                                                               \
+	done
 
 include $(top_srcdir)/config/conclude.am

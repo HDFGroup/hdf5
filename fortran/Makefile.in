@@ -669,12 +669,17 @@ check-install: installcheck
 install-examples uninstall-examples:
 	@(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
 
-# Check that examples can be successfully built 
-check-install:
-	@$(MAKE) $(AM_MAKEFLAGS) installcheck 
-
 installcheck-local:
 	@(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
+
+# Clean examples when check-clean is invoked
+check-clean ::
+	@$(MAKE) $(AM_MAKEFLAGS) build-$@ || exit 1;
+	@for d in X $(SUBDIRS) examples; do                                   \
+	    if test $$d != X && test $$d != .; then                           \
+	        (set -x; cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;     \
+	    fi;                                                               \
+	done
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
@@ -702,6 +707,7 @@ check-clean ::
 	        (set -x; cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;     \
 	    fi;                                                               \
 	done
+
 # Tell Automake to build tests when the user types `make all' (this is
 # not its default behavior).  Also build EXTRA_LIB and EXTRA_PROG since
 # Automake won't build them automatically, either.
@@ -720,6 +726,9 @@ build-check-clean:
 
 # run check-clean whenever mostlyclean is run
 mostlyclean-local: build-check-clean
+
+# check-install is just a synonym for installcheck
+	@$(MAKE) $(AM_MAKEFLAGS) installcheck
 
 # Run each test in order, passing $(TEST_FLAGS) to the program.
 # Since tests are done in a shell loop, "make -i" does apply inside it.

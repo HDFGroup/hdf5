@@ -84,19 +84,20 @@ test _test: check
 
 lib progs check-p check-s:
 	@@SETX@; for d in $(SUBDIRS); do                                \
-          if test $$d != .; then                                        \
+	  if test $$d != .; then                                        \
 	   (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;            \
-          fi;                                                           \
+	  fi;                                                           \
 	done
 
 # Make all, tests, and (un)install also recurse into perform directory
 all-local:
 	@cd perform && $(MAKE) $(AM_MAKEFLAGS) all
-tests check-clean:
+
+tests:
 	@@SETX@; for d in $(SUBDIRS) perform; do                        \
-          if test $$d != .; then                                        \
+	  if test $$d != .; then                                        \
 	   (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;            \
-          fi;                                                           \
+	  fi;                                                           \
 	done
 
 install-exec-local:
@@ -104,12 +105,20 @@ install-exec-local:
 uninstall-local:
 	@cd perform && $(MAKE) $(AM_MAKEFLAGS) uninstall
 
+# Check-clean also recurses into examples directory
+check-clean:
+	@@SETX@; for d in $(SUBDIRS) examples perform; do               \
+	  if test $$d != .; then                                        \
+	   (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;            \
+	  fi;                                                           \
+	done
+
 # Some C++ compilers/linkers will create a directory named ii_files in
 # the root directory, which should be cleaned.
 mostlyclean-local:
 	if test -d ii_files; then                                       \
-          $(RM) -rf ii_files;                                           \
-        fi
+	  $(RM) -rf ii_files;                                           \
+	fi
 
 # 'make install-all' also installs examples
 install-all:

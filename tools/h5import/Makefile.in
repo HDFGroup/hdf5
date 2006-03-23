@@ -693,6 +693,7 @@ check-clean ::
 	        (set -x; cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;     \
 	    fi;                                                               \
 	done
+
 # Tell Automake to build tests when the user types `make all' (this is
 # not its default behavior).  Also build EXTRA_LIB and EXTRA_PROG since
 # Automake won't build them automatically, either.
@@ -711,6 +712,9 @@ build-check-clean:
 
 # run check-clean whenever mostlyclean is run
 mostlyclean-local: build-check-clean
+
+# check-install is just a synonym for installcheck
+	@$(MAKE) $(AM_MAKEFLAGS) installcheck
 
 # Run each test in order, passing $(TEST_FLAGS) to the program.
 # Since tests are done in a shell loop, "make -i" does apply inside it.
