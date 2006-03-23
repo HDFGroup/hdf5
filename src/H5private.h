@@ -806,7 +806,9 @@ int HDremove_all(char * fname);
 #define HDsetpgid(P,PG)		setpgid(P,PG)
 #define HDsetsid()		setsid()
 #define HDsetuid(U)		setuid(U)
+#ifndef WIN32
 #define HDsetvbuf(F,S,M,Z)	setvbuf(F,S,M,Z)
+#endif
 #define HDsigaction(N,A)	sigaction(N,A)
 #define HDsigaddset(S,N)	sigaddset(S,N)
 #define HDsigdelset(S,N)	sigdelset(S,N)
