@@ -39,8 +39,8 @@
 #define UI_FORMAT_P   "%-15u %-15u %-15u %-14f\n"
 #define LI_FORMAT_P   "%-15ld %-15ld %-15ld %-14f\n"
 #define ULI_FORMAT_P  "%-15lu %-15lu %-15lu %-14f\n"
-#define LLI_FORMAT_P  "%-15"H5_PRINTF_LL_WIDTH"d %-15"H5_PRINTF_LL_WIDTH"d %-15"H5_PRINTF_LL_WIDTH"d %-14"H5_PRINTF_LL_WIDTH"f\n"
-#define ULLI_FORMAT_P "%-15"H5_PRINTF_LL_WIDTH"u %-15"H5_PRINTF_LL_WIDTH"u %-15"H5_PRINTF_LL_WIDTH"d %-14"H5_PRINTF_LL_WIDTH"u\n"
+#define LLI_FORMAT_P  "%-15"H5_PRINTF_LL_WIDTH"d %-15"H5_PRINTF_LL_WIDTH"d %-15"H5_PRINTF_LL_WIDTH"d %-14f\n"
+#define ULLI_FORMAT_P "%-15"H5_PRINTF_LL_WIDTH"u %-15"H5_PRINTF_LL_WIDTH"u %-15"H5_PRINTF_LL_WIDTH"d %-14f\n"
 #define SPACES        "          "
 
 
@@ -54,6 +54,8 @@
 static void    close_obj(H5G_obj_t obj_type, hid_t obj_id);
 static int     diff_region(hid_t region1_id, hid_t region2_id);
 static hbool_t is_zero(const void *_mem, size_t size);
+static int     ull2float(unsigned long_long ull_value, float *f_value);
+
 
 /*-------------------------------------------------------------------------
  * Function: print_data
@@ -346,7 +348,7 @@ hsize_t diff_datum(void       *_mem1,
  H5G_stat_t    sb2;
  hsize_t       nfound=0;   /* differences found */
  int           ret=0;      /* check return error */
- float         per;
+ float         f1, f2, per;
  
  type_size = H5Tget_size( m_type );
  
@@ -1416,7 +1418,10 @@ hsize_t diff_datum(void       *_mem1,
    /* !-d and -p */
    else if (!options->d && options->p)
    {
-    if ( temp1_ullong!=0 && labs((long)(1-temp2_ullong/temp1_ullong)) > (long)options->percent )
+    ull2float(temp1_ullong,&f1);
+    ull2float(temp2_ullong,&f2);
+    PER(f1,f2);
+    if ( per > options->percent )  
     {
      
      if ( print_data(options) )
@@ -1425,7 +1430,7 @@ hsize_t diff_datum(void       *_mem1,
       parallel_print(SPACES);
       parallel_print(ULLI_FORMAT_P,temp1_ullong,temp2_ullong, 
        (unsigned long_long)labs((long)(temp1_ullong-temp2_ullong)), 
-       (unsigned long_long)labs((long)(1-temp2_ullong/temp1_ullong)));
+       per);
      }
      nfound++;
     }
@@ -1433,8 +1438,10 @@ hsize_t diff_datum(void       *_mem1,
    /* -d and -p */
    else if ( options->d && options->p)
    {
-    if ( temp1_ullong!=0 && labs((long)(1-temp2_ullong/temp1_ullong)) > (long)options->percent &&
-     labs((long)(temp1_ullong-temp2_ullong)) > (long)options->delta )
+    ull2float(temp1_ullong,&f1);
+    ull2float(temp2_ullong,&f2);
+    PER(f1,f2);
+    if ( per > options->percent && labs((long)(temp1_ullong-temp2_ullong)) > (long)options->delta )
     {
      
      if ( print_data(options) )
@@ -1444,7 +1451,7 @@ hsize_t diff_datum(void       *_mem1,
       parallel_print(SPACES);
       parallel_print(ULLI_FORMAT_P,temp1_ullong,temp2_ullong, 
        (unsigned long_long)labs((long)(temp1_ullong-temp2_ullong)), 
-       (unsigned long_long)labs((long)(1-temp2_ullong/temp1_ullong)));
+       per);
      }
      nfound++;
     }
@@ -3528,6 +3535,7 @@ hsize_t diff_llong(unsigned char *mem1,
 
 
 
+
 /*-------------------------------------------------------------------------
  * Function: diff_ullong
  *
@@ -3553,8 +3561,8 @@ hsize_t diff_ullong(unsigned char *mem1,
  unsigned long_long  temp1_ullong;
  unsigned long_long  temp2_ullong;
  hsize_t             i;
- 
- 
+ float               f1, f2, per;
+  
  /* -d and !-p */
  if (options->d && !options->p)
  {
@@ -3591,8 +3599,11 @@ hsize_t diff_ullong(unsigned char *mem1,
   {
    memcpy(&temp1_ullong, mem1, sizeof(unsigned long_long));
    memcpy(&temp2_ullong, mem2, sizeof(unsigned long_long));
-   
-   if ( temp1_ullong!=0 && labs((long)(1-temp2_ullong/temp1_ullong)) > options->percent )
+
+   ull2float(temp1_ullong,&f1);
+   ull2float(temp2_ullong,&f2);
+   PER(f1,f2);
+   if ( per > options->percent )
    {
     if ( print_data(options) )
     {
@@ -3600,7 +3611,7 @@ hsize_t diff_ullong(unsigned char *mem1,
      parallel_print(SPACES);
      parallel_print(ULLI_FORMAT_P,temp1_ullong,temp2_ullong,
       (unsigned long_long)labs((long)(temp1_ullong-temp2_ullong)),
-      (unsigned long_long)labs((long)(1-temp2_ullong/temp1_ullong)));
+      per);
     }
     nfound++;
    }
@@ -3622,8 +3633,10 @@ hsize_t diff_ullong(unsigned char *mem1,
    memcpy(&temp1_ullong, mem1, sizeof(unsigned long_long));
    memcpy(&temp2_ullong, mem2, sizeof(unsigned long_long));
    
-   if ( temp1_ullong!=0 && labs((long)(1-temp2_ullong/temp1_ullong)) > options->percent &&
-    labs((long)(temp1_ullong-temp2_ullong)) > options->delta )
+   ull2float(temp1_ullong,&f1);
+   ull2float(temp2_ullong,&f2);
+   PER(f1,f2);
+   if ( per > options->percent && labs((long)(temp1_ullong-temp2_ullong)) > options->delta )
    {
     if ( print_data(options) )
     {
@@ -3631,7 +3644,7 @@ hsize_t diff_ullong(unsigned char *mem1,
      parallel_print(SPACES);
      parallel_print(ULLI_FORMAT_P,temp1_ullong,temp2_ullong,
       (unsigned long_long)labs((long)(temp1_ullong-temp2_ullong)),
-      (unsigned long_long)labs((long)(1-temp2_ullong/temp1_ullong)));
+      per);
     }
     nfound++;
    }
@@ -3675,4 +3688,52 @@ hsize_t diff_ullong(unsigned char *mem1,
 
 
 
+/*-------------------------------------------------------------------------
+ * Function:    ull2float
+ *
+ * Purpose:     convert unsigned long_long to float
+ *
+ * Programmer:  pvn
+ *              Mar 22, 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static 
+int ull2float(unsigned long_long ull_value, float *f_value)
+{
+ hid_t          dxpl_id;
+ unsigned char  *buf;
+ size_t         src_size;
+ size_t         dst_size;
+ 
+ if((dxpl_id = H5Pcreate(H5P_DATASET_XFER))<0) 
+  goto error;
+ 
+ src_size = H5Tget_size(H5T_NATIVE_ULLONG);
+ dst_size = H5Tget_size(H5T_NATIVE_FLOAT);
+ buf = (unsigned char*)calloc(1, MAX(src_size, dst_size));
+ 
+ memcpy(buf, &ull_value, src_size);
+ 
+ /* do conversion */
+ if(H5Tconvert(H5T_NATIVE_ULLONG, H5T_NATIVE_FLOAT, 1, buf, NULL, dxpl_id)<0) 
+  goto error;
+ 
+ memcpy(f_value, buf, dst_size);
+  
+ if(buf)
+  free(buf);
 
+ return 0;
+ 
+error:
+ H5E_BEGIN_TRY {
+  H5Pclose(dxpl_id);
+ } H5E_END_TRY;
+ if(buf)
+  free(buf);
+ 
+ return -1;
+}

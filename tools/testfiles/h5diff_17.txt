@@ -11,6 +11,8 @@ file1     file2
            x    /g1/dset4      
     x           /g1/dset5      
     x           /g1/dset6      
+    x           /g1/dset7      
+    x           /g1/dset8      
            x    /g2            
 
 Group:       </g1> and </g1>

@@ -251,6 +251,8 @@ int test_basic(const char *file1, const char *file2)
  double  data4[3][2] = {{110,100},{90,80},{140,200}};
  int     data5[3][2] = {{100,100},{100,100},{100,100}};
  int     data6[3][2] = {{101,102},{103,104},{150,200}};
+ unsigned long_long data7[3][2] = {{100,100},{100,100},{100,100}};
+ unsigned long_long data8[3][2] = {{101,102},{103,104},{150,200}};
 
 /*-------------------------------------------------------------------------
  * Create two files
@@ -271,9 +273,12 @@ int test_basic(const char *file1, const char *file2)
  write_dset(group2_id,2,dims,"dset4",H5T_NATIVE_DOUBLE,data4);
  write_dset(group2_id,2,dims,"dset1",H5T_NATIVE_DOUBLE,data2);
 
- /* integer relative */
+ /* relative (int) */
  write_dset(group1_id,2,dims,"dset5",H5T_NATIVE_INT,data5);
  write_dset(group1_id,2,dims,"dset6",H5T_NATIVE_INT,data6);
+ /* relative (unsigned long_long) */
+ write_dset(group1_id,2,dims,"dset7",H5T_NATIVE_ULLONG,data7);
+ write_dset(group1_id,2,dims,"dset8",H5T_NATIVE_ULLONG,data8);
 
 /*-------------------------------------------------------------------------
  * Close
