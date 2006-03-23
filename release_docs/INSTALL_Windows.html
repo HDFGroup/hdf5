@@ -2618,7 +2618,7 @@ lines. </p>
       <p class="note">Notes:</p>
       <p  class="note">This section is only for users who would like to build and test HDF5 snapshot 
       release.</p>
-      <h3><a name="step1_section8">Step I: Generate H5Tinit.c using Microsoft 
+      <h3><a name="step1_section9">Step I: Generate H5Tinit.c using Microsoft 
         Visual C++ 6.0</a></h3>
 
       <ul class="intable">
@@ -2626,10 +2626,11 @@ lines. </p>
         <p>For users who would like to build and test HDF5 C and C++ library, it 
         is necessary to manually generate H5Tinit.c before going to section II step 
         1(2). Follow the steps below to generate H5Tinit.c manually using Microsoft 
-        Visual C++ 6.0. We don&#39;t guarantee that H5Tinit.c can be sucesessfully created 
+        Visual C++ 6.0. We don&#39;t guarantee that H5Tinit.c can be 
+        successfully created 
         by other compilers. </p>
-        <h4>1. Previous step: <a href="#step1_section2">section 
-        II, step 1(1).</a></h4>
+        <h4>1. <a href="##step1_section2" name="prevstep_section9">Previous step: section 
+        II, step 1(1)</a><a href="#step1_section2">.</a></h4>
         <h4>2. Extra steps:</h4>
         <ul class="intable">
           <li>1) Open c:\myHDFstuff\hdf5\windows\misc\typegen\typegen.dsw. </h4>
@@ -2645,8 +2646,8 @@ lines. </p>
         </ul>
         </li>
         </ul>
-        <h3>Step II: Generate H5f90i_gen.h and H5fortran_types.f90 using Compaq 
-        Fortran 6.6c</h3>
+        <h3><a name="step2_section9">Step II: Generate H5f90i_gen.h and H5fortran_types.f90 using Compaq 
+        Fortran 6.6c</a></h3>
 
         <p class="note">Notes:</p>
         <p class="note">The users who don&#39;t want to build fortran library can skip this step.</p>
@@ -2664,7 +2665,7 @@ lines. </p>
           II, step 1(1)</a></h4>
           <h4>2. Extra Steps:</h4>
         <ul class="intable">
-          <li>1)Follow the steps in <a href="#step1_section8">Step I to generate H5Tinit.c.</a></li>
+          <li>1)Follow the steps in <a href="#step1_section9">Step I to generate H5Tinit.c.</a></li>
           <li>2) Open <span class="filename">H5fortran_detect_gen.dsw</span> under 
           directory <span class="filename">c:\myHDFstuff\hdf5\windows\misc\H5fortran_detect_gen</span> 
           Build the project file.</li>
@@ -3049,7 +3050,7 @@ Use run-time Library</li>
   to use HDF5 Fortran DLL.</p>
   </li>
 </ol>
-  <h3>3. Use hDF5 to obtain debug information from library</h3>
+  <h3><a name="debug_section11">3. Use hDF5 to obtain debug information from library</a></h3>
       <ul class="intable">
       <li><h3>3.1 Define Debug Macro</h3></li>
       <li><p>Go to directory <span class="filename">c:\MYHDFstuff\hdf5\windows\src</span>, open <span class="filename">
