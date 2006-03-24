@@ -105,62 +105,76 @@ call %tooltest% h5diff_12.txt
 set flag=%file1% %file2% -r
 call %tooltest% h5diff_13.txt 
  
-
 ::1.4 report  mode with objects
 set flag=%file1% %file2% -r g1/dset1 g1/dset2
 call %tooltest% h5diff_14.txt 
  
-
 ::1.5 with -d
 set flag=%file1% %file2% -r -d 5 g1/dset3 g1/dset4
 call %tooltest% h5diff_15.txt 
  
-
 ::1.6 with -p
 set flag=%file1% %file2% -r -p 0.05 g1/dset3 g1/dset4
 call %tooltest% h5diff_16.txt 
  
-
 ::1.7 verbose mode
 set flag=%file1% %file2% -v
 call %tooltest% h5diff_17.txt 
  
-
 ::1.8 quiet mode 
 set flag=%file1% %file2% -q
 call %tooltest% h5diff_18.txt 
+
+::#1.9.1 with -p (int)
+set flag=%file1% %file1% -v -p 0.02 g1/dset5 g1/dset6
+call %tooltest% h5diff_191.txt 
+
+::#1.9.2 with -p (unsigned long_long)
+set flag=%file1% %file1% -v -p 0.02 g1/dset7 g1/dset8
+call %tooltest% h5diff_192.txt 
 
 ::---------------------
 ::Not Comparable Types
 ::---------------------
 
 ::2.0
-set flag=%file3% %file3% -v dset group
+set flag=%file3% %file3% -v dset g1
 call %tooltest% h5diff_20.txt 
 
 ::2.1
-set flag=%file3% %file3% -v dset link
+set flag=%file3% %file3% -v dset l1
 call %tooltest% h5diff_21.txt 
  
 
 ::2.2
-set flag=%file3% %file3% -v dset type
+set flag=%file3% %file3% -v dset t1
 call %tooltest% h5diff_22.txt  
  
 
 ::2.3
-set flag=%file3% %file3% -v group group
+set flag=%file3% %file3% -v g1 g1
 call %tooltest% h5diff_23.txt 
 
 ::2.4
-set flag=%file3% %file3% -v type type
+set flag=%file3% %file3% -v t1 t1
 call %tooltest% h5diff_24.txt  
  
-
 ::2.5
-set flag=%file3% %file3% -v link link
+set flag=%file3% %file3% -v l1 l1
 call %tooltest% h5diff_25.txt  
+
+::2.6
+set flag=%file3% %file3% -v g1 g2
+call %tooltest% h5diff_26.txt 
+
+::2.7
+set flag=%file3% %file3% -v t1 t2
+call %tooltest% h5diff_27.txt  
  
+::2.8
+set flag=%file3% %file3% -v l1 l2
+call %tooltest% h5diff_28.txt  
+
 
 
 ::-------------
