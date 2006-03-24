@@ -631,6 +631,7 @@
 
 ./test/Makefile.am
 ./test/Makefile.in
+./test/be_data.h5
 ./test/big.c
 ./test/bittests.c
 ./test/btree2.c
@@ -639,6 +640,7 @@
 ./test/cache_common.c
 ./test/cache_common.h
 ./test/cmpd_dset.c
+./test/cross_read.c
 ./test/dangle.c
 ./test/deflate.h5
 ./test/dsets.c
@@ -659,6 +661,7 @@
 ./test/fillval.c
 ./test/flush1.c
 ./test/flush2.c
+./test/gen_cross.c
 ./test/gen_deflate.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_array.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_fill.c			_DO_NOT_DISTRIBUTE_
@@ -678,6 +681,7 @@
 ./test/h5test.h
 ./test/hyperslab.c
 ./test/istore.c
+./test/le_data.h5
 ./test/lheap.c
 ./test/links.c
 ./test/mount.c
@@ -731,6 +735,7 @@
 ./test/tvltypes.c
 ./test/unlink.c
 ./test/vfd.c
+./test/vms_data.h5
 ./test/test_filters_le.hdf5
 ./test/test_filters_be.hdf5
 ./test/gen_filters.c

@@ -37,7 +37,7 @@ TEST_PROG=testhdf5 lheap fheap ohdr stab gheap btree2 cache cache_api \
            dtypes dsets cmpd_dset extend external objcopy links unlink big mtime     \
            fillval mount flush1 flush2 enum \
            set_extent ttsafe stream_test \
-           getname vfd ntypes dangle dtransform reserved 
+           getname vfd ntypes dangle dtransform reserved cross_read
 
 # List programs to be built when testing here. error_test and err_compat are
 # built at the same time as the other tests, but executed by testerror.sh.
@@ -57,7 +57,7 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat testmeta
 if BUILD_ALL_CONDITIONAL
   BUILD_ALL_PROGS=gen_deflate gen_filters gen_new_array gen_new_fill   \
                   gen_new_group gen_new_mtime gen_new_super gen_noencoder \
-                  gen_nullspace space_overflow
+                  gen_nullspace space_overflow gen_cross
 else
   BUILD_ALL_PROGS=
 endif
