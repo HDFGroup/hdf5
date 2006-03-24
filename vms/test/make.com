@@ -245,7 +245,13 @@ $ type sys$input
 $ ccc  reserved
 $ link reserved, -
        libh5test.olb/lib,[-.src]hdf5.olb/lib
- 
+  
+$ type sys$input
+       Creating cross_read test
+$ ccc  cross_read
+$ link cross_read, -
+       libh5test.olb/lib,[-.src]hdf5.olb/lib
+
 $ type sys$input
        Done with tests compilation
 $ type sys$input
@@ -428,7 +434,9 @@ $ type sys$input
 -------			Running reserved     	-------
 $ run  reserved
 $ type sys$input
+ 
+$ type sys$input
+-------			Running cross_read     	-------
+$ run  cross_read
+$ type sys$input
 $EXIT 
-
-
-
