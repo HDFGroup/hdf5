@@ -117,13 +117,19 @@ case "$cc_vendor-$cc_version" in
             case "$host_cpu_model" in
                 # Hmm.. this might not catch Celerons, but it won't hurt them either...
                 *Pro*|*II*|*III*|*IV*|*Athlon*)
-                    arch="-march=i686"
+                    # architecture-specific optimizations cause problems
+                    # for some users who build binaries to be used on
+                    # multiple architectures.
+                    # arch="-march=i686"
                 ;;
             esac
             ;;
 
         *-i686)
-            arch="-march=i686"
+                    # architecture-specific optimizations cause problems
+                    # for some users who build binaries to be used on
+                    # multiple architectures.
+                    # arch="-march=i686"
             ;;
     esac
 
