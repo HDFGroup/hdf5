@@ -1636,47 +1636,49 @@ H5FD_alloc_from_free_list(H5FD_t *file, H5FD_mem_t type,
         need_aligned = file->alignment > 1 && size >= file->threshold;
 
         while (cur) {
-            file->maxsize = MAX(file->maxsize, cur->size);
+            if(cur->size > file->maxsize)
+                file->maxsize = cur->size;
 
             if (need_aligned) {
                 if ((head = cur->addr % file->alignment) == 0) {
                     /*
                      * Aligned address
                      */
-                    if (cur->size == size) {
-                        /* exact match */
-                        ret_value = cur->addr;
+                    if (cur->size >= size) {
+                        if (cur->size == size) {
+                            /* exact match */
+                            ret_value = cur->addr;
 
-                        /*
-                         * Make certain we don't hand out a block of raw data
-                         * from the free list which overlaps with the metadata
-                         * aggregation buffer (if it's turned on)
-                         */
-                        if (type == H5FD_MEM_DRAW &&
-                                (file->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) &&
-                                H5F_addr_overlap(ret_value, size,
-                                                 file->accum_loc, file->accum_size)) {
-                            ret_value = HADDR_UNDEF;
-                        } else {
-                            if (prev)
-                                prev->next = cur->next;
-                            else
-                                file->fl[mapped_type] = cur->next;
+                            /*
+                             * Make certain we don't hand out a block of raw data
+                             * from the free list which overlaps with the metadata
+                             * aggregation buffer (if it's turned on)
+                             */
+                            if (type == H5FD_MEM_DRAW &&
+                                    (file->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) &&
+                                    H5F_addr_overlap(ret_value, size,
+                                                     file->accum_loc, file->accum_size)) {
+                                ret_value = HADDR_UNDEF;
+                            } else {
+                                if (prev)
+                                    prev->next = cur->next;
+                                else
+                                    file->fl[mapped_type] = cur->next;
 
-                            H5FL_FREE(H5FD_free_t, cur);
+                                H5FL_FREE(H5FD_free_t, cur);
 
-                            if (size == file->maxsize)
-                                file->maxsize = 0;  /*unknown*/
+                                if (size == file->maxsize)
+                                    file->maxsize = 0;  /*unknown*/
 
-                            HGOTO_DONE(ret_value)
+                                HGOTO_DONE(ret_value)
+                            }
                         }
-                    }
-
-                    if (cur->size > size)
-                        if (!best || !found_aligned || cur->size < best->size) {
-                            best = cur;
-                            found_aligned = 1;
-                        }
+                        else
+                            if (!best || !found_aligned || cur->size < best->size) {
+                                best = cur;
+                                found_aligned = 1;
+                            }
+                    } /* end if */
                 } else {
                     /*
                      * Non-aligned address
@@ -1697,37 +1699,40 @@ H5FD_alloc_from_free_list(H5FD_t *file, H5FD_mem_t type,
                 }
             } else {
                 /* !need_aligned */
-                if (cur->size == size) {
-                    /* exact match */
-                    ret_value = cur->addr;
+                if (cur->size >= size) {
+                    if (cur->size == size) {
+                        /* exact match */
+                        ret_value = cur->addr;
 
-                    /*
-                     * Make certain we don't hand out a block of raw data
-                     * from the free list which overlaps with the metadata
-                     * aggregation buffer (if it's turned on)
-                     */
-                    if (type == H5FD_MEM_DRAW &&
-                            (file->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) &&
-                            H5F_addr_overlap(ret_value, size, file->accum_loc,
-                                             file->accum_size)) {
-                        ret_value = HADDR_UNDEF;
-                    } else {
-                        if (prev)
-                            prev->next = cur->next;
-                        else
-                            file->fl[mapped_type] = cur->next;
+                        /*
+                         * Make certain we don't hand out a block of raw data
+                         * from the free list which overlaps with the metadata
+                         * aggregation buffer (if it's turned on)
+                         */
+                        if (type == H5FD_MEM_DRAW &&
+                                (file->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) &&
+                                H5F_addr_overlap(ret_value, size, file->accum_loc,
+                                                 file->accum_size)) {
+                            ret_value = HADDR_UNDEF;
+                        } else {
+                            if (prev)
+                                prev->next = cur->next;
+                            else
+                                file->fl[mapped_type] = cur->next;
 
-                        H5FL_FREE(H5FD_free_t, cur);
+                            H5FL_FREE(H5FD_free_t, cur);
 
-                        if (size == file->maxsize)
-                            file->maxsize = 0;  /*unknown*/
+                            if (size == file->maxsize)
+                                file->maxsize = 0;  /*unknown*/
 
-                        HGOTO_DONE(ret_value)
+                            HGOTO_DONE(ret_value)
+                        }
                     }
-                } else {
-                    if (cur->size > size && (!best || cur->size < best->size))
-                        best = cur;
-                }
+                    else {
+                        if (!best || cur->size < best->size)
+                            best = cur;
+                    }
+                } /* end if */
             }
 
             prev = cur;
