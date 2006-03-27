@@ -1,11 +1,14 @@
 #############################
-Expected output for 'h5dump -A tnamed_dtype_attr.h5'
+Expected output for 'h5dump tnamed_dtype_attr.h5'
 #############################
 HDF5 "tnamed_dtype_attr.h5" {
 GROUP "/" {
    DATASET "Dataset" {
       DATATYPE  "/Datatype"
       DATASPACE  SCALAR
+      DATA {
+      (0): 0
+      }
       ATTRIBUTE "Attribute" {
          DATATYPE  "/Datatype"
          DATASPACE  SCALAR
@@ -15,6 +18,22 @@ GROUP "/" {
       }
    }
    DATATYPE "Datatype"       H5T_STD_I32LE;
+      ATTRIBUTE "Attribute" {
+         DATATYPE  H5T_STD_I32LE
+         DATASPACE  SCALAR
+         DATA {
+         (0): 8
+         }
+      }
 
+   GROUP "g1" {
+      ATTRIBUTE "Attribute" {
+         DATATYPE  "/Datatype"
+         DATASPACE  SCALAR
+         DATA {
+         (0): 8
+         }
+      }
+   }
 }
 }

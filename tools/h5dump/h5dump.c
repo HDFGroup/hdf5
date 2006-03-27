@@ -1607,26 +1607,33 @@ done:
  *
  * Programmer:  Ruey-Hsia Li
  *
- * Modifications: Comments: not yet implemented.
+ * Modifications: pvn March 27, 2006
+ *  add printing of attributes
  *
  *-------------------------------------------------------------------------
  */
 static void
 dump_named_datatype(hid_t type, const char *name)
 {
-    indentation(indent);
-    printf("%s \"%s\" %s", dump_header_format->datatypebegin, name,
-	   dump_header_format->datatypeblockbegin);
+ indentation(indent);
+ printf("%s \"%s\" %s", dump_header_format->datatypebegin, name,
+  dump_header_format->datatypeblockbegin);
+ 
+ if (H5Tget_class(type) == H5T_COMPOUND) {
+  print_datatype(type,1);
+ } else {
+  indentation(indent + COL);
+  print_datatype(type,1);
+  printf(";\n");
+ }
+ 
+ /* print attributes */
+ indent += COL;
+ H5Aiterate(type, NULL, dump_attr, NULL);
+ indent -= COL;
 
-    if (H5Tget_class(type) == H5T_COMPOUND) {
-	print_datatype(type,1);
-    } else {
-	indentation(indent + COL);
-	print_datatype(type,1);
-	printf(";\n");
-    }
-    end_obj(dump_header_format->datatypeend,
-	    dump_header_format->datatypeblockend);
+ end_obj(dump_header_format->datatypeend,
+  dump_header_format->datatypeblockend);
 }
 
 /*-------------------------------------------------------------------------

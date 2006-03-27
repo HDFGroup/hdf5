@@ -3,15 +3,15 @@ Expected output for 'h5dump --xml tnamed_dtype_attr.h5'
 #############################
 <?xml version="1.0" encoding="UTF-8"?>
 <hdf5:HDF5-File xmlns:hdf5="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdf.ncsa.uiuc.edu/DTDs/HDF5File http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd">
-<hdf5:RootGroup OBJ-XID="xid_928" H5Path="/">
-   <hdf5:NamedDataType Name="Datatype" OBJ-XID="xid_976" H5Path="/Datatype" Parents="xid_928" H5ParentPaths="/">
+<hdf5:RootGroup OBJ-XID="xid_96" H5Path="/">
+   <hdf5:NamedDataType Name="Datatype" OBJ-XID="xid_328" H5Path="/Datatype" Parents="xid_96" H5ParentPaths="/">
       <hdf5:DataType>
          <hdf5:AtomicType>
             <hdf5:IntegerType ByteOrder="LE" Sign="true" Size="4" />
          </hdf5:AtomicType>
       </hdf5:DataType>
    </hdf5:NamedDataType>
-   <hdf5:Dataset Name="Dataset" OBJ-XID="xid_1384" H5Path= "/Dataset" Parents="xid_928" H5ParentPaths="/">
+   <hdf5:Dataset Name="Dataset" OBJ-XID="xid_440" H5Path= "/Dataset" Parents="xid_96" H5ParentPaths="/">
       <hdf5:StorageLayout>
          <hdf5:ContiguousLayout/>
       </hdf5:StorageLayout>
@@ -23,12 +23,12 @@ Expected output for 'h5dump --xml tnamed_dtype_attr.h5'
       <hdf5:Dataspace>
          <hdf5:ScalarDataspace />
       </hdf5:Dataspace>
-      <hdf5:NamedDataTypePtr OBJ-XID="xid_976" H5Path="/Datatype" />
+      <hdf5:NamedDataTypePtr OBJ-XID="xid_328" H5Path="/Datatype" />
       <hdf5:Attribute Name="Attribute">
          <hdf5:Dataspace>
             <hdf5:ScalarDataspace />
          </hdf5:Dataspace>
-         <hdf5:NamedDataTypePtr OBJ-XID="xid_976" H5Path="/Datatype" />
+         <hdf5:NamedDataTypePtr OBJ-XID="xid_328" H5Path="/Datatype" />
          <hdf5:Data>
             <hdf5:DataFromFile>
             8
@@ -39,5 +39,18 @@ Expected output for 'h5dump --xml tnamed_dtype_attr.h5'
          <hdf5:NoData/>
       </hdf5:Data>
    </hdf5:Dataset>
+   <hdf5:Group Name="g1" OBJ-XID="xid_712" H5Path="/g1" Parents="xid_96" H5ParentPaths="/" >
+      <hdf5:Attribute Name="Attribute">
+         <hdf5:Dataspace>
+            <hdf5:ScalarDataspace />
+         </hdf5:Dataspace>
+         <hdf5:NamedDataTypePtr OBJ-XID="xid_328" H5Path="/Datatype" />
+         <hdf5:Data>
+            <hdf5:DataFromFile>
+            8
+            </hdf5:DataFromFile>
+         </hdf5:Data>
+      </hdf5:Attribute>
+   </hdf5:Group>
 </hdf5:RootGroup>
 </hdf5:HDF5-File>
