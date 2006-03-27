@@ -165,7 +165,6 @@ herr_t
 H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth)
 {
     H5HF_t	*fh = NULL;             /* Fractal heap header info */
-    H5HF_shared_t *shared;              /* Shared fractal heap information */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5HF_hdr_debug, FAIL)
@@ -185,10 +184,6 @@ H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     if(NULL == (fh = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap header")
 
-    /* Get the pointer to the shared fractal heap info */
-    shared = H5RC_GET_OBJ(fh->shared);
-    HDassert(shared);
-
     /* Print opening message */
     HDfprintf(stream, "%*sFractal Heap Header...\n", indent, "");
 
@@ -197,37 +192,33 @@ H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
      */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Heap address mapping method:",
-	      ((shared->addrmap) == H5HF_ABSOLUTE ? "Absolute" :
-	      ((shared->addrmap) == H5HF_MAPPED ? "Mapped" :
+	      ((fh->addrmap) == H5HF_ABSOLUTE ? "Absolute" :
+	      ((fh->addrmap) == H5HF_MAPPED ? "Mapped" :
               "Unknown!")));
     HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	      "Min. size of standalone object:",
-	      (unsigned long)shared->standalone_size);
-    HDfprintf(stream, "%*s%-*s %u%s\n", indent, "", fwidth,
-              "Ref. count size:",
-              (unsigned)shared->ref_count_size,
-              (shared->ref_count_size == 0 ? " (ref. count not stored)" : ""));
+	      (unsigned long)fh->standalone_size);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Total free space in managed blocks:",
-	      shared->total_man_free);
+	      fh->total_man_free);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Total # of free entries for standalone blocks:",
-	      shared->total_std_free);
+	      fh->total_std_free);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Total data block size:",
-	      shared->total_size);
+	      fh->total_size);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Total managed space data block size:",
-	      shared->man_size);
+	      fh->man_size);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Total standalone space data block size:",
-	      shared->std_size);
+	      fh->std_size);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Number of objects in heap:",
-	      shared->nobjs);
+	      fh->nobjs);
 
     HDfprintf(stream, "%*sManaged Objects Doubling-Table Info...\n", indent, "");
-    H5HF_dtable_debug(&shared->man_dtable, stream, indent + 3, MAX(0, fwidth -3));
+    H5HF_dtable_debug(&fh->man_dtable, stream, indent + 3, MAX(0, fwidth -3));
 
 done:
     if(fh && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, addr, fh, H5AC__NO_FLAGS_SET) < 0)
@@ -254,11 +245,9 @@ herr_t
 H5HF_dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
     int indent, int fwidth, haddr_t hdr_addr, size_t block_size)
 {
-    H5HF_t	*fh = NULL;             /* Fractal heap header info */
+    H5HF_t	*hdr = NULL;            /* Fractal heap header info */
     H5HF_direct_t *dblock = NULL;       /* Fractal heap direct block info */
-    H5HF_parent_shared_t par_shared;    /* Parent shared information */
     H5HF_direct_free_node_t *node;      /* Pointer to free list node for block */
-    H5HF_shared_t *shared;              /* Shared fractal heap information */
     size_t	blk_prefix_size;        /* Size of prefix for block */
     unsigned    node_count = 0;         /* Number of free space nodes */
     size_t	amount_free = 0;        /* Amount of free space in block */
@@ -283,21 +272,13 @@ H5HF_dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
     /*
      * Load the fractal heap header.
      */
-    if(NULL == (fh = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, hdr_addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (hdr = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, hdr_addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap header")
-
-    /* Get the pointer to the shared fractal heap info */
-    shared = H5RC_GET_OBJ(fh->shared);
-    HDassert(shared);
 
     /*
      * Load the heap direct block
      */
-    par_shared.shared = fh->shared;
-    par_shared.parent = NULL;
-    par_shared.parent_entry = 0;
-    par_shared.parent_free_space = 0;
-    if(NULL == (dblock = H5AC_protect(f, dxpl_id, H5AC_FHEAP_DBLOCK, addr, &block_size, &par_shared, H5AC_READ)))
+    if(NULL == (dblock = H5AC_protect(f, dxpl_id, H5AC_FHEAP_DBLOCK, addr, &block_size, hdr, H5AC_READ)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap direct block")
 
     /* Check for valid free list */
@@ -305,11 +286,6 @@ H5HF_dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
         if(H5HF_man_dblock_build_freelist(dblock, addr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, FAIL, "can't decode free list for block")
     HDassert(dblock->free_list);
-
-    /* Release the heap header */
-    if(H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, hdr_addr, fh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap header")
-    fh = NULL;
 
     /* Print opening message */
     HDfprintf(stream, "%*sFractal Heap Direct Block...\n", indent, "");
@@ -319,11 +295,20 @@ H5HF_dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
      */
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
 	      "Address of fractal heap that owns this block:",
-	      shared->heap_addr);
+	      hdr->heap_addr);
+    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+	      "Parent address:",
+	      dblock->par_addr);
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	      "Parent entry:",
+	      dblock->par_entry);
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	      "Parent # of rows:",
+	      dblock->par_nrows);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Offset of direct block in heap:",
 	      dblock->block_off);
-    blk_prefix_size = H5HF_MAN_ABS_DIRECT_OVERHEAD_DBLOCK(shared, dblock);
+    blk_prefix_size = H5HF_MAN_ABS_DIRECT_OVERHEAD_DBLOCK(hdr, dblock);
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of block header:",
               blk_prefix_size);
@@ -388,6 +373,8 @@ H5HF_dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
 done:
     if(dblock && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_DBLOCK, addr, dblock, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap direct block")
+    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, hdr_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_dblock_debug() */
@@ -410,9 +397,7 @@ herr_t
 H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
     int indent, int fwidth, haddr_t hdr_addr, unsigned nrows)
 {
-    H5HF_t	*fh = NULL;             /* Fractal heap header info */
-    H5HF_shared_t *shared;              /* Shared fractal heap information */
-    H5HF_parent_shared_t par_shared;    /* Parent shared information */
+    H5HF_t	*hdr = NULL;             /* Fractal heap header info */
     H5HF_indirect_t *iblock = NULL;     /* Fractal heap direct block info */
     size_t dblock_size;                 /* Current direct block size */
     char temp_str[64];                  /* Temporary string, for formatting */
@@ -435,27 +420,14 @@ H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
     /*
      * Load the fractal heap header.
      */
-    if(NULL == (fh = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, hdr_addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (hdr = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, hdr_addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap header")
-
-    /* Get the pointer to the shared fractal heap info */
-    shared = H5RC_GET_OBJ(fh->shared);
-    HDassert(shared);
 
     /*
      * Load the heap direct block
      */
-    par_shared.shared = fh->shared;
-    par_shared.parent = NULL;
-    par_shared.parent_entry = 0;
-    par_shared.parent_free_space = 0;
-    if(NULL == (iblock = H5AC_protect(f, dxpl_id, H5AC_FHEAP_IBLOCK, addr, &nrows, &par_shared, H5AC_READ)))
+    if(NULL == (iblock = H5AC_protect(f, dxpl_id, H5AC_FHEAP_IBLOCK, addr, &nrows, hdr, H5AC_READ)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap indirect block")
-
-    /* Release the heap header */
-    if(H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, hdr_addr, fh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap header")
-    fh = NULL;
 
     /* Print opening message */
     HDfprintf(stream, "%*sFractal Heap Indirect Block...\n", indent, "");
@@ -465,7 +437,16 @@ H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
      */
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
 	      "Address of fractal heap that owns this block:",
-	      shared->heap_addr);
+	      hdr->heap_addr);
+    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+	      "Parent address:",
+	      iblock->par_addr);
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	      "Parent entry:",
+	      iblock->par_entry);
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	      "Parent # of rows:",
+	      iblock->par_nrows);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Offset of indirect block in heap:",
 	      iblock->block_off);
@@ -483,7 +464,7 @@ H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
 	      iblock->max_rows);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Max direct block rows:",
-	      shared->man_dtable.max_direct_rows);
+	      hdr->man_dtable.max_direct_rows);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Next block column:",
 	      iblock->next_col);
@@ -496,15 +477,15 @@ H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
 
     /* Print the entry tables */
     HDfprintf(stream, "%*sDirect Block Entries (address, free space):\n", indent, "");
-    for(u = 0; u < shared->man_dtable.max_direct_rows && u < iblock->nrows; u++) {
-        sprintf(temp_str, "Row #%u: (block size: %lu)", (unsigned)u, (unsigned long)shared->man_dtable.row_block_size[u]);
+    for(u = 0; u < hdr->man_dtable.max_direct_rows && u < iblock->nrows; u++) {
+        sprintf(temp_str, "Row #%u: (block size: %lu)", (unsigned)u, (unsigned long)hdr->man_dtable.row_block_size[u]);
         HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
                 temp_str);
-        for(v = 0; v < shared->man_dtable.cparam.width; v++) {
-            size_t off = (u * shared->man_dtable.cparam.width) + v;
+        for(v = 0; v < hdr->man_dtable.cparam.width; v++) {
+            size_t off = (u * hdr->man_dtable.cparam.width) + v;
 
             sprintf(temp_str, "Col #%u:", (unsigned)v);
-            HDfprintf(stream, "%*s%-*s %8a, %8Zu\n", indent + 6, "", MAX(0, fwidth - 6),
+            HDfprintf(stream, "%*s%-*s %9a, %8Zu\n", indent + 6, "", MAX(0, fwidth - 6),
                     temp_str,
                     iblock->ents[off].addr,
                     iblock->ents[off].free_space);
@@ -512,16 +493,16 @@ H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
         dblock_size *= 2;
     } /* end for */
     HDfprintf(stream, "%*sIndirect Block Entries:\n", indent, "");
-    if(iblock->nrows > shared->man_dtable.max_direct_rows) {
-        for(u = shared->man_dtable.max_direct_rows; u < iblock->nrows; u++) {
+    if(iblock->nrows > hdr->man_dtable.max_direct_rows) {
+        for(u = hdr->man_dtable.max_direct_rows; u < iblock->nrows; u++) {
             sprintf(temp_str, "Row #%u:", (unsigned)u);
             HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
                     temp_str);
-            for(v = 0; v < shared->man_dtable.cparam.width; v++) {
-                size_t off = (u * shared->man_dtable.cparam.width) + v;
+            for(v = 0; v < hdr->man_dtable.cparam.width; v++) {
+                size_t off = (u * hdr->man_dtable.cparam.width) + v;
 
                 sprintf(temp_str, "Col #%u:", (unsigned)v);
-                HDfprintf(stream, "%*s%-*s %8a, %8Zu\n", indent + 6, "", MAX(0, fwidth - 6),
+                HDfprintf(stream, "%*s%-*s %9a, %8Zu\n", indent + 6, "", MAX(0, fwidth - 6),
                         temp_str,
                         iblock->ents[off].addr,
                         iblock->ents[off].free_space);
@@ -536,6 +517,8 @@ H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
 done:
     if(iblock && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_IBLOCK, addr, iblock, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap direct block")
+    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, hdr_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_iblock_debug() */

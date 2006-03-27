@@ -57,82 +57,87 @@
     )
 
 /* Size of doubling-table information */
-#define H5HF_DTABLE_INFO_SIZE(s) (                                            \
+#define H5HF_DTABLE_INFO_SIZE(h) (                                            \
     2   /* Width of table (i.e. # of columns) */                              \
-    + (s)->sizeof_size /* Starting block size */                            \
-    + (s)->sizeof_size /* Maximum direct block size */                      \
+    + (h)->sizeof_size /* Starting block size */                              \
+    + (h)->sizeof_size /* Maximum direct block size */                        \
     + 2 /* Max. size of heap (log2 of actual value - i.e. the # of bits) */   \
     + 2 /* Starting # of rows in root indirect block */                       \
-    + (s)->sizeof_addr /* File address of table managed */                  \
+    + (h)->sizeof_addr /* File address of table managed */                    \
     + 2 /* Current # of rows in root indirect block */                        \
-    + (s)->sizeof_size /* Next direct block's heap offset */                \
+    + (h)->sizeof_size /* Next direct block's heap offset */                  \
     )
 
 /* Size of the fractal heap header on disk */
-#define H5HF_HEADER_SIZE(s)     (                                             \
+#define H5HF_HEADER_SIZE(h)     (                                             \
     /* General metadata fields */                                             \
     H5HF_METADATA_PREFIX_SIZE                                                 \
                                                                               \
     /* Fractal heap header specific fields */                                 \
-    + 1 /* Address mapping */                                                 \
+    + 1 /* Address mapping mode */                                            \
     + 4 /* Min. size of standalone object */                                  \
-    + 1 /* Size of ref. count for objects */                                  \
-    + (s)->sizeof_size /* Total man. free space */                          \
-    + (s)->sizeof_size /* Total std. free entries */                        \
-    + (s)->sizeof_size /* Total size of heap */                             \
-    + (s)->sizeof_size /* Size of man. space in heap */                     \
-    + (s)->sizeof_size /* Size of std. space in heap */                     \
-    + (s)->sizeof_size /* Number of objects in heap */                      \
-    + H5HF_DTABLE_INFO_SIZE(s) /* Size of managed obj. doubling-table info */ \
+    + (h)->sizeof_size /* Total man. free space */                            \
+    + (h)->sizeof_size /* Total std. free entries */                          \
+    + (h)->sizeof_size /* Total size of heap */                               \
+    + (h)->sizeof_size /* Size of man. space in heap */                       \
+    + (h)->sizeof_size /* Size of std. space in heap */                       \
+    + (h)->sizeof_size /* Number of objects in heap */                        \
+    + H5HF_DTABLE_INFO_SIZE(h) /* Size of managed obj. doubling-table info */ \
     )
 
 /* Size of free space description in an absolute managed direct block */
 #define H5HF_MAN_ABS_DIRECT_FREE_NODE_SIZE(d) (2 * (d)->blk_off_size)
 
 /* Size of header for each object in an absolute managed direct block */
-#define H5HF_MAN_ABS_DIRECT_OBJ_PREFIX_LEN_SIZE(s, o) (                       \
+#define H5HF_MAN_ABS_DIRECT_OBJ_PREFIX_LEN_SIZE(h, o) (                       \
     H5HF_SIZEOF_OFFSET_LEN(o)   /* Length of object in block */               \
     + 1                         /* Free space fragment length */              \
-    + (s)->ref_count_size       /* Ref. count of object in block */           \
     )
-#define H5HF_MAN_ABS_DIRECT_OBJ_PREFIX_LEN_DBLOCK(s, d) (                     \
+#define H5HF_MAN_ABS_DIRECT_OBJ_PREFIX_LEN_DBLOCK(h, d) (                     \
     (d)->blk_off_size           /* Length of object in block */               \
     + 1                         /* Free space fragment length */              \
-    + (s)->ref_count_size       /* Ref. count of object in block */           \
     )
 
 /* Size of overhead for a direct block */
-#define H5HF_MAN_ABS_DIRECT_OVERHEAD_SIZE(s, o) (                             \
+#define H5HF_MAN_ABS_DIRECT_OVERHEAD_SIZE(h, o) (                             \
     /* General metadata fields */                                             \
     H5HF_METADATA_PREFIX_SIZE                                                 \
                                                                               \
     /* Fractal heap managed, absolutely mapped direct block specific fields */ \
-    + (s)->sizeof_addr          /* File address of heap owning the block */   \
-    + (s)->heap_off_size        /* Offset of the block in the heap */         \
-    + H5HF_SIZEOF_OFFSET_LEN(o) /* Total free space in a block */             \
+    + (h)->sizeof_addr          /* File address of heap owning the block */   \
+    + (h)->sizeof_addr          /* File address of parent block */            \
+    + 2                         /* Entry within parent block */               \
+    + 2                         /* # of rows for parent block */              \
+    + (h)->heap_off_size        /* Offset of the block in the heap */         \
     + H5HF_SIZEOF_OFFSET_LEN(o) /* Offset of first descriptor in free list */ \
     )
-#define H5HF_MAN_ABS_DIRECT_OVERHEAD_DBLOCK(s, d) (                           \
+#define H5HF_MAN_ABS_DIRECT_OVERHEAD_DBLOCK(h, d) (                           \
     /* General metadata fields */                                             \
     H5HF_METADATA_PREFIX_SIZE                                                 \
                                                                               \
     /* Fractal heap managed, absolutely mapped direct block specific fields */ \
-    + (s)->sizeof_addr          /* File address of heap owning the block */   \
-    + (s)->heap_off_size        /* Offset of the block in the heap */         \
+    + (h)->sizeof_addr          /* File address of heap owning the block */   \
+    + (h)->sizeof_addr          /* File address of parent block */            \
+    + 2                         /* Entry within parent block */               \
+    + 2                         /* # of rows for parent block */              \
+    + (h)->heap_off_size        /* Offset of the block in the heap */         \
     + (d)->blk_off_size         /* Offset of first descriptor in free list */ \
     )
 
 /* Size of managed indirect block (absolute & mapped) */
-#define H5HF_MAN_INDIRECT_SIZE(s, i) (                                        \
+#define H5HF_MAN_INDIRECT_SIZE(h, i) (                                        \
     /* General metadata fields */                                             \
     H5HF_METADATA_PREFIX_SIZE                                                 \
                                                                               \
     /* Fractal heap managed, absolutely mapped indirect block specific fields */ \
-    + (s)->sizeof_addr          /* File address of heap owning the block */   \
-    + (s)->heap_off_size        /* Offset of the block in the heap */         \
+    + (h)->sizeof_addr          /* File address of heap owning the block */   \
+    + (h)->sizeof_addr          /* File address of parent block */            \
+    + 2                         /* Entry within parent block */               \
+    + 2                         /* # of rows for parent block */              \
+    + (h)->heap_off_size        /* Offset of the block in the heap */         \
     + 4                         /* Next block entry to allocate from */       \
-    + (MIN((i)->nrows, (s)->man_dtable.max_direct_rows) * (s)->man_dtable.cparam.width * ((s)->sizeof_addr + (s)->man_dtable.max_dir_blk_off_size)) /* Size of entries for direct blocks */ \
-    + ((((i)->nrows > (s)->man_dtable.max_direct_rows) ? ((i)->nrows - (s)->man_dtable.max_direct_rows) : 0)  * (s)->man_dtable.cparam.width * ((s)->sizeof_addr + (s)->heap_off_size)) /* Size of entries for indirect blocks */ \
+    + (MIN((i)->nrows, (h)->man_dtable.max_direct_rows) * (h)->man_dtable.cparam.width * ((h)->sizeof_addr + (h)->man_dtable.max_dir_blk_off_size)) /* Size of entries for direct blocks */ \
+    + ((((i)->nrows > (h)->man_dtable.max_direct_rows) ? ((i)->nrows - (h)->man_dtable.max_direct_rows) : 0)  * (h)->man_dtable.cparam.width * ((h)->sizeof_addr + (h)->heap_off_size)) /* Size of entries for indirect blocks */ \
     )
 
 
@@ -175,10 +180,14 @@ typedef struct H5HF_freelist_t H5HF_freelist_t;
 /* Fractal heap free list section info (forward decl - defined in H5HFint.c) */
 typedef struct H5HF_section_free_node_t H5HF_section_free_node_t;
 
-/* Each fractal heap has certain information that can be shared across all
- * the instances of blocks in that fractal heap.
+/* The fractal heap header information */
+/* (Each fractal heap header has certain information that is shared across all
+ * the instances of blocks in that fractal heap)
  */
-typedef struct H5HF_shared_t {
+typedef struct H5HF_t {
+    /* Information for H5AC cache functions, _must_ be first field in structure */
+    H5AC_info_t cache_info;
+
     /* Shared internal information (varies during lifetime of heap) */
     hsize_t     total_man_free; /* Total amount of free space in managed blocks */
     hsize_t     total_std_free; /* Total # of free standalone ID entries */
@@ -190,8 +199,11 @@ typedef struct H5HF_shared_t {
     hsize_t     nobjs;          /* Number of objects in heap */
 
     /* Cached/computed values (not stored in header) */
+    size_t      rc;             /* Reference count of child blocks */
     hbool_t     dirty;          /* Shared info is modified */
+    hbool_t     evicted;        /* Shared info is evicted from cache */
     haddr_t     heap_addr;      /* Address of heap header in the file */
+    H5AC_protect_t mode;        /* Access mode for heap */
     H5F_t      *f;              /* Pointer to file for heap */
     size_t      sizeof_size;    /* Size of file sizes */
     size_t      sizeof_addr;    /* Size of file addresses */
@@ -205,23 +217,49 @@ typedef struct H5HF_shared_t {
     /* Information set by user */
     H5HF_addrmap_t addrmap;     /* Type of address mapping */
     uint32_t standalone_size;   /* Size of object to store standalone */
-    unsigned char ref_count_size; /* Size of ref. count for objects (only for heaps w/ref. counted objects) */
 
     /* Information derived from user parameters (not stored in header) */
     unsigned char heap_off_size; /* Size of heap offsets (in bytes) */
-    hbool_t     ref_count_obj;  /* Are objects in the heap ref. counted? */
+    hbool_t     debug_objs;     /* Is the heap storing objects in 'debug' format */
     hbool_t     have_io_filter; /* Does the heap have I/O filters for the direct blocks? */
     hbool_t     write_once;     /* Is heap being written in "write once" mode? */
-} H5HF_shared_t;
+} H5HF_t;
 
-/* The fractal heap header information */
-typedef struct H5HF_t {
+/* Indirect block entry */
+typedef struct H5HF_indirect_ent_t {
+    haddr_t     addr;           /* Direct block's address                     */
+    hsize_t     free_space;     /* Amount of free space in block pointed to   */
+/* XXX: Will need space for block size, for blocks with I/O filters */
+} H5HF_indirect_ent_t;
+
+/* Fractal heap indirect block */
+typedef struct H5HF_indirect_t {
     /* Information for H5AC cache functions, _must_ be first field in structure */
     H5AC_info_t cache_info;
 
-    /* Internal fractal heap information */
-    H5RC_t	*shared;	/* Ref-counted shared info	              */
-} H5HF_t;
+    /* Internal heap information */
+    size_t      rc;             /* Reference count of child blocks            */
+    hbool_t     dirty;          /* Info is modified                           */
+    hbool_t     evicted;        /* Info is evicted from cache                 */
+    H5HF_t	*shared;	/* Shared heap header info	              */
+    struct H5HF_indirect_t *parent;	/* Shared parent indirect block info  */
+    hsize_t     child_free_space;   /* Total amount of free space in children */
+    haddr_t     addr;           /* Address of this indirect block on disk     */
+    unsigned    nrows;          /* Total # of rows in indirect block          */
+    unsigned    max_rows;       /* Max. # of rows in indirect block           */
+    size_t      size;           /* Size of indirect block on disk             */
+    unsigned    next_col;       /* "Column" of next managed block (in doubling table) */
+    unsigned    next_row;       /* "Row" of next managed block (in doubling table) */
+    hsize_t     next_size;      /* Size of next managed block                 */
+    H5HF_indirect_ent_t *ents;  /* Pointer to block entry table               */
+
+    /* Stored values */
+    haddr_t     par_addr;       /* Address of parent block on disk            */
+    unsigned    par_entry;      /* Entry in parent's table                    */
+    unsigned    par_nrows;      /* Total # of rows in parent indirect block   */
+    hsize_t     block_off;      /* Offset of the block within the heap's address space */
+    size_t      next_entry;     /* Entry of next managed block                */
+} H5HF_indirect_t;
 
 /* Direct block free list node */
 typedef struct H5HF_direct_free_node_t {
@@ -245,59 +283,21 @@ typedef struct H5HF_direct_t {
     H5AC_info_t cache_info;
 
     /* Internal heap information */
-    H5RC_t	*shared;	/* Ref-counted shared heap info	              */
-    H5RC_t	*parent;	/* Ref-counted shared parent block info       */
-    size_t      parent_entry;   /* Entry in parent's table                    */
+    H5HF_t	*shared;	/* Shared heap header info	              */
+    H5HF_indirect_t *parent;	/* Shared parent indirect block info          */
     size_t      size;           /* Size of direct block                       */
     unsigned    blk_off_size;   /* Size of offsets in the block               */
+    size_t      blk_free_space; /* Total amount of free space in block        */
     H5HF_direct_free_head_t *free_list; /* Pointer to free list for block     */
     uint8_t     *blk;           /* Pointer to buffer containing block data    */
 
     /* Stored values */
+    haddr_t     par_addr;       /* Address of parent block on disk            */
+    unsigned    par_entry;      /* Entry in parent's table                    */
+    unsigned    par_nrows;      /* Total # of rows in parent indirect block   */
     hsize_t     block_off;      /* Offset of the block within the heap's address space */
-    size_t      blk_free_space; /* Total amount of free space in block        */
     size_t      free_list_head; /* Offset of head of free list in block       */
 } H5HF_direct_t;
-
-/* Indirect block entry */
-typedef struct H5HF_indirect_ent_t {
-    haddr_t     addr;           /* Direct block's address                     */
-    hsize_t     free_space;     /* Amount of free space in block pointed to   */
-/* XXX: Will need space for block size, for blocks with I/O filters */
-} H5HF_indirect_ent_t;
-
-/* Fractal heap indirect block */
-typedef struct H5HF_indirect_t {
-    /* Information for H5AC cache functions, _must_ be first field in structure */
-    H5AC_info_t cache_info;
-
-    /* Internal heap information */
-    hbool_t     dirty;          /* Info is modified                           */
-    H5RC_t	*shared;	/* Ref-counted shared info	              */
-    H5RC_t	*parent;	/* Ref-counted shared parent block info       */
-    size_t      parent_entry;   /* Entry in parent's table                    */
-    H5RC_t	*self;		/* Ref-counted shared 'self' block info       */
-    unsigned    nrows;          /* Total # of rows in indirect block          */
-    unsigned    max_rows;       /* Max. # of rows in indirect block           */
-    size_t      size;           /* Size of indirect block on disk             */
-    unsigned    next_col;       /* "Column" of next managed block (in doubling table) */
-    unsigned    next_row;       /* "Row" of next managed block (in doubling table) */
-    unsigned    next_entry;     /* Entry of next managed block                */
-    hsize_t     next_size;      /* Size of next managed block                 */
-    H5HF_indirect_ent_t *ents;  /* Pointer to block entry table               */
-
-    /* Stored values */
-    hsize_t     block_off;      /* Offset of the block within the heap's address space */
-    hsize_t     child_free_space;   /* Total amount of free space in children */
-} H5HF_indirect_t;
-
-/* Shared information for parent of a fractal heap block */
-typedef struct H5HF_parent_shared_t {
-    H5RC_t	*shared;	/* Ref-counted shared heap info	              */
-    H5RC_t	*parent;	/* Ref-counted shared parent block info       */
-    size_t      parent_entry;   /* Entry in parent's table                    */
-    hsize_t     parent_free_space;      /* Free space in block, from parent   */
-} H5HF_parent_shared_t;
 
 /* Fractal heap metadata statistics info */
 typedef struct H5HF_stat_t {
@@ -348,22 +348,32 @@ H5FL_SEQ_EXTERN(H5HF_indirect_ent_t);
 /* Package Private Prototypes */
 /******************************/
 
-/* Routines for managing shared fractal heap info */
-H5_DLL H5HF_shared_t * H5HF_shared_alloc(H5F_t *f);
-H5_DLL herr_t H5HF_shared_init(H5HF_shared_t *shared, H5HF_t *fh, haddr_t heap_addr, H5HF_create_t *cparam);
-H5_DLL herr_t H5HF_shared_own(H5HF_t *fh, H5HF_shared_t *shared);
+/* Routines for managing shared fractal heap header */
+H5_DLL H5HF_t * H5HF_alloc(H5F_t *f);
+H5_DLL herr_t H5HF_init(H5HF_t *fh, haddr_t heap_addr, H5HF_create_t *cparam);
+H5_DLL herr_t H5HF_finish_init(H5HF_t *fh);
+
+/* Doubling table routines */
+H5_DLL herr_t H5HF_dtable_dest(H5HF_dtable_t *dtable);
+
+/* Heap header routines */
+H5_DLL herr_t H5HF_cache_hdr_dest_real(H5HF_t *hdr);
+H5_DLL herr_t H5HF_hdr_incr(H5HF_t *hdr);
+H5_DLL herr_t H5HF_hdr_decr(H5HF_t *hdr);
 
 /* Indirect block routines */
-H5_DLL herr_t H5HF_iblock_free(void *_iblock);
+H5_DLL herr_t H5HF_cache_iblock_dest_real(H5HF_indirect_t *iblock);
+H5_DLL herr_t H5HF_iblock_incr(H5HF_indirect_t *iblock);
+H5_DLL herr_t H5HF_iblock_decr(H5HF_indirect_t *iblock);
 
 /* Routines for allocating space */
 H5_DLL herr_t H5HF_man_dblock_build_freelist(H5HF_direct_t *dblock, haddr_t dblock_addr);
-H5_DLL herr_t H5HF_man_find(H5RC_t *fh_shared, hid_t dxpl_id, size_t request,
+H5_DLL herr_t H5HF_man_find(H5HF_t *fh, hid_t dxpl_id, size_t request,
     H5HF_section_free_node_t **sec_node/*out*/);
-H5_DLL herr_t H5HF_man_insert(H5RC_t *fh_shared, hid_t dxpl_id,
+H5_DLL herr_t H5HF_man_insert(H5HF_t *fh, hid_t dxpl_id,
     H5HF_section_free_node_t *sec_node, size_t obj_size, const void *obj,
     void *id);
-H5_DLL herr_t H5HF_man_read(H5RC_t *fh_shared, hid_t dxpl_id, hsize_t obj_off,
+H5_DLL herr_t H5HF_man_read(H5HF_t *fh, hid_t dxpl_id, hsize_t obj_off,
     void *obj);
 
 /* Metadata cache callbacks */

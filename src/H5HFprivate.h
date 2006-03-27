@@ -65,8 +65,6 @@ typedef struct H5HF_create_t {
     H5HF_addrmap_t addrmap;     /* Type of address mapping for objects in heap */
     uint32_t standalone_size;   /* Size of object to store standalone */
                                 /* (i.e. max. size of object to manage) */
-    unsigned char ref_count_size; /* Size of ref. count field for objects, in bytes (0 means no ref. counts for objects) */
-                                /* (only for heaps w/ref. counted objects) */
 } H5HF_create_t;
 
 

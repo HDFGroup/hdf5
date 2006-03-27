@@ -86,8 +86,7 @@
 herr_t
 H5HF_get_cparam_test(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr, H5HF_create_t *cparam)
 {
-    H5HF_t	*fh = NULL;             /* Pointer to the B-tree header */
-    H5HF_shared_t *shared;              /* Shared fractal heap information */
+    H5HF_t	*hdr = NULL;            /* Pointer to the fractal heap header */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_get_cparam_test)
@@ -98,22 +97,17 @@ H5HF_get_cparam_test(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr, H5HF_create_t *cp
     HDassert(cparam);
 
     /* Look up the fractal heap header */
-    if(NULL == (fh = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (hdr = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to load fractal heap header")
 
-    /* Get the pointer to the shared fractal heap info */
-    shared = H5RC_GET_OBJ(fh->shared);
-    HDassert(shared);
-
     /* Get fractal heap creation parameters */
-    cparam->addrmap = shared->addrmap;
-    cparam->standalone_size = shared->standalone_size;
-    cparam->ref_count_size = shared->ref_count_size;
-    HDmemcpy(&(cparam->managed), &(shared->man_dtable.cparam), sizeof(H5HF_dtable_cparam_t));
+    cparam->addrmap = hdr->addrmap;
+    cparam->standalone_size = hdr->standalone_size;
+    HDmemcpy(&(cparam->managed), &(hdr->man_dtable.cparam), sizeof(H5HF_dtable_cparam_t));
 
 done:
     /* Release fractal heap header node */
-    if(fh && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, fh, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap header info")
 
     FUNC_LEAVE_NOAPI(ret_value)
