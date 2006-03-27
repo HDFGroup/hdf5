@@ -23,7 +23,6 @@ H5CC=$(bindir)/h5cc
 H5CC_PP=$(bindir)/h5pcc
 CPPFLAGS=-I. -I$(srcdir)
 CFLAGS=
-LIBHDF5=../src/libhdf5.la
 
 ## These are the programs that `make all' or `make tests' will build and which
 ## `make check' will run. List them in the order they should be run.
@@ -48,7 +47,7 @@ TEST_OBJ=$(TEST_SRC:.c=.lo)
 EXAMPLE_PROGS=$(TEST_SRC)
 
 ## How to build the programs... they all depend on the hdf5 library
-$(TEST_PROGS) $(TEST_PROGS_PARA): $(LIBHDF5)
+$(TEST_PROGS) $(TEST_PROGS_PARA):
 h5_chunk_read: $(srcdir)/h5_chunk_read.c
 	@if test "X$(PARALLEL)" = "Xno"; then				\
 	  echo $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;		\

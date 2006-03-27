@@ -48,8 +48,9 @@ TEST_PROGS=$(TEST_SRC:.cpp=)
 ## this directory.
 CLEAN=*.h5
 
-## How to build the programs... they all depend on the Fortran & C hdf5 libraries
-$(TEST_PROGS): $(LIB) $(LIBHDF5)
+## How to build the programs... they depend only on the installed library
+## and h5c++.
+$(TEST_PROGS):
 
 compound: $(srcdir)/compound.cpp
 	$(CXX) $(CPPFLAGS) -o $@ $(srcdir)/compound.cpp

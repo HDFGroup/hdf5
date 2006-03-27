@@ -44,8 +44,8 @@ TEST_OBJ=$(TEST_SRC:.f90=.lo)
 
 EXAMPLE_PROGS=$(TEST_SRC)
 
-## How to build the programs... they all depend on the Fortran & C hdf5 libraries
-$(TEST_PROGS): $(LIBHDF5)
+## How to build the programs... they all depend on the installed h5fc.
+$(TEST_PROGS):
 dsetexample: $(srcdir)/dsetexample.f90
 	@if test "X$(PARALLEL)" = "Xno"; then				\
 	  echo $(FC) -o $@ $(srcdir)/$@.f90;				\

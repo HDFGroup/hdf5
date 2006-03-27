@@ -26,8 +26,6 @@ H5CC=$(bindir)/h5cc
 H5PCC=$(bindir)/h5pcc
 CPPFLAGS=-I. -I$(srcdir)
 CFLAGS=
-LIBHDF5=../../src/libhdf5.la
-LIBHDF5_HL=../src/libhdf5_hl.la
 
 hdf5_srcdir=$(top_srcdir)/src
 hdf5_builddir=$(top_builddir)/src
@@ -52,8 +50,9 @@ TEST_PROGS=$(TEST_SRC:.c=)
 ## this directory.
 CLEAN=*.h5
 
-## How to build the programs... they all depend on the C and HL hdf5 libraries
-$(TEST_PROGS): $(LIB) $(LIBHDF5_HL) $(LIBHDF5)
+## How to build the programs... they depend only on the installed versions
+## of the libraries and h5cc.
+$(TEST_PROGS):
 
 ex_lite1: $(srcdir)/ex_lite1.c
 	@if test "X$(PARALLEL)" = "Xno"; then                           \
