@@ -201,24 +201,25 @@ int apply_filters(const char* name,    /* object name from traverse list */
  int          i;
 	pack_info_t  obj;
 
-
  if (rank==0)
   goto out;
 
-		/*-------------------------------------------------------------------------
-		* initialize the assigment object
-		*-------------------------------------------------------------------------
+/*-------------------------------------------------------------------------
+	* initialize the assigment object
+	*-------------------------------------------------------------------------
  */
 	init_packobject(&obj);
 
-
-	/*-------------------------------------------------------------------------
+/*-------------------------------------------------------------------------
  * find options
  *-------------------------------------------------------------------------
  */
  if (aux_assign_obj(name,options,&obj)==0)
   return 0;
 
+ /* get information about input filters */
+ if ((nfilters = H5Pget_nfilters(dcpl_id))<0)
+  return -1;
 
  /* check for datasets too small */
 	if ((size=H5Tget_size(type_id))==0)
@@ -228,21 +229,18 @@ int apply_filters(const char* name,    /* object name from traverse list */
 		nelmts*=dims[i];
 	if (nelmts*size < options->threshold )
 	{
-		if (options->verbose)
+		if (nfilters && options->verbose)
 			printf("Warning: Filter not applied to <%s>. Dataset smaller than <%d> bytes\n",
 			name,(int)options->threshold);
 		return 0;
 	}
-
- /* get information about input filters */
- if ((nfilters = H5Pget_nfilters(dcpl_id))<0)
-  return -1;
-		/*-------------------------------------------------------------------------
+	
+ /*-------------------------------------------------------------------------
 		* check if we have filters in the pipeline
 		* we want to replace them with the input filters
 		* only remove if we are inserting new ones
 		*-------------------------------------------------------------------------
- */
+  */
  if (nfilters && obj.nfilters ) {
   if (H5Premove_filter(dcpl_id,H5Z_FILTER_ALL)<0)
    return -1;

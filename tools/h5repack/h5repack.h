@@ -114,7 +114,8 @@ typedef struct {
 extern "C" {
 #endif
 
-int h5repack           (const char* infile, const char* outfile, pack_opt_t *options);
+int h5repack           (const char* infile, const char* outfile, pack_opt_t *options,
+                        int argc, const char *argv[]);
 int h5repack_addfilter (const char* str, pack_opt_t *options);
 int h5repack_addlayout (const char* str, pack_opt_t *options);
 int h5repack_init      (pack_opt_t *options, int verbose);
@@ -137,11 +138,15 @@ int h5repack_cmpdcpl   (const char *fname1,
 
 
 int check_objects(const char* fname,
-                  pack_opt_t *options);
+                  pack_opt_t *options,
+                  int argc, 
+                  const char *argv[]);
 
 int copy_objects(const char* fnamein,
                  const char* fnameout,
-                 pack_opt_t *options);
+                 pack_opt_t *options,
+                 int argc, 
+                 const char *argv[]);
 
 void print_objlist(const char *filename,
                    int nobjects,

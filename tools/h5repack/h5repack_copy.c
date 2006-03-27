@@ -145,7 +145,9 @@ static void print_obj(hid_t dcpl_id, char *name)
 
 int copy_objects(const char* fnamein,
                  const char* fnameout,
-                 pack_opt_t *options)
+                 pack_opt_t *options,
+                 int argc, 
+                 const char *argv[])
 {
  hid_t         fidin;
  hid_t         fidout=(-1);
@@ -155,12 +157,12 @@ int copy_objects(const char* fnamein,
  * open the files
  *-------------------------------------------------------------------------
  */
- if ((fidin=H5Fopen(fnamein,H5F_ACC_RDONLY,H5P_DEFAULT))<0 ){
-  printf("h5repack: <%s>: %s\n", fnamein, H5FOPENERROR );
+ if ((fidin=h5tools_fopen(fnamein, NULL, NULL, 0, argc, argv))<0 ){
+  printf("<%s>: %s\n", fnamein, H5FOPENERROR );
   goto out;
  }
  if ((fidout=H5Fcreate(fnameout,H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0 ){
-  printf("h5repack: <%s>: Could not create file\n", fnameout );
+  printf("<%s>: Could not create file\n", fnameout );
   goto out;
  }
 
@@ -179,7 +181,7 @@ int copy_objects(const char* fnamein,
  *-------------------------------------------------------------------------
  */
  if(do_copy_objects(fidin,fidout,travt,options)<0) {
-  printf("h5repack: <%s>: Could not copy data to: %s\n", fnamein, fnameout);
+  printf("<%s>: Could not copy data to: %s\n", fnamein, fnameout);
   goto out;
  }
 
@@ -189,7 +191,7 @@ int copy_objects(const char* fnamein,
  *-------------------------------------------------------------------------
  */
  if(do_copy_refobjs(fidin,fidout,travt,options)<0) {
-  printf("h5repack: <%s>: Could not copy data to: %s\n", fnamein, fnameout);
+  printf("<%s>: Could not copy data to: %s\n", fnamein, fnameout);
   goto out;
  }
 

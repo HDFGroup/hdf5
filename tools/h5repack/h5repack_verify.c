@@ -366,12 +366,12 @@ int h5repack_cmpdcpl(const char *fname1,
  /* Open the files */
  if ((fid1=H5Fopen(fname1,H5F_ACC_RDONLY,H5P_DEFAULT))<0 )
  {
-  printf("h5repack: <%s>: %s\n", fname1, H5FOPENERROR );
+  printf("<%s>: %s\n", fname1, H5FOPENERROR );
   return -1;
  }
  if ((fid2=H5Fopen(fname2,H5F_ACC_RDONLY,H5P_DEFAULT))<0 )
  {
-  printf("h5repack: <%s>: %s\n", fname2, H5FOPENERROR );
+  printf("<%s>: %s\n", fname2, H5FOPENERROR );
   H5Fclose(fid1);
   return -1;
  }

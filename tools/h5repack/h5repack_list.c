@@ -35,7 +35,9 @@
  *-------------------------------------------------------------------------
  */
 int check_objects(const char* fname,
-                  pack_opt_t *options)
+                  pack_opt_t *options,
+                  int argc, 
+                  const char *argv[])
 {
  hid_t         fid;
  int           i;
@@ -45,18 +47,10 @@ int check_objects(const char* fname,
  * open the file
  *-------------------------------------------------------------------------
  */
-
- /* disable out reporting */
- H5E_BEGIN_TRY {
-
- /* Open the files */
- if ((fid=H5Fopen(fname,H5F_ACC_RDONLY,H5P_DEFAULT))<0 ){
-  printf("h5repack: <%s>: %s\n", fname, H5FOPENERROR );
-  exit(1);
+ if ((fid=h5tools_fopen(fname, NULL, NULL, 0, argc, argv))<0){
+  printf("<%s>: %s\n", fname, H5FOPENERROR );
+  return -1;
  }
- /* enable out reporting */
- } H5E_END_TRY;
-
 
 /*-------------------------------------------------------------------------
  * get the list of objects in the file

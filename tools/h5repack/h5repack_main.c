@@ -16,6 +16,8 @@
 #include <string.h>
 #include "h5repack.h"
 
+const char *progname = "h5repack";
+int d_status = EXIT_SUCCESS;
 static void usage(void);
 
 /*-------------------------------------------------------------------------
@@ -108,7 +110,7 @@ int main(int argc, char **argv)
  }
 
  /* pack it */
- ret=h5repack(infile,outfile,&options);
+ ret=h5repack(infile,outfile,&options,argc,argv);
 
  /* free tables */
  h5repack_end(&options);
