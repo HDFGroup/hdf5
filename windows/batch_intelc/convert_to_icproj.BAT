@@ -30,10 +30,6 @@ for /R  %CD%\windows\ %%i in (*.icproj) do (
 del %%i
 )
 
-echo.
-echo START Converting files in .vcproj to .icproj 
-echo.
-
 ::Start Converting
 for /R %CD%\windows %%i in (*.vcproj) do (
 ICProjConvert80 %%i /IC >>convert_intel.log
