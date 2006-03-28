@@ -263,7 +263,8 @@ HDfprintf(stderr, "%s: *size_key = %Zu, *addr_key = %a\n", FUNC, *size_key, *add
     } /* end if */
     else {
         /* Have a single section, put it into the bins */
-         if(flist->sec_count == 1) {
+/* XXX: Take out the "&& flist->bins == NULL" when bins converted back into single section */
+         if(flist->sec_count == 1 && flist->bins == NULL) {
             HDassert(flist->single.node);
 
             /* Check if we should allocate the bins */

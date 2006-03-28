@@ -96,7 +96,8 @@ H5FL_DEFINE(H5HF_t);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_create(H5F_t *f, hid_t dxpl_id, H5HF_create_t *cparam, haddr_t *addr_p)
+H5HF_create(H5F_t *f, hid_t dxpl_id, H5HF_create_t *cparam, haddr_t *addr_p,
+    size_t *id_len_p)
 {
     H5HF_t *fh = NULL;                  /* The new fractal heap header information */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -109,6 +110,7 @@ H5HF_create(H5F_t *f, hid_t dxpl_id, H5HF_create_t *cparam, haddr_t *addr_p)
     HDassert(f);
     HDassert(cparam);
     HDassert(addr_p);
+    HDassert(id_len_p);
 
     /* Allocate & basic initialization for the shared header */
     if(NULL == (fh = H5HF_alloc(f)))
@@ -121,6 +123,12 @@ H5HF_create(H5F_t *f, hid_t dxpl_id, H5HF_create_t *cparam, haddr_t *addr_p)
     /* Initialize shared fractal heap header */
     if(H5HF_init(fh, *addr_p, cparam) < 0)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't initialize shared fractal heap header")
+
+    /* Set the length of heap IDs */
+    *id_len_p = fh->id_len;
+#ifdef QAK
+HDfprintf(stderr, "%s: fh->id_len = %Zu\n", FUNC, fh->id_len);
+#endif /* QAK */
 
     /* Cache the new fractal heap header */
     if(H5AC_set(f, dxpl_id, H5AC_FHEAP_HDR, *addr_p, fh, H5AC__NO_FLAGS_SET) < 0)
@@ -232,6 +240,7 @@ H5HF_read(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_id,
     H5HF_t *fh = NULL;                  /* The fractal heap header information */
     const uint8_t *id = (const uint8_t *)_id;   /* Object ID */
     hsize_t obj_off;                    /* Object's offset in heap */
+    size_t obj_len;                     /* Object's length in heap */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5HF_read, FAIL)
@@ -250,10 +259,11 @@ H5HF_read(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_id,
     if(NULL == (fh = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap header")
 
-    /* Decode the offset within the heap */
+    /* Decode the object offset within the heap & it's length */
     UINT64DECODE_VAR(id, obj_off, fh->heap_off_size);
+    UINT64DECODE_VAR(id, obj_len, fh->id_len);
 #ifdef QAK
-HDfprintf(stderr, "%s: obj_off = %Hu\n", FUNC, obj_off);
+HDfprintf(stderr, "%s: obj_off = %Hu, obj_len = %Zu\n", FUNC, obj_off, obj_len);
 #endif /* QAK */
 
     /* Check for standalone object */
@@ -262,7 +272,7 @@ HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "standalone blocks not supported ye
     } /* end if */
     else {
         /* Read object from managed heap blocks */
-        if(H5HF_man_read(fh, dxpl_id, obj_off, obj) < 0)
+        if(H5HF_man_read(fh, dxpl_id, obj_off, obj_len, obj) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't read object from fractal heap")
     } /* end else */
 

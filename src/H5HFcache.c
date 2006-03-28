@@ -180,9 +180,6 @@ H5HF_dtable_decode(H5F_t *f, const uint8_t **pp, H5HF_dtable_t *dtable)
     /* Current # of rows in root indirect block */
     UINT16DECODE(*pp, dtable->curr_root_rows);
 
-    /* Next direct block's heap offset */
-    H5F_DECODE_LENGTH(f, *pp, dtable->next_dir_block);
-
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF_dtable_decode() */
 
@@ -232,9 +229,6 @@ H5HF_dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_t *dtable)
 
     /* Current # of rows in root indirect block */
     UINT16ENCODE(*pp, dtable->curr_root_rows);
-
-    /* Next direct block's heap offset */
-    H5F_ENCODE_LENGTH(f, *pp, dtable->next_dir_block);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF_dtable_encode() */
@@ -1166,6 +1160,7 @@ HDfprintf(stderr, "%s: Load indirect block, addr = %a\n", FUNC, addr);
             UINT32DECODE_VAR(p, iblock->ents[u].free_space, hdr->man_dtable.max_dir_blk_off_size)
         else
             UINT64DECODE_VAR(p, iblock->ents[u].free_space, hdr->heap_off_size)
+/* XXX: Add code to indirect block cache load routine to create range sections for skipped blocks */
     } /* end for */
 
     /* Sanity check */
