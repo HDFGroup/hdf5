@@ -48490,184 +48490,220 @@ ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $FCFLAGS_SRCEXT conftest.$a
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 
-            ac_ext=${FC_SRCEXT-f}
-ac_compile='$FC -c $FCFLAGS $FCFLAGS_SRCEXT conftest.$ac_ext >&5'
-ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $FCFLAGS_SRCEXT conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_fc_compiler_gnu
+            cat >conftest.$ac_ext <<_ACEOF
+      program main
 
-
-test -d conftestdir || mkdir conftestdir
-cd conftestdir
-rm -rf *
-
-cat >conftest.$ac_ext <<EOF
-        program conftest
           include 'mpif.h'
-
           integer:: ierr
           call mpi_file_open( ierr )
-        end
-EOF
-
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>&5
+      end
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_fc_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; then
+  (exit $ac_status); }; }; then
   :
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+echo "$as_me:$LINENO: checking for
+            include 'mpif.h'
+            integer:: ierr
+            call mpi_file_open( ierr ) in -lmpi" >&5
+echo $ECHO_N "checking for
+            include 'mpif.h'
+            integer:: ierr
+            call mpi_file_open( ierr ) in -lmpi... $ECHO_C" >&6
+if test "${ac_cv_lib_mpi______________include__mpif_h______________integer___ierr_____________call_mpi_file_open__ierr__+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lmpi  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+      program main
+      call
+            include 'mpif.h'
+            integer:: ierr
+            call mpi_file_open( ierr )
+      end
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_fc_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_mpi______________include__mpif_h______________integer___ierr_____________call_mpi_file_open__ierr__=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_lib_mpi______________include__mpif_h______________integer___ierr_____________call_mpi_file_open__ierr__=no
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_mpi______________include__mpif_h______________integer___ierr_____________call_mpi_file_open__ierr__" >&5
+echo "${ECHO_T}$ac_cv_lib_mpi______________include__mpif_h______________integer___ierr_____________call_mpi_file_open__ierr__" >&6
+if test $ac_cv_lib_mpi______________include__mpif_h______________integer___ierr_____________call_mpi_file_open__ierr__ = yes; then
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBMPI 1
+_ACEOF
+
+  LIBS="-lmpi $LIBS"
 
 else
-  :
-  ac_ext=${FC_SRCEXT-f}
-ac_compile='$FC -c $FCFLAGS $FCFLAGS_SRCEXT conftest.$ac_ext >&5'
-ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $FCFLAGS_SRCEXT conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_fc_compiler_gnu
+  PARALLEL=no
+fi
 
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
 
-test -d conftestdir || mkdir conftestdir
-cd conftestdir
-rm -rf *
-
-cat >conftest.$ac_ext <<EOF
-        program conftest
+                  if test "X$PARALLEL" = "Xyes"; then
+        cat >conftest.$ac_ext <<_ACEOF
+      program main
 
             include 'mpif.h'
             integer:: ierr
             call mpi_file_open( ierr )
-        end
-EOF
-
-if test -n "mpi"; then
-  saved_LIBS="$LIBS"
-  LIBS="$LIBS -lmpi"
-fi
-
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>&5
+      end
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_fc_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; then
+  (exit $ac_status); }; }; then
   :
-
 else
-  LIBS="$saved_LIBS"
-  PARALLEL=no
-fi
-cd ..
-rm -rf conftest*
-ac_ext=${FC_SRCEXT-f}
-ac_compile='$FC -c $FCFLAGS $FCFLAGS_SRCEXT conftest.$ac_ext >&5'
-ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $FCFLAGS_SRCEXT conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_fc_compiler_gnu
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
 
 
-fi
-cd ..
-rm -rf conftest*
-ac_ext=${FC_SRCEXT-f}
-ac_compile='$FC -c $FCFLAGS $FCFLAGS_SRCEXT conftest.$ac_ext >&5'
-ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $FCFLAGS_SRCEXT conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_fc_compiler_gnu
-
-
-
-                  if test "X$PARALLEL" = "Xyes"; then
-        ac_ext=${FC_SRCEXT-f}
-ac_compile='$FC -c $FCFLAGS $FCFLAGS_SRCEXT conftest.$ac_ext >&5'
-ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $FCFLAGS_SRCEXT conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_fc_compiler_gnu
-
-
-test -d conftestdir || mkdir conftestdir
-cd conftestdir
-rm -rf *
-
-cat >conftest.$ac_ext <<EOF
-        program conftest
-          include 'mpif.h'
-
-            integer:: ierr
-            call mpi_file_open( ierr )
-        end
-EOF
-
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; then
-  :
-
+echo "$as_me:$LINENO: checking for
+              include 'mpif.h'
+              integer:: ierr
+              call mpi_file_open( ierr ) in -lmpio" >&5
+echo $ECHO_N "checking for
+              include 'mpif.h'
+              integer:: ierr
+              call mpi_file_open( ierr ) in -lmpio... $ECHO_C" >&6
+if test "${ac_cv_lib_mpio________________include__mpif_h________________integer___ierr_______________call_mpi_file_open__ierr__+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  :
-  ac_ext=${FC_SRCEXT-f}
-ac_compile='$FC -c $FCFLAGS $FCFLAGS_SRCEXT conftest.$ac_ext >&5'
-ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $FCFLAGS_SRCEXT conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_fc_compiler_gnu
-
-
-test -d conftestdir || mkdir conftestdir
-cd conftestdir
-rm -rf *
-
-cat >conftest.$ac_ext <<EOF
-        program conftest
-
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lmpio  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+      program main
+      call
               include 'mpif.h'
               integer:: ierr
               call mpi_file_open( ierr )
-        end
-EOF
+      end
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_fc_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_mpio________________include__mpif_h________________integer___ierr_______________call_mpi_file_open__ierr__=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
 
-if test -n "mpio"; then
-  saved_LIBS="$LIBS"
-  LIBS="$LIBS -lmpio"
+ac_cv_lib_mpio________________include__mpif_h________________integer___ierr_______________call_mpi_file_open__ierr__=no
 fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_mpio________________include__mpif_h________________integer___ierr_______________call_mpi_file_open__ierr__" >&5
+echo "${ECHO_T}$ac_cv_lib_mpio________________include__mpif_h________________integer___ierr_______________call_mpi_file_open__ierr__" >&6
+if test $ac_cv_lib_mpio________________include__mpif_h________________integer___ierr_______________call_mpi_file_open__ierr__ = yes; then
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBMPIO 1
+_ACEOF
 
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; then
-  :
+  LIBS="-lmpio $LIBS"
 
 else
-  LIBS="$saved_LIBS"
   PARALLEL=no
 fi
-cd ..
-rm -rf conftest*
-ac_ext=${FC_SRCEXT-f}
-ac_compile='$FC -c $FCFLAGS $FCFLAGS_SRCEXT conftest.$ac_ext >&5'
-ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $FCFLAGS_SRCEXT conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_fc_compiler_gnu
-
 
 fi
-cd ..
-rm -rf conftest*
-ac_ext=${FC_SRCEXT-f}
-ac_compile='$FC -c $FCFLAGS $FCFLAGS_SRCEXT conftest.$ac_ext >&5'
-ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $FCFLAGS_SRCEXT conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_fc_compiler_gnu
-
-
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
       fi
 
             ac_ext=c
