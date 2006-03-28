@@ -552,15 +552,18 @@ h5tools_print_char(h5tools_str_t *str, const h5tool_format_t *info, unsigned cha
  *		Added support for printing raw data. If info->raw is non-zero
  *		then data is printed in hexadecimal format.
  *
- *              Robb Matzke, 2003-01-10
- *              Binary output format is dd:dd:... instead of 0xdddd... so it
- *              doesn't look like a hexadecimal integer, and thus users will
- *              be less likely to complain that HDF5 didn't properly byte
- *              swap their data during type conversion.
+ *  Robb Matzke, 2003-01-10
+ *  Binary output format is dd:dd:... instead of 0xdddd... so it
+ *  doesn't look like a hexadecimal integer, and thus users will
+ *  be less likely to complain that HDF5 didn't properly byte
+ *  swap their data during type conversion.
  *
- *              Robb Matzke, LLNL, 2003-06-05
- *              If TYPE is a variable length string then the pointer to
- *              the value to pring (VP) is a pointer to a `char*'.
+ *  Robb Matzke, LLNL, 2003-06-05
+ *  If TYPE is a variable length string then the pointer to
+ *  the value to pring (VP) is a pointer to a `char*'.
+ *
+ *  pvn, 28 March 2006
+ *  added H5T_NATIVE_LDOUBLE case
  *-------------------------------------------------------------------------
  */
 char *
@@ -592,6 +595,9 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
     int                tempint;
     unsigned short     tempushort;
     short              tempshort;
+#if H5_SIZEOF_LONG_DOUBLE !=0
+    long double        templdouble;
+#endif
 
     /* Build default formats for long long types */
     if (!fmt_llong[0]) {
@@ -617,9 +623,14 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         memcpy(&tempfloat, vp, sizeof(float));
         h5tools_str_append(str, OPT(info->fmt_float, "%g"), tempfloat);
     } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
-        memcpy(&tempdouble, vp, sizeof(double));
-        h5tools_str_append(str, OPT(info->fmt_double, "%g"), tempdouble);
-    } else if (info->ascii && (H5Tequal(type, H5T_NATIVE_SCHAR) ||
+     memcpy(&tempdouble, vp, sizeof(double));
+     h5tools_str_append(str, OPT(info->fmt_double, "%g"), tempdouble);
+#if H5_SIZEOF_LONG_DOUBLE !=0
+    } else if (H5Tequal(type, H5T_NATIVE_LDOUBLE)) {
+      memcpy(&templdouble, vp, sizeof(long double));
+      h5tools_str_append(str, "%Lf", templdouble);
+#endif
+     } else if (info->ascii && (H5Tequal(type, H5T_NATIVE_SCHAR) ||
                                H5Tequal(type, H5T_NATIVE_UCHAR))) {
         h5tools_print_char(str, info, (unsigned char)(*ucp_vp));
     } else if (H5T_STRING == H5Tget_class(type)) {

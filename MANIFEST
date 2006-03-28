@@ -1059,7 +1059,9 @@
 ./tools/testfiles/tstring2.ddl
 ./tools/testfiles/tstr3.h5
 ./tools/testfiles/taindices.h5
-
+./tools/testfiles/tvms.ddl
+./tools/testfiles/tldouble.h5
+./tools/testfiles/tvms.h5
 
 
 # Expected output from h5ls tests

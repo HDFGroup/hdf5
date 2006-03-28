@@ -3,7 +3,7 @@ Expected output for 'h5dump -H -p -d nbit tfilters.h5'
 #############################
 HDF5 "tfilters.h5" {
 DATASET "nbit" {
-   DATATYPE  undefined integer
+   DATATYPE  32-bit little-endian integer
    DATASPACE  SIMPLE { ( 20, 10 ) / ( 20, 10 ) }
    STORAGE_LAYOUT {
       CHUNKED ( 10, 5 )

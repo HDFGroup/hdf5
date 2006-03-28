@@ -314,6 +314,11 @@ TOOLTEST tnullspace.ddl tnullspace.h5
 # test for displaying objects with very long names
 TOOLTEST tlonglinks.ddl tlonglinks.h5
 
+# test for long double (some systems do not have long double)
+#TOOLTEST tldouble.ddl tldouble.h5
+
+# test for vms
+TOOLTEST tvms.ddl tvms.h5
 
 if test $nerrors -eq 0 ; then
    echo "All $DUMPER tests passed."

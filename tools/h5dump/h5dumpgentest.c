@@ -78,6 +78,8 @@
 #define FILE49  "tstr3.h5"
 #define FILE50  "taindices.h5"
 #define FILE51  "tlonglinks.h5"
+#define FILE52  "tldouble.h5"
+
 
 
 
@@ -5415,6 +5417,59 @@ static void gent_longlinks(void)
 }
 
 
+
+/*-------------------------------------------------------------------------
+ * Function: gent_ldouble
+ *
+ * Purpose: make file with a long double dataset
+ *
+ *-------------------------------------------------------------------------
+ */
+static int gent_ldouble(void)
+{
+ hid_t       fid;        
+ hid_t       did;
+ hid_t       tid;
+ hid_t       sid;
+ size_t      size;
+ hsize_t     dims[1] = {3};             
+ long double buf[3] = {1,2,3};
+  
+ if ((fid = H5Fcreate(FILE52, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0)
+  goto error;
+ 
+ if ((sid = H5Screate_simple(1, dims, NULL))<0)
+  goto error;
+ 
+ if ((tid = H5Tcopy(H5T_NATIVE_LDOUBLE))<0)
+  goto error;
+
+ if ((size = H5Tget_size(tid))<0)
+  goto error;
+
+ if ((did = H5Dcreate(fid, "dset", tid, sid, H5P_DEFAULT))<0)
+  goto error;
+
+ if (H5Dwrite(did,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+  goto error;
+ 
+ if (H5Sclose(sid)<0)
+  goto error;
+ if (H5Tclose(tid)<0)
+  goto error;
+ if (H5Dclose(did)<0)
+  goto error;
+ if (H5Fclose(fid)<0)
+  goto error;
+ 
+ return 0;
+
+error:
+ printf("error !\n");
+ return -1;
+
+}
+
 /*-------------------------------------------------------------------------
  * Function: main
  *
@@ -5474,6 +5529,7 @@ int main(void)
     gent_string();
     gent_aindices();
     gent_longlinks();
+    gent_ldouble();
 
     return 0;
 }

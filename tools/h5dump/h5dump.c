@@ -655,7 +655,8 @@ usage(const char *prog)
  *
  * Programmer:  Ruey-Hsia Li
  *
- * Modifications:
+ * Modifications: pvn, March 28, 2006
+ *  print information about type when a native match is not possible
  *
  *-------------------------------------------------------------------------
  */
@@ -677,6 +678,9 @@ print_datatype(hid_t type,unsigned in_group)
     hid_t       super;
     hid_t       tmp_type;
     htri_t      is_vlstr=FALSE;
+    const char  *order_s=NULL;  /* byte order string */
+    H5T_sign_t  sign;           /* sign scheme value */
+    const char  *sign_s=NULL;   /* sign scheme string */
 
     if (!in_group && H5Tcommitted(type) > 0) {
         obj_t  *obj;    /* Found object */
@@ -696,88 +700,141 @@ print_datatype(hid_t type,unsigned in_group)
     } else {
         switch (H5Tget_class(type)) {
         case H5T_INTEGER:
-            if (H5Tequal(type, H5T_STD_I8BE)) {
+            if (H5Tequal(type, H5T_STD_I8BE)==TRUE) {
                 printf("H5T_STD_I8BE");
-            } else if (H5Tequal(type, H5T_STD_I8LE)) {
+            } else if (H5Tequal(type, H5T_STD_I8LE)==TRUE) {
                 printf("H5T_STD_I8LE");
-            } else if (H5Tequal(type, H5T_STD_I16BE)) {
+            } else if (H5Tequal(type, H5T_STD_I16BE)==TRUE) {
                 printf("H5T_STD_I16BE");
-            } else if (H5Tequal(type, H5T_STD_I16LE)) {
+            } else if (H5Tequal(type, H5T_STD_I16LE)==TRUE) {
                 printf("H5T_STD_I16LE");
-            } else if (H5Tequal(type, H5T_STD_I32BE)) {
+            } else if (H5Tequal(type, H5T_STD_I32BE)==TRUE) {
                 printf("H5T_STD_I32BE");
-            } else if (H5Tequal(type, H5T_STD_I32LE)) {
+            } else if (H5Tequal(type, H5T_STD_I32LE)==TRUE) {
                 printf("H5T_STD_I32LE");
-            } else if (H5Tequal(type, H5T_STD_I64BE)) {
+            } else if (H5Tequal(type, H5T_STD_I64BE)==TRUE) {
                 printf("H5T_STD_I64BE");
-            } else if (H5Tequal(type, H5T_STD_I64LE)) {
+            } else if (H5Tequal(type, H5T_STD_I64LE)==TRUE) {
                 printf("H5T_STD_I64LE");
-            } else if (H5Tequal(type, H5T_STD_U8BE)) {
+            } else if (H5Tequal(type, H5T_STD_U8BE)==TRUE) {
                 printf("H5T_STD_U8BE");
-            } else if (H5Tequal(type, H5T_STD_U8LE)) {
+            } else if (H5Tequal(type, H5T_STD_U8LE)==TRUE) {
                 printf("H5T_STD_U8LE");
-            } else if (H5Tequal(type, H5T_STD_U16BE)) {
+            } else if (H5Tequal(type, H5T_STD_U16BE)==TRUE) {
                 printf("H5T_STD_U16BE");
-            } else if (H5Tequal(type, H5T_STD_U16LE)) {
+            } else if (H5Tequal(type, H5T_STD_U16LE)==TRUE) {
                 printf("H5T_STD_U16LE");
-            } else if (H5Tequal(type, H5T_STD_U32BE)) {
+            } else if (H5Tequal(type, H5T_STD_U32BE)==TRUE) {
                 printf("H5T_STD_U32BE");
-            } else if (H5Tequal(type, H5T_STD_U32LE)) {
+            } else if (H5Tequal(type, H5T_STD_U32LE)==TRUE) {
                 printf("H5T_STD_U32LE");
-            } else if (H5Tequal(type, H5T_STD_U64BE)) {
+            } else if (H5Tequal(type, H5T_STD_U64BE)==TRUE) {
                 printf("H5T_STD_U64BE");
-            } else if (H5Tequal(type, H5T_STD_U64LE)) {
+            } else if (H5Tequal(type, H5T_STD_U64LE)==TRUE) {
                 printf("H5T_STD_U64LE");
-            } else if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
+            } else if (H5Tequal(type, H5T_NATIVE_SCHAR)==TRUE) {
                 printf("H5T_NATIVE_SCHAR");
-            } else if (H5Tequal(type, H5T_NATIVE_UCHAR)) {
+            } else if (H5Tequal(type, H5T_NATIVE_UCHAR)==TRUE) {
                 printf("H5T_NATIVE_UCHAR");
-            } else if (H5Tequal(type, H5T_NATIVE_SHORT)) {
+            } else if (H5Tequal(type, H5T_NATIVE_SHORT)==TRUE) {
                 printf("H5T_NATIVE_SHORT");
-            } else if (H5Tequal(type, H5T_NATIVE_USHORT)) {
+            } else if (H5Tequal(type, H5T_NATIVE_USHORT)==TRUE) {
                 printf("H5T_NATIVE_USHORT");
-            } else if (H5Tequal(type, H5T_NATIVE_INT)) {
+            } else if (H5Tequal(type, H5T_NATIVE_INT)==TRUE) {
                 printf("H5T_NATIVE_INT");
-            } else if (H5Tequal(type, H5T_NATIVE_UINT)) {
+            } else if (H5Tequal(type, H5T_NATIVE_UINT)==TRUE) {
                 printf("H5T_NATIVE_UINT");
-            } else if (H5Tequal(type, H5T_NATIVE_LONG)) {
+            } else if (H5Tequal(type, H5T_NATIVE_LONG)==TRUE) {
                 printf("H5T_NATIVE_LONG");
-            } else if (H5Tequal(type, H5T_NATIVE_ULONG)) {
+            } else if (H5Tequal(type, H5T_NATIVE_ULONG)==TRUE) {
                 printf("H5T_NATIVE_ULONG");
-            } else if (H5Tequal(type, H5T_NATIVE_LLONG)) {
+            } else if (H5Tequal(type, H5T_NATIVE_LLONG)==TRUE) {
                 printf("H5T_NATIVE_LLONG");
-            } else if (H5Tequal(type, H5T_NATIVE_ULLONG)) {
+            } else if (H5Tequal(type, H5T_NATIVE_ULLONG)==TRUE) {
                 printf("H5T_NATIVE_ULLONG");
             } else {
-                printf("undefined integer");
-                d_status = EXIT_FAILURE;
+                
+             /* byte order */
+             if (H5Tget_size(type)>1) 
+             {
+              order = H5Tget_order(type);
+              if (H5T_ORDER_LE==order) {
+               order_s = " little-endian";
+              } else if (H5T_ORDER_BE==order) {
+               order_s = " big-endian";
+              } else if (H5T_ORDER_VAX==order) {
+               order_s = " mixed-endian";
+              } else {
+               order_s = " unknown-byte-order";
+              }
+             } else {
+              order_s = "";
+             }
+             
+             /* sign */
+             if ((sign=H5Tget_sign(type))>=0) 
+             {
+              if (H5T_SGN_NONE==sign) {
+               sign_s = " unsigned";
+              } else if (H5T_SGN_2==sign) {
+               sign_s = "";
+              } else {
+               sign_s = " unknown-sign";
+              }
+             } else {
+              sign_s = " unknown-sign";
+             }
+             
+             /* print size, order, and sign  */
+             printf("%lu-bit%s%s integer",
+              (unsigned long)(8*H5Tget_size(type)), order_s, sign_s);
             }
             break;
 
         case H5T_FLOAT:
-            if (H5Tequal(type, H5T_IEEE_F32BE)) {
+            if (H5Tequal(type, H5T_IEEE_F32BE)==TRUE) {
                 printf("H5T_IEEE_F32BE");
-            } else if (H5Tequal(type, H5T_IEEE_F32LE)) {
+            } else if (H5Tequal(type, H5T_IEEE_F32LE)==TRUE) {
                 printf("H5T_IEEE_F32LE");
-            } else if (H5Tequal(type, H5T_IEEE_F64BE)) {
+            } else if (H5Tequal(type, H5T_IEEE_F64BE)==TRUE) {
                 printf("H5T_IEEE_F64BE");
-            } else if (H5Tequal(type, H5T_IEEE_F64LE)) {
+            } else if (H5Tequal(type, H5T_IEEE_F64LE)==TRUE) {
                 printf("H5T_IEEE_F64LE");
-            } else if (H5Tequal(type, H5T_VAX_F32)) {
+            } else if (H5Tequal(type, H5T_VAX_F32)==TRUE) {
                 printf("H5T_VAX_F32");
-            } else if (H5Tequal(type, H5T_VAX_F64)) {
+            } else if (H5Tequal(type, H5T_VAX_F64)==TRUE) {
                 printf("H5T_VAX_F64");
-            } else if (H5Tequal(type, H5T_NATIVE_FLOAT)) {
+            } else if (H5Tequal(type, H5T_NATIVE_FLOAT)==TRUE) {
                 printf("H5T_NATIVE_FLOAT");
-            } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
+            } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)==TRUE) {
                 printf("H5T_NATIVE_DOUBLE");
 #if H5_SIZEOF_LONG_DOUBLE !=0
-            } else if (H5Tequal(type, H5T_NATIVE_LDOUBLE)) {
+            } else if (H5Tequal(type, H5T_NATIVE_LDOUBLE)==TRUE) {
                 printf("H5T_NATIVE_LDOUBLE");
 #endif
             } else {
-                printf("undefined float");
-                d_status = EXIT_FAILURE;
+                
+             /* byte order */
+             if (H5Tget_size(type)>1) 
+             {
+              order = H5Tget_order(type);
+              if (H5T_ORDER_LE==order) {
+               order_s = " little-endian";
+              } else if (H5T_ORDER_BE==order) {
+               order_s = " big-endian";
+              } else if (H5T_ORDER_VAX==order) {
+               order_s = " mixed-endian";
+              } else {
+               order_s = " unknown-byte-order";
+              }
+             } else {
+              order_s = "";
+             }
+             
+             /* print size and byte order */
+             printf("%lu-bit%s floating-point",
+              (unsigned long)(8*H5Tget_size(type)), order_s);
+
             }
             break;
 
@@ -891,21 +948,21 @@ done:
             break;
 
         case H5T_BITFIELD:
-            if (H5Tequal(type, H5T_STD_B8BE)) {
+            if (H5Tequal(type, H5T_STD_B8BE)==TRUE) {
                 printf("H5T_STD_B8BE");
-            } else if (H5Tequal(type, H5T_STD_B8LE)) {
+            } else if (H5Tequal(type, H5T_STD_B8LE)==TRUE) {
                 printf("H5T_STD_B8LE");
-            } else if (H5Tequal(type, H5T_STD_B16BE)) {
+            } else if (H5Tequal(type, H5T_STD_B16BE)==TRUE) {
                 printf("H5T_STD_B16BE");
-            } else if (H5Tequal(type, H5T_STD_B16LE)) {
+            } else if (H5Tequal(type, H5T_STD_B16LE)==TRUE) {
                 printf("H5T_STD_B16LE");
-            } else if (H5Tequal(type, H5T_STD_B32BE)) {
+            } else if (H5Tequal(type, H5T_STD_B32BE)==TRUE) {
                 printf("H5T_STD_B32BE");
-            } else if (H5Tequal(type, H5T_STD_B32LE)) {
+            } else if (H5Tequal(type, H5T_STD_B32LE)==TRUE) {
                 printf("H5T_STD_B32LE");
-            } else if (H5Tequal(type, H5T_STD_B64BE)) {
+            } else if (H5Tequal(type, H5T_STD_B64BE)==TRUE) {
                 printf("H5T_STD_B64BE");
-            } else if (H5Tequal(type, H5T_STD_B64LE)) {
+            } else if (H5Tequal(type, H5T_STD_B64LE)==TRUE) {
                 printf("H5T_STD_B64LE");
             } else {
                 printf("undefined bitfield");
