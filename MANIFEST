@@ -1549,6 +1549,8 @@
 ./windows/test/chunkdll/chunkdll.dsp
 ./windows/test/cmpd_dset/cmpd_dset.dsp
 ./windows/test/cmpd_dsetdll/cmpd_dsetdll.dsp
+./windows/test/cross_read/cross_read.dsp
+./windows/test/cross_readdll/cross_readdll.dsp
 ./windows/test/dangle/dangle.dsp
 ./windows/test/dangledll/dangledll.dsp
 ./windows/test/dt_arith/dt_arith.dsp
