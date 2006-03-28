@@ -407,6 +407,12 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name h52gifdll
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name cross_read
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name cross_readdll
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -634,6 +640,42 @@ Package=<4>
 ###############################################################################
 
 Project: "cmpd_dsetdll"=..\..\test\cmpd_dsetdll\cmpd_dsetdll.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtestD
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "cross_read"=..\..\TEST\cross_read\cross_read.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtest
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "cross_readdll"=..\..\TEST\cross_readdll\cross_readdll.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
