@@ -121,10 +121,10 @@ call %tooltest% tattr-2.ddl
 set flag=--header -a /attr2 --attribute=/attr %tattr%
 call %tooltest% tattr-3.ddl
 
-::------------------------------------------------
-::test for displaying shared datatype in attribute
-::------------------------------------------------
-set flag=-A %tnamed_dtype_attr% 
+::-----------------------------------------------------------------------------
+::test for displaying attributes in shared datatype (also in group and dataset)
+::-----------------------------------------------------------------------------
+set flag=%tnamed_dtype_attr% 
 call %tooltest% tnamed_dtype_attr.ddl
 
 ::------------------------------
