@@ -280,6 +280,13 @@ reserved%2\%1\reserved%2
 
 echo.
 echo ============================
+echo Testing cross_read 
+echo ============================
+
+cross_read%2\%1\cross_read%2
+
+echo.
+echo ============================
 echo Testing ./testerror.sh  
 echo ============================
 
