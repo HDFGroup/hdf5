@@ -29,7 +29,7 @@ static void ccdataset_print(hsize_t start[],hsize_t block[],DATATYPE*dataset);
 static int ccdataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[],
 			  hsize_t block[], DATATYPE *dataset, DATATYPE *original);
 
-static void coll_chunktest(const char* filename,int chunk_factor,int select_factor);
+static void coll_chunktest(const char* filename,int chunk_factor,int select_factor,int api_option);
 
 
 /*-------------------------------------------------------------------------
@@ -74,7 +74,7 @@ coll_chunk1(void)
   const char *filename;
 
   filename = GetTestParameters();
-  coll_chunktest(filename,1,BYROW_CONT);
+  coll_chunktest(filename,1,BYROW_CONT,API_NONE);
 
 }
 
@@ -121,7 +121,7 @@ coll_chunk2(void)
   const char *filename;
 
   filename = GetTestParameters();
-  coll_chunktest(filename,1,BYROW_DISCONT);
+  coll_chunktest(filename,1,BYROW_DISCONT,API_NONE);
 
 }
 
@@ -173,7 +173,7 @@ coll_chunk3(void)
   MPI_Comm_size(comm,&mpi_size);
 
   filename = GetTestParameters();
-  coll_chunktest(filename,mpi_size,BYROW_CONT);
+  coll_chunktest(filename,mpi_size,BYROW_CONT,API_NONE);
 
 }
 
@@ -223,7 +223,307 @@ coll_chunk4(void)
   MPI_Comm comm = MPI_COMM_WORLD;
 
   filename = GetTestParameters();
-  coll_chunktest(filename,1,BYROW_SELECTNONE);
+  coll_chunktest(filename,1,BYROW_SELECTNONE,API_NONE);
+
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	coll_chunk4
+ *
+ * Purpose:	Wrapper to test the collective chunk IO for regular JOINT 
+                selection with at least number of 2*mpi_size chunks
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Unknown
+ *		July 12th, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/* ------------------------------------------------------------------------
+ *  Descriptions for the selection: one singular selection accross many chunks
+ *  Two dimensions, Num of chunks = 2* mpi_size
+ *
+ *  dim1       = SPACE_DIM1*mpi_size
+ *  dim2       = SPACE_DIM2
+ *  chunk_dim1 = dim1
+ *  chunk_dim2 = dim2
+ *  block      = 1 for all dimensions
+ *  stride     = 1 for all dimensions
+ *  count0     = SPACE_DIM1
+ *  count1     = SPACE_DIM2(3)
+ *  start0     = mpi_rank*SPACE_DIM1
+ *  start1     = 0
+ *  
+ * ------------------------------------------------------------------------
+ */
+
+void
+coll_chunk5(void)
+{
+
+  const char *filename;
+  int mpi_size;
+
+  MPI_Comm comm = MPI_COMM_WORLD;
+
+  filename = GetTestParameters();
+  coll_chunktest(filename,4,BYROW_SELECTUNBALANCE,API_LINK_HARD);
+
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	coll_chunk6
+ *
+ * Purpose:	Wrapper to test the collective chunk IO for regular JOINT 
+                selection with at least number of 2*mpi_size chunks
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Unknown
+ *		July 12th, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/* ------------------------------------------------------------------------
+ *  Descriptions for the selection: one singular selection accross many chunks
+ *  Two dimensions, Num of chunks = 2* mpi_size
+ *
+ *  dim1       = SPACE_DIM1*mpi_size
+ *  dim2       = SPACE_DIM2
+ *  chunk_dim1 = dim1
+ *  chunk_dim2 = dim2
+ *  block      = 1 for all dimensions
+ *  stride     = 1 for all dimensions
+ *  count0     = SPACE_DIM1
+ *  count1     = SPACE_DIM2(3)
+ *  start0     = mpi_rank*SPACE_DIM1
+ *  start1     = 0
+ *  
+ * ------------------------------------------------------------------------
+ */
+
+void
+coll_chunk6(void)
+{
+
+  const char *filename;
+  int mpi_size;
+
+  MPI_Comm comm = MPI_COMM_WORLD;
+
+  filename = GetTestParameters();
+  coll_chunktest(filename,4,BYROW_SELECTUNBALANCE,API_MULTI_HARD);
+
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	coll_chunk7
+ *
+ * Purpose:	Wrapper to test the collective chunk IO for regular JOINT 
+                selection with at least number of 2*mpi_size chunks
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Unknown
+ *		July 12th, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/* ------------------------------------------------------------------------
+ *  Descriptions for the selection: one singular selection accross many chunks
+ *  Two dimensions, Num of chunks = 2* mpi_size
+ *
+ *  dim1       = SPACE_DIM1*mpi_size
+ *  dim2       = SPACE_DIM2
+ *  chunk_dim1 = dim1
+ *  chunk_dim2 = dim2
+ *  block      = 1 for all dimensions
+ *  stride     = 1 for all dimensions
+ *  count0     = SPACE_DIM1
+ *  count1     = SPACE_DIM2(3)
+ *  start0     = mpi_rank*SPACE_DIM1
+ *  start1     = 0
+ *  
+ * ------------------------------------------------------------------------
+ */
+
+void
+coll_chunk7(void)
+{
+
+  const char *filename;
+  int mpi_size;
+
+  MPI_Comm comm = MPI_COMM_WORLD;
+
+  filename = GetTestParameters();
+  coll_chunktest(filename,4,BYROW_SELECTUNBALANCE,API_LINK_TRUE);
+
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	coll_chunk8
+ *
+ * Purpose:	Wrapper to test the collective chunk IO for regular JOINT 
+                selection with at least number of 2*mpi_size chunks
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Unknown
+ *		July 12th, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/* ------------------------------------------------------------------------
+ *  Descriptions for the selection: one singular selection accross many chunks
+ *  Two dimensions, Num of chunks = 2* mpi_size
+ *
+ *  dim1       = SPACE_DIM1*mpi_size
+ *  dim2       = SPACE_DIM2
+ *  chunk_dim1 = dim1
+ *  chunk_dim2 = dim2
+ *  block      = 1 for all dimensions
+ *  stride     = 1 for all dimensions
+ *  count0     = SPACE_DIM1
+ *  count1     = SPACE_DIM2(3)
+ *  start0     = mpi_rank*SPACE_DIM1
+ *  start1     = 0
+ *  
+ * ------------------------------------------------------------------------
+ */
+
+void
+coll_chunk8(void)
+{
+
+  const char *filename;
+  int mpi_size;
+
+  MPI_Comm comm = MPI_COMM_WORLD;
+
+  filename = GetTestParameters();
+  coll_chunktest(filename,4,BYROW_SELECTUNBALANCE,API_LINK_FALSE);
+
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	coll_chunk9
+ *
+ * Purpose:	Wrapper to test the collective chunk IO for regular JOINT 
+                selection with at least number of 2*mpi_size chunks
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Unknown
+ *		July 12th, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/* ------------------------------------------------------------------------
+ *  Descriptions for the selection: one singular selection accross many chunks
+ *  Two dimensions, Num of chunks = 2* mpi_size
+ *
+ *  dim1       = SPACE_DIM1*mpi_size
+ *  dim2       = SPACE_DIM2
+ *  chunk_dim1 = dim1
+ *  chunk_dim2 = dim2
+ *  block      = 1 for all dimensions
+ *  stride     = 1 for all dimensions
+ *  count0     = SPACE_DIM1
+ *  count1     = SPACE_DIM2(3)
+ *  start0     = mpi_rank*SPACE_DIM1
+ *  start1     = 0
+ *  
+ * ------------------------------------------------------------------------
+ */
+
+void
+coll_chunk9(void)
+{
+
+  const char *filename;
+  int mpi_size;
+
+  MPI_Comm comm = MPI_COMM_WORLD;
+
+  filename = GetTestParameters();
+  coll_chunktest(filename,4,BYROW_SELECTUNBALANCE,API_MULTI_COLL);
+
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	coll_chunk10
+ *
+ * Purpose:	Wrapper to test the collective chunk IO for regular JOINT 
+                selection with at least number of 2*mpi_size chunks
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Unknown
+ *		July 12th, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/* ------------------------------------------------------------------------
+ *  Descriptions for the selection: one singular selection accross many chunks
+ *  Two dimensions, Num of chunks = 2* mpi_size
+ *
+ *  dim1       = SPACE_DIM1*mpi_size
+ *  dim2       = SPACE_DIM2
+ *  chunk_dim1 = dim1
+ *  chunk_dim2 = dim2
+ *  block      = 1 for all dimensions
+ *  stride     = 1 for all dimensions
+ *  count0     = SPACE_DIM1
+ *  count1     = SPACE_DIM2(3)
+ *  start0     = mpi_rank*SPACE_DIM1
+ *  start1     = 0
+ *  
+ * ------------------------------------------------------------------------
+ */
+
+void
+coll_chunk10(void)
+{
+
+  const char *filename;
+  int mpi_size;
+
+  MPI_Comm comm = MPI_COMM_WORLD;
+
+  filename = GetTestParameters();
+  coll_chunktest(filename,4,BYROW_SELECTINCHUNK,API_MULTI_IND);
 
 }
 
@@ -253,7 +553,8 @@ coll_chunk4(void)
 static void
 coll_chunktest(const char* filename,
 	       int chunk_factor,
-	       int select_factor) {
+	       int select_factor,
+               int api_option) {
 
   hid_t	   file,dataset, file_dataspace;
   hid_t    acc_plist,xfer_plist,crp_plist;
@@ -263,6 +564,10 @@ coll_chunktest(const char* filename,
   int*     data_origin1 = NULL;
 
   hsize_t  start[RANK],count[RANK],stride[RANK],block[RANK];
+
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+  unsigned prop_value;
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
   hbool_t  use_gpfs = FALSE;
   int      mpi_size,mpi_rank;
@@ -335,10 +640,130 @@ coll_chunktest(const char* filename,
   status = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
   VRFY((status>= 0),"MPIO collective transfer property succeeded");
 
+  switch(api_option){
+	case API_LINK_HARD:
+	   status = H5Pset_dxpl_mpio_chunk_opt(xfer_plist,H5FD_MPIO_OPT_ONE_IO);
+           VRFY((status>= 0),"collective chunk optimization succeeded");
+	break;
+	case API_MULTI_HARD:
+	   status = H5Pset_dxpl_mpio_chunk_opt(xfer_plist,H5FD_MPIO_OPT_MULTI_IO);
+	   VRFY((status>= 0),"collective chunk optimization succeeded ");
+	break;
+	case API_LINK_TRUE:
+           status = H5Pset_dxpl_mpio_chunk_opt_num(xfer_plist,2);
+	   VRFY((status>= 0),"collective chunk optimization set chunk number succeeded");
+	break;
+	case API_LINK_FALSE:
+           status = H5Pset_dxpl_mpio_chunk_opt_num(xfer_plist,6);
+           VRFY((status>= 0),"collective chunk optimization set chunk number succeeded");
+	break;
+	case API_MULTI_COLL:
+           status = H5Pset_dxpl_mpio_chunk_opt_num(xfer_plist,8);/* make sure it is using multi-chunk IO */
+           VRFY((status>= 0),"collective chunk optimization set chunk number succeeded");
+	   status = H5Pset_dxpl_mpio_chunk_opt_ratio(xfer_plist,50);
+           VRFY((status>= 0),"collective chunk optimization set chunk ratio succeeded");
+	break;
+	case API_MULTI_IND:
+           status = H5Pset_dxpl_mpio_chunk_opt_num(xfer_plist,8);/* make sure it is using multi-chunk IO */
+           VRFY((status>= 0),"collective chunk optimization set chunk number succeeded");
+	   status = H5Pset_dxpl_mpio_chunk_opt_ratio(xfer_plist,100);
+           VRFY((status>= 0),"collective chunk optimization set chunk ratio succeeded");
+	break;
+	default:
+	;
+   } 
+   
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+  if(facc_type == FACC_MPIO) {
+  switch(api_option){
+	case API_LINK_HARD:
+           prop_value = H5D_XFER_COLL_CHUNK_DEF;
+           status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_HARD_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
+                       NULL,NULL,NULL,NULL,NULL,NULL);
+           VRFY((status >= 0),"testing property list inserted succeeded");
+	break;
+	case API_MULTI_HARD:
+           prop_value = H5D_XFER_COLL_CHUNK_DEF;   
+           status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
+                       NULL,NULL,NULL,NULL,NULL,NULL);
+           VRFY((status >= 0),"testing property list inserted succeeded");
+	break;
+	case API_LINK_TRUE:
+           prop_value = H5D_XFER_COLL_CHUNK_DEF;   
+           status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
+                       NULL,NULL,NULL,NULL,NULL,NULL);
+           VRFY((status >= 0),"testing property list inserted succeeded");
+	break;
+	case API_LINK_FALSE:
+           prop_value = H5D_XFER_COLL_CHUNK_DEF;   
+           status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
+                       NULL,NULL,NULL,NULL,NULL,NULL);
+           VRFY((status >= 0),"testing property list inserted succeeded");
+	
+	break;
+	case API_MULTI_COLL:
+           prop_value = H5D_XFER_COLL_CHUNK_DEF;   
+           status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
+                       NULL,NULL,NULL,NULL,NULL,NULL);
+           VRFY((status >= 0),"testing property list inserted succeeded");
+	
+	break;
+	case API_MULTI_IND:
+           prop_value = H5D_XFER_COLL_CHUNK_DEF;   
+           status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
+                       NULL,NULL,NULL,NULL,NULL,NULL);
+           VRFY((status >= 0),"testing property list inserted succeeded");
+	
+	break;
+	default:
+	;
+   } 
+   }
+#endif
+  
   /* write data collectively */
   status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, file_dataspace,
 		    xfer_plist, data_array1);
   VRFY((status >= 0),"dataset write succeeded");
+
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+  if(facc_type == FACC_MPIO) {
+  switch(api_option){
+	case API_LINK_HARD:
+           status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_HARD_NAME,&prop_value);
+           VRFY((status >= 0),"testing property list get succeeded");
+           VRFY((prop_value == 0),"API to set LINK COLLECTIVE IO without optimization succeeded");
+	break;
+	case API_MULTI_HARD:
+           status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME,&prop_value);
+           VRFY((status >= 0),"testing property list get succeeded");
+           VRFY((prop_value == 0),"API to set MULTI-CHUNK COLLECTIVE IO without optimization succeeded");
+	break;
+	case API_LINK_TRUE:
+           status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME,&prop_value);
+           VRFY((status >= 0),"testing property list get succeeded");
+           VRFY((prop_value == 0),"API to set LINK COLLECTIVE IO with true optimization succeeded");
+	break;
+	case API_LINK_FALSE:
+           status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME,&prop_value);
+           VRFY((status >= 0),"testing property list get succeeded");
+           VRFY((prop_value == 0),"API to set LINK IO transferring to multi-chunk IO succeeded");
+	break;
+	case API_MULTI_COLL:
+           status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME,&prop_value);
+           VRFY((status >= 0),"testing property list get succeeded");
+           VRFY((prop_value == 0),"API to set MULTI-CHUNK COLLECTIVE IO with optimization succeeded");
+	break;
+	case API_MULTI_IND:
+           status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME,&prop_value);
+           VRFY((status >= 0),"testing property list get succeeded");
+           VRFY((prop_value == 0),"API to set MULTI-CHUNK IO transferring to independent IO  succeeded");
+	break;
+	default:
+	;
+   } 
+   }
+#endif
 
   status = H5Dclose(dataset);
   VRFY((status >= 0),"");
@@ -490,7 +915,8 @@ ccslab_set(int mpi_rank,
         start[1]  = 0;
         stride[1] = 1;
 	if((mpi_rank *3)<(mpi_size*2)) start[0]  = mpi_rank;
-	else start[0] = 1 + SPACE_DIM1*mpi_size/2 + (mpi_rank-2*mpi_size/3);            break;
+	else start[0] = 1 + SPACE_DIM1*mpi_size/2 + (mpi_rank-2*mpi_size/3);      
+        break;
          
     case BYROW_SELECTINCHUNK:
       /* Each process will only select one chunk */

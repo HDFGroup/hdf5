@@ -19,6 +19,10 @@
 
 #include "testpar.h"
 
+enum H5TEST_COLL_CHUNK_API {API_NONE=0,API_LINK_HARD,
+	                    API_MULTI_HARD,API_LINK_TRUE,API_LINK_FALSE,
+                            API_MULTI_COLL,API_MULTI_IND};
+
 #ifndef FALSE
 #define FALSE   0
 #endif
@@ -52,12 +56,25 @@
 
 /*Constants for collective chunk definitions */
 #define SPACE_DIM1 24
-#define SPACE_DIM2 3
+#define SPACE_DIM2 4
 #define BYROW_CONT 1
 #define BYROW_DISCONT 2
 #define BYROW_SELECTNONE 3
 #define BYROW_SELECTUNBALANCE 4
 #define BYROW_SELECTINCHUNK 5
+
+#define DIMO_NUM_CHUNK 4
+#define DIM1_NUM_CHUNK 2
+#define LINK_TRUE_NUM_CHUNK 2
+#define LINK_FALSE_NUM_CHUNK 6
+#define MULTI_TRUE_PERCENT 50
+#define LINK_TRUE_CHUNK_NAME "h5_link_chunk_true"
+#define LINK_FALSE_CHUNK_NAME "h5_link_chunk_false"
+#define LINK_HARD_CHUNK_NAME "h5_link_chunk_hard"
+#define MULTI_HARD_CHUNK_NAME "h5_multi_chunk_hard"
+#define MULTI_COLL_CHUNK_NAME "h5_multi_chunk_coll"
+#define MULTI_INDP_CHUNK_NAME "h5_multi_chunk_indp"
+
 #define DSET_COLLECTIVE_CHUNK_NAME "coll_chunk_name"
 
 
@@ -199,6 +216,12 @@ void coll_chunk1(void);
 void coll_chunk2(void);
 void coll_chunk3(void);
 void coll_chunk4(void);
+void coll_chunk5(void);
+void coll_chunk6(void);
+void coll_chunk7(void);
+void coll_chunk8(void);
+void coll_chunk9(void);
+void coll_chunk10(void);
 void coll_irregular_cont_read(void);
 void coll_irregular_cont_write(void);
 void coll_irregular_simple_chunk_read(void);
