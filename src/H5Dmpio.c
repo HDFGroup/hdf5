@@ -550,6 +550,9 @@ H5D_mpio_get_sum_chunk(const H5D_io_info_t *io_info,
     num_chunkf = 0;
     ori_num_chunkf = H5SL_count(fm->fsel);
     H5_ASSIGN_OVERFLOW(num_chunkf,ori_num_chunkf,size_t,int);
+#ifdef KENT
+    printf("num_chunkf = %d\n",num_chunkf);
+#endif
 
     /* Determine the minimum # of chunks for all processes */
     if (MPI_SUCCESS != (mpi_code = MPI_Allreduce(&num_chunkf, sum_chunkf, 1, MPI_INT, MPI_SUM, io_info->comm)))
@@ -647,6 +650,10 @@ H5D_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf, hbool
     unsigned          one_link_chunk_io_threshold;
     H5P_genplist_t    *plist; 
     H5FD_mpio_chunk_opt_t chunk_opt_mode;
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+    htri_t            check_prop,temp_not_link_io = FALSE;
+    int               prop_value,new_value;
+#endif
     herr_t            ret_value = SUCCEED;    
 
 
@@ -660,6 +667,9 @@ H5D_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf, hbool
     
     /* Check the optional property list on what to do with collective chunk IO. */
     chunk_opt_mode=(H5FD_mpio_chunk_opt_t)H5P_peek_unsigned(plist,H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME);
+#ifdef KENT
+    printf("chunk_opt_mode = %d\n",chunk_opt_mode);
+#endif
     
     if(chunk_opt_mode == H5FD_MPIO_OPT_ONE_IO) io_option = H5D_ONE_LINK_CHUNK_IO;/*no opt*/
     else if(chunk_opt_mode == H5FD_MPIO_OPT_MULTI_IO) io_option = H5D_MULTI_CHUNK_IO;/*no opt */
@@ -673,11 +683,56 @@ H5D_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf, hbool
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
        one_link_chunk_io_threshold =H5P_peek_unsigned(plist,H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME);
+#ifdef KENT
+       printf("one link chunk io threshold =%d\n",one_link_chunk_io_threshold);
+       printf("sum_chunk = %d\n",sum_chunk);
+       printf("average number =%d\n",sum_chunk/mpi_size);
+#endif
 
       /* step 1: choose an IO option */
       /* If the average number of chunk per process is greater than a threshold, we will do one link chunked IO. */
        if(sum_chunk/mpi_size >= one_link_chunk_io_threshold) io_option = H5D_ONE_LINK_CHUNK_IO_MORE_OPT;
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+       else temp_not_link_io = TRUE;
+#endif
    }
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+    /*** Test collective chunk user-input optimization APIs. ***/
+	check_prop = H5Pexist(io_info->dxpl_id,H5D_XFER_COLL_CHUNK_LINK_HARD_NAME);
+        if(check_prop > 0) {
+	    if(io_option == H5D_ONE_LINK_CHUNK_IO) {
+	      new_value = 0;
+              if(H5Pset(io_info->dxpl_id,H5D_XFER_COLL_CHUNK_LINK_HARD_NAME,&new_value)<0)
+	        HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to get property value");
+            }
+        }
+        check_prop = H5Pexist(io_info->dxpl_id,H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME);
+        if(check_prop > 0) {
+          if(io_option == H5D_MULTI_CHUNK_IO) {
+	     new_value = 0;
+	     if(H5Pset(io_info->dxpl_id,H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME,&new_value)<0)
+                HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to get property value");
+          }
+        }
+        check_prop = H5Pexist(io_info->dxpl_id,H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME);
+        if(check_prop > 0) {
+	  if(io_option == H5D_ONE_LINK_CHUNK_IO_MORE_OPT) {
+	      new_value = 0;
+             if(H5Pset(io_info->dxpl_id,H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME,&new_value)<0)
+                HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to get property value");
+          }
+        }
+        check_prop = H5Pexist(io_info->dxpl_id,H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME);
+        if(check_prop > 0) {
+           if(temp_not_link_io){
+	      new_value = 0;
+              if(H5Pset(io_info->dxpl_id,H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME,&new_value)<0)
+	          HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to get property value");
+              }
+        }
+       
+              
+#endif
 #ifndef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
     if(io_option == H5D_ONE_LINK_CHUNK_IO ) io_option = H5D_MULTI_CHUNK_IO ;/* We can not do this with one chunk IO. */
     if(io_option == H5D_ONE_LINK_CHUNK_IO_MORE_OPT) io_option = H5D_MULTI_CHUNK_IO_MORE_OPT;
@@ -1591,6 +1646,10 @@ H5D_obtain_mpio_mode(H5D_io_info_t* io_info,
   H5P_genplist_t    *plist;
   int               mem_cleanup      = 0,
                     mpi_type_cleanup = 0;
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+  int prop_value,new_value;
+  htri_t check_prop;
+#endif
 
   herr_t            ret_value = SUCCEED;
 
@@ -1748,8 +1807,8 @@ H5D_obtain_mpio_mode(H5D_io_info_t* io_info,
 	    assign_io_mode[ic] = H5D_CHUNK_IO_MODE_COL;
 #endif
 	  }
-	
     }
+
 
     /* merge buffer io_mode info and chunk addr into one */
     HDmemcpy(mergebuf,assign_io_mode,sizeof(MPI_BYTE)*total_chunks);
@@ -1768,6 +1827,41 @@ H5D_obtain_mpio_mode(H5D_io_info_t* io_info,
    HDmemcpy(assign_io_mode,mergebuf,sizeof(MPI_BYTE)*total_chunks);
    HDmemcpy(chunk_addr,tempbuf,sizeof(haddr_t)*total_chunks);
 
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+    check_prop = H5Pexist(io_info->dxpl_id,H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME);
+    if(check_prop > 0) {
+#if !defined(H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS) || !defined(H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS)
+      new_value = 0;
+      if(H5Pset(io_info->dxpl_id,H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME,&new_value)<0)
+              HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to set property value");
+#else 
+      for(ic = 0; ic < total_chunks; ic++){
+        if(assign_io_mode[ic] == H5D_CHUNK_IO_MODE_COL) {
+           new_value = 0;
+	   if(H5Pset(io_info->dxpl_id,H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME,&new_value)<0)
+              HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to set property value");
+           break;
+        }
+      }
+#endif
+    }
+   check_prop = H5Pexist(io_info->dxpl_id,H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME);
+   if(check_prop > 0) {
+      int temp_count = 0;
+      for(ic = 0; ic < total_chunks; ic++){
+        if(assign_io_mode[ic] == H5D_CHUNK_IO_MODE_COL) {
+          temp_count++;
+          break;
+        }
+      }
+      if(temp_count==0){
+        new_value = 0;
+        if(H5Pset(io_info->dxpl_id,H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME,&new_value)<0)
+          HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to set property value");
+      }
+   }
+#endif
+ 
 done:
 
    if(mpi_type_cleanup) {
