@@ -57,9 +57,10 @@ const char *FILENAME[] = {
 };
 
 /*
- * Count up or down depending on whether the machine is big endian or little
- * endian.  If local variable `endian' is H5T_ORDER_BE then the result will
- * be I, otherwise the result will be Z-(I+1).
+ * Count up or down depending on whether the machine is big endian, little
+ * endian, or VAX (OpenVMS).  If local variable `endian' is H5T_ORDER_BE then 
+ * the result will be I, otherwise the result will be Z-(I+1).  VAX is printed
+ * as little endian.
  */
 #define ENDIAN(Z,I,E)	(H5T_ORDER_BE==E?(I):(Z)-((I)+1))
 
