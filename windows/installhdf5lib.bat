@@ -41,8 +41,8 @@ copy proj\hdf5\debug\hdf5d.lib hdf5lib\debug\lib
 copy proj\hdf5dll\debug\hdf5ddll.lib hdf5lib\debug\dll
 copy proj\hdf5dll\debug\hdf5ddll.dll hdf5lib\debug\dll
 
-copy tools\gifconv\debug\h52gif.exe hdf5lib\debug\bin
-copy tools\gifconv\debug\gif2h5.exe hdf5lib\debug\bin
+copy hl\tools\gifconv\gif2h5\debug\gif2h5.exe hdf5lib\debug\bin
+copy hl\tools\gifconv\h52gif\debug\h52gif.exe hdf5lib\debug\bin
 copy tools\h5debug\debug\h5debug.exe hdf5lib\debug\bin
 copy tools\h5diff\debug\h5diff.exe hdf5lib\debug\bin
 copy tools\h5dump\debug\h5dump.exe hdf5lib\debug\bin
@@ -53,8 +53,8 @@ copy tools\h5repack\debug\h5repack.exe hdf5lib\debug\bin
 copy tools\h5repart\debug\h5repart.exe hdf5lib\debug\bin
 copy tools\h5unjam\debug\h5unjam.exe hdf5lib\debug\bin
 
-copy tools\gifconvdll\debug\h52gifdll.exe hdf5lib\debug\bindll
-copy tools\gifconvdll\debug\gif2h5dll.exe hdf5lib\debug\bindll
+copy hl\tools\gifconvdll\h52gifdll\debug\h52gifdll.exe hdf5lib\debug\bindll
+copy hl\tools\gifconvdll\gif2h5dll\debug\gif2h5dll.exe hdf5lib\debug\bindll
 copy tools\h5debugdll\debug\h5debugdll.exe hdf5lib\debug\bindll
 copy tools\h5diffdll\debug\h5diffdll.exe hdf5lib\debug\bindll
 copy tools\h5dumpdll\debug\h5dumpdll.exe hdf5lib\debug\bindll
@@ -69,8 +69,9 @@ copy proj\hdf5\release\hdf5.lib hdf5lib\release\lib
 copy proj\hdf5dll\release\hdf5dll.lib hdf5lib\release\dll
 copy proj\hdf5dll\release\hdf5dll.dll hdf5lib\release\dll
 
-copy tools\gifconv\release\h52gif.exe hdf5lib\release\bin
-copy tools\gifconv\release\gif2h5.exe hdf5lib\release\bin
+
+copy hl\tools\gifconv\gif2h5\release\gif2h5.exe hdf5lib\release\bin
+copy hl\tools\gifconv\h52gif\release\h52gif.exe hdf5lib\release\bin
 copy tools\h5debug\release\h5debug.exe hdf5lib\release\bin
 copy tools\h5diff\release\h5diff.exe hdf5lib\release\bin
 copy tools\h5dump\release\h5dump.exe hdf5lib\release\bin
@@ -81,8 +82,8 @@ copy tools\h5repack\release\h5repack.exe hdf5lib\release\bin
 copy tools\h5repart\release\h5repart.exe hdf5lib\release\bin
 copy tools\h5unjam\release\h5unjam.exe hdf5lib\release\bin
 
-copy tools\gifconvdll\release\h52gifdll.exe hdf5lib\release\bindll
-copy tools\gifconvdll\release\gif2h5dll.exe hdf5lib\release\bindll
+copy hl\tools\gifconvdll\h52gifdll\release\h52gifdll.exe hdf5lib\release\bindll
+copy hl\tools\gifconvdll\gif2h5dll\release\gif2h5dll.exe hdf5lib\release\bindll
 copy tools\h5debugdll\release\h5debugdll.exe hdf5lib\release\bindll
 copy tools\h5diffdll\release\h5diffdll.exe hdf5lib\release\bindll
 copy tools\h5dumpdll\release\h5dumpdll.exe hdf5lib\release\bindll
