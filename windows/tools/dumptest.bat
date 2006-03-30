@@ -434,6 +434,13 @@ call %tooltest% tnullspace.ddl
 set flag=%tlonglinks%
 call %tooltest% tlonglinks.ddl
 
+::test for long double (Some systems do not have long double)
+set flag=%tldouble%
+call %tooltest% tldouble.ddl SKIP
+
+::Test for vms
+set flag=%tvms%
+call %tooltest% tvms.ddl
 
 echo. 
 echo.****************************************************
