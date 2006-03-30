@@ -29,7 +29,7 @@ const char *FILENAME[] = {
     NULL
 };
 
-#define DATASETNAME "IntArray"
+#define DATASETNAME "Array"
 #define NX 5           /* output buffer dimensions */
 #define NY 6
 #define RANK         2

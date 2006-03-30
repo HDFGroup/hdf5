@@ -26,7 +26,7 @@
 #include "h5test.h"
 
 #define H5FILE_NAME        "data.h5"
-#define DATASETNAME "IntArray"
+#define DATASETNAME "Array"
 #define NX     5                      /* dataset dimensions */
 #define NY     6
 #define RANK   2
