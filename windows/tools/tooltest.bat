@@ -265,7 +265,7 @@
 :SKIP
      set flagout=%flag:..\..\testfiles\=%
      set flagout=%flagout:..\..\temptest\=%
-     set result=SKIPED
+     set result=-SKIPED-
      set /A totalskip=totalskip+1
 		 goto ALIGN
 
