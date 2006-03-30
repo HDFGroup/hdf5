@@ -42,10 +42,8 @@
 
  ***************************************************************************/
 
-// Use C version of the header file testhdf5.h instead of re-coding it
-#include "testhdf5.h"
-
-#include "H5Cpp.h"
+#include "testhdf5.h"   // C test header file
+#include "H5Cpp.h"      // C++ API header file
 
 #ifndef H5_NO_NAMESPACE
 using namespace H5;

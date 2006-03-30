@@ -14,9 +14,6 @@
 
 #include <string>
 #ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::string;
-#endif  // H5_NO_STD
 #endif
 
 #include "H5Include.h"
@@ -116,7 +113,7 @@ H5T_order_t AtomType::getOrder() const
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5T_order_t AtomType::getOrder( string& order_string ) const
+H5T_order_t AtomType::getOrder( H5_std::string& order_string ) const
 {
    // Call the overloaded to get the type order without text
    H5T_order_t type_order = getOrder();

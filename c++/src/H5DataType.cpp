@@ -20,9 +20,6 @@
 
 #include <string>
 #ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::string;
-#endif  // H5_NO_STD
 #endif
 
 #include "H5Include.h"
@@ -192,7 +189,7 @@ void DataType::commit(CommonFG& loc, const char* name) const
 ///		argument \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataType::commit(CommonFG& loc, const string& name) const
+void DataType::commit(CommonFG& loc, const H5_std::string& name) const
 {
    commit( loc, name.c_str() );
 }
@@ -391,7 +388,7 @@ void DataType::registerFunc( H5T_pers_t pers, const char* name, const DataType& 
 ///		argument \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataType::registerFunc( H5T_pers_t pers, const string& name, const DataType& dest, H5T_conv_t func ) const
+void DataType::registerFunc( H5T_pers_t pers, const H5_std::string& name, const DataType& dest, H5T_conv_t func ) const
 {
    registerFunc( pers, name.c_str(), dest, func );
 }
@@ -428,7 +425,7 @@ void DataType::unregister( H5T_pers_t pers, const char* name, const DataType& de
 ///		argument \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataType::unregister( H5T_pers_t pers, const string& name, const DataType& dest, H5T_conv_t func ) const
+void DataType::unregister( H5T_pers_t pers, const H5_std::string& name, const DataType& dest, H5T_conv_t func ) const
 {
    unregister( pers, name.c_str(), dest, func );
 }
@@ -458,7 +455,7 @@ void DataType::setTag( const char* tag ) const
 ///		argument \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataType::setTag( const string& tag ) const
+void DataType::setTag( const H5_std::string& tag ) const
 {
    setTag( tag.c_str());
 }
@@ -470,7 +467,7 @@ void DataType::setTag( const string& tag ) const
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-string DataType::getTag() const
+H5_std::string DataType::getTag() const
 {
    char* tag_Cstr = H5Tget_tag( id );
 
@@ -478,7 +475,7 @@ string DataType::getTag() const
    // and return it, otherwise, raise an exception
    if( tag_Cstr != NULL )
    {
-      string tag = string(tag_Cstr); // convert C string to string object
+      H5_std::string tag = H5_std::string(tag_Cstr); // convert C string to string object
 	HDfree(tag_Cstr); // free the C string
       return (tag); // return the tag
    }
@@ -585,7 +582,7 @@ void* DataType::Reference(const char* name) const
 ///\param	name - IN: Name of the object to be referenced - \c std::string
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
-void* DataType::Reference(const string& name) const
+void* DataType::Reference(const H5_std::string& name) const
 {
    return(Reference(name.c_str()));
 }

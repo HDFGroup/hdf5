@@ -14,9 +14,6 @@
 
 #include <string>
 #ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::string;
-#endif  // H5_NO_STD
 #endif
 
 #include "H5Include.h"
@@ -137,7 +134,7 @@ void EnumType::insert( const char* name, void *value ) const
 ///		argument \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void EnumType::insert( const string& name, void *value ) const
+void EnumType::insert( const H5_std::string& name, void *value ) const
 {
     insert( name.c_str(), value );
 }
@@ -151,7 +148,7 @@ void EnumType::insert( const string& name, void *value ) const
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-string EnumType::nameOf( void *value, size_t size ) const
+H5_std::string EnumType::nameOf( void *value, size_t size ) const
 {
    char* name_C = new char[size+1];  // temporary C-string for C API
 
@@ -164,7 +161,7 @@ string EnumType::nameOf( void *value, size_t size ) const
       throw DataTypeIException("EnumType::nameOf", "H5Tenum_nameof failed");
    }
    // otherwise, create the string to hold the datatype name and return it
-   string name = string( name_C );
+   H5_std::string name = H5_std::string( name_C );
    delete [] name_C;
    return( name );
 }
@@ -195,7 +192,7 @@ void EnumType::valueOf( const char* name, void *value ) const
 ///		argument \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void EnumType::valueOf( const string& name, void *value ) const
+void EnumType::valueOf( const H5_std::string& name, void *value ) const
 {
     valueOf( name.c_str(), value );
 }
@@ -228,7 +225,7 @@ int EnumType::getMemberIndex(const char *name) const
 ///		argument \a name.
 // Programmer   Binh-Minh Ribler - May 16, 2002
 //--------------------------------------------------------------------------
-int EnumType::getMemberIndex(const string& name) const
+int EnumType::getMemberIndex(const H5_std::string& name) const
 {
     return(EnumType::getMemberIndex(name.c_str()));
 }

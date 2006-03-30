@@ -14,9 +14,6 @@
 
 #include <string>
 #ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::string;
-#endif  // H5_NO_STD
 #endif
 
 #include "H5Include.h"
@@ -41,7 +38,7 @@ namespace H5 {
 // problem.  May be moved to Iterator later.
 extern "C" herr_t userAttrOpWrpr( hid_t loc_id, const char* attr_name, void* op_data )
 {
-   string s_attr_name = string( attr_name );
+   H5_std::string s_attr_name = H5_std::string( attr_name );
 #ifdef NO_STATIC_CAST
    UserData4Aiterate* myData = (UserData4Aiterate *) op_data;
 #else
@@ -127,7 +124,7 @@ Attribute H5Object::createAttribute( const char* name, const DataType& data_type
 ///		a reference to an \c std::string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Attribute H5Object::createAttribute( const string& name, const DataType& data_type, const DataSpace& data_space, const PropList& create_plist ) const
+Attribute H5Object::createAttribute( const H5_std::string& name, const DataType& data_type, const DataSpace& data_space, const PropList& create_plist ) const
 {
    return( createAttribute( name.c_str(), data_type, data_space, create_plist ));
 }
@@ -161,7 +158,7 @@ Attribute H5Object::openAttribute( const char* name ) const
 ///		a reference to an \c std::string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Attribute H5Object::openAttribute( const string& name ) const
+Attribute H5Object::openAttribute( const H5_std::string& name ) const
 {
    return( openAttribute( name.c_str()) );
 }
@@ -268,7 +265,7 @@ void H5Object::removeAttr( const char* name ) const
 ///		a reference to an \c std::string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void H5Object::removeAttr( const string& name ) const
+void H5Object::removeAttr( const H5_std::string& name ) const
 {
    removeAttr( name.c_str() );
 }
@@ -297,7 +294,7 @@ void H5Object::renameAttr(const char* oldname, const char* newname) const
 ///		a reference to an \c std::string for the names.
 // Programmer	Binh-Minh Ribler - Mar, 2005
 //--------------------------------------------------------------------------
-void H5Object::renameAttr(const string& oldname, const string& newname) const
+void H5Object::renameAttr(const H5_std::string& oldname, const H5_std::string& newname) const
 {
    renameAttr (oldname.c_str(), newname.c_str());
 }
@@ -330,7 +327,7 @@ void H5Object::flush(H5F_scope_t scope ) const
 ///\exception	H5::IdComponentException
 // Programmer	Binh-Minh Ribler - Jul, 2004
 //--------------------------------------------------------------------------
-string H5Object::getFileName() const
+H5_std::string H5Object::getFileName() const
 {
    try {
       return(p_get_file_name());

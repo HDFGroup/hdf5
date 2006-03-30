@@ -14,9 +14,6 @@
 
 #include <string>
 #ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::string;
-#endif  // H5_NO_STD
 #endif
 
 #include "H5Include.h"
@@ -185,7 +182,7 @@ void FloatType::setEbias( size_t ebias ) const
 ///		\a norm_string.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5T_norm_t FloatType::getNorm( string& norm_string ) const
+H5T_norm_t FloatType::getNorm( H5_std::string& norm_string ) const
 {
    H5T_norm_t norm = H5Tget_norm( id );  // C routine
    // Returns a valid normalization type if successful
@@ -238,7 +235,7 @@ void FloatType::setNorm( H5T_norm_t norm ) const
 ///		\a pad_string.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5T_pad_t FloatType::getInpad( string& pad_string ) const
+H5T_pad_t FloatType::getInpad( H5_std::string& pad_string ) const
 {
    H5T_pad_t pad_type = H5Tget_inpad( id );
    // Returns a valid padding type if successful

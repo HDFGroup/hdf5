@@ -30,12 +30,11 @@ using namespace H5;
 #endif
 
 #ifndef H5_NO_STD
-int test_report (int, const std::string&);
 using std::cerr;
 using std::endl;
-#else
-int test_report (int, const string&);
 #endif
+
+int test_report (int, const string&);
 
 void issue_fail_msg(const char* where, int line, const char* file_name,
 		    const char* message="");

@@ -28,7 +28,6 @@
 
 #ifndef H5_NO_NAMESPACE
 #ifndef H5_NO_STD
-    using std::string;
     using std::cout;
     using std::endl;
 #endif  // H5_NO_STD
@@ -37,7 +36,8 @@
 #include "H5Cpp.h"
 
 #ifndef H5_NO_NAMESPACE
-using namespace H5;
+    using namespace H5;
+    using H5_std::string;
 #endif
 
 const string FILE_NAME( "SDSextendible.h5" );

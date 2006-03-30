@@ -14,9 +14,6 @@
 
 #include <string>
 #ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::string;
-#endif  // H5_NO_STD
 #endif
 
 #include "H5Include.h"
@@ -238,7 +235,7 @@ void PredType::commit( H5Object& loc, const char* name )
    throw DataTypeIException("PredType::commit", "Attempting to commit a predefined datatype.  This operation is invalid" );
 }
 
-void PredType::commit( H5Object& loc, const string& name )
+void PredType::commit( H5Object& loc, const H5_std::string& name )
 {
    commit( loc, name.c_str());
 }

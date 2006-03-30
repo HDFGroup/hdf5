@@ -26,12 +26,12 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	H5File( const char* name, unsigned int flags,
 	   const FileCreatPropList& create_plist = FileCreatPropList::DEFAULT,
 	   const FileAccPropList& access_plist = FileAccPropList::DEFAULT );
-	H5File( const string& name, unsigned int flags,
+	H5File( const H5_std::string& name, unsigned int flags,
 	   const FileCreatPropList& create_plist = FileCreatPropList::DEFAULT,
 	   const FileAccPropList& access_plist = FileAccPropList::DEFAULT );
 
 	// Open the file
-	void openFile(const string& name, unsigned int flags,
+	void openFile(const H5_std::string& name, unsigned int flags,
 	    const FileAccPropList& access_plist = FileAccPropList::DEFAULT);
 	void openFile(const char* name, unsigned int flags,
 	    const FileAccPropList& access_plist = FileAccPropList::DEFAULT);
@@ -49,7 +49,7 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	FileCreatPropList getCreatePlist() const;
 
 	// Gets the name of this file.
-	string getFileName() const;
+	H5_std::string getFileName() const;
 
         // Retrieves the file size of an opened file.
         hsize_t getFileSize() const;
@@ -78,7 +78,7 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 
 	// Determines if a file, specified by its name, is in HDF5 format
 	static bool isHdf5(const char* name );
-	static bool isHdf5(const string& name );
+	static bool isHdf5(const H5_std::string& name );
 
 	// Reopens this file.
 	void reOpen();	// added for better name
@@ -90,13 +90,13 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 
 	// Creates a reference to a named Hdf5 object in this object.
 	void* Reference(const char* name) const;
-	void* Reference(const string& name) const;
+	void* Reference(const H5_std::string& name) const;
 
 	// Returns this class name
-	virtual string fromClass () const { return("H5File"); }
+	virtual H5_std::string fromClass () const { return("H5File"); }
 
 	// Throw file exception.
-	virtual void throwException(const string func_name, const string msg) const;
+	virtual void throwException(const H5_std::string func_name, const H5_std::string msg) const;
 
 	// Gets the file id
 	virtual hid_t getLocId() const;

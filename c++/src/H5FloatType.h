@@ -41,19 +41,19 @@ class H5_DLLCPP FloatType : public AtomType {
 	void setFields( size_t spos, size_t epos, size_t esize, size_t mpos, size_t msize ) const;
 
 	// Retrieves the internal padding type for unused bits in floating-point datatypes.
-	H5T_pad_t getInpad( string& pad_string ) const;
+	H5T_pad_t getInpad( H5_std::string& pad_string ) const;
 
 	// Fills unused internal floating point bits.
 	void setInpad( H5T_pad_t inpad ) const;
 
 	// Retrieves mantissa normalization of a floating-point datatype.
-	H5T_norm_t getNorm( string& norm_string ) const;
+	H5T_norm_t getNorm( H5_std::string& norm_string ) const;
 
 	// Sets the mantissa normalization of a floating-point datatype.
 	void setNorm( H5T_norm_t norm ) const;
 
 	// Returns this class name
-	virtual string fromClass () const { return("FloatType"); }
+	virtual H5_std::string fromClass () const { return("FloatType"); }
 
 	// Default constructor
 	FloatType();

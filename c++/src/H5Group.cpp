@@ -20,9 +20,6 @@
 
 #include <string>
 #ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::string;
-#endif  // H5_NO_STD
 #endif
 
 #include "H5Include.h"
@@ -136,7 +133,7 @@ void* Group::Reference(const char* name) const
 ///\param	name - IN: Name of the object to be referenced
 // Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
-void* Group::Reference(const string& name) const
+void* Group::Reference(const H5_std::string& name) const
 {
    return(Reference(name.c_str()));
 }
@@ -216,9 +213,9 @@ void Group::close()
 //		implementation of Group.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void Group::throwException(const string func_name, const string msg) const
+void Group::throwException(const H5_std::string func_name, const H5_std::string msg) const
 {
-   string full_name = func_name;
+   H5_std::string full_name = func_name;
    full_name.insert(0, "Group::");
    throw GroupIException(full_name, msg);
 }

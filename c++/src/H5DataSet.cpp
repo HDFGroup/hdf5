@@ -20,9 +20,6 @@
 
 #include <string>
 #ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::string;
-#endif  // H5_NO_STD
 #endif
 
 #include "H5Include.h"
@@ -259,7 +256,7 @@ void DataSet::read( void* buf, const DataType& mem_type, const DataSpace& mem_sp
 ///		It takes a reference to a \c std::string for the buffer.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataSet::read( string& strg, const DataType& mem_type, const DataSpace& mem_space, const DataSpace& file_space, const DSetMemXferPropList& xfer_plist ) const
+void DataSet::read( H5_std::string& strg, const DataType& mem_type, const DataSpace& mem_space, const DataSpace& file_space, const DSetMemXferPropList& xfer_plist ) const
 {
    // Allocate C character string for reading
    size_t size = mem_type.getSize();
@@ -310,7 +307,7 @@ void DataSet::write( const void* buf, const DataType& mem_type, const DataSpace&
 ///		It takes a reference to a \c std::string for the buffer.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataSet::write( const string& strg, const DataType& mem_type, const DataSpace& mem_space, const DataSpace& file_space, const DSetMemXferPropList& xfer_plist ) const
+void DataSet::write( const H5_std::string& strg, const DataType& mem_type, const DataSpace& mem_space, const DataSpace& file_space, const DSetMemXferPropList& xfer_plist ) const
 {
    // Convert string to C-string
    const char* strg_C;
@@ -469,7 +466,7 @@ void* DataSet::Reference(const char* name) const
 ///\param	name - IN: Name of the object to be referenced - \c std::string
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
-void* DataSet::Reference(const string& name) const
+void* DataSet::Reference(const H5_std::string& name) const
 {
    return(Reference(name.c_str()));
 }

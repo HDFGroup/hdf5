@@ -29,19 +29,20 @@
 
 #ifndef H5_NO_NAMESPACE
 #ifndef H5_NO_STD
-    using std::string;
     using std::cerr;
     using std::endl;
 #endif  // H5_NO_STD
 #endif
 
 #include "h5test.h"
-#include "H5Exception.h"
-#include "h5cpputil.h"
+#include "H5Cpp.h"
 
 #ifndef H5_NO_NAMESPACE
-using namespace H5;
+    using namespace H5;
+    using H5_std::string;
 #endif
+
+#include "h5cpputil.h"
 
 
 /*-------------------------------------------------------------------------

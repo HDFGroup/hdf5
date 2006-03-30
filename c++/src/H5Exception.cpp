@@ -14,9 +14,6 @@
 
 #include <string>
 #ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::string;
-#endif  // H5_NO_STD
 #endif
 
 #include "H5Include.h"
@@ -26,7 +23,7 @@
 namespace H5 {
 #endif
 
-const string Exception::DEFAULT_MSG("No detailed information provided");
+const H5_std::string Exception::DEFAULT_MSG("No detailed information provided");
 
 //--------------------------------------------------------------------------
 // Function:	Exception default constructor
@@ -43,7 +40,7 @@ Exception::Exception() : detail_message(""), func_name("") {}
 ///\param	message   - IN: Message on the failure
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Exception::Exception(const string func_name, const string message) : detail_message(message), func_name(func_name) {}
+Exception::Exception(const H5_std::string func_name, const H5_std::string message) : detail_message(message), func_name(func_name) {}
 
 //--------------------------------------------------------------------------
 // Function:	Exception copy constructor
@@ -68,7 +65,7 @@ Exception::Exception( const Exception& orig )
 ///		will be returned.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-string Exception::getMajorString( hid_t err_major ) const
+H5_std::string Exception::getMajorString( hid_t err_major ) const
 {
    // Preliminary call to H5Eget_msg() to get the length of the message
    ssize_t mesg_size = H5Eget_msg(err_major, NULL, NULL, 0);
@@ -88,7 +85,7 @@ string Exception::getMajorString( hid_t err_major ) const
 				"H5Eget_msg failed");
 
    // Convert the C error description and return
-   string major_str(mesg_C);
+   H5_std::string major_str(mesg_C);
    delete []mesg_C;
    return( major_str );
 }
@@ -104,7 +101,7 @@ string Exception::getMajorString( hid_t err_major ) const
 ///		will be returned.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-string Exception::getMinorString( hid_t err_minor ) const
+H5_std::string Exception::getMinorString( hid_t err_minor ) const
 {
    // Preliminary call to H5Eget_msg() to get the length of the message
    ssize_t mesg_size = H5Eget_msg(err_minor, NULL, NULL, 0);
@@ -124,7 +121,7 @@ string Exception::getMinorString( hid_t err_minor ) const
 				"H5Eget_msg failed");
 
    // Convert the C error description and return
-   string minor_str(mesg_C);
+   H5_std::string minor_str(mesg_C);
    delete []mesg_C;
    return( minor_str );
 }
@@ -259,7 +256,7 @@ void Exception::walkErrorStack( H5E_direction_t direction, H5E_walk_t func, void
 ///\return	Text message - \c std::string
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-string Exception::getDetailMsg() const
+H5_std::string Exception::getDetailMsg() const
 {
    return(detail_message);
 }
@@ -282,7 +279,7 @@ const char* Exception::getCDetailMsg() const
 ///\return	Text message - \c std::string
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-string Exception::getFuncName() const
+H5_std::string Exception::getFuncName() const
 {
    return(func_name);
 }
@@ -334,7 +331,7 @@ FileIException::FileIException():Exception(){}
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-FileIException::FileIException(const string func_name, const string message) : Exception(func_name, message) {}
+FileIException::FileIException(const H5_std::string func_name, const H5_std::string message) : Exception(func_name, message) {}
 //--------------------------------------------------------------------------
 // Function:	FileIException destructor
 ///\brief	Noop destructor.
@@ -357,7 +354,7 @@ GroupIException::GroupIException():Exception(){}
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-GroupIException::GroupIException(const string func_name, const string message) : Exception(func_name, message) {}
+GroupIException::GroupIException(const H5_std::string func_name, const H5_std::string message) : Exception(func_name, message) {}
 //--------------------------------------------------------------------------
 // Function:	GroupIException destructor
 ///\brief	Noop destructor.
@@ -380,7 +377,7 @@ DataSpaceIException::DataSpaceIException():Exception(){}
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-DataSpaceIException::DataSpaceIException(const string func_name, const string message) : Exception(func_name, message) {}
+DataSpaceIException::DataSpaceIException(const H5_std::string func_name, const H5_std::string message) : Exception(func_name, message) {}
 //--------------------------------------------------------------------------
 // Function:	DataSpaceIException destructor
 ///\brief	Noop destructor.
@@ -403,7 +400,7 @@ DataTypeIException::DataTypeIException():Exception(){}
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-DataTypeIException::DataTypeIException(const string func_name, const string message) : Exception(func_name, message) {}
+DataTypeIException::DataTypeIException(const H5_std::string func_name, const H5_std::string message) : Exception(func_name, message) {}
 //--------------------------------------------------------------------------
 // Function:	DataTypeIException destructor
 ///\brief	Noop destructor.
@@ -426,7 +423,7 @@ PropListIException::PropListIException():Exception(){}
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-PropListIException::PropListIException(const string func_name, const string message) : Exception(func_name, message) {}
+PropListIException::PropListIException(const H5_std::string func_name, const H5_std::string message) : Exception(func_name, message) {}
 //--------------------------------------------------------------------------
 // Function:	PropListIException destructor
 ///\brief	Noop destructor.
@@ -449,7 +446,7 @@ DataSetIException::DataSetIException():Exception(){}
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-DataSetIException::DataSetIException(const string func_name, const string message) : Exception(func_name, message) {}
+DataSetIException::DataSetIException(const H5_std::string func_name, const H5_std::string message) : Exception(func_name, message) {}
 //--------------------------------------------------------------------------
 // Function:	DataSetIException destructor
 ///\brief	Noop destructor.
@@ -472,7 +469,7 @@ AttributeIException::AttributeIException():Exception(){}
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-AttributeIException::AttributeIException(const string func_name, const string message) : Exception(func_name, message) {}
+AttributeIException::AttributeIException(const H5_std::string func_name, const H5_std::string message) : Exception(func_name, message) {}
 //--------------------------------------------------------------------------
 // Function:	AttributeIException destructor
 ///\brief	Noop destructor.
@@ -495,7 +492,7 @@ ReferenceException::ReferenceException():Exception(){}
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-ReferenceException::ReferenceException(const string func_name, const string message) : Exception(func_name, message) {}
+ReferenceException::ReferenceException(const H5_std::string func_name, const H5_std::string message) : Exception(func_name, message) {}
 //--------------------------------------------------------------------------
 // Function:	ReferenceException destructor
 ///\brief	Noop destructor.
@@ -518,7 +515,7 @@ LibraryIException::LibraryIException():Exception(){}
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-LibraryIException::LibraryIException(const string func_name, const string message) : Exception(func_name, message) {}
+LibraryIException::LibraryIException(const H5_std::string func_name, const H5_std::string message) : Exception(func_name, message) {}
 //--------------------------------------------------------------------------
 // Function:	LibraryIException destructor
 ///\brief	Noop destructor.
@@ -541,7 +538,7 @@ IdComponentException::IdComponentException(): Exception() {}
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-IdComponentException::IdComponentException(const string func_name, const string message) : Exception(func_name, message) {}
+IdComponentException::IdComponentException(const H5_std::string func_name, const H5_std::string message) : Exception(func_name, message) {}
 //--------------------------------------------------------------------------
 // Function:	IdComponentException destructor
 ///\brief	Noop destructor.

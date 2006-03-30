@@ -28,7 +28,7 @@ namespace H5 {
 class H5_DLLCPP PredType : public AtomType {
    public:
 	// Returns this class name
-	virtual string fromClass () const { return("PredType"); }
+	virtual H5_std::string fromClass () const { return("PredType"); }
 
 	// Makes a copy of the predefined type and stores the new
 	// id in the left hand side object.
@@ -181,7 +181,7 @@ class H5_DLLCPP PredType : public AtomType {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// These dummy functions do not inherit from DataType - they'll
 	// throw a DataTypeIException if invoked.
-	void commit( H5Object& loc, const string& name );
+	void commit( H5Object& loc, const H5_std::string& name );
 	void commit( H5Object& loc, const char* name );
 	bool committed();
 #endif // DOXYGEN_SHOULD_SKIP_THIS

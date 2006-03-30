@@ -16,12 +16,9 @@
 #endif /*H5_VMS*/
 #include <string>
 #ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::string;
 #ifdef H5_VMS
     using std::count;
 #endif /*H5_VMS*/
-#endif  // H5_NO_STD
 #endif
 
 #include "H5Include.h"
@@ -266,14 +263,14 @@ IdComponent::~IdComponent() {
 ///		an exception is thrown.
 // Programmer	Binh-Minh Ribler - Aug 6, 2005
 //--------------------------------------------------------------------------
-string IdComponent::inMemFunc(const char* func_name) const
+H5_std::string IdComponent::inMemFunc(const char* func_name) const
 {
 #ifdef H5_VMS
-   string full_name = fromClass();
+   H5_std::string full_name = fromClass();
    full_name.append("::"); 
    full_name.append(func_name);
 #else
-   string full_name = func_name;
+   H5_std::string full_name = func_name;
    full_name.insert(0, "::");
    full_name.insert(0, fromClass());
 #endif /*H5_VMS*/
@@ -297,7 +294,7 @@ IdComponent::IdComponent() : id(-1) {}
 // 		H5File and H5Object subclasses.
 // Programmer	Binh-Minh Ribler - Jul, 2004
 //--------------------------------------------------------------------------
-string IdComponent::p_get_file_name() const
+H5_std::string IdComponent::p_get_file_name() const
 {
    // Preliminary call to H5Fget_name to get the length of the file name
    ssize_t name_size = H5Fget_name(id, NULL, 0);
@@ -319,7 +316,7 @@ string IdComponent::p_get_file_name() const
    }
 
    // Convert the C file name and return
-   string file_name(name_C);
+   H5_std::string file_name(name_C);
    delete []name_C;
    return(file_name);
 }
