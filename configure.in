@@ -2160,7 +2160,7 @@ case "X-$enable_parallel" in
       AC_LANG_PUSH(Fortran)
 
       dnl Try link a simple MPI program.  If fail, try again with -lmpi.
-      AC_TRY_LINK(, [
+      AC_LINK_IFELSE([
           include 'mpif.h'
           integer:: ierr
           call mpi_file_open( ierr )],,
@@ -2172,7 +2172,7 @@ case "X-$enable_parallel" in
       dnl Then try link a simple MPI-IO program.  If fail, try again with
       dnl -lmpio.
       if test "X$PARALLEL" = "Xyes"; then
-        AC_TRY_LINK(, [
+        AC_LINK_IFELSE([
             include 'mpif.h'
             integer:: ierr
             call mpi_file_open( ierr )],,
