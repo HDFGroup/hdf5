@@ -17,10 +17,7 @@
 #else
 #include <iostream>
 #endif
-
 #include <string>
-#ifndef H5_NO_NAMESPACE
-#endif
 
 #include "H5Include.h"
 #include "H5Exception.h"

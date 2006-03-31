@@ -13,8 +13,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
-#ifndef H5_NO_NAMESPACE
-#endif
 
 #include "H5CppDoc.h"	// included only for Doxygen to generate part of RM
 #include "H5Include.h"
