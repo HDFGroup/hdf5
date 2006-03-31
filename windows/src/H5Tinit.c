@@ -16,7 +16,7 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
- * Created:		Nov 29, 2005
+ * Created:		Mar 31, 2006
  *			
  *
  * Purpose:		This machine-generated source code contains
@@ -71,10 +71,6 @@
 #include "H5Eprivate.h"
 #include "H5FLprivate.h"
 #include "H5Tpkg.h"
-
-/* Declare external the free lists for H5T_t's and H5T_shared_t's */
-H5FL_EXTERN(H5T_t);
-H5FL_EXTERN(H5T_shared_t);
 
 
 
