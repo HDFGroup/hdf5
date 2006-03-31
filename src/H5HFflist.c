@@ -70,6 +70,7 @@ struct H5HF_freelist_t {
     unsigned nbins;             /* Number of bins                             */
     H5SL_operator_t node_free_op;       /* Callback for freeing nodes when free list is destroyed */
     H5SL_t **bins;              /* Pointer to array of lists of free nodes    */
+    hbool_t using_bins;         /* Flag to indicate that all nodes are in the bins */
 };
 
 
@@ -144,6 +145,7 @@ H5HF_flist_create(size_t max_block_size, H5SL_operator_t node_free_op)
     flist->nbins = H5V_log2_of2(max_block_size);
     flist->node_free_op = node_free_op;
     flist->bins = NULL;
+    flist->using_bins = FALSE;
 
     /* Set return value */
     ret_value = flist;
@@ -263,8 +265,8 @@ HDfprintf(stderr, "%s: *size_key = %Zu, *addr_key = %a\n", FUNC, *size_key, *add
     } /* end if */
     else {
         /* Have a single section, put it into the bins */
-/* XXX: Take out the "&& flist->bins == NULL" when bins converted back into single section */
-         if(flist->sec_count == 1 && flist->bins == NULL) {
+/* XXX: Take out the "&& !flist->using_bins" when bins converted back into single section */
+         if(flist->sec_count == 1 && !flist->using_bins) {
             HDassert(flist->single.node);
 
             /* Check if we should allocate the bins */
@@ -277,6 +279,9 @@ HDfprintf(stderr, "%s: *size_key = %Zu, *addr_key = %a\n", FUNC, *size_key, *add
             if(H5HF_flist_add_bin_node(flist, flist->single.node, flist->single.size_key, flist->single.addr_key) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "can't insert free list node into skip list")
             flist->single.node = NULL;
+
+            /* Using bins for storing nodes now */
+            flist->using_bins = TRUE;
         } /* end if */
         HDassert(flist->single.node == NULL);
 
@@ -395,6 +400,9 @@ H5HF_flist_find(H5HF_freelist_t *flist, size_t request, void **node)
     htri_t ret_value = FALSE;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_flist_find)
+#ifdef QAK
+HDfprintf(stderr, "%s: request = %Zu\n", FUNC, request);
+#endif /* QAK */
 
     /* Check arguments. */
     HDassert(flist);
@@ -404,7 +412,8 @@ H5HF_flist_find(H5HF_freelist_t *flist, size_t request, void **node)
     /* Check for any sections on free list */
     if(flist->sec_count > 0) {
         /* Check for single section */
-        if(flist->sec_count == 1) {
+/* XXX: Take out the "&& !flist->using_bins" when bins converted back into single section */
+        if(flist->sec_count == 1 && !flist->using_bins) {
             HDassert(flist->single.node);
 
             /* See if single section is large enough */
@@ -413,6 +422,8 @@ H5HF_flist_find(H5HF_freelist_t *flist, size_t request, void **node)
                 flist->single.node = NULL;
                 ret_value = TRUE;
             } /* end if */
+            else
+                HGOTO_DONE(FALSE)
         } /* end if */
         else {
             HDassert(flist->single.node == NULL);
@@ -424,7 +435,15 @@ H5HF_flist_find(H5HF_freelist_t *flist, size_t request, void **node)
 
         /* Decrement # of sections on free list */
         flist->sec_count--;
-/* XXX: Should check for only one section in bins & convert to single section */
+/* XXX: Should check for only one section in bins & convert to single section
+ *      This is somewhat hard because we "lose" the the size & address keys
+ *      (The address key is actually available, but the size key is gone, unless
+ *      we start tracking it.
+ *
+ *      Drop back to using a "single" node when the bins are empty.
+ */
+        if(flist->sec_count == 0)
+            flist->using_bins = FALSE;
     } /* end if */
 
 done:
@@ -490,7 +509,8 @@ H5HF_flist_free(H5HF_freelist_t *flist)
     HDassert(flist);
 
     /* Check for single section to free */
-    if(flist->sec_count == 1) {
+/* XXX: Take out the "&& !flist->using_bins" when bins converted back into single section */
+    if(flist->sec_count == 1 && !flist->using_bins) {
         HDassert(flist->single.node != NULL);
         flist->node_free_op(flist->single.node, flist->single.addr_key, NULL);
         flist->single.node = NULL;
