@@ -48492,9 +48492,11 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
             cat >conftest.$ac_ext <<_ACEOF
 
+          program main
           include 'mpif.h'
           integer:: ierr
           call mpi_file_open( ierr )
+          end
 _ACEOF
 rm -f conftest.$ac_objext conftest$ac_exeext
 if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
@@ -48598,9 +48600,11 @@ rm -f conftest.err conftest.$ac_objext \
                   if test "X$PARALLEL" = "Xyes"; then
         cat >conftest.$ac_ext <<_ACEOF
 
+            program main
             include 'mpif.h'
             integer:: ierr
             call mpi_file_open( ierr )
+            end
 _ACEOF
 rm -f conftest.$ac_objext conftest$ac_exeext
 if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5

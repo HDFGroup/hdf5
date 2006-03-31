@@ -2161,9 +2161,11 @@ case "X-$enable_parallel" in
 
       dnl Try link a simple MPI program.  If fail, try again with -lmpi.
       AC_LINK_IFELSE([
+          program main
           include 'mpif.h'
           integer:: ierr
-          call mpi_file_open( ierr )],,
+          call mpi_file_open( ierr )
+          end],,
           AC_CHECK_LIB(mpi, [
             include 'mpif.h'
             integer:: ierr
@@ -2173,9 +2175,11 @@ case "X-$enable_parallel" in
       dnl -lmpio.
       if test "X$PARALLEL" = "Xyes"; then
         AC_LINK_IFELSE([
+            program main
             include 'mpif.h'
             integer:: ierr
-            call mpi_file_open( ierr )],,
+            call mpi_file_open( ierr )
+            end],,
             AC_CHECK_LIB(mpio, [
               include 'mpif.h'
               integer:: ierr
