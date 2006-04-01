@@ -496,7 +496,7 @@ test_abs_insert_first(hid_t fapl, H5HF_create_t *cparam)
     HDmemset(heap_id, 0, sizeof(heap_id));
     if(H5HF_insert(f, dxpl, fh_addr, sizeof(obj), obj, heap_id) < 0)
         FAIL_STACK_ERROR
-    free_space = cparam->managed.start_block_size - ((sizeof(obj) + OBJ_PREFIX_LEN) + DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
+    free_space = cparam->managed.start_block_size - ((sizeof(obj) + OBJ_PREFIX_LEN) + OBJ_PREFIX_LEN +DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
     if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, (hsize_t)cparam->managed.start_block_size, (hsize_t)cparam->managed.start_block_size, (hsize_t)0, free_space, (hsize_t)1))
         FAIL_STACK_ERROR
 
@@ -586,7 +586,7 @@ test_abs_insert_second(hid_t fapl, H5HF_create_t *cparam)
     HDmemset(heap_id, 0, sizeof(heap_id));
     if(H5HF_insert(f, dxpl, fh_addr, sizeof(obj), obj, heap_id) < 0)
         FAIL_STACK_ERROR
-    free_space = cparam->managed.start_block_size - ((sizeof(obj) + OBJ_PREFIX_LEN) + DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
+    free_space = cparam->managed.start_block_size - ((sizeof(obj) + OBJ_PREFIX_LEN) + OBJ_PREFIX_LEN +DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
     if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, (hsize_t)cparam->managed.start_block_size, (hsize_t)cparam->managed.start_block_size, (hsize_t)0, free_space, (hsize_t)1))
         FAIL_STACK_ERROR
 
@@ -600,7 +600,7 @@ test_abs_insert_second(hid_t fapl, H5HF_create_t *cparam)
     HDmemset(heap_id, 0, sizeof(heap_id));
     if(H5HF_insert(f, dxpl, fh_addr, sizeof(obj2), obj2, heap_id) < 0)
         FAIL_STACK_ERROR
-    free_space = cparam->managed.start_block_size - ((sizeof(obj) + OBJ_PREFIX_LEN) + (sizeof(obj2) + OBJ_PREFIX_LEN) + DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
+    free_space = cparam->managed.start_block_size - ((sizeof(obj) + OBJ_PREFIX_LEN) + (sizeof(obj2) + OBJ_PREFIX_LEN) + OBJ_PREFIX_LEN +DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
     if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, (hsize_t)cparam->managed.start_block_size, (hsize_t)cparam->managed.start_block_size, (hsize_t)0, free_space, (hsize_t)2))
         FAIL_STACK_ERROR
 
@@ -770,7 +770,7 @@ test_abs_insert_force_indirect(hid_t fapl, H5HF_create_t *cparam)
     /* Increment object count */
     nobjs++;
 
-    free_space = cparam->managed.start_block_size - ((sizeof(obj) + OBJ_PREFIX_LEN) + DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
+    free_space = cparam->managed.start_block_size - ((sizeof(obj) + OBJ_PREFIX_LEN) + OBJ_PREFIX_LEN +DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
     if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, (hsize_t)(2 * cparam->managed.start_block_size), (hsize_t)(2 * cparam->managed.start_block_size), (hsize_t)0, free_space, (hsize_t)nobjs))
         FAIL_STACK_ERROR
 
@@ -951,7 +951,7 @@ test_abs_insert_third_direct(hid_t fapl, H5HF_create_t *cparam)
     /* Increment object count */
     tot_nobjs++;
 
-    free_space = cparam->managed.start_block_size - ((sizeof(obj) + OBJ_PREFIX_LEN) + DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
+    free_space = cparam->managed.start_block_size - ((sizeof(obj) + OBJ_PREFIX_LEN) + OBJ_PREFIX_LEN +DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
     if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, (hsize_t)(3 * cparam->managed.start_block_size), (hsize_t)(3 * cparam->managed.start_block_size), (hsize_t)0, free_space, (hsize_t)tot_nobjs))
         FAIL_STACK_ERROR
 
@@ -1135,7 +1135,7 @@ test_abs_start_second_row(hid_t fapl, H5HF_create_t *cparam)
     /* Increment object count */
     tot_nobjs++;
 
-    free_space = cparam->managed.start_block_size - ((sizeof(obj) + OBJ_PREFIX_LEN) + DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
+    free_space = cparam->managed.start_block_size - ((sizeof(obj) + OBJ_PREFIX_LEN) + OBJ_PREFIX_LEN +DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
     if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, (hsize_t)((cparam->managed.width + 1) * cparam->managed.start_block_size), (hsize_t)((cparam->managed.width + 1) * cparam->managed.start_block_size), (hsize_t)0, free_space, (hsize_t)tot_nobjs))
         FAIL_STACK_ERROR
 
@@ -1339,7 +1339,7 @@ test_abs_start_third_row(hid_t fapl, H5HF_create_t *cparam)
 
     heap_size = (2 * cparam->managed.width) * cparam->managed.start_block_size +
             (2 * cparam->managed.start_block_size);
-    free_space = (2 * cparam->managed.start_block_size) - ((sizeof(obj) + OBJ_PREFIX_LEN) + DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
+    free_space = (2 * cparam->managed.start_block_size) - ((sizeof(obj) + OBJ_PREFIX_LEN) + OBJ_PREFIX_LEN +DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
     if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, heap_size, heap_size, (hsize_t)0, free_space, (hsize_t)tot_nobjs))
         FAIL_STACK_ERROR
 
@@ -1648,7 +1648,7 @@ test_abs_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam)
     tot_nobjs++;
 
     heap_size += cparam->managed.start_block_size;
-    free_space = cparam->managed.start_block_size - ((sizeof(obj) + OBJ_PREFIX_LEN) + DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
+    free_space = cparam->managed.start_block_size - ((sizeof(obj) + OBJ_PREFIX_LEN) + OBJ_PREFIX_LEN +DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
     if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, heap_size, heap_size, (hsize_t)0, free_space, (hsize_t)tot_nobjs))
         FAIL_STACK_ERROR
 
@@ -1782,7 +1782,7 @@ test_abs_second_direct_recursive_indirect(hid_t fapl, H5HF_create_t *cparam)
     tot_nobjs++;
 
     heap_size += cparam->managed.start_block_size;
-    free_space = cparam->managed.start_block_size - ((sizeof(obj) + OBJ_PREFIX_LEN) + DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
+    free_space = cparam->managed.start_block_size - ((sizeof(obj) + OBJ_PREFIX_LEN) + OBJ_PREFIX_LEN +DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
     if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, heap_size, heap_size, (hsize_t)0, free_space, (hsize_t)tot_nobjs))
         FAIL_STACK_ERROR
 
@@ -2058,7 +2058,7 @@ test_abs_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam)
     tot_nobjs++;
 
     heap_size += cparam->managed.start_block_size;
-    free_space = cparam->managed.start_block_size - ((sizeof(obj) + OBJ_PREFIX_LEN) + DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
+    free_space = cparam->managed.start_block_size - ((sizeof(obj) + OBJ_PREFIX_LEN) + OBJ_PREFIX_LEN +DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
     if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, heap_size, heap_size, (hsize_t)0, free_space, (hsize_t)tot_nobjs))
         FAIL_STACK_ERROR
 
@@ -2489,7 +2489,7 @@ test_abs_start_2nd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam)
     tot_nobjs++;
 
     heap_size += cparam->managed.start_block_size;
-    free_space = cparam->managed.start_block_size - ((sizeof(obj) + OBJ_PREFIX_LEN) + DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
+    free_space = cparam->managed.start_block_size - ((sizeof(obj) + OBJ_PREFIX_LEN) + OBJ_PREFIX_LEN +DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
     if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, heap_size, heap_size, (hsize_t)0, free_space, (hsize_t)tot_nobjs))
         FAIL_STACK_ERROR
 
@@ -2775,7 +2775,7 @@ test_abs_start_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam)
     tot_nobjs++;
 
     heap_size += cparam->managed.start_block_size;
-    free_space = cparam->managed.start_block_size - ((sizeof(obj) + OBJ_PREFIX_LEN) + DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
+    free_space = cparam->managed.start_block_size - ((sizeof(obj) + OBJ_PREFIX_LEN) + OBJ_PREFIX_LEN +DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
     if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, heap_size, heap_size, (hsize_t)0, free_space, (hsize_t)tot_nobjs))
         FAIL_STACK_ERROR
 
@@ -3538,7 +3538,7 @@ test_abs_start_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam)
     tot_nobjs++;
 
     heap_size += cparam->managed.start_block_size;
-    free_space = cparam->managed.start_block_size - ((sizeof(obj) + OBJ_PREFIX_LEN) + DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
+    free_space = cparam->managed.start_block_size - ((sizeof(obj) + OBJ_PREFIX_LEN) + OBJ_PREFIX_LEN +DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
     if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, heap_size, heap_size, (hsize_t)0, free_space, (hsize_t)tot_nobjs))
         FAIL_STACK_ERROR
 
@@ -5347,6 +5347,127 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_abs_skip_2nd_block
+ *
+ * Purpose:	Test inserting object into absolute heap which is small
+ *              enough for starting block size, then add object too large
+ *              for any blocks in first row of direct blocks, to force
+ *              early creation of indirect block (and range of skipped blocks)
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, April  1, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_abs_skip_2nd_block(hid_t fapl, H5HF_create_t *cparam)
+{
+    hid_t	file = -1;              /* File ID */
+    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    char	filename[1024];         /* Filename to use */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    haddr_t     fh_addr;                /* Address of fractal heap created */
+    size_t      id_len;                 /* Size of fractal heap IDs */
+    unsigned char obj[10];              /* Buffer for first object to insert */
+    unsigned char robj[10];             /* Buffer for reading first object */
+    unsigned char *obj2;                /* Buffer for second object to insert */
+    unsigned char *robj2;               /* Buffer for reading second object */
+    unsigned char heap_id[HEAP_ID_LEN]; /* Heap ID for object inserted */
+    hsize_t     free_space;             /* Size of free space in heap */
+    size_t      obj2_size;               /* Size of object to add */
+    hsize_t     heap_size;              /* Total size of heap */
+    unsigned    u;                      /* Local index variable */
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+    /* Create the file to work on */
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f = H5I_object(file)))
+        STACK_ERROR
+
+    /* Create absolute heap */
+    if(H5HF_create(f, dxpl, cparam, &fh_addr/*out*/, &id_len/*out*/) < 0)
+        FAIL_STACK_ERROR
+    if(!H5F_addr_defined(fh_addr))
+        FAIL_STACK_ERROR
+    if(id_len > HEAP_ID_LEN)
+        FAIL_STACK_ERROR
+
+    /* Initialize object buffers */
+    for(u = 0; u < sizeof(obj); u++)
+        obj[u] = u;
+    obj2_size = cparam->managed.start_block_size + 1;
+    obj2 = H5MM_malloc(obj2_size);
+    for(u = 0; u < obj2_size; u++)
+        obj2[u] = u + 10;
+
+    /*
+     * Test inserting first (small) object into absolute heap
+     */
+    TESTING("inserting two (small) objects into absolute heap");
+    HDmemset(heap_id, 0, sizeof(heap_id));
+    if(H5HF_insert(f, dxpl, fh_addr, sizeof(obj), obj, heap_id) < 0)
+        FAIL_STACK_ERROR
+    free_space = cparam->managed.start_block_size - ((sizeof(obj) + OBJ_PREFIX_LEN) + OBJ_PREFIX_LEN + DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
+    if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, (hsize_t)cparam->managed.start_block_size, (hsize_t)cparam->managed.start_block_size, (hsize_t)0, free_space, (hsize_t)1))
+        FAIL_STACK_ERROR
+
+    /* Check reading back in the first object */
+    if(H5HF_read(f, dxpl, fh_addr, heap_id, robj) < 0)
+        FAIL_STACK_ERROR
+    if(HDmemcmp(obj, robj, sizeof(obj)))
+        FAIL_STACK_ERROR
+
+    /* Insert second object, to force creation of indirect block and
+     * range of skipped blocks that are too small to hold the second object
+     */
+    HDmemset(heap_id, 0, sizeof(heap_id));
+    if(H5HF_insert(f, dxpl, fh_addr, obj2_size, obj2, heap_id) < 0)
+        FAIL_STACK_ERROR
+    free_space += (cparam->managed.start_block_size - (OBJ_PREFIX_LEN + DBLOCK_OVERHEAD + (cparam->managed.max_index / 8))) * (cparam->managed.width - 1);       /* Rest of first row */
+    free_space += (cparam->managed.start_block_size - (OBJ_PREFIX_LEN + DBLOCK_OVERHEAD + (cparam->managed.max_index / 8))) * cparam->managed.width;             /* All of second row (blocks are same size as first row) */
+    free_space += (2 * cparam->managed.start_block_size) - ((obj2_size + OBJ_PREFIX_LEN) + OBJ_PREFIX_LEN +DBLOCK_OVERHEAD + (cparam->managed.max_index / 8));
+    heap_size = cparam->managed.start_block_size + (2 * cparam->managed.start_block_size);
+    if(check_stats(f, H5P_DATASET_XFER_DEFAULT, fh_addr, heap_size, heap_size, (hsize_t)0, free_space, (hsize_t)2))
+        FAIL_STACK_ERROR
+
+    /* Check reading back in the second object */
+    robj2 = H5MM_malloc(obj2_size);
+    if(H5HF_read(f, dxpl, fh_addr, heap_id, robj2) < 0)
+        FAIL_STACK_ERROR
+    if(HDmemcmp(obj2, robj2, obj2_size))
+        FAIL_STACK_ERROR
+
+    PASSED()
+
+    /* Close the file */
+    if(H5Fclose(file) < 0)
+        TEST_ERROR
+
+    /* All tests passed */
+    H5MM_xfree(obj2);
+    H5MM_xfree(robj2);
+    return(0);
+
+error:
+    H5E_BEGIN_TRY {
+	H5Fclose(file);
+    } H5E_END_TRY;
+    H5MM_xfree(obj2);
+    H5MM_xfree(robj2);
+    return(1);
+} /* test_abs_skip_2nd_block() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	run_tests
  *
  * Purpose:	Test the fractal heap code, with different file access property
@@ -5413,6 +5534,7 @@ HDfprintf(stderr, "Uncomment tests!\n");
     nerrors += test_abs_skip_start_block(fapl, cparam);
     nerrors += test_abs_skip_start_block_add_back(fapl, cparam);
     nerrors += test_abs_skip_start_block_add_skipped(fapl, cparam);
+    nerrors += test_abs_skip_2nd_block(fapl, cparam);
 #else /* QAK */
 HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK */

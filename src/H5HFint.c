@@ -1799,6 +1799,9 @@ H5HF_man_iblock_place_dblock(H5HF_t *hdr, hid_t dxpl_id, size_t min_dblock_size,
     H5HF_indirect_t *ret_value;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_place_dblock)
+#ifdef QAK
+HDfprintf(stderr, "%s: min_dblock_size = %Zu\n", FUNC, min_dblock_size);
+#endif /* QAK */
 
     /*
      * Check arguments.
@@ -1810,6 +1813,7 @@ H5HF_man_iblock_place_dblock(H5HF_t *hdr, hid_t dxpl_id, size_t min_dblock_size,
     /* Check for creating first indirect block */
     if(hdr->man_dtable.curr_root_rows == 0) {
         H5HF_direct_t *dblock;          /* Pointer to direct block to query */
+        hbool_t have_direct_block;      /* Flag to indicate a direct block already exists */
         unsigned nrows;                 /* Number of rows for root indirect block */
 
 #ifdef QAK
@@ -1844,7 +1848,8 @@ HDfprintf(stderr, "%s: iblock_addr = %a\n", FUNC, iblock_addr);
             HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap indirect block")
 
         /* Check if there's already a direct block as root) */
-        if(H5F_addr_defined(hdr->man_dtable.table_addr)) {
+        have_direct_block = H5F_addr_defined(hdr->man_dtable.table_addr);
+        if(have_direct_block) {
             /* Lock first (root) direct block */
             if(NULL == (dblock = H5AC_protect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, hdr->man_dtable.table_addr, &hdr->man_dtable.cparam.start_block_size, hdr, H5AC_READ)))
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap direct block")
@@ -1872,7 +1877,9 @@ HDfprintf(stderr, "%s: iblock_addr = %a\n", FUNC, iblock_addr);
             if(H5HF_man_iblock_inc_loc(iblock) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't advance fractal heap block location")
         } /* end if */
-        else {
+
+        /* Check for skipping over direct blocks, in order to get to large enough block */
+        if(min_dblock_size > iblock->next_size) {
             H5HF_section_free_node_t *sec_node; /* Pointer to free list section for range */
             size_t dblock_free_space;   /* Size of free space for direct block */
             hsize_t range;              /* Size range skipped over */
@@ -1880,7 +1887,7 @@ HDfprintf(stderr, "%s: iblock_addr = %a\n", FUNC, iblock_addr);
             unsigned u, v;              /* Local index variables */
 
             /* Initialize information for rows skipped over */
-            cur_entry = 0;
+            cur_entry = (unsigned)have_direct_block;
             range = 0;
             for(u = 0; u < (nrows - 1); u++) {
                 /* Compute free space in direct blocks for this row */
@@ -1889,7 +1896,11 @@ HDfprintf(stderr, "%s: iblock_addr = %a\n", FUNC, iblock_addr);
                             + H5HF_MAN_ABS_DIRECT_OBJ_PREFIX_LEN(hdr));
 
                 /* Initialize information for this row */
-                for(v = 0; v < hdr->man_dtable.cparam.width; v++) {
+                if(u == 0 && have_direct_block)
+                    v = 1;
+                else
+                    v = 0;
+                for(; v < hdr->man_dtable.cparam.width; v++) {
                     /* Initialize entry for this row */
                     iblock->ents[cur_entry].addr = HADDR_UNDEF;
                     iblock->ents[cur_entry].free_space = dblock_free_space;
@@ -1915,18 +1926,18 @@ HDfprintf(stderr, "%s: iblock_addr = %a\n", FUNC, iblock_addr);
 
             /* Create free space section for blocks skipped over */
 
-            /* Create free list section node */
+            /* Create free list section node for blocks skipped over */
             if(NULL == (sec_node = H5FL_MALLOC(H5HF_section_free_node_t)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for direct block free list section")
 
             /* Set section's information */
-            sec_node->sect_addr = 0;    /* Range starts at offset 0 in the heap */
+            sec_node->sect_addr = (hsize_t)have_direct_block * hdr->man_dtable.row_block_size[0];    /* Range starts at offset 0 in the heap */
             sec_node->sect_size = dblock_free_space;
             sec_node->type = H5HF_SECT_RANGE;
             sec_node->u.range.iblock_addr = iblock->addr;
             sec_node->u.range.iblock_nrows = iblock->nrows;
-            sec_node->u.range.entry = 0;
-            sec_node->u.range.num_entries = cur_entry;
+            sec_node->u.range.entry = (unsigned)have_direct_block;
+            sec_node->u.range.num_entries = cur_entry - (unsigned)have_direct_block;
             sec_node->u.range.range = range;
 
             /* Add new free space to the global list of space */
