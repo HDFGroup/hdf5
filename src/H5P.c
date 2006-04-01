@@ -54,7 +54,8 @@ hid_t H5P_CLS_GROUP_CREATE_g        = FAIL;
 hid_t H5P_CLS_GROUP_ACCESS_g        = FAIL;
 hid_t H5P_CLS_DATATYPE_CREATE_g     = FAIL;
 hid_t H5P_CLS_DATATYPE_ACCESS_g     = FAIL;
-hid_t H5P_CLS_ATTRIBUTE_CREATE_g     = FAIL;
+hid_t H5P_CLS_ATTRIBUTE_CREATE_g    = FAIL;
+hid_t H5P_CLS_OBJECT_COPY_g         = FAIL;
 
 /*
  * Predefined property lists for each predefined class. These are initialized
@@ -69,9 +70,10 @@ hid_t H5P_LST_DATASET_XFER_g        = FAIL;
 hid_t H5P_LST_MOUNT_g               = FAIL;
 hid_t H5P_LST_GROUP_CREATE_g        = FAIL;
 hid_t H5P_LST_GROUP_ACCESS_g        = FAIL;
-hid_t H5P_LST_DATATYPE_CREATE_g       = FAIL;
-hid_t H5P_LST_DATATYPE_ACCESS_g       = FAIL;
-hid_t H5P_LST_ATTRIBUTE_CREATE_g       = FAIL;
+hid_t H5P_LST_DATATYPE_CREATE_g     = FAIL;
+hid_t H5P_LST_DATATYPE_ACCESS_g     = FAIL;
+hid_t H5P_LST_ATTRIBUTE_CREATE_g    = FAIL;
+hid_t H5P_LST_OBJECT_COPY_g         = FAIL;
 
 /* Track the revision count of a class, to make comparisons faster */
 static unsigned H5P_next_rev=0;
@@ -240,6 +242,12 @@ H5P_init_interface(void)
      */
     H5P_genclass_t  *ocrt_class;    /* Pointer to object (dataset, group, or datatype) creation property list class created */
     unsigned    intmd_group = H5G_CRT_INTERMEDIATE_GROUP_DEF;
+    /* Object copy property class variables.  In sequence, they are,
+     * - Copy property list class to modify
+     * - Default value for "object copy parameters"
+     */
+    H5P_genclass_t *ocpy_class;     /* Pointer to group copying property list class */
+    unsigned    ocpy_option = H5G_CPY_OPTION_DEF;
     size_t      nprops;             /* Number of properties */
     herr_t      ret_value = SUCCEED;
 
@@ -263,18 +271,18 @@ H5P_init_interface(void)
 
     /* Register the root class */
     if ((H5P_CLS_NO_CLASS_g = H5I_register (H5I_GENPROP_CLS, root_class))<0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class")
 
     /* Create object property  class */
 
     /* Allocate the object class */
     assert(H5P_CLS_OBJECT_CREATE_g==(-1));
     if (NULL==(ocrt_class = H5P_create_class (root_class,"object create",1,NULL,NULL,NULL,NULL,NULL,NULL)))
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed")
 
     /* Register the object class */
     if ((H5P_CLS_OBJECT_CREATE_g = H5I_register (H5I_GENPROP_CLS, ocrt_class))<0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class")
 
     /* Get the number of properties in the object class */
     if(H5P_get_nprops_pclass(ocrt_class,&nprops,FALSE)<0)
@@ -285,6 +293,29 @@ H5P_init_interface(void)
         /* Register create intermediate groups */
         if(H5P_register(ocrt_class,H5G_CRT_INTERMEDIATE_GROUP_NAME,H5G_CRT_INTERMEDIATE_GROUP_SIZE,
                  &intmd_group,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+    } /* end if */
+
+    /* Create object copy property  class */
+
+    /* Allocate the object copy class */
+    HDassert(H5P_CLS_OBJECT_COPY_g == (-1));
+    if(NULL == (ocpy_class = H5P_create_class(root_class, "object copy", 1, NULL, NULL, NULL, NULL, NULL, NULL)))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed")
+
+    /* Register the object copy class */
+    if((H5P_CLS_OBJECT_COPY_g = H5I_register(H5I_GENPROP_CLS, ocpy_class)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class")
+
+    /* Get the number of properties in the class */
+    if(H5P_get_nprops_pclass(ocpy_class, &nprops, FALSE) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't query number of properties")
+
+    /* Assume that if there are properties in the class, they are the default ones */
+    if(nprops == 0) {
+        /* Register group info */
+        if(H5P_register(ocpy_class, H5G_CPY_OPTION_NAME, H5G_CPY_OPTION_SIZE,
+                 &ocpy_option, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
     } /* end if */
 
@@ -473,6 +504,7 @@ H5P_term_interface(void)
                         H5P_LST_DATATYPE_CREATE_g =
                         H5P_LST_DATATYPE_ACCESS_g =
                         H5P_LST_ATTRIBUTE_CREATE_g =
+                        H5P_LST_OBJECT_COPY_g =
                         H5P_LST_MOUNT_g = (-1);
                 } /* end if */
             } /* end if */
@@ -495,6 +527,7 @@ H5P_term_interface(void)
                         H5P_CLS_DATATYPE_CREATE_g =
                         H5P_CLS_DATATYPE_ACCESS_g =
                         H5P_CLS_ATTRIBUTE_CREATE_g =
+                        H5P_CLS_OBJECT_COPY_g =
                         H5P_CLS_MOUNT_g = (-1);
                 } /* end if */
             } /* end if */

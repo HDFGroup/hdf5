@@ -336,10 +336,10 @@ H5_DLL herr_t H5O_get_info(H5O_loc_t *loc, H5O_stat_t *ostat, hid_t dxpl_id);
 H5_DLL herr_t H5O_iterate(const H5O_loc_t *loc, unsigned type_id, H5O_operator_t op,
     void *op_data, hid_t dxpl_id);
 H5_DLL H5G_obj_t H5O_obj_type(H5O_loc_t *loc, hid_t dxpl_id);
-H5_DLL herr_t H5O_copy_header(const H5O_loc_t *oloc_src,
-    H5O_loc_t *oloc_dst /*out */, hid_t dxpl_id);
-H5_DLL herr_t H5O_copy_header_map(const H5O_loc_t *oloc_src,
-    H5O_loc_t *oloc_dst /*out */, hid_t dxpl_id, struct H5SL_t *map_list);
+H5_DLL herr_t H5O_copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */, 
+    hid_t dxpl_id, unsigned cpy_option);
+H5_DLL herr_t H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */, 
+    hid_t dxpl_id, unsigned cpy_option, struct H5SL_t *map_list);
 H5_DLL herr_t H5O_debug_id(unsigned type_id, H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream, int indent, int fwidth);
 H5_DLL herr_t H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
 			 int fwidth);

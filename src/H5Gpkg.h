@@ -228,6 +228,7 @@ typedef struct H5G_bt_it_ud5_t {
     H5F_t       *dst_file;       /* File of destination group */
     H5O_stab_t  *dst_stab;       /* symbol table info for destination group */
     H5SL_t      *map_list;       /* skip list to map copied object addresses */
+    unsigned    cpy_option;      /* cpy options */
 } H5G_bt_it_ud5_t;
 
 /* Typedef for path traversal operations */

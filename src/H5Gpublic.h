@@ -101,6 +101,15 @@ typedef struct H5G_stat_t {
 typedef herr_t (*H5G_iterate_t)(hid_t group, const char *name,
 				void *op_data);
 
+/* Flags for object copy (H5Gcopy) */
+#define H5G_COPY_CREATE_INTERMEDIATE_GROUP_FLAG    (0x0001u)   /* Create missing groups when create a group */
+#define H5G_COPY_SHALLOW_HIERARCHY_FLAG    	(0x0002u)   /* Copy only immediate members */
+#define H5G_COPY_EXPAND_SOFT_LINK_FLAG		(0x0004u)   /* Expand soft links into new objects */
+#define H5G_COPY_EXPAND_EXT_LINK_FLAG   	          (0x0008u)   /* Expand external links into new objects */
+#define H5G_COPY_EXPAND_OBJ_REFERENCE_FLAG 	(0x0010u)   /* Copy objects that are pointed by references */
+#define H5G_COPY_WITHOUT_ATTR_FLAG    		(0x0020u)   /* Copy object without copying attributes */
+#define H5G_COPY_ALL				(0x003Fu)	  /* All object copying flags (for internal range checking) */
+
 H5_DLL hid_t H5Gcreate(hid_t loc_id, const char *name, size_t size_hint);
 H5_DLL hid_t H5Gopen(hid_t loc_id, const char *name);
 H5_DLL herr_t H5Gclose(hid_t group_id);
@@ -125,8 +134,8 @@ H5_DLL int H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize,
 H5_DLL hid_t H5Gcreate_expand(hid_t loc_id, const char *name, hid_t gcpl_id,
     hid_t gapl_id);
 H5_DLL hid_t H5Gget_create_plist(hid_t group_id);
-H5_DLL herr_t H5Gcopy(hid_t src_id, hid_t dst_loc_id, const char *name_dst, 
-                              hid_t plist_id);
+H5_DLL herr_t H5Gcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
+        const char *dst_name, hid_t plist_id);
 
 #ifdef __cplusplus
 }

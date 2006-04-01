@@ -5275,6 +5275,12 @@ H5T_debug(const H5T_t *dt, FILE *stream)
 	}
 	fprintf(stream, "\n");
 
+    } else if (H5T_VLEN==dt->shared->type) {
+	/* Variable data type */
+	fprintf(stream, " VLEN ");
+        H5T_debug(dt->shared->parent, stream);
+	fprintf(stream, "\n");
+
     } else if (H5T_ENUM==dt->shared->type) {
 	/* Enumeration data type */
 	fprintf(stream, " ");

@@ -43,9 +43,9 @@ static herr_t H5O_link_reset(void *_mesg);
 static herr_t H5O_link_free(void *_mesg);
 static herr_t H5O_link_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
 static void *H5O_link_copy_file(H5F_t *file_src, void *native_src,
-    H5F_t *file_dst, hid_t dxpl_id, H5SL_t *map_list, void *udata);
-static herr_t H5O_link_post_copy_file(H5F_t *file_src, const void *mesg_src,
-    H5O_loc_t *dst_oloc, void *mesg_dst, hbool_t *modified, hid_t dxpl_id, H5SL_t *map_list);
+    H5F_t *file_dst, hid_t dxpl_id, unsigned cpy_option, H5SL_t *map_list, void *udata);
+static herr_t H5O_link_post_copy_file(H5F_t *file_src, const void *mesg_src, H5O_loc_t *dst_oloc, 
+    void *mesg_dst, hbool_t *modified, hid_t dxpl_id, unsigned cpy_option, H5SL_t *map_list);
 static herr_t H5O_link_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			     FILE * stream, int indent, int fwidth);
 
@@ -476,8 +476,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_link_copy_file(H5F_t UNUSED *file_src, void *native_src,
-       H5F_t UNUSED *file_dst, hid_t UNUSED dxpl_id, H5SL_t UNUSED *map_list, void UNUSED *udata)
+H5O_link_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t UNUSED *file_dst, 
+hid_t UNUSED dxpl_id, UNUSED unsigned cpy_option, H5SL_t UNUSED *map_list, void UNUSED *udata)
 {
     H5O_link_t           *link_src = (H5O_link_t *) native_src;
     H5O_link_t           *link_dst = NULL;
@@ -542,8 +542,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5O_link_post_copy_file(H5F_t *file_src, const void *mesg_src,
-    H5O_loc_t *dst_oloc, void *mesg_dst, hbool_t *modified, hid_t dxpl_id, H5SL_t *map_list)
+H5O_link_post_copy_file(H5F_t *file_src, const void *mesg_src, H5O_loc_t *dst_oloc, void *mesg_dst, 
+    hbool_t *modified, hid_t dxpl_id, unsigned cpy_option, H5SL_t *map_list)
 {
     const H5O_link_t     *link_src = (const H5O_link_t *)mesg_src;
     H5O_link_t           *link_dst = (H5O_link_t *)mesg_dst;
@@ -580,7 +580,7 @@ H5O_link_post_copy_file(H5F_t *file_src, const void *mesg_src,
 
                 /* Copy the shared object from source to destination */
                 /* (Increments link count on destination) */
-                if(H5O_copy_header_map(&src_oloc, &new_oloc, dxpl_id, map_list) < 0)
+                if(H5O_copy_header_map(&src_oloc, &new_oloc, dxpl_id, cpy_option, map_list) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
                 /* Update link information with new destination object's address */

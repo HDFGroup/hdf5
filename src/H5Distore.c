@@ -312,6 +312,9 @@ H5FL_SEQ_DEFINE_STATIC(size_t);
 /* Declare a free list to manage the raw page information */
 H5FL_BLK_DEFINE_STATIC(chunk_page);
 
+/* Declare extern the free list to manage blocks of type conversion data */
+H5FL_BLK_EXTERN(type_conv);
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5D_istore_get_shared
@@ -985,6 +988,7 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key, haddr_t a
     H5D_istore_it_ud4_t     *udata = (H5D_istore_it_ud4_t *)_udata;
     const H5D_istore_key_t  *lt_key = (const H5D_istore_key_t *)_lt_key;
     H5D_istore_ud1_t        udata_dst;                  /* User data about new destination chunk */
+    void                    *bkg = NULL;             /* Temporary buffer for copying data */
     hbool_t                 is_vlen = FALSE;
 
     /* General information about chunk copy */
@@ -1053,8 +1057,12 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key, haddr_t a
         /* Copy into another buffer, to reclaim memory later */
         HDmemcpy(reclaim_buf, buf, reclaim_buf_size);
 
+        /* allocate temporary bkg buff for data conversion */
+        if(NULL == (bkg = H5FL_BLK_CALLOC(type_conv, buf_size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5B_ITER_ERROR, "memory allocation failed")
+
         /* Convert from memory to destination file */
-        if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, NULL, dxpl_id) < 0)
+        if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, bkg, dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5B_ITER_ERROR, "datatype conversion failed")
 
         /* Reclaim space from variable length data */
@@ -1087,6 +1095,9 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key, haddr_t a
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, H5B_ITER_ERROR, "unable to write raw data to file")
 
 done:
+    if(bkg)
+        H5FL_BLK_FREE(type_conv, bkg);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_istore_iter_copy() */
 

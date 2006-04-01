@@ -41,8 +41,8 @@ static herr_t H5O_cont_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static size_t H5O_cont_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_cont_free(void *mesg);
 static herr_t H5O_cont_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
-static void *H5O_cont_copy_file(H5F_t *file_src, void *mesg_src,
-    H5F_t *file_dst, hid_t dxpl_id, H5SL_t *map_list, void *udata);
+static void *H5O_cont_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, 
+    hid_t dxpl_id, unsigned cpy_option, H5SL_t *map_list, void *udata);
 static herr_t H5O_cont_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			     int indent, int fwidth);
 
@@ -259,8 +259,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_cont_copy_file(H5F_t UNUSED *file_src, void *mesg_src,
-        H5F_t UNUSED *file_dst, hid_t UNUSED dxpl_id, H5SL_t UNUSED *map_list, void *udata)
+H5O_cont_copy_file(H5F_t UNUSED *file_src, void *mesg_src, H5F_t UNUSED *file_dst, 
+    hid_t UNUSED dxpl_id, UNUSED unsigned cpy_option, H5SL_t UNUSED *map_list, void *udata)
 {
     H5O_cont_t  *cont_src = (H5O_cont_t *) mesg_src;
     H5O_chunk_t *chunk = (H5O_chunk_t *)udata;

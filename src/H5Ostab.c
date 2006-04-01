@@ -44,9 +44,9 @@ static size_t H5O_stab_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_stab_free(void *_mesg);
 static herr_t H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
 static void *H5O_stab_copy_file(H5F_t *file_src, void *native_src,
-    H5F_t *file_dst, hid_t dxpl_id, H5SL_t *map_list, void *udata);
-static herr_t H5O_stab_post_copy_file(H5F_t *file_src, const void *mesg_src,
-    H5O_loc_t *dst_oloc, void *mesg_dst, hbool_t *modified, hid_t dxpl_id, H5SL_t *map_list);
+    H5F_t *file_dst, hid_t dxpl_id, unsigned cpy_option, H5SL_t *map_list, void *udata);
+static herr_t H5O_stab_post_copy_file(H5F_t *file_src, const void *mesg_src, H5O_loc_t *dst_oloc, 
+    void *mesg_dst, hbool_t *modified, hid_t dxpl_id, unsigned cpy_option, H5SL_t *map_list);
 static herr_t H5O_stab_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
     FILE * stream, int indent, int fwidth);
 
@@ -311,8 +311,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_stab_copy_file(H5F_t *file_src, void *native_src,
-       H5F_t *file_dst, hid_t dxpl_id, H5SL_t UNUSED *map_list, void UNUSED *udata)
+H5O_stab_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst, 
+    hid_t dxpl_id, UNUSED unsigned cpy_option, H5SL_t UNUSED *map_list, void UNUSED *udata)
 {
     H5O_stab_t          *stab_src = (H5O_stab_t *) native_src;
     H5O_stab_t          *stab_dst = NULL;
@@ -362,8 +362,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5O_stab_post_copy_file(H5F_t *file_src, const void *mesg_src,
-    H5O_loc_t *dst_oloc, void *mesg_dst, hbool_t UNUSED *modified, hid_t dxpl_id, H5SL_t *map_list)
+H5O_stab_post_copy_file(H5F_t *file_src, const void *mesg_src, H5O_loc_t *dst_oloc, 
+void *mesg_dst, hbool_t UNUSED *modified, hid_t dxpl_id, unsigned cpy_option, H5SL_t *map_list)
 {
     H5G_bt_it_ud5_t     udata;      /* B-tree user data */
     const H5O_stab_t    *stab_src = (const H5O_stab_t *)mesg_src;
@@ -385,6 +385,7 @@ H5O_stab_post_copy_file(H5F_t *file_src, const void *mesg_src,
     udata.src_heap_addr = stab_src->heap_addr;
     udata.dst_file = dst_oloc->file;
     udata.dst_stab = stab_dst;
+    udata.cpy_option = cpy_option;
 
     /* Iterate over objects in group, copying them */
     if((H5B_iterate(file_src, dxpl_id, H5B_SNODE, H5G_node_copy, stab_src->btree_addr, &udata)) < 0)

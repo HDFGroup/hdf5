@@ -1015,6 +1015,7 @@ H5D_contig_copy(H5F_t *f_src, H5O_layout_t *layout_src,
     hsize_t     total_src_nbytes;       /* Total number of bytes to copy */
     size_t      buf_size;               /* Size of copy buffer */
     void       *buf = NULL;             /* Buffer for copying data */
+    void       *bkg = NULL;             /* Temporary buffer for copying data */
     void       *reclaim_buf = NULL;     /* Buffer for reclaiming data */
     H5S_t      *buf_space = NULL;       /* Dataspace describing buffer */
     hid_t       buf_sid = -1;           /* ID for buffer dataspace */
@@ -1164,8 +1165,12 @@ H5D_contig_copy(H5F_t *f_src, H5O_layout_t *layout_src,
             /* Copy into another buffer, to reclaim memory later */
             HDmemcpy(reclaim_buf, buf, mem_nbytes);
 
+            /* allocate temporary bkg buff for data conversion */
+            if(NULL == (bkg = H5FL_BLK_CALLOC(type_conv, buf_size)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for copy buffer")
+
             /* Convert from memory to destination file */
-	    if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, NULL, dxpl_id) < 0)
+	    if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, bkg, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed")
 
             /* Reclaim space from variable length data */
@@ -1200,6 +1205,8 @@ done:
         H5FL_BLK_FREE(type_conv, buf);
     if(reclaim_buf)
         H5FL_BLK_FREE(type_conv, reclaim_buf);
+    if(bkg)
+        H5FL_BLK_FREE(type_conv, bkg);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_contig_copy() */

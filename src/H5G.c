@@ -181,8 +181,7 @@ static herr_t H5G_move(H5G_loc_t *src_loc, const char *src_name,
     H5G_loc_t *dst_loc, const char *dst_name, hid_t dxpl_id);
 static herr_t H5G_insertion_file_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/);
-static herr_t H5G_copy(H5G_loc_t *src_loc, H5G_loc_t *dst_loc,
-         const char *name_dst, hid_t plist_id);
+static herr_t H5G_copy(H5G_loc_t *src_loc, H5G_loc_t *dst_loc, const char *dst_name, hid_t plist_id);
 
 
 /*-------------------------------------------------------------------------
@@ -285,15 +284,21 @@ done:
  *		specified NAME, and creation property list GCPL_ID and access
  *              property list GAPL_ID.
  *
- *		The optional SIZE_HINT specifies how much file space to
- *		reserve to store the names that will appear in this
- *		group. If a non-positive value is supplied for the SIZE_HINT
- *		then a default size is chosen.
- *
  *              Given the default setting, H5Gcreate_expand() will have the
  *              same function of H5Gcreate()
  *
- * See also:	H5Gcreate(), H5Dcreate_expand()
+ * Usage:       H5Gcreate_expand(loc_id, char *name, gcpl_id, gapl_id)
+ *              hid_t loc_id;	  IN: File or group identifier
+ *              const char *name; IN: Absolute or relative name of the new group 
+ *              hid_t gcpl_id;	  IN: Property list for group creation             
+ *              hid_t gapl_id;	  IN: Property list for group access             
+ *
+ * Example:	To create missing groups "A" and "B01" along the given path "/A/B01/grp"
+ *              hid_t create_id = H5Pcreate(H5P_GROUP_CREATE);
+ *              int   status = H5Pset_create_intermediate_group(create_id, TRUE);
+ *              hid_t gid = H5Gcreate_expand(file_id, "/A/B01/grp", create_id, H5P_DEFAULT);
+ *
+ * See also:	H5Gcreate(), H5Dcreate_expand(), H5Pset_create_intermediate_group()
  *
  * Errors:
  *
@@ -1055,7 +1060,44 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Gcopy
  *
- * Purpose:     Copy an object to destination location 
+ * Purpose:     Copy an object (group or dataset) to destination location 
+ *              within a file or cross files. PLIST_ID is a property list
+ *              which is used to pass user options and properties to the
+ *              copy. 
+ *
+ *              OPTIONS THAT MAY APPLY TO COPY IN THE FUTURE.
+ *                  H5G_COPY_CREATE_INTERMEDIATE_GROUP_FLAG
+ *                      Do not create missing groups when create a group (default)
+ *                      Create missing groups when create a group
+ *                  H5G_COPY_SHALLOW_HIERARCHY_FLAG
+ *                      Recursively copy all objects below the group (default) 
+ *                      Only immediate members.
+ *                  H5G_COPY_EXPAND_SOFT_LINK_FLAG
+ *                      Keep soft links as they are (default) 
+ *                      Expand them into new objects
+ *                  H5G_COPY_EXPAND_EXT_LINK_FLAG
+ *                      Keep external links as they are (default) 
+ *                      Expand them into new objects
+ *                  H5G_COPY_EXPAND_OBJ_REFERENCE_FLAG
+  *                     Update only the values of object references (default)
+ *                      Copy objects that are pointed by references
+ *                  H5G_COPY_WITHOUT_ATTR_FLAG
+ *                      Copy object along with all its attributes (default)
+ *                      Copy object without copying attributes
+ *
+ *              PROPERTIES THAT MAY APPLY TO COPY IN FUTURE
+ *                  Change data layout such as chunk size
+ *                  Add filter such as data compression.
+ *                  Add an attribute to the copied object(s) that say the  date/time 
+ *                      for the copy or other information about the source file.
+ *
+ * Usage:      H5Gcopy(src_loc_id, src_name, dst_loc_id, dst_name, plist_id)
+ *             hid_t src_loc_id         IN: Source file or group identifier. 
+ *             const char *src_name     IN: Name of the source object to be copied
+ *             hid_t dst_loc_id         IN: Destination file or group identifier 
+ *             const char *dst_name     IN: Name of the destination object 
+ *             hid_t plist_id           IN: Properties which apply to the copy       
+ *              
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1065,35 +1107,63 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gcopy(hid_t src_id, hid_t dst_id, const char *name_dst, hid_t plist_id)
+H5Gcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
+        const char *dst_name, hid_t plist_id)
 {
-    H5G_loc_t	src_loc;                    /* Source object group location */
-    H5G_loc_t	dst_loc;                    /* Destination group location */
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    H5G_loc_t	loc;                    /* Source group group location */
+    H5G_loc_t	src_loc;                /* Source object group location */
+    H5G_loc_t	dst_loc;                /* Destination group location */
+
+    /* for opening the destination object */
+    H5G_name_t  src_path;               /* Opened source object hier. path */
+    H5O_loc_t   src_oloc;               /* Opened source object object location */
+    hbool_t     ent_found = FALSE;      /* Entry at 'name' found */
+    hbool_t     obj_open = FALSE;       /* Entry at 'name' found */
+
+    herr_t      ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_API(H5Gcopy, FAIL)
-    H5TRACE4("e","iisi",src_id,dst_id,name_dst,plist_id);
 
     /* Check arguments */
-    if(H5G_loc(src_id, &src_loc) < 0)
+    if(H5G_loc(src_loc_id, &loc) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(H5G_loc(dst_id, &dst_loc) < 0)
+    if(H5G_loc(dst_loc_id, &dst_loc) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!name_dst || !*name_dst)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+    if(!src_name || !*src_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no source name specified")
+    if(!dst_name || !*dst_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination name specified")
 
-/* Get correct property list */
-/* XXX: This is a kludge, to use the datatype creation property list - QAK */
-if(H5P_DEFAULT == plist_id)
-    plist_id = H5P_DATATYPE_CREATE_DEFAULT;
-else
-    if(TRUE != H5P_isa_class(plist_id, H5P_DATATYPE_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not object create property list")
+    /* Set up opened group location to fill in */
+    src_loc.oloc = &src_oloc;
+    src_loc.path = &src_path;
+    H5G_loc_reset(&src_loc);
 
-    if(H5G_copy(&src_loc, &dst_loc, name_dst, plist_id) < 0)
+    /* Find the source object to copy */
+    if(H5G_loc_find(&loc, src_name, &src_loc/*out*/, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "source object not found")
+    ent_found = TRUE;
+
+    if(H5O_open(&src_oloc) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
+    obj_open = TRUE;
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == plist_id)
+        plist_id = H5P_OBJECT_COPY_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(plist_id, H5P_OBJECT_COPY))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not object copy property list")
+
+    if(H5G_copy(&src_loc, &dst_loc, dst_name, plist_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
 done:
+    if(ent_found)
+        H5G_name_free(&src_path);
+    if (obj_open)
+        H5O_close(&src_oloc);
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gcopy() */
 
@@ -1127,17 +1197,17 @@ done:
 static herr_t
 H5G_init_interface(void)
 {
-    H5P_genclass_t  *crt_pclass;
+    H5P_genclass_t  *crt_pclass, *cpy_pclass;
     herr_t          ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_init_interface);
 
     /* Initialize the atom group for the group IDs */
-    if (H5I_register_type(H5I_GROUP, (size_t)H5I_GROUPID_HASHSIZE, H5G_RESERVED_ATOMS,
+    if(H5I_register_type(H5I_GROUP, (size_t)H5I_GROUPID_HASHSIZE, H5G_RESERVED_ATOMS,
 		       (H5I_free_t)H5G_close) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to initialize interface");
 
-    /* ========== group Creation Property Class Initialization ============*/
+    /* ========== Group Creation Property Class Initialization ============*/
     assert(H5P_CLS_GROUP_CREATE_g!=-1);
 
     /* Get the pointer to group creation class */
@@ -1145,9 +1215,23 @@ H5G_init_interface(void)
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
 
     /* Only register the default property list if it hasn't been created yet */
-    if(H5P_LST_GROUP_CREATE_g==(-1)) {
+    if(H5P_LST_GROUP_CREATE_g == (-1)) {
         /* Register the default group creation property list */
         if((H5P_LST_GROUP_CREATE_g = H5P_create_id(crt_pclass))<0)
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't insert property into class")
+    } /* end if */
+
+    /* ========== Object Copy Property Class Initialization ============*/
+    assert(H5P_CLS_OBJECT_COPY_g!=-1);
+
+    /* Get the pointer to group copy class */
+    if(NULL == (cpy_pclass = H5I_object(H5P_CLS_OBJECT_COPY_g)))
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
+
+    /* Only register the default property list if it hasn't been created yet */
+    if(H5P_LST_OBJECT_COPY_g == (-1)) {
+        /* Register the default group copy property list */
+        if((H5P_LST_OBJECT_COPY_g = H5P_create_id(cpy_pclass))<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't insert property into class")
     } /* end if */
 
@@ -2888,16 +2972,20 @@ H5G_unmount(H5G_t *grp)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_copy(H5G_loc_t *src_loc, H5G_loc_t *dst_loc,
-         const char *name_dst, hid_t plist_id)
+H5G_copy(H5G_loc_t *src_loc, H5G_loc_t *dst_loc, const char *dst_name, hid_t plist_id)
 {
-    H5P_genplist_t  *oc_plist;          /* Property list created */
+    H5P_genplist_t  *gcrt_plist;                /* Group create property list created */
+    H5P_genplist_t  *gcpy_plist;                /* Group copy property list created */
     hid_t           dxpl_id = H5AC_dxpl_id;
-    H5G_name_t      new_path;            	/* Copied object group hier. path */
-    H5O_loc_t       new_oloc;            	/* Copied object object location */
+    H5G_name_t      new_path;                   /* Copied object group hier. path */
+    H5O_loc_t       new_oloc;                   /* Copied object object location */
     H5G_loc_t       new_loc;                    /* Group location of object copied */
     hbool_t         entry_inserted = FALSE;     /* Flag to indicate that the new entry was inserted into a group */
-    herr_t          ret_value = SUCCEED;       /* Return value */
+    unsigned        cpy_option = 0;             /* Copy options */
+    H5P_genclass_t  *gcrt_class;	       /* Group creation property class */
+    hid_t	          gcplist_id = H5P_DEFAULT;   /* Group creation property list */
+    hbool_t         gcplist_created = FALSE;    /* Flag o indicate if group creation property list is created */
+    herr_t          ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_copy, FAIL);
 
@@ -2905,11 +2993,15 @@ H5G_copy(H5G_loc_t *src_loc, H5G_loc_t *dst_loc,
     HDassert(src_loc->oloc->file);
     HDassert(dst_loc);
     HDassert(dst_loc->oloc->file);
-    HDassert(name_dst);
+    HDassert(dst_name);
 
     /* Get the property list */
-    if(NULL == (oc_plist = H5I_object(plist_id)))
+    if(NULL == (gcpy_plist = H5I_object(plist_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+    /* Retrieve the copy parameters */
+    if(H5P_get(gcpy_plist, H5G_CPY_OPTION_NAME, &cpy_option) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object copy flag")
 
     /* Set up copied object location to fill in */
     new_loc.oloc = &new_oloc;
@@ -2918,11 +3010,29 @@ H5G_copy(H5G_loc_t *src_loc, H5G_loc_t *dst_loc,
     new_oloc.file = dst_loc->oloc->file;
 
     /* copy the object from the source file to the destination file */
-    if(H5O_copy_header(src_loc->oloc, &new_oloc, dxpl_id) < 0)
+    if(H5O_copy_header(src_loc->oloc, &new_oloc, dxpl_id, cpy_option) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
+    /* create group creatiion property to create missing groups */
+    if((cpy_option & H5G_COPY_CREATE_INTERMEDIATE_GROUP_FLAG) > 0) {
+        if(NULL == (gcrt_class = H5I_object_verify(H5P_GROUP_CREATE, H5I_GENPROP_CLS)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
+
+        /* Create the new property list */
+        if((gcplist_id = H5P_create_id(gcrt_class)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create property list");
+        gcplist_created = TRUE;
+
+        if(H5P_set(gcplist_id, H5G_CRT_INTERMEDIATE_GROUP_NAME, &cpy_option) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set intermediate group creation flag")
+    } else
+        plist_id = H5P_GROUP_CREATE_DEFAULT;
+
+    if(NULL == (gcrt_plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
     /* Insert the new object in the destination file's group */
-    if(H5G_insert(dst_loc, name_dst, &new_loc, dxpl_id, oc_plist) < 0)
+    if(H5G_insert(dst_loc, dst_name, &new_loc, dxpl_id, gcrt_plist) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to insert the name")
     entry_inserted = TRUE;
 
@@ -2930,6 +3040,8 @@ done:
     /* Free the ID to name buffers */
     if(entry_inserted)
         H5G_loc_free(&new_loc);
+    if (gcplist_created)
+        H5P_close(gcrt_plist);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_copy() */

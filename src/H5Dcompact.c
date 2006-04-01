@@ -167,6 +167,7 @@ H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src,
     hid_t       tid_dst = -1;           /* Datatype ID for destination datatype */
     hid_t       tid_mem = -1;           /* Datatype ID for memory datatype */
     void       *buf = NULL;             /* Buffer for copying data */
+    void       *bkg = NULL;             /* Temporary buffer for copying data */
     void       *reclaim_buf = NULL;     /* Buffer for reclaiming data */
     hid_t       buf_sid = -1;           /* ID for buffer dataspace */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -251,11 +252,11 @@ H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src,
 
         /* Allocate memory for recclaim buf */
         if(NULL == (reclaim_buf = H5FL_BLK_MALLOC(type_conv, buf_size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
         /* Allocate memory for copying the chunk */
         if(NULL == (buf = H5FL_BLK_MALLOC(type_conv, buf_size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
         HDmemcpy(buf, layout_src->u.compact.buf, layout_src->u.compact.size);
 
@@ -265,8 +266,12 @@ H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src,
 
         HDmemcpy(reclaim_buf, buf, buf_size);
 
+        /* allocate temporary bkg buff for data conversion */
+        if(NULL == (bkg = H5FL_BLK_CALLOC(type_conv, buf_size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
         /* Convert from memory to destination file */
-        if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, NULL, dxpl_id) < 0)
+        if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, bkg, dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed")
 
         HDmemcpy(layout_dst->u.compact.buf, buf, layout_dst->u.compact.size);
@@ -292,6 +297,8 @@ done:
         H5FL_BLK_FREE(type_conv, buf);
     if(reclaim_buf)
         H5FL_BLK_FREE(type_conv, reclaim_buf);
+    if(bkg)
+        H5FL_BLK_FREE(type_conv, bkg);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_compact_copy() */

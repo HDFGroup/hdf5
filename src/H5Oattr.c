@@ -38,7 +38,7 @@ static herr_t H5O_attr_free (void *mesg);
 static herr_t H5O_attr_delete (H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
 static herr_t H5O_attr_link(H5F_t *f, hid_t dxpl_id, const void *_mesg);
 static void *H5O_attr_copy_file(H5F_t *file_src, void *native_src,
-    H5F_t *file_dst, hid_t dxpl_id, H5SL_t *map_list, void *udata);
+    H5F_t *file_dst, hid_t dxpl_id, unsigned cpy_option, H5SL_t *map_list, void *udata);
 static herr_t H5O_attr_debug (H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			      FILE * stream, int indent, int fwidth);
 
@@ -653,8 +653,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_attr_copy_file(H5F_t UNUSED *file_src, void *native_src,
-       H5F_t *file_dst, hid_t dxpl_id, H5SL_t *map_list, void UNUSED *udata)
+H5O_attr_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst, 
+    hid_t dxpl_id, unsigned cpy_option, H5SL_t *map_list, void UNUSED *udata)
 {
     H5A_t        *attr_src = (H5A_t *)native_src;
     H5A_t        *attr_dst = NULL;
@@ -718,7 +718,7 @@ H5O_attr_copy_file(H5F_t UNUSED *file_src, void *native_src,
         dst_oloc->file = file_dst;
 
         /* Copy the shared object from source to destination */
-        if(H5O_copy_header_map(src_oloc, dst_oloc, dxpl_id, map_list) < 0)
+        if(H5O_copy_header_map(src_oloc, dst_oloc, dxpl_id, cpy_option, map_list) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy object")
 
         /* Reset shared message information */

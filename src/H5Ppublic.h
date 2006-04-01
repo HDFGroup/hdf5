@@ -93,6 +93,7 @@ typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data);
 #define H5P_DATATYPE_CREATE 		(H5OPEN H5P_CLS_DATATYPE_CREATE_g)
 #define H5P_DATATYPE_ACCESS 		(H5OPEN H5P_CLS_DATATYPE_ACCESS_g)
 #define H5P_ATTRIBUTE_CREATE 		(H5OPEN H5P_CLS_ATTRIBUTE_CREATE_g)
+#define H5P_OBJECT_COPY	 		(H5OPEN H5P_CLS_OBJECT_COPY_g)
 H5_DLLVAR hid_t H5P_CLS_NO_CLASS_g;
 H5_DLLVAR hid_t H5P_CLS_OBJECT_CREATE_g;
 H5_DLLVAR hid_t H5P_CLS_FILE_CREATE_g;
@@ -106,6 +107,7 @@ H5_DLLVAR hid_t H5P_CLS_GROUP_ACCESS_g;
 H5_DLLVAR hid_t H5P_CLS_DATATYPE_CREATE_g;
 H5_DLLVAR hid_t H5P_CLS_DATATYPE_ACCESS_g;
 H5_DLLVAR hid_t H5P_CLS_ATTRIBUTE_CREATE_g;
+H5_DLLVAR hid_t H5P_CLS_OBJECT_COPY_g;
 
 /*
  * The library created default property lists
@@ -126,6 +128,7 @@ H5_DLLVAR hid_t H5P_CLS_ATTRIBUTE_CREATE_g;
 #define H5P_DATATYPE_CREATE_DEFAULT	(H5OPEN H5P_LST_DATATYPE_CREATE_g)
 #define H5P_DATATYPE_ACCESS_DEFAULT 	(H5OPEN H5P_LST_DATATYPE_ACCESS_g)
 #define H5P_ATTRIBUTE_CREATE_DEFAULT	(H5OPEN H5P_LST_ATTRIBUTE_CREATE_g)
+#define H5P_OBJECT_COPY_DEFAULT		(H5OPEN H5P_LST_OBJECT_COPY_g)
 H5_DLLVAR hid_t H5P_LST_NO_CLASS_g;
 H5_DLLVAR hid_t H5P_LST_FILE_CREATE_g;
 H5_DLLVAR hid_t H5P_LST_FILE_ACCESS_g;
@@ -138,6 +141,7 @@ H5_DLLVAR hid_t H5P_LST_GROUP_ACCESS_g;
 H5_DLLVAR hid_t H5P_LST_DATATYPE_CREATE_g;
 H5_DLLVAR hid_t H5P_LST_DATATYPE_ACCESS_g;
 H5_DLLVAR hid_t H5P_LST_ATTRIBUTE_CREATE_g;
+H5_DLLVAR hid_t H5P_LST_OBJECT_COPY_g;
 
 /* Public functions */
 H5_DLL hid_t H5Pcreate_class(hid_t parent, const char *name,
@@ -345,6 +349,9 @@ H5_DLL herr_t H5Pget_est_link_info(hid_t plist_id, unsigned *est_num_entries /* 
 
 H5_DLL herr_t H5Pset_char_encoding(hid_t plist_id, H5T_cset_t encoding);
 H5_DLL herr_t H5Pget_char_encoding(hid_t plist_id, H5T_cset_t *encoding /*out*/);
+
+H5_DLL herr_t H5Pset_copy_object(hid_t plist_id, unsigned crt_intmd);
+H5_DLL herr_t H5Pget_copy_object(hid_t plist_id, unsigned *crt_intmd /*out*/);
 
 #ifdef __cplusplus
 }

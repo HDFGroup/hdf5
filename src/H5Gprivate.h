@@ -79,6 +79,12 @@
 #define H5G_CRT_INTERMEDIATE_GROUP_SIZE         sizeof(unsigned)
 #define H5G_CRT_INTERMEDIATE_GROUP_DEF          0
 
+/* definitions for copying objects */
+#define H5G_CPY_OPTION_NAME 			"copy object"
+#define H5G_CPY_OPTION_SIZE			sizeof(unsigned)
+#define H5G_CPY_OPTION_DEF			0
+
+
 /* Type of operation being performed for call to H5G_name_replace() */
 typedef enum {
     H5G_NAME_MOVE = 0,          /* H5*move call    */

@@ -1941,7 +1941,7 @@ H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
 
             /* Copy the shared object from source to destination */
             /* (Increments link count on destination) */
-            if(H5O_copy_header_map(&src_oloc, &new_oloc, dxpl_id, udata->map_list) < 0)
+            if(H5O_copy_header_map(&src_oloc, &new_oloc, dxpl_id, udata->cpy_option, udata->map_list) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, H5B_ITER_ERROR, "unable to copy object")
 
             /* Construct link information for eventual insertion */
