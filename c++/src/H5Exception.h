@@ -21,7 +21,7 @@
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #ifdef H5_NO_STD
-    namespace H5_std =;
+    namespace H5_std =::;
 #else
     namespace H5_std = std;
 #endif
