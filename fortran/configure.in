@@ -24,7 +24,7 @@ dnl
 dnl NOTE: Don't forget to change the version number here when we do a
 dnl release!!!
 dnl
-AC_INIT([HDF5 Fortran], [1.6.5-post9], [hdfhelp@ncsa.uiuc.edu])
+AC_INIT([HDF5 Fortran], [1.6.5-post10], [hdfhelp@ncsa.uiuc.edu])
 AC_CONFIG_SRCDIR([src/HDF5.f90])
 AC_CONFIG_HEADER([src/H5config_fortran.h])
 
