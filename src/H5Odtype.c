@@ -1216,7 +1216,7 @@ H5O_dtype_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_dtype_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type, void *mesg_src, void *_udata)
+H5O_dtype_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *type, void *mesg_src, void *_udata)
 {
     H5T_t	   *dt_src = (H5T_t *)mesg_src;  /* Source datatype */
     H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */

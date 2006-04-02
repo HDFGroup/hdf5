@@ -4848,7 +4848,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_mount(hid_t fapl)
+test_copy_mount(hid_t UNUSED fapl)
 {
     TESTING("H5Gcopy(): objects between mounted files");
 
@@ -5635,14 +5635,14 @@ test_copy_dataset_contig_vl_vl(hid_t fapl)
         buf[i].p=HDmalloc((i+1)*sizeof(hvl_t));
         if(buf[i].p==NULL) {
             TestErrPrintf("Cannot allocate memory for VL data! i=%u\n",i);
-            return;
+            TEST_ERROR;
         } /* end if */
         buf[i].len=i+1;
         for(tvl=buf[i].p,j=0; j<(i+1); j++, tvl++) {
             tvl->p=HDmalloc((j+1)*sizeof(unsigned int));
             if(tvl->p==NULL) {
                 TestErrPrintf("Cannot allocate memory for VL data! i=%u, j=%u\n",i,j);
-                return;
+                TEST_ERROR;
             } /* end if */
             tvl->len=j+1;
             for(k=0; k<(j+1); k++)
@@ -5790,14 +5790,14 @@ test_copy_dataset_chunked_vl_vl(hid_t fapl)
         buf[i].p=HDmalloc((i+1)*sizeof(hvl_t));
         if(buf[i].p==NULL) {
             TestErrPrintf("Cannot allocate memory for VL data! i=%u\n",i);
-            return;
+            TEST_ERROR;
         } /* end if */
         buf[i].len=i+1;
         for(tvl=buf[i].p,j=0; j<(i+1); j++, tvl++) {
             tvl->p=HDmalloc((j+1)*sizeof(unsigned int));
             if(tvl->p==NULL) {
                 TestErrPrintf("Cannot allocate memory for VL data! i=%u, j=%u\n",i,j);
-                return;
+                TEST_ERROR;
             } /* end if */
             tvl->len=j+1;
             for(k=0; k<(j+1); k++)
@@ -5946,14 +5946,14 @@ test_copy_dataset_compressed_vl_vl(hid_t fapl)
         buf[i].p=HDmalloc((i+1)*sizeof(hvl_t));
         if(buf[i].p==NULL) {
             TestErrPrintf("Cannot allocate memory for VL data! i=%u\n",i);
-            return;
+            TEST_ERROR;
         } /* end if */
         buf[i].len=i+1;
         for(tvl=buf[i].p,j=0; j<(i+1); j++, tvl++) {
             tvl->p=HDmalloc((j+1)*sizeof(unsigned int));
             if(tvl->p==NULL) {
                 TestErrPrintf("Cannot allocate memory for VL data! i=%u, j=%u\n",i,j);
-                return;
+                TEST_ERROR;
             } /* end if */
             tvl->len=j+1;
             for(k=0; k<(j+1); k++)

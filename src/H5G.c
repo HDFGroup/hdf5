@@ -3013,7 +3013,7 @@ H5G_copy(H5G_loc_t *src_loc, H5G_loc_t *dst_loc, const char *dst_name, hid_t pli
     if(H5O_copy_header(src_loc->oloc, &new_oloc, dxpl_id, cpy_option) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
-    /* create group creatiion property to create missing groups */
+    /* Create group creatiion property to create missing groups */
     if((cpy_option & H5G_COPY_CREATE_INTERMEDIATE_GROUP_FLAG) > 0) {
         if(NULL == (gcrt_class = H5I_object_verify(H5P_GROUP_CREATE, H5I_GENPROP_CLS)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
@@ -3022,14 +3022,16 @@ H5G_copy(H5G_loc_t *src_loc, H5G_loc_t *dst_loc, const char *dst_name, hid_t pli
         if((gcplist_id = H5P_create_id(gcrt_class)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create property list");
         gcplist_created = TRUE;
-
-        if(H5P_set(gcplist_id, H5G_CRT_INTERMEDIATE_GROUP_NAME, &cpy_option) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set intermediate group creation flag")
     } else
-        plist_id = H5P_GROUP_CREATE_DEFAULT;
+        gcplist_id = H5P_GROUP_CREATE_DEFAULT;
 
-    if(NULL == (gcrt_plist = H5I_object(plist_id)))
+    if(NULL == (gcrt_plist = H5I_object(gcplist_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+    /* Set the intermediate group creation property, if requested */
+    if(gcplist_created)
+        if(H5P_set(gcrt_plist, H5G_CRT_INTERMEDIATE_GROUP_NAME, &cpy_option) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set intermediate group creation flag")
 
     /* Insert the new object in the destination file's group */
     if(H5G_insert(dst_loc, dst_name, &new_loc, dxpl_id, gcrt_plist) < 0)
