@@ -2254,6 +2254,16 @@ main (int argc, const char *argv[])
              * group. */
             sym_insert(&sb, oname);
             iter.container = container = fix_name(show_file_name_g?fname:"", oname);
+            /* list root attributes */
+            if (verbose_g>0)
+            {
+             if ((root=H5Gopen(file, "/"))<0) 
+              leave(1); 
+             H5Aiterate(root, NULL, list_attr, NULL);
+             if (H5Gclose(root)<0) 
+              leave(1);
+            }
+            /* list */
             H5Giterate(file, oname, NULL, list, &iter);
             free(container);
 
@@ -2272,3 +2282,4 @@ main (int argc, const char *argv[])
     }
     leave(0);
 }
+
