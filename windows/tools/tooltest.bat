@@ -299,7 +299,7 @@
      echo %exefile% %flagout% %result%
      echo %exefile% %flagout% %result% >> ..\..\%tempResults% 
 		 if "%result%"=="FAILED" ( 
-     more ..\..\temp_fc.txt
+     ::more ..\..\temp_fc.txt
 		 more ..\..\temp_fc.txt >> ..\..\%tempResults% 
 		 ) 
 
