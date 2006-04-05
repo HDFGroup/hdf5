@@ -26,9 +26,9 @@ class H5_DLLCPP Attribute : public AbstractDs {
 	virtual void close();
 
 	// Gets the name of this attribute.
-	ssize_t getName( size_t buf_size, H5_std::string& attr_name ) const;
-	H5_std::string getName( size_t buf_size ) const; // returns name, not its length
-	H5_std::string getName() const; // returns name, no argument
+	ssize_t getName( size_t buf_size, H5std_string& attr_name ) const;
+	H5std_string getName( size_t buf_size ) const; // returns name, not its length
+	H5std_string getName() const; // returns name, no argument
 
 	// Gets a copy of the dataspace for this attribute.
 	virtual DataSpace getSpace() const;
@@ -38,14 +38,14 @@ class H5_DLLCPP Attribute : public AbstractDs {
 
 	// Reads data from this attribute.
 	void read( const DataType& mem_type, void *buf ) const;
-	void read( const DataType& mem_type, H5_std::string& strg ) const;
+	void read( const DataType& mem_type, H5std_string& strg ) const;
 
 	// Writes data to this attribute.
 	void write(const DataType& mem_type, const void *buf ) const;
-	void write(const DataType& mem_type, const H5_std::string& strg ) const;
+	void write(const DataType& mem_type, const H5std_string& strg ) const;
 
 	// Returns this class name
-	virtual H5_std::string fromClass () const { return("Attribute"); }
+	virtual H5std_string fromClass () const { return("Attribute"); }
 
         // Creates a copy of an existing attribute using the attribute id
         Attribute( const hid_t attr_id );

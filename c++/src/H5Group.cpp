@@ -130,7 +130,7 @@ void* Group::Reference(const char* name) const
 ///\param	name - IN: Name of the object to be referenced
 // Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
-void* Group::Reference(const H5_std::string& name) const
+void* Group::Reference(const H5std_string& name) const
 {
    return(Reference(name.c_str()));
 }
@@ -210,9 +210,9 @@ void Group::close()
 //		implementation of Group.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void Group::throwException(const H5_std::string func_name, const H5_std::string msg) const
+void Group::throwException(const H5std_string func_name, const H5std_string msg) const
 {
-   H5_std::string full_name = func_name;
+   H5std_string full_name = func_name;
    full_name.insert(0, "Group::");
    throw GroupIException(full_name, msg);
 }

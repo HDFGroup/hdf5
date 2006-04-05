@@ -233,7 +233,7 @@ void PredType::commit( H5Object& loc, const char* name )
    throw DataTypeIException("PredType::commit", "Attempting to commit a predefined datatype.  This operation is invalid" );
 }
 
-void PredType::commit( H5Object& loc, const H5_std::string& name )
+void PredType::commit( H5Object& loc, const H5std_string& name )
 {
    commit( loc, name.c_str());
 }

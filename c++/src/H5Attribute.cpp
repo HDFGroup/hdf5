@@ -91,7 +91,7 @@ void Attribute::write( const DataType& mem_type, const void *buf ) const
 ///\exception	H5::AttributeIException
 // Programmer	Binh-Minh Ribler - Apr, 2003
 //--------------------------------------------------------------------------
-void Attribute::write( const DataType& mem_type, const H5_std::string& strg ) const
+void Attribute::write( const DataType& mem_type, const H5std_string& strg ) const
 {
    // Convert string to C-string
    const char* strg_C;
@@ -130,7 +130,7 @@ void Attribute::read( const DataType& mem_type, void *buf ) const
 ///\exception	H5::AttributeIException
 // Programmer	Binh-Minh Ribler - Apr, 2003
 //--------------------------------------------------------------------------
-void Attribute::read( const DataType& mem_type, H5_std::string& strg ) const
+void Attribute::read( const DataType& mem_type, H5std_string& strg ) const
 {
    size_t size = mem_type.getSize();
    char* strg_C = new char[size+1];  // temporary C-string for C API
@@ -196,7 +196,7 @@ hid_t Attribute::p_get_type() const
 ///\exception	H5::AttributeIException
 // Programmer	Binh-Minh Ribler - Nov, 2001
 //--------------------------------------------------------------------------
-ssize_t Attribute::getName( size_t buf_size, H5_std::string& attr_name ) const
+ssize_t Attribute::getName( size_t buf_size, H5std_string& attr_name ) const
 {
    char* name_C = new char[buf_size+1];  // temporary C-string for C API
 
@@ -224,9 +224,9 @@ ssize_t Attribute::getName( size_t buf_size, H5_std::string& attr_name ) const
 ///\exception	H5::AttributeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5_std::string Attribute::getName( size_t buf_size ) const
+H5std_string Attribute::getName( size_t buf_size ) const
 {
-   H5_std::string attr_name;
+   H5std_string attr_name;
    ssize_t name_size = getName( buf_size, attr_name );
    return( attr_name );
    // let caller catch exception if any
@@ -241,7 +241,7 @@ H5_std::string Attribute::getName( size_t buf_size ) const
 ///\exception	H5::AttributeIException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
-H5_std::string Attribute::getName() const
+H5std_string Attribute::getName() const
 {
    // Try with 256 characters for the name first, if the name's length
    // returned is more than that then, read the name again with the
@@ -249,7 +249,7 @@ H5_std::string Attribute::getName() const
    char* name_C = new char[256];  // temporary C-string for C API
    ssize_t name_size = H5Aget_name(id, 255, name_C);
 
-   H5_std::string attr_name;
+   H5std_string attr_name;
    if (name_size >= 256)
       name_size = getName(name_size, attr_name);
 

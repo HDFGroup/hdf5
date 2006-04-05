@@ -58,13 +58,13 @@ class H5_DLLCPP DataSet : public AbstractDs {
 	// The memory and file dataspaces and the transferring property list
 	// can be defaults.
 	void read( void* buf, const DataType& mem_type, const DataSpace& mem_space = DataSpace::ALL, const DataSpace& file_space = DataSpace::ALL, const DSetMemXferPropList& xfer_plist = DSetMemXferPropList::DEFAULT ) const;
-        void read( H5_std::string& buf, const DataType& mem_type, const DataSpace& mem_space = DataSpace::ALL, const DataSpace& file_space = DataSpace::ALL, const DSetMemXferPropList& xfer_plist = DSetMemXferPropList::DEFAULT ) const;
+        void read( H5std_string& buf, const DataType& mem_type, const DataSpace& mem_space = DataSpace::ALL, const DataSpace& file_space = DataSpace::ALL, const DSetMemXferPropList& xfer_plist = DSetMemXferPropList::DEFAULT ) const;
 
 	// Writes the buffered data to this dataset.
 	// The memory and file dataspaces and the transferring property list
 	// can be defaults.
 	void write( const void* buf, const DataType& mem_type, const DataSpace& mem_space = DataSpace::ALL, const DataSpace& file_space = DataSpace::ALL, const DSetMemXferPropList& xfer_plist = DSetMemXferPropList::DEFAULT ) const;
-        void write( const H5_std::string& buf, const DataType& mem_type, const DataSpace& mem_space = DataSpace::ALL, const DataSpace& file_space = DataSpace::ALL, const DSetMemXferPropList& xfer_plist = DSetMemXferPropList::DEFAULT ) const;
+        void write( const H5std_string& buf, const DataType& mem_type, const DataSpace& mem_space = DataSpace::ALL, const DataSpace& file_space = DataSpace::ALL, const DSetMemXferPropList& xfer_plist = DSetMemXferPropList::DEFAULT ) const;
 
 	// Iterates the selected elements in the specified dataspace - not implemented in C++ style yet
         int iterateElems( void* buf, const DataType& type, const DataSpace& space, H5D_operator_t op, void* op_data = NULL );
@@ -81,10 +81,10 @@ class H5_DLLCPP DataSet : public AbstractDs {
 
 	// Creates a reference to a named Hdf5 object in this object.
 	void* Reference(const char* name) const;
-	void* Reference(const H5_std::string& name) const;
+	void* Reference(const H5std_string& name) const;
 
 	// Returns this class name
-	virtual H5_std::string fromClass () const { return("DataSet"); }
+	virtual H5std_string fromClass () const { return("DataSet"); }
 
 	// Creates a copy of an existing DataSet using its id.
 	DataSet(const hid_t existing_id);

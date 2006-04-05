@@ -96,7 +96,7 @@ H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& c
 ///		FileCreatPropList::DEFAULT
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5File::H5File( const H5_std::string& name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : IdComponent()
+H5File::H5File( const H5std_string& name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : IdComponent()
 {
    p_get_file(name.c_str(), flags, create_plist, access_plist);
 }
@@ -190,7 +190,7 @@ bool H5File::isHdf5(const char* name)
 ///\param	name - IN: Name of the file - \c std::string
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-bool H5File::isHdf5(const H5_std::string& name )
+bool H5File::isHdf5(const H5std_string& name )
 {
    return( isHdf5( name.c_str()) );
 }
@@ -233,7 +233,7 @@ void H5File::openFile(const char* name, unsigned int flags, const FileAccPropLis
 ///		FileAccPropList::DEFAULT
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void H5File::openFile(const H5_std::string& name, unsigned int flags, const FileAccPropList& access_plist)
+void H5File::openFile(const H5std_string& name, unsigned int flags, const FileAccPropList& access_plist)
 {
     openFile(name.c_str(), flags, access_plist);
 }
@@ -491,7 +491,7 @@ void H5File::getVFDHandle(void **file_handle) const
 ///\exception	H5::IdComponentException
 // Programmer	Binh-Minh Ribler - Jul, 2004
 //--------------------------------------------------------------------------
-H5_std::string H5File::getFileName() const
+H5std_string H5File::getFileName() const
 {
    try {
       return(p_get_file_name());
@@ -558,7 +558,7 @@ void* H5File::Reference(const char* name) const
 ///\param	name - IN: Name of the object to be referenced - \c std::string
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
-void* H5File::Reference(const H5_std::string& name) const
+void* H5File::Reference(const H5std_string& name) const
 {
    return(Reference(name.c_str()));
 }
@@ -672,9 +672,9 @@ void H5File::close()
 //		implementation of H5File.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void H5File::throwException(const H5_std::string func_name, const H5_std::string msg) const
+void H5File::throwException(const H5std_string func_name, const H5std_string msg) const
 {
-   H5_std::string full_name = func_name;
+   H5std_string full_name = func_name;
    full_name.insert(0, "H5File::");
    throw FileIException(full_name, msg);
 }

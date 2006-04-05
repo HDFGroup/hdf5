@@ -21,9 +21,9 @@
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #ifdef H5_NO_STD
-    namespace H5_std =::;
+    #define H5std_string ::string
 #else
-    namespace H5_std = std;
+    #define H5std_string std::string
 #endif
 #endif
 
@@ -31,20 +31,20 @@ class H5_DLLCPP Exception {
    public:
 	// Creates an exception with a function name where the failure occurs
 	// and an optional detailed message
-	Exception(const H5_std::string func_name, const H5_std::string message = DEFAULT_MSG);
+	Exception(const H5std_string func_name, const H5std_string message = DEFAULT_MSG);
 
 	// Returns a character string that describes the error specified by
 	// a major error number.
-	H5_std::string getMajorString( hid_t err_major_id ) const;
+	H5std_string getMajorString( hid_t err_major_id ) const;
 
 	// Returns a character string that describes the error specified by
 	// a minor error number.
-	H5_std::string getMinorString( hid_t err_minor_id ) const;
+	H5std_string getMinorString( hid_t err_minor_id ) const;
 
 	// Returns the detailed message set at the time the exception is thrown
-	H5_std::string getDetailMsg() const;
+	H5std_string getDetailMsg() const;
 	const char* getCDetailMsg() const;	// C string of detailed message
-	H5_std::string getFuncName() const;	// function name as a string object
+	H5std_string getFuncName() const;	// function name as a string object
 	const char* getCFuncName() const;	// function name as a char string
 
 	// Turns on the automatic error printing.
@@ -84,80 +84,80 @@ class H5_DLLCPP Exception {
 #if defined(WIN32)
 #pragma warning(disable: 4251)
 #endif
-	H5_std::string detail_message;
-	H5_std::string func_name;
+	H5std_string detail_message;
+	H5std_string func_name;
 
    protected:
         // Default value for detail_message
-        static const H5_std::string DEFAULT_MSG;
+        static const H5std_string DEFAULT_MSG;
 };
 
 class H5_DLLCPP FileIException : public Exception {
    public:
-	FileIException( const H5_std::string func_name, const H5_std::string message = DEFAULT_MSG);
+	FileIException( const H5std_string func_name, const H5std_string message = DEFAULT_MSG);
 	FileIException();
 	virtual ~FileIException();
 };
 
 class H5_DLLCPP GroupIException : public Exception {
    public:
-	GroupIException( const H5_std::string func_name, const H5_std::string message = DEFAULT_MSG);
+	GroupIException( const H5std_string func_name, const H5std_string message = DEFAULT_MSG);
 	GroupIException();
 	virtual ~GroupIException();
 };
 
 class H5_DLLCPP DataSpaceIException : public Exception {
    public:
-	DataSpaceIException(const H5_std::string func_name, const H5_std::string message = DEFAULT_MSG);
+	DataSpaceIException(const H5std_string func_name, const H5std_string message = DEFAULT_MSG);
 	DataSpaceIException();
 	virtual ~DataSpaceIException();
 };
 
 class H5_DLLCPP DataTypeIException : public Exception {
    public:
-	DataTypeIException(const H5_std::string func_name, const H5_std::string message = DEFAULT_MSG);
+	DataTypeIException(const H5std_string func_name, const H5std_string message = DEFAULT_MSG);
 	DataTypeIException();
 	virtual ~DataTypeIException();
 };
 
 class H5_DLLCPP PropListIException : public Exception {
    public:
-	PropListIException(const H5_std::string func_name, const H5_std::string message = DEFAULT_MSG);
+	PropListIException(const H5std_string func_name, const H5std_string message = DEFAULT_MSG);
 	PropListIException();
 	virtual ~PropListIException();
 };
 
 class H5_DLLCPP DataSetIException : public Exception {
    public:
-	DataSetIException(const H5_std::string func_name, const H5_std::string message = DEFAULT_MSG);
+	DataSetIException(const H5std_string func_name, const H5std_string message = DEFAULT_MSG);
 	DataSetIException();
 	virtual ~DataSetIException();
 };
 
 class H5_DLLCPP AttributeIException : public Exception {
    public:
-	AttributeIException(const H5_std::string func_name, const H5_std::string message = DEFAULT_MSG);
+	AttributeIException(const H5std_string func_name, const H5std_string message = DEFAULT_MSG);
 	AttributeIException();
 	virtual ~AttributeIException();
 };
 
 class H5_DLLCPP ReferenceException : public Exception {
    public:
-	ReferenceException(const H5_std::string func_name, const H5_std::string message = DEFAULT_MSG);
+	ReferenceException(const H5std_string func_name, const H5std_string message = DEFAULT_MSG);
 	ReferenceException();
 	virtual ~ReferenceException();
 };
 
 class H5_DLLCPP LibraryIException : public Exception {
    public:
-	LibraryIException(const H5_std::string func_name, const H5_std::string message = DEFAULT_MSG);
+	LibraryIException(const H5std_string func_name, const H5std_string message = DEFAULT_MSG);
 	LibraryIException();
 	virtual ~LibraryIException();
 };
 
 class H5_DLLCPP IdComponentException : public Exception {
    public:
-	IdComponentException(const H5_std::string func_name, const H5_std::string message = DEFAULT_MSG);
+	IdComponentException(const H5std_string func_name, const H5std_string message = DEFAULT_MSG);
 	IdComponentException();
 	virtual ~IdComponentException();
 };

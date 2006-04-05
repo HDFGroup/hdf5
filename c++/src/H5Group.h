@@ -37,13 +37,13 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 
 	// Creates a reference to a named Hdf5 object in this object.
 	void* Reference(const char* name) const;
-	void* Reference(const H5_std::string& name) const;
+	void* Reference(const H5std_string& name) const;
 
 	// Returns this class name
-	virtual H5_std::string fromClass () const { return("Group"); }
+	virtual H5std_string fromClass () const { return("Group"); }
 
         // Throw group exception.
-        virtual void throwException(const H5_std::string func_name, const H5_std::string msg) const;
+        virtual void throwException(const H5std_string func_name, const H5std_string msg) const;
 
 	// for CommonFG to get the file id.
 	virtual hid_t getLocId() const;

@@ -27,7 +27,7 @@ namespace H5 {
 class H5_DLLCPP AtomType : public DataType {
    public:
 	// Returns the byte order of an atomic datatype.
-	H5T_order_t getOrder( H5_std::string& order_string ) const;
+	H5T_order_t getOrder( H5std_string& order_string ) const;
 	H5T_order_t getOrder() const;
 
 	// Sets the byte ordering of an atomic datatype.
@@ -56,7 +56,7 @@ class H5_DLLCPP AtomType : public DataType {
 	void setSize( size_t size ) const;
 
         // Returns this class name
-        virtual H5_std::string fromClass () const { return("AtomType"); }
+        virtual H5std_string fromClass () const { return("AtomType"); }
 
 	// Copy constructor - makes copy of the original object
 	AtomType( const AtomType& original );

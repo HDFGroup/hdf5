@@ -157,7 +157,7 @@ void PropList::copyProp(PropList& dest, const char *name) const
 ///\param	name - IN: Name of the property to copy - \c std::string
 // Programmer	Binh-Minh Ribler - Jul, 2005
 //--------------------------------------------------------------------------
-void PropList::copyProp( PropList& dest, const H5_std::string& name ) const
+void PropList::copyProp( PropList& dest, const H5std_string& name ) const
 {
    copyProp( dest, name.c_str());
 }
@@ -194,7 +194,7 @@ void PropList::copyProp( PropList& dest, PropList& src, const char *name ) const
 ///\param	name - IN: Name of the property to copy - \c std::string
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void PropList::copyProp( PropList& dest, PropList& src, const H5_std::string& name ) const
+void PropList::copyProp( PropList& dest, PropList& src, const H5std_string& name ) const
 {
    copyProp( dest, src, name.c_str());
 }
@@ -275,7 +275,7 @@ bool PropList::propExist(const char* name ) const
 ///\param	name - IN: Name of property to check for - \c std::string
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
-bool PropList::propExist(const H5_std::string& name ) const
+bool PropList::propExist(const H5std_string& name ) const
 {
    return( propExist( name.c_str()) );
 }
@@ -329,7 +329,7 @@ void PropList::getProperty(const char* name, void* value) const
 ///\exception	H5::PropListIException
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
-H5_std::string PropList::getProperty(const char* name) const
+H5std_string PropList::getProperty(const char* name) const
 {
    size_t size = getPropSize(name);
    char* prop_strg_C = new char[size+1];  // temporary C-string for C API
@@ -342,7 +342,7 @@ H5_std::string PropList::getProperty(const char* name) const
    }
 
    // Return propety value as a string after deleting temp C-string
-   H5_std::string prop_strg = H5_std::string(prop_strg_C);
+   H5std_string prop_strg = H5std_string(prop_strg_C);
    delete []prop_strg_C;
    return (prop_strg);
 }
@@ -355,7 +355,7 @@ H5_std::string PropList::getProperty(const char* name) const
 ///\param	value - OUT: Pointer to the buffer for the property value
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
-void PropList::getProperty(const H5_std::string& name, void* value) const
+void PropList::getProperty(const H5std_string& name, void* value) const
 {
    getProperty(name.c_str(), value);
 }
@@ -368,7 +368,7 @@ void PropList::getProperty(const H5_std::string& name, void* value) const
 ///\return	The property that is a \c std::string.
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
-H5_std::string PropList::getProperty(const H5_std::string& name) const
+H5std_string PropList::getProperty(const H5std_string& name) const
 {
    return (getProperty(name.c_str()));
 }
@@ -405,7 +405,7 @@ size_t PropList::getPropSize(const char *name) const
 ///
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
-size_t PropList::getPropSize(const H5_std::string& name) const
+size_t PropList::getPropSize(const H5std_string& name) const
 {
    return (getPropSize(name.c_str()));
 }
@@ -417,14 +417,14 @@ size_t PropList::getPropSize(const H5_std::string& name) const
 ///		a NULL string.
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
-H5_std::string PropList::getClassName() const
+H5std_string PropList::getClassName() const
 {
    char* temp_str;
    temp_str = H5Pget_class_name(id);
 
    if (temp_str != NULL)
    {
-      H5_std::string class_name = H5_std::string(temp_str);
+      H5std_string class_name = H5std_string(temp_str);
       free(temp_str);
       return(class_name);
    }
@@ -491,7 +491,7 @@ void PropList::setProperty(const char* name, const char* charptr) const
 ///\param	strg - IN: Value for the property is a \c std::string
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
-void PropList::setProperty(const char* name, H5_std::string& strg) const
+void PropList::setProperty(const char* name, H5std_string& strg) const
 {
    setProperty(name, strg.c_str());
 }
@@ -505,7 +505,7 @@ void PropList::setProperty(const char* name, H5_std::string& strg) const
 ///\param	value - IN: Void pointer to the value for the property
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
-void PropList::setProperty(const H5_std::string& name, void* value) const
+void PropList::setProperty(const H5std_string& name, void* value) const
 {
    setProperty(name.c_str(), value);
 }
@@ -519,7 +519,7 @@ void PropList::setProperty(const H5_std::string& name, void* value) const
 ///\param	strg - IN: Value for the property is a \c std::string
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
-void PropList::setProperty(const H5_std::string& name, H5_std::string& strg) const
+void PropList::setProperty(const H5std_string& name, H5std_string& strg) const
 {
    setProperty(name.c_str(), strg.c_str());
 }
@@ -571,7 +571,7 @@ void PropList::removeProp(const char *name) const
 ///\param	name - IN: Name of property to remove - \c std::string
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
-void PropList::removeProp(const H5_std::string& name) const
+void PropList::removeProp(const H5std_string& name) const
 {
    removeProp(name.c_str());
 }

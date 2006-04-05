@@ -111,7 +111,7 @@ H5T_order_t AtomType::getOrder() const
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5T_order_t AtomType::getOrder( H5_std::string& order_string ) const
+H5T_order_t AtomType::getOrder( H5std_string& order_string ) const
 {
    // Call the overloaded to get the type order without text
    H5T_order_t type_order = getOrder();

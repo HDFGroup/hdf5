@@ -101,7 +101,7 @@ class H5_DLLCPP DSetCreatPropList : public PropList {
 	void setShuffle();
 
 	// Returns this class name
-	virtual H5_std::string fromClass () const { return("DSetCreatPropList"); }
+	virtual H5std_string fromClass () const { return("DSetCreatPropList"); }
 
 	// Default constructor: creates a stub dataset creation property list.
 	DSetCreatPropList();

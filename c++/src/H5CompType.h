@@ -38,13 +38,13 @@ class H5_DLLCPP CompType : public DataType {
 
 	// Returns the index of a member in this compound data type.
 	int getMemberIndex(const char* name) const;
-	int getMemberIndex(const H5_std::string& name) const;
+	int getMemberIndex(const H5std_string& name) const;
 
 	// Returns the offset of a member of this compound datatype.
 	size_t getMemberOffset( unsigned memb_no ) const;
 
 	// Returns the name of a member of this compound datatype.
-	H5_std::string getMemberName( unsigned member_num ) const;
+	H5std_string getMemberName( unsigned member_num ) const;
 
 	// Returns the generic datatype of the specified member in
 	// this compound datatype.
@@ -82,13 +82,13 @@ class H5_DLLCPP CompType : public DataType {
 	int getNmembers() const;
 
 	// Adds a new member to this compound datatype.
-	void insertMember( const H5_std::string& name, size_t offset, const DataType& new_member ) const;
+	void insertMember( const H5std_string& name, size_t offset, const DataType& new_member ) const;
 
 	// Recursively removes padding from within this compound datatype.
 	void pack() const;
 
 	// Returns this class name
-	virtual H5_std::string fromClass () const { return("CompType"); }
+	virtual H5std_string fromClass () const { return("CompType"); }
 
 	// Default constructor
 	CompType();

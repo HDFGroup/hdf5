@@ -40,7 +40,7 @@ class H5_DLLCPP DataType : public H5Object {
 	// Commits a transient datatype to a file; this datatype becomes
 	// a named datatype which can be accessed from the location.
 	void commit( CommonFG& loc, const char* name ) const;
-	void commit( CommonFG& loc, const H5_std::string& name ) const;
+	void commit( CommonFG& loc, const H5std_string& name ) const;
 
 	// Determines whether this datatype is a named datatype or
 	// a transient datatype.
@@ -71,18 +71,18 @@ class H5_DLLCPP DataType : public H5Object {
 
 	// Registers a conversion function.
 	void registerFunc(H5T_pers_t pers, const char* name, const DataType& dest, H5T_conv_t func ) const;
-	void registerFunc(H5T_pers_t pers, const H5_std::string& name, const DataType& dest, H5T_conv_t func ) const;
+	void registerFunc(H5T_pers_t pers, const H5std_string& name, const DataType& dest, H5T_conv_t func ) const;
 
 	// Removes a conversion function from all conversion paths.
 	void unregister( H5T_pers_t pers, const char* name, const DataType& dest, H5T_conv_t func ) const;
-	void unregister( H5T_pers_t pers, const H5_std::string& name, const DataType& dest, H5T_conv_t func ) const;
+	void unregister( H5T_pers_t pers, const H5std_string& name, const DataType& dest, H5T_conv_t func ) const;
 
 	// Tags an opaque datatype.
 	void setTag( const char* tag ) const;
-	void setTag( const H5_std::string& tag ) const;
+	void setTag( const H5std_string& tag ) const;
 
 	// Gets the tag associated with an opaque datatype.
-	H5_std::string getTag() const;
+	H5std_string getTag() const;
 
 	// Checks whether this datatype contains (or is) a certain type class.
 	bool detectClass(H5T_class_t cls) const;
@@ -92,7 +92,7 @@ class H5_DLLCPP DataType : public H5Object {
 
 	// Creates a reference to a named Hdf5 object in this object.
 	void* Reference(const char* name) const;
-	void* Reference(const H5_std::string& name) const;
+	void* Reference(const H5std_string& name) const;
 
 	// Creates a reference to a named Hdf5 object or to a dataset region
 	// in this object.
@@ -104,7 +104,7 @@ class H5_DLLCPP DataType : public H5Object {
 	// Retrieves a dataspace with the region pointed to selected.
 	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
 
-	virtual H5_std::string fromClass () const { return("DataType"); }
+	virtual H5std_string fromClass () const { return("DataType"); }
 
 	// Creates a copy of an existing DataType using its id
 	DataType( const hid_t type_id );
